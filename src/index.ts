@@ -2,11 +2,14 @@ import express from 'express'
 
 import { PORT } from './util/config.js'
 import logger from './util/logger.js'
+import accessLogger from './middleware/access.js'
 import { createCompletion } from './util/openai.js'
 
 const app = express()
 
 app.use(express.json())
+
+app.use(accessLogger)
 
 app.get('/ping', (_, res) => res.send('pong'))
 
