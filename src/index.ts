@@ -5,6 +5,7 @@ import { PORT } from './util/config'
 import logger from './util/logger'
 import accessLogger from './middleware/access'
 import { connectToDatabase } from './db/connection'
+import seed from './db/seeders'
 import { createCompletion } from './util/openai'
 
 const app = express()
@@ -30,6 +31,7 @@ app.post('/chat', async (req, res) => {
 
 app.listen(PORT, async () => {
   await connectToDatabase()
+  await seed()
 
   logger.info(`Server running on port ${PORT}`)
 })
