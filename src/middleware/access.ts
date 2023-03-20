@@ -1,7 +1,7 @@
 import morgan from 'morgan'
 
-import { inProduction } from '../util/config.js'
-import logger from '../util/logger.js'
+import { inProduction } from '../util/config'
+import logger from '../util/logger'
 
 // Morgan excepts a log format string to be returned, but here a separate logger is used instead.
 // Override the first function argument to return void instead of a string.

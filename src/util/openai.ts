@@ -1,7 +1,7 @@
 import { Configuration, OpenAIApi, ChatCompletionRequestMessage } from 'openai'
 
-import { OPENAI_API_KEY } from './config.js'
-import logger from './logger.js'
+import { OPENAI_API_KEY } from './config'
+import logger from './logger'
 
 const configuration = new Configuration({
   apiKey: OPENAI_API_KEY,

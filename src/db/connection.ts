@@ -1,22 +1,24 @@
 import { Sequelize } from 'sequelize'
 import { Umzug, SequelizeStorage } from 'umzug'
 
-import logger from '../util/logger.js'
-import { DB_URL } from '../util/config.js'
+import logger from '../util/logger'
+import { DB_URL } from '../util/config'
 
 const DB_CONNECTION_RETRY_LIMIT = 10
 
 export const sequelize = new Sequelize(DB_URL, { logging: false })
 
-const runMigrations = async () => {
-  const migrator = new Umzug({
-    migrations: { glob: 'src/server/db/migrations/*.cjs' },
-    context: sequelize.getQueryInterface(),
-    storage: new SequelizeStorage({ sequelize }),
-    logger: console,
-  })
+const umzug = new Umzug({
+  migrations: { glob: 'src/db/migrations/*.ts' },
+  context: sequelize.getQueryInterface(),
+  storage: new SequelizeStorage({ sequelize }),
+  logger: console,
+})
 
-  const migrations = await migrator.up()
+export type Migration = typeof umzug._types.migration
+
+const runMigrations = async () => {
+  const migrations = await umzug.up()
 
   logger.info('Migrations up to date', {
     migrations,
@@ -31,7 +33,7 @@ const testConnection = async () => {
 // eslint-disable-next-line no-promise-executor-return
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-const connectToDatabase = async (attempt = 0): Promise<void | null> => {
+export const connectToDatabase = async (attempt = 0): Promise<void | null> => {
   try {
     await testConnection()
   } catch (err: any) {
@@ -53,5 +55,3 @@ const connectToDatabase = async (attempt = 0): Promise<void | null> => {
 
   return null
 }
-
-export default connectToDatabase

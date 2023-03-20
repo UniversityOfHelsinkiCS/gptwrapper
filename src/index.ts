@@ -1,11 +1,11 @@
 import express from 'express'
 
-import { RequestBody } from './types.js'
-import { PORT } from './util/config.js'
-import logger from './util/logger.js'
-import accessLogger from './middleware/access.js'
-import connectToDatabase from './db/connection.js'
-import { createCompletion } from './util/openai.js'
+import { RequestBody } from './types'
+import { PORT } from './util/config'
+import logger from './util/logger'
+import accessLogger from './middleware/access'
+import { connectToDatabase } from './db/connection'
+import { createCompletion } from './util/openai'
 
 const app = express()
 

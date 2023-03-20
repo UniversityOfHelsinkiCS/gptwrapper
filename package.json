@@ -2,9 +2,9 @@
   "name": "gptwrapper",
   "version": "1.0.0",
   "description": "Simple wrapper to handle OpenAI API calls and access management",
-  "type": "module",
   "main": "src/index.ts",
   "scripts": {
+    "start": "docker compose up",
     "prod": "NODE_ENV=production node --loader ts-node/esm src/index.ts",
     "dev": "NODE_ENV=development nodemon --exec node --loader ts-node/esm src/index.ts",
     "lint": "eslint 'src/**/*.ts'",

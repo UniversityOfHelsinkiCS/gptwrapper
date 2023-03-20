@@ -21,8 +21,6 @@ jobs:
           containerfiles: |
             ./Containerfile
           build-args: |
-            BASE_PATH=/
-            GIT_SHA=${{ github.sha }}
             STAGING=true
 
       - name: Push to quay.io

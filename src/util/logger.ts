@@ -1,6 +1,6 @@
 import winston from 'winston'
 
-import { inProduction } from './config.js'
+import { inProduction } from './config'
 
 const { combine, timestamp, printf, splat } = winston.format
 
@@ -12,7 +12,7 @@ if (!inProduction) {
   const devFormat = printf(
     // eslint-disable-next-line @typescript-eslint/no-shadow
     ({ level, message, timestamp, ...rest }) =>
-      `${timestamp} ${level}: ${message} ${JSON.stringify(rest)}`
+      `${timestamp} ${level}: ${message} ${rest}`
   )
 
   transports.push(
