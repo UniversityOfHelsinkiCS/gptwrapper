@@ -5,7 +5,7 @@
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "prod": "node --loader ts-node/esm src/index.ts",
+    "prod": "NODE_ENV=production node --loader ts-node/esm src/index.ts",
     "dev": "NODE_ENV=development nodemon --exec node --loader ts-node/esm src/index.ts",
     "lint": "eslint 'src/**/*.ts'",
     "format": "prettier --write '*.{ts,json,css,md}'",
