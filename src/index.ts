@@ -1,5 +1,7 @@
 import express from 'express'
 
+import logger from './util/logger.js'
+
 const app = express()
 
 app.get('/', (_, res) => {
@@ -7,5 +9,5 @@ app.get('/', (_, res) => {
 })
 
 app.listen(3000, () => {
-  console.log('Server is running')
+  logger.info('Server is running')
 })
