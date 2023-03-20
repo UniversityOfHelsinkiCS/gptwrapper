@@ -12,7 +12,7 @@ if (!inProduction) {
   const devFormat = printf(
     // eslint-disable-next-line @typescript-eslint/no-shadow
     ({ level, message, timestamp, ...rest }) =>
-      `${timestamp} ${level}: ${message} ${rest}`
+      `${timestamp} ${level}: ${message} ${JSON.stringify(rest)}`
   )
 
   transports.push(

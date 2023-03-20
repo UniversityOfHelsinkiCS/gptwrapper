@@ -2,6 +2,7 @@ import {
   Model,
   InferAttributes,
   InferCreationAttributes,
+  CreationOptional,
   DataTypes,
 } from 'sequelize'
 
@@ -12,7 +13,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
 
   declare username: string
 
-  declare language: string
+  declare language: CreationOptional<string>
 }
 
 User.init(

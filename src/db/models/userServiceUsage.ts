@@ -12,7 +12,7 @@ class UserServiceUsage extends Model<
   InferAttributes<UserServiceUsage>,
   InferCreationAttributes<UserServiceUsage>
 > {
-  declare id: CreationOptional<number>
+  declare id: CreationOptional<string>
 
   declare userId: string
 
@@ -24,10 +24,10 @@ class UserServiceUsage extends Model<
 UserServiceUsage.init(
   {
     id: {
-      type: DataTypes.STRING,
+      type: DataTypes.UUID,
       allowNull: false,
       primaryKey: true,
-      autoIncrement: true,
+      defaultValue: DataTypes.UUIDV4,
     },
     userId: {
       type: DataTypes.STRING,
