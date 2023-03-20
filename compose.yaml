@@ -1,0 +1,27 @@
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: dev.Containerfile
+    image: gptwrapper_dev
+    environment:
+      - DB_URL=postgres://postgres:postgres@db:5432/postgres
+    volumes:
+      - ./:/opt/app-root/src
+    ports:
+      - 3000:3000
+    container_name: gptwrapper_dev
+
+  db:
+    image: docker.io/postgres:15.2-alpine
+    environment:
+      - PGDATA=/data
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - pg_data:/data
+    container_name: gptwrapper_db
+
+volumes:
+  pg_data:

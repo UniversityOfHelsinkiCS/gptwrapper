@@ -2,11 +2,11 @@ import { Sequelize } from 'sequelize'
 import { Umzug, SequelizeStorage } from 'umzug'
 
 import logger from '../util/logger.js'
-import { DB_CONNECTION_STRING } from '../util/config.js'
+import { DB_URL } from '../util/config.js'
 
 const DB_CONNECTION_RETRY_LIMIT = 10
 
-export const sequelize = new Sequelize(DB_CONNECTION_STRING, { logging: false })
+export const sequelize = new Sequelize(DB_URL, { logging: false })
 
 const runMigrations = async () => {
   const migrator = new Umzug({
@@ -31,7 +31,7 @@ const testConnection = async () => {
 // eslint-disable-next-line no-promise-executor-return
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-export const connectToDatabase = async (attempt = 0): Promise<void | null> => {
+const connectToDatabase = async (attempt = 0): Promise<void | null> => {
   try {
     await testConnection()
   } catch (err: any) {
@@ -53,3 +53,5 @@ export const connectToDatabase = async (attempt = 0): Promise<void | null> => {
 
   return null
 }
+
+export default connectToDatabase
