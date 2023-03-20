@@ -1,0 +1,29 @@
+{
+  "name": "gptwrapper",
+  "version": "1.0.0",
+  "description": "Simple wrapper to handle OpenAI API calls and access management",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "nodemon --exec node --loader ts-node/esm src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UniversityOfHelsinkiCS/GPTwrapper.git"
+  },
+  "author": "Miko Keskimäki",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/UniversityOfHelsinkiCS/GPTwrapper/issues"
+  },
+  "homepage": "https://github.com/UniversityOfHelsinkiCS/GPTwrapper#readme",
+  "devDependencies": {
+    "@types/node": "^18.15.3",
+    "eslint": "^8.36.0",
+    "nodemon": "^2.0.21",
+    "prettier": "^2.8.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.2"
+  }
+}
