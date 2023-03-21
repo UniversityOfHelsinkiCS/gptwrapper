@@ -1,8 +1,8 @@
 [
   {
-    "id": "testService",
-    "name": "Test Service",
-    "description": "This is a test service",
+    "id": "exampleService",
+    "name": "Example Service",
+    "description": "This is an example service",
     "usageLimit": 1
   }
 ]

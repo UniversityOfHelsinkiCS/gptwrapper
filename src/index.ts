@@ -29,8 +29,10 @@ app.post('/v0/chat', async (req, res) => {
   const { id, options } = request.body
   const { user } = request
 
+  if (!user.id) return res.status(401).send('Unauthorized')
   if (!id) return res.status(400).send('Missing id')
   if (!options) return res.status(400).send('Missing options')
+  if (options.stream) return res.status(400).send('Stream not supported')
 
   const service = await Service.findByPk(id)
   if (!service) return res.status(404).send('Service not found')

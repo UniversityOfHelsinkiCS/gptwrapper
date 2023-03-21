@@ -30,7 +30,7 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
     iamGroups,
   }
 
-  await User.upsert(user)
+  if (id && username) await User.upsert(user)
 
   req.user = user
 
