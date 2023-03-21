@@ -1,7 +1,7 @@
 {
   "name": "gptwrapper",
   "version": "1.0.0",
-  "description": "Simple wrapper to handle OpenAI API calls and access management",
+  "description": "Wrapper to handle OpenAI API calls and access management",
   "main": "src/index.ts",
   "scripts": {
     "start": "docker compose up",
