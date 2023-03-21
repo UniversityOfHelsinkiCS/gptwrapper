@@ -1,7 +1,8 @@
 import fs from 'fs'
+
 import { parse } from 'jsonc-parser'
 
-import { Service } from '../types'
+import { ApiResponse, ApiError, Service } from '../types'
 
 export const parseServices = (): Service[] => {
   const path = './services.jsonc'
@@ -9,3 +10,6 @@ export const parseServices = (): Service[] => {
 
   return parse(services)
 }
+
+export const isError = (response: ApiResponse): response is ApiError =>
+  'error' in response

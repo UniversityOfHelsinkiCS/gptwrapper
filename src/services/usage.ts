@@ -1,4 +1,4 @@
-import { User } from '../types'
+import { User, Service as ServiceType } from '../types'
 import { Service, UserServiceUsage } from '../db/models'
 
 const getUsageLimit = async (serviceId: string) => {
@@ -13,16 +13,16 @@ const getUsageLimit = async (serviceId: string) => {
 
 export const checkUsage = async (
   user: User,
-  serviceId: string
+  service: ServiceType
 ): Promise<boolean> => {
   const [serviceUsage] = await UserServiceUsage.findOrCreate({
     where: {
       userId: user.id,
-      serviceId,
+      serviceId: service.id,
     },
   })
 
-  const usageLimit = await getUsageLimit(serviceId)
+  const usageLimit = await getUsageLimit(service.id)
 
   if (serviceUsage.usageCount >= usageLimit) return false
 
