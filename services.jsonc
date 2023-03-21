@@ -1,8 +1,17 @@
+/*
+  Add new services here.
+  Automatically added to the database on server start.
+
+  id - unique identifier for the service
+  name - name of the service
+  description - description of the service
+  usageLimit - number of times the service can be used per user
+*/
 [
   {
     "id": "exampleService",
     "name": "Example Service",
     "description": "This is an example service",
-    "usageLimit": 1
+    "usageLimit": 0
   }
 ]
