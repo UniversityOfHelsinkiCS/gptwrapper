@@ -3,6 +3,8 @@ import express from 'express'
 import { RequestBody } from './types'
 import { PORT } from './util/config'
 import logger from './util/logger'
+import shibbolethMiddleware from './middleware/shibboleth'
+import userMiddleware from './middleware/user'
 import accessLogger from './middleware/access'
 import { connectToDatabase } from './db/connection'
 import seed from './db/seeders'
@@ -11,6 +13,9 @@ import { createCompletion } from './util/openai'
 const app = express()
 
 app.use(express.json())
+
+app.use(shibbolethMiddleware)
+app.use(userMiddleware)
 
 app.use(accessLogger)
 
