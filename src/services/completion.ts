@@ -23,7 +23,7 @@ const getCompletion = async (guide: string, question: string) => {
     temperature: 0.5,
   }
 
-  const { data } = await axios.post('api/v0/chat', {
+  const { data } = await axios.post('gptwrapper/api/v0/chat', {
     id: 'exampleService',
     options,
   })
