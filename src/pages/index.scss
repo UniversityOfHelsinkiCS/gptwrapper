@@ -1,0 +1,58 @@
+/* Import Montserrat font */
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap');
+@import '../../node_modules/bulma/bulma.sass';
+
+/* Set the font family for the entire app */
+body {
+  font-family: 'Montserrat', sans-serif;
+  background-color: rgb(255, 255, 255);
+}
+
+/* Style the hero section */
+.hero {
+  background-color: #ffffff;
+}
+
+/* Style the University of Helsinki logo */
+.hero img {
+  max-height: 120px;
+}
+
+/* Style the textareas */
+.textarea {
+  background-color: rgb(232, 232, 232);
+  border: none;
+  border-radius: 5px;
+  padding: 0.5rem 1rem;
+}
+
+/* Style the Send button */
+.button.is-success {
+  border: none;
+  border-radius: 5px;
+}
+
+/* Style the spinner */
+#spinner-container {
+  display: flex;
+  align-items: center;
+}
+
+/* Media query to handle the maximum width of the application on large screens */
+@media screen and (min-width: 1024px) {
+  .container {
+    max-width: 800px;
+  }
+}
+.title {
+  font-size: 1rem;
+}
+
+.is-centered-mobile .columns {
+  justify-content: center;
+  text-align: center;
+}
+
+.is-centered-mobile .column {
+  text-align: center;
+}
