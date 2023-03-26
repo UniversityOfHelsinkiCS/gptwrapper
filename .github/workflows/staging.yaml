@@ -21,7 +21,6 @@ jobs:
           containerfiles: |
             ./Containerfile
           build-args: |
-            BASE_PATH=/gptwrapper
             STAGING=true
 
       - name: Push to quay.io

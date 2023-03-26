@@ -81,13 +81,10 @@ const HomePage = () => {
                 <label className="label" htmlFor="answer">
                   Answer
                 </label>
-                <textarea className="textarea" id="answer" rows={5} readOnly />
+                <textarea className="textarea" id="answer" rows={10} readOnly defaultValue={answer} />
               </div>
               <div className="field is-grouped is-grouped-centered">
-                {answer ? (
-                  <p>{answer}</p>
-                ) : (
-                  <p className="control">
+                <p className="control">
                   <button
                     className="button is-success"
                     id="send-button"
@@ -96,7 +93,6 @@ const HomePage = () => {
                     Send
                   </button>
                 </p>
-                )}
               </div>
             </div>
           </div>

@@ -12,8 +12,8 @@ const handle = app.getRequestHandler()
 
 const server = express()
 
-server.use('/api', (req, res, nxt) => router(req, res, nxt))
-server.use('/api', (_, res) => res.sendStatus(404))
+server.use('/gptwrapper/api', (req, res, nxt) => router(req, res, nxt))
+server.use('/gptwrapper/api', (_, res) => res.sendStatus(404))
 
 const start = async () => {
   await app.prepare()
