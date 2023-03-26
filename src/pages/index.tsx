@@ -62,7 +62,7 @@ const HomePage = () => {
                   id="guide"
                   rows={2}
                   placeholder="Enter the guide here..."
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGuide(e.target.value)}
+                  onChange={(e: any) => setGuide(e.target.value)}
                 />
               </div>
               <div className="field">
@@ -74,7 +74,7 @@ const HomePage = () => {
                   id="question"
                   rows={2}
                   placeholder="Enter the question here..."
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuestion(e.target.value)}
+                  onChange={(e:any) => setQuestion(e.target.value)}
                 />
               </div>
               <div className="field">
