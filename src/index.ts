@@ -1,4 +1,5 @@
 import express from 'express'
+import cors from 'cors'
 
 import { ChatRequest } from './types'
 import { PORT } from './util/config'
@@ -15,6 +16,7 @@ import { createCompletion } from './util/openai'
 
 const app = express()
 
+app.use(cors())
 app.use(express.json())
 
 app.use(shibbolethMiddleware)
