@@ -13,5 +13,11 @@
     "name": "Example Service",
     "description": "This is an example service",
     "usageLimit": 10
+  },
+  {
+    "id": "educationalResearchTopicalIssues",
+    "name": "Topical Issues in Educational Research",
+    "description": "Used for the course Topical Issues in Educational Research - Spring 2023",
+    "usageLimit": 30
   }
 ]

@@ -17,14 +17,10 @@ const getCompletion = async (guide: string, question: string) => {
   const options = {
     model: 'gpt-3.5-turbo',
     messages,
-    max_tokens: 100,
-    n: 1,
-    stop: null,
-    temperature: 0.5,
   }
 
   const { data } = await axios.post('gptwrapper/api/v0/chat', {
-    id: 'exampleService',
+    id: 'educationalResearchTopicalIssues',
     options,
   })
 
