@@ -1,6 +1,6 @@
 import morgan from 'morgan'
 
-import { inProduction } from '../util/config'
+import { inProduction, inStaging } from '../util/config'
 import logger from '../util/logger'
 
 // Morgan excepts a log format string to be returned, but here a separate logger is used instead.
@@ -22,16 +22,17 @@ const accessLogger = access((tokens, req, res) => {
 
   const message = `${method} ${url} ${status} - ${responseTime} ms`
 
-  const additionalInfo = inProduction
-    ? {
-        userId: uid,
-        method,
-        url,
-        status,
-        responseTime,
-        userAgent,
-      }
-    : {}
+  const additionalInfo =
+    inProduction || inStaging
+      ? {
+          userId: uid,
+          method,
+          url,
+          status,
+          responseTime,
+          userAgent,
+        }
+      : {}
 
   logger.info(message, additionalInfo)
 })
