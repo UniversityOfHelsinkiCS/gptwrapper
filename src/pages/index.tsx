@@ -10,12 +10,16 @@ const HomePage = () => {
   const [system, setGuide] = useState('')
   const [question, setQuestion] = useState('')
   const [answer, setAnswer] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const onSend = async () => {
-    const completion = await getCompletion(system, question)
+    setLoading(true)
 
+    const completion = await getCompletion(system, question)
     const answer: string = completion.choices[0].message.content.trim()
+
     setAnswer(answer)
+    setLoading(false)
   }
 
   return (
@@ -89,6 +93,7 @@ const HomePage = () => {
                     className="button is-success"
                     id="send-button"
                     onClick={onSend}
+                    disabled={loading}
                   >
                     Send
                   </button>
