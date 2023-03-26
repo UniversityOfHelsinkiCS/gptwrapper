@@ -12,6 +12,6 @@
     "id": "exampleService",
     "name": "Example Service",
     "description": "This is an example service",
-    "usageLimit": 0
+    "usageLimit": 10
   }
 ]
