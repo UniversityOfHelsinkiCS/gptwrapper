@@ -37,10 +37,7 @@ router.post('/v0/chat', async (req, res) => {
   if (!service) return res.status(404).send('Service not found')
 
   if (service.courseRealisationId) {
-    const hasEnrolment = await checkEnrolment(
-      user.id,
-      service.courseRealisationId
-    )
+    const hasEnrolment = await checkEnrolment(user, service.courseRealisationId)
     if (!hasEnrolment) return res.status(403).send('Course enrolment required')
   }
 
