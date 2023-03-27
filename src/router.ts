@@ -9,6 +9,7 @@ import { Service } from './db/models'
 import { isError } from './util/parser'
 import checkEnrolment from './services/enrolment'
 import { checkUsage, decrementUsage } from './services/usage'
+import hashData from './util/hash'
 import { createCompletion } from './util/openai'
 
 const router = express()
@@ -44,6 +45,7 @@ router.post('/v0/chat', async (req, res) => {
   const usageAllowed = await checkUsage(user, service)
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
+  options.user = hashData(user.id)
   const response = await createCompletion(options)
 
   if (isError(response)) {
