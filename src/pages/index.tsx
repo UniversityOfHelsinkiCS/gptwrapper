@@ -66,13 +66,13 @@ const HomePage = () => {
             <div className="column is-8-desktop">
               <div className="field">
                 <label className="label" htmlFor="guide">
-                  Guide to Answer
+                  Instructions
                 </label>
                 <textarea
                   className="textarea"
                   id="guide"
                   rows={2}
-                  placeholder="Enter the guide here..."
+                  placeholder="e.g. You are a helpful assistant"
                   onChange={(e: any) => setGuide(e.target.value)}
                 />
               </div>
@@ -84,7 +84,7 @@ const HomePage = () => {
                   className="textarea"
                   id="question"
                   rows={2}
-                  placeholder="Enter the question here..."
+                  placeholder="Enter the question here"
                   onChange={(e:any) => setQuestion(e.target.value)}
                 />
               </div>
