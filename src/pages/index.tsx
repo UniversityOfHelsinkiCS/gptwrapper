@@ -1,6 +1,7 @@
 /* eslint-disable */
 import React, { useState } from 'react'
 import Image from 'next/image'
+import { enqueueSnackbar } from 'notistack'
 
 import hyLogo from '../public/university_of_helsinki_logo.png'
 import App from './_app'
@@ -15,10 +16,16 @@ const HomePage = () => {
   const onSend = async () => {
     setLoading(true)
 
-    const completion = await getCompletion(system, question)
-    const answer: string = completion.choices[0].message.content.trim()
+    try {
+      const completion = await getCompletion(system, question)
+      const answer: string = completion.choices[0].message.content.trim()
 
-    setAnswer(answer)
+      setAnswer(answer)
+    } catch (e: any) {
+      const message = e?.response?.data || e.message
+      enqueueSnackbar(message, { variant: 'error' })
+    }
+
     setLoading(false)
   }
 
