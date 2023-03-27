@@ -7,6 +7,7 @@ import userMiddleware from './middleware/user'
 import accessLogger from './middleware/access'
 import { Service } from './db/models'
 import { isError } from './util/parser'
+import checkEnrolment from './services/enrolment'
 import { checkUsage, decrementUsage } from './services/usage'
 import { createCompletion } from './util/openai'
 
@@ -34,6 +35,14 @@ router.post('/v0/chat', async (req, res) => {
 
   const service = await Service.findByPk(id)
   if (!service) return res.status(404).send('Service not found')
+
+  if (service.courseRealisationId) {
+    const hasEnrolment = await checkEnrolment(
+      user.id,
+      service.courseRealisationId
+    )
+    if (!hasEnrolment) return res.status(403).send('Course enrolment required')
+  }
 
   const usageAllowed = await checkUsage(user, service)
   if (!usageAllowed) return res.status(403).send('Usage limit reached')

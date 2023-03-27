@@ -6,6 +6,7 @@ services:
     image: gptwrapper_dev
     environment:
       - DB_URL=postgres://postgres:postgres@db:5432/postgres
+      - IMPORTER_URL=https://importer.cs.helsinki.fi/api/importer
     volumes:
       - ./:/opt/app-root/src
     ports:
