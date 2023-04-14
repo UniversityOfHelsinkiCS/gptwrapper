@@ -11,7 +11,7 @@ import { connectToDatabase } from './db/connection'
 import { Service } from './db/models'
 import seed from './db/seeders'
 import { isError } from './util/parser'
-import { checkUsage, decrementUsage } from './services/usage'
+import { checkUsage, incrementUsage } from './services/usage'
 import hashData from './util/hash'
 import { createCompletion } from './util/openai'
 
@@ -46,10 +46,10 @@ app.post('/v0/chat', async (req, res) => {
   options.user = hashData(user.id)
   const response = await createCompletion(options)
 
-  if (isError(response)) {
-    decrementUsage(user, id)
-    return res.status(424).send(response)
-  }
+  if (isError(response)) return res.status(424).send(response)
+
+  const tokenCount = response.usage?.total_tokens || 0
+  await incrementUsage(user, id, tokenCount)
 
   return res.send(response)
 })

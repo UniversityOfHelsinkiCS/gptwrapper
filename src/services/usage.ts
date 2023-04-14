@@ -26,12 +26,14 @@ export const checkUsage = async (
 
   if (serviceUsage.usageCount >= usageLimit) return false
 
-  serviceUsage.increment('usageCount')
-
   return true
 }
 
-export const decrementUsage = async (user: User, serviceId: string) => {
+export const incrementUsage = async (
+  user: User,
+  serviceId: string,
+  tokenCount: number
+) => {
   const serviceUsage = await UserServiceUsage.findOne({
     where: {
       userId: user.id,
@@ -39,5 +41,5 @@ export const decrementUsage = async (user: User, serviceId: string) => {
     },
   })
 
-  serviceUsage?.decrement('usageCount')
+  serviceUsage?.increment('usageCount', { by: tokenCount })
 }
