@@ -1,7 +1,7 @@
 import { Configuration, OpenAIApi, CreateChatCompletionRequest } from 'openai'
 
 import { ApiResponse } from '../types'
-import { OPENAI_API_KEY } from './config'
+import { OPENAI_API_KEY, inProduction } from './config'
 import logger from './logger'
 
 const configuration = new Configuration({
@@ -16,7 +16,8 @@ export const createCompletion = async (
   try {
     const { data } = await openai.createChatCompletion(options)
 
-    logger.info('OpenAI API response', { data })
+    // Response data is not logged in production for privacy reasons
+    if (!inProduction) logger.info('OpenAI API response', { data })
 
     return data
   } catch (err: any) {
