@@ -18,8 +18,6 @@ class Service extends Model<
   declare description: string
 
   declare usageLimit: number
-
-  declare courseRealisationId: string | null
 }
 
 Service.init(
@@ -43,10 +41,6 @@ Service.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
-    },
-    courseRealisationId: {
-      type: DataTypes.STRING,
-      allowNull: true,
     },
   },
   {

@@ -4,11 +4,6 @@ import { User } from '../db/models'
 const parseIamGroups = (iamGroups: string) =>
   iamGroups?.split(';').filter(Boolean) ?? []
 
-const checkAdmin = (iamGroups: string[]) =>
-  iamGroups.some((iamGroup) =>
-    ['grp-globalcampus', 'grp-toska'].includes(iamGroup)
-  )
-
 const mockHeaders = {
   uid: 'testUser',
   preferredlanguage: 'fi',
@@ -33,13 +28,9 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
     username,
     language,
     iamGroups,
-    isAdmin: checkAdmin(iamGroups),
   }
 
-  // Global Campus might not have hypersonsisuid
-  if (user.isAdmin && !id) user.id = username
-
-  if (user.id && user.username) await User.upsert(user)
+  if (id && username) await User.upsert(user)
 
   req.user = user
 

@@ -10,7 +10,6 @@ ENV STAGING=$STAGING
 COPY package* ./
 RUN npm ci --omit-dev --ignore-scripts
 COPY . .
-RUN npm run build && chmod -R 777 .next
 
 EXPOSE 3000
 

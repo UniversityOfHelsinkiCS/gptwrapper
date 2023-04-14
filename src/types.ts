@@ -14,7 +14,6 @@ export interface User {
   username: string
   language?: string
   iamGroups: string[]
-  isAdmin: boolean
 }
 
 export interface ChatRequest extends Request {

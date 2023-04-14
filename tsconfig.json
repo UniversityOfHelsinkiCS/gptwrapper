@@ -5,25 +5,18 @@
     "experimentalDecorators": true,
     "inlineSourceMap": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react",
     "lib": ["es2022"],
     "module": "esnext",
     "moduleDetection": "force",
     "moduleResolution": "node",
     "strict": true,
     "target": "esnext",
-    "useDefineForClassFields": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "incremental": true,
-    "resolveJsonModule": true
+    "useDefineForClassFields": true
   },
   "ts-node": {
     "compilerOptions": {
       "module": "CommonJS"
     }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "next.config.js"],
-  "exclude": ["node_modules"]
+  }
 }
