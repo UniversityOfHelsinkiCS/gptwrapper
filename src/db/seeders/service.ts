@@ -1,9 +1,15 @@
 import { Service } from '../models'
-import { parseServices } from '../../util/parser'
+
+const services = [
+  {
+    id: 'testService',
+    name: 'Test Service',
+    description: 'This is a test service',
+    usageLimit: Number.MAX_SAFE_INTEGER,
+  },
+]
 
 const seedServices = async () => {
-  const services = parseServices()
-
   const operations: any[] = []
   services.forEach((service) => {
     const operation = Service.upsert({

@@ -2,7 +2,7 @@ import express from 'express'
 import cors from 'cors'
 
 import { ChatRequest } from './types'
-import { PORT } from './util/config'
+import { PORT, inProduction } from './util/config'
 import logger from './util/logger'
 import shibbolethMiddleware from './middleware/shibboleth'
 import userMiddleware from './middleware/user'
@@ -56,7 +56,7 @@ app.post('/v0/chat', async (req, res) => {
 
 app.listen(PORT, async () => {
   await connectToDatabase()
-  await seed()
+  if (!inProduction) await seed()
 
   logger.info(`Server running on port ${PORT}`)
 })

@@ -1,15 +1,5 @@
-import fs from 'fs'
+import { ApiResponse, ApiError } from '../types'
 
-import { parse } from 'jsonc-parser'
-
-import { ApiResponse, ApiError, Service } from '../types'
-
-export const parseServices = (): Service[] => {
-  const path = './services.jsonc'
-  const services = fs.readFileSync(path, 'utf8')
-
-  return parse(services)
-}
-
+// eslint-disable-next-line import/prefer-default-export
 export const isError = (response: ApiResponse): response is ApiError =>
   'error' in response
