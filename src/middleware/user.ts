@@ -24,13 +24,13 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
   const iamGroups = parseIamGroups(hygroupcn)
 
   const user = {
-    id,
+    id: id || username,
     username,
     language,
     iamGroups,
   }
 
-  if (id && username) await User.upsert(user)
+  if (username) await User.upsert(user)
 
   req.user = user
 
