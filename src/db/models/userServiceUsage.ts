@@ -38,7 +38,7 @@ UserServiceUsage.init(
       allowNull: false,
     },
     usageCount: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       allowNull: false,
       defaultValue: 0,
     },

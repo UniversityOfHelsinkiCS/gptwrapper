@@ -38,7 +38,7 @@ Service.init(
       defaultValue: 'No description',
     },
     usageLimit: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       allowNull: false,
       defaultValue: 0,
     },
