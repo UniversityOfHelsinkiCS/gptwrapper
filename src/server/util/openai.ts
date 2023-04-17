@@ -1,7 +1,8 @@
 import { Configuration, OpenAIApi, CreateChatCompletionRequest } from 'openai'
 
 import { ApiResponse } from '../types'
-import { OPENAI_API_KEY, inProduction } from './config'
+import { OPENAI_API_KEY } from './config'
+import { inProduction } from '../../config'
 import logger from './logger'
 
 const configuration = new Configuration({

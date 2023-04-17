@@ -2,11 +2,11 @@ import { Sequelize } from 'sequelize'
 import { Umzug, SequelizeStorage } from 'umzug'
 
 import logger from '../util/logger'
-import { DB_URL } from '../util/config'
+import { DATABASE_URL } from '../util/config'
 
 const DB_CONNECTION_RETRY_LIMIT = 10
 
-export const sequelize = new Sequelize(DB_URL, { logging: false })
+export const sequelize = new Sequelize(DATABASE_URL, { logging: false })
 
 const umzug = new Umzug({
   migrations: { glob: 'src/db/migrations/*.ts' },

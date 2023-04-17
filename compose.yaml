@@ -5,7 +5,7 @@ services:
       dockerfile: dev.Containerfile
     image: gptwrapper_dev
     environment:
-      - DB_URL=postgres://postgres:postgres@db:5432/postgres
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
     volumes:
       - ./:/opt/app-root/src
     ports:

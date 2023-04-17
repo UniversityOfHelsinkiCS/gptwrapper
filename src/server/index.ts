@@ -1,6 +1,7 @@
 import express from 'express'
 
-import { PORT, inProduction } from './util/config'
+import { PORT } from './util/config'
+import { inProduction } from '../config'
 import router from './router'
 import logger from './util/logger'
 import { connectToDatabase } from './db/connection'

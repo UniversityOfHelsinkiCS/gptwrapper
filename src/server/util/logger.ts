@@ -3,7 +3,7 @@ import os from 'os'
 import winston from 'winston'
 import WinstonGelfTransporter from 'winston-gelf-transporter'
 
-import { inProduction } from './config'
+import { inProduction } from '../../config'
 
 const { combine, timestamp, printf, splat } = winston.format
 

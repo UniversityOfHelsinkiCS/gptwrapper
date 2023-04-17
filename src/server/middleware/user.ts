@@ -1,4 +1,4 @@
-import { inDevelopment } from '../util/config'
+import { inDevelopment } from '../../config'
 import { User } from '../db/models'
 
 const parseIamGroups = (iamGroups: string) =>

@@ -1,6 +1,6 @@
 import morgan from 'morgan'
 
-import { inProduction, inStaging } from '../util/config'
+import { inProduction, inStaging } from '../../config'
 import logger from '../util/logger'
 
 // Morgan excepts a log format string to be returned, but here a separate logger is used instead.
