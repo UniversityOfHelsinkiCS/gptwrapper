@@ -1,9 +1,19 @@
-import React, { useState } from 'react'
-
+import React, { useState, useEffect } from 'react'
 import { Box, Typography, Button } from '@mui/material'
+
+import apiClient from './util/apiClient'
+
+const testApi = async () => {
+  const { data } = await apiClient.get('/ping')
+  console.log(data)
+}
 
 const App = () => {
   const [count, setCount] = useState(0)
+
+  useEffect(() => {
+    testApi()
+  }, [count])
 
   return (
     <Box>
