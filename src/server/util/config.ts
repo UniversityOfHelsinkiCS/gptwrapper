@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv'
 
 dotenv.config()
 
-export const PORT = process.env.PORT || 3000
+export const PORT = process.env.PORT || 8000
 
 export const inDevelopment = process.env.NODE_ENV === 'development'
 

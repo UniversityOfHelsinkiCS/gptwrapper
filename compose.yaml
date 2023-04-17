@@ -10,6 +10,7 @@ services:
       - ./:/opt/app-root/src
     ports:
       - 3000:3000
+      - 8000:8000
     container_name: gptwrapper_dev
 
   db:
