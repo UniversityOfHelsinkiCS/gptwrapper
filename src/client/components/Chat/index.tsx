@@ -2,8 +2,10 @@ import React, { useState } from 'react'
 import { Box, TextField, Button, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
+import { Message } from '../../types'
 import useChatCompletion from '../../hooks/useChatCompletion'
 import { getResponse } from './util'
+import Conversation from './Conversation'
 
 type Set<T> = React.Dispatch<React.SetStateAction<T>>
 
@@ -31,14 +33,14 @@ const SystemMessage = ({
 }
 
 const Send = ({
-  setShowConversation,
+  setMessageSent,
 }: {
-  setShowConversation: Set<boolean>
+  setMessageSent: Set<boolean>
 }) => {
   const { t } = useTranslation()
 
   return (
-    <Button variant="contained" onClick={() => setShowConversation(true)}>
+    <Button variant="contained" onClick={() => setMessageSent(true)}>
       {t('send')}
     </Button>
   )
@@ -47,11 +49,11 @@ const Send = ({
 const NewMessage = ({
   message,
   setMessage,
-  setShowConversation,
+  setMessageSent,
 }: {
   message: string
   setMessage: Set<string>
-  setShowConversation: Set<boolean>
+  setMessageSent: Set<boolean>
 }) => {
   const { t } = useTranslation()
 
@@ -67,25 +69,40 @@ const NewMessage = ({
           placeholder={t('chat:messagePlaceholder') as string}
         />
       </Box>
-      <Send setShowConversation={setShowConversation} />
+      <Send setMessageSent={setMessageSent} />
     </Box>
   )
 }
 
-const Conversation = ({
+const Response = ({
   system,
   message,
+  messages,
+  setMessages,
+  setMessageSent,
 }: {
   system: string
   message: string
+  messages: Message[]
+  setMessages: Set<Message[]>
+  setMessageSent: Set<boolean>
 }) => {
   const { completion, isLoading } = useChatCompletion(system, message)
 
   if (isLoading) return null
 
+  const response = getResponse(completion)
+  const isNewResponse = !messages.find((m) => m.id === response.id)
+
+  if (isNewResponse) {
+    setMessages([...messages, response])
+    setMessageSent(false)
+  }
+
   return (
-    <Box>
-      <Typography variant="h5">{getResponse(completion)}</Typography>
+    <Box mb={2}>
+      <p>last response:</p>
+      <Typography variant="body1">{response.content}</Typography>
     </Box>
   )
 }
@@ -93,7 +110,8 @@ const Conversation = ({
 const Chat = () => {
   const [system, setSystem] = useState('')
   const [message, setMessage] = useState('')
-  const [showConversation, setShowConversation] = useState(false)
+  const [messageSent, setMessageSent] = useState(false)
+  const [messages, setMessages] = useState<Message[]>([])
 
   return (
     <Box
@@ -108,9 +126,20 @@ const Chat = () => {
       <NewMessage
         message={message}
         setMessage={setMessage}
-        setShowConversation={setShowConversation}
+        setMessageSent={setMessageSent}
       />
-      {showConversation && <Conversation system={system} message={message} />}
+      {messages.length > 1 && (
+        <Conversation messages={messages.slice(0, -1)} />
+      )}
+      {messageSent || messages.length > 0 && (
+        <Response
+          system={system}
+          message={message}
+          messages={messages}
+          setMessages={setMessages}
+          setMessageSent={setMessageSent}
+        />
+      )}
     </Box>
   )
 }
