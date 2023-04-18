@@ -11,6 +11,8 @@ COPY package* ./
 RUN npm ci --omit-dev --ignore-scripts
 COPY . .
 
-EXPOSE 3000
+RUN npm run build
+
+EXPOSE 8000
 
 CMD ["npm", "run", "prod"]
