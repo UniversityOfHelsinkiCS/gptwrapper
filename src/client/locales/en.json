@@ -1,5 +1,8 @@
 {
   "common": {
     "appName": "Gptwrapper"
+  },
+  "footer": {
+    "contactSupport": "Contact support: <mailTo>{{supportEmail}}</mailTo>"
   }
 }
