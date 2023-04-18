@@ -1,16 +1,29 @@
 import React from 'react'
 import { Box, Typography, Link } from '@mui/material'
 import { Trans, useTranslation } from 'react-i18next'
-import styles from '../../styles'
 
 import toskaColor from '../../assets/toscalogo_color.svg'
 
 const supportEmail = 'grp-toska@helsinki.fi'
 
+const styles = {
+  supportBox: {
+    py: '2rem',
+    px: '3rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  imageBox: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    rowGap: '1rem',
+  },
+}
+
 const Footer = () => {
   useTranslation()
-
-  const { footerStyles } = styles
 
   return (
     <Box
@@ -20,7 +33,7 @@ const Footer = () => {
         color: theme.palette.toskaDark.contrastText,
       })}
     >
-      <Box sx={footerStyles.supportBox}>
+      <Box sx={styles.supportBox}>
         <Box>
           <Typography>
             <Trans
@@ -39,7 +52,7 @@ const Footer = () => {
           </Typography>
         </Box>
 
-        <Box sx={footerStyles.imageBox}>
+        <Box sx={styles.imageBox}>
           <Link
             href="https://toska.dev"
             target="_blank"

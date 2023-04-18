@@ -18,7 +18,7 @@ import { Language, AdminPanelSettingsOutlined } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
 import hyLogo from '../../assets/hy_logo.svg'
-import styles from '../../styles'
+import styles from './styles'
 
 const NavBar = () => {
   const { t, i18n } = useTranslation()
@@ -41,26 +41,24 @@ const NavBar = () => {
     setOpenLanguageSelect(false)
   }
 
-  const { navStyles } = styles
-
   // if (isLoading) return null
 
   return (
-    <AppBar elevation={0} position="relative" sx={navStyles.appbar}>
+    <AppBar elevation={0} position="relative" sx={styles.appbar}>
       <Container maxWidth={false}>
-        <Toolbar sx={navStyles.toolbar} disableGutters>
-          <Box sx={navStyles.navBox}>
+        <Toolbar sx={styles.toolbar} disableGutters>
+          <Box sx={styles.navBox}>
             <Link href="/" style={{ marginBottom: -5 }}>
               <img src={hyLogo} alt="University of Helsinki" width="40" />
             </Link>
             <Box ml="2rem">
-              <Typography sx={navStyles.appName}>{t('appName')}</Typography>
+              <Typography sx={styles.appName}>{t('appName')}</Typography>
             </Box>
           </Box>
           <Box>
             <Link href="/admin" style={{ textDecoration: 'none' }}>
               <Button>
-                <AdminPanelSettingsOutlined sx={navStyles.icon} />{' '}
+                <AdminPanelSettingsOutlined sx={styles.icon} />{' '}
                 {t('admin')}
               </Button>
             </Link>
@@ -75,7 +73,7 @@ const NavBar = () => {
               aria-haspopup="true"
               onClick={() => setOpenLanguageSelect(!openLanguageSelect)}
             >
-              <Language sx={navStyles.language} /> {language}
+              <Language sx={styles.language} /> {language}
             </Button>
             <Popper
               open={openLanguageSelect}
@@ -109,8 +107,8 @@ const NavBar = () => {
                           <MenuItem
                             key={l}
                             sx={[
-                              navStyles.item,
-                              language === l && navStyles.activeItem,
+                              styles.item,
+                              language === l && styles.activeItem,
                             ]}
                             onClick={() => {
                               handleLanguageChange(l)
