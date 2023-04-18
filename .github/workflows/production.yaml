@@ -19,6 +19,8 @@ jobs:
           tags: production ${{ github.sha }}
           containerfiles: |
             ./Containerfile
+          build-args: |
+            BASE_PATH=/chat
 
       - name: Push to quay.io
         uses: redhat-actions/push-to-registry@v2

@@ -1,10 +1,11 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
+import { inStaging } from './src/config'
+
 export default defineConfig({
   plugins: [react()],
+  base: inStaging ? '/gptwrapper' : '/chat',
   server: {
     proxy: {
       '/api/': {
