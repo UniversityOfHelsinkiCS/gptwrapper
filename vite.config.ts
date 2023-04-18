@@ -5,7 +5,7 @@ import { inStaging } from './src/config'
 
 export default defineConfig({
   plugins: [react()],
-  base: inStaging ? '/gptwrapper' : '/chat',
+  base: inStaging ? '/gptwrapper' : '/',
   server: {
     proxy: {
       '/api/': {
