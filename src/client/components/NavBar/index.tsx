@@ -21,7 +21,7 @@ import hyLogo from '../../assets/hy_logo.svg'
 import styles from '../../styles'
 
 const NavBar = () => {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
   const anchorRef = useRef<HTMLButtonElement>(null)
 
@@ -34,7 +34,7 @@ const NavBar = () => {
   }, [user, i18n]) */
 
   const { language } = i18n
-  const languages = ['fi', 'sv', 'en']
+  const languages = ['fi', 'en'] // Possibly Swedish as well
 
   const handleLanguageChange = (newLanguage: string) => {
     i18n.changeLanguage(newLanguage)
@@ -55,7 +55,7 @@ const NavBar = () => {
             </Link> */}
             <img src={hyLogo} alt="University of Helsinki" width="40" />
             <Box ml="2rem">
-              <Typography sx={navStyles.appName}>Gptwrapper</Typography>
+              <Typography sx={navStyles.appName}>{t('appName')}</Typography>
             </Box>
           </Box>
           <Box>
