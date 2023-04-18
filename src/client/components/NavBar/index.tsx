@@ -1,5 +1,4 @@
 import React, { useRef, useState } from 'react'
-// import { Link } from 'react-router-dom'
 import {
   AppBar,
   Toolbar,
@@ -13,8 +12,9 @@ import {
   Grow,
   Popper,
   Typography,
+  Link,
 } from '@mui/material'
-import { Language, /* AdminPanelSettingsOutlined */ } from '@mui/icons-material'
+import { Language, AdminPanelSettingsOutlined } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
 import hyLogo from '../../assets/hy_logo.svg'
@@ -50,21 +50,20 @@ const NavBar = () => {
       <Container maxWidth={false}>
         <Toolbar sx={navStyles.toolbar} disableGutters>
           <Box sx={navStyles.navBox}>
-            {/* <Link to="/" style={{ marginBottom: -5 }}>
+            <Link href="/" style={{ marginBottom: -5 }}>
               <img src={hyLogo} alt="University of Helsinki" width="40" />
-            </Link> */}
-            <img src={hyLogo} alt="University of Helsinki" width="40" />
+            </Link>
             <Box ml="2rem">
               <Typography sx={navStyles.appName}>{t('appName')}</Typography>
             </Box>
           </Box>
           <Box>
-            {/* <Link to="/admin" style={{ textDecoration: 'none' }}>
+            <Link href="/admin" style={{ textDecoration: 'none' }}>
               <Button>
                 <AdminPanelSettingsOutlined sx={navStyles.icon} />{' '}
                 {t('admin')}
               </Button>
-            </Link> */}
+            </Link>
             <Button
               ref={anchorRef}
               id="composition-button"

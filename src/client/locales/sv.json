@@ -1,6 +1,7 @@
 {
   "common": {
-    "appName": ""
+    "appName": "",
+    "admin": ""
   },
   "footer": {
     "contactSupport": ""
