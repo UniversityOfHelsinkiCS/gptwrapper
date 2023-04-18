@@ -5,5 +5,9 @@
   },
   "footer": {
     "contactSupport": "Contact support: <mailTo>{{supportEmail}}</mailTo>"
+  },
+  "chat": {
+    "exampleSystemMessage": "e.g. You are a helpful assistant",
+    "messagePlaceholder": "Send a message..."
   }
 }

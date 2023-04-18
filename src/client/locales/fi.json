@@ -5,5 +5,9 @@
   },
   "footer": {
     "contactSupport": "Ota yhteyttä tukeen: <mailTo>{{supportEmail}}</mailTo>"
+  },
+  "chat": {
+    "exampleSystemMessage": "esim. Olet hyödyllinen avustaja",
+    "messagePlaceholder": "Lähetä viesti..."
   }
 }
