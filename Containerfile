@@ -4,6 +4,9 @@ ENV TZ="Europe/Helsinki"
 
 WORKDIR /opt/app-root/src
 
+ARG BASE_PATH
+ENV PUBLIC_URL=$BASE_PATH
+
 ARG STAGING
 ENV STAGING=$STAGING
 
