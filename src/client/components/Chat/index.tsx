@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
-import { Box, TextField, Button, Typography } from '@mui/material'
-import { useTranslation } from 'react-i18next'
+import { Box } from '@mui/material'
 
 import { Message } from '../../types'
 import { getChatCompletion, getResponse } from './util'
+import SystemMessage from './SystemMessage'
+import Conversation from './Conversation'
+import SendMessage from './SendMessage'
 
 const Chat = () => {
   const [system, setSystem] = useState('')
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
-
-  const { t } = useTranslation()
 
   const handleSend = async () => {
     const newMessage: Message = { role: 'user', content: message }
@@ -34,39 +34,13 @@ const Chat = () => {
         padding: '5%',
       }}
     >
-      <Box mb={2}>
-        <TextField
-          fullWidth
-          multiline
-          minRows={2}
-          value={system}
-          onChange={(e) => setSystem(e.target.value)}
-          placeholder={t('chat:exampleSystemMessage') as string}
-        />
-      </Box>
-
-      {messages.map(({ content }) => (
-        <Box mb={2} key={content}>
-          <Typography variant="body1">{content}</Typography>
-        </Box>
-      ))}
-
-      <Box mb={2}>
-        <Box mb={2}>
-          <TextField
-            fullWidth
-            multiline
-            minRows={5}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder={t('chat:messagePlaceholder') as string}
-          />
-        </Box>
-
-        <Button variant="contained" onClick={handleSend}>
-          {t('send')}
-        </Button>
-      </Box>
+      <SystemMessage system={system} setSystem={setSystem} />
+      <Conversation messages={messages} />
+      <SendMessage
+        message={message}
+        setMessage={setMessage}
+        handleSend={handleSend}
+      />
     </Box>
   )
 }
