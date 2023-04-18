@@ -1,7 +1,8 @@
+export type Set<T> = React.Dispatch<React.SetStateAction<T>>
+
 export type Role = 'system' | 'assistant' | 'user'
 
 export interface Message {
-  id: string
   role: Role
   content: string
 }
