@@ -2,7 +2,7 @@ import { Service } from '../models'
 
 const services = [
   {
-    id: 'testService',
+    id: 'chat',
     name: 'Test Service',
     description: 'This is a test service',
     usageLimit: Number.MAX_SAFE_INTEGER,

@@ -1,13 +1,14 @@
 {
   "common": {
     "appName": "Gptwrapper",
-    "admin": "Ylläpito"
+    "admin": "Ylläpito",
+    "send": "Lähetä"
   },
   "footer": {
     "contactSupport": "Ota yhteyttä tukeen: <mailTo>{{supportEmail}}</mailTo>"
   },
   "chat": {
     "exampleSystemMessage": "esim. Olet hyödyllinen avustaja",
-    "messagePlaceholder": "Lähetä viesti..."
+    "messagePlaceholder": "Kirjoita viestisi tähän"
   }
 }

@@ -23,7 +23,7 @@ router.use(accessLogger)
 
 router.get('/ping', (_, res) => res.send('pong'))
 
-router.post('/v0/chat', async (req, res) => {
+router.post('/chat', async (req, res) => {
   const request = req as ChatRequest
   const { id, options } = request.body
   const { user } = request
