@@ -13,7 +13,7 @@ const router = createBrowserRouter([
     errorElement: <Error />,
   },
   {
-    path: 'admin',
+    path: `${PUBLIC_URL}/admin`,
     element: <Admin />,
   },
 ])
