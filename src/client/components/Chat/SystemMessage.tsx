@@ -7,9 +7,11 @@ import { Set } from '../../types'
 const SystemMessage = ({
   system,
   setSystem,
+  disabled,
 }: {
   system: string
   setSystem: Set<string>
+  disabled: boolean
 }) => {
   const { t } = useTranslation()
 
@@ -22,6 +24,7 @@ const SystemMessage = ({
         value={system}
         onChange={(e) => setSystem(e.target.value)}
         placeholder={t('chat:exampleSystemMessage') as string}
+        disabled={disabled}
       />
     </Box>
   )

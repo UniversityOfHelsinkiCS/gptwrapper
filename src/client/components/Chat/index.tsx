@@ -27,14 +27,17 @@ const Chat = () => {
 
   return (
     <Box
-      m={2}
       sx={{
         margin: 'auto',
         width: '80%',
         padding: '5%',
       }}
     >
-      <SystemMessage system={system} setSystem={setSystem} />
+      <SystemMessage
+        system={system}
+        setSystem={setSystem}
+        disabled={messages.length > 0}
+      />
       <Conversation messages={messages} />
       <SendMessage
         message={message}

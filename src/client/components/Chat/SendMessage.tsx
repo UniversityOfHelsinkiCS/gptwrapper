@@ -28,7 +28,10 @@ const SendMessage = ({
         />
       </Box>
       
-      <Button variant="contained" onClick={handleSend}>
+      <Button
+        variant="contained"
+        onClick={handleSend}
+        disabled={!message}>
         {t('send')}
       </Button>
     </Box>
