@@ -17,6 +17,7 @@ import {
 import { Language, AdminPanelSettingsOutlined } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
+import { PUBLIC_URL } from '../../../config'
 import hyLogo from '../../assets/hy_logo.svg'
 import styles from './styles'
 
@@ -48,7 +49,7 @@ const NavBar = () => {
       <Container maxWidth={false}>
         <Toolbar sx={styles.toolbar} disableGutters>
           <Box sx={styles.navBox}>
-            <Link href="/" style={{ marginBottom: -5 }}>
+            <Link href={`${PUBLIC_URL}/`} style={{ marginBottom: -5 }}>
               <img src={hyLogo} alt="University of Helsinki" width="40" />
             </Link>
             <Box ml="2rem">
@@ -56,7 +57,7 @@ const NavBar = () => {
             </Box>
           </Box>
           <Box>
-            <Link href="/admin" style={{ textDecoration: 'none' }}>
+            <Link href={`${PUBLIC_URL}/admin`} style={{ textDecoration: 'none' }}>
               <Button>
                 <AdminPanelSettingsOutlined sx={styles.icon} />{' '}
                 {t('admin')}
