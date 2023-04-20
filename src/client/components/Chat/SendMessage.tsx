@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, TextField, Button } from '@mui/material'
+import { Box, TextField, Button, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 import { Set } from '../../types'
@@ -17,6 +17,9 @@ const SendMessage = ({
 
   return (
     <Box mb={2}>
+      <Typography variant="h6">
+        {t('chat:message')}
+      </Typography>
       <Box mb={2}>
         <TextField
           fullWidth

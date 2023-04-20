@@ -8,7 +8,10 @@
     "contactSupport": "Ota yhteyttä tukeen: <mailTo>{{supportEmail}}</mailTo>"
   },
   "chat": {
+    "systemMessage": "Ohjeistus",
+    "systemMessageInfo": "Alusta keskustelu antamalla yleistason ohjeita tekoälylle",
     "exampleSystemMessage": "esim. Olet hyödyllinen avustaja",
+    "message": "Kysymys",
     "messagePlaceholder": "Kirjoita viestisi tähän"
   }
 }

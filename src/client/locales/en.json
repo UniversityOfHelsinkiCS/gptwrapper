@@ -8,7 +8,10 @@
     "contactSupport": "Contact support: <mailTo>{{supportEmail}}</mailTo>"
   },
   "chat": {
+    "systemMessage": "Instructions",
+    "systemMessageInfo": "Initialize the conversation by giving high level instructions to the AI",
     "exampleSystemMessage": "e.g. You are a helpful assistant",
+    "message": "Question",
     "messagePlaceholder": "Enter your message here"
   }
 }

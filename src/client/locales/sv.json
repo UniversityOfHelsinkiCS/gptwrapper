@@ -7,7 +7,10 @@
     "contactSupport": ""
   },
   "chat": {
+    "systemMessage": "",
+    "systemMessageInfo": "",
     "exampleSystemMessage": "",
+    "message": "",
     "messagePlaceholder": ""
   }
 }
