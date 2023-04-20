@@ -1,6 +1,7 @@
 import React from 'react'
-import { Box, Typography, Paper } from '@mui/material'
+import { Box, Paper } from '@mui/material'
 import { Person, Storage } from '@mui/icons-material'
+import ReactMarkdown from 'react-markdown'
 
 import { Message, Role } from '../../types'
 
@@ -9,15 +10,15 @@ const Response = ({ role, content }: { role: Role, content: string }) => {
 
   return (
     <Box mb={2}>
-      <Box display="flex">
-        <Box display="inline-block">
-          <Paper variant="outlined">
-            <Box p={1} display="flex">
-              {isUser ? <Person sx={{ mr: 1 }} /> : <Storage sx={{ mr: 1 }} />}
-              <Typography variant="body1">{content}</Typography>
+      <Box display="inline-block">
+        <Paper variant="outlined">
+          <Box display="flex">
+            {isUser ? <Person sx={{ mx: 3, my: 4 }} /> : <Storage sx={{ mx: 3, my: 4 }} />}
+            <Box pr={7} py={2}>
+              <ReactMarkdown>{content}</ReactMarkdown>
             </Box>
-          </Paper>
-        </Box>
+          </Box>
+        </Paper>
       </Box>
     </Box>
   )
