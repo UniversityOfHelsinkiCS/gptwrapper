@@ -48,7 +48,7 @@ const themeOptions: ThemeOptions = {
   },
 
   shape: {
-    borderRadius: 0,
+    borderRadius: 6,
   },
 
   components: {

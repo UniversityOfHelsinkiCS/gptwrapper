@@ -17,9 +17,11 @@ const SendMessage = ({
 
   return (
     <Box mb={2}>
-      <Typography variant="h6">
-        {t('chat:message')}
-      </Typography>
+      <Box mb={1}>
+        <Typography variant="h6">
+          {t('chat:message')}
+        </Typography>
+      </Box>
       <Box mb={2}>
         <TextField
           fullWidth

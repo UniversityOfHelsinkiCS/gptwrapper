@@ -9,7 +9,7 @@ const Info = () => {
   const { t } = useTranslation()
 
   return (
-    <Box>
+    <Box mb={1}>
       <Typography variant="h6" display="inline">
         {t('chat:systemMessage')}
         <Tooltip placement="right" title={t('chat:systemMessageInfo')}>
