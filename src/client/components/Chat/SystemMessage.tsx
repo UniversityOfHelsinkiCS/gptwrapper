@@ -1,6 +1,5 @@
 import React from 'react'
 import { Box, TextField, Typography, Tooltip } from '@mui/material'
-import { HelpOutline } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
 import { Set } from '../../types'
@@ -10,12 +9,11 @@ const Info = () => {
 
   return (
     <Box mb={1}>
+      <Tooltip placement="right" title={t('chat:systemMessageInfo')}>
       <Typography variant="h6" display="inline">
         {t('chat:systemMessage')}
-        <Tooltip placement="right" title={t('chat:systemMessageInfo')}>
-          <HelpOutline sx={{ ml: 1 }} color="primary" />
-        </Tooltip>
       </Typography>
+      </Tooltip>
     </Box>
   )
 }
