@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   AppBar,
   Toolbar,
@@ -26,23 +26,26 @@ const NavBar = () => {
   const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
   const anchorRef = useRef<HTMLButtonElement>(null)
 
-  // const { user, isLoading } = useLoggedInUser()
-
-  /* useEffect(() => {
-    if (user?.language) {
-      i18n.changeLanguage(user.language)
-    }
-  }, [user, i18n]) */
-
   const { language } = i18n
   const languages = ['fi', 'en'] // Possibly Swedish as well
+
+  useEffect(() => {
+    const getLanguage = async () => {
+      const response = await fetch('/api/login')
+      const user = await response.json()
+      
+      if (user?.language && languages.includes(user.language)) {
+        i18n.changeLanguage(user.language)
+      }
+    }
+
+    getLanguage()
+  }, [i18n])
 
   const handleLanguageChange = (newLanguage: string) => {
     i18n.changeLanguage(newLanguage)
     setOpenLanguageSelect(false)
   }
-
-  // if (isLoading) return null
 
   return (
     <AppBar elevation={0} position="relative" sx={styles.appbar}>

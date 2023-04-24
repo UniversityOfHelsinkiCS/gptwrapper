@@ -113,4 +113,13 @@ router.post('/stream', async (req, res) => {
   })
 })
 
+router.get('/login', async (req, res) => {
+  const request = req as ChatRequest
+  const { user } = request
+
+  if (!user.id) return res.send({})
+
+  return res.send(user)
+})
+
 export default router
