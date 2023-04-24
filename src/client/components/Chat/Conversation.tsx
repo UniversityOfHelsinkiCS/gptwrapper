@@ -24,12 +24,33 @@ const Response = ({ role, content }: { role: Role, content: string }) => {
   )
 }
 
-const Conversation = ({ messages }: { messages: Message[] }) => (
-  <Box>
-    {messages.map(({ role, content }) => (
-      <Response key={content} role={role} content={content} />
-    ))}
-  </Box>
-)
+const LastMessage = ({ message }: { message: Message }) => {
+  const { role, content } = message
+
+  if (role === 'user') return <Response role={role} content={content} />
+
+  return (
+    <Response role={role} content={content} />
+  )
+}
+
+const Conversation = ({ messages }: { messages: Message[] }) => {
+  if (messages.length === 0) return null
+
+  const lastMessage = messages.at(-1) as Message
+  const previousMessages = messages.slice(0, -1)
+
+  console.log(lastMessage)
+  console.log(previousMessages)
+
+  return (
+    <Box>
+      {previousMessages.map(({ role, content }) => (
+        <Response key={content} role={role} content={content} />
+      ))}
+      <LastMessage message={lastMessage} />
+    </Box>
+  )
+}
 
 export default Conversation
