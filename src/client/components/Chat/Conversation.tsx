@@ -34,21 +34,15 @@ const LastMessage = ({ message }: { message: Message }) => {
   )
 }
 
-const Conversation = ({ messages }: { messages: Message[] }) => {
-  if (messages.length === 0) return null
-
-  const lastMessage = messages.at(-1) as Message
+const Conversation = ({ messages, lastMessage }: { messages: Message[], lastMessage: Message | null }) => {
   const previousMessages = messages.slice(0, -1)
-
-  console.log(lastMessage)
-  console.log(previousMessages)
 
   return (
     <Box>
       {previousMessages.map(({ role, content }) => (
         <Response key={content} role={role} content={content} />
       ))}
-      <LastMessage message={lastMessage} />
+      {lastMessage && <LastMessage message={lastMessage} />}
     </Box>
   )
 }

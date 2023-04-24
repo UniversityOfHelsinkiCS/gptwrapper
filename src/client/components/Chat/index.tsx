@@ -11,17 +11,21 @@ const Chat = () => {
   const [system, setSystem] = useState('')
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
+  const [lastMessage, setLastMessage] = useState<Message | null>(null)
 
   const handleSend = async () => {
     const newMessage: Message = { role: 'user', content: message }
+    setLastMessage(newMessage)
 
     const completion = await getChatCompletion(
       system,
       messages.concat(newMessage)
     )
+
     const response = getResponse(completion)
 
     setMessages([...messages, newMessage, response])
+    setLastMessage(response)
     setMessage('')
   }
 
@@ -38,7 +42,7 @@ const Chat = () => {
         setSystem={setSystem}
         disabled={messages.length > 0}
       />
-      <Conversation messages={messages} />
+      <Conversation messages={messages} lastMessage={lastMessage} />
       <SendMessage
         message={message}
         setMessage={setMessage}
