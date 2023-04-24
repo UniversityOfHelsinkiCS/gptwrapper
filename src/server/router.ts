@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 
+import { inProduction } from '../config'
 import { ChatRequest } from './types'
 import shibbolethMiddleware from './middleware/shibboleth'
 import userMiddleware from './middleware/user'
@@ -9,7 +10,8 @@ import { Service } from './db/models'
 import { isError } from './util/parser'
 import { checkUsage, incrementUsage } from './services/usage'
 import hashData from './util/hash'
-import { createCompletion } from './util/openai'
+import { createCompletion, completionStream } from './util/openai'
+import logger from './util/logger'
 
 const router = express()
 
@@ -48,6 +50,44 @@ router.post('/chat', async (req, res) => {
   await incrementUsage(user, id, tokenCount)
 
   return res.send(response)
+})
+
+// eslint-disable-next-line consistent-return
+router.post('/stream', async (req, res) => {
+  const request = req as ChatRequest
+  const { options } = request.body
+
+  if (!options) return res.status(400).send('Missing options')
+
+  const stream = await completionStream(options)
+
+  // https://github.com/openai/openai-node/issues/18#issuecomment-1493132878
+  stream.on('data', (chunk: Buffer) => {
+    // Messages in the event stream are separated by a pair of newline characters.
+    const payloads = chunk.toString().split('\n\n')
+    // eslint-disable-next-line no-restricted-syntax
+    for (const payload of payloads) {
+      if (payload.includes('[DONE]')) return
+      if (payload.startsWith('data:')) {
+        const data = payload.replaceAll(/(\n)?^data:\s*/g, '') // in case there's multiline data event
+        try {
+          const delta = JSON.parse(data.trim())
+          if (!inProduction) logger.info(delta.choices[0].delta?.content)
+          res.write(delta.choices[0].delta?.content)
+        } catch (error) {
+          logger.error(`Error with JSON.parse and ${payload}.\n${error}`)
+        }
+      }
+    }
+  })
+
+  stream.on('end', () => {
+    res.end()
+  })
+  stream.on('error', (e: Error) => {
+    logger.error(e)
+    res.end()
+  })
 })
 
 export default router

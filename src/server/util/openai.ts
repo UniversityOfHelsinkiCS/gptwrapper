@@ -1,3 +1,5 @@
+import { IncomingMessage } from 'http'
+
 import { Configuration, OpenAIApi, CreateChatCompletionRequest } from 'openai'
 
 import { ApiResponse } from '../types'
@@ -35,4 +37,16 @@ export const createCompletion = async (
 
     return error
   }
+}
+
+export const completionStream = async (
+  options: CreateChatCompletionRequest
+) => {
+  const response = await openai.createChatCompletion(options, {
+    responseType: 'stream',
+  })
+
+  const stream = response.data as unknown as IncomingMessage
+
+  return stream
 }

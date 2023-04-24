@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/aria-role */
 import React from 'react'
 import { Box, Paper } from '@mui/material'
 import { Person, Storage } from '@mui/icons-material'
@@ -24,27 +25,13 @@ const Response = ({ role, content }: { role: Role, content: string }) => {
   )
 }
 
-const LastMessage = ({ message }: { message: Message }) => {
-  const { role, content } = message
-
-  if (role === 'user') return <Response role={role} content={content} />
-
-  return (
-    <Response role={role} content={content} />
-  )
-}
-
-const Conversation = ({ messages, lastMessage }: { messages: Message[], lastMessage: Message | null }) => {
-  const previousMessages = messages.slice(0, -1)
-
-  return (
-    <Box>
-      {previousMessages.map(({ role, content }) => (
-        <Response key={content} role={role} content={content} />
-      ))}
-      {lastMessage && <LastMessage message={lastMessage} />}
-    </Box>
-  )
-}
+const Conversation = ({ messages, completion }: { messages: Message[], completion: string }) => (
+  <Box>
+    {messages.map(({ role, content }) => (
+      <Response key={content} role={role} content={content} />
+    ))}
+    {completion && <Response role="assistant" content={completion} />}
+  </Box>
+)
 
 export default Conversation

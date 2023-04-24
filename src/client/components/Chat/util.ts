@@ -39,3 +39,33 @@ export const getChatCompletion = async (
 
   return data
 }
+
+export const getCompletionStream = async (
+  system: string,
+  messages: Message[]
+) => {
+  const response = await fetch('/api/stream', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id: 'chat',
+      options: {
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'system',
+            content: system,
+          },
+          ...messages,
+        ],
+        stream: true,
+      },
+    }),
+  })
+
+  const stream = response.body as unknown as ReadableStream
+
+  return stream
+}

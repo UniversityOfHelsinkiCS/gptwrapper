@@ -1,8 +1,9 @@
+/* eslint-disable no-await-in-loop, no-constant-condition */
 import React, { useState } from 'react'
 import { Box } from '@mui/material'
 
 import { Message } from '../../types'
-import { getChatCompletion, getResponse } from './util'
+import { getCompletionStream } from './util'
 import SystemMessage from './SystemMessage'
 import Conversation from './Conversation'
 import SendMessage from './SendMessage'
@@ -11,21 +12,30 @@ const Chat = () => {
   const [system, setSystem] = useState('')
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
-  const [lastMessage, setLastMessage] = useState<Message | null>(null)
+  const [completion, setCompletion] = useState('')
 
   const handleSend = async () => {
     const newMessage: Message = { role: 'user', content: message }
-    setLastMessage(newMessage)
+    setMessages((prev) => [...prev, newMessage])
 
-    const completion = await getChatCompletion(
-      system,
-      messages.concat(newMessage)
-    )
+    const stream = await getCompletionStream(system, messages.concat(newMessage))
+    const reader = stream.getReader()
 
-    const response = getResponse(completion)
+    let content = ''
+    while (true) {
+      const { value, done } = await reader.read()
 
-    setMessages([...messages, newMessage, response])
-    setLastMessage(response)
+      if (done) break
+
+      const text = new TextDecoder().decode(value)
+
+      setCompletion((prev) => prev + text)
+      content += text
+    }
+
+    setMessages((prev) => [...prev, { role: 'assistant', content }])
+
+    setCompletion('')
     setMessage('')
   }
 
@@ -42,7 +52,7 @@ const Chat = () => {
         setSystem={setSystem}
         disabled={messages.length > 0}
       />
-      <Conversation messages={messages} lastMessage={lastMessage} />
+      <Conversation messages={messages} completion={completion} />
       <SendMessage
         message={message}
         setMessage={setMessage}
