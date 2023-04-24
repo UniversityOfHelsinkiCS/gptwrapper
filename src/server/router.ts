@@ -74,6 +74,8 @@ router.post('/stream', async (req, res) => {
 
   if (isError(stream)) return res.status(424).send(stream)
 
+  res.setHeader('content-type', 'text/plain')
+
   const encoding = getEncoding(options.model)
 
   let tokenCount = calculateUsage(options, encoding)

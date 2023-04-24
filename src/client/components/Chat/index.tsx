@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop, no-constant-condition */
 import React, { useState } from 'react'
-import { Box } from '@mui/material'
+import { Box, Paper } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 
 import { Message } from '../../types'
@@ -49,21 +49,28 @@ const Chat = () => {
     <Box
       sx={{
         margin: 'auto',
-        width: '80%',
+        width: '90%',
         padding: '5%',
       }}
     >
-      <SystemMessage
-        system={system}
-        setSystem={setSystem}
-        disabled={messages.length > 0}
-      />
-      <Conversation messages={messages} completion={completion} />
-      <SendMessage
-        message={message}
-        setMessage={setMessage}
-        handleSend={handleSend}
-      />
+      <Paper
+        variant="outlined"
+        sx={{
+          padding: '5% 10%',
+        }}
+      >
+        <SystemMessage
+          system={system}
+          setSystem={setSystem}
+          disabled={messages.length > 0}
+        />
+        <Conversation messages={messages} completion={completion} />
+        <SendMessage
+          message={message}
+          setMessage={setMessage}
+          handleSend={handleSend}
+        />
+      </Paper>
     </Box>
   )
 }

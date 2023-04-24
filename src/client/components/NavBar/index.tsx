@@ -14,7 +14,7 @@ import {
   Typography,
   Link,
 } from '@mui/material'
-import { Language, AdminPanelSettingsOutlined } from '@mui/icons-material'
+import { Language } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
 import { PUBLIC_URL } from '../../../config'
@@ -57,12 +57,12 @@ const NavBar = () => {
             </Box>
           </Box>
           <Box>
-            <Link href={`${PUBLIC_URL}/admin`} style={{ textDecoration: 'none' }}>
+            {/* <Link href={`${PUBLIC_URL}/admin`} style={{ textDecoration: 'none' }}>
               <Button>
                 <AdminPanelSettingsOutlined sx={styles.icon} />{' '}
                 {t('admin')}
               </Button>
-            </Link>
+            </Link> */}
             <Button
               ref={anchorRef}
               id="composition-button"
