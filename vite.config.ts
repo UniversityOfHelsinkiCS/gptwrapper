@@ -3,14 +3,17 @@ import react from '@vitejs/plugin-react'
 
 import { inStaging } from './src/config'
 
-const baseUrl = inStaging ? '/gptwrapper' : '/'
-const proxyUrl = inStaging ? '/gptwrapper/api/' : '/api/'
-
-const config = {
+export default defineConfig({
   plugins: [react()],
-  base: baseUrl,
+  base: inStaging ? '/gptwrapper' : '/',
   server: {
-    proxy: {},
+    proxy: {
+      '/api/': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
     watch: {
       usePolling: true,
     },
@@ -21,12 +24,4 @@ const config = {
   define: {
     'process.env': process.env,
   },
-}
-
-config.server.proxy[proxyUrl] = {
-  target: 'http://localhost:8000',
-  changeOrigin: true,
-  secure: false,
-}
-
-export default defineConfig(config)
+})

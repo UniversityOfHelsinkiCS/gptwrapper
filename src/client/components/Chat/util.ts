@@ -1,5 +1,6 @@
 import { CreateChatCompletionResponse } from 'openai'
 
+import { PUBLIC_URL } from '../../../config'
 import { Message } from '../../types'
 import apiClient from '../../util/apiClient'
 
@@ -44,7 +45,7 @@ export const getCompletionStream = async (
   system: string,
   messages: Message[]
 ) => {
-  const response = await fetch('/api/stream', {
+  const response = await fetch(`${PUBLIC_URL}/api/stream`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -31,7 +31,7 @@ const NavBar = () => {
 
   useEffect(() => {
     const getLanguage = async () => {
-      const response = await fetch('/api/login')
+      const response = await fetch(`${PUBLIC_URL}/api/login`)
       const user = await response.json()
       
       if (user?.language && languages.includes(user.language)) {
