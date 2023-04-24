@@ -8,10 +8,12 @@ const SendMessage = ({
   message,
   setMessage,
   handleSend,
+  disabled,
 }: {
   message: string
   setMessage: Set<string>
   handleSend: () => void
+  disabled: boolean
 }) => {
   const { t } = useTranslation()
 
@@ -36,7 +38,8 @@ const SendMessage = ({
       <Button
         variant="contained"
         onClick={handleSend}
-        disabled={!message}>
+        disabled={disabled}
+      >
         {t('send')}
       </Button>
     </Box>

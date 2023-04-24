@@ -18,6 +18,7 @@ const Chat = () => {
   const handleSend = async () => {
     const newMessage: Message = { role: 'user', content: message }
     setMessages((prev) => [...prev, newMessage])
+    setMessage('')
 
     try {
       const stream = await getCompletionStream(system, messages.concat(newMessage))
@@ -42,7 +43,6 @@ const Chat = () => {
     }
 
     setCompletion('')
-    setMessage('')
   }
 
   return (
@@ -69,6 +69,7 @@ const Chat = () => {
           message={message}
           setMessage={setMessage}
           handleSend={handleSend}
+          disabled={message.length === 0 || completion !== ''}
         />
       </Paper>
     </Box>

@@ -11,6 +11,7 @@
     "systemMessageInfo": "",
     "exampleSystemMessage": "",
     "message": "",
-    "messagePlaceholder": ""
+    "messagePlaceholder": "",
+    "conversation": ""
   }
 }

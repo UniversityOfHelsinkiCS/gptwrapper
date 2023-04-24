@@ -1,8 +1,9 @@
 /* eslint-disable jsx-a11y/aria-role */
 import React from 'react'
-import { Box, Paper } from '@mui/material'
-import { Person, Storage } from '@mui/icons-material'
+import { Box, Paper, Typography } from '@mui/material'
+import { Person, Assistant } from '@mui/icons-material'
 import ReactMarkdown from 'react-markdown'
+import { useTranslation } from 'react-i18next'
 
 import { Message, Role } from '../../types'
 
@@ -14,7 +15,7 @@ const Response = ({ role, content }: { role: Role, content: string }) => {
       <Box display="inline-block">
         <Paper variant="outlined">
           <Box display="flex">
-            {isUser ? <Person sx={{ mx: 3, my: 4 }} /> : <Storage sx={{ mx: 3, my: 4 }} />}
+            {isUser ? <Person sx={{ mx: 3, my: 4 }} /> : <Assistant sx={{ mx: 3, my: 4 }} />}
             <Box pr={7} py={2}>
               <ReactMarkdown>{content}</ReactMarkdown>
             </Box>
@@ -25,13 +26,23 @@ const Response = ({ role, content }: { role: Role, content: string }) => {
   )
 }
 
-const Conversation = ({ messages, completion }: { messages: Message[], completion: string }) => (
-  <Box>
-    {messages.map(({ role, content }) => (
-      <Response key={content} role={role} content={content} />
-    ))}
-    {completion && <Response role="assistant" content={completion} />}
-  </Box>
-)
+const Conversation = ({ messages, completion }: { messages: Message[], completion: string }) => {
+  const { t } = useTranslation()
 
+  if (messages.length === 0 && !completion) return null
+
+  return (
+    <Box>
+      <Box mb={1}>
+        <Typography variant="h6">
+          {t('chat:conversation')}
+        </Typography>
+      </Box>
+        {messages.map(({ role, content }) => (
+          <Response key={content} role={role} content={content} />
+        ))}
+        {completion && <Response role="assistant" content={completion} />}
+    </Box>
+  )
+}
 export default Conversation
