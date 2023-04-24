@@ -65,6 +65,11 @@ export const getCompletionStream = async (
     }),
   })
 
+  if (!response.ok) {
+    const message = (await response.text()) || 'Something went wrong'
+    throw new Error(message)
+  }
+
   const stream = response.body as unknown as ReadableStream
 
   return stream

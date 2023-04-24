@@ -2,7 +2,7 @@ import { IncomingMessage } from 'http'
 
 import { Configuration, OpenAIApi, CreateChatCompletionRequest } from 'openai'
 
-import { ApiResponse } from '../types'
+import { ApiError, ApiResponse } from '../types'
 import { OPENAI_API_KEY } from './config'
 import { inProduction } from '../../config'
 import logger from './logger'
@@ -41,12 +41,27 @@ export const createCompletion = async (
 
 export const completionStream = async (
   options: CreateChatCompletionRequest
-) => {
-  const response = await openai.createChatCompletion(options, {
-    responseType: 'stream',
-  })
+): Promise<IncomingMessage | ApiError> => {
+  try {
+    const response = await openai.createChatCompletion(options, {
+      responseType: 'stream',
+    })
 
-  const stream = response.data as unknown as IncomingMessage
+    const stream = response.data as unknown as IncomingMessage
 
-  return stream
+    return stream
+  } catch (err: any) {
+    const error = err.response
+      ? {
+          status: err.response.status,
+          error: err.response.data,
+        }
+      : {
+          error: err.message,
+        }
+
+    logger.error('OpenAI API error', { error })
+
+    return error
+  }
 }

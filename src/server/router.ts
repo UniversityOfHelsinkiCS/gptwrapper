@@ -72,6 +72,8 @@ router.post('/stream', async (req, res) => {
   options.user = hashData(user.id)
   const stream = await completionStream(options)
 
+  if (isError(stream)) return res.status(424).send(stream)
+
   const encoding = getEncoding(options.model)
 
   let tokenCount = calculateUsage(options, encoding)

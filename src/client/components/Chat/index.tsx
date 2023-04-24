@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop, no-constant-condition */
 import React, { useState } from 'react'
 import { Box } from '@mui/material'
+import { enqueueSnackbar } from 'notistack'
 
 import { Message } from '../../types'
 import { getCompletionStream } from './util'
@@ -18,22 +19,27 @@ const Chat = () => {
     const newMessage: Message = { role: 'user', content: message }
     setMessages((prev) => [...prev, newMessage])
 
-    const stream = await getCompletionStream(system, messages.concat(newMessage))
-    const reader = stream.getReader()
+    try {
+      const stream = await getCompletionStream(system, messages.concat(newMessage))
+      const reader = stream.getReader()
 
-    let content = ''
-    while (true) {
-      const { value, done } = await reader.read()
+      let content = ''
+      while (true) {
+        const { value, done } = await reader.read()
 
-      if (done) break
+        if (done) break
 
-      const text = new TextDecoder().decode(value)
+        const text = new TextDecoder().decode(value)
 
-      setCompletion((prev) => prev + text)
-      content += text
+        setCompletion((prev) => prev + text)
+        content += text
+      }
+
+      setMessages((prev) => [...prev, { role: 'assistant', content }])
+    } catch (err: any) {
+      const error = err?.response?.data || err.message
+      enqueueSnackbar(error, { variant: 'error' })
     }
-
-    setMessages((prev) => [...prev, { role: 'assistant', content }])
 
     setCompletion('')
     setMessage('')
