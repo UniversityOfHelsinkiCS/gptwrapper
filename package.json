@@ -84,6 +84,7 @@
     "typescript": "^5.0.2"
   },
   "dependencies": {
+    "@dqbd/tiktoken": "^1.0.6",
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
     "@mui/icons-material": "^5.11.16",

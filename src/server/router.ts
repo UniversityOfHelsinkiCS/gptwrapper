@@ -8,9 +8,10 @@ import userMiddleware from './middleware/user'
 import accessLogger from './middleware/access'
 import { Service } from './db/models'
 import { isError } from './util/parser'
-import { checkUsage, incrementUsage } from './services/usage'
+import { calculateUsage, checkUsage, incrementUsage } from './services/usage'
 import hashData from './util/hash'
 import { createCompletion, completionStream } from './util/openai'
+import getEncoding from './util/tiktoken'
 import logger from './util/logger'
 
 const router = express()
@@ -55,12 +56,25 @@ router.post('/chat', async (req, res) => {
 // eslint-disable-next-line consistent-return
 router.post('/stream', async (req, res) => {
   const request = req as ChatRequest
-  const { options } = request.body
+  const { id, options } = request.body
+  const { user } = request
 
+  if (!user.id) return res.status(401).send('Unauthorized')
+  if (!id) return res.status(400).send('Missing id')
   if (!options) return res.status(400).send('Missing options')
 
+  const service = await Service.findByPk(id)
+  if (!service) return res.status(404).send('Service not found')
+
+  const usageAllowed = await checkUsage(user, service)
+  if (!usageAllowed) return res.status(403).send('Usage limit reached')
+
+  options.user = hashData(user.id)
   const stream = await completionStream(options)
 
+  const encoding = getEncoding(options.model)
+
+  let tokenCount = calculateUsage(options, encoding)
   // https://github.com/openai/openai-node/issues/18#issuecomment-1493132878
   stream.on('data', (chunk: Buffer) => {
     // Messages in the event stream are separated by a pair of newline characters.
@@ -72,8 +86,11 @@ router.post('/stream', async (req, res) => {
         const data = payload.replaceAll(/(\n)?^data:\s*/g, '') // in case there's multiline data event
         try {
           const delta = JSON.parse(data.trim())
-          if (!inProduction) logger.info(delta.choices[0].delta?.content)
-          res.write(delta.choices[0].delta?.content)
+          const text = delta.choices[0].delta?.content
+
+          if (!inProduction) logger.info(text)
+          res.write(text)
+          tokenCount += encoding.encode(text).length || 0
         } catch (error) {
           logger.error(`Error with JSON.parse and ${payload}.\n${error}`)
         }
@@ -81,7 +98,9 @@ router.post('/stream', async (req, res) => {
     }
   })
 
-  stream.on('end', () => {
+  stream.on('end', async () => {
+    await incrementUsage(user, id, tokenCount)
+    logger.info(`Stream ended. Total tokens: ${tokenCount}`)
     res.end()
   })
   stream.on('error', (e: Error) => {
