@@ -67,6 +67,9 @@ router.post('/stream', async (req, res) => {
   const service = await Service.findByPk(id)
   if (!service) return res.status(404).send('Service not found')
 
+  if (options.messages.length > 10)
+    return res.status(403).send('Conversation message limit reached')
+
   // const usageAllowed = await checkUsage(user, service)
   // if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
