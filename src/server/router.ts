@@ -8,11 +8,11 @@ import userMiddleware from './middleware/user'
 import accessLogger from './middleware/access'
 import { Service } from './db/models'
 import { isError } from './util/parser'
-import { calculateUsage, incrementUsage } from './services/usage'
+import { calculateUsage, incrementUsage, checkUsage } from './services/usage'
 import hashData from './util/hash'
 import { completionStream } from './util/openai'
 import getEncoding from './util/tiktoken'
-import checkAccess from './util/access'
+import checkAccess from './services/access'
 import logger from './util/logger'
 
 const router = express()
@@ -43,8 +43,8 @@ router.post('/stream', async (req, res) => {
   if (options.messages.length > 10)
     return res.status(403).send('Conversation message limit reached')
 
-  // const usageAllowed = await checkUsage(user, service)
-  // if (!usageAllowed) return res.status(403).send('Usage limit reached')
+  const usageAllowed = await checkUsage(user, service)
+  if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
   const encoding = getEncoding(options.model)
   let tokenCount = calculateUsage(options, encoding)

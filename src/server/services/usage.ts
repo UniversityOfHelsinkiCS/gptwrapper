@@ -18,6 +18,8 @@ export const checkUsage = async (
   user: User,
   service: ServiceType
 ): Promise<boolean> => {
+  if (user.isAdmin) return true
+
   const [serviceUsage] = await UserServiceUsage.findOrCreate({
     where: {
       userId: user.id,
