@@ -45,6 +45,13 @@ const Chat = () => {
     setCompletion('')
   }
 
+  const handleReset = () => {
+    setMessages([])
+    setSystem('')
+    setMessage('')
+    setCompletion('')
+  }
+
   return (
     <Box
       sx={{
@@ -68,8 +75,10 @@ const Chat = () => {
         <SendMessage
           message={message}
           setMessage={setMessage}
+          handleReset={handleReset}
           handleSend={handleSend}
           disabled={message.length === 0 || completion !== ''}
+          resetDisabled={messages.length === 0 && system.length === 0 && message.length === 0}
         />
       </Paper>
     </Box>

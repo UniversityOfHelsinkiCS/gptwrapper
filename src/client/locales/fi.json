@@ -2,7 +2,8 @@
   "common": {
     "appName": "Gptwrapper",
     "admin": "Ylläpito",
-    "send": "Lähetä"
+    "send": "Lähetä",
+    "reset": "Tyhjennä"
   },
   "footer": {
     "contactSupport": "Ota yhteyttä tukeen: <mailTo>{{supportEmail}}</mailTo>"

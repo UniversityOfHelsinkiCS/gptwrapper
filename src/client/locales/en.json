@@ -2,7 +2,8 @@
   "common": {
     "appName": "Gptwrapper",
     "admin": "Admin",
-    "send": "Send"
+    "send": "Send",
+    "reset": "Reset"
   },
   "footer": {
     "contactSupport": "Contact support: <mailTo>{{supportEmail}}</mailTo>"

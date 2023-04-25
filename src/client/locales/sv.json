@@ -1,7 +1,9 @@
 {
   "common": {
     "appName": "",
-    "admin": ""
+    "admin": "",
+    "send": "",
+    "reset": ""
   },
   "footer": {
     "contactSupport": ""
