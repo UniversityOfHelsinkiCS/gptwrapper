@@ -1,11 +1,12 @@
+import { inProduction } from '../../../config'
 import { Service } from '../models'
 
 const services = [
   {
     id: 'chat',
-    name: 'Test Service',
-    description: 'This is a test service',
-    usageLimit: Number.MAX_SAFE_INTEGER,
+    name: 'Chat',
+    description: 'Open ended chatting.',
+    usageLimit: inProduction ? 100_000 : Number.MAX_SAFE_INTEGER,
   },
 ]
 

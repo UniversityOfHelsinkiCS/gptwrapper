@@ -1,3 +1,4 @@
+import { inProduction } from '../../../config'
 import logger from '../../util/logger'
 import seedUsers from './user'
 import seedServices from './service'
@@ -7,7 +8,7 @@ const seed = async () => {
   await new Promise<void>((resolve) => setTimeout(() => resolve(), 1_000))
 
   try {
-    await seedUsers()
+    if (!inProduction) await seedUsers()
     await seedServices()
     logger.info('Seeding successful')
   } catch (e) {

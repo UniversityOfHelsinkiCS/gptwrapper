@@ -24,7 +24,7 @@ if (inProduction || inStaging) {
 
 app.listen(PORT, async () => {
   await connectToDatabase()
-  if (!inProduction) await seed()
+  await seed()
 
   logger.info(`Server running on port ${PORT}`)
 })
