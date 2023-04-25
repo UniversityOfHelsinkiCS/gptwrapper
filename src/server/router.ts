@@ -67,8 +67,8 @@ router.post('/stream', async (req, res) => {
   const service = await Service.findByPk(id)
   if (!service) return res.status(404).send('Service not found')
 
-  const usageAllowed = await checkUsage(user, service)
-  if (!usageAllowed) return res.status(403).send('Usage limit reached')
+  // const usageAllowed = await checkUsage(user, service)
+  // if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
   options.user = hashData(user.id)
   const stream = await completionStream(options)
