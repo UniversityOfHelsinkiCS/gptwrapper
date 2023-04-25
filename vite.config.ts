@@ -1,11 +1,14 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-import { inStaging } from './src/config'
+import { inProduction, inStaging } from './src/config'
+
+// eslint-disable-next-line no-nested-ternary
+const base = inProduction ? '/chat' : inStaging ? '/gptwrapper' : '/'
 
 export default defineConfig({
   plugins: [react()],
-  base: inStaging ? '/gptwrapper' : '/',
+  base,
   server: {
     proxy: {
       '/api/': {
