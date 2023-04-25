@@ -12,6 +12,7 @@ import { calculateUsage, checkUsage, incrementUsage } from './services/usage'
 import hashData from './util/hash'
 import { createCompletion, completionStream } from './util/openai'
 import getEncoding from './util/tiktoken'
+import checkAccess from './util/access'
 import logger from './util/logger'
 
 const router = express()
@@ -116,8 +117,10 @@ router.post('/stream', async (req, res) => {
 router.get('/login', async (req, res) => {
   const request = req as ChatRequest
   const { user } = request
+  const { id, isAdmin, iamGroups } = user
 
-  if (!user.id) return res.send({})
+  if (!id) return res.send({})
+  if (!isAdmin && !checkAccess(iamGroups)) return res.send({})
 
   return res.send(user)
 })
