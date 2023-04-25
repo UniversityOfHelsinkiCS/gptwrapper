@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   AppBar,
   Toolbar,
@@ -12,7 +13,6 @@ import {
   Grow,
   Popper,
   Typography,
-  Link,
 } from '@mui/material'
 import { Language } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next'
 import { PUBLIC_URL } from '../../../config'
 import hyLogo from '../../assets/hy_logo.svg'
 import styles from './styles'
+import { User } from '../../types'
 
 const NavBar = () => {
   const { t, i18n } = useTranslation()
@@ -30,17 +31,22 @@ const NavBar = () => {
   const languages = ['fi', 'en'] // Possibly Swedish as well
 
   useEffect(() => {
-    const getLanguage = async () => {
+    const login = async () => {
       const response = await fetch(`${PUBLIC_URL}/api/login`)
-      const user = await response.json()
+      const user: User = await response.json()
       
       if (user?.language && languages.includes(user.language)) {
         i18n.changeLanguage(user.language)
       }
+
+      // No access, redirect to Curre front page
+      if (!user.id) {
+        window.location.replace('https://curre.helsinki.fi')
+      }
     }
 
-    getLanguage()
-  }, [i18n])
+    login()
+  }, [])
 
   const handleLanguageChange = (newLanguage: string) => {
     i18n.changeLanguage(newLanguage)
@@ -52,7 +58,7 @@ const NavBar = () => {
       <Container maxWidth={false}>
         <Toolbar sx={styles.toolbar} disableGutters>
           <Box sx={styles.navBox}>
-            <Link href={`${PUBLIC_URL}/`} style={{ marginBottom: -5 }}>
+            <Link to="/" style={{ marginBottom: -5 }}>
               <img src={hyLogo} alt="University of Helsinki" width="40" />
             </Link>
             <Box ml="2rem">
@@ -60,7 +66,7 @@ const NavBar = () => {
             </Box>
           </Box>
           <Box>
-            {/* <Link href={`${PUBLIC_URL}/admin`} style={{ textDecoration: 'none' }}>
+            {/* <Link to="/admin" style={{ textDecoration: 'none' }}>
               <Button>
                 <AdminPanelSettingsOutlined sx={styles.icon} />{' '}
                 {t('admin')}

@@ -6,3 +6,11 @@ export interface Message {
   role: Role
   content: string
 }
+
+export interface User {
+  id: string
+  username: string
+  language?: string
+  iamGroups: string[]
+  isAdmin: boolean
+}
