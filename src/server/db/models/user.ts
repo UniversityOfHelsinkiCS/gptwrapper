@@ -14,6 +14,8 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare username: string
 
   declare language: CreationOptional<string>
+
+  declare isAdmin: boolean
 }
 
 User.init(
@@ -29,6 +31,10 @@ User.init(
     },
     language: {
       type: DataTypes.STRING,
+    },
+    isAdmin: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
   },
   {

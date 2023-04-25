@@ -5,6 +5,7 @@ const users = [
     id: 'hy-hlo-123',
     username: 'testUser',
     language: 'fi',
+    isAdmin: true,
   },
 ]
 

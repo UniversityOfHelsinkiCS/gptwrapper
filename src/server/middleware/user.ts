@@ -4,6 +4,11 @@ import { User } from '../db/models'
 const parseIamGroups = (iamGroups: string) =>
   iamGroups?.split(';').filter(Boolean) ?? []
 
+const checkAdmin = (iamGroups: string[]) =>
+  iamGroups.some((iamGroup) =>
+    ['hy-ypa-opa-ote', 'grp-toska'].includes(iamGroup)
+  )
+
 const mockHeaders = {
   uid: 'testUser',
   preferredlanguage: 'fi',
@@ -28,6 +33,7 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
     username,
     language,
     iamGroups,
+    isAdmin: checkAdmin(iamGroups),
   }
 
   if (username) await User.upsert(user)
