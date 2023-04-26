@@ -18,8 +18,6 @@ export const checkUsage = async (
   user: User,
   service: ServiceType
 ): Promise<boolean> => {
-  if (user.isAdmin) return true
-
   const [serviceUsage] = await UserServiceUsage.findOrCreate({
     where: {
       userId: user.id,
@@ -28,6 +26,8 @@ export const checkUsage = async (
   })
 
   let usageLimit = await getUsageLimit(service.id)
+
+  if (user.isAdmin) return true
 
   if (user.iamGroups.includes('grp-curregpt')) usageLimit *= 2
 
