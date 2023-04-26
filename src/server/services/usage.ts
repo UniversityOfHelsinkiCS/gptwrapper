@@ -27,7 +27,9 @@ export const checkUsage = async (
     },
   })
 
-  const usageLimit = await getUsageLimit(service.id)
+  let usageLimit = await getUsageLimit(service.id)
+
+  if (user.iamGroups.includes('grp-curregpt')) usageLimit *= 2
 
   if (serviceUsage.usageCount >= usageLimit) return false
 
