@@ -10,9 +10,9 @@ const Info = () => {
   return (
     <Box mb={1}>
       <Tooltip placement="right" title={t('chat:systemMessageInfo')}>
-      <Typography variant="h6" display="inline">
-        {t('chat:systemMessage')}
-      </Typography>
+        <Typography variant="h6" display="inline">
+          {t('chat:systemMessage')}
+        </Typography>
       </Tooltip>
     </Box>
   )

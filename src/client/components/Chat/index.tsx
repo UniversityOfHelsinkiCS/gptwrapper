@@ -8,6 +8,7 @@ import { getCompletionStream } from './util'
 import SystemMessage from './SystemMessage'
 import Conversation from './Conversation'
 import SendMessage from './SendMessage'
+import Email from './Email'
 
 const Chat = () => {
   const [system, setSystem] = useState('')
@@ -80,6 +81,7 @@ const Chat = () => {
           disabled={message.length === 0 || completion !== ''}
           resetDisabled={messages.length === 0 && system.length === 0 && message.length === 0}
         />
+        <Email system={system} messages={messages} disabled={messages.length === 0 || completion !== ''} />
       </Paper>
     </Box>
   )

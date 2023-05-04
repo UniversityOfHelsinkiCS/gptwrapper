@@ -14,6 +14,7 @@ export interface User {
   username: string
   language?: string
   iamGroups: string[]
+  email?: string
   isAdmin: boolean
 }
 

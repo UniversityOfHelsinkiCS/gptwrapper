@@ -15,5 +15,12 @@
     "message": "Kysymys",
     "messagePlaceholder": "Kirjoita viestisi tähän",
     "conversation": "Keskustelu"
+  },
+  "email": {
+    "save": "Tallenna sähköpostina",
+    "user": "Käyttäjä",
+    "assistant": "Avustaja",
+    "success": "Sähköposti lähetetty",
+    "failure": "Sähköpostin lähetys epäonnistui"
   }
 }

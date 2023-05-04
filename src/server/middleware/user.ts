@@ -11,6 +11,7 @@ const checkAdmin = (iamGroups: string[]) =>
 
 const mockHeaders = {
   uid: 'testUser',
+  mail: 'grp-toska@helsinki.fi',
   preferredlanguage: 'fi',
   hypersonsisuid: 'hy-hlo-123',
   hygroupcn: 'grp-toska;hy-employees',
@@ -21,6 +22,7 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
 
   const {
     uid: username,
+    mail: email,
     preferredlanguage: language,
     hypersonsisuid: id,
     hygroupcn,
@@ -31,6 +33,7 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
   const user = {
     id: id || username,
     username,
+    email,
     language,
     iamGroups,
     isAdmin: checkAdmin(iamGroups),

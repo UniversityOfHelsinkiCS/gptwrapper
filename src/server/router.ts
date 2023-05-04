@@ -13,6 +13,7 @@ import hashData from './util/hash'
 import { completionStream } from './util/openai'
 import getEncoding from './util/tiktoken'
 import checkAccess from './services/access'
+import sendEmail from './util/pate'
 import logger from './util/logger'
 
 const router = express()
@@ -103,6 +104,14 @@ router.get('/login', async (req, res) => {
   if (!isAdmin && !checkAccess(iamGroups)) return res.send({})
 
   return res.send(user)
+})
+
+router.post('/email', async (req, res) => {
+  const { to, text, subject } = req.body
+
+  const response = await sendEmail([to], text, subject)
+
+  return res.send(response)
 })
 
 export default router

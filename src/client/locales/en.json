@@ -15,5 +15,12 @@
     "message": "Question",
     "messagePlaceholder": "Write your message here",
     "conversation": "Conversation"
+  },
+  "email": {
+    "save": "Save as email",
+    "user": "User",
+    "assistant": "Assistant",
+    "success": "Email sent",
+    "failure": "Sending email failed"
   }
 }

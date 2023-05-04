@@ -15,5 +15,12 @@
     "message": "",
     "messagePlaceholder": "",
     "conversation": ""
+  },
+  "email": {
+    "save": "",
+    "user": "",
+    "assistant": "",
+    "success": "",
+    "failure": ""
   }
 }
