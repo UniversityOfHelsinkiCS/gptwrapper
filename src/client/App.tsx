@@ -14,7 +14,7 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <SnackbarProvider preventDuplicate>
-        <Box>
+        <Box minHeight="100vh" display="flex" flexDirection="column">
           <NavBar />
           <Router />
           <Footer />

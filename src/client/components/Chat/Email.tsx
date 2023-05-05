@@ -34,7 +34,7 @@ const Email = ({ system, messages, disabled }: { system: string, messages: Messa
     if (response.ok) {
       enqueueSnackbar(t('email:success'), { variant: 'success' })
     } else {
-      enqueueSnackbar('email:failure', { variant: 'error' })
+      enqueueSnackbar(t('email:failure'), { variant: 'error' })
     }
   }
 

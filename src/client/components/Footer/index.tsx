@@ -31,8 +31,7 @@ const Footer = () => {
       sx={(theme) => ({
         backgroundColor: theme.palette.toskaDark.main,
         color: theme.palette.toskaDark.contrastText,
-        bottom: 0,
-        position: 'fixed',
+        mt: 'auto',
         width: '100%',
       })}
     >
