@@ -3,6 +3,7 @@ import { Tiktoken } from '@dqbd/tiktoken'
 
 import { User, Service as ServiceType } from '../types'
 import { Service, UserServiceUsage } from '../db/models'
+import logger from '../util/logger'
 
 const getUsageLimit = async (serviceId: string) => {
   const service = await Service.findByPk(serviceId, {
@@ -31,7 +32,16 @@ export const checkUsage = async (
 
   if (user.iamGroups.includes('grp-curregpt')) usageLimit *= 2
 
-  if (serviceUsage.usageCount >= usageLimit) return false
+  if (serviceUsage.usageCount >= usageLimit) {
+    logger.info('Usage limit reached', {
+      user,
+      service,
+      serviceUsage,
+      usageLimit,
+    })
+
+    return false
+  }
 
   return true
 }
