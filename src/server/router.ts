@@ -90,7 +90,8 @@ router.post('/stream', async (req, res) => {
     res.end()
   })
   stream.on('error', (e: Error) => {
-    logger.error(e)
+    // eslint-disable-next-line no-console
+    console.error(e)
     res.end()
   })
 })
