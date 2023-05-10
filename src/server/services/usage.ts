@@ -43,6 +43,13 @@ export const checkUsage = async (
     return false
   }
 
+  logger.info('Usage check passed', {
+    user,
+    service,
+    serviceUsage,
+    usageLimit,
+  })
+
   return true
 }
 

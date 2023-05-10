@@ -78,7 +78,8 @@ router.post('/stream', async (req, res) => {
           res.write(text)
           tokenCount += encoding.encode(text).length || 0
         } catch (error) {
-          logger.error(`Error with JSON.parse and ${payload}.\n${error}`)
+          // eslint-disable-next-line no-console
+          console.error(`Error with JSON.parse and ${payload}.\n${error}`)
         }
       }
     }
@@ -90,8 +91,7 @@ router.post('/stream', async (req, res) => {
     res.end()
   })
   stream.on('error', (e: Error) => {
-    // eslint-disable-next-line no-console
-    console.error(e)
+    logger.error(e)
     res.end()
   })
 })
