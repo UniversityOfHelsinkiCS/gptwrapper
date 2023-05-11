@@ -19,6 +19,8 @@ export const checkUsage = async (
   user: User,
   service: ServiceType
 ): Promise<boolean> => {
+  logger.info('Checking usage', { user, service })
+
   const [serviceUsage] = await UserServiceUsage.findOrCreate({
     where: {
       userId: user.id,
