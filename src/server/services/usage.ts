@@ -2,25 +2,13 @@ import { CreateChatCompletionRequest } from 'openai'
 import { Tiktoken } from '@dqbd/tiktoken'
 
 import { User, Service as ServiceType } from '../types'
-import { Service, UserServiceUsage } from '../db/models'
-import logger from '../util/logger'
-
-const getUsageLimit = async (serviceId: string) => {
-  const service = await Service.findByPk(serviceId, {
-    attributes: ['usageLimit'],
-  })
-
-  if (!service) throw new Error('Service not found')
-
-  return service.usageLimit
-}
+import { UserServiceUsage } from '../db/models'
 
 export const checkUsage = async (
   user: User,
   service: ServiceType
 ): Promise<boolean> => {
-  logger.info('checkUsage')
-  logger.info('Checking usage', { user, service })
+  if (user.isAdmin) return true
 
   const [serviceUsage] = await UserServiceUsage.findOrCreate({
     where: {
@@ -29,29 +17,12 @@ export const checkUsage = async (
     },
   })
 
-  let usageLimit = await getUsageLimit(service.id)
+  const usageCount = BigInt(serviceUsage.usageCount)
 
-  if (user.isAdmin) return true
+  let usageLimit = BigInt(service.usageLimit)
+  if (user.iamGroups.includes('grp-curregpt')) usageLimit *= BigInt(2)
 
-  if (user.iamGroups.includes('grp-curregpt')) usageLimit *= 2
-
-  if (serviceUsage.usageCount >= usageLimit) {
-    logger.info('Usage limit reached', {
-      user,
-      service,
-      serviceUsage,
-      usageLimit,
-    })
-
-    return false
-  }
-
-  logger.info('Usage check passed', {
-    user,
-    service,
-    serviceUsage,
-    usageLimit,
-  })
+  if (usageCount >= usageLimit) return false
 
   return true
 }
@@ -84,5 +55,11 @@ export const incrementUsage = async (
     },
   })
 
-  serviceUsage?.increment('usageCount', { by: tokenCount })
+  if (!serviceUsage) throw new Error('User service usage not found')
+
+  serviceUsage.usageCount = String(
+    BigInt(serviceUsage.usageCount) + BigInt(tokenCount)
+  )
+
+  await serviceUsage.save()
 }

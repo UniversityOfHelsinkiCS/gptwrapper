@@ -18,7 +18,7 @@ class UserServiceUsage extends Model<
 
   declare serviceId: string
 
-  declare usageCount: number
+  declare usageCount: string
 }
 
 UserServiceUsage.init(

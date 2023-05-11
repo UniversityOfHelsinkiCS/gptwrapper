@@ -5,7 +5,7 @@ const services = [
     id: 'chat',
     name: 'Chat',
     description: 'Open ended chatting.',
-    usageLimit: 50_000,
+    usageLimit: '50000', // Acually BigInt
   },
 ]
 

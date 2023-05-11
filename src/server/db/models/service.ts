@@ -17,7 +17,7 @@ class Service extends Model<
 
   declare description: string
 
-  declare usageLimit: number
+  declare usageLimit: string
 }
 
 Service.init(

@@ -34,5 +34,5 @@ export interface Service {
   id: string
   name: string
   description: string
-  usageLimit: number
+  usageLimit: string
 }
