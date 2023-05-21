@@ -55,7 +55,7 @@ const Email = ({ system, messages, disabled }: { system: string, messages: Messa
     <Tooltip title={email} followCursor>
       <span>
         <Button
-          sx={{ float: 'right', marginTop: -7 }}
+          sx={(theme) => ({ [theme.breakpoints.up('sm')]: { float: 'right', marginTop: -7 } })}
           onClick={handleSend}
           disabled={disabled}
           startIcon={<Mail />}
