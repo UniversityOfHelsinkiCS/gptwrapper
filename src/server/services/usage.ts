@@ -21,7 +21,11 @@ export const checkUsage = async (
   const usageCount = BigInt(serviceUsage.usageCount)
 
   let usageLimit = BigInt(service.usageLimit)
-  if (user.iamGroups.includes('grp-curregpt')) usageLimit *= BigInt(2)
+  if (
+    user.iamGroups.includes('grp-curregpt') ||
+    user.iamGroups.includes('grp-curregc')
+  )
+    usageLimit *= BigInt(2)
 
   if (usageCount >= usageLimit) {
     logger.info('Usage limit reached')
