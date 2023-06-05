@@ -10,8 +10,6 @@ export const checkUsage = async (
   user: User,
   service: ServiceType
 ): Promise<boolean> => {
-  if (user.isAdmin) return true
-
   const [serviceUsage] = await UserServiceUsage.findOrCreate({
     where: {
       userId: user.id,
@@ -25,7 +23,7 @@ export const checkUsage = async (
   if (user.iamGroups.some((iam) => doubleUsageIams.includes(iam)))
     usageLimit *= BigInt(2)
 
-  if (usageCount >= usageLimit) {
+  if (!user.isAdmin && usageCount >= usageLimit) {
     logger.info('Usage limit reached')
     logger.info({ user, service, serviceUsage })
 
