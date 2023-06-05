@@ -1,6 +1,7 @@
 import { CreateChatCompletionRequest } from 'openai'
 import { Tiktoken } from '@dqbd/tiktoken'
 
+import { doubleUsageIams } from '../util/config'
 import { User, Service as ServiceType } from '../types'
 import { UserServiceUsage } from '../db/models'
 import logger from '../util/logger'
@@ -21,10 +22,7 @@ export const checkUsage = async (
   const usageCount = BigInt(serviceUsage.usageCount)
 
   let usageLimit = BigInt(service.usageLimit)
-  if (
-    user.iamGroups.includes('grp-curregpt') ||
-    user.iamGroups.includes('grp-curregc')
-  )
+  if (user.iamGroups.some((iam) => doubleUsageIams.includes(iam)))
     usageLimit *= BigInt(2)
 
   if (usageCount >= usageLimit) {

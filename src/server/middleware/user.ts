@@ -1,13 +1,12 @@
 import { inDevelopment } from '../../config'
+import { adminIams } from '../util/config'
 import { User } from '../db/models'
 
 const parseIamGroups = (iamGroups: string) =>
   iamGroups?.split(';').filter(Boolean) ?? []
 
 const checkAdmin = (iamGroups: string[]) =>
-  iamGroups.some((iamGroup) =>
-    ['hy-ypa-opa-ote', 'grp-toska'].includes(iamGroup)
-  )
+  iamGroups.some((iam) => adminIams.includes(iam))
 
 const mockHeaders = {
   uid: 'testUser',

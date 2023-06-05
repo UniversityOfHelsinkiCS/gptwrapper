@@ -1,6 +1,7 @@
 import cron from 'node-cron'
 import { Op } from 'sequelize'
 
+import { globalCampusIam } from './config'
 import logger from './logger'
 import { User, UserServiceUsage } from '../db/models'
 
@@ -20,7 +21,7 @@ const resetGlobalCampusUsage = async () => {
   const glocalCampusUsers = await User.findAll({
     where: {
       iamGroups: {
-        [Op.contains]: ['grp-curregc'],
+        [Op.contains]: [globalCampusIam],
       },
     },
     attributes: ['id'],

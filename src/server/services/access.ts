@@ -1,6 +1,6 @@
+import { accessIams } from '../util/config'
+
 const checkAccess = (iamGroups: string[]) =>
-  iamGroups.some((iamGroup) =>
-    ['hy-ypa-opa-henkilosto', 'grp-curregpt', 'grp-curregc'].includes(iamGroup)
-  )
+  iamGroups.some((iam) => accessIams.includes(iam))
 
 export default checkAccess
