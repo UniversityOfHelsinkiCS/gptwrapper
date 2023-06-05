@@ -6,6 +6,7 @@ const users = [
     username: 'testUser',
     language: 'fi',
     isAdmin: true,
+    iamGroups: ['grp-toska', 'hy-employees'],
   },
 ]
 
