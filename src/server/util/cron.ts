@@ -1,15 +1,16 @@
 import cron from 'node-cron'
-import { Op, QueryTypes } from 'sequelize'
+import { Op } from 'sequelize'
 
 import logger from './logger'
-import { sequelize } from '../db/connection'
-import { User } from '../db/models'
+import { User, UserServiceUsage } from '../db/models'
 
 const resetUsage = async () => {
-  logger.info('Resetting usage')
+  logger.info('Resetting all usage')
 
-  await sequelize.query('UPDATE user_service_usages SET usage_count = 0', {
-    type: QueryTypes.UPDATE,
+  await UserServiceUsage.destroy({
+    where: {
+      serviceId: 'chat',
+    },
   })
 }
 
@@ -27,13 +28,14 @@ const resetGlobalCampusUsage = async () => {
 
   const userIds = glocalCampusUsers.map((user) => user.id)
 
-  await sequelize.query(
-    'UPDATE user_service_usages SET usage_count = 0 WHERE user_id IN (:userIds)',
-    {
-      replacements: { userIds },
-      type: QueryTypes.UPDATE,
-    }
-  )
+  await UserServiceUsage.destroy({
+    where: {
+      serviceId: 'chat',
+      userId: {
+        [Op.in]: userIds,
+      },
+    },
+  })
 }
 
 const setupCron = async () => {
