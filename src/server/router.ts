@@ -2,7 +2,6 @@ import express from 'express'
 import cors from 'cors'
 
 import { inProduction } from '../config'
-import { tikeIam } from './util/config'
 import { ChatRequest } from './types'
 import shibbolethMiddleware from './middleware/shibboleth'
 import userMiddleware from './middleware/user'
@@ -56,9 +55,7 @@ router.post('/stream', async (req, res) => {
     return res.status(403).send('Model maximum context reached')
 
   options.user = hashData(user.id)
-  const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
-
-  const stream = await completionStream(options, isTike)
+  const stream = await completionStream(options)
 
   if (isError(stream)) return res.status(424).send(stream)
 
