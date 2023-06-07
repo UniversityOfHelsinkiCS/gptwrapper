@@ -31,4 +31,6 @@ export const accessIams = [
   curregptIam,
   'hy-ypa-opa-henkilosto',
   tikeIam,
+  'hy-digiohry-opetus',
+  'hy-digiohry-tutkimus',
 ]
