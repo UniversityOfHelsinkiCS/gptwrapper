@@ -8,6 +8,8 @@ export const PORT = process.env.PORT || 8000
 
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ''
 
+export const TIKE_OPENAI_API_KEY = process.env.TIKE_OPENAI_API_KEY || ''
+
 export const DATABASE_URL = process.env.DATABASE_URL || ''
 
 export const PATE_URL = inProduction
@@ -22,8 +24,11 @@ const curregptIam = 'grp-curregpt'
 
 export const doubleUsageIams = [globalCampusIam, curregptIam]
 
+export const tikeIam = 'tike'
+
 export const accessIams = [
   globalCampusIam,
   curregptIam,
   'hy-ypa-opa-henkilosto',
+  tikeIam,
 ]
