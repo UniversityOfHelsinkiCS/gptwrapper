@@ -22,5 +22,9 @@
     "assistant": "Avustaja",
     "success": "Sähköposti lähetetty",
     "failure": "Sähköpostin lähetys epäonnistui"
+  },
+  "error": {
+    "noAccess": "Ei oikeuksia",
+    "noAccessInfo": "Sinulla ei tällä hetkellä ole käyttöoikeuksia Gptwrapperiin"
   }
 }

@@ -22,5 +22,9 @@
     "assistant": "Assistant",
     "success": "Email sent",
     "failure": "Sending email failed"
+  },
+  "error": {
+    "noAccess": "No access",
+    "noAccessInfo": "You do not currently have access to Gptwrapper"
   }
 }

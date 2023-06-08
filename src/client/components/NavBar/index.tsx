@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate, useLocation } from 'react-router-dom'
 import {
   AppBar,
   Toolbar,
@@ -24,6 +24,8 @@ import { User } from '../../types'
 
 const NavBar = () => {
   const { t, i18n } = useTranslation()
+  const location = useLocation()
+  const [user, setUser] = useState<User>()
   const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
   const anchorRef = useRef<HTMLButtonElement>(null)
 
@@ -33,16 +35,12 @@ const NavBar = () => {
   useEffect(() => {
     const login = async () => {
       const response = await fetch(`${PUBLIC_URL}/api/login`)
-      const user: User = await response.json()
-      
-      if (user?.language && languages.includes(user.language)) {
-        i18n.changeLanguage(user.language)
-      }
+      const loggedIdUser: User = await response.json()
 
-      // No access, redirect to Curre front page
-      if (!user.id) {
-        window.location.replace('https://curre.helsinki.fi')
-      }
+      setUser(loggedIdUser)
+      
+      if (user?.language && languages.includes(user.language))
+        i18n.changeLanguage(user.language)
     }
 
     login()
@@ -52,6 +50,9 @@ const NavBar = () => {
     i18n.changeLanguage(newLanguage)
     setOpenLanguageSelect(false)
   }
+
+  if (!user) return null
+  if (!user.id && location.pathname !== '/noaccess') return <Navigate to="/noaccess" />
 
   return (
     <AppBar elevation={0} position="relative" sx={styles.appbar}>
