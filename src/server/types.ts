@@ -36,3 +36,10 @@ export interface Service {
   description: string
   usageLimit: string
 }
+
+export type Role = 'system' | 'assistant' | 'user'
+
+export interface Message {
+  role: Role
+  content: string
+}

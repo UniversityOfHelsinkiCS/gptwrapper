@@ -11,6 +11,7 @@ import { isError } from './util/parser'
 import { calculateUsage, incrementUsage, checkUsage } from './services/usage'
 import hashData from './util/hash'
 import { completionStream } from './util/openai'
+import { getMessageContext } from './util/util'
 import getEncoding from './util/tiktoken'
 import checkAccess from './services/access'
 import sendEmail from './util/pate'
@@ -41,9 +42,6 @@ router.post('/stream', async (req, res) => {
   const service = await Service.findByPk(id)
   if (!service) return res.status(404).send('Service not found')
 
-  if (options.messages.length > 10)
-    return res.status(403).send('Conversation message limit reached')
-
   const usageAllowed = await checkUsage(user, service)
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
@@ -55,6 +53,8 @@ router.post('/stream', async (req, res) => {
     return res.status(403).send('Model maximum context reached')
 
   options.user = hashData(user.id)
+  options.messages = getMessageContext(options.messages)
+
   const stream = await completionStream(options)
 
   if (isError(stream)) return res.status(424).send(stream)
