@@ -35,12 +35,13 @@ const NavBar = () => {
   useEffect(() => {
     const login = async () => {
       const response = await fetch(`${PUBLIC_URL}/api/login`)
-      const loggedIdUser: User = await response.json()
+      const loggedInUser: User = await response.json()
 
-      setUser(loggedIdUser)
+      setUser(loggedInUser)
+      const { language: preferredLanguage } = loggedInUser
       
-      if (user?.language && languages.includes(user.language))
-        i18n.changeLanguage(user.language)
+      if (preferredLanguage && languages.includes(preferredLanguage))
+        i18n.changeLanguage(preferredLanguage)
     }
 
     login()
