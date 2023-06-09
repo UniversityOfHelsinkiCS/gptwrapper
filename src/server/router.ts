@@ -45,15 +45,15 @@ router.post('/stream', async (req, res) => {
   const usageAllowed = await checkUsage(user, service)
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
+  options.user = hashData(user.id)
+  options.messages = getMessageContext(options.messages)
+
   const encoding = getEncoding(options.model)
   let tokenCount = calculateUsage(options, encoding)
 
   // gpt-3.5-turbo has maximum context of 4096 tokens
   if (tokenCount > 4000)
     return res.status(403).send('Model maximum context reached')
-
-  options.user = hashData(user.id)
-  options.messages = getMessageContext(options.messages)
 
   const stream = await completionStream(options)
 
