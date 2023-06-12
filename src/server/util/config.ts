@@ -24,7 +24,7 @@ const curregptIam = 'grp-curregpt'
 
 export const doubleUsageIams = [globalCampusIam, curregptIam]
 
-export const tikeIam = 'grp-tike-allstaff'
+export const tikeIam = 'hy-tike-allstaff'
 
 export const accessIams = [
   globalCampusIam,
