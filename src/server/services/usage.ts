@@ -42,7 +42,7 @@ export const calculateUsage = (
   let tokenCount = 0
   // eslint-disable-next-line no-restricted-syntax
   for (const message of messages) {
-    const encoded = encoding.encode(message.content)
+    const encoded = encoding.encode(message.content || '')
     tokenCount += encoded.length
   }
 

@@ -38,8 +38,3 @@ export interface Service {
 }
 
 export type Role = 'system' | 'assistant' | 'user'
-
-export interface Message {
-  role: Role
-  content: string
-}
