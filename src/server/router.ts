@@ -49,11 +49,11 @@ router.post('/stream', async (req, res) => {
   options.user = hashData(user.id)
   options.messages = getMessageContext(options.messages)
 
-  const encoding = getEncoding(options.model)
+  const encoding = getEncoding()
   let tokenCount = calculateUsage(options, encoding)
 
-  // gpt-3.5-turbo has maximum context of 4096 tokens
-  if (tokenCount > 4000)
+  // Model has maximum context of 16k tokens
+  if (tokenCount > 16_000)
     return res.status(403).send('Model maximum context reached')
 
   const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
