@@ -51,6 +51,7 @@ router.post('/stream', async (req, res) => {
 
   const encoding = getEncoding()
   let tokenCount = calculateUsage(options, encoding)
+  encoding.free()
 
   // Model has maximum context of 16k tokens
   if (tokenCount > 16_000)
