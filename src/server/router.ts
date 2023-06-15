@@ -88,6 +88,8 @@ router.post('/stream', async (req, res) => {
     }
   })
 
+  encoding.free()
+
   stream.on('end', async () => {
     await incrementUsage(user, id, tokenCount)
     logger.info(`Stream ended. Total tokens: ${tokenCount}`, { tokenCount })
