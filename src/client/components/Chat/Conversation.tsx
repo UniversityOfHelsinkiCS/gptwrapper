@@ -11,7 +11,7 @@ const Response = ({ role, content }: { role: Role, content: string }) => {
   const isUser = role === 'user'
 
   return (
-    <Box mb={2}>
+    <Box mb={2} overflow="scroll">
       <Box display="inline-block">
         <Paper variant="outlined">
           <Box display="flex">
