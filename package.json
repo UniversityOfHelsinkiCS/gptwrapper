@@ -106,6 +106,7 @@
     "react-i18next": "^12.2.0",
     "react-markdown": "^8.0.7",
     "react-router-dom": "^6.10.0",
+    "remark-breaks": "^3.0.3",
     "sequelize": "^6.29.3",
     "umzug": "^3.2.1",
     "unfuck-utf8-headers-middleware": "^1.0.1",

@@ -5,6 +5,10 @@
     "send": "Lähetä",
     "reset": "Tyhjennä"
   },
+  "info": {
+    "title": "## Huomio",
+    "disclaimer": "### Kun käytät tekoälytyökaluja, vältä tietojen jakamista, joiden jakamisen luvallisuudesta sinulla ei ole varmuutta. Kun syötät tietoja tekoälytyökaluun, varmista, että otat huomioon mahdolliset luottamuksellisuusrajoitukset ja olet hankkinut tarvittavat tekijänoikeusluvat jne. annettujen tietojen jakamiseksi. Minkä tahansa luvattoman tiedon käyttö tekoälyjärjestelmissä voi johtaa kolmansien osapuolien immateriaalioikeuksien loukkaamiseen. \n \n ### Tämä verkkosivusto käyttää OpenAI:n rajapintaa: [openai.com/policies/api-data-usage-policies](https://openai.com/policies/api-data-usage-policies)"
+  },
   "footer": {
     "contactSupport": "Ota yhteyttä tukeen: <mailTo>{{supportEmail}}</mailTo>"
   },

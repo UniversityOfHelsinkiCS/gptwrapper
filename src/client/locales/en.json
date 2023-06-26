@@ -5,6 +5,10 @@
     "send": "Send",
     "reset": "Reset"
   },
+  "info": {
+    "title": "## Attention",
+    "disclaimer": "### When using AI tools avoid sharing any information, if you have not made sure you are allowed to share it. That is, when you are entering prompts to an AI tool, make sure that you consider any possible confidentiality restrictions and that you have acquired the necessary copyright permits, licenses etc. for sharing the entered information. Any unauthorized use of information within AI systems may lead to infringement of third-party IP rights. \n \n ### This website uses the OpenAI API: [openai.com/policies/api-data-usage-policies](https://openai.com/policies/api-data-usage-policies)"
+  },
   "footer": {
     "contactSupport": "Contact support: <mailTo>{{supportEmail}}</mailTo>"
   },

@@ -5,6 +5,10 @@
     "send": "",
     "reset": ""
   },
+  "info": {
+    "title": "",
+    "disclaimer": ""
+  },
   "footer": {
     "contactSupport": ""
   },

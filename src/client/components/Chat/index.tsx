@@ -5,6 +5,7 @@ import { enqueueSnackbar } from 'notistack'
 
 import { Message } from '../../types'
 import { getCompletionStream } from './util'
+import Banner from '../Banner'
 import SystemMessage from './SystemMessage'
 import Conversation from './Conversation'
 import SendMessage from './SendMessage'
@@ -54,36 +55,37 @@ const Chat = () => {
   }
 
   return (
-    <Box
-      sx={{
-        margin: 'auto',
-        width: '90%',
-        padding: '5%',
-      }}
-    >
-      <Paper
-        variant="outlined"
+      <Box
         sx={{
-          padding: '5% 10%',
+          width: '90%',
+          padding: '5%',
         }}
       >
-        <SystemMessage
-          system={system}
-          setSystem={setSystem}
-          disabled={messages.length > 0}
-        />
-        <Conversation messages={messages} completion={completion} />
-        <SendMessage
-          message={message}
-          setMessage={setMessage}
-          handleReset={handleReset}
-          handleSend={handleSend}
-          disabled={message.length === 0 || completion !== ''}
-          resetDisabled={messages.length === 0 && system.length === 0 && message.length === 0}
-        />
-        <Email system={system} messages={messages} disabled={messages.length === 0 || completion !== ''} />
-      </Paper>
-    </Box>
+        <Banner />
+        <Paper
+          variant="outlined"
+          sx={{
+            padding: '5% 10%',
+            mt: 5,
+          }}
+        >
+          <SystemMessage
+            system={system}
+            setSystem={setSystem}
+            disabled={messages.length > 0}
+          />
+          <Conversation messages={messages} completion={completion} />
+          <SendMessage
+            message={message}
+            setMessage={setMessage}
+            handleReset={handleReset}
+            handleSend={handleSend}
+            disabled={message.length === 0 || completion !== ''}
+            resetDisabled={messages.length === 0 && system.length === 0 && message.length === 0}
+          />
+          <Email system={system} messages={messages} disabled={messages.length === 0 || completion !== ''} />
+        </Paper>
+      </Box>
   )
 }
 

@@ -45,4 +45,5 @@ const Conversation = ({ messages, completion }: { messages: Message[], completio
     </Box>
   )
 }
+
 export default Conversation
