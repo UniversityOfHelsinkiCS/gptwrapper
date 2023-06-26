@@ -57,6 +57,7 @@ const Chat = () => {
   return (
       <Box
         sx={{
+          margin: '0 auto',
           width: '90%',
           padding: '5%',
         }}
