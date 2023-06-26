@@ -14,9 +14,16 @@ const ShowMore = ({
 }) => {
   const [expand, setExpand] = useState(expanded)
 
+  const handleChange = () => {
+    setExpand((prev) => !prev)
+
+    if (expand) localStorage.setItem('disclaimerClosed', 'true')
+    else localStorage.removeItem('disclaimerClosed')
+  }
+
   return (
     <>
-      <IconButton onClick={() => setExpand(!expand)}>
+      <IconButton onClick={() => handleChange()}>
         <HelpOutline />
         {!expand ? <ExpandMore /> : <ExpandLess />}
       </IconButton>

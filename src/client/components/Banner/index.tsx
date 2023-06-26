@@ -8,6 +8,8 @@ import ShowMore from './ShowMore'
 const Banner = () => {
   const { t } = useTranslation()
 
+  const showDisclaimer = !localStorage.getItem('disclaimerClosed') ?? true
+
   return (
     <Box sx={{ m: 2, maxWidth: 1560 }}>
       <Box
@@ -20,7 +22,7 @@ const Banner = () => {
         }}
       >
         <Markdown>{t('info:title')}</Markdown>
-        <ShowMore text={t('info:disclaimer')} expanded />
+        <ShowMore text={t('info:disclaimer')} expanded={showDisclaimer} />
       </Box>
     </Box>
   )
