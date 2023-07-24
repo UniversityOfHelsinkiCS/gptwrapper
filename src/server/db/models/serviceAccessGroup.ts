@@ -8,9 +8,9 @@ import {
 
 import { sequelize } from '../connection'
 
-class ServiceAcessGroup extends Model<
-  InferAttributes<ServiceAcessGroup>,
-  InferCreationAttributes<ServiceAcessGroup>
+class ServiceAccessGroup extends Model<
+  InferAttributes<ServiceAccessGroup>,
+  InferCreationAttributes<ServiceAccessGroup>
 > {
   declare id: CreationOptional<string>
 
@@ -18,14 +18,14 @@ class ServiceAcessGroup extends Model<
 
   declare iamGroup: string
 
-  declare model: string
+  declare model: CreationOptional<string>
 
   declare usageLimit: string | null // override service usage limit
 
   declare resetCron: string | null
 }
 
-ServiceAcessGroup.init(
+ServiceAccessGroup.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -61,4 +61,4 @@ ServiceAcessGroup.init(
   }
 )
 
-export default ServiceAcessGroup
+export default ServiceAccessGroup
