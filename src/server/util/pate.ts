@@ -1,5 +1,3 @@
-import axios from 'axios'
-
 import { PATE_URL } from './config'
 import { inDevelopment } from '../../config'
 
@@ -11,13 +9,6 @@ const settings = {
   headerFontColor: 'white',
   dryrun: inDevelopment,
 }
-
-const pateClient = axios.create({
-  baseURL: PATE_URL,
-  params: {
-    token: process.env.API_TOKEN,
-  },
-})
 
 const sendEmail = async (targets: string[], text: string, subject: string) => {
   const emails = targets.map((to) => ({ to, subject }))
@@ -31,7 +22,13 @@ const sendEmail = async (targets: string[], text: string, subject: string) => {
     settings,
   }
 
-  await pateClient.post('/', mail)
+  await fetch(`${PATE_URL}?token=${process.env.API_TOKEN}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(mail),
+  })
 }
 
 export default sendEmail
