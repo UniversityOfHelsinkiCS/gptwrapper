@@ -7,6 +7,7 @@ import accessLogger from '../middleware/access'
 import openaiRouter from './openai'
 import userRouter from './user'
 import emailRouter from './email'
+import adminRouter from './admin'
 
 const router = express()
 
@@ -23,5 +24,6 @@ router.get('/ping', (_, res) => res.send('pong'))
 router.use('/ai', openaiRouter)
 router.use('/users', userRouter)
 router.use('/email', emailRouter)
+router.use('/admin', adminRouter)
 
 export default router
