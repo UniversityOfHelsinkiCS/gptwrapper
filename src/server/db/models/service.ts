@@ -18,6 +18,8 @@ class Service extends Model<
   declare description: string
 
   declare usageLimit: string
+
+  declare resetCron: string | null
 }
 
 Service.init(
@@ -41,6 +43,10 @@ Service.init(
       type: DataTypes.BIGINT,
       allowNull: false,
       defaultValue: 0,
+    },
+    resetCron: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   {
