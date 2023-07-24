@@ -5,7 +5,7 @@ export const getCompletionStream = async (
   system: string,
   messages: Message[]
 ) => {
-  const response = await fetch(`${PUBLIC_URL}/api/stream`, {
+  const response = await fetch(`${PUBLIC_URL}/api/ai/stream`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

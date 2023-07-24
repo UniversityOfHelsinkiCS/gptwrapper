@@ -1,37 +1,21 @@
 import express from 'express'
-import cors from 'cors'
 
-import { inProduction } from '../config'
-import { tikeIam } from './util/config'
-import { ChatRequest } from './types'
-import shibbolethMiddleware from './middleware/shibboleth'
-import userMiddleware from './middleware/user'
-import accessLogger from './middleware/access'
-import { Service } from './db/models'
-import { isError } from './util/parser'
-import { calculateUsage, incrementUsage, checkUsage } from './services/usage'
-import hashData from './util/hash'
-import { completionStream } from './util/openai'
-import { getMessageContext } from './util/util'
-import getEncoding from './util/tiktoken'
-import checkAccess from './services/access'
-import sendEmail from './util/pate'
-import logger from './util/logger'
+import { inProduction } from '../../config'
+import { tikeIam } from '../util/config'
+import { ChatRequest } from '../types'
+import { Service } from '../db/models'
+import { isError } from '../util/parser'
+import { calculateUsage, incrementUsage, checkUsage } from '../services/usage'
+import hashData from '../util/hash'
+import { completionStream } from '../util/openai'
+import { getMessageContext } from '../util/util'
+import getEncoding from '../util/tiktoken'
+import logger from '../util/logger'
 
-const router = express()
-
-router.use(cors())
-router.use(express.json())
-
-router.use(shibbolethMiddleware)
-router.use(userMiddleware)
-
-router.use(accessLogger)
-
-router.get('/ping', (_, res) => res.send('pong'))
+const openaiRouter = express.Router()
 
 // eslint-disable-next-line consistent-return
-router.post('/stream', async (req, res) => {
+openaiRouter.post('/stream', async (req, res) => {
   const request = req as ChatRequest
   const { id, options } = request.body
   const { user } = request
@@ -101,24 +85,4 @@ router.post('/stream', async (req, res) => {
   })
 })
 
-router.get('/login', async (req, res) => {
-  const request = req as ChatRequest
-  const { user } = request
-  const { id, isAdmin, iamGroups } = user
-
-  if (!id) return res.status(401).send('Unauthorized')
-  if (!isAdmin && !checkAccess(iamGroups))
-    return res.status(401).send('Unauthorized')
-
-  return res.send(user)
-})
-
-router.post('/email', async (req, res) => {
-  const { to, text, subject } = req.body
-
-  const response = await sendEmail([to], text, subject)
-
-  return res.send(response)
-})
-
-export default router
+export default openaiRouter

@@ -6,7 +6,7 @@ export const queryKey = ['login']
 
 const useCurrentUser = () => {
   const queryFn = async (): Promise<User | null> => {
-    const res = await fetch('/api/login')
+    const res = await fetch('/api/users/login')
 
     if (res.status === 401) return null
 
