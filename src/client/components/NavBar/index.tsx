@@ -14,7 +14,7 @@ import {
   Popper,
   Typography,
 } from '@mui/material'
-import { Language } from '@mui/icons-material'
+import { Language, AdminPanelSettingsOutlined } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
 import useCurrentUser from '../../hooks/useCurrentUser'
@@ -59,12 +59,12 @@ const NavBar = () => {
             </Box>
           </Box>
           <Box>
-            {/* <Link to="/admin" style={{ textDecoration: 'none' }}>
+            <Link to="/admin" style={{ textDecoration: 'none' }}>
               <Button>
                 <AdminPanelSettingsOutlined sx={styles.icon} />{' '}
                 {t('admin')}
               </Button>
-            </Link> */}
+            </Link>
             <Button
               ref={anchorRef}
               id="composition-button"
