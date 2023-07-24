@@ -15,3 +15,12 @@ export interface User {
   email?: string
   isAdmin: boolean
 }
+
+export interface Service {
+  id: string
+  name: string
+  description: string
+  model: string
+  usageLimit: string
+  resetCron: string | null
+}

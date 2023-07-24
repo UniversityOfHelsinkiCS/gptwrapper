@@ -59,12 +59,12 @@ const NavBar = () => {
             </Box>
           </Box>
           <Box>
-            <Link to="/admin" style={{ textDecoration: 'none' }}>
+            {user?.isAdmin && <Link to="/admin" style={{ textDecoration: 'none' }}>
               <Button>
                 <AdminPanelSettingsOutlined sx={styles.icon} />{' '}
                 {t('admin')}
               </Button>
-            </Link>
+            </Link>}
             <Button
               ref={anchorRef}
               id="composition-button"
