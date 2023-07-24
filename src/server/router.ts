@@ -106,8 +106,9 @@ router.get('/login', async (req, res) => {
   const { user } = request
   const { id, isAdmin, iamGroups } = user
 
-  if (!id) return res.send({})
-  if (!isAdmin && !checkAccess(iamGroups)) return res.send({})
+  if (!id) return res.status(401).send('Unauthorized')
+  if (!isAdmin && !checkAccess(iamGroups))
+    return res.status(401).send('Unauthorized')
 
   return res.send(user)
 })

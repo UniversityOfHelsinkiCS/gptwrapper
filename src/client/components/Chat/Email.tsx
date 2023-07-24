@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { Button, Tooltip } from '@mui/material'
 import { Mail } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { enqueueSnackbar } from 'notistack'
 
-import { PUBLIC_URL } from '../../../config'
-import { Message, User } from '../../types'
+import { Message } from '../../types'
+import useCurrentUser from '../../hooks/useCurrentUser'
 import { sendEmail } from './util'
 
 const formatEmail = (messages: Message[], t: any): string => (
@@ -23,8 +23,11 @@ const formatEmail = (messages: Message[], t: any): string => (
 
 const Email = ({ system, messages, disabled }: { system: string, messages: Message[], disabled: boolean }) => {
   const { t } = useTranslation()
+  const { user, isLoading } = useCurrentUser()
 
-  const [email, setEmail] = useState('')
+  if (isLoading || !user?.email) return null
+
+  const { email } = user
 
   const handleSend = async () => {
     const text = formatEmail(messages, t)
@@ -37,19 +40,6 @@ const Email = ({ system, messages, disabled }: { system: string, messages: Messa
       enqueueSnackbar(t('email:failure'), { variant: 'error' })
     }
   }
-
-  useEffect(() => {
-    const getEmail = async () => {
-      const response = await fetch(`${PUBLIC_URL}/api/login`)
-      const user: User = await response.json()
-
-      if (user?.email) setEmail(user.email)
-    }
-
-    getEmail()
-  }, [])
-
-  if (!email) return null
 
   return (
     <Tooltip title={email} followCursor>

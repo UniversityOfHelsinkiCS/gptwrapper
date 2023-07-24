@@ -17,43 +17,34 @@ import {
 import { Language } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
-import { PUBLIC_URL } from '../../../config'
+import useCurrentUser from '../../hooks/useCurrentUser'
 import hyLogo from '../../assets/hy_logo.svg'
 import styles from './styles'
-import { User } from '../../types'
 
 const NavBar = () => {
   const { t, i18n } = useTranslation()
   const location = useLocation()
-  const [user, setUser] = useState<User>()
   const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
   const anchorRef = useRef<HTMLButtonElement>(null)
 
   const { language } = i18n
   const languages = ['fi', 'en'] // Possibly Swedish as well
 
+  const { user, isLoading } = useCurrentUser()
+
   useEffect(() => {
-    const login = async () => {
-      const response = await fetch(`${PUBLIC_URL}/api/login`)
-      const loggedInUser: User = await response.json()
+    if (user && user.language && languages.includes(user.language))
+      i18n.changeLanguage(user.language)
 
-      setUser(loggedInUser)
-      const { language: preferredLanguage } = loggedInUser
-      
-      if (preferredLanguage && languages.includes(preferredLanguage))
-        i18n.changeLanguage(preferredLanguage)
-    }
-
-    login()
-  }, [])
+  }, [user, i18n])
 
   const handleLanguageChange = (newLanguage: string) => {
     i18n.changeLanguage(newLanguage)
     setOpenLanguageSelect(false)
   }
 
-  if (!user) return null
-  if (!user.id && location.pathname !== '/noaccess') return <Navigate to="/noaccess" />
+  if (isLoading) return null
+  if (!user && location.pathname !== '/noaccess') return <Navigate to="/noaccess" />
 
   return (
     <AppBar elevation={0} position="relative" sx={styles.appbar}>
