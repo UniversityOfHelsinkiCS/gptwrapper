@@ -1,8 +1,5 @@
 import { Request } from 'express'
-import {
-  CreateChatCompletionRequest,
-  CreateChatCompletionResponse,
-} from 'openai'
+import { CreateChatCompletionRequest } from 'openai'
 
 interface RequestBody {
   id?: string
@@ -27,8 +24,6 @@ export interface ApiError {
   status?: number
   error: object | string
 }
-
-export type ApiResponse = ApiError | CreateChatCompletionResponse
 
 export interface Service {
   id: string

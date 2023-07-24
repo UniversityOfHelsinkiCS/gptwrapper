@@ -1,23 +1,5 @@
-import { CreateChatCompletionResponse } from 'openai'
-
 import { PUBLIC_URL } from '../../../config'
 import { Message } from '../../types'
-
-const errorResponse: Message = {
-  role: 'assistant',
-  content: 'Something went wrong',
-}
-
-export const getResponse = (data: CreateChatCompletionResponse): Message => {
-  const { role, content } = data?.choices?.[0]?.message || {}
-
-  if (!role || !content) return errorResponse
-
-  return {
-    role,
-    content,
-  }
-}
 
 export const getCompletionStream = async (
   system: string,
