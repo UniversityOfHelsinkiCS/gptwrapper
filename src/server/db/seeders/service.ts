@@ -5,6 +5,7 @@ const services = [
     id: 'chat',
     name: 'Chat',
     description: 'Open ended chatting.',
+    model: 'gpt-3.5-turbo',
     usageLimit: '50000', // Acually BigInt
     resetCron: '0 0 1 */3 *', // Every three months
   },

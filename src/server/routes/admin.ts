@@ -20,7 +20,7 @@ adminRouter.get('/accessGroups', async (_, res) => {
   return res.send(accessGroups)
 })
 
-export interface NewAccessGroupData {
+interface NewAccessGroupData {
   iamGroup: string
   model?: string
   usageLimit?: string
@@ -42,7 +42,7 @@ adminRouter.post('/accessGroups', async (req, res) => {
   return res.status(201).send(newAccessGroup)
 })
 
-export interface UpdatedAccessGroupData {
+interface UpdatedAccessGroupData {
   iamGroup: string
   model: string
   usageLimit: string

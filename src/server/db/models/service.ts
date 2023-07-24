@@ -17,6 +17,8 @@ class Service extends Model<
 
   declare description: string
 
+  declare model: string
+
   declare usageLimit: string
 
   declare resetCron: string | null
@@ -38,6 +40,11 @@ Service.init(
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: 'No description',
+    },
+    model: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'gpt-3.5-turbo',
     },
     usageLimit: {
       type: DataTypes.BIGINT,
