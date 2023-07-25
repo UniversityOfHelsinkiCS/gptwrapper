@@ -13,6 +13,7 @@ import {
   Modal,
 } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
+import { useTranslation } from 'react-i18next'
 
 import { AccessGroup } from '../../types'
 import useAccessGroups from '../../hooks/useAccessGroups'
@@ -34,10 +35,11 @@ const AccessGroupTable = ({ editFormOpen, setEditFormOpen }: Props) => {
 
   const mutation = useDeleteAccessGroupMutation()
 
+  const { t } = useTranslation()
+
   const onDelete = (accessGroupId: string) => {
     // eslint-disable-next-line no-alert
-    if (!window.confirm('Are you sure you want to delete this access group?'))
-      return
+    if (!window.confirm(t('admin:confirmAccessGroupDelete') as string)) return
 
     try {
       mutation.mutate(accessGroupId)
@@ -61,7 +63,7 @@ const AccessGroupTable = ({ editFormOpen, setEditFormOpen }: Props) => {
   return (
     <Box mb={2}>
       <Typography mb={2} variant="h4">
-        Access groups:
+        {t('admin:accessGroups')}
       </Typography>
 
       <TableContainer component={Paper}>
@@ -70,22 +72,22 @@ const AccessGroupTable = ({ editFormOpen, setEditFormOpen }: Props) => {
             <TableRow>
               <TableCell>
                 <Typography variant="h5">
-                  <b>IAM group</b>
+                  <b>{t('admin:iamGroup')}</b>
                 </Typography>
               </TableCell>
               <TableCell align="right">
                 <Typography variant="h5">
-                  <b>Model</b>
+                  <b>{t('admin:model')}</b>
                 </Typography>
               </TableCell>
               <TableCell align="right">
                 <Typography variant="h5">
-                  <b>Usage limit</b>
+                  <b>{t('admin:usageLimit')}</b>
                 </Typography>
               </TableCell>
               <TableCell align="right">
                 <Typography variant="h5">
-                  <b>Reset Schedule</b>
+                  <b>{t('admin:resetSchedule')}</b>
                 </Typography>
               </TableCell>
             </TableRow>
@@ -111,9 +113,11 @@ const AccessGroupTable = ({ editFormOpen, setEditFormOpen }: Props) => {
                   </TableCell>
 
                   <TableCell>
-                    <Button onClick={() => onEdit(id)}>Edit</Button>
+                    <Button onClick={() => onEdit(id)}>
+                      {t('common:edit')}
+                    </Button>
                     <Button color="error" onClick={() => onDelete(id)}>
-                      Delete
+                      {t('common:delete')}
                     </Button>
                   </TableCell>
                 </TableRow>

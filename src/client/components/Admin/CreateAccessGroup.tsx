@@ -10,6 +10,7 @@ import {
   Paper,
 } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
+import { useTranslation } from 'react-i18next'
 
 import {
   validModels,
@@ -28,6 +29,8 @@ const CreateAccessGroup = forwardRef(({ setFormOpen }: Props, ref) => {
   const [model, setModel] = useState(DEFAULT_MODEL)
   const [usageLimit, setUsageLimit] = useState(DEFAULT_TOKEN_LIMIT)
   const [resetCron, setResetCron] = useState(DEFAULT_RESET_CRON)
+
+  const { t } = useTranslation()
 
   const mutation = useCreateAccessGroupMutation()
 
@@ -55,7 +58,7 @@ const CreateAccessGroup = forwardRef(({ setFormOpen }: Props, ref) => {
       >
         <Box sx={{ mx: 3, my: 4 }}>
           <Typography mb={2} variant="h4">
-            New Access Group
+            {t('admin:newAccessGroup')}
           </Typography>
 
           <Box m={5} display="flex" justifyContent="space-between">
@@ -67,9 +70,9 @@ const CreateAccessGroup = forwardRef(({ setFormOpen }: Props, ref) => {
             >
               <Box>
                 <Typography mb={1} variant="h5">
-                  Access group:
+                  {t('admin:iamGroup')}
                 </Typography>
-                <Typography mb={1}>IAM group to give access to</Typography>
+                <Typography mb={1}>{t('admin:iamGroupInfo')}</Typography>
                 <TextField
                   sx={{ mb: 2, width: '300px' }}
                   value={iamGroup}
@@ -80,9 +83,9 @@ const CreateAccessGroup = forwardRef(({ setFormOpen }: Props, ref) => {
 
               <Box>
                 <Typography mb={1} variant="h5">
-                  Model
+                  {t('admin:model')}
                 </Typography>
-                <Typography mb={1}>OpenAi language model to use</Typography>
+                <Typography mb={1}>{t('admin:modelInfo')}</Typography>
                 <Select
                   sx={{ mb: 2, width: '300px' }}
                   value={model}
@@ -105,9 +108,9 @@ const CreateAccessGroup = forwardRef(({ setFormOpen }: Props, ref) => {
             >
               <Box>
                 <Typography mb={1} variant="h5">
-                  Usage limit
+                  {t('admin:usageLimit')}
                 </Typography>
-                <Typography mb={1}>Usage limit in tokens</Typography>
+                <Typography mb={1}>{t('admin:usageLimitInfo')}</Typography>
                 <TextField
                   sx={{ mb: 2, width: '300px' }}
                   value={usageLimit}
@@ -118,7 +121,7 @@ const CreateAccessGroup = forwardRef(({ setFormOpen }: Props, ref) => {
 
               <Box>
                 <Typography mb={1} variant="h5">
-                  Reset schedule
+                  {t('admin:resetCron')}
                 </Typography>
                 <Typography mb={1}>
                   Use Cron notation, see{' '}
@@ -145,10 +148,10 @@ const CreateAccessGroup = forwardRef(({ setFormOpen }: Props, ref) => {
               variant="contained"
               onClick={handleCreate}
             >
-              Create
+              {t('common:create')}
             </Button>
             <Button sx={{ px: 2, py: 1 }} onClick={() => setFormOpen(false)}>
-              Cancel
+              {t('common:cancel')}
             </Button>
           </Box>
         </Box>

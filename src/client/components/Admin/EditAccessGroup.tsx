@@ -10,6 +10,7 @@ import {
   Paper,
 } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
+import { useTranslation } from 'react-i18next'
 
 import { validModels } from '../../../config'
 import { AccessGroup } from '../../types'
@@ -42,6 +43,8 @@ const EditAccessGroup = forwardRef(
 
     const { services, isLoading } = useServices()
 
+    const { t } = useTranslation()
+
     if (isLoading) return null
 
     const { resetCron: defaultResetCron } = services[0]
@@ -71,7 +74,7 @@ const EditAccessGroup = forwardRef(
         >
           <Box sx={{ mx: 3, my: 4 }}>
             <Typography mb={2} variant="h4">
-              Edit Access Group
+              {t('admin:editAccessGroup')}
             </Typography>
 
             <Box m={5} display="flex" justifyContent="space-between">
@@ -83,9 +86,9 @@ const EditAccessGroup = forwardRef(
               >
                 <Box>
                   <Typography mb={1} variant="h5">
-                    Access group:
+                    {t('admin:iamGroup')}
                   </Typography>
-                  <Typography mb={1}>IAM group to give access to</Typography>
+                  <Typography mb={1}>{t('admin:iamGroupInfo')}</Typography>
                   <TextField
                     sx={{ mb: 2, width: '300px' }}
                     value={iamGroup}
@@ -96,9 +99,9 @@ const EditAccessGroup = forwardRef(
 
                 <Box>
                   <Typography mb={1} variant="h5">
-                    Model
+                    {t('admin:model')}
                   </Typography>
-                  <Typography mb={1}>OpenAi language model to use</Typography>
+                  <Typography mb={1}>{t('admin:modelInfo')}</Typography>
                   <Select
                     sx={{ mb: 2, width: '300px' }}
                     value={model}
@@ -121,9 +124,9 @@ const EditAccessGroup = forwardRef(
               >
                 <Box>
                   <Typography mb={1} variant="h5">
-                    Usage limit
+                    {t('admin:usageLimit')}
                   </Typography>
-                  <Typography mb={1}>Usage limit in tokens</Typography>
+                  <Typography mb={1}>{t('admin:usageLimitInfo')}</Typography>
                   <TextField
                     sx={{ mb: 2, width: '300px' }}
                     value={usageLimit}
@@ -134,7 +137,7 @@ const EditAccessGroup = forwardRef(
 
                 <Box>
                   <Typography mb={1} variant="h5">
-                    Reset schedule
+                    {t('admin:resetSchedule')}
                   </Typography>
                   <Typography mb={1}>
                     Use Cron notation, see{' '}
@@ -162,10 +165,10 @@ const EditAccessGroup = forwardRef(
                 variant="contained"
                 onClick={handleCreate}
               >
-                Update
+                {t('common:update')}
               </Button>
               <Button sx={{ px: 2, py: 1 }} onClick={() => setFormOpen(false)}>
-                Cancel
+                {t('common:cancel')}
               </Button>
             </Box>
           </Box>

@@ -3,7 +3,12 @@
     "appName": "",
     "admin": "",
     "send": "",
-    "reset": ""
+    "reset": "",
+    "edit": "",
+    "delete": "",
+    "update": "",
+    "cancel": "",
+    "create": ""
   },
   "info": {
     "title": "",
@@ -26,5 +31,23 @@
     "assistant": "",
     "success": "",
     "failure": ""
+  },
+  "error": {
+    "noAccess": "",
+    "noAccessInfo": ""
+  },
+  "admin": {
+    "accessGroups": "",
+    "createAccessGroup": "",
+    "confirmAccessGroupDelete": "",
+    "newAccessGroup": "",
+    "editAccessGroup": "",
+    "iamGroup": "",
+    "iamGroupInfo": "",
+    "model": "",
+    "modelInfo": "",
+    "usageLimit": "",
+    "usageLimitInfo": "",
+    "resetSchedule": ""
   }
 }

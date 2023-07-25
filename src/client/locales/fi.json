@@ -3,7 +3,12 @@
     "appName": "Gptwrapper",
     "admin": "Ylläpito",
     "send": "Lähetä",
-    "reset": "Tyhjennä"
+    "reset": "Tyhjennä",
+    "edit": "Muokkaa",
+    "delete": "Poista",
+    "update": "Päivitä",
+    "cancel": "Peruuta",
+    "create": "Luo"
   },
   "info": {
     "title": "## Huomio",
@@ -30,5 +35,19 @@
   "error": {
     "noAccess": "Ei oikeuksia",
     "noAccessInfo": "Sinulla ei tällä hetkellä ole käyttöoikeuksia Gptwrapperiin"
+  },
+  "admin": {
+    "accessGroups": "Käyttäjäryhmät",
+    "createAccessGroup": "Luo uusi käyttäjäryhmä",
+    "confirmAccessGroupDelete": "Haluatko varmasti poistaa tämän käyttäjäryhmän?",
+    "newAccessGroup": "Uusi käyttäjäryhmä",
+    "editAccessGroup": "Muokkaa käyttäjäryhmää",
+    "iamGroup": "IAM-ryhmä",
+    "iamGroupInfo": "Käyttöoikeudet saava IAM-ryhmä",
+    "model": "Kielimalli",
+    "modelInfo": "Käytettävä OpenAi:n kielimalli",
+    "usageLimit": "Käyttöraja",
+    "usageLimitInfo": "Käyttöraja tokeneissa",
+    "resetSchedule": "Nollaantumisaika"
   }
 }
