@@ -2,27 +2,20 @@ import React, { useState, forwardRef } from 'react'
 import { Box, Typography, TextField, Button, Link, Select, MenuItem, Paper } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 
-import useServices from '../../hooks/useServices'
+import { validModels, DEFAULT_MODEL, DEFAULT_TOKEN_LIMIT, DEFAULT_RESET_CRON } from '../../../config'
 import { useCreateAccessGroupMutation } from '../../hooks/useAccessGroupMutation'
 
 type Props = {
-  validModels: string[],
   setFormOpen: React.Dispatch<React.SetStateAction<boolean>>,
 }
 
-const CreateAccessGroup = forwardRef(({ validModels, setFormOpen }: Props, ref) => {
+const CreateAccessGroup = forwardRef(({ setFormOpen }: Props, ref) => {
   const [iamGroup, setIamGroup] = useState('')
-  const [model, setModel] = useState('gpt-3.5-turbo')
-  const [usageLimit, setUsageLimit] = useState('')
-  const [resetCron, setResetCron] = useState('')
+  const [model, setModel] = useState(DEFAULT_MODEL)
+  const [usageLimit, setUsageLimit] = useState(String(DEFAULT_TOKEN_LIMIT))
+  const [resetCron, setResetCron] = useState(DEFAULT_RESET_CRON)
 
   const mutation = useCreateAccessGroupMutation()
-
-  const { services, isLoading } = useServices()
-
-  if (isLoading) return null
-
-  const { resetCron: defaultResetCron } = services[0]
 
   const handleCreate = () => {
     try {
@@ -75,7 +68,7 @@ const CreateAccessGroup = forwardRef(({ validModels, setFormOpen }: Props, ref) 
               <Box>
                 <Typography mb={1} variant="h5">Reset schedule</Typography>
                 <Typography mb={1}>Use Cron notation, see <Link target="_blank" rel="noopener" href="https://crontab.guru">https://crontab.guru</Link></Typography>
-                <TextField sx={{ mb: 2, width: '300px' }} value={resetCron} onChange={(e) => setResetCron(e.target.value)} placeholder={defaultResetCron || ''} />
+                <TextField sx={{ mb: 2, width: '300px' }} value={resetCron} onChange={(e) => setResetCron(e.target.value)} />
               </Box>
             </Box>
           </Box>

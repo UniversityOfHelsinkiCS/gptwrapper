@@ -5,3 +5,13 @@ export const inStaging = process.env.STAGING === 'true'
 export const inProduction = !inStaging && process.env.NODE_ENV === 'production'
 
 export const PUBLIC_URL = process.env.PUBLIC_URL || ''
+
+export const DEFAULT_TOKEN_LIMIT =
+  Number(process.env.DEFAULT_TOKEN_LIMIT) || 50_000
+
+export const DEFAULT_MODEL = process.env.DEFAUL_MODEL || 'gpt-3.5-turbo'
+
+export const DEFAULT_RESET_CRON =
+  process.env.DEFAULT_RESET_CRON || '0 0 1 */3 *'
+
+export const validModels = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4']

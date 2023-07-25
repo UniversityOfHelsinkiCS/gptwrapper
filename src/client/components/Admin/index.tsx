@@ -7,8 +7,6 @@ import AccessGroupTable from './AccessGroupTable'
 const Admin = () => {
   const [createFormOpen, setCreateFormOpen] = useState(false)
 
-  const validModels = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4']
-
   return (
     <Box
     sx={{ margin: '0 auto', width: '90%', padding: '5%' }}
@@ -25,7 +23,7 @@ const Admin = () => {
       open={createFormOpen}
       onClose={() => setCreateFormOpen(false)}
     >
-      <CreateAccessGroup validModels={validModels} setFormOpen={setCreateFormOpen} />
+      <CreateAccessGroup setFormOpen={setCreateFormOpen} />
     </Modal>
   </Box>
   )
