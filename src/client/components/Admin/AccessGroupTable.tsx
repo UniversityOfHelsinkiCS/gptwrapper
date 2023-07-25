@@ -14,6 +14,7 @@ import {
 } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 
+import { AccessGroup } from '../../types'
 import useAccessGroups from '../../hooks/useAccessGroups'
 import { useDeleteAccessGroupMutation } from '../../hooks/useAccessGroupMutation'
 import EditAccessGroup from './EditAccessGroup'
@@ -22,6 +23,9 @@ type Props = {
   editFormOpen: boolean
   setEditFormOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
+
+const sortAccessGroups = (a: AccessGroup, b: AccessGroup) =>
+  a.iamGroup.localeCompare(b.iamGroup)
 
 const AccessGroupTable = ({ editFormOpen, setEditFormOpen }: Props) => {
   const [editId, setEditId] = useState('')
@@ -47,6 +51,8 @@ const AccessGroupTable = ({ editFormOpen, setEditFormOpen }: Props) => {
     setEditId(accessGroupId)
     setEditFormOpen(true)
   }
+
+  const sortedAccessGroups = accessGroups.sort(sortAccessGroups)
 
   const accessGroupToEdit = accessGroups.find(({ id }) => id === editId)
 
@@ -86,7 +92,7 @@ const AccessGroupTable = ({ editFormOpen, setEditFormOpen }: Props) => {
           </TableHead>
 
           <TableBody>
-            {accessGroups.map(
+            {sortedAccessGroups.map(
               ({ id, iamGroup, model, usageLimit, resetCron }) => (
                 <TableRow key={id}>
                   <TableCell component="th" scope="row">
