@@ -55,7 +55,7 @@ const themeOptions: ThemeOptions = {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 0,
+          borderRadius: 3,
         },
         outlined: {
           borderWidth: '2px',

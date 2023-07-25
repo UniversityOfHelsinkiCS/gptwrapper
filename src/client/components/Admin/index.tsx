@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Box, Typography, Button, Modal } from '@mui/material'
+import { Box, Button, Modal } from '@mui/material'
 
 import AccessGroupTable from './AccessGroupTable'
 import CreateAccessGroup from './CreateAccessGroup'
@@ -10,10 +10,6 @@ const Admin = () => {
 
   return (
     <Box sx={{ margin: '0 auto', width: '90%', padding: '5%' }}>
-      <Typography mb={2} variant="h3">
-        Admin
-      </Typography>
-
       <AccessGroupTable
         editFormOpen={editFormOpen}
         setEditFormOpen={setEditFormOpen}
