@@ -21,6 +21,7 @@ const App = () => {
         </Box>
       </SnackbarProvider>
     </ThemeProvider>
-)}
+  )
+}
 
 export default App

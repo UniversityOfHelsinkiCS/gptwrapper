@@ -35,7 +35,6 @@ const NavBar = () => {
   useEffect(() => {
     if (user && user.language && languages.includes(user.language))
       i18n.changeLanguage(user.language)
-
   }, [user, i18n])
 
   const handleLanguageChange = (newLanguage: string) => {
@@ -44,7 +43,8 @@ const NavBar = () => {
   }
 
   if (isLoading) return null
-  if (!user && location.pathname !== '/noaccess') return <Navigate to="/noaccess" />
+  if (!user && location.pathname !== '/noaccess')
+    return <Navigate to="/noaccess" />
 
   return (
     <AppBar elevation={0} position="relative" sx={styles.appbar}>
@@ -59,12 +59,13 @@ const NavBar = () => {
             </Box>
           </Box>
           <Box>
-            {user?.isAdmin && <Link to="/admin" style={{ textDecoration: 'none' }}>
-              <Button>
-                <AdminPanelSettingsOutlined sx={styles.icon} />{' '}
-                {t('admin')}
-              </Button>
-            </Link>}
+            {user?.isAdmin && (
+              <Link to="/admin" style={{ textDecoration: 'none' }}>
+                <Button>
+                  <AdminPanelSettingsOutlined sx={styles.icon} /> {t('admin')}
+                </Button>
+              </Link>
+            )}
             <Button
               ref={anchorRef}
               id="composition-button"

@@ -23,7 +23,10 @@ const Chat = () => {
     setMessage('')
 
     try {
-      const stream = await getCompletionStream(system, messages.concat(newMessage))
+      const stream = await getCompletionStream(
+        system,
+        messages.concat(newMessage)
+      )
       const reader = stream.getReader()
 
       let content = ''
@@ -55,38 +58,44 @@ const Chat = () => {
   }
 
   return (
-      <Box
+    <Box
+      sx={{
+        margin: '0 auto',
+        width: '90%',
+        padding: '5%',
+      }}
+    >
+      <Banner />
+      <Paper
+        variant="outlined"
         sx={{
-          margin: '0 auto',
-          width: '90%',
-          padding: '5%',
+          padding: '5% 10%',
+          mt: 5,
         }}
       >
-        <Banner />
-        <Paper
-          variant="outlined"
-          sx={{
-            padding: '5% 10%',
-            mt: 5,
-          }}
-        >
-          <SystemMessage
-            system={system}
-            setSystem={setSystem}
-            disabled={messages.length > 0}
-          />
-          <Conversation messages={messages} completion={completion} />
-          <SendMessage
-            message={message}
-            setMessage={setMessage}
-            handleReset={handleReset}
-            handleSend={handleSend}
-            disabled={message.length === 0 || completion !== ''}
-            resetDisabled={messages.length === 0 && system.length === 0 && message.length === 0}
-          />
-          <Email system={system} messages={messages} disabled={messages.length === 0 || completion !== ''} />
-        </Paper>
-      </Box>
+        <SystemMessage
+          system={system}
+          setSystem={setSystem}
+          disabled={messages.length > 0}
+        />
+        <Conversation messages={messages} completion={completion} />
+        <SendMessage
+          message={message}
+          setMessage={setMessage}
+          handleReset={handleReset}
+          handleSend={handleSend}
+          disabled={message.length === 0 || completion !== ''}
+          resetDisabled={
+            messages.length === 0 && system.length === 0 && message.length === 0
+          }
+        />
+        <Email
+          system={system}
+          messages={messages}
+          disabled={messages.length === 0 || completion !== ''}
+        />
+      </Paper>
+    </Box>
   )
 }
 

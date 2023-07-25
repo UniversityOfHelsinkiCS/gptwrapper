@@ -8,9 +8,11 @@ import { Message } from '../../types'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { sendEmail } from './util'
 
-const formatEmail = (messages: Message[], t: any): string => (
-  messages.map(({ role, content }) => (
-    `<div style="display: flex; margin-bottom: 10px;">
+const formatEmail = (messages: Message[], t: any): string =>
+  messages
+    .map(
+      ({ role, content }) =>
+        `<div style="display: flex; margin-bottom: 10px;">
       <div style="margin-right: 10px;">
         ${role === 'user' ? t('email:user') : t('email:assistant')}
       </div>
@@ -18,10 +20,18 @@ const formatEmail = (messages: Message[], t: any): string => (
         ${content}
       </div>
     </div>`
-  )).join('')
-)
+    )
+    .join('')
 
-const Email = ({ system, messages, disabled }: { system: string, messages: Message[], disabled: boolean }) => {
+const Email = ({
+  system,
+  messages,
+  disabled,
+}: {
+  system: string
+  messages: Message[]
+  disabled: boolean
+}) => {
   const { t } = useTranslation()
   const { user, isLoading } = useCurrentUser()
 
@@ -45,7 +55,9 @@ const Email = ({ system, messages, disabled }: { system: string, messages: Messa
     <Tooltip title={email} followCursor>
       <span>
         <Button
-          sx={(theme) => ({ [theme.breakpoints.up('sm')]: { float: 'right', marginTop: -7 } })}
+          sx={(theme) => ({
+            [theme.breakpoints.up('sm')]: { float: 'right', marginTop: -7 },
+          })}
           onClick={handleSend}
           disabled={disabled}
           startIcon={<Mail />}

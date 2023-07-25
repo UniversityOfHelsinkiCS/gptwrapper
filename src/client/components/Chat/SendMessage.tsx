@@ -24,9 +24,7 @@ const SendMessage = ({
   return (
     <Box mb={2}>
       <Box mb={1}>
-        <Typography variant="h6">
-          {t('chat:message')}
-        </Typography>
+        <Typography variant="h6">{t('chat:message')}</Typography>
       </Box>
       <Box mb={2}>
         <TextField
@@ -38,19 +36,11 @@ const SendMessage = ({
           placeholder={t('chat:messagePlaceholder') as string}
         />
       </Box>
-      
-      <Button
-        variant="contained"
-        onClick={handleSend}
-        disabled={disabled}
-      >
+
+      <Button variant="contained" onClick={handleSend} disabled={disabled}>
         {t('send')}
       </Button>
-      <Button
-        sx={{ ml: 2 }}
-        onClick={handleReset}
-        disabled={resetDisabled}  
-      >
+      <Button sx={{ ml: 2 }} onClick={handleReset} disabled={resetDisabled}>
         {t('reset')}
       </Button>
     </Box>

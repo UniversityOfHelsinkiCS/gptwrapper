@@ -54,7 +54,7 @@
   },
   "lint-staged": {
     "src/**/*.{ts,tsx}": "eslint",
-    "*.{ts,json,md}": "prettier --write"
+    "*.{ts,tsx,json,md}": "prettier --write"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.21.3",

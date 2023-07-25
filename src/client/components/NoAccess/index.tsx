@@ -7,7 +7,9 @@ const NoAccess = () => {
 
   return (
     <Box m={5} display="flex" justifyContent="center" flexDirection="column">
-      <Typography mb={2} variant="h3">{t('error:noAccess')}</Typography>
+      <Typography mb={2} variant="h3">
+        {t('error:noAccess')}
+      </Typography>
       <Typography>{t('error:noAccessInfo')}</Typography>
     </Box>
   )

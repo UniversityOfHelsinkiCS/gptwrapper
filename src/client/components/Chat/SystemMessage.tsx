@@ -38,7 +38,7 @@ const SystemMessage = ({
         minRows={1}
         value={system}
         onChange={(e) => setSystem(e.target.value)}
-        placeholder={disabled ? '' : t('chat:exampleSystemMessage') as string}
+        placeholder={disabled ? '' : (t('chat:exampleSystemMessage') as string)}
         disabled={disabled}
       />
     </Box>
