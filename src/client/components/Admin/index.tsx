@@ -1,16 +1,13 @@
 import React, { useState } from 'react'
 import { Box, Typography, Button, Modal } from '@mui/material'
 
-import useAccessGroups from '../../hooks/useAccessGroups'
 import CreateAccessGroup from './CreateAccessGroup'
+import AccessGroupTable from './AccessGroupTable'
 
 const Admin = () => {
   const [createFormOpen, setCreateFormOpen] = useState(false)
-  const { accessGroups, isLoading } = useAccessGroups()
 
   const validModels = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4']
-
-  if (isLoading) return null
 
   return (
     <Box
@@ -27,10 +24,7 @@ const Admin = () => {
       <CreateAccessGroup validModels={validModels} />
     </Modal>
 
-    <Typography>Access groups:</Typography>
-    {accessGroups.map((accessGroup) => (
-      <Typography key={accessGroup.id}>{accessGroup.iamGroup}</Typography>
-    ))}
+    <AccessGroupTable />
   </Box>
   )
 }

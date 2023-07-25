@@ -24,3 +24,11 @@ export interface Service {
   usageLimit: string
   resetCron: string | null
 }
+
+export interface AccessGroup {
+  id: string
+  iamGroup: string
+  model: string
+  usageLimit: string
+  resetCron: string | null
+}
