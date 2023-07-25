@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { Table, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Box, Button, Modal } from '@mui/material'
+import { enqueueSnackbar } from 'notistack'
 
 import useAccessGroups from '../../hooks/useAccessGroups'
+import { useDeleteAccessGroupMutation } from '../../hooks/useAccessGroupMutation'
 import EditAccessGroup from './EditAccessGroup'
 
 type Props = {
@@ -13,6 +15,20 @@ const AccessGroupTable = ({ editFormOpen, setEditFormOpen }: Props) => {
   const [editId, setEditId] = useState('')
 
   const { accessGroups, isLoading } = useAccessGroups()
+
+  const mutation = useDeleteAccessGroupMutation()
+
+  const onDelete = (accessGroupId: string) => {
+    // eslint-disable-next-line no-alert
+    if (!window.confirm('Are you sure you want to delete this access group?')) return
+
+    try {
+      mutation.mutate(accessGroupId)
+      enqueueSnackbar('Access group deleted', { variant: 'success' })
+    } catch (error: any) {
+      enqueueSnackbar(error.message, { variant: 'error' })
+    }
+  }
 
   const onEdit = (accessGroupId: string) => {
     setEditId(accessGroupId)
@@ -59,13 +75,14 @@ const AccessGroupTable = ({ editFormOpen, setEditFormOpen }: Props) => {
                   <Typography variant="h6">{usageLimit}</Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography variant="h6">{resetCron}</Typography>
+                  <Typography variant="h6"><code>{resetCron}</code></Typography>
                 </TableCell>
+
                 <TableCell>
-
-                <Button onClick={() => onEdit(id)}>Edit</Button>
-              </TableCell>
-
+                  <Button onClick={() => onEdit(id)}>Edit</Button>
+                  <Button color="error" onClick={() => onDelete(id)}>Delete</Button>
+                </TableCell>
+                
               </TableRow>
             ))}
           </TableBody>
