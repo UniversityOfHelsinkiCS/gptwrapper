@@ -29,6 +29,6 @@ export interface AccessGroup {
   id: string
   iamGroup: string
   model: string
-  usageLimit: string
+  usageLimit: number | null
   resetCron: string | null
 }

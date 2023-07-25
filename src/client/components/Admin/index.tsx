@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import { Box, Typography, Button, Modal } from '@mui/material'
 
-import CreateAccessGroup from './CreateAccessGroup'
 import AccessGroupTable from './AccessGroupTable'
+import CreateAccessGroup from './CreateAccessGroup'
 
 const Admin = () => {
   const [createFormOpen, setCreateFormOpen] = useState(false)
+  const [editFormOpen, setEditFormOpen] = useState(false)
 
   return (
     <Box
@@ -13,7 +14,7 @@ const Admin = () => {
   >
     <Typography mb={2} variant="h3">Admin</Typography>
 
-    <AccessGroupTable />
+    <AccessGroupTable editFormOpen={editFormOpen} setEditFormOpen={setEditFormOpen} />
 
     <Button sx={{ p: 2 }} variant="contained" onClick={() => setCreateFormOpen(true)}>
       Create new access group

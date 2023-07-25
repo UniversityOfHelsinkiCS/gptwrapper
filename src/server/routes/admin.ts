@@ -45,8 +45,8 @@ adminRouter.post('/accessGroups', async (req, res) => {
 interface UpdatedAccessGroupData {
   iamGroup: string
   model: string
-  usageLimit: string
-  resetCron: string
+  usageLimit: number | null
+  resetCron: string | null
 }
 
 adminRouter.put('/accessGroups/:id', async (req, res) => {
@@ -60,7 +60,7 @@ adminRouter.put('/accessGroups/:id', async (req, res) => {
 
   accessGroup.iamGroup = iamGroup
   accessGroup.model = model
-  accessGroup.usageLimit = usageLimit
+  accessGroup.usageLimit = usageLimit ? String(usageLimit) : null
   accessGroup.resetCron = resetCron
 
   await accessGroup.save()

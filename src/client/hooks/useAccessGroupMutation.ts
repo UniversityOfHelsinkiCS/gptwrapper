@@ -37,8 +37,8 @@ interface UpdatedAccessGroupData {
   id: string
   iamGroup: string
   model: string
-  usageLimit: number
-  resetCron: string
+  usageLimit: number | null
+  resetCron: string | null
 }
 
 export const useEditAccessGroupMutation = () => {
