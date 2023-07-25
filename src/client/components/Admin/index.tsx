@@ -15,16 +15,18 @@ const Admin = () => {
   >
     <Typography mb={2} variant="h3">Admin</Typography>
 
-    <Button variant="contained" onClick={() => setCreateFormOpen(true)}>Create new access group</Button>
+    <AccessGroupTable />
+
+    <Button sx={{ p: 2 }} variant="contained" onClick={() => setCreateFormOpen(true)}>
+      Create new access group
+    </Button>
 
     <Modal
       open={createFormOpen}
       onClose={() => setCreateFormOpen(false)}
     >
-      <CreateAccessGroup validModels={validModels} />
+      <CreateAccessGroup validModels={validModels} setFormOpen={setCreateFormOpen} />
     </Modal>
-
-    <AccessGroupTable />
   </Box>
   )
 }

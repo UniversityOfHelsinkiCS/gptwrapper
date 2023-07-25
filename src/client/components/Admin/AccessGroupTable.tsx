@@ -10,7 +10,7 @@ const AccessGroupTable = () => {
   if (isLoading) return null
 
   return (
-    <Box>
+    <Box mb={2}>
       <Typography mb={2} variant="h4">Access groups:</Typography>
  
       <TableContainer component={Paper}>

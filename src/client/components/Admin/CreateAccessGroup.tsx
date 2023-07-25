@@ -1,10 +1,16 @@
 import React, { useState, forwardRef } from 'react'
 import { Box, Typography, TextField, Button, Link, Select, MenuItem, Paper } from '@mui/material'
+import { enqueueSnackbar } from 'notistack'
 
 import useServices from '../../hooks/useServices'
 import { useCreateAccessGroupMutation } from '../../hooks/useAccessGroupMutation'
 
-const CreateAccessGroup = forwardRef(({ validModels }: { validModels: string[] }, ref) => {
+type Props = {
+  validModels: string[],
+  setFormOpen: React.Dispatch<React.SetStateAction<boolean>>,
+}
+
+const CreateAccessGroup = forwardRef(({ validModels, setFormOpen }: Props, ref) => {
   const [iamGroup, setIamGroup] = useState('')
   const [model, setModel] = useState('gpt-3.5-turbo')
   const [usageLimit, setUsageLimit] = useState('')
@@ -19,17 +25,19 @@ const CreateAccessGroup = forwardRef(({ validModels }: { validModels: string[] }
   const { resetCron: defaultResetCron } = services[0]
 
   const handleCreate = () => {
-    mutation.mutate({
-      iamGroup,
-      model,
-      usageLimit,
-      resetCron,
-    })
+    try {
+      mutation.mutate({
+        iamGroup,
+        model,
+        usageLimit,
+        resetCron,
+      })
 
-    setIamGroup('')
-    setModel('gpt-3.5-turbo')
-    setUsageLimit('')
-    setResetCron('')
+      setFormOpen(false)
+      enqueueSnackbar('Access group created', { variant: 'success' })
+    } catch (error: any) {
+      enqueueSnackbar(error.message, { variant: 'error' })
+    }
   }
 
   return (
@@ -73,7 +81,8 @@ const CreateAccessGroup = forwardRef(({ validModels }: { validModels: string[] }
           </Box>
 
           <Box>
-            <Button variant="contained" onClick={handleCreate}>Create</Button>
+            <Button sx={{ px: 2, py: 1 }} variant="contained" onClick={handleCreate}>Create</Button>
+            <Button sx={{ px: 2, py: 1 }} onClick={() => setFormOpen(false)}>Cancel</Button>
           </Box>
         </Box>
       </Paper>
