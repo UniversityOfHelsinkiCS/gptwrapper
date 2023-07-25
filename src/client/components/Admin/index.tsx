@@ -1,10 +1,11 @@
-import React from 'react'
-import { Box, Typography } from '@mui/material'
+import React, { useState } from 'react'
+import { Box, Typography, Button, Modal } from '@mui/material'
 
 import useAccessGroups from '../../hooks/useAccessGroups'
 import CreateAccessGroup from './CreateAccessGroup'
 
 const Admin = () => {
+  const [createFormOpen, setCreateFormOpen] = useState(false)
   const { accessGroups, isLoading } = useAccessGroups()
 
   const validModels = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4']
@@ -17,7 +18,14 @@ const Admin = () => {
   >
     <Typography mb={2} variant="h3">Admin</Typography>
 
-    <CreateAccessGroup validModels={validModels} />
+    <Button variant="contained" onClick={() => setCreateFormOpen(true)}>Create new access group</Button>
+
+    <Modal
+      open={createFormOpen}
+      onClose={() => setCreateFormOpen(false)}
+    >
+      <CreateAccessGroup validModels={validModels} />
+    </Modal>
 
     <Typography>Access groups:</Typography>
     {accessGroups.map((accessGroup) => (

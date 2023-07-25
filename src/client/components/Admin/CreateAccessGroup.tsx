@@ -33,7 +33,7 @@ const CreateAccessGroup = ({ validModels }: { validModels: string[] }) => {
   }
 
   return (
-    <Paper variant="outlined">
+    <Paper variant="outlined" sx={{ margin: 'auto', width: '900px', mt: '20vh' }}>
       <Box sx={{ mx: 3, my: 4 }}>
         <Typography mb={2} variant="h4">New Access Group</Typography>
 
