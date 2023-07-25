@@ -6,7 +6,7 @@ import { queryKey } from './useAccessGroups'
 export interface NewAccessGroupData {
   iamGroup: string
   model?: string
-  usageLimit?: string
+  usageLimit?: number
   resetCron?: string
 }
 
@@ -37,11 +37,11 @@ interface UpdatedAccessGroupData {
   id: string
   iamGroup: string
   model: string
-  usageLimit: string
+  usageLimit: number
   resetCron: string
 }
 
-export const useAccessGroupMutation = () => {
+export const useEditAccessGroupMutation = () => {
   const mutationFn = async (data: UpdatedAccessGroupData) => {
     const res = await fetch(`/api/admin/accessGroups/${data.id}`, {
       method: 'PUT',

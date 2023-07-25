@@ -12,7 +12,7 @@ type Props = {
 const CreateAccessGroup = forwardRef(({ setFormOpen }: Props, ref) => {
   const [iamGroup, setIamGroup] = useState('')
   const [model, setModel] = useState(DEFAULT_MODEL)
-  const [usageLimit, setUsageLimit] = useState(String(DEFAULT_TOKEN_LIMIT))
+  const [usageLimit, setUsageLimit] = useState(DEFAULT_TOKEN_LIMIT)
   const [resetCron, setResetCron] = useState(DEFAULT_RESET_CRON)
 
   const mutation = useCreateAccessGroupMutation()
@@ -62,7 +62,7 @@ const CreateAccessGroup = forwardRef(({ setFormOpen }: Props, ref) => {
               <Box>
                 <Typography mb={1} variant="h5">Usage limit</Typography>
                 <Typography mb={1}>Usage limit in tokens</Typography>
-                <TextField sx={{ mb: 2, width: '300px' }} value={usageLimit} type="number" onChange={(e) => setUsageLimit(e.target.value)} />
+                <TextField sx={{ mb: 2, width: '300px' }} value={usageLimit} type="number" onChange={(e) => setUsageLimit(Number(e.target.value))} />
               </Box>
 
               <Box>

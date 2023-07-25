@@ -23,7 +23,7 @@ adminRouter.get('/accessGroups', async (_, res) => {
 interface NewAccessGroupData {
   iamGroup: string
   model?: string
-  usageLimit?: string
+  usageLimit?: number
   resetCron?: string
 }
 
@@ -35,7 +35,7 @@ adminRouter.post('/accessGroups', async (req, res) => {
     serviceId: 'chat',
     iamGroup,
     model,
-    usageLimit,
+    usageLimit: String(usageLimit),
     resetCron,
   })
 
