@@ -1,6 +1,18 @@
-import { accessIams } from '../util/config'
+import { Op } from 'sequelize'
 
-const checkAccess = (iamGroups: string[]) =>
-  iamGroups.some((iam) => accessIams.includes(iam))
+import { ServiceAccessGroup } from '../db/models'
+
+const checkAccess = async (iamGroups: string[]) => {
+  const accessGroups = await ServiceAccessGroup.findAll({
+    where: {
+      iamGroup: {
+        [Op.in]: iamGroups,
+      },
+    },
+    attributes: ['model'],
+  })
+
+  return accessGroups.length > 0
+}
 
 export default checkAccess
