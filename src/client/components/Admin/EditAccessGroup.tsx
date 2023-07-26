@@ -14,7 +14,6 @@ import { useTranslation } from 'react-i18next'
 
 import { validModels } from '../../../config'
 import { AccessGroup } from '../../types'
-import useServices from '../../hooks/useServices'
 import { useEditAccessGroupMutation } from '../../hooks/useAccessGroupMutation'
 
 type Props = {
@@ -41,13 +40,7 @@ const EditAccessGroup = forwardRef(
 
     const mutation = useEditAccessGroupMutation()
 
-    const { services, isLoading } = useServices()
-
     const { t } = useTranslation()
-
-    if (isLoading) return null
-
-    const { resetCron: defaultResetCron } = services[0]
 
     const handleCreate = () => {
       try {
@@ -153,7 +146,6 @@ const EditAccessGroup = forwardRef(
                     sx={{ mb: 2, width: '300px' }}
                     value={resetCron}
                     onChange={(e) => setResetCron(e.target.value)}
-                    placeholder={defaultResetCron || ''}
                   />
                 </Box>
               </Box>
