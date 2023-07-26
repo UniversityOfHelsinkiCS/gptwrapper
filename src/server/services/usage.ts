@@ -1,10 +1,32 @@
 import { CreateChatCompletionRequest } from 'openai'
 import { Tiktoken } from '@dqbd/tiktoken'
+import { Op } from 'sequelize'
 
-import { doubleUsageIams } from '../util/config'
 import { User, Service } from '../types'
-import { UserServiceUsage } from '../db/models'
+import { UserServiceUsage, ServiceAccessGroup } from '../db/models'
 import logger from '../util/logger'
+
+// Get largest usage limit for user based on their IAM groups
+// If no usage limit is found, return the service's default usage limit
+const getUsageLimit = async (service: Service, user: User): Promise<number> => {
+  const accessGroups = await ServiceAccessGroup.findAll({
+    where: {
+      serviceId: service.id,
+      iamGroup: {
+        [Op.in]: user.iamGroups,
+      },
+    },
+    attributes: ['usageLimit'],
+  })
+
+  const usageLimits = accessGroups
+    .map(({ usageLimit }) => usageLimit)
+    .filter(Boolean)
+
+  if (usageLimits.length) return Math.max(...usageLimits)
+
+  return service.usageLimit
+}
 
 export const checkUsage = async (
   user: User,
@@ -17,10 +39,7 @@ export const checkUsage = async (
     },
   })
 
-  let { usageLimit } = service
-
-  if (user.iamGroups.some((iam) => doubleUsageIams.includes(iam)))
-    usageLimit *= 2
+  const usageLimit = await getUsageLimit(service, user)
 
   if (!user.isAdmin && serviceUsage.usageCount >= usageLimit) {
     logger.info('Usage limit reached')
