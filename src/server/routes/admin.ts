@@ -22,8 +22,8 @@ adminRouter.get('/accessGroups', async (_, res) => {
 
 interface NewAccessGroupData {
   iamGroup: string
-  model?: string
-  usageLimit?: number
+  model: string
+  usageLimit: number
   resetCron?: string
 }
 
@@ -35,7 +35,7 @@ adminRouter.post('/accessGroups', async (req, res) => {
     serviceId: 'chat',
     iamGroup,
     model,
-    usageLimit: String(usageLimit),
+    usageLimit,
     resetCron,
   })
 
@@ -45,7 +45,7 @@ adminRouter.post('/accessGroups', async (req, res) => {
 interface UpdatedAccessGroupData {
   iamGroup: string
   model: string
-  usageLimit: number | null
+  usageLimit: number
   resetCron: string | null
 }
 
@@ -60,7 +60,7 @@ adminRouter.put('/accessGroups/:id', async (req, res) => {
 
   accessGroup.iamGroup = iamGroup
   accessGroup.model = model
-  accessGroup.usageLimit = usageLimit ? String(usageLimit) : null
+  accessGroup.usageLimit = usageLimit
   accessGroup.resetCron = resetCron
 
   await accessGroup.save()

@@ -18,7 +18,7 @@ class UserServiceUsage extends Model<
 
   declare serviceId: string
 
-  declare usageCount: string
+  declare usageCount: number
 }
 
 UserServiceUsage.init(
@@ -38,7 +38,7 @@ UserServiceUsage.init(
       allowNull: false,
     },
     usageCount: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
     },

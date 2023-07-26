@@ -2,13 +2,13 @@ import { CreateChatCompletionRequest } from 'openai'
 import { Tiktoken } from '@dqbd/tiktoken'
 
 import { doubleUsageIams } from '../util/config'
-import { User, Service as ServiceType } from '../types'
+import { User, Service } from '../types'
 import { UserServiceUsage } from '../db/models'
 import logger from '../util/logger'
 
 export const checkUsage = async (
   user: User,
-  service: ServiceType
+  service: Service
 ): Promise<boolean> => {
   const [serviceUsage] = await UserServiceUsage.findOrCreate({
     where: {
@@ -17,13 +17,12 @@ export const checkUsage = async (
     },
   })
 
-  const usageCount = BigInt(serviceUsage.usageCount)
+  let { usageLimit } = service
 
-  let usageLimit = BigInt(service.usageLimit)
   if (user.iamGroups.some((iam) => doubleUsageIams.includes(iam)))
-    usageLimit *= BigInt(2)
+    usageLimit *= 2
 
-  if (!user.isAdmin && usageCount >= usageLimit) {
+  if (!user.isAdmin && serviceUsage.usageCount >= usageLimit) {
     logger.info('Usage limit reached')
     logger.info({ user, service, serviceUsage })
 
@@ -63,9 +62,7 @@ export const incrementUsage = async (
 
   if (!serviceUsage) throw new Error('User service usage not found')
 
-  serviceUsage.usageCount = String(
-    BigInt(serviceUsage.usageCount) + BigInt(tokenCount)
-  )
+  serviceUsage.usageCount += tokenCount
 
   await serviceUsage.save()
 }

@@ -20,7 +20,7 @@ class ServiceAccessGroup extends Model<
 
   declare model: CreationOptional<string>
 
-  declare usageLimit: string | null // override service usage limit
+  declare usageLimit: number
 
   declare resetCron: string | null
 }
@@ -47,8 +47,9 @@ ServiceAccessGroup.init(
       defaultValue: 'gpt-3.5-turbo',
     },
     usageLimit: {
-      type: DataTypes.BIGINT,
-      allowNull: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
     },
     resetCron: {
       type: DataTypes.STRING,

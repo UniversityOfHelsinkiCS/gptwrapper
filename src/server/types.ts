@@ -29,7 +29,7 @@ export interface Service {
   id: string
   name: string
   description: string
-  usageLimit: string
+  usageLimit: number
 }
 
 export type Role = 'system' | 'assistant' | 'user'

@@ -19,7 +19,7 @@ class Service extends Model<
 
   declare model: string
 
-  declare usageLimit: string
+  declare usageLimit: number
 
   declare resetCron: string | null
 }
@@ -47,7 +47,7 @@ Service.init(
       defaultValue: 'gpt-3.5-turbo',
     },
     usageLimit: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
     },
