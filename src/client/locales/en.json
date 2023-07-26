@@ -48,6 +48,7 @@
     "modelInfo": "OpenAi language model to use",
     "usageLimit": "Usage limit",
     "usageLimitInfo": "Usage limit in tokens",
-    "resetSchedule": "Reset schedule"
+    "resetSchedule": "Reset schedule",
+    "resetScheduleInfo": "Use Cron notation"
   }
 }

@@ -133,7 +133,7 @@ const EditAccessGroup = forwardRef(
                     {t('admin:resetSchedule')}
                   </Typography>
                   <Typography mb={1}>
-                    Use Cron notation, see{' '}
+                    {t('admin:resetScheduleInfo')}{' '}
                     <Link
                       target="_blank"
                       rel="noopener"

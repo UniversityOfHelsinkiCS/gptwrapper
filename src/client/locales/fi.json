@@ -47,7 +47,8 @@
     "model": "Kielimalli",
     "modelInfo": "Käytettävä OpenAi:n kielimalli",
     "usageLimit": "Käyttöraja",
-    "usageLimitInfo": "Käyttöraja tokeneissa",
-    "resetSchedule": "Nollaantumisaika"
+    "usageLimitInfo": "Käyttöraja tokeneina",
+    "resetSchedule": "Nollaantumisaika",
+    "resetScheduleInfo": "Käytä Cron-notaatiota"
   }
 }
