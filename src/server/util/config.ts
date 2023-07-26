@@ -18,19 +18,4 @@ export const PATE_URL = inProduction
 
 export const adminIams = ['grp-toska', 'hy-ypa-opa-ote']
 
-export const globalCampusIam = 'grp-curregc'
-
-const curregptIam = 'grp-curregpt'
-
-export const doubleUsageIams = [globalCampusIam, curregptIam]
-
 export const tikeIam = 'hy-tike-allstaff'
-
-export const accessIams = [
-  globalCampusIam,
-  curregptIam,
-  'hy-ypa-opa-henkilosto',
-  tikeIam,
-  'hy-digiohry-opetus',
-  'hy-digiohry-tutkimus',
-]
