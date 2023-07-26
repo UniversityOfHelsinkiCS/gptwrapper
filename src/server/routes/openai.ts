@@ -8,7 +8,7 @@ import { isError } from '../util/parser'
 import { calculateUsage, incrementUsage, checkUsage } from '../services/usage'
 import hashData from '../util/hash'
 import { completionStream } from '../util/openai'
-import { getMessageContext } from '../util/util'
+import { getMessageContext, getModel } from '../util/util'
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
 
@@ -32,6 +32,7 @@ openaiRouter.post('/stream', async (req, res) => {
 
   options.user = hashData(user.id)
   options.messages = getMessageContext(options.messages)
+  options.model = await getModel(user.iamGroups)
 
   const encoding = getEncoding()
   let tokenCount = calculateUsage(options, encoding)

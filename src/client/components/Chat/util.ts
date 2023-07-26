@@ -13,7 +13,6 @@ export const getCompletionStream = async (
     body: JSON.stringify({
       id: 'chat',
       options: {
-        model: 'gpt-3.5-turbo-16k',
         messages: [
           {
             role: 'system',

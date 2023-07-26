@@ -1,4 +1,8 @@
 import { ChatCompletionRequestMessage } from 'openai'
+import { Op } from 'sequelize'
+
+import { DEFAULT_MODEL } from '../../config'
+import { ServiceAccessGroup } from '../db/models'
 
 /**
  * Filter out messages in a long conversation to save costs
@@ -14,4 +18,28 @@ export const getMessageContext = (
   const latestMessages = otherMessages.slice(-10)
 
   return systemMessages.concat(latestMessages)
+}
+
+/**
+ * Get the model to use for a given user
+ * If the user has access to multiple models, use the largest model
+ * If the user has access to no models, use the default model
+ */
+export const getModel = async (iamGroups: string[]): Promise<string> => {
+  const accessGroups = await ServiceAccessGroup.findAll({
+    where: {
+      iamGroup: {
+        [Op.in]: iamGroups,
+      },
+    },
+    attributes: ['model'],
+  })
+
+  const models = accessGroups.map(({ model }) => model)
+
+  if (models.includes('gpt-4')) return 'gpt-4'
+  if (models.includes('gpt-3.5-turbo-16k')) return 'gpt-3.5-turbo-16k'
+  if (models.includes('gpt-3.5-turbo')) return 'gpt-3.5-turbo'
+
+  return DEFAULT_MODEL
 }
