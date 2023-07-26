@@ -1,49 +1,51 @@
 import cron from 'node-cron'
 import { Op } from 'sequelize'
 
-import { globalCampusIam } from './config'
 import logger from './logger'
-import { User, UserServiceUsage } from '../db/models'
+import { User, UserServiceUsage, ServiceAccessGroup } from '../db/models'
 
-const resetUsage = async () => {
-  logger.info('Resetting all usage')
-
-  await UserServiceUsage.destroy({
-    where: {
-      serviceId: 'chat',
-    },
-  })
-}
-
-const resetGlobalCampusUsage = async () => {
-  logger.info('Resetting global campus usage')
-
-  const glocalCampusUsers = await User.findAll({
-    where: {
-      iamGroups: {
-        [Op.contains]: [globalCampusIam],
-      },
-    },
-    attributes: ['id'],
-  })
-
-  const userIds = glocalCampusUsers.map((user) => user.id)
-
-  await UserServiceUsage.destroy({
-    where: {
-      serviceId: 'chat',
-      userId: {
-        [Op.in]: userIds,
-      },
-    },
-  })
+type ResetCron = {
+  iamGroup: string
+  resetCron: string
 }
 
 const setupCron = async () => {
   logger.info('Starting cron jobs')
 
-  cron.schedule('0 0 1 */3 *', resetUsage) // Every three months
-  cron.schedule('0 0 1 * *', resetGlobalCampusUsage) // Once a month
+  const accessGroups = (await ServiceAccessGroup.findAll({
+    where: {
+      resetCron: {
+        [Op.not]: null,
+      },
+    },
+    attributes: ['iamGroup', 'resetCron'],
+  })) as ResetCron[]
+
+  accessGroups.forEach(({ iamGroup, resetCron }) => {
+    cron.schedule(resetCron, async () => {
+      logger.info(`Resetting usage for ${iamGroup}`)
+
+      const users = await User.findAll({
+        where: {
+          iamGroups: {
+            [Op.contains]: [iamGroup],
+          },
+        },
+        attributes: ['id'],
+      })
+
+      const userIds = users.map(({ id }) => id)
+
+      await UserServiceUsage.destroy({
+        where: {
+          serviceId: 'chat',
+          userId: {
+            [Op.in]: userIds,
+          },
+        },
+      })
+    })
+  })
 }
 
 export default setupCron
