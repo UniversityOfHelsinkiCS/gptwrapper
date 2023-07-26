@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 
+import { PUBLIC_URL } from '../../config'
 import { AccessGroup } from '../types'
 
 export const queryKey = ['accessGroups']
 
 const useAccessGroups = () => {
   const queryFn = async (): Promise<AccessGroup[]> => {
-    const res = await fetch('/api/admin/accessGroups')
+    const res = await fetch(`${PUBLIC_URL}/api/admin/accessGroups`)
 
     const data = await res.json()
 

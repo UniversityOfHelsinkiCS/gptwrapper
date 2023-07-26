@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 
+import { PUBLIC_URL } from '../../config'
 import queryClient from '../util/queryClient'
 import { queryKey } from './useAccessGroups'
 
@@ -12,7 +13,7 @@ export interface NewAccessGroupData {
 
 export const useCreateAccessGroupMutation = () => {
   const mutationFn = async (data: NewAccessGroupData) => {
-    const res = await fetch('/api/admin/accessGroups', {
+    const res = await fetch(`${PUBLIC_URL}/api/admin/accessGroups`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -43,7 +44,7 @@ interface UpdatedAccessGroupData {
 
 export const useEditAccessGroupMutation = () => {
   const mutationFn = async (data: UpdatedAccessGroupData) => {
-    const res = await fetch(`/api/admin/accessGroups/${data.id}`, {
+    const res = await fetch(`${PUBLIC_URL}/api/admin/accessGroups/${data.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -66,7 +67,7 @@ export const useEditAccessGroupMutation = () => {
 
 export const useDeleteAccessGroupMutation = () => {
   const mutationFn = async (id: string) => {
-    const res = await fetch(`/api/admin/accessGroups/${id}`, {
+    const res = await fetch(`${PUBLIC_URL}/api/admin/accessGroups/${id}`, {
       method: 'DELETE',
     })
 
