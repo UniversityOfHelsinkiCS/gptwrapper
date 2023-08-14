@@ -14,7 +14,6 @@ import logger from '../util/logger'
 
 const openaiRouter = express.Router()
 
-// eslint-disable-next-line consistent-return
 openaiRouter.post('/stream', async (req, res) => {
   const request = req as ChatRequest
   const { id, options } = request.body
@@ -31,8 +30,9 @@ openaiRouter.post('/stream', async (req, res) => {
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
   options.user = hashData(user.id)
-  options.messages = getMessageContext(options.messages)
   options.model = await getModel(user.iamGroups)
+  options.messages = getMessageContext(options.messages)
+  options.stream = true
 
   const encoding = getEncoding()
   let tokenCount = calculateUsage(options, encoding)
@@ -49,41 +49,29 @@ openaiRouter.post('/stream', async (req, res) => {
 
   res.setHeader('content-type', 'text/plain')
 
-  // https://github.com/openai/openai-node/issues/18#issuecomment-1493132878
-  stream.on('data', (chunk: Buffer) => {
-    // Messages in the event stream are separated by a pair of newline characters.
-    const payloads = chunk.toString().split('\n\n')
-    // eslint-disable-next-line no-restricted-syntax
-    for (const payload of payloads) {
-      if (payload.includes('[DONE]')) return
-      if (payload.startsWith('data:')) {
-        const data = payload.replaceAll(/(\n)?^data:\s*/g, '') // in case there's multiline data event
-        try {
-          const delta = JSON.parse(data.trim())
-          const text = delta.choices[0].delta?.content
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const part of stream) {
+    try {
+      const text = part.choices[0].delta?.content
 
-          if (!inProduction) logger.info(text)
-          res.write(text)
-          tokenCount += encoding.encode(text).length || 0
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error(`Error with JSON.parse and ${payload}.\n${error}`)
-        }
+      if (!inProduction) logger.info(text)
+
+      if (text) {
+        res.write(text)
+        tokenCount += encoding.encode(text).length || 0
       }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
     }
-  })
+  }
 
-  stream.on('end', async () => {
-    await incrementUsage(user, id, tokenCount)
-    logger.info(`Stream ended. Total tokens: ${tokenCount}`, { tokenCount })
+  await incrementUsage(user, id, tokenCount)
+  logger.info(`Stream ended. Total tokens: ${tokenCount}`, { tokenCount })
 
-    encoding.free()
-    res.end()
-  })
-  stream.on('error', (e: Error) => {
-    logger.error(e)
-    res.end()
-  })
+  encoding.free()
+
+  return res.end()
 })
 
 export default openaiRouter

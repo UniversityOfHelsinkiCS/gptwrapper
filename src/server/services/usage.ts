@@ -1,8 +1,7 @@
-import { CreateChatCompletionRequest } from 'openai'
 import { Tiktoken } from '@dqbd/tiktoken'
 import { Op } from 'sequelize'
 
-import { User, Service } from '../types'
+import { User, Service, StreamingOptions } from '../types'
 import { UserServiceUsage, ServiceAccessGroup } from '../db/models'
 import logger from '../util/logger'
 
@@ -51,7 +50,7 @@ export const checkUsage = async (
 }
 
 export const calculateUsage = (
-  options: CreateChatCompletionRequest,
+  options: StreamingOptions,
   encoding: Tiktoken
 ): number => {
   const { messages } = options

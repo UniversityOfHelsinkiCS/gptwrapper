@@ -1,6 +1,6 @@
-import { ChatCompletionRequestMessage } from 'openai'
 import { Op } from 'sequelize'
 
+import { Message } from '../types'
 import { DEFAULT_MODEL } from '../../config'
 import { ServiceAccessGroup } from '../db/models'
 
@@ -9,9 +9,7 @@ import { ServiceAccessGroup } from '../db/models'
  * and to stay within context limit.
  * Always keep system messages and last 10 messages
  */
-export const getMessageContext = (
-  messages: ChatCompletionRequestMessage[]
-): ChatCompletionRequestMessage[] => {
+export const getMessageContext = (messages: Message[]): Message[] => {
   const systemMessages = messages.filter((message) => message.role === 'system')
   const otherMessages = messages.filter((message) => message.role !== 'system')
 

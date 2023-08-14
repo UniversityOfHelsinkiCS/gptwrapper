@@ -1,10 +1,5 @@
 import { Request } from 'express'
-import { CreateChatCompletionRequest } from 'openai'
-
-interface RequestBody {
-  id?: string
-  options?: CreateChatCompletionRequest
-}
+import OpenAI from 'openai'
 
 export interface User {
   id: string
@@ -20,9 +15,20 @@ export interface ChatRequest extends Request {
   user: User
 }
 
-export interface ApiError {
-  status?: number
-  error: object | string
+export type APIError = typeof OpenAI.APIError
+
+export type OpenAIStream = ReturnType<
+  typeof OpenAI.prototype.chat.completions.create
+>
+
+export type Message = OpenAI.Chat.ChatCompletionMessage
+
+export type StreamingOptions =
+  OpenAI.Chat.Completions.CompletionCreateParamsStreaming
+
+interface RequestBody {
+  id?: string
+  options?: StreamingOptions
 }
 
 export interface Service {

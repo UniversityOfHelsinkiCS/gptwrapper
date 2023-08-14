@@ -1,48 +1,34 @@
-import { IncomingMessage } from 'http'
+import OpenAI from 'openai'
 
-import { Configuration, OpenAIApi, CreateChatCompletionRequest } from 'openai'
-
-import { ApiError } from '../types'
+import { StreamingOptions, OpenAIStream, APIError } from '../types'
 import { OPENAI_API_KEY, TIKE_OPENAI_API_KEY } from './config'
 import logger from './logger'
 
-const defaultConfiguration = new Configuration({
+const defaultApi = new OpenAI({
   apiKey: OPENAI_API_KEY,
 })
 
-const tikeConfiguration = new Configuration({
+const tikeApi = new OpenAI({
   apiKey: TIKE_OPENAI_API_KEY,
 })
 
-const defaultApi = new OpenAIApi(defaultConfiguration)
-
-const tikeApi = new OpenAIApi(tikeConfiguration)
-
 export const completionStream = async (
-  options: CreateChatCompletionRequest,
+  options: StreamingOptions,
   isTike: boolean
-): Promise<IncomingMessage | ApiError> => {
+): Promise<OpenAIStream | APIError> => {
   try {
     const openai = isTike ? tikeApi : defaultApi
 
-    const response = await openai.createChatCompletion(options, {
-      responseType: 'stream',
-    })
-
-    const stream = response.data as unknown as IncomingMessage
+    const stream = await openai.chat.completions.create(options)
 
     return stream
-  } catch (err: any) {
-    const error = err.response
-      ? {
-          status: err.response.status,
-          error: err.response.data,
-        }
-      : {
-          error: err.message,
-        }
-
-    logger.error('OpenAI API error', { error })
+  } catch (error: any) {
+    if (error instanceof OpenAI.APIError) {
+      const { status, message, code, type } = error
+      logger.error('OpenAI API error', { status, message, code, type })
+    } else {
+      logger.error(error)
+    }
 
     return error
   }

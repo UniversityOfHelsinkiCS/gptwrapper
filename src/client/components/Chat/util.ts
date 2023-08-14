@@ -20,7 +20,6 @@ export const getCompletionStream = async (
           },
           ...messages,
         ],
-        stream: true,
       },
     }),
   })
