@@ -1,10 +1,10 @@
 import React from 'react'
+import { Outlet } from 'react-router-dom'
 import { SnackbarProvider } from 'notistack'
 import { ThemeProvider } from '@mui/material/styles'
 import { Box } from '@mui/material'
 
 import useTheme from './theme'
-import Router from './Router'
 import NavBar from './components/NavBar'
 import Footer from './components/Footer'
 
@@ -16,7 +16,7 @@ const App = () => {
       <SnackbarProvider preventDuplicate>
         <Box minHeight="100vh" display="flex" flexDirection="column">
           <NavBar />
-          <Router />
+          <Outlet />
           <Footer />
         </Box>
       </SnackbarProvider>

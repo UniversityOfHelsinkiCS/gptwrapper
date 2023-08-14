@@ -1,16 +1,30 @@
 import React from 'react'
-import { Route, Routes } from 'react-router-dom'
+import {
+  RouterProvider,
+  Route,
+  createBrowserRouter,
+  createRoutesFromElements,
+} from 'react-router-dom'
 
+import { PUBLIC_URL } from '../config'
+import App from './App'
 import Admin from './components/Admin'
 import Chat from './components/Chat'
 import NoAccess from './components/NoAccess'
 
-const Router = () => (
-  <Routes>
-    <Route path="/*" element={<Chat />} />
-    <Route path="/admin" element={<Admin />} />
-    <Route path="/noaccess" element={<NoAccess />} />
-  </Routes>
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/" element={<App />}>
+      <Route index element={<Chat />} />
+      <Route path="/admin" element={<Admin />} />
+      <Route path="/noaccess" element={<NoAccess />} />
+    </Route>
+  ),
+  {
+    basename: PUBLIC_URL,
+  }
 )
+
+const Router = () => <RouterProvider router={router} />
 
 export default Router
