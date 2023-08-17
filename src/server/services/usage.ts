@@ -7,7 +7,10 @@ import logger from '../util/logger'
 
 // Get largest usage limit for user based on their IAM groups
 // If no usage limit is found, return the service's default usage limit
-const getUsageLimit = async (service: Service, user: User): Promise<number> => {
+const getIamUsageLimit = async (
+  service: Service,
+  user: User
+): Promise<number> => {
   const accessGroups = await ServiceAccessGroup.findAll({
     where: {
       serviceId: service.id,
@@ -29,7 +32,8 @@ const getUsageLimit = async (service: Service, user: User): Promise<number> => {
 
 export const checkUsage = async (
   user: User,
-  service: Service
+  service: Service,
+  courseId?: string
 ): Promise<boolean> => {
   const [serviceUsage] = await UserServiceUsage.findOrCreate({
     where: {
@@ -38,7 +42,9 @@ export const checkUsage = async (
     },
   })
 
-  const usageLimit = await getUsageLimit(service, user)
+  const usageLimit = courseId
+    ? service.usageLimit
+    : await getIamUsageLimit(service, user)
 
   if (!user.isAdmin && serviceUsage.usageCount >= usageLimit) {
     logger.info('Usage limit reached', { user, service, serviceUsage })

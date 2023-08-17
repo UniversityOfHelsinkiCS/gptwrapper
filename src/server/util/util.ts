@@ -26,8 +26,6 @@ const getCourseModel = async (courseId: string): Promise<string> => {
     attributes: ['model'],
   })
 
-  console.log('service', service)
-
   return service?.model || DEFAULT_MODEL
 }
 
@@ -38,7 +36,7 @@ const getCourseModel = async (courseId: string): Promise<string> => {
  */
 export const getModel = async (
   iamGroups: string[],
-  courseId: string | undefined
+  courseId?: string
 ): Promise<string> => {
   if (courseId) return getCourseModel(courseId)
 

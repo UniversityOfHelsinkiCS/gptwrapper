@@ -26,7 +26,7 @@ openaiRouter.post('/stream', async (req, res) => {
   const service = await Service.findByPk(id)
   if (!service) return res.status(404).send('Service not found')
 
-  const usageAllowed = await checkUsage(user, service)
+  const usageAllowed = await checkUsage(user, service, courseId)
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
   options.user = hashData(user.id)
