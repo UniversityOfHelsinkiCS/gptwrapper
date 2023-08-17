@@ -14,15 +14,20 @@ userRouter.get('/login', async (req, res) => {
   if (!id) return res.status(401).send('Unauthorized')
 
   const hasIamAccess = await checkIamAccess(iamGroups)
-  if (isAdmin || hasIamAccess) return res.send(user)
 
   const userCourses = await checkCourseAccess(id)
-  if (userCourses.length === 0) return res.status(401).send('Unauthorized')
+  const hasCourseAccess = userCourses.length > 0
+
+  if (!isAdmin && !hasIamAccess && !hasCourseAccess)
+    return res.status(401).send('Unauthorized')
 
   user.activeCourseIds = userCourses
   await User.upsert(user)
 
-  return res.send(user)
+  return res.send({
+    ...user,
+    hasIamAccess: isAdmin || hasIamAccess,
+  })
 })
 
 export default userRouter

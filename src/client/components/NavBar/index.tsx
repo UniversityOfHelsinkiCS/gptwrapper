@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Link, Navigate, useLocation } from 'react-router-dom'
+import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
 import {
   AppBar,
   Toolbar,
@@ -23,6 +23,7 @@ import styles from './styles'
 
 const NavBar = () => {
   const { t, i18n } = useTranslation()
+  const { courseId } = useParams()
   const location = useLocation()
   const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
   const anchorRef = useRef<HTMLButtonElement>(null)
@@ -45,6 +46,10 @@ const NavBar = () => {
   if (isLoading) return null
   if (!user && location.pathname !== '/noaccess')
     return <Navigate to="/noaccess" />
+  if (courseId && !user?.activeCourseIds.includes(courseId))
+    return <Navigate to="/noaccess" />
+  if (!courseId && !user?.hasIamAccess)
+    return <Navigate to={`/${user?.activeCourseIds[0]}`} />
 
   return (
     <AppBar elevation={0} position="relative" sx={styles.appbar}>

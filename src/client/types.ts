@@ -14,6 +14,8 @@ export interface User {
   iamGroups: string[]
   email?: string
   isAdmin: boolean
+  activeCourseIds: string[]
+  hasIamAccess?: boolean
 }
 
 export interface Service {
