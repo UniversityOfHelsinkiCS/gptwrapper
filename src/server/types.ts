@@ -8,6 +8,7 @@ export interface User {
   iamGroups: string[]
   email?: string
   isAdmin: boolean
+  activeCourseIds: string[]
 }
 
 export interface ChatRequest extends Request {

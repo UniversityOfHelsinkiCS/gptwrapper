@@ -1,6 +1,5 @@
 import { inDevelopment } from '../../config'
 import { adminIams } from '../util/config'
-import { User } from '../db/models'
 
 const parseIamGroups = (iamGroups: string) =>
   iamGroups?.split(';').filter(Boolean) ?? []
@@ -37,8 +36,6 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
     iamGroups,
     isAdmin: checkAdmin(iamGroups),
   }
-
-  if (username) await User.upsert(user)
 
   req.user = user
 

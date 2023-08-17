@@ -18,6 +18,8 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare isAdmin: boolean
 
   declare iamGroups: string[]
+
+  declare activeCourseIds: CreationOptional<string[]>
 }
 
 User.init(
@@ -40,6 +42,11 @@ User.init(
     },
     iamGroups: {
       type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: [],
+    },
+    activeCourseIds: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: false,
       defaultValue: [],
     },
   },

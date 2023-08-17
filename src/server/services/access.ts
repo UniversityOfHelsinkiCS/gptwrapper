@@ -35,7 +35,9 @@ export const checkCourseAccess = async (userId: string) => {
     ({ courseUnitRealisation }) => courseUnitRealisation.id
   )
 
-  const hasAccess = enrolledCourseIds.some((id) => accessCourseIds.includes(id))
+  const courseIds = enrolledCourseIds.filter((id) =>
+    accessCourseIds.includes(id)
+  )
 
-  return hasAccess
+  return courseIds
 }
