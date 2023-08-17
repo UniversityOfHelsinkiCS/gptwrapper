@@ -30,11 +30,12 @@ openaiRouter.post('/stream', async (req, res) => {
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
   options.user = hashData(user.id)
-  options.model = await getModel(user.iamGroups, courseId)
+  const model = await getModel(user.iamGroups, courseId)
+  options.model = model
   options.messages = getMessageContext(options.messages)
   options.stream = true
 
-  const encoding = getEncoding()
+  const encoding = getEncoding(model)
   let tokenCount = calculateUsage(options, encoding)
 
   // Model has maximum context of 16k tokens
