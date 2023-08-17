@@ -30,6 +30,7 @@ export type StreamingOptions =
 interface RequestBody {
   id?: string
   options?: StreamingOptions
+  courseId?: string
 }
 
 export interface Service {

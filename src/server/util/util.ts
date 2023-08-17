@@ -2,7 +2,7 @@ import { Op } from 'sequelize'
 
 import { Message } from '../types'
 import { DEFAULT_MODEL } from '../../config'
-import { ServiceAccessGroup } from '../db/models'
+import { ServiceAccessGroup, Service } from '../db/models'
 
 /**
  * Filter out messages in a long conversation to save costs
@@ -18,12 +18,30 @@ export const getMessageContext = (messages: Message[]): Message[] => {
   return systemMessages.concat(latestMessages)
 }
 
+const getCourseModel = async (courseId: string): Promise<string> => {
+  const service = await Service.findOne({
+    where: {
+      courseId,
+    },
+    attributes: ['model'],
+  })
+
+  console.log('service', service)
+
+  return service?.model || DEFAULT_MODEL
+}
+
 /**
  * Get the model to use for a given user
  * If the user has access to multiple models, use the largest model
  * If the user has access to no models, use the default model
  */
-export const getModel = async (iamGroups: string[]): Promise<string> => {
+export const getModel = async (
+  iamGroups: string[],
+  courseId: string | undefined
+): Promise<string> => {
+  if (courseId) return getCourseModel(courseId)
+
   const accessGroups = await ServiceAccessGroup.findAll({
     where: {
       iamGroup: {

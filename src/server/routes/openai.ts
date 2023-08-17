@@ -16,7 +16,7 @@ const openaiRouter = express.Router()
 
 openaiRouter.post('/stream', async (req, res) => {
   const request = req as ChatRequest
-  const { id, options } = request.body
+  const { id, options, courseId } = request.body
   const { user } = request
 
   if (!user.id) return res.status(401).send('Unauthorized')
@@ -30,7 +30,7 @@ openaiRouter.post('/stream', async (req, res) => {
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
   options.user = hashData(user.id)
-  options.model = await getModel(user.iamGroups)
+  options.model = await getModel(user.iamGroups, courseId)
   options.messages = getMessageContext(options.messages)
   options.stream = true
 
