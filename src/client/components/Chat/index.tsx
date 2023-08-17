@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { Box, Paper } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
+import { useParams } from 'react-router-dom'
 
 import { Message } from '../../types'
 import { getCompletionStream } from './util'
@@ -12,6 +13,8 @@ import SendMessage from './SendMessage'
 import Email from './Email'
 
 const Chat = () => {
+  const { courseId } = useParams()
+
   const [system, setSystem] = useState('')
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
@@ -25,7 +28,8 @@ const Chat = () => {
     try {
       const stream = await getCompletionStream(
         system,
-        messages.concat(newMessage)
+        messages.concat(newMessage),
+        courseId
       )
       const reader = stream.getReader()
 

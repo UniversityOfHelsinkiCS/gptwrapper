@@ -3,7 +3,8 @@ import { Message } from '../../types'
 
 export const getCompletionStream = async (
   system: string,
-  messages: Message[]
+  messages: Message[],
+  courseId?: string
 ) => {
   const response = await fetch(`${PUBLIC_URL}/api/ai/stream`, {
     method: 'POST',
@@ -12,6 +13,7 @@ export const getCompletionStream = async (
     },
     body: JSON.stringify({
       id: 'chat',
+      courseId,
       options: {
         messages: [
           {
