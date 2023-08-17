@@ -1,4 +1,4 @@
-import { PATE_URL } from './config'
+import { PATE_URL, API_TOKEN } from './config'
 import { inDevelopment } from '../../config'
 
 const settings = {
@@ -22,7 +22,7 @@ const sendEmail = async (targets: string[], text: string, subject: string) => {
     settings,
   }
 
-  await fetch(`${PATE_URL}?token=${process.env.API_TOKEN}`, {
+  await fetch(`${PATE_URL}?token=${API_TOKEN}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

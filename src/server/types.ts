@@ -39,3 +39,18 @@ export interface Service {
 }
 
 export type Role = 'system' | 'assistant' | 'user'
+
+export type Enrollment = {
+  id: string
+  personId: string
+  state: string
+  courseUnitRealisation: {
+    id: string
+    name: string
+    nameSpecifier: string
+    activityPeriod: {
+      startDate: string
+      endDate: string
+    }
+  }
+}
