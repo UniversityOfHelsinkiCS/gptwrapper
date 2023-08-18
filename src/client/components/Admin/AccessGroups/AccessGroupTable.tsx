@@ -62,6 +62,10 @@ const AccessGroupTable = ({ editFormOpen, setEditFormOpen }: Props) => {
 
   return (
     <Box mb={2}>
+      <Typography mb={2} variant="h4">
+        {t('admin:accessGroups')}
+      </Typography>
+
       <TableContainer component={Paper}>
         <Table>
           <TableHead>

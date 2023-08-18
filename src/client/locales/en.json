@@ -49,6 +49,17 @@
     "usageLimit": "Usage limit",
     "usageLimitInfo": "Usage limit in tokens",
     "resetSchedule": "Reset schedule",
-    "resetScheduleInfo": "Use Cron notation"
+    "resetScheduleInfo": "Use Cron notation",
+    "courses": "Courses",
+    "createService": "Add a new course",
+    "confirmServiceDelete": "Are you sure you want to delete this course?",
+    "newService": "New course",
+    "editService": "Edit course",
+    "name": "Name",
+    "courseNameInfo": "Name of the course",
+    "description": "Description",
+    "courseDescriptionInfo": "Description for the course",
+    "courseId": "Course ID",
+    "courseIdInfo": "Sisu course unit realisation ID"
   }
 }

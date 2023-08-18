@@ -49,6 +49,17 @@
     "usageLimit": "Käyttöraja",
     "usageLimitInfo": "Käyttöraja tokeneina",
     "resetSchedule": "Nollaantumisaika",
-    "resetScheduleInfo": "Käytä Cron-notaatiota"
+    "resetScheduleInfo": "Käytä Cron-notaatiota",
+    "courses": "Kurssit",
+    "createService": "Lisää uusi kurssi",
+    "confirmServiceDelete": "Haluatko varmasti poistaa tämän kurssin?",
+    "newService": "Uusi kurssi",
+    "editService": "Muokkaa kurssia",
+    "name": "Nimi",
+    "courseNameInfo": "Kurssin nimi",
+    "description": "Kuvaus",
+    "courseDescriptionInfo": "Kurssin kuvaus",
+    "courseId": "Kurssin ID",
+    "courseIdInfo": "Sisun opintojakson (course unit realisation) ID"
   }
 }

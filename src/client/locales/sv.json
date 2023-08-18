@@ -49,6 +49,17 @@
     "usageLimit": "",
     "usageLimitInfo": "",
     "resetSchedule": "",
-    "resetScheduleInfo": ""
+    "resetScheduleInfo": "",
+    "courses": "",
+    "createService": "",
+    "confirmServiceDelete": "",
+    "newService": "",
+    "editService": "",
+    "name": "",
+    "courseNameInfo": "",
+    "description": "",
+    "courseDescriptionInfo": "",
+    "courseId": "",
+    "courseIdInfo": ""
   }
 }

@@ -62,6 +62,10 @@ const ServiceTable = ({ editFormOpen, setEditFormOpen }: Props) => {
 
   return (
     <Box mb={2}>
+      <Typography mb={2} variant="h4">
+        {t('admin:courses')}
+      </Typography>
+
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
