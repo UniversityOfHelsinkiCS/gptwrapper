@@ -13,7 +13,7 @@ class Service extends Model<
   InferAttributes<Service>,
   InferCreationAttributes<Service>
 > {
-  declare id: string
+  declare id: CreationOptional<string>
 
   declare name: string
 
@@ -36,6 +36,7 @@ Service.init(
       type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
     },
     name: {
       type: DataTypes.STRING,
