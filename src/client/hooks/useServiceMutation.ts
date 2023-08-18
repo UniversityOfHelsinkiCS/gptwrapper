@@ -37,6 +37,39 @@ export const useCreateServiceMutation = () => {
   return mutation
 }
 
+interface UpdatedServiceData {
+  id: string
+  name: string
+  description: string
+  model: string
+  usageLimit: number
+  courseId?: string
+  prompt: Message[]
+}
+
+export const useEditServiceMutation = () => {
+  const mutationFn = async (data: UpdatedServiceData) => {
+    const res = await fetch(`${PUBLIC_URL}/api/admin/services/${data.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+
+    const service = await res.json()
+
+    return service
+  }
+
+  const mutation = useMutation(mutationFn, {
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey,
+      }),
+  })
+
+  return mutation
+}
+
 export const useDeleteServiceMutation = () => {
   const mutationFn = async (id: string) => {
     const res = await fetch(`${PUBLIC_URL}/api/admin/services/${id}`, {

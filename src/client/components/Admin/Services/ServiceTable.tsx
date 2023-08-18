@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Table,
   TableContainer,
@@ -10,6 +10,7 @@ import {
   Typography,
   Box,
   Button,
+  Modal,
 } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
@@ -17,10 +18,18 @@ import { useTranslation } from 'react-i18next'
 import { Service } from '../../../types'
 import useServices from '../../../hooks/useServices'
 import { useDeleteServiceMutation } from '../../../hooks/useServiceMutation'
+import EditService from './EditService'
+
+type Props = {
+  editFormOpen: boolean
+  setEditFormOpen: React.Dispatch<React.SetStateAction<boolean>>
+}
 
 const sortServices = (a: Service, b: Service) => a.name.localeCompare(b.name)
 
-const ServiceTable = () => {
+const ServiceTable = ({ editFormOpen, setEditFormOpen }: Props) => {
+  const [editId, setEditId] = useState('')
+
   const { services, isLoading } = useServices()
 
   const mutation = useDeleteServiceMutation()
@@ -39,8 +48,15 @@ const ServiceTable = () => {
     }
   }
 
+  const onEdit = (serviceId: string) => {
+    setEditId(serviceId)
+    setEditFormOpen(true)
+  }
+
   const filteredServices = services.filter(({ id }) => id !== 'chat')
   const sortedServices = filteredServices.sort(sortServices)
+
+  const serviceToEdit = filteredServices.find(({ id }) => id === editId)
 
   if (isLoading) return null
 
@@ -100,6 +116,9 @@ const ServiceTable = () => {
                     </Typography>
                   </TableCell>
                   <TableCell>
+                    <Button onClick={() => onEdit(id)}>
+                      {t('common:edit')}
+                    </Button>
                     <Button color="error" onClick={() => onDelete(id)}>
                       {t('common:delete')}
                     </Button>
@@ -110,6 +129,10 @@ const ServiceTable = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Modal open={editFormOpen} onClose={() => setEditFormOpen(false)}>
+        <EditService service={serviceToEdit} setFormOpen={setEditFormOpen} />
+      </Modal>
     </Box>
   )
 }

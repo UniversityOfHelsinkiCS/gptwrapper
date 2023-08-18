@@ -111,6 +111,36 @@ adminRouter.post('/services', async (req, res) => {
   return res.status(201).send(newService)
 })
 
+interface UpdatedServiceData {
+  name: string
+  description: string
+  model: string
+  usageLimit: number
+  courseId: string
+  prompt: Message[]
+}
+
+adminRouter.put('/services/:id', async (req, res) => {
+  const { id } = req.params
+  const data = req.body as UpdatedServiceData
+  const { name, description, model, usageLimit, courseId, prompt } = data
+
+  const service = await Service.findByPk(id)
+
+  if (!service) return res.status(404).send('Service not found')
+
+  service.name = name
+  service.description = description
+  service.model = model
+  service.usageLimit = usageLimit
+  service.courseId = courseId
+  service.prompt = prompt
+
+  await service.save()
+
+  return res.send(service)
+})
+
 adminRouter.delete('/services/:id', async (req, res) => {
   const { id } = req.params
 

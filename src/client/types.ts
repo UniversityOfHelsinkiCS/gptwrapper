@@ -23,7 +23,7 @@ export interface Service {
   name: string
   description: string
   model: string
-  usageLimit: string
+  usageLimit: number
   resetCron?: string
   courseId?: string
   prompt: Message[]

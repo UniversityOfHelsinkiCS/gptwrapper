@@ -13,13 +13,17 @@ const Services = () => {
   const { user, isLoading } = useCurrentUser()
 
   const [createFormOpen, setCreateFormOpen] = useState(false)
+  const [editFormOpen, setEditFormOpen] = useState(false)
 
   if (isLoading) return null
   if (!user?.isAdmin) return <Navigate to="/" />
 
   return (
     <Box>
-      <ServiceTable />
+      <ServiceTable
+        editFormOpen={editFormOpen}
+        setEditFormOpen={setEditFormOpen}
+      />
 
       <Button
         sx={{ p: 2 }}
