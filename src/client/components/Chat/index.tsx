@@ -23,6 +23,19 @@ const Chat = () => {
   const [completion, setCompletion] = useState('')
   const [showSystem, setShowSystem] = useState(true)
 
+  const { service, isLoading } = useCourseService(courseId)
+
+  if (isLoading) return null
+
+  if (service?.prompt?.length && messages.length === 0) {
+    const [systemMessage, ...otherMessages] = service.prompt
+
+    setSystem(systemMessage?.content || '')
+    setShowSystem(!systemMessage?.content)
+    setMessages(otherMessages)
+    setPrompt(service.prompt)
+  }
+
   const handleSend = async () => {
     const newMessage: Message = { role: 'user', content: message }
     setMessages((prev) => [...prev, newMessage])
@@ -30,6 +43,7 @@ const Chat = () => {
 
     try {
       const stream = await getCompletionStream(
+        service?.id || 'chat',
         system,
         messages.concat(newMessage),
         courseId
@@ -64,19 +78,6 @@ const Chat = () => {
     setSystem(systemMessage?.content || '')
     setMessage('')
     setCompletion('')
-  }
-
-  const { service, isLoading } = useCourseService(courseId)
-
-  if (isLoading) return null
-
-  if (service?.prompt?.length && messages.length === 0) {
-    const [systemMessage, ...otherMessages] = service.prompt
-
-    setSystem(systemMessage?.content || '')
-    setShowSystem(!systemMessage?.content)
-    setMessages(otherMessages)
-    setPrompt(service.prompt)
   }
 
   return (

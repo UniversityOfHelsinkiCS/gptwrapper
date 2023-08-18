@@ -2,6 +2,7 @@ import { PUBLIC_URL } from '../../../config'
 import { Message } from '../../types'
 
 export const getCompletionStream = async (
+  id: string,
   system: string,
   messages: Message[],
   courseId?: string
@@ -12,7 +13,7 @@ export const getCompletionStream = async (
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      id: 'chat',
+      id,
       courseId,
       options: {
         messages: [
