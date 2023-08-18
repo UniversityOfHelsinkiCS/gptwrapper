@@ -70,11 +70,11 @@ const Chat = () => {
 
   if (isLoading) return null
 
-  if (service && messages.length === 0) {
+  if (service?.prompt?.length && messages.length === 0) {
     const [systemMessage, ...otherMessages] = service.prompt
 
-    setSystem(systemMessage.content || '')
-    setShowSystem(systemMessage.content === '')
+    setSystem(systemMessage?.content || '')
+    setShowSystem(!systemMessage?.content)
     setMessages(otherMessages)
     setPrompt(service.prompt)
   }
@@ -110,7 +110,7 @@ const Chat = () => {
           handleSend={handleSend}
           disabled={message.length === 0 || completion !== ''}
           resetDisabled={
-            messages.length === prompt.length - 1 &&
+            messages.length === (showSystem ? 0 : prompt.length - 1) &&
             (!showSystem || system.length === 0) &&
             message.length === 0
           }

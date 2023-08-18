@@ -17,9 +17,21 @@ import {
 import { Language, AdminPanelSettingsOutlined } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
+import { User } from '../../types'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import hyLogo from '../../assets/hy_logo.svg'
 import styles from './styles'
+
+const hasAccess = (
+  user: User | null | undefined,
+  courseId: string | undefined
+) => {
+  if (!user) return false
+  if (courseId && !user.activeCourseIds.includes(courseId)) return false
+  if (!courseId && !user.hasIamAccess) return false
+
+  return true
+}
 
 const NavBar = () => {
   const { t, i18n } = useTranslation()
@@ -45,14 +57,13 @@ const NavBar = () => {
 
   if (isLoading) return null
 
-  if (location.pathname !== '/noaccess') {
-    if (!user) return <Navigate to="/noaccess" />
-    if (courseId && !user?.activeCourseIds.includes(courseId))
-      return <Navigate to="/noaccess" />
-    if (!courseId && !user?.hasIamAccess) {
-      window.location.href += user?.activeCourseIds[0] as string
+  if (location.pathname !== '/noaccess' && !hasAccess(user, courseId)) {
+    if (user?.hasIamAccess) {
+      window.location.href = window.location.origin
       return null
     }
+
+    return <Navigate to="/noaccess" />
   }
 
   return (
