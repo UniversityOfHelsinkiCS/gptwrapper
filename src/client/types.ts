@@ -24,7 +24,8 @@ export interface Service {
   description: string
   model: string
   usageLimit: string
-  resetCron: string | null
+  resetCron?: string
+  courseId?: string
   prompt: Message[]
 }
 
