@@ -36,3 +36,22 @@ export const useCreateServiceMutation = () => {
 
   return mutation
 }
+
+export const useDeleteServiceMutation = () => {
+  const mutationFn = async (id: string) => {
+    const res = await fetch(`${PUBLIC_URL}/api/admin/services/${id}`, {
+      method: 'DELETE',
+    })
+
+    return res
+  }
+
+  const mutation = useMutation(mutationFn, {
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey,
+      }),
+  })
+
+  return mutation
+}

@@ -16,24 +16,24 @@ import { useTranslation } from 'react-i18next'
 
 import { Service } from '../../../types'
 import useServices from '../../../hooks/useServices'
-import { useDeleteAccessGroupMutation } from '../../../hooks/useAccessGroupMutation'
+import { useDeleteServiceMutation } from '../../../hooks/useServiceMutation'
 
 const sortServices = (a: Service, b: Service) => a.name.localeCompare(b.name)
 
 const ServiceTable = () => {
   const { services, isLoading } = useServices()
 
-  const mutation = useDeleteAccessGroupMutation()
+  const mutation = useDeleteServiceMutation()
 
   const { t } = useTranslation()
 
   const onDelete = (accessGroupId: string) => {
     // eslint-disable-next-line no-alert
-    if (!window.confirm(t('admin:confirmAccessGroupDelete') as string)) return
+    if (!window.confirm(t('admin:confirmServiceDelete') as string)) return
 
     try {
       mutation.mutate(accessGroupId)
-      enqueueSnackbar('Access group deleted', { variant: 'success' })
+      enqueueSnackbar('Course service deleted', { variant: 'success' })
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     }
