@@ -71,9 +71,7 @@ const NavBar = () => {
       <Container maxWidth={false}>
         <Toolbar sx={styles.toolbar} disableGutters>
           <Box sx={styles.navBox}>
-            <Link to="/" style={{ marginBottom: -5 }}>
-              <img src={hyLogo} alt="University of Helsinki" width="40" />
-            </Link>
+            <img src={hyLogo} alt="University of Helsinki" width="40" />
             <Box ml="2rem">
               <Typography sx={styles.appName}>{t('appName')}</Typography>
             </Box>
