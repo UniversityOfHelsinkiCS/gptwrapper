@@ -18,8 +18,7 @@ import { Service } from '../../../types'
 import useServices from '../../../hooks/useServices'
 import { useDeleteAccessGroupMutation } from '../../../hooks/useAccessGroupMutation'
 
-const sortServices = (a: Service, b: Service) =>
-  a.name.localeCompare(b.name)
+const sortServices = (a: Service, b: Service) => a.name.localeCompare(b.name)
 
 const ServiceTable = () => {
   const { services, isLoading } = useServices()
@@ -40,7 +39,8 @@ const ServiceTable = () => {
     }
   }
 
-  const sortedServices = services.sort(sortServices)
+  const filteredServices = services.filter(({ id }) => id !== 'chat')
+  const sortedServices = filteredServices.sort(sortServices)
 
   if (isLoading) return null
 
