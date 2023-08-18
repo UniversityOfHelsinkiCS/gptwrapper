@@ -48,8 +48,10 @@ const NavBar = () => {
     return <Navigate to="/noaccess" />
   if (courseId && !user?.activeCourseIds.includes(courseId))
     return <Navigate to="/noaccess" />
-  if (!courseId && !user?.hasIamAccess)
-    return <Navigate to={`/${user?.activeCourseIds[0]}`} />
+  if (!courseId && !user?.hasIamAccess) {
+    window.location.href += user?.activeCourseIds[0] as string
+    return null
+  }
 
   return (
     <AppBar elevation={0} position="relative" sx={styles.appbar}>

@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom'
 
 import { Message } from '../../types'
 import { getCompletionStream } from './util'
+import useCourseService from '../../hooks/useCourseService'
 import Banner from '../Banner'
 import SystemMessage from './SystemMessage'
 import Conversation from './Conversation'
@@ -15,10 +16,12 @@ import Email from './Email'
 const Chat = () => {
   const { courseId } = useParams()
 
+  const [prompt, setPrompt] = useState<Message[]>([])
   const [system, setSystem] = useState('')
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const [completion, setCompletion] = useState('')
+  const [showSystem, setShowSystem] = useState(true)
 
   const handleSend = async () => {
     const newMessage: Message = { role: 'user', content: message }
@@ -55,10 +58,25 @@ const Chat = () => {
   }
 
   const handleReset = () => {
-    setMessages([])
-    setSystem('')
+    const [systemMessage, ...otherMessages] = prompt
+
+    setMessages(otherMessages)
+    setSystem(systemMessage?.content || '')
     setMessage('')
     setCompletion('')
+  }
+
+  const { service, isLoading } = useCourseService(courseId)
+
+  if (isLoading) return null
+
+  if (service && messages.length === 0) {
+    const [systemMessage, ...otherMessages] = service.prompt
+
+    setSystem(systemMessage.content || '')
+    setShowSystem(systemMessage.content === '')
+    setMessages(otherMessages)
+    setPrompt(service.prompt)
   }
 
   return (
@@ -77,11 +95,13 @@ const Chat = () => {
           mt: 5,
         }}
       >
-        <SystemMessage
-          system={system}
-          setSystem={setSystem}
-          disabled={messages.length > 0}
-        />
+        {showSystem && (
+          <SystemMessage
+            system={system}
+            setSystem={setSystem}
+            disabled={messages.length > 0}
+          />
+        )}
         <Conversation messages={messages} completion={completion} />
         <SendMessage
           message={message}
@@ -90,7 +110,9 @@ const Chat = () => {
           handleSend={handleSend}
           disabled={message.length === 0 || completion !== ''}
           resetDisabled={
-            messages.length === 0 && system.length === 0 && message.length === 0
+            messages.length === prompt.length - 1 &&
+            (!showSystem || system.length === 0) &&
+            message.length === 0
           }
         />
         <Email

@@ -25,6 +25,7 @@ export interface Service {
   model: string
   usageLimit: string
   resetCron: string | null
+  prompt: Message[]
 }
 
 export interface AccessGroup {

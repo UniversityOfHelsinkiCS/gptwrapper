@@ -3,8 +3,10 @@ import { useQuery } from '@tanstack/react-query'
 import { PUBLIC_URL } from '../../config'
 import { Service } from '../types'
 
-const useCourseService = (courseId: string) => {
+const useCourseService = (courseId?: string) => {
   const queryKey = ['courseService', courseId]
+
+  if (!courseId) return { service: null, isLoading: false }
 
   const queryFn = async (): Promise<Service | null> => {
     const res = await fetch(`${PUBLIC_URL}/api/services/${courseId}`)
