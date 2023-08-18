@@ -44,13 +44,15 @@ const NavBar = () => {
   }
 
   if (isLoading) return null
-  if (!user && location.pathname !== '/noaccess')
-    return <Navigate to="/noaccess" />
-  if (courseId && !user?.activeCourseIds.includes(courseId))
-    return <Navigate to="/noaccess" />
-  if (!courseId && !user?.hasIamAccess) {
-    window.location.href += user?.activeCourseIds[0] as string
-    return null
+
+  if (location.pathname !== '/noaccess') {
+    if (!user) return <Navigate to="/noaccess" />
+    if (courseId && !user?.activeCourseIds.includes(courseId))
+      return <Navigate to="/noaccess" />
+    if (!courseId && !user?.hasIamAccess) {
+      window.location.href += user?.activeCourseIds[0] as string
+      return null
+    }
   }
 
   return (
