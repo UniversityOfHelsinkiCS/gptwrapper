@@ -1,7 +1,7 @@
 import express from 'express'
 
-import { RequestWithUser } from '../types'
-import { ServiceAccessGroup } from '../db/models'
+import { RequestWithUser, Message } from '../types'
+import { ServiceAccessGroup, Service } from '../db/models'
 
 const adminRouter = express.Router()
 
@@ -76,6 +76,49 @@ adminRouter.delete('/accessGroups/:id', async (req, res) => {
   if (!accessGroup) return res.status(404).send('Access group not found')
 
   await accessGroup.destroy()
+
+  return res.status(204).send()
+})
+
+adminRouter.get('/services', async (req, res) => {
+  const services = await Service.findAll()
+
+  return res.send(services)
+})
+
+interface NewServiceData {
+  name: string
+  description: string
+  model: string
+  usageLimit: number
+  courseId: string
+  prompt?: Message[]
+}
+
+adminRouter.post('/services', async (req, res) => {
+  const data = req.body as NewServiceData
+  const { name, description, model, usageLimit, courseId, prompt } = data
+
+  const newService = await Service.create({
+    name,
+    description,
+    model,
+    usageLimit,
+    courseId,
+    prompt,
+  })
+
+  return res.status(201).send(newService)
+})
+
+adminRouter.delete('/services/:id', async (req, res) => {
+  const { id } = req.params
+
+  const service = await Service.findByPk(id)
+
+  if (!service) return res.status(404).send('Service not found')
+
+  await service.destroy()
 
   return res.status(204).send()
 })
