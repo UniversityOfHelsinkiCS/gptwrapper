@@ -11,9 +11,12 @@ export interface User {
   activeCourseIds: string[]
 }
 
-export interface ChatRequest extends Request {
-  body: RequestBody
+export interface RequestWithUser extends Request {
   user: User
+}
+
+export interface ChatRequest extends RequestWithUser {
+  body: RequestBody
 }
 
 export type APIError = typeof OpenAI.APIError

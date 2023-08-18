@@ -1,12 +1,12 @@
 import express from 'express'
 
-import { ChatRequest } from '../types'
+import { RequestWithUser } from '../types'
 import { ServiceAccessGroup } from '../db/models'
 
 const adminRouter = express.Router()
 
 adminRouter.use((req, _, next) => {
-  const request = req as ChatRequest
+  const request = req as RequestWithUser
   const { user } = request
 
   if (!user.isAdmin) throw new Error('Unauthorized')
