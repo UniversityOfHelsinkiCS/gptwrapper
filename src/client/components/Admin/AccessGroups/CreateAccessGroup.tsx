@@ -17,8 +17,8 @@ import {
   DEFAULT_MODEL,
   DEFAULT_TOKEN_LIMIT,
   DEFAULT_RESET_CRON,
-} from '../../../config'
-import { useCreateAccessGroupMutation } from '../../hooks/useAccessGroupMutation'
+} from '../../../../config'
+import { useCreateAccessGroupMutation } from '../../../hooks/useAccessGroupMutation'
 
 type Props = {
   setFormOpen: React.Dispatch<React.SetStateAction<boolean>>

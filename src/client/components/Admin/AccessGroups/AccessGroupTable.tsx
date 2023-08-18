@@ -15,9 +15,9 @@ import {
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 
-import { AccessGroup } from '../../types'
-import useAccessGroups from '../../hooks/useAccessGroups'
-import { useDeleteAccessGroupMutation } from '../../hooks/useAccessGroupMutation'
+import { AccessGroup } from '../../../types'
+import useAccessGroups from '../../../hooks/useAccessGroups'
+import { useDeleteAccessGroupMutation } from '../../../hooks/useAccessGroupMutation'
 import EditAccessGroup from './EditAccessGroup'
 
 type Props = {

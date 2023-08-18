@@ -12,9 +12,9 @@ import {
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 
-import { validModels } from '../../../config'
-import { AccessGroup } from '../../types'
-import { useEditAccessGroupMutation } from '../../hooks/useAccessGroupMutation'
+import { validModels } from '../../../../config'
+import { AccessGroup } from '../../../types'
+import { useEditAccessGroupMutation } from '../../../hooks/useAccessGroupMutation'
 
 type Props = {
   accessGroup: AccessGroup | undefined
