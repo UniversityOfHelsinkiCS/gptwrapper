@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { RequestWithUser, Message } from '../types'
-import { ServiceAccessGroup, Service } from '../db/models'
+import { ServiceAccessGroup, Service, UserServiceUsage } from '../db/models'
 
 const adminRouter = express.Router()
 
@@ -147,6 +147,10 @@ adminRouter.delete('/services/:id', async (req, res) => {
   const service = await Service.findByPk(id)
 
   if (!service) return res.status(404).send('Service not found')
+
+  await UserServiceUsage.destroy({
+    where: { serviceId: id },
+  })
 
   await service.destroy()
 
