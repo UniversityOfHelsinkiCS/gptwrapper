@@ -6,6 +6,7 @@ import userMiddleware from '../middleware/user'
 import accessLogger from '../middleware/access'
 import openaiRouter from './openai'
 import userRouter from './user'
+import serviceRouter from './service'
 import emailRouter from './email'
 import adminRouter from './admin'
 
@@ -23,6 +24,7 @@ router.get('/ping', (_, res) => res.send('pong'))
 
 router.use('/ai', openaiRouter)
 router.use('/users', userRouter)
+router.use('/services', serviceRouter)
 router.use('/email', emailRouter)
 router.use('/admin', adminRouter)
 
