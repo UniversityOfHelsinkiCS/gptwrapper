@@ -17,7 +17,7 @@ const PromptSelector = ({
 }: {
   prompts: Prompt[]
   activePrompt: string
-  setActivePrompt: React.Dispatch<React.SetStateAction<string>>
+  setActivePrompt: (promptId: string) => void
 }) => (
   <Box mb={2}>
     <FormControl sx={{ width: '33%' }}>
@@ -31,7 +31,7 @@ const PromptSelector = ({
       >
         {prompts.map((prompt) => (
           <MenuItem key={prompt.id} value={prompt.id}>
-            {prompt.systemMessage}
+            {prompt.systemMessage.slice(0, 20)}
           </MenuItem>
         ))}
       </Select>

@@ -4,7 +4,7 @@ import { Box, Paper } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useParams } from 'react-router-dom'
 
-import { Message } from '../../types'
+import { Message, Prompt } from '../../types'
 import { getCompletionStream } from './util'
 import useCourseService from '../../hooks/useCourseService'
 import Banner from '../Banner'
@@ -69,6 +69,17 @@ const Chat = () => {
     setSystem('')
     setMessage('')
     setCompletion('')
+    setActivePrompt('')
+  }
+
+  const handleChangePrompt = (promptId: string) => {
+    const { systemMessage, messages: promptMessages } = service?.prompts.find(
+      ({ id }) => id === promptId
+    ) as Prompt
+
+    setSystem(systemMessage)
+    setMessages(promptMessages)
+    setActivePrompt(promptId)
   }
 
   return (
@@ -91,7 +102,7 @@ const Chat = () => {
           <PromptSelector
             prompts={service.prompts}
             activePrompt={activePrompt}
-            setActivePrompt={setActivePrompt}
+            setActivePrompt={handleChangePrompt}
           />
         )}
         <SystemMessage
