@@ -60,6 +60,6 @@
     "description": "Kuvaus",
     "courseDescriptionInfo": "Kurssin kuvaus",
     "courseId": "Kurssin ID",
-    "courseIdInfo": "Sisun opintojakson (course unit realisation) ID"
+    "courseIdInfo": "Kurssin ID (Course Unit Realisation)"
   }
 }

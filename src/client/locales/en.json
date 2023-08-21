@@ -60,6 +60,6 @@
     "description": "Description",
     "courseDescriptionInfo": "Description for the course",
     "courseId": "Course ID",
-    "courseIdInfo": "Sisu course unit realisation ID"
+    "courseIdInfo": "Course ID (Course Unit Realisation)"
   }
 }
