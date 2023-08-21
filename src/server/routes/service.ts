@@ -9,6 +9,7 @@ serviceRouter.get('/:courseId', async (req, res) => {
 
   const service = await Service.findOne({
     where: { courseId },
+    include: 'prompts',
   })
 
   return res.send(service)

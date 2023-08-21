@@ -13,7 +13,7 @@ class Prompt extends Model<
   InferAttributes<Prompt>,
   InferCreationAttributes<Prompt>
 > {
-  declare id: string
+  declare id: CreationOptional<string>
 
   declare serviceId: string
 
@@ -25,9 +25,10 @@ class Prompt extends Model<
 Prompt.init(
   {
     id: {
-      type: DataTypes.UUID,
+      type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
     },
     serviceId: {
       type: DataTypes.STRING,

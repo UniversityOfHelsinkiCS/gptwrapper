@@ -5,9 +5,10 @@ import { Migration } from '../connection'
 export const up: Migration = ({ context: queryInterface }) =>
   queryInterface.createTable('prompts', {
     id: {
-      type: DataTypes.UUID,
+      type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
     },
     service_id: {
       type: DataTypes.STRING,

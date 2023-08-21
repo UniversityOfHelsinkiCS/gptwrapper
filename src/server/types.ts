@@ -59,3 +59,10 @@ export type Enrollment = {
     }
   }
 }
+
+export type Prompt = {
+  id: string
+  serviceId: string
+  systemMessage: string
+  messages: Message[]
+}
