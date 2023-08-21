@@ -26,7 +26,6 @@ export interface Service {
   usageLimit: number
   resetCron?: string
   courseId?: string
-  prompt: Message[]
 }
 
 export interface AccessGroup {

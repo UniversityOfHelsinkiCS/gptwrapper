@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { RequestWithUser, Message } from '../types'
+import { RequestWithUser } from '../types'
 import { ServiceAccessGroup, Service, UserServiceUsage } from '../db/models'
 
 const adminRouter = express.Router()
@@ -92,12 +92,11 @@ interface NewServiceData {
   model: string
   usageLimit: number
   courseId: string
-  prompt?: Message[]
 }
 
 adminRouter.post('/services', async (req, res) => {
   const data = req.body as NewServiceData
-  const { name, description, model, usageLimit, courseId, prompt } = data
+  const { name, description, model, usageLimit, courseId } = data
 
   const newService = await Service.create({
     name,
@@ -105,7 +104,6 @@ adminRouter.post('/services', async (req, res) => {
     model,
     usageLimit,
     courseId,
-    prompt,
   })
 
   return res.status(201).send(newService)
@@ -117,13 +115,12 @@ interface UpdatedServiceData {
   model: string
   usageLimit: number
   courseId: string
-  prompt: Message[]
 }
 
 adminRouter.put('/services/:id', async (req, res) => {
   const { id } = req.params
   const data = req.body as UpdatedServiceData
-  const { name, description, model, usageLimit, courseId, prompt } = data
+  const { name, description, model, usageLimit, courseId } = data
 
   const service = await Service.findByPk(id)
 
@@ -134,7 +131,6 @@ adminRouter.put('/services/:id', async (req, res) => {
   service.model = model
   service.usageLimit = usageLimit
   service.courseId = courseId
-  service.prompt = prompt
 
   await service.save()
 

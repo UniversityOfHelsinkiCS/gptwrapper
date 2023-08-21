@@ -51,7 +51,6 @@ const EditService = forwardRef(({ service, setFormOpen }: Props, ref) => {
         model,
         usageLimit,
         courseId,
-        prompt: [],
       })
 
       setFormOpen(false)

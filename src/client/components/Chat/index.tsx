@@ -16,25 +16,14 @@ import Email from './Email'
 const Chat = () => {
   const { courseId } = useParams()
 
-  const [prompt, setPrompt] = useState<Message[]>([])
   const [system, setSystem] = useState('')
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const [completion, setCompletion] = useState('')
-  const [showSystem, setShowSystem] = useState(true)
 
   const { service, isLoading } = useCourseService(courseId)
 
   if (isLoading) return null
-
-  if (service?.prompt?.length && messages.length === 0) {
-    const [systemMessage, ...otherMessages] = service.prompt
-
-    setSystem(systemMessage?.content || '')
-    setShowSystem(!systemMessage?.content)
-    setMessages(otherMessages)
-    setPrompt(service.prompt)
-  }
 
   const handleSend = async () => {
     const newMessage: Message = { role: 'user', content: message }
@@ -72,10 +61,8 @@ const Chat = () => {
   }
 
   const handleReset = () => {
-    const [systemMessage, ...otherMessages] = prompt
-
-    setMessages(otherMessages)
-    setSystem(systemMessage?.content || '')
+    setMessages([])
+    setSystem('')
     setMessage('')
     setCompletion('')
   }
@@ -96,13 +83,11 @@ const Chat = () => {
           mt: 5,
         }}
       >
-        {showSystem && (
-          <SystemMessage
-            system={system}
-            setSystem={setSystem}
-            disabled={messages.length > 0}
-          />
-        )}
+        <SystemMessage
+          system={system}
+          setSystem={setSystem}
+          disabled={messages.length > 0}
+        />
         <Conversation messages={messages} completion={completion} />
         <SendMessage
           message={message}
@@ -111,9 +96,7 @@ const Chat = () => {
           handleSend={handleSend}
           disabled={message.length === 0 || completion !== ''}
           resetDisabled={
-            messages.length === (showSystem ? 0 : prompt.length - 1) &&
-            (!showSystem || system.length === 0) &&
-            message.length === 0
+            messages.length === 0 && system.length === 0 && message.length === 0
           }
         />
         <Email

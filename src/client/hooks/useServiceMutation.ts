@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 
 import { PUBLIC_URL } from '../../config'
-import { Message } from '../types'
 import queryClient from '../util/queryClient'
 import { queryKey } from './useServices'
 
@@ -11,7 +10,6 @@ interface NewServiceData {
   model: string
   usageLimit: number
   courseId: string
-  prompt: Message[]
 }
 
 export const useCreateServiceMutation = () => {
@@ -44,7 +42,6 @@ interface UpdatedServiceData {
   model: string
   usageLimit: number
   courseId?: string
-  prompt: Message[]
 }
 
 export const useEditServiceMutation = () => {

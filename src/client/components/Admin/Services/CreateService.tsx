@@ -41,7 +41,6 @@ const CreateService = forwardRef(({ setFormOpen }: Props, ref) => {
         model,
         usageLimit,
         courseId,
-        prompt: [],
       })
 
       setFormOpen(false)
