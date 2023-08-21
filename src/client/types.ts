@@ -18,6 +18,13 @@ export interface User {
   hasIamAccess?: boolean
 }
 
+export type Prompt = {
+  id: string
+  serviceId: string
+  systemMessage: string
+  messages: Message[]
+}
+
 export interface Service {
   id: string
   name: string
@@ -26,6 +33,7 @@ export interface Service {
   usageLimit: number
   resetCron?: string
   courseId?: string
+  prompts: Prompt[]
 }
 
 export interface AccessGroup {

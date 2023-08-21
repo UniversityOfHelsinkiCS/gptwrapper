@@ -8,6 +8,7 @@ import { Message } from '../../types'
 import { getCompletionStream } from './util'
 import useCourseService from '../../hooks/useCourseService'
 import Banner from '../Banner'
+import PromptSelector from './PromptSelector'
 import SystemMessage from './SystemMessage'
 import Conversation from './Conversation'
 import SendMessage from './SendMessage'
@@ -16,6 +17,7 @@ import Email from './Email'
 const Chat = () => {
   const { courseId } = useParams()
 
+  const [activePrompt, setActivePrompt] = useState('')
   const [system, setSystem] = useState('')
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
@@ -24,6 +26,8 @@ const Chat = () => {
   const { service, isLoading } = useCourseService(courseId)
 
   if (isLoading) return null
+
+  const hasPrompts = service && service.prompts.length > 0
 
   const handleSend = async () => {
     const newMessage: Message = { role: 'user', content: message }
@@ -83,6 +87,13 @@ const Chat = () => {
           mt: 5,
         }}
       >
+        {hasPrompts && (
+          <PromptSelector
+            prompts={service.prompts}
+            activePrompt={activePrompt}
+            setActivePrompt={setActivePrompt}
+          />
+        )}
         <SystemMessage
           system={system}
           setSystem={setSystem}
