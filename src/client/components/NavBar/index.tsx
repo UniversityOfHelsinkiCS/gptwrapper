@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import {
   AppBar,
   Toolbar,
@@ -22,15 +22,19 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import hyLogo from '../../assets/hy_logo.svg'
 import styles from './styles'
 
-const hasAccess = (
-  user: User | null | undefined,
-  courseId: string | undefined
-) => {
+const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
+  if (user.isAdmin) return true
   if (courseId && !user.activeCourseIds.includes(courseId)) return false
   if (!courseId && !user.hasIamAccess) return false
 
   return true
+}
+
+const getRedirect = (user: User | null | undefined) => {
+  if (!user) return '/noaccess'
+  if (user.hasIamAccess) return '/'
+  return `${user.activeCourseIds[0] || '/noaccess'}`
 }
 
 const NavBar = () => {
@@ -58,12 +62,8 @@ const NavBar = () => {
   if (isLoading) return null
 
   if (location.pathname !== '/noaccess' && !hasAccess(user, courseId)) {
-    if (user?.hasIamAccess) {
-      window.location.href = window.location.origin
-      return null
-    }
-
-    return <Navigate to="/noaccess" />
+    window.location.href = getRedirect(user)
+    return null
   }
 
   return (
