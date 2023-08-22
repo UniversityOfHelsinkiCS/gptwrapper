@@ -80,12 +80,6 @@ adminRouter.delete('/accessGroups/:id', async (req, res) => {
   return res.status(204).send()
 })
 
-adminRouter.get('/services', async (req, res) => {
-  const services = await Service.findAll()
-
-  return res.send(services)
-})
-
 interface NewServiceData {
   name: string
   description: string
