@@ -11,7 +11,16 @@ interface NewPromptData {
   messages: Message[]
 }
 
-// Add access check here
+promptRouter.get('/:serviceId', async (req, res) => {
+  const { serviceId } = req.params
+
+  const prompts = await Prompt.findAll({
+    where: { serviceId },
+  })
+
+  return res.send(prompts)
+})
+
 promptRouter.post('/', async (req, res) => {
   const data = req.body as NewPromptData
 
@@ -21,3 +30,15 @@ promptRouter.post('/', async (req, res) => {
 })
 
 export default promptRouter
+
+promptRouter.delete('/:id', async (req, res) => {
+  const { id } = req.params
+
+  const prompt = await Prompt.findByPk(id)
+
+  if (!prompt) return res.status(404).send('Prompt not found')
+
+  await prompt.destroy()
+
+  return res.status(204).send()
+})

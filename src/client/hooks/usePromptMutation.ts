@@ -2,6 +2,8 @@ import { useMutation } from '@tanstack/react-query'
 
 import { Message } from '../types'
 import { PUBLIC_URL } from '../../config'
+import queryClient from '../util/queryClient'
+import { queryKey } from './usePrompts'
 
 interface NewPromptData {
   serviceId: string
@@ -22,7 +24,31 @@ export const useCreatePromptMutation = () => {
     return prompt
   }
 
-  const mutation = useMutation(mutationFn)
+  const mutation = useMutation(mutationFn, {
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey,
+      }),
+  })
+
+  return mutation
+}
+
+export const useDeletePromptMutation = () => {
+  const mutationFn = async (id: string) => {
+    const res = await fetch(`${PUBLIC_URL}/api/prompts/${id}`, {
+      method: 'DELETE',
+    })
+
+    return res
+  }
+
+  const mutation = useMutation(mutationFn, {
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey,
+      }),
+  })
 
   return mutation
 }

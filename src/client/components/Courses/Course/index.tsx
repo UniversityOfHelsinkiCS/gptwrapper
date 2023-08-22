@@ -2,11 +2,16 @@ import React, { useState } from 'react'
 import { Box, Paper, Typography, TextField, Button } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
+import { useParams } from 'react-router-dom'
 
 import { Set, Message as MessageType } from '../../../types'
 import SystemMessage from '../../Chat/SystemMessage'
 import Conversation from '../../Chat/Conversation'
-import { useCreatePromptMutation } from '../../../hooks/usePromptMutation'
+import usePrompts from '../../../hooks/usePrompts'
+import {
+  useCreatePromptMutation,
+  useDeletePromptMutation,
+} from '../../../hooks/usePromptMutation'
 
 const Message = ({
   message,
@@ -58,9 +63,11 @@ const Course = () => {
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<MessageType[]>([])
 
+  const { id } = useParams()
   const { t } = useTranslation()
 
-  const mutation = useCreatePromptMutation()
+  const createMutation = useCreatePromptMutation()
+  const deleteMutation = useDeletePromptMutation()
 
   const handleAdd = () => {
     setMessages([...messages, { content: message, role: getRole(messages) }])
@@ -75,13 +82,30 @@ const Course = () => {
 
   const handleSave = () => {
     try {
-      mutation.mutate({ serviceId: 'test', systemMessage: system, messages })
+      createMutation.mutate({
+        serviceId: 'test',
+        systemMessage: system,
+        messages,
+      })
       enqueueSnackbar('Prompt created', { variant: 'success' })
       handleReset()
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     }
   }
+
+  const handleDelete = (promptId: string) => {
+    try {
+      deleteMutation.mutate(promptId)
+      enqueueSnackbar('Prompt deleted', { variant: 'success' })
+    } catch (error: any) {
+      enqueueSnackbar(error.message, { variant: 'error' })
+    }
+  }
+
+  const { prompts, isLoading } = usePrompts(id as string)
+
+  if (isLoading) return null
 
   return (
     <Box
@@ -98,6 +122,11 @@ const Course = () => {
           mt: 5,
         }}
       >
+        <Box mb={4}>
+          <Typography variant="h5" display="inline">
+            {t('common:newPrompt')}
+          </Typography>
+        </Box>
         <SystemMessage system={system} setSystem={setSystem} disabled={false} />
         <Conversation messages={messages} completion="" />
         <Message
@@ -111,6 +140,26 @@ const Course = () => {
           {t('common:save')}
         </Button>
       </Paper>
+
+      {prompts.map((prompt) => (
+        <Box key={prompt.id} pt="1%">
+          <Paper
+            variant="outlined"
+            sx={{
+              padding: '1%',
+              display: 'flex',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Typography variant="h6" display="inline">
+              {prompt.systemMessage}
+            </Typography>
+            <Button onClick={() => handleDelete(prompt.id)} color="error">
+              {t('common:delete')}
+            </Button>
+          </Paper>
+        </Box>
+      ))}
     </Box>
   )
 }
