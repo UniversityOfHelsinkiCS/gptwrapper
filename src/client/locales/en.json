@@ -8,7 +8,8 @@
     "delete": "Delete",
     "update": "Update",
     "cancel": "Cancel",
-    "create": "Create"
+    "create": "Create",
+    "courses": "Courses"
   },
   "info": {
     "title": "## Attention",

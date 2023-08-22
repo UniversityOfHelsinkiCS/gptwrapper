@@ -14,7 +14,11 @@ import {
   Popper,
   Typography,
 } from '@mui/material'
-import { Language, AdminPanelSettingsOutlined } from '@mui/icons-material'
+import {
+  Language,
+  AdminPanelSettingsOutlined,
+  BookmarksOutlined,
+} from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
 import { User } from '../../types'
@@ -78,11 +82,19 @@ const NavBar = () => {
           </Box>
           <Box>
             {user?.isAdmin && (
-              <Link to="/admin" style={{ textDecoration: 'none' }}>
-                <Button>
-                  <AdminPanelSettingsOutlined sx={styles.icon} /> {t('admin')}
-                </Button>
-              </Link>
+              <>
+                <Link to="/courses" style={{ textDecoration: 'none' }}>
+                  <Button>
+                    <BookmarksOutlined sx={styles.icon} /> {t('courses')}
+                  </Button>
+                </Link>
+
+                <Link to="/admin" style={{ textDecoration: 'none' }}>
+                  <Button>
+                    <AdminPanelSettingsOutlined sx={styles.icon} /> {t('admin')}
+                  </Button>
+                </Link>
+              </>
             )}
             <Button
               ref={anchorRef}
