@@ -12,7 +12,9 @@
     "courses": "Courses",
     "message": "Message",
     "addMessage": "Add message",
-    "save": "Save"
+    "save": "Save",
+    "newPrompt": "New prompt",
+    "toStudentView": "To student view"
   },
   "info": {
     "title": "## Attention",

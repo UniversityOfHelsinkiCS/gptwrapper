@@ -12,7 +12,9 @@
     "courses": "",
     "message": "",
     "addMessage": "",
-    "save": ""
+    "save": "",
+    "newPrompt": "",
+    "toStudentView": ""
   },
   "info": {
     "title": "",

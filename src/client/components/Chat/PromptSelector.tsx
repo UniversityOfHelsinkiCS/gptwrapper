@@ -31,7 +31,7 @@ const PromptSelector = ({
       >
         {prompts.map((prompt) => (
           <MenuItem key={prompt.id} value={prompt.id}>
-            {prompt.systemMessage.slice(0, 20)}
+            {prompt.systemMessage.slice(0, 50)}
           </MenuItem>
         ))}
       </Select>

@@ -12,7 +12,9 @@
     "courses": "Kurssit",
     "message": "Viesti",
     "addMessage": "Lisää viesti",
-    "save": "Tallenna"
+    "save": "Tallenna",
+    "newPrompt": "New prompt",
+    "toStudentView": "Opiskelijan näkymään"
   },
   "info": {
     "title": "## Huomio",

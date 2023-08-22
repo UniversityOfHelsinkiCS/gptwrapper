@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { Box, Paper, Typography, TextField, Button } from '@mui/material'
+import { OpenInNew } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 
 import { Set, Message as MessageType } from '../../../types'
 import SystemMessage from '../../Chat/SystemMessage'
@@ -115,6 +116,11 @@ const Course = () => {
         padding: '5%',
       }}
     >
+      <Box mb={-2}>
+        <Link to="/otm-f430e779-c133-42d9-a0a8-23f92c9cc69f">
+          {t('common:toStudentView')} <OpenInNew sx={{ mb: -1 }} />
+        </Link>
+      </Box>
       <Paper
         variant="outlined"
         sx={{
