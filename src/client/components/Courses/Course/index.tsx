@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
 import { Box, Paper, Typography, TextField, Button } from '@mui/material'
+import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 
 import { Set, Message as MessageType } from '../../../types'
 import SystemMessage from '../../Chat/SystemMessage'
 import Conversation from '../../Chat/Conversation'
+import { useCreatePromptMutation } from '../../../hooks/usePromptMutation'
 
 const Message = ({
   message,
@@ -36,9 +38,7 @@ const Message = ({
         />
       </Box>
 
-      <Button variant="contained" onClick={handleAdd}>
-        {t('common:addMessage')}
-      </Button>
+      <Button onClick={handleAdd}>{t('common:addMessage')}</Button>
       <Button sx={{ ml: 2 }} onClick={handleReset} disabled={resetDisabled}>
         {t('reset')}
       </Button>
@@ -58,6 +58,10 @@ const Course = () => {
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<MessageType[]>([])
 
+  const { t } = useTranslation()
+
+  const mutation = useCreatePromptMutation()
+
   const handleAdd = () => {
     setMessages([...messages, { content: message, role: getRole(messages) }])
     setMessage('')
@@ -67,6 +71,16 @@ const Course = () => {
     setMessages([])
     setSystem('')
     setMessage('')
+  }
+
+  const handleSave = () => {
+    try {
+      mutation.mutate({ serviceId: 'test', systemMessage: system, messages })
+      enqueueSnackbar('Prompt created', { variant: 'success' })
+      handleReset()
+    } catch (error: any) {
+      enqueueSnackbar(error.message, { variant: 'error' })
+    }
   }
 
   return (
@@ -93,6 +107,9 @@ const Course = () => {
           handleReset={handleReset}
           resetDisabled={false}
         />
+        <Button variant="contained" onClick={handleSave}>
+          {t('common:save')}
+        </Button>
       </Paper>
     </Box>
   )

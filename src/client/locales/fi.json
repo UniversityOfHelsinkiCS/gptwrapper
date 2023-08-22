@@ -11,7 +11,8 @@
     "create": "Luo",
     "courses": "Kurssit",
     "message": "Viesti",
-    "addMessage": "Lisää viesti"
+    "addMessage": "Lisää viesti",
+    "save": "Tallenna"
   },
   "info": {
     "title": "## Huomio",

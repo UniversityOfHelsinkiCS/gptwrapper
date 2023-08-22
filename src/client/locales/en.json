@@ -11,7 +11,8 @@
     "create": "Create",
     "courses": "Courses",
     "message": "Message",
-    "addMessage": "Add message"
+    "addMessage": "Add message",
+    "save": "Save"
   },
   "info": {
     "title": "## Attention",

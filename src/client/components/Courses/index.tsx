@@ -1,5 +1,6 @@
 import React from 'react'
-import { Box, Paper, Typography, Link } from '@mui/material'
+import { Link } from 'react-router-dom'
+import { Box, Paper, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 import { Service } from '../../types'
@@ -18,7 +19,7 @@ const Course = ({ course }: { course: Service }) => {
         }}
       >
         <Box mb={1} display="flex" justifyContent="space-between">
-          <Link href={`/courses/${id}`}>
+          <Link to={`/courses/${id}`}>
             <Typography variant="h6" display="inline">
               {name}
             </Typography>
