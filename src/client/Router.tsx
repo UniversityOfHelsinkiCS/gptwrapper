@@ -10,6 +10,7 @@ import { PUBLIC_URL } from '../config'
 import App from './App'
 import Admin from './components/Admin'
 import Chat from './components/Chat'
+import Courses from './components/Courses'
 import NoAccess from './components/NoAccess'
 
 const router = createBrowserRouter(
@@ -17,6 +18,7 @@ const router = createBrowserRouter(
     <Route path="/" element={<App />}>
       <Route index element={<Chat />} />
       <Route path="/:courseId" element={<Chat />} />
+      <Route path="/courses" element={<Courses />} />
       <Route path="/admin" element={<Admin />} />
       <Route path="/noaccess" element={<NoAccess />} />
     </Route>
