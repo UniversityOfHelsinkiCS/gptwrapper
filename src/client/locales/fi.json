@@ -9,7 +9,9 @@
     "update": "Päivitä",
     "cancel": "Peruuta",
     "create": "Luo",
-    "courses": "Kurssit"
+    "courses": "Kurssit",
+    "message": "Viesti",
+    "addMessage": "Lisää viesti"
   },
   "info": {
     "title": "## Huomio",

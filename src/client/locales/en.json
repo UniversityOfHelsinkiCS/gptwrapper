@@ -9,7 +9,9 @@
     "update": "Update",
     "cancel": "Cancel",
     "create": "Create",
-    "courses": "Courses"
+    "courses": "Courses",
+    "message": "Message",
+    "addMessage": "Add message"
   },
   "info": {
     "title": "## Attention",
