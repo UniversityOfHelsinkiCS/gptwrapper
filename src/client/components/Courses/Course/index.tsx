@@ -117,7 +117,7 @@ const Course = () => {
       }}
     >
       <Box mb={-2}>
-        <Link to="/otm-f430e779-c133-42d9-a0a8-23f92c9cc69f">
+        <Link to="/hy-opt-cur-2324-3a70433a-d793-46a4-a43e-a42968419133">
           {t('common:toStudentView')} <OpenInNew sx={{ mb: -1 }} />
         </Link>
       </Box>
