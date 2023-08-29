@@ -19,6 +19,8 @@ openaiRouter.post('/stream', async (req, res) => {
   const { id, options, courseId } = request.body
   const { user } = request
 
+  if (courseId) logger.info(`Completion stream for ${courseId}`)
+
   if (!user.id) return res.status(401).send('Unauthorized')
   if (!id) return res.status(400).send('Missing id')
   if (!options) return res.status(400).send('Missing options')
@@ -39,8 +41,10 @@ openaiRouter.post('/stream', async (req, res) => {
   let tokenCount = calculateUsage(options, encoding)
 
   const contextLimit = getModelContextLimit(model)
-  if (tokenCount > contextLimit)
+  if (tokenCount > contextLimit) {
+    logger.info('Maximum context reached')
     return res.status(403).send('Model maximum context reached')
+  }
 
   const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
 

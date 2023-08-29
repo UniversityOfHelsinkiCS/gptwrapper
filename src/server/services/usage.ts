@@ -47,7 +47,7 @@ export const checkUsage = async (
     : await getIamUsageLimit(service, user)
 
   if (!user.isAdmin && serviceUsage.usageCount >= usageLimit) {
-    logger.info('Usage limit reached', { user, service, serviceUsage })
+    logger.info('Usage limit reached')
 
     return false
   }
