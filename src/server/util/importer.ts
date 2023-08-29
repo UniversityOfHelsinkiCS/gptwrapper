@@ -30,4 +30,11 @@ export const getEnrollments = async (userId: string): Promise<Enrollment[]> => {
   return enrollments
 }
 
-export default getEnrollments
+export const getTeachers = async (courseId: string): Promise<string[]> => {
+  const url = `${IMPORTER_URL}/kliksutin/teachers/${courseId}`
+
+  const response = await fetch(`${url}?token=${API_TOKEN}`)
+  const teachers: string[] = (await response.json()) || []
+
+  return teachers
+}
