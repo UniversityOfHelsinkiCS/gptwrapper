@@ -1,7 +1,11 @@
 import express from 'express'
 
 import { ChatRequest } from '../types'
-import { checkIamAccess, checkCourseAccess } from '../services/access'
+import {
+  checkIamAccess,
+  checkCourseAccess,
+  getOwnCourses,
+} from '../services/access'
 import { User } from '../db/models'
 
 const userRouter = express.Router()
@@ -15,13 +19,17 @@ userRouter.get('/login', async (req, res) => {
 
   const hasIamAccess = await checkIamAccess(iamGroups)
 
-  const userCourses = await checkCourseAccess(id)
-  const hasCourseAccess = userCourses.length > 0
+  const enrolledCourses = await checkCourseAccess(id)
+  const teacherCourses = await getOwnCourses(id, user.isAdmin)
+
+  const courses = enrolledCourses.concat(teacherCourses)
+  const hasCourseAccess = courses.length > 0
 
   if (!isAdmin && !hasIamAccess && !hasCourseAccess)
     return res.status(401).send('Unauthorized')
 
-  user.activeCourseIds = userCourses
+  user.ownCourses = teacherCourses
+  user.activeCourseIds = courses
   await User.upsert(user)
 
   return res.send({

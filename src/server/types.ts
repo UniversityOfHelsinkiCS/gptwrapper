@@ -9,6 +9,7 @@ export interface User {
   email?: string
   isAdmin: boolean
   activeCourseIds: string[]
+  ownCourses: string[]
 }
 
 export interface RequestWithUser extends Request {

@@ -6,7 +6,6 @@ import { Service } from '../types'
 export const queryKey = ['services']
 
 const useUserCourses = (userId?: string) => {
-  console.log(userId)
   const queryFn = async (): Promise<Service[]> => {
     const res = await fetch(`${PUBLIC_URL}/api/courses/user/${userId}`)
 

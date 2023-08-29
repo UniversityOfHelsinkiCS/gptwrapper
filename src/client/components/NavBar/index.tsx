@@ -81,20 +81,19 @@ const NavBar = () => {
             </Box>
           </Box>
           <Box>
+            {user.ownCourses.length > 0 && (
+              <Link to="/courses" style={{ textDecoration: 'none' }}>
+                <Button>
+                  <BookmarksOutlined sx={styles.icon} /> {t('courses')}
+                </Button>
+              </Link>
+            )}
             {user?.isAdmin && (
-              <>
-                <Link to="/courses" style={{ textDecoration: 'none' }}>
-                  <Button>
-                    <BookmarksOutlined sx={styles.icon} /> {t('courses')}
-                  </Button>
-                </Link>
-
-                <Link to="/admin" style={{ textDecoration: 'none' }}>
-                  <Button>
-                    <AdminPanelSettingsOutlined sx={styles.icon} /> {t('admin')}
-                  </Button>
-                </Link>
-              </>
+              <Link to="/admin" style={{ textDecoration: 'none' }}>
+                <Button>
+                  <AdminPanelSettingsOutlined sx={styles.icon} /> {t('admin')}
+                </Button>
+              </Link>
             )}
             <Button
               ref={anchorRef}
