@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom'
 
 import { Message, Prompt } from '../../types'
 import { getCompletionStream } from './util'
-import useCourseService from '../../hooks/useCourseService'
+import useCourse from '../../hooks/useCourse'
 import Banner from '../Banner'
 import PromptSelector from './PromptSelector'
 import SystemMessage from './SystemMessage'
@@ -23,7 +23,7 @@ const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([])
   const [completion, setCompletion] = useState('')
 
-  const { service, isLoading } = useCourseService(courseId)
+  const { service, isLoading } = useCourse(courseId)
 
   if (isLoading) return null
 

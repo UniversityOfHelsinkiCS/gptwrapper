@@ -19,7 +19,7 @@ const getActiveEnrollments = (enrollments: Enrollment[]) => {
   return filteredEnrollments
 }
 
-const getEnrollments = async (userId: string): Promise<Enrollment[]> => {
+export const getEnrollments = async (userId: string): Promise<Enrollment[]> => {
   const url = `${IMPORTER_URL}/kliksutin/enrollments/${userId}`
 
   const response = await fetch(`${url}?token=${API_TOKEN}`)

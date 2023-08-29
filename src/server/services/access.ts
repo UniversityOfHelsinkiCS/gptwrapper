@@ -1,7 +1,7 @@
 import { Op } from 'sequelize'
 
 import { ServiceAccessGroup, Service } from '../db/models'
-import getEnrollments from '../util/importer'
+import { getEnrollments } from '../util/importer'
 
 export const checkIamAccess = async (iamGroups: string[]) => {
   const accessGroups = await ServiceAccessGroup.findAll({

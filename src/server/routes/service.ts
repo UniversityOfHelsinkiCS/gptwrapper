@@ -10,17 +10,6 @@ serviceRouter.get('/', async (_, res) => {
   return res.send(services)
 })
 
-serviceRouter.get('/course/:courseId', async (req, res) => {
-  const { courseId } = req.params
-
-  const service = await Service.findOne({
-    where: { courseId },
-    include: 'prompts',
-  })
-
-  return res.send(service)
-})
-
 serviceRouter.get('/:id', async (req, res) => {
   const { id } = req.params
 

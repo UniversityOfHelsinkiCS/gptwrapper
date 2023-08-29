@@ -4,7 +4,7 @@ import { Box, Paper, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 import { Service } from '../../types'
-import useServices from '../../hooks/useServices'
+import useCourses from '../../hooks/useCourses'
 
 const Course = ({ course }: { course: Service }) => {
   const { id, name, description, courseId } = course
@@ -39,9 +39,7 @@ const Course = ({ course }: { course: Service }) => {
 const Courses = () => {
   const { t } = useTranslation()
 
-  // Temporary
-  const { services, isLoading } = useServices()
-  const courses = services.filter(({ courseId }) => courseId)
+  const { courses, isLoading } = useCourses()
 
   if (isLoading) return null
 
