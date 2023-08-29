@@ -91,9 +91,9 @@ const CreateAccessGroup = forwardRef(({ setFormOpen }: Props, ref) => {
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
                 >
-                  {validModels.map((validModel) => (
-                    <MenuItem key={validModel} value={validModel}>
-                      {validModel}
+                  {validModels.map(({ name }) => (
+                    <MenuItem key={name} value={name}>
+                      {name}
                     </MenuItem>
                   ))}
                 </Select>

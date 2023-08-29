@@ -10,8 +10,23 @@ export const DEFAULT_TOKEN_LIMIT =
   Number(process.env.DEFAULT_TOKEN_LIMIT) || 50_000
 
 export const DEFAULT_MODEL = process.env.DEFAUL_MODEL || 'gpt-3.5-turbo'
+export const DEFAUL_CONTEXT_LIMIT =
+  Number(process.env.DEFAUL_CONTEXT_LIMIT) || 4_096
 
 export const DEFAULT_RESET_CRON =
   process.env.DEFAULT_RESET_CRON || '0 0 1 */3 *'
 
-export const validModels = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4']
+export const validModels = [
+  {
+    name: 'gpt-3.5-turbo',
+    context: 4_096,
+  },
+  {
+    name: 'gpt-3.5-turbo-16k',
+    context: 16_384,
+  },
+  {
+    name: 'gpt-4',
+    context: 8_192,
+  },
+]

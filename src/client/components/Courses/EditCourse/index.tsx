@@ -84,7 +84,7 @@ const Course = () => {
   const handleSave = () => {
     try {
       createMutation.mutate({
-        serviceId: 'test',
+        serviceId: id as string,
         systemMessage: system,
         messages,
       })

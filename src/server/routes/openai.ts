@@ -8,7 +8,7 @@ import { isError } from '../util/parser'
 import { calculateUsage, incrementUsage, checkUsage } from '../services/usage'
 import hashData from '../util/hash'
 import { completionStream } from '../util/openai'
-import { getMessageContext, getModel } from '../util/util'
+import { getMessageContext, getModel, getModelContextLimit } from '../util/util'
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
 
@@ -38,8 +38,8 @@ openaiRouter.post('/stream', async (req, res) => {
   const encoding = getEncoding(model)
   let tokenCount = calculateUsage(options, encoding)
 
-  // Model has maximum context of 16k tokens
-  if (tokenCount > 16_000)
+  const contextLimit = getModelContextLimit(model)
+  if (tokenCount > contextLimit)
     return res.status(403).send('Model maximum context reached')
 
   const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))

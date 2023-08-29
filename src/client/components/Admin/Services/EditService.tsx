@@ -137,9 +137,9 @@ const EditService = forwardRef(({ service, setFormOpen }: Props, ref) => {
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
                 >
-                  {validModels.map((validModel) => (
-                    <MenuItem key={validModel} value={validModel}>
-                      {validModel}
+                  {validModels.map(({ name: modelName }) => (
+                    <MenuItem key={modelName} value={modelName}>
+                      {modelName}
                     </MenuItem>
                   ))}
                 </Select>

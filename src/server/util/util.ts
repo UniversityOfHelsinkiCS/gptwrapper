@@ -1,7 +1,7 @@
 import { Op } from 'sequelize'
 
 import { Message } from '../types'
-import { DEFAULT_MODEL } from '../../config'
+import { DEFAULT_MODEL, DEFAUL_CONTEXT_LIMIT, validModels } from '../../config'
 import { ServiceAccessGroup, Service } from '../db/models'
 
 /**
@@ -56,4 +56,12 @@ export const getModel = async (
   if (models.includes('gpt-3.5-turbo')) return 'gpt-3.5-turbo'
 
   return DEFAULT_MODEL
+}
+
+export const getModelContextLimit = (modelName: string) => {
+  const model = validModels.find(({ name }) => name === modelName)
+
+  if (!model) return DEFAUL_CONTEXT_LIMIT
+
+  return model.context
 }
