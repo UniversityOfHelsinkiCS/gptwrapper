@@ -10,13 +10,23 @@ serviceRouter.get('/', async (_, res) => {
   return res.send(services)
 })
 
-serviceRouter.get('/:courseId', async (req, res) => {
+serviceRouter.get('/course/:courseId', async (req, res) => {
   const { courseId } = req.params
 
   const service = await Service.findOne({
     where: { courseId },
     include: 'prompts',
   })
+
+  return res.send(service)
+})
+
+serviceRouter.get('/:id', async (req, res) => {
+  const { id } = req.params
+
+  const service = await Service.findByPk(id)
+
+  if (!service) return res.status(404).send('Service not found')
 
   return res.send(service)
 })
