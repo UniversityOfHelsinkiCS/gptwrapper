@@ -4,7 +4,6 @@ import { Box, Paper, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 import { Service } from '../../types'
-import useCurrentUser from '../../hooks/useCurrentUser'
 import useUserCourses from '../../hooks/useUserCourses'
 
 const Course = ({ course }: { course: Service }) => {
@@ -40,10 +39,9 @@ const Course = ({ course }: { course: Service }) => {
 const Courses = () => {
   const { t } = useTranslation()
 
-  const { user } = useCurrentUser()
-  const { courses, isSuccess } = useUserCourses(user?.id)
+  const { courses, isLoading } = useUserCourses()
 
-  if (!isSuccess) return null
+  if (isLoading) return null
 
   return (
     <Box

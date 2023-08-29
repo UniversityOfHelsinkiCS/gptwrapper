@@ -5,9 +5,9 @@ import { Service } from '../types'
 
 export const queryKey = ['services']
 
-const useUserCourses = (userId?: string) => {
+const useUserCourses = () => {
   const queryFn = async (): Promise<Service[]> => {
-    const res = await fetch(`${PUBLIC_URL}/api/courses/user/${userId}`)
+    const res = await fetch(`${PUBLIC_URL}/api/courses/user`)
 
     const data = await res.json()
 
@@ -17,7 +17,6 @@ const useUserCourses = (userId?: string) => {
   const { data: courses, ...rest } = useQuery({
     queryKey,
     queryFn,
-    enabled: !!userId,
   })
 
   return { courses: courses || [], ...rest }
