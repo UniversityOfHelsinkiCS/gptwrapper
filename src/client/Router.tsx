@@ -11,7 +11,7 @@ import App from './App'
 import Admin from './components/Admin'
 import Chat from './components/Chat'
 import Courses from './components/Courses'
-import Course from './components/Courses/Course'
+import EditCourse from './components/Courses/EditCourse'
 import NoAccess from './components/NoAccess'
 
 const router = createBrowserRouter(
@@ -20,7 +20,7 @@ const router = createBrowserRouter(
       <Route index element={<Chat />} />
       <Route path="/:courseId" element={<Chat />} />
       <Route path="/courses" element={<Courses />} />
-      <Route path="/courses/:id" element={<Course />} />
+      <Route path="/courses/:id" element={<EditCourse />} />
       <Route path="/admin" element={<Admin />} />
       <Route path="/noaccess" element={<NoAccess />} />
     </Route>
