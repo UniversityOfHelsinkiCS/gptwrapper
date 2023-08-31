@@ -44,10 +44,12 @@ export interface AccessGroup {
   resetCron: string | null
 }
 
+export type ActivityPeriod = {
+  startDate: string
+  endDate: string
+}
+
 export interface Course extends Service {
-  activityPeriod?: {
-    startDate: string
-    endDate: string
-  }
+  activityPeriod?: ActivityPeriod
   prompts: Prompt[]
 }

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams, Link } from 'react-router-dom'
 
 import { Set, Message as MessageType } from '../../../types'
+import EditActivityPeriod from './EditActivityPeriod'
 import SystemMessage from '../../Chat/SystemMessage'
 import Conversation from '../../Chat/Conversation'
 import usePrompts from '../../../hooks/usePrompts'
@@ -106,9 +107,9 @@ const Course = () => {
   }
 
   const { prompts, isLoading } = usePrompts(id as string)
-  const { course, isLoading: serviceLoading } = useCourse(id as string, true)
+  const { course, isLoading: courseLoading } = useCourse(id as string, true)
 
-  if (isLoading || serviceLoading) return null
+  if (isLoading || courseLoading || !course) return null
 
   return (
     <Box
@@ -118,11 +119,12 @@ const Course = () => {
         padding: '5%',
       }}
     >
-      <Box mb={-2}>
+      <Box>
         <Link to={`/${course?.courseId}`}>
           {t('common:toStudentView')} <OpenInNew sx={{ mb: -1 }} />
         </Link>
       </Box>
+      <EditActivityPeriod course={course} />
       <Paper
         variant="outlined"
         sx={{

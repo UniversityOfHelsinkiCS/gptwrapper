@@ -6,6 +6,7 @@ import {
   DataTypes,
 } from 'sequelize'
 
+import { ActivityPeriod } from '../../types'
 import { sequelize } from '../connection'
 
 class Service extends Model<
@@ -25,6 +26,8 @@ class Service extends Model<
   declare resetCron: string | null
 
   declare courseId: string | null
+
+  declare activityPeriod: ActivityPeriod | null
 }
 
 Service.init(
@@ -61,6 +64,11 @@ Service.init(
     },
     courseId: {
       type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: null,
+    },
+    activityPeriod: {
+      type: DataTypes.JSON,
       allowNull: true,
       defaultValue: null,
     },

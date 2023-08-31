@@ -46,14 +46,16 @@ export interface Service {
 
 export type Role = 'system' | 'assistant' | 'user'
 
+export type ActivityPeriod = {
+  startDate: string
+  endDate: string
+}
+
 export type CourseUnitRealisation = {
   id: string
   name: object
   nameSpecifier: object
-  activityPeriod: {
-    startDate: string
-    endDate: string
-  }
+  activityPeriod: ActivityPeriod
 }
 
 export type Enrollment = {
