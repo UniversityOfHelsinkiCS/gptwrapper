@@ -45,7 +45,7 @@ export interface AccessGroup {
 }
 
 export interface Course extends Service {
-  activityPeriod: {
+  activityPeriod?: {
     startDate: string
     endDate: string
   }

@@ -41,20 +41,24 @@ courseRouter.get('/user', async (req, res) => {
 
 courseRouter.get('/:id', async (req, res) => {
   const { id } = req.params
+  const { useImporter } = req.query
 
   const service = await Service.findOne({
     where: { courseId: id },
     include: 'prompts',
   })
 
-  const course = await getCourse(id)
+  if (useImporter) {
+    const course = await getCourse(id)
+    if (!course) throw new Error('Course not found')
 
-  if (!course) throw new Error('Course not found')
+    return res.send({
+      ...service?.dataValues,
+      activityPeriod: course.activityPeriod,
+    })
+  }
 
-  return res.send({
-    ...service?.dataValues,
-    activityPeriod: course.activityPeriod,
-  })
+  return res.send(service)
 })
 
 export default courseRouter
