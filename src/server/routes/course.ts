@@ -1,9 +1,9 @@
 import express from 'express'
 import { Op } from 'sequelize'
 
+import { ActivityPeriod } from '../types'
 import { Service } from '../db/models'
 import { getOwnCourses } from '../services/access'
-import { getCourse } from '../util/importer'
 
 const courseRouter = express.Router()
 
@@ -41,22 +41,27 @@ courseRouter.get('/user', async (req, res) => {
 
 courseRouter.get('/:id', async (req, res) => {
   const { id } = req.params
-  const { useImporter } = req.query
 
   const service = await Service.findOne({
     where: { courseId: id },
     include: 'prompts',
   })
 
-  if (useImporter) {
-    const course = await getCourse(id)
-    if (!course) throw new Error('Course not found')
+  return res.send(service)
+})
 
-    return res.send({
-      ...service?.dataValues,
-      activityPeriod: course.activityPeriod,
-    })
-  }
+courseRouter.put('/:id', async (req, res) => {
+  const { id } = req.params
+  const { activityPeriod } = req.body as { activityPeriod: ActivityPeriod }
+
+  const service = await Service.findOne({
+    where: { courseId: id },
+  })
+
+  if (!service) throw new Error('Service not found')
+
+  service.activityPeriod = activityPeriod
+  service.save()
 
   return res.send(service)
 })

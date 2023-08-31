@@ -14,7 +14,10 @@
     "addMessage": "Add message",
     "save": "Save",
     "newPrompt": "New prompt",
-    "toStudentView": "To student view"
+    "toStudentView": "To student view",
+    "editActivityPeriod": "Edit activity period",
+    "opensAt": "Opens at",
+    "closesAt": "Closes at"
   },
   "info": {
     "title": "## Attention",

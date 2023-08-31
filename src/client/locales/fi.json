@@ -14,7 +14,10 @@
     "addMessage": "Lisää viesti",
     "save": "Tallenna",
     "newPrompt": "Uusi alustus",
-    "toStudentView": "Opiskelijan näkymään"
+    "toStudentView": "Opiskelijan näkymään",
+    "editActivityPeriod": "Muokkaa käynnissäoloaikaa",
+    "opensAt": "Avautuu",
+    "closesAt": "Sulkeutuu"
   },
   "info": {
     "title": "## Huomio",

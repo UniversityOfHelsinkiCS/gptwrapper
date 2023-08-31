@@ -107,7 +107,7 @@ const Course = () => {
   }
 
   const { prompts, isLoading } = usePrompts(id as string)
-  const { course, isLoading: courseLoading } = useCourse(id as string, true)
+  const { course, isLoading: courseLoading } = useCourse(id as string)
 
   if (isLoading || courseLoading || !course) return null
 

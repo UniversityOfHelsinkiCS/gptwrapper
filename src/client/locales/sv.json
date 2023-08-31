@@ -14,7 +14,10 @@
     "addMessage": "",
     "save": "",
     "newPrompt": "",
-    "toStudentView": ""
+    "toStudentView": "",
+    "editActivityPeriod": "",
+    "opensAt": "",
+    "closesAt": ""
   },
   "info": {
     "title": "",

@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { SnackbarProvider } from 'notistack'
 import { ThemeProvider } from '@mui/material/styles'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { fi } from 'date-fns/locale'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { Box } from '@mui/material'
 
@@ -15,7 +16,7 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
         <SnackbarProvider preventDuplicate>
           <Box minHeight="100vh" display="flex" flexDirection="column">
             <NavBar />

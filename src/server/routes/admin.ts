@@ -2,6 +2,7 @@ import express from 'express'
 
 import { RequestWithUser } from '../types'
 import { ServiceAccessGroup, Service, UserServiceUsage } from '../db/models'
+import { getCourse } from '../util/importer'
 
 const adminRouter = express.Router()
 
@@ -92,12 +93,16 @@ adminRouter.post('/services', async (req, res) => {
   const data = req.body as NewServiceData
   const { name, description, model, usageLimit, courseId } = data
 
+  const course = await getCourse(courseId)
+  if (!course) return res.status(404).send('Invalid course id')
+
   const newService = await Service.create({
     name,
     description,
     model,
     usageLimit,
     courseId,
+    activityPeriod: course.activityPeriod,
   })
 
   return res.status(201).send(newService)
