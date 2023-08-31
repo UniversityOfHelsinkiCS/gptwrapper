@@ -43,3 +43,11 @@ export interface AccessGroup {
   usageLimit: number | null
   resetCron: string | null
 }
+
+export interface Course extends Service {
+  activityPeriod: {
+    startDate: string
+    endDate: string
+  }
+  prompts: Prompt[]
+}

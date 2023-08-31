@@ -1,14 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { PUBLIC_URL } from '../../config'
-import { Service } from '../types'
+import { Course } from '../types'
 
 const useCourse = (courseId?: string) => {
-  const queryKey = ['courseService', courseId]
+  const queryKey = ['course', courseId]
 
-  if (!courseId) return { service: null, isLoading: false }
+  if (!courseId) return { course: null, isLoading: false }
 
-  const queryFn = async (): Promise<Service | null> => {
+  const queryFn = async (): Promise<Course | null> => {
     const res = await fetch(`${PUBLIC_URL}/api/courses/${courseId}`)
 
     const data = await res.json()
@@ -16,9 +16,9 @@ const useCourse = (courseId?: string) => {
     return data
   }
 
-  const { data: service, ...rest } = useQuery(queryKey, queryFn)
+  const { data: course, ...rest } = useQuery(queryKey, queryFn)
 
-  return { service, ...rest }
+  return { course, ...rest }
 }
 
 export default useCourse

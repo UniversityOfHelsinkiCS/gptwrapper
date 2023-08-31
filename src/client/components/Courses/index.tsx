@@ -7,7 +7,7 @@ import { Service } from '../../types'
 import useUserCourses from '../../hooks/useUserCourses'
 
 const Course = ({ course }: { course: Service }) => {
-  const { id, name, description, courseId } = course
+  const { name, description, courseId } = course
 
   return (
     <Box>
@@ -19,7 +19,7 @@ const Course = ({ course }: { course: Service }) => {
         }}
       >
         <Box mb={1} display="flex" justifyContent="space-between">
-          <Link to={`/courses/${id}`}>
+          <Link to={`/courses/${courseId}`}>
             <Typography variant="h6" display="inline">
               {name}
             </Typography>

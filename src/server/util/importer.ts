@@ -1,5 +1,5 @@
 import { IMPORTER_URL, API_TOKEN } from './config'
-import { Enrollment } from '../types'
+import { Enrollment, CourseUnitRealisation } from '../types'
 import { set, get } from './redis'
 
 const getActiveEnrollments = (enrollments: Enrollment[]) => {
@@ -52,4 +52,15 @@ export const getTeachers = async (courseId: string): Promise<string[]> => {
   await set(redisKey, teachers)
 
   return teachers
+}
+
+export const getCourse = async (
+  courseId: string
+): Promise<CourseUnitRealisation | null> => {
+  const url = `${IMPORTER_URL}/kliksutin/course/${courseId}`
+
+  const response = await fetch(`${url}?token=${API_TOKEN}`)
+  const course: CourseUnitRealisation | null = await response.json()
+
+  return course
 }

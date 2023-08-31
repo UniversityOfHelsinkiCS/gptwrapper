@@ -23,11 +23,11 @@ const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([])
   const [completion, setCompletion] = useState('')
 
-  const { service, isLoading } = useCourse(courseId)
+  const { course, isLoading } = useCourse(courseId)
 
   if (isLoading) return null
 
-  const hasPrompts = service && service.prompts.length > 0
+  const hasPrompts = course && course.prompts.length > 0
 
   const handleSend = async () => {
     const newMessage: Message = { role: 'user', content: message }
@@ -36,7 +36,7 @@ const Chat = () => {
 
     try {
       const stream = await getCompletionStream(
-        service?.id || 'chat',
+        course?.id || 'chat',
         system,
         messages.concat(newMessage),
         courseId
@@ -73,7 +73,7 @@ const Chat = () => {
   }
 
   const handleChangePrompt = (promptId: string) => {
-    const { systemMessage, messages: promptMessages } = service?.prompts.find(
+    const { systemMessage, messages: promptMessages } = course?.prompts.find(
       ({ id }) => id === promptId
     ) as Prompt
 
@@ -100,7 +100,7 @@ const Chat = () => {
       >
         {hasPrompts && (
           <PromptSelector
-            prompts={service.prompts}
+            prompts={course.prompts}
             activePrompt={activePrompt}
             setActivePrompt={handleChangePrompt}
           />

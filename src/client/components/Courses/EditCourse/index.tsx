@@ -9,7 +9,7 @@ import { Set, Message as MessageType } from '../../../types'
 import SystemMessage from '../../Chat/SystemMessage'
 import Conversation from '../../Chat/Conversation'
 import usePrompts from '../../../hooks/usePrompts'
-import useService from '../../../hooks/useService'
+import useCourse from '../../../hooks/useCourse'
 import {
   useCreatePromptMutation,
   useDeletePromptMutation,
@@ -106,7 +106,7 @@ const Course = () => {
   }
 
   const { prompts, isLoading } = usePrompts(id as string)
-  const { service, isLoading: serviceLoading } = useService(id as string)
+  const { course, isLoading: serviceLoading } = useCourse(id as string)
 
   if (isLoading || serviceLoading) return null
 
@@ -119,7 +119,7 @@ const Course = () => {
       }}
     >
       <Box mb={-2}>
-        <Link to={`/${service?.courseId}`}>
+        <Link to={`/${course?.courseId}`}>
           {t('common:toStudentView')} <OpenInNew sx={{ mb: -1 }} />
         </Link>
       </Box>

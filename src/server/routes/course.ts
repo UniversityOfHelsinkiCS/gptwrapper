@@ -3,6 +3,7 @@ import { Op } from 'sequelize'
 
 import { Service } from '../db/models'
 import { getOwnCourses } from '../services/access'
+import { getCourse } from '../util/importer'
 
 const courseRouter = express.Router()
 
@@ -46,7 +47,14 @@ courseRouter.get('/:id', async (req, res) => {
     include: 'prompts',
   })
 
-  return res.send(service)
+  const course = await getCourse(id)
+
+  if (!course) throw new Error('Course not found')
+
+  return res.send({
+    ...service?.dataValues,
+    activityPeriod: course.activityPeriod,
+  })
 })
 
 export default courseRouter
