@@ -72,7 +72,10 @@ openaiRouter.post('/stream', async (req, res) => {
   }
 
   await incrementUsage(user, id, tokenCount)
-  logger.info(`Stream ended. Total tokens: ${tokenCount}`, { tokenCount })
+  logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
+    tokenCount,
+    courseId,
+  })
 
   encoding.free()
 
