@@ -24,5 +24,9 @@ services:
       - pg_data:/data
     container_name: gptwrapper_db
 
+  redis:
+    image: redis:7-alpine
+    container_name: gptwrapper_redis
+
 volumes:
   pg_data:

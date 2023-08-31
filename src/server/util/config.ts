@@ -22,6 +22,8 @@ export const IMPORTER_URL = inStaging
   ? 'https://api-toska.apps.ocp-test-0.k8s.it.helsinki.fi/importer'
   : 'https://api-toska.apps.ocp-prod-0.k8s.it.helsinki.fi/importer'
 
+export const REDIS_HOST = process.env.REDIS_HOST || 'redis'
+
 export const adminIams = ['grp-toska', 'hy-ypa-opa-ote']
 
 export const tikeIam = 'hy-tike-allstaff'
