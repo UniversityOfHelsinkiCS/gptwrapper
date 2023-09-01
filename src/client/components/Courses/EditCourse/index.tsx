@@ -83,10 +83,15 @@ const Course = () => {
     setMessage('')
   }
 
+  const { prompts, isLoading } = usePrompts(id as string)
+  const { course, isLoading: courseLoading } = useCourse(id as string)
+
+  if (isLoading || courseLoading || !course) return null
+
   const handleSave = () => {
     try {
       createMutation.mutate({
-        serviceId: id as string,
+        serviceId: course.id,
         systemMessage: system,
         messages,
       })
@@ -105,11 +110,6 @@ const Course = () => {
       enqueueSnackbar(error.message, { variant: 'error' })
     }
   }
-
-  const { prompts, isLoading } = usePrompts(id as string)
-  const { course, isLoading: courseLoading } = useCourse(id as string)
-
-  if (isLoading || courseLoading || !course) return null
 
   return (
     <Box
