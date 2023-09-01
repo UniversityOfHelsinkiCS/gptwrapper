@@ -32,7 +32,7 @@ openaiRouter.post('/stream', async (req, res) => {
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
   options.user = hashData(user.id)
-  const model = await getModel(user.iamGroups, courseId)
+  const model = await getModel(user.iamGroups, courseId, user.isAdmin)
   options.model = model
   options.messages = getMessageContext(options.messages)
   options.stream = true
