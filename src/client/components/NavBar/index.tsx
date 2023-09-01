@@ -70,6 +70,8 @@ const NavBar = () => {
     return null
   }
 
+  if (!user) return null
+
   return (
     <AppBar elevation={0} position="relative" sx={styles.appbar}>
       <Container maxWidth={false}>
@@ -88,7 +90,7 @@ const NavBar = () => {
                 </Button>
               </Link>
             )}
-            {user?.isAdmin && (
+            {user.isAdmin && (
               <Link to="/admin" style={{ textDecoration: 'none' }}>
                 <Button>
                   <AdminPanelSettingsOutlined sx={styles.icon} /> {t('admin')}

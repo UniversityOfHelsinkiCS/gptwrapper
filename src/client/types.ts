@@ -15,6 +15,7 @@ export interface User {
   email?: string
   isAdmin: boolean
   activeCourseIds: string[]
+  ownCourses: string[]
   hasIamAccess?: boolean
 }
 

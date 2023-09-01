@@ -18,26 +18,35 @@ export const checkIamAccess = async (iamGroups: string[]) => {
 }
 
 export const checkCourseAccess = async (userId: string) => {
-  const coursesWithAccess = await Service.findAll({
+  const activeCourses = await Service.findAll({
     where: {
       courseId: {
         [Op.not]: null,
+      },
+      activityPeriod: {
+        startDate: {
+          [Op.lte]: new Date(),
+        },
+        endDate: {
+          [Op.gte]: new Date(),
+        },
       },
     },
     attributes: ['courseId'],
   })
 
-  const accessCourseIds = coursesWithAccess.map(
+  const activeCourseIds = activeCourses.map(
     ({ courseId }) => courseId
   ) as string[]
 
   const enrollments = await getEnrollments(userId)
+
   const enrolledCourseIds = enrollments.map(
     ({ courseUnitRealisation }) => courseUnitRealisation.id
   )
 
   const courseIds = enrolledCourseIds.filter((id) =>
-    accessCourseIds.includes(id)
+    activeCourseIds.includes(id)
   )
 
   return courseIds

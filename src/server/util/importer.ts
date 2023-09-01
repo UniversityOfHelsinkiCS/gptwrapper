@@ -6,15 +6,7 @@ const getActiveEnrollments = (enrollments: Enrollment[]) => {
   const filteredEnrollments = enrollments.filter((enrollment) => {
     if (enrollment.state !== 'ENROLLED') return false
     if (!enrollment.courseUnitRealisation.id) return false
-
-    const { startDate, endDate } =
-      enrollment.courseUnitRealisation.activityPeriod
-
-    const now = new Date()
-    const start = new Date(startDate)
-    const end = new Date(endDate)
-
-    return now >= start && now <= end
+    return true
   })
 
   return filteredEnrollments
