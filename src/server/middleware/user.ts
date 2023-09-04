@@ -1,5 +1,7 @@
 import { inDevelopment } from '../../config'
+import { User } from '../types'
 import { adminIams } from '../util/config'
+import { checkCourseAccess, getOwnCourses } from '../services/access'
 
 const parseIamGroups = (iamGroups: string) =>
   iamGroups?.split(';').filter(Boolean) ?? []
@@ -28,14 +30,24 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
 
   const iamGroups = parseIamGroups(hygroupcn)
 
-  const user = {
+  const user: User = {
     id: id || username,
     username,
     email,
     language,
     iamGroups,
     isAdmin: checkAdmin(iamGroups),
+    ownCourses: [],
+    activeCourseIds: [],
   }
+
+  const enrolledCourses = await checkCourseAccess(id)
+  const teacherCourses = await getOwnCourses(id, user.isAdmin)
+
+  const courses = enrolledCourses.concat(teacherCourses)
+
+  user.ownCourses = teacherCourses
+  user.activeCourseIds = courses
 
   req.user = user
 
