@@ -7,7 +7,13 @@ import { useTranslation } from 'react-i18next'
 
 import { Message, Role } from '../../types'
 
-const Response = ({ role, content }: { role: Role; content: string }) => {
+export const Response = ({
+  role,
+  content,
+}: {
+  role: Role
+  content: string
+}) => {
   const isUser = role === 'user'
 
   return (

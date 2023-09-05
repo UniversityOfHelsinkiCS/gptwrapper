@@ -4,22 +4,21 @@ import { ExpandLess, ExpandMore } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
 import { Prompt as PromptType, Set } from '../../../types'
+import { Response } from '../../Chat/Conversation'
 
 const ExpandButton = ({
   expand,
   setExpand,
+  disabled,
 }: {
   expand: boolean
   setExpand: Set<boolean>
-}) => {
-  return null
-
-  return (
-    <Button onClick={() => setExpand(!expand)}>
-      {expand ? <ExpandLess /> : <ExpandMore />}
-    </Button>
-  )
-}
+  disabled: boolean
+}) => (
+  <Button onClick={() => setExpand(!expand)} disabled={disabled}>
+    {expand ? <ExpandLess /> : <ExpandMore />}
+  </Button>
+)
 
 const Prompt = ({
   prompt,
@@ -32,28 +31,34 @@ const Prompt = ({
 
   const [expand, setExpand] = useState(false)
 
+  const { id, messages } = prompt
+
   return (
-    <Box key={prompt.id} pt="1%">
-      <Paper
-        variant="outlined"
-        sx={{
-          padding: '2%',
-          display: 'flex',
-          justifyContent: 'space-between',
-        }}
-      >
-        <Typography variant="h6" display="inline">
-          {prompt.systemMessage}
-        </Typography>
-        <Box>
-          {/* <Button onClick={() => handleDelete(prompt.id)}>
-            {t('common:edit')}
-          </Button> */}
-          <Button onClick={() => handleDelete(prompt.id)} color="error">
-            {t('common:delete')}
-          </Button>
-          <ExpandButton expand={expand} setExpand={setExpand} />
+    <Box key={id} pt="1%">
+      <Paper variant="outlined" sx={{ padding: '2%' }}>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6" display="inline">
+            {prompt.systemMessage}
+          </Typography>
+          <Box>
+            <Button onClick={() => handleDelete(prompt.id)} color="error">
+              {t('common:delete')}
+            </Button>
+            <ExpandButton
+              expand={expand}
+              setExpand={setExpand}
+              disabled={messages.length === 0}
+            />
+          </Box>
         </Box>
+
+        {expand && (
+          <Box mt={2}>
+            {messages.map(({ role, content }) => (
+              <Response key={content} role={role} content={content} />
+            ))}
+          </Box>
+        )}
       </Paper>
     </Box>
   )
