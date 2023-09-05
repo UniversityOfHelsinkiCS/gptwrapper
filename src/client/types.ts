@@ -51,6 +51,6 @@ export type ActivityPeriod = {
 }
 
 export interface Course extends Service {
-  activityPeriod?: ActivityPeriod
+  activityPeriod: ActivityPeriod
   prompts: Prompt[]
 }

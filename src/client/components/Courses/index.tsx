@@ -2,12 +2,20 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { Box, Paper, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
+import { format } from 'date-fns'
 
-import { Service } from '../../types'
+import { ActivityPeriod, Course as CourseType } from '../../types'
 import useUserCourses from '../../hooks/useUserCourses'
 
-const Course = ({ course }: { course: Service }) => {
-  const { name, description, courseId } = course
+const fomatDate = ({ startDate, endDate }: ActivityPeriod) => {
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+
+  return `${format(start, 'dd.MM.')}–${format(end, 'dd.MM.yyyy')}`
+}
+
+const Course = ({ course }: { course: CourseType }) => {
+  const { name, description, courseId, activityPeriod } = course
 
   return (
     <Box>
@@ -19,15 +27,17 @@ const Course = ({ course }: { course: Service }) => {
         }}
       >
         <Box mb={1} display="flex" justifyContent="space-between">
-          <Link to={`/courses/${courseId}`}>
-            <Typography variant="h6" display="inline">
-              {name}
-            </Typography>
-          </Link>
+          <Box>
+            <Link to={`/courses/${courseId}`}>
+              <Typography variant="h6">{name}</Typography>
+            </Link>
 
-          <Typography variant="body1" display="inline">
-            <code>{courseId}</code>
-          </Typography>
+            <Typography variant="body2">
+              <code>{courseId}</code>
+            </Typography>
+          </Box>
+
+          <Typography variant="body1">{fomatDate(activityPeriod)}</Typography>
         </Box>
 
         <Typography variant="body1">{description}</Typography>
