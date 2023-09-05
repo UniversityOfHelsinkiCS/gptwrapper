@@ -16,6 +16,7 @@ import {
   useDeletePromptMutation,
 } from '../../../hooks/usePromptMutation'
 import { formatDate } from '../util'
+import Prompt from './Prompt'
 
 const Message = ({
   message,
@@ -148,6 +149,10 @@ const Course = () => {
         </Paper>
       </Box>
 
+      {prompts.map((prompt) => (
+        <Prompt prompt={prompt} handleDelete={handleDelete} />
+      ))}
+
       <Paper
         variant="outlined"
         sx={{
@@ -183,26 +188,6 @@ const Course = () => {
           setOpen={setActivityPeriodFormOpen}
         />
       </Modal>
-
-      {prompts.map((prompt) => (
-        <Box key={prompt.id} pt="1%">
-          <Paper
-            variant="outlined"
-            sx={{
-              padding: '1%',
-              display: 'flex',
-              justifyContent: 'space-between',
-            }}
-          >
-            <Typography variant="h6" display="inline">
-              {prompt.systemMessage}
-            </Typography>
-            <Button onClick={() => handleDelete(prompt.id)} color="error">
-              {t('common:delete')}
-            </Button>
-          </Paper>
-        </Box>
-      ))}
     </Box>
   )
 }
