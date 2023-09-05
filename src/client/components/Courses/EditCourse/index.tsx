@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { Box, Paper, Typography, TextField, Button } from '@mui/material'
-import { OpenInNew } from '@mui/icons-material'
+import { Box, Paper, Typography, TextField, Button, Modal } from '@mui/material'
+import { OpenInNew, Edit } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 import { useParams, Link } from 'react-router-dom'
@@ -15,6 +15,7 @@ import {
   useCreatePromptMutation,
   useDeletePromptMutation,
 } from '../../../hooks/usePromptMutation'
+import { formatDate } from '../util'
 
 const Message = ({
   message,
@@ -65,6 +66,8 @@ const Course = () => {
   const [system, setSystem] = useState('')
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<MessageType[]>([])
+
+  const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
 
   const { id } = useParams()
   const { t } = useTranslation()
@@ -119,17 +122,37 @@ const Course = () => {
         padding: '5%',
       }}
     >
-      <Box>
-        <Link to={`/${course?.courseId}`}>
-          {t('common:toStudentView')} <OpenInNew sx={{ mb: -1 }} />
-        </Link>
+      <Box display="flex">
+        <Paper
+          variant="outlined"
+          sx={{
+            padding: '2%',
+            mt: 2,
+          }}
+        >
+          <Typography variant="h5">{course.name}</Typography>
+          <Typography>
+            Käynnissä: {formatDate(course.activityPeriod)}
+          </Typography>
+
+          <Button
+            startIcon={<Edit />}
+            onClick={() => setActivityPeriodFormOpen(true)}
+          >
+            {t('editActivityPeriod')}
+          </Button>
+
+          <Button endIcon={<OpenInNew />}>
+            <Link to={`/${course?.courseId}`}>{t('common:toStudentView')}</Link>
+          </Button>
+        </Paper>
       </Box>
-      <EditActivityPeriod course={course} />
+
       <Paper
         variant="outlined"
         sx={{
           padding: '5% 10%',
-          mt: 5,
+          mt: 2,
         }}
       >
         <Box mb={4}>
@@ -150,6 +173,16 @@ const Course = () => {
           {t('common:save')}
         </Button>
       </Paper>
+
+      <Modal
+        open={activityPeriodFormOpen}
+        onClose={() => setActivityPeriodFormOpen(false)}
+      >
+        <EditActivityPeriod
+          course={course}
+          setOpen={setActivityPeriodFormOpen}
+        />
+      </Modal>
 
       {prompts.map((prompt) => (
         <Box key={prompt.id} pt="1%">

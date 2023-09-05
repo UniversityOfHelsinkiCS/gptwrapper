@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 
 import { PUBLIC_URL } from '../../config'
 import { ActivityPeriod } from '../types'
+import queryClient from '../util/queryClient'
 
 interface UpdatedCourseData {
   activityPeriod: ActivityPeriod
@@ -20,7 +21,12 @@ export const useEditCourseMutation = (id: string) => {
     return course
   }
 
-  const mutation = useMutation(mutationFn)
+  const mutation = useMutation(mutationFn, {
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: ['course', id],
+      }),
+  })
 
   return mutation
 }

@@ -2,17 +2,10 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { Box, Paper, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import { format } from 'date-fns'
 
-import { ActivityPeriod, Course as CourseType } from '../../types'
+import { Course as CourseType } from '../../types'
 import useUserCourses from '../../hooks/useUserCourses'
-
-const fomatDate = ({ startDate, endDate }: ActivityPeriod) => {
-  const start = new Date(startDate)
-  const end = new Date(endDate)
-
-  return `${format(start, 'dd.MM.')}–${format(end, 'dd.MM.yyyy')}`
-}
+import { formatDate } from './util'
 
 const Course = ({ course }: { course: CourseType }) => {
   const { name, description, courseId, activityPeriod } = course
@@ -37,7 +30,7 @@ const Course = ({ course }: { course: CourseType }) => {
             </Typography>
           </Box>
 
-          <Typography variant="body1">{fomatDate(activityPeriod)}</Typography>
+          <Typography variant="body1">{formatDate(activityPeriod)}</Typography>
         </Box>
 
         <Typography variant="body1">{description}</Typography>
