@@ -19,7 +19,8 @@
     "opensAt": "",
     "closesAt": "",
     "confirmDeletePrompt": "",
-    "active": ""
+    "active": "",
+    "prompt": ""
   },
   "info": {
     "title": "",

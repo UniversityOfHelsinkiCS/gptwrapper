@@ -19,7 +19,8 @@
     "opensAt": "Opens at",
     "closesAt": "Closes at",
     "confirmDeletePrompt": "Are you sure you want to delete this prompt?",
-    "active": "Open: "
+    "active": "Open: ",
+    "prompt": "Prompt"
   },
   "info": {
     "title": "## Attention",

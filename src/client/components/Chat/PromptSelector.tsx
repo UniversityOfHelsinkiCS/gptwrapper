@@ -7,6 +7,7 @@ import {
   Select,
   SelectChangeEvent,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 
 import { Prompt } from '../../types'
 
@@ -18,25 +19,29 @@ const PromptSelector = ({
   prompts: Prompt[]
   activePrompt: string
   setActivePrompt: (promptId: string) => void
-}) => (
-  <Box mb={2}>
-    <FormControl sx={{ width: '33%' }}>
-      <InputLabel>Prompt</InputLabel>
-      <Select
-        label="Prompt"
-        value={activePrompt}
-        onChange={(event: SelectChangeEvent) =>
-          setActivePrompt(event.target.value)
-        }
-      >
-        {prompts.map((prompt) => (
-          <MenuItem key={prompt.id} value={prompt.id}>
-            {prompt.systemMessage.slice(0, 50)}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-  </Box>
-)
+}) => {
+  const { t } = useTranslation()
+
+  return (
+    <Box mb={2}>
+      <FormControl sx={{ width: '40%' }}>
+        <InputLabel>{t('prompt')}</InputLabel>
+        <Select
+          label={t('prompt')}
+          value={activePrompt}
+          onChange={(event: SelectChangeEvent) =>
+            setActivePrompt(event.target.value)
+          }
+        >
+          {prompts.map((prompt) => (
+            <MenuItem key={prompt.id} value={prompt.id}>
+              {prompt.systemMessage.slice(0, 50)}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Box>
+  )
+}
 
 export default PromptSelector

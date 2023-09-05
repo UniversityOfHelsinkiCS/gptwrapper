@@ -108,7 +108,7 @@ const Chat = () => {
         <SystemMessage
           system={system}
           setSystem={setSystem}
-          disabled={messages.length > 0}
+          disabled={activePrompt.length > 0 || messages.length > 0}
         />
         <Conversation messages={messages} completion={completion} />
         <SendMessage

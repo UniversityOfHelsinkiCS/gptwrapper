@@ -19,7 +19,8 @@
     "opensAt": "Avautuu",
     "closesAt": "Sulkeutuu",
     "confirmDeletePrompt": "Haluatko varmasti poistaa tämän alustuksen?",
-    "active": "Käynnissä: "
+    "active": "Käynnissä: ",
+    "prompt": "Alustus"
   },
   "info": {
     "title": "## Huomio",
