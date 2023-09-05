@@ -17,7 +17,8 @@
     "toStudentView": "Opiskelijan näkymään",
     "editActivityPeriod": "Muokkaa käynnissäoloaikaa",
     "opensAt": "Avautuu",
-    "closesAt": "Sulkeutuu"
+    "closesAt": "Sulkeutuu",
+    "confirmDeletePrompt": "Haluatko varmasti poistaa tämän alustuksen?"
   },
   "info": {
     "title": "## Huomio",

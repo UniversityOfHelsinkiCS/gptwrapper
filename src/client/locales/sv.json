@@ -17,7 +17,8 @@
     "toStudentView": "",
     "editActivityPeriod": "",
     "opensAt": "",
-    "closesAt": ""
+    "closesAt": "",
+    "confirmDeletePrompt": ""
   },
   "info": {
     "title": "",

@@ -107,6 +107,9 @@ const Course = () => {
   }
 
   const handleDelete = (promptId: string) => {
+    // eslint-disable-next-line no-alert
+    if (!window.confirm(t('confirmDeletePrompt') as string)) return
+
     try {
       deleteMutation.mutate(promptId)
       enqueueSnackbar('Prompt deleted', { variant: 'success' })
