@@ -18,7 +18,8 @@
     "editActivityPeriod": "Muokkaa käynnissäoloaikaa",
     "opensAt": "Avautuu",
     "closesAt": "Sulkeutuu",
-    "confirmDeletePrompt": "Haluatko varmasti poistaa tämän alustuksen?"
+    "confirmDeletePrompt": "Haluatko varmasti poistaa tämän alustuksen?",
+    "active": "Käynnissä: "
   },
   "info": {
     "title": "## Huomio",

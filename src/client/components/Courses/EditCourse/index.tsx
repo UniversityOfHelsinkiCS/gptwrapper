@@ -136,7 +136,8 @@ const Course = () => {
         >
           <Typography variant="h5">{course.name}</Typography>
           <Typography>
-            Käynnissä: {formatDate(course.activityPeriod)}
+            {t('active')}
+            {formatDate(course.activityPeriod)}
           </Typography>
 
           <Button

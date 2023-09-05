@@ -18,7 +18,8 @@
     "editActivityPeriod": "",
     "opensAt": "",
     "closesAt": "",
-    "confirmDeletePrompt": ""
+    "confirmDeletePrompt": "",
+    "active": ""
   },
   "info": {
     "title": "",
