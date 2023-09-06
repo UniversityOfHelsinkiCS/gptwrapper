@@ -4,7 +4,7 @@ import { set, get } from './redis'
 
 const getActiveEnrollments = (enrollments: Enrollment[]) => {
   const filteredEnrollments = enrollments.filter((enrollment) => {
-    if (enrollment.state !== 'ENROLLED') return false
+    // if (enrollment.state !== 'ENROLLED') return false
     if (!enrollment.courseUnitRealisation.id) return false
     return true
   })
