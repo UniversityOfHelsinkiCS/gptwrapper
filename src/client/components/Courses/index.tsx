@@ -8,6 +8,8 @@ import useUserCourses from '../../hooks/useUserCourses'
 import { formatDate } from './util'
 
 const Course = ({ course }: { course: CourseType }) => {
+  if (!course) return null
+
   const { name, description, courseId, activityPeriod } = course
 
   return (
@@ -42,7 +44,7 @@ const Course = ({ course }: { course: CourseType }) => {
 const Courses = () => {
   const { t } = useTranslation()
 
-  const { courses, isLoading } = useUserCourses()
+  const { courses, isLoading } = useUserCourses() || {}
 
   if (isLoading) return null
 
