@@ -46,6 +46,12 @@ openaiRouter.post('/stream', async (req, res) => {
     return res.status(403).send('Model maximum context reached')
   }
 
+  // Downgrade to gpt-3.5 for long student conversations
+  if (courseId && model === 'gpt-4' && tokenCount > 2_000) {
+    options.model = 'gpt-3.5-turbo-16k'
+    tokenCount /= 10
+  }
+
   const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
 
   const stream = await completionStream(options, isTike)
