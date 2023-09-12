@@ -22,16 +22,19 @@ const SystemMessage = ({
   system,
   setSystem,
   disabled,
+  showInfo = true,
 }: {
   system: string
   setSystem: Set<string>
   disabled: boolean
+  // eslint-disable-next-line react/require-default-props
+  showInfo?: boolean
 }) => {
   const { t } = useTranslation()
 
   return (
     <Box mb={2}>
-      <Info />
+      {showInfo && <Info />}
       <TextField
         fullWidth
         multiline

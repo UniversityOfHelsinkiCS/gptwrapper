@@ -8,6 +8,7 @@ import {
   Modal,
   Checkbox,
   FormControlLabel,
+  Input,
 } from '@mui/material'
 import { OpenInNew, Edit } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
@@ -73,6 +74,7 @@ const getRole = (messages: MessageType[]) => {
 }
 
 const Course = () => {
+  const [name, setName] = useState('')
   const [system, setSystem] = useState('')
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<MessageType[]>([])
@@ -106,6 +108,7 @@ const Course = () => {
     try {
       createMutation.mutate({
         serviceId: course.id,
+        name,
         systemMessage: system,
         messages,
         hidden,
@@ -180,6 +183,13 @@ const Course = () => {
             {t('common:newPrompt')}
           </Typography>
         </Box>
+
+        <Input
+          sx={{ mr: 2 }}
+          placeholder={t('promptName') as string}
+          value={name}
+          onChange={({ target }) => setName(target.value)}
+        />
 
         <FormControlLabel
           control={

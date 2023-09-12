@@ -10,17 +10,16 @@ import { useTranslation } from 'react-i18next'
 
 import { Prompt as PromptType, Set } from '../../../types'
 import { Response } from '../../Chat/Conversation'
+import SystemMessage from '../../Chat/SystemMessage'
 
 const ExpandButton = ({
   expand,
   setExpand,
-  disabled,
 }: {
   expand: boolean
   setExpand: Set<boolean>
-  disabled: boolean
 }) => (
-  <Button onClick={() => setExpand(!expand)} disabled={disabled}>
+  <Button onClick={() => setExpand(!expand)}>
     {expand ? <ExpandLess /> : <ExpandMore />}
   </Button>
 )
@@ -36,10 +35,10 @@ const Prompt = ({
 
   const [expand, setExpand] = useState(false)
 
-  const { id, messages, hidden } = prompt
+  const { id, name, systemMessage, messages, hidden } = prompt
 
   return (
-    <Box key={id} pt="1%">
+    <Box key={id} pt={2}>
       <Paper variant="outlined" sx={{ padding: '2%' }}>
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box>
@@ -55,23 +54,27 @@ const Prompt = ({
               )}
             </Box>
             <Typography variant="h6" display="inline">
-              {prompt.systemMessage}
+              {name}
             </Typography>
           </Box>
           <Box>
             <Button onClick={() => handleDelete(prompt.id)} color="error">
               {t('common:delete')}
             </Button>
-            <ExpandButton
-              expand={expand}
-              setExpand={setExpand}
-              disabled={messages.length === 0}
-            />
+            <ExpandButton expand={expand} setExpand={setExpand} />
           </Box>
         </Box>
 
         {expand && (
           <Box mt={2}>
+            <Box width="80%">
+              <SystemMessage
+                system={systemMessage}
+                setSystem={() => {}}
+                showInfo={false}
+                disabled
+              />
+            </Box>
             {messages.map(({ role, content }) => (
               <Response key={content} role={role} content={content} />
             ))}

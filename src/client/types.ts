@@ -21,6 +21,7 @@ export interface User {
 
 export type Prompt = {
   id: string
+  name: string
   serviceId: string
   systemMessage: string
   messages: Message[]

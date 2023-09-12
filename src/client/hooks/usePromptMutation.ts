@@ -7,6 +7,7 @@ import { queryKey } from './usePrompts'
 
 interface NewPromptData {
   serviceId: string
+  name: string
   systemMessage: string
   messages: Message[]
   hidden: boolean

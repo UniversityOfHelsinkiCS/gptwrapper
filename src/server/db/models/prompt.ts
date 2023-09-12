@@ -15,6 +15,8 @@ class Prompt extends Model<
 > {
   declare id: CreationOptional<string>
 
+  declare name: string
+
   declare serviceId: string
 
   declare systemMessage: string
@@ -31,6 +33,10 @@ Prompt.init(
       allowNull: false,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     serviceId: {
       type: DataTypes.STRING,

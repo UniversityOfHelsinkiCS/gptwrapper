@@ -21,9 +21,10 @@
     "confirmDeletePrompt": "Are you sure you want to delete this prompt?",
     "active": "Open: ",
     "prompt": "Prompt",
-    "hidePrompt": "Hide text from students",
+    "hidePrompt": "Hide prompt's text from students",
     "hiddenPromptInfo": "Prompt's text is not visible to students",
-    "visiblePromptInfo": "Prompt's text is visible to students"
+    "visiblePromptInfo": "Prompt's text is visible to students",
+    "promptName": "Prompt name"
   },
   "info": {
     "title": "## Attention",

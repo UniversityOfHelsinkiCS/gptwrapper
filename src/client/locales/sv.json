@@ -23,7 +23,8 @@
     "prompt": "",
     "hidePrompt": "",
     "hiddenPromptInfo": "",
-    "visiblePromptInfo": ""
+    "visiblePromptInfo": "",
+    "promptName": ""
   },
   "info": {
     "title": "",

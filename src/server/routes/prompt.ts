@@ -7,6 +7,7 @@ const promptRouter = express.Router()
 
 interface NewPromptData {
   serviceId: string
+  name: string
   systemMessage: string
   messages: Message[]
   hidden: boolean
