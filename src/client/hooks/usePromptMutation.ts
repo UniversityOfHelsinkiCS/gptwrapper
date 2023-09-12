@@ -9,6 +9,7 @@ interface NewPromptData {
   serviceId: string
   systemMessage: string
   messages: Message[]
+  hidden: boolean
 }
 
 export const useCreatePromptMutation = () => {

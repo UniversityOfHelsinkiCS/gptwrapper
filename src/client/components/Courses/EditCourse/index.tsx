@@ -1,5 +1,14 @@
 import React, { useState } from 'react'
-import { Box, Paper, Typography, TextField, Button, Modal } from '@mui/material'
+import {
+  Box,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Modal,
+  Checkbox,
+  FormControlLabel,
+} from '@mui/material'
 import { OpenInNew, Edit } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
@@ -67,6 +76,7 @@ const Course = () => {
   const [system, setSystem] = useState('')
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<MessageType[]>([])
+  const [hidden, setHidden] = useState(false)
 
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
 
@@ -98,6 +108,7 @@ const Course = () => {
         serviceId: course.id,
         systemMessage: system,
         messages,
+        hidden,
       })
       enqueueSnackbar('Prompt created', { variant: 'success' })
       handleReset()
@@ -154,7 +165,7 @@ const Course = () => {
       </Box>
 
       {prompts.map((prompt) => (
-        <Prompt prompt={prompt} handleDelete={handleDelete} />
+        <Prompt key={prompt.id} prompt={prompt} handleDelete={handleDelete} />
       ))}
 
       <Paper
@@ -164,11 +175,22 @@ const Course = () => {
           mt: 2,
         }}
       >
-        <Box mb={4}>
+        <Box mb={2}>
           <Typography variant="h5" display="inline">
             {t('common:newPrompt')}
           </Typography>
         </Box>
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              value={hidden}
+              onChange={() => setHidden((prev) => !prev)}
+            />
+          }
+          label={t('hidePrompt')}
+        />
+
         <SystemMessage system={system} setSystem={setSystem} disabled={false} />
         <Conversation messages={messages} completion="" />
         <Message

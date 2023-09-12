@@ -20,7 +20,10 @@
     "closesAt": "",
     "confirmDeletePrompt": "",
     "active": "",
-    "prompt": ""
+    "prompt": "",
+    "hidePrompt": "",
+    "hiddenPromptInfo": "",
+    "visiblePromptInfo": ""
   },
   "info": {
     "title": "",

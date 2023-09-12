@@ -20,7 +20,10 @@
     "closesAt": "Sulkeutuu",
     "confirmDeletePrompt": "Haluatko varmasti poistaa tämän alustuksen?",
     "active": "Käynnissä: ",
-    "prompt": "Alustus"
+    "prompt": "Alustus",
+    "hidePrompt": "Piilota teksti opiskelijoilta",
+    "hiddenPromptInfo": "Alustuksen teksti ei näy opiskelijoille",
+    "visiblePromptInfo": "Alustuksen teksti näkyy opiskelijoille"
   },
   "info": {
     "title": "## Huomio",
