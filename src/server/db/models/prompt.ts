@@ -20,6 +20,8 @@ class Prompt extends Model<
   declare systemMessage: string
 
   declare messages: CreationOptional<Message[]>
+
+  declare hidden: CreationOptional<boolean>
 }
 
 Prompt.init(
@@ -42,6 +44,11 @@ Prompt.init(
       type: DataTypes.ARRAY(DataTypes.JSON),
       allowNull: false,
       defaultValue: [],
+    },
+    hidden: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
   },
   {
