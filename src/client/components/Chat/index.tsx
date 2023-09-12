@@ -17,7 +17,7 @@ import Email from './Email'
 const Chat = () => {
   const { courseId } = useParams()
 
-  const [activePrompt, setActivePrompt] = useState('')
+  const [activePromptId, setActivePromptId] = useState('')
   const [system, setSystem] = useState('')
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
@@ -28,6 +28,18 @@ const Chat = () => {
   if (isLoading) return null
 
   const hasPrompts = course && course.prompts.length > 0
+  const activePrompt = course?.prompts.find(({ id }) => id === activePromptId)
+  const hidePrompt = activePrompt?.hidden ?? false
+
+  const getVisibleMessages = (): Message[] => {
+    if (!hidePrompt) return messages
+
+    const hideCount = activePrompt?.messages.length ?? 0
+
+    return messages.slice(hideCount)
+  }
+
+  const visibleMessages = getVisibleMessages()
 
   const handleSend = async () => {
     const newMessage: Message = { role: 'user', content: message }
@@ -69,7 +81,7 @@ const Chat = () => {
     setSystem('')
     setMessage('')
     setCompletion('')
-    setActivePrompt('')
+    setActivePromptId('')
   }
 
   const handleChangePrompt = (promptId: string) => {
@@ -79,7 +91,7 @@ const Chat = () => {
 
     setSystem(systemMessage)
     setMessages(promptMessages)
-    setActivePrompt(promptId)
+    setActivePromptId(promptId)
   }
 
   return (
@@ -101,16 +113,18 @@ const Chat = () => {
         {hasPrompts && (
           <PromptSelector
             prompts={course.prompts}
-            activePrompt={activePrompt}
+            activePrompt={activePromptId}
             setActivePrompt={handleChangePrompt}
           />
         )}
-        <SystemMessage
-          system={system}
-          setSystem={setSystem}
-          disabled={activePrompt.length > 0 || messages.length > 0}
-        />
-        <Conversation messages={messages} completion={completion} />
+        {!hidePrompt && (
+          <SystemMessage
+            system={system}
+            setSystem={setSystem}
+            disabled={activePromptId.length > 0 || messages.length > 0}
+          />
+        )}
+        <Conversation messages={visibleMessages} completion={completion} />
         <SendMessage
           message={message}
           setMessage={setMessage}
