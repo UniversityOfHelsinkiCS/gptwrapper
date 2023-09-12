@@ -95,8 +95,10 @@ const Course = () => {
 
   const handleReset = () => {
     setMessages([])
+    setName('')
     setSystem('')
     setMessage('')
+    setHidden(false)
   }
 
   const { prompts, isLoading } = usePrompts(id as string)
