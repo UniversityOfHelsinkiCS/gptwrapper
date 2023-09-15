@@ -81,6 +81,7 @@ openaiRouter.post('/stream', async (req, res) => {
   logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
     tokenCount,
     courseId,
+    model: options.model,
     user: user.username,
   })
 
