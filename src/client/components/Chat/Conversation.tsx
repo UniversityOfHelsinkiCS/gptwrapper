@@ -3,6 +3,7 @@ import React from 'react'
 import { Box, Paper, Typography } from '@mui/material'
 import { Person, Assistant } from '@mui/icons-material'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { useTranslation } from 'react-i18next'
 
 import { Message, Role } from '../../types'
@@ -27,7 +28,9 @@ export const Response = ({
               <Assistant sx={{ mx: 3, my: 4 }} />
             )}
             <Box pr={7} py={2}>
-              <ReactMarkdown>{content}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {content}
+              </ReactMarkdown>
             </Box>
           </Box>
         </Paper>
