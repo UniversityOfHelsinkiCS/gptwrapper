@@ -1,7 +1,12 @@
 import express from 'express'
 
 import { RequestWithUser } from '../types'
-import { ServiceAccessGroup, Service, UserServiceUsage } from '../db/models'
+import {
+  ServiceAccessGroup,
+  Service,
+  UserServiceUsage,
+  User,
+} from '../db/models'
 import { getCourse } from '../util/importer'
 
 const adminRouter = express.Router()
@@ -148,6 +153,35 @@ adminRouter.delete('/services/:id', async (req, res) => {
   })
 
   await service.destroy()
+
+  return res.status(204).send()
+})
+
+adminRouter.get('/services/usage', async (req, res) => {
+  const usage = await UserServiceUsage.findAll({
+    include: [
+      {
+        model: User,
+        as: 'user',
+      },
+      {
+        model: Service,
+        as: 'service',
+      },
+    ],
+  })
+
+  return res.send(usage)
+})
+
+adminRouter.delete('/services/usage/:id', async (req, res) => {
+  const { id } = req.params
+
+  const serviceUsage = await UserServiceUsage.findByPk(id)
+
+  if (!serviceUsage) return res.status(404).send('Service usage not found')
+
+  await serviceUsage.destroy()
 
   return res.status(204).send()
 })

@@ -76,6 +76,10 @@
     "description": "Kuvaus",
     "courseDescriptionInfo": "Kurssin kuvaus",
     "courseId": "Kurssin ID",
-    "courseIdInfo": "Kurssin ID (Course Unit Realisation)"
+    "courseIdInfo": "Kurssin ID (Course Unit Realisation)",
+    "usage": "Käyttö",
+    "username": "Käyttäjätunnus",
+    "usageCount": "Käyttömäärä",
+    "reset": "Nollaa"
   }
 }

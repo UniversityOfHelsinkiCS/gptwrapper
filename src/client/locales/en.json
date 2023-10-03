@@ -76,6 +76,10 @@
     "description": "Description",
     "courseDescriptionInfo": "Description for the course",
     "courseId": "Course ID",
-    "courseIdInfo": "Course ID (Course Unit Realisation)"
+    "courseIdInfo": "Course ID (Course Unit Realisation)",
+    "usage": "Usage",
+    "username": "Username",
+    "usageCount": "Usage count",
+    "reset": "Reset"
   }
 }

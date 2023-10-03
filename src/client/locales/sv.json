@@ -76,6 +76,10 @@
     "description": "",
     "courseDescriptionInfo": "",
     "courseId": "",
-    "courseIdInfo": ""
+    "courseIdInfo": "",
+    "usage": "",
+    "username": "",
+    "usageCount": "",
+    "reset": ""
   }
 }

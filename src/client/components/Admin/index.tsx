@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import AccessGroups from './AccessGroups'
 import Services from './Services'
+import Usage from './Usage'
 
 const Admin = () => {
   const [value, setValue] = useState(0)
@@ -19,11 +20,13 @@ const Admin = () => {
           onChange={(_, newValue) => setValue(newValue)}
         >
           <Tab label={t('admin:accessGroups')} />
-          <Tab label="Kurssit" />
+          <Tab label={t('admin:courses')} />
+          <Tab label={t('admin:usage')} />
         </Tabs>
       </Box>
       {value === 0 && <AccessGroups />}
       {value === 1 && <Services />}
+      {value === 2 && <Usage />}
     </Box>
   )
 }

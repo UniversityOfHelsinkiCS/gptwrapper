@@ -56,3 +56,10 @@ export interface Course extends Service {
   activityPeriod: ActivityPeriod
   prompts: Prompt[]
 }
+
+export type ServiceUsage = {
+  id: string
+  usageCount: number
+  user: User
+  service: Service
+}
