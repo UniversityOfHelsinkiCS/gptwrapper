@@ -37,7 +37,7 @@
     "systemMessage": "Ohjeistus",
     "systemMessageInfo": "Alusta keskustelu antamalla yleistason ohjeita tekoälylle",
     "exampleSystemMessage": "esim. Olet avulias avustaja",
-    "message": "Kysymys",
+    "message": "Kehoite",
     "messagePlaceholder": "Kirjoita viestisi tähän",
     "conversation": "Keskustelu"
   },
