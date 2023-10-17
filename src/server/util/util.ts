@@ -39,8 +39,8 @@ export const getModel = async (
   courseId?: string,
   isAdmin: boolean = false
 ): Promise<string> => {
-  if (isAdmin) return 'gpt-4'
   if (courseId) return getCourseModel(courseId)
+  if (isAdmin) return 'gpt-4'
 
   const accessGroups = await ServiceAccessGroup.findAll({
     where: {

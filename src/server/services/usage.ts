@@ -93,7 +93,7 @@ export const incrementUsage = async (
 
 export const getUserStatus = async (user: User, serviceId: string) => {
   const service = await Service.findByPk(serviceId, {
-    attributes: ['id', 'usageLimit', 'model'],
+    attributes: ['id', 'usageLimit', 'courseId'],
   })
 
   const serviceUsage = await UserServiceUsage.findOne({
@@ -104,9 +104,11 @@ export const getUserStatus = async (user: User, serviceId: string) => {
     attributes: ['usageCount'],
   })
 
+  const model = await getModel(user.iamGroups, service?.courseId, user.isAdmin)
+
   return {
     usage: serviceUsage?.usageCount ?? 0,
     limit: service?.usageLimit ?? 0,
-    model: service?.model ?? getModel(user.iamGroups, undefined, user.isAdmin),
+    model,
   }
 }
