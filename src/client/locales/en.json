@@ -48,6 +48,10 @@
     "success": "Email sent",
     "failure": "Sending email failed"
   },
+  "status": {
+    "modelInUse": "Language model in use:",
+    "tokensUsed": "tokens used"
+  },
   "error": {
     "noAccess": "No access",
     "noAccessInfo": "You do not currently have access to Gptwrapper"

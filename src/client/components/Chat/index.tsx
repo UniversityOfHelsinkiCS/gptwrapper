@@ -7,12 +7,14 @@ import { useParams } from 'react-router-dom'
 import { Message, Prompt } from '../../types'
 import { getCompletionStream } from './util'
 import useCourse from '../../hooks/useCourse'
+import useUserStatus from '../../hooks/useUserStatus'
 import Banner from '../Banner'
 import PromptSelector from './PromptSelector'
 import SystemMessage from './SystemMessage'
 import Conversation from './Conversation'
 import SendMessage from './SendMessage'
 import Email from './Email'
+import Status from './Status'
 
 const Chat = () => {
   const { courseId } = useParams()
@@ -24,8 +26,16 @@ const Chat = () => {
   const [completion, setCompletion] = useState('')
 
   const { course, isLoading } = useCourse(courseId)
+  const {
+    userStatus,
+    isLoading: statusLoading,
+    refetch,
+  } = useUserStatus(course?.id)
 
-  if (isLoading) return null
+  if (isLoading || statusLoading) return null
+  if (!userStatus) return null
+
+  const { model, usage, limit } = userStatus
 
   const hasPrompts = course && course.prompts.length > 0
   const activePrompt = course?.prompts.find(({ id }) => id === activePromptId)
@@ -74,6 +84,7 @@ const Chat = () => {
     }
 
     setCompletion('')
+    refetch()
   }
 
   const handleReset = () => {
@@ -141,6 +152,7 @@ const Chat = () => {
           disabled={messages.length === 0 || completion !== ''}
         />
       </Paper>
+      <Status model={model} usage={usage} limit={limit} />
     </Box>
   )
 }

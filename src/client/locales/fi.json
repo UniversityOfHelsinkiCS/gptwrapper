@@ -48,6 +48,10 @@
     "success": "Sähköposti lähetetty",
     "failure": "Sähköpostin lähetys epäonnistui"
   },
+  "status": {
+    "modelInUse": "Käytössä oleva kielimalli:",
+    "tokensUsed": "tokenia käytetty"
+  },
   "error": {
     "noAccess": "Ei oikeuksia",
     "noAccessInfo": "Sinulla ei tällä hetkellä ole käyttöoikeuksia Gptwrapperiin"

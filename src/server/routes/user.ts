@@ -7,6 +7,7 @@ import {
   getOwnCourses,
 } from '../services/access'
 import { User } from '../db/models'
+import { getUserStatus } from '../services/usage'
 
 const userRouter = express.Router()
 
@@ -35,6 +36,23 @@ userRouter.get('/login', async (req, res) => {
   return res.send({
     ...user,
     hasIamAccess: isAdmin || hasIamAccess,
+  })
+})
+
+userRouter.get('/:serviceId/status', async (req, res) => {
+  const { serviceId } = req.params
+  const request = req as any as ChatRequest
+  const { user } = request
+  const { id } = user
+
+  if (!id) return res.status(401).send('Unauthorized')
+
+  const { usage, limit, model } = await getUserStatus(user, serviceId)
+
+  return res.send({
+    usage,
+    limit,
+    model,
   })
 })
 
