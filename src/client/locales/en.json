@@ -84,6 +84,8 @@
     "usage": "Usage",
     "username": "Username",
     "usageCount": "Usage count",
-    "reset": "Reset"
+    "reset": "Reset",
+    "faculties": "Faculties",
+    "users": "Users"
   }
 }

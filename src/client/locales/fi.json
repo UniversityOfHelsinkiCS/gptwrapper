@@ -84,6 +84,8 @@
     "usage": "Käyttö",
     "username": "Käyttäjätunnus",
     "usageCount": "Käyttömäärä",
-    "reset": "Nollaa"
+    "reset": "Nollaa",
+    "faculties": "Tiedekunnat",
+    "users": "Käyttäjät"
   }
 }

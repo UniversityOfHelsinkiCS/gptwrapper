@@ -70,7 +70,7 @@ export type UserStatus = {
   limit: number
 }
 
-type Locales = {
+export type Locales = {
   fi: string
   en: string
   sv: string
@@ -79,4 +79,5 @@ type Locales = {
 export interface Faculty {
   code: string
   name: Locales
+  iams: string[]
 }

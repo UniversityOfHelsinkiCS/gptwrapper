@@ -21,7 +21,7 @@ import { useDeleteServiceUsageMutation } from '../../../hooks/useServiceUsageMut
 const sortUsage = (a: ServiceUsage, b: ServiceUsage) =>
   a.user.username.localeCompare(b.user.username)
 
-const UsageTable = () => {
+const UserTable = () => {
   const { usage, isLoading } = useServiceUsage()
 
   const mutation = useDeleteServiceUsageMutation()
@@ -43,11 +43,7 @@ const UsageTable = () => {
   if (isLoading) return null
 
   return (
-    <Box mb={2}>
-      <Typography mb={2} variant="h4">
-        {t('admin:courses')}
-      </Typography>
-
+    <Box my={2}>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -98,4 +94,4 @@ const UsageTable = () => {
   )
 }
 
-export default UsageTable
+export default UserTable

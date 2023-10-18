@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv'
 
-import { inProduction, inStaging } from '../../config'
+import { inProduction } from '../../config'
 
 dotenv.config()
 
@@ -22,9 +22,9 @@ export const PATE_URL = inProduction
   ? 'https://api-toska.apps.ocp-prod-0.k8s.it.helsinki.fi/pate/'
   : 'https://api-toska.apps.ocp-test-0.k8s.it.helsinki.fi/pate/'
 
-export const IMPORTER_URL = inStaging
-  ? 'https://api-toska.apps.ocp-test-0.k8s.it.helsinki.fi/importer'
-  : 'https://api-toska.apps.ocp-prod-0.k8s.it.helsinki.fi/importer'
+export const IMPORTER_URL = inProduction
+  ? 'https://api-toska.apps.ocp-prod-0.k8s.it.helsinki.fi/importer'
+  : 'https://api-toska.apps.ocp-test-0.k8s.it.helsinki.fi/importer'
 
 export const REDIS_HOST = process.env.REDIS_HOST || 'redis'
 
