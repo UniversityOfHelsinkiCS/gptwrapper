@@ -69,3 +69,14 @@ export type UserStatus = {
   usage: number
   limit: number
 }
+
+type Locales = {
+  fi: string
+  en: string
+  sv: string
+}
+
+export interface Faculty {
+  code: string
+  name: Locales
+}

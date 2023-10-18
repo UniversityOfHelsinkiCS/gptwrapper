@@ -71,3 +71,23 @@ export type Prompt = {
   systemMessage: string
   messages: Message[]
 }
+
+type Locales = {
+  fi: string
+  en: string
+  sv: string
+}
+
+type Programme = {
+  key: string
+  name: Locales
+  level: string
+  companionFaculties: Array<string>
+  international: boolean
+}
+
+export interface OrganisationData {
+  code: string
+  name: Locales
+  programmes: Array<Programme>
+}

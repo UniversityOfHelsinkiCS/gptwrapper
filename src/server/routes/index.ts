@@ -11,6 +11,7 @@ import courseRouter from './course'
 import promptRouter from './prompt'
 import emailRouter from './email'
 import adminRouter from './admin'
+import facultyRouter from './faculty'
 
 const router = express()
 
@@ -31,5 +32,6 @@ router.use('/courses', courseRouter)
 router.use('/prompts', promptRouter)
 router.use('/email', emailRouter)
 router.use('/admin', adminRouter)
+router.use('/faculties', facultyRouter)
 
 export default router
