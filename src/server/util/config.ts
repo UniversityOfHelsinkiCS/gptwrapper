@@ -12,6 +12,10 @@ export const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ''
 
 export const TIKE_OPENAI_API_KEY = process.env.TIKE_OPENAI_API_KEY || ''
 
+export const AZURE_API_KEY = process.env.AZURE_API_KEY || ''
+
+export const AZURE_RESOURCE = process.env.AZURE_RESOURCE || ''
+
 export const DATABASE_URL = process.env.DATABASE_URL || ''
 
 export const JAMI_URL = inProduction
