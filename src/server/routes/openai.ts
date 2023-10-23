@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import express from 'express'
 
 import { inProduction } from '../../config'
@@ -8,6 +9,7 @@ import { isError } from '../util/parser'
 import { calculateUsage, incrementUsage, checkUsage } from '../services/usage'
 import hashData from '../util/hash'
 import { completionStream } from '../util/openai'
+import { getCompletionEvents } from '../util/azure'
 import { getMessageContext, getModel, getModelContextLimit } from '../util/util'
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
@@ -54,26 +56,46 @@ openaiRouter.post('/stream', async (req, res) => {
 
   const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
 
-  const stream = await completionStream(options, isTike)
+  if (isTike) {
+    const stream = await completionStream(options, isTike)
 
-  if (isError(stream)) return res.status(424).send(stream)
+    if (isError(stream)) return res.status(424).send(stream)
 
-  res.setHeader('content-type', 'text/plain')
+    res.setHeader('content-type', 'text/plain')
 
-  // eslint-disable-next-line no-restricted-syntax
-  for await (const part of stream) {
-    try {
-      const text = part.choices[0].delta?.content
+    for await (const part of stream) {
+      try {
+        const text = part.choices[0].delta?.content
 
-      if (!inProduction) logger.info(text)
+        if (!inProduction) logger.info(text)
 
-      if (text) {
-        res.write(text)
-        tokenCount += encoding.encode(text).length || 0
+        if (text) {
+          res.write(text)
+          tokenCount += encoding.encode(text).length || 0
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error)
       }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
+    }
+  } else {
+    const events = await getCompletionEvents(
+      'gpt-3.5-turbo',
+      options.messages,
+      options
+    )
+
+    res.setHeader('content-type', 'text/plain')
+
+    for await (const event of events) {
+      for (const choice of event.choices) {
+        const delta = choice.delta?.content
+
+        if (delta !== undefined) {
+          res.write(delta)
+          tokenCount += encoding.encode(delta).length || 0
+        }
+      }
     }
   }
 

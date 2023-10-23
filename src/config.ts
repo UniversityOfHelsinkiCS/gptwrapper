@@ -1,7 +1,3 @@
-import * as dotenv from 'dotenv'
-
-dotenv.config()
-
 export const inDevelopment = process.env.NODE_ENV === 'development'
 
 export const inStaging = process.env.STAGING === 'true'
@@ -23,12 +19,12 @@ export const DEFAULT_RESET_CRON =
 export const validModels = [
   {
     name: 'gpt-3.5-turbo',
-    deployment: process.env['gpt-3.5-turbo'] || '',
+    deployment: process.env['gpt-3.5-turbo'] || 'curredev35',
     context: 4_096,
   },
   {
     name: 'gpt-3.5-turbo-16k',
-    deployment: process.env['gpt-3.5-turbo-16k'] || '',
+    deployment: process.env['gpt-3.5-turbo-16k'] || 'curredev3516',
     context: 16_384,
   },
   {
