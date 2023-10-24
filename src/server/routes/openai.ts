@@ -79,11 +79,9 @@ openaiRouter.post('/stream', async (req, res) => {
       }
     }
   } else {
-    const events = await getCompletionEvents(
-      'gpt-3.5-turbo',
-      options.messages,
-      options
-    )
+    const events = await getCompletionEvents(options)
+
+    if (isError(events)) return res.status(424).send(events)
 
     res.setHeader('content-type', 'text/plain')
 
