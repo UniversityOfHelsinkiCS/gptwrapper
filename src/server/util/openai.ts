@@ -1,24 +1,17 @@
 import OpenAI from 'openai'
 
 import { StreamingOptions, OpenAIStream, APIError } from '../types'
-import { OPENAI_API_KEY, TIKE_OPENAI_API_KEY } from './config'
+import { TIKE_OPENAI_API_KEY } from './config'
 import logger from './logger'
 
-const defaultApi = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-})
-
-const tikeApi = new OpenAI({
+const openai = new OpenAI({
   apiKey: TIKE_OPENAI_API_KEY,
 })
 
 export const completionStream = async (
-  options: StreamingOptions,
-  isTike: boolean
+  options: StreamingOptions
 ): Promise<OpenAIStream | APIError> => {
   try {
-    const openai = isTike ? tikeApi : defaultApi
-
     const stream = await openai.chat.completions.create(options)
 
     return stream

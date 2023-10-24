@@ -8,8 +8,6 @@ export const PORT = process.env.PORT || 8000
 
 export const API_TOKEN = process.env.API_TOKEN || ''
 
-export const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ''
-
 export const TIKE_OPENAI_API_KEY = process.env.TIKE_OPENAI_API_KEY || ''
 
 export const AZURE_API_KEY = process.env.AZURE_API_KEY || ''

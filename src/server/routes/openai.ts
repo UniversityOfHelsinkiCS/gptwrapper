@@ -57,7 +57,7 @@ openaiRouter.post('/stream', async (req, res) => {
   const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
 
   if (isTike) {
-    const stream = await completionStream(options, isTike)
+    const stream = await completionStream(options)
 
     if (isError(stream)) return res.status(424).send(stream)
 
