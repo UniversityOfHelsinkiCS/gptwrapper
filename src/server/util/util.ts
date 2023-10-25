@@ -1,7 +1,12 @@
 import { Op } from 'sequelize'
 
 import { Message } from '../types'
-import { DEFAULT_MODEL, DEFAUL_CONTEXT_LIMIT, validModels } from '../../config'
+import {
+  DEFAULT_MODEL,
+  DEFAUL_CONTEXT_LIMIT,
+  validModels,
+  inProduction,
+} from '../../config'
 import { ServiceAccessGroup, Service } from '../db/models'
 
 /**
@@ -40,7 +45,7 @@ export const getModel = async (
   isAdmin: boolean = false
 ): Promise<string> => {
   if (courseId) return getCourseModel(courseId)
-  if (isAdmin) return 'gpt-3.5-turbo'
+  if (isAdmin) return inProduction ? 'gpt-4' : 'gpt-3.5-turbo'
 
   const accessGroups = await ServiceAccessGroup.findAll({
     where: {
