@@ -10,7 +10,12 @@ import { calculateUsage, incrementUsage, checkUsage } from '../services/usage'
 import hashData from '../util/hash'
 import { completionStream } from '../util/openai'
 import { getCompletionEvents } from '../util/azure'
-import { getMessageContext, getModel, getModelContextLimit } from '../util/util'
+import {
+  getMessageContext,
+  getModel,
+  getModelContextLimit,
+  sleep,
+} from '../util/util'
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
 
@@ -85,16 +90,23 @@ openaiRouter.post('/stream', async (req, res) => {
 
     res.setHeader('content-type', 'text/plain')
 
+    let i = 0
     for await (const event of events) {
+      // Slow sending of messages to prevent blocky output
+      i += options.model === 'gpt-4' ? 100 : 50
       for (const choice of event.choices) {
         const delta = choice.delta?.content
 
         if (delta !== undefined) {
-          res.write(delta)
+          setTimeout(() => {
+            res.write(delta)
+          }, i)
           tokenCount += encoding.encode(delta).length || 0
         }
       }
     }
+
+    await sleep(i)
   }
 
   await incrementUsage(user, id, tokenCount)

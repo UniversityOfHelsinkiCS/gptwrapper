@@ -72,3 +72,7 @@ export const getModelContextLimit = (modelName: string) => {
 
   return model.context
 }
+
+export const sleep =
+  // eslint-disable-next-line no-promise-executor-return
+  (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))

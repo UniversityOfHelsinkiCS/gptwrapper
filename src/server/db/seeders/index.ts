@@ -1,11 +1,11 @@
 import { inProduction } from '../../../config'
+import { sleep } from '../../util/util'
 import logger from '../../util/logger'
 import seedUsers from './user'
 import seedServices from './service'
 
 const seed = async () => {
-  // eslint-disable-next-line no-promise-executor-return
-  await new Promise<void>((resolve) => setTimeout(() => resolve(), 1_000))
+  await sleep(1_000)
 
   try {
     if (!inProduction) await seedUsers()
