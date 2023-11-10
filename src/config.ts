@@ -19,17 +19,17 @@ export const DEFAULT_RESET_CRON =
 export const validModels = [
   {
     name: 'gpt-3.5-turbo',
-    deployment: process.env['gpt-3.5-turbo'] || 'curredev35',
+    deployment: process.env.GPT_35_TURBO || 'curredev35',
     context: 4_096,
   },
   {
     name: 'gpt-3.5-turbo-16k',
-    deployment: process.env['gpt-3.5-turbo-16k'] || 'curredev3516',
+    deployment: process.env.GPT_35_TURBO_16K || 'curredev3516',
     context: 16_384,
   },
   {
     name: 'gpt-4',
-    deployment: process.env['gpt-4'] || '',
+    deployment: process.env.GPT_4 || '',
     context: 8_192,
   },
 ]
