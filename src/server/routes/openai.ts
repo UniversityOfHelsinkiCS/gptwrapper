@@ -93,7 +93,7 @@ openaiRouter.post('/stream', async (req, res) => {
     let i = 0
     for await (const event of events) {
       // Slow sending of messages to prevent blocky output
-      i += options.model === 'gpt-4' ? 100 : 50
+      i += options.model === 'gpt-4' ? 150 : 50
       for (const choice of event.choices) {
         const delta = choice.delta?.content
 
