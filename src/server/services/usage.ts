@@ -1,6 +1,7 @@
 import { Tiktoken } from '@dqbd/tiktoken'
 import { Op } from 'sequelize'
 
+import { tikeIam } from '../util/config'
 import { User, Service as ServiceType, StreamingOptions } from '../types'
 import { Service, UserServiceUsage, ServiceAccessGroup } from '../db/models'
 import { getModel, getAllowedModels } from '../util/util'
@@ -92,6 +93,8 @@ export const incrementUsage = async (
 }
 
 export const getUserStatus = async (user: User, serviceId: string) => {
+  const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
+
   const service = await Service.findByPk(serviceId, {
     attributes: ['id', 'usageLimit', 'courseId'],
   })
@@ -104,7 +107,12 @@ export const getUserStatus = async (user: User, serviceId: string) => {
     attributes: ['usageCount'],
   })
 
-  const model = await getModel(user.iamGroups, service?.courseId, user.isAdmin)
+  const model = await getModel(
+    user.iamGroups,
+    service?.courseId,
+    user.isAdmin,
+    isTike
+  )
   const models = getAllowedModels(model)
 
   return {
@@ -112,5 +120,6 @@ export const getUserStatus = async (user: User, serviceId: string) => {
     limit: service?.usageLimit ?? 0,
     model,
     models,
+    isTike,
   }
 }

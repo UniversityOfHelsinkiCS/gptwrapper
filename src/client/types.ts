@@ -69,6 +69,7 @@ export type UserStatus = {
   models: string[]
   usage: number
   limit: number
+  isTike: boolean
 }
 
 export type Locales = {
