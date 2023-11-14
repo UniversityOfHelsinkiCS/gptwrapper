@@ -7,7 +7,6 @@ import { ChatRequest } from '../types'
 import { Service } from '../db/models'
 import { isError } from '../util/parser'
 import { calculateUsage, incrementUsage, checkUsage } from '../services/usage'
-import hashData from '../util/hash'
 import { completionStream } from '../util/openai'
 import { getCompletionEvents } from '../util/azure'
 import {
@@ -38,7 +37,6 @@ openaiRouter.post('/stream', async (req, res) => {
   const usageAllowed = await checkUsage(user, service, courseId)
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
-  options.user = hashData(user.id)
   const model = await getModel(user.iamGroups, courseId, user.isAdmin)
   options.model = model
   options.messages = getMessageContext(options.messages)

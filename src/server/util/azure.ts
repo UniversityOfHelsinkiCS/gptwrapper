@@ -12,7 +12,6 @@ const client = new OpenAIClient(endpoint, new AzureKeyCredential(AZURE_API_KEY))
 export const getCompletionEvents = async ({
   model,
   messages,
-  user,
 }: StreamingOptions) => {
   const deploymentId = validModels.find((m) => m.name === model)?.deployment
 
@@ -20,7 +19,6 @@ export const getCompletionEvents = async ({
 
   try {
     const events = client.listChatCompletions(deploymentId, messages, {
-      user,
       stream: true,
     })
 

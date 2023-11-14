@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next'
 
 import toskaColor from '../../assets/toscalogo_color.svg'
 
-const supportEmail = 'grp-toska@helsinki.fi'
+const supportEmail = 'opetusteknologia@helsinki.fi'
 
 const styles = {
   supportBox: {
