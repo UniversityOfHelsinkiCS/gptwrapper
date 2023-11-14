@@ -12,6 +12,7 @@ import { getCompletionEvents } from '../util/azure'
 import {
   getMessageContext,
   getModel,
+  getAllowedModels,
   getModelContextLimit,
   sleep,
 } from '../util/util'
@@ -38,7 +39,15 @@ openaiRouter.post('/stream', async (req, res) => {
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
   const model = await getModel(user.iamGroups, courseId, user.isAdmin)
-  options.model = model
+
+  if (options.model) {
+    const allowedModels = getAllowedModels(model)
+    if (!allowedModels.includes(options.model))
+      return res.status(403).send('Model not allowed')
+  } else {
+    options.model = model
+  }
+
   options.messages = getMessageContext(options.messages)
   options.stream = true
 

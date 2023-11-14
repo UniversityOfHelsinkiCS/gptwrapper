@@ -73,7 +73,11 @@ const Status = ({
   return (
     <Box mb={1} padding="2% 10%">
       {models.length > 1 ? (
-        <ModelSelector model={model} setModel={setModel} models={models} />
+        <ModelSelector
+          currentModel={model}
+          setModel={setModel}
+          models={models}
+        />
       ) : (
         <ModelText model={model} />
       )}
