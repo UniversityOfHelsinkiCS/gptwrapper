@@ -65,6 +65,16 @@ export const getModel = async (
   return DEFAULT_MODEL
 }
 
+export const getAllowedModels = (model: string): string[] => {
+  const allModels = validModels.map(({ name }) => name)
+
+  if (model === 'gpt-4') return allModels
+  if (model === 'gpt-3.5-turbo-16k')
+    return allModels.filter((name) => name !== 'gpt-4')
+
+  return ['gpt-3.5-turbo']
+}
+
 export const getModelContextLimit = (modelName: string) => {
   const model = validModels.find(({ name }) => name === modelName)
 

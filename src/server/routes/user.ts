@@ -47,12 +47,13 @@ userRouter.get('/:serviceId/status', async (req, res) => {
 
   if (!id) return res.status(401).send('Unauthorized')
 
-  const { usage, limit, model } = await getUserStatus(user, serviceId)
+  const { usage, limit, model, models } = await getUserStatus(user, serviceId)
 
   return res.send({
     usage,
     limit,
     model,
+    models,
   })
 })
 

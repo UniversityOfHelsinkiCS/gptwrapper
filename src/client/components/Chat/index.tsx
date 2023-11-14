@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop, no-constant-condition */
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Box, Paper } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useParams } from 'react-router-dom'
@@ -24,6 +24,7 @@ const Chat = () => {
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const [completion, setCompletion] = useState('')
+  const [model, setModel] = useState('')
 
   const { course, isLoading } = useCourse(courseId)
   const {
@@ -32,10 +33,15 @@ const Chat = () => {
     refetch,
   } = useUserStatus(course?.id)
 
+  useEffect(() => {
+    if (statusLoading || model) return
+    setModel(userStatus.model)
+  }, [userStatus])
+
   if (isLoading || statusLoading) return null
   if (!userStatus) return null
 
-  const { model, usage, limit } = userStatus
+  const { usage, limit, models } = userStatus
 
   const hasPrompts = course && course.prompts.length > 0
   const activePrompt = course?.prompts.find(({ id }) => id === activePromptId)
@@ -61,6 +67,7 @@ const Chat = () => {
         course?.id || 'chat',
         system,
         messages.concat(newMessage),
+        model,
         courseId
       )
       const reader = stream.getReader()
@@ -152,7 +159,13 @@ const Chat = () => {
           disabled={messages.length === 0 || completion !== ''}
         />
       </Paper>
-      <Status model={model} usage={usage} limit={limit} />
+      <Status
+        model={model}
+        setModel={setModel}
+        models={models}
+        usage={usage}
+        limit={limit}
+      />
     </Box>
   )
 }

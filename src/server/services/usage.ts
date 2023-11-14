@@ -3,7 +3,7 @@ import { Op } from 'sequelize'
 
 import { User, Service as ServiceType, StreamingOptions } from '../types'
 import { Service, UserServiceUsage, ServiceAccessGroup } from '../db/models'
-import { getModel } from '../util/util'
+import { getModel, getAllowedModels } from '../util/util'
 import logger from '../util/logger'
 
 // Get largest usage limit for user based on their IAM groups
@@ -105,10 +105,12 @@ export const getUserStatus = async (user: User, serviceId: string) => {
   })
 
   const model = await getModel(user.iamGroups, service?.courseId, user.isAdmin)
+  const models = getAllowedModels(model)
 
   return {
     usage: serviceUsage?.usageCount ?? 0,
     limit: service?.usageLimit ?? 0,
     model,
+    models,
   }
 }

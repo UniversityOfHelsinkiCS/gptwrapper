@@ -5,6 +5,7 @@ export const getCompletionStream = async (
   id: string,
   system: string,
   messages: Message[],
+  model: string,
   courseId?: string
 ) => {
   const response = await fetch(`${PUBLIC_URL}/api/ai/stream`, {
@@ -23,6 +24,7 @@ export const getCompletionStream = async (
           },
           ...messages,
         ],
+        model,
       },
     }),
   })

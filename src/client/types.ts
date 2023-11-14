@@ -66,6 +66,7 @@ export type ServiceUsage = {
 
 export type UserStatus = {
   model: string
+  models: string[]
   usage: number
   limit: number
 }
