@@ -1,4 +1,9 @@
-import { IMPORTER_URL, API_TOKEN } from './config'
+import {
+  IMPORTER_URL,
+  API_TOKEN,
+  TEST_COURSE_ID,
+  TEST_USER_IDS,
+} from './config'
 import { Enrollment, CourseUnitRealisation } from '../types'
 import { set, get } from './redis'
 
@@ -31,6 +36,8 @@ export const getEnrollments = async (userId: string): Promise<Enrollment[]> => {
 }
 
 export const getTeachers = async (courseId: string): Promise<string[]> => {
+  if (courseId === TEST_COURSE_ID) return TEST_USER_IDS
+
   const redisKey = `${courseId}-teachers`
 
   const cachedTeachers = await get(redisKey)
