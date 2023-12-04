@@ -43,7 +43,7 @@ Prompt.init(
       allowNull: false,
     },
     systemMessage: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     messages: {
