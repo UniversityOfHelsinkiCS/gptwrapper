@@ -29,7 +29,7 @@ export const validModels = [
   },
   {
     name: 'gpt-4',
-    deployment: process.env.GPT_4 || '',
+    deployment: process.env.GPT_4 || 'curredev4',
     context: 8_192,
   },
 ]
