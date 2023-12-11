@@ -5,7 +5,7 @@ const settings = {
   hideToska: false,
   disableToska: true,
   color: '#107eab',
-  header: 'Gptwrapper',
+  header: 'CurreChat',
   headerFontColor: 'white',
   dryrun: inDevelopment,
 }
@@ -15,7 +15,7 @@ const sendEmail = async (targets: string[], text: string, subject: string) => {
 
   const mail = {
     template: {
-      from: 'Gptwrapper',
+      from: 'CurreChat',
       text,
     },
     emails,
