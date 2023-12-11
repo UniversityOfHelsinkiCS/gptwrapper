@@ -62,7 +62,7 @@ openaiRouter.post('/stream', async (req, res) => {
 
   // Downgrade to gpt-3.5 for long student conversations
   if (courseId && model === 'gpt-4' && tokenCount > 2_000) {
-    options.model = 'gpt-3.5-turbo-16k'
+    options.model = 'gpt-3.5-turbo'
     tokenCount = Math.round(tokenCount / 10)
   }
 

@@ -46,7 +46,7 @@ export const getModel = async (
   isTike: boolean = false
 ): Promise<string> => {
   if (courseId) return getCourseModel(courseId)
-  if (isTike) return 'gpt-3.5-turbo-16k'
+  if (isTike) return 'gpt-3.5-turbo'
   if (isAdmin) return inProduction ? 'gpt-4' : 'gpt-3.5-turbo'
 
   const accessGroups = await ServiceAccessGroup.findAll({
@@ -61,7 +61,6 @@ export const getModel = async (
   const models = accessGroups.map(({ model }) => model)
 
   if (models.includes('gpt-4')) return 'gpt-4'
-  if (models.includes('gpt-3.5-turbo-16k')) return 'gpt-3.5-turbo-16k'
   if (models.includes('gpt-3.5-turbo')) return 'gpt-3.5-turbo'
 
   return DEFAULT_MODEL
@@ -69,10 +68,8 @@ export const getModel = async (
 
 export const getAllowedModels = (model: string): string[] => {
   const allModels = validModels.map(({ name }) => name)
-  const gpt35Models = allModels.filter((name) => name !== 'gpt-4')
 
   if (model === 'gpt-4') return allModels
-  if (model === 'gpt-3.5-turbo-16k') return gpt35Models
 
   return ['gpt-3.5-turbo']
 }

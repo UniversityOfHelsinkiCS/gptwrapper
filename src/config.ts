@@ -23,11 +23,6 @@ export const validModels = [
     context: 4_096,
   },
   {
-    name: 'gpt-3.5-turbo-16k',
-    deployment: process.env.GPT_35_TURBO_16K || 'curredev3516',
-    context: 16_384,
-  },
-  {
     name: 'gpt-4',
     deployment: process.env.GPT_4 || 'curredev4',
     context: 8_192,
