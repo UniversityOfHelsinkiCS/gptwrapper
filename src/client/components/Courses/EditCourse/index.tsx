@@ -10,7 +10,7 @@ import {
   FormControlLabel,
   Input,
 } from '@mui/material'
-import { OpenInNew, Edit } from '@mui/icons-material'
+import { OpenInNew, Edit, FileCopyOutlined } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 import { useParams, Link } from 'react-router-dom'
@@ -104,6 +104,8 @@ const Course = () => {
   const { prompts, isLoading } = usePrompts(id as string)
   const { course, isLoading: courseLoading } = useCourse(id as string)
 
+  const studentLink = `${window.location.origin}/chat/${course?.courseId}`
+
   if (isLoading || courseLoading || !course) return null
 
   const handleSave = () => {
@@ -132,6 +134,11 @@ const Course = () => {
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     }
+  }
+
+  const handleCopyLink = (link: string) => {
+    navigator.clipboard.writeText(link)
+    enqueueSnackbar(t('linkCopied'), { variant: 'info' })
   }
 
   return (
@@ -164,8 +171,18 @@ const Course = () => {
           </Button>
 
           <Button endIcon={<OpenInNew />}>
-            <Link to={`/${course?.courseId}`}>{t('common:toStudentView')}</Link>
+            <Link to={studentLink}>{t('common:toStudentView')}</Link>
           </Button>
+
+          <Box>
+            <Button
+              startIcon={<FileCopyOutlined />}
+              color="primary"
+              onClick={() => handleCopyLink(studentLink)}
+            >
+              {t('copyToClipboard')}
+            </Button>
+          </Box>
         </Paper>
       </Box>
 

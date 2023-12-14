@@ -24,7 +24,9 @@
     "hidePrompt": "Hide prompt text from students",
     "hiddenPromptInfo": "Prompt text is not visible to students",
     "visiblePromptInfo": "Prompt text is visible to students",
-    "promptName": "Prompt name"
+    "promptName": "Prompt name",
+    "copyStudentLink": "Copy student link",
+    "linkCopied": "Link copied"
   },
   "info": {
     "title": "## Attention",

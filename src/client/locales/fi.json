@@ -24,7 +24,9 @@
     "hidePrompt": "Piilota alustuksen teksti opiskelijoilta",
     "hiddenPromptInfo": "Alustuksen teksti ei näy opiskelijoille",
     "visiblePromptInfo": "Alustuksen teksti näkyy opiskelijoille",
-    "promptName": "Alustuksen nimi"
+    "promptName": "Alustuksen nimi",
+    "copyStudentLink": "Kopioi opiskelijan linkki",
+    "linkCopied": "Linkki kopioitu"
   },
   "info": {
     "title": "## Huomio",
