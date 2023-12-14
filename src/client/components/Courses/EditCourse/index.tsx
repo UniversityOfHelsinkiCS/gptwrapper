@@ -174,13 +174,17 @@ const Course = () => {
             <Link to={studentLink}>{t('common:toStudentView')}</Link>
           </Button>
 
+          <Box fontStyle="italic">
+            <Typography>{studentLink}</Typography>
+          </Box>
+          <Box mr={2} />
           <Box>
             <Button
               startIcon={<FileCopyOutlined />}
               color="primary"
               onClick={() => handleCopyLink(studentLink)}
             >
-              {t('copyToClipboard')}
+              {t('copyStudentLink')}
             </Button>
           </Box>
         </Paper>
