@@ -115,9 +115,14 @@ export const getUserStatus = async (user: User, serviceId: string) => {
   )
   const models = getAllowedModels(model)
 
+  const limit =
+    service.id === 'chat'
+      ? await getIamUsageLimit(service, user)
+      : service?.usageLimit ?? 0
+
   return {
     usage: serviceUsage?.usageCount ?? 0,
-    limit: service?.usageLimit ?? 0,
+    limit,
     model,
     models,
     isTike,
