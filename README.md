@@ -1,6 +1,6 @@
 # GPTwrapper
 
-UI and access management wrapper for OpenAI API
+UI and access management wrapper for Azure OpenAI service 
 
 ## Development
 
