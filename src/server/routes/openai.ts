@@ -3,7 +3,7 @@ import express from 'express'
 
 import { inProduction } from '../../config'
 import { tikeIam } from '../util/config'
-import { ChatRequest } from '../types'
+import { ChatRequest, AzureOptions } from '../types'
 import { Service } from '../db/models'
 import { isError } from '../util/parser'
 import { calculateUsage, incrementUsage, checkUsage } from '../services/usage'
@@ -91,7 +91,7 @@ openaiRouter.post('/stream', async (req, res) => {
       }
     }
   } else {
-    const events = await getCompletionEvents(options)
+    const events = await getCompletionEvents(options as AzureOptions)
 
     if (isError(events)) return res.status(424).send(events)
 
@@ -103,6 +103,8 @@ openaiRouter.post('/stream', async (req, res) => {
       i += options.model === 'gpt-4' ? 150 : 50
       for (const choice of event.choices) {
         const delta = choice.delta?.content
+
+        if (!inProduction) logger.info(delta)
 
         if (delta !== undefined) {
           setTimeout(() => {

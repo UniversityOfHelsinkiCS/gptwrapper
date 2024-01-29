@@ -1,5 +1,6 @@
 import { Request } from 'express'
 import OpenAI from 'openai'
+import { ChatRequestMessage } from '@azure/openai'
 
 export interface User {
   id: string
@@ -30,6 +31,11 @@ export type Message = OpenAI.Chat.ChatCompletionMessage
 
 export type StreamingOptions =
   OpenAI.Chat.Completions.CompletionCreateParamsStreaming
+
+export type AzureOptions = {
+  model: string
+  messages: ChatRequestMessage[]
+}
 
 interface RequestBody {
   id?: string
