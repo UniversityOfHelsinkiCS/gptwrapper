@@ -25,6 +25,7 @@ const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([])
   const [completion, setCompletion] = useState('')
   const [model, setModel] = useState('')
+  const [streamController, setStreamController] = useState<AbortController>()
 
   const { course, isLoading } = useCourse(courseId)
   const {
@@ -63,7 +64,7 @@ const Chat = () => {
     setMessage('')
 
     try {
-      const stream = await getCompletionStream(
+      const { stream, controller } = await getCompletionStream(
         course?.id || 'chat',
         system,
         messages.concat(newMessage),
@@ -71,6 +72,7 @@ const Chat = () => {
         courseId
       )
       const reader = stream.getReader()
+      setStreamController(controller)
 
       let content = ''
       while (true) {
@@ -86,15 +88,20 @@ const Chat = () => {
 
       setMessages((prev) => [...prev, { role: 'assistant', content }])
     } catch (err: any) {
+      if (err?.name === 'AbortError') return
       const error = err?.response?.data || err.message
       enqueueSnackbar(error, { variant: 'error' })
     }
 
+    setStreamController(undefined)
     setCompletion('')
     refetch()
   }
 
   const handleReset = () => {
+    if (streamController) streamController.abort()
+
+    setStreamController(undefined)
     setMessages([])
     setSystem('')
     setMessage('')

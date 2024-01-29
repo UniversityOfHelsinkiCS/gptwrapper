@@ -8,6 +8,8 @@ export const getCompletionStream = async (
   model: string,
   courseId?: string
 ) => {
+  const controller = new AbortController()
+
   const response = await fetch(`${PUBLIC_URL}/api/ai/stream`, {
     method: 'POST',
     headers: {
@@ -27,6 +29,7 @@ export const getCompletionStream = async (
         model,
       },
     }),
+    signal: controller.signal,
   })
 
   if (!response.ok) {
@@ -36,7 +39,7 @@ export const getCompletionStream = async (
 
   const stream = response.body as unknown as ReadableStream
 
-  return stream
+  return { stream, controller }
 }
 
 export const sendEmail = async (to: string, text: string, subject: string) => {
