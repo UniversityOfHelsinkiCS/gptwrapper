@@ -65,7 +65,6 @@
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.11.16",
     "@types/node-cron": "^3.0.11",
-    "@types/prettier": "^3.0.0",
     "@types/react": "^18.2.52",
     "@types/react-dom": "^18.2.18",
     "@types/react-router-dom": "^5.3.3",
