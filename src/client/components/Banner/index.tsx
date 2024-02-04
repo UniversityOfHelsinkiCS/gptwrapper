@@ -8,7 +8,7 @@ import ShowMore from './ShowMore'
 const Banner = () => {
   const { t } = useTranslation()
 
-  const showDisclaimer = !localStorage.getItem('disclaimerClosed') ?? true
+  const showDisclaimer = !localStorage.getItem('disclaimerClosed')
 
   return (
     <Box sx={{ m: 2, maxWidth: 1560 }}>
