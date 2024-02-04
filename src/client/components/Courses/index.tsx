@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import { Course as CourseType } from '../../types'
 import useUserCourses from '../../hooks/useUserCourses'
-import { formatDate } from './util'
+import { formatDate, sortCourses } from './util'
 
 const Course = ({ course }: { course: CourseType }) => {
   if (!course) return null
@@ -48,6 +48,8 @@ const Courses = () => {
 
   if (isLoading) return null
 
+  const sortedCourses = courses.toSorted(sortCourses)
+
   return (
     <Box
       sx={{
@@ -66,7 +68,7 @@ const Courses = () => {
         <Typography variant="h5" display="inline">
           {t('common:courses')}
         </Typography>
-        {courses.map((course) => (
+        {sortedCourses.map((course) => (
           <Course key={course.id} course={course} />
         ))}
       </Paper>

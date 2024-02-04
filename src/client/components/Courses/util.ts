@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 
-import { ActivityPeriod } from '../../types'
+import { ActivityPeriod, Course } from '../../types'
 
 export const formatDate = (activityPeriod?: ActivityPeriod) => {
   if (!activityPeriod) return ''
@@ -11,4 +11,11 @@ export const formatDate = (activityPeriod?: ActivityPeriod) => {
   const end = new Date(endDate)
 
   return `${format(start, 'dd.MM.')}–${format(end, 'dd.MM.yyyy')}`
+}
+
+export const sortCourses = (a: Course, b: Course) => {
+  const getStartTime = (course: Course) =>
+    new Date(course.activityPeriod.startDate).getTime()
+
+  return getStartTime(b) - getStartTime(a)
 }
