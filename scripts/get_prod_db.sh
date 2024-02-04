@@ -6,7 +6,7 @@ DB_NAME=postgres
 
 GPTWRAPPER_FILE_NAME=gptwrapper.sql.gz
 
-SERVER=svm-116.cs.helsinki.fi
+SERVER=toska.cs.helsinki.fi
 SERVER_PATH=/home/toska_user/most_recent_backup_store/
 
 SERVER_FILE=${SERVER_PATH}${GPTWRAPPER_FILE_NAME}
