@@ -25,7 +25,8 @@ export const useCreateServiceMutation = () => {
     return service
   }
 
-  const mutation = useMutation(mutationFn, {
+  const mutation = useMutation({
+    mutationFn,
     onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey,
@@ -57,7 +58,8 @@ export const useEditServiceMutation = () => {
     return service
   }
 
-  const mutation = useMutation(mutationFn, {
+  const mutation = useMutation({
+    mutationFn,
     onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey,
@@ -76,7 +78,8 @@ export const useDeleteServiceMutation = () => {
     return res
   }
 
-  const mutation = useMutation(mutationFn, {
+  const mutation = useMutation({
+    mutationFn,
     onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey,

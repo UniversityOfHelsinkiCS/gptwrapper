@@ -14,7 +14,7 @@ const useServiceUsage = () => {
     return data
   }
 
-  const { data: usage, ...rest } = useQuery(queryKey, queryFn)
+  const { data: usage, ...rest } = useQuery({ queryKey, queryFn })
 
   return { usage: usage || [], ...rest }
 }

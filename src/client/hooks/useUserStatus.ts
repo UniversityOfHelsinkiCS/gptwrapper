@@ -14,7 +14,7 @@ const useUserStatus = (serviceId: string = 'chat') => {
     return data
   }
 
-  const { data: userStatus, ...rest } = useQuery(queryKey, queryFn)
+  const { data: userStatus, ...rest } = useQuery({ queryKey, queryFn })
 
   return { userStatus, ...rest }
 }

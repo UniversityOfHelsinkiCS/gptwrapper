@@ -21,7 +21,8 @@ export const useEditCourseMutation = (id: string) => {
     return course
   }
 
-  const mutation = useMutation(mutationFn, {
+  const mutation = useMutation({
+    mutationFn,
     onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey: ['course', id],

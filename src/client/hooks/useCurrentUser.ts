@@ -16,7 +16,7 @@ const useCurrentUser = () => {
     return data
   }
 
-  const { data: user, ...rest } = useQuery(queryKey, queryFn)
+  const { data: user, ...rest } = useQuery({ queryKey, queryFn })
 
   return { user, ...rest }
 }

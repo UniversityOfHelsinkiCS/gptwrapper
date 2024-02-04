@@ -16,7 +16,7 @@ const useCourse = (courseId?: string) => {
     return data
   }
 
-  const { data: course, ...rest } = useQuery(queryKey, queryFn)
+  const { data: course, ...rest } = useQuery({ queryKey, queryFn })
 
   return { course, ...rest }
 }

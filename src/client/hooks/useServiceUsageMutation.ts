@@ -13,7 +13,8 @@ export const useDeleteServiceUsageMutation = () => {
     return res
   }
 
-  const mutation = useMutation(mutationFn, {
+  const mutation = useMutation({
+    mutationFn,
     onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey,

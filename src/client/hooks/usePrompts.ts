@@ -14,7 +14,7 @@ const usePrompts = (serviceId: string) => {
     return data
   }
 
-  const { data: prompts, ...rest } = useQuery(queryKey, queryFn)
+  const { data: prompts, ...rest } = useQuery({ queryKey, queryFn })
 
   return { prompts: prompts || [], ...rest }
 }

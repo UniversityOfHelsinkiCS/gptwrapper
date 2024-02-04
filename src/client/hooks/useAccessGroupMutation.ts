@@ -24,7 +24,8 @@ export const useCreateAccessGroupMutation = () => {
     return accessGroup
   }
 
-  const mutation = useMutation(mutationFn, {
+  const mutation = useMutation({
+    mutationFn,
     onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey,
@@ -55,7 +56,8 @@ export const useEditAccessGroupMutation = () => {
     return accessGroup
   }
 
-  const mutation = useMutation(mutationFn, {
+  const mutation = useMutation({
+    mutationFn,
     onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey,
@@ -74,7 +76,8 @@ export const useDeleteAccessGroupMutation = () => {
     return res
   }
 
-  const mutation = useMutation(mutationFn, {
+  const mutation = useMutation({
+    mutationFn,
     onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey,

@@ -26,7 +26,8 @@ export const useCreatePromptMutation = () => {
     return prompt
   }
 
-  const mutation = useMutation(mutationFn, {
+  const mutation = useMutation({
+    mutationFn,
     onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey,
@@ -45,7 +46,8 @@ export const useDeletePromptMutation = () => {
     return res
   }
 
-  const mutation = useMutation(mutationFn, {
+  const mutation = useMutation({
+    mutationFn,
     onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey,

@@ -14,7 +14,7 @@ const useAccessGroups = () => {
     return data
   }
 
-  const { data: accessGroups, ...rest } = useQuery(queryKey, queryFn)
+  const { data: accessGroups, ...rest } = useQuery({ queryKey, queryFn })
 
   return { accessGroups: accessGroups || [], ...rest }
 }

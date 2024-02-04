@@ -14,7 +14,7 @@ const useFaculties = () => {
     return data
   }
 
-  const { data: faculties, ...rest } = useQuery(queryKey, queryFn)
+  const { data: faculties, ...rest } = useQuery({ queryKey, queryFn })
 
   return { faculties, ...rest }
 }
