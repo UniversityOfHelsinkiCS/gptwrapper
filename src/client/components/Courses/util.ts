@@ -14,6 +14,8 @@ export const formatDate = (activityPeriod?: ActivityPeriod) => {
 }
 
 export const sortCourses = (a: Course, b: Course) => {
+  if (!a.activityPeriod || !b.activityPeriod) return 0
+
   const getStartTime = (course: Course) =>
     new Date(course.activityPeriod.startDate).getTime()
 
