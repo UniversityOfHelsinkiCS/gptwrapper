@@ -21,6 +21,12 @@ export interface ChatRequest extends RequestWithUser {
   body: RequestBody
 }
 
+export interface CourseChatRequest extends ChatRequest {
+  params: {
+    courseId: string
+  }
+}
+
 export type APIError = typeof OpenAI.APIError
 
 export type OpenAIStream = ReturnType<

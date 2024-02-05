@@ -105,6 +105,32 @@ export const incrementUsage = async (user: UserType, tokenCount: number) => {
   })
 }
 
+export const incrementCourseUsage = async (
+  user: UserType,
+  courseId: string,
+  tokenCount: number
+) => {
+  const service = await Service.findOne({
+    where: {
+      courseId,
+    },
+    attributes: ['id'],
+  })
+
+  const serviceUsage = await UserServiceUsage.findOne({
+    where: {
+      userId: user.id,
+      serviceId: service.id,
+    },
+  })
+
+  if (!serviceUsage) throw new Error('User service usage not found')
+
+  serviceUsage.usageCount += tokenCount
+
+  await serviceUsage.save()
+}
+
 export const getUserStatus = async (user: UserType, serviceId: string) => {
   const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
 
