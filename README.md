@@ -1,6 +1,6 @@
-# GPTwrapper
+# CurreChat
 
-UI and access management wrapper for Azure OpenAI service 
+UI and access management wrapper for Azure OpenAI service
 
 ## Development
 
