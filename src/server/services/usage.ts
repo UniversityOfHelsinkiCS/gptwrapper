@@ -1,6 +1,7 @@
 import { Tiktoken } from '@dqbd/tiktoken'
 import { Op } from 'sequelize'
 
+import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { tikeIam } from '../util/config'
 import {
   User as UserType,
@@ -50,9 +51,7 @@ export const checkUsage = async ({
     attributes: ['usage'],
   })
 
-  const usageLimit = 50_000
-
-  return !isAdmin && usage >= usageLimit
+  return !isAdmin && usage >= DEFAULT_TOKEN_LIMIT
 }
 
 export const checkCourseUsage = async (
@@ -97,33 +96,13 @@ export const calculateUsage = (
   return tokenCount
 }
 
-export const incrementUsage = async (
-  user: UserType,
-  serviceId: string,
-  courseId: string,
-  tokenCount: number
-) => {
-  if (courseId) {
-    const serviceUsage = await UserServiceUsage.findOne({
-      where: {
-        userId: user.id,
-        serviceId,
-      },
-    })
-
-    if (!serviceUsage) throw new Error('User service usage not found')
-
-    serviceUsage.usageCount += tokenCount
-
-    await serviceUsage.save()
-  } else {
-    await User.increment('usage', {
-      by: tokenCount,
-      where: {
-        id: user.id,
-      },
-    })
-  }
+export const incrementUsage = async (user: UserType, tokenCount: number) => {
+  await User.increment('usage', {
+    by: tokenCount,
+    where: {
+      id: user.id,
+    },
+  })
 }
 
 export const getUserStatus = async (user: UserType, serviceId: string) => {

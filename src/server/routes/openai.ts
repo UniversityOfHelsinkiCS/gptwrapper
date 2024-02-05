@@ -5,12 +5,7 @@ import { inProduction } from '../../config'
 import { tikeIam } from '../util/config'
 import { ChatRequest, AzureOptions } from '../types'
 import { isError } from '../util/parser'
-import {
-  calculateUsage,
-  incrementUsage,
-  checkUsage,
-  checkCourseUsage,
-} from '../services/usage'
+import { calculateUsage, incrementUsage, checkUsage } from '../services/usage'
 import { completionStream } from '../util/openai'
 import { getCompletionEvents } from '../util/azure'
 import { getMessageContext, getModelContextLimit, sleep } from '../util/util'
@@ -21,16 +16,13 @@ const openaiRouter = express.Router()
 
 openaiRouter.post('/stream', async (r, res) => {
   const req = r as ChatRequest
-  const { id, options, courseId } = req.body
+  const { options } = req.body
   const { model } = options
   const { user } = req
 
   if (!user.id) return res.status(401).send('Unauthorized')
 
-  const usageAllowed = courseId
-    ? await checkCourseUsage(user, courseId)
-    : checkUsage(user)
-  if (!usageAllowed) return res.status(403).send('Usage limit reached')
+  if (!checkUsage(user)) return res.status(403).send('Usage limit reached')
 
   options.messages = getMessageContext(options.messages)
   options.stream = true
@@ -42,12 +34,6 @@ openaiRouter.post('/stream', async (r, res) => {
   if (tokenCount > contextLimit) {
     logger.info('Maximum context reached')
     return res.status(403).send('Model maximum context reached')
-  }
-
-  // Downgrade to gpt-3.5 for long student conversations
-  if (courseId && model === 'gpt-4' && tokenCount > 2_000) {
-    options.model = 'gpt-3.5-turbo'
-    tokenCount = Math.round(tokenCount / 10)
   }
 
   const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
@@ -101,11 +87,10 @@ openaiRouter.post('/stream', async (r, res) => {
     await sleep(i)
   }
 
-  await incrementUsage(user, id, courseId, tokenCount)
+  await incrementUsage(user, tokenCount)
   logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
     tokenCount,
-    courseId,
-    model: options.model,
+    model,
     user: user.username,
   })
 
@@ -113,5 +98,7 @@ openaiRouter.post('/stream', async (r, res) => {
 
   return res.end()
 })
+
+openaiRouter.post('/stream/:courseId', async (_, res) => res.status(501))
 
 export default openaiRouter
