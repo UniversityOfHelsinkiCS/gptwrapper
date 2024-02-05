@@ -13,8 +13,8 @@ import {
   incrementCourseUsage,
 } from '../services/usage'
 import { completionStream } from '../util/openai'
-import { getCompletionEvents } from '../util/azure'
-import { getMessageContext, getModelContextLimit, sleep } from '../util/util'
+import { getCompletionEvents, streamCompletion } from '../util/azure'
+import { getMessageContext, getModelContextLimit } from '../util/util'
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
 
@@ -49,7 +49,7 @@ openaiRouter.post('/stream', async (r, res) => {
 
     if (isError(stream)) return res.status(424).send(stream)
 
-    res.setHeader('content-type', 'text/plain')
+    res.setHeader('content-type', 'text/event-stream')
 
     for await (const part of stream) {
       try {
@@ -70,27 +70,14 @@ openaiRouter.post('/stream', async (r, res) => {
 
     if (isError(events)) return res.status(424).send(events)
 
-    res.setHeader('content-type', 'text/plain')
+    res.setHeader('content-type', 'text/event-stream')
 
-    let i = 0
-    for await (const event of events) {
-      // Slow sending of messages to prevent blocky output
-      i += options.model === 'gpt-4' ? 150 : 50
-      for (const choice of event.choices) {
-        const delta = choice.delta?.content
-
-        if (!inProduction) logger.info(delta)
-
-        if (delta !== undefined) {
-          setTimeout(() => {
-            res.write(delta)
-          }, i)
-          tokenCount += encoding.encode(delta).length || 0
-        }
-      }
-    }
-
-    await sleep(i)
+    tokenCount += await streamCompletion(
+      events,
+      options as AzureOptions,
+      encoding,
+      res
+    )
   }
 
   await incrementUsage(user, tokenCount)
@@ -139,27 +126,14 @@ openaiRouter.post('/stream/:courseId', async (r, res) => {
 
   if (isError(events)) return res.status(424).send(events)
 
-  res.setHeader('content-type', 'text/plain')
+  res.setHeader('content-type', 'text/event-stream')
 
-  let i = 0
-  for await (const event of events) {
-    // Slow sending of messages to prevent blocky output
-    i += options.model === 'gpt-4' ? 150 : 50
-    for (const choice of event.choices) {
-      const delta = choice.delta?.content
-
-      if (!inProduction) logger.info(delta)
-
-      if (delta !== undefined) {
-        setTimeout(() => {
-          res.write(delta)
-        }, i)
-        tokenCount += encoding.encode(delta).length || 0
-      }
-    }
-  }
-
-  await sleep(i)
+  tokenCount += await streamCompletion(
+    events,
+    options as AzureOptions,
+    encoding,
+    res
+  )
 
   await incrementCourseUsage(user, courseId, tokenCount)
   logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
