@@ -6,7 +6,7 @@ import Prompt from './prompt'
 
 User.belongsToMany(Service, { through: UserServiceUsage, as: 'services' })
 Service.belongsToMany(User, { through: UserServiceUsage, as: 'users' })
-User.hasMany(UserServiceUsage, { as: 'usage' })
+// User.hasMany(UserServiceUsage, { as: 'usage' })
 UserServiceUsage.belongsTo(User, { as: 'user' })
 Service.hasMany(UserServiceUsage, { as: 'usage' })
 UserServiceUsage.belongsTo(Service, { as: 'service' })

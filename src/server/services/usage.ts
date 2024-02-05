@@ -2,8 +2,18 @@ import { Tiktoken } from '@dqbd/tiktoken'
 import { Op } from 'sequelize'
 
 import { tikeIam } from '../util/config'
-import { User, Service as ServiceType, StreamingOptions } from '../types'
-import { Service, UserServiceUsage, ServiceAccessGroup } from '../db/models'
+import {
+  User as UserType,
+  Service as ServiceType,
+  StreamingOptions,
+  AzureOptions,
+} from '../types'
+import {
+  Service,
+  UserServiceUsage,
+  ServiceAccessGroup,
+  User,
+} from '../db/models'
 import { getModel, getAllowedModels } from '../util/util'
 import logger from '../util/logger'
 
@@ -32,11 +42,29 @@ const getIamUsageLimit = async (
   return service.usageLimit
 }
 
-export const checkUsage = async (
-  user: User,
-  service: ServiceType,
-  courseId?: string
+export const checkUsage = async ({
+  id,
+  isAdmin,
+}: UserType): Promise<boolean> => {
+  const { usage } = await User.findByPk(id, {
+    attributes: ['usage'],
+  })
+
+  const usageLimit = 50_000
+
+  return !isAdmin && usage >= usageLimit
+}
+
+export const checkCourseUsage = async (
+  user: UserType,
+  courseId: string
 ): Promise<boolean> => {
+  const service = await Service.findOne({
+    where: {
+      courseId,
+    },
+  })
+
   const [serviceUsage] = await UserServiceUsage.findOrCreate({
     where: {
       userId: user.id,
@@ -44,11 +72,7 @@ export const checkUsage = async (
     },
   })
 
-  const usageLimit = courseId
-    ? service.usageLimit
-    : await getIamUsageLimit(service, user)
-
-  if (!user.isAdmin && serviceUsage.usageCount >= usageLimit) {
+  if (!user.isAdmin && serviceUsage.usageCount >= service.usageLimit) {
     logger.info('Usage limit reached')
 
     return false
@@ -58,7 +82,7 @@ export const checkUsage = async (
 }
 
 export const calculateUsage = (
-  options: StreamingOptions,
+  options: StreamingOptions | AzureOptions,
   encoding: Tiktoken
 ): number => {
   const { messages } = options
@@ -74,25 +98,35 @@ export const calculateUsage = (
 }
 
 export const incrementUsage = async (
-  user: User,
+  user: UserType,
   serviceId: string,
+  courseId: string,
   tokenCount: number
 ) => {
-  const serviceUsage = await UserServiceUsage.findOne({
-    where: {
-      userId: user.id,
-      serviceId,
-    },
-  })
+  if (courseId) {
+    const serviceUsage = await UserServiceUsage.findOne({
+      where: {
+        userId: user.id,
+        serviceId,
+      },
+    })
 
-  if (!serviceUsage) throw new Error('User service usage not found')
+    if (!serviceUsage) throw new Error('User service usage not found')
 
-  serviceUsage.usageCount += tokenCount
+    serviceUsage.usageCount += tokenCount
 
-  await serviceUsage.save()
+    await serviceUsage.save()
+  } else {
+    await User.increment('usage', {
+      by: tokenCount,
+      where: {
+        id: user.id,
+      },
+    })
+  }
 }
 
-export const getUserStatus = async (user: User, serviceId: string) => {
+export const getUserStatus = async (user: UserType, serviceId: string) => {
   const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
 
   const service = await Service.findByPk(serviceId, {

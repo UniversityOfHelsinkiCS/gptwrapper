@@ -4,49 +4,33 @@ import express from 'express'
 import { inProduction } from '../../config'
 import { tikeIam } from '../util/config'
 import { ChatRequest, AzureOptions } from '../types'
-import { Service } from '../db/models'
 import { isError } from '../util/parser'
-import { calculateUsage, incrementUsage, checkUsage } from '../services/usage'
+import {
+  calculateUsage,
+  incrementUsage,
+  checkUsage,
+  checkCourseUsage,
+} from '../services/usage'
 import { completionStream } from '../util/openai'
 import { getCompletionEvents } from '../util/azure'
-import {
-  getMessageContext,
-  getModel,
-  getAllowedModels,
-  getModelContextLimit,
-  sleep,
-} from '../util/util'
+import { getMessageContext, getModelContextLimit, sleep } from '../util/util'
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
 
 const openaiRouter = express.Router()
 
-openaiRouter.post('/stream', async (req, res) => {
-  const request = req as ChatRequest
-  const { id, options, courseId } = request.body
-  const { user } = request
-
-  if (courseId) logger.info(`Completion stream for ${courseId}`)
+openaiRouter.post('/stream', async (r, res) => {
+  const req = r as ChatRequest
+  const { id, options, courseId } = req.body
+  const { model } = options
+  const { user } = req
 
   if (!user.id) return res.status(401).send('Unauthorized')
-  if (!id) return res.status(400).send('Missing id')
-  if (!options) return res.status(400).send('Missing options')
 
-  const service = await Service.findByPk(id)
-  if (!service) return res.status(404).send('Service not found')
-
-  const usageAllowed = await checkUsage(user, service, courseId)
+  const usageAllowed = courseId
+    ? await checkCourseUsage(user, courseId)
+    : checkUsage(user)
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
-
-  const model = await getModel(user.iamGroups, courseId, user.isAdmin)
-
-  if (options.model) {
-    const allowedModels = getAllowedModels(model)
-    if (!allowedModels.includes(options.model))
-      return res.status(403).send('Model not allowed')
-  } else {
-    options.model = model
-  }
 
   options.messages = getMessageContext(options.messages)
   options.stream = true
@@ -117,7 +101,7 @@ openaiRouter.post('/stream', async (req, res) => {
     await sleep(i)
   }
 
-  await incrementUsage(user, id, tokenCount)
+  await incrementUsage(user, id, courseId, tokenCount)
   logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
     tokenCount,
     courseId,

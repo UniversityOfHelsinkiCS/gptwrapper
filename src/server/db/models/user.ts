@@ -19,6 +19,8 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
 
   declare iamGroups: string[]
 
+  declare usage: number
+
   declare activeCourseIds: CreationOptional<string[]>
 }
 
@@ -43,6 +45,10 @@ User.init(
     iamGroups: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       defaultValue: [],
+    },
+    usage: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     activeCourseIds: {
       type: DataTypes.ARRAY(DataTypes.STRING),
