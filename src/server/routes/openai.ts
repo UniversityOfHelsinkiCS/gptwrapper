@@ -86,8 +86,7 @@ openaiRouter.post('/stream', async (req, res) => {
           tokenCount += encoding.encode(text).length || 0
         }
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error)
+        logger.error(error)
       }
     }
   } else {

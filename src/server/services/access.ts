@@ -1,21 +1,12 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import { Op } from 'sequelize'
 
-import { ServiceAccessGroup, Service } from '../db/models'
+import { accessIams } from '../util/config'
+import { Service } from '../db/models'
 import { getEnrollments, getTeachers } from '../util/importer'
 
-export const checkIamAccess = async (iamGroups: string[]) => {
-  const accessGroups = await ServiceAccessGroup.findAll({
-    where: {
-      iamGroup: {
-        [Op.in]: iamGroups,
-      },
-    },
-    attributes: ['model'],
-  })
-
-  return accessGroups.length > 0
-}
+export const checkIamAccess = (iamGroups: string[]) =>
+  accessIams.some((iam) => iamGroups.includes(iam))
 
 export const checkCourseAccess = async (userId: string) => {
   const activeCourses = await Service.findAll({

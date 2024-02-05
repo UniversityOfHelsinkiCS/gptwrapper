@@ -32,6 +32,12 @@ export const REDIS_HOST = process.env.REDIS_HOST || 'redis'
 
 export const adminIams = ['grp-toska', 'hy-ypa-opa-ote']
 
+export const basicUserIam = 'grp-currechat'
+
+export const powerUserIam = 'grp-currechat-powerusers'
+
+export const accessIams = [basicUserIam, powerUserIam]
+
 export const tikeIam = 'hy-tike-allstaff'
 
 export const TEST_COURSE_ID = 'test-course'
