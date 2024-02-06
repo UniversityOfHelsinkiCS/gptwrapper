@@ -4,7 +4,7 @@ import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { tikeIam } from '../util/config'
 import { User as UserType, StreamingOptions, AzureOptions } from '../types'
 import { Service, UserServiceUsage, User } from '../db/models'
-import { getModel, getAllowedModels } from '../util/util'
+import { getCourseModel, getAllowedModels } from '../util/util'
 import logger from '../util/logger'
 
 export const getUsage = async (userId: string) => {
@@ -116,12 +116,7 @@ export const getUserStatus = async (user: UserType, serviceId: string) => {
     attributes: ['usageCount'],
   })
 
-  const model = await getModel(
-    user.iamGroups,
-    service?.courseId,
-    user.isAdmin,
-    isTike
-  )
+  const model = await getCourseModel(service.courseId)
   const models = getAllowedModels(model)
 
   return {
