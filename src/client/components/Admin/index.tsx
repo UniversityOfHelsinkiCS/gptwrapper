@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { Box, Tabs, Tab } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
-import AccessGroups from './AccessGroups'
 import Services from './Services'
 import Usage from './Usage'
 
@@ -19,14 +18,12 @@ const Admin = () => {
           value={value}
           onChange={(_, newValue) => setValue(newValue)}
         >
-          <Tab label={t('admin:accessGroups')} />
           <Tab label={t('admin:courses')} />
           <Tab label={t('admin:usage')} />
         </Tabs>
       </Box>
-      {value === 0 && <AccessGroups />}
-      {value === 1 && <Services />}
-      {value === 2 && <Usage />}
+      {value === 0 && <Services />}
+      {value === 1 && <Usage />}
     </Box>
   )
 }
