@@ -1,7 +1,5 @@
-/* eslint-disable no-restricted-syntax */
 import express from 'express'
 
-import { inProduction } from '../../config'
 import { tikeIam } from '../util/config'
 import { ChatRequest, CourseChatRequest, AzureOptions } from '../types'
 import { isError } from '../util/parser'
@@ -12,7 +10,7 @@ import {
   checkCourseUsage,
   incrementCourseUsage,
 } from '../services/usage'
-import { completionStream } from '../util/openai'
+import { completionStream, handleTike } from '../util/openai'
 import { getCompletionEvents, streamCompletion } from '../util/azure'
 import { getMessageContext, getModelContextLimit } from '../util/util'
 import getEncoding from '../util/tiktoken'
@@ -47,28 +45,15 @@ openaiRouter.post('/stream', async (r, res) => {
   if (isTike) {
     const stream = await completionStream(options)
 
-    if (isError(stream)) return res.status(424).send(stream)
+    if (isError(stream)) return res.status(424)
 
     res.setHeader('content-type', 'text/event-stream')
 
-    for await (const part of stream) {
-      try {
-        const text = part.choices[0].delta?.content
-
-        if (!inProduction) logger.info(text)
-
-        if (text) {
-          res.write(text)
-          tokenCount += encoding.encode(text).length || 0
-        }
-      } catch (error) {
-        logger.error(error)
-      }
-    }
+    tokenCount += await handleTike(stream, encoding, res)
   } else {
     const events = await getCompletionEvents(options as AzureOptions)
 
-    if (isError(events)) return res.status(424).send(events)
+    if (isError(events)) return res.status(424)
 
     res.setHeader('content-type', 'text/event-stream')
 
