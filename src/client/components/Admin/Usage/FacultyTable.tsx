@@ -12,21 +12,21 @@ import {
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
-import { ServiceUsage, Faculty, Locales } from '../../../types'
-import useServiceUsage from '../../../hooks/useServiceUsage'
+import { Faculty, Locales, User } from '../../../types'
+import useUsers from '../../../hooks/userUsers'
 import useFaculties from '../../../hooks/useFaculties'
 
-const calculateFacultyUsage = (usage: ServiceUsage[], faculties: Faculty[]) => {
+const calculateFacultyUsage = (users: User[], faculties: Faculty[]) => {
   const facultyUsage = faculties.map((faculty) => ({
     faculty,
     usageCount: 0,
   }))
 
-  usage.forEach(({ usageCount, user }) => {
+  users.forEach(({ usage, iamGroups }) => {
     faculties.forEach(({ code, iams }) => {
-      if (iams.some((iam) => user.iamGroups.includes(iam))) {
+      if (iams.some((iam) => iamGroups.includes(iam))) {
         facultyUsage.find(({ faculty }) => faculty.code === code).usageCount +=
-          usageCount
+          usage
       }
     })
   })
@@ -38,14 +38,14 @@ const sortUsage = (a: { faculty: Faculty }, b: { faculty: Faculty }) =>
   a.faculty.code.localeCompare(b.faculty.code)
 
 const FacultyTable = () => {
-  const { usage, isLoading } = useServiceUsage()
+  const { users, isLoading } = useUsers()
   const { faculties, isLoading: facultiesLoading } = useFaculties()
 
   const { t, i18n } = useTranslation()
 
   if (isLoading || facultiesLoading) return null
 
-  const facultyUsage = calculateFacultyUsage(usage, faculties)
+  const facultyUsage = calculateFacultyUsage(users, faculties)
   const sortedUsage = facultyUsage.sort(sortUsage)
 
   return (
