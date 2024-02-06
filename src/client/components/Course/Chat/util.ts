@@ -1,19 +1,23 @@
-import { PUBLIC_URL } from '../../../config'
-import { Message } from '../../types'
+import { PUBLIC_URL } from '../../../../config'
+import { Message } from '../../../types'
 
-export const getCompletionStream = async (
+export const getCourseCompletionStream = async (
+  id: string,
   system: string,
   messages: Message[],
-  model: string
+  model: string,
+  courseId?: string
 ) => {
   const controller = new AbortController()
 
-  const response = await fetch(`${PUBLIC_URL}/api/ai/stream`, {
+  const response = await fetch(`${PUBLIC_URL}/api/ai/stream/${id}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
+      id,
+      courseId,
       options: {
         messages: [
           {

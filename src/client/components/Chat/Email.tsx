@@ -6,7 +6,7 @@ import { enqueueSnackbar } from 'notistack'
 
 import { Message } from '../../types'
 import useCurrentUser from '../../hooks/useCurrentUser'
-import { sendEmail } from './util'
+import { sendEmail } from '../../util/email'
 
 const formatEmail = (messages: Message[], t: any): string =>
   messages

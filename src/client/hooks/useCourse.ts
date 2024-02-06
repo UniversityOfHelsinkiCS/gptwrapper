@@ -6,8 +6,6 @@ import { Course } from '../types'
 const useCourse = (courseId?: string) => {
   const queryKey = ['course', courseId]
 
-  if (!courseId) return { course: null, isLoading: false }
-
   const queryFn = async (): Promise<Course | null> => {
     const res = await fetch(`${PUBLIC_URL}/api/courses/${courseId}`)
 
