@@ -14,15 +14,19 @@ import {
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 
-import { ServiceUsage } from '../../../types'
+import { ServiceUsage, Service } from '../../../types'
 import useServiceUsage from '../../../hooks/useServiceUsage'
+import useUsers from '../../../hooks/userUsers'
 import { useDeleteServiceUsageMutation } from '../../../hooks/useServiceUsageMutation'
 
-const sortUsage = (a: ServiceUsage, b: ServiceUsage) =>
+type Usage = Omit<ServiceUsage, 'service'> & { service?: Service }
+
+const sortUsage = (a: Usage, b: Usage) =>
   a.user.username.localeCompare(b.user.username)
 
 const UserTable = () => {
-  const { usage, isLoading } = useServiceUsage()
+  const { usage: serviceUsage, isLoading } = useServiceUsage()
+  const { users, isLoading: usersLoading } = useUsers()
 
   const mutation = useDeleteServiceUsageMutation()
 
@@ -37,10 +41,22 @@ const UserTable = () => {
     }
   }
 
-  const filteredUsage = usage.filter(({ usageCount }) => usageCount !== 0)
-  const sortedUsage = filteredUsage.sort(sortUsage)
+  if (isLoading || usersLoading) return null
 
-  if (isLoading) return null
+  const filteredUsers = users.filter(({ usage }) => usage !== 0)
+
+  const userUsages: Usage[] = filteredUsers.map((user) => ({
+    id: user.id,
+    user,
+    usageCount: user.usage,
+  }))
+
+  const filteredUsage = serviceUsage.filter(
+    ({ usageCount }) => usageCount !== 0
+  )
+  const sortedUsage = (filteredUsage as Usage[])
+    .concat(userUsages)
+    .toSorted(sortUsage)
 
   return (
     <Box my={2}>
@@ -77,13 +93,15 @@ const UserTable = () => {
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="overline">
-                    <code>{service.courseId ?? ''}</code>
+                    <code>{service?.courseId ?? ''}</code>
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <Button color="error" onClick={() => onDelete(id)}>
-                    {t('admin:reset')}
-                  </Button>
+                  {service?.courseId && (
+                    <Button color="error" onClick={() => onDelete(id)}>
+                      {t('admin:reset')}
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

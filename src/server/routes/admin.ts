@@ -157,7 +157,7 @@ adminRouter.delete('/services/:id', async (req, res) => {
   return res.status(204).send()
 })
 
-adminRouter.get('/services/usage', async (req, res) => {
+adminRouter.get('/services/usage', async (_, res) => {
   const usage = await UserServiceUsage.findAll({
     include: [
       {
@@ -184,6 +184,14 @@ adminRouter.delete('/services/usage/:id', async (req, res) => {
   await serviceUsage.destroy()
 
   return res.status(204).send()
+})
+
+adminRouter.get('/users', async (_, res) => {
+  const usage = await User.findAll({
+    attributes: ['id', 'username', 'iamGroups', 'usage'],
+  })
+
+  return res.send(usage)
 })
 
 export default adminRouter
