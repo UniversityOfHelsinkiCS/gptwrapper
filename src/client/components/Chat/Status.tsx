@@ -10,18 +10,19 @@ import {
   InputLabel,
 } from '@mui/material'
 
+import { DEFAULT_TOKEN_LIMIT, validModels } from '../../../config'
 import { Set } from '../../types'
 
 const ModelSelector = ({
   currentModel,
   setModel,
-  models,
 }: {
   currentModel: string
   setModel: Set<string>
-  models: string[]
 }) => {
   const { t } = useTranslation()
+
+  const models = validModels.map(({ name }) => name)
 
   return (
     <Box mb={2}>
@@ -43,47 +44,23 @@ const ModelSelector = ({
   )
 }
 
-const ModelText = ({ model }: { model: string }) => {
-  const { t } = useTranslation()
-
-  return (
-    <Box>
-      <Typography variant="body1">
-        {t('status:modelInUse')} <code>{model}</code>
-      </Typography>
-    </Box>
-  )
-}
-
 const Status = ({
   model,
   setModel,
-  models,
   usage,
-  limit,
 }: {
   model: string
   setModel: Set<string>
-  models: string[]
   usage: number
-  limit: number
 }) => {
   const { t } = useTranslation()
 
   return (
     <Box mb={1} padding="2% 10%">
-      {models.length > 1 ? (
-        <ModelSelector
-          currentModel={model}
-          setModel={setModel}
-          models={models}
-        />
-      ) : (
-        <ModelText model={model} />
-      )}
+      <ModelSelector currentModel={model} setModel={setModel} />
 
       <Typography variant="body1">
-        {usage} / {limit} {t('status:tokensUsed')}
+        {usage} / {DEFAULT_TOKEN_LIMIT} {t('status:tokensUsed')}
       </Typography>
     </Box>
   )

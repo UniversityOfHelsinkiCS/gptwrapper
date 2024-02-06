@@ -1,15 +1,12 @@
 /* eslint-disable no-await-in-loop, no-constant-condition */
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Box, Paper } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
-import { useParams } from 'react-router-dom'
 
-import { Message, Prompt } from '../../types'
+import { Message } from '../../types'
 import { getCompletionStream } from './util'
-import useCourse from '../../hooks/useCourse'
-import useUserStatus from '../../hooks/useUserStatus'
+import useCurrentUser from '../../hooks/useCurrentUser'
 import Banner from '../Banner'
-import PromptSelector from './PromptSelector'
 import SystemMessage from './SystemMessage'
 import Conversation from './Conversation'
 import SendMessage from './SendMessage'
@@ -17,46 +14,18 @@ import Email from './Email'
 import Status from './Status'
 
 const Chat = () => {
-  const { courseId } = useParams()
-
-  const [activePromptId, setActivePromptId] = useState('')
   const [system, setSystem] = useState('')
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const [completion, setCompletion] = useState('')
-  const [model, setModel] = useState('')
+  const [model, setModel] = useState('gpt-4')
   const [streamController, setStreamController] = useState<AbortController>()
 
-  const { course, isLoading } = useCourse(courseId)
-  const {
-    userStatus,
-    isLoading: statusLoading,
-    refetch,
-  } = useUserStatus(course?.id)
+  const { user, isLoading, refetch } = useCurrentUser()
 
-  useEffect(() => {
-    if (statusLoading || model) return
-    setModel(userStatus.model)
-  }, [userStatus])
+  if (isLoading) return null
 
-  if (isLoading || statusLoading) return null
-  if (!userStatus) return null
-
-  const { usage, limit, models } = userStatus
-
-  const hasPrompts = course && course.prompts.length > 0
-  const activePrompt = course?.prompts.find(({ id }) => id === activePromptId)
-  const hidePrompt = activePrompt?.hidden ?? false
-
-  const getVisibleMessages = (): Message[] => {
-    if (!hidePrompt) return messages
-
-    const hideCount = activePrompt?.messages.length ?? 0
-
-    return messages.slice(hideCount)
-  }
-
-  const visibleMessages = getVisibleMessages()
+  const { usage } = user
 
   const handleSend = async () => {
     const newMessage: Message = { role: 'user', content: message }
@@ -65,11 +34,9 @@ const Chat = () => {
 
     try {
       const { stream, controller } = await getCompletionStream(
-        course?.id || 'chat',
         system,
         messages.concat(newMessage),
-        model,
-        courseId
+        model
       )
       const reader = stream.getReader()
       setStreamController(controller)
@@ -106,17 +73,6 @@ const Chat = () => {
     setSystem('')
     setMessage('')
     setCompletion('')
-    setActivePromptId('')
-  }
-
-  const handleChangePrompt = (promptId: string) => {
-    const { systemMessage, messages: promptMessages } = course?.prompts.find(
-      ({ id }) => id === promptId
-    ) as Prompt
-
-    setSystem(systemMessage)
-    setMessages(promptMessages)
-    setActivePromptId(promptId)
   }
 
   return (
@@ -135,21 +91,12 @@ const Chat = () => {
           mt: 5,
         }}
       >
-        {hasPrompts && (
-          <PromptSelector
-            prompts={course.prompts}
-            activePrompt={activePromptId}
-            setActivePrompt={handleChangePrompt}
-          />
-        )}
-        {!hidePrompt && (
-          <SystemMessage
-            system={system}
-            setSystem={setSystem}
-            disabled={activePromptId.length > 0 || messages.length > 0}
-          />
-        )}
-        <Conversation messages={visibleMessages} completion={completion} />
+        <SystemMessage
+          system={system}
+          setSystem={setSystem}
+          disabled={messages.length > 0}
+        />
+        <Conversation messages={messages} completion={completion} />
         <SendMessage
           message={message}
           setMessage={setMessage}
@@ -166,13 +113,7 @@ const Chat = () => {
           disabled={messages.length === 0 || completion !== ''}
         />
       </Paper>
-      <Status
-        model={model}
-        setModel={setModel}
-        models={models}
-        usage={usage}
-        limit={limit}
-      />
+      <Status model={model} setModel={setModel} usage={usage} />
     </Box>
   )
 }
