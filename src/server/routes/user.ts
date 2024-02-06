@@ -7,7 +7,7 @@ import {
   getOwnCourses,
 } from '../services/access'
 import { User } from '../db/models'
-import { getUserStatus } from '../services/usage'
+import { getUserStatus, getUsage } from '../services/usage'
 
 const userRouter = express.Router()
 
@@ -19,6 +19,7 @@ userRouter.get('/login', async (req, res) => {
   if (!id) return res.status(401).send('Unauthorized')
 
   const hasIamAccess = checkIamAccess(iamGroups)
+  const usage = await getUsage(id)
 
   const enrolledCourses = await checkCourseAccess(id)
   const teacherCourses = await getOwnCourses(id, user.isAdmin)
@@ -35,6 +36,7 @@ userRouter.get('/login', async (req, res) => {
 
   return res.send({
     ...user,
+    usage,
     hasIamAccess: isAdmin || hasIamAccess,
   })
 })

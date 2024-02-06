@@ -43,13 +43,19 @@ const getIamUsageLimit = async (
   return service.usageLimit
 }
 
+export const getUsage = async (userId: string) => {
+  const { usage } = await User.findByPk(userId, {
+    attributes: ['usage'],
+  })
+
+  return usage
+}
+
 export const checkUsage = async ({
   id,
   isAdmin,
 }: UserType): Promise<boolean> => {
-  const { usage } = await User.findByPk(id, {
-    attributes: ['usage'],
-  })
+  const usage = await getUsage(id)
 
   return !isAdmin && usage >= DEFAULT_TOKEN_LIMIT
 }
