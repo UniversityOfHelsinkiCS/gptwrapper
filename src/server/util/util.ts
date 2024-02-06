@@ -1,13 +1,6 @@
-import { Op } from 'sequelize'
-
 import { Message } from '../types'
-import {
-  DEFAULT_MODEL,
-  DEFAUL_CONTEXT_LIMIT,
-  validModels,
-  inProduction,
-} from '../../config'
-import { ServiceAccessGroup, Service } from '../db/models'
+import { DEFAULT_MODEL, DEFAUL_CONTEXT_LIMIT, validModels } from '../../config'
+import { Service } from '../db/models'
 
 /**
  * Filter out messages in a long conversation to save costs
@@ -23,7 +16,7 @@ export const getMessageContext = (messages: Message[]): Message[] => {
   return systemMessages.concat(latestMessages)
 }
 
-const getCourseModel = async (courseId: string): Promise<string> => {
+export const getCourseModel = async (courseId: string): Promise<string> => {
   const service = await Service.findOne({
     where: {
       courseId,
@@ -32,38 +25,6 @@ const getCourseModel = async (courseId: string): Promise<string> => {
   })
 
   return service?.model || DEFAULT_MODEL
-}
-
-/**
- * Get the model to use for a given user
- * If the user has access to multiple models, use the largest model
- * If the user has access to no models, use the default model
- */
-export const getModel = async (
-  iamGroups: string[],
-  courseId?: string,
-  isAdmin: boolean = false,
-  isTike: boolean = false
-): Promise<string> => {
-  if (courseId) return getCourseModel(courseId)
-  if (isTike) return 'gpt-3.5-turbo'
-  if (isAdmin) return inProduction ? 'gpt-4' : 'gpt-3.5-turbo'
-
-  const accessGroups = await ServiceAccessGroup.findAll({
-    where: {
-      iamGroup: {
-        [Op.in]: iamGroups,
-      },
-    },
-    attributes: ['model'],
-  })
-
-  const models = accessGroups.map(({ model }) => model)
-
-  if (models.includes('gpt-4')) return 'gpt-4'
-  if (models.includes('gpt-3.5-turbo')) return 'gpt-3.5-turbo'
-
-  return DEFAULT_MODEL
 }
 
 export const getAllowedModels = (model: string): string[] => {

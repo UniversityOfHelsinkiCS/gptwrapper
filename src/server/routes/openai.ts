@@ -12,7 +12,12 @@ import {
 } from '../services/usage'
 import { completionStream, handleTike } from '../util/openai'
 import { getCompletionEvents, streamCompletion } from '../util/azure'
-import { getMessageContext, getModelContextLimit } from '../util/util'
+import {
+  getMessageContext,
+  getModelContextLimit,
+  getCourseModel,
+  getAllowedModels,
+} from '../util/util'
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
 
@@ -81,7 +86,6 @@ openaiRouter.post('/stream/:courseId', async (r, res) => {
   const { courseId } = r.params
   const req = r as CourseChatRequest
   const { options } = req.body
-  const { model } = options
   const { user } = req
 
   if (!user.id) return res.status(401).send('Unauthorized')
@@ -92,10 +96,20 @@ openaiRouter.post('/stream/:courseId', async (r, res) => {
   options.messages = getMessageContext(options.messages)
   options.stream = true
 
-  const encoding = getEncoding(model)
+  const model = await getCourseModel(courseId)
+
+  if (options.model) {
+    const allowedModels = getAllowedModels(model)
+    if (!allowedModels.includes(options.model))
+      return res.status(403).send('Model not allowed')
+  } else {
+    options.model = model
+  }
+
+  const encoding = getEncoding(options.model)
   let tokenCount = calculateUsage(options, encoding)
 
-  const contextLimit = getModelContextLimit(model)
+  const contextLimit = getModelContextLimit(options.model)
   if (tokenCount > contextLimit) {
     logger.info('Maximum context reached')
     return res.status(403).send('Model maximum context reached')
@@ -124,7 +138,7 @@ openaiRouter.post('/stream/:courseId', async (r, res) => {
   logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
     tokenCount,
     courseId,
-    model,
+    model: options.model,
     user: user.username,
   })
 
