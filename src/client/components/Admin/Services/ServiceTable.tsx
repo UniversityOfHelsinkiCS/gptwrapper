@@ -55,7 +55,7 @@ const ServiceTable = ({ editFormOpen, setEditFormOpen }: Props) => {
 
   const sortedServices = services.sort(sortServices)
 
-  const serviceToEdit = filteredServices.find(({ id }) => id === editId)
+  const serviceToEdit = sortedServices.find(({ id }) => id === editId)
 
   if (isLoading) return null
 
