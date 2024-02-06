@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { PUBLIC_URL } from '../../config'
 import { UserStatus } from '../types'
 
-const useUserStatus = (serviceId: string = 'chat') => {
+const useUserStatus = (serviceId: string) => {
   const queryKey = ['status', serviceId]
 
   const queryFn = async (): Promise<UserStatus> => {

@@ -1,47 +1,11 @@
 import { Tiktoken } from '@dqbd/tiktoken'
-import { Op } from 'sequelize'
 
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { tikeIam } from '../util/config'
-import {
-  User as UserType,
-  Service as ServiceType,
-  StreamingOptions,
-  AzureOptions,
-} from '../types'
-import {
-  Service,
-  UserServiceUsage,
-  ServiceAccessGroup,
-  User,
-} from '../db/models'
+import { User as UserType, StreamingOptions, AzureOptions } from '../types'
+import { Service, UserServiceUsage, User } from '../db/models'
 import { getModel, getAllowedModels } from '../util/util'
 import logger from '../util/logger'
-
-// Get largest usage limit for user based on their IAM groups
-// If no usage limit is found, return the service's default usage limit
-const getIamUsageLimit = async (
-  service: ServiceType,
-  user: User
-): Promise<number> => {
-  const accessGroups = await ServiceAccessGroup.findAll({
-    where: {
-      serviceId: service.id,
-      iamGroup: {
-        [Op.in]: user.iamGroups,
-      },
-    },
-    attributes: ['usageLimit'],
-  })
-
-  const usageLimits = accessGroups
-    .map(({ usageLimit }) => usageLimit)
-    .filter(Boolean)
-
-  if (usageLimits.length) return Math.max(...usageLimits)
-
-  return service.usageLimit
-}
 
 export const getUsage = async (userId: string) => {
   const { usage } = await User.findByPk(userId, {
@@ -160,14 +124,9 @@ export const getUserStatus = async (user: UserType, serviceId: string) => {
   )
   const models = getAllowedModels(model)
 
-  const limit =
-    service.id === 'chat'
-      ? await getIamUsageLimit(service, user)
-      : service?.usageLimit ?? 0
-
   return {
     usage: serviceUsage?.usageCount ?? 0,
-    limit,
+    limit: service?.usageLimit ?? 0,
     model,
     models,
     isTike,

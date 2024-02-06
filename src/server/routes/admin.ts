@@ -1,12 +1,7 @@
 import express from 'express'
 
 import { RequestWithUser } from '../types'
-import {
-  ServiceAccessGroup,
-  Service,
-  UserServiceUsage,
-  User,
-} from '../db/models'
+import { Service, UserServiceUsage, User } from '../db/models'
 import { getCourse } from '../util/importer'
 
 const adminRouter = express.Router()
@@ -18,72 +13,6 @@ adminRouter.use((req, _, next) => {
   if (!user.isAdmin) throw new Error('Unauthorized')
 
   return next()
-})
-
-adminRouter.get('/accessGroups', async (_, res) => {
-  const accessGroups = await ServiceAccessGroup.findAll()
-
-  return res.send(accessGroups)
-})
-
-interface NewAccessGroupData {
-  iamGroup: string
-  model: string
-  usageLimit: number
-  resetCron?: string
-}
-
-adminRouter.post('/accessGroups', async (req, res) => {
-  const data = req.body as NewAccessGroupData
-  const { iamGroup, model, usageLimit, resetCron } = data
-
-  const newAccessGroup = await ServiceAccessGroup.create({
-    serviceId: 'chat',
-    iamGroup,
-    model,
-    usageLimit,
-    resetCron,
-  })
-
-  return res.status(201).send(newAccessGroup)
-})
-
-interface UpdatedAccessGroupData {
-  iamGroup: string
-  model: string
-  usageLimit: number
-  resetCron: string | null
-}
-
-adminRouter.put('/accessGroups/:id', async (req, res) => {
-  const { id } = req.params
-  const data = req.body as UpdatedAccessGroupData
-  const { iamGroup, model, usageLimit, resetCron } = data
-
-  const accessGroup = await ServiceAccessGroup.findByPk(id)
-
-  if (!accessGroup) return res.status(404).send('Access group not found')
-
-  accessGroup.iamGroup = iamGroup
-  accessGroup.model = model
-  accessGroup.usageLimit = usageLimit
-  accessGroup.resetCron = resetCron
-
-  await accessGroup.save()
-
-  return res.send(accessGroup)
-})
-
-adminRouter.delete('/accessGroups/:id', async (req, res) => {
-  const { id } = req.params
-
-  const accessGroup = await ServiceAccessGroup.findByPk(id)
-
-  if (!accessGroup) return res.status(404).send('Access group not found')
-
-  await accessGroup.destroy()
-
-  return res.status(204).send()
 })
 
 interface NewServiceData {

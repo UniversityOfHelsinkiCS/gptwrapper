@@ -3,14 +3,6 @@ import { Service } from '../models'
 
 const services = [
   {
-    id: 'chat',
-    name: 'Chat',
-    description: 'Default service used with IAM access',
-    model: 'gpt-3.5-turbo',
-    usageLimit: 50_000,
-    resetCron: '0 0 1 */3 *', // Every three months
-  },
-  {
     id: TEST_COURSE_ID,
     name: 'Test Course',
     description: 'Course for testing purposes',

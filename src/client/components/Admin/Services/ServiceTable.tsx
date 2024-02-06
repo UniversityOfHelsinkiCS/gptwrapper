@@ -53,8 +53,7 @@ const ServiceTable = ({ editFormOpen, setEditFormOpen }: Props) => {
     setEditFormOpen(true)
   }
 
-  const filteredServices = services.filter(({ id }) => id !== 'chat')
-  const sortedServices = filteredServices.sort(sortServices)
+  const sortedServices = services.sort(sortServices)
 
   const serviceToEdit = filteredServices.find(({ id }) => id === editId)
 
