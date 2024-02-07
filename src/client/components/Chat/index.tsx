@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { Box, Paper } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 
+import { DEFAULT_TOKEN_LIMIT } from '../../../config'
 import { Message } from '../../types'
 import { getCompletionStream } from './util'
 import useCurrentUser from '../../hooks/useCurrentUser'
@@ -25,7 +26,7 @@ const Chat = () => {
 
   if (isLoading) return null
 
-  const { usage } = user
+  const { usage, isPowerUser } = user
 
   const handleSend = async () => {
     const newMessage: Message = { role: 'user', content: message }
@@ -113,7 +114,12 @@ const Chat = () => {
           disabled={messages.length === 0 || completion !== ''}
         />
       </Paper>
-      <Status model={model} setModel={setModel} usage={usage} />
+      <Status
+        model={model}
+        setModel={setModel}
+        usage={usage}
+        limit={isPowerUser ? DEFAULT_TOKEN_LIMIT * 10 : DEFAULT_TOKEN_LIMIT}
+      />
     </Box>
   )
 }

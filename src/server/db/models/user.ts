@@ -17,6 +17,8 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
 
   declare isAdmin: boolean
 
+  declare isPowerUser: boolean
+
   declare iamGroups: string[]
 
   declare usage: number
@@ -39,6 +41,10 @@ User.init(
       type: DataTypes.STRING,
     },
     isAdmin: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    isPowerUser: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },

@@ -17,11 +17,17 @@ export const getUsage = async (userId: string) => {
 
 export const checkUsage = async ({
   id,
+  isPowerUser,
   isAdmin,
 }: UserType): Promise<boolean> => {
   const usage = await getUsage(id)
 
-  return !isAdmin && usage >= DEFAULT_TOKEN_LIMIT
+  // 10x token limit for power users
+  const tokenLimit = isPowerUser
+    ? DEFAULT_TOKEN_LIMIT * 10
+    : DEFAULT_TOKEN_LIMIT
+
+  return !isAdmin && usage >= tokenLimit
 }
 
 export const checkCourseUsage = async (

@@ -14,6 +14,7 @@ export interface User {
   iamGroups: string[]
   email?: string
   isAdmin: boolean
+  isPowerUser: boolean
   usage: number
   activeCourseIds: string[]
   ownCourses: string[]

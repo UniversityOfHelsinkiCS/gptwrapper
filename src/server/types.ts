@@ -9,6 +9,7 @@ export interface User {
   iamGroups: string[]
   email?: string
   isAdmin: boolean
+  isPowerUser: boolean
   activeCourseIds: string[]
   ownCourses: string[]
 }
