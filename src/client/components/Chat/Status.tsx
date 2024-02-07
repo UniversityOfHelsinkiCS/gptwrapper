@@ -11,14 +11,13 @@ import {
 } from '@mui/material'
 
 import { validModels } from '../../../config'
-import { Set } from '../../types'
 
 const ModelSelector = ({
   currentModel,
   setModel,
 }: {
   currentModel: string
-  setModel: Set<string>
+  setModel: (model: string) => void
 }) => {
   const { t } = useTranslation()
 
@@ -51,7 +50,7 @@ const Status = ({
   limit,
 }: {
   model: string
-  setModel: Set<string>
+  setModel: (model: string) => void
   usage: number
   limit: number
 }) => {

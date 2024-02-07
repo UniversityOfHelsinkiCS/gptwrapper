@@ -10,15 +10,13 @@ import {
   InputLabel,
 } from '@mui/material'
 
-import { Set } from '../../../types'
-
 const ModelSelector = ({
   currentModel,
   setModel,
   models,
 }: {
   currentModel: string
-  setModel: Set<string>
+  setModel: (model: string) => void
   models: string[]
 }) => {
   const { t } = useTranslation()
@@ -63,7 +61,7 @@ const Status = ({
   limit,
 }: {
   model: string
-  setModel: Set<string>
+  setModel: (model: string) => void
   models: string[]
   usage: number
   limit: number

@@ -31,7 +31,7 @@ openaiRouter.post('/stream', async (r, res) => {
 
   if (!user.id) return res.status(401).send('Unauthorized')
 
-  const usageAllowed = await checkUsage(user)
+  const usageAllowed = await checkUsage(user, model)
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
   options.messages = getMessageContext(options.messages)
@@ -71,7 +71,7 @@ openaiRouter.post('/stream', async (r, res) => {
     )
   }
 
-  await incrementUsage(user, tokenCount)
+  if (model === 'gpt-4') await incrementUsage(user, tokenCount)
   logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
     tokenCount,
     model,

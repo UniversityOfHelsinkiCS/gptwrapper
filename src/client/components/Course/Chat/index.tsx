@@ -24,7 +24,7 @@ const Chat = () => {
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const [completion, setCompletion] = useState('')
-  const [model, setModel] = useState('')
+  const [model, setModel] = useState(localStorage.getItem('model') ?? '')
   const [streamController, setStreamController] = useState<AbortController>()
 
   const { course, isLoading } = useCourse(courseId)
@@ -57,6 +57,11 @@ const Chat = () => {
   }
 
   const visibleMessages = getVisibleMessages()
+
+  const handleSetModel = (newModel: string) => {
+    setModel(newModel)
+    localStorage.setItem('model', newModel)
+  }
 
   const handleSend = async () => {
     const newMessage: Message = { role: 'user', content: message }
@@ -168,7 +173,7 @@ const Chat = () => {
       </Paper>
       <Status
         model={model}
-        setModel={setModel}
+        setModel={handleSetModel}
         models={models}
         usage={usage}
         limit={limit}

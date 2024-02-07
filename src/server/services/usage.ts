@@ -15,11 +15,12 @@ export const getUsage = async (userId: string) => {
   return usage
 }
 
-export const checkUsage = async ({
-  id,
-  isPowerUser,
-  isAdmin,
-}: UserType): Promise<boolean> => {
+export const checkUsage = async (
+  { id, isPowerUser, isAdmin }: UserType,
+  model: string
+): Promise<boolean> => {
+  if (model === 'gpt-3.5-turbo') return true
+
   const usage = await getUsage(id)
 
   // 10x token limit for power users

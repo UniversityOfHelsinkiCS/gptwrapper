@@ -19,7 +19,7 @@ const Chat = () => {
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const [completion, setCompletion] = useState('')
-  const [model, setModel] = useState('gpt-4')
+  const [model, setModel] = useState(localStorage.getItem('model') ?? 'gpt-4')
   const [streamController, setStreamController] = useState<AbortController>()
 
   const { user, isLoading, refetch } = useCurrentUser()
@@ -27,6 +27,11 @@ const Chat = () => {
   if (isLoading) return null
 
   const { usage, isPowerUser } = user
+
+  const handleSetModel = (newModel: string) => {
+    setModel(newModel)
+    localStorage.setItem('model', newModel)
+  }
 
   const handleSend = async () => {
     const newMessage: Message = { role: 'user', content: message }
@@ -116,7 +121,7 @@ const Chat = () => {
       </Paper>
       <Status
         model={model}
-        setModel={setModel}
+        setModel={handleSetModel}
         usage={usage}
         limit={isPowerUser ? DEFAULT_TOKEN_LIMIT * 10 : DEFAULT_TOKEN_LIMIT}
       />
