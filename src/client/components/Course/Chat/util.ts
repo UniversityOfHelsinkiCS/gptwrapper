@@ -6,11 +6,11 @@ export const getCourseCompletionStream = async (
   system: string,
   messages: Message[],
   model: string,
-  courseId?: string
+  courseId: string
 ) => {
   const controller = new AbortController()
 
-  const response = await fetch(`${PUBLIC_URL}/api/ai/stream/${id}`, {
+  const response = await fetch(`${PUBLIC_URL}/api/ai/stream/${courseId}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

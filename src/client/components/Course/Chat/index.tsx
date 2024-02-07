@@ -32,7 +32,7 @@ const Chat = () => {
     userStatus,
     isLoading: statusLoading,
     refetch,
-  } = useUserStatus(course?.id)
+  } = useUserStatus(courseId)
 
   useEffect(() => {
     if (statusLoading || model) return

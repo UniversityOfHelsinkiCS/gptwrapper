@@ -7,7 +7,7 @@ const useUserStatus = (serviceId: string) => {
   const queryKey = ['status', serviceId]
 
   const queryFn = async (): Promise<UserStatus> => {
-    const res = await fetch(`${PUBLIC_URL}/api/users/${serviceId}/status`)
+    const res = await fetch(`${PUBLIC_URL}/api/users/status/${serviceId}`)
 
     const data = await res.json()
 

@@ -41,15 +41,15 @@ userRouter.get('/login', async (req, res) => {
   })
 })
 
-userRouter.get('/:serviceId/status', async (req, res) => {
-  const { serviceId } = req.params
+userRouter.get('/status/:courseId', async (req, res) => {
+  const { courseId } = req.params
   const request = req as any as ChatRequest
   const { user } = request
   const { id } = user
 
   if (!id) return res.status(401).send('Unauthorized')
 
-  const { usage, limit, model, models } = await getUserStatus(user, serviceId)
+  const { usage, limit, model, models } = await getUserStatus(user, courseId)
 
   return res.send({
     usage,

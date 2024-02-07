@@ -106,16 +106,19 @@ export const incrementCourseUsage = async (
   await serviceUsage.save()
 }
 
-export const getUserStatus = async (user: UserType, serviceId: string) => {
+export const getUserStatus = async (user: UserType, courseId: string) => {
   const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
 
-  const service = await Service.findByPk(serviceId, {
+  const service = await Service.findOne({
+    where: {
+      courseId,
+    },
     attributes: ['id', 'usageLimit', 'courseId'],
   })
 
   const serviceUsage = await UserServiceUsage.findOne({
     where: {
-      serviceId,
+      serviceId: service.id,
       userId: user.id,
     },
     attributes: ['usageCount'],
