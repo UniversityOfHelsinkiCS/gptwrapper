@@ -2,7 +2,7 @@ import { Tiktoken } from '@dqbd/tiktoken'
 
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { tikeIam } from '../util/config'
-import { User as UserType, StreamingOptions, AzureOptions } from '../types'
+import { User as UserType, StreamingOptions } from '../types'
 import { Service, UserServiceUsage, User } from '../db/models'
 import { getCourseModel, getAllowedModels } from '../util/util'
 import logger from '../util/logger'
@@ -51,17 +51,16 @@ export const checkCourseUsage = async (
 }
 
 export const calculateUsage = (
-  options: StreamingOptions | AzureOptions,
+  options: StreamingOptions,
   encoding: Tiktoken
 ): number => {
   const { messages } = options
 
   let tokenCount = 0
-  // eslint-disable-next-line no-restricted-syntax
-  for (const message of messages) {
+  messages.forEach((message) => {
     const encoded = encoding.encode(message.content || '')
     tokenCount += encoded.length
-  }
+  })
 
   return tokenCount
 }
