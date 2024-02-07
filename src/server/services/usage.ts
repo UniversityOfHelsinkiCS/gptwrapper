@@ -27,7 +27,7 @@ export const checkUsage = async ({
     ? DEFAULT_TOKEN_LIMIT * 10
     : DEFAULT_TOKEN_LIMIT
 
-  return !isAdmin && usage >= tokenLimit
+  return isAdmin || usage <= tokenLimit
 }
 
 export const checkCourseUsage = async (

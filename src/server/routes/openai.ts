@@ -31,7 +31,8 @@ openaiRouter.post('/stream', async (r, res) => {
 
   if (!user.id) return res.status(401).send('Unauthorized')
 
-  if (!checkUsage(user)) return res.status(403).send('Usage limit reached')
+  const usageAllowed = await checkUsage(user)
+  if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
   options.messages = getMessageContext(options.messages)
   options.stream = true
