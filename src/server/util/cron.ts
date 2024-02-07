@@ -5,6 +5,8 @@ import logger from './logger'
 import { User } from '../db/models'
 
 const resetUsage = async () => {
+  logger.info('Resetting usage')
+
   await User.update(
     { usage: 0 },
     {
