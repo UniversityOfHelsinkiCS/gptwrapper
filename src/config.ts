@@ -9,7 +9,7 @@ export const GIT_SHA = process.env.REACT_APP_GIT_SHA || ''
 export const PUBLIC_URL = process.env.PUBLIC_URL || ''
 
 export const DEFAULT_TOKEN_LIMIT =
-  Number(process.env.DEFAULT_TOKEN_LIMIT) || 50_000
+  Number(process.env.DEFAULT_TOKEN_LIMIT) || 75_000
 
 export const DEFAULT_MODEL = process.env.DEFAUL_MODEL || 'gpt-3.5-turbo'
 export const DEFAUL_CONTEXT_LIMIT =
