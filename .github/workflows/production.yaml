@@ -21,6 +21,7 @@ jobs:
             ./Containerfile
           build-args: |
             BASE_PATH=/chat
+            GIT_SHA=${{ github.sha }}
 
       - name: Push to quay.io
         uses: redhat-actions/push-to-registry@v2

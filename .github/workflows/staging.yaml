@@ -22,6 +22,7 @@ jobs:
             ./Containerfile
           build-args: |
             BASE_PATH=/gptwrapper
+            GIT_SHA=${{ github.sha }}
             STAGING=true
 
       - name: Push to quay.io

@@ -4,6 +4,8 @@ export const inStaging = process.env.STAGING === 'true'
 
 export const inProduction = !inStaging && process.env.NODE_ENV === 'production'
 
+export const GIT_SHA = process.env.REACT_APP_GIT_SHA || ''
+
 export const PUBLIC_URL = process.env.PUBLIC_URL || ''
 
 export const DEFAULT_TOKEN_LIMIT =

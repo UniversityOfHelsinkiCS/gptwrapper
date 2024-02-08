@@ -4,6 +4,9 @@ ENV TZ="Europe/Helsinki"
 
 WORKDIR /opt/app-root/src
 
+ARG GIT_SHA
+ENV REACT_APP_GIT_SHA=$GIT_SHA
+
 ARG BASE_PATH
 ENV PUBLIC_URL=$BASE_PATH
 
