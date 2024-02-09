@@ -7,16 +7,23 @@ import { User } from '../db/models'
 const resetUsage = async () => {
   logger.info('Resetting usage')
 
-  await User.update(
-    { usage: 0 },
-    {
-      where: {
-        usage: {
-          [Op.gt]: 0,
-        },
+  const usersWithUsage = await User.findAll({
+    where: {
+      usage: {
+        [Op.gt]: 0,
       },
-    }
-  )
+    },
+    attributes: ['id', 'usage', 'totalUsage'],
+  })
+
+  usersWithUsage.forEach(async (user) => {
+    const { usage, totalUsage } = user
+
+    await user.update({
+      usage: 0,
+      totalUsage: totalUsage + BigInt(usage),
+    })
+  })
 }
 
 const setupCron = async () => {
