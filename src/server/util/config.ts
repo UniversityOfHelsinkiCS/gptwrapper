@@ -39,7 +39,7 @@ export const basicUserIam = 'grp-currechat'
 
 export const powerUserIam = 'grp-currechat-powerusers'
 
-export const accessIams = [basicUserIam, powerUserIam]
+export const accessIams = [basicUserIam, powerUserIam, 'hy-employees']
 
 export const tikeIam = 'hy-tike-allstaff'
 
