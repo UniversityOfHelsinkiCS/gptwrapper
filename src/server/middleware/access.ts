@@ -27,6 +27,7 @@ const accessLogger = access((tokens, req, res) => {
       ? {
           userId: uid,
           method,
+          referrer: req.headers.referer,
           url,
           status,
           responseTime,

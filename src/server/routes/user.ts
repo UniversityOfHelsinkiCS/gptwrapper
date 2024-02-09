@@ -1,6 +1,7 @@
 import express from 'express'
 
 import { ChatRequest } from '../types'
+import logger from '../util/logger'
 import {
   checkIamAccess,
   checkCourseAccess,
@@ -27,8 +28,10 @@ userRouter.get('/login', async (req, res) => {
   const courses = enrolledCourses.concat(teacherCourses)
   const hasCourseAccess = courses.length > 0
 
-  if (!isAdmin && !hasIamAccess && !hasCourseAccess)
+  if (!isAdmin && !hasIamAccess && !hasCourseAccess) {
+    logger.info('Unauthorized user', { iamGroups })
     return res.status(401).send('Unauthorized')
+  }
 
   user.ownCourses = teacherCourses
   user.activeCourseIds = courses
