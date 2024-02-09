@@ -21,6 +21,7 @@ import {
 } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
+import { PUBLIC_URL } from '../../../config'
 import { User } from '../../types'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import hyLogo from '../../assets/hy_logo.svg'
@@ -38,7 +39,7 @@ const hasAccess = (user: User | null | undefined, courseId?: string) => {
 const getRedirect = (user: User | null | undefined) => {
   if (!user) return '/noaccess'
   if (user.hasIamAccess) return '/'
-  return `${user.activeCourseIds[0] || '/noaccess'}`
+  return `/${user.activeCourseIds[0] || '/noaccess'}`
 }
 
 const NavBar = () => {
@@ -65,8 +66,8 @@ const NavBar = () => {
 
   if (isLoading) return null
 
-  if (location.pathname !== '/noaccess' && !hasAccess(user, courseId)) {
-    window.location.href = getRedirect(user)
+  if (!location.pathname.includes('/noaccess') && !hasAccess(user, courseId)) {
+    window.location.href = PUBLIC_URL + getRedirect(user)
     return null
   }
 
