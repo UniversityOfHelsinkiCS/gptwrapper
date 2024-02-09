@@ -23,6 +23,8 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
 
   declare usage: number
 
+  declare totalUsage: bigint
+
   declare activeCourseIds: CreationOptional<string[]>
 }
 
@@ -54,6 +56,10 @@ User.init(
     },
     usage: {
       type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    totalUsage: {
+      type: DataTypes.BIGINT,
       defaultValue: 0,
     },
     activeCourseIds: {
