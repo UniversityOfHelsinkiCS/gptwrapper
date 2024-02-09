@@ -56,7 +56,7 @@
   },
   "error": {
     "noAccess": "Ei oikeuksia",
-    "noAccessInfo": "Sinulla ei tällä hetkellä ole käyttöoikeuksia Gptwrapperiin"
+    "noAccessInfo": "Sinulla ei tällä hetkellä ole käyttöoikeuksia CurreChattiin"
   },
   "admin": {
     "accessGroups": "Käyttäjäryhmät",
