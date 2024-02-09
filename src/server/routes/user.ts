@@ -20,7 +20,6 @@ userRouter.get('/login', async (req, res) => {
   if (!id) return res.status(401).send('Unauthorized')
 
   const hasIamAccess = checkIamAccess(iamGroups)
-  const usage = await getUsage(id)
 
   const enrolledCourses = await checkCourseAccess(id)
   const teacherCourses = await getOwnCourses(id, user.isAdmin)
@@ -36,6 +35,8 @@ userRouter.get('/login', async (req, res) => {
   user.ownCourses = teacherCourses
   user.activeCourseIds = courses
   await User.upsert(user)
+
+  const usage = await getUsage(id)
 
   return res.send({
     ...user,
