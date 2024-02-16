@@ -1,4 +1,4 @@
-import { TEST_COURSE_ID } from '../../util/config'
+import { TEST_COURSE_ID, EXAMPLE_COURSE_ID } from '../../util/config'
 import { Service } from '../models'
 
 const services = [
@@ -10,6 +10,16 @@ const services = [
     activityPeriod: {
       startDate: '2023-01-01',
       endDate: '2023-12-31',
+    },
+  },
+  {
+    id: EXAMPLE_COURSE_ID,
+    name: 'Example Course',
+    description: '',
+    courseId: EXAMPLE_COURSE_ID,
+    activityPeriod: {
+      startDate: '2024-01-01',
+      endDate: '2024-12-31',
     },
   },
 ]

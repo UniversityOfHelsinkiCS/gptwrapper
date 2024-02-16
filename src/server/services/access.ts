@@ -1,14 +1,17 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import { Op } from 'sequelize'
 
-import { accessIams } from '../util/config'
+import { accessIams, employeeIam, EXAMPLE_COURSE_ID } from '../util/config'
 import { Service } from '../db/models'
 import { getEnrollments, getTeachers } from '../util/importer'
 
 export const checkIamAccess = (iamGroups: string[]) =>
   accessIams.some((iam) => iamGroups.includes(iam))
 
-export const checkCourseAccess = async (userId: string) => {
+export const checkCourseAccess = async (
+  userId: string,
+  iamGroups: string[]
+) => {
   const activeCourses = await Service.findAll({
     where: {
       courseId: {
@@ -39,6 +42,8 @@ export const checkCourseAccess = async (userId: string) => {
   const courseIds = enrolledCourseIds.filter((id) =>
     activeCourseIds.includes(id)
   )
+
+  if (iamGroups.includes(employeeIam)) courseIds.push(EXAMPLE_COURSE_ID)
 
   return courseIds
 }

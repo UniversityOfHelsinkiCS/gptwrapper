@@ -39,11 +39,15 @@ export const basicUserIam = 'grp-currechat'
 
 export const powerUserIam = 'grp-currechat-powerusers'
 
-export const accessIams = [basicUserIam, powerUserIam, 'hy-employees']
+export const employeeIam = 'hy-employees'
+
+export const accessIams = [basicUserIam, powerUserIam, employeeIam]
 
 export const tikeIam = 'hy-tike-allstaff'
 
 export const TEST_COURSE_ID = 'test-course'
+
+export const EXAMPLE_COURSE_ID = 'esimerkit'
 
 export const TEST_USER_IDS = [
   'hy-hlo-95971222',
