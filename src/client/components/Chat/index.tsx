@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop, no-constant-condition */
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Box, Paper } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 
@@ -18,7 +18,7 @@ const Chat = () => {
   const [system, setSystem] = useState('')
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
-  const [file, setFile] = useState<File>(null)
+  const inputFileRef = useRef<HTMLInputElement>(null)
   const [completion, setCompletion] = useState('')
   const [model, setModel] = useState(localStorage.getItem('model') ?? 'gpt-4')
   const [streamController, setStreamController] = useState<AbortController>()
@@ -36,6 +36,7 @@ const Chat = () => {
 
   const handleSend = async () => {
     const formData = new FormData()
+    const file = inputFileRef.current.files[0] as File
     formData.append('file', file)
     const newMessage: Message = { role: 'user', content: message }
     setMessages((prev) => [
@@ -76,6 +77,7 @@ const Chat = () => {
     setStreamController(undefined)
     setCompletion('')
     refetch()
+    inputFileRef.current.value = ''
   }
 
   const handleReset = () => {
@@ -86,6 +88,7 @@ const Chat = () => {
     setSystem('')
     setMessage('')
     setCompletion('')
+    inputFileRef.current.value = ''
   }
 
   return (
@@ -119,7 +122,7 @@ const Chat = () => {
           resetDisabled={
             messages.length === 0 && system.length === 0 && message.length === 0
           }
-          setFile={setFile}
+          inputFileRef={inputFileRef}
         />
         <Email
           system={system}
