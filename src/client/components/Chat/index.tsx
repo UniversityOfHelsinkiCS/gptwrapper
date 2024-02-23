@@ -18,6 +18,7 @@ const Chat = () => {
   const [system, setSystem] = useState('')
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
+  const [file, setFile] = useState<File>(null)
   const [completion, setCompletion] = useState('')
   const [model, setModel] = useState(localStorage.getItem('model') ?? 'gpt-4')
   const [streamController, setStreamController] = useState<AbortController>()
@@ -34,15 +35,21 @@ const Chat = () => {
   }
 
   const handleSend = async () => {
+    const formData = new FormData()
+    formData.append('file', file)
     const newMessage: Message = { role: 'user', content: message }
-    setMessages((prev) => [...prev, newMessage])
+    setMessages((prev) => [
+      ...prev,
+      { role: 'user', content: message + (file ? `\n\n${file.name}` : '') },
+    ])
     setMessage('')
 
     try {
       const { stream, controller } = await getCompletionStream(
         system,
         messages.concat(newMessage),
-        model
+        model,
+        formData
       )
       const reader = stream.getReader()
       setStreamController(controller)
@@ -112,6 +119,7 @@ const Chat = () => {
           resetDisabled={
             messages.length === 0 && system.length === 0 && message.length === 0
           }
+          setFile={setFile}
         />
         <Email
           system={system}

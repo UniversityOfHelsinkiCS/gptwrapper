@@ -1,7 +1,8 @@
 import express from 'express'
+import multer from 'multer'
 
 import { tikeIam } from '../util/config'
-import { ChatRequest, CourseChatRequest, AzureOptions } from '../types'
+import { CourseChatRequest, AzureOptions } from '../types'
 import { isError } from '../util/parser'
 import {
   calculateUsage,
@@ -23,9 +24,25 @@ import logger from '../util/logger'
 
 const openaiRouter = express.Router()
 
-openaiRouter.post('/stream', async (r, res) => {
-  const req = r as ChatRequest
-  const { options } = req.body
+const storage = multer.memoryStorage()
+const upload = multer({ storage })
+
+openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
+  const { options } = JSON.parse(req.body.options)
+
+  if (req.file && req.file.mimetype === 'text/plain') {
+    const fileBuffer = req.file.buffer
+    const fileContent = fileBuffer.toString('utf8')
+    const allMessages = options.messages
+
+    const updatedMessage = {
+      ...allMessages[allMessages.length - 1],
+      content: `${allMessages[allMessages.length - 1].content} ${fileContent}`,
+    }
+    options.messages.pop()
+    options.messages = [...options.messages, updatedMessage]
+  }
+
   const { model } = options
   const { user } = req
 

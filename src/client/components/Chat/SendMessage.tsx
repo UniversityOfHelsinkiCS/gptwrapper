@@ -11,6 +11,7 @@ const SendMessage = ({
   handleReset,
   disabled,
   resetDisabled,
+  setFile,
 }: {
   message: string
   setMessage: Set<string>
@@ -18,6 +19,7 @@ const SendMessage = ({
   handleReset: () => void
   disabled: boolean
   resetDisabled: boolean
+  setFile: Set<File>
 }) => {
   const { t } = useTranslation()
 
@@ -36,6 +38,11 @@ const SendMessage = ({
           placeholder={t('chat:messagePlaceholder') as string}
         />
       </Box>
+      <input
+        type="file"
+        accept=".txt"
+        onChange={(e) => setFile(e.target.files[0])}
+      />
 
       <Button variant="contained" onClick={handleSend} disabled={disabled}>
         {t('send')}
