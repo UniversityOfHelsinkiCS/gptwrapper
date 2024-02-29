@@ -26,7 +26,8 @@
     "visiblePromptInfo": "Alustuksen teksti näkyy opiskelijoille",
     "promptName": "Alustuksen nimi",
     "copyStudentLink": "Kopioi opiskelijan linkki",
-    "linkCopied": "Linkki kopioitu"
+    "linkCopied": "Linkki kopioitu",
+    "fileUploadText": "Lisää tiedosto"
   },
   "info": {
     "title": "## Huomio",

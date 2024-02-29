@@ -26,7 +26,8 @@
     "visiblePromptInfo": "Prompt text is visible to students",
     "promptName": "Prompt name",
     "copyStudentLink": "Copy student link",
-    "linkCopied": "Link copied"
+    "linkCopied": "Link copied",
+    "fileUploadText": "Upload file"
   },
   "info": {
     "title": "## Attention",

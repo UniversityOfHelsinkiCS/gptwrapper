@@ -19,6 +19,7 @@ const Chat = () => {
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const inputFileRef = useRef<HTMLInputElement>(null)
+  const [fileName, setFileName] = useState<string>('')
   const [completion, setCompletion] = useState('')
   const [model, setModel] = useState(localStorage.getItem('model') ?? 'gpt-4')
   const [streamController, setStreamController] = useState<AbortController>()
@@ -78,6 +79,7 @@ const Chat = () => {
     setCompletion('')
     refetch()
     inputFileRef.current.value = ''
+    setFileName('')
   }
 
   const handleReset = () => {
@@ -89,6 +91,7 @@ const Chat = () => {
     setMessage('')
     setCompletion('')
     inputFileRef.current.value = ''
+    setFileName('')
   }
 
   return (
@@ -123,6 +126,8 @@ const Chat = () => {
             messages.length === 0 && system.length === 0 && message.length === 0
           }
           inputFileRef={inputFileRef}
+          fileName={fileName}
+          setFileName={setFileName}
         />
         <Email
           system={system}
