@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react'
 import { Box, Paper } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
+import { useTranslation } from 'react-i18next'
 
 import { DEFAULT_TOKEN_LIMIT } from '../../../config'
 import { Message } from '../../types'
@@ -24,6 +25,8 @@ const Chat = () => {
   const [model, setModel] = useState(localStorage.getItem('model') ?? 'gpt-4')
   const [streamController, setStreamController] = useState<AbortController>()
 
+  const { t } = useTranslation()
+
   const { user, isLoading, refetch } = useCurrentUser()
 
   if (isLoading) return null
@@ -39,7 +42,10 @@ const Chat = () => {
     const formData = new FormData()
     const file = inputFileRef.current.files[0] as File
     formData.append('file', file)
-    const newMessage: Message = { role: 'user', content: message }
+    const newMessage: Message = {
+      role: 'user',
+      content: message + (file ? `${t('fileInfoPrompt')}` : ''),
+    }
     setMessages((prev) => [
       ...prev,
       { role: 'user', content: message + (file ? `\n\n${file.name}` : '') },

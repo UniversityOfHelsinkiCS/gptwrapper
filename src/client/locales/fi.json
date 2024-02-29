@@ -27,7 +27,8 @@
     "promptName": "Alustuksen nimi",
     "copyStudentLink": "Kopioi opiskelijan linkki",
     "linkCopied": "Linkki kopioitu",
-    "fileUploadText": "Lisää tiedosto"
+    "fileUploadText": "Lisää tiedosto",
+    "fileInfoPrompt": "\n\nTässä on tiedoston sisältämä teksti:\n\n"
   },
   "info": {
     "title": "## Huomio",
