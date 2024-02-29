@@ -21,6 +21,7 @@ import {
 } from '../util/util'
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
+import { parsePdf } from '../util/pdf'
 
 const openaiRouter = express.Router()
 
@@ -30,9 +31,17 @@ const upload = multer({ storage })
 openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
   const { options } = JSON.parse(req.body.options)
 
-  if (req.file && req.file.mimetype === 'text/plain') {
+  let fileContent = ''
+
+  if (req.file) {
     const fileBuffer = req.file.buffer
-    const fileContent = fileBuffer.toString('utf8')
+    if (req.file.mimetype === 'text/plain') {
+      fileContent = fileBuffer.toString('utf8')
+    }
+    if (req.file.mimetype === 'application/pdf') {
+      fileContent = await parsePdf(fileBuffer)
+    }
+
     const allMessages = options.messages
 
     const updatedMessage = {
