@@ -1,18 +1,10 @@
-import PDFParser from 'pdf2json'
+import fs from 'fs'
 
-export const parsePdf = (dataBuffer: Buffer): Promise<string> => {
-  const pdfParser: any = new PDFParser(this, 1)
+import pdf from 'pdf-parse'
 
-  return new Promise((resolve, reject) => {
-    pdfParser.on('pdfParser_dataReady', () => {
-      const text = pdfParser.getRawTextContent()
-      resolve(text)
-    })
+export const parsePdf = async (path: string) => {
+  const dataBuffer = fs.readFileSync(path)
+  const data = await pdf(dataBuffer)
 
-    pdfParser.on('pdfParser_dataError', (err: any) => {
-      reject(err)
-    })
-
-    pdfParser.parseBuffer(dataBuffer)
-  })
+  return data.text
 }

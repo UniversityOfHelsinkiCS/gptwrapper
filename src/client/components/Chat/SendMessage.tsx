@@ -11,7 +11,6 @@ const SendMessage = ({
   handleReset,
   disabled,
   resetDisabled,
-  inputFileRef,
 }: {
   message: string
   setMessage: Set<string>
@@ -19,7 +18,6 @@ const SendMessage = ({
   handleReset: () => void
   disabled: boolean
   resetDisabled: boolean
-  inputFileRef: React.RefObject<HTMLInputElement>
 }) => {
   const { t } = useTranslation()
 
@@ -38,7 +36,6 @@ const SendMessage = ({
           placeholder={t('chat:messagePlaceholder') as string}
         />
       </Box>
-      <input type="file" accept=".txt" ref={inputFileRef} />
 
       <Button variant="contained" onClick={handleSend} disabled={disabled}>
         {t('send')}
