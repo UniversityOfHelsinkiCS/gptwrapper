@@ -4,27 +4,29 @@ import { Message } from '../../types'
 export const getCompletionStream = async (
   system: string,
   messages: Message[],
-  model: string
+  model: string,
+  formData: FormData
 ) => {
   const controller = new AbortController()
 
+  const str = JSON.stringify({
+    options: {
+      messages: [
+        {
+          role: 'system',
+          content: system,
+        },
+        ...messages,
+      ],
+      model,
+    },
+  })
+
+  formData.set('options', str)
+
   const response = await fetch(`${PUBLIC_URL}/api/ai/stream`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      options: {
-        messages: [
-          {
-            role: 'system',
-            content: system,
-          },
-          ...messages,
-        ],
-        model,
-      },
-    }),
+    body: formData,
     signal: controller.signal,
   })
 
