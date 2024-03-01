@@ -56,7 +56,7 @@ const Email = ({
       <span>
         <Button
           sx={(theme) => ({
-            [theme.breakpoints.up('sm')]: { float: 'right', marginTop: -7 },
+            [theme.breakpoints.up('lg')]: { float: 'right', marginTop: -7 },
           })}
           onClick={handleSend}
           disabled={disabled}
