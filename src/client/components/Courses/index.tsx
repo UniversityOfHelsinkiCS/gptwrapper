@@ -48,7 +48,7 @@ const Courses = () => {
 
   if (isLoading) return null
 
-  const sortedCourses = courses.toSorted(sortCourses)
+  const sortedCourses = courses.sort(sortCourses)
 
   return (
     <Box
