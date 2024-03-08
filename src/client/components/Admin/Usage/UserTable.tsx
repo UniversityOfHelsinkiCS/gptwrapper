@@ -56,7 +56,7 @@ const UserTable = () => {
   )
   const sortedUsage = (filteredUsage as Usage[])
     .concat(userUsages)
-    .toSorted(sortUsage)
+    .sort(sortUsage)
 
   return (
     <Box my={2}>

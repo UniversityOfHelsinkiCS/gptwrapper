@@ -50,7 +50,7 @@ const NavBar = () => {
   const anchorRef = useRef<HTMLButtonElement>(null)
 
   const { language } = i18n
-  const languages = ['fi', 'en'] // Possibly Swedish as well
+  const languages = ['fi', 'sv', 'en']
 
   const { user, isLoading } = useCurrentUser()
 
