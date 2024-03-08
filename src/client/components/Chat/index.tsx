@@ -14,6 +14,7 @@ import Conversation from './Conversation'
 import SendMessage from './SendMessage'
 import Email from './Email'
 import Status from './Status'
+import '../../styles.css'
 
 const Chat = () => {
   const [system, setSystem] = useState('')
@@ -122,6 +123,7 @@ const Chat = () => {
           disabled={messages.length > 0}
         />
         <Conversation messages={messages} completion={completion} />
+        {completion && <div className="loader" />}
         <SendMessage
           message={message}
           setMessage={setMessage}
