@@ -33,23 +33,28 @@ openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
 
   let fileContent = ''
 
-  if (req.file) {
-    const fileBuffer = req.file.buffer
-    if (req.file.mimetype === 'text/plain') {
-      fileContent = fileBuffer.toString('utf8')
-    }
-    if (req.file.mimetype === 'application/pdf') {
-      fileContent = await parsePdf(fileBuffer)
-    }
+  try {
+    if (req.file) {
+      const fileBuffer = req.file.buffer
+      if (req.file.mimetype === 'text/plain') {
+        fileContent = fileBuffer.toString('utf8')
+      }
+      if (req.file.mimetype === 'application/pdf') {
+        fileContent = await parsePdf(fileBuffer)
+      }
 
-    const allMessages = options.messages
+      const allMessages = options.messages
 
-    const updatedMessage = {
-      ...allMessages[allMessages.length - 1],
-      content: `${allMessages[allMessages.length - 1].content} ${fileContent}`,
+      const updatedMessage = {
+        ...allMessages[allMessages.length - 1],
+        content: `${allMessages[allMessages.length - 1].content} ${fileContent}`,
+      }
+      options.messages.pop()
+      options.messages = [...options.messages, updatedMessage]
     }
-    options.messages.pop()
-    options.messages = [...options.messages, updatedMessage]
+  } catch (error) {
+    logger.error('Error parsing file', { error })
+    return res.status(400).send('Error parsing file')
   }
 
   const { model } = options

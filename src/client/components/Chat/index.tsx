@@ -79,7 +79,13 @@ const Chat = () => {
     } catch (err: any) {
       if (err?.name === 'AbortError') return
       const error = err?.response?.data || err.message
-      enqueueSnackbar(error, { variant: 'error' })
+      if (error === 'Model maximum context reached' && fileName) {
+        enqueueSnackbar(t('error:tooLargeFile'), { variant: 'error' })
+      } else if (error === 'Error parsing file' && fileName) {
+        enqueueSnackbar(t('error:fileParsingError'), { variant: 'error' })
+      } else {
+        enqueueSnackbar(error, { variant: 'error' })
+      }
     }
 
     setStreamController(undefined)
