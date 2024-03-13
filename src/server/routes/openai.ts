@@ -28,31 +28,35 @@ const openaiRouter = express.Router()
 const storage = multer.memoryStorage()
 const upload = multer({ storage })
 
-const fileParsing = async (options: any, req: any) => {
-  const fileBuffer = req.file.buffer
-  let fileContent = ''
-  if (req.file.mimetype === 'text/plain') {
-    fileContent = fileBuffer.toString('utf8')
-  }
-  if (req.file.mimetype === 'application/pdf') {
-    fileContent = await parsePdf(fileBuffer)
-  }
-
-  const allMessages = options.messages
-
-  const updatedMessage = {
-    ...allMessages[allMessages.length - 1],
-    content: `${allMessages[allMessages.length - 1].content} ${fileContent}`,
-  }
-  options.messages.pop()
-  // eslint-disable-next-line no-param-reassign
-  options.messages = [...options.messages, updatedMessage]
-
-  return options.messages
-}
-
 openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
   const { options } = JSON.parse(req.body.options)
+
+  let fileContent = ''
+
+  try {
+    if (req.file) {
+      const fileBuffer = req.file.buffer
+      if (req.file.mimetype === 'text/plain') {
+        fileContent = fileBuffer.toString('utf8')
+      }
+      if (req.file.mimetype === 'application/pdf') {
+        fileContent = await parsePdf(fileBuffer)
+      }
+
+      const allMessages = options.messages
+
+      const updatedMessage = {
+        ...allMessages[allMessages.length - 1],
+        content: `${allMessages[allMessages.length - 1].content} ${fileContent}`,
+      }
+      options.messages.pop()
+      options.messages = [...options.messages, updatedMessage]
+    }
+  } catch (error) {
+    logger.error('Error parsing file', { error })
+    return res.status(400).send('Error parsing file')
+  }
+
   const { model } = options
   const { user } = req
 
@@ -61,20 +65,7 @@ openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
   const usageAllowed = await checkUsage(user, model)
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
-  let optionsMessagesWithFile = null
-
-  try {
-    if (req.file) {
-      optionsMessagesWithFile = await fileParsing(options, req)
-    }
-  } catch (error) {
-    logger.error('Error parsing file', { error })
-    return res.status(400).send('Error parsing file')
-  }
-  console.log('optionsMessage: ', optionsMessagesWithFile)
-  options.messages = getMessageContext(
-    optionsMessagesWithFile || options.messages
-  )
+  options.messages = getMessageContext(options.messages)
   options.stream = true
 
   const encoding = getEncoding(model)
