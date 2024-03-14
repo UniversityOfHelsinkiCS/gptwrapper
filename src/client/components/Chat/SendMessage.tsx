@@ -53,23 +53,24 @@ const SendMessage = ({
           placeholder={t('chat:messagePlaceholder') as string}
         />
       </Box>
-      {user?.isAdmin && (
-        <Button
-          component="label"
-          variant="outlined"
-          startIcon={<UploadFileIcon />}
-          sx={{ marginRight: '1rem' }}
-        >
-          {t('fileUploadText')}
-          <input
-            type="file"
-            accept=".txt, .pdf"
-            hidden
-            ref={inputFileRef}
-            onChange={(e) => setFileName(e.target.files[0].name)}
-          />
-        </Button>
-      )}
+      <Button
+        component="label"
+        variant="outlined"
+        startIcon={<UploadFileIcon />}
+        sx={{
+          marginRight: '1rem',
+          display: !user?.isAdmin ? 'none' : undefined,
+        }}
+      >
+        {t('fileUploadText')}
+        <input
+          type="file"
+          accept=".txt, .pdf"
+          hidden
+          ref={inputFileRef}
+          onChange={(e) => setFileName(e.target.files[0].name)}
+        />
+      </Button>
       {fileName && (
         <Button
           onClick={handleDeleteFile}
