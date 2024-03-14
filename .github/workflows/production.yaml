@@ -22,6 +22,7 @@ jobs:
           build-args: |
             BASE_PATH=/chat
             GIT_SHA=${{ github.sha }}
+            STAGING=false
 
       - name: Push to quay.io
         uses: redhat-actions/push-to-registry@v2
