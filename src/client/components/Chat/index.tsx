@@ -41,7 +41,9 @@ const Chat = () => {
 
   const handleSend = async () => {
     const formData = new FormData()
-    const file = inputFileRef.current.files[0] as File
+    const file = user.isAdmin
+      ? (inputFileRef.current.files[0] as File)
+      : undefined
     formData.append('file', file)
     const newMessage: Message = {
       role: 'user',
