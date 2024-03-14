@@ -6,6 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import { useTranslation } from 'react-i18next'
 
 import { Set } from '../../types'
+import useCurrentUser from '../../hooks/useCurrentUser'
 
 const SendMessage = ({
   message,
@@ -35,6 +36,8 @@ const SendMessage = ({
     setFileName('')
   }
 
+  const { user } = useCurrentUser()
+
   return (
     <Box mb={2}>
       <Box mb={1}>
@@ -50,21 +53,23 @@ const SendMessage = ({
           placeholder={t('chat:messagePlaceholder') as string}
         />
       </Box>
-      <Button
-        component="label"
-        variant="outlined"
-        startIcon={<UploadFileIcon />}
-        sx={{ marginRight: '1rem' }}
-      >
-        {t('fileUploadText')}
-        <input
-          type="file"
-          accept=".txt, .pdf"
-          hidden
-          ref={inputFileRef}
-          onChange={(e) => setFileName(e.target.files[0].name)}
-        />
-      </Button>
+      {user?.isAdmin && (
+        <Button
+          component="label"
+          variant="outlined"
+          startIcon={<UploadFileIcon />}
+          sx={{ marginRight: '1rem' }}
+        >
+          {t('fileUploadText')}
+          <input
+            type="file"
+            accept=".txt, .pdf"
+            hidden
+            ref={inputFileRef}
+            onChange={(e) => setFileName(e.target.files[0].name)}
+          />
+        </Button>
+      )}
       {fileName && (
         <Button
           onClick={handleDeleteFile}
