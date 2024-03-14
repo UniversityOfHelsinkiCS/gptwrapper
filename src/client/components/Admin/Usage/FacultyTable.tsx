@@ -13,7 +13,7 @@ import {
 import { useTranslation } from 'react-i18next'
 
 import { Faculty, Locales, User } from '../../../types'
-import useUsers from '../../../hooks/userUsers'
+import useUsers from '../../../hooks/useUsers'
 import useFaculties from '../../../hooks/useFaculties'
 
 const calculateFacultyUsage = (users: User[], faculties: Faculty[]) => {

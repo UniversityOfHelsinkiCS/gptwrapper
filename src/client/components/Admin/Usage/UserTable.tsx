@@ -16,8 +16,9 @@ import { useTranslation } from 'react-i18next'
 
 import { ServiceUsage, Service } from '../../../types'
 import useServiceUsage from '../../../hooks/useServiceUsage'
-import useUsers from '../../../hooks/userUsers'
+import useUsers from '../../../hooks/useUsers'
 import { useDeleteServiceUsageMutation } from '../../../hooks/useServiceUsageMutation'
+import useResetUsageMutation from '../../../hooks/useResetUsageMutation'
 
 type Usage = Omit<ServiceUsage, 'service'> & { service?: Service }
 
@@ -28,14 +29,24 @@ const UserTable = () => {
   const { usage: serviceUsage, isLoading } = useServiceUsage()
   const { users, isLoading: usersLoading } = useUsers()
 
-  const mutation = useDeleteServiceUsageMutation()
+  const deleteServiceUsage = useDeleteServiceUsageMutation()
+  const resetUsage = useResetUsageMutation()
 
   const { t } = useTranslation()
 
-  const onDelete = (serviceUsageId: string) => {
+  const onDeleteServiceUsage = (serviceUsageId: string) => {
     try {
-      mutation.mutate(serviceUsageId)
+      deleteServiceUsage.mutate(serviceUsageId)
       enqueueSnackbar('Service usage deleted', { variant: 'success' })
+    } catch (error: any) {
+      enqueueSnackbar(error.message, { variant: 'error' })
+    }
+  }
+
+  const onResetUsage = (userId: string) => {
+    try {
+      resetUsage.mutate(userId)
+      enqueueSnackbar('User usage reset', { variant: 'success' })
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     }
@@ -97,11 +108,16 @@ const UserTable = () => {
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  {service?.courseId && (
-                    <Button color="error" onClick={() => onDelete(id)}>
-                      {t('admin:reset')}
-                    </Button>
-                  )}
+                  <Button
+                    color="error"
+                    onClick={() =>
+                      service?.courseId
+                        ? onDeleteServiceUsage(id)
+                        : onResetUsage(user.id)
+                    }
+                  >
+                    {t('admin:reset')}
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}

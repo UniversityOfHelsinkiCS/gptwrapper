@@ -123,4 +123,18 @@ adminRouter.get('/users', async (_, res) => {
   return res.send(usage)
 })
 
+adminRouter.delete('/usage/:userId', async (req, res) => {
+  const { userId } = req.params
+
+  const user = await User.findByPk(userId)
+
+  if (!user) return res.status(404).send('User not found')
+
+  user.usage = 0
+
+  await user.save()
+
+  return res.status(204).send()
+})
+
 export default adminRouter
