@@ -1,7 +1,7 @@
 import express from 'express'
 import multer from 'multer'
 
-import { tikeIam } from '../util/config'
+// import { tikeIam } from '../util/config'
 import { CourseChatRequest, AzureOptions } from '../types'
 import { isError } from '../util/parser'
 import {
@@ -11,7 +11,7 @@ import {
   checkCourseUsage,
   incrementCourseUsage,
 } from '../services/usage'
-import { completionStream, handleTike } from '../util/openai'
+// import { completionStream, handleTike } from '../util/openai'
 import { getCompletionEvents, streamCompletion } from '../util/azure'
 import {
   getMessageContext,
@@ -86,7 +86,9 @@ openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
     return res.status(403).send('Model maximum context reached')
   }
 
-  const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
+  // Tike API quota reached so this is disabled for now.
+  // Ask JP for how it's going to be done in the future.
+  /* const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
 
   if (isTike) {
     const stream = await completionStream(options)
@@ -96,20 +98,20 @@ openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
     res.setHeader('content-type', 'text/event-stream')
 
     tokenCount += await handleTike(stream, encoding, res)
-  } else {
-    const events = await getCompletionEvents(options as AzureOptions)
+  } else { */
+  const events = await getCompletionEvents(options as AzureOptions)
 
-    if (isError(events)) return res.status(424)
+  if (isError(events)) return res.status(424)
 
-    res.setHeader('content-type', 'text/event-stream')
+  res.setHeader('content-type', 'text/event-stream')
 
-    tokenCount += await streamCompletion(
-      events,
-      options as AzureOptions,
-      encoding,
-      res
-    )
-  }
+  tokenCount += await streamCompletion(
+    events,
+    options as AzureOptions,
+    encoding,
+    res
+  )
+  // }
 
   if (model === 'gpt-4') await incrementUsage(user, tokenCount)
   logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
