@@ -60,7 +60,8 @@
     "noAccess": "Ei oikeuksia",
     "noAccessInfo": "Sinulla ei tällä hetkellä ole käyttöoikeuksia CurreChattiin",
     "tooLargeFile": "Tiedosto on liian suuri",
-    "fileParsingError": "Tiedoston lukeminen epäonnistui"
+    "fileParsingError": "Tiedoston lukeminen epäonnistui",
+    "invalidFileType": "Tiedostotyyppiä ei tueta"
   },
   "admin": {
     "accessGroups": "Käyttäjäryhmät",

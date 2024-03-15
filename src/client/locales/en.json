@@ -60,7 +60,8 @@
     "noAccess": "No access",
     "noAccessInfo": "You do not currently have access to CurreChat",
     "tooLargeFile": "The file is too large",
-    "fileParsingError": "Parsing the file failed"
+    "fileParsingError": "Parsing the file failed",
+    "invalidFileType": "Invalid file type"
   },
   "admin": {
     "accessGroups": "Access groups",

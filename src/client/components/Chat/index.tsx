@@ -45,7 +45,7 @@ const Chat = () => {
     if (file.type === 'text/plain') {
       formData.append('file', file)
     } else {
-      enqueueSnackbar('Tiedostotyyppiä ei tueta', { variant: 'error' })
+      enqueueSnackbar(t('error:invalidFileType'), { variant: 'error' })
       return
     }
     const newMessage: Message = {
