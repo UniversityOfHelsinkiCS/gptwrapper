@@ -42,7 +42,12 @@ const Chat = () => {
   const handleSend = async () => {
     const formData = new FormData()
     const file = inputFileRef.current.files[0] as File
-    formData.append('file', file)
+    if (file.type === 'text/plain') {
+      formData.append('file', file)
+    } else {
+      enqueueSnackbar('Tiedostotyyppiä ei tueta', { variant: 'error' })
+      return
+    }
     const newMessage: Message = {
       role: 'user',
       content: message + (file ? `${t('fileInfoPrompt')}` : ''),
