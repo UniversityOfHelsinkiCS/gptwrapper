@@ -42,11 +42,13 @@ const Chat = () => {
   const handleSend = async () => {
     const formData = new FormData()
     const file = inputFileRef.current.files[0] as File
-    if (file.type === 'text/plain') {
-      formData.append('file', file)
-    } else {
-      enqueueSnackbar(t('error:invalidFileType'), { variant: 'error' })
-      return
+    if (file) {
+      if (file.type === 'text/plain') {
+        formData.append('file', file)
+      } else {
+        enqueueSnackbar(t('error:invalidFileType'), { variant: 'error' })
+        return
+      }
     }
     const newMessage: Message = {
       role: 'user',
