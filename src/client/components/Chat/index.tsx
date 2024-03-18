@@ -114,6 +114,13 @@ const Chat = () => {
     setFileName('')
   }
 
+  const handleStop = () => {
+    if (streamController) streamController.abort()
+    setStreamController(undefined)
+    setCompletion('')
+    setMessages(messages.slice(0, -1))
+  }
+
   return (
     <Box
       sx={{
@@ -135,8 +142,11 @@ const Chat = () => {
           setSystem={setSystem}
           disabled={messages.length > 0}
         />
-        <Conversation messages={messages} completion={completion} />
-        {completion && <div className="loader" />}
+        <Conversation
+          messages={messages}
+          completion={completion}
+          handleStop={handleStop}
+        />
         <SendMessage
           message={message}
           setMessage={setMessage}

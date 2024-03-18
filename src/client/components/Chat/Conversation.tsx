@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/aria-role */
 import React from 'react'
-import { Box, Paper, Typography } from '@mui/material'
+import { Box, Button, Paper, Stack, Typography } from '@mui/material'
 import { Person, Assistant } from '@mui/icons-material'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -42,9 +42,11 @@ export const Response = ({
 const Conversation = ({
   messages,
   completion,
+  handleStop,
 }: {
   messages: Message[]
   completion: string
+  handleStop: () => void
 }) => {
   const { t } = useTranslation()
 
@@ -58,7 +60,21 @@ const Conversation = ({
       {messages.map(({ role, content }) => (
         <Response key={content} role={role} content={content} />
       ))}
-      {completion && <Response role="assistant" content={completion} />}
+      {completion && (
+        <>
+          <Stack direction="row" spacing={2} sx={{ marginBottom: '20px' }}>
+            <div className="loader" />
+            <Button
+              onClick={handleStop}
+              variant="contained"
+              sx={{ marginLeft: '30px', backgroundColor: 'red' }}
+            >
+              Stop!
+            </Button>
+          </Stack>
+          <Response role="assistant" content={completion} />
+        </>
+      )}
     </Box>
   )
 }
