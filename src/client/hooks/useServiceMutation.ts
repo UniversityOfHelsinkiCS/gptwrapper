@@ -14,7 +14,7 @@ interface NewServiceData {
 
 export const useCreateServiceMutation = () => {
   const mutationFn = async (data: NewServiceData) => {
-    const res = await fetch(`${PUBLIC_URL}/api/admin/services`, {
+    const res = await fetch(`${PUBLIC_URL}/api/admin/chatinstances`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -47,11 +47,14 @@ interface UpdatedServiceData {
 
 export const useEditServiceMutation = () => {
   const mutationFn = async (data: UpdatedServiceData) => {
-    const res = await fetch(`${PUBLIC_URL}/api/admin/services/${data.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
+    const res = await fetch(
+      `${PUBLIC_URL}/api/admin/chatinstances/${data.id}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      }
+    )
 
     const service = await res.json()
 
@@ -71,7 +74,7 @@ export const useEditServiceMutation = () => {
 
 export const useDeleteServiceMutation = () => {
   const mutationFn = async (id: string) => {
-    const res = await fetch(`${PUBLIC_URL}/api/admin/services/${id}`, {
+    const res = await fetch(`${PUBLIC_URL}/api/admin/chatinstances/${id}`, {
       method: 'DELETE',
     })
 

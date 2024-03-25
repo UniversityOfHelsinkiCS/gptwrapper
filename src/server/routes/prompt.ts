@@ -6,7 +6,7 @@ import { Prompt, ChatInstance } from '../db/models'
 const promptRouter = express.Router()
 
 interface NewPromptData {
-  serviceId: string
+  chatInstanceId: string
   name: string
   systemMessage: string
   messages: Message[]

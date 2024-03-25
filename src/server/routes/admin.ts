@@ -23,7 +23,7 @@ interface NewChatInstanceData {
   courseId: string
 }
 
-adminRouter.post('/services', async (req, res) => {
+adminRouter.post('/chatinstances', async (req, res) => {
   const data = req.body as NewChatInstanceData
   const { name, description, model, usageLimit, courseId } = data
 
@@ -50,7 +50,7 @@ interface UpdatedChatInstanceData {
   courseId: string
 }
 
-adminRouter.put('/services/:id', async (req, res) => {
+adminRouter.put('/chatinstances/:id', async (req, res) => {
   const { id } = req.params
   const data = req.body as UpdatedChatInstanceData
   const { name, description, model, usageLimit, courseId } = data
@@ -70,7 +70,7 @@ adminRouter.put('/services/:id', async (req, res) => {
   return res.send(chatInstance)
 })
 
-adminRouter.delete('/services/:id', async (req, res) => {
+adminRouter.delete('/chatinstances/:id', async (req, res) => {
   const { id } = req.params
 
   const chatInstance = await ChatInstance.findByPk(id)
@@ -86,7 +86,7 @@ adminRouter.delete('/services/:id', async (req, res) => {
   return res.status(204).send()
 })
 
-adminRouter.get('/services/usage', async (_, res) => {
+adminRouter.get('/chatinstances/usage', async (_, res) => {
   const usage = await UserServiceUsage.findAll({
     include: [
       {
@@ -103,7 +103,7 @@ adminRouter.get('/services/usage', async (_, res) => {
   return res.send(usage)
 })
 
-adminRouter.delete('/services/usage/:id', async (req, res) => {
+adminRouter.delete('/chatinstances/usage/:id', async (req, res) => {
   const { id } = req.params
 
   const serviceUsage = await UserServiceUsage.findByPk(id)

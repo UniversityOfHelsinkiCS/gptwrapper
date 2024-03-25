@@ -5,9 +5,9 @@ import { Prompt } from '../types'
 
 export const queryKey = ['prompts']
 
-const usePrompts = (serviceId: string) => {
+const usePrompts = (chatInstanceId: string) => {
   const queryFn = async (): Promise<Prompt[]> => {
-    const res = await fetch(`${PUBLIC_URL}/api/prompts/${serviceId}`)
+    const res = await fetch(`${PUBLIC_URL}/api/prompts/${chatInstanceId}`)
 
     const data = await res.json()
 

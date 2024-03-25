@@ -7,7 +7,7 @@ const useService = (id: string) => {
   const queryKey = ['service', id]
 
   const queryFn = async (): Promise<ChatInstance | null> => {
-    const res = await fetch(`${PUBLIC_URL}/api/services/${id}`)
+    const res = await fetch(`${PUBLIC_URL}/api/chatinstances/${id}`)
 
     const data = await res.json()
 

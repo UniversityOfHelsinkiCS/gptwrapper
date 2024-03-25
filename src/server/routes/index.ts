@@ -9,7 +9,7 @@ import errorHandler from '../middleware/error'
 import accessLogger from '../middleware/access'
 import openaiRouter from './openai'
 import userRouter from './user'
-import serviceRouter from './chatInstance'
+import chatInstancesRouter from './chatInstance'
 import courseRouter from './course'
 import promptRouter from './prompt'
 import emailRouter from './email'
@@ -35,7 +35,7 @@ router.get('/ping', (_, res) => res.send('pong'))
 
 router.use('/ai', openaiRouter)
 router.use('/users', userRouter)
-router.use('/services', serviceRouter)
+router.use('/chatinstances', chatInstancesRouter)
 router.use('/courses', courseRouter)
 router.use('/prompts', promptRouter)
 router.use('/email', emailRouter)

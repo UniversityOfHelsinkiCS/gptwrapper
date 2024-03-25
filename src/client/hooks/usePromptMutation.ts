@@ -6,7 +6,7 @@ import queryClient from '../util/queryClient'
 import { queryKey } from './usePrompts'
 
 interface NewPromptData {
-  serviceId: string
+  chatInstanceId: string
   name: string
   systemMessage: string
   messages: Message[]

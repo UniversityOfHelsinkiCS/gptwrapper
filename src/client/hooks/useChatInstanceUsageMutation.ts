@@ -6,9 +6,12 @@ import { queryKey } from './useChatInstanceUsage'
 
 export const useDeleteChatInstanceUsageMutation = () => {
   const mutationFn = async (id: string) => {
-    const res = await fetch(`${PUBLIC_URL}/api/admin/services/usage/${id}`, {
-      method: 'DELETE',
-    })
+    const res = await fetch(
+      `${PUBLIC_URL}/api/admin/chatinstances/usage/${id}`,
+      {
+        method: 'DELETE',
+      }
+    )
 
     return res
   }

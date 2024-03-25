@@ -112,7 +112,7 @@ const Course = () => {
   const handleSave = () => {
     try {
       createMutation.mutate({
-        serviceId: course.id,
+        chatInstanceId: course.id,
         name,
         systemMessage: system,
         messages,

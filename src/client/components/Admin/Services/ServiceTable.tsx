@@ -49,8 +49,8 @@ const ServiceTable = ({ editFormOpen, setEditFormOpen }: Props) => {
     }
   }
 
-  const onEdit = (serviceId: string) => {
-    setEditId(serviceId)
+  const onEdit = (chatInstanceId: string) => {
+    setEditId(chatInstanceId)
     setEditFormOpen(true)
   }
 

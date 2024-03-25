@@ -7,7 +7,7 @@ export const queryKey = ['services']
 
 const useServices = () => {
   const queryFn = async (): Promise<ChatInstance[]> => {
-    const res = await fetch(`${PUBLIC_URL}/api/services`)
+    const res = await fetch(`${PUBLIC_URL}/api/chatinstances`)
 
     const data = await res.json()
 
