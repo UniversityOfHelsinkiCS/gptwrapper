@@ -9,7 +9,6 @@
     "dev": "NODE_ENV=development concurrently \"nodemon --exec node --loader @swc-node/register/esm src/server/index.ts\" \"vite\"",
     "lint": "eslint 'src/**/*.ts'",
     "format": "prettier --write '*.{ts,json,css,md}'",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "vite build",
     "prepare": "husky install"
   },
@@ -59,6 +58,7 @@
   "devDependencies": {
     "@babel/eslint-parser": "^7.23.10",
     "@babel/preset-typescript": "^7.23.3",
+    "@playwright/test": "^1.42.1",
     "@types/cors": "^2.8.17",
     "@types/eslint": "^8.56.2",
     "@types/express": "^4.17.21",

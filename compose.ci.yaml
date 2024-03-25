@@ -1,0 +1,29 @@
+services:
+  app:
+    image: gptwrapper:latest
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+    volumes:
+      - ./:/opt/app-root/src
+    ports:
+      - 3000:3000
+      - 8000:8000
+    container_name: gptwrapper_dev
+
+  db:
+    image: docker.io/postgres:15.2-alpine
+    environment:
+      - PGDATA=/data
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - pg_data:/data
+    container_name: gptwrapper_db
+
+  redis:
+    image: redis:7-alpine
+    container_name: gptwrapper_redis
+
+volumes:
+  pg_data:
