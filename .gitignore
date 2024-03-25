@@ -9,3 +9,4 @@ my_username
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+.npm
