@@ -16,34 +16,34 @@ import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 
 import { ChatInstance } from '../../../types'
-import useServices from '../../../hooks/useServices'
-import { useDeleteServiceMutation } from '../../../hooks/useServiceMutation'
-import EditService from './EditService'
+import useChatInstances from '../../../hooks/useChatInstances'
+import { useDeleteChatInstanceMutation } from '../../../hooks/useChatInstanceMutation'
+import EditChatInstance from './EditChatInstance'
 
 type Props = {
   editFormOpen: boolean
   setEditFormOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const sortServices = (a: ChatInstance, b: ChatInstance) =>
+const sortChatInstances = (a: ChatInstance, b: ChatInstance) =>
   a.name.localeCompare(b.name)
 
-const ServiceTable = ({ editFormOpen, setEditFormOpen }: Props) => {
+const ChatInstanceTable = ({ editFormOpen, setEditFormOpen }: Props) => {
   const [editId, setEditId] = useState('')
 
-  const { services, isLoading } = useServices()
+  const { chatInstances, isLoading } = useChatInstances()
 
-  const mutation = useDeleteServiceMutation()
+  const mutation = useDeleteChatInstanceMutation()
 
   const { t } = useTranslation()
 
   const onDelete = (accessGroupId: string) => {
     // eslint-disable-next-line no-alert
-    if (!window.confirm(t('admin:confirmServiceDelete') as string)) return
+    if (!window.confirm(t('admin:confirmChatInstanceDelete') as string)) return
 
     try {
       mutation.mutate(accessGroupId)
-      enqueueSnackbar('Course service deleted', { variant: 'success' })
+      enqueueSnackbar('Course chat instance deleted', { variant: 'success' })
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     }
@@ -54,9 +54,9 @@ const ServiceTable = ({ editFormOpen, setEditFormOpen }: Props) => {
     setEditFormOpen(true)
   }
 
-  const sortedServices = services.sort(sortServices)
+  const sortedChatInstances = chatInstances.sort(sortChatInstances)
 
-  const serviceToEdit = sortedServices.find(({ id }) => id === editId)
+  const chatInstanceToEdit = sortedChatInstances.find(({ id }) => id === editId)
 
   if (isLoading) return null
 
@@ -99,7 +99,7 @@ const ServiceTable = ({ editFormOpen, setEditFormOpen }: Props) => {
           </TableHead>
 
           <TableBody>
-            {sortedServices.map(
+            {sortedChatInstances.map(
               ({ id, name, description, model, usageLimit, courseId }) => (
                 <TableRow key={id}>
                   <TableCell component="th" scope="row">
@@ -135,10 +135,13 @@ const ServiceTable = ({ editFormOpen, setEditFormOpen }: Props) => {
       </TableContainer>
 
       <Modal open={editFormOpen} onClose={() => setEditFormOpen(false)}>
-        <EditService service={serviceToEdit} setFormOpen={setEditFormOpen} />
+        <EditChatInstance
+          chatInstance={chatInstanceToEdit}
+          setFormOpen={setEditFormOpen}
+        />
       </Modal>
     </Box>
   )
 }
 
-export default ServiceTable
+export default ChatInstanceTable

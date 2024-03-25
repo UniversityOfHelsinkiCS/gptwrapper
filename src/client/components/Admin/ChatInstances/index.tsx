@@ -4,10 +4,10 @@ import { Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 import useCurrentUser from '../../../hooks/useCurrentUser'
-import ServiceTable from './ServiceTable'
-import CreateService from './CreateService'
+import ChatInstanceTable from './ChatInstanceTable'
+import CreateChatInstance from './CreateChatInstance'
 
-const Services = () => {
+const ChatInstances = () => {
   const { t } = useTranslation()
 
   const { user, isLoading } = useCurrentUser()
@@ -20,7 +20,7 @@ const Services = () => {
 
   return (
     <Box>
-      <ServiceTable
+      <ChatInstanceTable
         editFormOpen={editFormOpen}
         setEditFormOpen={setEditFormOpen}
       />
@@ -30,14 +30,14 @@ const Services = () => {
         variant="contained"
         onClick={() => setCreateFormOpen(true)}
       >
-        {t('admin:createService')}
+        {t('admin:createChatInstance')}
       </Button>
 
       <Modal open={createFormOpen} onClose={() => setCreateFormOpen(false)}>
-        <CreateService setFormOpen={setCreateFormOpen} />
+        <CreateChatInstance setFormOpen={setCreateFormOpen} />
       </Modal>
     </Box>
   )
 }
 
-export default Services
+export default ChatInstances

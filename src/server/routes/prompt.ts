@@ -16,7 +16,7 @@ interface NewPromptData {
 promptRouter.get('/:courseId', async (req, res) => {
   const { courseId } = req.params
 
-  const service = await ChatInstance.findOne({
+  const chatInstance = await ChatInstance.findOne({
     where: {
       courseId,
     },
@@ -24,7 +24,7 @@ promptRouter.get('/:courseId', async (req, res) => {
   })
 
   const prompts = await Prompt.findAll({
-    where: { chatInstanceId: service?.id },
+    where: { chatInstanceId: chatInstance?.id },
   })
 
   return res.send(prompts)

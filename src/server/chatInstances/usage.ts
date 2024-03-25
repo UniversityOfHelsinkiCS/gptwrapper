@@ -35,20 +35,23 @@ export const checkCourseUsage = async (
   user: UserType,
   courseId: string
 ): Promise<boolean> => {
-  const service = await ChatInstance.findOne({
+  const chatInstance = await ChatInstance.findOne({
     where: {
       courseId,
     },
   })
 
-  const [serviceUsage] = await UserServiceUsage.findOrCreate({
+  const [chatInstanceUsage] = await UserServiceUsage.findOrCreate({
     where: {
       userId: user.id,
-      chatInstanceId: service.id,
+      chatInstanceId: chatInstance.id,
     },
   })
 
-  if (!user.isAdmin && serviceUsage.usageCount >= service.usageLimit) {
+  if (
+    !user.isAdmin &&
+    chatInstanceUsage.usageCount >= chatInstance.usageLimit
+  ) {
     logger.info('Usage limit reached')
 
     return false
@@ -86,51 +89,51 @@ export const incrementCourseUsage = async (
   courseId: string,
   tokenCount: number
 ) => {
-  const service = await ChatInstance.findOne({
+  const chatInstance = await ChatInstance.findOne({
     where: {
       courseId,
     },
     attributes: ['id'],
   })
 
-  const serviceUsage = await UserServiceUsage.findOne({
+  const chatInstanceUsage = await UserServiceUsage.findOne({
     where: {
       userId: user.id,
-      chatInstanceId: service.id,
+      chatInstanceId: chatInstance.id,
     },
   })
 
-  if (!serviceUsage) throw new Error('User service usage not found')
+  if (!chatInstanceUsage) throw new Error('User chatInstance usage not found')
 
-  serviceUsage.usageCount += tokenCount
+  chatInstanceUsage.usageCount += tokenCount
 
-  await serviceUsage.save()
+  await chatInstanceUsage.save()
 }
 
 export const getUserStatus = async (user: UserType, courseId: string) => {
   const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
 
-  const service = await ChatInstance.findOne({
+  const chatInstance = await ChatInstance.findOne({
     where: {
       courseId,
     },
     attributes: ['id', 'usageLimit', 'courseId'],
   })
 
-  const serviceUsage = await UserServiceUsage.findOne({
+  const chatInstanceUsage = await UserServiceUsage.findOne({
     where: {
-      chatInstanceId: service.id,
+      chatInstanceId: chatInstance.id,
       userId: user.id,
     },
     attributes: ['usageCount'],
   })
 
-  const model = await getCourseModel(service.courseId)
+  const model = await getCourseModel(chatInstance.courseId)
   const models = getAllowedModels(model)
 
   return {
-    usage: serviceUsage?.usageCount ?? 0,
-    limit: service?.usageLimit ?? 0,
+    usage: chatInstanceUsage?.usageCount ?? 0,
+    limit: chatInstance?.usageLimit ?? 0,
     model,
     models,
     isTike,

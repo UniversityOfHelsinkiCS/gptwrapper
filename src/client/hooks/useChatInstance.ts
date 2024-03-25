@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import { PUBLIC_URL } from '../../config'
 import { ChatInstance } from '../types'
 
-const useService = (id: string) => {
-  const queryKey = ['service', id]
+const useChatInstance = (id: string) => {
+  const queryKey = ['chatInstance', id]
 
   const queryFn = async (): Promise<ChatInstance | null> => {
     const res = await fetch(`${PUBLIC_URL}/api/chatinstances/${id}`)
@@ -14,9 +14,9 @@ const useService = (id: string) => {
     return data
   }
 
-  const { data: service, ...rest } = useQuery({ queryKey, queryFn })
+  const { data: chatInstance, ...rest } = useQuery({ queryKey, queryFn })
 
-  return { service, ...rest }
+  return { chatInstance, ...rest }
 }
 
-export default useService
+export default useChatInstance

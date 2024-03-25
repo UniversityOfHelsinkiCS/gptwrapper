@@ -6,9 +6,9 @@ import {
   checkIamAccess,
   checkCourseAccess,
   getOwnCourses,
-} from '../services/access'
+} from '../chatInstances/access'
 import { User } from '../db/models'
-import { getUserStatus, getUsage } from '../services/usage'
+import { getUserStatus, getUsage } from '../chatInstances/usage'
 
 const userRouter = express.Router()
 

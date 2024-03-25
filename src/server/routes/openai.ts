@@ -10,7 +10,7 @@ import {
   checkUsage,
   checkCourseUsage,
   incrementCourseUsage,
-} from '../services/usage'
+} from '../chatInstances/usage'
 // import { completionStream, handleTike } from '../util/openai'
 import { getCompletionEvents, streamCompletion } from '../util/azure'
 import {

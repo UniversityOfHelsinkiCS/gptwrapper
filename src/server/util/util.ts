@@ -17,14 +17,14 @@ export const getMessageContext = (messages: Message[]): Message[] => {
 }
 
 export const getCourseModel = async (courseId: string): Promise<string> => {
-  const service = await ChatInstance.findOne({
+  const chatInstance = await ChatInstance.findOne({
     where: {
       courseId,
     },
     attributes: ['model'],
   })
 
-  return service?.model || DEFAULT_MODEL
+  return chatInstance?.model || DEFAULT_MODEL
 }
 
 export const getAllowedModels = (model: string): string[] => {

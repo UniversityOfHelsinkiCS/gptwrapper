@@ -16,13 +16,13 @@ import {
   DEFAULT_MODEL,
   DEFAULT_TOKEN_LIMIT,
 } from '../../../../config'
-import { useCreateServiceMutation } from '../../../hooks/useServiceMutation'
+import { useCreateChatInstanceMutation } from '../../../hooks/useChatInstanceMutation'
 
 type Props = {
   setFormOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const CreateService = forwardRef(({ setFormOpen }: Props, ref) => {
+const CreateChatInstance = forwardRef(({ setFormOpen }: Props, ref) => {
   const [courseId, setCourseId] = useState('')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -31,7 +31,7 @@ const CreateService = forwardRef(({ setFormOpen }: Props, ref) => {
 
   const { t } = useTranslation()
 
-  const mutation = useCreateServiceMutation()
+  const mutation = useCreateChatInstanceMutation()
 
   const handleCreate = () => {
     try {
@@ -44,7 +44,7 @@ const CreateService = forwardRef(({ setFormOpen }: Props, ref) => {
       })
 
       setFormOpen(false)
-      enqueueSnackbar('Course service created', { variant: 'success' })
+      enqueueSnackbar('Course chat instances created', { variant: 'success' })
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     }
@@ -58,7 +58,7 @@ const CreateService = forwardRef(({ setFormOpen }: Props, ref) => {
       >
         <Box sx={{ mx: 3, my: 4 }}>
           <Typography mb={2} variant="h4">
-            {t('admin:newService')}
+            {t('admin:newChatInstance')}
           </Typography>
 
           <Box mb={-5} ml="35px">
@@ -168,4 +168,4 @@ const CreateService = forwardRef(({ setFormOpen }: Props, ref) => {
   )
 })
 
-export default CreateService
+export default CreateChatInstance

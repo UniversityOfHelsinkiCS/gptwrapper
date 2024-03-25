@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { PUBLIC_URL } from '../../config'
 import { Course } from '../types'
 
-export const queryKey = ['services']
+export const queryKey = ['chatInstances']
 
 const useUserCourses = () => {
   const queryFn = async (): Promise<Course[]> => {

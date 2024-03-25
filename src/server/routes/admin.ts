@@ -106,11 +106,12 @@ adminRouter.get('/chatinstances/usage', async (_, res) => {
 adminRouter.delete('/chatinstances/usage/:id', async (req, res) => {
   const { id } = req.params
 
-  const serviceUsage = await UserServiceUsage.findByPk(id)
+  const chatInstanceUsage = await UserServiceUsage.findByPk(id)
 
-  if (!serviceUsage) return res.status(404).send('ChatInstance usage not found')
+  if (!chatInstanceUsage)
+    return res.status(404).send('ChatInstance usage not found')
 
-  await serviceUsage.destroy()
+  await chatInstanceUsage.destroy()
 
   return res.status(204).send()
 })

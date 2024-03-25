@@ -3,7 +3,7 @@ import { Op } from 'sequelize'
 
 import { ActivityPeriod } from '../types'
 import { ChatInstance } from '../db/models'
-import { getOwnCourses } from '../services/access'
+import { getOwnCourses } from '../chatInstances/access'
 
 const courseRouter = express.Router()
 
@@ -42,28 +42,28 @@ courseRouter.get('/user', async (req, res) => {
 courseRouter.get('/:id', async (req, res) => {
   const { id } = req.params
 
-  const service = await ChatInstance.findOne({
+  const chatInstance = await ChatInstance.findOne({
     where: { courseId: id },
     include: 'prompts',
   })
 
-  return res.send(service)
+  return res.send(chatInstance)
 })
 
 courseRouter.put('/:id', async (req, res) => {
   const { id } = req.params
   const { activityPeriod } = req.body as { activityPeriod: ActivityPeriod }
 
-  const service = await ChatInstance.findOne({
+  const chatInstance = await ChatInstance.findOne({
     where: { courseId: id },
   })
 
-  if (!service) throw new Error('ChatInstance not found')
+  if (!chatInstance) throw new Error('ChatInstance not found')
 
-  service.activityPeriod = activityPeriod
-  service.save()
+  chatInstance.activityPeriod = activityPeriod
+  chatInstance.save()
 
-  return res.send(service)
+  return res.send(chatInstance)
 })
 
 export default courseRouter

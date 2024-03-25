@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { PUBLIC_URL } from '../../config'
 import { ChatInstanceUsage } from '../types'
 
-export const queryKey = ['serviceUsage']
+export const queryKey = ['chatInstanceUsage']
 
 const useChatInstanceUsage = () => {
   const queryFn = async (): Promise<ChatInstanceUsage[]> => {

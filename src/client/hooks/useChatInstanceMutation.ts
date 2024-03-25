@@ -2,9 +2,9 @@ import { useMutation } from '@tanstack/react-query'
 
 import { PUBLIC_URL } from '../../config'
 import queryClient from '../util/queryClient'
-import { queryKey } from './useServices'
+import { queryKey } from './useChatInstances'
 
-interface NewServiceData {
+interface NewChatInstanceData {
   name: string
   description: string
   model: string
@@ -12,17 +12,17 @@ interface NewServiceData {
   courseId: string
 }
 
-export const useCreateServiceMutation = () => {
-  const mutationFn = async (data: NewServiceData) => {
+export const useCreateChatInstanceMutation = () => {
+  const mutationFn = async (data: NewChatInstanceData) => {
     const res = await fetch(`${PUBLIC_URL}/api/admin/chatinstances`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     })
 
-    const service = await res.json()
+    const chatInstance = await res.json()
 
-    return service
+    return chatInstance
   }
 
   const mutation = useMutation({
@@ -36,7 +36,7 @@ export const useCreateServiceMutation = () => {
   return mutation
 }
 
-interface UpdatedServiceData {
+interface UpdatedChatInstanceData {
   id: string
   name: string
   description: string
@@ -45,8 +45,8 @@ interface UpdatedServiceData {
   courseId?: string
 }
 
-export const useEditServiceMutation = () => {
-  const mutationFn = async (data: UpdatedServiceData) => {
+export const useEditChatInstanceMutation = () => {
+  const mutationFn = async (data: UpdatedChatInstanceData) => {
     const res = await fetch(
       `${PUBLIC_URL}/api/admin/chatinstances/${data.id}`,
       {
@@ -56,9 +56,9 @@ export const useEditServiceMutation = () => {
       }
     )
 
-    const service = await res.json()
+    const chatInstance = await res.json()
 
-    return service
+    return chatInstance
   }
 
   const mutation = useMutation({
@@ -72,7 +72,7 @@ export const useEditServiceMutation = () => {
   return mutation
 }
 
-export const useDeleteServiceMutation = () => {
+export const useDeleteChatInstanceMutation = () => {
   const mutationFn = async (id: string) => {
     const res = await fetch(`${PUBLIC_URL}/api/admin/chatinstances/${id}`, {
       method: 'DELETE',
