@@ -59,11 +59,11 @@ export interface Course extends ChatInstance {
   prompts: Prompt[]
 }
 
-export type ServiceUsage = {
+export type ChatInstanceUsage = {
   id: string
   usageCount: number
   user: User
-  service: ChatInstance
+  chatInstance: ChatInstance
 }
 
 export type UserStatus = {

@@ -14,29 +14,31 @@ import {
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 
-import { ServiceUsage, ChatInstance } from '../../../types'
-import useServiceUsage from '../../../hooks/useServiceUsage'
+import { ChatInstanceUsage, ChatInstance } from '../../../types'
+import useChatInstanceUsage from '../../../hooks/useChatInstanceUsage'
 import useUsers from '../../../hooks/useUsers'
-import { useDeleteServiceUsageMutation } from '../../../hooks/useServiceUsageMutation'
+import { useDeleteChatInstanceUsageMutation } from '../../../hooks/useChatInstanceUsageMutation'
 import useResetUsageMutation from '../../../hooks/useResetUsageMutation'
 
-type Usage = Omit<ServiceUsage, 'service'> & { service?: ChatInstance }
+type Usage = Omit<ChatInstanceUsage, 'chatInstance'> & {
+  chatInstance?: ChatInstance
+}
 
 const sortUsage = (a: Usage, b: Usage) =>
   a.user.username.localeCompare(b.user.username)
 
 const UserTable = () => {
-  const { usage: serviceUsage, isLoading } = useServiceUsage()
+  const { usage: chatInstanceUsage, isLoading } = useChatInstanceUsage()
   const { users, isLoading: usersLoading } = useUsers()
 
-  const deleteServiceUsage = useDeleteServiceUsageMutation()
+  const deleteChatInstanceUsage = useDeleteChatInstanceUsageMutation()
   const resetUsage = useResetUsageMutation()
 
   const { t } = useTranslation()
 
-  const onDeleteServiceUsage = (serviceUsageId: string) => {
+  const onDeleteChatInstanceUsage = (chatInstanceUsageId: string) => {
     try {
-      deleteServiceUsage.mutate(serviceUsageId)
+      deleteChatInstanceUsage.mutate(chatInstanceUsageId)
       enqueueSnackbar('ChatInstance usage deleted', { variant: 'success' })
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
@@ -62,7 +64,7 @@ const UserTable = () => {
     usageCount: user.usage,
   }))
 
-  const filteredUsage = serviceUsage.filter(
+  const filteredUsage = chatInstanceUsage.filter(
     ({ usageCount }) => usageCount !== 0
   )
   const sortedUsage = (filteredUsage as Usage[])
@@ -94,7 +96,7 @@ const UserTable = () => {
           </TableHead>
 
           <TableBody>
-            {sortedUsage.map(({ id, usageCount, user, service }) => (
+            {sortedUsage.map(({ id, usageCount, user, chatInstance }) => (
               <TableRow key={id}>
                 <TableCell component="th" scope="row">
                   <Typography variant="h6">{user.username}</Typography>
@@ -104,15 +106,15 @@ const UserTable = () => {
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="overline">
-                    <code>{service?.courseId ?? ''}</code>
+                    <code>{chatInstance?.courseId ?? ''}</code>
                   </Typography>
                 </TableCell>
                 <TableCell>
                   <Button
                     color="error"
                     onClick={() =>
-                      service?.courseId
-                        ? onDeleteServiceUsage(id)
+                      chatInstance?.courseId
+                        ? onDeleteChatInstanceUsage(id)
                         : onResetUsage(user.id)
                     }
                   >

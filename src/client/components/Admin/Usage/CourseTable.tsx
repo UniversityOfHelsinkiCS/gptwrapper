@@ -12,18 +12,23 @@ import {
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
-import { ServiceUsage, Course } from '../../../types'
-import useServiceUsage from '../../../hooks/useServiceUsage'
+import { ChatInstanceUsage, Course } from '../../../types'
+import useChatInstanceUsage from '../../../hooks/useChatInstanceUsage'
 import useUserCourses from '../../../hooks/useUserCourses'
 
-const calculateCourseUsage = (usage: ServiceUsage[], courses: Course[]) => {
+const calculateCourseUsage = (
+  usage: ChatInstanceUsage[],
+  courses: Course[]
+) => {
   const courseUsage = courses.map((course) => ({
     course,
     usageCount: 0,
   }))
 
-  usage.forEach(({ usageCount, service }) => {
-    const course = courseUsage.find(({ course: { id } }) => id === service.id)
+  usage.forEach(({ usageCount, chatInstance }) => {
+    const course = courseUsage.find(
+      ({ course: { id } }) => id === chatInstance.id
+    )
     if (course) course.usageCount += usageCount
   })
 
@@ -34,7 +39,7 @@ const sortUsage = (a: { course: Course }, b: { course: Course }) =>
   a.course.name.localeCompare(b.course.name)
 
 const CourseTable = () => {
-  const { usage, isLoading } = useServiceUsage()
+  const { usage, isLoading } = useChatInstanceUsage()
   const { courses, isLoading: coursesLoading } = useUserCourses()
 
   const { t } = useTranslation()
