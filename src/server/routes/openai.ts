@@ -2,7 +2,7 @@ import express from 'express'
 import multer from 'multer'
 
 // import { tikeIam } from '../util/config'
-import { CourseChatRequest, AzureOptions } from '../types'
+import { CourseChatRequest, AzureOptions, RequestWithUser } from '../types'
 import { isError } from '../util/parser'
 import {
   calculateUsage,
@@ -48,9 +48,10 @@ const fileParsing = async (options: any, req: any) => {
 }
 
 openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
+  const request = req as RequestWithUser
   const { options } = JSON.parse(req.body.options)
   const { model } = options
-  const { user } = req
+  const { user } = request
 
   if (!user.id) return res.status(401).send('Unauthorized')
 

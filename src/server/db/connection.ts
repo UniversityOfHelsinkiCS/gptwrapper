@@ -1,4 +1,3 @@
-import '@swc-node/register'
 import { Sequelize } from 'sequelize'
 import { Umzug, SequelizeStorage } from 'umzug'
 

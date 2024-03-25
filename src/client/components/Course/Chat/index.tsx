@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-await-in-loop, no-constant-condition */
 import React, { useState, useEffect } from 'react'
 import { Box, Paper } from '@mui/material'
@@ -155,7 +156,7 @@ const Chat = () => {
           />
         )}
         <Conversation messages={visibleMessages} completion={completion} />
-        <SendMessage
+        {/* <SendMessage
           message={message}
           setMessage={setMessage}
           handleReset={handleReset}
@@ -164,7 +165,7 @@ const Chat = () => {
           resetDisabled={
             messages.length === 0 && system.length === 0 && message.length === 0
           }
-        />
+        /> */}
         <Email
           system={system}
           messages={messages}

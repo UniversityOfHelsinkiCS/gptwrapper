@@ -42,11 +42,11 @@ export const Response = ({
 const Conversation = ({
   messages,
   completion,
-  handleStop,
+  handleStop = () => {},
 }: {
   messages: Message[]
   completion: string
-  handleStop: () => void
+  handleStop?: () => void
 }) => {
   const { t } = useTranslation()
 

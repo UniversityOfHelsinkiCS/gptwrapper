@@ -27,7 +27,7 @@ const SendMessage = ({
   resetDisabled: boolean
   inputFileRef: React.RefObject<HTMLInputElement>
   fileName: string
-  setFileName: Set<string>
+  setFileName: (name: string) => void
 }) => {
   const { t } = useTranslation()
 

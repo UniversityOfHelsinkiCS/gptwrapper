@@ -1,5 +1,4 @@
 import path from 'path'
-import { fileURLToPath } from 'url'
 
 import express from 'express'
 
@@ -17,14 +16,11 @@ app.use('/api', (req, res, next) => router(req, res, next))
 app.use('/api', (_, res) => res.sendStatus(404))
 
 if (inProduction || inStaging) {
-  const fileName = fileURLToPath(import.meta.url)
-  const dirName = path.dirname(fileName)
+  const DIST_PATH = path.resolve(__dirname, '../../dist')
+  const INDEX_PATH = path.resolve(DIST_PATH, 'index.html')
 
-  const dist = path.resolve(dirName, '../../dist')
-  const index = path.resolve(dist, 'index.html')
-
-  app.use(express.static(dist))
-  app.get('*', (_, res) => res.sendFile(index))
+  app.use(express.static(DIST_PATH))
+  app.get('*', (_, res) => res.sendFile(INDEX_PATH))
 }
 
 app.listen(PORT, async () => {

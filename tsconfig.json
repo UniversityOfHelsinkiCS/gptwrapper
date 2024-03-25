@@ -19,5 +19,10 @@
     "useDefineForClassFields": true,
     "strictNullChecks": false
   },
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
 }

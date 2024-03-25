@@ -5,8 +5,9 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "docker compose up",
-    "prod": "NODE_ENV=production node --loader @swc-node/register/esm  src/server/index.ts",
-    "dev": "NODE_ENV=development concurrently \"nodemon --exec node --loader @swc-node/register/esm src/server/index.ts\" \"vite\"",
+    "prod": "NODE_ENV=production node --loader ts-node/esm src/server/index.ts",
+    "dev": "NODE_ENV=development concurrently \"nodemon --exec node --loader ts-node/esm src/server/index.ts\" \"vite\"",
+    "tsc": "tsc",
     "lint": "eslint 'src/**/*.ts'",
     "format": "prettier --write '*.{ts,json,css,md}'",
     "build": "vite build",
@@ -43,7 +44,8 @@
           "unnamedComponents": "arrow-function"
         }
       ],
-      "import/prefer-default-export": "off"
+      "import/prefer-default-export": "off",
+      "react/require-default-props": "off"
     }
   },
   "prettier": {
@@ -93,7 +95,6 @@
     "@mui/x-date-pickers": "^6.19.3",
     "@sentry/browser": "^7.100.1",
     "@sentry/node": "^7.100.1",
-    "@swc-node/register": "^1.8.0",
     "@tanstack/react-query": "^5.18.1",
     "@types/multer": "^1.4.11",
     "@vitejs/plugin-react": "^4.2.1",
@@ -121,6 +122,7 @@
     "unfuck-utf8-headers-middleware": "^1.0.1",
     "vite": "^5.0.12",
     "winston": "^3.11.0",
-    "winston-gelf-transporter": "^1.0.2"
+    "winston-gelf-transporter": "^1.0.2",
+    "ts-node": "^10.9.2"
   }
 }
