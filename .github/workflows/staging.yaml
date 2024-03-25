@@ -70,7 +70,7 @@ jobs:
       - name: Print logs on failure
         shell: bash
         if: failure()
-        run: docker-compose -f compose.ci.yml logs
+        run: docker-compose -f compose.ci.yaml logs
 
 
   build-and-push:
