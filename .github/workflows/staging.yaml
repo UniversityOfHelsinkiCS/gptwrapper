@@ -56,6 +56,9 @@ jobs:
       - run: npx playwright install-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
+      - name: Wait for the application to start
+        run: docker-compose -f compose.ci.yaml logs -f | grep -q "Server running on port"
+
       - name: Run your tests
         env:
           CI: true
