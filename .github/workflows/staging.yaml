@@ -33,6 +33,10 @@ jobs:
       - name: Start the application
         run: docker-compose -f compose.ci.yaml up -d
 
+        # Copy dependencies from the container
+      - name: Copy dependencies from the container
+        run: docker cp toppi:/opt/app-root/src/node_modules ./node_modules
+
         # https://playwrightsolutions.com/playwright-github-action-to-cache-the-browser-binaries/
       - name: Get installed Playwright version
         id: playwright-version
@@ -46,7 +50,7 @@ jobs:
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
       
-      - run: npm ci
+      
       - run: npx playwright install --with-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
       - run: npx playwright install-deps

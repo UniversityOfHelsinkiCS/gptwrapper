@@ -4,8 +4,6 @@ services:
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
       - PORT=8000
-    volumes:
-      - ./:/opt/app-root/src
     ports:
       - 8000:8000
     container_name: gptwrapper

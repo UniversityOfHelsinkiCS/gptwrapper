@@ -14,7 +14,7 @@ ARG STAGING
 ENV STAGING=$STAGING
 
 COPY package* ./
-RUN npm ci --omit-dev --ignore-scripts
+RUN npm ci --omit-dev --ignore-scripts --no-audit --no-fund
 COPY . .
 
 RUN npm run build
