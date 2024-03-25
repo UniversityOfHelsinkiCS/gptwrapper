@@ -8,9 +8,9 @@ import {
 
 import { sequelize } from '../connection'
 
-class UserServiceUsage extends Model<
-  InferAttributes<UserServiceUsage>,
-  InferCreationAttributes<UserServiceUsage>
+class UserChatInstanceUsage extends Model<
+  InferAttributes<UserChatInstanceUsage>,
+  InferCreationAttributes<UserChatInstanceUsage>
 > {
   declare id: CreationOptional<string>
 
@@ -21,7 +21,7 @@ class UserServiceUsage extends Model<
   declare usageCount: number
 }
 
-UserServiceUsage.init(
+UserChatInstanceUsage.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -49,4 +49,4 @@ UserServiceUsage.init(
   }
 )
 
-export default UserServiceUsage
+export default UserChatInstanceUsage

@@ -3,7 +3,7 @@ import { Tiktoken } from '@dqbd/tiktoken'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { tikeIam } from '../util/config'
 import { User as UserType, StreamingOptions } from '../types'
-import { ChatInstance, UserServiceUsage, User } from '../db/models'
+import { ChatInstance, UserChatInstanceUsage, User } from '../db/models'
 import { getCourseModel, getAllowedModels } from '../util/util'
 import logger from '../util/logger'
 
@@ -41,7 +41,7 @@ export const checkCourseUsage = async (
     },
   })
 
-  const [chatInstanceUsage] = await UserServiceUsage.findOrCreate({
+  const [chatInstanceUsage] = await UserChatInstanceUsage.findOrCreate({
     where: {
       userId: user.id,
       chatInstanceId: chatInstance.id,
@@ -96,7 +96,7 @@ export const incrementCourseUsage = async (
     attributes: ['id'],
   })
 
-  const chatInstanceUsage = await UserServiceUsage.findOne({
+  const chatInstanceUsage = await UserChatInstanceUsage.findOne({
     where: {
       userId: user.id,
       chatInstanceId: chatInstance.id,
@@ -120,7 +120,7 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
     attributes: ['id', 'usageLimit', 'courseId'],
   })
 
-  const chatInstanceUsage = await UserServiceUsage.findOne({
+  const chatInstanceUsage = await UserChatInstanceUsage.findOne({
     where: {
       chatInstanceId: chatInstance.id,
       userId: user.id,

@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { RequestWithUser } from '../types'
-import { ChatInstance, UserServiceUsage, User } from '../db/models'
+import { ChatInstance, UserChatInstanceUsage, User } from '../db/models'
 import { getCourse } from '../util/importer'
 
 const adminRouter = express.Router()
@@ -77,7 +77,7 @@ adminRouter.delete('/chatinstances/:id', async (req, res) => {
 
   if (!chatInstance) return res.status(404).send('ChatInstance not found')
 
-  await UserServiceUsage.destroy({
+  await UserChatInstanceUsage.destroy({
     where: { chatInstanceId: id },
   })
 
@@ -87,7 +87,7 @@ adminRouter.delete('/chatinstances/:id', async (req, res) => {
 })
 
 adminRouter.get('/chatinstances/usage', async (_, res) => {
-  const usage = await UserServiceUsage.findAll({
+  const usage = await UserChatInstanceUsage.findAll({
     include: [
       {
         model: User,
@@ -106,7 +106,7 @@ adminRouter.get('/chatinstances/usage', async (_, res) => {
 adminRouter.delete('/chatinstances/usage/:id', async (req, res) => {
   const { id } = req.params
 
-  const chatInstanceUsage = await UserServiceUsage.findByPk(id)
+  const chatInstanceUsage = await UserChatInstanceUsage.findByPk(id)
 
   if (!chatInstanceUsage)
     return res.status(404).send('ChatInstance usage not found')
