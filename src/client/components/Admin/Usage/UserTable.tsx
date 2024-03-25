@@ -14,13 +14,13 @@ import {
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 
-import { ServiceUsage, Service } from '../../../types'
+import { ServiceUsage, ChatInstance } from '../../../types'
 import useServiceUsage from '../../../hooks/useServiceUsage'
 import useUsers from '../../../hooks/useUsers'
 import { useDeleteServiceUsageMutation } from '../../../hooks/useServiceUsageMutation'
 import useResetUsageMutation from '../../../hooks/useResetUsageMutation'
 
-type Usage = Omit<ServiceUsage, 'service'> & { service?: Service }
+type Usage = Omit<ServiceUsage, 'service'> & { service?: ChatInstance }
 
 const sortUsage = (a: Usage, b: Usage) =>
   a.user.username.localeCompare(b.user.username)
@@ -37,7 +37,7 @@ const UserTable = () => {
   const onDeleteServiceUsage = (serviceUsageId: string) => {
     try {
       deleteServiceUsage.mutate(serviceUsageId)
-      enqueueSnackbar('Service usage deleted', { variant: 'success' })
+      enqueueSnackbar('ChatInstance usage deleted', { variant: 'success' })
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     }

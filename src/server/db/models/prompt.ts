@@ -17,7 +17,7 @@ class Prompt extends Model<
 
   declare name: string
 
-  declare serviceId: string
+  declare chatInstanceId: string
 
   declare systemMessage: string
 
@@ -38,7 +38,7 @@ Prompt.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    serviceId: {
+    chatInstanceId: {
       type: DataTypes.STRING,
       allowNull: false,
     },

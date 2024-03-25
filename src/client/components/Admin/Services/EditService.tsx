@@ -12,11 +12,11 @@ import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 
 import { validModels } from '../../../../config'
-import { Service } from '../../../types'
+import { ChatInstance } from '../../../types'
 import { useEditServiceMutation } from '../../../hooks/useServiceMutation'
 
 type Props = {
-  service: Service | undefined
+  service: ChatInstance | undefined
   setFormOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 

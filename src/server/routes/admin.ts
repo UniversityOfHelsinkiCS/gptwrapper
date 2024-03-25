@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { RequestWithUser } from '../types'
-import { Service, UserServiceUsage, User } from '../db/models'
+import { ChatInstance, UserServiceUsage, User } from '../db/models'
 import { getCourse } from '../util/importer'
 
 const adminRouter = express.Router()
@@ -15,7 +15,7 @@ adminRouter.use((req, _, next) => {
   return next()
 })
 
-interface NewServiceData {
+interface NewChatInstanceData {
   name: string
   description: string
   model: string
@@ -24,13 +24,13 @@ interface NewServiceData {
 }
 
 adminRouter.post('/services', async (req, res) => {
-  const data = req.body as NewServiceData
+  const data = req.body as NewChatInstanceData
   const { name, description, model, usageLimit, courseId } = data
 
   const course = await getCourse(courseId)
   if (!course) return res.status(404).send('Invalid course id')
 
-  const newService = await Service.create({
+  const newChatInstance = await ChatInstance.create({
     name,
     description,
     model,
@@ -39,10 +39,10 @@ adminRouter.post('/services', async (req, res) => {
     activityPeriod: course.activityPeriod,
   })
 
-  return res.status(201).send(newService)
+  return res.status(201).send(newChatInstance)
 })
 
-interface UpdatedServiceData {
+interface UpdatedChatInstanceData {
   name: string
   description: string
   model: string
@@ -52,36 +52,36 @@ interface UpdatedServiceData {
 
 adminRouter.put('/services/:id', async (req, res) => {
   const { id } = req.params
-  const data = req.body as UpdatedServiceData
+  const data = req.body as UpdatedChatInstanceData
   const { name, description, model, usageLimit, courseId } = data
 
-  const service = await Service.findByPk(id)
+  const chatInstance = await ChatInstance.findByPk(id)
 
-  if (!service) return res.status(404).send('Service not found')
+  if (!chatInstance) return res.status(404).send('ChatInstance not found')
 
-  service.name = name
-  service.description = description
-  service.model = model
-  service.usageLimit = usageLimit
-  service.courseId = courseId
+  chatInstance.name = name
+  chatInstance.description = description
+  chatInstance.model = model
+  chatInstance.usageLimit = usageLimit
+  chatInstance.courseId = courseId
 
-  await service.save()
+  await chatInstance.save()
 
-  return res.send(service)
+  return res.send(chatInstance)
 })
 
 adminRouter.delete('/services/:id', async (req, res) => {
   const { id } = req.params
 
-  const service = await Service.findByPk(id)
+  const chatInstance = await ChatInstance.findByPk(id)
 
-  if (!service) return res.status(404).send('Service not found')
+  if (!chatInstance) return res.status(404).send('ChatInstance not found')
 
   await UserServiceUsage.destroy({
-    where: { serviceId: id },
+    where: { chatInstanceId: id },
   })
 
-  await service.destroy()
+  await chatInstance.destroy()
 
   return res.status(204).send()
 })
@@ -94,8 +94,8 @@ adminRouter.get('/services/usage', async (_, res) => {
         as: 'user',
       },
       {
-        model: Service,
-        as: 'service',
+        model: ChatInstance,
+        as: 'chatInstance',
       },
     ],
   })
@@ -108,7 +108,7 @@ adminRouter.delete('/services/usage/:id', async (req, res) => {
 
   const serviceUsage = await UserServiceUsage.findByPk(id)
 
-  if (!serviceUsage) return res.status(404).send('Service usage not found')
+  if (!serviceUsage) return res.status(404).send('ChatInstance usage not found')
 
   await serviceUsage.destroy()
 

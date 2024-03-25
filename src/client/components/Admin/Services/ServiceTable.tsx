@@ -15,7 +15,7 @@ import {
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 
-import { Service } from '../../../types'
+import { ChatInstance } from '../../../types'
 import useServices from '../../../hooks/useServices'
 import { useDeleteServiceMutation } from '../../../hooks/useServiceMutation'
 import EditService from './EditService'
@@ -25,7 +25,8 @@ type Props = {
   setEditFormOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const sortServices = (a: Service, b: Service) => a.name.localeCompare(b.name)
+const sortServices = (a: ChatInstance, b: ChatInstance) =>
+  a.name.localeCompare(b.name)
 
 const ServiceTable = ({ editFormOpen, setEditFormOpen }: Props) => {
   const [editId, setEditId] = useState('')

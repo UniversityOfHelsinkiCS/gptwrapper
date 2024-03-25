@@ -1,6 +1,6 @@
 import { Message } from '../types'
 import { DEFAULT_MODEL, DEFAUL_CONTEXT_LIMIT, validModels } from '../../config'
-import { Service } from '../db/models'
+import { ChatInstance } from '../db/models'
 
 /**
  * Filter out messages in a long conversation to save costs
@@ -17,7 +17,7 @@ export const getMessageContext = (messages: Message[]): Message[] => {
 }
 
 export const getCourseModel = async (courseId: string): Promise<string> => {
-  const service = await Service.findOne({
+  const service = await ChatInstance.findOne({
     where: {
       courseId,
     },

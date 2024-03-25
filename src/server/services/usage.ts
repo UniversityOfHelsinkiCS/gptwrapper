@@ -3,7 +3,7 @@ import { Tiktoken } from '@dqbd/tiktoken'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { tikeIam } from '../util/config'
 import { User as UserType, StreamingOptions } from '../types'
-import { Service, UserServiceUsage, User } from '../db/models'
+import { ChatInstance, UserServiceUsage, User } from '../db/models'
 import { getCourseModel, getAllowedModels } from '../util/util'
 import logger from '../util/logger'
 
@@ -35,7 +35,7 @@ export const checkCourseUsage = async (
   user: UserType,
   courseId: string
 ): Promise<boolean> => {
-  const service = await Service.findOne({
+  const service = await ChatInstance.findOne({
     where: {
       courseId,
     },
@@ -44,7 +44,7 @@ export const checkCourseUsage = async (
   const [serviceUsage] = await UserServiceUsage.findOrCreate({
     where: {
       userId: user.id,
-      serviceId: service.id,
+      chatInstanceId: service.id,
     },
   })
 
@@ -86,7 +86,7 @@ export const incrementCourseUsage = async (
   courseId: string,
   tokenCount: number
 ) => {
-  const service = await Service.findOne({
+  const service = await ChatInstance.findOne({
     where: {
       courseId,
     },
@@ -96,7 +96,7 @@ export const incrementCourseUsage = async (
   const serviceUsage = await UserServiceUsage.findOne({
     where: {
       userId: user.id,
-      serviceId: service.id,
+      chatInstanceId: service.id,
     },
   })
 
@@ -110,7 +110,7 @@ export const incrementCourseUsage = async (
 export const getUserStatus = async (user: UserType, courseId: string) => {
   const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
 
-  const service = await Service.findOne({
+  const service = await ChatInstance.findOne({
     where: {
       courseId,
     },
@@ -119,7 +119,7 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
 
   const serviceUsage = await UserServiceUsage.findOne({
     where: {
-      serviceId: service.id,
+      chatInstanceId: service.id,
       userId: user.id,
     },
     attributes: ['usageCount'],

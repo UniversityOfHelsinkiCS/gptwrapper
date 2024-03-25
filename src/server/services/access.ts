@@ -2,7 +2,7 @@
 import { Op } from 'sequelize'
 
 import { accessIams, employeeIam, EXAMPLE_COURSE_ID } from '../util/config'
-import { Service } from '../db/models'
+import { ChatInstance } from '../db/models'
 import { getEnrollments, getTeachers } from '../util/importer'
 
 export const checkIamAccess = (iamGroups: string[]) =>
@@ -12,7 +12,7 @@ export const checkCourseAccess = async (
   userId: string,
   iamGroups: string[]
 ) => {
-  const activeCourses = await Service.findAll({
+  const activeCourses = await ChatInstance.findAll({
     where: {
       courseId: {
         [Op.not]: null,
@@ -49,7 +49,7 @@ export const checkCourseAccess = async (
 }
 
 export const getOwnCourses = async (userId: string, isAdmin = false) => {
-  const courses = await Service.findAll({
+  const courses = await ChatInstance.findAll({
     where: {
       courseId: { [Op.not]: null },
     },
@@ -65,7 +65,9 @@ export const getOwnCourses = async (userId: string, isAdmin = false) => {
     const teachers = await getTeachers(id)
 
     if (teachers.includes(userId)) {
-      const course = courses.find(({ courseId }) => courseId === id) as Service
+      const course = courses.find(
+        ({ courseId }) => courseId === id
+      ) as ChatInstance
 
       access.push(course.courseId as string)
     }

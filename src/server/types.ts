@@ -49,7 +49,7 @@ interface RequestBody {
   options?: StreamingOptions
 }
 
-export interface Service {
+export interface ChatInstance {
   id: string
   name: string
   description: string
@@ -79,7 +79,7 @@ export type Enrollment = {
 
 export type Prompt = {
   id: string
-  serviceId: string
+  chatInstanceId: string
   systemMessage: string
   messages: Message[]
 }

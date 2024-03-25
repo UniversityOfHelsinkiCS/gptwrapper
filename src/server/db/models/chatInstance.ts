@@ -9,9 +9,9 @@ import {
 import { ActivityPeriod } from '../../types'
 import { sequelize } from '../connection'
 
-class Service extends Model<
-  InferAttributes<Service>,
-  InferCreationAttributes<Service>
+class ChatInstance extends Model<
+  InferAttributes<ChatInstance>,
+  InferCreationAttributes<ChatInstance>
 > {
   declare id: CreationOptional<string>
 
@@ -30,7 +30,7 @@ class Service extends Model<
   declare activityPeriod: ActivityPeriod | null
 }
 
-Service.init(
+ChatInstance.init(
   {
     id: {
       type: DataTypes.STRING,
@@ -79,4 +79,4 @@ Service.init(
   }
 )
 
-export default Service
+export default ChatInstance

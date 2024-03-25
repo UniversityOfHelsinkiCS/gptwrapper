@@ -2,13 +2,13 @@ import express from 'express'
 import { Op } from 'sequelize'
 
 import { ActivityPeriod } from '../types'
-import { Service } from '../db/models'
+import { ChatInstance } from '../db/models'
 import { getOwnCourses } from '../services/access'
 
 const courseRouter = express.Router()
 
 const getCourses = async () => {
-  const courses = await Service.findAll({
+  const courses = await ChatInstance.findAll({
     where: {
       courseId: { [Op.not]: null },
     },
@@ -28,7 +28,7 @@ courseRouter.get('/user', async (req, res) => {
 
   const courseIds = await getOwnCourses(id, isAdmin)
 
-  const courses = await Service.findAll({
+  const courses = await ChatInstance.findAll({
     where: {
       courseId: {
         [Op.in]: courseIds,
@@ -42,7 +42,7 @@ courseRouter.get('/user', async (req, res) => {
 courseRouter.get('/:id', async (req, res) => {
   const { id } = req.params
 
-  const service = await Service.findOne({
+  const service = await ChatInstance.findOne({
     where: { courseId: id },
     include: 'prompts',
   })
@@ -54,11 +54,11 @@ courseRouter.put('/:id', async (req, res) => {
   const { id } = req.params
   const { activityPeriod } = req.body as { activityPeriod: ActivityPeriod }
 
-  const service = await Service.findOne({
+  const service = await ChatInstance.findOne({
     where: { courseId: id },
   })
 
-  if (!service) throw new Error('Service not found')
+  if (!service) throw new Error('ChatInstance not found')
 
   service.activityPeriod = activityPeriod
   service.save()

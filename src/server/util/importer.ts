@@ -6,6 +6,8 @@ import {
 } from './config'
 import { Enrollment, CourseUnitRealisation } from '../types'
 import { set, get } from './redis'
+import { inDevelopment } from '../../config'
+import logger from './logger'
 
 const getActiveEnrollments = (enrollments: Enrollment[]) => {
   const filteredEnrollments = enrollments.filter((enrollment) => {
@@ -26,7 +28,17 @@ export const getEnrollments = async (userId: string): Promise<Enrollment[]> => {
   const url = `${IMPORTER_URL}/kliksutin/enrollments/${userId}`
 
   const response = await fetch(`${url}?token=${API_TOKEN}`)
-  const data = await response.json()
+  let data = await response.json()
+
+  if (data.error) {
+    logger.error('Failed to fetch enrollments', data)
+
+    // when in development, ignore the error and just make it
+    // an empty array
+    if (inDevelopment) {
+      data = Array.isArray(data) ? data : []
+    }
+  }
 
   const enrollments = getActiveEnrollments(data || [])
 

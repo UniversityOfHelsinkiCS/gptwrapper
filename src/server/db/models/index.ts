@@ -1,14 +1,17 @@
 import User from './user'
-import Service from './service'
+import ChatInstance from './chatInstance'
 import UserServiceUsage from './userServiceUsage'
 import Prompt from './prompt'
 
-User.belongsToMany(Service, { through: UserServiceUsage, as: 'services' })
-Service.belongsToMany(User, { through: UserServiceUsage, as: 'users' })
+User.belongsToMany(ChatInstance, {
+  through: UserServiceUsage,
+  as: 'chatInstances',
+})
+ChatInstance.belongsToMany(User, { through: UserServiceUsage, as: 'users' })
 UserServiceUsage.belongsTo(User, { as: 'user' })
-Service.hasMany(UserServiceUsage, { as: 'usage' })
-UserServiceUsage.belongsTo(Service, { as: 'service' })
-Service.hasMany(Prompt, { as: 'prompts' })
-Prompt.belongsTo(Service, { as: 'service' })
+ChatInstance.hasMany(UserServiceUsage, { as: 'usage' })
+UserServiceUsage.belongsTo(ChatInstance, { as: 'chatInstance' })
+ChatInstance.hasMany(Prompt, { as: 'prompts' })
+Prompt.belongsTo(ChatInstance, { as: 'chatInstance' })
 
-export { User, Service, UserServiceUsage, Prompt }
+export { User, ChatInstance, UserServiceUsage, Prompt }

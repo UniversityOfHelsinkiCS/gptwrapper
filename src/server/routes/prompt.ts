@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { Message } from '../types'
-import { Prompt, Service } from '../db/models'
+import { Prompt, ChatInstance } from '../db/models'
 
 const promptRouter = express.Router()
 
@@ -16,7 +16,7 @@ interface NewPromptData {
 promptRouter.get('/:courseId', async (req, res) => {
   const { courseId } = req.params
 
-  const service = await Service.findOne({
+  const service = await ChatInstance.findOne({
     where: {
       courseId,
     },
@@ -24,7 +24,7 @@ promptRouter.get('/:courseId', async (req, res) => {
   })
 
   const prompts = await Prompt.findAll({
-    where: { serviceId: service?.id },
+    where: { chatInstanceId: service?.id },
   })
 
   return res.send(prompts)

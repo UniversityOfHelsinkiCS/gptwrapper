@@ -1,7 +1,7 @@
 import { TEST_COURSE_ID, EXAMPLE_COURSE_ID } from '../../util/config'
-import { Service } from '../models'
+import { ChatInstance } from '../models'
 
-const services = [
+const chatInstances = [
   {
     id: TEST_COURSE_ID,
     name: 'Test Course',
@@ -24,11 +24,11 @@ const services = [
   },
 ]
 
-const seedServices = async () => {
+const seedChatInstances = async () => {
   const operations: any[] = []
-  services.forEach((service) => {
-    const operation = Service.upsert({
-      ...service,
+  chatInstances.forEach((chatInstance) => {
+    const operation = ChatInstance.upsert({
+      ...chatInstance,
     })
 
     operations.push(operation)
@@ -37,4 +37,4 @@ const seedServices = async () => {
   await Promise.all(operations)
 }
 
-export default seedServices
+export default seedChatInstances

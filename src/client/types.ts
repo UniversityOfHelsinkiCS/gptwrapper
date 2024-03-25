@@ -30,7 +30,7 @@ export type Prompt = {
   hidden: boolean
 }
 
-export interface Service {
+export interface ChatInstance {
   id: string
   name: string
   description: string
@@ -54,7 +54,7 @@ export type ActivityPeriod = {
   endDate: string
 }
 
-export interface Course extends Service {
+export interface Course extends ChatInstance {
   activityPeriod: ActivityPeriod
   prompts: Prompt[]
 }
@@ -63,7 +63,7 @@ export type ServiceUsage = {
   id: string
   usageCount: number
   user: User
-  service: Service
+  service: ChatInstance
 }
 
 export type UserStatus = {

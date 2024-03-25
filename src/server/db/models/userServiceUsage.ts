@@ -16,7 +16,7 @@ class UserServiceUsage extends Model<
 
   declare userId: string
 
-  declare serviceId: string
+  declare chatInstanceId: string
 
   declare usageCount: number
 }
@@ -33,7 +33,7 @@ UserServiceUsage.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    serviceId: {
+    chatInstanceId: {
       type: DataTypes.STRING,
       allowNull: false,
     },
