@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "docker compose up",
-    "prod": "NODE_ENV=production node --experimental-specifier-resolution=node --loader ts-node/esm src/server/index.ts",
-    "dev": "NODE_ENV=development concurrently \"nodemon --exec node --experimental-specifier-resolution=node --loader ts-node/esm src/server/index.ts\" \"vite\"",
+    "prod": "NODE_ENV=production node --no-warnings --experimental-specifier-resolution=node --loader ts-node/esm src/server/index.ts",
+    "dev": "NODE_ENV=development concurrently \"nodemon --exec node --no-warnings --experimental-specifier-resolution=node --loader ts-node/esm src/server/index.ts\" \"vite\"",
     "tsc": "tsc",
     "lint": "eslint 'src/**/*.ts'",
     "format": "prettier --write '*.{ts,json,css,md}'",
