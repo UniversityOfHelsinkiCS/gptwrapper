@@ -1,6 +1,6 @@
 services:
   app:
-    image: gptwrapper:staging
+    image: localhost/gptwrapper:staging
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
       - PORT=8000
