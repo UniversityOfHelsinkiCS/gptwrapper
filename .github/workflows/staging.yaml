@@ -31,45 +31,45 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Start the application
-        run: docker-compose -f compose.ci.yaml up
+        run: docker-compose -f compose.ci.yaml up --abort-on-container-exit
 
-        # Copy dependencies from the container
-      - name: Copy dependencies from the container
-        run: docker cp gptwrapper:/opt/app-root/src/node_modules ./node_modules
+      #   # Copy dependencies from the container
+      # - name: Copy dependencies from the container
+      #   run: docker cp gptwrapper:/opt/app-root/src/node_modules ./node_modules
 
-        # https://playwrightsolutions.com/playwright-github-action-to-cache-the-browser-binaries/
-      - name: Get installed Playwright version
-        id: playwright-version
-        run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package-lock.json').packages[''].devDependencies['@playwright/test'])")" >> $GITHUB_ENV
+      #   # https://playwrightsolutions.com/playwright-github-action-to-cache-the-browser-binaries/
+      # - name: Get installed Playwright version
+      #   id: playwright-version
+      #   run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package-lock.json').packages[''].devDependencies['@playwright/test'])")" >> $GITHUB_ENV
 
-      - name: Cache playwright binaries
-        uses: actions/cache@v3
-        id: playwright-cache
-        with:
-          path: |
-            ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+      # - name: Cache playwright binaries
+      #   uses: actions/cache@v3
+      #   id: playwright-cache
+      #   with:
+      #     path: |
+      #       ~/.cache/ms-playwright
+      #     key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
       
       
-      - run: npx playwright install --with-deps
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-      - run: npx playwright install-deps
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      # - run: npx playwright install --with-deps
+      #   if: steps.playwright-cache.outputs.cache-hit != 'true'
+      # - run: npx playwright install-deps
+      #   if: steps.playwright-cache.outputs.cache-hit != 'true'
 
-      - name: Wait for the application to start
-        run: docker-compose -f compose.ci.yaml logs -f | grep -q "Server running on port"
+      # - name: Wait for the application to start
+      #   run: docker-compose -f compose.ci.yaml logs -f | grep -q "Server running on port"
 
-      - name: Run your tests
-        env:
-          CI: true
-        run: npx playwright test
+      # - name: Run your tests
+      #   env:
+      #     CI: true
+      #   run: npx playwright test
 
-      - name: Upload test results
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: playwright-report
-          path: playwright-report
+      # - name: Upload test results
+      #   if: failure()
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: playwright-report
+      #     path: playwright-report
 
       - name: Print logs on failure
         shell: bash
