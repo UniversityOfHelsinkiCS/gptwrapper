@@ -3,6 +3,7 @@ import ChatInstance from './chatInstance'
 import UserChatInstanceUsage from './userChatInstanceUsage'
 import Prompt from './prompt'
 import Enrolment from './enrolment'
+import Responsibility from './responsibilities'
 
 User.belongsToMany(ChatInstance, {
   through: UserChatInstanceUsage,
@@ -32,4 +33,19 @@ Enrolment.belongsTo(ChatInstance, { as: 'chatInstance' })
 
 ChatInstance.hasMany(Enrolment, { as: 'enrolments' })
 
-export { User, ChatInstance, UserChatInstanceUsage, Prompt }
+Responsibility.belongsTo(User, { as: 'user' })
+
+User.hasMany(Responsibility, { as: 'responsibilities' })
+
+Responsibility.belongsTo(ChatInstance, { as: 'chatInstance' })
+
+ChatInstance.hasMany(Responsibility, { as: 'responsibilities' })
+
+export {
+  User,
+  ChatInstance,
+  UserChatInstanceUsage,
+  Prompt,
+  Enrolment,
+  Responsibility,
+}
