@@ -1,4 +1,6 @@
 import path from 'path'
+import { dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import express from 'express'
 
@@ -16,7 +18,10 @@ app.use('/api', (req, res, next) => router(req, res, next))
 app.use('/api', (_, res) => res.sendStatus(404))
 
 if (inProduction || inStaging) {
-  const DIST_PATH = path.resolve(__dirname, '../../dist')
+  const DIST_PATH = path.resolve(
+    dirname(fileURLToPath(import.meta.url)),
+    '../../dist'
+  )
   const INDEX_PATH = path.resolve(DIST_PATH, 'index.html')
 
   app.use(express.static(DIST_PATH))
