@@ -125,5 +125,14 @@
     "vite": "^5.0.12",
     "winston": "^3.11.0",
     "winston-gelf-transporter": "^1.0.2"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "e2e"
+    ],
+    "watch": [
+      "src"
+    ],
+    "ext": "*.js,*.ts,*.json"
   }
 }

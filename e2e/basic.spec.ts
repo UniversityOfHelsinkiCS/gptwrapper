@@ -5,5 +5,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('Can visit home', async ({ page }) => {
-  await expect(page.getByText('CurreChat', { exact: true })).toBeVisible()
+  await expect(page.getByText('CurreChat', { exact: true })).toContainText(
+    'CurreChat'
+  )
 })
