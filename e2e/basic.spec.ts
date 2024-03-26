@@ -5,7 +5,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('Can visit home', async ({ page }) => {
-  await expect(page.getByText('CurreChat', { exact: true })).toContainText(
-    'CurreChat'
-  )
+  // Take a screenshot
+  await page.screenshot({ path: 'screenshot.png' })
+  await expect(page.getByText('CurreChat', { exact: true })).toBeVisible()
 })
