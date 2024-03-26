@@ -24,6 +24,15 @@ jobs:
             BASE_PATH=/gptwrapper
             GIT_SHA=${{ github.sha }}
             STAGING=true
+      
+      - name: Push to quay.io
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: quay.io/toska
+          username: toska+github
+          password: ${{ secrets.QUAY_IO_TOKEN }}
 
       - name: Start the application
         run: docker-compose -f compose.ci.yaml up -d
@@ -66,12 +75,3 @@ jobs:
         shell: bash
         # if: failure()
         run: docker-compose -f compose.ci.yaml logs
-
-      - name: Push to quay.io
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ steps.build-image.outputs.image }}
-          tags: ${{ steps.build-image.outputs.tags }}
-          registry: quay.io/toska
-          username: toska+github
-          password: ${{ secrets.QUAY_IO_TOKEN }}
