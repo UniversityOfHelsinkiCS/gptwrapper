@@ -1,9 +1,11 @@
 services:
   app:
-    image: gptwrapper:latest
+    image: quay.io/toska/gptwrapper:staging
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
       - PORT=8000
+      - AZURE_API_KEY=asdasd
+      - AZURE_RESOURCE=asdasd
     ports:
       - 8000:8000
     container_name: gptwrapper
