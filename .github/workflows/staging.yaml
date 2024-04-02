@@ -12,20 +12,21 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build image
+      - name: Build CI image
         id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
           image: gptwrapper
-          tags: staging ${{ github.sha }}
+          tags: ci ${{ github.sha }}
           containerfiles: |
             ./Containerfile
           build-args: |
-            BASE_PATH=/gptwrapper
+            BASE_PATH=/
             GIT_SHA=${{ github.sha }}
             STAGING=true
+            CI=true
       
-      - name: Push to quay.io
+      - name: Push CI image to quay.io
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build-image.outputs.image }}
@@ -63,6 +64,28 @@ jobs:
         env:
           CI: true
         run: npx playwright test
+
+      - name: Build staging image
+        id: build-staging-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: gptwrapper
+          tags: staging ${{ github.sha }}
+          containerfiles: |
+            ./Containerfile
+          build-args: |
+            BASE_PATH=/gptwrapper
+            GIT_SHA=${{ github.sha }}
+            STAGING=true
+      
+      - name: Push staging image to quay.io
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-staging-image.outputs.image }}
+          tags: ${{ steps.build-staging-image.outputs.tags }}
+          registry: quay.io/toska
+          username: toska+github
+          password: ${{ secrets.QUAY_IO_TOKEN }}
       
       - name: Upload test results
         if: failure()
@@ -82,3 +105,4 @@ jobs:
         shell: bash
         if: failure()
         run: docker-compose -f compose.ci.yaml logs
+      

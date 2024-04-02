@@ -1,4 +1,4 @@
-import { inDevelopment } from '../../config'
+import { inCI, inDevelopment } from '../../config'
 import { adminIams, powerUserIam } from '../util/config'
 
 const parseIamGroups = (iamGroups: string) =>
@@ -18,7 +18,7 @@ const mockHeaders = {
 }
 
 const userMiddleware = async (req: any, _res: any, next: any) => {
-  const headers = inDevelopment ? mockHeaders : req.headers
+  const headers = inDevelopment || inCI ? mockHeaders : req.headers
 
   const {
     uid: username,
