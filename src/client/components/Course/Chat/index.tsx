@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-await-in-loop, no-constant-condition */
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Box, Paper } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useParams } from 'react-router-dom'
@@ -156,7 +156,8 @@ const Chat = () => {
           />
         )}
         <Conversation messages={visibleMessages} completion={completion} />
-        {/* <SendMessage
+        {/* @ts-expect-error */}
+        <SendMessage
           message={message}
           setMessage={setMessage}
           handleReset={handleReset}
@@ -165,7 +166,10 @@ const Chat = () => {
           resetDisabled={
             messages.length === 0 && system.length === 0 && message.length === 0
           }
-        /> */}
+          // inputFileRef={inputFileRef}
+          // fileName={fileName}
+          // setFileName={setFileName}
+        />
         <Email
           system={system}
           messages={messages}
