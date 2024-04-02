@@ -22,7 +22,10 @@ if (inProduction || inStaging) {
     dirname(fileURLToPath(import.meta.url)),
     '../../dist'
   )
+  console.log(DIST_PATH)
+
   const INDEX_PATH = path.resolve(DIST_PATH, 'index.html')
+  console.log(INDEX_PATH)
 
   app.use(express.static(DIST_PATH))
   app.get('*', (_, res) => res.sendFile(INDEX_PATH))
