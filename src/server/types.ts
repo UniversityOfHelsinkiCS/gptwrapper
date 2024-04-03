@@ -103,3 +103,12 @@ export interface OrganisationData {
   name: Locales
   programmes: Array<Programme>
 }
+
+export interface SisuCourseWithRealization {
+  id: string
+  courseUnitRealisationTypeUrn: string
+  flowState: string
+  courseUnits: any[]
+  name: Locales
+  activityPeriod: ActivityPeriod
+}
