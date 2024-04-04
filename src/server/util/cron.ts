@@ -4,8 +4,9 @@ import { Op } from 'sequelize'
 import logger from './logger'
 import { User } from '../db/models'
 import { fetchUsers } from './updater/users'
-import { updateCoursesAndResponsibilities } from './updater/courses'
+import { fetchCoursesAndResponsibilities } from './updater/courses'
 import { clearOffsets } from './updater/util'
+import { fetchEnrolments } from './updater/enrolments'
 
 const resetUsage = async () => {
   logger.info('Resetting usage')
@@ -31,8 +32,8 @@ const resetUsage = async () => {
 
 const fetchDataFromImporter = async () => {
   await fetchUsers()
-  await updateCoursesAndResponsibilities()
-  // await fetchEnrollments()
+  await fetchCoursesAndResponsibilities()
+  await fetchEnrolments()
 }
 
 export const runUpdater = async () => {
