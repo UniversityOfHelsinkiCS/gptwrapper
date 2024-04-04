@@ -5,6 +5,7 @@ import {
   SisuCourseWithRealization,
 } from '../../types'
 import { mangleData } from './mangleData'
+import { upsertResponsibilities } from './responsibilities'
 import { safeBulkCreate } from './util'
 
 const validRealisationTypes = [
@@ -87,11 +88,12 @@ const coursesHandler = async (
   )
 
   await createChatInstance(filteredCourseRealizations)
+  await upsertResponsibilities(filteredCourseRealizations)
 }
 
 // default 1000, set to 10 for example when debugging
 const SPEED = 1000
 
-export const updateCourses = async () => {
+export const updateCoursesAndResponsibilities = async () => {
   await mangleData('courses', SPEED, coursesHandler)
 }

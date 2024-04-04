@@ -109,6 +109,10 @@ export interface SisuCourseUnit {
   name: Locales
   validityPeriod: ActivityPeriod
 }
+export interface SisuResponsibilityInfo {
+  roleUrn: string
+  personId: string
+}
 
 export interface SisuCourseWithRealization {
   id: string
@@ -117,4 +121,11 @@ export interface SisuCourseWithRealization {
   courseUnits: SisuCourseUnit[]
   name: Locales
   activityPeriod: ActivityPeriod
+  responsibilityInfos: SisuResponsibilityInfo[]
+}
+
+export interface ResponsibilityRow {
+  id?: string
+  chatInstanceId: string
+  userId: string
 }

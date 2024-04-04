@@ -13,13 +13,8 @@ const parsePreferredLanguageUrnToLanguage = (urn: string) => {
 
 interface SisuUser {
   id: string
-  callName: string
-  firstNames: string
-  primaryEmail: string
-  secondaryEmail: string
   preferredLanguageUrn: string
   eduPersonPrincipalName: string
-  has_study_right: boolean
 }
 
 const usersHandler = async (users: SisuUser[]) => {

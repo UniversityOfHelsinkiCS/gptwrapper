@@ -4,7 +4,8 @@ import { Op } from 'sequelize'
 import logger from './logger'
 import { User } from '../db/models'
 import { fetchUsers } from './updater/users'
-import { updateCourses } from './updater/courses'
+import { updateCoursesAndResponsibilities } from './updater/courses'
+import { clearOffsets } from './updater/util'
 
 const resetUsage = async () => {
   logger.info('Resetting usage')
@@ -30,9 +31,7 @@ const resetUsage = async () => {
 
 const fetchDataFromImporter = async () => {
   await fetchUsers()
-  await updateCourses()
-  // TODO:
-  // await fetchResponsibilities()
+  await updateCoursesAndResponsibilities()
   // await fetchEnrollments()
 }
 
@@ -42,6 +41,7 @@ const setupCron = async () => {
   cron.schedule('0 0 1 * *', resetUsage) // Reset usage every month
   // fetch data from importer every 12 hours
   // cron.schedule('0 */12 * * *', fetchDataFromImporter)
+  await clearOffsets()
   fetchDataFromImporter()
 }
 
