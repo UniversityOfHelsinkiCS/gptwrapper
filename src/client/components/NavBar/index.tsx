@@ -85,6 +85,7 @@ const NavBar = () => {
             </Box>
           </MuiLink>
           <Box>
+            <Button href={t('curreUrl')}>{t('curreTitle')}</Button>
             {user.ownCourses.length > 0 && (
               <Link to="/courses" style={{ textDecoration: 'none' }}>
                 <Button>
