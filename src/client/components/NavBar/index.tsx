@@ -13,6 +13,7 @@ import {
   Grow,
   Popper,
   Typography,
+  Link as MuiLink,
 } from '@mui/material'
 import {
   Language,
@@ -77,12 +78,12 @@ const NavBar = () => {
     <AppBar elevation={0} position="relative" sx={styles.appbar}>
       <Container maxWidth={false}>
         <Toolbar sx={styles.toolbar} disableGutters>
-          <Box sx={styles.navBox}>
+          <MuiLink to="/" sx={styles.navBox} component={Link}>
             <img src={hyLogo} alt="University of Helsinki" width="40" />
             <Box ml="2rem">
               <Typography sx={styles.appName}>{t('appName')}</Typography>
             </Box>
-          </Box>
+          </MuiLink>
           <Box>
             {user.ownCourses.length > 0 && (
               <Link to="/courses" style={{ textDecoration: 'none' }}>
