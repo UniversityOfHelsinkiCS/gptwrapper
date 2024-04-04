@@ -28,9 +28,7 @@
     "copyStudentLink": "Kopioi opiskelijan linkki",
     "linkCopied": "Linkki kopioitu",
     "fileUploadText": "Lisää tiedosto",
-    "fileInfoPrompt": "\n\nTässä on tiedoston sisältämä teksti:\n\n",
-    "curreUrl": "https://curre.helsinki.fi/",
-    "curreTitle": "Curre"
+    "fileInfoPrompt": "\n\nTässä on tiedoston sisältämä teksti:\n\n"
   },
   "info": {
     "title": "## Huomio",
