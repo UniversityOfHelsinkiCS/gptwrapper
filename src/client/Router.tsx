@@ -22,7 +22,7 @@ const router = createBrowserRouter(
       <Route path="/:courseId" element={<CourseChat />} />
       <Route path="/courses" element={<Courses />} />
       <Route path="/courses/:id" element={<EditCourse />} />
-      <Route path="/admin" element={<Admin />} />
+      <Route path="/admin/*" element={<Admin />} />
       <Route path="/noaccess" element={<NoAccess />} />
     </Route>
   ),

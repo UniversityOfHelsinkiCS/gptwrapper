@@ -35,6 +35,11 @@ const fetchDataFromImporter = async () => {
   // await fetchEnrollments()
 }
 
+export const runUpdater = async () => {
+  await clearOffsets()
+  await fetchDataFromImporter()
+}
+
 const setupCron = async () => {
   logger.info('Starting cron jobs')
 

@@ -3,6 +3,7 @@ import express from 'express'
 import { RequestWithUser } from '../types'
 import { ChatInstance, UserChatInstanceUsage, User } from '../db/models'
 import { getCourse } from '../util/importer'
+import { runUpdater } from '../util/cron'
 
 const adminRouter = express.Router()
 
@@ -136,6 +137,11 @@ adminRouter.delete('/usage/:userId', async (req, res) => {
   await user.save()
 
   return res.status(204).send()
+})
+
+adminRouter.post('/run-updater', async (req, res) => {
+  runUpdater()
+  return res.send('Updater started')
 })
 
 export default adminRouter
