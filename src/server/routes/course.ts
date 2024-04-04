@@ -61,7 +61,7 @@ courseRouter.put('/:id', async (req, res) => {
   if (!chatInstance) throw new Error('ChatInstance not found')
 
   chatInstance.activityPeriod = activityPeriod
-  chatInstance.save()
+  await chatInstance.save()
 
   return res.send(chatInstance)
 })
