@@ -33,8 +33,8 @@ if (inProduction || inStaging) {
 app.listen(PORT, async () => {
   await connectToDatabase()
   await seed()
-  await setupCron()
   // await clearOffsets()
+  await setupCron()
 
   logger.info(`Server running on port ${PORT}`)
 })

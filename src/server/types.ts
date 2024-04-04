@@ -104,11 +104,17 @@ export interface OrganisationData {
   programmes: Array<Programme>
 }
 
+export interface SisuCourseUnit {
+  id: string
+  name: Locales
+  validityPeriod: ActivityPeriod
+}
+
 export interface SisuCourseWithRealization {
   id: string
   courseUnitRealisationTypeUrn: string
   flowState: string
-  courseUnits: any[]
+  courseUnits: SisuCourseUnit[]
   name: Locales
   activityPeriod: ActivityPeriod
 }

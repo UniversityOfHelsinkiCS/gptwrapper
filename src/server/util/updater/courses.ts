@@ -1,5 +1,9 @@
 import { ChatInstance } from '../../db/models'
-import { SisuCourseWithRealization } from '../../types'
+import {
+  ActivityPeriod,
+  SisuCourseUnit,
+  SisuCourseWithRealization,
+} from '../../types'
 import { mangleData } from './mangleData'
 import { safeBulkCreate } from './util'
 
@@ -16,14 +20,48 @@ const validRealisationTypes = [
   'urn:code:course-unit-realisation-type:teaching-participation-distance',
 ]
 
+// Find the newest course unit that has started before the course realisation
+const getCourseUnit = (
+  courseUnits: SisuCourseUnit[],
+  activityPeriod: ActivityPeriod
+) => {
+  let courseUnit = courseUnits[0] // old default
+
+  const { startDate: realisationStartDate } = activityPeriod
+
+  courseUnits.sort((a, b) => {
+    const { startDate: aStartDate } = a.validityPeriod
+    const { startDate: bStartDate } = b.validityPeriod
+
+    if (!aStartDate || !bStartDate) return 0
+
+    return Date.parse(aStartDate) - Date.parse(bStartDate)
+  })
+
+  courseUnit =
+    courseUnits.find(({ validityPeriod }) => {
+      const { startDate } = validityPeriod
+
+      if (!startDate) return false
+
+      return Date.parse(realisationStartDate) > Date.parse(startDate)
+    }) ?? courseUnit
+
+  return courseUnit
+}
+
 const createChatInstance = async (
   courseRealisations: SisuCourseWithRealization[]
 ) => {
-  const chatInstances = courseRealisations.map((course) => ({
-    name: course.name.en || course.name.fi || course.name.sv,
-    courseId: course.id,
-    activityPeriod: course.activityPeriod,
-  }))
+  const chatInstances = courseRealisations.map((course) => {
+    const courseUnit = getCourseUnit(course.courseUnits, course.activityPeriod)
+
+    return {
+      name: courseUnit.name.en || courseUnit.name.fi || courseUnit.name.sv,
+      courseId: course.id,
+      activityPeriod: course.activityPeriod,
+    }
+  })
 
   await safeBulkCreate({
     entityName: 'ChatInstance',
