@@ -11,6 +11,7 @@ import logger from './util/logger'
 import { connectToDatabase } from './db/connection'
 import seed from './db/seeders'
 import setupCron from './util/cron'
+// import { clearOffsets } from './util/updater/util'
 
 const app = express()
 
@@ -33,6 +34,7 @@ app.listen(PORT, async () => {
   await connectToDatabase()
   await seed()
   await setupCron()
+  // await clearOffsets()
 
   logger.info(`Server running on port ${PORT}`)
 })
