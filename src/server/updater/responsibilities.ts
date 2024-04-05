@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import { Op } from 'sequelize'
-import { sequelize } from '../../db/connection'
-import { ChatInstance, Responsibility } from '../../db/models'
-import { ResponsibilityRow, SisuCourseWithRealization } from '../../types'
+import { sequelize } from '../db/connection'
+import { ChatInstance, Responsibility } from '../db/models'
+import { ResponsibilityRow, SisuCourseWithRealization } from '../types'
 import { safeBulkCreate } from './util'
 
 const removeOldResponsibilities = async (

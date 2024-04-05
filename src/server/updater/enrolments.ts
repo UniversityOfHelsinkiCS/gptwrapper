@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { Op } from 'sequelize'
-import { ChatInstance, Enrolment } from '../../db/models'
+import { ChatInstance, Enrolment } from '../db/models'
 import { mangleData } from './mangleData'
 import { safeBulkCreate } from './util'
 

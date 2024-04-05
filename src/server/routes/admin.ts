@@ -3,7 +3,7 @@ import express from 'express'
 import { RequestWithUser } from '../types'
 import { ChatInstance, UserChatInstanceUsage, User } from '../db/models'
 import { getCourse } from '../util/importer'
-import { runUpdater } from '../util/cron'
+import { run as runUpdater } from '../updater'
 
 const adminRouter = express.Router()
 

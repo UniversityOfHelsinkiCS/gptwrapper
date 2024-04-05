@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-import { IMPORTER_URL, API_TOKEN } from '../config'
-import logger from '../logger'
+import { IMPORTER_URL, API_TOKEN } from '../util/config'
+import logger from '../util/logger'
 
 const importerClient = axios.create({
   baseURL: IMPORTER_URL,

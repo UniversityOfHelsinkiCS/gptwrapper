@@ -1,9 +1,9 @@
-import { ChatInstance } from '../../db/models'
+import { ChatInstance } from '../db/models'
 import {
   ActivityPeriod,
   SisuCourseUnit,
   SisuCourseWithRealization,
-} from '../../types'
+} from '../types'
 import { mangleData } from './mangleData'
 import { upsertResponsibilities } from './responsibilities'
 import { safeBulkCreate } from './util'

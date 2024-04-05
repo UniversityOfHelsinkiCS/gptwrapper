@@ -1,8 +1,8 @@
 /* eslint-disable no-restricted-syntax */
 import Sentry from '@sentry/node'
 
-import { redis } from '../redis'
-import logger from '../logger'
+import { redis } from '../util/redis'
+import logger from '../util/logger'
 
 const logError = (message: string, error: Error) => {
   logger.error(`${message} ${error.name}, ${error.message}`)

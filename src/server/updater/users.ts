@@ -1,4 +1,4 @@
-import { User } from '../../db/models'
+import { User } from '../db/models'
 import { mangleData } from './mangleData'
 import { safeBulkCreate } from './util'
 
