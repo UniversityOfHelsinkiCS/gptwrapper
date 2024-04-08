@@ -36,7 +36,10 @@ const setupCron = async () => {
   if (inDevelopment) {
     await runUpdater()
   } else {
-    cron.schedule('0 */12 * * *', runUpdater) // Run updater every 12 hours
+    // Disabling updater cron for now
+    // before we figure out how to prevent both pods
+    // from running the updater at the same time
+    // cron.schedule('0 */12 * * *', runUpdater) // Run updater every 12 hours
   }
 }
 
