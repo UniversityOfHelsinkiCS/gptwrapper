@@ -1,14 +1,14 @@
 import React from 'react'
 import { Box, Button } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
-import apiClient from '../../util/apiClient'
+import { updaterApiClient } from '../../util/apiClient'
 
 const Updater = () => {
   const startUpdater = async () => {
     // eslint-disable-next-line no-alert
     if (!window.confirm('Are you sure you want to start the updater?')) return
 
-    const res = await apiClient.post(`/admin/run-updater`)
+    const res = await updaterApiClient.post(`/admin/run-updater`)
 
     const resText = res.data
 
