@@ -10,6 +10,8 @@ export const GIT_SHA = process.env.REACT_APP_GIT_SHA || ''
 
 export const PUBLIC_URL = process.env.PUBLIC_URL || ''
 
+export const UPDATER_CRON_ENABLED = process.env.UPDATER_CRON_ENABLED === 'true'
+
 export const DEFAULT_TOKEN_LIMIT =
   Number(process.env.DEFAULT_TOKEN_LIMIT) || 75_000
 
