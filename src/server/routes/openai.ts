@@ -49,7 +49,7 @@ const fileParsing = async (options: any, req: any) => {
 
 openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
   const request = req as RequestWithUser
-  const { options } = JSON.parse(req.body.options)
+  const { options } = JSON.parse(req.body.data)
   const { model } = options
   const { user } = request
 
@@ -123,70 +123,74 @@ openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
   return res.end()
 })
 
-openaiRouter.post('/stream/:courseId', async (r, res) => {
-  const { courseId } = r.params
-  const req = r as CourseChatRequest
-  const { options } = req.body
-  const { user } = req
+openaiRouter.post(
+  '/stream/:courseId',
+  upload.single('file'),
+  async (r, res) => {
+    const { courseId } = r.params
+    const req = r as CourseChatRequest
+    const { options } = JSON.parse(r.body.data)
+    const { user } = req
 
-  if (!user.id) return res.status(401).send('Unauthorized')
+    if (!user.id) return res.status(401).send('Unauthorized')
 
-  const usageAllowed = await checkCourseUsage(user, courseId)
-  if (!usageAllowed) return res.status(403).send('Usage limit reached')
+    const usageAllowed = await checkCourseUsage(user, courseId)
+    if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
-  options.messages = getMessageContext(options.messages)
-  options.stream = true
+    options.messages = getMessageContext(options.messages)
+    options.stream = true
 
-  const model = await getCourseModel(courseId)
+    const model = await getCourseModel(courseId)
 
-  if (options.model) {
-    const allowedModels = getAllowedModels(model)
-    if (!allowedModels.includes(options.model))
-      return res.status(403).send('Model not allowed')
-  } else {
-    options.model = model
+    if (options.model) {
+      const allowedModels = getAllowedModels(model)
+      if (!allowedModels.includes(options.model))
+        return res.status(403).send('Model not allowed')
+    } else {
+      options.model = model
+    }
+
+    const encoding = getEncoding(options.model)
+    let tokenCount = calculateUsage(options, encoding)
+
+    const contextLimit = getModelContextLimit(options.model)
+    if (tokenCount > contextLimit) {
+      logger.info('Maximum context reached')
+      return res.status(403).send('Model maximum context reached')
+    }
+
+    // Downgrade to gpt-3.5 for long student conversations
+    if (courseId && model === 'gpt-4' && tokenCount > 2_000) {
+      options.model = 'gpt-3.5-turbo'
+      tokenCount = Math.round(tokenCount / 10)
+    }
+
+    const events = await getCompletionEvents(options as AzureOptions)
+
+    if (isError(events)) return res.status(424).send(events)
+
+    res.setHeader('content-type', 'text/event-stream')
+
+    tokenCount += await streamCompletion(
+      events,
+      options as AzureOptions,
+      encoding,
+      res
+    )
+
+    const userToCharge = req.hijackedBy || user
+    await incrementCourseUsage(userToCharge, courseId, tokenCount)
+    logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
+      tokenCount,
+      courseId,
+      model: options.model,
+      user: user.username,
+    })
+
+    encoding.free()
+
+    return res.end()
   }
-
-  const encoding = getEncoding(options.model)
-  let tokenCount = calculateUsage(options, encoding)
-
-  const contextLimit = getModelContextLimit(options.model)
-  if (tokenCount > contextLimit) {
-    logger.info('Maximum context reached')
-    return res.status(403).send('Model maximum context reached')
-  }
-
-  // Downgrade to gpt-3.5 for long student conversations
-  if (courseId && model === 'gpt-4' && tokenCount > 2_000) {
-    options.model = 'gpt-3.5-turbo'
-    tokenCount = Math.round(tokenCount / 10)
-  }
-
-  const events = await getCompletionEvents(options as AzureOptions)
-
-  if (isError(events)) return res.status(424).send(events)
-
-  res.setHeader('content-type', 'text/event-stream')
-
-  tokenCount += await streamCompletion(
-    events,
-    options as AzureOptions,
-    encoding,
-    res
-  )
-
-  const userToCharge = req.hijackedBy || user
-  await incrementCourseUsage(userToCharge, courseId, tokenCount)
-  logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
-    tokenCount,
-    courseId,
-    model: options.model,
-    user: user.username,
-  })
-
-  encoding.free()
-
-  return res.end()
-})
+)
 
 export default openaiRouter

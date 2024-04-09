@@ -49,7 +49,7 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
     if (!hijackedUser) {
       return next(new Error('User not found'))
     }
-    req.user = { ...acualUser, ...hijackedUser.dataValues }
+    req.user = { email: acualUser.email, ...hijackedUser.toJSON() }
     req.hijackedBy = acualUser
   } else {
     req.user = acualUser
