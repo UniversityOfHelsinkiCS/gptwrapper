@@ -1,17 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { PUBLIC_URL } from '../../config'
 import { User } from '../types'
+import apiClient from '../util/apiClient'
 
 export const queryKey = ['login']
 
 const useCurrentUser = () => {
   const queryFn = async (): Promise<User | null> => {
-    const res = await fetch(`${PUBLIC_URL}/api/users/login`)
+    const res = await apiClient.get(`/users/login`)
 
     if (res.status === 401) return null
 
-    const data = await res.json()
+    const { data } = res
 
     return data
   }

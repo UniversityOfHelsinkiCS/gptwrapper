@@ -1,15 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { PUBLIC_URL } from '../../config'
 import { Course } from '../types'
+import apiClient from '../util/apiClient'
 
 export const queryKey = ['chatInstances']
 
 const useUserCourses = () => {
   const queryFn = async (): Promise<Course[]> => {
-    const res = await fetch(`${PUBLIC_URL}/api/courses/user`)
+    const res = await apiClient.get(`/courses/user`)
 
-    const data = await res.json()
+    const { data } = res
 
     return data
   }

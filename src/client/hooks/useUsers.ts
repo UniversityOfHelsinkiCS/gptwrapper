@@ -1,15 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { PUBLIC_URL } from '../../config'
 import { User } from '../types'
+import apiClient from '../util/apiClient'
 
 export const queryKey = ['users']
 
 const useUsers = () => {
   const queryFn = async (): Promise<User[]> => {
-    const res = await fetch(`${PUBLIC_URL}/api/admin/users`)
+    const res = await apiClient.get(`/admin/users`)
 
-    const data = await res.json()
+    const { data } = res
 
     return data
   }

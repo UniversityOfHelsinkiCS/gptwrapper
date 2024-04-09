@@ -1,9 +1,9 @@
 import { useMutation } from '@tanstack/react-query'
 
 import { Message } from '../types'
-import { PUBLIC_URL } from '../../config'
 import queryClient from '../util/queryClient'
 import { queryKey } from './usePrompts'
+import apiClient from '../util/apiClient'
 
 interface NewPromptData {
   chatInstanceId: string
@@ -15,13 +15,9 @@ interface NewPromptData {
 
 export const useCreatePromptMutation = () => {
   const mutationFn = async (data: NewPromptData) => {
-    const res = await fetch(`${PUBLIC_URL}/api/prompts`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
+    const res = await apiClient.post(`/prompts`, data)
 
-    const prompt = await res.json()
+    const prompt = res.data
 
     return prompt
   }
@@ -39,9 +35,7 @@ export const useCreatePromptMutation = () => {
 
 export const useDeletePromptMutation = () => {
   const mutationFn = async (id: string) => {
-    const res = await fetch(`${PUBLIC_URL}/api/prompts/${id}`, {
-      method: 'DELETE',
-    })
+    const res = await apiClient.delete(`/prompts/${id}`)
 
     return res
   }
