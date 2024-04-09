@@ -10,12 +10,13 @@ export interface User {
   email?: string
   isAdmin: boolean
   isPowerUser: boolean
-  activeCourseIds: string[]
-  ownCourses: string[]
+  activeCourseIds?: string[]
+  ownCourses?: string[]
 }
 
 export interface RequestWithUser extends Request {
   user: User
+  hijackedBy?: User
 }
 
 export interface ChatRequest extends RequestWithUser {

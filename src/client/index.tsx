@@ -34,6 +34,12 @@ const Main = () => {
     if (inDevelopment) {
       setShowDevtools(true)
     }
+
+    const adminLoggedInAs = localStorage.getItem('adminLoggedInAs')
+    if (adminLoggedInAs) {
+      // eslint-disable-next-line no-console
+      console.log(`%cLogged in as ${adminLoggedInAs}`, 'color: orange')
+    }
   }, [])
 
   return (

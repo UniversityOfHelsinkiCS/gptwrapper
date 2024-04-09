@@ -68,7 +68,7 @@ openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
     logger.error('Error parsing file', { error })
     return res.status(400).send('Error parsing file')
   }
-  console.log('optionsMessage: ', optionsMessagesWithFile)
+
   options.messages = getMessageContext(
     optionsMessagesWithFile || options.messages
   )
@@ -110,7 +110,8 @@ openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
   )
   // }
 
-  if (model === 'gpt-4') await incrementUsage(user, tokenCount)
+  const userToCharge = request.hijackedBy || user
+  if (model === 'gpt-4') await incrementUsage(userToCharge, tokenCount)
   logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
     tokenCount,
     model,
@@ -174,7 +175,8 @@ openaiRouter.post('/stream/:courseId', async (r, res) => {
     res
   )
 
-  await incrementCourseUsage(user, courseId, tokenCount)
+  const userToCharge = req.hijackedBy || user
+  await incrementCourseUsage(userToCharge, courseId, tokenCount)
   logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
     tokenCount,
     courseId,
