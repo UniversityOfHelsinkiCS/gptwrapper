@@ -3,6 +3,7 @@ import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import express from 'express'
+import 'express-async-errors'
 
 import { PORT } from './util/config'
 import { inProduction, inStaging } from '../config'
