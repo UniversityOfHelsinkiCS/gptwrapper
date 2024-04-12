@@ -11,11 +11,9 @@ const Banner = () => {
   const showDisclaimer = !localStorage.getItem('disclaimerClosed')
 
   return (
-    <Box sx={{ m: 2, maxWidth: 1560 }}>
+    <Box mt="1rem" mb="3rem">
       <Box
         sx={{
-          my: 2,
-          mx: 2,
           display: 'flex',
           flexWrap: 'wrap',
           gap: 0.3,

@@ -57,7 +57,7 @@ const Status = ({
   const { t } = useTranslation()
 
   return (
-    <Box mb={1} padding="2% 10%">
+    <Box>
       <ModelSelector currentModel={model} setModel={setModel} />
 
       <Typography variant="body1">

@@ -75,7 +75,12 @@ const NavBar = () => {
   if (!user) return null
 
   return (
-    <AppBar elevation={0} position="relative" sx={styles.appbar}>
+    <AppBar
+      elevation={0}
+      position="relative"
+      sx={styles.appbar}
+      color="transparent"
+    >
       <Container maxWidth={false}>
         <Toolbar sx={styles.toolbar} disableGutters>
           <MuiLink to="/" sx={styles.navBox} component={Link}>
@@ -146,7 +151,7 @@ const NavBar = () => {
                             key={l}
                             sx={[
                               styles.item,
-                              language === l && styles.activeItem,
+                              language === l && (styles.activeItem as any),
                             ]}
                             onClick={() => {
                               handleLanguageChange(l)

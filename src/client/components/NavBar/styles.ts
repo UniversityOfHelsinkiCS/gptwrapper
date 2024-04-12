@@ -1,11 +1,10 @@
-import { Theme } from '@mui/material/styles'
+import { SxProps, Theme } from '@mui/material/styles'
 
-const styles = {
+const styles: { [key: string]: SxProps<Theme> } = {
   appbar: {
     zIndex: (theme: Theme) => theme.zIndex.drawer + 1,
-    backgroundColor: 'rgba(255, 255, 255, 0)',
-    borderRadius: 0,
-    borderBottom: '1px solid black',
+    borderBottom: '1px solid',
+    borderColor: (theme: Theme) => theme.palette.divider,
     py: '1rem',
   },
   toolbar: {

@@ -5,7 +5,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { useTranslation } from 'react-i18next'
 
-import { Set } from '../../types'
+import { SetState } from '../../types'
 import useCurrentUser from '../../hooks/useCurrentUser'
 
 const SendMessage = ({
@@ -20,7 +20,7 @@ const SendMessage = ({
   setFileName,
 }: {
   message: string
-  setMessage: Set<string>
+  setMessage: SetState<string>
   handleSend: () => void
   handleReset: () => void
   disabled: boolean
@@ -53,43 +53,45 @@ const SendMessage = ({
           placeholder={t('chat:messagePlaceholder') as string}
         />
       </Box>
-      <Button
-        component="label"
-        variant="outlined"
-        startIcon={<UploadFileIcon />}
-        sx={{
-          marginRight: '1rem',
-          display: !user?.isAdmin ? 'none' : undefined,
-        }}
+      <Box
+        sx={(theme) => ({
+          display: 'flex',
+          flexDirection: 'row',
+          [theme.breakpoints.down('sm')]: {
+            flexDirection: 'column',
+          },
+          gap: 1,
+        })}
       >
-        {t('fileUploadText')}
-        <input
-          type="file"
-          accept=".txt"
-          hidden
-          ref={inputFileRef}
-          onChange={(e) => setFileName(e.target.files[0].name)}
-        />
-      </Button>
-      {fileName && (
-        <Button
-          onClick={handleDeleteFile}
-          endIcon={<DeleteIcon />}
-          sx={{ marginRight: '1rem' }}
-        >
-          {fileName}
+        {fileName && (
+          <Button onClick={handleDeleteFile} endIcon={<DeleteIcon />}>
+            {fileName}
+          </Button>
+        )}
+        <Button variant="contained" onClick={handleSend} disabled={disabled}>
+          {t('send')}
         </Button>
-      )}
-      <Button variant="contained" onClick={handleSend} disabled={disabled}>
-        {t('send')}
-      </Button>
-      <Button
-        sx={{ ml: 2 }}
-        onClick={() => handleReset()}
-        disabled={resetDisabled}
-      >
-        {t('reset')}
-      </Button>
+        <Button
+          component="label"
+          variant="outlined"
+          startIcon={<UploadFileIcon />}
+          sx={{
+            display: !user?.isAdmin ? 'none' : undefined,
+          }}
+        >
+          {t('fileUploadText')}
+          <input
+            type="file"
+            accept=".txt"
+            hidden
+            ref={inputFileRef}
+            onChange={(e) => setFileName(e.target.files[0].name)}
+          />
+        </Button>
+        <Button onClick={() => handleReset()} disabled={resetDisabled}>
+          {t('reset')}
+        </Button>
+      </Box>
     </Box>
   )
 }
