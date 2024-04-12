@@ -61,3 +61,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <Main />
   </React.StrictMode>
 )
+
+// Console log vite environment variables
+// eslint-disable-next-line no-console
+console.log('Vite environment variables', import.meta.env)

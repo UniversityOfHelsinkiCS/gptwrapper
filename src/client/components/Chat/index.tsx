@@ -1,11 +1,11 @@
 /* eslint-disable no-await-in-loop, no-constant-condition */
-import React, { useState, useRef } from 'react'
-import { Box, Paper } from '@mui/material'
+import React, { useState, useRef, useEffect } from 'react'
+import { Box } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 
 import { DEFAULT_TOKEN_LIMIT } from '../../../config'
-import { Message } from '../../types'
+import { Message, SetState } from '../../types'
 import { getCompletionStream } from './util'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import Banner from '../Banner'
@@ -16,10 +16,36 @@ import Email from './Email'
 import Status from './Status'
 import '../../styles.css'
 
+const chatPersistingEnabled = import.meta.env.VITE_CHAT_PERSISTING
+
+/**
+ * Chat state persisting is not yet ready for production use, there are privacy concerns.
+ * It is therefore guarded by a feature flag only set in development.
+ */
+function usePersistedState<T>(key: string, defaultValue: T): [T, SetState<T>] {
+  const [state, setState] = useState<T>(() => {
+    const persistedValue = chatPersistingEnabled
+      ? localStorage.getItem(key)
+      : null
+    return persistedValue ? JSON.parse(persistedValue) : defaultValue
+  })
+
+  useEffect(() => {
+    if (chatPersistingEnabled) {
+      localStorage.setItem(key, JSON.stringify(state))
+    }
+  }, [key, state])
+
+  return [state, setState]
+}
+
 const Chat = () => {
-  const [system, setSystem] = useState('')
-  const [message, setMessage] = useState('')
-  const [messages, setMessages] = useState<Message[]>([])
+  const [system, setSystem] = usePersistedState('general-chat-system', '')
+  const [message, setMessage] = usePersistedState('general-chat-current', '')
+  const [messages, setMessages] = usePersistedState<Message[]>(
+    'general-chat-messages',
+    []
+  )
   const inputFileRef = useRef<HTMLInputElement>(null)
   const [fileName, setFileName] = useState<string>('')
   const [completion, setCompletion] = useState('')
@@ -122,50 +148,38 @@ const Chat = () => {
   }
 
   return (
-    <Box
-      sx={{
-        margin: '0 auto',
-        width: '90%',
-        padding: '5%',
-      }}
-    >
+    <Box>
       <Banner />
-      <Paper
-        variant="outlined"
-        sx={{
-          padding: '5% 10%',
-          mt: 5,
-        }}
-      >
-        <SystemMessage
-          system={system}
-          setSystem={setSystem}
-          disabled={messages.length > 0}
-        />
-        <Conversation
-          messages={messages}
-          completion={completion}
-          handleStop={handleStop}
-        />
-        <SendMessage
-          message={message}
-          setMessage={setMessage}
-          handleReset={handleReset}
-          handleSend={handleSend}
-          disabled={message.length === 0 || completion !== ''}
-          resetDisabled={
-            messages.length === 0 && system.length === 0 && message.length === 0
-          }
-          inputFileRef={inputFileRef}
-          fileName={fileName}
-          setFileName={setFileName}
-        />
-        <Email
-          system={system}
-          messages={messages}
-          disabled={messages.length === 0 || completion !== ''}
-        />
-      </Paper>
+      <SystemMessage
+        system={system}
+        setSystem={setSystem}
+        disabled={messages.length > 0}
+      />
+      <Box sx={{ mb: 3 }} />
+      <Conversation
+        messages={messages}
+        completion={completion}
+        handleStop={handleStop}
+      />
+      <SendMessage
+        message={message}
+        setMessage={setMessage}
+        handleReset={handleReset}
+        handleSend={handleSend}
+        disabled={message.length === 0 || completion !== ''}
+        resetDisabled={
+          messages.length === 0 && system.length === 0 && message.length === 0
+        }
+        inputFileRef={inputFileRef}
+        fileName={fileName}
+        setFileName={setFileName}
+      />
+      <Email
+        system={system}
+        messages={messages}
+        disabled={messages.length === 0 || completion !== ''}
+      />
+      <Box sx={{ mb: 6 }} />
       <Status
         model={model}
         setModel={handleSetModel}

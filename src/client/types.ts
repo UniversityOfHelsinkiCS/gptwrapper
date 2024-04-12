@@ -1,4 +1,4 @@
-export type Set<T> = React.Dispatch<React.SetStateAction<T>>
+export type SetState<T> = React.Dispatch<React.SetStateAction<T>>
 
 export type Role = 'system' | 'assistant' | 'user'
 

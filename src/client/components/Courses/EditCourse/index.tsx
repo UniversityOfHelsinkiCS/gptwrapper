@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams, Link } from 'react-router-dom'
 
 import { PUBLIC_URL } from '../../../../config'
-import { Set, Message as MessageType } from '../../../types'
+import { SetState, Message as MessageType } from '../../../types'
 import EditActivityPeriod from './EditActivityPeriod'
 import SystemMessage from '../../Chat/SystemMessage'
 import Conversation from '../../Chat/Conversation'
@@ -37,7 +37,7 @@ const Message = ({
   resetDisabled,
 }: {
   message: string
-  setMessage: Set<string>
+  setMessage: SetState<string>
   handleAdd: () => void
   handleReset: () => void
   resetDisabled: boolean
