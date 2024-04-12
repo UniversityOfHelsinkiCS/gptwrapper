@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/aria-role */
 import React from 'react'
 import { Box, Button, Paper, Stack, Typography } from '@mui/material'
-import { Person, Assistant } from '@mui/icons-material'
+import { Person, Assistant, Stop } from '@mui/icons-material'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useTranslation } from 'react-i18next'
@@ -62,14 +62,16 @@ const Conversation = ({
       ))}
       {completion && (
         <>
-          <Stack direction="row" spacing={2} sx={{ marginBottom: '20px' }}>
+          <Stack direction="row" spacing={4} mb="1rem" mt="2rem">
             <div className="loader" />
             <Button
               onClick={handleStop}
-              variant="contained"
-              sx={{ marginLeft: '30px', backgroundColor: 'red' }}
+              variant="outlined"
+              color="error"
+              size="small"
+              endIcon={<Stop />}
             >
-              Stop!
+              {t('chat:stop')}
             </Button>
           </Stack>
           <Response role="assistant" content={completion} />

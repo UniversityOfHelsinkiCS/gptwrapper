@@ -45,7 +45,8 @@
     "exampleSystemMessage": "e.g. You are a helpful assistant",
     "message": "Prompt",
     "messagePlaceholder": "Write your message here",
-    "conversation": "Conversation"
+    "conversation": "Conversation",
+    "stop": "Stop"
   },
   "email": {
     "save": "Save as email",

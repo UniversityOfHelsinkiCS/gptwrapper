@@ -43,7 +43,8 @@
     "exampleSystemMessage": "esim. Olet avulias avustaja",
     "message": "Kehote",
     "messagePlaceholder": "Kirjoita viestisi tähän",
-    "conversation": "Keskustelu"
+    "conversation": "Keskustelu",
+    "stop": "Keskeytä"
   },
   "email": {
     "save": "Tallenna sähköpostina",

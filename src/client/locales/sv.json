@@ -43,7 +43,8 @@
     "exampleSystemMessage": "t.ex. Du är en hjälpsam assistent",
     "message": "Uppmaning",
     "messagePlaceholder": "Skriv ditt meddelande här",
-    "conversation": "Keskustelu"
+    "conversation": "Keskustelu",
+    "stop": "Stoppa"
   },
   "email": {
     "save": "Spara som e-post",
