@@ -28,7 +28,10 @@ export const Response = ({
               <Assistant sx={{ mx: 3, my: 4 }} />
             )}
             <Box pr={7} py={2}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                className="line-break-markdown"
+              >
                 {content}
               </ReactMarkdown>
             </Box>
