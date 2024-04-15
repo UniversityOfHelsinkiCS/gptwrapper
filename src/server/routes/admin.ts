@@ -1,4 +1,5 @@
 import express from 'express'
+import { Op } from 'sequelize'
 
 import { RequestWithUser } from '../types'
 import { ChatInstance, UserChatInstanceUsage, User } from '../db/models'
@@ -137,6 +138,41 @@ adminRouter.delete('/usage/:userId', async (req, res) => {
   await user.save()
 
   return res.status(204).send()
+})
+
+adminRouter.get('/user-search', async (req, res) => {
+  const user = req.query.user as string
+
+  const params = {} as any
+  const where = {} as any
+
+  const isSisuId = !Number.isNaN(Number(user[user.length - 1]))
+  const isUsername = !isSisuId
+
+  if (isSisuId) {
+    where.id = {
+      [Op.iLike]: `${user}%`,
+    }
+    params.id = user
+  } else if (isUsername) {
+    where.username = {
+      [Op.iLike]: `%${user}%`,
+    }
+    params.username = user
+  }
+
+  const { rows: persons, count } = await User.findAndCountAll({
+    where,
+    limit: 20,
+  })
+
+  return res.send({
+    params,
+    persons: persons.map((person) => ({
+      ...person.dataValues,
+    })),
+    count,
+  })
 })
 
 adminRouter.post('/run-updater', async (req, res) => {

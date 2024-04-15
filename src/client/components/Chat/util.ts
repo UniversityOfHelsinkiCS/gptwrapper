@@ -1,5 +1,5 @@
-import { PUBLIC_URL } from '../../../config'
 import { Message } from '../../types'
+import { postAbortableStream } from '../../util/apiClient'
 
 export const getCompletionStream = async (
   system: string,
@@ -7,9 +7,7 @@ export const getCompletionStream = async (
   model: string,
   formData: FormData
 ) => {
-  const controller = new AbortController()
-
-  const str = JSON.stringify({
+  const data = {
     options: {
       messages: [
         {
@@ -20,22 +18,9 @@ export const getCompletionStream = async (
       ],
       model,
     },
-  })
-
-  formData.set('options', str)
-
-  const response = await fetch(`${PUBLIC_URL}/api/ai/stream`, {
-    method: 'POST',
-    body: formData,
-    signal: controller.signal,
-  })
-
-  if (!response.ok) {
-    const message = (await response.text()) || 'Something went wrong'
-    throw new Error(message)
   }
 
-  const stream = response.body as unknown as ReadableStream
+  formData.set('data', JSON.stringify(data))
 
-  return { stream, controller }
+  return postAbortableStream('/ai/stream', formData)
 }

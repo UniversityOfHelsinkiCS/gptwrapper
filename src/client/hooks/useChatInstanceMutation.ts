@@ -1,8 +1,8 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { PUBLIC_URL } from '../../config'
 import queryClient from '../util/queryClient'
 import { queryKey } from './useChatInstances'
+import apiClient from '../util/apiClient'
 
 interface NewChatInstanceData {
   name: string
@@ -14,13 +14,9 @@ interface NewChatInstanceData {
 
 export const useCreateChatInstanceMutation = () => {
   const mutationFn = async (data: NewChatInstanceData) => {
-    const res = await fetch(`${PUBLIC_URL}/api/admin/chatinstances`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
+    const res = await apiClient.post(`/admin/chatinstances`, data)
 
-    const chatInstance = await res.json()
+    const chatInstance = res.data
 
     return chatInstance
   }
@@ -47,16 +43,9 @@ interface UpdatedChatInstanceData {
 
 export const useEditChatInstanceMutation = () => {
   const mutationFn = async (data: UpdatedChatInstanceData) => {
-    const res = await fetch(
-      `${PUBLIC_URL}/api/admin/chatinstances/${data.id}`,
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      }
-    )
+    const res = await apiClient.put(`/admin/chatinstances/${data.id}`, data)
 
-    const chatInstance = await res.json()
+    const chatInstance = res.data
 
     return chatInstance
   }
@@ -74,9 +63,7 @@ export const useEditChatInstanceMutation = () => {
 
 export const useDeleteChatInstanceMutation = () => {
   const mutationFn = async (id: string) => {
-    const res = await fetch(`${PUBLIC_URL}/api/admin/chatinstances/${id}`, {
-      method: 'DELETE',
-    })
+    const res = await apiClient.delete(`/admin/chatinstances/${id}`)
 
     return res
   }

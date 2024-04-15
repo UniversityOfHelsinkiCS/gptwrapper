@@ -25,7 +25,7 @@ const Chat = () => {
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const [completion, setCompletion] = useState('')
-  const [model, setModel] = useState(localStorage.getItem('model') ?? '')
+  const [model, setModel] = useState('')
   const [streamController, setStreamController] = useState<AbortController>()
 
   const { course, isLoading } = useCourse(courseId)

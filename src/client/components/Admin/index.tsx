@@ -7,6 +7,7 @@ import { get } from 'lodash'
 import ChatInstances from './ChatInstances'
 import Usage from './Usage'
 import Updater from './Updater'
+import LoginAsSelector from './Usage/UserSearch'
 
 const stripSearch = (path: string) => path.split('?')[0]
 
@@ -38,12 +39,14 @@ const Admin = () => {
             to="/admin/updater"
             component={Link}
           />
+          <Tab label={t('admin:search')} to="/admin/search" component={Link} />
         </RouterTabs>
       </Box>
       <Routes>
         <Route path="/chatinstances" element={<ChatInstances />} />
-        <Route path="/chatinstances" element={<Usage />} />
+        <Route path="/usage" element={<Usage />} />
         <Route path="/updater" element={<Updater />} />
+        <Route path="/search" element={<LoginAsSelector />} />
       </Routes>
     </Box>
   )

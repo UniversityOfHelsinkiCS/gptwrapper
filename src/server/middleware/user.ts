@@ -1,4 +1,6 @@
 import { inCI, inDevelopment } from '../../config'
+import { User as UserModel } from '../db/models'
+import { User } from '../types'
 import { adminIams, powerUserIam } from '../util/config'
 
 const parseIamGroups = (iamGroups: string) =>
@@ -11,7 +13,7 @@ const isPowerUser = (iamGroups: string[]) => iamGroups.includes(powerUserIam)
 
 const mockHeaders = {
   uid: 'testUser',
-  mail: 'grp-toska@helsinki.fi',
+  mail: 'veikko@toska.test.dev',
   preferredlanguage: 'fi',
   hypersonsisuid: 'hy-hlo-123',
   hygroupcn: 'grp-toska;hy-employees',
@@ -30,7 +32,7 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
 
   const iamGroups = parseIamGroups(hygroupcn)
 
-  const user = {
+  const acualUser: User = {
     id: id || username,
     username,
     email,
@@ -40,7 +42,18 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
     isPowerUser: isPowerUser(iamGroups),
   }
 
-  req.user = user
+  const adminLoggedInAsId = req.headers['x-admin-logged-in-as']
+
+  if (acualUser.isAdmin && adminLoggedInAsId) {
+    const hijackedUser = await UserModel.findByPk(adminLoggedInAsId)
+    if (!hijackedUser) {
+      return next(new Error('User not found'))
+    }
+    req.user = { email: acualUser.email, ...hijackedUser.toJSON() }
+    req.hijackedBy = acualUser
+  } else {
+    req.user = acualUser
+  }
 
   return next()
 }

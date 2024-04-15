@@ -1,15 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { PUBLIC_URL } from '../../config'
 import { ChatInstanceUsage } from '../types'
+import apiClient from '../util/apiClient'
 
 export const queryKey = ['chatInstanceUsage']
 
 const useChatInstanceUsage = () => {
   const queryFn = async (): Promise<ChatInstanceUsage[]> => {
-    const res = await fetch(`${PUBLIC_URL}/api/admin/chatinstances/usage`)
+    const res = await apiClient.get(`/admin/chatinstances/usage`)
 
-    const data = await res.json()
+    const { data } = res
 
     return data
   }

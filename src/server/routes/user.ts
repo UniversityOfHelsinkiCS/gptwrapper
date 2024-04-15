@@ -34,7 +34,10 @@ userRouter.get('/login', async (req, res) => {
 
   user.ownCourses = teacherCourses
   user.activeCourseIds = courses
-  await User.upsert(user)
+
+  if (!request.hijackedBy) {
+    await User.upsert(user)
+  }
 
   const usage = await getUsage(id)
 

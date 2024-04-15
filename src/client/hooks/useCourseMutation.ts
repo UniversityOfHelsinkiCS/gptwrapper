@@ -1,8 +1,8 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { PUBLIC_URL } from '../../config'
 import { ActivityPeriod } from '../types'
 import queryClient from '../util/queryClient'
+import apiClient from '../util/apiClient'
 
 interface UpdatedCourseData {
   activityPeriod: ActivityPeriod
@@ -10,13 +10,9 @@ interface UpdatedCourseData {
 
 export const useEditCourseMutation = (id: string) => {
   const mutationFn = async (data: UpdatedCourseData) => {
-    const res = await fetch(`${PUBLIC_URL}/api/courses/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
+    const res = await apiClient.put(`/courses/${id}`, data)
 
-    const course = await res.json()
+    const course = res.data
 
     return course
   }

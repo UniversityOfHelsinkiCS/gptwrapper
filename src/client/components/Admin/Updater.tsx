@@ -1,18 +1,16 @@
 import React from 'react'
 import { Box, Button } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
-import { PUBLIC_URL } from '../../../config'
+import { updaterApiClient } from '../../util/apiClient'
 
 const Updater = () => {
   const startUpdater = async () => {
     // eslint-disable-next-line no-alert
     if (!window.confirm('Are you sure you want to start the updater?')) return
 
-    const res = await fetch(`${PUBLIC_URL}/api/admin/run-updater`, {
-      method: 'POST',
-    })
+    const res = await updaterApiClient.post(`/admin/run-updater`)
 
-    const resText = await res.text()
+    const resText = res.data
 
     enqueueSnackbar(resText, { variant: 'info' })
   }

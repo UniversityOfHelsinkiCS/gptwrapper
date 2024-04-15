@@ -1,5 +1,5 @@
-import { PUBLIC_URL } from '../../../../config'
 import { Message } from '../../../types'
+import { postAbortableStream } from '../../../util/apiClient'
 
 export const getCourseCompletionStream = async (
   id: string,
@@ -8,36 +8,22 @@ export const getCourseCompletionStream = async (
   model: string,
   courseId: string
 ) => {
-  const controller = new AbortController()
-
-  const response = await fetch(`${PUBLIC_URL}/api/ai/stream/${courseId}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
+  const data = {
+    id,
+    courseId,
+    options: {
+      messages: [
+        {
+          role: 'system',
+          content: system,
+        },
+        ...messages,
+      ],
+      model,
     },
-    body: JSON.stringify({
-      id,
-      courseId,
-      options: {
-        messages: [
-          {
-            role: 'system',
-            content: system,
-          },
-          ...messages,
-        ],
-        model,
-      },
-    }),
-    signal: controller.signal,
-  })
-
-  if (!response.ok) {
-    const message = (await response.text()) || 'Something went wrong'
-    throw new Error(message)
   }
+  const formData = new FormData()
+  formData.set('data', JSON.stringify(data))
 
-  const stream = response.body as unknown as ReadableStream
-
-  return { stream, controller }
+  return postAbortableStream(`/ai/stream/${courseId}`, formData)
 }

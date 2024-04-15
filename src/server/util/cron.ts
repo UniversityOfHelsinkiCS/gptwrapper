@@ -4,7 +4,7 @@ import { Op } from 'sequelize'
 import logger from './logger'
 import { User } from '../db/models'
 import { run as runUpdater } from '../updater'
-import { inDevelopment } from '../../config'
+import { UPDATER_CRON_ENABLED, inDevelopment } from '../../config'
 
 const resetUsage = async () => {
   logger.info('Resetting usage')
@@ -35,11 +35,8 @@ const setupCron = async () => {
 
   if (inDevelopment) {
     await runUpdater()
-  } else {
-    // Disabling updater cron for now
-    // before we figure out how to prevent both pods
-    // from running the updater at the same time
-    // cron.schedule('0 */12 * * *', runUpdater) // Run updater every 12 hours
+  } else if (UPDATER_CRON_ENABLED) {
+    cron.schedule('45 3,15 * * *', runUpdater) // Run updater every 12 hours
   }
 }
 
