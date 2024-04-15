@@ -1,13 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { ChatInstance } from '../types'
-import apiClient from '../util/apiClient'
+import { ChatInstance } from '../../../types'
+import apiClient from '../../../util/apiClient'
 
-export const queryKey = ['chatInstances']
+const useChatInstances = ({ limit = 100, offset = 0 }) => {
+  const queryKey = ['chatInstances', { limit, offset }]
 
-const useChatInstances = () => {
   const queryFn = async (): Promise<ChatInstance[]> => {
-    const res = await apiClient.get(`/chatinstances`)
+    const res = await apiClient.get(
+      `/chatinstances?limit=${limit}&offset=${offset}`
+    )
 
     const { data } = res
 
