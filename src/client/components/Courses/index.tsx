@@ -14,13 +14,7 @@ const Course = ({ course }: { course: CourseType }) => {
 
   return (
     <Box>
-      <Paper
-        variant="outlined"
-        sx={{
-          padding: '2% 4%',
-          mt: 3,
-        }}
-      >
+      <Paper variant="outlined" sx={{ my: 1, p: 2 }}>
         <Box mb={1} display="flex" justifyContent="space-between">
           <Box>
             <Link to={`/courses/${courseId}`}>
@@ -55,14 +49,16 @@ const Courses = () => {
 
   return (
     <Box>
-      <Typography variant="h5" display="inline">
-        {t('common:courses')}
-      </Typography>
-      <Pagination
-        count={Math.ceil(count / itemsPerPage) ?? 0}
-        onChange={(_ev, value) => setPage(value)}
-        page={page}
-      />
+      <Box display="flex" gap={2}>
+        <Typography variant="h5" display="inline" mb={1}>
+          {t('common:courses')}
+        </Typography>
+        <Pagination
+          count={count ? Math.ceil(count / itemsPerPage) : undefined}
+          onChange={(_ev, value) => setPage(value)}
+          page={page}
+        />
+      </Box>
       {sortedCourses?.map((course) => (
         <Course key={course.id} course={course} />
       ))}

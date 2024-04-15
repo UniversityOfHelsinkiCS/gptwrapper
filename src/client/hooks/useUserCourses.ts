@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 import { Course } from '../types'
 import apiClient from '../util/apiClient'
@@ -25,6 +25,7 @@ const useUserCourses = ({
   const { data, ...rest } = useQuery({
     queryKey,
     queryFn,
+    placeholderData: keepPreviousData,
   })
 
   return { courses: data?.courses || [], count: data?.count, ...rest }

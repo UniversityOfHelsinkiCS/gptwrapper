@@ -3,7 +3,6 @@ import { Op } from 'sequelize'
 
 import { ActivityPeriod } from '../types'
 import { ChatInstance } from '../db/models'
-import { getOwnCourses } from '../chatInstances/access'
 
 const courseRouter = express.Router()
 
@@ -27,23 +26,21 @@ courseRouter.get('/user', async (req, res) => {
   const { limit: limitStr, offset: offsetStr } = req.query
   const limit = limitStr ? parseInt(limitStr as string, 10) : 100
   const offset = offsetStr ? parseInt(offsetStr as string, 10) : 0
-  const { id, isAdmin } = (req as any).user
-
-  const courseIds = await getOwnCourses(id, isAdmin)
+  const { id } = (req as any).user
 
   const { rows: courses, count } = await ChatInstance.findAndCountAll({
-    where: {
-      courseId: {
-        [Op.in]: courseIds,
+    include: [
+      {
+        association: 'responsibilities',
+        attributes: ['userId'],
+        where: {
+          userId: id,
+        },
       },
-    },
-    include: {
-      association: 'responsibilities',
-      attributes: ['userId'],
-      include: [{ association: 'user', attributes: ['username'] }],
-    },
+    ],
     limit,
     offset,
+    order: [['name', 'DESC']], // @TODO: Fix sort order fakd
   })
 
   return res.send({ courses, count })
