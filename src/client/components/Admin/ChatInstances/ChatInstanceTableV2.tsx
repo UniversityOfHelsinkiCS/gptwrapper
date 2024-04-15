@@ -6,13 +6,12 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TablePagination from '@mui/material/TablePagination'
-import { Button } from '@mui/material'
+import { Button, TextField } from '@mui/material'
 import TableRow from '@mui/material/TableRow'
-import { useQuery } from '@tanstack/react-query'
+import { debounce } from 'lodash'
 import Paper from '@mui/material/Paper'
 import { ChatInstance } from '../../../types'
 import useChatInstances from './useChatInstances'
-import apiClient from '../../../util/apiClient'
 
 interface HeadCell {
   disablePadding: boolean
@@ -71,18 +70,64 @@ const Head = () => (
   </TableHead>
 )
 
-const useChatInstanceCount = () => {
-  const queryKey = ['chatInstances', 'count']
-  const queryFn = async () => {
-    const res = await apiClient.get('/chatinstances/count')
-
-    return res.data
-  }
-
-  const { data: chatInstanceCount, ...rest } = useQuery({ queryKey, queryFn })
-
-  return { chatInstanceCount, ...rest }
-}
+const ChatInstanceTableData = React.memo(
+  ({
+    rows,
+    onSelect,
+    onDelete,
+  }: {
+    rows: ChatInstance[]
+    onSelect: (chatInstance: ChatInstance) => void
+    onDelete: (id: string) => void
+  }) => (
+    <TableContainer>
+      <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
+        <Head />
+        <TableBody>
+          {rows.map((row) => (
+            <TableRow role="checkbox" key={row.id}>
+              <TableCell
+                component="th"
+                scope="row"
+                padding="none"
+                width="40%"
+                sx={{ pl: 1 }}
+              >
+                {row.name}
+              </TableCell>
+              <TableCell align="right">{row.description}</TableCell>
+              <TableCell align="right">{row.model}</TableCell>
+              <TableCell sx={{ fontFamily: 'monospace' }} align="right">
+                {row.usageLimit}
+              </TableCell>
+              <TableCell sx={{ fontFamily: 'monospace' }} align="right">
+                {row.courseId}
+              </TableCell>
+              <TableCell>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  color="primary"
+                  onClick={() => onSelect(row)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="text"
+                  size="small"
+                  color="error"
+                  onClick={() => onDelete(row.id)}
+                >
+                  Delete
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  )
+)
 
 const ChatInstanceTableV2 = ({
   onSelect,
@@ -91,85 +136,67 @@ const ChatInstanceTableV2 = ({
   onSelect: (chatInstance: ChatInstance) => void
   onDelete: (id: string) => void
 }) => {
+  const [search, setSearch] = React.useState('')
+  const deferredSearch = React.useDeferredValue(search)
+
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(10)
-  const { chatInstances } = useChatInstances({
+
+  const { chatInstances, count } = useChatInstances({
     offset: page * rowsPerPage,
     limit: rowsPerPage,
+    search: deferredSearch,
   })
-  const { chatInstanceCount } = useChatInstanceCount()
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage)
-  }
+  const handleChangePage = React.useCallback(
+    (event: unknown, newPage: number) => {
+      setPage(newPage)
+    },
+    []
+  )
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10))
-    setPage(0)
-  }
+  const handleChangeRowsPerPage = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setRowsPerPage(parseInt(event.target.value, 10))
+      setPage(0)
+    },
+    []
+  )
+
+  const handleChangeSearch = debounce(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newSearch = event.target.value
+      if (newSearch && newSearch.length < 4) return
+      setSearch(newSearch)
+    },
+    300
+  )
 
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
-        <Box sx={{ display: 'flex' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <TextField
+            label="Search course (input at least 4 characters)"
+            variant="outlined"
+            sx={{ flex: 1, m: 1 }}
+            onChange={handleChangeSearch}
+          />
           <TablePagination
             rowsPerPageOptions={[10, 50, 100]}
             component="div"
-            count={chatInstanceCount || -1}
+            count={count || -1}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
         </Box>
-        <TableContainer>
-          <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
-            <Head />
-            <TableBody>
-              {chatInstances.map((row) => (
-                <TableRow role="checkbox" key={row.id}>
-                  <TableCell
-                    component="th"
-                    scope="row"
-                    padding="none"
-                    width="40%"
-                    sx={{ pl: 1 }}
-                  >
-                    {row.name}
-                  </TableCell>
-                  <TableCell align="right">{row.description}</TableCell>
-                  <TableCell align="right">{row.model}</TableCell>
-                  <TableCell sx={{ fontFamily: 'monospace' }} align="right">
-                    {row.usageLimit}
-                  </TableCell>
-                  <TableCell sx={{ fontFamily: 'monospace' }} align="right">
-                    {row.courseId}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      color="primary"
-                      onClick={() => onSelect(row)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="text"
-                      size="small"
-                      color="error"
-                      onClick={() => onDelete(row.id)}
-                    >
-                      Delete
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <ChatInstanceTableData
+          rows={chatInstances}
+          onSelect={onSelect}
+          onDelete={onDelete}
+        />
       </Paper>
     </Box>
   )
