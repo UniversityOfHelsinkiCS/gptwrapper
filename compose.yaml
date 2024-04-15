@@ -9,8 +9,8 @@ services:
     volumes:
       - ./:/opt/app-root/src
     ports:
-      - 3000:3000
-      - 8000:8000
+      - 3001:3000
+      - 8001:8000
     container_name: gptwrapper_dev
 
   db:
@@ -19,7 +19,7 @@ services:
       - PGDATA=/data
       - POSTGRES_PASSWORD=postgres
     ports:
-      - 5432:5432
+      - 5433:5432
     volumes:
       - pg_data:/data
     container_name: gptwrapper_db

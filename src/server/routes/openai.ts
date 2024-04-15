@@ -129,6 +129,18 @@ openaiRouter.post('/stream/inventorstep1', async (req, res) => {
   return res.end()
 })
 
+openaiRouter.get('/stream/inventor/ping1', async (req, res) => {
+  console.log('INNOTIN IS PINGING FROM FRONTEND')
+
+  res.send()
+})
+
+openaiRouter.get('/stream/inventor/ping2', async (req, res) => {
+  console.log('INNOTIN IS PINGING FROM BACKEND')
+
+  res.send()
+})
+
 openaiRouter.post('/stream/inventorstep2', async (req, res) => {
   console.log('Inventor Step 2')
 
@@ -226,7 +238,7 @@ openaiRouter.post('/stream/innotin', async (req, res) => {
 
   options.messages = getMessageContext(options.messages)
   options.stream = true
-
+  console.log('options messages:', options.messages)
   const encoding = getEncoding(model)
   let tokenCount = calculateUsage(options, encoding)
 
