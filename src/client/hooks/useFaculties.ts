@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Faculty } from '../types'
 import apiClient from '../util/apiClient'
 
-export const queryKey = ['faculties']
+const queryKey = ['faculties']
 
 const useFaculties = () => {
   const queryFn = async (): Promise<Faculty[]> => {

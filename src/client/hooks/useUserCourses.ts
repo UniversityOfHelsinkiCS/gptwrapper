@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Course } from '../types'
 import apiClient from '../util/apiClient'
 
-export const queryKey = ['chatInstances']
+const queryKey = ['chatInstances']
 
 const useUserCourses = () => {
   const queryFn = async (): Promise<Course[]> => {
