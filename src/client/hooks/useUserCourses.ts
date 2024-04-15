@@ -3,23 +3,31 @@ import { useQuery } from '@tanstack/react-query'
 import { Course } from '../types'
 import apiClient from '../util/apiClient'
 
-const queryKey = ['chatInstances']
+const useUserCourses = ({
+  limit,
+  offset,
+}: {
+  limit: number
+  offset: number
+}) => {
+  const queryKey = ['chatInstances', { limit, offset }]
 
-const useUserCourses = () => {
-  const queryFn = async (): Promise<Course[]> => {
-    const res = await apiClient.get(`/courses/user`)
+  const queryFn = async (): Promise<{ courses: Course[]; count: number }> => {
+    const res = await apiClient.get(
+      `/courses/user?limit=${limit}&offset=${offset}`
+    )
 
     const { data } = res
 
     return data
   }
 
-  const { data: courses, ...rest } = useQuery({
+  const { data, ...rest } = useQuery({
     queryKey,
     queryFn,
   })
 
-  return { courses: courses || [], ...rest }
+  return { courses: data?.courses || [], count: data?.count, ...rest }
 }
 
 export default useUserCourses

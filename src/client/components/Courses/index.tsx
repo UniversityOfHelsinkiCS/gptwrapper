@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Box, Paper, Typography } from '@mui/material'
+import { Box, Pagination, Paper, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 import { Course as CourseType } from '../../types'
@@ -44,34 +44,28 @@ const Course = ({ course }: { course: CourseType }) => {
 const Courses = () => {
   const { t } = useTranslation()
 
-  const { courses = [], isLoading } = useUserCourses() || {}
-
-  if (isLoading) return null
+  const [page, setPage] = React.useState(1)
+  const itemsPerPage = 20
+  const { courses = [], count } = useUserCourses({
+    limit: itemsPerPage,
+    offset: (page - 1) * itemsPerPage,
+  })
 
   const sortedCourses = courses.sort(sortCourses)
 
   return (
-    <Box
-      sx={{
-        margin: '0 auto',
-        width: '90%',
-        padding: '5%',
-      }}
-    >
-      <Paper
-        variant="outlined"
-        sx={{
-          padding: '5% 10%',
-          mt: 5,
-        }}
-      >
-        <Typography variant="h5" display="inline">
-          {t('common:courses')}
-        </Typography>
-        {sortedCourses.map((course) => (
-          <Course key={course.id} course={course} />
-        ))}
-      </Paper>
+    <Box>
+      <Typography variant="h5" display="inline">
+        {t('common:courses')}
+      </Typography>
+      <Pagination
+        count={Math.ceil(count / itemsPerPage) ?? 0}
+        onChange={(_ev, value) => setPage(value)}
+        page={page}
+      />
+      {sortedCourses?.map((course) => (
+        <Course key={course.id} course={course} />
+      ))}
     </Box>
   )
 }

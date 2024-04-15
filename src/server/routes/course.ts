@@ -24,19 +24,29 @@ courseRouter.get('/', async (_, res) => {
 })
 
 courseRouter.get('/user', async (req, res) => {
+  const { limit: limitStr, offset: offsetStr } = req.query
+  const limit = limitStr ? parseInt(limitStr as string, 10) : 100
+  const offset = offsetStr ? parseInt(offsetStr as string, 10) : 0
   const { id, isAdmin } = (req as any).user
 
   const courseIds = await getOwnCourses(id, isAdmin)
 
-  const courses = await ChatInstance.findAll({
+  const { rows: courses, count } = await ChatInstance.findAndCountAll({
     where: {
       courseId: {
         [Op.in]: courseIds,
       },
     },
+    include: {
+      association: 'responsibilities',
+      attributes: ['userId'],
+      include: [{ association: 'user', attributes: ['username'] }],
+    },
+    limit,
+    offset,
   })
 
-  return res.send(courses)
+  return res.send({ courses, count })
 })
 
 courseRouter.get('/:id', async (req, res) => {
