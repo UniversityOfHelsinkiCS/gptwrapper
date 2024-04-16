@@ -6,6 +6,15 @@ on:
       - main
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci --no-audit --no-progress --no-fund
+      - run: npm run tsc
+      - run: npm run lint
+
   build-test-and-push:
     runs-on: ubuntu-latest
 
