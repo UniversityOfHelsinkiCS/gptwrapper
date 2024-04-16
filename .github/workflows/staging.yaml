@@ -38,7 +38,7 @@ jobs:
       - name: Start the application
         run: docker-compose -f compose.ci.yaml up -d
 
-      - run: npm run ci
+      - run: npm ci
       - run: npm run tsc
       - run: npm run lint
       
