@@ -5,7 +5,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { fi } from 'date-fns/locale'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
-import { Box, Button, Container, Snackbar } from '@mui/material'
+import { Box, Button, Container, CssBaseline, Snackbar } from '@mui/material'
 
 import useTheme from './theme'
 import NavBar from './components/NavBar'
@@ -46,6 +46,7 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
         <SnackbarProvider preventDuplicate>
           <Box minHeight="100vh" display="flex" flexDirection="column">

@@ -18,7 +18,6 @@ const styles: { [key: string]: SxProps<Theme> } = {
   },
   appName: {
     textTransform: 'uppercase',
-    color: 'black',
     fontWeight: 700,
     fontSize: 24,
     userSelect: 'none',

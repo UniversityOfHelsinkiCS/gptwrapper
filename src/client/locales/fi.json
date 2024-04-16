@@ -9,6 +9,7 @@
     "update": "Päivitä",
     "cancel": "Peruuta",
     "create": "Luo",
+    "enable": "Ota käyttöön",
     "courses": "Kurssit",
     "message": "Viesti",
     "addMessage": "Lisää viesti",
@@ -95,5 +96,12 @@
     "reset": "Nollaa",
     "faculties": "Tiedekunnat",
     "users": "Käyttäjät"
+  },
+  "course": {
+    "curreEnabled": "CurreChat on käytössä kurssilla",
+    "curreNotEnabled": "CurreChat ei ole käytössä kurssilla",
+    "enableCurre": "Ota CurreChat käyttöön",
+    "enableCurreModalTitle": "Ota CurreChat käyttöön kurssille {{name}}?",
+    "enableCurreModalText": "Kurssille asetetaan oletusasetuksena {{defaultModel}} -kielimalli sekä {{defaultTokenLimit}} tokenin käyttöraja per opiskelija. CurreChat on kurssilla käytössä {{activityPeriod}} (kurssin käynnissäoloaika + 1 kk). Voit muokata näitä asetuksia myöhemmin."
   }
 }

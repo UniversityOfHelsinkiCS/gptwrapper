@@ -34,3 +34,5 @@ export const validModels = [
     context: 128_000,
   },
 ]
+
+export const DEFAULT_MODEL_ON_ENABLE = 'gpt-4'
