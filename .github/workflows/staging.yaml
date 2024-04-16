@@ -6,15 +6,6 @@ on:
       - main
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm ci --no-audit --no-progress --no-fund
-      - run: npm run tsc
-      - run: npm run lint
-
   build-test-and-push:
     runs-on: ubuntu-latest
 
@@ -47,9 +38,9 @@ jobs:
       - name: Start the application
         run: docker-compose -f compose.ci.yaml up -d
 
-        # Copy dependencies from the container
-      - name: Copy dependencies from the container
-        run: docker cp gptwrapper:/opt/app-root/src/node_modules ./node_modules
+      - run: npm run ci
+      - run: npm run tsc
+      - run: npm run lint
       
         # https://playwrightsolutions.com/playwright-github-action-to-cache-the-browser-binaries/
       - name: Get installed Playwright version
