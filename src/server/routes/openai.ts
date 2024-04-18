@@ -51,8 +51,6 @@ const fileParsing = async (options: any, req: any) => {
 if (!inProduction) {
   console.log('INNOTIN_ENDPOINT in use')
   openaiRouter.post('/stream/innotin', async (req, res) => {
-    console.log('INNOTIN PINGING')
-
     const request = req as RequestWithUser
     const { options } = req.body
     const { model } = options
@@ -65,7 +63,6 @@ if (!inProduction) {
 
     options.messages = getMessageContext(options.messages)
     options.stream = true
-    console.log('options messages:', options.messages)
     const encoding = getEncoding(model)
     let tokenCount = calculateUsage(options, encoding)
 
@@ -75,7 +72,6 @@ if (!inProduction) {
       return res.status(403).send('Model maximum context reached')
     }
 
-    console.log('OPTIONS: ', options)
     const events = await getCompletionEvents(options as AzureOptions)
 
     if (isError(events)) return res.status(424)
