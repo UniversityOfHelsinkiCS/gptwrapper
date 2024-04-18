@@ -1,3 +1,7 @@
+.line-break-markdown {
+  white-space: pre-line;
+}
+
 .loader {
   width: 45px;
   aspect-ratio: 2;

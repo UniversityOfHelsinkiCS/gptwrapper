@@ -5,11 +5,14 @@ import { useTranslation } from 'react-i18next'
 import { format } from 'date-fns'
 import { enqueueSnackbar } from 'notistack'
 
-import { Course, Set } from '../../../types'
+import { Course, SetState } from '../../../types'
 import { useEditCourseMutation } from '../../../hooks/useCourseMutation'
 
 const EditActivityPeriod = forwardRef(
-  ({ course, setOpen }: { course: Course; setOpen: Set<boolean> }, ref) => {
+  (
+    { course, setOpen }: { course: Course; setOpen: SetState<boolean> },
+    ref
+  ) => {
     const { t } = useTranslation()
     const mutation = useEditCourseMutation(course?.courseId as string)
 

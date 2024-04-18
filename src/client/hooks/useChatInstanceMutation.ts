@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 
 import queryClient from '../util/queryClient'
-import { queryKey } from './useChatInstances'
 import apiClient from '../util/apiClient'
 
 interface NewChatInstanceData {
@@ -25,7 +24,7 @@ export const useCreateChatInstanceMutation = () => {
     mutationFn,
     onSuccess: () =>
       queryClient.invalidateQueries({
-        queryKey,
+        queryKey: ['chatInstances'],
       }),
   })
 
@@ -54,7 +53,7 @@ export const useEditChatInstanceMutation = () => {
     mutationFn,
     onSuccess: () =>
       queryClient.invalidateQueries({
-        queryKey,
+        queryKey: ['chatInstances'],
       }),
   })
 
@@ -72,7 +71,7 @@ export const useDeleteChatInstanceMutation = () => {
     mutationFn,
     onSuccess: () =>
       queryClient.invalidateQueries({
-        queryKey,
+        queryKey: ['chatInstances'],
       }),
   })
 

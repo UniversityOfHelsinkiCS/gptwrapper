@@ -2,7 +2,7 @@ import React from 'react'
 import { Box, TextField, Typography, Tooltip } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
-import { Set } from '../../types'
+import { SetState } from '../../types'
 
 const Info = () => {
   const { t } = useTranslation()
@@ -25,7 +25,7 @@ const SystemMessage = ({
   showInfo = true,
 }: {
   system: string
-  setSystem: Set<string>
+  setSystem: SetState<string>
   disabled: boolean
   // eslint-disable-next-line react/require-default-props
   showInfo?: boolean
@@ -33,7 +33,7 @@ const SystemMessage = ({
   const { t } = useTranslation()
 
   return (
-    <Box mb={2}>
+    <Box>
       {showInfo && <Info />}
       <TextField
         fullWidth

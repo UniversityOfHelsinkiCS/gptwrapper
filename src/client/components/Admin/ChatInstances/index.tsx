@@ -13,20 +13,14 @@ const ChatInstances = () => {
   const { user, isLoading } = useCurrentUser()
 
   const [createFormOpen, setCreateFormOpen] = useState(false)
-  const [editFormOpen, setEditFormOpen] = useState(false)
 
   if (isLoading) return null
   if (!user?.isAdmin) return <Navigate to="/" />
 
   return (
     <Box>
-      <ChatInstanceTable
-        editFormOpen={editFormOpen}
-        setEditFormOpen={setEditFormOpen}
-      />
-
       <Button
-        sx={{ p: 2 }}
+        sx={{ p: 1, mb: 2 }}
         variant="contained"
         onClick={() => setCreateFormOpen(true)}
       >
@@ -36,6 +30,8 @@ const ChatInstances = () => {
       <Modal open={createFormOpen} onClose={() => setCreateFormOpen(false)}>
         <CreateChatInstance setFormOpen={setCreateFormOpen} />
       </Modal>
+
+      <ChatInstanceTable />
     </Box>
   )
 }

@@ -21,6 +21,7 @@ import {
 } from '../util/util'
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
+import { inProduction } from '../../config'
 
 const openaiRouter = express.Router()
 
@@ -47,53 +48,59 @@ const fileParsing = async (options: any, req: any) => {
   return options.messages
 }
 
-openaiRouter.post('/stream/innotin', async (req, res) => {
-  const request = req as RequestWithUser
-  const { options } = req.body
-  const { model } = options
-  const { user } = request
+if (!inProduction) {
+  console.log('INNOTIN_ENDPOINT in use')
+  openaiRouter.post('/stream/innotin', async (req, res) => {
+    console.log('INNOTIN PINGING')
 
-  if (!user.id) return res.status(401).send('Unauthorized')
+    const request = req as RequestWithUser
+    const { options } = req.body
+    const { model } = options
+    const { user } = request
 
-  const usageAllowed = await checkUsage(user, model)
-  if (!usageAllowed) return res.status(403).send('Usage limit reached')
+    if (!user.id) return res.status(401).send('Unauthorized')
 
-  options.messages = getMessageContext(options.messages)
-  options.stream = true
+    const usageAllowed = await checkUsage(user, model)
+    if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
-  const encoding = getEncoding(model)
-  let tokenCount = calculateUsage(options, encoding)
+    options.messages = getMessageContext(options.messages)
+    options.stream = true
+    console.log('options messages:', options.messages)
+    const encoding = getEncoding(model)
+    let tokenCount = calculateUsage(options, encoding)
 
-  const contextLimit = getModelContextLimit(model)
-  if (tokenCount > contextLimit) {
-    logger.info('Maximum context reached')
-    return res.status(403).send('Model maximum context reached')
-  }
+    const contextLimit = getModelContextLimit(model)
+    if (tokenCount > contextLimit) {
+      logger.info('Maximum context reached')
+      return res.status(403).send('Model maximum context reached')
+    }
 
-  const events = await getCompletionEvents(options as AzureOptions)
+    console.log('OPTIONS: ', options)
+    const events = await getCompletionEvents(options as AzureOptions)
 
-  if (isError(events)) return res.status(424)
+    if (isError(events)) return res.status(424)
 
-  res.setHeader('content-type', 'text/event-stream')
+    res.setHeader('content-type', 'text/event-stream')
 
-  tokenCount += await streamCompletion(
-    events,
-    options as AzureOptions,
-    encoding,
-    res
-  )
+    tokenCount += await streamCompletion(
+      events,
+      options as AzureOptions,
+      encoding,
+      res
+    )
 
-  if (model === 'gpt-4') await incrementUsage(user, tokenCount)
-  logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
-    tokenCount,
-    model,
-    user: user.username,
+    if (model === 'gpt-4') await incrementUsage(user, tokenCount)
+    logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
+      tokenCount,
+      model,
+      user: user.username,
+    })
+
+    encoding.free()
+
+    return res.end()
   })
-
-  encoding.free()
-
-  return res.end()
-})
+}
 
 openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
   const request = req as RequestWithUser

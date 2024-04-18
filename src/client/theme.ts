@@ -4,6 +4,7 @@ import {
   responsiveFontSizes,
   ThemeOptions,
 } from '@mui/material/styles'
+// import { useMediaQuery } from '@mui/material'
 
 /**
  * Module augmentation to extend default theme with new colours: https://mui.com/material-ui/customization/palette/#customization
@@ -34,9 +35,9 @@ const themeOptions: ThemeOptions = {
   },
 
   palette: {
-    primary: {
-      main: '#107eab',
-    },
+    // primary: {
+    //   main: '#107eab',
+    // },
     toskaDark: {
       main: '#1a202c',
       contrastText: '#fff',
@@ -76,7 +77,12 @@ const themeOptions: ThemeOptions = {
   },
 }
 
+// const ColorModeContext = React.createContext({ toggleColorMode: () => {} });
+
 const useTheme = () => {
+  const prefersDarkMode = false // useMediaQuery('(prefers-color-scheme: dark)');
+  themeOptions.palette.mode = prefersDarkMode ? 'dark' : 'light'
+
   const theme = useMemo(
     () => responsiveFontSizes(createTheme(themeOptions)),
     []

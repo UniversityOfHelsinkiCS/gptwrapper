@@ -1,7 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { QueryClientProvider } from '@tanstack/react-query'
-import CssBaseline from '@mui/material/CssBaseline'
 // This is only included in bundle in development
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
@@ -44,9 +43,7 @@ const Main = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <CssBaseline>
-        <Router />
-      </CssBaseline>
+      <Router />
       {showDevtools && (
         <React.Suspense fallback={null}>
           <ReactQueryDevtoolsProduction />
@@ -61,3 +58,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <Main />
   </React.StrictMode>
 )
+
+// Console log vite environment variables
+// eslint-disable-next-line no-console
+console.log('Vite environment variables', import.meta.env)

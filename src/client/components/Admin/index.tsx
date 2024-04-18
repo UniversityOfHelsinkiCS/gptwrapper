@@ -25,7 +25,7 @@ const Admin = () => {
   const { t } = useTranslation()
 
   return (
-    <Box sx={{ margin: '0 auto', width: '90%', padding: '5%' }}>
+    <Box>
       <Box mb={3}>
         <RouterTabs>
           <Tab

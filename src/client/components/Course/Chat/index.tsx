@@ -126,21 +126,9 @@ const Chat = () => {
   }
 
   return (
-    <Box
-      sx={{
-        margin: '0 auto',
-        width: '90%',
-        padding: '5%',
-      }}
-    >
+    <Box>
       <Banner />
-      <Paper
-        variant="outlined"
-        sx={{
-          padding: '5% 10%',
-          mt: 5,
-        }}
-      >
+      <Paper variant="outlined">
         {hasPrompts && (
           <PromptSelector
             prompts={course.prompts}

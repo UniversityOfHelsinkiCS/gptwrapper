@@ -8,7 +8,7 @@ import {
 } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
-import { Prompt as PromptType, Set } from '../../../types'
+import { Prompt as PromptType, SetState } from '../../../types'
 import { Response } from '../../Chat/Conversation'
 import SystemMessage from '../../Chat/SystemMessage'
 
@@ -17,7 +17,7 @@ const ExpandButton = ({
   setExpand,
 }: {
   expand: boolean
-  setExpand: Set<boolean>
+  setExpand: SetState<boolean>
 }) => (
   <Button onClick={() => setExpand(!expand)}>
     {expand ? <ExpandLess /> : <ExpandMore />}

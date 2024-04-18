@@ -3,6 +3,7 @@ import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import express from 'express'
+import 'express-async-errors'
 
 import { PORT } from './util/config'
 import { inProduction, inStaging } from '../config'
@@ -10,7 +11,7 @@ import router from './routes'
 import logger from './util/logger'
 import { connectToDatabase } from './db/connection'
 import seed from './db/seeders'
-// import setupCron from './util/cron'
+import setupCron from './util/cron'
 
 const app = express()
 
@@ -32,7 +33,9 @@ if (inProduction || inStaging) {
 app.listen(PORT, async () => {
   await connectToDatabase()
   await seed()
-  // await setupCron()
+  if (inProduction || inStaging) {
+    await setupCron()
+  }
 
   logger.info(`Server running on port ${PORT}`)
 })

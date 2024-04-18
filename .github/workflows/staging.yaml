@@ -38,9 +38,9 @@ jobs:
       - name: Start the application
         run: docker-compose -f compose.ci.yaml up -d
 
-        # Copy dependencies from the container
-      - name: Copy dependencies from the container
-        run: docker cp gptwrapper:/opt/app-root/src/node_modules ./node_modules
+      - run: npm ci
+      - run: npm run tsc
+      - run: npm run lint
       
         # https://playwrightsolutions.com/playwright-github-action-to-cache-the-browser-binaries/
       - name: Get installed Playwright version
