@@ -10,18 +10,16 @@ import {
   InputLabel,
 } from '@mui/material'
 
-import { validModels } from '../../../config'
-
 const ModelSelector = ({
   currentModel,
   setModel,
+  models,
 }: {
   currentModel: string
   setModel: (model: string) => void
+  models: string[]
 }) => {
   const { t } = useTranslation()
-
-  const models = validModels.map(({ name }) => name)
 
   return (
     <Box mb={2}>
@@ -43,14 +41,28 @@ const ModelSelector = ({
   )
 }
 
+const ModelText = ({ model }: { model: string }) => {
+  const { t } = useTranslation()
+
+  return (
+    <Box>
+      <Typography variant="body1">
+        {t('status:modelInUse')} <code>{model}</code>
+      </Typography>
+    </Box>
+  )
+}
+
 const Status = ({
   model,
   setModel,
+  models,
   usage,
   limit,
 }: {
   model: string
   setModel: (model: string) => void
+  models: string[]
   usage: number
   limit: number
 }) => {
@@ -58,7 +70,15 @@ const Status = ({
 
   return (
     <Box>
-      <ModelSelector currentModel={model} setModel={setModel} />
+      {models.length > 1 ? (
+        <ModelSelector
+          currentModel={model}
+          setModel={setModel}
+          models={models}
+        />
+      ) : (
+        <ModelText model={model} />
+      )}
 
       <Typography variant="body1">
         {usage} / {limit} {t('status:tokensUsed')}

@@ -3,8 +3,14 @@ import { Tiktoken } from '@dqbd/tiktoken'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { tikeIam } from '../util/config'
 import { User as UserType, StreamingOptions } from '../types'
-import { ChatInstance, UserChatInstanceUsage, User } from '../db/models'
-import { getCourseModel, getAllowedModels } from '../util/util'
+import {
+  ChatInstance,
+  UserChatInstanceUsage,
+  User,
+  Enrolment,
+  Responsibility,
+} from '../db/models'
+import { getAllowedModels } from '../util/util'
 import logger from '../util/logger'
 
 export const getUsage = async (userId: string) => {
@@ -117,19 +123,57 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
     where: {
       courseId,
     },
-    attributes: ['id', 'usageLimit', 'courseId'],
+    attributes: ['id', 'usageLimit', 'courseId', 'model'],
   })
 
-  const chatInstanceUsage = await UserChatInstanceUsage.findOne({
+  if (!chatInstance) throw new Error('Chat instance not found')
+
+  console.log('chatInstance', chatInstance.toJSON())
+
+  // Get enrollment
+  const enrollment = await Enrolment.findOne({
+    where: {
+      userId: user.id,
+      chatInstanceId: chatInstance.id,
+    },
+  })
+
+  // Get responsibility
+  const responsibility = await Responsibility.findOne({
+    where: {
+      userId: user.id,
+      chatInstanceId: chatInstance.id,
+    },
+  })
+
+  // If user has neither and is not admin, return unauthorized
+  if (!enrollment && !responsibility && !user.isAdmin) {
+    logger.info('Unauthorized user on course', { userId: user.id, courseId })
+
+    return {
+      usage: 0,
+      limit: 0,
+      model: '',
+      models: [],
+      isTike,
+    }
+  }
+
+  const [chatInstanceUsage] = await UserChatInstanceUsage.findOrCreate({
     where: {
       chatInstanceId: chatInstance.id,
+      userId: user.id,
+    },
+    defaults: {
       userId: user.id,
     },
     attributes: ['usageCount'],
   })
 
-  const model = await getCourseModel(chatInstance.courseId)
+  const model = chatInstance.model ?? ''
   const models = getAllowedModels(model)
+
+  console.log('chatInstanceUsage', chatInstanceUsage.toJSON())
 
   return {
     usage: chatInstanceUsage?.usageCount ?? 0,

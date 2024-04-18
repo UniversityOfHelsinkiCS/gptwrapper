@@ -9,7 +9,7 @@ import {
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
-import { Prompt } from '../../../types'
+import { Prompt } from '../../types'
 
 const PromptSelector = ({
   prompts,

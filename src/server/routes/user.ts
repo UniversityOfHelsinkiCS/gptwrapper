@@ -4,11 +4,12 @@ import { ChatRequest } from '../types'
 import logger from '../util/logger'
 import {
   checkIamAccess,
-  checkCourseAccess,
+  getEnrolledCourses,
   getOwnCourses,
 } from '../chatInstances/access'
 import { User } from '../db/models'
 import { getUserStatus, getUsage } from '../chatInstances/usage'
+import { DEFAULT_TOKEN_LIMIT } from '../../config'
 
 const userRouter = express.Router()
 
@@ -21,7 +22,7 @@ userRouter.get('/login', async (req, res) => {
 
   const hasIamAccess = checkIamAccess(iamGroups)
 
-  const enrolledCourses = await checkCourseAccess(id, iamGroups)
+  const enrolledCourses = await getEnrolledCourses(id)
   const teacherCourses = await getOwnCourses(id, user.isAdmin)
 
   const courses = enrolledCourses.concat(teacherCourses)
@@ -45,6 +46,26 @@ userRouter.get('/login', async (req, res) => {
     ...user,
     usage,
     hasIamAccess: isAdmin || hasIamAccess,
+  })
+})
+
+userRouter.get('/status', async (req, res) => {
+  const request = req as any as ChatRequest
+  const { user } = request
+  const { id } = user
+
+  if (!id) return res.status(401).send('Unauthorized')
+
+  const usage = await getUsage(id)
+  const limit = user.isPowerUser
+    ? 10 * DEFAULT_TOKEN_LIMIT
+    : DEFAULT_TOKEN_LIMIT
+
+  return res.send({
+    usage,
+    limit,
+    // model,
+    // models,
   })
 })
 

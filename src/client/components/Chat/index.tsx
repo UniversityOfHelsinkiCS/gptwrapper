@@ -3,11 +3,11 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Box } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
+import { useParams } from 'react-router-dom'
 
-import { DEFAULT_TOKEN_LIMIT } from '../../../config'
-import { Message, SetState } from '../../types'
-import { getCompletionStream } from './util'
-import useCurrentUser from '../../hooks/useCurrentUser'
+import { validModels } from '../../../config'
+import { Message, Prompt, SetState } from '../../types'
+import { getCompletionStream, getCourseCompletionStream } from './util'
 import Banner from '../Banner'
 import SystemMessage from './SystemMessage'
 import Conversation from './Conversation'
@@ -15,8 +15,11 @@ import SendMessage from './SendMessage'
 import Email from './Email'
 import Status from './Status'
 import '../../styles.css'
+import useCourse from '../../hooks/useCourse'
+import useUserStatus from '../../hooks/useUserStatus'
+import PromptSelector from './PromptSelector'
 
-const chatPersistingEnabled = import.meta.env.VITE_CHAT_PERSISTING
+const chatPersistingEnabled = false // import.meta.env.VITE_CHAT_PERSISTING
 
 /**
  * Chat state persisting is not yet ready for production use, there are privacy concerns.
@@ -40,6 +43,17 @@ function usePersistedState<T>(key: string, defaultValue: T): [T, SetState<T>] {
 }
 
 const Chat = () => {
+  // Null when in general chat
+  const { courseId } = useParams()
+
+  const { course } = useCourse(courseId)
+  const {
+    userStatus,
+    isLoading: statusLoading,
+    refetch: refetchStatus,
+  } = useUserStatus(courseId)
+
+  const [activePromptId, setActivePromptId] = useState('')
   const [system, setSystem] = usePersistedState('general-chat-system', '')
   const [message, setMessage] = usePersistedState('general-chat-current', '')
   const [messages, setMessages] = usePersistedState<Message[]>(
@@ -53,12 +67,16 @@ const Chat = () => {
   const [streamController, setStreamController] = useState<AbortController>()
 
   const { t } = useTranslation()
+  if (statusLoading) return null
+  const { usage, limit, models: courseModels } = userStatus
 
-  const { user, isLoading, refetch } = useCurrentUser()
+  const models = courseModels ?? validModels.map((m) => m.name)
 
-  if (isLoading) return null
-
-  const { usage, isPowerUser } = user
+  const hasPrompts = course && course.prompts.length > 0
+  const activePrompt = (course?.prompts ?? []).find(
+    ({ id }) => id === activePromptId
+  )
+  const hidePrompt = activePrompt?.hidden ?? false
 
   const handleSetModel = (newModel: string) => {
     setModel(newModel)
@@ -87,12 +105,20 @@ const Chat = () => {
     setMessage('')
 
     try {
-      const { stream, controller } = await getCompletionStream(
-        system,
-        messages.concat(newMessage),
-        model,
-        formData
-      )
+      const { stream, controller } = !courseId
+        ? await getCompletionStream(
+            system,
+            messages.concat(newMessage),
+            model,
+            formData
+          )
+        : await getCourseCompletionStream(
+            course.id,
+            system,
+            messages.concat(newMessage),
+            model,
+            courseId
+          )
       const reader = stream.getReader()
       setStreamController(controller)
 
@@ -123,7 +149,7 @@ const Chat = () => {
 
     setStreamController(undefined)
     setCompletion('')
-    refetch()
+    refetchStatus()
     inputFileRef.current.value = ''
     setFileName('')
   }
@@ -147,14 +173,33 @@ const Chat = () => {
     setMessages(messages.slice(0, -1))
   }
 
+  const handleChangePrompt = (promptId: string) => {
+    const { systemMessage, messages: promptMessages } = course?.prompts.find(
+      ({ id }) => id === promptId
+    ) as Prompt
+
+    setSystem(systemMessage)
+    setMessages(promptMessages)
+    setActivePromptId(promptId)
+  }
+
   return (
     <Box>
       <Banner />
-      <SystemMessage
-        system={system}
-        setSystem={setSystem}
-        disabled={messages.length > 0}
-      />
+      {hasPrompts && (
+        <PromptSelector
+          prompts={course.prompts}
+          activePrompt={activePromptId}
+          setActivePrompt={handleChangePrompt}
+        />
+      )}
+      {!hidePrompt && (
+        <SystemMessage
+          system={system}
+          setSystem={setSystem}
+          disabled={activePromptId.length > 0 || messages.length > 0}
+        />
+      )}
       <Box sx={{ mb: 3 }} />
       <Conversation
         messages={messages}
@@ -183,8 +228,9 @@ const Chat = () => {
       <Status
         model={model}
         setModel={handleSetModel}
+        models={models}
         usage={usage}
-        limit={isPowerUser ? DEFAULT_TOKEN_LIMIT * 10 : DEFAULT_TOKEN_LIMIT}
+        limit={limit}
       />
     </Box>
   )
