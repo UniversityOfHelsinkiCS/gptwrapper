@@ -49,17 +49,9 @@ const fileParsing = async (options: any, req: any) => {
 }
 
 if (!inProduction) {
-  console.log('INNOTIN_ENDPOINT in use')
   openaiRouter.post('/stream/innotin', async (req, res) => {
-    const request = req as RequestWithUser
     const { options } = req.body
     const { model } = options
-    const { user } = request
-
-    if (!user.id) return res.status(401).send('Unauthorized')
-
-    const usageAllowed = await checkUsage(user, model)
-    if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
     options.messages = getMessageContext(options.messages)
     options.stream = true
@@ -84,13 +76,6 @@ if (!inProduction) {
       encoding,
       res
     )
-
-    if (model === 'gpt-4') await incrementUsage(user, tokenCount)
-    logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
-      tokenCount,
-      model,
-      user: user.username,
-    })
 
     encoding.free()
 
