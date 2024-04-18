@@ -23,12 +23,9 @@ courseRouter.get('/', async (_, res) => {
 })
 
 courseRouter.get('/user', async (req, res) => {
-  const { limit: limitStr, offset: offsetStr } = req.query
-  const limit = limitStr ? parseInt(limitStr as string, 10) : 100
-  const offset = offsetStr ? parseInt(offsetStr as string, 10) : 0
   const { id } = (req as any).user
 
-  const { rows: courses, count } = await ChatInstance.findAndCountAll({
+  const { rows: chatinstances, count } = await ChatInstance.findAndCountAll({
     include: [
       {
         association: 'responsibilities',
@@ -38,12 +35,21 @@ courseRouter.get('/user', async (req, res) => {
         },
       },
     ],
-    limit,
-    offset,
-    order: [['name', 'DESC']], // @TODO: Fix sort order fakd
+    order: [
+      ['usageLimit', 'DESC'],
+      ['name', 'DESC'],
+    ], // @TODO: Fix sort order fakd
   })
 
-  return res.send({ courses, count })
+  const coursesWithExtra = chatinstances.map((chatinstance) => ({
+    ...chatinstance.toJSON(),
+    isActive:
+      chatinstance.usageLimit > 0 &&
+      Date.parse(chatinstance.activityPeriod.endDate) > Date.now(),
+    isExpired: Date.parse(chatinstance.activityPeriod.endDate) < Date.now(),
+  }))
+
+  return res.send({ courses: coursesWithExtra, count })
 })
 
 courseRouter.get('/:id', async (req, res) => {

@@ -1,25 +1,32 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import _ from 'lodash'
 
 import { Course } from '../types'
 import apiClient from '../util/apiClient'
 
-const useUserCourses = ({
-  limit,
-  offset,
-}: {
-  limit: number
-  offset: number
-}) => {
-  const queryKey = ['chatInstances', { limit, offset }]
+export type CoursesViewCourse = {
+  isActive: boolean
+  isExpired: boolean
+} & Course
 
-  const queryFn = async (): Promise<{ courses: Course[]; count: number }> => {
-    const res = await apiClient.get(
-      `/courses/user?limit=${limit}&offset=${offset}`
-    )
+const useUserCourses = () => {
+  const queryKey = ['chatInstances', 'user']
+
+  const queryFn = async (): Promise<{
+    courses: CoursesViewCourse[]
+    count: number
+  }> => {
+    const res = await apiClient.get(`/courses/user`)
 
     const { data } = res
 
-    return data
+    const courses = _.orderBy(
+      data?.courses ?? [],
+      ['isActive', 'isExpired'],
+      ['desc', 'asc']
+    )
+    const count = data?.count || 0
+    return { courses, count }
   }
 
   const { data, ...rest } = useQuery({
@@ -28,7 +35,7 @@ const useUserCourses = ({
     placeholderData: keepPreviousData,
   })
 
-  return { courses: data?.courses || [], count: data?.count, ...rest }
+  return { courses: data?.courses, count: data?.count, ...rest }
 }
 
 export default useUserCourses

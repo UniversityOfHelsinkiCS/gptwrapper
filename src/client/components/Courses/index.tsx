@@ -10,14 +10,13 @@ import {
   DialogContentText,
   DialogTitle,
   Link,
-  Pagination,
   Paper,
   Typography,
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 import { Course as CourseType } from '../../types'
-import useUserCourses from '../../hooks/useUserCourses'
+import useUserCourses, { CoursesViewCourse } from '../../hooks/useUserCourses'
 import { formatDate } from './util'
 import { useEnableCourse } from './useEnableCourse'
 import { DEFAULT_MODEL_ON_ENABLE, DEFAULT_TOKEN_LIMIT } from '../../../config'
@@ -26,25 +25,23 @@ const Course = ({
   course,
   onEnable,
 }: {
-  course: CourseType
-  onEnable: (course: CourseType) => void
+  course: CoursesViewCourse
+  onEnable: (course: CoursesViewCourse) => void
 }) => {
   const { t } = useTranslation()
   if (!course) return null
 
-  const { name, description, courseId, activityPeriod, usageLimit } = course
-
-  const inUse = usageLimit > 0
+  const { name, courseId, activityPeriod, isActive, isExpired } = course
 
   return (
-    <Box>
+    <Box mb="1rem">
       <Paper
         variant="outlined"
-        sx={{ my: 1, p: 2, display: 'flex', alignItems: 'stretch' }}
+        sx={{ p: 2, display: 'flex', alignItems: 'stretch' }}
       >
         <Box mr="auto">
           <Typography variant="body1">{formatDate(activityPeriod)}</Typography>
-          {inUse ? (
+          {isActive ? (
             <Link to={`/courses/${courseId}`} component={RouterLink}>
               <Typography variant="h6">{name}</Typography>
             </Link>
@@ -55,13 +52,12 @@ const Course = ({
           <Typography variant="body2">
             <code>{courseId}</code>
           </Typography>
-          <Typography variant="body1">{description}</Typography>
         </Box>
 
         <Box display="flex" flexDirection="column" alignItems="end">
-          {inUse ? (
-            <Typography>{t('course:curreEnabled')}</Typography>
-          ) : (
+          {isActive && <Typography>{t('course:curreEnabled')}</Typography>}
+          {isExpired && <Typography>{t('course:curreExpired')}</Typography>}
+          {!isActive && !isExpired && (
             <>
               <Typography>{t('course:curreNotEnabled')}</Typography>
               <Button
@@ -81,13 +77,7 @@ const Course = ({
 
 const Courses = () => {
   const { t } = useTranslation()
-
-  const [page, setPage] = React.useState(1)
-  const itemsPerPage = 20
-  const { courses = [], count } = useUserCourses({
-    limit: itemsPerPage,
-    offset: (page - 1) * itemsPerPage,
-  })
+  const { courses } = useUserCourses()
 
   const enableMutation = useEnableCourse()
 
@@ -113,15 +103,16 @@ const Courses = () => {
         <Typography variant="h5" display="inline" mb={1}>
           {t('common:courses')}
         </Typography>
-        <Pagination
-          count={count ? Math.ceil(count / itemsPerPage) : undefined}
-          onChange={(_ev, value) => setPage(value)}
-          page={page}
-        />
       </Box>
-      {courses?.map((course) => (
-        <Course key={course.id} course={course} onEnable={setCourseToEnable} />
-      ))}
+      <Box>
+        {courses?.map((course) => (
+          <Course
+            key={course.id}
+            course={course}
+            onEnable={setCourseToEnable}
+          />
+        ))}
+      </Box>
 
       <Dialog
         open={courseToEnable !== null}
