@@ -1,7 +1,14 @@
 import React from 'react'
 import { Box, Tabs, Tab } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import { Route, Routes, Link, matchPath, useLocation } from 'react-router-dom'
+import {
+  Route,
+  Routes,
+  Link,
+  matchPath,
+  useLocation,
+  Navigate,
+} from 'react-router-dom'
 import { get } from 'lodash'
 
 import ChatInstances from './ChatInstances'
@@ -39,10 +46,15 @@ const Admin = () => {
             to="/admin/updater"
             component={Link}
           />
-          <Tab label={t('admin:search')} to="/admin/search" component={Link} />
+          <Tab
+            label={t('admin:searchUsers')}
+            to="/admin/search"
+            component={Link}
+          />
         </RouterTabs>
       </Box>
       <Routes>
+        <Route path="/" element={<Navigate to="/admin/chatinstances" />} />
         <Route path="/chatinstances" element={<ChatInstances />} />
         <Route path="/usage" element={<Usage />} />
         <Route path="/updater" element={<Updater />} />
