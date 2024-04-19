@@ -12,12 +12,12 @@ export const checkIamAccess = (iamGroups: string[]) =>
  * Gets the chat instance ids of the courses the user is enrolled in
  */
 export const getEnrolledCourses = async (userId: string) => {
-  const enrollments = await Enrolment.findAll({
+  const enrollments = (await Enrolment.findAll({
     where: {
       userId,
     },
-    include: { model: ChatInstance, as: 'chatInstance' },
-  })
+    include: [Enrolment.associations.chatInstance],
+  })) as (Enrolment & { chatInstance: ChatInstance })[]
 
   const chatInstanceIds = enrollments.map(
     (enrolment) => enrolment.chatInstance.courseId
