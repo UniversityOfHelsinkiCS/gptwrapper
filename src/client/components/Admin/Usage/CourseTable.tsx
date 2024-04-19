@@ -40,10 +40,7 @@ const sortUsage = (a: { course: Course }, b: { course: Course }) =>
 
 const CourseTable = () => {
   const { usage, isLoading } = useChatInstanceUsage()
-  const { courses, isLoading: coursesLoading } = useUserCourses({
-    offset: 0,
-    limit: 100,
-  })
+  const { courses, isLoading: coursesLoading } = useUserCourses()
 
   const { t } = useTranslation()
 
