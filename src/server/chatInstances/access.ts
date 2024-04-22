@@ -1,9 +1,5 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
-import { Op } from 'sequelize'
-
 import { accessIams } from '../util/config'
-import { ChatInstance, Enrolment } from '../db/models'
-import { getTeachers } from '../util/importer'
+import { ChatInstance, Enrolment, Responsibility } from '../db/models'
 
 export const checkIamAccess = (iamGroups: string[]) =>
   accessIams.some((iam) => iamGroups.includes(iam))
@@ -19,39 +15,28 @@ export const getEnrolledCourses = async (userId: string) => {
     include: [Enrolment.associations.chatInstance],
   })) as (Enrolment & { chatInstance: ChatInstance })[]
 
-  const chatInstanceIds = enrollments.map(
+  const courseIds = enrollments.map(
     (enrolment) => enrolment.chatInstance.courseId
   ) as string[]
 
-  console.log('chatInstanceIds', chatInstanceIds)
+  console.log('enrolled courseIds', courseIds)
 
-  return chatInstanceIds
+  return courseIds
 }
 
-export const getOwnCourses = async (userId: string, isAdmin = false) => {
-  const courses = await ChatInstance.findAll({
+export const getOwnCourses = async (userId: string) => {
+  const enrollments = (await Responsibility.findAll({
     where: {
-      courseId: { [Op.not]: null },
+      userId,
     },
-    attributes: ['courseId'],
-  })
+    include: [Responsibility.associations.chatInstance],
+  })) as (Responsibility & { chatInstance: ChatInstance })[]
 
-  const courseIds = courses.map(({ courseId }) => courseId) as string[]
+  const courseIds = enrollments.map(
+    (enrolment) => enrolment.chatInstance.courseId
+  ) as string[]
 
-  if (isAdmin) return courseIds
+  console.log('teacher courseIds', courseIds)
 
-  const access: string[] = []
-  for (const id of courseIds) {
-    const teachers = await getTeachers(id)
-
-    if (teachers.includes(userId)) {
-      const course = courses.find(
-        ({ courseId }) => courseId === id
-      ) as ChatInstance
-
-      access.push(course.courseId as string)
-    }
-  }
-
-  return access
+  return courseIds
 }
