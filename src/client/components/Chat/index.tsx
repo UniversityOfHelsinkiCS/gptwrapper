@@ -86,17 +86,21 @@ const Chat = () => {
   const handleSend = async () => {
     const formData = new FormData()
     const file = inputFileRef.current.files[0] as File
+
     if (file) {
       formData.append('file', file)
     }
+
     const newMessage: Message = {
       role: 'user',
       content: message + (file ? `${t('fileInfoPrompt')}` : ''),
     }
+
     setMessages((prev) => [
       ...prev,
       { role: 'user', content: message + (file ? `\n\n${file.name}` : '') },
     ])
+
     setMessage('')
 
     try {
@@ -111,12 +115,13 @@ const Chat = () => {
       setStreamController(controller)
 
       let content = ''
+      const decoder = new TextDecoder()
       while (true) {
         const { value, done } = await reader.read()
 
         if (done) break
 
-        const text = new TextDecoder().decode(value)
+        const text = decoder.decode(value)
 
         setCompletion((prev) => prev + text)
         content += text

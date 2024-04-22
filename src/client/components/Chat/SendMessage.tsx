@@ -72,7 +72,7 @@ const SendMessage = ({
           {t('fileUploadText')}
           <input
             type="file"
-            accept=".txt, .md, .html"
+            accept="text/*"
             hidden
             ref={inputFileRef}
             onChange={(e) => setFileName(e.target.files[0].name)}
