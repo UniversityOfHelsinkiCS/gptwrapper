@@ -97,5 +97,13 @@
     "reset": "Reset",
     "faculties": "Faculties",
     "users": "Users"
+  },
+  "course": {
+    "curreEnabled": "CurreChat is enabled for the course",
+    "curreNotEnabled": "CurreChat is not enabled for the course",
+    "curreExpired": "The course is over",
+    "enableCurre": "Enable CurreChat",
+    "enableCurreModalTitle": "Enable CurreChat on the course {{name}}?",
+    "enableCurreModalText": "The course will by default use {{defaultModel}} and have a token usage limit of {{defaultTokenLimit}} per student. CurreChat will be available between {{activityPeriod}} (course running time + 1 month). You can edit these settings later."
   }
 }
