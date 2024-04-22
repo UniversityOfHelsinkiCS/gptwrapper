@@ -46,6 +46,4 @@ export const validModels = [
       ]
 )
 
-console.log(validModels)
-
 export const DEFAULT_MODEL_ON_ENABLE = 'gpt-4'
