@@ -33,6 +33,19 @@ export const validModels = [
     deployment: process.env.GPT_4 || 'curredev4',
     context: 128_000,
   },
-]
+].concat(
+  // Add mock model if not in production
+  inProduction
+    ? []
+    : [
+        {
+          name: 'mock',
+          deployment: 'mock',
+          context: 128_000,
+        },
+      ]
+)
+
+console.log(validModels)
 
 export const DEFAULT_MODEL_ON_ENABLE = 'gpt-4'

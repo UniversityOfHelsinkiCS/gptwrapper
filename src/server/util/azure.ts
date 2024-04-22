@@ -18,6 +18,39 @@ const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
 const client = new OpenAIClient(endpoint, new AzureKeyCredential(AZURE_API_KEY))
 
+/**
+ * Mock stream for testing
+ */
+const getMockCompletionEvents: () => Promise<
+  EventStream<ChatCompletions>
+> = async () => {
+  const mockStream = new ReadableStream<ChatCompletions>({
+    start(controller) {
+      for (let i = 0; i < 10; i += 1) {
+        controller.enqueue({
+          id: String(i),
+          created: new Date(),
+          promptFilterResults: [],
+          choices: [
+            {
+              delta: {
+                content: `This is completion ${i}\n`,
+                role: 'system',
+                toolCalls: [],
+              },
+              index: 0,
+              finishReason: 'completed',
+            },
+          ],
+        })
+      }
+      controller.close()
+    },
+  }) as EventStream<ChatCompletions>
+
+  return mockStream
+}
+
 export const getCompletionEvents = async ({
   model,
   messages,
@@ -25,6 +58,8 @@ export const getCompletionEvents = async ({
   const deploymentId = validModels.find((m) => m.name === model)?.deployment
 
   if (!deploymentId) throw new Error(`Invalid model: ${model}`)
+
+  if (deploymentId === 'mock') return getMockCompletionEvents()
 
   try {
     const events = await client.streamChatCompletions(deploymentId, messages)
