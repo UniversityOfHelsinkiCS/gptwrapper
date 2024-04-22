@@ -3,7 +3,7 @@
     "appName": "CurreChat",
     "admin": "Admin",
     "send": "Skicka till",
-    "reset": "Klart",
+    "reset": "Radera",
     "edit": "Edit",
     "delete": "Delete",
     "update": "Update",
@@ -27,7 +27,7 @@
     "promptName": "Prompt name",
     "copyStudentLink": "Copy student link",
     "linkCopied": "Link copied",
-    "fileUploadText": "Upload file",
+    "fileUploadText": "Ladda upp fil",
     "fileInfoPrompt": "\n\nHere is the contents of the file\n\n"
   },
   "info": {
