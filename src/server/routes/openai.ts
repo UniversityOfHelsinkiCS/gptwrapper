@@ -1,7 +1,6 @@
 import express from 'express'
 import multer from 'multer'
 
-// import { tikeIam } from '../util/config'
 import { CourseChatRequest, AzureOptions, RequestWithUser } from '../types'
 import { isError } from '../util/parser'
 import {
@@ -11,7 +10,6 @@ import {
   checkCourseUsage,
   incrementCourseUsage,
 } from '../chatInstances/usage'
-// import { completionStream, handleTike } from '../util/openai'
 import { getCompletionEvents, streamCompletion } from '../util/azure'
 import {
   getMessageContext,
@@ -119,19 +117,6 @@ openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
     return res.status(403).send('Model maximum context reached')
   }
 
-  // Tike API quota reached so this is disabled for now.
-  // Ask JP for how it's going to be done in the future.
-  /* const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
-
-  if (isTike) {
-    const stream = await completionStream(options)
-
-    if (isError(stream)) return res.status(424)
-
-    res.setHeader('content-type', 'text/event-stream')
-
-    tokenCount += await handleTike(stream, encoding, res)
-  } else { */
   const events = await getCompletionEvents(options as AzureOptions)
 
   if (isError(events)) return res.status(424)
@@ -144,7 +129,6 @@ openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
     encoding,
     res
   )
-  // }
 
   const userToCharge = request.hijackedBy || user
   if (model === 'gpt-4') await incrementUsage(userToCharge, tokenCount)
@@ -190,15 +174,16 @@ openaiRouter.post(
     let tokenCount = calculateUsage(options, encoding)
 
     const contextLimit = getModelContextLimit(options.model)
+
+    console.log({
+      model,
+      tokenCount,
+      contextLimit,
+    })
+
     if (tokenCount > contextLimit) {
       logger.info('Maximum context reached')
       return res.status(403).send('Model maximum context reached')
-    }
-
-    // Downgrade to gpt-3.5 for long student conversations
-    if (courseId && model === 'gpt-4' && tokenCount > 2_000) {
-      options.model = 'gpt-3.5-turbo'
-      tokenCount = Math.round(tokenCount / 10)
     }
 
     const events = await getCompletionEvents(options as AzureOptions)
@@ -214,7 +199,11 @@ openaiRouter.post(
       res
     )
 
-    const userToCharge = req.hijackedBy || user
+    let userToCharge = user
+    if (inProduction && req.hijackedBy) {
+      userToCharge = req.hijackedBy
+    }
+
     await incrementCourseUsage(userToCharge, courseId, tokenCount)
     logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
       tokenCount,
