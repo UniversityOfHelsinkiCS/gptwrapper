@@ -7,7 +7,7 @@ import { useParams } from 'react-router-dom'
 
 import { validModels } from '../../../config'
 import { Message, Prompt, SetState } from '../../types'
-import { getCompletionStream, getCourseCompletionStream } from './util'
+import { getCompletionStream } from './util'
 import Banner from '../Banner'
 import SystemMessage from './SystemMessage'
 import Conversation from './Conversation'
@@ -87,12 +87,7 @@ const Chat = () => {
     const formData = new FormData()
     const file = inputFileRef.current.files[0] as File
     if (file) {
-      if (file.type === 'text/plain') {
-        formData.append('file', file)
-      } else {
-        enqueueSnackbar(t('error:invalidFileType'), { variant: 'error' })
-        return
-      }
+      formData.append('file', file)
     }
     const newMessage: Message = {
       role: 'user',
@@ -105,20 +100,13 @@ const Chat = () => {
     setMessage('')
 
     try {
-      const { stream, controller } = !courseId
-        ? await getCompletionStream(
-            system,
-            messages.concat(newMessage),
-            model,
-            formData
-          )
-        : await getCourseCompletionStream(
-            course.id,
-            system,
-            messages.concat(newMessage),
-            model,
-            courseId
-          )
+      const { stream, controller } = await getCompletionStream(
+        system,
+        messages.concat(newMessage),
+        model,
+        formData,
+        courseId
+      )
       const reader = stream.getReader()
       setStreamController(controller)
 

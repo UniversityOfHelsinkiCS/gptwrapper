@@ -28,10 +28,7 @@ const upload = multer({ storage })
 
 const fileParsing = async (options: any, req: any) => {
   const fileBuffer = req.file.buffer
-  let fileContent = ''
-  if (req.file.mimetype === 'text/plain') {
-    fileContent = fileBuffer.toString('utf8')
-  }
+  const fileContent = fileBuffer.toString('utf8')
 
   const allMessages = options.messages
 
@@ -81,15 +78,19 @@ if (!inProduction) {
   })
 }
 
-openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
-  const request = req as RequestWithUser
+openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
+  const req = r as RequestWithUser
+  const { courseId } = req.body
   const { options } = JSON.parse(req.body.data)
   const { model } = options
-  const { user } = request
+  const { user } = req
 
   if (!user.id) return res.status(401).send('Unauthorized')
 
-  const usageAllowed = await checkUsage(user, model)
+  const usageAllowed = courseId
+    ? await checkCourseUsage(user, courseId)
+    : await checkUsage(user, model)
+
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
 
   let optionsMessagesWithFile = null
@@ -112,6 +113,13 @@ openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
   let tokenCount = calculateUsage(options, encoding)
 
   const contextLimit = getModelContextLimit(model)
+
+  console.log({
+    model,
+    tokenCount,
+    contextLimit,
+  })
+
   if (tokenCount > contextLimit) {
     logger.info('Maximum context reached')
     return res.status(403).send('Model maximum context reached')
@@ -130,8 +138,17 @@ openaiRouter.post('/stream', upload.single('file'), async (req, res) => {
     res
   )
 
-  const userToCharge = request.hijackedBy || user
-  if (model === 'gpt-4') await incrementUsage(userToCharge, tokenCount)
+  let userToCharge = user
+  if (inProduction && req.hijackedBy) {
+    userToCharge = req.hijackedBy
+  }
+
+  if (courseId) {
+    await incrementCourseUsage(userToCharge, courseId, tokenCount)
+  } else if (model === 'gpt-4') {
+    await incrementUsage(userToCharge, tokenCount)
+  }
+
   logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
     tokenCount,
     model,

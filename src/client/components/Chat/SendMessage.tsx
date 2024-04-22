@@ -6,7 +6,6 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import { useTranslation } from 'react-i18next'
 
 import { SetState } from '../../types'
-import useCurrentUser from '../../hooks/useCurrentUser'
 
 const SendMessage = ({
   message,
@@ -35,8 +34,6 @@ const SendMessage = ({
     inputFileRef.current.value = ''
     setFileName('')
   }
-
-  const { user } = useCurrentUser()
 
   return (
     <Box mb={2}>
@@ -71,14 +68,7 @@ const SendMessage = ({
         <Button variant="contained" onClick={handleSend} disabled={disabled}>
           {t('send')}
         </Button>
-        <Button
-          component="label"
-          variant="outlined"
-          startIcon={<UploadFileIcon />}
-          sx={{
-            display: !user?.isAdmin ? 'none' : undefined,
-          }}
-        >
+        <Button component="label" variant="text" startIcon={<UploadFileIcon />}>
           {t('fileUploadText')}
           <input
             type="file"

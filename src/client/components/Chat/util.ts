@@ -5,9 +5,11 @@ export const getCompletionStream = async (
   system: string,
   messages: Message[],
   model: string,
-  formData: FormData
+  formData: FormData,
+  courseId?: string
 ) => {
   const data = {
+    courseId,
     options: {
       messages: [
         {
@@ -49,5 +51,5 @@ export const getCourseCompletionStream = async (
   const formData = new FormData()
   formData.set('data', JSON.stringify(data))
 
-  return postAbortableStream(`/ai/stream/${courseId}`, formData)
+  return postAbortableStream(`/ai/stream/`, formData)
 }
