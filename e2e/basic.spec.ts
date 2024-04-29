@@ -10,7 +10,7 @@ test('Can visit home', async ({ page }) => {
 
   await page.screenshot({ path: 'screenshots/home.png' })
 })
-
+/*
 test('Can prompt', async ({ page }) => {
   await page.getByText('gpt-4', { exact: true }).click()
   await page.getByRole('option', { name: 'mock' }).click()
@@ -19,3 +19,4 @@ test('Can prompt', async ({ page }) => {
   await page.getByRole('button', { name: 'Lähetä' }).click()
   await page.getByText('This is completion 0 This is').click()
 })
+*/

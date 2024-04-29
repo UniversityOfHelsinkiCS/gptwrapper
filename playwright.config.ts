@@ -6,7 +6,7 @@ import { defineConfig, devices } from '@playwright/test'
  * https://github.com/motdotla/dotenv
  */
 // require('dotenv').config();
-const inE2E = process.env.CI === 'true'
+const inE2E = true // process.env.CI === 'true'
 
 /**
  * See https://playwright.dev/docs/test-configuration.
