@@ -22,8 +22,8 @@ userRouter.get('/login', async (req, res) => {
 
   const hasIamAccess = checkIamAccess(iamGroups)
 
-  const enrolledCourses = await getEnrolledCourses(id)
-  const teacherCourses = await getOwnCourses(id)
+  const enrolledCourses = await getEnrolledCourses(user)
+  const teacherCourses = await getOwnCourses(user)
 
   const courses = enrolledCourses.concat(teacherCourses)
   const hasCourseAccess = courses.length > 0

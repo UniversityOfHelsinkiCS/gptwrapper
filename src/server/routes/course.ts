@@ -1,8 +1,9 @@
 import express from 'express'
 import { Op } from 'sequelize'
 
-import { ActivityPeriod } from '../types'
+import { ActivityPeriod, RequestWithUser } from '../types'
 import { ChatInstance } from '../db/models'
+import { getOwnCourses } from '../chatInstances/access'
 
 const courseRouter = express.Router()
 
@@ -23,18 +24,17 @@ courseRouter.get('/', async (_, res) => {
 })
 
 courseRouter.get('/user', async (req, res) => {
-  const { id } = (req as any).user
+  const request = req as RequestWithUser
+  const { user } = request
+
+  const courseIds = await getOwnCourses(user)
 
   const { rows: chatinstances, count } = await ChatInstance.findAndCountAll({
-    include: [
-      {
-        association: 'responsibilities',
-        attributes: ['userId'],
-        where: {
-          userId: id,
-        },
+    where: {
+      courseId: {
+        [Op.in]: courseIds,
       },
-    ],
+    },
     order: [
       ['usageLimit', 'DESC'],
       ['name', 'DESC'],
