@@ -118,6 +118,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     model,
     tokenCount,
     contextLimit,
+    courseId,
   })
 
   if (tokenCount > contextLimit) {
@@ -153,6 +154,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     tokenCount,
     model,
     user: user.username,
+    courseId,
   })
 
   encoding.free()
