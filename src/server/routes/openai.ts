@@ -80,8 +80,7 @@ if (!inProduction) {
 
 openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   const req = r as RequestWithUser
-  const { courseId } = req.body
-  const { options } = JSON.parse(req.body.data)
+  const { options, courseId } = JSON.parse(req.body.data)
   const { model } = options
   const { user } = req
 
