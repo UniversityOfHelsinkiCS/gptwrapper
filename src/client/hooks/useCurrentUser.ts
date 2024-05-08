@@ -16,7 +16,14 @@ const useCurrentUser = () => {
     return data
   }
 
-  const { data: user, ...rest } = useQuery({ queryKey, queryFn })
+  const { data: user, ...rest } = useQuery({
+    queryKey,
+    queryFn,
+    // multiple components mount this hook.
+    // staleTime ensures that the data is not refetched
+    // unnecessarily within a short period of time.
+    staleTime: 5000,
+  })
 
   return { user, ...rest }
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   AppBar,
   Toolbar,
@@ -22,31 +22,12 @@ import {
 } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
-import { PUBLIC_URL } from '../../../config'
-import { User } from '../../types'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import hyLogo from '../../assets/hy_logo.svg'
 import styles from './styles'
 
-const hasAccess = (user: User | null | undefined, courseId?: string) => {
-  if (!user) return false
-  if (user.isAdmin) return true
-  if (courseId && !user.activeCourseIds.includes(courseId)) return false
-  if (!courseId && !user.hasIamAccess) return false
-
-  return true
-}
-
-const getRedirect = (user: User | null | undefined) => {
-  if (!user) return '/noaccess'
-  if (user.hasIamAccess) return '/'
-  return `/${user.activeCourseIds[0] || '/noaccess'}`
-}
-
 const NavBar = () => {
   const { t, i18n } = useTranslation()
-  const { courseId } = useParams()
-  const location = useLocation()
   const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
   const anchorRef = useRef<HTMLButtonElement>(null)
 
@@ -66,11 +47,6 @@ const NavBar = () => {
   }
 
   if (isLoading) return null
-
-  if (!location.pathname.includes('/noaccess') && !hasAccess(user, courseId)) {
-    window.location.href = PUBLIC_URL + getRedirect(user)
-    return null
-  }
 
   if (!user) return null
 
