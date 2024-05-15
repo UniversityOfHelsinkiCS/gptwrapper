@@ -17,6 +17,8 @@ const SendMessage = ({
   inputFileRef,
   fileName,
   setFileName,
+  setDisallowedFileType,
+  setAlertOpen,
 }: {
   message: string
   setMessage: SetState<string>
@@ -27,12 +29,36 @@ const SendMessage = ({
   inputFileRef: React.RefObject<HTMLInputElement>
   fileName: string
   setFileName: (name: string) => void
+  setDisallowedFileType: React.Dispatch<string>
+  setAlertOpen: React.Dispatch<boolean>
 }) => {
   const { t } = useTranslation()
+
+  const alloweFileTypesRegularExpression = 'text/plain'
 
   const handleDeleteFile = () => {
     inputFileRef.current.value = ''
     setFileName('')
+  }
+
+  const handleFileTypeValidation = (file: File): void => {
+    const allowedFileTypes = [
+      'text/plain',
+      'text/html',
+      'text/css',
+      'text/csv',
+      'text/markdown',
+    ]
+
+    if (allowedFileTypes.includes(file.type)) {
+      setFileName(file.name)
+    } else {
+      setDisallowedFileType(file.type)
+      setAlertOpen(true)
+      setTimeout(() => {
+        setAlertOpen(false)
+      }, 6000)
+    }
   }
 
   return (
@@ -72,10 +98,10 @@ const SendMessage = ({
           {t('fileUploadText')}
           <input
             type="file"
-            accept="text/*"
+            accept={alloweFileTypesRegularExpression}
             hidden
             ref={inputFileRef}
-            onChange={(e) => setFileName(e.target.files[0].name)}
+            onChange={(e) => handleFileTypeValidation(e.target.files[0])}
           />
         </Button>
         <Button onClick={() => handleReset()} disabled={resetDisabled}>

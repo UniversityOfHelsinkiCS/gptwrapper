@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop, no-constant-condition */
 import React, { useState, useRef, useEffect } from 'react'
-import { Box } from '@mui/material'
+import { Alert, Box, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
@@ -65,7 +65,8 @@ const Chat = () => {
   const [completion, setCompletion] = useState('')
   const [model, setModel] = useState(localStorage.getItem('model') ?? 'gpt-4')
   const [streamController, setStreamController] = useState<AbortController>()
-
+  const [alertOpen, setAlertOpen] = useState(false)
+  const [disallowedFileType, setDisallowedFileType] = useState('')
   const { t } = useTranslation()
   if (statusLoading) return null
   const { usage, limit, models: courseModels } = userStatus
@@ -211,12 +212,30 @@ const Chat = () => {
         inputFileRef={inputFileRef}
         fileName={fileName}
         setFileName={setFileName}
+        setDisallowedFileType={setDisallowedFileType}
+        setAlertOpen={setAlertOpen}
       />
       <Email
         system={system}
         messages={messages}
         disabled={messages.length === 0 || completion !== ''}
       />
+      {alertOpen && (
+        <Alert
+          severity="warning"
+          sx={{
+            maxWidth: '500px',
+          }}
+        >
+          <Typography>
+            {`File of type "${disallowedFileType}" not supported currently`}
+          </Typography>
+          <Typography>
+            {`Currenlty there is only support for ".txt"`}
+          </Typography>
+        </Alert>
+      )}
+
       <Box sx={{ mb: 6 }} />
       <Status
         model={model}
