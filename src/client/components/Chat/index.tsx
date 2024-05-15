@@ -86,9 +86,22 @@ const Chat = () => {
 
   const handleSend = async () => {
     const formData = new FormData()
-    const file = inputFileRef.current.files[0] as File
 
-    if (file) {
+    let file = null
+
+    const allowedFileTypes = [
+      'text/plain',
+      'text/html',
+      'text/css',
+      'text/csv',
+      'text/markdown',
+      'text/md',
+    ]
+
+    if (allowedFileTypes.includes(inputFileRef.current.files[0].type))
+      file = inputFileRef.current.files[0] as File
+
+    if (file && allowedFileTypes.includes(file.type)) {
       formData.append('file', file)
     }
 
