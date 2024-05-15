@@ -34,8 +34,6 @@ const SendMessage = ({
 }) => {
   const { t } = useTranslation()
 
-  const alloweFileTypesRegularExpression = 'text/plain'
-
   const handleDeleteFile = () => {
     inputFileRef.current.value = ''
     setFileName('')
@@ -98,7 +96,7 @@ const SendMessage = ({
           {t('fileUploadText')}
           <input
             type="file"
-            accept={alloweFileTypesRegularExpression}
+            accept="text/*"
             hidden
             ref={inputFileRef}
             onChange={(e) => handleFileTypeValidation(e.target.files[0])}
