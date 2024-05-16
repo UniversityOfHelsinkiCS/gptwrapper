@@ -87,7 +87,7 @@ const Chat = () => {
   const handleSend = async () => {
     const formData = new FormData()
 
-    let file = null as File
+    let file = inputFileRef.current.files[0] as File
 
     const allowedFileTypes = [
       'text/plain',
@@ -98,11 +98,10 @@ const Chat = () => {
       'text/md',
     ]
 
-    if (allowedFileTypes.includes(inputFileRef.current.files[0].type))
-      file = inputFileRef.current.files[0] as File
-
     if (file && allowedFileTypes.includes(file.type)) {
       formData.append('file', file)
+    } else {
+      file = null
     }
 
     const newMessage: Message = {
