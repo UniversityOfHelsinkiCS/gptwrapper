@@ -97,7 +97,7 @@ const Chat = () => {
       'text/markdown',
       'text/md',
     ]
-    console.log('FILE: ', file)
+
     if (file) {
       if (allowedFileTypes.includes(file.type)) {
         formData.append('file', file)
