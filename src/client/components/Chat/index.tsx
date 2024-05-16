@@ -87,7 +87,7 @@ const Chat = () => {
   const handleSend = async () => {
     const formData = new FormData()
 
-    let file = null
+    let file = null as File
 
     const allowedFileTypes = [
       'text/plain',
