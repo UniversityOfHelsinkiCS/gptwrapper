@@ -97,11 +97,13 @@ const Chat = () => {
       'text/markdown',
       'text/md',
     ]
-
-    if (file && allowedFileTypes.includes(file.type)) {
-      formData.append('file', file)
-    } else {
-      file = null
+    console.log('FILE: ', file)
+    if (file) {
+      if (allowedFileTypes.includes(file.type)) {
+        formData.append('file', file)
+      } else {
+        file = null
+      }
     }
 
     const newMessage: Message = {
