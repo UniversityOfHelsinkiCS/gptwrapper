@@ -20,6 +20,7 @@ import {
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
 import { inProduction } from '../../config'
+import { CURRE_API_PASSWORD } from '../util/config'
 
 const openaiRouter = express.Router()
 
@@ -45,7 +46,10 @@ const fileParsing = async (options: any, req: any) => {
 
 openaiRouter.post('/stream/innotin', async (req, res) => {
   const { options } = req.body
-  const { model } = options
+  const { model, CURRE_API_PASSWORD_INNOTIN } = options
+
+  if (CURRE_API_PASSWORD_INNOTIN !== CURRE_API_PASSWORD)
+    return res.status(401).send('Unauthorized')
 
   options.messages = getMessageContext(options.messages)
   options.stream = true
