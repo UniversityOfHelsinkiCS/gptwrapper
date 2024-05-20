@@ -48,9 +48,15 @@ openaiRouter.post('/stream/innotin', async (req, res) => {
   const { options } = req.body
   const { model, CURRE_API_PASSWORD_INNOTIN } = options
 
-  if (CURRE_API_PASSWORD_INNOTIN !== CURRE_API_PASSWORD)
+  if (
+    CURRE_API_PASSWORD_INNOTIN === undefined ||
+    CURRE_API_PASSWORD === undefined
+  ) {
     return res.status(401).send('Unauthorized')
-
+  }
+  if (CURRE_API_PASSWORD_INNOTIN !== CURRE_API_PASSWORD) {
+    return res.status(401).send('Unauthorized')
+  }
   options.messages = getMessageContext(options.messages)
   options.stream = true
   const encoding = getEncoding(model)
