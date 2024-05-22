@@ -15,6 +15,7 @@ import promptRouter from './prompt'
 import emailRouter from './email'
 import adminRouter from './admin'
 import facultyRouter from './faculty'
+import innotinRouter from './innotin'
 
 const router = express()
 
@@ -25,6 +26,10 @@ router.use(SentryHandlers.tracingHandler())
 
 router.use(cors())
 router.use(express.json())
+
+// Innotin router must be before shibboleth middleware
+// the validation is done using the CURRE_API_PASSWORD_INNOTIN
+router.use('/innotin', innotinRouter)
 
 router.use(shibbolethMiddleware)
 router.use(userMiddleware)

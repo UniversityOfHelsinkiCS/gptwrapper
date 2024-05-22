@@ -20,7 +20,6 @@ import {
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
 import { inProduction } from '../../config'
-import { CURRE_API_PASSWORD } from '../util/config'
 
 const openaiRouter = express.Router()
 
@@ -43,45 +42,6 @@ const fileParsing = async (options: any, req: any) => {
 
   return options.messages
 }
-
-openaiRouter.post('/stream/innotin', async (req, res) => {
-  const { options } = req.body
-  const { model, CURRE_API_PASSWORD_INNOTIN } = options
-
-  if (!CURRE_API_PASSWORD_INNOTIN || !CURRE_API_PASSWORD) {
-    return res.status(500).send('Internal Server Error')
-  }
-  if (CURRE_API_PASSWORD_INNOTIN !== CURRE_API_PASSWORD) {
-    return res.status(401).send('Unauthorized')
-  }
-  options.messages = getMessageContext(options.messages)
-  options.stream = true
-  const encoding = getEncoding(model)
-  let tokenCount = calculateUsage(options, encoding)
-
-  const contextLimit = getModelContextLimit(model)
-  if (tokenCount > contextLimit) {
-    logger.info('Maximum context reached')
-    return res.status(403).send('Model maximum context reached')
-  }
-
-  const events = await getCompletionEvents(options as AzureOptions)
-
-  if (isError(events)) return res.status(424)
-
-  res.setHeader('content-type', 'text/event-stream')
-
-  tokenCount += await streamCompletion(
-    events,
-    options as AzureOptions,
-    encoding,
-    res
-  )
-
-  encoding.free()
-
-  return res.end()
-})
 
 openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   const req = r as RequestWithUser
