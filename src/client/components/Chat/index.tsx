@@ -96,6 +96,7 @@ const Chat = () => {
       'text/csv',
       'text/markdown',
       'text/md',
+      'application/pdf',
     ]
 
     if (file) {
