@@ -46,6 +46,7 @@ const SendMessage = ({
       'text/css',
       'text/csv',
       'text/markdown',
+      'application/pdf',
     ]
 
     if (allowedFileTypes.includes(file.type)) {
@@ -96,7 +97,7 @@ const SendMessage = ({
           {t('fileUploadText')}
           <input
             type="file"
-            accept="text/*"
+            accept="^(test\/.*|application\/pdf)$"
             hidden
             ref={inputFileRef}
             onChange={(e) => handleFileTypeValidation(e.target.files[0])}
