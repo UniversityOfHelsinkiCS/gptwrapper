@@ -40,6 +40,7 @@ const getMockCompletionEvents: () => Promise<
               },
               index: 0,
               finishReason: 'completed',
+              logprobs: undefined,
             },
           ],
         })
