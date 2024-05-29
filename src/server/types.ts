@@ -36,6 +36,11 @@ export type OpenAIStream = ReturnType<
 >
 
 export type Message = OpenAI.Chat.ChatCompletionMessage
+export interface CustomMessage {
+  role: Role
+  content: string
+}
+export type Role = 'system' | 'assistant' | 'user'
 
 export type StreamingOptions =
   OpenAI.Chat.Completions.CompletionCreateParamsStreaming
@@ -56,8 +61,6 @@ export interface ChatInstance {
   description: string
   usageLimit: number
 }
-
-export type Role = 'system' | 'assistant' | 'user'
 
 export type ActivityPeriod = {
   startDate: string
