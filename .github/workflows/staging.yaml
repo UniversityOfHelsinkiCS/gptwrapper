@@ -55,15 +55,12 @@ jobs:
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
       
-      - name: Install Playwright browsers if not cached
-        run: npx playwright install --with-deps
+      - run: npx playwright install --with-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-
-      - name: Ensure Playwright dependencies are installed
-        run: npx playwright install
+      - run: npx playwright install-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         
-      - name: Run Playwright tests
+      - name: Run your tests
         env:
           CI: true
         run: npx playwright test
@@ -108,4 +105,3 @@ jobs:
         shell: bash
         if: failure()
         run: docker-compose -f compose.ci.yaml logs
-      
