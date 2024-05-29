@@ -20,6 +20,7 @@ import {
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
 import { inProduction } from '../../config'
+import { pdfToText } from '../util/pdfToText'
 
 const openaiRouter = express.Router()
 
@@ -27,8 +28,24 @@ const storage = multer.memoryStorage()
 const upload = multer({ storage })
 
 const fileParsing = async (options: any, req: any) => {
-  const fileBuffer = req.file.buffer
-  const fileContent = fileBuffer.toString('utf8')
+  let fileContent = ''
+
+  const textFileTypes = [
+    'text/plain',
+    'text/html',
+    'text/css',
+    'text/csv',
+    'text/markdown',
+    'text/md',
+  ]
+  if (textFileTypes.includes(req.file.mimetype)) {
+    const fileBuffer = req.file.buffer
+    fileContent = fileBuffer.toString('utf8')
+  }
+
+  if (req.file.mimetype === 'application/pdf') {
+    fileContent = await pdfToText(req.file.buffer)
+  }
 
   const allMessages = options.messages
 
