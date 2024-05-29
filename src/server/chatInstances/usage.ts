@@ -74,7 +74,11 @@ export const calculateUsage = (
 
   let tokenCount = 0
   messages.forEach((message) => {
-    const encoded = encoding.encode(message.content || '')
+    let content: string = ''
+    if (typeof message.content === 'string') {
+      content = message.content
+    }
+    const encoded = encoding.encode(content)
     tokenCount += encoded.length
   })
 
