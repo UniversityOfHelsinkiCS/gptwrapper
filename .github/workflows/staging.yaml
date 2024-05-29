@@ -60,7 +60,7 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
       - name: Ensure Playwright dependencies are installed
-        run: npx playwright install-deps
+        run: npx playwright install
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         
       - name: Run Playwright tests
