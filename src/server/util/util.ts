@@ -1,4 +1,4 @@
-import { Message } from '../types'
+import { CustomMessage } from '../types'
 import { DEFAULT_MODEL, DEFAUL_CONTEXT_LIMIT, validModels } from '../../config'
 import { ChatInstance } from '../db/models'
 
@@ -7,7 +7,9 @@ import { ChatInstance } from '../db/models'
  * and to stay within context limit.
  * Always keep system messages and last 10 messages
  */
-export const getMessageContext = (messages: Message[]): Message[] => {
+export const getMessageContext = (
+  messages: CustomMessage[]
+): CustomMessage[] => {
   const systemMessages = messages.filter((message) => message.role === 'system')
   const otherMessages = messages.filter((message) => message.role !== 'system')
 
