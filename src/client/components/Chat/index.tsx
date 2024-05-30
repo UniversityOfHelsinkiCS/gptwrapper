@@ -246,7 +246,7 @@ const Chat = () => {
             {`File of type "${disallowedFileType}" not supported currently`}
           </Typography>
           <Typography>
-            {`Currenlty there is only support for ".txt"`}
+            {`Currenlty there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}
           </Typography>
         </Alert>
       )}
