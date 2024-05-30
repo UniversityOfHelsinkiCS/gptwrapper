@@ -97,7 +97,7 @@ const SendMessage = ({
           {t('fileUploadText')}
           <input
             type="file"
-            accept="^(test\/.*|application\/pdf)$"
+            accept="text/*,application/pdf"
             hidden
             ref={inputFileRef}
             onChange={(e) => handleFileTypeValidation(e.target.files[0])}
