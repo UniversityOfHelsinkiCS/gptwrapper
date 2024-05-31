@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build image
         id: build-image
@@ -38,7 +38,7 @@ jobs:
     needs: build-and-push
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Pull image and create a container
         run: docker create --name gptwrapper quay.io/toska/gptwrapper:production
