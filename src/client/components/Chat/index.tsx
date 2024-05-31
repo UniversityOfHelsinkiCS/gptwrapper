@@ -178,8 +178,8 @@ const Chat = () => {
   const handleStop = () => {
     if (streamController) streamController.abort()
     setStreamController(undefined)
+    setMessages((prev) => [...prev, { role: 'assistant', content: completion }])
     setCompletion('')
-    setMessages(messages.slice(0, -1))
   }
 
   const handleChangePrompt = (promptId: string) => {
