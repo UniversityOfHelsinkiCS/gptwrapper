@@ -77,6 +77,10 @@ jobs:
             BASE_PATH=/gptwrapper
             GIT_SHA=${{ github.sha }}
             STAGING=true
+          # Extra args are needed to increase the number of open files
+          # because of build EMFILE error: https://github.com/npm/cli/issues/4783#issuecomment-1908016260
+          extra-args: |
+            --ulimit nofile=4096:4096 
       
       - name: Push staging image to quay.io
         uses: redhat-actions/push-to-registry@v2
