@@ -1,6 +1,6 @@
 import express from 'express'
 import cors from 'cors'
-import { Handlers as SentryHandlers } from '@sentry/node'
+import * as Sentry from '@sentry/node'
 
 import shibbolethMiddleware from '../middleware/shibboleth'
 import userMiddleware from '../middleware/user'
@@ -18,10 +18,7 @@ import facultyRouter from './faculty'
 
 const router = express()
 
-initializeSentry(router)
-
-router.use(SentryHandlers.requestHandler())
-router.use(SentryHandlers.tracingHandler())
+initializeSentry()
 
 router.use(cors())
 router.use(express.json())
@@ -42,7 +39,7 @@ router.use('/email', emailRouter)
 router.use('/admin', adminRouter)
 router.use('/faculties', facultyRouter)
 
-router.use(SentryHandlers.errorHandler())
+Sentry.setupExpressErrorHandler(router)
 router.use(errorHandler)
 
 export default router
