@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax */
-import Sentry from '@sentry/node'
+import * as Sentry from '@sentry/node'
 
 import { redis } from '../util/redis'
 import logger from '../util/logger'

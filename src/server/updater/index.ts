@@ -1,4 +1,4 @@
-import Sentry from '@sentry/node'
+import * as Sentry from '@sentry/node'
 import logger from '../util/logger'
 import { fetchCoursesAndResponsibilities } from './courses'
 import { fetchEnrolments } from './enrolments'
