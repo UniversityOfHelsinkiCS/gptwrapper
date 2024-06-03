@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/nodejs-18-minimal:1-93
+FROM registry.access.redhat.com/ubi9/nodejs-18-minimal:1-113.1716472876
 
 ENV TZ="Europe/Helsinki"
 
