@@ -45,4 +45,22 @@ export const postAbortableStream = async (path: string, formData: FormData) => {
   return { stream, controller }
 }
 
+export const postCheckTokenSize = async (path: string, formData: FormData) => {
+  const adminHeaders = {} as any
+  const adminLoggedInAs = localStorage.getItem('adminLoggedInAs')
+  if (adminLoggedInAs) {
+    adminHeaders['x-admin-logged-in-as'] = adminLoggedInAs
+  }
+
+  const response = await fetch(`${PUBLIC_URL}/api/${path}`, {
+    method: 'POST',
+    headers: adminHeaders,
+    body: formData,
+  })
+
+  const message = response.text() || 'Test'
+
+  return message
+}
+
 export default apiClient
