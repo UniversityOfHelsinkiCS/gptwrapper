@@ -7,7 +7,7 @@ import { useParams } from 'react-router-dom'
 
 import { validModels } from '../../../config'
 import { Message, Prompt, SetState } from '../../types'
-import { getCompletionStream } from './util'
+import { getCompletionStream, getTokenUsage } from './util'
 import Banner from '../Banner'
 import SystemMessage from './SystemMessage'
 import Conversation from './Conversation'
@@ -18,6 +18,7 @@ import '../../styles.css'
 import useCourse from '../../hooks/useCourse'
 import useUserStatus from '../../hooks/useUserStatus'
 import PromptSelector from './PromptSelector'
+import TokenUsageWarning from './TokenUsageWarning'
 
 const chatPersistingEnabled = false // import.meta.env.VITE_CHAT_PERSISTING
 
@@ -67,6 +68,13 @@ const Chat = () => {
   const [streamController, setStreamController] = useState<AbortController>()
   const [alertOpen, setAlertOpen] = useState(false)
   const [disallowedFileType, setDisallowedFileType] = useState('')
+  const [tokenUsageWarning, setTokenUsageWarning] = useState('')
+  const [tokenWarningVisible, setTokenWarningVisible] = useState(false)
+
+  const [fileState, setFileState] = useState<File>(null)
+  const [formDataState, setFormDataState] = useState<FormData>(null)
+  const [newMessageState, setNewMessageState] = useState<Message>(null)
+
   const { t } = useTranslation()
   if (statusLoading) return null
   const { usage, limit, models: courseModels } = userStatus
@@ -84,34 +92,17 @@ const Chat = () => {
     localStorage.setItem('model', newModel)
   }
 
-  const handleSend = async () => {
-    const formData = new FormData()
+  const handleCancel = () => {
+    setFileName('')
+    setMessage('')
+    setTokenWarningVisible(false)
+  }
 
-    let file = inputFileRef.current.files[0] as File
-
-    const allowedFileTypes = [
-      'text/plain',
-      'text/html',
-      'text/css',
-      'text/csv',
-      'text/markdown',
-      'text/md',
-      'application/pdf',
-    ]
-
-    if (file) {
-      if (allowedFileTypes.includes(file.type)) {
-        formData.append('file', file)
-      } else {
-        file = null
-      }
-    }
-
-    const newMessage: Message = {
-      role: 'user',
-      content: message + (file ? `${t('fileInfoPrompt')}` : ''),
-    }
-
+  const handleSend = async (
+    formData: FormData = formDataState,
+    file: File = fileState,
+    newMessage: Message = newMessageState
+  ) => {
     setMessages((prev) => [
       ...prev,
       { role: 'user', content: message + (file ? `\n\n${file.name}` : '') },
@@ -161,6 +152,64 @@ const Chat = () => {
     refetchStatus()
     inputFileRef.current.value = ''
     setFileName('')
+  }
+
+  const handleContinue = () => {
+    handleSend()
+    setTokenWarningVisible(false)
+  }
+
+  const handleTokenCountandSend = async () => {
+    const newFormData = new FormData()
+
+    let newFile = inputFileRef.current.files[0] as File
+
+    const allowedFileTypes = [
+      'text/plain',
+      'text/html',
+      'text/css',
+      'text/csv',
+      'text/markdown',
+      'text/md',
+      'application/pdf',
+    ]
+
+    if (newFile) {
+      if (allowedFileTypes.includes(newFile.type)) {
+        newFormData.append('file', newFile)
+      } else {
+        newFile = null
+      }
+    }
+
+    const userMessage: Message = {
+      role: 'user',
+      content: message + (newFile ? `${t('fileInfoPrompt')}` : ''),
+    }
+
+    try {
+      const tokenUsageAnalysis = await getTokenUsage(
+        system,
+        messages.concat(userMessage),
+        model,
+        newFormData,
+        courseId
+      )
+      const tokenAnalysis = JSON.parse(tokenUsageAnalysis)
+
+      setFileState(newFile)
+      setFormDataState(newFormData)
+      setNewMessageState(userMessage)
+
+      if (tokenAnalysis.tokenConsumtionWarning) {
+        setTokenUsageWarning(tokenAnalysis.message)
+        setTokenWarningVisible(true)
+      } else {
+        handleSend(newFormData, newFile, userMessage)
+      }
+    } catch {
+      setTokenUsageWarning('Error Occured')
+    }
   }
 
   const handleReset = () => {
@@ -219,7 +268,7 @@ const Chat = () => {
         message={message}
         setMessage={setMessage}
         handleReset={handleReset}
-        handleSend={handleSend}
+        handleSend={handleTokenCountandSend}
         disabled={message.length === 0 || completion !== ''}
         resetDisabled={
           messages.length === 0 && system.length === 0 && message.length === 0
@@ -250,6 +299,12 @@ const Chat = () => {
           </Typography>
         </Alert>
       )}
+      <TokenUsageWarning
+        tokenUsageWarning={tokenUsageWarning}
+        handleCancel={handleCancel}
+        handleContinue={handleContinue}
+        visible={tokenWarningVisible}
+      />
 
       <Box sx={{ mb: 6 }} />
       <Status
