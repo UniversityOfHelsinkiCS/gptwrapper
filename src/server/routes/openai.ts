@@ -19,7 +19,7 @@ import {
 } from '../util/util'
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
-import { inProduction } from '../../config'
+import { inProduction, DEFAULT_TOKEN_LIMIT } from '../../config'
 import { pdfToText } from '../util/pdfToText'
 
 const openaiRouter = express.Router()
@@ -59,6 +59,55 @@ const fileParsing = async (options: any, req: any) => {
 
   return options.messages
 }
+
+openaiRouter.post('/checktokensize', upload.single('file'), async (r, res) => {
+  const req = r as RequestWithUser
+  const { options, courseId } = JSON.parse(req.body.data)
+  const { model } = options
+  const { user } = req
+
+  if (!user.id) return res.status(401).send('Unauthorized')
+
+  const usageAllowed = courseId
+    ? await checkCourseUsage(user, courseId)
+    : await checkUsage(user, model)
+
+  if (!usageAllowed) return res.status(403).send('Usage limit reached')
+
+  let optionsMessagesWithFile = null
+
+  try {
+    if (req.file) {
+      optionsMessagesWithFile = await fileParsing(options, req)
+    }
+  } catch (error) {
+    logger.error('Error parsing file', { error })
+    return res.status(400).send('Error parsing file')
+  }
+
+  options.messages = getMessageContext(
+    optionsMessagesWithFile || options.messages
+  )
+  options.stream = true
+
+  const encoding = getEncoding(model)
+  const tokenCount = calculateUsage(options, encoding)
+  const tokenUsagePercentage = Math.round(
+    (tokenCount / DEFAULT_TOKEN_LIMIT) * 100
+  )
+
+  if (tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT) {
+    return res
+      .status(201)
+      .json({
+        tokenConsumtionWarning: true,
+        message: `You are about to use ${tokenUsagePercentage}% of your allowed CurreChat usage`,
+      })
+  }
+  return res
+    .status(201)
+    .json({ tokenConsumtionWarning: false, message: 'Lets go!' })
+})
 
 openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   const req = r as RequestWithUser
