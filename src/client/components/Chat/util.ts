@@ -1,11 +1,12 @@
 import { Message } from '../../types'
-import { postAbortableStream, postCheckTokenSize } from '../../util/apiClient'
+import { postAbortableStream } from '../../util/apiClient'
 
 export const getCompletionStream = async (
   system: string,
   messages: Message[],
   model: string,
   formData: FormData,
+  userConsent: boolean,
   courseId?: string
 ) => {
   const data = {
@@ -19,38 +20,13 @@ export const getCompletionStream = async (
         ...messages,
       ],
       model,
+      userConsent,
     },
   }
 
   formData.set('data', JSON.stringify(data))
 
   return postAbortableStream('/ai/stream', formData)
-}
-
-export const getTokenUsage = async (
-  system: string,
-  messages: Message[],
-  model: string,
-  formData: FormData,
-  courseId?: string
-) => {
-  const data = {
-    courseId,
-    options: {
-      messages: [
-        {
-          role: 'system',
-          content: system,
-        },
-        ...messages,
-      ],
-      model,
-    },
-  }
-
-  formData.set('data', JSON.stringify(data))
-
-  return postCheckTokenSize('/ai/checktokensize', formData)
 }
 
 export const getCourseCompletionStream = async (
