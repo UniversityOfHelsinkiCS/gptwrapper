@@ -40,27 +40,21 @@ export const postAbortableStream = async (path: string, formData: FormData) => {
     throw new Error(message)
   }
 
-  const stream = response.body as unknown as ReadableStream
+  let tokenUsageAnalysis: {
+    tokenUsageWarning: boolean
+    message: string
+  } | null = null
+  let stream: ReadableStream<Uint8Array> | null = null
 
-  return { stream, controller }
-}
-
-export const postCheckTokenSize = async (path: string, formData: FormData) => {
-  const adminHeaders = {} as any
-  const adminLoggedInAs = localStorage.getItem('adminLoggedInAs')
-  if (adminLoggedInAs) {
-    adminHeaders['x-admin-logged-in-as'] = adminLoggedInAs
+  const contentType = response.headers.get('content-type')
+  if (contentType && contentType.includes('application/json')) {
+    tokenUsageAnalysis = await response.json()
+  } else {
+    const clonedResponse = response.clone()
+    stream = clonedResponse.body
   }
 
-  const response = await fetch(`${PUBLIC_URL}/api/${path}`, {
-    method: 'POST',
-    headers: adminHeaders,
-    body: formData,
-  })
-
-  const message = response.text() || 'Test'
-
-  return message
+  return { tokenUsageAnalysis, stream, controller }
 }
 
 export default apiClient
