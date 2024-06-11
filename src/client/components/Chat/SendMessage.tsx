@@ -22,7 +22,7 @@ const SendMessage = ({
 }: {
   message: string
   setMessage: SetState<string>
-  handleSend: () => void
+  handleSend: (userConsent: boolean) => void
   handleReset: () => void
   disabled: boolean
   resetDisabled: boolean
@@ -59,7 +59,9 @@ const SendMessage = ({
       }, 6000)
     }
   }
-
+  const handleOnClick = () => {
+    handleSend(false)
+  }
   return (
     <Box mb={2}>
       <Box mb={1}>
@@ -90,7 +92,7 @@ const SendMessage = ({
             {fileName}
           </Button>
         )}
-        <Button variant="contained" onClick={handleSend} disabled={disabled}>
+        <Button variant="contained" onClick={handleOnClick} disabled={disabled}>
           {t('send')}
         </Button>
         <Button component="label" variant="text" startIcon={<UploadFileIcon />}>
