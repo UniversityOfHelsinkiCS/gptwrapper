@@ -7,7 +7,7 @@ import { useParams } from 'react-router-dom'
 
 import { validModels } from '../../../config'
 import { Message, Prompt, SetState } from '../../types'
-import { getCompletionStream, getTokenUsage } from './util'
+import { getCompletionStream } from './util'
 import Banner from '../Banner'
 import SystemMessage from './SystemMessage'
 import Conversation from './Conversation'
@@ -71,10 +71,6 @@ const Chat = () => {
   const [tokenUsageWarning, setTokenUsageWarning] = useState('')
   const [tokenWarningVisible, setTokenWarningVisible] = useState(false)
 
-  const [fileState, setFileState] = useState<File>(null)
-  const [formDataState, setFormDataState] = useState<FormData>(null)
-  const [newMessageState, setNewMessageState] = useState<Message>(null)
-
   const { t } = useTranslation()
   if (statusLoading) return null
   const { usage, limit, models: courseModels } = userStatus
@@ -95,74 +91,14 @@ const Chat = () => {
   const handleCancel = () => {
     setFileName('')
     setMessage('')
+    setMessages(messages.slice(0, -1))
     setTokenWarningVisible(false)
   }
 
-  const handleSend = async (
-    formData: FormData = formDataState,
-    file: File = fileState,
-    newMessage: Message = newMessageState
-  ) => {
-    setMessages((prev) => [
-      ...prev,
-      { role: 'user', content: message + (file ? `\n\n${file.name}` : '') },
-    ])
+  const handleSend = async (userConsent: boolean) => {
+    const formData = new FormData()
 
-    setMessage('')
-
-    try {
-      const { stream, controller } = await getCompletionStream(
-        system,
-        messages.concat(newMessage),
-        model,
-        formData,
-        courseId
-      )
-      const reader = stream.getReader()
-      setStreamController(controller)
-
-      let content = ''
-      const decoder = new TextDecoder()
-      while (true) {
-        const { value, done } = await reader.read()
-
-        if (done) break
-
-        const text = decoder.decode(value)
-
-        setCompletion((prev) => prev + text)
-        content += text
-      }
-
-      setMessages((prev) => [...prev, { role: 'assistant', content }])
-    } catch (err: any) {
-      if (err?.name === 'AbortError') return
-      const error = err?.response?.data || err.message
-      if (error === 'Model maximum context reached' && fileName) {
-        enqueueSnackbar(t('error:tooLargeFile'), { variant: 'error' })
-      } else if (error === 'Error parsing file' && fileName) {
-        enqueueSnackbar(t('error:fileParsingError'), { variant: 'error' })
-      } else {
-        enqueueSnackbar(error, { variant: 'error' })
-      }
-    }
-
-    setStreamController(undefined)
-    setCompletion('')
-    refetchStatus()
-    inputFileRef.current.value = ''
-    setFileName('')
-  }
-
-  const handleContinue = () => {
-    handleSend()
-    setTokenWarningVisible(false)
-  }
-
-  const handleTokenCountandSend = async () => {
-    const newFormData = new FormData()
-
-    let newFile = inputFileRef.current.files[0] as File
+    let file = inputFileRef.current.files[0] as File
 
     const allowedFileTypes = [
       'text/plain',
@@ -174,42 +110,82 @@ const Chat = () => {
       'application/pdf',
     ]
 
-    if (newFile) {
-      if (allowedFileTypes.includes(newFile.type)) {
-        newFormData.append('file', newFile)
+    if (file) {
+      if (allowedFileTypes.includes(file.type)) {
+        formData.append('file', file)
       } else {
-        newFile = null
+        file = null
       }
     }
 
     const userMessage: Message = {
       role: 'user',
-      content: message + (newFile ? `${t('fileInfoPrompt')}` : ''),
+      content: message + (file ? `${t('fileInfoPrompt')}` : ''),
     }
 
-    try {
-      const tokenUsageAnalysis = await getTokenUsage(
+    setMessages((prev) => [
+      ...prev,
+      { role: 'user', content: message + (file ? `\n\n${file.name}` : '') },
+    ])
+
+    setMessage('')
+    const { tokenUsageAnalysis, stream, controller } =
+      await getCompletionStream(
         system,
         messages.concat(userMessage),
         model,
-        newFormData,
+        formData,
+        userConsent,
         courseId
       )
-      const tokenAnalysis = JSON.parse(tokenUsageAnalysis)
 
-      setFileState(newFile)
-      setFormDataState(newFormData)
-      setNewMessageState(userMessage)
-
-      if (tokenAnalysis.tokenConsumtionWarning) {
-        setTokenUsageWarning(tokenAnalysis.message)
-        setTokenWarningVisible(true)
-      } else {
-        handleSend(newFormData, newFile, userMessage)
-      }
-    } catch {
-      setTokenUsageWarning('Error Occured')
+    if (tokenUsageAnalysis && tokenUsageAnalysis.message) {
+      setTokenUsageWarning(tokenUsageAnalysis.message)
+      setTokenWarningVisible(true)
+      return
     }
+
+    try {
+      const reader = stream.getReader()
+      setStreamController(controller)
+
+      let content = ''
+      const decoder = new TextDecoder()
+
+      while (true) {
+        const { value, done } = await reader.read()
+        if (done) break
+
+        const text = decoder.decode(value)
+        setCompletion((prev) => prev + text)
+        content += text
+      }
+
+      setMessages((prev) => [...prev, { role: 'assistant', content }])
+    } catch (err: any) {
+      if (err?.name === 'AbortError') return
+
+      const error = err?.response?.data || err.message
+
+      if (error === 'Model maximum context reached' && fileName) {
+        enqueueSnackbar(t('error:tooLargeFile'), { variant: 'error' })
+      } else if (error === 'Error parsing file' && fileName) {
+        enqueueSnackbar(t('error:fileParsingError'), { variant: 'error' })
+      } else {
+        enqueueSnackbar(error, { variant: 'error' })
+      }
+    } finally {
+      setStreamController(undefined)
+      setCompletion('')
+      refetchStatus()
+      inputFileRef.current.value = ''
+      setFileName('')
+    }
+  }
+
+  const handleContinue = () => {
+    handleSend(true)
+    setTokenWarningVisible(false)
   }
 
   const handleReset = () => {
@@ -268,7 +244,7 @@ const Chat = () => {
         message={message}
         setMessage={setMessage}
         handleReset={handleReset}
-        handleSend={handleTokenCountandSend}
+        handleSend={handleSend}
         disabled={message.length === 0 || completion !== ''}
         resetDisabled={
           messages.length === 0 && system.length === 0 && message.length === 0
