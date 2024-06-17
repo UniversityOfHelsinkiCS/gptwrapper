@@ -99,7 +99,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   if (tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT && !userConsent) {
     return res.status(201).json({
       tokenConsumtionWarning: true,
-      message: `You are about to use ${tokenUsagePercentage}% of your allowed CurreChat usage`,
+      message: `You are about to use ${tokenUsagePercentage}% of your monthly CurreChat usage`,
     })
   }
 
