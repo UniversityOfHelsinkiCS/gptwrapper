@@ -90,6 +90,7 @@ const Chat = () => {
 
   const handleCancel = () => {
     setFileName('')
+    inputFileRef.current.value = ''
     setMessage('')
     setMessages(messages.slice(0, -1))
     setTokenWarningVisible(false)
