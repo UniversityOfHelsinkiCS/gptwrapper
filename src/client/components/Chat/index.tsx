@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop, no-constant-condition */
 import React, { useState, useRef, useEffect } from 'react'
-import { Alert, Box, Typography } from '@mui/material'
+import { Alert, Box, Typography, Slider } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
@@ -21,6 +21,21 @@ import PromptSelector from './PromptSelector'
 import TokenUsageWarning from './TokenUsageWarning'
 
 const chatPersistingEnabled = false // import.meta.env.VITE_CHAT_PERSISTING
+
+const sliderMarks = [
+  {
+    value: 0,
+    label: 'More precise',
+  },
+  {
+    value: 1,
+    label: 'More balanced',
+  },
+  {
+    value: 2,
+    label: 'More creative',
+  },
+]
 
 /**
  * Chat state persisting is not yet ready for production use, there are privacy concerns.
@@ -70,6 +85,7 @@ const Chat = () => {
   const [disallowedFileType, setDisallowedFileType] = useState('')
   const [tokenUsageWarning, setTokenUsageWarning] = useState('')
   const [tokenWarningVisible, setTokenWarningVisible] = useState(false)
+  const [modelTemperature, setModelTemperature] = useState(1)
 
   const { t } = useTranslation()
   if (statusLoading) return null
@@ -217,6 +233,10 @@ const Chat = () => {
     setActivePromptId(promptId)
   }
 
+  const handleSlider = (event: Event, newValue: number | number[]) => {
+    setModelTemperature(newValue as number)
+  }
+
   return (
     <Box>
       <Banner />
@@ -281,8 +301,19 @@ const Chat = () => {
         handleContinue={handleContinue}
         visible={tokenWarningVisible}
       />
-
-      <Box sx={{ mb: 6 }} />
+      <Box sx={{ my: 5 }}>
+        <Typography>Set model&#39;s temperature</Typography>
+        <Slider
+          onChange={handleSlider}
+          value={modelTemperature}
+          step={0.05}
+          valueLabelDisplay="auto"
+          marks={sliderMarks}
+          min={0}
+          max={2}
+          sx={{ width: '50%', mt: 2 }}
+        />
+      </Box>
       <Status
         model={model}
         setModel={handleSetModel}
