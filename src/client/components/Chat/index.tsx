@@ -22,21 +22,6 @@ import TokenUsageWarning from './TokenUsageWarning'
 
 const chatPersistingEnabled = false // import.meta.env.VITE_CHAT_PERSISTING
 
-const sliderMarks = [
-  {
-    value: 0,
-    label: 'More precise',
-  },
-  {
-    value: 0.5,
-    label: 'More balanced',
-  },
-  {
-    value: 1,
-    label: 'More creative',
-  },
-]
-
 /**
  * Chat state persisting is not yet ready for production use, there are privacy concerns.
  * It is therefore guarded by a feature flag only set in development.
@@ -302,17 +287,29 @@ const Chat = () => {
         handleContinue={handleContinue}
         visible={tokenWarningVisible}
       />
-      <Typography>{`Set model's temperature`}</Typography>
-      <Box sx={{ my: 4, px: 5.5 }}>
+      <Box sx={{ px: 4, my: 4, width: '50%' }}>
+        <Typography>{t('chat:temperature')}</Typography>
         <Slider
           onChange={handleSlider}
           value={modelTemperature}
           step={0.05}
           valueLabelDisplay="auto"
-          marks={sliderMarks}
+          marks={[
+            {
+              value: 0,
+              label: t('chat:preciseTemperature'),
+            },
+            {
+              value: 0.5,
+              label: t('chat:balancedTemperature'),
+            },
+            {
+              value: 1,
+              label: t('chat:creativeTemperature'),
+            },
+          ]}
           min={0}
           max={1}
-          sx={{ width: '50%' }}
         />
       </Box>
       <Status

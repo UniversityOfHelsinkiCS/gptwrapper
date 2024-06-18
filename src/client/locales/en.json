@@ -46,7 +46,11 @@
     "message": "Prompt",
     "messagePlaceholder": "Write your message here",
     "conversation": "Conversation",
-    "stop": "Stop"
+    "stop": "Stop",
+    "temperature": "Adjust the model's temperature",
+    "preciseTemperature": "More precise",
+    "balancedTemperature": "More balanced",
+    "creativeTemperature": "More creative"
   },
   "email": {
     "save": "Save as email",

@@ -45,7 +45,11 @@
     "message": "Kehote",
     "messagePlaceholder": "Kirjoita viestisi tähän",
     "conversation": "Keskustelu",
-    "stop": "Keskeytä"
+    "stop": "Keskeytä",
+    "temperature": "Säädä kielimallin tarkkuutta",
+    "preciseTemperature": "Tarkempi",
+    "balancedTemperature": "Tasapainoisempi",
+    "creativeTemperature": "Luovempi"
   },
   "email": {
     "save": "Tallenna sähköpostina",
