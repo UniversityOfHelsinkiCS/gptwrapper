@@ -65,7 +65,11 @@ courseRouter.get('/:id', async (req, res) => {
 
 courseRouter.put('/:id', async (req, res) => {
   const { id } = req.params
-  const { activityPeriod } = req.body as { activityPeriod: ActivityPeriod }
+  const { activityPeriod, model, usageLimit } = req.body as {
+    activityPeriod: ActivityPeriod
+    model: string
+    usageLimit: number
+  }
 
   const chatInstance = await ChatInstance.findOne({
     where: { courseId: id },
@@ -74,6 +78,9 @@ courseRouter.put('/:id', async (req, res) => {
   if (!chatInstance) throw new Error('ChatInstance not found')
 
   chatInstance.activityPeriod = activityPeriod
+  chatInstance.model = model
+  chatInstance.usageLimit = usageLimit
+
   await chatInstance.save()
 
   return res.send(chatInstance)
