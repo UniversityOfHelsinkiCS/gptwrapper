@@ -55,6 +55,7 @@ const getMockCompletionEvents: () => Promise<
 export const getCompletionEvents = async ({
   model,
   messages,
+  options,
 }: AzureOptions) => {
   const deploymentId = validModels.find((m) => m.name === model)?.deployment
 
@@ -63,7 +64,11 @@ export const getCompletionEvents = async ({
   if (deploymentId === 'mock') return getMockCompletionEvents()
 
   try {
-    const events = await client.streamChatCompletions(deploymentId, messages)
+    const events = await client.streamChatCompletions(
+      deploymentId,
+      messages,
+      options
+    )
 
     return events
   } catch (error: any) {
