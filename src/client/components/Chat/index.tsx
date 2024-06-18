@@ -28,11 +28,11 @@ const sliderMarks = [
     label: 'More precise',
   },
   {
-    value: 1,
+    value: 0.5,
     label: 'More balanced',
   },
   {
-    value: 2,
+    value: 1,
     label: 'More creative',
   },
 ]
@@ -85,7 +85,7 @@ const Chat = () => {
   const [disallowedFileType, setDisallowedFileType] = useState('')
   const [tokenUsageWarning, setTokenUsageWarning] = useState('')
   const [tokenWarningVisible, setTokenWarningVisible] = useState(false)
-  const [modelTemperature, setModelTemperature] = useState(1)
+  const [modelTemperature, setModelTemperature] = useState(0.5)
 
   const { t } = useTranslation()
   if (statusLoading) return null
@@ -152,6 +152,7 @@ const Chat = () => {
         model,
         formData,
         userConsent,
+        modelTemperature,
         courseId
       )
 
@@ -301,8 +302,8 @@ const Chat = () => {
         handleContinue={handleContinue}
         visible={tokenWarningVisible}
       />
-      <Box sx={{ my: 5 }}>
-        <Typography>Set model&#39;s temperature</Typography>
+      <Typography>{`Set model's temperature`}</Typography>
+      <Box sx={{ my: 4, px: 5.5 }}>
         <Slider
           onChange={handleSlider}
           value={modelTemperature}
@@ -310,8 +311,8 @@ const Chat = () => {
           valueLabelDisplay="auto"
           marks={sliderMarks}
           min={0}
-          max={2}
-          sx={{ width: '50%', mt: 2 }}
+          max={1}
+          sx={{ width: '50%' }}
         />
       </Box>
       <Status
