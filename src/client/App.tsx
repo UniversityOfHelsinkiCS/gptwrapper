@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router-dom'
 import { SnackbarProvider } from 'notistack'
+import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
 import { ThemeProvider } from '@mui/material/styles'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { fi } from 'date-fns/locale'
@@ -65,6 +66,10 @@ const App = () => {
   const location = useLocation()
 
   const { user, isLoading } = useCurrentUser()
+
+  useEffect(() => {
+    initShibbolethPinger()
+  }, [])
 
   const onNoAccessPage = location.pathname.includes('/noaccess')
 
