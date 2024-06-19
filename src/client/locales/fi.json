@@ -107,6 +107,7 @@
     "curreExpired": "Kurssi on päättynyt",
     "enableCurre": "Ota CurreChat käyttöön",
     "enableCurreModalTitle": "Ota CurreChat käyttöön kurssille {{name}}?",
-    "enableCurreModalText": "Kurssille asetetaan oletusasetuksena {{defaultModel}} -kielimalli sekä {{defaultTokenLimit}} tokenin käyttöraja per opiskelija. CurreChat on kurssilla käytössä {{activityPeriod}} (kurssin käynnissäoloaika + 1 kk). Voit muokata näitä asetuksia myöhemmin."
+    "enableCurreModalText": "Kurssille asetetaan oletusasetuksena {{defaultModel}} -kielimalli sekä {{defaultTokenLimit}} tokenin käyttöraja per opiskelija. CurreChat on kurssilla käytössä {{activityPeriod}} (kurssin käynnissäoloaika + 1 kk). Voit muokata näitä asetuksia myöhemmin.",
+    "courseUpdated": "Kurssi päivitetty"
   }
 }

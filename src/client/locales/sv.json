@@ -96,5 +96,8 @@
     "reset": "Reset",
     "faculties": "Faculties",
     "users": "Users"
+  },
+  "course": {
+    "courseUpdated": "Course updated"
   }
 }

@@ -42,7 +42,7 @@ const EditCourseForm = forwardRef(
         endDate: format(endDate, 'yyyy-MM-dd'),
       }
 
-      enqueueSnackbar('Activity period updated', { variant: 'success' })
+      enqueueSnackbar(t('course:courseUpdated'), { variant: 'success' })
       try {
         mutation.mutate({ activityPeriod, model, usageLimit })
         setOpen(false)
