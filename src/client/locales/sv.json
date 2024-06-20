@@ -98,6 +98,9 @@
     "users": "Users"
   },
   "course": {
-    "courseUpdated": "Course updated"
+    "courseUpdated": "Course updated",
+    "closeToMaxTokenLimit": "Students close to the token limit",
+    "noStudentsCloseToMaxTokenLimit": "No students",
+    "editCourse": "Edit course"
   }
 }

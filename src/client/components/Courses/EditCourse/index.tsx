@@ -28,6 +28,7 @@ import {
 import { formatDate } from '../util'
 import Prompt from './Prompt'
 import EditCourseForm from './EditCourseForm'
+import MaxTokenUsageStudents from './MaxTokenUsageStudents'
 
 const Message = ({
   message,
@@ -168,7 +169,7 @@ const Course = () => {
             startIcon={<Edit />}
             onClick={() => setActivityPeriodFormOpen(true)}
           >
-            Muokkaa kurssin tietoja
+            {t('course:editCourse')}
           </Button>
 
           <Button endIcon={<OpenInNew />}>
@@ -190,6 +191,8 @@ const Course = () => {
           </Box>
         </Paper>
       </Box>
+
+      <MaxTokenUsageStudents courseId={id as string} />
 
       {prompts.map((prompt) => (
         <Prompt key={prompt.id} prompt={prompt} handleDelete={handleDelete} />
