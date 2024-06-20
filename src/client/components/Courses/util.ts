@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 
-import { ActivityPeriod, Course } from '../../types'
+import { ActivityPeriod, ChatInstanceUsage, Course } from '../../types'
 
 export const formatDate = (activityPeriod?: ActivityPeriod) => {
   if (!activityPeriod) return ''
@@ -20,4 +20,17 @@ export const sortCourses = (a: Course, b: Course) => {
     new Date(course.activityPeriod.startDate).getTime()
 
   return getStartTime(b) - getStartTime(a)
+}
+
+export const filterUsages = (
+  maxTokenLimit: number,
+  usages: ChatInstanceUsage[]
+) => {
+  const limit = maxTokenLimit * 0.9
+
+  const closeToMaxTokenLimit = usages.filter(
+    (usage) => usage.usageCount >= limit
+  )
+
+  return closeToMaxTokenLimit
 }
