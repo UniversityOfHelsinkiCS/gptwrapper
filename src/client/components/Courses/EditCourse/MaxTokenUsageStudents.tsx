@@ -1,5 +1,14 @@
 import React from 'react'
-import { Box, Paper, Typography } from '@mui/material'
+import {
+  Button,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Typography,
+} from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import useCourseUsage from '../../../hooks/useCourseStudents'
 import { filterUsages } from '../util'
@@ -27,11 +36,25 @@ const MaxTokenUsageStudents = ({ courseId }: { courseId: string }) => {
       {filteredUsages.length === 0 ? (
         <Typography>{t('course:noStudentsCloseToMaxTokenLimit')}</Typography>
       ) : (
-        filteredUsages.map((usage) => (
-          <Box key={usage.id} sx={{ m: 1 }}>
-            {usage.user.username} {usage.usageCount}
-          </Box>
-        ))
+        <TableContainer>
+          <Table>
+            <TableBody>
+              {filteredUsages.map(({ id, usageCount, user }) => (
+                <TableRow key={id}>
+                  <TableCell component="th" scope="row">
+                    <Typography>{user.username}</Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Typography>{usageCount}</Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Button color="error">{t('admin:reset')}</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
     </Paper>
   )
