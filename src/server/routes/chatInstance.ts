@@ -2,7 +2,7 @@ import express from 'express'
 import { Op } from 'sequelize'
 import { addMonths } from 'date-fns'
 
-import { ChatInstance } from '../db/models'
+import { ChatInstance, User, UserChatInstanceUsage } from '../db/models'
 import { DEFAULT_MODEL_ON_ENABLE, DEFAULT_TOKEN_LIMIT } from '../../config'
 
 const chatInstanceRouter = express.Router()
@@ -60,6 +60,46 @@ chatInstanceRouter.post('/:id/enable', async (req, res) => {
   await chatInstance.save()
 
   return res.send(chatInstance)
+})
+
+chatInstanceRouter.get('/:id/usages', async (req, res) => {
+  const { id } = req.params
+
+  const usage = await UserChatInstanceUsage.findAll({
+    where: {
+      chatInstanceId: id,
+    },
+    include: [
+      {
+        model: User,
+        as: 'user',
+      },
+      {
+        model: ChatInstance,
+        as: 'chatInstance',
+      },
+    ],
+  })
+
+  if (usage.length === 0)
+    return res.status(404).send('ChatInstanceUsages not found')
+
+  return res.status(200).send(usage)
+})
+
+chatInstanceRouter.delete('/usage/:id', async (req, res) => {
+  const { id } = req.params
+
+  const chatInstanceUsage = await UserChatInstanceUsage.findByPk(id)
+
+  if (!chatInstanceUsage)
+    return res.status(404).send('ChatInstance usage not found')
+
+  chatInstanceUsage.usageCount = 0
+
+  chatInstanceUsage.save()
+
+  return res.status(204).send()
 })
 
 export default chatInstanceRouter
