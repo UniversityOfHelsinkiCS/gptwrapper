@@ -6,6 +6,8 @@ import apiClient from '../util/apiClient'
 
 interface UpdatedCourseData {
   activityPeriod: ActivityPeriod
+  model: string
+  usageLimit: number
 }
 
 export const useEditCourseMutation = (id: string) => {

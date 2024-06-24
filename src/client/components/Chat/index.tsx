@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop, no-constant-condition */
 import React, { useState, useRef, useEffect } from 'react'
-import { Alert, Box, Typography } from '@mui/material'
+import { Alert, Box, Typography, Slider } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
@@ -64,12 +64,15 @@ const Chat = () => {
   const inputFileRef = useRef<HTMLInputElement>(null)
   const [fileName, setFileName] = useState<string>('')
   const [completion, setCompletion] = useState('')
-  const [model, setModel] = useState(localStorage.getItem('model') ?? 'gpt-4')
+  const [model, setModel] = useState(
+    localStorage.getItem('model') ?? 'gpt-3.5-turbo'
+  )
   const [streamController, setStreamController] = useState<AbortController>()
   const [alertOpen, setAlertOpen] = useState(false)
   const [disallowedFileType, setDisallowedFileType] = useState('')
   const [tokenUsageWarning, setTokenUsageWarning] = useState('')
   const [tokenWarningVisible, setTokenWarningVisible] = useState(false)
+  const [modelTemperature, setModelTemperature] = useState(0.5)
 
   const { t } = useTranslation()
   if (statusLoading) return null
@@ -143,6 +146,7 @@ const Chat = () => {
         model,
         formData,
         userConsent,
+        modelTemperature,
         courseId
       )
 
@@ -224,6 +228,10 @@ const Chat = () => {
     setActivePromptId(promptId)
   }
 
+  const handleSlider = (event: Event, newValue: number | number[]) => {
+    setModelTemperature(newValue as number)
+  }
+
   return (
     <Box>
       <Banner />
@@ -288,8 +296,31 @@ const Chat = () => {
         handleContinue={handleContinue}
         visible={tokenWarningVisible}
       />
-
-      <Box sx={{ mb: 6 }} />
+      <Box sx={{ px: 4, my: 4, width: '50%' }}>
+        <Typography>{t('chat:temperature')}</Typography>
+        <Slider
+          onChange={handleSlider}
+          value={modelTemperature}
+          step={0.05}
+          valueLabelDisplay="auto"
+          marks={[
+            {
+              value: 0,
+              label: t('chat:preciseTemperature'),
+            },
+            {
+              value: 0.5,
+              label: t('chat:balancedTemperature'),
+            },
+            {
+              value: 1,
+              label: t('chat:creativeTemperature'),
+            },
+          ]}
+          min={0}
+          max={1}
+        />
+      </Box>
       <Status
         model={model}
         setModel={handleSetModel}

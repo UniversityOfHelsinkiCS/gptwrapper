@@ -1,6 +1,6 @@
 import { Request } from 'express'
 import OpenAI from 'openai'
-import { ChatRequestMessage } from '@azure/openai'
+import { ChatRequestMessage, GetChatCompletionsOptions } from '@azure/openai'
 
 export interface User {
   id: string
@@ -48,6 +48,7 @@ export type StreamingOptions =
 export type AzureOptions = {
   model: string
   messages: ChatRequestMessage[]
+  options: GetChatCompletionsOptions
 }
 
 interface RequestBody {

@@ -46,7 +46,11 @@
     "message": "Prompt",
     "messagePlaceholder": "Write your message here",
     "conversation": "Conversation",
-    "stop": "Stop"
+    "stop": "Stop",
+    "temperature": "Adjust the model's temperature",
+    "preciseTemperature": "More precise",
+    "balancedTemperature": "More balanced",
+    "creativeTemperature": "More creative"
   },
   "email": {
     "save": "Save as email",
@@ -104,6 +108,10 @@
     "curreExpired": "The course is over",
     "enableCurre": "Enable CurreChat",
     "enableCurreModalTitle": "Enable CurreChat on the course {{name}}?",
-    "enableCurreModalText": "The course will by default use {{defaultModel}} and have a token usage limit of {{defaultTokenLimit}} per student. CurreChat will be available between {{activityPeriod}} (course running time + 1 month). You can edit these settings later."
+    "enableCurreModalText": "The course will by default use {{defaultModel}} and have a token usage limit of {{defaultTokenLimit}} per student. CurreChat will be available between {{activityPeriod}} (course running time + 1 month). You can edit these settings later.",
+    "courseUpdated": "Course updated",
+    "closeToMaxTokenLimit": "Students close to the token limit",
+    "noStudentsCloseToMaxTokenLimit": "No students",
+    "editCourse": "Edit course"
   }
 }

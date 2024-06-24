@@ -66,6 +66,8 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   const { model, userConsent } = options
   const { user } = req
 
+  options.options = { temperature: options.modelTemperature }
+
   if (!user.id) return res.status(401).send('Unauthorized')
 
   const usageAllowed = courseId
@@ -104,13 +106,6 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   }
 
   const contextLimit = getModelContextLimit(model)
-
-  console.log({
-    model,
-    tokenCount,
-    contextLimit,
-    courseId,
-  })
 
   if (tokenCount > contextLimit) {
     logger.info('Maximum context reached')

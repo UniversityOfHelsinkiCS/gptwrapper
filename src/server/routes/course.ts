@@ -2,7 +2,7 @@ import express from 'express'
 import { Op } from 'sequelize'
 
 import { ActivityPeriod, RequestWithUser } from '../types'
-import { ChatInstance } from '../db/models'
+import { ChatInstance, User, UserChatInstanceUsage } from '../db/models'
 import { getOwnCourses } from '../chatInstances/access'
 
 const courseRouter = express.Router()
@@ -52,6 +52,35 @@ courseRouter.get('/user', async (req, res) => {
   return res.send({ courses: coursesWithExtra, count })
 })
 
+courseRouter.get('/usage/:courseId', async (req: RequestWithUser, res: any) => {
+  const { user } = req
+  const { courseId } = req.params
+
+  if (!user.isAdmin && !user.ownCourses?.includes(courseId))
+    throw new Error('Unauthorized')
+
+  const usage = await UserChatInstanceUsage.findAll({
+    where: {
+      chatInstanceId: courseId,
+    },
+    include: [
+      {
+        model: User,
+        as: 'user',
+      },
+      {
+        model: ChatInstance,
+        as: 'chatInstance',
+      },
+    ],
+  })
+
+  if (usage.length === 0)
+    return res.status(404).send('ChatInstanceUsages not found')
+
+  return res.status(200).send(usage)
+})
+
 courseRouter.get('/:id', async (req, res) => {
   const { id } = req.params
 
@@ -65,7 +94,11 @@ courseRouter.get('/:id', async (req, res) => {
 
 courseRouter.put('/:id', async (req, res) => {
   const { id } = req.params
-  const { activityPeriod } = req.body as { activityPeriod: ActivityPeriod }
+  const { activityPeriod, model, usageLimit } = req.body as {
+    activityPeriod: ActivityPeriod
+    model: string
+    usageLimit: number
+  }
 
   const chatInstance = await ChatInstance.findOne({
     where: { courseId: id },
@@ -74,6 +107,9 @@ courseRouter.put('/:id', async (req, res) => {
   if (!chatInstance) throw new Error('ChatInstance not found')
 
   chatInstance.activityPeriod = activityPeriod
+  chatInstance.model = model
+  chatInstance.usageLimit = usageLimit
+
   await chatInstance.save()
 
   return res.send(chatInstance)

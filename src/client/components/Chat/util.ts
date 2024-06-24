@@ -7,6 +7,7 @@ export const getCompletionStream = async (
   model: string,
   formData: FormData,
   userConsent: boolean,
+  modelTemperature: number,
   courseId?: string
 ) => {
   const data = {
@@ -21,6 +22,7 @@ export const getCompletionStream = async (
       ],
       model,
       userConsent,
+      modelTemperature,
     },
   }
 

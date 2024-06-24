@@ -44,7 +44,11 @@
     "message": "Uppmaning",
     "messagePlaceholder": "Skriv ditt meddelande här",
     "conversation": "Keskustelu",
-    "stop": "Stoppa"
+    "stop": "Stoppa",
+    "temperature": "Adjust the model's temperature",
+    "preciseTemperature": "More precise",
+    "balancedTemperature": "More balanced",
+    "creativeTemperature": "More creative"
   },
   "email": {
     "save": "Spara som e-post",
@@ -92,5 +96,11 @@
     "reset": "Reset",
     "faculties": "Faculties",
     "users": "Users"
+  },
+  "course": {
+    "courseUpdated": "Course updated",
+    "closeToMaxTokenLimit": "Students close to the token limit",
+    "noStudentsCloseToMaxTokenLimit": "No students",
+    "editCourse": "Edit course"
   }
 }

@@ -17,7 +17,6 @@ import { useParams, Link } from 'react-router-dom'
 
 import { PUBLIC_URL } from '../../../../config'
 import { SetState, Message as MessageType } from '../../../types'
-import EditActivityPeriod from './EditActivityPeriod'
 import SystemMessage from '../../Chat/SystemMessage'
 import Conversation from '../../Chat/Conversation'
 import usePrompts from '../../../hooks/usePrompts'
@@ -28,6 +27,8 @@ import {
 } from '../../../hooks/usePromptMutation'
 import { formatDate } from '../util'
 import Prompt from './Prompt'
+import EditCourseForm from './EditCourseForm'
+import MaxTokenUsageStudents from './MaxTokenUsageStudents'
 
 const Message = ({
   message,
@@ -168,7 +169,7 @@ const Course = () => {
             startIcon={<Edit />}
             onClick={() => setActivityPeriodFormOpen(true)}
           >
-            {t('editActivityPeriod')}
+            {t('course:editCourse')}
           </Button>
 
           <Button endIcon={<OpenInNew />}>
@@ -190,6 +191,8 @@ const Course = () => {
           </Box>
         </Paper>
       </Box>
+
+      <MaxTokenUsageStudents courseId={id as string} />
 
       {prompts.map((prompt) => (
         <Prompt key={prompt.id} prompt={prompt} handleDelete={handleDelete} />
@@ -243,10 +246,7 @@ const Course = () => {
         open={activityPeriodFormOpen}
         onClose={() => setActivityPeriodFormOpen(false)}
       >
-        <EditActivityPeriod
-          course={course}
-          setOpen={setActivityPeriodFormOpen}
-        />
+        <EditCourseForm course={course} setOpen={setActivityPeriodFormOpen} />
       </Modal>
     </Box>
   )
