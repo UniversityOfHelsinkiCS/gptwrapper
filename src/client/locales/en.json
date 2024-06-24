@@ -112,6 +112,7 @@
     "courseUpdated": "Course updated",
     "closeToMaxTokenLimit": "Students close to the token limit",
     "noStudentsCloseToMaxTokenLimit": "No students",
-    "editCourse": "Edit course"
+    "editCourse": "Edit course",
+    "usageResetSuccess": "Usage reset successfully"
   }
 }

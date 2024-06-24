@@ -31,7 +31,7 @@ const MaxTokenUsageStudents = ({ courseId }: { courseId: string }) => {
   const onResetUsage = (id: string) => {
     try {
       resetUsage.mutate(id)
-      enqueueSnackbar('Usage reset successfully', { variant: 'success' })
+      enqueueSnackbar(t('course:usageResetSuccess'), { variant: 'success' })
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     }

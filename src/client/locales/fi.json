@@ -111,6 +111,7 @@
     "courseUpdated": "Kurssi päivitetty",
     "closeToMaxTokenLimit": "Tokeneiden käyttörajaa lähestyvät opiskelijat",
     "noStudentsCloseToMaxTokenLimit": "Ei näytettäviä opiskelijoita",
-    "editCourse": "Muokkaa kurssin tietoja"
+    "editCourse": "Muokkaa kurssin tietoja",
+    "usageResetSuccess": "Käyttö nollattu onnistuneesti"
   }
 }
