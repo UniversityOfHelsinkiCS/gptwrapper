@@ -119,21 +119,27 @@ const Chat = () => {
       }
     }
 
-    const userMessage: Message = {
-      role: 'user',
-      content: message + (file ? `${t('fileInfoPrompt')}` : ''),
+    if (!userConsent) {
+      setMessages((prev) => [
+        ...prev,
+        { role: 'user', content: message + (file ? `\n\n${file.name}` : '') },
+      ])
     }
-
-    setMessages((prev) => [
-      ...prev,
-      { role: 'user', content: message + (file ? `\n\n${file.name}` : '') },
-    ])
 
     setMessage('')
     const { tokenUsageAnalysis, stream, controller } =
       await getCompletionStream(
         system,
-        messages.concat(userMessage),
+        messages.concat(
+          userConsent
+            ? []
+            : [
+                {
+                  role: 'user',
+                  content: message + (file ? `${t('fileInfoPrompt')}` : ''),
+                },
+              ]
+        ),
         model,
         formData,
         userConsent,
