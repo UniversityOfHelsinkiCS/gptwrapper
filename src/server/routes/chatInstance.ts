@@ -62,6 +62,20 @@ chatInstanceRouter.post('/:id/enable', async (req, res) => {
   return res.send(chatInstance)
 })
 
+chatInstanceRouter.post('/:id/disable', async (req, res) => {
+  const { id } = req.params
+
+  const chatInstance = await ChatInstance.findByPk(id)
+
+  if (!chatInstance) return res.status(404).send('ChatInstance not found')
+
+  chatInstance.usageLimit = 0
+
+  await chatInstance.save()
+
+  return res.send(chatInstance)
+})
+
 chatInstanceRouter.get('/:id/usages', async (req, res) => {
   const { id } = req.params
 
