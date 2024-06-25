@@ -66,7 +66,7 @@ const Course = ({
                 sx={{ mt: 'auto' }}
                 onClick={() => disableMutation.mutate({ id: course.id })}
               >
-                Disable
+                {t('course:disableCurre')}
               </Button>
             </>
           )}
