@@ -20,6 +20,7 @@ import useUserCourses, { CoursesViewCourse } from '../../hooks/useUserCourses'
 import { formatDate } from './util'
 import { useEnableCourse } from './useEnableCourse'
 import { DEFAULT_MODEL_ON_ENABLE, DEFAULT_TOKEN_LIMIT } from '../../../config'
+import { useDisableCourse } from './useDisableCourse'
 
 const Course = ({
   course,
@@ -29,6 +30,8 @@ const Course = ({
   onEnable: (course: CoursesViewCourse) => void
 }) => {
   const { t } = useTranslation()
+  const disableMutation = useDisableCourse()
+
   if (!course) return null
 
   const { name, courseId, activityPeriod, isActive, isExpired } = course
@@ -55,7 +58,18 @@ const Course = ({
         </Box>
 
         <Box display="flex" flexDirection="column" alignItems="end">
-          {isActive && <Typography>{t('course:curreEnabled')}</Typography>}
+          {isActive && (
+            <>
+              <Typography>{t('course:curreEnabled')}</Typography>
+              <Button
+                variant="contained"
+                sx={{ mt: 'auto' }}
+                onClick={() => disableMutation.mutate({ id: course.id })}
+              >
+                Disable
+              </Button>
+            </>
+          )}
           {isExpired && <Typography>{t('course:curreExpired')}</Typography>}
           {!isActive && !isExpired && (
             <>
