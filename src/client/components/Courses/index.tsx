@@ -44,14 +44,10 @@ const Course = ({
       >
         <Box mr="auto">
           <Typography variant="body1">{formatDate(activityPeriod)}</Typography>
-          {isActive ? (
-            <Link to={`/courses/${courseId}`} component={RouterLink}>
-              <Typography variant="h6">{name}</Typography>
-            </Link>
-          ) : (
-            <Typography variant="h6">{name}</Typography>
-          )}
 
+          <Link to={`/courses/${courseId}`} component={RouterLink}>
+            <Typography variant="h6">{name}</Typography>
+          </Link>
           <Typography variant="body2">
             <code>{courseId}</code>
           </Typography>
