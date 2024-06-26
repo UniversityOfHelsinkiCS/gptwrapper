@@ -106,6 +106,7 @@
     "curreEnabled": "CurreChat is enabled for the course",
     "curreNotEnabled": "CurreChat is not enabled for the course",
     "curreExpired": "The course is over",
+    "curreNotOpen": "Students cannot access this course",
     "disableCurre": "Disable CurreChat",
     "enableCurre": "Enable CurreChat",
     "enableCurreModalTitle": "Enable CurreChat on the course {{name}}?",

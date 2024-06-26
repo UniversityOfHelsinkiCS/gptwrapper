@@ -9,6 +9,7 @@ import {
   Checkbox,
   FormControlLabel,
   Input,
+  Alert,
 } from '@mui/material'
 import { OpenInNew, Edit, FileCopyOutlined } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
@@ -143,6 +144,10 @@ const Course = () => {
     enqueueSnackbar(t('linkCopied'), { variant: 'info' })
   }
 
+  const isCourseActive =
+    course.usageLimit > 0 &&
+    Date.parse(course.activityPeriod.endDate) > Date.now()
+
   return (
     <Box
       sx={{
@@ -151,6 +156,11 @@ const Course = () => {
         padding: '5%',
       }}
     >
+      {!isCourseActive && (
+        <Alert severity="warning">
+          <Typography variant="h6">{t('course:curreNotOpen')}</Typography>
+        </Alert>
+      )}
       <Box display="flex">
         <Paper
           variant="outlined"
