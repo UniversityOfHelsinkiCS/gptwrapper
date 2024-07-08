@@ -22,20 +22,6 @@ import { formatDate } from './util'
 import { Course as CourseType } from '../../types'
 import { DEFAULT_MODEL_ON_ENABLE, DEFAULT_TOKEN_LIMIT } from '../../../config'
 
-const styles = {
-  title: {
-    fontSize: '1.1rem',
-    fontWeight: (theme) => theme.typography.fontWeightMedium,
-  },
-  details: {
-    flexDirection: 'column',
-    padding: 0,
-  },
-  icon: {
-    marginRight: (theme) => theme.spacing(1),
-  },
-}
-
 const Course = ({
   course,
   onEnable,
@@ -103,6 +89,8 @@ const Course = ({
 const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
   const { t } = useTranslation()
 
+  if (!courseUnits) return null
+
   const enableMutation = useEnableCourse()
 
   const [courseToEnable, setCourseToEnable] = useState<CourseType>(null)
@@ -123,7 +111,7 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
 
   return (
     <>
-      <Box sx={styles.details}>
+      <Box>
         {courseUnits.length === 0 && (
           <Box p={2}>
             <Typography color="textSecondary" align="center">

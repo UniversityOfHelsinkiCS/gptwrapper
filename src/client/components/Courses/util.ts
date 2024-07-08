@@ -1,6 +1,7 @@
 import { format } from 'date-fns'
 
 import { ActivityPeriod, ChatInstanceUsage, Course } from '../../types'
+import { CoursesViewCourse } from '../../hooks/useUserCourses'
 
 export const formatDate = (activityPeriod?: ActivityPeriod) => {
   if (!activityPeriod) return ''
@@ -33,4 +34,17 @@ export const filterUsages = (
   )
 
   return closeToMaxTokenLimit
+}
+
+export const getGroupedCourses = (courses: CoursesViewCourse[]) => {
+  const normalizedCourseUnits = courses ?? []
+
+  const curreEnabled = normalizedCourseUnits.filter((course) => course.isActive)
+
+  const ended = normalizedCourseUnits.filter((course) => course.isExpired)
+
+  return {
+    curreEnabled,
+    ended,
+  }
 }

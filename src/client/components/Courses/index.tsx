@@ -4,6 +4,7 @@ import { Box, Tab, Tabs, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import useUserCourses from '../../hooks/useUserCourses'
 import CourseList from './CourseList'
+import { getGroupedCourses } from './util'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -31,6 +32,8 @@ const Courses = () => {
     setValue(newValue)
   }
 
+  const { curreEnabled, ended } = getGroupedCourses(courses)
+
   return (
     <>
       <Box display="flex" gap={2}>
@@ -44,17 +47,17 @@ const Courses = () => {
         aria-label="basic tabs example"
       >
         <Tab label="Kaikki" />
-        <Tab label="CurreChat" />
+        <Tab label="CurreChat käytössä" />
         <Tab label="Päättyneet" />
       </Tabs>
       <CustomTabPanel value={value} index={0}>
         <CourseList courseUnits={courses} />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
-        <CourseList courseUnits={courses} />
+        <CourseList courseUnits={curreEnabled} />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
-        <CourseList courseUnits={courses} />
+        <CourseList courseUnits={ended} />
       </CustomTabPanel>
     </>
   )
