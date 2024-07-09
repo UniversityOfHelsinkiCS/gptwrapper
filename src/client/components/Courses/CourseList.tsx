@@ -29,12 +29,14 @@ const Course = ({
   course: CoursesViewCourse
   onEnable: (course: CoursesViewCourse) => void
 }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const disableMutation = useDisableCourse()
 
   if (!course) return null
 
   const { name, courseId, activityPeriod, isActive, isExpired } = course
+
+  const { language } = i18n
 
   return (
     <Box mb="1rem">
@@ -46,7 +48,7 @@ const Course = ({
           <Typography variant="body1">{formatDate(activityPeriod)}</Typography>
 
           <Link to={`/courses/${courseId}`} component={RouterLink}>
-            <Typography variant="h6">{name}</Typography>
+            <Typography variant="h6">{name[language]}</Typography>
           </Link>
 
           <Typography variant="body2">
@@ -87,7 +89,7 @@ const Course = ({
 }
 
 const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const enableMutation = useEnableCourse()
   const [courseToEnable, setCourseToEnable] = useState<CourseType>(null)
 
@@ -106,6 +108,8 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
   const activityPeriodString = courseToEnable
     ? formatDate(defaultActivityPeriod)
     : null
+
+  const { language } = i18n
 
   return (
     <>
@@ -130,7 +134,9 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
         onClose={() => setCourseToEnable(null)}
       >
         <DialogTitle>
-          {t('course:enableCurreModalTitle', { name: courseToEnable?.name })}
+          {t('course:enableCurreModalTitle', {
+            name: courseToEnable?.name[language],
+          })}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>

@@ -6,7 +6,7 @@ import {
   DataTypes,
 } from 'sequelize'
 
-import { ActivityPeriod } from '../../types'
+import { ActivityPeriod, Locales } from '../../types'
 import { sequelize } from '../connection'
 
 class ChatInstance extends Model<
@@ -15,7 +15,7 @@ class ChatInstance extends Model<
 > {
   declare id: CreationOptional<string>
 
-  declare name: string
+  declare name: Locales
 
   declare description: string
 
@@ -39,9 +39,8 @@ ChatInstance.init(
       defaultValue: DataTypes.UUIDV4,
     },
     name: {
-      type: DataTypes.STRING,
+      type: DataTypes.JSONB,
       allowNull: false,
-      defaultValue: 'Untitled',
     },
     description: {
       type: DataTypes.STRING,

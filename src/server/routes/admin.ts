@@ -33,7 +33,7 @@ adminRouter.post('/chatinstances', async (req, res) => {
   if (!course) return res.status(404).send('Invalid course id')
 
   const newChatInstance = await ChatInstance.create({
-    name,
+    name: { en: name, fi: name, sv: name },
     description,
     model,
     usageLimit,
@@ -55,13 +55,13 @@ interface UpdatedChatInstanceData {
 adminRouter.put('/chatinstances/:id', async (req, res) => {
   const { id } = req.params
   const data = req.body as UpdatedChatInstanceData
-  const { name, description, model, usageLimit, courseId } = data
+  const { description, model, usageLimit, courseId, name } = data
 
   const chatInstance = await ChatInstance.findByPk(id)
 
   if (!chatInstance) return res.status(404).send('ChatInstance not found')
 
-  chatInstance.name = name
+  chatInstance.name = { en: name, fi: name, sv: name }
   chatInstance.description = description
   chatInstance.model = model
   chatInstance.usageLimit = usageLimit

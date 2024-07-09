@@ -10,6 +10,7 @@ import { Button, TextField } from '@mui/material'
 import TableRow from '@mui/material/TableRow'
 import { debounce } from 'lodash'
 import Paper from '@mui/material/Paper'
+import { useTranslation } from 'react-i18next'
 import { ChatInstance } from '../../../types'
 import useChatInstances from './useChatInstances'
 
@@ -79,54 +80,60 @@ const ChatInstanceTableData = React.memo(
     rows: ChatInstance[]
     onSelect: (chatInstance: ChatInstance) => void
     onDelete: (id: string) => void
-  }) => (
-    <TableContainer>
-      <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
-        <Head />
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow role="checkbox" key={row.id}>
-              <TableCell
-                component="th"
-                scope="row"
-                padding="none"
-                width="40%"
-                sx={{ pl: 1 }}
-              >
-                {row.name}
-              </TableCell>
-              <TableCell align="right">{row.description}</TableCell>
-              <TableCell align="right">{row.model}</TableCell>
-              <TableCell sx={{ fontFamily: 'monospace' }} align="right">
-                {row.usageLimit}
-              </TableCell>
-              <TableCell sx={{ fontFamily: 'monospace' }} align="right">
-                {row.courseId}
-              </TableCell>
-              <TableCell>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  color="primary"
-                  onClick={() => onSelect(row)}
+  }) => {
+    const { i18n } = useTranslation()
+
+    const { language } = i18n
+
+    return (
+      <TableContainer>
+        <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
+          <Head />
+          <TableBody>
+            {rows.map((row) => (
+              <TableRow role="checkbox" key={row.id}>
+                <TableCell
+                  component="th"
+                  scope="row"
+                  padding="none"
+                  width="40%"
+                  sx={{ pl: 1 }}
                 >
-                  Edit
-                </Button>
-                <Button
-                  variant="text"
-                  size="small"
-                  color="error"
-                  onClick={() => onDelete(row.id)}
-                >
-                  Delete
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  )
+                  {row.name[language]}
+                </TableCell>
+                <TableCell align="right">{row.description}</TableCell>
+                <TableCell align="right">{row.model}</TableCell>
+                <TableCell sx={{ fontFamily: 'monospace' }} align="right">
+                  {row.usageLimit}
+                </TableCell>
+                <TableCell sx={{ fontFamily: 'monospace' }} align="right">
+                  {row.courseId}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color="primary"
+                    onClick={() => onSelect(row)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="text"
+                    size="small"
+                    color="error"
+                    onClick={() => onDelete(row.id)}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    )
+  }
 )
 
 const ChatInstanceTableV2 = ({

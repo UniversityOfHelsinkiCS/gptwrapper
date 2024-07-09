@@ -33,15 +33,15 @@ const EditChatInstance = forwardRef(
       courseId: currentCourseId,
     } = chatInstance
 
-    const [name, setName] = useState(currentName)
+    const { t, i18n } = useTranslation()
+    const { language } = i18n
+    const [name, setName] = useState(currentName[language])
     const [description, setDescription] = useState(currentDescription)
     const [model, setModel] = useState(currentModel)
     const [usageLimit, setUsageLimit] = useState(currentUsageLimit)
     const [courseId, setCourseId] = useState(currentCourseId)
 
     const mutation = useEditChatInstanceMutation()
-
-    const { t } = useTranslation()
 
     const handleCreate = () => {
       try {

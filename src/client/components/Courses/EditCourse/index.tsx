@@ -86,7 +86,9 @@ const Course = () => {
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
 
   const { id } = useParams()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+
+  const { language } = i18n
 
   const createMutation = useCreatePromptMutation()
   const deleteMutation = useDeletePromptMutation()
@@ -169,7 +171,7 @@ const Course = () => {
             mt: 2,
           }}
         >
-          <Typography variant="h5">{course.name}</Typography>
+          <Typography variant="h5">{course.name[language]}</Typography>
           <Typography>
             {t('active')}
             {formatDate(course.activityPeriod)}

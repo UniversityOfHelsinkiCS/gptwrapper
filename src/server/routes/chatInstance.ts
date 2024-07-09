@@ -19,7 +19,9 @@ chatInstanceRouter.get('/', async (req, res) => {
       ? {
           [Op.or]: [
             { courseId: { [Op.like]: `${search}%` } },
-            { name: { [Op.iLike]: `%${search}%` } },
+            { 'name.en': { [Op.iLike]: `%${search}%` } },
+            { 'name.fi': { [Op.iLike]: `%${search}%` } },
+            { 'name.sv': { [Op.iLike]: `%${search}%` } },
           ],
         }
       : undefined,

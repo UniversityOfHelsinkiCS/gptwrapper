@@ -35,19 +35,22 @@ const calculateCourseUsage = (
   return courseUsage
 }
 
-const sortUsage = (a: { course: Course }, b: { course: Course }) =>
-  a.course.name.localeCompare(b.course.name)
+const sortUsage =
+  (language: string) => (a: { course: Course }, b: { course: Course }) =>
+    a.course.name[language].localeCompare(b.course.name[language])
 
 const CourseTable = () => {
   const { usage, isLoading } = useChatInstanceUsage()
   const { courses, isLoading: coursesLoading } = useUserCourses()
 
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   if (isLoading || coursesLoading) return null
 
+  const { language } = i18n
+
   const courseUsage = calculateCourseUsage(usage, courses)
-  const sortedUsage = courseUsage.sort(sortUsage)
+  const sortedUsage = courseUsage.sort(sortUsage(language))
 
   return (
     <Box my={2}>
@@ -72,7 +75,7 @@ const CourseTable = () => {
             {sortedUsage.map(({ course, usageCount }) => (
               <TableRow key={course.id}>
                 <TableCell component="th" scope="row">
-                  <Typography variant="h6">{course.name}</Typography>
+                  <Typography variant="h6">{course.name[language]}</Typography>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="h6">{usageCount}</Typography>

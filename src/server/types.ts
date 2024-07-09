@@ -58,7 +58,7 @@ interface RequestBody {
 
 export interface ChatInstance {
   id: string
-  name: string
+  name: Locales
   description: string
   usageLimit: number
 }
@@ -70,7 +70,7 @@ export type ActivityPeriod = {
 
 export type CourseUnitRealisation = {
   id: string
-  name: object
+  name: Locales
   nameSpecifier: object
   activityPeriod: ActivityPeriod
 }
@@ -89,7 +89,7 @@ export type Prompt = {
   messages: Message[]
 }
 
-type Locales = {
+export type Locales = {
   fi: string
   en: string
   sv: string

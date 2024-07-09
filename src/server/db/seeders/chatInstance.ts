@@ -4,7 +4,7 @@ import { ChatInstance } from '../models'
 const chatInstances = [
   {
     id: TEST_COURSE_ID,
-    name: 'Test Course',
+    name: { en: 'Test Course', sv: 'Test Course', fi: 'Test Course' },
     description: 'Course for testing purposes',
     courseId: TEST_COURSE_ID,
     activityPeriod: {
@@ -14,7 +14,7 @@ const chatInstances = [
   },
   {
     id: EXAMPLE_COURSE_ID,
-    name: 'Example Course',
+    name: { en: 'Example Course', sv: 'Example Course', fi: 'Example Course' },
     description: '',
     courseId: EXAMPLE_COURSE_ID,
     activityPeriod: {
