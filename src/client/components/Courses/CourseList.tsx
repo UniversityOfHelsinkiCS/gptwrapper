@@ -88,12 +88,10 @@ const Course = ({
 
 const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
   const { t } = useTranslation()
+  const enableMutation = useEnableCourse()
+  const [courseToEnable, setCourseToEnable] = useState<CourseType>(null)
 
   if (!courseUnits) return null
-
-  const enableMutation = useEnableCourse()
-
-  const [courseToEnable, setCourseToEnable] = useState<CourseType>(null)
 
   const defaultActivityPeriod = courseToEnable
     ? {

@@ -16,9 +16,9 @@ const CustomTabPanel = (props: TabPanelProps) => {
   const { children, value, index } = props
 
   return (
-    <div role="tabpanel" hidden={value !== index}>
+    <Box role="tabpanel" hidden={value !== index}>
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
+    </Box>
   )
 }
 
@@ -41,11 +41,7 @@ const Courses = () => {
           {t('common:courses')}
         </Typography>
       </Box>
-      <Tabs
-        value={value}
-        onChange={handleChange}
-        aria-label="basic tabs example"
-      >
+      <Tabs value={value} onChange={handleChange}>
         <Tab label="Kaikki" />
         <Tab label="CurreChat käytössä" />
         <Tab label="Päättyneet" />
