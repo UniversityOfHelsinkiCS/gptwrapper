@@ -23,6 +23,7 @@ jobs:
             BASE_PATH=/chat
             GIT_SHA=${{ github.sha }}
             STAGING=false
+          extra-args: --ulimit nofile=4096:4096
 
       - name: Push to quay.io
         uses: redhat-actions/push-to-registry@v2
