@@ -58,7 +58,11 @@ const createChatInstance = async (
     const courseUnit = getCourseUnit(course.courseUnits, course.activityPeriod)
 
     return {
-      name: courseUnit.name,
+      name: {
+        fi: courseUnit.name.fi,
+        en: courseUnit.name.en || courseUnit.name.fi,
+        sv: courseUnit.name.sv || courseUnit.name.fi,
+      },
       courseId: course.id,
       activityPeriod: course.activityPeriod,
     }
