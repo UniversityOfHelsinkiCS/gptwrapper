@@ -42,9 +42,9 @@ const Courses = () => {
         </Typography>
       </Box>
       <Tabs value={value} onChange={handleChange}>
-        <Tab label="Kaikki" />
-        <Tab label="CurreChat käytössä" />
-        <Tab label="Päättyneet" />
+        <Tab label={t('course:allTab')} />
+        <Tab label={t('course:curreEnabledTab')} />
+        <Tab label={t('course:endedTab')} />
       </Tabs>
       <CustomTabPanel value={value} index={0}>
         <CourseList courseUnits={courses} />

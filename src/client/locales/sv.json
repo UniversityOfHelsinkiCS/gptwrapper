@@ -104,6 +104,9 @@
     "noStudentsCloseToMaxTokenLimit": "No students",
     "editCourse": "Edit course",
     "usageResetSuccess": "Usage reset successfully",
-    "curreNotOpen": "Students cannot access this course"
+    "curreNotOpen": "Students cannot access this course",
+    "allTab": "All",
+    "curreEnabledTab": "CurreChat enabled",
+    "endedTab": "Emded"
   }
 }
