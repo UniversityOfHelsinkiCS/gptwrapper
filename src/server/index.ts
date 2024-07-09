@@ -33,7 +33,7 @@ if (inProduction || inStaging) {
 app.listen(PORT, async () => {
   await connectToDatabase()
   await seed()
-  if (true || inProduction || inStaging) {
+  if (inProduction || inStaging) {
     await setupCron()
   }
 
