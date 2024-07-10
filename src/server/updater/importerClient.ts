@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { Agent as HttpAgent } from 'http'
+import { Agent as HttpsAgent } from 'https'
 
 import { IMPORTER_URL, API_TOKEN } from '../util/config'
 import logger from '../util/logger'
@@ -8,6 +10,12 @@ const importerClient = axios.create({
   params: {
     token: API_TOKEN,
   },
+  // see this issue: https://github.com/axios/axios/issues/5929#issue-1918808460
+  // see related issue: https://github.com/node-fetch/node-fetch/issues/1735
+  // people report that using custom Agent solves the problem
+  // see https://github.com/node-fetch/node-fetch/issues/1735#issuecomment-1561855887
+  httpAgent: new HttpAgent({ keepAlive: true }),
+  httpsAgent: new HttpsAgent({ keepAlive: true }),
 })
 
 const defaultValidator = () => true
