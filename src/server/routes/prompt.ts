@@ -25,6 +25,7 @@ promptRouter.get('/:courseId', async (req, res) => {
 
   const prompts = await Prompt.findAll({
     where: { chatInstanceId: chatInstance?.id },
+    order: [['name', 'ASC']],
   })
 
   return res.send(prompts)
