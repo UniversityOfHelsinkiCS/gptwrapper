@@ -51,3 +51,19 @@ promptRouter.delete('/:id', async (req, res) => {
 
   return res.status(204).send()
 })
+
+promptRouter.put('/:id', async (req, res) => {
+  const { id } = req.params
+  const data = req.body as Prompt
+  const { systemMessage } = data
+
+  const prompt = await Prompt.findByPk(id)
+
+  if (!prompt) return res.status(404).send('Prompt not found')
+
+  prompt.systemMessage = systemMessage
+
+  await prompt.save()
+
+  return res.send(prompt)
+})
