@@ -16,9 +16,11 @@ import {
 } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
+import { enqueueSnackbar } from 'notistack'
 import { Prompt as PromptType, SetState } from '../../../types'
 import { Response } from '../../Chat/Conversation'
 import SystemMessage from '../../Chat/SystemMessage'
+import { useEditPromptMutation } from '../../../hooks/usePromptMutation'
 
 const ExpandButton = ({
   expand,
@@ -40,6 +42,7 @@ const Prompt = ({
   handleDelete: (promptId: string) => void
 }) => {
   const { t } = useTranslation()
+  const mutation = useEditPromptMutation()
 
   const { id, name, systemMessage, messages, hidden } = prompt
 
@@ -48,7 +51,18 @@ const Prompt = ({
   const [message, setMessage] = useState(systemMessage)
 
   const handleSave = () => {
-    console.log(message)
+    const updatedPrompt = {
+      ...prompt,
+      systemMessage: message,
+    }
+
+    try {
+      mutation.mutate(updatedPrompt)
+      setEditPrompt(false)
+      enqueueSnackbar('Prompt updated', { variant: 'success' })
+    } catch (error: any) {
+      enqueueSnackbar(error.message, { variant: 'error' })
+    }
   }
 
   return (

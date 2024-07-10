@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { Message } from '../types'
+import { Message, Prompt } from '../types'
 import queryClient from '../util/queryClient'
 import { queryKey } from './usePrompts'
 import apiClient from '../util/apiClient'
@@ -38,6 +38,24 @@ export const useDeletePromptMutation = () => {
     const res = await apiClient.delete(`/prompts/${id}`)
 
     return res
+  }
+
+  const mutation = useMutation({
+    mutationFn,
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey,
+      }),
+  })
+
+  return mutation
+}
+
+export const useEditPromptMutation = () => {
+  const mutationFn = async (data: Prompt) => {
+    const res = await apiClient.put(`/prompts/${data.id}`, data)
+    const prompt = res.data
+    return prompt
   }
 
   const mutation = useMutation({
