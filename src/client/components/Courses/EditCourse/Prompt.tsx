@@ -1,5 +1,13 @@
 import React, { useState } from 'react'
-import { Box, Paper, Typography, Button, Tooltip } from '@mui/material'
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Tooltip,
+  TextField,
+  Stack,
+} from '@mui/material'
 import {
   ExpandLess,
   ExpandMore,
@@ -33,9 +41,15 @@ const Prompt = ({
 }) => {
   const { t } = useTranslation()
 
-  const [expand, setExpand] = useState(false)
-
   const { id, name, systemMessage, messages, hidden } = prompt
+
+  const [expand, setExpand] = useState(false)
+  const [editPrompt, setEditPrompt] = useState(false)
+  const [message, setMessage] = useState(systemMessage)
+
+  const handleSave = () => {
+    console.log(message)
+  }
 
   return (
     <Box key={id} pt={2}>
@@ -67,17 +81,43 @@ const Prompt = ({
 
         {expand && (
           <Box mt={2}>
-            <Box width="80%">
-              <SystemMessage
-                system={systemMessage}
-                setSystem={() => {}}
-                showInfo={false}
-                disabled
+            {!editPrompt ? (
+              <>
+                <Box width="80%">
+                  <SystemMessage
+                    system={systemMessage}
+                    setSystem={() => {}}
+                    showInfo={false}
+                    disabled
+                  />
+                </Box>
+                <Box>
+                  {messages.map(({ role, content }) => (
+                    <Response key={content} role={role} content={content} />
+                  ))}
+                </Box>
+              </>
+            ) : (
+              <TextField
+                defaultValue={systemMessage}
+                sx={{ width: '80%' }}
+                multiline
+                onChange={(e) => setMessage(e.target.value)}
               />
-            </Box>
-            {messages.map(({ role, content }) => (
-              <Response key={content} role={role} content={content} />
-            ))}
+            )}
+            <Stack direction="row" spacing={2} marginTop={2}>
+              {editPrompt && (
+                <Button onClick={handleSave} variant="outlined">
+                  Tallenna
+                </Button>
+              )}
+              <Button
+                variant="outlined"
+                onClick={() => setEditPrompt(!editPrompt)}
+              >
+                {editPrompt ? 'Peruuta' : 'Muokkaa'}
+              </Button>
+            </Stack>
           </Box>
         )}
       </Paper>
