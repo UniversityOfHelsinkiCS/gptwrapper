@@ -49,11 +49,13 @@ const Prompt = ({
   const [expand, setExpand] = useState(false)
   const [editPrompt, setEditPrompt] = useState(false)
   const [message, setMessage] = useState(systemMessage)
+  const [updatedName, setUpdatedName] = useState(name)
 
   const handleSave = () => {
     const updatedPrompt = {
       ...prompt,
       systemMessage: message,
+      name: updatedName,
     }
 
     try {
@@ -81,9 +83,17 @@ const Prompt = ({
                 </Tooltip>
               )}
             </Box>
-            <Typography variant="h6" display="inline">
-              {name}
-            </Typography>
+            {!editPrompt ? (
+              <Typography variant="h6" display="inline">
+                {name}
+              </Typography>
+            ) : (
+              <TextField
+                defaultValue={updatedName}
+                sx={{ width: '650px' }}
+                onChange={(e) => setUpdatedName(e.target.value)}
+              />
+            )}
           </Box>
           <Box>
             <Button onClick={() => handleDelete(prompt.id)} color="error">
