@@ -37,7 +37,7 @@ const enrolmentsHandler = async (enrolments: SisuEnrolment[]) => {
     bulkCreate: async (e, opt) => Enrolment.bulkCreate(e, opt),
     fallbackCreate: async (e, opt) => Enrolment.upsert(e, opt),
     options: {
-      conflictAttributes: ['userId', 'chatInstanceId'],
+      conflictAttributes: ['user_id', 'chat_instance_id'],
       ignoreDuplicates: true,
     },
   })
