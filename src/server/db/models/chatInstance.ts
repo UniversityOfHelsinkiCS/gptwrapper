@@ -65,6 +65,7 @@ ChatInstance.init(
       type: DataTypes.STRING,
       allowNull: true,
       defaultValue: null,
+      unique: true,
     },
     activityPeriod: {
       type: DataTypes.JSON,
