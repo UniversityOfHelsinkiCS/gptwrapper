@@ -39,6 +39,12 @@ Responsibility.init(
   {
     underscored: true,
     sequelize,
+    indexes: [
+      {
+        unique: true,
+        fields: ['userId', 'chatInstanceId'],
+      },
+    ],
   }
 )
 
