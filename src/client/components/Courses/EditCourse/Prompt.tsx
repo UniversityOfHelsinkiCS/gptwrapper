@@ -122,14 +122,14 @@ const Prompt = ({
             <Stack direction="row" spacing={2} marginTop={2}>
               {editPrompt && (
                 <Button onClick={handleSave} variant="outlined">
-                  Tallenna
+                  {t('common:save')}
                 </Button>
               )}
               <Button
                 variant="outlined"
                 onClick={() => setEditPrompt(!editPrompt)}
               >
-                {editPrompt ? 'Peruuta' : 'Muokkaa'}
+                {editPrompt ? t('common:cancel') : t('common:edit')}
               </Button>
             </Stack>
           </Box>
