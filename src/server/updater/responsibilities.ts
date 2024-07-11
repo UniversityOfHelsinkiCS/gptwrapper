@@ -79,7 +79,8 @@ export const upsertResponsibilities = async (
       bulkCreate: async (e, opts) => Responsibility.bulkCreate(e, opts),
       fallbackCreate: async (e, opts) => Responsibility.upsert(e, opts),
       options: {
-        updateOnDuplicate: ['user_id', 'chat_instance_id'],
+        conflictAttributes: ['user_id', 'chat_instance_id'],
+        ignoreDuplicates: true,
       },
     })
 
