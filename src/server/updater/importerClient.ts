@@ -13,9 +13,9 @@ const importerClient = axios.create({
   // see this issue: https://github.com/axios/axios/issues/5929#issue-1918808460
   // see related issue: https://github.com/node-fetch/node-fetch/issues/1735
   // people report that using custom Agent solves the problem
-  // see https://github.com/node-fetch/node-fetch/issues/1735#issuecomment-1561855887
-  httpAgent: new HttpAgent({ keepAlive: true }),
-  httpsAgent: new HttpsAgent({ keepAlive: true }),
+  // see https://github.com/axios/axios/issues/5929#issuecomment-1856110046
+  httpAgent: new HttpAgent({ keepAlive: false }),
+  httpsAgent: new HttpsAgent({ keepAlive: false }),
 })
 
 const defaultValidator = () => true
