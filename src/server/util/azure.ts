@@ -95,13 +95,15 @@ export const streamCompletion = async (
       if (!inProduction) logger.info(delta)
 
       if (delta !== undefined) {
-        // eslint-disable-next-line no-await-in-loop
+        // eslint-disable-next-line no-await-in-loop, @typescript-eslint/no-loop-func
         await new Promise((resolve) => {
-          if (!res.write(delta)) {
-            res.once('drain', resolve)
-          } else {
-            process.nextTick(resolve)
-          }
+          setTimeout(() => {
+            if (!res.write(delta)) {
+              res.once('drain', resolve)
+            } else {
+              process.nextTick(resolve)
+            }
+          }, i)
         })
 
         tokenCount += encoding.encode(delta).length ?? 0
