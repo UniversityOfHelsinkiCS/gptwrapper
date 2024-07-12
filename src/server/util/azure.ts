@@ -97,6 +97,10 @@ export const streamCompletion = async (
       if (delta !== undefined) {
         // eslint-disable-next-line no-await-in-loop, @typescript-eslint/no-loop-func
         await new Promise((resolve) => {
+          // I'm not sure if this setTimeout is necessary
+          // if removed, it seems like we are able to
+          // send the response immediately to the user
+          // which speeds up the use of Curre Chat a lot
           setTimeout(() => {
             if (!res.write(delta)) {
               res.once('drain', resolve)
