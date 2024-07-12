@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Table,
   TableContainer,
@@ -10,6 +10,7 @@ import {
   Typography,
   Box,
   Button,
+  TextField,
 } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
@@ -34,25 +35,9 @@ const UserTable = () => {
   const deleteChatInstanceUsage = useDeleteChatInstanceUsageMutation()
   const resetUsage = useResetUsageMutation()
 
+  const [searchedUsages, setSearchedUsages] = useState<Usage[]>([])
+
   const { t } = useTranslation()
-
-  const onDeleteChatInstanceUsage = (chatInstanceUsageId: string) => {
-    try {
-      deleteChatInstanceUsage.mutate(chatInstanceUsageId)
-      enqueueSnackbar('ChatInstance usage deleted', { variant: 'success' })
-    } catch (error: any) {
-      enqueueSnackbar(error.message, { variant: 'error' })
-    }
-  }
-
-  const onResetUsage = (userId: string) => {
-    try {
-      resetUsage.mutate(userId)
-      enqueueSnackbar('User usage reset', { variant: 'success' })
-    } catch (error: any) {
-      enqueueSnackbar(error.message, { variant: 'error' })
-    }
-  }
 
   if (isLoading || usersLoading) return null
 
@@ -71,8 +56,37 @@ const UserTable = () => {
     .concat(userUsages)
     .sort(sortUsage)
 
+  const onDeleteChatInstanceUsage = (chatInstanceUsageId: string) => {
+    try {
+      deleteChatInstanceUsage.mutate(chatInstanceUsageId)
+      enqueueSnackbar('ChatInstance usage deleted', { variant: 'success' })
+    } catch (error: any) {
+      enqueueSnackbar(error.message, { variant: 'error' })
+    }
+  }
+
+  const handleChange = (value) => {
+    const searched = sortedUsage.filter((u) => u.user.username.includes(value))
+    setSearchedUsages(searched)
+  }
+
+  const onResetUsage = (userId: string) => {
+    try {
+      resetUsage.mutate(userId)
+      enqueueSnackbar('User usage reset', { variant: 'success' })
+    } catch (error: any) {
+      enqueueSnackbar(error.message, { variant: 'error' })
+    }
+  }
+
   return (
     <Box my={2}>
+      <TextField
+        style={{ width: '30em' }}
+        label="Username"
+        variant="outlined"
+        onChange={(e) => handleChange(e.target.value)}
+      />
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -96,33 +110,35 @@ const UserTable = () => {
           </TableHead>
 
           <TableBody>
-            {sortedUsage.map(({ id, usageCount, user, chatInstance }) => (
-              <TableRow key={id}>
-                <TableCell component="th" scope="row">
-                  <Typography variant="h6">{user.username}</Typography>
-                </TableCell>
-                <TableCell align="right">
-                  <Typography variant="h6">{usageCount}</Typography>
-                </TableCell>
-                <TableCell align="right">
-                  <Typography variant="overline">
-                    <code>{chatInstance?.courseId ?? ''}</code>
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    color="error"
-                    onClick={() =>
-                      chatInstance?.courseId
-                        ? onDeleteChatInstanceUsage(id)
-                        : onResetUsage(user.id)
-                    }
-                  >
-                    {t('admin:reset')}
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {(searchedUsages.length !== 0 ? searchedUsages : sortedUsage).map(
+              ({ id, usageCount, user, chatInstance }) => (
+                <TableRow key={id}>
+                  <TableCell component="th" scope="row">
+                    <Typography variant="h6">{user.username}</Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Typography variant="h6">{usageCount}</Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Typography variant="overline">
+                      <code>{chatInstance?.courseId ?? ''}</code>
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      color="error"
+                      onClick={() =>
+                        chatInstance?.courseId
+                          ? onDeleteChatInstanceUsage(id)
+                          : onResetUsage(user.id)
+                      }
+                    >
+                      {t('admin:reset')}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )
+            )}
           </TableBody>
         </Table>
       </TableContainer>
