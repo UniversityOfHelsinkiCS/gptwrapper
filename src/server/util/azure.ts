@@ -95,7 +95,17 @@ export const streamCompletion = async (
       if (!inProduction) logger.info(delta)
 
       if (delta !== undefined) {
-        setTimeout(() => res.write(delta), i)
+        setTimeout(() => {
+          console.log(
+            'return of res.write',
+            res.write(delta, (err) => {
+              if (err) {
+                console.log('Error writing stream', err)
+              }
+              console.log('write done')
+            })
+          )
+        }, i)
         tokenCount += encoding.encode(delta).length ?? 0
       }
     }

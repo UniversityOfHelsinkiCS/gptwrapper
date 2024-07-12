@@ -25,8 +25,6 @@ export const getEnrolledCourses = async (user: User) => {
     courseIds.push(TEST_COURSE_ID)
   }
 
-  console.log('enrolled courseIds', courseIds)
-
   return courseIds
 }
 
@@ -46,8 +44,6 @@ export const getOwnCourses = async (user: User) => {
     courseIds.push(EXAMPLE_COURSE_ID)
     courseIds.push(TEST_COURSE_ID)
   }
-
-  console.log('teacher courseIds', courseIds)
 
   return courseIds
 }
