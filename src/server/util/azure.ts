@@ -12,7 +12,6 @@ import { AzureOptions, APIError } from '../types'
 import { AZURE_RESOURCE, AZURE_API_KEY } from './config'
 import { validModels, inProduction } from '../../config'
 import logger from './logger'
-import { sleep } from './util'
 
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
@@ -84,38 +83,28 @@ export const streamCompletion = async (
   encoding: Tiktoken,
   res: Response
 ) => {
-  let i = 0
   let tokenCount = 0
   for await (const event of events) {
     // Slow sending of messages to prevent blocky output
-    i += options.model === 'gpt-4' ? 150 : 50
     for (const choice of event.choices) {
       const delta = choice.delta?.content
 
       if (!inProduction) logger.info(delta)
 
       if (delta !== undefined) {
-        // eslint-disable-next-line no-await-in-loop, @typescript-eslint/no-loop-func
+        // eslint-disable-next-line
         await new Promise((resolve) => {
-          // I'm not sure if this setTimeout is necessary
-          // if removed, it seems like we are able to
-          // send the response immediately to the user
-          // which speeds up the use of Curre Chat a lot
-          setTimeout(() => {
-            if (!res.write(delta)) {
-              res.once('drain', resolve)
-            } else {
-              process.nextTick(resolve)
-            }
-          }, i)
+          if (!res.write(delta)) {
+            res.once('drain', resolve)
+          } else {
+            process.nextTick(resolve)
+          }
         })
 
         tokenCount += encoding.encode(delta).length ?? 0
       }
     }
   }
-
-  await sleep(i)
 
   return tokenCount
 }
