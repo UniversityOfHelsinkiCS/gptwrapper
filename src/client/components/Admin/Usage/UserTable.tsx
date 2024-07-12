@@ -82,8 +82,8 @@ const UserTable = () => {
   return (
     <Box my={2}>
       <TextField
-        style={{ width: '30em' }}
-        label="Username"
+        sx={{ width: '30em', my: 2 }}
+        label="Search users"
         variant="outlined"
         onChange={(e) => handleChange(e.target.value)}
       />
