@@ -96,10 +96,10 @@ export const streamCompletion = async (
         await new Promise((resolve) => {
           if (
             !res.write(delta, (err) => {
-              if (err) console.log(err)
+              if (err) console.log(delta, err)
             })
           ) {
-            console.log('res.write returned false, waiting for drain')
+            console.log(delta, 'res.write returned false, waiting for drain')
             res.once('drain', resolve)
           } else {
             process.nextTick(resolve)
