@@ -110,6 +110,8 @@ export const streamCompletion = async (
         })
 
         tokenCount += encoding.encode(delta).length ?? 0
+      } else {
+        console.log(choice.delta)
       }
     }
   }
