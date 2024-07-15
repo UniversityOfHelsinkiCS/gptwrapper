@@ -94,7 +94,12 @@ export const streamCompletion = async (
       if (delta !== undefined) {
         // eslint-disable-next-line
         await new Promise((resolve) => {
-          if (!res.write(delta)) {
+          if (
+            !res.write(delta, (err) => {
+              if (err) console.log(err)
+            })
+          ) {
+            console.log('res.write returned false, waiting for drain')
             res.once('drain', resolve)
           } else {
             process.nextTick(resolve)
