@@ -117,6 +117,9 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   if (isError(events)) return res.status(424)
 
   res.setHeader('content-type', 'text/event-stream')
+  res.write('', (err) => {
+    if (err) console.log(err)
+  })
 
   tokenCount += await streamCompletion(
     events,
@@ -196,6 +199,9 @@ openaiRouter.post(
     if (isError(events)) return res.status(424).send(events)
 
     res.setHeader('content-type', 'text/event-stream')
+    res.write('', (err) => {
+      if (err) console.log(err)
+    })
 
     tokenCount += await streamCompletion(
       events,
