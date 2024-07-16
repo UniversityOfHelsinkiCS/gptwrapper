@@ -116,7 +116,27 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   if (isError(events)) return res.status(424)
 
+  console.log(
+    'Before setting headers',
+    res.writable,
+    res.writableCorked,
+    res.writableEnded,
+    res.writableFinished,
+    res.writableHighWaterMark,
+    res.writableLength,
+    res.writableObjectMode
+  )
   res.setHeader('content-type', 'text/event-stream')
+  console.log(
+    'After setting headers',
+    res.writable,
+    res.writableCorked,
+    res.writableEnded,
+    res.writableFinished,
+    res.writableHighWaterMark,
+    res.writableLength,
+    res.writableObjectMode
+  )
   res.write('', (err) => {
     if (err) console.log(err)
   })
@@ -198,7 +218,27 @@ openaiRouter.post(
 
     if (isError(events)) return res.status(424).send(events)
 
+    console.log(
+      'Before setting headers',
+      res.writable,
+      res.writableCorked,
+      res.writableEnded,
+      res.writableFinished,
+      res.writableHighWaterMark,
+      res.writableLength,
+      res.writableObjectMode
+    )
     res.setHeader('content-type', 'text/event-stream')
+    console.log(
+      'After setting headers',
+      res.writable,
+      res.writableCorked,
+      res.writableEnded,
+      res.writableFinished,
+      res.writableHighWaterMark,
+      res.writableLength,
+      res.writableObjectMode
+    )
     res.write('', (err) => {
       if (err) console.log(err)
     })
