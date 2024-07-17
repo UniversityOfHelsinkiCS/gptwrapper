@@ -118,7 +118,10 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   console.log(
     'Before setting headers',
+    res.finished,
+    res.destroyed,
     res.writable,
+    res.writableNeedDrain,
     res.writableCorked,
     res.writableEnded,
     res.writableFinished,
@@ -129,7 +132,10 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   res.setHeader('content-type', 'text/event-stream')
   console.log(
     'After setting headers',
+    res.finished,
+    res.destroyed,
     res.writable,
+    res.writableNeedDrain,
     res.writableCorked,
     res.writableEnded,
     res.writableFinished,
@@ -140,6 +146,19 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   res.write('', (err) => {
     if (err) console.log(err)
   })
+  console.log(
+    'After writing is attempted',
+    res.finished,
+    res.destroyed,
+    res.writable,
+    res.writableNeedDrain,
+    res.writableCorked,
+    res.writableEnded,
+    res.writableFinished,
+    res.writableHighWaterMark,
+    res.writableLength,
+    res.writableObjectMode
+  )
 
   tokenCount += await streamCompletion(
     events,
@@ -220,7 +239,10 @@ openaiRouter.post(
 
     console.log(
       'Before setting headers',
+      res.finished,
+      res.destroyed,
       res.writable,
+      res.writableNeedDrain,
       res.writableCorked,
       res.writableEnded,
       res.writableFinished,
@@ -231,7 +253,10 @@ openaiRouter.post(
     res.setHeader('content-type', 'text/event-stream')
     console.log(
       'After setting headers',
+      res.finished,
+      res.destroyed,
       res.writable,
+      res.writableNeedDrain,
       res.writableCorked,
       res.writableEnded,
       res.writableFinished,
@@ -242,6 +267,19 @@ openaiRouter.post(
     res.write('', (err) => {
       if (err) console.log(err)
     })
+    console.log(
+      'After writing is attempted',
+      res.finished,
+      res.destroyed,
+      res.writable,
+      res.writableNeedDrain,
+      res.writableCorked,
+      res.writableEnded,
+      res.writableFinished,
+      res.writableHighWaterMark,
+      res.writableLength,
+      res.writableObjectMode
+    )
 
     tokenCount += await streamCompletion(
       events,
