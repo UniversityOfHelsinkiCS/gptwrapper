@@ -61,6 +61,7 @@ const fileParsing = async (options: any, req: any) => {
 }
 
 openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
+  console.log('At the very beginning', res.destroyed)
   const req = r as RequestWithUser
   const { options, courseId } = JSON.parse(req.body.data)
   const { model, userConsent } = options
@@ -222,11 +223,7 @@ openaiRouter.post(
 
     const contextLimit = getModelContextLimit(options.model)
 
-    console.log({
-      model,
-      tokenCount,
-      contextLimit,
-    })
+    console.log('Logging!!!', model, tokenCount, contextLimit)
 
     if (tokenCount > contextLimit) {
       logger.info('Maximum context reached')
