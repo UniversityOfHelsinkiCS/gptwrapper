@@ -23,4 +23,24 @@ const useCourse = (courseId?: string) => {
   return { course, ...rest }
 }
 
+export const useCourseStatistics = (courseId?: string) => {
+  const queryKey = ['statistics', courseId]
+
+  const queryFn = async () => {
+    const res = await apiClient.get(`/courses/statistics/${courseId}`)
+
+    const { data } = res
+
+    return data
+  }
+
+  const { data: stats, ...rest } = useQuery({
+    queryKey,
+    queryFn,
+    enabled: !!courseId,
+  })
+
+  return { stats, ...rest }
+}
+
 export default useCourse
