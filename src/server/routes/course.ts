@@ -2,7 +2,7 @@ import express from 'express'
 import { Op } from 'sequelize'
 
 import { ActivityPeriod, RequestWithUser } from '../types'
-import { ChatInstance } from '../db/models'
+import { ChatInstance, UserChatInstanceUsage } from '../db/models'
 import { getOwnCourses } from '../chatInstances/access'
 
 const courseRouter = express.Router()
@@ -50,6 +50,19 @@ courseRouter.get('/user', async (req, res) => {
   }))
 
   return res.send({ courses: coursesWithExtra, count })
+})
+
+courseRouter.get('/statistics/:id', async (req, res) => {
+  const { id } = req.params
+
+  const usages = await UserChatInstanceUsage.findAll({
+    where: { chatInstanceId: id },
+  })
+
+  const average =
+    usages.map((u) => u.usageCount).reduce((a, b) => a + b, 0) / usages.length
+
+  return res.send({ average })
 })
 
 courseRouter.get('/:id', async (req, res) => {
