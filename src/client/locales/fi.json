@@ -117,6 +117,8 @@
     "usageResetSuccess": "Käyttö nollattu onnistuneesti",
     "allTab": "Kaikki",
     "curreEnabledTab": "CurreChat käytössä",
-    "endedTab": "Päättyneet"
+    "endedTab": "Päättyneet",
+    "statistics": "Tilastoja",
+    "averageTokenUsage": "Käytettyjen tokeneiden keskiarvo: "
   }
 }

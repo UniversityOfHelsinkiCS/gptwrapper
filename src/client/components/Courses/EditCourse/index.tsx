@@ -21,7 +21,7 @@ import { SetState, Message as MessageType } from '../../../types'
 import SystemMessage from '../../Chat/SystemMessage'
 import Conversation from '../../Chat/Conversation'
 import usePrompts from '../../../hooks/usePrompts'
-import useCourse from '../../../hooks/useCourse'
+import useCourse, { useCourseStatistics } from '../../../hooks/useCourse'
 import {
   useCreatePromptMutation,
   useDeletePromptMutation,
@@ -92,6 +92,8 @@ const Course = () => {
 
   const createMutation = useCreatePromptMutation()
   const deleteMutation = useDeletePromptMutation()
+
+  const { stats } = useCourseStatistics(id)
 
   const handleAdd = () => {
     setMessages([...messages, { content: message, role: getRole(messages) }])
@@ -203,6 +205,24 @@ const Course = () => {
           </Box>
         </Paper>
       </Box>
+
+      {stats.average && (
+        <Paper
+          variant="outlined"
+          sx={{
+            padding: '2%',
+            mt: 2,
+          }}
+        >
+          <Typography variant="h6" display="inline">
+            {t('course:statistics')}
+          </Typography>
+          <Typography>
+            {t('course:averageTokenUsage')}
+            {parseInt(stats.average, 10)}
+          </Typography>
+        </Paper>
+      )}
 
       <MaxTokenUsageStudents courseId={id as string} />
 

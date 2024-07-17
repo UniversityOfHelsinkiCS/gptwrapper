@@ -107,6 +107,8 @@
     "curreNotOpen": "Students cannot access this course",
     "allTab": "All",
     "curreEnabledTab": "CurreChat enabled",
-    "endedTab": "Emded"
+    "endedTab": "Ended",
+    "statistics": "Statistics",
+    "averageTokenUsage": "Average token usage: "
   }
 }

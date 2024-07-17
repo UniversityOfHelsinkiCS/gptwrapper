@@ -118,6 +118,8 @@
     "usageResetSuccess": "Usage reset successfully",
     "allTab": "All",
     "curreEnabledTab": "CurreChat enabled",
-    "endedTab": "Ended"
+    "endedTab": "Ended",
+    "statistics": "Statistics",
+    "averageTokenUsage": "Average token usage: "
   }
 }
