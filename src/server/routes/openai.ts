@@ -61,20 +61,25 @@ const fileParsing = async (options: any, req: any) => {
 }
 
 openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
+  console.log('At the very beginning', res.destroyed)
   const req = r as RequestWithUser
   const { options, courseId } = JSON.parse(req.body.data)
   const { model, userConsent } = options
   const { user } = req
+  console.log('After body.data parsed', res.destroyed)
 
   options.options = { temperature: options.modelTemperature }
 
   if (!user.id) return res.status(401).send('Unauthorized')
+  console.log('After user.id check', res.destroyed)
 
   const usageAllowed = courseId
     ? await checkCourseUsage(user, courseId)
     : await checkUsage(user, model)
+  console.log('After usage check', res.destroyed)
 
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
+  console.log('After usageAllowed check', res.destroyed)
 
   let optionsMessagesWithFile = null
 
@@ -97,6 +102,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   const tokenUsagePercentage = Math.round(
     (tokenCount / DEFAULT_TOKEN_LIMIT) * 100
   )
+  console.log('After token count', res.destroyed)
 
   if (tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT && !userConsent) {
     return res.status(201).json({
@@ -106,13 +112,16 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   }
 
   const contextLimit = getModelContextLimit(model)
+  console.log('After context limit', res.destroyed)
 
   if (tokenCount > contextLimit) {
     logger.info('Maximum context reached')
     return res.status(403).send('Model maximum context reached')
   }
 
+  console.log('Before getting completion events', res.destroyed)
   const events = await getCompletionEvents(options as AzureOptions)
+  console.log('After getting completion events', res.destroyed, events)
 
   if (isError(events)) return res.status(424)
 
@@ -194,20 +203,28 @@ openaiRouter.post(
   '/stream/:courseId',
   upload.single('file'),
   async (r, res) => {
+    console.log('At the very beginning', res.destroyed)
     const { courseId } = r.params
     const req = r as CourseChatRequest
     const { options } = JSON.parse(r.body.data)
     const { user } = req
+    console.log('After body.data parsed', res.destroyed)
 
     if (!user.id) return res.status(401).send('Unauthorized')
 
+    console.log('After user.id check', res.destroyed)
+
     const usageAllowed = await checkCourseUsage(user, courseId)
+    console.log('After course usage is checked', res.destroyed)
     if (!usageAllowed) return res.status(403).send('Usage limit reached')
+    console.log('After usageAllowed check', res.destroyed)
 
     options.messages = getMessageContext(options.messages)
+    console.log('After we got message context', res.destroyed)
     options.stream = true
 
     const model = await getCourseModel(courseId)
+    console.log('After we got course model', res.destroyed)
 
     if (options.model) {
       const allowedModels = getAllowedModels(model)
@@ -221,12 +238,6 @@ openaiRouter.post(
     let tokenCount = calculateUsage(options, encoding)
 
     const contextLimit = getModelContextLimit(options.model)
-
-    console.log({
-      model,
-      tokenCount,
-      contextLimit,
-    })
 
     if (tokenCount > contextLimit) {
       logger.info('Maximum context reached')
