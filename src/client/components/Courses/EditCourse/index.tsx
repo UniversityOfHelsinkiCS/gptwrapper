@@ -30,6 +30,7 @@ import { formatDate } from '../util'
 import Prompt from './Prompt'
 import EditCourseForm from './EditCourseForm'
 import MaxTokenUsageStudents from './MaxTokenUsageStudents'
+import Stats from './Stats'
 
 const Message = ({
   message,
@@ -206,23 +207,7 @@ const Course = () => {
         </Paper>
       </Box>
 
-      {stats.average && (
-        <Paper
-          variant="outlined"
-          sx={{
-            padding: '2%',
-            mt: 2,
-          }}
-        >
-          <Typography variant="h6" display="inline">
-            {t('course:statistics')}
-          </Typography>
-          <Typography>
-            {t('course:averageTokenUsage')}
-            {parseInt(stats.average, 10)}
-          </Typography>
-        </Paper>
-      )}
+      <Stats stats={stats} t={t} />
 
       <MaxTokenUsageStudents courseId={id as string} />
 
