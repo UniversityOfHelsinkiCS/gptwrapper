@@ -6,6 +6,8 @@ dotenv.config()
 
 export const PORT = process.env.PORT || 8000
 
+export const SESSION_SECRET = process.env.SESSION_SECRET || ''
+
 export const API_TOKEN = process.env.API_TOKEN || ''
 
 export const { CURRE_API_PASSWORD } = process.env
@@ -17,6 +19,16 @@ export const AZURE_API_KEY = process.env.AZURE_API_KEY || ''
 export const AZURE_RESOURCE = process.env.AZURE_RESOURCE || ''
 
 export const DATABASE_URL = process.env.DATABASE_URL || ''
+
+export const OIDC_ISSUER = inProduction
+  ? 'https://login.helsinki.fi/.well-known/openid-configuration'
+  : 'https://login-test.it.helsinki.fi/.well-known/openid-configuration'
+
+export const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID || ''
+
+export const OIDC_CLIENT_SECRET = process.env.OIDC_CLIENT_SECRET || ''
+
+export const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI || ''
 
 export const JAMI_URL =
   inProduction || inDevelopment

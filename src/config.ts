@@ -8,7 +8,7 @@ export const inCI = process.env.CI === 'true'
 
 export const GIT_SHA = process.env.REACT_APP_GIT_SHA || ''
 
-export const PUBLIC_URL = process.env.PUBLIC_URL || ''
+export const BASE_PATH = process.env.BASE_PATH || ''
 
 export const UPDATER_CRON_ENABLED = process.env.UPDATER_CRON_ENABLED === 'true'
 

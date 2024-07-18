@@ -3,17 +3,33 @@ import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import express from 'express'
+import session from 'express-session'
+import passport from 'passport'
 import 'express-async-errors'
 
-import { PORT } from './util/config'
-import { inProduction, inStaging } from '../config'
+import { PORT, SESSION_SECRET } from './util/config'
+import { inCI, inProduction, inStaging } from '../config'
 import router from './routes'
 import logger from './util/logger'
 import { connectToDatabase } from './db/connection'
 import seed from './db/seeders'
 import setupCron from './util/cron'
+import setupAuthentication from './util/oidc'
+import { redisStore } from './util/redis'
 
 const app = express()
+
+app.use(
+  session({
+    store: redisStore,
+    resave: false,
+    saveUninitialized: false,
+    secret: inCI ? 'testing' : SESSION_SECRET,
+  })
+)
+
+app.use(passport.initialize())
+app.use(passport.session())
 
 app.use('/api', (req, res, next) => router(req, res, next))
 app.use('/api', (_, res) => res.sendStatus(404))
@@ -33,6 +49,9 @@ if (inProduction || inStaging) {
 app.listen(PORT, async () => {
   await connectToDatabase()
   await seed()
+
+  await setupAuthentication()
+
   if (inProduction || inStaging) {
     await setupCron()
   }

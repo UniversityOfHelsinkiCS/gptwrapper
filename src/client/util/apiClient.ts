@@ -1,9 +1,9 @@
 import axios from 'axios'
-import { PUBLIC_URL } from '../../config'
+import { BASE_PATH } from '../../config'
 
-const apiClient = axios.create({ baseURL: `${PUBLIC_URL}/api` })
+const apiClient = axios.create({ baseURL: `${BASE_PATH}/api` })
 export const updaterApiClient = axios.create({
-  baseURL: `${PUBLIC_URL}/updater/api`,
+  baseURL: `${BASE_PATH}/updater/api`,
 })
 
 apiClient.interceptors.request.use((config) => {
@@ -28,7 +28,7 @@ export const postAbortableStream = async (path: string, formData: FormData) => {
     adminHeaders['x-admin-logged-in-as'] = adminLoggedInAs
   }
 
-  const response = await fetch(`${PUBLIC_URL}/api/${path}`, {
+  const response = await fetch(`${BASE_PATH}/api/${path}`, {
     method: 'POST',
     headers: adminHeaders,
     body: formData,
