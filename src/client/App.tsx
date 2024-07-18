@@ -1,19 +1,18 @@
 import React, { useEffect } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router-dom'
 import { SnackbarProvider } from 'notistack'
-import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
 import { ThemeProvider } from '@mui/material/styles'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { fi } from 'date-fns/locale'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
 import { Box, Button, Container, CssBaseline, Snackbar } from '@mui/material'
 
-import { PUBLIC_URL } from '../config'
+import { BASE_PATH } from '../config'
 import { User } from './types'
 import useTheme from './theme'
 import NavBar from './components/NavBar'
 import Footer from './components/Footer'
-import useCurrentUser from './hooks/useCurrentUser'
+import useLoggedInUser from './hooks/useCurrentUser'
 
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
@@ -25,7 +24,7 @@ const hasAccess = (user: User | null | undefined, courseId?: string) => {
 }
 
 const getRedirect = (user: User | null | undefined) => {
-  if (!user) return '/noaccess'
+  if (!user) return `/api/users/login`
   if (user.hasIamAccess) return '/'
   return `/${user.activeCourseIds[0] || '/noaccess'}`
 }
@@ -65,18 +64,14 @@ const App = () => {
   const { courseId } = useParams()
   const location = useLocation()
 
-  const { user, isLoading } = useCurrentUser()
-
-  useEffect(() => {
-    initShibbolethPinger()
-  }, [])
+  const { user, isLoading } = useLoggedInUser()
 
   const onNoAccessPage = location.pathname.includes('/noaccess')
 
   if (isLoading && !onNoAccessPage) return null
 
   if (!onNoAccessPage && !hasAccess(user, courseId)) {
-    window.location.href = PUBLIC_URL + getRedirect(user)
+    window.location.href = BASE_PATH + getRedirect(user)
     return null
   }
 

@@ -1,15 +1,10 @@
-import { inCI, inDevelopment } from '../../config'
+import { getEnrolledCourses, getOwnCourses } from '../chatInstances/access'
+import { getUsage } from '../chatInstances/usage'
 import { User as UserModel } from '../db/models'
 import { User } from '../types'
-import { adminIams, powerUserIam } from '../util/config'
 
 const parseIamGroups = (iamGroups: string) =>
   iamGroups?.split(';').filter(Boolean) ?? []
-
-const checkAdmin = (iamGroups: string[]) =>
-  iamGroups.some((iam) => adminIams.includes(iam))
-
-const isPowerUser = (iamGroups: string[]) => iamGroups.includes(powerUserIam)
 
 const mockHeaders = {
   uid: 'testUser',
@@ -19,8 +14,10 @@ const mockHeaders = {
   hygroupcn: 'grp-toska;hy-employees',
 }
 
-const userMiddleware = async (req: any, _res: any, next: any) => {
-  const headers = inDevelopment || inCI ? mockHeaders : req.headers
+const userMiddleware = async (req: any, res: any, next: any) => {
+  if (req.path.includes('/login')) return next()
+
+  const headers = mockHeaders
 
   const {
     uid: username,
@@ -32,28 +29,34 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
 
   const iamGroups = parseIamGroups(hygroupcn)
 
+  const acualId = id || username
+
   const acualUser: User = {
-    id: id || username,
+    id: acualId,
     username,
     email,
     language,
     iamGroups,
-    isAdmin: checkAdmin(iamGroups),
-    isPowerUser: isPowerUser(iamGroups),
+    isAdmin: true,
+    isPowerUser: true,
   }
 
-  const adminLoggedInAsId = req.headers['x-admin-logged-in-as']
-
-  if (acualUser.isAdmin && adminLoggedInAsId) {
-    const hijackedUser = await UserModel.findByPk(adminLoggedInAsId)
-    if (!hijackedUser) {
-      return next(new Error('User not found'))
-    }
-    req.user = { email: acualUser.email, ...hijackedUser.toJSON() }
-    req.hijackedBy = acualUser
-  } else {
-    req.user = acualUser
+  if (!acualId) {
+    return res.status(401).send('User not found')
   }
+
+  const enrolledCourses = await getEnrolledCourses(acualUser)
+  const teacherCourses = await getOwnCourses(acualUser)
+
+  const courses = enrolledCourses.concat(teacherCourses)
+
+  acualUser.ownCourses = teacherCourses
+  acualUser.activeCourseIds = courses
+
+  await UserModel.upsert(acualUser)
+
+  const usage = await getUsage(id)
+  req.user = { ...acualUser, usage, hasIamAccess: true }
 
   return next()
 }

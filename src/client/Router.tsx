@@ -6,7 +6,7 @@ import {
   createRoutesFromElements,
 } from 'react-router-dom'
 
-import { PUBLIC_URL } from '../config'
+import { BASE_PATH } from '../config'
 import App from './App'
 import Admin from './components/Admin'
 import Chat from './components/Chat'
@@ -26,7 +26,7 @@ const router = createBrowserRouter(
     </Route>
   ),
   {
-    basename: PUBLIC_URL,
+    basename: BASE_PATH,
   }
 )
 

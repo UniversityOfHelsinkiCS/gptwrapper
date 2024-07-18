@@ -16,7 +16,7 @@ import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 import { useParams, Link } from 'react-router-dom'
 
-import { PUBLIC_URL } from '../../../../config'
+import { BASE_PATH } from '../../../../config'
 import { SetState, Message as MessageType } from '../../../types'
 import SystemMessage from '../../Chat/SystemMessage'
 import Conversation from '../../Chat/Conversation'
@@ -111,7 +111,7 @@ const Course = () => {
   const { prompts, isLoading } = usePrompts(id as string)
   const { course, isLoading: courseLoading } = useCourse(id as string)
 
-  const studentLink = `${window.location.origin}${PUBLIC_URL}/${course?.courseId}`
+  const studentLink = `${window.location.origin}${BASE_PATH}/${course?.courseId}`
 
   if (isLoading || courseLoading || !course) return null
 
