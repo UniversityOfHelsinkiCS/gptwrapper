@@ -17,6 +17,7 @@ const Banner = () => {
           display: 'flex',
           flexWrap: 'wrap',
           gap: 0.3,
+          overflowWrap: 'anywhere',
         }}
       >
         <Markdown>{t('info:title')}</Markdown>

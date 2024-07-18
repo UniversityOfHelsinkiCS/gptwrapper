@@ -296,7 +296,7 @@ const Chat = () => {
         handleContinue={handleContinue}
         visible={tokenWarningVisible}
       />
-      <Box sx={{ px: 4, my: 4, width: '50%' }}>
+      <Box sx={{ px: 4, my: 4, maxWidth: '40rem' }}>
         <Typography>{t('chat:temperature')}</Typography>
         <Slider
           onChange={handleSlider}
