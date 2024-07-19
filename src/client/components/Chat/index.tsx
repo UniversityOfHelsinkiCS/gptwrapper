@@ -168,7 +168,7 @@ const Chat = () => {
     getCompletionParams: Parameters<typeof getCompletionStream>[0],
     abortController: AbortController
   ) => {
-    abortController.abort('Creating a stream took too long')
+    abortController?.abort('Creating a stream took too long')
     const newAbortController = new AbortController()
     setStreamController(newAbortController)
 
@@ -198,8 +198,10 @@ const Chat = () => {
       ])
     }
 
-    clearRetryTimeout()
+    // Abort the old request if a new one is sent
+    // Also clear the retry timeout and message
     streamController?.abort('Sending a new request, aborting the old one')
+    clearRetryTimeout()
     setMessage('')
 
     const abortController = new AbortController()
