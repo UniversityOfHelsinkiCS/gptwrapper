@@ -16,7 +16,6 @@ import {
   getModelContextLimit,
   getCourseModel,
   getAllowedModels,
-  sleep,
 } from '../util/util'
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
@@ -114,7 +113,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   }
 
   const events = await getCompletionEvents(options as AzureOptions)
-  await sleep(10000)
+
   if (isError(events)) return res.status(424)
 
   res.setHeader('content-type', 'text/event-stream')
