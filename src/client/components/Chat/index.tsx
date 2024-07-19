@@ -168,6 +168,8 @@ const Chat = () => {
     getCompletionParams: Parameters<typeof getCompletionStream>[0],
     abortController: AbortController
   ) => {
+    if (!abortController || abortController.signal.aborted) return
+
     abortController?.abort('Creating a stream took too long')
     const newAbortController = new AbortController()
     setStreamController(newAbortController)
@@ -241,6 +243,7 @@ const Chat = () => {
       return
     }
 
+    clearRetryTimeout()
     await processStream(stream)
   }
 
