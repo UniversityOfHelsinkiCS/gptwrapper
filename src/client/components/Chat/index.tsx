@@ -205,7 +205,7 @@ const Chat = () => {
     const abortController = new AbortController()
     setStreamController(abortController)
 
-    const getCompletionsParams = {
+    const getCompletionsArgs = {
       system,
       messages: messages.concat(
         userConsent
@@ -226,12 +226,12 @@ const Chat = () => {
     }
     // Retry the request if the server is stuck for WAIT_FOR_STREAM_TIMEOUT seconds
     setRetryTimeout(
-      () => handleRetry(getCompletionsParams, abortController),
+      () => handleRetry(getCompletionsArgs, abortController),
       WAIT_FOR_STREAM_TIMEOUT
     )
 
     const { tokenUsageAnalysis, stream } =
-      await getCompletionStream(getCompletionsParams)
+      await getCompletionStream(getCompletionsArgs)
 
     if (tokenUsageAnalysis && tokenUsageAnalysis.message) {
       setTokenUsageWarning(tokenUsageAnalysis.message)
