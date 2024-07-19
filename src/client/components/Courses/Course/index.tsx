@@ -207,7 +207,7 @@ const Course = () => {
         </Paper>
       </Box>
 
-      <Stats stats={stats} t={t} />
+      <Stats stats={stats} />
 
       <MaxTokenUsageStudents courseId={id as string} />
 

@@ -120,6 +120,7 @@
     "curreEnabledTab": "CurreChat enabled",
     "endedTab": "Ended",
     "statistics": "Statistics",
-    "averageTokenUsage": "Average token usage: "
+    "averageTokenUsage": "Average token usage: ",
+    "usagePercentage": "Percentage of students who have used CurreChat: "
   }
 }

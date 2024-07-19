@@ -1,19 +1,13 @@
 import React from 'react'
 import { Paper, Typography } from '@mui/material'
-import { TFunction } from 'i18next/typescript/t'
+import { useTranslation } from 'react-i18next'
 
-const Stats = ({
-  stats,
-  t,
-}: {
-  stats: any
-  t: TFunction<'translation', undefined>
-}) => {
-  if (!stats) return null
+const Stats = ({ stats }: { stats: any }) => {
+  const { t } = useTranslation()
+
+  if (!stats || (!stats.average && !stats.usagePercentage)) return null
 
   const { average, usagePercentage } = stats
-
-  if (!average && !usagePercentage) return null
 
   return (
     <Paper
@@ -26,6 +20,7 @@ const Stats = ({
       <Typography variant="h6" display="inline">
         {t('course:statistics')}
       </Typography>
+
       {average && (
         <Typography>
           {t('course:averageTokenUsage')} {parseInt(average, 10)}
@@ -34,8 +29,8 @@ const Stats = ({
 
       {usagePercentage && (
         <Typography>
-          CurreChatin käyttöön ottaneiden opiskelijoiden osuus:
-          {usagePercentage}
+          {t('course:usagePercentage')}
+          {usagePercentage * 100}%
         </Typography>
       )}
     </Paper>
