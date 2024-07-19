@@ -85,7 +85,6 @@ export const streamCompletion = async (
 ) => {
   let tokenCount = 0
   for await (const event of events) {
-    // Slow sending of messages to prevent blocky output
     for (const choice of event.choices) {
       const delta = choice.delta?.content
 
@@ -96,12 +95,11 @@ export const streamCompletion = async (
         await new Promise((resolve) => {
           if (
             !res.write(delta, (err) => {
-              if (err) console.log(choice.delta, err)
+              if (err) logger.error(`${choice.delta} ${err}`)
             })
           ) {
-            console.log(
-              choice.delta,
-              'res.write returned false, waiting for drain'
+            logger.info(
+              `${choice.delta} res.write returned false, waiting for drain`
             )
             res.once('drain', resolve)
           } else {
@@ -110,8 +108,6 @@ export const streamCompletion = async (
         })
 
         tokenCount += encoding.encode(delta).length ?? 0
-      } else {
-        console.log(choice.delta)
       }
     }
   }
