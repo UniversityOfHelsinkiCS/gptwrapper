@@ -59,7 +59,7 @@ const NavBar = () => {
     >
       <Container maxWidth={false}>
         <Toolbar sx={styles.toolbar} disableGutters>
-          <MuiLink to="/" sx={styles.navBox} component={Link}>
+          <MuiLink to="/" sx={styles.navBox} component={Link} reloadDocument>
             <img src={hyLogo} alt="University of Helsinki" width="40" />
             <Box ml="2rem">
               <Typography sx={styles.appName}>{t('appName')}</Typography>
