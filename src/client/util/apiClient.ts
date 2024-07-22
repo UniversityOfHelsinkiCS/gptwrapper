@@ -19,8 +19,12 @@ apiClient.interceptors.request.use((config) => {
   return newConfig
 })
 
-export const postAbortableStream = async (path: string, formData: FormData) => {
-  const controller = new AbortController()
+export const postAbortableStream = async (
+  path: string,
+  formData: FormData,
+  externalController?: AbortController
+) => {
+  const controller = externalController ?? new AbortController()
 
   const adminHeaders = {} as any
   const adminLoggedInAs = localStorage.getItem('adminLoggedInAs')

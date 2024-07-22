@@ -60,8 +60,9 @@ const Conversation = ({
       <Box mb={1}>
         <Typography variant="h6">{t('chat:conversation')}</Typography>
       </Box>
-      {messages.map(({ role, content }) => (
-        <Response key={content} role={role} content={content} />
+      {messages.map(({ role, content }, index) => (
+        // eslint-disable-next-line
+        <Response key={content + index} role={role} content={content} />
       ))}
       {completion && (
         <>

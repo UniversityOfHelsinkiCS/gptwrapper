@@ -1,15 +1,26 @@
 import { Message } from '../../types'
 import { postAbortableStream } from '../../util/apiClient'
 
-export const getCompletionStream = async (
-  system: string,
-  messages: Message[],
-  model: string,
-  formData: FormData,
-  userConsent: boolean,
-  modelTemperature: number,
+interface GetCompletoinStreamProps {
+  system: string
+  messages: Message[]
+  model: string
+  formData: FormData
+  userConsent: boolean
+  modelTemperature: number
   courseId?: string
-) => {
+  abortController?: AbortController
+}
+export const getCompletionStream = async ({
+  system,
+  messages,
+  model,
+  formData,
+  userConsent,
+  modelTemperature,
+  courseId,
+  abortController,
+}: GetCompletoinStreamProps) => {
   const data = {
     courseId,
     options: {
@@ -28,16 +39,25 @@ export const getCompletionStream = async (
 
   formData.set('data', JSON.stringify(data))
 
-  return postAbortableStream('/ai/stream', formData)
+  return postAbortableStream('/ai/stream', formData, abortController)
 }
 
-export const getCourseCompletionStream = async (
-  id: string,
-  system: string,
-  messages: Message[],
-  model: string,
+interface GetCourseCompletionStreamProps {
+  id: string
+  system: string
+  messages: Message[]
+  model: string
   courseId: string
-) => {
+  abortController?: AbortController
+}
+export const getCourseCompletionStream = async ({
+  id,
+  system,
+  messages,
+  model,
+  courseId,
+  abortController,
+}: GetCourseCompletionStreamProps) => {
   const data = {
     id,
     courseId,
@@ -55,5 +75,5 @@ export const getCourseCompletionStream = async (
   const formData = new FormData()
   formData.set('data', JSON.stringify(data))
 
-  return postAbortableStream(`/ai/stream/`, formData)
+  return postAbortableStream(`/ai/stream/`, formData, abortController)
 }

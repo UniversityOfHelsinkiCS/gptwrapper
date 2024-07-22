@@ -20,7 +20,18 @@ import useUserStatus from '../../hooks/useUserStatus'
 import PromptSelector from './PromptSelector'
 import TokenUsageWarning from './TokenUsageWarning'
 import useInfoTexts from '../../hooks/useInfoTexts'
+import useRetryTimeout from '../../hooks/useRetryTimeout'
 
+const WAIT_FOR_STREAM_TIMEOUT = 4000
+const ALLOWED_FILE_TYPES = [
+  'text/plain',
+  'text/html',
+  'text/css',
+  'text/csv',
+  'text/markdown',
+  'text/md',
+  'application/pdf',
+]
 const chatPersistingEnabled = false // import.meta.env.VITE_CHAT_PERSISTING
 
 /**
@@ -76,6 +87,7 @@ const Chat = () => {
   const [tokenUsageWarning, setTokenUsageWarning] = useState('')
   const [tokenWarningVisible, setTokenWarningVisible] = useState(false)
   const [modelTemperature, setModelTemperature] = useState(0.5)
+  const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
 
   const { t, i18n } = useTranslation()
   const { language } = i18n
@@ -110,68 +122,25 @@ const Chat = () => {
     setMessage('')
     setMessages(messages.slice(0, -1))
     setTokenWarningVisible(false)
+    clearRetryTimeout()
   }
 
-  const handleSend = async (userConsent: boolean) => {
-    const formData = new FormData()
+  const handleReset = () => {
+    if (streamController) streamController.abort()
 
-    let file = inputFileRef.current.files[0] as File
-
-    const allowedFileTypes = [
-      'text/plain',
-      'text/html',
-      'text/css',
-      'text/csv',
-      'text/markdown',
-      'text/md',
-      'application/pdf',
-    ]
-
-    if (file) {
-      if (allowedFileTypes.includes(file.type)) {
-        formData.append('file', file)
-      } else {
-        file = null
-      }
-    }
-
-    if (!userConsent) {
-      setMessages((prev) => [
-        ...prev,
-        { role: 'user', content: message + (file ? `\n\n${file.name}` : '') },
-      ])
-    }
-
+    setStreamController(undefined)
+    setMessages([])
+    setSystem('')
     setMessage('')
-    const { tokenUsageAnalysis, stream, controller } =
-      await getCompletionStream(
-        system,
-        messages.concat(
-          userConsent
-            ? []
-            : [
-                {
-                  role: 'user',
-                  content: message + (file ? `${t('fileInfoPrompt')}` : ''),
-                },
-              ]
-        ),
-        model,
-        formData,
-        userConsent,
-        modelTemperature,
-        courseId
-      )
+    setCompletion('')
+    inputFileRef.current.value = ''
+    setFileName('')
+    clearRetryTimeout()
+  }
 
-    if (tokenUsageAnalysis && tokenUsageAnalysis.message) {
-      setTokenUsageWarning(tokenUsageAnalysis.message)
-      setTokenWarningVisible(true)
-      return
-    }
-
+  const processStream = async (stream: ReadableStream) => {
     try {
       const reader = stream.getReader()
-      setStreamController(controller)
 
       let content = ''
       const decoder = new TextDecoder()
@@ -204,24 +173,96 @@ const Chat = () => {
       refetchStatus()
       inputFileRef.current.value = ''
       setFileName('')
+      clearRetryTimeout()
     }
+  }
+
+  const handleRetry = async (
+    getCompletionParams: Parameters<typeof getCompletionStream>[0],
+    abortController: AbortController
+  ) => {
+    if (!abortController || abortController.signal.aborted) return
+
+    abortController?.abort('Creating a stream took too long')
+    const newAbortController = new AbortController()
+    setStreamController(newAbortController)
+
+    const { stream: retriedStream } = await getCompletionStream({
+      ...getCompletionParams,
+      abortController: newAbortController,
+    })
+
+    await processStream(retriedStream)
+  }
+
+  const handleSend = async (userConsent: boolean) => {
+    const formData = new FormData()
+    let file = inputFileRef.current.files[0] as File
+    if (file) {
+      if (ALLOWED_FILE_TYPES.includes(file.type)) {
+        formData.append('file', file)
+      } else {
+        file = null
+      }
+    }
+
+    if (!userConsent) {
+      setMessages((prev) => [
+        ...prev,
+        { role: 'user', content: message + (file ? `\n\n${file.name}` : '') },
+      ])
+    }
+
+    // Abort the old request if a new one is sent
+    // Also clear the retry timeout and message
+    streamController?.abort('Sending a new request, aborting the old one')
+    clearRetryTimeout()
+    setMessage('')
+
+    const abortController = new AbortController()
+    setStreamController(abortController)
+
+    const getCompletionsArgs = {
+      system,
+      messages: messages.concat(
+        userConsent
+          ? []
+          : [
+              {
+                role: 'user',
+                content: message + (file ? `${t('fileInfoPrompt')}` : ''),
+              },
+            ]
+      ),
+      model,
+      formData,
+      userConsent,
+      modelTemperature,
+      courseId,
+      abortController,
+    }
+    // Retry the request if the server is stuck for WAIT_FOR_STREAM_TIMEOUT seconds
+    setRetryTimeout(
+      () => handleRetry(getCompletionsArgs, abortController),
+      WAIT_FOR_STREAM_TIMEOUT
+    )
+
+    const { tokenUsageAnalysis, stream } =
+      await getCompletionStream(getCompletionsArgs)
+
+    if (tokenUsageAnalysis && tokenUsageAnalysis.message) {
+      setTokenUsageWarning(tokenUsageAnalysis.message)
+      setTokenWarningVisible(true)
+      return
+    }
+
+    clearRetryTimeout()
+    await processStream(stream)
   }
 
   const handleContinue = () => {
     handleSend(true)
     setTokenWarningVisible(false)
-  }
-
-  const handleReset = () => {
-    if (streamController) streamController.abort()
-
-    setStreamController(undefined)
-    setMessages([])
-    setSystem('')
-    setMessage('')
-    setCompletion('')
-    inputFileRef.current.value = ''
-    setFileName('')
   }
 
   const handleStop = () => {
@@ -241,7 +282,7 @@ const Chat = () => {
     setActivePromptId(promptId)
   }
 
-  const handleSlider = (event: Event, newValue: number | number[]) => {
+  const handleSlider = (_: Event, newValue: number | number[]) => {
     setModelTemperature(newValue as number)
   }
 
