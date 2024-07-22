@@ -5,7 +5,7 @@ import { Box } from '@mui/material'
 import Markdown from './Markdown'
 import ShowMore from './ShowMore'
 
-const Banner = () => {
+const Banner = ({ disclaimer }: { disclaimer: string }) => {
   const { t } = useTranslation()
 
   const showDisclaimer = !localStorage.getItem('disclaimerClosed')
@@ -21,7 +21,7 @@ const Banner = () => {
         }}
       >
         <Markdown>{t('info:title')}</Markdown>
-        <ShowMore text={t('info:disclaimer')} expanded={showDisclaimer} />
+        <ShowMore text={disclaimer} expanded={showDisclaimer} />
       </Box>
     </Box>
   )

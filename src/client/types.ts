@@ -74,6 +74,12 @@ export type UserStatus = {
   isTike: boolean
 }
 
+export type InfoText = {
+  id: string
+  name: string
+  text: Locales
+}
+
 export type Locales = {
   fi: string
   en: string

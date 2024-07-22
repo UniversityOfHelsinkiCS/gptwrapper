@@ -19,6 +19,7 @@ import useCourse from '../../hooks/useCourse'
 import useUserStatus from '../../hooks/useUserStatus'
 import PromptSelector from './PromptSelector'
 import TokenUsageWarning from './TokenUsageWarning'
+import useInfoTexts from '../../hooks/useInfoTexts'
 
 const chatPersistingEnabled = false // import.meta.env.VITE_CHAT_PERSISTING
 
@@ -54,6 +55,8 @@ const Chat = () => {
     refetch: refetchStatus,
   } = useUserStatus(courseId)
 
+  const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
+
   const [activePromptId, setActivePromptId] = useState('')
   const [system, setSystem] = usePersistedState('general-chat-system', '')
   const [message, setMessage] = usePersistedState('general-chat-current', '')
@@ -74,8 +77,18 @@ const Chat = () => {
   const [tokenWarningVisible, setTokenWarningVisible] = useState(false)
   const [modelTemperature, setModelTemperature] = useState(0.5)
 
-  const { t } = useTranslation()
-  if (statusLoading) return null
+  const { t, i18n } = useTranslation()
+  const { language } = i18n
+
+  if (statusLoading || infoTextsLoading) return null
+
+  const disclaimer = infoTexts.find(
+    (infoText) => infoText.name === 'disclaimer'
+  ).text[language]
+  const systemMessageInfo = infoTexts.find(
+    (infoText) => infoText.name === 'systemMessage'
+  ).text[language]
+
   const { usage, limit, models: courseModels } = userStatus
 
   const models = courseModels ?? validModels.map((m) => m.name)
@@ -234,7 +247,7 @@ const Chat = () => {
 
   return (
     <Box>
-      <Banner />
+      <Banner disclaimer={disclaimer} />
       {hasPrompts && (
         <PromptSelector
           prompts={course.prompts}
@@ -244,6 +257,7 @@ const Chat = () => {
       )}
       {!hidePrompt && (
         <SystemMessage
+          infoText={systemMessageInfo}
           system={system}
           setSystem={setSystem}
           disabled={activePromptId.length > 0 || messages.length > 0}

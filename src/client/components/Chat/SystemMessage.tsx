@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next'
 
 import { SetState } from '../../types'
 
-const Info = () => {
+const Info = ({ infoText }: { infoText: string }) => {
   const { t } = useTranslation()
 
   return (
     <Box mb={1}>
-      <Tooltip placement="right" title={t('chat:systemMessageInfo')}>
+      <Tooltip placement="right" title={infoText}>
         <Typography variant="h6" display="inline">
           {t('chat:systemMessage')}
         </Typography>
@@ -23,18 +23,20 @@ const SystemMessage = ({
   setSystem,
   disabled,
   showInfo = true,
+  infoText = '',
 }: {
   system: string
   setSystem: SetState<string>
   disabled: boolean
   // eslint-disable-next-line react/require-default-props
   showInfo?: boolean
+  infoText?: string
 }) => {
   const { t } = useTranslation()
 
   return (
     <Box>
-      {showInfo && <Info />}
+      {showInfo && <Info infoText={infoText} />}
       <TextField
         fullWidth
         multiline
