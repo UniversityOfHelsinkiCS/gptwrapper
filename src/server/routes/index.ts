@@ -15,6 +15,7 @@ import promptRouter from './prompt'
 import emailRouter from './email'
 import adminRouter from './admin'
 import facultyRouter from './faculty'
+import infoTextRouter from './infotext'
 
 const router = express()
 
@@ -38,6 +39,7 @@ router.use('/prompts', promptRouter)
 router.use('/email', emailRouter)
 router.use('/admin', adminRouter)
 router.use('/faculties', facultyRouter)
+router.use('/infotexts', infoTextRouter)
 
 Sentry.setupExpressErrorHandler(router)
 router.use(errorHandler)
