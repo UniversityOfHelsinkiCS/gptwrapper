@@ -21,7 +21,7 @@ import PromptSelector from './PromptSelector'
 import TokenUsageWarning from './TokenUsageWarning'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 
-const WAIT_FOR_STREAM_TIMEOUT = 3000
+const WAIT_FOR_STREAM_TIMEOUT = 4000
 const ALLOWED_FILE_TYPES = [
   'text/plain',
   'text/html',
