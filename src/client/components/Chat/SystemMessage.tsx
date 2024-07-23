@@ -2,17 +2,19 @@ import React from 'react'
 import { Box, TextField, Typography, Tooltip } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
+import { HelpOutline } from '@mui/icons-material'
 import { SetState } from '../../types'
 
 const Info = ({ infoText }: { infoText: string }) => {
   const { t } = useTranslation()
 
   return (
-    <Box mb={1}>
+    <Box mb={1} sx={{ display: 'flex', alignItems: 'center' }}>
+      <Typography variant="h6" display="inline" marginRight={1}>
+        {t('chat:systemMessage')}
+      </Typography>
       <Tooltip placement="right" title={infoText}>
-        <Typography variant="h6" display="inline">
-          {t('chat:systemMessage')}
-        </Typography>
+        <HelpOutline color="action" />
       </Tooltip>
     </Box>
   )
