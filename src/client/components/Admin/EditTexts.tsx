@@ -1,20 +1,23 @@
 import React, { useState } from 'react'
 import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
+import { useTranslation } from 'react-i18next'
 import useInfoTexts from '../../hooks/useInfoTexts'
 import { InfoText } from '../../types'
 import { useEditInfoTextMutation } from '../../hooks/useInfoTextMutation'
 
 const Text = ({ info }: { info: InfoText }) => {
-  if (!info) return null
-
   const [isEditing, setIsEditing] = useState(false)
+
+  const { t, i18n } = useTranslation()
 
   const [fi, setFi] = useState(info.text.fi)
   const [sv, setSv] = useState(info.text.sv)
   const [en, setEn] = useState(info.text.en)
 
   const mutation = useEditInfoTextMutation()
+
+  const { language } = i18n
 
   const handleSave = () => {
     try {
@@ -58,14 +61,14 @@ const Text = ({ info }: { info: InfoText }) => {
             variant="outlined"
             sx={{ mr: 2 }}
           >
-            Tallenna
+            {t('common:save')}
           </Button>
         </>
       ) : (
-        <Box margin={1}>{info.text.fi}</Box>
+        <Box margin={1}>{info.text[language]}</Box>
       )}
       <Button onClick={() => setIsEditing(!isEditing)} variant="outlined">
-        {isEditing ? 'Peruuta' : 'Muokkaa'}
+        {isEditing ? t('common:cancel') : t('common:edit')}
       </Button>
     </Box>
   )
