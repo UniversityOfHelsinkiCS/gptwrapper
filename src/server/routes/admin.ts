@@ -186,8 +186,6 @@ adminRouter.put('/info-texts/:id', async (req, res) => {
   const data = req.body as InfoText
   const { text } = data
 
-  console.log(data)
-
   const infoText = await InfoText.findByPk(id)
 
   infoText.text = text
