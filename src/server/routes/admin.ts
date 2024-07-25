@@ -5,6 +5,7 @@ import { RequestWithUser } from '../types'
 import { ChatInstance, UserChatInstanceUsage, User } from '../db/models'
 import { getCourse } from '../util/importer'
 import { run as runUpdater } from '../updater'
+import InfoText from '../db/models/infotext'
 
 const adminRouter = express.Router()
 
@@ -178,6 +179,22 @@ adminRouter.get('/user-search', async (req, res) => {
 adminRouter.post('/run-updater', async (req, res) => {
   runUpdater()
   return res.send('Updater started')
+})
+
+adminRouter.put('/info-texts/:id', async (req, res) => {
+  const { id } = req.params
+  const data = req.body as InfoText
+  const { text } = data
+
+  console.log(data)
+
+  const infoText = await InfoText.findByPk(id)
+
+  infoText.text = text
+
+  await infoText.save()
+
+  return res.send(infoText)
 })
 
 export default adminRouter
