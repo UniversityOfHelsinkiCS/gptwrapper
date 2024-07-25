@@ -15,6 +15,7 @@ import ChatInstances from './ChatInstances'
 import Usage from './Usage'
 import Updater from './Updater'
 import LoginAsSelector from './Usage/UserSearch'
+import EditTexts from './EditTexts'
 
 const stripSearch = (path: string) => path.split('?')[0]
 
@@ -51,6 +52,11 @@ const Admin = () => {
             to="/admin/search"
             component={Link}
           />
+          <Tab
+            label="Muokkaa tekstejä"
+            to="/admin/edit-texts"
+            component={Link}
+          />
         </RouterTabs>
       </Box>
       <Routes>
@@ -59,6 +65,7 @@ const Admin = () => {
         <Route path="/usage" element={<Usage />} />
         <Route path="/updater" element={<Updater />} />
         <Route path="/search" element={<LoginAsSelector />} />
+        <Route path="/edit-texts" element={<EditTexts />} />
       </Routes>
     </Box>
   )
