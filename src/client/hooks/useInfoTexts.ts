@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import apiClient from '../util/apiClient'
 import { InfoText } from '../types'
 
-const queryKey = ['infotexts']
+const queryKey = ['infoTexts']
 
 const useInfoTexts = () => {
   const queryFn = async (): Promise<InfoText[]> => {
