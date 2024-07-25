@@ -127,7 +127,7 @@
     "remark-gfm": "^4.0.0",
     "sequelize": "^6.36.0",
     "umzug": "^3.6.1",
-    "unfuck-spa-shibboleth-session": "^3.1.4",
+    "unfuck-spa-shibboleth-session": "^4.1.0",
     "unfuck-utf8-headers-middleware": "^1.0.1",
     "vite": "^5.0.12",
     "winston": "^3.11.0",
