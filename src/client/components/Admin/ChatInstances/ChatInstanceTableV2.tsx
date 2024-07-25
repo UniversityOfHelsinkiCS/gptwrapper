@@ -54,22 +54,26 @@ const headCells: readonly HeadCell[] = [
   },
 ]
 
-const Head = () => (
-  <TableHead>
-    <TableRow>
-      {headCells.map((headCell) => (
-        <TableCell
-          key={headCell.id}
-          align={headCell.numeric ? 'right' : 'left'}
-          padding={headCell.disablePadding ? 'none' : 'normal'}
-          sx={{ pl: 1 }}
-        >
-          {headCell.label}
-        </TableCell>
-      ))}
-    </TableRow>
-  </TableHead>
-)
+const Head = () => {
+  const { t } = useTranslation()
+
+  return (
+    <TableHead>
+      <TableRow>
+        {headCells.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            align={headCell.numeric ? 'right' : 'left'}
+            padding={headCell.disablePadding ? 'none' : 'normal'}
+            sx={{ pl: 1 }}
+          >
+            {t(`admin:${headCell.id}`)}
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+  )
+}
 
 const ChatInstanceTableData = React.memo(
   ({
@@ -81,7 +85,7 @@ const ChatInstanceTableData = React.memo(
     onSelect: (chatInstance: ChatInstance) => void
     onDelete: (id: string) => void
   }) => {
-    const { i18n } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     const { language } = i18n
 
@@ -116,7 +120,7 @@ const ChatInstanceTableData = React.memo(
                     color="primary"
                     onClick={() => onSelect(row)}
                   >
-                    Edit
+                    {t('common:edit')}
                   </Button>
                   <Button
                     variant="text"
@@ -124,7 +128,7 @@ const ChatInstanceTableData = React.memo(
                     color="error"
                     onClick={() => onDelete(row.id)}
                   >
-                    Delete
+                    {t('common:delete')}
                   </Button>
                 </TableCell>
               </TableRow>
@@ -143,6 +147,7 @@ const ChatInstanceTableV2 = ({
   onSelect: (chatInstance: ChatInstance) => void
   onDelete: (id: string) => void
 }) => {
+  const { t } = useTranslation()
   const [search, setSearch] = React.useState('')
   const deferredSearch = React.useDeferredValue(search)
 
@@ -184,7 +189,7 @@ const ChatInstanceTableV2 = ({
       <Paper sx={{ width: '100%', mb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <TextField
-            label="Search course (input at least 4 characters)"
+            label={t('admin:searchCourse')}
             variant="outlined"
             sx={{ flex: 1, m: 1 }}
             onChange={handleChangeSearch}
@@ -197,6 +202,7 @@ const ChatInstanceTableV2 = ({
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage={t('admin:rowsPerPage')}
           />
         </Box>
         <ChatInstanceTableData

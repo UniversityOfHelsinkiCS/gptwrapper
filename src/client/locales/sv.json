@@ -95,7 +95,17 @@
     "usageCount": "Usage count",
     "reset": "Reset",
     "faculties": "Faculties",
-    "users": "Users"
+    "users": "Users",
+    "searchUsers": "Search users",
+    "editTexts": "Edit texts",
+    "userSearchFieldLabel": "Username or Sisu id",
+    "searchedFor": "Searched for: ",
+    "press": "Press",
+    "enter": "enter to login as",
+    "loginAsButton": "Login as",
+    "startUpdater": "Start Updater",
+    "rowsPerPage": "Rows per page",
+    "searchCourse": "Search course (input at least 4 characters)"
   },
   "course": {
     "courseUpdated": "Course updated",

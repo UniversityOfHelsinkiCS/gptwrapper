@@ -99,7 +99,17 @@
     "usageCount": "Käyttömäärä",
     "reset": "Nollaa",
     "faculties": "Tiedekunnat",
-    "users": "Käyttäjät"
+    "users": "Käyttäjät",
+    "searchUsers": "Etsi käyttäjiä",
+    "editTexts": "Muokkaa tekstejä",
+    "userSearchFieldLabel": "Käyttäjätunnus tai Sisu id",
+    "searchedFor": "Etsitty: ",
+    "press": "Paina",
+    "enter": "enteriä kirjautuaksesi sisään käyttäjällä",
+    "loginAsButton": "Kirjaudu sisään käyttäjällä",
+    "startUpdater": "Käynnistä Updater",
+    "rowsPerPage": "Rivien määrä sivulla",
+    "searchCourse": "Etsi kurssia (syötä vähintään 4 merkkiä)"
   },
   "course": {
     "curreEnabled": "CurreChat on käytössä kurssilla",

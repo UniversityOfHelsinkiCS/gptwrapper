@@ -3,6 +3,7 @@ import React, { KeyboardEvent, useState } from 'react'
 import { TextField, Box } from '@mui/material'
 
 import { debounce } from 'lodash'
+import { useTranslation } from 'react-i18next'
 import UserAccordion from './UserAccordion'
 import apiClient from '../../../util/apiClient'
 import { User } from '../../../types'
@@ -13,6 +14,7 @@ const handleLoginAs = (user: User) => () => {
 }
 
 const LoginAsSelector = () => {
+  const { t } = useTranslation()
   const [potentialUsers, setPotentialUsers] = useState([])
   const [focusIndex, setFocusIndex] = useState(0)
   const [lastQuery, setLastQuery] = useState({})
@@ -52,13 +54,13 @@ const LoginAsSelector = () => {
     <Box my={4} onKeyDown={handleKeyPress}>
       <TextField
         style={{ width: '30em' }}
-        label="Username or sisu id"
+        label={t('admin:userSearchFieldLabel')}
         variant="outlined"
         onChange={handleChange}
       />
 
       <div style={{ paddingTop: 10 }}>
-        Searched for:{' '}
+        {t('admin:searchedFor')}
         {Object.entries(lastQuery).map(([key, value]) => (
           <p key={key}>
             {key}: {value as string}

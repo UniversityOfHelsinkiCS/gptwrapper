@@ -53,7 +53,7 @@ const Admin = () => {
             component={Link}
           />
           <Tab
-            label="Muokkaa tekstejä"
+            label={t('admin:editTexts')}
             to="/admin/edit-texts"
             component={Link}
           />
