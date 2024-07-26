@@ -7,6 +7,8 @@ import {
   Tooltip,
   TextField,
   Stack,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material'
 import {
   ExpandLess,
@@ -50,12 +52,14 @@ const Prompt = ({
   const [editPrompt, setEditPrompt] = useState(false)
   const [message, setMessage] = useState(systemMessage)
   const [updatedName, setUpdatedName] = useState(name)
+  const [updatedHidden, setUpdatedHidden] = useState(false)
 
   const handleSave = () => {
     const updatedPrompt = {
       ...prompt,
       systemMessage: message,
       name: updatedName,
+      hidden: updatedHidden,
     }
 
     try {
@@ -122,12 +126,23 @@ const Prompt = ({
                 </Box>
               </>
             ) : (
-              <TextField
-                defaultValue={systemMessage}
-                sx={{ width: '80%' }}
-                multiline
-                onChange={(e) => setMessage(e.target.value)}
-              />
+              <>
+                <TextField
+                  defaultValue={systemMessage}
+                  sx={{ width: '80%' }}
+                  multiline
+                  onChange={(e) => setMessage(e.target.value)}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={updatedHidden}
+                      onChange={() => setUpdatedHidden((prev) => !prev)}
+                    />
+                  }
+                  label={t('hidePrompt')}
+                />
+              </>
             )}
             <Stack direction="row" spacing={2} marginTop={2}>
               {editPrompt && (

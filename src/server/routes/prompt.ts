@@ -56,7 +56,7 @@ promptRouter.delete('/:id', async (req, res) => {
 promptRouter.put('/:id', async (req, res) => {
   const { id } = req.params
   const data = req.body as Prompt
-  const { systemMessage, name } = data
+  const { systemMessage, name, hidden } = data
 
   const prompt = await Prompt.findByPk(id)
 
@@ -64,6 +64,7 @@ promptRouter.put('/:id', async (req, res) => {
 
   prompt.systemMessage = systemMessage
   prompt.name = name
+  prompt.hidden = hidden
 
   await prompt.save()
 
