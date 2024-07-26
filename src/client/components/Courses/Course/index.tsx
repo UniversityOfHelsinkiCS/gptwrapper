@@ -83,6 +83,7 @@ const Course = () => {
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<MessageType[]>([])
   const [hidden, setHidden] = useState(false)
+  const [mandatory, setMandatory] = useState(false)
 
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
 
@@ -229,20 +230,10 @@ const Course = () => {
         </Box>
 
         <Input
-          sx={{ mr: 2 }}
+          sx={{ mr: 2, mb: 2 }}
           placeholder={t('promptName') as string}
           value={name}
           onChange={({ target }) => setName(target.value)}
-        />
-
-        <FormControlLabel
-          control={
-            <Checkbox
-              value={hidden}
-              onChange={() => setHidden((prev) => !prev)}
-            />
-          }
-          label={t('hidePrompt')}
         />
 
         <SystemMessage system={system} setSystem={setSystem} disabled={false} />
@@ -254,7 +245,28 @@ const Course = () => {
           handleReset={handleReset}
           resetDisabled={false}
         />
-        <Button variant="contained" onClick={handleSave}>
+        <Box sx={{ paddingBottom: 2 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={mandatory}
+                onChange={() => setMandatory((prev) => !prev)}
+              />
+            }
+            label="Tee alustuksesta pakollinen opiskelijoille"
+            sx={{ mr: 5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                value={hidden}
+                onChange={() => setHidden((prev) => !prev)}
+              />
+            }
+            label={t('hidePrompt')}
+          />
+        </Box>
+        <Button variant="contained" onClick={handleSave} sx={{ mr: 2 }}>
           {t('common:save')}
         </Button>
       </Paper>
