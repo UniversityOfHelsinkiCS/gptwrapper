@@ -14,7 +14,7 @@ const formatEmail = (messages: Message[], t: any): string =>
       ({ role, content }) =>
         `<div style="display: flex; margin-bottom: 10px;">
       <div style="margin-right: 10px;">
-        ${role === 'user' ? t('email:user') : t('email:assistant')}
+        ${t(`email:${role}`)}
       </div>
       <div>
         ${content}
@@ -40,9 +40,20 @@ const Email = ({
   const { email } = user
 
   const handleSend = async () => {
-    const text = formatEmail(messages, t)
+    const systemMessage: Message = { role: 'system', content: system }
 
-    const response = await sendEmail(email, text, system)
+    const newMessages = systemMessage.content
+      ? [].concat(systemMessage, messages)
+      : messages
+
+    const date = new Date()
+
+    const formattedDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+    const subject = `CurreChat ${formattedDate}`
+
+    const text = formatEmail(newMessages, t)
+
+    const response = await sendEmail(email, text, subject)
 
     if (response.ok) {
       enqueueSnackbar(t('email:success'), { variant: 'success' })

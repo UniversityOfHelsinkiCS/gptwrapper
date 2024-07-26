@@ -54,6 +54,7 @@
     "save": "Spara som e-post",
     "user": "Käyttäjä",
     "assistant": "Avustaja",
+    "system": "System message",
     "success": "Sähköposti lähetetty",
     "failure": "Sähköpostin lähetys epäonnistui"
   },

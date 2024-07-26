@@ -55,6 +55,7 @@
     "save": "Tallenna sähköpostina",
     "user": "Käyttäjä",
     "assistant": "Avustaja",
+    "system": "Ohjeistus",
     "success": "Sähköposti lähetetty",
     "failure": "Sähköpostin lähetys epäonnistui"
   },
