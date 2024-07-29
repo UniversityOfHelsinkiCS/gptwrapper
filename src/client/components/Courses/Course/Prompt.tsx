@@ -15,6 +15,7 @@ import {
   ExpandMore,
   Visibility,
   VisibilityOff,
+  PriorityHigh,
 } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
@@ -46,7 +47,7 @@ const Prompt = ({
   const { t } = useTranslation()
   const mutation = useEditPromptMutation()
 
-  const { id, name, systemMessage, messages, hidden } = prompt
+  const { id, name, systemMessage, messages, hidden, mandatory } = prompt
 
   const [expand, setExpand] = useState(false)
   const [editPrompt, setEditPrompt] = useState(false)
@@ -87,6 +88,13 @@ const Prompt = ({
                 </Tooltip>
               )}
             </Box>
+            {mandatory && (
+              <Box display="inline" mr={2}>
+                <Tooltip title="Alustus on pakollinen opiskelijoille">
+                  <PriorityHigh />
+                </Tooltip>
+              </Box>
+            )}
             {!editPrompt ? (
               <Typography variant="h6" display="inline">
                 {name}
