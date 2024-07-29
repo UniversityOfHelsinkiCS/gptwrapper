@@ -11,6 +11,7 @@ interface NewPromptData {
   systemMessage: string
   messages: Message[]
   hidden: boolean
+  mandatory: boolean
 }
 
 export const useCreatePromptMutation = () => {

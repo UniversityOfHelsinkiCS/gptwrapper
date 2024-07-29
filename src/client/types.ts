@@ -28,6 +28,7 @@ export type Prompt = {
   systemMessage: string
   messages: Message[]
   hidden: boolean
+  mandatory: boolean
 }
 
 export interface ChatInstance {

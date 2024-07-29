@@ -108,6 +108,7 @@ const Course = () => {
     setSystem('')
     setMessage('')
     setHidden(false)
+    setMandatory(false)
   }
 
   const { prompts, isLoading } = usePrompts(id as string)
@@ -125,6 +126,7 @@ const Course = () => {
         systemMessage: system,
         messages,
         hidden,
+        mandatory,
       })
       enqueueSnackbar('Prompt created', { variant: 'success' })
       handleReset()
