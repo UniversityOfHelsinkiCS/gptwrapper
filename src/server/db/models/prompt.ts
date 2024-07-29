@@ -24,6 +24,8 @@ class Prompt extends Model<
   declare messages: CreationOptional<Message[]>
 
   declare hidden: CreationOptional<boolean>
+
+  declare mandatory: CreationOptional<boolean>
 }
 
 Prompt.init(
@@ -52,6 +54,11 @@ Prompt.init(
       defaultValue: [],
     },
     hidden: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    mandatory: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
