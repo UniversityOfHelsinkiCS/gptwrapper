@@ -13,9 +13,11 @@ const Info = ({ infoText }: { infoText: string }) => {
       <Typography variant="h6" display="inline" marginRight={1}>
         {t('chat:systemMessage')}
       </Typography>
-      <Tooltip placement="right" title={infoText}>
-        <HelpOutline color="action" />
-      </Tooltip>
+      {infoText && (
+        <Tooltip placement="right" title={infoText}>
+          <HelpOutline color="action" />
+        </Tooltip>
+      )}
     </Box>
   )
 }
