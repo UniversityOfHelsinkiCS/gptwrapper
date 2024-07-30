@@ -53,7 +53,8 @@ const Prompt = ({
   const [editPrompt, setEditPrompt] = useState(false)
   const [message, setMessage] = useState(systemMessage)
   const [updatedName, setUpdatedName] = useState(name)
-  const [updatedHidden, setUpdatedHidden] = useState(false)
+  const [updatedHidden, setUpdatedHidden] = useState(hidden)
+  const [updatedMandatory, setUpdatedMandatory] = useState(mandatory)
 
   const handleSave = () => {
     const updatedPrompt = {
@@ -61,6 +62,7 @@ const Prompt = ({
       systemMessage: message,
       name: updatedName,
       hidden: updatedHidden,
+      mandatory: updatedMandatory,
     }
 
     try {
@@ -140,6 +142,16 @@ const Prompt = ({
                   sx={{ width: '80%' }}
                   multiline
                   onChange={(e) => setMessage(e.target.value)}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={updatedMandatory}
+                      onChange={() => setUpdatedMandatory((prev) => !prev)}
+                    />
+                  }
+                  label="Tee alustuksesta pakollinen opiskelijoille"
+                  sx={{ mr: 5 }}
                 />
                 <FormControlLabel
                   control={
