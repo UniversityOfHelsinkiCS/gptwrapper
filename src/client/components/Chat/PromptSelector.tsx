@@ -22,23 +22,35 @@ const PromptSelector = ({
 }) => {
   const { t } = useTranslation()
 
+  const mandatoryPrompt = prompts.find((prompt) => prompt.mandatory)
+
+  if (mandatoryPrompt) setActivePrompt(mandatoryPrompt.id)
+
   return (
     <Box mb={2}>
       <FormControl sx={{ width: '40%' }}>
         <InputLabel>{t('prompt')}</InputLabel>
-        <Select
-          label={t('prompt')}
-          value={activePrompt}
-          onChange={(event: SelectChangeEvent) =>
-            setActivePrompt(event.target.value)
-          }
-        >
-          {prompts.map((prompt) => (
-            <MenuItem key={prompt.id} value={prompt.id}>
-              {prompt.name}
+        {!mandatoryPrompt ? (
+          <Select
+            label={t('prompt')}
+            value={activePrompt}
+            onChange={(event: SelectChangeEvent) =>
+              setActivePrompt(event.target.value)
+            }
+          >
+            {prompts.map((prompt) => (
+              <MenuItem key={prompt.id} value={prompt.id}>
+                {prompt.name}
+              </MenuItem>
+            ))}
+          </Select>
+        ) : (
+          <Select disabled label={t('prompt')} value={activePrompt}>
+            <MenuItem value={mandatoryPrompt.id}>
+              {mandatoryPrompt.name}
             </MenuItem>
-          ))}
-        </Select>
+          </Select>
+        )}
       </FormControl>
     </Box>
   )
