@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Box,
   InputLabel,
@@ -21,10 +21,16 @@ const PromptSelector = ({
   setActivePrompt: (promptId: string) => void
 }) => {
   const { t } = useTranslation()
+  const [mandatoryPrompt, setMandatoryPrompt] = useState<Prompt>()
 
-  const mandatoryPrompt = prompts.find((prompt) => prompt.mandatory)
+  useEffect(() => {
+    const mandatory = prompts.find((prompt) => prompt.mandatory)
 
-  if (mandatoryPrompt) setActivePrompt(mandatoryPrompt.id)
+    if (mandatory) {
+      setActivePrompt(mandatory.id)
+      setMandatoryPrompt(mandatory)
+    }
+  }, [])
 
   return (
     <Box mb={2}>
