@@ -10,6 +10,7 @@ import {
   FormControlLabel,
   Input,
   Alert,
+  Tooltip,
 } from '@mui/material'
 import { OpenInNew, Edit, FileCopyOutlined } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
@@ -118,7 +119,7 @@ const Course = () => {
 
   if (isLoading || courseLoading || !course) return null
 
-  const mandatoryPrompt = prompts.find((prompt) => prompt.mandatory)?.id
+  const mandatoryPromptId = prompts.find((prompt) => prompt.mandatory)?.id
 
   const handleSave = () => {
     try {
@@ -221,7 +222,7 @@ const Course = () => {
           key={prompt.id}
           prompt={prompt}
           handleDelete={handleDelete}
-          mandatoryPromptId={mandatoryPrompt}
+          mandatoryPromptId={mandatoryPromptId}
         />
       ))}
 
@@ -255,16 +256,26 @@ const Course = () => {
           resetDisabled={false}
         />
         <Box sx={{ paddingBottom: 2 }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={mandatory}
-                onChange={() => setMandatory((prev) => !prev)}
+          {!mandatoryPromptId ? (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={mandatory}
+                  onChange={() => setMandatory((prev) => !prev)}
+                />
+              }
+              label="Tee alustuksesta pakollinen opiskelijoille"
+              sx={{ mr: 5 }}
+            />
+          ) : (
+            <Tooltip title="Kurssilla voi olla vain yksi pakollinen alustus">
+              <FormControlLabel
+                control={<Checkbox checked={mandatory} disabled />}
+                label="Tee alustuksesta pakollinen opiskelijoille"
+                sx={{ mr: 5 }}
               />
-            }
-            label="Tee alustuksesta pakollinen opiskelijoille"
-            sx={{ mr: 5 }}
-          />
+            </Tooltip>
+          )}
           <FormControlLabel
             control={
               <Checkbox
