@@ -118,6 +118,8 @@ const Course = () => {
 
   if (isLoading || courseLoading || !course) return null
 
+  const mandatoryPrompt = prompts.find((prompt) => prompt.mandatory)?.id
+
   const handleSave = () => {
     try {
       createMutation.mutate({
@@ -215,7 +217,12 @@ const Course = () => {
       <MaxTokenUsageStudents courseId={id as string} />
 
       {prompts.map((prompt) => (
-        <Prompt key={prompt.id} prompt={prompt} handleDelete={handleDelete} />
+        <Prompt
+          key={prompt.id}
+          prompt={prompt}
+          handleDelete={handleDelete}
+          mandatoryPromptId={mandatoryPrompt}
+        />
       ))}
 
       <Paper

@@ -40,9 +40,11 @@ const ExpandButton = ({
 const Prompt = ({
   prompt,
   handleDelete,
+  mandatoryPromptId,
 }: {
   prompt: PromptType
   handleDelete: (promptId: string) => void
+  mandatoryPromptId: string
 }) => {
   const { t } = useTranslation()
   const mutation = useEditPromptMutation()
@@ -143,16 +145,27 @@ const Prompt = ({
                   multiline
                   onChange={(e) => setMessage(e.target.value)}
                 />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={updatedMandatory}
-                      onChange={() => setUpdatedMandatory((prev) => !prev)}
+                {!mandatoryPromptId || mandatoryPromptId === prompt.id ? (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={updatedMandatory}
+                        onChange={() => setUpdatedMandatory((prev) => !prev)}
+                      />
+                    }
+                    label="Tee alustuksesta pakollinen opiskelijoille"
+                    sx={{ mr: 5 }}
+                  />
+                ) : (
+                  <Tooltip title="Kurssilla voi olla vain yksi pakollinen alustus">
+                    <FormControlLabel
+                      control={<Checkbox checked={updatedMandatory} disabled />}
+                      label="Tee alustuksesta pakollinen opiskelijoille"
+                      sx={{ mr: 5 }}
                     />
-                  }
-                  label="Tee alustuksesta pakollinen opiskelijoille"
-                  sx={{ mr: 5 }}
-                />
+                  </Tooltip>
+                )}
+
                 <FormControlLabel
                   control={
                     <Checkbox
