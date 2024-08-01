@@ -309,6 +309,7 @@ const Chat = () => {
         messages={messages}
         completion={completion}
         handleStop={handleStop}
+        setMessage={setMessage}
       />
       <SendMessage
         message={message}

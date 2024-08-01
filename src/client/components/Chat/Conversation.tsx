@@ -11,9 +11,11 @@ import { Message, Role } from '../../types'
 export const Response = ({
   role,
   content,
+  setMessage,
 }: {
   role: Role
   content: string
+  setMessage?: any
 }) => {
   const isUser = role === 'user'
 
@@ -23,7 +25,12 @@ export const Response = ({
         <Paper variant="outlined">
           <Box display="flex">
             {isUser ? (
-              <Person sx={{ mx: 3, my: 4 }} />
+              <>
+                {setMessage && (
+                  <Button onClick={() => setMessage(content)}>Kopioi</Button>
+                )}
+                <Person sx={{ mx: 3, my: 4 }} />
+              </>
             ) : (
               <Assistant sx={{ mx: 3, my: 4 }} />
             )}
@@ -46,10 +53,12 @@ const Conversation = ({
   messages,
   completion,
   handleStop = () => {},
+  setMessage,
 }: {
   messages: Message[]
   completion: string
   handleStop?: () => void
+  setMessage?: any
 }) => {
   const { t } = useTranslation()
 
@@ -61,8 +70,13 @@ const Conversation = ({
         <Typography variant="h6">{t('chat:conversation')}</Typography>
       </Box>
       {messages.map(({ role, content }, index) => (
-        // eslint-disable-next-line
-        <Response key={content + index} role={role} content={content} />
+        <Response
+          // eslint-disable-next-line react/no-array-index-key
+          key={content + index}
+          role={role}
+          content={content}
+          setMessage={setMessage}
+        />
       ))}
       {completion && (
         <>
@@ -78,7 +92,11 @@ const Conversation = ({
               {t('chat:stop')}
             </Button>
           </Stack>
-          <Response role="assistant" content={completion} />
+          <Response
+            role="assistant"
+            content={completion}
+            setMessage={setMessage}
+          />
         </>
       )}
     </Box>
