@@ -29,7 +29,8 @@
     "copyStudentLink": "Kopioi opiskelijan linkki",
     "linkCopied": "Linkki kopioitu",
     "fileUploadText": "Lisää tiedosto",
-    "fileInfoPrompt": "\n\nTässä on tiedoston sisältämä teksti:\n\n"
+    "fileInfoPrompt": "\n\nTässä on tiedoston sisältämä teksti:\n\n",
+    "copy": "Kopioi"
   },
   "info": {
     "title": "## Huomio",

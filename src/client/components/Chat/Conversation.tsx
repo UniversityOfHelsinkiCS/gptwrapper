@@ -17,6 +17,8 @@ export const Response = ({
   content: string
   setMessage?: any
 }) => {
+  const { t } = useTranslation()
+
   const isUser = role === 'user'
 
   return (
@@ -27,7 +29,9 @@ export const Response = ({
             {isUser ? (
               <>
                 {setMessage && (
-                  <Button onClick={() => setMessage(content)}>Kopioi</Button>
+                  <Button onClick={() => setMessage(content)}>
+                    {t('common:copy')}
+                  </Button>
                 )}
                 <Person sx={{ mx: 3, my: 4 }} />
               </>

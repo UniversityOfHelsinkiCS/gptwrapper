@@ -28,7 +28,8 @@
     "copyStudentLink": "Copy student link",
     "linkCopied": "Link copied",
     "fileUploadText": "Ladda upp fil",
-    "fileInfoPrompt": "\n\nHere is the contents of the file\n\n"
+    "fileInfoPrompt": "\n\nHere is the contents of the file\n\n",
+    "copy": "Copy"
   },
   "info": {
     "title": "## Uppmärksamhet",

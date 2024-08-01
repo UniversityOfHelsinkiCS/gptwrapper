@@ -30,7 +30,8 @@
     "fileUploadText": "Upload file",
     "fileInfoPrompt": "\n\nHere is the contents of the file\n\n",
     "curreUrl": "https://curre.helsinki.fi/",
-    "curreTitle": "Curre"
+    "curreTitle": "Curre",
+    "copy": "Copy"
   },
   "info": {
     "title": "## Attention",
