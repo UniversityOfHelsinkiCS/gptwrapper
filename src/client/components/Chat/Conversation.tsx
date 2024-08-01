@@ -5,6 +5,7 @@ import { Person, Assistant, Stop } from '@mui/icons-material'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useTranslation } from 'react-i18next'
+import CopyToClipboardButton from './CopyToClipboardButton'
 
 import { Message, Role } from '../../types'
 
@@ -17,8 +18,6 @@ export const Response = ({
   content: string
   setMessage?: any
 }) => {
-  const { t } = useTranslation()
-
   const isUser = role === 'user'
 
   return (
@@ -28,15 +27,14 @@ export const Response = ({
           <Box display="flex">
             {isUser ? (
               <>
-                {setMessage && (
-                  <Button onClick={() => setMessage(content)} sx={{ ml: 1 }}>
-                    {t('common:copy')}
-                  </Button>
-                )}
+                {setMessage && <CopyToClipboardButton copied={content} />}
                 <Person sx={{ mx: 3, my: 4 }} />
               </>
             ) : (
-              <Assistant sx={{ mx: 3, my: 4 }} />
+              <>
+                {setMessage && <CopyToClipboardButton copied={content} />}
+                <Assistant sx={{ mx: 3, my: 4 }} />
+              </>
             )}
             <Box pr={7} py={2}>
               <ReactMarkdown
