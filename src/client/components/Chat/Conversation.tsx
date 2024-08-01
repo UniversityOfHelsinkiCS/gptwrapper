@@ -29,7 +29,7 @@ export const Response = ({
             {isUser ? (
               <>
                 {setMessage && (
-                  <Button onClick={() => setMessage(content)}>
+                  <Button onClick={() => setMessage(content)} sx={{ ml: 1 }}>
                     {t('common:copy')}
                   </Button>
                 )}
@@ -96,11 +96,7 @@ const Conversation = ({
               {t('chat:stop')}
             </Button>
           </Stack>
-          <Response
-            role="assistant"
-            content={completion}
-            setMessage={setMessage}
-          />
+          <Response role="assistant" content={completion} />
         </>
       )}
     </Box>
