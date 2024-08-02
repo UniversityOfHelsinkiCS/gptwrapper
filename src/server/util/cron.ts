@@ -1,5 +1,5 @@
 import cron from 'node-cron'
-import { Op } from 'sequelize'
+import { Op, literal } from 'sequelize'
 
 import logger from './logger'
 import { User } from '../db/models'
@@ -9,23 +9,19 @@ import { UPDATER_CRON_ENABLED, inDevelopment } from '../../config'
 const resetUsage = async () => {
   logger.info('Resetting usage')
 
-  const usersWithUsage = await User.findAll({
-    where: {
-      usage: {
-        [Op.gt]: 0,
-      },
-    },
-    attributes: ['id', 'usage', 'totalUsage'],
-  })
-
-  usersWithUsage.forEach(async (user) => {
-    const { usage, totalUsage } = user
-
-    await user.update({
+  await User.update(
+    {
       usage: 0,
-      totalUsage: totalUsage + BigInt(usage),
-    })
-  })
+      totalUsage: literal('total_usage + CAST(usage AS BIGINT)'),
+    },
+    {
+      where: {
+        usage: {
+          [Op.gt]: 0,
+        },
+      },
+    }
+  )
 }
 
 const setupCron = async () => {
