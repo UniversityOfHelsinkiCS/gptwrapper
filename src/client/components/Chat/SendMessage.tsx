@@ -2,8 +2,8 @@
 import React from 'react'
 import { Box, TextField, Button, Typography } from '@mui/material'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
-import DeleteIcon from '@mui/icons-material/Delete'
 import { useTranslation } from 'react-i18next'
+import AttachmentButton from './AttachmentButton'
 
 import { SetState } from '../../types'
 
@@ -87,11 +87,6 @@ const SendMessage = ({
           gap: 1,
         })}
       >
-        {fileName && (
-          <Button onClick={handleDeleteFile} endIcon={<DeleteIcon />}>
-            {fileName}
-          </Button>
-        )}
         <Button variant="contained" onClick={handleOnClick} disabled={disabled}>
           {t('send')}
         </Button>
@@ -105,6 +100,12 @@ const SendMessage = ({
             onChange={(e) => handleFileTypeValidation(e.target.files[0])}
           />
         </Button>
+        {fileName && (
+          <AttachmentButton
+            fileName={fileName}
+            handleDeleteFile={handleDeleteFile}
+          />
+        )}
         <Button onClick={() => handleReset()} disabled={resetDisabled}>
           {t('reset')}
         </Button>
