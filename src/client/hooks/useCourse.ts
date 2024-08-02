@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { Course } from '../types'
+import { Course, CourseStatistics } from '../types'
 import apiClient from '../util/apiClient'
 
 const useCourse = (courseId?: string) => {
@@ -26,7 +26,7 @@ const useCourse = (courseId?: string) => {
 export const useCourseStatistics = (courseId?: string) => {
   const queryKey = ['statistics', courseId]
 
-  const queryFn = async () => {
+  const queryFn = async (): Promise<CourseStatistics | null> => {
     const res = await apiClient.get(`/courses/statistics/${courseId}`)
 
     const { data } = res

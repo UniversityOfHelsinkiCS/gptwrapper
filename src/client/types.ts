@@ -92,3 +92,14 @@ export interface Faculty {
   name: Locales
   iams: string[]
 }
+
+export interface CourseStatistics {
+  average: number
+  usagePercentage: number
+  usages: {
+    id: string
+    usageCount: number
+    userId: string
+    chatInstanceId: string
+  }[]
+}
