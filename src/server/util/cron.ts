@@ -27,9 +27,6 @@ const resetUsage = async () => {
 const setupCron = async () => {
   logger.info('Starting cron jobs')
 
-  // Reset usage immediately on deploy.
-  // This will be removed SOON
-  resetUsage()
   cron.schedule('0 0 1 * *', resetUsage) // Reset usage every month
 
   if (inDevelopment) {
