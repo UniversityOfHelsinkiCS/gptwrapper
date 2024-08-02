@@ -32,7 +32,7 @@ const Stats = ({ courseId }: { courseId: string }) => {
         width: '100%',
       }}
     >
-      <Typography variant="h6" display="inline">
+      <Typography variant="h5" display="inline">
         {t('course:statistics')}
       </Typography>
 
@@ -52,10 +52,10 @@ const Stats = ({ courseId }: { courseId: string }) => {
             margin={{ top: 50, right: 20, bottom: 20, left: 0 }}
           >
             <Tooltip />
-            <YAxis />
+            <YAxis domain={[0, 100]} />
             <XAxis>
               <Label
-                value="Opiskelijoiden käytettyjen tokeneiden jakautuminen"
+                value="Opiskelijoiden käytetyt tokenit prosenttiosuutena käyttörajasta"
                 position="bottom"
               />
             </XAxis>

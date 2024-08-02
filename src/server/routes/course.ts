@@ -77,7 +77,12 @@ courseRouter.get('/statistics/:id', async (req, res) => {
     enrolledUsages.map((u) => u.usageCount).reduce((a, b) => a + b, 0) /
     enrolledUsages.length
 
-  return res.send({ average, usagePercentage, usages: enrolledUsages })
+  const normalizedUsage = enrolledUsages.map((usage) => ({
+    ...usage,
+    usageCount: (usage.usageCount / chatInstance.usageLimit) * 100,
+  }))
+
+  return res.send({ average, usagePercentage, usages: normalizedUsage })
 })
 
 courseRouter.get('/:id', async (req, res) => {
