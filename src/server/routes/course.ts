@@ -59,6 +59,8 @@ courseRouter.get('/statistics/:id', async (req, res) => {
     where: { courseId: id },
   })
 
+  if (!chatInstance) throw new Error('ChatInstance not found')
+
   const usages = await UserChatInstanceUsage.findAll({
     where: { chatInstanceId: chatInstance.id },
   })
@@ -72,9 +74,10 @@ courseRouter.get('/statistics/:id', async (req, res) => {
   const usagePercentage = enrolledUsages.length / enrolments.length
 
   const average =
-    usages.map((u) => u.usageCount).reduce((a, b) => a + b, 0) / usages.length
+    enrolledUsages.map((u) => u.usageCount).reduce((a, b) => a + b, 0) /
+    enrolledUsages.length
 
-  return res.send({ average, usagePercentage })
+  return res.send({ average, usagePercentage, usages: enrolledUsages })
 })
 
 courseRouter.get('/:id', async (req, res) => {
