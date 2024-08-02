@@ -1,13 +1,27 @@
 import React from 'react'
 import { Paper, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
+import {
+  BarChart,
+  Bar,
+  YAxis,
+  Tooltip,
+  XAxis,
+  Label,
+  ResponsiveContainer,
+} from 'recharts'
+import { useCourseStatistics } from '../../../hooks/useCourse'
 
-const Stats = ({ stats }: { stats: any }) => {
+const Stats = ({ courseId }: { courseId: string }) => {
   const { t } = useTranslation()
 
-  if (!stats || (!stats.average && !stats.usagePercentage)) return null
+  const { stats, isLoading } = useCourseStatistics(courseId)
 
-  const { average, usagePercentage } = stats
+  if (!stats || isLoading) return null
+
+  const { average, usagePercentage, usages } = stats
+
+  usages.sort((a, b) => a.usageCount - b.usageCount)
 
   return (
     <Paper
@@ -15,23 +29,39 @@ const Stats = ({ stats }: { stats: any }) => {
       sx={{
         padding: '2%',
         mt: 2,
+        width: '100%',
       }}
     >
       <Typography variant="h6" display="inline">
         {t('course:statistics')}
       </Typography>
 
-      {average && (
-        <Typography>
-          {t('course:averageTokenUsage')} {parseInt(average, 10)}
-        </Typography>
-      )}
+      <Typography sx={{ my: 1 }}>
+        {t('course:averageTokenUsage')} {average ?? 'Ei dataa'}
+      </Typography>
 
-      {usagePercentage && (
-        <Typography>
-          {t('course:usagePercentage')}
-          {usagePercentage * 100}%
-        </Typography>
+      <Typography>
+        {t('course:usagePercentage')}{' '}
+        {usagePercentage ? `${usagePercentage * 100}%` : 'Ei dataa'}
+      </Typography>
+
+      {usages && usages.length !== 0 && (
+        <ResponsiveContainer width="99%" height={300}>
+          <BarChart
+            data={usages}
+            margin={{ top: 50, right: 20, bottom: 20, left: 0 }}
+          >
+            <Tooltip />
+            <YAxis />
+            <XAxis>
+              <Label
+                value="Opiskelijoiden käytettyjen tokeneiden jakautuminen"
+                position="bottom"
+              />
+            </XAxis>
+            <Bar dataKey="usageCount" fill="#8884d8" />
+          </BarChart>
+        </ResponsiveContainer>
       )}
     </Paper>
   )
