@@ -133,6 +133,8 @@
     "endedTab": "Ended",
     "statistics": "Statistics",
     "averageTokenUsage": "Average token usage: ",
-    "usagePercentage": "Percentage of students who have used CurreChat: "
+    "usagePercentage": "Percentage of students who have used CurreChat: ",
+    "usageChartTitle": "Student token usages as percentages",
+    "noData": "No data"
   }
 }

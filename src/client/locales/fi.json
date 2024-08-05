@@ -132,6 +132,8 @@
     "endedTab": "Päättyneet",
     "statistics": "Tilastoja",
     "averageTokenUsage": "Käytettyjen tokeneiden keskiarvo: ",
-    "usagePercentage": "CurreChatin käyttöön ottaneiden opiskelijoiden osuus: "
+    "usagePercentage": "CurreChatin käyttöön ottaneiden opiskelijoiden osuus: ",
+    "usageChartTitle": "Opiskelijoiden käytetyt tokenit prosenttiosuutena käyttörajasta",
+    "noData": "Ei dataa"
   }
 }

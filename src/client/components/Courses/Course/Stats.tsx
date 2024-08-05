@@ -37,12 +37,12 @@ const Stats = ({ courseId }: { courseId: string }) => {
       </Typography>
 
       <Typography sx={{ my: 1 }}>
-        {t('course:averageTokenUsage')} {average ?? 'Ei dataa'}
+        {t('course:averageTokenUsage')} {average ?? t('course:noData')}
       </Typography>
 
       <Typography>
         {t('course:usagePercentage')}{' '}
-        {usagePercentage ? `${usagePercentage * 100}%` : 'Ei dataa'}
+        {usagePercentage ? `${usagePercentage * 100}%` : t('course:noData')}
       </Typography>
 
       {usages && usages.length !== 0 && (
@@ -54,10 +54,7 @@ const Stats = ({ courseId }: { courseId: string }) => {
             <Tooltip />
             <YAxis domain={[0, 100]} />
             <XAxis>
-              <Label
-                value="Opiskelijoiden käytetyt tokenit prosenttiosuutena käyttörajasta"
-                position="bottom"
-              />
+              <Label value={t('course:usageChartTitle')} position="bottom" />
             </XAxis>
             <Bar dataKey="usageCount" fill="#8884d8" />
           </BarChart>
