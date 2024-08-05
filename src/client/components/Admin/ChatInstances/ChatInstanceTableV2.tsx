@@ -6,10 +6,11 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TablePagination from '@mui/material/TablePagination'
-import { Button, TextField } from '@mui/material'
+import { Button, TextField, Link } from '@mui/material'
 import TableRow from '@mui/material/TableRow'
 import { debounce } from 'lodash'
 import Paper from '@mui/material/Paper'
+import { Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ChatInstance } from '../../../types'
 import useChatInstances from './useChatInstances'
@@ -103,7 +104,9 @@ const ChatInstanceTableData = React.memo(
                   width="40%"
                   sx={{ pl: 1 }}
                 >
-                  {row.name[language]}
+                  <Link to={`/courses/${row.courseId}`} component={RouterLink}>
+                    {row.name[language]}
+                  </Link>
                 </TableCell>
                 <TableCell align="right">{row.description}</TableCell>
                 <TableCell align="right">{row.model}</TableCell>
