@@ -107,7 +107,8 @@
     "loginAsButton": "Login as",
     "startUpdater": "Start Updater",
     "rowsPerPage": "Rows per page",
-    "searchCourse": "Search course (input at least 4 characters)"
+    "searchCourse": "Search course (input at least 4 characters)",
+    "prompts": "Prompts"
   },
   "course": {
     "courseUpdated": "Course updated",

@@ -48,10 +48,10 @@ const headCells: readonly HeadCell[] = [
     label: 'Usagelimit',
   },
   {
-    id: 'courseId',
+    id: 'prompts',
     numeric: true,
     disablePadding: false,
-    label: 'CourseId',
+    label: 'Prompts',
   },
 ]
 
@@ -90,6 +90,8 @@ const ChatInstanceTableData = React.memo(
 
     const { language } = i18n
 
+    console.log(rows)
+
     return (
       <TableContainer>
         <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
@@ -114,7 +116,7 @@ const ChatInstanceTableData = React.memo(
                   {row.usageLimit}
                 </TableCell>
                 <TableCell sx={{ fontFamily: 'monospace' }} align="right">
-                  {row.courseId}
+                  {row.prompts ? row.prompts.length : 0}
                 </TableCell>
                 <TableCell>
                   <Button

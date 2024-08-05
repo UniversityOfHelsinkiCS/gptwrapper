@@ -15,6 +15,7 @@ chatInstanceRouter.get('/', async (req, res) => {
   const hasSearch = search && search.length >= 4
 
   const { rows: chatInstances, count } = await ChatInstance.findAndCountAll({
+    include: 'prompts',
     where: hasSearch
       ? {
           [Op.or]: [
@@ -27,7 +28,6 @@ chatInstanceRouter.get('/', async (req, res) => {
       : undefined,
     limit,
     offset,
-    order: [['activityPeriod.startDate', 'DESC']],
   })
 
   return res.send({ chatInstances, count })
