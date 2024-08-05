@@ -36,7 +36,7 @@ jobs:
           password: ${{ secrets.QUAY_IO_TOKEN }}
 
       - name: Start the application
-        run: docker-compose -f compose.ci.yaml up -d
+        run: docker compose -f compose.ci.yaml up -d
 
       - run: npm ci
       - run: npm run tsc
@@ -108,4 +108,4 @@ jobs:
       - name: Print logs on failure
         shell: bash
         if: failure()
-        run: docker-compose -f compose.ci.yaml logs
+        run: docker compose -f compose.ci.yaml logs
