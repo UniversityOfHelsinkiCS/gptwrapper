@@ -4,6 +4,7 @@ import { addMonths } from 'date-fns'
 
 import { ChatInstance, User, UserChatInstanceUsage } from '../db/models'
 import { DEFAULT_MODEL_ON_ENABLE, DEFAULT_TOKEN_LIMIT } from '../../config'
+import { sequelize } from '../db/connection'
 
 const chatInstanceRouter = express.Router()
 
@@ -15,7 +16,20 @@ chatInstanceRouter.get('/', async (req, res) => {
   const hasSearch = search && search.length >= 4
 
   const { rows: chatInstances, count } = await ChatInstance.findAndCountAll({
-    include: 'prompts',
+    attributes: {
+      include: [
+        [
+          sequelize.literal(`(
+                      SELECT COUNT(*)
+                      FROM prompts
+                      WHERE prompts.chat_instance_id = "ChatInstance"."id" 
+                  )`),
+          'promptCount',
+        ],
+      ],
+      exclude: ['updatedAt', 'createdAt'],
+    },
+
     where: hasSearch
       ? {
           [Op.or]: [
@@ -28,6 +42,7 @@ chatInstanceRouter.get('/', async (req, res) => {
       : undefined,
     limit,
     offset,
+    order: [[sequelize.literal('"promptCount"'), 'DESC']],
   })
 
   return res.send({ chatInstances, count })
