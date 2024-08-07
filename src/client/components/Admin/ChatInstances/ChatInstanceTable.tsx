@@ -1,48 +1,246 @@
-import React, { useState } from 'react'
-import { Modal } from '@mui/material'
-import { enqueueSnackbar } from 'notistack'
+/* eslint-disable import/no-extraneous-dependencies */
+import * as React from 'react'
+import Box from '@mui/material/Box'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
+import TablePagination from '@mui/material/TablePagination'
+import { TextField, Link, TableSortLabel } from '@mui/material'
+import TableRow from '@mui/material/TableRow'
+import { debounce } from 'lodash'
+import Paper from '@mui/material/Paper'
+import { Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-
-import { useDeleteChatInstanceMutation } from '../../../hooks/useChatInstanceMutation'
-import EditChatInstance from './EditChatInstance'
-import ChatInstanceTableV2 from './ChatInstanceTableV2'
+import { visuallyHidden } from '@mui/utils'
 import { ChatInstance } from '../../../types'
+import useChatInstances from './useChatInstances'
 
-const ChatInstanceTable = () => {
-  const [editFormOpen, setEditFormOpen] = useState(false)
-  const [chatInstanceToEdit, setChatInstanceToEdit] = useState<ChatInstance>()
+interface HeadCell {
+  disablePadding: boolean
+  id: keyof ChatInstance
+  label: string
+  numeric: boolean
+}
 
-  const mutation = useDeleteChatInstanceMutation()
+type Order = 'asc' | 'desc'
 
+const headCells: readonly HeadCell[] = [
+  {
+    id: 'name',
+    numeric: false,
+    disablePadding: true,
+    label: 'Name',
+  },
+  {
+    id: 'description',
+    numeric: true,
+    disablePadding: false,
+    label: 'Description',
+  },
+  {
+    id: 'model',
+    numeric: true,
+    disablePadding: false,
+    label: 'Model',
+  },
+  {
+    id: 'usageLimit',
+    numeric: true,
+    disablePadding: false,
+    label: 'Usagelimit',
+  },
+  {
+    id: 'promptCount',
+    numeric: true,
+    disablePadding: false,
+    label: 'PromptCount',
+  },
+]
+
+const Head = ({
+  onRequestSort,
+  order,
+  orderBy,
+}: {
+  onRequestSort: (
+    event: React.MouseEvent<unknown>,
+    property: keyof ChatInstance
+  ) => void
+  order: Order
+  orderBy: string
+}) => {
   const { t } = useTranslation()
 
-  const onDelete = (accessGroupId: string) => {
-    // eslint-disable-next-line no-alert
-    if (!window.confirm(t('admin:confirmChatInstanceDelete') as string)) return
-
-    try {
-      mutation.mutate(accessGroupId)
-      enqueueSnackbar('Course chat instance deleted', { variant: 'success' })
-    } catch (error: any) {
-      enqueueSnackbar(error.message, { variant: 'error' })
+  const createSortHandler =
+    (property: keyof ChatInstance) => (event: React.MouseEvent<unknown>) => {
+      onRequestSort(event, property)
     }
-  }
 
-  const onSelect = (ci: ChatInstance) => {
-    setChatInstanceToEdit(ci)
-    setEditFormOpen(true)
+  return (
+    <TableHead>
+      <TableRow>
+        {headCells.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            align={headCell.numeric ? 'right' : 'left'}
+            padding={headCell.disablePadding ? 'none' : 'normal'}
+            sx={{ pl: 1 }}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : 'asc'}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {t(`admin:${headCell.id}`)}
+              {orderBy === headCell.id ? (
+                <Box component="span" sx={visuallyHidden}>
+                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                </Box>
+              ) : null}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+  )
+}
+
+const ChatInstanceTableData = React.memo(
+  ({
+    rows,
+    order,
+    orderBy,
+    onRequestSort,
+  }: {
+    rows: ChatInstance[]
+    order: Order
+    orderBy: string
+    onRequestSort: (
+      event: React.MouseEvent<unknown>,
+      property: keyof ChatInstance
+    ) => void
+  }) => {
+    const { i18n } = useTranslation()
+
+    const { language } = i18n
+
+    return (
+      <TableContainer>
+        <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
+          <Head order={order} orderBy={orderBy} onRequestSort={onRequestSort} />
+          <TableBody>
+            {rows.map((row) => (
+              <TableRow role="checkbox" key={row.id}>
+                <TableCell
+                  component="th"
+                  scope="row"
+                  padding="none"
+                  width="40%"
+                  sx={{ pl: 1 }}
+                >
+                  <Link to={`/courses/${row.courseId}`} component={RouterLink}>
+                    {row.name[language]}
+                  </Link>
+                </TableCell>
+                <TableCell align="right">{row.description}</TableCell>
+                <TableCell align="right">{row.model}</TableCell>
+                <TableCell sx={{ fontFamily: 'monospace' }} align="right">
+                  {row.usageLimit}
+                </TableCell>
+                <TableCell sx={{ fontFamily: 'monospace' }} align="right">
+                  {row.promptCount}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    )
+  }
+)
+
+const ChatInstanceTable = () => {
+  const { t } = useTranslation()
+  const [search, setSearch] = React.useState('')
+  const deferredSearch = React.useDeferredValue(search)
+  const [order, setOrder] = React.useState<Order>('asc')
+  const [orderBy, setOrderBy] = React.useState<keyof ChatInstance>('name')
+
+  const [page, setPage] = React.useState(0)
+  const [rowsPerPage, setRowsPerPage] = React.useState(10)
+
+  const { chatInstances, count } = useChatInstances({
+    offset: page * rowsPerPage,
+    limit: rowsPerPage,
+    search: deferredSearch,
+    order,
+    orderBy,
+  })
+
+  const handleChangePage = React.useCallback(
+    (event: unknown, newPage: number) => {
+      setPage(newPage)
+    },
+    []
+  )
+
+  const handleChangeRowsPerPage = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setRowsPerPage(parseInt(event.target.value, 10))
+      setPage(0)
+    },
+    []
+  )
+
+  const handleChangeSearch = debounce(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newSearch = event.target.value
+      if (newSearch && newSearch.length < 4) return
+      setSearch(newSearch)
+    },
+    300
+  )
+
+  const handleRequestSort = (
+    event: React.MouseEvent<unknown>,
+    property: keyof ChatInstance
+  ) => {
+    const isAsc = orderBy === property && order === 'asc'
+    setOrder(isAsc ? 'desc' : 'asc')
+    setOrderBy(property)
   }
 
   return (
-    <>
-      <ChatInstanceTableV2 onSelect={onSelect} onDelete={onDelete} />
-      <Modal open={editFormOpen} onClose={() => setEditFormOpen(false)}>
-        <EditChatInstance
-          chatInstance={chatInstanceToEdit}
-          setFormOpen={setEditFormOpen}
+    <Box sx={{ width: '100%' }}>
+      <Paper sx={{ width: '100%', mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <TextField
+            label={t('admin:searchCourse')}
+            variant="outlined"
+            sx={{ flex: 1, m: 1 }}
+            onChange={handleChangeSearch}
+          />
+          <TablePagination
+            rowsPerPageOptions={[10, 50, 100]}
+            component="div"
+            count={count || -1}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage={t('admin:rowsPerPage')}
+          />
+        </Box>
+        <ChatInstanceTableData
+          rows={chatInstances}
+          onRequestSort={handleRequestSort}
+          order={order}
+          orderBy={orderBy}
         />
-      </Modal>
-    </>
+      </Paper>
+    </Box>
   )
 }
 
