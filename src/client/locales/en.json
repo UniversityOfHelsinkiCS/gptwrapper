@@ -113,7 +113,7 @@
     "startUpdater": "Start Updater",
     "rowsPerPage": "Rows per page",
     "searchCourse": "Search course (input at least 4 characters)",
-    "prompts": "Prompts"
+    "promptCount": "Prompts"
   },
   "course": {
     "curreEnabled": "CurreChat is enabled for the course",

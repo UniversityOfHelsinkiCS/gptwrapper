@@ -71,8 +71,7 @@ const Head = ({
   order: Order
   orderBy: string
 }) => {
-  /* 
-  const { t } = useTranslation() */
+  const { t } = useTranslation()
 
   const createSortHandler =
     (property: keyof ChatInstance) => (event: React.MouseEvent<unknown>) => {
@@ -94,7 +93,7 @@ const Head = ({
               direction={orderBy === headCell.id ? order : 'asc'}
               onClick={createSortHandler(headCell.id)}
             >
-              {headCell.label}
+              {t(`admin:${headCell.id}`)}
               {orderBy === headCell.id ? (
                 <Box component="span" sx={visuallyHidden}>
                   {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
