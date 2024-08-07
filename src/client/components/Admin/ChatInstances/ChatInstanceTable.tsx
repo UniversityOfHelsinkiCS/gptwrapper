@@ -16,10 +16,16 @@ import { useTranslation } from 'react-i18next'
 import { visuallyHidden } from '@mui/utils'
 import { ChatInstance } from '../../../types'
 import useChatInstances from './useChatInstances'
+import useChatInstanceUsage from '../../../hooks/useChatInstanceUsage'
+import { calculateCourseUsage } from './utils'
+
+interface Data extends ChatInstance {
+  tokenUsage: number
+}
 
 interface HeadCell {
   disablePadding: boolean
-  id: keyof ChatInstance
+  id: keyof Data
   label: string
   numeric: boolean
 }
@@ -57,6 +63,12 @@ const headCells: readonly HeadCell[] = [
     disablePadding: false,
     label: 'PromptCount',
   },
+  {
+    id: 'tokenUsage',
+    numeric: true,
+    disablePadding: false,
+    label: 'TokenUsage',
+  },
 ]
 
 const Head = ({
@@ -66,7 +78,7 @@ const Head = ({
 }: {
   onRequestSort: (
     event: React.MouseEvent<unknown>,
-    property: keyof ChatInstance
+    property: keyof Data
   ) => void
   order: Order
   orderBy: string
@@ -74,7 +86,7 @@ const Head = ({
   const { t } = useTranslation()
 
   const createSortHandler =
-    (property: keyof ChatInstance) => (event: React.MouseEvent<unknown>) => {
+    (property: keyof Data) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property)
     }
 
@@ -114,12 +126,12 @@ const ChatInstanceTableData = React.memo(
     orderBy,
     onRequestSort,
   }: {
-    rows: ChatInstance[]
+    rows: Data[]
     order: Order
     orderBy: string
     onRequestSort: (
       event: React.MouseEvent<unknown>,
-      property: keyof ChatInstance
+      property: keyof Data
     ) => void
   }) => {
     const { i18n } = useTranslation()
@@ -152,6 +164,9 @@ const ChatInstanceTableData = React.memo(
                 <TableCell sx={{ fontFamily: 'monospace' }} align="right">
                   {row.promptCount}
                 </TableCell>
+                <TableCell sx={{ fontFamily: 'monospace' }} align="right">
+                  {row.tokenUsage}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -166,10 +181,12 @@ const ChatInstanceTable = () => {
   const [search, setSearch] = React.useState('')
   const deferredSearch = React.useDeferredValue(search)
   const [order, setOrder] = React.useState<Order>('asc')
-  const [orderBy, setOrderBy] = React.useState<keyof ChatInstance>('name')
+  const [orderBy, setOrderBy] = React.useState<keyof Data>('name')
 
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(10)
+
+  const { usage, isLoading } = useChatInstanceUsage()
 
   const { chatInstances, count } = useChatInstances({
     offset: page * rowsPerPage,
@@ -205,12 +222,21 @@ const ChatInstanceTable = () => {
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
-    property: keyof ChatInstance
+    property: keyof Data
   ) => {
     const isAsc = orderBy === property && order === 'asc'
     setOrder(isAsc ? 'desc' : 'asc')
     setOrderBy(property)
   }
+
+  if (isLoading) return null
+
+  const courseUsage = calculateCourseUsage(usage, chatInstances)
+
+  const data = chatInstances.map((ci) => ({
+    ...ci,
+    tokenUsage: courseUsage.find((u) => u.course.id === ci.id)?.usageCount,
+  }))
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -234,7 +260,7 @@ const ChatInstanceTable = () => {
           />
         </Box>
         <ChatInstanceTableData
-          rows={chatInstances}
+          rows={data}
           onRequestSort={handleRequestSort}
           order={order}
           orderBy={orderBy}
