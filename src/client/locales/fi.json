@@ -112,7 +112,8 @@
     "startUpdater": "Käynnistä Updater",
     "rowsPerPage": "Rivien määrä sivulla",
     "searchCourse": "Etsi kurssia (syötä vähintään 4 merkkiä)",
-    "promptCount": "Alustukset"
+    "promptCount": "Alustukset",
+    "tokenUsage": "Käytetyt tokenit"
   },
   "course": {
     "curreEnabled": "CurreChat on käytössä kurssilla",
