@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import * as React from 'react'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
@@ -6,12 +7,13 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TablePagination from '@mui/material/TablePagination'
-import { Button, TextField, Link } from '@mui/material'
+import { Button, TextField, Link, TableSortLabel } from '@mui/material'
 import TableRow from '@mui/material/TableRow'
 import { debounce } from 'lodash'
 import Paper from '@mui/material/Paper'
 import { Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { visuallyHidden } from '@mui/utils'
 import { ChatInstance } from '../../../types'
 import useChatInstances from './useChatInstances'
 
@@ -21,6 +23,8 @@ interface HeadCell {
   label: string
   numeric: boolean
 }
+
+type Order = 'asc' | 'desc'
 
 const headCells: readonly HeadCell[] = [
   {
@@ -48,15 +52,32 @@ const headCells: readonly HeadCell[] = [
     label: 'Usagelimit',
   },
   {
-    id: 'prompts',
+    id: 'promptCount',
     numeric: true,
     disablePadding: false,
-    label: 'Prompts',
+    label: 'PromptCount',
   },
 ]
 
-const Head = () => {
-  const { t } = useTranslation()
+const Head = ({
+  onRequestSort,
+  order,
+  orderBy,
+}: {
+  onRequestSort: (
+    event: React.MouseEvent<unknown>,
+    property: keyof ChatInstance
+  ) => void
+  order: Order
+  orderBy: string
+}) => {
+  /* 
+  const { t } = useTranslation() */
+
+  const createSortHandler =
+    (property: keyof ChatInstance) => (event: React.MouseEvent<unknown>) => {
+      onRequestSort(event, property)
+    }
 
   return (
     <TableHead>
@@ -68,7 +89,18 @@ const Head = () => {
             padding={headCell.disablePadding ? 'none' : 'normal'}
             sx={{ pl: 1 }}
           >
-            {t(`admin:${headCell.id}`)}
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : 'asc'}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+              {orderBy === headCell.id ? (
+                <Box component="span" sx={visuallyHidden}>
+                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                </Box>
+              ) : null}
+            </TableSortLabel>
           </TableCell>
         ))}
       </TableRow>
@@ -81,21 +113,28 @@ const ChatInstanceTableData = React.memo(
     rows,
     onSelect,
     onDelete,
+    order,
+    orderBy,
+    onRequestSort,
   }: {
     rows: ChatInstance[]
     onSelect: (chatInstance: ChatInstance) => void
     onDelete: (id: string) => void
+    order: Order
+    orderBy: string
+    onRequestSort: (
+      event: React.MouseEvent<unknown>,
+      property: keyof ChatInstance
+    ) => void
   }) => {
     const { t, i18n } = useTranslation()
 
     const { language } = i18n
 
-    console.log(rows)
-
     return (
       <TableContainer>
         <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
-          <Head />
+          <Head order={order} orderBy={orderBy} onRequestSort={onRequestSort} />
           <TableBody>
             {rows.map((row) => (
               <TableRow role="checkbox" key={row.id}>
@@ -116,7 +155,7 @@ const ChatInstanceTableData = React.memo(
                   {row.usageLimit}
                 </TableCell>
                 <TableCell sx={{ fontFamily: 'monospace' }} align="right">
-                  {row.prompts ? row.prompts.length : 0}
+                  {row.promptCount}
                 </TableCell>
                 <TableCell>
                   <Button
@@ -155,6 +194,8 @@ const ChatInstanceTableV2 = ({
   const { t } = useTranslation()
   const [search, setSearch] = React.useState('')
   const deferredSearch = React.useDeferredValue(search)
+  const [order, setOrder] = React.useState<Order>('asc')
+  const [orderBy, setOrderBy] = React.useState<keyof ChatInstance>('name')
 
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(10)
@@ -163,6 +204,8 @@ const ChatInstanceTableV2 = ({
     offset: page * rowsPerPage,
     limit: rowsPerPage,
     search: deferredSearch,
+    order,
+    orderBy,
   })
 
   const handleChangePage = React.useCallback(
@@ -189,6 +232,15 @@ const ChatInstanceTableV2 = ({
     300
   )
 
+  const handleRequestSort = (
+    event: React.MouseEvent<unknown>,
+    property: keyof ChatInstance
+  ) => {
+    const isAsc = orderBy === property && order === 'asc'
+    setOrder(isAsc ? 'desc' : 'asc')
+    setOrderBy(property)
+  }
+
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
@@ -214,6 +266,9 @@ const ChatInstanceTableV2 = ({
           rows={chatInstances}
           onSelect={onSelect}
           onDelete={onDelete}
+          onRequestSort={handleRequestSort}
+          order={order}
+          orderBy={orderBy}
         />
       </Paper>
     </Box>

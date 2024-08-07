@@ -3,15 +3,21 @@ import { useQuery } from '@tanstack/react-query'
 import { ChatInstance } from '../../../types'
 import apiClient from '../../../util/apiClient'
 
-const useChatInstances = ({ limit = 100, offset = 0, search = '' }) => {
-  const queryKey = ['chatInstances', { limit, offset, search }]
+const useChatInstances = ({
+  limit = 100,
+  offset = 0,
+  search = '',
+  order = '',
+  orderBy = '',
+}) => {
+  const queryKey = ['chatInstances', { limit, offset, search, order, orderBy }]
 
   const queryFn = async (): Promise<{
     chatInstances: ChatInstance[]
     count: number
   }> => {
     const res = await apiClient.get(
-      `/chatinstances?limit=${limit}&offset=${offset}&search=${search}`
+      `/chatinstances?limit=${limit}&offset=${offset}&search=${search}&orderBy=${orderBy}&order=${order}`
     )
 
     const { data } = res

@@ -9,10 +9,18 @@ import { sequelize } from '../db/connection'
 const chatInstanceRouter = express.Router()
 
 chatInstanceRouter.get('/', async (req, res) => {
-  const { limit: limitStr, offset: offsetStr, search: searchRaw } = req.query
+  const {
+    limit: limitStr,
+    offset: offsetStr,
+    search: searchRaw,
+    order: orderRaw,
+    orderBy: orderByRaw,
+  } = req.query
   const limit = limitStr ? parseInt(limitStr as string, 10) : 100
   const offset = offsetStr ? parseInt(offsetStr as string, 10) : 0
   const search = String(searchRaw)
+  const order = String(orderRaw)
+  const orderBy = String(orderByRaw)
   const hasSearch = search && search.length >= 4
 
   const { rows: chatInstances, count } = await ChatInstance.findAndCountAll({
@@ -42,7 +50,7 @@ chatInstanceRouter.get('/', async (req, res) => {
       : undefined,
     limit,
     offset,
-    order: [[sequelize.literal('"promptCount"'), 'DESC']],
+    order: [[sequelize.literal(`"${orderBy}"`), order]],
   })
 
   return res.send({ chatInstances, count })
