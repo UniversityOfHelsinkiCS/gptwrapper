@@ -32,6 +32,7 @@ export type Prompt = {
 }
 
 export interface ChatInstance {
+  promptCount?: number
   id: string
   name: Locales
   description: string
