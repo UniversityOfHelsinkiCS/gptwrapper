@@ -330,6 +330,7 @@ const Chat = () => {
         system={system}
         messages={messages}
         disabled={messages.length === 0 || completion !== ''}
+        hidePrompt={hidePrompt}
       />
       {alertOpen && (
         <Alert

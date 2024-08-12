@@ -27,10 +27,12 @@ const Email = ({
   system,
   messages,
   disabled,
+  hidePrompt,
 }: {
   system: string
   messages: Message[]
   disabled: boolean
+  hidePrompt: boolean
 }) => {
   const { t } = useTranslation()
   const { user, isLoading } = useCurrentUser()
@@ -42,9 +44,10 @@ const Email = ({
   const handleSend = async () => {
     const systemMessage: Message = { role: 'system', content: system }
 
-    const newMessages = systemMessage.content
-      ? [].concat(systemMessage, messages)
-      : messages
+    const newMessages =
+      systemMessage.content && !hidePrompt
+        ? [].concat(systemMessage, messages)
+        : messages
 
     const date = new Date()
 
