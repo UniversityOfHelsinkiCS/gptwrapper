@@ -15,7 +15,7 @@ import {
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 
-import { ChatInstanceUsage, ChatInstance } from '../../../types'
+import { ChatInstanceUsage, ChatInstance, User } from '../../../types'
 import useChatInstanceUsage from '../../../hooks/useChatInstanceUsage'
 import useUsers from '../../../hooks/useUsers'
 import { useDeleteChatInstanceUsageMutation } from '../../../hooks/useChatInstanceUsageMutation'
@@ -27,6 +27,11 @@ type Usage = Omit<ChatInstanceUsage, 'chatInstance'> & {
 
 const sortUsage = (a: Usage, b: Usage) =>
   a.user.username.localeCompare(b.user.username)
+
+const handleLoginAs = (user: User) => () => {
+  localStorage.setItem('adminLoggedInAs', user.id)
+  window.location.reload()
+}
 
 const UserTable = () => {
   const { usage: chatInstanceUsage, isLoading } = useChatInstanceUsage()
@@ -134,6 +139,11 @@ const UserTable = () => {
                       }
                     >
                       {t('admin:reset')}
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="outlined" onClick={handleLoginAs(user)}>
+                      Kirjaudu käyttäjällä
                     </Button>
                   </TableCell>
                 </TableRow>
