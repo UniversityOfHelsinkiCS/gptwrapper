@@ -25,8 +25,7 @@ type Usage = Omit<ChatInstanceUsage, 'chatInstance'> & {
   chatInstance?: ChatInstance
 }
 
-const sortUsage = (a: Usage, b: Usage) =>
-  a.user.username.localeCompare(b.user.username)
+const sortUsage = (a: Usage, b: Usage) => b.usageCount - a.usageCount
 
 const handleLoginAs = (user: User) => () => {
   localStorage.setItem('adminLoggedInAs', user.id)
@@ -42,24 +41,22 @@ const UserTable = () => {
 
   const [searchedUsages, setSearchedUsages] = useState<Usage[]>([])
 
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+
+  const { language } = i18n
 
   if (isLoading || usersLoading) return null
 
-  const filteredUsers = users.filter(({ usage }) => usage !== 0)
-
-  const userUsages: Usage[] = filteredUsers.map((user) => ({
+  const userUsages: Usage[] = users.map((user) => ({
     id: user.id,
     user,
     usageCount: user.usage,
   }))
 
-  const filteredUsage = chatInstanceUsage.filter(
-    ({ usageCount }) => usageCount !== 0
-  )
-  const sortedUsage = (filteredUsage as Usage[])
+  const sortedUsage = (chatInstanceUsage as Usage[])
     .concat(userUsages)
     .sort(sortUsage)
+    .slice(0, 10)
 
   const onDeleteChatInstanceUsage = (chatInstanceUsageId: string) => {
     try {
@@ -108,7 +105,7 @@ const UserTable = () => {
               </TableCell>
               <TableCell align="right">
                 <Typography variant="h5">
-                  <b>{t('admin:courseId')}</b>
+                  <b>Kurssin nimi</b>
                 </Typography>
               </TableCell>
             </TableRow>
@@ -126,7 +123,7 @@ const UserTable = () => {
                   </TableCell>
                   <TableCell align="right">
                     <Typography variant="overline">
-                      <code>{chatInstance?.courseId ?? ''}</code>
+                      <code>{chatInstance?.name[language] ?? ''}</code>
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -143,7 +140,7 @@ const UserTable = () => {
                   </TableCell>
                   <TableCell>
                     <Button variant="outlined" onClick={handleLoginAs(user)}>
-                      Kirjaudu käyttäjällä
+                      Kirjaudu käyttäjänä
                     </Button>
                   </TableCell>
                 </TableRow>
