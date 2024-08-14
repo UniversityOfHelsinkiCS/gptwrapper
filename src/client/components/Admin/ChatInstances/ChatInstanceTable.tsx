@@ -116,7 +116,7 @@ const Head = ({
                 ) : null}
               </TableSortLabel>
             ) : (
-              <TableCell align="right">{t(`admin:${headCell.id}`)}</TableCell>
+              t(`admin:${headCell.id}`)
             )}
           </TableCell>
         ))}
