@@ -25,12 +25,13 @@ import { DEFAULT_MODEL_ON_ENABLE, DEFAULT_TOKEN_LIMIT } from '../../../config'
 const Course = ({
   course,
   onEnable,
+  onDisable,
 }: {
   course: CoursesViewCourse
   onEnable: (course: CoursesViewCourse) => void
+  onDisable: (course: CoursesViewCourse) => void
 }) => {
   const { t, i18n } = useTranslation()
-  const disableMutation = useDisableCourse()
 
   if (!course) return null
 
@@ -62,8 +63,9 @@ const Course = ({
               <Typography>{t('course:curreEnabled')}</Typography>
               <Button
                 variant="contained"
+                color="error"
                 sx={{ mt: 'auto' }}
-                onClick={() => disableMutation.mutate({ id: course.id })}
+                onClick={() => onDisable(course)}
               >
                 {t('course:disableCurre')}
               </Button>
@@ -91,7 +93,9 @@ const Course = ({
 const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
   const { t, i18n } = useTranslation()
   const enableMutation = useEnableCourse()
+  const disableMutation = useDisableCourse()
   const [courseToEnable, setCourseToEnable] = useState<CourseType>(null)
+  const [courseToDisable, setCourseToDisable] = useState<CourseType>(null)
 
   if (!courseUnits) return null
 
@@ -126,6 +130,7 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
             key={course.id}
             course={course}
             onEnable={setCourseToEnable}
+            onDisable={setCourseToDisable}
           />
         ))}
       </Box>
@@ -158,6 +163,28 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
             variant="contained"
           >
             {t('enable')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={courseToDisable !== null}
+        onClose={() => setCourseToDisable(null)}
+      >
+        <DialogTitle>
+          {`Poista CurreChat käytöstä kurssilla ${courseToDisable?.name[language]}`}
+        </DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setCourseToDisable(null)}>
+            {t('cancel')}
+          </Button>
+          <Button
+            onClick={() => {
+              disableMutation.mutate({ id: courseToDisable.id })
+              setCourseToDisable(null)
+            }}
+            variant="contained"
+          >
+            Ok
           </Button>
         </DialogActions>
       </Dialog>
