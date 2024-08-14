@@ -116,6 +116,7 @@
     "disableCurre": "Disable CurreChat",
     "closeToMaxTokenLimit": "Students close to the token limit",
     "noStudentsCloseToMaxTokenLimit": "No students",
+    "disableCurreModalTitle": "Disable CurreChat on the course {{name}}?",
     "editCourse": "Edit course",
     "usageResetSuccess": "Usage reset successfully",
     "curreNotOpen": "Students cannot access this course",

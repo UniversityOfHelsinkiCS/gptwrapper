@@ -123,6 +123,7 @@
     "disableCurre": "Poista CurreChat käytöstä",
     "enableCurre": "Ota CurreChat käyttöön",
     "enableCurreModalTitle": "Ota CurreChat käyttöön kurssille {{name}}?",
+    "disableCurreModalTitle": "Poista CurreChat käytöstä kurssilla {{name}}?",
     "enableCurreModalText": "Kurssille asetetaan oletusasetuksena {{defaultModel}} -kielimalli sekä {{defaultTokenLimit}} tokenin käyttöraja per opiskelija. CurreChat on kurssilla käytössä {{activityPeriod}} (kurssin käynnissäoloaika + 1 kk). Voit muokata näitä asetuksia myöhemmin.",
     "courseUpdated": "Kurssi päivitetty",
     "closeToMaxTokenLimit": "Tokeneiden käyttörajaa lähestyvät opiskelijat",

@@ -171,7 +171,9 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
         onClose={() => setCourseToDisable(null)}
       >
         <DialogTitle>
-          {`Poista CurreChat käytöstä kurssilla ${courseToDisable?.name[language]}`}
+          {t('course:disableCurreModalTitle', {
+            name: courseToDisable?.name[language],
+          })}
         </DialogTitle>
         <DialogActions>
           <Button onClick={() => setCourseToDisable(null)}>
