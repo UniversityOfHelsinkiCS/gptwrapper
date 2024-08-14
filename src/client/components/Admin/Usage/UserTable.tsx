@@ -129,7 +129,7 @@ const UserTable = () => {
               </TableCell>
               <TableCell align="right">
                 <Typography variant="h5">
-                  <b>Kurssin nimi</b>
+                  <b>{t('admin:courseNameInfo')}</b>
                 </Typography>
               </TableCell>
             </TableRow>
@@ -164,7 +164,7 @@ const UserTable = () => {
                   </TableCell>
                   <TableCell>
                     <Button variant="outlined" onClick={handleLoginAs(user)}>
-                      Kirjaudu käyttäjänä
+                      {t('admin:loginAsButton')}
                     </Button>
                   </TableCell>
                 </TableRow>
