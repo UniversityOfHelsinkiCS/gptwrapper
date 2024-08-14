@@ -15,11 +15,13 @@ import {
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 
+import { debounce } from 'lodash'
 import { ChatInstanceUsage, ChatInstance, User } from '../../../types'
 import useChatInstanceUsage from '../../../hooks/useChatInstanceUsage'
 import useUsers from '../../../hooks/useUsers'
 import { useDeleteChatInstanceUsageMutation } from '../../../hooks/useChatInstanceUsageMutation'
 import useResetUsageMutation from '../../../hooks/useResetUsageMutation'
+import apiClient from '../../../util/apiClient'
 
 type Usage = Omit<ChatInstanceUsage, 'chatInstance'> & {
   chatInstance?: ChatInstance
@@ -67,10 +69,32 @@ const UserTable = () => {
     }
   }
 
-  const handleChange = (value) => {
-    const searched = sortedUsage.filter((u) => u.user.username.includes(value))
-    setSearchedUsages(searched)
-  }
+  const handleSearchChange = debounce(async ({ target }) => {
+    const query = target.value
+
+    if (query.length === 0) {
+      setSearchedUsages([])
+      return
+    }
+    if (query.length < 5) return
+
+    const params = {
+      user: query,
+    }
+
+    const res = await apiClient.get(`/admin/user-search`, { params })
+    const { persons } = res.data as {
+      persons: User[]
+    }
+
+    const searchedUserUsages: Usage[] = persons.map((user) => ({
+      id: user.id,
+      user,
+      usageCount: user.usage,
+    }))
+
+    setSearchedUsages(searchedUserUsages)
+  }, 400)
 
   const onResetUsage = (userId: string) => {
     try {
@@ -87,7 +111,7 @@ const UserTable = () => {
         sx={{ width: '30em', my: 2 }}
         label="Search users"
         variant="outlined"
-        onChange={(e) => handleChange(e.target.value)}
+        onChange={handleSearchChange}
       />
       <TableContainer component={Paper}>
         <Table>
