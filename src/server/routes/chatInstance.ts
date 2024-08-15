@@ -34,10 +34,17 @@ chatInstanceRouter.get('/', async (req, res) => {
                   )`),
           'promptCount',
         ],
+        [
+          sequelize.literal(`(
+            SELECT COALESCE(SUM(usage_count), 0)
+            FROM user_chat_instance_usages
+            WHERE user_chat_instance_usages.chat_instance_id = "ChatInstance"."id" 
+        )`),
+          'tokenUsage',
+        ],
       ],
       exclude: ['updatedAt', 'createdAt'],
     },
-
     where: hasSearch
       ? {
           [Op.or]: [
