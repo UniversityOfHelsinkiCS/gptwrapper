@@ -11,16 +11,22 @@ import {
   DialogTitle,
   Link,
   Paper,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Link as RouterLink } from 'react-router-dom'
+import { enqueueSnackbar } from 'notistack'
 import { CoursesViewCourse } from '../../hooks/useUserCourses'
 import { useDisableCourse } from './useDisableCourse'
 import { useEnableCourse } from './useEnableCourse'
 import { formatDate } from './util'
 import { Course as CourseType } from '../../types'
-import { DEFAULT_MODEL_ON_ENABLE, DEFAULT_TOKEN_LIMIT } from '../../../config'
+import {
+  DEFAULT_MODEL_ON_ENABLE,
+  DEFAULT_TOKEN_LIMIT,
+  PUBLIC_URL,
+} from '../../../config'
 
 const Course = ({
   course,
@@ -39,6 +45,13 @@ const Course = ({
 
   const { language } = i18n
 
+  const studentLink = `${window.location.origin}${PUBLIC_URL}/${courseId}`
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(studentLink)
+    enqueueSnackbar(t('linkCopied'), { variant: 'info' })
+  }
+
   return (
     <Box mb="1rem">
       <Paper
@@ -51,10 +64,13 @@ const Course = ({
           <Link to={`/courses/${courseId}`} component={RouterLink}>
             <Typography variant="h6">{name[language]}</Typography>
           </Link>
-
-          <Typography variant="body2">
-            <code>{courseId}</code>
-          </Typography>
+          <Tooltip title={t('copy')} placement="right">
+            <Button sx={{ p: 0 }} color="inherit">
+              <Typography variant="body2" onClick={() => handleCopyLink()}>
+                {studentLink}
+              </Typography>
+            </Button>
+          </Tooltip>
         </Box>
 
         <Box display="flex" flexDirection="column" alignItems="end">
