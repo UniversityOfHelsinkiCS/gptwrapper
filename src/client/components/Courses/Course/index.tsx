@@ -262,14 +262,14 @@ const Course = () => {
                   onChange={() => setMandatory((prev) => !prev)}
                 />
               }
-              label="Tee alustuksesta pakollinen opiskelijoille"
+              label={t('course:editMandatoryPrompt')}
               sx={{ mr: 5 }}
             />
           ) : (
-            <Tooltip title="Kurssilla voi olla vain yksi pakollinen alustus">
+            <Tooltip title={t('course:oneMandatoryPrompt')}>
               <FormControlLabel
                 control={<Checkbox checked={mandatory} disabled />}
-                label="Tee alustuksesta pakollinen opiskelijoille"
+                label={t('course:editMandatoryPrompt')}
                 sx={{ mr: 5 }}
               />
             </Tooltip>

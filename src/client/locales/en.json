@@ -138,6 +138,8 @@
     "averageTokenUsage": "Average token usage: ",
     "usagePercentage": "Percentage of students who have used CurreChat: ",
     "usageChartTitle": "Student token usages as percentages",
-    "noData": "No data"
+    "noData": "No data",
+    "editMandatoryPrompt": "Make prompt mandatory",
+    "oneMandatoryPrompt": "Course can have only one mandatory prompt"
   }
 }
