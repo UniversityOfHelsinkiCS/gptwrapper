@@ -127,9 +127,6 @@ chatInstanceRouter.get('/:id/usages', async (req, res) => {
     ],
   })
 
-  if (usage.length === 0)
-    return res.status(404).send('ChatInstanceUsages not found')
-
   return res.status(200).send(usage)
 })
 
