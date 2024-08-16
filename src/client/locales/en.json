@@ -132,7 +132,7 @@
     "noStudentsCloseToMaxTokenLimit": "No students",
     "editCourse": "Edit course",
     "usageResetSuccess": "Usage reset successfully",
-    "allTab": "All",
+    "activeTab": "Active courses",
     "curreEnabledTab": "CurreChat enabled",
     "endedTab": "Ended",
     "statistics": "Statistics",

@@ -24,15 +24,19 @@ const CustomTabPanel = (props: TabPanelProps) => {
 
 const Courses = () => {
   const { t } = useTranslation()
-  const { courses } = useUserCourses()
+  const { courses, isLoading } = useUserCourses()
 
   const [value, setValue] = React.useState(0)
+
+  if (!courses || isLoading) return null
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue)
   }
 
   const { curreEnabled, ended } = getGroupedCourses(courses)
+
+  const activeCourses = courses.filter((course) => !course.isExpired)
 
   return (
     <>
@@ -42,12 +46,12 @@ const Courses = () => {
         </Typography>
       </Box>
       <Tabs value={value} onChange={handleChange}>
-        <Tab label={t('course:allTab')} />
+        <Tab label={t('course:activeTab')} />
         <Tab label={t('course:curreEnabledTab')} />
         <Tab label={t('course:endedTab')} />
       </Tabs>
       <CustomTabPanel value={value} index={0}>
-        <CourseList courseUnits={courses} />
+        <CourseList courseUnits={activeCourses} />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
         <CourseList courseUnits={curreEnabled} />

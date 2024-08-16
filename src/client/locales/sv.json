@@ -121,7 +121,7 @@
     "editCourse": "Edit course",
     "usageResetSuccess": "Usage reset successfully",
     "curreNotOpen": "Students cannot access this course",
-    "allTab": "All",
+    "activeTab": "Active courses",
     "curreEnabledTab": "CurreChat enabled",
     "endedTab": "Ended",
     "statistics": "Statistics",
