@@ -114,7 +114,8 @@
     "rowsPerPage": "Rows per page",
     "searchCourse": "Search course (input at least 4 characters)",
     "promptCount": "Prompts",
-    "tokenUsage": "Used tokens"
+    "tokenUsage": "Used tokens",
+    "activityPeriod": "Course active"
   },
   "course": {
     "curreEnabled": "CurreChat is enabled for the course",

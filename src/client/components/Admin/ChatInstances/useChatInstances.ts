@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { ChatInstance } from '../../../types'
+import { ActivityPeriod, ChatInstance } from '../../../types'
 import apiClient from '../../../util/apiClient'
 
 interface ChatInstanceWithTokens extends ChatInstance {
+  activityPeriod: ActivityPeriod
   tokenUsage: number
 }
 

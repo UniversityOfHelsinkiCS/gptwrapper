@@ -109,7 +109,8 @@
     "rowsPerPage": "Rows per page",
     "searchCourse": "Search course (input at least 4 characters)",
     "promptCount": "Prompts",
-    "tokenUsage": "Used tokens"
+    "tokenUsage": "Used tokens",
+    "activityPeriod": "Course active"
   },
   "course": {
     "courseUpdated": "Course updated",

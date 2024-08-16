@@ -57,7 +57,14 @@ chatInstanceRouter.get('/', async (req, res) => {
       : undefined,
     limit,
     offset,
-    order: [[sequelize.literal(`"${orderBy}"`), order]],
+    order: [
+      [
+        orderBy === 'activityPeriod'
+          ? 'activityPeriod.startDate'
+          : sequelize.literal(`"${orderBy}"`),
+        order,
+      ],
+    ],
   })
 
   return res.send({ chatInstances, count })

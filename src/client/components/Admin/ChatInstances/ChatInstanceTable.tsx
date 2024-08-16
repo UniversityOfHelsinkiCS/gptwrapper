@@ -14,10 +14,11 @@ import Paper from '@mui/material/Paper'
 import { Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { visuallyHidden } from '@mui/utils'
-import { ChatInstance } from '../../../types'
+import { ActivityPeriod, ChatInstance } from '../../../types'
 import useChatInstances from './useChatInstances'
 
 interface ChatInstanceWithTokens extends ChatInstance {
+  activityPeriod: ActivityPeriod
   tokenUsage: number
 }
 
@@ -66,6 +67,12 @@ const headCells: readonly HeadCell[] = [
     numeric: true,
     disablePadding: false,
     label: 'TokenUsage',
+  },
+  {
+    id: 'activityPeriod',
+    numeric: false,
+    disablePadding: false,
+    label: 'ActivityPeriod',
   },
 ]
 
@@ -165,6 +172,9 @@ const ChatInstanceTableChatInstanceWithTokens = React.memo(
                 </TableCell>
                 <TableCell sx={{ fontFamily: 'monospace' }} align="right">
                   {row.tokenUsage ?? 0}
+                </TableCell>
+                <TableCell sx={{ fontFamily: 'monospace' }} align="right">
+                  {row.activityPeriod.startDate}-{row.activityPeriod.endDate}
                 </TableCell>
               </TableRow>
             ))}
