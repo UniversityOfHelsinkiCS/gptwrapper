@@ -140,6 +140,7 @@
     "usageChartTitle": "Opiskelijoiden käytetyt tokenit prosenttiosuutena käyttörajasta",
     "noData": "Ei dataa",
     "editMandatoryPrompt": "Tee alustuksesta pakollinen opiskelijoille",
-    "oneMandatoryPrompt": "Kurssilla voi olla vain yksi pakollinen alustus"
+    "oneMandatoryPrompt": "Kurssilla voi olla vain yksi pakollinen alustus",
+    "noCourses": "Ei näytettäviä kursseja"
   }
 }

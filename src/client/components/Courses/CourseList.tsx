@@ -137,7 +137,7 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
         {courseUnits.length === 0 && (
           <Box p={2}>
             <Typography color="textSecondary" align="center">
-              {t('teacherView:noCourses')}
+              {t('course:noCourses')}
             </Typography>
           </Box>
         )}

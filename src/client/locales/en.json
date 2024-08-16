@@ -141,6 +141,7 @@
     "usageChartTitle": "Student token usages as percentages",
     "noData": "No data",
     "editMandatoryPrompt": "Make prompt mandatory",
-    "oneMandatoryPrompt": "Course can have only one mandatory prompt"
+    "oneMandatoryPrompt": "Course can have only one mandatory prompt",
+    "noCourses": "No courses"
   }
 }
