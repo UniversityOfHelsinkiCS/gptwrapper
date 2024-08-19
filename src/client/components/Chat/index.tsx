@@ -230,7 +230,7 @@ const Chat = () => {
           : [
               {
                 role: 'user',
-                content: message + (file ? `${t('fileInfoPrompt')}` : ''),
+                content: message + (file ? '\n\nFile content:\n\n' : ''),
               },
             ]
       ),
