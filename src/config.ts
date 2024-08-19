@@ -33,6 +33,11 @@ export const validModels = [
     deployment: process.env.GPT_4 || 'curredev4',
     context: 128_000,
   },
+  {
+    name: 'gpt-4o',
+    deployment: process.env.GPT_4o || 'gpt4o',
+    context: 128_000,
+  },
 ].concat(
   // Add mock model if not in production
   inProduction
