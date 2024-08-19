@@ -34,10 +34,17 @@ chatInstanceRouter.get('/', async (req, res) => {
                   )`),
           'promptCount',
         ],
+        [
+          sequelize.literal(`(
+            SELECT COALESCE(SUM(usage_count), 0)
+            FROM user_chat_instance_usages
+            WHERE user_chat_instance_usages.chat_instance_id = "ChatInstance"."id" 
+        )`),
+          'tokenUsage',
+        ],
       ],
       exclude: ['updatedAt', 'createdAt'],
     },
-
     where: hasSearch
       ? {
           [Op.or]: [
@@ -50,7 +57,14 @@ chatInstanceRouter.get('/', async (req, res) => {
       : undefined,
     limit,
     offset,
-    order: [[sequelize.literal(`"${orderBy}"`), order]],
+    order: [
+      [
+        orderBy === 'activityPeriod'
+          ? 'activityPeriod.startDate'
+          : sequelize.literal(`"${orderBy}"`),
+        order,
+      ],
+    ],
   })
 
   return res.send({ chatInstances, count })
@@ -119,9 +133,6 @@ chatInstanceRouter.get('/:id/usages', async (req, res) => {
       },
     ],
   })
-
-  if (usage.length === 0)
-    return res.status(404).send('ChatInstanceUsages not found')
 
   return res.status(200).send(usage)
 })

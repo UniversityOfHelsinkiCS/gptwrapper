@@ -12,16 +12,15 @@ import {
 import { useTranslation } from 'react-i18next'
 import { enqueueSnackbar } from 'notistack'
 import { filterUsages } from '../util'
-import useCourse from '../../../hooks/useCourse'
 import { useCourseUsage } from '../../../hooks/useChatInstanceUsage'
 import { useResetChatInstanceUsageMutation } from '../../../hooks/useChatInstanceUsageMutation'
+import { Course } from '../../../types'
 
-const MaxTokenUsageStudents = ({ courseId }: { courseId: string }) => {
+const MaxTokenUsageStudents = ({ course }: { course: Course }) => {
   const { chatInstanceUsages, isLoading: usagesLoading } = useCourseUsage(
-    courseId as string
+    course.id as string
   )
   const resetUsage = useResetChatInstanceUsageMutation()
-  const { course } = useCourse(courseId as string)
   const { t } = useTranslation()
 
   if (usagesLoading || !chatInstanceUsages || !course) return null

@@ -1,7 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { ChatInstance } from '../../../types'
+import { ActivityPeriod, ChatInstance } from '../../../types'
 import apiClient from '../../../util/apiClient'
+
+interface ChatInstanceWithTokens extends ChatInstance {
+  activityPeriod: ActivityPeriod
+  tokenUsage: number
+}
 
 const useChatInstances = ({
   limit = 100,
@@ -13,7 +18,7 @@ const useChatInstances = ({
   const queryKey = ['chatInstances', { limit, offset, search, order, orderBy }]
 
   const queryFn = async (): Promise<{
-    chatInstances: ChatInstance[]
+    chatInstances: ChatInstanceWithTokens[]
     count: number
   }> => {
     const res = await apiClient.get(

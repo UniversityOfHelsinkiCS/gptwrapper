@@ -109,23 +109,28 @@
     "rowsPerPage": "Rows per page",
     "searchCourse": "Search course (input at least 4 characters)",
     "promptCount": "Prompts",
-    "tokenUsage": "Used tokens"
+    "tokenUsage": "Used tokens",
+    "activityPeriod": "Course active"
   },
   "course": {
     "courseUpdated": "Course updated",
     "disableCurre": "Disable CurreChat",
     "closeToMaxTokenLimit": "Students close to the token limit",
     "noStudentsCloseToMaxTokenLimit": "No students",
+    "disableCurreModalTitle": "Disable CurreChat on the course {{name}}?",
     "editCourse": "Edit course",
     "usageResetSuccess": "Usage reset successfully",
     "curreNotOpen": "Students cannot access this course",
-    "allTab": "All",
+    "activeTab": "Active courses",
     "curreEnabledTab": "CurreChat enabled",
     "endedTab": "Ended",
     "statistics": "Statistics",
     "averageTokenUsage": "Average token usage: ",
     "usagePercentage": "Percentage of students who have used CurreChat: ",
     "usageChartTitle": "Student token usages as percentages",
-    "noData": "No data"
+    "noData": "No data",
+    "editMandatoryPrompt": "Make prompt mandatory",
+    "oneMandatoryPrompt": "Course can have only one mandatory prompt",
+    "noCourses": "No courses"
   }
 }

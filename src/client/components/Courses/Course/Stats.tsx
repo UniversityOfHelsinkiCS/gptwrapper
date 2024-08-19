@@ -37,12 +37,15 @@ const Stats = ({ courseId }: { courseId: string }) => {
       </Typography>
 
       <Typography sx={{ my: 1 }}>
-        {t('course:averageTokenUsage')} {average ?? t('course:noData')}
+        {t('course:averageTokenUsage')}{' '}
+        {Math.round(average) ?? t('course:noData')}
       </Typography>
 
       <Typography>
         {t('course:usagePercentage')}{' '}
-        {usagePercentage ? `${usagePercentage * 100}%` : t('course:noData')}
+        {usagePercentage
+          ? `${Math.round(usagePercentage * 100 * 10) / 10}%`
+          : t('course:noData')}
       </Typography>
 
       {usages && usages.length !== 0 && (
@@ -52,7 +55,7 @@ const Stats = ({ courseId }: { courseId: string }) => {
             margin={{ top: 50, right: 20, bottom: 20, left: 0 }}
           >
             <Tooltip />
-            <YAxis domain={[0, 100]} />
+            <YAxis domain={[0, 100]} allowDataOverflow />
             <XAxis>
               <Label value={t('course:usageChartTitle')} position="bottom" />
             </XAxis>

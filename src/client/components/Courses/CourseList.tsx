@@ -11,32 +11,46 @@ import {
   DialogTitle,
   Link,
   Paper,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Link as RouterLink } from 'react-router-dom'
+import { enqueueSnackbar } from 'notistack'
 import { CoursesViewCourse } from '../../hooks/useUserCourses'
 import { useDisableCourse } from './useDisableCourse'
 import { useEnableCourse } from './useEnableCourse'
 import { formatDate } from './util'
 import { Course as CourseType } from '../../types'
-import { DEFAULT_MODEL_ON_ENABLE, DEFAULT_TOKEN_LIMIT } from '../../../config'
+import {
+  DEFAULT_MODEL_ON_ENABLE,
+  DEFAULT_TOKEN_LIMIT,
+  PUBLIC_URL,
+} from '../../../config'
 
 const Course = ({
   course,
   onEnable,
+  onDisable,
 }: {
   course: CoursesViewCourse
   onEnable: (course: CoursesViewCourse) => void
+  onDisable: (course: CoursesViewCourse) => void
 }) => {
   const { t, i18n } = useTranslation()
-  const disableMutation = useDisableCourse()
 
   if (!course) return null
 
   const { name, courseId, activityPeriod, isActive, isExpired } = course
 
   const { language } = i18n
+
+  const studentLink = `${window.location.origin}${PUBLIC_URL}/${courseId}`
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(studentLink)
+    enqueueSnackbar(t('linkCopied'), { variant: 'info' })
+  }
 
   return (
     <Box mb="1rem">
@@ -50,10 +64,13 @@ const Course = ({
           <Link to={`/courses/${courseId}`} component={RouterLink}>
             <Typography variant="h6">{name[language]}</Typography>
           </Link>
-
-          <Typography variant="body2">
-            <code>{courseId}</code>
-          </Typography>
+          <Tooltip title={t('copy')} placement="right">
+            <Button sx={{ p: 0 }} color="inherit">
+              <Typography variant="body2" onClick={() => handleCopyLink()}>
+                {studentLink}
+              </Typography>
+            </Button>
+          </Tooltip>
         </Box>
 
         <Box display="flex" flexDirection="column" alignItems="end">
@@ -62,8 +79,9 @@ const Course = ({
               <Typography>{t('course:curreEnabled')}</Typography>
               <Button
                 variant="contained"
+                color="error"
                 sx={{ mt: 'auto' }}
-                onClick={() => disableMutation.mutate({ id: course.id })}
+                onClick={() => onDisable(course)}
               >
                 {t('course:disableCurre')}
               </Button>
@@ -91,7 +109,9 @@ const Course = ({
 const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
   const { t, i18n } = useTranslation()
   const enableMutation = useEnableCourse()
+  const disableMutation = useDisableCourse()
   const [courseToEnable, setCourseToEnable] = useState<CourseType>(null)
+  const [courseToDisable, setCourseToDisable] = useState<CourseType>(null)
 
   if (!courseUnits) return null
 
@@ -117,7 +137,7 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
         {courseUnits.length === 0 && (
           <Box p={2}>
             <Typography color="textSecondary" align="center">
-              {t('teacherView:noCourses')}
+              {t('course:noCourses')}
             </Typography>
           </Box>
         )}
@@ -126,6 +146,7 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
             key={course.id}
             course={course}
             onEnable={setCourseToEnable}
+            onDisable={setCourseToDisable}
           />
         ))}
       </Box>
@@ -158,6 +179,30 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
             variant="contained"
           >
             {t('enable')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={courseToDisable !== null}
+        onClose={() => setCourseToDisable(null)}
+      >
+        <DialogTitle>
+          {t('course:disableCurreModalTitle', {
+            name: courseToDisable?.name[language],
+          })}
+        </DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setCourseToDisable(null)}>
+            {t('cancel')}
+          </Button>
+          <Button
+            onClick={() => {
+              disableMutation.mutate({ id: courseToDisable.id })
+              setCourseToDisable(null)
+            }}
+            variant="contained"
+          >
+            Ok
           </Button>
         </DialogActions>
       </Dialog>

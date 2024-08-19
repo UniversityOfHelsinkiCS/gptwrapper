@@ -113,7 +113,8 @@
     "rowsPerPage": "Rivien määrä sivulla",
     "searchCourse": "Etsi kurssia (syötä vähintään 4 merkkiä)",
     "promptCount": "Alustukset",
-    "tokenUsage": "Käytetyt tokenit"
+    "tokenUsage": "Käytetyt tokenit",
+    "activityPeriod": "Kurssi käynnissä"
   },
   "course": {
     "curreEnabled": "CurreChat on käytössä kurssilla",
@@ -123,19 +124,23 @@
     "disableCurre": "Poista CurreChat käytöstä",
     "enableCurre": "Ota CurreChat käyttöön",
     "enableCurreModalTitle": "Ota CurreChat käyttöön kurssille {{name}}?",
+    "disableCurreModalTitle": "Poista CurreChat käytöstä kurssilla {{name}}?",
     "enableCurreModalText": "Kurssille asetetaan oletusasetuksena {{defaultModel}} -kielimalli sekä {{defaultTokenLimit}} tokenin käyttöraja per opiskelija. CurreChat on kurssilla käytössä {{activityPeriod}} (kurssin käynnissäoloaika + 1 kk). Voit muokata näitä asetuksia myöhemmin.",
     "courseUpdated": "Kurssi päivitetty",
     "closeToMaxTokenLimit": "Tokeneiden käyttörajaa lähestyvät opiskelijat",
     "noStudentsCloseToMaxTokenLimit": "Ei näytettäviä opiskelijoita",
     "editCourse": "Muokkaa kurssin tietoja",
     "usageResetSuccess": "Käyttö nollattu onnistuneesti",
-    "allTab": "Kaikki",
+    "activeTab": "Aktiiviset kurssit",
     "curreEnabledTab": "CurreChat käytössä",
     "endedTab": "Päättyneet",
     "statistics": "Tilastoja",
     "averageTokenUsage": "Käytettyjen tokeneiden keskiarvo: ",
     "usagePercentage": "CurreChatin käyttöön ottaneiden opiskelijoiden osuus: ",
     "usageChartTitle": "Opiskelijoiden käytetyt tokenit prosenttiosuutena käyttörajasta",
-    "noData": "Ei dataa"
+    "noData": "Ei dataa",
+    "editMandatoryPrompt": "Tee alustuksesta pakollinen opiskelijoille",
+    "oneMandatoryPrompt": "Kurssilla voi olla vain yksi pakollinen alustus",
+    "noCourses": "Ei näytettäviä kursseja"
   }
 }

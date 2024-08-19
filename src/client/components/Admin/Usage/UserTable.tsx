@@ -15,18 +15,24 @@ import {
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 
-import { ChatInstanceUsage, ChatInstance } from '../../../types'
+import { debounce } from 'lodash'
+import { ChatInstanceUsage, ChatInstance, User } from '../../../types'
 import useChatInstanceUsage from '../../../hooks/useChatInstanceUsage'
 import useUsers from '../../../hooks/useUsers'
 import { useDeleteChatInstanceUsageMutation } from '../../../hooks/useChatInstanceUsageMutation'
 import useResetUsageMutation from '../../../hooks/useResetUsageMutation'
+import apiClient from '../../../util/apiClient'
 
 type Usage = Omit<ChatInstanceUsage, 'chatInstance'> & {
   chatInstance?: ChatInstance
 }
 
-const sortUsage = (a: Usage, b: Usage) =>
-  a.user.username.localeCompare(b.user.username)
+const sortUsage = (a: Usage, b: Usage) => b.usageCount - a.usageCount
+
+const handleLoginAs = (user: User) => () => {
+  localStorage.setItem('adminLoggedInAs', user.id)
+  window.location.reload()
+}
 
 const UserTable = () => {
   const { usage: chatInstanceUsage, isLoading } = useChatInstanceUsage()
@@ -37,24 +43,22 @@ const UserTable = () => {
 
   const [searchedUsages, setSearchedUsages] = useState<Usage[]>([])
 
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+
+  const { language } = i18n
 
   if (isLoading || usersLoading) return null
 
-  const filteredUsers = users.filter(({ usage }) => usage !== 0)
-
-  const userUsages: Usage[] = filteredUsers.map((user) => ({
+  const userUsages: Usage[] = users.map((user) => ({
     id: user.id,
     user,
     usageCount: user.usage,
   }))
 
-  const filteredUsage = chatInstanceUsage.filter(
-    ({ usageCount }) => usageCount !== 0
-  )
-  const sortedUsage = (filteredUsage as Usage[])
+  const sortedUsage = (chatInstanceUsage as Usage[])
     .concat(userUsages)
     .sort(sortUsage)
+    .slice(0, 10)
 
   const onDeleteChatInstanceUsage = (chatInstanceUsageId: string) => {
     try {
@@ -65,10 +69,32 @@ const UserTable = () => {
     }
   }
 
-  const handleChange = (value) => {
-    const searched = sortedUsage.filter((u) => u.user.username.includes(value))
-    setSearchedUsages(searched)
-  }
+  const handleSearchChange = debounce(async ({ target }) => {
+    const query = target.value
+
+    if (query.length === 0) {
+      setSearchedUsages([])
+      return
+    }
+    if (query.length < 5) return
+
+    const params = {
+      user: query,
+    }
+
+    const res = await apiClient.get(`/admin/user-search`, { params })
+    const { persons } = res.data as {
+      persons: User[]
+    }
+
+    const searchedUserUsages: Usage[] = persons.map((user) => ({
+      id: user.id,
+      user,
+      usageCount: user.usage,
+    }))
+
+    setSearchedUsages(searchedUserUsages)
+  }, 400)
 
   const onResetUsage = (userId: string) => {
     try {
@@ -85,7 +111,7 @@ const UserTable = () => {
         sx={{ width: '30em', my: 2 }}
         label="Search users"
         variant="outlined"
-        onChange={(e) => handleChange(e.target.value)}
+        onChange={handleSearchChange}
       />
       <TableContainer component={Paper}>
         <Table>
@@ -103,7 +129,7 @@ const UserTable = () => {
               </TableCell>
               <TableCell align="right">
                 <Typography variant="h5">
-                  <b>{t('admin:courseId')}</b>
+                  <b>{t('admin:courseNameInfo')}</b>
                 </Typography>
               </TableCell>
             </TableRow>
@@ -121,7 +147,7 @@ const UserTable = () => {
                   </TableCell>
                   <TableCell align="right">
                     <Typography variant="overline">
-                      <code>{chatInstance?.courseId ?? ''}</code>
+                      <code>{chatInstance?.name[language] ?? ''}</code>
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -134,6 +160,11 @@ const UserTable = () => {
                       }
                     >
                       {t('admin:reset')}
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="outlined" onClick={handleLoginAs(user)}>
+                      {t('admin:loginAsButton')}
                     </Button>
                   </TableCell>
                 </TableRow>

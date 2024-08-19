@@ -4,7 +4,6 @@ import { Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 import useCurrentUser from '../../../hooks/useCurrentUser'
-import CourseTable from './CourseTable'
 import FacultyTable from './FacultyTable'
 import UserTable from './UserTable'
 
@@ -24,13 +23,11 @@ const Usage = () => {
         value={value}
         onChange={(_, newValue) => setValue(newValue)}
       >
-        <Tab label={t('admin:courses')} />
         <Tab label={t('admin:faculties')} />
         <Tab label={t('admin:users')} />
       </Tabs>
-      {value === 0 && <CourseTable />}
-      {value === 1 && <FacultyTable />}
-      {value === 2 && <UserTable />}
+      {value === 0 && <FacultyTable />}
+      {value === 1 && <UserTable />}
     </Box>
   )
 }

@@ -114,7 +114,8 @@
     "rowsPerPage": "Rows per page",
     "searchCourse": "Search course (input at least 4 characters)",
     "promptCount": "Prompts",
-    "tokenUsage": "Used tokens"
+    "tokenUsage": "Used tokens",
+    "activityPeriod": "Course active"
   },
   "course": {
     "curreEnabled": "CurreChat is enabled for the course",
@@ -124,19 +125,23 @@
     "disableCurre": "Disable CurreChat",
     "enableCurre": "Enable CurreChat",
     "enableCurreModalTitle": "Enable CurreChat on the course {{name}}?",
+    "disableCurreModalTitle": "Disable CurreChat on the course {{name}}?",
     "enableCurreModalText": "The course will by default use {{defaultModel}} and have a token usage limit of {{defaultTokenLimit}} per student. CurreChat will be available between {{activityPeriod}} (course running time + 1 month). You can edit these settings later.",
     "courseUpdated": "Course updated",
     "closeToMaxTokenLimit": "Students close to the token limit",
     "noStudentsCloseToMaxTokenLimit": "No students",
     "editCourse": "Edit course",
     "usageResetSuccess": "Usage reset successfully",
-    "allTab": "All",
+    "activeTab": "Active courses",
     "curreEnabledTab": "CurreChat enabled",
     "endedTab": "Ended",
     "statistics": "Statistics",
     "averageTokenUsage": "Average token usage: ",
     "usagePercentage": "Percentage of students who have used CurreChat: ",
     "usageChartTitle": "Student token usages as percentages",
-    "noData": "No data"
+    "noData": "No data",
+    "editMandatoryPrompt": "Make prompt mandatory",
+    "oneMandatoryPrompt": "Course can have only one mandatory prompt",
+    "noCourses": "No courses"
   }
 }
