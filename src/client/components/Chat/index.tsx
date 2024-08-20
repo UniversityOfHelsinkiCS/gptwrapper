@@ -78,9 +78,7 @@ const Chat = () => {
   const inputFileRef = useRef<HTMLInputElement>(null)
   const [fileName, setFileName] = useState<string>('')
   const [completion, setCompletion] = useState('')
-  const [model, setModel] = useState(
-    localStorage.getItem('model') ?? 'gpt-3.5-turbo'
-  )
+  const [model, setModel] = useState(localStorage.getItem('model') ?? 'gpt-4o')
   const [streamController, setStreamController] = useState<AbortController>()
   const [alertOpen, setAlertOpen] = useState(false)
   const [disallowedFileType, setDisallowedFileType] = useState('')
