@@ -35,7 +35,12 @@ export const validModels = [
   },
   {
     name: 'gpt-4o',
-    deployment: process.env.GPT_4o || 'gpt4o',
+    deployment: process.env.GPT_4O || 'curredev4o',
+    context: 128_000,
+  },
+  {
+    name: 'gpt-4o-mini',
+    deployment: process.env.GPT_4O_MINI || 'curredev4omini',
     context: 128_000,
   },
 ].concat(
