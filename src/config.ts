@@ -15,7 +15,7 @@ export const UPDATER_CRON_ENABLED = process.env.UPDATER_CRON_ENABLED === 'true'
 export const DEFAULT_TOKEN_LIMIT =
   Number(process.env.DEFAULT_TOKEN_LIMIT) || 75_000
 
-export const DEFAULT_MODEL = process.env.DEFAUL_MODEL || 'gpt-3.5-turbo'
+export const DEFAULT_MODEL = process.env.DEFAUL_MODEL || 'gpt-4o'
 export const DEFAUL_CONTEXT_LIMIT =
   Number(process.env.DEFAUL_CONTEXT_LIMIT) || 4_096
 
