@@ -34,7 +34,7 @@ export const getAllowedModels = (model: string): string[] => {
 
   if (model === 'gpt-4') return allModels
 
-  return ['gpt-3.5-turbo']
+  return ['gpt-4o-mini']
 }
 
 export const getModelContextLimit = (modelName: string) => {

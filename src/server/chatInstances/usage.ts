@@ -25,7 +25,7 @@ export const checkUsage = async (
   { id, isPowerUser, isAdmin }: UserType,
   model: string
 ): Promise<boolean> => {
-  if (model === 'gpt-3.5-turbo') return true
+  if (model === 'gpt-4o-mini') return true
 
   const usage = await getUsage(id)
 
