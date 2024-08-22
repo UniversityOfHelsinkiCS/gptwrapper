@@ -5,7 +5,7 @@ import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
-import { validModels } from '../../../config'
+import { validModels, DEFAULT_MODEL } from '../../../config'
 import { Message, Prompt, SetState } from '../../types'
 import { getCompletionStream } from './util'
 import Banner from '../Banner'
@@ -56,10 +56,14 @@ function usePersistedState<T>(key: string, defaultValue: T): [T, SetState<T>] {
 }
 
 const allowedModels = validModels.map((m) => m.name) // [gpt-4, gpt-4o, gpt-4o-mini] 22.8.2024
-console.log('allowedModels:', allowedModels)
+
 const getInitialModel = () => {
   const storedModel = localStorage.getItem('model')
-  return allowedModels.includes(storedModel) ? storedModel : 'gpt-4o'
+  if (allowedModels.includes(storedModel)) {
+    return storedModel
+  }
+  localStorage.setItem('model', DEFAULT_MODEL)
+  return DEFAULT_MODEL
 }
 
 const Chat = () => {
