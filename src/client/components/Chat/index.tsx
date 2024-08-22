@@ -55,6 +55,13 @@ function usePersistedState<T>(key: string, defaultValue: T): [T, SetState<T>] {
   return [state, setState]
 }
 
+const allowedModels = validModels.map((m) => m.name) // [gpt-4, gpt-4o, gpt-4o-mini] 22.8.2024
+console.log('allowedModels:', allowedModels)
+const getInitialModel = () => {
+  const storedModel = localStorage.getItem('model')
+  return allowedModels.includes(storedModel) ? storedModel : 'gpt-4o'
+}
+
 const Chat = () => {
   // Null when in general chat
   const { courseId } = useParams()
@@ -65,6 +72,8 @@ const Chat = () => {
     isLoading: statusLoading,
     refetch: refetchStatus,
   } = useUserStatus(courseId)
+
+  const [model, setModel] = useState(getInitialModel())
 
   const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
 
@@ -78,7 +87,6 @@ const Chat = () => {
   const inputFileRef = useRef<HTMLInputElement>(null)
   const [fileName, setFileName] = useState<string>('')
   const [completion, setCompletion] = useState('')
-  const [model, setModel] = useState(localStorage.getItem('model') ?? 'gpt-4o')
   const [streamController, setStreamController] = useState<AbortController>()
   const [alertOpen, setAlertOpen] = useState(false)
   const [disallowedFileType, setDisallowedFileType] = useState('')
