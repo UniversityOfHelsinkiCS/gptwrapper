@@ -85,8 +85,7 @@ export const upsertResponsibilities = async (
       fallbackCreateOptions: {
         conflictFields: ['user_id', 'chat_instance_id'],
         fields: ['user_id', 'chat_instance_id'],
-        returning: false,
-      }
+      },
     })
 
     await t.commit()

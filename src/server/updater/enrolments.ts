@@ -41,10 +41,9 @@ const enrolmentsHandler = async (enrolments: SisuEnrolment[]) => {
       ignoreDuplicates: true,
     },
     fallbackCreateOptions: {
-      conflictFields: ['user_id', 'chat_instanceId'],
+      conflictFields: ['user_id', 'chat_instance_id'],
       fields: ['user_id', 'chat_instance_id'],
-      returning: false,
-    }
+    },
   })
 }
 

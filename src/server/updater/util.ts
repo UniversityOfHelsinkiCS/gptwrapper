@@ -15,9 +15,7 @@ type AllowedBulkCreateOptionField =
   | 'conflictAttributes'
   | 'updateOnDuplicate'
   | 'ignoreDuplicates'
-type AllowedFallbackCreateOptionField =
-  | 'fields'
-  | 'conflictFields'
+type AllowedFallbackCreateOptionField = 'fields' | 'conflictFields'
 
 interface BulkCreateOptions {
   entityName: string
@@ -36,9 +34,7 @@ export const safeBulkCreate = async ({
   entities,
 }: BulkCreateOptions) => {
   try {
-    const result = await bulkCreate(entities, {
-      ...bulkCreateOptions,
-    })
+    const result = await bulkCreate(entities, bulkCreateOptions)
     return result
   } catch (bulkCreateError: any) {
     const result = []
@@ -50,9 +46,7 @@ export const safeBulkCreate = async ({
     for (const entity of entities) {
       try {
         // eslint-disable-next-line no-await-in-loop
-        const res = await fallbackCreate(entity, {
-          ...fallbackCreateOptions,
-        })
+        const res = await fallbackCreate(entity, fallbackCreateOptions)
         result.push(res)
       } catch (fallbackCreateError: any) {
         logError(
