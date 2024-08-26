@@ -8,19 +8,6 @@ import { mangleData } from './mangleData'
 import { upsertResponsibilities } from './responsibilities'
 import { safeBulkCreate } from './util'
 
-const validRealisationTypes = [
-  'urn:code:course-unit-realisation-type:teaching-participation-lab',
-  'urn:code:course-unit-realisation-type:teaching-participation-online',
-  'urn:code:course-unit-realisation-type:teaching-participation-field-course',
-  'urn:code:course-unit-realisation-type:teaching-participation-project',
-  'urn:code:course-unit-realisation-type:teaching-participation-lectures',
-  'urn:code:course-unit-realisation-type:teaching-participation-small-group',
-  'urn:code:course-unit-realisation-type:teaching-participation-seminar',
-  'urn:code:course-unit-realisation-type:teaching-participation-blended',
-  'urn:code:course-unit-realisation-type:teaching-participation-contact',
-  'urn:code:course-unit-realisation-type:teaching-participation-distance',
-]
-
 // Find the newest course unit that has started before the course realisation
 const getCourseUnit = (
   courseUnits: SisuCourseUnit[],
@@ -86,7 +73,6 @@ const coursesHandler = async (
   const filteredCourseRealizations = courseRealizations.filter(
     (course) =>
       course.courseUnits.length &&
-      validRealisationTypes.includes(course.courseUnitRealisationTypeUrn) &&
       course.flowState !== 'CANCELLED' &&
       course.flowState !== 'ARCHIVED'
   )
