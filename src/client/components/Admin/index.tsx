@@ -15,6 +15,7 @@ import ChatInstances from './ChatInstances'
 import Usage from './Usage'
 import Updater from './Updater'
 import EditTexts from './EditTexts'
+import useCurrentUser from '../../hooks/useCurrentUser'
 
 const stripSearch = (path: string) => path.split('?')[0]
 
@@ -30,6 +31,9 @@ const RouterTabs = ({ children }: { children: React.ReactElement[] }) => {
 
 const Admin = () => {
   const { t } = useTranslation()
+  const { user, isLoading } = useCurrentUser()
+
+  if (isLoading) return null
 
   return (
     <Box>
@@ -41,11 +45,13 @@ const Admin = () => {
             component={Link}
           />
           <Tab label={t('admin:usage')} to="/admin/usage" component={Link} />
-          <Tab
-            label={t('admin:updater')}
-            to="/admin/updater"
-            component={Link}
-          />
+          {user.iamGroups.includes('grp-toska') && (
+            <Tab
+              label={t('admin:updater')}
+              to="/admin/updater"
+              component={Link}
+            />
+          )}
           <Tab
             label={t('admin:editTexts')}
             to="/admin/edit-texts"
@@ -57,7 +63,9 @@ const Admin = () => {
         <Route path="/" element={<Navigate to="/admin/chatinstances" />} />
         <Route path="/chatinstances" element={<ChatInstances />} />
         <Route path="/usage" element={<Usage />} />
-        <Route path="/updater" element={<Updater />} />
+        {user.iamGroups.includes('grp-toska') && (
+          <Route path="/updater" element={<Updater />} />
+        )}
         <Route path="/edit-texts" element={<EditTexts />} />
       </Routes>
     </Box>
