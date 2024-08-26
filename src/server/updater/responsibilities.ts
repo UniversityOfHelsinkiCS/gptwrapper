@@ -78,10 +78,15 @@ export const upsertResponsibilities = async (
       entities: responsibilitiesToInsert,
       bulkCreate: async (e, opts) => Responsibility.bulkCreate(e, opts),
       fallbackCreate: async (e, opts) => Responsibility.upsert(e, opts),
-      options: {
-        conflictAttributes: ['user_id', 'chat_instance_id'],
+      bulkCreateOptions: {
+        conflictAttributes: ['userId', 'chatInstanceId'],
         ignoreDuplicates: true,
       },
+      fallbackCreateOptions: {
+        conflictFields: ['user_id', 'chat_instance_id'],
+        fields: ['user_id', 'chat_instance_id'],
+        returning: false,
+      }
     })
 
     await t.commit()

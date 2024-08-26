@@ -42,7 +42,7 @@ Responsibility.init(
     indexes: [
       {
         unique: true,
-        fields: ['userId', 'chatInstanceId'],
+        fields: ['user_id', 'chat_instance_id'],
       },
     ],
   }

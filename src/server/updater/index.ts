@@ -6,7 +6,7 @@ import { fetchUsers } from './users'
 import { clearOffsets } from './util'
 
 const runUpdater = async () => {
-  await fetchUsers()
+  // await fetchUsers()
   await fetchCoursesAndResponsibilities()
   await fetchEnrolments()
 }

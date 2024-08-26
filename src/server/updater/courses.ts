@@ -60,10 +60,13 @@ const createChatInstance = async (
     entities: chatInstances,
     bulkCreate: async (e, opts) => ChatInstance.bulkCreate(e, opts),
     fallbackCreate: async (e, opts) => ChatInstance.upsert(e, opts),
-    options: {
+    bulkCreateOptions: {
       updateOnDuplicate: ['name'],
       conflictAttributes: ['courseId'],
     },
+    fallbackCreateOptions: {
+      fields: ['courseId']
+    }
   })
 }
 

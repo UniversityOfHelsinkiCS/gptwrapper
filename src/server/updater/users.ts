@@ -33,9 +33,12 @@ const usersHandler = async (users: SisuUser[]) => {
     entities: parsedUsers,
     bulkCreate: async (e, opt) => User.bulkCreate(e, opt),
     fallbackCreate: async (e, opt) => User.upsert(e, opt),
-    options: {
+    bulkCreateOptions: {
       updateOnDuplicate: ['language', 'username'],
     },
+    fallbackCreateOptions: {
+      fields: ['language', 'username'],
+    }
   })
 }
 

@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/node'
 
 import { redis } from '../util/redis'
 import logger from '../util/logger'
+import { PartialRecord } from '../types'
 
 const logError = (message: string, error: Error) => {
   logger.error(`${message} ${error.name}, ${error.message}`)
@@ -10,22 +11,34 @@ const logError = (message: string, error: Error) => {
   Sentry.captureException(error)
 }
 
+type AllowedBulkCreateOptionField =
+  | 'conflictAttributes'
+  | 'updateOnDuplicate'
+  | 'ignoreDuplicates'
+type AllowedFallbackCreateOptionField =
+  | 'fields'
+  | 'conflictFields'
+
 interface BulkCreateOptions {
   entityName: string
   bulkCreate: (entities: object[], options: any) => Promise<any>
   fallbackCreate: (entity: object, options: any) => Promise<any>
-  options: Record<string, any>
+  bulkCreateOptions: PartialRecord<AllowedBulkCreateOptionField, any>
+  fallbackCreateOptions: PartialRecord<AllowedFallbackCreateOptionField, any>
   entities: Record<string, any>[]
 }
 export const safeBulkCreate = async ({
   entityName,
   bulkCreate,
   fallbackCreate,
-  options,
+  bulkCreateOptions,
+  fallbackCreateOptions,
   entities,
 }: BulkCreateOptions) => {
   try {
-    const result = await bulkCreate(entities, options)
+    const result = await bulkCreate(entities, {
+      ...bulkCreateOptions,
+    })
     return result
   } catch (bulkCreateError: any) {
     const result = []
@@ -38,8 +51,7 @@ export const safeBulkCreate = async ({
       try {
         // eslint-disable-next-line no-await-in-loop
         const res = await fallbackCreate(entity, {
-          ...options,
-          fields: options.updateOnDuplicate,
+          ...fallbackCreateOptions,
         })
         result.push(res)
       } catch (fallbackCreateError: any) {
