@@ -10,6 +10,7 @@ import {
 import { User } from '../db/models'
 import { getUserStatus, getUsage } from '../chatInstances/usage'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
+import { getLastRestart } from '../util/lastRestart'
 
 const userRouter = express.Router()
 
@@ -42,10 +43,13 @@ userRouter.get('/login', async (req, res) => {
 
   const usage = await getUsage(id)
 
+  const lastRestart = await getLastRestart()
+
   return res.send({
     ...user,
     usage,
     hasIamAccess: isAdmin || hasIamAccess,
+    lastRestart,
   })
 })
 

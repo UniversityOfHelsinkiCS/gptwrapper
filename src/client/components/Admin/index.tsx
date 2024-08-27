@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Tabs, Tab } from '@mui/material'
+import { Box, Tabs, Tab, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import {
   Route,
@@ -11,6 +11,7 @@ import {
 } from 'react-router-dom'
 import { get } from 'lodash'
 
+import { format } from 'date-fns'
 import ChatInstances from './ChatInstances'
 import Usage from './Usage'
 import Updater from './Updater'
@@ -35,8 +36,16 @@ const Admin = () => {
 
   if (isLoading) return null
 
+  const lastRestart = format(new Date(user?.lastRestart), 'dd/MM/yyyy HH.mm.ss')
+
   return (
     <Box>
+      <Box m={2}>
+        <Typography variant="body1">
+          {t('admin:lastUpdate')}
+          {lastRestart}
+        </Typography>
+      </Box>
       <Box mb={3}>
         <RouterTabs>
           <Tab

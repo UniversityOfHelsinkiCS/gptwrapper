@@ -19,6 +19,7 @@ export interface User {
   activeCourseIds: string[]
   ownCourses: string[]
   hasIamAccess?: boolean
+  lastRestart: any
 }
 
 export type Prompt = {
