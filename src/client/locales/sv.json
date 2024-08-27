@@ -110,7 +110,8 @@
     "searchCourse": "Search course (input at least 4 characters)",
     "promptCount": "Prompts",
     "tokenUsage": "Used tokens",
-    "activityPeriod": "Course active"
+    "activityPeriod": "Course active",
+    "lastUpdate": "Latest release: "
   },
   "course": {
     "courseUpdated": "Course updated",

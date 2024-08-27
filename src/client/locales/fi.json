@@ -114,7 +114,8 @@
     "searchCourse": "Etsi kurssia (syötä vähintään 4 merkkiä)",
     "promptCount": "Alustukset",
     "tokenUsage": "Käytetyt tokenit",
-    "activityPeriod": "Kurssi käynnissä"
+    "activityPeriod": "Kurssi käynnissä",
+    "lastUpdate": "Viimeisin julkaisu: "
   },
   "course": {
     "curreEnabled": "CurreChat on käytössä kurssilla",
