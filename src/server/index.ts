@@ -35,7 +35,7 @@ app.listen(PORT, async () => {
   await connectToDatabase()
   await seed()
   await updateLastRestart()
-  if (true || inProduction || inStaging) {
+  if (inProduction || inStaging) {
     await setupCron()
   }
 
