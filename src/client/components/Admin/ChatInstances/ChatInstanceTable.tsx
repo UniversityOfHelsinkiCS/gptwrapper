@@ -7,7 +7,13 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TablePagination from '@mui/material/TablePagination'
-import { TextField, Link, TableSortLabel } from '@mui/material'
+import {
+  TextField,
+  Link,
+  TableSortLabel,
+  Checkbox,
+  InputLabel,
+} from '@mui/material'
 import TableRow from '@mui/material/TableRow'
 import { debounce } from 'lodash'
 import Paper from '@mui/material/Paper'
@@ -192,6 +198,7 @@ const ChatInstanceTable = () => {
   const [order, setOrder] = React.useState<Order>('asc')
   const [orderBy, setOrderBy] =
     React.useState<keyof ChatInstanceWithTokens>('name')
+  const [showActiveCourses, setShowActiveCourses] = React.useState(false)
 
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(10)
@@ -202,6 +209,7 @@ const ChatInstanceTable = () => {
     search: deferredSearch,
     order,
     orderBy,
+    showActiveCourses,
   })
 
   const handleChangePage = React.useCallback(
@@ -242,6 +250,16 @@ const ChatInstanceTable = () => {
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
+        <Box>
+          <InputLabel>
+            <Checkbox
+              checked={showActiveCourses}
+              onChange={() => setShowActiveCourses(!showActiveCourses)}
+              inputProps={{ 'aria-label': 'controlled' }}
+            />
+            Näytä aktiiviset kurssit
+          </InputLabel>
+        </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <TextField
             label={t('admin:searchCourse')}

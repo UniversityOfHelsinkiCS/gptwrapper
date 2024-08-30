@@ -15,12 +15,14 @@ chatInstanceRouter.get('/', async (req, res) => {
     search: searchRaw,
     order: orderRaw,
     orderBy: orderByRaw,
+    showActiveCourses: showActiveCoursesRaw,
   } = req.query
   const limit = limitStr ? parseInt(limitStr as string, 10) : 100
   const offset = offsetStr ? parseInt(offsetStr as string, 10) : 0
   const search = String(searchRaw)
   const order = String(orderRaw)
   const orderBy = String(orderByRaw)
+  const showActiveCourses = String(showActiveCoursesRaw)
   const hasSearch = search && search.length >= 4
 
   const { rows: chatInstances, count } = await ChatInstance.findAndCountAll({
@@ -45,16 +47,27 @@ chatInstanceRouter.get('/', async (req, res) => {
       ],
       exclude: ['updatedAt', 'createdAt'],
     },
-    where: hasSearch
-      ? {
-          [Op.or]: [
-            { courseId: { [Op.like]: `${search}%` } },
-            { 'name.en': { [Op.iLike]: `%${search}%` } },
-            { 'name.fi': { [Op.iLike]: `%${search}%` } },
-            { 'name.sv': { [Op.iLike]: `%${search}%` } },
-          ],
-        }
-      : undefined,
+    where:
+      // eslint-disable-next-line no-nested-ternary
+      showActiveCourses === 'true'
+        ? {
+            'activityPeriod.endDate': {
+              [Op.gt]: new Date().toISOString(),
+            },
+            'activityPeriod.startDate': {
+              [Op.lt]: new Date().toISOString(),
+            },
+          }
+        : hasSearch
+          ? {
+              [Op.or]: [
+                { courseId: { [Op.like]: `${search}%` } },
+                { 'name.en': { [Op.iLike]: `%${search}%` } },
+                { 'name.fi': { [Op.iLike]: `%${search}%` } },
+                { 'name.sv': { [Op.iLike]: `%${search}%` } },
+              ],
+            }
+          : undefined,
     limit,
     offset,
     order: [
