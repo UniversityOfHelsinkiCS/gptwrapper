@@ -20,7 +20,7 @@ userRouter.get('/login', async (req, res) => {
   const { id, isAdmin, iamGroups } = user
 
   if (!id) return res.status(401).send('Unauthorized')
-    const lastRestart = await getLastRestart()
+
   const hasIamAccess = checkIamAccess(iamGroups)
 
   const enrolledCourses = await getEnrolledCourses(user)
