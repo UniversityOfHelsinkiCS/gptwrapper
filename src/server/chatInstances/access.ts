@@ -1,15 +1,23 @@
-import { EXAMPLE_COURSE_ID, TEST_COURSE_ID, accessIams } from '../util/config'
-import { ChatInstance, Enrolment, Responsibility } from '../db/models'
+import { EXAMPLE_COURSE_ID, TEST_COURSE_ID, employeeIam } from '../util/config'
+import {
+  ChatInstance,
+  Enrolment,
+  Responsibility,
+  User as UserModel,
+} from '../db/models'
 import { User } from '../types'
 
-export const checkIamAccess = (iamGroups: string[]) =>
-  accessIams.some((iam) => iamGroups.includes(iam))
+const getUserById = async (id: string) => UserModel.findByPk(id)
 
 /**
  * Gets the chat instance ids of the courses the user is enrolled in
  */
 export const getEnrolledCourses = async (user: User) => {
-  if (checkIamAccess(user.iamGroups)) {
+  // Only do the example/test course upserts if the user is an employee
+  // students have no reason to be in these courses.
+  // We also want to check if the user exists in the database
+  // before we try to upsert the enrolments.
+  if (user.iamGroups.includes(employeeIam) && getUserById(user.id)) {
     await Enrolment.upsert(
       {
         userId: user.id,
@@ -47,7 +55,9 @@ export const getEnrolledCourses = async (user: User) => {
 }
 
 export const getOwnCourses = async (user: User) => {
-  if (user.isAdmin) {
+  // We want to check if the user exists in the database
+  // before we try to upsert the enrolments
+  if (user.isAdmin && getUserById(user.id)) {
     await Responsibility.upsert(
       {
         userId: user.id,

@@ -2,15 +2,15 @@ import express from 'express'
 
 import { ChatRequest } from '../types'
 import logger from '../util/logger'
-import {
-  checkIamAccess,
-  getEnrolledCourses,
-  getOwnCourses,
-} from '../chatInstances/access'
+import { getEnrolledCourses, getOwnCourses } from '../chatInstances/access'
 import { User } from '../db/models'
 import { getUserStatus, getUsage } from '../chatInstances/usage'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { getLastRestart } from '../util/lastRestart'
+import { accessIams } from '../util/config'
+
+export const checkIamAccess = (iamGroups: string[]) =>
+  accessIams.some((iam) => iamGroups.includes(iam))
 
 const userRouter = express.Router()
 
@@ -20,7 +20,7 @@ userRouter.get('/login', async (req, res) => {
   const { id, isAdmin, iamGroups } = user
 
   if (!id) return res.status(401).send('Unauthorized')
-
+    const lastRestart = await getLastRestart()
   const hasIamAccess = checkIamAccess(iamGroups)
 
   const enrolledCourses = await getEnrolledCourses(user)
