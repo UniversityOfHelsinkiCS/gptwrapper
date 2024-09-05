@@ -245,8 +245,6 @@ const ChatInstanceTable = () => {
     setOrderBy(property)
   }
 
-  if (isLoading) return null
-
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
@@ -278,12 +276,14 @@ const ChatInstanceTable = () => {
             labelRowsPerPage={t('admin:rowsPerPage')}
           />
         </Box>
-        <ChatInstanceTableChatInstanceWithTokens
-          rows={chatInstances}
-          onRequestSort={handleRequestSort}
-          order={order}
-          orderBy={orderBy}
-        />
+        {!isLoading && (
+          <ChatInstanceTableChatInstanceWithTokens
+            rows={chatInstances}
+            onRequestSort={handleRequestSort}
+            order={order}
+            orderBy={orderBy}
+          />
+        )}
       </Paper>
     </Box>
   )
