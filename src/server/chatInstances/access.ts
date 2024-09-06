@@ -17,7 +17,7 @@ export const getEnrolledCourses = async (user: User) => {
   // students have no reason to be in these courses.
   // We also want to check if the user exists in the database
   // before we try to upsert the enrolments.
-  if (user.iamGroups.includes(employeeIam) && getUserById(user.id)) {
+  if (user.iamGroups.includes(employeeIam) && (await getUserById(user.id))) {
     await Enrolment.upsert(
       {
         userId: user.id,
@@ -57,7 +57,7 @@ export const getEnrolledCourses = async (user: User) => {
 export const getOwnCourses = async (user: User) => {
   // We want to check if the user exists in the database
   // before we try to upsert the enrolments
-  if (user.isAdmin && getUserById(user.id)) {
+  if (user.isAdmin && (await getUserById(user.id))) {
     await Responsibility.upsert(
       {
         userId: user.id,
