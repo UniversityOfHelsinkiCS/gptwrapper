@@ -42,6 +42,7 @@ export interface ChatInstance {
   resetCron?: string
   courseId?: string
   prompts: Prompt[]
+  courseUnitRealisationTypeUrn?: string
 }
 
 export interface AccessGroup {

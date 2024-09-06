@@ -28,6 +28,8 @@ class ChatInstance extends Model<
   declare courseId: string | null
 
   declare activityPeriod: ActivityPeriod | null
+
+  declare courseUnitRealisationTypeUrn: string | null
 }
 
 ChatInstance.init(
@@ -69,6 +71,11 @@ ChatInstance.init(
     },
     activityPeriod: {
       type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: null,
+    },
+    courseUnitRealisationTypeUrn: {
+      type: DataTypes.STRING,
       allowNull: true,
       defaultValue: null,
     },

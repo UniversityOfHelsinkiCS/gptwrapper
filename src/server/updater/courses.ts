@@ -52,6 +52,7 @@ const createChatInstance = async (
       },
       courseId: course.id,
       activityPeriod: course.activityPeriod,
+      courseUnitRealisationTypeUrn: course.courseUnitRealisationTypeUrn,
     }
   })
 
@@ -65,8 +66,8 @@ const createChatInstance = async (
       conflictAttributes: ['courseId'],
     },
     fallbackCreateOptions: {
-      fields: ['courseId']
-    }
+      fields: ['courseId'],
+    },
   })
 }
 
