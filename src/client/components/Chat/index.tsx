@@ -299,6 +299,8 @@ const Chat = () => {
   return (
     <Box>
       <Banner disclaimer={disclaimer} />
+      {course && <Typography variant="h4">{course.name[language]}</Typography>}
+      <Box sx={{ mb: 3 }} />
       {hasPrompts && (
         <PromptSelector
           prompts={course.prompts}
