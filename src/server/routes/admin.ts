@@ -127,6 +127,19 @@ adminRouter.get('/users', async (_, res) => {
   return res.send(usage)
 })
 
+adminRouter.get('/users/:search', async (req, res) => {
+  const matches = await User.findAll({
+    where: {
+      username: {
+        [Op.iLike]: `%${req.params.search}%`,
+      },
+    },
+    limit: 20,
+  })
+
+  return res.send(matches)
+})
+
 adminRouter.delete('/usage/:userId', async (req, res) => {
   const { userId } = req.params
 

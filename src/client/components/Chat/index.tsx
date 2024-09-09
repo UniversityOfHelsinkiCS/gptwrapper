@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
 import { validModels, DEFAULT_MODEL } from '../../../config'
-import { Message, Prompt, SetState } from '../../types'
+import { Message, Prompt, SetState, Course } from '../../types'
 import { getCompletionStream } from './util'
 import Banner from '../Banner'
 import SystemMessage from './SystemMessage'
@@ -66,6 +66,20 @@ const getInitialModel = () => {
   return DEFAULT_MODEL
 }
 
+const CourseInfo = ({ course }: { course: Course }) => {
+  const { i18n } = useTranslation()
+  const { language } = i18n
+
+  return (
+    <Box>
+      <Typography variant="h4">{course.name[language]}</Typography>
+      <div style={{ marginTop: 10 }}>
+        {course.activityPeriod.startDate} - {course.activityPeriod.endDate}
+      </div>
+    </Box>
+  )
+}
+
 const Chat = () => {
   // Null when in general chat
   const { courseId } = useParams()
@@ -78,7 +92,6 @@ const Chat = () => {
   } = useUserStatus(courseId)
 
   const [model, setModel] = useState(getInitialModel())
-
   const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
 
   const [activePromptId, setActivePromptId] = useState('')
@@ -103,6 +116,46 @@ const Chat = () => {
   const { language } = i18n
 
   if (statusLoading || infoTextsLoading) return null
+
+  if (course && course.usageLimit === 0) {
+    return (
+      <Box>
+        <CourseInfo course={course} />
+        <Alert severity="warning" style={{ marginTop: 20 }}>
+          <Typography variant="h6">{t('course:curreNotOpen')}</Typography>
+        </Alert>
+      </Box>
+    )
+  }
+
+  if (course && course.activityPeriod) {
+    const { startDate, endDate } = course && course.activityPeriod
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const now = new Date()
+
+    if (now < start) {
+      return (
+        <Box>
+          <CourseInfo course={course} />
+          <Alert severity="warning" style={{ marginTop: 20 }}>
+            <Typography variant="h6">{t('course:curreNotStarted')}</Typography>
+          </Alert>
+        </Box>
+      )
+    }
+
+    if (now > end) {
+      return (
+        <Box>
+          <CourseInfo course={course} />
+          <Alert severity="warning" style={{ marginTop: 20 }}>
+            <Typography variant="h6">{t('course:curreExpired')}</Typography>
+          </Alert>
+        </Box>
+      )
+    }
+  }
 
   const disclaimer = infoTexts.find(
     (infoText) => infoText.name === 'disclaimer'
@@ -299,7 +352,7 @@ const Chat = () => {
   return (
     <Box>
       <Banner disclaimer={disclaimer} />
-      {course && <Typography variant="h4">{course.name[language]}</Typography>}
+      {course && <CourseInfo course={course} />}
       <Box sx={{ mb: 3 }} />
       {hasPrompts && (
         <PromptSelector

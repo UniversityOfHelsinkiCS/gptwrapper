@@ -16,6 +16,7 @@ import ChatInstances from './ChatInstances'
 import Usage from './Usage'
 import Updater from './Updater'
 import EditTexts from './EditTexts'
+import UserSearch from './UserSearch'
 import useCurrentUser from '../../hooks/useCurrentUser'
 
 const stripSearch = (path: string) => path.split('?')[0]
@@ -66,6 +67,11 @@ const Admin = () => {
             to="/admin/edit-texts"
             component={Link}
           />
+          <Tab
+            label={t('admin:searchUsers')}
+            to="/admin/usersearch"
+            component={Link}
+          />
         </RouterTabs>
       </Box>
       <Routes>
@@ -76,6 +82,7 @@ const Admin = () => {
           <Route path="/updater" element={<Updater />} />
         )}
         <Route path="/edit-texts" element={<EditTexts />} />
+        <Route path="/usersearch" element={<UserSearch />} />
       </Routes>
     </Box>
   )
