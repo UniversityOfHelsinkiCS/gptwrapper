@@ -26,6 +26,14 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare totalUsage: bigint
 
   declare activeCourseIds: CreationOptional<string[]>
+
+  declare lastName: string
+
+  declare firstNames: string
+
+  declare studentNumber: string
+
+  declare primaryEmail: string
 }
 
 User.init(
@@ -66,6 +74,26 @@ User.init(
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: false,
       defaultValue: [],
+    },
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: null,
+    },
+    firstNames: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: null,
+    },
+    studentNumber: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: null,
+    },
+    primaryEmail: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: null,
     },
   },
   {

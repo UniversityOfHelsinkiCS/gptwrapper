@@ -13,6 +13,10 @@ export interface User {
   language?: string
   iamGroups: string[]
   email?: string
+  firstNames: string
+  lastName: string
+  primaryEmail: string
+  studentNumber: string
   isAdmin: boolean
   isPowerUser: boolean
   usage: number

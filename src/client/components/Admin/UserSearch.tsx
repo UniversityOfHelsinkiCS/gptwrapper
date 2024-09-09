@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Box, Input, Button } from '@mui/material'
+import { Input, Box, Button } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import useUserSearch from '../../hooks/useUserSearch'
 

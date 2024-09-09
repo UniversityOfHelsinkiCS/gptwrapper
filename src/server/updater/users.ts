@@ -15,31 +15,52 @@ interface SisuUser {
   id: string
   preferredLanguageUrn: string
   eduPersonPrincipalName: string
+  firstNames: string
+  lastName: string
+  primaryEmail: string
+  studentNumber: string
 }
 
 const usersHandler = async (users: SisuUser[]) => {
-  const parsedUsers = users.map((user) => ({
-    id: user.id,
-    language: parsePreferredLanguageUrnToLanguage(user.preferredLanguageUrn),
-    username: user.eduPersonPrincipalName
-      ? user.eduPersonPrincipalName.split('@')[0]
-      : user.id,
-    active_course_ids: [],
-  }))
+  // eslint-disable-next-line arrow-body-style
+  const parsedUsers = users.map((user) => {
+    return {
+      id: user.id,
+      language: parsePreferredLanguageUrnToLanguage(user.preferredLanguageUrn),
+      username: user.eduPersonPrincipalName
+        ? user.eduPersonPrincipalName.split('@')[0]
+        : user.id,
+      active_course_ids: [],
+      lastName: user.lastName,
+      firstNames: user.firstNames,
+      studentNumber: user.studentNumber,
+      primaryEmail: user.primaryEmail,
+    }
+  })
 
-  // By default updates all fields on duplicate id
+  const fieldsToUpdate = [
+    'language',
+    'username',
+    'lastName',
+    'last_name',
+    'firstNames',
+    'studentNumber',
+    'primaryEmail',
+  ]
+
   await safeBulkCreate({
     entityName: 'User',
     entities: parsedUsers,
     bulkCreate: async (e, opt) => User.bulkCreate(e, opt),
     fallbackCreate: async (e, opt) => User.upsert(e, opt),
     bulkCreateOptions: {
-      updateOnDuplicate: ['language', 'username'],
+      updateOnDuplicate: fieldsToUpdate,
     },
     fallbackCreateOptions: {
-      fields: ['language', 'username'],
-    }
+      fields: fieldsToUpdate,
+    },
   })
+  console.log(`[UPDATER] Updated ${users.length} users`)
 }
 
 export const fetchUsers = async () => {
