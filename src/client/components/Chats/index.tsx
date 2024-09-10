@@ -33,6 +33,16 @@ const Chats = () => {
     return <h3>{t('chats:noChats')}</h3>
   }
 
+  const getChatLink = (chat: any) => {
+    // TODO: make this function better
+
+    if (window.location.hostname === 'localhost') {
+      return `http://localhost:3000/${chat.courseId}`
+    }
+
+    return `https://curre.helsinki.fi/chat/${chat.courseId}`
+  }
+
   return (
     <div>
       <h2>{t('chats:header')}</h2>
@@ -72,8 +82,8 @@ const Chats = () => {
                     </Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <a href={`/chat/${chat.id}`}>
-                      <Typography variant="h6">{`https://curre.helsinki.fi/chat/${chat.id}`}</Typography>
+                    <a href={getChatLink(chat)}>
+                      <Typography variant="h6">{getChatLink(chat)}</Typography>
                     </a>
                   </TableCell>
                 </TableRow>
