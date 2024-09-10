@@ -104,10 +104,7 @@ const UserTable = ({ users }: { users: User[] }) => {
                   <Typography variant="h6">{user.usage}</Typography>
                 </TableCell>
                 <TableCell>
-                  <Button
-                    variant="outlined"
-                    onClick={() => handleLoginAs(user)}
-                  >
+                  <Button variant="outlined" onClick={handleLoginAs(user)}>
                     {t('admin:loginAsButton')}
                   </Button>
                   {user.usage > 0 && (
