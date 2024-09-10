@@ -93,7 +93,7 @@
     "usageLimitInfo": "Käyttöraja tokeneina",
     "resetSchedule": "Nollaantumisaika",
     "resetScheduleInfo": "Käytä Cron-notaatiota",
-    "courses": "Opettamani kurssit",
+    "courses": "Kurssit",
     "createChatInstance": "Lisää uusi kurssi",
     "confirmChatInstanceDelete": "Haluatko varmasti poistaa tämän kurssin?",
     "newChatInstance": "Uusi kurssi",

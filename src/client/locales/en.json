@@ -94,7 +94,7 @@
     "usageLimitInfo": "Usage limit in tokens",
     "resetSchedule": "Reset schedule",
     "resetScheduleInfo": "Use Cron notation",
-    "courses": "Courses I teach",
+    "courses": "Courses",
     "createChatInstance": "Add a new course",
     "confirmChatInstanceDelete": "Are you sure you want to delete this course?",
     "newChatInstance": "New course",
