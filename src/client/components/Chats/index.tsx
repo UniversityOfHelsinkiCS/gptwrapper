@@ -29,6 +29,10 @@ const Chats = () => {
       new Date() <= new Date(chat.activityPeriod.endDate)
   )
 
+  if (chats.length === 0) {
+    return <h3>{t('chats:noChats')}</h3>
+  }
+
   return (
     <div>
       <h2>{t('chats:header')}</h2>

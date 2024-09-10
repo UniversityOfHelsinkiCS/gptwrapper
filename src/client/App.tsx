@@ -19,6 +19,8 @@ const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
   if (user.isAdmin) return true
   if (courseId && !user.activeCourseIds.includes(courseId)) return false
+
+  if (!courseId && window.location.pathname === '/chats') return true
   if (!courseId && !user.hasIamAccess) return false
 
   return true
@@ -27,7 +29,9 @@ const hasAccess = (user: User | null | undefined, courseId?: string) => {
 const getRedirect = (user: User | null | undefined) => {
   if (!user) return '/noaccess'
   if (user.hasIamAccess) return '/'
-  return `/${user.activeCourseIds[0] || '/noaccess'}`
+  if (user.activeCourseIds.length > 0) return '/chats'
+
+  return '/noaccess'
 }
 
 const AdminLoggedInAsBanner = () => {

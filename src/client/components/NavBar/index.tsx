@@ -66,7 +66,16 @@ const NavBar = () => {
             </Box>
           </MuiLink>
           <Box>
-            <Button href={t('curreUrl')}>{t('curreTitle')}</Button>
+            {user.hasIamAccess && (
+              <Button href={t('curreUrl')}>{t('curreTitle')}</Button>
+            )}
+            {user.enrolledCourses.length > 0 && (
+              <Link to="/chats" style={{ textDecoration: 'none' }}>
+                <Button>
+                  <BookmarksOutlined sx={styles.icon} /> {t('chats')}
+                </Button>
+              </Link>
+            )}
             {user.ownCourses.length > 0 && (
               <Link to="/courses" style={{ textDecoration: 'none' }}>
                 <Button>
