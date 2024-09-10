@@ -32,17 +32,20 @@ const getRedirect = (user: User | null | undefined) => {
 
 const AdminLoggedInAsBanner = () => {
   const [open, setOpen] = React.useState(false)
+  const [user, setUser] = React.useState<User | null>(null)
 
   useEffect(() => {
     const adminLoggedInAs = localStorage.getItem('adminLoggedInAs')
     if (adminLoggedInAs) {
       setOpen(true)
+      setUser(JSON.parse(localStorage.getItem('adminLoggedInAsUser') || 'null'))
     }
   }, [])
 
   const handleClick = () => {
     setOpen(false)
     localStorage.removeItem('adminLoggedInAs')
+    localStorage.removeItem('adminLoggedInAsUser')
     window.location.reload()
   }
 
@@ -50,7 +53,7 @@ const AdminLoggedInAsBanner = () => {
     <Snackbar
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       open={open}
-      message="You are logged in as someone else!"
+      message={`You are currently logged in as ${user?.studentNumber} ${user?.lastName} ${user?.firstNames}`}
       action={
         <Button color="secondary" onClick={handleClick}>
           Return to yourself

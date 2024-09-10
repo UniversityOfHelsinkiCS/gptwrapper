@@ -19,6 +19,7 @@ import { User } from '../../types'
 
 const handleLoginAs = (user: User) => () => {
   localStorage.setItem('adminLoggedInAs', user.id)
+  localStorage.setItem('adminLoggedInAsUser', JSON.stringify(user))
   window.location.reload()
 }
 
@@ -96,7 +97,7 @@ const UserSearch = () => {
   const { t } = useTranslation()
 
   useEffect(() => {
-    if (search.length > 4) {
+    if (search && search.length > 4) {
       refetch()
     }
   }, [search])

@@ -17,10 +17,10 @@ const useUserSearch = (search: string) => {
   const { data: users, ...rest } = useQuery({
     queryKey,
     queryFn,
-    enabled: search.length > 4,
+    enabled: !!(search && search.length > 4),
   })
 
-  return { users: search.length > 4 ? users : [] || [], ...rest }
+  return { users: search && search.length > 4 ? users : [] || [], ...rest }
 }
 
 export default useUserSearch
