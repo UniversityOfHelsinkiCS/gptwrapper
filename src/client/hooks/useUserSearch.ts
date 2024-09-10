@@ -14,15 +14,13 @@ const useUserSearch = (search: string) => {
     return data
   }
 
-  console.log('HERE', search)
-
   const { data: users, ...rest } = useQuery({
     queryKey,
     queryFn,
-    enabled: search.length > 3,
+    enabled: search.length > 4,
   })
 
-  return { users: search.length > 3 ? users : [] || [], ...rest }
+  return { users: search.length > 4 ? users : [] || [], ...rest }
 }
 
 export default useUserSearch

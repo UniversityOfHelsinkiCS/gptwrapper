@@ -130,9 +130,23 @@ adminRouter.get('/users', async (_, res) => {
 adminRouter.get('/users/:search', async (req, res) => {
   const matches = await User.findAll({
     where: {
-      username: {
-        [Op.iLike]: `%${req.params.search}%`,
-      },
+      [Op.or]: [
+        {
+          username: {
+            [Op.iLike]: `%${req.params.search}%`,
+          },
+        },
+        {
+          studentNumber: {
+            [Op.iLike]: `%${req.params.search}%`,
+          },
+        },
+        {
+          primaryEmail: {
+            [Op.iLike]: `%${req.params.search}%`,
+          },
+        },
+      ],
     },
     limit: 20,
   })
