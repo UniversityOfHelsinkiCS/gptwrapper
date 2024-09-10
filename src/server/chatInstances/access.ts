@@ -9,9 +9,6 @@ import { User } from '../types'
 
 const getUserById = async (id: string) => UserModel.findByPk(id)
 
-/**
- * Gets the chat instance ids of the courses the user is enrolled in
- */
 export const getEnrolledCourses = async (user: User) => {
   // Only do the example/test course upserts if the user is an employee
   // students have no reason to be in these courses.
@@ -47,6 +44,14 @@ export const getEnrolledCourses = async (user: User) => {
     include: [Enrolment.associations.chatInstance],
   })) as (Enrolment & { chatInstance: ChatInstance })[]
 
+  return enrollments
+}
+
+/**
+ * Gets the chat instance ids of the courses the user is enrolled in
+ */
+export const getEnrolledCourseIds = async (user: User) => {
+  const enrollments = await getEnrolledCourses(user)
   const courseIds = enrollments.map(
     (enrolment) => enrolment.chatInstance.courseId
   ) as string[]

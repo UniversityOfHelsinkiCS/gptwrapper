@@ -2,7 +2,7 @@ import express from 'express'
 
 import { ChatRequest } from '../types'
 import logger from '../util/logger'
-import { getEnrolledCourses, getOwnCourses } from '../chatInstances/access'
+import { getEnrolledCourseIds, getOwnCourses } from '../chatInstances/access'
 import { User } from '../db/models'
 import { getUserStatus, getUsage } from '../chatInstances/usage'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
@@ -23,7 +23,7 @@ userRouter.get('/login', async (req, res) => {
 
   const hasIamAccess = checkIamAccess(iamGroups)
 
-  const enrolledCourses = await getEnrolledCourses(user)
+  const enrolledCourses = await getEnrolledCourseIds(user)
   const teacherCourses = await getOwnCourses(user)
 
   const courses = enrolledCourses.concat(teacherCourses)
