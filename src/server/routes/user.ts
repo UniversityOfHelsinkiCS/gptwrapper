@@ -2,7 +2,11 @@ import express from 'express'
 
 import { ChatRequest } from '../types'
 import logger from '../util/logger'
-import { getEnrolledCourseIds, getOwnCourses } from '../chatInstances/access'
+import {
+  getEnrolledCourseIds,
+  getOwnCourses,
+  getEnrolledCourses,
+} from '../chatInstances/access'
 import { User } from '../db/models'
 import { getUserStatus, getUsage } from '../chatInstances/usage'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
@@ -23,10 +27,10 @@ userRouter.get('/login', async (req, res) => {
 
   const hasIamAccess = checkIamAccess(iamGroups)
 
-  const enrolledCourses = await getEnrolledCourseIds(user)
+  const enrolledCourseIds = await getEnrolledCourseIds(user)
   const teacherCourses = await getOwnCourses(user)
 
-  const courses = enrolledCourses.concat(teacherCourses)
+  const courses = enrolledCourseIds.concat(teacherCourses)
   const hasCourseAccess = courses.length > 0
 
   if (!isAdmin && !hasIamAccess && !hasCourseAccess) {
@@ -45,11 +49,16 @@ userRouter.get('/login', async (req, res) => {
 
   const lastRestart = await getLastRestart()
 
+  const enrolledCourses = await getEnrolledCourses(user)
+
   return res.send({
     ...user,
     usage,
     hasIamAccess: isAdmin || hasIamAccess,
     lastRestart,
+    enrolledCourses: enrolledCourses.map(
+      (enrollment) => enrollment.chatInstance
+    ),
   })
 })
 
