@@ -20,7 +20,7 @@ const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (user.isAdmin) return true
   if (courseId && !user.activeCourseIds.includes(courseId)) return false
 
-  if (!courseId && window.location.pathname === '/chats') return true
+  if (!courseId && window.location.pathname.endsWith('/chats')) return true
   if (!courseId && !user.hasIamAccess) return false
 
   return true
