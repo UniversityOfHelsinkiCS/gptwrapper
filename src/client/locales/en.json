@@ -9,7 +9,7 @@
     "update": "Update",
     "cancel": "Cancel",
     "create": "Create",
-    "courses": "Courses",
+    "courses": "Courses I teach",
     "message": "Message",
     "addMessage": "Add message",
     "save": "Save",
@@ -72,6 +72,12 @@
     "fileParsingError": "Parsing the file failed",
     "invalidFileType": "Invalid file type"
   },
+  "chats": {
+    "header": "Registered courses",
+    "name": "Name",
+    "limit": "Token limit",
+    "link": "Link to chat"
+  },
   "admin": {
     "accessGroups": "Access groups",
     "createAccessGroup": "Create new access group",
@@ -86,7 +92,7 @@
     "usageLimitInfo": "Usage limit in tokens",
     "resetSchedule": "Reset schedule",
     "resetScheduleInfo": "Use Cron notation",
-    "courses": "Courses",
+    "courses": "Courses I teach",
     "createChatInstance": "Add a new course",
     "confirmChatInstanceDelete": "Are you sure you want to delete this course?",
     "newChatInstance": "New course",

@@ -10,7 +10,7 @@
     "cancel": "Peruuta",
     "create": "Luo",
     "enable": "Ota käyttöön",
-    "courses": "Kurssit",
+    "courses": "Opettamani kurssit",
     "message": "Viesti",
     "addMessage": "Lisää viesti",
     "save": "Tallenna",
@@ -52,6 +52,12 @@
     "balancedTemperature": "Tasapainoisempi",
     "creativeTemperature": "Luovempi"
   },
+  "chats": {
+    "header": "Kurssit",
+    "name": "Nimi",
+    "limit": "Token-raja",
+    "link": "Linkki chattiin"
+  },
   "email": {
     "save": "Tallenna sähköpostina",
     "user": "Käyttäjä",
@@ -85,7 +91,7 @@
     "usageLimitInfo": "Käyttöraja tokeneina",
     "resetSchedule": "Nollaantumisaika",
     "resetScheduleInfo": "Käytä Cron-notaatiota",
-    "courses": "Kurssit",
+    "courses": "Opettamani kurssit",
     "createChatInstance": "Lisää uusi kurssi",
     "confirmChatInstanceDelete": "Haluatko varmasti poistaa tämän kurssin?",
     "newChatInstance": "Uusi kurssi",

@@ -24,6 +24,7 @@ export interface User {
   ownCourses: string[]
   hasIamAccess?: boolean
   lastRestart: string
+  enrolledCourses: ChatInstance[]
 }
 
 export type Prompt = {
