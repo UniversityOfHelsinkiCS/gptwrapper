@@ -48,6 +48,7 @@ export interface ChatInstance {
   courseId?: string
   prompts: Prompt[]
   courseUnitRealisationTypeUrn?: string
+  activityPeriod: ActivityPeriod
 }
 
 export interface AccessGroup {

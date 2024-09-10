@@ -22,6 +22,13 @@ const Chats = () => {
     return <div>Loading...</div>
   }
 
+  const chats = user.enrolledCourses.filter(
+    (chat) =>
+      chat.usageLimit > 0 &&
+      new Date() >= new Date(chat.activityPeriod.startDate) &&
+      new Date() <= new Date(chat.activityPeriod.endDate)
+  )
+
   return (
     <div>
       <h2>{t('chats:header')}</h2>
@@ -38,24 +45,27 @@ const Chats = () => {
                 </TableCell>
                 <TableCell align="left">
                   <Typography variant="h6">
-                    <b>{t('chats:limit')}</b>
+                    <b>{t('chats:dates')}</b>
                   </Typography>
                 </TableCell>
                 <TableCell align="left">
                   <Typography variant="h6">
-                    <b>{t('chats:linkki')}</b>
+                    <b>{t('chats:link')}</b>
                   </Typography>
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {user.enrolledCourses.map((chat) => (
+              {chats.map((chat) => (
                 <TableRow key={chat.id}>
                   <TableCell component="th" scope="row">
                     <Typography variant="h6">{chat.name[language]}</Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <Typography variant="h6">{chat.usageLimit}</Typography>
+                    <Typography>
+                      {chat.activityPeriod.startDate} -{' '}
+                      {chat.activityPeriod.endDate}
+                    </Typography>
                   </TableCell>
                   <TableCell align="left">
                     <a href={`/chat/${chat.id}`}>

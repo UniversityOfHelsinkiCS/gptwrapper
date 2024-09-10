@@ -73,9 +73,9 @@
     "invalidFileType": "Invalid file type"
   },
   "chats": {
-    "header": "Registered courses",
+    "header": "Current course chats",
     "name": "Name",
-    "limit": "Token limit",
+    "dates": "Time",
     "link": "Link to chat"
   },
   "admin": {

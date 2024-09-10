@@ -53,9 +53,9 @@
     "creativeTemperature": "Luovempi"
   },
   "chats": {
-    "header": "Kurssit",
+    "header": "Auki olevat kurssichatit",
     "name": "Nimi",
-    "limit": "Token-raja",
+    "dates": "Aika",
     "link": "Linkki chattiin"
   },
   "email": {
