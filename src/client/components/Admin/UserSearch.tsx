@@ -13,7 +13,9 @@ import {
   Table,
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
+import { enqueueSnackbar } from 'notistack'
 import useUserSearch from '../../hooks/useUserSearch'
+import useResetUsageMutation from '../../hooks/useResetUsageMutation'
 
 import { User } from '../../types'
 
@@ -24,7 +26,23 @@ const handleLoginAs = (user: User) => () => {
 }
 
 const UserTable = ({ users }: { users: User[] }) => {
+  if (!users || users.length === 0) return null
+  const resetUsage = useResetUsageMutation()
+
+  const onResetUsage = (userId: string) => {
+    try {
+      resetUsage.mutate(userId)
+      enqueueSnackbar(
+        'User usage reset, please refresh the browser to see the change!',
+        { variant: 'success' }
+      )
+    } catch (error: any) {
+      enqueueSnackbar(error.message, { variant: 'error' })
+    }
+  }
+
   const { t } = useTranslation()
+
   return (
     <Box my={2}>
       <TableContainer component={Paper}>
@@ -56,9 +74,14 @@ const UserTable = ({ users }: { users: User[] }) => {
                   <b>{t('admin:email')}</b>
                 </Typography>
               </TableCell>
+              <TableCell align="left">
+                <Typography variant="h6">
+                  <b>{t('admin:usage')}</b>
+                </Typography>
+              </TableCell>
+              <TableCell />
             </TableRow>
           </TableHead>
-
           <TableBody>
             {users.map((user) => (
               <TableRow key={user.id}>
@@ -77,10 +100,24 @@ const UserTable = ({ users }: { users: User[] }) => {
                 <TableCell align="left">
                   <Typography variant="h6">{user.primaryEmail}</Typography>
                 </TableCell>
+                <TableCell align="left">
+                  <Typography variant="h6">{user.usage}</Typography>
+                </TableCell>
                 <TableCell>
-                  <Button variant="outlined" onClick={handleLoginAs(user)}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleLoginAs(user)}
+                  >
                     {t('admin:loginAsButton')}
                   </Button>
+                  {user.usage > 0 && (
+                    <Button
+                      variant="outlined"
+                      onClick={() => onResetUsage(user.id)}
+                    >
+                      {t('admin:resetTokens')}
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
