@@ -19,7 +19,7 @@ const chatInstances = [
     courseId: EXAMPLE_COURSE_ID,
     activityPeriod: {
       startDate: '2024-01-01',
-      endDate: '2024-12-31',
+      endDate: '2024-08-31',
     },
   },
 ]
