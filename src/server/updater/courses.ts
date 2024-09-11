@@ -62,7 +62,7 @@ const createChatInstance = async (
     bulkCreate: async (e, opts) => ChatInstance.bulkCreate(e, opts),
     fallbackCreate: async (e, opts) => ChatInstance.upsert(e, opts),
     bulkCreateOptions: {
-      updateOnDuplicate: ['name'],
+      updateOnDuplicate: ['name', 'courseUnitRealisationTypeUrn'],
       conflictAttributes: ['courseId'],
     },
     fallbackCreateOptions: {
