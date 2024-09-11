@@ -28,6 +28,8 @@ import {
   PUBLIC_URL,
 } from '../../../config'
 
+import curTypes from '../../locales/curTypes.json'
+
 const Course = ({
   course,
   onEnable,
@@ -39,9 +41,18 @@ const Course = ({
 }) => {
   const { t, i18n } = useTranslation()
 
+  // console.log(curTypes)
+
   if (!course) return null
 
-  const { name, courseId, activityPeriod, isActive, isExpired } = course
+  const {
+    name,
+    courseId,
+    activityPeriod,
+    isActive,
+    isExpired,
+    courseUnitRealisationTypeUrn,
+  } = course
 
   const { language } = i18n
 
@@ -52,6 +63,9 @@ const Course = ({
     enqueueSnackbar(t('linkCopied'), { variant: 'info' })
   }
 
+  const getTypeLabel = (type: string) =>
+    curTypes[type] && curTypes[type].name[language]
+
   return (
     <Box mb="1rem">
       <Paper
@@ -61,16 +75,24 @@ const Course = ({
         <Box mr="auto">
           <Typography variant="body1">{formatDate(activityPeriod)}</Typography>
 
-          <Link to={`/courses/${courseId}`} component={RouterLink}>
-            <Typography variant="h6">{name[language]}</Typography>
-          </Link>
-          <Tooltip title={t('copy')} placement="right">
-            <Button sx={{ p: 0 }} color="inherit">
-              <Typography variant="body2" onClick={() => handleCopyLink()}>
-                {studentLink}
-              </Typography>
-            </Button>
-          </Tooltip>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Link to={`/courses/${courseId}`} component={RouterLink}>
+              <Typography variant="h6">{name[language]}</Typography>
+            </Link>
+            <Typography style={{ fontStyle: 'italic', marginLeft: 20 }}>
+              {getTypeLabel(courseUnitRealisationTypeUrn)}
+            </Typography>
+          </div>
+
+          {isActive && (
+            <Tooltip title={t('copy')} placement="right">
+              <Button sx={{ p: 0 }} color="inherit">
+                <Typography onClick={() => handleCopyLink()}>
+                  {studentLink}
+                </Typography>
+              </Button>
+            </Tooltip>
+          )}
         </Box>
 
         <Box display="flex" flexDirection="column" alignItems="end">

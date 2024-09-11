@@ -1,0 +1,408 @@
+{
+  "urn:code:course-unit-realisation-type:independent-work-presentation": {
+    "type": "Code",
+    "name": {
+      "en": "Presentation",
+      "fi": "Esitys",
+      "sv": "Presentation"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:independent-work-presentation",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:teaching-participation-lab": {
+    "type": "Code",
+    "name": {
+      "en": "Laboratory work",
+      "fi": "Laboratoriotyöskentely",
+      "sv": "Laborationer"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:teaching-participation-lab",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:teaching-participation-online": {
+    "type": "Code",
+    "name": {
+      "en": "Online teaching",
+      "fi": "Verkko-opetus",
+      "sv": "Nätundervisning"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:teaching-participation-online",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:exam-electronic": {
+    "type": "Code",
+    "name": {
+      "en": "Electronic exam",
+      "fi": "Akvaariotentti",
+      "sv": "Elektronisk tentamen"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:exam-electronic",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:thesis-doctoral": {
+    "type": "Code",
+    "name": {
+      "en": "Doctoral dissertation",
+      "fi": "Väitöskirja",
+      "sv": "Doktorsavhandling"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:thesis-doctoral",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:productions": {
+    "type": "Code",
+    "name": {
+      "en": "Productions",
+      "fi": "Tuotanto",
+      "sv": "Produktioner"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:productions",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:amk-thesis-bachelor": {
+    "type": "Code",
+    "name": {
+      "en": "Thesis project",
+      "fi": "Ammattikorkeakoulututkinnon opinnäytetyö",
+      "sv": "Lärdomsprov för yrkeshögskoleexamen"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:amk-thesis-bachelor",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:teaching-participation-distance": {
+    "type": "Code",
+    "name": {
+      "en": "Distance teaching",
+      "fi": "Etäopetus",
+      "sv": "Distansundervisning"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:teaching-participation-distance",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:exam-midterm": {
+    "type": "Code",
+    "name": {
+      "en": "Midterm",
+      "fi": "Välikoe",
+      "sv": "Mellanprov"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:exam-midterm",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:teaching-participation-contact": {
+    "type": "Code",
+    "name": {
+      "en": "Contact teaching",
+      "fi": "Lähiopetus",
+      "sv": "Kontaktundervisning"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:teaching-participation-contact",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:portfolio": {
+    "type": "Code",
+    "name": {
+      "en": "Portfolio",
+      "fi": "Portfolio",
+      "sv": "Portfolio"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:portfolio",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:teaching-participation-lectures": {
+    "type": "Code",
+    "name": {
+      "en": "Lectures",
+      "fi": "Luento-opetus",
+      "sv": "Närundervisning"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:teaching-participation-lectures",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:teaching-participation-small-group": {
+    "type": "Code",
+    "name": {
+      "en": "Small group teaching",
+      "fi": "Pienryhmäopetus",
+      "sv": "Smågruppsundervisning"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:teaching-participation-small-group",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:independent-work-essay": {
+    "type": "Code",
+    "name": {
+      "en": "Essay",
+      "fi": "Kirjallinen työ",
+      "sv": "Skriftligt arbete"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:independent-work-essay",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:teaching-participation-seminar": {
+    "type": "Code",
+    "name": {
+      "en": "Seminar",
+      "fi": "Seminaari",
+      "sv": "Seminarium"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:teaching-participation-seminar",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:licentiate-thesis": {
+    "type": "Code",
+    "name": {
+      "en": "Licentiate thesis",
+      "fi": "Lisensiaatintutkimus",
+      "sv": "Licentiatavhandling"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:licentiate-thesis",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:training-training": {
+    "type": "Code",
+    "name": {
+      "en": "Work placement",
+      "fi": "Harjoittelu",
+      "sv": "Praktik"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:training-training",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:exam-exam": {
+    "type": "Code",
+    "name": {
+      "en": "Exam",
+      "fi": "Tentti",
+      "sv": "Tentamen"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:exam-exam",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:exam-online": {
+    "type": "Code",
+    "name": {
+      "en": "Online examination",
+      "fi": "Etätentti",
+      "sv": "Distanstentamen"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:exam-online",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:independent-work-project": {
+    "type": "Code",
+    "name": {
+      "en": "Independent project",
+      "fi": "Itsenäinen projekti",
+      "sv": "Självständigt projekt"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:independent-work-project",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:teaching-participation-blended": {
+    "type": "Code",
+    "name": {
+      "en": "Blended teaching",
+      "fi": "Monimuoto-opetus",
+      "sv": "Flerformsundervisning"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:teaching-participation-blended",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:amk-thesis-master": {
+    "type": "Code",
+    "name": {
+      "en": "Master's thesis project",
+      "fi": "Ylemmän ammattikorkeakoulututkinnon opinnäytetyö",
+      "sv": "Lärdomsprov för högre yrkeshögskoleexamen"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:amk-thesis-master",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:teaching-participation-field-course": {
+    "type": "Code",
+    "name": {
+      "en": "Field course",
+      "fi": "Kenttäkurssi",
+      "sv": "Fältkurs"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:teaching-participation-field-course",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:thesis-bachelor": {
+    "type": "Code",
+    "name": {
+      "en": "Bachelor's thesis",
+      "fi": "Opinnäytetyö alemmassa korkeakoulututkinnossa",
+      "sv": "Examensarbete inom lägre högskoleexamen"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:thesis-bachelor",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:teaching-participation-individual-teaching": {
+    "type": "Code",
+    "name": {
+      "en": "Individual teaching",
+      "fi": "Yksilöopetus",
+      "sv": "Individuell undervisning"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:teaching-participation-individual-teaching",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:teaching-participation-project": {
+    "type": "Code",
+    "name": {
+      "en": "Project",
+      "fi": "Projekti",
+      "sv": "Projekt"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:teaching-participation-project",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:thesis-masters": {
+    "type": "Code",
+    "name": {
+      "en": "Master's thesis",
+      "fi": "Opinnäytetyö ylemmässä korkeakoulututkinnossa",
+      "sv": "Examensarbete inom högre högskoleexamen"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:thesis-masters",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:exam-final": {
+    "type": "Code",
+    "name": {
+      "en": "Final exam",
+      "fi": "Loppukoe",
+      "sv": "Slutprov"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:exam-final",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  },
+  "urn:code:course-unit-realisation-type:independent-work-learning-diary": {
+    "type": "Code",
+    "name": {
+      "en": "Learning diary",
+      "fi": "Oppimispäiväkirja",
+      "sv": "Inlärningsdagbok"
+    },
+    "shortName": null,
+    "urn": "urn:code:course-unit-realisation-type:independent-work-learning-diary",
+    "parentUrn": null,
+    "isLeafNode": true,
+    "universitySpecifier": null,
+    "deprecated": null
+  }
+}

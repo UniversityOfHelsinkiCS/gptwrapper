@@ -33,6 +33,8 @@ import EditCourseForm from './EditCourseForm'
 import MaxTokenUsageStudents from './MaxTokenUsageStudents'
 import Stats from './Stats'
 
+import curTypes from '../../../locales/curTypes.json'
+
 const Message = ({
   message,
   setMessage,
@@ -95,6 +97,9 @@ const Course = () => {
 
   const createMutation = useCreatePromptMutation()
   const deleteMutation = useDeletePromptMutation()
+
+  const getTypeLabel = (type: string) =>
+    curTypes[type] && curTypes[type].name[language]
 
   const handleAdd = () => {
     setMessages([...messages, { content: message, role: getRole(messages) }])
@@ -178,36 +183,46 @@ const Course = () => {
             mt: 2,
           }}
         >
-          <Typography variant="h5">{course.name[language]}</Typography>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant="h5">{course.name[language]}</Typography>
+            <Typography style={{ fontStyle: 'italic', marginLeft: 20 }}>
+              {getTypeLabel(course.courseUnitRealisationTypeUrn)}
+            </Typography>
+          </div>
+
           <Typography>
             {t('active')}
             {formatDate(course.activityPeriod)}
           </Typography>
 
-          <Button
-            startIcon={<Edit />}
-            onClick={() => setActivityPeriodFormOpen(true)}
-          >
-            {t('course:editCourse')}
-          </Button>
+          {isCourseActive && (
+            <div>
+              <Button
+                startIcon={<Edit />}
+                onClick={() => setActivityPeriodFormOpen(true)}
+              >
+                {t('course:editCourse')}
+              </Button>
 
-          <Button endIcon={<OpenInNew />}>
-            <Link to={studentLink}>{t('common:toStudentView')}</Link>
-          </Button>
+              <Button endIcon={<OpenInNew />}>
+                <Link to={studentLink}>{t('common:toStudentView')}</Link>
+              </Button>
 
-          <Box fontStyle="italic">
-            <Typography>{studentLink}</Typography>
-          </Box>
-          <Box mr={2} />
-          <Box>
-            <Button
-              startIcon={<FileCopyOutlined />}
-              color="primary"
-              onClick={() => handleCopyLink(studentLink)}
-            >
-              {t('copyStudentLink')}
-            </Button>
-          </Box>
+              <Box fontStyle="italic">
+                <Typography>{studentLink}</Typography>
+              </Box>
+              <Box mr={2} />
+              <Box>
+                <Button
+                  startIcon={<FileCopyOutlined />}
+                  color="primary"
+                  onClick={() => handleCopyLink(studentLink)}
+                >
+                  {t('copyStudentLink')}
+                </Button>
+              </Box>
+            </div>
+          )}
         </Paper>
       </Box>
 
