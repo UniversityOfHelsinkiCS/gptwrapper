@@ -136,6 +136,7 @@
     "curreNotEnabled": "CurreChat ei ole käytössä kurssilla",
     "curreExpired": "Kurssi on päättynyt",
     "curreNotOpen": "Kurssin chat ei ole auki opiskelijoille",
+    "curreOpen": "Kurssin chat on auki opiskelijoille",
     "curreNotStarted": "Kurssi ei ole alkanut",
     "disableCurre": "Poista CurreChat käytöstä",
     "enableCurre": "Ota CurreChat käyttöön",

@@ -60,7 +60,6 @@ const usersHandler = async (users: SisuUser[]) => {
       fields: fieldsToUpdate,
     },
   })
-  console.log(`[UPDATER] Updated ${users.length} users`)
 }
 
 export const fetchUsers = async () => {

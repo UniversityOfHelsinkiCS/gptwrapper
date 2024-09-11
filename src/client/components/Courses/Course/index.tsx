@@ -158,9 +158,12 @@ const Course = () => {
     enqueueSnackbar(t('linkCopied'), { variant: 'info' })
   }
 
+  const courseEnabled = course.usageLimit > 0
+
   const isCourseActive =
-    course.usageLimit > 0 &&
-    Date.parse(course.activityPeriod.endDate) > Date.now()
+    courseEnabled &&
+    Date.parse(course.activityPeriod.endDate) > Date.now() &&
+    Date.parse(course.activityPeriod.startDate) <= Date.now()
 
   return (
     <Box
@@ -170,9 +173,14 @@ const Course = () => {
         padding: '5%',
       }}
     >
-      {!isCourseActive && (
+      {!courseEnabled && (
         <Alert severity="warning">
           <Typography variant="h6">{t('course:curreNotOpen')}</Typography>
+        </Alert>
+      )}
+      {isCourseActive && (
+        <Alert severity="success">
+          <Typography variant="h6">{t('course:curreOpen')}</Typography>
         </Alert>
       )}
       <Box display="flex">
@@ -181,6 +189,7 @@ const Course = () => {
           sx={{
             padding: '2%',
             mt: 2,
+            width: '100%',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center' }}>
