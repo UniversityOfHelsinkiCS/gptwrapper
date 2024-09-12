@@ -28,7 +28,7 @@ const Stats = ({ courseId }: { courseId: string }) => {
 
   let statsUsed = stats
 
-  if (!inDevelopment) {
+  if (inDevelopment) {
     const dataValues = {
       userId: 'user-1',
     }
