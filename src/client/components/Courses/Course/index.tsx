@@ -232,35 +232,43 @@ const Course = () => {
             </div>
 
             <div style={{ ...left, boxSizing: 'border-box' }}>
-              <Button
-                onClick={() => setActivityPeriodFormOpen(true)}
-                style={{ marginLeft: -8 }}
-              >
-                {t('course:editCourse')} <Edit />
-              </Button>
+              {courseEnabled && (
+                <Button
+                  onClick={() => setActivityPeriodFormOpen(true)}
+                  style={{ marginLeft: -8 }}
+                >
+                  {t('course:editCourse')} <Edit />
+                </Button>
+              )}
+              {!courseEnabled && (
+                <Typography style={{ fontStyle: 'italic' }}>
+                  {t('course:howToActive')}
+                </Typography>
+              )}
             </div>
             <div style={{ ...right, boxSizing: 'border-box' }}>
-              {isCourseActive && (
+              {courseEnabled && (
                 <Link to={studentLink}>
                   {t('common:toStudentView')} <OpenInNew fontSize="small" />
                 </Link>
               )}
             </div>
 
-            {isCourseActive && (
+            {courseEnabled && (
               <div style={{ ...left, boxSizing: 'border-box' }}>
                 <Typography>{studentLink}</Typography>
               </div>
             )}
 
-            {isCourseActive && (
+            {courseEnabled && (
               <div style={{ ...right, boxSizing: 'border-box' }}>
                 <Button
                   color="primary"
                   onClick={() => handleCopyLink(studentLink)}
                   style={{ marginLeft: -8 }}
                 >
-                  {t('copyStudentLink')} <FileCopyOutlined />
+                  {t('copyStudentLink')}{' '}
+                  <FileCopyOutlined style={{ margin: 3 }} />
                 </Button>
               </div>
             )}
@@ -303,6 +311,7 @@ const Course = () => {
 
         <SystemMessage system={system} setSystem={setSystem} disabled={false} />
         <Conversation messages={messages} completion="" />
+
         <Message
           message={message}
           setMessage={setMessage}
@@ -310,6 +319,7 @@ const Course = () => {
           handleReset={handleReset}
           resetDisabled={false}
         />
+
         <Box sx={{ paddingBottom: 2 }}>
           {!mandatoryPromptId ? (
             <FormControlLabel

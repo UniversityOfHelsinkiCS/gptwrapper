@@ -133,6 +133,7 @@
     "lastUpdate": "Latest release: "
   },
   "course": {
+    "howToActive": "Go to Courses I teach to activate the chat",
     "coursePage": "To course page",
     "curreEnabled": "CurreChat is enabled for the course",
     "curreNotEnabled": "CurreChat is not enabled for the course",

@@ -41,8 +41,6 @@ const Course = ({
 }) => {
   const { t, i18n } = useTranslation()
 
-  // console.log(curTypes)
-
   if (!course) return null
 
   const {

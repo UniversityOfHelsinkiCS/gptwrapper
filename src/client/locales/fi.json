@@ -132,6 +132,7 @@
     "lastUpdate": "Viimeisin julkaisu: "
   },
   "course": {
+    "howToActive": "Valitse opettamani kurssit jos haluat ottaa käyttöön kurssichatin",
     "coursePage": "Kurssisivulle",
     "curreEnabled": "CurreChat on käytössä kurssilla",
     "curreNotEnabled": "CurreChat ei ole käytössä kurssilla",
