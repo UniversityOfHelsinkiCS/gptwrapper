@@ -12,7 +12,6 @@ import {
 import { useTranslation } from 'react-i18next'
 import { BarChart, Bar, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
-import { inDevelopment } from '../../../../config'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import useCourse, { useCourseStatistics } from '../../../hooks/useCourse'
 
@@ -26,57 +25,7 @@ const Stats = ({ courseId }: { courseId: string }) => {
   if (!stats || !user || isLoading || isUserLoading || courseLoading)
     return null
 
-  let statsUsed = stats
-
-  if (inDevelopment) {
-    const dataValues = {
-      userId: 'user-1',
-    }
-
-    statsUsed = {
-      average: 75,
-      usagePercentage: 0.85,
-      usages: [
-        {
-          id: 'module-1',
-          usageCount: 60,
-          userId: 'user-1',
-          chatInstanceId: 'chat-1',
-          dataValues,
-        },
-        {
-          id: 'module-2',
-          usageCount: 80,
-          userId: 'user-2',
-          chatInstanceId: 'chat-2',
-          dataValues,
-        },
-        {
-          id: 'module-3',
-          usageCount: 50,
-          userId: 'user-3',
-          chatInstanceId: 'chat-3',
-          dataValues,
-        },
-        {
-          id: 'module-4',
-          usageCount: 90,
-          userId: 'user-4',
-          chatInstanceId: 'chat-4',
-          dataValues,
-        },
-        {
-          id: 'module-5',
-          usageCount: 70,
-          userId: 'user-5',
-          chatInstanceId: 'chat-5',
-          dataValues,
-        },
-      ],
-    }
-  }
-
-  const { average, usagePercentage, usages } = statsUsed
+  const { average, usagePercentage, usages } = stats
 
   usages.sort((a, b) => a.usageCount - b.usageCount)
 
@@ -153,7 +102,7 @@ const Stats = ({ courseId }: { courseId: string }) => {
         </>
       )}
 
-      {usages && usages.length !== 0 && user.isAdmin && (
+      {usages && user.isAdmin && (
         <>
           <Typography variant="h6" sx={{ mt: 2 }}>
             {t('admin:usageByUser')}
