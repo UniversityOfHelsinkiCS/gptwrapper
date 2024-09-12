@@ -165,6 +165,18 @@ const Course = () => {
     Date.parse(course.activityPeriod.endDate) > Date.now() &&
     Date.parse(course.activityPeriod.startDate) <= Date.now()
 
+  const left = {
+    flex: '0 0 74%',
+    boxSizing: 'borderBox',
+    height: '40px',
+  }
+
+  const right = {
+    flex: '0 0 26%',
+    boxSizing: 'borderBox',
+    height: '40px',
+  }
+
   return (
     <Box
       sx={{
@@ -178,11 +190,13 @@ const Course = () => {
           <Typography variant="h6">{t('course:curreNotOpen')}</Typography>
         </Alert>
       )}
+
       {isCourseActive && (
         <Alert severity="success">
           <Typography variant="h6">{t('course:curreOpen')}</Typography>
         </Alert>
       )}
+
       <Box display="flex">
         <Paper
           variant="outlined"
@@ -192,46 +206,65 @@ const Course = () => {
             width: '100%',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Typography variant="h5">{course.name[language]}</Typography>
-            <Typography style={{ fontStyle: 'italic', marginLeft: 20 }}>
-              {getTypeLabel(course.courseUnitRealisationTypeUrn)}
-            </Typography>
-          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+            <div style={{ ...left, boxSizing: 'border-box', height: '50px' }}>
+              <Typography variant="h5">{course.name[language]}</Typography>
+            </div>
+            <div style={{ ...right, boxSizing: 'border-box', height: '50px' }}>
+              <Typography style={{ fontStyle: 'italic' }}>
+                {getTypeLabel(course.courseUnitRealisationTypeUrn)}
+              </Typography>
+            </div>
 
-          <Typography>
-            {t('active')}
-            {formatDate(course.activityPeriod)}
-          </Typography>
+            <div style={{ ...left, boxSizing: 'border-box' }}>
+              <Typography>
+                {t('active')} {formatDate(course.activityPeriod)}
+              </Typography>
+            </div>
 
-          {isCourseActive && (
-            <div>
-              <Button
-                startIcon={<Edit />}
-                onClick={() => setActivityPeriodFormOpen(true)}
+            <div style={{ ...right, boxSizing: 'border-box' }}>
+              <Link
+                to={`https://studies.helsinki.fi/kurssit/toteutus/${course.courseId}`}
+                target="_blank"
               >
-                {t('course:editCourse')}
-              </Button>
+                {t('course:coursePage')} <OpenInNew fontSize="small" />
+              </Link>
+            </div>
 
-              <Button endIcon={<OpenInNew />}>
-                <Link to={studentLink}>{t('common:toStudentView')}</Link>
+            <div style={{ ...left, boxSizing: 'border-box' }}>
+              <Button
+                onClick={() => setActivityPeriodFormOpen(true)}
+                style={{ marginLeft: -8 }}
+              >
+                {t('course:editCourse')} <Edit />
               </Button>
+            </div>
+            <div style={{ ...right, boxSizing: 'border-box' }}>
+              {isCourseActive && (
+                <Link to={studentLink}>
+                  {t('common:toStudentView')} <OpenInNew fontSize="small" />
+                </Link>
+              )}
+            </div>
 
-              <Box fontStyle="italic">
+            {isCourseActive && (
+              <div style={{ ...left, boxSizing: 'border-box' }}>
                 <Typography>{studentLink}</Typography>
-              </Box>
-              <Box mr={2} />
-              <Box>
+              </div>
+            )}
+
+            {isCourseActive && (
+              <div style={{ ...right, boxSizing: 'border-box' }}>
                 <Button
-                  startIcon={<FileCopyOutlined />}
                   color="primary"
                   onClick={() => handleCopyLink(studentLink)}
+                  style={{ marginLeft: -8 }}
                 >
-                  {t('copyStudentLink')}
+                  {t('copyStudentLink')} <FileCopyOutlined />
                 </Button>
-              </Box>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </Paper>
       </Box>
 

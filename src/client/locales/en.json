@@ -26,7 +26,7 @@
     "hiddenPromptInfo": "Prompt text is not visible to students",
     "visiblePromptInfo": "Prompt text is visible to students",
     "promptName": "Prompt name",
-    "copyStudentLink": "Copy student link",
+    "copyStudentLink": "Copy",
     "linkCopied": "Link copied",
     "fileUploadText": "Upload file",
     "fileInfoPrompt": "\n\nHere is the contents of the file\n\n",
@@ -133,6 +133,7 @@
     "lastUpdate": "Latest release: "
   },
   "course": {
+    "coursePage": "To course page",
     "curreEnabled": "CurreChat is enabled for the course",
     "curreNotEnabled": "CurreChat is not enabled for the course",
     "curreExpired": "The course is over",

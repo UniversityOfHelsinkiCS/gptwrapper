@@ -27,7 +27,7 @@
     "hiddenPromptInfo": "Alustuksen teksti ei näy opiskelijoille",
     "visiblePromptInfo": "Alustuksen teksti näkyy opiskelijoille",
     "promptName": "Alustuksen nimi",
-    "copyStudentLink": "Kopioi opiskelijan linkki",
+    "copyStudentLink": "Kopioi",
     "linkCopied": "Linkki kopioitu",
     "fileUploadText": "Lisää tiedosto",
     "fileInfoPrompt": "\n\nTässä on tiedoston sisältämä teksti:\n\n",
@@ -132,6 +132,7 @@
     "lastUpdate": "Viimeisin julkaisu: "
   },
   "course": {
+    "coursePage": "Kurssisivulle",
     "curreEnabled": "CurreChat on käytössä kurssilla",
     "curreNotEnabled": "CurreChat ei ole käytössä kurssilla",
     "curreExpired": "Kurssi on päättynyt",
