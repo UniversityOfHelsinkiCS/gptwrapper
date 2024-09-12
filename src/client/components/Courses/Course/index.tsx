@@ -165,6 +165,28 @@ const Course = () => {
     Date.parse(course.activityPeriod.endDate) > Date.now() &&
     Date.parse(course.activityPeriod.startDate) <= Date.now()
 
+  const willBeEnabled =
+    courseEnabled && Date.parse(course.activityPeriod.startDate) > Date.now()
+
+  const wasEnabled =
+    courseEnabled && Date.parse(course.activityPeriod.endDate) < Date.now()
+
+  const getInfoSeverity = () => {
+    if (!courseEnabled) return 'warning'
+    if (isCourseActive) return 'success'
+    return 'info'
+  }
+
+  const getInfoMessage = () => {
+    if (!courseEnabled) return t('course:curreNotOpen')
+    if (isCourseActive) return t('course:curreOpen')
+    if (willBeEnabled)
+      return `${t('course:curreWillBeOpen')} ${course.activityPeriod.startDate}`
+    if (wasEnabled)
+      return `${t('course:curreWasOpen')} ${course.activityPeriod.endDate}`
+    return ''
+  }
+
   const left = {
     flex: '0 0 74%',
     boxSizing: 'borderBox',
@@ -185,17 +207,9 @@ const Course = () => {
         padding: '5%',
       }}
     >
-      {!courseEnabled && (
-        <Alert severity="warning">
-          <Typography variant="h6">{t('course:curreNotOpen')}</Typography>
-        </Alert>
-      )}
-
-      {isCourseActive && (
-        <Alert severity="success">
-          <Typography variant="h6">{t('course:curreOpen')}</Typography>
-        </Alert>
-      )}
+      <Alert severity={getInfoSeverity()}>
+        <Typography variant="h6">{getInfoMessage()}</Typography>
+      </Alert>
 
       <Box display="flex">
         <Paper

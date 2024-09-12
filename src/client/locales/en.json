@@ -143,6 +143,8 @@
     "curreNotOpen": "Students cannot access the chat of this course",
     "curreNotStarted": "The course has not started",
     "curreOpen": "The course chat is open for students",
+    "curreWasOpen": "The course chat has been closed",
+    "curreWillBeOpen": "The course chat will be open for students",
     "disableCurre": "Disable CurreChat",
     "enableCurre": "Enable CurreChat",
     "enableCurreModalTitle": "Enable CurreChat on the course {{name}}?",
