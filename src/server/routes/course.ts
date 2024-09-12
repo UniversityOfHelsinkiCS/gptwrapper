@@ -2,7 +2,13 @@ import express from 'express'
 import { Op } from 'sequelize'
 
 import { ActivityPeriod, RequestWithUser } from '../types'
-import { ChatInstance, Enrolment, UserChatInstanceUsage } from '../db/models'
+import {
+  ChatInstance,
+  Enrolment,
+  UserChatInstanceUsage,
+  Prompt,
+  User,
+} from '../db/models'
 import { getOwnCourses } from '../chatInstances/access'
 
 const courseRouter = express.Router()
@@ -64,13 +70,15 @@ courseRouter.get('/statistics/:id', async (req, res) => {
   const usages = await UserChatInstanceUsage.findAll({
     where: { chatInstanceId: chatInstance.id },
   })
+
   const enrolments = await Enrolment.findAll({
     where: { chatInstanceId: chatInstance.id },
   })
 
-  const enrolledUsages = usages.filter((usage) =>
-    enrolments.map((e) => e.userId).includes(usage.userId)
-  )
+  const enrolledUsages = usages
+    .filter((usage) => enrolments.map((e) => e.userId).includes(usage.userId))
+    .filter((u) => u.usageCount > 0)
+
   const usagePercentage = enrolledUsages.length / enrolments.length
 
   const average =
@@ -86,11 +94,36 @@ courseRouter.get('/statistics/:id', async (req, res) => {
 })
 
 courseRouter.get('/:id', async (req, res) => {
+  const request = req as unknown as RequestWithUser
+  const { user } = request
   const { id } = req.params
+
+  const includeNormal = [
+    {
+      model: Prompt,
+      as: 'prompts',
+    },
+  ]
+
+  const includeAdmin = [
+    ...includeNormal,
+    {
+      model: Enrolment,
+      as: 'enrolments',
+      attributes: ['id'],
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'username', 'last_name', 'first_names'],
+        },
+      ],
+    },
+  ]
 
   const chatInstance = await ChatInstance.findOne({
     where: { courseId: id },
-    include: 'prompts',
+    include: user.isAdmin ? includeAdmin : includeNormal,
   })
 
   return res.send(chatInstance)

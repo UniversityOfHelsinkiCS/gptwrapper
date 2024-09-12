@@ -81,6 +81,7 @@
     "noChats": "No open course chats"
   },
   "admin": {
+    "usageByUser": "Usage per student",
     "accessGroups": "Access groups",
     "createAccessGroup": "Create new access group",
     "confirmAccessGroupDelete": "Are you sure you want to delete this access group?",
@@ -133,6 +134,7 @@
     "lastUpdate": "Latest release: "
   },
   "course": {
+    "percentageUsed": "Percentage of tokens used",
     "howToActive": "Go to Courses I teach to activate the chat",
     "coursePage": "To course page",
     "curreEnabled": "CurreChat is enabled for the course",

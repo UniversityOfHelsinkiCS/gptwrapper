@@ -285,7 +285,7 @@ const Course = () => {
 
       <Stats courseId={id} />
 
-      <MaxTokenUsageStudents course={course} />
+      {courseEnabled && <MaxTokenUsageStudents course={course} />}
 
       {prompts.map((prompt) => (
         <Prompt

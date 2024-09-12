@@ -64,9 +64,19 @@ export type ActivityPeriod = {
   endDate: string
 }
 
+export interface Enrolment {
+  id: string
+  user: {
+    id: string
+    username: string
+    last_name: string
+    first_names: string
+  }
+}
 export interface Course extends ChatInstance {
   activityPeriod: ActivityPeriod
   prompts: Prompt[]
+  enrolments: Enrolment[]
 }
 
 export type ChatInstanceUsage = {
@@ -110,5 +120,8 @@ export interface CourseStatistics {
     usageCount: number
     userId: string
     chatInstanceId: string
+    dataValues: {
+      userId: string
+    }
   }[]
 }

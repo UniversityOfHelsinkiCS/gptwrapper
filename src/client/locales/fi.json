@@ -80,6 +80,7 @@
     "invalidFileType": "Tiedostotyyppiä ei tueta"
   },
   "admin": {
+    "usageByUser": "Käyttö per opiskelija",
     "accessGroups": "Käyttäjäryhmät",
     "createAccessGroup": "Luo uusi käyttäjäryhmä",
     "confirmAccessGroupDelete": "Haluatko varmasti poistaa tämän käyttäjäryhmän?",
@@ -132,6 +133,7 @@
     "lastUpdate": "Viimeisin julkaisu: "
   },
   "course": {
+    "percentageUsed": "Prosenttia tokeneista käytetty",
     "howToActive": "Valitse opettamani kurssit jos haluat ottaa käyttöön kurssichatin",
     "coursePage": "Kurssisivulle",
     "curreEnabled": "CurreChat on käytössä kurssilla",
