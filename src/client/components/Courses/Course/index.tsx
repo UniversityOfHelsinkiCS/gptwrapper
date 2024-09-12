@@ -12,7 +12,7 @@ import {
   Alert,
   Tooltip,
 } from '@mui/material'
-import { OpenInNew, Edit, FileCopyOutlined } from '@mui/icons-material'
+import { OpenInNew, Edit } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 import { useParams, Link } from 'react-router-dom'
@@ -231,6 +231,24 @@ const Course = () => {
               </Link>
             </div>
 
+            {courseEnabled && (
+              <div style={{ ...left, boxSizing: 'border-box' }}>
+                <Typography>
+                  {t('admin:model')}: {course.model}{' '}
+                  <span style={{ marginRight: 20 }} />
+                  {t('admin:usageLimit')}: {course.usageLimit}
+                </Typography>
+              </div>
+            )}
+
+            {courseEnabled && (
+              <div style={{ ...right, boxSizing: 'border-box' }}>
+                <Link to={studentLink}>
+                  {t('common:toStudentView')} <OpenInNew fontSize="small" />
+                </Link>
+              </div>
+            )}
+
             <div style={{ ...left, boxSizing: 'border-box' }}>
               {courseEnabled && (
                 <Button
@@ -246,31 +264,20 @@ const Course = () => {
                 </Typography>
               )}
             </div>
-            <div style={{ ...right, boxSizing: 'border-box' }}>
-              {courseEnabled && (
-                <Link to={studentLink}>
-                  {t('common:toStudentView')} <OpenInNew fontSize="small" />
-                </Link>
-              )}
-            </div>
+
+            <div style={{ ...right, boxSizing: 'border-box' }} />
 
             {courseEnabled && (
-              <div style={{ ...left, boxSizing: 'border-box' }}>
-                <Typography>{studentLink}</Typography>
-              </div>
-            )}
-
-            {courseEnabled && (
-              <div style={{ ...right, boxSizing: 'border-box' }}>
-                <Button
-                  color="primary"
-                  onClick={() => handleCopyLink(studentLink)}
-                  style={{ marginLeft: -8 }}
-                >
-                  {t('copyStudentLink')}{' '}
-                  <FileCopyOutlined style={{ margin: 3 }} />
+              <Tooltip title={t('copy')} placement="right">
+                <Button sx={{ p: 0 }} color="inherit">
+                  <Typography
+                    style={{ textTransform: 'lowercase' }}
+                    onClick={() => handleCopyLink(studentLink)}
+                  >
+                    {studentLink}
+                  </Typography>
                 </Button>
-              </div>
+              </Tooltip>
             )}
           </div>
         </Paper>
