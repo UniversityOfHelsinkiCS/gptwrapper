@@ -8,6 +8,7 @@ import {
   UserChatInstanceUsage,
   Prompt,
   User,
+  Responsibility,
 } from '../db/models'
 import { getOwnCourses } from '../chatInstances/access'
 
@@ -97,6 +98,18 @@ courseRouter.get('/:id', async (req, res) => {
   const { id } = req.params
 
   const include = [
+    {
+      model: Responsibility,
+      as: 'responsibilities',
+      attributes: ['id'],
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'username', 'last_name', 'first_names'],
+        },
+      ],
+    },
     {
       model: Prompt,
       as: 'prompts',

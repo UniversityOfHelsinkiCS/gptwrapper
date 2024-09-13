@@ -80,6 +80,8 @@
     "invalidFileType": "Tiedostotyyppiä ei tueta"
   },
   "admin": {
+    "hideTeachers": "Piilota opettajat ja vastuuhenkilöt",
+    "showTeachers": "Näytä opettajat ja vastuuhenkilöt",
     "showStudentList": "Näytä opiskelijat",
     "hideStudentList": "Piilota opiskelijat",
     "usageByUser": "Käyttö per opiskelija",

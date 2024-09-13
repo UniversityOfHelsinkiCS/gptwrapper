@@ -23,6 +23,7 @@ import SystemMessage from '../../Chat/SystemMessage'
 import Conversation from '../../Chat/Conversation'
 import usePrompts from '../../../hooks/usePrompts'
 import useCourse from '../../../hooks/useCourse'
+import useCurrentUser from '../../../hooks/useCurrentUser'
 import {
   useCreatePromptMutation,
   useDeletePromptMutation,
@@ -86,6 +87,8 @@ const Course = () => {
   const [hidden, setHidden] = useState(false)
   const [mandatory, setMandatory] = useState(false)
 
+  const [showTeachers, setShowTeachers] = useState(false)
+
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
 
   const { id } = useParams()
@@ -112,10 +115,12 @@ const Course = () => {
 
   const { prompts, isLoading } = usePrompts(id as string)
   const { course, isLoading: courseLoading } = useCourse(id as string)
+  const { user, isLoading: isUserLoading } = useCurrentUser()
 
   const studentLink = `${window.location.origin}${PUBLIC_URL}/${course?.courseId}`
 
-  if (isLoading || courseLoading || !course) return null
+  if (isLoading || courseLoading || !course || isUserLoading || !user)
+    return null
 
   const mandatoryPromptId = prompts.find((prompt) => prompt.mandatory)?.id
 
@@ -154,6 +159,8 @@ const Course = () => {
   }
 
   const courseEnabled = course.usageLimit > 0
+
+  const responsebilitues = course.responsibilities
 
   const isCourseActive =
     courseEnabled &&
@@ -289,6 +296,29 @@ const Course = () => {
               </Tooltip>
             )}
           </div>
+
+          {user.isAdmin && (
+            <>
+              <Button
+                onClick={() => setShowTeachers(!showTeachers)}
+                style={{ marginTop: 10, marginLeft: -8 }}
+              >
+                {showTeachers
+                  ? t('admin:hideTeachers')
+                  : t('admin:showTeachers')}
+              </Button>
+              {showTeachers && (
+                <ul>
+                  {responsebilitues.map((responsibility) => (
+                    <li>
+                      {responsibility.user.last_name}{' '}
+                      {responsibility.user.first_names}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
         </Paper>
       </Box>
 

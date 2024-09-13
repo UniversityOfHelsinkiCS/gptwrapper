@@ -110,6 +110,7 @@ const Stats = ({ courseId }: { courseId: string }) => {
             onClick={() => setStudentListOpen(!studentListOpen)}
             sx={{ mt: 1 }}
             color="primary"
+            style={{ marginTop: 10, marginLeft: -8 }}
           >
             {studentListOpen
               ? t('admin:hideStudentList')

@@ -74,10 +74,22 @@ export interface Enrolment {
     student_number: string
   }
 }
+
+interface Responsebility {
+  id: string
+  user: {
+    id: string
+    username: string
+    last_name: string
+    first_names: string
+  }
+}
+
 export interface Course extends ChatInstance {
   activityPeriod: ActivityPeriod
   prompts: Prompt[]
   enrolments: Enrolment[]
+  responsibilities: Responsebility[]
 }
 
 export type ChatInstanceUsage = {
