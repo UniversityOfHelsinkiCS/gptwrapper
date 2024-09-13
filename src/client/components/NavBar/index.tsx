@@ -50,13 +50,6 @@ const NavBar = () => {
 
   if (!user) return null
 
-  const chats = user.enrolledCourses.filter(
-    (chat) =>
-      chat.usageLimit > 0 &&
-      new Date() >= new Date(chat.activityPeriod.startDate) &&
-      new Date() <= new Date(chat.activityPeriod.endDate)
-  )
-
   return (
     <AppBar
       elevation={0}
@@ -76,7 +69,7 @@ const NavBar = () => {
             {user.hasIamAccess && (
               <Button href={t('curreUrl')}>{t('curreTitle')}</Button>
             )}
-            {chats.length > 0 && (
+            {user.enrolledCourses.length > 0 && (
               <Link to="/chats" style={{ textDecoration: 'none' }}>
                 <Button>
                   <BookmarksOutlined sx={styles.icon} /> {t('chats')}

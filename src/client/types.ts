@@ -71,6 +71,7 @@ export interface Enrolment {
     username: string
     last_name: string
     first_names: string
+    student_number: string
   }
 }
 export interface Course extends ChatInstance {

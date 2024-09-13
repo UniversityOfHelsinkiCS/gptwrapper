@@ -54,7 +54,13 @@ const MaxTokenUsageStudents = ({ course }: { course: Course }) => {
               {filteredUsages.map(({ id, usageCount, user }) => (
                 <TableRow key={id}>
                   <TableCell component="th" scope="row">
-                    <Typography>{user.username}</Typography>
+                    <Typography>{user.studentNumber}</Typography>
+                  </TableCell>
+                  <TableCell component="th" scope="row">
+                    <Typography>{user.lastName}</Typography>
+                  </TableCell>
+                  <TableCell component="th" scope="row">
+                    <Typography>{user.firstNames}</Typography>
                   </TableCell>
                   <TableCell align="right">
                     <Typography>{usageCount}</Typography>

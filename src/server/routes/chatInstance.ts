@@ -139,6 +139,13 @@ chatInstanceRouter.get('/:id/usages', async (req, res) => {
       {
         model: User,
         as: 'user',
+        attributes: [
+          'id',
+          'student_number',
+          'last_name',
+          'first_names',
+          'username',
+        ],
       },
       {
         model: ChatInstance,

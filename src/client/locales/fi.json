@@ -80,6 +80,8 @@
     "invalidFileType": "Tiedostotyyppiä ei tueta"
   },
   "admin": {
+    "showStudentList": "Näytä opiskelijat",
+    "hideStudentList": "Piilota opiskelijat",
     "usageByUser": "Käyttö per opiskelija",
     "accessGroups": "Käyttäjäryhmät",
     "createAccessGroup": "Luo uusi käyttäjäryhmä",

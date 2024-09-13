@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { ChatRequest } from '../types'
+import { ChatInstance, ChatRequest } from '../types'
 import logger from '../util/logger'
 import {
   getEnrolledCourseIds,
@@ -51,14 +51,18 @@ userRouter.get('/login', async (req, res) => {
 
   const enrolledCourses = await getEnrolledCourses(user)
 
+  const isNowOrInFuture = ({ chatInstance }: { chatInstance: ChatInstance }) =>
+    chatInstance.usageLimit > 0 &&
+    new Date() <= new Date(chatInstance.activityPeriod.endDate)
+
   return res.send({
     ...user,
     usage,
     hasIamAccess: isAdmin || hasIamAccess,
     lastRestart,
-    enrolledCourses: enrolledCourses.map(
-      (enrollment) => enrollment.chatInstance
-    ),
+    enrolledCourses: enrolledCourses
+      .filter(isNowOrInFuture)
+      .map((enrollment) => enrollment.chatInstance),
   })
 })
 

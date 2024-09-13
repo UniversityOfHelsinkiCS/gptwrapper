@@ -3,6 +3,11 @@ import { format } from 'date-fns'
 import { ActivityPeriod, ChatInstanceUsage, Course } from '../../types'
 import { CoursesViewCourse } from '../../hooks/useUserCourses'
 
+import curTypes from '../../locales/curTypes.json'
+
+export const getCurTypeLabel = (type: string, language: string) =>
+  curTypes[type] && curTypes[type].name[language]
+
 export const formatDate = (activityPeriod?: ActivityPeriod) => {
   if (!activityPeriod) return ''
 

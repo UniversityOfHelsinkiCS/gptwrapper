@@ -22,12 +22,7 @@ const Chats = () => {
     return <div>Loading...</div>
   }
 
-  const chats = user.enrolledCourses.filter(
-    (chat) =>
-      chat.usageLimit > 0 &&
-      new Date() >= new Date(chat.activityPeriod.startDate) &&
-      new Date() <= new Date(chat.activityPeriod.endDate)
-  )
+  const chats = user.enrolledCourses
 
   if (chats.length === 0) {
     return <h3>{t('chats:noChats')}</h3>
@@ -38,6 +33,10 @@ const Chats = () => {
 
     if (window.location.hostname === 'localhost') {
       return `http://localhost:3000/${chat.courseId}`
+    }
+
+    if (window.location.hostname === 'toska-staging') {
+      return `https://toska-staging.cs.helsinki.fi/gptwrapper${chat.courseId}`
     }
 
     return `https://curre.helsinki.fi/chat/${chat.courseId}`

@@ -81,6 +81,8 @@
     "noChats": "No open course chats"
   },
   "admin": {
+    "showStudentList": "Show students",
+    "hideStudentList": "Hide students",
     "usageByUser": "Usage per student",
     "accessGroups": "Access groups",
     "createAccessGroup": "Create new access group",

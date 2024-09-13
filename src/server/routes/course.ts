@@ -94,19 +94,13 @@ courseRouter.get('/statistics/:id', async (req, res) => {
 })
 
 courseRouter.get('/:id', async (req, res) => {
-  const request = req as unknown as RequestWithUser
-  const { user } = request
   const { id } = req.params
 
-  const includeNormal = [
+  const include = [
     {
       model: Prompt,
       as: 'prompts',
     },
-  ]
-
-  const includeAdmin = [
-    ...includeNormal,
     {
       model: Enrolment,
       as: 'enrolments',
@@ -115,7 +109,13 @@ courseRouter.get('/:id', async (req, res) => {
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'username', 'last_name', 'first_names'],
+          attributes: [
+            'id',
+            'username',
+            'last_name',
+            'first_names',
+            'student_number',
+          ],
         },
       ],
     },
@@ -123,7 +123,7 @@ courseRouter.get('/:id', async (req, res) => {
 
   const chatInstance = await ChatInstance.findOne({
     where: { courseId: id },
-    include: user.isAdmin ? includeAdmin : includeNormal,
+    include,
   })
 
   return res.send(chatInstance)

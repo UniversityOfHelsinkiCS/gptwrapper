@@ -27,13 +27,11 @@ import {
   useCreatePromptMutation,
   useDeletePromptMutation,
 } from '../../../hooks/usePromptMutation'
-import { formatDate } from '../util'
+import { formatDate, getCurTypeLabel } from '../util'
 import Prompt from './Prompt'
 import EditCourseForm from './EditCourseForm'
 import MaxTokenUsageStudents from './MaxTokenUsageStudents'
 import Stats from './Stats'
-
-import curTypes from '../../../locales/curTypes.json'
 
 const Message = ({
   message,
@@ -97,9 +95,6 @@ const Course = () => {
 
   const createMutation = useCreatePromptMutation()
   const deleteMutation = useDeletePromptMutation()
-
-  const getTypeLabel = (type: string) =>
-    curTypes[type] && curTypes[type].name[language]
 
   const handleAdd = () => {
     setMessages([...messages, { content: message, role: getRole(messages) }])
@@ -226,7 +221,7 @@ const Course = () => {
             </div>
             <div style={{ ...right, boxSizing: 'border-box', height: '50px' }}>
               <Typography style={{ fontStyle: 'italic' }}>
-                {getTypeLabel(course.courseUnitRealisationTypeUrn)}
+                {getCurTypeLabel(course.courseUnitRealisationTypeUrn, language)}
               </Typography>
             </div>
 

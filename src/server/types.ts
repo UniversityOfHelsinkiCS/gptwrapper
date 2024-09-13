@@ -2,7 +2,7 @@ import { Request } from 'express'
 import OpenAI from 'openai'
 import { ChatRequestMessage, GetChatCompletionsOptions } from '@azure/openai'
 
-export type PartialRecord<K extends keyof any, T> =  Partial<Record<K, T>>
+export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>
 
 export interface User {
   id: string
@@ -63,6 +63,7 @@ export interface ChatInstance {
   name: Locales
   description: string
   usageLimit: number
+  activityPeriod: ActivityPeriod
 }
 
 export type ActivityPeriod = {

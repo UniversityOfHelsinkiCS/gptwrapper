@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Paper,
@@ -8,6 +8,7 @@ import {
   TableHead,
   TableRow,
   Table,
+  Button,
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { BarChart, Bar, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
@@ -18,6 +19,7 @@ import useCourse, { useCourseStatistics } from '../../../hooks/useCourse'
 const Stats = ({ courseId }: { courseId: string }) => {
   const { t } = useTranslation()
   const { user, isLoading: isUserLoading } = useCurrentUser()
+  const [studentListOpen, setStudentListOpen] = useState(false)
 
   const { stats, isLoading } = useCourseStatistics(courseId)
   const { course, isLoading: courseLoading } = useCourse(courseId)
@@ -102,43 +104,51 @@ const Stats = ({ courseId }: { courseId: string }) => {
         </>
       )}
 
-      {usages && user.isAdmin && (
+      {usages && (
         <>
-          <Typography variant="h6" sx={{ mt: 2 }}>
-            {t('admin:usageByUser')}
-          </Typography>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>
-                  <strong>{t('course:username')}</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>{t('course:lastName')}</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>{t('course:firstNames')}</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>{t('course:usage')}</strong>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {enrolledUsers.sort(byLastName).map((enrolled) => (
-                <TableRow key={enrolled.id}>
-                  <TableCell>{enrolled.username}</TableCell>
-                  <TableCell>{enrolled.last_name}</TableCell>
-                  <TableCell>{enrolled.first_names}</TableCell>
+          <Button
+            onClick={() => setStudentListOpen(!studentListOpen)}
+            sx={{ mt: 1 }}
+            color="primary"
+          >
+            {studentListOpen
+              ? t('admin:hideStudentList')
+              : t('admin:showStudentList')}
+          </Button>
+          {studentListOpen && (
+            <Table>
+              <TableHead>
+                <TableRow>
                   <TableCell>
-                    {usageByUser[enrolled.id]
-                      ? usageByUser[enrolled.id].usageCount
-                      : 0}
+                    <strong>{t('admin:studentNumber')}</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>{t('admin:lastName')}</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>{t('admin:firstNames')}</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>{t('admin:usage')}</strong>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                {enrolledUsers.sort(byLastName).map((enrolled) => (
+                  <TableRow key={enrolled.id}>
+                    <TableCell>{enrolled.student_number}</TableCell>
+                    <TableCell>{enrolled.last_name}</TableCell>
+                    <TableCell>{enrolled.first_names}</TableCell>
+                    <TableCell>
+                      {usageByUser[enrolled.id]
+                        ? usageByUser[enrolled.id].usageCount
+                        : 0}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </>
       )}
     </Paper>

@@ -20,15 +20,13 @@ import { enqueueSnackbar } from 'notistack'
 import { CoursesViewCourse } from '../../hooks/useUserCourses'
 import { useDisableCourse } from './useDisableCourse'
 import { useEnableCourse } from './useEnableCourse'
-import { formatDate } from './util'
+import { formatDate, getCurTypeLabel } from './util'
 import { Course as CourseType } from '../../types'
 import {
   DEFAULT_MODEL_ON_ENABLE,
   DEFAULT_TOKEN_LIMIT,
   PUBLIC_URL,
 } from '../../../config'
-
-import curTypes from '../../locales/curTypes.json'
 
 const Course = ({
   course,
@@ -61,9 +59,6 @@ const Course = ({
     enqueueSnackbar(t('linkCopied'), { variant: 'info' })
   }
 
-  const getTypeLabel = (type: string) =>
-    curTypes[type] && curTypes[type].name[language]
-
   return (
     <Box mb="1rem">
       <Paper
@@ -78,14 +73,17 @@ const Course = ({
               <Typography variant="h6">{name[language]}</Typography>
             </Link>
             <Typography style={{ fontStyle: 'italic', marginLeft: 20 }}>
-              {getTypeLabel(courseUnitRealisationTypeUrn)}
+              {getCurTypeLabel(courseUnitRealisationTypeUrn, language)}
             </Typography>
           </div>
 
           {isActive && (
             <Tooltip title={t('copy')} placement="right">
               <Button sx={{ p: 0 }} color="inherit">
-                <Typography onClick={() => handleCopyLink()}>
+                <Typography
+                  style={{ textTransform: 'lowercase' }}
+                  onClick={() => handleCopyLink()}
+                >
                   {studentLink}
                 </Typography>
               </Button>
