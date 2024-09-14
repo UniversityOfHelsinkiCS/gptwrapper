@@ -100,7 +100,7 @@ export type Locales = {
 
 export interface CourseUnit {
   code: string
-  unit: {
+  organisations: {
     id: string
     code: string
     name: {

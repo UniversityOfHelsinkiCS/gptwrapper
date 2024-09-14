@@ -51,11 +51,18 @@ const courseUnitsOf = ({ courseUnits }: any) => {
     return now >= startDate && now <= endDate
   }
 
-  const validUnits = courseUnits.filter((unit) => isValid(unit))
+  const wasValid = (unit) => {
+    const endDate = new Date(unit.validityPeriod.endDate)
+    return endDate.getFullYear() > 2023
+  }
+
+  const validUnits = courseUnits.filter(
+    (unit) => true || isValid(unit) || wasValid(unit)
+  )
 
   const relevantFields = validUnits.map((unit) => ({
     code: unit.code,
-    unit: unit.organisations,
+    organisations: unit.organisations,
   }))
 
   // take only unique values
