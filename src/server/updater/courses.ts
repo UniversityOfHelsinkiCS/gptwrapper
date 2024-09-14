@@ -38,6 +38,36 @@ const getCourseUnit = (
   return courseUnit
 }
 
+const courseUnitsOf = ({ courseUnits }: any) => {
+  const isValid = (unit) => {
+    const now = new Date()
+    const startDate = new Date(unit.validityPeriod.startDate)
+
+    if (!unit.validityPeriod.endDate && now >= startDate) {
+      return true
+    }
+    const endDate = new Date(unit.validityPeriod.endDate)
+
+    return now >= startDate && now <= endDate
+  }
+
+  const validUnits = courseUnits.filter((unit) => isValid(unit))
+
+  const relevantFields = validUnits.map((unit) => ({
+    code: unit.code,
+    unit: unit.organisations,
+  }))
+
+  // take only unique values
+  return relevantFields.reduce((acc, curr) => {
+    const found = acc.find((item) => item.code === curr.code)
+    if (!found) {
+      acc.push(curr)
+    }
+    return acc
+  }, [])
+}
+
 const createChatInstance = async (
   courseRealisations: SisuCourseWithRealization[]
 ) => {
@@ -53,6 +83,7 @@ const createChatInstance = async (
       courseId: course.id,
       activityPeriod: course.activityPeriod,
       courseUnitRealisationTypeUrn: course.courseUnitRealisationTypeUrn,
+      courseUnits: courseUnitsOf(course),
     }
   })
 
@@ -62,7 +93,11 @@ const createChatInstance = async (
     bulkCreate: async (e, opts) => ChatInstance.bulkCreate(e, opts),
     fallbackCreate: async (e, opts) => ChatInstance.upsert(e, opts),
     bulkCreateOptions: {
-      updateOnDuplicate: ['name', 'courseUnitRealisationTypeUrn'],
+      updateOnDuplicate: [
+        'name',
+        'courseUnitRealisationTypeUrn',
+        'courseUnits',
+      ],
       conflictAttributes: ['courseId'],
     },
     fallbackCreateOptions: {

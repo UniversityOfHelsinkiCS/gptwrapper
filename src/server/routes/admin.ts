@@ -134,6 +134,7 @@ adminRouter.get('/users/:search', async (req, res) => {
   if (search.split(' ').length > 1) {
     const firstNames = search.split(' ')[0]
     const lastName = search.split(' ')[1]
+
     where = {
       firstNames: {
         [Op.iLike]: `%${firstNames}%`,

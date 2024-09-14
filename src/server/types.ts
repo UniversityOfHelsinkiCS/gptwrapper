@@ -98,6 +98,19 @@ export type Locales = {
   sv: string
 }
 
+export interface CourseUnit {
+  code: string
+  unit: {
+    id: string
+    code: string
+    name: {
+      en: string
+      fi: string
+      sv: string
+    }
+  }[]
+}
+
 type Programme = {
   key: string
   name: Locales

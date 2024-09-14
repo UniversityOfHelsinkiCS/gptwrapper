@@ -6,7 +6,7 @@ import {
   DataTypes,
 } from 'sequelize'
 
-import { ActivityPeriod, Locales } from '../../types'
+import { ActivityPeriod, CourseUnit, Locales } from '../../types'
 import { sequelize } from '../connection'
 
 class ChatInstance extends Model<
@@ -30,6 +30,8 @@ class ChatInstance extends Model<
   declare activityPeriod: ActivityPeriod | null
 
   declare courseUnitRealisationTypeUrn: string | null
+
+  declare courseUnits: CreationOptional<CourseUnit[]>
 }
 
 ChatInstance.init(
@@ -78,6 +80,11 @@ ChatInstance.init(
       type: DataTypes.STRING,
       allowNull: true,
       defaultValue: null,
+    },
+    courseUnits: {
+      type: DataTypes.ARRAY(DataTypes.JSONB),
+      allowNull: true,
+      defaultValue: [],
     },
   },
   {
