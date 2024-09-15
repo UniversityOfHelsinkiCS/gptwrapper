@@ -21,6 +21,7 @@ export interface Statistic {
   programmes: string[]
   students: number
   usedTokens: number
+  promptCount: number
 }
 
 export interface StatisticResponse {

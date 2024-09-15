@@ -17,10 +17,12 @@ import {
 import useStatistics from '../../hooks/useStatistics'
 import { Statistic } from '../../types'
 import programme from '../../locales/programme.json'
+import faculties from '../../locales/faculties.json'
 
 const Statistics = () => {
   const [from, setFrom] = useState(1)
-  const [to, setTo] = useState(3)
+  const [to, setTo] = useState(4)
+  const [selectedFaculty, setFaculties] = useState('H00')
   const { statistics, isLoading } = useStatistics()
   const { t, i18n } = useTranslation()
   const { language } = i18n
@@ -42,12 +44,23 @@ const Statistics = () => {
   )
 
   const byUsage = (a, b) => b.usedTokens - a.usedTokens
+
   const termWithin = (stat: Statistic) => {
     const terms = stat.terms.map((tr) => tr.id)
     return selectedTerms.some((term) => terms.includes(term))
   }
 
-  const statsToShow = statistics.data.filter(termWithin).sort(byUsage)
+  const belongsToFaculty = (stat: Statistic) => {
+    if (selectedFaculty === 'H00') return true
+    return stat.programmes.some((p) =>
+      p.startsWith(selectedFaculty.substring(1))
+    )
+  }
+
+  const statsToShow = statistics.data
+    .filter(termWithin)
+    .filter(belongsToFaculty)
+    .sort(byUsage)
 
   return (
     <div>
@@ -78,6 +91,19 @@ const Statistics = () => {
                   {term.label[language]}
                 </MenuItem>
               ))}
+          </Select>
+
+          <span style={{ margin: 10 }}>{t('admin:showing')}</span>
+
+          <Select
+            value={selectedFaculty}
+            onChange={(e) => setFaculties(e.target.value as string)}
+          >
+            {faculties.map((f) => (
+              <MenuItem key={f.code} value={f.code}>
+                {f.name[language]}
+              </MenuItem>
+            ))}
           </Select>
         </div>
 
@@ -115,6 +141,11 @@ const Statistics = () => {
                     <b>{t('admin:usageCount')}</b>
                   </Typography>
                 </TableCell>
+                <TableCell align="left">
+                  <Typography variant="h6">
+                    <b>{t('admin:promptCount')}</b>
+                  </Typography>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -141,6 +172,9 @@ const Statistics = () => {
                   </TableCell>
                   <TableCell align="left">
                     <Typography>{chat.usedTokens}</Typography>
+                  </TableCell>
+                  <TableCell align="left">
+                    <Typography>{chat.promptCount}</Typography>
                   </TableCell>
                 </TableRow>
               ))}

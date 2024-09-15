@@ -81,13 +81,14 @@
     "noChats": "No open course chats"
   },
   "admin": {
+    "showing": "Showing",
     "timePeriodStart": "Starting",
     "timePeriodStop": "ending",
     "courseStats": "Course stats",
     "courseTerms": "Terms",
     "courseCodes": "Course codes",
     "programCodes": "Programmes",
-    "studentCounts": "Students",
+    "studentCount": "Students",
     "hideTeachers": "Hide teachers",
     "showTeachers": "Show teachers",
     "showStudentList": "Show students",

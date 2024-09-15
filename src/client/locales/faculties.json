@@ -1,0 +1,117 @@
+[
+  {
+    "code": "H00",
+    "name": {
+      "en": "All faculties",
+      "fi": "Kaikki tiedekunnat",
+      "sv": "Alla fakulteten"
+    }
+  },
+  {
+    "code": "H57",
+    "name": {
+      "en": "Faculty of Biological and Environmental Sciences",
+      "fi": "Bio- ja ympäristötieteellinen tiedekunta",
+      "sv": "Bio- och miljövetenskapliga fakulteten"
+    }
+  },
+  {
+    "code": "H90",
+    "name": {
+      "en": "Faculty of Veterinary Medicine",
+      "fi": "Eläinlääketieteellinen tiedekunta",
+      "sv": "Veterinärmedicinska fakulteten"
+    }
+  },
+  {
+    "code": "H55",
+    "name": {
+      "en": "Faculty of Pharmacy",
+      "fi": "Farmasian tiedekunta",
+      "sv": "Farmaceutiska fakulteten"
+    }
+  },
+  {
+    "code": "H40",
+    "name": {
+      "en": "Faculty of Arts",
+      "fi": "Humanistinen tiedekunta",
+      "sv": "Humanistiska fakulteten"
+    }
+  },
+  {
+    "code": "H60",
+    "name": {
+      "en": "Faculty of Educational Sciences",
+      "fi": "Kasvatustieteellinen tiedekunta",
+      "sv": "Pedagogiska fakulteten"
+    }
+  },
+  {
+    "code": "H30",
+    "name": {
+      "en": "Faculty of Medicine",
+      "fi": "Lääketieteellinen tiedekunta",
+      "sv": "Medicinska fakulteten"
+    }
+  },
+  {
+    "code": "H80",
+    "name": {
+      "en": "Faculty of Agriculture and Forestry",
+      "fi": "Maatalous-metsätieteellinen tiedekunta",
+      "sv": "Agrikultur-forstvetenskapliga fakulteten"
+    }
+  },
+  {
+    "code": "H50",
+    "name": {
+      "en": "Faculty of Science",
+      "fi": "Matemaattis-luonnontieteellinen tiedekunta",
+      "sv": "Matematisk-naturvetenskapliga fakulteten"
+    }
+  },
+  {
+    "code": "H20",
+    "name": {
+      "en": "Faculty of Law",
+      "fi": "Oikeustieteellinen tiedekunta",
+      "sv": "Juridiska fakulteten"
+    }
+  },
+  {
+    "code": "H74",
+    "name": {
+      "en": "Swedish School of Social Science",
+      "fi": "Svenska social- och kommunalhögskolan",
+      "sv": "Svenska social- och kommunalhögskolan"
+    },
+    "parent_id": "hy-org-2024-03-27-1",
+    "createdAt": "2021-01-12T10:56:28.451Z",
+    "updatedAt": "2024-09-14T01:00:00.495Z"
+  },
+  {
+    "id": "hy-org-1000000580",
+    "code": "H10",
+    "name": {
+      "en": "Faculty of Theology",
+      "fi": "Teologinen tiedekunta",
+      "sv": "Teologiska fakulteten"
+    },
+    "parent_id": "hy-org-2024-03-27-5",
+    "createdAt": "2021-01-12T10:56:28.430Z",
+    "updatedAt": "2024-09-14T01:00:00.451Z"
+  },
+  {
+    "id": "hy-org-1000000940",
+    "code": "H70",
+    "name": {
+      "en": "Faculty of Social Sciences",
+      "fi": "Valtiotieteellinen tiedekunta",
+      "sv": "Statsvetenskapliga fakulteten"
+    },
+    "parent_id": "hy-org-2024-03-27-5",
+    "createdAt": "2021-01-12T10:56:28.451Z",
+    "updatedAt": "2024-09-14T01:00:00.399Z"
+  }
+]

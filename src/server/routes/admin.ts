@@ -2,7 +2,7 @@ import express from 'express'
 import { Op } from 'sequelize'
 
 import { RequestWithUser } from '../types'
-import { ChatInstance, UserChatInstanceUsage, User } from '../db/models'
+import { ChatInstance, UserChatInstanceUsage, User, Prompt } from '../db/models'
 import { getCourse } from '../util/importer'
 import { run as runUpdater } from '../updater'
 import InfoText from '../db/models/infotext'
@@ -45,12 +45,14 @@ adminRouter.post('/chatinstances', async (req, res) => {
   return res.status(201).send(newChatInstance)
 })
 
+// this function is mostly garbage code
 adminRouter.get('/statistics', async (req, res) => {
   const yearNow = new Date().getFullYear()
 
   const terms = []
   let id = 1
 
+  // this is ugly
   for (let y = 2023; y <= yearNow + 1; y += 1) {
     terms.push({
       label: {
@@ -119,7 +121,7 @@ adminRouter.get('/statistics', async (req, res) => {
       }, [])
     }
 
-    const extractFields = (chatInstance: ChatInstance) => {
+    const extractFields = (chatInstance: ChatInstance & { prompts: any[] }) => {
       const units = chatInstance.courseUnits
 
       const codes = units.map((u) => u.code)
@@ -137,6 +139,7 @@ adminRouter.get('/statistics', async (req, res) => {
         programmes: getUniqueValues(programmes),
         students: courses[chatInstance.id].students,
         usedTokens: courses[chatInstance.id].usedTokens,
+        promptCount: chatInstance.prompts.length,
       }
     }
 
@@ -145,7 +148,16 @@ adminRouter.get('/statistics', async (req, res) => {
     // eslint-disable-next-line no-restricted-syntax
     for (const courseId of Object.keys(courses)) {
       // eslint-disable-next-line no-await-in-loop
-      const chatInstance = await ChatInstance.findByPk(courseId)
+      const chatInstance = (await ChatInstance.findByPk(courseId, {
+        include: [
+          {
+            model: Prompt,
+            as: 'prompts',
+            attributes: ['id'],
+          },
+        ],
+      })) as ChatInstance & { prompts: any[] }
+
       datas.push(extractFields(chatInstance))
     }
 
