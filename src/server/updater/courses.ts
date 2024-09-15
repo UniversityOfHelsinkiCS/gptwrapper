@@ -89,6 +89,7 @@ const createChatInstance = async (
       },
       courseId: course.id,
       activityPeriod: course.activityPeriod,
+      courseActivityPeriod: course.activityPeriod,
       courseUnitRealisationTypeUrn: course.courseUnitRealisationTypeUrn,
       courseUnits: courseUnitsOf(course),
     }
@@ -104,6 +105,7 @@ const createChatInstance = async (
         'name',
         'courseUnitRealisationTypeUrn',
         'courseUnits',
+        'courseActivityPeriod',
       ],
       conflictAttributes: ['courseId'],
     },

@@ -29,6 +29,8 @@ class ChatInstance extends Model<
 
   declare activityPeriod: ActivityPeriod | null
 
+  declare courseActivityPeriod: ActivityPeriod | null
+
   declare courseUnitRealisationTypeUrn: string | null
 
   declare courseUnits: CreationOptional<CourseUnit[]>
@@ -72,6 +74,11 @@ ChatInstance.init(
       unique: true,
     },
     activityPeriod: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: null,
+    },
+    courseActivityPeriod: {
       type: DataTypes.JSON,
       allowNull: true,
       defaultValue: null,
