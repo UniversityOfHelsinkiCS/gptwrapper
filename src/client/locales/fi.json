@@ -80,6 +80,13 @@
     "invalidFileType": "Tiedostotyyppiä ei tueta"
   },
   "admin": {
+    "timePeriodStart": "Alkaen",
+    "timePeriodStop": "päättyen",
+    "courseStats": "Kurssitilastot",
+    "courseTerms": "Lukukaudet",
+    "courseCodes": "Kurssikoodit",
+    "programCodes": "Koulutusohjelmat",
+    "studentCounts": "Opiskelijoita",
     "hideTeachers": "Piilota opettajat ja vastuuhenkilöt",
     "showTeachers": "Näytä opettajat ja vastuuhenkilöt",
     "showStudentList": "Näytä opiskelijat",

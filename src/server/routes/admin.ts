@@ -45,6 +45,119 @@ adminRouter.post('/chatinstances', async (req, res) => {
   return res.status(201).send(newChatInstance)
 })
 
+adminRouter.get('/statistics', async (req, res) => {
+  const yearNow = new Date().getFullYear()
+
+  const terms = []
+  let id = 1
+
+  for (let y = 2023; y <= yearNow + 1; y += 1) {
+    terms.push({
+      label: {
+        en: `spring ${y}`,
+        fi: `kevät ${y}`,
+      },
+      id,
+      startDate: `${y}-01-01`,
+      endDate: `${y}-07-31`,
+    })
+
+    terms.push({
+      label: {
+        en: `fall ${y}`,
+        fi: `syksy ${y}`,
+      },
+      id: id + 1,
+      startDate: `${y}-08-01`,
+      endDate: `${y}-12-31`,
+    })
+
+    id += 2
+  }
+
+  const mangelStats = async () => {
+    const courses = {}
+
+    const usages = await UserChatInstanceUsage.findAll({
+      where: {
+        usageCount: {
+          [Op.gt]: 0,
+        },
+      },
+    })
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const usage of usages) {
+      if (!courses[usage.chatInstanceId]) {
+        courses[usage.chatInstanceId] = {
+          students: 0,
+          usedTokens: 0,
+        }
+      }
+      courses[usage.chatInstanceId].students += 1
+      courses[usage.chatInstanceId].usedTokens += usage.usageCount
+    }
+
+    const getTermsOf = ({ courseActivityPeriod }) => {
+      const checkDateOverlap = (term, course) =>
+        new Date(term.startDate) <= new Date(course.endDate || '2112-12-21') &&
+        new Date(term.endDate) >= new Date(course.startDate)
+
+      if (!courseActivityPeriod) return []
+
+      return terms.filter((term) =>
+        checkDateOverlap(term, courseActivityPeriod)
+      )
+    }
+
+    function getUniqueValues(array) {
+      return array.reduce((acc, value) => {
+        if (!acc.includes(value)) {
+          acc.push(value)
+        }
+        return acc
+      }, [])
+    }
+
+    const extractFields = (chatInstance: ChatInstance) => {
+      const units = chatInstance.courseUnits
+
+      const codes = units.map((u) => u.code)
+      const programmes = units.flatMap((item) =>
+        item.organisations.map((org) => org.code)
+      )
+
+      return {
+        startDate: chatInstance.activityPeriod.startDate,
+        endDate: chatInstance.activityPeriod.endDate,
+        terms: getTermsOf(chatInstance),
+        id: chatInstance.courseId,
+        name: chatInstance.name,
+        codes: getUniqueValues(codes),
+        programmes: getUniqueValues(programmes),
+        students: courses[chatInstance.id].students,
+        usedTokens: courses[chatInstance.id].usedTokens,
+      }
+    }
+
+    const datas = []
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const courseId of Object.keys(courses)) {
+      // eslint-disable-next-line no-await-in-loop
+      const chatInstance = await ChatInstance.findByPk(courseId)
+      datas.push(extractFields(chatInstance))
+    }
+
+    return datas
+  }
+
+  return res.send({
+    data: await mangelStats(),
+    terms,
+  })
+})
+
 interface UpdatedChatInstanceData {
   name: string
   description: string

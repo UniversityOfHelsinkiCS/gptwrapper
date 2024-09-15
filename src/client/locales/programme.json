@@ -1,0 +1,522 @@
+{
+  "400-M007": {
+    "en": "Master's Programme in Finnish and Finno-Ugrian Languages and Cultures",
+    "fi": "Suomen kielen ja suomalais-ugrilaisten kielten ja kulttuurien maisteriohjelma",
+    "sv": "Magisterprogrammet i finska och finskugriska språk och kulturer"
+  },
+  "700-M008": {
+    "en": "Master's Programme in Social Research",
+    "fi": "Sosiaalitieteiden maisteriohjelma",
+    "sv": "Magisterprogrammet i sociala vetenskaper"
+  },
+  "500-K003": {
+    "en": "Bachelor's Programme in Chemistry",
+    "fi": "Kemian kandiohjelma",
+    "sv": "Kandidatprogrammet i kemi"
+  },
+  "300-M001": {
+    "en": "Degree Programme in Medicine",
+    "fi": "Lääketieteen koulutusohjelma",
+    "sv": "Utbildningsprogrammet i medicin"
+  },
+  "700-M010": {
+    "en": "International Masters in Economy, State & Society",
+    "fi": "International Masters in Economy, State & Society",
+    "sv": "International Masters in Economy, State & Society"
+  },
+  "300-K003": {
+    "en": "Bachelor's Programme in Applied Psychology",
+    "fi": "Soveltavan psykologian kandiohjelma",
+    "sv": "Kandidatprogrammet i tillämpad psykologi"
+  },
+  "100-K001": {
+    "en": "Bachelor's Programme in Theology and Religious Studies",
+    "fi": "Teologian ja uskonnontutkimuksen kandiohjelma",
+    "sv": "Kandidatsprogrammet i religionsforskning"
+  },
+  "200-K001": {
+    "en": "Bachelor's Programme in Law",
+    "fi": "Oikeusnotaarin koulutusohjelma",
+    "sv": "Utbildningsprogrammet för rättsnotarie"
+  },
+  "300-K001": {
+    "en": "Bachelor's Programme in Psychology",
+    "fi": "Psykologian kandiohjelma",
+    "sv": "Kandidatprogrammet i psykologi"
+  },
+  "300-K002": {
+    "en": "Bachelor's Programme in Logopedics",
+    "fi": "Logopedian kandiohjelma",
+    "sv": "Kandidatprogrammet i logopedi"
+  },
+  "400-K001": {
+    "en": "Bachelor's Programme in Philosophy",
+    "fi": "Filosofian kandiohjelma",
+    "sv": "Kandidatprogrammet i filosofi"
+  },
+  "400-K002": {
+    "en": "Bachelor's Programme in Art Studies",
+    "fi": "Taiteiden tutkimuksen kandiohjelma",
+    "sv": "Kandidatprogrammet i konstforskning"
+  },
+  "400-K003": {
+    "en": "Bachelor's Programme in Languages",
+    "fi": "Kielten kandiohjelma",
+    "sv": "Kandidatprogrammet i språk"
+  },
+  "400-K004": {
+    "en": "Bachelor's Programme in the Languages and Literatures of Finland",
+    "fi": "Kotimaisten kielten ja kirjallisuuksien kandiohjelma",
+    "sv": "Kandidatprogrammet i finskugriska och nordiska språk och litteraturer"
+  },
+  "400-K005": {
+    "en": "Bachelor's Programme in Cultural Studies",
+    "fi": "Kulttuurien tutkimuksen kandiohjelma",
+    "sv": "Kandidatprogrammet i kulturforskning"
+  },
+  "400-K006": {
+    "en": "Bachelor's Programme in History",
+    "fi": "Historian kandiohjelma",
+    "sv": "Kandidatprogrammet i historia"
+  },
+  "500-K001": {
+    "en": "Bachelor's Programme in Mathematical Sciences",
+    "fi": "Matemaattisten tieteiden kandiohjelma",
+    "sv": "Kandidatsprogrammet i matematiska vetenskaper"
+  },
+  "500-K002": {
+    "en": "Bachelor's Programme in Physical Sciences",
+    "fi": "Fysikaalisten tieteiden kandiohjelma",
+    "sv": "Kandidatprogrammet i fysikaliska vetenskaper"
+  },
+  "500-K004": {
+    "en": "Bachelor's Programme for Teachers of Mathematics, Physics and Chemistry",
+    "fi": "Matematiikan, fysiikan ja kemian opettajan kandiohjelma",
+    "sv": "Kandidatprogrammet för ämneslärare i matematik, fysik och kemi"
+  },
+  "500-K005": {
+    "en": "Bachelor's Programme in Computer Science",
+    "fi": "Tietojenkäsittelytieteen kandiohjelma",
+    "sv": "Kandidatprogrammet i datavetenskap"
+  },
+  "500-K006": {
+    "en": "Bachelor's Programme in Geosciences",
+    "fi": "Geotieteiden kandiohjelma",
+    "sv": "Kandidatsprogrammet i geovetenskap"
+  },
+  "500-K007": {
+    "en": "Bachelor's Programme in Geography",
+    "fi": "Maantieteen kandiohjelma",
+    "sv": "Kandidatprogrammet i geografi"
+  },
+  "500-K008": {
+    "en": "Bachelor’s Programme in Science",
+    "fi": "Bachelor’s Programme in Science",
+    "sv": "Bachelor’s Programme in Science"
+  },
+  "500-K009": {
+    "en": "Bachelor’s Programme in Atmospheric Sciences (Commissioned education)",
+    "fi": "Bachelor’s Programme in Atmospheric Sciences (Commissioned education)",
+    "sv": "Bachelor’s Programme in Atmospheric Sciences (Commissioned education)"
+  },
+  "550-K001": {
+    "en": "Bachelor's Programme in Pharmacy",
+    "fi": "Farmaseutin koulutusohjelma",
+    "sv": "Utbildningsprogrammet för farmaceutexamen"
+  },
+  "570-K001": {
+    "en": "Bachelor's Programme in Biology",
+    "fi": "Biologian kandiohjelma",
+    "sv": "Kandidatprogrammet i biologi"
+  },
+  "570-K002": {
+    "en": "Bachelor's Programme in Molecular Biosciences",
+    "fi": "Molekyylibiotieteiden kandiohjelma",
+    "sv": "Kandidatsprogrammet i molekylära biovetenskaper"
+  },
+  "570-K003": {
+    "en": "Bachelor's Programme in Enviromental Sciences",
+    "fi": "Ympäristötieteiden kandiohjelma",
+    "sv": "Kandidatprogrammet i miljövetenskaper"
+  },
+  "600-K001": {
+    "en": "Bachelor's Programme in Education",
+    "fi": "Kasvatustieteiden kandiohjelma",
+    "sv": "Kandidatprogrammet i pedagogik"
+  },
+  "700-K001": {
+    "en": "Bachelor's Programme in Politics, Media and Communication",
+    "fi": "Politiikan ja viestinnän kandiohjelma",
+    "sv": "Kandidatprogrammet i politik, medier och kommunikation"
+  },
+  "700-K002": {
+    "en": "Bachelor's Programme in Society and Change",
+    "fi": "Yhteiskunnallisen muutoksen kandiohjelma",
+    "sv": "Kandidatprogrammet för samhälle i förändring"
+  },
+  "700-K003": {
+    "en": "Bachelor's Programme in Social Research",
+    "fi": "Sosiaalitieteiden kandiohjelma",
+    "sv": "Kandidatprogrammet i sociala vetenskaper"
+  },
+  "700-K004": {
+    "en": "Bachelor's Programme in Economics",
+    "fi": "Taloustieteen kandiohjelma",
+    "sv": "Kandidatprogrammet i ekonomi"
+  },
+  "740-K001": {
+    "en": "Bachelor’s program in Social Sciences",
+    "fi": "Yhteiskuntatieteiden kandiohjelma",
+    "sv": "Kandidatprogrammet i samhällsvetenskaper"
+  },
+  "800-K001": {
+    "en": "Bachelor's Programme in Agricultural Sciences",
+    "fi": "Maataloustieteiden kandiohjelma",
+    "sv": "Kandidatprogrammet i lantbruksvetenskaper"
+  },
+  "800-K002": {
+    "en": "Bachelor's Programme in Forest Sciences",
+    "fi": "Metsätieteiden kandiohjelma",
+    "sv": "Kandidatprogrammet i skogsvetenskaper"
+  },
+  "800-K003": {
+    "en": "Bachelor's Programme in Food Sciences",
+    "fi": "Elintarviketieteiden kandiohjelma",
+    "sv": "Kandidatsprogrammet i livsmedelsvetenskaper"
+  },
+  "800-K004": {
+    "en": "Bachelor's Programme in Enviromental and Food Economics",
+    "fi": "Ympäristö- ja elintarviketalouden kandiohjelma",
+    "sv": "Kandidatprogrammet i miljö- och livsmedelsekonomi"
+  },
+  "900-K001": {
+    "en": "Bachelor's Programme in Veterinary Medicine",
+    "fi": "Eläinlääketieteen kandiohjelma",
+    "sv": "Kandidatsprogrammet i veterinärmedicin"
+  },
+  "100-M001": {
+    "en": "Master's Programme in Theology and Religious Studies",
+    "fi": "Teologian ja uskonnontutkimuksen maisteriohjelma",
+    "sv": "Magisterprogrammet i teologi och religionsforskning"
+  },
+  "200-M001": {
+    "en": "Master's Programme in Law",
+    "fi": "Oikeustieteen maisterin koulutusohjelma",
+    "sv": "Magisterprogrammet i rättsvetenskap"
+  },
+  "200-M002": {
+    "en": "Master's Programme in International Business Law",
+    "fi": "Kansainvälisen liikejuridiikan maisteriohjelma",
+    "sv": "Magisterprogrammet i internationell affärsjuridik"
+  },
+  "200-M003": {
+    "en": "Master's Programme in Global Governance Law",
+    "fi": "Globaalia hallintoa koskevan oikeuden maisteriohjelma",
+    "sv": "Magisterprogrammet i den globala styrelsens rättsliga frågor"
+  },
+  "300-M002": {
+    "en": "Master's Programme in Translational Medicine",
+    "fi": "Translationaalisen lääketieteen maisteriohjelma",
+    "sv": "Magisterprogrammet i translationell medicin"
+  },
+  "300-M003": {
+    "en": "Degree Programme in Dentistry",
+    "fi": "Hammaslääketieteen koulutusohjelma",
+    "sv": "Utbildningsprogrammet i odontologi"
+  },
+  "300-M004": {
+    "en": "Master's Programme in Psychology",
+    "fi": "Psykologian maisteriohjelma",
+    "sv": "Magisterprogrammet i psykologi"
+  },
+  "300-M005": {
+    "en": "Master's Programme in Logopedics",
+    "fi": "Logopedian maisteriohjelma",
+    "sv": "Magistgerprogrammet i logopedi"
+  },
+  "300-M006": {
+    "en": "Master's Programme in Development of Healthcare Services",
+    "fi": "Terveydenhuollon kehittämisen maisteriohjelma",
+    "sv": "Magisterprogrammet för utveckling av hälsovården"
+  },
+  "400-M001": {
+    "en": "Master's Programme in Art Studies",
+    "fi": "Taiteiden tutkimuksen maisteriohjelma",
+    "sv": "Magisterprogrammet i konstforskning"
+  },
+  "400-M002": {
+    "en": "Master's Programme in Languages",
+    "fi": "Kielten maisteriohjelma",
+    "sv": "Magisterprogrammet i språk"
+  },
+  "400-M003": {
+    "en": "Master's Programme in English Studies",
+    "fi": "Englannin kielen ja kirjallisuuden maisteriohjelma",
+    "sv": "Magisterprogrammet i engelska språket och litteraturen"
+  },
+  "400-M004": {
+    "en": "Master's Programme in Russian, Eurasian and Eastern European Studies",
+    "fi": "Venäjän, Euraasian ja itäisen Euroopan tutkimuksen maisteriohjelma",
+    "sv": "Magisterprogrammet i studier i Ryssland, Eurasien och östra Europa"
+  },
+  "400-M005": {
+    "en": "Master's Programme in Linguistic Diversity and Digital Humanities",
+    "fi": "Kielellisen diversiteetin ja digitaalisten ihmistieteiden maisteriohjelma",
+    "sv": "Magisterprogrammet i språklig diversitet och digital humaniora"
+  },
+  "400-M006": {
+    "en": "Master's Programme in Translation and Interpreting",
+    "fi": "Kääntämisen ja tulkkauksen maisteriohjelma",
+    "sv": "Magisterprogrammet i översättning och tolkning"
+  },
+  "400-M008": {
+    "en": "Master's Programme in Scandinavian Languages and Literatures",
+    "fi": "Pohjoismaisten kielten ja kirjallisuuksien maisteriohjelma",
+    "sv": "Magisterprogrammet i nordiska språk och litteraturer"
+  },
+  "400-M009": {
+    "en": "Master's Programme in Literary Studies",
+    "fi": "Kirjallisuudentutkimuksen maisteriohjelma",
+    "sv": "Magisterprogrammet i litteraturvetenskap"
+  },
+  "400-M010": {
+    "en": "Master's Programme in Cultural Heritage",
+    "fi": "Kulttuuriperinnön maisteriohjelma",
+    "sv": "Magisterprogrammet i kulturarv"
+  },
+  "400-M011": {
+    "en": "Master's Programme in Intercultural Encounters",
+    "fi": "Kulttuurienvälisen vuorovaikutuksen maisteriohjelma",
+    "sv": "Magisterprogrammet i interkulturell växelverkan"
+  },
+  "400-M012": {
+    "en": "Master's Programme in Area and Cultural Studies",
+    "fi": "Alue- ja kulttuurintutkimuksen maisteriohjelma",
+    "sv": "Magisterprogrammet i region- och kulturstudier"
+  },
+  "400-M014": {
+    "en": "Master's Programme in Gender Studies",
+    "fi": "Sukupuolentutkimuksen maisteriohjelma",
+    "sv": "Magisterprogrammet i genusvetenskap"
+  },
+  "400-M015": {
+    "en": "Master's Programme in History",
+    "fi": "Historian maisteriohjelma",
+    "sv": "Magisterprogrammet i historia"
+  },
+  "500-M001": {
+    "en": "Master's Programme in Mathematics and Statistics",
+    "fi": "Matematiikan ja tilastotieteen maisteriohjelma",
+    "sv": "Magisterprogrammet i matematik och statistik"
+  },
+  "500-M002": {
+    "en": "Master's Programme in Life Science Informatics",
+    "fi": "Life Science Informatics -maisteriohjelma",
+    "sv": "Magisterprogrammet i Life Science Informatics"
+  },
+  "500-M003": {
+    "en": "Master's Programme in Theoretical and Computational Methods",
+    "fi": "Teoreettisten ja laskennallisten menetelmien maisteriohjelma",
+    "sv": "Magisterprogrammet i teoretiska och beräkningsmetoder"
+  },
+  "500-M004": {
+    "en": "Master's Programme in Particle Physics and Astrophysical Sciences",
+    "fi": "Alkeishiukkasfysiikan ja astrofysikaalisten tieteiden maisteriohjelma",
+    "sv": "Magisterprogrammet i elementarpartikelfysik och astrofysikaliska vetenskaper"
+  },
+  "500-M005": {
+    "en": "Master's Programme in Materials Research",
+    "fi": "Materiaalitutkimuksen maisteriohjelma",
+    "sv": "Magisterprogrammet i materialforskning"
+  },
+  "500-M006": {
+    "en": "Master's Programme in Atmospheric Sciences",
+    "fi": "Ilmakehätieteiden maisteriohjelma",
+    "sv": "Magisterprogrammet i atmosfärsvetenskaper"
+  },
+  "500-M007": {
+    "en": "Master's Programme in Chemistry and Molecular Sciences",
+    "fi": "Kemian ja molekyylitieteiden maisteriohjelma",
+    "sv": "Magisterprogrammet i kemi och molekylära vetenskaper"
+  },
+  "500-M008": {
+    "en": "Master's Programme for Teachers of Mathematics, Physics and Chemistry",
+    "fi": "Matematiikan, fysiikan ja kemian opettajan maisteriohjelma",
+    "sv": "Magisterprogrammet för ämneslärare i matematik, fysik och kemi"
+  },
+  "500-M009": {
+    "en": "Master's Programme in Computer Science",
+    "fi": "Tietojenkäsittelytieteen maisteriohjelma",
+    "sv": "Magisterprogrammet i datavetenskap"
+  },
+  "500-M010": {
+    "en": "Master's Programme in Data Science",
+    "fi": "Datatieteen maisteriohjelma",
+    "sv": "Magisterprogrammet i data science"
+  },
+  "500-M011": {
+    "en": "Master's Programme in Geology and Geophysics",
+    "fi": "Geologian ja geofysiikan maisteriohjelma",
+    "sv": "Magisterprogrammet i geologi och geofysik"
+  },
+  "500-M012": {
+    "en": "Master's Programme in Geography",
+    "fi": "Maantieteen maisteriohjelma",
+    "sv": "Magisterprogrammet i geografi"
+  },
+  "500-M013": {
+    "en": "Master's Programme in Urban Studies and Planning",
+    "fi": "Kaupunkitutkimuksen ja suunnittelun maisteriohjelma",
+    "sv": "Magisterprogrammet i urbana studier och planering"
+  },
+  "500-M014": {
+    "en": "Nordic Master Programme in Environmental Changes at Higher Latitudes",
+    "fi": "Nordic Master Programme in Environmental Changes at Higher Latitudes",
+    "sv": "Nordic Master Programme in Environmental Changes at Higher Latitudes"
+  },
+  "500-M015": {
+    "en": "Master’s Programme in Atmospheric Sciences (Commissioned education)",
+    "fi": "Master’s Programme in Atmospheric Sciences (Commissioned education)",
+    "sv": "Master’s Programme in Atmospheric Sciences (Commissioned education)"
+  },
+  "550-M001": {
+    "en": "Master's Programme in Pharmacy",
+    "fi": "Proviisorin koulutusohjelma",
+    "sv": "Utbildningsprogrammet för provisorsexamen"
+  },
+  "550-M002": {
+    "en": "Master's programme in Pharmaceutical Research, Development and Safety",
+    "fi": "Lääketutkimuksen, farmaseuttisen tuotekehityksen ja lääkitysturvallisuuden maisteriohjelma",
+    "sv": "Master's programme in Pharmaceutical Research, Development and Safety"
+  },
+  "570-M001": {
+    "en": "Master's Programme in Ecology and Evolutionary Biology",
+    "fi": "Ekologian ja evoluutiobiologian maisteriohjelma",
+    "sv": "Magisterprogrammet i ekologi och evolutionsbiologi"
+  },
+  "570-M002": {
+    "en": "Master's Programme in Integrative Plant Sciences",
+    "fi": "Kasvitieteen maisteriohjelma",
+    "sv": "Magisterprogrammet i botanik"
+  },
+  "570-M003": {
+    "en": "Master's Programme in Genetics and Molecular Biosciences",
+    "fi": "Genetiikan ja molekulaaristen biotieteiden maisteriohjelma",
+    "sv": "Magisterprogrammet i genetik och molekylära biovetenskaper"
+  },
+  "570-M004": {
+    "en": "Master's Programme in Neuroscience",
+    "fi": "Neurotieteen maisteriohjelma",
+    "sv": "Magisterprogrammet i neurovetenskap"
+  },
+  "570-M005": {
+    "en": "Master's Programme in Environmental Change and Global Sustainability",
+    "fi": "Ympäristömuutoksen ja globaalin kestävyyden maisteriohjelma",
+    "sv": "Magisterprogrammet i miljöförändringar och global hållbarhet"
+  },
+  "600-M001": {
+    "en": "Master's Programme in Education",
+    "fi": "Kasvatustieteiden maisteriohjelma",
+    "sv": "Magisterprogrammet i pedagogik"
+  },
+  "600-M002": {
+    "en": "Master's Programme in Changing Education",
+    "fi": "Muuttuvan kasvatuksen ja koulutuksen maisteriohjelma",
+    "sv": "Magisterprogrammet utbildning i förändring"
+  },
+  "700-M001": {
+    "en": "Master's Programme in Philosophy",
+    "fi": "Filosofian maisteriohjelma",
+    "sv": "Magisterprogrammet i filosofi"
+  },
+  "700-M002": {
+    "en": "Master's Programme in Politics, Media and Communication",
+    "fi": "Politiikan ja viestinnän maisteriohjelma",
+    "sv": "Magisterprogrammet i politik, medier och kommunikation"
+  },
+  "700-M003": {
+    "en": "Master's Programme in Global Politics and Communication",
+    "fi": "Globaalin politiikan ja viestinnän maisteriohjelma",
+    "sv": "Magisterprogrammet i global politik och kommunikation"
+  },
+  "700-M004": {
+    "en": "Master's Programme in Society and Change",
+    "fi": "Yhteiskunnallisen muutoksen maisteriohjelma",
+    "sv": "Magisterprogrammet för samhälle i förändring"
+  },
+  "700-M005": {
+    "en": "Master's Programme in Contemporary Societies",
+    "fi": "Nyky-yhteiskunnan tutkimuksen maisteriohjelma",
+    "sv": "Magisterprogrammet i moderna samhällen"
+  },
+  "700-M006": {
+    "en": "Master's Programme in European and Nordic Studies",
+    "fi": "Euroopan ja Pohjoismaiden tutkimuksen maisteriohjelma",
+    "sv": "Magisterprogrammet i Europa- och Nordenstudier"
+  },
+  "700-M007": {
+    "en": "Master's Programme in Social Science in Swedish",
+    "fi": "Yhteiskuntatieteiden maisteriohjelma",
+    "sv": "Magisterprogrammet i samhällsvetenskaper"
+  },
+  "700-M009": {
+    "en": "Master's Programme in Economics",
+    "fi": "Taloustieteen maisteriohjelma",
+    "sv": "Magisterprogrammet i ekonomi"
+  },
+  "700-M011": {
+    "en": "Master's Programme in Social and Health Research and Management",
+    "fi": "Sosiaali- ja terveystutkimuksen ja -johtamisen maisteriohjelma",
+    "sv": "Magisterprogrammet i social- och hälsoforskning och ledning"
+  },
+  "800-M001": {
+    "en": "Master's Programme in Agricultural Sciences",
+    "fi": "Maataloustieteiden maisteriohjelma",
+    "sv": "Magisterprogrammet i lantbruksvetenskaper"
+  },
+  "800-M002": {
+    "en": "Master's Programme in Agricultural, Environmental and Resource Economics",
+    "fi": "Maatalous-, ympäristö- ja luonnonvaraekonomian maisteriohjelma",
+    "sv": "Magisterprogrammet i lantbruks -, miljö- och naturresursekonomi"
+  },
+  "800-M003": {
+    "en": "Master's Programme in Forest Sciences",
+    "fi": "Metsätieteiden maisteriohjelma",
+    "sv": "Magisterprogrammet i skogsvetenskaper"
+  },
+  "800-M004": {
+    "en": "Master's Programme in Food Sciences",
+    "fi": "Elintarviketieteiden maisteriohjelma",
+    "sv": "Magisterprogrammet i livsmedelsvetenskaper"
+  },
+  "800-M005": {
+    "en": "Master's Programme in Human Nutrition and Food-Related Behaviour",
+    "fi": "Ihmisen ravitsemuksen ja ruokakäyttäytymisen maisteriohjelma",
+    "sv": "Magisterprogrammet i human nutrition och matbeteende"
+  },
+  "800-M006": {
+    "en": "Master's Programme in Food Economy and Consumption",
+    "fi": "Elintarviketalouden ja kulutuksen maisteriohjelma",
+    "sv": "Magisterprogrammet i livsmedelsekonomi och konsumtion"
+  },
+  "800-M007": {
+    "en": "Master's Programme in Microbiology and Microbial Biotechnology",
+    "fi": "Mikrobiologian ja mikrobibiotekniikan maisteriohjelma",
+    "sv": "Magisterprogrammet i mikrobiologi och mikrobiell bioteknik"
+  },
+  "900-M001": {
+    "en": "Degree Programme in Veterinary Medicine",
+    "fi": "Eläinlääketieteen lisensiaatin koulutusohjelma",
+    "sv": "Utbildningsprogrammet i veterinärmedicin"
+  },
+  "800-M008": {
+    "en": "Erasmus-Mundus Master's Programme in Plant Breeding (EMPLANT)",
+    "fi": "Erasmus-Mundus Master's Programme in Plant Breeding (EMPLANT)",
+    "sv": "Erasmus-Mundus Master's Programme in Plant Breeding (EMPLANT)"
+  },
+  "400-M013": {
+    "en": "Magisterprogrammet i kultur och kommunikation",
+    "fi": "Magisterprogrammet i kultur och kommunikation",
+    "sv": "Magisterprogrammet i kultur och kommunikation"
+  }
+}

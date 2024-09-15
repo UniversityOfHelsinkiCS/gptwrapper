@@ -7,6 +7,27 @@ export interface Message {
   content: string
 }
 
+interface Term {
+  label: Locales[]
+  id: number
+}
+export interface Statistic {
+  startDate: string
+  endDate: string
+  terms: Term[]
+  id: string
+  name: Locales
+  codes: string[]
+  programmes: string[]
+  students: number
+  usedTokens: number
+}
+
+export interface StatisticResponse {
+  data: Statistic[]
+  terms: Term[]
+}
+
 export interface User {
   id: string
   username: string
