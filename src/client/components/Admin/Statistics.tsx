@@ -13,7 +13,9 @@ import {
   Select,
   MenuItem,
   Tooltip,
+  Link,
 } from '@mui/material'
+import { Link as RouterLink } from 'react-router-dom'
 import useStatistics from '../../hooks/useStatistics'
 import { Statistic } from '../../types'
 import programme from '../../locales/programme.json'
@@ -155,7 +157,9 @@ const Statistics = () => {
                     <Typography>{chat.codes.join(', ')}</Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <Typography>{chat.name[language]}</Typography>
+                    <Link to={`/courses/${chat.id}`} component={RouterLink}>
+                      <Typography>{chat.name[language]}</Typography>
+                    </Link>
                   </TableCell>
                   <TableCell align="left">
                     <Typography>
