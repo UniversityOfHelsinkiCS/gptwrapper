@@ -94,8 +94,20 @@ courseRouter.get('/statistics/:id', async (req, res) => {
   return res.send({ average, usagePercentage, usages: normalizedUsage })
 })
 
+interface AcualResponsibility {
+  id: string
+  user: {
+    id: string
+    username: string
+    last_name: string
+    first_names: string
+  }
+}
+
 courseRouter.get('/:id', async (req, res) => {
   const { id } = req.params
+  const request = req as unknown as RequestWithUser
+  const { user } = request
 
   const include = [
     {
@@ -134,10 +146,16 @@ courseRouter.get('/:id', async (req, res) => {
     },
   ]
 
-  const chatInstance = await ChatInstance.findOne({
+  const chatInstance = (await ChatInstance.findOne({
     where: { courseId: id },
     include,
-  })
+  })) as ChatInstance & { responsibilities: AcualResponsibility[] }
+
+  const canAccess =
+    user.isAdmin ||
+    chatInstance.responsibilities.map((r) => r.user.id).includes(user.id)
+
+  if (!canAccess) throw new Error('Unauthorized')
 
   return res.send(chatInstance)
 })

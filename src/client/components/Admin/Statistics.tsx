@@ -20,6 +20,7 @@ import useStatistics from '../../hooks/useStatistics'
 import { Statistic } from '../../types'
 import programme from '../../locales/programme.json'
 import faculties from '../../locales/faculties.json'
+import useCurrentUser from '../../hooks/useCurrentUser'
 
 const Statistics = () => {
   const [from, setFrom] = useState(1)
@@ -28,8 +29,9 @@ const Statistics = () => {
   const { statistics, isLoading } = useStatistics()
   const { t, i18n } = useTranslation()
   const { language } = i18n
+  const { user, isLoading: isUserLoading } = useCurrentUser()
 
-  if (isLoading) return null
+  if (isLoading || isUserLoading) return null
 
   const namesOf = (codes: string[]) => {
     if (!codes || codes.length === 0) return ''
@@ -157,9 +159,13 @@ const Statistics = () => {
                     <Typography>{chat.codes.join(', ')}</Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <Link to={`/courses/${chat.id}`} component={RouterLink}>
+                    {user.isAdmin ? (
+                      <Link to={`/courses/${chat.id}`} component={RouterLink}>
+                        <Typography>{chat.name[language]}</Typography>
+                      </Link>
+                    ) : (
                       <Typography>{chat.name[language]}</Typography>
-                    </Link>
+                    )}
                   </TableCell>
                   <TableCell align="left">
                     <Typography>
