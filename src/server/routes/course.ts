@@ -151,13 +151,19 @@ courseRouter.get('/:id', async (req, res) => {
     include,
   })) as ChatInstance & { responsibilities: AcualResponsibility[] }
 
-  const canAccess =
+  const hasFullAccess =
     user.isAdmin ||
     chatInstance.responsibilities.map((r) => r.user.id).includes(user.id)
 
-  if (!canAccess) throw new Error('Unauthorized')
+  const objectToReturn = hasFullAccess
+    ? chatInstance
+    : {
+        ...chatInstance.toJSON(),
+        enrolments: undefined,
+        responsibilities: undefined,
+      }
 
-  return res.send(chatInstance)
+  return res.send(objectToReturn)
 })
 
 courseRouter.put('/:id', async (req, res) => {

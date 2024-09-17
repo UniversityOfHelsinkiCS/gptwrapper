@@ -132,8 +132,6 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
 
   if (!chatInstance) throw new Error('Chat instance not found')
 
-  console.log('chatInstance', chatInstance.toJSON())
-
   // Get enrollment
   const enrollment = await Enrolment.findOne({
     where: {
