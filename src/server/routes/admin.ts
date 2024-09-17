@@ -1,12 +1,15 @@
 import express from 'express'
 import { Op } from 'sequelize'
 
+import { sequelize } from '../db/connection'
+
 import { RequestWithUser } from '../types'
 import { ChatInstance, UserChatInstanceUsage, User, Prompt } from '../db/models'
 import { getCourse } from '../util/importer'
 import { run as runUpdater } from '../updater'
 import InfoText from '../db/models/infotext'
 import { statsViewerIams } from '../util/config'
+import { generateTerms } from '../util/util'
 
 const adminRouter = express.Router()
 
@@ -52,51 +55,31 @@ adminRouter.post('/chatinstances', async (req, res) => {
   return res.status(201).send(newChatInstance)
 })
 
-// this function is mostly garbage code
+const getUsages = async () => {
+  const [usages] = (await sequelize.query(`
+    SELECT u.*
+    FROM user_chat_instance_usages u
+    LEFT JOIN responsibilities r
+    ON u.user_id = r.user_id AND u.chat_instance_id = r.chat_instance_id
+    WHERE r.user_id IS NULL AND usage_count > 0;  
+  `)) as any[]
+
+  return usages.map((usage) => ({
+    id: usage.id,
+    userId: usage.user_id,
+    usageCount: usage.usage_count,
+    chatInstanceId: usage.chat_instance_id,
+  }))
+}
+
+// this function is mostly garbage
 adminRouter.get('/statistics', async (req, res) => {
-  const yearNow = new Date().getFullYear()
-
-  const terms = []
-  let id = 1
-
-  // this is ugly
-  for (let y = 2023; y <= yearNow + 1; y += 1) {
-    terms.push({
-      label: {
-        en: `spring ${y}`,
-        fi: `kevät ${y}`,
-        sv: `vår ${y}`,
-      },
-      id,
-      startDate: `${y}-01-01`,
-      endDate: `${y}-07-31`,
-    })
-
-    terms.push({
-      label: {
-        en: `fall ${y}`,
-        fi: `syksy ${y}`,
-        sv: `höst ${y}`,
-      },
-      id: id + 1,
-      startDate: `${y}-08-01`,
-      endDate: `${y}-12-31`,
-    })
-
-    id += 2
-  }
+  const terms = generateTerms()
 
   const mangelStats = async () => {
+    const usages = await getUsages()
+
     const courses = {}
-
-    const usages = await UserChatInstanceUsage.findAll({
-      where: {
-        usageCount: {
-          [Op.gt]: 0,
-        },
-      },
-    })
-
     // eslint-disable-next-line no-restricted-syntax
     for (const usage of usages) {
       if (!courses[usage.chatInstanceId]) {

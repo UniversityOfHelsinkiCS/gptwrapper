@@ -48,3 +48,39 @@ export const getModelContextLimit = (modelName: string) => {
 export const sleep =
   // eslint-disable-next-line no-promise-executor-return
   (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+export const generateTerms = () => {
+  const yearNow = new Date().getFullYear()
+
+  const terms = []
+  let id = 1
+
+  // this is ugly
+  for (let y = 2023; y <= yearNow + 1; y += 1) {
+    terms.push({
+      label: {
+        en: `spring ${y}`,
+        fi: `kevät ${y}`,
+        sv: `vår ${y}`,
+      },
+      id,
+      startDate: `${y}-01-01`,
+      endDate: `${y}-07-31`,
+    })
+
+    terms.push({
+      label: {
+        en: `fall ${y}`,
+        fi: `syksy ${y}`,
+        sv: `höst ${y}`,
+      },
+      id: id + 1,
+      startDate: `${y}-08-01`,
+      endDate: `${y}-12-31`,
+    })
+
+    id += 2
+  }
+
+  return terms
+}
