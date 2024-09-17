@@ -51,4 +51,4 @@ export const validModels = [
       ]
 )
 
-export const DEFAULT_MODEL_ON_ENABLE = 'gpt-4'
+export const DEFAULT_MODEL_ON_ENABLE = 'gpt-4o'
