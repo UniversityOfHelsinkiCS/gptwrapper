@@ -50,13 +50,15 @@ export const sleep =
   (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export const generateTerms = () => {
-  const yearNow = new Date().getFullYear()
+  const dateNow = new Date()
+  const yearNow = dateNow.getFullYear()
+  const monthNow = dateNow.getMonth()
 
   const terms = []
   let id = 1
 
   // this is ugly
-  for (let y = 2023; y <= yearNow + 1; y += 1) {
+  for (let y = 2023; y <= yearNow + (monthNow > 7 ? 1 : 0); y += 1) {
     terms.push({
       label: {
         en: `spring ${y}`,
@@ -82,5 +84,5 @@ export const generateTerms = () => {
     id += 2
   }
 
-  return terms
+  return terms.splice(0, terms.length - 1).reverse()
 }
