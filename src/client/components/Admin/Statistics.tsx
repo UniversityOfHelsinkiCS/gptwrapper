@@ -152,7 +152,7 @@ const Statistics = () => {
               {statsToShow.map((chat) => (
                 <TableRow key={chat.id}>
                   <TableCell align="left">
-                    <Typography>{chat.codes}</Typography>
+                    <Typography>{chat.codes.join(', ')}</Typography>
                   </TableCell>
                   <TableCell align="left">
                     <Typography>{chat.name[language]}</Typography>
