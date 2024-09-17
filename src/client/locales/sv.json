@@ -68,6 +68,14 @@
     "noAccessInfo": "You do not currently have access to CurreChat"
   },
   "admin": {
+    "showing": "Showing",
+    "timePeriodStart": "Starting",
+    "timePeriodStop": "ending",
+    "courseStats": "Course stats",
+    "courseTerms": "Terms",
+    "courseCodes": "Course codes",
+    "programCodes": "Programmes",
+    "studentCount": "Students",
     "accessGroups": "Access groups",
     "createAccessGroup": "Create new access group",
     "confirmAccessGroupDelete": "Are you sure you want to delete this access group?",

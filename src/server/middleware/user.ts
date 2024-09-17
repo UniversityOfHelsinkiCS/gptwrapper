@@ -1,7 +1,7 @@
 import { inCI, inDevelopment } from '../../config'
 import { User as UserModel } from '../db/models'
 import { User } from '../types'
-import { adminIams, powerUserIam } from '../util/config'
+import { adminIams, powerUserIam, statsViewerIams } from '../util/config'
 
 const parseIamGroups = (iamGroups: string) =>
   iamGroups?.split(';').filter(Boolean) ?? []
@@ -40,6 +40,7 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
     iamGroups,
     isAdmin: checkAdmin(iamGroups),
     isPowerUser: isPowerUser(iamGroups),
+    isStatsViewer: statsViewerIams.some((iam) => iamGroups.includes(iam)),
   }
 
   const adminLoggedInAsId = req.headers['x-admin-logged-in-as']
@@ -49,7 +50,15 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
     if (!hijackedUser) {
       return next(new Error('User not found'))
     }
-    req.user = { email: acualUser.email, ...hijackedUser.toJSON() }
+    const isStatsViewer = statsViewerIams.some((iam) =>
+      hijackedUser.iamGroups.includes(iam)
+    )
+
+    req.user = {
+      email: acualUser.email,
+      ...hijackedUser.toJSON(),
+      isStatsViewer,
+    }
     req.hijackedBy = acualUser
   } else {
     req.user = acualUser

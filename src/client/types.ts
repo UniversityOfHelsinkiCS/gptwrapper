@@ -47,6 +47,7 @@ export interface User {
   hasIamAccess?: boolean
   lastRestart: string
   enrolledCourses: ChatInstance[]
+  isStatsViewer: boolean
 }
 
 export type Prompt = {

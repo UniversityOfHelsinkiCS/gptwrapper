@@ -14,6 +14,7 @@ export interface User {
   isPowerUser: boolean
   activeCourseIds?: string[]
   ownCourses?: string[]
+  isStatsViewer: boolean
 }
 
 export interface RequestWithUser extends Request {

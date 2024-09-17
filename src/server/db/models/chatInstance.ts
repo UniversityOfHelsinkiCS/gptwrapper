@@ -56,7 +56,7 @@ ChatInstance.init(
     model: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 'gpt-4o-mini',
+      defaultValue: 'gpt-4o',
     },
     usageLimit: {
       type: DataTypes.INTEGER,

@@ -6,6 +6,7 @@ import { ChatInstance, UserChatInstanceUsage, User, Prompt } from '../db/models'
 import { getCourse } from '../util/importer'
 import { run as runUpdater } from '../updater'
 import InfoText from '../db/models/infotext'
+import { statsViewerIams } from '../util/config'
 
 const adminRouter = express.Router()
 
@@ -13,7 +14,13 @@ adminRouter.use((req, _, next) => {
   const request = req as RequestWithUser
   const { user } = request
 
-  if (!user.isAdmin) throw new Error('Unauthorized')
+  const isStatsViewer = statsViewerIams.some((iam) =>
+    user.iamGroups.includes(iam)
+  )
+  const isAllowed =
+    user.isAdmin || (isStatsViewer && req.path.includes('/statistics'))
+
+  if (!isAllowed) throw new Error('Unauthorized')
 
   return next()
 })
@@ -58,6 +65,7 @@ adminRouter.get('/statistics', async (req, res) => {
       label: {
         en: `spring ${y}`,
         fi: `kevät ${y}`,
+        sv: `vår ${y}`,
       },
       id,
       startDate: `${y}-01-01`,
@@ -68,6 +76,7 @@ adminRouter.get('/statistics', async (req, res) => {
       label: {
         en: `fall ${y}`,
         fi: `syksy ${y}`,
+        sv: `höst ${y}`,
       },
       id: id + 1,
       startDate: `${y}-08-01`,

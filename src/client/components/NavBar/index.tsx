@@ -90,6 +90,14 @@ const NavBar = () => {
                 </Button>
               </Link>
             )}
+            {user.isStatsViewer && (
+              <Link to="/statistics" style={{ textDecoration: 'none' }}>
+                <Button>
+                  <AdminPanelSettingsOutlined sx={styles.icon} />{' '}
+                  {t('admin:courseStats')}
+                </Button>
+              </Link>
+            )}
             <Button
               ref={anchorRef}
               id="composition-button"
