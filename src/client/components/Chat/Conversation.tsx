@@ -37,10 +37,7 @@ export const Response = ({
               </>
             )}
             <Box pr={7} py={2}>
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                className="line-break-markdown"
-              >
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {content}
               </ReactMarkdown>
             </Box>

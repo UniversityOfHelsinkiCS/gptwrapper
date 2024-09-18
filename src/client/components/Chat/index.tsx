@@ -370,6 +370,7 @@ const Chat = () => {
         />
       )}
       <Box sx={{ mb: 3 }} />
+
       <Conversation
         messages={messages}
         completion={completion}
