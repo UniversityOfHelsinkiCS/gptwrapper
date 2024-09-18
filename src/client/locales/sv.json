@@ -1,6 +1,7 @@
 {
   "common": {
-    "courseStats": "",
+    "noAccess": "Ingen åtkomst",
+    "courseStats": "Kursstatistik",
     "appName": "CurreChat",
     "admin": "Admin",
     "send": "Skicka till",

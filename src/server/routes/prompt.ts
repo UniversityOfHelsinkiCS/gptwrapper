@@ -1,7 +1,7 @@
 import express from 'express'
 
-import { Message } from '../types'
-import { Prompt, ChatInstance } from '../db/models'
+import { Message, RequestWithUser } from '../types'
+import { Prompt, ChatInstance, Responsibility } from '../db/models'
 
 const promptRouter = express.Router()
 
@@ -32,7 +32,40 @@ promptRouter.get('/:courseId', async (req, res) => {
   return res.send(prompts)
 })
 
-promptRouter.post('/', async (req, res) => {
+const authorizeUser = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const request = req as RequestWithUser
+  const data = req.body as NewPromptData
+  const { user } = request
+  const { id } = req.params
+
+  const chatInstanceId = id
+    ? (await Prompt.findByPk(id)).chatInstanceId
+    : data.chatInstanceId
+
+  const chatInstance = (await ChatInstance.findByPk(chatInstanceId, {
+    include: [
+      {
+        model: Responsibility,
+        as: 'responsibilities',
+      },
+    ],
+  })) as ChatInstance & { responsibilities: Responsibility[] }
+
+  const isAmongActiveCourses = chatInstance?.responsibilities.some(
+    (r) => r.userId === user.id
+  )
+
+  if (!isAmongActiveCourses && !user.isAdmin)
+    return res.status(403).send('Not allowed')
+
+  return next()
+}
+
+promptRouter.post('/', authorizeUser, async (req, res) => {
   const data = req.body as NewPromptData
 
   const newPrompt = await Prompt.create(data)
@@ -42,7 +75,7 @@ promptRouter.post('/', async (req, res) => {
 
 export default promptRouter
 
-promptRouter.delete('/:id', async (req, res) => {
+promptRouter.delete('/:id', authorizeUser, authorizeUser, async (req, res) => {
   const { id } = req.params
 
   const prompt = await Prompt.findByPk(id)
@@ -54,7 +87,7 @@ promptRouter.delete('/:id', async (req, res) => {
   return res.status(204).send()
 })
 
-promptRouter.put('/:id', async (req, res) => {
+promptRouter.put('/:id', authorizeUser, authorizeUser, async (req, res) => {
   const { id } = req.params
   const data = req.body as Prompt
   const { systemMessage, name, hidden, mandatory } = data

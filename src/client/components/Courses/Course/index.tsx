@@ -122,6 +122,18 @@ const Course = () => {
   if (isLoading || courseLoading || !course || isUserLoading || !user)
     return null
 
+  const amongResponsibles = course.responsibilities
+    ? course.responsibilities.some((r) => r.user.id === user.id)
+    : false
+
+  if (!user.isAdmin && !amongResponsibles) {
+    return (
+      <Box>
+        <Typography variant="h5">{t('noAccess')}</Typography>
+      </Box>
+    )
+  }
+
   const mandatoryPromptId = prompts.find((prompt) => prompt.mandatory)?.id
 
   const handleSave = () => {
