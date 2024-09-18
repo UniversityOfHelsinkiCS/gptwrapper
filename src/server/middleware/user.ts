@@ -40,7 +40,9 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
     iamGroups,
     isAdmin: checkAdmin(iamGroups),
     isPowerUser: isPowerUser(iamGroups),
-    isStatsViewer: statsViewerIams.some((iam) => iamGroups.includes(iam)),
+    isStatsViewer:
+      checkAdmin(iamGroups) ||
+      statsViewerIams.some((iam) => iamGroups.includes(iam)),
   }
 
   const adminLoggedInAsId = req.headers['x-admin-logged-in-as']
@@ -50,15 +52,16 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
     if (!hijackedUser) {
       return next(new Error('User not found'))
     }
-    const isStatsViewer = statsViewerIams.some((iam) =>
-      hijackedUser.iamGroups.includes(iam)
-    )
+    const isStatsViewer =
+      hijackedUser.isAdmin ||
+      statsViewerIams.some((iam) => hijackedUser.iamGroups.includes(iam))
 
     req.user = {
       email: acualUser.email,
       ...hijackedUser.toJSON(),
       isStatsViewer,
     }
+
     req.hijackedBy = acualUser
   } else {
     req.user = acualUser

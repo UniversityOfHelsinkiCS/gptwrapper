@@ -83,18 +83,18 @@ const NavBar = () => {
                 </Button>
               </Link>
             )}
-            {user.isAdmin && (
-              <Link to="/admin" style={{ textDecoration: 'none' }}>
-                <Button>
-                  <AdminPanelSettingsOutlined sx={styles.icon} /> {t('admin')}
-                </Button>
-              </Link>
-            )}
             {user.isStatsViewer && (
               <Link to="/statistics" style={{ textDecoration: 'none' }}>
                 <Button>
                   <AdminPanelSettingsOutlined sx={styles.icon} />{' '}
-                  {t('admin:courseStats')}
+                  {t('courseStats')}
+                </Button>
+              </Link>
+            )}
+            {user.isAdmin && (
+              <Link to="/admin" style={{ textDecoration: 'none' }}>
+                <Button>
+                  <AdminPanelSettingsOutlined sx={styles.icon} /> {t('admin')}
                 </Button>
               </Link>
             )}

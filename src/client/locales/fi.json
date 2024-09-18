@@ -1,5 +1,6 @@
 {
   "common": {
+    "courseStats": "Kurssitilastot",
     "appName": "CurreChat",
     "admin": "Ylläpito",
     "send": "Lähetä",
@@ -32,6 +33,18 @@
     "fileUploadText": "Lisää tiedosto",
     "fileInfoPrompt": "\n\nTässä on tiedoston sisältämä teksti:\n\n",
     "copy": "Kopioi"
+  },
+  "stats": {
+    "showing": "Näytetään",
+    "timePeriodStart": "Alkaen",
+    "timePeriodStop": "päättyen",
+    "courseStats": "Kurssitilastot",
+    "courseTerms": "Lukukaudet",
+    "courseNameInfo": "Kurssi",
+    "usageCount": "Käyttömäärä",
+    "promptCount": "Kehtotteita",
+    "programCodes": "Ohjelmat",
+    "studentCount": "Opis"
   },
   "info": {
     "title": "## Huomio",

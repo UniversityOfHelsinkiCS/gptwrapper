@@ -16,11 +16,11 @@ import {
   Link,
 } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
-import useStatistics from '../../hooks/useStatistics'
-import { Statistic } from '../../types'
-import programme from '../../locales/programme.json'
-import faculties from '../../locales/faculties.json'
-import useCurrentUser from '../../hooks/useCurrentUser'
+import useStatistics from '../hooks/useStatistics'
+import { Statistic } from '../types'
+import programme from '../locales/programme.json'
+import faculties from '../locales/faculties.json'
+import useCurrentUser from '../hooks/useCurrentUser'
 
 const Statistics = () => {
   const [from, setFrom] = useState(1)
@@ -70,7 +70,7 @@ const Statistics = () => {
     <div>
       <Box my={2}>
         <div>
-          <span style={{ marginRight: 10 }}>{t('admin:timePeriodStart')}</span>
+          <span style={{ marginRight: 10 }}>{t('stats:timePeriodStart')}</span>
 
           <Select
             value={from}
@@ -83,7 +83,7 @@ const Statistics = () => {
             ))}
           </Select>
 
-          <span style={{ margin: 10 }}>{t('admin:timePeriodStop')}</span>
+          <span style={{ margin: 10 }}>{t('stats:timePeriodStop')}</span>
           <Select
             value={to}
             onChange={(e) => setTo(parseInt(e.target.value as string, 10))}
@@ -97,7 +97,7 @@ const Statistics = () => {
               ))}
           </Select>
 
-          <span style={{ margin: 10 }}>{t('admin:showing')}</span>
+          <span style={{ margin: 10 }}>{t('stats:showing')}</span>
 
           <Select
             value={selectedFaculty}
@@ -117,37 +117,37 @@ const Statistics = () => {
               <TableRow>
                 <TableCell align="left">
                   <Typography variant="h6">
-                    <b>{t('admin:courseCodes')}</b>
+                    <b>{t('stats:courseCodes')}</b>
                   </Typography>
                 </TableCell>
                 <TableCell>
                   <Typography variant="h6">
-                    <b>{t('admin:courseNameInfo')}</b>
+                    <b>{t('stats:courseNameInfo')}</b>
                   </Typography>
                 </TableCell>
                 <TableCell align="left">
                   <Typography variant="h6">
-                    <b>{t('admin:courseTerms')}</b>
+                    <b>{t('stats:courseTerms')}</b>
                   </Typography>
                 </TableCell>
                 <TableCell align="left">
                   <Typography variant="h6">
-                    <b>{t('admin:programCodes')}</b>
+                    <b>{t('stats:programCodes')}</b>
                   </Typography>
                 </TableCell>
                 <TableCell align="left">
                   <Typography variant="h6">
-                    <b>{t('admin:studentCount')}</b>
+                    <b>{t('stats:studentCount')}</b>
                   </Typography>
                 </TableCell>
                 <TableCell align="left">
                   <Typography variant="h6">
-                    <b>{t('admin:usageCount')}</b>
+                    <b>{t('stats:usageCount')}</b>
                   </Typography>
                 </TableCell>
                 <TableCell align="left">
                   <Typography variant="h6">
-                    <b>{t('admin:promptCount')}</b>
+                    <b>{t('stats:promptCount')}</b>
                   </Typography>
                 </TableCell>
               </TableRow>

@@ -14,7 +14,7 @@ import Courses from './components/Courses'
 import Course from './components/Courses/Course'
 import NoAccess from './components/NoAccess'
 import Chats from './components/Chats'
-import Statistics from './components/Admin/Statistics'
+import Statistics from './components/Statistics'
 
 const router = createBrowserRouter(
   createRoutesFromElements(

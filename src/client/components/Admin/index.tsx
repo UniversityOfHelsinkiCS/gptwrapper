@@ -17,7 +17,6 @@ import Usage from './Usage'
 import Updater from './Updater'
 import EditTexts from './EditTexts'
 import UserSearch from './UserSearch'
-import Statistics from './Statistics'
 import useCurrentUser from '../../hooks/useCurrentUser'
 
 const stripSearch = (path: string) => path.split('?')[0]
@@ -73,11 +72,6 @@ const Admin = () => {
             to="/admin/usersearch"
             component={Link}
           />
-          <Tab
-            label={t('admin:courseStats')}
-            to="/admin/statistics"
-            component={Link}
-          />
         </RouterTabs>
       </Box>
       <Routes>
@@ -89,7 +83,6 @@ const Admin = () => {
         )}
         <Route path="/edit-texts" element={<EditTexts />} />
         <Route path="/usersearch" element={<UserSearch />} />
-        <Route path="/statistics" element={<Statistics />} />
       </Routes>
     </Box>
   )

@@ -175,8 +175,6 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
   const model = chatInstance.model ?? ''
   const models = getAllowedModels(model)
 
-  console.log('chatInstanceUsage', chatInstanceUsage.toJSON())
-
   return {
     usage: chatInstanceUsage?.usageCount ?? 0,
     limit: chatInstance?.usageLimit ?? 0,

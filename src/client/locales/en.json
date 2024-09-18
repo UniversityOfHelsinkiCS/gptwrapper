@@ -1,5 +1,6 @@
 {
   "common": {
+    "courseStats": "Course stats",
     "appName": "CurreChat",
     "admin": "Admin",
     "send": "Send",
@@ -33,6 +34,18 @@
     "curreUrl": "https://curre.helsinki.fi/",
     "curreTitle": "Curre",
     "copy": "Copy"
+  },
+  "stats": {
+    "timePeriodStart": "Starting",
+    "timePeriodStop": "Ending",
+    "showing": "Showing",
+    "courseCodes": "Course codes",
+    "programCodes": "Programmes",
+    "studentCount": "Students",
+    "courseNameInfo": "Name of the course",
+    "courseTerms": "Terms",
+    "usageCount": "Usage count",
+    "promptCount": "Prompts"
   },
   "info": {
     "title": "## Attention",

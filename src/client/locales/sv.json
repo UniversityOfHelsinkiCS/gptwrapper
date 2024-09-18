@@ -1,5 +1,6 @@
 {
   "common": {
+    "courseStats": "",
     "appName": "CurreChat",
     "admin": "Admin",
     "send": "Skicka till",
@@ -30,6 +31,18 @@
     "fileUploadText": "Ladda upp fil",
     "fileInfoPrompt": "\n\nHere is the contents of the file\n\n",
     "copy": "Copy"
+  },
+  "stats": {
+    "timePeriodStart": "Starting",
+    "timePeriodStop": "Ending",
+    "showing": "Showing",
+    "courseCodes": "Course codes",
+    "programCodes": "Programmes",
+    "studentCount": "Students",
+    "courseNameInfo": "Name of the course",
+    "courseTerms": "Terms",
+    "usageCount": "Usage count",
+    "promptCount": "Prompts"
   },
   "info": {
     "title": "## Uppmärksamhet",
