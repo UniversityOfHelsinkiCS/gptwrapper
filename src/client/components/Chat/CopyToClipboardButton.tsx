@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Box, IconButton, Snackbar } from '@mui/material'
 import ContentCopy from '@mui/icons-material/ContentCopy'
+import markdownToTxt from 'markdown-to-txt'
 
 interface CopyToClipboardButtonProps {
   copied: string
@@ -15,10 +16,10 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
 
   const handleClick = () => {
     setOpen(true)
-
-    const innerHtml = document.getElementById(id).innerHTML
-    const blobHtml = new Blob([innerHtml], { type: 'text/html' })
-    const blobText = new Blob([copied], { type: 'text/plain' })
+    const blobHtml = new Blob([document.getElementById(id).innerHTML], {
+      type: 'text/html',
+    })
+    const blobText = new Blob([markdownToTxt(copied)], { type: 'text/plain' })
     const data = [
       new ClipboardItem({
         'text/plain': blobText,

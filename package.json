@@ -111,6 +111,7 @@
     "i18next": "^23.0.0",
     "ioredis": "^5.3.2",
     "lodash": "^4.17.21",
+    "markdown-to-txt": "^2.0.1",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.3",
