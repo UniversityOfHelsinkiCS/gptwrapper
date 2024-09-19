@@ -132,8 +132,13 @@ const Prompt = ({
                   />
                 </Box>
                 <Box>
-                  {messages.map(({ role, content }) => (
-                    <Response key={content} role={role} content={content} />
+                  {messages.map(({ role, content }, index) => (
+                    <Response
+                      key={content}
+                      role={role}
+                      content={content}
+                      id={`message-${index}`}
+                    />
                   ))}
                 </Box>
               </>
