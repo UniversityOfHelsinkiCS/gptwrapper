@@ -13,10 +13,12 @@ export const Response = ({
   role,
   content,
   setMessage,
+  id,
 }: {
   role: Role
   content: string
   setMessage?: any
+  id: string
 }) => {
   const isUser = role === 'user'
 
@@ -27,19 +29,25 @@ export const Response = ({
           <Box display="flex">
             {isUser ? (
               <>
-                {setMessage && <CopyToClipboardButton copied={content} />}
+                {setMessage && (
+                  <CopyToClipboardButton copied={content} id={id} />
+                )}
                 <Person sx={{ mx: 3, my: 4 }} />
               </>
             ) : (
               <>
-                {setMessage && <CopyToClipboardButton copied={content} />}
+                {setMessage && (
+                  <CopyToClipboardButton copied={content} id={id} />
+                )}
                 <Assistant sx={{ mx: 3, my: 4 }} />
               </>
             )}
             <Box pr={7} py={2}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {content}
-              </ReactMarkdown>
+              <div id={id}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {content}
+                </ReactMarkdown>
+              </div>
             </Box>
           </Box>
         </Paper>
@@ -70,6 +78,7 @@ const Conversation = ({
       </Box>
       {messages.map(({ role, content }, index) => (
         <Response
+          id={`message-${index}`}
           // eslint-disable-next-line react/no-array-index-key
           key={content + index}
           role={role}
@@ -91,7 +100,7 @@ const Conversation = ({
               {t('chat:stop')}
             </Button>
           </Stack>
-          <Response role="assistant" content={completion} />
+          <Response role="assistant" content={completion} id="message" />
         </>
       )}
     </Box>
