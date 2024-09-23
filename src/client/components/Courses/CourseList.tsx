@@ -48,6 +48,7 @@ const Course = ({
     isActive,
     isExpired,
     courseUnitRealisationTypeUrn,
+    courseUnits,
   } = course
 
   const { language } = i18n
@@ -58,6 +59,8 @@ const Course = ({
     navigator.clipboard.writeText(studentLink)
     enqueueSnackbar(t('linkCopied'), { variant: 'info' })
   }
+
+  const code = courseUnits[0]?.code
 
   return (
     <Box mb="1rem">
@@ -72,6 +75,7 @@ const Course = ({
             <Link to={`/courses/${courseId}`} component={RouterLink}>
               <Typography variant="h6">{name[language]}</Typography>
             </Link>
+            <Typography style={{ marginLeft: 5 }}>{code}</Typography>
             <Typography style={{ fontStyle: 'italic', marginLeft: 20 }}>
               {getCurTypeLabel(courseUnitRealisationTypeUrn, language)}
             </Typography>

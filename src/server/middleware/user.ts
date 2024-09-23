@@ -38,8 +38,7 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
     email,
     language,
     iamGroups,
-    isAdmin:
-      !['testUser', 'mluukkai'].includes(username) && checkAdmin(iamGroups),
+    isAdmin: !['mluukkai'].includes(username) && checkAdmin(iamGroups),
     isPowerUser: isPowerUser(iamGroups),
     isStatsViewer:
       checkAdmin(iamGroups) ||

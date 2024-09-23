@@ -108,11 +108,18 @@ interface Responsebility {
   }
 }
 
+export interface CourseUnit {
+  id: string
+  name: Locales
+  code: string
+}
+
 export interface Course extends ChatInstance {
   activityPeriod: ActivityPeriod
   prompts: Prompt[]
   enrolments: Enrolment[]
   responsibilities: Responsebility[]
+  courseUnits: CourseUnit[]
 }
 
 export type ChatInstanceUsage = {

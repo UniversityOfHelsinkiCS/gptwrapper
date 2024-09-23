@@ -201,6 +201,12 @@ const Course = () => {
     return ''
   }
 
+  const full = {
+    flex: '0 0 100%',
+    boxSizing: 'borderBox',
+    height: '40px',
+  }
+
   const left = {
     flex: '0 0 74%',
     boxSizing: 'borderBox',
@@ -235,8 +241,14 @@ const Course = () => {
           }}
         >
           <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-            <div style={{ ...left, boxSizing: 'border-box', height: '50px' }}>
+            <div style={{ ...full, boxSizing: 'border-box', height: '50px' }}>
               <Typography variant="h5">{course.name[language]}</Typography>
+            </div>
+
+            <div style={{ ...left, boxSizing: 'border-box', height: '50px' }}>
+              <Typography>
+                {course.courseUnits.map((cu) => cu.code).join(', ')}
+              </Typography>
             </div>
             <div style={{ ...right, boxSizing: 'border-box', height: '50px' }}>
               <Typography style={{ fontStyle: 'italic' }}>
