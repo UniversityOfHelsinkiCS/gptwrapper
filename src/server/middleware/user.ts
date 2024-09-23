@@ -32,13 +32,15 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
 
   const iamGroups = parseIamGroups(hygroupcn)
 
+  const excludeFromAdmin = ['mluukkai2']
+
   const acualUser: User = {
     id: id || username,
     username,
     email,
     language,
     iamGroups,
-    isAdmin: !['mluukkai'].includes(username) && checkAdmin(iamGroups),
+    isAdmin: !excludeFromAdmin.includes(username) && checkAdmin(iamGroups),
     isPowerUser: isPowerUser(iamGroups),
     isStatsViewer:
       checkAdmin(iamGroups) ||
