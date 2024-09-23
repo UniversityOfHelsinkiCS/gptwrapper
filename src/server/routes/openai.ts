@@ -19,7 +19,7 @@ import {
 } from '../util/util'
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
-import { inProduction, DEFAULT_TOKEN_LIMIT } from '../../config'
+import { inProduction, DEFAULT_TOKEN_LIMIT, FREE_MODEL } from '../../config'
 import { pdfToText } from '../util/pdfToText'
 
 const openaiRouter = express.Router()
@@ -72,7 +72,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   const usageAllowed = courseId
     ? await checkCourseUsage(user, courseId)
-    : await checkUsage(user, model)
+    : model === FREE_MODEL || (await checkUsage(user, model))
 
   if (!usageAllowed) return res.status(403).send('Usage limit reached')
 

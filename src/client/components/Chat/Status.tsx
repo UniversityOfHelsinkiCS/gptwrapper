@@ -9,6 +9,7 @@ import {
   SelectChangeEvent,
   InputLabel,
 } from '@mui/material'
+import { FREE_MODEL } from '../../../config'
 
 const ModelSelector = ({
   currentModel,
@@ -20,6 +21,16 @@ const ModelSelector = ({
   models: string[]
 }) => {
   const { t } = useTranslation()
+
+  if (models.length === 1) {
+    return (
+      <Box style={{ marginBottom: 5 }}>
+        <Typography variant="body1">
+          {t('status:modelInUse')} <code>{models[0]}</code>
+        </Typography>
+      </Box>
+    )
+  }
 
   return (
     <Box mb={2}>
@@ -41,18 +52,6 @@ const ModelSelector = ({
   )
 }
 
-const ModelText = ({ model }: { model: string }) => {
-  const { t } = useTranslation()
-
-  return (
-    <Box>
-      <Typography variant="body1">
-        {t('status:modelInUse')} <code>{model}</code>
-      </Typography>
-    </Box>
-  )
-}
-
 const Status = ({
   model,
   setModel,
@@ -68,20 +67,23 @@ const Status = ({
 }) => {
   const { t } = useTranslation()
 
+  const tokensUsed = usage > limit
+
+  const style = tokensUsed ? { color: 'red' } : {}
+
+  const acualModels = tokensUsed ? [FREE_MODEL] : models
+
   return (
     <Box>
-      {models.length > 1 ? (
-        <ModelSelector
-          currentModel={model}
-          setModel={setModel}
-          models={models}
-        />
-      ) : (
-        <ModelText model={model} />
-      )}
+      <ModelSelector
+        currentModel={model}
+        setModel={setModel}
+        models={acualModels}
+      />
 
-      <Typography variant="body1">
+      <Typography variant="body1" style={style}>
         {usage} / {limit} {t('status:tokensUsed')}
+        {tokensUsed ? t('status:limitedUsage') : ''}
       </Typography>
     </Box>
   )

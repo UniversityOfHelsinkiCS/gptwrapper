@@ -5,7 +5,7 @@ import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
-import { validModels, DEFAULT_MODEL } from '../../../config'
+import { validModels, DEFAULT_MODEL, FREE_MODEL } from '../../../config'
 import { Message, Prompt, SetState, Course } from '../../types'
 import { getCompletionStream } from './util'
 import Banner from '../Banner'
@@ -166,6 +166,12 @@ const Chat = () => {
   ).text[language]
 
   const { usage, limit, models: courseModels } = userStatus
+
+  const tokensUsed = usage >= limit
+
+  if (tokensUsed && model !== FREE_MODEL) {
+    setModel(FREE_MODEL)
+  }
 
   const models = courseModels ?? validModels.map((m) => m.name)
 
@@ -355,6 +361,7 @@ const Chat = () => {
       <Banner disclaimer={disclaimer} />
       {course && <CourseInfo course={course} />}
       <Box sx={{ mb: 3 }} />
+
       {hasPrompts && (
         <PromptSelector
           prompts={course.prompts}
@@ -420,6 +427,17 @@ const Chat = () => {
         handleContinue={handleContinue}
         visible={tokenWarningVisible}
       />
+
+      <Box sx={{ mb: 3 }} />
+
+      <Status
+        model={model}
+        setModel={handleSetModel}
+        models={models}
+        usage={usage}
+        limit={limit}
+      />
+
       <Box sx={{ px: 4, my: 4, maxWidth: '40rem' }}>
         <Typography>{t('chat:temperature')}</Typography>
         <Slider
@@ -445,13 +463,6 @@ const Chat = () => {
           max={1}
         />
       </Box>
-      <Status
-        model={model}
-        setModel={handleSetModel}
-        models={models}
-        usage={usage}
-        limit={limit}
-      />
     </Box>
   )
 }

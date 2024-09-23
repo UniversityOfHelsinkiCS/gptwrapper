@@ -75,7 +75,8 @@
   },
   "status": {
     "modelInUse": "Språkmodell i användning:",
-    "tokensUsed": "tokens som används"
+    "tokensUsed": "tokens som används",
+    "limitedUsage": ", the other models are not usable when the limit is reached"
   },
   "error": {
     "noAccess": "No access",
