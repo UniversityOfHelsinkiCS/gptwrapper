@@ -3,7 +3,6 @@ import {
   Box,
   Paper,
   Typography,
-  TextField,
   Button,
   Modal,
   Checkbox,
@@ -18,7 +17,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams, Link } from 'react-router-dom'
 
 import { PUBLIC_URL } from '../../../../config'
-import { SetState, Message as MessageType } from '../../../types'
+import { Message as MessageType } from '../../../types'
 import SystemMessage from '../../Chat/SystemMessage'
 import Conversation from '../../Chat/Conversation'
 import usePrompts from '../../../hooks/usePrompts'
@@ -34,55 +33,9 @@ import EditCourseForm from './EditCourseForm'
 import MaxTokenUsageStudents from './MaxTokenUsageStudents'
 import Stats from './Stats'
 
-const Message = ({
-  message,
-  setMessage,
-  handleAdd,
-  handleReset,
-  resetDisabled,
-}: {
-  message: string
-  setMessage: SetState<string>
-  handleAdd: () => void
-  handleReset: () => void
-  resetDisabled: boolean
-}) => {
-  const { t } = useTranslation()
-
-  return (
-    <Box mb={2}>
-      <Box mb={1}>
-        <Typography variant="h6">{t('common:message')}</Typography>
-      </Box>
-      <Box mb={2}>
-        <TextField
-          fullWidth
-          multiline
-          minRows={5}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-      </Box>
-
-      <Button onClick={handleAdd}>{t('common:addMessage')}</Button>
-      <Button sx={{ ml: 2 }} onClick={handleReset} disabled={resetDisabled}>
-        {t('reset')}
-      </Button>
-    </Box>
-  )
-}
-
-const getRole = (messages: MessageType[]) => {
-  if (messages.length === 0) return 'user'
-  const lastMessage = messages[messages.length - 1]
-
-  return lastMessage.role === 'user' ? 'assistant' : 'user'
-}
-
 const Course = () => {
   const [name, setName] = useState('')
   const [system, setSystem] = useState('')
-  const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<MessageType[]>([])
   const [hidden, setHidden] = useState(false)
   const [mandatory, setMandatory] = useState(false)
@@ -99,16 +52,10 @@ const Course = () => {
   const createMutation = useCreatePromptMutation()
   const deleteMutation = useDeletePromptMutation()
 
-  const handleAdd = () => {
-    setMessages([...messages, { content: message, role: getRole(messages) }])
-    setMessage('')
-  }
-
   const handleReset = () => {
     setMessages([])
     setName('')
     setSystem('')
-    setMessage('')
     setHidden(false)
     setMandatory(false)
   }
@@ -379,16 +326,14 @@ const Course = () => {
           onChange={({ target }) => setName(target.value)}
         />
 
-        <SystemMessage system={system} setSystem={setSystem} disabled={false} />
-        <Conversation messages={messages} completion="" />
-
-        <Message
-          message={message}
-          setMessage={setMessage}
-          handleAdd={handleAdd}
-          handleReset={handleReset}
-          resetDisabled={false}
+        <SystemMessage
+          system={system}
+          setSystem={setSystem}
+          disabled={false}
+          creation
         />
+
+        <Conversation messages={messages} completion="" />
 
         <Box sx={{ paddingBottom: 2 }}>
           {!mandatoryPromptId ? (

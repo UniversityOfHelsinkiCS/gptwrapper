@@ -57,6 +57,7 @@
   },
   "chat": {
     "systemMessage": "Instructions",
+    "systemMessageCreation": "Prompt",
     "systemMessageInfo": "Initialize the conversation by giving high level instructions to the AI",
     "exampleSystemMessage": "e.g. You are a helpful assistant",
     "message": "Prompt",
