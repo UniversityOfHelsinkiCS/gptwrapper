@@ -160,6 +160,7 @@ const Chat = () => {
   const disclaimer = infoTexts.find(
     (infoText) => infoText.name === 'disclaimer'
   ).text[language]
+
   const systemMessageInfo = infoTexts.find(
     (infoText) => infoText.name === 'systemMessage'
   ).text[language]
