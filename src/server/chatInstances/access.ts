@@ -1,4 +1,4 @@
-import { EXAMPLE_COURSE_ID, TEST_COURSE_ID, employeeIam } from '../util/config'
+import { TEST_COURSES, employeeIam } from '../util/config'
 import {
   ChatInstance,
   Enrolment,
@@ -18,7 +18,7 @@ export const getEnrolledCourses = async (user: User) => {
     await Enrolment.upsert(
       {
         userId: user.id,
-        chatInstanceId: EXAMPLE_COURSE_ID,
+        chatInstanceId: TEST_COURSES.OTE_SANDBOX.id,
       },
       // TS is wrong here. It expects fields in camelCase
       // while the actual fields need to be in snake_case
@@ -28,7 +28,17 @@ export const getEnrolledCourses = async (user: User) => {
     await Enrolment.upsert(
       {
         userId: user.id,
-        chatInstanceId: TEST_COURSE_ID,
+        chatInstanceId: TEST_COURSES.EXAMPLE_COURSE.id,
+      },
+      // TS is wrong here. It expects fields in camelCase
+      // while the actual fields need to be in snake_case
+      // @ts-expect-error
+      { conflictFields: ['user_id', 'chat_instance_id'] }
+    )
+    await Enrolment.upsert(
+      {
+        userId: user.id,
+        chatInstanceId: TEST_COURSES.TEST_COURSE.id,
       },
       // TS is wrong here. It expects fields in camelCase
       // while the actual fields need to be in snake_case
@@ -66,7 +76,7 @@ export const getOwnCourses = async (user: User) => {
     await Responsibility.upsert(
       {
         userId: user.id,
-        chatInstanceId: EXAMPLE_COURSE_ID,
+        chatInstanceId: TEST_COURSES.OTE_SANDBOX.id,
       },
       // TS is wrong here. It expects fields in camelCase
       // while the actual fields need to be in snake_case
@@ -76,7 +86,17 @@ export const getOwnCourses = async (user: User) => {
     await Responsibility.upsert(
       {
         userId: user.id,
-        chatInstanceId: TEST_COURSE_ID,
+        chatInstanceId: TEST_COURSES.EXAMPLE_COURSE.id,
+      },
+      // TS is wrong here. It expects fields in camelCase
+      // while the actual fields need to be in snake_case
+      // @ts-expect-error
+      { conflictFields: ['user_id', 'chat_instance_id'] }
+    )
+    await Responsibility.upsert(
+      {
+        userId: user.id,
+        chatInstanceId: TEST_COURSES.TEST_COURSE.id,
       },
       // TS is wrong here. It expects fields in camelCase
       // while the actual fields need to be in snake_case

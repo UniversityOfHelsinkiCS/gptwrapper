@@ -49,9 +49,22 @@ export const accessIams = [basicUserIam, powerUserIam, employeeIam]
 
 export const tikeIam = 'hy-tike-allstaff'
 
-export const TEST_COURSE_ID = 'test-course'
-
-export const EXAMPLE_COURSE_ID = 'esimerkit'
+export const TEST_COURSES = {
+  OTE_SANDBOX: {
+    id: 'sandbox',
+    name: {
+      en: 'OTE sandbox',
+      sv: 'OTE sandbox',
+      fi: 'OTE:n hiekkalaatikko',
+    },
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2026-08-31',
+    },
+  },
+  TEST_COURSE: { id: 'test-course' },
+  EXAMPLE_COURSE: { id: 'esimerkit' },
+}
 
 export const TEST_USER_IDS = [
   'hy-hlo-95971222',

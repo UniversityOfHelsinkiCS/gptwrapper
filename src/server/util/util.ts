@@ -34,6 +34,8 @@ export const getAllowedModels = (model: string): string[] => {
 
   if (model === 'gpt-4') return allModels
 
+  if (model === 'gpt-4o') return ['gpt-4o', 'gpt-4o-mini']
+
   return ['gpt-4o-mini']
 }
 

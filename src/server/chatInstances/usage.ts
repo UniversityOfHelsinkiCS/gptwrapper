@@ -173,6 +173,7 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
   })
 
   const model = chatInstance.model ?? ''
+
   const models = getAllowedModels(model)
 
   return {
