@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom'
 import { validModels, DEFAULT_MODEL, FREE_MODEL } from '../../../config'
 import { Message, Prompt, SetState, Course } from '../../types'
 import { getCompletionStream } from './util'
+import { formatDate } from '../Courses/util'
 import Banner from '../Banner'
 import SystemMessage from './SystemMessage'
 import Conversation from './Conversation'
@@ -72,10 +73,14 @@ const CourseInfo = ({ course }: { course: Course }) => {
 
   return (
     <Box>
-      <Typography variant="h4">{course.name[language]}</Typography>
-      <div style={{ marginTop: 10 }}>
-        {course.activityPeriod.startDate} - {course.activityPeriod.endDate}
+      <div style={{ display: 'flex' }}>
+        <Typography variant="h4">{course.name[language]}</Typography>
+        <div style={{ marginLeft: 10, paddingTop: 12, fontStyle: 'italic' }}>
+          {course.courseUnits.map((unit) => unit.code).join(', ')}
+        </div>
       </div>
+
+      <div style={{ marginTop: 10 }}>{formatDate(course.activityPeriod)}</div>
     </Box>
   )
 }

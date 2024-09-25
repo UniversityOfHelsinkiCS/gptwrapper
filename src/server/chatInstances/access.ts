@@ -10,8 +10,7 @@ import { User } from '../types'
 const getUserById = async (id: string) => UserModel.findByPk(id)
 
 export const getEnrolledCourses = async (user: User) => {
-  // Only do the example/test course upserts if the user is an employee
-  // students have no reason to be in these courses.
+  // Only do the example/test course upserts if the user is an admin.
   // We also want to check if the user exists in the database
   // before we try to upsert the enrolments.
   if (user.isAdmin && (await getUserById(user.id))) {
@@ -19,26 +18,6 @@ export const getEnrolledCourses = async (user: User) => {
       {
         userId: user.id,
         chatInstanceId: TEST_COURSES.OTE_SANDBOX.id,
-      },
-      // TS is wrong here. It expects fields in camelCase
-      // while the actual fields need to be in snake_case
-      // @ts-expect-error
-      { conflictFields: ['user_id', 'chat_instance_id'] }
-    )
-    await Enrolment.upsert(
-      {
-        userId: user.id,
-        chatInstanceId: TEST_COURSES.EXAMPLE_COURSE.id,
-      },
-      // TS is wrong here. It expects fields in camelCase
-      // while the actual fields need to be in snake_case
-      // @ts-expect-error
-      { conflictFields: ['user_id', 'chat_instance_id'] }
-    )
-    await Enrolment.upsert(
-      {
-        userId: user.id,
-        chatInstanceId: TEST_COURSES.TEST_COURSE.id,
       },
       // TS is wrong here. It expects fields in camelCase
       // while the actual fields need to be in snake_case

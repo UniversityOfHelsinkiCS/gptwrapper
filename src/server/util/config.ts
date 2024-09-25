@@ -61,6 +61,7 @@ export const TEST_COURSES = {
       startDate: '2024-09-01',
       endDate: '2026-08-31',
     },
+    code: 'OTE-1234',
   },
   TEST_COURSE: { id: 'test-course' },
   EXAMPLE_COURSE: { id: 'esimerkit' },

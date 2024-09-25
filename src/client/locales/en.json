@@ -91,6 +91,7 @@
   },
   "chats": {
     "header": "Current course chats",
+    "codes": "Code",
     "name": "Name",
     "dates": "Time",
     "link": "Link to chat",

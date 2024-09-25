@@ -12,6 +12,8 @@ import {
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import { formatDate } from '../Courses/util'
+import { Course } from '../../types'
 
 const Chats = () => {
   const { user, isLoading } = useCurrentUser()
@@ -22,13 +24,13 @@ const Chats = () => {
     return <div>Loading...</div>
   }
 
-  const chats = user.enrolledCourses
+  const chats = user.enrolledCourses as Course[]
 
   if (chats.length === 0) {
     return <h3>{t('chats:noChats')}</h3>
   }
 
-  const getChatLink = (chat: any) => {
+  const getChatLink = (chat: Course) => {
     // TODO: make this function better
 
     if (window.location.hostname === 'localhost') {
@@ -56,6 +58,11 @@ const Chats = () => {
                     <b>{t('chats:name')}</b>
                   </Typography>
                 </TableCell>
+                <TableCell>
+                  <Typography variant="h6">
+                    <b>{t('chats:codes')}</b>
+                  </Typography>
+                </TableCell>
                 <TableCell align="left">
                   <Typography variant="h6">
                     <b>{t('chats:dates')}</b>
@@ -74,11 +81,13 @@ const Chats = () => {
                   <TableCell component="th" scope="row">
                     <Typography variant="h6">{chat.name[language]}</Typography>
                   </TableCell>
-                  <TableCell align="left">
-                    <Typography>
-                      {chat.activityPeriod.startDate} -{' '}
-                      {chat.activityPeriod.endDate}
+                  <TableCell component="th" scope="row">
+                    <Typography variant="h6">
+                      {chat.courseUnits.map((c) => c.code).join(', ')}
                     </Typography>
+                  </TableCell>
+                  <TableCell align="left">
+                    <Typography>{formatDate(chat.activityPeriod)}</Typography>
                   </TableCell>
                   <TableCell align="left">
                     <a href={getChatLink(chat)}>

@@ -1,3 +1,4 @@
+import { CourseUnit } from '../../types'
 import { TEST_COURSES } from '../../util/config'
 import { ChatInstance } from '../models'
 
@@ -28,6 +29,18 @@ const chatInstances = [
     description: '',
     courseId: TEST_COURSES.OTE_SANDBOX.id,
     activityPeriod: TEST_COURSES.OTE_SANDBOX.activityPeriod,
+    courseUnits: [
+      {
+        code: TEST_COURSES.OTE_SANDBOX.code,
+        organisations: [
+          {
+            code: 'ote',
+            id: 'ote',
+            name: { en: 'OTE', fi: 'OTE', sv: 'OTE' },
+          },
+        ],
+      },
+    ] as CourseUnit[],
   },
 ]
 
