@@ -38,7 +38,7 @@ const ModelSelector = ({
   return (
     <Box mb={2}>
       <FormControl sx={{ width: '200px' }}>
-        {currentModel}
+        <span style={{ color: 'white' }}>{currentModel}</span>
         <InputLabel>{t('status:modelInUse')}</InputLabel>
         <Select
           label={t('status:modelInUse')}
