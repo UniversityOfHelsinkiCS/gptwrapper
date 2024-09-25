@@ -32,13 +32,9 @@ const ModelSelector = ({
     )
   }
 
-  console.log('model', currentModel)
-  console.log('models', models)
-
   return (
     <Box mb={2}>
       <FormControl sx={{ width: '200px' }}>
-        <span style={{ color: 'white' }}>{currentModel}</span>
         <InputLabel>{t('status:modelInUse')}</InputLabel>
         <Select
           label={t('status:modelInUse')}

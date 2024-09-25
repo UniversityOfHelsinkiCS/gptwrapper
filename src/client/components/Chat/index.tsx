@@ -172,6 +172,10 @@ const Chat = () => {
 
   const { usage, limit, models: courseModels } = userStatus
 
+  if (course && !courseModels.includes(model)) {
+    setModel(courseModels[0])
+  }
+
   const tokensUsed = usage >= limit
 
   if (tokensUsed && model !== FREE_MODEL) {
