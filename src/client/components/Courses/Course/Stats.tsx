@@ -70,7 +70,7 @@ const Stats = ({ courseId }: { courseId: string }) => {
           : t('course:noData')}
       </Typography>
 
-      {usages && usages.length !== 0 && usagePercentage > 0.2 && (
+      {usages && usages.length > 3 && usagePercentage > 0.2 && (
         <>
           <ResponsiveContainer width="99%" height={300}>
             <BarChart
