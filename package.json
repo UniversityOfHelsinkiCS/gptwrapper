@@ -12,8 +12,7 @@
     "lint": "eslint 'src/**/*.ts'",
     "format": "prettier --write '*.{ts,json,css,md}'",
     "build": "vite build",
-    "prepare": "husky install",
-    "tmpusers": "nodemon --exec node --no-warnings --experimental-specifier-resolution=node --loader ts-node/esm src/server/updater/tmpUsers.ts"
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
