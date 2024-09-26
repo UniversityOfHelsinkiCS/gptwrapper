@@ -60,10 +60,10 @@ jobs:
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
       
-      #- name: Run your tests
-      #  env:
-      #    CI: true
-      #  run: npx playwright test
+      - name: Run your tests
+        env:
+          CI: true
+        run: npx playwright test
 
       - name: Build staging image
         id: build-staging-image
