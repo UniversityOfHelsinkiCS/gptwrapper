@@ -21,6 +21,9 @@ const userRouter = express.Router()
 userRouter.get('/login', async (req, res) => {
   const request = req as ChatRequest
   const { user } = request
+
+  console.log('user', JSON.stringify(user))
+
   const { id, isAdmin, iamGroups } = user
 
   if (!id) return res.status(401).send('Unauthorized')
