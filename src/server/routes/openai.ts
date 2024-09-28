@@ -98,7 +98,11 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     (tokenCount / DEFAULT_TOKEN_LIMIT) * 100
   )
 
-  if (tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT && !userConsent) {
+  if (
+    model !== FREE_MODEL &&
+    tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT &&
+    !userConsent
+  ) {
     return res.status(201).json({
       tokenConsumtionWarning: true,
       message: `You are about to use ${tokenUsagePercentage}% of your monthly CurreChat usage`,
@@ -132,7 +136,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   if (courseId) {
     await incrementCourseUsage(userToCharge, courseId, tokenCount)
-  } else if (model === 'gpt-4') {
+  } else if (model !== FREE_MODEL) {
     await incrementUsage(userToCharge, tokenCount)
   }
 
