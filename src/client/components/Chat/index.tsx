@@ -98,7 +98,6 @@ const Chat = () => {
 
   const [model, setModel] = useState(getInitialModel())
   const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
-
   const [activePromptId, setActivePromptId] = useState('')
   const [system, setSystem] = usePersistedState('general-chat-system', '')
   const [message, setMessage] = usePersistedState('general-chat-current', '')
@@ -119,6 +118,13 @@ const Chat = () => {
 
   const { t, i18n } = useTranslation()
   const { language } = i18n
+
+  // Update model when course is set
+  useEffect(() => {
+    if (course && course.model !== model) {
+      setModel(course.model)
+    }
+  }, [course])
 
   if (statusLoading || infoTextsLoading) return null
 
