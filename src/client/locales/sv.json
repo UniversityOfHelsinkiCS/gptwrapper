@@ -76,7 +76,7 @@
     "messagePlaceholder": "Skriv ditt meddelande här",
     "conversation": "Samtala",
     "stop": "Stoppa",
-    "temperature": "Adjust the model's temperature",
+    "temperature": "Justera modellens temperatur",
     "preciseTemperature": "Mer exakt",
     "balancedTemperature": "Mer balanserad",
     "creativeTemperature": "Mer kreativ"
