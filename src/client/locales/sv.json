@@ -55,9 +55,9 @@
     "programCodes": "Program",
     "studentCount": "Studenter",
     "courseNameInfo": "Kursens namn",
-    "courseTerms": "Terms",
-    "usageCount": "Usage count",
-    "promptCount": "Prompts",
+    "courseTerms": "Termer",
+    "usageCount": "Antal användningar",
+    "promptCount": "Frågeställningar",
     "courseStats": "Kursstatistik"
   },
   "info": {
