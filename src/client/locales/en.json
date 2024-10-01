@@ -11,6 +11,7 @@
     "update": "Update",
     "cancel": "Cancel",
     "create": "Create",
+    "enable": "Enable",
     "courses": "Courses I teach",
     "chats": "Course chats",
     "message": "Message",
@@ -46,7 +47,8 @@
     "courseNameInfo": "Name of the course",
     "courseTerms": "Terms",
     "usageCount": "Usage count",
-    "promptCount": "Prompts"
+    "promptCount": "Prompts",
+    "courseStats": "Course stats"
   },
   "info": {
     "title": "## Attention",
