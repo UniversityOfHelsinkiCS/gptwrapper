@@ -52,12 +52,12 @@
     "timePeriodStop": "Slut",
     "showing": "Visande",
     "courseCodes": "Kurskoder",
-    "programCodes": "Program",
+    "programCodes": "Programkoder",
     "studentCount": "Studenter",
     "courseNameInfo": "Kursens namn",
-    "courseTerms": "Terms",
-    "usageCount": "Usage count",
-    "promptCount": "Prompts",
+    "courseTerms": "Villkor",
+    "usageCount": "Användningsräkning",
+    "promptCount": "Uppmaningar",
     "courseStats": "Kursstatistik"
   },
   "info": {
@@ -108,7 +108,7 @@
     "courseStats": "Kursstatistik",
     "courseTerms": "Villkor",
     "courseCodes": "Kurskoder",
-    "programCodes": "Program",
+    "programCodes": "Programkoder",
     "studentCount": "Studenter",
     "accessGroups": "Få tillgång till grupper",
     "createAccessGroup": "Skapa ny åtkomstgrupp",
@@ -150,7 +150,7 @@
     "startUpdater": "Starta Updater",
     "rowsPerPage": "Rader per sida",
     "searchCourse": "Sök kurs (skriv in minst 4 tecken)",
-    "promptCount": "Prompts",
+    "promptCount": "Uppmaningar",
     "tokenUsage": "Använda polletter",
     "activityPeriod": "Kurs aktiv",
     "lastUpdate": "Senaste utgåvan: ",
@@ -199,8 +199,8 @@
     "curreNotStarted": "Kursen har inte startat",
     "enableCurre": "Aktivera CurreChat",
     "enableCurreModalTitle": "Aktivera CurreChat för kursen {{name}}?",
-    "enableCurreModalText": "Språkmodellen {{defaultModel}} och {{defaultTokenLimit}} tokenanvändningsgränsen per elev är inställda som standardinställningar för kursen. CurreChat används under kursen {{activityPeriod}} (kursens längd + 1 månad). Du kan redigera dessa inställningar senare."
-
+    "enableCurreModalText": "Språkmodellen {{defaultModel}} och {{defaultTokenLimit}} tokenanvändningsgränsen per elev är inställda som standardinställningar för kursen. CurreChat används under kursen {{activityPeriod}} (kursens längd + 1 månad). Du kan redigera dessa inställningar senare.",
+    "showActiveCourses": "Visa aktiva kurser"
 
   }
 }

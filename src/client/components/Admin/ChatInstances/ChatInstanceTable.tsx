@@ -255,7 +255,8 @@ const ChatInstanceTable = () => {
               onChange={() => setShowActiveCourses(!showActiveCourses)}
               inputProps={{ 'aria-label': 'controlled' }}
             />
-            Näytä aktiiviset kurssit
+            
+            {t(`course:showActiveCourses`)}
           </InputLabel>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
