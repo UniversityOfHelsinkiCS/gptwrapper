@@ -33,7 +33,9 @@
     "linkCopied": "Linkki kopioitu",
     "fileUploadText": "Lisää tiedosto",
     "fileInfoPrompt": "\n\nTässä on tiedoston sisältämä teksti:\n\n",
-    "copy": "Kopioi"
+    "copy": "Kopioi",
+    "curreUrl": "https://curre.helsinki.fi/",
+    "curreTitle": "Curre"
   },
   "stats": {
     "showing": "Näytetään",
@@ -45,7 +47,8 @@
     "usageCount": "Käyttömäärä",
     "promptCount": "Kehtotteita",
     "programCodes": "Ohjelmat",
-    "studentCount": "Opis"
+    "studentCount": "Opis",
+    "courseCodes": "Kurssikoodit"
   },
   "info": {
     "title": "## Huomio",
@@ -104,7 +107,7 @@
     "courseTerms": "Lukukaudet",
     "courseCodes": "Kurssikoodit",
     "programCodes": "Ohjelmat",
-    "studentCount": "Opisk",
+    "studentCount": "Opiskelijat",
     "hideTeachers": "Piilota opettajat ja vastuuhenkilöt",
     "showTeachers": "Näytä opettajat ja vastuuhenkilöt",
     "showStudentList": "Näytä opiskelijat",
