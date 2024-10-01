@@ -96,9 +96,8 @@ const Chat = () => {
     refetch: refetchStatus,
   } = useUserStatus(courseId)
 
-  const [model, setModel] = useState(getInitialModel())
+  const [model, setModel] = useState(course ? course.model : getInitialModel())
   const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
-
   const [activePromptId, setActivePromptId] = useState('')
   const [system, setSystem] = usePersistedState('general-chat-system', '')
   const [message, setMessage] = usePersistedState('general-chat-current', '')
