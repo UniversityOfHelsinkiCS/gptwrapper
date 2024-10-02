@@ -35,7 +35,7 @@ export const IMPORTER_URL =
 
 export const REDIS_HOST = process.env.REDIS_HOST || 'redis'
 
-export const statsViewerIams = ['hy-one']
+export const statsViewerIams = ['hy-one', 'hy-ypa-opa-opintoasiainpaallikot']
 
 export const adminIams = ['grp-toska', 'hy-ypa-opa-ote']
 
