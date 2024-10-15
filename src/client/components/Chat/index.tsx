@@ -215,7 +215,7 @@ const Chat = () => {
 
     setStreamController(undefined)
     setMessages([])
-    setSystem('')
+    setSystem(activePrompt?.systemMessage ?? '')
     setMessage('')
     setCompletion('')
     inputFileRef.current.value = ''
