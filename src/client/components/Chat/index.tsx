@@ -1,7 +1,6 @@
 /* eslint-disable no-await-in-loop, no-constant-condition */
 import React, { useState, useRef, useEffect } from 'react'
 import { Alert, Box, Typography, Slider } from '@mui/material'
-import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
@@ -22,6 +21,7 @@ import PromptSelector from './PromptSelector'
 import TokenUsageWarning from './TokenUsageWarning'
 import useInfoTexts from '../../hooks/useInfoTexts'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
+import { handleCompletionStreamError } from './error'
 
 const WAIT_FOR_STREAM_TIMEOUT = 4000
 const ALLOWED_FILE_TYPES = [
@@ -241,17 +241,7 @@ const Chat = () => {
 
       setMessages((prev) => [...prev, { role: 'assistant', content }])
     } catch (err: any) {
-      if (err?.name === 'AbortError') return
-
-      const error = err?.response?.data || err.message
-
-      if (error === 'Model maximum context reached' && fileName) {
-        enqueueSnackbar(t('error:tooLargeFile'), { variant: 'error' })
-      } else if (error === 'Error parsing file' && fileName) {
-        enqueueSnackbar(t('error:fileParsingError'), { variant: 'error' })
-      } else {
-        enqueueSnackbar(error, { variant: 'error' })
-      }
+      handleCompletionStreamError(err, fileName)
     } finally {
       setStreamController(undefined)
       setCompletion('')
@@ -272,12 +262,24 @@ const Chat = () => {
     const newAbortController = new AbortController()
     setStreamController(newAbortController)
 
-    const { stream: retriedStream } = await getCompletionStream({
-      ...getCompletionParams,
-      abortController: newAbortController,
-    })
+    try {
+      const { tokenUsageAnalysis, stream: retriedStream } =
+        await getCompletionStream({
+          ...getCompletionParams,
+          abortController: newAbortController,
+        })
 
-    await processStream(retriedStream)
+      if (tokenUsageAnalysis && tokenUsageAnalysis.message) {
+        setTokenUsageWarning(tokenUsageAnalysis.message)
+        setTokenWarningVisible(true)
+        return
+      }
+
+      if (!retriedStream) return
+      await processStream(retriedStream)
+    } catch (err: any) {
+      handleCompletionStreamError(err, fileName)
+    }
   }
 
   const handleSend = async (userConsent: boolean) => {
@@ -332,17 +334,21 @@ const Chat = () => {
       WAIT_FOR_STREAM_TIMEOUT
     )
 
-    const { tokenUsageAnalysis, stream } =
-      await getCompletionStream(getCompletionsArgs)
+    try {
+      const { tokenUsageAnalysis, stream } =
+        await getCompletionStream(getCompletionsArgs)
 
-    if (tokenUsageAnalysis && tokenUsageAnalysis.message) {
-      setTokenUsageWarning(tokenUsageAnalysis.message)
-      setTokenWarningVisible(true)
-      return
+      if (tokenUsageAnalysis && tokenUsageAnalysis.message) {
+        setTokenUsageWarning(tokenUsageAnalysis.message)
+        setTokenWarningVisible(true)
+        return
+      }
+
+      clearRetryTimeout()
+      await processStream(stream)
+    } catch (err: any) {
+      handleCompletionStreamError(err, file?.name)
     }
-
-    clearRetryTimeout()
-    await processStream(stream)
   }
 
   const handleContinue = () => {
