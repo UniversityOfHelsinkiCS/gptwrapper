@@ -85,6 +85,7 @@
     "limitedUsage": ", the other models are not usable when the limit is reached"
   },
   "error": {
+    "unexpected": "An unexpected error occurred",
     "noAccess": "No access",
     "noAccessInfo": "You do not currently have access to CurreChat",
     "tooLargeFile": "The file is too large",

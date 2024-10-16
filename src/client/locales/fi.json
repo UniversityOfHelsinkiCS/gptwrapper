@@ -93,6 +93,7 @@
     "limitedUsage": ", muut kielimallit eivät ole käytettävissä rajan ylityttyä"
   },
   "error": {
+    "unexpected": "Odottomaton virhe tapahtui",
     "noAccess": "Ei oikeuksia",
     "noAccessInfo": "Sinulla ei tällä hetkellä ole käyttöoikeuksia CurreChattiin",
     "tooLargeFile": "Tiedosto on liian suuri",
