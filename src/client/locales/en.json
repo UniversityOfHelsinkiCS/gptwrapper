@@ -90,7 +90,8 @@
     "noAccessInfo": "You do not currently have access to CurreChat",
     "tooLargeFile": "The file is too large",
     "fileParsingError": "Parsing the file failed",
-    "invalidFileType": "Invalid file type"
+    "invalidFileType": "Invalid file type",
+    "streamCreationTimeout": "Creating the stream timed out, retrying"
   },
   "chats": {
     "header": "Current course chats",

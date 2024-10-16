@@ -258,7 +258,7 @@ const Chat = () => {
   ) => {
     if (!abortController || abortController.signal.aborted) return
 
-    abortController?.abort('Creating a stream took too long')
+    abortController?.abort(new Error('Creating a stream took too long'))
     const newAbortController = new AbortController()
     setStreamController(newAbortController)
 
