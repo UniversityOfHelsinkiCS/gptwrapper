@@ -13,8 +13,6 @@ export const handleCompletionStreamError = (err: any, file: string) => {
     enqueueSnackbar(t('error:tooLargeFile'), { variant: 'error' })
   } else if (error === 'Error parsing file' && file) {
     enqueueSnackbar(t('error:fileParsingError'), { variant: 'error' })
-  } else if (error === 'Creating a stream took too long') {
-    enqueueSnackbar(t('error:streamCreationTimeout'), { variant: 'warning' })
   } else {
     enqueueSnackbar(t('error:unexpected'), { variant: 'error' })
   }
