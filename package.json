@@ -63,7 +63,7 @@
     "@babel/preset-typescript": "^7.23.3",
     "@playwright/test": "^1.42.1",
     "@types/cors": "^2.8.17",
-    "@types/eslint": "^8.56.2",
+    "@types/eslint": "^9.0.0",
     "@types/express": "^5.0.0",
     "@types/lodash": "^4.17.0",
     "@types/morgan": "^1.9.9",
