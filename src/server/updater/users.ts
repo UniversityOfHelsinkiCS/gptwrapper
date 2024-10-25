@@ -22,7 +22,6 @@ interface SisuUser {
 }
 
 const usersHandler = async (users: SisuUser[]) => {
-  // eslint-disable-next-line arrow-body-style
   const parsedUsers = users.map((user) => {
     return {
       id: user.id,

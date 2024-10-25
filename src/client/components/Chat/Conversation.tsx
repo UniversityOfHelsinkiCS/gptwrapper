@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/aria-role */
-import React from 'react'
 import { Box, Button, Paper, Stack, Typography } from '@mui/material'
 import { Person, Assistant, Stop } from '@mui/icons-material'
 import ReactMarkdown from 'react-markdown'
@@ -79,7 +77,6 @@ const Conversation = ({
       {messages.map(({ role, content }, index) => (
         <Response
           id={`message-${index}`}
-          // eslint-disable-next-line react/no-array-index-key
           key={content + index}
           role={role}
           content={content}

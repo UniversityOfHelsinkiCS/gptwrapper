@@ -13,7 +13,6 @@ import { inDevelopment } from '../config'
 const ReactQueryDevtoolsProduction = inDevelopment
   ? ReactQueryDevtools
   : React.lazy(() =>
-      // eslint-disable-next-line import/extensions
       import('@tanstack/react-query-devtools/build/modern/production.js').then(
         (d) => ({
           default: d.ReactQueryDevtools,
@@ -36,7 +35,6 @@ const Main = () => {
 
     const adminLoggedInAs = localStorage.getItem('adminLoggedInAs')
     if (adminLoggedInAs) {
-      // eslint-disable-next-line no-console
       console.log(`%cLogged in as ${adminLoggedInAs}`, 'color: orange')
     }
   }, [])
@@ -60,5 +58,5 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 )
 
 // Console log vite environment variables
-// eslint-disable-next-line no-console
+
 console.log('Vite environment variables', import.meta.env)

@@ -1,4 +1,3 @@
-import React from 'react'
 import { Box, TextField, Typography, Tooltip } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
@@ -39,7 +38,7 @@ const SystemMessage = ({
   system: string
   setSystem: SetState<string>
   disabled: boolean
-  // eslint-disable-next-line react/require-default-props
+
   showInfo?: boolean
   infoText?: string
   creation?: boolean

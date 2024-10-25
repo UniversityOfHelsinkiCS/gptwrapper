@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import React from 'react'
 import { Box, TextField, Button, Typography } from '@mui/material'
 import UploadFileIcon from '@mui/icons-material/UploadFile'

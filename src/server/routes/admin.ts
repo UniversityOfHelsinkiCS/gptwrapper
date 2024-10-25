@@ -80,7 +80,7 @@ adminRouter.get('/statistics', async (req, res) => {
     const usages = await getUsages()
 
     const courses = {}
-    // eslint-disable-next-line no-restricted-syntax
+
     for (const usage of usages) {
       if (!courses[usage.chatInstanceId]) {
         courses[usage.chatInstanceId] = {
@@ -137,9 +137,7 @@ adminRouter.get('/statistics', async (req, res) => {
 
     const datas = []
 
-    // eslint-disable-next-line no-restricted-syntax
     for (const courseId of Object.keys(courses)) {
-      // eslint-disable-next-line no-await-in-loop
       const chatInstance = (await ChatInstance.findByPk(courseId, {
         include: [
           {

@@ -54,7 +54,7 @@ const fileParsing = async (options: any, req: any) => {
     content: `${allMessages[allMessages.length - 1].content} ${fileContent}`,
   }
   options.messages.pop()
-  // eslint-disable-next-line no-param-reassign
+
   options.messages = [...options.messages, updatedMessage]
 
   return options.messages

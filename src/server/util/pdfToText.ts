@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import pdf from 'pdf-parse-fork'
 
 export const pdfToText = async (fileBuffer: Buffer) => {
@@ -7,6 +6,7 @@ export const pdfToText = async (fileBuffer: Buffer) => {
 
     return data.text
   } catch (error) {
+    console.log(error)
     throw new Error('Error parsing PDF')
   }
 }

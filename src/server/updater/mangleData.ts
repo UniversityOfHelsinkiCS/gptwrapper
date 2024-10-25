@@ -53,7 +53,7 @@ export const mangleData = async <T = object>(
    *
    * This way Importer, which is comparatively slower, will be constantly working on one request.
    */
-  /* eslint-disable no-await-in-loop */
+
   while (checkTimeout(start)) {
     try {
       try {
@@ -71,7 +71,6 @@ export const mangleData = async <T = object>(
 
       nextData = fetchData<T[]>(url, { limit, offset, since })
 
-      // eslint-disable-next-line no-continue
       if (!currentData) continue // first iteration
 
       const processingStart = Date.now()

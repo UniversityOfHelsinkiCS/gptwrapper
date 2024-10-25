@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { IconButton, Collapse } from '@mui/material'
 import { ExpandLess, ExpandMore, HelpOutline } from '@mui/icons-material'
 
@@ -9,7 +9,7 @@ const ShowMore = ({
   expanded = false,
 }: {
   text: string
-  // eslint-disable-next-line react/require-default-props
+
   expanded?: boolean
 }) => {
   const [expand, setExpand] = useState(expanded)

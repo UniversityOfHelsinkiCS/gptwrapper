@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax */
 import * as Sentry from '@sentry/node'
 
 import { redis } from '../util/redis'
@@ -45,7 +44,6 @@ export const safeBulkCreate = async ({
     logger.info(`[UPDATER] Creating ${entityName}s one by one`)
     for (const entity of entities) {
       try {
-        // eslint-disable-next-line no-await-in-loop
         const res = await fallbackCreate(entity, fallbackCreateOptions)
         result.push(res)
       } catch (fallbackCreateError: any) {
@@ -61,32 +59,10 @@ export const safeBulkCreate = async ({
   }
 }
 
-export const logOperation = async (func: Function, message: string) => {
-  const start = Date.now()
-  let success = false
-  let info = null
-  try {
-    info = await func()
-    success = true
-  } catch (error) {
-    Sentry.captureMessage(`Operation failed: ${message}`)
-    Sentry.captureException(error)
-    logger.error('Error: ', error)
-  }
-
-  const durationMs = (Date.now() - start).toFixed()
-  if (success) {
-    logger.info(`${message} - done in ${durationMs} ms`, info)
-  } else {
-    logger.error(`Failure: ${message} - failed in ${durationMs} ms`, info)
-  }
-}
-
 export const clearOffsets = async () => {
   const keys = await redis.keys('*-offset')
 
   for (const key of keys) {
-    // eslint-disable-next-line no-await-in-loop
     await redis.del(key)
   }
 }

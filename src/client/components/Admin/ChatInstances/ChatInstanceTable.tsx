@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import * as React from 'react'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
@@ -255,7 +254,7 @@ const ChatInstanceTable = () => {
               onChange={() => setShowActiveCourses(!showActiveCourses)}
               inputProps={{ 'aria-label': 'controlled' }}
             />
-            
+
             {t(`course:showActiveCourses`)}
           </InputLabel>
         </Box>

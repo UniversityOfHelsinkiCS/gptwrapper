@@ -20,7 +20,7 @@ const useUserSearch = (search: string) => {
     enabled: !!(search && search.length > 4),
   })
 
-  return { users: search && search.length > 4 ? users : [] || [], ...rest }
+  return { users: search && search.length > 4 ? users : [], ...rest }
 }
 
 export default useUserSearch

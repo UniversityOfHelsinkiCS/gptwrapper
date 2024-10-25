@@ -48,7 +48,6 @@ chatInstanceRouter.get('/', async (req, res) => {
       exclude: ['updatedAt', 'createdAt'],
     },
     where:
-      // eslint-disable-next-line no-nested-ternary
       showActiveCourses === 'true'
         ? {
             'activityPeriod.endDate': {

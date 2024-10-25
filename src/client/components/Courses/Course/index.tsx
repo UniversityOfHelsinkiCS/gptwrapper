@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
   Box,
   Paper,
@@ -101,7 +101,6 @@ const Course = () => {
   }
 
   const handleDelete = (promptId: string) => {
-    // eslint-disable-next-line no-alert
     if (!window.confirm(t('confirmDeletePrompt') as string)) return
 
     try {
