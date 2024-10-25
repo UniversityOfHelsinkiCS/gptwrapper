@@ -39,28 +39,7 @@ const getCourseUnit = (
 }
 
 const courseUnitsOf = ({ courseUnits }: any) => {
-  const isValid = (unit) => {
-    const now = new Date()
-    const startDate = new Date(unit.validityPeriod.startDate)
-
-    if (!unit.validityPeriod.endDate && now >= startDate) {
-      return true
-    }
-    const endDate = new Date(unit.validityPeriod.endDate)
-
-    return now >= startDate && now <= endDate
-  }
-
-  const wasValid = (unit) => {
-    const endDate = new Date(unit.validityPeriod.endDate)
-    return endDate.getFullYear() > 2023
-  }
-
-  const validUnits = courseUnits.filter(
-    (unit) => true || isValid(unit) || wasValid(unit)
-  )
-
-  const relevantFields = validUnits.map((unit) => ({
+  const relevantFields = courseUnits.map((unit) => ({
     code: unit.code,
     organisations: unit.organisations,
   }))

@@ -1,4 +1,3 @@
-import React from 'react'
 import { KeyboardReturn } from '@mui/icons-material'
 import {
   Accordion,

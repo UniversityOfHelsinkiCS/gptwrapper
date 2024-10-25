@@ -1,4 +1,3 @@
-import React from 'react'
 import { Button, Tooltip } from '@mui/material'
 import { Mail } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'

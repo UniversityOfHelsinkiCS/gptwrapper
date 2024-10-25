@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import { encoding_for_model, TiktokenModel } from '@dqbd/tiktoken'
 
 const getEncoding = (model: string) => {

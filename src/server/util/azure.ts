@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax */
 import {
   OpenAIClient,
   AzureKeyCredential,
@@ -91,7 +90,6 @@ export const streamCompletion = async (
       if (!inProduction) logger.info(delta)
 
       if (delta) {
-        // eslint-disable-next-line
         await new Promise((resolve) => {
           if (
             !res.write(delta, (err) => {

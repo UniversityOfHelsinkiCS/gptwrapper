@@ -1,5 +1,4 @@
-/* eslint-disable no-await-in-loop, no-constant-condition */
-import React, { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Alert, Box, Typography, Slider } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'

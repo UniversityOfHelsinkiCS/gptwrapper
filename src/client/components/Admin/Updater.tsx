@@ -1,4 +1,3 @@
-import React from 'react'
 import { Box, Button } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
@@ -7,7 +6,6 @@ import { updaterApiClient } from '../../util/apiClient'
 const Updater = () => {
   const { t } = useTranslation()
   const startUpdater = async () => {
-    // eslint-disable-next-line no-alert
     if (!window.confirm('Are you sure you want to start the updater?')) return
 
     const res = await updaterApiClient.post(`/admin/run-updater`)

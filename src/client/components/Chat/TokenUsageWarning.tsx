@@ -1,4 +1,3 @@
-import React from 'react'
 import { Alert, Box, Button } from '@mui/material'
 
 type TokenUsageWarningProps = {

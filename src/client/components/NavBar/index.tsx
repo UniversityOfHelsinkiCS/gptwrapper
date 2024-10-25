@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   AppBar,
@@ -121,7 +121,6 @@ const NavBar = () => {
             >
               {({ TransitionProps, placement }) => (
                 <Grow
-                  // eslint-disable-next-line react/jsx-props-no-spreading
                   {...TransitionProps}
                   style={{
                     transformOrigin:
