@@ -17,7 +17,9 @@ import { updateLastRestart } from './util/lastRestart'
 const app = express()
 
 app.use('/api', (req, res, next) => router(req, res, next))
-app.use('/api', (_, res) => res.sendStatus(404))
+app.use('/api', (_, res) => {
+  res.sendStatus(404)
+})
 
 if (inProduction || inStaging) {
   const DIST_PATH = path.resolve(

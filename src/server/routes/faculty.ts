@@ -29,7 +29,7 @@ facultyRouter.get('/', async (_, res) => {
     iams: facultyIamsMap[code] || [],
   }))
 
-  return res.send(faculties)
+  res.send(faculties)
 })
 
 export default facultyRouter

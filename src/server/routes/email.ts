@@ -9,7 +9,7 @@ emailRouter.post('/', async (req, res) => {
 
   const response = await sendEmail([to], text, subject)
 
-  return res.send(response)
+  res.send(response)
 })
 
 export default emailRouter

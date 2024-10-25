@@ -29,7 +29,9 @@ router.use(userMiddleware)
 
 router.use(accessLogger)
 
-router.get('/ping', (_, res) => res.send('pong'))
+router.get('/ping', (_, res) => {
+  res.send('pong')
+})
 
 router.use('/ai', openaiRouter)
 router.use('/users', userRouter)

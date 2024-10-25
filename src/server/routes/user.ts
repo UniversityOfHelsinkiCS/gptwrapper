@@ -23,7 +23,10 @@ userRouter.get('/login', async (req, res) => {
   const { user } = request
   const { id, isAdmin, iamGroups } = user
 
-  if (!id) return res.status(401).send('Unauthorized')
+  if (!id) {
+    res.status(401).send('Unauthorized')
+    return
+  }
 
   const hasIamAccess = checkIamAccess(iamGroups)
 
@@ -35,7 +38,8 @@ userRouter.get('/login', async (req, res) => {
 
   if (!isAdmin && !hasIamAccess && !hasCourseAccess) {
     logger.info('Unauthorized user', { iamGroups })
-    return res.status(401).send('Unauthorized')
+    res.status(401).send('Unauthorized')
+    return
   }
 
   user.ownCourses = teacherCourses
@@ -55,7 +59,7 @@ userRouter.get('/login', async (req, res) => {
     chatInstance.usageLimit > 0 &&
     new Date() <= new Date(chatInstance.activityPeriod.endDate)
 
-  return res.send({
+  res.send({
     ...user,
     usage,
     hasIamAccess: isAdmin || hasIamAccess,
@@ -64,6 +68,7 @@ userRouter.get('/login', async (req, res) => {
       .filter(isNowOrInFuture)
       .map((enrollment) => enrollment.chatInstance),
   })
+  return
 })
 
 userRouter.get('/status', async (req, res) => {
@@ -71,19 +76,23 @@ userRouter.get('/status', async (req, res) => {
   const { user } = request
   const { id } = user
 
-  if (!id) return res.status(401).send('Unauthorized')
+  if (!id) {
+    res.status(401).send('Unauthorized')
+    return
+  }
 
   const usage = await getUsage(id)
   const limit = user.isPowerUser
     ? 10 * DEFAULT_TOKEN_LIMIT
     : DEFAULT_TOKEN_LIMIT
 
-  return res.send({
+  res.send({
     usage,
     limit,
     // model,
     // models,
   })
+  return
 })
 
 userRouter.get('/status/:courseId', async (req, res) => {
@@ -92,16 +101,20 @@ userRouter.get('/status/:courseId', async (req, res) => {
   const { user } = request
   const { id } = user
 
-  if (!id) return res.status(401).send('Unauthorized')
+  if (!id) {
+    res.status(401).send('Unauthorized')
+    return
+  }
 
   const { usage, limit, model, models } = await getUserStatus(user, courseId)
 
-  return res.send({
+  res.send({
     usage,
     limit,
     model,
     models,
   })
+  return
 })
 
 export default userRouter

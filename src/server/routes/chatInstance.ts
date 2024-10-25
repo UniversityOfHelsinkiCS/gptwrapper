@@ -79,7 +79,7 @@ chatInstanceRouter.get('/', async (req, res) => {
     ],
   })
 
-  return res.send({ chatInstances, count })
+  res.send({ chatInstances, count })
 })
 
 chatInstanceRouter.get('/:id', async (req, res) => {
@@ -87,9 +87,12 @@ chatInstanceRouter.get('/:id', async (req, res) => {
 
   const chatInstance = await ChatInstance.findByPk(id)
 
-  if (!chatInstance) return res.status(404).send('ChatInstance not found')
+  if (!chatInstance) {
+    res.status(404).send('ChatInstance not found')
+    return
+  }
 
-  return res.send(chatInstance)
+  res.send(chatInstance)
 })
 
 chatInstanceRouter.post('/:id/enable', async (req, res) => {
@@ -97,7 +100,10 @@ chatInstanceRouter.post('/:id/enable', async (req, res) => {
 
   const chatInstance = await ChatInstance.findByPk(id)
 
-  if (!chatInstance) return res.status(404).send('ChatInstance not found')
+  if (!chatInstance) {
+    res.status(404).send('ChatInstance not found')
+    return
+  }
 
   const defaultActivityPeriod = {
     startDate: chatInstance.activityPeriod.startDate,
@@ -110,7 +116,7 @@ chatInstanceRouter.post('/:id/enable', async (req, res) => {
 
   await chatInstance.save()
 
-  return res.send(chatInstance)
+  res.send(chatInstance)
 })
 
 chatInstanceRouter.post('/:id/disable', async (req, res) => {
@@ -118,13 +124,16 @@ chatInstanceRouter.post('/:id/disable', async (req, res) => {
 
   const chatInstance = await ChatInstance.findByPk(id)
 
-  if (!chatInstance) return res.status(404).send('ChatInstance not found')
+  if (!chatInstance) {
+    res.status(404).send('ChatInstance not found')
+    return
+  }
 
   chatInstance.usageLimit = 0
 
   await chatInstance.save()
 
-  return res.send(chatInstance)
+  res.send(chatInstance)
 })
 
 chatInstanceRouter.get('/:id/usages', async (req, res) => {
@@ -153,7 +162,7 @@ chatInstanceRouter.get('/:id/usages', async (req, res) => {
     ],
   })
 
-  return res.status(200).send(usage)
+  res.status(200).send(usage)
 })
 
 chatInstanceRouter.delete('/usage/:id', async (req, res) => {
@@ -161,14 +170,16 @@ chatInstanceRouter.delete('/usage/:id', async (req, res) => {
 
   const chatInstanceUsage = await UserChatInstanceUsage.findByPk(id)
 
-  if (!chatInstanceUsage)
-    return res.status(404).send('ChatInstance usage not found')
+  if (!chatInstanceUsage) {
+    res.status(404).send('ChatInstance usage not found')
+    return
+  }
 
   chatInstanceUsage.usageCount = 0
 
   chatInstanceUsage.save()
 
-  return res.status(204).send()
+  res.status(204).send()
 })
 
 export default chatInstanceRouter

@@ -68,13 +68,19 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   options.options = { temperature: options.modelTemperature }
 
-  if (!user.id) return res.status(401).send('Unauthorized')
+  if (!user.id) {
+    res.status(401).send('Unauthorized')
+    return
+  }
 
   const usageAllowed = courseId
     ? await checkCourseUsage(user, courseId)
     : model === FREE_MODEL || (await checkUsage(user, model))
 
-  if (!usageAllowed) return res.status(403).send('Usage limit reached')
+  if (!usageAllowed) {
+    res.status(403).send('Usage limit reached')
+    return
+  }
 
   let optionsMessagesWithFile = null
 
@@ -84,7 +90,8 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     }
   } catch (error) {
     logger.error('Error parsing file', { error })
-    return res.status(400).send('Error parsing file')
+    res.status(400).send('Error parsing file')
+    return
   }
 
   options.messages = getMessageContext(
@@ -103,22 +110,27 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT &&
     !userConsent
   ) {
-    return res.status(201).json({
+    res.status(201).json({
       tokenConsumtionWarning: true,
       message: `You are about to use ${tokenUsagePercentage}% of your monthly CurreChat usage`,
     })
+    return
   }
 
   const contextLimit = getModelContextLimit(model)
 
   if (tokenCount > contextLimit) {
     logger.info('Maximum context reached')
-    return res.status(403).send('Model maximum context reached')
+    res.status(403).send('Model maximum context reached')
+    return
   }
 
   const events = await getCompletionEvents(options as AzureOptions)
 
-  if (isError(events)) return res.status(424)
+  if (isError(events)) {
+    res.status(424)
+    return
+  }
 
   res.setHeader('content-type', 'text/event-stream')
 
@@ -149,7 +161,8 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   encoding.free()
 
-  return res.end()
+  res.end()
+  return
 })
 
 openaiRouter.post(
@@ -161,10 +174,16 @@ openaiRouter.post(
     const { options } = JSON.parse(r.body.data)
     const { user } = req
 
-    if (!user.id) return res.status(401).send('Unauthorized')
+    if (!user.id) {
+      res.status(401).send('Unauthorized')
+      return
+    }
 
     const usageAllowed = await checkCourseUsage(user, courseId)
-    if (!usageAllowed) return res.status(403).send('Usage limit reached')
+    if (!usageAllowed) {
+      res.status(403).send('Usage limit reached')
+      return
+    }
 
     options.messages = getMessageContext(options.messages)
     options.stream = true
@@ -173,8 +192,10 @@ openaiRouter.post(
 
     if (options.model) {
       const allowedModels = getAllowedModels(model)
-      if (!allowedModels.includes(options.model))
-        return res.status(403).send('Model not allowed')
+      if (!allowedModels.includes(options.model)) {
+        res.status(403).send('Model not allowed')
+        return
+      }
     } else {
       options.model = model
     }
@@ -186,12 +207,16 @@ openaiRouter.post(
 
     if (tokenCount > contextLimit) {
       logger.info('Maximum context reached')
-      return res.status(403).send('Model maximum context reached')
+      res.status(403).send('Model maximum context reached')
+      return
     }
 
     const events = await getCompletionEvents(options as AzureOptions)
 
-    if (isError(events)) return res.status(424).send(events)
+    if (isError(events)) {
+      res.status(424).send(events)
+      return
+    }
 
     res.setHeader('content-type', 'text/event-stream')
 
@@ -217,7 +242,8 @@ openaiRouter.post(
 
     encoding.free()
 
-    return res.end()
+    res.end()
+    return
   }
 )
 

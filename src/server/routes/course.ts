@@ -27,7 +27,7 @@ const getCourses = async () => {
 courseRouter.get('/', async (_, res) => {
   const courses = await getCourses()
 
-  return res.send(courses)
+  res.send(courses)
 })
 
 courseRouter.get('/user', async (req, res) => {
@@ -56,7 +56,7 @@ courseRouter.get('/user', async (req, res) => {
     isExpired: Date.parse(chatinstance.activityPeriod.endDate) < Date.now(),
   }))
 
-  return res.send({ courses: coursesWithExtra, count })
+  res.send({ courses: coursesWithExtra, count })
 })
 
 courseRouter.get('/statistics/:id', async (req, res) => {
@@ -91,7 +91,7 @@ courseRouter.get('/statistics/:id', async (req, res) => {
     usageCount: (usage.usageCount / chatInstance.usageLimit) * 100,
   }))
 
-  return res.send({ average, usagePercentage, usages: normalizedUsage })
+  res.send({ average, usagePercentage, usages: normalizedUsage })
 })
 
 interface AcualResponsibility {
@@ -163,7 +163,7 @@ courseRouter.get('/:id', async (req, res) => {
         responsibilities: undefined,
       }
 
-  return res.send(objectToReturn)
+  res.send(objectToReturn)
 })
 
 courseRouter.put('/:id', async (req, res) => {
@@ -186,7 +186,7 @@ courseRouter.put('/:id', async (req, res) => {
 
   await chatInstance.save()
 
-  return res.send(chatInstance)
+  res.send(chatInstance)
 })
 
 export default courseRouter

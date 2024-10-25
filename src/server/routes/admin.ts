@@ -41,7 +41,10 @@ adminRouter.post('/chatinstances', async (req, res) => {
   const { name, description, model, usageLimit, courseId } = data
 
   const course = await getCourse(courseId)
-  if (!course) return res.status(404).send('Invalid course id')
+  if (!course) {
+    res.status(404).send('Invalid course id')
+    return
+  }
 
   const newChatInstance = await ChatInstance.create({
     name: { en: name, fi: name, sv: name },
@@ -52,7 +55,7 @@ adminRouter.post('/chatinstances', async (req, res) => {
     activityPeriod: course.activityPeriod,
   })
 
-  return res.status(201).send(newChatInstance)
+  res.status(201).send(newChatInstance)
 })
 
 const getUsages = async () => {
@@ -154,7 +157,7 @@ adminRouter.get('/statistics', async (req, res) => {
     return datas
   }
 
-  return res.send({
+  res.send({
     data: await mangelStats(),
     terms,
   })
@@ -175,7 +178,10 @@ adminRouter.put('/chatinstances/:id', async (req, res) => {
 
   const chatInstance = await ChatInstance.findByPk(id)
 
-  if (!chatInstance) return res.status(404).send('ChatInstance not found')
+  if (!chatInstance) {
+    res.status(404).send('ChatInstance not found')
+    return
+  }
 
   chatInstance.name = { en: name, fi: name, sv: name }
   chatInstance.description = description
@@ -185,7 +191,7 @@ adminRouter.put('/chatinstances/:id', async (req, res) => {
 
   await chatInstance.save()
 
-  return res.send(chatInstance)
+  res.send(chatInstance)
 })
 
 adminRouter.delete('/chatinstances/:id', async (req, res) => {
@@ -193,7 +199,10 @@ adminRouter.delete('/chatinstances/:id', async (req, res) => {
 
   const chatInstance = await ChatInstance.findByPk(id)
 
-  if (!chatInstance) return res.status(404).send('ChatInstance not found')
+  if (!chatInstance) {
+    res.status(404).send('ChatInstance not found')
+    return
+  }
 
   await UserChatInstanceUsage.destroy({
     where: { chatInstanceId: id },
@@ -201,7 +210,7 @@ adminRouter.delete('/chatinstances/:id', async (req, res) => {
 
   await chatInstance.destroy()
 
-  return res.status(204).send()
+  res.status(204).send()
 })
 
 adminRouter.get('/chatinstances/usage', async (_, res) => {
@@ -218,7 +227,7 @@ adminRouter.get('/chatinstances/usage', async (_, res) => {
     ],
   })
 
-  return res.send(usage)
+  res.send(usage)
 })
 
 adminRouter.delete('/chatinstances/usage/:id', async (req, res) => {
@@ -226,12 +235,14 @@ adminRouter.delete('/chatinstances/usage/:id', async (req, res) => {
 
   const chatInstanceUsage = await UserChatInstanceUsage.findByPk(id)
 
-  if (!chatInstanceUsage)
-    return res.status(404).send('ChatInstance usage not found')
+  if (!chatInstanceUsage) {
+    res.status(404).send('ChatInstance usage not found')
+    return
+  }
 
   await chatInstanceUsage.destroy()
 
-  return res.status(204).send()
+  res.status(204).send()
 })
 
 adminRouter.get('/users', async (_, res) => {
@@ -239,7 +250,7 @@ adminRouter.get('/users', async (_, res) => {
     attributes: ['id', 'username', 'iamGroups', 'usage'],
   })
 
-  return res.send(usage)
+  res.send(usage)
 })
 
 adminRouter.get('/users/:search', async (req, res) => {
@@ -285,7 +296,7 @@ adminRouter.get('/users/:search', async (req, res) => {
     limit: 20,
   })
 
-  return res.send(matches)
+  res.send(matches)
 })
 
 adminRouter.delete('/usage/:userId', async (req, res) => {
@@ -293,13 +304,15 @@ adminRouter.delete('/usage/:userId', async (req, res) => {
 
   const user = await User.findByPk(userId)
 
-  if (!user) return res.status(404).send('User not found')
+  if (!user) {
+    res.status(404).send('User not found')
+  }
 
   user.usage = 0
 
   await user.save()
 
-  return res.status(204).send()
+  res.status(204).send()
 })
 
 adminRouter.get('/user-search', async (req, res) => {
@@ -328,7 +341,7 @@ adminRouter.get('/user-search', async (req, res) => {
     limit: 20,
   })
 
-  return res.send({
+  res.send({
     params,
     persons: persons.map((person) => ({
       ...person.dataValues,
@@ -339,7 +352,7 @@ adminRouter.get('/user-search', async (req, res) => {
 
 adminRouter.post('/run-updater', async (req, res) => {
   runUpdater()
-  return res.send('Updater started')
+  res.send('Updater started')
 })
 
 adminRouter.put('/info-texts/:id', async (req, res) => {
@@ -353,7 +366,7 @@ adminRouter.put('/info-texts/:id', async (req, res) => {
 
   await infoText.save()
 
-  return res.send(infoText)
+  res.send(infoText)
 })
 
 export default adminRouter

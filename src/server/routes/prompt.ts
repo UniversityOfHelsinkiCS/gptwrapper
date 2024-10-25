@@ -29,7 +29,8 @@ promptRouter.get('/:courseId', async (req, res) => {
     order: [['name', 'ASC']],
   })
 
-  return res.send(prompts)
+  res.send(prompts)
+  return
 })
 
 const authorizeUser = async (
@@ -59,10 +60,13 @@ const authorizeUser = async (
     (r) => r.userId === user.id
   )
 
-  if (!isAmongActiveCourses && !user.isAdmin)
-    return res.status(403).send('Not allowed')
+  if (!isAmongActiveCourses && !user.isAdmin) {
+    res.status(403).send('Not allowed')
+    return
+  }
 
-  return next()
+  next()
+  return
 }
 
 promptRouter.post('/', authorizeUser, async (req, res) => {
@@ -70,7 +74,7 @@ promptRouter.post('/', authorizeUser, async (req, res) => {
 
   const newPrompt = await Prompt.create(data)
 
-  return res.status(201).send(newPrompt)
+  res.status(201).send(newPrompt)
 })
 
 export default promptRouter
@@ -80,11 +84,14 @@ promptRouter.delete('/:id', authorizeUser, authorizeUser, async (req, res) => {
 
   const prompt = await Prompt.findByPk(id)
 
-  if (!prompt) return res.status(404).send('Prompt not found')
+  if (!prompt) {
+    res.status(404).send('Prompt not found')
+    return
+  }
 
   await prompt.destroy()
 
-  return res.status(204).send()
+  res.status(204).send()
 })
 
 promptRouter.put('/:id', authorizeUser, authorizeUser, async (req, res) => {
@@ -94,7 +101,10 @@ promptRouter.put('/:id', authorizeUser, authorizeUser, async (req, res) => {
 
   const prompt = await Prompt.findByPk(id)
 
-  if (!prompt) return res.status(404).send('Prompt not found')
+  if (!prompt) {
+    res.status(404).send('Prompt not found')
+    return
+  }
 
   prompt.systemMessage = systemMessage
   prompt.name = name
@@ -103,5 +113,5 @@ promptRouter.put('/:id', authorizeUser, authorizeUser, async (req, res) => {
 
   await prompt.save()
 
-  return res.send(prompt)
+  res.send(prompt)
 })

@@ -6,9 +6,12 @@ const infoTextRouter = express.Router()
 infoTextRouter.get('/', async (req, res) => {
   const infoTexts = await InfoText.findAll()
 
-  if (!infoTexts) return res.status(404).send('InfoTexts not found')
+  if (!infoTexts) {
+    res.status(404).send('InfoTexts not found')
+    return
+  }
 
-  return res.send(infoTexts)
+  res.send(infoTexts)
 })
 
 export default infoTextRouter
