@@ -27,13 +27,11 @@ export default [
         version: 'detect',
       },
     },
-    overrides: [
-      {
-        files: ['**/*.integration-test.*', '**/*.test.*'],
-        env: {
-          jest: true,
-        },
-      },
-    ],
+  },
+  {
+    files: ['**/*.integration-test.*', '**/*.test.*'],
+    env: {
+      jest: true,
+    },
   },
 ]
