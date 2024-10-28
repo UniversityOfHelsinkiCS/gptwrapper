@@ -22,5 +22,18 @@ export default [
         project: './tsconfig.json',
       },
     },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+    overrides: [
+      {
+        files: ['**/*.integration-test.*', '**/*.test.*'],
+        env: {
+          jest: true,
+        },
+      },
+    ],
   },
 ]
