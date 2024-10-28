@@ -30,8 +30,8 @@ export default [
   },
   {
     files: ['**/*.integration-test.*', '**/*.test.*'],
-    env: {
-      jest: true,
+    languageOptions: {
+      globals: globals.jest,
     },
   },
 ]
