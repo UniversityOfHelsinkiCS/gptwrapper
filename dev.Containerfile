@@ -1,4 +1,4 @@
-FROM docker.io/node:22-alpine
+FROM docker.io/node:20-alpine
 
 ENV TZ="Europe/Helsinki"
 
