@@ -43,7 +43,7 @@
     "@types/express": "^5.0.0",
     "@types/lodash": "^4.17.0",
     "@types/morgan": "^1.9.9",
-    "@types/node": "^20.11.16",
+    "@types/node": "^22.0.0",
     "@types/node-cron": "^3.0.11",
     "@types/react": "^18.2.52",
     "@types/react-dom": "^18.2.18",
