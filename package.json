@@ -108,7 +108,7 @@
     "umzug": "^3.6.1",
     "unfuck-spa-shibboleth-session": "^4.1.0",
     "unfuck-utf8-headers-middleware": "^1.0.1",
-    "vite": "^5.0.12",
+    "vite": "^6.0.0",
     "winston": "^3.11.0",
     "winston-gelf-transporter": "^1.0.2"
   },
