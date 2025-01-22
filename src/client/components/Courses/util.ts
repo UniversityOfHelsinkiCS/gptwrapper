@@ -19,6 +19,9 @@ export const formatDate = (activityPeriod?: ActivityPeriod) => {
   return `${format(start, 'dd.MM.')}–${format(end, 'dd.MM.yyyy')}`
 }
 
+export const formatDateTime = (date: string) =>
+  `${format(new Date(date), 'dd.MM.yyyy hh:mm:ss')}`
+
 export const sortCourses = (a: Course, b: Course) => {
   if (!a.activityPeriod || !b.activityPeriod) return 0
 

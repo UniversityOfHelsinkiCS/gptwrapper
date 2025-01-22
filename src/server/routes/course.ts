@@ -1,5 +1,5 @@
 import express from 'express'
-import { Op } from 'sequelize'
+import { Op, Sequelize } from 'sequelize'
 
 import { ActivityPeriod, RequestWithUser } from '../types'
 import {
@@ -9,8 +9,10 @@ import {
   Prompt,
   User,
   Responsibility,
+  Discussion,
 } from '../db/models'
 import { getOwnCourses } from '../chatInstances/access'
+import { encrypt, decrypt } from '../util/util'
 
 const courseRouter = express.Router()
 
@@ -164,6 +166,85 @@ courseRouter.get('/:id', async (req, res) => {
       }
 
   res.send(objectToReturn)
+})
+
+const checkDiscussionAccess = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const request = req as unknown as RequestWithUser
+  const { user } = request
+
+  const { id } = req.params
+  const chatInstance = (await ChatInstance.findOne({
+    where: { courseId: id },
+    include: [
+      {
+        model: Responsibility,
+        as: 'responsibilities',
+        attributes: ['id'],
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: ['id', 'username', 'last_name', 'first_names'],
+          },
+        ],
+      },
+    ],
+  })) as ChatInstance & { responsibilities: AcualResponsibility[] }
+
+  const hasFullAccess =
+    user.isAdmin ||
+    chatInstance.responsibilities.map((r) => r.user.id).includes(user.id)
+
+  if (!hasFullAccess) {
+    return res.status(401).send('Unauthorized')
+  }
+
+  return next()
+}
+
+courseRouter.get(
+  '/:id/discussions/:user_id',
+  checkDiscussionAccess,
+  async (req, res) => {
+    const userId = decrypt(req.params.user_id)
+    const { id } = req.params
+    const discussions = await Discussion.findAll({
+      where: {
+        courseId: id,
+        userId,
+      },
+    })
+
+    return res.send(discussions.map((d) => d))
+  }
+)
+
+courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {
+  const { id } = req.params
+
+  const discussionCounts = (await Discussion.findAll({
+    attributes: [
+      'user_id',
+      [Sequelize.fn('COUNT', Sequelize.col('id')), 'discussion_count'],
+    ],
+    where: { courseId: id },
+    group: ['user_id'],
+  })) as any
+
+  return res.send(
+    discussionCounts.map((disc) => {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { user_id, discussion_count } = disc.dataValues
+      return {
+        user_id: encrypt(user_id).encryptedData,
+        discussion_count,
+      }
+    })
+  )
 })
 
 courseRouter.put('/:id', async (req, res) => {

@@ -1,3 +1,5 @@
+import crypto from 'crypto'
+
 import { CustomMessage } from '../types'
 import { DEFAULT_MODEL, DEFAUL_CONTEXT_LIMIT, validModels } from '../../config'
 import { ChatInstance } from '../db/models'
@@ -86,4 +88,30 @@ export const generateTerms = () => {
   }
 
   return terms.splice(0, terms.length - 1).reverse()
+}
+
+// eslint-disable-next-line prefer-destructuring
+const ENCRYPTION_IV = process.env.ENCRYPTION_IV
+
+const algorithm = 'aes-256-cbc'
+const key = new Uint8Array(Buffer.from(process.env.ENCRYPTION_KEY, 'hex'))
+const iv = new Uint8Array(Buffer.from(ENCRYPTION_IV, 'hex'))
+
+export function encrypt(text) {
+  const cipher = crypto.createCipheriv(algorithm, key, iv)
+  let encrypted = cipher.update(text)
+  encrypted = Buffer.concat([encrypted, cipher.final()])
+  return { encryptedData: encrypted.toString('hex') }
+}
+
+export function decrypt(encryptedData) {
+  const text = {
+    iv: ENCRYPTION_IV,
+    encryptedData,
+  }
+
+  const encryptedText = Buffer.from(text.encryptedData, 'hex')
+  const decipher = crypto.createDecipheriv(algorithm, key, iv)
+  const decrypted = decipher.update(new Uint8Array(encryptedText))
+  return Buffer.concat([decrypted, decipher.final()]).toString()
 }

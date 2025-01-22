@@ -23,6 +23,48 @@ const useCourse = (courseId?: string) => {
   return { course, ...rest }
 }
 
+export const useCourseDiscussers = (courseId?: string) => {
+  const queryKey = ['discussers', courseId]
+
+  const queryFn = async (): Promise<any | null> => {
+    const res = await apiClient.get(`/courses/${courseId}/discussers`)
+
+    const { data } = res
+
+    return data
+  }
+
+  const { data: discussers, ...rest } = useQuery({
+    queryKey,
+    queryFn,
+    enabled: !!courseId,
+  })
+
+  return { discussers, ...rest }
+}
+
+export const useCourseDiscussion = (courseId: string, userId: string) => {
+  const queryKey = ['messages', courseId, userId]
+
+  const queryFn = async (): Promise<any | null> => {
+    const res = await apiClient.get(
+      `/courses/${courseId}/discussions/${userId}`
+    )
+
+    const { data } = res
+
+    return data
+  }
+
+  const { data: messages, ...rest } = useQuery({
+    queryKey,
+    queryFn,
+    enabled: !!courseId,
+  })
+
+  return { messages, ...rest }
+}
+
 export const useCourseStatistics = (courseId?: string) => {
   const queryKey = ['statistics', courseId]
 

@@ -83,6 +83,7 @@ export const streamCompletion = async (
   res: Response
 ) => {
   let tokenCount = 0
+  const contents = []
   for await (const event of events) {
     for (const choice of event.choices) {
       const delta = choice.delta?.content
@@ -104,11 +105,14 @@ export const streamCompletion = async (
             process.nextTick(resolve)
           }
         })
-
+        contents.push(delta)
         tokenCount += encoding.encode(delta).length ?? 0
       }
     }
   }
 
-  return tokenCount
+  return {
+    tokenCount,
+    response: contents.join(''),
+  }
 }

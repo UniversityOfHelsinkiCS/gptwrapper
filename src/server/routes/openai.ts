@@ -21,6 +21,7 @@ import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
 import { inProduction, DEFAULT_TOKEN_LIMIT, FREE_MODEL } from '../../config'
 import { pdfToText } from '../util/pdfToText'
+import { Discussion } from '../db/models'
 
 const openaiRouter = express.Router()
 
@@ -134,12 +135,14 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   res.setHeader('content-type', 'text/event-stream')
 
-  tokenCount += await streamCompletion(
+  const completion = await streamCompletion(
     events,
     options as AzureOptions,
     encoding,
     res
   )
+
+  tokenCount += completion.tokenCount
 
   let userToCharge = user
   if (inProduction && req.hijackedBy) {
@@ -158,6 +161,22 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     user: user.username,
     courseId,
   })
+
+  const consentToSave =
+    ['testUser', 'mluukkai'].includes(user.username) && courseId === 'sandbox'
+
+  // eslint-disable-next-line no-console
+  console.log('consentToSave', consentToSave)
+
+  if (consentToSave) {
+    const discussion = {
+      userId: user.id,
+      courseId,
+      response: completion.response,
+      metadata: options,
+    }
+    await Discussion.create(discussion)
+  }
 
   encoding.free()
 
@@ -220,12 +239,14 @@ openaiRouter.post(
 
     res.setHeader('content-type', 'text/event-stream')
 
-    tokenCount += await streamCompletion(
+    const completion = await streamCompletion(
       events,
       options as AzureOptions,
       encoding,
       res
     )
+
+    tokenCount += completion.tokenCount
 
     let userToCharge = user
     if (inProduction && req.hijackedBy) {

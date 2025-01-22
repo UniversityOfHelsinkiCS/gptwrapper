@@ -4,6 +4,7 @@ import UserChatInstanceUsage from './userChatInstanceUsage'
 import Prompt from './prompt'
 import Enrolment from './enrolment'
 import Responsibility from './responsibilities'
+import Discussion from './discussion'
 
 User.belongsToMany(ChatInstance, {
   through: UserChatInstanceUsage,
@@ -48,4 +49,5 @@ export {
   Prompt,
   Enrolment,
   Responsibility,
+  Discussion,
 }
