@@ -162,11 +162,14 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     courseId,
   })
 
-  const course = await ChatInstance.findOne({
-    where: { courseId },
-  })
+  const course =
+    courseId &&
+    (await ChatInstance.findOne({
+      where: { courseId },
+    }))
 
-  const consentToSave = course.saveDiscussions && options.saveConsent
+  const consentToSave =
+    courseId && course.saveDiscussions && options.saveConsent
 
   // eslint-disable-next-line no-console
   console.log(
