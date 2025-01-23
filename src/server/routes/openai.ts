@@ -21,7 +21,7 @@ import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
 import { inProduction, DEFAULT_TOKEN_LIMIT, FREE_MODEL } from '../../config'
 import { pdfToText } from '../util/pdfToText'
-import { Discussion } from '../db/models'
+import { Discussion, ChatInstance } from '../db/models'
 
 const openaiRouter = express.Router()
 
@@ -162,9 +162,15 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     courseId,
   })
 
+  const course = await ChatInstance.findOne({
+    where: { courseId },
+  })
+
+  console.log('-->', course.saveDiscussions)
+
   const consentToSave =
-    ['testUser', 'mluukkai', 'admini2'].includes(user.username) &&
-    courseId === 'sandbox'
+    course.saveDiscussions &&
+    ['testUser', 'mluukkai', 'admini2'].includes(user.username)
 
   // eslint-disable-next-line no-console
   console.log('consentToSave', consentToSave, user.username)

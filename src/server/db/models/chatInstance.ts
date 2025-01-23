@@ -34,6 +34,8 @@ class ChatInstance extends Model<
   declare courseUnitRealisationTypeUrn: string | null
 
   declare courseUnits: CreationOptional<CourseUnit[]>
+
+  declare saveDiscussions: boolean
 }
 
 ChatInstance.init(
@@ -92,6 +94,9 @@ ChatInstance.init(
       type: DataTypes.ARRAY(DataTypes.JSONB),
       allowNull: true,
       defaultValue: [],
+    },
+    saveDiscussions: {
+      type: DataTypes.BOOLEAN,
     },
   },
   {
