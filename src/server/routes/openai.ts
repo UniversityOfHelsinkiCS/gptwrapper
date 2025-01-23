@@ -163,10 +163,11 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   })
 
   const consentToSave =
-    ['testUser', 'mluukkai'].includes(user.username) && courseId === 'sandbox'
+    ['testUser', 'mluukkai', 'admini2'].includes(user.username) &&
+    courseId === 'sandbox'
 
   // eslint-disable-next-line no-console
-  console.log('consentToSave', consentToSave)
+  console.log('consentToSave', consentToSave, user.username)
 
   if (consentToSave) {
     const discussion = {
