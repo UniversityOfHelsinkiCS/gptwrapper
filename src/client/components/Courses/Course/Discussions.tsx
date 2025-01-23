@@ -1,4 +1,3 @@
-import React from 'react'
 import { useParams, Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
