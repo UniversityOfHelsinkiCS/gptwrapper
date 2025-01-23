@@ -168,6 +168,7 @@ courseRouter.get('/:id', async (req, res) => {
   res.send(objectToReturn)
 })
 
+/*
 const checkDiscussionAccess = async (
   req: express.Request,
   res: express.Response,
@@ -205,10 +206,11 @@ const checkDiscussionAccess = async (
 
   return next()
 }
+*/
 
 courseRouter.get(
   '/:id/discussions/:user_id',
-  checkDiscussionAccess,
+  //checkDiscussionAccess,
   async (req, res) => {
     const userId = decrypt(req.params.user_id)
     const { id } = req.params
@@ -219,11 +221,12 @@ courseRouter.get(
       },
     })
 
-    return res.send(discussions.map((d) => d))
+    res.send(discussions.map((d) => d))
   }
 )
 
-courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {
+//courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {
+courseRouter.get('/:id/discussers', async (req, res) => {
   const { id } = req.params
 
   const discussionCounts = (await Discussion.findAll({
@@ -235,7 +238,7 @@ courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {
     group: ['user_id'],
   })) as any
 
-  return res.send(
+  res.send(
     discussionCounts.map((disc) => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { user_id, discussion_count } = disc.dataValues
