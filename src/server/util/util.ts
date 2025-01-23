@@ -91,10 +91,11 @@ export const generateTerms = () => {
 }
 
 // eslint-disable-next-line prefer-destructuring
-const ENCRYPTION_IV = process.env.ENCRYPTION_IV
+const ENCRYPTION_IV = process.env.ENCRYPTION_IV || 'default'
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'default'
 
 const algorithm = 'aes-256-cbc'
-const key = new Uint8Array(Buffer.from(process.env.ENCRYPTION_KEY, 'hex'))
+const key = new Uint8Array(Buffer.from(ENCRYPTION_KEY, 'hex'))
 const iv = new Uint8Array(Buffer.from(ENCRYPTION_IV, 'hex'))
 
 export function encrypt(text) {
