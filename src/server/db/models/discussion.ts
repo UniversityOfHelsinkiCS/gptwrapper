@@ -20,7 +20,7 @@ class Discussion extends Model<
 
   declare response: string
 
-  declare metadata: Object
+  declare metadata: object
 }
 
 // docker exec -it 2b43f5dfb5c5 psql -U postgres
