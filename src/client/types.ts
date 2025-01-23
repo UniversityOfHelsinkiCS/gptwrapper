@@ -120,6 +120,7 @@ export interface Course extends ChatInstance {
   enrolments: Enrolment[]
   responsibilities: Responsebility[]
   courseUnits: CourseUnit[]
+  saveDiscussions: boolean
 }
 
 export type ChatInstanceUsage = {

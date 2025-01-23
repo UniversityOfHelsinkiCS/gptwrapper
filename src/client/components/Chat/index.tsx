@@ -80,6 +80,14 @@ const CourseInfo = ({ course }: { course: Course }) => {
       </div>
 
       <div style={{ marginTop: 10 }}>{formatDate(course.activityPeriod)}</div>
+
+      {course.saveDiscussions && (
+        <Alert severity="warning" style={{ marginTop: 20 }}>
+          <Typography variant="h6">
+            Kurssin keskustelut talletetaan anonyymisti jos annat tallennusluvan
+          </Typography>
+        </Alert>
+      )}
     </Box>
   )
 }
@@ -114,6 +122,7 @@ const Chat = () => {
   const [tokenWarningVisible, setTokenWarningVisible] = useState(false)
   const [modelTemperature, setModelTemperature] = useState(0.5)
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
+  const [saveConsent, setSaveConsent] = useState(true)
 
   const { t, i18n } = useTranslation()
   const { language } = i18n
@@ -281,7 +290,7 @@ const Chat = () => {
     }
   }
 
-  const handleSend = async (userConsent: boolean) => {
+  const handleSend = async (userConsent: boolean, saveConsent: boolean) => {
     const formData = new FormData()
     let file = inputFileRef.current.files[0] as File
     if (file) {
@@ -326,7 +335,11 @@ const Chat = () => {
       modelTemperature,
       courseId,
       abortController,
+      saveConsent,
     }
+
+    console.log('getCompletionsArgs', getCompletionsArgs)
+
     // Retry the request if the server is stuck for WAIT_FOR_STREAM_TIMEOUT seconds
     setRetryTimeout(
       () => handleRetry(getCompletionsArgs, abortController),
@@ -351,7 +364,7 @@ const Chat = () => {
   }
 
   const handleContinue = () => {
-    handleSend(true)
+    handleSend(true, saveConsent)
     setTokenWarningVisible(false)
   }
 
@@ -419,6 +432,9 @@ const Chat = () => {
         setFileName={setFileName}
         setDisallowedFileType={setDisallowedFileType}
         setAlertOpen={setAlertOpen}
+        saveConsent={saveConsent}
+        setSaveConsent={setSaveConsent}
+        saveChat={course && course.saveDiscussions}
       />
       <Email
         system={system}

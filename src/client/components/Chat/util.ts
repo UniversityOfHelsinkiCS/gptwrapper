@@ -10,6 +10,7 @@ interface GetCompletoinStreamProps {
   modelTemperature: number
   courseId?: string
   abortController?: AbortController
+  saveConsent: boolean
 }
 export const getCompletionStream = async ({
   system,
@@ -20,6 +21,7 @@ export const getCompletionStream = async ({
   modelTemperature,
   courseId,
   abortController,
+  saveConsent,
 }: GetCompletoinStreamProps) => {
   const data = {
     courseId,
@@ -34,6 +36,7 @@ export const getCompletionStream = async ({
       model,
       userConsent,
       modelTemperature,
+      saveConsent,
     },
   }
 

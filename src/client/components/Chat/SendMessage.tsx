@@ -1,5 +1,12 @@
 import React from 'react'
-import { Box, TextField, Button, Typography } from '@mui/material'
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Switch,
+  FormControlLabel,
+} from '@mui/material'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import { useTranslation } from 'react-i18next'
 import AttachmentButton from './AttachmentButton'
@@ -18,10 +25,13 @@ const SendMessage = ({
   setFileName,
   setDisallowedFileType,
   setAlertOpen,
+  saveChat,
+  saveConsent,
+  setSaveConsent,
 }: {
   message: string
   setMessage: SetState<string>
-  handleSend: (userConsent: boolean) => void
+  handleSend: (userConsent: boolean, saveConsent: boolean) => void
   handleReset: () => void
   disabled: boolean
   resetDisabled: boolean
@@ -30,6 +40,9 @@ const SendMessage = ({
   setFileName: (name: string) => void
   setDisallowedFileType: React.Dispatch<string>
   setAlertOpen: React.Dispatch<boolean>
+  saveConsent: boolean
+  setSaveConsent: React.Dispatch<boolean>
+  saveChat: boolean
 }) => {
   const { t } = useTranslation()
 
@@ -59,7 +72,7 @@ const SendMessage = ({
     }
   }
   const handleOnClick = () => {
-    handleSend(false)
+    handleSend(false, saveConsent)
   }
   return (
     <Box mb={2}>
@@ -108,6 +121,17 @@ const SendMessage = ({
         <Button onClick={() => handleReset()} disabled={resetDisabled}>
           {t('reset')}
         </Button>
+        {saveChat && (
+          <FormControlLabel
+            control={
+              <Switch
+                onChange={() => setSaveConsent(!saveConsent)}
+                checked={saveConsent}
+              />
+            }
+            label="keskustelun saa tallentaa"
+          />
+        )}
       </Box>
     </Box>
   )
