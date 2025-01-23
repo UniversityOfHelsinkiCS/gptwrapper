@@ -168,7 +168,6 @@ courseRouter.get('/:id', async (req, res) => {
   res.send(objectToReturn)
 })
 
-/*
 const checkDiscussionAccess = async (
   req: express.Request,
   res: express.Response,
@@ -201,16 +200,15 @@ const checkDiscussionAccess = async (
     chatInstance.responsibilities.map((r) => r.user.id).includes(user.id)
 
   if (!hasFullAccess) {
-    return res.status(401).send('Unauthorized')
+    res.status(401).send('Unauthorized')
+  } else {
+    next()
   }
-
-  return next()
 }
-*/
 
 courseRouter.get(
   '/:id/discussions/:user_id',
-  //checkDiscussionAccess,
+  checkDiscussionAccess,
   async (req, res) => {
     const userId = decrypt(req.params.user_id)
     const { id } = req.params
@@ -225,8 +223,7 @@ courseRouter.get(
   }
 )
 
-//courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {
-courseRouter.get('/:id/discussers', async (req, res) => {
+courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {
   const { id } = req.params
 
   const discussionCounts = (await Discussion.findAll({
