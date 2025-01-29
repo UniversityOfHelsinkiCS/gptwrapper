@@ -296,6 +296,28 @@ const Course = () => {
 
       {courseEnabled && <MaxTokenUsageStudents course={course} />}
 
+      {course.saveDiscussions && (
+        <Paper
+          variant="outlined"
+          sx={{
+            padding: '2%',
+            mt: 2,
+            width: '100%',
+          }}
+        >
+          <Typography variant="h6">Tutkimuskurssi</Typography>
+          <Alert severity="warning" style={{ marginTop: 20, marginBottom: 20 }}>
+            <Typography>
+              Kurssin keskustelut talletetaan anonyymisti jos käyttäjä antaa
+              luvan
+            </Typography>
+          </Alert>
+          <Link to={`/courses/${id}/discussions`}>
+            Näytä talletetut keskustelut <OpenInNew fontSize="small" />
+          </Link>
+        </Paper>
+      )}
+
       {prompts.map((prompt) => (
         <Prompt
           key={prompt.id}
