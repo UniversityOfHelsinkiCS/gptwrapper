@@ -249,11 +249,21 @@ courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {
 
 courseRouter.put('/:id', async (req, res) => {
   const { id } = req.params
-  const { activityPeriod, model, usageLimit } = req.body as {
+  const {
+    activityPeriod,
+    model,
+    usageLimit,
+    saveDiscussions,
+    notOptoutSaving,
+  } = req.body as {
     activityPeriod: ActivityPeriod
     model: string
     usageLimit: number
+    saveDiscussions: boolean
+    notOptoutSaving: boolean
   }
+
+  console.log('->', saveDiscussions, notOptoutSaving)
 
   const chatInstance = await ChatInstance.findOne({
     where: { courseId: id },
@@ -264,6 +274,10 @@ courseRouter.put('/:id', async (req, res) => {
   chatInstance.activityPeriod = activityPeriod
   chatInstance.model = model
   chatInstance.usageLimit = usageLimit
+  if (saveDiscussions !== undefined) {
+    chatInstance.saveDiscussions = saveDiscussions
+    chatInstance.notOptoutSaving = notOptoutSaving
+  }
 
   await chatInstance.save()
 

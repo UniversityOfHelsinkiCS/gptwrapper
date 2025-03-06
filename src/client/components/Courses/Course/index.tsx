@@ -305,7 +305,7 @@ const Course = () => {
             width: '100%',
           }}
         >
-          <Typography variant="h6">Tutkimuskurssi</Typography>
+          <Typography variant="h6">{t('course:reseachCourse')}</Typography>
           <Alert severity="warning" style={{ marginTop: 20, marginBottom: 20 }}>
             <Typography>
               {course.notOptoutSaving
@@ -314,7 +314,7 @@ const Course = () => {
             </Typography>
           </Alert>
           <Link to={`/courses/${id}/discussions`}>
-            Näytä talletetut keskustelut <OpenInNew fontSize="small" />
+            {t('course:showDiscussions')} <OpenInNew fontSize="small" />
           </Link>
         </Paper>
       )}
@@ -397,7 +397,11 @@ const Course = () => {
         open={activityPeriodFormOpen}
         onClose={() => setActivityPeriodFormOpen(false)}
       >
-        <EditCourseForm course={course} setOpen={setActivityPeriodFormOpen} />
+        <EditCourseForm
+          course={course}
+          setOpen={setActivityPeriodFormOpen}
+          user={user}
+        />
       </Modal>
     </Box>
   )

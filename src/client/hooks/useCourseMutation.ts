@@ -8,6 +8,8 @@ interface UpdatedCourseData {
   activityPeriod: ActivityPeriod
   model: string
   usageLimit: number
+  saveDiscussions: boolean
+  notOptoutSaving: boolean
 }
 
 export const useEditCourseMutation = (id: string) => {

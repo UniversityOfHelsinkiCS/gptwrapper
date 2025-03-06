@@ -7,19 +7,25 @@ import {
   Select,
   MenuItem,
   TextField,
+  FormControlLabel,
+  Switch,
 } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { useTranslation } from 'react-i18next'
 import { format } from 'date-fns'
 import { enqueueSnackbar } from 'notistack'
 
-import { Course, SetState } from '../../../types'
+import { Course, SetState, User } from '../../../types'
 import { useEditCourseMutation } from '../../../hooks/useCourseMutation'
 import { validModels } from '../../../../config'
 
 const EditCourseForm = forwardRef(
   (
-    { course, setOpen }: { course: Course; setOpen: SetState<boolean> },
+    {
+      course,
+      setOpen,
+      user,
+    }: { course: Course; setOpen: SetState<boolean>; user: User },
     ref
   ) => {
     const { t } = useTranslation()
@@ -35,6 +41,12 @@ const EditCourseForm = forwardRef(
     const [endDate, setEndDate] = useState(new Date(defaultEnd))
     const [model, setModel] = useState(currentModel)
     const [usageLimit, setUsageLimit] = useState(currentUsageLimit)
+    const [saveDiscussions, setSaveDiscussions] = useState(
+      course.saveDiscussions
+    )
+    const [notOptoutSaving, setNotOptoutSaving] = useState(
+      course.notOptoutSaving
+    )
 
     const onUpdate = () => {
       const activityPeriod = {
@@ -44,7 +56,13 @@ const EditCourseForm = forwardRef(
 
       enqueueSnackbar(t('course:courseUpdated'), { variant: 'success' })
       try {
-        mutation.mutate({ activityPeriod, model, usageLimit })
+        mutation.mutate({
+          activityPeriod,
+          model,
+          usageLimit,
+          saveDiscussions,
+          notOptoutSaving,
+        })
         setOpen(false)
       } catch (error: any) {
         enqueueSnackbar(error.message, { variant: 'error' })
@@ -114,7 +132,35 @@ const EditCourseForm = forwardRef(
             </Box>
           </Box>
 
-          <Box m={1}>
+          {user.isAdmin && (
+            <Box m={1}>
+              <Typography mb={1} variant="h5">
+                {t('course:reseachCourse')}
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    onChange={() => setSaveDiscussions(!saveDiscussions)}
+                    checked={saveDiscussions}
+                  />
+                }
+                label={t('course:isReseachCourse')}
+              />
+
+              <FormControlLabel
+                control={
+                  <Switch
+                    onChange={() => setNotOptoutSaving(!notOptoutSaving)}
+                    checked={notOptoutSaving}
+                    disabled={!saveDiscussions}
+                  />
+                }
+                label={t('course:canOptOut')}
+              />
+            </Box>
+          )}
+
+          <Box m={1} style={{ marginBottom: 10 }}>
             <Button onClick={onUpdate} variant="contained">
               {t('save')}
             </Button>

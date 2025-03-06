@@ -169,6 +169,10 @@
     "lastUpdate": "Latest release: "
   },
   "course": {
+    "showDiscussions": "Show the saved discussions",
+    "reseachCourse": "Research course",
+    "isReseachCourse": "The course is a research course",
+    "canOptOut": "It is possible to opt out from saving the discussions",
     "percentageUsed": "Percentage of tokens used",
     "howToActive": "Go to Courses I teach to activate the chat",
     "coursePage": "To course page",
