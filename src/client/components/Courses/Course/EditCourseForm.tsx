@@ -69,6 +69,8 @@ const EditCourseForm = forwardRef(
       }
     }
 
+    console.log('admin', user.isAdmin)
+
     return (
       <Box ref={ref} display="flex" tabIndex={-1}>
         <Paper
