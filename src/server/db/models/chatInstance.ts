@@ -36,6 +36,8 @@ class ChatInstance extends Model<
   declare courseUnits: CreationOptional<CourseUnit[]>
 
   declare saveDiscussions: boolean
+
+  declare notOptoutSaving: boolean
 }
 
 ChatInstance.init(
@@ -96,6 +98,9 @@ ChatInstance.init(
       defaultValue: [],
     },
     saveDiscussions: {
+      type: DataTypes.BOOLEAN,
+    },
+    notOptoutSaving: {
       type: DataTypes.BOOLEAN,
     },
   },

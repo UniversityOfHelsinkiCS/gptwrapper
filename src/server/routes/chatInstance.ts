@@ -139,7 +139,7 @@ chatInstanceRouter.post('/:id/disable', async (req, res) => {
 chatInstanceRouter.get('/:id/usages', async (req, res) => {
   const { id } = req.params
 
-  const usage = await UserChatInstanceUsage.findAll({
+  const usage = (await UserChatInstanceUsage.findAll({
     where: {
       chatInstanceId: id,
     },
@@ -160,9 +160,37 @@ chatInstanceRouter.get('/:id/usages', async (req, res) => {
         as: 'chatInstance',
       },
     ],
+  })) as any[]
+
+  const anon_user = {
+    id: 'hidden',
+    student_number: 'hidden',
+    last_name: 'hidden',
+    first_names: 'hidden',
+    username: 'hidden',
+  }
+
+  const course = await ChatInstance.findByPk(id)
+
+  const usageLimit = course.usageLimit
+  const saveDiscussions = course.saveDiscussions
+
+  const sanitizedUsage = usage.map((u) => {
+    return {
+      ...u.toJSON(),
+      user: saveDiscussions ? anon_user : u.user,
+      userId:
+        !saveDiscussions || u.usageCount > 0.8 * usageLimit
+          ? u.userId
+          : 'hidden',
+      UserId:
+        !saveDiscussions || u.usageCount > 0.8 * usageLimit
+          ? u.userId
+          : 'hidden',
+    }
   })
 
-  res.status(200).send(usage)
+  res.status(200).send(sanitizedUsage)
 })
 
 chatInstanceRouter.delete('/usage/:id', async (req, res) => {

@@ -69,7 +69,9 @@
     "temperature": "Adjust the model's temperature",
     "preciseTemperature": "More precise",
     "balancedTemperature": "More balanced",
-    "creativeTemperature": "More creative"
+    "creativeTemperature": "More creative",
+    "allowSave": "The discussion can be saved",
+    "toBeSaved": "The discussion will be saved anonymously"
   },
   "email": {
     "save": "Save as email",
@@ -199,6 +201,9 @@
     "editMandatoryPrompt": "Make prompt mandatory",
     "oneMandatoryPrompt": "Course can have only one mandatory prompt",
     "noCourses": "No courses",
-    "showActiveCourses": "Show active courses"
+    "showActiveCourses": "Show active courses",
+    "isSavedOptOut": "The course discussions will be saved anonymously if you give permission to save",
+    "isSavedNotOptOut": "The course discussions will be saved anonymously",
+    "isSavedForTeacherOptOut": "The course discussions will be saved anonymously if user gives permission to save"
   }
 }

@@ -6,6 +6,7 @@ import {
   Typography,
   Switch,
   FormControlLabel,
+  Alert,
 } from '@mui/material'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import { useTranslation } from 'react-i18next'
@@ -28,6 +29,7 @@ const SendMessage = ({
   saveChat,
   saveConsent,
   setSaveConsent,
+  notOptoutSaving,
 }: {
   message: string
   setMessage: SetState<string>
@@ -43,6 +45,7 @@ const SendMessage = ({
   saveConsent: boolean
   setSaveConsent: React.Dispatch<boolean>
   saveChat: boolean
+  notOptoutSaving: boolean
 }) => {
   const { t } = useTranslation()
 
@@ -121,7 +124,7 @@ const SendMessage = ({
         <Button onClick={() => handleReset()} disabled={resetDisabled}>
           {t('reset')}
         </Button>
-        {saveChat && (
+        {!notOptoutSaving && saveChat && (
           <FormControlLabel
             control={
               <Switch
@@ -129,8 +132,13 @@ const SendMessage = ({
                 checked={saveConsent}
               />
             }
-            label="keskustelun saa tallentaa"
+            label={t('chat:allowSave')}
           />
+        )}
+        {notOptoutSaving && saveChat && (
+          <Alert severity="warning" style={{ marginLeft: 20 }}>
+            <Typography>{t('chat:toBeSaved')}</Typography>
+          </Alert>
         )}
       </Box>
     </Box>

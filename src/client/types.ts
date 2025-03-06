@@ -121,6 +121,7 @@ export interface Course extends ChatInstance {
   responsibilities: Responsebility[]
   courseUnits: CourseUnit[]
   saveDiscussions: boolean
+  notOptoutSaving: boolean
 }
 
 export type ChatInstanceUsage = {

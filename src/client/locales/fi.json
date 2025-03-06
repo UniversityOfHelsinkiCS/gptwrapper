@@ -69,7 +69,9 @@
     "temperature": "Säädä kielimallin tarkkuutta (temperature)",
     "preciseTemperature": "Tarkempi",
     "balancedTemperature": "Tasapainoisempi",
-    "creativeTemperature": "Luovempi"
+    "creativeTemperature": "Luovempi",
+    "allowSave": "Keskustelun saa tallentaa",
+    "toBeSaved": "Keskustelu tallennetaan anonyymisti"
   },
   "chats": {
     "header": "Auki olevat kurssichatit",
@@ -199,6 +201,9 @@
     "editMandatoryPrompt": "Tee alustuksesta pakollinen opiskelijoille",
     "oneMandatoryPrompt": "Kurssilla voi olla vain yksi pakollinen alustus",
     "noCourses": "Ei näytettäviä kursseja",
-    "showActiveCourses": "Näytä aktiiviset kurssit"
+    "showActiveCourses": "Näytä aktiiviset kurssit",
+    "isSavedOptOut": "Kurssin keskustelut talletetaan anonyymisti jos annat tallennusluvan",
+    "isSavedNotOptOut": "Kurssin keskustelut talletetaan anonyymisti",
+    "isSavedForTeacherOptOut": "Kurssin keskustelut talletetaan anonyymisti jos käyttäjä antaa luvan"
   }
 }

@@ -67,7 +67,7 @@ const getInitialModel = () => {
 }
 
 const CourseInfo = ({ course }: { course: Course }) => {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { language } = i18n
 
   return (
@@ -84,7 +84,9 @@ const CourseInfo = ({ course }: { course: Course }) => {
       {course.saveDiscussions && (
         <Alert severity="warning" style={{ marginTop: 20 }}>
           <Typography variant="h6">
-            Kurssin keskustelut talletetaan anonyymisti jos annat tallennusluvan
+            {course.notOptoutSaving
+              ? t('course:isSavedNotOptOut')
+              : t('course:isSavedOptOut')}
           </Typography>
         </Alert>
       )}
@@ -435,6 +437,7 @@ const Chat = () => {
         saveConsent={saveConsent}
         setSaveConsent={setSaveConsent}
         saveChat={course && course.saveDiscussions}
+        notOptoutSaving={course && course.notOptoutSaving}
       />
       <Email
         system={system}

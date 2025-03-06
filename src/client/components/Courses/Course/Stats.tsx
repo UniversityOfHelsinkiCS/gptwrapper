@@ -104,7 +104,7 @@ const Stats = ({ courseId }: { courseId: string }) => {
         </>
       )}
 
-      {usages && (
+      {usages && !course.saveDiscussions && (
         <>
           <Button
             onClick={() => setStudentListOpen(!studentListOpen)}

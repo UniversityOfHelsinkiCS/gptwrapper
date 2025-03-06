@@ -308,8 +308,9 @@ const Course = () => {
           <Typography variant="h6">Tutkimuskurssi</Typography>
           <Alert severity="warning" style={{ marginTop: 20, marginBottom: 20 }}>
             <Typography>
-              Kurssin keskustelut talletetaan anonyymisti jos käyttäjä antaa
-              luvan
+              {course.notOptoutSaving
+                ? t('course:isSavedNotOptOut')
+                : t('course:isSavedForTeacherOptOut')}
             </Typography>
           </Alert>
           <Link to={`/courses/${id}/discussions`}>
