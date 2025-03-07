@@ -206,8 +206,8 @@
     "oneMandatoryPrompt": "Kurssilla voi olla vain yksi pakollinen alustus",
     "noCourses": "Ei näytettäviä kursseja",
     "showActiveCourses": "Näytä aktiiviset kurssit",
-    "isSavedOptOut": "Kurssin keskustelut talletetaan anonyymisti jos annat tallennusluvan\n\nTallennettuja keskusteluja voidaan käyttää tutkimuksessa",
-    "isSavedNotOptOut": "Kurssin keskustelut talletetaan anonyymisti.\n\nTallennettuja keskusteluja voidaan käyttää tutkimuksessa",
-    "isSavedForTeacherOptOut": "Kurssin keskustelut talletetaan anonyymisti jos käyttäjä antaa luvan"
+    "isSavedOptOut": "Kurssin keskustelut tallennetaan anonyymisti jos annat tallennusluvan\n\nTallennettuja keskusteluja voidaan käyttää tutkimuksessa",
+    "isSavedNotOptOut": "Kurssin keskustelut tallennetaan anonyymisti.\n\nTallennettuja keskusteluja voidaan käyttää tutkimuksessa",
+    "isSavedForTeacherOptOut": "Kurssin keskustelut tallennetaan anonyymisti jos käyttäjä antaa luvan"
   }
 }
