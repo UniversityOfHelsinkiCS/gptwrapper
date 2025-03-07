@@ -207,7 +207,7 @@
     "noCourses": "No courses",
     "showActiveCourses": "Show active courses",
     "isSavedOptOut": "The course discussions will be saved anonymously if you give permission to save",
-    "isSavedNotOptOut": "The course discussions will be saved anonymously",
-    "isSavedForTeacherOptOut": "The course discussions will be saved anonymously if user gives permission to save"
+    "isSavedNotOptOut": "The course discussions will be saved anonymously\n\nSaved discussions can be used for research purposes",
+    "isSavedForTeacherOptOut": "The course discussions will be saved anonymously if user gives permission to save. Saved discussions can be used for research purposes"
   }
 }
