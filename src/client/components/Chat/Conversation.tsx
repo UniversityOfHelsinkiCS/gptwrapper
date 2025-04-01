@@ -20,6 +20,9 @@ export const Response = ({
 }) => {
   const isUser = role === 'user'
 
+  //Makes sure that single \n is made to be a line break when displaying a chat message
+  const contentWithLineBreaks = content.replace('\n', '  \n')
+
   return (
     <Box mb={2} overflow="auto">
       <Box display="inline-block">
@@ -43,7 +46,7 @@ export const Response = ({
             <Box pr={7} py={2}>
               <div id={id}>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {content}
+                  {contentWithLineBreaks}
                 </ReactMarkdown>
               </div>
             </Box>
@@ -71,9 +74,11 @@ const Conversation = ({
 
   return (
     <Box>
+      <h1>HELLO THERE</h1>
       <Box mb={1}>
         <Typography variant="h6">{t('chat:conversation')}</Typography>
       </Box>
+
       {messages.map(({ role, content }, index) => (
         <Response
           id={`message-${index}`}
