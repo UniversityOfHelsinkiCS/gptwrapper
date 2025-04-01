@@ -74,7 +74,6 @@ const Conversation = ({
 
   return (
     <Box>
-      <h1>HELLO THERE</h1>
       <Box mb={1}>
         <Typography variant="h6">{t('chat:conversation')}</Typography>
       </Box>
