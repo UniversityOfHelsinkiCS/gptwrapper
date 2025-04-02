@@ -20,8 +20,17 @@ export const Response = ({
 }) => {
   const isUser = role === 'user'
 
-  //Makes sure that single \n is made to be a line break when displaying a chat message
-  const contentWithLineBreaks = content.replace(/\n/g, '  \n')
+  //Formats input string to have correctly formatted spaces and linebreaks.
+  function formatContent(text: string): string {
+    const contentWithCorrectSpaces = text.replace(/ /g, '&nbsp;')
+    const contentWithCorrectBreaks = contentWithCorrectSpaces.replace(
+      /\n/g,
+      '  \n'
+    )
+    return contentWithCorrectBreaks
+  }
+
+  const formattedContent: string = formatContent(content)
 
   return (
     <Box mb={2} overflow="auto">
@@ -46,7 +55,10 @@ export const Response = ({
             <Box pr={7} py={2}>
               <div id={id}>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {contentWithLineBreaks}
+                  {
+                    //the check avoids a bug when the AI answers with a formatted list.
+                    isUser ? formattedContent : content
+                  }
                 </ReactMarkdown>
               </div>
             </Box>
