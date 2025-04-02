@@ -21,7 +21,7 @@ export const Response = ({
   const isUser = role === 'user'
 
   //Makes sure that single \n is made to be a line break when displaying a chat message
-  const contentWithLineBreaks = content.replace('\n', '  \n')
+  const contentWithLineBreaks = content.replace(/\n/g, '  \n')
 
   return (
     <Box mb={2} overflow="auto">
