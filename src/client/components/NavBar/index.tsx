@@ -66,9 +66,6 @@ const NavBar = () => {
             </Box>
           </MuiLink>
           <Box>
-            {user.hasIamAccess && (
-              <Button href={t('curreUrl')}>{t('curreTitle')}</Button>
-            )}
             {user.enrolledCourses.length > 0 && (
               <Link to="/chats" style={{ textDecoration: 'none' }}>
                 <Button>
