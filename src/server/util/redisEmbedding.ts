@@ -41,7 +41,7 @@ async function createIndex(): Promise<void> {
       'TYPE',
       'FLOAT32',
       'DIM',
-      '1536',
+      '768',
       'DISTANCE_METRIC',
       'COSINE'
     )
@@ -69,6 +69,8 @@ async function insertDocument(
   const float32Arr = new Float32Array(embeddingObject.embedding)
   const buffer = Buffer.from(float32Arr.buffer)
 
+  console.log(`Embedding for document ${id}:`, float32Arr) // Log the embedding as a Float32Array
+
   await redis.hset(key, 'title', title, 'content', content, 'embedding', buffer)
   console.log(`Inserted document ${id}`)
 }
@@ -79,6 +81,7 @@ export async function searchByEmbedding(queryVec: Buffer): Promise<any> {
   // to the binary query vector provided as $vec_param.
   const searchQuery = '*=>[KNN 10 @embedding $vec_param]'
   // Note the use of the "PARAMS" clause to pass in our binary vector.
+  console.log('Query vector length:', queryVec.length) // Log the query vector
   const res = await redis.call(
     'FT.SEARCH',
     'myIndex',
@@ -88,7 +91,10 @@ export async function searchByEmbedding(queryVec: Buffer): Promise<any> {
     'vec_param',
     queryVec,
     'DIALECT',
-    '2'
+    '2',
+    'RETURN',
+    '1', // Specify the number of fields to return
+    'content' // Return only the title field
   )
   console.log('Search results:', res)
   return res
