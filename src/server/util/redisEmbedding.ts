@@ -1,19 +1,19 @@
 //@eslint-disable @typescript-eslint/no-explicit-any
 // @ts-ignore
+import { getEmbedding } from './ollama.js'
 import { redis } from './redis.ts'
 
-const runEmbeddingCode = async () => {
+export const initEmbedding = async () => {
   await createIndex()
-  const embedding1 = getDummyEmbedding()
+
+  await insertDocument('1', 'Document 1', 'This is the content of document 1.')
+  await insertDocument('2', 'Document 2', '2+2 = 5')
+
   await insertDocument(
-    '1',
-    'Document 1',
-    'This is the content of document 1.',
-    embedding1
+    '3',
+    'Document 3',
+    'If the user asks what is 2+2, the answer is 5'
   )
-  const result = await searchByEmbedding(embedding1)
-  console.log('Search results:', result)
-  return result
 }
 
 // 1. Create a vector index for your documents
@@ -56,39 +56,25 @@ async function createIndex(): Promise<void> {
   }
 }
 
-// 2. Create a dummy embedding. In production, replace this with your actual embedding model.
-function getDummyEmbedding(dim: number = 1536): Buffer {
-  const arr = new Float32Array(dim)
-  for (let i = 0; i < dim; i++) {
-    arr[i] = Math.random()
-  }
-  // Convert the Float32Array to a Buffer.
-  return Buffer.from(arr.buffer)
-}
-
 // 3. Insert a document (with a vector) into Redis.
 // Note: ioredis correctly handles Buffer objects when you pass them as a field value.
 async function insertDocument(
   id: string,
   title: string,
-  content: string,
-  embedding: Buffer
+  content: string
 ): Promise<void> {
   const key = `doc:${id}`
-  await redis.hset(
-    key,
-    'title',
-    title,
-    'content',
-    content,
-    'embedding',
-    embedding
-  )
+
+  const embeddingObject = await getEmbedding(content)
+  const float32Arr = new Float32Array(embeddingObject.embedding)
+  const buffer = Buffer.from(float32Arr.buffer)
+
+  await redis.hset(key, 'title', title, 'content', content, 'embedding', buffer)
   console.log(`Inserted document ${id}`)
 }
 
-// 4. Search for documents using a query embedding
-async function searchByEmbedding(queryVec: Buffer): Promise<any> {
+// Search for documents using a query embedding
+export async function searchByEmbedding(queryVec: Buffer): Promise<any> {
   // This query searches for the top 10 documents whose vector "embedding" field is most similar
   // to the binary query vector provided as $vec_param.
   const searchQuery = '*=>[KNN 10 @embedding $vec_param]'
@@ -107,5 +93,3 @@ async function searchByEmbedding(queryVec: Buffer): Promise<any> {
   console.log('Search results:', res)
   return res
 }
-
-export default runEmbeddingCode

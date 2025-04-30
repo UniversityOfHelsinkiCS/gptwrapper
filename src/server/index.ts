@@ -13,7 +13,7 @@ import { connectToDatabase } from './db/connection'
 import seed from './db/seeders'
 import setupCron from './util/cron'
 import { updateLastRestart } from './util/lastRestart'
-import runEmbeddingCode from './util/redisEmbedding'
+import { initEmbedding } from './util/redisEmbedding'
 
 const app = express()
 
@@ -39,7 +39,7 @@ app.listen(PORT, async () => {
   await seed()
   await updateLastRestart()
   if (!inProduction) {
-    await runEmbeddingCode()
+    await initEmbedding()
   }
   if (inProduction || inStaging) {
     await setupCron()

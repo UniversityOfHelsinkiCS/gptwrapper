@@ -23,6 +23,7 @@ import { inProduction, DEFAULT_TOKEN_LIMIT, FREE_MODEL } from '../../config'
 import { pdfToText } from '../util/pdfToText'
 import { Discussion, ChatInstance } from '../db/models'
 import { getEmbedding } from '../util/ollama'
+import { searchByEmbedding } from '../util/redisEmbedding'
 
 const openaiRouter = express.Router()
 
@@ -274,11 +275,13 @@ openaiRouter.post(
   }
 )
 
-openaiRouter.post('/embed', async (req) => {
+openaiRouter.post('/embed', async (req, res) => {
   const prompt = req.body.prompt
-
   const embedding = await getEmbedding(prompt)
   console.log(embedding)
+  const buffer = Buffer.from(new Float32Array(embedding.embedding).buffer)
+  const answer = await searchByEmbedding(buffer)
+  res.json(answer)
 })
 
 export default openaiRouter
