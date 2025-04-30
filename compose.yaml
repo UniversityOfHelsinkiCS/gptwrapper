@@ -25,7 +25,7 @@ services:
     container_name: gptwrapper_db
 
   redis:
-    image: redis:7-alpine
+    image: redis/redis-stack-server
     container_name: gptwrapper_redis
 
 volumes:
