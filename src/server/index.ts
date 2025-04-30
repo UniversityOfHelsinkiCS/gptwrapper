@@ -38,7 +38,9 @@ app.listen(PORT, async () => {
   await connectToDatabase()
   await seed()
   await updateLastRestart()
-  await runEmbeddingCode()
+  if (!inProduction) {
+    await runEmbeddingCode()
+  }
   if (inProduction || inStaging) {
     await setupCron()
   }
