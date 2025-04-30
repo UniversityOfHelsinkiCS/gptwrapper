@@ -22,6 +22,7 @@ import logger from '../util/logger'
 import { inProduction, DEFAULT_TOKEN_LIMIT, FREE_MODEL } from '../../config'
 import { pdfToText } from '../util/pdfToText'
 import { Discussion, ChatInstance } from '../db/models'
+import { getEmbedding } from '../util/ollama'
 
 const openaiRouter = express.Router()
 
@@ -171,7 +172,6 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   const consentToSave =
     courseId && course.saveDiscussions && options.saveConsent
 
-  // eslint-disable-next-line no-console
   console.log('consentToSave', options.saveConsent, user.username)
 
   if (consentToSave) {
@@ -273,5 +273,12 @@ openaiRouter.post(
     return
   }
 )
+
+openaiRouter.post('/embed', async (req) => {
+  const prompt = req.body.prompt
+
+  const embedding = await getEmbedding(prompt)
+  console.log(embedding)
+})
 
 export default openaiRouter

@@ -3,6 +3,7 @@ import {
   AzureKeyCredential,
   EventStream,
   ChatCompletions,
+  GetEmbeddingsOptions,
 } from '@azure/openai'
 import { Tiktoken } from '@dqbd/tiktoken'
 import { Response } from 'express'
@@ -115,4 +116,19 @@ export const streamCompletion = async (
     tokenCount,
     response: contents.join(''),
   }
+}
+
+export const getOpenAiEmbedding = async (prompt: string) => {
+  const opts: GetEmbeddingsOptions = {
+    dimensions: 1536,
+    model: 'text-embedding-3-small',
+  }
+
+  const embedding = await client.getEmbeddings(
+    'text-embedding-3-small',
+    [prompt],
+    opts
+  )
+
+  console.log(embedding)
 }

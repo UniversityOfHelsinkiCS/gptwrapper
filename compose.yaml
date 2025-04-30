@@ -28,5 +28,13 @@ services:
     image: redis/redis-stack-server
     container_name: gptwrapper_redis
 
+  ollama:
+    image: ollama/ollama
+    ports:
+      - 11434:11434  # expose the Ollama API to the host
+    volumes:
+      - ollama_data:/root/.ollama  # persistent model storage
+
 volumes:
   pg_data:
+  ollama_data:

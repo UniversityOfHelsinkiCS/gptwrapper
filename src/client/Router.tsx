@@ -16,6 +16,7 @@ import Discussion from './components/Courses/Course/Discussion'
 import NoAccess from './components/NoAccess'
 import Chats from './components/Chats'
 import Statistics from './components/Statistics'
+import Rag from './components/Rag'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -33,6 +34,7 @@ const router = createBrowserRouter(
       <Route path="/noaccess" element={<NoAccess />} />
       <Route path="/chats" element={<Chats />} />
       <Route path="/statistics" element={<Statistics />} />
+      <Route path="/rag" element={<Rag />} />
     </Route>
   ),
   {
