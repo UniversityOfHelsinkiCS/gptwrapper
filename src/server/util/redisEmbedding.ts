@@ -43,7 +43,7 @@ async function createIndex(): Promise<void> {
       'DIM',
       '768',
       'DISTANCE_METRIC',
-      'COSINE'
+      'L2'
     )
     //console.log('Index created:', res);
   } catch (err: any) {
@@ -79,7 +79,7 @@ async function insertDocument(
 export async function searchByEmbedding(queryVec: Buffer): Promise<any> {
   // This query searches for the top 10 documents whose vector "embedding" field is most similar
   // to the binary query vector provided as $vec_param.
-  const searchQuery = '*=>[KNN 10 @embedding $vec_param]'
+  const searchQuery = '*=>[KNN 1 @embedding $vec_param]'
   // Note the use of the "PARAMS" clause to pass in our binary vector.
   console.log('Query vector length:', queryVec.length) // Log the query vector
   const res = await redis.call(
