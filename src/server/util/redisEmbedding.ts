@@ -1,7 +1,7 @@
 //@eslint-disable @typescript-eslint/no-explicit-any
 // @ts-ignore
 import { getEmbedding } from './ollama.js'
-import { redis } from './redis.ts'
+import { redisClient } from './redis'
 
 export const initEmbedding = async () => {
   await createIndex()
@@ -19,31 +19,39 @@ export const initEmbedding = async () => {
 // 1. Create a vector index for your documents
 async function createIndex(): Promise<void> {
   try {
-    // The following creates an index named "myIndex" on hashes with keys prefixed by "doc:".
-    // It defines three fields: title and content (as texts) and embedding (as a binary vector).
-    await redis.call(
-      'FT.CREATE',
-      'myIndex', // index name
-      'ON',
-      'HASH', // data type: HASH
-      'PREFIX',
-      '1',
-      'doc:', // key prefix for your documents
-      'SCHEMA',
-      'title',
-      'TEXT',
-      'content',
-      'TEXT',
-      'embedding',
-      'VECTOR',
-      'FLAT',
-      '6',
-      'TYPE',
-      'FLOAT32',
-      'DIM',
-      '768',
-      'DISTANCE_METRIC',
-      'L2'
+    await redisClient.ft.dropIndex('myIndex')
+  } catch (err: any) {
+    // If the index doesn't exist, you might get an error; handle it gracefully.
+    if (err.message.includes('Index not found')) {
+      console.log('Index not found. Moving on ...')
+    } else {
+      console.error('Error dropping index:', err)
+    }
+  }
+
+  try {
+    await redisClient.ft.create(
+      'myIndex',
+      {
+        title: {
+          type: 'TEXT',
+        },
+        content: {
+          type: 'TEXT',
+        },
+        embedding: {
+          type: 'VECTOR',
+          TYPE: 'FLOAT32',
+          ALGORITHM: 'HNSW',
+          DIM: 768,
+          DISTANCE_METRIC: 'L2',
+        },
+      },
+      {
+        ON: 'HASH',
+        PREFIX: 'doc:',
+        NOOFFSETS: true,
+      }
     )
     //console.log('Index created:', res);
   } catch (err: any) {
@@ -57,7 +65,6 @@ async function createIndex(): Promise<void> {
 }
 
 // 3. Insert a document (with a vector) into Redis.
-// Note: ioredis correctly handles Buffer objects when you pass them as a field value.
 async function insertDocument(
   id: string,
   title: string,
@@ -71,31 +78,36 @@ async function insertDocument(
 
   console.log(`Embedding for document ${id}:`, float32Arr) // Log the embedding as a Float32Array
 
-  await redis.hset(key, 'title', title, 'content', content, 'embedding', buffer)
+  await redisClient.hSet(key, {
+    title,
+    content,
+    buffer,
+  })
   console.log(`Inserted document ${id}`)
 }
 
 // Search for documents using a query embedding
 export async function searchByEmbedding(queryVec: Buffer): Promise<any> {
-  // This query searches for the top 10 documents whose vector "embedding" field is most similar
-  // to the binary query vector provided as $vec_param.
-  const searchQuery = '*=>[KNN 1 @embedding $vec_param]'
-  // Note the use of the "PARAMS" clause to pass in our binary vector.
-  console.log('Query vector length:', queryVec.length) // Log the query vector
-  const res = await redis.call(
-    'FT.SEARCH',
+  const res = await redisClient.ft.search(
     'myIndex',
-    searchQuery,
-    'PARAMS',
-    '2',
-    'vec_param',
-    queryVec,
-    'DIALECT',
-    '2',
-    'RETURN',
-    '1', // Specify the number of fields to return
-    'content' // Return only the title field
+    '*=>[KNN 3 @embedding $vec_param AS score]',
+    {
+      PARAMS: {
+        vec_param: queryVec,
+      },
+      DIALECT: 2,
+      RETURN: ['title', 'content', 'score'], // Specify the fields to return
+    }
   )
-  console.log('Search results:', res)
+
+  if (!res.documents) {
+    console.log('No documents found.')
+    return null
+  }
+
+  for (const doc of res.documents) {
+    console.log(`${doc.id}: '${doc.value.content}', Score: ${doc.value.score}`)
+  }
+
   return res
 }

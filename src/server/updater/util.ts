@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/node'
 
-import { redis } from '../util/redis'
+import { redisClient } from '../util/redis'
 import logger from '../util/logger'
 import { PartialRecord } from '../types'
 
@@ -60,9 +60,9 @@ export const safeBulkCreate = async ({
 }
 
 export const clearOffsets = async () => {
-  const keys = await redis.keys('*-offset')
+  const keys = await redisClient.keys('*-offset')
 
   for (const key of keys) {
-    await redis.del(key)
+    await redisClient.del(key)
   }
 }

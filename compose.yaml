@@ -27,6 +27,8 @@ services:
   redis:
     image: redis/redis-stack-server
     container_name: gptwrapper_redis
+    volumes:
+      - redis_data:/data
 
   ollama:
     image: ollama/ollama
@@ -37,4 +39,5 @@ services:
 
 volumes:
   pg_data:
+  redis_data:
   ollama_data:
