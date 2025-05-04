@@ -22,9 +22,6 @@ import logger from '../util/logger'
 import { inProduction, DEFAULT_TOKEN_LIMIT, FREE_MODEL } from '../../config'
 import { pdfToText } from '../util/pdfToText'
 import { Discussion, ChatInstance } from '../db/models'
-import { getEmbedding } from '../util/ollama'
-import { searchByEmbedding } from '../util/redisEmbedding'
-import { get } from 'lodash'
 
 const openaiRouter = express.Router()
 
@@ -275,24 +272,5 @@ openaiRouter.post(
     return
   }
 )
-
-function generateRandomEmbedding(): Float32Array {
-  const embedding = new Float32Array(768) // 768 dimensions
-  for (let i = 0; i < embedding.length; i++) {
-    embedding[i] = Math.random() // Random value between 0 and 1
-  }
-  return embedding
-}
-
-
-openaiRouter.post('/embed', async (req, res) => {
-  const prompt = req.body.prompt
-  console.log('Prompt:', prompt)
-  const embedding = await getEmbedding(prompt)
-  console.log(embedding)
-  const buffer = Buffer.from(new Float32Array(embedding.embedding).buffer)
-  const answer = await searchByEmbedding(buffer)
-  res.json(answer)
-})
 
 export default openaiRouter

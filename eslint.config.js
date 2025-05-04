@@ -13,8 +13,26 @@ export default [
   eslintPluginPrettierRecommended,
   {
     rules: {
+      'prettier/prettier': [
+        'warn',
+        {
+          endOfLine: 'auto',
+          singleQuote: true,
+          trailingComma: 'all',
+          printWidth: 180,
+          semi: false,
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
+      ],
     },
     languageOptions: {
       parserOptions: {

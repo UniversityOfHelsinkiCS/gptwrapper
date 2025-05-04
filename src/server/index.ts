@@ -13,7 +13,7 @@ import { connectToDatabase } from './db/connection'
 import seed from './db/seeders'
 import setupCron from './util/cron'
 import { updateLastRestart } from './util/lastRestart'
-import { initEmbedding } from './util/redisEmbedding'
+import { initRag } from './util/rag'
 
 const app = express()
 
@@ -39,11 +39,13 @@ app.listen(PORT, async () => {
   await seed()
   await updateLastRestart()
   if (!inProduction) {
-    await initEmbedding()
+    await initRag()
   }
   if (inProduction || inStaging) {
     await setupCron()
   }
 
   logger.info(`Server running on port ${PORT}`)
+
+  logger.error('Error message')
 })

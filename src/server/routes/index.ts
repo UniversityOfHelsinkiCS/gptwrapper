@@ -8,6 +8,7 @@ import initializeSentry from '../util/sentry'
 import errorHandler from '../middleware/error'
 import accessLogger from '../middleware/access'
 import openaiRouter from './openai'
+import ragRouter from './rag'
 import userRouter from './user'
 import chatInstancesRouter from './chatInstance'
 import courseRouter from './course'
@@ -34,6 +35,7 @@ router.get('/ping', (_, res) => {
 })
 
 router.use('/ai', openaiRouter)
+router.use('/rag', ragRouter)
 router.use('/users', userRouter)
 router.use('/chatinstances', chatInstancesRouter)
 router.use('/courses', courseRouter)

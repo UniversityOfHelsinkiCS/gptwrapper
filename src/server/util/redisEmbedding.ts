@@ -1,53 +1,22 @@
 //@eslint-disable @typescript-eslint/no-explicit-any
 // @ts-ignore
+import { EmbedResponse } from 'ollama'
 import { getEmbedding } from './ollama.js'
 import { redisClient } from './redis'
-import { readFile, readdir } from 'fs/promises'
 
-/**
- * Reads all markdown documents from directory ./data, splits them into chunks,
- * and inserts them into Redis with embeddings.
- */
-export const initEmbedding = async () => {
-  // 1. Create a vector index for your documents
-  await createIndex()
-  await insertDocument('asd', 'asd', 'asd') // Test document to check if the index is created correctly
-  return
+export async function createIndex(): Promise<void> {
+  /* try {
+    await redisClient.ft.dropIndex('myIndex')
 
-  // 2. Read all markdown documents from the directory
-  const files = await readdir('./data')
-  console.log('Files:', files)
-
-  // Limit to first file
-  const filesDev = files.slice(0, 1)
-
-  for (const file of filesDev) {
-    const filePath = `./data/${file}`
-    const content = await readFile(filePath, 'utf-8')
-
-    // Split by paragraphs
-    const paragraphs = content.split('\n\n')
-    for (let i = 0; i < paragraphs.length; i++) {
-      const paragraph = paragraphs[i].trim()
-      // Cleanup: if the paragraph starts with { or <, skip it
-      if (paragraph.startsWith('{') || paragraph.startsWith('<')) {
-        console.log(`Skipping paragraph ${i} in file ${file}:`, paragraph)
-        continue
-      }
-
-      if (paragraph.length > 0) {
-        // Insert each paragraph as a separate document
-        const id = `${file}-${i}`
-        await insertDocument(id, id, paragraph)
-      }
+    // Also delete the data in the index
+    const keys = await redisClient.keys('doc:*')
+    if (keys.length > 0) {
+      await redisClient.del(keys)
+      console.log('Deleted keys:', keys)
+    } else {
+      console.log('No keys to delete.')
     }
-  }
-}
 
-// 1. Create a vector index for your documents
-async function createIndex(): Promise<void> {
-  try {
-    // await redisClient.ft.dropIndex('myIndex')
     console.log('Index dropped')
   } catch (err: any) {
     // If the index doesn't exist, you might get an error; handle it gracefully.
@@ -56,7 +25,7 @@ async function createIndex(): Promise<void> {
     } else {
       console.error('Error dropping index:', err)
     }
-  }
+  } */
 
   try {
     await redisClient.ft.create(
@@ -71,18 +40,17 @@ async function createIndex(): Promise<void> {
         embedding: {
           type: 'VECTOR',
           TYPE: 'FLOAT32',
-          ALGORITHM: 'FLAT',
-          DIM: 768,
+          ALGORITHM: 'HNSW',
+          DIM: 1024,
           DISTANCE_METRIC: 'L2',
         },
       },
       {
         ON: 'HASH',
         PREFIX: 'doc:',
-        NOOFFSETS: true,
       }
     )
-    //console.log('Index created:', res);
+    console.log('Index created:', res)
   } catch (err: any) {
     // If the index already exists, you might get an error; handle it gracefully.
     if (err.message.includes('Index already exists')) {
@@ -93,8 +61,14 @@ async function createIndex(): Promise<void> {
   }
 }
 
+const embedResponseToBuffer = (embeddingObject: EmbedResponse) => {
+  const f32Arr = new Float32Array(embeddingObject.embeddings[0])
+  const buffer = Buffer.from(f32Arr.buffer)
+  return buffer
+}
+
 // 3. Insert a document (with a vector) into Redis.
-async function insertDocument(
+export async function insertDocument(
   id: string,
   title: string,
   content: string
@@ -102,32 +76,42 @@ async function insertDocument(
   const key = `doc:${id}`
 
   const embeddingObject = await getEmbedding(content)
-  const float32Arr = new Float32Array(embeddingObject.embedding)
-  const buffer = Buffer.from(float32Arr.buffer)
-
-  // console.log(`Embedding for document ${id}:`, float32Arr) // Log the embedding as a Float32Array
+  const embedding = embedResponseToBuffer(embeddingObject)
 
   await redisClient.hSet(key, {
     title,
     content,
-    buffer,
+    embedding,
   })
   console.log(`Inserted document ${id}`)
 }
 
 // Search for documents using a query embedding
-export async function searchByEmbedding(queryVec: Buffer): Promise<any> {
-  const res = await redisClient.ft.search('myIndex', '*', {
+export async function searchEmbedding(prompt: string): Promise<any> {
+  const embeddingObject = await getEmbedding(prompt)
+  const embedding = embedResponseToBuffer(embeddingObject)
+
+  // console.log(embedding.length)
+  if (embedding.length !== 4096) {
+    console.error(
+      `Query vector length ${embedding.length} does not match expected length 4096`
+    )
+    return null
+  }
+
+  const queryString = '(*)=>[KNN 5 @embedding $vec_param AS score]'
+
+  const res = await redisClient.ft.search('myIndex', queryString, {
     PARAMS: {
-      vec_param: queryVec,
+      vec_param: embedding,
     },
     DIALECT: 2,
-    RETURN: ['content', 'title'], // Specify the fields to return
+    RETURN: ['content', 'title', 'score'], // Specify the fields to return
   })
 
-  console.log(res)
+  // console.log(res)
 
-  console.log(res.documents?.length)
+  // console.log(res.documents?.length)
 
   if (!res.documents) {
     console.log('No documents found.')
@@ -135,10 +119,14 @@ export async function searchByEmbedding(queryVec: Buffer): Promise<any> {
   }
 
   for (const doc of res.documents) {
-    console.log(
-      `${doc.id}: ${doc.value.title} '${doc.value.content}', Score: ${doc.value.score}`
-    )
+    // console.log(`${doc.id}: ${doc.value.title} '${doc.value.content}', Score: ${doc.value.score}`)
   }
 
   return res
+}
+
+export const existsDocument = async (id: string): Promise<boolean> => {
+  const key = `doc:${id}`
+  const exists = await redisClient.exists(key)
+  return exists === 1
 }
