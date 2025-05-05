@@ -16,7 +16,7 @@ const formatEmail = (messages: Message[], t: any): string =>
         ${t(`email:${role}`)}
       </div>
       <div>
-        <textarea disabled="true" style="border: none;background-color:white;"> 
+        <textarea disabled="true" style="border: none;background-color:white; min-height: 100px;"> 
         ${content}
          </textarea>
       </div>
