@@ -50,7 +50,6 @@ export async function createIndex(): Promise<void> {
         PREFIX: 'doc:',
       }
     )
-    console.log('Index created:', res)
   } catch (err: any) {
     // If the index already exists, you might get an error; handle it gracefully.
     if (err.message.includes('Index already exists')) {
