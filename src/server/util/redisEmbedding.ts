@@ -117,9 +117,9 @@ export async function searchEmbedding(prompt: string): Promise<any> {
     return null
   }
 
-  for (const doc of res.documents) {
-    // console.log(`${doc.id}: ${doc.value.title} '${doc.value.content}', Score: ${doc.value.score}`)
-  }
+  // for (const doc of res.documents) {
+  // console.log(`${doc.id}: ${doc.value.title} '${doc.value.content}', Score: ${doc.value.score}`)
+  // }
 
   return res
 }
