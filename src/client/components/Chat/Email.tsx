@@ -11,14 +11,16 @@ const formatEmail = (messages: Message[], t: any): string =>
   messages
     .map(
       ({ role, content }) =>
-        ` <div style="margin-right: 10px;"> <textarea disabled="true" style="border: none;background-color:white;"> <div style="display: flex; margin-bottom: 10px;">
+        ` <div style="margin-right: 10px;"> <div style="display: flex; margin-bottom: 10px;">
      
         ${t(`email:${role}`)}
       </div>
       <div>
+        <textarea disabled="true" style="border: none;background-color:white;"> 
         ${content}
+         </textarea>
       </div>
-    </textarea></div>`
+   </div>`
     )
     .join('')
 
