@@ -112,10 +112,10 @@ export async function searchEmbedding(prompt: string): Promise<any> {
 
   // console.log(res.documents?.length)
 
-  if (!res.documents) {
-    console.log('No documents found.')
-    return null
-  }
+  // if (!res.documents) {
+  //   console.log('No documents found.')
+  //   return null
+  // }
 
   // for (const doc of res.documents) {
   // console.log(`${doc.id}: ${doc.value.title} '${doc.value.content}', Score: ${doc.value.score}`)
