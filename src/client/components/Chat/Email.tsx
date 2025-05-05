@@ -7,6 +7,16 @@ import { Message } from '../../types'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { sendEmail } from '../../util/email'
 
+const escapeHtml = (str: string): string => {
+  const escapedStr = str
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+  return escapedStr
+}
+
 const formatEmail = (messages: Message[], t: any): string =>
   messages
     .map(
@@ -17,7 +27,7 @@ const formatEmail = (messages: Message[], t: any): string =>
       </div>
       <div>
         
-        ${content}
+        ${escapeHtml(content)}
        
       </div>
    </div>`
