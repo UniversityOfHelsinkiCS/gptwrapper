@@ -39,7 +39,7 @@ app.listen(PORT, async () => {
   await seed()
   await updateLastRestart()
   if (!inProduction) {
-    await initRag()
+    //await initRag()
   }
   if (inProduction || inStaging) {
     await setupCron()
