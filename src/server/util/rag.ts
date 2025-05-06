@@ -64,6 +64,7 @@ export const initRag = async () => {
       if (await existsDocument(id)) {
         console.log(`Document ${id} already exists, skipping...`)
       } else {
+        console.log(`Inserting document ${id}...`)
         await insertDocument(id, title, content)
       }
     }
