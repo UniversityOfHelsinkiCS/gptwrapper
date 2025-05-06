@@ -21,7 +21,7 @@ const Rag: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     console.log('Form submitted with value:', inputValue)
-    const res = await apiClient.post('/rag', {
+    const res = await apiClient.post('/rag/query', {
       prompt: inputValue,
     })
     console.log('Response from server:', res.data)
