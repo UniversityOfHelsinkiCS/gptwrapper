@@ -1,8 +1,9 @@
 import { Ollama } from 'ollama'
+import { OLLAMA_HOST } from '../../config'
 
 const MODEL_NAME = 'snowflake-arctic-embed2'
 
-const ollama = new Ollama({ host: 'http://ollama:11434' })
+const ollama = new Ollama({ host: OLLAMA_HOST })
 
 ollama
   .pull({
