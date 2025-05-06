@@ -70,7 +70,7 @@ export const initRag = async () => {
       }
     }
   }
-
+  console.log('All documents inserted into Redis with embeddings.')
   await searchEmbedding('What is the purpose of this document?')
 }
 
