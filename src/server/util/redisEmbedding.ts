@@ -76,7 +76,7 @@ export async function insertDocument(
 
   const embeddingObject = await getEmbedding(content)
   const embedding = embedResponseToBuffer(embeddingObject)
-
+  console.log('got the embedding, next is saving to redis:', embedding)
   await redisClient.hSet(key, {
     title,
     content,
