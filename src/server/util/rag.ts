@@ -5,12 +5,17 @@ import {
   insertDocument,
   searchEmbedding,
 } from './redisEmbedding'
+import { getEmbedding } from './ollama'
 
 /**
  * Reads all markdown documents from directory ./data, splits them into chunks,
  * and inserts them into Redis with embeddings.
  */
 export const initRag = async () => {
+  const embedding = await getEmbedding('test')
+  console.log('Embedding:', embedding)
+  return
+
   // 1. Create a vector index for your documents
   await createIndex()
 
