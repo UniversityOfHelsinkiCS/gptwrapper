@@ -86,9 +86,10 @@ export async function insertDocument(
 
 // Search for documents using a query embedding
 export async function searchEmbedding(prompt: string): Promise<any> {
+  console.log('attempting to get embedding')
   const embeddingObject = await getEmbedding(prompt)
   const embedding = embedResponseToBuffer(embeddingObject)
-
+  console.log('got the embedding, next is searching redis:', embedding)
   // console.log(embedding.length)
   if (embedding.length !== 4096) {
     console.error(
@@ -96,7 +97,7 @@ export async function searchEmbedding(prompt: string): Promise<any> {
     )
     return null
   }
-
+  console.log('searching redis with embedding:', embedding)
   const queryString = '(*)=>[KNN 5 @embedding $vec_param AS score]'
 
   const res = await redisClient.ft.search('myIndex', queryString, {
@@ -106,8 +107,7 @@ export async function searchEmbedding(prompt: string): Promise<any> {
     DIALECT: 2,
     RETURN: ['content', 'title', 'score'], // Specify the fields to return
   })
-
-  // console.log(res)
+  console.log('search result:', res)
 
   // console.log(res.documents?.length)
 
