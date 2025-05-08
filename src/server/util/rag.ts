@@ -33,7 +33,7 @@ export const initRag = async () => {
     const sections = []
 
     for (const line of lines) {
-      console.log('Line:', line)
+      //     console.log('Line:', line)
       // Check if line starts with '#'
       if (line.startsWith('#')) {
         const content = section.join('\n')
@@ -68,11 +68,12 @@ export const initRag = async () => {
       } else {
         console.log(`Inserting document ${id}...`)
         await insertDocument(id, title, content)
+        console.log(`Inserted document ${id}`)
       }
     }
   }
   console.log('All documents inserted into Redis with embeddings.')
-  await searchEmbedding('What is the purpose of this document?')
+  //  await searchEmbedding('What is the purpose of this document?')
 }
 
 export const searchRag = async (prompt: string) => {

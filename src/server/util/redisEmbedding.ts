@@ -73,7 +73,7 @@ export async function insertDocument(
   content: string
 ): Promise<void> {
   const key = `doc:${id}`
-
+  console.log('attempting to get embedding')
   const embeddingObject = await getEmbedding(content)
   const embedding = embedResponseToBuffer(embeddingObject)
   console.log('got the embedding, next is saving to redis:', embedding)
@@ -82,7 +82,6 @@ export async function insertDocument(
     content,
     embedding,
   })
-  console.log(`Inserted document ${id}`)
 }
 
 // Search for documents using a query embedding
