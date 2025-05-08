@@ -105,7 +105,7 @@ export async function searchEmbedding(prompt: string): Promise<any> {
       vec_param: embedding,
     },
     DIALECT: 2,
-    RETURN: ['content', 'title', 'score'], // Specify the fields to return
+    RETURN: ['content', 'title', 'score'], // Specify the fields to returnF
   })
   console.log('search result:', res)
 

@@ -33,7 +33,7 @@ export const initRag = async () => {
     const sections = []
 
     for (const line of lines) {
-      //     console.log('Line:', line)
+      console.log('Line:', line)
       // Check if line starts with '#'
       if (line.startsWith('#')) {
         const content = section.join('\n')
