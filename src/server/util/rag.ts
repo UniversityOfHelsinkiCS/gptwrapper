@@ -12,6 +12,10 @@ import { getEmbedding } from './ollama'
  * and inserts them into Redis with embeddings.
  */
 export const initRag = async () => {
+  const embeddingObject = await getEmbedding('test')
+  console.log('Embedding object:', embeddingObject)
+  return
+
   // 1. Create a vector index for your documents
   await createIndex()
 
