@@ -6,7 +6,12 @@ import express from 'express'
 import 'express-async-errors'
 
 import { PORT } from './util/config'
-import { inProduction, inStaging, UPDATER_CRON_ENABLED } from '../config'
+import {
+  inProduction,
+  inStaging,
+  RAG_ENABLED,
+  UPDATER_CRON_ENABLED,
+} from '../config'
 import router from './routes'
 import logger from './util/logger'
 import { connectToDatabase } from './db/connection'
@@ -38,7 +43,7 @@ app.listen(PORT, async () => {
   await connectToDatabase()
   await seed()
   await updateLastRestart()
-  if (!inProduction && !UPDATER_CRON_ENABLED) {
+  if (RAG_ENABLED) {
     await initRag()
   }
   if (inProduction || inStaging) {
