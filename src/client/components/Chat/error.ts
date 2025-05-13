@@ -13,6 +13,8 @@ export const handleCompletionStreamError = (err: any, file: string) => {
     enqueueSnackbar(t('error:tooLargeFile'), { variant: 'error' })
   } else if (error === 'Error parsing file' && file) {
     enqueueSnackbar(t('error:fileParsingError'), { variant: 'error' })
+  } else if (error === 'TimeoutError') {
+    enqueueSnackbar(t('error:waitingForResponse'), { variant: 'error' })
   } else {
     console.error('Unexpected error in completion stream: ', error)
     enqueueSnackbar(t('error:unexpected'), { variant: 'error' })
