@@ -17,11 +17,13 @@ import NoAccess from './components/NoAccess'
 import Chats from './components/Chats'
 import Statistics from './components/Statistics'
 import Rag from './components/Rag'
+import { ChatV2 } from './components/ChatV2/ChatV2'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
       <Route index element={<Chat />} />
+      <Route path="/v2" element={<ChatV2 />} />
       <Route path="/:courseId" element={<Chat />} />
       <Route path="/courses" element={<Courses />} />
       <Route path="/courses/:id" element={<Course />} />
