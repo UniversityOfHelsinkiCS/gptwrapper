@@ -1,11 +1,11 @@
-import { TEST_COURSES } from '../util/config'
+import { TEST_COURSES } from '../../util/config'
 import {
   ChatInstance,
   Enrolment,
   Responsibility,
   User as UserModel,
-} from '../db/models'
-import { User } from '../types'
+} from '../../db/models'
+import { User } from '../../types'
 
 const getUserById = async (id: string) => UserModel.findByPk(id)
 

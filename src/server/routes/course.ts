@@ -11,7 +11,7 @@ import {
   Responsibility,
   Discussion,
 } from '../db/models'
-import { getOwnCourses } from '../chatInstances/access'
+import { getOwnCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 
 const courseRouter = express.Router()
@@ -237,7 +237,6 @@ courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {
 
   res.send(
     discussionCounts.map((disc) => {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { user_id, discussion_count } = disc.dataValues
       return {
         user_id: encrypt(user_id).encryptedData,

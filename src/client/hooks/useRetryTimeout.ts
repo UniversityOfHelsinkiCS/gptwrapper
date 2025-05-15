@@ -4,7 +4,6 @@ const useRetryTimeout = (): [
   (cb: () => Promise<void> | void, time: number) => void,
   () => void,
 ] => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setDummyState] = useState(false) // Dummy state to force re-render
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 

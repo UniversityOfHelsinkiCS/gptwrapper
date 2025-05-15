@@ -90,7 +90,6 @@ export const generateTerms = () => {
   return terms.splice(0, terms.length - 1).reverse()
 }
 
-// eslint-disable-next-line prefer-destructuring
 const ENCRYPTION_IV = process.env.ENCRYPTION_IV || 'default'
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'default'
 

@@ -6,9 +6,9 @@ import {
   getEnrolledCourseIds,
   getOwnCourses,
   getEnrolledCourses,
-} from '../chatInstances/access'
+} from '../services/chatInstances/access'
 import { User } from '../db/models'
-import { getUserStatus, getUsage } from '../chatInstances/usage'
+import { getUserStatus, getUsage } from '../services/chatInstances/usage'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { getLastRestart } from '../util/lastRestart'
 import { accessIams } from '../util/config'

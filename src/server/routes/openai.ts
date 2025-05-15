@@ -9,7 +9,7 @@ import {
   checkUsage,
   checkCourseUsage,
   incrementCourseUsage,
-} from '../chatInstances/usage'
+} from '../services/chatInstances/usage'
 import { getCompletionEvents, streamCompletion } from '../util/azure'
 import {
   getMessageContext,

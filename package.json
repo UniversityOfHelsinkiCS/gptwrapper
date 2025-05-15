@@ -10,7 +10,8 @@
     "dev": "NODE_ENV=development concurrently \"nodemon --exec node --no-warnings --experimental-specifier-resolution=node --loader ts-node/esm src/server/index.ts\" \"vite\"",
     "tsc": "tsc",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
-    "format": "prettier --write '*.{ts,json,css,md}'",
+    "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
+    "format": "prettier --write '**/*.{ts,json,css,md}'",
     "build": "vite build",
     "prepare": "husky install"
   },

@@ -1,17 +1,17 @@
 import { Tiktoken } from '@dqbd/tiktoken'
 
-import { DEFAULT_TOKEN_LIMIT } from '../../config'
-import { tikeIam } from '../util/config'
-import { User as UserType, StreamingOptions } from '../types'
+import { DEFAULT_TOKEN_LIMIT } from '../../../config'
+import { tikeIam } from '../../util/config'
+import { User as UserType, StreamingOptions } from '../../types'
 import {
   ChatInstance,
   UserChatInstanceUsage,
   User,
   Enrolment,
   Responsibility,
-} from '../db/models'
-import { getAllowedModels } from '../util/util'
-import logger from '../util/logger'
+} from '../../db/models'
+import { getAllowedModels } from '../../util/util'
+import logger from '../../util/logger'
 
 export const getUsage = async (userId: string) => {
   const { usage } = await User.findByPk(userId, {

@@ -136,6 +136,21 @@ export const ChatV2 = () => {
     }
   }
 
+  const handleReset = () => {
+    setMessages([])
+    setMessage({ content: '' })
+    setCompletion('')
+    setStreamController(undefined)
+    setTokenUsageWarning('')
+    setTokenWarningVisible(false)
+    setRetryTimeout(() => {
+      if (streamController) {
+        streamController.abort()
+      }
+    }, 5000)
+    clearRetryTimeout()
+  }
+
   return (
     <Box
       sx={{
@@ -155,24 +170,7 @@ export const ChatV2 = () => {
           content={system.content}
           setContent={(content) => setSystem({ content })}
         />
-        <Button
-          onClick={() => {
-            setMessages([])
-            setMessage({ content: '' })
-            setCompletion('')
-            setStreamController(undefined)
-            setTokenUsageWarning('')
-            setTokenWarningVisible(false)
-            setRetryTimeout(() => {
-              if (streamController) {
-                streamController.abort()
-              }
-            }, 5000)
-            clearRetryTimeout()
-          }}
-        >
-          Reset
-        </Button>
+        <Button onClick={handleReset}>Reset</Button>
       </Box>
       <Conversation messages={messages} completion={completion} />
       <ChatBox

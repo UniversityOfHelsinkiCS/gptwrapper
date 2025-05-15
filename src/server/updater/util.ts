@@ -48,9 +48,7 @@ export const safeBulkCreate = async ({
         result.push(res)
       } catch (fallbackCreateError: any) {
         logError(
-          `[UPDATER] Fallback could not create ${entityName} (${JSON.stringify(
-            entity
-          )}), reason:`,
+          `[UPDATER] Fallback could not create ${entityName} (${JSON.stringify(entity)}), reason:`,
           fallbackCreateError
         )
       }

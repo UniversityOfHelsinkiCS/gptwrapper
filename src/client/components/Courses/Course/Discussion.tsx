@@ -64,7 +64,7 @@ const Message = ({ message }: { message: MessageType }) => {
 const Discussion = () => {
   const { i18n } = useTranslation()
   const { language } = i18n
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   const { id, user_id } = useParams()
   const { user, isLoading: isUserLoading } = useCurrentUser()
   const { course, isLoading: courseLoading } = useCourse(id)

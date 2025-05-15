@@ -107,8 +107,6 @@ export const mangleData = async <T = object>(
 
   const duration = Date.now() - start
   logger.info(
-    `[UPDATER] Updated ${count} items at ${(duration / count).toFixed(
-      4
-    )}ms/item, total time ${(duration / 1000).toFixed(2)}s`
+    `[UPDATER] Updated ${count} items at ${(duration / count).toFixed(4)}ms/item, total time ${(duration / 1000).toFixed(2)}s`
   )
 }
