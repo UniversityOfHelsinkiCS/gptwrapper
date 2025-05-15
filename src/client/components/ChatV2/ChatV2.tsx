@@ -9,10 +9,12 @@ import { Message } from '../../types'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
-import { Box } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import { Disclaimer } from './Disclaimer'
 import { Conversation } from './Conversation'
 import { ChatBox } from './ChatBox'
+import { getCompletionStream } from './util'
+import { SystemPrompt } from './System'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -23,11 +25,19 @@ export const ChatV2 = () => {
     isLoading: statusLoading,
     refetch: refetchStatus,
   } = useUserStatus(courseId)
-  const [model, setModel] = useLocalStorageState(DEFAULT_MODEL, 'model')
+  const [model, setModel] = useLocalStorageState<{ name: string }>('model', {
+    name: DEFAULT_MODEL,
+  })
   const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
   const [activePromptId, setActivePromptId] = useState('')
-  const [system, setSystem] = useLocalStorageState('general-chat-system', '')
-  const [message, setMessage] = useLocalStorageState('general-chat-current', '')
+  const [system, setSystem] = useLocalStorageState<{ content: string }>(
+    'general-chat-system',
+    { content: '' }
+  )
+  const [message, setMessage] = useLocalStorageState<{ content: string }>(
+    'general-chat-current',
+    { content: '' }
+  )
   const [messages, setMessages] = useLocalStorageState<Message[]>(
     'general-chat-messages',
     []
@@ -70,38 +80,107 @@ export const ChatV2 = () => {
         const text = decoder.decode(value)
         setCompletion((prev) => prev + text)
         content += text
+        console.log(text)
       }
 
-      setMessages(messages.concat({ role: 'assistant', content }))
+      setMessages((prev: Message[]) =>
+        prev.concat({ role: 'assistant', content })
+      )
     } catch (err: any) {
       handleCompletionStreamError(err, fileName)
     } finally {
       setStreamController(undefined)
       setCompletion('')
       refetchStatus()
-      inputFileRef.current.value = ''
+      // inputFileRef.current.value = ''
       setFileName('')
       clearRetryTimeout()
     }
   }
 
+  const handleSubmit = async (message: string) => {
+    const newMessages = messages.concat({ role: 'user', content: message })
+    setMessages(newMessages)
+    setMessage({ content: '' })
+    setCompletion('')
+    setStreamController(new AbortController())
+    setRetryTimeout(() => {
+      if (streamController) {
+        streamController.abort()
+      }
+    }, 5000)
+
+    try {
+      const { tokenUsageAnalysis, stream } = await getCompletionStream({
+        system: system.content,
+        messages: newMessages,
+        model: model.name,
+        formData: new FormData(),
+        userConsent: true,
+        modelTemperature,
+        courseId,
+        abortController: streamController,
+        saveConsent,
+      })
+
+      if (tokenUsageAnalysis && tokenUsageAnalysis.message) {
+        setTokenUsageWarning(tokenUsageAnalysis.message)
+        setTokenWarningVisible(true)
+        return
+      }
+
+      clearRetryTimeout()
+      await processStream(stream)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }
+
   return (
-    <Box>
-      {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
-      <Conversation messages={messages} />
-      <ChatBox
-        disabled={false}
-        onSubmit={(message) => {
-          if (message.trim()) {
-            setMessages(messages.concat({ role: 'user', content: message }))
-            setMessage('')
+    <Box
+      sx={{
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          gap: '1rem',
+        }}
+      >
+        {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
+        <SystemPrompt
+          content={system.content}
+          setContent={(content) => setSystem({ content })}
+        />
+        <Button
+          onClick={() => {
+            setMessages([])
+            setMessage({ content: '' })
             setCompletion('')
-            setStreamController(new AbortController())
+            setStreamController(undefined)
+            setTokenUsageWarning('')
+            setTokenWarningVisible(false)
             setRetryTimeout(() => {
               if (streamController) {
                 streamController.abort()
               }
             }, 5000)
+            clearRetryTimeout()
+          }}
+        >
+          Reset
+        </Button>
+      </Box>
+      <Conversation messages={messages} completion={completion} />
+      <ChatBox
+        disabled={false}
+        onSubmit={(message) => {
+          if (message.trim()) {
+            handleSubmit(message)
+            setMessage({ content: '' })
           }
         }}
       />

@@ -1,5 +1,5 @@
 import { Send } from '@mui/icons-material'
-import { IconButton, TextField } from '@mui/material'
+import { Container, IconButton, Paper, TextField } from '@mui/material'
 import { useState } from 'react'
 
 export const ChatBox = ({
@@ -20,26 +20,53 @@ export const ChatBox = ({
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <TextField
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type your message here..."
-        fullWidth
-        disabled={disabled}
-        variant="outlined"
-        size="small"
-        sx={{ marginBottom: '1rem' }}
-        slotProps={{
-          input: {
-            endAdornment: (
-              <IconButton type="submit" disabled={disabled}>
-                <Send />
-              </IconButton>
-            ),
-          },
+    <Container
+      disableGutters
+      sx={{
+        position: 'fixed',
+        bottom: '8rem',
+        // width: '100%',
+      }}
+    >
+      <Paper
+        sx={{
+          marginBottom: '1rem',
         }}
-      />
-    </form>
+        elevation={3}
+        component="form"
+        onSubmit={handleSubmit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault()
+            handleSubmit(e)
+          }
+        }}
+      >
+        <TextField
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Type your message here..."
+          fullWidth
+          multiline
+          disabled={disabled}
+          variant="standard"
+          sx={{ padding: '0.5rem' }}
+          slotProps={{
+            input: {
+              sx: {
+                padding: '0.5rem',
+                fontSize: '1.5rem',
+                // lineHeight: '1.5rem',
+              },
+              endAdornment: (
+                <IconButton disabled={disabled} type="submit">
+                  <Send />
+                </IconButton>
+              ),
+            },
+          }}
+        />
+      </Paper>
+    </Container>
   )
 }

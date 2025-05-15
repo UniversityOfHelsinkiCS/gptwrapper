@@ -1,8 +1,4 @@
-import * as dotenv from 'dotenv'
-
 import { inProduction, inDevelopment } from '../../config'
-
-dotenv.config()
 
 export const PORT = process.env.PORT || 8000
 

@@ -19,7 +19,7 @@ export const DEFAULT_TOKEN_LIMIT =
   Number(process.env.DEFAULT_TOKEN_LIMIT) || 150_000
 
 export const FREE_MODEL = process.env.FREE_MODEL || 'gpt-4o-mini' // as it was decided in 23th Sept 2024 meeting
-export const DEFAULT_MODEL = process.env.DEFAUL_MODEL || 'gpt-4o'
+export const DEFAULT_MODEL = process.env.DEFAUL_MODEL || 'gpt-4o-mini'
 export const DEFAUL_CONTEXT_LIMIT =
   Number(process.env.DEFAUL_CONTEXT_LIMIT) || 4_096
 
@@ -54,5 +54,7 @@ export const validModels = [
         },
       ]
 )
+
+console.log(`Valid models: ${JSON.stringify(validModels, null, 2)}`)
 
 export const DEFAULT_MODEL_ON_ENABLE = 'gpt-4o'

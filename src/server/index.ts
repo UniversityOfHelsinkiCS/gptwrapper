@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 import path from 'path'
 import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -51,6 +53,4 @@ app.listen(PORT, async () => {
   }
 
   logger.info(`Server running on port ${PORT}`)
-
-  logger.error('Error message')
 })

@@ -58,7 +58,10 @@ export const getCompletionEvents = async ({
 }: AzureOptions) => {
   const deploymentId = validModels.find((m) => m.name === model)?.deployment
 
-  if (!deploymentId) throw new Error(`Invalid model: ${model}`)
+  if (!deploymentId)
+    throw new Error(
+      `Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`
+    )
 
   if (deploymentId === 'mock') return getMockCompletionEvents()
 
