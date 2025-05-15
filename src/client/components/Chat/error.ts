@@ -1,10 +1,12 @@
 import { t } from 'i18next'
+import { console } from 'inspector'
 import { enqueueSnackbar } from 'notistack'
 
 /**
  * Handle error messages related to completion stream creation
  */
 export const handleCompletionStreamError = (err: any, file: string) => {
+  console.log('Error in completion stream: ', err)
   if (err?.name === 'AbortError' || !err) return
 
   const error = err?.response?.data || err.message
