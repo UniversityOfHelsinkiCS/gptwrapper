@@ -16,7 +16,7 @@ export const handleCompletionStreamError = (err: any, file: string) => {
   } else if (error === 'TimeoutError') {
     enqueueSnackbar(t('error:waitingForResponse'), { variant: 'error' })
   } else {
-    console.error('Unexpected error in completion stream: ', error)
+    console.log('Unexpected error in completion stream: ', error)
     enqueueSnackbar(t('error:unexpected'), { variant: 'error' })
   }
 }
