@@ -2,19 +2,14 @@ import express from 'express'
 
 import { ChatInstance, ChatRequest } from '../types'
 import logger from '../util/logger'
-import {
-  getEnrolledCourseIds,
-  getOwnCourses,
-  getEnrolledCourses,
-} from '../services/chatInstances/access'
+import { getEnrolledCourseIds, getOwnCourses, getEnrolledCourses } from '../services/chatInstances/access'
 import { User } from '../db/models'
 import { getUserStatus, getUsage } from '../services/chatInstances/usage'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { getLastRestart } from '../util/lastRestart'
 import { accessIams } from '../util/config'
 
-export const checkIamAccess = (iamGroups: string[]) =>
-  accessIams.some((iam) => iamGroups.includes(iam))
+export const checkIamAccess = (iamGroups: string[]) => accessIams.some((iam) => iamGroups.includes(iam))
 
 const userRouter = express.Router()
 
@@ -55,18 +50,14 @@ userRouter.get('/login', async (req, res) => {
 
   const enrolledCourses = await getEnrolledCourses(user)
 
-  const isNowOrInFuture = ({ chatInstance }: { chatInstance: ChatInstance }) =>
-    chatInstance.usageLimit > 0 &&
-    new Date() <= new Date(chatInstance.activityPeriod.endDate)
+  const isNowOrInFuture = ({ chatInstance }: { chatInstance: ChatInstance }) => chatInstance.usageLimit > 0 && new Date() <= new Date(chatInstance.activityPeriod.endDate)
 
   res.send({
     ...user,
     usage,
     hasIamAccess: isAdmin || hasIamAccess,
     lastRestart,
-    enrolledCourses: enrolledCourses
-      .filter(isNowOrInFuture)
-      .map((enrollment) => enrollment.chatInstance),
+    enrolledCourses: enrolledCourses.filter(isNowOrInFuture).map((enrollment) => enrollment.chatInstance),
   })
   return
 })
@@ -82,9 +73,7 @@ userRouter.get('/status', async (req, res) => {
   }
 
   const usage = await getUsage(id)
-  const limit = user.isPowerUser
-    ? 10 * DEFAULT_TOKEN_LIMIT
-    : DEFAULT_TOKEN_LIMIT
+  const limit = user.isPowerUser ? 10 * DEFAULT_TOKEN_LIMIT : DEFAULT_TOKEN_LIMIT
 
   res.send({
     usage,

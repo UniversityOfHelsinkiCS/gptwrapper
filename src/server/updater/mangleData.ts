@@ -14,8 +14,7 @@ const logError = (message: string, error: Error) => {
  * Stop Updater from running indefinitely, crashing Norppa and messing up logs
  */
 const checkTimeout = (start: number) => {
-  if (Date.now() - start > 7_200_000)
-    throw new Error('Updater time limit exceeded!')
+  if (Date.now() - start > 7_200_000) throw new Error('Updater time limit exceeded!')
   return true
 }
 
@@ -28,12 +27,7 @@ const checkTimeout = (start: number) => {
  * @param {(data: object[]) => Promise<void>} handler handler function to mangel and store entities in db
  * @param {Date} since date since the data is to be fetched
  */
-export const mangleData = async <T = object>(
-  url: string,
-  limit: number,
-  handler: (data: T[]) => Promise<void>,
-  since: Date = null
-) => {
+export const mangleData = async <T = object>(url: string, limit: number, handler: (data: T[]) => Promise<void>, since: Date = null) => {
   logger.info(`[UPDATER] Starting to update items with url ${url}`)
   const offsetKey = `${url}-offset`
   const start = Date.now()
@@ -106,7 +100,5 @@ export const mangleData = async <T = object>(
   }
 
   const duration = Date.now() - start
-  logger.info(
-    `[UPDATER] Updated ${count} items at ${(duration / count).toFixed(4)}ms/item, total time ${(duration / 1000).toFixed(2)}s`
-  )
+  logger.info(`[UPDATER] Updated ${count} items at ${(duration / count).toFixed(4)}ms/item, total time ${(duration / 1000).toFixed(2)}s`)
 }

@@ -23,16 +23,9 @@ export class Embedder extends Transform {
     mkdirSync(this.cachePath, { recursive: true })
   }
 
-  async _transform(
-    chunk: Chunk,
-    _encoding: BufferEncoding,
-    callback: (error?: Error | null) => void
-  ) {
+  async _transform(chunk: Chunk, _encoding: BufferEncoding, callback: (error?: Error | null) => void) {
     try {
-      const embedding = await getEmbeddingVector(
-        this.client,
-        chunk.content.join('\n')
-      )
+      const embedding = await getEmbeddingVector(this.client, chunk.content.join('\n'))
       const embeddedChunk: EmbeddedChunk = {
         ...chunk,
         embedding,

@@ -8,12 +8,7 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import { sendEmail } from '../../util/email'
 
 const escapeHtml = (str: string): string => {
-  const escapedStr = str
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;')
+  const escapedStr = str.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;')
   return escapedStr
 }
 
@@ -30,21 +25,11 @@ const formatEmail = (messages: Message[], t: any): string =>
         ${escapeHtml(content)}
        
       </div>
-   </div>`
+   </div>`,
     )
     .join('')
 
-const Email = ({
-  system,
-  messages,
-  disabled,
-  hidePrompt,
-}: {
-  system: string
-  messages: Message[]
-  disabled: boolean
-  hidePrompt: boolean
-}) => {
+const Email = ({ system, messages, disabled, hidePrompt }: { system: string; messages: Message[]; disabled: boolean; hidePrompt: boolean }) => {
   const { t } = useTranslation()
   const { user, isLoading } = useCurrentUser()
 
@@ -55,10 +40,7 @@ const Email = ({
   const handleSend = async () => {
     const systemMessage: Message = { role: 'system', content: system }
 
-    const newMessages =
-      systemMessage.content && !hidePrompt
-        ? [].concat(systemMessage, messages)
-        : messages
+    const newMessages = systemMessage.content && !hidePrompt ? [].concat(systemMessage, messages) : messages
 
     const date = new Date()
 

@@ -12,16 +12,13 @@ const transports = []
 transports.push(new winston.transports.File({ filename: 'debug.log' }))
 
 if (!inProduction) {
-  const devFormat = printf(
-    ({ level, message, timestamp, ...rest }) =>
-      `${timestamp} ${level}: ${message} ${JSON.stringify(rest)}`
-  )
+  const devFormat = printf(({ level, message, timestamp, ...rest }) => `${timestamp} ${level}: ${message} ${JSON.stringify(rest)}`)
 
   transports.push(
     new winston.transports.Console({
       level: 'debug',
       format: combine(splat(), timestamp(), devFormat),
-    })
+    }),
   )
 } else {
   const levels: { [key: string]: number } = {
@@ -38,7 +35,7 @@ if (!inProduction) {
     JSON.stringify({
       level: levels[level],
       ...rest,
-    })
+    }),
   )
   transports.push(new winston.transports.Console({ format: prodFormat }))
 
@@ -53,7 +50,7 @@ if (!inProduction) {
         app: 'gptwrapper',
         environment: 'production',
       },
-    })
+    }),
   )
 }
 

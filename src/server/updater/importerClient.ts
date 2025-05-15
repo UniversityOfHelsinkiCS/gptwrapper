@@ -20,11 +20,7 @@ const importerClient = axios.create({
 
 const defaultValidator = () => true
 
-export const fetchData = async <T = unknown>(
-  url: string,
-  params: Record<string, any> = {},
-  validator: (data: T) => boolean = defaultValidator
-): Promise<T> => {
+export const fetchData = async <T = unknown>(url: string, params: Record<string, any> = {}, validator: (data: T) => boolean = defaultValidator): Promise<T> => {
   const { data } = await importerClient.get(`curre/${url}`, {
     params,
   })
@@ -32,9 +28,7 @@ export const fetchData = async <T = unknown>(
   if (data.waitAndRetry) {
     // importer is working to prepare data. Wait a bit and try again
     const waitTime = data.waitTime ?? 1000
-    logger.info(
-      `[UPDATER] Importer told me to wait ${waitTime}ms before retrying`
-    )
+    logger.info(`[UPDATER] Importer told me to wait ${waitTime}ms before retrying`)
     await new Promise((resolve) => {
       setTimeout(resolve, waitTime)
     })
@@ -42,9 +36,7 @@ export const fetchData = async <T = unknown>(
   }
 
   if (!validator(data)) {
-    throw new Error(
-      `[UPDATER] Invalid data received from importer: ${JSON.stringify(data)}`
-    )
+    throw new Error(`[UPDATER] Invalid data received from importer: ${JSON.stringify(data)}`)
   }
 
   return data

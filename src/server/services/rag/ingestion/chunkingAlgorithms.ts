@@ -94,11 +94,7 @@ export const createStaticChunks = (file: FileData): Chunk[] => {
   const chunks: Chunk[] = []
 
   for (let i = 1; i < lines.length - 1; i++) {
-    const chunkContent = [
-      lines[i - 1].trim(),
-      lines[i].trim(),
-      lines[i + 1].trim(),
-    ]
+    const chunkContent = [lines[i - 1].trim(), lines[i].trim(), lines[i + 1].trim()]
 
     chunks.push({
       id: `${file.fileName}-${i}`,

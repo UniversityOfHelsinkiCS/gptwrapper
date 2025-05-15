@@ -7,26 +7,13 @@ import CopyToClipboardButton from './CopyToClipboardButton'
 
 import { Message, Role } from '../../types'
 
-export const Response = ({
-  role,
-  content,
-  setMessage,
-  id,
-}: {
-  role: Role
-  content: string
-  setMessage?: any
-  id: string
-}) => {
+export const Response = ({ role, content, setMessage, id }: { role: Role; content: string; setMessage?: any; id: string }) => {
   const isUser = role === 'user'
 
   //Formats input string to have correctly formatted spaces and linebreaks.
   function formatContent(text: string): string {
     const contentWithCorrectSpaces = text.replace(/ /g, '&nbsp;')
-    const contentWithCorrectBreaks = contentWithCorrectSpaces.replace(
-      /\n/g,
-      '  \n'
-    )
+    const contentWithCorrectBreaks = contentWithCorrectSpaces.replace(/\n/g, '  \n')
     return contentWithCorrectBreaks
   }
 
@@ -39,16 +26,12 @@ export const Response = ({
           <Box display="flex">
             {isUser ? (
               <>
-                {setMessage && (
-                  <CopyToClipboardButton copied={content} id={id} />
-                )}
+                {setMessage && <CopyToClipboardButton copied={content} id={id} />}
                 <Person sx={{ mx: 3, my: 4 }} />
               </>
             ) : (
               <>
-                {setMessage && (
-                  <CopyToClipboardButton copied={content} id={id} />
-                )}
+                {setMessage && <CopyToClipboardButton copied={content} id={id} />}
                 <Assistant sx={{ mx: 3, my: 4 }} />
               </>
             )}
@@ -69,17 +52,7 @@ export const Response = ({
   )
 }
 
-const Conversation = ({
-  messages,
-  completion,
-  handleStop = () => {},
-  setMessage,
-}: {
-  messages: Message[]
-  completion: string
-  handleStop?: () => void
-  setMessage?: any
-}) => {
+const Conversation = ({ messages, completion, handleStop = () => {}, setMessage }: { messages: Message[]; completion: string; handleStop?: () => void; setMessage?: any }) => {
   const { t } = useTranslation()
 
   if (messages.length === 0 && !completion) return null
@@ -91,25 +64,13 @@ const Conversation = ({
       </Box>
 
       {messages.map(({ role, content }, index) => (
-        <Response
-          id={`message-${index}`}
-          key={content + index}
-          role={role}
-          content={content}
-          setMessage={setMessage}
-        />
+        <Response id={`message-${index}`} key={content + index} role={role} content={content} setMessage={setMessage} />
       ))}
       {completion && (
         <>
           <Stack direction="row" spacing={4} mb="1rem" mt="2rem">
             <div className="loader" />
-            <Button
-              onClick={handleStop}
-              variant="outlined"
-              color="error"
-              size="small"
-              endIcon={<Stop />}
-            >
+            <Button onClick={handleStop} variant="outlined" color="error" size="small" endIcon={<Stop />}>
               {t('chat:stop')}
             </Button>
           </Stack>

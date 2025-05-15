@@ -1,14 +1,4 @@
-import {
-  Table,
-  TableContainer,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Box,
-} from '@mui/material'
+import { Table, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Box } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 import { Faculty, Locales, User } from '../../../types'
@@ -24,8 +14,7 @@ const calculateFacultyUsage = (users: User[], faculties: Faculty[]) => {
   users.forEach(({ usage, iamGroups }) => {
     faculties.forEach(({ code, iams }) => {
       if (iams.some((iam) => iamGroups.includes(iam))) {
-        facultyUsage.find(({ faculty }) => faculty.code === code).usageCount +=
-          usage
+        facultyUsage.find(({ faculty }) => faculty.code === code).usageCount += usage
       }
     })
   })
@@ -33,8 +22,7 @@ const calculateFacultyUsage = (users: User[], faculties: Faculty[]) => {
   return facultyUsage
 }
 
-const sortUsage = (a: { faculty: Faculty }, b: { faculty: Faculty }) =>
-  a.faculty.code.localeCompare(b.faculty.code)
+const sortUsage = (a: { faculty: Faculty }, b: { faculty: Faculty }) => a.faculty.code.localeCompare(b.faculty.code)
 
 const FacultyTable = () => {
   const { users, isLoading } = useUsers()
@@ -70,10 +58,7 @@ const FacultyTable = () => {
             {sortedUsage.map(({ faculty, usageCount }) => (
               <TableRow key={faculty.code}>
                 <TableCell component="th" scope="row">
-                  <Typography variant="h6">
-                    {faculty.name[i18n.language as keyof Locales] ??
-                      faculty.name.fi}
-                  </Typography>
+                  <Typography variant="h6">{faculty.name[i18n.language as keyof Locales] ?? faculty.name.fi}</Typography>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="h6">{usageCount}</Typography>

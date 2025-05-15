@@ -8,10 +8,7 @@ interface CopyToClipboardButtonProps {
   id: string
 }
 
-const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
-  copied,
-  id,
-}) => {
+const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ copied, id }) => {
   const [open, setOpen] = useState(false)
 
   const handleClick = () => {
@@ -35,13 +32,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
       <IconButton onClick={handleClick} color="primary">
         <ContentCopy />
       </IconButton>
-      <Snackbar
-        message="Copied to clipboard"
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        autoHideDuration={2000}
-        onClose={() => setOpen(false)}
-        open={open}
-      />
+      <Snackbar message="Copied to clipboard" anchorOrigin={{ vertical: 'top', horizontal: 'center' }} autoHideDuration={2000} onClose={() => setOpen(false)} open={open} />
     </Box>
   )
 }

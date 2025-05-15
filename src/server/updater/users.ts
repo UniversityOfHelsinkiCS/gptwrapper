@@ -26,9 +26,7 @@ const usersHandler = async (users: SisuUser[]) => {
     return {
       id: user.id,
       language: parsePreferredLanguageUrnToLanguage(user.preferredLanguageUrn),
-      username: user.eduPersonPrincipalName
-        ? user.eduPersonPrincipalName.split('@')[0]
-        : user.id,
+      username: user.eduPersonPrincipalName ? user.eduPersonPrincipalName.split('@')[0] : user.id,
       active_course_ids: [],
       lastName: user.lastName,
       firstNames: user.firstNames,
@@ -37,15 +35,7 @@ const usersHandler = async (users: SisuUser[]) => {
     }
   })
 
-  const fieldsToUpdate = [
-    'language',
-    'username',
-    'lastName',
-    'last_name',
-    'firstNames',
-    'studentNumber',
-    'primaryEmail',
-  ]
+  const fieldsToUpdate = ['language', 'username', 'lastName', 'last_name', 'firstNames', 'studentNumber', 'primaryEmail']
 
   await safeBulkCreate({
     entityName: 'User',

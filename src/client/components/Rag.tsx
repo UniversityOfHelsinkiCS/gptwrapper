@@ -41,13 +41,7 @@ const Rag: React.FC = () => {
         margin: '0 auto',
       }}
     >
-      <TextField
-        label="Enter text"
-        variant="outlined"
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        fullWidth
-      />
+      <TextField label="Enter text" variant="outlined" value={inputValue} onChange={(e) => setInputValue(e.target.value)} fullWidth />
       <Button type="submit" variant="contained" color="primary">
         Submit
       </Button>
@@ -66,9 +60,7 @@ const Rag: React.FC = () => {
             <Box key={doc.id} sx={{ marginBottom: 1 }}>
               <Typography variant="subtitle1">{doc.value.title}</Typography>
               <Typography variant="body2">{doc.value.content}</Typography>
-              <Typography variant="caption">
-                Score: {doc.value.score}
-              </Typography>
+              <Typography variant="caption">Score: {doc.value.score}</Typography>
             </Box>
           ))}
         </Box>

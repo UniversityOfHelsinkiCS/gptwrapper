@@ -6,13 +6,7 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TablePagination from '@mui/material/TablePagination'
-import {
-  TextField,
-  Link,
-  TableSortLabel,
-  Checkbox,
-  InputLabel,
-} from '@mui/material'
+import { TextField, Link, TableSortLabel, Checkbox, InputLabel } from '@mui/material'
 import TableRow from '@mui/material/TableRow'
 import { debounce } from 'lodash'
 import Paper from '@mui/material/Paper'
@@ -86,36 +80,22 @@ const Head = ({
   order,
   orderBy,
 }: {
-  onRequestSort: (
-    event: React.MouseEvent<unknown>,
-    property: keyof ChatInstanceWithTokens
-  ) => void
+  onRequestSort: (event: React.MouseEvent<unknown>, property: keyof ChatInstanceWithTokens) => void
   order: Order
   orderBy: string
 }) => {
   const { t } = useTranslation()
 
-  const createSortHandler =
-    (property: keyof ChatInstanceWithTokens) =>
-    (event: React.MouseEvent<unknown>) => {
-      onRequestSort(event, property)
-    }
+  const createSortHandler = (property: keyof ChatInstanceWithTokens) => (event: React.MouseEvent<unknown>) => {
+    onRequestSort(event, property)
+  }
 
   return (
     <TableHead>
       <TableRow>
         {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'normal'}
-            sx={{ pl: 1 }}
-          >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : 'asc'}
-              onClick={createSortHandler(headCell.id)}
-            >
+          <TableCell key={headCell.id} align={headCell.numeric ? 'right' : 'left'} padding={headCell.disablePadding ? 'none' : 'normal'} sx={{ pl: 1 }}>
+            <TableSortLabel active={orderBy === headCell.id} direction={orderBy === headCell.id ? order : 'asc'} onClick={createSortHandler(headCell.id)}>
               {t(`admin:${headCell.id}`)}
               {orderBy === headCell.id ? (
                 <Box component="span" sx={visuallyHidden}>
@@ -140,10 +120,7 @@ const ChatInstanceTableChatInstanceWithTokens = React.memo(
     rows: ChatInstanceWithTokens[]
     order: Order
     orderBy: string
-    onRequestSort: (
-      event: React.MouseEvent<unknown>,
-      property: keyof ChatInstanceWithTokens
-    ) => void
+    onRequestSort: (event: React.MouseEvent<unknown>, property: keyof ChatInstanceWithTokens) => void
   }) => {
     const { i18n } = useTranslation()
 
@@ -156,13 +133,7 @@ const ChatInstanceTableChatInstanceWithTokens = React.memo(
           <TableBody>
             {rows.map((row) => (
               <TableRow role="checkbox" key={row.id}>
-                <TableCell
-                  component="th"
-                  scope="row"
-                  padding="none"
-                  width="40%"
-                  sx={{ pl: 1 }}
-                >
+                <TableCell component="th" scope="row" padding="none" width="40%" sx={{ pl: 1 }}>
                   <Link to={`/courses/${row.courseId}`} component={RouterLink}>
                     {row.name[language]}
                   </Link>
@@ -187,7 +158,7 @@ const ChatInstanceTableChatInstanceWithTokens = React.memo(
         </Table>
       </TableContainer>
     )
-  }
+  },
 )
 
 const ChatInstanceTable = () => {
@@ -195,8 +166,7 @@ const ChatInstanceTable = () => {
   const [search, setSearch] = React.useState('')
   const deferredSearch = React.useDeferredValue(search)
   const [order, setOrder] = React.useState<Order>('asc')
-  const [orderBy, setOrderBy] =
-    React.useState<keyof ChatInstanceWithTokens>('name')
+  const [orderBy, setOrderBy] = React.useState<keyof ChatInstanceWithTokens>('name')
   const [showActiveCourses, setShowActiveCourses] = React.useState(false)
 
   const [page, setPage] = React.useState(0)
@@ -211,34 +181,22 @@ const ChatInstanceTable = () => {
     showActiveCourses,
   })
 
-  const handleChangePage = React.useCallback(
-    (event: unknown, newPage: number) => {
-      setPage(newPage)
-    },
-    []
-  )
+  const handleChangePage = React.useCallback((event: unknown, newPage: number) => {
+    setPage(newPage)
+  }, [])
 
-  const handleChangeRowsPerPage = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setRowsPerPage(parseInt(event.target.value, 10))
-      setPage(0)
-    },
-    []
-  )
+  const handleChangeRowsPerPage = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
+  }, [])
 
-  const handleChangeSearch = debounce(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newSearch = event.target.value
-      if (newSearch && newSearch.length < 4) return
-      setSearch(newSearch)
-    },
-    300
-  )
+  const handleChangeSearch = debounce((event: React.ChangeEvent<HTMLInputElement>) => {
+    const newSearch = event.target.value
+    if (newSearch && newSearch.length < 4) return
+    setSearch(newSearch)
+  }, 300)
 
-  const handleRequestSort = (
-    event: React.MouseEvent<unknown>,
-    property: keyof ChatInstanceWithTokens
-  ) => {
+  const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof ChatInstanceWithTokens) => {
     const isAsc = orderBy === property && order === 'asc'
     setOrder(isAsc ? 'desc' : 'asc')
     setOrderBy(property)
@@ -249,22 +207,13 @@ const ChatInstanceTable = () => {
       <Paper sx={{ width: '100%', mb: 2 }}>
         <Box>
           <InputLabel>
-            <Checkbox
-              checked={showActiveCourses}
-              onChange={() => setShowActiveCourses(!showActiveCourses)}
-              inputProps={{ 'aria-label': 'controlled' }}
-            />
+            <Checkbox checked={showActiveCourses} onChange={() => setShowActiveCourses(!showActiveCourses)} inputProps={{ 'aria-label': 'controlled' }} />
 
             {t(`course:showActiveCourses`)}
           </InputLabel>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <TextField
-            label={t('admin:searchCourse')}
-            variant="outlined"
-            sx={{ flex: 1, m: 1 }}
-            onChange={handleChangeSearch}
-          />
+          <TextField label={t('admin:searchCourse')} variant="outlined" sx={{ flex: 1, m: 1 }} onChange={handleChangeSearch} />
           <TablePagination
             rowsPerPageOptions={[10, 50, 100]}
             component="div"
@@ -276,14 +225,7 @@ const ChatInstanceTable = () => {
             labelRowsPerPage={t('admin:rowsPerPage')}
           />
         </Box>
-        {!isLoading && (
-          <ChatInstanceTableChatInstanceWithTokens
-            rows={chatInstances}
-            onRequestSort={handleRequestSort}
-            order={order}
-            orderBy={orderBy}
-          />
-        )}
+        {!isLoading && <ChatInstanceTableChatInstanceWithTokens rows={chatInstances} onRequestSort={handleRequestSort} order={order} orderBy={orderBy} />}
       </Paper>
     </Box>
   )

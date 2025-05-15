@@ -2,15 +2,7 @@ import express from 'express'
 import { Op, Sequelize } from 'sequelize'
 
 import { ActivityPeriod, RequestWithUser } from '../types'
-import {
-  ChatInstance,
-  Enrolment,
-  UserChatInstanceUsage,
-  Prompt,
-  User,
-  Responsibility,
-  Discussion,
-} from '../db/models'
+import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, User, Responsibility, Discussion } from '../db/models'
 import { getOwnCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 
@@ -52,9 +44,7 @@ courseRouter.get('/user', async (req, res) => {
 
   const coursesWithExtra = chatinstances.map((chatinstance) => ({
     ...chatinstance.toJSON(),
-    isActive:
-      chatinstance.usageLimit > 0 &&
-      Date.parse(chatinstance.activityPeriod.endDate) > Date.now(),
+    isActive: chatinstance.usageLimit > 0 && Date.parse(chatinstance.activityPeriod.endDate) > Date.now(),
     isExpired: Date.parse(chatinstance.activityPeriod.endDate) < Date.now(),
   }))
 
@@ -78,15 +68,11 @@ courseRouter.get('/statistics/:id', async (req, res) => {
     where: { chatInstanceId: chatInstance.id },
   })
 
-  const enrolledUsages = usages
-    .filter((usage) => enrolments.map((e) => e.userId).includes(usage.userId))
-    .filter((u) => u.usageCount > 0)
+  const enrolledUsages = usages.filter((usage) => enrolments.map((e) => e.userId).includes(usage.userId)).filter((u) => u.usageCount > 0)
 
   const usagePercentage = enrolledUsages.length / enrolments.length
 
-  const average =
-    enrolledUsages.map((u) => u.usageCount).reduce((a, b) => a + b, 0) /
-    enrolledUsages.length
+  const average = enrolledUsages.map((u) => u.usageCount).reduce((a, b) => a + b, 0) / enrolledUsages.length
 
   const normalizedUsage = enrolledUsages.map((usage) => ({
     ...usage,
@@ -136,13 +122,7 @@ courseRouter.get('/:id', async (req, res) => {
         {
           model: User,
           as: 'user',
-          attributes: [
-            'id',
-            'username',
-            'last_name',
-            'first_names',
-            'student_number',
-          ],
+          attributes: ['id', 'username', 'last_name', 'first_names', 'student_number'],
         },
       ],
     },
@@ -153,9 +133,7 @@ courseRouter.get('/:id', async (req, res) => {
     include,
   })) as ChatInstance & { responsibilities: AcualResponsibility[] }
 
-  const hasFullAccess =
-    user.isAdmin ||
-    chatInstance.responsibilities.map((r) => r.user.id).includes(user.id)
+  const hasFullAccess = user.isAdmin || chatInstance.responsibilities.map((r) => r.user.id).includes(user.id)
 
   const objectToReturn = hasFullAccess
     ? chatInstance
@@ -168,11 +146,7 @@ courseRouter.get('/:id', async (req, res) => {
   res.send(objectToReturn)
 })
 
-const checkDiscussionAccess = async (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) => {
+const checkDiscussionAccess = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
 
@@ -195,9 +169,7 @@ const checkDiscussionAccess = async (
     ],
   })) as ChatInstance & { responsibilities: AcualResponsibility[] }
 
-  const hasFullAccess =
-    user.isAdmin ||
-    chatInstance.responsibilities.map((r) => r.user.id).includes(user.id)
+  const hasFullAccess = user.isAdmin || chatInstance.responsibilities.map((r) => r.user.id).includes(user.id)
 
   if (!hasFullAccess) {
     res.status(401).send('Unauthorized')
@@ -206,31 +178,24 @@ const checkDiscussionAccess = async (
   }
 }
 
-courseRouter.get(
-  '/:id/discussions/:user_id',
-  checkDiscussionAccess,
-  async (req, res) => {
-    const userId = decrypt(req.params.user_id)
-    const { id } = req.params
-    const discussions = await Discussion.findAll({
-      where: {
-        courseId: id,
-        userId,
-      },
-    })
+courseRouter.get('/:id/discussions/:user_id', checkDiscussionAccess, async (req, res) => {
+  const userId = decrypt(req.params.user_id)
+  const { id } = req.params
+  const discussions = await Discussion.findAll({
+    where: {
+      courseId: id,
+      userId,
+    },
+  })
 
-    res.send(discussions.map((d) => d))
-  }
-)
+  res.send(discussions.map((d) => d))
+})
 
 courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {
   const { id } = req.params
 
   const discussionCounts = (await Discussion.findAll({
-    attributes: [
-      'user_id',
-      [Sequelize.fn('COUNT', Sequelize.col('id')), 'discussion_count'],
-    ],
+    attributes: ['user_id', [Sequelize.fn('COUNT', Sequelize.col('id')), 'discussion_count']],
     where: { courseId: id },
     group: ['user_id'],
   })) as any
@@ -242,19 +207,13 @@ courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {
         user_id: encrypt(user_id).encryptedData,
         discussion_count,
       }
-    })
+    }),
   )
 })
 
 courseRouter.put('/:id', async (req, res) => {
   const { id } = req.params
-  const {
-    activityPeriod,
-    model,
-    usageLimit,
-    saveDiscussions,
-    notOptoutSaving,
-  } = req.body as {
+  const { activityPeriod, model, usageLimit, saveDiscussions, notOptoutSaving } = req.body as {
     activityPeriod: ActivityPeriod
     model: string
     usageLimit: number

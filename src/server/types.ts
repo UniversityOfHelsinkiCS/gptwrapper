@@ -34,9 +34,7 @@ export interface CourseChatRequest extends ChatRequest {
 
 export type APIError = typeof OpenAI.APIError
 
-export type OpenAIStream = ReturnType<
-  typeof OpenAI.prototype.chat.completions.create
->
+export type OpenAIStream = ReturnType<typeof OpenAI.prototype.chat.completions.create>
 
 export type Message = OpenAI.Chat.ChatCompletionMessage
 export interface CustomMessage {
@@ -45,8 +43,7 @@ export interface CustomMessage {
 }
 export type Role = 'system' | 'assistant' | 'user'
 
-export type StreamingOptions =
-  OpenAI.Chat.Completions.CompletionCreateParamsStreaming
+export type StreamingOptions = OpenAI.Chat.Completions.CompletionCreateParamsStreaming
 
 export type AzureOptions = {
   model: string

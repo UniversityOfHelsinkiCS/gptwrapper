@@ -13,11 +13,9 @@ import { inDevelopment } from '../config'
 const ReactQueryDevtoolsProduction = inDevelopment
   ? ReactQueryDevtools
   : React.lazy(() =>
-      import('@tanstack/react-query-devtools/build/modern/production.js').then(
-        (d) => ({
-          default: d.ReactQueryDevtools,
-        })
-      )
+      import('@tanstack/react-query-devtools/build/modern/production.js').then((d) => ({
+        default: d.ReactQueryDevtools,
+      })),
     )
 
 initializeSentry()
@@ -54,7 +52,7 @@ const Main = () => {
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <Main />
-  </React.StrictMode>
+  </React.StrictMode>,
 )
 
 // Console log vite environment variables

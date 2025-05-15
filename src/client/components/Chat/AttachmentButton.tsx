@@ -7,15 +7,9 @@ interface AttachmentButtonProps {
   handleDeleteFile: () => void
 }
 
-const AttachmentButton: React.FC<AttachmentButtonProps> = ({
-  fileName,
-  handleDeleteFile,
-}) => {
+const AttachmentButton: React.FC<AttachmentButtonProps> = ({ fileName, handleDeleteFile }) => {
   const maxLength = 30
-  const displayName =
-    fileName.length > maxLength
-      ? `${fileName.substring(0, maxLength)}...`
-      : fileName
+  const displayName = fileName.length > maxLength ? `${fileName.substring(0, maxLength)}...` : fileName
 
   return (
     <Button onClick={() => handleDeleteFile()} endIcon={<DeleteIcon />}>

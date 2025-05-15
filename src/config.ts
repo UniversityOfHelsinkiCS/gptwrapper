@@ -15,16 +15,13 @@ export const UPDATER_CRON_ENABLED = process.env.UPDATER_CRON_ENABLED === 'true'
 export const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://ollama:11434'
 export const RAG_ENABLED = process.env.RAG_ENABLED === 'true'
 
-export const DEFAULT_TOKEN_LIMIT =
-  Number(process.env.DEFAULT_TOKEN_LIMIT) || 150_000
+export const DEFAULT_TOKEN_LIMIT = Number(process.env.DEFAULT_TOKEN_LIMIT) || 150_000
 
 export const FREE_MODEL = process.env.FREE_MODEL || 'gpt-4o-mini' // as it was decided in 23th Sept 2024 meeting
 export const DEFAULT_MODEL = process.env.DEFAUL_MODEL || 'gpt-4o-mini'
-export const DEFAUL_CONTEXT_LIMIT =
-  Number(process.env.DEFAUL_CONTEXT_LIMIT) || 4_096
+export const DEFAUL_CONTEXT_LIMIT = Number(process.env.DEFAUL_CONTEXT_LIMIT) || 4_096
 
-export const DEFAULT_RESET_CRON =
-  process.env.DEFAULT_RESET_CRON || '0 0 1 */3 *'
+export const DEFAULT_RESET_CRON = process.env.DEFAULT_RESET_CRON || '0 0 1 */3 *'
 
 export const EMBED_MODEL = 'text-embedding-small'
 export const EMBED_DIM = 1024
@@ -55,7 +52,7 @@ export const validModels = [
           deployment: 'mock',
           context: 128_000,
         },
-      ]
+      ],
 )
 
 console.log(`Valid models: ${JSON.stringify(validModels, null, 2)}`)

@@ -8,12 +8,7 @@ import express from 'express'
 import 'express-async-errors'
 
 import { PORT } from './util/config'
-import {
-  inProduction,
-  inStaging,
-  RAG_ENABLED,
-  UPDATER_CRON_ENABLED,
-} from '../config'
+import { inProduction, inStaging, RAG_ENABLED, UPDATER_CRON_ENABLED } from '../config'
 import router from './routes'
 import logger from './util/logger'
 import { connectToDatabase } from './db/connection'
@@ -29,10 +24,7 @@ app.use('/api', (_, res) => {
 })
 
 if (inProduction || inStaging) {
-  const DIST_PATH = path.resolve(
-    dirname(fileURLToPath(import.meta.url)),
-    '../../dist'
-  )
+  const DIST_PATH = path.resolve(dirname(fileURLToPath(import.meta.url)), '../../dist')
 
   const INDEX_PATH = path.resolve(DIST_PATH, 'index.html')
 

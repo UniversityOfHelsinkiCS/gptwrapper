@@ -2,8 +2,7 @@ import { DataTypes } from 'sequelize'
 
 import { Migration } from '../connection'
 
-export const up: Migration = ({ context: queryInterface }) =>
-  queryInterface.dropTable('service_access_groups')
+export const up: Migration = ({ context: queryInterface }) => queryInterface.dropTable('service_access_groups')
 
 export const down: Migration = async ({ context: queryInterface }) =>
   queryInterface.createTable('service_access_groups', {

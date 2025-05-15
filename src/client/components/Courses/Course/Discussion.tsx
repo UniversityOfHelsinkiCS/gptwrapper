@@ -28,22 +28,13 @@ const Message = ({ message }: { message: MessageType }) => {
 
   return (
     <Box style={{ marginBottom: '2em' }}>
-      {message.metadata.messages.length === 2 && (
-        <Divider style={{ marginBottom: 25 }} />
-      )}
-      <div style={{ fontWeight: 'bold', marginBottom: '1em' }}>
-        {formatDateTime(message.createdAt)}
-      </div>
-      <Paper
-        variant="outlined"
-        style={{ marginBottom: '1em', backgroundColor: '#f5f5f5' }}
-      >
+      {message.metadata.messages.length === 2 && <Divider style={{ marginBottom: 25 }} />}
+      <div style={{ fontWeight: 'bold', marginBottom: '1em' }}>{formatDateTime(message.createdAt)}</div>
+      <Paper variant="outlined" style={{ marginBottom: '1em', backgroundColor: '#f5f5f5' }}>
         <Box display="flex">
           <Person sx={{ mx: 3, my: 4 }} />
           <Box pr={7} py={2}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {prompt.content}
-            </ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{prompt.content}</ReactMarkdown>
           </Box>
         </Box>
       </Paper>
@@ -51,9 +42,7 @@ const Message = ({ message }: { message: MessageType }) => {
         <Box display="flex">
           <Assistant sx={{ mx: 3, my: 4 }} />
           <Box pr={7} py={2}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {message.response}
-            </ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.response}</ReactMarkdown>
           </Box>
         </Box>
       </Paper>
@@ -70,15 +59,7 @@ const Discussion = () => {
   const { course, isLoading: courseLoading } = useCourse(id)
   const { messages, isLoading: usageLoading } = useCourseDiscussion(id, user_id)
 
-  if (
-    !course ||
-    courseLoading ||
-    !messages ||
-    usageLoading ||
-    isUserLoading ||
-    !user
-  )
-    return null
+  if (!course || courseLoading || !messages || usageLoading || isUserLoading || !user) return null
 
   return (
     <div>

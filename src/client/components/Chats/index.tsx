@@ -1,14 +1,4 @@
-import {
-  Box,
-  TableContainer,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Table,
-} from '@mui/material'
+import { Box, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Table } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { formatDate } from '../Courses/util'
@@ -81,9 +71,7 @@ const Chats = () => {
                     <Typography variant="h6">{chat.name[language]}</Typography>
                   </TableCell>
                   <TableCell component="th" scope="row">
-                    <Typography variant="h6">
-                      {chat.courseUnits.map((c) => c.code).join(', ')}
-                    </Typography>
+                    <Typography variant="h6">{chat.courseUnits.map((c) => c.code).join(', ')}</Typography>
                   </TableCell>
                   <TableCell align="left">
                     <Typography>{formatDate(chat.activityPeriod)}</Typography>

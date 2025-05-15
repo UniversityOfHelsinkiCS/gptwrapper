@@ -1,13 +1,4 @@
-import {
-  Button,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  Typography,
-} from '@mui/material'
+import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableRow, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { enqueueSnackbar } from 'notistack'
 import { filterUsages } from '../util'
@@ -16,9 +7,7 @@ import { useResetChatInstanceUsageMutation } from '../../../hooks/useChatInstanc
 import { Course } from '../../../types'
 
 const MaxTokenUsageStudents = ({ course }: { course: Course }) => {
-  const { chatInstanceUsages, isLoading: usagesLoading } = useCourseUsage(
-    course.id as string
-  )
+  const { chatInstanceUsages, isLoading: usagesLoading } = useCourseUsage(course.id as string)
   const resetUsage = useResetChatInstanceUsageMutation()
   const { t } = useTranslation()
 

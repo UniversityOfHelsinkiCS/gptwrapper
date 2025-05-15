@@ -2,13 +2,7 @@ import { Send } from '@mui/icons-material'
 import { Container, IconButton, Paper, TextField } from '@mui/material'
 import { useState } from 'react'
 
-export const ChatBox = ({
-  disabled,
-  onSubmit,
-}: {
-  disabled: boolean
-  onSubmit: (message: string) => void
-}) => {
+export const ChatBox = ({ disabled, onSubmit }: { disabled: boolean; onSubmit: (message: string) => void }) => {
   const [message, setMessage] = useState<string>('')
 
   const handleSubmit = (e: React.FormEvent) => {

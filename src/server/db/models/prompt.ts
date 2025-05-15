@@ -1,18 +1,9 @@
-import {
-  Model,
-  InferAttributes,
-  InferCreationAttributes,
-  CreationOptional,
-  DataTypes,
-} from 'sequelize'
+import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
 
 import { Message } from '../../types'
 import { sequelize } from '../connection'
 
-class Prompt extends Model<
-  InferAttributes<Prompt>,
-  InferCreationAttributes<Prompt>
-> {
+class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prompt>> {
   declare id: CreationOptional<string>
 
   declare name: string
@@ -67,7 +58,7 @@ Prompt.init(
   {
     underscored: true,
     sequelize,
-  }
+  },
 )
 
 export default Prompt

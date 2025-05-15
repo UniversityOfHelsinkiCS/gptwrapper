@@ -1,9 +1,5 @@
 import { useMemo } from 'react'
-import {
-  createTheme,
-  responsiveFontSizes,
-  ThemeOptions,
-} from '@mui/material/styles'
+import { createTheme, responsiveFontSizes, ThemeOptions } from '@mui/material/styles'
 // import { useMediaQuery } from '@mui/material'
 
 /**
@@ -23,15 +19,7 @@ declare module '@mui/material/styles' {
 
 const themeOptions: ThemeOptions = {
   typography: {
-    fontFamily: [
-      '"Open Sans"',
-      '"Helvetica"',
-      '"Arial"',
-      '"sans-serif"',
-      '"Apple Color Emoji"',
-      '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"',
-    ].join(','),
+    fontFamily: ['"Open Sans"', '"Helvetica"', '"Arial"', '"sans-serif"', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'].join(','),
   },
 
   palette: {
@@ -83,10 +71,7 @@ const useTheme = () => {
   const prefersDarkMode = false // useMediaQuery('(prefers-color-scheme: dark)');
   themeOptions.palette.mode = prefersDarkMode ? 'dark' : 'light'
 
-  const theme = useMemo(
-    () => responsiveFontSizes(createTheme(themeOptions)),
-    []
-  )
+  const theme = useMemo(() => responsiveFontSizes(createTheme(themeOptions)), [])
 
   return theme
 }

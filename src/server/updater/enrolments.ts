@@ -12,9 +12,7 @@ interface SisuEnrolment {
 const enrolmentsHandler = async (enrolments: SisuEnrolment[]) => {
   const enrolmentsMap = _.groupBy(enrolments, 'courseUnitRealisationId')
 
-  const relatedCourseIds = enrolments.map(
-    ({ courseUnitRealisationId }) => courseUnitRealisationId
-  )
+  const relatedCourseIds = enrolments.map(({ courseUnitRealisationId }) => courseUnitRealisationId)
   const relatedChatInstances = await ChatInstance.findAll({
     where: {
       courseId: {
@@ -28,7 +26,7 @@ const enrolmentsHandler = async (enrolments: SisuEnrolment[]) => {
     (enrolmentsMap[chatInstance.courseId] || []).map((enrolment) => ({
       chatInstanceId: chatInstance.id,
       userId: enrolment.personId,
-    }))
+    })),
   )
 
   await safeBulkCreate({

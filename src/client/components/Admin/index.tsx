@@ -1,14 +1,7 @@
 import React from 'react'
 import { Box, Tabs, Tab, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import {
-  Route,
-  Routes,
-  Link,
-  matchPath,
-  useLocation,
-  Navigate,
-} from 'react-router-dom'
+import { Route, Routes, Link, matchPath, useLocation, Navigate } from 'react-router-dom'
 import { get } from 'lodash'
 
 import { format } from 'date-fns'
@@ -49,38 +42,18 @@ const Admin = () => {
       </Box>
       <Box mb={3}>
         <RouterTabs>
-          <Tab
-            label={t('admin:courses')}
-            to="/admin/chatinstances"
-            component={Link}
-          />
+          <Tab label={t('admin:courses')} to="/admin/chatinstances" component={Link} />
           <Tab label={t('admin:usage')} to="/admin/usage" component={Link} />
-          {user.iamGroups.includes('grp-toska') && (
-            <Tab
-              label={t('admin:updater')}
-              to="/admin/updater"
-              component={Link}
-            />
-          )}
-          <Tab
-            label={t('admin:editTexts')}
-            to="/admin/edit-texts"
-            component={Link}
-          />
-          <Tab
-            label={t('admin:searchUsers')}
-            to="/admin/usersearch"
-            component={Link}
-          />
+          {user.iamGroups.includes('grp-toska') && <Tab label={t('admin:updater')} to="/admin/updater" component={Link} />}
+          <Tab label={t('admin:editTexts')} to="/admin/edit-texts" component={Link} />
+          <Tab label={t('admin:searchUsers')} to="/admin/usersearch" component={Link} />
         </RouterTabs>
       </Box>
       <Routes>
         <Route path="/" element={<Navigate to="/admin/chatinstances" />} />
         <Route path="/chatinstances" element={<ChatInstances />} />
         <Route path="/usage" element={<Usage />} />
-        {user.iamGroups.includes('grp-toska') && (
-          <Route path="/updater" element={<Updater />} />
-        )}
+        {user.iamGroups.includes('grp-toska') && <Route path="/updater" element={<Updater />} />}
         <Route path="/edit-texts" element={<EditTexts />} />
         <Route path="/usersearch" element={<UserSearch />} />
       </Routes>

@@ -41,25 +41,14 @@ const Footer = () => {
               i18nKey="footer:contactSupport"
               values={{ supportEmail }}
               components={{
-                mailTo: (
-                  <Link
-                    href={`mailto:${supportEmail}`}
-                    underline="hover"
-                    color="toskaPrimary.main"
-                  />
-                ),
+                mailTo: <Link href={`mailto:${supportEmail}`} underline="hover" color="toskaPrimary.main" />,
               }}
             />
           </Typography>
         </Box>
 
         <Box sx={styles.imageBox}>
-          <Link
-            href="https://toska.dev"
-            target="_blank"
-            rel="noopener"
-            underline="hover"
-          >
+          <Link href="https://toska.dev" target="_blank" rel="noopener" underline="hover">
             <img src={toskaColor} alt="Toska" width="70" />
           </Link>
         </Box>

@@ -9,9 +9,7 @@ import { ChatInstance } from '../db/models'
  * and to stay within context limit.
  * Always keep system messages and last 10 messages
  */
-export const getMessageContext = (
-  messages: CustomMessage[]
-): CustomMessage[] => {
+export const getMessageContext = (messages: CustomMessage[]): CustomMessage[] => {
   const systemMessages = messages.filter((message) => message.role === 'system')
   const otherMessages = messages.filter((message) => message.role !== 'system')
 
@@ -49,8 +47,7 @@ export const getModelContextLimit = (modelName: string) => {
   return model.context
 }
 
-export const sleep = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms))
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export const generateTerms = () => {
   const dateNow = new Date()

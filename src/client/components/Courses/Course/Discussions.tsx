@@ -1,13 +1,6 @@
 import { useParams, Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Table,
-  Link,
-} from '@mui/material'
+import { TableBody, TableCell, TableHead, TableRow, Table, Link } from '@mui/material'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import useCourse, { useCourseDiscussers } from '../../../hooks/useCourse'
 
@@ -19,8 +12,7 @@ const Usage = () => {
   const { course, isLoading: courseLoading } = useCourse(id)
   const { discussers, isLoading: discussersLoading } = useCourseDiscussers(id)
 
-  if (!course || courseLoading || isUserLoading || !user || discussersLoading)
-    return null
+  if (!course || courseLoading || isUserLoading || !user || discussersLoading) return null
 
   return (
     <div>
@@ -37,10 +29,7 @@ const Usage = () => {
           {discussers.map((d) => (
             <TableRow key={d.user_id}>
               <TableCell>
-                <Link
-                  to={`/courses/${id}/discussions/${d.user_id}`}
-                  component={RouterLink}
-                >
+                <Link to={`/courses/${id}/discussions/${d.user_id}`} component={RouterLink}>
                   {d.user_id}
                 </Link>
               </TableCell>

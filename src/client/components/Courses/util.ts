@@ -5,8 +5,7 @@ import { CoursesViewCourse } from '../../hooks/useUserCourses'
 
 import curTypes from '../../locales/curTypes.json'
 
-export const getCurTypeLabel = (type: string, language: string) =>
-  curTypes[type] && curTypes[type].name[language]
+export const getCurTypeLabel = (type: string, language: string) => curTypes[type] && curTypes[type].name[language]
 
 export const formatDate = (activityPeriod?: ActivityPeriod) => {
   if (!activityPeriod) return ''
@@ -19,27 +18,20 @@ export const formatDate = (activityPeriod?: ActivityPeriod) => {
   return `${format(start, 'dd.MM.')}–${format(end, 'dd.MM.yyyy')}`
 }
 
-export const formatDateTime = (date: string) =>
-  `${format(new Date(date), 'dd.MM.yyyy hh:mm:ss')}`
+export const formatDateTime = (date: string) => `${format(new Date(date), 'dd.MM.yyyy hh:mm:ss')}`
 
 export const sortCourses = (a: Course, b: Course) => {
   if (!a.activityPeriod || !b.activityPeriod) return 0
 
-  const getStartTime = (course: Course) =>
-    new Date(course.activityPeriod.startDate).getTime()
+  const getStartTime = (course: Course) => new Date(course.activityPeriod.startDate).getTime()
 
   return getStartTime(b) - getStartTime(a)
 }
 
-export const filterUsages = (
-  maxTokenLimit: number,
-  usages: ChatInstanceUsage[]
-) => {
+export const filterUsages = (maxTokenLimit: number, usages: ChatInstanceUsage[]) => {
   const limit = maxTokenLimit * 0.9
 
-  const closeToMaxTokenLimit = usages.filter(
-    (usage) => usage.usageCount >= limit
-  )
+  const closeToMaxTokenLimit = usages.filter((usage) => usage.usageCount >= limit)
 
   return closeToMaxTokenLimit
 }

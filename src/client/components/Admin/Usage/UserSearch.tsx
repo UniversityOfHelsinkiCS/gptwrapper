@@ -32,14 +32,11 @@ const LoginAsSelector = () => {
 
     setLastQuery(queried)
     setPotentialUsers(persons)
-    setFocusIndex(
-      Math.min(focusIndex, persons.length > 0 ? persons.length - 1 : 0)
-    )
+    setFocusIndex(Math.min(focusIndex, persons.length > 0 ? persons.length - 1 : 0))
   }, 400)
 
   const handleKeyPress = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' && potentialUsers.length > 0)
-      handleLoginAs(potentialUsers[focusIndex])()
+    if (event.key === 'Enter' && potentialUsers.length > 0) handleLoginAs(potentialUsers[focusIndex])()
     if (event.key === 'ArrowDown') {
       setFocusIndex(Math.min(focusIndex + 1, potentialUsers.length - 1))
       event.preventDefault()
@@ -52,12 +49,7 @@ const LoginAsSelector = () => {
 
   return (
     <Box my={4} onKeyDown={handleKeyPress}>
-      <TextField
-        style={{ width: '30em' }}
-        label={t('admin:userSearchFieldLabel')}
-        variant="outlined"
-        onChange={handleChange}
-      />
+      <TextField style={{ width: '30em' }} label={t('admin:userSearchFieldLabel')} variant="outlined" onChange={handleChange} />
 
       <div style={{ paddingTop: 10 }}>
         {t('admin:searchedFor')}
@@ -69,12 +61,7 @@ const LoginAsSelector = () => {
       </div>
 
       {potentialUsers.map((user, index) => (
-        <UserAccordion
-          key={user.id}
-          user={user}
-          handleLoginAs={handleLoginAs}
-          isFocused={index === focusIndex}
-        />
+        <UserAccordion key={user.id} user={user} handleLoginAs={handleLoginAs} isFocused={index === focusIndex} />
       ))}
     </Box>
   )

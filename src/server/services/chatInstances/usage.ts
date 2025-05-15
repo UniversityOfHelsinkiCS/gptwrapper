@@ -3,13 +3,7 @@ import { Tiktoken } from '@dqbd/tiktoken'
 import { DEFAULT_TOKEN_LIMIT } from '../../../config'
 import { tikeIam } from '../../util/config'
 import { User as UserType, StreamingOptions } from '../../types'
-import {
-  ChatInstance,
-  UserChatInstanceUsage,
-  User,
-  Enrolment,
-  Responsibility,
-} from '../../db/models'
+import { ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../../db/models'
 import { getAllowedModels } from '../../util/util'
 import logger from '../../util/logger'
 
@@ -21,26 +15,18 @@ export const getUsage = async (userId: string) => {
   return usage
 }
 
-export const checkUsage = async (
-  { id, isPowerUser, isAdmin }: UserType,
-  model: string
-): Promise<boolean> => {
+export const checkUsage = async ({ id, isPowerUser, isAdmin }: UserType, model: string): Promise<boolean> => {
   if (model === 'gpt-4o-mini') return true
 
   const usage = await getUsage(id)
 
   // 10x token limit for power users
-  const tokenLimit = isPowerUser
-    ? DEFAULT_TOKEN_LIMIT * 10
-    : DEFAULT_TOKEN_LIMIT
+  const tokenLimit = isPowerUser ? DEFAULT_TOKEN_LIMIT * 10 : DEFAULT_TOKEN_LIMIT
 
   return isAdmin || usage <= tokenLimit
 }
 
-export const checkCourseUsage = async (
-  user: UserType,
-  courseId: string
-): Promise<boolean> => {
+export const checkCourseUsage = async (user: UserType, courseId: string): Promise<boolean> => {
   const chatInstance = await ChatInstance.findOne({
     where: {
       courseId,
@@ -54,10 +40,7 @@ export const checkCourseUsage = async (
     },
   })
 
-  if (
-    !user.isAdmin &&
-    chatInstanceUsage.usageCount >= chatInstance.usageLimit
-  ) {
+  if (!user.isAdmin && chatInstanceUsage.usageCount >= chatInstance.usageLimit) {
     logger.info('Usage limit reached')
 
     return false
@@ -66,10 +49,7 @@ export const checkCourseUsage = async (
   return true
 }
 
-export const calculateUsage = (
-  options: StreamingOptions,
-  encoding: Tiktoken
-): number => {
+export const calculateUsage = (options: StreamingOptions, encoding: Tiktoken): number => {
   const { messages } = options
 
   let tokenCount = 0
@@ -94,11 +74,7 @@ export const incrementUsage = async (user: UserType, tokenCount: number) => {
   })
 }
 
-export const incrementCourseUsage = async (
-  user: UserType,
-  courseId: string,
-  tokenCount: number
-) => {
+export const incrementCourseUsage = async (user: UserType, courseId: string, tokenCount: number) => {
   const chatInstance = await ChatInstance.findOne({
     where: {
       courseId,

@@ -5,12 +5,8 @@ import { ChatInstance, Responsibility } from '../db/models'
 import { ResponsibilityRow, SisuCourseWithRealization } from '../types'
 import { safeBulkCreate } from './util'
 
-const removeOldResponsibilities = async (
-  responsibilitiesToInsert: ResponsibilityRow[]
-) => {
-  const chatInstanceIds = responsibilitiesToInsert.map(
-    ({ chatInstanceId }) => chatInstanceId
-  )
+const removeOldResponsibilities = async (responsibilitiesToInsert: ResponsibilityRow[]) => {
+  const chatInstanceIds = responsibilitiesToInsert.map(({ chatInstanceId }) => chatInstanceId)
 
   await Responsibility.destroy({
     where: {
@@ -21,33 +17,24 @@ const removeOldResponsibilities = async (
   })
 }
 
-const getResponsibilityInfos = (
-  courseRealisation: SisuCourseWithRealization
-) => {
+const getResponsibilityInfos = (courseRealisation: SisuCourseWithRealization) => {
   const combinedResponsibilityInfos = courseRealisation.responsibilityInfos
 
-  const uniqueResponsibilityInfos = _.uniqBy(
-    combinedResponsibilityInfos,
-    ({ personId, roleUrn }) => `${personId}${roleUrn}`
-  )
+  const uniqueResponsibilityInfos = _.uniqBy(combinedResponsibilityInfos, ({ personId, roleUrn }) => `${personId}${roleUrn}`)
 
   return uniqueResponsibilityInfos
 }
 
-export const upsertResponsibilities = async (
-  courseRealizations: SisuCourseWithRealization[]
-) => {
-  const responsibilitiesFlat = courseRealizations.flatMap(
-    (courseRealization) => {
-      const responsibilityInfos = getResponsibilityInfos(courseRealization)
-      return responsibilityInfos
-        .filter(({ personId }) => personId)
-        .map(({ personId }) => ({
-          courseId: courseRealization.id,
-          userId: personId,
-        }))
-    }
-  )
+export const upsertResponsibilities = async (courseRealizations: SisuCourseWithRealization[]) => {
+  const responsibilitiesFlat = courseRealizations.flatMap((courseRealization) => {
+    const responsibilityInfos = getResponsibilityInfos(courseRealization)
+    return responsibilityInfos
+      .filter(({ personId }) => personId)
+      .map(({ personId }) => ({
+        courseId: courseRealization.id,
+        userId: personId,
+      }))
+  })
 
   const responsibilitiesMap = _.groupBy(responsibilitiesFlat, 'courseId')
 
@@ -61,12 +48,11 @@ export const upsertResponsibilities = async (
     attributes: ['id', 'courseId'],
   })
 
-  const responsibilitiesToInsert = relatedChatInstances.flatMap(
-    ({ id, courseId }) =>
-      responsibilitiesMap[courseId].map((responsibility) => ({
-        chatInstanceId: id,
-        userId: responsibility.userId,
-      }))
+  const responsibilitiesToInsert = relatedChatInstances.flatMap(({ id, courseId }) =>
+    responsibilitiesMap[courseId].map((responsibility) => ({
+      chatInstanceId: id,
+      userId: responsibility.userId,
+    })),
   )
 
   const t = await sequelize.transaction()

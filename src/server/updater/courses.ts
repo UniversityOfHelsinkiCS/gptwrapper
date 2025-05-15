@@ -1,18 +1,11 @@
 import { ChatInstance } from '../db/models'
-import {
-  ActivityPeriod,
-  SisuCourseUnit,
-  SisuCourseWithRealization,
-} from '../types'
+import { ActivityPeriod, SisuCourseUnit, SisuCourseWithRealization } from '../types'
 import { mangleData } from './mangleData'
 import { upsertResponsibilities } from './responsibilities'
 import { safeBulkCreate } from './util'
 
 // Find the newest course unit that has started before the course realisation
-const getCourseUnit = (
-  courseUnits: SisuCourseUnit[],
-  activityPeriod: ActivityPeriod
-) => {
+const getCourseUnit = (courseUnits: SisuCourseUnit[], activityPeriod: ActivityPeriod) => {
   let courseUnit = courseUnits[0] // old default
 
   const { startDate: realisationStartDate } = activityPeriod
@@ -54,9 +47,7 @@ const courseUnitsOf = ({ courseUnits }: any) => {
   }, [])
 }
 
-const createChatInstance = async (
-  courseRealisations: SisuCourseWithRealization[]
-) => {
+const createChatInstance = async (courseRealisations: SisuCourseWithRealization[]) => {
   const chatInstances = courseRealisations.map((course) => {
     const courseUnit = getCourseUnit(course.courseUnits, course.activityPeriod)
 
@@ -80,12 +71,7 @@ const createChatInstance = async (
     bulkCreate: async (e, opts) => ChatInstance.bulkCreate(e, opts),
     fallbackCreate: async (e, opts) => ChatInstance.upsert(e, opts),
     bulkCreateOptions: {
-      updateOnDuplicate: [
-        'name',
-        'courseUnitRealisationTypeUrn',
-        'courseUnits',
-        'courseActivityPeriod',
-      ],
+      updateOnDuplicate: ['name', 'courseUnitRealisationTypeUrn', 'courseUnits', 'courseActivityPeriod'],
       conflictAttributes: ['courseId'],
     },
     fallbackCreateOptions: {
@@ -94,15 +80,8 @@ const createChatInstance = async (
   })
 }
 
-const coursesHandler = async (
-  courseRealizations: SisuCourseWithRealization[]
-) => {
-  const filteredCourseRealizations = courseRealizations.filter(
-    (course) =>
-      course.courseUnits.length &&
-      course.flowState !== 'CANCELLED' &&
-      course.flowState !== 'ARCHIVED'
-  )
+const coursesHandler = async (courseRealizations: SisuCourseWithRealization[]) => {
+  const filteredCourseRealizations = courseRealizations.filter((course) => course.courseUnits.length && course.flowState !== 'CANCELLED' && course.flowState !== 'ARCHIVED')
 
   await createChatInstance(filteredCourseRealizations)
   await upsertResponsibilities(filteredCourseRealizations)

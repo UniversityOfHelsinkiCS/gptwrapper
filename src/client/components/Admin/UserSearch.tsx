@@ -1,17 +1,5 @@
 import { useState, useEffect } from 'react'
-import {
-  Input,
-  Box,
-  Button,
-  TableContainer,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Table,
-} from '@mui/material'
+import { Input, Box, Button, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Table } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { enqueueSnackbar } from 'notistack'
 import useUserSearch from '../../hooks/useUserSearch'
@@ -32,10 +20,7 @@ const UserTable = ({ users }: { users: User[] }) => {
   const onResetUsage = (userId: string) => {
     try {
       resetUsage.mutate(userId)
-      enqueueSnackbar(
-        'User usage reset, please refresh the browser to see the change!',
-        { variant: 'success' }
-      )
+      enqueueSnackbar('User usage reset, please refresh the browser to see the change!', { variant: 'success' })
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     }
@@ -108,10 +93,7 @@ const UserTable = ({ users }: { users: User[] }) => {
                     {t('admin:loginAsButton')}
                   </Button>
                   {user.usage > 0 && (
-                    <Button
-                      variant="outlined"
-                      onClick={() => onResetUsage(user.id)}
-                    >
+                    <Button variant="outlined" onClick={() => onResetUsage(user.id)}>
                       {t('admin:resetTokens')}
                     </Button>
                   )}
@@ -138,16 +120,9 @@ const UserSearch = () => {
 
   return (
     <Box>
-      <Input
-        type="text"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder={t('admin:searchUsers')}
-      />
+      <Input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('admin:searchUsers')} />
 
-      {search.length > 2 && search.length < 5 && (
-        <div>{t('admin:typeMore')}</div>
-      )}
+      {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
 
       {isLoading && <div>Loading...</div>}
       {!isLoading && <UserTable users={users} />}

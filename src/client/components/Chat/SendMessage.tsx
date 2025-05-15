@@ -1,13 +1,5 @@
 import React from 'react'
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Switch,
-  FormControlLabel,
-  Alert,
-} from '@mui/material'
+import { Box, TextField, Button, Typography, Switch, FormControlLabel, Alert } from '@mui/material'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import { useTranslation } from 'react-i18next'
 import AttachmentButton from './AttachmentButton'
@@ -55,14 +47,7 @@ const SendMessage = ({
   }
 
   const handleFileTypeValidation = (file: File): void => {
-    const allowedFileTypes = [
-      'text/plain',
-      'text/html',
-      'text/css',
-      'text/csv',
-      'text/markdown',
-      'application/pdf',
-    ]
+    const allowedFileTypes = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'application/pdf']
 
     if (allowedFileTypes.includes(file.type)) {
       setFileName(file.name)
@@ -83,14 +68,7 @@ const SendMessage = ({
         <Typography variant="h6">{t('chat:message')}</Typography>
       </Box>
       <Box mb={2}>
-        <TextField
-          fullWidth
-          multiline
-          minRows={5}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder={t('chat:messagePlaceholder') as string}
-        />
+        <TextField fullWidth multiline minRows={5} value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t('chat:messagePlaceholder') as string} />
       </Box>
       <Box
         sx={(theme) => ({
@@ -107,34 +85,13 @@ const SendMessage = ({
         </Button>
         <Button component="label" variant="text" startIcon={<UploadFileIcon />}>
           {t('fileUploadText')}
-          <input
-            type="file"
-            accept="text/*,application/pdf"
-            hidden
-            ref={inputFileRef}
-            onChange={(e) => handleFileTypeValidation(e.target.files[0])}
-          />
+          <input type="file" accept="text/*,application/pdf" hidden ref={inputFileRef} onChange={(e) => handleFileTypeValidation(e.target.files[0])} />
         </Button>
-        {fileName && (
-          <AttachmentButton
-            fileName={fileName}
-            handleDeleteFile={handleDeleteFile}
-          />
-        )}
+        {fileName && <AttachmentButton fileName={fileName} handleDeleteFile={handleDeleteFile} />}
         <Button onClick={() => handleReset()} disabled={resetDisabled}>
           {t('reset')}
         </Button>
-        {!notOptoutSaving && saveChat && (
-          <FormControlLabel
-            control={
-              <Switch
-                onChange={() => setSaveConsent(!saveConsent)}
-                checked={saveConsent}
-              />
-            }
-            label={t('chat:allowSave')}
-          />
-        )}
+        {!notOptoutSaving && saveChat && <FormControlLabel control={<Switch onChange={() => setSaveConsent(!saveConsent)} checked={saveConsent} />} label={t('chat:allowSave')} />}
         {notOptoutSaving && saveChat && (
           <Alert severity="warning" style={{ marginLeft: 20 }}>
             <Typography>{t('chat:toBeSaved')}</Typography>

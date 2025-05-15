@@ -20,11 +20,7 @@ const useUserCourses = () => {
 
     const { data } = res
 
-    const courses = _.orderBy(
-      data?.courses ?? [],
-      ['isActive', 'isExpired'],
-      ['desc', 'asc']
-    )
+    const courses = _.orderBy(data?.courses ?? [], ['isActive', 'isExpired'], ['desc', 'asc'])
     const count = data?.count || 0
     return { courses, count }
   }

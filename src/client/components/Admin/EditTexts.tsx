@@ -38,29 +38,13 @@ const Text = ({ info }: { info: InfoText }) => {
         <>
           <Stack gap={2} sx={{ my: 2 }}>
             <Typography variant="h6">FI</Typography>
-            <TextField
-              defaultValue={info.text.fi}
-              multiline
-              onChange={(e) => setFi(e.target.value)}
-            />
+            <TextField defaultValue={info.text.fi} multiline onChange={(e) => setFi(e.target.value)} />
             <Typography variant="h6">SV</Typography>
-            <TextField
-              defaultValue={info.text.sv}
-              multiline
-              onChange={(e) => setSv(e.target.value)}
-            />
+            <TextField defaultValue={info.text.sv} multiline onChange={(e) => setSv(e.target.value)} />
             <Typography variant="h6">EN</Typography>
-            <TextField
-              defaultValue={info.text.en}
-              multiline
-              onChange={(e) => setEn(e.target.value)}
-            />
+            <TextField defaultValue={info.text.en} multiline onChange={(e) => setEn(e.target.value)} />
           </Stack>
-          <Button
-            onClick={() => handleSave()}
-            variant="outlined"
-            sx={{ mr: 2 }}
-          >
+          <Button onClick={() => handleSave()} variant="outlined" sx={{ mr: 2 }}>
             {t('common:save')}
           </Button>
         </>

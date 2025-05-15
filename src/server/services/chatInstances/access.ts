@@ -1,10 +1,5 @@
 import { TEST_COURSES } from '../../util/config'
-import {
-  ChatInstance,
-  Enrolment,
-  Responsibility,
-  User as UserModel,
-} from '../../db/models'
+import { ChatInstance, Enrolment, Responsibility, User as UserModel } from '../../db/models'
 import { User } from '../../types'
 
 const getUserById = async (id: string) => UserModel.findByPk(id)
@@ -22,7 +17,7 @@ export const getEnrolledCourses = async (user: User) => {
       // TS is wrong here. It expects fields in camelCase
       // while the actual fields need to be in snake_case
       // @ts-expect-error
-      { conflictFields: ['user_id', 'chat_instance_id'] }
+      { conflictFields: ['user_id', 'chat_instance_id'] },
     )
   }
 
@@ -41,9 +36,7 @@ export const getEnrolledCourses = async (user: User) => {
  */
 export const getEnrolledCourseIds = async (user: User) => {
   const enrollments = await getEnrolledCourses(user)
-  const courseIds = enrollments.map(
-    (enrolment) => enrolment.chatInstance.courseId
-  ) as string[]
+  const courseIds = enrollments.map((enrolment) => enrolment.chatInstance.courseId) as string[]
 
   return courseIds
 }
@@ -60,7 +53,7 @@ export const getOwnCourses = async (user: User) => {
       // TS is wrong here. It expects fields in camelCase
       // while the actual fields need to be in snake_case
       // @ts-expect-error
-      { conflictFields: ['user_id', 'chat_instance_id'] }
+      { conflictFields: ['user_id', 'chat_instance_id'] },
     )
     await Responsibility.upsert(
       {
@@ -70,7 +63,7 @@ export const getOwnCourses = async (user: User) => {
       // TS is wrong here. It expects fields in camelCase
       // while the actual fields need to be in snake_case
       // @ts-expect-error
-      { conflictFields: ['user_id', 'chat_instance_id'] }
+      { conflictFields: ['user_id', 'chat_instance_id'] },
     )
     await Responsibility.upsert(
       {
@@ -80,7 +73,7 @@ export const getOwnCourses = async (user: User) => {
       // TS is wrong here. It expects fields in camelCase
       // while the actual fields need to be in snake_case
       // @ts-expect-error
-      { conflictFields: ['user_id', 'chat_instance_id'] }
+      { conflictFields: ['user_id', 'chat_instance_id'] },
     )
   }
 
@@ -91,9 +84,7 @@ export const getOwnCourses = async (user: User) => {
     include: [Responsibility.associations.chatInstance],
   })) as (Responsibility & { chatInstance: ChatInstance })[]
 
-  const courseIds = responsibilities.map(
-    (responsibility) => responsibility.chatInstance.courseId
-  ) as string[]
+  const courseIds = responsibilities.map((responsibility) => responsibility.chatInstance.courseId) as string[]
 
   return courseIds
 }

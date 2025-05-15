@@ -1,22 +1,6 @@
 import { useState } from 'react'
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  Tooltip,
-  TextField,
-  Stack,
-  FormControlLabel,
-  Checkbox,
-} from '@mui/material'
-import {
-  ExpandLess,
-  ExpandMore,
-  Visibility,
-  VisibilityOff,
-  PriorityHigh,
-} from '@mui/icons-material'
+import { Box, Paper, Typography, Button, Tooltip, TextField, Stack, FormControlLabel, Checkbox } from '@mui/material'
+import { ExpandLess, ExpandMore, Visibility, VisibilityOff, PriorityHigh } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
 import { enqueueSnackbar } from 'notistack'
@@ -25,27 +9,11 @@ import { Response } from '../../Chat/Conversation'
 import SystemMessage from '../../Chat/SystemMessage'
 import { useEditPromptMutation } from '../../../hooks/usePromptMutation'
 
-const ExpandButton = ({
-  expand,
-  setExpand,
-}: {
-  expand: boolean
-  setExpand: SetState<boolean>
-}) => (
-  <Button onClick={() => setExpand(!expand)}>
-    {expand ? <ExpandLess /> : <ExpandMore />}
-  </Button>
+const ExpandButton = ({ expand, setExpand }: { expand: boolean; setExpand: SetState<boolean> }) => (
+  <Button onClick={() => setExpand(!expand)}>{expand ? <ExpandLess /> : <ExpandMore />}</Button>
 )
 
-const Prompt = ({
-  prompt,
-  handleDelete,
-  mandatoryPromptId,
-}: {
-  prompt: PromptType
-  handleDelete: (promptId: string) => void
-  mandatoryPromptId: string
-}) => {
+const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptType; handleDelete: (promptId: string) => void; mandatoryPromptId: string }) => {
   const { t } = useTranslation()
   const mutation = useEditPromptMutation()
 
@@ -104,11 +72,7 @@ const Prompt = ({
                 {name}
               </Typography>
             ) : (
-              <TextField
-                defaultValue={updatedName}
-                sx={{ width: '650px' }}
-                onChange={(e) => setUpdatedName(e.target.value)}
-              />
+              <TextField defaultValue={updatedName} sx={{ width: '650px' }} onChange={(e) => setUpdatedName(e.target.value)} />
             )}
           </Box>
           <Box>
@@ -124,62 +88,30 @@ const Prompt = ({
             {!editPrompt ? (
               <>
                 <Box width="80%">
-                  <SystemMessage
-                    system={systemMessage}
-                    setSystem={() => {}}
-                    showInfo={false}
-                    disabled
-                  />
+                  <SystemMessage system={systemMessage} setSystem={() => {}} showInfo={false} disabled />
                 </Box>
                 <Box>
                   {messages.map(({ role, content }, index) => (
-                    <Response
-                      key={content}
-                      role={role}
-                      content={content}
-                      id={`message-${index}`}
-                    />
+                    <Response key={content} role={role} content={content} id={`message-${index}`} />
                   ))}
                 </Box>
               </>
             ) : (
               <>
-                <TextField
-                  defaultValue={systemMessage}
-                  sx={{ width: '80%' }}
-                  multiline
-                  onChange={(e) => setMessage(e.target.value)}
-                />
+                <TextField defaultValue={systemMessage} sx={{ width: '80%' }} multiline onChange={(e) => setMessage(e.target.value)} />
                 {!mandatoryPromptId || mandatoryPromptId === prompt.id ? (
                   <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={updatedMandatory}
-                        onChange={() => setUpdatedMandatory((prev) => !prev)}
-                      />
-                    }
+                    control={<Checkbox checked={updatedMandatory} onChange={() => setUpdatedMandatory((prev) => !prev)} />}
                     label="Tee alustuksesta pakollinen opiskelijoille"
                     sx={{ mr: 5 }}
                   />
                 ) : (
                   <Tooltip title="Kurssilla voi olla vain yksi pakollinen alustus">
-                    <FormControlLabel
-                      control={<Checkbox checked={updatedMandatory} disabled />}
-                      label="Tee alustuksesta pakollinen opiskelijoille"
-                      sx={{ mr: 5 }}
-                    />
+                    <FormControlLabel control={<Checkbox checked={updatedMandatory} disabled />} label="Tee alustuksesta pakollinen opiskelijoille" sx={{ mr: 5 }} />
                   </Tooltip>
                 )}
 
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={updatedHidden}
-                      onChange={() => setUpdatedHidden((prev) => !prev)}
-                    />
-                  }
-                  label={t('hidePrompt')}
-                />
+                <FormControlLabel control={<Checkbox checked={updatedHidden} onChange={() => setUpdatedHidden((prev) => !prev)} />} label={t('hidePrompt')} />
               </>
             )}
             <Stack direction="row" spacing={2} marginTop={2}>
@@ -188,10 +120,7 @@ const Prompt = ({
                   {t('common:save')}
                 </Button>
               )}
-              <Button
-                variant="outlined"
-                onClick={() => setEditPrompt(!editPrompt)}
-              >
+              <Button variant="outlined" onClick={() => setEditPrompt(!editPrompt)}>
                 {editPrompt ? t('common:cancel') : t('common:edit')}
               </Button>
             </Stack>

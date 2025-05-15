@@ -1,10 +1,4 @@
-import {
-  Model,
-  InferAttributes,
-  InferCreationAttributes,
-  CreationOptional,
-  DataTypes,
-} from 'sequelize'
+import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
 
 import { sequelize } from '../connection'
 
@@ -13,10 +7,7 @@ export type RagIndexMetadata = {
   dim: number
 }
 
-class RagIndex extends Model<
-  InferAttributes<RagIndex>,
-  InferCreationAttributes<RagIndex>
-> {
+class RagIndex extends Model<InferAttributes<RagIndex>, InferCreationAttributes<RagIndex>> {
   declare id: CreationOptional<number>
 
   declare userId: string
@@ -50,7 +41,7 @@ RagIndex.init(
   {
     underscored: true,
     sequelize,
-  }
+  },
 )
 
 export default RagIndex

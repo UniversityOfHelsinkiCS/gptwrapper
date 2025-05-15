@@ -1,20 +1,7 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-} from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material'
 import { useState } from 'react'
 
-export const SystemPrompt = ({
-  content,
-  setContent,
-}: {
-  content: string
-  setContent: (content: string) => void
-}) => {
+export const SystemPrompt = ({ content, setContent }: { content: string; setContent: (content: string) => void }) => {
   const [open, setOpen] = useState(false)
 
   return (

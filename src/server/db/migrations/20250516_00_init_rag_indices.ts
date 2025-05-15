@@ -32,5 +32,4 @@ export const up: Migration = ({ context: queryInterface }) =>
     },
   })
 
-export const down: Migration = ({ context: queryInterface }) =>
-  queryInterface.dropTable('rag_indices')
+export const down: Migration = ({ context: queryInterface }) => queryInterface.dropTable('rag_indices')

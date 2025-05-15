@@ -8,26 +8,14 @@ interface ChatInstanceWithTokens extends ChatInstance {
   tokenUsage: number
 }
 
-const useChatInstances = ({
-  limit = 100,
-  offset = 0,
-  search = '',
-  order = '',
-  orderBy = '',
-  showActiveCourses = false,
-}) => {
-  const queryKey = [
-    'chatInstances',
-    { limit, offset, search, order, orderBy, showActiveCourses },
-  ]
+const useChatInstances = ({ limit = 100, offset = 0, search = '', order = '', orderBy = '', showActiveCourses = false }) => {
+  const queryKey = ['chatInstances', { limit, offset, search, order, orderBy, showActiveCourses }]
 
   const queryFn = async (): Promise<{
     chatInstances: ChatInstanceWithTokens[]
     count: number
   }> => {
-    const res = await apiClient.get(
-      `/chatinstances?limit=${limit}&offset=${offset}&search=${search}&orderBy=${orderBy}&order=${order}&showActiveCourses=${showActiveCourses}`
-    )
+    const res = await apiClient.get(`/chatinstances?limit=${limit}&offset=${offset}&search=${search}&orderBy=${orderBy}&order=${order}&showActiveCourses=${showActiveCourses}`)
 
     const { data } = res
 

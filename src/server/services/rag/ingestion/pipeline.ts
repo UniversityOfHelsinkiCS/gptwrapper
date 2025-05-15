@@ -16,25 +16,13 @@ const initPipelineCache = async () => {
     await stat(pipelineCachePath)
     await rm(pipelineCachePath, { recursive: true, force: true })
   } catch (error) {
-    console.warn(
-      `Pipeline cache not found, creating ${pipelineCachePath} --- `,
-      error
-    )
+    console.warn(`Pipeline cache not found, creating ${pipelineCachePath} --- `, error)
   }
   await mkdir(pipelineCachePath)
 }
 
-export const ingestionPipeline = async (
-  client: OpenAI,
-  loadpath: string,
-  ragIndex: RagIndex
-) => {
+export const ingestionPipeline = async (client: OpenAI, loadpath: string, ragIndex: RagIndex) => {
   await initPipelineCache()
 
-  await pipeline([
-    new FileLoader(loadpath),
-    new Chunker(pipelineCachePath),
-    new Embedder(client, pipelineCachePath),
-    new RedisStorer(ragIndex),
-  ])
+  await pipeline([new FileLoader(loadpath), new Chunker(pipelineCachePath), new Embedder(client, pipelineCachePath), new RedisStorer(ragIndex)])
 }

@@ -1,16 +1,5 @@
 import { useState } from 'react'
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  Modal,
-  Checkbox,
-  FormControlLabel,
-  Input,
-  Alert,
-  Tooltip,
-} from '@mui/material'
+import { Box, Paper, Typography, Button, Modal, Checkbox, FormControlLabel, Input, Alert, Tooltip } from '@mui/material'
 import { OpenInNew, Edit } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
@@ -23,10 +12,7 @@ import Conversation from '../../Chat/Conversation'
 import usePrompts from '../../../hooks/usePrompts'
 import useCourse from '../../../hooks/useCourse'
 import useCurrentUser from '../../../hooks/useCurrentUser'
-import {
-  useCreatePromptMutation,
-  useDeletePromptMutation,
-} from '../../../hooks/usePromptMutation'
+import { useCreatePromptMutation, useDeletePromptMutation } from '../../../hooks/usePromptMutation'
 import { formatDate, getCurTypeLabel } from '../util'
 import Prompt from './Prompt'
 import EditCourseForm from './EditCourseForm'
@@ -66,12 +52,9 @@ const Course = () => {
 
   const studentLink = `${window.location.origin}${PUBLIC_URL}/${course?.courseId}`
 
-  if (isLoading || courseLoading || !course || isUserLoading || !user)
-    return null
+  if (isLoading || courseLoading || !course || isUserLoading || !user) return null
 
-  const amongResponsibles = course.responsibilities
-    ? course.responsibilities.some((r) => r.user.id === user.id)
-    : false
+  const amongResponsibles = course.responsibilities ? course.responsibilities.some((r) => r.user.id === user.id) : false
 
   if (!user.isAdmin && !amongResponsibles) {
     return (
@@ -120,16 +103,11 @@ const Course = () => {
 
   const responsebilitues = course.responsibilities
 
-  const isCourseActive =
-    courseEnabled &&
-    Date.parse(course.activityPeriod.endDate) > Date.now() &&
-    Date.parse(course.activityPeriod.startDate) <= Date.now()
+  const isCourseActive = courseEnabled && Date.parse(course.activityPeriod.endDate) > Date.now() && Date.parse(course.activityPeriod.startDate) <= Date.now()
 
-  const willBeEnabled =
-    courseEnabled && Date.parse(course.activityPeriod.startDate) > Date.now()
+  const willBeEnabled = courseEnabled && Date.parse(course.activityPeriod.startDate) > Date.now()
 
-  const wasEnabled =
-    courseEnabled && Date.parse(course.activityPeriod.endDate) < Date.now()
+  const wasEnabled = courseEnabled && Date.parse(course.activityPeriod.endDate) < Date.now()
 
   const getInfoSeverity = () => {
     if (!courseEnabled) return 'warning'
@@ -140,10 +118,8 @@ const Course = () => {
   const getInfoMessage = () => {
     if (!courseEnabled) return t('course:curreNotOpen')
     if (isCourseActive) return t('course:curreOpen')
-    if (willBeEnabled)
-      return `${t('course:curreWillBeOpen')} ${course.activityPeriod.startDate}`
-    if (wasEnabled)
-      return `${t('course:curreWasOpen')} ${course.activityPeriod.endDate}`
+    if (willBeEnabled) return `${t('course:curreWillBeOpen')} ${course.activityPeriod.startDate}`
+    if (wasEnabled) return `${t('course:curreWasOpen')} ${course.activityPeriod.endDate}`
     return ''
   }
 
@@ -192,14 +168,10 @@ const Course = () => {
             </div>
 
             <div style={{ ...left, boxSizing: 'border-box', height: '50px' }}>
-              <Typography>
-                {course.courseUnits.map((cu) => cu.code).join(', ')}
-              </Typography>
+              <Typography>{course.courseUnits.map((cu) => cu.code).join(', ')}</Typography>
             </div>
             <div style={{ ...right, boxSizing: 'border-box', height: '50px' }}>
-              <Typography style={{ fontStyle: 'italic' }}>
-                {getCurTypeLabel(course.courseUnitRealisationTypeUrn, language)}
-              </Typography>
+              <Typography style={{ fontStyle: 'italic' }}>{getCurTypeLabel(course.courseUnitRealisationTypeUrn, language)}</Typography>
             </div>
 
             <div style={{ ...left, boxSizing: 'border-box' }}>
@@ -209,10 +181,7 @@ const Course = () => {
             </div>
 
             <div style={{ ...right, boxSizing: 'border-box' }}>
-              <Link
-                to={`https://studies.helsinki.fi/kurssit/toteutus/${course.courseId}`}
-                target="_blank"
-              >
+              <Link to={`https://studies.helsinki.fi/kurssit/toteutus/${course.courseId}`} target="_blank">
                 {t('course:coursePage')} <OpenInNew fontSize="small" />
               </Link>
             </div>
@@ -220,8 +189,7 @@ const Course = () => {
             {courseEnabled && (
               <div style={{ ...left, boxSizing: 'border-box' }}>
                 <Typography>
-                  {t('admin:model')}: {course.model}{' '}
-                  <span style={{ marginRight: 20 }} />
+                  {t('admin:model')}: {course.model} <span style={{ marginRight: 20 }} />
                   {t('admin:usageLimit')}: {course.usageLimit}
                 </Typography>
               </div>
@@ -237,18 +205,11 @@ const Course = () => {
 
             <div style={{ ...left, boxSizing: 'border-box' }}>
               {courseEnabled && (
-                <Button
-                  onClick={() => setActivityPeriodFormOpen(true)}
-                  style={{ marginLeft: -8 }}
-                >
+                <Button onClick={() => setActivityPeriodFormOpen(true)} style={{ marginLeft: -8 }}>
                   {t('course:editCourse')} <Edit />
                 </Button>
               )}
-              {!courseEnabled && (
-                <Typography style={{ fontStyle: 'italic' }}>
-                  {t('course:howToActive')}
-                </Typography>
-              )}
+              {!courseEnabled && <Typography style={{ fontStyle: 'italic' }}>{t('course:howToActive')}</Typography>}
             </div>
 
             <div style={{ ...right, boxSizing: 'border-box' }} />
@@ -256,10 +217,7 @@ const Course = () => {
             {courseEnabled && (
               <Tooltip title={t('copy')} placement="right">
                 <Button sx={{ p: 0 }} color="inherit">
-                  <Typography
-                    style={{ textTransform: 'lowercase' }}
-                    onClick={() => handleCopyLink(studentLink)}
-                  >
+                  <Typography style={{ textTransform: 'lowercase' }} onClick={() => handleCopyLink(studentLink)}>
                     {studentLink}
                   </Typography>
                 </Button>
@@ -269,20 +227,14 @@ const Course = () => {
 
           {user.isAdmin && (
             <>
-              <Button
-                onClick={() => setShowTeachers(!showTeachers)}
-                style={{ marginTop: 10, marginLeft: -8 }}
-              >
-                {showTeachers
-                  ? t('admin:hideTeachers')
-                  : t('admin:showTeachers')}
+              <Button onClick={() => setShowTeachers(!showTeachers)} style={{ marginTop: 10, marginLeft: -8 }}>
+                {showTeachers ? t('admin:hideTeachers') : t('admin:showTeachers')}
               </Button>
               {showTeachers && (
                 <ul>
                   {responsebilitues.map((responsibility) => (
                     <li>
-                      {responsibility.user.last_name}{' '}
-                      {responsibility.user.first_names}
+                      {responsibility.user.last_name} {responsibility.user.first_names}
                     </li>
                   ))}
                 </ul>
@@ -307,11 +259,7 @@ const Course = () => {
         >
           <Typography variant="h6">{t('course:reseachCourse')}</Typography>
           <Alert severity="warning" style={{ marginTop: 20, marginBottom: 20 }}>
-            <Typography>
-              {course.notOptoutSaving
-                ? t('course:isSavedNotOptOut')
-                : t('course:isSavedForTeacherOptOut')}
-            </Typography>
+            <Typography>{course.notOptoutSaving ? t('course:isSavedNotOptOut') : t('course:isSavedForTeacherOptOut')}</Typography>
           </Alert>
           <Link to={`/courses/${id}/discussions`}>
             {t('course:showDiscussions')} <OpenInNew fontSize="small" />
@@ -320,12 +268,7 @@ const Course = () => {
       )}
 
       {prompts.map((prompt) => (
-        <Prompt
-          key={prompt.id}
-          prompt={prompt}
-          handleDelete={handleDelete}
-          mandatoryPromptId={mandatoryPromptId}
-        />
+        <Prompt key={prompt.id} prompt={prompt} handleDelete={handleDelete} mandatoryPromptId={mandatoryPromptId} />
       ))}
 
       <Paper
@@ -341,67 +284,29 @@ const Course = () => {
           </Typography>
         </Box>
 
-        <Input
-          sx={{ mr: 2, mb: 2 }}
-          placeholder={t('promptName') as string}
-          value={name}
-          onChange={({ target }) => setName(target.value)}
-        />
+        <Input sx={{ mr: 2, mb: 2 }} placeholder={t('promptName') as string} value={name} onChange={({ target }) => setName(target.value)} />
 
-        <SystemMessage
-          system={system}
-          setSystem={setSystem}
-          disabled={false}
-          creation
-        />
+        <SystemMessage system={system} setSystem={setSystem} disabled={false} creation />
 
         <Conversation messages={messages} completion="" />
 
         <Box sx={{ paddingBottom: 2 }}>
           {!mandatoryPromptId ? (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={mandatory}
-                  onChange={() => setMandatory((prev) => !prev)}
-                />
-              }
-              label={t('course:editMandatoryPrompt')}
-              sx={{ mr: 5 }}
-            />
+            <FormControlLabel control={<Checkbox checked={mandatory} onChange={() => setMandatory((prev) => !prev)} />} label={t('course:editMandatoryPrompt')} sx={{ mr: 5 }} />
           ) : (
             <Tooltip title={t('course:oneMandatoryPrompt')}>
-              <FormControlLabel
-                control={<Checkbox checked={mandatory} disabled />}
-                label={t('course:editMandatoryPrompt')}
-                sx={{ mr: 5 }}
-              />
+              <FormControlLabel control={<Checkbox checked={mandatory} disabled />} label={t('course:editMandatoryPrompt')} sx={{ mr: 5 }} />
             </Tooltip>
           )}
-          <FormControlLabel
-            control={
-              <Checkbox
-                value={hidden}
-                onChange={() => setHidden((prev) => !prev)}
-              />
-            }
-            label={t('hidePrompt')}
-          />
+          <FormControlLabel control={<Checkbox value={hidden} onChange={() => setHidden((prev) => !prev)} />} label={t('hidePrompt')} />
         </Box>
         <Button variant="contained" onClick={handleSave} sx={{ mr: 2 }}>
           {t('common:save')}
         </Button>
       </Paper>
 
-      <Modal
-        open={activityPeriodFormOpen}
-        onClose={() => setActivityPeriodFormOpen(false)}
-      >
-        <EditCourseForm
-          course={course}
-          setOpen={setActivityPeriodFormOpen}
-          user={user}
-        />
+      <Modal open={activityPeriodFormOpen} onClose={() => setActivityPeriodFormOpen(false)}>
+        <EditCourseForm course={course} setOpen={setActivityPeriodFormOpen} user={user} />
       </Modal>
     </Box>
   )

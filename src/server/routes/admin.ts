@@ -17,11 +17,8 @@ adminRouter.use((req, _, next) => {
   const request = req as RequestWithUser
   const { user } = request
 
-  const isStatsViewer = statsViewerIams.some((iam) =>
-    user.iamGroups.includes(iam)
-  )
-  const isAllowed =
-    user.isAdmin || (isStatsViewer && req.path.includes('/statistics'))
+  const isStatsViewer = statsViewerIams.some((iam) => user.iamGroups.includes(iam))
+  const isAllowed = user.isAdmin || (isStatsViewer && req.path.includes('/statistics'))
 
   if (!isAllowed) throw new Error('Unauthorized')
 
@@ -96,15 +93,11 @@ adminRouter.get('/statistics', async (req, res) => {
     }
 
     const getTermsOf = ({ courseActivityPeriod }) => {
-      const checkDateOverlap = (term, course) =>
-        new Date(term.startDate) <= new Date(course.endDate || '2112-12-21') &&
-        new Date(term.endDate) >= new Date(course.startDate)
+      const checkDateOverlap = (term, course) => new Date(term.startDate) <= new Date(course.endDate || '2112-12-21') && new Date(term.endDate) >= new Date(course.startDate)
 
       if (!courseActivityPeriod) return []
 
-      return terms.filter((term) =>
-        checkDateOverlap(term, courseActivityPeriod)
-      )
+      return terms.filter((term) => checkDateOverlap(term, courseActivityPeriod))
     }
 
     function getUniqueValues(array) {
@@ -120,9 +113,7 @@ adminRouter.get('/statistics', async (req, res) => {
       const units = chatInstance.courseUnits
 
       const codes = units.map((u) => u.code)
-      const programmes = units.flatMap((item) =>
-        item.organisations.map((org) => org.code)
-      )
+      const programmes = units.flatMap((item) => item.organisations.map((org) => org.code))
 
       return {
         startDate: chatInstance.activityPeriod.startDate,

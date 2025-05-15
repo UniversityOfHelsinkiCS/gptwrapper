@@ -1,10 +1,4 @@
-import {
-  OpenAIClient,
-  AzureKeyCredential,
-  EventStream,
-  ChatCompletions,
-  GetEmbeddingsOptions,
-} from '@azure/openai'
+import { OpenAIClient, AzureKeyCredential, EventStream, ChatCompletions, GetEmbeddingsOptions } from '@azure/openai'
 import { Tiktoken } from '@dqbd/tiktoken'
 import { Response } from 'express'
 
@@ -16,10 +10,7 @@ import { AzureOpenAI } from 'openai'
 
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
-const oldClient = new OpenAIClient(
-  endpoint,
-  new AzureKeyCredential(AZURE_API_KEY)
-)
+const oldClient = new OpenAIClient(endpoint, new AzureKeyCredential(AZURE_API_KEY))
 
 export const getAzureOpenAIClient = (deployment: string) =>
   new AzureOpenAI({
@@ -32,9 +23,7 @@ export const getAzureOpenAIClient = (deployment: string) =>
 /**
  * Mock stream for testing
  */
-const getMockCompletionEvents: () => Promise<
-  EventStream<ChatCompletions>
-> = async () => {
+const getMockCompletionEvents: () => Promise<EventStream<ChatCompletions>> = async () => {
   const mockStream = new ReadableStream<ChatCompletions>({
     start(controller) {
       for (let i = 0; i < 10; i += 1) {
@@ -63,26 +52,15 @@ const getMockCompletionEvents: () => Promise<
   return mockStream
 }
 
-export const getCompletionEvents = async ({
-  model,
-  messages,
-  options,
-}: AzureOptions) => {
+export const getCompletionEvents = async ({ model, messages, options }: AzureOptions) => {
   const deploymentId = validModels.find((m) => m.name === model)?.deployment
 
-  if (!deploymentId)
-    throw new Error(
-      `Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`
-    )
+  if (!deploymentId) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
 
   if (deploymentId === 'mock') return getMockCompletionEvents()
 
   try {
-    const events = await oldClient.streamChatCompletions(
-      deploymentId,
-      messages,
-      options
-    )
+    const events = await oldClient.streamChatCompletions(deploymentId, messages, options)
 
     return events
   } catch (error: any) {
@@ -92,12 +70,7 @@ export const getCompletionEvents = async ({
   }
 }
 
-export const streamCompletion = async (
-  events: EventStream<ChatCompletions>,
-  options: AzureOptions,
-  encoding: Tiktoken,
-  res: Response
-) => {
+export const streamCompletion = async (events: EventStream<ChatCompletions>, options: AzureOptions, encoding: Tiktoken, res: Response) => {
   let tokenCount = 0
   const contents = []
   for await (const event of events) {
@@ -113,9 +86,7 @@ export const streamCompletion = async (
               if (err) logger.error(`${choice.delta} ${err}`)
             })
           ) {
-            logger.info(
-              `${choice.delta} res.write returned false, waiting for drain`
-            )
+            logger.info(`${choice.delta} res.write returned false, waiting for drain`)
             res.once('drain', resolve)
           } else {
             process.nextTick(resolve)
@@ -139,11 +110,7 @@ export const getOpenAiEmbedding = async (prompt: string) => {
     model: 'text-embedding-3-small',
   }
 
-  const embedding = await oldClient.getEmbeddings(
-    'text-embedding-3-small',
-    [prompt],
-    opts
-  )
+  const embedding = await oldClient.getEmbeddings('text-embedding-3-small', [prompt], opts)
 
   console.log(embedding)
 }

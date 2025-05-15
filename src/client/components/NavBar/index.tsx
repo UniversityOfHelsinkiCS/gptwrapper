@@ -1,25 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  AppBar,
-  Toolbar,
-  MenuItem,
-  Box,
-  Container,
-  MenuList,
-  Button,
-  Paper,
-  ClickAwayListener,
-  Grow,
-  Popper,
-  Typography,
-  Link as MuiLink,
-} from '@mui/material'
-import {
-  Language,
-  AdminPanelSettingsOutlined,
-  BookmarksOutlined,
-} from '@mui/icons-material'
+import { AppBar, Toolbar, MenuItem, Box, Container, MenuList, Button, Paper, ClickAwayListener, Grow, Popper, Typography, Link as MuiLink } from '@mui/material'
+import { Language, AdminPanelSettingsOutlined, BookmarksOutlined } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
 import useCurrentUser from '../../hooks/useCurrentUser'
@@ -37,8 +19,7 @@ const NavBar = () => {
   const { user, isLoading } = useCurrentUser()
 
   useEffect(() => {
-    if (user && user.language && languages.includes(user.language))
-      i18n.changeLanguage(user.language)
+    if (user && user.language && languages.includes(user.language)) i18n.changeLanguage(user.language)
   }, [user, i18n])
 
   const handleLanguageChange = (newLanguage: string) => {
@@ -51,12 +32,7 @@ const NavBar = () => {
   if (!user) return null
 
   return (
-    <AppBar
-      elevation={0}
-      position="relative"
-      sx={styles.appbar}
-      color="transparent"
-    >
+    <AppBar elevation={0} position="relative" sx={styles.appbar} color="transparent">
       <Container maxWidth={false}>
         <Toolbar sx={styles.toolbar} disableGutters>
           <MuiLink to="/" sx={styles.navBox} component={Link} reloadDocument>
@@ -83,8 +59,7 @@ const NavBar = () => {
             {user.isStatsViewer && (
               <Link to="/statistics" style={{ textDecoration: 'none' }}>
                 <Button>
-                  <AdminPanelSettingsOutlined sx={styles.icon} />{' '}
-                  {t('courseStats')}
+                  <AdminPanelSettingsOutlined sx={styles.icon} /> {t('courseStats')}
                 </Button>
               </Link>
             )}
@@ -99,49 +74,28 @@ const NavBar = () => {
               ref={anchorRef}
               id="composition-button"
               data-cy="language-select"
-              aria-controls={
-                openLanguageSelect ? 'composition-menu' : undefined
-              }
+              aria-controls={openLanguageSelect ? 'composition-menu' : undefined}
               aria-expanded={openLanguageSelect ? 'true' : undefined}
               aria-haspopup="true"
               onClick={() => setOpenLanguageSelect(!openLanguageSelect)}
             >
               <Language sx={styles.language} /> {language}
             </Button>
-            <Popper
-              open={openLanguageSelect}
-              anchorEl={anchorRef.current}
-              role={undefined}
-              placement="bottom-start"
-              transition
-              disablePortal
-            >
+            <Popper open={openLanguageSelect} anchorEl={anchorRef.current} role={undefined} placement="bottom-start" transition disablePortal>
               {({ TransitionProps, placement }) => (
                 <Grow
                   {...TransitionProps}
                   style={{
-                    transformOrigin:
-                      placement === 'bottom-start' ? 'left top' : 'left bottom',
+                    transformOrigin: placement === 'bottom-start' ? 'left top' : 'left bottom',
                   }}
                 >
                   <Paper>
-                    <ClickAwayListener
-                      onClickAway={() =>
-                        setOpenLanguageSelect(!openLanguageSelect)
-                      }
-                    >
-                      <MenuList
-                        autoFocusItem={openLanguageSelect}
-                        id="composition-menu"
-                        aria-labelledby="composition-button"
-                      >
+                    <ClickAwayListener onClickAway={() => setOpenLanguageSelect(!openLanguageSelect)}>
+                      <MenuList autoFocusItem={openLanguageSelect} id="composition-menu" aria-labelledby="composition-button">
                         {languages.map((l) => (
                           <MenuItem
                             key={l}
-                            sx={[
-                              styles.item,
-                              language === l && (styles.activeItem as any),
-                            ]}
+                            sx={[styles.item, language === l && (styles.activeItem as any)]}
                             onClick={() => {
                               handleLanguageChange(l)
                             }}

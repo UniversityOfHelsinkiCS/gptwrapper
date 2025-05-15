@@ -23,15 +23,7 @@ import useRetryTimeout from '../../hooks/useRetryTimeout'
 import { handleCompletionStreamError } from './error'
 
 const WAIT_FOR_STREAM_TIMEOUT = 4000
-const ALLOWED_FILE_TYPES = [
-  'text/plain',
-  'text/html',
-  'text/css',
-  'text/csv',
-  'text/markdown',
-  'text/md',
-  'application/pdf',
-]
+const ALLOWED_FILE_TYPES = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'text/md', 'application/pdf']
 const chatPersistingEnabled = false // import.meta.env.VITE_CHAT_PERSISTING
 
 /**
@@ -40,9 +32,7 @@ const chatPersistingEnabled = false // import.meta.env.VITE_CHAT_PERSISTING
  */
 function usePersistedState<T>(key: string, defaultValue: T): [T, SetState<T>] {
   const [state, setState] = useState<T>(() => {
-    const persistedValue = chatPersistingEnabled
-      ? localStorage.getItem(key)
-      : null
+    const persistedValue = chatPersistingEnabled ? localStorage.getItem(key) : null
     return persistedValue ? JSON.parse(persistedValue) : defaultValue
   })
 
@@ -74,20 +64,14 @@ const CourseInfo = ({ course }: { course: Course }) => {
     <Box>
       <div style={{ display: 'flex' }}>
         <Typography variant="h4">{course.name[language]}</Typography>
-        <div style={{ marginLeft: 10, paddingTop: 12, fontStyle: 'italic' }}>
-          {course.courseUnits.map((unit) => unit.code).join(', ')}
-        </div>
+        <div style={{ marginLeft: 10, paddingTop: 12, fontStyle: 'italic' }}>{course.courseUnits.map((unit) => unit.code).join(', ')}</div>
       </div>
 
       <div style={{ marginTop: 10 }}>{formatDate(course.activityPeriod)}</div>
 
       {course.saveDiscussions && (
         <Alert severity="warning" style={{ marginTop: 20 }}>
-          <Typography variant="h6">
-            {course.notOptoutSaving
-              ? t('course:isSavedNotOptOut')
-              : t('course:isSavedOptOut')}
-          </Typography>
+          <Typography variant="h6">{course.notOptoutSaving ? t('course:isSavedNotOptOut') : t('course:isSavedOptOut')}</Typography>
         </Alert>
       )}
     </Box>
@@ -99,21 +83,14 @@ const Chat = () => {
   const { courseId } = useParams()
 
   const { course } = useCourse(courseId)
-  const {
-    userStatus,
-    isLoading: statusLoading,
-    refetch: refetchStatus,
-  } = useUserStatus(courseId)
+  const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
 
   const [model, setModel] = useState(getInitialModel())
   const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
   const [activePromptId, setActivePromptId] = useState('')
   const [system, setSystem] = usePersistedState('general-chat-system', '')
   const [message, setMessage] = usePersistedState('general-chat-current', '')
-  const [messages, setMessages] = usePersistedState<Message[]>(
-    'general-chat-messages',
-    []
-  )
+  const [messages, setMessages] = usePersistedState<Message[]>('general-chat-messages', [])
   const inputFileRef = useRef<HTMLInputElement>(null)
   const [fileName, setFileName] = useState<string>('')
   const [completion, setCompletion] = useState('')
@@ -178,13 +155,9 @@ const Chat = () => {
     }
   }
 
-  const disclaimer = infoTexts.find(
-    (infoText) => infoText.name === 'disclaimer'
-  ).text[language]
+  const disclaimer = infoTexts.find((infoText) => infoText.name === 'disclaimer').text[language]
 
-  const systemMessageInfo = infoTexts.find(
-    (infoText) => infoText.name === 'systemMessage'
-  ).text[language]
+  const systemMessageInfo = infoTexts.find((infoText) => infoText.name === 'systemMessage').text[language]
 
   const { usage, limit, models: courseModels } = userStatus
 
@@ -201,9 +174,7 @@ const Chat = () => {
   const models = courseModels ?? validModels.map((m) => m.name)
 
   const hasPrompts = course && course.prompts.length > 0
-  const activePrompt = (course?.prompts ?? []).find(
-    ({ id }) => id === activePromptId
-  )
+  const activePrompt = (course?.prompts ?? []).find(({ id }) => id === activePromptId)
   const hidePrompt = activePrompt?.hidden ?? false
 
   const handleSetModel = (newModel: string) => {
@@ -262,10 +233,7 @@ const Chat = () => {
     }
   }
 
-  const handleRetry = async (
-    getCompletionParams: Parameters<typeof getCompletionStream>[0],
-    abortController: AbortController
-  ) => {
+  const handleRetry = async (getCompletionParams: Parameters<typeof getCompletionStream>[0], abortController: AbortController) => {
     if (!abortController || abortController.signal.aborted) return
 
     abortController?.abort('Creating a stream took too long')
@@ -273,11 +241,10 @@ const Chat = () => {
     setStreamController(newAbortController)
 
     try {
-      const { tokenUsageAnalysis, stream: retriedStream } =
-        await getCompletionStream({
-          ...getCompletionParams,
-          abortController: newAbortController,
-        })
+      const { tokenUsageAnalysis, stream: retriedStream } = await getCompletionStream({
+        ...getCompletionParams,
+        abortController: newAbortController,
+      })
 
       if (tokenUsageAnalysis && tokenUsageAnalysis.message) {
         setTokenUsageWarning(tokenUsageAnalysis.message)
@@ -304,10 +271,7 @@ const Chat = () => {
     }
 
     if (!userConsent) {
-      setMessages((prev) => [
-        ...prev,
-        { role: 'user', content: message + (file ? `\n\n${file.name}` : '') },
-      ])
+      setMessages((prev) => [...prev, { role: 'user', content: message + (file ? `\n\n${file.name}` : '') }])
     }
 
     // Abort the old request if a new one is sent
@@ -329,7 +293,7 @@ const Chat = () => {
                 role: 'user',
                 content: message + (file ? '\n\nFile content:\n\n' : ''),
               },
-            ]
+            ],
       ),
       model,
       formData,
@@ -343,14 +307,10 @@ const Chat = () => {
     console.log('getCompletionsArgs', getCompletionsArgs)
 
     // Retry the request if the server is stuck for WAIT_FOR_STREAM_TIMEOUT seconds
-    setRetryTimeout(
-      () => handleRetry(getCompletionsArgs, abortController),
-      WAIT_FOR_STREAM_TIMEOUT
-    )
+    setRetryTimeout(() => handleRetry(getCompletionsArgs, abortController), WAIT_FOR_STREAM_TIMEOUT)
 
     try {
-      const { tokenUsageAnalysis, stream } =
-        await getCompletionStream(getCompletionsArgs)
+      const { tokenUsageAnalysis, stream } = await getCompletionStream(getCompletionsArgs)
 
       if (tokenUsageAnalysis && tokenUsageAnalysis.message) {
         setTokenUsageWarning(tokenUsageAnalysis.message)
@@ -378,9 +338,7 @@ const Chat = () => {
   }
 
   const handleChangePrompt = (promptId: string) => {
-    const { systemMessage, messages: promptMessages } = course?.prompts.find(
-      ({ id }) => id === promptId
-    ) as Prompt
+    const { systemMessage, messages: promptMessages } = course?.prompts.find(({ id }) => id === promptId) as Prompt
 
     setSystem(systemMessage)
     setMessages(promptMessages)
@@ -397,38 +355,18 @@ const Chat = () => {
       {course && <CourseInfo course={course} />}
       <Box sx={{ mb: 3 }} />
 
-      {hasPrompts && (
-        <PromptSelector
-          prompts={course.prompts}
-          activePrompt={activePromptId}
-          setActivePrompt={handleChangePrompt}
-        />
-      )}
-      {!hidePrompt && (
-        <SystemMessage
-          infoText={systemMessageInfo}
-          system={system}
-          setSystem={setSystem}
-          disabled={activePromptId.length > 0 || messages.length > 0}
-        />
-      )}
+      {hasPrompts && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}
+      {!hidePrompt && <SystemMessage infoText={systemMessageInfo} system={system} setSystem={setSystem} disabled={activePromptId.length > 0 || messages.length > 0} />}
       <Box sx={{ mb: 3 }} />
 
-      <Conversation
-        messages={messages}
-        completion={completion}
-        handleStop={handleStop}
-        setMessage={setMessage}
-      />
+      <Conversation messages={messages} completion={completion} handleStop={handleStop} setMessage={setMessage} />
       <SendMessage
         message={message}
         setMessage={setMessage}
         handleReset={handleReset}
         handleSend={handleSend}
         disabled={message.length === 0 || completion !== ''}
-        resetDisabled={
-          messages.length === 0 && system.length === 0 && message.length === 0
-        }
+        resetDisabled={messages.length === 0 && system.length === 0 && message.length === 0}
         inputFileRef={inputFileRef}
         fileName={fileName}
         setFileName={setFileName}
@@ -439,12 +377,7 @@ const Chat = () => {
         saveChat={course && course.saveDiscussions}
         notOptoutSaving={course && course.notOptoutSaving}
       />
-      <Email
-        system={system}
-        messages={messages}
-        disabled={messages.length === 0 || completion !== ''}
-        hidePrompt={hidePrompt}
-      />
+      <Email system={system} messages={messages} disabled={messages.length === 0 || completion !== ''} hidePrompt={hidePrompt} />
       {alertOpen && (
         <Alert
           severity="warning"
@@ -456,22 +389,11 @@ const Chat = () => {
           <Typography>{`Currenlty there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}</Typography>
         </Alert>
       )}
-      <TokenUsageWarning
-        tokenUsageWarning={tokenUsageWarning}
-        handleCancel={handleCancel}
-        handleContinue={handleContinue}
-        visible={tokenWarningVisible}
-      />
+      <TokenUsageWarning tokenUsageWarning={tokenUsageWarning} handleCancel={handleCancel} handleContinue={handleContinue} visible={tokenWarningVisible} />
 
       <Box sx={{ mb: 3 }} />
 
-      <Status
-        model={model}
-        setModel={handleSetModel}
-        models={models}
-        usage={usage}
-        limit={limit}
-      />
+      <Status model={model} setModel={handleSetModel} models={models} usage={usage} limit={limit} />
 
       <Box sx={{ px: 4, my: 4, maxWidth: '40rem' }}>
         <Typography>{t('chat:temperature')}</Typography>

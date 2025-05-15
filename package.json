@@ -11,7 +11,6 @@
     "tsc": "tsc",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
-    "format": "prettier --write '**/*.{ts,json,css,md}'",
     "build": "vite build",
     "prepare": "husky install"
   },
@@ -31,8 +30,7 @@
     "singleQuote": true
   },
   "lint-staged": {
-    "src/**/*.{ts,tsx}": "eslint",
-    "*.{ts,tsx,json,md}": "prettier --write"
+    "src/**/*.{ts,tsx}": "eslint"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.23.10",

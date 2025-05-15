@@ -13,8 +13,7 @@ const MessageItem = ({ message }: { message: Message }) => (
       mr: message.role === 'assistant' ? '2rem' : '0',
       p: '1rem',
       backgroundColor: message.role === 'user' ? '#ffffff' : '#e0f7fa',
-      borderRadius:
-        message.role === 'assistant' ? '0 1rem 1rem 1rem' : '1rem 0 1rem 1rem',
+      borderRadius: message.role === 'assistant' ? '0 1rem 1rem 1rem' : '1rem 0 1rem 1rem',
     }}
   >
     <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
@@ -42,20 +41,12 @@ const PöhinäLogo = () => (
   </Box>
 )
 
-export const Conversation = ({
-  messages,
-  completion,
-}: {
-  messages: Message[]
-  completion: string
-}) => (
+export const Conversation = ({ messages, completion }: { messages: Message[]; completion: string }) => (
   <Box sx={{ flex: 1, overflowY: 'auto' }}>
     {messages.map((message, idx) => (
       <MessageItem key={idx} message={message} />
     ))}
-    {completion && (
-      <MessageItem message={{ role: 'assistant', content: completion }} />
-    )}
+    {completion && <MessageItem message={{ role: 'assistant', content: completion }} />}
     {messages.length === 0 && <PöhinäLogo />}
   </Box>
 )

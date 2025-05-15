@@ -1,9 +1,4 @@
-import {
-  RouterProvider,
-  Route,
-  createBrowserRouter,
-  createRoutesFromElements,
-} from 'react-router-dom'
+import { RouterProvider, Route, createBrowserRouter, createRoutesFromElements } from 'react-router-dom'
 
 import { PUBLIC_URL } from '../config'
 import App from './App'
@@ -28,20 +23,17 @@ const router = createBrowserRouter(
       <Route path="/courses" element={<Courses />} />
       <Route path="/courses/:id" element={<Course />} />
       <Route path="/courses/:id/discussions" element={<Discussions />} />
-      <Route
-        path="/courses/:id/discussions/:user_id"
-        element={<Discussion />}
-      />
+      <Route path="/courses/:id/discussions/:user_id" element={<Discussion />} />
       <Route path="/admin/*" element={<Admin />} />
       <Route path="/noaccess" element={<NoAccess />} />
       <Route path="/chats" element={<Chats />} />
       <Route path="/statistics" element={<Statistics />} />
       <Route path="/rag" element={<Rag />} />
-    </Route>
+    </Route>,
   ),
   {
     basename: PUBLIC_URL,
-  }
+  },
 )
 
 const Router = () => <RouterProvider router={router} />

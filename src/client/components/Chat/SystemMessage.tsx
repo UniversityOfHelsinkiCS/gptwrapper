@@ -4,13 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { HelpOutline } from '@mui/icons-material'
 import { SetState } from '../../types'
 
-const Info = ({
-  infoText,
-  creation = false,
-}: {
-  infoText: string
-  creation?: boolean
-}) => {
+const Info = ({ infoText, creation = false }: { infoText: string; creation?: boolean }) => {
   const { t } = useTranslation()
 
   return (

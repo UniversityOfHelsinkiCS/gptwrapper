@@ -34,5 +34,4 @@ export const up: Migration = ({ context: queryInterface }) =>
     },
   })
 
-export const down: Migration = ({ context: queryInterface }) =>
-  queryInterface.dropTable('services')
+export const down: Migration = ({ context: queryInterface }) => queryInterface.dropTable('services')

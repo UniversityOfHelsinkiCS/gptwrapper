@@ -18,11 +18,7 @@ const Usage = () => {
 
   return (
     <Box>
-      <Tabs
-        sx={{ borderBottom: 1, borderColor: 'divider' }}
-        value={value}
-        onChange={(_, newValue) => setValue(newValue)}
-      >
+      <Tabs sx={{ borderBottom: 1, borderColor: 'divider' }} value={value} onChange={(_, newValue) => setValue(newValue)}>
         <Tab label={t('admin:faculties')} />
         <Tab label={t('admin:users')} />
       </Tabs>

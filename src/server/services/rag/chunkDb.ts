@@ -23,7 +23,7 @@ export const createChunkIndex = async (ragIndex: RagIndex) => {
       {
         ON: 'HASH',
         PREFIX: `idx:${ragIndex.metadata.name}`,
-      }
+      },
     )
 
     console.log(`Index ${ragIndex.metadata.name} created`)
@@ -61,15 +61,13 @@ export const addChunk = async (
     metadata?: { [key: string]: any }
     content: string
     embedding: number[]
-  }
+  },
 ) => {
   const embeddingBuffer = Buffer.copyBytesFrom(new Float32Array(embedding))
 
   // Check if the embedding length is correct
   if (embeddingBuffer.length !== 4 * ragIndex.metadata.dim) {
-    throw new Error(
-      `Embedding length is incorrect, got ${embeddingBuffer.length} bytes`
-    )
+    throw new Error(`Embedding length is incorrect, got ${embeddingBuffer.length} bytes`)
   }
 
   await redisClient.hSet(`idx:${ragIndex.metadata.name}:${id}`, {
@@ -81,32 +79,22 @@ export const addChunk = async (
   console.log(`Document ${id} added to index ${ragIndex.metadata.name}`)
 }
 
-export const searchKChunks = async (
-  ragIndex: RagIndex,
-  embedding: number[],
-  k: number
-) => {
+export const searchKChunks = async (ragIndex: RagIndex, embedding: number[], k: number) => {
   const embeddingBuffer = Buffer.copyBytesFrom(new Float32Array(embedding))
 
   if (embeddingBuffer.length !== 4 * ragIndex.metadata.dim) {
-    throw new Error(
-      `Embedding length is incorrect, got ${embeddingBuffer.length} bytes`
-    )
+    throw new Error(`Embedding length is incorrect, got ${embeddingBuffer.length} bytes`)
   }
 
   const queryString = `(*)=>[KNN ${k} @embedding $vec_param AS score]`
 
-  const results = await redisClient.ft.search(
-    ragIndex.metadata.name,
-    queryString,
-    {
-      PARAMS: {
-        vec_param: embeddingBuffer,
-      },
-      DIALECT: 2,
-      RETURN: ['content', 'title', 'score'], // Specify the fields to return
-    }
-  )
+  const results = await redisClient.ft.search(ragIndex.metadata.name, queryString, {
+    PARAMS: {
+      vec_param: embeddingBuffer,
+    },
+    DIALECT: 2,
+    RETURN: ['content', 'title', 'score'], // Specify the fields to return
+  })
 
   return results as {
     total: number

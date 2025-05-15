@@ -1,20 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Box,
-  TableContainer,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Table,
-  Select,
-  MenuItem,
-  Tooltip,
-  Link,
-} from '@mui/material'
+import { Box, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Table, Select, MenuItem, Tooltip, Link } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
 import useStatistics from '../hooks/useStatistics'
 import { Statistic } from '../types'
@@ -37,15 +23,10 @@ const Statistics = () => {
     if (!codes || codes.length === 0) return ''
     const code = codes[0]
     if (!programme[code]) return code
-    return codes
-      .map((c) => (programme[c] ? programme[c][language] : c))
-      .join(', ')
+    return codes.map((c) => (programme[c] ? programme[c][language] : c)).join(', ')
   }
 
-  const selectedTerms = Array.from(
-    { length: to - from + 1 },
-    (_, i) => i + from
-  )
+  const selectedTerms = Array.from({ length: to - from + 1 }, (_, i) => i + from)
 
   const byUsage = (a, b) => b.usedTokens - a.usedTokens
 
@@ -56,15 +37,10 @@ const Statistics = () => {
 
   const belongsToFaculty = (stat: Statistic) => {
     if (selectedFaculty === 'H00') return true
-    return stat.programmes.some((p) =>
-      p.startsWith(selectedFaculty.substring(1))
-    )
+    return stat.programmes.some((p) => p.startsWith(selectedFaculty.substring(1)))
   }
 
-  const statsToShow = statistics.data
-    .filter(termWithin)
-    .filter(belongsToFaculty)
-    .sort(byUsage)
+  const statsToShow = statistics.data.filter(termWithin).filter(belongsToFaculty).sort(byUsage)
 
   return (
     <div>
@@ -72,10 +48,7 @@ const Statistics = () => {
         <div>
           <span style={{ marginRight: 10 }}>{t('stats:timePeriodStart')}</span>
 
-          <Select
-            value={from}
-            onChange={(e) => setFrom(parseInt(e.target.value as string, 10))}
-          >
+          <Select value={from} onChange={(e) => setFrom(parseInt(e.target.value as string, 10))}>
             {statistics.terms.map((term) => (
               <MenuItem key={term.id} value={term.id}>
                 {term.label[language]}
@@ -84,10 +57,7 @@ const Statistics = () => {
           </Select>
 
           <span style={{ margin: 10 }}>{t('stats:timePeriodStop')}</span>
-          <Select
-            value={to}
-            onChange={(e) => setTo(parseInt(e.target.value as string, 10))}
-          >
+          <Select value={to} onChange={(e) => setTo(parseInt(e.target.value as string, 10))}>
             {statistics.terms
               .filter((trm) => trm.id >= from)
               .map((term) => (
@@ -99,10 +69,7 @@ const Statistics = () => {
 
           <span style={{ margin: 10 }}>{t('stats:showing')}</span>
 
-          <Select
-            value={selectedFaculty}
-            onChange={(e) => setFaculties(e.target.value as string)}
-          >
+          <Select value={selectedFaculty} onChange={(e) => setFaculties(e.target.value as string)}>
             {faculties.map((f) => (
               <MenuItem key={f.code} value={f.code}>
                 {f.name[language]}
@@ -168,9 +135,7 @@ const Statistics = () => {
                     )}
                   </TableCell>
                   <TableCell align="left">
-                    <Typography>
-                      {chat.terms.map((trm) => trm.label[language]).join(', ')}
-                    </Typography>
+                    <Typography>{chat.terms.map((trm) => trm.label[language]).join(', ')}</Typography>
                   </TableCell>
                   <TableCell align="left">
                     <Tooltip title={namesOf(chat.programmes)}>

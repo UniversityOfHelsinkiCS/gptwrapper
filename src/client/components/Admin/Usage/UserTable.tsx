@@ -1,17 +1,5 @@
 import { useState } from 'react'
-import {
-  Table,
-  TableContainer,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Box,
-  Button,
-  TextField,
-} from '@mui/material'
+import { Table, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Box, Button, TextField } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 
@@ -55,10 +43,7 @@ const UserTable = () => {
     usageCount: user.usage,
   }))
 
-  const sortedUsage = (chatInstanceUsage as Usage[])
-    .concat(userUsages)
-    .sort(sortUsage)
-    .slice(0, 10)
+  const sortedUsage = (chatInstanceUsage as Usage[]).concat(userUsages).sort(sortUsage).slice(0, 10)
 
   const onDeleteChatInstanceUsage = (chatInstanceUsageId: string) => {
     try {
@@ -107,12 +92,7 @@ const UserTable = () => {
 
   return (
     <Box my={2}>
-      <TextField
-        sx={{ width: '30em', my: 2 }}
-        label="Search users"
-        variant="outlined"
-        onChange={handleSearchChange}
-      />
+      <TextField sx={{ width: '30em', my: 2 }} label="Search users" variant="outlined" onChange={handleSearchChange} />
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -136,40 +116,31 @@ const UserTable = () => {
           </TableHead>
 
           <TableBody>
-            {(searchedUsages.length !== 0 ? searchedUsages : sortedUsage).map(
-              ({ id, usageCount, user, chatInstance }) => (
-                <TableRow key={id}>
-                  <TableCell component="th" scope="row">
-                    <Typography variant="h6">{user.username}</Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography variant="h6">{usageCount}</Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography variant="overline">
-                      <code>{chatInstance?.name[language] ?? ''}</code>
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      color="error"
-                      onClick={() =>
-                        chatInstance?.courseId
-                          ? onDeleteChatInstanceUsage(id)
-                          : onResetUsage(user.id)
-                      }
-                    >
-                      {t('admin:reset')}
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="outlined" onClick={handleLoginAs(user)}>
-                      {t('admin:loginAsButton')}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              )
-            )}
+            {(searchedUsages.length !== 0 ? searchedUsages : sortedUsage).map(({ id, usageCount, user, chatInstance }) => (
+              <TableRow key={id}>
+                <TableCell component="th" scope="row">
+                  <Typography variant="h6">{user.username}</Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography variant="h6">{usageCount}</Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography variant="overline">
+                    <code>{chatInstance?.name[language] ?? ''}</code>
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Button color="error" onClick={() => (chatInstance?.courseId ? onDeleteChatInstanceUsage(id) : onResetUsage(user.id))}>
+                    {t('admin:reset')}
+                  </Button>
+                </TableCell>
+                <TableCell>
+                  <Button variant="outlined" onClick={handleLoginAs(user)}>
+                    {t('admin:loginAsButton')}
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>

@@ -1,15 +1,5 @@
 import { useState } from 'react'
-import {
-  Box,
-  Paper,
-  Typography,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Table,
-  Button,
-} from '@mui/material'
+import { Box, Paper, Typography, TableBody, TableCell, TableHead, TableRow, Table, Button } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { BarChart, Bar, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -24,19 +14,15 @@ const Stats = ({ courseId }: { courseId: string }) => {
   const { stats, isLoading } = useCourseStatistics(courseId)
   const { course, isLoading: courseLoading } = useCourse(courseId)
 
-  if (!stats || !user || isLoading || isUserLoading || courseLoading)
-    return null
+  if (!stats || !user || isLoading || isUserLoading || courseLoading) return null
 
   const { average, usagePercentage, usages } = stats
 
   usages.sort((a, b) => a.usageCount - b.usageCount)
 
-  const usageByUser = usages
-    .map((usage) => usage.dataValues)
-    .reduce((acc, u) => ({ ...acc, [u.userId]: u }), {})
+  const usageByUser = usages.map((usage) => usage.dataValues).reduce((acc, u) => ({ ...acc, [u.userId]: u }), {})
 
-  const enrolledUsers =
-    course.enrolments && course.enrolments.map((enrolment) => enrolment.user)
+  const enrolledUsers = course.enrolments && course.enrolments.map((enrolment) => enrolment.user)
 
   const byLastName = (a: { last_name: string }, b: { last_name: string }) => {
     if (a.last_name < b.last_name) {
@@ -59,15 +45,11 @@ const Stats = ({ courseId }: { courseId: string }) => {
       </Typography>
 
       <Typography sx={{ my: 1 }}>
-        {t('course:averageTokenUsage')}{' '}
-        {Math.round(average) ?? t('course:noData')}
+        {t('course:averageTokenUsage')} {Math.round(average) ?? t('course:noData')}
       </Typography>
 
       <Typography>
-        {t('course:usagePercentage')}{' '}
-        {usagePercentage
-          ? `${Math.round(usagePercentage * 100 * 10) / 10}%`
-          : t('course:noData')}
+        {t('course:usagePercentage')} {usagePercentage ? `${Math.round(usagePercentage * 100 * 10) / 10}%` : t('course:noData')}
       </Typography>
 
       {usages && usages.length > 3 && usagePercentage > 0.2 && (
@@ -83,11 +65,7 @@ const Stats = ({ courseId }: { courseId: string }) => {
               <Tooltip />
               <YAxis domain={[0, 100]} allowDataOverflow />
 
-              <Bar
-                dataKey="usageCount"
-                name={t('course:percentageUsed')}
-                fill="#8884d8"
-              />
+              <Bar dataKey="usageCount" name={t('course:percentageUsed')} fill="#8884d8" />
             </BarChart>
           </ResponsiveContainer>
           <Box textAlign="center" ml={8} mr={6}>
@@ -106,15 +84,8 @@ const Stats = ({ courseId }: { courseId: string }) => {
 
       {usages && !course.saveDiscussions && (
         <>
-          <Button
-            onClick={() => setStudentListOpen(!studentListOpen)}
-            sx={{ mt: 1 }}
-            color="primary"
-            style={{ marginTop: 10, marginLeft: -8 }}
-          >
-            {studentListOpen
-              ? t('admin:hideStudentList')
-              : t('admin:showStudentList')}
+          <Button onClick={() => setStudentListOpen(!studentListOpen)} sx={{ mt: 1 }} color="primary" style={{ marginTop: 10, marginLeft: -8 }}>
+            {studentListOpen ? t('admin:hideStudentList') : t('admin:showStudentList')}
           </Button>
           {studentListOpen && (
             <Table>
@@ -140,11 +111,7 @@ const Stats = ({ courseId }: { courseId: string }) => {
                     <TableCell>{enrolled.student_number}</TableCell>
                     <TableCell>{enrolled.last_name}</TableCell>
                     <TableCell>{enrolled.first_names}</TableCell>
-                    <TableCell>
-                      {usageByUser[enrolled.id]
-                        ? usageByUser[enrolled.id].usageCount
-                        : 0}
-                    </TableCell>
+                    <TableCell>{usageByUser[enrolled.id] ? usageByUser[enrolled.id].usageCount : 0}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

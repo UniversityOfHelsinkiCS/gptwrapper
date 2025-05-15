@@ -1,37 +1,15 @@
 import { KeyboardReturn } from '@mui/icons-material'
-import {
-  Accordion,
-  AccordionActions,
-  AccordionSummary,
-  Box,
-  Button,
-  Typography,
-} from '@mui/material'
+import { Accordion, AccordionActions, AccordionSummary, Box, Button, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useTranslation } from 'react-i18next'
 import { User } from '../../../types'
 
-const UserAccordion = ({
-  user,
-  isFocused,
-  handleLoginAs,
-  decoration,
-}: {
-  user: User
-  isFocused: boolean
-  handleLoginAs: (user: User) => () => void
-  decoration?: JSX.Element
-}) => {
+const UserAccordion = ({ user, isFocused, handleLoginAs, decoration }: { user: User; isFocused: boolean; handleLoginAs: (user: User) => () => void; decoration?: JSX.Element }) => {
   const { t } = useTranslation()
 
   return (
-    <Accordion
-      key={user.id}
-      TransitionProps={{ mountOnEnter: true, unmountOnExit: true }}
-    >
-      <AccordionSummary
-        sx={{ cursor: 'pointer', '&:hover': { background: grey['50'] } }}
-      >
+    <Accordion key={user.id} TransitionProps={{ mountOnEnter: true, unmountOnExit: true }}>
+      <AccordionSummary sx={{ cursor: 'pointer', '&:hover': { background: grey['50'] } }}>
         <Box display="flex" alignItems="center" width="100%">
           <Typography>{user.username}</Typography>
           <Box mr={2} />
@@ -57,11 +35,7 @@ const UserAccordion = ({
       </AccordionSummary>
       <AccordionActions>
         {typeof handleLoginAs === 'function' && (
-          <Button
-            onClick={handleLoginAs(user)}
-            variant="outlined"
-            color="primary"
-          >
+          <Button onClick={handleLoginAs(user)} variant="outlined" color="primary">
             {t('admin:loginAsButton')}
           </Button>
         )}

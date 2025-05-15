@@ -15,9 +15,7 @@ const importerClient = {
   },
 }
 
-export const getCourse = async (
-  courseId: string
-): Promise<CourseUnitRealisation | null> => {
+export const getCourse = async (courseId: string): Promise<CourseUnitRealisation | null> => {
   const data = await importerClient.get(`kliksutin/course/${courseId}`)
   const course: CourseUnitRealisation | null = data.error ? null : data
 

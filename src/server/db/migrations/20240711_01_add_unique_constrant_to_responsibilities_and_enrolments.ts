@@ -16,12 +16,6 @@ export const up: Migration = async ({ context: queryInterface }) => {
 
 export const down: Migration = async ({ context: queryInterface }) => {
   // remove unique constaraint on user_id and chat_instance_id
-  queryInterface.removeConstraint(
-    'responsibilities',
-    'responsibilities_user_id_chat_instance_id'
-  )
-  queryInterface.removeConstraint(
-    'enrolments',
-    'enrolments_user_id_chat_instance_id'
-  )
+  queryInterface.removeConstraint('responsibilities', 'responsibilities_user_id_chat_instance_id')
+  queryInterface.removeConstraint('enrolments', 'enrolments_user_id_chat_instance_id')
 }

@@ -20,7 +20,7 @@ const resetUsage = async () => {
           [Op.gt]: 0,
         },
       },
-    }
+    },
   )
 }
 

@@ -53,14 +53,7 @@ interface GetCourseCompletionStreamProps {
   courseId: string
   abortController?: AbortController
 }
-export const getCourseCompletionStream = async ({
-  id,
-  system,
-  messages,
-  model,
-  courseId,
-  abortController,
-}: GetCourseCompletionStreamProps) => {
+export const getCourseCompletionStream = async ({ id, system, messages, model, courseId, abortController }: GetCourseCompletionStreamProps) => {
   const data = {
     id,
     courseId,

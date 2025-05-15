@@ -47,9 +47,7 @@ export const useCourseDiscussion = (courseId: string, userId: string) => {
   const queryKey = ['messages', courseId, userId]
 
   const queryFn = async (): Promise<any | null> => {
-    const res = await apiClient.get(
-      `/courses/${courseId}/discussions/${userId}`
-    )
+    const res = await apiClient.get(`/courses/${courseId}/discussions/${userId}`)
 
     const { data } = res
 

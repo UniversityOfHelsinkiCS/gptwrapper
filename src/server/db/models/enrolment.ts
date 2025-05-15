@@ -1,17 +1,8 @@
-import {
-  Model,
-  InferAttributes,
-  InferCreationAttributes,
-  CreationOptional,
-  DataTypes,
-} from 'sequelize'
+import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
 
 import { sequelize } from '../connection'
 
-class Enrolment extends Model<
-  InferAttributes<Enrolment>,
-  InferCreationAttributes<Enrolment>
-> {
+class Enrolment extends Model<InferAttributes<Enrolment>, InferCreationAttributes<Enrolment>> {
   declare id: CreationOptional<string>
 
   declare userId: string
@@ -45,7 +36,7 @@ Enrolment.init(
         fields: ['user_id', 'chat_instance_id'],
       },
     ],
-  }
+  },
 )
 
 export default Enrolment

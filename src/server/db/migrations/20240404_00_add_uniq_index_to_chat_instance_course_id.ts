@@ -10,8 +10,5 @@ export const up: Migration = async ({ context: queryInterface }) => {
 }
 
 export const down: Migration = async ({ context: queryInterface }) => {
-  await queryInterface.removeIndex(
-    'chat_instances',
-    'chat_instances_course_id_unique'
-  )
+  await queryInterface.removeIndex('chat_instances', 'chat_instances_course_id_unique')
 }

@@ -11,11 +11,7 @@ export class RedisStorer extends Writable {
     this.ragIndex = ragIndex
   }
 
-  async _write(
-    chunk: EmbeddedChunk,
-    _encoding: BufferEncoding,
-    callback: (error?: Error | null) => void
-  ) {
+  async _write(chunk: EmbeddedChunk, _encoding: BufferEncoding, callback: (error?: Error | null) => void) {
     await addChunk(this.ragIndex, {
       id: chunk.id,
       metadata: chunk.metadata,

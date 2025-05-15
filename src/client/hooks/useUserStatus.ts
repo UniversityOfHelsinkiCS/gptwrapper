@@ -8,9 +8,7 @@ const useUserStatus = (chatInstanceId?: string) => {
   if (chatInstanceId) queryKey.push(chatInstanceId)
 
   const queryFn = async (): Promise<UserStatus> => {
-    const res = await apiClient.get(
-      chatInstanceId ? `/users/status/${chatInstanceId}` : '/users/status'
-    )
+    const res = await apiClient.get(chatInstanceId ? `/users/status/${chatInstanceId}` : '/users/status')
 
     const { data } = res
 

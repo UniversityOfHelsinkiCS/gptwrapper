@@ -33,19 +33,13 @@ promptRouter.get('/:courseId', async (req, res) => {
   return
 })
 
-const authorizeUser = async (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) => {
+const authorizeUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const request = req as RequestWithUser
   const data = req.body as NewPromptData
   const { user } = request
   const { id } = req.params
 
-  const chatInstanceId = id
-    ? (await Prompt.findByPk(id)).chatInstanceId
-    : data.chatInstanceId
+  const chatInstanceId = id ? (await Prompt.findByPk(id)).chatInstanceId : data.chatInstanceId
 
   const chatInstance = (await ChatInstance.findByPk(chatInstanceId, {
     include: [
@@ -56,9 +50,7 @@ const authorizeUser = async (
     ],
   })) as ChatInstance & { responsibilities: Responsibility[] }
 
-  const isAmongActiveCourses = chatInstance?.responsibilities.some(
-    (r) => r.userId === user.id
-  )
+  const isAmongActiveCourses = chatInstance?.responsibilities.some((r) => r.userId === user.id)
 
   if (!isAmongActiveCourses && !user.isAdmin) {
     res.status(403).send('Not allowed')

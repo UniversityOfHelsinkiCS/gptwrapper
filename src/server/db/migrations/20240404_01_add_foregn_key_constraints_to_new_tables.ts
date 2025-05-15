@@ -49,16 +49,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
 
 export const down: Migration = async ({ context: queryInterface }) => {
   await queryInterface.removeConstraint('enrolments', 'FK_enrolments_user_id')
-  await queryInterface.removeConstraint(
-    'enrolments',
-    'FK_enrolments_chat_instance_id'
-  )
-  await queryInterface.removeConstraint(
-    'responsibilities',
-    'FK_responsibilities_user_id'
-  )
-  await queryInterface.removeConstraint(
-    'responsibilities',
-    'FK_responsibilities_chat_instance_id'
-  )
+  await queryInterface.removeConstraint('enrolments', 'FK_enrolments_chat_instance_id')
+  await queryInterface.removeConstraint('responsibilities', 'FK_responsibilities_user_id')
+  await queryInterface.removeConstraint('responsibilities', 'FK_responsibilities_chat_instance_id')
 }

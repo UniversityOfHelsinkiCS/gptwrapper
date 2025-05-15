@@ -1,10 +1,4 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import Markdown from '../Banner/Markdown'
 
@@ -15,26 +9,16 @@ export const Disclaimer = ({ disclaimer }: { disclaimer: string }) => {
 
   return (
     <>
-      <Button
-        variant="outlined"
-        onClick={() => setDisclaimerStatus({ open: true })}
-        size="small"
-      >
+      <Button variant="outlined" onClick={() => setDisclaimerStatus({ open: true })} size="small">
         Disclaimer
       </Button>
-      <Dialog
-        open={disclaimerStatus.open}
-        onClose={() => setDisclaimerStatus({ open: false })}
-      >
+      <Dialog open={disclaimerStatus.open} onClose={() => setDisclaimerStatus({ open: false })}>
         <DialogTitle>Disclaimer</DialogTitle>
         <DialogContent>
           <Markdown>{disclaimer}</Markdown>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => setDisclaimerStatus({ open: false })}
-            color="primary"
-          >
+          <Button onClick={() => setDisclaimerStatus({ open: false })} color="primary">
             Close
           </Button>
         </DialogActions>

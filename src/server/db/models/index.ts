@@ -47,13 +47,4 @@ User.hasMany(RagIndex, { as: 'ragIndices' })
 
 RagIndex.belongsTo(User, { as: 'user' })
 
-export {
-  User,
-  ChatInstance,
-  UserChatInstanceUsage,
-  Prompt,
-  Enrolment,
-  Responsibility,
-  Discussion,
-  RagIndex,
-}
+export { User, ChatInstance, UserChatInstanceUsage, Prompt, Enrolment, Responsibility, Discussion, RagIndex }

@@ -1,24 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import {
-  Box,
-  Typography,
-  MenuItem,
-  FormControl,
-  Select,
-  SelectChangeEvent,
-  InputLabel,
-} from '@mui/material'
+import { Box, Typography, MenuItem, FormControl, Select, SelectChangeEvent, InputLabel } from '@mui/material'
 import { FREE_MODEL } from '../../../config'
 
-const ModelSelector = ({
-  currentModel,
-  setModel,
-  models,
-}: {
-  currentModel: string
-  setModel: (model: string) => void
-  models: string[]
-}) => {
+const ModelSelector = ({ currentModel, setModel, models }: { currentModel: string; setModel: (model: string) => void; models: string[] }) => {
   const { t } = useTranslation()
 
   if (models.length === 1) {
@@ -35,11 +19,7 @@ const ModelSelector = ({
     <Box mb={2}>
       <FormControl sx={{ width: '200px' }}>
         <InputLabel>{t('status:modelInUse')}</InputLabel>
-        <Select
-          label={t('status:modelInUse')}
-          value={currentModel}
-          onChange={(event: SelectChangeEvent) => setModel(event.target.value)}
-        >
+        <Select label={t('status:modelInUse')} value={currentModel} onChange={(event: SelectChangeEvent) => setModel(event.target.value)}>
           {models.map((model) => (
             <MenuItem key={model} value={model}>
               {model}
@@ -51,19 +31,7 @@ const ModelSelector = ({
   )
 }
 
-const Status = ({
-  model,
-  setModel,
-  models,
-  usage,
-  limit,
-}: {
-  model: string
-  setModel: (model: string) => void
-  models: string[]
-  usage: number
-  limit: number
-}) => {
+const Status = ({ model, setModel, models, usage, limit }: { model: string; setModel: (model: string) => void; models: string[]; usage: number; limit: number }) => {
   const { t } = useTranslation()
 
   const tokensUsed = usage > limit
@@ -74,11 +42,7 @@ const Status = ({
 
   return (
     <Box>
-      <ModelSelector
-        currentModel={model}
-        setModel={setModel}
-        models={acualModels}
-      />
+      <ModelSelector currentModel={model} setModel={setModel} models={acualModels} />
 
       <Typography variant="body1" style={style}>
         {usage} / {limit} {t('status:tokensUsed')}

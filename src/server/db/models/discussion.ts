@@ -1,17 +1,8 @@
-import {
-  Model,
-  InferAttributes,
-  InferCreationAttributes,
-  CreationOptional,
-  DataTypes,
-} from 'sequelize'
+import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
 
 import { sequelize } from '../connection'
 
-class Discussion extends Model<
-  InferAttributes<Discussion>,
-  InferCreationAttributes<Discussion>
-> {
+class Discussion extends Model<InferAttributes<Discussion>, InferCreationAttributes<Discussion>> {
   declare id: CreationOptional<string>
 
   declare userId: string
@@ -55,7 +46,7 @@ Discussion.init(
   {
     underscored: true,
     sequelize,
-  }
+  },
 )
 
 export default Discussion

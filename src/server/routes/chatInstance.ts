@@ -9,14 +9,7 @@ import { sequelize } from '../db/connection'
 const chatInstanceRouter = express.Router()
 
 chatInstanceRouter.get('/', async (req, res) => {
-  const {
-    limit: limitStr,
-    offset: offsetStr,
-    search: searchRaw,
-    order: orderRaw,
-    orderBy: orderByRaw,
-    showActiveCourses: showActiveCoursesRaw,
-  } = req.query
+  const { limit: limitStr, offset: offsetStr, search: searchRaw, order: orderRaw, orderBy: orderByRaw, showActiveCourses: showActiveCoursesRaw } = req.query
   const limit = limitStr ? parseInt(limitStr as string, 10) : 100
   const offset = offsetStr ? parseInt(offsetStr as string, 10) : 0
   const search = String(searchRaw)
@@ -69,14 +62,7 @@ chatInstanceRouter.get('/', async (req, res) => {
           : undefined,
     limit,
     offset,
-    order: [
-      [
-        orderBy === 'activityPeriod'
-          ? 'activityPeriod.startDate'
-          : sequelize.literal(`"${orderBy}"`),
-        order,
-      ],
-    ],
+    order: [[orderBy === 'activityPeriod' ? 'activityPeriod.startDate' : sequelize.literal(`"${orderBy}"`), order]],
   })
 
   res.send({ chatInstances, count })
@@ -147,13 +133,7 @@ chatInstanceRouter.get('/:id/usages', async (req, res) => {
       {
         model: User,
         as: 'user',
-        attributes: [
-          'id',
-          'student_number',
-          'last_name',
-          'first_names',
-          'username',
-        ],
+        attributes: ['id', 'student_number', 'last_name', 'first_names', 'username'],
       },
       {
         model: ChatInstance,
@@ -179,14 +159,8 @@ chatInstanceRouter.get('/:id/usages', async (req, res) => {
     return {
       ...u.toJSON(),
       user: saveDiscussions ? anon_user : u.user,
-      userId:
-        !saveDiscussions || u.usageCount > 0.8 * usageLimit
-          ? u.userId
-          : 'hidden',
-      UserId:
-        !saveDiscussions || u.usageCount > 0.8 * usageLimit
-          ? u.userId
-          : 'hidden',
+      userId: !saveDiscussions || u.usageCount > 0.8 * usageLimit ? u.userId : 'hidden',
+      UserId: !saveDiscussions || u.usageCount > 0.8 * usageLimit ? u.userId : 'hidden',
     }
   })
 

@@ -1,10 +1,4 @@
-import {
-  Model,
-  InferAttributes,
-  InferCreationAttributes,
-  CreationOptional,
-  DataTypes,
-} from 'sequelize'
+import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
 
 import { sequelize } from '../connection'
 
@@ -99,7 +93,7 @@ User.init(
   {
     underscored: true,
     sequelize,
-  }
+  },
 )
 
 export default User
