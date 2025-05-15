@@ -1,5 +1,4 @@
 import { t } from 'i18next'
-import { console } from 'inspector'
 import { enqueueSnackbar } from 'notistack'
 
 /**
