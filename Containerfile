@@ -16,8 +16,6 @@ ENV STAGING=$STAGING
 ARG CI
 ENV CI=$CI
 
-ENV NODE_ENV=development
-
 COPY package* ./
 RUN npm ci --omit-dev --ignore-scripts --no-audit --no-fund
 COPY . .
