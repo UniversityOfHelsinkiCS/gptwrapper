@@ -26,6 +26,9 @@ export const DEFAUL_CONTEXT_LIMIT =
 export const DEFAULT_RESET_CRON =
   process.env.DEFAULT_RESET_CRON || '0 0 1 */3 *'
 
+export const EMBED_MODEL = 'text-embedding-small'
+export const EMBED_DIM = 1024
+
 export const validModels = [
   {
     name: 'gpt-4',

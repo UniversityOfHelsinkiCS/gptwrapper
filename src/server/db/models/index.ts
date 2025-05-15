@@ -5,6 +5,7 @@ import Prompt from './prompt'
 import Enrolment from './enrolment'
 import Responsibility from './responsibilities'
 import Discussion from './discussion'
+import RagIndex from './ragIndex'
 
 User.belongsToMany(ChatInstance, {
   through: UserChatInstanceUsage,
@@ -42,6 +43,10 @@ Responsibility.belongsTo(ChatInstance, { as: 'chatInstance' })
 
 ChatInstance.hasMany(Responsibility, { as: 'responsibilities' })
 
+User.hasMany(RagIndex, { as: 'ragIndices' })
+
+RagIndex.belongsTo(User, { as: 'user' })
+
 export {
   User,
   ChatInstance,
@@ -50,4 +55,5 @@ export {
   Enrolment,
   Responsibility,
   Discussion,
+  RagIndex,
 }

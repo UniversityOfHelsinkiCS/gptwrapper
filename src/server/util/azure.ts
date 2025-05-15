@@ -12,10 +12,22 @@ import { AzureOptions, APIError } from '../types'
 import { AZURE_RESOURCE, AZURE_API_KEY } from './config'
 import { validModels, inProduction } from '../../config'
 import logger from './logger'
+import { AzureOpenAI } from 'openai'
 
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
-const client = new OpenAIClient(endpoint, new AzureKeyCredential(AZURE_API_KEY))
+const oldClient = new OpenAIClient(
+  endpoint,
+  new AzureKeyCredential(AZURE_API_KEY)
+)
+
+export const getAzureOpenAIClient = (deployment: string) =>
+  new AzureOpenAI({
+    apiKey: AZURE_API_KEY,
+    deployment,
+    apiVersion: '2025-03-01-preview',
+    endpoint,
+  })
 
 /**
  * Mock stream for testing
@@ -66,7 +78,7 @@ export const getCompletionEvents = async ({
   if (deploymentId === 'mock') return getMockCompletionEvents()
 
   try {
-    const events = await client.streamChatCompletions(
+    const events = await oldClient.streamChatCompletions(
       deploymentId,
       messages,
       options
@@ -127,7 +139,7 @@ export const getOpenAiEmbedding = async (prompt: string) => {
     model: 'text-embedding-3-small',
   }
 
-  const embedding = await client.getEmbeddings(
+  const embedding = await oldClient.getEmbeddings(
     'text-embedding-3-small',
     [prompt],
     opts
