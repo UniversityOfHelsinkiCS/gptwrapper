@@ -1,20 +1,26 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, IconButton, Dialog, DialogTitle, styled } from '@mui/material'
 import apiClient from '../util/apiClient'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import type { RagIndexAttributes } from '../../server/db/models/ragIndex'
 import { CloudUpload, Settings } from '@mui/icons-material'
+import Markdown from './Banner/Markdown'
 
 type RagResponse = {
-  total: number
-  documents: Array<{
-    id: string
-    value: {
-      title: string
-      content: string
-      score: number
-    }
-  }>
+  id: string
+  value: {
+    title: string
+    content: string
+    score: number
+  }
+}
+
+type RagIndexAttributes = {
+  id: number
+  metadata: {
+    name: string
+    dim: number
+  }
+  numOfChunks: number
 }
 
 const useRagIndices = () => {
@@ -60,11 +66,18 @@ const useUploadMutation = (index: RagIndexAttributes | null) => {
       Array.from(files).forEach((file) => {
         formData.append('files', file)
       })
-      const response = await apiClient.post(`/rag/indices/${index.id}/upload`, formData, {
+
+      // Returns a stream
+      const response = await apiClient.put(`/rag/indices/${index.id}/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        responseType: 'stream',
+        
+
       })
+
+      console.log('Upload response:', response.data)
       return response.data
     },
   })
@@ -90,19 +103,47 @@ const Rag: React.FC = () => {
   const [indexName, setIndexName] = useState('')
   const [selectedIndex, setSelectedIndex] = useState<RagIndexAttributes>(null)
   const [inputValue, setInputValue] = useState('')
-  const [response, setResponse] = useState<RagResponse | null>(null)
+  const [topK, setTopK] = useState(5)
+  const [response, setResponse] = useState<RagResponse[] | null>(null)
   const uploadMutation = useUploadMutation(selectedIndex)
   const [modalOpen, setModalOpen] = useState(false)
+  const progressLogs = useRef<HTMLParagraphElement>()
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     console.log('Form submitted with value:', inputValue)
     const res = await apiClient.post('/rag/query', {
-      prompt: inputValue,
+      query: inputValue,
+      indexId: selectedIndex?.id,
+      topK,
     })
     console.log('Response from server:', res.data)
     setResponse(res.data)
     setInputValue('')
+  }
+
+  // Processes the upload progress stream which returns JSON objects
+  const processUploadProgressStream = (stream) => {
+    stream.on('data', (data: any) => {
+      const parsedData = JSON.parse(data.toString())
+      console.log('Parsed data:', parsedData)
+      if (parsedData.stage === 'done') {
+        progressLogs.current.innerHTML += `Upload completed: ${JSON.stringify(parsedData)}\n`
+      } else if (parsedData.error) {
+        progressLogs.current.innerHTML += `Error: ${parsedData.error}\n`
+      } else {
+        progressLogs.current.innerHTML += `Progress: ${JSON.stringify(parsedData)}\n`
+      }
+    })
+    stream.on('end', () => {
+      progressLogs.current.innerHTML += 'Upload stream ended.\n'
+    })
+    stream.on('error', (err: any) => {
+      progressLogs.current.innerHTML += `Error: ${err}\n`
+    })
+    stream.on('close', () => {
+      progressLogs.current.innerHTML += 'Upload stream closed.\n'
+    })
   }
 
   return (
@@ -118,8 +159,8 @@ const Rag: React.FC = () => {
                 const files = event.target.files
                 console.log('Files selected:', files)
                 if (files && files.length > 0) {
-                  await uploadMutation.mutateAsync(files)
-                  refetch()
+                  const stream = await uploadMutation.mutateAsync(files)
+                  processUploadProgressStream(stream)
                 }
               }}
               multiple
@@ -138,6 +179,9 @@ const Rag: React.FC = () => {
           >
             Delete Index
           </Button>
+        </Box>
+        <Box sx={{ padding: 2 }}>
+          <p ref={progressLogs} style={{ whiteSpace: 'pre-wrap' }} />
         </Box>
       </Dialog>
       <Box>
@@ -174,6 +218,7 @@ const Rag: React.FC = () => {
                   <TableCell>ID</TableCell>
                   <TableCell>Name</TableCell>
                   <TableCell>Dim</TableCell>
+                  <TableCell>Num chunks</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -181,6 +226,7 @@ const Rag: React.FC = () => {
                   <TableCell>{index.id}</TableCell>
                   <TableCell>{index.metadata.name}</TableCell>
                   <TableCell>{index.metadata.dim}</TableCell>
+                  <TableCell>{index.numOfChunks}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -205,35 +251,25 @@ const Rag: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
-          width: '300px',
           margin: '0 auto',
         }}
       >
         <TextField label="Enter text" variant="outlined" value={inputValue} onChange={(e) => setInputValue(e.target.value)} fullWidth />
-        <Button type="submit" variant="contained" color="primary">
-          Submit
+        <TextField label="top k" variant="outlined" type="number" value={topK} onChange={(e) => setTopK(parseInt(e.target.value, 10))} fullWidth />
+        <Button type="submit" variant="contained" color="primary" disabled={!inputValue || !selectedIndex}>
+          Search
         </Button>
         {response && (
-          <Box
-            sx={{
-              marginTop: 2,
-              padding: 2,
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-            }}
-          >
+          <Box mt={2}>
             <Typography variant="h6">Response:</Typography>
-            <Typography variant="body1">Total: {response.total}</Typography>
-            {response.documents.map((doc) => (
-              <Box key={doc.id} sx={{ marginBottom: 1 }}>
-                <Typography variant="subtitle1">{doc.value.title}</Typography>
-                <Typography variant="body2">{doc.value.content}</Typography>
+            {response.map((doc) => (
+              <Paper key={doc.id} sx={{ marginBottom: 2, p: 1 }} elevation={2}>
                 <Typography variant="caption">Score: {doc.value.score}</Typography>
-              </Box>
+                <Markdown>{doc.value.content}</Markdown>
+              </Paper>
             ))}
           </Box>
         )}
-        ss
       </Box>
     </Box>
   )

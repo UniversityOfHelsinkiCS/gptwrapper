@@ -1,6 +1,6 @@
-import { Router } from 'express'
+import { NextFunction, Request, Response, Router } from 'express'
 import { EMBED_DIM, EMBED_MODEL } from '../../config'
-import { createChunkIndex, deleteChunkIndex } from '../services/rag/chunkDb'
+import { createChunkIndex, deleteChunkIndex, getNumberOfChunks } from '../services/rag/chunkDb'
 import { RagIndex } from '../db/models'
 import { RequestWithUser } from '../types'
 import z from 'zod'
@@ -8,9 +8,11 @@ import { queryRagIndex } from '../services/rag/query'
 import { ingestionPipeline } from '../services/rag/ingestion/pipeline'
 import { getAzureOpenAIClient } from '../util/azure'
 import multer from 'multer'
-import { mkdir } from 'fs/promises'
+import { mkdir, rm, stat } from 'fs/promises'
 
 const router = Router()
+
+const UPLOAD_DIR = 'uploads/rag'
 
 const IndexCreationSchema = z.object({
   name: z.string().min(1).max(100),
@@ -31,6 +33,8 @@ router.post('/indices', async (req, res) => {
 
   await createChunkIndex(ragIndex)
 
+  // Create upload directory for this index
+
   res.json(ragIndex)
 })
 
@@ -49,6 +53,14 @@ router.delete('/indices/:id', async (req, res) => {
 
   await deleteChunkIndex(ragIndex)
 
+  const uploadPath = `${UPLOAD_DIR}/${id}`
+  try {
+    await rm(uploadPath, { recursive: true, force: true })
+    console.log(`Upload directory ${uploadPath} deleted`)
+  } catch (error) {
+    console.warn(`Upload directory ${uploadPath} not found, nothing to delete --- `, error)
+  }
+
   await ragIndex.destroy()
 
   res.json({ message: 'Index deleted' })
@@ -57,16 +69,32 @@ router.delete('/indices/:id', async (req, res) => {
 router.get('/indices', async (_req, res) => {
   const indices = await RagIndex.findAll()
 
-  res.json(indices)
+  const indicesWithMetadata = await Promise.all(
+    indices.map(async (index) => {
+      const numOfChunks = await getNumberOfChunks(index)
+
+      return {
+        ...index.toJSON(),
+        numOfChunks,
+      }
+    }),
+  )
+
+  res.json(indicesWithMetadata)
 })
+
+const IndexIdSchema = z.coerce.number().min(1)
 
 const upload = multer({
   storage: multer.diskStorage({
     destination: async (req, file, cb) => {
-      const uploadPath = `uploads/rag/${req.params.id}`
-      // Create the directory if it doesn't exist
-      await mkdir(uploadPath, { recursive: true })
+      const id = IndexIdSchema.parse(req.params.id)
+      const uploadPath = `${UPLOAD_DIR}/${id}`
       cb(null, uploadPath)
+    },
+    filename: (req, file, cb) => {
+      const uniqueFilename = file.originalname
+      cb(null, uniqueFilename)
     },
   }),
   limits: {
@@ -75,9 +103,21 @@ const upload = multer({
 })
 const uploadMiddleware = upload.array('files')
 
-router.post('/indices/:id/upload', uploadMiddleware, async (req, res) => {
+const indexUploadDirMiddleware = async (req: Request, _res: Response, next: NextFunction) => {
+  const id = IndexIdSchema.parse(req.params.id)
+  const uploadPath = `${UPLOAD_DIR}/${id}`
+  try {
+    await stat(uploadPath)
+  } catch (_error) {
+    console.warn(`RAG upload dir not found, creating ${uploadPath} --- `)
+    await mkdir(uploadPath, { recursive: true })
+  }
+  next()
+}
+
+router.put('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware], async (req, res) => {
   const { user } = req as unknown as RequestWithUser
-  const { id } = req.params
+  const id = IndexIdSchema.parse(req.params.id)
 
   const ragIndex = await RagIndex.findOne({
     where: { id, userId: user.id },
@@ -94,9 +134,7 @@ router.post('/indices/:id/upload', uploadMiddleware, async (req, res) => {
 
   const openAiClient = getAzureOpenAIClient(EMBED_MODEL)
 
-  res.json({ message: 'Ingestion started' })
-
-  await ingestionPipeline(openAiClient, `uploads/rag/${req.params.id}`, ragIndex)
+  await ingestionPipeline(openAiClient, `uploads/rag/${id}`, ragIndex)
 })
 
 const RagIndexQuerySchema = z.object({

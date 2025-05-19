@@ -17,7 +17,7 @@ export class Chunker extends Transform {
   }
 
   _transform(data: FileData, _encoding: BufferEncoding, callback: (error?: Error | null) => void) {
-    const chunks = createSplittedTitleChunks(data)
+    const chunks = createTitleChunks(data)
     for (const chunk of chunks) {
       this.push(chunk)
     }

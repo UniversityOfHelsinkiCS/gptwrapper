@@ -1,5 +1,5 @@
 import { RagIndex } from '../../db/models'
-import { redisClient } from '../../util/redis'
+import { countKeysMatchingPattern, redisClient } from '../../util/redis'
 
 export const createChunkIndex = async (ragIndex: RagIndex) => {
   try {
@@ -17,7 +17,7 @@ export const createChunkIndex = async (ragIndex: RagIndex) => {
           TYPE: 'FLOAT32',
           ALGORITHM: 'HNSW',
           DIM: ragIndex.metadata.dim,
-          DISTANCE_METRIC: 'L2',
+          DISTANCE_METRIC: 'COSINE',
         },
       },
       {
@@ -36,6 +36,12 @@ export const createChunkIndex = async (ragIndex: RagIndex) => {
   }
 }
 
+export const getNumberOfChunks = async (ragIndex: RagIndex) => {
+  const pattern = `idx:${ragIndex.metadata.name}:*`
+  const count = await countKeysMatchingPattern(pattern)
+  return count
+}
+
 export const deleteChunkIndex = async (ragIndex: RagIndex) => {
   try {
     await redisClient.ft.dropIndex(ragIndex.metadata.name)
@@ -47,6 +53,25 @@ export const deleteChunkIndex = async (ragIndex: RagIndex) => {
       console.error('Error deleting index', err)
     }
   }
+
+  const pattern = `idx:${ragIndex.metadata.name}:*`
+
+  let cursor = '0'
+  let numDeleted = 0
+  do {
+    const result = await redisClient.scan(cursor, {
+      MATCH: pattern,
+      COUNT: 100,
+    })
+
+    if (result.keys.length > 0) {
+      await redisClient.del(result.keys as string[])
+      numDeleted += result.keys.length
+    }
+    cursor = result.cursor as string
+  } while (cursor !== '0')
+
+  console.log(`Deleted ${numDeleted} keys matching pattern ${pattern}`)
 }
 
 export const addChunk = async (
@@ -79,7 +104,7 @@ export const addChunk = async (
   console.log(`Document ${id} added to index ${ragIndex.metadata.name}`)
 }
 
-export const searchKChunks = async (ragIndex: RagIndex, embedding: number[], k: number) => {
+export const vectorSearchKChunks = async (ragIndex: RagIndex, embedding: number[], k: number) => {
   const embeddingBuffer = Buffer.copyBytesFrom(new Float32Array(embedding))
 
   if (embeddingBuffer.length !== 4 * ragIndex.metadata.dim) {
@@ -104,6 +129,29 @@ export const searchKChunks = async (ragIndex: RagIndex, embedding: number[], k: 
         content: string
         title: string
         score: number
+        metadata: string
+      }
+    }[]
+  }
+}
+
+export const fullTextSearchChunks = async (ragIndex: RagIndex, query: string) => {
+  const queryString = `@content:%${query}% | @title:%${query}%`
+
+  const results = await redisClient.ft.search(ragIndex.metadata.name, queryString, {
+    DIALECT: 2,
+    RETURN: ['content', 'title'],
+    SLOP: 1,
+    INORDER: true,
+  })
+
+  return results as {
+    total: number
+    documents: {
+      id: string
+      value: {
+        content: string
+        title: string
         metadata: string
       }
     }[]

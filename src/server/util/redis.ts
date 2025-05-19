@@ -24,3 +24,20 @@ export const get = async (key: string): Promise<any | null> => {
 
   return JSON.parse(value)
 }
+
+export async function countKeysMatchingPattern(pattern: string) {
+  let cursor = '0'
+  let count = 0
+
+  do {
+    const result = await redisClient.scan(cursor, {
+      MATCH: pattern,
+      COUNT: 100,
+    })
+
+    cursor = result.cursor as string
+    count += result.keys.length
+  } while (cursor !== '0')
+
+  return count
+}

@@ -24,5 +24,6 @@ const initPipelineCache = async () => {
 export const ingestionPipeline = async (client: OpenAI, loadpath: string, ragIndex: RagIndex) => {
   await initPipelineCache()
 
-  await pipeline([new FileLoader(loadpath), new Chunker(pipelineCachePath), new Embedder(client, pipelineCachePath), new RedisStorer(ragIndex)])
+  await pipeline([new FileLoader(loadpath), new Chunker(pipelineCachePath), new Embedder(client, pipelineCachePath, 10), new RedisStorer(ragIndex)])
+  console.log('Ingestion pipeline completed')
 }
