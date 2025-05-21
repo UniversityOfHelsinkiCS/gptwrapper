@@ -23,6 +23,10 @@ class RagFile extends Model<InferAttributes<RagFile>, InferCreationAttributes<Ra
   declare userId: string
 
   declare metadata: Record<string, unknown> | null
+
+  declare createdAt: CreationOptional<Date>
+
+  declare updatedAt: CreationOptional<Date>
 }
 
 RagFile.init(
@@ -75,6 +79,14 @@ RagFile.init(
     metadata: {
       type: DataTypes.JSONB,
       allowNull: true,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
     },
   },
   {

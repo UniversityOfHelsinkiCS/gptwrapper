@@ -53,7 +53,7 @@ export const ingestionPipeline = async (client: OpenAI, loadpath: string, ragInd
         fileSize: 0,
         userId: user.id,
         ragIndexId: ragIndex.id,
-        pipelineStage: 'readFiles',
+        pipelineStage: 'extractText',
       },
       {
         where: { id: ragFile.id },
@@ -68,7 +68,7 @@ export const ingestionPipeline = async (client: OpenAI, loadpath: string, ragInd
     await RagFile.update(
       {
         fileSize: textData.content.length,
-        pipelineStage: 'extractText',
+        pipelineStage: 'chunk',
         metadata: {
           chunkingStrategy: textData.chunkingStrategy,
         },
@@ -86,7 +86,7 @@ export const ingestionPipeline = async (client: OpenAI, loadpath: string, ragInd
     await RagFile.update(
       {
         numChunks: chunks.length,
-        pipelineStage: 'chunk',
+        pipelineStage: 'embed',
       },
       {
         where: { id: ragFile.id },
@@ -112,7 +112,7 @@ export const ingestionPipeline = async (client: OpenAI, loadpath: string, ragInd
 
     await RagFile.update(
       {
-        pipelineStage: 'embed',
+        pipelineStage: 'store',
       },
       {
         where: { id: ragFile.id },
