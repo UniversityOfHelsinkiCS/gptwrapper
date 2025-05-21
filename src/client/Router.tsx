@@ -13,6 +13,7 @@ import Chats from './components/Chats'
 import Statistics from './components/Statistics'
 import Rag from './components/Rag/Rag'
 import { ChatV2 } from './components/ChatV2/ChatV2'
+import { RagIndex } from './components/Rag/RagIndex'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -29,6 +30,7 @@ const router = createBrowserRouter(
       <Route path="/chats" element={<Chats />} />
       <Route path="/statistics" element={<Statistics />} />
       <Route path="/rag" element={<Rag />} />
+      <Route path="/rag/:id" element={<RagIndex />} />
     </Route>,
   ),
   {

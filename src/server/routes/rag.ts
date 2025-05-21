@@ -9,6 +9,7 @@ import { ingestionPipeline } from '../services/rag/ingestion/pipeline'
 import multer from 'multer'
 import { mkdir, rm, stat } from 'fs/promises'
 import { getOllamaOpenAIClient } from '../util/ollama'
+import { Sequelize } from 'sequelize'
 
 const router = Router()
 
@@ -61,14 +62,31 @@ router.delete('/indices/:id', async (req, res) => {
     console.warn(`Upload directory ${uploadPath} not found, nothing to delete --- `, error)
   }
 
-  await ragIndex.destroy()
+  await ragIndex.destroy() // Cascade deletes RagFiles
 
   res.json({ message: 'Index deleted' })
 })
 
 router.get('/indices', async (_req, res) => {
-  const indices = await RagIndex.findAll()
-  res.json(indices)
+  const indices = await RagIndex.findAll({
+    include: [
+      {
+        model: RagFile,
+        as: 'ragFiles',
+        attributes: ['id'],
+      },
+    ],
+  })
+
+  // Add ragFileCount to each index
+  const indicesWithCount = await Promise.all(
+    indices.map(async (index: any) => {
+      const count = await RagFile.count({ where: { ragIndexId: index.id } })
+      return { ...index.toJSON(), ragFileCount: count }
+    }),
+  )
+
+  res.json(indicesWithCount)
 })
 
 router.get('/indices/:id', async (req, res) => {
@@ -79,7 +97,7 @@ router.get('/indices/:id', async (req, res) => {
     where: { id, userId: user.id },
     include: {
       model: RagFile,
-      as: 'files',
+      as: 'ragFiles',
     },
   })
 
@@ -143,7 +161,7 @@ router.post('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware],
     return
   }
 
-  await RagIndex.bulkCreate(
+  await RagFile.bulkCreate(
     req.files.map((file) => ({
       filename: file.originalname,
       fileType: 'pending',

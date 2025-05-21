@@ -1,11 +1,14 @@
 import React, { useState } from 'react'
-import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, IconButton, Dialog, DialogTitle, styled } from '@mui/material'
-import apiClient, { postAbortableStream } from '../../util/apiClient'
+import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, IconButton, Dialog, DialogTitle, styled, LinearProgress } from '@mui/material'
+import apiClient from '../../util/apiClient'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { CloudUpload, Settings } from '@mui/icons-material'
 import Markdown from '../Banner/Markdown'
 import { useSnackbar } from 'notistack'
-import { ProgressReporter } from './ProgressReporter'
+import type { RagFileAttributes } from '../../../server/db/models/ragFile'
+import { orderBy } from 'lodash'
+import { IngestionPipelineStageKeys, IngestionPipelineStages } from '../../../shared/constants'
+import { useNavigate } from 'react-router-dom'
 
 type RagResponse = {
   id: string
@@ -19,12 +22,13 @@ type RagResponse = {
 
 type RagIndexAttributes = {
   id: number
+  createdAt: string
+  updatedAt: string
   metadata: {
     name: string
     dim: number
   }
-  numOfChunks: number
-  filenames: string[]
+  ragFileCount: number
 }
 
 const useRagIndices = () => {
@@ -38,7 +42,6 @@ const useRagIndices = () => {
 
   return { data, ...rest }
 }
-
 const useCreateRagIndexMutation = () => {
   const mutation = useMutation({
     mutationFn: async (indexName: string) => {
@@ -49,65 +52,16 @@ const useCreateRagIndexMutation = () => {
   return mutation
 }
 
-const useDeleteRagIndexMutation = () => {
-  const mutation = useMutation({
-    mutationFn: async (indexId: number) => {
-      const response = await apiClient.delete(`/rag/indices/${indexId}`)
-      return response.data
-    },
-  })
-  return mutation
-}
-
-const useUploadMutation = (index: RagIndexAttributes | null) => {
-  const mutation = useMutation({
-    mutationFn: async (files: FileList) => {
-      if (!index) {
-        throw new Error('Index is required')
-      }
-      const formData = new FormData()
-      // Append each file individually
-      Array.from(files).forEach((file) => {
-        formData.append('files', file)
-      })
-
-      const { stream } = await postAbortableStream(`/rag/indices/${index.id}/upload`, formData)
-      if (!stream) {
-        throw new Error('No stream returned from server')
-      }
-
-      return stream
-    },
-  })
-  return mutation
-}
-
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: 1,
-})
-
 const Rag: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar()
+  const navigate = useNavigate()
   const { data: indices, refetch } = useRagIndices()
   const createIndexMutation = useCreateRagIndexMutation()
-  const deleteIndexMutation = useDeleteRagIndexMutation()
   const [indexName, setIndexName] = useState('')
   const [selectedIndex, setSelectedIndex] = useState<RagIndexAttributes>(null)
   const [inputValue, setInputValue] = useState('')
   const [topK, setTopK] = useState(5)
   const [response, setResponse] = useState<RagResponse[] | null>(null)
-  const uploadMutation = useUploadMutation(selectedIndex)
-  const [modalOpen, setModalOpen] = useState(false)
-  const [stream, setStream] = useState<ReadableStream | null>(null)
-  const [filenames, setFilenames] = useState<string[]>([])
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -130,51 +84,8 @@ const Rag: React.FC = () => {
     setInputValue('')
   }
 
-  const handleUploadError = () => {
-    setStream(null)
-  }
-
   return (
     <Box sx={{ display: 'flex', gap: 2 }}>
-      <Dialog open={!!selectedIndex && modalOpen} onClose={() => { setModalOpen(false); refetch(); }} fullWidth maxWidth="md">
-        <DialogTitle>Edit {selectedIndex?.metadata?.name}</DialogTitle>
-        <Box sx={{ padding: 2 }}>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button component="label" role={undefined} variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
-              {uploadMutation.isPending ? 'Uploading...' : 'Upload Files'}
-              <VisuallyHiddenInput
-                type="file"
-                onChange={async (event) => {
-                  const files = event.target.files
-                  console.log('Files selected:', files)
-                  if (files && files.length > 0) {
-                    const stream = await uploadMutation.mutateAsync(files)
-                    setFilenames(Array.from(files).map((file) => file.name))
-                    setStream(stream)
-                  }
-                }}
-                multiple
-              />
-            </Button>
-            <Button
-              variant="text"
-              color="error"
-              onClick={async () => {
-                if (selectedIndex && window.confirm(`Are you sure you want to delete index ${selectedIndex.metadata.name}?`)) {
-                  await deleteIndexMutation.mutateAsync(selectedIndex.id)
-                  setSelectedIndex(null)
-                  refetch()
-                }
-              }}
-            >
-              Delete Index
-            </Button>
-          </Box>
-          <Box mt={2}>
-            <ProgressReporter filenames={filenames} stream={stream} onError={handleUploadError} />
-          </Box>
-        </Box>
-      </Dialog>
       <Box>
         <Typography variant="h4" mb="1rem">
           RAG Indices
@@ -185,9 +96,9 @@ const Rag: React.FC = () => {
             variant="contained"
             color="primary"
             onClick={async () => {
-              await createIndexMutation.mutateAsync(indexName)
+              const newIndex = await createIndexMutation.mutateAsync(indexName)
               setIndexName('')
-              refetch()
+              navigate(`/rag/${newIndex.id}`)
             }}
           >
             Create Index
@@ -208,40 +119,23 @@ const Rag: React.FC = () => {
                 <TableRow>
                   <TableCell>ID</TableCell>
                   <TableCell>Name</TableCell>
-                  <TableCell>Files</TableCell>
-                  <TableCell>Dim</TableCell>
-                  <TableCell>Num chunks</TableCell>
+                  <TableCell>Vector Dimensions</TableCell>
+                  <TableCell>Number of files</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 <TableRow>
                   <TableCell>{index.id}</TableCell>
-                  <TableCell>{index.metadata.name}</TableCell>
-                  <TableCell>
-                    {index.filenames.length ? (
-                      <>
-                        {index.filenames.map((filename) => (
-                          <p key={filename}>{filename}</p>
-                        ))}
-                      </>
-                    ) : (
-                      'No files'
-                    )}
-                  </TableCell>
-                  <TableCell>{index.metadata.dim}</TableCell>
-                  <TableCell>{index.numOfChunks}</TableCell>
+                  <TableCell>{index.metadata?.name}</TableCell>
+                  <TableCell>{index.metadata?.dim}</TableCell>
+                  <TableCell>{index.ragFileCount}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
             <Button disabled={selectedIndex?.id === index.id} onClick={() => setSelectedIndex(index)}>
               {selectedIndex?.id === index.id ? 'Selected' : 'Select'}
             </Button>
-            <IconButton
-              onClick={() => {
-                setSelectedIndex(index)
-                setModalOpen(true)
-              }}
-            >
+            <IconButton href={`rag/${index.id}`}>
               <Settings />
             </IconButton>
           </Paper>

@@ -32,6 +32,13 @@ RagIndex.init(
     metadata: {
       type: DataTypes.JSONB,
       allowNull: true,
+      validate: {
+        hasName(value: any) {
+          if (value && typeof value === 'object' && !value.name) {
+            throw new Error('metadata must have a name property')
+          }
+        },
+      },
     },
   },
   {
