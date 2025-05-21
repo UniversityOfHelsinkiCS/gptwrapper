@@ -20,15 +20,28 @@ export const ChatV2 = () => {
   const { courseId } = useParams()
 
   const { course } = useCourse(courseId)
-  const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
-  const [model, setModel] = useLocalStorageState<{ name: string }>('model', {
+  const {
+    userStatus,
+    isLoading: statusLoading,
+    refetch: refetchStatus,
+  } = useUserStatus(courseId)
+  const [model, setModel] = useLocalStorageState<{ name: string }>('model-v2', {
     name: DEFAULT_MODEL,
   })
   const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
   const [activePromptId, setActivePromptId] = useState('')
-  const [system, setSystem] = useLocalStorageState<{ content: string }>('general-chat-system', { content: '' })
-  const [message, setMessage] = useLocalStorageState<{ content: string }>('general-chat-current', { content: '' })
-  const [messages, setMessages] = useLocalStorageState<Message[]>('general-chat-messages', [])
+  const [system, setSystem] = useLocalStorageState<{ content: string }>(
+    'general-chat-system',
+    { content: '' }
+  )
+  const [message, setMessage] = useLocalStorageState<{ content: string }>(
+    'general-chat-current',
+    { content: '' }
+  )
+  const [messages, setMessages] = useLocalStorageState<Message[]>(
+    'general-chat-messages',
+    []
+  )
   const inputFileRef = useRef<HTMLInputElement>(null)
   const [fileName, setFileName] = useState<string>('')
   const [completion, setCompletion] = useState('')
@@ -44,8 +57,14 @@ export const ChatV2 = () => {
   const { t, i18n } = useTranslation()
   const { language } = i18n
 
-  const disclaimerInfo = infoTexts?.find((infoText) => infoText.name === 'disclaimer')?.text[language] ?? null
-  const systemMessageInfo = infoTexts?.find((infoText) => infoText.name === 'systemMessage')?.text[language] ?? null
+  const disclaimerInfo =
+    infoTexts?.find((infoText) => infoText.name === 'disclaimer')?.text[
+      language
+    ] ?? null
+  const systemMessageInfo =
+    infoTexts?.find((infoText) => infoText.name === 'systemMessage')?.text[
+      language
+    ] ?? null
 
   const processStream = async (stream: ReadableStream) => {
     try {
@@ -64,7 +83,9 @@ export const ChatV2 = () => {
         console.log(text)
       }
 
-      setMessages((prev: Message[]) => prev.concat({ role: 'assistant', content }))
+      setMessages((prev: Message[]) =>
+        prev.concat({ role: 'assistant', content })
+      )
     } catch (err: any) {
       handleCompletionStreamError(err, fileName)
     } finally {
@@ -145,7 +166,10 @@ export const ChatV2 = () => {
         }}
       >
         {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
-        <SystemPrompt content={system.content} setContent={(content) => setSystem({ content })} />
+        <SystemPrompt
+          content={system.content}
+          setContent={(content) => setSystem({ content })}
+        />
         <Button onClick={handleReset}>Reset</Button>
       </Box>
       <Conversation messages={messages} completion={completion} />
