@@ -6,6 +6,7 @@ import { Embedder } from './embedder.ts'
 import { RedisStorer } from './storer.ts'
 import type OpenAI from 'openai'
 import RagIndex from '../../../db/models/ragIndex.ts'
+import { TextExtractor } from './textExtractor.ts'
 
 // Pipeline debug cache in pipeline/
 // Check if exists, if not create it.
@@ -24,6 +25,13 @@ const initPipelineCache = async () => {
 export const ingestionPipeline = async (client: OpenAI, loadpath: string, ragIndex: RagIndex) => {
   await initPipelineCache()
 
-  await pipeline([new FileLoader(loadpath), new Chunker(pipelineCachePath), new Embedder(client, pipelineCachePath, 10), new RedisStorer(ragIndex)])
+  await pipeline([
+    new FileLoader(loadpath),
+    new TextExtractor(pipelineCachePath),
+    new Chunker(pipelineCachePath),
+    new Embedder(client, pipelineCachePath, 10),
+    new RedisStorer(ragIndex),
+  ])
+
   console.log('Ingestion pipeline completed')
 }

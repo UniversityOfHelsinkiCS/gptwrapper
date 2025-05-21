@@ -1,10 +1,7 @@
 import { readdir, readFile, stat } from 'node:fs/promises'
 import { Readable } from 'node:stream'
 
-export type FileData = {
-  fileName: string
-  content: string
-}
+export type FileData = { fileName: string; type: 'text' | 'md'; content: string } | { fileName: string; type: 'pdf'; content: Buffer }
 
 async function* loadFiles(loadpath: string): AsyncGenerator<FileData> {
   // Check if the path is a file
@@ -29,11 +26,23 @@ async function* loadFiles(loadpath: string): AsyncGenerator<FileData> {
 }
 
 const loadFile = async (filePath: string): Promise<FileData> => {
-  const content = await readFile(filePath, 'utf-8')
+  const extension = filePath.split('.').pop()
   const fileName = filePath.split('/').pop() || 'unknown'
+
+  if (extension === 'pdf') {
+    const content = await readFile(filePath)
+    return {
+      fileName,
+      content,
+      type: 'pdf',
+    }
+  }
+
+  const content = await readFile(filePath, 'utf-8')
   return {
     fileName,
     content,
+    type: extension === 'md' ? 'md' : 'text',
   }
 }
 

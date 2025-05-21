@@ -12,6 +12,7 @@ type RagResponse = {
     title: string
     content: string
     score: number
+    metadata: Record<string, any>
   }
 }
 
@@ -114,7 +115,15 @@ const Rag: React.FC = () => {
       topK,
     })
     console.log('Response from server:', res.data)
-    setResponse(res.data)
+    // Parse metadatas
+    const parsedResponse = res.data.map((doc) => ({
+      ...doc,
+      value: {
+        ...doc.value,
+        metadata: JSON.parse(doc.value.metadata),
+      },
+    }))
+    setResponse(parsedResponse)
     setInputValue('')
   }
 
@@ -238,7 +247,14 @@ const Rag: React.FC = () => {
             {response.map((doc) => (
               <Paper key={doc.id} sx={{ marginBottom: 2, p: 1 }} elevation={2}>
                 <Typography variant="caption">Score: {doc.value.score}</Typography>
-                <Markdown>{doc.value.content}</Markdown>
+                <Typography variant="subtitle1" fontFamily="monospace" mb={2}>{JSON.stringify(doc.value.metadata, null, 2)}</Typography>
+                {doc.value.metadata.type === 'md' ? (
+                  <Markdown>{doc.value.content}</Markdown>
+                ) : (
+                  <Typography whiteSpace="pre-line" variant="body1">
+                    {doc.value.content}
+                  </Typography>
+                )}
               </Paper>
             ))}
           </Box>

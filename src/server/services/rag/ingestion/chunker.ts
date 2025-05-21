@@ -1,8 +1,8 @@
 import { Transform } from 'node:stream'
-import { createSplittedTitleChunks, createStaticChunks, createTitleChunks } from './chunkingAlgorithms.ts'
-import type { FileData } from './loader.ts'
+import { chunkingAlgorithms } from './chunkingAlgorithms.ts'
 import { mkdirSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
+import { TextData } from './textExtractor.ts'
 
 export class Chunker extends Transform {
   private cachePath: string
@@ -16,8 +16,10 @@ export class Chunker extends Transform {
     mkdirSync(this.cachePath, { recursive: true })
   }
 
-  _transform(data: FileData, _encoding: BufferEncoding, callback: (error?: Error | null) => void) {
-    const chunks = createTitleChunks(data)
+  _transform(data: TextData, _encoding: BufferEncoding, callback: (error?: Error | null) => void) {
+    const chunkingAlgorithm = chunkingAlgorithms[data.chunkingStrategy]
+
+    const chunks = chunkingAlgorithm(data)
     for (const chunk of chunks) {
       this.push(chunk)
     }

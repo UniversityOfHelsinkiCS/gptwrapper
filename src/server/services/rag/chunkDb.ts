@@ -118,7 +118,7 @@ export const vectorSearchKChunks = async (ragIndex: RagIndex, embedding: number[
       vec_param: embeddingBuffer,
     },
     DIALECT: 2,
-    RETURN: ['content', 'title', 'score'], // Specify the fields to return
+    RETURN: ['content', 'title', 'score', 'metadata'], // Specify the fields to return
   })
 
   return results as {
@@ -136,11 +136,11 @@ export const vectorSearchKChunks = async (ragIndex: RagIndex, embedding: number[
 }
 
 export const fullTextSearchChunks = async (ragIndex: RagIndex, query: string) => {
-  const queryString = `@content:%${query}% | @title:%${query}%`
+  const queryString = `@content:"%${query}%" | @title:"%${query}%"`
 
   const results = await redisClient.ft.search(ragIndex.metadata.name, queryString, {
     DIALECT: 2,
-    RETURN: ['content', 'title'],
+    RETURN: ['content', 'title', 'metadata'],
     SLOP: 1,
     INORDER: true,
   })

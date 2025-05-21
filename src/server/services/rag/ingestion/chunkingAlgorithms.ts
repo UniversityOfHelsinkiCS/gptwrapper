@@ -1,4 +1,4 @@
-import type { FileData } from './loader.ts'
+import { TextData } from './textExtractor.ts'
 
 export type Chunk = {
   id: string
@@ -8,7 +8,7 @@ export type Chunk = {
   }
 }
 
-export const createTitleChunks = (file: FileData): Chunk[] => {
+export const createTitleChunks = (file: TextData): Chunk[] => {
   const lines = file.content.split('\n')
 
   const titleHierarchy = [file.fileName]
@@ -27,6 +27,7 @@ export const createTitleChunks = (file: FileData): Chunk[] => {
         metadata: {
           title,
           titleHierarchy: [...titleHierarchy],
+          type: file.type,
         },
       })
 
@@ -60,6 +61,7 @@ export const createTitleChunks = (file: FileData): Chunk[] => {
       metadata: {
         title,
         titleHierarchy: [...titleHierarchy],
+        type: file.type,
       },
     })
   }
@@ -67,7 +69,7 @@ export const createTitleChunks = (file: FileData): Chunk[] => {
   return chunks
 }
 
-export const createSplittedTitleChunks = (file: FileData): Chunk[] => {
+export const createSplittedTitleChunks = (file: TextData): Chunk[] => {
   return createTitleChunks(file).flatMap((chunk) => {
     const title = chunk.metadata?.title
     const titleHierarchy = chunk.metadata?.titleHierarchy
@@ -81,29 +83,36 @@ export const createSplittedTitleChunks = (file: FileData): Chunk[] => {
         metadata: {
           title: `${title} - ${index + 1}`,
           titleHierarchy: [...titleHierarchy, index + 1],
+          type: file.type,
         },
       }))
   })
 }
 
-export const createStaticChunks = (file: FileData): Chunk[] => {
-  const lines = file.content.split('\n').filter((line) => line.trim() !== '')
-
-  if (lines.length <= 2) return []
+export const createStaticChunks = (file: TextData, length: number = 800, overlap: number = 400): Chunk[] => {
+  const content = file.content
 
   const chunks: Chunk[] = []
 
-  for (let i = 1; i < lines.length - 1; i++) {
-    const chunkContent = [lines[i - 1].trim(), lines[i].trim(), lines[i + 1].trim()]
-
-    chunks.push({
-      id: `${file.fileName}-${i}`,
-      content: [...chunkContent],
-      metadata: {
-        title: `Chunk ${i}`,
-      },
-    })
+  for (let i = overlap; i < content.length - length - overlap; i += length) {
+    const chunkContent = content.slice(i - overlap, i + length + overlap)
+    if (chunkContent.length > 0) {
+      chunks.push({
+        id: `${file.fileName}-${chunks.length}`,
+        content: chunkContent.split('\n'),
+        metadata: {
+          title: file.fileName,
+          type: file.type,
+        },
+      })
+    }
   }
 
   return chunks
+}
+
+export const chunkingAlgorithms = {
+  static: createStaticChunks,
+  title: createTitleChunks,
+  splittedTitle: createSplittedTitleChunks,
 }
