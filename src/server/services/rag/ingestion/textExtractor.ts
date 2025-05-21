@@ -46,7 +46,7 @@ export class TextExtractor extends Transform {
     const textPath = `${this.cachePath}/${data.fileName}.txt`
     await writeFile(textPath, textContent, 'utf-8')
 
-    this.progressReporter.reportProgress(data.fileName)
+    this.progressReporter.reportProgress([data.fileName])
 
     callback()
   }

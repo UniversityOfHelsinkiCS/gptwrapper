@@ -63,7 +63,7 @@ export class FileLoader extends Readable {
         this.progressReporter.reportDone()
       } else {
         this.push(file.value)
-        this.progressReporter.reportProgress(file.value.fileName)
+        this.progressReporter.reportProgress([file.value.fileName])
       }
     })
   }

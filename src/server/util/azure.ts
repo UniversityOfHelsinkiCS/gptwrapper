@@ -103,14 +103,3 @@ export const streamCompletion = async (events: EventStream<ChatCompletions>, opt
     response: contents.join(''),
   }
 }
-
-export const getOpenAiEmbedding = async (prompt: string) => {
-  const opts: GetEmbeddingsOptions = {
-    dimensions: 1536,
-    model: 'text-embedding-3-small',
-  }
-
-  const embedding = await oldClient.getEmbeddings('text-embedding-3-small', [prompt], opts)
-
-  console.log(embedding)
-}

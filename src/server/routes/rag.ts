@@ -10,6 +10,7 @@ import { getAzureOpenAIClient } from '../util/azure'
 import multer from 'multer'
 import { mkdir, rm, stat } from 'fs/promises'
 import { Readable } from 'stream'
+import { getOllamaOpenAIClient } from '../util/ollama'
 
 const router = Router()
 
@@ -17,7 +18,7 @@ const UPLOAD_DIR = 'uploads/rag'
 
 const IndexCreationSchema = z.object({
   name: z.string().min(1).max(100),
-  dim: z.number().min(1024).max(1024).default(EMBED_DIM),
+  dim: z.number().min(EMBED_DIM).max(EMBED_DIM).default(EMBED_DIM),
 })
 
 router.post('/indices', async (req, res) => {
@@ -136,7 +137,7 @@ router.post('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware],
   res.setHeader('Content-Type', 'application/x-ndjson')
   res.setHeader('Transfer-Encoding', 'chunked')
 
-  const openAiClient = getAzureOpenAIClient(EMBED_MODEL)
+  const openAiClient = getOllamaOpenAIClient() // getAzureOpenAIClient(EMBED_MODEL)
 
   const progressReporter = await ingestionPipeline(openAiClient, `uploads/rag/${id}`, ragIndex)
 

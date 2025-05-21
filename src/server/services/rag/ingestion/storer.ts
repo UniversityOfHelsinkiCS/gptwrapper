@@ -14,13 +14,17 @@ export class RedisStorer extends Writable {
   }
 
   async _write(chunk: EmbeddedChunk, _encoding: BufferEncoding, callback: (error?: Error | null) => void) {
-    await addChunk(this.ragIndex, {
-      id: chunk.id,
-      metadata: chunk.metadata,
-      content: chunk.content.join('\n'),
-      embedding: chunk.embedding,
-    })
-    this.progressReporter.reportProgress(chunk.metadata.filename)
+    try {
+      await addChunk(this.ragIndex, {
+        id: chunk.id,
+        metadata: chunk.metadata,
+        content: chunk.content.join('\n'),
+        embedding: chunk.embedding,
+      })
+      this.progressReporter.reportProgress([chunk.metadata.filename])
+    } catch (error) {
+      this.progressReporter.reportError((error as Error).message, [chunk.metadata.filename])
+    }
     callback()
   }
 

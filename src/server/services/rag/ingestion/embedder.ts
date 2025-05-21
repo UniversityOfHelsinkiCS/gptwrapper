@@ -47,6 +47,7 @@ export class Embedder extends Transform {
   }
 
   private async embedBatch(callback: (error?: Error | null) => void) {
+    const currentBatchFilenames = this.currentBatch.map((chunk) => chunk.metadata.filename)
     try {
       const chunkContents = this.currentBatch.map((chunk) => chunk.content.join('\n'))
       const startedAt = Date.now()
@@ -65,15 +66,16 @@ export class Embedder extends Transform {
         // Save embedded chunk to cache
         const path = `${this.cachePath}/${embeddedChunk.id}.json`
         await writeFile(path, JSON.stringify(embeddedChunk, null, 2), 'utf-8')
-        this.progressReporter.reportProgress(embeddedChunk.metadata.filename)
       })
+      this.progressReporter.reportProgress(currentBatchFilenames)
 
       // Reset the current batch
       this.currentBatch = []
 
       callback()
     } catch (error) {
-      console.error(`Error saving chunk to cache: ${error}`)
+      console.error(`Embedding stage ${error}`)
+      this.progressReporter.reportError('Embedding chunk failed', currentBatchFilenames)
       callback(error as Error)
     }
   }

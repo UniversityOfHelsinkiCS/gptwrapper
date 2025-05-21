@@ -35,7 +35,7 @@ export class Chunker extends Transform {
       }),
     )
 
-    this.progressReporter.reportProgress(data.fileName)
+    this.progressReporter.reportProgress([data.fileName])
 
     callback()
   }

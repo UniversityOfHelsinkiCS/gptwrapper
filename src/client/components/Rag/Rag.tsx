@@ -106,6 +106,7 @@ const Rag: React.FC = () => {
   const uploadMutation = useUploadMutation(selectedIndex)
   const [modalOpen, setModalOpen] = useState(false)
   const [stream, setStream] = useState<ReadableStream | null>(null)
+  const [filenames, setFilenames] = useState<string[]>([])
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -128,9 +129,13 @@ const Rag: React.FC = () => {
     setInputValue('')
   }
 
+  const handleUploadError = () => {
+    setStream(null)
+  }
+
   return (
     <Box sx={{ display: 'flex', gap: 2 }}>
-      <Dialog open={!!selectedIndex && modalOpen} onClose={() => setModalOpen(false)}>
+      <Dialog open={!!selectedIndex && modalOpen} onClose={() => setModalOpen(false)} fullWidth maxWidth="md">
         <DialogTitle>Edit {selectedIndex?.metadata?.name}</DialogTitle>
         <Box sx={{ padding: 2 }}>
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -143,6 +148,7 @@ const Rag: React.FC = () => {
                   console.log('Files selected:', files)
                   if (files && files.length > 0) {
                     const stream = await uploadMutation.mutateAsync(files)
+                    setFilenames(Array.from(files).map((file) => file.name))
                     setStream(stream)
                   }
                 }}
@@ -164,7 +170,7 @@ const Rag: React.FC = () => {
             </Button>
           </Box>
           <Box mt={2}>
-            <ProgressReporter stream={stream} />
+            <ProgressReporter filenames={filenames} stream={stream} onError={handleUploadError} />
           </Box>
         </Box>
       </Dialog>
