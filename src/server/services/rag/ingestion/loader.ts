@@ -2,11 +2,11 @@ import { readdir, readFile, stat } from 'node:fs/promises'
 
 export type FileData = { fileName: string; type: 'text' | 'md'; content: string } | { fileName: string; type: 'pdf'; content: Buffer }
 
-export async function* loadFiles(loadpath: string): AsyncGenerator<FileData> {
+export async function loadFiles(loadpath: string, callback: (fileData: FileData) => void) {
   // Check if the path is a file
   const stats = await stat(loadpath)
   if (!stats.isDirectory()) {
-    yield await loadFile(loadpath)
+    loadFile(loadpath).then(callback)
     return
   }
 
@@ -15,11 +15,11 @@ export async function* loadFiles(loadpath: string): AsyncGenerator<FileData> {
 
   for (const file of files) {
     if (file.isDirectory()) {
-      return loadFiles(`${loadpath}/${file.name}`)
+      return loadFiles(`${loadpath}/${file.name}`, callback)
     } else if (file.isFile()) {
       const filePath = `${loadpath}/${file.name}`
       console.log(`Loading file: ${filePath}`)
-      yield await loadFile(filePath)
+      loadFile(filePath).then(callback)
     }
   }
 }
