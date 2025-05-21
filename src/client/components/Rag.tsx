@@ -1,9 +1,10 @@
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, IconButton, Dialog, DialogTitle, styled } from '@mui/material'
 import apiClient from '../util/apiClient'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { CloudUpload, Settings } from '@mui/icons-material'
 import Markdown from './Banner/Markdown'
+import { useSnackbar } from 'notistack'
 
 type RagResponse = {
   id: string
@@ -67,17 +68,12 @@ const useUploadMutation = (index: RagIndexAttributes | null) => {
         formData.append('files', file)
       })
 
-      // Returns a stream
       const response = await apiClient.put(`/rag/indices/${index.id}/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        responseType: 'stream',
-        
-
       })
 
-      console.log('Upload response:', response.data)
       return response.data
     },
   })
@@ -97,6 +93,7 @@ const VisuallyHiddenInput = styled('input')({
 })
 
 const Rag: React.FC = () => {
+  const { enqueueSnackbar } = useSnackbar()
   const { data: indices, refetch } = useRagIndices()
   const createIndexMutation = useCreateRagIndexMutation()
   const deleteIndexMutation = useDeleteRagIndexMutation()
@@ -107,7 +104,6 @@ const Rag: React.FC = () => {
   const [response, setResponse] = useState<RagResponse[] | null>(null)
   const uploadMutation = useUploadMutation(selectedIndex)
   const [modalOpen, setModalOpen] = useState(false)
-  const progressLogs = useRef<HTMLParagraphElement>()
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -122,45 +118,25 @@ const Rag: React.FC = () => {
     setInputValue('')
   }
 
-  // Processes the upload progress stream which returns JSON objects
-  const processUploadProgressStream = (stream) => {
-    stream.on('data', (data: any) => {
-      const parsedData = JSON.parse(data.toString())
-      console.log('Parsed data:', parsedData)
-      if (parsedData.stage === 'done') {
-        progressLogs.current.innerHTML += `Upload completed: ${JSON.stringify(parsedData)}\n`
-      } else if (parsedData.error) {
-        progressLogs.current.innerHTML += `Error: ${parsedData.error}\n`
-      } else {
-        progressLogs.current.innerHTML += `Progress: ${JSON.stringify(parsedData)}\n`
-      }
-    })
-    stream.on('end', () => {
-      progressLogs.current.innerHTML += 'Upload stream ended.\n'
-    })
-    stream.on('error', (err: any) => {
-      progressLogs.current.innerHTML += `Error: ${err}\n`
-    })
-    stream.on('close', () => {
-      progressLogs.current.innerHTML += 'Upload stream closed.\n'
-    })
-  }
-
   return (
     <Box sx={{ display: 'flex', gap: 2 }}>
       <Dialog open={!!selectedIndex && modalOpen} onClose={() => setModalOpen(false)}>
         <DialogTitle>Edit {selectedIndex?.metadata?.name}</DialogTitle>
         <Box sx={{ padding: 2, display: 'flex', gap: 2 }}>
-          <Button component="label" role={undefined} variant="contained" tabIndex={-1} startIcon={<CloudUpload />}>
-            Upload files
+          <Button component="label" role={undefined} variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
+            {uploadMutation.isPending ? 'Uploading...' : 'Upload Files'}
             <VisuallyHiddenInput
               type="file"
               onChange={async (event) => {
                 const files = event.target.files
                 console.log('Files selected:', files)
                 if (files && files.length > 0) {
-                  const stream = await uploadMutation.mutateAsync(files)
-                  processUploadProgressStream(stream)
+                  await uploadMutation.mutateAsync(files)
+                  refetch()
+                  setModalOpen(false)
+                  enqueueSnackbar('Files uploaded successfully', {
+                    variant: 'success',
+                  })
                 }
               }}
               multiple
@@ -179,9 +155,6 @@ const Rag: React.FC = () => {
           >
             Delete Index
           </Button>
-        </Box>
-        <Box sx={{ padding: 2 }}>
-          <p ref={progressLogs} style={{ whiteSpace: 'pre-wrap' }} />
         </Box>
       </Dialog>
       <Box>

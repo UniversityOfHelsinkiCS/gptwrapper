@@ -135,6 +135,8 @@ router.put('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware], 
   const openAiClient = getAzureOpenAIClient(EMBED_MODEL)
 
   await ingestionPipeline(openAiClient, `uploads/rag/${id}`, ragIndex)
+
+  res.json({ message: 'Files uploaded and processed' })
 })
 
 const RagIndexQuerySchema = z.object({
