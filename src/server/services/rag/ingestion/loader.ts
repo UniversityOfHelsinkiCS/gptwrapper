@@ -1,10 +1,8 @@
 import { readdir, readFile, stat } from 'node:fs/promises'
-import { Readable } from 'node:stream'
-import { StageReporter } from './progressReporter';
 
 export type FileData = { fileName: string; type: 'text' | 'md'; content: string } | { fileName: string; type: 'pdf'; content: Buffer }
 
-async function* loadFiles(loadpath: string): AsyncGenerator<FileData> {
+export async function* loadFiles(loadpath: string): AsyncGenerator<FileData> {
   // Check if the path is a file
   const stats = await stat(loadpath)
   if (!stats.isDirectory()) {
@@ -44,27 +42,5 @@ const loadFile = async (filePath: string): Promise<FileData> => {
     fileName,
     content,
     type: extension === 'md' ? 'md' : 'text',
-  }
-}
-
-export class FileLoader extends Readable {
-  private files: AsyncGenerator<FileData>
-  public progressReporter: StageReporter
-
-  constructor(loadpath: string) {
-    super({ objectMode: true })
-    this.files = loadFiles(loadpath)
-  }
-
-  _read() {
-    this.files.next().then((file) => {
-      if (file.done) {
-        this.push(null)
-        this.progressReporter.reportDone()
-      } else {
-        this.push(file.value)
-        this.progressReporter.reportProgress([file.value.fileName])
-      }
-    })
   }
 }

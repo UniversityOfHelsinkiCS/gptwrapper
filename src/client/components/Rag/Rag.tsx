@@ -24,6 +24,7 @@ type RagIndexAttributes = {
     dim: number
   }
   numOfChunks: number
+  filenames: string[]
 }
 
 const useRagIndices = () => {
@@ -135,7 +136,7 @@ const Rag: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex', gap: 2 }}>
-      <Dialog open={!!selectedIndex && modalOpen} onClose={() => setModalOpen(false)} fullWidth maxWidth="md">
+      <Dialog open={!!selectedIndex && modalOpen} onClose={() => { setModalOpen(false); refetch(); }} fullWidth maxWidth="md">
         <DialogTitle>Edit {selectedIndex?.metadata?.name}</DialogTitle>
         <Box sx={{ padding: 2 }}>
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -207,6 +208,7 @@ const Rag: React.FC = () => {
                 <TableRow>
                   <TableCell>ID</TableCell>
                   <TableCell>Name</TableCell>
+                  <TableCell>Files</TableCell>
                   <TableCell>Dim</TableCell>
                   <TableCell>Num chunks</TableCell>
                 </TableRow>
@@ -215,6 +217,17 @@ const Rag: React.FC = () => {
                 <TableRow>
                   <TableCell>{index.id}</TableCell>
                   <TableCell>{index.metadata.name}</TableCell>
+                  <TableCell>
+                    {index.filenames.length ? (
+                      <>
+                        {index.filenames.map((filename) => (
+                          <p key={filename}>{filename}</p>
+                        ))}
+                      </>
+                    ) : (
+                      'No files'
+                    )}
+                  </TableCell>
                   <TableCell>{index.metadata.dim}</TableCell>
                   <TableCell>{index.numOfChunks}</TableCell>
                 </TableRow>

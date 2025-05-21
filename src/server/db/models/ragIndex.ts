@@ -11,6 +11,8 @@ class RagIndex extends Model<InferAttributes<RagIndex>, InferCreationAttributes<
   declare courseId?: string
 
   declare metadata: RagIndexMetadata
+
+  declare filenames: string[]
 }
 
 RagIndex.init(
@@ -32,6 +34,10 @@ RagIndex.init(
     metadata: {
       type: DataTypes.JSONB,
       allowNull: true,
+    },
+    filenames: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: false,
     },
   },
   {

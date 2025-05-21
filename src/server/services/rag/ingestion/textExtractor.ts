@@ -1,10 +1,7 @@
-import { Transform } from 'node:stream'
 import type { FileData } from './loader.ts'
 import { mkdirSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { pdfToText } from '../../../util/pdfToText.ts'
-import { StageReporter } from './progressReporter.ts'
-import { TransformCallback } from 'stream'
 
 export type TextData = {
   fileName: string
@@ -13,46 +10,26 @@ export type TextData = {
   chunkingStrategy: 'static' | 'title' | 'splittedTitle'
 }
 
-export class TextExtractor extends Transform {
-  private cachePath: string
-  public progressReporter: StageReporter
+export async function extractTextFromFileData(data: FileData, cachePath: string): Promise<TextData> {
+  const textsDir = cachePath + '/texts'
+  mkdirSync(textsDir, { recursive: true })
 
-  constructor(cachePath: string) {
-    super({ objectMode: true })
+  let textContent = data.type === 'text' ? data.content : ''
 
-    this.cachePath = cachePath + '/texts'
-
-    // Make sure the cache path exists
-    mkdirSync(this.cachePath, { recursive: true })
+  if (data.type === 'pdf') {
+    textContent = await pdfToText(data.content)
   }
 
-  async _transform(data: FileData, _encoding: BufferEncoding, callback: (error?: Error | null) => void) {
-    let textContent = data.type === 'text' ? data.content : ''
-
-    if (data.type === 'pdf') {
-      textContent = await pdfToText(data.content)
-    }
-
-    const textData: TextData = {
-      fileName: data.fileName,
-      content: textContent,
-      type: data.type,
-      chunkingStrategy: data.type === 'pdf' ? 'static' : 'title',
-    }
-
-    this.push(textData)
-
-    // Save text data to cache
-    const textPath = `${this.cachePath}/${data.fileName}.txt`
-    await writeFile(textPath, textContent, 'utf-8')
-
-    this.progressReporter.reportProgress([data.fileName])
-
-    callback()
+  const textData: TextData = {
+    fileName: data.fileName,
+    content: textContent,
+    type: data.type,
+    chunkingStrategy: data.type === 'pdf' ? 'static' : 'title',
   }
 
-  _flush(callback: TransformCallback): void {
-    this.progressReporter.reportDone()
-    callback()
-  }
+  // Save text data to cache
+  const textPath = `${textsDir}/${data.fileName}.txt`
+  await writeFile(textPath, textContent, 'utf-8')
+
+  return textData
 }

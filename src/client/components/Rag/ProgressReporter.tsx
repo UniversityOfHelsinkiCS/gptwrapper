@@ -1,12 +1,10 @@
-import { Box, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
-import { orderBy } from 'lodash'
+import { LinearProgress, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 import { useEffect, useReducer } from 'react'
 import { IngestionPipelineStageKey, IngestionPipelineStageKeys, IngestionPipelineStages } from '../../../shared/constants'
 
 type ProgressEvent = {
   stage: string
   items?: string[]
-  done?: boolean
   error?: string
 }
 
@@ -14,12 +12,10 @@ type ProgressState = Record<
   IngestionPipelineStageKey,
   {
     count: number
-    done: boolean
     error: boolean
     files: {
       [fileName: string]: {
         count: number
-        done: boolean
         error: boolean
       }
     }
@@ -32,7 +28,6 @@ const getInitialProgressState = () =>
       stage,
       {
         count: 0,
-        done: false,
         error: false,
         files: {},
       },
@@ -44,25 +39,14 @@ type Action = { type: 'UPDATE'; payload: ProgressEvent } | { type: 'RESET' }
 const progressReducer = (state: ProgressState, action: Action): ProgressState => {
   switch (action.type) {
     case 'UPDATE': {
-      const { stage, items, done, error } = action.payload
-
-      if (done) {
-        return {
-          ...state,
-          [stage]: {
-            ...state[stage],
-            done: true,
-            error: !!error || false,
-          },
-        }
-      }
+      const { stage, items, error } = action.payload
 
       if (!items) return state
 
       const updatedFiles = items.reduce(
         (acc, fileName) => {
           if (!acc[fileName]) {
-            acc[fileName] = { count: 0, done: done || false, error: !!error || false }
+            acc[fileName] = { count: 0, error: !!error || false }
           }
           acc[fileName].count += 1
           return acc
@@ -74,7 +58,6 @@ const progressReducer = (state: ProgressState, action: Action): ProgressState =>
         ...state,
         [stage]: {
           ...state[stage],
-          done: done || state[stage]?.done,
           error: !!error || state[stage]?.error,
           count: state[stage]?.count + items.length,
           files: updatedFiles,
@@ -144,8 +127,6 @@ export const ProgressReporter: React.FC<{ filenames: string[]; stream: ReadableS
     }
   }, [stream])
 
-  console.log('Progress state:', progress)
-
   return (
     <Table size="small">
       <TableHead>
@@ -155,13 +136,16 @@ export const ProgressReporter: React.FC<{ filenames: string[]; stream: ReadableS
             <TableCell key={stage}>
               <Typography variant="body2">{IngestionPipelineStages[stage].name}</Typography>
               <Typography variant="caption" color="textSecondary">
-                {progress[stage].count}{' '}
+                {progress[stage].count}/{filenames.length}
               </Typography>
-              <Typography variant="caption" color="textSecondary">
-                {progress[stage].done ? 'Done' : progress[stage].error ? 'Error' : 'In Progress'}
-              </Typography>
+              {progress[stage].error && (
+                <Typography variant="caption" color="error">
+                  Error
+                </Typography>
+              )}
             </TableCell>
           ))}
+          <TableCell>Status</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -170,30 +154,31 @@ export const ProgressReporter: React.FC<{ filenames: string[]; stream: ReadableS
             <TableCell component="th" scope="row">
               {filename}
             </TableCell>
-            {IngestionPipelineStageKeys.map((stage) => (
-              <TableCell
-                key={stage}
-                sx={{
-                  transition: 'background-color 0.3s',
-                  backgroundColor: progress[stage]?.error
-                    ? 'error.light'
-                    : progress[stage]?.done
-                      ? 'success.light'
-                      : progress[stage]?.files[filename]?.error
-                        ? 'error.light'
-                        : progress[stage]?.files[filename]?.count
-                          ? 'info.light'
-                          : 'inherit',
-                }}
-              >
-                <Box display="flex" gap={2}>
-                  <Typography variant="body2">{progress[stage].files[filename]?.count > 1 || ''}</Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    {progress[stage]?.files[filename]?.done ? 'Done' : progress[stage].files[filename]?.error ? 'Error' : ''}
-                  </Typography>
-                </Box>
-              </TableCell>
-            ))}
+            <TableCell colSpan={IngestionPipelineStageKeys.length}>
+              <LinearProgress
+                variant="determinate"
+                value={(IngestionPipelineStageKeys.reduce((acc, stage) => acc + (progress[stage].files[filename]?.count ? 1 : 0), 0) / IngestionPipelineStageKeys.length) * 100}
+              />
+            </TableCell>
+            <TableCell>
+              {IngestionPipelineStageKeys.some((stage) => progress[stage].files[filename]?.error) ? (
+                <Typography variant="body2" color="error">
+                  Error
+                </Typography>
+              ) : progress['store']?.files[filename]?.count > 0 ? (
+                <Typography variant="body2" color="textSecondary">
+                  Completed
+                </Typography>
+              ) : IngestionPipelineStageKeys.some((stage) => progress[stage].files[filename]?.count) ? (
+                <Typography variant="body2" color="textSecondary">
+                  In Progress
+                </Typography>
+              ) : (
+                <Typography variant="body2" color="textSecondary">
+                  Not Started
+                </Typography>
+              )}
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

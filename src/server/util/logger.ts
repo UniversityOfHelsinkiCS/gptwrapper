@@ -12,7 +12,16 @@ const transports = []
 transports.push(new winston.transports.File({ filename: 'debug.log' }))
 
 if (!inProduction) {
-  const devFormat = printf(({ level, message, timestamp, ...rest }) => `${timestamp} ${level}: ${message} ${JSON.stringify(rest)}`)
+  const devFormat = printf(({ level, message, timestamp, ...rest }) => {
+    let restString = ''
+    try {
+      restString = JSON.stringify(rest)
+    } catch (e) {
+      restString = 'Error stringifying rest'
+    }
+
+    return `${timestamp} ${level}: ${message} ${restString}`
+  })
 
   transports.push(
     new winston.transports.Console({

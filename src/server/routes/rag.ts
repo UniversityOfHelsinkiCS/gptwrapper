@@ -1,15 +1,13 @@
 import { NextFunction, Request, Response, Router } from 'express'
-import { EMBED_DIM, EMBED_MODEL } from '../../config'
+import { EMBED_DIM } from '../../config'
 import { createChunkIndex, deleteChunkIndex, getNumberOfChunks } from '../services/rag/chunkDb'
 import { RagIndex } from '../db/models'
 import { RequestWithUser } from '../types'
 import z from 'zod'
 import { queryRagIndex } from '../services/rag/query'
 import { ingestionPipeline } from '../services/rag/ingestion/pipeline'
-import { getAzureOpenAIClient } from '../util/azure'
 import multer from 'multer'
 import { mkdir, rm, stat } from 'fs/promises'
-import { Readable } from 'stream'
 import { getOllamaOpenAIClient } from '../util/ollama'
 
 const router = Router()
@@ -30,7 +28,9 @@ router.post('/indices', async (req, res) => {
     metadata: {
       name,
       dim,
+      numOfChunks: 0,
     },
+    filenames: [],
   })
 
   await createChunkIndex(ragIndex)
