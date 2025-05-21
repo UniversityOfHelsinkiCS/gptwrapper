@@ -3,6 +3,8 @@ import type { FileData } from './loader.ts'
 import { mkdirSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { pdfToText } from '../../../util/pdfToText.ts'
+import { StageReporter } from './progressReporter.ts'
+import { TransformCallback } from 'stream'
 
 export type TextData = {
   fileName: string
@@ -13,6 +15,7 @@ export type TextData = {
 
 export class TextExtractor extends Transform {
   private cachePath: string
+  public progressReporter: StageReporter
 
   constructor(cachePath: string) {
     super({ objectMode: true })
@@ -42,6 +45,14 @@ export class TextExtractor extends Transform {
     // Save text data to cache
     const textPath = `${this.cachePath}/${data.fileName}.txt`
     await writeFile(textPath, textContent, 'utf-8')
+
+    this.progressReporter.reportProgress(data.fileName)
+
+    callback()
+  }
+
+  _flush(callback: TransformCallback): void {
+    this.progressReporter.reportDone()
     callback()
   }
 }

@@ -3,9 +3,11 @@ import { chunkingAlgorithms } from './chunkingAlgorithms.ts'
 import { mkdirSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { TextData } from './textExtractor.ts'
+import { StageReporter } from './progressReporter.ts'
 
 export class Chunker extends Transform {
   private cachePath: string
+  public progressReporter: StageReporter
 
   constructor(cachePath: string) {
     super({ objectMode: true })
@@ -16,7 +18,7 @@ export class Chunker extends Transform {
     mkdirSync(this.cachePath, { recursive: true })
   }
 
-  _transform(data: TextData, _encoding: BufferEncoding, callback: (error?: Error | null) => void) {
+  async _transform(data: TextData, _encoding: BufferEncoding, callback: (error?: Error | null) => void) {
     const chunkingAlgorithm = chunkingAlgorithms[data.chunkingStrategy]
 
     const chunks = chunkingAlgorithm(data)
@@ -26,13 +28,20 @@ export class Chunker extends Transform {
 
     // Save chunks to cache
 
-    Promise.all(
+    await Promise.all(
       chunks.map((chunk) => {
         const chunkPath = `${this.cachePath}/${chunk.id}.json`
         return writeFile(chunkPath, JSON.stringify(chunk, null, 2), 'utf-8')
       }),
-    ).then(() => {
-      callback()
-    })
+    )
+
+    this.progressReporter.reportProgress(data.fileName)
+
+    callback()
+  }
+
+  _flush(callback: (error?: Error | null) => void) {
+    this.progressReporter.reportDone()
+    callback()
   }
 }

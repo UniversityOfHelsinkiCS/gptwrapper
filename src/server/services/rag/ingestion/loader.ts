@@ -1,5 +1,6 @@
 import { readdir, readFile, stat } from 'node:fs/promises'
 import { Readable } from 'node:stream'
+import { StageReporter } from './progressReporter';
 
 export type FileData = { fileName: string; type: 'text' | 'md'; content: string } | { fileName: string; type: 'pdf'; content: Buffer }
 
@@ -48,6 +49,7 @@ const loadFile = async (filePath: string): Promise<FileData> => {
 
 export class FileLoader extends Readable {
   private files: AsyncGenerator<FileData>
+  public progressReporter: StageReporter
 
   constructor(loadpath: string) {
     super({ objectMode: true })
@@ -58,8 +60,10 @@ export class FileLoader extends Readable {
     this.files.next().then((file) => {
       if (file.done) {
         this.push(null)
+        this.progressReporter.reportDone()
       } else {
         this.push(file.value)
+        this.progressReporter.reportProgress(file.value.fileName)
       }
     })
   }

@@ -4,6 +4,7 @@ import { mkdirSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { getEmbeddingVectorBatch } from '../embed'
 import OpenAI from 'openai'
+import { StageReporter } from './progressReporter.ts'
 
 export type EmbeddedChunk = Chunk & {
   embedding: number[]
@@ -14,6 +15,7 @@ export class Embedder extends Transform {
   private client: OpenAI
   private currentBatch: Chunk[] = []
   private batchSize: number // Number of chunks to embed at once
+  public progressReporter: StageReporter
 
   constructor(client: OpenAI, cachePath: string, batchSize: number) {
     super({ objectMode: true })
@@ -28,6 +30,7 @@ export class Embedder extends Transform {
 
   async _flush(callback: (error?: Error | null) => void) {
     await this.embedBatch(callback)
+    this.progressReporter.reportDone()
   }
 
   async _transform(chunk: Chunk, _encoding: BufferEncoding, callback: (error?: Error | null) => void) {
@@ -62,6 +65,7 @@ export class Embedder extends Transform {
         // Save embedded chunk to cache
         const path = `${this.cachePath}/${embeddedChunk.id}.json`
         await writeFile(path, JSON.stringify(embeddedChunk, null, 2), 'utf-8')
+        this.progressReporter.reportProgress(embeddedChunk.metadata.filename)
       })
 
       // Reset the current batch

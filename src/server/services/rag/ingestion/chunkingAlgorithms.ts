@@ -3,8 +3,11 @@ import { TextData } from './textExtractor.ts'
 export type Chunk = {
   id: string
   content: string[]
-  metadata?: {
-    [key: string]: any
+  metadata: {
+    title?: string
+    titleHierarchy?: string[]
+    type: string
+    filename: string
   }
 }
 
@@ -28,6 +31,7 @@ export const createTitleChunks = (file: TextData): Chunk[] => {
           title,
           titleHierarchy: [...titleHierarchy],
           type: file.type,
+          filename: file.fileName,
         },
       })
 
@@ -62,6 +66,7 @@ export const createTitleChunks = (file: TextData): Chunk[] => {
         title,
         titleHierarchy: [...titleHierarchy],
         type: file.type,
+        filename: file.fileName,
       },
     })
   }
@@ -82,8 +87,9 @@ export const createSplittedTitleChunks = (file: TextData): Chunk[] => {
         content: section.split('\n'),
         metadata: {
           title: `${title} - ${index + 1}`,
-          titleHierarchy: [...titleHierarchy, index + 1],
+          titleHierarchy: [...titleHierarchy, index + 1 + ''],
           type: file.type,
+          filename: file.fileName,
         },
       }))
   })
@@ -103,6 +109,7 @@ export const createStaticChunks = (file: TextData, length: number = 800, overlap
         metadata: {
           title: file.fileName,
           type: file.type,
+          filename: file.fileName,
         },
       })
     }

@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, IconButton, Dialog, DialogTitle, styled } from '@mui/material'
-import apiClient from '../util/apiClient'
+import apiClient, { postAbortableStream } from '../../util/apiClient'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { CloudUpload, Settings } from '@mui/icons-material'
-import Markdown from './Banner/Markdown'
+import Markdown from '../Banner/Markdown'
 import { useSnackbar } from 'notistack'
+import { ProgressReporter } from './ProgressReporter'
 
 type RagResponse = {
   id: string
@@ -69,13 +70,12 @@ const useUploadMutation = (index: RagIndexAttributes | null) => {
         formData.append('files', file)
       })
 
-      const response = await apiClient.put(`/rag/indices/${index.id}/upload`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
+      const { stream } = await postAbortableStream(`/rag/indices/${index.id}/upload`, formData)
+      if (!stream) {
+        throw new Error('No stream returned from server')
+      }
 
-      return response.data
+      return stream
     },
   })
   return mutation
@@ -105,6 +105,7 @@ const Rag: React.FC = () => {
   const [response, setResponse] = useState<RagResponse[] | null>(null)
   const uploadMutation = useUploadMutation(selectedIndex)
   const [modalOpen, setModalOpen] = useState(false)
+  const [stream, setStream] = useState<ReadableStream | null>(null)
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -131,39 +132,40 @@ const Rag: React.FC = () => {
     <Box sx={{ display: 'flex', gap: 2 }}>
       <Dialog open={!!selectedIndex && modalOpen} onClose={() => setModalOpen(false)}>
         <DialogTitle>Edit {selectedIndex?.metadata?.name}</DialogTitle>
-        <Box sx={{ padding: 2, display: 'flex', gap: 2 }}>
-          <Button component="label" role={undefined} variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
-            {uploadMutation.isPending ? 'Uploading...' : 'Upload Files'}
-            <VisuallyHiddenInput
-              type="file"
-              onChange={async (event) => {
-                const files = event.target.files
-                console.log('Files selected:', files)
-                if (files && files.length > 0) {
-                  await uploadMutation.mutateAsync(files)
+        <Box sx={{ padding: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button component="label" role={undefined} variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
+              {uploadMutation.isPending ? 'Uploading...' : 'Upload Files'}
+              <VisuallyHiddenInput
+                type="file"
+                onChange={async (event) => {
+                  const files = event.target.files
+                  console.log('Files selected:', files)
+                  if (files && files.length > 0) {
+                    const stream = await uploadMutation.mutateAsync(files)
+                    setStream(stream)
+                  }
+                }}
+                multiple
+              />
+            </Button>
+            <Button
+              variant="text"
+              color="error"
+              onClick={async () => {
+                if (selectedIndex && window.confirm(`Are you sure you want to delete index ${selectedIndex.metadata.name}?`)) {
+                  await deleteIndexMutation.mutateAsync(selectedIndex.id)
+                  setSelectedIndex(null)
                   refetch()
-                  setModalOpen(false)
-                  enqueueSnackbar('Files uploaded successfully', {
-                    variant: 'success',
-                  })
                 }
               }}
-              multiple
-            />
-          </Button>
-          <Button
-            variant="text"
-            color="error"
-            onClick={async () => {
-              if (selectedIndex && window.confirm(`Are you sure you want to delete index ${selectedIndex.metadata.name}?`)) {
-                await deleteIndexMutation.mutateAsync(selectedIndex.id)
-                setSelectedIndex(null)
-                refetch()
-              }
-            }}
-          >
-            Delete Index
-          </Button>
+            >
+              Delete Index
+            </Button>
+          </Box>
+          <Box mt={2}>
+            <ProgressReporter stream={stream} />
+          </Box>
         </Box>
       </Dialog>
       <Box>
@@ -247,7 +249,9 @@ const Rag: React.FC = () => {
             {response.map((doc) => (
               <Paper key={doc.id} sx={{ marginBottom: 2, p: 1 }} elevation={2}>
                 <Typography variant="caption">Score: {doc.value.score}</Typography>
-                <Typography variant="subtitle1" fontFamily="monospace" mb={2}>{JSON.stringify(doc.value.metadata, null, 2)}</Typography>
+                <Typography variant="subtitle1" fontFamily="monospace" mb={2}>
+                  {JSON.stringify(doc.value.metadata, null, 2)}
+                </Typography>
                 {doc.value.metadata.type === 'md' ? (
                   <Markdown>{doc.value.content}</Markdown>
                 ) : (

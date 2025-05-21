@@ -9,6 +9,7 @@ import { ingestionPipeline } from '../services/rag/ingestion/pipeline'
 import { getAzureOpenAIClient } from '../util/azure'
 import multer from 'multer'
 import { mkdir, rm, stat } from 'fs/promises'
+import { Readable } from 'stream'
 
 const router = Router()
 
@@ -115,7 +116,7 @@ const indexUploadDirMiddleware = async (req: Request, _res: Response, next: Next
   next()
 }
 
-router.put('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware], async (req, res) => {
+router.post('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware], async (req, res) => {
   const { user } = req as unknown as RequestWithUser
   const id = IndexIdSchema.parse(req.params.id)
 
@@ -132,11 +133,14 @@ router.put('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware], 
     return
   }
 
+  res.setHeader('Content-Type', 'application/x-ndjson')
+  res.setHeader('Transfer-Encoding', 'chunked')
+
   const openAiClient = getAzureOpenAIClient(EMBED_MODEL)
 
-  await ingestionPipeline(openAiClient, `uploads/rag/${id}`, ragIndex)
+  const progressReporter = await ingestionPipeline(openAiClient, `uploads/rag/${id}`, ragIndex)
 
-  res.json({ message: 'Files uploaded and processed' })
+  progressReporter.pipe(res)
 })
 
 const RagIndexQuerySchema = z.object({

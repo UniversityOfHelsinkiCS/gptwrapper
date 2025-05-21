@@ -7,6 +7,8 @@ import { RedisStorer } from './storer.ts'
 import type OpenAI from 'openai'
 import RagIndex from '../../../db/models/ragIndex.ts'
 import { TextExtractor } from './textExtractor.ts'
+import { Readable } from 'node:stream'
+import { ProgressReporter } from './progressReporter.ts'
 
 // Pipeline debug cache in pipeline/
 // Check if exists, if not create it.
@@ -25,13 +27,29 @@ const initPipelineCache = async () => {
 export const ingestionPipeline = async (client: OpenAI, loadpath: string, ragIndex: RagIndex) => {
   await initPipelineCache()
 
-  await pipeline([
+  const progressReporter = new ProgressReporter()
+
+  const stages = [
     new FileLoader(loadpath),
     new TextExtractor(pipelineCachePath),
     new Chunker(pipelineCachePath),
     new Embedder(client, pipelineCachePath, 10),
     new RedisStorer(ragIndex),
-  ])
+  ]
 
-  console.log('Ingestion pipeline completed')
+  stages.forEach((stage) => {
+    stage.progressReporter = progressReporter.getStageReporter(stage.constructor.name)
+  })
+
+  pipeline(stages)
+    .then(() => {
+      console.log('Pipeline completed')
+      progressReporter.emit('end')
+    })
+    .catch((error) => {
+      console.error('Pipeline error:', error)
+      progressReporter.emit('error', 'Pipeline error')
+    })
+
+  return progressReporter
 }

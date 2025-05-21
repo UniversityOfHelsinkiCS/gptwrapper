@@ -11,7 +11,7 @@ import Discussion from './components/Courses/Course/Discussion'
 import NoAccess from './components/NoAccess'
 import Chats from './components/Chats'
 import Statistics from './components/Statistics'
-import Rag from './components/Rag'
+import Rag from './components/Rag/Rag'
 import { ChatV2 } from './components/ChatV2/ChatV2'
 
 const router = createBrowserRouter(
