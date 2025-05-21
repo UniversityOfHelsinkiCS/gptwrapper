@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express'
 import { EMBED_DIM } from '../../config'
-import { createChunkIndex, deleteChunkIndex, getNumberOfChunks } from '../services/rag/chunkDb'
-import { RagIndex } from '../db/models'
+import { createChunkIndex, deleteChunkIndex } from '../services/rag/chunkDb'
+import { RagFile, RagIndex } from '../db/models'
 import { RequestWithUser } from '../types'
 import z from 'zod'
 import { queryRagIndex } from '../services/rag/query'
@@ -28,9 +28,7 @@ router.post('/indices', async (req, res) => {
     metadata: {
       name,
       dim,
-      numOfChunks: 0,
     },
-    filenames: [],
   })
 
   await createChunkIndex(ragIndex)
@@ -70,19 +68,27 @@ router.delete('/indices/:id', async (req, res) => {
 
 router.get('/indices', async (_req, res) => {
   const indices = await RagIndex.findAll()
+  res.json(indices)
+})
 
-  const indicesWithMetadata = await Promise.all(
-    indices.map(async (index) => {
-      const numOfChunks = await getNumberOfChunks(index)
+router.get('/indices/:id', async (req, res) => {
+  const { user } = req as unknown as RequestWithUser
+  const { id } = req.params
 
-      return {
-        ...index.toJSON(),
-        numOfChunks,
-      }
-    }),
-  )
+  const ragIndex = await RagIndex.findOne({
+    where: { id, userId: user.id },
+    include: {
+      model: RagFile,
+      as: 'files',
+    },
+  })
 
-  res.json(indicesWithMetadata)
+  if (!ragIndex) {
+    res.status(404).json({ error: 'Index not found' })
+    return
+  }
+
+  res.json(ragIndex)
 })
 
 const IndexIdSchema = z.coerce.number().min(1)
@@ -110,8 +116,11 @@ const indexUploadDirMiddleware = async (req: Request, _res: Response, next: Next
   const uploadPath = `${UPLOAD_DIR}/${id}`
   try {
     await stat(uploadPath)
-  } catch (_error) {
-    console.warn(`RAG upload dir not found, creating ${uploadPath} --- `)
+    await rm(uploadPath, { recursive: true, force: true })
+    console.log(`Upload directory ${uploadPath} deleted`)
+    await mkdir(uploadPath, { recursive: true })
+  } catch (error) {
+    console.warn(`RAG upload dir not found, creating ${uploadPath} --- ${error}`)
     await mkdir(uploadPath, { recursive: true })
   }
   next()
@@ -134,14 +143,23 @@ router.post('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware],
     return
   }
 
-  res.setHeader('Content-Type', 'application/x-ndjson')
-  res.setHeader('Transfer-Encoding', 'chunked')
+  await RagIndex.bulkCreate(
+    req.files.map((file) => ({
+      filename: file.originalname,
+      fileType: 'pending',
+      fileSize: 0,
+      numChunks: 0,
+      userId: user.id,
+      ragIndexId: ragIndex.id,
+      pipelineStage: 'pending',
+    })),
+  )
 
   const openAiClient = getOllamaOpenAIClient() // getAzureOpenAIClient(EMBED_MODEL)
 
-  const progressReporter = await ingestionPipeline(openAiClient, `uploads/rag/${id}`, ragIndex)
+  ingestionPipeline(openAiClient, `uploads/rag/${id}`, ragIndex, user)
 
-  progressReporter.pipe(res)
+  res.json({ message: 'Files uploaded successfully, starting ingestion' })
 })
 
 const RagIndexQuerySchema = z.object({
@@ -161,6 +179,20 @@ router.post('/query', async (req, res) => {
 
   const results = await queryRagIndex(ragIndex, query, topK)
   res.json(results)
+})
+
+router.delete('/files/:id', async (req, res) => {
+  const { user } = req as unknown as RequestWithUser
+  const { id } = req.params
+  const ragFile = await RagFile.findOne({
+    where: { id, userId: user.id },
+  })
+  if (!ragFile) {
+    res.status(404).json({ error: 'File not found' })
+    return
+  }
+  await ragFile.destroy()
+  res.json({ message: 'File deleted' })
 })
 
 export default router

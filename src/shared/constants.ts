@@ -1,4 +1,7 @@
 export const IngestionPipelineStages = {
+  pending: {
+    name: 'Pending',
+  },
   readFiles: {
     name: 'Read files',
   },
@@ -13,6 +16,9 @@ export const IngestionPipelineStages = {
   },
   store: {
     name: 'Save to database',
+  },
+  completed: {
+    name: 'Completed',
   },
 } as const
 
