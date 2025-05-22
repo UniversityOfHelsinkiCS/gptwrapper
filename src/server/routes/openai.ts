@@ -1,11 +1,28 @@
 import express from 'express'
 import multer from 'multer'
 
-import { CourseChatRequest, AzureOptions, RequestWithUser } from '../types'
+import {
+  CourseChatRequest,
+  AzureOptions,
+  RequestWithUser,
+  AzureOptionsV2,
+} from '../types'
 import { isError } from '../util/parser'
-import { calculateUsage, incrementUsage, checkUsage, checkCourseUsage, incrementCourseUsage } from '../services/chatInstances/usage'
-import { getCompletionEvents, streamCompletion } from '../util/azure'
-import { getMessageContext, getModelContextLimit, getCourseModel, getAllowedModels } from '../util/util'
+import {
+  calculateUsage,
+  incrementUsage,
+  checkUsage,
+  checkCourseUsage,
+  incrementCourseUsage,
+} from '../services/chatInstances/usage'
+// import { getCompletionEvents, streamCompletion } from '../util/azure'
+import { getCompletionEventsV2, streamCompletionV2 } from '../util/azureV2'
+import {
+  getMessageContext,
+  getModelContextLimit,
+  getCourseModel,
+  getAllowedModels,
+} from '../util/util'
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
 import { inProduction, DEFAULT_TOKEN_LIMIT, FREE_MODEL } from '../../config'
@@ -20,7 +37,14 @@ const upload = multer({ storage })
 const fileParsing = async (options: any, req: any) => {
   let fileContent = ''
 
-  const textFileTypes = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'text/md']
+  const textFileTypes = [
+    'text/plain',
+    'text/html',
+    'text/css',
+    'text/csv',
+    'text/markdown',
+    'text/md',
+  ]
   if (textFileTypes.includes(req.file.mimetype)) {
     const fileBuffer = req.file.buffer
     fileContent = fileBuffer.toString('utf8')
@@ -56,7 +80,9 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     return
   }
 
-  const usageAllowed = courseId ? await checkCourseUsage(user, courseId) : model === FREE_MODEL || (await checkUsage(user, model))
+  const usageAllowed = courseId
+    ? await checkCourseUsage(user, courseId)
+    : model === FREE_MODEL || (await checkUsage(user, model))
 
   if (!usageAllowed) {
     res.status(403).send('Usage limit reached')
@@ -75,14 +101,22 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     return
   }
 
-  options.messages = getMessageContext(optionsMessagesWithFile || options.messages)
+  options.messages = getMessageContext(
+    optionsMessagesWithFile || options.messages
+  )
   options.stream = true
 
   const encoding = getEncoding(model)
   let tokenCount = calculateUsage(options, encoding)
-  const tokenUsagePercentage = Math.round((tokenCount / DEFAULT_TOKEN_LIMIT) * 100)
+  const tokenUsagePercentage = Math.round(
+    (tokenCount / DEFAULT_TOKEN_LIMIT) * 100
+  )
 
-  if (model !== FREE_MODEL && tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT && !userConsent) {
+  if (
+    model !== FREE_MODEL &&
+    tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT &&
+    !userConsent
+  ) {
     res.status(201).json({
       tokenConsumtionWarning: true,
       message: `You are about to use ${tokenUsagePercentage}% of your monthly CurreChat usage`,
@@ -98,7 +132,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     return
   }
 
-  const events = await getCompletionEvents(options as AzureOptions)
+  const events = await getCompletionEventsV2(options)
 
   if (isError(events)) {
     res.status(424)
@@ -107,7 +141,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   res.setHeader('content-type', 'text/event-stream')
 
-  const completion = await streamCompletion(events, options as AzureOptions, encoding, res)
+  const completion = await streamCompletionV2(events, encoding, res)
 
   tokenCount += completion.tokenCount
 
@@ -135,7 +169,8 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
       where: { courseId },
     }))
 
-  const consentToSave = courseId && course.saveDiscussions && options.saveConsent
+  const consentToSave =
+    courseId && course.saveDiscussions && options.saveConsent
 
   console.log('consentToSave', options.saveConsent, user.username)
 
@@ -155,79 +190,83 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   return
 })
 
-openaiRouter.post('/stream/:courseId', upload.single('file'), async (r, res) => {
-  const { courseId } = r.params
-  const req = r as CourseChatRequest
-  const { options } = JSON.parse(r.body.data)
-  const { user } = req
+openaiRouter.post(
+  '/stream/:courseId',
+  upload.single('file'),
+  async (r, res) => {
+    const { courseId } = r.params
+    const req = r as CourseChatRequest
+    const { options } = JSON.parse(r.body.data)
+    const { user } = req
 
-  if (!user.id) {
-    res.status(401).send('Unauthorized')
-    return
-  }
-
-  const usageAllowed = await checkCourseUsage(user, courseId)
-  if (!usageAllowed) {
-    res.status(403).send('Usage limit reached')
-    return
-  }
-
-  options.messages = getMessageContext(options.messages)
-  options.stream = true
-
-  const model = await getCourseModel(courseId)
-
-  if (options.model) {
-    const allowedModels = getAllowedModels(model)
-    if (!allowedModels.includes(options.model)) {
-      res.status(403).send('Model not allowed')
+    if (!user.id) {
+      res.status(401).send('Unauthorized')
       return
     }
-  } else {
-    options.model = model
-  }
 
-  const encoding = getEncoding(options.model)
-  let tokenCount = calculateUsage(options, encoding)
+    const usageAllowed = await checkCourseUsage(user, courseId)
+    if (!usageAllowed) {
+      res.status(403).send('Usage limit reached')
+      return
+    }
 
-  const contextLimit = getModelContextLimit(options.model)
+    options.messages = getMessageContext(options.messages)
+    options.stream = true
 
-  if (tokenCount > contextLimit) {
-    logger.info('Maximum context reached')
-    res.status(403).send('Model maximum context reached')
+    const model = await getCourseModel(courseId)
+
+    if (options.model) {
+      const allowedModels = getAllowedModels(model)
+      if (!allowedModels.includes(options.model)) {
+        res.status(403).send('Model not allowed')
+        return
+      }
+    } else {
+      options.model = model
+    }
+
+    const encoding = getEncoding(options.model)
+    let tokenCount = calculateUsage(options, encoding)
+
+    const contextLimit = getModelContextLimit(options.model)
+
+    if (tokenCount > contextLimit) {
+      logger.info('Maximum context reached')
+      res.status(403).send('Model maximum context reached')
+      return
+    }
+
+    const events = await getCompletionEventsV2(options)
+
+    if (isError(events)) {
+      res.status(424).send(events)
+      return
+    }
+
+    res.setHeader('content-type', 'text/event-stream')
+
+    const completion = await streamCompletionV2(events, encoding, res)
+
+    tokenCount += completion.tokenCount
+
+    let userToCharge = user
+    if (inProduction && req.hijackedBy) {
+      userToCharge = req.hijackedBy
+    }
+
+    await incrementCourseUsage(userToCharge, courseId, tokenCount)
+    logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
+      tokenCount,
+      courseId,
+      model: options.model,
+      user: user.username,
+    })
+
+    encoding.free()
+
+    res.end()
     return
   }
-
-  const events = await getCompletionEvents(options as AzureOptions)
-
-  if (isError(events)) {
-    res.status(424).send(events)
-    return
-  }
-
-  res.setHeader('content-type', 'text/event-stream')
-
-  const completion = await streamCompletion(events, options as AzureOptions, encoding, res)
-
-  tokenCount += completion.tokenCount
-
-  let userToCharge = user
-  if (inProduction && req.hijackedBy) {
-    userToCharge = req.hijackedBy
-  }
-
-  await incrementCourseUsage(userToCharge, courseId, tokenCount)
-  logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
-    tokenCount,
-    courseId,
-    model: options.model,
-    user: user.username,
-  })
-
-  encoding.free()
-
-  res.end()
-  return
-})
+)
 
 export default openaiRouter
