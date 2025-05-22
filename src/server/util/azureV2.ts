@@ -9,7 +9,10 @@ import { APIError, AzureOptionsV2 } from '../types'
 import { AzureOpenAI } from 'openai'
 import type { EventStream } from '@azure/openai'
 import type { Stream } from 'openai/streaming'
-import type { ChatCompletionChunk } from 'openai/resources/chat'
+import type {
+  ChatCompletionChunk,
+  ChatCompletionCreateParamsStreaming,
+} from 'openai/resources/chat'
 
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
@@ -61,8 +64,8 @@ const getMockCompletionEvents: () => Promise<
 export const getCompletionEventsV2 = async ({
   model,
   messages,
-  options,
-}: AzureOptionsV2): Promise<
+  stream,
+}: ChatCompletionCreateParamsStreaming): Promise<
   Stream<ChatCompletionChunk> | EventStream<ChatCompletionChunk> | APIError
 > => {
   const deploymentId = validModels.find((m) => m.name === model)?.deployment
@@ -78,7 +81,7 @@ export const getCompletionEventsV2 = async ({
     const events = await client.chat.completions.create({
       messages,
       model: deploymentId,
-      stream: true,
+      stream,
     })
 
     return events
@@ -91,7 +94,6 @@ export const getCompletionEventsV2 = async ({
 
 export const streamCompletionV2 = async (
   events: Stream<ChatCompletionChunk> | EventStream<ChatCompletionChunk>,
-  options: AzureOptionsV2,
   encoding: Tiktoken,
   res: Response
 ) => {

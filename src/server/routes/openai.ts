@@ -132,7 +132,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     return
   }
 
-  const events = await getCompletionEventsV2(options as AzureOptionsV2)
+  const events = await getCompletionEventsV2(options)
 
   if (isError(events)) {
     res.status(424)
@@ -141,12 +141,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   res.setHeader('content-type', 'text/event-stream')
 
-  const completion = await streamCompletionV2(
-    events,
-    options as AzureOptionsV2,
-    encoding,
-    res
-  )
+  const completion = await streamCompletionV2(events, encoding, res)
 
   tokenCount += completion.tokenCount
 
@@ -241,7 +236,7 @@ openaiRouter.post(
       return
     }
 
-    const events = await getCompletionEventsV2(options as AzureOptionsV2)
+    const events = await getCompletionEventsV2(options)
 
     if (isError(events)) {
       res.status(424).send(events)
@@ -250,12 +245,7 @@ openaiRouter.post(
 
     res.setHeader('content-type', 'text/event-stream')
 
-    const completion = await streamCompletionV2(
-      events,
-      options as AzureOptionsV2,
-      encoding,
-      res
-    )
+    const completion = await streamCompletionV2(events, encoding, res)
 
     tokenCount += completion.tokenCount
 
