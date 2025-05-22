@@ -116,12 +116,13 @@ export const ingestionPipeline = async (client: OpenAI, loadpath: string, ragInd
       },
       {
         where: { id: ragFile.id },
+        returning: true,
       },
     )
 
     // Storing
     for await (const chunk of batchEmbeddedChunks) {
-      await storeChunk(ragIndex, chunk).catch((error) => {
+      await storeChunk(ragIndex, ragFile, chunk).catch((error) => {
         throw error
       })
     }

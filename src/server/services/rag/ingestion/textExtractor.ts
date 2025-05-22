@@ -14,7 +14,7 @@ export async function extractTextFromFileData(data: FileData, cachePath: string)
   const textsDir = cachePath + '/texts'
   mkdirSync(textsDir, { recursive: true })
 
-  let textContent = data.type === 'text' ? data.content : ''
+  let textContent = typeof data.content === 'string' ? data.content : ''
 
   if (data.type === 'pdf') {
     textContent = await pdfToText(data.content)

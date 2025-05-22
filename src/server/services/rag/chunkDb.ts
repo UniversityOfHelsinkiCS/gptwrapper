@@ -1,10 +1,10 @@
-import { RagIndex } from '../../db/models'
+import { RagFile, RagIndex } from '../../db/models'
 import { countKeysMatchingPattern, redisClient } from '../../util/redis'
 
 export const createChunkIndex = async (ragIndex: RagIndex) => {
   try {
     await redisClient.ft.create(
-      ragIndex.metadata.name,
+      ragIndex.getRedisIndexName(),
       {
         metadata: {
           type: 'TEXT',
@@ -22,7 +22,7 @@ export const createChunkIndex = async (ragIndex: RagIndex) => {
       },
       {
         ON: 'HASH',
-        PREFIX: `idx:${ragIndex.metadata.name}`,
+        PREFIX: ragIndex.getRedisIndexPrefix(),
       },
     )
 
@@ -37,24 +37,25 @@ export const createChunkIndex = async (ragIndex: RagIndex) => {
 }
 
 export const getNumberOfChunks = async (ragIndex: RagIndex) => {
-  const pattern = `idx:${ragIndex.metadata.name}:*`
+  const pattern = `${ragIndex.getRedisIndexPrefix()}:*`
   const count = await countKeysMatchingPattern(pattern)
   return count
 }
 
 export const deleteChunkIndex = async (ragIndex: RagIndex) => {
+  const indexName = ragIndex.getRedisIndexName()
   try {
-    await redisClient.ft.dropIndex(ragIndex.metadata.name)
-    console.log(`Index ${ragIndex.metadata.name} deleted`)
+    await redisClient.ft.dropIndex(indexName)
+    console.log(`Index ${indexName} deleted`)
   } catch (err: any) {
     if (err.message.includes('Index not found')) {
-      console.log(`Index ${ragIndex.metadata.name} not found`)
+      console.log(`Index ${indexName} not found`)
     } else {
       console.error('Error deleting index', err)
     }
   }
 
-  const pattern = `idx:${ragIndex.metadata.name}:*`
+  const pattern = `${ragIndex.getRedisIndexPrefix()}:*`
 
   let cursor = '0'
   let numDeleted = 0
@@ -76,6 +77,7 @@ export const deleteChunkIndex = async (ragIndex: RagIndex) => {
 
 export const addChunk = async (
   ragIndex: RagIndex,
+  ragFile: RagFile,
   {
     id,
     metadata,
@@ -95,13 +97,16 @@ export const addChunk = async (
     throw new Error(`Embedding length is incorrect, got ${embeddingBuffer.length} bytes`)
   }
 
-  await redisClient.hSet(`idx:${ragIndex.metadata.name}:${id}`, {
+  const chunkKeySection = `${ragFile.getRedisKeyPrefix()}:${id}`
+  const key = `${ragIndex.getRedisIndexPrefix()}:${chunkKeySection}`
+
+  await redisClient.hSet(key, {
     metadata: JSON.stringify(metadata || {}),
     content,
     embedding: embeddingBuffer,
   })
 
-  console.log(`Document ${id} added to index ${ragIndex.metadata.name}`)
+  console.log(`Document ${chunkKeySection} added to index ${ragIndex.getRedisIndexName()}`)
 }
 
 export const vectorSearchKChunks = async (ragIndex: RagIndex, embedding: number[], k: number) => {
@@ -113,7 +118,7 @@ export const vectorSearchKChunks = async (ragIndex: RagIndex, embedding: number[
 
   const queryString = `(*)=>[KNN ${k} @embedding $vec_param AS score]`
 
-  const results = await redisClient.ft.search(ragIndex.metadata.name, queryString, {
+  const results = await redisClient.ft.search(ragIndex.getRedisIndexName(), queryString, {
     PARAMS: {
       vec_param: embeddingBuffer,
     },
@@ -138,7 +143,7 @@ export const vectorSearchKChunks = async (ragIndex: RagIndex, embedding: number[
 export const fullTextSearchChunks = async (ragIndex: RagIndex, query: string) => {
   const queryString = `@content:"%${query}%" | @title:"%${query}%"`
 
-  const results = await redisClient.ft.search(ragIndex.metadata.name, queryString, {
+  const results = await redisClient.ft.search(ragIndex.getRedisIndexName(), queryString, {
     DIALECT: 2,
     RETURN: ['content', 'title', 'metadata'],
     SLOP: 1,

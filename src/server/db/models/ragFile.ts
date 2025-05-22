@@ -27,6 +27,10 @@ class RagFile extends Model<InferAttributes<RagFile>, InferCreationAttributes<Ra
   declare createdAt: CreationOptional<Date>
 
   declare updatedAt: CreationOptional<Date>
+
+  getRedisKeyPrefix(): string {
+    return `${this.id}-${this.filename}`
+  }
 }
 
 RagFile.init(

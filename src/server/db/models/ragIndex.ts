@@ -11,6 +11,14 @@ class RagIndex extends Model<InferAttributes<RagIndex>, InferCreationAttributes<
   declare courseId?: string
 
   declare metadata: RagIndexMetadata
+
+  getRedisIndexName() {
+    return `${this.id}-${this.metadata.name}`
+  }
+
+  getRedisIndexPrefix() {
+    return `idx:${this.getRedisIndexName()}`
+  }
 }
 
 RagIndex.init(
