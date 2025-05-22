@@ -1,6 +1,8 @@
 import { Request } from 'express'
 import OpenAI from 'openai'
 import { ChatRequestMessage, GetChatCompletionsOptions } from '@azure/openai'
+import { ChatCompletionMessageParam } from 'openai/resources/chat'
+import { RequestOptions } from 'openai/core'
 
 export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>
 
@@ -34,7 +36,9 @@ export interface CourseChatRequest extends ChatRequest {
 
 export type APIError = typeof OpenAI.APIError
 
-export type OpenAIStream = ReturnType<typeof OpenAI.prototype.chat.completions.create>
+export type OpenAIStream = ReturnType<
+  typeof OpenAI.prototype.chat.completions.create
+>
 
 export type Message = OpenAI.Chat.ChatCompletionMessage
 export interface CustomMessage {
@@ -43,12 +47,19 @@ export interface CustomMessage {
 }
 export type Role = 'system' | 'assistant' | 'user'
 
-export type StreamingOptions = OpenAI.Chat.Completions.CompletionCreateParamsStreaming
+export type StreamingOptions =
+  OpenAI.Chat.Completions.CompletionCreateParamsStreaming
 
 export type AzureOptions = {
   model: string
   messages: ChatRequestMessage[]
   options: GetChatCompletionsOptions
+}
+
+export type AzureOptionsV2 = {
+  model: string
+  messages: ChatCompletionMessageParam[]
+  options: RequestOptions
 }
 
 interface RequestBody {
