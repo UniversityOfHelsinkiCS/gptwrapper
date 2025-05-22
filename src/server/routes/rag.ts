@@ -9,7 +9,6 @@ import { ingestionPipeline } from '../services/rag/ingestion/pipeline'
 import multer from 'multer'
 import { mkdir, rm, stat } from 'fs/promises'
 import { getOllamaOpenAIClient } from '../util/ollama'
-import { Sequelize } from 'sequelize'
 
 const router = Router()
 

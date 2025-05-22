@@ -1,11 +1,12 @@
 import { EMBED_MODEL } from '../../../config'
 import { RagIndex } from '../../db/models'
 import { getAzureOpenAIClient } from '../../util/azure'
+import { getOllamaOpenAIClient } from '../../util/ollama'
 import { fullTextSearchChunks, vectorSearchKChunks } from './chunkDb'
 import { getEmbeddingVector } from './embed'
 
 const vectorSearch = async (ragIndex: RagIndex, query: string, topK: number) => {
-  const client = getAzureOpenAIClient(EMBED_MODEL)
+  const client = getOllamaOpenAIClient()
   console.time('getEmbedding')
   const queryEmbedding = await getEmbeddingVector(client, query)
   console.timeEnd('getEmbedding')
@@ -32,7 +33,7 @@ export const queryRagIndex = async (ragIndex: RagIndex, query: string, topK: num
   fullTextSearchResult.forEach((doc) => {
     const existingDoc = combinedResults.find((d) => d.id === doc.id)
     if (!existingDoc) {
-      const newDoc = doc as (typeof vectorSearchResult)[0]
+      const newDoc = doc as (typeof vectorSearchResult)[number]
       newDoc.value.score = 1.0
       combinedResults.push(newDoc)
     } else {

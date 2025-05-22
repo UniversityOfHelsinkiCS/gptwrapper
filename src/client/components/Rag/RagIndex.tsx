@@ -60,8 +60,9 @@ const useUploadMutation = (index: RagIndexAttributes | null) => {
 
 const RagFile: React.FC<{ file: RagFileAttributes }> = ({ file }) => {
   const inProgress = file.pipelineStage !== 'completed' && file.pipelineStage !== 'pending'
-  const progressIdx = IngestionPipelineStageKeys.findIndex((stage) => stage === file.pipelineStage)
+  const progressIdx = IngestionPipelineStageKeys.findIndex((stage) => stage === file.pipelineStage) - 1
   const progressNextIdx = inProgress ? progressIdx + 1 : progressIdx
+  const numSteps = IngestionPipelineStageKeys.length - 2
 
   return (
     <Paper sx={{ padding: 2, marginBottom: 2 }} elevation={3}>
@@ -85,16 +86,12 @@ const RagFile: React.FC<{ file: RagFileAttributes }> = ({ file }) => {
             <TableCell>{file.fileType}</TableCell>
             <TableCell>{file.fileSize}</TableCell>
             <TableCell>{file.numChunks}</TableCell>
-            <TableCell>{file.pipelineStage}</TableCell>
+            <TableCell>{IngestionPipelineStages[file.pipelineStage].name}</TableCell>
           </TableRow>
         </TableBody>
       </Table>
       {file.pipelineStage !== 'completed' && file.pipelineStage !== 'pending' && (
-        <LinearProgress
-          variant="buffer"
-          value={(progressIdx * 100) / (IngestionPipelineStageKeys.length - 1)}
-          valueBuffer={(progressNextIdx * 100) / (IngestionPipelineStageKeys.length - 1)}
-        />
+        <LinearProgress variant="buffer" value={(progressIdx * 100) / numSteps} valueBuffer={(progressNextIdx * 100) / numSteps} />
       )}
       {file.error && (
         <Typography variant="body2" color="error">
@@ -132,8 +129,8 @@ export const RagIndex: React.FC = () => {
 
   return (
     <>
-      <Typography variant='body1'>RAG index</Typography>
-      <Typography variant='h3'>{ragDetails?.metadata?.name}</Typography>
+      <Typography variant="body1">RAG index</Typography>
+      <Typography variant="h3">{ragDetails?.metadata?.name}</Typography>
       <Box py={2}>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button component="label" role={undefined} variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
