@@ -1,14 +1,13 @@
 import React from 'react'
-import { Button, Box, Typography, Paper, styled, LinearProgress, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Button, Box, Typography, styled, LinearProgress, Link } from '@mui/material'
+import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom'
 import apiClient from '../../util/apiClient'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { CloudUpload } from '@mui/icons-material'
-import { useSnackbar } from 'notistack'
 import type { RagFileAttributes } from '../../../server/db/models/ragFile'
 import { orderBy } from 'lodash'
-import { IngestionPipelineStageKeys, IngestionPipelineStages } from '../../../shared/constants'
 import { RagIndexAttributes } from '../../../server/db/models/ragIndex'
+import { RagFileInfo } from './RagFileDetails'
 
 type RagIndexDetails = Omit<RagIndexAttributes, 'ragFileCount'> & {
   ragFiles: RagFileAttributes[]
@@ -58,50 +57,6 @@ const useUploadMutation = (index: RagIndexAttributes | null) => {
   return mutation
 }
 
-const RagFile: React.FC<{ file: RagFileAttributes }> = ({ file }) => {
-  const inProgress = file.pipelineStage !== 'completed' && file.pipelineStage !== 'pending'
-  const progressIdx = IngestionPipelineStageKeys.findIndex((stage) => stage === file.pipelineStage) - 1
-  const progressNextIdx = inProgress ? progressIdx + 1 : progressIdx
-  const numSteps = IngestionPipelineStageKeys.length - 2
-
-  return (
-    <Paper sx={{ padding: 2, marginBottom: 2 }} elevation={3}>
-      <Box display={'flex'} width="100%">
-        <Typography variant="subtitle1">{file.filename}</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ marginLeft: 'auto' }}>
-          Added {new Date(file.createdAt).toLocaleString()}
-        </Typography>
-      </Box>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Type</TableCell>
-            <TableCell>Size (characters)</TableCell>
-            <TableCell>Chunks</TableCell>
-            <TableCell>Status</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          <TableRow>
-            <TableCell>{file.fileType}</TableCell>
-            <TableCell>{file.fileSize}</TableCell>
-            <TableCell>{file.numChunks}</TableCell>
-            <TableCell>{IngestionPipelineStages[file.pipelineStage].name}</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-      {file.pipelineStage !== 'completed' && file.pipelineStage !== 'pending' && (
-        <LinearProgress variant="buffer" value={(progressIdx * 100) / numSteps} valueBuffer={(progressNextIdx * 100) / numSteps} />
-      )}
-      {file.error && (
-        <Typography variant="body2" color="error">
-          Error: {JSON.stringify(file.error)}
-        </Typography>
-      )}
-    </Paper>
-  )
-}
-
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
   clipPath: 'inset(50%)',
@@ -118,7 +73,6 @@ export const RagIndex: React.FC = () => {
   const { id: strId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const id = parseInt(strId, 10)
-  const { enqueueSnackbar } = useSnackbar()
   const deleteIndexMutation = useDeleteRagIndexMutation()
   const { data: ragDetails, isLoading } = useRagIndexDetails(id, 1000)
   const uploadMutation = useUploadMutation(ragDetails)
@@ -129,6 +83,9 @@ export const RagIndex: React.FC = () => {
 
   return (
     <>
+      <Link component={RouterLink} to="/rag">
+        <Typography variant="body1">Back to RAG Indices</Typography>
+      </Link>
       <Typography variant="body1">RAG index</Typography>
       <Typography variant="h3">{ragDetails?.metadata?.name}</Typography>
       <Box py={2}>
@@ -163,7 +120,7 @@ export const RagIndex: React.FC = () => {
         <Box mt={2}>
           <Typography variant="h6">Files:</Typography>
           {orderBy(ragDetails?.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (
-            <RagFile key={file.id} file={file} />
+            <RagFileInfo key={file.id} file={file} link />
           ))}
         </Box>
       </Box>

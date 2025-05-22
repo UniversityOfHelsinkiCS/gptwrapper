@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response, Router } from 'express'
 import { EMBED_DIM } from '../../config'
-import { createChunkIndex, deleteChunkIndex } from '../services/rag/chunkDb'
+import { createChunkIndex, deleteChunkIndex, getRagFileChunks } from '../services/rag/chunkDb'
 import { RagFile, RagIndex } from '../db/models'
 import { RequestWithUser } from '../types'
 import z from 'zod'
@@ -88,9 +88,11 @@ router.get('/indices', async (_req, res) => {
   res.json(indicesWithCount)
 })
 
+const IndexIdSchema = z.coerce.number().min(1)
+
 router.get('/indices/:id', async (req, res) => {
   const { user } = req as unknown as RequestWithUser
-  const { id } = req.params
+  const id = IndexIdSchema.parse(req.params.id)
 
   const ragIndex = await RagIndex.findOne({
     where: { id, userId: user.id },
@@ -108,7 +110,32 @@ router.get('/indices/:id', async (req, res) => {
   res.json(ragIndex)
 })
 
-const IndexIdSchema = z.coerce.number().min(1)
+router.get('/indices/:id/files/:fileId', async (req, res) => {
+  const { user } = req as unknown as RequestWithUser
+  const indexId = IndexIdSchema.parse(req.params.id)
+  const fileId = IndexIdSchema.parse(req.params.fileId)
+
+  const ragFile = await RagFile.findOne({
+    where: { id: fileId },
+    include: {
+      model: RagIndex,
+      as: 'ragIndex',
+      where: { id: indexId, userId: user.id },
+    },
+  })
+
+  if (!ragFile) {
+    res.status(404).json({ error: 'File not found' })
+    return
+  }
+
+  const chunks = await getRagFileChunks(ragFile.ragIndex, ragFile)
+
+  res.json({
+    ...ragFile.toJSON(),
+    chunks,
+  })
+})
 
 const upload = multer({
   storage: multer.diskStorage({

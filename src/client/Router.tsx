@@ -14,6 +14,7 @@ import Statistics from './components/Statistics'
 import Rag from './components/Rag/Rag'
 import { ChatV2 } from './components/ChatV2/ChatV2'
 import { RagIndex } from './components/Rag/RagIndex'
+import { RagFile } from './components/Rag/RagFile'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -31,6 +32,7 @@ const router = createBrowserRouter(
       <Route path="/statistics" element={<Statistics />} />
       <Route path="/rag" element={<Rag />} />
       <Route path="/rag/:id" element={<RagIndex />} />
+      <Route path="/rag/:id/files/:fileId" element={<RagFile />} />
     </Route>,
   ),
   {

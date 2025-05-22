@@ -162,3 +162,32 @@ export const fullTextSearchChunks = async (ragIndex: RagIndex, query: string) =>
     }[]
   }
 }
+
+export const getRagFileChunks = async (ragIndex: RagIndex, ragFile: RagFile) => {
+  const pattern = `${ragIndex.getRedisIndexPrefix()}:${ragFile.getRedisKeyPrefix()}:*`
+
+  let cursor = '0'
+  const results = []
+  do {
+    const result = await redisClient.scan(cursor, {
+      MATCH: pattern,
+      COUNT: 100,
+    })
+
+    if (result.keys.length > 0) {
+      for (const key of result.keys) {
+        const chunk = await redisClient.hGetAll(key)
+        results.push({
+          id: (key as string).split(':').pop(),
+          ...chunk,
+        })
+      }
+    }
+    cursor = result.cursor as string
+  } while (cursor !== '0')
+
+  return results.map((chunk) => ({
+    ...chunk,
+    metadata: JSON.parse(chunk.metadata || '{}'),
+  }))
+}

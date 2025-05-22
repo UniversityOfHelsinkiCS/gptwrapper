@@ -1,14 +1,11 @@
 import React, { useState } from 'react'
-import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, IconButton, Dialog, DialogTitle, styled, LinearProgress } from '@mui/material'
+import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, IconButton, Link } from '@mui/material'
 import apiClient from '../../util/apiClient'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { CloudUpload, Settings } from '@mui/icons-material'
-import Markdown from '../Banner/Markdown'
+import { Settings } from '@mui/icons-material'
 import { useSnackbar } from 'notistack'
-import type { RagFileAttributes } from '../../../server/db/models/ragFile'
-import { orderBy } from 'lodash'
-import { IngestionPipelineStageKeys, IngestionPipelineStages } from '../../../shared/constants'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link as RouterLink } from 'react-router-dom'
+import { Chunk } from './Chunk'
 
 type RagResponse = {
   id: string
@@ -132,12 +129,14 @@ const Rag: React.FC = () => {
                 </TableRow>
               </TableBody>
             </Table>
-            <Button disabled={selectedIndex?.id === index.id} onClick={() => setSelectedIndex(index)}>
-              {selectedIndex?.id === index.id ? 'Selected' : 'Select'}
-            </Button>
-            <IconButton href={`rag/${index.id}`}>
-              <Settings />
-            </IconButton>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <Button disabled={selectedIndex?.id === index.id} onClick={() => setSelectedIndex(index)}>
+                {selectedIndex?.id === index.id ? 'Selected' : 'Select'}
+              </Button>
+              <Link to={`/rag/${index.id}`} component={RouterLink} sx={{ ml: 'auto' }}>
+                View details
+              </Link>
+            </Box>
           </Paper>
         ))}
       </Box>
@@ -160,19 +159,7 @@ const Rag: React.FC = () => {
           <Box mt={2}>
             <Typography variant="h6">Response:</Typography>
             {response.map((doc) => (
-              <Paper key={doc.id} sx={{ marginBottom: 2, p: 1 }} elevation={2}>
-                <Typography variant="caption">Score: {doc.value.score}</Typography>
-                <Typography variant="subtitle1" fontFamily="monospace" mb={2}>
-                  {JSON.stringify(doc.value.metadata, null, 2)}
-                </Typography>
-                {doc.value.metadata.type === 'md' ? (
-                  <Markdown>{doc.value.content}</Markdown>
-                ) : (
-                  <Typography whiteSpace="pre-line" variant="body1">
-                    {doc.value.content}
-                  </Typography>
-                )}
-              </Paper>
+              <Chunk key={doc.id} doc={doc.value} />
             ))}
           </Box>
         )}

@@ -2,6 +2,7 @@ import { Model, InferAttributes, InferCreationAttributes, CreationOptional, Data
 
 import { sequelize } from '../connection'
 import { IngestionPipelineStageKey } from '../../../shared/constants'
+import RagIndex from './ragIndex'
 
 class RagFile extends Model<InferAttributes<RagFile>, InferCreationAttributes<RagFile>> {
   declare id: CreationOptional<number>
@@ -27,6 +28,8 @@ class RagFile extends Model<InferAttributes<RagFile>, InferCreationAttributes<Ra
   declare createdAt: CreationOptional<Date>
 
   declare updatedAt: CreationOptional<Date>
+
+  declare ragIndex?: RagIndex
 
   getRedisKeyPrefix(): string {
     return `${this.id}-${this.filename}`
