@@ -1,18 +1,31 @@
 import { Send } from '@mui/icons-material'
-import { Container, IconButton, Paper, TextField } from '@mui/material'
-import { useState } from 'react'
+import { Box, Container, IconButton, Paper, TextField, Typography } from '@mui/material'
+import { useEffect, useState } from 'react'
+import useUserStatus from '../../hooks/useUserStatus';
+import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export const ChatBox = ({ disabled, onSubmit }: { disabled: boolean; onSubmit: (message: string) => void }) => {
+  const { courseId } = useParams()
+  const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
   const [message, setMessage] = useState<string>('')
 
+  const { t, i18n } = useTranslation()
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (message.trim()) {
       onSubmit(message)
       setMessage('')
+      refetchStatus()
     }
   }
+  useEffect(() => {
+    console.log('userStatus', userStatus)
+  })
 
+  if(statusLoading) {
+    return (<p>loading</p>)
+  }
   return (
     <Container
       disableGutters
@@ -60,6 +73,12 @@ export const ChatBox = ({ disabled, onSubmit }: { disabled: boolean; onSubmit: (
             },
           }}
         />
+         <Box>
+          <Typography variant="body1">
+            {userStatus.usage} / {userStatus.limit} {t('status:tokensUsed')}
+          </Typography>
+        </Box>
+
       </Paper>
     </Container>
   )
