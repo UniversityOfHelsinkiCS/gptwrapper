@@ -5,14 +5,11 @@ import { AZURE_RESOURCE, AZURE_API_KEY } from './config'
 import { validModels, inProduction } from '../../config'
 import logger from './logger'
 
-import { APIError, AzureOptionsV2 } from '../types'
+import { APIError } from '../types'
 import { AzureOpenAI } from 'openai'
-import type { EventStream } from '@azure/openai'
-import type { Stream } from 'openai/streaming'
-import type {
-  ChatCompletionChunk,
-  ChatCompletionCreateParamsStreaming,
-} from 'openai/resources/chat'
+// import { EventStream } from '@azure/openai'
+import { Stream } from 'openai/streaming'
+import { ResponseStreamEvent } from 'openai/resources/responses/responses'
 
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
@@ -29,44 +26,33 @@ const client = getAzureOpenAIClient(process.env.GPT_4O)
 /**
  * Mock stream for testing
  */
-const getMockCompletionEvents: () => Promise<
-  EventStream<ChatCompletionChunk>
-> = async () => {
-  const mockStream = new ReadableStream<ChatCompletionChunk>({
-    start(controller) {
-      for (let i = 0; i < 10; i += 1) {
-        controller.enqueue({
-          id: String(i),
-          object: 'chat.completion.chunk',
-          model: 'mock-model',
-          created: Date.now(),
-          choices: [
-            {
-              delta: {
-                content: `This is completion ${i}\n`,
-                role: 'system',
-                tool_calls: [],
-              },
-              index: 0,
-              finish_reason: 'stop',
-              logprobs: undefined,
-            },
-          ],
-        })
-      }
-      controller.close()
-    },
-  }) as EventStream<ChatCompletionChunk>
+// const getMockCompletionEvents: () => Promise<
+//   EventStream<ResponseStreamEvent>
+// > = async () => {
+//   const mockStream = new ReadableStream<ResponseStreamEvent>({
+//     start(controller) {
+//       for (let i = 0; i < 10; i += 1) {
+//         controller.enqueue({
+//           event: "response",
+//           data: ""
+//         })
+//       }
+//       controller.close()
+//     },
+//   }) as EventStream<ResponseStreamEvent>
 
-  return mockStream
-}
+//   return mockStream
+// }
 
-export const getCompletionEventsV2 = async ({
+export const getResponsesEvents = async ({
   model,
-  messages,
+  input,
   stream,
-}: ChatCompletionCreateParamsStreaming): Promise<
-  Stream<ChatCompletionChunk> | EventStream<ChatCompletionChunk> | APIError
+}: any): Promise<
+  | Stream<ResponseStreamEvent>
+  // EventStream<ChatCompletionChunk>
+  | APIError
+  | any
 > => {
   const deploymentId = validModels.find((m) => m.name === model)?.deployment
 
@@ -75,12 +61,14 @@ export const getCompletionEventsV2 = async ({
       `Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`
     )
 
-  if (deploymentId === 'mock') return getMockCompletionEvents()
+  // Mocking disabled because it's difficult to mock a event stream for responses API.
+  // if (deploymentId === 'mock') return getMockCompletionEvents()
 
   try {
-    const events = await client.chat.completions.create({
-      messages,
+    const events = await client.responses.create({
       model: deploymentId,
+      instructions: 'Olet avulias apuri.',
+      input,
       stream,
     })
 
@@ -92,37 +80,36 @@ export const getCompletionEventsV2 = async ({
   }
 }
 
-export const streamCompletionV2 = async (
-  events: Stream<ChatCompletionChunk> | EventStream<ChatCompletionChunk>,
+export const streamResponsesEvents = async (
+  events: Stream<ResponseStreamEvent>,
   encoding: Tiktoken,
   res: Response
 ) => {
   let tokenCount = 0
   const contents = []
+
   for await (const event of events) {
-    for (const choice of event.choices) {
-      const delta = choice.delta?.content
+    switch (event.type) {
+      case 'response.output_text.delta':
+        if (!inProduction) logger.info(event.delta)
 
-      if (!inProduction) logger.info(delta)
-
-      if (delta) {
         await new Promise((resolve) => {
           if (
-            !res.write(delta, (err) => {
-              if (err) logger.error(`${choice.delta} ${err}`)
+            !res.write(event.delta, (err) => {
+              if (err) logger.error(`${event.delta} ${err}`)
             })
           ) {
             logger.info(
-              `${choice.delta} res.write returned false, waiting for drain`
+              `${event.delta} res.write returned false, waiting for drain`
             )
             res.once('drain', resolve)
           } else {
             process.nextTick(resolve)
           }
         })
-        contents.push(delta)
-        tokenCount += encoding.encode(delta).length ?? 0
-      }
+        contents.push(event.delta)
+        tokenCount += encoding.encode(event.delta).length ?? 0
+        break
     }
   }
 
