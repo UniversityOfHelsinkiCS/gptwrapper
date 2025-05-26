@@ -1,6 +1,6 @@
 import { EMBED_MODEL } from '../../../config'
 import { RagIndex } from '../../db/models'
-import { getAzureOpenAIClient } from '../../util/azure'
+import { getAzureOpenAIClient } from '../../util/azure/client'
 import { getOllamaOpenAIClient } from '../../util/ollama'
 import { fullTextSearchChunks, vectorSearchKChunks } from './chunkDb'
 import { getEmbeddingVector } from './embed'

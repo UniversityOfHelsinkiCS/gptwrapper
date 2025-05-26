@@ -1,11 +1,11 @@
 import { Tiktoken } from '@dqbd/tiktoken'
 import { Response } from 'express'
 
-import { AZURE_RESOURCE, AZURE_API_KEY } from './config'
-import { validModels, inProduction } from '../../config'
-import logger from './logger'
+import { AZURE_RESOURCE, AZURE_API_KEY } from '../config'
+import { validModels, inProduction } from '../../../config'
+import logger from '../logger'
 
-import { APIError } from '../types'
+import { APIError } from '../../types'
 import { AzureOpenAI } from 'openai'
 // import { EventStream } from '@azure/openai'
 import { Stream } from 'openai/streaming'
@@ -67,6 +67,7 @@ export const getResponsesEvents = async ({
       instructions: 'Olet avulias apuri.',
       input,
       stream,
+      tools: [],
     })
 
     return events
