@@ -8,7 +8,7 @@ const MessageItem = ({ message }: { message: Message }) => (
   <Paper
     elevation={3}
     sx={{
-      my: '1rem',
+      my: '2rem',
       ml: message.role === 'assistant' ? '0' : '2rem',
       mr: message.role === 'assistant' ? '2rem' : '0',
       p: '1rem',
@@ -42,7 +42,7 @@ const PöhinäLogo = () => (
 )
 
 export const Conversation = ({ messages, completion }: { messages: Message[]; completion: string }) => (
-  <Box sx={{ flex: 1, overflowY: 'auto' }}>
+  <Box sx={{ flex: 1, overflowY: 'auto', gap: 2 }}>
     {messages.map((message, idx) => (
       <MessageItem key={idx} message={message} />
     ))}

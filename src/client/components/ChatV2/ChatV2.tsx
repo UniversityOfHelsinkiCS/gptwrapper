@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
 import useUserStatus from '../../hooks/useUserStatus'
-import { useRef, useState } from 'react'
+import { useRef, useState, useContext, useEffect } from 'react'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { DEFAULT_MODEL } from '../../../config'
 import useInfoTexts from '../../hooks/useInfoTexts'
@@ -15,6 +15,7 @@ import { Conversation } from './Conversation'
 import { ChatBox } from './ChatBox'
 import { getCompletionStream } from './util'
 import { SystemPrompt } from './System'
+import { AppContext } from '../../util/context'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -29,6 +30,10 @@ export const ChatV2 = () => {
   const [system, setSystem] = useLocalStorageState<{ content: string }>('general-chat-system', { content: '' })
   const [message, setMessage] = useLocalStorageState<{ content: string }>('general-chat-current', { content: '' })
   const [messages, setMessages] = useLocalStorageState<Message[]>('general-chat-messages', [])
+
+  const appContainerRef = useContext(AppContext)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+
   const inputFileRef = useRef<HTMLInputElement>(null)
   const [fileName, setFileName] = useState<string>('')
   const [completion, setCompletion] = useState('')
@@ -130,6 +135,28 @@ export const ChatV2 = () => {
     clearRetryTimeout()
   }
 
+  useEffect(() => {
+    const chatContainer = chatContainerRef.current
+    const appContainer = appContainerRef.current
+
+    if (!chatContainer || !appContainer || !messages.length) return
+
+    const scrollToBottom = () => {
+      appContainer.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      })
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+      scrollToBottom()
+    })
+
+    resizeObserver.observe(chatContainer)
+
+    return () => resizeObserver.disconnect()
+  }, [])
+
   return (
     <Box
       sx={{
@@ -138,26 +165,23 @@ export const ChatV2 = () => {
         flexDirection: 'column',
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          gap: '1rem',
-        }}
-      >
+      <Box sx={{ display: 'flex', gap: '1rem' }}>
         {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
         <SystemPrompt content={system.content} setContent={(content) => setSystem({ content })} />
         <Button onClick={handleReset}>Reset</Button>
       </Box>
-      <Conversation messages={messages} completion={completion} />
-      <ChatBox
-        disabled={false}
-        onSubmit={(message) => {
-          if (message.trim()) {
-            handleSubmit(message)
-            setMessage({ content: '' })
-          }
-        }}
-      />
+      <Box ref={chatContainerRef}>
+        <Conversation messages={messages} completion={completion} />
+        <ChatBox
+          disabled={false}
+          onSubmit={(message) => {
+            if (message.trim()) {
+              handleSubmit(message)
+              setMessage({ content: '' })
+            }
+          }}
+        />
+      </Box>
     </Box>
   )
 }

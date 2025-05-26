@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router-dom'
 import { SnackbarProvider } from 'notistack'
 import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
@@ -7,6 +7,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { fi } from 'date-fns/locale'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
 import { Box, Button, Container, CssBaseline, Snackbar } from '@mui/material'
+import { AppContext } from './util/context'
 
 import { PUBLIC_URL } from '../config'
 import { User } from './types'
@@ -69,6 +70,7 @@ const AdminLoggedInAsBanner = () => {
 
 const App = () => {
   const theme = useTheme()
+  const appRef = useRef<HTMLDivElement>(null)
   const { courseId } = useParams()
   const location = useLocation()
 
@@ -94,13 +96,15 @@ const App = () => {
       <CssBaseline />
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
         <SnackbarProvider preventDuplicate>
-          <Box minHeight="100vh" display="flex" flexDirection="column">
-            <NavBar />
-            <Container component="main" sx={{ mt: '4rem', mb: '10rem' }}>
-              <Outlet />
-            </Container>
-            <Footer />
-          </Box>
+          <AppContext.Provider value={appRef}>
+            <Box minHeight="100vh" display="flex" flexDirection="column" ref={appRef}>
+              <NavBar />
+              <Container component="main" sx={{ mt: '4rem', mb: '10rem' }}>
+                <Outlet />
+              </Container>
+              <Footer />
+            </Box>
+          </AppContext.Provider>
           <AdminLoggedInAsBanner />
         </SnackbarProvider>
       </LocalizationProvider>
