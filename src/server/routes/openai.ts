@@ -4,6 +4,7 @@ import multer from 'multer'
 import { CourseChatRequest, RequestWithUser } from '../types'
 import { isError } from '../util/parser'
 import { calculateUsage, incrementUsage, checkUsage, checkCourseUsage, incrementCourseUsage } from '../services/chatInstances/usage'
+import { getCompletionEvents, streamCompletion } from '../util/azure'
 import { streamResponsesEvents, getResponsesEvents } from '../util/azureV2'
 import { getMessageContext, getModelContextLimit, getCourseModel, getAllowedModels } from '../util/util'
 import getEncoding from '../util/tiktoken'
@@ -43,8 +44,9 @@ const fileParsing = async (options: any, req: any) => {
   return options.messages
 }
 
-openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
+openaiRouter.post('/stream/:version?', upload.single('file'), async (r, res) => {
   const req = r as RequestWithUser
+  const { version } = r.params
   const { options, courseId } = JSON.parse(req.body.data)
   const { model, userConsent } = options
   const { user } = req
@@ -98,11 +100,16 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     return
   }
 
-  const events = await getResponsesEvents({
-    model: options.model,
-    input: options.messages,
-    stream: options.stream,
-  })
+  let events
+  if (version === 'v2') {
+    events = await getResponsesEvents({
+      model: options.model,
+      input: options.messages,
+      stream: options.stream,
+    })
+  } else {
+    events = await getCompletionEvents(options)
+  }
 
   if (isError(events)) {
     res.status(424)
@@ -111,7 +118,12 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   res.setHeader('content-type', 'text/event-stream')
 
-  const completion = await streamResponsesEvents(events, encoding, res)
+  let completion
+  if (version === 'v2') {
+    completion = await streamResponsesEvents(events, encoding, res)
+  } else {
+    completion = await streamCompletion(events, options, encoding, res)
+  }
 
   tokenCount += completion.tokenCount
 
@@ -159,8 +171,8 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   return
 })
 
-openaiRouter.post('/stream/:courseId', upload.single('file'), async (r, res) => {
-  const { courseId } = r.params
+openaiRouter.post('/stream/:courseId/:version?', upload.single('file'), async (r, res) => {
+  const { courseId, version } = r.params
   const req = r as CourseChatRequest
   const { options } = JSON.parse(r.body.data)
   const { user } = req
@@ -202,11 +214,16 @@ openaiRouter.post('/stream/:courseId', upload.single('file'), async (r, res) => 
     return
   }
 
-  const events = await getResponsesEvents({
-    model: options.model,
-    input: options.messages,
-    stream: options.stream,
-  })
+  let events
+  if (version === 'v2') {
+    events = await getResponsesEvents({
+      model: options.model,
+      input: options.messages,
+      stream: options.stream,
+    })
+  } else {
+    events = await getCompletionEvents(options)
+  }
 
   if (isError(events)) {
     res.status(424).send(events)
@@ -215,7 +232,12 @@ openaiRouter.post('/stream/:courseId', upload.single('file'), async (r, res) => 
 
   res.setHeader('content-type', 'text/event-stream')
 
-  const completion = await streamResponsesEvents(events, encoding, res)
+  let completion
+  if (version === 'v2') {
+    completion = await streamResponsesEvents(events, encoding, res)
+  } else {
+    completion = await streamCompletion(events, options, encoding, res)
+  }
 
   tokenCount += completion.tokenCount
 

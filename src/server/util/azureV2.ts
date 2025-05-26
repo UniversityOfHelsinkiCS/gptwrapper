@@ -56,10 +56,7 @@ export const getResponsesEvents = async ({
 > => {
   const deploymentId = validModels.find((m) => m.name === model)?.deployment
 
-  if (!deploymentId)
-    throw new Error(
-      `Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`
-    )
+  if (!deploymentId) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
 
   // Mocking disabled because it's difficult to mock a event stream for responses API.
   // if (deploymentId === 'mock') return getMockCompletionEvents()
@@ -80,11 +77,7 @@ export const getResponsesEvents = async ({
   }
 }
 
-export const streamResponsesEvents = async (
-  events: Stream<ResponseStreamEvent>,
-  encoding: Tiktoken,
-  res: Response
-) => {
+export const streamResponsesEvents = async (events: Stream<ResponseStreamEvent>, encoding: Tiktoken, res: Response) => {
   let tokenCount = 0
   const contents = []
 
@@ -99,9 +92,7 @@ export const streamResponsesEvents = async (
               if (err) logger.error(`${event.delta} ${err}`)
             })
           ) {
-            logger.info(
-              `${event.delta} res.write returned false, waiting for drain`
-            )
+            logger.info(`${event.delta} res.write returned false, waiting for drain`)
             res.once('drain', resolve)
           } else {
             process.nextTick(resolve)
