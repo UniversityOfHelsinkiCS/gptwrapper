@@ -1,4 +1,11 @@
-export const testTool = {
+import { FunctionTool } from 'openai/resources/responses/responses'
+
+interface ToolObject {
+  definition: FunctionTool
+  function: (query: string) => Promise<any>
+}
+
+export const testTool: ToolObject = {
   definition: {
     type: 'function',
     name: 'test_knowledge_retrieval',
@@ -13,13 +20,18 @@ export const testTool = {
         },
       },
       required: ['query'],
+      additionalProperties: false,
     },
+    strict: true, // or true, depending on your requirements
   },
-  function: async (query: string) => {
+  function: async (
+    query: string
+  ): Promise<{ query: string; result: string }> => {
     // Simulate a tool function that returns a simple message
     return {
       query,
-      message: 'This is a test tool function',
+      result:
+        'This is a test result from the test tool. The secret is: Chili kastike',
     }
   },
 }
