@@ -12,8 +12,11 @@ export const PUBLIC_URL = process.env.PUBLIC_URL || ''
 
 export const UPDATER_CRON_ENABLED = process.env.UPDATER_CRON_ENABLED === 'true'
 
-export const OLLAMA_URL = process.env.OLLAMA_HOST || 'http://ollama:11434/v1/'
+export const OLLAMA_URL = process.env.OLLAMA_URL || 'http://ollama:11434/v1/'
 export const RAG_ENABLED = process.env.RAG_ENABLED === 'true'
+
+export const LAAMA_API_URL = process.env.LAAMA_API_URL || ''
+export const LAAMA_API_TOKEN = process.env.LAAMA_API_TOKEN || ''
 
 export const DEFAULT_TOKEN_LIMIT = Number(process.env.DEFAULT_TOKEN_LIMIT) || 150_000
 

@@ -1,9 +1,7 @@
 import React, { useState } from 'react'
-import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, IconButton, Link } from '@mui/material'
+import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, Link } from '@mui/material'
 import apiClient from '../../util/apiClient'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { Settings } from '@mui/icons-material'
-import { useSnackbar } from 'notistack'
 import { useNavigate, Link as RouterLink } from 'react-router-dom'
 import { Chunk } from './Chunk'
 
@@ -50,9 +48,8 @@ const useCreateRagIndexMutation = () => {
 }
 
 const Rag: React.FC = () => {
-  const { enqueueSnackbar } = useSnackbar()
   const navigate = useNavigate()
-  const { data: indices, refetch } = useRagIndices()
+  const { data: indices } = useRagIndices()
   const createIndexMutation = useCreateRagIndexMutation()
   const [indexName, setIndexName] = useState('')
   const [selectedIndex, setSelectedIndex] = useState<RagIndexAttributes>(null)

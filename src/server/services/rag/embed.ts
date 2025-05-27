@@ -1,5 +1,6 @@
 import { EMBED_DIM, EMBED_MODEL } from '../../../config'
 import type OpenAI from 'openai'
+import { getOllamaClient } from '../../util/ollama'
 
 export const getEmbeddingVector = async (client: OpenAI, query: string) => {
   const response = await client.embeddings.create({
@@ -21,4 +22,14 @@ export const getEmbeddingVectorBatch = async (client: OpenAI, queries: string[])
   })
 
   return response.data
+}
+
+export const getOllamaEmbeddingVectorBatch = async (query: string[]) => {
+  const client = getOllamaClient()
+  const response = await client.embed({
+    model: EMBED_MODEL,
+    input: query,
+  })
+
+  return response.embeddings
 }

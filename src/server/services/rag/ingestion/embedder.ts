@@ -1,7 +1,7 @@
 import type { Chunk } from './chunkingAlgorithms.ts'
 import { mkdirSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
-import { getEmbeddingVectorBatch } from '../embed'
+import { getEmbeddingVectorBatch, getOllamaEmbeddingVectorBatch } from '../embed'
 import OpenAI from 'openai'
 
 export type EmbeddedChunk = Chunk & {
@@ -42,13 +42,13 @@ export class Embedder {
   private async embedBatch() {
     const chunkContents = this.currentBatch.map((chunk) => chunk.content.join('\n'))
     const startedAt = Date.now()
-    const result = await getEmbeddingVectorBatch(this.client, chunkContents)
+    const result = await getOllamaEmbeddingVectorBatch(chunkContents)
     const elapsed = Date.now() - startedAt
     console.log(`Embedded ${chunkContents.length} chunks in ${elapsed}ms`)
 
     const embeddedChunks: EmbeddedChunk[] = this.currentBatch.map((chunk, index) => ({
       ...chunk,
-      embedding: result[index].embedding,
+      embedding: result[index],
     }))
 
     await Promise.all(
