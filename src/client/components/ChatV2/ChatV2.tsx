@@ -9,15 +9,18 @@ import { Message } from '../../types'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
-import { Box, Button } from '@mui/material'
+import { Box, Button, IconButton, Modal, Typography } from '@mui/material'
 import { Disclaimer } from './Disclaimer'
 import { Conversation } from './Conversation'
 import { ChatBox } from './ChatBox'
 import { getCompletionStream } from './util'
 import { SystemPrompt } from './System'
 import { AppContext } from '../../util/context'
+import { Close, Settings } from '@mui/icons-material'
+import { SettingsModal } from './SettingsModal'
 
 export const ChatV2 = () => {
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false)
   const { courseId } = useParams()
 
   const { course } = useCourse(courseId)
@@ -165,10 +168,16 @@ export const ChatV2 = () => {
         flexDirection: 'column',
       }}
     >
+    
+      <SettingsModal open={settingsModalOpen} setOpen={setSettingsModalOpen}></SettingsModal>
       <Box sx={{ display: 'flex', gap: '1rem' }}>
         {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
         <SystemPrompt content={system.content} setContent={(content) => setSystem({ content })} />
         <Button onClick={handleReset}>Reset</Button>
+        <IconButton onClick={() => setSettingsModalOpen(true)} title="Settings">
+          <Settings></Settings>
+        </IconButton>
+
       </Box>
       <Box ref={chatContainerRef}>
         <Conversation messages={messages} completion={completion} />
