@@ -73,8 +73,9 @@ export const ChatBox = ({ disabled, onSubmit }: { disabled: boolean; onSubmit: (
             },
           }}
         />
-         <Box>
-          <Typography variant="body1">
+        
+        <Box>
+          <Typography variant="body1" style={{ padding: '0.5rem', fontSize: '0.875rem' }}>
             {userStatus.usage} / {userStatus.limit} {t('status:tokensUsed')}
           </Typography>
         </Box>
