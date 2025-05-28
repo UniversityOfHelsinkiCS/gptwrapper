@@ -1,6 +1,6 @@
 import { Tiktoken } from '@dqbd/tiktoken'
 import { Response } from 'express'
-import { isError } from '../../util/parser'
+import { isError } from '../parser'
 
 import { AZURE_RESOURCE, AZURE_API_KEY } from '../config'
 import { validModels, inProduction } from '../../../config'
@@ -11,16 +11,10 @@ import { AzureOpenAI } from 'openai'
 
 // import { EventStream } from '@azure/openai'
 import { Stream } from 'openai/streaming'
-import {
-  FileSearchTool,
-  FunctionTool,
-  ResponseInput,
-  ResponseInputItem,
-  ResponseStreamEvent,
-} from 'openai/resources/responses/responses'
+import { FileSearchTool, FunctionTool, ResponseInput, ResponseInputItem, ResponseStreamEvent } from 'openai/resources/responses/responses'
 
-// import { ohtuRAGTest } from './functionTools'
-import { fileSearchTest } from './fileSearchTools'
+import { courseAssistants, type CourseAssistant } from './courseAssistants'
+import { createFileSearchTool } from './util'
 
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
@@ -37,31 +31,36 @@ const client = getAzureOpenAIClient(process.env.GPT_4O)
 export class ResponsesClient {
   model: string
   instructions: string
-  tools: (FunctionTool | FileSearchTool)[]
+  tools: FileSearchTool[]
 
-  constructor(model: string, instructions?: string) {
+  constructor({ model, courseId }: { model: string; courseId?: string }) {
     const deploymentId = validModels.find((m) => m.name === model)?.deployment
 
-    if (!deploymentId)
-      throw new Error(
-        `Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`
-      )
+    if (!deploymentId) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
+
+    let courseAssistant: CourseAssistant
+
+    if (courseId) {
+      courseAssistant = courseAssistants.find((assistant) => assistant.course_id === courseId)
+
+      if (!courseAssistant) throw new Error(`No course assistant found for course ID: ${courseId}`)
+    } else {
+      courseAssistant = courseAssistants.find((assistant) => assistant.name === 'default')
+    }
 
     this.model = deploymentId
-    this.instructions =
-      instructions ||
-      'Olet ohjelmistotuotanto kurssin avustaja. Jos käyttäjä kysyy jotain, niin arvioi ensin liittyykö se ohjelmistotuotannon kurssiin. Jos liittyy, niin toteuta file_search. jos et löydä sopivia tiedostoja, niin sano että haulla ei löytynyt mitään. Jos käyttäjän viesti ei liittynyt ohjelmistotuotannon kurssiin, niin kysy ystävällisesti voitko auttaa jotenkin muuten kurssimateriaalien suhteen.'
-    this.tools = [
-      // ohtuRAGTest.definition,
-      fileSearchTest.definition,
-    ]
+    this.instructions = courseAssistant.assistant_instruction
+
+    const fileSearchTool = courseId
+      ? createFileSearchTool({
+          vectorStoreId: courseAssistant.vector_store_id,
+        })
+      : null
+
+    this.tools = [fileSearchTool]
   }
 
-  async createResponse({
-    input,
-  }: {
-    input: ResponseInput
-  }): Promise<Stream<ResponseStreamEvent> | APIError> {
+  async createResponse({ input }: { input: ResponseInput }): Promise<Stream<ResponseStreamEvent> | APIError> {
     try {
       return await client.responses.create({
         model: this.model,
@@ -79,17 +78,7 @@ export class ResponsesClient {
     }
   }
 
-  async handleResponse({
-    events,
-    prevMessages,
-    encoding,
-    res,
-  }: {
-    events: Stream<ResponseStreamEvent>
-    prevMessages: ResponseInput
-    encoding: Tiktoken
-    res: Response
-  }) {
+  async handleResponse({ events, encoding, res }: { events: Stream<ResponseStreamEvent>; encoding: Tiktoken; res: Response }) {
     let tokenCount = 0
     const contents = []
 

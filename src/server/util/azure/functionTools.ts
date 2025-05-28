@@ -10,8 +10,7 @@ export const functionCallTest: functionCallObject = {
   definition: {
     type: 'function',
     name: 'test_knowledge_retrieval',
-    description:
-      'Test tool for knowledge retrieval. Always call this when user says TEST-RAG',
+    description: 'Test tool for knowledge retrieval. Always call this when user says TEST-RAG',
     parameters: {
       type: 'object',
       properties: {
@@ -25,15 +24,11 @@ export const functionCallTest: functionCallObject = {
     },
     strict: true, // or true, depending on your requirements
   },
-  function: async (
-    client: AzureOpenAI,
-    query: string
-  ): Promise<{ query: string; result: string }> => {
+  function: async (client: AzureOpenAI, query: string): Promise<{ query: string; result: string }> => {
     // Simulate a tool function that returns a simple message
     return {
       query,
-      result:
-        'This is a test result from the test tool. The secret is: Chili kastike',
+      result: 'This is a test result from the test tool. The secret is: Chili kastike',
     }
   },
 }
@@ -43,8 +38,7 @@ export const ohtuRAGTest: functionCallObject = {
   definition: {
     type: 'function',
     name: 'ohtu_retrieval',
-    description:
-      'Helsingin yliopiston ohjelmistotuotannon kurssimateriaalin haku funktio. Kutsu tätä kun käyttäjä haluaa tietoa kurssiin liittyen. Muuten älä kutsu tätä.',
+    description: 'Helsingin yliopiston ohjelmistotuotannon kurssimateriaalin haku funktio. Kutsu tätä kun käyttäjä haluaa tietoa kurssiin liittyen. Muuten älä kutsu tätä.',
     parameters: {
       type: 'object',
       properties: {

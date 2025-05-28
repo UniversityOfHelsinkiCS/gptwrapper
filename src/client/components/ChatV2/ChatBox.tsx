@@ -1,9 +1,9 @@
 import { Send } from '@mui/icons-material'
 import { Box, Container, IconButton, Paper, TextField, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
-import useUserStatus from '../../hooks/useUserStatus';
-import { useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import useUserStatus from '../../hooks/useUserStatus'
+import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 export const ChatBox = ({ disabled, onSubmit }: { disabled: boolean; onSubmit: (message: string) => void }) => {
   const { courseId } = useParams()
@@ -23,8 +23,8 @@ export const ChatBox = ({ disabled, onSubmit }: { disabled: boolean; onSubmit: (
     console.log('userStatus', userStatus)
   })
 
-  if(statusLoading) {
-    return (<p>loading</p>)
+  if (statusLoading) {
+    return <p>loading</p>
   }
   return (
     <Container
@@ -73,13 +73,12 @@ export const ChatBox = ({ disabled, onSubmit }: { disabled: boolean; onSubmit: (
             },
           }}
         />
-        
+
         <Box>
           <Typography variant="body1" style={{ padding: '0.5rem', fontSize: '0.875rem' }}>
             {userStatus.usage} / {userStatus.limit} {t('status:tokensUsed')}
           </Typography>
         </Box>
-
       </Paper>
     </Container>
   )

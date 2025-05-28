@@ -168,7 +168,6 @@ export const ChatV2 = () => {
         flexDirection: 'column',
       }}
     >
-    
       <SettingsModal open={settingsModalOpen} setOpen={setSettingsModalOpen}></SettingsModal>
       <Box sx={{ display: 'flex', gap: '1rem' }}>
         {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
@@ -177,7 +176,6 @@ export const ChatV2 = () => {
         <IconButton onClick={() => setSettingsModalOpen(true)} title="Settings">
           <Settings></Settings>
         </IconButton>
-
       </Box>
       <Box ref={chatContainerRef}>
         <Conversation messages={messages} completion={completion} />

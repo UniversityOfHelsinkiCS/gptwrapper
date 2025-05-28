@@ -5,7 +5,7 @@ import { CourseChatRequest, RequestWithUser } from '../types'
 import { isError } from '../util/parser'
 import { calculateUsage, incrementUsage, checkUsage, checkCourseUsage, incrementCourseUsage } from '../services/chatInstances/usage'
 import { getCompletionEvents, streamCompletion } from '../util/azure/client'
-import { ResponsesClient } from '../util/azure/clientV2'
+import { ResponsesClient } from '../util/azure/ResponsesAPI'
 import { getMessageContext, getModelContextLimit, getCourseModel, getAllowedModels } from '../util/util'
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
@@ -100,7 +100,9 @@ openaiRouter.post('/stream/:version?', upload.single('file'), async (r, res) => 
     return
   }
 
-  const responsesClient = new ResponsesClient(model)
+  const responsesClient = new ResponsesClient({
+    model,
+  })
 
   let events
   if (version === 'v2') {
@@ -119,7 +121,6 @@ openaiRouter.post('/stream/:version?', upload.single('file'), async (r, res) => 
   if (version === 'v2') {
     completion = await responsesClient.handleResponse({
       events,
-      prevMessages: options.messages,
       encoding,
       res,
     })
@@ -216,7 +217,10 @@ openaiRouter.post('/stream/:courseId/:version?', upload.single('file'), async (r
     return
   }
 
-  const responsesClient = new ResponsesClient(model)
+  const responsesClient = new ResponsesClient({
+    model,
+    courseId,
+  })
 
   let events
   if (version === 'v2') {
@@ -236,7 +240,6 @@ openaiRouter.post('/stream/:courseId/:version?', upload.single('file'), async (r
   if (version === 'v2') {
     completion = await responsesClient.handleResponse({
       events,
-      prevMessages: options.messages,
       encoding,
       res,
     })

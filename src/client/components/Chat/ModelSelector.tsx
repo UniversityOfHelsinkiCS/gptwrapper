@@ -31,6 +31,4 @@ const ModelSelector = ({ currentModel, setModel, models }: { currentModel: strin
   )
 }
 
-
-
 export default ModelSelector
