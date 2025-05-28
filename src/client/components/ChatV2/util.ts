@@ -47,36 +47,10 @@ export const getCompletionStream = async ({
 
   formData.set('data', JSON.stringify(data))
 
-  return postAbortableStream('/ai/stream/v2', formData, abortController)
-}
-
-interface GetCourseCompletionStreamProps {
-  id: string
-  system: string
-  messages: Message[]
-  model: string
-  courseId: string
-  abortController?: AbortController
-  prevResponseId?: string
-}
-export const getCourseCompletionStream = async ({ id, system, messages, model, courseId, abortController, prevResponseId }: GetCourseCompletionStreamProps) => {
-  const data = {
-    id,
-    courseId,
-    options: {
-      messages: [
-        {
-          role: 'system',
-          content: system,
-        },
-        ...messages,
-      ],
-      model,
-      prevResponseId,
-    },
+  if (courseId) {
+    return postAbortableStream(`/ai/stream/${courseId}/v2`, formData, abortController)
+  } else {
+    return postAbortableStream('/ai/stream/v2', formData, abortController)
   }
-  const formData = new FormData()
-  formData.set('data', JSON.stringify(data))
 
-  return postAbortableStream(`/ai/stream/${courseId}/v2`, formData, abortController)
 }

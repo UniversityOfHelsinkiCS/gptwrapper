@@ -67,7 +67,7 @@ export class ResponsesClient {
     try {
       return await client.responses.create({
         model: this.model,
-        previous_response_id: prevResponseId,
+        previous_response_id: prevResponseId || undefined,
         instructions: this.instructions,
         input,
         stream: true,

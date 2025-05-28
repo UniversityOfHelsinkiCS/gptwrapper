@@ -156,6 +156,7 @@ export const ChatV2 = () => {
   const handleReset = () => {
     setMessages([])
     setMessage({ content: '' })
+    setPrevResponse({ id: '' })
     setCompletion('')
     setStreamController(undefined)
     setTokenUsageWarning('')
