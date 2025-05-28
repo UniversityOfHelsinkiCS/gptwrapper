@@ -8,16 +8,19 @@ import logger from '../logger'
 
 import { APIError } from '../../types'
 import { AzureOpenAI } from 'openai'
+
 // import { EventStream } from '@azure/openai'
 import { Stream } from 'openai/streaming'
 import {
+  FileSearchTool,
   FunctionTool,
   ResponseInput,
   ResponseInputItem,
   ResponseStreamEvent,
 } from 'openai/resources/responses/responses'
 
-import { testTool } from './tools'
+// import { ohtuRAGTest } from './functionTools'
+import { fileSearchTest } from './fileSearchTools'
 
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
@@ -34,7 +37,7 @@ const client = getAzureOpenAIClient(process.env.GPT_4O)
 export class ResponsesClient {
   model: string
   instructions: string
-  tools: FunctionTool[]
+  tools: (FunctionTool | FileSearchTool)[]
 
   constructor(model: string, instructions?: string) {
     const deploymentId = validModels.find((m) => m.name === model)?.deployment
@@ -45,8 +48,13 @@ export class ResponsesClient {
       )
 
     this.model = deploymentId
-    this.instructions = instructions || 'Olet avulias apuri.'
-    this.tools = [testTool.definition]
+    this.instructions =
+      instructions ||
+      'Olet ohjelmistotuotanto kurssin avustaja. Jos käyttäjä kysyy jotain, niin arvioi ensin liittyykö se ohjelmistotuotannon kurssiin. Jos liittyy, niin toteuta file_search. jos et löydä sopivia tiedostoja, niin sano että haulla ei löytynyt mitään. Jos käyttäjän viesti ei liittynyt ohjelmistotuotannon kurssiin, niin kysy ystävällisesti voitko auttaa jotenkin muuten kurssimateriaalien suhteen.'
+    this.tools = [
+      // ohtuRAGTest.definition,
+      fileSearchTest.definition,
+    ]
   }
 
   async createResponse({
@@ -57,10 +65,12 @@ export class ResponsesClient {
     try {
       return await client.responses.create({
         model: this.model,
+        // previous_response_id=response.id // THIS MIGHT BE IT!!!!!!1
         instructions: this.instructions,
         input,
         stream: true,
         tools: this.tools,
+        tool_choice: 'auto',
       })
     } catch (error: any) {
       logger.error(error)
@@ -75,7 +85,7 @@ export class ResponsesClient {
     encoding,
     res,
   }: {
-    events: Stream<any>
+    events: Stream<ResponseStreamEvent>
     prevMessages: ResponseInput
     encoding: Tiktoken
     res: Response
@@ -94,27 +104,20 @@ export class ResponsesClient {
           tokenCount += encoding.encode(event.delta).length ?? 0
           break
 
+        case 'response.file_search_call.completed':
+          console.log('file search completed')
+          break
+
+        case 'response.output_item.done':
+          console.log('OUTPUT_ITEM DONE???', JSON.stringify(event, null, 2))
+          break
+
+        case 'response.output_text.annotation.added':
+          console.log('ANNOTATIONS ADDED', JSON.stringify(event, null, 2))
+          break
+
         case 'response.function_call_arguments.done':
-          // WORK IN PROGRESS
-
-          // const augRetrieval = await this.callToolFunction(
-          //   event.arguments,
-          //   event.call_id
-          // )
-          // const newEvents = await this.createResponse({
-          //   input: [...prevMessages, augRetrieval],
-          // })
-
-          // if (isError(events)) {
-          //   throw new Error(`Error creating response from function call`)
-          // }
-
-          // await this.handleResponse({
-          //   events: newEvents as Stream<ResponseStreamEvent>,
-          //   prevMessages: [...prevMessages, augRetrieval],
-          //   encoding,
-          //   res,
-          // })
+          // Listen to file_search instead
           break
       }
     }
@@ -140,30 +143,5 @@ export class ResponsesClient {
         process.nextTick(resolve)
       }
     })
-  }
-
-  private async callToolFunction(
-    args: string,
-    callId: string
-  ): Promise<ResponseInputItem[]> {
-    const { query } = JSON.parse(args)
-    try {
-      const retrieval = await testTool.function(query)
-
-      return [
-        {
-          role: 'user',
-          content: retrieval.query,
-        },
-        {
-          type: 'function_call_output',
-          call_id: callId,
-          output: retrieval.result,
-        },
-      ]
-    } catch (error) {
-      logger.error('Error calling tool function:', error)
-      return null
-    }
   }
 }
