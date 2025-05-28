@@ -19,6 +19,7 @@ import { SystemPrompt } from './System'
 import { AppContext } from '../../util/context'
 import { Close, Settings } from '@mui/icons-material'
 import { SettingsModal } from './SettingsModal'
+import { Link } from 'react-router-dom'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -198,7 +199,7 @@ export const ChatV2 = () => {
       }}
     >
       <SettingsModal open={settingsModalOpen} setOpen={setSettingsModalOpen}></SettingsModal>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between'}}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
 
       <Box sx={{ display: 'flex', gap: '1rem' }}>
         {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
@@ -208,7 +209,9 @@ export const ChatV2 = () => {
           <Settings></Settings>
         </IconButton>
       </Box>
-      <Button variant='outlined' size='small'>Ohtu sandbox</Button>
+        {
+          courseId ? <Link to={'/v2'}>CurreChat</Link> : <Link to={'/v2/sandbox'}>Ohtu Sandbox</Link>
+        }
       </Box>
       <Box ref={chatContainerRef}>
         <Conversation messages={messages} completion={completion} />
