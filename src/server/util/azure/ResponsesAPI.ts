@@ -52,12 +52,14 @@ export class ResponsesClient {
     this.instructions = courseAssistant.assistant_instruction
 
     const fileSearchTool = courseId
-      ? createFileSearchTool({
-          vectorStoreId: courseAssistant.vector_store_id,
-        })
-      : null
+      ? [
+          createFileSearchTool({
+            vectorStoreId: courseAssistant.vector_store_id,
+          }),
+        ]
+      : [] // needs to retrun empty array for null
 
-    this.tools = [fileSearchTool]
+    this.tools = fileSearchTool
   }
 
   async createResponse({ input }: { input: ResponseInput }): Promise<Stream<ResponseStreamEvent> | APIError> {
