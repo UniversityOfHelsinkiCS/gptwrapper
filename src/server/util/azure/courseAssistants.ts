@@ -14,10 +14,11 @@ export const courseAssistants = [
     vector_store_id: null,
   },
   {
-    course_id: 'ohtu-test',
+    // sandbox for testing purposes with ohtu kurssi materials
+    course_id: 'sandbox',
     name: 'ohtu-kurssi',
     assistant_instruction:
       'Olet ohjelmistotuotanto kurssin avustaja. Jos käyttäjä kysyy jotain, niin arvioi ensin liittyykö se ohjelmistotuotannon kurssiin. Jos liittyy, niin toteuta file_search. jos et löydä sopivia tiedostoja, niin sano että haulla ei löytynyt mitään. Jos käyttäjän viesti ei liittynyt ohjelmistotuotannon kurssiin, niin kysy ystävällisesti voitko auttaa jotenkin muuten kurssimateriaalien suhteen.',
-    vector_store_id: 'vs_Lsyd0uMbgeT8lS9pnxZQEl3c',
+    vector_store_id: 'vs_Lsyd0uMbgeT8lS9pnxZQEl3c', // ohtu kurssi vector store id
   },
 ] as const satisfies CourseAssistant[]
