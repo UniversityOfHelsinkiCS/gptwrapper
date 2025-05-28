@@ -19,9 +19,11 @@ export const ChatBox = ({ disabled, onSubmit }: { disabled: boolean; onSubmit: (
       refetchStatus()
     }
   }
-  useEffect(() => {
-    console.log('userStatus', userStatus)
-  })
+
+  // Work in progress from Matias. Commented by Ben
+  // useEffect(() => {
+  //   console.log('userStatus', userStatus)
+  // })
 
   if (statusLoading) {
     return <p>loading</p>

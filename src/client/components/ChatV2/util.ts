@@ -9,6 +9,7 @@ interface GetCompletoinStreamProps {
   userConsent: boolean
   modelTemperature: number
   courseId?: string
+  prevResponseId?: string
   abortController?: AbortController
   saveConsent: boolean
 }
@@ -20,6 +21,7 @@ export const getCompletionStream = async ({
   userConsent,
   modelTemperature,
   courseId,
+  prevResponseId,
   abortController,
   saveConsent,
 }: GetCompletoinStreamProps) => {
@@ -37,6 +39,7 @@ export const getCompletionStream = async ({
       userConsent,
       modelTemperature,
       saveConsent,
+      prevResponseId,
     },
   }
 
@@ -54,8 +57,9 @@ interface GetCourseCompletionStreamProps {
   model: string
   courseId: string
   abortController?: AbortController
+  prevResponseId?: string
 }
-export const getCourseCompletionStream = async ({ id, system, messages, model, courseId, abortController }: GetCourseCompletionStreamProps) => {
+export const getCourseCompletionStream = async ({ id, system, messages, model, courseId, abortController, prevResponseId }: GetCourseCompletionStreamProps) => {
   const data = {
     id,
     courseId,
@@ -68,6 +72,7 @@ export const getCourseCompletionStream = async ({ id, system, messages, model, c
         ...messages,
       ],
       model,
+      prevResponseId,
     },
   }
   const formData = new FormData()

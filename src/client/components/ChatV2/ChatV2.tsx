@@ -6,6 +6,7 @@ import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { DEFAULT_MODEL } from '../../../config'
 import useInfoTexts from '../../hooks/useInfoTexts'
 import { Message } from '../../types'
+import { ResponseStreamValue } from '../../../shared/types'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
@@ -33,6 +34,9 @@ export const ChatV2 = () => {
   const [system, setSystem] = useLocalStorageState<{ content: string }>('general-chat-system', { content: '' })
   const [message, setMessage] = useLocalStorageState<{ content: string }>('general-chat-current', { content: '' })
   const [messages, setMessages] = useLocalStorageState<Message[]>('general-chat-messages', [])
+  const [prevResponse, setPrevResponse] = useLocalStorageState<{
+    id: string
+  }>('general-prev-response', { id: '' })
 
   const appContainerRef = useContext(AppContext)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -55,21 +59,43 @@ export const ChatV2 = () => {
   const disclaimerInfo = infoTexts?.find((infoText) => infoText.name === 'disclaimer')?.text[language] ?? null
   const systemMessageInfo = infoTexts?.find((infoText) => infoText.name === 'systemMessage')?.text[language] ?? null
 
+  const decoder = new TextDecoder()
+
   const processStream = async (stream: ReadableStream) => {
     try {
       const reader = stream.getReader()
 
       let content = ''
-      const decoder = new TextDecoder()
 
       while (true) {
         const { value, done } = await reader.read()
         if (done) break
 
-        const text = decoder.decode(value)
-        setCompletion((prev) => prev + text)
-        content += text
-        console.log(text)
+        const data = decoder.decode(value)
+
+        for (const chunk of data.split('\n')) {
+          if (!chunk || chunk.trim().length === 0) continue
+
+          const parsedChunk: ResponseStreamValue = JSON.parse(chunk)
+
+          switch (parsedChunk.status) {
+            case 'writing':
+              setCompletion((prev) => prev + parsedChunk.text)
+              content += parsedChunk.text
+              break
+
+            case 'complete':
+              setPrevResponse({ id: parsedChunk.prevResponseId })
+              break
+
+            case 'error':
+              console.error('Somehing went wrong when streaming responses')
+              break
+
+            default:
+              break
+          }
+        }
       }
 
       setMessages((prev: Message[]) => prev.concat({ role: 'assistant', content }))
@@ -89,6 +115,7 @@ export const ChatV2 = () => {
     const newMessages = messages.concat({ role: 'user', content: message })
     setMessages(newMessages)
     setMessage({ content: '' })
+    setPrevResponse({ id: '' })
     setCompletion('')
     setStreamController(new AbortController())
     setRetryTimeout(() => {
@@ -108,6 +135,7 @@ export const ChatV2 = () => {
         courseId,
         abortController: streamController,
         saveConsent,
+        prevResponseId: prevResponse.id,
       })
 
       if (tokenUsageAnalysis && tokenUsageAnalysis.message) {

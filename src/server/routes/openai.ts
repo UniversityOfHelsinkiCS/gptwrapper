@@ -106,7 +106,8 @@ openaiRouter.post('/stream/:version?', upload.single('file'), async (r, res) => 
 
   let events
   if (version === 'v2') {
-    events = await responsesClient.createResponse({ input: options.messages })
+    const latestMessage = options.messages[options.messages.length - 1] // Adhoc to input only the latest message
+    events = await responsesClient.createResponse({ input: [latestMessage], prevResponseId: options.prevResponseId })
   } else {
     events = await getCompletionEvents(options)
   }
@@ -224,7 +225,8 @@ openaiRouter.post('/stream/:courseId/:version?', upload.single('file'), async (r
 
   let events
   if (version === 'v2') {
-    events = await responsesClient.createResponse({ input: options.messages })
+    const latestMessage = options.messages[options.messages.length - 1] // Adhoc to input only the latest message
+    events = await responsesClient.createResponse({ input: [latestMessage], prevResponseId: options.prevResponseId })
   } else {
     events = await getCompletionEvents(options)
   }

@@ -16,6 +16,8 @@ import { FileSearchTool, FunctionTool, ResponseInput, ResponseInputItem, Respons
 import { courseAssistants, type CourseAssistant } from './courseAssistants'
 import { createFileSearchTool } from './util'
 
+import type { ResponseStreamValue } from '../../../shared/types'
+
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
 export const getAzureOpenAIClient = (deployment: string) =>
@@ -48,9 +50,6 @@ export class ResponsesClient {
       courseAssistant = courseAssistants.find((assistant) => assistant.name === 'default')
     }
 
-    this.model = deploymentId
-    this.instructions = courseAssistant.assistant_instruction
-
     const fileSearchTool = courseId
       ? [
           createFileSearchTool({
@@ -59,14 +58,16 @@ export class ResponsesClient {
         ]
       : [] // needs to retrun empty array for null
 
+    this.model = deploymentId
+    this.instructions = courseAssistant.assistant_instruction
     this.tools = fileSearchTool
   }
 
-  async createResponse({ input }: { input: ResponseInput }): Promise<Stream<ResponseStreamEvent> | APIError> {
+  async createResponse({ input, prevResponseId }: { input: ResponseInput; prevResponseId?: string }): Promise<Stream<ResponseStreamEvent> | APIError> {
     try {
       return await client.responses.create({
         model: this.model,
-        // previous_response_id=response.id // THIS MIGHT BE IT!!!!!!1
+        previous_response_id: prevResponseId,
         instructions: this.instructions,
         input,
         stream: true,
@@ -89,7 +90,14 @@ export class ResponsesClient {
 
       switch (event.type) {
         case 'response.output_text.delta':
-          await this.writeDelta(event.delta, res)
+          await this.write(
+            {
+              status: 'writing',
+              text: event.delta,
+              prevResponseId: null,
+            },
+            res,
+          )
 
           contents.push(event.delta)
           tokenCount += encoding.encode(event.delta).length ?? 0
@@ -107,8 +115,15 @@ export class ResponsesClient {
           console.log('ANNOTATIONS ADDED', JSON.stringify(event, null, 2))
           break
 
-        case 'response.function_call_arguments.done':
-          // Listen to file_search instead
+        case 'response.completed':
+          await this.write(
+            {
+              status: 'complete',
+              text: null,
+              prevResponseId: event.response.id,
+            },
+            res,
+          )
           break
       }
     }
@@ -119,16 +134,24 @@ export class ResponsesClient {
     }
   }
 
-  private async writeDelta(text: string, res: Response) {
-    // if (!inProduction) logger.info(text)
+  private async write({ status, text, prevResponseId }: ResponseStreamValue, res: Response) {
+    // if (!inProduction) logger.info(message)
 
     await new Promise((resolve) => {
-      if (
-        !res.write(text, (err) => {
-          if (err) logger.error(`${text} ${err}`)
-        })
-      ) {
-        logger.info(`${text} res.write returned false, waiting for drain`)
+      const data: ResponseStreamValue = {
+        status,
+        text,
+        prevResponseId: prevResponseId,
+      }
+
+      const success = res.write(JSON.stringify(data) + '\n', (err) => {
+        if (err) {
+          logger.error(err)
+        }
+      })
+
+      if (!success) {
+        logger.info('res.write returned false, waiting for drain')
         res.once('drain', resolve)
       } else {
         process.nextTick(resolve)
