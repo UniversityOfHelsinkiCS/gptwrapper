@@ -1,8 +1,8 @@
 export interface CourseAssistant {
-  course_id: string
+  course_id: string | null
   name: string
   assistant_instruction: string
-  vector_store_id: string
+  vector_store_id: string | null
 }
 
 export const courseAssistants = [
