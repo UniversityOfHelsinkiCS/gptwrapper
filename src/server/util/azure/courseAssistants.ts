@@ -14,7 +14,7 @@ export const courseAssistants = [
     vector_store_id: null,
   },
   {
-    course_id: '123',
+    course_id: 'ohtu-test',
     name: 'ohtu-kurssi',
     assistant_instruction:
       'Olet ohjelmistotuotanto kurssin avustaja. Jos käyttäjä kysyy jotain, niin arvioi ensin liittyykö se ohjelmistotuotannon kurssiin. Jos liittyy, niin toteuta file_search. jos et löydä sopivia tiedostoja, niin sano että haulla ei löytynyt mitään. Jos käyttäjän viesti ei liittynyt ohjelmistotuotannon kurssiin, niin kysy ystävällisesti voitko auttaa jotenkin muuten kurssimateriaalien suhteen.',

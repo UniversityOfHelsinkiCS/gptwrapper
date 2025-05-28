@@ -21,27 +21,27 @@ import { Close, Settings } from '@mui/icons-material'
 import { SettingsModal } from './SettingsModal'
 
 export const ChatV2 = () => {
-  const [settingsModalOpen, setSettingsModalOpen] = useState(false)
   const { courseId } = useParams()
-
   const { course } = useCourse(courseId)
+  const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
+
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
   const [model, setModel] = useLocalStorageState<{ name: string }>('model-v2', {
     name: DEFAULT_MODEL,
   })
-  const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
-  const [activePromptId, setActivePromptId] = useState('')
   const [system, setSystem] = useLocalStorageState<{ content: string }>('general-chat-system', { content: '' })
   const [message, setMessage] = useLocalStorageState<{ content: string }>('general-chat-current', { content: '' })
   const [messages, setMessages] = useLocalStorageState<Message[]>('general-chat-messages', [])
   const [prevResponse, setPrevResponse] = useLocalStorageState<{
     id: string
   }>('general-prev-response', { id: '' })
-
+  
   const appContainerRef = useContext(AppContext)
   const chatContainerRef = useRef<HTMLDivElement>(null)
-
   const inputFileRef = useRef<HTMLInputElement>(null)
+  
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false)
+  const [activePromptId, setActivePromptId] = useState('')
   const [fileName, setFileName] = useState<string>('')
   const [completion, setCompletion] = useState('')
   const [streamController, setStreamController] = useState<AbortController>()
@@ -50,8 +50,9 @@ export const ChatV2 = () => {
   const [tokenUsageWarning, setTokenUsageWarning] = useState('')
   const [tokenWarningVisible, setTokenWarningVisible] = useState(false)
   const [modelTemperature, setModelTemperature] = useState(0.5)
-  const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
   const [saveConsent, setSaveConsent] = useState(true)
+  
+  const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
 
   const { t, i18n } = useTranslation()
   const { language } = i18n
@@ -197,6 +198,8 @@ export const ChatV2 = () => {
       }}
     >
       <SettingsModal open={settingsModalOpen} setOpen={setSettingsModalOpen}></SettingsModal>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between'}}>
+
       <Box sx={{ display: 'flex', gap: '1rem' }}>
         {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
         <SystemPrompt content={system.content} setContent={(content) => setSystem({ content })} />
@@ -204,6 +207,8 @@ export const ChatV2 = () => {
         <IconButton onClick={() => setSettingsModalOpen(true)} title="Settings">
           <Settings></Settings>
         </IconButton>
+      </Box>
+      <Button variant='outlined' size='small'>Ohtu sandbox</Button>
       </Box>
       <Box ref={chatContainerRef}>
         <Conversation messages={messages} completion={completion} />

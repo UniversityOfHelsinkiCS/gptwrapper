@@ -5,13 +5,14 @@ import { CourseChatRequest, RequestWithUser } from '../types'
 import { isError } from '../util/parser'
 import { calculateUsage, incrementUsage, checkUsage, checkCourseUsage, incrementCourseUsage } from '../services/chatInstances/usage'
 import { getCompletionEvents, streamCompletion } from '../util/azure/client'
-import { ResponsesClient } from '../util/azure/ResponsesAPI'
 import { getMessageContext, getModelContextLimit, getCourseModel, getAllowedModels } from '../util/util'
 import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
 import { inProduction, DEFAULT_TOKEN_LIMIT, FREE_MODEL } from '../../config'
 import { pdfToText } from '../util/pdfToText'
 import { Discussion, ChatInstance } from '../db/models'
+
+import { ResponsesClient } from '../util/azure/ResponsesAPI'
 
 const openaiRouter = express.Router()
 

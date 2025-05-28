@@ -21,6 +21,7 @@ const router = createBrowserRouter(
     <Route path="/" element={<App />}>
       <Route index element={<Chat />} />
       <Route path="/v2" element={<ChatV2 />} />
+      <Route path="/v2/:courseId" element={<ChatV2 />} />
       <Route path="/:courseId" element={<Chat />} />
       <Route path="/courses" element={<Courses />} />
       <Route path="/courses/:id" element={<Course />} />
