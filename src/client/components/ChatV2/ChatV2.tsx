@@ -20,6 +20,7 @@ import { AppContext } from '../../util/context'
 import { Close, Settings } from '@mui/icons-material'
 import { SettingsModal } from './SettingsModal'
 import { Link } from 'react-router-dom'
+import { useScrollToBottom } from './useScrollToBottom'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -36,11 +37,11 @@ export const ChatV2 = () => {
   const [prevResponse, setPrevResponse] = useLocalStorageState<{
     id: string
   }>('general-prev-response', { id: '' })
-  
+
   const appContainerRef = useContext(AppContext)
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const inputFileRef = useRef<HTMLInputElement>(null)
-  
+
   const [settingsModalOpen, setSettingsModalOpen] = useState(false)
   const [activePromptId, setActivePromptId] = useState('')
   const [fileName, setFileName] = useState<string>('')
@@ -52,7 +53,7 @@ export const ChatV2 = () => {
   const [tokenWarningVisible, setTokenWarningVisible] = useState(false)
   const [modelTemperature, setModelTemperature] = useState(0.5)
   const [saveConsent, setSaveConsent] = useState(true)
-  
+
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
 
   const { t, i18n } = useTranslation()
@@ -169,27 +170,7 @@ export const ChatV2 = () => {
     clearRetryTimeout()
   }
 
-  useEffect(() => {
-    const chatContainer = chatContainerRef.current
-    const appContainer = appContainerRef.current
-
-    if (!chatContainer || !appContainer || !messages.length) return
-
-    const scrollToBottom = () => {
-      appContainer.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end',
-      })
-    }
-
-    const resizeObserver = new ResizeObserver(() => {
-      scrollToBottom()
-    })
-
-    resizeObserver.observe(chatContainer)
-
-    return () => resizeObserver.disconnect()
-  }, [])
+  useScrollToBottom(chatContainerRef, appContainerRef, messages)
 
   return (
     <Box
@@ -199,20 +180,17 @@ export const ChatV2 = () => {
         flexDirection: 'column',
       }}
     >
-      <SettingsModal open={settingsModalOpen} setOpen={setSettingsModalOpen}></SettingsModal>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
-        {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
-        <SystemPrompt content={system.content} setContent={(content) => setSystem({ content })} />
-        <Button onClick={handleReset}>Reset</Button>
-        <IconButton onClick={() => setSettingsModalOpen(true)} title="Settings">
-          <Settings></Settings>
-        </IconButton>
-      </Box>
-        {
-          courseId ? <Link to={'/v2'}>CurreChat</Link> : <Link to={'/v2/sandbox'}>Ohtu Sandbox</Link>
-        }
+      <SettingsModal open={settingsModalOpen} setOpen={setSettingsModalOpen} model={model.name} setModel={(name) => setModel({ name })}></SettingsModal>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', gap: '1rem' }}>
+          {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
+          <SystemPrompt content={system.content} setContent={(content) => setSystem({ content })} />
+          <Button onClick={handleReset}>Reset</Button>
+          <IconButton onClick={() => setSettingsModalOpen(true)} title="Settings">
+            <Settings></Settings>
+          </IconButton>
+        </Box>
+        {courseId ? <Link to={'/v2'}>CurreChat</Link> : <Link to={'/v2/sandbox'}>Ohtu Sandbox</Link>}
       </Box>
       <Box ref={chatContainerRef}>
         <Conversation messages={messages} completion={completion} />
