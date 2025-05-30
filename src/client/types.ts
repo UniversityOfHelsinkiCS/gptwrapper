@@ -1,3 +1,5 @@
+import { FileCitation } from "../shared/types"
+
 export type SetState<T> = React.Dispatch<React.SetStateAction<T>>
 
 export type Role = 'system' | 'assistant' | 'user'
@@ -5,6 +7,7 @@ export type Role = 'system' | 'assistant' | 'user'
 export interface Message {
   role: Role
   content: string
+  citations?: FileCitation[]
 }
 
 interface Term {

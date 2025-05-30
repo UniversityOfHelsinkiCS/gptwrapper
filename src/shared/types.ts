@@ -3,8 +3,27 @@ export type RagIndexMetadata = {
   dim: number
 }
 
-export type ResponseStreamValue = {
-  status: 'writing' | 'complete' | 'error'
-  text: string | null
-  prevResponseId: string | null
+export type FileCitation = {
+  file_id: string
+  filename: string
+  index: number
+  type: 'file_citation'
 }
+
+export type ResponseStreamEventData =
+  | {
+      type: 'writing'
+      text: string
+    }
+  | {
+      type: 'complete'
+      prevResponseId: string
+    }
+  | {
+      type: 'error'
+      error: any
+    }
+  | {
+      type: 'annotation'
+      annotation: FileCitation
+    }

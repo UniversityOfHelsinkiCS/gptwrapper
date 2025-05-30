@@ -6,7 +6,7 @@ import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { DEFAULT_MODEL } from '../../../config'
 import useInfoTexts from '../../hooks/useInfoTexts'
 import { Message } from '../../types'
-import { ResponseStreamValue } from '../../../shared/types'
+import { FileCitation, ResponseStreamEventData } from '../../../shared/types'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
@@ -21,6 +21,7 @@ import { Close, Settings } from '@mui/icons-material'
 import { SettingsModal } from './SettingsModal'
 import { Link } from 'react-router-dom'
 import { useScrollToBottom } from './useScrollToBottom'
+import { set } from 'lodash'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -46,6 +47,7 @@ export const ChatV2 = () => {
   const [activePromptId, setActivePromptId] = useState('')
   const [fileName, setFileName] = useState<string>('')
   const [completion, setCompletion] = useState('')
+  const [citations, setCitations] = useState<FileCitation[]>([])
   const [streamController, setStreamController] = useState<AbortController>()
   const [alertOpen, setAlertOpen] = useState(false)
   const [disallowedFileType, setDisallowedFileType] = useState('')
@@ -69,6 +71,7 @@ export const ChatV2 = () => {
       const reader = stream.getReader()
 
       let content = ''
+      const citations: FileCitation[] = []
 
       while (true) {
         const { value, done } = await reader.read()
@@ -79,15 +82,22 @@ export const ChatV2 = () => {
         for (const chunk of data.split('\n')) {
           if (!chunk || chunk.trim().length === 0) continue
 
-          const parsedChunk: ResponseStreamValue = JSON.parse(chunk)
+          const parsedChunk: ResponseStreamEventData = JSON.parse(chunk)
 
-          switch (parsedChunk.status) {
+          switch (parsedChunk.type) {
             case 'writing':
               setCompletion((prev) => prev + parsedChunk.text)
               content += parsedChunk.text
               break
 
+            case 'annotation':
+              console.log('Received annotation:', parsedChunk.annotation)
+              setCitations((prev) => [...prev, parsedChunk.annotation])
+              citations.push(parsedChunk.annotation)
+              break
+
             case 'complete':
+              console.log('Stream completed with response ID:', parsedChunk)
               setPrevResponse({ id: parsedChunk.prevResponseId })
               break
 
@@ -101,7 +111,7 @@ export const ChatV2 = () => {
         }
       }
 
-      setMessages((prev: Message[]) => prev.concat({ role: 'assistant', content }))
+      setMessages((prev: Message[]) => prev.concat({ role: 'assistant', content, citations }))
     } catch (err: any) {
       handleCompletionStreamError(err, fileName)
     } finally {
@@ -120,6 +130,7 @@ export const ChatV2 = () => {
     setMessage({ content: '' })
     setPrevResponse({ id: '' })
     setCompletion('')
+    setCitations([])
     setStreamController(new AbortController())
     setRetryTimeout(() => {
       if (streamController) {
@@ -193,7 +204,7 @@ export const ChatV2 = () => {
         {courseId ? <Link to={'/v2'}>CurreChat</Link> : <Link to={'/v2/sandbox'}>Ohtu Sandbox</Link>}
       </Box>
       <Box ref={chatContainerRef}>
-        <Conversation messages={messages} completion={completion} />
+        <Conversation messages={messages} completion={completion} citations={citations} />
         <ChatBox
           disabled={false}
           onSubmit={(message) => {

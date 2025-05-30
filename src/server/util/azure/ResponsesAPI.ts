@@ -11,12 +11,12 @@ import { AzureOpenAI } from 'openai'
 
 // import { EventStream } from '@azure/openai'
 import { Stream } from 'openai/streaming'
-import { FileSearchTool, FunctionTool, ResponseInput, ResponseInputItem, ResponseStreamEvent } from 'openai/resources/responses/responses'
+import { FileSearchTool, FunctionTool, ResponseInput, ResponseInputItem, ResponseStreamEvent, ResponseTextAnnotationDeltaEvent } from 'openai/resources/responses/responses'
 
 import { courseAssistants, type CourseAssistant } from './courseAssistants'
 import { createFileSearchTool } from './util'
 
-import type { ResponseStreamValue } from '../../../shared/types'
+import type { FileCitation, ResponseStreamEventData } from '../../../shared/types'
 
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
@@ -92,9 +92,8 @@ export class ResponsesClient {
         case 'response.output_text.delta':
           await this.write(
             {
-              status: 'writing',
+              type: 'writing',
               text: event.delta,
-              prevResponseId: null,
             },
             res,
           )
@@ -112,14 +111,19 @@ export class ResponsesClient {
           break
 
         case 'response.output_text.annotation.added':
-          console.log('ANNOTATIONS ADDED', JSON.stringify(event, null, 2))
+          this.write(
+            {
+              type: 'annotation',
+              annotation: event.annotation as FileCitation,
+            },
+            res,
+          )
           break
 
         case 'response.completed':
           await this.write(
             {
-              status: 'complete',
-              text: null,
+              type: 'complete',
               prevResponseId: event.response.id,
             },
             res,
@@ -134,16 +138,8 @@ export class ResponsesClient {
     }
   }
 
-  private async write({ status, text, prevResponseId }: ResponseStreamValue, res: Response) {
-    // if (!inProduction) logger.info(message)
-
+  private async write(data: ResponseStreamEventData, res: Response) {
     await new Promise((resolve) => {
-      const data: ResponseStreamValue = {
-        status,
-        text,
-        prevResponseId: prevResponseId,
-      }
-
       const success = res.write(JSON.stringify(data) + '\n', (err) => {
         if (err) {
           logger.error(err)
