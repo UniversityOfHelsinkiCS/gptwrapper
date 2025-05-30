@@ -22,6 +22,7 @@ import { SettingsModal } from './SettingsModal'
 import { Link } from 'react-router-dom'
 import { useScrollToBottom } from './useScrollToBottom'
 import { set } from 'lodash'
+import { CitationsBox } from './CitationsBox'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -112,6 +113,7 @@ export const ChatV2 = () => {
       }
 
       setMessages((prev: Message[]) => prev.concat({ role: 'assistant', content, citations }))
+      setCitations([])
     } catch (err: any) {
       handleCompletionStreamError(err, fileName)
     } finally {
@@ -203,17 +205,20 @@ export const ChatV2 = () => {
         </Box>
         {courseId ? <Link to={'/v2'}>CurreChat</Link> : <Link to={'/v2/sandbox'}>Ohtu Sandbox</Link>}
       </Box>
-      <Box ref={chatContainerRef}>
-        <Conversation messages={messages} completion={completion} citations={citations} />
-        <ChatBox
-          disabled={false}
-          onSubmit={(message) => {
-            if (message.trim()) {
-              handleSubmit(message)
-              setMessage({ content: '' })
-            }
-          }}
-        />
+      <Box sx={{ display: 'flex' }}>
+        <Box ref={chatContainerRef}>
+          <Conversation messages={messages} completion={completion} citations={citations} />
+          <ChatBox
+            disabled={false}
+            onSubmit={(message) => {
+              if (message.trim()) {
+                handleSubmit(message)
+                setMessage({ content: '' })
+              }
+            }}
+          />
+        </Box>
+        <CitationsBox messages={messages} citations={citations} />
       </Box>
     </Box>
   )
