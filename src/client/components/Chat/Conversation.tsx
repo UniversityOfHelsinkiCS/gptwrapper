@@ -52,7 +52,17 @@ export const Response = ({ role, content, setMessage, id }: { role: Role; conten
   )
 }
 
-const Conversation = ({ messages, completion, handleStop = () => {}, setMessage }: { messages: Message[]; completion: string; handleStop?: () => void; setMessage?: any }) => {
+const Conversation = ({
+  messages,
+  completion,
+  handleStop = () => {},
+  setMessage,
+}: {
+  messages: Message[]
+  completion: string
+  handleStop?: () => void
+  setMessage?: any
+}) => {
   const { t } = useTranslation()
 
   if (messages.length === 0 && !completion) return null

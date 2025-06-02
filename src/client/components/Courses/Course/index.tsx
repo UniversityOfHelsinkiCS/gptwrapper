@@ -293,7 +293,11 @@ const Course = () => {
 
         <Box sx={{ paddingBottom: 2 }}>
           {!mandatoryPromptId ? (
-            <FormControlLabel control={<Checkbox checked={mandatory} onChange={() => setMandatory((prev) => !prev)} />} label={t('course:editMandatoryPrompt')} sx={{ mr: 5 }} />
+            <FormControlLabel
+              control={<Checkbox checked={mandatory} onChange={() => setMandatory((prev) => !prev)} />}
+              label={t('course:editMandatoryPrompt')}
+              sx={{ mr: 5 }}
+            />
           ) : (
             <Tooltip title={t('course:oneMandatoryPrompt')}>
               <FormControlLabel control={<Checkbox checked={mandatory} disabled />} label={t('course:editMandatoryPrompt')} sx={{ mr: 5 }} />

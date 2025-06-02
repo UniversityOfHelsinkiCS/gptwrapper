@@ -15,7 +15,9 @@ const useChatInstances = ({ limit = 100, offset = 0, search = '', order = '', or
     chatInstances: ChatInstanceWithTokens[]
     count: number
   }> => {
-    const res = await apiClient.get(`/chatinstances?limit=${limit}&offset=${offset}&search=${search}&orderBy=${orderBy}&order=${order}&showActiveCourses=${showActiveCourses}`)
+    const res = await apiClient.get(
+      `/chatinstances?limit=${limit}&offset=${offset}&search=${search}&orderBy=${orderBy}&order=${order}&showActiveCourses=${showActiveCourses}`,
+    )
 
     const { data } = res
 

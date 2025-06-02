@@ -12,7 +12,15 @@ import { formatDate, getCurTypeLabel } from './util'
 import { Course as CourseType } from '../../types'
 import { DEFAULT_MODEL_ON_ENABLE, DEFAULT_TOKEN_LIMIT, PUBLIC_URL } from '../../../config'
 
-const Course = ({ course, onEnable, onDisable }: { course: CoursesViewCourse; onEnable: (course: CoursesViewCourse) => void; onDisable: (course: CoursesViewCourse) => void }) => {
+const Course = ({
+  course,
+  onEnable,
+  onDisable,
+}: {
+  course: CoursesViewCourse
+  onEnable: (course: CoursesViewCourse) => void
+  onDisable: (course: CoursesViewCourse) => void
+}) => {
   const { t, i18n } = useTranslation()
 
   if (!course) return null

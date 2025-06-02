@@ -183,7 +183,11 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
 
   const latestMessage = options.messages[options.messages.length - 1]
 
-  const events = await responsesClient.createResponse({ input: [latestMessage], prevResponseId: options.prevResponseId, include: ragIndexId ? ['file_search_call.results'] : [] })
+  const events = await responsesClient.createResponse({
+    input: [latestMessage],
+    prevResponseId: options.prevResponseId,
+    include: ragIndexId ? ['file_search_call.results'] : [],
+  })
 
   if (isError(events)) {
     res.status(424)

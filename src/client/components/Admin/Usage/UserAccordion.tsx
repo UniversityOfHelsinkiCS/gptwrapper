@@ -4,7 +4,17 @@ import { grey } from '@mui/material/colors'
 import { useTranslation } from 'react-i18next'
 import { User } from '../../../types'
 
-const UserAccordion = ({ user, isFocused, handleLoginAs, decoration }: { user: User; isFocused: boolean; handleLoginAs: (user: User) => () => void; decoration?: JSX.Element }) => {
+const UserAccordion = ({
+  user,
+  isFocused,
+  handleLoginAs,
+  decoration,
+}: {
+  user: User
+  isFocused: boolean
+  handleLoginAs: (user: User) => () => void
+  decoration?: JSX.Element
+}) => {
   const { t } = useTranslation()
 
   return (

@@ -19,7 +19,7 @@ export default [
           endOfLine: 'auto',
           singleQuote: true,
           trailingComma: 'all',
-          printWidth: 180,
+          printWidth: 170,
           semi: false,
         },
       ],

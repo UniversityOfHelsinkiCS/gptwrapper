@@ -81,7 +81,9 @@ const createChatInstance = async (courseRealisations: SisuCourseWithRealization[
 }
 
 const coursesHandler = async (courseRealizations: SisuCourseWithRealization[]) => {
-  const filteredCourseRealizations = courseRealizations.filter((course) => course.courseUnits.length && course.flowState !== 'CANCELLED' && course.flowState !== 'ARCHIVED')
+  const filteredCourseRealizations = courseRealizations.filter(
+    (course) => course.courseUnits.length && course.flowState !== 'CANCELLED' && course.flowState !== 'ARCHIVED',
+  )
 
   await createChatInstance(filteredCourseRealizations)
   await upsertResponsibilities(filteredCourseRealizations)

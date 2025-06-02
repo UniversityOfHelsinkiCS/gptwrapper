@@ -32,7 +32,13 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ copied, i
       <IconButton onClick={handleClick} color="primary">
         <ContentCopy />
       </IconButton>
-      <Snackbar message="Copied to clipboard" anchorOrigin={{ vertical: 'top', horizontal: 'center' }} autoHideDuration={2000} onClose={() => setOpen(false)} open={open} />
+      <Snackbar
+        message="Copied to clipboard"
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        autoHideDuration={2000}
+        onClose={() => setOpen(false)}
+        open={open}
+      />
     </Box>
   )
 }

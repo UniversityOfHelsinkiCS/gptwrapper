@@ -91,7 +91,9 @@ const SendMessage = ({
         <Button onClick={() => handleReset()} disabled={resetDisabled}>
           {t('reset')}
         </Button>
-        {!notOptoutSaving && saveChat && <FormControlLabel control={<Switch onChange={() => setSaveConsent(!saveConsent)} checked={saveConsent} />} label={t('chat:allowSave')} />}
+        {!notOptoutSaving && saveChat && (
+          <FormControlLabel control={<Switch onChange={() => setSaveConsent(!saveConsent)} checked={saveConsent} />} label={t('chat:allowSave')} />
+        )}
         {notOptoutSaving && saveChat && (
           <Alert severity="warning" style={{ marginLeft: 20 }}>
             <Typography>{t('chat:toBeSaved')}</Typography>

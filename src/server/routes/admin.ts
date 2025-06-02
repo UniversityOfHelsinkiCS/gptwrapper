@@ -93,7 +93,8 @@ adminRouter.get('/statistics', async (req, res) => {
     }
 
     const getTermsOf = ({ courseActivityPeriod }) => {
-      const checkDateOverlap = (term, course) => new Date(term.startDate) <= new Date(course.endDate || '2112-12-21') && new Date(term.endDate) >= new Date(course.startDate)
+      const checkDateOverlap = (term, course) =>
+        new Date(term.startDate) <= new Date(course.endDate || '2112-12-21') && new Date(term.endDate) >= new Date(course.startDate)
 
       if (!courseActivityPeriod) return []
 
