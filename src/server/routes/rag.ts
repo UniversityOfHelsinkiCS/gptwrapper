@@ -1,14 +1,13 @@
+import fs from 'fs'
 import { NextFunction, Request, Response, Router } from 'express'
 import { EMBED_DIM } from '../../config'
-import { createChunkIndex, deleteChunkIndex, getRagFileChunks } from '../services/rag/chunkDb'
 import { RagFile, RagIndex } from '../db/models'
 import { RequestWithUser } from '../types'
 import z from 'zod'
 import { queryRagIndex } from '../services/rag/query'
-import { ingestionPipeline } from '../services/rag/ingestion/pipeline'
 import multer from 'multer'
 import { mkdir, rm, stat } from 'fs/promises'
-import { getOllamaOpenAIClient } from '../util/ollama'
+import { getAzureOpenAIClient } from '../util/azure/client'
 
 const router = Router()
 
@@ -23,15 +22,19 @@ router.post('/indices', async (req, res) => {
   const { user } = req as RequestWithUser
   const { name, dim } = IndexCreationSchema.parse(req.body)
 
+  const client = getAzureOpenAIClient('curredev4omini')
+  const vectorStore = await client.vectorStores.create({
+    name,
+  })
+
   const ragIndex = await RagIndex.create({
     userId: user.id,
     metadata: {
       name,
       dim,
+      azureVectorStoreId: vectorStore.id,
     },
   })
-
-  await createChunkIndex(ragIndex)
 
   // Create upload directory for this index
 
@@ -51,7 +54,14 @@ router.delete('/indices/:id', async (req, res) => {
     return
   }
 
-  await deleteChunkIndex(ragIndex)
+  const client = getAzureOpenAIClient('curredev4omini')
+  try {
+    await client.vectorStores.del(ragIndex.metadata.azureVectorStoreId)
+  } catch (error) {
+    console.error(`Failed to delete Azure vector store ${ragIndex.metadata.azureVectorStoreId}:`, error)
+    res.status(500).json({ error: 'Failed to delete Azure vector store' })
+    return
+  }
 
   const uploadPath = `${UPLOAD_DIR}/${id}`
   try {
@@ -77,11 +87,14 @@ router.get('/indices', async (_req, res) => {
     ],
   })
 
+  const client = getAzureOpenAIClient('curredev4omini')
+
   // Add ragFileCount to each index
   const indicesWithCount = await Promise.all(
     indices.map(async (index: any) => {
+      const vectorStore = await client.vectorStores.retrieve(index.metadata.azureVectorStoreId)
       const count = await RagFile.count({ where: { ragIndexId: index.id } })
-      return { ...index.toJSON(), ragFileCount: count }
+      return { ...index.toJSON(), ragFileCount: count, vectorStore }
     }),
   )
 
@@ -107,7 +120,13 @@ router.get('/indices/:id', async (req, res) => {
     return
   }
 
-  res.json(ragIndex)
+  const client = getAzureOpenAIClient('curredev4omini')
+  const vectorStore = await client.vectorStores.retrieve(ragIndex.metadata.azureVectorStoreId)
+
+  res.json({
+    ...ragIndex.toJSON(),
+    vectorStore,
+  })
 })
 
 router.get('/indices/:id/files/:fileId', async (req, res) => {
@@ -129,11 +148,20 @@ router.get('/indices/:id/files/:fileId', async (req, res) => {
     return
   }
 
-  const chunks = await getRagFileChunks(ragFile.ragIndex, ragFile)
+  // Read file content
+  const filePath = `${UPLOAD_DIR}/${indexId}/${ragFile.filename}`
+  let fileContent: string
+  try {
+    fileContent = await fs.promises.readFile(filePath, 'utf-8')
+  } catch (error) {
+    console.error(`Failed to read file ${filePath}:`, error)
+    res.status(500).json({ error: 'Failed to read file content' })
+    return
+  }
 
   res.json({
     ...ragFile.toJSON(),
-    chunks,
+    fileContent,
   })
 })
 
@@ -160,9 +188,7 @@ const indexUploadDirMiddleware = async (req: Request, _res: Response, next: Next
   const uploadPath = `${UPLOAD_DIR}/${id}`
   try {
     await stat(uploadPath)
-    await rm(uploadPath, { recursive: true, force: true })
-    console.log(`Upload directory ${uploadPath} deleted`)
-    await mkdir(uploadPath, { recursive: true })
+    console.log(`RAG upload dir exists: ${uploadPath}`)
   } catch (error) {
     console.warn(`RAG upload dir not found, creating ${uploadPath} --- ${error}`)
     await mkdir(uploadPath, { recursive: true })
@@ -187,23 +213,44 @@ router.post('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware],
     return
   }
 
-  await RagFile.bulkCreate(
-    req.files.map((file) => ({
-      filename: file.originalname,
-      fileType: 'pending',
-      fileSize: 0,
-      numChunks: 0,
-      userId: user.id,
-      ragIndexId: ragIndex.id,
-      pipelineStage: 'pending',
-    })),
+  const ragFiles: RagFile[] = await Promise.all(
+    req.files.map((file: Express.Multer.File) =>
+      RagFile.create({
+        userId: user.id,
+        ragIndexId: ragIndex.id,
+        pipelineStage: 'upload',
+        filename: file.originalname,
+        fileType: file.mimetype,
+        fileSize: file.size,
+        metadata: {},
+      }),
+    ),
   )
 
-  const openAiClient = getOllamaOpenAIClient() // getAzureOpenAIClient(EMBED_MODEL)
+  const client = getAzureOpenAIClient('curredev4omini')
 
-  ingestionPipeline(openAiClient, `uploads/rag/${id}`, ragIndex, user)
+  const uploadDirPath = `${UPLOAD_DIR}/${id}`
 
-  res.json({ message: 'Files uploaded successfully, starting ingestion' })
+  const fileStreams = req.files.map((file: Express.Multer.File) => {
+    const filePath = `${uploadDirPath}/${file.originalname}`
+    return fs.createReadStream(filePath)
+  })
+
+  const fileBatchRes = await client.vectorStores.fileBatches.uploadAndPoll(ragIndex.metadata.azureVectorStoreId, {
+    files: fileStreams,
+  })
+
+  console.log('File batch upload response:', fileBatchRes)
+
+  await Promise.all(
+    ragFiles.map(async (ragFile) =>
+      ragFile.update({
+        pipelineStage: 'completed',
+      }),
+    ),
+  )
+
+  res.json({ message: 'Files uploaded successfully' })
 })
 
 const RagIndexQuerySchema = z.object({

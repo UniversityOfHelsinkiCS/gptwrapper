@@ -1,6 +1,7 @@
 export type RagIndexMetadata = {
   name: string
   dim: number
+  azureVectorStoreId: string
 }
 
 export type FileCitation = {

@@ -8,12 +8,7 @@ import type { RagIndexAttributes } from '../../../server/db/models/ragIndex'
 import { Chunk } from './Chunk'
 
 type RagFile = RagFileAttributes & {
-  chunks: {
-    id: string
-    content: string
-    title: string
-    metadata: Record<string, unknown>
-  }[]
+  fileContent: string
   ragIndex: RagIndexAttributes
 }
 
@@ -41,20 +36,17 @@ export const RagFile: React.FC = () => {
         {ragFile.ragIndex.metadata.name} / {ragFile.filename}
       </Typography>
       <RagFileInfo file={ragFile} />
-      <Typography variant="h4">Chunks</Typography>
-      {ragFile.chunks.length === 0 ? (
-        <Typography variant="body1">No chunks found</Typography>
+      <Typography variant="h4">Content</Typography>
+      {ragFile.fileContent.length === 0 ? (
+        <Typography variant="body1">No content</Typography>
       ) : (
-        ragFile.chunks.map((chunk) => (
-          <Chunk
-            key={chunk.id}
-            doc={{
-              title: chunk.title,
-              content: chunk.content,
-              metadata: chunk.metadata,
-            }}
-          />
-        ))
+        <Chunk
+          doc={{
+            title: ragFile.filename,
+            content: ragFile.fileContent,
+            metadata: ragFile.metadata,
+          }}
+        />
       )}
     </>
   )

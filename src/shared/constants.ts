@@ -2,6 +2,9 @@ export const IngestionPipelineStages = {
   pending: {
     name: 'Pending',
   },
+  upload: {
+    name: 'Uploading',
+  },
   readFiles: {
     name: 'Read files',
   },

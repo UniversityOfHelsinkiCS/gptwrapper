@@ -13,7 +13,7 @@ type RagIndexDetails = Omit<RagIndexAttributes, 'ragFileCount'> & {
   ragFiles: RagFileAttributes[]
 }
 
-const useRagIndexDetails = (indexId: number | null, refetchInterval: number) => {
+const useRagIndexDetails = (indexId: number | null) => {
   const { data, ...rest } = useQuery<RagIndexDetails>({
     queryKey: ['ragIndex', indexId],
     queryFn: async () => {
@@ -21,7 +21,6 @@ const useRagIndexDetails = (indexId: number | null, refetchInterval: number) => 
       return response.data
     },
     enabled: !!indexId,
-    refetchInterval,
   })
 
   return { data, ...rest }
@@ -74,7 +73,7 @@ export const RagIndex: React.FC = () => {
   const navigate = useNavigate()
   const id = parseInt(strId, 10)
   const deleteIndexMutation = useDeleteRagIndexMutation()
-  const { data: ragDetails, isLoading } = useRagIndexDetails(id, 1000)
+  const { data: ragDetails, isLoading, refetch } = useRagIndexDetails(id)
   const uploadMutation = useUploadMutation(ragDetails)
 
   if (isLoading) {
@@ -99,6 +98,7 @@ export const RagIndex: React.FC = () => {
                 console.log('Files selected:', files)
                 if (files && files.length > 0) {
                   await uploadMutation.mutateAsync(files)
+                  refetch()
                 }
               }}
               multiple
