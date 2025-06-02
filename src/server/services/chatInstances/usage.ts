@@ -49,7 +49,10 @@ export const checkCourseUsage = async (user: UserType, courseId: string): Promis
   return true
 }
 
-export const calculateUsage = (options: StreamingOptions, encoding: Tiktoken): number => {
+interface UsageOptions {
+  messages: StreamingOptions['messages']
+}
+export const calculateUsage = (options: UsageOptions, encoding: Tiktoken): number => {
   const { messages } = options
 
   let tokenCount = 0

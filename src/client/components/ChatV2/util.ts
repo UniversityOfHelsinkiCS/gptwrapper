@@ -38,6 +38,7 @@ export const getCompletionStream = async ({
         },
         ...messages,
       ],
+      ragIndexId,
       model,
       userConsent,
       modelTemperature,
@@ -50,10 +51,5 @@ export const getCompletionStream = async ({
 
   formData.set('data', JSON.stringify(data))
 
-  if (courseId) {
-    return postAbortableStream(`/ai/stream/${courseId}/v2`, formData, abortController)
-  } else {
-    return postAbortableStream('/ai/stream/v2', formData, abortController)
-  }
-
+  return postAbortableStream('/ai/stream/v2', formData, abortController)
 }

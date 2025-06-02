@@ -10,9 +10,10 @@ import getEncoding from '../util/tiktoken'
 import logger from '../util/logger'
 import { inProduction, DEFAULT_TOKEN_LIMIT, FREE_MODEL } from '../../config'
 import { pdfToText } from '../util/pdfToText'
-import { Discussion, ChatInstance } from '../db/models'
+import { Discussion, ChatInstance, RagIndex } from '../db/models'
 
 import { ResponsesClient } from '../util/azure/ResponsesAPI'
+import { z } from 'zod'
 
 const openaiRouter = express.Router()
 
@@ -45,26 +46,57 @@ const fileParsing = async (options: any, req: any) => {
   return options.messages
 }
 
+const PostStreamSchemaV2 = z.object({
+  options: z.object({
+    model: z.string(),
+    messages: z.array(z.any()),
+    userConsent: z.boolean().optional(),
+    modelTemperature: z.number().optional(),
+    saveConsent: z.boolean().optional(),
+    prevResponseId: z.string().optional(),
+    courseId: z.string().optional(),
+    ragIndexId: z.number().optional(),
+  }),
+  courseId: z.string().optional(),
+})
+
 openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   const req = r as RequestWithUser
-  const { options, courseId } = JSON.parse(req.body.data)
-  const { model, userConsent } = options
+  const { options, courseId } = PostStreamSchemaV2.parse(JSON.parse(req.body.data))
+  const { userConsent } = options
   const { user } = req
 
-  options.options = { temperature: options.modelTemperature }
+  console.log('options', options)
 
   if (!user.id) {
     res.status(401).send('Unauthorized')
     return
   }
 
-  const usageAllowed = courseId ? await checkCourseUsage(user, courseId) : model === FREE_MODEL || (await checkUsage(user, model))
+  // Check if the user has usage limits for the course or model
+  const usageAllowed = courseId ? await checkCourseUsage(user, courseId) : options.model === FREE_MODEL || (await checkUsage(user, options.model))
 
   if (!usageAllowed) {
     res.status(403).send('Usage limit reached')
     return
   }
 
+  // Check if the model is allowed for the course
+  if (courseId) {
+    const courseModel = await getCourseModel(courseId)
+
+    if (options.model) {
+      const allowedModels = getAllowedModels(courseModel)
+      if (!allowedModels.includes(options.model)) {
+        res.status(403).send('Model not allowed')
+        return
+      }
+    } else {
+      options.model = courseModel
+    }
+  }
+
+  // Check file
   let optionsMessagesWithFile = null
 
   try {
@@ -78,13 +110,12 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   }
 
   options.messages = getMessageContext(optionsMessagesWithFile || options.messages)
-  options.stream = true
 
-  const encoding = getEncoding(model)
-  let tokenCount = calculateUsage(options, encoding)
+  const encoding = getEncoding(options.model)
+  let tokenCount = calculateUsage(options as any, encoding)
   const tokenUsagePercentage = Math.round((tokenCount / DEFAULT_TOKEN_LIMIT) * 100)
 
-  if (model !== FREE_MODEL && tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT && !userConsent) {
+  if (options.model !== FREE_MODEL && tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT && !userConsent) {
     res.status(201).json({
       tokenConsumtionWarning: true,
       message: `You are about to use ${tokenUsagePercentage}% of your monthly CurreChat usage`,
@@ -92,7 +123,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     return
   }
 
-  const contextLimit = getModelContextLimit(model)
+  const contextLimit = getModelContextLimit(options.model)
 
   if (tokenCount > contextLimit) {
     logger.info('Maximum context reached')
@@ -100,8 +131,21 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     return
   }
 
+  let vectorStoreId: string | undefined = undefined
+  if (courseId) {
+    const ragIndex = await RagIndex.findOne({
+      where: { courseId },
+    })
+    if (ragIndex) {
+      vectorStoreId = ragIndex.metadata.azureVectorStoreId
+      console.log('using', ragIndex.toJSON())
+    }
+  }
+
   const responsesClient = new ResponsesClient({
-    model,
+    model: options.model,
+    courseId,
+    vectorStoreId,
   })
 
   const latestMessage = options.messages[options.messages.length - 1] // Adhoc to input only the latest message
@@ -129,13 +173,13 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
 
   if (courseId) {
     await incrementCourseUsage(userToCharge, courseId, tokenCount)
-  } else if (model !== FREE_MODEL) {
+  } else if (options.model !== FREE_MODEL) {
     await incrementUsage(userToCharge, tokenCount)
   }
 
   logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
     tokenCount,
-    model,
+    model: options.model,
     user: user.username,
     courseId,
   })

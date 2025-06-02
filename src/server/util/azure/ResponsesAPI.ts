@@ -36,7 +36,7 @@ export class ResponsesClient {
   tools: FileSearchTool[]
   courseAssistant: CourseAssistant
 
-  constructor({ model, courseId }: { model: string; courseId?: string }) {
+  constructor({ model, courseId, vectorStoreId }: { model: string; courseId?: string; vectorStoreId?: string }) {
     const deploymentId = validModels.find((m) => m.name === model)?.deployment
 
     if (!deploymentId) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
@@ -52,7 +52,7 @@ export class ResponsesClient {
     const fileSearchTool = courseId
       ? [
           createFileSearchTool({
-            vectorStoreId: this.courseAssistant.vector_store_id,
+            vectorStoreId,
           }),
         ]
       : [] // needs to retrun empty array for null

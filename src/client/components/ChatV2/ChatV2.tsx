@@ -230,7 +230,7 @@ export const ChatV2 = () => {
             }}
           />
         </Box>
-        <CitationsBox messages={messages} citations={citations} />
+        {ragIndex && <CitationsBox messages={messages} citations={citations} ragIndex={ragIndex} />}
       </Box>
     </Box>
   )

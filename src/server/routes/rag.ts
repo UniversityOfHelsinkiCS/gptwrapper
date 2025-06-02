@@ -36,7 +36,6 @@ router.post('/indices', async (req, res) => {
     include: {
       model: Responsibility,
       as: 'responsibilities',
-      where: { userId: user.id },
       required: true, // Ensure the user is responsible for the course
     },
   })
@@ -67,11 +66,10 @@ router.post('/indices', async (req, res) => {
 })
 
 router.delete('/indices/:id', async (req, res) => {
-  const { user } = req as unknown as RequestWithUser // <- fix type
   const { id } = req.params
 
   const ragIndex = await RagIndex.findOne({
-    where: { id, userId: user.id },
+    where: { id },
   })
 
   if (!ragIndex) {
@@ -119,7 +117,7 @@ router.get('/indices', async (req, res) => {
       {
         model: RagFile,
         as: 'ragFiles',
-        attributes: ['id'],
+        attributes: ['id', 'filename'],
       },
     ],
   })
@@ -146,11 +144,10 @@ router.get('/indices', async (req, res) => {
 const IndexIdSchema = z.coerce.number().min(1)
 
 router.get('/indices/:id', async (req, res) => {
-  const { user } = req as unknown as RequestWithUser
   const id = IndexIdSchema.parse(req.params.id)
 
   const ragIndex = await RagIndex.findOne({
-    where: { id, userId: user.id },
+    where: { id },
     include: {
       model: RagFile,
       as: 'ragFiles',
@@ -172,7 +169,6 @@ router.get('/indices/:id', async (req, res) => {
 })
 
 router.get('/indices/:id/files/:fileId', async (req, res) => {
-  const { user } = req as unknown as RequestWithUser
   const indexId = IndexIdSchema.parse(req.params.id)
   const fileId = IndexIdSchema.parse(req.params.fileId)
 
@@ -181,7 +177,7 @@ router.get('/indices/:id/files/:fileId', async (req, res) => {
     include: {
       model: RagIndex,
       as: 'ragIndex',
-      where: { id: indexId, userId: user.id },
+      where: { id: indexId },
     },
   })
 
@@ -243,7 +239,7 @@ router.post('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware],
   const id = IndexIdSchema.parse(req.params.id)
 
   const ragIndex = await RagIndex.findOne({
-    where: { id, userId: user.id },
+    where: { id },
   })
   if (!ragIndex) {
     res.status(404).json({ error: 'Index not found' })
@@ -296,10 +292,9 @@ router.post('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware],
 })
 
 router.delete('/files/:id', async (req, res) => {
-  const { user } = req as unknown as RequestWithUser
   const { id } = req.params
   const ragFile = await RagFile.findOne({
-    where: { id, userId: user.id },
+    where: { id },
   })
   if (!ragFile) {
     res.status(404).json({ error: 'File not found' })
