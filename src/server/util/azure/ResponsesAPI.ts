@@ -13,10 +13,10 @@ import { AzureOpenAI } from 'openai'
 import { Stream } from 'openai/streaming'
 import { FileSearchTool, FunctionTool, ResponseInput, ResponseInputItem, ResponseStreamEvent, ResponseTextAnnotationDeltaEvent } from 'openai/resources/responses/responses'
 
-import { courseAssistants, type CourseAssistant } from './courseAssistants'
+import { courseAssistants } from './courseAssistants'
 import { createFileSearchTool } from './util'
 
-import type { FileCitation, ResponseStreamEventData } from '../../../shared/types'
+import type { CourseAssistant, FileCitation, ResponseStreamEventData } from '../../../shared/types'
 
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
@@ -28,38 +28,37 @@ export const getAzureOpenAIClient = (deployment: string) =>
     endpoint,
   })
 
-const client = getAzureOpenAIClient(process.env.GPT_4O)
+const client = getAzureOpenAIClient(process.env.GPT_4O_MINI)
 
 export class ResponsesClient {
   model: string
   instructions: string
   tools: FileSearchTool[]
+  courseAssistant: CourseAssistant
 
   constructor({ model, courseId }: { model: string; courseId?: string }) {
     const deploymentId = validModels.find((m) => m.name === model)?.deployment
 
     if (!deploymentId) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
 
-    let courseAssistant: CourseAssistant
-
     if (courseId) {
-      courseAssistant = courseAssistants.find((assistant) => assistant.course_id === courseId)
+      this.courseAssistant = courseAssistants.find((assistant) => assistant.course_id === courseId)
 
-      if (!courseAssistant) throw new Error(`No course assistant found for course ID: ${courseId}`)
+      if (!this.courseAssistant) throw new Error(`No course assistant found for course ID: ${courseId}`)
     } else {
-      courseAssistant = courseAssistants.find((assistant) => assistant.name === 'default')
+      this.courseAssistant = courseAssistants.find((assistant) => assistant.name === 'default')
     }
 
     const fileSearchTool = courseId
       ? [
           createFileSearchTool({
-            vectorStoreId: courseAssistant.vector_store_id,
+            vectorStoreId: this.courseAssistant.vector_store_id,
           }),
         ]
       : [] // needs to retrun empty array for null
 
     this.model = deploymentId
-    this.instructions = courseAssistant.assistant_instruction
+    this.instructions = this.courseAssistant.assistant_instruction
     this.tools = fileSearchTool
   }
 

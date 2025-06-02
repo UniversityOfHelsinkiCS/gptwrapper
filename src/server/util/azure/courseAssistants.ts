@@ -1,9 +1,4 @@
-export interface CourseAssistant {
-  course_id: string | null
-  name: string
-  assistant_instruction: string
-  vector_store_id: string | null
-}
+import { CourseAssistant } from "../../../shared/types";
 
 export const courseAssistants = [
   {

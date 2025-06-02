@@ -12,6 +12,10 @@ export type FileCitation = {
 
 export type ResponseStreamEventData =
   | {
+      type: 'start'
+      vectorStoreId: string | null
+    }
+  | {
       type: 'writing'
       text: string
     }
@@ -27,3 +31,10 @@ export type ResponseStreamEventData =
       type: 'annotation'
       annotation: FileCitation
     }
+
+export interface CourseAssistant {
+  course_id: string | null
+  name: string
+  assistant_instruction: string
+  vector_store_id: string | null
+}

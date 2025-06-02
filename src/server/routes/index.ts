@@ -17,6 +17,8 @@ import emailRouter from './email'
 import adminRouter from './admin'
 import facultyRouter from './faculty'
 import infoTextRouter from './infotext'
+import filesRouter from './files'
+import assistantRouter from './assistants'
 
 const router = express()
 
@@ -36,6 +38,8 @@ router.get('/ping', (_, res) => {
 
 router.use('/ai', openaiRouter)
 router.use('/rag', ragRouter)
+router.use('/files', filesRouter)
+router.use('/assistants', assistantRouter)
 router.use('/users', userRouter)
 router.use('/chatinstances', chatInstancesRouter)
 router.use('/courses', courseRouter)
