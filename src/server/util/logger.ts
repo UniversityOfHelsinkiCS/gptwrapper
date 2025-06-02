@@ -54,8 +54,8 @@ if (!inProduction) {
   transports.push(
     new LokiTransport({
       host: LOKI_HOST,
-      labels: { app: 'gptwrapper', environment: process.env.NODE_ENV || 'production' }
-    })
+      labels: { app: 'gptwrapper', environment: process.env.NODE_ENV || 'production' },
+    }),
   )
 
   transports.push(

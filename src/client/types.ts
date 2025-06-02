@@ -1,4 +1,4 @@
-import { FileCitation } from "../shared/types"
+import { FileCitation } from '../shared/types'
 
 export type SetState<T> = React.Dispatch<React.SetStateAction<T>>
 

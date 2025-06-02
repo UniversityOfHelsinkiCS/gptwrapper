@@ -1,4 +1,4 @@
-import { CourseAssistant } from "../../../shared/types";
+import { CourseAssistant } from '../../../shared/types'
 
 export const courseAssistants = [
   {
