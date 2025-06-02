@@ -72,6 +72,7 @@ export class ResponsesClient {
         stream: true,
         tools: this.tools,
         tool_choice: 'auto',
+        store: true,
       })
     } catch (error: any) {
       logger.error(error)
