@@ -21,12 +21,13 @@ import { Close, Settings } from '@mui/icons-material'
 import { SettingsModal } from './SettingsModal'
 import { Link } from 'react-router-dom'
 import { useScrollToBottom } from './useScrollToBottom'
-import { set } from 'lodash'
 import { CitationsBox } from './CitationsBox'
+import { useRagIndices } from '../../hooks/useRagIndices'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
   const { course } = useCourse(courseId)
+  const { ragIndices } = useRagIndices(courseId)
   const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
 
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
@@ -56,6 +57,8 @@ export const ChatV2 = () => {
   const [tokenWarningVisible, setTokenWarningVisible] = useState(false)
   const [modelTemperature, setModelTemperature] = useState(0.5)
   const [saveConsent, setSaveConsent] = useState(true)
+  const [ragIndexId, setRagIndexId] = useState<number | null>(null)
+  const ragIndex = ragIndices?.find((index) => index.id === ragIndexId) ?? null
 
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
 
@@ -144,6 +147,7 @@ export const ChatV2 = () => {
       const { tokenUsageAnalysis, stream } = await getCompletionStream({
         system: system.content,
         messages: newMessages,
+        ragIndexId: ragIndexId ?? undefined,
         model: model.name,
         formData: new FormData(),
         userConsent: true,
@@ -193,7 +197,15 @@ export const ChatV2 = () => {
         flexDirection: 'column',
       }}
     >
-      <SettingsModal open={settingsModalOpen} setOpen={setSettingsModalOpen} model={model.name} setModel={(name) => setModel({ name })}></SettingsModal>
+      <SettingsModal
+        open={settingsModalOpen}
+        setOpen={setSettingsModalOpen}
+        model={model.name}
+        setModel={(name) => setModel({ name })}
+        setRagIndex={setRagIndexId}
+        ragIndices={ragIndices}
+        currentRagIndex={ragIndex}
+      />
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', gap: '1rem' }}>
           {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}

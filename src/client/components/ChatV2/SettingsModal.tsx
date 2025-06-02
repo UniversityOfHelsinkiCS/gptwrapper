@@ -3,15 +3,20 @@ import { Box, IconButton, Modal, Typography } from '@mui/material'
 import ModelSelector from './ModelSelector'
 import { validModels } from '../../../config'
 import React from 'react'
+import RagSelector from './RagSelector'
+import { RagIndexAttributes } from '../../../shared/types'
 
 interface SettingsModalProps {
   open: boolean
   setOpen: (open: boolean) => void
   model: string
   setModel: (model: string) => void
+  setRagIndex: (ragIndex: number) => void
+  ragIndices: RagIndexAttributes[]
+  currentRagIndex: RagIndexAttributes
 }
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ open, setOpen, model, setModel }) => {
+export const SettingsModal: React.FC<SettingsModalProps> = ({ open, setOpen, model, setModel, setRagIndex, ragIndices, currentRagIndex }) => {
   return (
     <Modal open={open} onClose={() => setOpen(false)}>
       <Box
@@ -33,7 +38,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, setOpen, mod
         <Typography id="modal-title" variant="h6" component="h2">
           Settings
         </Typography>
-        <ModelSelector currentModel={model} setModel={setModel} models={validModels.map(m => m.name)} />
+        <ModelSelector currentModel={model} setModel={setModel} models={validModels.map((m) => m.name)} />
+        <RagSelector currentRagIndex={currentRagIndex} setRagIndex={setRagIndex} ragIndices={ragIndices} />
       </Box>
     </Modal>
   )

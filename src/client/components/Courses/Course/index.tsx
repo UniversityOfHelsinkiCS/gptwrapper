@@ -18,6 +18,7 @@ import Prompt from './Prompt'
 import EditCourseForm from './EditCourseForm'
 import MaxTokenUsageStudents from './MaxTokenUsageStudents'
 import Stats from './Stats'
+import Rag from '../../Rag/Rag'
 
 const Course = () => {
   const [name, setName] = useState('')
@@ -308,6 +309,10 @@ const Course = () => {
       <Modal open={activityPeriodFormOpen} onClose={() => setActivityPeriodFormOpen(false)}>
         <EditCourseForm course={course} setOpen={setActivityPeriodFormOpen} user={user} />
       </Modal>
+
+      <Box sx={{ mt: 2 }}>
+        <Rag />
+      </Box>
     </Box>
   )
 }

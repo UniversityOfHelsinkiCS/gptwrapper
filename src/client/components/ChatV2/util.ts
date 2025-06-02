@@ -1,3 +1,4 @@
+import { RagIndexAttributes } from '../../../shared/types'
 import { Message } from '../../types'
 import { postAbortableStream } from '../../util/apiClient'
 
@@ -6,6 +7,7 @@ interface GetCompletoinStreamProps {
   messages: Message[]
   model: string
   formData: FormData
+  ragIndexId?: number
   userConsent: boolean
   modelTemperature: number
   courseId?: string
@@ -18,6 +20,7 @@ export const getCompletionStream = async ({
   messages,
   model,
   formData,
+  ragIndexId,
   userConsent,
   modelTemperature,
   courseId,

@@ -1,46 +1,14 @@
 import React, { useState } from 'react'
 import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, Link } from '@mui/material'
 import apiClient from '../../util/apiClient'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { useNavigate, Link as RouterLink } from 'react-router-dom'
-import { Chunk } from './Chunk'
+import { useMutation } from '@tanstack/react-query'
+import { useNavigate, Link as RouterLink, useParams } from 'react-router-dom'
+import { useRagIndices } from '../../hooks/useRagIndices'
 
-type RagResponse = {
-  id: string
-  value: {
-    title: string
-    content: string
-    score: number
-    metadata: Record<string, any>
-  }
-}
-
-type RagIndexAttributes = {
-  id: number
-  createdAt: string
-  updatedAt: string
-  metadata: {
-    name: string
-    dim: number
-  }
-  ragFileCount: number
-}
-
-const useRagIndices = () => {
-  const { data, ...rest } = useQuery<RagIndexAttributes[]>({
-    queryKey: ['ragIndices'],
-    queryFn: async () => {
-      const response = await apiClient.get('/rag/indices')
-      return response.data
-    },
-  })
-
-  return { data, ...rest }
-}
 const useCreateRagIndexMutation = () => {
   const mutation = useMutation({
-    mutationFn: async (indexName: string) => {
-      const response = await apiClient.post('/rag/indices', { name: indexName })
+    mutationFn: async ({ courseId, indexName }: { courseId: string; indexName: string }) => {
+      const response = await apiClient.post('/rag/indices', { name: indexName, courseId })
       return response.data
     },
   })
@@ -48,35 +16,11 @@ const useCreateRagIndexMutation = () => {
 }
 
 const Rag: React.FC = () => {
+  const { id: courseId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { data: indices } = useRagIndices()
+  const { ragIndices } = useRagIndices(courseId, true)
   const createIndexMutation = useCreateRagIndexMutation()
   const [indexName, setIndexName] = useState('')
-  const [selectedIndex, setSelectedIndex] = useState<RagIndexAttributes>(null)
-  const [inputValue, setInputValue] = useState('')
-  const [topK, setTopK] = useState(5)
-  const [response, setResponse] = useState<RagResponse[] | null>(null)
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault()
-    console.log('Form submitted with value:', inputValue)
-    const res = await apiClient.post('/rag/query', {
-      query: inputValue,
-      indexId: selectedIndex?.id,
-      topK,
-    })
-    console.log('Response from server:', res.data)
-    // Parse metadatas
-    const parsedResponse = res.data.map((doc) => ({
-      ...doc,
-      value: {
-        ...doc.value,
-        metadata: JSON.parse(doc.value.metadata),
-      },
-    }))
-    setResponse(parsedResponse)
-    setInputValue('')
-  }
 
   return (
     <Box sx={{ display: 'flex', gap: 2 }}>
@@ -90,7 +34,7 @@ const Rag: React.FC = () => {
             variant="contained"
             color="primary"
             onClick={async () => {
-              const newIndex = await createIndexMutation.mutateAsync(indexName)
+              const newIndex = await createIndexMutation.mutateAsync({ courseId, indexName })
               setIndexName('')
               navigate(`/rag/${newIndex.id}`)
             }}
@@ -98,15 +42,13 @@ const Rag: React.FC = () => {
             Create Index
           </Button>
         </Box>
-        {indices?.map((index) => (
+        {ragIndices?.map((index) => (
           <Paper
             key={index.id}
             sx={{
               mb: 2,
               p: 1,
-              outline: selectedIndex?.id === index.id ? '2px solid blue' : 'none',
             }}
-            elevation={selectedIndex?.id === index.id ? 4 : 2}
           >
             <Table sx={{ mb: 1 }}>
               <TableHead>
@@ -127,39 +69,12 @@ const Rag: React.FC = () => {
               </TableBody>
             </Table>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <Button disabled={selectedIndex?.id === index.id} onClick={() => setSelectedIndex(index)}>
-                {selectedIndex?.id === index.id ? 'Selected' : 'Select'}
-              </Button>
               <Link to={`/rag/${index.id}`} component={RouterLink} sx={{ ml: 'auto' }}>
                 View details
               </Link>
             </Box>
           </Paper>
         ))}
-      </Box>
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
-          margin: '0 auto',
-        }}
-      >
-        <TextField label="Enter text" variant="outlined" value={inputValue} onChange={(e) => setInputValue(e.target.value)} fullWidth />
-        <TextField label="top k" variant="outlined" type="number" value={topK} onChange={(e) => setTopK(parseInt(e.target.value, 10))} fullWidth />
-        <Button type="submit" variant="contained" color="primary" disabled={!inputValue || !selectedIndex}>
-          Search
-        </Button>
-        {response && (
-          <Box mt={2}>
-            <Typography variant="h6">Response:</Typography>
-            {response.map((doc) => (
-              <Chunk key={doc.id} doc={doc.value} />
-            ))}
-          </Box>
-        )}
       </Box>
     </Box>
   )

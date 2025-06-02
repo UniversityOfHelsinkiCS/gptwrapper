@@ -4,6 +4,14 @@ export type RagIndexMetadata = {
   azureVectorStoreId: string
 }
 
+export type RagIndexAttributes = {
+  id: number
+  createdAt: string
+  updatedAt: string
+  metadata: RagIndexMetadata
+  ragFileCount: number
+}
+
 export type FileCitation = {
   file_id: string
   filename: string
