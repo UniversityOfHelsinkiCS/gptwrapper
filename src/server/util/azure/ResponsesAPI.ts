@@ -1,9 +1,8 @@
 import { Tiktoken } from '@dqbd/tiktoken'
 import { Response } from 'express'
-import { isError } from '../parser'
 
 import { AZURE_RESOURCE, AZURE_API_KEY } from '../config'
-import { validModels, inProduction } from '../../../config'
+import { validModels } from '../../../config'
 import logger from '../logger'
 
 import { APIError } from '../../types'
@@ -11,12 +10,11 @@ import { AzureOpenAI } from 'openai'
 
 // import { EventStream } from '@azure/openai'
 import { Stream } from 'openai/streaming'
-import { FileSearchTool, FunctionTool, ResponseInput, ResponseInputItem, ResponseStreamEvent, ResponseTextAnnotationDeltaEvent } from 'openai/resources/responses/responses'
+import { FileSearchTool, ResponseIncludable, ResponseInput, ResponseStreamEvent } from 'openai/resources/responses/responses'
 
-import { courseAssistants } from './courseAssistants'
 import { createFileSearchTool } from './util'
 
-import type { CourseAssistant, FileCitation, ResponseStreamEventData } from '../../../shared/types'
+import type { FileCitation, ResponseStreamEventData } from '../../../shared/types'
 
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
@@ -34,20 +32,11 @@ export class ResponsesClient {
   model: string
   instructions: string
   tools: FileSearchTool[]
-  courseAssistant: CourseAssistant
 
-  constructor({ model, courseId, vectorStoreId }: { model: string; courseId?: string; vectorStoreId?: string }) {
+  constructor({ model, courseId, vectorStoreId, instructions }: { model: string; courseId?: string; vectorStoreId?: string; instructions?: string }) {
     const deploymentId = validModels.find((m) => m.name === model)?.deployment
 
     if (!deploymentId) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
-
-    if (courseId) {
-      this.courseAssistant = courseAssistants.find((assistant) => assistant.course_id === courseId)
-
-      if (!this.courseAssistant) throw new Error(`No course assistant found for course ID: ${courseId}`)
-    } else {
-      this.courseAssistant = courseAssistants.find((assistant) => assistant.name === 'default')
-    }
 
     const fileSearchTool = courseId
       ? [
@@ -58,11 +47,19 @@ export class ResponsesClient {
       : [] // needs to retrun empty array for null
 
     this.model = deploymentId
-    this.instructions = this.courseAssistant.assistant_instruction
+    this.instructions = instructions
     this.tools = fileSearchTool
   }
 
-  async createResponse({ input, prevResponseId }: { input: ResponseInput; prevResponseId?: string }): Promise<Stream<ResponseStreamEvent> | APIError> {
+  async createResponse({
+    input,
+    prevResponseId,
+    include,
+  }: {
+    input: ResponseInput
+    prevResponseId?: string
+    include?: ResponseIncludable[]
+  }): Promise<Stream<ResponseStreamEvent> | APIError> {
     try {
       return await client.responses.create({
         model: this.model,
@@ -73,6 +70,7 @@ export class ResponsesClient {
         tools: this.tools,
         tool_choice: 'auto',
         store: true,
+        include,
       })
     } catch (error: any) {
       logger.error(error)

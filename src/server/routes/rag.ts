@@ -45,7 +45,7 @@ router.post('/indices', async (req, res) => {
     return
   }
 
-  const client = getAzureOpenAIClient('curredev4omini')
+  const client = getAzureOpenAIClient()
   const vectorStore = await client.vectorStores.create({
     name,
   })
@@ -77,7 +77,7 @@ router.delete('/indices/:id', async (req, res) => {
     return
   }
 
-  const client = getAzureOpenAIClient('curredev4omini')
+  const client = getAzureOpenAIClient()
   try {
     await client.vectorStores.del(ragIndex.metadata.azureVectorStoreId)
   } catch (error) {
@@ -123,7 +123,7 @@ router.get('/indices', async (req, res) => {
   })
 
   if (includeExtras) {
-    const client = getAzureOpenAIClient('curredev4omini')
+    const client = getAzureOpenAIClient()
 
     // Add ragFileCount to each index
     const indicesWithCount = await Promise.all(
@@ -159,7 +159,7 @@ router.get('/indices/:id', async (req, res) => {
     return
   }
 
-  const client = getAzureOpenAIClient('curredev4omini')
+  const client = getAzureOpenAIClient()
   const vectorStore = await client.vectorStores.retrieve(ragIndex.metadata.azureVectorStoreId)
 
   res.json({
@@ -265,7 +265,7 @@ router.post('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware],
     ),
   )
 
-  const client = getAzureOpenAIClient('curredev4omini')
+  const client = getAzureOpenAIClient()
 
   const uploadDirPath = `${UPLOAD_DIR}/${id}`
 

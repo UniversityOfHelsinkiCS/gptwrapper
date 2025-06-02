@@ -1,7 +1,8 @@
 export type RagIndexMetadata = {
   name: string
-  dim: number
+  dim?: number
   azureVectorStoreId: string
+  instructions?: string
 }
 
 export type RagFileAttributes = {

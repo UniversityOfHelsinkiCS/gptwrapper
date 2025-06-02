@@ -1,4 +1,4 @@
-import { OpenAIClient, AzureKeyCredential, EventStream, ChatCompletions, GetEmbeddingsOptions } from '@azure/openai'
+import { OpenAIClient, AzureKeyCredential, EventStream, ChatCompletions } from '@azure/openai'
 import { Tiktoken } from '@dqbd/tiktoken'
 import { Response } from 'express'
 
@@ -12,7 +12,7 @@ const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
 const oldClient = new OpenAIClient(endpoint, new AzureKeyCredential(AZURE_API_KEY))
 
-export const getAzureOpenAIClient = (deployment: string) =>
+export const getAzureOpenAIClient = (deployment?: string) =>
   new AzureOpenAI({
     apiKey: AZURE_API_KEY,
     deployment,

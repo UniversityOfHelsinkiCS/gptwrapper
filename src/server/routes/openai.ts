@@ -63,7 +63,7 @@ const PostStreamSchemaV2 = z.object({
 openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   const req = r as RequestWithUser
   const { options, courseId } = PostStreamSchemaV2.parse(JSON.parse(req.body.data))
-  const { userConsent } = options
+  const { userConsent, ragIndexId } = options
   const { user } = req
 
   console.log('options', options)
@@ -73,8 +73,26 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     return
   }
 
+  const course =
+    courseId &&
+    (await ChatInstance.findOne({
+      where: { courseId },
+    }))
+
+  if (courseId && !course) {
+    res.status(404).send('Course not found')
+    return
+  }
+
   // Check if the user has usage limits for the course or model
-  const usageAllowed = courseId ? await checkCourseUsage(user, courseId) : options.model === FREE_MODEL || (await checkUsage(user, options.model))
+  let usageAllowed = false
+  if (courseId) {
+    usageAllowed = await checkCourseUsage(user, courseId)
+  } else if (options.model === FREE_MODEL) {
+    usageAllowed = true
+  } else {
+    usageAllowed = await checkUsage(user, options.model)
+  }
 
   if (!usageAllowed) {
     res.status(403).send('Usage limit reached')
@@ -123,6 +141,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     return
   }
 
+  // Check context limit
   const contextLimit = getModelContextLimit(options.model)
 
   if (tokenCount > contextLimit) {
@@ -131,14 +150,27 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     return
   }
 
+  // Check rag index
   let vectorStoreId: string | undefined = undefined
-  if (courseId) {
-    const ragIndex = await RagIndex.findOne({
-      where: { courseId },
-    })
+  let instructions: string | undefined = undefined
+
+  if (ragIndexId) {
+    const ragIndex = await RagIndex.findByPk(ragIndexId)
     if (ragIndex) {
+      if (courseId && ragIndex.courseId !== courseId) {
+        logger.error('RagIndex does not belong to the course', { ragIndexId, courseId })
+        res.status(403).send('RagIndex does not belong to the course')
+        return
+      }
+
       vectorStoreId = ragIndex.metadata.azureVectorStoreId
+      instructions = ragIndex.metadata.instructions
+
       console.log('using', ragIndex.toJSON())
+    } else {
+      logger.error('RagIndex not found', { ragIndexId })
+      res.status(404).send('RagIndex not found')
+      return
     }
   }
 
@@ -146,10 +178,12 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     model: options.model,
     courseId,
     vectorStoreId,
+    instructions,
   })
 
-  const latestMessage = options.messages[options.messages.length - 1] // Adhoc to input only the latest message
-  const events = await responsesClient.createResponse({ input: [latestMessage], prevResponseId: options.prevResponseId })
+  const latestMessage = options.messages[options.messages.length - 1]
+
+  const events = await responsesClient.createResponse({ input: [latestMessage], prevResponseId: options.prevResponseId, include: ragIndexId ? ['file_search_call.results'] : [] })
 
   if (isError(events)) {
     res.status(424)
@@ -183,12 +217,6 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     user: user.username,
     courseId,
   })
-
-  const course =
-    courseId &&
-    (await ChatInstance.findOne({
-      where: { courseId },
-    }))
 
   const consentToSave = courseId && course.saveDiscussions && options.saveConsent
 
