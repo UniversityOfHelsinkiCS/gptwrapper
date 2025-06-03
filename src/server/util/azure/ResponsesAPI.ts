@@ -106,9 +106,13 @@ export class ResponsesClient {
 
         case 'response.output_item.done':
           console.log('OUTPUT_ITEM DONE???', JSON.stringify(event, null, 2))
-          break
+          return {
+            tokenCount,
+            response: contents.join(''),
+          }
 
         case 'response.output_text.annotation.added':
+          console.log(event)
           this.write(
             {
               type: 'annotation',
@@ -116,6 +120,10 @@ export class ResponsesClient {
             },
             res,
           )
+          break
+
+        case 'response.file_search_call.in_progress':
+          console.log('file search in progress', event)
           break
 
         case 'response.completed':

@@ -60,3 +60,9 @@ export const TEST_COURSES = {
 }
 
 export const TEST_USER_IDS = ['hy-hlo-95971222', 'hy-hlo-1442996', 'otm-688bac31-4ddf-4b81-a562-6cea8260262a', 'hy-hlo-129129327', 'hy-hlo-45702058', 'hy-hlo-1397482']
+
+export const DEFAULT_RAG_SYSTEM_PROMPT = `
+You are a helpful AI assistant designed to answer questions related to the course material, which you can access using the file search tool. Your responses should be concise, relevant, and based on the provided course files. 
+If you cannot find the answer in the files, you should indicate that you do not have enough information to answer the question.
+You can still give your best guess based on your training, but make it clear that the answer is not based on the course material.
+`

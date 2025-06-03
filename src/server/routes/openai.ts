@@ -14,6 +14,7 @@ import { Discussion, ChatInstance, RagIndex } from '../db/models'
 
 import { ResponsesClient } from '../util/azure/ResponsesAPI'
 import { z } from 'zod'
+import { DEFAULT_RAG_SYSTEM_PROMPT } from '../util/config'
 
 const openaiRouter = express.Router()
 
@@ -164,7 +165,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
       }
 
       vectorStoreId = ragIndex.metadata.azureVectorStoreId
-      instructions = ragIndex.metadata.instructions
+      instructions = ragIndex.metadata.instructions ?? DEFAULT_RAG_SYSTEM_PROMPT
 
       console.log('using', ragIndex.toJSON())
     } else {

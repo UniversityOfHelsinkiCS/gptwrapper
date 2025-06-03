@@ -2,6 +2,7 @@ import { Box, Paper, Typography } from '@mui/material'
 import { FileCitation, RagFileAttributes, RagIndexAttributes } from '../../../shared/types'
 import { Message } from '../../types'
 import { useQuery } from '@tanstack/react-query'
+import Markdown from 'react-markdown'
 
 const useFileCitationText = (citation: FileCitation, ragIndex: RagIndexAttributes) => {
   const ragFileId = ragIndex?.ragFiles?.find((file) => file.filename === citation.filename)?.id
@@ -44,7 +45,7 @@ const Citation = ({ citation, ragIndex }: { citation: FileCitation; ragIndex: Ra
           Error loading citation text: {error.message}
         </Typography>
       ) : (
-        ragFile && <Typography variant="body2">{contentAtIdx}</Typography>
+        ragFile && <Markdown>{contentAtIdx}</Markdown>
       )}
     </Box>
   )
@@ -52,7 +53,7 @@ const Citation = ({ citation, ragIndex }: { citation: FileCitation; ragIndex: Ra
 
 const MessageCitations = ({ citations, ragIndex }: { citations: FileCitation[]; ragIndex: RagIndexAttributes }) => {
   return (
-    <Box sx={{ mt: 1, fontSize: '0.875rem', color: 'gray' }}>
+    <Box sx={{ mt: 1 }}>
       {citations.map((citation, index) => (
         <Citation key={index} citation={citation} ragIndex={ragIndex} />
       ))}
