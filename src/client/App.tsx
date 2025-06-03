@@ -99,7 +99,7 @@ const App = () => {
           <AppContext.Provider value={appRef}>
             <Box minHeight="100vh" display="flex" flexDirection="column" ref={appRef}>
               <NavBar />
-              <Container component="main" sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
+              <Container component="main" maxWidth={false}>
                 <Outlet />
               </Container>
               <Footer />

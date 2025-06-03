@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Alert, Box, Typography, Slider } from '@mui/material'
+import { Alert, Box, Typography, Slider, Container } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
@@ -350,7 +350,8 @@ const Chat = () => {
   }
 
   return (
-    <Box>
+    <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
+
       <Banner disclaimer={disclaimer} />
       {course && <CourseInfo course={course} />}
       <Box sx={{ mb: 3 }} />
@@ -420,7 +421,7 @@ const Chat = () => {
           max={1}
         />
       </Box>
-    </Box>
+    </Container>
   )
 }
 

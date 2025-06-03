@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, Link } from '@mui/material'
+import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, Link, Container } from '@mui/material'
 import apiClient from '../../util/apiClient'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate, Link as RouterLink, useParams } from 'react-router-dom'
@@ -23,7 +23,7 @@ const Rag: React.FC = () => {
   const [indexName, setIndexName] = useState('')
 
   return (
-    <Box sx={{ display: 'flex', gap: 2 }}>
+    <Container sx={{ display: 'flex', gap: 2, mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Box>
         <Typography variant="h4" mb="1rem">
           RAG Indices
@@ -76,7 +76,7 @@ const Rag: React.FC = () => {
           </Paper>
         ))}
       </Box>
-    </Box>
+    </Container>
   )
 }
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Tabs, Tab, Typography } from '@mui/material'
+import { Container, Box, Tabs, Tab, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Route, Routes, Link, matchPath, useLocation, Navigate } from 'react-router-dom'
 import { get } from 'lodash'
@@ -33,7 +33,7 @@ const Admin = () => {
   const lastRestart = format(new Date(user?.lastRestart), 'dd/MM/yyyy HH.mm.ss')
 
   return (
-    <Box>
+    <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Box m={2}>
         <Typography variant="body1">
           {t('admin:lastUpdate')}
@@ -57,7 +57,7 @@ const Admin = () => {
         <Route path="/edit-texts" element={<EditTexts />} />
         <Route path="/usersearch" element={<UserSearch />} />
       </Routes>
-    </Box>
+    </ Container>
   )
 }
 

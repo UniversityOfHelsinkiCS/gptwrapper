@@ -1,4 +1,4 @@
-import { Box, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Table } from '@mui/material'
+import { Box, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Table, Container } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { formatDate } from '../Courses/util'
@@ -34,7 +34,7 @@ const Chats = () => {
   }
 
   return (
-    <div>
+    <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <h2>{t('chats:header')}</h2>
 
       <Box my={2}>
@@ -87,7 +87,7 @@ const Chats = () => {
           </Table>
         </TableContainer>
       </Box>
-    </div>
+    </Container>
   )
 }
 

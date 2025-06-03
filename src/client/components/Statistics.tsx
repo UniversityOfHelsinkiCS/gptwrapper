@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Table, Select, MenuItem, Tooltip, Link } from '@mui/material'
+import { Box, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Table, Select, MenuItem, Tooltip, Link, Container } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
 import useStatistics from '../hooks/useStatistics'
 import { Statistic } from '../types'
@@ -43,7 +43,7 @@ const Statistics = () => {
   const statsToShow = statistics.data.filter(termWithin).filter(belongsToFaculty).sort(byUsage)
 
   return (
-    <div>
+    <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Box my={2}>
         <div>
           <span style={{ marginRight: 10 }}>{t('stats:timePeriodStart')}</span>
@@ -157,7 +157,7 @@ const Statistics = () => {
           </Table>
         </TableContainer>
       </Box>
-    </div>
+    </Container>
   )
 }
 

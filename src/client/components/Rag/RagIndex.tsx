@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Box, Typography, styled, LinearProgress, Link } from '@mui/material'
+import { Button, Box, Typography, styled, LinearProgress, Link, Container } from '@mui/material'
 import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom'
 import apiClient from '../../util/apiClient'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -81,7 +81,7 @@ export const RagIndex: React.FC = () => {
   }
 
   return (
-    <>
+    <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Link component={RouterLink} to="/rag">
         <Typography variant="body1">Back to RAG Indices</Typography>
       </Link>
@@ -124,6 +124,6 @@ export const RagIndex: React.FC = () => {
           ))}
         </Box>
       </Box>
-    </>
+    </ Container>
   )
 }

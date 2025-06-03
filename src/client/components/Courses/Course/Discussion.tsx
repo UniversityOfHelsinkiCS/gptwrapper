@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Box, Paper, Divider } from '@mui/material'
+import { Box, Paper, Divider, Container } from '@mui/material'
 import { Person, Assistant } from '@mui/icons-material'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -62,7 +62,7 @@ const Discussion = () => {
   if (!course || courseLoading || !messages || usageLoading || isUserLoading || !user) return null
 
   return (
-    <div>
+    <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <h2>{course.name[language]}</h2>
 
       <div>student: {user_id}</div>
@@ -72,7 +72,7 @@ const Discussion = () => {
           <Message key={u.id} message={u} />
         ))}
       </div>
-    </div>
+    </Container>
   )
 }
 

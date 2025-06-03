@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useParams, Link as RouterLink } from 'react-router-dom'
 import apiClient from '../../util/apiClient'
 import type { RagFileAttributes } from '../../../server/db/models/ragFile'
-import { Link, Typography } from '@mui/material'
+import { Container, Link, Typography } from '@mui/material'
 import { RagFileInfo } from './RagFileDetails'
 import type { RagIndexAttributes } from '../../../server/db/models/ragIndex'
 import { Chunk } from './Chunk'
@@ -27,7 +27,7 @@ export const RagFile: React.FC = () => {
   }
 
   return (
-    <>
+    <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Link component={RouterLink} to={`/rag/${id}`}>
         Back to RAG Index
       </Link>
@@ -48,6 +48,6 @@ export const RagFile: React.FC = () => {
           }}
         />
       )}
-    </>
+    </Container>
   )
 }

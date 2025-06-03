@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Tab, Tabs, Typography } from '@mui/material'
+import { Box, Tab, Tabs, Typography, Container } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import useUserCourses from '../../hooks/useUserCourses'
 import CourseList from './CourseList'
@@ -38,7 +38,7 @@ const Courses = () => {
   const activeCourses = courses.filter((course) => !course.isExpired)
 
   return (
-    <>
+    <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Box display="flex" gap={2}>
         <Typography variant="h5" display="inline" mb={1}>
           {t('common:courses')}
@@ -58,7 +58,7 @@ const Courses = () => {
       <CustomTabPanel value={value} index={2}>
         <CourseList courseUnits={ended} />
       </CustomTabPanel>
-    </>
+    </Container>
   )
 }
 

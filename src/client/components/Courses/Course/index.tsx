@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Box, Paper, Typography, Button, Modal, Checkbox, FormControlLabel, Input, Alert, Tooltip } from '@mui/material'
+import { Box, Paper, Typography, Button, Modal, Checkbox, FormControlLabel, Input, Alert, Tooltip, Container } from '@mui/material'
 import { OpenInNew, Edit } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
@@ -143,13 +143,7 @@ const Course = () => {
   }
 
   return (
-    <Box
-      sx={{
-        margin: '0 auto',
-        width: '90%',
-        padding: '5%',
-      }}
-    >
+    <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Alert severity={getInfoSeverity()}>
         <Typography variant="h6">{getInfoMessage()}</Typography>
       </Alert>
@@ -317,7 +311,7 @@ const Course = () => {
       <Box sx={{ mt: 2 }}>
         <Rag />
       </Box>
-    </Box>
+    </Container>
   )
 }
 
