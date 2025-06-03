@@ -142,7 +142,7 @@ export const ChatV2 = () => {
     setMessage({ content: '' })
     setPrevResponse({ id: '' })
     setCompletion('')
-    setFileSearchResult(undefined)
+    setFileSearchResult(null)
     setStreamController(new AbortController())
     setRetryTimeout(() => {
       if (streamController) {
