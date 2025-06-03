@@ -34,7 +34,6 @@ export const ChatBox = ({ disabled, onSubmit }: { disabled: boolean; onSubmit: (
       sx={{
         position: 'fixed',
         bottom: '8rem',
-        // width: '100%',
       }}
     >
       <Paper

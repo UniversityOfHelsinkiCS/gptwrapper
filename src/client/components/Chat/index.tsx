@@ -351,7 +351,6 @@ const Chat = () => {
 
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
-
       <Banner disclaimer={disclaimer} />
       {course && <CourseInfo course={course} />}
       <Box sx={{ mb: 3 }} />

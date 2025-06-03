@@ -57,7 +57,7 @@ const Admin = () => {
         <Route path="/edit-texts" element={<EditTexts />} />
         <Route path="/usersearch" element={<UserSearch />} />
       </Routes>
-    </ Container>
+    </Container>
   )
 }
 

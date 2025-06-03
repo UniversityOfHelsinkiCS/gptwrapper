@@ -10,7 +10,7 @@ import { FileSearchResult, ResponseStreamEventData } from '../../../shared/types
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
-import { Box, Button, IconButton } from '@mui/material'
+import { Box, Button, IconButton, Container } from '@mui/material'
 import { Disclaimer } from './Disclaimer'
 import { Conversation } from './Conversation'
 import { ChatBox } from './ChatBox'
@@ -198,35 +198,48 @@ export const ChatV2 = () => {
   useScrollToBottom(chatContainerRef, appContainerRef, messages)
 
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <SettingsModal
-        open={settingsModalOpen}
-        setOpen={setSettingsModalOpen}
-        model={model.name}
-        setModel={(name) => setModel({ name })}
-        setRagIndex={setRagIndexId}
-        ragIndices={ragIndices}
-        currentRagIndex={ragIndex}
-      />
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box sx={{ display: 'flex', gap: '1rem' }}>
-          {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
-          <SystemPrompt content={system.content} setContent={(content) => setSystem({ content })} />
-          <Button onClick={handleReset}>Reset</Button>
-          <IconButton onClick={() => setSettingsModalOpen(true)} title="Settings">
-            <Settings></Settings>
-          </IconButton>
-        </Box>
-        {courseId ? <Link to={'/v2'}>CurreChat</Link> : <Link to={'/v2/sandbox'}>Ohtu Sandbox</Link>}
+    <Box sx={{ display: 'flex', flexDirection: 'row', p: 0 }}>
+      {/* Course chats columns */}
+      <Box sx={{ flex: 1, borderRight: '1px solid lightgray' }}>
+        <div>Course Chats</div>
       </Box>
-      <Box sx={{ display: 'flex' }}>
-        <Box ref={chatContainerRef} flex={1}>
+
+      <Box
+        sx={{
+          flex: 4,
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          p: '2rem',
+        }}
+      >
+        <SettingsModal
+          open={settingsModalOpen}
+          setOpen={setSettingsModalOpen}
+          model={model.name}
+          setModel={(name) => setModel({ name })}
+          setRagIndex={setRagIndexId}
+          ragIndices={ragIndices}
+          currentRagIndex={ragIndex}
+        />
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Box sx={{ display: 'flex', gap: '1rem' }}>
+            {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
+            <SystemPrompt content={system.content} setContent={(content) => setSystem({ content })} />
+            <Button onClick={handleReset}>Reset</Button>
+            <IconButton onClick={() => setSettingsModalOpen(true)} title="Settings">
+              <Settings></Settings>
+            </IconButton>
+          </Box>
+          {courseId ? <Link to={'/v2'}>CurreChat</Link> : <Link to={'/v2/sandbox'}>Ohtu Sandbox</Link>}
+        </Box>
+        <Box sx={{ display: 'flex', width: '100%' }}>
           <Conversation messages={messages} completion={completion} fileSearchResult={fileSearchResult} />
           <ChatBox
             disabled={false}
@@ -244,6 +257,9 @@ export const ChatV2 = () => {
           </Box>
         )}
       </Box>
+
+      {/* Annotations columns */}
+      <Box sx={{ flex: 1 }}></Box>
     </Box>
   )
 }

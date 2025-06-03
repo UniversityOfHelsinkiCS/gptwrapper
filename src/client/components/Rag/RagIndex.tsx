@@ -124,6 +124,6 @@ export const RagIndex: React.FC = () => {
           ))}
         </Box>
       </Box>
-    </ Container>
+    </Container>
   )
 }
