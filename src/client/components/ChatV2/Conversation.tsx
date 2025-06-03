@@ -3,7 +3,7 @@ import { Message } from '../../types'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Assistant } from '@mui/icons-material'
-import { FileCitation, FileSearchResult } from '../../../shared/types'
+import { FileSearchResult } from '../../../shared/types'
 
 const MessageItem = ({ message }: { message: Message }) => (
   <Paper

@@ -155,7 +155,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   let vectorStoreId: string | undefined = undefined
   let instructions: string | undefined = undefined
 
-  if (ragIndexId) {
+  if (ragIndexId && user.isAdmin) {
     const ragIndex = await RagIndex.findByPk(ragIndexId)
     if (ragIndex) {
       if (courseId && ragIndex.courseId !== courseId) {
