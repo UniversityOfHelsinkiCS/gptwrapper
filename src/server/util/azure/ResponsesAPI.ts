@@ -104,12 +104,19 @@ export class ResponsesClient {
           console.log('file search completed')
           break
 
-        case 'response.output_item.done':
-          console.log('OUTPUT_ITEM DONE???', JSON.stringify(event, null, 2))
-          return {
-            tokenCount,
-            response: contents.join(''),
+        case 'response.output_item.done': {
+          if (event.item.type === 'file_search_call') {
+            this.write(
+              {
+                type: 'fileSearchDone',
+                fileSearch: event.item,
+              },
+              res,
+            )
           }
+
+          break
+        }
 
         case 'response.output_text.annotation.added':
           console.log(event)

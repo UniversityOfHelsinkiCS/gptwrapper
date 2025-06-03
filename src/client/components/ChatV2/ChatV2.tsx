@@ -6,7 +6,7 @@ import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { DEFAULT_MODEL } from '../../../config'
 import useInfoTexts from '../../hooks/useInfoTexts'
 import { Message } from '../../types'
-import { FileCitation, ResponseStreamEventData } from '../../../shared/types'
+import { FileCitation, FileSearchResult, ResponseStreamEventData } from '../../../shared/types'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
@@ -49,7 +49,7 @@ export const ChatV2 = () => {
   const [activePromptId, setActivePromptId] = useState('')
   const [fileName, setFileName] = useState<string>('')
   const [completion, setCompletion] = useState('')
-  const [citations, setCitations] = useState<FileCitation[]>([])
+  const [fileSearchResult, setFileSearchResult] = useLocalStorageState<FileSearchResult>('last-file-search', null)
   const [streamController, setStreamController] = useState<AbortController>()
   const [alertOpen, setAlertOpen] = useState(false)
   const [disallowedFileType, setDisallowedFileType] = useState('')
@@ -75,7 +75,7 @@ export const ChatV2 = () => {
       const reader = stream.getReader()
 
       let content = ''
-      const citations: FileCitation[] = []
+      let fileSearchResult: FileSearchResult
 
       while (true) {
         const { value, done } = await reader.read()
@@ -86,7 +86,12 @@ export const ChatV2 = () => {
         for (const chunk of data.split('\n')) {
           if (!chunk || chunk.trim().length === 0) continue
 
-          const parsedChunk: ResponseStreamEventData = JSON.parse(chunk)
+          let parsedChunk: ResponseStreamEventData = null
+          try {
+            parsedChunk = JSON.parse(chunk)
+          } catch (_e) {
+            console.error('Could not parse the chunk:', chunk)
+          }
 
           switch (parsedChunk.type) {
             case 'writing':
@@ -96,8 +101,11 @@ export const ChatV2 = () => {
 
             case 'annotation':
               console.log('Received annotation:', parsedChunk.annotation)
-              setCitations((prev) => [...prev, parsedChunk.annotation])
-              citations.push(parsedChunk.annotation)
+              break
+
+            case 'fileSearchDone':
+              fileSearchResult = parsedChunk.fileSearch
+              setFileSearchResult(parsedChunk.fileSearch)
               break
 
             case 'complete':
@@ -115,8 +123,7 @@ export const ChatV2 = () => {
         }
       }
 
-      setMessages((prev: Message[]) => prev.concat({ role: 'assistant', content, citations }))
-      setCitations([])
+      setMessages((prev: Message[]) => prev.concat({ role: 'assistant', content, fileSearchResult }))
     } catch (err: any) {
       handleCompletionStreamError(err, fileName)
     } finally {
@@ -135,7 +142,7 @@ export const ChatV2 = () => {
     setMessage({ content: '' })
     setPrevResponse({ id: '' })
     setCompletion('')
-    setCitations([])
+    setFileSearchResult(undefined)
     setStreamController(new AbortController())
     setRetryTimeout(() => {
       if (streamController) {
@@ -176,6 +183,7 @@ export const ChatV2 = () => {
     setMessage({ content: '' })
     setPrevResponse({ id: '' })
     setCompletion('')
+    setFileSearchResult(null)
     setStreamController(undefined)
     setTokenUsageWarning('')
     setTokenWarningVisible(false)
@@ -218,8 +226,8 @@ export const ChatV2 = () => {
         {courseId ? <Link to={'/v2'}>CurreChat</Link> : <Link to={'/v2/sandbox'}>Ohtu Sandbox</Link>}
       </Box>
       <Box sx={{ display: 'flex' }}>
-        <Box ref={chatContainerRef}>
-          <Conversation messages={messages} completion={completion} citations={citations} />
+        <Box ref={chatContainerRef} flex={1}>
+          <Conversation messages={messages} completion={completion} fileSearchResult={fileSearchResult} />
           <ChatBox
             disabled={false}
             onSubmit={(message) => {
@@ -230,7 +238,11 @@ export const ChatV2 = () => {
             }}
           />
         </Box>
-        {ragIndex && <CitationsBox messages={messages} citations={citations} ragIndex={ragIndex} />}
+        {ragIndex && (
+          <Box flex={1}>
+            <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />
+          </Box>
+        )}
       </Box>
     </Box>
   )

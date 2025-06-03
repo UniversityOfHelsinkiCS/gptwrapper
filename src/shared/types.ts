@@ -1,3 +1,5 @@
+import type { ResponseFileSearchToolCall } from 'openai/resources/responses/responses'
+
 export type RagIndexMetadata = {
   name: string
   dim?: number
@@ -26,6 +28,8 @@ export type FileCitation = {
   type: 'file_citation'
 }
 
+export type FileSearchResult = ResponseFileSearchToolCall
+
 export type ResponseStreamEventData =
   | {
       type: 'start'
@@ -38,6 +42,10 @@ export type ResponseStreamEventData =
   | {
       type: 'complete'
       prevResponseId: string
+    }
+  | {
+      type: 'fileSearchDone'
+      fileSearch: FileSearchResult
     }
   | {
       type: 'error'

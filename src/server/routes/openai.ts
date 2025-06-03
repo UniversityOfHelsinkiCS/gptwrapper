@@ -197,13 +197,13 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
 
   res.setHeader('content-type', 'text/event-stream')
 
-  const completion = await responsesClient.handleResponse({
+  const result = await responsesClient.handleResponse({
     events,
     encoding,
     res,
   })
 
-  tokenCount += completion.tokenCount
+  tokenCount += result.tokenCount
 
   let userToCharge = user
   if (inProduction && req.hijackedBy) {
@@ -228,10 +228,11 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   console.log('consentToSave', options.saveConsent, user.username)
 
   if (consentToSave) {
+    // @todo: should file search results also be saved?
     const discussion = {
       userId: user.id,
       courseId,
-      response: completion.response,
+      response: result.response,
       metadata: options,
     }
     await Discussion.create(discussion)

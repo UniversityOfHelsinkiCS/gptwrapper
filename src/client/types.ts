@@ -1,4 +1,4 @@
-import { FileCitation } from '../shared/types'
+import { FileSearchResult } from "../shared/types"
 
 export type SetState<T> = React.Dispatch<React.SetStateAction<T>>
 
@@ -7,7 +7,7 @@ export type Role = 'system' | 'assistant' | 'user'
 export interface Message {
   role: Role
   content: string
-  citations?: FileCitation[]
+  fileSearchResult?: FileSearchResult
 }
 
 interface Term {

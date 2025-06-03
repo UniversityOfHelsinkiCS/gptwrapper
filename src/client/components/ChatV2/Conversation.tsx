@@ -3,31 +3,19 @@ import { Message } from '../../types'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Assistant } from '@mui/icons-material'
-import { FileCitation } from '../../../shared/types'
+import { FileCitation, FileSearchResult } from '../../../shared/types'
 
 const MessageItem = ({ message }: { message: Message }) => (
   <Paper
-    elevation={3}
+    elevation={message.role === 'assistant' ? 0 : 3}
     sx={{
       my: '2rem',
       ml: message.role === 'assistant' ? '0' : '2rem',
       mr: message.role === 'assistant' ? '2rem' : '0',
       p: '1rem',
-      backgroundColor: message.role === 'user' ? '#ffffff' : '#e0f7fa',
-      borderRadius: message.role === 'assistant' ? '0 1rem 1rem 1rem' : '1rem 0 1rem 1rem',
     }}
   >
     <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
-    {message.citations && message.citations.length > 0 && (
-      <Box sx={{ mt: 1, fontSize: '0.875rem', color: 'gray' }}>
-        Citations:
-        {message.citations.map((citation, index) => (
-          <Box key={index} sx={{ display: 'block' }}>
-            {citation.filename}
-          </Box>
-        ))}
-      </Box>
-    )}
   </Paper>
 )
 
@@ -52,12 +40,12 @@ const PöhinäLogo = () => (
   </Box>
 )
 
-export const Conversation = ({ messages, completion, citations }: { messages: Message[]; completion: string; citations: FileCitation[] }) => (
+export const Conversation = ({ messages, completion, fileSearchResult }: { messages: Message[]; completion: string; fileSearchResult: FileSearchResult }) => (
   <Box sx={{ flex: 1, overflowY: 'auto', gap: 2 }}>
     {messages.map((message, idx) => (
       <MessageItem key={idx} message={message} />
     ))}
-    {completion && <MessageItem message={{ role: 'assistant', content: completion, citations }} />}
+    {completion && <MessageItem message={{ role: 'assistant', content: completion, fileSearchResult }} />}
     {messages.length === 0 && <PöhinäLogo />}
   </Box>
 )
