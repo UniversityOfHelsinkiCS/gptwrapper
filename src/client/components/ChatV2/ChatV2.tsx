@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
 import useUserStatus from '../../hooks/useUserStatus'
-import { useRef, useState, useContext } from 'react'
+import { useState } from 'react'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { DEFAULT_MODEL } from '../../../config'
 import useInfoTexts from '../../hooks/useInfoTexts'
@@ -10,17 +10,16 @@ import { FileSearchResult, ResponseStreamEventData } from '../../../shared/types
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
-import { Box, Button, IconButton, Container } from '@mui/material'
+import { Box, Button, IconButton } from '@mui/material'
 import { Disclaimer } from './Disclaimer'
 import { Conversation } from './Conversation'
 import { ChatBox } from './ChatBox'
 import { getCompletionStream } from './util'
 import { SystemPrompt } from './System'
-import { AppContext } from '../../util/context'
 import { Settings } from '@mui/icons-material'
 import { SettingsModal } from './SettingsModal'
 import { Link } from 'react-router-dom'
-import { useScrollToBottom } from './useScrollToBottom'
+// import { useScrollToBottom } from './useScrollToBottom'
 import { CitationsBox } from './CitationsBox'
 import { useRagIndices } from '../../hooks/useRagIndices'
 
@@ -40,10 +39,6 @@ export const ChatV2 = () => {
   const [prevResponse, setPrevResponse] = useLocalStorageState<{
     id: string
   }>('general-prev-response', { id: '' })
-
-  const appContainerRef = useContext(AppContext)
-  const chatContainerRef = useRef<HTMLDivElement>(null)
-  const inputFileRef = useRef<HTMLInputElement>(null)
 
   const [settingsModalOpen, setSettingsModalOpen] = useState(false)
   const [activePromptId, setActivePromptId] = useState('')
@@ -195,12 +190,17 @@ export const ChatV2 = () => {
     clearRetryTimeout()
   }
 
-  useScrollToBottom(chatContainerRef, appContainerRef, messages)
-
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'row', p: 0 }}>
+    <Box
+      sx={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'row',
+        p: 0,
+      }}
+    >
       {/* Course chats columns */}
-      <Box sx={{ flex: 1, borderRight: '1px solid lightgray' }}>
+      <Box sx={{ borderRight: '1px solid lightgray' }}>
         <div>Course Chats</div>
       </Box>
 
@@ -210,7 +210,6 @@ export const ChatV2 = () => {
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
-          p: '2rem',
         }}
       >
         <SettingsModal
@@ -227,6 +226,7 @@ export const ChatV2 = () => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            flexShrink: 0,
           }}
         >
           <Box sx={{ display: 'flex', gap: '1rem' }}>
@@ -239,7 +239,7 @@ export const ChatV2 = () => {
           </Box>
           {courseId ? <Link to={'/v2'}>CurreChat</Link> : <Link to={'/v2/sandbox'}>Ohtu Sandbox</Link>}
         </Box>
-        <Box sx={{ display: 'flex', width: '100%' }}>
+        <Box sx={{ flex: 1, display: 'flex', width: '100%', overflow: 'hidden' }}>
           <Conversation messages={messages} completion={completion} fileSearchResult={fileSearchResult} />
           <ChatBox
             disabled={false}
@@ -251,15 +251,15 @@ export const ChatV2 = () => {
             }}
           />
         </Box>
-        {ragIndex && (
-          <Box flex={1}>
-            <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />
-          </Box>
-        )}
       </Box>
 
       {/* Annotations columns */}
-      <Box sx={{ flex: 1 }}></Box>
+      {/* <Box sx={{ flex: 1 }}></Box> */}
+      {ragIndex && (
+        <Box flex={1}>
+          <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />
+        </Box>
+      )}
     </Box>
   )
 }
