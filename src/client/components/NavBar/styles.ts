@@ -5,7 +5,7 @@ const styles: { [key: string]: SxProps<Theme> } = {
     zIndex: (theme: Theme) => theme.zIndex.drawer + 1,
     borderBottom: '1px solid',
     borderColor: (theme: Theme) => theme.palette.divider,
-    py: '1rem',
+    py: '0.8rem',
   },
   toolbar: {
     display: 'flex',

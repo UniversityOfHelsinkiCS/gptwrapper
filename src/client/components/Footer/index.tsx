@@ -7,7 +7,7 @@ const supportEmail = 'opetusteknologia@helsinki.fi'
 
 const styles = {
   supportBox: {
-    py: '2rem',
+    py: '1rem',
     px: '3rem',
     display: 'flex',
     justifyContent: 'space-between',
