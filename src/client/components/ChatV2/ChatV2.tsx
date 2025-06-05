@@ -10,7 +10,13 @@ import { FileSearchResult, ResponseStreamEventData } from '../../../shared/types
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
-import { Box, Button, IconButton } from '@mui/material'
+
+import { Box, Button, IconButton, Typography } from '@mui/material'
+import SettingsIcon from '@mui/icons-material/Settings'
+import AddCommentIcon from '@mui/icons-material/AddComment'
+import EmailIcon from '@mui/icons-material/Email'
+import DeleteIcon from '@mui/icons-material/Delete'
+
 import { Disclaimer } from './Disclaimer'
 import { Conversation } from './Conversation'
 import { ChatBox } from './ChatBox'
@@ -22,6 +28,9 @@ import { Link } from 'react-router-dom'
 // import { useScrollToBottom } from './useScrollToBottom'
 import { CitationsBox } from './CitationsBox'
 import { useRagIndices } from '../../hooks/useRagIndices'
+import CourseOption from './generics/CourseOption'
+import SettingsButton from './generics/SettingsButton'
+
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -84,7 +93,8 @@ export const ChatV2 = () => {
           let parsedChunk: ResponseStreamEventData = null
           try {
             parsedChunk = JSON.parse(chunk)
-          } catch (_e) {
+          } catch (e: any) {
+            console.error('Error', e)
             console.error('Could not parse the chunk:', chunk)
           }
 
@@ -196,51 +206,63 @@ export const ChatV2 = () => {
         flex: 1,
         display: 'flex',
         flexDirection: 'row',
-        p: 0,
+        height: '100%',
       }}
     >
       {/* Course chats columns */}
-      <Box sx={{ borderRight: '1px solid lightgray' }}>
-        <div>Course Chats</div>
+      <Box sx={{ position: 'relative', flex: 1, borderRight: '1px solid lightgray' }}>
+        <Box sx={{ position: 'sticky', left: 0, top: 0, padding: '2rem 1.5rem' }}>
+          <Typography variant="h6" fontWeight="light">
+            Currechat
+          </Typography>
+          <CourseOption link="/v2">Basic</CourseOption>
+
+          <Typography variant="h6" fontWeight="light" sx={{ mt: '2rem' }}>
+            Kurssichatit
+          </Typography>
+          <CourseOption link="/v2/sandbox">Ohtu sandbox</CourseOption>
+        </Box>
       </Box>
 
+      {/* Chat view */}
       <Box
         sx={{
           flex: 4,
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
+          height: '100%',
         }}
       >
-        <SettingsModal
-          open={settingsModalOpen}
-          setOpen={setSettingsModalOpen}
-          model={model.name}
-          setModel={(name) => setModel({ name })}
-          setRagIndex={setRagIndexId}
-          ragIndices={ragIndices}
-          currentRagIndex={ragIndex}
-        />
+
         <Box
           sx={{
+            position: 'sticky',
+            top: 0,
             display: 'flex',
-            justifyContent: 'space-between',
+            justifyContent: 'center',
             alignItems: 'center',
-            flexShrink: 0,
+            gap: '1.2rem',
+            backgroundColor: 'white',
+            padding: '1.8rem 1rem 0.8rem 1rem',
           }}
         >
-          <Box sx={{ display: 'flex', gap: '1rem' }}>
-            {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
+          {/* {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
             <SystemPrompt content={system.content} setContent={(content) => setSystem({ content })} />
             <Button onClick={handleReset}>Reset</Button>
             <IconButton onClick={() => setSettingsModalOpen(true)} title="Settings">
               <Settings></Settings>
-            </IconButton>
-          </Box>
-          {courseId ? <Link to={'/v2'}>CurreChat</Link> : <Link to={'/v2/sandbox'}>Ohtu Sandbox</Link>}
+            </IconButton> */}
+          <SettingsButton startIcon={<SettingsIcon />}>Keskustelun asetukset</SettingsButton>
+          {/* <SettingsButton startIcon={<AddCommentIcon />}>Alustus</SettingsButton> */}
+          <SettingsButton startIcon={<EmailIcon />}>Tallenna sähköpostina</SettingsButton>
+          <SettingsButton startIcon={<DeleteIcon />}>Tyhjennä</SettingsButton>
+          {/* {courseId ? <Link to={'/v2'}>CurreChat</Link> : <Link to={'/v2/sandbox'}>Ohtu Sandbox</Link>} */}
         </Box>
-        <Box sx={{ flex: 1, display: 'flex', width: '100%', overflow: 'hidden' }}>
-          <Conversation messages={messages} completion={completion} fileSearchResult={fileSearchResult} />
+
+        <Conversation messages={messages} completion={completion} fileSearchResult={fileSearchResult} />
+
+        <Box sx={{ position: 'sticky', bottom: 0, backgroundColor: 'white', paddingBottom: '1.2rem' }}>
           <ChatBox
             disabled={false}
             onSubmit={(message) => {
@@ -254,12 +276,23 @@ export const ChatV2 = () => {
       </Box>
 
       {/* Annotations columns */}
-      {/* <Box sx={{ flex: 1 }}></Box> */}
-      {ragIndex && (
-        <Box flex={1}>
-          <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />
-        </Box>
-      )}
+      <Box sx={{ flex: 1, borderLeft: '1px solid lightgray', position: 'relative' }}>
+        {ragIndex && (
+          <Box sx={{ position: 'sticky', top: 0 }}>
+            <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />
+          </Box>
+        )}
+      </Box>
+
+      <SettingsModal
+        open={settingsModalOpen}
+        setOpen={setSettingsModalOpen}
+        model={model.name}
+        setModel={(name) => setModel({ name })}
+        setRagIndex={setRagIndexId}
+        ragIndices={ragIndices}
+        currentRagIndex={ragIndex}
+      />
     </Box>
   )
 }

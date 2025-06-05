@@ -5,7 +5,7 @@ const styles: { [key: string]: SxProps<Theme> } = {
     zIndex: (theme: Theme) => theme.zIndex.drawer + 1,
     borderBottom: '1px solid',
     borderColor: (theme: Theme) => theme.palette.divider,
-    py: '0.8rem',
+    py: '0.6rem',
   },
   toolbar: {
     display: 'flex',
@@ -19,7 +19,7 @@ const styles: { [key: string]: SxProps<Theme> } = {
   appName: {
     textTransform: 'uppercase',
     fontWeight: 700,
-    fontSize: 24,
+    fontSize: '1.5rem',
     userSelect: 'none',
   },
   navBox: {

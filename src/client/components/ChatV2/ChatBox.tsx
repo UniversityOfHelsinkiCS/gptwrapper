@@ -1,5 +1,5 @@
 import { Send } from '@mui/icons-material'
-import { Box, Container, IconButton, Paper, TextField, Typography } from '@mui/material'
+import { Box, IconButton, TextField, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
@@ -20,27 +20,18 @@ export const ChatBox = ({ disabled, onSubmit }: { disabled: boolean; onSubmit: (
     }
   }
 
-  // Work in progress from Matias. Commented by Ben
-  // useEffect(() => {
-  //   console.log('userStatus', userStatus)
-  // })
-
   if (statusLoading) {
     return <p>loading</p>
   }
   return (
-    <Container
-      disableGutters
+    <Box
       sx={{
-        position: 'fixed',
-        bottom: '8rem',
+        width: '60%',
+        minWidth: 300,
+        margin: 'auto',
       }}
     >
-      <Paper
-        sx={{
-          marginBottom: '1rem',
-        }}
-        elevation={3}
+      <Box
         component="form"
         onSubmit={handleSubmit}
         onKeyDown={(e) => {
@@ -50,37 +41,37 @@ export const ChatBox = ({ disabled, onSubmit }: { disabled: boolean; onSubmit: (
           }
         }}
       >
-        <TextField
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type your message here..."
-          fullWidth
-          multiline
-          disabled={disabled}
-          variant="standard"
-          sx={{ padding: '0.5rem' }}
-          slotProps={{
-            input: {
-              sx: {
-                padding: '0.5rem',
-                fontSize: '1.5rem',
-                // lineHeight: '1.5rem',
+        <Box sx={{ border: '1px solid rgba(0,0,0,0.4)', borderRadius: '0.2rem' }}>
+
+          <TextField
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Kirjoita viestisi tähän..."
+            fullWidth
+            multiline
+            maxRows={8}
+            disabled={disabled}
+            variant="standard"
+            sx={{ padding: '0.5rem 1rem' }}
+            slotProps={{
+              input: {
+                disableUnderline: true,
+                endAdornment: (
+                  <IconButton disabled={disabled} type="submit">
+                    <Send />
+                  </IconButton>
+                ),
               },
-              endAdornment: (
-                <IconButton disabled={disabled} type="submit">
-                  <Send />
-                </IconButton>
-              ),
-            },
-          }}
-        />
+            }}
+          />
+        </Box>
 
         <Box>
           <Typography variant="body1" style={{ padding: '0.5rem', fontSize: '0.875rem' }}>
             {userStatus.usage} / {userStatus.limit} {t('status:tokensUsed')}
           </Typography>
         </Box>
-      </Paper>
-    </Container>
+      </Box>
+    </Box>
   )
 }

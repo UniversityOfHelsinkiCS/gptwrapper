@@ -6,7 +6,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { fi } from 'date-fns/locale'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
-import { Box, Button, Container, CssBaseline, Snackbar } from '@mui/material'
+import { Box, Button, CssBaseline, Snackbar } from '@mui/material'
 
 import { PUBLIC_URL } from '../config'
 import { User } from './types'
@@ -97,7 +97,7 @@ const App = () => {
         <SnackbarProvider preventDuplicate>
           <Box minHeight="100vh" height="100vh" display="flex" flexDirection="column" ref={appRef}>
             <NavBar />
-            <Box component="main" sx={{ flex: 1 }} width="100%">
+            <Box component="main" sx={{ flex: 1 }}>
               <Outlet />
             </Box>
             <Footer />
