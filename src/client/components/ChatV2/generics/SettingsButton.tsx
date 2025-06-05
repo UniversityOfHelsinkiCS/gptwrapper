@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
 import { Button } from '@mui/material'
 
-export default function SettingsButton({ children, startIcon }: { children: ReactNode; startIcon?: ReactNode }) {
+export default function SettingsButton({ children, startIcon, onClick }: { children: ReactNode; startIcon?: ReactNode; onClick: () => any }) {
   return (
     <Button
+      onClick={onClick}
       startIcon={startIcon}
       sx={{
         textTransform: 'none',

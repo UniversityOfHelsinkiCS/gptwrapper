@@ -234,7 +234,6 @@ export const ChatV2 = () => {
           height: '100%',
         }}
       >
-
         <Box
           sx={{
             position: 'sticky',
@@ -253,11 +252,16 @@ export const ChatV2 = () => {
             <IconButton onClick={() => setSettingsModalOpen(true)} title="Settings">
               <Settings></Settings>
             </IconButton> */}
-          <SettingsButton startIcon={<SettingsIcon />}>Keskustelun asetukset</SettingsButton>
           {/* <SettingsButton startIcon={<AddCommentIcon />}>Alustus</SettingsButton> */}
-          <SettingsButton startIcon={<EmailIcon />}>Tallenna sähköpostina</SettingsButton>
-          <SettingsButton startIcon={<DeleteIcon />}>Tyhjennä</SettingsButton>
-          {/* {courseId ? <Link to={'/v2'}>CurreChat</Link> : <Link to={'/v2/sandbox'}>Ohtu Sandbox</Link>} */}
+          <SettingsButton startIcon={<SettingsIcon />} onClick={() => console.log('clicked')}>
+            Keskustelun asetukset
+          </SettingsButton>
+          <SettingsButton startIcon={<EmailIcon />} onClick={() => console.log('clicked')}>
+            Tallenna sähköpostina
+          </SettingsButton>
+          <SettingsButton startIcon={<DeleteIcon />} onClick={handleReset}>
+            Tyhjennä
+          </SettingsButton>
         </Box>
 
         <Conversation messages={messages} completion={completion} fileSearchResult={fileSearchResult} />

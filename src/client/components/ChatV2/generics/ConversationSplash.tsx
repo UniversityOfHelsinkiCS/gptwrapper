@@ -1,10 +1,12 @@
 import { Box, Typography } from '@mui/material'
-import { Assistant } from '@mui/icons-material'
+import hyLogo from '../../../assets/hy_logo.svg'
 
-export const PöhinäLogo = () => (
+
+export const ConversationSplash = () => (
   <Box
     sx={{
       display: 'flex',
+      flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
       height: '40rem',
@@ -18,7 +20,9 @@ export const PöhinäLogo = () => (
       },
     }}
   >
-    <Assistant sx={{ fontSize: 160, color: '#efefef', marginBottom: '2rem' }} />
-    <Typography>Aloite keskustelu läettämällä viesti...</Typography>
+    <img src={hyLogo} alt="University of Helsinki" width="240" style={{ opacity: 0.1, marginBottom: '2rem' }} />
+    <Typography fontStyle="italic" color="rgba(0,0,0,0.5)">
+      Aloita keskustelu läettämällä viesti...
+    </Typography>
   </Box>
 )

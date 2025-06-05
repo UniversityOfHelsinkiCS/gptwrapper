@@ -3,7 +3,7 @@ import { Message } from '../../types'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { FileSearchResult } from '../../../shared/types'
-import { PöhinäLogo } from './generics/PohinaLogo'
+import { ConversationSplash } from './generics/ConversationSplash'
 
 const MessageItem = ({ message }: { message: Message }) => (
   <Box
@@ -22,7 +22,7 @@ const MessageItem = ({ message }: { message: Message }) => (
 
 export const Conversation = ({ messages, completion, fileSearchResult }: { messages: Message[]; completion: string; fileSearchResult: FileSearchResult }) => (
   <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3, width: '70%', minWidth: 600, margin: 'auto', paddingBottom: '5rem' }}>
-    {messages.length === 0 && <PöhinäLogo />}
+    {messages.length === 0 && <ConversationSplash />}
     {messages.map((message, idx) => (
       <MessageItem key={idx} message={message} />
     ))}
