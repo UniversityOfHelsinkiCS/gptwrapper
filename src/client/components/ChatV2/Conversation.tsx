@@ -21,11 +21,11 @@ const MessageItem = ({ message }: { message: Message }) => (
 )
 
 export const Conversation = ({ messages, completion, fileSearchResult }: { messages: Message[]; completion: string; fileSearchResult: FileSearchResult }) => (
-  <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3, width: '70%', minWidth: 600, margin: 'auto', paddingBottom: '5rem' }}>
+  <>
     {messages.length === 0 && <ConversationSplash />}
     {messages.map((message, idx) => (
       <MessageItem key={idx} message={message} />
     ))}
     {completion && <MessageItem message={{ role: 'assistant', content: completion, fileSearchResult }} />}
-  </Box>
+  </>
 )

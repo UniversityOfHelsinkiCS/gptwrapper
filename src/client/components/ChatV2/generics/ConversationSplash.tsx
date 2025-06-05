@@ -9,7 +9,7 @@ export const ConversationSplash = () => (
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      height: '40rem',
+      height: '100%',
       transition: 'opacity 0.6s, transform 0.6s',
       opacity: 1,
       transform: 'scale(1)',

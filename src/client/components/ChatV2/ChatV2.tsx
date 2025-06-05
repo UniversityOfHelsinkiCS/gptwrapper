@@ -203,7 +203,6 @@ export const ChatV2 = () => {
   return (
     <Box
       sx={{
-        flex: 1,
         display: 'flex',
         flexDirection: 'row',
         height: '100%',
@@ -228,10 +227,9 @@ export const ChatV2 = () => {
       <Box
         sx={{
           flex: 4,
-          position: 'relative',
           display: 'flex',
+          position: 'relative',
           flexDirection: 'column',
-          height: '100%',
         }}
       >
         <Box
@@ -264,9 +262,11 @@ export const ChatV2 = () => {
           </SettingsButton>
         </Box>
 
-        <Conversation messages={messages} completion={completion} fileSearchResult={fileSearchResult} />
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 3, width: '70%', minWidth: 600, margin: 'auto', paddingBottom: '5rem' }}>
+          <Conversation messages={messages} completion={completion} fileSearchResult={fileSearchResult} />
+        </Box>
 
-        <Box sx={{ position: 'sticky', bottom: 0, backgroundColor: 'white', paddingBottom: '1.2rem' }}>
+        <Box sx={{ position: 'sticky', bottom: 0, backgroundColor: 'white', paddingBottom: '1.5rem' }}>
           <ChatBox
             disabled={false}
             onSubmit={(message) => {
@@ -280,7 +280,7 @@ export const ChatV2 = () => {
       </Box>
 
       {/* Annotations columns */}
-      <Box sx={{ flex: 1, borderLeft: '1px solid lightgray', position: 'relative' }}>
+      <Box sx={{ flex: 1, borderLeft: 'none', position: 'relative' }}>
         {ragIndex && (
           <Box sx={{ position: 'sticky', top: 0 }}>
             <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />

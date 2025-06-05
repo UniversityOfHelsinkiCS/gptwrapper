@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router-dom'
 import { SnackbarProvider } from 'notistack'
 import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
@@ -69,7 +69,6 @@ const AdminLoggedInAsBanner = () => {
 
 const App = () => {
   const theme = useTheme()
-  const appRef = useRef<HTMLDivElement>(null)
   const { courseId } = useParams()
   const location = useLocation()
 
@@ -95,9 +94,9 @@ const App = () => {
       <CssBaseline />
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
         <SnackbarProvider preventDuplicate>
-          <Box minHeight="100vh" height="100vh" display="flex" flexDirection="column" ref={appRef}>
+          <Box minHeight="100vh" height="100vh" display="flex" flexDirection="column">
             <NavBar />
-            <Box component="main" sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1 }}>
               <Outlet />
             </Box>
             <Footer />
