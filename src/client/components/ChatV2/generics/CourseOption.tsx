@@ -1,23 +1,27 @@
-import type { ReactNode } from 'react'
-import { Button } from '@mui/material'
+import { useState, type ReactNode } from 'react'
+import { Typography } from '@mui/material'
+import { Link } from 'react-router-dom'
 
 export default function CourseOption({ children, link }: { children: ReactNode; link: string }) {
+  const [isHovered, setIsHovered] = useState<boolean>(false)
+
   return (
-    <Button
-      variant="text"
-      fullWidth
+    <Typography
       sx={{
-        justifyContent: 'flex-start',
+        backgroundColor: isHovered ? '#efefef' : 'transparent',
         color: 'black',
         cursor: 'pointer',
         borderRadius: '0.5rem',
-        padding: '0.4rem 1rem',
+        padding: '0.5rem 1rem',
         transitionDuration: '200ms',
-        textTransform: 'none',
+        textDecoration: 'none',
       }}
-      href={link}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      {children}
-    </Button>
+      <Link style={{ textDecoration: 'none', textTransform: 'none' }} to={link}>
+        {children}
+      </Link>
+    </Typography>
   )
 }
