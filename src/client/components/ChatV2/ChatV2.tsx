@@ -66,7 +66,7 @@ export const ChatV2 = () => {
   const appContainerRef = useContext(AppContext)
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const conversationRef = useRef<HTMLElement>(null)
-  const settingsRef = useRef<HTMLElement>(null)
+  const chatHeaderRef = useRef<HTMLElement>(null)
   const inputFieldRef = useRef<HTMLElement>(null)
 
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
@@ -209,7 +209,7 @@ export const ChatV2 = () => {
 
   useEffect(() => {
     // Scrolls to bottom on initial load only
-    if (!appContainerRef.current || !conversationRef.current || !settingsRef.current || messages.length === 0) return
+    if (!appContainerRef.current || !conversationRef.current || !chatHeaderRef.current || messages.length === 0) return
     if (isCompletionDone) {
       const container = appContainerRef.current
       if (container) {
@@ -223,13 +223,13 @@ export const ChatV2 = () => {
 
   useEffect(() => {
     // Scrolls to last assistant message on text generation
-    if (!appContainerRef.current || !conversationRef.current || !settingsRef.current || messages.length === 0) return
+    if (!appContainerRef.current || !conversationRef.current || !chatHeaderRef.current || messages.length === 0) return
 
     const lastNode = conversationRef.current.lastElementChild as HTMLElement
 
     if (lastNode.classList.contains('message-role-assistant') && !isCompletionDone) {
       const container = appContainerRef.current
-      const settingsHeight = settingsRef.current.clientHeight
+      const settingsHeight = chatHeaderRef.current.clientHeight
 
       const containerRect = container.getBoundingClientRect()
       const lastNodeRect = lastNode.getBoundingClientRect()
@@ -259,12 +259,22 @@ export const ChatV2 = () => {
           <Typography variant="h6" fontWeight="light">
             Currechat
           </Typography>
-          <CourseOption link="/v2">Basic</CourseOption>
 
-          <Typography variant="h6" fontWeight="light" sx={{ mt: '2rem' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.5rem' }}>
+            <CourseOption link="/v2" isActive={!course}>
+              Tavallinen
+            </CourseOption>
+          </Box>
+
+          <Typography variant="h6" fontWeight="light" mt={'2rem'} mb="0.2rem">
             Kurssichatit
           </Typography>
-          <CourseOption link="/v2/sandbox">Ohtu sandbox</CourseOption>
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.5rem' }}>
+            <CourseOption link="/v2/sandbox" isActive={!!course}>
+              OHTE sandbox
+            </CourseOption>
+          </Box>
         </Box>
       </Box>
 
@@ -280,30 +290,36 @@ export const ChatV2 = () => {
         }}
       >
         <Box
-          ref={settingsRef}
+          ref={chatHeaderRef}
           sx={{
             position: 'sticky',
             top: 80,
             display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '1.2rem',
+            flexDirection: 'column',
             backgroundColor: 'white',
             padding: '1.8rem 1rem 0.8rem 1rem',
             zIndex: 10,
           }}
         >
-          {/* {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
+          {course && (
+            <Typography variant="h4" sx={{ textAlign: 'center', fontWeight: 'bold', mb: '1.5rem' }}>
+              {course.id}
+            </Typography>
+          )}
+
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
+            {/* {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
           {/* <SettingsButton startIcon={<AddCommentIcon />}>Alustus</SettingsButton> */}
-          <SettingsButton startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)}>
-            Keskustelun asetukset
-          </SettingsButton>
-          <SettingsButton startIcon={<EmailIcon />} onClick={() => alert('Ei toimi vielä')}>
-            Tallenna sähköpostina
-          </SettingsButton>
-          <SettingsButton startIcon={<DeleteIcon />} onClick={handleReset}>
-            Tyhjennä
-          </SettingsButton>
+            <SettingsButton startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)}>
+              Keskustelun asetukset
+            </SettingsButton>
+            <SettingsButton startIcon={<EmailIcon />} onClick={() => alert('Ei toimi vielä')}>
+              Tallenna sähköpostina
+            </SettingsButton>
+            <SettingsButton startIcon={<DeleteIcon />} onClick={handleReset}>
+              Tyhjennä
+            </SettingsButton>
+          </Box>
         </Box>
 
         <Box
@@ -319,7 +335,7 @@ export const ChatV2 = () => {
         >
           <Conversation
             conversationRef={conversationRef}
-            expandedNodeHeight={window.innerHeight - settingsRef.current?.clientHeight - inputFieldRef.current?.clientHeight}
+            expandedNodeHeight={window.innerHeight - chatHeaderRef.current?.clientHeight - inputFieldRef.current?.clientHeight}
             messages={messages}
             completion={completion}
             isCompletionDone={isCompletionDone}

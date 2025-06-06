@@ -1,27 +1,29 @@
 import { useState, type ReactNode } from 'react'
 import { Typography } from '@mui/material'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
-export default function CourseOption({ children, link }: { children: ReactNode; link: string }) {
+export default function CourseOption({ children, link, isActive }: { children: ReactNode; link: string, isActive: boolean }) {
   const [isHovered, setIsHovered] = useState<boolean>(false)
+  const navigate = useNavigate()
 
   return (
     <Typography
       sx={{
-        backgroundColor: isHovered ? '#efefef' : 'transparent',
-        color: 'black',
+        backgroundColor: isHovered || isActive ? '#efefef' : 'transparent',
         cursor: 'pointer',
         borderRadius: '0.5rem',
         padding: '0.5rem 1rem',
         transitionDuration: '200ms',
         textDecoration: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={() => navigate(link)}
     >
-      <Link style={{ textDecoration: 'none', textTransform: 'none' }} to={link}>
-        {children}
-      </Link>
+      {children}
     </Typography>
   )
 }
