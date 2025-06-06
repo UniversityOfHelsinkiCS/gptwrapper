@@ -2,6 +2,7 @@ import { SxProps, Theme } from '@mui/material/styles'
 
 const styles: { [key: string]: SxProps<Theme> } = {
   appbar: {
+    backgroundColor: 'white',
     zIndex: (theme: Theme) => theme.zIndex.drawer + 1,
     borderBottom: '1px solid',
     borderColor: (theme: Theme) => theme.palette.divider,

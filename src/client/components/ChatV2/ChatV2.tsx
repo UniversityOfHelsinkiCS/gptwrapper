@@ -194,6 +194,7 @@ export const ChatV2 = () => {
     setMessage({ content: '' })
     setPrevResponse({ id: '' })
     setCompletion('')
+    setIsCompletionDone(true)
     setFileSearchResult(null)
     setStreamController(undefined)
     setTokenUsageWarning('')
@@ -207,6 +208,7 @@ export const ChatV2 = () => {
   }
 
   useEffect(() => {
+    // Keep this useEffect for autoscroll effect
     if (!appContainerRef.current || !conversationRef.current || !settingsRef.current || messages.length === 0) return
 
     const lastNode = conversationRef.current.lastElementChild as HTMLElement
@@ -218,7 +220,7 @@ export const ChatV2 = () => {
       const containerRect = container.getBoundingClientRect()
       const lastNodeRect = lastNode.getBoundingClientRect()
 
-      const scrollTopPadding = 100
+      const scrollTopPadding = 180
       const scrollOffset = lastNodeRect.top - containerRect.top + container.scrollTop - settingsHeight - scrollTopPadding
 
       container.scrollTo({
@@ -239,7 +241,7 @@ export const ChatV2 = () => {
     >
       {/* Course chats columns */}
       <Box sx={{ position: 'relative', flex: 1, borderRight: '1px solid lightgray' }}>
-        <Box sx={{ position: 'sticky', left: 0, top: 0, padding: '2rem 1.5rem' }}>
+        <Box sx={{ position: 'sticky', top: 80, padding: '2rem 1.5rem' }}>
           <Typography variant="h6" fontWeight="light">
             Currechat
           </Typography>
@@ -267,7 +269,7 @@ export const ChatV2 = () => {
           ref={settingsRef}
           sx={{
             position: 'sticky',
-            top: 0,
+            top: 80,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -299,7 +301,6 @@ export const ChatV2 = () => {
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
-            gap: 3,
             width: '70%',
             margin: 'auto',
             paddingBottom: '5rem',
@@ -332,7 +333,7 @@ export const ChatV2 = () => {
       {/* Annotations columns */}
       <Box sx={{ flex: 1, borderLeft: 'none', position: 'relative' }}>
         {ragIndex && (
-          <Box sx={{ position: 'sticky', top: 0 }}>
+          <Box sx={{ position: 'sticky', top: 80 }}>
             <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />
           </Box>
         )}

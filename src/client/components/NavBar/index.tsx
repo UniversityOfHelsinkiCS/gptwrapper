@@ -32,7 +32,7 @@ const NavBar = () => {
   if (!user) return null
 
   return (
-    <AppBar elevation={0} position="relative" sx={styles.appbar} color="transparent">
+    <AppBar elevation={0} position="sticky" sx={styles.appbar} color="transparent">
       <Container maxWidth={false}>
         <Toolbar sx={styles.toolbar} disableGutters>
           <MuiLink to="/" sx={styles.navBox} component={Link} reloadDocument>

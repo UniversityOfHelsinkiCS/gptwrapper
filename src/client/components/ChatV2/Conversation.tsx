@@ -53,9 +53,7 @@ const MessageItem = ({ message, isLastAssistantNode, lastNodeHeight }: { message
       height: isLastAssistantNode ? lastNodeHeight : 'auto',
     }}
   >
-    <Typography>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
-    </Typography>
+    <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
   </Box>
 )
 
@@ -74,7 +72,7 @@ export const Conversation = ({
   isCompletionDone: boolean
   fileSearchResult: FileSearchResult
 }) => (
-  <Box style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 20 }} ref={conversationRef}>
+  <Box style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '2.5rem' }} ref={conversationRef}>
     {messages.length === 0 && <ConversationSplash />}
     {messages.map((message, idx) => {
       const isLastAssistantNode = idx === messages.length - 1 && message.role === 'assistant'
