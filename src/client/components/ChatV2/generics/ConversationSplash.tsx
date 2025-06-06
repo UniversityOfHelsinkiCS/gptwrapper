@@ -1,15 +1,14 @@
 import { Box, Typography } from '@mui/material'
 import hyLogo from '../../../assets/hy_logo.svg'
 
-
 export const ConversationSplash = () => (
   <Box
     sx={{
+      height: '100%',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      height: '100%',
       transition: 'opacity 0.6s, transform 0.6s',
       opacity: 1,
       transform: 'scale(1)',

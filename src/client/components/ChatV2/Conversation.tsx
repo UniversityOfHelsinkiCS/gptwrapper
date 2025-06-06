@@ -15,11 +15,11 @@ const dotStyle = (delay: number) => ({
   animationDelay: `${delay}s`,
 })
 
-export const MessageLoading = ({ lastNodeHeight }: { lastNodeHeight: number }) => (
+export const LoadingMessage = ({ expandedNodeHeight }: { expandedNodeHeight: number }) => (
   <div
     className="message-role-assistant"
     style={{
-      height: lastNodeHeight,
+      height: expandedNodeHeight,
       display: 'flex',
       padding: '2rem',
     }}
@@ -42,7 +42,7 @@ export const MessageLoading = ({ lastNodeHeight }: { lastNodeHeight: number }) =
   </div>
 )
 
-const MessageItem = ({ message, isLastAssistantNode, lastNodeHeight }: { message: Message; isLastAssistantNode: boolean; lastNodeHeight: number }) => (
+const MessageItem = ({ message, isLastAssistantNode, expandedNodeHeight }: { message: Message; isLastAssistantNode: boolean; expandedNodeHeight: number }) => (
   <Box
     className={`message-role-${message.role}`}
     sx={{
@@ -50,7 +50,8 @@ const MessageItem = ({ message, isLastAssistantNode, lastNodeHeight }: { message
       backgroundColor: message.role === 'assistant' ? 'transparent' : '#efefef',
       padding: '0 1.5rem',
       borderRadius: '0.6rem',
-      height: isLastAssistantNode ? lastNodeHeight : 'auto',
+      minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
+      boxShadow: message.role === 'assistant' ? 'none' : '0px 2px 2px rgba(0, 0, 0, 0.2)',
     }}
   >
     <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
@@ -59,14 +60,14 @@ const MessageItem = ({ message, isLastAssistantNode, lastNodeHeight }: { message
 
 export const Conversation = ({
   conversationRef,
-  lastNodeHeight,
+  expandedNodeHeight,
   messages,
   completion,
   isCompletionDone,
   fileSearchResult,
 }: {
   conversationRef: React.RefObject<HTMLElement>
-  lastNodeHeight: number
+  expandedNodeHeight: number
   messages: Message[]
   completion: string
   isCompletionDone: boolean
@@ -77,14 +78,14 @@ export const Conversation = ({
     {messages.map((message, idx) => {
       const isLastAssistantNode = idx === messages.length - 1 && message.role === 'assistant'
 
-      return <MessageItem key={idx} message={message} isLastAssistantNode={isLastAssistantNode} lastNodeHeight={lastNodeHeight} />
+      return <MessageItem key={idx} message={message} isLastAssistantNode={isLastAssistantNode} expandedNodeHeight={expandedNodeHeight} />
     })}
     {!isCompletionDone &&
       messages.length > 0 &&
       (completion.length > 0 ? (
-        <MessageItem message={{ role: 'assistant', content: completion, fileSearchResult }} isLastAssistantNode={true} lastNodeHeight={lastNodeHeight} />
+        <MessageItem message={{ role: 'assistant', content: completion, fileSearchResult }} isLastAssistantNode={true} expandedNodeHeight={expandedNodeHeight} />
       ) : (
-        <MessageLoading lastNodeHeight={lastNodeHeight} />
+        <LoadingMessage expandedNodeHeight={expandedNodeHeight} />
       ))}
   </Box>
 )

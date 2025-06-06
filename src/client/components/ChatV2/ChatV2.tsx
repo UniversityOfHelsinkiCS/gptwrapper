@@ -208,19 +208,33 @@ export const ChatV2 = () => {
   }
 
   useEffect(() => {
-    // Keep this useEffect for autoscroll effect
+    // Scrolls to bottom on initial load only
+    if (!appContainerRef.current || !conversationRef.current || !settingsRef.current || messages.length === 0) return
+    if (isCompletionDone) {
+      const container = appContainerRef.current
+      if (container) {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: 'instant',
+        })
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    // Scrolls to last assistant message on text generation
     if (!appContainerRef.current || !conversationRef.current || !settingsRef.current || messages.length === 0) return
 
     const lastNode = conversationRef.current.lastElementChild as HTMLElement
 
-    if (lastNode.classList.contains('message-role-assistant')) {
+    if (lastNode.classList.contains('message-role-assistant') && !isCompletionDone) {
       const container = appContainerRef.current
       const settingsHeight = settingsRef.current.clientHeight
 
       const containerRect = container.getBoundingClientRect()
       const lastNodeRect = lastNode.getBoundingClientRect()
 
-      const scrollTopPadding = 180
+      const scrollTopPadding = 200
       const scrollOffset = lastNodeRect.top - containerRect.top + container.scrollTop - settingsHeight - scrollTopPadding
 
       container.scrollTo({
@@ -276,14 +290,10 @@ export const ChatV2 = () => {
             gap: '1.2rem',
             backgroundColor: 'white',
             padding: '1.8rem 1rem 0.8rem 1rem',
+            zIndex: 10,
           }}
         >
           {/* {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
-            <SystemPrompt content={system.content} setContent={(content) => setSystem({ content })} />
-            <Button onClick={handleReset}>Reset</Button>
-            <IconButton onClick={() => setSettingsModalOpen(true)} title="Settings">
-              <Settings></Settings>
-            </IconButton> */}
           {/* <SettingsButton startIcon={<AddCommentIcon />}>Alustus</SettingsButton> */}
           <SettingsButton startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)}>
             Keskustelun asetukset
@@ -298,18 +308,18 @@ export const ChatV2 = () => {
 
         <Box
           sx={{
-            height: '100%',
             display: 'flex',
             flexDirection: 'column',
+            height: '100%',
             width: '70%',
             margin: 'auto',
-            paddingBottom: '5rem',
             paddingTop: '1rem',
+            paddingBottom: '8rem',
           }}
         >
           <Conversation
             conversationRef={conversationRef}
-            lastNodeHeight={window.innerHeight - settingsRef.current?.clientHeight - inputFieldRef.current?.clientHeight}
+            expandedNodeHeight={window.innerHeight - settingsRef.current?.clientHeight - inputFieldRef.current?.clientHeight}
             messages={messages}
             completion={completion}
             isCompletionDone={isCompletionDone}
@@ -319,7 +329,7 @@ export const ChatV2 = () => {
 
         <Box ref={inputFieldRef} sx={{ position: 'sticky', bottom: 0, backgroundColor: 'white', paddingBottom: '1.5rem' }}>
           <ChatBox
-            disabled={false}
+            disabled={!isCompletionDone}
             onSubmit={(message) => {
               if (message.trim()) {
                 handleSubmit(message)
