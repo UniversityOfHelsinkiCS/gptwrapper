@@ -1,7 +1,7 @@
+import { useState, useRef, useContext, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
 import useUserStatus from '../../hooks/useUserStatus'
-import { useState } from 'react'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { DEFAULT_MODEL } from '../../../config'
 import useInfoTexts from '../../hooks/useInfoTexts'
@@ -10,27 +10,25 @@ import { FileSearchResult, ResponseStreamEventData } from '../../../shared/types
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
+import { getCompletionStream } from './util'
 
-import { Box, Button, IconButton, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
-import AddCommentIcon from '@mui/icons-material/AddComment'
 import EmailIcon from '@mui/icons-material/Email'
 import DeleteIcon from '@mui/icons-material/Delete'
 
 import { Disclaimer } from './Disclaimer'
 import { Conversation } from './Conversation'
 import { ChatBox } from './ChatBox'
-import { getCompletionStream } from './util'
 import { SystemPrompt } from './System'
-import { Settings } from '@mui/icons-material'
 import { SettingsModal } from './SettingsModal'
-import { Link } from 'react-router-dom'
-// import { useScrollToBottom } from './useScrollToBottom'
+
 import { CitationsBox } from './CitationsBox'
 import { useRagIndices } from '../../hooks/useRagIndices'
 import CourseOption from './generics/CourseOption'
 import SettingsButton from './generics/SettingsButton'
 
+import { AppContext } from '../../util/context'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -52,7 +50,8 @@ export const ChatV2 = () => {
   const [settingsModalOpen, setSettingsModalOpen] = useState(false)
   const [activePromptId, setActivePromptId] = useState('')
   const [fileName, setFileName] = useState<string>('')
-  const [completion, setCompletion] = useState('')
+  const [completion, setCompletion] = useState<string>('')
+  const [isCompletionDone, setIsCompletionDone] = useState<boolean>(true)
   const [fileSearchResult, setFileSearchResult] = useLocalStorageState<FileSearchResult>('last-file-search', null)
   const [streamController, setStreamController] = useState<AbortController>()
   const [alertOpen, setAlertOpen] = useState(false)
@@ -63,6 +62,12 @@ export const ChatV2 = () => {
   const [saveConsent, setSaveConsent] = useState(true)
   const [ragIndexId, setRagIndexId] = useState<number | null>(null)
   const ragIndex = ragIndices?.find((index) => index.id === ragIndexId) ?? null
+
+  const appContainerRef = useContext(AppContext)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+  const conversationRef = useRef<HTMLElement>(null)
+  const settingsRef = useRef<HTMLElement>(null)
+  const inputFieldRef = useRef<HTMLElement>(null)
 
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
 
@@ -134,8 +139,8 @@ export const ChatV2 = () => {
     } finally {
       setStreamController(undefined)
       setCompletion('')
+      setIsCompletionDone(true)
       refetchStatus()
-      // inputFileRef.current.value = ''
       setFileName('')
       clearRetryTimeout()
     }
@@ -147,6 +152,7 @@ export const ChatV2 = () => {
     setMessage({ content: '' })
     setPrevResponse({ id: '' })
     setCompletion('')
+    setIsCompletionDone(false)
     setFileSearchResult(null)
     setStreamController(new AbortController())
     setRetryTimeout(() => {
@@ -200,12 +206,35 @@ export const ChatV2 = () => {
     clearRetryTimeout()
   }
 
+  useEffect(() => {
+    if (!appContainerRef.current || !conversationRef.current || !settingsRef.current || messages.length === 0) return
+
+    const lastNode = conversationRef.current.lastElementChild as HTMLElement
+
+    if (lastNode.classList.contains('message-role-assistant')) {
+      const container = appContainerRef.current
+      const settingsHeight = settingsRef.current.clientHeight
+
+      const containerRect = container.getBoundingClientRect()
+      const lastNodeRect = lastNode.getBoundingClientRect()
+
+      const scrollTopPadding = 100
+      const scrollOffset = lastNodeRect.top - containerRect.top + container.scrollTop - settingsHeight - scrollTopPadding
+
+      container.scrollTo({
+        top: scrollOffset,
+        behavior: 'smooth',
+      })
+    }
+  }, [isCompletionDone])
+
   return (
     <Box
       sx={{
         display: 'flex',
         flexDirection: 'row',
         height: '100%',
+        minWidth: 1400,
       }}
     >
       {/* Course chats columns */}
@@ -225,14 +254,17 @@ export const ChatV2 = () => {
 
       {/* Chat view */}
       <Box
+        ref={chatContainerRef}
         sx={{
           flex: 4,
           display: 'flex',
           position: 'relative',
           flexDirection: 'column',
+          height: '100%',
         }}
       >
         <Box
+          ref={settingsRef}
           sx={{
             position: 'sticky',
             top: 0,
@@ -251,10 +283,10 @@ export const ChatV2 = () => {
               <Settings></Settings>
             </IconButton> */}
           {/* <SettingsButton startIcon={<AddCommentIcon />}>Alustus</SettingsButton> */}
-          <SettingsButton startIcon={<SettingsIcon />} onClick={() => console.log('clicked')}>
+          <SettingsButton startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)}>
             Keskustelun asetukset
           </SettingsButton>
-          <SettingsButton startIcon={<EmailIcon />} onClick={() => console.log('clicked')}>
+          <SettingsButton startIcon={<EmailIcon />} onClick={() => alert('Ei toimi vielä')}>
             Tallenna sähköpostina
           </SettingsButton>
           <SettingsButton startIcon={<DeleteIcon />} onClick={handleReset}>
@@ -262,11 +294,29 @@ export const ChatV2 = () => {
           </SettingsButton>
         </Box>
 
-        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 3, width: '70%', minWidth: 600, margin: 'auto', paddingBottom: '5rem' }}>
-          <Conversation messages={messages} completion={completion} fileSearchResult={fileSearchResult} />
+        <Box
+          sx={{
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 3,
+            width: '70%',
+            margin: 'auto',
+            paddingBottom: '5rem',
+            paddingTop: '1rem',
+          }}
+        >
+          <Conversation
+            conversationRef={conversationRef}
+            lastNodeHeight={window.innerHeight - settingsRef.current?.clientHeight - inputFieldRef.current?.clientHeight}
+            messages={messages}
+            completion={completion}
+            isCompletionDone={isCompletionDone}
+            fileSearchResult={fileSearchResult}
+          />
         </Box>
 
-        <Box sx={{ position: 'sticky', bottom: 0, backgroundColor: 'white', paddingBottom: '1.5rem' }}>
+        <Box ref={inputFieldRef} sx={{ position: 'sticky', bottom: 0, backgroundColor: 'white', paddingBottom: '1.5rem' }}>
           <ChatBox
             disabled={false}
             onSubmit={(message) => {
