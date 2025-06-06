@@ -302,8 +302,8 @@ export const ChatV2 = () => {
           }}
         >
           {course && (
-            <Typography variant="h4" sx={{ textAlign: 'center', fontWeight: 'bold', mb: '1.5rem' }}>
-              {course.id}
+            <Typography variant="h5" sx={{ textAlign: 'center', fontWeight: 'bold', mb: '1.5rem' }}>
+              {course.id === 'sandbox' ? 'OHTE Sandbox' : course.id}
             </Typography>
           )}
 
@@ -346,6 +346,8 @@ export const ChatV2 = () => {
         <Box ref={inputFieldRef} sx={{ position: 'sticky', bottom: 0, backgroundColor: 'white', paddingBottom: '1.5rem' }}>
           <ChatBox
             disabled={!isCompletionDone}
+            currentModel={model.name}
+            setModel={(name) => setModel({ name })}
             onSubmit={(message) => {
               if (message.trim()) {
                 handleSubmit(message)

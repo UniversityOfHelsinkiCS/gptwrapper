@@ -1,12 +1,25 @@
+import React from 'react'
 import { Send } from '@mui/icons-material'
-import StopIcon from '@mui/icons-material/Stop';
+import StopIcon from '@mui/icons-material/Stop'
+import { validModels } from '../../../config'
 import { Box, IconButton, TextField, Typography } from '@mui/material'
 import { useState, useRef } from 'react'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import ModelSelector from './ModelSelector'
 
-export const ChatBox = ({ disabled, onSubmit }: { disabled: boolean; onSubmit: (message: string) => void }) => {
+export const ChatBox = ({
+  disabled,
+  currentModel,
+  setModel,
+  onSubmit,
+}: {
+  disabled: boolean
+  currentModel: string
+  setModel: (model: string) => void
+  onSubmit: (message: string) => void
+}) => {
   const { courseId } = useParams()
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
   const [message, setMessage] = useState<string>('')
@@ -19,7 +32,6 @@ export const ChatBox = ({ disabled, onSubmit }: { disabled: boolean; onSubmit: (
 
     // This is here to prevent the form from submitting but because disabling it in the component breaks re-focusing on the text field
     if (disabled) return
-
 
     if (message.trim()) {
       onSubmit(message)
@@ -53,8 +65,7 @@ export const ChatBox = ({ disabled, onSubmit }: { disabled: boolean; onSubmit: (
           }
         }}
       >
-        <Box sx={{ border: '1px solid rgba(0,0,0,0.4)', borderRadius: '0.2rem' }}>
-
+        <Box sx={{ border: '1px solid rgba(0,0,0,0.3)', borderRadius: '0.3rem', padding: '0.5rem 1rem' }}>
           <TextField
             ref={textFieldRef}
             autoFocus
@@ -64,28 +75,33 @@ export const ChatBox = ({ disabled, onSubmit }: { disabled: boolean; onSubmit: (
             fullWidth
             multiline
             maxRows={8}
+            sx={{ padding: '0.5rem' }}
             variant="standard"
-            sx={{ padding: '0.5rem 1rem' }}
             slotProps={{
               input: {
                 disableUnderline: true,
-                endAdornment: disabled ? (
-                  // TODO: finish the stop signal API
-                  <IconButton disabled={!disabled}>
-                    <StopIcon />
-                  </IconButton>
-                ) : (
-                  <IconButton disabled={disabled} type="submit">
-                    <Send />
-                  </IconButton>
-                ),
               },
             }}
           />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: '0.5rem' }}>
+            <ModelSelector currentModel={currentModel} setModel={setModel} models={validModels.map((m) => m.name)} />
+
+            {/* Submit/Stop button */}
+            {disabled ? (
+              // TODO: finish the stop signal API
+              <IconButton disabled={!disabled}>
+                <StopIcon />
+              </IconButton>
+            ) : (
+              <IconButton disabled={disabled} type="submit">
+                <Send />
+              </IconButton>
+            )}
+          </Box>
         </Box>
 
         <Box>
-          <Typography variant="body1" style={{ padding: '0.5rem', fontSize: '0.875rem' }}>
+          <Typography variant="body1" style={{ padding: '1rem', opacity: 0.7 }}>
             {userStatus.usage} / {userStatus.limit} {t('status:tokensUsed')}
           </Typography>
         </Box>
