@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
 import { getCompletionStream } from './util'
 
-import { Box, Typography } from '@mui/material'
+import { Box, Typography, Fade, Collapse } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import EmailIcon from '@mui/icons-material/Email'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -40,13 +40,15 @@ export const ChatV2 = () => {
   const [model, setModel] = useLocalStorageState<{ name: string }>('model-v2', {
     name: DEFAULT_MODEL,
   })
-  const [system, setSystem] = useLocalStorageState<{ content: string }>('general-chat-system', { content: '' })
-  const [message, setMessage] = useLocalStorageState<{ content: string }>('general-chat-current', { content: '' })
-  const [messages, setMessages] = useLocalStorageState<Message[]>('general-chat-messages', [])
-  const [prevResponse, setPrevResponse] = useLocalStorageState<{
-    id: string
-  }>('general-prev-response', { id: '' })
 
+  // local storage
+  const localStoragePrefix = 'general'
+  const [system, setSystem] = useLocalStorageState<{ content: string }>(`${localStoragePrefix}-chat-system`, { content: '' })
+  const [message, setMessage] = useLocalStorageState<{ content: string }>(`${localStoragePrefix}-chat-current`, { content: '' })
+  const [messages, setMessages] = useLocalStorageState<Message[]>(`${localStoragePrefix}-chat-messages`, [])
+  const [prevResponse, setPrevResponse] = useLocalStorageState<{ id: string }>(`${localStoragePrefix}-prev-response`, { id: '' })
+
+  // States
   const [settingsModalOpen, setSettingsModalOpen] = useState(false)
   const [activePromptId, setActivePromptId] = useState('')
   const [fileName, setFileName] = useState<string>('')
@@ -63,6 +65,7 @@ export const ChatV2 = () => {
   const [ragIndexId, setRagIndexId] = useState<number | null>(null)
   const ragIndex = ragIndices?.find((index) => index.id === ragIndexId) ?? null
 
+  // Refs
   const appContainerRef = useContext(AppContext)
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const conversationRef = useRef<HTMLElement>(null)
@@ -208,6 +211,12 @@ export const ChatV2 = () => {
   }
 
   useEffect(() => {
+    // Fethces data from local storage according to chat
+    console.log("course changed")
+
+  }, [course])
+
+  useEffect(() => {
     // Scrolls to bottom on initial load only
     if (!appContainerRef.current || !conversationRef.current || !chatHeaderRef.current || messages.length === 0) return
     if (isCompletionDone) {
@@ -253,8 +262,8 @@ export const ChatV2 = () => {
         minWidth: 1400,
       }}
     >
-      {/* Course chats columns */}
-      <Box sx={{ position: 'relative', flex: 1, borderRight: '1px solid lightgray' }}>
+      {/* Chat selection column -------------------------------------------------------------------------------------------*/}
+      <Box sx={{ position: 'relative', flex: 1, borderRight: '1px solid rgba(0, 0, 0, 0.12)' }}>
         <Box sx={{ position: 'sticky', top: 80, padding: '2rem 1.5rem' }}>
           <Typography variant="h6" fontWeight="light">
             Currechat
@@ -278,11 +287,11 @@ export const ChatV2 = () => {
         </Box>
       </Box>
 
-      {/* Chat view */}
+      {/* Chat view column ------------------------------------------------------------------------------------------------ */}
       <Box
         ref={chatContainerRef}
         sx={{
-          flex: 4,
+          flex: 3,
           display: 'flex',
           position: 'relative',
           flexDirection: 'column',
@@ -301,11 +310,13 @@ export const ChatV2 = () => {
             zIndex: 10,
           }}
         >
-          {course && (
-            <Typography variant="h5" sx={{ textAlign: 'center', fontWeight: 'bold', mb: '1.5rem' }}>
-              {course.id === 'sandbox' ? 'OHTE Sandbox' : course.id}
-            </Typography>
-          )}
+          <Collapse in={!!course} timeout={100}>
+            <Fade in={true} timeout={800}>
+              <Typography variant="h5" sx={{ textAlign: 'center', fontWeight: 'bold', mb: '1.5rem' }}>
+                {course?.id === 'sandbox' ? 'OHTE Sandbox' : course?.id}
+              </Typography>
+            </Fade>
+          </Collapse>
 
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
             {/* {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
@@ -358,15 +369,37 @@ export const ChatV2 = () => {
         </Box>
       </Box>
 
-      {/* Annotations columns */}
-      <Box sx={{ flex: 1, borderLeft: 'none', position: 'relative' }}>
-        {ragIndex && (
-          <Box sx={{ position: 'sticky', top: 80 }}>
-            <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />
-          </Box>
-        )}
+      {/* Annotations columns ----------------------------------------------------------------------------------------------------- */}
+      <Box sx={{ position: 'relative', flex: 1 }}>
+        <Box sx={{ position: 'sticky', top: 80, padding: '4rem 2rem 2rem 0' }}>
+          {/* {ragIndex && ( */}
+          {course && (
+            <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <Typography variant="h6">Lähteet</Typography>
+              <Box sx={{ flex: 1, borderRadius: '1rem', backgroundColor: 'rgba(0,0,0,0.0)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                {/* <CitationsBox messages={messages} fileSearchResult={fileSearchResult} /> */}
+                <Box sx={{ borderLeft: '4px solid #3f51b5', paddingLeft: '1rem', backgroundColor: 'white', borderRadius: '4px' }}>
+                  <Typography variant="body2" color="textSecondary">
+                    Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is rendered...
+                  </Typography>
+                </Box>
+                <Box sx={{ borderLeft: '4px solid #3f51b5', paddingLeft: '1rem', backgroundColor: 'white', borderRadius: '4px' }}>
+                  <Typography variant="body2" color="textSecondary">
+                    Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is rendered...
+                  </Typography>
+                </Box>
+                <Box sx={{ borderLeft: '4px solid #3f51b5', paddingLeft: '1rem', backgroundColor: 'white', borderRadius: '4px' }}>
+                  <Typography variant="body2" color="textSecondary">
+                    Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is rendered...
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          )}
+        </Box>
       </Box>
 
+      {/* Modal --------------------------------------*/}
       <SettingsModal
         open={settingsModalOpen}
         setOpen={setSettingsModalOpen}

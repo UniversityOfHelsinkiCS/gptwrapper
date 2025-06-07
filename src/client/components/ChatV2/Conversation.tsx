@@ -73,7 +73,7 @@ export const Conversation = ({
   isCompletionDone: boolean
   fileSearchResult: FileSearchResult
 }) => (
-  <Box style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '2.5rem' }} ref={conversationRef}>
+  <Box style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '2rem' }} ref={conversationRef}>
     {messages.length === 0 && <ConversationSplash />}
     {messages.map((message, idx) => {
       const isLastAssistantNode = idx === messages.length - 1 && message.role === 'assistant'
