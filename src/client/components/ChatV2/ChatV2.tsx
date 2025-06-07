@@ -260,6 +260,7 @@ export const ChatV2 = () => {
         flexDirection: 'row',
         height: '100%',
         minWidth: 1400,
+        overflowX: 'clip',
       }}
     >
       {/* Chat selection column -------------------------------------------------------------------------------------------*/}
@@ -370,29 +371,34 @@ export const ChatV2 = () => {
       </Box>
 
       {/* Annotations columns ----------------------------------------------------------------------------------------------------- */}
-      <Box sx={{ position: 'relative', flex: 1 }}>
+      <Box
+        sx={{
+          position: 'relative',
+          flex: 1,
+          transform: course ? 'translateX(0%)' : 'translateX(100%)',
+          transition: 'transform 200ms ease-in-out 200ms', // 0.2s duration, no delay
+        }}
+      >
         <Box sx={{ position: 'sticky', top: 80, padding: '4rem 2rem 2rem 0' }}>
           {/* {ragIndex && ( */}
           {course && (
             <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <Typography variant="h6">Lähteet</Typography>
-              <Box sx={{ flex: 1, borderRadius: '1rem', backgroundColor: 'rgba(0,0,0,0.0)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                {/* <CitationsBox messages={messages} fileSearchResult={fileSearchResult} /> */}
-                <Box sx={{ borderLeft: '4px solid #3f51b5', paddingLeft: '1rem', backgroundColor: 'white', borderRadius: '4px' }}>
-                  <Typography variant="body2" color="textSecondary">
-                    Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is rendered...
-                  </Typography>
-                </Box>
-                <Box sx={{ borderLeft: '4px solid #3f51b5', paddingLeft: '1rem', backgroundColor: 'white', borderRadius: '4px' }}>
-                  <Typography variant="body2" color="textSecondary">
-                    Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is rendered...
-                  </Typography>
-                </Box>
-                <Box sx={{ borderLeft: '4px solid #3f51b5', paddingLeft: '1rem', backgroundColor: 'white', borderRadius: '4px' }}>
-                  <Typography variant="body2" color="textSecondary">
-                    Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is rendered...
-                  </Typography>
-                </Box>
+              {/* <CitationsBox messages={messages} fileSearchResult={fileSearchResult} /> */}
+              <Box sx={{ borderLeft: '4px solid #3f51b5', paddingLeft: '1rem', backgroundColor: 'white', borderRadius: '4px' }}>
+                <Typography variant="body2" color="rgba(0,0,0,0.4)">
+                  Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is rendered...
+                </Typography>
+              </Box>
+              <Box sx={{ borderLeft: '4px solid #3f51b5', paddingLeft: '1rem', backgroundColor: 'white', borderRadius: '4px' }}>
+                <Typography variant="body2" color="rgba(0,0,0,0.4)">
+                  Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is rendered...
+                </Typography>
+              </Box>
+              <Box sx={{ borderLeft: '4px solid #3f51b5', paddingLeft: '1rem', backgroundColor: 'white', borderRadius: '4px' }}>
+                <Typography variant="body2" color="rgba(0,0,0,0.4)">
+                  Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is rendered...
+                </Typography>
               </Box>
             </Box>
           )}

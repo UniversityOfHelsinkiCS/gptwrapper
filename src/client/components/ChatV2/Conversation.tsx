@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material'
+import { useParams } from 'react-router-dom'
 import { Message } from '../../types'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -42,21 +43,33 @@ export const LoadingMessage = ({ expandedNodeHeight }: { expandedNodeHeight: num
   </div>
 )
 
-const MessageItem = ({ message, isLastAssistantNode, expandedNodeHeight }: { message: Message; isLastAssistantNode: boolean; expandedNodeHeight: number }) => (
-  <Box
-    className={`message-role-${message.role}`}
-    sx={{
-      alignSelf: message.role === 'assistant' ? 'flex-start' : 'flex-end',
-      backgroundColor: message.role === 'assistant' ? 'transparent' : '#efefef',
-      padding: '0 1.5rem',
-      borderRadius: '0.6rem',
-      minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
-      boxShadow: message.role === 'assistant' ? 'none' : '0px 2px 2px rgba(0, 0, 0, 0.2)',
-    }}
-  >
-    <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
-  </Box>
-)
+const MessageItem = ({ message, isLastAssistantNode, expandedNodeHeight }: { message: Message; isLastAssistantNode: boolean; expandedNodeHeight: number }) => {
+  // TÄMÄ on kaikki hämäystä demonstroidakseen lähdeviittaukset kurssichatissa
+  const { courseId } = useParams()
+  const hasAnnotations_Leikisti = isLastAssistantNode && courseId
+
+  return (
+    <Box
+      className={`message-role-${message.role}`}
+      sx={{
+        minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
+        alignSelf: message.role === 'assistant' ? 'flex-start' : 'flex-end',
+      }}
+    >
+      <Box
+        sx={{
+          backgroundColor: message.role === 'assistant' ? 'transparent' : '#efefef',
+          padding: message.role === 'assistant' ? '0 1.5rem' : '0.175rem 1.5rem',
+          borderRadius: message.role === 'assistant' ? '5px' : '0.6rem',
+          boxShadow: message.role === 'assistant' ? 'none' : '0px 2px 2px rgba(0, 0, 0, 0.2)',
+          borderLeft: hasAnnotations_Leikisti ? '5px solid #3f51b5' : 'none',
+        }}
+      >
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+      </Box>
+    </Box>
+  )
+}
 
 export const Conversation = ({
   conversationRef,
@@ -73,7 +86,7 @@ export const Conversation = ({
   isCompletionDone: boolean
   fileSearchResult: FileSearchResult
 }) => (
-  <Box style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '2rem' }} ref={conversationRef}>
+  <Box style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '2.5rem' }} ref={conversationRef}>
     {messages.length === 0 && <ConversationSplash />}
     {messages.map((message, idx) => {
       const isLastAssistantNode = idx === messages.length - 1 && message.role === 'assistant'
