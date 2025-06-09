@@ -2,7 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 
-export default function CourseOption({ children, link, isActive }: { children: ReactNode; link: string, isActive: boolean }) {
+export default function CourseOption({ children, link, isActive }: { children: ReactNode; link: string; isActive: boolean }) {
   const [isHovered, setIsHovered] = useState<boolean>(false)
   const navigate = useNavigate()
 
