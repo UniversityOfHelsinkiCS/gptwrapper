@@ -43,7 +43,6 @@ export const ChatV2 = () => {
   const [model, setModel] = useLocalStorageState<{ name: string }>('model-v2', {
     name: DEFAULT_MODEL,
   })
-  // TODO: Do translation
   const [assistantInstructions, setAssistantInstructions] = useLocalStorageState<{ content: string }>(`${localStoragePrefix}-chat-instructions`, {
     content: DEFAULT_ASSISTANT_INSTRUCTIONS,
   })
@@ -56,13 +55,13 @@ export const ChatV2 = () => {
   const [fileSearchResult, setFileSearchResult] = useLocalStorageState<FileSearchResult>('last-file-search', null)
 
   // UI States
-  const [settingsModalOpen, setSettingsModalOpen] = useState(true)
+  const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
   const [fileName, setFileName] = useState<string>('')
-  const [alertOpen, setAlertOpen] = useState(false)
-  const [disallowedFileType, setDisallowedFileType] = useState('')
-  const [tokenUsageWarning, setTokenUsageWarning] = useState('')
-  const [tokenWarningVisible, setTokenWarningVisible] = useState(false)
-  const [saveConsent, setSaveConsent] = useState(true)
+  const [alertOpen, setAlertOpen] = useState<boolean>(false)
+  const [disallowedFileType, setDisallowedFileType] = useState<string>('')
+  const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
+  const [tokenWarningVisible, setTokenWarningVisible] = useState<boolean>(false)
+  const [saveConsent, setSaveConsent] = useState<boolean>(true)
 
   // Chat Streaming states
   const [completion, setCompletion] = useState<string>('')
@@ -289,7 +288,7 @@ export const ChatV2 = () => {
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.5rem' }}>
             <CourseOption link="/v2/sandbox" isActive={!!course}>
-              OHTE sandbox
+              Sandbox
             </CourseOption>
           </Box>
         </Box>
@@ -321,7 +320,7 @@ export const ChatV2 = () => {
           <Collapse in={!!course} timeout={100}>
             <Fade in={true} timeout={800}>
               <Typography variant="h5" sx={{ textAlign: 'center', fontWeight: 'bold', mb: '1.5rem' }}>
-                {course?.id === 'sandbox' ? 'OHTE Sandbox' : course?.id}
+                {course?.id === 'sandbox' ? 'Sandbox' : course?.id}
               </Typography>
             </Fade>
           </Collapse>
@@ -359,6 +358,7 @@ export const ChatV2 = () => {
             completion={completion}
             isCompletionDone={isCompletionDone}
             fileSearchResult={fileSearchResult}
+            hasRagIndex={!!ragIndex}
           />
         </Box>
 
@@ -387,8 +387,7 @@ export const ChatV2 = () => {
         }}
       >
         <Box sx={{ position: 'sticky', top: 80, padding: '4rem 2rem 2rem 0' }}>
-          {/* {ragIndex && ( */}
-          {course && (
+          {ragIndex && course && (
             <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <Typography variant="h6">Lähteet</Typography>
               {/* <CitationsBox messages={messages} fileSearchResult={fileSearchResult} /> */}

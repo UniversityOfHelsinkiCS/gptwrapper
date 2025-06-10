@@ -43,10 +43,20 @@ export const LoadingMessage = ({ expandedNodeHeight }: { expandedNodeHeight: num
   </div>
 )
 
-const MessageItem = ({ message, isLastAssistantNode, expandedNodeHeight }: { message: Message; isLastAssistantNode: boolean; expandedNodeHeight: number }) => {
-  // TÄMÄ on kaikki hämäystä demonstroidakseen lähdeviittaukset kurssichatissa
+const MessageItem = ({
+  message,
+  isLastAssistantNode,
+  expandedNodeHeight,
+  hasRagIndex,
+}: {
+  message: Message
+  isLastAssistantNode: boolean
+  expandedNodeHeight: number
+  hasRagIndex: boolean
+}) => {
   const { courseId } = useParams()
-  const hasAnnotations_Leikisti = isLastAssistantNode && courseId
+  // TÄMÄ on kaikki hämäystä demonstroidakseen lähdeviittaukset kurssichatissa
+  const hasAnnotations_Leikisti = isLastAssistantNode && courseId && hasRagIndex
 
   return (
     <Box
@@ -78,6 +88,7 @@ export const Conversation = ({
   completion,
   isCompletionDone,
   fileSearchResult,
+  hasRagIndex,
 }: {
   conversationRef: React.RefObject<HTMLElement>
   expandedNodeHeight: number
@@ -85,18 +96,24 @@ export const Conversation = ({
   completion: string
   isCompletionDone: boolean
   fileSearchResult: FileSearchResult
+  hasRagIndex: boolean
 }) => (
   <Box style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '2.5rem' }} ref={conversationRef}>
     {messages.length === 0 && <ConversationSplash />}
     {messages.map((message, idx) => {
       const isLastAssistantNode = idx === messages.length - 1 && message.role === 'assistant'
 
-      return <MessageItem key={idx} message={message} isLastAssistantNode={isLastAssistantNode} expandedNodeHeight={expandedNodeHeight} />
+      return <MessageItem key={idx} message={message} isLastAssistantNode={isLastAssistantNode} expandedNodeHeight={expandedNodeHeight} hasRagIndex={hasRagIndex} />
     })}
     {!isCompletionDone &&
       messages.length > 0 &&
       (completion.length > 0 ? (
-        <MessageItem message={{ role: 'assistant', content: completion, fileSearchResult }} isLastAssistantNode={true} expandedNodeHeight={expandedNodeHeight} />
+        <MessageItem
+          message={{ role: 'assistant', content: completion, fileSearchResult }}
+          isLastAssistantNode={true}
+          expandedNodeHeight={expandedNodeHeight}
+          hasRagIndex={hasRagIndex}
+        />
       ) : (
         <LoadingMessage expandedNodeHeight={expandedNodeHeight} />
       ))}
