@@ -37,35 +37,40 @@ export const ChatV2 = () => {
   const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
 
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
+
+  // local storage states
+  const localStoragePrefix = 'general'
   const [model, setModel] = useLocalStorageState<{ name: string }>('model-v2', {
     name: DEFAULT_MODEL,
   })
-
-  // local storage
-  const localStoragePrefix = 'general'
   // TODO: Do translation
   const defaultInstructions = 'Olet avulias avustaja'
   const [assistantInstructions, setAssistantInstructions] = useLocalStorageState<{ content: string }>(`${localStoragePrefix}-chat-instructions`, {
     content: defaultInstructions,
   })
+  const [modelTemperature, setModelTemperature] = useLocalStorageState<{ value: number }>(`${localStoragePrefix}-chat-model-temperature`, {
+    value: 0.5,
+  })
   const [message, setMessage] = useLocalStorageState<{ content: string }>(`${localStoragePrefix}-chat-current`, { content: '' })
   const [messages, setMessages] = useLocalStorageState<Message[]>(`${localStoragePrefix}-chat-messages`, [])
   const [prevResponse, setPrevResponse] = useLocalStorageState<{ id: string }>(`${localStoragePrefix}-prev-response`, { id: '' })
-
-  // States
-  const [settingsModalOpen, setSettingsModalOpen] = useState(true)
-  const [activePromptId, setActivePromptId] = useState('')
-  const [fileName, setFileName] = useState<string>('')
-  const [completion, setCompletion] = useState<string>('')
-  const [isCompletionDone, setIsCompletionDone] = useState<boolean>(true)
   const [fileSearchResult, setFileSearchResult] = useLocalStorageState<FileSearchResult>('last-file-search', null)
-  const [streamController, setStreamController] = useState<AbortController>()
+
+  // UI States
+  const [settingsModalOpen, setSettingsModalOpen] = useState(true)
+  const [fileName, setFileName] = useState<string>('')
   const [alertOpen, setAlertOpen] = useState(false)
   const [disallowedFileType, setDisallowedFileType] = useState('')
   const [tokenUsageWarning, setTokenUsageWarning] = useState('')
   const [tokenWarningVisible, setTokenWarningVisible] = useState(false)
-  const [modelTemperature, setModelTemperature] = useState(0.5)
   const [saveConsent, setSaveConsent] = useState(true)
+
+  // Chat Streaming states
+  const [completion, setCompletion] = useState<string>('')
+  const [isCompletionDone, setIsCompletionDone] = useState<boolean>(true)
+  const [streamController, setStreamController] = useState<AbortController>()
+
+  // RAG states
   const [ragIndexId, setRagIndexId] = useState<number | null>(null)
   const ragIndex = ragIndices?.find((index) => index.id === ragIndexId) ?? null
 
@@ -176,7 +181,7 @@ export const ChatV2 = () => {
         model: model.name,
         formData: new FormData(),
         userConsent: true,
-        modelTemperature,
+        modelTemperature: modelTemperature.value,
         courseId,
         abortController: streamController,
         saveConsent,
@@ -414,6 +419,8 @@ export const ChatV2 = () => {
         setOpen={setSettingsModalOpen}
         assistantInstructions={assistantInstructions.content}
         setAssistantInstructions={(updatedInstructions) => setAssistantInstructions({ content: updatedInstructions })}
+        modelTemperature={modelTemperature.value}
+        setModelTemperature={(updatedTemperature) => setModelTemperature({ value: updatedTemperature })}
         model={model.name}
         setModel={(name) => setModel({ name })}
         setRagIndex={setRagIndexId}

@@ -53,7 +53,7 @@ const PostStreamSchemaV2 = z.object({
     assistantInstructions: z.string().optional(),
     messages: z.array(z.any()),
     userConsent: z.boolean().optional(),
-    modelTemperature: z.number().optional(),
+    modelTemperature: z.number().min(0).max(2).optional(),
     saveConsent: z.boolean().optional(),
     prevResponseId: z.string().optional(),
     courseId: z.string().optional(),
@@ -184,6 +184,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     courseId,
     vectorStoreId,
     instructions,
+    temperature: options.modelTemperature,
   })
 
   const latestMessage = options.messages[options.messages.length - 1]
@@ -404,8 +405,10 @@ openaiRouter.post('/stream/:courseId/:version?', upload.single('file'), async (r
   }
 
   const responsesClient = new ResponsesClient({
-    model,
+    model: options.model,
     courseId,
+    instructions: options.assistantInstructions,
+    temperature: options.modelTemperature,
   })
 
   let events

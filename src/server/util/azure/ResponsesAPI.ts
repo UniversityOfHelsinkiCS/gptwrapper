@@ -31,9 +31,22 @@ const client = getAzureOpenAIClient(process.env.GPT_4O_MINI)
 export class ResponsesClient {
   model: string
   instructions: string
+  temperature: number
   tools: FileSearchTool[]
 
-  constructor({ model, courseId, vectorStoreId, instructions }: { model: string; courseId?: string; vectorStoreId?: string; instructions?: string }) {
+  constructor({
+    model,
+    temperature,
+    courseId,
+    vectorStoreId,
+    instructions,
+  }: {
+    model: string
+    temperature: number
+    courseId?: string
+    vectorStoreId?: string
+    instructions?: string
+  }) {
     const deploymentId = validModels.find((m) => m.name === model)?.deployment
 
     if (!deploymentId) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
@@ -47,6 +60,7 @@ export class ResponsesClient {
       : [] // needs to retrun empty array for null
 
     this.model = deploymentId
+    this.temperature = temperature
     this.instructions = instructions
     this.tools = fileSearchTool
   }
@@ -65,6 +79,7 @@ export class ResponsesClient {
         model: this.model,
         previous_response_id: prevResponseId || undefined,
         instructions: this.instructions,
+        temperature: this.temperature,
         input,
         stream: true,
         tools: this.tools,
@@ -143,6 +158,8 @@ export class ResponsesClient {
           break
 
         case 'response.completed':
+          console.log(`Response completed with temp: ${event.response.temperature}, model: ${event.response.model}`)
+
           await this.write(
             {
               type: 'complete',
