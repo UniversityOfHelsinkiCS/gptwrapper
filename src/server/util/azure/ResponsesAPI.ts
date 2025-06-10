@@ -10,7 +10,7 @@ import { AzureOpenAI } from 'openai'
 
 // import { EventStream } from '@azure/openai'
 import { Stream } from 'openai/streaming'
-import { FileSearchTool, ResponseIncludable, ResponseInput, ResponseStreamEvent } from 'openai/resources/responses/responses'
+import type { FileSearchTool, ResponseIncludable, ResponseInput, ResponseItemsPage, ResponseStreamEvent } from 'openai/resources/responses/responses'
 
 import { createFileSearchTool } from './util'
 
@@ -71,6 +71,15 @@ export class ResponsesClient {
         tool_choice: 'auto',
         store: true,
         include,
+        /**
+         * background: true is mot currenlty supported by Azure OpenAI.
+         * It breaks the text generation. But it is vital for really
+         * stopping the text generation. Currently cancelling a text
+         * generation is only handled on the client level.
+         *
+         * Waiting for Azure/openai to fix this issue.
+         */
+        // background: true,
       })
     } catch (error: any) {
       logger.error(error)
@@ -166,5 +175,23 @@ export class ResponsesClient {
         process.nextTick(resolve)
       }
     })
+  }
+
+  static async cancelResponse({ responseId }: { responseId: string }): Promise<void> {
+    try {
+      await client.responses.cancel(responseId)
+    } catch (error: any) {
+      logger.error(`Error cancelling response ${responseId}:`, error)
+      throw new Error(`Failed to cancel response: ${error.message}`)
+    }
+  }
+
+  static async getResponseItemList({ responseId }: { responseId: string }): Promise<ResponseItemsPage> {
+    try {
+      return await client.responses.inputItems.list(responseId)
+    } catch (error: any) {
+      logger.error(`Error retrieving response items for ${responseId}:`, error)
+      throw new Error(`Failed to retrieve response items: ${error.message}`)
+    }
   }
 }
