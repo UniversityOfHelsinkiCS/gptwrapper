@@ -49,7 +49,7 @@ export const ChatV2 = () => {
   const [prevResponse, setPrevResponse] = useLocalStorageState<{ id: string }>(`${localStoragePrefix}-prev-response`, { id: '' })
 
   // States
-  const [settingsModalOpen, setSettingsModalOpen] = useState(false)
+  const [settingsModalOpen, setSettingsModalOpen] = useState(true)
   const [activePromptId, setActivePromptId] = useState('')
   const [fileName, setFileName] = useState<string>('')
   const [completion, setCompletion] = useState<string>('')
@@ -212,8 +212,7 @@ export const ChatV2 = () => {
 
   useEffect(() => {
     // Fethces data from local storage according to chat
-    console.log("course changed")
-
+    console.log('course changed')
   }, [course])
 
   useEffect(() => {
