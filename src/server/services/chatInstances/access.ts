@@ -1,14 +1,15 @@
-import { TEST_COURSES } from '../../util/config'
+import { TEST_COURSES, TEST_USERS } from '../../util/config'
 import { ChatInstance, Enrolment, Responsibility, User as UserModel } from '../../db/models'
 import { User } from '../../types'
 
 const getUserById = async (id: string) => UserModel.findByPk(id)
 
 export const getEnrolledCourses = async (user: User) => {
-  // Only do the example/test course upserts if the user is an admin.
+  // Only do the example/test course upserts if the user is an admin or member of the special course
   // We also want to check if the user exists in the database
   // before we try to upsert the enrolments.
-  if (user.isAdmin && (await getUserById(user.id))) {
+  const enrolledToSandbox = user.iamGroups.includes(TEST_USERS.enrolled) //user.isAdmin || 
+  if (enrolledToSandbox && (await getUserById(user.id))) {
     await Enrolment.upsert(
       {
         userId: user.id,

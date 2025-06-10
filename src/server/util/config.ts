@@ -73,6 +73,10 @@ export const TEST_USER_IDS = [
   'hy-hlo-45702058',
   'hy-hlo-1397482',
 ]
+export const TEST_USERS = {
+  enrolled: 'grp-currechat-demostudents',
+  teachers: 'grp-currechat-demoteachers',
+}
 
 export const DEFAULT_RAG_SYSTEM_PROMPT = `
 You are a helpful AI assistant designed to answer questions related to the course material, which you can access using the file search tool. Your responses should be concise, relevant, and based on the provided course files.
