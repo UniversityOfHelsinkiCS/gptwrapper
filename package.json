@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "docker compose up",
-    "prod": "NODE_ENV=production node --no-warnings --experimental-specifier-resolution=node --loader ts-node/esm src/server/index.ts",
-    "dev": "NODE_ENV=development concurrently \"tsx src/server/index.ts\" \"vite\"",
+    "prod": "NODE_ENV=production tsx src/server/index.ts",
+    "dev": "NODE_ENV=development concurrently \"tsx watch src/server/index.ts\" \"vite\"",
     "tsc": "tsc",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
