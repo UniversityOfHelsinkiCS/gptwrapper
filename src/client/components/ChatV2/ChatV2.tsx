@@ -43,7 +43,11 @@ export const ChatV2 = () => {
 
   // local storage
   const localStoragePrefix = 'general'
-  const [system, setSystem] = useLocalStorageState<{ content: string }>(`${localStoragePrefix}-chat-system`, { content: '' })
+  // TODO: Do translation
+  const defaultInstructions = 'Olet avulias avustaja'
+  const [assistantInstructions, setAssistantInstructions] = useLocalStorageState<{ content: string }>(`${localStoragePrefix}-chat-instructions`, {
+    content: defaultInstructions,
+  })
   const [message, setMessage] = useLocalStorageState<{ content: string }>(`${localStoragePrefix}-chat-current`, { content: '' })
   const [messages, setMessages] = useLocalStorageState<Message[]>(`${localStoragePrefix}-chat-messages`, [])
   const [prevResponse, setPrevResponse] = useLocalStorageState<{ id: string }>(`${localStoragePrefix}-prev-response`, { id: '' })
@@ -166,7 +170,7 @@ export const ChatV2 = () => {
 
     try {
       const { tokenUsageAnalysis, stream } = await getCompletionStream({
-        system: system.content,
+        assistantInstructions: assistantInstructions.content,
         messages: newMessages,
         ragIndexId: ragIndexId ?? undefined,
         model: model.name,
@@ -408,6 +412,8 @@ export const ChatV2 = () => {
       <SettingsModal
         open={settingsModalOpen}
         setOpen={setSettingsModalOpen}
+        assistantInstructions={assistantInstructions.content}
+        setAssistantInstructions={(updatedInstructions) => setAssistantInstructions({ content: updatedInstructions })}
         model={model.name}
         setModel={(name) => setModel({ name })}
         setRagIndex={setRagIndexId}

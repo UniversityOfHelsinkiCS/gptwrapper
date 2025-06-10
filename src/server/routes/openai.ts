@@ -50,6 +50,7 @@ const fileParsing = async (options: any, req: any) => {
 const PostStreamSchemaV2 = z.object({
   options: z.object({
     model: z.string(),
+    assistantInstructions: z.string().optional(),
     messages: z.array(z.any()),
     userConsent: z.boolean().optional(),
     modelTemperature: z.number().optional(),
@@ -153,19 +154,22 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
 
   // Check rag index
   let vectorStoreId: string | undefined = undefined
-  let instructions: string | undefined = undefined
+  let instructions: string | undefined = options.assistantInstructions
 
   if (ragIndexId && user.isAdmin) {
     const ragIndex = await RagIndex.findByPk(ragIndexId)
     if (ragIndex) {
       if (courseId && ragIndex.courseId !== courseId) {
-        logger.error('RagIndex does not belong to the course', { ragIndexId, courseId })
+        logger.error('RagIndex does not belong to the course', {
+          ragIndexId,
+          courseId,
+        })
         res.status(403).send('RagIndex does not belong to the course')
         return
       }
 
       vectorStoreId = ragIndex.metadata.azureVectorStoreId
-      instructions = ragIndex.metadata.instructions ?? DEFAULT_RAG_SYSTEM_PROMPT
+      instructions = `${instructions} ${ragIndex.metadata.instructions ?? DEFAULT_RAG_SYSTEM_PROMPT}`
 
       console.log('using', ragIndex.toJSON())
     } else {
@@ -407,7 +411,10 @@ openaiRouter.post('/stream/:courseId/:version?', upload.single('file'), async (r
   let events
   if (version === 'v2') {
     const latestMessage = options.messages[options.messages.length - 1] // Adhoc to input only the latest message
-    events = await responsesClient.createResponse({ input: [latestMessage], prevResponseId: options.prevResponseId })
+    events = await responsesClient.createResponse({
+      input: [latestMessage],
+      prevResponseId: options.prevResponseId,
+    })
   } else {
     events = await getCompletionEvents(options)
   }

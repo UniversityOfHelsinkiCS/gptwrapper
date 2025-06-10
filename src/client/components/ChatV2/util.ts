@@ -3,7 +3,7 @@ import { Message } from '../../types'
 import { postAbortableStream } from '../../util/apiClient'
 
 interface GetCompletoinStreamProps {
-  system: string
+  assistantInstructions: string
   messages: Message[]
   model: string
   formData: FormData
@@ -16,7 +16,7 @@ interface GetCompletoinStreamProps {
   saveConsent: boolean
 }
 export const getCompletionStream = async ({
-  system,
+  assistantInstructions,
   messages,
   model,
   formData,
@@ -34,10 +34,11 @@ export const getCompletionStream = async ({
       messages: [
         {
           role: 'system',
-          content: system,
+          content: assistantInstructions,
         },
         ...messages,
       ],
+      assistantInstructions,
       ragIndexId,
       model,
       userConsent,

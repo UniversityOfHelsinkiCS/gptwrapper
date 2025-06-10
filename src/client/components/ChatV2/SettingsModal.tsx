@@ -9,6 +9,8 @@ import { RagIndexAttributes } from '../../../shared/types'
 interface SettingsModalProps {
   open: boolean
   setOpen: (open: boolean) => void
+  assistantInstructions: string
+  setAssistantInstructions: (instructions: string) => void
   model: string
   setModel: (model: string) => void
   setRagIndex: (ragIndex: number) => void
@@ -16,7 +18,17 @@ interface SettingsModalProps {
   currentRagIndex: RagIndexAttributes
 }
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ open, setOpen, model, setModel, setRagIndex, ragIndices, currentRagIndex }) => {
+export const SettingsModal: React.FC<SettingsModalProps> = ({
+  open,
+  setOpen,
+  assistantInstructions,
+  setAssistantInstructions,
+  model,
+  setModel,
+  setRagIndex,
+  ragIndices,
+  currentRagIndex,
+}) => {
   return (
     <Modal open={open} onClose={() => setOpen(false)}>
       <Box
@@ -51,7 +63,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, setOpen, mod
         {/* <ModelSelector currentModel={model} setModel={setModel} models={validModels.map((m) => m.name)} /> */}
         {/* Disabled for now due to RAG not functioning cirreclty */}
         {/* <RagSelector currentRagIndex={currentRagIndex} setRagIndex={setRagIndex} ragIndices={ragIndices} /> */}
-        <TextField multiline minRows={6} maxRows={10} label="Alustuksen sisältö" defaultValue="Olet avulias avustaja" />
+        <TextField
+          multiline
+          minRows={6}
+          maxRows={10}
+          label="Alustuksen sisältö"
+          value={assistantInstructions}
+          onChange={(e) => setAssistantInstructions(e.target.value)}
+        />
       </Box>
     </Modal>
   )
