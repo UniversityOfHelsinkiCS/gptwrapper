@@ -2,7 +2,7 @@ import React from 'react'
 import { Send } from '@mui/icons-material'
 import StopIcon from '@mui/icons-material/Stop'
 import { validModels } from '../../../config'
-import { Box, IconButton, TextField, Typography } from '@mui/material'
+import { Box, IconButton, TextField, Tooltip, Typography } from '@mui/material'
 import { useState, useRef } from 'react'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
@@ -86,12 +86,14 @@ export const ChatBox = ({
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: '0.5rem' }}>
             <ModelSelector currentModel={currentModel} setModel={setModel} models={validModels.map((m) => m.name)} />
 
-            {/* Submit/Stop button */}
             {disabled ? (
-              // TODO: finish the stop signal API
-              <IconButton disabled={!disabled}>
-                <StopIcon />
-              </IconButton>
+              // Stop signal is currently not supported due to OpenAI response cancel endpoint not working properly.
+              // Try implementing this in the fall 2025.
+              <Tooltip title="Cancelling responses is currently not supported" arrow placement="top">
+                <IconButton disabled={!disabled}>
+                  <StopIcon />
+                </IconButton>
+              </Tooltip>
             ) : (
               <IconButton disabled={disabled} type="submit">
                 <Send />
