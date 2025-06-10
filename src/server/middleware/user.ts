@@ -14,7 +14,7 @@ const mockHeaders = {
   mail: 'veikko@toska.test.dev',
   preferredlanguage: 'fi',
   hypersonsisuid: 'hy-hlo-123',
-  hygroupcn: 'grp-toska;hy-employees;grp-currechat-demostudents',
+  hygroupcn: 'grp-toska;hy-employees;grp-currechat-demostudents;grp-currechat-demoteachers',
 }
 
 const userMiddleware = async (req: any, _res: any, next: any) => {
