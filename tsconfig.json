@@ -3,7 +3,6 @@
     "module": "ESNext",
     "moduleResolution": "Node",
     "moduleDetection": "force",
-    "allowJs": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "inlineSourceMap": true,

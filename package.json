@@ -7,7 +7,7 @@
   "scripts": {
     "start": "docker compose up",
     "prod": "NODE_ENV=production node --no-warnings --experimental-specifier-resolution=node --loader ts-node/esm src/server/index.ts",
-    "dev": "NODE_ENV=development concurrently \"nodemon --exec node --no-warnings --experimental-specifier-resolution=node --loader ts-node/esm src/server/index.ts\" \"vite\"",
+    "dev": "NODE_ENV=development concurrently \"tsx src/server/index.ts\" \"vite\"",
     "tsc": "tsc",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
@@ -18,7 +18,7 @@
     "type": "git",
     "url": "git+https://github.com/UniversityOfHelsinkiCS/GPTwrapper.git"
   },
-  "author": "Miko Keskimäki",
+  "author": "toska.dev",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/UniversityOfHelsinkiCS/GPTwrapper/issues"
@@ -57,11 +57,11 @@
     "eslint-plugin-react": "^7.37.2",
     "husky": "^9.0.10",
     "lint-staged": "^15.2.1",
-    "nodemon": "^3.0.3",
     "prettier": "^3.2.5",
     "sequelize-cli": "^6.6.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.3.3",
+    "tsx": "4.19.4",
+    "vite": "6.3.5",
+    "typescript": "5.8.3",
     "typescript-eslint": "^8.11.0"
   },
   "dependencies": {
@@ -108,19 +108,9 @@
     "umzug": "^3.6.1",
     "unfuck-spa-shibboleth-session": "^4.1.0",
     "unfuck-utf8-headers-middleware": "^1.0.1",
-    "vite": "^5.0.12",
     "winston": "^3.11.0",
     "winston-gelf-transporter": "^1.0.2",
     "winston-loki": "^6.1.3",
     "zod": "^3.24.4"
-  },
-  "nodemonConfig": {
-    "ignore": [
-      "e2e"
-    ],
-    "watch": [
-      "src"
-    ],
-    "ext": "*.js,*.ts,*.json"
   }
 }
