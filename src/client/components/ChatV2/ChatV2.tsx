@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
 import useUserStatus from '../../hooks/useUserStatus'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
-import { DEFAULT_MODEL } from '../../../config'
+import { DEFAULT_MODEL, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE } from '../../../config'
 import useInfoTexts from '../../hooks/useInfoTexts'
 import { Message } from '../../types'
 import { FileSearchResult, ResponseStreamEventData } from '../../../shared/types'
@@ -28,7 +28,7 @@ import { useRagIndices } from '../../hooks/useRagIndices'
 import CourseOption from './generics/CourseOption'
 import SettingsButton from './generics/SettingsButton'
 
-import { AppContext } from '../../util/context'
+import { AppContext } from '../../util/AppContext'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -44,12 +44,11 @@ export const ChatV2 = () => {
     name: DEFAULT_MODEL,
   })
   // TODO: Do translation
-  const defaultInstructions = 'Olet avulias avustaja'
   const [assistantInstructions, setAssistantInstructions] = useLocalStorageState<{ content: string }>(`${localStoragePrefix}-chat-instructions`, {
-    content: defaultInstructions,
+    content: DEFAULT_ASSISTANT_INSTRUCTIONS,
   })
   const [modelTemperature, setModelTemperature] = useLocalStorageState<{ value: number }>(`${localStoragePrefix}-chat-model-temperature`, {
-    value: 0.5,
+    value: DEFAULT_MODEL_TEMPERATURE,
   })
   const [message, setMessage] = useLocalStorageState<{ content: string }>(`${localStoragePrefix}-chat-current`, { content: '' })
   const [messages, setMessages] = useLocalStorageState<Message[]>(`${localStoragePrefix}-chat-messages`, [])

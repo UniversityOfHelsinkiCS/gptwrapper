@@ -7,7 +7,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { fi } from 'date-fns/locale'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
 import { Box, Button, CssBaseline, Snackbar } from '@mui/material'
-import { AppContext } from './util/context'
+import { AppContext } from './util/AppContext'
 
 import { PUBLIC_URL } from '../config'
 import { User } from './types'

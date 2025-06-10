@@ -1,5 +1,6 @@
 import { Close } from '@mui/icons-material'
 import { Box, IconButton, Modal, Slider, TextField, Typography } from '@mui/material'
+import { DEFAULT_MODEL, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE } from '../../../config'
 import ModelSelector from './ModelSelector'
 import { validModels } from '../../../config'
 import React from 'react'
@@ -35,7 +36,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   currentRagIndex,
 }) => {
   const resetSettings = () => {
-    alert('resetting')
+    setAssistantInstructions(DEFAULT_ASSISTANT_INSTRUCTIONS)
+    setModelTemperature(DEFAULT_MODEL_TEMPERATURE)
   }
 
   return (
