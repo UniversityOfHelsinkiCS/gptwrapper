@@ -64,3 +64,4 @@ export const DEFAULT_MODEL_ON_ENABLE = 'gpt-4o'
 
 export const DEFAULT_ASSISTANT_INSTRUCTIONS = 'Olet avulias avustaja'
 export const DEFAULT_MODEL_TEMPERATURE = 0.5
+export const ALLOWED_FILE_TYPES = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'text/md', 'application/pdf']

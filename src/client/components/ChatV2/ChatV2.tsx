@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
 import useUserStatus from '../../hooks/useUserStatus'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
-import { DEFAULT_MODEL, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE } from '../../../config'
+import { DEFAULT_MODEL, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE, ALLOWED_FILE_TYPES } from '../../../config'
 import useInfoTexts from '../../hooks/useInfoTexts'
 import { Message } from '../../types'
 import { FileSearchResult, ResponseStreamEventData } from '../../../shared/types'
@@ -78,6 +78,7 @@ export const ChatV2 = () => {
   const conversationRef = useRef<HTMLElement>(null)
   const chatHeaderRef = useRef<HTMLElement>(null)
   const inputFieldRef = useRef<HTMLElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
 
@@ -158,6 +159,17 @@ export const ChatV2 = () => {
 
   const handleSubmit = async (message: string) => {
     const newMessages = messages.concat({ role: 'user', content: message })
+    const formData = new FormData()
+    let file = fileInputRef.current.files[0] as File
+    if (file) {
+      if (ALLOWED_FILE_TYPES.includes(file.type)) {
+        formData.append('file', file)
+      } else {
+        console.error('File not attached')
+        file = null
+      }
+    }
+
     setMessages(newMessages)
     setMessage({ content: '' })
     setPrevResponse({ id: '' })
@@ -177,8 +189,8 @@ export const ChatV2 = () => {
         messages: newMessages,
         ragIndexId: ragIndexId ?? undefined,
         model: model.name,
-        formData: new FormData(),
-        userConsent: true,
+        formData,
+        userConsent: true, // change to not hard coded
         modelTemperature: modelTemperature.value,
         courseId,
         abortController: streamController,
@@ -366,6 +378,11 @@ export const ChatV2 = () => {
           <ChatBox
             disabled={!isCompletionDone}
             currentModel={model.name}
+            fileInputRef={fileInputRef}
+            fileName={fileName}
+            setFileName={setFileName}
+            setDisallowedFileType={setDisallowedFileType}
+            setAlertOpen={setAlertOpen}
             setModel={(name) => setModel({ name })}
             onSubmit={(message) => {
               if (message.trim()) {

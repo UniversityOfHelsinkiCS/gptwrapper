@@ -1,8 +1,9 @@
 import React from 'react'
 import { Send } from '@mui/icons-material'
 import StopIcon from '@mui/icons-material/Stop'
+import AttachFileIcon from '@mui/icons-material/AttachFile'
 import { validModels } from '../../../config'
-import { Box, IconButton, TextField, Tooltip, Typography } from '@mui/material'
+import { Box, Chip, IconButton, TextField, Tooltip, Typography } from '@mui/material'
 import { useState, useRef } from 'react'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
@@ -12,11 +13,21 @@ import ModelSelector from './ModelSelector'
 export const ChatBox = ({
   disabled,
   currentModel,
+  fileInputRef,
+  fileName,
+  setDisallowedFileType,
+  setAlertOpen,
+  setFileName,
   setModel,
   onSubmit,
 }: {
   disabled: boolean
   currentModel: string
+  fileInputRef: React.RefObject<HTMLInputElement>
+  fileName: string
+  setDisallowedFileType: React.Dispatch<string>
+  setAlertOpen: React.Dispatch<boolean>
+  setFileName: (name: string) => void
   setModel: (model: string) => void
   onSubmit: (message: string) => void
 }) => {
@@ -27,6 +38,26 @@ export const ChatBox = ({
   const textFieldRef = useRef<HTMLInputElement>(null)
 
   const { t, i18n } = useTranslation()
+
+  const handleDeleteFile = () => {
+    fileInputRef.current.value = null
+    setFileName('')
+  }
+
+  const handleFileTypeValidation = (file: File): void => {
+    const allowedFileTypes = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'application/pdf']
+
+    if (allowedFileTypes.includes(file.type)) {
+      setFileName(file.name)
+    } else {
+      setDisallowedFileType(file.type)
+      setAlertOpen(true)
+      setTimeout(() => {
+        setAlertOpen(false)
+      }, 5000)
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -84,7 +115,14 @@ export const ChatBox = ({
             }}
           />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: '0.5rem' }}>
-            <ModelSelector currentModel={currentModel} setModel={setModel} models={validModels.map((m) => m.name)} />
+            <Box>
+              <IconButton component="label">
+                <AttachFileIcon />
+                <input type="file" accept="text/*,application/pdf" hidden ref={fileInputRef} onChange={(e) => handleFileTypeValidation(e.target.files[0])} />
+              </IconButton>
+              {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
+              <ModelSelector currentModel={currentModel} setModel={setModel} models={validModels.map((m) => m.name)} />
+            </Box>
 
             {disabled ? (
               // Stop signal is currently not supported due to OpenAI response cancel endpoint not working properly.
