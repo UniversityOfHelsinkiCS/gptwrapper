@@ -110,7 +110,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             jota haastatellaan kaktusten hoidosta.
           </Typography>
 
-          {hasPrompts && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}
+          {hasPrompts && course && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}
 
           <TextField
             multiline
