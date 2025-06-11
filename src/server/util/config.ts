@@ -6,8 +6,6 @@ export const API_TOKEN = process.env.API_TOKEN || ''
 
 export const { CURRE_API_PASSWORD } = process.env
 
-export const TIKE_OPENAI_API_KEY = process.env.TIKE_OPENAI_API_KEY || ''
-
 export const AZURE_API_KEY = process.env.AZURE_API_KEY || ''
 
 export const AZURE_RESOURCE = process.env.AZURE_RESOURCE || ''
