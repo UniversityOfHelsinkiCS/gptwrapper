@@ -1,13 +1,13 @@
 {
   "name": "gptwrapper",
   "version": "1.0.0",
-  "description": "Wrapper to handle OpenAI API calls and access management",
-  "main": "src/index.ts",
+  "description": "CurreChat - The GPT chat interface of University of Helsinki",
   "type": "module",
   "scripts": {
     "start": "docker compose up",
     "prod": "NODE_ENV=production tsx src/server/index.ts",
-    "dev": "NODE_ENV=development concurrently \"tsx watch src/server/index.ts\" \"vite\"",
+    "dev": "concurrently \"npm run dev:server\" \"vite\"",
+    "dev:server": "NODE_ENV=development tsx watch --clear-screen=false src/server/index.ts",
     "tsc": "tsc",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
