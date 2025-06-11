@@ -3,45 +3,84 @@ import { useParams } from 'react-router-dom'
 import { Message } from '../../types'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import 'highlight.js/styles/github-dark.css' // pick your favorite theme
 import { FileSearchResult } from '../../../shared/types'
 import { ConversationSplash } from './generics/ConversationSplash'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 
-const dotStyle = (delay: number) => ({
-  width: 4,
-  height: 4,
-  margin: '0 4px',
-  borderRadius: '50%',
-  backgroundColor: '#666',
-  animation: 'bounceWave 1.2s infinite',
-  animationDelay: `${delay}s`,
-})
+import { LoadingMessage } from './generics/LoadingMessage'
 
-export const LoadingMessage = ({ expandedNodeHeight }: { expandedNodeHeight: number }) => (
-  <div
-    className="message-role-assistant"
-    style={{
-      height: expandedNodeHeight,
-      display: 'flex',
-      padding: '2rem',
+const UserMessage = ({
+  content,
+  attachements,
+  isLastAssistantNode,
+  expandedNodeHeight,
+}: {
+  content: string
+  attachements: string
+  isLastAssistantNode: boolean
+  expandedNodeHeight: number
+}) => (
+  <Box
+    className={`message-role-user`}
+    sx={{
+      minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
+      alignSelf: 'flex-end',
     }}
   >
-    <style>
-      {`
-        @keyframes bounceWave {
-          0%, 80%, 100% {
-            transform: translateY(0);
-          }
-          40% {
-            transform: translateY(-8px);
-          }
-        }
-      `}
-    </style>
-    <div style={dotStyle(0)} />
-    <div style={dotStyle(0.15)} />
-    <div style={dotStyle(0.3)} />
-  </div>
+    <Box
+      sx={{
+        backgroundColor: '#efefef',
+        padding: '1.5rem 2rem',
+        marginLeft: 20,
+        borderRadius: '0.6rem',
+        boxShadow: '0px 2px 2px rgba(0, 0, 0, 0.2)',
+        whiteSpace: 'pre-wrap', // 🧠 This preserves formatting
+        wordBreak: 'break-word',
+      }}
+    >
+      {content}
+
+      {attachements && (
+        <Typography variant="body2" sx={{ display: 'flex', gap: 0.5, alignItems: 'center', opacity: 0.7, marginTop: '1rem' }}>
+          <AttachFileIcon fontSize="small" />
+          {attachements}
+        </Typography>
+      )}
+    </Box>
+  </Box>
+)
+
+const AssistantMessage = ({
+  content,
+  hasRagIndex,
+  hasAnnotations,
+  isLastAssistantNode,
+  expandedNodeHeight,
+}: {
+  content: string
+  hasRagIndex: boolean
+  hasAnnotations: boolean
+  isLastAssistantNode: boolean
+  expandedNodeHeight: number
+}) => (
+  <Box
+    className={`message-role-assistant`}
+    sx={{
+      minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
+      alignSelf: 'flex-start',
+    }}
+  >
+    <Box
+      sx={{
+        padding: '0 1.5rem',
+        borderRadius: '5px',
+        borderLeft: hasAnnotations ? '5px solid #3f51b5' : 'none',
+      }}
+    >
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+    </Box>
+  </Box>
 )
 
 const MessageItem = ({
@@ -59,37 +98,19 @@ const MessageItem = ({
   // TÄMÄ on kaikki hämäystä demonstroidakseen lähdeviittaukset kurssichatissa
   const hasAnnotations_Leikisti = isLastAssistantNode && courseId && hasRagIndex
 
-  return (
-    <Box
-      className={`message-role-${message.role}`}
-      sx={{
-        minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
-        alignSelf: message.role === 'assistant' ? 'flex-start' : 'flex-end',
-      }}
-    >
-      <Box
-        sx={{
-          backgroundColor: message.role === 'assistant' ? 'transparent' : '#efefef',
-          padding: message.role === 'assistant' ? '0 1.5rem' : '0.175rem 1.5rem',
-          marginLeft: message.role === 'assistant' ? 0 : 20,
-          borderRadius: message.role === 'assistant' ? '5px' : '0.6rem',
-          boxShadow: message.role === 'assistant' ? 'none' : '0px 2px 2px rgba(0, 0, 0, 0.2)',
-          borderLeft: hasAnnotations_Leikisti ? '5px solid #3f51b5' : 'none',
-          whiteSpace: message.role === 'assistant' ? 'normal' : 'pre-wrap', // 🧠 This preserves formatting
-          wordBreak: 'break-word',
-        }}
-      >
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
-
-        {message.attachements && (
-          <Typography variant="body2" sx={{ display: 'flex', gap: 0.5, alignItems: 'center', opacity: 0.7, pb: 2 }}>
-            <AttachFileIcon fontSize="small" />
-            {message.attachements}
-          </Typography>
-        )}
-      </Box>
-    </Box>
-  )
+  if (message.role === 'assistant') {
+    return (
+      <AssistantMessage
+        content={message.content}
+        hasAnnotations={hasAnnotations_Leikisti}
+        hasRagIndex={hasRagIndex}
+        isLastAssistantNode={isLastAssistantNode}
+        expandedNodeHeight={expandedNodeHeight}
+      />
+    )
+  } else {
+    return <UserMessage content={message.content} attachements={message.attachements} isLastAssistantNode={isLastAssistantNode} expandedNodeHeight={expandedNodeHeight} />
+  }
 }
 
 export const Conversation = ({
