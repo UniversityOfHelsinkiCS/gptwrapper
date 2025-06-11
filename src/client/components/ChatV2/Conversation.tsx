@@ -70,9 +70,11 @@ const MessageItem = ({
         sx={{
           backgroundColor: message.role === 'assistant' ? 'transparent' : '#efefef',
           padding: message.role === 'assistant' ? '0 1.5rem' : '0.175rem 1.5rem',
+          marginLeft: message.role === 'assistant' ? 0 : 20,
           borderRadius: message.role === 'assistant' ? '5px' : '0.6rem',
           boxShadow: message.role === 'assistant' ? 'none' : '0px 2px 2px rgba(0, 0, 0, 0.2)',
           borderLeft: hasAnnotations_Leikisti ? '5px solid #3f51b5' : 'none',
+          whiteSpace: message.role === 'assistant' ? 'normal' : 'pre-wrap', // 🧠 This preserves formatting
         }}
       >
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
