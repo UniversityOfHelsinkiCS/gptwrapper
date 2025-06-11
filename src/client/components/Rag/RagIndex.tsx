@@ -1,60 +1,10 @@
 import React from 'react'
 import { Button, Box, Typography, styled, LinearProgress, Link, Container } from '@mui/material'
 import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom'
-import apiClient from '../../util/apiClient'
-import { useMutation, useQuery } from '@tanstack/react-query'
 import { CloudUpload } from '@mui/icons-material'
-import type { RagFileAttributes } from '../../../server/db/models/ragFile'
 import { orderBy } from 'lodash'
-import { RagIndexAttributes } from '../../../server/db/models/ragIndex'
 import { RagFileInfo } from './RagFileDetails'
-
-type RagIndexDetails = Omit<RagIndexAttributes, 'ragFileCount'> & {
-  ragFiles: RagFileAttributes[]
-}
-
-const useRagIndexDetails = (indexId: number | null) => {
-  const { data, ...rest } = useQuery<RagIndexDetails>({
-    queryKey: ['ragIndex', indexId],
-    queryFn: async () => {
-      const response = await apiClient.get(`/rag/indices/${indexId}`)
-      return response.data
-    },
-    enabled: !!indexId,
-  })
-
-  return { data, ...rest }
-}
-
-const useDeleteRagIndexMutation = () => {
-  const mutation = useMutation({
-    mutationFn: async (indexId: number) => {
-      const response = await apiClient.delete(`/rag/indices/${indexId}`)
-      return response.data
-    },
-  })
-  return mutation
-}
-
-const useUploadMutation = (index: RagIndexAttributes | null) => {
-  const mutation = useMutation({
-    mutationFn: async (files: FileList) => {
-      if (!index) {
-        throw new Error('Index is required')
-      }
-      const formData = new FormData()
-      // Append each file individually
-      Array.from(files).forEach((file) => {
-        formData.append('files', file)
-      })
-
-      const res = await apiClient.post(`/rag/indices/${index.id}/upload`, formData)
-
-      return res.data
-    },
-  })
-  return mutation
-}
+import { useDeleteRagIndexMutation, useRagIndexDetails, useUploadMutation } from './api'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',

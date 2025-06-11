@@ -3,6 +3,7 @@ import { Model, InferAttributes, InferCreationAttributes, CreationOptional, Data
 import { sequelize } from '../connection'
 import { IngestionPipelineStageKey } from '../../../shared/constants'
 import RagIndex from './ragIndex'
+import { RagFileMetadata } from '../../../shared/types'
 
 class RagFile extends Model<InferAttributes<RagFile>, InferCreationAttributes<RagFile>> {
   declare id: CreationOptional<number>
@@ -23,7 +24,7 @@ class RagFile extends Model<InferAttributes<RagFile>, InferCreationAttributes<Ra
 
   declare userId: string
 
-  declare metadata: Record<string, unknown> | null
+  declare metadata: RagFileMetadata | null
 
   declare createdAt: CreationOptional<Date>
 
@@ -104,5 +105,3 @@ RagFile.init(
 )
 
 export default RagFile
-
-export type RagFileAttributes = InferAttributes<RagFile>

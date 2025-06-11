@@ -1,19 +1,8 @@
 import React, { useState } from 'react'
 import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, Link, Container } from '@mui/material'
-import apiClient from '../../util/apiClient'
-import { useMutation } from '@tanstack/react-query'
 import { useNavigate, Link as RouterLink, useParams } from 'react-router-dom'
 import { useRagIndices } from '../../hooks/useRagIndices'
-
-const useCreateRagIndexMutation = () => {
-  const mutation = useMutation({
-    mutationFn: async ({ courseId, indexName }: { courseId: string; indexName: string }) => {
-      const response = await apiClient.post('/rag/indices', { name: indexName, courseId })
-      return response.data
-    },
-  })
-  return mutation
-}
+import { useCreateRagIndexMutation } from './api'
 
 const Rag: React.FC = () => {
   const { id: courseId } = useParams<{ id: string }>()

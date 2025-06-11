@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
-import { useParams, Link as RouterLink } from 'react-router-dom'
+import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom'
 import apiClient from '../../util/apiClient'
-import type { RagFileAttributes } from '../../../server/db/models/ragFile'
-import { Container, Link, Typography } from '@mui/material'
+import type { RagFileAttributes } from '../../../shared/types'
+import { Button, Container, Link, Typography } from '@mui/material'
 import { RagFileInfo } from './RagFileDetails'
 import type { RagIndexAttributes } from '../../../server/db/models/ragIndex'
 import { Chunk } from './Chunk'
+import { useDeleteRagFileMutation } from './api'
 
 type RagFile = RagFileAttributes & {
   fileContent: string
@@ -21,6 +22,8 @@ export const RagFile: React.FC = () => {
       return res.data
     },
   })
+  const deleteMutation = useDeleteRagFileMutation()
+  const navigate = useNavigate()
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -35,6 +38,19 @@ export const RagFile: React.FC = () => {
       <Typography variant="h3">
         {ragFile.ragIndex.metadata.name} / {ragFile.filename}
       </Typography>
+      <Button
+        variant="text"
+        color="error"
+        sx={{ my: 2 }}
+        onClick={async () => {
+          if (window.confirm('Are you sure you want to delete this file?')) {
+            await deleteMutation.mutateAsync({ indexId: ragFile.ragIndex.id, fileId: ragFile.id })
+            navigate(`/rag/${ragFile.ragIndex.id}`)
+          }
+        }}
+      >
+        Delete File
+      </Button>
       <RagFileInfo file={ragFile} />
       <Typography variant="h4">Content</Typography>
       {ragFile.fileContent.length === 0 ? (

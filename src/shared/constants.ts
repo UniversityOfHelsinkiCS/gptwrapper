@@ -23,6 +23,9 @@ export const IngestionPipelineStages = {
   completed: {
     name: 'Completed',
   },
+  deleting: {
+    name: 'Being deleted',
+  },
 } as const
 
 export const IngestionPipelineStageKeys = Object.keys(IngestionPipelineStages) as Array<keyof typeof IngestionPipelineStages>

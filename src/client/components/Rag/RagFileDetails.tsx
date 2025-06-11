@@ -1,7 +1,7 @@
 import { Box, LinearProgress, Link, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
-import { RagFileAttributes } from '../../../server/db/models/ragFile'
 import { IngestionPipelineStageKeys, IngestionPipelineStages } from '../../../shared/constants'
 import { Link as RouterLink } from 'react-router-dom'
+import type { RagFileAttributes } from '../../../shared/types'
 
 export const RagFileInfo: React.FC<{ file: RagFileAttributes; link?: boolean }> = ({ file, link = false }) => {
   const inProgress = file.pipelineStage !== 'completed' && file.pipelineStage !== 'pending'

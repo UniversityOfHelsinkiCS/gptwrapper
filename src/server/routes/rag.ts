@@ -203,6 +203,56 @@ router.get('/indices/:id/files/:fileId', async (req, res) => {
   })
 })
 
+router.delete('/indices/:id/files/:fileId', async (req, res) => {
+  const indexId = IndexIdSchema.parse(req.params.id)
+  const fileId = IndexIdSchema.parse(req.params.fileId)
+
+  const ragFile = await RagFile.findOne({
+    where: { id: fileId },
+    include: {
+      model: RagIndex,
+      as: 'ragIndex',
+      where: { id: indexId },
+    },
+  })
+
+  if (!ragFile) {
+    res.status(404).json({ error: 'File not found' })
+    return
+  }
+
+  await RagFile.update(
+    { pipelineStage: 'deleting' },
+    {
+      where: { id: ragFile.id },
+    },
+  )
+
+  // Delete file from disk
+  const filePath = `${UPLOAD_DIR}/${indexId}/${ragFile.filename}`
+  try {
+    await fs.promises.unlink(filePath)
+  } catch (error) {
+    console.error(`Failed to delete file ${filePath}:`, error)
+    res.status(500).json({ error: 'Failed to delete file' })
+    return
+  }
+
+  // Delete from vector store
+  const client = getAzureOpenAIClient()
+  try {
+    await client.vectorStores.files.del(ragFile.ragIndex.metadata.azureVectorStoreId, ragFile.metadata.vectorStoreFileId)
+  } catch (error) {
+    console.error(`Failed to delete file from Azure vector store:`, error)
+    res.status(500).json({ error: 'Failed to delete file from vector store' })
+    return
+  }
+
+  // Delete RagFile record
+  await ragFile.destroy()
+  res.json({ message: 'File deleted successfully' })
+})
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: async (req, file, cb) => {
@@ -269,23 +319,26 @@ router.post('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware],
 
   const uploadDirPath = `${UPLOAD_DIR}/${id}`
 
-  const fileStreams = req.files.map((file: Express.Multer.File) => {
-    const filePath = `${uploadDirPath}/${file.originalname}`
-    return fs.createReadStream(filePath)
-  })
-
-  const fileBatchRes = await client.vectorStores.fileBatches.uploadAndPoll(ragIndex.metadata.azureVectorStoreId, {
-    files: fileStreams,
-  })
-
-  console.log('File batch upload response:', fileBatchRes)
-
   await Promise.all(
-    ragFiles.map(async (ragFile) =>
-      ragFile.update({
-        pipelineStage: 'completed',
-      }),
-    ),
+    ragFiles.map(async (ragFile) => {
+      const filePath = `${uploadDirPath}/${ragFile.filename}`
+      const stream = fs.createReadStream(filePath)
+      const vectorStoreFile = await client.vectorStores.files.upload(ragIndex.metadata.azureVectorStoreId, stream)
+      console.log(`File ${filePath} uploaded to vector store`)
+      await RagFile.update(
+        {
+          pipelineStage: 'completed',
+          metadata: {
+            chunkingStrategy: vectorStoreFile.chunking_strategy.type,
+            usageBytes: vectorStoreFile.usage_bytes,
+            vectorStoreFileId: vectorStoreFile.id,
+          },
+        },
+        {
+          where: { id: ragFile.id },
+        },
+      )
+    }),
   )
 
   res.json({ message: 'Files uploaded successfully' })

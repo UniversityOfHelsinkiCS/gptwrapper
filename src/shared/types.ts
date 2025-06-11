@@ -1,4 +1,6 @@
 import type { ResponseFileSearchToolCall } from 'openai/resources/responses/responses'
+import { IngestionPipelineStageKey } from './constants'
+import type { VectorStoreFile } from 'openai/resources/vector-stores/files'
 
 export type RagIndexMetadata = {
   name: string
@@ -7,9 +9,25 @@ export type RagIndexMetadata = {
   instructions?: string
 }
 
+export type RagFileMetadata = {
+  chunkingStrategy?: VectorStoreFile['chunking_strategy']['type']
+  vectorStoreFileId?: string
+  usageBytes?: number
+}
+
 export type RagFileAttributes = {
   id: number
   filename: string
+  createdAt: string
+  updatedAt: string
+  ragIndexId: number
+  pipelineStage: IngestionPipelineStageKey
+  fileType: string
+  fileSize: number
+  numChunks: number | null
+  userId: string
+  metadata: Record<string, unknown> | null
+  error: string | null
 }
 
 export type RagIndexAttributes = {
