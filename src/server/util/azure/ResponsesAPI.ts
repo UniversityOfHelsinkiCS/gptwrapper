@@ -1,5 +1,6 @@
 import { Tiktoken } from '@dqbd/tiktoken'
 import { Response } from 'express'
+import { z } from 'zod'
 
 import { AZURE_RESOURCE, AZURE_API_KEY } from '../config'
 import { validModels } from '../../../config'
@@ -27,6 +28,13 @@ export const getAzureOpenAIClient = (deployment: string) =>
   })
 
 const client = getAzureOpenAIClient(process.env.GPT_4O_MINI)
+
+const inputSchema = z
+  .object({
+    role: z.enum(['assistant', 'user', 'system']),
+    content: z.string().trim(),
+  })
+  .array()
 
 export class ResponsesClient {
   model: string
@@ -75,12 +83,14 @@ export class ResponsesClient {
     include?: ResponseIncludable[]
   }): Promise<Stream<ResponseStreamEvent> | APIError> {
     try {
+      const sanitizedInput = inputSchema.parse(input) as ResponseInput
+
       return await client.responses.create({
         model: this.model,
         previous_response_id: prevResponseId || undefined,
         instructions: this.instructions,
         temperature: this.temperature,
-        input,
+        input: sanitizedInput,
         stream: true,
         tools: this.tools,
         tool_choice: 'auto',
@@ -142,16 +152,16 @@ export class ResponsesClient {
           break
         }
 
-        case 'response.output_text.annotation.added':
-          console.log(event)
-          this.write(
-            {
-              type: 'annotation',
-              annotation: event.annotation as FileCitation,
-            },
-            res,
-          )
-          break
+        // case 'response.output_text.annotation.added':
+        //   console.log(event)
+        //   this.write(
+        //     {
+        //       type: 'annotation',
+        //       annotation: event.annotation as FileCitation,
+        //     },
+        //     res
+        //   )
+        //   break
 
         case 'response.file_search_call.in_progress':
           console.log('file search in progress', event)
