@@ -1,12 +1,14 @@
+import { useEffect, useState } from 'react'
 import { Close } from '@mui/icons-material'
 import { Box, IconButton, Modal, Slider, TextField, Typography } from '@mui/material'
 import { DEFAULT_MODEL, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE } from '../../../config'
-import ModelSelector from './ModelSelector'
-import { validModels } from '../../../config'
-import React from 'react'
-import RagSelector from './RagSelector'
+import { Prompt, Course } from '../../types'
+// import ModelSelector from './ModelSelector'
+// import { validModels } from '../../../config'
+// import RagSelector from './RagSelector'
 import { RagIndexAttributes } from '../../../shared/types'
 import SettingsButton from './generics/SettingsButton'
+import PromptSelector from './PromptSelector'
 
 interface SettingsModalProps {
   open: boolean
@@ -20,6 +22,7 @@ interface SettingsModalProps {
   setRagIndex: (ragIndex: number) => void
   ragIndices: RagIndexAttributes[]
   currentRagIndex: RagIndexAttributes
+  course?: Course
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -29,16 +32,39 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   setAssistantInstructions,
   modelTemperature,
   setModelTemperature,
-  model,
-  setModel,
-  setRagIndex,
-  ragIndices,
-  currentRagIndex,
+  // model,
+  // setModel,
+  // setRagIndex,
+  // ragIndices,
+  // currentRagIndex,
+  course,
 }) => {
+  const [activePromptId, setActivePromptId] = useState<string>('')
+  const [hasPrompts, setHasPrompts] = useState<boolean>(false)
+
   const resetSettings = () => {
     setAssistantInstructions(DEFAULT_ASSISTANT_INSTRUCTIONS)
     setModelTemperature(DEFAULT_MODEL_TEMPERATURE)
   }
+
+  console.log('SettingsModal course:', course)
+
+  // const activePrompt = (course?.prompts ?? []).find(({ id }) => id === activePromptId)
+
+  const handleChangePrompt = (promptId: string) => {
+    const { systemMessage, messages: promptMessages } = course?.prompts.find(({ id }) => id === promptId) as Prompt
+
+    // setSystem(systemMessage)
+    // setMessages(promptMessages)
+    console.log('Prompt changed:', promptId, systemMessage, promptMessages)
+    setActivePromptId(promptId)
+  }
+
+  useEffect(() => {
+    if (course && course.prompts.length > 0) {
+      setHasPrompts(true)
+    }
+  }, [course])
 
   return (
     <Modal open={open} onClose={() => setOpen(false)}>
@@ -83,6 +109,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             Alustuksella tarkoitetaan yleistason ohjeistusta keskustelulle. Kielimallia voi esimerkiksi pyytää käyttämään akateemista kieltä tai esittämään puutarhuria
             jota haastatellaan kaktusten hoidosta.
           </Typography>
+
+          {hasPrompts && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}
+
           <TextField
             multiline
             minRows={6}
@@ -114,12 +143,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </Box>
           </Box>
 
-          {/* <ModelSelector currentModel={model} setModel={setModel} models={validModels.map((m) => m.name)} /> */}
           {/* Disabled for now due to RAG not functioning cirreclty */}
           {/* <RagSelector currentRagIndex={currentRagIndex} setRagIndex={setRagIndex} ragIndices={ragIndices} /> */}
         </Box>
 
-        <Box sx={{ padding: '2rem 3rem', display: 'flex', borderTop: '1px solid rgba(0,0,0,0.25)', justifyContent: 'flex-end' }}>
+        <Box sx={{ padding: '2rem 3rem', display: 'flex', justifyContent: 'flex-end' }}>
           <SettingsButton onClick={resetSettings}>Palauta oletusasetukset</SettingsButton>
         </Box>
       </Box>

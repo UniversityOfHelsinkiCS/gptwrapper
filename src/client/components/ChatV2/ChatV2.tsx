@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
 import { getCompletionStream } from './util'
 
-import { Box, Typography, Fade, Collapse } from '@mui/material'
+import { Box, Typography, Alert } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import EmailIcon from '@mui/icons-material/Email'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -29,10 +29,12 @@ import CourseOption from './generics/CourseOption'
 import SettingsButton from './generics/SettingsButton'
 
 import { AppContext } from '../../util/AppContext'
+import { CourseInfo } from './generics/CourseInfo'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
   const { course } = useCourse(courseId)
+
   const { ragIndices } = useRagIndices(courseId)
   const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
 
@@ -240,11 +242,6 @@ export const ChatV2 = () => {
   }
 
   useEffect(() => {
-    // Fethces data from local storage according to chat
-    console.log('course changed')
-  }, [course])
-
-  useEffect(() => {
     // Scrolls to bottom on initial load only
     if (!appContainerRef.current || !conversationRef.current || !chatHeaderRef.current || messages.length === 0) return
     if (isCompletionDone) {
@@ -281,6 +278,54 @@ export const ChatV2 = () => {
     }
   }, [isCompletionDone])
 
+  useEffect(() => {
+    // Update model when course is set
+    if (course && course.model !== model.name) {
+      setModel({ name: course.model })
+    }
+  }, [course])
+
+  if (statusLoading || infoTextsLoading) return null
+  if (course && course.usageLimit === 0) {
+    return (
+      <Box>
+        <CourseInfo course={course} />
+        <Alert severity="warning" style={{ marginTop: 20 }}>
+          <Typography variant="h6">{t('course:curreNotOpen')}</Typography>
+        </Alert>
+      </Box>
+    )
+  }
+
+  if (course && course.activityPeriod) {
+    const { startDate, endDate } = course && course.activityPeriod
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const now = new Date()
+
+    if (now < start) {
+      return (
+        <Box>
+          <CourseInfo course={course} />
+          <Alert severity="warning" style={{ marginTop: 20 }}>
+            <Typography variant="h6">{t('course:curreNotStarted')}</Typography>
+          </Alert>
+        </Box>
+      )
+    }
+
+    if (now > end) {
+      return (
+        <Box>
+          <CourseInfo course={course} />
+          <Alert severity="warning" style={{ marginTop: 20 }}>
+            <Typography variant="h6">{t('course:curreExpired')}</Typography>
+          </Alert>
+        </Box>
+      )
+    }
+  }
+
   return (
     <Box
       sx={{
@@ -310,7 +355,7 @@ export const ChatV2 = () => {
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.5rem' }}>
             <CourseOption link="/v2/sandbox" isActive={!!course}>
-              Sandbox
+              OTE:n hiekkalaatikko
             </CourseOption>
           </Box>
         </Box>
@@ -339,26 +384,21 @@ export const ChatV2 = () => {
             zIndex: 10,
           }}
         >
-          <Collapse in={!!course} timeout={100}>
-            <Fade in={true} timeout={800}>
-              <Typography variant="h5" sx={{ textAlign: 'center', fontWeight: 'bold', mb: '1.5rem' }}>
-                {course?.id === 'sandbox' ? 'Sandbox' : course?.id}
-              </Typography>
-            </Fade>
-          </Collapse>
+          <Box sx={{ margin: 'auto' }}>
+            {course && <CourseInfo course={course} />}
 
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
-            {/* {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />}
-          {/* <SettingsButton startIcon={<AddCommentIcon />}>Alustus</SettingsButton> */}
-            <SettingsButton startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)}>
-              Keskustelun asetukset
-            </SettingsButton>
-            <SettingsButton startIcon={<EmailIcon />} onClick={() => alert('Not yet supported')}>
-              Tallenna sähköpostina
-            </SettingsButton>
-            <SettingsButton startIcon={<DeleteIcon />} onClick={handleReset}>
-              Tyhjennä
-            </SettingsButton>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
+              {/* {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />} */}
+              <SettingsButton startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)}>
+                Keskustelun asetukset
+              </SettingsButton>
+              <SettingsButton startIcon={<EmailIcon />} onClick={() => alert('Not yet supported')}>
+                Tallenna sähköpostina
+              </SettingsButton>
+              <SettingsButton startIcon={<DeleteIcon />} onClick={handleReset}>
+                Tyhjennä
+              </SettingsButton>
+            </Box>
           </Box>
         </Box>
 
@@ -452,6 +492,7 @@ export const ChatV2 = () => {
         setRagIndex={setRagIndexId}
         ragIndices={ragIndices}
         currentRagIndex={ragIndex}
+        course={course}
       />
     </Box>
   )
