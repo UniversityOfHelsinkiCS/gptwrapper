@@ -84,6 +84,8 @@ export const ChatBox = ({
         width: '65%',
         minWidth: 700,
         margin: 'auto',
+        borderRadius: '0.3rem',
+        backgroundColor: 'white',
       }}
     >
       <Box
@@ -133,9 +135,11 @@ export const ChatBox = ({
                 </IconButton>
               </Tooltip>
             ) : (
-              <IconButton disabled={disabled} type="submit">
-                <Send />
-              </IconButton>
+              <Tooltip title="Or send on Shift + Enter" arrow placement="top">
+                <IconButton disabled={disabled} type="submit">
+                  <Send />
+                </IconButton>
+              </Tooltip>
             )}
           </Box>
         </Box>

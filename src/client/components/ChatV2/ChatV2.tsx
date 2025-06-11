@@ -385,7 +385,7 @@ export const ChatV2 = () => {
           />
         </Box>
 
-        <Box ref={inputFieldRef} sx={{ position: 'sticky', bottom: 0, backgroundColor: 'white', paddingBottom: '1.5rem' }}>
+        <Box ref={inputFieldRef} sx={{ position: 'sticky', bottom: 0, paddingBottom: '1.5rem' }}>
           <ChatBox
             disabled={!isCompletionDone}
             currentModel={model.name}
