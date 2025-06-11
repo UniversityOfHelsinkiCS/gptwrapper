@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { FileSearchResult } from '../../../shared/types'
 import { ConversationSplash } from './generics/ConversationSplash'
+import AttachFileIcon from '@mui/icons-material/AttachFile'
 
 const dotStyle = (delay: number) => ({
   width: 4,
@@ -75,9 +76,17 @@ const MessageItem = ({
           boxShadow: message.role === 'assistant' ? 'none' : '0px 2px 2px rgba(0, 0, 0, 0.2)',
           borderLeft: hasAnnotations_Leikisti ? '5px solid #3f51b5' : 'none',
           whiteSpace: message.role === 'assistant' ? 'normal' : 'pre-wrap', // 🧠 This preserves formatting
+          wordBreak: 'break-word',
         }}
       >
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+
+        {message.attachements && (
+          <Typography variant="body2" sx={{ display: 'flex', gap: 0.5, alignItems: 'center', opacity: 0.7, pb: 2 }}>
+            <AttachFileIcon fontSize="small" />
+            {message.attachements}
+          </Typography>
+        )}
       </Box>
     </Box>
   )

@@ -158,8 +158,8 @@ export const ChatV2 = () => {
   }
 
   const handleSubmit = async (message: string) => {
-    const newMessages = messages.concat({ role: 'user', content: message })
     const formData = new FormData()
+
     let file = fileInputRef.current.files[0] as File
     if (file) {
       if (ALLOWED_FILE_TYPES.includes(file.type)) {
@@ -170,11 +170,19 @@ export const ChatV2 = () => {
       }
     }
 
+    const newMessages = messages.concat({
+      role: 'user',
+      content: message,
+      attachements: file && fileName ? fileName : undefined,
+    })
+
     setMessages(newMessages)
     setMessage({ content: '' })
     setPrevResponse({ id: '' })
     setCompletion('')
     setIsCompletionDone(false)
+    fileInputRef.current.value = null
+    setFileName('')
     setFileSearchResult(null)
     setStreamController(new AbortController())
     setRetryTimeout(() => {
@@ -217,6 +225,8 @@ export const ChatV2 = () => {
     setPrevResponse({ id: '' })
     setCompletion('')
     setIsCompletionDone(true)
+    fileInputRef.current.value = null
+    setFileName('')
     setFileSearchResult(null)
     setStreamController(undefined)
     setTokenUsageWarning('')
@@ -343,7 +353,7 @@ export const ChatV2 = () => {
             <SettingsButton startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)}>
               Keskustelun asetukset
             </SettingsButton>
-            <SettingsButton startIcon={<EmailIcon />} onClick={() => alert('Ei toimi vielä')}>
+            <SettingsButton startIcon={<EmailIcon />} onClick={() => alert('Not yet supported')}>
               Tallenna sähköpostina
             </SettingsButton>
             <SettingsButton startIcon={<DeleteIcon />} onClick={handleReset}>
@@ -366,7 +376,7 @@ export const ChatV2 = () => {
         >
           <Conversation
             conversationRef={conversationRef}
-            expandedNodeHeight={window.innerHeight - chatHeaderRef.current?.clientHeight - inputFieldRef.current?.clientHeight}
+            expandedNodeHeight={window.innerHeight - chatHeaderRef.current?.clientHeight - inputFieldRef.current?.clientHeight - 200}
             messages={messages}
             completion={completion}
             isCompletionDone={isCompletionDone}

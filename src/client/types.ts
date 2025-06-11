@@ -7,6 +7,7 @@ export type Role = 'system' | 'assistant' | 'user'
 export interface Message {
   role: Role
   content: string
+  attachements?: string
   fileSearchResult?: FileSearchResult
 }
 

@@ -103,7 +103,7 @@ const App = () => {
                 flexDirection: 'column',
                 minHeight: '100vh',
                 height: '100vh',
-                overflowY: 'auto',
+                overflowY: 'auto', // deleting this will break the auto scroll on chats
               }}
               ref={appRef}
             >
