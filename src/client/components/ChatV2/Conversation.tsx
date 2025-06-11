@@ -3,10 +3,11 @@ import { useParams } from 'react-router-dom'
 import { Message } from '../../types'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import 'highlight.js/styles/github-dark.css' // pick your favorite theme
 import { FileSearchResult } from '../../../shared/types'
 import { ConversationSplash } from './generics/ConversationSplash'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { vscDarkPlus, materialDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 
 import { LoadingMessage } from './generics/LoadingMessage'
 
@@ -68,17 +69,47 @@ const AssistantMessage = ({
     className={`message-role-assistant`}
     sx={{
       minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
-      alignSelf: 'flex-start',
     }}
   >
     <Box
       sx={{
         padding: '0 1.5rem',
         borderRadius: '5px',
+        width: '100%',
         borderLeft: hasAnnotations ? '5px solid #3f51b5' : 'none',
       }}
     >
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          code(props) {
+            const { children, className, node, ...rest } = props
+            const match = /language-(\w+)/.exec(className || '')
+            const language = match?.[1] || 'plaintext' // safe fallback
+            return match ? (
+              <Box sx={{ borderRadius: '0.5rem', overflow: 'hidden' }}>
+                <Typography sx={{ opacity: 1, fontSize: '0.8rem', padding: '0.4rem 0.8rem', backgroundColor: '#efefef' }}>{language}</Typography>
+                {/* @ts-ignore */}
+                <SyntaxHighlighter
+                  {...rest}
+                  PreTag="div"
+                  children={String(children).replace(/\n$/, '')}
+                  language={language}
+                  style={materialDark}
+                  customStyle={{ padding: '1rem', margin: 0 }}
+                />
+
+              </Box>
+            ) : (
+              <code {...rest} className={className}>
+                {children}
+              </code>
+            )
+          },
+        }}
+      >
+        {content}
+      </ReactMarkdown>
     </Box>
   </Box>
 )
