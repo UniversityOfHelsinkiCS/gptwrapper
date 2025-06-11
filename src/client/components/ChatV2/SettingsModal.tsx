@@ -98,7 +98,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <Typography variant="body1">
             Suuremmat arvot, kuten 0.8, tekevät tulosteesta satunnaisemman, kun taas pienemmät arvot, kuten 0.2, tekevät siitä tarkemman ja deterministisemmän.
           </Typography>
-          <Box sx={{ border: '1px solid rgba(0,0,0,0.225)', borderRadius: '6px', maxWidth: 500, padding: '2rem' }}>
+          <Box sx={{ maxWidth: 400, padding: '1.5rem 0' }}>
             <Slider
               min={0.0}
               max={1.0}

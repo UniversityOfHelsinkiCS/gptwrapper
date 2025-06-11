@@ -81,8 +81,8 @@ export const ChatBox = ({
   return (
     <Box
       sx={{
-        width: '60%',
-        minWidth: 300,
+        width: '65%',
+        minWidth: 700,
         margin: 'auto',
       }}
     >
@@ -105,7 +105,7 @@ export const ChatBox = ({
             placeholder="Kirjoita viestisi tähän..."
             fullWidth
             multiline
-            maxRows={8}
+            maxRows={28}
             sx={{ padding: '0.5rem' }}
             variant="standard"
             slotProps={{
