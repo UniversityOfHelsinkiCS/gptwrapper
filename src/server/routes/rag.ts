@@ -7,6 +7,7 @@ import z from 'zod/v4'
 import multer from 'multer'
 import { mkdir, rm, stat } from 'fs/promises'
 import { getAzureOpenAIClient } from '../util/azure/client'
+import { shouldRenderAsText } from '../../shared/utils'
 
 const router = Router()
 
@@ -186,15 +187,20 @@ router.get('/indices/:id/files/:fileId', async (req, res) => {
     return
   }
 
-  // Read file content
-  const filePath = `${UPLOAD_DIR}/${indexId}/${ragFile.filename}`
   let fileContent: string
-  try {
-    fileContent = await fs.promises.readFile(filePath, 'utf-8')
-  } catch (error) {
-    console.error(`Failed to read file ${filePath}:`, error)
-    res.status(500).json({ error: 'Failed to read file content' })
-    return
+
+  if (shouldRenderAsText(ragFile.fileType)) {
+    // Read file content
+    const filePath = `${UPLOAD_DIR}/${indexId}/${ragFile.filename}`
+    try {
+      fileContent = await fs.promises.readFile(filePath, 'utf-8')
+    } catch (error) {
+      console.error(`Failed to read file ${filePath}:`, error)
+      res.status(500).json({ error: 'Failed to read file content' })
+      return
+    }
+  } else {
+    fileContent = 'this file cannot be displayed as readable text'
   }
 
   res.json({
