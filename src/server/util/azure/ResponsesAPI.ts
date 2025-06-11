@@ -1,6 +1,6 @@
 import { Tiktoken } from '@dqbd/tiktoken'
 import { Response } from 'express'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import { AZURE_RESOURCE, AZURE_API_KEY } from '../config'
 import { validModels } from '../../../config'

@@ -13,7 +13,7 @@ import { pdfToText } from '../util/pdfToText'
 import { Discussion, ChatInstance, RagIndex } from '../db/models'
 
 import { ResponsesClient } from '../util/azure/ResponsesAPI'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import { DEFAULT_RAG_SYSTEM_PROMPT } from '../util/config'
 
 const openaiRouter = express.Router()
