@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
 import useUserStatus from '../../hooks/useUserStatus'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
-import { DEFAULT_MODEL, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE, ALLOWED_FILE_TYPES } from '../../../config'
+import { validModels, DEFAULT_MODEL, FREE_MODEL, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE, ALLOWED_FILE_TYPES } from '../../../config'
 import useInfoTexts from '../../hooks/useInfoTexts'
 import { Message } from '../../types'
 import { FileSearchResult, ResponseStreamEventData } from '../../../shared/types'
@@ -21,12 +21,11 @@ import HelpIcon from '@mui/icons-material/Help'
 import { DisclaimerModal } from './Disclaimer'
 import { Conversation } from './Conversation'
 import { ChatBox } from './ChatBox'
-import { SystemPrompt } from './System'
 import { SettingsModal } from './SettingsModal'
+import { TokenUsageWarning } from './TokenUsageWarning'
 
 import { CitationsBox } from './CitationsBox'
 import { useRagIndices } from '../../hooks/useRagIndices'
-import CourseOption from './generics/CourseOption'
 import SettingsButton from './generics/SettingsButton'
 
 import { AppContext } from '../../util/AppContext'
@@ -90,7 +89,22 @@ export const ChatV2 = () => {
   const { language } = i18n
 
   const disclaimerInfo = infoTexts?.find((infoText) => infoText.name === 'disclaimer')?.text[language] ?? null
-  const systemMessageInfo = infoTexts?.find((infoText) => infoText.name === 'systemMessage')?.text[language] ?? null
+  // const systemMessageInfo = infoTexts?.find((infoText) => infoText.name === 'systemMessage')?.text[language] ?? null
+
+  // const { usage, limit, models: courseModels } = userStatus
+
+  // const allowedModels = validModels.map((m) => m.name) // [gpt-4, gpt-4o, gpt-4o-mini] 22.8.2024
+
+  // if (course && !courseModels.includes(model.name)) {
+  //   setModel({ name: courseModels[0] })
+  // }
+
+
+  // const tokensUsed = usage >= limit
+
+  // if (tokensUsed && model.name !== FREE_MODEL) {
+  //   setModel({ name: FREE_MODEL })
+  // }
 
   const decoder = new TextDecoder()
 
@@ -243,6 +257,25 @@ export const ChatV2 = () => {
     clearRetryTimeout()
   }
 
+  // const handleCancel = () => {
+  //   setMessages(messages.slice(0, -1))
+  //   setMessage({ content: '' })
+  //   setCompletion('')
+  //   setIsCompletionDone(true)
+  //   fileInputRef.current.value = null
+  //   setFileName('')
+  //   setFileSearchResult(null)
+  //   setStreamController(undefined)
+  //   setTokenUsageWarning('')
+  //   setTokenWarningVisible(false)
+  //   clearRetryTimeout()
+  // }
+
+  // const handleContinue = () => {
+  //   handleSubmit(message.content)
+  //   setTokenWarningVisible(false)
+  // }
+
   useEffect(() => {
     // Scrolls to bottom on initial load only
     if (!appContainerRef.current || !conversationRef.current || messages.length === 0) return
@@ -370,6 +403,7 @@ export const ChatV2 = () => {
           height: '100%',
         }}
       >
+
         <Box
           sx={{
             display: 'flex',
@@ -396,6 +430,14 @@ export const ChatV2 = () => {
         </Box>
 
         <Box ref={inputFieldRef} sx={{ position: 'sticky', bottom: 0, paddingBottom: '1rem', width: '80%', minWidth: 750, margin: 'auto', backgroundColor: 'white' }}>
+
+          {alertOpen && (
+            <Alert severity="warning">
+              <Typography>{`File of type "${disallowedFileType}" not supported currently`}</Typography>
+              <Typography>{`Currenlty there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}</Typography>
+            </Alert>
+          )}
+
           <ChatBox
             disabled={!isCompletionDone}
             currentModel={model.name}
@@ -413,6 +455,9 @@ export const ChatV2 = () => {
             }}
           />
         </Box>
+
+        {/* <TokenUsageWarning tokenUsageWarning={tokenUsageWarning} handleCancel={handleCancel} handleContinue={handleContinue} visible={tokenWarningVisible} /> */}
+
       </Box>
 
       {/* Annotations columns ----------------------------------------------------------------------------------------------------- */}
