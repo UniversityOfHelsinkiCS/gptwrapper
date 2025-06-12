@@ -1,23 +1,11 @@
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, MenuItem, FormControl, Select, SelectChangeEvent, InputLabel } from '@mui/material'
-import { FREE_MODEL } from '../../../config'
+import { MenuItem, FormControl, Select, SelectChangeEvent } from '@mui/material'
 
-const ModelSelector = ({ currentModel, setModel, models }: { currentModel: string; setModel: (model: string) => void; models: string[] }) => {
+const ModelSelector = ({ currentModel, setModel, availableModels }: { currentModel: string; setModel: (model: string) => void; availableModels: string[] }) => {
   const { t } = useTranslation()
-
-  // if (models.length === 1) {
-  //   return (
-  //     <Box style={{ marginBottom: 5 }}>
-  //       <Typography variant="body1">
-  //         {t('status:modelInUse')} <code>{models[0]}</code>
-  //       </Typography>
-  //     </Box>
-  //   )
-  // }
 
   return (
     <FormControl sx={{ minWidth: 100, opacity: 0.7 }} size="small">
-      {/* <InputLabel>{t('status:modelInUse')}</InputLabel> */}
       <Select
         sx={{
           '& .MuiOutlinedInput-notchedOutline': {
@@ -27,7 +15,7 @@ const ModelSelector = ({ currentModel, setModel, models }: { currentModel: strin
         value={currentModel}
         onChange={(event: SelectChangeEvent) => setModel(event.target.value)}
       >
-        {models.map((model) => (
+        {availableModels.map((model) => (
           <MenuItem key={model} value={model}>
             {model}
           </MenuItem>

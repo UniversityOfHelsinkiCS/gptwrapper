@@ -2,7 +2,6 @@ import React from 'react'
 import { Send } from '@mui/icons-material'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
-import { validModels } from '../../../config'
 import { Box, Chip, IconButton, TextField, Tooltip, Typography } from '@mui/material'
 import { useState, useRef } from 'react'
 import useUserStatus from '../../hooks/useUserStatus'
@@ -15,6 +14,7 @@ export const ChatBox = ({
   currentModel,
   fileInputRef,
   fileName,
+  availableModels,
   setDisallowedFileType,
   setAlertOpen,
   setFileName,
@@ -25,6 +25,7 @@ export const ChatBox = ({
   currentModel: string
   fileInputRef: React.RefObject<HTMLInputElement>
   fileName: string
+  availableModels: string[]
   setDisallowedFileType: React.Dispatch<string>
   setAlertOpen: React.Dispatch<boolean>
   setFileName: (name: string) => void
@@ -115,7 +116,7 @@ export const ChatBox = ({
                 <input type="file" accept="text/*,application/pdf" hidden ref={fileInputRef} onChange={(e) => handleFileTypeValidation(e.target.files[0])} />
               </IconButton>
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
-              <ModelSelector currentModel={currentModel} setModel={setModel} models={validModels.map((m) => m.name)} />
+              <ModelSelector currentModel={currentModel} setModel={setModel} availableModels={availableModels} />
             </Box>
 
             {disabled ? (

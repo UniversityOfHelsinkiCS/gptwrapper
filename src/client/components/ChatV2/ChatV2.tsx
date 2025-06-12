@@ -42,7 +42,7 @@ export const ChatV2 = () => {
 
   // local storage states
   const localStoragePrefix = 'general'
-  const [model, setModel] = useLocalStorageState<{ name: string }>('model-v2', {
+  const [activeModel, setActiveModel] = useLocalStorageState<{ name: string }>('model-v2', {
     name: DEFAULT_MODEL,
   })
   const [disclaimerStatus, setDisclaimerStatus] = useLocalStorageState<{ open: boolean }>('disclaimer-status', { open: true })
@@ -58,7 +58,7 @@ export const ChatV2 = () => {
   const [prevResponse, setPrevResponse] = useLocalStorageState<{ id: string }>(`${localStoragePrefix}-prev-response`, { id: '' })
   const [fileSearchResult, setFileSearchResult] = useLocalStorageState<FileSearchResult>('last-file-search', null)
 
-  // UI States
+  // App States
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
   const [fileName, setFileName] = useState<string>('')
   const [alertOpen, setAlertOpen] = useState<boolean>(false)
@@ -66,6 +66,7 @@ export const ChatV2 = () => {
   const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
   const [tokenWarningVisible, setTokenWarningVisible] = useState<boolean>(false)
   const [saveConsent, setSaveConsent] = useState<boolean>(true)
+  const [allowedModels, setAllowedModels] = useState<string[]>([])
 
   // Chat Streaming states
   const [completion, setCompletion] = useState<string>('')
@@ -85,28 +86,11 @@ export const ChatV2 = () => {
 
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
 
+  const decoder = new TextDecoder()
   const { t, i18n } = useTranslation()
   const { language } = i18n
 
   const disclaimerInfo = infoTexts?.find((infoText) => infoText.name === 'disclaimer')?.text[language] ?? null
-  // const systemMessageInfo = infoTexts?.find((infoText) => infoText.name === 'systemMessage')?.text[language] ?? null
-
-  // const { usage, limit, models: courseModels } = userStatus
-
-  // const allowedModels = validModels.map((m) => m.name) // [gpt-4, gpt-4o, gpt-4o-mini] 22.8.2024
-
-  // if (course && !courseModels.includes(model.name)) {
-  //   setModel({ name: courseModels[0] })
-  // }
-
-
-  // const tokensUsed = usage >= limit
-
-  // if (tokensUsed && model.name !== FREE_MODEL) {
-  //   setModel({ name: FREE_MODEL })
-  // }
-
-  const decoder = new TextDecoder()
 
   const processStream = async (stream: ReadableStream) => {
     try {
@@ -214,7 +198,7 @@ export const ChatV2 = () => {
         assistantInstructions: assistantInstructions.content,
         messages: newMessages,
         ragIndexId: ragIndexId ?? undefined,
-        model: model.name,
+        model: activeModel.name,
         formData,
         userConsent: true, // change to not hard coded
         modelTemperature: modelTemperature.value,
@@ -313,13 +297,33 @@ export const ChatV2 = () => {
   }, [isCompletionDone])
 
   useEffect(() => {
-    // Update model when course is set
-    if (course && course.model !== model.name) {
-      setModel({ name: course.model })
+    if (!userStatus) return
+
+    const { usage, limit, model: defaultCourseModel, models: courseModels } = userStatus
+
+    if (course && courseModels) {
+      setAllowedModels(courseModels)
+
+      if (courseModels.includes(activeModel.name)) {
+        setActiveModel({ name: activeModel.name })
+      } else {
+        setActiveModel({ name: defaultCourseModel ?? courseModels[0] })
+      }
+    } else {
+      const allowedModels = validModels.map((m) => m.name) // [gpt-4, gpt-4o, gpt-4o-mini] 22.8.2024
+      setAllowedModels(allowedModels)
     }
-  }, [course])
+
+    const tokenUseExceeded = usage >= limit
+
+    if (tokenUseExceeded) {
+      setActiveModel({ name: FREE_MODEL })
+      return
+    }
+  }, [userStatus, course])
 
   if (statusLoading || infoTextsLoading) return null
+
   if (course && course.usageLimit === 0) {
     return (
       <Box>
@@ -403,7 +407,6 @@ export const ChatV2 = () => {
           height: '100%',
         }}
       >
-
         <Box
           sx={{
             display: 'flex',
@@ -420,7 +423,7 @@ export const ChatV2 = () => {
             courseName={course?.name[language]}
             courseDate={course?.activityPeriod}
             conversationRef={conversationRef}
-            expandedNodeHeight={window.innerHeight - inputFieldRef.current?.clientHeight - 240}
+            expandedNodeHeight={window.innerHeight - inputFieldRef.current?.clientHeight - 300}
             messages={messages}
             completion={completion}
             isCompletionDone={isCompletionDone}
@@ -430,7 +433,6 @@ export const ChatV2 = () => {
         </Box>
 
         <Box ref={inputFieldRef} sx={{ position: 'sticky', bottom: 0, paddingBottom: '1rem', width: '80%', minWidth: 750, margin: 'auto', backgroundColor: 'white' }}>
-
           {alertOpen && (
             <Alert severity="warning">
               <Typography>{`File of type "${disallowedFileType}" not supported currently`}</Typography>
@@ -440,13 +442,14 @@ export const ChatV2 = () => {
 
           <ChatBox
             disabled={!isCompletionDone}
-            currentModel={model.name}
+            currentModel={activeModel.name}
+            availableModels={allowedModels}
             fileInputRef={fileInputRef}
             fileName={fileName}
             setFileName={setFileName}
             setDisallowedFileType={setDisallowedFileType}
             setAlertOpen={setAlertOpen}
-            setModel={(name) => setModel({ name })}
+            setModel={(name) => setActiveModel({ name })}
             onSubmit={(message) => {
               if (message.trim()) {
                 handleSubmit(message)
@@ -457,7 +460,6 @@ export const ChatV2 = () => {
         </Box>
 
         {/* <TokenUsageWarning tokenUsageWarning={tokenUsageWarning} handleCancel={handleCancel} handleContinue={handleContinue} visible={tokenWarningVisible} /> */}
-
       </Box>
 
       {/* Annotations columns ----------------------------------------------------------------------------------------------------- */}
@@ -502,8 +504,8 @@ export const ChatV2 = () => {
         setAssistantInstructions={(updatedInstructions) => setAssistantInstructions({ content: updatedInstructions })}
         modelTemperature={modelTemperature.value}
         setModelTemperature={(updatedTemperature) => setModelTemperature({ value: updatedTemperature })}
-        model={model.name}
-        setModel={(name) => setModel({ name })}
+        model={activeModel.name}
+        setModel={(name) => setActiveModel({ name })}
         setRagIndex={setRagIndexId}
         ragIndices={ragIndices}
         currentRagIndex={ragIndex}
