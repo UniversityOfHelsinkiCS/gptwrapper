@@ -1,28 +1,49 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
-import useLocalStorageState from '../../hooks/useLocalStorageState'
+import { Modal, Box, IconButton, Typography } from '@mui/material'
+import { Close } from '@mui/icons-material'
 import Markdown from '../Banner/Markdown'
 
-export const Disclaimer = ({ disclaimer }: { disclaimer: string }) => {
-  const [disclaimerStatus, setDisclaimerStatus] = useLocalStorageState<{
-    open: boolean
-  }>('disclaimer-status', { open: true })
-
+export const DisclaimerModal = ({
+  disclaimer,
+  disclaimerStatus,
+  setDisclaimerStatus,
+}: {
+  disclaimer: string
+  disclaimerStatus: { open: boolean }
+  setDisclaimerStatus: (status: { open: boolean }) => void
+}) => {
   return (
-    <>
-      <Button variant="outlined" onClick={() => setDisclaimerStatus({ open: true })} size="small">
-        Disclaimer
-      </Button>
-      <Dialog open={disclaimerStatus.open} onClose={() => setDisclaimerStatus({ open: false })}>
-        <DialogTitle>Disclaimer</DialogTitle>
-        <DialogContent>
-          <Markdown>{disclaimer}</Markdown>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDisclaimerStatus({ open: false })} color="primary">
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
+    <Modal open={disclaimerStatus.open} onClose={() => setDisclaimerStatus({ open: false })}>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          minWidth: 600,
+          width: '85vw',
+          maxWidth: 1000,
+          minHeight: '80vh',
+          maxHeight: '80vh',
+          bgcolor: 'background.paper',
+          boxShadow: 24,
+          borderRadius: '0.3rem',
+          overflow: 'hidden',
+          padding: '2rem',
+        }}
+      >
+        <IconButton onClick={() => setDisclaimerStatus({ open: false })} sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500' }}>
+          <Close />
+        </IconButton>
+
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+          Huomio
+        </Typography>
+
+        <Markdown>{disclaimer}</Markdown>
+      </Box>
+    </Modal>
   )
 }

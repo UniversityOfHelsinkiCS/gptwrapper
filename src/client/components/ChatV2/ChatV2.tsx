@@ -16,8 +16,9 @@ import { Box, Typography, Alert } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import EmailIcon from '@mui/icons-material/Email'
 import DeleteIcon from '@mui/icons-material/Delete'
+import HelpIcon from '@mui/icons-material/Help'
 
-import { Disclaimer } from './Disclaimer'
+import { DisclaimerModal } from './Disclaimer'
 import { Conversation } from './Conversation'
 import { ChatBox } from './ChatBox'
 import { SystemPrompt } from './System'
@@ -45,12 +46,14 @@ export const ChatV2 = () => {
   const [model, setModel] = useLocalStorageState<{ name: string }>('model-v2', {
     name: DEFAULT_MODEL,
   })
+  const [disclaimerStatus, setDisclaimerStatus] = useLocalStorageState<{ open: boolean }>('disclaimer-status', { open: true })
   const [assistantInstructions, setAssistantInstructions] = useLocalStorageState<{ content: string }>(`${localStoragePrefix}-chat-instructions`, {
     content: DEFAULT_ASSISTANT_INSTRUCTIONS,
   })
   const [modelTemperature, setModelTemperature] = useLocalStorageState<{ value: number }>(`${localStoragePrefix}-chat-model-temperature`, {
     value: DEFAULT_MODEL_TEMPERATURE,
   })
+
   const [message, setMessage] = useLocalStorageState<{ content: string }>(`${localStoragePrefix}-chat-current`, { content: '' })
   const [messages, setMessages] = useLocalStorageState<Message[]>(`${localStoragePrefix}-chat-messages`, [])
   const [prevResponse, setPrevResponse] = useLocalStorageState<{ id: string }>(`${localStoragePrefix}-prev-response`, { id: '' })
@@ -340,7 +343,6 @@ export const ChatV2 = () => {
           {course && <ChatInfo course={course} />}
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            {/* {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />} */}
             <SettingsButton startIcon={<DeleteIcon />} onClick={handleReset}>
               Tyhjennä keskustelu
             </SettingsButton>
@@ -349,6 +351,9 @@ export const ChatV2 = () => {
             </SettingsButton>
             <SettingsButton startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)}>
               Keskustelun asetukset
+            </SettingsButton>
+            <SettingsButton startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus({ open: true })}>
+              Disclaimer
             </SettingsButton>
           </Box>
         </Box>
@@ -442,7 +447,7 @@ export const ChatV2 = () => {
         </Box>
       </Box>
 
-      {/* Modal --------------------------------------*/}
+      {/* Modals --------------------------------------*/}
       <SettingsModal
         open={settingsModalOpen}
         setOpen={setSettingsModalOpen}
@@ -457,6 +462,8 @@ export const ChatV2 = () => {
         currentRagIndex={ragIndex}
         course={course}
       />
+
+      <DisclaimerModal disclaimer={disclaimerInfo} disclaimerStatus={disclaimerStatus} setDisclaimerStatus={setDisclaimerStatus} />
     </Box>
   )
 }
