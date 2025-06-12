@@ -8,16 +8,15 @@ export const ChatInfo = ({ course }: { course: Course }) => {
   const { language } = i18n
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', alignItems: 'baseline' }}>
-        <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-          {course?.name[language] || 'undefined course'}
-        </Typography>
-        <Typography variant="body2" ml="1rem" fontStyle="italic">
-          {course.courseUnits.map((unit) => unit.code).join(', ')}
-        </Typography>
-      </Box>
-      <Typography m="0.5rem 0 1rem 0">{formatDate(course.activityPeriod)}</Typography>
+    <Box mb={5}>
+      <Typography variant="body2" fontStyle="italic">
+        {course.courseUnits.map((unit) => unit.code).join(', ')}
+      </Typography>
+      <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
+        {course?.name[language] || 'undefined course'}
+      </Typography>
+
+      <Typography variant="body2">{formatDate(course.activityPeriod)}</Typography>
 
       {course.saveDiscussions && (
         <Alert severity="warning" style={{ marginTop: 20 }}>

@@ -29,7 +29,7 @@ import CourseOption from './generics/CourseOption'
 import SettingsButton from './generics/SettingsButton'
 
 import { AppContext } from '../../util/AppContext'
-import { CourseInfo } from './generics/CourseInfo'
+import { ChatInfo } from './generics/ChatInfo'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -78,7 +78,6 @@ export const ChatV2 = () => {
   const appContainerRef = useContext(AppContext)
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const conversationRef = useRef<HTMLElement>(null)
-  const chatHeaderRef = useRef<HTMLElement>(null)
   const inputFieldRef = useRef<HTMLElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -243,7 +242,7 @@ export const ChatV2 = () => {
 
   useEffect(() => {
     // Scrolls to bottom on initial load only
-    if (!appContainerRef.current || !conversationRef.current || !chatHeaderRef.current || messages.length === 0) return
+    if (!appContainerRef.current || !conversationRef.current || messages.length === 0) return
     if (isCompletionDone) {
       const container = appContainerRef.current
       if (container) {
@@ -257,19 +256,18 @@ export const ChatV2 = () => {
 
   useEffect(() => {
     // Scrolls to last assistant message on text generation
-    if (!appContainerRef.current || !conversationRef.current || !chatHeaderRef.current || messages.length === 0) return
+    if (!appContainerRef.current || !conversationRef.current || messages.length === 0) return
 
     const lastNode = conversationRef.current.lastElementChild as HTMLElement
 
     if (lastNode.classList.contains('message-role-assistant') && !isCompletionDone) {
       const container = appContainerRef.current
-      const settingsHeight = chatHeaderRef.current.clientHeight
 
       const containerRect = container.getBoundingClientRect()
       const lastNodeRect = lastNode.getBoundingClientRect()
 
-      const scrollTopPadding = 200
-      const scrollOffset = lastNodeRect.top - containerRect.top + container.scrollTop - settingsHeight - scrollTopPadding
+      const scrollTopPadding = 240
+      const scrollOffset = lastNodeRect.top - containerRect.top + container.scrollTop - scrollTopPadding
 
       container.scrollTo({
         top: scrollOffset,
@@ -289,7 +287,7 @@ export const ChatV2 = () => {
   if (course && course.usageLimit === 0) {
     return (
       <Box>
-        <CourseInfo course={course} />
+        <ChatInfo course={course} />
         <Alert severity="warning" style={{ marginTop: 20 }}>
           <Typography variant="h6">{t('course:curreNotOpen')}</Typography>
         </Alert>
@@ -306,7 +304,7 @@ export const ChatV2 = () => {
     if (now < start) {
       return (
         <Box>
-          <CourseInfo course={course} />
+          <ChatInfo course={course} />
           <Alert severity="warning" style={{ marginTop: 20 }}>
             <Typography variant="h6">{t('course:curreNotStarted')}</Typography>
           </Alert>
@@ -317,7 +315,7 @@ export const ChatV2 = () => {
     if (now > end) {
       return (
         <Box>
-          <CourseInfo course={course} />
+          <ChatInfo course={course} />
           <Alert severity="warning" style={{ marginTop: 20 }}>
             <Typography variant="h6">{t('course:curreExpired')}</Typography>
           </Alert>
@@ -339,24 +337,19 @@ export const ChatV2 = () => {
       {/* Chat selection column -------------------------------------------------------------------------------------------*/}
       <Box sx={{ position: 'relative', flex: 1, borderRight: '1px solid rgba(0, 0, 0, 0.12)' }}>
         <Box sx={{ position: 'sticky', top: 80, padding: '2rem 1.5rem' }}>
-          <Typography variant="h6" fontWeight="light">
-            Currechat
-          </Typography>
+          {course && <ChatInfo course={course} />}
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.5rem' }}>
-            <CourseOption link="/v2" isActive={!course}>
-              Tavallinen
-            </CourseOption>
-          </Box>
-
-          <Typography variant="h6" fontWeight="light" mt={'2rem'} mb="0.2rem">
-            Kurssichatit
-          </Typography>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.5rem' }}>
-            <CourseOption link="/v2/sandbox" isActive={!!course}>
-              OTE:n hiekkalaatikko
-            </CourseOption>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            {/* {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />} */}
+            <SettingsButton startIcon={<DeleteIcon />} onClick={handleReset}>
+              Tyhjennä keskustelu
+            </SettingsButton>
+            <SettingsButton startIcon={<EmailIcon />} onClick={() => alert('Not yet supported')}>
+              Tallenna sähköpostina
+            </SettingsButton>
+            <SettingsButton startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)}>
+              Keskustelun asetukset
+            </SettingsButton>
           </Box>
         </Box>
       </Box>
@@ -373,36 +366,6 @@ export const ChatV2 = () => {
         }}
       >
         <Box
-          ref={chatHeaderRef}
-          sx={{
-            position: 'sticky',
-            top: 80,
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: 'white',
-            padding: '1.8rem 1rem 0.8rem 1rem',
-            zIndex: 10,
-          }}
-        >
-          <Box sx={{ margin: 'auto' }}>
-            {course && <CourseInfo course={course} />}
-
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
-              {/* {disclaimerInfo && <Disclaimer disclaimer={disclaimerInfo} />} */}
-              <SettingsButton startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)}>
-                Keskustelun asetukset
-              </SettingsButton>
-              <SettingsButton startIcon={<EmailIcon />} onClick={() => alert('Not yet supported')}>
-                Tallenna sähköpostina
-              </SettingsButton>
-              <SettingsButton startIcon={<DeleteIcon />} onClick={handleReset}>
-                Tyhjennä
-              </SettingsButton>
-            </Box>
-          </Box>
-        </Box>
-
-        <Box
           sx={{
             display: 'flex',
             flexDirection: 'column',
@@ -416,7 +379,7 @@ export const ChatV2 = () => {
         >
           <Conversation
             conversationRef={conversationRef}
-            expandedNodeHeight={window.innerHeight - chatHeaderRef.current?.clientHeight - inputFieldRef.current?.clientHeight - 200}
+            expandedNodeHeight={window.innerHeight - inputFieldRef.current?.clientHeight - 240}
             messages={messages}
             completion={completion}
             isCompletionDone={isCompletionDone}
@@ -425,7 +388,7 @@ export const ChatV2 = () => {
           />
         </Box>
 
-        <Box ref={inputFieldRef} sx={{ position: 'sticky', bottom: 0, paddingBottom: '1.5rem' }}>
+        <Box ref={inputFieldRef} sx={{ position: 'sticky', bottom: 0, paddingBottom: '1rem', width: '80%', minWidth: 750, margin: 'auto' }}>
           <ChatBox
             disabled={!isCompletionDone}
             currentModel={model.name}
