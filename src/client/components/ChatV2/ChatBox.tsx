@@ -79,15 +79,7 @@ export const ChatBox = ({
     return <p>loading</p>
   }
   return (
-    <Box
-      sx={{
-        width: '65%',
-        minWidth: 700,
-        margin: 'auto',
-        borderRadius: '0.3rem',
-        backgroundColor: 'white',
-      }}
-    >
+    <Box>
       <Box
         component="form"
         onSubmit={handleSubmit}
@@ -107,7 +99,7 @@ export const ChatBox = ({
             placeholder="Kirjoita viestisi tähän..."
             fullWidth
             multiline
-            maxRows={28}
+            maxRows={25}
             sx={{ padding: '0.5rem' }}
             variant="standard"
             slotProps={{
