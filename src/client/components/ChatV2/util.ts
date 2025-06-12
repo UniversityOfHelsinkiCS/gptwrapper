@@ -3,6 +3,7 @@ import { Message } from '../../types'
 import { postAbortableStream } from '../../util/apiClient'
 
 interface GetCompletoinStreamProps {
+  courseId?: string
   assistantInstructions: string
   messages: Message[]
   model: string
@@ -10,12 +11,12 @@ interface GetCompletoinStreamProps {
   ragIndexId?: number
   userConsent: boolean
   modelTemperature: number
-  courseId?: string
   prevResponseId?: string
   abortController?: AbortController
   saveConsent: boolean
 }
 export const getCompletionStream = async ({
+  courseId,
   assistantInstructions,
   messages,
   model,
@@ -23,7 +24,6 @@ export const getCompletionStream = async ({
   ragIndexId,
   userConsent,
   modelTemperature,
-  courseId,
   prevResponseId,
   abortController,
   saveConsent,
@@ -51,6 +51,11 @@ export const getCompletionStream = async ({
   console.log('data', data)
 
   formData.set('data', JSON.stringify(data))
+
+  // This is probably a bad solution, fix when demo deadline is over
+  if (courseId) {
+    return postAbortableStream(`/ai/stream/${courseId}/v2`, formData, abortController)
+  }
 
   return postAbortableStream('/ai/stream/v2', formData, abortController)
 }
