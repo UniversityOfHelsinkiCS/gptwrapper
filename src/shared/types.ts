@@ -80,3 +80,9 @@ export interface CourseAssistant {
   assistant_instruction: string
   vector_store_id: string | null
 }
+
+export type Locale = {
+  fi?: string
+  en?: string
+  sv?: string
+}

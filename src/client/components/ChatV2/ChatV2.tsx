@@ -30,6 +30,7 @@ import SettingsButton from './generics/SettingsButton'
 
 import { AppContext } from '../../util/AppContext'
 import { ChatInfo } from './generics/ChatInfo'
+import { getLanguageValue } from '../../../shared/utils'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -430,8 +431,8 @@ export const ChatV2 = () => {
           }}
         >
           <Conversation
-            courseName={course.name[language]}
-            courseDate={course.activityPeriod}
+            courseName={course && getLanguageValue(course.name, language)}
+            courseDate={course && course.activityPeriod}
             conversationRef={conversationRef}
             expandedNodeHeight={window.innerHeight - inputFieldRef.current?.clientHeight - 300}
             messages={messages}
