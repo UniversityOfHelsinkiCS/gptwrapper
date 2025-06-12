@@ -65,8 +65,8 @@ export const ChatV2 = () => {
   const [disallowedFileType, setDisallowedFileType] = useState<string>('')
   const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
   const [tokenWarningVisible, setTokenWarningVisible] = useState<boolean>(false)
-  const [saveConsent, setSaveConsent] = useState<boolean>(true)
   const [allowedModels, setAllowedModels] = useState<string[]>([])
+  const [saveConsent, setSaveConsent] = useState<boolean>(true) // asking for consent for saving chats for research is not implemented in v1, so should it be implemented in v2?
 
   // Chat Streaming states
   const [completion, setCompletion] = useState<string>('')
@@ -200,11 +200,11 @@ export const ChatV2 = () => {
         ragIndexId: ragIndexId ?? undefined,
         model: activeModel.name,
         formData,
-        userConsent: true, // change to not hard coded
+        userConsent: true, // this asks if the user wants to continue sending token expensive message despite warning
         modelTemperature: modelTemperature.value,
         courseId,
         abortController: streamController,
-        saveConsent,
+        saveConsent, // this asks if user allows saving the chat messaging for research purposes
         prevResponseId: prevResponse.id,
       })
 
