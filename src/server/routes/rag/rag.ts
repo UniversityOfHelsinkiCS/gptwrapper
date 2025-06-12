@@ -10,7 +10,7 @@ const router = Router()
 
 const IndexCreationSchema = z.object({
   name: z.string().min(1).max(100),
-  courseId: z.string().min(1).max(100),
+  chatInstanceId: z.string().min(1).max(100),
   dim: z.number().min(EMBED_DIM).max(EMBED_DIM).default(EMBED_DIM),
 })
 
@@ -21,9 +21,9 @@ const hasChatInstanceRagPermission = (user: User, chatInstance: ChatInstance) =>
 
 router.post('/indices', async (req, res) => {
   const { user } = req as RequestWithUser
-  const { name, dim, courseId } = IndexCreationSchema.parse(req.body)
+  const { name, dim, chatInstanceId } = IndexCreationSchema.parse(req.body)
 
-  const chatInstance = await ChatInstance.findByPk(courseId, {
+  const chatInstance = await ChatInstance.findByPk(chatInstanceId, {
     include: {
       model: Responsibility,
       as: 'responsibilities',
@@ -49,7 +49,7 @@ router.post('/indices', async (req, res) => {
 
   const ragIndex = await RagIndex.create({
     userId: user.id,
-    chatInstanceId: courseId,
+    chatInstanceId,
     metadata: {
       name,
       dim,

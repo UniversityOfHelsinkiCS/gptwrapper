@@ -5,9 +5,9 @@ import { useRagIndices } from '../../hooks/useRagIndices'
 import { useCreateRagIndexMutation } from './api'
 
 const Rag: React.FC = () => {
-  const { id: courseId } = useParams<{ id: string }>()
+  const { id: chatInstanceId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { ragIndices } = useRagIndices(courseId, true)
+  const { ragIndices } = useRagIndices(chatInstanceId, true)
   const createIndexMutation = useCreateRagIndexMutation()
   const [indexName, setIndexName] = useState('')
 
@@ -24,7 +24,7 @@ const Rag: React.FC = () => {
             color="primary"
             onClick={async () => {
               const newIndex = await createIndexMutation.mutateAsync({
-                courseId,
+                chatInstanceId,
                 indexName,
               })
               setIndexName('')
