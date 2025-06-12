@@ -50,7 +50,8 @@ userRouter.get('/login', async (req, res) => {
 
   const enrolledCourses = await getEnrolledCourses(user)
 
-  const isNowOrInFuture = ({ chatInstance }: { chatInstance: ChatInstance }) => chatInstance.usageLimit > 0 && new Date() <= new Date(chatInstance.activityPeriod.endDate)
+  const isNowOrInFuture = ({ chatInstance }: { chatInstance: ChatInstance }) =>
+    chatInstance.usageLimit > 0 && new Date() <= new Date(chatInstance.activityPeriod.endDate)
 
   res.send({
     ...user,

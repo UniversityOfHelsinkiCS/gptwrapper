@@ -44,7 +44,10 @@ export const RagFile: React.FC = () => {
         sx={{ my: 2 }}
         onClick={async () => {
           if (window.confirm('Are you sure you want to delete this file?')) {
-            await deleteMutation.mutateAsync({ indexId: ragFile.ragIndex.id, fileId: ragFile.id })
+            await deleteMutation.mutateAsync({
+              indexId: ragFile.ragIndex.id,
+              fileId: ragFile.id,
+            })
             navigate(`/rag/${ragFile.ragIndex.id}`)
           }
         }}

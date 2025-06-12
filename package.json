@@ -11,6 +11,7 @@
     "tsc": "tsc",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
+    "format": "prettier --write 'src/**/*.{ts,tsx}'",
     "build": "vite build",
     "prepare": "husky install"
   },
@@ -24,11 +25,6 @@
     "url": "https://github.com/UniversityOfHelsinkiCS/GPTwrapper/issues"
   },
   "homepage": "https://github.com/UniversityOfHelsinkiCS/GPTwrapper#readme",
-  "prettier": {
-    "trailingComma": "es5",
-    "semi": false,
-    "singleQuote": true
-  },
   "lint-staged": {
     "src/**/*.{ts,tsx}": "eslint"
   },

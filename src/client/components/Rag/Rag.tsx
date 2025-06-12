@@ -23,7 +23,10 @@ const Rag: React.FC = () => {
             variant="contained"
             color="primary"
             onClick={async () => {
-              const newIndex = await createIndexMutation.mutateAsync({ courseId, indexName })
+              const newIndex = await createIndexMutation.mutateAsync({
+                courseId,
+                indexName,
+              })
               setIndexName('')
               navigate(`/rag/${newIndex.id}`)
             }}

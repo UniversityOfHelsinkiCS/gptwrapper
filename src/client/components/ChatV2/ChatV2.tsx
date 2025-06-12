@@ -45,11 +45,15 @@ export const ChatV2 = () => {
   const [activeModel, setActiveModel] = useLocalStorageState<{ name: string }>('model-v2', {
     name: DEFAULT_MODEL,
   })
-  const [disclaimerStatus, setDisclaimerStatus] = useLocalStorageState<{ open: boolean }>('disclaimer-status', { open: true })
+  const [disclaimerStatus, setDisclaimerStatus] = useLocalStorageState<{
+    open: boolean
+  }>('disclaimer-status', { open: true })
   const [assistantInstructions, setAssistantInstructions] = useLocalStorageState<{ content: string }>(`${localStoragePrefix}-chat-instructions`, {
     content: DEFAULT_ASSISTANT_INSTRUCTIONS,
   })
-  const [modelTemperature, setModelTemperature] = useLocalStorageState<{ value: number }>(`${localStoragePrefix}-chat-model-temperature`, {
+  const [modelTemperature, setModelTemperature] = useLocalStorageState<{
+    value: number
+  }>(`${localStoragePrefix}-chat-model-temperature`, {
     value: DEFAULT_MODEL_TEMPERATURE,
   })
 
@@ -374,8 +378,14 @@ export const ChatV2 = () => {
         overflowX: 'clip',
       }}
     >
-      {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
-      <Box sx={{ position: 'relative', flex: 1, borderRight: '1px solid rgba(0, 0, 0, 0.12)' }}>
+      {/* Chat selection column -------------------------------------------------------------------------------------------*/}
+      <Box
+        sx={{
+          position: 'relative',
+          flex: 1,
+          borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+        }}
+      >
         <Box sx={{ position: 'sticky', top: 80, padding: '2rem 1.5rem' }}>
           {course && <ChatInfo course={course} />}
 
@@ -432,14 +442,24 @@ export const ChatV2 = () => {
           />
         </Box>
 
-        <Box ref={inputFieldRef} sx={{ position: 'sticky', bottom: 0, paddingBottom: '1rem', width: '80%', minWidth: 750, margin: 'auto', backgroundColor: 'white' }}>
+        <Box
+          ref={inputFieldRef}
+          sx={{
+            position: 'sticky',
+            bottom: 0,
+            paddingBottom: '1rem',
+            width: '80%',
+            minWidth: 750,
+            margin: 'auto',
+            backgroundColor: 'white',
+          }}
+        >
           {alertOpen && (
             <Alert severity="warning">
               <Typography>{`File of type "${disallowedFileType}" not supported currently`}</Typography>
               <Typography>{`Currenlty there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}</Typography>
             </Alert>
           )}
-
           <ChatBox
             disabled={!isCompletionDone}
             currentModel={activeModel.name}
@@ -473,22 +493,53 @@ export const ChatV2 = () => {
       >
         <Box sx={{ position: 'sticky', top: 80, padding: '4rem 2rem 2rem 0' }}>
           {ragIndex && course && (
-            <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <Box
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1.5rem',
+              }}
+            >
               <Typography variant="h6">Lähteet</Typography>
               {/* <CitationsBox messages={messages} fileSearchResult={fileSearchResult} /> */}
-              <Box sx={{ borderLeft: '4px solid #3f51b5', paddingLeft: '1rem', backgroundColor: 'white', borderRadius: '4px' }}>
+              <Box
+                sx={{
+                  borderLeft: '4px solid #3f51b5',
+                  paddingLeft: '1rem',
+                  backgroundColor: 'white',
+                  borderRadius: '4px',
+                }}
+              >
                 <Typography variant="body2" color="rgba(0,0,0,0.4)">
-                  Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is rendered...
+                  Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is
+                  rendered...
                 </Typography>
               </Box>
-              <Box sx={{ borderLeft: '4px solid #3f51b5', paddingLeft: '1rem', backgroundColor: 'white', borderRadius: '4px' }}>
+              <Box
+                sx={{
+                  borderLeft: '4px solid #3f51b5',
+                  paddingLeft: '1rem',
+                  backgroundColor: 'white',
+                  borderRadius: '4px',
+                }}
+              >
                 <Typography variant="body2" color="rgba(0,0,0,0.4)">
-                  Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is rendered...
+                  Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is
+                  rendered...
                 </Typography>
               </Box>
-              <Box sx={{ borderLeft: '4px solid #3f51b5', paddingLeft: '1rem', backgroundColor: 'white', borderRadius: '4px' }}>
+              <Box
+                sx={{
+                  borderLeft: '4px solid #3f51b5',
+                  paddingLeft: '1rem',
+                  backgroundColor: 'white',
+                  borderRadius: '4px',
+                }}
+              >
                 <Typography variant="body2" color="rgba(0,0,0,0.4)">
-                  Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is rendered...
+                  Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is
+                  rendered...
                 </Typography>
               </Box>
             </Box>

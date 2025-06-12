@@ -1,5 +1,5 @@
 import { Ollama } from 'ollama'
-import { LAAMA_API_TOKEN, LAAMA_API_URL, OLLAMA_URL } from '../../config'
+import { LAAMA_API_TOKEN, LAAMA_API_URL, OLLAMA_URL } from './config'
 import OpenAI from 'openai'
 
 export const getOllamaClient = () =>

@@ -5,7 +5,10 @@ import { RagFileAttributes, RagIndexAttributes } from '../../../shared/types'
 export const useCreateRagIndexMutation = () => {
   const mutation = useMutation({
     mutationFn: async ({ courseId, indexName }: { courseId: string; indexName: string }) => {
-      const response = await apiClient.post('/rag/indices', { name: indexName, courseId })
+      const response = await apiClient.post('/rag/indices', {
+        name: indexName,
+        courseId,
+      })
       return response.data
     },
   })

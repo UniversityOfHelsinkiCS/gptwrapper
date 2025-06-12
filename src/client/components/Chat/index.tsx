@@ -356,7 +356,9 @@ const Chat = () => {
       <Box sx={{ mb: 3 }} />
 
       {hasPrompts && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}
-      {!hidePrompt && <SystemMessage infoText={systemMessageInfo} system={system} setSystem={setSystem} disabled={activePromptId.length > 0 || messages.length > 0} />}
+      {!hidePrompt && (
+        <SystemMessage infoText={systemMessageInfo} system={system} setSystem={setSystem} disabled={activePromptId.length > 0 || messages.length > 0} />
+      )}
       <Box sx={{ mb: 3 }} />
 
       <Conversation messages={messages} completion={completion} handleStop={handleStop} setMessage={setMessage} />

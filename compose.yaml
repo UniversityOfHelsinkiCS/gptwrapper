@@ -30,12 +30,12 @@ services:
     # volumes:
     #   - redis_data:/data
 
-  ollama:
-    image: ollama/ollama
-    ports:
-      - 11434:11434  # expose the Ollama API to the host
-    volumes:
-      - ollama_data:/root/.ollama  # persistent model storage
+  # ollama:
+  #   image: ollama/ollama
+  #   ports:
+  #     - 11434:11434  # expose the Ollama API to the host
+  #   volumes:
+  #     - ollama_data:/root/.ollama  # persistent model storage
 
 volumes:
   pg_data:

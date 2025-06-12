@@ -4,7 +4,15 @@ import { useTranslation } from 'react-i18next'
 
 import { Prompt } from '../../types'
 
-const PromptSelector = ({ prompts, activePrompt, setActivePrompt }: { prompts: Prompt[]; activePrompt: string; setActivePrompt: (promptId: string) => void }) => {
+const PromptSelector = ({
+  prompts,
+  activePrompt,
+  setActivePrompt,
+}: {
+  prompts: Prompt[]
+  activePrompt: string
+  setActivePrompt: (promptId: string) => void
+}) => {
   const { t } = useTranslation()
   const [mandatoryPrompt, setMandatoryPrompt] = useState<Prompt>()
 

@@ -4,7 +4,8 @@ import { Op, literal } from 'sequelize'
 import logger from './logger'
 import { User } from '../db/models'
 import { run as runUpdater } from '../updater'
-import { UPDATER_CRON_ENABLED, inDevelopment } from '../../config'
+import { inDevelopment } from '../../config'
+import { UPDATER_CRON_ENABLED } from './config'
 
 const resetUsage = async () => {
   logger.info('Resetting usage')

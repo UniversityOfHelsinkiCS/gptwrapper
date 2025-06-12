@@ -8,7 +8,7 @@ import express from 'express'
 import 'express-async-errors'
 
 import { PORT } from './util/config'
-import { inProduction, inStaging, RAG_ENABLED, UPDATER_CRON_ENABLED } from '../config'
+import { inProduction, inStaging } from '../config'
 import router from './routes'
 import logger from './util/logger'
 import { connectToDatabase } from './db/connection'

@@ -17,7 +17,11 @@ const RagSelector = ({
     <Box mb={2}>
       <FormControl sx={{ width: '200px' }}>
         <InputLabel>RAG index</InputLabel>
-        <Select label={'RAG index'} value={String(currentRagIndex?.id ?? '')} onChange={(event: SelectChangeEvent) => setRagIndex(parseInt(event.target.value, 10))}>
+        <Select
+          label={'RAG index'}
+          value={String(currentRagIndex?.id ?? '')}
+          onChange={(event: SelectChangeEvent) => setRagIndex(parseInt(event.target.value, 10))}
+        >
           <MenuItem key={-1} value="none">
             None
           </MenuItem>

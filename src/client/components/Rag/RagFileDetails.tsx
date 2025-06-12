@@ -3,7 +3,10 @@ import { IngestionPipelineStageKeys, IngestionPipelineStages } from '../../../sh
 import { Link as RouterLink } from 'react-router-dom'
 import type { RagFileAttributes } from '../../../shared/types'
 
-export const RagFileInfo: React.FC<{ file: RagFileAttributes; link?: boolean }> = ({ file, link = false }) => {
+export const RagFileInfo: React.FC<{
+  file: RagFileAttributes
+  link?: boolean
+}> = ({ file, link = false }) => {
   const inProgress = file.pipelineStage !== 'completed' && file.pipelineStage !== 'pending'
   const progressIdx = IngestionPipelineStageKeys.findIndex((stage) => stage === file.pipelineStage) - 1
   const progressNextIdx = inProgress ? progressIdx + 1 : progressIdx

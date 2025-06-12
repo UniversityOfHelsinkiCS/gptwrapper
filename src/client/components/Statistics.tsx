@@ -1,6 +1,21 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Table, Select, MenuItem, Tooltip, Link, Container } from '@mui/material'
+import {
+  Box,
+  TableContainer,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  Table,
+  Select,
+  MenuItem,
+  Tooltip,
+  Link,
+  Container,
+} from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
 import useStatistics from '../hooks/useStatistics'
 import { Statistic } from '../types'

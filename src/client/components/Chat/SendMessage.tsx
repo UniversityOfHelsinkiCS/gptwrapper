@@ -68,7 +68,14 @@ const SendMessage = ({
         <Typography variant="h6">{t('chat:message')}</Typography>
       </Box>
       <Box mb={2}>
-        <TextField fullWidth multiline minRows={5} value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t('chat:messagePlaceholder') as string} />
+        <TextField
+          fullWidth
+          multiline
+          minRows={5}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder={t('chat:messagePlaceholder') as string}
+        />
       </Box>
       <Box
         sx={(theme) => ({

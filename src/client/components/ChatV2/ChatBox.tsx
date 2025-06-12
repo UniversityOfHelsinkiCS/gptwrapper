@@ -91,7 +91,13 @@ export const ChatBox = ({
           }
         }}
       >
-        <Box sx={{ border: '1px solid rgba(0,0,0,0.3)', borderRadius: '0.3rem', padding: '0.5rem 1rem' }}>
+        <Box
+          sx={{
+            border: '1px solid rgba(0,0,0,0.3)',
+            borderRadius: '0.3rem',
+            padding: '0.5rem 1rem',
+          }}
+        >
           <TextField
             ref={textFieldRef}
             autoFocus
@@ -109,7 +115,14 @@ export const ChatBox = ({
               },
             }}
           />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: '0.5rem' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mt: '0.5rem',
+            }}
+          >
             <Box>
               <IconButton component="label">
                 <AttachFileIcon />

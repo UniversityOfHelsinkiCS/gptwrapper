@@ -43,7 +43,16 @@ const UserMessage = ({
       {content}
 
       {attachements && (
-        <Typography variant="body2" sx={{ display: 'flex', gap: 0.5, alignItems: 'center', opacity: 0.7, marginTop: '1rem' }}>
+        <Typography
+          variant="body2"
+          sx={{
+            display: 'flex',
+            gap: 0.5,
+            alignItems: 'center',
+            opacity: 0.7,
+            marginTop: '1rem',
+          }}
+        >
           <AttachFileIcon fontSize="small" />
           {attachements}
         </Typography>
@@ -88,7 +97,16 @@ const AssistantMessage = ({
             const language = match?.[1] || 'plaintext' // safe fallback
             return match ? (
               <Box sx={{ borderRadius: '0.5rem', overflow: 'hidden' }}>
-                <Typography sx={{ opacity: 1, fontSize: '0.8rem', padding: '0.4rem 0.8rem', backgroundColor: '#efefef' }}>{language}</Typography>
+                <Typography
+                  sx={{
+                    opacity: 1,
+                    fontSize: '0.8rem',
+                    padding: '0.4rem 0.8rem',
+                    backgroundColor: '#efefef',
+                  }}
+                >
+                  {language}
+                </Typography>
                 {/* @ts-ignore */}
                 <SyntaxHighlighter
                   {...rest}
@@ -139,7 +157,14 @@ const MessageItem = ({
       />
     )
   } else {
-    return <UserMessage content={message.content} attachements={message.attachements} isLastAssistantNode={isLastAssistantNode} expandedNodeHeight={expandedNodeHeight} />
+    return (
+      <UserMessage
+        content={message.content}
+        attachements={message.attachements}
+        isLastAssistantNode={isLastAssistantNode}
+        expandedNodeHeight={expandedNodeHeight}
+      />
+    )
   }
 }
 
@@ -164,12 +189,23 @@ export const Conversation = ({
   fileSearchResult: FileSearchResult
   hasRagIndex: boolean
 }) => (
-  <Box style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '2.5rem', padding: '1rem 0' }} ref={conversationRef}>
-    {messages.length === 0 && <ConversationSplash courseName={courseName} courseDate={courseDate} />}
+  <Box
+    style={{
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '2.5rem',
+      padding: '1rem 0',
+    }}
+    ref={conversationRef}
+  >
+    {messages.length === 0 && <ConversationSplash />}
     {messages.map((message, idx) => {
       const isLastAssistantNode = idx === messages.length - 1 && message.role === 'assistant'
 
-      return <MessageItem key={idx} message={message} isLastAssistantNode={isLastAssistantNode} expandedNodeHeight={expandedNodeHeight} hasRagIndex={hasRagIndex} />
+      return (
+        <MessageItem key={idx} message={message} isLastAssistantNode={isLastAssistantNode} expandedNodeHeight={expandedNodeHeight} hasRagIndex={hasRagIndex} />
+      )
     })}
     {!isCompletionDone &&
       messages.length > 0 &&

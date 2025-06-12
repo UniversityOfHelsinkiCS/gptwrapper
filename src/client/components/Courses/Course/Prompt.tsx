@@ -107,7 +107,11 @@ const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptTyp
                   />
                 ) : (
                   <Tooltip title="Kurssilla voi olla vain yksi pakollinen alustus">
-                    <FormControlLabel control={<Checkbox checked={updatedMandatory} disabled />} label="Tee alustuksesta pakollinen opiskelijoille" sx={{ mr: 5 }} />
+                    <FormControlLabel
+                      control={<Checkbox checked={updatedMandatory} disabled />}
+                      label="Tee alustuksesta pakollinen opiskelijoille"
+                      sx={{ mr: 5 }}
+                    />
                   </Tooltip>
                 )}
 

@@ -42,7 +42,9 @@ router.post('/indices', async (req, res) => {
   })
 
   if (!course) {
-    res.status(404).json({ error: 'Course not found or you are not responsible for this course' })
+    res.status(404).json({
+      error: 'Course not found or you are not responsible for this course',
+    })
     return
   }
 

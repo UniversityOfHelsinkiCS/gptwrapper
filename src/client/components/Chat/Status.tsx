@@ -3,7 +3,19 @@ import { Box, Typography, MenuItem, FormControl, Select, SelectChangeEvent, Inpu
 import { FREE_MODEL } from '../../../config'
 import ModelSelector from './ModelSelector'
 
-const Status = ({ model, setModel, models, usage, limit }: { model: string; setModel: (model: string) => void; models: string[]; usage: number; limit: number }) => {
+const Status = ({
+  model,
+  setModel,
+  models,
+  usage,
+  limit,
+}: {
+  model: string
+  setModel: (model: string) => void
+  models: string[]
+  usage: number
+  limit: number
+}) => {
   const { t } = useTranslation()
 
   const tokensUsed = usage > limit

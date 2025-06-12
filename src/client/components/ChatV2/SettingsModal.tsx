@@ -111,8 +111,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             Keskustelun alustus
           </Typography>
           <Typography variant="body1">
-            Alustuksella tarkoitetaan yleistason ohjeistusta keskustelulle. Kielimallia voi esimerkiksi pyytää käyttämään akateemista kieltä tai esittämään puutarhuria
-            jota haastatellaan kaktusten hoidosta.
+            Alustuksella tarkoitetaan yleistason ohjeistusta keskustelulle. Kielimallia voi esimerkiksi pyytää käyttämään akateemista kieltä tai esittämään
+            puutarhuria jota haastatellaan kaktusten hoidosta.
           </Typography>
 
           {hasPrompts && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}
@@ -149,7 +149,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* <RagSelector currentRagIndex={currentRagIndex} setRagIndex={setRagIndex} ragIndices={ragIndices} /> */}
         </Box>
 
-        <Box sx={{ padding: '2rem 3rem', display: 'flex', justifyContent: 'flex-end' }}>
+        <Box
+          sx={{
+            padding: '2rem 3rem',
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}
+        >
           <SettingsButton onClick={resetSettings}>Palauta oletusasetukset</SettingsButton>
         </Box>
       </Box>

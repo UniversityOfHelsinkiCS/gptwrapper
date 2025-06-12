@@ -89,7 +89,10 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
             <Typography mb={1} variant="h5">
               {t('course:reseachCourse')}
             </Typography>
-            <FormControlLabel control={<Switch onChange={() => setSaveDiscussions(!saveDiscussions)} checked={saveDiscussions} />} label={t('course:isReseachCourse')} />
+            <FormControlLabel
+              control={<Switch onChange={() => setSaveDiscussions(!saveDiscussions)} checked={saveDiscussions} />}
+              label={t('course:isReseachCourse')}
+            />
 
             <FormControlLabel
               control={<Switch onChange={() => setNotOptoutSaving(!notOptoutSaving)} checked={notOptoutSaving} disabled={!saveDiscussions} />}
