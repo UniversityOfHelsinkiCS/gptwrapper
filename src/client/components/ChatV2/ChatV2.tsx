@@ -337,7 +337,7 @@ export const ChatV2 = () => {
         overflowX: 'clip',
       }}
     >
-      {/* Chat selection column -------------------------------------------------------------------------------------------*/}
+      {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
       <Box sx={{ position: 'relative', flex: 1, borderRight: '1px solid rgba(0, 0, 0, 0.12)' }}>
         <Box sx={{ position: 'sticky', top: 80, padding: '2rem 1.5rem' }}>
           {course && <ChatInfo course={course} />}
@@ -383,6 +383,8 @@ export const ChatV2 = () => {
           }}
         >
           <Conversation
+            courseName={course?.name[language]}
+            courseDate={course?.activityPeriod}
             conversationRef={conversationRef}
             expandedNodeHeight={window.innerHeight - inputFieldRef.current?.clientHeight - 240}
             messages={messages}

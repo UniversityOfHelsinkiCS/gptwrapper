@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material'
 import { useParams } from 'react-router-dom'
-import { Message } from '../../types'
+import { ActivityPeriod, Message } from '../../types'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { FileSearchResult } from '../../../shared/types'
@@ -144,6 +144,8 @@ const MessageItem = ({
 }
 
 export const Conversation = ({
+  courseName,
+  courseDate,
   conversationRef,
   expandedNodeHeight,
   messages,
@@ -152,6 +154,8 @@ export const Conversation = ({
   fileSearchResult,
   hasRagIndex,
 }: {
+  courseName?: string
+  courseDate?: ActivityPeriod
   conversationRef: React.RefObject<HTMLElement>
   expandedNodeHeight: number
   messages: Message[]
@@ -161,7 +165,7 @@ export const Conversation = ({
   hasRagIndex: boolean
 }) => (
   <Box style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '2.5rem', padding: '1rem 0' }} ref={conversationRef}>
-    {messages.length === 0 && <ConversationSplash />}
+    {messages.length === 0 && <ConversationSplash courseName={courseName} courseDate={courseDate} />}
     {messages.map((message, idx) => {
       const isLastAssistantNode = idx === messages.length - 1 && message.role === 'assistant'
 

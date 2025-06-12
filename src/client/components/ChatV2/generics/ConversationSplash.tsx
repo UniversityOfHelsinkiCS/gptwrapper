@@ -1,7 +1,9 @@
 import { Box, Typography } from '@mui/material'
 import hyLogo from '../../../assets/hy_logo.svg'
+import { formatDate } from '../../Courses/util'
+import { ActivityPeriod } from '../../../types';
 
-export const ConversationSplash = () => (
+export const ConversationSplash = ({ courseName, courseDate }: { courseName?: string; courseDate?: ActivityPeriod }) => (
   <Box
     sx={{
       height: '100%',
@@ -19,9 +21,20 @@ export const ConversationSplash = () => (
       },
     }}
   >
-    <img src={hyLogo} alt="University of Helsinki" width="240" style={{ opacity: 0.1, marginBottom: '2rem' }} />
-    <Typography fontStyle="italic" color="rgba(0,0,0,0.5)">
-      Aloita keskustelu läettämällä viesti...
-    </Typography>
+    <img src={hyLogo} alt="University of Helsinki" width="240" style={{ opacity: 0.2, marginBottom: '2rem' }} />
+    {courseName ? (
+      <>
+        <Typography variant="h4" fontWeight="bold" sx={{ mb: 1, opacity: 0.5 }}>
+          {courseName}
+        </Typography>
+        <Typography variant="subtitle1" color="textSecondary">
+          {formatDate(courseDate)}
+        </Typography>
+      </>
+    ) : (
+      <Typography variant="h6" fontStyle="italic" sx={{ mb: 1, opacity: 0.5 }}>
+        Aloita keskustelu läettämällä viesti...
+      </Typography>
+    )}
   </Box>
 )
