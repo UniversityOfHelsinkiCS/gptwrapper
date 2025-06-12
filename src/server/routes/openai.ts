@@ -157,7 +157,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   if (ragIndexId && user.isAdmin) {
     const ragIndex = await RagIndex.findByPk(ragIndexId)
     if (ragIndex) {
-      if (courseId && ragIndex.courseId !== courseId) {
+      if (courseId && ragIndex.chatInstanceId !== courseId) {
         logger.error('RagIndex does not belong to the course', {
           ragIndexId,
           courseId,
@@ -409,7 +409,7 @@ openaiRouter.post('/stream/:courseId/:version?', upload.single('file'), async (r
   if (ragIndexId && user.isAdmin) {
     const ragIndex = await RagIndex.findByPk(ragIndexId)
     if (ragIndex) {
-      if (courseId && ragIndex.courseId !== courseId) {
+      if (courseId && ragIndex.chatInstanceId !== courseId) {
         logger.error('RagIndex does not belong to the course', {
           ragIndexId,
           courseId,

@@ -8,7 +8,7 @@ class RagIndex extends Model<InferAttributes<RagIndex>, InferCreationAttributes<
 
   declare userId: string
 
-  declare courseId?: string
+  declare chatInstanceId?: string
 
   declare metadata: RagIndexMetadata
 
@@ -33,7 +33,7 @@ RagIndex.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    courseId: {
+    chatInstanceId: {
       type: DataTypes.STRING,
       allowNull: true,
     },

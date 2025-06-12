@@ -16,6 +16,9 @@ class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAtt
 
   declare resetCron: string | null
 
+  /**
+   * the Course Unit Realisation id. The term "course" is a bit misleading
+   */
   declare courseId: string | null
 
   declare activityPeriod: ActivityPeriod | null

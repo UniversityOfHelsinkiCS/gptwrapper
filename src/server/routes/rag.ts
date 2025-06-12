@@ -11,6 +11,29 @@ import { shouldRenderAsText } from '../../shared/utils'
 
 const router = Router()
 
+interface RagIndexRequest extends RequestWithUser {
+  ragIndex: RagIndex
+  chatInstance?: ChatInstance
+}
+
+const IndexIdSchema = z.coerce.number().min(1)
+
+const ragIndexMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  const reqWithUser = req as RequestWithUser
+  const ragIndexId = IndexIdSchema.parse(req.params.indexId)
+  const ragIndex = await RagIndex.findByPk(ragIndexId)
+  if (!ragIndex) {
+    res.status(404).json({ error: 'RagIndex not found' })
+    return
+  }
+  let chatInstance: ChatInstance | undefined
+  if (ragIndex.chatInstanceId) {
+    chatInstance = await ChatInstance.findByPk(ragIndex.chatInstanceId)
+  }
+  // reqWithUser.ragIndex = ragIndex
+  next()
+}
+
 router.use((req, res, next) => {
   const { user } = req as RequestWithUser
   if (!user.isAdmin) {
@@ -32,8 +55,7 @@ router.post('/indices', async (req, res) => {
   const { user } = req as RequestWithUser
   const { name, dim, courseId } = IndexCreationSchema.parse(req.body)
 
-  const course = await ChatInstance.findOne({
-    where: { courseId },
+  const course = await ChatInstance.findByPk(courseId, {
     include: {
       model: Responsibility,
       as: 'responsibilities',
@@ -55,7 +77,7 @@ router.post('/indices', async (req, res) => {
 
   const ragIndex = await RagIndex.create({
     userId: user.id,
-    courseId,
+    chatInstanceId: courseId,
     metadata: {
       name,
       dim,
@@ -68,12 +90,10 @@ router.post('/indices', async (req, res) => {
   res.json(ragIndex)
 })
 
-router.delete('/indices/:id', async (req, res) => {
-  const { id } = req.params
+router.delete('/indices/:indexId', async (req, res) => {
+  const { indexId } = req.params
 
-  const ragIndex = await RagIndex.findOne({
-    where: { id },
-  })
+  const ragIndex = await RagIndex.findByPk(indexId)
 
   if (!ragIndex) {
     res.status(404).json({ error: 'Index not found' })
@@ -89,7 +109,7 @@ router.delete('/indices/:id', async (req, res) => {
     return
   }
 
-  const uploadPath = `${UPLOAD_DIR}/${id}`
+  const uploadPath = `${UPLOAD_DIR}/${indexId}`
   try {
     await rm(uploadPath, { recursive: true, force: true })
     console.log(`Upload directory ${uploadPath} deleted`)
@@ -115,7 +135,7 @@ router.get('/indices', async (req, res) => {
   const { courseId, includeExtras } = GetIndicesQuerySchema.parse(req.query)
 
   const indices = await RagIndex.findAll({
-    ...(courseId ? { where: { courseId } } : {}),
+    ...(courseId ? { where: { chatInstanceId: courseId } } : {}),
     include: [
       {
         model: RagFile,
@@ -143,8 +163,6 @@ router.get('/indices', async (req, res) => {
 
   res.json(indices)
 })
-
-const IndexIdSchema = z.coerce.number().min(1)
 
 router.get('/indices/:id', async (req, res) => {
   const id = IndexIdSchema.parse(req.params.id)
