@@ -199,7 +199,7 @@ export const Conversation = ({
     }}
     ref={conversationRef}
   >
-    {messages.length === 0 && <ConversationSplash />}
+    {messages.length === 0 && <ConversationSplash courseName={courseName} courseDate={courseDate} />}
     {messages.map((message, idx) => {
       const isLastAssistantNode = idx === messages.length - 1 && message.role === 'assistant'
 

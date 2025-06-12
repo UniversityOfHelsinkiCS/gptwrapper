@@ -430,8 +430,8 @@ export const ChatV2 = () => {
           }}
         >
           <Conversation
-            courseName={course?.name[language]}
-            courseDate={course?.activityPeriod}
+            courseName={course.name[language]}
+            courseDate={course.activityPeriod}
             conversationRef={conversationRef}
             expandedNodeHeight={window.innerHeight - inputFieldRef.current?.clientHeight - 300}
             messages={messages}
