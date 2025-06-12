@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Course } from '../../../types'
 import { formatDate } from '../../Courses/util'
 
-export const CourseInfo = ({ course }: { course: Course }) => {
+export const ChatInfo = ({ course }: { course: Course }) => {
   const { t, i18n } = useTranslation()
   const { language } = i18n
 
