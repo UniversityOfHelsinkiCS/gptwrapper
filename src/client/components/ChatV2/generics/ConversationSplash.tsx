@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material'
 import hyLogo from '../../../assets/hy_logo.svg'
 import { formatDate } from '../../Courses/util'
-import { ActivityPeriod } from '../../../types';
+import { ActivityPeriod } from '../../../types'
 
 export const ConversationSplash = ({ courseName, courseDate }: { courseName?: string; courseDate?: ActivityPeriod }) => (
   <Box

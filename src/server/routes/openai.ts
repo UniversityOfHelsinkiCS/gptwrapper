@@ -364,7 +364,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 openaiRouter.post('/stream/:courseId/:version?', upload.single('file'), async (r, res) => {
   const { courseId, version } = r.params
   const req = r as CourseChatRequest
-  const { options } = JSON.parse(r.body.data)
+  const { options, ragIndexId } = JSON.parse(r.body.data)
   const { user } = req
 
   if (!user.id) {
@@ -404,19 +404,50 @@ openaiRouter.post('/stream/:courseId/:version?', upload.single('file'), async (r
     return
   }
 
+  // Check rag index
+  let vectorStoreId: string | undefined = undefined
+  let instructions: string | undefined = options.assistantInstructions
+
+  if (ragIndexId && user.isAdmin) {
+    const ragIndex = await RagIndex.findByPk(ragIndexId)
+    if (ragIndex) {
+      if (courseId && ragIndex.courseId !== courseId) {
+        logger.error('RagIndex does not belong to the course', {
+          ragIndexId,
+          courseId,
+        })
+        res.status(403).send('RagIndex does not belong to the course')
+        return
+      }
+
+      vectorStoreId = ragIndex.metadata.azureVectorStoreId
+      instructions = `${instructions} ${ragIndex.metadata.instructions ?? DEFAULT_RAG_SYSTEM_PROMPT}`
+
+      console.log('using', ragIndex.toJSON())
+    } else {
+      logger.error('RagIndex not found', { ragIndexId })
+      res.status(404).send('RagIndex not found')
+      return
+    }
+  }
+
   const responsesClient = new ResponsesClient({
     model: options.model,
     courseId,
-    instructions: options.assistantInstructions,
+    vectorStoreId,
+    instructions,
     temperature: options.modelTemperature,
   })
 
   let events
   if (version === 'v2') {
-    const latestMessage = options.messages[options.messages.length - 1] // Adhoc to input only the latest message
+    // Adhoc to input only the latest message, cuz ResponsesAPI expects a single message input
+    const latestMessage = options.messages[options.messages.length - 1]
+
     events = await responsesClient.createResponse({
       input: [latestMessage],
       prevResponseId: options.prevResponseId,
+      include: ragIndexId ? ['file_search_call.results'] : [],
     })
   } else {
     events = await getCompletionEvents(options)
