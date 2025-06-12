@@ -9,6 +9,7 @@ import { Prompt, Course } from '../../types'
 import { RagIndexAttributes } from '../../../shared/types'
 import SettingsButton from './generics/SettingsButton'
 import PromptSelector from './PromptSelector'
+import AssistantInstructionsInput from './AssistantInstructionsInput'
 
 interface SettingsModalProps {
   open: boolean
@@ -41,28 +42,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
   const [activePromptId, setActivePromptId] = useState<string>('')
   const [hasPrompts, setHasPrompts] = useState<boolean>(false)
+  const [hidePrompt, setHidePrompt] = useState<boolean>(false)
 
   const resetSettings = () => {
+    setActivePromptId('')
     setAssistantInstructions(DEFAULT_ASSISTANT_INSTRUCTIONS)
     setModelTemperature(DEFAULT_MODEL_TEMPERATURE)
   }
 
-  console.log('SettingsModal course:', course)
-
-  // const activePrompt = (course?.prompts ?? []).find(({ id }) => id === activePromptId)
-
   const handleChangePrompt = (promptId: string) => {
-    const { systemMessage, messages: promptMessages } = course?.prompts.find(({ id }) => id === promptId) as Prompt
+    const { systemMessage } = course?.prompts.find(({ id }) => id === promptId) as Prompt
 
-    // setSystem(systemMessage)
-    // setMessages(promptMessages)
-    console.log('Prompt changed:', promptId, systemMessage, promptMessages)
+    setAssistantInstructions(systemMessage)
     setActivePromptId(promptId)
+    const hidePrompt = course?.prompts.find(({ id }) => id === promptId)?.hidden ?? false
+    setHidePrompt(hidePrompt)
   }
 
   useEffect(() => {
+    // Sets to default instructions to prevent hidden prompts from showing
+    // Come up with a persistant storage solution if there is a need to preserve instructions per course
+    setActivePromptId('')
+    setHidePrompt(false)
+    setAssistantInstructions(DEFAULT_ASSISTANT_INSTRUCTIONS)
+
     if (course && course.prompts.length > 0) {
-      setHasPrompts(true)
+      setHasPrompts(true) // Show alustus select if there are prompts
     }
   }, [course])
 
@@ -110,15 +115,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             jota haastatellaan kaktusten hoidosta.
           </Typography>
 
-          {hasPrompts && course && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}
-
-          <TextField
-            multiline
-            minRows={6}
-            maxRows={10}
-            label="Alustuksen sisältö"
-            value={assistantInstructions}
-            onChange={(e) => setAssistantInstructions(e.target.value)}
+          {hasPrompts && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}
+          <AssistantInstructionsInput
+            disabled={activePromptId.length > 0}
+            hidden={hidePrompt}
+            instructions={assistantInstructions}
+            setInstructions={setAssistantInstructions}
           />
 
           <Typography variant="h6" fontWeight={600} mt="2rem">

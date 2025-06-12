@@ -98,7 +98,6 @@ const AssistantMessage = ({
                   style={materialDark}
                   customStyle={{ padding: '1rem', margin: 0 }}
                 />
-
               </Box>
             ) : (
               <code {...rest} className={className}>
