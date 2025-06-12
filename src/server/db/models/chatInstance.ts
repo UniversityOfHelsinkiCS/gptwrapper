@@ -2,6 +2,7 @@ import { Model, InferAttributes, InferCreationAttributes, CreationOptional, Data
 
 import { ActivityPeriod, CourseUnit, Locales } from '../../types'
 import { sequelize } from '../connection'
+import type Responsibility from './responsibilities'
 
 class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAttributes<ChatInstance>> {
   declare id: CreationOptional<string>
@@ -32,6 +33,8 @@ class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAtt
   declare saveDiscussions: boolean
 
   declare notOptoutSaving: boolean
+
+  declare responsibilities?: Responsibility[]
 }
 
 ChatInstance.init(

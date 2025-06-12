@@ -1,104 +1,67 @@
 import fs from 'fs'
 import { NextFunction, Request, Response, Router } from 'express'
-import { EMBED_DIM } from '../../config'
-import { ChatInstance, RagFile, RagIndex, Responsibility } from '../db/models'
-import { RequestWithUser } from '../types'
+import { ChatInstance, RagFile, RagIndex, Responsibility } from '../../db/models'
+import { RequestWithUser } from '../../types'
 import z from 'zod/v4'
 import multer from 'multer'
 import { mkdir, rm, stat } from 'fs/promises'
-import { getAzureOpenAIClient } from '../util/azure/client'
-import { shouldRenderAsText } from '../../shared/utils'
+import { getAzureOpenAIClient } from '../../util/azure/client'
+import { shouldRenderAsText } from '../../../shared/utils'
 
-const router = Router()
+const ragIndexRouter = Router()
 
 interface RagIndexRequest extends RequestWithUser {
   ragIndex: RagIndex
   chatInstance?: ChatInstance
 }
 
-const IndexIdSchema = z.coerce.number().min(1)
+const RagIndexIdSchema = z.coerce.number().min(1)
 
-const ragIndexMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+/**
+ * Middleware to load the RagIndex and ChatInstance from the request parameters.
+ * And authorize the user.
+ */
+ragIndexRouter.use(async (req: Request, res: Response, next: NextFunction) => {
   const reqWithUser = req as RequestWithUser
-  const ragIndexId = IndexIdSchema.parse(req.params.indexId)
+  const user = reqWithUser.user
+  const ragIndexId = RagIndexIdSchema.parse(req.params.indexId)
   const ragIndex = await RagIndex.findByPk(ragIndexId)
+
   if (!ragIndex) {
     res.status(404).json({ error: 'RagIndex not found' })
     return
   }
+
   let chatInstance: ChatInstance | undefined
   if (ragIndex.chatInstanceId) {
-    chatInstance = await ChatInstance.findByPk(ragIndex.chatInstanceId)
+    chatInstance = await ChatInstance.findByPk(ragIndex.chatInstanceId, {
+      include: { model: Responsibility, as: 'responsibilities', where: { userId: user.id } },
+    })
+    // Check that user is admin or responsible for this chatInstance
+    if (!chatInstance && !user.isAdmin) {
+      res.status(403).json({ error: 'Forbidden' })
+      return
+    }
+  } else {
+    // Chack that user is admin
+    if (!user.isAdmin) {
+      res.status(403).json({ error: 'Forbidden' })
+      return
+    }
   }
-  // reqWithUser.ragIndex = ragIndex
-  next()
-}
 
-router.use((req, res, next) => {
-  const { user } = req as RequestWithUser
-  if (!user.isAdmin) {
-    res.status(403).json({ error: 'Forbidden' })
-    return
-  }
+  const ragIndexRequest = reqWithUser as RagIndexRequest
+  ragIndexRequest.ragIndex = ragIndex
+  ragIndexRequest.chatInstance = chatInstance
+
   next()
 })
 
 const UPLOAD_DIR = 'uploads/rag'
 
-const IndexCreationSchema = z.object({
-  name: z.string().min(1).max(100),
-  courseId: z.string().min(1).max(100),
-  dim: z.number().min(EMBED_DIM).max(EMBED_DIM).default(EMBED_DIM),
-})
-
-router.post('/indices', async (req, res) => {
-  const { user } = req as RequestWithUser
-  const { name, dim, courseId } = IndexCreationSchema.parse(req.body)
-
-  const course = await ChatInstance.findByPk(courseId, {
-    include: {
-      model: Responsibility,
-      as: 'responsibilities',
-      required: true, // Ensure the user is responsible for the course
-    },
-  })
-
-  if (!course) {
-    res.status(404).json({
-      error: 'Course not found or you are not responsible for this course',
-    })
-    return
-  }
-
-  const client = getAzureOpenAIClient()
-  const vectorStore = await client.vectorStores.create({
-    name,
-  })
-
-  const ragIndex = await RagIndex.create({
-    userId: user.id,
-    chatInstanceId: courseId,
-    metadata: {
-      name,
-      dim,
-      azureVectorStoreId: vectorStore.id,
-    },
-  })
-
-  // Create upload directory for this index
-
-  res.json(ragIndex)
-})
-
-router.delete('/indices/:indexId', async (req, res) => {
-  const { indexId } = req.params
-
-  const ragIndex = await RagIndex.findByPk(indexId)
-
-  if (!ragIndex) {
-    res.status(404).json({ error: 'Index not found' })
-    return
-  }
+ragIndexRouter.delete('/', async (req, res) => {
+  const ragIndexRequest = req as RagIndexRequest
+  const ragIndex = ragIndexRequest.ragIndex
 
   const client = getAzureOpenAIClient()
   try {
@@ -109,7 +72,7 @@ router.delete('/indices/:indexId', async (req, res) => {
     return
   }
 
-  const uploadPath = `${UPLOAD_DIR}/${indexId}`
+  const uploadPath = `${UPLOAD_DIR}/${ragIndex.id}`
   try {
     await rm(uploadPath, { recursive: true, force: true })
     console.log(`Upload directory ${uploadPath} deleted`)
@@ -122,63 +85,9 @@ router.delete('/indices/:indexId', async (req, res) => {
   res.json({ message: 'Index deleted' })
 })
 
-const GetIndicesQuerySchema = z.object({
-  courseId: z.string().optional(),
-  includeExtras: z
-    .string()
-    .toLowerCase()
-    .transform((x) => x === 'true')
-    .pipe(z.boolean()),
-})
-
-router.get('/indices', async (req, res) => {
-  const { courseId, includeExtras } = GetIndicesQuerySchema.parse(req.query)
-
-  const indices = await RagIndex.findAll({
-    ...(courseId ? { where: { chatInstanceId: courseId } } : {}),
-    include: [
-      {
-        model: RagFile,
-        as: 'ragFiles',
-        attributes: ['id', 'filename'],
-      },
-    ],
-  })
-
-  if (includeExtras) {
-    const client = getAzureOpenAIClient()
-
-    // Add ragFileCount to each index
-    const indicesWithCount = await Promise.all(
-      indices.map(async (index: any) => {
-        const vectorStore = await client.vectorStores.retrieve(index.metadata.azureVectorStoreId)
-        const count = await RagFile.count({ where: { ragIndexId: index.id } })
-        return { ...index.toJSON(), ragFileCount: count, vectorStore }
-      }),
-    )
-
-    res.json(indicesWithCount)
-    return
-  }
-
-  res.json(indices)
-})
-
-router.get('/indices/:id', async (req, res) => {
-  const id = IndexIdSchema.parse(req.params.id)
-
-  const ragIndex = await RagIndex.findOne({
-    where: { id },
-    include: {
-      model: RagFile,
-      as: 'ragFiles',
-    },
-  })
-
-  if (!ragIndex) {
-    res.status(404).json({ error: 'Index not found' })
-    return
-  }
+ragIndexRouter.get('/', async (req, res) => {
+  const ragIndexRequest = req as RagIndexRequest
+  const ragIndex = ragIndexRequest.ragIndex
 
   const client = getAzureOpenAIClient()
   const vectorStore = await client.vectorStores.retrieve(ragIndex.metadata.azureVectorStoreId)
@@ -189,17 +98,15 @@ router.get('/indices/:id', async (req, res) => {
   })
 })
 
-router.get('/indices/:id/files/:fileId', async (req, res) => {
-  const indexId = IndexIdSchema.parse(req.params.id)
-  const fileId = IndexIdSchema.parse(req.params.fileId)
+const RagFileIdSchema = z.coerce.number().min(1)
+
+ragIndexRouter.get('/files/:fileId', async (req, res) => {
+  const ragIndexRequest = req as unknown as RagIndexRequest
+  const ragIndex = ragIndexRequest.ragIndex
+  const fileId = RagFileIdSchema.parse(req.params.fileId)
 
   const ragFile = await RagFile.findOne({
-    where: { id: fileId },
-    include: {
-      model: RagIndex,
-      as: 'ragIndex',
-      where: { id: indexId },
-    },
+    where: { id: fileId, ragIndexId: ragIndex.id },
   })
 
   if (!ragFile) {
@@ -211,7 +118,7 @@ router.get('/indices/:id/files/:fileId', async (req, res) => {
 
   if (shouldRenderAsText(ragFile.fileType)) {
     // Read file content
-    const filePath = `${UPLOAD_DIR}/${indexId}/${ragFile.filename}`
+    const filePath = `${UPLOAD_DIR}/${ragIndex.id}/${ragFile.filename}`
     try {
       fileContent = await fs.promises.readFile(filePath, 'utf-8')
     } catch (error) {
@@ -223,23 +130,21 @@ router.get('/indices/:id/files/:fileId', async (req, res) => {
     fileContent = 'this file cannot be displayed as readable text'
   }
 
+  ragFile.ragIndex = ragIndex
+
   res.json({
     ...ragFile.toJSON(),
     fileContent,
   })
 })
 
-router.delete('/indices/:id/files/:fileId', async (req, res) => {
-  const indexId = IndexIdSchema.parse(req.params.id)
-  const fileId = IndexIdSchema.parse(req.params.fileId)
+ragIndexRouter.delete('/files/:fileId', async (req, res) => {
+  const ragIndexRequest = req as unknown as RagIndexRequest
+  const ragIndex = ragIndexRequest.ragIndex
+  const fileId = RagFileIdSchema.parse(req.params.fileId)
 
   const ragFile = await RagFile.findOne({
-    where: { id: fileId },
-    include: {
-      model: RagIndex,
-      as: 'ragIndex',
-      where: { id: indexId },
-    },
+    where: { id: fileId, ragIndexId: ragIndex.id },
   })
 
   if (!ragFile) {
@@ -255,7 +160,7 @@ router.delete('/indices/:id/files/:fileId', async (req, res) => {
   )
 
   // Delete file from disk
-  const filePath = `${UPLOAD_DIR}/${indexId}/${ragFile.filename}`
+  const filePath = `${UPLOAD_DIR}/${ragIndex.id}/${ragFile.filename}`
   try {
     await fs.promises.unlink(filePath)
   } catch (error) {
@@ -282,7 +187,7 @@ router.delete('/indices/:id/files/:fileId', async (req, res) => {
 const upload = multer({
   storage: multer.diskStorage({
     destination: async (req, file, cb) => {
-      const id = IndexIdSchema.parse(req.params.id)
+      const id = RagIndexIdSchema.parse(req.params.id)
       const uploadPath = `${UPLOAD_DIR}/${id}`
       cb(null, uploadPath)
     },
@@ -298,7 +203,7 @@ const upload = multer({
 const uploadMiddleware = upload.array('files')
 
 const indexUploadDirMiddleware = async (req: Request, _res: Response, next: NextFunction) => {
-  const id = IndexIdSchema.parse(req.params.id)
+  const id = RagIndexIdSchema.parse(req.params.id)
   const uploadPath = `${UPLOAD_DIR}/${id}`
   try {
     await stat(uploadPath)
@@ -310,17 +215,9 @@ const indexUploadDirMiddleware = async (req: Request, _res: Response, next: Next
   next()
 }
 
-router.post('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware], async (req, res) => {
-  const { user } = req as unknown as RequestWithUser
-  const id = IndexIdSchema.parse(req.params.id)
-
-  const ragIndex = await RagIndex.findOne({
-    where: { id },
-  })
-  if (!ragIndex) {
-    res.status(404).json({ error: 'Index not found' })
-    return
-  }
+ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], async (req, res) => {
+  const ragIndexRequest = req as unknown as RagIndexRequest
+  const { ragIndex, user } = ragIndexRequest
 
   if (!req.files || req.files.length === 0) {
     res.status(400).json({ error: 'No files uploaded' })
@@ -343,7 +240,7 @@ router.post('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware],
 
   const client = getAzureOpenAIClient()
 
-  const uploadDirPath = `${UPLOAD_DIR}/${id}`
+  const uploadDirPath = `${UPLOAD_DIR}/${ragIndex.id}`
 
   await Promise.all(
     ragFiles.map(async (ragFile) => {
@@ -370,17 +267,4 @@ router.post('/indices/:id/upload', [indexUploadDirMiddleware, uploadMiddleware],
   res.json({ message: 'Files uploaded successfully' })
 })
 
-router.delete('/files/:id', async (req, res) => {
-  const { id } = req.params
-  const ragFile = await RagFile.findOne({
-    where: { id },
-  })
-  if (!ragFile) {
-    res.status(404).json({ error: 'File not found' })
-    return
-  }
-  await ragFile.destroy()
-  res.json({ message: 'File deleted' })
-})
-
-export default router
+export default ragIndexRouter

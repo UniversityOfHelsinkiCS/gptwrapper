@@ -1,6 +1,7 @@
 import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
 
 import { sequelize } from '../connection'
+import type User from './user'
 
 class Responsibility extends Model<InferAttributes<Responsibility>, InferCreationAttributes<Responsibility>> {
   declare id: CreationOptional<string>
@@ -8,6 +9,8 @@ class Responsibility extends Model<InferAttributes<Responsibility>, InferCreatio
   declare userId: string
 
   declare chatInstanceId: string
+
+  declare user?: User
 }
 
 Responsibility.init(
