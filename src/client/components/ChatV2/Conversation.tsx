@@ -7,7 +7,7 @@ import { FileSearchResult } from '../../../shared/types'
 import { ConversationSplash } from './generics/ConversationSplash'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { vscDarkPlus, materialDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 
 import { LoadingMessage } from './generics/LoadingMessage'
 
@@ -95,8 +95,8 @@ const AssistantMessage = ({
                   PreTag="div"
                   children={String(children).replace(/\n$/, '')}
                   language={language}
-                  style={materialDark}
-                  customStyle={{ padding: '1rem', margin: 0 }}
+                  customStyle={{ padding: '1rem', margin: 0, fontSize: '16px' }}
+                  style={vscDarkPlus}
                 />
               </Box>
             ) : (
