@@ -22,11 +22,13 @@ const Chats = () => {
   const getChatLink = (chat: Course) => {
     // TODO: make this function better
 
+    console.log('getChatLink', window.location.hostname)
+
     if (window.location.hostname === 'localhost') {
       return `http://localhost:3000/${chat.courseId}`
     }
 
-    if (window.location.hostname === 'toska-staging') {
+    if (window.location.hostname.includes('toska-staging')) {
       return `https://toska-staging.cs.helsinki.fi/gptwrapper${chat.courseId}`
     }
 
