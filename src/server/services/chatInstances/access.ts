@@ -8,6 +8,7 @@ export const getEnrolledCourses = async (user: User) => {
   // Only do the example/test course upserts if the user is an admin or member of the special course
   // We also want to check if the user exists in the database
   // before we try to upsert the enrolments.
+  console.log('getEnrolledCourses', user.id, user.isAdmin, user.iamGroups.includes(TEST_USERS.enrolled))
   const enrolledToSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.enrolled)
   if (enrolledToSandbox && (await getUserById(user.id))) {
     await Enrolment.upsert(
@@ -47,6 +48,7 @@ export const getOwnCourses = async (user: User) => {
   // before we try to upsert the enrolments
   const teacherOfSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.teachers)
 
+  console.log('teacherOfSandbox', user.id, user.isAdmin, user.iamGroups.includes(TEST_USERS.teachers))
   if (teacherOfSandbox && (await getUserById(user.id))) {
     await Responsibility.upsert(
       {
