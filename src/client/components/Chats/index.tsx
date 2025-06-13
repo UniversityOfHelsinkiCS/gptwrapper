@@ -29,7 +29,7 @@ const Chats = () => {
     }
 
     if (window.location.hostname.includes('toska-staging')) {
-      return `https://toska-staging.cs.helsinki.fi/gptwrapper${chat.courseId}`
+      return `https://toska-staging.cs.helsinki.fi/gptwrapper/${chat.courseId}`
     }
 
     return `https://curre.helsinki.fi/chat/${chat.courseId}`
