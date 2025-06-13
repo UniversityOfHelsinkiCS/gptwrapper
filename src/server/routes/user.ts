@@ -48,11 +48,7 @@ userRouter.get('/login', async (req, res) => {
 
   const lastRestart = await getLastRestart()
 
-  console.log('getting enrolledCourses')
-
   const enrolledCourses = await getEnrolledCourses(user)
-
-  console.log('enrolledCourses', enrolledCourses.length, enrolledCourses.map((e) => e.chatInstance.id))
 
   const isNowOrInFuture = ({ chatInstance }: { chatInstance: ChatInstance }) => chatInstance.usageLimit > 0 && new Date() <= new Date(chatInstance.activityPeriod.endDate)
 
