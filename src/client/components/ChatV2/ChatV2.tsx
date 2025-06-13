@@ -128,7 +128,7 @@ export const ChatV2 = () => {
               break
 
             case 'annotation':
-              console.log('Received annotation:', parsedChunk.annotation)
+              // console.log('Received annotation:', parsedChunk.annotation)
               break
 
             case 'fileSearchDone':
@@ -137,7 +137,7 @@ export const ChatV2 = () => {
               break
 
             case 'complete':
-              console.log('Stream completed with response ID:', parsedChunk)
+              // console.log('Stream completed with response ID:', parsedChunk)
               setPrevResponse({ id: parsedChunk.prevResponseId })
               break
 

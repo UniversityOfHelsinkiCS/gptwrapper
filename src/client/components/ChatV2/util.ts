@@ -48,7 +48,7 @@ export const getCompletionStream = async ({
     },
   }
 
-  console.log('data', data)
+  // console.log('data', data)
 
   formData.set('data', JSON.stringify(data))
 

@@ -68,8 +68,6 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   const { userConsent, ragIndexId } = options
   const { user } = req
 
-  console.log('options', options)
-
   if (!user.id) {
     res.status(401).send('Unauthorized')
     return
