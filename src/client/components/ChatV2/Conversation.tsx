@@ -84,7 +84,7 @@ const AssistantMessage = ({
       sx={{
         padding: '0 1.5rem',
         borderRadius: '5px',
-        width: '100%',
+        overflowX: 'auto',
         borderLeft: hasAnnotations ? '5px solid #3f51b5' : 'none',
       }}
     >
@@ -96,7 +96,7 @@ const AssistantMessage = ({
             const match = /language-(\w+)/.exec(className || '')
             const language = match?.[1] || 'plaintext' // safe fallback
             return match ? (
-              <Box sx={{ borderRadius: '0.5rem', overflow: 'hidden' }}>
+              <Box sx={{ borderRadius: '0.5rem', overflowX: 'auto', maxWidth: '100%' }}>
                 <Typography
                   sx={{
                     opacity: 1,
@@ -111,9 +111,14 @@ const AssistantMessage = ({
                 <SyntaxHighlighter
                   {...rest}
                   PreTag="div"
-                  children={String(children).replace(/\n$/, '')}
+                  children={String(children)}
                   language={language}
-                  customStyle={{ padding: '1rem', margin: 0, fontSize: '16px' }}
+                  customStyle={{
+                    padding: '1rem', margin: 0, fontSize: '16px',
+                    wordBreak: 'break-all',
+                    overflowWrap: 'break-word',
+                    whiteSpace: 'pre-wrap' /* preserve line breaks but allow wrapping */
+                  }}
                   style={vscDarkPlus}
                 />
               </Box>
@@ -196,6 +201,7 @@ export const Conversation = ({
       flexDirection: 'column',
       gap: '2.5rem',
       padding: '1rem 0',
+      flex: 1,
     }}
     ref={conversationRef}
   >

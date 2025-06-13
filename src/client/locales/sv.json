@@ -64,10 +64,16 @@
     "title": "## Uppmärksamhet",
     "disclaimer": "### När du använder AI-verktyg, undvik att dela data som du inte är säker på att du har rätt att dela. När du matar in data i ett AI-verktyg ska du se till att du tar hänsyn till eventuella sekretessbegränsningar och att du har fått nödvändiga upphovsrättstillstånd etc. för att dela de data som tillhandahålls. Användning av obehöriga data i AI-system kan leda till intrång i tredje parts immateriella rättigheter. \n \n ### CurreChat använder stora språkmodeller som utvecklats av OpenAI och som finns på Microsoft Azure-molntjänsten vid Helsingfors universitet i EU. De uppgifter som matas in i tjänsten kommer inte att användas för ytterligare utbildning av språkmodellen. Dessutom överförs inga användaridentifieringsdata till språkmodellen. \n \n ### GPT-4o-mini förbrukar inte tokens. Varje användare har tillgång till 150 000 tokens för språkmodellen GPT-4. Detta saldo återställs varje månad. För att minska förbrukningen av tokens bör du rensa konversationen med CLEAR-knappen varje gång du byter ämne för konversationen. \n \n ### Du kan se förbrukningen av tokens och den språkmodell som används längst ner i konversationsfönstret. \n ### Du kan läsa mer om de tokens som används av de viktigaste språkmodellerna här: [https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them). \n \n ### Mer information om användningen av AI inom utbildning finns på: [https://teaching.helsinki.fi/instruktioner/artikel/artificiell-intelligens-i-undervisningen](https://teaching.helsinki.fi/instruktioner/artikel/artificiell-intelligens-i-undervisningen)."
   },
+  "infoSmall": {
+    "title": "Uppmärksamhet",
+    "disclaimer": "När du använder AI-verktyg, undvik att dela data som du inte är säker på att du har rätt att dela. När du matar in data i ett AI-verktyg ska du se till att du tar hänsyn till eventuella sekretessbegränsningar och att du har fått nödvändiga upphovsrättstillstånd etc. för att dela de data som tillhandahålls. Användning av obehöriga data i AI-system kan leda till intrång i tredje parts immateriella rättigheter. \n \n CurreChat använder stora språkmodeller som utvecklats av OpenAI och som finns på Microsoft Azure-molntjänsten vid Helsingfors universitet i EU. De uppgifter som matas in i tjänsten kommer inte att användas för ytterligare utbildning av språkmodellen. Dessutom överförs inga användaridentifieringsdata till språkmodellen. \n \n GPT-4o-mini förbrukar inte tokens. Varje användare har tillgång till 150 000 tokens för språkmodellen GPT-4. Detta saldo återställs varje månad. För att minska förbrukningen av tokens bör du rensa konversationen med CLEAR-knappen varje gång du byter ämne för konversationen. \n \n Du kan se förbrukningen av tokens och den språkmodell som används längst ner i konversationsfönstret. \n Du kan läsa mer om de tokens som används av de viktigaste språkmodellerna här: [https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them). \n \n Mer information om användningen av AI inom utbildning finns på: [https://teaching.helsinki.fi/instruktioner/artikel/artificiell-intelligens-i-undervisningen](https://teaching.helsinki.fi/instruktioner/artikel/artificiell-intelligens-i-undervisningen)."
+  },
   "footer": {
     "contactSupport": "Kontakta support: <mailTo>{{supportEmail}}</mailTo>"
   },
   "chat": {
+    "start": "Starta konversationen genom att skicka ett meddelande...",
+    "writeHere": "Skriv ditt meddelande här...",
     "systemMessage": "Vägledning",
     "systemMessageCreation": "Initiering",
     "systemMessageInfo": "Initiera konversationen genom att ge instruktioner på hög nivå till AI:n",
@@ -79,7 +85,20 @@
     "temperature": "Justera modellens temperatur",
     "preciseTemperature": "Mer exakt",
     "balancedTemperature": "Mer balanserad",
-    "creativeTemperature": "Mer kreativ"
+    "creativeTemperature": "Mer kreativ",
+    "emptyConversation": "Rensa konversationen",
+    "settings": "Chattinställningar",
+    "shiftEnter": "Eller skicka med Shift + Enter"
+  },
+  "settings": {
+    "prompt": "Samtalsstart",
+    "promptInstructions": "Starten syftar till allmänna riktlinjer för samtalet. Språkmodellen kan till exempel ombes använda akademiskt språk eller agera som en trädgårdsmästare som intervjuas om kaktusskötsel.",
+    "promptContent": "Startens innehåll",
+    "temperature": "Justera språkmodellens precision",
+    "temperatureInstructions": "Högre värden, som 0.8, gör utskriften mer slumpmässig, medan lägre värden, som 0.2, gör den mer exakt och deterministisk.",
+    "temperatureAccurate": "Mer exakt",
+    "temperatureRandom": "Slumpmässig",
+    "resetDefault": "Återställ standardinställningar"
   },
   "email": {
     "save": "Spara som e-post",

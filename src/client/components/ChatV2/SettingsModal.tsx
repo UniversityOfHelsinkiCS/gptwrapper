@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Close } from '@mui/icons-material'
-import { Box, IconButton, Modal, Slider, TextField, Typography } from '@mui/material'
+import { Box, IconButton, Modal, Slider, Typography } from '@mui/material'
 import { DEFAULT_MODEL, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE } from '../../../config'
 import { Prompt, Course } from '../../types'
 // import ModelSelector from './ModelSelector'
@@ -40,6 +41,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   // currentRagIndex,
   course,
 }) => {
+  const { t, i18n } = useTranslation()
+  const { language } = i18n
+
   const [activePromptId, setActivePromptId] = useState<string>('')
   const [hasPrompts, setHasPrompts] = useState<boolean>(false)
   const [hidePrompt, setHidePrompt] = useState<boolean>(false)
@@ -48,6 +52,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setActivePromptId('')
     setAssistantInstructions(DEFAULT_ASSISTANT_INSTRUCTIONS)
     setModelTemperature(DEFAULT_MODEL_TEMPERATURE)
+    setHidePrompt(false)
   }
 
   const handleChangePrompt = (promptId: string) => {
@@ -108,15 +113,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           }}
         >
           <Typography variant="h6" fontWeight={600}>
-            Keskustelun alustus
+            {t('settings:prompt')}
           </Typography>
           <Typography variant="body1">
-            Alustuksella tarkoitetaan yleistason ohjeistusta keskustelulle. Kielimallia voi esimerkiksi pyytää käyttämään akateemista kieltä tai esittämään
-            puutarhuria jota haastatellaan kaktusten hoidosta.
+            {t('settings:promptInstructions')}
           </Typography>
 
           {hasPrompts && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}
           <AssistantInstructionsInput
+            label={t('settings:promptContent')}
             disabled={activePromptId.length > 0}
             hidden={hidePrompt}
             instructions={assistantInstructions}
@@ -124,10 +129,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           />
 
           <Typography variant="h6" fontWeight={600} mt="2rem">
-            Säädä kielimallin tarkkuutta
+            {t('settings:temperature')}
           </Typography>
           <Typography variant="body1">
-            Suuremmat arvot, kuten 0.8, tekevät tulosteesta satunnaisemman, kun taas pienemmät arvot, kuten 0.2, tekevät siitä tarkemman ja deterministisemmän.
+            {t('settings:temperatureInstructions')}
           </Typography>
           <Box sx={{ maxWidth: 400, padding: '1.5rem 0' }}>
             <Slider
@@ -140,8 +145,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               onChange={(_event, value) => setModelTemperature(typeof value === 'number' ? value : modelTemperature)}
             />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography>Tarkempi</Typography>
-              <Typography>Satunnainen</Typography>
+              <Typography>{t('settings:temperatureAccurate')}</Typography>
+              <Typography>{t('settings:temperatureRandom')}</Typography>
             </Box>
           </Box>
 
@@ -156,7 +161,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             justifyContent: 'flex-end',
           }}
         >
-          <SettingsButton onClick={resetSettings}>Palauta oletusasetukset</SettingsButton>
+          <SettingsButton onClick={resetSettings}>{t('settings:resetDefault')}</SettingsButton>
         </Box>
       </Box>
     </Modal>

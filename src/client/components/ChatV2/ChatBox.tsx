@@ -103,7 +103,7 @@ export const ChatBox = ({
             autoFocus
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Kirjoita viestisi tähän..."
+            placeholder={t('chat:writeHere')}
             fullWidth
             multiline
             maxRows={25}
@@ -141,7 +141,7 @@ export const ChatBox = ({
                 </IconButton>
               </Tooltip>
             ) : (
-              <Tooltip title="Or send on Shift + Enter" arrow placement="top">
+              <Tooltip title={t('chat:shiftEnter')} arrow placement="top">
                 <IconButton disabled={disabled} type="submit">
                   <Send />
                 </IconButton>

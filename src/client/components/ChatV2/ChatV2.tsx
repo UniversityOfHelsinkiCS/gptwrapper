@@ -375,15 +375,17 @@ export const ChatV2 = () => {
         display: 'flex',
         flexDirection: 'row',
         height: '100%',
-        minWidth: 1400,
+        width: '100%',
+        maxWidth: '100%',
         overflowX: 'clip',
       }}
     >
-      {/* Chat selection column -------------------------------------------------------------------------------------------*/}
+      {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
       <Box
         sx={{
-          position: 'relative',
           flex: 1,
+          minWidth: 300,
+          position: 'relative',
           borderRight: '1px solid rgba(0, 0, 0, 0.12)',
         }}
       >
@@ -392,16 +394,16 @@ export const ChatV2 = () => {
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
             <SettingsButton startIcon={<DeleteIcon />} onClick={handleReset}>
-              Tyhjennä keskustelu
+              {t('chat:emptyConversation')}
             </SettingsButton>
             <SettingsButton startIcon={<EmailIcon />} onClick={() => alert('Not yet supported')}>
-              Tallenna sähköpostina
+              {t('email:save')}
             </SettingsButton>
             <SettingsButton startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)}>
-              Keskustelun asetukset
+              {t('chat:settings')}
             </SettingsButton>
             <SettingsButton startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus({ open: true })}>
-              Disclaimer
+              {t('infoSmall:title')}
             </SettingsButton>
           </Box>
         </Box>
@@ -412,6 +414,8 @@ export const ChatV2 = () => {
         ref={chatContainerRef}
         sx={{
           flex: 3,
+          minWidth: 800,
+          width: '100%',
           display: 'flex',
           position: 'relative',
           flexDirection: 'column',
@@ -424,7 +428,7 @@ export const ChatV2 = () => {
             flexDirection: 'column',
             height: '100%',
             width: '80%',
-            minWidth: 750,
+            maxWidth: '80%',
             margin: 'auto',
             paddingTop: '1rem',
             paddingBottom: '8rem',
@@ -486,8 +490,9 @@ export const ChatV2 = () => {
       {/* Annotations columns ----------------------------------------------------------------------------------------------------- */}
       <Box
         sx={{
-          position: 'relative',
           flex: 1,
+          minWidth: 300,
+          position: 'relative',
           transform: course ? 'translateX(0%)' : 'translateX(100%)',
           transition: 'transform 200ms ease-in-out 200ms', // 0.2s duration, no delay
         }}
@@ -513,8 +518,7 @@ export const ChatV2 = () => {
                 }}
               >
                 <Typography variant="body2" color="rgba(0,0,0,0.4)">
-                  Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is
-                  rendered...
+                  Testing testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing.
                 </Typography>
               </Box>
               <Box
@@ -526,8 +530,7 @@ export const ChatV2 = () => {
                 }}
               >
                 <Typography variant="body2" color="rgba(0,0,0,0.4)">
-                  Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is
-                  rendered...
+                  Testing testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing.
                 </Typography>
               </Box>
               <Box
@@ -539,8 +542,7 @@ export const ChatV2 = () => {
                 }}
               >
                 <Typography variant="body2" color="rgba(0,0,0,0.4)">
-                  Make sure your ref is attached to a real DOM element (component="div" for MUI Box). Only access .current.clientHeight after the DOM is
-                  rendered...
+                  Testing testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing.
                 </Typography>
               </Box>
             </Box>

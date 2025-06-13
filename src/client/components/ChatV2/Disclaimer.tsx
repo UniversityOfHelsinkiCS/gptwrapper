@@ -1,6 +1,7 @@
 import { Modal, Box, IconButton, Typography } from '@mui/material'
 import { Close } from '@mui/icons-material'
 import Markdown from '../Banner/Markdown'
+import { useTranslation } from 'react-i18next'
 
 export const DisclaimerModal = ({
   disclaimer,
@@ -11,6 +12,8 @@ export const DisclaimerModal = ({
   disclaimerStatus: { open: boolean }
   setDisclaimerStatus: (status: { open: boolean }) => void
 }) => {
+  const { t } = useTranslation()
+
   return (
     <Modal open={disclaimerStatus.open} onClose={() => setDisclaimerStatus({ open: false })}>
       <Box
@@ -21,17 +24,15 @@ export const DisclaimerModal = ({
           transform: 'translate(-50%, -50%)',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'space-between',
           minWidth: 600,
           width: '85vw',
           maxWidth: 1000,
-          minHeight: '80vh',
           maxHeight: '80vh',
           bgcolor: 'background.paper',
           boxShadow: 24,
           borderRadius: '0.3rem',
-          overflow: 'hidden',
-          padding: '2rem',
+          overflow: 'auto',
+          padding: '3rem',
         }}
       >
         <IconButton onClick={() => setDisclaimerStatus({ open: false })} sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500' }}>
@@ -39,7 +40,7 @@ export const DisclaimerModal = ({
         </IconButton>
 
         <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-          Huomio
+          {t('infoSmall:title')}
         </Typography>
 
         <Markdown>{disclaimer}</Markdown>

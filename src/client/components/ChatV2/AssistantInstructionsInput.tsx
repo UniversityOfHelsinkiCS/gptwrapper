@@ -11,11 +11,13 @@ const VisibilityOff = () => (
 )
 
 export default function AssistantInstructionsInput({
+  label,
   disabled,
   hidden,
   instructions,
   setInstructions,
 }: {
+  label: string,
   disabled: boolean
   hidden: boolean
   instructions: string
@@ -30,7 +32,7 @@ export default function AssistantInstructionsInput({
       maxRows={10}
       disabled={disabled}
       hidden={hidden}
-      label="Alustuksen sisältö"
+      label={label}
       value={instructions}
       onChange={(e) => setInstructions(e.target.value)}
     />
