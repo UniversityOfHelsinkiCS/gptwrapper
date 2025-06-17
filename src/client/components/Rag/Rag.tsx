@@ -18,7 +18,14 @@ const Rag: React.FC = () => {
           RAG Indices
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, marginBottom: 2 }}>
-          <TextField label="Index Name" variant="outlined" value={indexName} onChange={(e) => setIndexName(e.target.value)} fullWidth />
+          <TextField
+            label="Index Name"
+            helperText="Use a descriptive name. It is shown to users when RAG is used."
+            variant="outlined"
+            value={indexName}
+            onChange={(e) => setIndexName(e.target.value)}
+            fullWidth
+          />
           <Button
             variant="contained"
             color="primary"

@@ -1,10 +1,10 @@
-import fs from 'fs'
-import { NextFunction, Request, Response, Router } from 'express'
-import { ChatInstance, ChatInstanceRagIndex, RagFile, RagIndex, Responsibility } from '../../db/models'
-import { RequestWithUser } from '../../types'
+import fs from 'node:fs'
+import { type NextFunction, type Request, type Response, Router } from 'express'
+import { ChatInstance, RagFile, RagIndex, Responsibility } from '../../db/models'
+import type { RequestWithUser } from '../../types'
 import z from 'zod/v4'
 import multer from 'multer'
-import { mkdir, rm, stat } from 'fs/promises'
+import { mkdir, rm, stat } from 'node:fs/promises'
 import { getAzureOpenAIClient } from '../../util/azure/client'
 import { shouldRenderAsText } from '../../../shared/utils'
 
@@ -14,18 +14,24 @@ interface RagIndexRequest extends RequestWithUser {
   ragIndex: RagIndex
 }
 
-const RagIndexIdSchema = z.coerce.number().min(1)
+const RagIndexIdSchema = z.object({
+  ragIndexId: z.coerce.number().min(1),
+})
 
 /**
  * Middleware to load the RagIndex from the request parameters.
  * And authorize the user.
  */
-ragIndexRouter.use(async (req: Request, res: Response, next: NextFunction) => {
+export async function ragIndexMiddleware(req: Request, res: Response, next: NextFunction) {
   const reqWithUser = req as RequestWithUser
   const user = reqWithUser.user
-  const ragIndexId = RagIndexIdSchema.parse(req.params.indexId)
-  const responsibilities = await Responsibility.findAll({ where: { userId: user.id } })
-  const ragIndex = await RagIndex.findByPk(ragIndexId, { include: { model: ChatInstance, as: 'chatInstances' } })
+  const { ragIndexId } = RagIndexIdSchema.parse(req.params)
+  const responsibilities = await Responsibility.findAll({
+    where: { userId: user.id },
+  })
+  const ragIndex = await RagIndex.findByPk(ragIndexId, {
+    include: { model: ChatInstance, as: 'chatInstances' },
+  })
 
   if (!ragIndex) {
     res.status(404).json({ error: 'RagIndex not found' })
@@ -44,7 +50,7 @@ ragIndexRouter.use(async (req: Request, res: Response, next: NextFunction) => {
   ragIndexRequest.ragIndex = ragIndex
 
   next()
-})
+}
 
 const UPLOAD_DIR = 'uploads/rag'
 
@@ -78,11 +84,16 @@ ragIndexRouter.get('/', async (req, res) => {
   const ragIndexRequest = req as RagIndexRequest
   const ragIndex = ragIndexRequest.ragIndex
 
+  const ragFiles = await RagFile.findAll({
+    where: { ragIndexId: ragIndex.id },
+  })
+
   const client = getAzureOpenAIClient()
   const vectorStore = await client.vectorStores.retrieve(ragIndex.metadata.azureVectorStoreId)
 
   res.json({
     ...ragIndex.toJSON(),
+    ragFiles: ragFiles.map((file) => file.toJSON()),
     vectorStore,
   })
 })
@@ -176,8 +187,8 @@ ragIndexRouter.delete('/files/:fileId', async (req, res) => {
 const upload = multer({
   storage: multer.diskStorage({
     destination: async (req, file, cb) => {
-      const id = RagIndexIdSchema.parse(req.params.id)
-      const uploadPath = `${UPLOAD_DIR}/${id}`
+      const { ragIndex } = req as RagIndexRequest
+      const uploadPath = `${UPLOAD_DIR}/${ragIndex.id}`
       cb(null, uploadPath)
     },
     filename: (req, file, cb) => {
@@ -192,8 +203,8 @@ const upload = multer({
 const uploadMiddleware = upload.array('files')
 
 const indexUploadDirMiddleware = async (req: Request, _res: Response, next: NextFunction) => {
-  const id = RagIndexIdSchema.parse(req.params.id)
-  const uploadPath = `${UPLOAD_DIR}/${id}`
+  const { ragIndex } = req as RagIndexRequest
+  const uploadPath = `${UPLOAD_DIR}/${ragIndex.id}`
   try {
     await stat(uploadPath)
     console.log(`RAG upload dir exists: ${uploadPath}`)

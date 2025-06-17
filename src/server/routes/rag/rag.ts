@@ -4,7 +4,7 @@ import { ChatInstance, ChatInstanceRagIndex, RagFile, RagIndex, Responsibility }
 import { RequestWithUser, User } from '../../types'
 import z from 'zod/v4'
 import { getAzureOpenAIClient } from '../../util/azure/client'
-import ragIndexRouter from './ragIndex'
+import ragIndexRouter, { ragIndexMiddleware } from './ragIndex'
 
 const router = Router()
 
@@ -130,6 +130,6 @@ router.get('/indices', async (req, res) => {
   res.json(indices)
 })
 
-router.use('/indices/:ragIndexId', ragIndexRouter)
+router.use('/indices/:ragIndexId', [ragIndexMiddleware], ragIndexRouter)
 
 export default router
