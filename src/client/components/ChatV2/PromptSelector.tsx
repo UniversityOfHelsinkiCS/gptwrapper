@@ -35,9 +35,6 @@ const PromptSelector = ({
           </Select>
         ) : (
           <Select label={t('prompt')} value={activePrompt} onChange={(event: SelectChangeEvent) => setActivePrompt(event.target.value)}>
-            <MenuItem value="">
-              <em>{t('prompt')}</em>
-            </MenuItem>
             {prompts.map((prompt) => (
               <MenuItem key={prompt.id} value={prompt.id}>
                 {prompt.name}
