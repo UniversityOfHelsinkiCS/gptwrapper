@@ -387,6 +387,9 @@ export const ChatV2 = () => {
     }
   }
 
+  const showFileSearch = ragIndex && (isFileSearching || messages.some((m) => m.fileSearchResult) || fileSearchResult)
+  console.table(showFileSearch)
+
   return (
     <Box
       sx={{
@@ -510,13 +513,10 @@ export const ChatV2 = () => {
         sx={{
           flex: 1,
           minWidth: 300,
-          position: 'relative',
-          transform: course ? 'translateX(0%)' : 'translateX(100%)',
-          transition: 'transform 200ms ease-in-out 200ms', // 0.2s duration, no delay
         }}
       >
-        <Box sx={{ position: 'sticky', top: 80, padding: '4rem 2rem 2rem 0' }}>
-          {ragIndex && (isFileSearching || messages.some((m) => m.fileSearchResult) || fileSearchResult) && (
+        <Box>
+          {showFileSearch && (
             <Box
               sx={{
                 height: '100%',

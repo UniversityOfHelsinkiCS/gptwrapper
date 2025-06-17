@@ -42,7 +42,7 @@ export const CitationsBox = ({ messages, fileSearchResult }: { messages: Message
   }
 
   return (
-    <Box p={2}>
+    <Box>
       {messageCitations.map((c, key) => (
         <MessageFileSearchResult key={key} fileSearchResult={c} />
       ))}
