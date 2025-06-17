@@ -62,6 +62,9 @@ export type ResponseStreamEventData =
       prevResponseId: string
     }
   | {
+      type: 'fileSearchStarted'
+    }
+  | {
       type: 'fileSearchDone'
       fileSearch: FileSearchResult
     }

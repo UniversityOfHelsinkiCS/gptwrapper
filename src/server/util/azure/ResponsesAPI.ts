@@ -151,7 +151,12 @@ export class ResponsesClient {
         //   break
 
         case 'response.file_search_call.in_progress':
-          console.log('file search in progress', event)
+          this.write(
+            {
+              type: 'fileSearchStarted',
+            },
+            res,
+          )
           break
 
         case 'response.completed':

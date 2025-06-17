@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
 import { getCompletionStream } from './util'
 
-import { Box, Typography, Alert } from '@mui/material'
+import { Box, Typography, Alert, CircularProgress } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import EmailIcon from '@mui/icons-material/Email'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -62,6 +62,8 @@ export const ChatV2 = () => {
   const [messages, setMessages] = useLocalStorageState<Message[]>(`${localStoragePrefix}-chat-messages`, [])
   const [prevResponse, setPrevResponse] = useLocalStorageState<{ id: string }>(`${localStoragePrefix}-prev-response`, { id: '' })
   const [fileSearchResult, setFileSearchResult] = useLocalStorageState<FileSearchResult>('last-file-search', null)
+
+  const [isFileSearching, setIsFileSearching] = useState<boolean>(false)
 
   // App States
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
@@ -138,16 +140,20 @@ export const ChatV2 = () => {
               break
 
             case 'annotation':
-              // console.log('Received annotation:', parsedChunk.annotation)
+              console.log('Received annotation:', parsedChunk.annotation)
+              break
+
+            case 'fileSearchStarted':
+              setIsFileSearching(true)
               break
 
             case 'fileSearchDone':
               fileSearchResult = parsedChunk.fileSearch
               setFileSearchResult(parsedChunk.fileSearch)
+              setIsFileSearching(false)
               break
 
             case 'complete':
-              // console.log('Stream completed with response ID:', parsedChunk)
               setPrevResponse({ id: parsedChunk.prevResponseId })
               break
 
@@ -170,6 +176,7 @@ export const ChatV2 = () => {
       setIsCompletionDone(true)
       refetchStatus()
       setFileName('')
+      setIsFileSearching(false)
       clearRetryTimeout()
     }
   }
@@ -201,6 +208,7 @@ export const ChatV2 = () => {
     fileInputRef.current.value = null
     setFileName('')
     setFileSearchResult(null)
+    setIsFileSearching(false)
     setStreamController(new AbortController())
     setRetryTimeout(() => {
       if (streamController) {
@@ -508,7 +516,7 @@ export const ChatV2 = () => {
         }}
       >
         <Box sx={{ position: 'sticky', top: 80, padding: '4rem 2rem 2rem 0' }}>
-          {ragIndex && course && (
+          {ragIndex && (isFileSearching || messages.some((m) => m.fileSearchResult) || fileSearchResult) && (
             <Box
               sx={{
                 height: '100%',
@@ -517,7 +525,10 @@ export const ChatV2 = () => {
                 gap: '1.5rem',
               }}
             >
-              <Typography variant="h6">Lähteet</Typography>
+              <Box sx={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <Typography variant="h6">Lähteet</Typography>
+                {isFileSearching && <CircularProgress />}
+              </Box>
               <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />
             </Box>
           )}

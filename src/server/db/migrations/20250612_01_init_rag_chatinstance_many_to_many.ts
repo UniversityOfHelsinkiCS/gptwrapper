@@ -1,6 +1,6 @@
 import { DataTypes, QueryTypes } from 'sequelize'
 
-import { Migration } from '../connection'
+import type { Migration } from '../connection'
 import { ChatInstance, ChatInstanceRagIndex } from '../models'
 
 export const up: Migration = async ({ context: queryInterface }) => {

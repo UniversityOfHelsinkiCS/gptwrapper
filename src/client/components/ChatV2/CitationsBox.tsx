@@ -1,6 +1,6 @@
 import { Box, Paper, Typography } from '@mui/material'
-import { FileSearchResult } from '../../../shared/types'
-import { Message } from '../../types'
+import type { FileSearchResult } from '../../../shared/types'
+import type { Message } from '../../types'
 import Markdown from 'react-markdown'
 
 type FileItem = FileSearchResult['results'][number]
