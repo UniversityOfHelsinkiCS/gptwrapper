@@ -526,7 +526,10 @@ export const ChatV2 = () => {
               }}
             >
               <Box sx={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <Typography variant="h6">Lähteet</Typography>
+                <Box>
+                  <Typography variant="h6">Lähdemateriaalit</Typography>
+                  <Typography variant="body1">{ragIndex.metadata.name}</Typography>
+                </Box>
                 {isFileSearching && <CircularProgress />}
               </Box>
               <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />
