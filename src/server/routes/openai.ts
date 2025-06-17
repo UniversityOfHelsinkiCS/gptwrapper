@@ -1,7 +1,7 @@
 import express from 'express'
 import multer from 'multer'
 
-import { CourseChatRequest, RequestWithUser } from '../types'
+import type { CourseChatRequest, RequestWithUser } from '../types'
 import { isError } from '../util/parser'
 import { calculateUsage, incrementUsage, checkUsage, checkCourseUsage, incrementCourseUsage } from '../services/chatInstances/usage'
 import { getCompletionEvents, streamCompletion } from '../util/azure/client'
@@ -73,6 +73,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     return
   }
 
+  // @todo were not checking if the user is enrolled?
   const course =
     courseId &&
     (await ChatInstance.findOne({
@@ -154,22 +155,17 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   let vectorStoreId: string | undefined = undefined
   let instructions: string | undefined = options.assistantInstructions
 
-  if (ragIndexId && user.isAdmin) {
-    const ragIndex = await RagIndex.findByPk(ragIndexId)
-    if (ragIndex) {
-      if (courseId && ragIndex.chatInstanceId !== courseId) {
-        logger.error('RagIndex does not belong to the course', {
-          ragIndexId,
-          courseId,
-        })
-        res.status(403).send('RagIndex does not belong to the course')
-        return
-      }
+  if (ragIndexId) {
+    if (!courseId && !user.isAdmin) {
+      logger.error('User is not admin and trying to access non-course rag')
+      res.status(403).send('Forbidden')
+      return
+    }
 
+    const ragIndex = await RagIndex.findByPk(ragIndexId, { include: { model: ChatInstance, as: 'chatInstances', where: courseId ? { courseId } : {} } })
+    if (ragIndex) {
       vectorStoreId = ragIndex.metadata.azureVectorStoreId
       instructions = `${instructions} ${ragIndex.metadata.instructions ?? DEFAULT_RAG_SYSTEM_PROMPT}`
-
-      console.log('using', ragIndex.toJSON())
     } else {
       logger.error('RagIndex not found', { ragIndexId })
       res.status(404).send('RagIndex not found')
@@ -403,31 +399,8 @@ openaiRouter.post('/stream/:courseId/:version?', upload.single('file'), async (r
   }
 
   // Check rag index
-  let vectorStoreId: string | undefined = undefined
-  let instructions: string | undefined = options.assistantInstructions
-
-  if (ragIndexId && user.isAdmin) {
-    const ragIndex = await RagIndex.findByPk(ragIndexId)
-    if (ragIndex) {
-      if (courseId && ragIndex.chatInstanceId !== courseId) {
-        logger.error('RagIndex does not belong to the course', {
-          ragIndexId,
-          courseId,
-        })
-        res.status(403).send('RagIndex does not belong to the course')
-        return
-      }
-
-      vectorStoreId = ragIndex.metadata.azureVectorStoreId
-      instructions = `${instructions} ${ragIndex.metadata.instructions ?? DEFAULT_RAG_SYSTEM_PROMPT}`
-
-      console.log('using', ragIndex.toJSON())
-    } else {
-      logger.error('RagIndex not found', { ragIndexId })
-      res.status(404).send('RagIndex not found')
-      return
-    }
-  }
+  const vectorStoreId: string | undefined = undefined
+  const instructions: string | undefined = options.assistantInstructions
 
   const responsesClient = new ResponsesClient({
     model: options.model,

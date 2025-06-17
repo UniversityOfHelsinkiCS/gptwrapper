@@ -1,6 +1,6 @@
 import fs from 'fs'
 import { NextFunction, Request, Response, Router } from 'express'
-import { ChatInstance, RagFile, RagIndex, Responsibility } from '../../db/models'
+import { ChatInstance, ChatInstanceRagIndex, RagFile, RagIndex, Responsibility } from '../../db/models'
 import { RequestWithUser } from '../../types'
 import z from 'zod/v4'
 import multer from 'multer'
@@ -12,47 +12,36 @@ const ragIndexRouter = Router()
 
 interface RagIndexRequest extends RequestWithUser {
   ragIndex: RagIndex
-  chatInstance?: ChatInstance
 }
 
 const RagIndexIdSchema = z.coerce.number().min(1)
 
 /**
- * Middleware to load the RagIndex and ChatInstance from the request parameters.
+ * Middleware to load the RagIndex from the request parameters.
  * And authorize the user.
  */
 ragIndexRouter.use(async (req: Request, res: Response, next: NextFunction) => {
   const reqWithUser = req as RequestWithUser
   const user = reqWithUser.user
   const ragIndexId = RagIndexIdSchema.parse(req.params.indexId)
-  const ragIndex = await RagIndex.findByPk(ragIndexId)
+  const responsibilities = await Responsibility.findAll({ where: { userId: user.id } })
+  const ragIndex = await RagIndex.findByPk(ragIndexId, { include: { model: ChatInstance, as: 'chatInstances' } })
 
   if (!ragIndex) {
     res.status(404).json({ error: 'RagIndex not found' })
     return
   }
 
-  let chatInstance: ChatInstance | undefined
-  if (ragIndex.chatInstanceId) {
-    chatInstance = await ChatInstance.findByPk(ragIndex.chatInstanceId, {
-      include: { model: Responsibility, as: 'responsibilities', where: { userId: user.id } },
-    })
-    // Check that user is admin or responsible for this chatInstance
-    if (!chatInstance && !user.isAdmin) {
-      res.status(403).json({ error: 'Forbidden' })
-      return
-    }
-  } else {
-    // Chack that user is admin
-    if (!user.isAdmin) {
-      res.status(403).json({ error: 'Forbidden' })
-      return
-    }
+  const isResponsible = responsibilities.some((r) => ragIndex.chatInstances.some((ci) => ci.id === r.chatInstanceId))
+
+  // Check that user is admin or responsible for this chatInstance
+  if (!isResponsible && !user.isAdmin) {
+    res.status(403).json({ error: 'Forbidden' })
+    return
   }
 
   const ragIndexRequest = reqWithUser as RagIndexRequest
   ragIndexRequest.ragIndex = ragIndex
-  ragIndexRequest.chatInstance = chatInstance
 
   next()
 })

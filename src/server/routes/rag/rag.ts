@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { EMBED_DIM } from '../../../config'
-import { ChatInstance, RagFile, RagIndex, Responsibility } from '../../db/models'
+import { ChatInstance, ChatInstanceRagIndex, RagFile, RagIndex, Responsibility } from '../../db/models'
 import { RequestWithUser, User } from '../../types'
 import z from 'zod/v4'
 import { getAzureOpenAIClient } from '../../util/azure/client'
@@ -49,12 +49,17 @@ router.post('/indices', async (req, res) => {
 
   const ragIndex = await RagIndex.create({
     userId: user.id,
-    chatInstanceId,
     metadata: {
       name,
       dim,
       azureVectorStoreId: vectorStore.id,
     },
+  })
+
+  await ChatInstanceRagIndex.create({
+    chatInstanceId,
+    ragIndexId: ragIndex.id,
+    userId: user.id,
   })
 
   res.json(ragIndex)

@@ -1,7 +1,7 @@
 import express from 'express'
 import { Op, Sequelize } from 'sequelize'
 
-import { ActivityPeriod, RequestWithUser } from '../types'
+import type { ActivityPeriod, RequestWithUser } from '../types'
 import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, User, Responsibility, Discussion } from '../db/models'
 import { getOwnCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
