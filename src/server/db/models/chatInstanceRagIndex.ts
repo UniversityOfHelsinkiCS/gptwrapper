@@ -49,6 +49,7 @@ ChatInstanceRagIndex.init(
   },
   {
     underscored: true,
+    tableName: 'chat_instances_rag_indices',
     sequelize,
     indexes: [
       {

@@ -20,7 +20,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    userId: {
+    user_id: {
       type: DataTypes.STRING,
       allowNull: true,
     },

@@ -16,7 +16,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
   for await (const ragIndex of ragIndices) {
     const chatInstances = (await queryInterface.sequelize.query(
       `
-      SELECT * FROM chat_instances WHERE id = ${ragIndex.chat_instance_id}
+      SELECT * FROM chat_instances WHERE id = '${ragIndex.chat_instance_id}'
     `,
       { transaction, type: 'SELECT' },
     )) as any[]
@@ -26,7 +26,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
 
     await queryInterface.sequelize.query(
       `
-      UPDATE rag_indices SET chat_instance_id = ${chatInstanceId} WHERE id = ${ragIndex.id}
+      UPDATE rag_indices SET chat_instance_id = '${chatInstanceId}' WHERE id = '${ragIndex.id}'
     `,
       { transaction },
     )
