@@ -1,16 +1,16 @@
-import { Tiktoken } from '@dqbd/tiktoken'
-import { Response } from 'express'
+import type { Tiktoken } from '@dqbd/tiktoken'
+import type { Response } from 'express'
 import { z } from 'zod/v4'
 
 import { AZURE_RESOURCE, AZURE_API_KEY } from '../config'
 import { validModels } from '../../../config'
 import logger from '../logger'
 
-import { APIError } from '../../types'
+import type { APIError } from '../../types'
 import { AzureOpenAI } from 'openai'
 
 // import { EventStream } from '@azure/openai'
-import { Stream } from 'openai/streaming'
+import type { Stream } from 'openai/streaming'
 import type { FileSearchTool, ResponseIncludable, ResponseInput, ResponseItemsPage, ResponseStreamEvent } from 'openai/resources/responses/responses'
 
 import { createFileSearchTool } from './util'
@@ -42,24 +42,12 @@ export class ResponsesClient {
   temperature: number
   tools: FileSearchTool[]
 
-  constructor({
-    model,
-    temperature,
-    courseId,
-    vectorStoreId,
-    instructions,
-  }: {
-    model: string
-    temperature: number
-    courseId?: string
-    vectorStoreId?: string
-    instructions?: string
-  }) {
+  constructor({ model, temperature, vectorStoreId, instructions }: { model: string; temperature: number; vectorStoreId?: string; instructions?: string }) {
     const deploymentId = validModels.find((m) => m.name === model)?.deployment
 
     if (!deploymentId) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
 
-    const fileSearchTool = courseId
+    const fileSearchTool = vectorStoreId
       ? [
           createFileSearchTool({
             vectorStoreId,
@@ -91,7 +79,7 @@ export class ResponsesClient {
         temperature: this.temperature,
         input: sanitizedInput,
         stream: true,
-        // tools: this.tools, // this is broken
+        tools: this.tools,
         tool_choice: 'auto',
         store: true,
         include,

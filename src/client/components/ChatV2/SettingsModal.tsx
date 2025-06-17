@@ -11,6 +11,7 @@ import { RagIndexAttributes } from '../../../shared/types'
 import SettingsButton from './generics/SettingsButton'
 import PromptSelector from './PromptSelector'
 import AssistantInstructionsInput from './AssistantInstructionsInput'
+import RagSelector from './RagSelector'
 
 interface SettingsModalProps {
   open: boolean
@@ -34,11 +35,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   setAssistantInstructions,
   modelTemperature,
   setModelTemperature,
-  // model,
-  // setModel,
-  // setRagIndex,
-  // ragIndices,
-  // currentRagIndex,
+  model,
+  setModel,
+  setRagIndex,
+  ragIndices,
+  currentRagIndex,
   course,
 }) => {
   const { t, i18n } = useTranslation()
@@ -115,9 +116,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <Typography variant="h6" fontWeight={600}>
             {t('settings:prompt')}
           </Typography>
-          <Typography variant="body1">
-            {t('settings:promptInstructions')}
-          </Typography>
+          <Typography variant="body1">{t('settings:promptInstructions')}</Typography>
 
           {hasPrompts && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}
           <AssistantInstructionsInput
@@ -131,9 +130,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <Typography variant="h6" fontWeight={600} mt="2rem">
             {t('settings:temperature')}
           </Typography>
-          <Typography variant="body1">
-            {t('settings:temperatureInstructions')}
-          </Typography>
+          <Typography variant="body1">{t('settings:temperatureInstructions')}</Typography>
           <Box sx={{ maxWidth: 400, padding: '1.5rem 0' }}>
             <Slider
               min={0.0}
@@ -150,8 +147,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </Box>
           </Box>
 
-          {/* Disabled for now due to RAG not functioning cirreclty */}
-          {/* <RagSelector currentRagIndex={currentRagIndex} setRagIndex={setRagIndex} ragIndices={ragIndices} /> */}
+          <RagSelector currentRagIndex={currentRagIndex} setRagIndex={setRagIndex} ragIndices={ragIndices} />
         </Box>
 
         <Box

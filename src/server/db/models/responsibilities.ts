@@ -1,4 +1,4 @@
-import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, NonAttribute } from 'sequelize'
+import { Model, type InferAttributes, type InferCreationAttributes, type CreationOptional, DataTypes, type NonAttribute } from 'sequelize'
 
 import { sequelize } from '../connection'
 import type User from './user'

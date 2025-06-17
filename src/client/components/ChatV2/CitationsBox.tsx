@@ -28,8 +28,8 @@ const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileS
         ))}
       </Box>
 
-      {fileSearchResult.results.map((result, key) => (
-        <FileItemComponent key={key} fileItem={result} />
+      {fileSearchResult.results.map((result, idx) => (
+        <FileItemComponent key={idx} fileItem={result} />
       ))}
     </Box>
   )
@@ -43,8 +43,8 @@ export const CitationsBox = ({ messages, fileSearchResult }: { messages: Message
 
   return (
     <Box p={2}>
-      {messageCitations.map((c, index) => (
-        <MessageFileSearchResult key={index} fileSearchResult={fileSearchResult} />
+      {messageCitations.map((c, key) => (
+        <MessageFileSearchResult key={key} fileSearchResult={c} />
       ))}
     </Box>
   )

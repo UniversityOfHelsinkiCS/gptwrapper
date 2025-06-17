@@ -1,8 +1,7 @@
-import { RagIndexAttributes } from '../../../shared/types'
-import { Message } from '../../types'
+import type { Message } from '../../types'
 import { postAbortableStream } from '../../util/apiClient'
 
-interface GetCompletoinStreamProps {
+interface GetCompletionStreamProps {
   courseId?: string
   assistantInstructions: string
   messages: Message[]
@@ -27,7 +26,7 @@ export const getCompletionStream = async ({
   prevResponseId,
   abortController,
   saveConsent,
-}: GetCompletoinStreamProps) => {
+}: GetCompletionStreamProps) => {
   const data = {
     courseId,
     options: {

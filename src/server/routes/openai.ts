@@ -175,7 +175,6 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
 
   const responsesClient = new ResponsesClient({
     model: options.model,
-    courseId,
     vectorStoreId,
     instructions,
     temperature: options.modelTemperature,

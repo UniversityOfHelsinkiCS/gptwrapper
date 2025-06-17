@@ -5,8 +5,8 @@ import useUserStatus from '../../hooks/useUserStatus'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { validModels, DEFAULT_MODEL, FREE_MODEL, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE, ALLOWED_FILE_TYPES } from '../../../config'
 import useInfoTexts from '../../hooks/useInfoTexts'
-import { Message } from '../../types'
-import { FileSearchResult, ResponseStreamEventData } from '../../../shared/types'
+import type { Message } from '../../types'
+import type { FileSearchResult, ResponseStreamEventData } from '../../../shared/types'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
@@ -110,6 +110,7 @@ export const ChatV2 = () => {
 
         const data = decoder.decode(value)
 
+        let accumulatedChunk = ''
         for (const chunk of data.split('\n')) {
           if (!chunk || chunk.trim().length === 0) continue
 
@@ -119,6 +120,15 @@ export const ChatV2 = () => {
           } catch (e: any) {
             console.error('Error', e)
             console.error('Could not parse the chunk:', chunk)
+            accumulatedChunk += chunk
+
+            try {
+              parsedChunk = JSON.parse(accumulatedChunk)
+              accumulatedChunk = ''
+            } catch (e: any) {
+              console.error('Error', e)
+              console.error('Could not parse the accumulated chunk:', accumulatedChunk)
+            }
           }
 
           switch (parsedChunk.type) {
@@ -213,7 +223,7 @@ export const ChatV2 = () => {
         prevResponseId: prevResponse.id,
       })
 
-      if (tokenUsageAnalysis && tokenUsageAnalysis.message) {
+      if (tokenUsageAnalysis?.message) {
         setTokenUsageWarning(tokenUsageAnalysis.message)
         setTokenWarningVisible(true)
         return
@@ -340,8 +350,8 @@ export const ChatV2 = () => {
     )
   }
 
-  if (course && course.activityPeriod) {
-    const { startDate, endDate } = course && course.activityPeriod
+  if (course?.activityPeriod) {
+    const { startDate, endDate } = course.activityPeriod
     const start = new Date(startDate)
     const end = new Date(endDate)
     const now = new Date()
@@ -436,7 +446,7 @@ export const ChatV2 = () => {
         >
           <Conversation
             courseName={course && getLanguageValue(course.name, language)}
-            courseDate={course && course.activityPeriod}
+            courseDate={course?.activityPeriod}
             conversationRef={conversationRef}
             expandedNodeHeight={window.innerHeight - inputFieldRef.current?.clientHeight - 300}
             messages={messages}
@@ -508,43 +518,7 @@ export const ChatV2 = () => {
               }}
             >
               <Typography variant="h6">Lähteet</Typography>
-              {/* <CitationsBox messages={messages} fileSearchResult={fileSearchResult} /> */}
-              <Box
-                sx={{
-                  borderLeft: '4px solid #3f51b5',
-                  paddingLeft: '1rem',
-                  backgroundColor: 'white',
-                  borderRadius: '4px',
-                }}
-              >
-                <Typography variant="body2" color="rgba(0,0,0,0.4)">
-                  Testing testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing.
-                </Typography>
-              </Box>
-              <Box
-                sx={{
-                  borderLeft: '4px solid #3f51b5',
-                  paddingLeft: '1rem',
-                  backgroundColor: 'white',
-                  borderRadius: '4px',
-                }}
-              >
-                <Typography variant="body2" color="rgba(0,0,0,0.4)">
-                  Testing testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing.
-                </Typography>
-              </Box>
-              <Box
-                sx={{
-                  borderLeft: '4px solid #3f51b5',
-                  paddingLeft: '1rem',
-                  backgroundColor: 'white',
-                  borderRadius: '4px',
-                }}
-              >
-                <Typography variant="body2" color="rgba(0,0,0,0.4)">
-                  Testing testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing a testing testing.
-                </Typography>
-              </Box>
+              <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />
             </Box>
           )}
         </Box>
