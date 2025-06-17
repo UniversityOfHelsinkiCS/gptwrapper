@@ -48,14 +48,7 @@ export const getCompletionStream = async ({
     },
   }
 
-  // console.log('data', data)
-
   formData.set('data', JSON.stringify(data))
-
-  // This is probably a bad solution, fix when demo deadline is over
-  if (courseId) {
-    return postAbortableStream(`/ai/stream/${courseId}/v2`, formData, abortController)
-  }
 
   return postAbortableStream('/ai/stream/v2', formData, abortController)
 }

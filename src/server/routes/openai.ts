@@ -1,7 +1,7 @@
 import express from 'express'
 import multer from 'multer'
 
-import type { CourseChatRequest, RequestWithUser } from '../types'
+import type { RequestWithUser } from '../types'
 import { isError } from '../util/parser'
 import { calculateUsage, incrementUsage, checkUsage, checkCourseUsage, incrementCourseUsage } from '../services/chatInstances/usage'
 import { getCompletionEvents, streamCompletion } from '../util/azure/client'
@@ -348,114 +348,6 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     }
     await Discussion.create(discussion)
   }
-
-  encoding.free()
-
-  res.end()
-  return
-})
-
-openaiRouter.post('/stream/:courseId/:version?', upload.single('file'), async (r, res) => {
-  const { courseId, version } = r.params
-  const req = r as CourseChatRequest
-  const { options, ragIndexId } = JSON.parse(r.body.data)
-  const { user } = req
-
-  if (!user.id) {
-    res.status(401).send('Unauthorized')
-    return
-  }
-
-  const usageAllowed = await checkCourseUsage(user, courseId)
-  if (!usageAllowed) {
-    res.status(403).send('Usage limit reached')
-    return
-  }
-
-  options.messages = getMessageContext(options.messages)
-  options.stream = true
-
-  const model = await getCourseModel(courseId)
-
-  if (options.model) {
-    const allowedModels = getAllowedModels(model)
-    if (!allowedModels.includes(options.model)) {
-      res.status(403).send('Model not allowed')
-      return
-    }
-  } else {
-    options.model = model
-  }
-
-  const encoding = getEncoding(options.model)
-  let tokenCount = calculateUsage(options, encoding)
-
-  const contextLimit = getModelContextLimit(options.model)
-
-  if (tokenCount > contextLimit) {
-    logger.info('Maximum context reached')
-    res.status(403).send('Model maximum context reached')
-    return
-  }
-
-  // Check rag index
-  const vectorStoreId: string | undefined = undefined
-  const instructions: string | undefined = options.assistantInstructions
-
-  const responsesClient = new ResponsesClient({
-    model: options.model,
-    courseId,
-    vectorStoreId,
-    instructions,
-    temperature: options.modelTemperature,
-  })
-
-  let events
-  if (version === 'v2') {
-    // Adhoc to input only the latest message, cuz ResponsesAPI expects a single message input
-    const latestMessage = options.messages[options.messages.length - 1]
-
-    events = await responsesClient.createResponse({
-      input: [latestMessage],
-      prevResponseId: options.prevResponseId,
-      include: ragIndexId ? ['file_search_call.results'] : [],
-    })
-  } else {
-    events = await getCompletionEvents(options)
-  }
-
-  if (isError(events)) {
-    res.status(424).send(events)
-    return
-  }
-
-  res.setHeader('content-type', 'text/event-stream')
-
-  let completion
-  if (version === 'v2') {
-    completion = await responsesClient.handleResponse({
-      events,
-      encoding,
-      res,
-    })
-  } else {
-    completion = await streamCompletion(events, options, encoding, res)
-  }
-
-  tokenCount += completion.tokenCount
-
-  let userToCharge = user
-  if (inProduction && req.hijackedBy) {
-    userToCharge = req.hijackedBy
-  }
-
-  await incrementCourseUsage(userToCharge, courseId, tokenCount)
-  logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
-    tokenCount,
-    courseId,
-    model: options.model,
-    user: user.username,
-  })
 
   encoding.free()
 
