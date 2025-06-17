@@ -13,8 +13,6 @@ export const up: Migration = async ({ context: queryInterface }) => {
     { transaction, type: 'SELECT' },
   )) as any[]
 
-  console.log(ragIndices)
-
   for await (const ragIndex of ragIndices) {
     const chatInstances = (await queryInterface.sequelize.query(
       `

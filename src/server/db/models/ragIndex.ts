@@ -1,16 +1,17 @@
-import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
+import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, NonAttribute } from 'sequelize'
 
 import { sequelize } from '../connection'
 import { RagIndexMetadata } from '../../../shared/types'
+import type ChatInstance from './chatInstance'
 
 class RagIndex extends Model<InferAttributes<RagIndex>, InferCreationAttributes<RagIndex>> {
   declare id: CreationOptional<number>
 
   declare userId: string
 
-  declare chatInstanceId?: string
-
   declare metadata: RagIndexMetadata
+
+  declare chatInstances?: NonAttribute<ChatInstance[]>
 
   getRedisIndexName() {
     return `${this.id}-${this.metadata.name}`
@@ -32,10 +33,6 @@ RagIndex.init(
     userId: {
       type: DataTypes.STRING,
       allowNull: false,
-    },
-    chatInstanceId: {
-      type: DataTypes.STRING,
-      allowNull: true,
     },
     metadata: {
       type: DataTypes.JSONB,

@@ -7,6 +7,7 @@ import Responsibility from './responsibilities'
 import Discussion from './discussion'
 import RagIndex from './ragIndex'
 import RagFile from './ragFile'
+import ChatInstanceRagIndex from './chatInstanceRagIndex'
 
 User.belongsToMany(ChatInstance, {
   through: UserChatInstanceUsage,
@@ -54,4 +55,15 @@ RagIndex.hasMany(RagFile, { as: 'ragFiles' })
 
 RagFile.belongsTo(User, { as: 'user' })
 
-export { User, ChatInstance, UserChatInstanceUsage, Prompt, Enrolment, Responsibility, Discussion, RagIndex, RagFile }
+/**
+ * Everyone's favourite super-many-to-many relationship
+ */
+RagIndex.belongsToMany(ChatInstance, { as: 'chatInstances', through: ChatInstanceRagIndex })
+ChatInstance.belongsToMany(RagIndex, { as: 'ragIndices', through: ChatInstanceRagIndex })
+RagIndex.hasMany(ChatInstanceRagIndex, { as: 'chatInstancesRagIndices' })
+ChatInstance.hasMany(ChatInstanceRagIndex, { as: 'chatInstancesRagIndices' })
+ChatInstanceRagIndex.belongsTo(ChatInstance, { as: 'chatInstance' })
+ChatInstanceRagIndex.belongsTo(RagIndex, { as: 'ragIndex' })
+ChatInstanceRagIndex.belongsTo(User, { as: 'user' })
+
+export { User, ChatInstance, UserChatInstanceUsage, Prompt, Enrolment, Responsibility, Discussion, RagIndex, RagFile, ChatInstanceRagIndex }

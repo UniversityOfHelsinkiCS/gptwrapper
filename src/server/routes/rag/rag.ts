@@ -74,8 +74,15 @@ router.get('/indices', async (req, res) => {
   const { user } = req as RequestWithUser
 
   // Check access
+  let chatInstance: ChatInstance | undefined
   if (courseId) {
-    const chatInstance = await ChatInstance.findByPk(courseId, { include: [{ model: Responsibility, as: 'responsibilities' }] })
+    chatInstance = await ChatInstance.findOne({
+      where: { courseId },
+      include: [
+        { model: Responsibility, as: 'responsibilities' },
+        { model: RagIndex, as: 'ragIndices' },
+      ],
+    })
     if (!hasChatInstanceRagPermission(user, chatInstance)) {
       res.status(403).json({ error: 'Forbidden' })
       return
@@ -87,16 +94,17 @@ router.get('/indices', async (req, res) => {
     }
   }
 
-  const indices = await RagIndex.findAll({
-    ...(courseId ? { where: { chatInstanceId: courseId } } : {}),
-    include: [
-      {
-        model: RagFile,
-        as: 'ragFiles',
-        attributes: ['id', 'filename'],
-      },
-    ],
-  })
+  const indices = chatInstance
+    ? chatInstance.ragIndices
+    : await RagIndex.findAll({
+        include: [
+          {
+            model: RagFile,
+            as: 'ragFiles',
+            attributes: ['id', 'filename'],
+          },
+        ],
+      })
 
   if (includeExtras) {
     const client = getAzureOpenAIClient()

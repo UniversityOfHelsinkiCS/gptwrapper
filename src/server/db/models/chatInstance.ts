@@ -1,8 +1,9 @@
-import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
+import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, NonAttribute } from 'sequelize'
 
 import { ActivityPeriod, CourseUnit, Locales } from '../../types'
 import { sequelize } from '../connection'
 import type Responsibility from './responsibilities'
+import type RagIndex from './ragIndex'
 
 class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAttributes<ChatInstance>> {
   declare id: CreationOptional<string>
@@ -34,7 +35,9 @@ class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAtt
 
   declare notOptoutSaving: boolean
 
-  declare responsibilities?: Responsibility[]
+  declare responsibilities?: NonAttribute<Responsibility[]>
+
+  declare ragIndices?: NonAttribute<RagIndex[]>
 }
 
 ChatInstance.init(
