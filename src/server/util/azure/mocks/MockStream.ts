@@ -1,8 +1,10 @@
 import {
   getBasicStreamMock,
+  getCodeBlockStreamMock,
   getFailedStreamMock,
   getFileSearchFailStreamMock,
   getFileSearchStreamMock,
+  getMathBlockStreamMock,
   getMidwayFailStreamMock,
   getTimeoutFailStreamMock,
   MockType,
@@ -26,7 +28,7 @@ class MockStream<T> {
         await new Promise((r) => setTimeout(r, 1000))
       }
 
-      await new Promise((r) => setTimeout(r, 60))
+      await new Promise((r) => setTimeout(r, 50))
       yield this.events[this.index++]
     }
   }
@@ -55,6 +57,14 @@ export function createMockStream<T extends { content: string }>(input: T): Async
 
     case MockType.TIMEOUT_FAIL:
       mockType = getTimeoutFailStreamMock()
+      break
+
+    case MockType.CODE_BLOCK:
+      mockType = getCodeBlockStreamMock()
+      break
+
+    case MockType.MATH_BLOCK:
+      mockType = getMathBlockStreamMock()
       break
 
     default:

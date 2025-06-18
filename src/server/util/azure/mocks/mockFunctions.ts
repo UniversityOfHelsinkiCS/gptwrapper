@@ -11,6 +11,8 @@ export enum MockType {
   MIDWAY_FAIL = 'midway fail',
   TIMEOUT_FAIL = 'timeout fail',
   RAG_FAIL = 'rag fail',
+  CODE_BLOCK = 'code block',
+  MATH_BLOCK = 'math block',
 }
 
 const chunkText = (text: string): string[] => {
@@ -41,6 +43,8 @@ export const getBasicStreamMock = (): MockResponseStreamEvent[] => {
 - To mock a timed-out response, write: **timeout fail**
 - To mock a file search, write: **rag**
 - To mock a file search fail response, write: **rag fail**
+- To mock a code block, write: **code block**
+- To mock a math block, write: **math block**
 `
 
   const chunkedResponseText = chunkText(responseText)
@@ -200,6 +204,68 @@ export const getTimeoutFailStreamMock = (): MockResponseStreamEvent[] => {
 
 export const getFileSearchFailStreamMock = (): MockResponseStreamEvent[] => {
   const responseText = `Testing failed RAG stream`
+
+  const chunkedResponseText = chunkText(responseText)
+
+  return [
+    {
+      type: 'response.created',
+    },
+    ...chunkedResponseText.map((chunk) => ({
+      type: 'response.output_text.delta' as ResponseStreamEvent['type'],
+      item_id: 'msg_mock',
+      delta: chunk,
+    })),
+    {
+      type: 'response.completed',
+      response: {
+        id: 'resp_mock',
+        usage: {
+          input_tokens: 0,
+          output_tokens: 0,
+          output_tokens_details: {
+            reasoning_tokens: 0,
+          },
+          total_tokens: 0,
+        },
+      },
+    },
+  ]
+}
+
+export const getCodeBlockStreamMock = (): MockResponseStreamEvent[] => {
+  const responseText = `Testing code block stream`
+
+  const chunkedResponseText = chunkText(responseText)
+
+  return [
+    {
+      type: 'response.created',
+    },
+    ...chunkedResponseText.map((chunk) => ({
+      type: 'response.output_text.delta' as ResponseStreamEvent['type'],
+      item_id: 'msg_mock',
+      delta: chunk,
+    })),
+    {
+      type: 'response.completed',
+      response: {
+        id: 'resp_mock',
+        usage: {
+          input_tokens: 0,
+          output_tokens: 0,
+          output_tokens_details: {
+            reasoning_tokens: 0,
+          },
+          total_tokens: 0,
+        },
+      },
+    },
+  ]
+}
+
+export const getMathBlockStreamMock = (): MockResponseStreamEvent[] => {
+  const responseText = `Testing math block stream`
 
   const chunkedResponseText = chunkText(responseText)
 
