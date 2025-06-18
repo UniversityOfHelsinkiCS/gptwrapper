@@ -31,7 +31,7 @@ const NavBar = () => {
 
   if (!user) return null
 
-  const isV2 = window.location.pathname.startsWith('/v2') || window.location.pathname.startsWith('/chat/v2')
+  const isV2 = window.location.pathname.endsWith('/v2')
   console.log('isV2', isV2, window.location.pathname)
 
 
