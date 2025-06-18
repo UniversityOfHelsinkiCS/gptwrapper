@@ -17,7 +17,8 @@ import { createFileSearchTool } from './util'
 
 import type { FileCitation, ResponseStreamEventData } from '../../../shared/types'
 
-import { createMockStream } from './MockStream'
+import { createMockStream } from './mocks/MockStream'
+import type { MockResponseStreamEvent } from './mocks/mockFunctions'
 
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
@@ -83,7 +84,7 @@ export class ResponsesClient {
     input: ResponseInput
     prevResponseId?: string
     include?: ResponseIncludable[]
-  }): Promise<Stream<ResponseStreamEvent> | Promise<AsyncIterable<ResponseStreamEvent>> | APIError> {
+  }): Promise<Stream<ResponseStreamEvent> | Promise<AsyncIterable<MockResponseStreamEvent>> | APIError> {
     try {
       const sanitizedInput = inputSchema.parse(input) as ResponseInput
 
@@ -126,7 +127,7 @@ export class ResponsesClient {
     encoding,
     res,
   }: {
-    events: Stream<ResponseStreamEvent> | AsyncIterable<ResponseStreamEvent>
+    events: Stream<ResponseStreamEvent> | AsyncIterable<MockResponseStreamEvent>
     encoding: Tiktoken
     res: Response
   }) {
@@ -134,7 +135,7 @@ export class ResponsesClient {
     const contents = []
 
     for await (const event of events) {
-      // console.log('event type:', event)
+      // console.log('event type:', event.type)
 
       switch (event.type) {
         case 'response.output_text.delta':
