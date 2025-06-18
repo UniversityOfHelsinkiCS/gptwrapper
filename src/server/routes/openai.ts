@@ -131,7 +131,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   options.messages = getMessageContext(optionsMessagesWithFile || options.messages)
 
   const encoding = getEncoding(options.model)
-  let tokenCount = calculateUsage(options as any, encoding)
+  let tokenCount = options.model === 'mock' ? 0 : calculateUsage(options as any, encoding)
   const tokenUsagePercentage = Math.round((tokenCount / DEFAULT_TOKEN_LIMIT) * 100)
 
   if (options.model !== FREE_MODEL && tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT && !userConsent) {
@@ -180,7 +180,8 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     temperature: options.modelTemperature,
   })
 
-  // TODO: when we get rid of CCV1, then start sending only the last message to this endpoint
+  // TODO: when we get rid of CCV1, we might want to start sending only the last message to this endpoint
+  // take into account how the tokens are calculated based in all the messages send into this endpoint
   const latestMessage = options.messages[options.messages.length - 1]
 
   const events = await responsesClient.createResponse({
@@ -202,7 +203,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     res,
   })
 
-  tokenCount += result.tokenCount
+  tokenCount += options.model === 'mock' ? 0 : result.tokenCount
 
   let userToCharge = user
   if (inProduction && req.hijackedBy) {

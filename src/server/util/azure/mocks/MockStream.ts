@@ -21,7 +21,12 @@ class MockStream<T> {
 
   async *[Symbol.asyncIterator]() {
     while (this.index < this.events.length) {
-      await new Promise((r) => setTimeout(r, 100))
+      // Longer delay for simulating responses creation
+      if (this.index === 0) {
+        await new Promise((r) => setTimeout(r, 1000))
+      }
+
+      await new Promise((r) => setTimeout(r, 60))
       yield this.events[this.index++]
     }
   }

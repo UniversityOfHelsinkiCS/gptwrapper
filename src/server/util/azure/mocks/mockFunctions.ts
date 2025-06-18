@@ -37,7 +37,7 @@ export const getBasicStreamMock = (): MockResponseStreamEvent[] => {
   const responseText = `### You are calling mock endpoint for streaming mock data.
 
 - To mock a failed response, write: **fail**
-- To mock a mid-sentence failed response, write **midway fail**
+- To mock a mid-sentence failed response, write: **midway fail**
 - To mock a timed-out response, write: **timeout fail**
 - To mock a file search, write: **rag**
 - To mock a file search fail response, write: **rag fail**
