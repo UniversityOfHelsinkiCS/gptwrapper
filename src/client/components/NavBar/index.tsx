@@ -31,7 +31,7 @@ const NavBar = () => {
 
   if (!user) return null
 
-  const isV2 = window.location.pathname.startsWith('/v2')
+  const isV2 = window.location.pathname.startsWith('/v2') || window.location.pathname.startsWith('/chat/v2')
 
   return (
     <AppBar elevation={0} position="sticky" sx={styles.appbar} color="transparent">
