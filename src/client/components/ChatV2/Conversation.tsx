@@ -7,9 +7,13 @@ import { FileSearchResult } from '../../../shared/types'
 import { ConversationSplash } from './generics/ConversationSplash'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism'
-
+import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 import { LoadingMessage } from './generics/LoadingMessage'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import { preprocessMath } from './util'
+import 'katex/dist/katex.min.css'
+import 'katex/dist/contrib/mhchem'
 
 const UserMessage = ({
   content,
@@ -22,13 +26,7 @@ const UserMessage = ({
   isLastAssistantNode: boolean
   expandedNodeHeight: number
 }) => (
-  <Box
-    className={`message-role-user`}
-    sx={{
-      minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
-      alignSelf: 'flex-end',
-    }}
-  >
+  <Box className={`message-role-user`} sx={{ minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto', alignSelf: 'flex-end' }}>
     <Box
       sx={{
         backgroundColor: '#efefef',
@@ -43,16 +41,7 @@ const UserMessage = ({
       {content}
 
       {attachements && (
-        <Typography
-          variant="body2"
-          sx={{
-            display: 'flex',
-            gap: 0.5,
-            alignItems: 'center',
-            opacity: 0.7,
-            marginTop: '1rem',
-          }}
-        >
+        <Typography variant="body2" sx={{ display: 'flex', gap: 0.5, alignItems: 'center', opacity: 0.7, marginTop: '1rem' }}>
           <AttachFileIcon fontSize="small" />
           {attachements}
         </Typography>
@@ -73,68 +62,75 @@ const AssistantMessage = ({
   hasAnnotations: boolean
   isLastAssistantNode: boolean
   expandedNodeHeight: number
-}) => (
-  <Box
-    className={`message-role-assistant`}
-    sx={{
-      minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
-    }}
-  >
-    <Box
-      sx={{
-        padding: '0 1.5rem',
-        borderRadius: '5px',
-        overflowX: 'auto',
-        borderLeft: hasAnnotations ? '5px solid #3f51b5' : 'none',
-      }}
-    >
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          code(props) {
-            const { children, className, node, ...rest } = props
-            const match = /language-(\w+)/.exec(className || '')
-            const language = match?.[1] || 'plaintext' // safe fallback
-            return match ? (
-              <Box sx={{ borderRadius: '0.5rem', overflowX: 'auto', maxWidth: '100%' }}>
-                <Typography
-                  sx={{
-                    opacity: 1,
-                    fontSize: '0.8rem',
-                    padding: '0.4rem 0.8rem',
-                    backgroundColor: '#efefef',
-                  }}
-                >
-                  {language}
-                </Typography>
-                {/* @ts-ignore */}
-                <SyntaxHighlighter
-                  {...rest}
-                  PreTag="div"
-                  children={String(children)}
-                  language={language}
-                  customStyle={{
-                    padding: '1rem', margin: 0, fontSize: '16px',
-                    wordBreak: 'break-all',
-                    overflowWrap: 'break-word',
-                    whiteSpace: 'pre-wrap' /* preserve line breaks but allow wrapping */
-                  }}
-                  style={vscDarkPlus}
-                />
-              </Box>
-            ) : (
-              <code {...rest} className={className}>
-                {children}
-              </code>
-            )
-          },
-        }}
-      >
-        {content}
-      </ReactMarkdown>
+}) => {
+  const processedContent = preprocessMath(content)
+  const katexOptions = {
+    macros: {
+      '\\abs': '\\left|#1\\right|',
+      '\\norm': '\\left\\|#1\\right\\|',
+      '\\R': '\\mathbb{R}',
+      '\\C': '\\mathbb{C}',
+      '\\N': '\\mathbb{N}',
+      '\\Z': '\\mathbb{Z}',
+      '\\vec': '\\mathbf{#1}',
+      '\\deriv': '\\frac{d#1}{d#2}',
+      '\\pdv': '\\frac{\\partial#1}{\\partial#2}',
+      '\\set': '\\left\\{#1\\right\\}',
+      '\\lr': '\\left(#1\\right)',
+      '\\T': '^{\\mathsf{T}}',
+      '\\defeq': '\\coloneqq',
+    },
+    extensions: ['mhchem.js'],
+    output: 'htmlAndMathml',
+    throwOnError: false, // If math is badly formatted, display it in red instead of throwing errors
+    errorColor: '#cc0000',
+  }
+
+  return (
+    <Box className={`message-role-assistant`} sx={{ minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto' }}>
+      <Box sx={{ padding: '0 1.5rem', borderRadius: '5px', overflowX: 'auto', borderLeft: hasAnnotations ? '5px solid #3f51b5' : 'none' }}>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
+          rehypePlugins={[[rehypeKatex, katexOptions]]}
+          components={{
+            code(props) {
+              const { children, className, node, ...rest } = props
+              const match = /language-(\w+)/.exec(className || '')
+              const language = match?.[1] || 'plaintext' // safe fallback
+              return match ? (
+                <Box sx={{ borderRadius: '0.5rem', overflowX: 'auto', maxWidth: '100%' }}>
+                  <Typography sx={{ opacity: 1, fontSize: '0.8rem', padding: '0.4rem 0.8rem', backgroundColor: '#efefef' }}>{language}</Typography>
+                  {/* @ts-ignore */}
+                  <SyntaxHighlighter
+                    {...rest}
+                    PreTag="div"
+                    children={String(children)}
+                    language={language}
+                    customStyle={{
+                      padding: '1rem',
+                      margin: 0,
+                      fontSize: '16px',
+                      wordBreak: 'break-all',
+                      overflowWrap: 'break-word',
+                      whiteSpace: 'pre-wrap' /* preserve line breaks but allow wrapping */,
+                    }}
+                    style={oneDark}
+                  />
+                </Box>
+              ) : (
+                <code {...rest} className={className}>
+                  {children}
+                </code>
+              )
+            },
+          }}
+        >
+          {processedContent}
+        </ReactMarkdown>
+      </Box>
     </Box>
-  </Box>
-)
+  )
+}
 
 const MessageItem = ({
   message,
@@ -194,17 +190,7 @@ export const Conversation = ({
   fileSearchResult: FileSearchResult
   hasRagIndex: boolean
 }) => (
-  <Box
-    style={{
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '2.5rem',
-      padding: '1rem 0',
-      flex: 1,
-    }}
-    ref={conversationRef}
-  >
+  <Box style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '2.5rem', padding: '1rem 0', flex: 1 }} ref={conversationRef}>
     {messages.length === 0 && <ConversationSplash courseName={courseName} courseDate={courseDate} />}
     {messages.map((message, idx) => {
       const isLastAssistantNode = idx === messages.length - 1 && message.role === 'assistant'
