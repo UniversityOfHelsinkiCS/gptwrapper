@@ -2,6 +2,7 @@ import { Box, Paper, Typography } from '@mui/material'
 import type { FileSearchResult } from '../../../shared/types'
 import type { Message } from '../../types'
 import Markdown from 'react-markdown'
+import { useRagIndex } from '../../hooks/useRagIndex'
 
 type FileItem = FileSearchResult['results'][number]
 
@@ -17,8 +18,11 @@ const FileItemComponent = ({ fileItem }: { fileItem: FileItem }) => {
 }
 
 const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileSearchResult }) => {
+  const { ragIndex, isSuccess } = useRagIndex(fileSearchResult.ragIndexId)
+
   return (
     <Box sx={{ mt: 1 }}>
+      <Typography>{isSuccess ? ragIndex.metadata.name : '...'}</Typography>
       <Typography>Searched for:</Typography>
       <Box display="flex" gap={2}>
         {fileSearchResult.queries.map((q, idx) => (

@@ -201,6 +201,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     events,
     encoding,
     res,
+    ragIndexId,
   })
 
   tokenCount += options.model === 'mock' ? 0 : result.tokenCount

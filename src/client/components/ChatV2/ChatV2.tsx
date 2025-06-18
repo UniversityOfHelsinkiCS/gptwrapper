@@ -22,7 +22,6 @@ import { DisclaimerModal } from './Disclaimer'
 import { Conversation } from './Conversation'
 import { ChatBox } from './ChatBox'
 import { SettingsModal } from './SettingsModal'
-import { TokenUsageWarning } from './TokenUsageWarning'
 
 import { CitationsBox } from './CitationsBox'
 import { useRagIndices } from '../../hooks/useRagIndices'
@@ -31,9 +30,12 @@ import SettingsButton from './generics/SettingsButton'
 import { AppContext } from '../../util/AppContext'
 import { ChatInfo } from './generics/ChatInfo'
 import { getLanguageValue } from '../../../shared/utils'
+import RagSelector from './RagSelector'
+import { useRagIndex } from '../../hooks/useRagIndex'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
+  console.log('Course = ', courseId)
   const { course } = useCourse(courseId)
 
   const { ragIndices } = useRagIndices(courseId)
@@ -309,6 +311,7 @@ export const ChatV2 = () => {
     }
   }, [])
 
+  // @todo fix this shit when having long file search results
   useEffect(() => {
     // Scrolls to last assistant message on text generation
     if (!appContainerRef.current || !conversationRef.current || messages.length === 0) return
@@ -399,8 +402,8 @@ export const ChatV2 = () => {
     }
   }
 
-  const showFileSearch = ragIndex && (isFileSearching || messages.some((m) => m.fileSearchResult) || fileSearchResult)
-  console.table(showFileSearch)
+  const showFileSearch = isFileSearching || messages.some((m) => m.fileSearchResult) || fileSearchResult
+  const showRagSelector = ragIndices?.length > 0
 
   return (
     <Box
@@ -438,6 +441,7 @@ export const ChatV2 = () => {
             <SettingsButton startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus({ open: true })}>
               {t('infoSmall:title')}
             </SettingsButton>
+            {showRagSelector && <RagSelector currentRagIndex={ragIndex} setRagIndex={setRagIndexId} ragIndices={ragIndices} />}
           </Box>
         </Box>
       </Box>
@@ -528,27 +532,7 @@ export const ChatV2 = () => {
           minWidth: 300,
         }}
       >
-        <Box>
-          {showFileSearch && (
-            <Box
-              sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.5rem',
-              }}
-            >
-              <Box sx={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <Box>
-                  <Typography variant="h6">Lähdemateriaalit</Typography>
-                  <Typography variant="body1">{ragIndex.metadata.name}</Typography>
-                </Box>
-                {isFileSearching && <CircularProgress />}
-              </Box>
-              <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />
-            </Box>
-          )}
-        </Box>
+        <Box>{showFileSearch && <FileSearchInfo isFileSearching={isFileSearching} fileSearchResult={fileSearchResult} messages={messages} />}</Box>
       </Box>
 
       {/* Modals --------------------------------------*/}
@@ -568,6 +552,35 @@ export const ChatV2 = () => {
       />
 
       <DisclaimerModal disclaimer={disclaimerInfo} disclaimerStatus={disclaimerStatus} setDisclaimerStatus={setDisclaimerStatus} />
+    </Box>
+  )
+}
+
+const FileSearchInfo = ({
+  isFileSearching,
+  fileSearchResult,
+  messages,
+}: {
+  isFileSearching: boolean
+  fileSearchResult: FileSearchResult
+  messages: Message[]
+}) => {
+  return (
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1.5rem',
+      }}
+    >
+      <Box sx={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <Box>
+          <Typography variant="h6">Lähdemateriaalit</Typography>
+        </Box>
+        {isFileSearching && <CircularProgress />}
+      </Box>
+      <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />
     </Box>
   )
 }

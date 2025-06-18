@@ -1,4 +1,4 @@
-import { FileSearchResult } from '../shared/types'
+import type { FileSearchResult } from '../shared/types'
 
 export type SetState<T> = React.Dispatch<React.SetStateAction<T>>
 

@@ -46,7 +46,9 @@ export type FileCitation = {
   type: 'file_citation'
 }
 
-export type FileSearchResult = ResponseFileSearchToolCall
+export type FileSearchResult = ResponseFileSearchToolCall & {
+  ragIndexId: number
+}
 
 export type ResponseStreamEventData =
   | {

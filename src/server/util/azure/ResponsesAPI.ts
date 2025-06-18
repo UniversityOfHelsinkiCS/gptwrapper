@@ -45,19 +45,7 @@ export class ResponsesClient {
   temperature: number
   tools: FileSearchTool[]
 
-  constructor({
-    model,
-    temperature,
-    courseId,
-    vectorStoreId,
-    instructions,
-  }: {
-    model: string
-    temperature: number
-    courseId?: string
-    vectorStoreId?: string
-    instructions?: string
-  }) {
+  constructor({ model, temperature, vectorStoreId, instructions }: { model: string; temperature: number; vectorStoreId?: string; instructions?: string }) {
     const selectedModel = validModels.find((m) => m.name === model)?.deployment
 
     if (!selectedModel) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
@@ -84,12 +72,13 @@ export class ResponsesClient {
     input: ResponseInput
     prevResponseId?: string
     include?: ResponseIncludable[]
-  }): Promise<Stream<ResponseStreamEvent> | Promise<AsyncIterable<MockResponseStreamEvent>> | APIError> {
+  }): Promise<Stream<ResponseStreamEvent> | APIError> {
     try {
       const sanitizedInput = validatedInputSchema.parse(input)
 
       if (this.model === 'mock') {
-        return createMockStream<ValidatedResponseInput>(sanitizedInput)
+        // @todo create a type that both acual requests and mock requests can implement properly. Now it is mayhem.
+        return createMockStream<ValidatedResponseInput>(sanitizedInput) as unknown as Promise<Stream<ResponseStreamEvent>>
       }
 
       return await client.responses.create({
@@ -120,15 +109,7 @@ export class ResponsesClient {
     }
   }
 
-  async handleResponse({
-    events,
-    encoding,
-    res,
-  }: {
-    events: Stream<ResponseStreamEvent> | AsyncIterable<MockResponseStreamEvent>
-    encoding: Tiktoken
-    res: Response
-  }) {
+  async handleResponse({ events, encoding, res, ragIndexId }: { events: Stream<ResponseStreamEvent>; encoding: Tiktoken; res: Response; ragIndexId?: number }) {
     let tokenCount = 0
     const contents = []
 
@@ -158,7 +139,7 @@ export class ResponsesClient {
             this.write(
               {
                 type: 'fileSearchDone',
-                fileSearch: event.item,
+                fileSearch: { ...event.item, ragIndexId },
               },
               res,
             )
