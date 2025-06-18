@@ -153,12 +153,24 @@ export const ChatV2 = () => {
               setIsFileSearching(false)
               break
 
-            case 'complete':
-              setPrevResponse({ id: parsedChunk.prevResponseId })
+            case 'fileSearchError':
+              console.error("File search error")
+              break
+
+            case "streamError":
+              console.error("Response streaming error")
+              break
+
+            case "timeoutError":
+              console.error("Response timeout error")
               break
 
             case 'error':
               console.error('Somehing went wrong when streaming responses')
+              break
+
+            case 'complete':
+              setPrevResponse({ id: parsedChunk.prevResponseId })
               break
 
             default:
