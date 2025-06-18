@@ -17,6 +17,8 @@ import { createFileSearchTool } from './util'
 
 import type { FileCitation, ResponseStreamEventData } from '../../../shared/types'
 
+import { createMockStream } from './MockStream'
+
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
 export const getAzureOpenAIClient = (deployment: string) =>
@@ -42,10 +44,22 @@ export class ResponsesClient {
   temperature: number
   tools: FileSearchTool[]
 
-  constructor({ model, temperature, vectorStoreId, instructions }: { model: string; temperature: number; vectorStoreId?: string; instructions?: string }) {
-    const deploymentId = validModels.find((m) => m.name === model)?.deployment
+  constructor({
+    model,
+    temperature,
+    courseId,
+    vectorStoreId,
+    instructions,
+  }: {
+    model: string
+    temperature: number
+    courseId?: string
+    vectorStoreId?: string
+    instructions?: string
+  }) {
+    const selectedModel = validModels.find((m) => m.name === model)?.deployment
 
-    if (!deploymentId) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
+    if (!selectedModel) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
 
     const fileSearchTool = vectorStoreId
       ? [
@@ -55,7 +69,7 @@ export class ResponsesClient {
         ]
       : [] // needs to retrun empty array for null
 
-    this.model = deploymentId
+    this.model = selectedModel
     this.temperature = temperature
     this.instructions = instructions
     this.tools = fileSearchTool
@@ -69,9 +83,16 @@ export class ResponsesClient {
     input: ResponseInput
     prevResponseId?: string
     include?: ResponseIncludable[]
-  }): Promise<Stream<ResponseStreamEvent> | APIError> {
+  }): Promise<Stream<ResponseStreamEvent> | Promise<AsyncIterable<ResponseStreamEvent>> | APIError> {
     try {
       const sanitizedInput = inputSchema.parse(input) as ResponseInput
+
+      if (this.model === 'mock') {
+        return createMockStream({
+          input: sanitizedInput,
+        })
+      }
+
       return await client.responses.create({
         model: this.model,
         previous_response_id: prevResponseId || undefined,
@@ -100,12 +121,20 @@ export class ResponsesClient {
     }
   }
 
-  async handleResponse({ events, encoding, res }: { events: Stream<ResponseStreamEvent>; encoding: Tiktoken; res: Response }) {
+  async handleResponse({
+    events,
+    encoding,
+    res,
+  }: {
+    events: Stream<ResponseStreamEvent> | AsyncIterable<ResponseStreamEvent>
+    encoding: Tiktoken
+    res: Response
+  }) {
     let tokenCount = 0
     const contents = []
 
     for await (const event of events) {
-      console.log('event type:', event.type)
+      // console.log('event type:', event)
 
       switch (event.type) {
         case 'response.output_text.delta':
@@ -160,8 +189,6 @@ export class ResponsesClient {
           break
 
         case 'response.completed':
-          console.log(`Response completed with temp: ${event.response.temperature}, model: ${event.response.model}`)
-
           await this.write(
             {
               type: 'complete',
