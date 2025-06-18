@@ -89,7 +89,8 @@
     "creativeTemperature": "Mer kreativ",
     "emptyConversation": "Rensa konversationen",
     "settings": "Chattinställningar",
-    "shiftEnter": "Eller skicka med Shift + Enter"
+    "shiftEnter": "Eller skicka med Shift + Enter",
+    "testUseInfo": "Den nya chattvyn är fortfarande under utveckling och det är möjligt att fel uppstår"
   },
   "settings": {
     "prompt": "Samtalsstart",

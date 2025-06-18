@@ -81,7 +81,8 @@
     "toBeSaved": "The discussion will be saved anonymously",
     "emptyConversation": "Empty conversation",
     "settings": "Chat settings",
-    "shiftEnter": "Or send on Shift + Enter"
+    "shiftEnter": "Or send on Shift + Enter",
+    "testUseInfo": "The new chat view is still in development and bugs are likely to occur"
   },
   "settings": {
     "prompt": "Conversation prompt",

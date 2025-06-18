@@ -154,15 +154,15 @@ export const ChatV2 = () => {
               break
 
             case 'fileSearchError':
-              console.error("File search error")
+              console.error('File search error')
               break
 
-            case "streamError":
-              console.error("Response streaming error")
+            case 'streamError':
+              console.error('Response streaming error')
               break
 
-            case "timeoutError":
-              console.error("Response timeout error")
+            case 'timeoutError':
+              console.error('Response timeout error')
               break
 
             case 'error':
@@ -467,6 +467,7 @@ export const ChatV2 = () => {
             paddingBottom: '8rem',
           }}
         >
+          <Alert severity="info">{t('chat:testUseInfo')}</Alert>
           <Conversation
             courseName={course && getLanguageValue(course.name, language)}
             courseDate={course?.activityPeriod}

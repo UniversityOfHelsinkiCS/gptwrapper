@@ -81,7 +81,8 @@
     "toBeSaved": "Keskustelu tallennetaan anonyymisti",
     "emptyConversation": "Tyhjennä keskustelu",
     "settings": "Keskustelun asetukset",
-    "shiftEnter": "Tai lähetä Shift + Enterillä"
+    "shiftEnter": "Tai lähetä Shift + Enterillä",
+    "testUseInfo": "Curren uusi chattinäkymä on vielä kehitysvaiheessa ja bugeja varmasti ilmenee"
   },
   "settings": {
     "prompt": "Keskustelun alustus",
