@@ -1,5 +1,13 @@
-import { type ResponseInput } from 'openai/resources/responses/responses'
-import { getBasicStreamMock, type MockResponseStreamEvent } from './mockFunctions'
+import {
+  getBasicStreamMock,
+  getFailedStreamMock,
+  getFileSearchFailStreamMock,
+  getFileSearchStreamMock,
+  getMidwayFailStreamMock,
+  getTimeoutFailStreamMock,
+  MockType,
+  type MockResponseStreamEvent,
+} from './mockFunctions'
 
 class MockStream<T> {
   private events: T[]
@@ -19,13 +27,30 @@ class MockStream<T> {
   }
 }
 
-export function createMockStream({ input }: { input: ResponseInput }): AsyncIterable<MockResponseStreamEvent> {
+export function createMockStream<T extends { content: string }>(input: T): AsyncIterable<MockResponseStreamEvent> {
+  const command: string = input.content
   let mockType: MockResponseStreamEvent[]
 
-  switch (input) {
-    // case :
-    //     mockType = getFailStream()
-    //     break
+  switch (command) {
+    case MockType.RAG:
+      mockType = getFileSearchStreamMock()
+      break
+
+    case MockType.RAG_FAIL:
+      mockType = getFileSearchFailStreamMock()
+      break
+
+    case MockType.FAIL:
+      mockType = getFailedStreamMock()
+      break
+
+    case MockType.MIDWAY_FAIL:
+      mockType = getMidwayFailStreamMock()
+      break
+
+    case MockType.TIMEOUT_FAIL:
+      mockType = getTimeoutFailStreamMock()
+      break
 
     default:
       mockType = getBasicStreamMock()

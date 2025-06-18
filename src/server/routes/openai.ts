@@ -180,10 +180,11 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     temperature: options.modelTemperature,
   })
 
+  // TODO: when we get rid of CCV1, then start sending only the last message to this endpoint
   const latestMessage = options.messages[options.messages.length - 1]
 
   const events = await responsesClient.createResponse({
-    input: [latestMessage],
+    input: latestMessage,
     prevResponseId: options.prevResponseId,
     include: ragIndexId ? ['file_search_call.results'] : [],
   })

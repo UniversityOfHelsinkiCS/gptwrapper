@@ -32,12 +32,12 @@ export const getAzureOpenAIClient = (deployment: string) =>
 
 const client = getAzureOpenAIClient(process.env.GPT_4O_MINI)
 
-const inputSchema = z
-  .object({
-    role: z.enum(['assistant', 'user', 'system']),
-    content: z.string().trim(),
-  })
-  .array()
+const validatedInputSchema = z.object({
+  role: z.enum(['assistant', 'user', 'system']),
+  content: z.string().trim(),
+})
+
+type ValidatedResponseInput = z.infer<typeof validatedInputSchema>
 
 export class ResponsesClient {
   model: string
@@ -86,12 +86,10 @@ export class ResponsesClient {
     include?: ResponseIncludable[]
   }): Promise<Stream<ResponseStreamEvent> | Promise<AsyncIterable<MockResponseStreamEvent>> | APIError> {
     try {
-      const sanitizedInput = inputSchema.parse(input) as ResponseInput
+      const sanitizedInput = validatedInputSchema.parse(input)
 
       if (this.model === 'mock') {
-        return createMockStream({
-          input: sanitizedInput,
-        })
+        return createMockStream<ValidatedResponseInput>(sanitizedInput)
       }
 
       return await client.responses.create({
@@ -99,7 +97,7 @@ export class ResponsesClient {
         previous_response_id: prevResponseId || undefined,
         instructions: this.instructions,
         temperature: this.temperature,
-        input: sanitizedInput,
+        input: [sanitizedInput],
         stream: true,
         tools: this.tools,
         tool_choice: 'auto',
