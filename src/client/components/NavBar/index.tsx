@@ -32,8 +32,6 @@ const NavBar = () => {
   if (!user) return null
 
   const isV2 = window.location.pathname.endsWith('/v2')
-  console.log('isV2', isV2, window.location.pathname)
-
 
   return (
     <AppBar elevation={0} position="sticky" sx={styles.appbar} color="transparent">
