@@ -9,7 +9,6 @@ export const getEnrolledCourses = async (user: User) => {
   // We also want to check if the user exists in the database
   // before we try to upsert the enrolments.
 
-  console.log('enrolledToSandbox', user.id, user.isAdmin, user.iamGroups, TEST_USERS.enrolled, user.iamGroups.includes(TEST_USERS.enrolled))
   const enrolledToSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.enrolled)
   if (enrolledToSandbox && (await getUserById(user.id))) {
     await Enrolment.upsert(
