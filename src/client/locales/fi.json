@@ -35,7 +35,8 @@
     "fileInfoPrompt": "\n\nTässä on tiedoston sisältämä teksti:\n\n",
     "copy": "Kopioi",
     "curreUrl": "https://curre.helsinki.fi/",
-    "curreTitle": "Curre"
+    "curreTitle": "Curre",
+    "tryNew": "Kokeile uutta chattiä"
   },
   "stats": {
     "showing": "Näytetään",

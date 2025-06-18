@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AppBar, Toolbar, MenuItem, Box, Container, MenuList, Button, Paper, ClickAwayListener, Grow, Popper, Typography, Link as MuiLink } from '@mui/material'
-import { Language, AdminPanelSettingsOutlined, BookmarksOutlined } from '@mui/icons-material'
+import { Language, AdminPanelSettingsOutlined, BookmarksOutlined, GradeOutlined } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
 import useCurrentUser from '../../hooks/useCurrentUser'
@@ -42,6 +42,11 @@ const NavBar = () => {
             </Box>
           </MuiLink>
           <Box>
+            <Link to="/v2" style={{ textDecoration: 'none' }}>
+              <Button>
+                <GradeOutlined sx={styles.icon} /> {t('tryNew')}
+              </Button>
+            </Link>
             {user.enrolledCourses.length > 0 && (
               <Link to="/chats" style={{ textDecoration: 'none' }}>
                 <Button>

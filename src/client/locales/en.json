@@ -35,7 +35,8 @@
     "fileInfoPrompt": "\n\nHere is the contents of the file\n\n",
     "curreUrl": "https://curre.helsinki.fi/",
     "curreTitle": "Curre",
-    "copy": "Copy"
+    "copy": "Copy",
+    "tryNew": "Try the new chat"
   },
   "stats": {
     "timePeriodStart": "Starting",
