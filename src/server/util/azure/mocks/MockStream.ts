@@ -25,10 +25,10 @@ class MockStream<T> {
     while (this.index < this.events.length) {
       // Longer delay for simulating responses creation
       if (this.index === 0) {
-        await new Promise((r) => setTimeout(r, 1000))
+        await new Promise((r) => setTimeout(r, 800))
       }
 
-      await new Promise((r) => setTimeout(r, 50))
+      await new Promise((r) => setTimeout(r, 30))
       yield this.events[this.index++]
     }
   }
