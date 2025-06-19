@@ -1,8 +1,10 @@
-import { Box, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Table, Container } from '@mui/material'
+import { Box, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Link as MuiLink } from '@mui/material'
+import { Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import type { Course } from '../../types'
 import { formatDate } from '../Courses/util'
-import { Course } from '../../types'
+import { getLanguageValue } from '../../../shared/utils'
 
 const Chats = () => {
   const { user, isLoading } = useCurrentUser()
@@ -17,22 +19,6 @@ const Chats = () => {
 
   if (chats.length === 0) {
     return <h3>{t('chats:noChats')}</h3>
-  }
-
-  const getChatLink = (chat: Course) => {
-    // TODO: make this function better
-
-    console.log('getChatLink', window.location.hostname)
-
-    if (window.location.hostname === 'localhost') {
-      return `http://localhost:3000/${chat.courseId}`
-    }
-
-    if (window.location.hostname.includes('toska-staging')) {
-      return `https://toska-staging.cs.helsinki.fi/gptwrapper/${chat.courseId}`
-    }
-
-    return `https://curre.helsinki.fi/chat/${chat.courseId}`
   }
 
   return (
@@ -79,9 +65,12 @@ const Chats = () => {
                     <Typography>{formatDate(chat.activityPeriod)}</Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <a href={getChatLink(chat)}>
-                      <Typography variant="h6">{getChatLink(chat)}</Typography>
-                    </a>
+                    <MuiLink component={RouterLink} to={`/${chat.id}`}>
+                      <Typography variant="h6">{getLanguageValue(chat.name, language)}</Typography>
+                    </MuiLink>
+                    <MuiLink component={RouterLink} to={`/v2/${chat.id}`}>
+                      <Typography variant="h6">{getLanguageValue(chat.name, language)} (v2 UI)</Typography>
+                    </MuiLink>
                   </TableCell>
                 </TableRow>
               ))}

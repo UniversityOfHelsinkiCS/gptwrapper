@@ -31,7 +31,7 @@ const NavBar = () => {
 
   if (!user) return null
 
-  const isV2 = window.location.pathname.endsWith('/v2')
+  const isV2 = window.location.pathname.startsWith('/v2') || window.location.pathname.startsWith('/chat/v2')
 
   return (
     <AppBar elevation={0} position="sticky" sx={styles.appbar} color="transparent">
@@ -44,15 +44,13 @@ const NavBar = () => {
             </Box>
           </MuiLink>
           <Box>
-            {
-              !isV2 && (
-                <Link to="/v2" style={{ textDecoration: 'none' }}>
-                  <Button>
-                    <GradeOutlined sx={styles.icon} /> {t('tryNew')}
-                  </Button>
-                </Link>
-              )
-            }
+            {!isV2 && (
+              <Link to="/v2" style={{ textDecoration: 'none' }}>
+                <Button>
+                  <GradeOutlined sx={styles.icon} /> {t('tryNew')}
+                </Button>
+              </Link>
+            )}
 
             {user.enrolledCourses.length > 0 && (
               <Link to="/chats" style={{ textDecoration: 'none' }}>

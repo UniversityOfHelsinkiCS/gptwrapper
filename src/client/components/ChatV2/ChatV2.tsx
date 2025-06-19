@@ -31,7 +31,6 @@ import { AppContext } from '../../util/AppContext'
 import { ChatInfo } from './generics/ChatInfo'
 import { getLanguageValue } from '../../../shared/utils'
 import RagSelector from './RagSelector'
-import { useRagIndex } from '../../hooks/useRagIndex'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -60,7 +59,6 @@ export const ChatV2 = () => {
     value: DEFAULT_MODEL_TEMPERATURE,
   })
 
-  const [message, setMessage] = useLocalStorageState<{ content: string }>(`${localStoragePrefix}-chat-current`, { content: '' })
   const [messages, setMessages] = useLocalStorageState<Message[]>(`${localStoragePrefix}-chat-messages`, [])
   const [prevResponse, setPrevResponse] = useLocalStorageState<{ id: string }>(`${localStoragePrefix}-prev-response`, { id: '' })
   const [fileSearchResult, setFileSearchResult] = useLocalStorageState<FileSearchResult>('last-file-search', null)
@@ -215,7 +213,6 @@ export const ChatV2 = () => {
     })
 
     setMessages(newMessages)
-    setMessage({ content: '' })
     setPrevResponse({ id: '' })
     setCompletion('')
     setIsCompletionDone(false)
@@ -260,7 +257,6 @@ export const ChatV2 = () => {
 
   const handleReset = () => {
     setMessages([])
-    setMessage({ content: '' })
     setPrevResponse({ id: '' })
     setCompletion('')
     setIsCompletionDone(true)
@@ -280,7 +276,6 @@ export const ChatV2 = () => {
 
   // const handleCancel = () => {
   //   setMessages(messages.slice(0, -1))
-  //   setMessage({ content: '' })
   //   setCompletion('')
   //   setIsCompletionDone(true)
   //   fileInputRef.current.value = null
@@ -516,7 +511,6 @@ export const ChatV2 = () => {
             onSubmit={(message) => {
               if (message.trim()) {
                 handleSubmit(message)
-                setMessage({ content: '' })
               }
             }}
           />
