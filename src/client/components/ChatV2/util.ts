@@ -85,9 +85,15 @@ export const preprocessMath = (content: string): string => {
     .replace(/\\\[([\s\S]*?)\\\]/g, (match, innerContent) => {
       return `$$${innerContent.trim()}$$`
     })
+
     // Convert Latex inline math \(...\) -> Katex display math `$$...$$`
     .replace(/\\\(([\s\S]*?)\\\)/g, (match, innerContent) => {
       return `$$${innerContent.trim()}$$`
+    })
+
+    // Convert text mode parentheses
+    .replace(/\\text\{([^}]*\([^}]*\)[^}]*)\}/g, (match, innerContent) => {
+      return `\\text{${innerContent.replace(/\(/g, '\\(').replace(/\)/g, '\\)')}}`
     })
 
     // Support for matrix environments
