@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Box, Paper, Typography, Button, Modal, Checkbox, FormControlLabel, Input, Alert, Tooltip, Container } from '@mui/material'
+import { Box, Paper, Typography, Button, Modal, Checkbox, FormControlLabel, Input, Alert, Tooltip, Container, Skeleton } from '@mui/material'
 import { OpenInNew, Edit } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
@@ -47,13 +47,13 @@ const Course = () => {
     setMandatory(false)
   }
 
-  const { prompts, isLoading } = usePrompts(id as string)
+  const { prompts, isLoading: promptsLoading } = usePrompts(id as string)
   const { course, isLoading: courseLoading } = useCourse(id as string)
-  const { user, isLoading: isUserLoading } = useCurrentUser()
+  const { user, isLoading: userLoading } = useCurrentUser()
 
   const studentLink = `${window.location.origin}${PUBLIC_URL}/${course?.courseId}`
 
-  if (isLoading || courseLoading || !course || isUserLoading || !user) return null
+  if (userLoading || !user || courseLoading) return null
 
   const amongResponsibles = course.responsibilities ? course.responsibilities.some((r) => r.user.id === user.id) : false
 
@@ -65,7 +65,7 @@ const Course = () => {
     )
   }
 
-  const mandatoryPromptId = prompts.find((prompt) => prompt.mandatory)?.id
+  const mandatoryPromptId = prompts?.find((prompt) => prompt.mandatory)?.id
 
   const handleSave = () => {
     try {
@@ -262,9 +262,11 @@ const Course = () => {
         </Paper>
       )}
 
-      {prompts.map((prompt) => (
-        <Prompt key={prompt.id} prompt={prompt} handleDelete={handleDelete} mandatoryPromptId={mandatoryPromptId} />
-      ))}
+      {promptsLoading ? (
+        <Skeleton />
+      ) : (
+        prompts.map((prompt) => <Prompt key={prompt.id} prompt={prompt} handleDelete={handleDelete} mandatoryPromptId={mandatoryPromptId} />)
+      )}
 
       <Paper
         variant="outlined"
