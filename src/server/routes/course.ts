@@ -1,5 +1,5 @@
 import express from 'express'
-import { Op, Sequelize } from 'sequelize'
+import { Includeable, Op, Sequelize } from 'sequelize'
 
 import type { ActivityPeriod, RequestWithUser } from '../types'
 import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, User, Responsibility, Discussion } from '../db/models'
@@ -97,7 +97,8 @@ courseRouter.get('/:id', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
 
-  const include = [
+  // @todo Optimize this shit. We should have multiple endpoints instead of this one mega endpoint
+  const include: Includeable[] = [
     {
       model: Responsibility,
       as: 'responsibilities',

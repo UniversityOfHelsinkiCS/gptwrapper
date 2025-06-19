@@ -1,24 +1,24 @@
-import { useState } from 'react'
-import { Box, Paper, Typography, Button, Modal, Checkbox, FormControlLabel, Input, Alert, Tooltip, Container, Skeleton } from '@mui/material'
-import { OpenInNew, Edit } from '@mui/icons-material'
+import { Edit, OpenInNew } from '@mui/icons-material'
+import { Alert, Box, Button, Checkbox, Container, FormControlLabel, Input, Modal, Paper, Skeleton, Tooltip, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams, Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
 import { PUBLIC_URL } from '../../../../config'
-import { Message as MessageType } from '../../../types'
-import SystemMessage from '../../Chat/SystemMessage'
-import Conversation from '../../Chat/Conversation'
-import usePrompts from '../../../hooks/usePrompts'
 import useCourse from '../../../hooks/useCourse'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import { useCreatePromptMutation, useDeletePromptMutation } from '../../../hooks/usePromptMutation'
+import usePrompts from '../../../hooks/usePrompts'
+import type { Message as MessageType } from '../../../types'
+import Conversation from '../../Chat/Conversation'
+import SystemMessage from '../../Chat/SystemMessage'
+import Rag from '../../Rag/Rag'
 import { formatDate, getCurTypeLabel } from '../util'
-import Prompt from './Prompt'
 import EditCourseForm from './EditCourseForm'
 import MaxTokenUsageStudents from './MaxTokenUsageStudents'
+import Prompt from './Prompt'
 import Stats from './Stats'
-import Rag from '../../Rag/Rag'
 
 const Course = () => {
   const [name, setName] = useState('')
@@ -262,7 +262,7 @@ const Course = () => {
         </Paper>
       )}
 
-      {promptsLoading ? (
+      {promptsLoading ? ( // @todo separate prompts into its own component, like <Rag />
         <Skeleton />
       ) : (
         prompts.map((prompt) => <Prompt key={prompt.id} prompt={prompt} handleDelete={handleDelete} mandatoryPromptId={mandatoryPromptId} />)
