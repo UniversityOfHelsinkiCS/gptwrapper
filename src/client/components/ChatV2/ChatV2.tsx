@@ -34,7 +34,6 @@ import RagSelector from './RagSelector'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
-  console.log('Course = ', courseId)
   const { course } = useCourse(courseId)
 
   const { ragIndices } = useRagIndices(courseId)
@@ -43,7 +42,7 @@ export const ChatV2 = () => {
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
 
   // local storage states
-  const localStoragePrefix = 'general'
+  const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
   const [activeModel, setActiveModel] = useLocalStorageState<{ name: string }>('model-v2', {
     name: DEFAULT_MODEL,
   })
@@ -61,7 +60,7 @@ export const ChatV2 = () => {
 
   const [messages, setMessages] = useLocalStorageState<Message[]>(`${localStoragePrefix}-chat-messages`, [])
   const [prevResponse, setPrevResponse] = useLocalStorageState<{ id: string }>(`${localStoragePrefix}-prev-response`, { id: '' })
-  const [fileSearchResult, setFileSearchResult] = useLocalStorageState<FileSearchResult>('last-file-search', null)
+  const [fileSearchResult, setFileSearchResult] = useLocalStorageState<FileSearchResult>(`${localStoragePrefix}-last-file-search`, null)
 
   const [isFileSearching, setIsFileSearching] = useState<boolean>(false)
 

@@ -3,7 +3,6 @@ import apiClient from '../util/apiClient'
 import { RagIndexAttributes } from '../../shared/types'
 
 export const useRagIndex = (ragIndexId: number) => {
-  console.log(ragIndexId)
   const { data: ragIndex, ...rest } = useQuery<RagIndexAttributes>({
     queryKey: ['ragIndices', ragIndexId],
     queryFn: async () => {
