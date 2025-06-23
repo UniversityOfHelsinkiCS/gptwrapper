@@ -1,6 +1,6 @@
-import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
+import { type CreationOptional, DataTypes, type InferAttributes, type InferCreationAttributes, Model } from 'sequelize'
 
-import { Message } from '../../types'
+import type { Message } from '../../types'
 import { sequelize } from '../connection'
 
 class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prompt>> {
@@ -8,7 +8,13 @@ class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prom
 
   declare name: string
 
-  declare chatInstanceId: string
+  declare type: 'CHAT_INSTANCE' | 'PERSONAL' | 'RAG_INDEX'
+
+  declare chatInstanceId?: string
+
+  declare userId?: string
+
+  declare ragIndexId?: number
 
   declare systemMessage: string
 
@@ -31,9 +37,21 @@ Prompt.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    type: {
+      type: DataTypes.ENUM('CHAT_INSTANCE', 'PERSONAL', 'RAG_INDEX'),
+      allowNull: false,
+    },
     chatInstanceId: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
+    },
+    userId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    ragIndexId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
     systemMessage: {
       type: DataTypes.TEXT,
