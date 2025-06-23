@@ -1,21 +1,19 @@
 import express from 'express'
 import multer from 'multer'
-
-import type { RequestWithUser } from '../types'
-import { isError } from '../util/parser'
-import { calculateUsage, incrementUsage, checkUsage, checkCourseUsage, incrementCourseUsage } from '../services/chatInstances/usage'
-import { getCompletionEvents, streamCompletion } from '../util/azure/client'
-import { getMessageContext, getModelContextLimit, getCourseModel, getAllowedModels } from '../util/util'
-import getEncoding from '../util/tiktoken'
-import logger from '../util/logger'
-import { inProduction, DEFAULT_TOKEN_LIMIT, FREE_MODEL } from '../../config'
-import { pdfToText } from '../util/pdfToText'
-import { Discussion, ChatInstance, RagIndex } from '../db/models'
-
-import { ResponsesClient } from '../util/azure/ResponsesAPI'
 import { z } from 'zod/v4'
-import { DEFAULT_RAG_SYSTEM_PROMPT } from '../util/config'
+import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction } from '../../config'
+import { ChatInstance, Discussion, RagIndex } from '../db/models'
+import { calculateUsage, checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../services/chatInstances/usage'
+import type { RequestWithUser } from '../types'
+import { getCompletionEvents, streamCompletion } from '../util/azure/client'
 import { FileSearchResultsStore } from '../util/azure/fileSearchResultsStore'
+import { ResponsesClient } from '../util/azure/ResponsesAPI'
+import { DEFAULT_RAG_SYSTEM_PROMPT } from '../util/config'
+import logger from '../util/logger'
+import { isError } from '../util/parser'
+import { pdfToText } from '../util/pdfToText'
+import getEncoding from '../util/tiktoken'
+import { getAllowedModels, getCourseModel, getMessageContext, getModelContextLimit } from '../util/util'
 
 const openaiRouter = express.Router()
 
@@ -153,7 +151,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   }
 
   // Check rag index
-  let vectorStoreId: string | undefined = undefined
+  let vectorStoreId: string | undefined
   let instructions: string | undefined = options.assistantInstructions
 
   if (ragIndexId) {
@@ -163,7 +161,13 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
       return
     }
 
-    const ragIndex = await RagIndex.findByPk(ragIndexId, { include: { model: ChatInstance, as: 'chatInstances', where: courseId ? { courseId } : {} } })
+    const ragIndex = await RagIndex.findByPk(ragIndexId, {
+      include: {
+        model: ChatInstance,
+        as: 'chatInstances',
+        where: courseId ? { courseId } : {},
+      },
+    })
     if (ragIndex) {
       vectorStoreId = ragIndex.metadata.azureVectorStoreId
       instructions = `${instructions} ${ragIndex.metadata.instructions ?? DEFAULT_RAG_SYSTEM_PROMPT}`
@@ -249,7 +253,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
 
 openaiRouter.get('/fileSearchResults/:fileSearchId', async (req, res) => {
   const { fileSearchId } = req.params
-  const { user } = req
+  const { user } = req as unknown as RequestWithUser
 
   if (!user.id) {
     res.status(401).send('Unauthorized')

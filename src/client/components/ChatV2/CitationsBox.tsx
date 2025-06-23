@@ -1,13 +1,11 @@
 import { Box, Paper, Typography } from '@mui/material'
-import type { FileSearchCompletedData } from '../../../shared/types'
+import type { FileSearchCompletedData, FileSearchResultData } from '../../../shared/types'
 import type { Message } from '../../types'
 import Markdown from 'react-markdown'
 import { useRagIndex } from '../../hooks/useRagIndex'
 import { useFileSearchResults } from './api'
 
-type FileItem = FileSearchCompletedData['results'][number]
-
-const FileItemComponent = ({ fileItem }: { fileItem: FileItem }) => {
+const FileItemComponent = ({ fileItem }: { fileItem: FileSearchResultData }) => {
   return (
     <Paper sx={{ p: 1, mt: 2 }}>
       <Typography variant="body2" color="textSecondary">
