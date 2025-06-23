@@ -46,9 +46,11 @@ export type FileCitation = {
   type: 'file_citation'
 }
 
-export type FileSearchResult = ResponseFileSearchToolCall & {
+export type FileSearchCompletedData = Omit<ResponseFileSearchToolCall, 'results'> & {
   ragIndexId: number
 }
+
+export type FileSearchResultData = ResponseFileSearchToolCall['results'][number]
 
 export type ResponseStreamEventData =
   | {
@@ -68,7 +70,7 @@ export type ResponseStreamEventData =
     }
   | {
       type: 'fileSearchDone'
-      fileSearch: FileSearchResult
+      fileSearch: FileSearchCompletedData
     }
   | {
       type: 'fileSearchError'

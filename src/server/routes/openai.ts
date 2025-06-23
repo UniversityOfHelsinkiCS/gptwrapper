@@ -15,6 +15,7 @@ import { Discussion, ChatInstance, RagIndex } from '../db/models'
 import { ResponsesClient } from '../util/azure/ResponsesAPI'
 import { z } from 'zod/v4'
 import { DEFAULT_RAG_SYSTEM_PROMPT } from '../util/config'
+import { FileSearchResultsStore } from '../util/azure/fileSearchResultsStore'
 
 const openaiRouter = express.Router()
 
@@ -178,6 +179,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     vectorStoreId,
     instructions,
     temperature: options.modelTemperature,
+    user,
   })
 
   // TODO: when we get rid of CCV1, we might want to start sending only the last message to this endpoint
@@ -243,6 +245,25 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
 
   res.end()
   return
+})
+
+openaiRouter.get('/fileSearchResults/:fileSearchId', async (req, res) => {
+  const { fileSearchId } = req.params
+  const { user } = req
+
+  if (!user.id) {
+    res.status(401).send('Unauthorized')
+    return
+  }
+
+  const results = await FileSearchResultsStore.getResults(fileSearchId, user)
+
+  if (!results) {
+    res.status(404).send('File search results not found')
+    return
+  }
+
+  res.json(results)
 })
 
 openaiRouter.post('/stream', upload.single('file'), async (r, res) => {

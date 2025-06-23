@@ -6,7 +6,7 @@ import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { validModels, DEFAULT_MODEL, FREE_MODEL, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE, ALLOWED_FILE_TYPES } from '../../../config'
 import useInfoTexts from '../../hooks/useInfoTexts'
 import type { Message } from '../../types'
-import type { FileSearchResult, ResponseStreamEventData } from '../../../shared/types'
+import type { FileSearchCompletedData, FileSearchResultData, ResponseStreamEventData } from '../../../shared/types'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
@@ -60,7 +60,7 @@ export const ChatV2 = () => {
 
   const [messages, setMessages] = useLocalStorageState<Message[]>(`${localStoragePrefix}-chat-messages`, [])
   const [prevResponse, setPrevResponse] = useLocalStorageState<{ id: string }>(`${localStoragePrefix}-prev-response`, { id: '' })
-  const [fileSearchResult, setFileSearchResult] = useLocalStorageState<FileSearchResult>(`${localStoragePrefix}-last-file-search`, null)
+  const [fileSearch, setFileSearch] = useLocalStorageState<FileSearchCompletedData>(`${localStoragePrefix}-last-file-search`, null)
 
   const [isFileSearching, setIsFileSearching] = useState<boolean>(false)
 
@@ -103,7 +103,7 @@ export const ChatV2 = () => {
       const reader = stream.getReader()
 
       let content = ''
-      let fileSearchResult: FileSearchResult
+      let fileSearch: FileSearchCompletedData
 
       while (true) {
         const { value, done } = await reader.read()
@@ -147,8 +147,8 @@ export const ChatV2 = () => {
               break
 
             case 'fileSearchDone':
-              fileSearchResult = parsedChunk.fileSearch
-              setFileSearchResult(parsedChunk.fileSearch)
+              fileSearch = parsedChunk.fileSearch
+              setFileSearch(parsedChunk.fileSearch)
               setIsFileSearching(false)
               break
 
@@ -178,7 +178,7 @@ export const ChatV2 = () => {
         }
       }
 
-      setMessages((prev: Message[]) => prev.concat({ role: 'assistant', content, fileSearchResult }))
+      setMessages((prev: Message[]) => prev.concat({ role: 'assistant', content, fileSearchResult: fileSearch }))
     } catch (err: any) {
       handleCompletionStreamError(err, fileName)
     } finally {
@@ -217,7 +217,7 @@ export const ChatV2 = () => {
     setIsCompletionDone(false)
     fileInputRef.current.value = null
     setFileName('')
-    setFileSearchResult(null)
+    setFileSearch(null)
     setIsFileSearching(false)
     setStreamController(new AbortController())
     setRetryTimeout(() => {
@@ -261,7 +261,7 @@ export const ChatV2 = () => {
     setIsCompletionDone(true)
     fileInputRef.current.value = null
     setFileName('')
-    setFileSearchResult(null)
+    setFileSearch(null)
     setStreamController(undefined)
     setTokenUsageWarning('')
     setTokenWarningVisible(false)
@@ -396,7 +396,7 @@ export const ChatV2 = () => {
     }
   }
 
-  const showFileSearch = isFileSearching || messages.some((m) => m.fileSearchResult) || fileSearchResult
+  const showFileSearch = isFileSearching || messages.some((m) => m.fileSearchResult) || fileSearch
   const showRagSelector = ragIndices?.length > 0
 
   return (
@@ -474,7 +474,7 @@ export const ChatV2 = () => {
             messages={messages}
             completion={completion}
             isCompletionDone={isCompletionDone}
-            fileSearchResult={fileSearchResult}
+            fileSearchResult={fileSearch}
             hasRagIndex={!!ragIndex}
           />
         </Box>
@@ -525,7 +525,7 @@ export const ChatV2 = () => {
           minWidth: 300,
         }}
       >
-        <Box>{showFileSearch && <FileSearchInfo isFileSearching={isFileSearching} fileSearchResult={fileSearchResult} messages={messages} />}</Box>
+        <Box>{showFileSearch && <FileSearchInfo isFileSearching={isFileSearching} fileSearchResult={fileSearch} messages={messages} />}</Box>
       </Box>
 
       {/* Modals --------------------------------------*/}
@@ -555,7 +555,7 @@ const FileSearchInfo = ({
   messages,
 }: {
   isFileSearching: boolean
-  fileSearchResult: FileSearchResult
+  fileSearchResult: FileSearchCompletedData
   messages: Message[]
 }) => {
   return (

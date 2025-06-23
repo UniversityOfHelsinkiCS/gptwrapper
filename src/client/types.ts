@@ -1,4 +1,4 @@
-import type { FileSearchResult } from '../shared/types'
+import type { FileSearchCompletedData } from '../shared/types'
 
 export type SetState<T> = React.Dispatch<React.SetStateAction<T>>
 
@@ -8,7 +8,7 @@ export interface Message {
   role: Role
   content: string
   attachements?: string
-  fileSearchResult?: FileSearchResult
+  fileSearchResult?: FileSearchCompletedData
 }
 
 interface Term {

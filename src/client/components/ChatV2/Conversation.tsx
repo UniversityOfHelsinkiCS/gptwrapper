@@ -1,16 +1,16 @@
-import { Box, Typography } from '@mui/material'
-import { useParams } from 'react-router-dom'
-import { ActivityPeriod, Message } from '../../types'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import { FileSearchResult } from '../../../shared/types'
-import { ConversationSplash } from './generics/ConversationSplash'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
+import { Box, Typography } from '@mui/material'
+import ReactMarkdown from 'react-markdown'
+import { useParams } from 'react-router-dom'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
-import { LoadingMessage } from './generics/LoadingMessage'
-import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
+import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import type { FileSearchCompletedData } from '../../../shared/types'
+import type { ActivityPeriod, Message } from '../../types'
+import { ConversationSplash } from './generics/ConversationSplash'
+import { LoadingMessage } from './generics/LoadingMessage'
 import { preprocessMath } from './util'
 import 'katex/dist/katex.min.css'
 import 'katex/dist/contrib/mhchem'
@@ -26,7 +26,13 @@ const UserMessage = ({
   isLastAssistantNode: boolean
   expandedNodeHeight: number
 }) => (
-  <Box className={`message-role-user`} sx={{ minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto', alignSelf: 'flex-end' }}>
+  <Box
+    className={`message-role-user`}
+    sx={{
+      minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
+      alignSelf: 'flex-end',
+    }}
+  >
     <Box
       sx={{
         backgroundColor: '#efefef',
@@ -41,7 +47,16 @@ const UserMessage = ({
       {content}
 
       {attachements && (
-        <Typography variant="body2" sx={{ display: 'flex', gap: 0.5, alignItems: 'center', opacity: 0.7, marginTop: '1rem' }}>
+        <Typography
+          variant="body2"
+          sx={{
+            display: 'flex',
+            gap: 0.5,
+            alignItems: 'center',
+            opacity: 0.7,
+            marginTop: '1rem',
+          }}
+        >
           <AttachFileIcon fontSize="small" />
           {attachements}
         </Typography>
@@ -88,7 +103,14 @@ const AssistantMessage = ({
 
   return (
     <Box className={`message-role-assistant`} sx={{ minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto' }}>
-      <Box sx={{ padding: '0 1.5rem', borderRadius: '5px', overflowX: 'auto', borderLeft: hasAnnotations ? '5px solid #3f51b5' : 'none' }}>
+      <Box
+        sx={{
+          padding: '0 1.5rem',
+          borderRadius: '5px',
+          overflowX: 'auto',
+          borderLeft: hasAnnotations ? '5px solid #3f51b5' : 'none',
+        }}
+      >
         <ReactMarkdown
           remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
           rehypePlugins={[[rehypeKatex, katexOptions]]}
@@ -98,8 +120,23 @@ const AssistantMessage = ({
               const match = /language-(\w+)/.exec(className || '')
               const language = match?.[1] || 'plaintext' // safe fallback
               return match ? (
-                <Box sx={{ borderRadius: '0.5rem', overflowX: 'auto', maxWidth: '100%' }}>
-                  <Typography sx={{ opacity: 1, fontSize: '0.8rem', padding: '0.4rem 0.8rem', backgroundColor: '#efefef' }}>{language}</Typography>
+                <Box
+                  sx={{
+                    borderRadius: '0.5rem',
+                    overflowX: 'auto',
+                    maxWidth: '100%',
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      opacity: 1,
+                      fontSize: '0.8rem',
+                      padding: '0.4rem 0.8rem',
+                      backgroundColor: '#efefef',
+                    }}
+                  >
+                    {language}
+                  </Typography>
                   {/* @ts-ignore */}
                   <SyntaxHighlighter
                     {...rest}
@@ -187,10 +224,20 @@ export const Conversation = ({
   messages: Message[]
   completion: string
   isCompletionDone: boolean
-  fileSearchResult: FileSearchResult
+  fileSearchResult: FileSearchCompletedData
   hasRagIndex: boolean
 }) => (
-  <Box style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '2.5rem', padding: '1rem 0', flex: 1 }} ref={conversationRef}>
+  <Box
+    style={{
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '2.5rem',
+      padding: '1rem 0',
+      flex: 1,
+    }}
+    ref={conversationRef}
+  >
     {messages.length === 0 && <ConversationSplash courseName={courseName} courseDate={courseDate} />}
     {messages.map((message, idx) => {
       const isLastAssistantNode = idx === messages.length - 1 && message.role === 'assistant'

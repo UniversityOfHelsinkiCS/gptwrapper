@@ -1,24 +1,17 @@
 import type { Tiktoken } from '@dqbd/tiktoken'
 import type { Response } from 'express'
-import { z } from 'zod/v4'
-
-import { AZURE_RESOURCE, AZURE_API_KEY } from '../config'
-import { validModels } from '../../../config'
-import logger from '../logger'
-
-import type { APIError } from '../../types'
 import { AzureOpenAI } from 'openai'
-
-// import { EventStream } from '@azure/openai'
-import type { Stream } from 'openai/streaming'
 import type { FileSearchTool, ResponseIncludable, ResponseInput, ResponseItemsPage, ResponseStreamEvent } from 'openai/resources/responses/responses'
-
-import { createFileSearchTool } from './util'
-
-import type { FileCitation, ResponseStreamEventData } from '../../../shared/types'
-
+import type { Stream } from 'openai/streaming'
+import { z } from 'zod/v4'
+import { validModels } from '../../../config'
+import type { ResponseStreamEventData } from '../../../shared/types'
+import type { APIError, User } from '../../types'
+import { AZURE_API_KEY, AZURE_RESOURCE } from '../config'
+import logger from '../logger'
 import { createMockStream } from './mocks/MockStream'
-import type { MockResponseStreamEvent } from './mocks/mockFunctions'
+import { createFileSearchTool } from './util'
+import { FileSearchResultsStore } from './fileSearchResultsStore'
 
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
@@ -44,8 +37,21 @@ export class ResponsesClient {
   instructions: string
   temperature: number
   tools: FileSearchTool[]
+  user: User
 
-  constructor({ model, temperature, vectorStoreId, instructions }: { model: string; temperature: number; vectorStoreId?: string; instructions?: string }) {
+  constructor({
+    model,
+    temperature,
+    vectorStoreId,
+    instructions,
+    user,
+  }: {
+    model: string
+    temperature: number
+    vectorStoreId?: string
+    instructions?: string
+    user: User
+  }) {
     const selectedModel = validModels.find((m) => m.name === model)?.deployment
 
     if (!selectedModel) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
@@ -62,6 +68,7 @@ export class ResponsesClient {
     this.temperature = temperature
     this.instructions = instructions
     this.tools = fileSearchTool
+    this.user = user
   }
 
   async createResponse({
@@ -136,10 +143,18 @@ export class ResponsesClient {
 
         case 'response.output_item.done': {
           if (event.item.type === 'file_search_call') {
-            this.write(
+            await FileSearchResultsStore.saveResults(event.item.id, event.item.results, this.user)
+
+            await this.write(
               {
                 type: 'fileSearchDone',
-                fileSearch: { ...event.item, ragIndexId },
+                fileSearch: {
+                  id: event.item.id,
+                  queries: event.item.queries,
+                  status: event.item.status,
+                  type: event.item.type,
+                  ragIndexId,
+                },
               },
               res,
             )
@@ -147,17 +162,6 @@ export class ResponsesClient {
 
           break
         }
-
-        // case 'response.output_text.annotation.added':
-        //   console.log(event)
-        //   this.write(
-        //     {
-        //       type: 'annotation',
-        //       annotation: event.annotation as FileCitation,
-        //     },
-        //     res
-        //   )
-        //   break
 
         case 'response.file_search_call.in_progress':
           this.write(
@@ -188,7 +192,7 @@ export class ResponsesClient {
 
   private async write(data: ResponseStreamEventData, res: Response) {
     await new Promise((resolve) => {
-      const success = res.write(JSON.stringify(data) + '\n', (err) => {
+      const success = res.write(`${JSON.stringify(data)}\n`, (err) => {
         if (err) {
           logger.error(err)
         }

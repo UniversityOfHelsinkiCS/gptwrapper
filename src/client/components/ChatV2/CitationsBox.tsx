@@ -1,10 +1,11 @@
 import { Box, Paper, Typography } from '@mui/material'
-import type { FileSearchResult } from '../../../shared/types'
+import type { FileSearchCompletedData } from '../../../shared/types'
 import type { Message } from '../../types'
 import Markdown from 'react-markdown'
 import { useRagIndex } from '../../hooks/useRagIndex'
+import { useFileSearchResults } from './api'
 
-type FileItem = FileSearchResult['results'][number]
+type FileItem = FileSearchCompletedData['results'][number]
 
 const FileItemComponent = ({ fileItem }: { fileItem: FileItem }) => {
   return (
@@ -17,8 +18,9 @@ const FileItemComponent = ({ fileItem }: { fileItem: FileItem }) => {
   )
 }
 
-const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileSearchResult }) => {
+const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileSearchCompletedData }) => {
   const { ragIndex, isSuccess } = useRagIndex(fileSearchResult.ragIndexId)
+  const { results, isSuccess: isResultsSuccess } = useFileSearchResults(fileSearchResult.id)
 
   return (
     <Box sx={{ mt: 1 }}>
@@ -32,14 +34,12 @@ const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileS
         ))}
       </Box>
 
-      {fileSearchResult.results.map((result, idx) => (
-        <FileItemComponent key={idx} fileItem={result} />
-      ))}
+      {isResultsSuccess && results.map((result, idx) => <FileItemComponent key={idx} fileItem={result} />)}
     </Box>
   )
 }
 
-export const CitationsBox = ({ messages, fileSearchResult }: { messages: Message[]; fileSearchResult?: FileSearchResult }) => {
+export const CitationsBox = ({ messages, fileSearchResult }: { messages: Message[]; fileSearchResult?: FileSearchCompletedData }) => {
   const messageCitations = [...messages.map((m) => m.fileSearchResult).filter(Boolean)]
   if (fileSearchResult) {
     messageCitations.push(fileSearchResult)

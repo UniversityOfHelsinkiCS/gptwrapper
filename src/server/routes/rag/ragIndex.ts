@@ -210,7 +210,7 @@ const indexUploadDirMiddleware = async (req: Request, _res: Response, next: Next
     await stat(uploadPath)
     console.log(`RAG upload dir exists: ${uploadPath}`)
   } catch (error) {
-    console.warn(`RAG upload dir not found, creating ${uploadPath} --- ${error}`)
+    console.warn(`RAG upload dir not found, creating ${uploadPath}`)
     await mkdir(uploadPath, { recursive: true })
   }
   next()
