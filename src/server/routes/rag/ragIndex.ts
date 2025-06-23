@@ -107,6 +107,7 @@ ragIndexRouter.get('/files/:fileId', async (req, res) => {
 
   const ragFile = await RagFile.findOne({
     where: { id: fileId, ragIndexId: ragIndex.id },
+    include: { model: RagIndex, as: 'ragIndex' },
   })
 
   if (!ragFile) {

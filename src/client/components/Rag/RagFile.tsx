@@ -36,7 +36,7 @@ export const RagFile: React.FC = () => {
       </Link>
       <Typography variant="body1">RAG file</Typography>
       <Typography variant="h3">
-        {ragFile.ragIndex.metadata.name} / {ragFile.filename}
+        {ragFile.ragIndex.metadata?.name} / {ragFile.filename}
       </Typography>
       <Button
         variant="text"
