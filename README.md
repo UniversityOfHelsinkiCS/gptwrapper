@@ -15,7 +15,7 @@ UI and access management wrapper for Azure OpenAI service.
 
 In browser console, run
 ```
-window.toggleDevtools()
+toggleDevtools()
 ```
 
 ### Troubleshooting
