@@ -9,6 +9,7 @@ import initializeSentry from './util/sentry'
 import initializeI18n from './util/i18n'
 import queryClient from './util/queryClient'
 import { inDevelopment } from '../config'
+import useCurrentUser from './hooks/useCurrentUser'
 
 const ReactQueryDevtoolsProduction = inDevelopment
   ? ReactQueryDevtools
@@ -23,6 +24,7 @@ initializeI18n()
 
 const Main = () => {
   const [showDevtools, setShowDevtools] = React.useState(false)
+  const { user } = useCurrentUser()
 
   React.useEffect(() => {
     // @ts-expect-error
@@ -36,6 +38,12 @@ const Main = () => {
       console.log(`%cLogged in as ${adminLoggedInAs}`, 'color: orange')
     }
   }, [])
+
+  React.useEffect(() => {
+    if (user?.isAdmin) {
+      setShowDevtools(true)
+    }
+  }, [user?.isAdmin])
 
   return (
     <QueryClientProvider client={queryClient}>
