@@ -25,11 +25,6 @@ export const EMBED_DIM = process.env.EMBED_DIM ? Number(process.env.EMBED_DIM) :
 
 export const validModels = [
   {
-    name: 'gpt-4',
-    deployment: process.env.GPT_4 || 'curredev4',
-    context: 128_000,
-  },
-  {
     name: 'gpt-4o',
     deployment: process.env.GPT_4O || '',
     context: 128_000,
