@@ -1,14 +1,17 @@
 import { type CreationOptional, DataTypes, type InferAttributes, type InferCreationAttributes, Model } from 'sequelize'
 
-import type { Message } from '../../types'
+import type { CustomMessage } from '../../types'
 import { sequelize } from '../connection'
+
+export const PromptTypeValues = ['CHAT_INSTANCE', 'PERSONAL', 'RAG_INDEX'] as const
+export type PromptType = (typeof PromptTypeValues)[number]
 
 class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prompt>> {
   declare id: CreationOptional<string>
 
   declare name: string
 
-  declare type: 'CHAT_INSTANCE' | 'PERSONAL' | 'RAG_INDEX'
+  declare type: PromptType
 
   declare chatInstanceId?: string
 
@@ -18,7 +21,7 @@ class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prom
 
   declare systemMessage: string
 
-  declare messages: CreationOptional<Message[]>
+  declare messages: CreationOptional<CustomMessage[]>
 
   declare hidden: CreationOptional<boolean>
 
@@ -38,7 +41,7 @@ Prompt.init(
       allowNull: false,
     },
     type: {
-      type: DataTypes.ENUM('CHAT_INSTANCE', 'PERSONAL', 'RAG_INDEX'),
+      type: DataTypes.ENUM(...PromptTypeValues),
       allowNull: false,
     },
     chatInstanceId: {

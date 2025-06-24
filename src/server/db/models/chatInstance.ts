@@ -1,9 +1,10 @@
-import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, NonAttribute } from 'sequelize'
+import { type CreationOptional, DataTypes, type InferAttributes, type InferCreationAttributes, Model, type NonAttribute } from 'sequelize'
 
-import { ActivityPeriod, CourseUnit, Locales } from '../../types'
+import type { ActivityPeriod, CourseUnit, Locales } from '../../types'
 import { sequelize } from '../connection'
-import type Responsibility from './responsibilities'
+import type Prompt from './prompt'
 import type RagIndex from './ragIndex'
+import type Responsibility from './responsibilities'
 
 class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAttributes<ChatInstance>> {
   declare id: CreationOptional<string>
@@ -38,6 +39,8 @@ class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAtt
   declare responsibilities?: NonAttribute<Responsibility[]>
 
   declare ragIndices?: NonAttribute<RagIndex[]>
+
+  declare prompts?: NonAttribute<Prompt[]>
 }
 
 ChatInstance.init(

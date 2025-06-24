@@ -1,18 +1,10 @@
 import express from 'express'
-
-import { Message, RequestWithUser } from '../types'
-import { Prompt, ChatInstance, Responsibility } from '../db/models'
+import z from 'zod/v4'
+import { ChatInstance, Prompt, RagIndex, Responsibility } from '../db/models'
+import type { RequestWithUser, User } from '../types'
+import { ApplicationError } from '../util/ApplicationError'
 
 const promptRouter = express.Router()
-
-interface NewPromptData {
-  chatInstanceId: string
-  name: string
-  systemMessage: string
-  messages: Message[]
-  hidden: boolean
-  mandatory: boolean
-}
 
 promptRouter.get('/:courseId', async (req, res) => {
   const { courseId } = req.params
@@ -22,81 +14,179 @@ promptRouter.get('/:courseId', async (req, res) => {
       courseId,
     },
     attributes: ['id'],
+    include: {
+      model: Prompt,
+      as: 'prompts',
+      order: [['name', 'ASC']],
+    },
   })
 
-  const prompts = await Prompt.findAll({
-    where: { chatInstanceId: chatInstance?.id },
-    order: [['name', 'ASC']],
-  })
+  const prompts = chatInstance?.prompts || []
 
   res.send(prompts)
   return
 })
 
-const authorizeUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const request = req as RequestWithUser
-  const data = req.body as NewPromptData
-  const { user } = request
-  const { id } = req.params
+const PromptUpdateableParams = z.object({
+  name: z.string().min(1).max(255),
+  systemMessage: z.string().max(20_000),
+  hidden: z.boolean().default(false),
+  mandatory: z.boolean().default(false),
+})
 
-  const chatInstanceId = id ? (await Prompt.findByPk(id)).chatInstanceId : data.chatInstanceId
+const PromptCreationParams = z.intersection(
+  PromptUpdateableParams.extend({
+    userId: z.string().min(1),
+    messages: z
+      .array(
+        z.object({
+          role: z.enum(['system', 'assistant', 'user']),
+          content: z.string().min(1),
+        }),
+      )
+      .default([]),
+  }),
+  z.discriminatedUnion('type', [
+    z.object({
+      type: z.literal('CHAT_INSTANCE'),
+      chatInstanceId: z.string().min(1),
+    }),
+    z.object({
+      type: z.literal('PERSONAL'),
+    }),
+    z.object({
+      type: z.literal('RAG_INDEX'),
+      ragIndexId: z.number().min(1),
+      chatInstanceId: z.string().min(1).optional(),
+    }),
+  ]),
+)
 
-  const chatInstance = (await ChatInstance.findByPk(chatInstanceId, {
+interface ChatInstancePrompt {
+  chatInstanceId: string
+}
+
+const authorizeChatInstancePromptResponsible = async (user: User, prompt: ChatInstancePrompt) => {
+  const chatInstance = await ChatInstance.findByPk(prompt.chatInstanceId, {
     include: [
       {
         model: Responsibility,
         as: 'responsibilities',
       },
     ],
-  })) as ChatInstance & { responsibilities: Responsibility[] }
+  })
 
-  const isAmongActiveCourses = chatInstance?.responsibilities.some((r) => r.userId === user.id)
-
-  if (!isAmongActiveCourses && !user.isAdmin) {
-    res.status(403).send('Not allowed')
-    return
+  if (!chatInstance) {
+    throw ApplicationError.NotFound('Chat instance not found')
   }
 
-  next()
-  return
+  const isResponsible = chatInstance?.responsibilities.some((r) => r.userId === user.id)
+
+  if (!isResponsible && !user.isAdmin) {
+    throw ApplicationError.Forbidden('Not allowed')
+  }
 }
 
-promptRouter.post('/', authorizeUser, async (req, res) => {
-  const data = req.body as NewPromptData
+interface RagIndexPrompt {
+  ragIndexId: number
+  chatInstanceId?: string
+}
 
-  const newPrompt = await Prompt.create(data)
+const authorizeRagIndexPromptResponsible = async (user: User, prompt: RagIndexPrompt) => {
+  const ragIndex = await RagIndex.findByPk(prompt.ragIndexId)
+  const isAuthor = ragIndex?.userId === user.id
+
+  if (!isAuthor && !user.isAdmin) {
+    if (!prompt.chatInstanceId) {
+      throw ApplicationError.Forbidden('Not allowed')
+    }
+    await authorizeChatInstancePromptResponsible(user, prompt as ChatInstancePrompt)
+  }
+}
+
+const authorizePromptCreation = async (user: User, promptParams: z.infer<typeof PromptCreationParams>) => {
+  switch (promptParams.type) {
+    case 'CHAT_INSTANCE': {
+      await authorizeChatInstancePromptResponsible(user, promptParams)
+      break
+    }
+    case 'RAG_INDEX': {
+      await authorizeRagIndexPromptResponsible(user, promptParams)
+      break
+    }
+    case 'PERSONAL': {
+      // This is fine. Anyone can create a personal prompt. Lets just limit the number of prompts per user to 200
+      const count = await Prompt.count({ where: { userId: user.id } })
+      if (count >= 200) {
+        throw ApplicationError.Forbidden('Maximum number of prompts reached')
+      }
+      break
+    }
+  }
+}
+
+promptRouter.post('/', async (req, res) => {
+  const { user } = req as RequestWithUser
+  const input = req.body
+  input.userId = user.id
+  const promptParams = PromptCreationParams.parse(input)
+
+  await authorizePromptCreation(user, promptParams)
+
+  const newPrompt = await Prompt.create(promptParams)
 
   res.status(201).send(newPrompt)
 })
 
-export default promptRouter
+const authorizePromptUpdate = async (user: User, prompt: Prompt) => {
+  switch (prompt.type) {
+    case 'CHAT_INSTANCE': {
+      await authorizeChatInstancePromptResponsible(user, prompt as ChatInstancePrompt)
+      break
+    }
+    case 'RAG_INDEX': {
+      await authorizeRagIndexPromptResponsible(user, prompt as RagIndexPrompt)
+      break
+    }
+    case 'PERSONAL': {
+      if (!(user.id === prompt.userId)) {
+        throw ApplicationError.Forbidden('Not allowed')
+      }
+      break
+    }
+  }
+}
 
-promptRouter.delete('/:id', authorizeUser, authorizeUser, async (req, res) => {
+promptRouter.delete('/:id', async (req, res) => {
+  const { user } = req as unknown as RequestWithUser
   const { id } = req.params
 
   const prompt = await Prompt.findByPk(id)
 
   if (!prompt) {
-    res.status(404).send('Prompt not found')
-    return
+    throw ApplicationError.NotFound('Prompt not found')
   }
+
+  await authorizePromptUpdate(user, prompt)
 
   await prompt.destroy()
 
   res.status(204).send()
 })
 
-promptRouter.put('/:id', authorizeUser, authorizeUser, async (req, res) => {
+promptRouter.put('/:id', async (req, res) => {
   const { id } = req.params
-  const data = req.body as Prompt
-  const { systemMessage, name, hidden, mandatory } = data
+  const { user } = req as unknown as RequestWithUser
+  const updates = PromptUpdateableParams.parse(req.body)
+  const { systemMessage, name, hidden, mandatory } = updates
 
   const prompt = await Prompt.findByPk(id)
 
   if (!prompt) {
-    res.status(404).send('Prompt not found')
-    return
+    throw ApplicationError.NotFound('Prompt not found')
   }
+
+  await authorizePromptUpdate(user, prompt)
 
   prompt.systemMessage = systemMessage
   prompt.name = name
@@ -107,3 +197,5 @@ promptRouter.put('/:id', authorizeUser, authorizeUser, async (req, res) => {
 
   res.send(prompt)
 })
+
+export default promptRouter

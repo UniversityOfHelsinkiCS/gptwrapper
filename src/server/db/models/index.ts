@@ -29,8 +29,6 @@ ChatInstance.hasMany(Prompt, { as: 'prompts' })
 
 User.hasMany(Prompt, { as: 'prompts' })
 
-RagIndex.hasOne(Prompt, { as: 'prompt' })
-
 Prompt.belongsTo(ChatInstance, { as: 'chatInstance' })
 
 Prompt.belongsTo(User, { as: 'user' })
