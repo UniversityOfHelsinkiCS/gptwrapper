@@ -67,10 +67,11 @@ const Course = () => {
 
   const mandatoryPromptId = prompts?.find((prompt) => prompt.mandatory)?.id
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      createMutation.mutate({
+      await createMutation.mutateAsync({
         chatInstanceId: course.id,
+        type: 'CHAT_INSTANCE',
         name,
         systemMessage: system,
         messages,

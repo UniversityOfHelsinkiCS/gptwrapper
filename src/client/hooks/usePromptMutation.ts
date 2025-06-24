@@ -7,6 +7,7 @@ import apiClient from '../util/apiClient'
 
 interface NewPromptData {
   chatInstanceId: string
+  type: 'CHAT_INSTANCE' | 'PERSONAL' | 'RAG_INDEX'
   name: string
   systemMessage: string
   messages: Message[]

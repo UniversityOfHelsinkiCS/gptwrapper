@@ -26,7 +26,7 @@ const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptTyp
   const [updatedHidden, setUpdatedHidden] = useState(hidden)
   const [updatedMandatory, setUpdatedMandatory] = useState(mandatory)
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const updatedPrompt = {
       ...prompt,
       systemMessage: message,
@@ -36,7 +36,7 @@ const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptTyp
     }
 
     try {
-      mutation.mutate(updatedPrompt)
+      await mutation.mutateAsync(updatedPrompt)
       setEditPrompt(false)
       enqueueSnackbar('Prompt updated', { variant: 'success' })
     } catch (error: any) {

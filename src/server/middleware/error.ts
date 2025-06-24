@@ -9,12 +9,13 @@ const errorHandler = (error: Error, _req: Request, res: Response, next: NextFunc
   Sentry.captureException(error)
 
   if (res.headersSent) {
-    return next(error)
+    next(error)
+    return
   }
 
   const normalizedError = error instanceof ApplicationError ? error : new ApplicationError(error.message)
 
-  return res.status(normalizedError.status).json(normalizedError)
+  res.status(normalizedError.status).json(normalizedError)
 }
 
 export default errorHandler
