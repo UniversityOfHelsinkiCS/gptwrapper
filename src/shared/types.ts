@@ -73,20 +73,8 @@ export type ResponseStreamEventData =
       fileSearch: FileSearchCompletedData
     }
   | {
-      type: 'fileSearchError'
-      error: any
-    }
-  | {
-      type: 'streamError'
-      error: any
-    }
-  | {
-      type: 'timeoutError'
-      error: any
-    }
-  | {
       type: 'error'
-      error: any
+      error: string
     }
   | {
       type: 'annotation'
