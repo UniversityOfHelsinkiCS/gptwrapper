@@ -181,6 +181,36 @@ export class ResponsesClient {
             res,
           )
           break
+
+        case 'response.failed':
+          await this.write(
+            {
+              type: 'error',
+              error: event.response.error.message,
+            },
+            res,
+          )
+          break
+
+        case 'response.incomplete':
+          await this.write(
+            {
+              type: 'error',
+              error: `Response incomplete due to error: ${event.response.incomplete_details.reason}`,
+            },
+            res,
+          )
+          break
+
+        case 'error':
+          await this.write(
+            {
+              type: 'error',
+              error: event.message,
+            },
+            res,
+          )
+          break
       }
     }
 

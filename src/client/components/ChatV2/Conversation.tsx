@@ -67,12 +67,14 @@ const UserMessage = ({
 
 const AssistantMessage = ({
   content,
+  error,
   hasRagIndex,
   hasAnnotations,
   isLastAssistantNode,
   expandedNodeHeight,
 }: {
   content: string
+  error?: string
   hasRagIndex: boolean
   hasAnnotations: boolean
   isLastAssistantNode: boolean
@@ -163,7 +165,13 @@ const AssistantMessage = ({
           }}
         >
           {processedContent}
+
         </ReactMarkdown>
+        {error &&
+          <Box>
+            <Typography color='#cc0000'>{`\n\n ${error}`}</Typography>
+          </Box>
+        }
       </Box>
     </Box>
   )
@@ -188,6 +196,7 @@ const MessageItem = ({
     return (
       <AssistantMessage
         content={message.content}
+        error={message.error}
         hasAnnotations={hasAnnotations_Leikisti}
         hasRagIndex={hasRagIndex}
         isLastAssistantNode={isLastAssistantNode}

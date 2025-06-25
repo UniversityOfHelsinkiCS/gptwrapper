@@ -8,7 +8,7 @@ import {
   getMathBlockStreamMock,
   getMidwayFailStreamMock,
   getTimeoutFailStreamMock,
-  MockType,
+  MockEventType,
   type MockResponseStreamEvent,
 } from './mockFunctions'
 
@@ -40,35 +40,35 @@ export function createMockStream<T extends { content: string }>(input: T): Async
   let mockType: MockResponseStreamEvent[]
 
   switch (command) {
-    case MockType.FAIL:
+    case MockEventType.FAIL:
       mockType = getFailedStreamMock()
       break
 
-    case MockType.MIDWAY_FAIL:
+    case MockEventType.MIDWAY_FAIL:
       mockType = getMidwayFailStreamMock()
       break
 
-    case MockType.TIMEOUT_FAIL:
+    case MockEventType.TIMEOUT_FAIL:
       mockType = getTimeoutFailStreamMock()
       break
 
-    case MockType.INCOMPLETE_FAIL:
+    case MockEventType.INCOMPLETE_FAIL:
       mockType = getIncompleteStreamMock()
       break
 
-    case MockType.RAG:
+    case MockEventType.RAG:
       mockType = getFileSearchStreamMock()
       break
 
-    case MockType.RAG_FAIL:
+    case MockEventType.RAG_FAIL:
       mockType = getFileSearchFailStreamMock()
       break
 
-    case MockType.CODE_BLOCK:
+    case MockEventType.CODE_BLOCK:
       mockType = getCodeBlockStreamMock()
       break
 
-    case MockType.MATH_BLOCK:
+    case MockEventType.MATH_BLOCK:
       mockType = getMathBlockStreamMock()
       break
 

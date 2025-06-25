@@ -5,11 +5,12 @@ export interface MockResponseStreamEvent {
   [key: string]: any
 }
 
-export enum MockType {
+export enum MockEventType {
   RAG = 'rag',
   FAIL = 'fail',
   MIDWAY_FAIL = 'midway fail',
   TIMEOUT_FAIL = 'timeout fail',
+  INCOMPLETE_FAIL = 'incomplete fail',
   RAG_FAIL = 'rag fail',
   CODE_BLOCK = 'code block',
   MATH_BLOCK = 'math block',
@@ -80,32 +81,10 @@ export const getBasicStreamMock = (): MockResponseStreamEvent[] => {
 
 export const getFailedStreamMock = (): MockResponseStreamEvent[] => {
   // https://platform.openai.com/docs/api-reference/responses-streaming/error
-  const responseText = `Testing failed stream`
-
-  const chunkedResponseText = chunkText(responseText)
-
   return [
     {
-      type: 'response.created',
-    },
-    ...chunkedResponseText.map((chunk) => ({
-      type: 'response.output_text.delta' as ResponseStreamEvent['type'],
-      item_id: 'msg_mock',
-      delta: chunk,
-    })),
-    {
-      type: 'response.completed',
-      response: {
-        id: '',
-        usage: {
-          input_tokens: 0,
-          output_tokens: 0,
-          output_tokens_details: {
-            reasoning_tokens: 0,
-          },
-          total_tokens: 0,
-        },
-      },
+      type: 'error',
+      message: 'Mock error for failed stream',
     },
   ]
 }
@@ -138,7 +117,7 @@ export const getIncompleteStreamMock = (): MockResponseStreamEvent[] => {
 
 export const getMidwayFailStreamMock = (): MockResponseStreamEvent[] => {
   // https://platform.openai.com/docs/api-reference/responses-streaming/response/failed
-  const responseText = `Testing midway failed stream`
+  const responseText = `Testing midway failed stream. One upon a time, Bob went to store but was hit by a`
 
   const chunkedResponseText = chunkText(responseText)
 
@@ -152,9 +131,13 @@ export const getMidwayFailStreamMock = (): MockResponseStreamEvent[] => {
       delta: chunk,
     })),
     {
-      type: 'response.completed',
+      type: 'response.failed',
       response: {
         id: '',
+        error: {
+          code: 'server_error',
+          message: 'Mock error for midway failed stream',
+        },
         usage: {
           input_tokens: 0,
           output_tokens: 0,
