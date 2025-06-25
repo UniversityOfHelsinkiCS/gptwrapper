@@ -1,9 +1,8 @@
-import { Table, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Box } from '@mui/material'
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-
-import { ChatInstanceUsage, Course } from '../../../types'
 import useChatInstanceUsage from '../../../hooks/useChatInstanceUsage'
 import useUserCourses from '../../../hooks/useUserCourses'
+import type { ChatInstanceUsage, Course } from '../../../types'
 
 const calculateCourseUsage = (usage: ChatInstanceUsage[], courses: Course[]) => {
   const courseUsage = courses.map((course) => ({
@@ -22,12 +21,12 @@ const calculateCourseUsage = (usage: ChatInstanceUsage[], courses: Course[]) => 
 const sortUsage = (language: string) => (a: { course: Course }, b: { course: Course }) => a.course.name[language].localeCompare(b.course.name[language])
 
 const CourseTable = () => {
-  const { usage, isLoading } = useChatInstanceUsage()
-  const { courses, isLoading: coursesLoading } = useUserCourses()
+  const { usage } = useChatInstanceUsage()
+  const { courses } = useUserCourses()
 
   const { t, i18n } = useTranslation()
 
-  if (isLoading || coursesLoading) return null
+  if (!courses || !usage) return null
 
   const { language } = i18n
 

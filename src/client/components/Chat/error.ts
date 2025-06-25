@@ -4,7 +4,7 @@ import { enqueueSnackbar } from 'notistack'
 /**
  * Handle error messages related to completion stream creation
  */
-export const handleCompletionStreamError = (err: any, file: string) => {
+export const handleCompletionStreamError = (err: any, file?: string) => {
   if (err?.name === 'AbortError' || !err) return
   console.log('Error in completion stream: ', err)
   const error = err?.response?.data || err.message

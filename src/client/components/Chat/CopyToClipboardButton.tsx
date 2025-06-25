@@ -12,8 +12,10 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ copied, i
   const [open, setOpen] = useState(false)
 
   const handleClick = () => {
+    const element = document.getElementById(id)
+    if (!element) return
     setOpen(true)
-    const blobHtml = new Blob([document.getElementById(id).innerHTML], {
+    const blobHtml = new Blob([element.innerHTML], {
       type: 'text/html',
     })
     const blobText = new Blob([markdownToTxt(copied)], { type: 'text/plain' })

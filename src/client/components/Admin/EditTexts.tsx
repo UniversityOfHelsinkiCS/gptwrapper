@@ -1,10 +1,10 @@
-import { useState } from 'react'
 import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import useInfoTexts from '../../hooks/useInfoTexts'
-import { InfoText } from '../../types'
 import { useEditInfoTextMutation } from '../../hooks/useInfoTextMutation'
+import useInfoTexts from '../../hooks/useInfoTexts'
+import type { InfoText } from '../../types'
 
 const Text = ({ info }: { info: InfoText }) => {
   const [isEditing, setIsEditing] = useState(false)
@@ -59,8 +59,10 @@ const Text = ({ info }: { info: InfoText }) => {
 }
 
 const EditTexts = () => {
-  const { infoTexts, isLoading } = useInfoTexts()
-  if (isLoading) return null
+  const { infoTexts } = useInfoTexts()
+  if (!infoTexts) {
+    return null
+  }
 
   return (
     <Box>

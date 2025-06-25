@@ -1,10 +1,9 @@
-import { Button, Tooltip } from '@mui/material'
 import { Mail } from '@mui/icons-material'
-import { useTranslation } from 'react-i18next'
+import { Button, Tooltip } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
-
-import { Message } from '../../types'
+import { useTranslation } from 'react-i18next'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import type { Message } from '../../types'
 import { sendEmail } from '../../util/email'
 
 const escapeHtml = (str: string): string => {
@@ -17,13 +16,13 @@ const formatEmail = (messages: Message[], t: any): string =>
     .map(
       ({ role, content }) =>
         ` <div style="margin-right: 10px;"> <div style="display: flex; margin-bottom: 10px;">
-     
+
         ${t(`email:${role}`)}
       </div>
       <div>
-        
+
         ${escapeHtml(content)}
-       
+
       </div>
    </div>`,
     )
@@ -40,7 +39,7 @@ const Email = ({ system, messages, disabled, hidePrompt }: { system: string; mes
   const handleSend = async () => {
     const systemMessage: Message = { role: 'system', content: system }
 
-    const newMessages = systemMessage.content && !hidePrompt ? [].concat(systemMessage, messages) : messages
+    const newMessages = systemMessage.content && !hidePrompt ? ([] as Message[]).concat(systemMessage, messages) : messages
 
     const date = new Date()
 

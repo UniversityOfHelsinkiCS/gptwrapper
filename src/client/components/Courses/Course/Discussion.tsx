@@ -8,22 +8,9 @@ import remarkGfm from 'remark-gfm'
 import { formatDateTime } from '../util'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import useCourse, { useCourseDiscussion } from '../../../hooks/useCourse'
+import type { Discussion } from '../../../../shared/types'
 
-type MessageType = {
-  response: string
-  id: string
-  userId: string
-  metadata: {
-    model: string
-    messages: {
-      role: string
-      content: string
-    }[]
-  }
-  createdAt: string
-}
-
-const Message = ({ message }: { message: MessageType }) => {
+const Message = ({ message }: { message: Discussion }) => {
   const prompt = message.metadata.messages[message.metadata.messages.length - 1]
 
   return (
@@ -50,16 +37,16 @@ const Message = ({ message }: { message: MessageType }) => {
   )
 }
 
-const Discussion = () => {
+const UserDiscussion = () => {
   const { i18n } = useTranslation()
   const { language } = i18n
 
   const { id, user_id } = useParams()
   const { user, isLoading: isUserLoading } = useCurrentUser()
   const { course, isLoading: courseLoading } = useCourse(id)
-  const { messages, isLoading: usageLoading } = useCourseDiscussion(id, user_id)
+  const discussionQuery = useCourseDiscussion(id, user_id)
 
-  if (!course || courseLoading || !messages || usageLoading || isUserLoading || !user) return null
+  if (!course || courseLoading || !discussionQuery.isSuccess || isUserLoading || !user) return null
 
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
@@ -68,7 +55,7 @@ const Discussion = () => {
       <div>student: {user_id}</div>
 
       <div style={{ marginBottom: '2em' }}>
-        {messages.map((u) => (
+        {discussionQuery.data.map((u) => (
           <Message key={u.id} message={u} />
         ))}
       </div>
@@ -76,4 +63,4 @@ const Discussion = () => {
   )
 }
 
-export default Discussion
+export default UserDiscussion

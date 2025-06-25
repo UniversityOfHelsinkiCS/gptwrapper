@@ -14,7 +14,7 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 
 const stripSearch = (path: string) => path.split('?')[0]
 
-const RouterTabs = ({ children }: { children: React.ReactElement[] }) => {
+const RouterTabs = ({ children }: { children: (React.ReactElement | false)[] }) => {
   const { pathname } = useLocation()
 
   const activeIndex = React.Children.toArray(children)
@@ -26,9 +26,8 @@ const RouterTabs = ({ children }: { children: React.ReactElement[] }) => {
 
 const Admin = () => {
   const { t } = useTranslation()
-  const { user, isLoading } = useCurrentUser()
-
-  if (isLoading) return null
+  const { user } = useCurrentUser()
+  if (!user) return null
 
   const lastRestart = format(new Date(user?.lastRestart), 'dd/MM/yyyy HH.mm.ss')
 

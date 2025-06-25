@@ -93,3 +93,18 @@ export type Locale = {
   en?: string
   sv?: string
 }
+
+export type Discussion = {
+  id: string
+  userId: string
+  courseId: string
+  response: string
+  metadata: {
+    model: string
+    messages: {
+      role: string
+      content: string
+    }[]
+  }
+  createdAt: string
+}

@@ -1,10 +1,9 @@
-import React from 'react'
-import { Box, TextField, Button, Typography, Switch, FormControlLabel, Alert } from '@mui/material'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
+import { Alert, Box, Button, FormControlLabel, Switch, TextField, Typography } from '@mui/material'
+import type React from 'react'
 import { useTranslation } from 'react-i18next'
+import type { SetState } from '../../types'
 import AttachmentButton from './AttachmentButton'
-
-import { SetState } from '../../types'
 
 const SendMessage = ({
   message,
@@ -42,7 +41,9 @@ const SendMessage = ({
   const { t } = useTranslation()
 
   const handleDeleteFile = () => {
-    inputFileRef.current.value = ''
+    if (inputFileRef.current) {
+      inputFileRef.current.value = ''
+    }
     setFileName('')
   }
 
@@ -92,7 +93,13 @@ const SendMessage = ({
         </Button>
         <Button component="label" variant="text" startIcon={<UploadFileIcon />}>
           {t('fileUploadText')}
-          <input type="file" accept="text/*,application/pdf" hidden ref={inputFileRef} onChange={(e) => handleFileTypeValidation(e.target.files[0])} />
+          <input
+            type="file"
+            accept="text/*,application/pdf"
+            hidden
+            ref={inputFileRef}
+            onChange={(e) => e.target.files?.[0] && handleFileTypeValidation(e.target.files[0])}
+          />
         </Button>
         {fileName && <AttachmentButton fileName={fileName} handleDeleteFile={handleDeleteFile} />}
         <Button onClick={() => handleReset()} disabled={resetDisabled}>

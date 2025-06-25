@@ -14,9 +14,9 @@ const useInfoTexts = () => {
     return data
   }
 
-  const { data: infoTexts, ...rest } = useQuery({ queryKey, queryFn })
+  const { data: infoTexts, isSuccess, ...rest } = useQuery({ queryKey, queryFn })
 
-  return { infoTexts, ...rest }
+  return { infoTexts, isSuccess, ...rest }
 }
 
 export default useInfoTexts

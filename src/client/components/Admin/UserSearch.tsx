@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react'
-import { Input, Box, Button, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Table } from '@mui/material'
-import { useTranslation } from 'react-i18next'
+import { Box, Button, Input, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
-import useUserSearch from '../../hooks/useUserSearch'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import useResetUsageMutation from '../../hooks/useResetUsageMutation'
+import useUserSearch from '../../hooks/useUserSearch'
 
-import { User } from '../../types'
+import type { User } from '../../types'
 
 const handleLoginAs = (user: User) => () => {
   localStorage.setItem('adminLoggedInAs', user.id)
@@ -14,7 +14,6 @@ const handleLoginAs = (user: User) => () => {
 }
 
 const UserTable = ({ users }: { users: User[] }) => {
-  if (!users || users.length === 0) return null
   const resetUsage = useResetUsageMutation()
 
   const onResetUsage = (userId: string) => {
@@ -27,6 +26,8 @@ const UserTable = ({ users }: { users: User[] }) => {
   }
 
   const { t } = useTranslation()
+
+  if (!users || users.length === 0) return null
 
   return (
     <Box my={2}>
@@ -125,7 +126,7 @@ const UserSearch = () => {
       {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
 
       {isLoading && <div>Loading...</div>}
-      {!isLoading && <UserTable users={users} />}
+      {users && <UserTable users={users} />}
     </Box>
   )
 }

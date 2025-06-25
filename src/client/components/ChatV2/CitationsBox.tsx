@@ -18,21 +18,23 @@ const FileItemComponent = ({ fileItem }: { fileItem: FileSearchResultData }) => 
 
 const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileSearchCompletedData }) => {
   const { ragIndex, isSuccess } = useRagIndex(fileSearchResult.ragIndexId)
-  const { results, isSuccess: isResultsSuccess } = useFileSearchResults(fileSearchResult.id)
+  const { results, isSuccess: isResultsSuccess, error } = useFileSearchResults(fileSearchResult.id)
+  const isExpired = error?.status === 404
 
   return (
     <Box sx={{ mt: 1 }}>
       <Typography>{isSuccess ? ragIndex.metadata.name : '...'}</Typography>
       <Typography>Searched for:</Typography>
       <Box display="flex" gap={2}>
-        {fileSearchResult.queries.map((q, idx) => (
-          <Typography variant="body2" key={idx}>
+        {fileSearchResult.queries.map((q) => (
+          <Typography variant="body2" key={q}>
             "{q}"
           </Typography>
         ))}
       </Box>
 
       {isResultsSuccess && results.map((result, idx) => <FileItemComponent key={idx} fileItem={result} />)}
+      {isExpired && <Typography color="error">File search results expired</Typography>}
     </Box>
   )
 }

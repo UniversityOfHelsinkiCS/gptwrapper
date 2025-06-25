@@ -1,26 +1,26 @@
-import { useState, useRef, useEffect } from 'react'
-import { Alert, Box, Typography, Slider, Container } from '@mui/material'
+import { Alert, Box, Container, Slider, Typography } from '@mui/material'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
-import { validModels, DEFAULT_MODEL, FREE_MODEL } from '../../../config'
-import { Message, Prompt, SetState, Course } from '../../types'
-import { getCompletionStream } from './util'
-import { formatDate } from '../Courses/util'
+import { DEFAULT_MODEL, FREE_MODEL, validModels } from '../../../config'
+import type { Course, Message, Prompt, SetState } from '../../types'
 import Banner from '../Banner'
-import SystemMessage from './SystemMessage'
+import { formatDate } from '../Courses/util'
 import Conversation from './Conversation'
-import SendMessage from './SendMessage'
 import Email from './Email'
+import SendMessage from './SendMessage'
 import Status from './Status'
+import SystemMessage from './SystemMessage'
+import { getCompletionStream } from './util'
 import '../../styles.css'
 import useCourse from '../../hooks/useCourse'
-import useUserStatus from '../../hooks/useUserStatus'
-import PromptSelector from './PromptSelector'
-import TokenUsageWarning from './TokenUsageWarning'
 import useInfoTexts from '../../hooks/useInfoTexts'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
+import useUserStatus from '../../hooks/useUserStatus'
 import { handleCompletionStreamError } from './error'
+import PromptSelector from './PromptSelector'
+import TokenUsageWarning from './TokenUsageWarning'
 
 const WAIT_FOR_STREAM_TIMEOUT = 4000
 const ALLOWED_FILE_TYPES = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'text/md', 'application/pdf']
@@ -49,7 +49,7 @@ const allowedModels = validModels.map((m) => m.name) // [gpt-4, gpt-4o, gpt-4o-m
 
 const getInitialModel = () => {
   const storedModel = localStorage.getItem('model')
-  if (allowedModels.includes(storedModel)) {
+  if (storedModel && allowedModels.includes(storedModel)) {
     return storedModel
   }
   localStorage.setItem('model', DEFAULT_MODEL)
@@ -83,10 +83,10 @@ const Chat = () => {
   const { courseId } = useParams()
 
   const { course } = useCourse(courseId)
-  const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
+  const { userStatus, refetch: refetchStatus } = useUserStatus(courseId)
 
   const [model, setModel] = useState(getInitialModel())
-  const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
+  const { infoTexts } = useInfoTexts()
   const [activePromptId, setActivePromptId] = useState('')
   const [system, setSystem] = usePersistedState('general-chat-system', '')
   const [message, setMessage] = usePersistedState('general-chat-current', '')
@@ -113,7 +113,7 @@ const Chat = () => {
     }
   }, [course])
 
-  if (statusLoading || infoTextsLoading) return null
+  if (!userStatus || !infoTexts) return null
 
   if (course && course.usageLimit === 0) {
     return (
@@ -155,9 +155,9 @@ const Chat = () => {
     }
   }
 
-  const disclaimer = infoTexts.find((infoText) => infoText.name === 'disclaimer').text[language]
+  const disclaimer = infoTexts.find((infoText) => infoText.name === 'disclaimer')?.text?.[language]
 
-  const systemMessageInfo = infoTexts.find((infoText) => infoText.name === 'systemMessage').text[language]
+  const systemMessageInfo = infoTexts.find((infoText) => infoText.name === 'systemMessage')?.text?.[language]
 
   const { usage, limit, models: courseModels } = userStatus
 
@@ -184,7 +184,9 @@ const Chat = () => {
 
   const handleCancel = () => {
     setFileName('')
-    inputFileRef.current.value = ''
+    if (inputFileRef.current) {
+      inputFileRef.current.value = ''
+    }
     setMessage('')
     setMessages(messages.slice(0, -1))
     setTokenWarningVisible(false)
@@ -199,7 +201,9 @@ const Chat = () => {
     setSystem(activePrompt?.systemMessage ?? '')
     setMessage('')
     setCompletion('')
-    inputFileRef.current.value = ''
+    if (inputFileRef.current) {
+      inputFileRef.current.value = ''
+    }
     setFileName('')
     clearRetryTimeout()
   }
@@ -227,7 +231,9 @@ const Chat = () => {
       setStreamController(undefined)
       setCompletion('')
       refetchStatus()
-      inputFileRef.current.value = ''
+      if (inputFileRef.current) {
+        inputFileRef.current.value = ''
+      }
       setFileName('')
       clearRetryTimeout()
     }
@@ -261,7 +267,7 @@ const Chat = () => {
 
   const handleSend = async (userConsent: boolean, saveConsent: boolean) => {
     const formData = new FormData()
-    let file = inputFileRef.current.files[0] as File
+    let file = inputFileRef.current?.files?.[0] as File | null
     if (file) {
       if (ALLOWED_FILE_TYPES.includes(file.type)) {
         formData.append('file', file)
@@ -311,6 +317,10 @@ const Chat = () => {
 
     try {
       const { tokenUsageAnalysis, stream } = await getCompletionStream(getCompletionsArgs)
+
+      if (!stream) {
+        throw new Error('No stream received')
+      }
 
       if (tokenUsageAnalysis && tokenUsageAnalysis.message) {
         setTokenUsageWarning(tokenUsageAnalysis.message)
@@ -376,8 +386,8 @@ const Chat = () => {
         setAlertOpen={setAlertOpen}
         saveConsent={saveConsent}
         setSaveConsent={setSaveConsent}
-        saveChat={course && course.saveDiscussions}
-        notOptoutSaving={course && course.notOptoutSaving}
+        saveChat={!!course && !!course.saveDiscussions}
+        notOptoutSaving={!!course && !!course.notOptoutSaving}
       />
       <Email system={system} messages={messages} disabled={messages.length === 0 || completion !== ''} hidePrompt={hidePrompt} />
       {alertOpen && (

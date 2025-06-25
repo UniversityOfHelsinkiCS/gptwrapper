@@ -2,6 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 
 import { Course, CourseStatistics } from '../types'
 import apiClient from '../util/apiClient'
+import { AxiosError } from 'axios'
+import { useGetQuery } from './apiHooks'
+import { Discussion } from '../../shared/types'
 
 const useCourse = (courseId?: string) => {
   const queryKey = ['course', courseId]
@@ -43,24 +46,14 @@ export const useCourseDiscussers = (courseId?: string) => {
   return { discussers, ...rest }
 }
 
-export const useCourseDiscussion = (courseId: string, userId: string) => {
+export const useCourseDiscussion = (courseId?: string, userId?: string) => {
   const queryKey = ['messages', courseId, userId]
 
-  const queryFn = async (): Promise<any | null> => {
-    const res = await apiClient.get(`/courses/${courseId}/discussions/${userId}`)
-
-    const { data } = res
-
-    return data
-  }
-
-  const { data: messages, ...rest } = useQuery({
+  return useGetQuery<Discussion[]>({
     queryKey,
-    queryFn,
+    url: `/courses/${courseId}/discussions/${userId}`,
     enabled: !!courseId,
   })
-
-  return { messages, ...rest }
 }
 
 export const useCourseStatistics = (courseId?: string) => {

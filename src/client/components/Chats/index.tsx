@@ -1,17 +1,17 @@
-import { Box, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Link as MuiLink } from '@mui/material'
-import { Link as RouterLink } from 'react-router-dom'
+import { Box, Container, Link as MuiLink, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
+import { Link as RouterLink } from 'react-router-dom'
+import { getLanguageValue } from '../../../shared/utils'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Course } from '../../types'
 import { formatDate } from '../Courses/util'
-import { getLanguageValue } from '../../../shared/utils'
 
 const Chats = () => {
-  const { user, isLoading } = useCurrentUser()
+  const { user } = useCurrentUser()
   const { t, i18n } = useTranslation()
   const { language } = i18n
 
-  if (isLoading) {
+  if (!user) {
     return <div>Loading...</div>
   }
 

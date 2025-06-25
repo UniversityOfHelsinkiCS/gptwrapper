@@ -1,5 +1,7 @@
-import axios from 'axios'
+import axios, { type AxiosError } from 'axios'
 import { PUBLIC_URL } from '../../config'
+
+export type ApiError = AxiosError<{ message: string }>
 
 const apiClient = axios.create({ baseURL: `${PUBLIC_URL}/api` })
 export const updaterApiClient = axios.create({

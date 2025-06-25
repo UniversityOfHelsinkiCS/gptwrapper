@@ -1,9 +1,8 @@
-import { Table, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Box } from '@mui/material'
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-
-import { Faculty, Locales, User } from '../../../types'
-import useUsers from '../../../hooks/useUsers'
 import useFaculties from '../../../hooks/useFaculties'
+import useUsers from '../../../hooks/useUsers'
+import type { Faculty, Locales, User } from '../../../types'
 
 const calculateFacultyUsage = (users: User[], faculties: Faculty[]) => {
   const facultyUsage = faculties.map((faculty) => ({
@@ -14,7 +13,9 @@ const calculateFacultyUsage = (users: User[], faculties: Faculty[]) => {
   users.forEach(({ usage, iamGroups }) => {
     faculties.forEach(({ code, iams }) => {
       if (iams.some((iam) => iamGroups.includes(iam))) {
-        facultyUsage.find(({ faculty }) => faculty.code === code).usageCount += usage
+        const theFaculty = facultyUsage.find(({ faculty }) => faculty.code === code)
+        if (!theFaculty) return
+        theFaculty.usageCount += usage
       }
     })
   })
@@ -25,12 +26,12 @@ const calculateFacultyUsage = (users: User[], faculties: Faculty[]) => {
 const sortUsage = (a: { faculty: Faculty }, b: { faculty: Faculty }) => a.faculty.code.localeCompare(b.faculty.code)
 
 const FacultyTable = () => {
-  const { users, isLoading } = useUsers()
-  const { faculties, isLoading: facultiesLoading } = useFaculties()
+  const { users } = useUsers()
+  const { faculties } = useFaculties()
 
   const { t, i18n } = useTranslation()
 
-  if (isLoading || facultiesLoading) return null
+  if (!users || !faculties) return null
 
   const facultyUsage = calculateFacultyUsage(users, faculties)
   const sortedUsage = facultyUsage.sort(sortUsage)
