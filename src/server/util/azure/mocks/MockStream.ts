@@ -4,6 +4,7 @@ import {
   getFailedStreamMock,
   getFileSearchFailStreamMock,
   getFileSearchStreamMock,
+  getIncompleteStreamMock,
   getMathBlockStreamMock,
   getMidwayFailStreamMock,
   getTimeoutFailStreamMock,
@@ -49,6 +50,10 @@ export function createMockStream<T extends { content: string }>(input: T): Async
 
     case MockType.TIMEOUT_FAIL:
       mockType = getTimeoutFailStreamMock()
+      break
+
+    case MockType.INCOMPLETE_FAIL:
+      mockType = getIncompleteStreamMock()
       break
 
     case MockType.RAG:
