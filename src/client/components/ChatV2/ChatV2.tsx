@@ -103,6 +103,7 @@ export const ChatV2 = () => {
       const reader = stream.getReader()
 
       let content = ''
+      let error = ''
       let fileSearch: FileSearchCompletedData
 
       while (true) {
@@ -152,20 +153,8 @@ export const ChatV2 = () => {
               setIsFileSearching(false)
               break
 
-            case 'fileSearchError':
-              console.error('File search error')
-              break
-
-            case 'streamError':
-              console.error('Response streaming error')
-              break
-
-            case 'timeoutError':
-              console.error('Response timeout error')
-              break
-
             case 'error':
-              console.error('Somehing went wrong when streaming responses')
+              error += parsedChunk.error
               break
 
             case 'complete':
@@ -178,7 +167,7 @@ export const ChatV2 = () => {
         }
       }
 
-      setMessages((prev: Message[]) => prev.concat({ role: 'assistant', content, fileSearchResult: fileSearch }))
+      setMessages((prev: Message[]) => prev.concat({ role: 'assistant', content, error, fileSearchResult: fileSearch }))
     } catch (err: any) {
       handleCompletionStreamError(err, fileName)
     } finally {
@@ -342,7 +331,7 @@ export const ChatV2 = () => {
         setActiveModel({ name: defaultCourseModel ?? courseModels[0] })
       }
     } else {
-      const allowedModels = validModels.map((m) => m.name) // [gpt-4, gpt-4o, gpt-4o-mini] 22.8.2024
+      const allowedModels = validModels.map((m) => m.name) // [gpt-4.1, gpt-4o, gpt-4o-mini] 25.6.2025
       setAllowedModels(allowedModels)
     }
 
