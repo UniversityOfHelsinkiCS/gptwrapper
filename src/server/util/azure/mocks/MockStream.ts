@@ -39,14 +39,6 @@ export function createMockStream<T extends { content: string }>(input: T): Async
   let mockType: MockResponseStreamEvent[]
 
   switch (command) {
-    case MockType.RAG:
-      mockType = getFileSearchStreamMock()
-      break
-
-    case MockType.RAG_FAIL:
-      mockType = getFileSearchFailStreamMock()
-      break
-
     case MockType.FAIL:
       mockType = getFailedStreamMock()
       break
@@ -57,6 +49,14 @@ export function createMockStream<T extends { content: string }>(input: T): Async
 
     case MockType.TIMEOUT_FAIL:
       mockType = getTimeoutFailStreamMock()
+      break
+
+    case MockType.RAG:
+      mockType = getFileSearchStreamMock()
+      break
+
+    case MockType.RAG_FAIL:
+      mockType = getFileSearchFailStreamMock()
       break
 
     case MockType.CODE_BLOCK:

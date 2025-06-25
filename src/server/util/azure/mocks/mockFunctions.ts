@@ -53,7 +53,7 @@ export const getBasicStreamMock = (): MockResponseStreamEvent[] => {
     {
       type: 'response.created',
       response: {
-        id: 'resp_mock',
+        id: '',
       },
     },
     ...chunkedResponseText.map((chunk) => ({
@@ -64,38 +64,7 @@ export const getBasicStreamMock = (): MockResponseStreamEvent[] => {
     {
       type: 'response.completed',
       response: {
-        id: 'resp_mock',
-        usage: {
-          input_tokens: 0,
-          output_tokens: 0,
-          output_tokens_details: {
-            reasoning_tokens: 0,
-          },
-          total_tokens: 0,
-        },
-      },
-    },
-  ]
-}
-
-export const getFileSearchStreamMock = (): MockResponseStreamEvent[] => {
-  const responseText = `Testing RAG stream`
-
-  const chunkedResponseText = chunkText(responseText)
-
-  return [
-    {
-      type: 'response.created',
-    },
-    ...chunkedResponseText.map((chunk) => ({
-      type: 'response.output_text.delta' as ResponseStreamEvent['type'],
-      item_id: 'msg_mock',
-      delta: chunk,
-    })),
-    {
-      type: 'response.completed',
-      response: {
-        id: 'resp_mock',
+        id: '',
         usage: {
           input_tokens: 0,
           output_tokens: 0,
@@ -110,6 +79,7 @@ export const getFileSearchStreamMock = (): MockResponseStreamEvent[] => {
 }
 
 export const getFailedStreamMock = (): MockResponseStreamEvent[] => {
+  // https://platform.openai.com/docs/api-reference/responses-streaming/error
   const responseText = `Testing failed stream`
 
   const chunkedResponseText = chunkText(responseText)
@@ -126,7 +96,7 @@ export const getFailedStreamMock = (): MockResponseStreamEvent[] => {
     {
       type: 'response.completed',
       response: {
-        id: 'resp_mock',
+        id: '',
         usage: {
           input_tokens: 0,
           output_tokens: 0,
@@ -140,7 +110,34 @@ export const getFailedStreamMock = (): MockResponseStreamEvent[] => {
   ]
 }
 
+export const getIncompleteStreamMock = (): MockResponseStreamEvent[] => {
+  // https://platform.openai.com/docs/api-reference/responses-streaming/response/incomplete
+  const responseText = `Testing incomplete stream`
+
+  const chunkedResponseText = chunkText(responseText)
+  return [
+    {
+      type: 'response.created',
+    },
+    ...chunkedResponseText.map((chunk) => ({
+      type: 'response.output_text.delta' as ResponseStreamEvent['type'],
+      item_id: 'msg_mock',
+      delta: chunk,
+    })),
+    {
+      type: 'response.incomplete',
+      response: {
+        id: '',
+        incomplete_details: {
+          reason: 'max_tokens',
+        },
+      },
+    },
+  ]
+}
+
 export const getMidwayFailStreamMock = (): MockResponseStreamEvent[] => {
+  // https://platform.openai.com/docs/api-reference/responses-streaming/response/failed
   const responseText = `Testing midway failed stream`
 
   const chunkedResponseText = chunkText(responseText)
@@ -157,7 +154,7 @@ export const getMidwayFailStreamMock = (): MockResponseStreamEvent[] => {
     {
       type: 'response.completed',
       response: {
-        id: 'resp_mock',
+        id: '',
         usage: {
           input_tokens: 0,
           output_tokens: 0,
@@ -172,7 +169,13 @@ export const getMidwayFailStreamMock = (): MockResponseStreamEvent[] => {
 }
 
 export const getTimeoutFailStreamMock = (): MockResponseStreamEvent[] => {
-  const responseText = `Testing timeout failed stream`
+  // Simulate an unresponsive api
+  return []
+}
+
+export const getFileSearchStreamMock = (): MockResponseStreamEvent[] => {
+  // https://platform.openai.com/docs/api-reference/responses-streaming/response/file_search_call
+  const responseText = `For testing RAG stream. Not yet implemented.`
 
   const chunkedResponseText = chunkText(responseText)
 
@@ -188,7 +191,7 @@ export const getTimeoutFailStreamMock = (): MockResponseStreamEvent[] => {
     {
       type: 'response.completed',
       response: {
-        id: 'resp_mock',
+        id: '',
         usage: {
           input_tokens: 0,
           output_tokens: 0,
@@ -203,7 +206,7 @@ export const getTimeoutFailStreamMock = (): MockResponseStreamEvent[] => {
 }
 
 export const getFileSearchFailStreamMock = (): MockResponseStreamEvent[] => {
-  const responseText = `Testing failed RAG stream`
+  const responseText = `For testing failed RAG stream. Not implemented yet.`
 
   const chunkedResponseText = chunkText(responseText)
 
@@ -219,7 +222,7 @@ export const getFileSearchFailStreamMock = (): MockResponseStreamEvent[] => {
     {
       type: 'response.completed',
       response: {
-        id: 'resp_mock',
+        id: '',
         usage: {
           input_tokens: 0,
           output_tokens: 0,
@@ -234,7 +237,7 @@ export const getFileSearchFailStreamMock = (): MockResponseStreamEvent[] => {
 }
 
 export const getCodeBlockStreamMock = (): MockResponseStreamEvent[] => {
-  const responseText = `Testing code block stream`
+  const responseText = `For testing code block stream. Not yet implemented.`
 
   const chunkedResponseText = chunkText(responseText)
 
@@ -250,7 +253,7 @@ export const getCodeBlockStreamMock = (): MockResponseStreamEvent[] => {
     {
       type: 'response.completed',
       response: {
-        id: 'resp_mock',
+        id: '',
         usage: {
           input_tokens: 0,
           output_tokens: 0,
@@ -265,7 +268,7 @@ export const getCodeBlockStreamMock = (): MockResponseStreamEvent[] => {
 }
 
 export const getMathBlockStreamMock = (): MockResponseStreamEvent[] => {
-  const responseText = `Testing math block stream`
+  const responseText = `For testing math block stream. Not yet implemented.`
 
   const chunkedResponseText = chunkText(responseText)
 
@@ -281,7 +284,7 @@ export const getMathBlockStreamMock = (): MockResponseStreamEvent[] => {
     {
       type: 'response.completed',
       response: {
-        id: 'resp_mock',
+        id: '',
         usage: {
           input_tokens: 0,
           output_tokens: 0,
