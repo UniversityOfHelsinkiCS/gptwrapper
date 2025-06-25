@@ -169,7 +169,7 @@ const AssistantMessage = ({
         </ReactMarkdown>
         {error &&
           <Box>
-            <Typography color='#cc0000'>{`\n\n ${error}`}</Typography>
+            <Typography variant='body1' fontStyle="italic" color='#cc0000'>{`\n\n ${error}`}</Typography>
           </Box>
         }
       </Box>

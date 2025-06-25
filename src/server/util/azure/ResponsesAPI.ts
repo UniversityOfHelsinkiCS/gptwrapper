@@ -186,7 +186,7 @@ export class ResponsesClient {
           await this.write(
             {
               type: 'error',
-              error: event.response.error.message,
+              error: `Failed to complete message. Error: ${event.response.error.message}`,
             },
             res,
           )
@@ -196,7 +196,7 @@ export class ResponsesClient {
           await this.write(
             {
               type: 'error',
-              error: `Response incomplete due to error: ${event.response.incomplete_details.reason}`,
+              error: `Response incomplete. Error: ${event.response.incomplete_details.reason}`,
             },
             res,
           )
@@ -206,7 +206,7 @@ export class ResponsesClient {
           await this.write(
             {
               type: 'error',
-              error: event.message,
+              error: `Failed to create response. Error: ${event.message}`,
             },
             res,
           )

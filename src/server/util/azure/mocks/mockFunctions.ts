@@ -85,14 +85,14 @@ export const getFailedStreamMock = (): MockResponseStreamEvent[] => {
   return [
     {
       type: 'error',
-      message: 'Mock error for failed stream',
+      message: 'Something went wrong',
     },
   ]
 }
 
 export const getIncompleteStreamMock = (): MockResponseStreamEvent[] => {
   // https://platform.openai.com/docs/api-reference/responses-streaming/response/incomplete
-  const responseText = `Testing incomplete stream`
+  const responseText = `Testing incomplete stream. Once upon a time, Alice went bought a new compuer. But inside the box was a strange`
 
   const chunkedResponseText = chunkText(responseText)
   return [
@@ -118,7 +118,7 @@ export const getIncompleteStreamMock = (): MockResponseStreamEvent[] => {
 
 export const getMidwayFailStreamMock = (): MockResponseStreamEvent[] => {
   // https://platform.openai.com/docs/api-reference/responses-streaming/response/failed
-  const responseText = `Testing midway failed stream. One upon a time, Bob went to store but was hit by a`
+  const responseText = `Testing midway failed stream. Once upon a time, Bob went to store but was hit by a`
 
   const chunkedResponseText = chunkText(responseText)
 
@@ -137,7 +137,7 @@ export const getMidwayFailStreamMock = (): MockResponseStreamEvent[] => {
         id: '',
         error: {
           code: 'server_error',
-          message: 'Mock error for midway failed stream',
+          message: 'Server error',
         },
         usage: {
           input_tokens: 0,
