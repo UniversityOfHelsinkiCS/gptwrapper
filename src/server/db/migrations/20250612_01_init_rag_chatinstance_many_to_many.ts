@@ -46,6 +46,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
     if (!ragIndex.chat_instance_id) continue
 
     const chatInstance = await ChatInstance.findByPk(ragIndex.chat_instance_id)
+    if (!chatInstance) continue
 
     await ChatInstanceRagIndex.create({
       ragIndexId: ragIndex.id,

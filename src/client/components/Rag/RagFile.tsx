@@ -15,17 +15,26 @@ type RagFile = RagFileAttributes & {
 
 export const RagFile: React.FC = () => {
   const { id, fileId } = useParams()
-  const { data: ragFile, isLoading } = useQuery<RagFile>({
+  const {
+    data: ragFile,
+    isSuccess,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ['ragFile', id],
     queryFn: async () => {
-      const res = await apiClient.get(`/rag/indices/${id}/files/${fileId}`)
+      const res = await apiClient.get<RagFile>(`/rag/indices/${id}/files/${fileId}`)
       return res.data
     },
   })
   const deleteMutation = useDeleteRagFileMutation()
   const navigate = useNavigate()
 
-  if (isLoading) {
+  if (isError) {
+    return <div>Error: {error.message}</div>
+  }
+
+  if (!isSuccess) {
     return <div>Loading...</div>
   }
 

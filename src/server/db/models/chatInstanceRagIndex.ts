@@ -12,9 +12,9 @@ class ChatInstanceRagIndex extends Model<InferAttributes<ChatInstanceRagIndex>, 
 
   declare userId: CreationOptional<string | null>
 
-  declare createdAt: Date
+  declare createdAt: CreationOptional<Date>
 
-  declare updatedAt: Date
+  declare updatedAt: CreationOptional<Date>
 
   declare user?: NonAttribute<User>
 }

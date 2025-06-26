@@ -6,17 +6,15 @@ import apiClient from '../util/apiClient'
 const useStatistics = () => {
   const queryKey = ['statistics']
 
-  const queryFn = async (): Promise<StatisticResponse> => {
-    const res = await apiClient.get(`/admin/statistics`)
+  const queryFn = async () => {
+    const res = await apiClient.get<StatisticResponse>(`/admin/statistics`)
 
     const { data } = res
 
     return data
   }
 
-  const { data, ...rest } = useQuery({ queryKey, queryFn })
-
-  return { statistics: data, ...rest }
+  return useQuery({ queryKey, queryFn })
 }
 
 export default useStatistics

@@ -13,7 +13,7 @@ const ExpandButton = ({ expand, setExpand }: { expand: boolean; setExpand: SetSt
   <Button onClick={() => setExpand(!expand)}>{expand ? <ExpandLess /> : <ExpandMore />}</Button>
 )
 
-const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptType; handleDelete: (promptId: string) => void; mandatoryPromptId: string }) => {
+const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptType; handleDelete: (promptId: string) => void; mandatoryPromptId?: string }) => {
   const { t } = useTranslation()
   const mutation = useEditPromptMutation()
 

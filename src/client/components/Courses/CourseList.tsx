@@ -98,9 +98,9 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
 
   const defaultActivityPeriod = courseToEnable
     ? {
-      startDate: courseToEnable.activityPeriod.startDate,
-      endDate: addMonths(courseToEnable.activityPeriod.endDate, 1).toDateString(),
-    }
+        startDate: courseToEnable.activityPeriod.startDate,
+        endDate: addMonths(courseToEnable.activityPeriod.endDate, 1).toDateString(),
+      }
     : undefined
 
   const activityPeriodString = courseToEnable ? formatDate(defaultActivityPeriod) : null
@@ -140,6 +140,7 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
           <Button onClick={() => setCourseToEnable(null)}>{t('cancel')}</Button>
           <Button
             onClick={() => {
+              if (!courseToEnable) return
               enableMutation.mutate({ id: courseToEnable.id })
               setCourseToEnable(null)
             }}
@@ -160,6 +161,7 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
           <Button onClick={() => setCourseToDisable(null)}>{t('cancel')}</Button>
           <Button
             onClick={() => {
+              if (!courseToDisable) return
               disableMutation.mutate({ id: courseToDisable.id })
               setCourseToDisable(null)
             }}

@@ -17,30 +17,32 @@ const Rag: React.FC = () => {
         <Typography variant="h4" mb="1rem">
           RAG Indices
         </Typography>
-        <Box sx={{ display: 'flex', gap: 2, marginBottom: 2 }}>
-          <TextField
-            label="Index Name"
-            helperText="Use a descriptive name. It is shown to users when RAG is used."
-            variant="outlined"
-            value={indexName}
-            onChange={(e) => setIndexName(e.target.value)}
-            fullWidth
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={async () => {
-              const newIndex = await createIndexMutation.mutateAsync({
-                chatInstanceId,
-                indexName,
-              })
-              setIndexName('')
-              navigate(`/rag/${newIndex.id}`)
-            }}
-          >
-            Create Index
-          </Button>
-        </Box>
+        {chatInstanceId && (
+          <Box sx={{ display: 'flex', gap: 2, marginBottom: 2 }}>
+            <TextField
+              label="Index Name"
+              helperText="Use a descriptive name. It is shown to users when RAG is used."
+              variant="outlined"
+              value={indexName}
+              onChange={(e) => setIndexName(e.target.value)}
+              fullWidth
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={async () => {
+                const newIndex = await createIndexMutation.mutateAsync({
+                  chatInstanceId,
+                  indexName,
+                })
+                setIndexName('')
+                navigate(`/rag/${newIndex.id}`)
+              }}
+            >
+              Create Index
+            </Button>
+          </Box>
+        )}
         {ragIndices?.map((index) => (
           <Paper
             key={index.id}

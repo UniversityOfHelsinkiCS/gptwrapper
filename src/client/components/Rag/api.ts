@@ -20,7 +20,7 @@ type RagIndexDetails = Omit<RagIndexAttributes, 'ragFileCount'> & {
 }
 
 export const useRagIndexDetails = (indexId: number | null) => {
-  const { data, ...rest } = useQuery<RagIndexDetails>({
+  return useQuery<RagIndexDetails>({
     queryKey: ['ragIndex', indexId],
     queryFn: async () => {
       const response = await apiClient.get(`/rag/indices/${indexId}`)
@@ -28,8 +28,6 @@ export const useRagIndexDetails = (indexId: number | null) => {
     },
     enabled: !!indexId,
   })
-
-  return { data, ...rest }
 }
 
 export const useDeleteRagIndexMutation = () => {
@@ -42,7 +40,7 @@ export const useDeleteRagIndexMutation = () => {
   return mutation
 }
 
-export const useUploadMutation = (index: RagIndexDetails | null) => {
+export const useUploadMutation = (index?: RagIndexDetails) => {
   const mutation = useMutation({
     mutationFn: async (files: FileList) => {
       if (!index) {

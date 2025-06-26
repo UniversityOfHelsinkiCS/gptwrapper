@@ -1,3 +1,4 @@
+import { InferCreationAttributes } from 'sequelize'
 import { CourseUnit } from '../../types'
 import { TEST_COURSES } from '../../util/config'
 import { ChatInstance } from '../models'
@@ -42,7 +43,7 @@ const chatInstances = [
       },
     ] as CourseUnit[],
   },
-]
+] as InferCreationAttributes<ChatInstance>[]
 
 const seedChatInstances = async () => {
   const operations: any[] = []

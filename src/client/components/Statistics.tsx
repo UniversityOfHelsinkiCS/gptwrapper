@@ -27,12 +27,12 @@ const Statistics = () => {
   const [from, setFrom] = useState(1)
   const [to, setTo] = useState(4)
   const [selectedFaculty, setFaculties] = useState('H00')
-  const { statistics, isLoading } = useStatistics()
+  const { data: statistics, isSuccess } = useStatistics()
   const { t, i18n } = useTranslation()
   const { language } = i18n
   const { user, isLoading: isUserLoading } = useCurrentUser()
 
-  if (isLoading || isUserLoading) return null
+  if (!isSuccess || isUserLoading) return null
 
   const namesOf = (codes: string[]) => {
     if (!codes || codes.length === 0) return ''
@@ -141,7 +141,7 @@ const Statistics = () => {
                     <Typography>{chat.codes.join(', ')}</Typography>
                   </TableCell>
                   <TableCell align="left">
-                    {user.isAdmin ? (
+                    {user?.isAdmin ? (
                       <Link to={`/courses/${chat.id}`} component={RouterLink}>
                         <Typography>{chat.name[language]}</Typography>
                       </Link>

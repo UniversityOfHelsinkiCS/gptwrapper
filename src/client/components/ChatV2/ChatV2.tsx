@@ -557,7 +557,7 @@ const FileSearchInfo = ({
   messages,
 }: {
   isFileSearching: boolean
-  fileSearchResult: FileSearchCompletedData
+  fileSearchResult?: FileSearchCompletedData
   messages: Message[]
 }) => {
   return (

@@ -19,14 +19,14 @@ const VisuallyHiddenInput = styled('input')({
 })
 
 export const RagIndex: React.FC = () => {
-  const { id: strId } = useParams<{ id: string }>()
+  const { id: strId } = useParams() as { id: string }
   const navigate = useNavigate()
   const id = parseInt(strId, 10)
   const deleteIndexMutation = useDeleteRagIndexMutation()
-  const { data: ragDetails, isLoading, refetch } = useRagIndexDetails(id)
+  const { data: ragDetails, isSuccess, refetch } = useRagIndexDetails(id)
   const uploadMutation = useUploadMutation(ragDetails)
 
-  if (isLoading) {
+  if (!isSuccess) {
     return <LinearProgress />
   }
 

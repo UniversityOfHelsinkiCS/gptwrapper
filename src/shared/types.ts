@@ -1,6 +1,6 @@
 import type { ResponseFileSearchToolCall } from 'openai/resources/responses/responses'
-import { IngestionPipelineStageKey } from './constants'
 import type { VectorStoreFile } from 'openai/resources/vector-stores/files'
+import type { IngestionPipelineStageKey } from './constants'
 
 export type RagIndexMetadata = {
   name: string
@@ -10,7 +10,7 @@ export type RagIndexMetadata = {
 }
 
 export type RagFileMetadata = {
-  chunkingStrategy?: VectorStoreFile['chunking_strategy']['type']
+  chunkingStrategy?: NonNullable<VectorStoreFile['chunking_strategy']>['type']
   vectorStoreFileId?: string
   usageBytes?: number
 }
@@ -50,7 +50,7 @@ export type FileSearchCompletedData = Omit<ResponseFileSearchToolCall, 'results'
   ragIndexId: number
 }
 
-export type FileSearchResultData = ResponseFileSearchToolCall['results'][number]
+export type FileSearchResultData = NonNullable<ResponseFileSearchToolCall['results']>[number]
 
 export type ResponseStreamEventData =
   | {

@@ -11,24 +11,24 @@ class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAtt
 
   declare name: Locales
 
-  declare description: string
+  declare description: CreationOptional<string>
 
-  declare model: string
+  declare model: CreationOptional<string>
 
-  declare usageLimit: number
+  declare usageLimit: CreationOptional<number>
 
-  declare resetCron: string | null
+  declare resetCron: CreationOptional<string | null>
 
   /**
    * the Course Unit Realisation id. The term "course" is a bit misleading
    */
-  declare courseId: string | null
+  declare courseId: CreationOptional<string | null>
 
-  declare activityPeriod: ActivityPeriod | null
+  declare activityPeriod: CreationOptional<ActivityPeriod | null>
 
-  declare courseActivityPeriod: ActivityPeriod | null
+  declare courseActivityPeriod: CreationOptional<ActivityPeriod | null>
 
-  declare courseUnitRealisationTypeUrn: string | null
+  declare courseUnitRealisationTypeUrn: CreationOptional<string | null>
 
   declare courseUnits: CreationOptional<CourseUnit[]>
 
