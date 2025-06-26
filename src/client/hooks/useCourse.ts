@@ -1,29 +1,25 @@
 import { useQuery } from '@tanstack/react-query'
-
-import { Course, CourseStatistics } from '../types'
+import type { Discussion } from '../../shared/types'
+import type { Course, CourseStatistics } from '../types'
 import apiClient from '../util/apiClient'
-import { AxiosError } from 'axios'
 import { useGetQuery } from './apiHooks'
-import { Discussion } from '../../shared/types'
 
 const useCourse = (courseId?: string) => {
   const queryKey = ['course', courseId]
 
-  const queryFn = async (): Promise<Course | null> => {
-    const res = await apiClient.get(`/courses/${courseId}`)
+  const queryFn = async () => {
+    const res = await apiClient.get<Course>(`/courses/${courseId}`)
 
     const { data } = res
 
     return data
   }
 
-  const { data: course, ...rest } = useQuery({
+  return useQuery({
     queryKey,
     queryFn,
     enabled: !!courseId,
   })
-
-  return { course, ...rest }
 }
 
 export const useCourseDiscussers = (courseId?: string) => {

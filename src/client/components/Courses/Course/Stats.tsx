@@ -12,9 +12,9 @@ const Stats = ({ courseId }: { courseId: string }) => {
   const [studentListOpen, setStudentListOpen] = useState(false)
 
   const { stats, isLoading } = useCourseStatistics(courseId)
-  const { course, isLoading: courseLoading } = useCourse(courseId)
+  const { data: course, isSuccess: isCourseSuccess } = useCourse(courseId)
 
-  if (!stats || !user || isLoading || isUserLoading || courseLoading) return null
+  if (!stats || !user || isLoading || isUserLoading || !isCourseSuccess) return null
 
   const { average, usagePercentage, usages } = stats
 

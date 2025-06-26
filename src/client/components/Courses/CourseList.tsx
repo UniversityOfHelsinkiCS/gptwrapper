@@ -49,7 +49,7 @@ const Course = ({
               <Typography variant="h6">{name[language]}</Typography>
             </Link>
             <Typography style={{ marginLeft: 5 }}>{code}</Typography>
-            <Typography style={{ fontStyle: 'italic', marginLeft: 20 }}>{getCurTypeLabel(courseUnitRealisationTypeUrn, language)}</Typography>
+            <Typography style={{ fontStyle: 'italic', marginLeft: 20 }}>{getCurTypeLabel(courseUnitRealisationTypeUrn ?? '', language)}</Typography>
           </div>
 
           {isActive && (

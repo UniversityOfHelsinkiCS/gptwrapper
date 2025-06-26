@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Close } from '@mui/icons-material'
 import { Box, IconButton, Modal, Slider, Typography } from '@mui/material'
-import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE } from '../../../config'
-import { Prompt, Course } from '../../types'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE } from '../../../config'
 // import ModelSelector from './ModelSelector'
 // import { validModels } from '../../../config'
 // import RagSelector from './RagSelector'
-import { RagIndexAttributes } from '../../../shared/types'
+import type { RagIndexAttributes } from '../../../shared/types'
+import type { Course, Prompt } from '../../types'
+import AssistantInstructionsInput from './AssistantInstructionsInput'
 import SettingsButton from './generics/SettingsButton'
 import PromptSelector from './PromptSelector'
-import AssistantInstructionsInput from './AssistantInstructionsInput'
 import RagSelector from './RagSelector'
 
 interface SettingsModalProps {
@@ -23,9 +23,9 @@ interface SettingsModalProps {
   model: string
   setModel: (model: string) => void
   setRagIndex: (ragIndex: number) => void
-  ragIndices: RagIndexAttributes[]
-  currentRagIndex: RagIndexAttributes
-  course?: Course | null
+  ragIndices?: RagIndexAttributes[]
+  currentRagIndex?: RagIndexAttributes
+  course?: Course
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -46,7 +46,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const { language } = i18n
 
   const [activePromptId, setActivePromptId] = useState<string>('')
-  const [hasPrompts, setHasPrompts] = useState<boolean>(false)
   const [hidePrompt, setHidePrompt] = useState<boolean>(false)
 
   const resetSettings = () => {
@@ -64,18 +63,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const hidePrompt = course?.prompts.find(({ id }) => id === promptId)?.hidden ?? false
     setHidePrompt(hidePrompt)
   }
-
-  useEffect(() => {
-    // Sets to default instructions to prevent hidden prompts from showing
-    // Come up with a persistant storage solution if there is a need to preserve instructions per course
-    setActivePromptId('')
-    setHidePrompt(false)
-    setAssistantInstructions(DEFAULT_ASSISTANT_INSTRUCTIONS)
-
-    if (course && course.prompts.length > 0) {
-      setHasPrompts(true) // Show alustus select if there are prompts
-    }
-  }, [course])
 
   return (
     <Modal open={open} onClose={() => setOpen(false)}>
@@ -118,7 +105,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </Typography>
           <Typography variant="body1">{t('settings:promptInstructions')}</Typography>
 
-          {hasPrompts && course && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}
+          {course?.prompts && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}
           <AssistantInstructionsInput
             label={t('settings:promptContent')}
             disabled={activePromptId.length > 0}
@@ -147,7 +134,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </Box>
           </Box>
 
-          <RagSelector currentRagIndex={currentRagIndex} setRagIndex={setRagIndex} ragIndices={ragIndices} />
+          <RagSelector currentRagIndex={currentRagIndex} setRagIndex={setRagIndex} ragIndices={ragIndices ?? []} />
         </Box>
 
         <Box

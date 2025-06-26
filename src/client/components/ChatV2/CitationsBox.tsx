@@ -17,8 +17,8 @@ const FileItemComponent = ({ fileItem }: { fileItem: FileSearchResultData }) => 
 }
 
 const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileSearchCompletedData }) => {
-  const { ragIndex, isSuccess } = useRagIndex(fileSearchResult.ragIndexId)
-  const { results, isSuccess: isResultsSuccess, error } = useFileSearchResults(fileSearchResult.id)
+  const { data: ragIndex, isSuccess } = useRagIndex(fileSearchResult.ragIndexId)
+  const { data: results, isSuccess: isResultsSuccess, error } = useFileSearchResults(fileSearchResult.id)
   const isExpired = error?.status === 404
 
   return (
@@ -40,7 +40,7 @@ const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileS
 }
 
 export const CitationsBox = ({ messages, fileSearchResult }: { messages: Message[]; fileSearchResult?: FileSearchCompletedData }) => {
-  const messageCitations = [...messages.map((m) => m.fileSearchResult).filter(Boolean)]
+  const messageCitations = [...messages.map((m) => m.fileSearchResult).filter(Boolean)] as FileSearchCompletedData[]
   if (fileSearchResult) {
     messageCitations.push(fileSearchResult)
   }

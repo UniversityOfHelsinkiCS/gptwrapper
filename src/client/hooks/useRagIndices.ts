@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
+import type { RagIndexAttributes } from '../../shared/types'
 import apiClient from '../util/apiClient'
-import { RagIndexAttributes } from '../../shared/types'
 
-export const useRagIndices = (chatInstanceId: string | null | undefined, includeExtras?: boolean) => {
+export const useRagIndices = (chatInstanceId?: string, includeExtras?: boolean) => {
   const { data: ragIndices, ...rest } = useQuery<RagIndexAttributes[]>({
     queryKey: chatInstanceId ? ['ragIndices', chatInstanceId] : ['ragIndices'],
     queryFn: async () => {

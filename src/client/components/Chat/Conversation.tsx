@@ -1,11 +1,10 @@
+import { Assistant, Person, Stop } from '@mui/icons-material'
 import { Box, Button, Paper, Stack, Typography } from '@mui/material'
-import { Person, Assistant, Stop } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { useTranslation } from 'react-i18next'
+import type { Message, Role } from '../../types'
 import CopyToClipboardButton from './CopyToClipboardButton'
-
-import { Message, Role } from '../../types'
 
 export const Response = ({ role, content, setMessage, id }: { role: Role; content: string; setMessage?: any; id: string }) => {
   const isUser = role === 'user'

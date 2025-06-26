@@ -9,10 +9,10 @@ const Usage = () => {
   const { language } = i18n
   const { id } = useParams()
   const { user, isLoading: isUserLoading } = useCurrentUser()
-  const { course, isLoading: courseLoading } = useCourse(id)
+  const { data: course, isSuccess: isCourseSuccess } = useCourse(id)
   const { discussers, isLoading: discussersLoading } = useCourseDiscussers(id)
 
-  if (!course || courseLoading || isUserLoading || !user || discussersLoading) return null
+  if (!course || !isCourseSuccess || isUserLoading || !user || discussersLoading) return null
 
   return (
     <div>

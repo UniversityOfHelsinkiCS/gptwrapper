@@ -7,7 +7,7 @@ const RagSelector = ({
   setRagIndex,
   ragIndices,
 }: {
-  currentRagIndex: RagIndexAttributes
+  currentRagIndex?: RagIndexAttributes
   setRagIndex: (ragIndex: number) => void
   ragIndices: RagIndexAttributes[]
 }) => {

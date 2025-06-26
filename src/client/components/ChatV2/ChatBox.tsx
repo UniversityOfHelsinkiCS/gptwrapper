@@ -133,11 +133,7 @@ export const ChatBox = ({
                   accept="text/*,application/pdf"
                   hidden
                   ref={fileInputRef}
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      handleFileTypeValidation(e.target.files[0])
-                    }
-                  }}
+                  onChange={(e) => e.target.files?.[0] && handleFileTypeValidation(e.target.files[0])}
                 />
               </IconButton>
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
@@ -164,7 +160,7 @@ export const ChatBox = ({
 
         <Box>
           <Typography variant="body1" style={{ padding: '1rem', opacity: 0.7 }}>
-            {userStatus?.usage} / {userStatus?.limit} {t('status:tokensUsed')}
+            {userStatus?.usage ?? '-'} / {userStatus?.limit ?? '-'} {t('status:tokensUsed')}
           </Typography>
         </Box>
       </Box>

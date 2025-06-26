@@ -31,7 +31,7 @@ const Course = () => {
 
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
 
-  const { id } = useParams()
+  const { id } = useParams() as { id: string }
   const { t, i18n } = useTranslation()
 
   const { language } = i18n
@@ -47,13 +47,13 @@ const Course = () => {
     setMandatory(false)
   }
 
-  const { prompts, isLoading: promptsLoading } = usePrompts(id as string)
-  const { course, isLoading: courseLoading } = useCourse(id as string)
+  const { prompts, isLoading: promptsLoading } = usePrompts(id)
+  const { data: course, isSuccess: isCourseSuccess } = useCourse(id)
   const { user, isLoading: userLoading } = useCurrentUser()
 
   const studentLink = `${window.location.origin}${PUBLIC_URL}/${course?.courseId}`
 
-  if (userLoading || !user || courseLoading) return null
+  if (userLoading || !user || !isCourseSuccess) return null
 
   const amongResponsibles = course.responsibilities ? course.responsibilities.some((r) => r.user.id === user.id) : false
 
@@ -167,7 +167,7 @@ const Course = () => {
               <Typography>{course.courseUnits.map((cu) => cu.code).join(', ')}</Typography>
             </div>
             <div style={{ ...right, boxSizing: 'border-box', height: '50px' }}>
-              <Typography style={{ fontStyle: 'italic' }}>{getCurTypeLabel(course.courseUnitRealisationTypeUrn, language)}</Typography>
+              <Typography style={{ fontStyle: 'italic' }}>{getCurTypeLabel(course.courseUnitRealisationTypeUrn ?? '', language)}</Typography>
             </div>
 
             <div style={{ ...left, boxSizing: 'border-box' }}>

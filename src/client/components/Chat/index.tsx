@@ -82,7 +82,7 @@ const Chat = () => {
   // Null when in general chat
   const { courseId } = useParams()
 
-  const { course } = useCourse(courseId)
+  const { data: course } = useCourse(courseId)
   const { userStatus, refetch: refetchStatus } = useUserStatus(courseId)
 
   const [model, setModel] = useState(getInitialModel())

@@ -6,7 +6,7 @@ import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { validModels, DEFAULT_MODEL, FREE_MODEL, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE, ALLOWED_FILE_TYPES } from '../../../config'
 import useInfoTexts from '../../hooks/useInfoTexts'
 import type { Message } from '../../types'
-import type { FileSearchCompletedData, FileSearchResultData, ResponseStreamEventData } from '../../../shared/types'
+import type { FileSearchCompletedData, ResponseStreamEventData } from '../../../shared/types'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
@@ -34,7 +34,7 @@ import RagSelector from './RagSelector'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
-  const { course } = useCourse(courseId)
+  const { data: course } = useCourse(courseId)
 
   const { ragIndices } = useRagIndices(courseId)
   const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
@@ -58,9 +58,9 @@ export const ChatV2 = () => {
     value: DEFAULT_MODEL_TEMPERATURE,
   })
 
-  const [messages, setMessages] = useLocalStorageState<Message[]>(`${localStoragePrefix}-chat-messages`, [])
-  const [prevResponse, setPrevResponse] = useLocalStorageState<{ id: string }>(`${localStoragePrefix}-prev-response`, { id: '' })
-  const [fileSearch, setFileSearch] = useLocalStorageState<FileSearchCompletedData>(`${localStoragePrefix}-last-file-search`, null)
+  const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as Message[])
+  const [prevResponse, setPrevResponse] = useLocalStorageState(`${localStoragePrefix}-prev-response`, { id: '' })
+  const [fileSearch, setFileSearch] = useLocalStorageState<FileSearchCompletedData>(`${localStoragePrefix}-last-file-search`)
 
   const [isFileSearching, setIsFileSearching] = useState<boolean>(false)
 
@@ -80,8 +80,8 @@ export const ChatV2 = () => {
   const [streamController, setStreamController] = useState<AbortController>()
 
   // RAG states
-  const [ragIndexId, setRagIndexId] = useState<number | null>(null)
-  const ragIndex = ragIndices?.find((index) => index.id === ragIndexId) ?? null
+  const [ragIndexId, setRagIndexId] = useState<number | undefined>()
+  const ragIndex = ragIndices?.find((index) => index.id === ragIndexId)
 
   // Refs
   const appContainerRef = useContext(AppContext)
@@ -116,8 +116,7 @@ export const ChatV2 = () => {
         for (const chunk of data.split('\n')) {
           if (!chunk || chunk.trim().length === 0) continue
 
-          let parsedChunk: ResponseStreamEventData | null = null
-
+          let parsedChunk: ResponseStreamEventData | undefined
           try {
             parsedChunk = JSON.parse(chunk)
           } catch (e: any) {
@@ -134,7 +133,7 @@ export const ChatV2 = () => {
             }
           }
 
-          if (!parsedChunk) continue;
+          if (!parsedChunk) continue
 
           switch (parsedChunk.type) {
             case 'writing':
@@ -187,24 +186,13 @@ export const ChatV2 = () => {
   const handleSubmit = async (message: string) => {
     const formData = new FormData()
 
-    const fileInput = fileInputRef.current
-    if (!fileInput) {
-      console.error('fileInputRef is not set')
-      return
-    }
-
-    let file: File | null = null
-
-    if (fileInput.files && fileInput.files.length > 0) {
-      file = fileInput.files[0]
-    }
-
+    let file = fileInputRef.current?.files?.[0]
     if (file) {
       if (ALLOWED_FILE_TYPES.includes(file.type)) {
         formData.append('file', file)
       } else {
         console.error('File not attached')
-        file = null
+        file = undefined
       }
     }
 
@@ -222,7 +210,7 @@ export const ChatV2 = () => {
       fileInputRef.current.value = ''
     }
     setFileName('')
-    setFileSearch(null)
+    setFileSearch(undefined)
     setIsFileSearching(false)
     setStreamController(new AbortController())
     setRetryTimeout(() => {
@@ -245,6 +233,11 @@ export const ChatV2 = () => {
         saveConsent, // this asks if user allows saving the chat messaging for research purposes
         prevResponseId: prevResponse.id,
       })
+
+      if (!stream) {
+        console.error('Stream is undefined')
+        return
+      }
 
       if (tokenUsageAnalysis?.message) {
         setTokenUsageWarning(tokenUsageAnalysis.message)
@@ -270,7 +263,7 @@ export const ChatV2 = () => {
       fileInputRef.current.value = ''
     }
     setFileName('')
-    setFileSearch(null)
+    setFileSearch(undefined)
     setStreamController(undefined)
     setTokenUsageWarning('')
     setTokenWarningVisible(false)
@@ -302,7 +295,7 @@ export const ChatV2 = () => {
 
   useEffect(() => {
     // Scrolls to bottom on initial load only
-    if (!appContainerRef || !appContainerRef.current || !conversationRef.current || messages.length === 0) return
+    if (!appContainerRef?.current || !conversationRef.current || messages.length === 0) return
     if (isCompletionDone) {
       const container = appContainerRef?.current
       if (container) {
@@ -317,7 +310,7 @@ export const ChatV2 = () => {
   // @todo fix this shit when having long file search results
   useEffect(() => {
     // Scrolls to last assistant message on text generation
-    if (!appContainerRef || !appContainerRef.current || !conversationRef.current || messages.length === 0) return
+    if (!appContainerRef?.current || !conversationRef.current || messages.length === 0) return
 
     const lastNode = conversationRef.current.lastElementChild as HTMLElement
 
@@ -406,7 +399,7 @@ export const ChatV2 = () => {
   }
 
   const showFileSearch = isFileSearching || messages.some((m) => m.fileSearchResult) || fileSearch
-  const showRagSelector = ragIndices?.length > 0
+  const showRagSelector = (ragIndices?.length ?? 0) > 0
 
   return (
     <Box
@@ -444,7 +437,7 @@ export const ChatV2 = () => {
             <SettingsButton startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus({ open: true })}>
               {t('infoSmall:title')}
             </SettingsButton>
-            {showRagSelector && <RagSelector currentRagIndex={ragIndex} setRagIndex={setRagIndexId} ragIndices={ragIndices} />}
+            {showRagSelector && <RagSelector currentRagIndex={ragIndex} setRagIndex={setRagIndexId} ragIndices={ragIndices ?? []} />}
           </Box>
         </Box>
       </Box>
@@ -479,11 +472,7 @@ export const ChatV2 = () => {
             courseName={course && getLanguageValue(course.name, language)}
             courseDate={course?.activityPeriod}
             conversationRef={conversationRef}
-            expandedNodeHeight={
-              window.innerHeight -
-              (inputFieldRef?.current?.clientHeight ?? 200) -
-              300 // eye-balled number for cutting the excess padding
-            }
+            expandedNodeHeight={window.innerHeight - (inputFieldRef.current?.clientHeight ?? 0) - 300}
             messages={messages}
             completion={completion}
             isCompletionDone={isCompletionDone}

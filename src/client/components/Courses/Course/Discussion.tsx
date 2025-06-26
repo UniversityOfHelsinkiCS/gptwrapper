@@ -43,10 +43,10 @@ const UserDiscussion = () => {
 
   const { id, user_id } = useParams()
   const { user, isLoading: isUserLoading } = useCurrentUser()
-  const { course, isLoading: courseLoading } = useCourse(id)
-  const discussionQuery = useCourseDiscussion(id, user_id)
+  const { data: course, isSuccess: isCourseSuccess } = useCourse(id)
+  const { data: discussion, isSuccess: isDiscussionSuccess } = useCourseDiscussion(id, user_id)
 
-  if (!course || courseLoading || !discussionQuery.isSuccess || isUserLoading || !user) return null
+  if (!course || !isCourseSuccess || !isDiscussionSuccess || isUserLoading || !user) return null
 
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
@@ -55,7 +55,7 @@ const UserDiscussion = () => {
       <div>student: {user_id}</div>
 
       <div style={{ marginBottom: '2em' }}>
-        {discussionQuery.data.map((u) => (
+        {discussion.map((u) => (
           <Message key={u.id} message={u} />
         ))}
       </div>

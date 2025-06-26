@@ -22,7 +22,7 @@ const UserMessage = ({
   expandedNodeHeight,
 }: {
   content: string
-  attachements: string
+  attachements?: string
   isLastAssistantNode: boolean
   expandedNodeHeight: number
 }) => (
@@ -165,13 +165,12 @@ const AssistantMessage = ({
           }}
         >
           {processedContent}
-
         </ReactMarkdown>
-        {error &&
+        {error && (
           <Box>
-            <Typography variant='body1' fontStyle="italic" color='#cc0000'>{`\n\n ${error}`}</Typography>
+            <Typography variant="body1" fontStyle="italic" color="#cc0000">{`\n\n ${error}`}</Typography>
           </Box>
-        }
+        )}
       </Box>
     </Box>
   )
@@ -189,8 +188,8 @@ const MessageItem = ({
   hasRagIndex: boolean
 }) => {
   const { courseId } = useParams()
-  // TÄMÄ on kaikki hämäystä demonstroidakseen lähdeviittaukset kurssichatissa
-  const hasAnnotations_Leikisti = isLastAssistantNode && courseId && hasRagIndex
+  // @todo when has annotations?
+  const hasAnnotations_Leikisti = false
 
   if (message.role === 'assistant') {
     return (
@@ -233,7 +232,7 @@ export const Conversation = ({
   messages: Message[]
   completion: string
   isCompletionDone: boolean
-  fileSearchResult: FileSearchCompletedData
+  fileSearchResult?: FileSearchCompletedData
   hasRagIndex: boolean
 }) => (
   <Box
