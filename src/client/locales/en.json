@@ -82,7 +82,8 @@
     "emptyConversation": "Empty conversation",
     "settings": "Chat settings",
     "shiftEnter": "Or send on Shift + Enter",
-    "testUseInfo": "The new chat view is still in development and bugs are likely to occur"
+    "testUseInfo": "The new chat view is still in development and bugs are likely to occur",
+    "searchTerms": "Searched for:"
   },
   "settings": {
     "prompt": "Conversation prompt",

@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { handleCompletionStreamError } from './error'
 import { getCompletionStream } from './util'
 
-import { Box, Typography, Alert, CircularProgress } from '@mui/material'
+import { Box, Typography, Alert, Skeleton } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import EmailIcon from '@mui/icons-material/Email'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -465,6 +465,7 @@ export const ChatV2 = () => {
             margin: 'auto',
             paddingTop: '1rem',
             paddingBottom: '8rem',
+            overflowY: 'auto',
           }}
         >
           <Alert severity="info">{t('chat:testUseInfo')}</Alert>
@@ -525,9 +526,12 @@ export const ChatV2 = () => {
         sx={{
           flex: 1,
           minWidth: 300,
+          height: '100vh',
+          position: 'sticky',
+          top: 0,
         }}
       >
-        <Box>{showFileSearch && <FileSearchInfo isFileSearching={isFileSearching} fileSearchResult={fileSearch} messages={messages} />}</Box>
+        {showFileSearch && <FileSearchInfo isFileSearching={isFileSearching} fileSearchResult={fileSearch} messages={messages} />}
       </Box>
 
       {/* Modals --------------------------------------*/}
@@ -560,22 +564,54 @@ const FileSearchInfo = ({
   fileSearchResult?: FileSearchCompletedData
   messages: Message[]
 }) => {
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth',
+      })
+    }
+  }, [messages, fileSearchResult, isFileSearching])
+
   return (
     <Box
+      ref={scrollRef}
       sx={{
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
         gap: '1.5rem',
+        minWidth: 300,
+        borderLeft: '1px solid rgba(0, 0, 0, 0.12)',
+        overflowY: 'auto',
+        mr: '4px',
       }}
     >
-      <Box sx={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-        <Box>
-          <Typography variant="h6">Lähdemateriaalit</Typography>
-        </Box>
-        {isFileSearching && <CircularProgress />}
+      <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+        <Typography variant="h5" sx={{ pt: 3, pb: 0 }}>
+          Lähdemateriaalit
+        </Typography>
       </Box>
-      <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />
+      {isFileSearching ? (
+        <Box
+          sx={{
+            width: '95%',
+            display: 'flex',
+            flexDirection: 'column',
+            pl: 2.5,
+            mr: 2,
+            gap: 2,
+          }}
+        >
+          <Skeleton variant="rounded" height={'15rem'} />
+          <Skeleton variant="rounded" height={'15rem'} />
+          <Skeleton variant="rounded" height={'15rem'} />
+        </Box>
+      ) : (
+        <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />
+      )}
     </Box>
   )
 }

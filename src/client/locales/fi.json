@@ -82,7 +82,8 @@
     "emptyConversation": "Tyhjennä keskustelu",
     "settings": "Keskustelun asetukset",
     "shiftEnter": "Tai lähetä Shift + Enterillä",
-    "testUseInfo": "Curren uusi chattinäkymä on vielä kehitysvaiheessa ja bugeja varmasti ilmenee"
+    "testUseInfo": "Curren uusi chattinäkymä on vielä kehitysvaiheessa ja bugeja varmasti ilmenee",
+    "searchTerms": "Hakusanat:"
   },
   "settings": {
     "prompt": "Keskustelun alustus",
