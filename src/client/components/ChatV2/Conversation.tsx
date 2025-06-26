@@ -197,7 +197,7 @@ const MessageItem = ({
       <AssistantMessage
         content={message.content}
         error={message.error}
-        hasAnnotations={hasAnnotations_Leikisti}
+        hasAnnotations={!!hasAnnotations_Leikisti}
         hasRagIndex={hasRagIndex}
         isLastAssistantNode={isLastAssistantNode}
         expandedNodeHeight={expandedNodeHeight}
@@ -207,7 +207,7 @@ const MessageItem = ({
     return (
       <UserMessage
         content={message.content}
-        attachements={message.attachements}
+        attachements={message.attachements ?? ''}
         isLastAssistantNode={isLastAssistantNode}
         expandedNodeHeight={expandedNodeHeight}
       />

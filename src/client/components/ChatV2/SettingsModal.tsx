@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Close } from '@mui/icons-material'
 import { Box, IconButton, Modal, Slider, Typography } from '@mui/material'
-import { DEFAULT_MODEL, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE } from '../../../config'
+import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE } from '../../../config'
 import { Prompt, Course } from '../../types'
 // import ModelSelector from './ModelSelector'
 // import { validModels } from '../../../config'
@@ -118,7 +118,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </Typography>
           <Typography variant="body1">{t('settings:promptInstructions')}</Typography>
 
-          {hasPrompts && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}
+          {hasPrompts && course && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}
           <AssistantInstructionsInput
             label={t('settings:promptContent')}
             disabled={activePromptId.length > 0}

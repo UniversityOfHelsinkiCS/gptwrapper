@@ -91,17 +91,17 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
   const { t, i18n } = useTranslation()
   const enableMutation = useEnableCourse()
   const disableMutation = useDisableCourse()
-  const [courseToEnable, setCourseToEnable] = useState<CourseType>(null)
-  const [courseToDisable, setCourseToDisable] = useState<CourseType>(null)
+  const [courseToEnable, setCourseToEnable] = useState<CourseType | null>(null)
+  const [courseToDisable, setCourseToDisable] = useState<CourseType | null>(null)
 
   if (!courseUnits) return null
 
   const defaultActivityPeriod = courseToEnable
     ? {
-        startDate: courseToEnable.activityPeriod.startDate,
-        endDate: addMonths(courseToEnable.activityPeriod.endDate, 1).toDateString(),
-      }
-    : null
+      startDate: courseToEnable.activityPeriod.startDate,
+      endDate: addMonths(courseToEnable.activityPeriod.endDate, 1).toDateString(),
+    }
+    : undefined
 
   const activityPeriodString = courseToEnable ? formatDate(defaultActivityPeriod) : null
 
