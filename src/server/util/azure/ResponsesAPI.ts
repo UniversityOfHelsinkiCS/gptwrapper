@@ -23,7 +23,7 @@ export const getAzureOpenAIClient = (deployment: string) =>
     endpoint,
   })
 
-const client = getAzureOpenAIClient(process.env.GPT_4O_MINI)
+const client = getAzureOpenAIClient(process.env.GPT_4O_MINI ?? '')
 
 const validatedInputSchema = z.object({
   role: z.enum(['assistant', 'user', 'system']),
@@ -66,7 +66,7 @@ export class ResponsesClient {
 
     this.model = selectedModel
     this.temperature = temperature
-    this.instructions = instructions
+    this.instructions = instructions ?? ''
     this.tools = fileSearchTool
     this.user = user
   }
@@ -118,7 +118,7 @@ export class ResponsesClient {
 
   async handleResponse({ events, encoding, res, ragIndexId }: { events: Stream<ResponseStreamEvent>; encoding: Tiktoken; res: Response; ragIndexId?: number }) {
     let tokenCount = 0
-    const contents = []
+    const contents: string[] = []
 
     for await (const event of events) {
       // console.log('event type:', event.type)
@@ -186,7 +186,7 @@ export class ResponsesClient {
           await this.write(
             {
               type: 'error',
-              error: `Failed to complete message. Error: ${event.response.error.message}`,
+              error: `Failed to complete message. Error: ${event.response.error?.message ?? 'Unknown error'}`,
             },
             res,
           )
@@ -196,7 +196,7 @@ export class ResponsesClient {
           await this.write(
             {
               type: 'error',
-              error: `Response incomplete. Error: ${event.response.incomplete_details.reason}`,
+              error: `Response incomplete. Error: ${event.response.incomplete_details?.reason ?? 'Unknown reason'}`,
             },
             res,
           )

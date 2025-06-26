@@ -40,7 +40,7 @@ const getMockCompletionEvents: () => Promise<EventStream<ChatCompletions>> = asy
               },
               index: 0,
               finishReason: 'completed',
-              logprobs: undefined,
+              logprobs: null,
             },
           ],
         })
@@ -72,7 +72,8 @@ export const getCompletionEvents = async ({ model, messages, options }: AzureOpt
 
 export const streamCompletion = async (events: EventStream<ChatCompletions>, options: AzureOptions, encoding: Tiktoken, res: Response) => {
   let tokenCount = 0
-  const contents = []
+  const contents: string[] = []
+
   for await (const event of events) {
     for (const choice of event.choices) {
       const delta = choice.delta?.content

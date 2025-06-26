@@ -41,7 +41,9 @@ export const ChatBox = ({
   const { t, i18n } = useTranslation()
 
   const handleDeleteFile = () => {
-    fileInputRef.current.value = null
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
     setFileName('')
   }
 
@@ -126,7 +128,17 @@ export const ChatBox = ({
             <Box>
               <IconButton component="label">
                 <AttachFileIcon />
-                <input type="file" accept="text/*,application/pdf" hidden ref={fileInputRef} onChange={(e) => handleFileTypeValidation(e.target.files[0])} />
+                <input
+                  type="file"
+                  accept="text/*,application/pdf"
+                  hidden
+                  ref={fileInputRef}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      handleFileTypeValidation(e.target.files[0])
+                    }
+                  }}
+                />
               </IconButton>
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
               <ModelSelector currentModel={currentModel} setModel={setModel} availableModels={availableModels} />
@@ -152,7 +164,7 @@ export const ChatBox = ({
 
         <Box>
           <Typography variant="body1" style={{ padding: '1rem', opacity: 0.7 }}>
-            {userStatus.usage} / {userStatus.limit} {t('status:tokensUsed')}
+            {userStatus?.usage} / {userStatus?.limit} {t('status:tokensUsed')}
           </Typography>
         </Box>
       </Box>

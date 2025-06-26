@@ -1,6 +1,6 @@
 import * as redis from './redis'
 
-let lastRestart = null
+let lastRestart: number | null = null
 
 export const updateLastRestart = async () => {
   const now = Date.now()

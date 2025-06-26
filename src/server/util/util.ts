@@ -54,7 +54,17 @@ export const generateTerms = () => {
   const yearNow = dateNow.getFullYear()
   const monthNow = dateNow.getMonth()
 
-  const terms = []
+  type Term = {
+    label: {
+      en: string
+      fi: string
+      sv: string
+    }
+    id: number
+    startDate: string
+    endDate: string
+  }
+  const terms: Term[] = []
   let id = 1
 
   // this is ugly

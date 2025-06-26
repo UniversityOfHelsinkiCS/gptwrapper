@@ -52,7 +52,7 @@ const PostStreamSchemaV2 = z.object({
     assistantInstructions: z.string().optional(),
     messages: z.array(z.any()),
     userConsent: z.boolean().optional(),
-    modelTemperature: z.number().min(0).max(2).optional(),
+    modelTemperature: z.number().min(0).max(2),
     saveConsent: z.boolean().optional(),
     prevResponseId: z.string().optional(),
     courseId: z.string().optional(),
@@ -73,11 +73,14 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   }
 
   // @todo were not checking if the user is enrolled?
-  const course =
-    courseId &&
-    (await ChatInstance.findOne({
+  let course: ChatInstance | null = null
+
+  if (courseId) {
+    const found = await ChatInstance.findOne({
       where: { courseId },
-    }))
+    })
+    course = found ?? null
+  }
 
   if (courseId && !course) {
     res.status(404).send('Course not found')
@@ -230,7 +233,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     courseId,
   })
 
-  const consentToSave = courseId && course.saveDiscussions && options.saveConsent
+  const consentToSave = courseId && course!.saveDiscussions && options.saveConsent
 
   console.log('consentToSave', options.saveConsent, user.username)
 

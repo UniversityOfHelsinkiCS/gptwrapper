@@ -26,7 +26,7 @@ export const safeBulkCreate = async ({ entityName, bulkCreate, fallbackCreate, b
     const result = await bulkCreate(entities, bulkCreateOptions)
     return result
   } catch (bulkCreateError: any) {
-    const result = []
+    const result: any[] = []
     logError(`[UPDATER] ${entityName}.bulkCreate failed, reason: `, bulkCreateError)
     logger.info(`[UPDATER] Creating ${entityName}s one by one`)
     for (const entity of entities) {
