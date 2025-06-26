@@ -59,10 +59,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         type: 'PERSONAL',
       }
       if (isNewPrompt) {
-        await apiClient.post('/prompts', promptData)
+        const res = await apiClient.post<Prompt>('/prompts', promptData)
+        setActivePrompt(res.data)
       } else {
         await apiClient.put(`/prompts/${activePrompt?.id}`, promptData)
       }
+      refetch()
+    },
+  })
+  const promptDeleteMutation = useMutation({
+    mutationFn: async (prompt: Prompt) => {
+      await apiClient.delete(`/prompts/${prompt.id}`)
       refetch()
     },
   })
@@ -136,15 +143,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {t('settings:prompt')}
           </Typography>
           <Typography variant="body1">{t('settings:promptInstructions')}</Typography>
-          <Box sx={{ display: 'flex', gap: '1.2rem' }}>
-            <PromptSelector
-              title={t('settings:coursePrompts')}
-              coursePrompts={course?.prompts ?? []}
-              myPrompts={myPrompts}
-              activePrompt={activePrompt}
-              setActivePrompt={handleChangePrompt}
-            />
-          </Box>
+          <PromptSelector
+            coursePrompts={course?.prompts ?? []}
+            myPrompts={myPrompts}
+            activePrompt={activePrompt}
+            setActivePrompt={handleChangePrompt}
+            handleDeletePrompt={(prompt) => promptDeleteMutation.mutateAsync(prompt)}
+          />
           <AssistantInstructionsInput
             label={t('settings:promptContent')}
             disabled={!isPromptEditable}

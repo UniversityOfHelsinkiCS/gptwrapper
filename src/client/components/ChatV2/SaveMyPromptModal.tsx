@@ -38,15 +38,16 @@ export const SaveMyPromptModal = ({ isOpen, setIsOpen, onSave, systemMessage, ex
             slotProps={{ htmlInput: { minLength: 1 } }}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder={t('settings:saveMyPromptAs')}
+            label={t('settings:saveMyPromptAs')}
             fullWidth
+            sx={{ mt: 1 }}
           />
           <Typography sx={{ mt: 2 }} variant="body2" color="textSecondary">
             {systemMessage}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button color="primary" type="submit">
+          <Button color="primary" type="submit" disabled={!name}>
             {isNewPrompt ? t('settings:saveNewPrompt') : t('settings:updatePrompt')}
           </Button>
           <Button color="secondary" type="button" onClick={() => setIsOpen(false)}>

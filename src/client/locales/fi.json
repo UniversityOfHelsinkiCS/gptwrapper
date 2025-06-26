@@ -93,7 +93,17 @@
     "temperatureInstructions": "Suuremmat arvot, kuten 0.8, tekevät tulosteesta satunnaisemman, kun taas pienemmät arvot, kuten 0.2, tekevät siitä tarkemman ja deterministisemmän.",
     "temperatureAccurate": "Tarkempi",
     "temperatureRandom": "Satunnainen",
-    "resetDefault": "Palauta oletusasetukset"
+    "resetDefault": "Palauta oletusasetukset",
+    "myPrompts": "Omat alustukset",
+    "coursePrompts": "Kurssin alustukset",
+    "saveMyPrompt": "Tallenna oma alustus",
+    "saveMyPromptModalTitle": "Luo tai päivitä oma alustus",
+    "saveMyPromptAs": "Tallenna alustus nimellä",
+    "saveNewPrompt": "Luo uusi oma alustus",
+    "updatePrompt": "Päivitä alustus",
+    "choosePrompt": "Valitse alustus",
+    "default": "Oletus",
+    "confirmDeletePrompt": "Haluatko varmasti poistaa alustuksen '{{name}}'?"
   },
   "chats": {
     "header": "Auki olevat kurssichatit",

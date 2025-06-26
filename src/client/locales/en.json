@@ -93,7 +93,17 @@
     "temperatureInstructions": "Higher values, like 0.8, make the output more random, while lower values, like 0.2, make it more accurate and deterministic.",
     "temperatureAccurate": "Accurate",
     "temperatureRandom": "Random",
-    "resetDefault": "Reset to default settings"
+    "resetDefault": "Reset to default settings",
+    "myPrompts": "My prompts",
+    "coursePrompts": "Course prompts",
+    "saveMyPrompt": "Save to my prompts",
+    "saveMyPromptModalTitle": "Create or update a prompt",
+    "saveMyPromptAs": "Save prompt as",
+    "saveNewPrompt": "Create a new prompt",
+    "updatePrompt": "Update prompt",
+    "choosePrompt": "Choose prompt",
+    "default": "Default",
+    "confirmDeletePrompt": "Are you sure you want to delete the prompt '{{name}}'?"
   },
   "email": {
     "save": "Save as email",
