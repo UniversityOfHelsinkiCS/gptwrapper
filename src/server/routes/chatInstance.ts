@@ -5,6 +5,7 @@ import { addMonths } from 'date-fns'
 import { ChatInstance, User, UserChatInstanceUsage } from '../db/models'
 import { DEFAULT_MODEL_ON_ENABLE, DEFAULT_TOKEN_LIMIT } from '../../config'
 import { sequelize } from '../db/connection'
+import { ApplicationError } from '../util/ApplicationError'
 
 const chatInstanceRouter = express.Router()
 
@@ -25,7 +26,7 @@ chatInstanceRouter.get('/', async (req, res) => {
           sequelize.literal(`(
                       SELECT COUNT(*)
                       FROM prompts
-                      WHERE prompts.chat_instance_id = "ChatInstance"."id" 
+                      WHERE prompts.chat_instance_id = "ChatInstance"."id"
                   )`),
           'promptCount',
         ],
@@ -33,7 +34,7 @@ chatInstanceRouter.get('/', async (req, res) => {
           sequelize.literal(`(
             SELECT COALESCE(SUM(usage_count), 0)
             FROM user_chat_instance_usages
-            WHERE user_chat_instance_usages.chat_instance_id = "ChatInstance"."id" 
+            WHERE user_chat_instance_usages.chat_instance_id = "ChatInstance"."id"
         )`),
           'tokenUsage',
         ],
@@ -91,9 +92,10 @@ chatInstanceRouter.post('/:id/enable', async (req, res) => {
     return
   }
 
+  const defaultStartDate = chatInstance.activityPeriod?.startDate || new Date().toDateString()
   const defaultActivityPeriod = {
-    startDate: chatInstance.activityPeriod.startDate,
-    endDate: addMonths(chatInstance.activityPeriod.endDate, 1).toDateString(),
+    startDate: defaultStartDate,
+    endDate: addMonths(defaultStartDate, 1).toDateString(),
   }
 
   chatInstance.usageLimit = DEFAULT_TOKEN_LIMIT
@@ -151,6 +153,9 @@ chatInstanceRouter.get('/:id/usages', async (req, res) => {
   }
 
   const course = await ChatInstance.findByPk(id)
+  if (!course) {
+    throw ApplicationError.NotFound('ChatInstance not found')
+  }
 
   const usageLimit = course.usageLimit
   const saveDiscussions = course.saveDiscussions

@@ -1,5 +1,5 @@
 import express from 'express'
-import { Op } from 'sequelize'
+import { Op, WhereOptions } from 'sequelize'
 
 import { sequelize } from '../db/connection'
 
@@ -10,6 +10,8 @@ import { run as runUpdater } from '../updater'
 import InfoText from '../db/models/infotext'
 import { statsViewerIams } from '../util/config'
 import { generateTerms } from '../util/util'
+import { Where } from 'sequelize/types/utils'
+import { ApplicationError } from '../util/ApplicationError'
 
 const adminRouter = express.Router()
 
@@ -50,6 +52,8 @@ adminRouter.post('/chatinstances', async (req, res) => {
     usageLimit,
     courseId,
     activityPeriod: course.activityPeriod,
+    saveDiscussions: false,
+    notOptoutSaving: false,
   })
 
   res.status(201).send(newChatInstance)
@@ -61,7 +65,7 @@ const getUsages = async () => {
     FROM user_chat_instance_usages u
     LEFT JOIN responsibilities r
     ON u.user_id = r.user_id AND u.chat_instance_id = r.chat_instance_id
-    WHERE r.user_id IS NULL AND usage_count > 0;  
+    WHERE r.user_id IS NULL AND usage_count > 0;
   `)) as any[]
 
   return usages.map((usage) => ({
@@ -117,8 +121,8 @@ adminRouter.get('/statistics', async (req, res) => {
       const programmes = units.flatMap((item) => item.organisations.map((org) => org.code))
 
       return {
-        startDate: chatInstance.activityPeriod.startDate,
-        endDate: chatInstance.activityPeriod.endDate,
+        startDate: chatInstance.activityPeriod?.startDate,
+        endDate: chatInstance.activityPeriod?.endDate,
         terms: getTermsOf(chatInstance),
         id: chatInstance.courseId,
         name: chatInstance.name,
@@ -130,7 +134,7 @@ adminRouter.get('/statistics', async (req, res) => {
       }
     }
 
-    const datas = []
+    const datas = [] as ReturnType<typeof extractFields>[]
 
     for (const courseId of Object.keys(courses)) {
       const chatInstance = (await ChatInstance.findByPk(courseId, {
@@ -247,7 +251,7 @@ adminRouter.get('/users', async (_, res) => {
 
 adminRouter.get('/users/:search', async (req, res) => {
   const { search } = req.params
-  let where = null
+  let where = {} as WhereOptions<User>
 
   if (search.split(' ').length > 1) {
     const firstNames = search.split(' ')[0]
@@ -298,6 +302,7 @@ adminRouter.delete('/usage/:userId', async (req, res) => {
 
   if (!user) {
     res.status(404).send('User not found')
+    return
   }
 
   user.usage = 0
@@ -353,6 +358,10 @@ adminRouter.put('/info-texts/:id', async (req, res) => {
   const { text } = data
 
   const infoText = await InfoText.findByPk(id)
+
+  if (!infoText) {
+    throw ApplicationError.NotFound('InfoText not found')
+  }
 
   infoText.text = text
 
