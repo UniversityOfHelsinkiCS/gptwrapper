@@ -85,10 +85,10 @@ export const ChatV2 = () => {
 
   // Refs
   const appContainerRef = useContext(AppContext)
-  const chatContainerRef = useRef<HTMLDivElement>(null)
-  const conversationRef = useRef<HTMLElement>(null)
-  const inputFieldRef = useRef<HTMLElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const chatContainerRef = useRef<HTMLDivElement | null>(null)
+  const conversationRef = useRef<HTMLElement | null>(null)
+  const inputFieldRef = useRef<HTMLElement | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
 
@@ -116,7 +116,8 @@ export const ChatV2 = () => {
         for (const chunk of data.split('\n')) {
           if (!chunk || chunk.trim().length === 0) continue
 
-          let parsedChunk: ResponseStreamEventData = null
+          let parsedChunk: ResponseStreamEventData | null = null
+
           try {
             parsedChunk = JSON.parse(chunk)
           } catch (e: any) {
@@ -132,6 +133,8 @@ export const ChatV2 = () => {
               console.error('Could not parse the accumulated chunk:', accumulatedChunk)
             }
           }
+
+          if (!parsedChunk) continue;
 
           switch (parsedChunk.type) {
             case 'writing':
@@ -184,7 +187,18 @@ export const ChatV2 = () => {
   const handleSubmit = async (message: string) => {
     const formData = new FormData()
 
-    let file = fileInputRef.current.files[0] as File
+    const fileInput = fileInputRef.current
+    if (!fileInput) {
+      console.error('fileInputRef is not set')
+      return
+    }
+
+    let file: File | null = null
+
+    if (fileInput.files && fileInput.files.length > 0) {
+      file = fileInput.files[0]
+    }
+
     if (file) {
       if (ALLOWED_FILE_TYPES.includes(file.type)) {
         formData.append('file', file)
@@ -204,7 +218,9 @@ export const ChatV2 = () => {
     setPrevResponse({ id: '' })
     setCompletion('')
     setIsCompletionDone(false)
-    fileInputRef.current.value = null
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
     setFileName('')
     setFileSearch(null)
     setIsFileSearching(false)
@@ -237,7 +253,9 @@ export const ChatV2 = () => {
       }
 
       clearRetryTimeout()
-      await processStream(stream)
+      if (stream) {
+        await processStream(stream)
+      }
     } catch (err: any) {
       console.error(err)
     }
@@ -248,7 +266,9 @@ export const ChatV2 = () => {
     setPrevResponse({ id: '' })
     setCompletion('')
     setIsCompletionDone(true)
-    fileInputRef.current.value = null
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
     setFileName('')
     setFileSearch(null)
     setStreamController(undefined)
@@ -282,9 +302,9 @@ export const ChatV2 = () => {
 
   useEffect(() => {
     // Scrolls to bottom on initial load only
-    if (!appContainerRef.current || !conversationRef.current || messages.length === 0) return
+    if (!appContainerRef || !appContainerRef.current || !conversationRef.current || messages.length === 0) return
     if (isCompletionDone) {
-      const container = appContainerRef.current
+      const container = appContainerRef?.current
       if (container) {
         container.scrollTo({
           top: container.scrollHeight,
@@ -297,7 +317,7 @@ export const ChatV2 = () => {
   // @todo fix this shit when having long file search results
   useEffect(() => {
     // Scrolls to last assistant message on text generation
-    if (!appContainerRef.current || !conversationRef.current || messages.length === 0) return
+    if (!appContainerRef || !appContainerRef.current || !conversationRef.current || messages.length === 0) return
 
     const lastNode = conversationRef.current.lastElementChild as HTMLElement
 
@@ -459,7 +479,11 @@ export const ChatV2 = () => {
             courseName={course && getLanguageValue(course.name, language)}
             courseDate={course?.activityPeriod}
             conversationRef={conversationRef}
-            expandedNodeHeight={window.innerHeight - inputFieldRef.current?.clientHeight - 300}
+            expandedNodeHeight={
+              window.innerHeight -
+              (inputFieldRef?.current?.clientHeight ?? 200) -
+              300 // eye-balled number for cutting the excess padding
+            }
             messages={messages}
             completion={completion}
             isCompletionDone={isCompletionDone}

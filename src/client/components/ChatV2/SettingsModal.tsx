@@ -25,7 +25,7 @@ interface SettingsModalProps {
   setRagIndex: (ragIndex: number) => void
   ragIndices: RagIndexAttributes[]
   currentRagIndex: RagIndexAttributes
-  course?: Course
+  course?: Course | null
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
