@@ -7,7 +7,6 @@ import {
   getIncompleteStreamMock,
   getMathBlockStreamMock,
   getMidwayFailStreamMock,
-  getTimeoutFailStreamMock,
   MockEventType,
   type MockResponseStreamEvent,
 } from './mockFunctions'
@@ -46,10 +45,6 @@ export function createMockStream<T extends { content: string }>(input: T): Async
 
     case MockEventType.MIDWAY_FAIL:
       mockType = getMidwayFailStreamMock()
-      break
-
-    case MockEventType.TIMEOUT_FAIL:
-      mockType = getTimeoutFailStreamMock()
       break
 
     case MockEventType.INCOMPLETE_FAIL:

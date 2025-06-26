@@ -1,4 +1,5 @@
 import type { ResponseStreamEvent } from 'openai/resources/responses/responses'
+import { mathTestContent, codeTestContent } from './mockContent'
 
 export interface MockResponseStreamEvent {
   type: ResponseStreamEvent['type'] // inferred Responses Stream event types
@@ -17,19 +18,18 @@ export enum MockEventType {
 }
 
 const chunkText = (text: string): string[] => {
-  const lines = text.trim().split('\n')
+  const lines = text.split('\n')
   const chunkSize = 3
   const chunks: string[] = []
 
   for (const line of lines) {
-    const words = line.trim().split(/\s+/)
+    // Keep leading whitespace
+    const words = line.match(/(\s+|\S+)/g) || []
     for (let i = 0; i < words.length; i += chunkSize) {
-      // Join chunk words and append space, except after last chunk in the line
-      const chunk = words.slice(i, i + chunkSize).join(' ') + ' '
+      const chunk = words.slice(i, i + chunkSize).join('') // preserve exact spacing
       chunks.push(chunk)
     }
-    // Add a newline chunk after each line to preserve line breaks
-    chunks.push('\n')
+    chunks.push('\n') // Preserve line breaks
   }
 
   return chunks
@@ -41,7 +41,6 @@ export const getBasicStreamMock = (): MockResponseStreamEvent[] => {
 
 - To mock a failed response, write: **fail**
 - To mock a mid-sentence failed response, write: **midway fail**
-- To mock a timed-out response, write: **timeout fail**
 - To mock a incomplete response, write: **incomplete fail**
 - To mock a file search, write: **rag**
 - To mock a file search fail response, write: **rag fail**
@@ -152,11 +151,6 @@ export const getMidwayFailStreamMock = (): MockResponseStreamEvent[] => {
   ]
 }
 
-export const getTimeoutFailStreamMock = (): MockResponseStreamEvent[] => {
-  // Simulate an unresponsive api
-  return []
-}
-
 export const getFileSearchStreamMock = (): MockResponseStreamEvent[] => {
   // https://platform.openai.com/docs/api-reference/responses-streaming/response/file_search_call
   const responseText = `For testing RAG stream. Not yet implemented.`
@@ -221,9 +215,7 @@ export const getFileSearchFailStreamMock = (): MockResponseStreamEvent[] => {
 }
 
 export const getCodeBlockStreamMock = (): MockResponseStreamEvent[] => {
-  const responseText = `For testing code block stream. Not yet implemented.`
-
-  const chunkedResponseText = chunkText(responseText)
+  const chunkedResponseText = chunkText(codeTestContent)
 
   return [
     {
@@ -252,9 +244,7 @@ export const getCodeBlockStreamMock = (): MockResponseStreamEvent[] => {
 }
 
 export const getMathBlockStreamMock = (): MockResponseStreamEvent[] => {
-  const responseText = `For testing math block stream. Not yet implemented.`
-
-  const chunkedResponseText = chunkText(responseText)
+  const chunkedResponseText = chunkText(mathTestContent)
 
   return [
     {
