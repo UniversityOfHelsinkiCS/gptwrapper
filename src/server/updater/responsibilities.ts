@@ -49,7 +49,7 @@ export const upsertResponsibilities = async (courseRealizations: SisuCourseWithR
   })
 
   const responsibilitiesToInsert = relatedChatInstances.flatMap(({ id, courseId }) =>
-    responsibilitiesMap[courseId].map((responsibility) => ({
+    responsibilitiesMap[courseId ?? ''].map((responsibility) => ({
       chatInstanceId: id,
       userId: responsibility.userId,
     })),

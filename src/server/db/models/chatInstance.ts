@@ -24,7 +24,7 @@ class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAtt
    */
   declare courseId: CreationOptional<string | null>
 
-  declare activityPeriod: CreationOptional<ActivityPeriod | null>
+  declare activityPeriod: ActivityPeriod
 
   declare courseActivityPeriod: CreationOptional<ActivityPeriod | null>
 
@@ -82,8 +82,6 @@ ChatInstance.init(
     },
     activityPeriod: {
       type: DataTypes.JSON,
-      allowNull: true,
-      defaultValue: null,
     },
     courseActivityPeriod: {
       type: DataTypes.JSON,

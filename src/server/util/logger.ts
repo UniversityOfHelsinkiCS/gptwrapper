@@ -10,7 +10,9 @@ const { combine, timestamp, printf, splat } = winston.format
 
 const LOKI_HOST = 'http://loki-svc.toska-lokki.svc.cluster.local:3100'
 
-const transports = []
+type Transport = winston.transport
+
+const transports: Transport[] = []
 
 transports.push(new winston.transports.File({ filename: 'debug.log' }))
 
@@ -72,7 +74,7 @@ if (!inProduction) {
         app: 'gptwrapper',
         environment: 'production',
       },
-    }),
+    }) as Transport,
   )
 }
 

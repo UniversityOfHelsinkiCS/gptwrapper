@@ -80,7 +80,7 @@ const authorizeChatInstancePromptResponsible = async (user: User, prompt: ChatIn
     throw ApplicationError.NotFound('Chat instance not found')
   }
 
-  const isResponsible = chatInstance?.responsibilities.some((r) => r.userId === user.id)
+  const isResponsible = chatInstance.responsibilities?.some((r) => r.userId === user.id)
 
   if (!isResponsible && !user.isAdmin) {
     throw ApplicationError.Forbidden('Not allowed')

@@ -92,10 +92,10 @@ chatInstanceRouter.post('/:id/enable', async (req, res) => {
     return
   }
 
-  const defaultStartDate = chatInstance.activityPeriod?.startDate || new Date().toDateString()
+  // @todo what?? this is extremely confusing. shouldnt we set the activity period based on the courseActivityPeriod??
   const defaultActivityPeriod = {
-    startDate: defaultStartDate,
-    endDate: addMonths(defaultStartDate, 1).toDateString(),
+    startDate: chatInstance.activityPeriod.startDate,
+    endDate: addMonths(chatInstance.activityPeriod.startDate, 1).toDateString(),
   }
 
   chatInstance.usageLimit = DEFAULT_TOKEN_LIMIT

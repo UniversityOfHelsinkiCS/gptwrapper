@@ -27,17 +27,17 @@ const checkTimeout = (start: number) => {
  * @param {(data: object[]) => Promise<void>} handler handler function to mangel and store entities in db
  * @param {Date} since date since the data is to be fetched
  */
-export const mangleData = async <T = object>(url: string, limit: number, handler: (data: T[]) => Promise<void>, since: Date = null) => {
+export const mangleData = async <T = object>(url: string, limit: number, handler: (data: T[]) => Promise<void>, since: Date | null = null) => {
   logger.info(`[UPDATER] Starting to update items with url ${url}`)
   const offsetKey = `${url}-offset`
   const start = Date.now()
-  let requestStart = null
+  let requestStart = Date.now()
   let loopStart = Date.now()
 
   let offset = Number(await redis.get(offsetKey))
   let count = 0
-  let currentData = null
-  let nextData = null
+  let currentData: any[] | null = null
+  let nextData: Promise<any[]> | null = null
 
   /**
    * Async loop:

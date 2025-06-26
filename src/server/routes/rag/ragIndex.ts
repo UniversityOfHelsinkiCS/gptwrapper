@@ -38,7 +38,7 @@ export async function ragIndexMiddleware(req: Request, res: Response, next: Next
     return
   }
 
-  const isResponsible = responsibilities.some((r) => ragIndex.chatInstances.some((ci) => ci.id === r.chatInstanceId))
+  const isResponsible = responsibilities.some((r) => ragIndex.chatInstances?.some((ci) => ci.id === r.chatInstanceId))
 
   // Check that user is admin or responsible for this chatInstance
   if (!isResponsible && !user.isAdmin) {
@@ -173,7 +173,9 @@ ragIndexRouter.delete('/files/:fileId', async (req, res) => {
   // Delete from vector store
   const client = getAzureOpenAIClient()
   try {
-    await client.vectorStores.files.del(ragFile.ragIndex.metadata.azureVectorStoreId, ragFile.metadata.vectorStoreFileId)
+    if (ragFile.metadata?.vectorStoreFileId) {
+      await client.vectorStores.files.del(ragIndex.metadata.azureVectorStoreId, ragFile.metadata?.vectorStoreFileId)
+    }
   } catch (error) {
     console.error(`Failed to delete file from Azure vector store:`, error)
     res.status(500).json({ error: 'Failed to delete file from vector store' })
@@ -253,7 +255,7 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
         {
           pipelineStage: 'completed',
           metadata: {
-            chunkingStrategy: vectorStoreFile.chunking_strategy.type,
+            chunkingStrategy: vectorStoreFile.chunking_strategy?.type,
             usageBytes: vectorStoreFile.usage_bytes,
             vectorStoreFileId: vectorStoreFile.id,
           },

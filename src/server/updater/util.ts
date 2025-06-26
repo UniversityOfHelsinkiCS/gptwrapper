@@ -15,8 +15,8 @@ type AllowedFallbackCreateOptionField = 'fields' | 'conflictFields'
 
 interface BulkCreateOptions {
   entityName: string
-  bulkCreate: (entities: object[], options: any) => Promise<any>
-  fallbackCreate: (entity: object, options: any) => Promise<any>
+  bulkCreate: (entities: any[], options: any) => Promise<any>
+  fallbackCreate: (entity: any, options: any) => Promise<any>
   bulkCreateOptions: PartialRecord<AllowedBulkCreateOptionField, any>
   fallbackCreateOptions: PartialRecord<AllowedFallbackCreateOptionField, any>
   entities: Record<string, any>[]

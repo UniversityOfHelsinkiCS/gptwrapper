@@ -5,6 +5,7 @@ import type { ActivityPeriod, RequestWithUser } from '../types'
 import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, User, Responsibility, Discussion } from '../db/models'
 import { getOwnCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
+import { ApplicationError } from '../util/ApplicationError'
 
 const courseRouter = express.Router()
 
@@ -132,9 +133,18 @@ courseRouter.get('/:id', async (req, res) => {
   const chatInstance = (await ChatInstance.findOne({
     where: { courseId: id },
     include,
-  })) as ChatInstance & { responsibilities: AcualResponsibility[] }
+  })) as ChatInstance
 
-  const hasFullAccess = user.isAdmin || chatInstance.responsibilities.map((r) => r.user.id).includes(user.id)
+  if (!chatInstance) {
+    throw ApplicationError.NotFound('Chat instance not found')
+  }
+
+  const hasFullAccess =
+    user.isAdmin ||
+    chatInstance.responsibilities
+      ?.map((r) => r.user?.id)
+      .filter(Boolean)
+      .includes(user.id)
 
   const objectToReturn = hasFullAccess
     ? chatInstance
@@ -168,9 +178,18 @@ const checkDiscussionAccess = async (req: express.Request, res: express.Response
         ],
       },
     ],
-  })) as ChatInstance & { responsibilities: AcualResponsibility[] }
+  })) as ChatInstance
 
-  const hasFullAccess = user.isAdmin || chatInstance.responsibilities.map((r) => r.user.id).includes(user.id)
+  if (!chatInstance) {
+    throw ApplicationError.NotFound('Chat instance not found')
+  }
+
+  const hasFullAccess =
+    user.isAdmin ||
+    chatInstance.responsibilities
+      ?.map((r) => r.user?.id)
+      .filter(Boolean)
+      .includes(user.id)
 
   if (!hasFullAccess) {
     res.status(401).send('Unauthorized')

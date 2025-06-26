@@ -5,6 +5,7 @@ import { RequestWithUser, User } from '../../types'
 import z from 'zod/v4'
 import { getAzureOpenAIClient } from '../../util/azure/client'
 import ragIndexRouter, { ragIndexMiddleware } from './ragIndex'
+import { ApplicationError } from '../../util/ApplicationError'
 
 const router = Router()
 
@@ -15,7 +16,7 @@ const IndexCreationSchema = z.object({
 })
 
 const hasChatInstanceRagPermission = (user: User, chatInstance: ChatInstance) => {
-  const isResponsible = chatInstance.responsibilities.some((r) => r.userId === user.id)
+  const isResponsible = chatInstance.responsibilities?.some((r) => r.userId === user.id)
   return isResponsible || user.isAdmin
 }
 
@@ -79,7 +80,7 @@ router.get('/indices', async (req, res) => {
   const { user } = req as RequestWithUser
 
   // Check access
-  let chatInstance: ChatInstance | undefined
+  let chatInstance: ChatInstance | null = null
   if (courseId) {
     chatInstance = await ChatInstance.findOne({
       where: { courseId },
@@ -88,6 +89,9 @@ router.get('/indices', async (req, res) => {
         { model: RagIndex, as: 'ragIndices' },
       ],
     })
+    if (!chatInstance) {
+      throw ApplicationError.NotFound('Chat instance not found')
+    }
     if (!hasChatInstanceRagPermission(user, chatInstance)) {
       res.status(403).json({ error: 'Forbidden' })
       return
@@ -100,7 +104,7 @@ router.get('/indices', async (req, res) => {
   }
 
   const indices = chatInstance
-    ? chatInstance.ragIndices
+    ? (chatInstance.ragIndices ?? [])
     : await RagIndex.findAll({
         include: [
           {

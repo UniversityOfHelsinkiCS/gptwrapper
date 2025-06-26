@@ -23,7 +23,7 @@ const enrolmentsHandler = async (enrolments: SisuEnrolment[]) => {
   })
 
   const toInsert = relatedChatInstances.flatMap((chatInstance) =>
-    (enrolmentsMap[chatInstance.courseId] || []).map((enrolment) => ({
+    (enrolmentsMap[chatInstance.courseId ?? ''] || []).map((enrolment) => ({
       chatInstanceId: chatInstance.id,
       userId: enrolment.personId,
     })),

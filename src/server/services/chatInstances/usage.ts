@@ -6,13 +6,18 @@ import { User as UserType, StreamingOptions } from '../../types'
 import { ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../../db/models'
 import { getAllowedModels } from '../../util/util'
 import logger from '../../util/logger'
+import { ApplicationError } from '../../util/ApplicationError'
 
 export const getUsage = async (userId: string) => {
-  const { usage } = await User.findByPk(userId, {
+  const user = await User.findByPk(userId, {
     attributes: ['usage'],
   })
 
-  return usage
+  if (!user) {
+    throw ApplicationError.NotFound('User not found')
+  }
+
+  return user.usage
 }
 
 export const checkUsage = async ({ id, isPowerUser, isAdmin }: UserType, model: string): Promise<boolean> => {
@@ -32,6 +37,10 @@ export const checkCourseUsage = async (user: UserType, courseId: string): Promis
       courseId,
     },
   })
+
+  if (!chatInstance) {
+    throw ApplicationError.NotFound('Chat instance not found')
+  }
 
   const [chatInstanceUsage] = await UserChatInstanceUsage.findOrCreate({
     where: {
@@ -84,6 +93,10 @@ export const incrementCourseUsage = async (user: UserType, courseId: string, tok
     },
     attributes: ['id'],
   })
+
+  if (!chatInstance) {
+    throw ApplicationError.NotFound('Chat instance not found')
+  }
 
   const chatInstanceUsage = await UserChatInstanceUsage.findOne({
     where: {
@@ -146,6 +159,7 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
       userId: user.id,
     },
     defaults: {
+      chatInstanceId: chatInstance.id,
       userId: user.id,
     },
     attributes: ['usageCount'],

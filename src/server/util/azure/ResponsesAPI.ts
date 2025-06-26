@@ -12,6 +12,7 @@ import logger from '../logger'
 import { createMockStream } from './mocks/MockStream'
 import { createFileSearchTool } from './util'
 import { FileSearchResultsStore } from './fileSearchResultsStore'
+import { ApplicationError } from '../ApplicationError'
 
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
@@ -143,7 +144,11 @@ export class ResponsesClient {
 
         case 'response.output_item.done': {
           if (event.item.type === 'file_search_call') {
-            await FileSearchResultsStore.saveResults(event.item.id, event.item.results, this.user)
+            if (!ragIndexId) throw new Error('how is this possible. you managed to invoke file search without ragIndexId')
+
+            if (event.item.results) {
+              await FileSearchResultsStore.saveResults(event.item.id, event.item.results, this.user)
+            }
 
             await this.write(
               {

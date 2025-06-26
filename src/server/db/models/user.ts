@@ -9,25 +9,25 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
 
   declare language: CreationOptional<string>
 
-  declare isAdmin: boolean
+  declare isAdmin: CreationOptional<boolean>
 
-  declare isPowerUser: boolean
+  declare isPowerUser: CreationOptional<boolean>
 
-  declare iamGroups: string[]
+  declare iamGroups: CreationOptional<string[]>
 
-  declare usage: number
+  declare usage: CreationOptional<number>
 
-  declare totalUsage: bigint
+  declare totalUsage: CreationOptional<bigint>
 
   declare activeCourseIds: CreationOptional<string[]>
 
-  declare lastName: string
+  declare lastName: CreationOptional<string>
 
-  declare firstNames: string
+  declare firstNames: CreationOptional<string>
 
-  declare studentNumber: string
+  declare studentNumber: CreationOptional<string>
 
-  declare primaryEmail: string
+  declare primaryEmail: CreationOptional<string>
 }
 
 User.init(

@@ -9,7 +9,7 @@ class UserChatInstanceUsage extends Model<InferAttributes<UserChatInstanceUsage>
 
   declare chatInstanceId: string
 
-  declare usageCount: number
+  declare usageCount: CreationOptional<number>
 }
 
 UserChatInstanceUsage.init(
