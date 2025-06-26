@@ -6,6 +6,21 @@ import { ApplicationError } from '../util/ApplicationError'
 
 const promptRouter = express.Router()
 
+promptRouter.get('/my-prompts', async (req, res) => {
+  const { user } = req as RequestWithUser
+
+  const myPrompts = await Prompt.findAll({
+    where: {
+      userId: user.id,
+      type: 'PERSONAL',
+    },
+    order: [['name', 'ASC']],
+  })
+
+  res.send(myPrompts)
+  return
+})
+
 promptRouter.get('/:courseId', async (req, res) => {
   const { courseId } = req.params
 

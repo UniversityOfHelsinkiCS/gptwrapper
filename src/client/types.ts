@@ -63,6 +63,7 @@ export type Prompt = {
   messages: Message[]
   hidden: boolean
   mandatory: boolean
+  type: 'CHAT_INSTANCE' | 'PERSONAL' | 'RAG_INDEX'
 }
 
 export interface ChatInstance {

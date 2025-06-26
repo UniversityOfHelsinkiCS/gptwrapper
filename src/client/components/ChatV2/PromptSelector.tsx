@@ -1,47 +1,58 @@
 import { useEffect, useState } from 'react'
-import { Box, InputLabel, MenuItem, FormControl, Select, SelectChangeEvent } from '@mui/material'
+import { Box, InputLabel, MenuItem, FormControl, Select, SelectChangeEvent, Divider, ListSubheader } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 import { Prompt } from '../../types'
 
 const PromptSelector = ({
-  prompts,
+  title,
+  coursePrompts,
+  myPrompts,
   activePrompt,
   setActivePrompt,
 }: {
-  prompts: Prompt[]
-  activePrompt: string
-  setActivePrompt: (promptId: string) => void
+  title: string
+  coursePrompts: Prompt[]
+  myPrompts: Prompt[]
+  activePrompt?: Prompt
+  setActivePrompt: (prompt: Prompt | undefined) => void
 }) => {
   const { t } = useTranslation()
-  const [mandatoryPrompt, setMandatoryPrompt] = useState<Prompt>()
 
-  useEffect(() => {
-    const mandatory = prompts.find((prompt) => prompt.mandatory)
-
-    if (mandatory) {
-      setActivePrompt(mandatory.id)
-      setMandatoryPrompt(mandatory)
-    }
-  }, [])
+  const allPrompts = [...coursePrompts, ...myPrompts]
 
   return (
-    <Box mb={2}>
-      <FormControl sx={{ width: '40%' }}>
-        <InputLabel>{t('prompt')}</InputLabel>
-        {mandatoryPrompt ? (
-          <Select disabled label={t('prompt')} value={activePrompt}>
-            <MenuItem value={mandatoryPrompt.id}>{mandatoryPrompt.name}</MenuItem>
-          </Select>
-        ) : (
-          <Select label={t('prompt')} value={activePrompt} onChange={(event: SelectChangeEvent) => setActivePrompt(event.target.value)}>
-            {prompts.map((prompt) => (
-              <MenuItem key={prompt.id} value={prompt.id}>
-                {prompt.name}
-              </MenuItem>
-            ))}
-          </Select>
-        )}
+    <Box mb={2} sx={{ flex: 1 }}>
+      <FormControl fullWidth>
+        <InputLabel>{title}</InputLabel>
+        <Select
+          label={title}
+          value={activePrompt?.id ?? 'none'}
+          onChange={(event: SelectChangeEvent) => {
+            const newPrompt = allPrompts.find(({ id }) => id === event.target.value)
+            if (newPrompt) {
+              setActivePrompt(newPrompt)
+            } else {
+              setActivePrompt(undefined)
+            }
+          }}
+        >
+          <MenuItem value="">{t('settings:none')}</MenuItem>
+          <Divider />
+          <ListSubheader>{t('settings:coursePrompts')}</ListSubheader>
+          {coursePrompts.map((prompt) => (
+            <MenuItem key={prompt.id} value={prompt.id} selected={prompt.id === activePrompt?.id}>
+              {prompt.name}
+            </MenuItem>
+          ))}
+          <Divider />
+          <ListSubheader>{t('settings:myPrompts')}</ListSubheader>
+          {myPrompts.map((prompt) => (
+            <MenuItem key={prompt.id} value={prompt.id} selected={prompt.id === activePrompt?.id}>
+              {prompt.name}
+            </MenuItem>
+          ))}
+        </Select>
       </FormControl>
     </Box>
   )

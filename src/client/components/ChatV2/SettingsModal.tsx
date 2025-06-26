@@ -1,5 +1,5 @@
 import { Close } from '@mui/icons-material'
-import { Box, IconButton, Modal, Slider, Typography } from '@mui/material'
+import { Box, Button, IconButton, Modal, Slider, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE } from '../../../config'
@@ -12,6 +12,9 @@ import AssistantInstructionsInput from './AssistantInstructionsInput'
 import SettingsButton from './generics/SettingsButton'
 import PromptSelector from './PromptSelector'
 import RagSelector from './RagSelector'
+import { SaveMyPromptModal } from './SaveMyPromptModal'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import apiClient from '../../util/apiClient'
 
 interface SettingsModalProps {
   open: boolean
@@ -42,26 +45,54 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   currentRagIndex,
   course,
 }) => {
-  const { t, i18n } = useTranslation()
-  const { language } = i18n
+  const { t } = useTranslation()
 
-  const [activePromptId, setActivePromptId] = useState<string>('')
-  const [hidePrompt, setHidePrompt] = useState<boolean>(false)
+  const { data: myPrompts, refetch } = useQuery<Prompt[]>({
+    queryKey: ['/prompts/my-prompts'],
+    initialData: [],
+  })
+  const promptSaveMutation = useMutation({
+    mutationFn: async ({ name, isNewPrompt }: { name: string; isNewPrompt: boolean }) => {
+      const promptData = {
+        name,
+        systemMessage: assistantInstructions,
+        type: 'PERSONAL',
+      }
+      if (isNewPrompt) {
+        await apiClient.post('/prompts', promptData)
+      } else {
+        await apiClient.put(`/prompts/${activePrompt?.id}`, promptData)
+      }
+      refetch()
+    },
+  })
+  const [activePrompt, setActivePrompt] = useState<Prompt>()
+  const [myPromptModalOpen, setMyPromptModalOpen] = useState<boolean>(false)
+  const mandatoryPrompt = course?.prompts.find((p) => p.mandatory)
+  const isPromptHidden = activePrompt?.hidden ?? false
+  const isPromptEditable = activePrompt?.type !== 'CHAT_INSTANCE' && activePrompt?.type !== 'RAG_INDEX'
+
+  useEffect(() => {
+    if (mandatoryPrompt) {
+      setActivePrompt(mandatoryPrompt)
+    }
+  }, [mandatoryPrompt])
 
   const resetSettings = () => {
-    setActivePromptId('')
+    setActivePrompt(undefined)
     setAssistantInstructions(DEFAULT_ASSISTANT_INSTRUCTIONS)
     setModelTemperature(DEFAULT_MODEL_TEMPERATURE)
-    setHidePrompt(false)
   }
 
-  const handleChangePrompt = (promptId: string) => {
-    const { systemMessage } = course?.prompts.find(({ id }) => id === promptId) as Prompt
+  const handleChangePrompt = (newPrompt: Prompt | undefined) => {
+    if (!newPrompt) {
+      setActivePrompt(undefined)
+      setAssistantInstructions(DEFAULT_ASSISTANT_INSTRUCTIONS)
+      return
+    }
 
-    setAssistantInstructions(systemMessage)
-    setActivePromptId(promptId)
-    const hidePrompt = course?.prompts.find(({ id }) => id === promptId)?.hidden ?? false
-    setHidePrompt(hidePrompt)
+    setAssistantInstructions(newPrompt.systemMessage)
+    setActivePrompt(newPrompt)
   }
 
   return (
@@ -95,6 +126,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
+            alignItems: 'stretch',
             gap: '1.2rem',
             overflowY: 'auto',
             p: '3rem',
@@ -104,15 +136,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {t('settings:prompt')}
           </Typography>
           <Typography variant="body1">{t('settings:promptInstructions')}</Typography>
-
-          {course?.prompts && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}
+          <Box sx={{ display: 'flex', gap: '1.2rem' }}>
+            <PromptSelector
+              title={t('settings:coursePrompts')}
+              coursePrompts={course?.prompts ?? []}
+              myPrompts={myPrompts}
+              activePrompt={activePrompt}
+              setActivePrompt={handleChangePrompt}
+            />
+          </Box>
           <AssistantInstructionsInput
             label={t('settings:promptContent')}
-            disabled={activePromptId.length > 0}
-            hidden={hidePrompt}
+            disabled={!isPromptEditable}
+            hidden={isPromptHidden}
             instructions={assistantInstructions}
             setInstructions={setAssistantInstructions}
           />
+          {!isPromptHidden && <Button onClick={() => setMyPromptModalOpen(true)}>{t('settings:saveMyPrompt')}</Button>}
 
           <Typography variant="h6" fontWeight={600} mt="2rem">
             {t('settings:temperature')}
@@ -146,6 +186,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         >
           <SettingsButton onClick={resetSettings}>{t('settings:resetDefault')}</SettingsButton>
         </Box>
+        <SaveMyPromptModal
+          isOpen={myPromptModalOpen}
+          setIsOpen={setMyPromptModalOpen}
+          systemMessage={assistantInstructions}
+          myPrompts={myPrompts}
+          existingName={activePrompt?.name}
+          onSave={async (name, isNewPrompt) => {
+            await promptSaveMutation.mutateAsync({ name, isNewPrompt })
+          }}
+        />
       </Box>
     </Modal>
   )

@@ -1,36 +1,32 @@
-import { useState, useRef, useContext, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import useCourse from '../../hooks/useCourse'
-import useUserStatus from '../../hooks/useUserStatus'
-import useLocalStorageState from '../../hooks/useLocalStorageState'
-import { validModels, DEFAULT_MODEL, FREE_MODEL, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE, ALLOWED_FILE_TYPES } from '../../../config'
-import useInfoTexts from '../../hooks/useInfoTexts'
-import type { Message } from '../../types'
-import type { FileSearchCompletedData, ResponseStreamEventData } from '../../../shared/types'
-import useRetryTimeout from '../../hooks/useRetryTimeout'
-import { useTranslation } from 'react-i18next'
-import { handleCompletionStreamError } from './error'
-import { getCompletionStream } from './util'
-
-import { Box, Typography, Alert, Skeleton } from '@mui/material'
-import SettingsIcon from '@mui/icons-material/Settings'
-import EmailIcon from '@mui/icons-material/Email'
 import DeleteIcon from '@mui/icons-material/Delete'
+import EmailIcon from '@mui/icons-material/Email'
 import HelpIcon from '@mui/icons-material/Help'
-
-import { DisclaimerModal } from './Disclaimer'
-import { Conversation } from './Conversation'
-import { ChatBox } from './ChatBox'
-import { SettingsModal } from './SettingsModal'
-
-import { CitationsBox } from './CitationsBox'
-import { useRagIndices } from '../../hooks/useRagIndices'
-import SettingsButton from './generics/SettingsButton'
-
-import { AppContext } from '../../util/AppContext'
-import { ChatInfo } from './generics/ChatInfo'
+import SettingsIcon from '@mui/icons-material/Settings'
+import { Alert, Box, Typography, Skeleton } from '@mui/material'
+import { useContext, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useParams } from 'react-router-dom'
+import { ALLOWED_FILE_TYPES, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, validModels } from '../../../config'
+import type { FileSearchCompletedData, ResponseStreamEventData } from '../../../shared/types'
 import { getLanguageValue } from '../../../shared/utils'
+import useCourse from '../../hooks/useCourse'
+import useInfoTexts from '../../hooks/useInfoTexts'
+import useLocalStorageState from '../../hooks/useLocalStorageState'
+import { useRagIndices } from '../../hooks/useRagIndices'
+import useRetryTimeout from '../../hooks/useRetryTimeout'
+import useUserStatus from '../../hooks/useUserStatus'
+import type { Message } from '../../types'
+import { AppContext } from '../../util/AppContext'
+import { ChatBox } from './ChatBox'
+import { CitationsBox } from './CitationsBox'
+import { Conversation } from './Conversation'
+import { DisclaimerModal } from './Disclaimer'
+import { handleCompletionStreamError } from './error'
+import { ChatInfo } from './generics/ChatInfo'
+import SettingsButton from './generics/SettingsButton'
 import RagSelector from './RagSelector'
+import { SettingsModal } from './SettingsModal'
+import { getCompletionStream } from './util'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -72,7 +68,7 @@ export const ChatV2 = () => {
   const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
   const [tokenWarningVisible, setTokenWarningVisible] = useState<boolean>(false)
   const [allowedModels, setAllowedModels] = useState<string[]>([])
-  const [saveConsent, setSaveConsent] = useState<boolean>(true) // asking for consent for saving chats for research is not implemented in v1, so should it be implemented in v2?
+  const [saveConsent, setSaveConsent] = useState<boolean>(true)
 
   // Chat Streaming states
   const [completion, setCompletion] = useState<string>('')
@@ -169,7 +165,14 @@ export const ChatV2 = () => {
         }
       }
 
-      setMessages((prev: Message[]) => prev.concat({ role: 'assistant', content, error, fileSearchResult: fileSearch }))
+      setMessages((prev: Message[]) =>
+        prev.concat({
+          role: 'assistant',
+          content,
+          error,
+          fileSearchResult: fileSearch,
+        }),
+      )
     } catch (err: any) {
       handleCompletionStreamError(err, fileName)
     } finally {
