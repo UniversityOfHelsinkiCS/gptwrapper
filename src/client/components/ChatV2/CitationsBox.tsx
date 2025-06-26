@@ -22,7 +22,6 @@ const FileItemComponent = ({ fileItem, cutOff = false }: { fileItem: FileSearchR
 }
 
 const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileSearchCompletedData }) => {
-  const { data: ragIndex, isSuccess } = useRagIndex(fileSearchResult.ragIndexId)
   const { data: results, isSuccess: isResultsSuccess, error } = useFileSearchResults(fileSearchResult.id)
   const { t } = useTranslation()
   const [sourceModalOpen, setSourceModalOpen] = useState<boolean>(false)

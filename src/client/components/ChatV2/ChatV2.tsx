@@ -586,7 +586,7 @@ const FileSearchInfo = ({
         minWidth: 300,
         borderLeft: '1px solid rgba(0, 0, 0, 0.12)',
         overflowY: 'auto',
-        mr: '4px',
+        mr: '8px',
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
