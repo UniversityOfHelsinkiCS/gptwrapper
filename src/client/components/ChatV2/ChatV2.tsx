@@ -427,7 +427,7 @@ export const ChatV2 = () => {
         <Box sx={{ position: 'sticky', top: 85, padding: '2rem 1.5rem' }}>
           {course && <ChatInfo course={course} />}
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', mb: '2rem' }}>
             <SettingsButton startIcon={<DeleteIcon />} onClick={handleReset}>
               {t('chat:emptyConversation')}
             </SettingsButton>
@@ -440,8 +440,13 @@ export const ChatV2 = () => {
             <SettingsButton startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus({ open: true })}>
               {t('infoSmall:title')}
             </SettingsButton>
-            {showRagSelector && <RagSelector currentRagIndex={ragIndex} setRagIndex={setRagIndexId} ragIndices={ragIndices ?? []} />}
           </Box>
+          {showRagSelector &&
+            <>
+              <Typography variant='h6' mb={'0.5rem'} fontWeight="bold">{t("settings:courseMaterials")}</Typography>
+              <RagSelector currentRagIndex={ragIndex} setRagIndex={setRagIndexId} ragIndices={ragIndices ?? []} />
+            </>
+          }
         </Box>
       </Box>
 

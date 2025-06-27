@@ -3,7 +3,7 @@ import { Box, InputLabel, MenuItem, FormControl, Select, SelectChangeEvent, Divi
 import { useTranslation } from 'react-i18next'
 
 import { Prompt } from '../../types'
-import { DeleteOutline, KeyboardArrowDown } from '@mui/icons-material'
+import { DeleteOutline, KeyboardArrowDown, Lock } from '@mui/icons-material'
 
 const PromptSelector = ({
   coursePrompts,
@@ -47,16 +47,17 @@ const PromptSelector = ({
 
 
   return (
-    <Box mb={2}>
+    <Box>
       <Button
         disabled={!!mandatoryPrompt}
         variant="outlined"
         onClick={(event) => {
           setAnchorEl(event.currentTarget)
         }}
-        endIcon={<KeyboardArrowDown />}
+        endIcon={mandatoryPrompt ? <Lock /> : <KeyboardArrowDown />}
       >
         {activePrompt?.name ?? t('settings:choosePrompt')}
+        {!!mandatoryPrompt && ` - ${t('settings:promptLocked')}`}
       </Button>
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>

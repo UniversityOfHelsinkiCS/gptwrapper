@@ -97,6 +97,8 @@
     "prompt": "Samtalsstart",
     "promptInstructions": "Starten syftar till allmänna riktlinjer för samtalet. Språkmodellen kan till exempel ombes använda akademiskt språk eller agera som en trädgårdsmästare som intervjuas om kaktusskötsel.",
     "promptContent": "Startens innehåll",
+    "promptLocked": "låst",
+    "courseMaterials": "Kurschattsmaterial",
     "temperature": "Justera språkmodellens precision",
     "temperatureInstructions": "Högre värden, som 0.8, gör utskriften mer slumpmässig, medan lägre värden, som 0.2, gör den mer exakt och deterministisk.",
     "temperatureAccurate": "Mer exakt",

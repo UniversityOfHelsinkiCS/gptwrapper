@@ -90,6 +90,8 @@
     "prompt": "Keskustelun alustus",
     "promptInstructions": "Alustuksella tarkoitetaan yleistason ohjeistusta keskustelulle. Kielimallia voi esimerkiksi pyytää käyttämään akateemista kieltä tai esittämään puutarhuria jota haastatellaan kaktusten hoidosta.",
     "promptContent": "Alustuksen sisältö",
+    "promptLocked": "lukittu",
+    "courseMaterials": "Kurssichatin materiaalit",
     "temperature": "Säädä kielimallin tarkkuutta",
     "temperatureInstructions": "Suuremmat arvot, kuten 0.8, tekevät tulosteesta satunnaisemman, kun taas pienemmät arvot, kuten 0.2, tekevät siitä tarkemman ja deterministisemmän.",
     "temperatureAccurate": "Tarkempi",

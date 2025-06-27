@@ -90,6 +90,8 @@
     "prompt": "Conversation prompt",
     "promptInstructions": "The prompt refers to general guidelines for the conversation. For example, the language model can be asked to use academic language or to act as a gardener being interviewed about cactus care.",
     "promptContent": "Prompt content",
+    "promptLocked": "locked",
+    "courseMaterials": "Course materials",
     "temperature": "Adjust language model precision",
     "temperatureInstructions": "Higher values, like 0.8, make the output more random, while lower values, like 0.2, make it more accurate and deterministic.",
     "temperatureAccurate": "Accurate",
