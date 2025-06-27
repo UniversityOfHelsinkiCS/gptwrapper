@@ -235,7 +235,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
 
   const consentToSave = courseId && course!.saveDiscussions && options.saveConsent
 
-  console.log('consentToSave', options.saveConsent, user.username)
+  console.log(`Consent to save discussion: ${options.saveConsent} ${user.username}`)
 
   if (consentToSave) {
     // @todo: should file search results also be saved?

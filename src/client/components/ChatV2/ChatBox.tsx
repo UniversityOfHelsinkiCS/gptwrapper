@@ -2,7 +2,7 @@ import React from 'react'
 import { Send } from '@mui/icons-material'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
-import { Box, Chip, IconButton, TextField, Tooltip, Typography } from '@mui/material'
+import { Box, Chip, IconButton, TextField, Tooltip, Typography, FormControlLabel, Switch, Alert } from '@mui/material'
 import { useState, useRef } from 'react'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
@@ -17,6 +17,10 @@ export const ChatBox = ({
   availableModels,
   setDisallowedFileType,
   setAlertOpen,
+  saveConsent,
+  setSaveConsent,
+  saveChat,
+  notOptoutSaving,
   setFileName,
   setModel,
   onSubmit,
@@ -28,6 +32,10 @@ export const ChatBox = ({
   availableModels: string[]
   setDisallowedFileType: React.Dispatch<string>
   setAlertOpen: React.Dispatch<boolean>
+  saveConsent: boolean
+  setSaveConsent: React.Dispatch<boolean>
+  saveChat: boolean
+  notOptoutSaving: boolean
   setFileName: (name: string) => void
   setModel: (model: string) => void
   onSubmit: (message: string) => void
@@ -158,10 +166,21 @@ export const ChatBox = ({
           </Box>
         </Box>
 
-        <Box>
-          <Typography variant="body1" style={{ padding: '1rem', opacity: 0.7 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0' }}>
+          <Typography variant="body1" sx={{ padding: '0.5rem 0', opacity: 0.7 }}>
             {userStatus?.usage ?? '-'} / {userStatus?.limit ?? '-'} {t('status:tokensUsed')}
           </Typography>
+
+          <>
+            {!notOptoutSaving && saveChat && (
+              <FormControlLabel control={<Switch onChange={() => setSaveConsent(!saveConsent)} checked={saveConsent} />} label={t('chat:allowSave')} />
+            )}
+            {notOptoutSaving && saveChat && (
+              <Alert severity="warning" style={{ marginLeft: 20 }}>
+                <Typography>{t('chat:toBeSaved')}</Typography>
+              </Alert>
+            )}
+          </>
         </Box>
       </Box>
     </Box>

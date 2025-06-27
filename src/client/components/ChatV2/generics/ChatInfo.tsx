@@ -20,7 +20,7 @@ export const ChatInfo = ({ course }: { course: Course }) => {
 
       {course.saveDiscussions && (
         <Alert severity="warning" style={{ marginTop: 20 }}>
-          <Typography variant="h6">{course.notOptoutSaving ? t('course:isSavedNotOptOut') : t('course:isSavedOptOut')}</Typography>
+          <Typography variant="body1">{course.notOptoutSaving ? t('course:isSavedNotOptOut') : t('course:isSavedOptOut')}</Typography>
         </Alert>
       )}
     </Box>

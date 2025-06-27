@@ -512,6 +512,10 @@ export const ChatV2 = () => {
             setFileName={setFileName}
             setDisallowedFileType={setDisallowedFileType}
             setAlertOpen={setAlertOpen}
+            saveConsent={saveConsent}
+            setSaveConsent={setSaveConsent}
+            saveChat={!!course && course.saveDiscussions}
+            notOptoutSaving={!!course && course.notOptoutSaving}
             setModel={(name) => setActiveModel({ name })}
             onSubmit={(message) => {
               if (message.trim()) {
