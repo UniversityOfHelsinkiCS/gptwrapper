@@ -2,7 +2,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EmailIcon from '@mui/icons-material/Email'
 import HelpIcon from '@mui/icons-material/Help'
 import SettingsIcon from '@mui/icons-material/Settings'
-import { Alert, Box, Typography, Skeleton } from '@mui/material'
+import { Alert, Box, Typography, Skeleton, Button } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
@@ -58,17 +58,18 @@ export const ChatV2 = () => {
   const [prevResponse, setPrevResponse] = useLocalStorageState(`${localStoragePrefix}-prev-response`, { id: '' })
   const [fileSearch, setFileSearch] = useLocalStorageState<FileSearchCompletedData>(`${localStoragePrefix}-last-file-search`)
 
-  const [isFileSearching, setIsFileSearching] = useState<boolean>(false)
 
   // App States
+  const [message, setMessage] = useState<string>('')
+  const [isFileSearching, setIsFileSearching] = useState<boolean>(false)
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
   const [fileName, setFileName] = useState<string>('')
-  const [alertOpen, setAlertOpen] = useState<boolean>(false)
+  const [fileTypeAlertOpen, setFileTypeAlertOpen] = useState<boolean>(false)
   const [disallowedFileType, setDisallowedFileType] = useState<string>('')
   const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
-  const [tokenWarningVisible, setTokenWarningVisible] = useState<boolean>(false)
+  const [tokenUsageAlertOpen, setTokenUsageAlertOpen] = useState<boolean>(false)
   const [allowedModels, setAllowedModels] = useState<string[]>([])
-  const [saveConsent, setSaveConsent] = useState<boolean>(true)
+  const [saveConsent, setSaveConsent] = useState<boolean>(false)
 
   // Chat Streaming states
   const [completion, setCompletion] = useState<string>('')
@@ -229,11 +230,10 @@ export const ChatV2 = () => {
         ragIndexId: ragIndexId ?? undefined,
         model: activeModel.name,
         formData,
-        userConsent: true, // this asks if the user wants to continue sending token expensive message despite warning
         modelTemperature: modelTemperature.value,
         courseId,
         abortController: streamController,
-        saveConsent, // this asks if user allows saving the chat messaging for research purposes
+        saveConsent,
         prevResponseId: prevResponse.id,
       })
 
@@ -244,7 +244,7 @@ export const ChatV2 = () => {
 
       if (tokenUsageAnalysis?.message) {
         setTokenUsageWarning(tokenUsageAnalysis.message)
-        setTokenWarningVisible(true)
+        setTokenUsageAlertOpen(true)
         return
       }
 
@@ -269,7 +269,7 @@ export const ChatV2 = () => {
     setFileSearch(undefined)
     setStreamController(undefined)
     setTokenUsageWarning('')
-    setTokenWarningVisible(false)
+    setTokenUsageAlertOpen(false)
     setRetryTimeout(() => {
       if (streamController) {
         streamController.abort()
@@ -278,23 +278,19 @@ export const ChatV2 = () => {
     clearRetryTimeout()
   }
 
-  // const handleCancel = () => {
-  //   setMessages(messages.slice(0, -1))
-  //   setCompletion('')
-  //   setIsCompletionDone(true)
-  //   fileInputRef.current.value = null
-  //   setFileName('')
-  //   setFileSearchResult(null)
-  //   setStreamController(undefined)
-  //   setTokenUsageWarning('')
-  //   setTokenWarningVisible(false)
-  //   clearRetryTimeout()
-  // }
+  const handleCancel = () => {
+    setIsCompletionDone(true)
+    setStreamController(undefined)
+    setTokenUsageWarning('')
+    setTokenUsageAlertOpen(false)
+    clearRetryTimeout()
+  }
 
-  // const handleContinue = () => {
-  //   handleSubmit(message.content)
-  //   setTokenWarningVisible(false)
-  // }
+  const handleContinue = () => {
+    setTokenUsageWarning('')
+    setTokenUsageAlertOpen(false)
+    handleSubmit(message)
+  }
 
   useEffect(() => {
     // Scrolls to bottom on initial load only
@@ -502,13 +498,29 @@ export const ChatV2 = () => {
             backgroundColor: 'white',
           }}
         >
-          {alertOpen && (
+          {fileTypeAlertOpen && (
             <Alert severity="warning">
               <Typography>{`File of type "${disallowedFileType}" not supported currently`}</Typography>
               <Typography>{`Currenlty there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}</Typography>
             </Alert>
           )}
+          {
+            tokenUsageAlertOpen &&
+            <Alert severity="warning" sx={{ my: '0.2rem' }}
+              action={<Box sx={{ display: 'flex', gap: 1 }}>
+                <Button variant="outlined" size='small' onClick={handleCancel} color="primary" type="button">
+                  {t("common:cancel")}
+                </Button>
+                <Button variant="contained" size='small' onClick={handleContinue} color="primary" type="button">
+                  {t("common:continue")}
+                </Button>
+              </ Box>}>
+              {tokenUsageWarning}
+            </Alert>
+          }
           <ChatBox
+            message={message}
+            setMessage={setMessage}
             disabled={!isCompletionDone}
             currentModel={activeModel.name}
             availableModels={allowedModels}
@@ -516,21 +528,16 @@ export const ChatV2 = () => {
             fileName={fileName}
             setFileName={setFileName}
             setDisallowedFileType={setDisallowedFileType}
-            setAlertOpen={setAlertOpen}
+            setFileTypeAlertOpen={setFileTypeAlertOpen}
             saveConsent={saveConsent}
             setSaveConsent={setSaveConsent}
             saveChat={!!course && course.saveDiscussions}
             notOptoutSaving={!!course && course.notOptoutSaving}
             setModel={(name) => setActiveModel({ name })}
-            onSubmit={(message) => {
-              if (message.trim()) {
-                handleSubmit(message)
-              }
-            }}
+            onSubmit={(newMessage) => handleSubmit(newMessage)}
           />
         </Box>
 
-        {/* <TokenUsageWarning tokenUsageWarning={tokenUsageWarning} handleCancel={handleCancel} handleContinue={handleContinue} visible={tokenWarningVisible} /> */}
       </Box>
 
       {/* Annotations columns ----------------------------------------------------------------------------------------------------- */}

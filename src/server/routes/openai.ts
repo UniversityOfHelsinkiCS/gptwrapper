@@ -64,7 +64,7 @@ const PostStreamSchemaV2 = z.object({
 openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   const req = r as RequestWithUser
   const { options, courseId } = PostStreamSchemaV2.parse(JSON.parse(req.body.data))
-  const { userConsent, ragIndexId } = options
+  const { ragIndexId } = options
   const { user } = req
 
   if (!user.id) {
@@ -133,10 +133,10 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   options.messages = getMessageContext(optionsMessagesWithFile || options.messages)
 
   const encoding = getEncoding(options.model)
-  let tokenCount = options.model === 'mock' ? 0 : calculateUsage(options as any, encoding)
+  let tokenCount = calculateUsage(options as any, encoding)
   const tokenUsagePercentage = Math.round((tokenCount / DEFAULT_TOKEN_LIMIT) * 100)
 
-  if (options.model !== FREE_MODEL && tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT && !userConsent) {
+  if (options.model !== FREE_MODEL && tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT) {
     res.status(201).json({
       tokenConsumtionWarning: true,
       message: `You are about to use ${tokenUsagePercentage}% of your monthly CurreChat usage`,
@@ -189,8 +189,6 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     user,
   })
 
-  // TODO: when we get rid of CCV1, we might want to start sending only the last message to this endpoint
-  // take into account how the tokens are calculated based in all the messages send into this endpoint
   const latestMessage = options.messages[options.messages.length - 1]
 
   const events = await responsesClient.createResponse({

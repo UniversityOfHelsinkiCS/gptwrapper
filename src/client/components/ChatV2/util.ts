@@ -8,7 +8,7 @@ interface GetCompletionStreamProps {
   model: string
   formData: FormData
   ragIndexId?: number
-  userConsent: boolean
+  userConsent?: boolean
   modelTemperature: number
   prevResponseId?: string
   abortController?: AbortController

@@ -3,20 +3,22 @@ import { Send } from '@mui/icons-material'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import { Box, Chip, IconButton, TextField, Tooltip, Typography, FormControlLabel, Switch, Alert } from '@mui/material'
-import { useState, useRef } from 'react'
+import { useRef } from 'react'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import ModelSelector from './ModelSelector'
 
 export const ChatBox = ({
+  message,
+  setMessage,
   disabled,
   currentModel,
   fileInputRef,
   fileName,
   availableModels,
   setDisallowedFileType,
-  setAlertOpen,
+  setFileTypeAlertOpen,
   saveConsent,
   setSaveConsent,
   saveChat,
@@ -25,13 +27,15 @@ export const ChatBox = ({
   setModel,
   onSubmit,
 }: {
+  message: string
+  setMessage: React.Dispatch<string>
   disabled: boolean
   currentModel: string
   fileInputRef: React.RefObject<HTMLInputElement>
   fileName: string
   availableModels: string[]
   setDisallowedFileType: React.Dispatch<string>
-  setAlertOpen: React.Dispatch<boolean>
+  setFileTypeAlertOpen: React.Dispatch<boolean>
   saveConsent: boolean
   setSaveConsent: React.Dispatch<boolean>
   saveChat: boolean
@@ -42,11 +46,10 @@ export const ChatBox = ({
 }) => {
   const { courseId } = useParams()
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
-  const [message, setMessage] = useState<string>('')
 
   const textFieldRef = useRef<HTMLInputElement>(null)
 
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
 
   const handleDeleteFile = () => {
     if (fileInputRef.current) {
@@ -62,9 +65,9 @@ export const ChatBox = ({
       setFileName(file.name)
     } else {
       setDisallowedFileType(file.type)
-      setAlertOpen(true)
+      setFileTypeAlertOpen(true)
       setTimeout(() => {
-        setAlertOpen(false)
+        setFileTypeAlertOpen(false)
       }, 5000)
     }
   }
