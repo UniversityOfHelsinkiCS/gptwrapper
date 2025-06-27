@@ -441,7 +441,7 @@ export const ChatV2 = () => {
               {t('infoSmall:title')}
             </SettingsButton>
           </Box>
-          {showRagSelector &&
+          {course && showRagSelector &&
             <>
               <Typography variant='h6' mb={'0.5rem'} fontWeight="bold">{t("settings:courseMaterials")}</Typography>
               <RagSelector currentRagIndex={ragIndex} setRagIndex={setRagIndexId} ragIndices={ragIndices ?? []} />
@@ -556,6 +556,7 @@ export const ChatV2 = () => {
         setModelTemperature={(updatedTemperature) => setModelTemperature({ value: updatedTemperature })}
         model={activeModel.name}
         setModel={(name) => setActiveModel({ name })}
+        showRagSelector={showRagSelector}
         setRagIndex={setRagIndexId}
         ragIndices={ragIndices}
         currentRagIndex={ragIndex}

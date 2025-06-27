@@ -25,6 +25,7 @@ interface SettingsModalProps {
   setModelTemperature: (value: number) => void
   model: string
   setModel: (model: string) => void
+  showRagSelector: boolean
   setRagIndex: (ragIndex: number) => void
   ragIndices?: RagIndexAttributes[]
   currentRagIndex?: RagIndexAttributes
@@ -40,6 +41,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   setModelTemperature,
   model,
   setModel,
+  showRagSelector,
   setRagIndex,
   ragIndices,
   currentRagIndex,
@@ -179,7 +181,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </Box>
           </Box>
 
-          <RagSelector currentRagIndex={currentRagIndex} setRagIndex={setRagIndex} ragIndices={ragIndices ?? []} />
+          {course && showRagSelector &&
+            <>
+              <Typography variant='h6' mb={'0.5rem'} fontWeight="bold">{t("settings:courseMaterials")}</Typography>
+              <RagSelector currentRagIndex={currentRagIndex} setRagIndex={setRagIndex} ragIndices={ragIndices ?? []} />
+            </>
+          }
         </Box>
 
         <Box

@@ -47,7 +47,7 @@ const PromptSelector = ({
 
 
   return (
-    <Box>
+    <Box mb={"0.5rem"}>
       <Button
         disabled={!!mandatoryPrompt}
         variant="outlined"
