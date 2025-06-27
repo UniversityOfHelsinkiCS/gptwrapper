@@ -47,7 +47,7 @@ const PromptSelector = ({
 
 
   return (
-    <Box mb={2} sx={{ flex: 1 }}>
+    <Box mb={2}>
       <Button
         disabled={!!mandatoryPrompt}
         variant="outlined"
