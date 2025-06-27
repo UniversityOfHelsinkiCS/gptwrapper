@@ -1,118 +1,120 @@
 export const mathTestContent = `
-### ✅ Inline Math
+### Inline Math to be displayed (as display math)
 
-\\(\\alpha + \\beta = \\gamma\\)
-
-\\(\\frac{a}{b} + \\sqrt{c^2 + d^2}\\)
-
-\\(\\int_0^1 x^2 \\, dx = \\frac{1}{3}\\)
-
-\\(\\sum_{n=1}^{\\infty} \\frac{1}{n^2} = \\frac{\\pi^2}{6}\\)
-
-\\(\\lim_{x \\to 0} \\frac{\\sin x}{x} = 1\\)
+Let \\(f(x) = x^2\\) and \\(g(x) = 2x + 1\\). Then \\(f(x) + g(x) = x^2 + 2x + 1\\).
+The definite integral is \\(\\int_a^b f(x) dx\\).
 
 ---
 
-### ✅ Display Math
+### Display Math Examples
 
-\\[E = mc^2\\]
+Here is a famous equation: \\[E = mc^2\\]
+And another: \\[a^2 + b^2 = c^2\\]
+A more complex one: \\[\\sum_{k=1}^N k = \\frac{N(N+1)}{2}\\]
 
-\\[\\int_{-\\infty}^\\infty e^{-x^2} dx = \\sqrt{\\pi}\\]
+---
 
+### Aligned Equations
+
+Consider the following steps:
+\\begin{align*}
+  y &= (x+1)^2 \\
+    &= x^2 + 2x + 1 \\
+    &= x(x+2) + 1
+\\end{align*}
+
+And for some general variables:
+\\begin{aligned}
+  A &= B + C \\
+    &= D - E + F
+\\end{aligned}
+
+---
+
+### Matrix Examples
+
+A simple 2x2 matrix:
+\\begin{bmatrix}
+  1 & 0 \\
+  0 & 1
+\\end{bmatrix}
+
+A determinant:
+\\begin{vmatrix}
+  a & b \\
+  c & d
+\\end{vmatrix}
+
+A general matrix with fractions:
+\\begin{pmatrix}
+  \\frac{1}{3} & \\sqrt{3} \\\\
+  \\sin(\\theta) & \\cos(\\phi)
+\\end{pmatrix}
+
+---
+
+### Text with Parentheses in Math
+
+Here's a statement with text and math:
 \\[
-f(x) = \\begin{cases}
-  x^2 & x \\geq 0 \\\\
-  -x^2 & x < 0
-\\end{cases}
+  \\text{The final answer, after several calculations, was approximately } 42 \\text{, which means that } \\sum_{n=1}^{\\infty} \\frac{1}{n^2} = \\frac{\\pi^2}{6} \\text{ is always true.}
+\\]
+
+This illustrates how a long sentence can contain math:
+\\[
+  \\text{If we consider the function } f(x) = e^x \\text{, its derivative is simply } \\deriv{f(x)}{x} = e^x \\text{.}
 \\]
 
 ---
 
-### ✅ Aligned Environments
+### Code Block Protection Check
 
-\\\\begin{align*}
-  a &= b + c \\\\
-    &= d + e
-\\\\end{align*}
-
-\\\\begin{aligned}
-  x &= y + z \\\\
-    &= w - t
-\\\\end{aligned}
-
----
-
-### ✅ Matrices
-
-\\\\begin{matrix}
-  1 & 2 \\\\
-  3 & 4
-\\\\end{matrix}
-
-\\\\begin{bmatrix}
-  a & b \\\\
-  c & d
-\\\\end{bmatrix}
-
-\\\\begin{pmatrix}
-  \\frac{1}{2} & \\sqrt{2} \\\\
-  0 & 1
-\\\\end{pmatrix}
-
----
-
-### ✅ Special Symbols and Operators
-
-\\[\\nabla \\cdot \\vec{E} = \\frac{\\rho}{\\varepsilon_0}\\]
-
-\\[x \\in \\mathbb{R},\\quad A \\subseteq B,\\quad \\forall x \\in X,\\quad \\exists y \\in Y\\]
-
-\\[f'(x) = \\frac{d}{dx} f(x), \\quad \\nabla f = \\left( \\frac{\\partial f}{\\partial x}, \\frac{\\partial f}{\\partial y} \\right)\\]
-
----
-
-### ✅ Text Inside Math
-
-\\[\\text{Let } f(x) = \\sin(x),\\quad \\text{then } f(0) = 0\\]
-
----
-
-### ✅ Mixed Math & Text with Parentheses
-
-\\[\\text{If } f(x) = x^2 \\text{ then } f(2) = 4 \\text{ (obvious)}\\]
-
----
-
-### ✅ Code Block Protection Test
-
-\`\`\`js
-// Inline math-like syntax inside code
-const formula = "a = b + c"; // Should not be parsed as math
+\`\`\`python
+# This is a Python code block
+result = 2 * (3 + 4) # Should not be affected by math preprocessing
+# For example, \\(x^2 + y^2\\) here is just a string.
 \`\`\`
 
 ---
 
-### 🧪 Mixed Test Block
+### Mixed Content Test
 
-\`\`\`markdown
-Here’s everything together:
+A quick calculation: \\(2 + 2 = 4\\).
 
-\\(x^2 + y^2 = z^2\\)
+Then we have this:
+\\[\\frac{d}{dx} e^x = e^x\\]
 
-\\[\\int_1^2 x^3 dx = \\frac{15}{4}\\]
+Now for an alignment:
+\\begin{align*}
+  P(A|B) &= \\frac{P(B|A)P(A)}{P(B)} \\\\
+         &= \\frac{P(B|A)P(A)}{\\sum P(B|A_i)P(A_i)}
+\\end{align*}
 
-\\\\begin{align*}
-  E &= mc^2 \\\\
-    &= (2)(3^2)
-\\\\end{align*}
+And finally, a small matrix:
+\\begin{pmatrix}
+  5 & 6 \\\\
+  7 & 8
+\\end{pmatrix}
 
-\\\\begin{pmatrix}
-  1 & 0 \\\\
-  0 & 1
-\\\\end{pmatrix}
+---
 
-\\text{That’s all (folks)}
-\`\`\`
+### Additional Macro Tests
+
+The norm of vector \\(\\vec{x}\\) is \\(\\norm{x}\\). Real numbers are in \\(\\R\\), and integers in \\(\\Z\\).
+The partial derivative \\(\\pdv{f}{y}\\) is defined. A matrix transpose is denoted by \\(M\\T\\).
+We consider the set \\(\\set{x \\mid x \\in \\N}\\).
+
+A vector quantity is denoted as \\(\\vb{v}\\), and its differential as \\(\\dd{t}\\).
+The gradient of a scalar field \\(\\phi\\) is \\(\\grad \\phi\\).
+The inner product of quantum states \\(\\psi\\) and \\(\\phi\\) is \\(\\braket{\\psi}{\\phi}\\).
+
+---
+
+### Additional MChem Tests
+
+A simple chemical reaction: \\(\\ch{H2 + Cl2 -> 2HCl}\\).
+An ion with charge: \\(\\ch{Fe^3+}\\) and an isotope \\(\\ch{^238U}\\).
+
 `
 export const codeTestContent = `
 ### ✅ JavaScript
