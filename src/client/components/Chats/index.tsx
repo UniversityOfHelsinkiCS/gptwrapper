@@ -65,10 +65,10 @@ const Chats = () => {
                     <Typography>{formatDate(chat.activityPeriod)}</Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <MuiLink component={RouterLink} to={`/${chat.id}`}>
+                    <MuiLink component={RouterLink} to={`/${chat.courseId}`}>
                       <Typography variant="h6">{getLanguageValue(chat.name, language)}</Typography>
                     </MuiLink>
-                    <MuiLink component={RouterLink} to={`/v2/${chat.id}`}>
+                    <MuiLink component={RouterLink} to={`/v2/${chat.courseId}`}>
                       <Typography variant="h6">{getLanguageValue(chat.name, language)} (v2 UI)</Typography>
                     </MuiLink>
                   </TableCell>
