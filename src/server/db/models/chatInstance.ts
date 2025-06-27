@@ -5,6 +5,7 @@ import { sequelize } from '../connection'
 import type Prompt from './prompt'
 import type RagIndex from './ragIndex'
 import type Responsibility from './responsibilities'
+import type Enrolment from './enrolment'
 
 class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAttributes<ChatInstance>> {
   declare id: CreationOptional<string>
@@ -41,6 +42,8 @@ class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAtt
   declare ragIndices?: NonAttribute<RagIndex[]>
 
   declare prompts?: NonAttribute<Prompt[]>
+
+  declare enrolments?: NonAttribute<Enrolment[]>
 }
 
 ChatInstance.init(

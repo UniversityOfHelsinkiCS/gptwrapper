@@ -83,57 +83,62 @@ courseRouter.get('/statistics/:id', async (req, res) => {
   res.send({ average, usagePercentage, usages: normalizedUsage })
 })
 
-interface AcualResponsibility {
-  id: string
-  user: {
-    id: string
-    username: string
-    last_name: string
-    first_names: string
-  }
-}
-
 courseRouter.get('/:id', async (req, res) => {
   const { id } = req.params
+
+  console.time('ChatInstance.findOne')
+  const chatInstance = await ChatInstance.findOne({
+    where: { courseId: id },
+    include: [
+      {
+        model: Responsibility,
+        as: 'responsibilities',
+        attributes: ['id'],
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: ['id', 'username', 'last_name', 'first_names'],
+          },
+        ],
+      },
+      {
+        model: Prompt,
+        as: 'prompts',
+      },
+    ],
+  })
+  console.timeEnd('ChatInstance.findOne')
+
+  if (!chatInstance) {
+    throw ApplicationError.NotFound('Chat instance not found')
+  }
+
+  res.send(chatInstance)
+})
+
+courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Response) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
 
-  // @todo Optimize this shit. We should have multiple endpoints instead of this one mega endpoint
-  const include: Includeable[] = [
-    {
-      model: Responsibility,
-      as: 'responsibilities',
-      attributes: ['id'],
-      include: [
-        {
-          model: User,
-          as: 'user',
-          attributes: ['id', 'username', 'last_name', 'first_names'],
-        },
-      ],
-    },
-    {
-      model: Prompt,
-      as: 'prompts',
-    },
-    {
-      model: Enrolment,
-      as: 'enrolments',
-      attributes: ['id'],
-      include: [
-        {
-          model: User,
-          as: 'user',
-          attributes: ['id', 'username', 'last_name', 'first_names', 'student_number'],
-        },
-      ],
-    },
-  ]
-
-  const chatInstance = (await ChatInstance.findOne({
+  const { id } = req.params
+  const chatInstance = await ChatInstance.findOne({
     where: { courseId: id },
-    include,
-  })) as ChatInstance
+    include: [
+      {
+        model: Enrolment,
+        as: 'enrolments',
+        attributes: ['id'],
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: ['id', 'username', 'last_name', 'first_names', 'student_number'],
+          },
+        ],
+      },
+    ],
+  })
 
   if (!chatInstance) {
     throw ApplicationError.NotFound('Chat instance not found')
@@ -146,15 +151,11 @@ courseRouter.get('/:id', async (req, res) => {
       .filter(Boolean)
       .includes(user.id)
 
-  const objectToReturn = hasFullAccess
-    ? chatInstance
-    : {
-        ...chatInstance.toJSON(),
-        enrolments: undefined,
-        responsibilities: undefined,
-      }
+  if (!hasFullAccess) {
+    throw ApplicationError.Forbidden('Unauthorized')
+  }
 
-  res.send(objectToReturn)
+  res.send(chatInstance.enrolments)
 })
 
 const checkDiscussionAccess = async (req: express.Request, res: express.Response, next: express.NextFunction) => {

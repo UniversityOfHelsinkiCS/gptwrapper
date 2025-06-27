@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import type { Discussion } from '../../shared/types'
-import type { Course, CourseStatistics } from '../types'
+import type { Course, CourseStatistics, Enrolment } from '../types'
 import apiClient from '../util/apiClient'
 import { useGetQuery } from './apiHooks'
 
@@ -9,6 +9,24 @@ const useCourse = (courseId?: string) => {
 
   const queryFn = async () => {
     const res = await apiClient.get<Course>(`/courses/${courseId}`)
+
+    const { data } = res
+
+    return data
+  }
+
+  return useQuery({
+    queryKey,
+    queryFn,
+    enabled: !!courseId,
+  })
+}
+
+export const useCourseEnrolments = (courseId?: string) => {
+  const queryKey = ['enrolments', courseId]
+
+  const queryFn = async () => {
+    const res = await apiClient.get<Enrolment[]>(`/courses/${courseId}/enrolments`)
 
     const { data } = res
 

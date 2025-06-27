@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { BarChart, Bar, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 import useCurrentUser from '../../../hooks/useCurrentUser'
-import useCourse, { useCourseStatistics } from '../../../hooks/useCourse'
+import useCourse, { useCourseEnrolments, useCourseStatistics } from '../../../hooks/useCourse'
 
 const Stats = ({ courseId }: { courseId: string }) => {
   const { t } = useTranslation()
@@ -13,6 +13,7 @@ const Stats = ({ courseId }: { courseId: string }) => {
 
   const { stats, isLoading } = useCourseStatistics(courseId)
   const { data: course, isSuccess: isCourseSuccess } = useCourse(courseId)
+  const { data: enrolments } = useCourseEnrolments(courseId)
 
   if (!stats || !user || isLoading || isUserLoading || !isCourseSuccess) return null
 
@@ -22,7 +23,7 @@ const Stats = ({ courseId }: { courseId: string }) => {
 
   const usageByUser = usages.map((usage) => usage.dataValues).reduce((acc, u) => ({ ...acc, [u.userId]: u }), {})
 
-  const enrolledUsers = course.enrolments && course.enrolments.map((enrolment) => enrolment.user)
+  const enrolledUsers = enrolments?.map((enrolment) => enrolment.user) ?? []
 
   const byLastName = (a: { last_name: string }, b: { last_name: string }) => {
     if (a.last_name < b.last_name) {
