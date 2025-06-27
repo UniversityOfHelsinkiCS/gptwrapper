@@ -6,7 +6,15 @@ function useLocalStorageState<T extends object>(key: string, defaultValue = unde
   const [state, setState] = useState(() => {
     const storedValue = localStorage.getItem(key)
     if (!storedValue) return defaultValue
-    return JSON.parse(storedValue) as T
+
+    let parsedValue: T | undefined
+    try {
+      parsedValue = JSON.parse(storedValue) as T
+    } catch (error) {
+      console.error(`Failed to parse value for key "${key}":`, error)
+      parsedValue = defaultValue
+    }
+    return parsedValue
   })
 
   useEffect(() => {
