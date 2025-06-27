@@ -10,7 +10,7 @@ function useLocalStorageState<T extends object>(key: string, defaultValue = unde
   })
 
   useEffect(() => {
-    if (!state) localStorage.setItem(key, JSON.stringify(state))
+    if (state) localStorage.setItem(key, JSON.stringify(state))
   }, [key, state])
 
   return [state, setState]
