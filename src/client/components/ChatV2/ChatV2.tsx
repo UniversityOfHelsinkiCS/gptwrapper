@@ -424,7 +424,7 @@ export const ChatV2 = () => {
           borderRight: '1px solid rgba(0, 0, 0, 0.12)',
         }}
       >
-        <Box sx={{ position: 'sticky', top: 80, padding: '2rem 1.5rem' }}>
+        <Box sx={{ position: 'sticky', top: 85, padding: '2rem 1.5rem' }}>
           {course && <ChatInfo course={course} />}
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
@@ -535,7 +535,7 @@ export const ChatV2 = () => {
           minWidth: 300,
           height: '100vh',
           position: 'sticky',
-          top: 0,
+          top: 85,
         }}
       >
         {showFileSearch && <FileSearchInfo isFileSearching={isFileSearching} fileSearchResult={fileSearch} messages={messages} />}
