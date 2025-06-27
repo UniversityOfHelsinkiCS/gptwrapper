@@ -2,6 +2,11 @@ import { Box, Typography, Link } from '@mui/material'
 import { Trans, useTranslation } from 'react-i18next'
 
 import toskaColor from '../../assets/toscalogo_color.svg'
+import { useQuery } from '@tanstack/react-query'
+import { maxBy } from 'lodash'
+import { Release } from '../../../shared/types'
+import { formatDistanceToNow } from 'date-fns'
+import { locales } from '../../locales/locales'
 
 const supportEmail = 'opetusteknologia@helsinki.fi'
 
@@ -22,7 +27,17 @@ const styles = {
 }
 
 const Footer = () => {
-  useTranslation()
+  const { t, i18n } = useTranslation()
+
+  const { data: changelog } = useQuery<Release[]>({
+    queryKey: ['/changelog'],
+    select: (data) => {
+      const last = maxBy(data, (d) => Date.parse(d.time))
+      return last ? [last] : []
+    },
+  })
+
+  const publishedAgo = formatDistanceToNow(changelog?.[0]?.time ?? new Date().getTime(), { addSuffix: true, locale: locales[i18n.language] })
 
   return (
     <Box
@@ -45,6 +60,7 @@ const Footer = () => {
               }}
             />
           </Typography>
+          <Typography variant="caption">{t('footer:version', { version: changelog?.[0]?.version, publishedAgo })}</Typography>
         </Box>
 
         <Box sx={styles.imageBox}>

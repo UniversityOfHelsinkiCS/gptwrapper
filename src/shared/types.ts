@@ -108,3 +108,10 @@ export type Discussion = {
   }
   createdAt: string
 }
+
+export type Release = {
+  description: string
+  time: string
+  title: string
+  version: string
+}
