@@ -181,12 +181,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </Box>
           </Box>
 
-          {course && showRagSelector &&
+          {course && showRagSelector && (
             <>
-              <Typography variant='h6' mb={'0.5rem'} fontWeight="bold">{t("settings:courseMaterials")}</Typography>
+              <Typography variant="h6" mb={'0.5rem'} fontWeight="bold">
+                {t('settings:courseMaterials')}
+              </Typography>
               <RagSelector currentRagIndex={currentRagIndex} setRagIndex={setRagIndex} ragIndices={ragIndices ?? []} />
             </>
-          }
+          )}
         </Box>
 
         <Box
@@ -194,9 +196,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             padding: '2rem 3rem',
             display: 'flex',
             justifyContent: 'flex-end',
+            gap: 1,
           }}
         >
           <SettingsButton onClick={resetSettings}>{t('settings:resetDefault')}</SettingsButton>
+          <SettingsButton onClick={() => setOpen(false)}>{t('common:close')}</SettingsButton>
         </Box>
         <SaveMyPromptModal
           isOpen={myPromptModalOpen}

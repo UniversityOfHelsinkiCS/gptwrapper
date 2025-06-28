@@ -37,7 +37,8 @@
     "copy": "Kopioi",
     "curreUrl": "https://curre.helsinki.fi/",
     "curreTitle": "Curre",
-    "tryNew": "Kokeile uutta chattiä"
+    "tryNew": "Kokeile uutta chattiä",
+    "close": "Sulje"
   },
   "stats": {
     "showing": "Näytetään",

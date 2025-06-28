@@ -58,7 +58,6 @@ export const ChatV2 = () => {
   const [prevResponse, setPrevResponse] = useLocalStorageState(`${localStoragePrefix}-prev-response`, { id: '' })
   const [fileSearch, setFileSearch] = useLocalStorageState<FileSearchCompletedData>(`${localStoragePrefix}-last-file-search`)
 
-
   // App States
   const [message, setMessage] = useState<string>('')
   const [isFileSearching, setIsFileSearching] = useState<boolean>(false)
@@ -437,12 +436,14 @@ export const ChatV2 = () => {
               {t('infoSmall:title')}
             </SettingsButton>
           </Box>
-          {course && showRagSelector &&
+          {course && showRagSelector && (
             <>
-              <Typography variant='h6' mb={'0.5rem'} fontWeight="bold">{t("settings:courseMaterials")}</Typography>
+              <Typography variant="h6" mb={'0.5rem'} fontWeight="bold">
+                {t('settings:courseMaterials')}
+              </Typography>
               <RagSelector currentRagIndex={ragIndex} setRagIndex={setRagIndexId} ragIndices={ragIndices ?? []} />
             </>
-          }
+          )}
         </Box>
       </Box>
 
@@ -504,20 +505,24 @@ export const ChatV2 = () => {
               <Typography>{`Currenlty there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}</Typography>
             </Alert>
           )}
-          {
-            tokenUsageAlertOpen &&
-            <Alert severity="warning" sx={{ my: '0.2rem' }}
-              action={<Box sx={{ display: 'flex', gap: 1 }}>
-                <Button variant="outlined" size='small' onClick={handleCancel} color="primary" type="button">
-                  {t("common:cancel")}
-                </Button>
-                <Button variant="contained" size='small' onClick={handleContinue} color="primary" type="button">
-                  {t("common:continue")}
-                </Button>
-              </ Box>}>
+          {tokenUsageAlertOpen && (
+            <Alert
+              severity="warning"
+              sx={{ my: '0.2rem' }}
+              action={
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Button variant="outlined" size="small" onClick={handleCancel} color="primary" type="button">
+                    {t('common:cancel')}
+                  </Button>
+                  <Button variant="contained" size="small" onClick={handleContinue} color="primary" type="button">
+                    {t('common:continue')}
+                  </Button>
+                </Box>
+              }
+            >
               {tokenUsageWarning}
             </Alert>
-          }
+          )}
           <ChatBox
             message={message}
             setMessage={setMessage}
@@ -537,7 +542,6 @@ export const ChatV2 = () => {
             onSubmit={(newMessage) => handleSubmit(newMessage)}
           />
         </Box>
-
       </Box>
 
       {/* Annotations columns ----------------------------------------------------------------------------------------------------- */}
@@ -588,12 +592,14 @@ const FileSearchInfo = ({
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: 'smooth',
-      })
+      setTimeout(() => {
+        scrollRef.current?.scrollTo({
+          top: scrollRef.current.scrollHeight,
+          behavior: 'smooth',
+        })
+      }, 50)
     }
-  }, [messages, fileSearchResult, isFileSearching])
+  }, [isFileSearching, fileSearchResult, messages.length])
 
   return (
     <Box
@@ -614,24 +620,7 @@ const FileSearchInfo = ({
           Lähdemateriaalit
         </Typography>
       </Box>
-      {isFileSearching ? (
-        <Box
-          sx={{
-            width: '95%',
-            display: 'flex',
-            flexDirection: 'column',
-            pl: 2.5,
-            mr: 2,
-            gap: 2,
-          }}
-        >
-          <Skeleton variant="rounded" height={'15rem'} />
-          <Skeleton variant="rounded" height={'15rem'} />
-          <Skeleton variant="rounded" height={'15rem'} />
-        </Box>
-      ) : (
-        <CitationsBox messages={messages} fileSearchResult={fileSearchResult} />
-      )}
+      <CitationsBox messages={messages} fileSearchResult={fileSearchResult} isFileSearching={isFileSearching} />
     </Box>
   )
 }

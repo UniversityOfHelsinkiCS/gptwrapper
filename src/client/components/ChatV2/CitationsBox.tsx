@@ -1,4 +1,4 @@
-import { Box, Chip, Paper, Typography, Button, Drawer } from '@mui/material'
+import { Box, Chip, Paper, Typography, Button, Drawer, Skeleton } from '@mui/material'
 import type { FileSearchCompletedData, FileSearchResultData } from '../../../shared/types'
 import type { Message } from '../../types'
 import Markdown from 'react-markdown'
@@ -28,14 +28,13 @@ const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileS
   const isExpired = error?.status === 404
 
   return (
-    <Box>
+    <Box sx={{ pl: 2.5, mb: 5 }}>
       <Box
         gap={1}
         sx={{
           display: 'flex',
           flexDirection: 'row',
           flexWrap: 'wrap',
-          pl: 2,
         }}
       >
         <Typography>{t('chat:searchTerms')}</Typography>
@@ -60,7 +59,7 @@ const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileS
       </Box>
       {isResultsSuccess && (
         <>
-          <Box sx={{ display: 'flex', flexDirection: 'column', pl: 2.5 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             {results.map((result, idx) => (
               <FileItemComponent key={idx} fileItem={result} cutOff={true} />
             ))}
@@ -69,7 +68,7 @@ const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileS
       )}
 
       {isExpired && <Typography color="error">File search results expired</Typography>}
-      <Box sx={{ position: 'sticky', bottom: 0, background: '#FFF', mt: 0.1, pl: 2.5 }}>
+      <Box sx={{ mt: 1 }}>
         <Button variant="outlined" startIcon={<Subject />} onClick={() => setSourceModalOpen(true)} sx={{ borderRadius: 4, mt: 2, mb: 2 }}>
           Lue lisää
         </Button>
@@ -111,7 +110,15 @@ const SourceModal = ({ open, setOpen, results }: { open: boolean; setOpen: any; 
   )
 }
 
-export const CitationsBox = ({ messages, fileSearchResult }: { messages: Message[]; fileSearchResult?: FileSearchCompletedData }) => {
+export const CitationsBox = ({
+  messages,
+  fileSearchResult,
+  isFileSearching,
+}: {
+  messages: Message[]
+  fileSearchResult?: FileSearchCompletedData
+  isFileSearching: boolean
+}) => {
   const messageCitations = [...messages.map((m) => m.fileSearchResult).filter(Boolean)] as FileSearchCompletedData[]
 
   if (fileSearchResult && !messageCitations.includes(fileSearchResult)) {
@@ -123,6 +130,33 @@ export const CitationsBox = ({ messages, fileSearchResult }: { messages: Message
       {messageCitations.map((c, key) => (
         <MessageFileSearchResult key={key} fileSearchResult={c} />
       ))}
+
+      {isFileSearching && (
+        <Box
+          sx={{
+            width: '95%',
+            display: 'flex',
+            flexDirection: 'column',
+            pl: 2.5,
+            mr: 2,
+            gap: 2,
+            mt: messageCitations.length > 0 ? 2 : 0,
+            mb: 2,
+          }}
+        >
+          <Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
+              <Skeleton sx={{ borderRadius: 5, flex: 2 }} height={'3rem'} />
+              <Skeleton sx={{ borderRadius: 5, flex: 1 }} height={'3rem'} />
+            </Box>
+            <Skeleton sx={{ borderRadius: 5 }} height={'3rem'} />
+          </Box>
+
+          <Skeleton variant="rounded" height={'15rem'} />
+          <Skeleton variant="rounded" height={'15rem'} />
+          <Skeleton variant="rounded" height={'15rem'} />
+        </Box>
+      )}
     </Box>
   )
 }

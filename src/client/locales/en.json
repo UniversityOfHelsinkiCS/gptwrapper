@@ -37,7 +37,8 @@
     "curreUrl": "https://curre.helsinki.fi/",
     "curreTitle": "Curre",
     "copy": "Copy",
-    "tryNew": "Try the new chat"
+    "tryNew": "Try the new chat",
+    "close": "Close"
   },
   "stats": {
     "timePeriodStart": "Starting",

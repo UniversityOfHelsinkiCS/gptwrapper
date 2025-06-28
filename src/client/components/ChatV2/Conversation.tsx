@@ -115,8 +115,9 @@ const AssistantMessage = ({
     },
     extensions: ['mhchem.js'],
     output: 'htmlAndMathml',
-    throwOnError: false, // If math is badly formatted, display it in red instead of throwing errors
     errorColor: '#cc0000',
+    throwOnError: false,
+    strict: false, // disables logging katex warnings/errors – if debugging, turn these two on
   }
 
   return (
@@ -167,7 +168,7 @@ const AssistantMessage = ({
                       fontSize: '16px',
                       wordBreak: 'break-all',
                       overflowWrap: 'break-word',
-                      whiteSpace: 'pre-wrap' /* preserve line breaks but allow wrapping */,
+                      whiteSpace: 'pre-wrap',
                     }}
                     style={oneDark}
                   />
