@@ -65,7 +65,7 @@ const PostStreamSchemaV2 = z.object({
 openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   const req = r as RequestWithUser
   const { options, courseId } = PostStreamSchemaV2.parse(JSON.parse(req.body.data))
-  const { ragIndexId } = options
+  const { model, ragIndexId } = options
   const { user } = req
 
   // @todo were not checking if the user is enrolled?
@@ -82,15 +82,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     throw ApplicationError.NotFound('Course not found')
   }
 
-  // Check if the user has usage limits for the course or model
-  let usageAllowed = false
-  if (courseId) {
-    usageAllowed = await checkCourseUsage(user, courseId)
-  } else if (options.model === FREE_MODEL) {
-    usageAllowed = true
-  } else {
-    usageAllowed = await checkUsage(user, options.model)
-  }
+  const usageAllowed = (courseId ? await checkCourseUsage(user, courseId) : model === FREE_MODEL) || (await checkUsage(user, model))
 
   if (!usageAllowed) {
     throw ApplicationError.Forbidden('Usage limit reached')
@@ -262,7 +254,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   options.options = { temperature: options.modelTemperature }
 
-  const usageAllowed = courseId ? await checkCourseUsage(user, courseId) : model === FREE_MODEL || (await checkUsage(user, model))
+  const usageAllowed = (courseId ? await checkCourseUsage(user, courseId) : model === FREE_MODEL) || (await checkUsage(user, model))
 
   if (!usageAllowed) {
     throw ApplicationError.Forbidden('Usage limit reached')
