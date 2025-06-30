@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Send } from '@mui/icons-material'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
@@ -46,6 +46,7 @@ export const ChatBox = ({
 }) => {
   const { courseId } = useParams()
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
+  const [isWarning, setIsWarning] = useState<boolean>(false)
 
   const textFieldRef = useRef<HTMLInputElement>(null)
 
@@ -88,6 +89,13 @@ export const ChatBox = ({
       textFieldRef.current.focus()
     }
   }
+
+  useEffect(() => {
+    if (!userStatus) return
+
+    setIsWarning(userStatus.usage > userStatus.limit)
+
+  }, [statusLoading, userStatus])
 
   if (statusLoading) {
     return <p>loading</p>
@@ -170,7 +178,7 @@ export const ChatBox = ({
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0' }}>
-          <Typography variant="body1" sx={{ padding: '0.5rem 0', opacity: 0.7 }}>
+          <Typography variant="body1" sx={{ padding: '0.5rem 0', opacity: isWarning ? 1 : 0.7, color: isWarning ? '#cc0000' : 'inherit' }}>
             {userStatus?.usage ?? '-'} / {userStatus?.limit ?? '-'} {t('status:tokensUsed')}
           </Typography>
 
