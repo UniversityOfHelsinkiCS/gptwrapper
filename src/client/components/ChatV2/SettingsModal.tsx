@@ -90,15 +90,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const isPromptHidden = activePrompt?.hidden ?? false
   const isPromptEditable = activePrompt?.type !== 'CHAT_INSTANCE' && activePrompt?.type !== 'RAG_INDEX'
 
-  useEffect(() => {
-    if (mandatoryPrompt) {
-      setActivePrompt(mandatoryPrompt)
-    } else if (urlPrompt) {
-      console.log(`Using promptId=${urlPrompt.id} defined by URL search param`)
-      setActivePrompt(urlPrompt)
-    }
-  }, [mandatoryPrompt, urlPrompt])
-
   const resetSettings = () => {
     handleChangePrompt(undefined)
     setModelTemperature(DEFAULT_MODEL_TEMPERATURE)
@@ -115,6 +106,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setAssistantInstructions(newPrompt.systemMessage)
     setActivePrompt(newPrompt)
   }
+
+  useEffect(() => {
+    if (mandatoryPrompt) {
+      handleChangePrompt(mandatoryPrompt)
+    } else if (urlPrompt) {
+      console.log(`Using promptId=${urlPrompt.id} defined by URL search param`)
+      handleChangePrompt(urlPrompt)
+    }
+  }, [mandatoryPrompt, urlPrompt])
 
   return (
     <Modal open={open} onClose={() => setOpen(false)}>
