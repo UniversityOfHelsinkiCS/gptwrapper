@@ -62,17 +62,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     initialData: [],
   })
   const promptSaveMutation = useMutation({
-    mutationFn: async ({ name, isNewPrompt }: { name: string; isNewPrompt: boolean }) => {
+    mutationFn: async ({ name, promptToSave }: { name: string; promptToSave?: Prompt }) => {
       const promptData = {
         name,
         systemMessage: assistantInstructions,
         type: 'PERSONAL',
       }
-      if (isNewPrompt) {
-        const res = await apiClient.post<Prompt>('/prompts', promptData)
+      if (promptToSave) {
+        const res = await apiClient.put<Prompt>(`/prompts/${promptToSave.id}`, promptData)
         setActivePrompt(res.data)
       } else {
-        await apiClient.put(`/prompts/${activePrompt?.id}`, promptData)
+        const res = await apiClient.post<Prompt>('/prompts', promptData)
+        setActivePrompt(res.data)
       }
       refetch()
     },
@@ -222,8 +223,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           systemMessage={assistantInstructions}
           myPrompts={myPrompts}
           existingName={activePrompt?.name}
-          onSave={async (name, isNewPrompt) => {
-            await promptSaveMutation.mutateAsync({ name, isNewPrompt })
+          onSave={async (name, promptToSave) => {
+            await promptSaveMutation.mutateAsync({ name, promptToSave })
           }}
         />
       </Box>

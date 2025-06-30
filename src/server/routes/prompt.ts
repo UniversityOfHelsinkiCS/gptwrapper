@@ -3,6 +3,7 @@ import z from 'zod/v4'
 import { ChatInstance, Prompt, RagIndex, Responsibility } from '../db/models'
 import type { RequestWithUser, User } from '../types'
 import { ApplicationError } from '../util/ApplicationError'
+import { InferAttributes } from 'sequelize'
 
 const promptRouter = express.Router()
 
@@ -77,6 +78,37 @@ const PromptCreationParams = z.intersection(
   ]),
 )
 
+type PromptCreationParamsType = z.infer<typeof PromptCreationParams>
+
+const getPotentialNameConflicts = async (prompt: InferAttributes<Prompt, { omit: 'id' }>) => {
+  switch (prompt.type) {
+    case 'CHAT_INSTANCE': {
+      return await Prompt.findAll({
+        attributes: ['id', 'name'],
+        where: {
+          chatInstanceId: prompt.chatInstanceId,
+        },
+      })
+    }
+    case 'PERSONAL': {
+      return await Prompt.findAll({
+        attributes: ['id', 'name'],
+        where: {
+          userId: prompt.userId,
+        },
+      })
+    }
+    case 'RAG_INDEX': {
+      return Prompt.findAll({
+        attributes: ['id', 'name'],
+        where: {
+          ragIndexId: prompt.ragIndexId,
+        },
+      })
+    }
+  }
+}
+
 interface ChatInstancePrompt {
   chatInstanceId: string
 }
@@ -119,7 +151,7 @@ const authorizeRagIndexPromptResponsible = async (user: User, prompt: RagIndexPr
   }
 }
 
-const authorizePromptCreation = async (user: User, promptParams: z.infer<typeof PromptCreationParams>) => {
+const authorizePromptCreation = async (user: User, promptParams: PromptCreationParamsType) => {
   switch (promptParams.type) {
     case 'CHAT_INSTANCE': {
       await authorizeChatInstancePromptResponsible(user, promptParams)
@@ -147,6 +179,11 @@ promptRouter.post('/', async (req, res) => {
   const promptParams = PromptCreationParams.parse(input)
 
   await authorizePromptCreation(user, promptParams)
+
+  const potentialConflicts = await getPotentialNameConflicts(promptParams)
+  if (potentialConflicts.some((p) => p.name === promptParams.name)) {
+    throw ApplicationError.Conflict('Prompt name already exists')
+  }
 
   const newPrompt = await Prompt.create(promptParams)
 
@@ -195,6 +232,7 @@ promptRouter.put('/:id', async (req, res) => {
   const updates = PromptUpdateableParams.parse(req.body)
   const { systemMessage, name, hidden, mandatory } = updates
 
+  console.log(id)
   const prompt = await Prompt.findByPk(id)
 
   if (!prompt) {
@@ -202,6 +240,11 @@ promptRouter.put('/:id', async (req, res) => {
   }
 
   await authorizePromptUpdate(user, prompt)
+
+  const potentialConflicts = await getPotentialNameConflicts(prompt)
+  if (potentialConflicts.some((p) => p.name === name && p.id !== prompt.id)) {
+    throw ApplicationError.Conflict('Prompt name already exists')
+  }
 
   prompt.systemMessage = systemMessage
   prompt.name = name

@@ -9,7 +9,7 @@ type SaveMyPromptModalProps = {
   systemMessage: string
   existingName?: string
   myPrompts: Prompt[]
-  onSave: (name: string, isNewPrompt: boolean) => Promise<void>
+  onSave: (name: string, promptToSave: Prompt | undefined) => Promise<void>
 }
 
 export const SaveMyPromptModal = ({ isOpen, setIsOpen, onSave, systemMessage, existingName, myPrompts }: SaveMyPromptModalProps) => {
@@ -20,7 +20,8 @@ export const SaveMyPromptModal = ({ isOpen, setIsOpen, onSave, systemMessage, ex
     setName(existingName ?? '')
   }, [existingName])
 
-  const isNewPrompt = myPrompts.every((prompt) => prompt.name !== name)
+  // If name exists, modify the existing prompt
+  const promptToSave = myPrompts.find((prompt) => prompt.name === name)
 
   return (
     <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
@@ -28,7 +29,7 @@ export const SaveMyPromptModal = ({ isOpen, setIsOpen, onSave, systemMessage, ex
         onSubmit={async (e) => {
           console.log('Saving', name)
           e.preventDefault()
-          await onSave(name, isNewPrompt)
+          await onSave(name, promptToSave)
           setIsOpen(false)
         }}
       >
@@ -48,7 +49,7 @@ export const SaveMyPromptModal = ({ isOpen, setIsOpen, onSave, systemMessage, ex
         </DialogContent>
         <DialogActions>
           <Button color="primary" type="submit" disabled={!name}>
-            {isNewPrompt ? t('settings:saveNewPrompt') : t('settings:updatePrompt')}
+            {promptToSave ? t('settings:updatePrompt') : t('settings:saveNewPrompt')}
           </Button>
           <Button color="secondary" type="button" onClick={() => setIsOpen(false)}>
             {t('common:cancel')}
