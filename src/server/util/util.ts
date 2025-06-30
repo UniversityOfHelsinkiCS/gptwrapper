@@ -30,11 +30,15 @@ export const getCourseModel = async (courseId: string): Promise<string> => {
 }
 
 export const getAllowedModels = (model: string): string[] => {
+  // Some kludge implementation
+  // Do better model management https://github.com/UniversityOfHelsinkiCS/gptwrapper/issues/267
   const allModels = validModels.map(({ name }) => name)
 
   if (model === 'gpt-4') return allModels
 
-  if (model === 'gpt-4o') return ['gpt-4o', 'gpt-4o-mini']
+  if (model === 'gpt-4o') return ['gpt-4.1', 'gpt-4o', 'gpt-4o-mini']
+
+  if (model === 'gpt-4.1') return ['gpt-4.1', 'gpt-4o-mini']
 
   return ['gpt-4o-mini']
 }
