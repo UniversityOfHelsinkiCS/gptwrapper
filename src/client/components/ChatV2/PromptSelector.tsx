@@ -11,16 +11,18 @@ const PromptSelector = ({
   activePrompt,
   setActivePrompt,
   handleDeletePrompt,
+  mandatoryPrompt,
 }: {
   coursePrompts: Prompt[]
   myPrompts: Prompt[]
   activePrompt?: Prompt
   setActivePrompt: (prompt: Prompt | undefined) => void
   handleDeletePrompt: (prompt: Prompt) => void
+  mandatoryPrompt?: Prompt
+  urlPrompt?: Prompt
 }) => {
   const { t } = useTranslation()
 
-  const [mandatoryPrompt, setMandatoryPrompt] = useState<Prompt | null>()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   const handleSelect = (prompt?: Prompt) => {
@@ -33,21 +35,8 @@ const PromptSelector = ({
     if (confirm(t('settings:confirmDeletePrompt', { name: prompt.name }))) handleDeletePrompt(prompt)
   }
 
-  useEffect(() => {
-    const mandatory: Prompt | undefined = coursePrompts.find((prompt) => prompt.mandatory === true)
-
-    if (mandatory) {
-      setActivePrompt(mandatory)
-      setMandatoryPrompt(mandatory)
-    } else {
-      setMandatoryPrompt(null)
-      handleSelect(undefined)
-    }
-  }, [])
-
-
   return (
-    <Box mb={"0.5rem"}>
+    <Box mb={'0.5rem'}>
       <Button
         disabled={!!mandatoryPrompt}
         variant="outlined"
@@ -90,7 +79,6 @@ const PromptSelector = ({
           </>
         )}
       </Menu>
-
     </Box>
   )
 }

@@ -15,6 +15,13 @@ import RagSelector from './RagSelector'
 import { SaveMyPromptModal } from './SaveMyPromptModal'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import apiClient from '../../util/apiClient'
+import { useSearchParams } from 'react-router-dom'
+
+const useUrlPromptId = () => {
+  const [searchParams] = useSearchParams()
+  const promptId = searchParams.get('promptId')
+  return promptId
+}
 
 interface SettingsModalProps {
   open: boolean
@@ -47,6 +54,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   currentRagIndex,
   course,
 }) => {
+  const urlPromptId = useUrlPromptId()
   const { t } = useTranslation()
 
   const { data: myPrompts, refetch } = useQuery<Prompt[]>({
@@ -78,23 +86,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [activePrompt, setActivePrompt] = useState<Prompt>()
   const [myPromptModalOpen, setMyPromptModalOpen] = useState<boolean>(false)
   const mandatoryPrompt = course?.prompts.find((p) => p.mandatory)
+  const urlPrompt = course?.prompts.find((p) => p.id === urlPromptId)
   const isPromptHidden = activePrompt?.hidden ?? false
   const isPromptEditable = activePrompt?.type !== 'CHAT_INSTANCE' && activePrompt?.type !== 'RAG_INDEX'
 
   useEffect(() => {
     if (mandatoryPrompt) {
       setActivePrompt(mandatoryPrompt)
+    } else if (urlPrompt) {
+      console.log(`Using promptId=${urlPrompt.id} defined by URL search param`)
+      setActivePrompt(urlPrompt)
     }
-  }, [mandatoryPrompt])
+  }, [mandatoryPrompt, urlPrompt])
 
   const resetSettings = () => {
-    setActivePrompt(undefined)
-    setAssistantInstructions(DEFAULT_ASSISTANT_INSTRUCTIONS)
+    handleChangePrompt(undefined)
     setModelTemperature(DEFAULT_MODEL_TEMPERATURE)
   }
 
   const handleChangePrompt = (newPrompt: Prompt | undefined) => {
     if (!newPrompt) {
+      console.log('Setting default prompt')
       setActivePrompt(undefined)
       setAssistantInstructions(DEFAULT_ASSISTANT_INSTRUCTIONS)
       return
@@ -151,6 +163,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             activePrompt={activePrompt}
             setActivePrompt={handleChangePrompt}
             handleDeletePrompt={(prompt) => promptDeleteMutation.mutateAsync(prompt)}
+            mandatoryPrompt={mandatoryPrompt}
+            urlPrompt={urlPrompt}
           />
           <AssistantInstructionsInput
             label={t('settings:promptContent')}

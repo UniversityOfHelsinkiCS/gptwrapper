@@ -5,7 +5,7 @@ import SettingsIcon from '@mui/icons-material/Settings'
 import { Alert, Box, Typography, Skeleton, Button } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { ALLOWED_FILE_TYPES, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, validModels } from '../../../config'
 import type { FileSearchCompletedData, ResponseStreamEventData } from '../../../shared/types'
 import { getLanguageValue } from '../../../shared/utils'
@@ -30,6 +30,7 @@ import { getCompletionStream } from './util'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
+
   const { data: course } = useCourse(courseId)
 
   const { ragIndices } = useRagIndices(courseId)
