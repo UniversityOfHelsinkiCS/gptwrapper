@@ -30,13 +30,14 @@ export const getCourseModel = async (courseId: string): Promise<string> => {
 }
 
 export const getAllowedModels = (model: string): string[] => {
-  // Some kludge implementation
-  // Do better model management https://github.com/UniversityOfHelsinkiCS/gptwrapper/issues/267
   const allModels = validModels.map(({ name }) => name)
 
-  if (model === 'gpt-4') return allModels
+  // Logic: allowed models are selected by the pricing of the model
+  // gpt-4o is the most expensive, so it is allowed for all
+  // gpt-4.1 is cheaper, so all models cheaper than it are allowed
+  // pricings: https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/?cdn=disable
 
-  if (model === 'gpt-4o') return ['gpt-4.1', 'gpt-4o', 'gpt-4o-mini']
+  if (model === 'gpt-4o') return allModels
 
   if (model === 'gpt-4.1') return ['gpt-4.1', 'gpt-4o-mini']
 
