@@ -6,7 +6,6 @@ const styles: { [key: string]: SxProps<Theme> } = {
     zIndex: (theme: Theme) => theme.zIndex.drawer + 1,
     borderBottom: '1px solid',
     borderColor: (theme: Theme) => theme.palette.divider,
-    py: '0.6rem',
   },
   toolbar: {
     display: 'flex',
@@ -15,12 +14,12 @@ const styles: { [key: string]: SxProps<Theme> } = {
       display: 'none',
     },
     justifyContent: 'space-between',
-    padding: '0.2rem 0 0.2rem 0',
   },
   appName: {
     textTransform: 'uppercase',
     fontWeight: 700,
-    fontSize: '1.5rem',
+    fontSize: '1.4rem',
+    mt: '0.2rem',
     userSelect: 'none',
   },
   navBox: {
@@ -30,7 +29,6 @@ const styles: { [key: string]: SxProps<Theme> } = {
     textDecoration: 'none',
     marginRight: 1,
     fontWeight: (theme: Theme) => theme.typography.fontWeightMedium,
-    padding: '5px 12px',
     backgroundColor: 'rgba(255, 255, 255, 0)',
     transition: 'background-color 0.1s',
     borderRadius: 3,
@@ -38,7 +36,7 @@ const styles: { [key: string]: SxProps<Theme> } = {
       backgroundColor: 'rgba(255, 255, 255, 0.22)',
     },
   },
-  icon: { mr: 1 },
+  icon: { mr: 1, fontSize: '1rem' },
   language: { mr: 1 },
   item: {
     flexGrow: 1,
