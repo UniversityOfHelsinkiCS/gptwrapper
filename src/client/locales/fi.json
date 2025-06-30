@@ -245,6 +245,8 @@
     "showActiveCourses": "Näytä aktiiviset kurssit",
     "isSavedOptOut": "Kurssin keskustelut tallennetaan anonyymisti jos annat tallennusluvan\n\nTallennettuja keskusteluja voidaan käyttää tutkimuksessa",
     "isSavedNotOptOut": "Kurssin keskustelut tallennetaan anonyymisti.\n\nTallennettuja keskusteluja voidaan käyttää tutkimuksessa",
-    "isSavedForTeacherOptOut": "Kurssin keskustelut tallennetaan anonyymisti jos käyttäjä antaa luvan"
+    "isSavedForTeacherOptOut": "Kurssin keskustelut tallennetaan anonyymisti jos käyttäjä antaa luvan",
+    "directPromptLink": "Linkki kurssichattiin käyttäen tätä alustusta",
+    "copyDirectPromptLinkInfo": "Kopioi linkki tämän alustuksen kurssichattiin"
   }
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Box, Paper, Typography, Button, Tooltip, TextField, Stack, FormControlLabel, Checkbox } from '@mui/material'
-import { ExpandLess, ExpandMore, Visibility, VisibilityOff, PriorityHigh } from '@mui/icons-material'
+import { Box, Paper, Typography, Button, Tooltip, TextField, Stack, FormControlLabel, Checkbox, IconButton, Link } from '@mui/material'
+import { ExpandLess, ExpandMore, Visibility, VisibilityOff, PriorityHigh, ContentCopyOutlined } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
 import { enqueueSnackbar } from 'notistack'
@@ -8,6 +8,7 @@ import { Prompt as PromptType, SetState } from '../../../types'
 import { Response } from '../../Chat/Conversation'
 import SystemMessage from '../../Chat/SystemMessage'
 import { useEditPromptMutation } from '../../../hooks/usePromptMutation'
+import { useParams, Link as RouterLink } from 'react-router-dom'
 
 const ExpandButton = ({ expand, setExpand }: { expand: boolean; setExpand: SetState<boolean> }) => (
   <Button onClick={() => setExpand(!expand)}>{expand ? <ExpandLess /> : <ExpandMore />}</Button>
@@ -15,6 +16,7 @@ const ExpandButton = ({ expand, setExpand }: { expand: boolean; setExpand: SetSt
 
 const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptType; handleDelete: (promptId: string) => void; mandatoryPromptId?: string }) => {
   const { t } = useTranslation()
+  const { id: courseId } = useParams()
   const mutation = useEditPromptMutation()
 
   const { id, name, systemMessage, messages, hidden, mandatory } = prompt
@@ -25,6 +27,8 @@ const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptTyp
   const [updatedName, setUpdatedName] = useState(name)
   const [updatedHidden, setUpdatedHidden] = useState(hidden)
   const [updatedMandatory, setUpdatedMandatory] = useState(mandatory)
+  const chatPath = `/v2/${courseId}?promptId=${id}`
+  const directLink = `${window.location.origin}${chatPath}`
 
   const handleSave = async () => {
     const updatedPrompt = {
@@ -68,9 +72,21 @@ const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptTyp
               </Box>
             )}
             {!editPrompt ? (
-              <Typography variant="h6" display="inline">
-                {name}
-              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <Typography variant="h6" display="inline">
+                  {name}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Link component={RouterLink} to={chatPath} variant="caption">
+                    {t('course:directPromptLink')}
+                  </Link>
+                  <Tooltip title={t('course:copyDirectPromptLinkInfo')} placement="right">
+                    <IconButton size="small">
+                      <ContentCopyOutlined fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </Box>
             ) : (
               <TextField defaultValue={updatedName} sx={{ width: '650px' }} onChange={(e) => setUpdatedName(e.target.value)} />
             )}
