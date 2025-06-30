@@ -22,10 +22,11 @@ const FileItemComponent = ({ fileItem, cutOff = false }: { fileItem: FileSearchR
 }
 
 const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileSearchCompletedData }) => {
-  const { data: results, isSuccess: isResultsSuccess, error } = useFileSearchResults(fileSearchResult.id)
+  const { data: results, isSuccess: isResultsSuccess } = useFileSearchResults(fileSearchResult.id)
   const { t } = useTranslation()
   const [sourceModalOpen, setSourceModalOpen] = useState<boolean>(false)
-  const isExpired = error?.status === 404
+  const isExpired = isResultsSuccess && 'expired' in results
+  const arrayResults = Array.isArray(results) ? results : []
 
   return (
     <Box sx={{ pl: 2.5, mb: 5 }}>
@@ -57,14 +58,12 @@ const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileS
           />
         ))}
       </Box>
-      {isResultsSuccess && (
-        <>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            {results.map((result, idx) => (
-              <FileItemComponent key={idx} fileItem={result} cutOff={true} />
-            ))}
-          </Box>
-        </>
+      {isResultsSuccess && !('expired' in results) && (
+        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          {results.map((result, idx) => (
+            <FileItemComponent key={idx} fileItem={result} cutOff={true} />
+          ))}
+        </Box>
       )}
 
       {isExpired && <Typography color="error">File search results expired</Typography>}
@@ -73,7 +72,7 @@ const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileS
           Lue lisää
         </Button>
       </Box>
-      <SourceModal open={sourceModalOpen} setOpen={setSourceModalOpen} results={results} />
+      <SourceModal open={sourceModalOpen} setOpen={setSourceModalOpen} results={arrayResults} />
     </Box>
   )
 }

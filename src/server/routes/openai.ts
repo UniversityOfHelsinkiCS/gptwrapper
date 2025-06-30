@@ -240,7 +240,8 @@ openaiRouter.get('/fileSearchResults/:fileSearchId', async (req, res) => {
   const results = await FileSearchResultsStore.getResults(fileSearchId, user)
 
   if (!results) {
-    throw ApplicationError.NotFound('File search results not found')
+    res.json({ expired: true })
+    return
   }
 
   res.json(results)
