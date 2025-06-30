@@ -14,6 +14,7 @@ import { isError } from '../util/parser'
 import { pdfToText } from '../util/pdfToText'
 import getEncoding from '../util/tiktoken'
 import { getAllowedModels, getCourseModel, getMessageContext, getModelContextLimit } from '../util/util'
+import { ApplicationError } from '../util/ApplicationError'
 
 const openaiRouter = express.Router()
 
@@ -67,11 +68,6 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   const { ragIndexId } = options
   const { user } = req
 
-  if (!user.id) {
-    res.status(401).send('Unauthorized')
-    return
-  }
-
   // @todo were not checking if the user is enrolled?
   let course: ChatInstance | null = null
 
@@ -83,8 +79,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   }
 
   if (courseId && !course) {
-    res.status(404).send('Course not found')
-    return
+    throw ApplicationError.NotFound('Course not found')
   }
 
   // Check if the user has usage limits for the course or model
@@ -98,8 +93,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   }
 
   if (!usageAllowed) {
-    res.status(403).send('Usage limit reached')
-    return
+    throw ApplicationError.Forbidden('Usage limit reached')
   }
 
   // Check if the model is allowed for the course
@@ -109,8 +103,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     if (options.model) {
       const allowedModels = getAllowedModels(courseModel)
       if (!allowedModels.includes(options.model)) {
-        res.status(403).send('Model not allowed')
-        return
+        throw ApplicationError.Forbidden('Model not allowed')
       }
     } else {
       options.model = courseModel
@@ -126,8 +119,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     }
   } catch (error) {
     logger.error('Error parsing file', { error })
-    res.status(400).send('Error parsing file')
-    return
+    throw ApplicationError.BadRequest('Error parsing file')
   }
 
   options.messages = getMessageContext(optionsMessagesWithFile || options.messages)
@@ -148,9 +140,8 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   const contextLimit = getModelContextLimit(options.model)
 
   if (tokenCount > contextLimit) {
-    logger.info('Maximum context reached')
-    res.status(403).send('Model maximum context reached')
-    return
+    logger.info('Maximum context reached') // @todo sure we need to log twice the error message?
+    throw ApplicationError.BadRequest('Model maximum context reached')
   }
 
   // Check rag index
@@ -160,8 +151,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   if (ragIndexId) {
     if (!courseId && !user.isAdmin) {
       logger.error('User is not admin and trying to access non-course rag')
-      res.status(403).send('Forbidden')
-      return
+      throw ApplicationError.Forbidden('User is not admin and trying to access non-course rag')
     }
 
     const ragIndex = await RagIndex.findByPk(ragIndexId, {
@@ -198,8 +188,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   })
 
   if (isError(events)) {
-    res.status(424)
-    return
+    throw new ApplicationError('Error creating a response stream', 424)
   }
 
   res.setHeader('content-type', 'text/event-stream')
@@ -256,16 +245,10 @@ openaiRouter.get('/fileSearchResults/:fileSearchId', async (req, res) => {
   const { fileSearchId } = req.params
   const { user } = req as unknown as RequestWithUser
 
-  if (!user.id) {
-    res.status(401).send('Unauthorized')
-    return
-  }
-
   const results = await FileSearchResultsStore.getResults(fileSearchId, user)
 
   if (!results) {
-    res.status(404).send('File search results not found')
-    return
+    throw ApplicationError.NotFound('File search results not found')
   }
 
   res.json(results)
@@ -279,16 +262,10 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   options.options = { temperature: options.modelTemperature }
 
-  if (!user.id) {
-    res.status(401).send('Unauthorized')
-    return
-  }
-
   const usageAllowed = courseId ? await checkCourseUsage(user, courseId) : model === FREE_MODEL || (await checkUsage(user, model))
 
   if (!usageAllowed) {
-    res.status(403).send('Usage limit reached')
-    return
+    throw ApplicationError.Forbidden('Usage limit reached')
   }
 
   let optionsMessagesWithFile = null
@@ -299,8 +276,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     }
   } catch (error) {
     logger.error('Error parsing file', { error })
-    res.status(400).send('Error parsing file')
-    return
+    throw ApplicationError.BadRequest('Error parsing file')
   }
 
   options.messages = getMessageContext(optionsMessagesWithFile || options.messages)
@@ -322,15 +298,13 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   if (tokenCount > contextLimit) {
     logger.info('Maximum context reached')
-    res.status(403).send('Model maximum context reached')
-    return
+    throw ApplicationError.BadRequest('Maximum context reached')
   }
 
   const events = await getCompletionEvents(options)
 
   if (isError(events)) {
-    res.status(424)
-    return
+    throw new ApplicationError('Error creating a response stream', 424)
   }
 
   res.setHeader('content-type', 'text/event-stream')

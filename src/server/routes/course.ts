@@ -1,5 +1,5 @@
 import express from 'express'
-import { Includeable, Op, Sequelize } from 'sequelize'
+import { Op, Sequelize } from 'sequelize'
 
 import type { ActivityPeriod, RequestWithUser } from '../types'
 import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, User, Responsibility, Discussion } from '../db/models'
@@ -59,7 +59,7 @@ courseRouter.get('/statistics/:id', async (req, res) => {
     where: { courseId: id },
   })
 
-  if (!chatInstance) throw new Error('ChatInstance not found')
+  if (!chatInstance) throw ApplicationError.NotFound('ChatInstance not found')
 
   const usages = await UserChatInstanceUsage.findAll({
     where: { chatInstanceId: chatInstance.id },
@@ -86,7 +86,6 @@ courseRouter.get('/statistics/:id', async (req, res) => {
 courseRouter.get('/:id', async (req, res) => {
   const { id } = req.params
 
-  console.time('ChatInstance.findOne')
   const chatInstance = await ChatInstance.findOne({
     where: { courseId: id },
     include: [
@@ -108,7 +107,6 @@ courseRouter.get('/:id', async (req, res) => {
       },
     ],
   })
-  console.timeEnd('ChatInstance.findOne')
 
   if (!chatInstance) {
     throw ApplicationError.NotFound('Chat instance not found')
@@ -248,7 +246,7 @@ courseRouter.put('/:id', async (req, res) => {
     where: { courseId: id },
   })
 
-  if (!chatInstance) throw new Error('ChatInstance not found')
+  if (!chatInstance) throw ApplicationError.NotFound('ChatInstance not found')
 
   chatInstance.activityPeriod = activityPeriod
   chatInstance.model = model

@@ -8,6 +8,7 @@ import { getUserStatus, getUsage } from '../services/chatInstances/usage'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { getLastRestart } from '../util/lastRestart'
 import { accessIams } from '../util/config'
+import { ApplicationError } from '../util/ApplicationError'
 
 export const checkIamAccess = (iamGroups: string[]) => accessIams.some((iam) => iamGroups.includes(iam))
 
@@ -17,11 +18,6 @@ userRouter.get('/login', async (req, res) => {
   const request = req as ChatRequest
   const { user } = request
   const { id, isAdmin, iamGroups } = user
-
-  if (!id) {
-    res.status(401).send('Unauthorized')
-    return
-  }
 
   const hasIamAccess = checkIamAccess(iamGroups)
 
@@ -33,8 +29,7 @@ userRouter.get('/login', async (req, res) => {
 
   if (!isAdmin && !hasIamAccess && !hasCourseAccess) {
     logger.info('Unauthorized user', { iamGroups })
-    res.status(401).send('Unauthorized')
-    return
+    throw ApplicationError.Unauthorized('Unauthorized')
   }
 
   user.ownCourses = teacherCourses
@@ -68,11 +63,6 @@ userRouter.get('/status', async (req, res) => {
   const { user } = request
   const { id } = user
 
-  if (!id) {
-    res.status(401).send('Unauthorized')
-    return
-  }
-
   const usage = await getUsage(id)
   const limit = user.isPowerUser ? 10 * DEFAULT_TOKEN_LIMIT : DEFAULT_TOKEN_LIMIT
 
@@ -89,12 +79,6 @@ userRouter.get('/status/:courseId', async (req, res) => {
   const { courseId } = req.params
   const request = req as any as ChatRequest
   const { user } = request
-  const { id } = user
-
-  if (!id) {
-    res.status(401).send('Unauthorized')
-    return
-  }
 
   const { usage, limit, model, models } = await getUserStatus(user, courseId)
 

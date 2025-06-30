@@ -41,8 +41,7 @@ adminRouter.post('/chatinstances', async (req, res) => {
 
   const course = await getCourse(courseId)
   if (!course) {
-    res.status(404).send('Invalid course id')
-    return
+    throw ApplicationError.NotFound('Invalid course id')
   }
 
   const newChatInstance = await ChatInstance.create({
@@ -175,8 +174,7 @@ adminRouter.put('/chatinstances/:id', async (req, res) => {
   const chatInstance = await ChatInstance.findByPk(id)
 
   if (!chatInstance) {
-    res.status(404).send('ChatInstance not found')
-    return
+    throw ApplicationError.NotFound('Invalid chat instance id')
   }
 
   chatInstance.name = { en: name, fi: name, sv: name }
@@ -196,8 +194,7 @@ adminRouter.delete('/chatinstances/:id', async (req, res) => {
   const chatInstance = await ChatInstance.findByPk(id)
 
   if (!chatInstance) {
-    res.status(404).send('ChatInstance not found')
-    return
+    throw ApplicationError.NotFound('Invalid chat instance id')
   }
 
   await UserChatInstanceUsage.destroy({
@@ -232,8 +229,7 @@ adminRouter.delete('/chatinstances/usage/:id', async (req, res) => {
   const chatInstanceUsage = await UserChatInstanceUsage.findByPk(id)
 
   if (!chatInstanceUsage) {
-    res.status(404).send('ChatInstance usage not found')
-    return
+    throw ApplicationError.NotFound('Invalid chat instance id')
   }
 
   await chatInstanceUsage.destroy()
@@ -301,8 +297,7 @@ adminRouter.delete('/usage/:userId', async (req, res) => {
   const user = await User.findByPk(userId)
 
   if (!user) {
-    res.status(404).send('User not found')
-    return
+    throw ApplicationError.NotFound('Invalid user id')
   }
 
   user.usage = 0

@@ -31,11 +31,19 @@ export class ApplicationError extends Error {
     return new ApplicationError(msg, 403)
   }
 
+  static Unauthorized(msg = 'Unauthorized') {
+    return new ApplicationError(msg, 401)
+  }
+
   static Conflict(msg = 'Conflict') {
     return new ApplicationError(msg, 409)
   }
 
   static BadRequest(msg = 'Bad request') {
     return new ApplicationError(msg, 400)
+  }
+
+  static InternalServerError(msg = 'Internal server error') {
+    return new ApplicationError(msg, 500)
   }
 }

@@ -75,8 +75,7 @@ chatInstanceRouter.get('/:id', async (req, res) => {
   const chatInstance = await ChatInstance.findByPk(id)
 
   if (!chatInstance) {
-    res.status(404).send('ChatInstance not found')
-    return
+    throw ApplicationError.NotFound('ChatInstance not found')
   }
 
   res.send(chatInstance)
@@ -88,8 +87,7 @@ chatInstanceRouter.post('/:id/enable', async (req, res) => {
   const chatInstance = await ChatInstance.findByPk(id)
 
   if (!chatInstance) {
-    res.status(404).send('ChatInstance not found')
-    return
+    throw ApplicationError.NotFound('ChatInstance not found')
   }
 
   // @todo what?? this is extremely confusing. shouldnt we set the activity period based on the courseActivityPeriod??
@@ -113,8 +111,7 @@ chatInstanceRouter.post('/:id/disable', async (req, res) => {
   const chatInstance = await ChatInstance.findByPk(id)
 
   if (!chatInstance) {
-    res.status(404).send('ChatInstance not found')
-    return
+    throw ApplicationError.NotFound('ChatInstance not found')
   }
 
   chatInstance.usageLimit = 0
@@ -178,8 +175,7 @@ chatInstanceRouter.delete('/usage/:id', async (req, res) => {
   const chatInstanceUsage = await UserChatInstanceUsage.findByPk(id)
 
   if (!chatInstanceUsage) {
-    res.status(404).send('ChatInstance usage not found')
-    return
+    throw ApplicationError.NotFound('ChatInstance not found')
   }
 
   chatInstanceUsage.usageCount = 0

@@ -7,6 +7,7 @@ import multer from 'multer'
 import { mkdir, rm, stat } from 'node:fs/promises'
 import { getAzureOpenAIClient } from '../../util/azure/client'
 import { shouldRenderAsText } from '../../../shared/utils'
+import { ApplicationError } from '../../util/ApplicationError'
 
 const ragIndexRouter = Router()
 
@@ -34,8 +35,7 @@ export async function ragIndexMiddleware(req: Request, res: Response, next: Next
   })
 
   if (!ragIndex) {
-    res.status(404).json({ error: 'RagIndex not found' })
-    return
+    throw ApplicationError.NotFound('RagIndex not found')
   }
 
   const isResponsible = responsibilities.some((r) => ragIndex.chatInstances?.some((ci) => ci.id === r.chatInstanceId))
@@ -63,8 +63,7 @@ ragIndexRouter.delete('/', async (req, res) => {
     await client.vectorStores.del(ragIndex.metadata.azureVectorStoreId)
   } catch (error) {
     console.error(`Failed to delete Azure vector store ${ragIndex.metadata.azureVectorStoreId}:`, error)
-    res.status(500).json({ error: 'Failed to delete Azure vector store' })
-    return
+    throw ApplicationError.InternalServerError('Failed to delete Azure vector store')
   }
 
   const uploadPath = `${UPLOAD_DIR}/${ragIndex.id}`
@@ -111,8 +110,7 @@ ragIndexRouter.get('/files/:fileId', async (req, res) => {
   })
 
   if (!ragFile) {
-    res.status(404).json({ error: 'File not found' })
-    return
+    throw ApplicationError.NotFound('File not found')
   }
 
   let fileContent: string
@@ -124,8 +122,7 @@ ragIndexRouter.get('/files/:fileId', async (req, res) => {
       fileContent = await fs.promises.readFile(filePath, 'utf-8')
     } catch (error) {
       console.error(`Failed to read file ${filePath}:`, error)
-      res.status(500).json({ error: 'Failed to read file content' })
-      return
+      throw ApplicationError.InternalServerError('Failed to read file content')
     }
   } else {
     fileContent = 'this file cannot be displayed as readable text'
@@ -149,8 +146,7 @@ ragIndexRouter.delete('/files/:fileId', async (req, res) => {
   })
 
   if (!ragFile) {
-    res.status(404).json({ error: 'File not found' })
-    return
+    throw ApplicationError.NotFound('File not found')
   }
 
   await RagFile.update(
@@ -166,8 +162,7 @@ ragIndexRouter.delete('/files/:fileId', async (req, res) => {
     await fs.promises.unlink(filePath)
   } catch (error) {
     console.error(`Failed to delete file ${filePath}:`, error)
-    res.status(500).json({ error: 'Failed to delete file' })
-    return
+    throw ApplicationError.InternalServerError('Failed to delete file')
   }
 
   // Delete from vector store
@@ -178,8 +173,7 @@ ragIndexRouter.delete('/files/:fileId', async (req, res) => {
     }
   } catch (error) {
     console.error(`Failed to delete file from Azure vector store:`, error)
-    res.status(500).json({ error: 'Failed to delete file from vector store' })
-    return
+    throw ApplicationError.InternalServerError('Failed to delete file from vector store')
   }
 
   // Delete RagFile record
@@ -223,8 +217,7 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
   const { ragIndex, user } = ragIndexRequest
 
   if (!req.files || req.files.length === 0) {
-    res.status(400).json({ error: 'No files uploaded' })
-    return
+    throw ApplicationError.BadRequest('No files uploaded')
   }
 
   const ragFiles: RagFile[] = await Promise.all(

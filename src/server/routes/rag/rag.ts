@@ -33,14 +33,11 @@ router.post('/indices', async (req, res) => {
   })
 
   if (!chatInstance) {
-    res.status(404).json({
-      error: 'Course not found',
-    })
-    return
+    throw ApplicationError.NotFound('Invalid chat instance id')
   }
 
   if (!hasChatInstanceRagPermission(user, chatInstance)) {
-    res.status(403).json({ error: 'Cannot create index, user is not responsible for the course' })
+    throw ApplicationError.Forbidden('Cannot create index, user is not responsible for the course')
   }
 
   const client = getAzureOpenAIClient()
@@ -93,13 +90,11 @@ router.get('/indices', async (req, res) => {
       throw ApplicationError.NotFound('Chat instance not found')
     }
     if (!hasChatInstanceRagPermission(user, chatInstance)) {
-      res.status(403).json({ error: 'Forbidden' })
-      return
+      throw ApplicationError.Forbidden('Forbidden')
     }
   } else {
     if (!user.isAdmin) {
-      res.status(403).json({ error: 'Forbidden' })
-      return
+      throw ApplicationError.Forbidden('Forbidden')
     }
   }
 
