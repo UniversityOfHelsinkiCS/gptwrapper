@@ -428,7 +428,7 @@ export const ChatV2 = () => {
               {t('chat:settings')}
             </SettingsButton>
             <SettingsButton startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus({ open: true })}>
-              {t('infoSmall:title')}
+              {t('info:title')}
             </SettingsButton>
           </Box>
           {course && showRagSelector && (

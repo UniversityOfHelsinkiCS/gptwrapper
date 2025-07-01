@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Box } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 
 import Markdown from './Markdown'
 import ShowMore from './ShowMore'
@@ -19,7 +19,7 @@ const Banner = ({ disclaimer }: { disclaimer: string }) => {
           overflowWrap: 'anywhere',
         }}
       >
-        <Markdown>{t('info:title')}</Markdown>
+        <Typography variant='h5'>{t('info:title')}</Typography>
         <ShowMore text={disclaimer} expanded={showDisclaimer} />
       </Box>
     </Box>

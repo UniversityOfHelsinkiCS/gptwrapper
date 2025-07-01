@@ -39,8 +39,8 @@ export const DisclaimerModal = ({
           <Close />
         </IconButton>
 
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-          {t('infoSmall:title')}
+        <Typography variant="h5" sx={{ mb: 2, fontWeight: 'bold' }}>
+          {t('info:title')}
         </Typography>
 
         <Markdown>{disclaimer}</Markdown>
