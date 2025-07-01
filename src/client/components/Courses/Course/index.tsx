@@ -1,9 +1,9 @@
 import { Edit, OpenInNew } from '@mui/icons-material'
-import { Alert, Box, Button, Checkbox, Container, FormControlLabel, Input, Modal, Paper, Skeleton, Tooltip, Typography } from '@mui/material'
+import { Alert, Box, Button, Checkbox, Container, FormControlLabel, Input, Modal, Paper, Skeleton, Tab, Tooltip, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useParams } from 'react-router-dom'
+import { Link, Route, Routes, useParams } from 'react-router-dom'
 
 import { PUBLIC_URL } from '../../../../config'
 import useCourse from '../../../hooks/useCourse'
@@ -19,14 +19,10 @@ import EditCourseForm from './EditCourseForm'
 import MaxTokenUsageStudents from './MaxTokenUsageStudents'
 import Prompt from './Prompt'
 import Stats from './Stats'
+import { RouterTabs } from '../../common/RouterTabs'
+import Discussion from './Discussions'
 
 const Course = () => {
-  const [name, setName] = useState('')
-  const [system, setSystem] = useState('')
-  const [messages, setMessages] = useState<MessageType[]>([])
-  const [hidden, setHidden] = useState(false)
-  const [mandatory, setMandatory] = useState(false)
-
   const [showTeachers, setShowTeachers] = useState(false)
 
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
@@ -36,18 +32,6 @@ const Course = () => {
 
   const { language } = i18n
 
-  const createMutation = useCreatePromptMutation()
-  const deleteMutation = useDeletePromptMutation()
-
-  const handleReset = () => {
-    setMessages([])
-    setName('')
-    setSystem('')
-    setHidden(false)
-    setMandatory(false)
-  }
-
-  const { prompts, isLoading: promptsLoading } = usePrompts(id)
   const { data: course, isSuccess: isCourseSuccess } = useCourse(id)
   const { user, isLoading: userLoading } = useCurrentUser()
 
@@ -65,45 +49,12 @@ const Course = () => {
     )
   }
 
-  const mandatoryPromptId = prompts?.find((prompt) => prompt.mandatory)?.id
-
-  const handleSave = async () => {
-    try {
-      await createMutation.mutateAsync({
-        chatInstanceId: course.id,
-        type: 'CHAT_INSTANCE',
-        name,
-        systemMessage: system,
-        messages,
-        hidden,
-        mandatory,
-      })
-      enqueueSnackbar('Prompt created', { variant: 'success' })
-      handleReset()
-    } catch (error: any) {
-      enqueueSnackbar(error.message, { variant: 'error' })
-    }
-  }
-
-  const handleDelete = (promptId: string) => {
-    if (!window.confirm(t('confirmDeletePrompt') as string)) return
-
-    try {
-      deleteMutation.mutate(promptId)
-      enqueueSnackbar('Prompt deleted', { variant: 'success' })
-    } catch (error: any) {
-      enqueueSnackbar(error.message, { variant: 'error' })
-    }
-  }
-
   const handleCopyLink = (link: string) => {
     navigator.clipboard.writeText(link)
     enqueueSnackbar(t('linkCopied'), { variant: 'info' })
   }
 
   const courseEnabled = course.usageLimit > 0
-
-  const responsebilitues = course.responsibilities
 
   const isCourseActive = courseEnabled && Date.parse(course.activityPeriod.endDate) > Date.now() && Date.parse(course.activityPeriod.startDate) <= Date.now()
 
@@ -228,8 +179,8 @@ const Course = () => {
               </Button>
               {showTeachers && (
                 <ul>
-                  {responsebilitues.map((responsibility) => (
-                    <li>
+                  {course.responsibilities.map((responsibility) => (
+                    <li key={responsibility.id}>
                       {responsibility.user.last_name} {responsibility.user.first_names}
                     </li>
                   ))}
@@ -240,29 +191,83 @@ const Course = () => {
         </Paper>
       </Box>
 
-      <Stats courseId={id} />
+      <Modal open={activityPeriodFormOpen} onClose={() => setActivityPeriodFormOpen(false)}>
+        <EditCourseForm course={course} setOpen={setActivityPeriodFormOpen} user={user} />
+      </Modal>
 
-      {courseEnabled && <MaxTokenUsageStudents course={course} />}
+      <Box my={2}>
+        <RouterTabs>
+          <Tab label={t('course:stats')} to={`/courses/${id}`} component={Link} />
+          <Tab label={t('course:discussions')} to={`/courses/${id}/discussions`} component={Link} />
+          <Tab label={t('course:prompts')} to={`/courses/${id}/prompts`} component={Link} />
+          <Tab label={t('course:rag')} to={`/courses/${id}/rag`} component={Link} />
+        </RouterTabs>
+      </Box>
 
-      {course.saveDiscussions && (
-        <Paper
-          variant="outlined"
-          sx={{
-            padding: '2%',
-            mt: 2,
-            width: '100%',
-          }}
-        >
-          <Typography variant="h6">{t('course:reseachCourse')}</Typography>
-          <Alert severity="warning" style={{ marginTop: 20, marginBottom: 20 }}>
-            <Typography>{course.notOptoutSaving ? t('course:isSavedNotOptOut') : t('course:isSavedForTeacherOptOut')}</Typography>
-          </Alert>
-          <Link to={`/courses/${id}/discussions`}>
-            {t('course:showDiscussions')} <OpenInNew fontSize="small" />
-          </Link>
-        </Paper>
-      )}
+      <Routes>
+        <Route path="/" element={<Stats courseId={id} />} />
+        <Route path={`/discussions/*`} element={<Discussion />} />
+        <Route path="/prompts" element={<Prompts courseId={id} />} />
+        <Route path="/rag" element={<Rag />} />
+      </Routes>
+    </Container>
+  )
+}
 
+const Prompts = ({ courseId }: { courseId: string }) => {
+  const { t } = useTranslation()
+  const [name, setName] = useState('')
+  const [system, setSystem] = useState('')
+  const [messages, setMessages] = useState<MessageType[]>([])
+  const [hidden, setHidden] = useState(false)
+  const [mandatory, setMandatory] = useState(false)
+
+  const createMutation = useCreatePromptMutation()
+  const deleteMutation = useDeletePromptMutation()
+
+  const handleReset = () => {
+    setMessages([])
+    setName('')
+    setSystem('')
+    setHidden(false)
+    setMandatory(false)
+  }
+
+  const { prompts, isLoading: promptsLoading } = usePrompts(courseId)
+
+  const mandatoryPromptId = prompts?.find((prompt) => prompt.mandatory)?.id
+
+  const handleSave = async () => {
+    try {
+      await createMutation.mutateAsync({
+        chatInstanceId: courseId,
+        type: 'CHAT_INSTANCE',
+        name,
+        systemMessage: system,
+        messages,
+        hidden,
+        mandatory,
+      })
+      enqueueSnackbar('Prompt created', { variant: 'success' })
+      handleReset()
+    } catch (error: any) {
+      enqueueSnackbar(error.message, { variant: 'error' })
+    }
+  }
+
+  const handleDelete = (promptId: string) => {
+    if (!window.confirm(t('confirmDeletePrompt') as string)) return
+
+    try {
+      deleteMutation.mutate(promptId)
+      enqueueSnackbar('Prompt deleted', { variant: 'success' })
+    } catch (error: any) {
+      enqueueSnackbar(error.message, { variant: 'error' })
+    }
+  }
+
+  return (
+    <>
       {promptsLoading ? ( // @todo separate prompts into its own component, like <Rag />
         <Skeleton />
       ) : (
@@ -306,15 +311,7 @@ const Course = () => {
           {t('common:save')}
         </Button>
       </Paper>
-
-      <Modal open={activityPeriodFormOpen} onClose={() => setActivityPeriodFormOpen(false)}>
-        <EditCourseForm course={course} setOpen={setActivityPeriodFormOpen} user={user} />
-      </Modal>
-
-      <Box sx={{ mt: 2 }}>
-        <Rag />
-      </Box>
-    </Container>
+    </>
   )
 }
 

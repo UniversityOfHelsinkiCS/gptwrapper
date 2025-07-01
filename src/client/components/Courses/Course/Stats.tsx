@@ -5,6 +5,7 @@ import { BarChart, Bar, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import useCourse, { useCourseEnrolments, useCourseStatistics } from '../../../hooks/useCourse'
+import MaxTokenUsageStudents from './MaxTokenUsageStudents'
 
 const Stats = ({ courseId }: { courseId: string }) => {
   const { t } = useTranslation()
@@ -120,6 +121,8 @@ const Stats = ({ courseId }: { courseId: string }) => {
           )}
         </>
       )}
+
+      <MaxTokenUsageStudents course={course} />
     </Paper>
   )
 }
