@@ -1,5 +1,7 @@
 import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEditInfoTextMutation } from '../../hooks/useInfoTextMutation'
@@ -26,35 +28,46 @@ const Text = ({ info }: { info: InfoText }) => {
         text: { fi, sv, en },
       })
       setIsEditing(false)
-      enqueueSnackbar('saved', { variant: 'success' })
+      enqueueSnackbar(t("common:saved"), { variant: 'success' })
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     }
   }
 
   return (
-    <Box sx={{ my: 2 }}>
-      <Typography variant="h6">{info.name}</Typography>
-      {isEditing ? (
-        <>
-          <Stack gap={2} sx={{ my: 2 }}>
-            <Typography variant="h6">FI</Typography>
-            <TextField defaultValue={info.text.fi} multiline onChange={(e) => setFi(e.target.value)} />
-            <Typography variant="h6">SV</Typography>
-            <TextField defaultValue={info.text.sv} multiline onChange={(e) => setSv(e.target.value)} />
-            <Typography variant="h6">EN</Typography>
-            <TextField defaultValue={info.text.en} multiline onChange={(e) => setEn(e.target.value)} />
-          </Stack>
-          <Button onClick={() => handleSave()} variant="outlined" sx={{ mr: 2 }}>
+    <Box>
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
+        <Typography variant="h5">{info.name}</Typography>
+
+        <Button onClick={() => setIsEditing(!isEditing)} variant="outlined" size='small'>
+          {isEditing ? t('common:cancel') : t('common:edit')}
+        </Button>
+
+        {isEditing &&
+          <Button onClick={() => handleSave()} variant="contained" size='small'>
             {t('common:save')}
           </Button>
-        </>
+        }
+      </Box>
+      {isEditing ? (
+        <Stack gap={2} sx={{ my: 2 }}>
+          <Typography variant="h6">FI</Typography>
+          <TextField defaultValue={info.text.fi} multiline onChange={(e) => setFi(e.target.value)} />
+          <Typography variant="h6">SV</Typography>
+          <TextField defaultValue={info.text.sv} multiline onChange={(e) => setSv(e.target.value)} />
+          <Typography variant="h6">EN</Typography>
+          <TextField defaultValue={info.text.en} multiline onChange={(e) => setEn(e.target.value)} />
+        </Stack>
       ) : (
-        <Box margin={1}>{info.text[language]}</Box>
+        <Stack gap={2} sx={{ my: 2 }}>
+          <Box sx={{ borderRadius: '0.5rem', p: '1rem 2rem', border: '1px solid lightgray', opacity: 0.7 }}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {info.text[language]}
+            </ReactMarkdown>
+          </Box>
+        </Stack>
       )}
-      <Button onClick={() => setIsEditing(!isEditing)} variant="outlined">
-        {isEditing ? t('common:cancel') : t('common:edit')}
-      </Button>
+
     </Box>
   )
 }
@@ -66,7 +79,7 @@ const EditTexts = () => {
   }
 
   return (
-    <Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {infoTexts.map((info) => (
         <Text info={info} key={info.id} />
       ))}
