@@ -138,7 +138,12 @@
     "tooLargeFile": "Tiedosto on liian suuri",
     "fileParsingError": "Tiedoston lukeminen epäonnistui",
     "invalidFileType": "Tiedostotyyppiä ei tueta",
-    "streamCreationTimeout": "Vastauksen luonti kesti liian kauan, yritetään uudelleen"
+    "streamCreationTimeout": "Vastauksen luonti kesti liian kauan, yritetään uudelleen",
+    "notFoundTitle": "Etsimääsi sivua ei löytynyt.",
+    "goHome": "Palaa etusivulle",
+    "reload": "Lataa sivu uudelleen",
+    "description": "Pahoittelut, jokin meni pieleen. Kehittäjätiimillemme on ilmoitettu ongelmasta.",
+    "errorMessage": "Virheviesti"
   },
   "admin": {
     "showing": "Näytetään",

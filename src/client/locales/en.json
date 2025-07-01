@@ -130,7 +130,12 @@
     "tooLargeFile": "The file is too large",
     "fileParsingError": "Parsing the file failed",
     "invalidFileType": "Invalid file type",
-    "streamCreationTimeout": "Creating the stream timed out, retrying"
+    "streamCreationTimeout": "Creating the stream timed out, retrying",
+    "notFoundTitle": "The page you are looking for does not exist.",
+    "goHome": "Go to home",
+    "reload": "Reload page",
+    "description": "Sorry, something went wrong. Our team has been notified.",
+    "errorMessage": "Error message"
   },
   "chats": {
     "header": "Current course chats",

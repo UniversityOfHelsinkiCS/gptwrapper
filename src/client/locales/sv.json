@@ -121,11 +121,17 @@
     "limitedUsage": ", de andra modellerna är inte användbara när gränsen nås"
   },
   "error": {
+    "unexpected": "Ett oväntat fel inträffade",
     "noAccess": "Ingen tillgång",
     "noAccessInfo": "Du har för närvarande inte tillgång till CurreChat",
     "tooLargeFile": "Filen är för stor",
     "fileParsingError": "Det gick inte att läsa filen",
-    "invalidFileType": "Filtypen stöds inte"
+    "invalidFileType": "Filtypen stöds inte",
+    "notFoundTitle": "Sidan du letar efter hittades inte.",
+    "goHome": "Gå till startsidan",
+    "reload": "Ladda om",
+    "description": "Tyvärr, något gick fel. Vårt team har underrättats.",
+    "errorMessage": "Felmeddelande"
   },
   "admin": {
     "showing": "Visande",

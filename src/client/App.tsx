@@ -8,6 +8,7 @@ import { fi } from 'date-fns/locale'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
 import { Box, Button, CssBaseline, Snackbar } from '@mui/material'
 import { AppContext } from './util/AppContext'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 import { PUBLIC_URL } from '../config'
 import { User } from './types'
@@ -92,32 +93,34 @@ const App = () => {
   if (!user && !onNoAccessPage) return null
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
-        <SnackbarProvider preventDuplicate>
-          <AppContext.Provider value={appRef}>
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                minHeight: '100vh',
-                height: '100vh',
-                overflowY: 'auto', // deleting this will break the auto scroll on chats
-              }}
-              ref={appRef}
-            >
-              <NavBar />
-              <Box sx={{ flex: 1 }}>
-                <Outlet />
+    <ErrorBoundary>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
+          <SnackbarProvider preventDuplicate>
+            <AppContext.Provider value={appRef}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  minHeight: '100vh',
+                  height: '100vh',
+                  overflowY: 'auto', // deleting this will break the auto scroll on chats
+                }}
+                ref={appRef}
+              >
+                <NavBar />
+                <Box sx={{ flex: 1 }}>
+                  <Outlet />
+                </Box>
+                <Footer />
               </Box>
-              <Footer />
-            </Box>
-            <AdminLoggedInAsBanner />
-          </AppContext.Provider>
-        </SnackbarProvider>
-      </LocalizationProvider>
-    </ThemeProvider>
+              <AdminLoggedInAsBanner />
+            </AppContext.Provider>
+          </SnackbarProvider>
+        </LocalizationProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   )
 }
 
