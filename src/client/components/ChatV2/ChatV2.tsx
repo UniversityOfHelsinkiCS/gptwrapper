@@ -313,7 +313,7 @@ export const ChatV2 = () => {
       const containerRect = container.getBoundingClientRect()
       const lastNodeRect = lastNode.getBoundingClientRect()
 
-      const scrollTopPadding = 240
+      const scrollTopPadding = 220
       const scrollOffset = lastNodeRect.top - containerRect.top + container.scrollTop - scrollTopPadding
 
       container.scrollTo({
@@ -414,7 +414,7 @@ export const ChatV2 = () => {
           borderRight: '1px solid rgba(0, 0, 0, 0.12)',
         }}
       >
-        <Box sx={{ position: 'sticky', top: 85, padding: '2rem 1.5rem' }}>
+        <Box sx={{ position: 'sticky', top: 70, padding: '2rem 1.5rem' }}>
           {course && <ChatInfo course={course} />}
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', mb: '2rem' }}>
@@ -522,7 +522,7 @@ export const ChatV2 = () => {
           minWidth: 300,
           height: '100vh',
           position: 'sticky',
-          top: 85,
+          top: 70,
         }}
       >
         {showFileSearch && <FileSearchInfo isFileSearching={isFileSearching} fileSearchResult={fileSearch} messages={messages} />}
