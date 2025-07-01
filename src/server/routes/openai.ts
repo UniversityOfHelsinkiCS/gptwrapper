@@ -192,16 +192,16 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     ragIndexId,
   })
 
-  tokenCount += options.model === 'mock' ? 0 : result.tokenCount
+  tokenCount += result.tokenCount
 
   let userToCharge = user
   if (inProduction && req.hijackedBy) {
     userToCharge = req.hijackedBy
   }
 
-  if (courseId) {
+  if (courseId && model !== FREE_MODEL && model !== 'mock') {
     await incrementCourseUsage(userToCharge, courseId, tokenCount)
-  } else if (options.model !== FREE_MODEL) {
+  } else if (model !== FREE_MODEL && model !== 'mock') {
     await incrementUsage(userToCharge, tokenCount)
   }
 
