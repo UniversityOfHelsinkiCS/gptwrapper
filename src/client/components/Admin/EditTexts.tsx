@@ -26,6 +26,7 @@ const Text = ({ info }: { info: InfoText }) => {
         text: { fi, sv, en },
       })
       setIsEditing(false)
+      enqueueSnackbar('saved', { variant: 'success' })
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     }
