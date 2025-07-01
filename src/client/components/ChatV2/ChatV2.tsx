@@ -60,12 +60,9 @@ export const ChatV2 = () => {
   const [fileSearch, setFileSearch] = useLocalStorageState<FileSearchCompletedData>(`${localStoragePrefix}-last-file-search`)
 
   // App States
-  const [message, setMessage] = useState<string>('')
   const [isFileSearching, setIsFileSearching] = useState<boolean>(false)
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
   const [fileName, setFileName] = useState<string>('')
-  const [fileTypeAlertOpen, setFileTypeAlertOpen] = useState<boolean>(false)
-  const [disallowedFileType, setDisallowedFileType] = useState<string>('')
   const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
   const [tokenUsageAlertOpen, setTokenUsageAlertOpen] = useState<boolean>(false)
   const [allowedModels, setAllowedModels] = useState<string[]>([])
@@ -187,7 +184,7 @@ export const ChatV2 = () => {
     }
   }
 
-  const handleSubmit = async (message: string) => {
+  const handleSubmit = async (message: string, ignoreTokenUsageWarning: boolean) => {
     const formData = new FormData()
 
     let file = fileInputRef.current?.files?.[0]
@@ -242,7 +239,10 @@ export const ChatV2 = () => {
         return
       }
 
-      if (tokenUsageAnalysis?.message) {
+      if (ignoreTokenUsageWarning) {
+        setTokenUsageWarning('')
+        setTokenUsageAlertOpen(false)
+      } else if (tokenUsageAnalysis?.tokenUsageWarning) {
         setTokenUsageWarning(tokenUsageAnalysis.message)
         setTokenUsageAlertOpen(true)
         return
@@ -284,12 +284,6 @@ export const ChatV2 = () => {
     setTokenUsageWarning('')
     setTokenUsageAlertOpen(false)
     clearRetryTimeout()
-  }
-
-  const handleContinue = () => {
-    setTokenUsageWarning('')
-    setTokenUsageAlertOpen(false)
-    handleSubmit(message)
   }
 
   useEffect(() => {
@@ -500,47 +494,23 @@ export const ChatV2 = () => {
             backgroundColor: 'white',
           }}
         >
-          {fileTypeAlertOpen && (
-            <Alert severity="warning">
-              <Typography>{`File of type "${disallowedFileType}" not supported currently`}</Typography>
-              <Typography>{`Currenlty there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}</Typography>
-            </Alert>
-          )}
-          {tokenUsageAlertOpen && (
-            <Alert
-              severity="warning"
-              sx={{ my: '0.2rem' }}
-              action={
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Button variant="outlined" size="small" onClick={handleCancel} color="primary" type="button">
-                    {t('common:cancel')}
-                  </Button>
-                  <Button variant="contained" size="small" onClick={handleContinue} color="primary" type="button">
-                    {t('common:continue')}
-                  </Button>
-                </Box>
-              }
-            >
-              {tokenUsageWarning}
-            </Alert>
-          )}
           <ChatBox
-            message={message}
-            setMessage={setMessage}
             disabled={!isCompletionDone}
             currentModel={activeModel.name}
             availableModels={allowedModels}
             fileInputRef={fileInputRef}
             fileName={fileName}
             setFileName={setFileName}
-            setDisallowedFileType={setDisallowedFileType}
-            setFileTypeAlertOpen={setFileTypeAlertOpen}
             saveConsent={saveConsent}
             setSaveConsent={setSaveConsent}
+            tokenUsageWarning={tokenUsageWarning}
+            tokenUsageAlertOpen={tokenUsageAlertOpen}
             saveChat={!!course && course.saveDiscussions}
             notOptoutSaving={!!course && course.notOptoutSaving}
             setModel={(name) => setActiveModel({ name })}
-            onSubmit={(newMessage) => handleSubmit(newMessage)}
+            handleCancel={handleCancel}
+            handleContinue={(newMessage) => handleSubmit(newMessage, true)}
+            handleSubmit={(newMessage) => handleSubmit(newMessage, false)}
           />
         </Box>
       </Box>
