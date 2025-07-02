@@ -128,6 +128,7 @@ const AssistantMessage = ({
     throwOnError: false,
     strict: false, // disables logging katex warnings/errors – if debugging, turn these two on
   }
+  let codeCount = 0
 
   return (
     <Box className={`message-role-assistant`} sx={{ minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto' }}>
@@ -148,55 +149,61 @@ const AssistantMessage = ({
               const match = /language-(\w+)/.exec(className || '')
               const language = match?.[1] || 'plaintext' // safe fallback
 
-              return match ? (
-                <Box
-                  sx={{
-                    borderRadius: '0.5rem',
-                    overflowX: 'auto',
-                    maxWidth: '100%',
-                  }}
-                >
-                  <Typography
+              if (match) {
+                const codeBlockId = `codeBlock-${++codeCount}`
+
+                return (
+                  <Box
                     sx={{
-                      opacity: 1,
-                      fontSize: '0.8rem',
-                      padding: '0.4rem 0.8rem',
-                      backgroundColor: '#efefef',
+                      borderRadius: '0.5rem',
+                      overflowX: 'auto',
+                      maxWidth: '100%',
                     }}
                   >
-                    {language}
-                  </Typography>
-                  <Box sx={{ position: 'relative' }}>
-                    {/* @ts-ignore */}
-                    <SyntaxHighlighter
-                      {...rest}
-                      PreTag="div"
-                      children={String(children)}
-                      language={language}
-                      customStyle={{
-                        padding: '1rem',
-                        margin: 0,
-                        fontSize: '15px',
-                        wordBreak: 'break-all',
-                        overflowWrap: 'break-word',
-                        whiteSpace: 'pre-wrap',
+                    <Typography
+                      sx={{
+                        opacity: 1,
+                        fontSize: '0.8rem',
+                        padding: '0.4rem 0.8rem',
+                        backgroundColor: '#efefef',
                       }}
-                      style={oneDark}
-                      id="syntaxHighlighter"
-                    />
-                    <CopyToClipboardButton
-                      id="syntaxHighlighter"
-                      copied={String(children)}
-                      iconColor="#FFF"
-                      buttonStyle={{ position: 'absolute', top: '10px', right: '10px' }}
-                    />
+                    >
+                      {language}
+                    </Typography>
+                    <Box sx={{ position: 'relative' }}>
+                      {/* @ts-ignore */}
+                      <SyntaxHighlighter
+                        {...rest}
+                        PreTag="div"
+                        children={String(children)}
+                        language={language}
+                        customStyle={{
+                          padding: '1rem',
+                          margin: 0,
+                          fontSize: '15px',
+                          wordBreak: 'break-all',
+                          overflowWrap: 'break-word',
+                          whiteSpace: 'pre-wrap',
+                        }}
+                        style={oneDark}
+                        id={codeBlockId}
+                      />
+                      <CopyToClipboardButton
+                        id={codeBlockId}
+                        copied={String(children)}
+                        iconColor="#FFF"
+                        buttonStyle={{ position: 'absolute', top: '10px', right: '10px' }}
+                      />
+                    </Box>
                   </Box>
-                </Box>
-              ) : (
-                <code {...rest} className={className}>
-                  {children}
-                </code>
-              )
+                )
+              } else {
+                return (
+                  <code {...rest} className={className}>
+                    {children}
+                  </code>
+                )
+              }
             },
           }}
         >
