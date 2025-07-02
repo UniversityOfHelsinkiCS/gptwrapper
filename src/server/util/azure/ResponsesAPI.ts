@@ -12,7 +12,6 @@ import logger from '../logger'
 import { createMockStream } from './mocks/MockStream'
 import { createFileSearchTool } from './util'
 import { FileSearchResultsStore } from './fileSearchResultsStore'
-import { ApplicationError } from '../ApplicationError'
 
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
 
@@ -125,7 +124,7 @@ export class ResponsesClient {
       // console.log('event type:', event.type)
 
       switch (event.type) {
-        case 'response.output_text.delta':
+        case 'response.output_text.delta': {
           await this.write(
             {
               type: 'writing',
@@ -137,10 +136,7 @@ export class ResponsesClient {
           contents.push(event.delta)
           tokenCount += encoding.encode(event.delta).length ?? 0
           break
-
-        case 'response.file_search_call.completed':
-          console.log('file search completed')
-          break
+        }
 
         case 'response.output_item.done': {
           if (event.item.type === 'file_search_call') {
@@ -168,7 +164,7 @@ export class ResponsesClient {
           break
         }
 
-        case 'response.file_search_call.in_progress':
+        case 'response.file_search_call.in_progress': {
           this.write(
             {
               type: 'fileSearchStarted',
@@ -176,8 +172,9 @@ export class ResponsesClient {
             res,
           )
           break
+        }
 
-        case 'response.completed':
+        case 'response.completed': {
           await this.write(
             {
               type: 'complete',
@@ -186,8 +183,9 @@ export class ResponsesClient {
             res,
           )
           break
+        }
 
-        case 'response.failed':
+        case 'response.failed': {
           await this.write(
             {
               type: 'error',
@@ -196,8 +194,9 @@ export class ResponsesClient {
             res,
           )
           break
+        }
 
-        case 'response.incomplete':
+        case 'response.incomplete': {
           await this.write(
             {
               type: 'error',
@@ -206,8 +205,9 @@ export class ResponsesClient {
             res,
           )
           break
+        }
 
-        case 'error':
+        case 'error': {
           await this.write(
             {
               type: 'error',
@@ -216,6 +216,7 @@ export class ResponsesClient {
             res,
           )
           break
+        }
       }
     }
 
