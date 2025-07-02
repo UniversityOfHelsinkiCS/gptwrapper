@@ -32,8 +32,8 @@ export const ChatBox = ({
   fileInputRef: React.RefObject<HTMLInputElement>
   fileName: string
   availableModels: string[]
-  tokenUsageWarning: string,
-  tokenUsageAlertOpen: boolean,
+  tokenUsageWarning: string
+  tokenUsageAlertOpen: boolean
   saveConsent: boolean
   setSaveConsent: React.Dispatch<boolean>
   saveChat: boolean
@@ -77,7 +77,6 @@ export const ChatBox = ({
     }
   }
 
-
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -107,7 +106,6 @@ export const ChatBox = ({
   }
   return (
     <Box>
-
       {fileTypeAlertOpen && (
         <Alert severity="warning">
           <Typography>{`File of type "${disallowedFileType}" not supported currently`}</Typography>
@@ -208,7 +206,10 @@ export const ChatBox = ({
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0' }}>
-          <Typography variant="body1" sx={{ padding: '0.5rem 0', opacity: isTokenLimitExceeded ? 1 : 0.7, color: isTokenLimitExceeded ? '#cc0000' : 'inherit' }}>
+          <Typography
+            variant="body1"
+            sx={{ padding: '0.5rem 0', opacity: isTokenLimitExceeded ? 1 : 0.7, color: isTokenLimitExceeded ? '#cc0000' : 'inherit' }}
+          >
             {userStatus?.usage ?? '-'} / {userStatus?.limit ?? '-'} {t('status:tokensUsed')}
           </Typography>
 

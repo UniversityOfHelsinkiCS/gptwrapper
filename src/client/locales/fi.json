@@ -82,7 +82,14 @@
     "settings": "Keskustelun asetukset",
     "shiftEnter": "Tai lähetä Shift + Enterillä",
     "testUseInfo": "Curren uusi chattinäkymä on vielä kehitysvaiheessa ja bugeja varmasti ilmenee",
-    "searchTerms": "Hakusanat:"
+    "searchTerms": "Hakusanat:",
+    "readMore": "Lue lisää",
+    "readLess": "Lue vähemmän",
+    "confirmResetChat": "Oletko varma, että haluat tyhjentää tämän keskustelun?",
+    "copyToClipboard": "Kopioi leikepöydälle",
+    "sources": "Lähdemateriaali",
+    "displaySources": "Näytä lähteet",
+    "hideSources": "Piilota lähteet"
   },
   "settings": {
     "prompt": "Keskustelun alustus",
@@ -249,5 +256,8 @@
     "isSavedForTeacherOptOut": "Kurssin keskustelut tallennetaan anonyymisti jos käyttäjä antaa luvan",
     "directPromptLink": "Linkki kurssichattiin käyttäen tätä alustusta",
     "copyDirectPromptLinkInfo": "Kopioi linkki tämän alustuksen kurssichattiin"
+  },
+  "tooltip": {
+    "copied": "Kopioitu!"
   }
 }

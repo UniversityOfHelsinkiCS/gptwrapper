@@ -14,6 +14,9 @@ import { LoadingMessage } from './generics/LoadingMessage'
 import { preprocessMath } from './util'
 import 'katex/dist/katex.min.css'
 import 'katex/dist/contrib/mhchem'
+import SettingsButton from './generics/SettingsButton'
+import CopyToClipboardButton from '../Chat/CopyToClipboardButton'
+import { t } from 'i18next'
 
 const UserMessage = ({
   content,
@@ -72,6 +75,9 @@ const AssistantMessage = ({
   hasAnnotations,
   isLastAssistantNode,
   expandedNodeHeight,
+  fileSearchStatus,
+  ragDisplay,
+  toggleRagDisplay,
 }: {
   content: string
   error?: string
@@ -79,6 +85,9 @@ const AssistantMessage = ({
   hasAnnotations: boolean
   isLastAssistantNode: boolean
   expandedNodeHeight: number
+  fileSearchStatus: boolean
+  ragDisplay: boolean
+  toggleRagDisplay: () => void
 }) => {
   const processedContent = preprocessMath(content)
   const katexOptions = {
@@ -138,6 +147,7 @@ const AssistantMessage = ({
               const { children, className, node, ...rest } = props
               const match = /language-(\w+)/.exec(className || '')
               const language = match?.[1] || 'plaintext' // safe fallback
+
               return match ? (
                 <Box
                   sx={{
@@ -156,22 +166,31 @@ const AssistantMessage = ({
                   >
                     {language}
                   </Typography>
-                  {/* @ts-ignore */}
-                  <SyntaxHighlighter
-                    {...rest}
-                    PreTag="div"
-                    children={String(children)}
-                    language={language}
-                    customStyle={{
-                      padding: '1rem',
-                      margin: 0,
-                      fontSize: '16px',
-                      wordBreak: 'break-all',
-                      overflowWrap: 'break-word',
-                      whiteSpace: 'pre-wrap',
-                    }}
-                    style={oneDark}
-                  />
+                  <Box sx={{ position: 'relative' }}>
+                    {/* @ts-ignore */}
+                    <SyntaxHighlighter
+                      {...rest}
+                      PreTag="div"
+                      children={String(children)}
+                      language={language}
+                      customStyle={{
+                        padding: '1rem',
+                        margin: 0,
+                        fontSize: '15px',
+                        wordBreak: 'break-all',
+                        overflowWrap: 'break-word',
+                        whiteSpace: 'pre-wrap',
+                      }}
+                      style={oneDark}
+                      id="syntaxHighlighter"
+                    />
+                    <CopyToClipboardButton
+                      id="syntaxHighlighter"
+                      copied={String(children)}
+                      iconColor="#FFF"
+                      buttonStyle={{ position: 'absolute', top: '10px', right: '10px' }}
+                    />
+                  </Box>
                 </Box>
               ) : (
                 <code {...rest} className={className}>
@@ -189,6 +208,11 @@ const AssistantMessage = ({
           </Box>
         )}
       </Box>
+      {isLastAssistantNode && fileSearchStatus && (
+        <Box>
+          <SettingsButton onClick={() => toggleRagDisplay()}>{ragDisplay ? t('chat:hideSources') : t('chat:displaySources')}</SettingsButton>
+        </Box>
+      )}
     </Box>
   )
 }
@@ -198,11 +222,15 @@ const MessageItem = ({
   isLastAssistantNode,
   expandedNodeHeight,
   hasRagIndex,
+  ragDisplay,
+  toggleRagDisplay,
 }: {
   message: Message
   isLastAssistantNode: boolean
   expandedNodeHeight: number
   hasRagIndex: boolean
+  ragDisplay: boolean
+  toggleRagDisplay: () => void
 }) => {
   const { courseId } = useParams()
   // @todo when has annotations?
@@ -217,6 +245,9 @@ const MessageItem = ({
         hasRagIndex={hasRagIndex}
         isLastAssistantNode={isLastAssistantNode}
         expandedNodeHeight={expandedNodeHeight}
+        fileSearchStatus={message.fileSearchResult?.status == 'completed'}
+        ragDisplay={ragDisplay}
+        toggleRagDisplay={toggleRagDisplay}
       />
     )
   } else {
@@ -241,6 +272,8 @@ export const Conversation = ({
   isCompletionDone,
   fileSearchResult,
   hasRagIndex,
+  ragDisplay,
+  toggleRagDisplay,
 }: {
   courseName?: string
   courseDate?: ActivityPeriod
@@ -251,6 +284,8 @@ export const Conversation = ({
   isCompletionDone: boolean
   fileSearchResult?: FileSearchCompletedData
   hasRagIndex: boolean
+  ragDisplay: boolean
+  toggleRagDisplay: () => void
 }) => (
   <Box
     style={{
@@ -266,9 +301,16 @@ export const Conversation = ({
     {messages.length === 0 && <ConversationSplash courseName={courseName} courseDate={courseDate} />}
     {messages.map((message, idx) => {
       const isLastAssistantNode = idx === messages.length - 1 && message.role === 'assistant'
-
       return (
-        <MessageItem key={idx} message={message} isLastAssistantNode={isLastAssistantNode} expandedNodeHeight={expandedNodeHeight} hasRagIndex={hasRagIndex} />
+        <MessageItem
+          key={idx}
+          message={message}
+          isLastAssistantNode={isLastAssistantNode}
+          expandedNodeHeight={expandedNodeHeight}
+          hasRagIndex={hasRagIndex}
+          ragDisplay={ragDisplay}
+          toggleRagDisplay={toggleRagDisplay}
+        />
       )
     })}
     {!isCompletionDone &&
@@ -279,6 +321,8 @@ export const Conversation = ({
           isLastAssistantNode={true}
           expandedNodeHeight={expandedNodeHeight}
           hasRagIndex={hasRagIndex}
+          ragDisplay={ragDisplay}
+          toggleRagDisplay={toggleRagDisplay}
         />
       ) : (
         <LoadingMessage expandedNodeHeight={expandedNodeHeight} />

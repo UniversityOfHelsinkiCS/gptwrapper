@@ -2,10 +2,10 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EmailIcon from '@mui/icons-material/Email'
 import HelpIcon from '@mui/icons-material/Help'
 import SettingsIcon from '@mui/icons-material/Settings'
-import { Alert, Box, Typography, Skeleton, Button } from '@mui/material'
+import { Alert, Box, Typography } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { ALLOWED_FILE_TYPES, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, validModels } from '../../../config'
 import type { FileSearchCompletedData, ResponseStreamEventData } from '../../../shared/types'
 import { getLanguageValue } from '../../../shared/utils'
@@ -18,7 +18,7 @@ import useUserStatus from '../../hooks/useUserStatus'
 import type { Message } from '../../types'
 import { AppContext } from '../../util/AppContext'
 import { ChatBox } from './ChatBox'
-import { CitationsBox } from './CitationsBox'
+import { FileSearchInfo } from './CitationsBox'
 import { Conversation } from './Conversation'
 import { DisclaimerModal } from './Disclaimer'
 import { handleCompletionStreamError } from './error'
@@ -75,6 +75,7 @@ export const ChatV2 = () => {
 
   // RAG states
   const [ragIndexId, setRagIndexId] = useState<number | undefined>()
+  const [ragDisplay, setRagDisplay] = useState<boolean>(true)
   const ragIndex = ragIndices?.find((index) => index.id === ragIndexId)
 
   // Refs
@@ -257,25 +258,34 @@ export const ChatV2 = () => {
     }
   }
 
+  const handleRagDisplay = () => {
+    setRagDisplay((prev) => !prev)
+  }
+
   const handleReset = () => {
-    setMessages([])
-    setPrevResponse({ id: '' })
-    setCompletion('')
-    setIsCompletionDone(true)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
-    setFileName('')
-    setFileSearch(undefined)
-    setStreamController(undefined)
-    setTokenUsageWarning('')
-    setTokenUsageAlertOpen(false)
-    setRetryTimeout(() => {
-      if (streamController) {
-        streamController.abort()
+    if (window.confirm('Are you sure you want to empty this conversation?')) {
+      setMessages([])
+      setPrevResponse({ id: '' })
+      setCompletion('')
+      setIsCompletionDone(true)
+      if (!ragDisplay) {
+        handleRagDisplay()
       }
-    }, 5000)
-    clearRetryTimeout()
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+      setFileName('')
+      setFileSearch(undefined)
+      setStreamController(undefined)
+      setTokenUsageWarning('')
+      setTokenUsageAlertOpen(false)
+      setRetryTimeout(() => {
+        if (streamController) {
+          streamController.abort()
+        }
+      }, 5000)
+      clearRetryTimeout()
+    }
   }
 
   const handleCancel = () => {
@@ -479,6 +489,8 @@ export const ChatV2 = () => {
             isCompletionDone={isCompletionDone}
             fileSearchResult={fileSearch}
             hasRagIndex={!!ragIndex}
+            ragDisplay={ragDisplay}
+            toggleRagDisplay={handleRagDisplay}
           />
         </Box>
 
@@ -525,7 +537,15 @@ export const ChatV2 = () => {
           top: 70,
         }}
       >
-        {showFileSearch && <FileSearchInfo isFileSearching={isFileSearching} fileSearchResult={fileSearch} messages={messages} />}
+        {showFileSearch && (
+          <FileSearchInfo
+            isFileSearching={isFileSearching}
+            fileSearchResult={fileSearch}
+            messages={messages}
+            ragDisplay={ragDisplay}
+            toggleRagDisplay={handleRagDisplay}
+          />
+        )}
       </Box>
 
       {/* Modals --------------------------------------*/}
@@ -546,52 +566,6 @@ export const ChatV2 = () => {
       />
 
       <DisclaimerModal disclaimer={disclaimerInfo} disclaimerStatus={disclaimerStatus} setDisclaimerStatus={setDisclaimerStatus} />
-    </Box>
-  )
-}
-
-const FileSearchInfo = ({
-  isFileSearching,
-  fileSearchResult,
-  messages,
-}: {
-  isFileSearching: boolean
-  fileSearchResult?: FileSearchCompletedData
-  messages: Message[]
-}) => {
-  const scrollRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      setTimeout(() => {
-        scrollRef.current?.scrollTo({
-          top: scrollRef.current.scrollHeight,
-          behavior: 'smooth',
-        })
-      }, 50)
-    }
-  }, [isFileSearching, fileSearchResult, messages.length])
-
-  return (
-    <Box
-      ref={scrollRef}
-      sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1.5rem',
-        minWidth: 300,
-        borderLeft: '1px solid rgba(0, 0, 0, 0.12)',
-        overflowY: 'auto',
-        mr: '8px',
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-        <Typography variant="h5" sx={{ pt: 3, pb: 0 }}>
-          Lähdemateriaalit
-        </Typography>
-      </Box>
-      <CitationsBox messages={messages} fileSearchResult={fileSearchResult} isFileSearching={isFileSearching} />
     </Box>
   )
 }

@@ -1,15 +1,19 @@
 import React, { useState } from 'react'
-import { Box, IconButton, Snackbar } from '@mui/material'
+import { Box, IconButton, Snackbar, Tooltip } from '@mui/material'
 import ContentCopy from '@mui/icons-material/ContentCopy'
 import markdownToTxt from 'markdown-to-txt'
+import { useTranslation } from 'react-i18next'
 
 interface CopyToClipboardButtonProps {
   copied: string
   id: string
+  iconColor?: string
+  buttonStyle?: React.CSSProperties
 }
 
-const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ copied, id }) => {
+const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ copied, id, iconColor = 'primary', buttonStyle }) => {
   const [open, setOpen] = useState(false)
+  const { t } = useTranslation()
 
   const handleClick = () => {
     const element = document.getElementById(id)
@@ -25,17 +29,24 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ copied, i
         'text/html': blobHtml,
       }),
     ]
-
     navigator.clipboard.write(data)
   }
 
   return (
     <Box>
-      <IconButton onClick={handleClick} color="primary">
-        <ContentCopy />
-      </IconButton>
+      <Tooltip title={t('chat:copyToClipboard')} arrow>
+        <IconButton
+          onClick={handleClick}
+          style={{
+            ...buttonStyle,
+            opacity: '0.8',
+          }}
+        >
+          <ContentCopy sx={{ color: iconColor }} />
+        </IconButton>
+      </Tooltip>
       <Snackbar
-        message="Copied to clipboard"
+        message={t('tooltip:copied')}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         autoHideDuration={2000}
         onClose={() => setOpen(false)}
