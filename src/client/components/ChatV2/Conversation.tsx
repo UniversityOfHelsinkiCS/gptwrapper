@@ -192,7 +192,7 @@ const AssistantMessage = ({
                         id={codeBlockId}
                         copied={String(children)}
                         iconColor="#FFF"
-                        buttonStyle={{ position: 'absolute', top: '10px', right: '10px' }}
+                        buttonStyle={{ position: 'absolute', top: '8px', right: '8px' }}
                       />
                     </Box>
                   </Box>
@@ -214,12 +214,10 @@ const AssistantMessage = ({
             <Typography variant="body1" fontStyle="italic" color="#cc0000">{`\n\n ${error}`}</Typography>
           </Box>
         )}
-      </Box>
-      {isLastAssistantNode && fileSearchStatus && (
-        <Box>
+        {isLastAssistantNode && fileSearchStatus && (
           <SettingsButton onClick={() => toggleRagDisplay()}>{ragDisplay ? t('chat:hideSources') : t('chat:displaySources')}</SettingsButton>
-        </Box>
-      )}
+        )}
+      </Box>
     </Box>
   )
 }

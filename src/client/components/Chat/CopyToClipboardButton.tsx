@@ -39,7 +39,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ copied, i
           onClick={handleClick}
           style={{
             ...buttonStyle,
-            opacity: '0.8',
+            opacity: '0.7',
           }}
         >
           <ContentCopy sx={{ color: iconColor }} />

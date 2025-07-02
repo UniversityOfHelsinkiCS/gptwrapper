@@ -66,6 +66,7 @@ const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileS
       )}
 
       {isExpired && <Typography color="error">File search results expired</Typography>}
+
       <Box sx={{ mt: 1 }}>
         <Button variant="outlined" startIcon={<Subject />} onClick={() => setSourceModalOpen(true)} sx={{ borderRadius: 4, mt: 2, mb: 2 }}>
           {t('chat:readMore')}
@@ -120,16 +121,17 @@ export const CitationsBox = ({
 }) => {
   const messageCitations = [...messages.map((m) => m.fileSearchResult).filter(Boolean)] as FileSearchCompletedData[]
   const { t } = useTranslation()
+
   if (fileSearchResult && !messageCitations.includes(fileSearchResult)) {
     messageCitations.push(fileSearchResult)
   }
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', flexGrow: 1 }}>
       <Typography variant="h5" sx={{ p: 3 }}>
         {t('chat:sources')}
       </Typography>
-      <Box sx={{ mr: 2.5 }}>
+      <Box sx={{ mr: 2.5, flexGrow: 1 }}>
         {messageCitations.map((c, key) => (
           <MessageFileSearchResult key={key} fileSearchResult={c} />
         ))}
@@ -204,6 +206,7 @@ export const FileSearchInfo = ({
         borderLeft: '1px solid rgba(0, 0, 0, 0.12)',
         overflowY: 'auto',
         mr: '8px',
+        paddingBottom: '3rem',
       }}
     >
       <CitationsBox messages={messages} fileSearchResult={fileSearchResult} isFileSearching={isFileSearching} />
