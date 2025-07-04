@@ -23,7 +23,7 @@ const ModelSelector = ({ currentModel, setModel, availableModels }: { currentMod
         </MenuItem> */}
         {availableModels.map((model) => (
           <MenuItem key={model} value={model}>
-            {model}
+            <>{model}</>
           </MenuItem>
         ))}
       </Select>

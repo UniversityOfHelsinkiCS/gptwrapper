@@ -65,7 +65,9 @@
     "courseStats": "Kursstatistik"
   },
   "info": {
-    "title": "Uppmärksamhet"
+    "title": "Användarvillkor",
+    "usage": "Tokens återställs varje månad. För att minska förbrukningen av token kan du välja en annan språkmodell eller tömma konversationen varje gång du byter ämne.",
+    "email": "Konversationen kommer att skickas till {{email}}"
   },
   "footer": {
     "contactSupport": "Kontakta support: <mailTo>{{supportEmail}}</mailTo>"

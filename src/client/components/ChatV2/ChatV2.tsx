@@ -2,7 +2,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EmailIcon from '@mui/icons-material/Email'
 import HelpIcon from '@mui/icons-material/Help'
 import SettingsIcon from '@mui/icons-material/Settings'
-import { Alert, Box, Typography } from '@mui/material'
+import { Alert, Box, Tooltip, Typography } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
@@ -27,6 +27,7 @@ import RagSelector from './RagSelector'
 import { SettingsModal } from './SettingsModal'
 import { getCompletionStream } from './util'
 import { OutlineButtonBlack } from './generics/Buttons'
+import useCurrentUser from '../../hooks/useCurrentUser'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -37,6 +38,8 @@ export const ChatV2 = () => {
   const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
 
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
+
+  const { user } = useCurrentUser()
 
   // local storage states
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
@@ -431,9 +434,19 @@ export const ChatV2 = () => {
             <OutlineButtonBlack startIcon={<DeleteIcon />} onClick={handleReset}>
               {t('chat:emptyConversation')}
             </OutlineButtonBlack>
-            <OutlineButtonBlack startIcon={<EmailIcon />} onClick={() => alert('Not yet supported')}>
-              {t('email:save')}
-            </OutlineButtonBlack>
+            <Tooltip
+              title={
+                <Typography variant="body2" sx={{ p: 0.5 }}>
+                  {t('info:email', { email: user?.email })}
+                </Typography>
+              }
+              arrow
+              placement="right"
+            >
+              <OutlineButtonBlack startIcon={<EmailIcon />} onClick={() => alert('Not yet supported')}>
+                {t('email:save')}
+              </OutlineButtonBlack>
+            </Tooltip>
             <OutlineButtonBlack startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)}>
               {t('chat:settings')}
             </OutlineButtonBlack>

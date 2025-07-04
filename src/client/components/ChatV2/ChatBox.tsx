@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Send } from '@mui/icons-material'
+import { HelpOutline, Send } from '@mui/icons-material'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import { Box, Chip, IconButton, TextField, Tooltip, Typography, FormControlLabel, Switch, Alert, Button } from '@mui/material'
@@ -208,12 +208,25 @@ export const ChatBox = ({
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0' }}>
-          <Typography
-            variant="body1"
-            sx={{ padding: '0.5rem 0', opacity: isTokenLimitExceeded ? 1 : 0.7, color: isTokenLimitExceeded ? '#cc0000' : 'inherit' }}
-          >
-            {userStatus?.usage ?? '-'} / {userStatus?.limit ?? '-'} {t('status:tokensUsed')}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography
+              variant="body1"
+              sx={{ padding: '0.5rem 0', opacity: isTokenLimitExceeded ? 1 : 0.7, color: isTokenLimitExceeded ? '#cc0000' : 'inherit' }}
+            >
+              {userStatus?.usage ?? '-'} / {userStatus?.limit ?? '-'} {t('status:tokensUsed')}
+            </Typography>
+            <Tooltip
+              arrow
+              placement="right"
+              title={
+                <Typography variant="body2" sx={{ p: 1 }}>
+                  {t('info:usage')}
+                </Typography>
+              }
+            >
+              <HelpOutline fontSize="small" sx={{ color: 'inherit', opacity: 0.7, mt: 0.5 }} />
+            </Tooltip>
+          </Box>
 
           <>
             {!notOptoutSaving && saveChat && (

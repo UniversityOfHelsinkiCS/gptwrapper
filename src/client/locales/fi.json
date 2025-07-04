@@ -55,7 +55,9 @@
     "courseCodes": "Kurssikoodit"
   },
   "info": {
-    "title": "Huomio"
+    "title": "Käyttöehdot",
+    "usage": "Tokenit nollaantuvat kuukauden välein. Vähentääksesi tokenien kulumista voit valita toisen kielimallin tai tyhjentää keskustelun aina kun vaihdat keskustelun aihetta.",
+    "email": "Keskustelu lähetetään osoitteeseen {{email}}"
   },
   "footer": {
     "contactSupport": "Ota yhteyttä tukeen: <mailTo>{{supportEmail}}</mailTo>",
@@ -251,7 +253,7 @@
     "oneMandatoryPrompt": "Kurssilla voi olla vain yksi pakollinen alustus",
     "noCourses": "Ei näytettäviä kursseja",
     "showActiveCourses": "Näytä aktiiviset kurssit",
-    "isSavedOptOut": "Kurssin keskustelut tallennetaan anonyymisti jos annat tallennusluvan\n\nTallennettuja keskusteluja voidaan käyttää tutkimuksessa",
+    "isSavedOptOut": "Kurssin keskustelut tallennetaan anonyymisti jos annat tallennusluvan.\nTallennettuja keskusteluja voidaan käyttää tutkimuksessa",
     "isSavedNotOptOut": "Kurssin keskustelut tallennetaan anonyymisti.\n\nTallennettuja keskusteluja voidaan käyttää tutkimuksessa",
     "isSavedForTeacherOptOut": "Kurssin keskustelut tallennetaan anonyymisti jos käyttäjä antaa luvan",
     "directPromptLink": "Linkki kurssichattiin käyttäen tätä alustusta",
