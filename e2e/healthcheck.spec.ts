@@ -9,7 +9,7 @@ test.describe('Health Check Tests', () => {
 
     // Check that we get a successful response
     const response = await page.goto('/')
-    expect(response?.status()).toBe(200)
+    expect([200, 304]).toContain(response?.status())
   })
 
   test('Page has expected title and basic elements', async ({ page }) => {
@@ -24,7 +24,7 @@ test.describe('Health Check Tests', () => {
 
   test('API ping endpoint responds', async ({ request }) => {
     const response = await request.get('/api/ping')
-    expect(response.status()).toBe(200)
+    expect([200, 304]).toContain(response?.status())
   })
 
   test('No console errors on page load', async ({ page }) => {

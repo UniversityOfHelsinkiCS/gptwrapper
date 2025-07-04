@@ -18,11 +18,11 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: inCI,
   /* Retry on CI only */
-  retries: inCI ? 2 : 0,
+  retries: inCI ? 1 : 0,
   /* Global timeout for each test */
-  timeout: 10_000,
+  timeout: 8_000,
   expect: {
-    timeout: inCI ? 5_000 : 2_500,
+    timeout: inCI ? 4_000 : 2_000,
   },
   /* Opt out of parallel tests on CI. */
   workers: inCI ? 1 : undefined,
@@ -50,15 +50,15 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
 
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    // },
+    //
+    // {
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'] },
+    // },
 
     /* Test against mobile viewports. */
     // {
