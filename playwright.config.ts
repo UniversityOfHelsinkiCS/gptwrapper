@@ -20,9 +20,9 @@ export default defineConfig({
   /* Retry on CI only */
   retries: inCI ? 2 : 0,
   /* Global timeout for each test */
-  timeout: 30_000,
+  timeout: 10_000,
   expect: {
-    timeout: inCI ? 10_000 : 5_000,
+    timeout: inCI ? 5_000 : 2_500,
   },
   /* Opt out of parallel tests on CI. */
   workers: inCI ? 1 : undefined,

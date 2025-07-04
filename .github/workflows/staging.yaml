@@ -11,34 +11,32 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Build CI image
-        id: build-image
-        uses: redhat-actions/buildah-build@v2
+      - uses: actions/setup-node@v3
         with:
-          image: gptwrapper
-          tags: ci ${{ github.sha }}
-          containerfiles: |
-            ./Containerfile
+          node-version: '20'
+          cache: 'npm'
+      - uses: docker/setup-buildx-action@v2
+
+      - name: Build image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Containerfile
           build-args: |
-            BASE_PATH=/
-            GIT_SHA=${{ github.sha }}
-            STAGING=true
-            CI=true
-
-      - name: Push CI image to quay.io
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ steps.build-image.outputs.image }}
-          tags: ${{ steps.build-image.outputs.tags }}
-          registry: quay.io/toska
-          username: toska+github
-          password: ${{ secrets.QUAY_IO_TOKEN }}
+            E2E=true
+          push: false
+          load: true
+          tags: toppi:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Start the application
-        run: docker compose -f compose.ci.yaml up -d
+        run: docker-compose -f compose.ci.yml up -d
 
-      - run: npm ci
+        # Copy dependencies from the container
+      - name: Copy dependencies from the container
+        run: docker cp toppi:/opt/app-root/src/node_modules ./node_modules
+
       - run: npm run tsc
       - run: npm run lint
 
@@ -47,11 +45,6 @@ jobs:
         id: playwright-version
         run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package-lock.json').packages[''].devDependencies['@playwright/test'])")" >> $GITHUB_ENV
 
-      - run: npx playwright install --with-deps
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-      - run: npx playwright install-deps
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-
       - name: Cache playwright binaries
         uses: actions/cache@v4
         id: playwright-cache
@@ -59,6 +52,11 @@ jobs:
           path: |
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+
+      - run: npx playwright install --with-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - run: npx playwright install-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
 
       - name: Run your tests
         env:
