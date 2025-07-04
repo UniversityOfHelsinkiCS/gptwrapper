@@ -86,15 +86,23 @@ router.get('/indices', async (req, res) => {
         { model: RagIndex, as: 'ragIndices' },
       ],
     })
+
     if (!chatInstance) {
       throw ApplicationError.NotFound('Chat instance not found')
     }
+
+    if (!chatInstance.ragIndices?.length) {
+      res.json([]).send()
+      return
+    }
+
     if (!hasChatInstanceRagPermission(user, chatInstance)) {
       throw ApplicationError.Forbidden('Forbidden')
     }
   } else {
     if (!user.isAdmin) {
-      throw ApplicationError.Forbidden('Forbidden')
+      res.json([]).send()
+      return
     }
   }
 
