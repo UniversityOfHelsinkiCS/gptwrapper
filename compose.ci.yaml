@@ -6,6 +6,7 @@ services:
       - PORT=3000
       - AZURE_API_KEY=asdasd
       - AZURE_RESOURCE=asdasd
+      - STAGING=true # @todo should we instead be "in production" in ci? needs a little investigation
       - CI=true
       - PUBLIC_URL=http://localhost:8000
     ports:
