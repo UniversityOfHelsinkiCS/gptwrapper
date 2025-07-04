@@ -23,10 +23,10 @@ import { Conversation } from './Conversation'
 import { DisclaimerModal } from './Disclaimer'
 import { handleCompletionStreamError } from './error'
 import { ChatInfo } from './generics/ChatInfo'
-import SettingsButton from './generics/SettingsButton'
 import RagSelector from './RagSelector'
 import { SettingsModal } from './SettingsModal'
 import { getCompletionStream } from './util'
+import { OutlineButtonBlack } from './generics/Buttons'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -428,18 +428,18 @@ export const ChatV2 = () => {
           {course && <ChatInfo course={course} />}
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', mb: '2rem' }}>
-            <SettingsButton startIcon={<DeleteIcon />} onClick={handleReset}>
+            <OutlineButtonBlack startIcon={<DeleteIcon />} onClick={handleReset}>
               {t('chat:emptyConversation')}
-            </SettingsButton>
-            <SettingsButton startIcon={<EmailIcon />} onClick={() => alert('Not yet supported')}>
+            </OutlineButtonBlack>
+            <OutlineButtonBlack startIcon={<EmailIcon />} onClick={() => alert('Not yet supported')}>
               {t('email:save')}
-            </SettingsButton>
-            <SettingsButton startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)}>
+            </OutlineButtonBlack>
+            <OutlineButtonBlack startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)}>
               {t('chat:settings')}
-            </SettingsButton>
-            <SettingsButton startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus({ open: true })}>
+            </OutlineButtonBlack>
+            <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus({ open: true })}>
               {t('info:title')}
-            </SettingsButton>
+            </OutlineButtonBlack>
           </Box>
           {course && showRagSelector && (
             <>
