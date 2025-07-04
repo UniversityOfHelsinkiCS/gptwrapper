@@ -31,7 +31,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Start the application
-        run: docker-compose -f compose.ci.yml up -d
+        run: docker compose -f compose.ci.yml up -d
 
         # Copy dependencies from the container
       - name: Copy dependencies from the container
