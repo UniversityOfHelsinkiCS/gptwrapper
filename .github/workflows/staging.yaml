@@ -54,12 +54,12 @@ jobs:
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
 
-      - run: npx playwright install --with-deps
+      - run: npx playwright install --with-deps chromium firefox webkit
         if: steps.playwright-cache.outputs.cache-hit != 'true'
       - run: npx playwright install-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
-      - name: Run your tests
+      - name: Run tests
         env:
           CI: true
         run: npx playwright test
