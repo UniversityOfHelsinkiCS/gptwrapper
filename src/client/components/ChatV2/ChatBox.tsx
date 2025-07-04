@@ -161,6 +161,7 @@ export const ChatBox = ({
             slotProps={{
               input: {
                 disableUnderline: true,
+                id: 'chat-input',
               },
             }}
           />

@@ -35,7 +35,11 @@ export const DisclaimerModal = ({
           padding: '3rem',
         }}
       >
-        <IconButton onClick={() => setDisclaimerStatus({ open: false })} sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500' }}>
+        <IconButton
+          id="close-disclaimer"
+          onClick={() => setDisclaimerStatus({ open: false })}
+          sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500' }}
+        >
           <Close />
         </IconButton>
 

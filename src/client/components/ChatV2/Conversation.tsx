@@ -30,7 +30,8 @@ const UserMessage = ({
   expandedNodeHeight: number
 }) => (
   <Box
-    className={`message-role-user`}
+    className="message-role-user"
+    data-testid="user-message"
     sx={{
       minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
       alignSelf: 'flex-end',
@@ -131,7 +132,7 @@ const AssistantMessage = ({
   let codeCount = 0
 
   return (
-    <Box className={`message-role-assistant`} sx={{ minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto' }}>
+    <Box className={`message-role-assistant`} data-testid="assistant-message" sx={{ minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto' }}>
       <Box
         sx={{
           padding: '0 1.5rem',

@@ -4,7 +4,7 @@ import { MenuItem, FormControl, Select, SelectChangeEvent } from '@mui/material'
 const ModelSelector = ({ currentModel, setModel, availableModels }: { currentModel: string; setModel: (model: string) => void; availableModels: string[] }) => {
   const { t } = useTranslation()
 
-  const validModel = availableModels.includes(currentModel) ? currentModel : '';
+  const validModel = availableModels.includes(currentModel) ? currentModel : ''
 
   return (
     <FormControl sx={{ minWidth: 100, opacity: 0.7 }} size="small">
@@ -14,6 +14,7 @@ const ModelSelector = ({ currentModel, setModel, availableModels }: { currentMod
             border: 'none',
           },
         }}
+        id="model-selector"
         value={validModel}
         onChange={(event: SelectChangeEvent) => setModel(event.target.value)}
       >
