@@ -1,6 +1,6 @@
 services:
   app:
-    image: quay.io/toska/gptwrapper:ci
+    image: gptwrapper:ci
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
       - PORT=3000

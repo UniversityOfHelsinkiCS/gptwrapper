@@ -22,12 +22,9 @@ test.describe('Health Check Tests', () => {
     await expect(page.locator('body')).toBeVisible()
   })
 
-  test('API health endpoint responds', async ({ request }) => {
-    // Test API health endpoint if it exists
-    const response = await request.get('/api/health')
-
-    // Accept both 200 (if endpoint exists) or 404 (if it doesn't exist yet)
-    expect([200, 404]).toContain(response.status())
+  test('API ping endpoint responds', async ({ request }) => {
+    const response = await request.get('/api/ping')
+    expect(response.status()).toBe(200)
   })
 
   test('No console errors on page load', async ({ page }) => {

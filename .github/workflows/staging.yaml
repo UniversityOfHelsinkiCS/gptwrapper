@@ -24,6 +24,7 @@ jobs:
           file: ./Containerfile
           build-args: |
             E2E=true
+            BASE_PATH=/
           push: false
           load: true
           tags: gptwrapper:ci
