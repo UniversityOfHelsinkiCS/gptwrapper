@@ -23,7 +23,7 @@ jobs:
           context: .
           file: ./Containerfile
           build-args: |
-            E2E=true
+            CI=true
             BASE_PATH=/
           push: false
           load: true
