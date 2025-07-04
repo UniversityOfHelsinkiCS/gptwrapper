@@ -25,7 +25,7 @@ jobs:
             GIT_SHA=${{ github.sha }}
             STAGING=true
             CI=true
-      
+
       - name: Push CI image to quay.io
         uses: redhat-actions/push-to-registry@v2
         with:
@@ -41,7 +41,7 @@ jobs:
       - run: npm ci
       - run: npm run tsc
       - run: npm run lint
-      
+
         # https://playwrightsolutions.com/playwright-github-action-to-cache-the-browser-binaries/
       - name: Get installed Playwright version
         id: playwright-version
@@ -59,11 +59,35 @@ jobs:
           path: |
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
-      
-      #- name: Run your tests
-      #  env:
-      #    CI: true
-      #  run: npx playwright test
+
+      - name: Run your tests
+        env:
+          CI: true
+        run: npx playwright test
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 7
+
+      - name: Upload Screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: screenshots
+          path: test-results/screenshots/
+          retention-days: 7
 
       - name: Build staging image
         id: build-staging-image
@@ -80,8 +104,8 @@ jobs:
           # Extra args are needed to increase the number of open files
           # because of build EMFILE error: https://github.com/npm/cli/issues/4783#issuecomment-1908016260
           extra-args: |
-            --ulimit nofile=4096:4096 
-      
+            --ulimit nofile=4096:4096
+
       - name: Push staging image to quay.io
         uses: redhat-actions/push-to-registry@v2
         with:
@@ -90,21 +114,21 @@ jobs:
           registry: quay.io/toska
           username: toska+github
           password: ${{ secrets.QUAY_IO_TOKEN }}
-      
+
       - name: Upload test results
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: playwright-report
-      
+
       - name: Upload screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: screenshots
           path: screenshots
-        
+
       - name: Print logs on failure
         shell: bash
         if: failure()
