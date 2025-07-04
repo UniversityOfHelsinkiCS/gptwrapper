@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import SettingsButton from '../ChatV2/generics/SettingsButton'
+import { OutlineButtonBlack } from '../ChatV2/generics/Buttons'
 
 export const NotFound = () => {
   const navigate = useNavigate()
@@ -25,7 +25,7 @@ export const NotFound = () => {
     >
       <Typography variant="h1">{404}</Typography>
       <Typography variant="h4">{t('error:notFoundTitle')}</Typography>
-      <SettingsButton onClick={handleGoHome}>{t('error:goHome')}</SettingsButton>
+      <OutlineButtonBlack onClick={handleGoHome}>{t('error:goHome')}</OutlineButtonBlack>
     </Box>
   )
 }

@@ -1,7 +1,8 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from '@mui/material'
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Prompt } from '../../types'
+import { BlueButton, OutlineButtonBlack } from './generics/Buttons'
 
 type SaveMyPromptModalProps = {
   isOpen: boolean
@@ -20,11 +21,15 @@ export const SaveMyPromptModal = ({ isOpen, setIsOpen, onSave, systemMessage, ex
     setName(existingName ?? '')
   }, [existingName])
 
-  // If name exists, modify the existing prompt
   const promptToSave = myPrompts.find((prompt) => prompt.name === name)
 
   return (
-    <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+    <Dialog
+      open={isOpen}
+      onClose={() => setIsOpen(false)}
+      maxWidth="md"
+      sx={{ '& .MuiDialog-paper': { width: '100%', minWidth: { xs: '90%', sm: 450, md: 600 } } }}
+    >
       <form
         onSubmit={async (e) => {
           console.log('Saving', name)
@@ -32,9 +37,10 @@ export const SaveMyPromptModal = ({ isOpen, setIsOpen, onSave, systemMessage, ex
           await onSave(name, promptToSave)
           setIsOpen(false)
         }}
+        style={{ padding: 8 }}
       >
         <DialogTitle>{t('settings:saveMyPromptModalTitle')}</DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'flex-start' }}>
           <TextField
             slotProps={{ htmlInput: { minLength: 1 } }}
             value={name}
@@ -43,17 +49,17 @@ export const SaveMyPromptModal = ({ isOpen, setIsOpen, onSave, systemMessage, ex
             fullWidth
             sx={{ mt: 1 }}
           />
-          <Typography sx={{ mt: 2 }} variant="body2" color="textSecondary">
-            {systemMessage}
+          <Typography sx={{ mt: 2, textAlign: 'flex-start', width: '100%', fontStyle: 'italic' }} variant="body2" color="textSecondary">
+            "{systemMessage}"
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button color="primary" type="submit" disabled={!name}>
-            {promptToSave ? t('settings:updatePrompt') : t('settings:saveNewPrompt')}
-          </Button>
-          <Button color="secondary" type="button" onClick={() => setIsOpen(false)}>
+          <OutlineButtonBlack type="button" onClick={() => setIsOpen(false)}>
             {t('common:cancel')}
-          </Button>
+          </OutlineButtonBlack>
+          <BlueButton type="submit" disabled={!name}>
+            {promptToSave ? t('settings:updatePrompt') : t('settings:saveNewPrompt')}
+          </BlueButton>
         </DialogActions>
       </form>
     </Dialog>

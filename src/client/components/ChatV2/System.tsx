@@ -1,5 +1,6 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material'
 import { useState } from 'react'
+import { BlueButton } from './generics/Buttons'
 
 export const SystemPrompt = ({ content, setContent }: { content: string; setContent: (content: string) => void }) => {
   const [open, setOpen] = useState(false)
@@ -27,9 +28,7 @@ export const SystemPrompt = ({ content, setContent }: { content: string; setCont
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(false)} color="primary">
-            Close
-          </Button>
+          <BlueButton onClick={() => setOpen(false)}>Close</BlueButton>
         </DialogActions>
       </Dialog>
     </>

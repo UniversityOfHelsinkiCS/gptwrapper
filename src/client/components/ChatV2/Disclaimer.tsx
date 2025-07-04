@@ -2,6 +2,7 @@ import { Modal, Box, IconButton, Typography } from '@mui/material'
 import { Close } from '@mui/icons-material'
 import Markdown from '../Banner/Markdown'
 import { useTranslation } from 'react-i18next'
+import { BlueButton } from './generics/Buttons'
 
 export const DisclaimerModal = ({
   disclaimer,
@@ -27,7 +28,8 @@ export const DisclaimerModal = ({
           minWidth: 600,
           width: '85vw',
           maxWidth: 1000,
-          maxHeight: '80vh',
+          height: 'fit-content',
+          maxHeight: '100vh',
           bgcolor: 'background.paper',
           boxShadow: 24,
           borderRadius: '0.3rem',
@@ -48,6 +50,10 @@ export const DisclaimerModal = ({
         </Typography>
 
         <Markdown>{disclaimer}</Markdown>
+
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <BlueButton onClick={() => setDisclaimerStatus({ open: false })}>OK</BlueButton>
+        </Box>
       </Box>
     </Modal>
   )

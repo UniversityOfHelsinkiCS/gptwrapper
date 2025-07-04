@@ -6,6 +6,7 @@ import { useFileSearchResults } from './api'
 import { useTranslation } from 'react-i18next'
 import { ShortText, Subject } from '@mui/icons-material'
 import { useEffect, useRef, useState } from 'react'
+import { OutlineButtonBlue } from './generics/Buttons'
 
 const FileItemComponent = ({ fileItem, cutOff = false }: { fileItem: FileSearchResultData; cutOff?: boolean }) => {
   return (
@@ -67,10 +68,10 @@ const MessageFileSearchResult = ({ fileSearchResult }: { fileSearchResult: FileS
 
       {isExpired && <Typography color="error">File search results expired</Typography>}
 
-      <Box sx={{ mt: 1 }}>
-        <Button variant="outlined" startIcon={<Subject />} onClick={() => setSourceModalOpen(true)} sx={{ borderRadius: 4, mt: 2, mb: 2 }}>
+      <Box sx={{ mt: 2, display: 'flex' }}>
+        <OutlineButtonBlue startIcon={<Subject />} onClick={() => setSourceModalOpen(true)}>
           {t('chat:readMore')}
-        </Button>
+        </OutlineButtonBlue>
       </Box>
       <SourceModal open={sourceModalOpen} setOpen={setSourceModalOpen} results={arrayResults} />
     </Box>
@@ -102,9 +103,9 @@ const SourceModal = ({ open, setOpen, results }: { open: boolean; setOpen: any; 
         {results?.map((result, idx) => <FileItemComponent key={idx} fileItem={result} />)}
       </Box>
       <Box sx={{ position: 'sticky', bottom: 0, background: '#FFF', p: 1 }}>
-        <Button variant="outlined" startIcon={<ShortText />} onClick={() => setOpen(false)} sx={{ borderRadius: 4, mt: 2, mb: 2 }}>
+        <OutlineButtonBlue startIcon={<ShortText />} onClick={() => setOpen(false)} sx={{ mt: 2, mb: 2 }}>
           {t('chat:readLess')}
-        </Button>
+        </OutlineButtonBlue>
       </Box>
     </Drawer>
   )

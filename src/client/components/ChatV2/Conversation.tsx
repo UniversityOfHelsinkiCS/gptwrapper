@@ -14,9 +14,9 @@ import { LoadingMessage } from './generics/LoadingMessage'
 import { preprocessMath } from './util'
 import 'katex/dist/katex.min.css'
 import 'katex/dist/contrib/mhchem'
-import SettingsButton from './generics/SettingsButton'
 import CopyToClipboardButton from '../Chat/CopyToClipboardButton'
 import { t } from 'i18next'
+import { OutlineButtonBlue } from './generics/Buttons'
 
 const UserMessage = ({
   content,
@@ -216,7 +216,9 @@ const AssistantMessage = ({
           </Box>
         )}
         {isLastAssistantNode && fileSearchStatus && (
-          <SettingsButton onClick={() => toggleRagDisplay()}>{ragDisplay ? t('chat:hideSources') : t('chat:displaySources')}</SettingsButton>
+          <OutlineButtonBlue sx={{ padding: '0.4rem 0.8rem', fontSize: '14px' }} onClick={() => toggleRagDisplay()}>
+            {ragDisplay ? t('chat:hideSources') : t('chat:displaySources')}
+          </OutlineButtonBlue>
         )}
       </Box>
     </Box>

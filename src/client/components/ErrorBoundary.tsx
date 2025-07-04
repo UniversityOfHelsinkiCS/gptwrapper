@@ -2,8 +2,9 @@ import React from 'react'
 import { Box, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
-import SettingsButton from './ChatV2/generics/SettingsButton'
 import { setErrorStateHandler } from '../util/apiClient'
+import { OutlineButtonBlack } from './ChatV2/generics/Buttons'
+import { ArrowBack, Replay } from '@mui/icons-material'
 
 // todo: setup sentry
 
@@ -96,8 +97,12 @@ const ErrorPage = ({ error, setErrorState }: { error?: Error; setErrorState: Voi
         </Box>
       )}
       <Box sx={{ display: 'flex', gap: 2 }}>
-        <SettingsButton onClick={handleGoHome}>{t('error:goHome')}</SettingsButton>
-        <SettingsButton onClick={handleReload}>{t('error:reload')}</SettingsButton>
+        <OutlineButtonBlack startIcon={<ArrowBack />} onClick={handleGoHome}>
+          {t('error:goHome')}
+        </OutlineButtonBlack>
+        <OutlineButtonBlack startIcon={<Replay />} onClick={handleReload}>
+          {t('error:reload')}
+        </OutlineButtonBlack>
       </Box>
     </Box>
   )

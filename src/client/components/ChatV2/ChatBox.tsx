@@ -8,6 +8,7 @@ import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import ModelSelector from './ModelSelector'
+import { BlueButton, GrayButton } from './generics/Buttons'
 
 export const ChatBox = ({
   disabled,
@@ -118,12 +119,12 @@ export const ChatBox = ({
           sx={{ my: '0.2rem' }}
           action={
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button variant="outlined" size="small" onClick={handleCancel} color="primary" type="button">
+              <GrayButton onClick={handleCancel} type="button">
                 {t('common:cancel')}
-              </Button>
-              <Button variant="contained" size="small" onClick={() => handleContinue(message)} color="primary" type="button">
+              </GrayButton>
+              <BlueButton onClick={() => handleContinue(message)} color="primary" type="button">
                 {t('common:continue')}
-              </Button>
+              </BlueButton>
             </Box>
           }
         >

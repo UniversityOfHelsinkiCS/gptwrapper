@@ -9,13 +9,13 @@ import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATUR
 import type { RagIndexAttributes } from '../../../shared/types'
 import type { Course, Prompt } from '../../types'
 import AssistantInstructionsInput from './AssistantInstructionsInput'
-import SettingsButton from './generics/SettingsButton'
 import PromptSelector from './PromptSelector'
 import RagSelector from './RagSelector'
 import { SaveMyPromptModal } from './SaveMyPromptModal'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import apiClient from '../../util/apiClient'
 import { useSearchParams } from 'react-router-dom'
+import { BlueButton, OutlineButtonBlack } from './generics/Buttons'
 
 const useUrlPromptId = () => {
   const [searchParams] = useSearchParams()
@@ -131,7 +131,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           minWidth: 600,
           width: '85vw',
           maxWidth: 1000,
-          minHeight: '80vh',
+          minHeight: '25vh',
           maxHeight: '80vh',
           bgcolor: 'background.paper',
           boxShadow: 24,
@@ -174,31 +174,39 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             instructions={assistantInstructions}
             setInstructions={setAssistantInstructions}
           />
-          {!isPromptHidden && <Button onClick={() => setMyPromptModalOpen(true)}>{t('settings:saveMyPrompt')}</Button>}
+          {!isPromptHidden && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <BlueButton onClick={() => setMyPromptModalOpen(true)}>{t('settings:saveMyPrompt')}</BlueButton>
+            </Box>
+          )}
 
           <Typography variant="h6" fontWeight={600} mt="2rem">
             {t('settings:temperature')}
           </Typography>
           <Typography variant="body1">{t('settings:temperatureInstructions')}</Typography>
-          <Box sx={{ maxWidth: 400, padding: '1.5rem 0' }}>
-            <Slider
-              min={0.0}
-              max={1.0}
-              step={0.1}
-              value={modelTemperature}
-              marks
-              valueLabelDisplay="auto"
-              onChange={(_event, value) => setModelTemperature(typeof value === 'number' ? value : modelTemperature)}
-            />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography>{t('settings:temperatureAccurate')}</Typography>
-              <Typography>{t('settings:temperatureRandom')}</Typography>
+
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Box sx={{ padding: '1.5rem 0' }}>
+              <Slider
+                sx={{ width: 800 }}
+                min={0.0}
+                max={1.0}
+                step={0.1}
+                value={modelTemperature}
+                marks
+                valueLabelDisplay="auto"
+                onChange={(_event, value) => setModelTemperature(typeof value === 'number' ? value : modelTemperature)}
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography>{t('settings:temperatureAccurate')}</Typography>
+                <Typography>{t('settings:temperatureRandom')}</Typography>
+              </Box>
             </Box>
           </Box>
 
           {course && showRagSelector && (
             <>
-              <Typography variant="h6" mb={'0.5rem'} fontWeight="bold">
+              <Typography variant="h6" mb={'0.5rem'} fontWeight={600}>
                 {t('settings:courseMaterials')}
               </Typography>
               <RagSelector currentRagIndex={currentRagIndex} setRagIndex={setRagIndex} ragIndices={ragIndices ?? []} />
@@ -214,8 +222,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             gap: 1,
           }}
         >
-          <SettingsButton onClick={resetSettings}>{t('settings:resetDefault')}</SettingsButton>
-          <SettingsButton onClick={() => setOpen(false)}>{t('common:close')}</SettingsButton>
+          <OutlineButtonBlack
+            onClick={() => {
+              if (window.confirm('Are you sure you want to reset to default settings?')) {
+                resetSettings()
+              }
+            }}
+          >
+            {t('settings:resetDefault')}
+          </OutlineButtonBlack>{' '}
+          <BlueButton onClick={() => setOpen(false)}>{t('common:close')}</BlueButton>
         </Box>
         <SaveMyPromptModal
           isOpen={myPromptModalOpen}
