@@ -26,6 +26,10 @@ if (inCI) {
 export default defineConfig({
   plugins: [react()],
   base,
+  build: {
+    minify: inCI ? false : 'esbuild',
+    sourcemap: inCI ? 'inline' : undefined,
+  },
   server: {
     proxy: {
       '/api/': {
