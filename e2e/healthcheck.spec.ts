@@ -1,6 +1,24 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Health Check Tests', () => {
+  test.beforeEach(async ({ page }) => {
+    page.on('requestfailed', (request) => {
+      console.log('Request failed: ' + request.url() + ' ' + request.failure()?.errorText)
+    })
+
+    page.on('console', (msg) => {
+      console.log(`Console message: ${msg.text()}`)
+    })
+
+    page.on('crash', () => {
+      console.log('Page crashed')
+    })
+
+    page.on('pageerror', (error) => {
+      console.log('Page error: ' + error.message)
+    })
+  })
+
   test('Application loads successfully', async ({ page }) => {
     await page.goto('/')
 
@@ -31,6 +49,7 @@ test.describe('Health Check Tests', () => {
     const consoleErrors: string[] = []
 
     page.on('console', (msg) => {
+      console.log(msg.text())
       if (msg.type() === 'error') {
         const errorText = msg.text()
         // Filter out this network error
