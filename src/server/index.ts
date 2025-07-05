@@ -28,8 +28,8 @@ if (inProduction || inStaging) {
   const DIST_PATH = path.resolve(dirname(fileURLToPath(import.meta.url)), '../../dist')
 
   // Log contents of dist folder
-  const distFiles = readdirSync(DIST_PATH)
-  console.log('Contents of dist folder:', distFiles)
+  const assetFiles = readdirSync(`${DIST_PATH}/assets`)
+  console.log('Contents of dist folder:', assetFiles)
 
   const INDEX_PATH = path.resolve(DIST_PATH, 'index.html')
 
