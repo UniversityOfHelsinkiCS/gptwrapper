@@ -55,14 +55,15 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Start the application
-        run: docker run -d \
-          --name gptwrapper \
-          -e DATABASE_URL=postgres://postgres:postgres@postgres:5432/test \
-          -e PORT=3000 \
-          -e STAGING=true \
-          -e CI=true \
-          -p 8000:3000 \
-          gptwrapper:ci
+        run: |
+          docker run -d \
+            --name gptwrapper \
+            -e DATABASE_URL=postgres://postgres:postgres@postgres:5432/test \
+            -e PORT=3000 \
+            -e STAGING=true \
+            -e CI=true \
+            -p 8000:3000 \
+            gptwrapper:ci
 
         # Copy dependencies from the container
       - name: Copy dependencies from the container
