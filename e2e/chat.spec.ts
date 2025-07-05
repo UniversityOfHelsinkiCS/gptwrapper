@@ -6,6 +6,14 @@ test.describe('Chat v2 Functionality Tests', () => {
       console.log('Request failed: ' + request.url() + ' ' + request.failure()?.errorText)
     })
 
+    page.on('request', (request) => {
+      console.log('Request: ' + request.url())
+    })
+
+    page.on('response', (response) => {
+      console.log('Request finished: ' + response.url() + ' ' + response.status())
+    })
+
     page.on('console', (msg) => {
       console.log(`Console message: ${msg.text()}`)
     })

@@ -6,6 +6,14 @@ test.describe('Health Check Tests', () => {
       console.log('Request failed: ' + request.url() + ' ' + request.failure()?.errorText)
     })
 
+    page.on('request', (request) => {
+      console.log('Request: ' + request.url())
+    })
+
+    page.on('response', (response) => {
+      console.log('Request finished: ' + response.url() + ' ' + response.status())
+    })
+
     page.on('console', (msg) => {
       console.log(`Console message: ${msg.text()}`)
     })
@@ -49,13 +57,9 @@ test.describe('Health Check Tests', () => {
     const consoleErrors: string[] = []
 
     page.on('console', (msg) => {
-      console.log(msg.text())
       if (msg.type() === 'error') {
         const errorText = msg.text()
-        // Filter out this network error
-        if (!errorText.includes('net::ERR_NAME_NOT_RESOLVED')) {
-          consoleErrors.push(errorText)
-        }
+        consoleErrors.push(errorText)
       }
     })
 
