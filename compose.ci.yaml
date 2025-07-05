@@ -8,7 +8,7 @@ services:
       - AZURE_RESOURCE=asdasd
       - STAGING=true # @todo should we instead be "in production" in ci? needs a little investigation
       - CI=true
-      - PUBLIC_URL=http://localhost:8000
+      - PUBLIC_URL=localhost:8000
     ports:
       - 8000:3000
     container_name: gptwrapper
