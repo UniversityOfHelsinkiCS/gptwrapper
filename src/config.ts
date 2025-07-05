@@ -52,8 +52,6 @@ export const validModels = [
       ],
 )
 
-console.log(`Valid models: ${JSON.stringify(validModels, null, 2)}`)
-
 export const DEFAULT_MODEL_ON_ENABLE = 'gpt-4o'
 
 export const DEFAULT_ASSISTANT_INSTRUCTIONS = 'Olet avulias avustaja'

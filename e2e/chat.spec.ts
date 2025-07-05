@@ -3,11 +3,8 @@ import { expect, test } from '@playwright/test'
 test.describe('Chat v2 Functionality Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/v2')
-    // Check for dissclaimer modal and close it if present
-    const disclaimerButton = page.locator('#close-disclaimer').first()
-    if (await disclaimerButton.isVisible()) {
-      await disclaimerButton.click()
-    }
+    // Press esc to close disclaimer modal if present
+    await page.keyboard.press('Escape')
   })
 
   test('Chat v2 mock response works', async ({ page }) => {

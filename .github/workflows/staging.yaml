@@ -64,7 +64,7 @@ jobs:
       - name: Run tests
         env:
           CI: true
-        run: npx playwright test
+        run: npm run test:e2e
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
