@@ -24,6 +24,24 @@ if (!inDevelopment && !inStaging && !inCI) {
 
 initializeI18n()
 
+if (inCI) {
+  // Add global error handler to prevent app crashes from network errors
+  window.addEventListener('error', (event) => {
+    if (event.error?.message?.includes('ERR_NAME_NOT_RESOLVED')) {
+      console.warn('Network error caught and prevented from crashing app:', event.error)
+      event.preventDefault()
+    }
+  })
+
+  // Add unhandled promise rejection handler
+  window.addEventListener('unhandledrejection', (event) => {
+    if (event.reason?.message?.includes('ERR_NAME_NOT_RESOLVED')) {
+      console.warn('Unhandled promise rejection caught:', event.reason)
+      event.preventDefault()
+    }
+  })
+}
+
 const Main = () => {
   const [showDevtools, setShowDevtools] = React.useState(false)
 
