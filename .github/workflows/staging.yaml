@@ -25,7 +25,7 @@ jobs:
           build-args: |
             CI=true
             STAGING=true
-            BASE_PATH=localhost:8000/
+            BASE_PATH=/
           push: false
           load: true
           tags: gptwrapper:ci
