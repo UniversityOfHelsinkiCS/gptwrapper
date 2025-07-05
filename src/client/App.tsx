@@ -10,7 +10,7 @@ import { Box, Button, CssBaseline, Snackbar } from '@mui/material'
 import { AppContext } from './util/AppContext'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
-import { PUBLIC_URL, inCI } from '../config'
+import { PUBLIC_URL, inCI, inDevelopment, inProduction, inStaging } from '../config'
 import { User } from './types'
 import useTheme from './theme'
 import NavBar from './components/NavBar'
@@ -78,8 +78,19 @@ const App = () => {
   const { user, isLoading } = useCurrentUser()
 
   useEffect(() => {
-    if (!inCI) {
-      initShibbolethPinger()
+    // Add error handling to prevent app crashes
+    try {
+      console.log('Environment check:', { inCI, inStaging, inProduction, inDevelopment })
+
+      if (!inCI && !inStaging && !inDevelopment) {
+        console.log('Initializing Shibboleth pinger...')
+        initShibbolethPinger()
+      } else {
+        console.log('Skipping Shibboleth pinger initialization in non-production environments.')
+      }
+    } catch (error) {
+      console.error('Error initializing Shibboleth pinger:', error)
+      // Don't let this crash the app
     }
   }, [])
 
