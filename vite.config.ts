@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+import { inProduction, inStaging, inCI } from './src/config'
+
 // eslint-disable-next-line no-nested-ternary
 const ciBase = '/'
 const developmentBase = '/'
@@ -9,15 +11,14 @@ const productionBase = '/chat'
 
 let base = developmentBase
 
-if (process.env.STAGING === 'true') {
+if (inStaging) {
   base = stagingBase
 }
 
-if (process.env.NODE_ENV === 'production') {
+if (inProduction) {
   base = productionBase
 }
 
-const inCI = process.env.CI === 'true'
 if (inCI) {
   base = ciBase
 }
@@ -25,10 +26,6 @@ if (inCI) {
 export default defineConfig({
   plugins: [react()],
   base,
-  build: {
-    minify: inCI ? false : 'esbuild',
-    sourcemap: inCI ? 'inline' : undefined,
-  },
   server: {
     proxy: {
       '/api/': {

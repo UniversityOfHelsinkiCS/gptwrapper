@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-push:
+  build-test-and-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,6 +16,64 @@ jobs:
           node-version: '20'
           cache: 'npm'
       - uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Containerfile
+          build-args: |
+            CI=true
+            STAGING=true
+            BASE_PATH=/
+          push: false
+          load: true
+          tags: gptwrapper:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start the application
+        run: docker compose -f compose.ci.yaml up -d
+
+        # Copy dependencies from the container
+      - name: Copy dependencies from the container
+        run: docker cp gptwrapper:/opt/app-root/src/node_modules ./node_modules
+
+      #- run: npm run tsc
+      #- run: npm run lint
+
+      # https://playwrightsolutions.com/playwright-github-action-to-cache-the-browser-binaries/
+      - name: Get installed Playwright version
+        id: playwright-version
+        run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package-lock.json').packages[''].devDependencies['@playwright/test'])")" >> $GITHUB_ENV
+
+      - name: Cache playwright binaries
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+
+      - run: npx playwright install --with-deps chromium firefox webkit
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - run: npx playwright install-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - run: curl localhost:8000
+
+      - name: Run tests
+        env:
+          CI: true
+        run: npm run test:e2e
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
 
       - name: Build staging image
         id: build-staging-image
@@ -42,3 +100,8 @@ jobs:
           registry: quay.io/toska
           username: toska+github
           password: ${{ secrets.QUAY_IO_TOKEN }}
+
+      - name: Print logs on failure
+        shell: bash
+        if: failure()
+        run: docker compose -f compose.ci.yaml logs
