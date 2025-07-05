@@ -24,6 +24,7 @@ jobs:
           file: ./Containerfile
           build-args: |
             CI=true
+            STAGING=true
             BASE_PATH=/
           push: false
           load: true
