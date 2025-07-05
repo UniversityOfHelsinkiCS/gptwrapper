@@ -91,7 +91,15 @@ const ErrorPage = ({ error, setErrorState }: { error?: Error; setErrorState: Voi
             textAlign: 'center',
           }}
         >
-          <b>{t('error:errorMessage')}:</b> {error.message}
+          <b>{t('error:errorName')}:</b> {error.name} <br />
+          <b>{t('error:errorMessage')}:</b> {error.message} <br />
+          <b>{t('error:stackTrace')}:</b> {error.stack}
+          <br />
+          {error.cause ? (
+            <>
+              <b>{t('error:cause')}:</b> {error.cause + ''}
+            </>
+          ) : null}
         </Box>
       )}
       <Box sx={{ display: 'flex', gap: 2 }}>
