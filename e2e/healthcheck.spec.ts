@@ -39,12 +39,7 @@ test.describe('Health Check Tests', () => {
     await page.goto('/')
     await page.waitForLoadState('networkidle')
 
-    // Filter out common non-critical errors
-    const criticalErrors = consoleErrors.filter(
-      (error) => !error.includes('favicon.ico') && !error.includes('net::ERR_FAILED') && !error.toLowerCase().includes('blocked by cors'),
-    )
-
-    expect(criticalErrors).toHaveLength(0)
+    expect(consoleErrors).toHaveLength(0)
   })
 
   test('Page is responsive', async ({ page }) => {
