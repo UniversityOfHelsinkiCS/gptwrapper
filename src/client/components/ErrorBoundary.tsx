@@ -50,7 +50,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
 const ErrorPage = ({ error, setErrorState }: { error?: Error; setErrorState: VoidFunction }) => {
   const { t } = useTranslation()
-  const navigate = useNavigate()
+  /*const navigate = useNavigate()
 
   const handleReload = () => {
     setErrorState()
@@ -60,7 +60,7 @@ const ErrorPage = ({ error, setErrorState }: { error?: Error; setErrorState: Voi
   const handleGoHome = () => {
     setErrorState()
     navigate('/', { replace: true })
-  }
+  }*/
 
   return (
     <Box
@@ -97,12 +97,12 @@ const ErrorPage = ({ error, setErrorState }: { error?: Error; setErrorState: Voi
         </Box>
       )}
       <Box sx={{ display: 'flex', gap: 2 }}>
-        <OutlineButtonBlack startIcon={<ArrowBack />} onClick={handleGoHome}>
+        {/*<OutlineButtonBlack startIcon={<ArrowBack />} onClick={handleGoHome}>
           {t('error:goHome')}
         </OutlineButtonBlack>
         <OutlineButtonBlack startIcon={<Replay />} onClick={handleReload}>
           {t('error:reload')}
-        </OutlineButtonBlack>
+          </OutlineButtonBlack>*/}
       </Box>
     </Box>
   )
