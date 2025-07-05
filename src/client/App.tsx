@@ -96,12 +96,12 @@ const App = () => {
 
   const onNoAccessPage = location.pathname.includes('/noaccess')
 
-  if (isLoading && !onNoAccessPage) return null
-
-  if (!onNoAccessPage && !hasAccess(user, courseId)) {
-    window.location.href = PUBLIC_URL + getRedirect(user)
-    return null
-  }
+  // if (isLoading && !onNoAccessPage) return null
+  //
+  // if (!onNoAccessPage && !hasAccess(user, courseId)) {
+  //   window.location.href = PUBLIC_URL + getRedirect(user)
+  //   return null
+  // }
 
   if (!user && !onNoAccessPage) return null
 
