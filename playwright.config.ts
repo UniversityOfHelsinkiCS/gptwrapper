@@ -41,6 +41,11 @@ export default defineConfig({
 
     /* Record video on failure */
     video: 'retain-on-failure',
+
+    /* Add network logging */
+    launchOptions: {
+      args: ['--enable-logging', '--v=1'],
+    },
   },
 
   /* Configure projects for major browsers */
