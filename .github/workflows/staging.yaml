@@ -59,6 +59,8 @@ jobs:
       - run: npx playwright install-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
+      - run: curl localhost:8000
+
       - name: Run tests
         env:
           CI: true
