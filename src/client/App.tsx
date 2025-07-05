@@ -10,7 +10,7 @@ import { Box, Button, CssBaseline, Snackbar } from '@mui/material'
 import { AppContext } from './util/AppContext'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
-import { PUBLIC_URL } from '../config'
+import { PUBLIC_URL, inCI } from '../config'
 import { User } from './types'
 import useTheme from './theme'
 import NavBar from './components/NavBar'
@@ -78,7 +78,9 @@ const App = () => {
   const { user, isLoading } = useCurrentUser()
 
   useEffect(() => {
-    initShibbolethPinger()
+    if (!inCI) {
+      initShibbolethPinger()
+    }
   }, [])
 
   const onNoAccessPage = location.pathname.includes('/noaccess')

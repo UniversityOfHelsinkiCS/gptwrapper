@@ -31,6 +31,7 @@ test.describe('Health Check Tests', () => {
     const consoleErrors: string[] = []
 
     page.on('console', (msg) => {
+      console.log(msg.text())
       if (msg.type() === 'error') {
         consoleErrors.push(msg.text())
       }
