@@ -1,7 +1,6 @@
 import React from 'react'
 import { Box, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router'
 import { setErrorStateHandler } from '../util/apiClient'
 import { OutlineButtonBlack } from './ChatV2/generics/Buttons'
 import { ArrowBack, Replay } from '@mui/icons-material'
@@ -50,17 +49,16 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
 const ErrorPage = ({ error, setErrorState }: { error?: Error; setErrorState: VoidFunction }) => {
   const { t } = useTranslation()
-  /*const navigate = useNavigate()
 
   const handleReload = () => {
     setErrorState()
-    navigate(window.location.pathname, { replace: true })
+    window.location.reload()
   }
 
   const handleGoHome = () => {
     setErrorState()
-    navigate('/', { replace: true })
-  }*/
+    window.location.href = '/'
+  }
 
   return (
     <Box
@@ -97,12 +95,12 @@ const ErrorPage = ({ error, setErrorState }: { error?: Error; setErrorState: Voi
         </Box>
       )}
       <Box sx={{ display: 'flex', gap: 2 }}>
-        {/*<OutlineButtonBlack startIcon={<ArrowBack />} onClick={handleGoHome}>
+        <OutlineButtonBlack startIcon={<ArrowBack />} onClick={handleGoHome}>
           {t('error:goHome')}
         </OutlineButtonBlack>
         <OutlineButtonBlack startIcon={<Replay />} onClick={handleReload}>
           {t('error:reload')}
-          </OutlineButtonBlack>*/}
+        </OutlineButtonBlack>
       </Box>
     </Box>
   )

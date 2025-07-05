@@ -14,7 +14,6 @@ import { ChatV2 } from './components/ChatV2/ChatV2'
 import { RagIndex } from './components/Rag/RagIndex'
 import { RagFile } from './components/Rag/RagFile'
 import { NotFound } from './components/common/NotFound'
-import { ErrorBoundary } from './components/ErrorBoundary'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -40,10 +39,6 @@ const router = createBrowserRouter(
   },
 )
 
-const Router = () => (
-  <ErrorBoundary>
-    <RouterProvider router={router} />
-  </ErrorBoundary>
-)
+const Router = () => <RouterProvider router={router} />
 
 export default Router
