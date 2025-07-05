@@ -8,7 +8,7 @@ import Router from './Router'
 import initializeSentry from './util/sentry'
 import initializeI18n from './util/i18n'
 import queryClient from './util/queryClient'
-import { inDevelopment } from '../config'
+import { inCI, inDevelopment, inStaging } from '../config'
 
 const ReactQueryDevtoolsProduction = inDevelopment
   ? ReactQueryDevtools
@@ -18,7 +18,10 @@ const ReactQueryDevtoolsProduction = inDevelopment
       })),
     )
 
-initializeSentry()
+if (!inDevelopment && !inStaging && !inCI) {
+  initializeSentry()
+}
+
 initializeI18n()
 
 const Main = () => {
