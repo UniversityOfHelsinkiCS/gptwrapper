@@ -4,6 +4,7 @@ import { PUBLIC_URL } from '../../config'
 export type ApiError = AxiosError<{ message: string }>
 
 const apiClient = axios.create({ baseURL: `${PUBLIC_URL}/api` })
+console.log('apiClient baseURL:', apiClient.defaults.baseURL)
 export const updaterApiClient = axios.create({
   baseURL: `${PUBLIC_URL}/updater/api`,
 })
