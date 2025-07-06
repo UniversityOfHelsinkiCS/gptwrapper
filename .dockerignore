@@ -1,0 +1,8 @@
+node_modules
+.github
+.husky
+scripts
+e2e
+eslint.config.js
+playwright.config.ts
+renovate.json
