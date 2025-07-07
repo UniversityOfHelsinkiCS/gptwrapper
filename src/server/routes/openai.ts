@@ -137,8 +137,8 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   }
 
   // Check rag index
-  let vectorStoreId: string | undefined
   let instructions: string | undefined = options.assistantInstructions
+  let ragIndex: RagIndex | undefined
 
   if (ragIndexId) {
     if (!courseId && !user.isAdmin) {
@@ -146,27 +146,29 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
       throw ApplicationError.Forbidden('User is not admin and trying to access non-course rag')
     }
 
-    const ragIndex = await RagIndex.findByPk(ragIndexId, {
-      include: {
-        model: ChatInstance,
-        as: 'chatInstances',
-        where: courseId ? { courseId } : {},
-      },
-    })
+    ragIndex =
+      (await RagIndex.findByPk(ragIndexId, {
+        include: {
+          model: ChatInstance,
+          as: 'chatInstances',
+          where: courseId ? { courseId } : {},
+        },
+      })) ?? undefined
     if (ragIndex) {
-      vectorStoreId = ragIndex.metadata.azureVectorStoreId
       instructions = `${instructions} ${ragIndex.metadata.instructions ?? DEFAULT_RAG_SYSTEM_PROMPT}`
-    } else {
+    }
+    if (!ragIndex) {
       logger.error('RagIndex not found', { ragIndexId })
       res.status(404).send('RagIndex not found')
       return
     }
   }
 
+  console.log('ragIndex', ragIndexId, ragIndex)
+
   const responsesClient = new ResponsesClient({
     model: options.model,
-    vectorStoreId,
-    ragIndexId,
+    ragIndex,
     instructions,
     temperature: options.modelTemperature,
     user,

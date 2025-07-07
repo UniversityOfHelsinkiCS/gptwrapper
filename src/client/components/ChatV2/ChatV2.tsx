@@ -228,7 +228,7 @@ export const ChatV2 = () => {
       const { tokenUsageAnalysis, stream } = await getCompletionStream({
         assistantInstructions: assistantInstructions.content,
         messages: newMessages,
-        ragIndexId: ragIndexId ?? undefined,
+        ragIndexId,
         model: activeModel.name,
         formData,
         modelTemperature: modelTemperature.value,

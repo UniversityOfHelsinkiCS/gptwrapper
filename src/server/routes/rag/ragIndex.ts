@@ -237,12 +237,12 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
 
       const uploadedFile = await client.files.create({
         file: stream,
-        purpose: 'user_data',
+        purpose: 'assistants',
       })
       const vectorStoreFile = await client.vectorStores.files.create(ragIndex.metadata.azureVectorStoreId, {
         file_id: uploadedFile.id,
         attributes: {
-          ragIndexId: ragIndex.id,
+          ragIndexFilter: ragIndex.metadata.ragIndexFilterValue,
         },
       })
 

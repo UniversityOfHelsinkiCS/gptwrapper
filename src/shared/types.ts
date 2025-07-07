@@ -6,6 +6,7 @@ export type RagIndexMetadata = {
   name: string
   dim?: number
   azureVectorStoreId: string
+  ragIndexFilterValue: string
   instructions?: string
 }
 

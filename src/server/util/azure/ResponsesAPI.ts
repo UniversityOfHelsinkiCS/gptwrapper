@@ -11,6 +11,7 @@ import { createMockStream } from './mocks/MockStream'
 import { createFileSearchTool } from './util'
 import { FileSearchResultsStore } from '../../services/azureFileSearch/fileSearchResultsStore'
 import { getAzureOpenAIClient } from './client'
+import { RagIndex } from '../../db/models'
 
 const client = getAzureOpenAIClient(process.env.GPT_4O_MINI ?? '')
 
@@ -27,43 +28,40 @@ export class ResponsesClient {
   temperature: number
   tools: FileSearchTool[]
   user: User
-  ragIndexId?: number
+  ragIndex?: RagIndex
 
   constructor({
     model,
     temperature,
-    vectorStoreId,
     instructions,
     user,
-    ragIndexId,
+    ragIndex,
   }: {
     model: string
     temperature: number
-    vectorStoreId?: string
     instructions?: string
     user: User
-    ragIndexId?: number
+    ragIndex?: RagIndex
   }) {
     const selectedModel = validModels.find((m) => m.name === model)?.deployment
 
     if (!selectedModel) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
 
-    const fileSearchTool =
-      vectorStoreId && ragIndexId
-        ? [
-            createFileSearchTool({
-              vectorStoreId,
-              filters: { key: 'ragIndexId', value: ragIndexId, type: 'eq' },
-            }),
-          ]
-        : [] // needs to retrun empty array for null
+    const fileSearchTool = ragIndex
+      ? [
+          createFileSearchTool({
+            vectorStoreId: ragIndex.metadata.azureVectorStoreId,
+            filters: { key: 'ragIndexFilterValue', value: ragIndex.metadata.ragIndexFilterValue, type: 'eq' },
+          }),
+        ]
+      : [] // needs to retrun empty array for null
 
     this.model = selectedModel
     this.temperature = temperature
     this.instructions = instructions ?? ''
     this.tools = fileSearchTool
     this.user = user
-    this.ragIndexId = ragIndexId
+    this.ragIndex = ragIndex
   }
 
   async createResponse({
@@ -145,7 +143,7 @@ export class ResponsesClient {
 
         case 'response.output_item.done': {
           if (event.item.type === 'file_search_call') {
-            if (!this.ragIndexId) throw new Error('how is this possible. you managed to invoke file search without ragIndexId')
+            if (!this.ragIndex) throw new Error('how is this possible. you managed to invoke file search without ragIndexId')
 
             if (event.item.results) {
               await FileSearchResultsStore.saveResults(event.item.id, event.item.results, this.user)
@@ -159,7 +157,7 @@ export class ResponsesClient {
                   queries: event.item.queries,
                   status: event.item.status,
                   type: event.item.type,
-                  ragIndexId: this.ragIndexId,
+                  ragIndexId: this.ragIndex.id,
                 },
               },
               res,

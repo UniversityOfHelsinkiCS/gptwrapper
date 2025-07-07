@@ -8,6 +8,7 @@ import { getAzureOpenAIClient } from '../../util/azure/client'
 import { TEST_COURSES } from '../../util/config'
 import ragIndexRouter, { ragIndexMiddleware } from './ragIndex'
 import { getPrimaryVectorStoreId } from '../../services/azureFileSearch/vectorStore'
+import { randomUUID } from 'node:crypto'
 
 const router = Router()
 
@@ -60,6 +61,7 @@ router.post('/indices', async (req, res) => {
       name,
       dim,
       azureVectorStoreId: vectorStoreId,
+      ragIndexFilterValue: randomUUID(),
     },
   })
 
