@@ -12,7 +12,6 @@ export enum MockEventType {
   MIDWAY_FAIL = 'midway fail',
   TIMEOUT_FAIL = 'timeout fail',
   INCOMPLETE_FAIL = 'incomplete fail',
-  RAG_FAIL = 'rag fail',
   CODE_BLOCK = 'code block',
   MATH_BLOCK = 'math block',
 }
@@ -43,7 +42,6 @@ export const getBasicStreamMock = (): MockResponseStreamEvent[] => {
 - To mock a mid-sentence failed response, write: **midway fail**
 - To mock a incomplete response, write: **incomplete fail**
 - To mock a file search, write: **rag** -- _make sure to have a RAG index selected_
-- To mock a file search fail response, write: **rag fail** -- _make sure to have a RAG index selected_
 - To mock a code block, write: **code block**
 - To mock a math block, write: **math block**
 OVER
@@ -196,37 +194,6 @@ export const getFileSearchStreamMock = (): MockResponseStreamEvent[] => {
           },
         ],
       },
-    },
-    ...chunkedResponseText.map((chunk) => ({
-      type: 'response.output_text.delta' as ResponseStreamEvent['type'],
-      item_id: 'msg_mock',
-      delta: chunk,
-    })),
-    {
-      type: 'response.completed',
-      response: {
-        id: '',
-        usage: {
-          input_tokens: 0,
-          output_tokens: 0,
-          output_tokens_details: {
-            reasoning_tokens: 0,
-          },
-          total_tokens: 0,
-        },
-      },
-    },
-  ]
-}
-
-export const getFileSearchFailStreamMock = (): MockResponseStreamEvent[] => {
-  const responseText = `For testing failed RAG stream. Not implemented yet.`
-
-  const chunkedResponseText = chunkText(responseText)
-
-  return [
-    {
-      type: 'response.created',
     },
     ...chunkedResponseText.map((chunk) => ({
       type: 'response.output_text.delta' as ResponseStreamEvent['type'],

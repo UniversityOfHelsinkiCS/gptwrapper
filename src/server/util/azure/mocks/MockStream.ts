@@ -2,7 +2,6 @@ import {
   getBasicStreamMock,
   getCodeBlockStreamMock,
   getFailedStreamMock,
-  getFileSearchFailStreamMock,
   getFileSearchStreamMock,
   getIncompleteStreamMock,
   getMathBlockStreamMock,
@@ -53,10 +52,6 @@ export function createMockStream<T extends { content: string }>(input: T): Async
 
     case MockEventType.RAG:
       mockType = getFileSearchStreamMock()
-      break
-
-    case MockEventType.RAG_FAIL:
-      mockType = getFileSearchFailStreamMock()
       break
 
     case MockEventType.CODE_BLOCK:
