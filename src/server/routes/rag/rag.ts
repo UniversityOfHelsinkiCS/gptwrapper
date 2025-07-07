@@ -92,7 +92,7 @@ router.get('/indices', async (req, res) => {
     }
 
     if (!chatInstance.ragIndices?.length) {
-      res.json([]).send()
+      res.json([])
       return
     }
 
@@ -101,7 +101,7 @@ router.get('/indices', async (req, res) => {
     }
   } else {
     if (!user.isAdmin) {
-      res.json([]).send()
+      res.json([])
       return
     }
   }

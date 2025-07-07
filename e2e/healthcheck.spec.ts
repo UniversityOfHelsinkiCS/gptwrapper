@@ -1,31 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Health Check Tests', () => {
-  test.beforeEach(async ({ page }) => {
-    page.on('requestfailed', (request) => {
-      console.log('Request failed: ' + request.url() + ' ' + request.failure()?.errorText)
-    })
-
-    page.on('request', (request) => {
-      console.log('Request: ' + request.url())
-    })
-
-    page.on('response', (response) => {
-      console.log('Request finished: ' + response.url() + ' ' + response.status())
-    })
-
-    page.on('console', (msg) => {
-      console.log(`Console message: ${msg.text()}`)
-    })
-
-    page.on('crash', () => {
-      console.log('Page crashed')
-    })
-
-    page.on('pageerror', (error) => {
-      console.log('Page error: ' + error.message)
-    })
-  })
+  test.beforeEach(async ({ page }) => {})
 
   test('Application loads successfully', async ({ page }) => {
     await page.goto('/')
