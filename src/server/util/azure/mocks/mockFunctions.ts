@@ -42,8 +42,8 @@ export const getBasicStreamMock = (): MockResponseStreamEvent[] => {
 - To mock a failed response, write: **fail**
 - To mock a mid-sentence failed response, write: **midway fail**
 - To mock a incomplete response, write: **incomplete fail**
-- To mock a file search, write: **rag**
-- To mock a file search fail response, write: **rag fail**
+- To mock a file search, write: **rag** -- _make sure to have a RAG index selected_
+- To mock a file search fail response, write: **rag fail** -- _make sure to have a RAG index selected_
 - To mock a code block, write: **code block**
 - To mock a math block, write: **math block**
 OVER
@@ -154,13 +154,48 @@ export const getMidwayFailStreamMock = (): MockResponseStreamEvent[] => {
 
 export const getFileSearchStreamMock = (): MockResponseStreamEvent[] => {
   // https://platform.openai.com/docs/api-reference/responses-streaming/response/file_search_call
-  const responseText = `For testing RAG stream. Not yet implemented.`
+  const responseText = `This is a mock response for file search stream. It simulates a response that is augmented with file search results.`
 
   const chunkedResponseText = chunkText(responseText)
 
   return [
     {
       type: 'response.created',
+    },
+    {
+      type: 'response.file_search_call.in_progress',
+    },
+    {
+      type: 'response.output_item.done',
+      item: {
+        id: 'fs_mock',
+        status: 'completed',
+        type: 'file_search_call',
+        queries: ['mock', 'mock query'],
+        results: [
+          {
+            attributes: {},
+            file_id: 'mock_file_search_id',
+            filename: 'mock_filename',
+            score: 0.333,
+            text: 'Mocking RAG file annotations 1',
+          },
+          {
+            attributes: {},
+            file_id: 'mock_file_search_id',
+            filename: 'mock_filename',
+            score: 0.444,
+            text: 'Mocking RAG file annotations 2',
+          },
+          {
+            attributes: {},
+            file_id: 'mock_file_search_id',
+            filename: 'mock_filename',
+            score: 0.555,
+            text: 'Mocking RAG file annotations 3',
+          },
+        ],
+      },
     },
     ...chunkedResponseText.map((chunk) => ({
       type: 'response.output_text.delta' as ResponseStreamEvent['type'],

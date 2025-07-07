@@ -138,6 +138,16 @@ export class ResponsesClient {
           break
         }
 
+        case 'response.file_search_call.in_progress': {
+          this.write(
+            {
+              type: 'fileSearchStarted',
+            },
+            res,
+          )
+          break
+        }
+
         case 'response.output_item.done': {
           if (event.item.type === 'file_search_call') {
             if (!ragIndexId) throw new Error('how is this possible. you managed to invoke file search without ragIndexId')
@@ -161,16 +171,6 @@ export class ResponsesClient {
             )
           }
 
-          break
-        }
-
-        case 'response.file_search_call.in_progress': {
-          this.write(
-            {
-              type: 'fileSearchStarted',
-            },
-            res,
-          )
           break
         }
 
