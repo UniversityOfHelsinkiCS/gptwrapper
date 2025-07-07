@@ -90,11 +90,15 @@ chatInstanceRouter.post('/:id/enable', async (req, res) => {
     throw ApplicationError.NotFound('ChatInstance not found')
   }
 
-  // @todo what?? this is extremely confusing. shouldnt we set the activity period based on the courseActivityPeriod??
-  const defaultActivityPeriod = {
-    startDate: chatInstance.activityPeriod.startDate,
-    endDate: addMonths(chatInstance.activityPeriod.startDate, 1).toDateString(),
-  }
+  const defaultActivityPeriod = chatInstance.courseActivityPeriod
+    ? {
+        startDate: chatInstance.courseActivityPeriod.startDate,
+        endDate: addMonths(chatInstance.courseActivityPeriod?.endDate, 1).toDateString(),
+      }
+    : {
+        startDate: new Date().toDateString(),
+        endDate: addMonths(new Date(), 1).toDateString(),
+      }
 
   chatInstance.usageLimit = DEFAULT_TOKEN_LIMIT
   chatInstance.activityPeriod = defaultActivityPeriod
