@@ -1,27 +1,16 @@
 import type { Tiktoken } from '@dqbd/tiktoken'
 import type { Response } from 'express'
-import { AzureOpenAI } from 'openai'
 import type { FileSearchTool, ResponseIncludable, ResponseInput, ResponseItemsPage, ResponseStreamEvent } from 'openai/resources/responses/responses'
 import type { Stream } from 'openai/streaming'
 import { z } from 'zod/v4'
 import { validModels } from '../../../config'
 import type { ResponseStreamEventData } from '../../../shared/types'
 import type { APIError, User } from '../../types'
-import { AZURE_API_KEY, AZURE_RESOURCE } from '../config'
 import logger from '../logger'
 import { createMockStream } from './mocks/MockStream'
 import { createFileSearchTool } from './util'
-import { FileSearchResultsStore } from './fileSearchResultsStore'
-
-const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
-
-export const getAzureOpenAIClient = (deployment: string) =>
-  new AzureOpenAI({
-    apiKey: AZURE_API_KEY,
-    deployment,
-    apiVersion: '2025-03-01-preview',
-    endpoint,
-  })
+import { FileSearchResultsStore } from '../../services/azureFileSearch/fileSearchResultsStore'
+import { getAzureOpenAIClient } from './client'
 
 const client = getAzureOpenAIClient(process.env.GPT_4O_MINI ?? '')
 
@@ -38,6 +27,7 @@ export class ResponsesClient {
   temperature: number
   tools: FileSearchTool[]
   user: User
+  ragIndexId?: number
 
   constructor({
     model,
@@ -45,30 +35,35 @@ export class ResponsesClient {
     vectorStoreId,
     instructions,
     user,
+    ragIndexId,
   }: {
     model: string
     temperature: number
     vectorStoreId?: string
     instructions?: string
     user: User
+    ragIndexId?: number
   }) {
     const selectedModel = validModels.find((m) => m.name === model)?.deployment
 
     if (!selectedModel) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
 
-    const fileSearchTool = vectorStoreId
-      ? [
-          createFileSearchTool({
-            vectorStoreId,
-          }),
-        ]
-      : [] // needs to retrun empty array for null
+    const fileSearchTool =
+      vectorStoreId && ragIndexId
+        ? [
+            createFileSearchTool({
+              vectorStoreId,
+              filters: { key: 'ragIndexId', value: ragIndexId, type: 'eq' },
+            }),
+          ]
+        : [] // needs to retrun empty array for null
 
     this.model = selectedModel
     this.temperature = temperature
     this.instructions = instructions ?? ''
     this.tools = fileSearchTool
     this.user = user
+    this.ragIndexId = ragIndexId
   }
 
   async createResponse({
@@ -116,7 +111,7 @@ export class ResponsesClient {
     }
   }
 
-  async handleResponse({ events, encoding, res, ragIndexId }: { events: Stream<ResponseStreamEvent>; encoding: Tiktoken; res: Response; ragIndexId?: number }) {
+  async handleResponse({ events, encoding, res }: { events: Stream<ResponseStreamEvent>; encoding: Tiktoken; res: Response }) {
     let tokenCount = 0
     const contents: string[] = []
 
@@ -150,7 +145,7 @@ export class ResponsesClient {
 
         case 'response.output_item.done': {
           if (event.item.type === 'file_search_call') {
-            if (!ragIndexId) throw new Error('how is this possible. you managed to invoke file search without ragIndexId')
+            if (!this.ragIndexId) throw new Error('how is this possible. you managed to invoke file search without ragIndexId')
 
             if (event.item.results) {
               await FileSearchResultsStore.saveResults(event.item.id, event.item.results, this.user)
@@ -164,7 +159,7 @@ export class ResponsesClient {
                   queries: event.item.queries,
                   status: event.item.status,
                   type: event.item.type,
-                  ragIndexId,
+                  ragIndexId: this.ragIndexId,
                 },
               },
               res,

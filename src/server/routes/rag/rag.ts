@@ -1,11 +1,13 @@
 import { Router } from 'express'
+import z from 'zod/v4'
 import { EMBED_DIM } from '../../../config'
 import { ChatInstance, ChatInstanceRagIndex, RagFile, RagIndex, Responsibility } from '../../db/models'
-import { RequestWithUser, User } from '../../types'
-import z from 'zod/v4'
-import { getAzureOpenAIClient } from '../../util/azure/client'
-import ragIndexRouter, { ragIndexMiddleware } from './ragIndex'
+import type { RequestWithUser, User } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
+import { getAzureOpenAIClient } from '../../util/azure/client'
+import { TEST_COURSES } from '../../util/config'
+import ragIndexRouter, { ragIndexMiddleware } from './ragIndex'
+import { getPrimaryVectorStoreId } from '../../services/azureFileSearch/vectorStore'
 
 const router = Router()
 
@@ -25,11 +27,17 @@ router.post('/indices', async (req, res) => {
   const { name, dim, chatInstanceId } = IndexCreationSchema.parse(req.body)
 
   const chatInstance = await ChatInstance.findByPk(chatInstanceId, {
-    include: {
-      model: Responsibility,
-      as: 'responsibilities',
-      required: true, // Ensure the user is responsible for the course
-    },
+    include: [
+      {
+        model: Responsibility,
+        as: 'responsibilities',
+        required: true, // Ensure the user is responsible for the course
+      },
+      {
+        model: RagIndex,
+        as: 'ragIndices',
+      },
+    ],
   })
 
   if (!chatInstance) {
@@ -40,17 +48,18 @@ router.post('/indices', async (req, res) => {
     throw ApplicationError.Forbidden('Cannot create index, user is not responsible for the course')
   }
 
-  const client = getAzureOpenAIClient()
-  const vectorStore = await client.vectorStores.create({
-    name,
-  })
+  if (chatInstance.courseId !== TEST_COURSES.OTE_SANDBOX.id && (chatInstance.ragIndices ?? []).length > 0) {
+    throw ApplicationError.Forbidden('Cannot create index, index already exists on the course')
+  }
+
+  const vectorStoreId = await getPrimaryVectorStoreId()
 
   const ragIndex = await RagIndex.create({
     userId: user.id,
     metadata: {
       name,
       dim,
-      azureVectorStoreId: vectorStore.id,
+      azureVectorStoreId: vectorStoreId,
     },
   })
 

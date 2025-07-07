@@ -6,7 +6,7 @@ import { ChatInstance, Discussion, RagIndex } from '../db/models'
 import { calculateUsage, checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../services/chatInstances/usage'
 import type { RequestWithUser } from '../types'
 import { getCompletionEvents, streamCompletion } from '../util/azure/client'
-import { FileSearchResultsStore } from '../util/azure/fileSearchResultsStore'
+import { FileSearchResultsStore } from '../services/azureFileSearch/fileSearchResultsStore'
 import { ResponsesClient } from '../util/azure/ResponsesAPI'
 import { DEFAULT_RAG_SYSTEM_PROMPT } from '../util/config'
 import logger from '../util/logger'
@@ -166,6 +166,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   const responsesClient = new ResponsesClient({
     model: options.model,
     vectorStoreId,
+    ragIndexId,
     instructions,
     temperature: options.modelTemperature,
     user,
@@ -189,7 +190,6 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     events,
     encoding,
     res,
-    ragIndexId,
   })
 
   tokenCount += result.tokenCount

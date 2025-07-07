@@ -58,14 +58,6 @@ ragIndexRouter.delete('/', async (req, res) => {
   const ragIndexRequest = req as RagIndexRequest
   const ragIndex = ragIndexRequest.ragIndex
 
-  const client = getAzureOpenAIClient()
-  try {
-    await client.vectorStores.del(ragIndex.metadata.azureVectorStoreId)
-  } catch (error) {
-    console.error(`Failed to delete Azure vector store ${ragIndex.metadata.azureVectorStoreId}:`, error)
-    throw ApplicationError.InternalServerError('Failed to delete Azure vector store')
-  }
-
   const uploadPath = `${UPLOAD_DIR}/${ragIndex.id}`
   try {
     await rm(uploadPath, { recursive: true, force: true })
@@ -242,7 +234,18 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
     ragFiles.map(async (ragFile) => {
       const filePath = `${uploadDirPath}/${ragFile.filename}`
       const stream = fs.createReadStream(filePath)
-      const vectorStoreFile = await client.vectorStores.files.upload(ragIndex.metadata.azureVectorStoreId, stream)
+
+      const uploadedFile = await client.files.create({
+        file: stream,
+        purpose: 'user_data',
+      })
+      const vectorStoreFile = await client.vectorStores.files.create(ragIndex.metadata.azureVectorStoreId, {
+        file_id: uploadedFile.id,
+        attributes: {
+          ragIndexId: ragIndex.id,
+        },
+      })
+
       console.log(`File ${filePath} uploaded to vector store`)
       await RagFile.update(
         {
