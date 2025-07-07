@@ -22,44 +22,6 @@ apiClient.interceptors.request.use((config) => {
   return newConfig
 })
 
-let errorStateHandler: ((error: Error) => void) | null = null
-let isHandlingError = false
-
-export const setErrorStateHandler = (handler: (error: Error) => void) => {
-  errorStateHandler = handler
-}
-
-const handleError = (error: AxiosError<{ message: string }>, isStream = false, streamMessage?: string) => {
-  if (isHandlingError) {
-    console.error('Error occurred while handling another error:', error)
-    return
-  }
-
-  const message = streamMessage || error.response?.data?.message || error.message || 'Something went wrong'
-  const customError = new Error(message)
-
-  if (errorStateHandler) {
-    try {
-      isHandlingError = true
-      errorStateHandler(customError)
-    } catch (handlerError) {
-      console.error('Error in error handler:', handlerError)
-    } finally {
-      isHandlingError = false
-    }
-  }
-
-  if (isStream) {
-    throw customError
-  }
-  return Promise.reject(customError)
-}
-
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error: AxiosError<{ message: string }>) => handleError(error),
-)
-
 export const postAbortableStream = async (path: string, formData: FormData, externalController?: AbortController) => {
   const controller = externalController ?? new AbortController()
 
@@ -75,12 +37,6 @@ export const postAbortableStream = async (path: string, formData: FormData, exte
     body: formData,
     signal: controller.signal,
   })
-
-  if (!response.ok) {
-    const message = (await response.text()) || 'Something went wrong'
-    const mockError = { response: { status: response.status } } as AxiosError<{ message: string }>
-    handleError(mockError, true, message)
-  }
 
   let tokenUsageAnalysis: {
     tokenUsageWarning: boolean

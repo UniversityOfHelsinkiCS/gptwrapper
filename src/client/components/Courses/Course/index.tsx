@@ -16,11 +16,11 @@ import SystemMessage from '../../Chat/SystemMessage'
 import Rag from '../../Rag/Rag'
 import { formatDate, getCurTypeLabel } from '../util'
 import EditCourseForm from './EditCourseForm'
-import MaxTokenUsageStudents from './MaxTokenUsageStudents'
 import Prompt from './Prompt'
 import Stats from './Stats'
 import { RouterTabs } from '../../common/RouterTabs'
 import Discussion from './Discussions'
+import { ApiErrorView } from '../../common/ApiErrorView'
 
 const Course = () => {
   const [showTeachers, setShowTeachers] = useState(false)
@@ -32,12 +32,16 @@ const Course = () => {
 
   const { language } = i18n
 
-  const { data: course, isSuccess: isCourseSuccess } = useCourse(id)
   const { user, isLoading: userLoading } = useCurrentUser()
 
-  const studentLink = `${window.location.origin}${PUBLIC_URL}/${course?.courseId}`
+  const { data: course, isSuccess: isCourseSuccess, error } = useCourse(id)
+  if (error) {
+    return <ApiErrorView error={error} />
+  }
 
   if (userLoading || !user || !isCourseSuccess) return null
+
+  const studentLink = `${window.location.origin}${PUBLIC_URL}/${course.courseId}`
 
   const amongResponsibles = course.responsibilities ? course.responsibilities.some((r) => r.user.id === user.id) : false
 

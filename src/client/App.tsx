@@ -8,10 +8,9 @@ import { fi } from 'date-fns/locale'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
 import { Box, Button, CssBaseline, Snackbar } from '@mui/material'
 import { AppContext } from './util/AppContext'
-import { ErrorBoundary } from './components/ErrorBoundary'
 
-import { PUBLIC_URL, inCI, inDevelopment, inProduction, inStaging } from '../config'
-import { User } from './types'
+import { PUBLIC_URL } from '../config'
+import type { User } from './types'
 import useTheme from './theme'
 import NavBar from './components/NavBar'
 import Footer from './components/Footer'
@@ -78,62 +77,47 @@ const App = () => {
   const { user, isLoading } = useCurrentUser()
 
   useEffect(() => {
-    // Add error handling to prevent app crashes
-    try {
-      console.log('Environment check:', { inCI, inStaging, inProduction, inDevelopment })
-
-      if (!inCI && !inStaging && !inDevelopment) {
-        console.log('Initializing Shibboleth pinger...')
-        initShibbolethPinger()
-      } else {
-        console.log('Skipping Shibboleth pinger initialization in non-production environments.')
-      }
-    } catch (error) {
-      console.error('Error initializing Shibboleth pinger:', error)
-      // Don't let this crash the app
-    }
+    initShibbolethPinger()
   }, [])
 
   const onNoAccessPage = location.pathname.includes('/noaccess')
 
-  // if (isLoading && !onNoAccessPage) return null
-  //
-  // if (!onNoAccessPage && !hasAccess(user, courseId)) {
-  //   window.location.href = PUBLIC_URL + getRedirect(user)
-  //   return null
-  // }
+  if (isLoading && !onNoAccessPage) return null
+
+  if (!onNoAccessPage && !hasAccess(user, courseId)) {
+    window.location.href = PUBLIC_URL + getRedirect(user)
+    return null
+  }
 
   if (!user && !onNoAccessPage) return null
 
   return (
-    <ErrorBoundary>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
-          <SnackbarProvider preventDuplicate>
-            <AppContext.Provider value={appRef}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  minHeight: '100vh',
-                  height: '100vh',
-                  overflowY: 'auto', // deleting this will break the auto scroll on chats
-                }}
-                ref={appRef}
-              >
-                <NavBar />
-                <Box sx={{ flex: 1 }}>
-                  <Outlet />
-                </Box>
-                <Footer />
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
+        <SnackbarProvider preventDuplicate>
+          <AppContext.Provider value={appRef}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: '100vh',
+                height: '100vh',
+                overflowY: 'auto', // deleting this will break the auto scroll on chats
+              }}
+              ref={appRef}
+            >
+              <NavBar />
+              <Box sx={{ flex: 1 }}>
+                <Outlet />
               </Box>
-              <AdminLoggedInAsBanner />
-            </AppContext.Provider>
-          </SnackbarProvider>
-        </LocalizationProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+              <Footer />
+            </Box>
+            <AdminLoggedInAsBanner />
+          </AppContext.Provider>
+        </SnackbarProvider>
+      </LocalizationProvider>
+    </ThemeProvider>
   )
 }
 

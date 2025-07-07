@@ -14,11 +14,11 @@ import { ChatV2 } from './components/ChatV2/ChatV2'
 import { RagIndex } from './components/Rag/RagIndex'
 import { RagFile } from './components/Rag/RagFile'
 import { NotFound } from './components/common/NotFound'
-import { ErrorBoundary } from './components/ErrorBoundary'
+import { ErrorPage } from './components/ErrorPage'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<App />}>
+    <Route path="/" element={<App />} ErrorBoundary={ErrorPage}>
       <Route index element={<Chat />} />
       <Route path="/v2" element={<ChatV2 />} />
       <Route path="/v2/:courseId" element={<ChatV2 />} />
@@ -40,10 +40,6 @@ const router = createBrowserRouter(
   },
 )
 
-const Router = () => (
-  <ErrorBoundary>
-    <RouterProvider router={router} />
-  </ErrorBoundary>
-)
+const Router = () => <RouterProvider router={router} />
 
 export default Router

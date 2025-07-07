@@ -19,6 +19,7 @@ const useCourse = (courseId?: string) => {
     queryKey,
     queryFn,
     enabled: !!courseId,
+    retry: false,
   })
 }
 

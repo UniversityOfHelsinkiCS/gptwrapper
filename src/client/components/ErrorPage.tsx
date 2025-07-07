@@ -1,63 +1,19 @@
 import React from 'react'
 import { Box, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import { setErrorStateHandler } from '../util/apiClient'
 import { OutlineButtonBlack } from './ChatV2/generics/Buttons'
 import { ArrowBack, Replay } from '@mui/icons-material'
-import { inDevelopment } from '../../config'
+import { useRouteError } from 'react-router-dom'
 
-// todo: setup sentry
-
-interface ErrorBoundaryState {
-  hasError: boolean
-  error?: Error
-}
-
-interface ErrorBoundaryProps {
-  children: React.ReactNode
-}
-
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props)
-    this.state = { hasError: false }
-
-    setErrorStateHandler((error: Error) => {
-      this.setState({ hasError: true, error })
-    })
-  }
-
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error }
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo)
-  }
-
-  emptyErrorState = () => {
-    this.setState({ hasError: false, error: undefined })
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return <ErrorPage error={this.state.error} setErrorState={this.emptyErrorState} />
-    }
-
-    return this.props.children
-  }
-}
-
-const ErrorPage = ({ error, setErrorState }: { error?: Error; setErrorState: VoidFunction }) => {
+export const ErrorPage = () => {
+  const error = useRouteError() as Error
   const { t } = useTranslation()
 
   const handleReload = () => {
-    setErrorState()
     window.location.reload()
   }
 
   const handleGoHome = () => {
-    setErrorState()
     window.location.href = '/'
   }
 
