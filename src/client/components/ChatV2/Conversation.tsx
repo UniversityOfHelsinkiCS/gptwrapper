@@ -16,7 +16,7 @@ import 'katex/dist/katex.min.css'
 import 'katex/dist/contrib/mhchem'
 import CopyToClipboardButton from '../Chat/CopyToClipboardButton'
 import { t } from 'i18next'
-import { OutlineButtonBlue } from './generics/Buttons'
+import { OutlineButtonBlue, OutlineButtonBlack } from './generics/Buttons'
 
 const UserMessage = ({
   content,

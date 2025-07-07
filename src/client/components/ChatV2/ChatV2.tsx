@@ -28,6 +28,7 @@ import { SettingsModal } from './SettingsModal'
 import { getCompletionStream } from './util'
 import { OutlineButtonBlack } from './generics/Buttons'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import Annotations from './Annotations'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -63,7 +64,6 @@ export const ChatV2 = () => {
   const [fileSearch, setFileSearch] = useLocalStorageState<FileSearchCompletedData>(`${localStoragePrefix}-last-file-search`)
 
   // App States
-  const [isFileSearching, setIsFileSearching] = useState<boolean>(false)
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
   const [fileName, setFileName] = useState<string>('')
   const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
@@ -77,6 +77,7 @@ export const ChatV2 = () => {
   const [streamController, setStreamController] = useState<AbortController>()
 
   // RAG states
+  const [isFileSearching, setIsFileSearching] = useState<boolean>(false) // file search <=> RAG
   const [ragIndexId, setRagIndexId] = useState<number | undefined>()
   const [ragDisplay, setRagDisplay] = useState<boolean>(true)
   const ragIndex = ragIndices?.find((index) => index.id === ragIndexId)
@@ -546,11 +547,10 @@ export const ChatV2 = () => {
           flex: 1,
           minWidth: 300,
           height: '100vh',
-          position: 'sticky',
-          top: 70,
+          position: 'relative',
         }}
       >
-        {showFileSearch && (
+        {/* {showFileSearch && (
           <FileSearchInfo
             isFileSearching={isFileSearching}
             fileSearchResult={fileSearch}
@@ -558,7 +558,10 @@ export const ChatV2 = () => {
             ragDisplay={ragDisplay}
             toggleRagDisplay={handleRagDisplay}
           />
-        )}
+        )} */}
+        <Box sx={{ position: 'sticky', top: 70 }}>
+          {fileSearch && <Annotations fileSearchResult={fileSearch} />}
+        </Box>
       </Box>
 
       {/* Modals --------------------------------------*/}
