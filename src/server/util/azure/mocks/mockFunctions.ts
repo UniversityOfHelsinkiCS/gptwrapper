@@ -46,6 +46,7 @@ export const getBasicStreamMock = (): MockResponseStreamEvent[] => {
 - To mock a file search fail response, write: **rag fail**
 - To mock a code block, write: **code block**
 - To mock a math block, write: **math block**
+OVER
 `
 
   const chunkedResponseText = chunkText(responseText)

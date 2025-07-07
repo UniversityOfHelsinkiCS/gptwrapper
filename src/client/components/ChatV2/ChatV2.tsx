@@ -431,7 +431,7 @@ export const ChatV2 = () => {
           {course && <ChatInfo course={course} />}
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', mb: '2rem' }}>
-            <OutlineButtonBlack startIcon={<DeleteIcon />} onClick={handleReset}>
+            <OutlineButtonBlack startIcon={<DeleteIcon />} onClick={handleReset} id="empty-conversation-button">
               {t('chat:emptyConversation')}
             </OutlineButtonBlack>
             <Tooltip
@@ -447,10 +447,10 @@ export const ChatV2 = () => {
                 {t('email:save')}
               </OutlineButtonBlack>
             </Tooltip>
-            <OutlineButtonBlack startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)}>
+            <OutlineButtonBlack startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)} id="settings-button">
               {t('chat:settings')}
             </OutlineButtonBlack>
-            <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus({ open: true })}>
+            <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus({ open: true })} id="help-button">
               {t('info:title')}
             </OutlineButtonBlack>
           </Box>

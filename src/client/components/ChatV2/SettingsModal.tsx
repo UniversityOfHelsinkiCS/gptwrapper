@@ -139,7 +139,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           overflow: 'hidden',
         }}
       >
-        <IconButton onClick={() => setOpen(false)} sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500' }}>
+        <IconButton onClick={() => setOpen(false)} sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500' }} id="close-settings">
           <Close />
         </IconButton>
 
