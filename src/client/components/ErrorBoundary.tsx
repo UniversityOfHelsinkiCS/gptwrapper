@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { setErrorStateHandler } from '../util/apiClient'
 import { OutlineButtonBlack } from './ChatV2/generics/Buttons'
 import { ArrowBack, Replay } from '@mui/icons-material'
+import { inDevelopment } from '../../config'
 
 // todo: setup sentry
 
@@ -91,7 +92,6 @@ const ErrorPage = ({ error, setErrorState }: { error?: Error; setErrorState: Voi
             textAlign: 'center',
           }}
         >
-          <b>{t('error:errorName')}:</b> {error.name} <br />
           <b>{t('error:errorMessage')}:</b> {error.message} <br />
           <b>{t('error:stackTrace')}:</b> {error.stack}
           <br />

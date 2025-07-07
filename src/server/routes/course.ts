@@ -124,6 +124,11 @@ courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Re
     where: { courseId: id },
     include: [
       {
+        model: Responsibility,
+        as: 'responsibilities',
+        attributes: ['userId'],
+      },
+      {
         model: Enrolment,
         as: 'enrolments',
         attributes: ['id'],
@@ -145,7 +150,7 @@ courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Re
   const hasFullAccess =
     user.isAdmin ||
     chatInstance.responsibilities
-      ?.map((r) => r.user?.id)
+      ?.map((r) => r.userId)
       .filter(Boolean)
       .includes(user.id)
 
