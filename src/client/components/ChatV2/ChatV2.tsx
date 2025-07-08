@@ -428,7 +428,7 @@ export const ChatV2 = () => {
           borderRight: '1px solid rgba(0, 0, 0, 0.12)',
         }}
       >
-        <Box sx={{ position: 'sticky', top: 70, padding: '2rem 1.5rem' }}>
+        <Box sx={{ position: 'sticky', top: 65, padding: '2rem 1.5rem' }}>
           {course && <ChatInfo course={course} />}
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', mb: '2rem' }}>
@@ -559,7 +559,7 @@ export const ChatV2 = () => {
             toggleRagDisplay={handleRagDisplay}
           />
         )} */}
-        <Box sx={{ position: 'sticky', top: 70 }}>
+        <Box sx={{ position: 'sticky', top: 65, height: '100%', overflow: 'hidden' }}>
           {fileSearch && <Annotations fileSearchResult={fileSearch} />}
         </Box>
       </Box>
