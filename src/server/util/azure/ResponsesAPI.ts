@@ -12,7 +12,7 @@ import { createFileSearchTool } from './util'
 import { FileSearchResultsStore } from '../../services/azureFileSearch/fileSearchResultsStore'
 import { getAzureOpenAIClient } from './client'
 import { RagIndex } from '../../db/models'
-import OpenAI, { APIError } from 'openai'
+import OpenAI from 'openai'
 import { ApplicationError } from '../ApplicationError'
 
 const client = getAzureOpenAIClient(process.env.GPT_4O_MINI ?? '')
@@ -84,6 +84,21 @@ export class ResponsesClient {
         // @todo create a type that both acual requests and mock requests can implement properly. Now it is mayhem.
         return createMockStream<ValidatedResponseInput>(sanitizedInput) as unknown as Promise<Stream<ResponseStreamEvent>>
       }
+
+      const lol = {
+        model: this.model,
+        previous_response_id: prevResponseId || undefined,
+        instructions: this.instructions,
+        temperature: this.temperature,
+        input: [sanitizedInput],
+        stream: true,
+        tools: this.tools,
+        tool_choice: 'auto',
+        store: true,
+        include,
+      }
+
+      console.log(JSON.stringify(lol, null, 2))
 
       return await client.responses.create({
         model: this.model,
