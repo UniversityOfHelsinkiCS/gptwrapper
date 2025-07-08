@@ -28,6 +28,7 @@ import { SettingsModal } from './SettingsModal'
 import { getCompletionStream } from './util'
 import { OutlineButtonBlack } from './generics/Buttons'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import { enqueueSnackbar } from 'notistack'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -243,6 +244,7 @@ export const ChatV2 = () => {
 
       if (!stream) {
         console.error('Stream is undefined')
+        handleCancel()
         return
       }
 
@@ -261,6 +263,7 @@ export const ChatV2 = () => {
       }
     } catch (err: any) {
       console.error(err)
+      handleCancel()
     }
   }
 

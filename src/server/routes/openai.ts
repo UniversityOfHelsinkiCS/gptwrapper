@@ -57,7 +57,7 @@ const PostStreamSchemaV2 = z.object({
     saveConsent: z.boolean().optional(),
     prevResponseId: z.string().optional(),
     courseId: z.string().optional(),
-    ragIndexId: z.number().optional(),
+    ragIndexId: z.number().optional().nullable(),
   }),
   courseId: z.string().optional(),
 })
