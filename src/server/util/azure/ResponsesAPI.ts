@@ -87,19 +87,6 @@ export class ResponsesClient {
         return createMockStream<ValidatedResponseInput>(sanitizedInput) as unknown as Promise<Stream<ResponseStreamEvent>>
       }
 
-      const lol = {
-        model: this.model,
-        previous_response_id: prevResponseId || undefined,
-        instructions: this.instructions,
-        temperature: this.temperature,
-        input: [sanitizedInput],
-        stream: true,
-        tools: this.tools,
-        tool_choice: 'auto',
-        store: true,
-        include,
-      }
-
       return await client.responses.create({
         model: this.model,
         previous_response_id: prevResponseId || undefined,
