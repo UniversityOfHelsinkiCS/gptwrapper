@@ -53,9 +53,7 @@ export class ResponsesClient {
       ? [
           createFileSearchTool({
             vectorStoreId: ragIndex.metadata.azureVectorStoreId,
-            filters: ragIndex.metadata.ragIndexFilterValue
-              ? { key: 'ragIndexFilterValue', value: ragIndex.metadata.ragIndexFilterValue, type: 'eq' }
-              : undefined,
+            filters: ragIndex.metadata.ragIndexFilterValue ? { key: 'ragIndexFilter', value: ragIndex.metadata.ragIndexFilterValue, type: 'eq' } : undefined,
           }),
         ]
       : [] // needs to retrun empty array for null
