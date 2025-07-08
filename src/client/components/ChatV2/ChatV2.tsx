@@ -28,6 +28,7 @@ import { SettingsModal } from './SettingsModal'
 import { getCompletionStream } from './util'
 import { OutlineButtonBlack } from './generics/Buttons'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import Annotations from './Annotations'
 import { enqueueSnackbar } from 'notistack'
 
 export const ChatV2 = () => {
@@ -547,16 +548,9 @@ export const ChatV2 = () => {
       </Box>
 
       {/* Annotations columns ----------------------------------------------------------------------------------------------------- */}
-      <Box
-        sx={{
-          flex: 1,
-          minWidth: 300,
-          height: '100vh',
-          position: 'sticky',
-          top: 70,
-        }}
-      >
-        {showFileSearch && (
+
+
+      {/* {showFileSearch && (
           <FileSearchInfo
             isFileSearching={isFileSearching}
             fileSearchResult={fileSearch}
@@ -564,7 +558,22 @@ export const ChatV2 = () => {
             ragDisplay={ragDisplay}
             toggleRagDisplay={handleRagDisplay}
           />
-        )}
+        )} */}
+      {/* <pre>{isFileSearching}</pre>
+        <pre>{JSON.stringify(fileSearch, null, 2)}</pre>
+        <pre>{ragDisplay}</pre> */}
+
+      <Box
+        sx={{
+          flex: 1,
+          minWidth: 300,
+          position: 'relative',
+          borderLeft: fileSearch ? '1px solid rgba(0, 0, 0, 0.12)' : 'none',
+        }}
+      >
+        <Box sx={{ position: 'sticky', top: 65, padding: '2rem' }}>
+          {fileSearch && <Annotations fileSearchResult={fileSearch} />}
+        </Box>
       </Box>
 
       {/* Modals --------------------------------------*/}
