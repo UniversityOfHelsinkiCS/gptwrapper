@@ -10,7 +10,7 @@ import { FileSearchResultsStore } from '../services/azureFileSearch/fileSearchRe
 import { ResponsesClient } from '../util/azure/ResponsesAPI'
 import { DEFAULT_RAG_SYSTEM_PROMPT } from '../util/config'
 import logger from '../util/logger'
-import { isError } from '../util/parser'
+import { isError } from '../util/isError'
 import { pdfToText } from '../util/pdfToText'
 import getEncoding from '../util/tiktoken'
 import { getAllowedModels, getCourseModel, getMessageContext, getModelContextLimit } from '../util/util'
@@ -179,10 +179,6 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     prevResponseId: options.prevResponseId,
     include: ragIndexId ? ['file_search_call.results'] : [],
   })
-
-  if (isError(events)) {
-    throw new ApplicationError('Error creating a response stream', 424)
-  }
 
   res.setHeader('content-type', 'text/event-stream')
 

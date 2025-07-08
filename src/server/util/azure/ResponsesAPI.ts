@@ -12,6 +12,8 @@ import { createFileSearchTool } from './util'
 import { FileSearchResultsStore } from '../../services/azureFileSearch/fileSearchResultsStore'
 import { getAzureOpenAIClient } from './client'
 import { RagIndex } from '../../db/models'
+import OpenAI, { APIError } from 'openai'
+import { ApplicationError } from '../ApplicationError'
 
 const client = getAzureOpenAIClient(process.env.GPT_4O_MINI ?? '')
 
@@ -68,10 +70,12 @@ export class ResponsesClient {
     input,
     prevResponseId,
     include,
+    attemptNumber = 1,
   }: {
     input: ResponseInput
     prevResponseId?: string
     include?: ResponseIncludable[]
+    attemptNumber?: number
   }): Promise<Stream<ResponseStreamEvent> | APIError> {
     try {
       const sanitizedInput = validatedInputSchema.parse(input)
@@ -102,10 +106,16 @@ export class ResponsesClient {
          */
         // background: true,
       })
-    } catch (error: any) {
-      logger.error(error)
-
-      return { error } as any as APIError
+    } catch (error: unknown) {
+      if (error instanceof OpenAI.APIError && attemptNumber < 3) {
+        const retryDelay = 2 ** attemptNumber * 200
+        logger.error(`Failed to create a response stream after ${attemptNumber} attempts. Retrying after ${retryDelay}ms`, { error })
+        // Retry the request after a delay
+        await new Promise((resolve) => setTimeout(resolve, retryDelay))
+        return await this.createResponse({ prevResponseId, input, attemptNumber: attemptNumber + 1 })
+      } else {
+        throw ApplicationError.InternalServerError(`Failed to create a response stream after ${attemptNumber} attempts, sorry`, { extra: { error } })
+      }
     }
   }
 
