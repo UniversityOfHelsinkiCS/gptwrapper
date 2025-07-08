@@ -7,7 +7,6 @@ import { ApplicationError } from '../../util/ApplicationError'
 import { getAzureOpenAIClient } from '../../util/azure/client'
 import { TEST_COURSES } from '../../util/config'
 import ragIndexRouter, { ragIndexMiddleware } from './ragIndex'
-import { getPrimaryVectorStoreId } from '../../services/azureFileSearch/vectorStore'
 import { randomUUID } from 'node:crypto'
 
 const router = Router()
@@ -53,14 +52,17 @@ router.post('/indices', async (req, res) => {
     throw ApplicationError.Forbidden('Cannot create index, index already exists on the course')
   }
 
-  const vectorStoreId = await getPrimaryVectorStoreId()
+  const client = getAzureOpenAIClient()
+  const vectorStore = await client.vectorStores.create({
+    name: `${name}-${user.id}-${chatInstance.id}`,
+  })
 
   const ragIndex = await RagIndex.create({
     userId: user.id,
     metadata: {
       name,
       dim,
-      azureVectorStoreId: vectorStoreId,
+      azureVectorStoreId: vectorStore.id,
       ragIndexFilterValue: randomUUID(),
     },
   })
