@@ -13,17 +13,18 @@ const AnnotationBox = ({
     data: FileSearchResultData,
     relevanceOrder: number // By default the backend returns the RAG results in most relevant results first 
 }) => {
+    const lineNum = 3;
     const multilineEllipsisTruncate = {
         // This is a trick to achieve a multu-line ellipsis truncation for max 3 rows of text. 
         // -webkit-box is used to support legacy browsers and for WebkitBoxOrient
         overflow: 'hidden',
         flex: '1',
         display: '-webkit-box',
-        WebkitLineClamp: 4,
+        WebkitLineClamp: lineNum,
         WebkitBoxOrient: 'vertical',
         textOverflow: 'ellipsis',
         lineHeight: '1.5',
-        maxHeight: 'calc(1.5em * 4)',
+        maxHeight: `calc(1.5em * ${lineNum})`,
     }
 
     return (
@@ -68,7 +69,7 @@ const Queries = ({ queries }: { queries: string[] }) => {
                 label={q}
                 sx={{
                     width: 'fit-content',
-                    p: 0.4,
+                    p: 0.5,
                     borderRadius: 2,
                     fontWeight: '600',
                     height: 'auto',
@@ -90,8 +91,8 @@ const Annotations = ({ fileSearchResult }: { fileSearchResult: FileSearchComplet
 
 
     return (
-        <Box sx={{ borderLeft: '1px solid rgba(0, 0, 0, 0.12)', padding: '2rem 1.5rem', height: '100%' }}>
-            <Typography variant="h6" fontWeight={'bold'} sx={{ mb: 2 }}>
+        <Box>
+            <Typography variant="h6" fontWeight={'bold'} sx={{ mb: 2.5 }}>
                 {t('chat:sources')}
             </Typography>
             <Queries queries={fileSearchResult.queries} />
