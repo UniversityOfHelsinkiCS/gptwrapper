@@ -164,8 +164,6 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     }
   }
 
-  console.log('ragIndex', ragIndexId, ragIndex)
-
   const responsesClient = new ResponsesClient({
     model: options.model,
     ragIndex,

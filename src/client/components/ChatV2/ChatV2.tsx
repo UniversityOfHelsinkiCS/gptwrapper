@@ -97,12 +97,12 @@ export const ChatV2 = () => {
   const disclaimerInfo = infoTexts?.find((infoText) => infoText.name === 'disclaimer')?.text[language] ?? null
 
   const processStream = async (stream: ReadableStream) => {
+    let content = ''
+    let error = ''
+    let fileSearch: FileSearchCompletedData
+
     try {
       const reader = stream.getReader()
-
-      let content = ''
-      let error = ''
-      let fileSearch: FileSearchCompletedData
 
       while (true) {
         const { value, done } = await reader.read()
@@ -166,18 +166,21 @@ export const ChatV2 = () => {
           }
         }
       }
-
-      setMessages((prev: Message[]) =>
-        prev.concat({
-          role: 'assistant',
-          content,
-          error,
-          fileSearchResult: fileSearch,
-        }),
-      )
     } catch (err: any) {
       handleCompletionStreamError(err, fileName)
+      error += '\nResponse stream was interrupted'
     } finally {
+      if (content.length > 0) {
+        setMessages((prev: Message[]) =>
+          prev.concat({
+            role: 'assistant',
+            content,
+            error: error.length > 0 ? error : undefined,
+            fileSearchResult: fileSearch,
+          }),
+        )
+      }
+
       setStreamController(undefined)
       setCompletion('')
       setIsCompletionDone(true)
