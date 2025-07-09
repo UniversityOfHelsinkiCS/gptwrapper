@@ -21,32 +21,6 @@ const openaiRouter = express.Router()
 const storage = multer.memoryStorage()
 const upload = multer({ storage })
 
-const fileParsing = async (options: any, req: any) => {
-  let fileContent = ''
-
-  const textFileTypes = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'text/md']
-  if (textFileTypes.includes(req.file.mimetype)) {
-    const fileBuffer = req.file.buffer
-    fileContent = fileBuffer.toString('utf8')
-  }
-
-  if (req.file.mimetype === 'application/pdf') {
-    fileContent = await pdfToText(req.file.buffer)
-  }
-
-  const allMessages = options.messages
-
-  const updatedMessage = {
-    ...allMessages[allMessages.length - 1],
-    content: `${allMessages[allMessages.length - 1].content} ${fileContent}`,
-  }
-  options.messages.pop()
-
-  options.messages = [...options.messages, updatedMessage]
-
-  return options.messages
-}
-
 const PostStreamSchemaV2 = z.object({
   options: z.object({
     model: z.string(),
@@ -61,6 +35,35 @@ const PostStreamSchemaV2 = z.object({
   }),
   courseId: z.string().optional(),
 })
+
+type PostStreamBody = z.infer<typeof PostStreamSchemaV2>
+
+const parseFileAndAddToLastMessage = async (options: PostStreamBody['options'], file: Express.Multer.File) => {
+  let fileContent = ''
+
+  const textFileTypes = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'text/md']
+  if (textFileTypes.includes(file.mimetype)) {
+    const fileBuffer = file.buffer
+    fileContent = fileBuffer.toString('utf8')
+  }
+
+  if (file.mimetype === 'application/pdf') {
+    fileContent = await pdfToText(file.buffer)
+  }
+
+  const messageToAddFileTo = options.messages[options.messages.length - 1]
+
+  const updatedMessage = {
+    ...messageToAddFileTo,
+    content: `${messageToAddFileTo.content} ${fileContent}`,
+  }
+
+  // Remove the old message and add the new one
+  options.messages.pop()
+  options.messages = [...options.messages, updatedMessage]
+
+  return options.messages
+}
 
 openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   const req = r as RequestWithUser
@@ -82,7 +85,8 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     throw ApplicationError.NotFound('Course not found')
   }
 
-  const usageAllowed = (courseId ? await checkCourseUsage(user, courseId) : model === FREE_MODEL) || (await checkUsage(user, model))
+  const isFreeModel = model === FREE_MODEL
+  const usageAllowed = (courseId ? await checkCourseUsage(user, courseId) : isFreeModel) || (await checkUsage(user, model))
 
   if (!usageAllowed) {
     throw ApplicationError.Forbidden('Usage limit reached')
@@ -107,7 +111,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
 
   try {
     if (req.file) {
-      optionsMessagesWithFile = await fileParsing(options, req)
+      optionsMessagesWithFile = await parseFileAndAddToLastMessage(options, req)
     }
   } catch (error) {
     logger.error('Error parsing file', { error })
@@ -120,7 +124,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   let tokenCount = calculateUsage(options as any, encoding)
   const tokenUsagePercentage = Math.round((tokenCount / DEFAULT_TOKEN_LIMIT) * 100)
 
-  if (options.model !== FREE_MODEL && tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT) {
+  if (!isFreeModel && tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT) {
     res.status(201).json({
       tokenConsumtionWarning: true,
       message: `You are about to use ${tokenUsagePercentage}% of your monthly CurreChat usage`,
@@ -132,7 +136,6 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   const contextLimit = getModelContextLimit(options.model)
 
   if (tokenCount > contextLimit) {
-    logger.info('Maximum context reached') // @todo sure we need to log twice the error message?
     throw ApplicationError.BadRequest('Model maximum context reached')
   }
 
@@ -142,7 +145,6 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
 
   if (ragIndexId) {
     if (!courseId && !user.isAdmin) {
-      logger.error('User is not admin and trying to access non-course rag')
       throw ApplicationError.Forbidden('User is not admin and trying to access non-course rag')
     }
 
@@ -172,6 +174,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     user,
   })
 
+  // Using the responses API, we only send the last message and the id to previous message
   const latestMessage = options.messages[options.messages.length - 1]
 
   const events = await responsesClient.createResponse({
@@ -180,6 +183,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     include: ragIndexId ? ['file_search_call.results'] : [],
   })
 
+  // Prepare for streaming response
   res.setHeader('content-type', 'text/event-stream')
 
   const result = await responsesClient.handleResponse({
@@ -190,15 +194,19 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
 
   tokenCount += result.tokenCount
 
-  let userToCharge = user
-  if (inProduction && req.hijackedBy) {
-    userToCharge = req.hijackedBy
-  }
+  // Increment user usage if not using free model
+  // If the user is hijacked by admin in production, charge the admin instead
+  if (!isFreeModel) {
+    let userToCharge = user
+    if (inProduction && req.hijackedBy) {
+      userToCharge = req.hijackedBy
+    }
 
-  if (courseId && model !== FREE_MODEL && model !== 'mock') {
-    await incrementCourseUsage(userToCharge, courseId, tokenCount)
-  } else if (model !== FREE_MODEL && model !== 'mock') {
-    await incrementUsage(userToCharge, tokenCount)
+    if (courseId) {
+      await incrementCourseUsage(userToCharge, courseId, tokenCount)
+    } else {
+      await incrementUsage(userToCharge, tokenCount)
+    }
   }
 
   logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
@@ -208,10 +216,9 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     courseId,
   })
 
-  const consentToSave = courseId && course!.saveDiscussions && options.saveConsent
-
+  // If course has saveDiscussion turned on and user has consented to saving the discussion, save the discussion
+  const consentToSave = courseId && course?.saveDiscussions && options.saveConsent
   console.log(`Consent to save discussion: ${options.saveConsent} ${user.username}`)
-
   if (consentToSave) {
     // @todo: should file search results also be saved?
     const discussion = {
@@ -261,7 +268,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   try {
     if (req.file) {
-      optionsMessagesWithFile = await fileParsing(options, req)
+      optionsMessagesWithFile = await parseFileAndAddToLastMessage(options, req)
     }
   } catch (error) {
     logger.error('Error parsing file', { error })

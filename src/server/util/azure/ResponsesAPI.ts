@@ -76,7 +76,7 @@ export class ResponsesClient {
     prevResponseId?: string
     include?: ResponseIncludable[]
     attemptNumber?: number
-  }): Promise<Stream<ResponseStreamEvent> | APIError> {
+  }): Promise<Stream<ResponseStreamEvent>> {
     try {
       const sanitizedInput = validatedInputSchema.parse(input)
 
