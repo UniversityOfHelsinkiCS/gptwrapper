@@ -210,7 +210,7 @@ const AssistantMessage = ({
         )}
         {fileSearchResult?.status === "completed" &&
           <OutlineButtonBlack sx={{ mt: 3 }} startIcon={<FormatQuoteIcon />} onClick={() => setActiveFileSearchResult(fileSearchResult)}>
-            <Typography variant='body2'>{`${t('chat:displaySources')}: `}<em>{fileSearchResult.searchedFiles.join(', ')}</em></Typography>
+            <Typography variant='body2'>{`${t('chat:displaySources')}: `}<em>{fileSearchResult?.searchedFiles?.join(', ')}</em></Typography>
           </OutlineButtonBlack>
         }
       </Box>
