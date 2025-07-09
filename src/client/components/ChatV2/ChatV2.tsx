@@ -508,7 +508,6 @@ export const ChatV2 = () => {
             completion={completion}
             isCompletionDone={isCompletionDone}
             fileSearchResult={fileSearch}
-            hasRagIndex={!!ragIndex}
             ragDisplay={ragDisplay}
             toggleRagDisplay={handleRagDisplay}
           />

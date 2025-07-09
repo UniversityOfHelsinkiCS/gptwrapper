@@ -1,7 +1,6 @@
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import { Box, Typography } from '@mui/material'
 import ReactMarkdown from 'react-markdown'
-import { useParams } from 'react-router-dom'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 import rehypeKatex from 'rehype-katex'
@@ -72,8 +71,6 @@ const UserMessage = ({
 const AssistantMessage = ({
   content,
   error,
-  hasRagIndex,
-  hasAnnotations,
   isLastAssistantNode,
   expandedNodeHeight,
   fileSearchStatus,
@@ -82,8 +79,6 @@ const AssistantMessage = ({
 }: {
   content: string
   error?: string
-  hasRagIndex: boolean
-  hasAnnotations: boolean
   isLastAssistantNode: boolean
   expandedNodeHeight: number
   fileSearchStatus: boolean
@@ -138,7 +133,6 @@ const AssistantMessage = ({
           padding: '0 1.5rem',
           borderRadius: '5px',
           overflowX: 'auto',
-          borderLeft: hasAnnotations ? '5px solid #3f51b5' : 'none',
         }}
       >
         <ReactMarkdown
@@ -229,28 +223,21 @@ const MessageItem = ({
   message,
   isLastAssistantNode,
   expandedNodeHeight,
-  hasRagIndex,
   ragDisplay,
   toggleRagDisplay,
 }: {
   message: Message
   isLastAssistantNode: boolean
   expandedNodeHeight: number
-  hasRagIndex: boolean
   ragDisplay: boolean
   toggleRagDisplay: () => void
 }) => {
-  const { courseId } = useParams()
-  // @todo when has annotations?
-  const hasAnnotations_Leikisti = false
 
   if (message.role === 'assistant') {
     return (
       <AssistantMessage
         content={message.content}
         error={message.error}
-        hasAnnotations={!!hasAnnotations_Leikisti}
-        hasRagIndex={hasRagIndex}
         isLastAssistantNode={isLastAssistantNode}
         expandedNodeHeight={expandedNodeHeight}
         fileSearchStatus={message.fileSearchResult?.status == 'completed'}
@@ -279,7 +266,6 @@ export const Conversation = ({
   completion,
   isCompletionDone,
   fileSearchResult,
-  hasRagIndex,
   ragDisplay,
   toggleRagDisplay,
 }: {
@@ -291,7 +277,6 @@ export const Conversation = ({
   completion: string
   isCompletionDone: boolean
   fileSearchResult?: FileSearchCompletedData
-  hasRagIndex: boolean
   ragDisplay: boolean
   toggleRagDisplay: () => void
 }) => (
@@ -315,7 +300,6 @@ export const Conversation = ({
           message={message}
           isLastAssistantNode={isLastAssistantNode}
           expandedNodeHeight={expandedNodeHeight}
-          hasRagIndex={hasRagIndex}
           ragDisplay={ragDisplay}
           toggleRagDisplay={toggleRagDisplay}
         />
@@ -328,7 +312,6 @@ export const Conversation = ({
           message={{ role: 'assistant', content: completion, fileSearchResult }}
           isLastAssistantNode={true}
           expandedNodeHeight={expandedNodeHeight}
-          hasRagIndex={hasRagIndex}
           ragDisplay={ragDisplay}
           toggleRagDisplay={toggleRagDisplay}
         />
