@@ -211,7 +211,7 @@ const AssistantMessage = ({
         {/* {ragDisplay ? t('chat:hideSources') : t('chat:displaySources')} */}
         {fileSearchResult?.status === "completed" &&
           <OutlineButtonBlack sx={{ mt: 3 }} startIcon={<FormatQuoteIcon />} onClick={() => setActiveFileSearchResult(fileSearchResult)}>
-            <Typography variant='body2'>Lähteet: <em> llm_test_kalevala.pdf </em></Typography>
+            <Typography variant='body2'>Lähteet: <em>{fileSearchResult.id}</em></Typography>
           </OutlineButtonBlack>
         }
       </Box>
