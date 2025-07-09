@@ -208,10 +208,9 @@ const AssistantMessage = ({
             <Typography variant="body1" fontStyle="italic" color="#cc0000">{`\n\n ${error}`}</Typography>
           </Box>
         )}
-        {/* {ragDisplay ? t('chat:hideSources') : t('chat:displaySources')} */}
         {fileSearchResult?.status === "completed" &&
           <OutlineButtonBlack sx={{ mt: 3 }} startIcon={<FormatQuoteIcon />} onClick={() => setActiveFileSearchResult(fileSearchResult)}>
-            <Typography variant='body2'>Lähteet: <em>{fileSearchResult.id}</em></Typography>
+            <Typography variant='body2'>{`${t('chat:displaySources')}: `}<em>{fileSearchResult.searchedFiles.join(', ')}</em></Typography>
           </OutlineButtonBlack>
         }
       </Box>

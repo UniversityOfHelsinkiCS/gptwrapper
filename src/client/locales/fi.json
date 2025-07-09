@@ -90,8 +90,7 @@
     "confirmResetChat": "Oletko varma, että haluat tyhjentää tämän keskustelun?",
     "copyToClipboard": "Kopioi leikepöydälle",
     "sources": "Lähdemateriaali",
-    "displaySources": "Näytä lähteet",
-    "hideSources": "Piilota lähteet"
+    "displaySources": "Lähteet"
   },
   "settings": {
     "prompt": "Keskustelun alustus",

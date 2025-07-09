@@ -167,6 +167,7 @@ export class ResponsesClient {
                   queries: event.item.queries,
                   status: event.item.status,
                   type: event.item.type,
+                  searchedFiles: [...new Set(event.item.results?.map((result) => result.filename))], // Set() datastructure keeps each item unique
                   ragIndexId: this.ragIndex.id,
                 },
               },

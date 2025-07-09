@@ -48,6 +48,7 @@ export type FileCitation = {
 }
 
 export type FileSearchCompletedData = Omit<ResponseFileSearchToolCall, 'results'> & {
+  searchedFiles: ResponseFileSearchToolCall.Result['filename'][]
   ragIndexId: number
 }
 

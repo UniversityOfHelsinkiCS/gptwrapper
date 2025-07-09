@@ -90,7 +90,7 @@
     "confirmResetChat": "Are you sure you want to empty this conversation?",
     "copyToClipboard": "Copy to clipboard",
     "sources": "Source materials",
-    "displaySources": "Display sources"
+    "displaySources": "Sources"
   },
   "settings": {
     "prompt": "Conversation prompt",
