@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -18,7 +18,7 @@ import {
   IconButton,
   Stack,
 } from '@mui/material'
-import { Link as RouterLink } from 'react-router-dom'
+import { redirect, Link as RouterLink } from 'react-router-dom'
 import useStatistics from '../hooks/useStatistics'
 import { Statistic } from '../types'
 import programme from '../locales/programme.json'
@@ -27,6 +27,8 @@ import useCurrentUser from '../hooks/useCurrentUser'
 import * as xlsx from 'xlsx'
 import { BlueButton, GrayButton } from './ChatV2/generics/Buttons'
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import { ChromeReaderModeRounded, DownloadSharp } from '@mui/icons-material'
+import { BrowserClient } from '@sentry/browser'
 
 const Statistics = () => {
   const [from, setFrom] = useState(1)
@@ -36,7 +38,8 @@ const Statistics = () => {
   const { t, i18n } = useTranslation()
   const { language } = i18n
   const { user, isLoading: isUserLoading } = useCurrentUser()
-
+  const dataDownloadLink = useRef<HTMLAnchorElement | null>(null)
+  
   if (!isSuccess || isUserLoading) return null
 
   const namesOf = (codes: string[]) => {
@@ -69,6 +72,23 @@ const Statistics = () => {
       xlsx.writeFile(book, 'statistics.xlsx')         
   }
 
+  
+
+  const exportToCSV = (jsonData: any) => {
+      //const book = xlsx.utils.book_new()
+      const sheet = xlsx.utils.json_to_sheet(jsonData)
+      const csv = xlsx.utils.sheet_to_csv(sheet, {})
+      
+      const blob = new Blob([csv], {type: 'text/csv'})
+      const url = URL.createObjectURL(blob)
+      if( dataDownloadLink?.current ){
+        dataDownloadLink.current.href = url
+        dataDownloadLink.current.download = 'data.csv'
+        dataDownloadLink.current.click()
+      }
+}
+
+
   const handleXLSX = () => {
     const mangledStatistics = statsToShow.map((chat) => {
       return (
@@ -82,7 +102,7 @@ const Statistics = () => {
           PromptCount: chat.promptCount
      
     })})
-    exportToExcel(mangledStatistics)
+    exportToCSV(mangledStatistics)
   }
   
   return (
@@ -121,7 +141,8 @@ const Statistics = () => {
             ))}
           </Select>
           </div>
-          <IconButton onClick={() => {handleXLSX()}} sx={{marginLeft: 'auto'}}><CloudDownloadIcon fontSize="large"/></IconButton>
+          <a ref={dataDownloadLink} style={{display: 'none'}}/>
+          <IconButton  onClick={() => {handleXLSX()}} sx={{marginLeft: 'auto'}}><CloudDownloadIcon fontSize="large"/></IconButton>
          </Stack>
 
         <TableContainer component={Paper}>
