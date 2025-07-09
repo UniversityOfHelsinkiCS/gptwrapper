@@ -15,6 +15,8 @@ import {
   Tooltip,
   Link,
   Container,
+  IconButton,
+  Stack,
 } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
 import useStatistics from '../hooks/useStatistics'
@@ -22,6 +24,9 @@ import { Statistic } from '../types'
 import programme from '../locales/programme.json'
 import faculties from '../locales/faculties.json'
 import useCurrentUser from '../hooks/useCurrentUser'
+import * as xlsx from 'xlsx'
+import { BlueButton, GrayButton } from './ChatV2/generics/Buttons'
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 
 const Statistics = () => {
   const [from, setFrom] = useState(1)
@@ -57,10 +62,34 @@ const Statistics = () => {
 
   const statsToShow = statistics.data.filter(termWithin).filter(belongsToFaculty).sort(byUsage)
 
+  const exportToExcel = (jsonData: any) => {
+      const book = xlsx.utils.book_new()
+      const sheet = xlsx.utils.json_to_sheet(jsonData)
+      xlsx.utils.book_append_sheet(book, sheet, 'Tilastot')
+      xlsx.writeFile(book, 'statistics.xlsx')         
+  }
+
+  const handleXLSX = () => {
+    const mangledStatistics = statsToShow.map((chat) => {
+      return (
+        {
+          Codes: chat.codes.join(', '),
+          Course: chat.name[language],
+          Terms: chat.terms.map(trm => trm.label[language]).join(', '),
+          Programmes: namesOf(chat.programmes),
+          Students: chat.students,
+          UsedTokens: chat.usedTokens,
+          PromptCount: chat.promptCount
+     
+    })})
+    exportToExcel(mangledStatistics)
+  }
+  
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Box my={2}>
-        <div>
+        <Stack direction='row'>
+          <div>
           <span style={{ marginRight: 10 }}>{t('stats:timePeriodStart')}</span>
 
           <Select value={from} onChange={(e) => setFrom(parseInt(e.target.value as string, 10))}>
@@ -91,7 +120,9 @@ const Statistics = () => {
               </MenuItem>
             ))}
           </Select>
-        </div>
+          </div>
+          <IconButton onClick={() => {handleXLSX()}} sx={{marginLeft: 'auto'}}><CloudDownloadIcon fontSize="large"/></IconButton>
+         </Stack>
 
         <TableContainer component={Paper}>
           <Table>
