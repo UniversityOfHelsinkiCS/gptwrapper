@@ -75,7 +75,8 @@ const AssistantMessage = ({
   isLastAssistantNode,
   expandedNodeHeight,
   fileSearchResult,
-  setActiveFileSearchResult
+  setActiveFileSearchResult,
+  setShowAnnotations
 }: {
   content: string
   error?: string
@@ -83,6 +84,7 @@ const AssistantMessage = ({
   expandedNodeHeight: number
   fileSearchResult?: FileSearchCompletedData
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
+  setShowAnnotations: (show: boolean) => void
 }) => {
   const processedContent = preprocessMath(content)
   const katexOptions = {
@@ -124,6 +126,11 @@ const AssistantMessage = ({
     strict: false, // disables logging katex warnings/errors – if debugging, turn these two on
   }
   let codeCount = 0
+
+  const handleAnnotations = (fileSearchResult: FileSearchCompletedData) => {
+    setActiveFileSearchResult(fileSearchResult)
+    setShowAnnotations(true)
+  }
 
   return (
     <Box className={`message-role-assistant`} data-testid="assistant-message" sx={{ minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto' }}>
@@ -209,7 +216,7 @@ const AssistantMessage = ({
           </Box>
         )}
         {fileSearchResult?.status === "completed" &&
-          <OutlineButtonBlack sx={{ mt: 3 }} startIcon={<FormatQuoteIcon />} onClick={() => setActiveFileSearchResult(fileSearchResult)}>
+          <OutlineButtonBlack sx={{ mt: 3 }} startIcon={<FormatQuoteIcon />} onClick={() => handleAnnotations(fileSearchResult)}>
             <Typography variant='body2'>{`${t('chat:displaySources')}: `}<em>{fileSearchResult?.searchedFiles?.join(', ')}</em></Typography>
           </OutlineButtonBlack>
         }
@@ -222,12 +229,14 @@ const MessageItem = ({
   message,
   isLastAssistantNode,
   expandedNodeHeight,
-  setActiveFileSearchResult
+  setActiveFileSearchResult,
+  setShowAnnotations
 }: {
   message: Message
   isLastAssistantNode: boolean
   expandedNodeHeight: number
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
+  setShowAnnotations: (show: boolean) => void
 }) => {
 
   if (message.role === 'assistant') {
@@ -239,6 +248,7 @@ const MessageItem = ({
         expandedNodeHeight={expandedNodeHeight}
         fileSearchResult={message.fileSearchResult}
         setActiveFileSearchResult={setActiveFileSearchResult}
+        setShowAnnotations={setShowAnnotations}
       />
     )
   } else {
@@ -261,7 +271,8 @@ export const Conversation = ({
   messages,
   completion,
   isCompletionDone,
-  setActiveFileSearchResult
+  setActiveFileSearchResult,
+  setShowAnnotations
 }: {
   courseName?: string
   courseDate?: ActivityPeriod
@@ -271,6 +282,7 @@ export const Conversation = ({
   completion: string
   isCompletionDone: boolean
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
+  setShowAnnotations: (show: boolean) => void
 }) => (
   <Box
     style={{
@@ -293,6 +305,7 @@ export const Conversation = ({
           isLastAssistantNode={isLastAssistantNode}
           expandedNodeHeight={expandedNodeHeight}
           setActiveFileSearchResult={setActiveFileSearchResult}
+          setShowAnnotations={setShowAnnotations}
         />
       )
     })}
@@ -304,6 +317,7 @@ export const Conversation = ({
           isLastAssistantNode={true}
           expandedNodeHeight={expandedNodeHeight}
           setActiveFileSearchResult={setActiveFileSearchResult}
+          setShowAnnotations={setShowAnnotations}
         />
       ) : (
         <LoadingMessage expandedNodeHeight={expandedNodeHeight} />

@@ -1,4 +1,5 @@
-import { Box, Typography, Chip } from '@mui/material'
+import { Box, Typography, Chip, IconButton } from '@mui/material'
+import { Close } from '@mui/icons-material'
 import { FileSearchCompletedData, FileSearchResultData } from '../../../shared/types'
 import { useTranslation } from 'react-i18next'
 import { useFileSearchResults } from './api'
@@ -83,17 +84,24 @@ const Queries = ({ queries }: { queries: string[] }) => {
     </Box>)
 }
 
-const Annotations = ({ fileSearchResult }: { fileSearchResult: FileSearchCompletedData }) => {
+const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResult: FileSearchCompletedData; setShowAnnotations: (show: boolean) => void }) => {
     const { data: results, isSuccess: isResultsSuccess } = useFileSearchResults(fileSearchResult.id)
     const arrayResults = Array.isArray(results) ? results : []
     const { t } = useTranslation()
 
-
     return (
         <Box>
-            <Typography variant="h6" fontWeight={'bold'} sx={{ mb: 2.5 }}>
-                {t('chat:sources')}
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+                <Typography variant="h6" fontWeight={'bold'}>
+                    {t('chat:sources')}
+                </Typography>
+                <IconButton
+                    id="close-annotations"
+                    onClick={() => setShowAnnotations(false)}
+                >
+                    <Close />
+                </IconButton>
+            </Box>
             <Queries queries={fileSearchResult.queries} />
             {isResultsSuccess ?
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', minHeight: 400 }}>

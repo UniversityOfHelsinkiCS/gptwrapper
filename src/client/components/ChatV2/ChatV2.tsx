@@ -61,7 +61,6 @@ export const ChatV2 = () => {
 
   const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as Message[])
   const [prevResponse, setPrevResponse] = useLocalStorageState(`${localStoragePrefix}-prev-response`, { id: '' })
-  const [fileSearch, setFileSearch] = useLocalStorageState<FileSearchCompletedData>(`${localStoragePrefix}-last-file-search`)
 
   // App States
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
@@ -70,6 +69,7 @@ export const ChatV2 = () => {
   const [tokenUsageAlertOpen, setTokenUsageAlertOpen] = useState<boolean>(false)
   const [allowedModels, setAllowedModels] = useState<string[]>([])
   const [saveConsent, setSaveConsent] = useState<boolean>(false)
+  const [showAnnotations, setShowAnnotations] = useState<boolean>(false)
 
   // RAG states
   const [ragIndexId, setRagIndexId] = useState<number | undefined>()
@@ -103,8 +103,8 @@ export const ChatV2 = () => {
       handleCompletionStreamError(error, fileName)
     },
     onFileSearchComplete: (fileSearch) => {
-      setFileSearch(fileSearch) // possibly deprecating this
       setActiveFileSearchResult(fileSearch)
+      setShowAnnotations(true)
     },
   })
 
@@ -133,7 +133,6 @@ export const ChatV2 = () => {
       fileInputRef.current.value = ''
     }
     setFileName('')
-    setFileSearch(undefined)
     setRetryTimeout(() => {
       if (streamController) {
         streamController.abort()
@@ -182,12 +181,12 @@ export const ChatV2 = () => {
   const handleReset = () => {
     if (window.confirm('Are you sure you want to empty this conversation?')) {
       setMessages([])
+      setShowAnnotations(false)
       setPrevResponse({ id: '' })
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
       setFileName('')
-      setFileSearch(undefined)
       setTokenUsageWarning('')
       setTokenUsageAlertOpen(false)
       setRetryTimeout(() => {
@@ -405,6 +404,7 @@ export const ChatV2 = () => {
             completion={completion}
             isCompletionDone={!isStreaming}
             setActiveFileSearchResult={setActiveFileSearchResult}
+            setShowAnnotations={setShowAnnotations}
           />
         </Box>
 
@@ -461,10 +461,21 @@ export const ChatV2 = () => {
           flex: 1,
           minWidth: 300,
           position: 'relative',
-          borderLeft: activeFileSearchResult ? '1px solid rgba(0, 0, 0, 0.12)' : 'none',
+          transition: 'border 300ms',
+          borderLeft: '1px solid',
+          borderColor: showAnnotations ? 'rgba(0,0,0,0.12)' : 'rgba(0,0,0,0)'
         }}
       >
-        <Box sx={{ position: 'sticky', top: 65, padding: '2rem' }}>{activeFileSearchResult && <Annotations fileSearchResult={activeFileSearchResult} />}</Box>
+        <Box
+          sx={{
+            position: 'sticky',
+            top: 65,
+            padding: '2rem',
+            transition: 'transform 250ms ease-in-out',
+            transform: showAnnotations ? 'translateX(0%)' : 'translate(100%)'
+          }}>
+          {activeFileSearchResult && <Annotations fileSearchResult={activeFileSearchResult} setShowAnnotations={setShowAnnotations} />}
+        </Box>
       </Box>
 
       {/* Modals --------------------------------------*/}
