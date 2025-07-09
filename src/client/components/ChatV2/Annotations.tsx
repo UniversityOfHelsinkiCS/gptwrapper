@@ -39,7 +39,6 @@ const AnnotationBox = ({
                 alignItems: 'center',
                 borderRadius: '100%',
                 fontSize: '0.8rem',
-                mt: '0.4rem'
             }}>
                 {relevanceOrder}
             </Box>

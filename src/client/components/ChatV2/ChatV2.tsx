@@ -103,7 +103,8 @@ export const ChatV2 = () => {
       handleCompletionStreamError(error, fileName)
     },
     onFileSearchComplete: (fileSearch) => {
-      setFileSearch(fileSearch)
+      setFileSearch(fileSearch) // possibly deprecating this
+      setActiveFileSearchResult(fileSearch)
     },
   })
 
