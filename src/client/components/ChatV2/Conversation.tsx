@@ -15,7 +15,8 @@ import 'katex/dist/katex.min.css'
 import 'katex/dist/contrib/mhchem'
 import CopyToClipboardButton from '../Chat/CopyToClipboardButton'
 import { t } from 'i18next'
-import { OutlineButtonBlue } from './generics/Buttons'
+import { OutlineButtonBlack, } from './generics/Buttons'
+import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 
 const UserMessage = ({
   content,
@@ -73,17 +74,15 @@ const AssistantMessage = ({
   error,
   isLastAssistantNode,
   expandedNodeHeight,
-  fileSearchStatus,
-  ragDisplay,
-  toggleRagDisplay,
+  fileSearchResult,
+  setActiveFileSearchResult
 }: {
   content: string
   error?: string
   isLastAssistantNode: boolean
   expandedNodeHeight: number
-  fileSearchStatus: boolean
-  ragDisplay: boolean
-  toggleRagDisplay: () => void
+  fileSearchResult?: FileSearchCompletedData
+  setActiveFileSearchResult: (data: FileSearchCompletedData) => void
 }) => {
   const processedContent = preprocessMath(content)
   const katexOptions = {
@@ -209,11 +208,12 @@ const AssistantMessage = ({
             <Typography variant="body1" fontStyle="italic" color="#cc0000">{`\n\n ${error}`}</Typography>
           </Box>
         )}
-        {isLastAssistantNode && fileSearchStatus && (
-          <OutlineButtonBlue sx={{ padding: '0.4rem 0.8rem', fontSize: '14px' }} onClick={() => toggleRagDisplay()}>
-            {ragDisplay ? t('chat:hideSources') : t('chat:displaySources')}
-          </OutlineButtonBlue>
-        )}
+        {/* {ragDisplay ? t('chat:hideSources') : t('chat:displaySources')} */}
+        {fileSearchResult?.status === "completed" &&
+          <OutlineButtonBlack sx={{ mt: 3 }} startIcon={<FormatQuoteIcon />} onClick={() => setActiveFileSearchResult(fileSearchResult)}>
+            <Typography variant='body2'>Lähteet: <em>{fileSearchResult.id}</em></Typography>
+          </OutlineButtonBlack>
+        }
       </Box>
     </Box>
   )
@@ -223,14 +223,12 @@ const MessageItem = ({
   message,
   isLastAssistantNode,
   expandedNodeHeight,
-  ragDisplay,
-  toggleRagDisplay,
+  setActiveFileSearchResult
 }: {
   message: Message
   isLastAssistantNode: boolean
   expandedNodeHeight: number
-  ragDisplay: boolean
-  toggleRagDisplay: () => void
+  setActiveFileSearchResult: (data: FileSearchCompletedData) => void
 }) => {
 
   if (message.role === 'assistant') {
@@ -240,9 +238,8 @@ const MessageItem = ({
         error={message.error}
         isLastAssistantNode={isLastAssistantNode}
         expandedNodeHeight={expandedNodeHeight}
-        fileSearchStatus={message.fileSearchResult?.status == 'completed'}
-        ragDisplay={ragDisplay}
-        toggleRagDisplay={toggleRagDisplay}
+        fileSearchResult={message.fileSearchResult}
+        setActiveFileSearchResult={setActiveFileSearchResult}
       />
     )
   } else {
@@ -265,9 +262,7 @@ export const Conversation = ({
   messages,
   completion,
   isCompletionDone,
-  fileSearchResult,
-  ragDisplay,
-  toggleRagDisplay,
+  setActiveFileSearchResult
 }: {
   courseName?: string
   courseDate?: ActivityPeriod
@@ -276,9 +271,7 @@ export const Conversation = ({
   messages: Message[]
   completion: string
   isCompletionDone: boolean
-  fileSearchResult?: FileSearchCompletedData
-  ragDisplay: boolean
-  toggleRagDisplay: () => void
+  setActiveFileSearchResult: (data: FileSearchCompletedData) => void
 }) => (
   <Box
     style={{
@@ -300,8 +293,7 @@ export const Conversation = ({
           message={message}
           isLastAssistantNode={isLastAssistantNode}
           expandedNodeHeight={expandedNodeHeight}
-          ragDisplay={ragDisplay}
-          toggleRagDisplay={toggleRagDisplay}
+          setActiveFileSearchResult={setActiveFileSearchResult}
         />
       )
     })}
@@ -309,11 +301,10 @@ export const Conversation = ({
       messages.length > 0 &&
       (completion.length > 0 ? (
         <MessageItem
-          message={{ role: 'assistant', content: completion, fileSearchResult }}
+          message={{ role: 'assistant', content: completion }}
           isLastAssistantNode={true}
           expandedNodeHeight={expandedNodeHeight}
-          ragDisplay={ragDisplay}
-          toggleRagDisplay={toggleRagDisplay}
+          setActiveFileSearchResult={setActiveFileSearchResult}
         />
       ) : (
         <LoadingMessage expandedNodeHeight={expandedNodeHeight} />

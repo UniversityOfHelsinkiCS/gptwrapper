@@ -81,6 +81,7 @@ export const ChatV2 = () => {
   // RAG states
   const [ragIndexId, setRagIndexId] = useState<number | undefined>()
   const [ragDisplay, setRagDisplay] = useState<boolean>(true)
+  const [activeFileSearchResult, setActiveFileSearchResult] = useState<FileSearchCompletedData | undefined>()
   const ragIndex = ragIndices?.find((index) => index.id === ragIndexId)
 
   // Refs
@@ -320,7 +321,6 @@ export const ChatV2 = () => {
     }
   }, [])
 
-  // @todo fix this shit when having long file search results
   useEffect(() => {
     // Scrolls to last assistant message on text generation
     if (!appContainerRef?.current || !conversationRef.current || messages.length === 0) return
@@ -411,7 +411,6 @@ export const ChatV2 = () => {
     }
   }
 
-  const showFileSearch = isFileSearching || messages.some((m) => m.fileSearchResult) || fileSearch
   const showRagSelector = (ragIndices?.length ?? 0) > 0
 
   return (
@@ -507,9 +506,7 @@ export const ChatV2 = () => {
             messages={messages}
             completion={completion}
             isCompletionDone={isCompletionDone}
-            fileSearchResult={fileSearch}
-            ragDisplay={ragDisplay}
-            toggleRagDisplay={handleRagDisplay}
+            setActiveFileSearchResult={setActiveFileSearchResult}
           />
         </Box>
 
@@ -549,6 +546,7 @@ export const ChatV2 = () => {
       {/* Annotations columns ----------------------------------------------------------------------------------------------------- */}
 
 
+      {/* LEGACY - keep here for legacy when new annotations flow is work in progres */}
       {/* {showFileSearch && (
           <FileSearchInfo
             isFileSearching={isFileSearching}
@@ -567,11 +565,11 @@ export const ChatV2 = () => {
           flex: 1,
           minWidth: 300,
           position: 'relative',
-          borderLeft: fileSearch ? '1px solid rgba(0, 0, 0, 0.12)' : 'none',
+          borderLeft: activeFileSearchResult ? '1px solid rgba(0, 0, 0, 0.12)' : 'none',
         }}
       >
         <Box sx={{ position: 'sticky', top: 65, padding: '2rem' }}>
-          {fileSearch && <Annotations fileSearchResult={fileSearch} />}
+          {activeFileSearchResult && <Annotations fileSearchResult={activeFileSearchResult} />}
         </Box>
       </Box>
 
