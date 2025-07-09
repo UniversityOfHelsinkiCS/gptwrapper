@@ -73,7 +73,6 @@ export const ChatV2 = () => {
 
   // RAG states
   const [ragIndexId, setRagIndexId] = useState<number | undefined>()
-  const [ragDisplay, setRagDisplay] = useState<boolean>(true)
   const [activeFileSearchResult, setActiveFileSearchResult] = useState<FileSearchCompletedData | undefined>()
   const ragIndex = ragIndices?.find((index) => index.id === ragIndexId)
 
@@ -179,17 +178,10 @@ export const ChatV2 = () => {
     }
   }
 
-  const handleRagDisplay = () => {
-    setRagDisplay((prev) => !prev)
-  }
-
   const handleReset = () => {
     if (window.confirm('Are you sure you want to empty this conversation?')) {
       setMessages([])
       setPrevResponse({ id: '' })
-      if (!ragDisplay) {
-        handleRagDisplay()
-      }
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
