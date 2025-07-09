@@ -7,7 +7,7 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { ALLOWED_FILE_TYPES, DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, validModels } from '../../../config'
-import type { FileSearchCompletedData, ResponseStreamEventData } from '../../../shared/types'
+import type { FileSearchCompletedData } from '../../../shared/types'
 import { getLanguageValue } from '../../../shared/utils'
 import useCourse from '../../hooks/useCourse'
 import useInfoTexts from '../../hooks/useInfoTexts'
@@ -18,7 +18,6 @@ import useUserStatus from '../../hooks/useUserStatus'
 import type { Message } from '../../types'
 import { AppContext } from '../../util/AppContext'
 import { ChatBox } from './ChatBox'
-import { FileSearchInfo } from './CitationsBox'
 import { Conversation } from './Conversation'
 import { DisclaimerModal } from './Disclaimer'
 import { handleCompletionStreamError } from './error'
@@ -28,8 +27,8 @@ import { SettingsModal } from './SettingsModal'
 import { getCompletionStream } from './util'
 import { OutlineButtonBlack } from './generics/Buttons'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import { useChatStream } from './useChatStream'
 import Annotations from './Annotations'
-import { enqueueSnackbar } from 'notistack'
 
 export const ChatV2 = () => {
   const { courseId } = useParams()
@@ -37,7 +36,7 @@ export const ChatV2 = () => {
   const { data: course } = useCourse(courseId)
 
   const { ragIndices } = useRagIndices(courseId)
-  const { infoTexts, isLoading: infoTextsLoading } = useInfoTexts()
+  const { infoTexts } = useInfoTexts()
 
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
 
@@ -65,18 +64,12 @@ export const ChatV2 = () => {
   const [fileSearch, setFileSearch] = useLocalStorageState<FileSearchCompletedData>(`${localStoragePrefix}-last-file-search`)
 
   // App States
-  const [isFileSearching, setIsFileSearching] = useState<boolean>(false)
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
   const [fileName, setFileName] = useState<string>('')
   const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
   const [tokenUsageAlertOpen, setTokenUsageAlertOpen] = useState<boolean>(false)
   const [allowedModels, setAllowedModels] = useState<string[]>([])
   const [saveConsent, setSaveConsent] = useState<boolean>(false)
-
-  // Chat Streaming states
-  const [completion, setCompletion] = useState<string>('')
-  const [isCompletionDone, setIsCompletionDone] = useState<boolean>(true)
-  const [streamController, setStreamController] = useState<AbortController>()
 
   // RAG states
   const [ragIndexId, setRagIndexId] = useState<number | undefined>()
@@ -93,106 +86,27 @@ export const ChatV2 = () => {
 
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
 
-  const decoder = new TextDecoder()
   const { t, i18n } = useTranslation()
-  const { language } = i18n
 
-  const disclaimerInfo = infoTexts?.find((infoText) => infoText.name === 'disclaimer')?.text[language] ?? null
+  const disclaimerInfo = infoTexts?.find((infoText) => infoText.name === 'disclaimer')?.text[i18n.language] ?? null
 
-  const processStream = async (stream: ReadableStream) => {
-    let content = ''
-    let error = ''
-    let fileSearch: FileSearchCompletedData
-
-    try {
-      const reader = stream.getReader()
-
-      while (true) {
-        const { value, done } = await reader.read()
-        if (done) break
-
-        const data = decoder.decode(value)
-
-        let accumulatedChunk = ''
-        for (const chunk of data.split('\n')) {
-          if (!chunk || chunk.trim().length === 0) continue
-
-          let parsedChunk: ResponseStreamEventData | undefined
-          try {
-            parsedChunk = JSON.parse(chunk)
-          } catch (e: any) {
-            console.error('Error', e)
-            console.error('Could not parse the chunk:', chunk)
-            accumulatedChunk += chunk
-
-            try {
-              parsedChunk = JSON.parse(accumulatedChunk)
-              accumulatedChunk = ''
-            } catch (e: any) {
-              console.error('Error', e)
-              console.error('Could not parse the accumulated chunk:', accumulatedChunk)
-            }
-          }
-
-          if (!parsedChunk) continue
-
-          switch (parsedChunk.type) {
-            case 'writing':
-              setCompletion((prev) => prev + parsedChunk.text)
-              content += parsedChunk.text
-              break
-
-            case 'annotation':
-              console.log('Received annotation:', parsedChunk.annotation)
-              break
-
-            case 'fileSearchStarted':
-              setIsFileSearching(true)
-              break
-
-            case 'fileSearchDone':
-              fileSearch = parsedChunk.fileSearch
-              setFileSearch(parsedChunk.fileSearch)
-              setIsFileSearching(false)
-              break
-
-            case 'error':
-              error += parsedChunk.error
-              break
-
-            case 'complete':
-              setPrevResponse({ id: parsedChunk.prevResponseId })
-              break
-
-            default:
-              break
-          }
-        }
+  const { processStream, completion, isStreaming, isFileSearching, streamController } = useChatStream({
+    onComplete: ({ message, previousResponseId }) => {
+      if (previousResponseId) {
+        setPrevResponse({ id: previousResponseId })
       }
-    } catch (err: any) {
-      handleCompletionStreamError(err, fileName)
-      error += '\nResponse stream was interrupted'
-    } finally {
-      if (content.length > 0) {
-        setMessages((prev: Message[]) =>
-          prev.concat({
-            role: 'assistant',
-            content,
-            error: error.length > 0 ? error : undefined,
-            fileSearchResult: fileSearch,
-          }),
-        )
+      if (message.content.length > 0) {
+        setMessages((prev: Message[]) => prev.concat(message))
+        refetchStatus()
       }
-
-      setStreamController(undefined)
-      setCompletion('')
-      setIsCompletionDone(true)
-      refetchStatus()
-      setFileName('')
-      setIsFileSearching(false)
-      clearRetryTimeout()
-    }
-  }
+    },
+    onError: (error) => {
+      handleCompletionStreamError(error, fileName)
+    },
+    onFileSearchComplete: (fileSearch) => {
+      setFileSearch(fileSearch)
+    },
+  })
 
   const handleSubmit = async (message: string, ignoreTokenUsageWarning: boolean) => {
     const formData = new FormData()
@@ -215,15 +129,11 @@ export const ChatV2 = () => {
 
     setMessages(newMessages)
     setPrevResponse({ id: '' })
-    setCompletion('')
-    setIsCompletionDone(false)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
     setFileName('')
     setFileSearch(undefined)
-    setIsFileSearching(false)
-    setStreamController(new AbortController())
     setRetryTimeout(() => {
       if (streamController) {
         streamController.abort()
@@ -277,8 +187,6 @@ export const ChatV2 = () => {
     if (window.confirm('Are you sure you want to empty this conversation?')) {
       setMessages([])
       setPrevResponse({ id: '' })
-      setCompletion('')
-      setIsCompletionDone(true)
       if (!ragDisplay) {
         handleRagDisplay()
       }
@@ -287,7 +195,6 @@ export const ChatV2 = () => {
       }
       setFileName('')
       setFileSearch(undefined)
-      setStreamController(undefined)
       setTokenUsageWarning('')
       setTokenUsageAlertOpen(false)
       setRetryTimeout(() => {
@@ -300,8 +207,6 @@ export const ChatV2 = () => {
   }
 
   const handleCancel = () => {
-    setIsCompletionDone(true)
-    setStreamController(undefined)
     setTokenUsageWarning('')
     setTokenUsageAlertOpen(false)
     clearRetryTimeout()
@@ -310,7 +215,7 @@ export const ChatV2 = () => {
   useEffect(() => {
     // Scrolls to bottom on initial load only
     if (!appContainerRef?.current || !conversationRef.current || messages.length === 0) return
-    if (isCompletionDone) {
+    if (!isStreaming) {
       const container = appContainerRef?.current
       if (container) {
         container.scrollTo({
@@ -327,7 +232,7 @@ export const ChatV2 = () => {
 
     const lastNode = conversationRef.current.lastElementChild as HTMLElement
 
-    if (lastNode.classList.contains('message-role-assistant') && !isCompletionDone) {
+    if (lastNode.classList.contains('message-role-assistant') && isStreaming) {
       const container = appContainerRef.current
 
       const containerRect = container.getBoundingClientRect()
@@ -341,7 +246,7 @@ export const ChatV2 = () => {
         behavior: 'smooth',
       })
     }
-  }, [isCompletionDone])
+  }, [isStreaming])
 
   useEffect(() => {
     if (!userStatus) return
@@ -369,7 +274,7 @@ export const ChatV2 = () => {
     }
   }, [userStatus, course])
 
-  if (statusLoading || infoTextsLoading) return null
+  if (statusLoading) return null
 
   if (course && course.usageLimit === 0) {
     return (
@@ -499,13 +404,13 @@ export const ChatV2 = () => {
         >
           <Alert severity="info">{t('chat:testUseInfo')}</Alert>
           <Conversation
-            courseName={course && getLanguageValue(course.name, language)}
+            courseName={course && getLanguageValue(course.name, i18n.language)}
             courseDate={course?.activityPeriod}
             conversationRef={conversationRef}
             expandedNodeHeight={window.innerHeight - (inputFieldRef.current?.clientHeight ?? 0) - 300}
             messages={messages}
             completion={completion}
-            isCompletionDone={isCompletionDone}
+            isCompletionDone={!isStreaming}
             setActiveFileSearchResult={setActiveFileSearchResult}
           />
         </Box>
@@ -523,7 +428,7 @@ export const ChatV2 = () => {
           }}
         >
           <ChatBox
-            disabled={!isCompletionDone}
+            disabled={isStreaming}
             currentModel={activeModel.name}
             availableModels={allowedModels}
             fileInputRef={fileInputRef}
@@ -545,8 +450,6 @@ export const ChatV2 = () => {
 
       {/* Annotations columns ----------------------------------------------------------------------------------------------------- */}
 
-
-      {/* LEGACY - keep here for legacy when new annotations flow is work in progres */}
       {/* {showFileSearch && (
           <FileSearchInfo
             isFileSearching={isFileSearching}
@@ -568,9 +471,7 @@ export const ChatV2 = () => {
           borderLeft: activeFileSearchResult ? '1px solid rgba(0, 0, 0, 0.12)' : 'none',
         }}
       >
-        <Box sx={{ position: 'sticky', top: 65, padding: '2rem' }}>
-          {activeFileSearchResult && <Annotations fileSearchResult={activeFileSearchResult} />}
-        </Box>
+        <Box sx={{ position: 'sticky', top: 65, padding: '2rem' }}>{activeFileSearchResult && <Annotations fileSearchResult={activeFileSearchResult} />}</Box>
       </Box>
 
       {/* Modals --------------------------------------*/}

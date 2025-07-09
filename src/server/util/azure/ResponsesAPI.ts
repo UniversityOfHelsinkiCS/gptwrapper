@@ -11,7 +11,7 @@ import { createMockStream } from './mocks/MockStream'
 import { createFileSearchTool } from './util'
 import { FileSearchResultsStore } from '../../services/azureFileSearch/fileSearchResultsStore'
 import { getAzureOpenAIClient } from './client'
-import { RagIndex } from '../../db/models'
+import type { RagIndex } from '../../db/models'
 import OpenAI from 'openai'
 import { ApplicationError } from '../ApplicationError'
 
