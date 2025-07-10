@@ -21,11 +21,18 @@ const openaiRouter = express.Router()
 const storage = multer.memoryStorage()
 const upload = multer({ storage })
 
+const MessageSchema = z.object({
+  role: z.enum(['system', 'user', 'assistant']),
+  content: z.string().min(1).max(40_000),
+})
+
+type MessageType = z.infer<typeof MessageSchema>
+
 const PostStreamSchemaV2 = z.object({
   options: z.object({
     model: z.string(),
     assistantInstructions: z.string().optional(),
-    messages: z.array(z.any()),
+    messages: z.array(MessageSchema),
     userConsent: z.boolean().optional(),
     modelTemperature: z.number().min(0).max(2),
     saveConsent: z.boolean().optional(),
@@ -107,11 +114,11 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   }
 
   // Check file
-  let optionsMessagesWithFile = null
+  let optionsMessagesWithFile: MessageType[] | undefined = undefined
 
   try {
     if (req.file) {
-      optionsMessagesWithFile = await parseFileAndAddToLastMessage(options, req)
+      optionsMessagesWithFile = await parseFileAndAddToLastMessage(options, req.file)
     }
   } catch (error) {
     logger.error('Error parsing file', { error })
