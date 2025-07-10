@@ -400,6 +400,7 @@ export const ChatV2 = () => {
             messages={messages}
             completion={completion}
             isStreaming={isStreaming}
+            isFileSearching={isFileSearching}
             setActiveFileSearchResult={setActiveFileSearchResult}
             setShowAnnotations={setShowAnnotations}
           />

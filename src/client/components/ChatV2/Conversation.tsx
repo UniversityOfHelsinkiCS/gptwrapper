@@ -118,8 +118,6 @@ const AssistantMessage = ({
   return (
     <Box
       sx={{
-        padding: '0 1.5rem',
-        borderRadius: '5px',
         overflowX: 'auto',
       }}
     >
@@ -242,9 +240,7 @@ const MessageItem = ({
       <Box
         className="message-role-user"
         data-testid="user-message"
-        sx={{
-          alignSelf: 'flex-end',
-        }}
+        sx={{ alignSelf: 'flex-end' }}
       >
         <UserMessage
           content={message.content}
@@ -262,6 +258,7 @@ export const Conversation = ({
   expandedNodeHeight,
   messages,
   completion,
+  isFileSearching,
   isStreaming,
   setActiveFileSearchResult,
   setShowAnnotations
@@ -272,6 +269,7 @@ export const Conversation = ({
   expandedNodeHeight: number
   messages: Message[]
   completion: string
+  isFileSearching: boolean
   isStreaming: boolean
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
   setShowAnnotations: (show: boolean) => void
@@ -312,7 +310,7 @@ export const Conversation = ({
           setShowAnnotations={setShowAnnotations}
         />
       ) : (
-        <LoadingMessage expandedNodeHeight={expandedNodeHeight} />
+        <LoadingMessage expandedNodeHeight={expandedNodeHeight} isFileSearching={isFileSearching} />
       ))}
   </Box>
 )
