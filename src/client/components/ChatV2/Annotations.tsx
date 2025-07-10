@@ -4,9 +4,11 @@ import { Close } from '@mui/icons-material'
 import { FileSearchCompletedData, FileSearchResultData } from '../../../shared/types'
 import { useTranslation } from 'react-i18next'
 import { useFileSearchResults } from './api'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 
-const AnnotationBox = ({
+const AnnotationTruncated = ({
     data,
     relevanceOrder,
     setIsDrawerOpen
@@ -63,6 +65,34 @@ const AnnotationBox = ({
             <Typography sx={multilineEllipsisTruncate}>
                 {data.text}
             </Typography>
+        </Box>
+    )
+}
+
+const AnnotationFull = ({ data, relevanceOrder }: { data: FileSearchResultData, relevanceOrder: number }) => {
+    return (
+        <Box key={relevanceOrder} sx={{ display: 'flex', gap: 2, }}>
+            <Box sx={{
+                color: 'black',
+                backgroundColor: 'rgba(0,0,0,0.12)',
+                minWidth: '1.8rem',
+                height: '1.8rem',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderRadius: '100%',
+            }}>
+                {relevanceOrder + 1}
+            </Box>
+            <Box>
+                <Box sx={{ display: 'flex', gap: 2, mb: '0.8rem', alignItems: 'center' }}>
+                    <Typography fontWeight={600}>{data.filename}</Typography>
+                    <Typography sx={{ opacity: 0.7 }}>{`Score: ${data.score}`}</Typography>
+                </Box>
+                <Box sx={{ p: "0.5rem 2rem", borderRadius: '0.5rem', backgroundColor: '#f5f5f5' }}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.text}</ReactMarkdown>
+                </Box>
+            </Box>
         </Box>
     )
 }
@@ -124,36 +154,15 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
             {isResultsSuccess ?
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', minHeight: 400 }}>
                     {arrayResults.map((result, i) => (
-                        <AnnotationBox key={i} data={result} relevanceOrder={i + 1} setIsDrawerOpen={setIsDrawerOpen} />
+                        <AnnotationTruncated key={i} data={result} relevanceOrder={i + 1} setIsDrawerOpen={setIsDrawerOpen} />
                     ))}
                 </Box> :
                 <Typography>{t('chat:failedSources')}</Typography>
             }
             <Drawer anchor={'right'} open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
-                <Box sx={{ maxWidth: '60vw', padding: '8rem 3rem', display: 'flex', gap: '3rem', flexDirection: 'column' }}>
-
-                    {arrayResults.map((result, relevanceOrder) => (
-                        <Box key={relevanceOrder} sx={{ display: 'flex', gap: 2, }}>
-                            <Box sx={{
-                                color: 'black',
-                                backgroundColor: 'rgba(0,0,0,0.12)',
-                                minWidth: '1.8rem',
-                                height: '1.8rem',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                borderRadius: '100%',
-                            }}>
-                                {relevanceOrder + 1}
-                            </Box>
-                            <Box>
-                                <Box sx={{ display: 'flex', gap: 2, mb: '0.6rem', alignItems: 'center' }}>
-                                    <Typography fontWeight={600}>{result.filename}</Typography>
-                                    <Typography sx={{ opacity: 0.7 }}>{`Score: ${result.score}`}</Typography>
-                                </Box>
-                                <Typography>{result.text}</Typography>
-                            </Box>
-                        </Box>
+                <Box sx={{ maxWidth: '60vw', padding: '8rem 3rem', display: 'flex', gap: '4rem', flexDirection: 'column' }}>
+                    {arrayResults.map((result, i) => (
+                        <AnnotationFull data={result} relevanceOrder={i + 1} />
                     ))}
                 </Box>
             </Drawer>
