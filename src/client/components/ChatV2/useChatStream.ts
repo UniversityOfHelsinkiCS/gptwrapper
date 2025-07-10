@@ -24,8 +24,6 @@ export const useChatStream = ({
     let fileSearch: FileSearchCompletedData | undefined
     let previousResponseId: string | undefined
 
-    setIsStreaming(true)
-
     try {
       const reader = stream.getReader()
 
@@ -116,6 +114,7 @@ export const useChatStream = ({
     processStream,
     completion,
     isStreaming,
+    setIsStreaming,
     isFileSearching,
     streamController,
   }

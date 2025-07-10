@@ -89,7 +89,7 @@ export const ChatV2 = () => {
 
   const disclaimerInfo = infoTexts?.find((infoText) => infoText.name === 'disclaimer')?.text[i18n.language] ?? null
 
-  const { processStream, completion, isStreaming, isFileSearching, streamController } = useChatStream({
+  const { processStream, completion, isStreaming, setIsStreaming, isFileSearching, streamController } = useChatStream({
     onComplete: ({ message, previousResponseId }) => {
       if (previousResponseId) {
         setPrevResponse({ id: previousResponseId })
@@ -133,6 +133,8 @@ export const ChatV2 = () => {
         streamController.abort()
       }
     }, 5000)
+
+    setIsStreaming(true)
 
     try {
       const { tokenUsageAnalysis, stream } = await getCompletionStream({
@@ -196,6 +198,7 @@ export const ChatV2 = () => {
   const handleCancel = () => {
     setTokenUsageWarning('')
     setTokenUsageAlertOpen(false)
+    setIsStreaming(false)
     clearRetryTimeout()
   }
 
@@ -225,7 +228,7 @@ export const ChatV2 = () => {
       const containerRect = container.getBoundingClientRect()
       const lastNodeRect = lastNode.getBoundingClientRect()
 
-      const scrollTopPadding = 220
+      const scrollTopPadding = 200
       const scrollOffset = lastNodeRect.top - containerRect.top + container.scrollTop - scrollTopPadding
 
       container.scrollTo({
@@ -327,7 +330,6 @@ export const ChatV2 = () => {
       >
         <Box sx={{ position: 'sticky', top: 70, padding: '2rem 1.5rem' }}>
           {course && <ChatInfo course={course} />}
-
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', mb: '2rem' }}>
             <OutlineButtonBlack startIcon={<DeleteIcon />} onClick={handleReset} id="empty-conversation-button">
               {t('chat:emptyConversation')}
@@ -397,7 +399,7 @@ export const ChatV2 = () => {
             expandedNodeHeight={window.innerHeight - (inputFieldRef.current?.clientHeight ?? 0) - 300}
             messages={messages}
             completion={completion}
-            isCompletionDone={!isStreaming}
+            isStreaming={isStreaming}
             setActiveFileSearchResult={setActiveFileSearchResult}
             setShowAnnotations={setShowAnnotations}
           />
