@@ -91,7 +91,8 @@
     "copyToClipboard": "Copy to clipboard",
     "sources": "Source materials",
     "displaySources": "Sources",
-    "readSources": "Reading sources"
+    "readSources": "Reading sources",
+    "failedSources": "Failed to display sources"
   },
   "settings": {
     "prompt": "Conversation prompt",

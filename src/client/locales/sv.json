@@ -98,7 +98,8 @@
     "copyToClipboard": "Kopiera till urklipp",
     "sources": "Källmaterial",
     "displaySources": "Källor",
-    "readSources": "Läser källor"
+    "readSources": "Läser källor",
+    "failedSources": "Misslyckades att visa källor"
   },
   "settings": {
     "prompt": "Samtalsstart",
