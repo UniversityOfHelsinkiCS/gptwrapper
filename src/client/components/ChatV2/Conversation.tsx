@@ -21,67 +21,50 @@ import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 const UserMessage = ({
   content,
   attachements,
-  isLastAssistantNode,
-  expandedNodeHeight,
 }: {
   content: string
   attachements?: string
-  isLastAssistantNode: boolean
-  expandedNodeHeight: number
 }) => (
   <Box
-    className="message-role-user"
-    data-testid="user-message"
     sx={{
-      minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
-      alignSelf: 'flex-end',
+      backgroundColor: '#efefef',
+      padding: '1.5rem 2rem',
+      marginLeft: 20,
+      borderRadius: '0.6rem',
+      boxShadow: '0px 2px 2px rgba(0, 0, 0, 0.2)',
+      whiteSpace: 'pre-wrap', // 🧠 This preserves formatting
+      wordBreak: 'break-word',
     }}
   >
-    <Box
-      sx={{
-        backgroundColor: '#efefef',
-        padding: '1.5rem 2rem',
-        marginLeft: 20,
-        borderRadius: '0.6rem',
-        boxShadow: '0px 2px 2px rgba(0, 0, 0, 0.2)',
-        whiteSpace: 'pre-wrap', // 🧠 This preserves formatting
-        wordBreak: 'break-word',
-      }}
-    >
-      {content}
+    {content}
 
-      {attachements && (
-        <Typography
-          variant="body2"
-          sx={{
-            display: 'flex',
-            gap: 0.5,
-            alignItems: 'center',
-            opacity: 0.7,
-            marginTop: '1rem',
-          }}
-        >
-          <AttachFileIcon fontSize="small" />
-          {attachements}
-        </Typography>
-      )}
-    </Box>
+    {attachements && (
+      <Typography
+        variant="body2"
+        sx={{
+          display: 'flex',
+          gap: 0.5,
+          alignItems: 'center',
+          opacity: 0.7,
+          marginTop: '1rem',
+        }}
+      >
+        <AttachFileIcon fontSize="small" />
+        {attachements}
+      </Typography>
+    )}
   </Box>
 )
 
 const AssistantMessage = ({
   content,
   error,
-  isLastAssistantNode,
-  expandedNodeHeight,
   fileSearchResult,
   setActiveFileSearchResult,
   setShowAnnotations
 }: {
   content: string
   error?: string
-  isLastAssistantNode: boolean
-  expandedNodeHeight: number
   fileSearchResult?: FileSearchCompletedData
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
   setShowAnnotations: (show: boolean) => void
@@ -133,94 +116,92 @@ const AssistantMessage = ({
   }
 
   return (
-    <Box className={`message-role-assistant`} data-testid="assistant-message" sx={{ minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto' }}>
-      <Box
-        sx={{
-          padding: '0 1.5rem',
-          borderRadius: '5px',
-          overflowX: 'auto',
-        }}
-      >
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
-          rehypePlugins={[[rehypeKatex, katexOptions]]}
-          components={{
-            code(props) {
-              const { children, className, node, ...rest } = props
-              const match = /language-(\w+)/.exec(className || '')
-              const language = match?.[1] || 'plaintext' // safe fallback
+    <Box
+      sx={{
+        padding: '0 1.5rem',
+        borderRadius: '5px',
+        overflowX: 'auto',
+      }}
+    >
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
+        rehypePlugins={[[rehypeKatex, katexOptions]]}
+        components={{
+          code(props) {
+            const { children, className, node, ...rest } = props
+            const match = /language-(\w+)/.exec(className || '')
+            const language = match?.[1] || 'plaintext' // safe fallback
 
-              if (match) {
-                const codeBlockId = `codeBlock-${++codeCount}`
+            if (match) {
+              const codeBlockId = `codeBlock-${++codeCount}`
 
-                return (
-                  <Box
+              return (
+                <Box
+                  sx={{
+                    borderRadius: '0.5rem',
+                    overflowX: 'auto',
+                    maxWidth: '100%',
+                  }}
+                >
+                  <Typography
                     sx={{
-                      borderRadius: '0.5rem',
-                      overflowX: 'auto',
-                      maxWidth: '100%',
+                      opacity: 1,
+                      fontSize: '0.8rem',
+                      padding: '0.4rem 0.8rem',
+                      backgroundColor: '#efefef',
                     }}
                   >
-                    <Typography
-                      sx={{
-                        opacity: 1,
-                        fontSize: '0.8rem',
-                        padding: '0.4rem 0.8rem',
-                        backgroundColor: '#efefef',
+                    {language}
+                  </Typography>
+                  <Box sx={{ position: 'relative' }}>
+                    {/* @ts-ignore */}
+                    <SyntaxHighlighter
+                      {...rest}
+                      PreTag="div"
+                      children={String(children)}
+                      language={language}
+                      customStyle={{
+                        padding: '1rem',
+                        margin: 0,
+                        fontSize: '15px',
+                        wordBreak: 'break-all',
+                        overflowWrap: 'break-word',
+                        whiteSpace: 'pre-wrap',
                       }}
-                    >
-                      {language}
-                    </Typography>
-                    <Box sx={{ position: 'relative' }}>
-                      {/* @ts-ignore */}
-                      <SyntaxHighlighter
-                        {...rest}
-                        PreTag="div"
-                        children={String(children)}
-                        language={language}
-                        customStyle={{
-                          padding: '1rem',
-                          margin: 0,
-                          fontSize: '15px',
-                          wordBreak: 'break-all',
-                          overflowWrap: 'break-word',
-                          whiteSpace: 'pre-wrap',
-                        }}
-                        style={oneDark}
-                        id={codeBlockId}
-                      />
-                      <CopyToClipboardButton
-                        id={codeBlockId}
-                        copied={String(children)}
-                        iconColor="#FFF"
-                        buttonStyle={{ position: 'absolute', top: '8px', right: '8px' }}
-                      />
-                    </Box>
+                      style={oneDark}
+                      id={codeBlockId}
+                    />
+                    <CopyToClipboardButton
+                      id={codeBlockId}
+                      copied={String(children)}
+                      iconColor="#FFF"
+                      buttonStyle={{ position: 'absolute', top: '8px', right: '8px' }}
+                    />
                   </Box>
-                )
-              } else {
-                return (
-                  <code {...rest} className={className}>
-                    {children}
-                  </code>
-                )
-              }
-            },
-          }}
-        >
-          {processedContent}
-        </ReactMarkdown>
-        {error && (
-          <Box>
-            <Typography variant="body1" fontStyle="italic" color="#cc0000">{`\n\n ${error}`}</Typography>
-          </Box>
-        )}
-        {fileSearchResult?.status === "completed" &&
-          <OutlineButtonBlack sx={{ mt: 3 }} startIcon={<FormatQuoteIcon />} onClick={() => handleAnnotations(fileSearchResult)}>
-            <Typography variant='body2'>{`${t('chat:displaySources')}: `}<em>{fileSearchResult?.searchedFiles?.join(', ')}</em></Typography>
-          </OutlineButtonBlack>
-        }
-      </Box>
+                </Box>
+              )
+            } else {
+              return (
+                <code {...rest} className={className}>
+                  {children}
+                </code>
+              )
+            }
+          },
+        }}
+      >
+        {processedContent}
+      </ReactMarkdown>
+      {error && (
+        <Box>
+          <Typography variant="body1" fontStyle="italic" color="#cc0000">{`\n\n ${error}`}</Typography>
+        </Box>
+      )}
+      {fileSearchResult?.status === "completed" &&
+        <OutlineButtonBlack sx={{ mt: 3 }} startIcon={<FormatQuoteIcon />} onClick={() => handleAnnotations(fileSearchResult)}>
+          <Typography variant='body2'>{`${t('chat:displaySources')}: `}<em>{fileSearchResult?.searchedFiles?.join(', ')}</em></Typography>
+        </OutlineButtonBlack>
+      }
     </Box>
   )
 }
@@ -241,24 +222,35 @@ const MessageItem = ({
 
   if (message.role === 'assistant') {
     return (
-      <AssistantMessage
-        content={message.content}
-        error={message.error}
-        isLastAssistantNode={isLastAssistantNode}
-        expandedNodeHeight={expandedNodeHeight}
-        fileSearchResult={message.fileSearchResult}
-        setActiveFileSearchResult={setActiveFileSearchResult}
-        setShowAnnotations={setShowAnnotations}
-      />
+      <Box
+        className={`message-role-assistant`}
+        data-testid="assistant-message"
+        sx={{
+          minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
+        }}>
+        <AssistantMessage
+          content={message.content}
+          error={message.error}
+          fileSearchResult={message.fileSearchResult}
+          setActiveFileSearchResult={setActiveFileSearchResult}
+          setShowAnnotations={setShowAnnotations}
+        />
+      </Box>
     )
   } else {
     return (
-      <UserMessage
-        content={message.content}
-        attachements={message.attachements ?? ''}
-        isLastAssistantNode={isLastAssistantNode}
-        expandedNodeHeight={expandedNodeHeight}
-      />
+      <Box
+        className="message-role-user"
+        data-testid="user-message"
+        sx={{
+          alignSelf: 'flex-end',
+        }}
+      >
+        <UserMessage
+          content={message.content}
+          attachements={message.attachements ?? ''}
+        />
+      </Box>
     )
   }
 }
@@ -270,7 +262,7 @@ export const Conversation = ({
   expandedNodeHeight,
   messages,
   completion,
-  isCompletionDone,
+  isStreaming,
   setActiveFileSearchResult,
   setShowAnnotations
 }: {
@@ -280,7 +272,7 @@ export const Conversation = ({
   expandedNodeHeight: number
   messages: Message[]
   completion: string
-  isCompletionDone: boolean
+  isStreaming: boolean
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
   setShowAnnotations: (show: boolean) => void
 }) => (
@@ -309,7 +301,7 @@ export const Conversation = ({
         />
       )
     })}
-    {!isCompletionDone &&
+    {isStreaming &&
       messages.length > 0 &&
       (completion.length > 0 ? (
         <MessageItem
