@@ -271,11 +271,11 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     throw ApplicationError.Forbidden('Usage limit reached')
   }
 
-  let optionsMessagesWithFile = null
+  let optionsMessagesWithFile: MessageType[] | undefined = undefined
 
   try {
     if (req.file) {
-      optionsMessagesWithFile = await parseFileAndAddToLastMessage(options, req)
+      optionsMessagesWithFile = await parseFileAndAddToLastMessage(options, req.file)
     }
   } catch (error) {
     logger.error('Error parsing file', { error })
