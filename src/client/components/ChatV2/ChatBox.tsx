@@ -65,17 +65,16 @@ export const ChatBox = ({
   }
 
   const handleFileTypeValidation = (file: File): void => {
-    const allowedFileTypes = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'application/pdf']
-
-    if (allowedFileTypes.includes(file.type)) {
-      setFileName(file.name)
-    } else {
+    if (!file.type.startsWith('text/') && file.type !== 'application/pdf') {
       setDisallowedFileType(file.type)
       setFileTypeAlertOpen(true)
       setTimeout(() => {
         setFileTypeAlertOpen(false)
-      }, 5000)
+      }, 6000)
+      return
     }
+
+    setFileName(file.name)
   }
 
   const onSubmit = (e: React.FormEvent) => {
@@ -177,13 +176,7 @@ export const ChatBox = ({
             <Box>
               <IconButton component="label">
                 <AttachFileIcon />
-                <input
-                  type="file"
-                  accept="text/*,application/pdf"
-                  hidden
-                  ref={fileInputRef}
-                  onChange={(e) => e.target.files?.[0] && handleFileTypeValidation(e.target.files[0])}
-                />
+                <input type="file" accept="*" hidden ref={fileInputRef} onChange={(e) => e.target.files?.[0] && handleFileTypeValidation(e.target.files[0])} />
               </IconButton>
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
               <ModelSelector currentModel={currentModel} setModel={setModel} availableModels={availableModels} />
