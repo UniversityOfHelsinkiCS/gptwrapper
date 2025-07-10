@@ -441,19 +441,6 @@ export const ChatV2 = () => {
 
       {/* Annotations columns ----------------------------------------------------------------------------------------------------- */}
 
-      {/* {showFileSearch && (
-          <FileSearchInfo
-            isFileSearching={isFileSearching}
-            fileSearchResult={fileSearch}
-            messages={messages}
-            ragDisplay={ragDisplay}
-            toggleRagDisplay={handleRagDisplay}
-          />
-        )} */}
-      {/* <pre>{isFileSearching}</pre>
-        <pre>{JSON.stringify(fileSearch, null, 2)}</pre>
-        <pre>{ragDisplay}</pre> */}
-
       <Box
         sx={{
           flex: 1,
