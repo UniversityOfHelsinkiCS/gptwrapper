@@ -15,7 +15,8 @@
     "build": "vite build",
     "prepare": "husky install",
     "test:e2e": "playwright test",
-    "test:record": "playwright codegen -o e2e/recorded.spec.ts localhost:3000"
+    "test:record": "playwright codegen -o e2e/recorded.spec.ts localhost:3000",
+    "translations": "node scripts/analyzeTranslations.js"
   },
   "repository": {
     "type": "git",
@@ -53,10 +54,12 @@
     "concurrently": "^9.0.0",
     "eslint": "^9.13.0",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-i18next": "^6.1.2",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.37.2",
     "husky": "^9.0.10",
     "lint-staged": "^15.2.1",
+    "minimist": "^1.2.8",
     "prettier": "^3.2.5",
     "sequelize-cli": "^6.6.2",
     "tsx": "4.19.4",
