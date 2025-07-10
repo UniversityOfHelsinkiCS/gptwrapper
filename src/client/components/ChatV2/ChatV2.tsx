@@ -111,14 +111,9 @@ export const ChatV2 = () => {
   const handleSubmit = async (message: string, ignoreTokenUsageWarning: boolean) => {
     const formData = new FormData()
 
-    let file = fileInputRef.current?.files?.[0]
+    const file = fileInputRef.current?.files?.[0]
     if (file) {
-      if (ALLOWED_FILE_TYPES.includes(file.type)) {
-        formData.append('file', file)
-      } else {
-        console.error('File not attached')
-        file = undefined
-      }
+      formData.append('file', file)
     }
 
     const newMessages = messages.concat({
@@ -463,7 +458,7 @@ export const ChatV2 = () => {
           position: 'relative',
           transition: 'border 300ms',
           borderLeft: '1px solid',
-          borderColor: showAnnotations ? 'rgba(0,0,0,0.12)' : 'rgba(0,0,0,0)'
+          borderColor: showAnnotations ? 'rgba(0,0,0,0.12)' : 'rgba(0,0,0,0)',
         }}
       >
         <Box
@@ -472,8 +467,9 @@ export const ChatV2 = () => {
             top: 65,
             padding: '2rem',
             transition: 'transform 250ms ease-in-out',
-            transform: showAnnotations ? 'translateX(0%)' : 'translate(100%)'
-          }}>
+            transform: showAnnotations ? 'translateX(0%)' : 'translate(100%)',
+          }}
+        >
           {activeFileSearchResult && <Annotations fileSearchResult={activeFileSearchResult} setShowAnnotations={setShowAnnotations} />}
         </Box>
       </Box>

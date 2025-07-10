@@ -9,7 +9,7 @@ export const useChatStream = ({
 }: {
   onFileSearchComplete: (data: FileSearchCompletedData) => void
   onComplete: ({ previousResponseId, message }: { previousResponseId: string | undefined; message: Message }) => void
-  onError: (error: string) => void
+  onError: (error: unknown) => void
 }) => {
   const [completion, setCompletion] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
@@ -91,7 +91,7 @@ export const useChatStream = ({
           }
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       error += '\nResponse stream was interrupted'
       onError(err)
     } finally {
