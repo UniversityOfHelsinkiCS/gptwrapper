@@ -264,8 +264,6 @@ export const ChatV2 = () => {
     }
   }, [userStatus, course])
 
-  if (statusLoading) return null
-
   if (course && course.usageLimit === 0) {
     return (
       <Box>
@@ -307,6 +305,8 @@ export const ChatV2 = () => {
   }
 
   const showRagSelector = (ragIndices?.length ?? 0) > 0
+
+  if (statusLoading) return null
 
   return (
     <Box

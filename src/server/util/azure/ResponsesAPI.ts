@@ -1,6 +1,13 @@
 import type { Tiktoken } from '@dqbd/tiktoken'
 import type { Response } from 'express'
-import type { FileSearchTool, ResponseIncludable, ResponseInput, ResponseItemsPage, ResponseStreamEvent } from 'openai/resources/responses/responses'
+import type {
+  FileSearchTool,
+  ResponseIncludable,
+  ResponseInput,
+  ResponseInputItem,
+  ResponseItemsPage,
+  ResponseStreamEvent,
+} from 'openai/resources/responses/responses'
 import type { Stream } from 'openai/streaming'
 import { z } from 'zod/v4'
 import { validModels } from '../../../config'
@@ -72,7 +79,7 @@ export class ResponsesClient {
     include,
     attemptNumber = 1,
   }: {
-    input: ResponseInput
+    input: ResponseInputItem
     prevResponseId?: string
     include?: ResponseIncludable[]
     attemptNumber?: number
