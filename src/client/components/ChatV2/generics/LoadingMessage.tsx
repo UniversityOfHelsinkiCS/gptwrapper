@@ -15,7 +15,7 @@ const sourcesTextStyle = {
   fontStyle: 'italic',
   ml: '1rem',
   color: 'rgba(0,0,0,0.6)',
-  animation: 'slideInFromLeft 0.3s ease-out',
+  animation: 'slideIn 0.3s ease-out',
 }
 
 export const LoadingMessage = ({ expandedNodeHeight, isFileSearching }: { expandedNodeHeight: number; isFileSearching: boolean }) => {
@@ -38,7 +38,7 @@ export const LoadingMessage = ({ expandedNodeHeight, isFileSearching }: { expand
             }
           }
           
-          @keyframes slideInFromLeft {
+          @keyframes slideIn {
             0% {
               transform: translateX(-20px);
               opacity: 0;

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Box, Typography, Chip, IconButton, Drawer } from '@mui/material'
 import { Close } from '@mui/icons-material'
 import { FileSearchCompletedData, FileSearchResultData } from '../../../shared/types'
@@ -11,11 +11,13 @@ import remarkGfm from 'remark-gfm'
 const AnnotationTruncated = ({
     data,
     relevanceOrder,
-    setIsDrawerOpen
+    setIsDrawerOpen,
+    setSelectedAnnotation
 }: {
     data: FileSearchResultData,
-    relevanceOrder: number // By default the backend returns the RAG results in most relevant results first 
+    relevanceOrder: number // By default the backend returns the RAG results in most relevant results first
     setIsDrawerOpen: (open: boolean) => void
+    setSelectedAnnotation: (order: number) => void
 }) => {
     const [isHovering, setIsHovering] = useState<boolean>(false)
 
@@ -44,7 +46,10 @@ const AnnotationTruncated = ({
                 borderRadius: '0.6rem',
                 cursor: 'pointer'
             }}
-            onClick={() => setIsDrawerOpen(true)}
+            onClick={() => {
+                setIsDrawerOpen(true)
+                setSelectedAnnotation(relevanceOrder)
+            }}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
 
@@ -69,9 +74,35 @@ const AnnotationTruncated = ({
     )
 }
 
-const AnnotationFull = ({ data, relevanceOrder }: { data: FileSearchResultData, relevanceOrder: number }) => {
+const AnnotationFull = ({
+    data,
+    relevanceOrder,
+    isSelected
+}: {
+    data: FileSearchResultData,
+    relevanceOrder: number,
+    isSelected: boolean
+}) => {
+
+    const annotationRef = useRef<HTMLDivElement>(null)
+    const [shouldFlash, setShouldFlash] = useState(false)
+
+    useEffect(() => {
+        if (isSelected && annotationRef.current) {
+            annotationRef.current.scrollIntoView({
+                behavior: 'instant',
+                block: 'center'
+            })
+            setShouldFlash(true)
+        }
+
+        return () => setShouldFlash(false)
+    }, [isSelected])
+
     return (
-        <Box key={relevanceOrder} sx={{ display: 'flex', gap: 2, }}>
+        <Box
+            ref={annotationRef}
+            sx={{ display: 'flex', gap: 2, }}>
             <Box sx={{
                 color: 'black',
                 backgroundColor: 'rgba(0,0,0,0.12)',
@@ -82,15 +113,33 @@ const AnnotationFull = ({ data, relevanceOrder }: { data: FileSearchResultData, 
                 alignItems: 'center',
                 borderRadius: '100%',
             }}>
-                {relevanceOrder + 1}
+                {relevanceOrder}
             </Box>
             <Box>
                 <Box sx={{ display: 'flex', gap: 2, mb: '0.8rem', alignItems: 'center' }}>
                     <Typography fontWeight={600}>{data.filename}</Typography>
                     <Typography sx={{ opacity: 0.7 }}>{`Score: ${data.score}`}</Typography>
                 </Box>
-                <Box sx={{ p: "0.5rem 2rem", borderRadius: '0.5rem', backgroundColor: '#f5f5f5' }}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.text}</ReactMarkdown>
+                <Box
+                    sx={{
+                        p: "0.5rem 2rem",
+                        borderRadius: '0.5rem',
+                        backgroundColor: '#f5f5f5',
+                        animation: shouldFlash ? 'flashIn 0.5s ease-out 0.4s 1' : undefined,
+                    }}
+                >
+                    <style>
+                        {`
+                        @keyframes flashIn {
+                            0% { background-color: #f5f5f5; }
+                            50% { background-color:#cccccc; }
+                            100% { background-color: #f5f5f5; }
+                        }
+                        `}
+                    </style>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {data.text}
+                    </ReactMarkdown>
                 </Box>
             </Box>
         </Box>
@@ -134,6 +183,7 @@ const Queries = ({ queries }: { queries: string[] }) => {
 const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResult: FileSearchCompletedData; setShowAnnotations: (show: boolean) => void }) => {
     const { data: results, isSuccess: isResultsSuccess } = useFileSearchResults(fileSearchResult.id)
     const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
+    const [selectedAnnotation, setSelectedAnnotation] = useState<number | null>(null)
     const arrayResults = Array.isArray(results) ? results : []
     const { t } = useTranslation()
 
@@ -154,7 +204,13 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
             {isResultsSuccess ?
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', minHeight: 400 }}>
                     {arrayResults.map((result, i) => (
-                        <AnnotationTruncated key={i} data={result} relevanceOrder={i + 1} setIsDrawerOpen={setIsDrawerOpen} />
+                        <AnnotationTruncated
+                            key={i}
+                            data={result}
+                            relevanceOrder={i + 1}
+                            setIsDrawerOpen={setIsDrawerOpen}
+                            setSelectedAnnotation={setSelectedAnnotation}
+                        />
                     ))}
                 </Box> :
                 <Typography>{t('chat:failedSources')}</Typography>
@@ -162,7 +218,12 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
             <Drawer anchor={'right'} open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
                 <Box sx={{ maxWidth: '60vw', padding: '8rem 3rem', display: 'flex', gap: '4rem', flexDirection: 'column' }}>
                     {arrayResults.map((result, i) => (
-                        <AnnotationFull data={result} relevanceOrder={i + 1} />
+                        <AnnotationFull
+                            key={i}
+                            data={result}
+                            relevanceOrder={i + 1}
+                            isSelected={selectedAnnotation === i + 1}
+                        />
                     ))}
                 </Box>
             </Drawer>
