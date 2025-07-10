@@ -147,7 +147,10 @@
     "goHome": "Palaa etusivulle",
     "reload": "Lataa sivu uudelleen",
     "description": "Pahoittelut, jokin meni pieleen. Kehittäjätiimillemme on ilmoitettu ongelmasta.",
-    "errorMessage": "Virheviesti"
+    "errorMessage": "Virheviesti",
+    "stackTrace": "Stack trace",
+    "cause": "Cause",
+    "waitingForResponse": "Waiting for response"
   },
   "admin": {
     "showing": "Näytetään",
@@ -212,7 +215,8 @@
     "promptCount": "Alustukset",
     "tokenUsage": "Käytetyt tokenit",
     "activityPeriod": "Kurssi käynnissä",
-    "lastUpdate": "Viimeisin julkaisu: "
+    "lastUpdate": "Viimeisin julkaisu: ",
+    "updater": "Updater"
   },
   "course": {
     "showDiscussions": "Näytä talletetut keskustelut",
@@ -256,7 +260,11 @@
     "isSavedNotOptOut": "Kurssin keskustelut tallennetaan anonyymisti.\n\nTallennettuja keskusteluja voidaan käyttää tutkimuksessa",
     "isSavedForTeacherOptOut": "Kurssin keskustelut tallennetaan anonyymisti jos käyttäjä antaa luvan",
     "directPromptLink": "Linkki kurssichattiin käyttäen tätä alustusta",
-    "copyDirectPromptLinkInfo": "Kopioi linkki tämän alustuksen kurssichattiin"
+    "copyDirectPromptLinkInfo": "Kopioi linkki tämän alustuksen kurssichattiin",
+    "stats": "Statistiikka",
+    "discussions": "Keskustelut",
+    "prompts": "Alustukset",
+    "rag": "RAG"
   },
   "tooltip": {
     "copied": "Kopioitu!"

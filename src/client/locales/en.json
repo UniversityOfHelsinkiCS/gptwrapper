@@ -139,7 +139,10 @@
     "goHome": "Go to home",
     "reload": "Reload page",
     "description": "Sorry, something went wrong. Our team has been notified.",
-    "errorMessage": "Error message"
+    "errorMessage": "Error message",
+    "stackTrace": "Stack trace",
+    "cause": "Cause",
+    "waitingForResponse": "Waiting for response"
   },
   "chats": {
     "header": "Current course chats",
@@ -212,7 +215,8 @@
     "promptCount": "Prompts",
     "tokenUsage": "Used tokens",
     "activityPeriod": "Course active",
-    "lastUpdate": "Latest release: "
+    "lastUpdate": "Latest release: ",
+    "updater": "Updater"
   },
   "course": {
     "showDiscussions": "Show the saved discussions",
@@ -256,7 +260,11 @@
     "isSavedNotOptOut": "The course discussions will be saved anonymously\n\nSaved discussions can be used for research purposes",
     "isSavedForTeacherOptOut": "The course discussions will be saved anonymously if user gives permission to save. Saved discussions can be used for research purposes",
     "directPromptLink": "Link to chat with this prompt active",
-    "copyDirectPromptLinkInfo": "Copy a link to chat with this prompt active"
+    "copyDirectPromptLinkInfo": "Copy a link to chat with this prompt active",
+    "stats": "Statistics",
+    "discussions": "Discussions",
+    "prompts": "Prompts",
+    "rag": "RAG"
   },
   "tooltip": {
     "copied": "Copied!"

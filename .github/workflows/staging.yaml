@@ -39,8 +39,9 @@ jobs:
       - name: Copy dependencies from the container
         run: docker cp gptwrapper:/opt/app-root/src/node_modules ./node_modules
 
-      #- run: npm run tsc
-      #- run: npm run lint
+      - run: npm run tsc
+      - run: npm run lint
+      - run: npm run translations -- --lang fi,en
 
       # https://playwrightsolutions.com/playwright-github-action-to-cache-the-browser-binaries/
       - name: Get installed Playwright version
@@ -59,8 +60,6 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
       - run: npx playwright install-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-
-      - run: curl localhost:8000
 
       - name: Run tests
         env:
