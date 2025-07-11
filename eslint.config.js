@@ -20,6 +20,7 @@ export default [
       // 'max-len': 200,
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
+      'i18next/no-literal-string': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
