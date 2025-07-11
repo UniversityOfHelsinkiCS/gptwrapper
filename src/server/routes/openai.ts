@@ -23,7 +23,7 @@ const upload = multer({ storage })
 
 const MessageSchema = z.object({
   role: z.enum(['system', 'user', 'assistant']),
-  content: z.string().min(1).max(40_000),
+  content: z.string().min(0).max(40_000),
 })
 
 type MessageType = z.infer<typeof MessageSchema>
