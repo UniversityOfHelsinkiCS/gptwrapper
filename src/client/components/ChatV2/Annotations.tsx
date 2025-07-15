@@ -231,7 +231,7 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
                 <Box sx={{ maxWidth: '60vw', padding: '6rem 3rem' }}>
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <IconButton
-                            id="close-annotations"
+                            id="close-expanded-annotations"
                             onClick={() => {
                                 setIsDrawerOpen(false)
                                 setSelectedAnnotation(null)
