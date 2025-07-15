@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { HelpOutline, Send } from '@mui/icons-material'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
-import { Box, Chip, IconButton, TextField, Tooltip, Typography, FormControlLabel, Switch, Alert, Button } from '@mui/material'
+import { Box, Chip, IconButton, TextField, Tooltip, Typography, FormControlLabel, Switch, Alert } from '@mui/material'
+import CircularProgress from '@mui/material/CircularProgress';
 import { useRef } from 'react'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
@@ -102,7 +103,11 @@ export const ChatBox = ({
   }, [statusLoading, userStatus])
 
   if (statusLoading) {
-    return <p>loading</p>
+    return (
+      <Box sx={{ display: 'flex' }}>
+        <CircularProgress />
+      </Box>
+    )
   }
   return (
     <Box>
