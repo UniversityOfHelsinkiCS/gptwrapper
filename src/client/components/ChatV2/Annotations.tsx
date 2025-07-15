@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next'
 import { useFileSearchResults } from './api'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { OutlineButtonBlack } from './generics/Buttons'
+import SubjectIcon from '@mui/icons-material/Subject';
 
 
 const AnnotationTruncated = ({
@@ -74,7 +76,7 @@ const AnnotationTruncated = ({
     )
 }
 
-const AnnotationFull = ({
+const AnnotationExpanded = ({
     data,
     relevanceOrder,
     isSelected
@@ -212,19 +214,42 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
                             setSelectedAnnotation={setSelectedAnnotation}
                         />
                     ))}
+                    <OutlineButtonBlack
+                        sx={{ margin: '1.5rem auto' }}
+                        startIcon={<SubjectIcon />}
+                        onClick={() => {
+                            setIsDrawerOpen(true)
+                            setSelectedAnnotation(null)
+                        }}
+                    >
+                        {t("chat:readMore")}
+                    </OutlineButtonBlack>
                 </Box> :
                 <Typography>{t('chat:failedSources')}</Typography>
             }
             <Drawer anchor={'right'} open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
-                <Box sx={{ maxWidth: '60vw', padding: '8rem 3rem', display: 'flex', gap: '4rem', flexDirection: 'column' }}>
-                    {arrayResults.map((result, i) => (
-                        <AnnotationFull
-                            key={i}
-                            data={result}
-                            relevanceOrder={i + 1}
-                            isSelected={selectedAnnotation === i + 1}
-                        />
-                    ))}
+                <Box sx={{ maxWidth: '60vw', padding: '6rem 3rem' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <IconButton
+                            id="close-annotations"
+                            onClick={() => {
+                                setIsDrawerOpen(false)
+                                setSelectedAnnotation(null)
+                            }}
+                        >
+                            <Close />
+                        </IconButton>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: '4rem', flexDirection: 'column' }}>
+                        {arrayResults.map((result, i) => (
+                            <AnnotationExpanded
+                                key={i}
+                                data={result}
+                                relevanceOrder={i + 1}
+                                isSelected={selectedAnnotation === i + 1}
+                            />
+                        ))}
+                    </Box>
                 </Box>
             </Drawer>
         </Box>
