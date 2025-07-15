@@ -92,7 +92,8 @@
     "sources": "Lähdemateriaali",
     "displaySources": "Lähteet",
     "readSources": "Luetaan lähteitä",
-    "failedSources": "Lähteiden näyttäminen epäonnistui"
+    "failedSources": "Lähteiden näyttäminen epäonnistui",
+    "freeModel": "ilmainen"
   },
   "settings": {
     "prompt": "Keskustelun alustus",

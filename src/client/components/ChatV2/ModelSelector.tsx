@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { MenuItem, FormControl, Select, SelectChangeEvent } from '@mui/material'
+import { MenuItem, FormControl, Select, SelectChangeEvent, Typography } from '@mui/material'
+import { FREE_MODEL } from '../../../config';
 
 const ModelSelector = ({ currentModel, setModel, availableModels }: { currentModel: string; setModel: (model: string) => void; availableModels: string[] }) => {
   const { t } = useTranslation()
@@ -18,16 +19,16 @@ const ModelSelector = ({ currentModel, setModel, availableModels }: { currentMod
         value={validModel}
         onChange={(event: SelectChangeEvent) => setModel(event.target.value)}
       >
-        {/* <MenuItem value={''}>
-          <em>{t('prompt')}</em>
-        </MenuItem> */}
         {availableModels.map((model) => (
           <MenuItem key={model} value={model}>
-            <>{model}</>
+            <Typography>
+              {model}
+              {model === FREE_MODEL && <Typography component='span' sx={{ fontStyle: 'italic', opacity: 0.8 }}> ({t("chat:freeModel")})</Typography>}
+            </Typography>
           </MenuItem>
         ))}
       </Select>
-    </FormControl>
+    </FormControl >
   )
 }
 

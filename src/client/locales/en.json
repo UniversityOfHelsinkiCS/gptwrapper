@@ -92,7 +92,8 @@
     "sources": "Source materials",
     "displaySources": "Sources",
     "readSources": "Reading sources",
-    "failedSources": "Failed to display sources"
+    "failedSources": "Failed to display sources",
+    "freeModel": "free"
   },
   "settings": {
     "prompt": "Conversation prompt",

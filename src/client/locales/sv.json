@@ -99,7 +99,8 @@
     "sources": "Källmaterial",
     "displaySources": "Källor",
     "readSources": "Läser källor",
-    "failedSources": "Misslyckades att visa källor"
+    "failedSources": "Misslyckades att visa källor",
+    "freeModel": "gratis"
   },
   "settings": {
     "prompt": "Samtalsstart",
