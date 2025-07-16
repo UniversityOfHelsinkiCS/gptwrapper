@@ -72,6 +72,10 @@ const parseFileAndAddToLastMessage = async (options: PostStreamBody['options'], 
   return options.messages
 }
 
+openaiRouter.get('/stream/k6', async (r, res) => {
+  res.status(200).send('yahooo!')
+})
+
 openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   const req = r as RequestWithUser
   const { options, courseId } = PostStreamSchemaV2.parse(JSON.parse(req.body.data))
