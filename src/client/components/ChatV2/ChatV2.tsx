@@ -388,7 +388,7 @@ export const ChatV2 = () => {
             margin: 'auto',
             paddingTop: '1rem',
             paddingBottom: '8rem',
-            overflowY: 'auto',
+            overflowY: 'visible',
           }}
         >
           <Alert severity="info">{t('chat:testUseInfo')}</Alert>
@@ -411,11 +411,9 @@ export const ChatV2 = () => {
           sx={{
             position: 'sticky',
             bottom: 0,
-            paddingBottom: '1rem',
             width: '80%',
             minWidth: 750,
             margin: 'auto',
-            backgroundColor: 'white',
           }}
         >
           <ChatBox

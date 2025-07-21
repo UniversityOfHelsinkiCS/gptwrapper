@@ -3,6 +3,15 @@ import { SxProps, Theme } from '@mui/material/styles'
 const styles: { [key: string]: SxProps<Theme> } = {
   appbar: {
     backgroundColor: 'white',
+    // The world is not yet ready for this:
+    // background: 'linear-gradient(to bottom, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.5) 100%)',
+    // 'backdrop-filter': 'blur(10px)',
+    // '-webkit-backdrop-filter': 'blur(10px)',
+    // 'box-shadow': `
+    //     /* Short subsurface effect */
+    //     inset 0px 0px 10px 5px rgba(255, 255, 255, 0.025);
+    //     /* Long subsurface effect */
+    //     inset 0px 0px 40px 5px rgba(255, 255, 255, 0.025);`,
     zIndex: (theme: Theme) => theme.zIndex.drawer + 1,
     borderBottom: '1px solid',
     borderColor: (theme: Theme) => theme.palette.divider,

@@ -3,7 +3,7 @@ import { HelpOutline, Send } from '@mui/icons-material'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import { Box, Chip, IconButton, TextField, Tooltip, Typography, FormControlLabel, Switch, Alert } from '@mui/material'
-import CircularProgress from '@mui/material/CircularProgress';
+import CircularProgress from '@mui/material/CircularProgress'
 import { useRef } from 'react'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
@@ -110,7 +110,13 @@ export const ChatBox = ({
     )
   }
   return (
-    <Box>
+    <Box
+      sx={{
+        background: 'white',
+        borderTopRightRadius: '0.3rem',
+        borderTopLeftRadius: '0.3rem',
+      }}
+    >
       {fileTypeAlertOpen && (
         <Alert severity="warning">
           <Typography>{`File of type "${disallowedFileType}" not supported currently`}</Typography>
@@ -205,7 +211,7 @@ export const ChatBox = ({
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0rem' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography
               variant="body1"
