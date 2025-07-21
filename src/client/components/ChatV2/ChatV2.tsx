@@ -181,6 +181,7 @@ export const ChatV2 = () => {
     if (window.confirm('Are you sure you want to empty this conversation?')) {
       setMessages([])
       setShowAnnotations(false)
+      setActiveFileSearchResult(undefined)
       setPrevResponse({ id: '' })
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
@@ -309,6 +310,8 @@ export const ChatV2 = () => {
   const showRagSelector = (ragIndices?.length ?? 0) > 0
 
   if (statusLoading) return null
+
+  console.log('showAnnotations:', showAnnotations)
 
   return (
     <Box
@@ -445,8 +448,7 @@ export const ChatV2 = () => {
 
       <Box
         sx={{
-          flex: 1,
-          minWidth: 300,
+          flex: 0,
           position: 'relative',
           transition: 'border 300ms',
           borderLeft: '1px solid',
@@ -457,7 +459,6 @@ export const ChatV2 = () => {
           sx={{
             position: 'sticky',
             top: 65,
-            padding: '2rem',
             transition: 'transform 250ms ease-in-out',
             transform: showAnnotations ? 'translateX(0%)' : 'translate(100%)',
           }}
