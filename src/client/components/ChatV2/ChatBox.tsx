@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { HelpOutline, Send } from '@mui/icons-material'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
+import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import { Box, Chip, IconButton, TextField, Tooltip, Typography, FormControlLabel, Switch, Alert } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useRef } from 'react'
@@ -10,6 +11,7 @@ import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import ModelSelector from './ModelSelector'
 import { BlueButton, GrayButton } from './generics/Buttons'
+import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 
 export const ChatBox = ({
   disabled,
@@ -28,6 +30,7 @@ export const ChatBox = ({
   handleCancel,
   handleContinue,
   handleSubmit,
+  handleReset,
 }: {
   disabled: boolean
   currentModel: string
@@ -45,8 +48,10 @@ export const ChatBox = ({
   handleCancel: () => void
   handleContinue: (message: string) => void
   handleSubmit: (message: string) => void
+  handleReset: () => void
 }) => {
   const { courseId } = useParams()
+  const isEmbedded = useIsEmbedded()
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
 
   const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
@@ -190,7 +195,10 @@ export const ChatBox = ({
                 <input type="file" accept="*" hidden ref={fileInputRef} onChange={(e) => e.target.files?.[0] && handleFileTypeValidation(e.target.files[0])} />
               </IconButton>
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
-              <ModelSelector currentModel={currentModel} setModel={setModel} availableModels={availableModels} />
+              {!isEmbedded && <ModelSelector currentModel={currentModel} setModel={setModel} availableModels={availableModels} />}
+              <IconButton onClick={handleReset}>
+                <RestartAltIcon />
+              </IconButton>
             </Box>
 
             {disabled ? (

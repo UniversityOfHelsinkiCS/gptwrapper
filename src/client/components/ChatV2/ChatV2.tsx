@@ -1,4 +1,4 @@
-import DeleteIcon from '@mui/icons-material/Delete'
+import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import EmailIcon from '@mui/icons-material/Email'
 import HelpIcon from '@mui/icons-material/Help'
 import SettingsIcon from '@mui/icons-material/Settings'
@@ -31,6 +31,25 @@ import { useChatStream } from './useChatStream'
 import Annotations from './Annotations'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 
+function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
+  const [value, setValue] = useLocalStorageState(key, defaultValue)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const urlValue = searchParams.get(urlKey)
+
+  // If urlValue is defined, it overrides the localStorage setting.
+  // However if user changes the setting, the urlValue is removed.
+  const modifiedSetValue = (newValue: string) => {
+    console.log('newValue', newValue, 'urlValue', urlValue)
+    if (newValue !== urlValue) {
+      setValue(newValue)
+      searchParams.delete(urlKey)
+      setSearchParams(searchParams)
+    }
+  }
+
+  return [urlValue ?? value, modifiedSetValue] as const
+}
+
 export const ChatV2 = () => {
   const { courseId } = useParams()
   const isEmbeddedMode = useIsEmbedded()
@@ -46,23 +65,22 @@ export const ChatV2 = () => {
 
   // local storage states
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
-  const [activeModel, setActiveModel] = useLocalStorageState<{ name: string }>('model-v2', {
-    name: DEFAULT_MODEL,
-  })
+  const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model')
   const [disclaimerStatus, setDisclaimerStatus] = useLocalStorageState<{
     open: boolean
   }>('disclaimer-status', { open: true })
-  const [assistantInstructions, setAssistantInstructions] = useLocalStorageState<{ content: string }>(`${localStoragePrefix}-chat-instructions`, {
-    content: DEFAULT_ASSISTANT_INSTRUCTIONS,
-  })
-  const [modelTemperature, setModelTemperature] = useLocalStorageState<{
-    value: number
-  }>(`${localStoragePrefix}-chat-model-temperature`, {
-    value: DEFAULT_MODEL_TEMPERATURE,
-  })
+  const [assistantInstructions, setAssistantInstructions] = useLocalStorageState<string>(
+    `${localStoragePrefix}-chat-instructions`,
+    DEFAULT_ASSISTANT_INSTRUCTIONS,
+  )
+  const [modelTemperature, setModelTemperature] = useLocalStorageStateWithURLDefault(
+    `${localStoragePrefix}-chat-model-temperature`,
+    String(DEFAULT_MODEL_TEMPERATURE),
+    'temperature',
+  )
 
   const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as Message[])
-  const [prevResponse, setPrevResponse] = useLocalStorageState(`${localStoragePrefix}-prev-response`, { id: '' })
+  const [prevResponseId, setPrevResponse] = useLocalStorageState(`${localStoragePrefix}-prev-response`, '')
 
   // App States
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
@@ -94,7 +112,7 @@ export const ChatV2 = () => {
   const { processStream, completion, isStreaming, setIsStreaming, isFileSearching, streamController } = useChatStream({
     onComplete: ({ message, previousResponseId }) => {
       if (previousResponseId) {
-        setPrevResponse({ id: previousResponseId })
+        setPrevResponse(previousResponseId)
       }
       if (message.content.length > 0) {
         setMessages((prev: Message[]) => prev.concat(message))
@@ -125,7 +143,7 @@ export const ChatV2 = () => {
     })
 
     setMessages(newMessages)
-    setPrevResponse({ id: '' })
+    setPrevResponse('')
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -140,16 +158,16 @@ export const ChatV2 = () => {
 
     try {
       const { tokenUsageAnalysis, stream } = await getCompletionStream({
-        assistantInstructions: assistantInstructions.content,
+        assistantInstructions: assistantInstructions,
         messages: newMessages,
         ragIndexId,
-        model: activeModel.name,
+        model: activeModel,
         formData,
-        modelTemperature: modelTemperature.value,
+        modelTemperature: parseFloat(modelTemperature),
         courseId,
         abortController: streamController,
         saveConsent,
-        prevResponseId: prevResponse.id,
+        prevResponseId,
       })
 
       if (!stream) {
@@ -182,7 +200,7 @@ export const ChatV2 = () => {
       setMessages([])
       setShowAnnotations(false)
       setActiveFileSearchResult(undefined)
-      setPrevResponse({ id: '' })
+      setPrevResponse('')
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
@@ -249,10 +267,10 @@ export const ChatV2 = () => {
     if (course && courseModels) {
       setAllowedModels(courseModels)
 
-      if (courseModels.includes(activeModel.name)) {
-        setActiveModel({ name: activeModel.name })
+      if (courseModels.includes(activeModel)) {
+        setActiveModel(activeModel)
       } else {
-        setActiveModel({ name: defaultCourseModel ?? courseModels[0] })
+        setActiveModel(defaultCourseModel ?? courseModels[0])
       }
     } else {
       const allowedModels = validModels.map((m) => m.name) // [gpt-4.1, gpt-4o, gpt-4o-mini] 25.6.2025
@@ -262,7 +280,7 @@ export const ChatV2 = () => {
     const tokenUseExceeded = usage >= limit
 
     if (tokenUseExceeded) {
-      setActiveModel({ name: FREE_MODEL })
+      setActiveModel(FREE_MODEL)
       return
     }
   }, [userStatus, course])
@@ -311,8 +329,6 @@ export const ChatV2 = () => {
 
   if (statusLoading) return null
 
-  console.log('showAnnotations:', showAnnotations)
-
   return (
     <Box
       sx={{
@@ -337,7 +353,7 @@ export const ChatV2 = () => {
           <Box sx={{ position: 'sticky', top: 70, padding: '2rem 1.5rem' }}>
             {course && <ChatInfo course={course} />}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', mb: '2rem' }}>
-              <OutlineButtonBlack startIcon={<DeleteIcon />} onClick={handleReset} id="empty-conversation-button">
+              <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} id="empty-conversation-button">
                 {t('chat:emptyConversation')}
               </OutlineButtonBlack>
               <Tooltip
@@ -425,7 +441,7 @@ export const ChatV2 = () => {
         >
           <ChatBox
             disabled={isStreaming}
-            currentModel={activeModel.name}
+            currentModel={activeModel}
             availableModels={allowedModels}
             fileInputRef={fileInputRef}
             fileName={fileName}
@@ -436,10 +452,11 @@ export const ChatV2 = () => {
             tokenUsageAlertOpen={tokenUsageAlertOpen}
             saveChat={!!course && course.saveDiscussions}
             notOptoutSaving={!!course && course.notOptoutSaving}
-            setModel={(name) => setActiveModel({ name })}
+            setModel={(model) => setActiveModel(model)}
             handleCancel={handleCancel}
             handleContinue={(newMessage) => handleSubmit(newMessage, true)}
             handleSubmit={(newMessage) => handleSubmit(newMessage, false)}
+            handleReset={handleReset}
           />
         </Box>
       </Box>
@@ -471,12 +488,12 @@ export const ChatV2 = () => {
       <SettingsModal
         open={settingsModalOpen}
         setOpen={setSettingsModalOpen}
-        assistantInstructions={assistantInstructions.content}
-        setAssistantInstructions={(updatedInstructions) => setAssistantInstructions({ content: updatedInstructions })}
-        modelTemperature={modelTemperature.value}
-        setModelTemperature={(updatedTemperature) => setModelTemperature({ value: updatedTemperature })}
-        model={activeModel.name}
-        setModel={(name) => setActiveModel({ name })}
+        assistantInstructions={assistantInstructions}
+        setAssistantInstructions={(updatedInstructions) => setAssistantInstructions(updatedInstructions)}
+        modelTemperature={parseFloat(modelTemperature)}
+        setModelTemperature={(updatedTemperature) => setModelTemperature(String(updatedTemperature))}
+        model={activeModel}
+        setModel={(model) => setActiveModel(model)}
         showRagSelector={showRagSelector}
         setRagIndex={setRagIndexId}
         ragIndices={ragIndices}
