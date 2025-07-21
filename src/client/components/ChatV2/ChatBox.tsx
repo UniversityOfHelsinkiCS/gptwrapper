@@ -196,9 +196,11 @@ export const ChatBox = ({
               </IconButton>
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
               {!isEmbedded && <ModelSelector currentModel={currentModel} setModel={setModel} availableModels={availableModels} />}
-              <IconButton onClick={handleReset}>
-                <RestartAltIcon />
-              </IconButton>
+              <Tooltip title={t('chat:emptyConversation')} arrow placement="right">
+                <IconButton onClick={handleReset}>
+                  <RestartAltIcon />
+                </IconButton>
+              </Tooltip>
             </Box>
 
             {disabled ? (
