@@ -15,6 +15,7 @@ import useTheme from './theme'
 import NavBar from './components/NavBar'
 import Footer from './components/Footer'
 import useCurrentUser from './hooks/useCurrentUser'
+import { EmbeddedProvider, useIsEmbedded } from './contexts/EmbeddedContext'
 
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
@@ -72,7 +73,6 @@ const App = () => {
   const theme = useTheme()
   const { courseId } = useParams()
   const location = useLocation()
-  const appRef = useRef<HTMLDivElement>(null)
 
   const { user, isLoading } = useCurrentUser()
 
@@ -96,28 +96,39 @@ const App = () => {
       <CssBaseline />
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
         <SnackbarProvider preventDuplicate>
-          <AppContext.Provider value={appRef}>
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                minHeight: '100vh',
-                height: '100vh',
-                overflowY: 'auto', // deleting this will break the auto scroll on chats
-              }}
-              ref={appRef}
-            >
-              <NavBar />
-              <Box sx={{ flex: 1 }}>
-                <Outlet />
-              </Box>
-              <Footer />
-            </Box>
-            <AdminLoggedInAsBanner />
-          </AppContext.Provider>
+          <EmbeddedProvider>
+            <Layout />
+          </EmbeddedProvider>
         </SnackbarProvider>
       </LocalizationProvider>
     </ThemeProvider>
+  )
+}
+
+const Layout = () => {
+  const appRef = useRef<HTMLDivElement>(null)
+  const isEmbedded = useIsEmbedded()
+
+  return (
+    <AppContext.Provider value={appRef}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+          height: '100vh',
+          overflowY: 'auto', // deleting this will break the auto scroll on chats
+        }}
+        ref={appRef}
+      >
+        {!isEmbedded && <NavBar />}
+        <Box sx={{ flex: 1 }}>
+          <Outlet />
+        </Box>
+        {!isEmbedded && <Footer />}
+      </Box>
+      <AdminLoggedInAsBanner />
+    </AppContext.Provider>
   )
 }
 

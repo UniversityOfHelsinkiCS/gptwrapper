@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
-import { Box, InputLabel, MenuItem, FormControl, Select, SelectChangeEvent, Divider, ListSubheader, Menu, Button, IconButton } from '@mui/material'
-import { useTranslation } from 'react-i18next'
-
-import { Prompt } from '../../types'
 import { DeleteOutline, KeyboardArrowDown, Lock } from '@mui/icons-material'
+import { Box, Button, Divider, IconButton, ListSubheader, Menu, MenuItem } from '@mui/material'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { Prompt } from '../../types'
 
 const PromptSelector = ({
   coursePrompts,
