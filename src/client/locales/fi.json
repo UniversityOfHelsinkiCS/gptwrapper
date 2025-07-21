@@ -55,7 +55,7 @@
     "courseCodes": "Kurssikoodit"
   },
   "info": {
-    "title": "Käyttöehdot",
+    "title": "Käyttöohje",
     "usage": "Tokenit nollaantuvat kuukauden välein. Vähentääksesi tokenien kulumista voit valita ilmaisen kielimallin tai tyhjentää keskustelun aina kun vaihdat keskustelun aihetta.",
     "email": "Keskustelu lähetetään osoitteeseen {{email}}"
   },

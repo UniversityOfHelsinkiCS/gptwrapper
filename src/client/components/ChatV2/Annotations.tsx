@@ -107,9 +107,9 @@ const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: FileSe
         {relevanceOrder}
       </Box>
       <Box>
-        <Box sx={{ display: 'flex', gap: 2, mb: '0.8rem', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'center', justifyContent: 'space-between' }}>
           <Typography fontWeight={600}>{data.filename}</Typography>
-          <Typography sx={{ opacity: 0.7 }}>{`Score: ${data.score}`}</Typography>
+          <Typography sx={{ opacity: 0.7, whiteSpace: 'nowrap', justifySelf: 'flex-end' }}>{`Score: ${data.score}`}</Typography>
         </Box>
         <Box
           sx={{
@@ -179,8 +179,8 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
   const { t } = useTranslation()
 
   return (
-    <Box sx={{ padding: '2rem' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h6" fontWeight={'bold'}>
           {t('chat:sources')}
         </Typography>
@@ -210,7 +210,7 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
       )}
       <Drawer anchor={'right'} open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
         <Box sx={{ maxWidth: '60vw', padding: '6rem 3rem' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
             <IconButton
               id="close-expanded-annotations"
               onClick={() => {

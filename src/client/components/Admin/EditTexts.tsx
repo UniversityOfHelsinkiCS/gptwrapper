@@ -28,7 +28,7 @@ const Text = ({ info }: { info: InfoText }) => {
         text: { fi, sv, en },
       })
       setIsEditing(false)
-      enqueueSnackbar(t("common:saved"), { variant: 'success' })
+      enqueueSnackbar(t('common:saved'), { variant: 'success' })
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     }
@@ -39,15 +39,15 @@ const Text = ({ info }: { info: InfoText }) => {
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
         <Typography variant="h5">{info.name}</Typography>
 
-        <Button onClick={() => setIsEditing(!isEditing)} variant="outlined" size='small'>
+        <Button onClick={() => setIsEditing(!isEditing)} variant="outlined" size="small">
           {isEditing ? t('common:cancel') : t('common:edit')}
         </Button>
 
-        {isEditing &&
-          <Button onClick={() => handleSave()} variant="contained" size='small'>
+        {isEditing && (
+          <Button onClick={() => handleSave()} variant="contained" size="small">
             {t('common:save')}
           </Button>
-        }
+        )}
       </Box>
       {isEditing ? (
         <Stack gap={2} sx={{ my: 2 }}>
@@ -61,13 +61,10 @@ const Text = ({ info }: { info: InfoText }) => {
       ) : (
         <Stack gap={2} sx={{ my: 2 }}>
           <Box sx={{ borderRadius: '0.5rem', p: '1rem 2rem', border: '1px solid lightgray', opacity: 0.7 }}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {info.text[language]}
-            </ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{info.text[language]}</ReactMarkdown>
           </Box>
         </Stack>
       )}
-
     </Box>
   )
 }

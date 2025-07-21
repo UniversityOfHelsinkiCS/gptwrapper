@@ -55,7 +55,7 @@
     "courseStats": "Course stats"
   },
   "info": {
-    "title": "Terms of use",
+    "title": "Instructions",
     "usage": "Tokens reset every month. To reduce token consumption, you can choose a free language model or empty the conversation each time you change the topic.",
     "email": "The conversation will be sent to {{email}}"
   },

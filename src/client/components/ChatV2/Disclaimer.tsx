@@ -1,8 +1,9 @@
-import { Modal, Box, IconButton, Typography } from '@mui/material'
+import { Modal, Box, IconButton, Typography, FormGroup } from '@mui/material'
 import { Close } from '@mui/icons-material'
-import Markdown from '../Banner/Markdown'
 import { useTranslation } from 'react-i18next'
 import { BlueButton } from './generics/Buttons'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 export const DisclaimerModal = ({
   disclaimer,
@@ -45,15 +46,15 @@ export const DisclaimerModal = ({
           <Close />
         </IconButton>
 
-        <Typography variant="h5" sx={{ mb: 2, fontWeight: 'bold' }}>
-          {t('info:title')}
-        </Typography>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{disclaimer}</ReactMarkdown>
 
-        <Markdown>{disclaimer}</Markdown>
-
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <BlueButton onClick={() => setDisclaimerStatus({ open: false })}>OK</BlueButton>
-        </Box>
+        <FormGroup>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <BlueButton onClick={() => setDisclaimerStatus({ open: false })} type="submit">
+              OK
+            </BlueButton>
+          </Box>
+        </FormGroup>
       </Box>
     </Modal>
   )
