@@ -56,7 +56,7 @@
   },
   "info": {
     "title": "Käyttöehdot",
-    "usage": "Tokenit nollaantuvat kuukauden välein. Vähentääksesi tokenien kulumista voit valita toisen kielimallin tai tyhjentää keskustelun aina kun vaihdat keskustelun aihetta.",
+    "usage": "Tokenit nollaantuvat kuukauden välein. Vähentääksesi tokenien kulumista voit valita ilmaisen kielimallin tai tyhjentää keskustelun aina kun vaihdat keskustelun aihetta.",
     "email": "Keskustelu lähetetään osoitteeseen {{email}}"
   },
   "footer": {

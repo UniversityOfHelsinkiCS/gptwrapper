@@ -15,16 +15,10 @@ import 'katex/dist/katex.min.css'
 import 'katex/dist/contrib/mhchem'
 import CopyToClipboardButton from '../Chat/CopyToClipboardButton'
 import { t } from 'i18next'
-import { OutlineButtonBlack, } from './generics/Buttons'
-import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
+import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
+import { useState } from 'react'
 
-const UserMessage = ({
-  content,
-  attachements,
-}: {
-  content: string
-  attachements?: string
-}) => (
+const UserMessage = ({ content, attachements }: { content: string; attachements?: string }) => (
   <Box
     sx={{
       backgroundColor: '#efefef',
@@ -61,7 +55,7 @@ const AssistantMessage = ({
   error,
   fileSearchResult,
   setActiveFileSearchResult,
-  setShowAnnotations
+  setShowAnnotations,
 }: {
   content: string
   error?: string
@@ -109,6 +103,7 @@ const AssistantMessage = ({
     strict: false, // disables logging katex warnings/errors – if debugging, turn these two on
   }
   let codeCount = 0
+  const [isHovering, setIsHovering] = useState<boolean>(false)
 
   const handleAnnotations = (fileSearchResult: FileSearchCompletedData) => {
     setActiveFileSearchResult(fileSearchResult)
@@ -195,11 +190,37 @@ const AssistantMessage = ({
           <Typography variant="body1" fontStyle="italic" color="#cc0000">{`\n\n ${error}`}</Typography>
         </Box>
       )}
-      {fileSearchResult?.status === "completed" &&
-        <OutlineButtonBlack sx={{ mt: 3 }} startIcon={<FormatQuoteIcon />} onClick={() => handleAnnotations(fileSearchResult)}>
-          <Typography variant='body2'>{`${t('chat:displaySources')}: `}<em>{fileSearchResult?.searchedFiles?.join(', ')}</em></Typography>
-        </OutlineButtonBlack>
-      }
+      {fileSearchResult?.status === 'completed' && (
+        <>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              fontStyle: 'italic',
+              opacity: '0.85',
+              mt: 3,
+              width: 'fit-content',
+              backgroundColor: isHovering ? '#efefef' : 'transparent',
+              transition: 'background-color 0.1s ease-in-out',
+              cursor: 'pointer',
+              padding: '0.6rem',
+              borderRadius: '0.6rem',
+            }}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+            onClick={() => {
+              handleAnnotations(fileSearchResult)
+            }}
+          >
+            <FormatQuoteIcon sx={{ fontSize: '2rem' }} />
+            <Typography variant="body2" sx={{ whiteSpace: 'pre', mr: 3 }}>
+              {`${t('chat:displaySources')}: `}
+              <em>{fileSearchResult?.searchedFiles?.join('\r\n')}</em>
+            </Typography>
+          </Box>
+        </>
+      )}
     </Box>
   )
 }
@@ -209,7 +230,7 @@ const MessageItem = ({
   isLastAssistantNode,
   expandedNodeHeight,
   setActiveFileSearchResult,
-  setShowAnnotations
+  setShowAnnotations,
 }: {
   message: Message
   isLastAssistantNode: boolean
@@ -217,7 +238,6 @@ const MessageItem = ({
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
   setShowAnnotations: (show: boolean) => void
 }) => {
-
   if (message.role === 'assistant') {
     return (
       <Box
@@ -225,7 +245,8 @@ const MessageItem = ({
         data-testid="assistant-message"
         sx={{
           minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
-        }}>
+        }}
+      >
         <AssistantMessage
           content={message.content}
           error={message.error}
@@ -237,15 +258,8 @@ const MessageItem = ({
     )
   } else {
     return (
-      <Box
-        className="message-role-user"
-        data-testid="user-message"
-        sx={{ alignSelf: 'flex-end' }}
-      >
-        <UserMessage
-          content={message.content}
-          attachements={message.attachements ?? ''}
-        />
+      <Box className="message-role-user" data-testid="user-message" sx={{ alignSelf: 'flex-end' }}>
+        <UserMessage content={message.content} attachements={message.attachements ?? ''} />
       </Box>
     )
   }
@@ -261,7 +275,7 @@ export const Conversation = ({
   isFileSearching,
   isStreaming,
   setActiveFileSearchResult,
-  setShowAnnotations
+  setShowAnnotations,
 }: {
   courseName?: string
   courseDate?: ActivityPeriod
