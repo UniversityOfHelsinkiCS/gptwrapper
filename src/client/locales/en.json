@@ -274,6 +274,14 @@
     "copied": "Copied!"
   },
   "feedback": {
-    "giveFeedback": "Give feedback"
+    "giveFeedback": "Give feedback",
+    "success": "Feedback sent, thank you",
+    "error": "Sending feedback failed",
+    "title": "Give feedback about CurreChat to the developers",
+    "message": "your feedback",
+    "cancel": "Cancel",
+    "submit": "Send",
+    "description": "Facing problems? Or have a feature suggestion? Tell about it below. Note that the feedback is not anonymous. You can also ask for a reply from the developers.",
+    "responseWanted": "I want a reply to the feedback"
   }
 }

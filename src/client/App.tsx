@@ -7,7 +7,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { fi } from 'date-fns/locale'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
 import { Box, Button, CssBaseline, Snackbar } from '@mui/material'
-import { AppContext } from './util/AppContext'
+import { AppContext } from './contexts/AppContext'
 
 import { PUBLIC_URL } from '../config'
 import type { User } from './types'
@@ -16,6 +16,8 @@ import NavBar from './components/NavBar'
 import Footer from './components/Footer'
 import useCurrentUser from './hooks/useCurrentUser'
 import { EmbeddedProvider, useIsEmbedded } from './contexts/EmbeddedContext'
+import { Feedback } from './components/Feedback'
+import { AnalyticsProvider } from './stores/analytics'
 
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
@@ -97,7 +99,9 @@ const App = () => {
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
         <SnackbarProvider preventDuplicate autoHideDuration={15_000}>
           <EmbeddedProvider>
-            <Layout />
+            <AnalyticsProvider>
+              <Layout />
+            </AnalyticsProvider>
           </EmbeddedProvider>
         </SnackbarProvider>
       </LocalizationProvider>
@@ -126,6 +130,7 @@ const Layout = () => {
           <Outlet />
         </Box>
         {!isEmbedded && <Footer />}
+        <Feedback />
       </Box>
       <AdminLoggedInAsBanner />
     </AppContext.Provider>

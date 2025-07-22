@@ -274,6 +274,14 @@
     "copied": "Kopioitu!"
   },
   "feedback": {
-    "giveFeedback": "Anna palautetta"
+    "giveFeedback": "Anna palautetta",
+    "success": "Palaute lähetetty, kiitos",
+    "error": "Palautteen lähetys ei onnistunut",
+    "title": "Anna palautetta CurreChatistä kehittäjille",
+    "message": "palautteesi",
+    "cancel": "Peru",
+    "submit": "Lähetä",
+    "description": "Törmäsitko ongelmiin? Onko sinulle kehitysehdotus? Kerro siitä tässä. Huom. palaute ei ole anonyymiä. Voit myös halutessasi pyytää vastausta kehittäjiltä.",
+    "responseWanted": "Haluan vastauksen palautteeseen"
   }
 }
