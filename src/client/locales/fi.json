@@ -57,7 +57,8 @@
   "info": {
     "title": "Käyttöohje",
     "usage": "Tokenit nollaantuvat kuukauden välein. Vähentääksesi tokenien kulumista voit valita ilmaisen kielimallin tai tyhjentää keskustelun aina kun vaihdat keskustelun aihetta.",
-    "email": "Keskustelu lähetetään osoitteeseen {{email}}"
+    "email": "Keskustelu lähetetään osoitteeseen {{email}}",
+    "acceptDisclaimer": "Olen lukenut ja ymmärtänyt käyttöohjeet"
   },
   "footer": {
     "contactSupport": "Ota yhteyttä tukeen: <mailTo>{{supportEmail}}</mailTo>",

@@ -53,6 +53,7 @@ export interface User {
   lastRestart: string
   enrolledCourses: ChatInstance[]
   isStatsViewer: boolean
+  termsAcceptedAt?: string | null
 }
 
 export type Prompt = {

@@ -28,6 +28,8 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare studentNumber: CreationOptional<string>
 
   declare primaryEmail: CreationOptional<string>
+
+  declare termsAcceptedAt: CreationOptional<Date | null>
 }
 
 User.init(
@@ -86,6 +88,11 @@ User.init(
     },
     primaryEmail: {
       type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: null,
+    },
+    termsAcceptedAt: {
+      type: DataTypes.DATE,
       allowNull: true,
       defaultValue: null,
     },

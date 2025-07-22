@@ -1,10 +1,13 @@
-import { Modal, Box, IconButton, Typography, FormGroup } from '@mui/material'
+import { Modal, Box, IconButton, Typography, Checkbox, FormControlLabel, FormGroup } from '@mui/material'
 import { Close } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { BlueButton } from './generics/Buttons'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-
+import { useState, useEffect } from 'react'
+import { useAcceptTermsMutation } from '../../hooks/useAcceptTermsMutation'
+import useCurrentUser from '../../hooks/useCurrentUser'
+import { ApplicationError } from '../../../server/util/ApplicationError'
 export const DisclaimerModal = ({
   disclaimer,
   disclaimerStatus,
@@ -15,6 +18,34 @@ export const DisclaimerModal = ({
   setDisclaimerStatus: (status: boolean) => void
 }) => {
   const { t } = useTranslation()
+  const { user } = useCurrentUser()
+  const acceptTermsMutation = useAcceptTermsMutation()
+  const termsAccepted = Boolean(user?.termsAcceptedAt)
+  const [hasRead, setHasRead] = useState(false)
+
+  useEffect(() => {
+    if (user) {
+      setHasRead(termsAccepted)
+    }
+  }, [user, termsAccepted])
+
+  const handleToggle = () => {
+    setHasRead(!hasRead)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (hasRead) {
+      try {
+        await acceptTermsMutation.mutateAsync()
+        setDisclaimerStatus(false)
+      } catch (error) {
+        console.error('Failed to accept terms:', error)
+        throw ApplicationError.InternalServerError('Failed to accept terms')
+      }
+    }
+  }
 
   return (
     <Modal open={disclaimerStatus} onClose={() => setDisclaimerStatus(false)}>
@@ -43,14 +74,21 @@ export const DisclaimerModal = ({
         </IconButton>
 
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{disclaimer}</ReactMarkdown>
-
-        <FormGroup>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <BlueButton onClick={() => setDisclaimerStatus(false)} type="submit">
-              OK
-            </BlueButton>
-          </Box>
-        </FormGroup>
+        <form onSubmit={handleSubmit}>
+          <FormGroup sx={{ mt: 2 }}>
+            <FormControlLabel
+              disabled={termsAccepted}
+              sx={{ display: termsAccepted ? 'none' : '' }}
+              control={<Checkbox required checked={hasRead} onChange={handleToggle} />}
+              label={t('info:acceptDisclaimer')}
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <BlueButton disabled={!(hasRead || termsAccepted) || acceptTermsMutation.isPending} type="submit">
+                OK
+              </BlueButton>
+            </Box>
+          </FormGroup>
+        </form>
       </Box>
     </Modal>
   )

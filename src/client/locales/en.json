@@ -57,7 +57,8 @@
   "info": {
     "title": "Instructions",
     "usage": "Tokens reset every month. To reduce token consumption, you can choose a free language model or empty the conversation each time you change the topic.",
-    "email": "The conversation will be sent to {{email}}"
+    "email": "The conversation will be sent to {{email}}",
+    "acceptDisclaimer": "I have read and understood these instructions"
   },
   "footer": {
     "contactSupport": "Contact support: <mailTo>{{supportEmail}}</mailTo>",

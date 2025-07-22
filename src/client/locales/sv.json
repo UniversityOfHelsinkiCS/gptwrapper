@@ -67,7 +67,8 @@
   "info": {
     "title": "Bruksanvisning",
     "usage": "Lösenord nollställs varje månad. Du kan minska förbrukningen av token genom att välja en gratis språkmall eller genom att rensa konversationen varje gång du byter ämne.",
-    "email": "Konversationen kommer att skickas till {{email}}"
+    "email": "Konversationen kommer att skickas till {{email}}",
+    "acceptDisclaimer": "Jag har läst och förstått bruksanvisningen"
   },
   "footer": {
     "contactSupport": "Kontakta support: <mailTo>{{supportEmail}}</mailTo>"

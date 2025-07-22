@@ -45,6 +45,8 @@ userRouter.get('/login', async (req, res) => {
 
   const enrolledCourses = await getEnrolledCourses(user)
 
+  const termsAccepted = await User.findByPk(id, { attributes: ['termsAcceptedAt'] })
+
   const isNowOrInFuture = ({ chatInstance }: { chatInstance: ChatInstance }) =>
     chatInstance.usageLimit > 0 && new Date() <= new Date(chatInstance.activityPeriod.endDate)
 
@@ -54,6 +56,7 @@ userRouter.get('/login', async (req, res) => {
     hasIamAccess: isAdmin || hasIamAccess,
     lastRestart,
     enrolledCourses: enrolledCourses.filter(isNowOrInFuture).map((enrollment) => enrollment.chatInstance),
+    termsAcceptedAt: termsAccepted?.termsAcceptedAt,
   })
   return
 })
@@ -89,6 +92,16 @@ userRouter.get('/status/:courseId', async (req, res) => {
     models,
   })
   return
+})
+
+userRouter.post('/accept-terms', async (req, res) => {
+  const request = req as ChatRequest
+  const { user } = request
+  const { id } = user
+
+  await User.update({ termsAcceptedAt: new Date() }, { where: { id } })
+
+  res.status(200).send()
 })
 
 export default userRouter
