@@ -93,7 +93,8 @@
     "displaySources": "Sources",
     "readSources": "Reading sources",
     "failedSources": "Failed to display sources",
-    "freeModel": "free"
+    "freeModel": "free",
+    "errorInstructions": "Generating a response failed. We recommended saving the current conversation and starting a new one. You can also try another model. If the problem persists, please contact support."
   },
   "settings": {
     "prompt": "Conversation prompt",
@@ -271,5 +272,8 @@
   },
   "tooltip": {
     "copied": "Copied!"
+  },
+  "feedback": {
+    "giveFeedback": "Give feedback"
   }
 }

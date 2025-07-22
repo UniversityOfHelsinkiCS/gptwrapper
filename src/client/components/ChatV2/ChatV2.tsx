@@ -30,6 +30,7 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import { useChatStream } from './useChatStream'
 import Annotations from './Annotations'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
+import { enqueueSnackbar } from 'notistack'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -121,6 +122,7 @@ export const ChatV2 = () => {
     },
     onError: (error) => {
       handleCompletionStreamError(error, fileName)
+      enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
     },
     onFileSearchComplete: (fileSearch) => {
       setActiveFileSearchResult(fileSearch)
@@ -170,9 +172,10 @@ export const ChatV2 = () => {
         prevResponseId,
       })
 
-      if (!stream) {
-        console.error('Stream is undefined')
+      if (!stream && !tokenUsageAnalysis) {
+        console.error('getCompletionStream did not return a stream or token usage analysis')
         handleCancel()
+        enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
         return
       }
 

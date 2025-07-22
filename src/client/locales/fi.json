@@ -93,7 +93,8 @@
     "displaySources": "Lähteet",
     "readSources": "Luetaan lähteitä",
     "failedSources": "Lähteiden näyttäminen epäonnistui",
-    "freeModel": "ilmainen"
+    "freeModel": "ilmainen",
+    "errorInstructions": "Vastauksen generointi ei onnistunut. Suosittelemme tallentamaan nykyisen keskustelun ja aloittamaan uuden. Voit myös kokeilla toista mallia. Jos ongelma jatkuu, ota yhteyttä tukeen."
   },
   "settings": {
     "prompt": "Keskustelun alustus",
@@ -271,5 +272,8 @@
   },
   "tooltip": {
     "copied": "Kopioitu!"
+  },
+  "feedback": {
+    "giveFeedback": "Anna palautetta"
   }
 }

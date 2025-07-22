@@ -1,3 +1,4 @@
+import { ApplicationError } from '../../ApplicationError'
 import {
   getBasicStreamMock,
   getCodeBlockStreamMock,
@@ -41,6 +42,9 @@ export function createMockStream<T extends { content: string }>(input: T): Async
     case MockEventType.FAIL:
       mockType = getFailedStreamMock()
       break
+
+    case MockEventType.API_FAIL:
+      throw new Error('Mock API failure')
 
     case MockEventType.MIDWAY_FAIL:
       mockType = getMidwayFailStreamMock()

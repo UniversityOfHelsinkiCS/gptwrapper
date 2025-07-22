@@ -46,7 +46,10 @@ export const postAbortableStream = async (path: string, formData: FormData, exte
 
   const contentType = response.headers.get('content-type')
   if (contentType && contentType.includes('application/json')) {
-    tokenUsageAnalysis = await response.json()
+    const json = await response.json()
+    if (!('error' in json)) {
+      tokenUsageAnalysis = json
+    }
   } else {
     const clonedResponse = response.clone()
     stream = clonedResponse.body

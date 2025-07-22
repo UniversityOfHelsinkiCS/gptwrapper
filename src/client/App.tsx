@@ -95,7 +95,7 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
-        <SnackbarProvider preventDuplicate>
+        <SnackbarProvider preventDuplicate autoHideDuration={15_000}>
           <EmbeddedProvider>
             <Layout />
           </EmbeddedProvider>

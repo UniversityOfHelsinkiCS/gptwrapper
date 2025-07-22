@@ -9,6 +9,7 @@ export interface MockResponseStreamEvent {
 export enum MockEventType {
   RAG = 'rag',
   FAIL = 'fail',
+  API_FAIL = 'api fail',
   MIDWAY_FAIL = 'midway fail',
   TIMEOUT_FAIL = 'timeout fail',
   INCOMPLETE_FAIL = 'incomplete fail',
