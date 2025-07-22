@@ -49,7 +49,12 @@ export const Feedback: React.FC = () => {
   return (
     <>
       <Tooltip title={t('feedback:giveFeedback')} placement="top">
-        <Fab color="default" aria-label="feedback" sx={{ position: 'absolute', bottom: 80, right: 32 }} onClick={() => setModalOpen(true)}>
+        <Fab
+          color="default"
+          aria-label="feedback"
+          sx={(theme) => ({ position: 'absolute', bottom: 80, right: 32, zIndex: theme.zIndex.modal + 1 })}
+          onClick={() => setModalOpen(true)}
+        >
           <FeedbackIcon />
         </Fab>
       </Tooltip>

@@ -179,7 +179,7 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
   const { t } = useTranslation()
 
   return (
-    <Box>
+    <Box p={2}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h6" fontWeight={'bold'}>
           {t('chat:sources')}
