@@ -220,7 +220,8 @@
     "tokenUsage": "Käytetyt tokenit",
     "activityPeriod": "Kurssi käynnissä",
     "lastUpdate": "Viimeisin julkaisu: ",
-    "updater": "Updater"
+    "updater": "Updater",
+    "feedbacks": "Käyttäjäpalautteet"
   },
   "course": {
     "showDiscussions": "Näytä talletetut keskustelut",

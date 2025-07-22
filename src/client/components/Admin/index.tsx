@@ -10,6 +10,7 @@ import EditTexts from './EditTexts'
 import UserSearch from './UserSearch'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { RouterTabs } from '../common/RouterTabs'
+import Feedbacks from './Feedbacks'
 
 const Admin = () => {
   const { t } = useTranslation()
@@ -33,6 +34,7 @@ const Admin = () => {
           {user.iamGroups.includes('grp-toska') && <Tab label={t('admin:updater')} to="/admin/updater" component={Link} />}
           <Tab label={t('admin:editTexts')} to="/admin/edit-texts" component={Link} />
           <Tab label={t('admin:searchUsers')} to="/admin/usersearch" component={Link} />
+          <Tab label={t('admin:feedbacks')} to="/admin/feedbacks" component={Link} />
         </RouterTabs>
       </Box>
       <Routes>
@@ -42,6 +44,7 @@ const Admin = () => {
         {user.iamGroups.includes('grp-toska') && <Route path="/updater" element={<Updater />} />}
         <Route path="/edit-texts" element={<EditTexts />} />
         <Route path="/usersearch" element={<UserSearch />} />
+        <Route path="/feedbacks" element={<Feedbacks />} />
       </Routes>
     </Container>
   )

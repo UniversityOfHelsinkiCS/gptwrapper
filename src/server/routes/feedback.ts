@@ -1,5 +1,5 @@
 import express from 'express'
-import { Feedback } from '../db/models'
+import { Feedback, User } from '../db/models'
 import type { RequestWithUser } from '../types'
 import { ApplicationError } from '../util/ApplicationError'
 import { FeedbackPostSchema } from '../../shared/feedback'
@@ -29,6 +29,7 @@ feedbackRouter.get('/', async (req, res) => {
   }
 
   const feedbacks = await Feedback.findAll({
+    include: [{ model: User, as: 'user', attributes: ['id', 'username', 'firstNames', 'lastName', 'primaryEmail'] }],
     order: [['createdAt', 'DESC']],
   })
 

@@ -220,7 +220,8 @@
     "tokenUsage": "Used tokens",
     "activityPeriod": "Course active",
     "lastUpdate": "Latest release: ",
-    "updater": "Updater"
+    "updater": "Updater",
+    "feedbacks": "User feedback"
   },
   "course": {
     "showDiscussions": "Show the saved discussions",

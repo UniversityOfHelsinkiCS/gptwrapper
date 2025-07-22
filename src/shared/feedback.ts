@@ -18,7 +18,7 @@ export const FeedbackMetadataSchema = z
     browser: shortString,
     os: shortString,
     mobile: z.boolean(),
-    screenResolution: shortString,
+    windowResolution: shortString,
   })
   .partial()
   .default({})
