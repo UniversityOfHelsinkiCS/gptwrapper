@@ -8,6 +8,7 @@ import Discussion from './discussion'
 import RagIndex from './ragIndex'
 import RagFile from './ragFile'
 import ChatInstanceRagIndex from './chatInstanceRagIndex'
+import Feedback from './feedback'
 
 User.belongsToMany(ChatInstance, {
   through: UserChatInstanceUsage,
@@ -72,4 +73,7 @@ ChatInstanceRagIndex.belongsTo(ChatInstance, { as: 'chatInstance' })
 ChatInstanceRagIndex.belongsTo(RagIndex, { as: 'ragIndex' })
 ChatInstanceRagIndex.belongsTo(User, { as: 'user' })
 
-export { User, ChatInstance, UserChatInstanceUsage, Prompt, Enrolment, Responsibility, Discussion, RagIndex, RagFile, ChatInstanceRagIndex }
+Feedback.belongsTo(User, { as: 'user' })
+User.hasMany(Feedback, { as: 'feedbacks' })
+
+export { User, ChatInstance, UserChatInstanceUsage, Prompt, Enrolment, Responsibility, Discussion, RagIndex, RagFile, ChatInstanceRagIndex, Feedback }
