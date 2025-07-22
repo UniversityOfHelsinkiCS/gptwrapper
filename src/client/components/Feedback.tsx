@@ -7,7 +7,7 @@ import apiClient from '../util/apiClient'
 import { addJustInTimeFields, useAnalytics } from '../stores/analytics'
 import type { FeedbackPost } from '../../shared/feedback'
 import { useSnackbar } from 'notistack'
-import { OutlineButtonBlack, OutlineButtonBlue } from './ChatV2/generics/Buttons'
+import { BlueButton, OutlineButtonBlack, OutlineButtonBlue } from './ChatV2/generics/Buttons'
 
 const useSubmitFeedbackMutation = () => {
   const analyticsMetadata = useAnalytics()
@@ -65,7 +65,7 @@ export const Feedback: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <OutlineButtonBlack onClick={() => setModalOpen(false)}>{t('feedback:cancel')}</OutlineButtonBlack>
-          <OutlineButtonBlue onClick={handleSubmit}>{t('feedback:submit')}</OutlineButtonBlue>
+          <BlueButton onClick={handleSubmit}>{t('feedback:submit')}</BlueButton>
         </DialogActions>
       </Dialog>
     </>

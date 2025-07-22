@@ -16,6 +16,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import apiClient from '../../util/apiClient'
 import { useSearchParams } from 'react-router-dom'
 import { BlueButton, OutlineButtonBlack } from './generics/Buttons'
+import { useAnalyticsDispatch } from '../../stores/analytics'
 
 const useUrlPromptId = () => {
   const [searchParams] = useSearchParams()
@@ -90,6 +91,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const urlPrompt = course?.prompts.find((p) => p.id === urlPromptId)
   const isPromptHidden = activePrompt?.hidden ?? false
   const isPromptEditable = activePrompt?.type !== 'CHAT_INSTANCE' && activePrompt?.type !== 'RAG_INDEX'
+
+  const dispatchAnalytics = useAnalyticsDispatch()
+  useEffect(() => {
+    dispatchAnalytics({
+      type: 'SET_ANALYTICS_DATA',
+      payload: {
+        promptId: activePrompt?.id,
+        promptName: activePrompt?.name,
+      },
+    })
+  }, [activePrompt?.id, dispatchAnalytics])
 
   const resetSettings = () => {
     handleChangePrompt(undefined)

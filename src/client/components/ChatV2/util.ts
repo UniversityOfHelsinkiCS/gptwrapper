@@ -47,6 +47,8 @@ export const getCompletionStream = async ({
     },
   }
 
+  console.log(prevResponseId)
+
   formData.set('data', JSON.stringify(data))
 
   return postAbortableStream('/ai/stream/v2', formData, abortController)

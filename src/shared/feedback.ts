@@ -1,20 +1,24 @@
 import z from 'zod/v4'
 
+const shortString = z.string().max(200)
+
 export const FeedbackMetadataSchema = z
   .object({
-    url: z.string(),
-    courseId: z.string(),
-    model: z.string(),
-    promptId: z.string(),
+    url: z.url(),
+    courseId: shortString,
+    model: shortString,
+    promptId: shortString,
+    promptName: shortString,
     ragIndexId: z.number(),
+    ragIndexName: shortString,
     nMessages: z.number(),
     fileSearchesMade: z.number(),
     filesUploaded: z.number(),
-    language: z.string(),
-    browser: z.string(),
-    os: z.string(),
+    language: shortString,
+    browser: shortString,
+    os: shortString,
     mobile: z.boolean(),
-    screenResolution: z.string(),
+    screenResolution: shortString,
   })
   .partial()
   .default({})

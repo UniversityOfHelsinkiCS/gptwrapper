@@ -11,6 +11,8 @@ function useLocalStorageState<T>(key: string, defaultValue = undefined) {
     try {
       const parsedObject = JSON.parse(storedValue) as { value: T }
 
+      console.log(`localStorage value for "${key}":`, parsedObject.value)
+
       if (!('value' in parsedObject)) throw new Error('Invalid localStorageState JSON format')
 
       parsedValue = parsedObject.value
@@ -22,8 +24,13 @@ function useLocalStorageState<T>(key: string, defaultValue = undefined) {
   })
 
   useEffect(() => {
-    if (state) localStorage.setItem(key, JSON.stringify({ value: state }))
-    if (state === undefined) localStorage.removeItem(key)
+    if (state !== undefined) {
+      console.log(`Setting localStorage value for "${key}"`, state)
+      localStorage.setItem(key, JSON.stringify({ value: state }))
+    } else {
+      console.log(`Removing localStorage value for "${key}"`)
+      localStorage.removeItem(key)
+    }
   }, [key, state])
 
   return [state, setState]

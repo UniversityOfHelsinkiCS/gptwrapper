@@ -2,19 +2,38 @@ import { createContext, type ReactNode, useContext, useReducer } from 'react'
 import type { FeedbackMetadata } from '../../shared/feedback'
 import { getI18n } from 'react-i18next'
 
-type AnalyticsAction = {
-  type: 'SET_ANALYTICS_DATA'
-  payload: { model: string; courseId: string }
-}
+type AnalyticsAction =
+  | {
+      type: 'SET_ANALYTICS_DATA'
+      payload: FeedbackMetadata
+    }
+  | {
+      type: 'RESET_CHAT'
+    }
+  | {
+      type: 'INCREMENT_FILE_SEARCHES'
+    }
 
 const initialFeedbackMetadata: FeedbackMetadata = {}
 
 function analyticsReducer(state: FeedbackMetadata, action: AnalyticsAction): FeedbackMetadata {
+  console.log('analyticsReducer', action)
   switch (action.type) {
     case 'SET_ANALYTICS_DATA':
       return {
         ...state,
         ...action.payload,
+      }
+    case 'RESET_CHAT':
+      return {
+        ...state,
+        fileSearchesMade: undefined,
+        nMessages: undefined,
+      }
+    case 'INCREMENT_FILE_SEARCHES':
+      return {
+        ...state,
+        fileSearchesMade: state.fileSearchesMade ? state.fileSearchesMade + 1 : 1,
       }
     default:
       return state
@@ -74,6 +93,7 @@ export const addJustInTimeFields = (analytics: FeedbackMetadata): FeedbackMetada
     ...analytics,
     url: window.location.href,
     language: getI18n().language,
+    windowResolution: `${window.innerWidth}x${window.innerHeight}`,
     ...getUserAgentData(),
   }
 }

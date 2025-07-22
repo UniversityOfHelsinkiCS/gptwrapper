@@ -11,13 +11,13 @@ export const DisclaimerModal = ({
   setDisclaimerStatus,
 }: {
   disclaimer: string
-  disclaimerStatus: { open: boolean }
-  setDisclaimerStatus: (status: { open: boolean }) => void
+  disclaimerStatus: boolean
+  setDisclaimerStatus: (status: boolean) => void
 }) => {
   const { t } = useTranslation()
 
   return (
-    <Modal open={disclaimerStatus.open} onClose={() => setDisclaimerStatus({ open: false })}>
+    <Modal open={disclaimerStatus} onClose={() => setDisclaimerStatus(false)}>
       <Box
         sx={{
           position: 'absolute',
@@ -38,11 +38,7 @@ export const DisclaimerModal = ({
           padding: '3rem',
         }}
       >
-        <IconButton
-          id="close-disclaimer"
-          onClick={() => setDisclaimerStatus({ open: false })}
-          sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500' }}
-        >
+        <IconButton id="close-disclaimer" onClick={() => setDisclaimerStatus(false)} sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500' }}>
           <Close />
         </IconButton>
 
@@ -50,7 +46,7 @@ export const DisclaimerModal = ({
 
         <FormGroup>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <BlueButton onClick={() => setDisclaimerStatus({ open: false })} type="submit">
+            <BlueButton onClick={() => setDisclaimerStatus(false)} type="submit">
               OK
             </BlueButton>
           </Box>

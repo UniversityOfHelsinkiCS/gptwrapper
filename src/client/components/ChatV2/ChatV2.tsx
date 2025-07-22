@@ -31,6 +31,7 @@ import { useChatStream } from './useChatStream'
 import Annotations from './Annotations'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { enqueueSnackbar } from 'notistack'
+import { useAnalyticsDispatch } from '../../stores/analytics'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -40,7 +41,6 @@ function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, u
   // If urlValue is defined, it overrides the localStorage setting.
   // However if user changes the setting, the urlValue is removed.
   const modifiedSetValue = (newValue: string) => {
-    console.log('newValue', newValue, 'urlValue', urlValue)
     if (newValue !== urlValue) {
       setValue(newValue)
       searchParams.delete(urlKey)
@@ -67,9 +67,7 @@ export const ChatV2 = () => {
   // local storage states
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
   const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model')
-  const [disclaimerStatus, setDisclaimerStatus] = useLocalStorageState<{
-    open: boolean
-  }>('disclaimer-status', { open: true })
+  const [disclaimerStatus, setDisclaimerStatus] = useLocalStorageState<boolean>('disclaimer-status', true)
   const [assistantInstructions, setAssistantInstructions] = useLocalStorageState<string>(
     `${localStoragePrefix}-chat-instructions`,
     DEFAULT_ASSISTANT_INSTRUCTIONS,
@@ -96,6 +94,21 @@ export const ChatV2 = () => {
   const [ragIndexId, setRagIndexId] = useState<number | undefined>()
   const [activeFileSearchResult, setActiveFileSearchResult] = useState<FileSearchCompletedData | undefined>()
   const ragIndex = ragIndices?.find((index) => index.id === ragIndexId)
+
+  // Analytics
+  const dispatchAnalytics = useAnalyticsDispatch()
+  useEffect(() => {
+    dispatchAnalytics({
+      type: 'SET_ANALYTICS_DATA',
+      payload: {
+        model: activeModel,
+        courseId,
+        nMessages: messages.length,
+        ragIndexId,
+        ragIndexName: ragIndex?.metadata.name,
+      },
+    })
+  }, [messages, courseId, ragIndexId, activeModel, dispatchAnalytics])
 
   // Refs
   const appContainerRef = useContext(AppContext)
@@ -127,6 +140,7 @@ export const ChatV2 = () => {
     onFileSearchComplete: (fileSearch) => {
       setActiveFileSearchResult(fileSearch)
       setShowAnnotations(true)
+      dispatchAnalytics({ type: 'INCREMENT_FILE_SEARCHES' })
     },
   })
 
@@ -216,6 +230,7 @@ export const ChatV2 = () => {
         }
       }, 5000)
       clearRetryTimeout()
+      dispatchAnalytics({ type: 'RESET_CHAT' })
     }
   }
 
@@ -375,7 +390,7 @@ export const ChatV2 = () => {
               <OutlineButtonBlack startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)} id="settings-button">
                 {t('chat:settings')}
               </OutlineButtonBlack>
-              <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus({ open: true })} id="help-button">
+              <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} id="help-button">
                 {t('info:title')}
               </OutlineButtonBlack>
             </Box>
