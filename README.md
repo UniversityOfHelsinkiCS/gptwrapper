@@ -1,6 +1,12 @@
 # CurreChat
 
-UI and access management wrapper for Azure OpenAI service.
+LLM chat built for University of Helsinki staff and students, for education and research.
+
+Some key features include:
+
+- Access based on enrolments and staff role
+- Custom system prompts managed by teachers
+- Retrieval-augmented generation: teachers can bring their own source material for a course
 
 ## Development
 
