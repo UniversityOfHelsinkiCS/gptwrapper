@@ -4,6 +4,7 @@ import { sequelize } from '../connection'
 class Feedback extends Model {
   public id!: number
   public userId!: string
+  public feedback!: string
   public responseWanted!: boolean
   public metadata!: object
   public readonly createdAt!: Date
@@ -19,6 +20,10 @@ Feedback.init(
     },
     userId: {
       type: DataTypes.STRING,
+      allowNull: false,
+    },
+    feedback: {
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     responseWanted: {

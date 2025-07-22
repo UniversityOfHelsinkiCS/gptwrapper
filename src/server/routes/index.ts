@@ -18,6 +18,7 @@ import adminRouter from './admin'
 import facultyRouter from './faculty'
 import infoTextRouter from './infotext'
 import changeLogRouter from './changeLog'
+import feedbackRouter from './feedback'
 
 const router = express()
 
@@ -46,6 +47,7 @@ router.use('/admin', adminRouter)
 router.use('/faculties', facultyRouter)
 router.use('/infotexts', infoTextRouter)
 router.use('/changelog', changeLogRouter)
+router.use('/feedback', feedbackRouter)
 
 Sentry.setupExpressErrorHandler(router)
 router.use(errorHandler)

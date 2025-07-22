@@ -13,6 +13,10 @@ export const up: Migration = async ({ context: queryInterface }) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    feedback: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
     response_wanted: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
