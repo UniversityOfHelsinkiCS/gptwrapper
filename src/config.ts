@@ -39,20 +39,14 @@ export const validModels = [
     deployment: process.env.GPT_41 || '',
     context: 128_000,
   },
-].concat(
-  // Add mock model if not in production
-  inProduction
-    ? []
-    : [
-        {
-          name: 'mock',
-          deployment: 'mock',
-          context: 128_000,
-        },
-      ],
-)
+  {
+    name: 'mock',
+    deployment: 'mock',
+    context: 128_000,
+  },
+]
 
-export const DEFAULT_MODEL_ON_ENABLE = 'gpt-4o'
+export const DEFAULT_MODEL_ON_ENABLE = 'gpt-4.1'
 
 export const DEFAULT_ASSISTANT_INSTRUCTIONS = 'Olet avulias avustaja'
 export const DEFAULT_MODEL_TEMPERATURE = 0.5
