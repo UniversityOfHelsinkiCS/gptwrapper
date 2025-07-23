@@ -236,7 +236,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         >
           <OutlineButtonBlack
             onClick={() => {
-              if (window.confirm('Are you sure you want to reset to default settings?')) {
+              if (window.confirm(t('settings:resetConfirm'))) {
                 resetSettings()
               }
             }}

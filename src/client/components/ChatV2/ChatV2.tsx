@@ -213,7 +213,7 @@ export const ChatV2 = () => {
   }
 
   const handleReset = () => {
-    if (window.confirm('Are you sure you want to empty this conversation?')) {
+    if (window.confirm(t('chat:emptyConfirm'))) {
       setMessages([])
       setShowAnnotations(false)
       setActiveFileSearchResult(undefined)
