@@ -7,6 +7,8 @@ const router = Router()
 
 const changelog: { data?: Release[] } = {}
 
+let isApiError = false
+
 export type ChangelogResBody = Release[]
 
 router.get('/', async (_req: Request, res: Response) => {
@@ -38,15 +40,28 @@ router.get('/', async (_req: Request, res: Response) => {
     res.status(200).json(fakeRelease)
     return
   }
-  const response = await axios.get('https://api.github.com/repos/UniversityOfHelsinkiCS/gptwrapper/releases')
-  const releasesFromAPI: Release[] = response.data.map((release: Record<string, any>) => ({
-    description: release.body,
-    time: release.published_at,
-    title: release.name,
-    version: release.tag_name,
-  }))
-  changelog.data = releasesFromAPI
-  res.status(200).json(releasesFromAPI)
+
+  try {
+    // If github api is erroring, do not try again.
+    if (isApiError) {
+      res.status(200).json([])
+      return
+    }
+
+    const response = await axios.get('https://api.github.com/repos/UniversityOfHelsinkiCS/gptwrapper/releases')
+    const releasesFromAPI: Release[] = response.data.map((release: Record<string, any>) => ({
+      description: release.body,
+      time: release.published_at,
+      title: release.name,
+      version: release.tag_name,
+    }))
+    changelog.data = releasesFromAPI
+    res.status(200).json(releasesFromAPI)
+  } catch (error) {
+    console.error(error)
+    isApiError = true
+    res.status(200).json([])
+  }
 })
 
 export default router
