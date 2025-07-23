@@ -435,7 +435,7 @@ export const ChatV2 = () => {
             maxWidth: '80%',
             margin: 'auto',
             paddingTop: '1rem',
-            paddingBottom: '8rem',
+            paddingBottom: '2.5rem',
             overflowY: 'visible',
           }}
         >

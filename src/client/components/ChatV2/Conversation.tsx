@@ -17,6 +17,9 @@ import CopyToClipboardButton from '../Chat/CopyToClipboardButton'
 import { t } from 'i18next'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import { useState } from 'react'
+import { PriorityHigh } from '@mui/icons-material'
+import useLocalStorageState from '../../hooks/useLocalStorageState'
+import { OutlineButtonBlack } from './generics/Buttons'
 
 const UserMessage = ({ content, attachements }: { content: string; attachements?: string }) => (
   <Box
@@ -287,44 +290,57 @@ export const Conversation = ({
   isStreaming: boolean
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
   setShowAnnotations: (show: boolean) => void
-}) => (
-  <Box
-    style={{
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '2.5rem',
-      padding: '1rem 0',
-      flex: 1,
-    }}
-    ref={conversationRef}
-  >
-    {messages.length === 0 && <ConversationSplash courseName={courseName} courseDate={courseDate} />}
-    {messages.map((message, idx) => {
-      const isLastAssistantNode = idx === messages.length - 1 && message.role === 'assistant'
-      return (
-        <MessageItem
-          key={idx}
-          message={message}
-          isLastAssistantNode={isLastAssistantNode}
-          expandedNodeHeight={expandedNodeHeight}
-          setActiveFileSearchResult={setActiveFileSearchResult}
-          setShowAnnotations={setShowAnnotations}
-        />
-      )
-    })}
-    {isStreaming &&
-      messages.length > 0 &&
-      (completion.length > 0 ? (
-        <MessageItem
-          message={{ role: 'assistant', content: completion }}
-          isLastAssistantNode={true}
-          expandedNodeHeight={expandedNodeHeight}
-          setActiveFileSearchResult={setActiveFileSearchResult}
-          setShowAnnotations={setShowAnnotations}
-        />
-      ) : (
-        <LoadingMessage expandedNodeHeight={expandedNodeHeight} isFileSearching={isFileSearching} />
-      ))}
-  </Box>
-)
+}) => {
+  const [reminderSeen, setReminderSeen] = useLocalStorageState<boolean>('reminderSeen', false)
+
+  return (
+    <>
+      <Box
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2.5rem',
+          padding: '1rem 0',
+          flex: 1,
+        }}
+        ref={conversationRef}
+      >
+        {messages.length === 0 && <ConversationSplash courseName={courseName} courseDate={courseDate} />}
+        {messages.map((message, idx) => {
+          const isLastAssistantNode = idx === messages.length - 1 && message.role === 'assistant'
+          return (
+            <MessageItem
+              key={idx}
+              message={message}
+              isLastAssistantNode={isLastAssistantNode}
+              expandedNodeHeight={expandedNodeHeight}
+              setActiveFileSearchResult={setActiveFileSearchResult}
+              setShowAnnotations={setShowAnnotations}
+            />
+          )
+        })}
+        {isStreaming &&
+          messages.length > 0 &&
+          (completion.length > 0 ? (
+            <MessageItem
+              message={{ role: 'assistant', content: completion }}
+              isLastAssistantNode={true}
+              expandedNodeHeight={expandedNodeHeight}
+              setActiveFileSearchResult={setActiveFileSearchResult}
+              setShowAnnotations={setShowAnnotations}
+            />
+          ) : (
+            <LoadingMessage expandedNodeHeight={expandedNodeHeight} isFileSearching={isFileSearching} />
+          ))}
+      </Box>
+      {!reminderSeen && !isStreaming && messages.length > 10 && (
+        <Box sx={{ display: 'flex', gap: 2, justifyItems: 'center', fontStyle: 'italic' }}>
+          <PriorityHigh sx={{ mt: 1 }} />
+          <Typography>{t('chat:emptyReminder')}</Typography>
+          <OutlineButtonBlack onClick={() => setReminderSeen(true)}>OK</OutlineButtonBlack>
+        </Box>
+      )}
+    </>
+  )
+}

@@ -102,7 +102,8 @@
     "displaySources": "Källor",
     "readSources": "Läser källor",
     "failedSources": "Misslyckades att visa källor",
-    "freeModel": "gratis"
+    "freeModel": "gratis",
+    "emptyReminder": "Observera att långa konversationer förbrukar fler tokens. Vi rekommenderar att du rensar konversationen när du byter samtalsämne."
   },
   "settings": {
     "prompt": "Samtalsstart",

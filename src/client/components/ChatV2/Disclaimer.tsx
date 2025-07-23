@@ -1,4 +1,4 @@
-import { Modal, Box, IconButton, Typography, Checkbox, FormControlLabel, FormGroup } from '@mui/material'
+import { Modal, Box, IconButton, Checkbox, FormControlLabel, FormGroup } from '@mui/material'
 import { Close } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { BlueButton } from './generics/Buttons'
@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { useAcceptTermsMutation } from '../../hooks/useAcceptTermsMutation'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { ApplicationError } from '../../../server/util/ApplicationError'
+
 export const DisclaimerModal = ({
   disclaimer,
   disclaimerStatus,
@@ -35,7 +36,6 @@ export const DisclaimerModal = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     if (hasRead) {
       try {
         await acceptTermsMutation.mutateAsync()

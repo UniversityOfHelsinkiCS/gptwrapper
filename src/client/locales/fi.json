@@ -96,7 +96,8 @@
     "readSources": "Luetaan lähteitä",
     "failedSources": "Lähteiden näyttäminen epäonnistui",
     "freeModel": "ilmainen",
-    "errorInstructions": "Vastauksen generointi ei onnistunut. Suosittelemme tallentamaan nykyisen keskustelun ja aloittamaan uuden. Voit myös kokeilla toista mallia. Jos ongelma jatkuu, ota yhteyttä tukeen."
+    "errorInstructions": "Vastauksen generointi ei onnistunut. Suosittelemme tallentamaan nykyisen keskustelun ja aloittamaan uuden. Voit myös kokeilla toista mallia. Jos ongelma jatkuu, ota yhteyttä tukeen.",
+    "emptyReminder": "Huomaathan, että pitkät keskustelut kuluttavat enemmän tokeneita. Suosittelemme tyhjentämään keskustelun aina, kun vaihdat keskustelun aihetta."
   },
   "settings": {
     "prompt": "Keskustelun alustus",
