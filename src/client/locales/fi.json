@@ -224,7 +224,8 @@
     "activityPeriod": "Kurssi käynnissä",
     "lastUpdate": "Viimeisin julkaisu: ",
     "updater": "Updater",
-    "feedbacks": "Käyttäjäpalautteet"
+    "feedbacks": "Käyttäjäpalautteet",
+    "testing": "Testaustyökalut"
   },
   "course": {
     "showDiscussions": "Näytä talletetut keskustelut",

@@ -224,7 +224,8 @@
     "activityPeriod": "Course active",
     "lastUpdate": "Latest release: ",
     "updater": "Updater",
-    "feedbacks": "User feedback"
+    "feedbacks": "User feedback",
+    "testing": "Testing tools"
   },
   "course": {
     "showDiscussions": "Show the saved discussions",
