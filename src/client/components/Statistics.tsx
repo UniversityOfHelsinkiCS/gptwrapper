@@ -25,10 +25,7 @@ import programme from '../locales/programme.json'
 import faculties from '../locales/faculties.json'
 import useCurrentUser from '../hooks/useCurrentUser'
 import * as xlsx from 'xlsx'
-import { BlueButton, GrayButton } from './ChatV2/generics/Buttons'
-import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
-import { ChromeReaderModeRounded, DownloadSharp } from '@mui/icons-material'
-import { BrowserClient } from '@sentry/browser'
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
 
 const Statistics = () => {
   const [from, setFrom] = useState(1)
@@ -39,7 +36,7 @@ const Statistics = () => {
   const { language } = i18n
   const { user, isLoading: isUserLoading } = useCurrentUser()
   const dataDownloadLink = useRef<HTMLAnchorElement | null>(null)
-  
+
   if (!isSuccess || isUserLoading) return null
 
   const namesOf = (codes: string[]) => {
@@ -66,84 +63,87 @@ const Statistics = () => {
   const statsToShow = statistics.data.filter(termWithin).filter(belongsToFaculty).sort(byUsage)
 
   const exportToExcel = (jsonData: any) => {
-      const book = xlsx.utils.book_new()
-      const sheet = xlsx.utils.json_to_sheet(jsonData)
-      xlsx.utils.book_append_sheet(book, sheet, 'Tilastot')
-      xlsx.writeFile(book, 'statistics.xlsx')         
+    const book = xlsx.utils.book_new()
+    const sheet = xlsx.utils.json_to_sheet(jsonData)
+    xlsx.utils.book_append_sheet(book, sheet, 'Tilastot')
+    xlsx.writeFile(book, 'statistics.xlsx')
   }
 
-  
-
   const exportToCSV = (jsonData: any) => {
-      //const book = xlsx.utils.book_new()
-      const sheet = xlsx.utils.json_to_sheet(jsonData)
-      const csv = xlsx.utils.sheet_to_csv(sheet, {})
-      
-      const blob = new Blob([csv], {type: 'text/csv'})
-      const url = URL.createObjectURL(blob)
-      if( dataDownloadLink?.current ){
-        dataDownloadLink.current.href = url
-        dataDownloadLink.current.download = 'data.csv'
-        dataDownloadLink.current.click()
-      }
-}
+    //const book = xlsx.utils.book_new()
+    const sheet = xlsx.utils.json_to_sheet(jsonData)
+    const csv = xlsx.utils.sheet_to_csv(sheet, {})
 
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    if (dataDownloadLink?.current) {
+      dataDownloadLink.current.href = url
+      dataDownloadLink.current.download = 'data.csv'
+      dataDownloadLink.current.click()
+    }
+  }
 
   const handleXLSX = () => {
     const mangledStatistics = statsToShow.map((chat) => {
-      return (
-        {
-          Codes: chat.codes.join(', '),
-          Course: chat.name[language],
-          Terms: chat.terms.map(trm => trm.label[language]).join(', '),
-          Programmes: namesOf(chat.programmes),
-          Students: chat.students,
-          UsedTokens: chat.usedTokens,
-          PromptCount: chat.promptCount
-     
-    })})
+      return {
+        Codes: chat.codes.join(', '),
+        Course: chat.name[language],
+        Terms: chat.terms.map((trm) => trm.label[language]).join(', '),
+        Programmes: namesOf(chat.programmes),
+        Students: chat.students,
+        UsedTokens: chat.usedTokens,
+        PromptCount: chat.promptCount,
+      }
+    })
     exportToCSV(mangledStatistics)
   }
-  
+
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Box my={2}>
-        <Stack direction='row'>
+        <Stack direction="row">
           <div>
-          <span style={{ marginRight: 10 }}>{t('stats:timePeriodStart')}</span>
+            <span style={{ marginRight: 10 }}>{t('stats:timePeriodStart')}</span>
 
-          <Select value={from} onChange={(e) => setFrom(parseInt(e.target.value as string, 10))}>
-            {statistics.terms.map((term) => (
-              <MenuItem key={term.id} value={term.id}>
-                {term.label[language]}
-              </MenuItem>
-            ))}
-          </Select>
-
-          <span style={{ margin: 10 }}>{t('stats:timePeriodStop')}</span>
-          <Select value={to} onChange={(e) => setTo(parseInt(e.target.value as string, 10))}>
-            {statistics.terms
-              .filter((trm) => trm.id >= from)
-              .map((term) => (
+            <Select value={from} onChange={(e) => setFrom(parseInt(e.target.value as string, 10))}>
+              {statistics.terms.map((term) => (
                 <MenuItem key={term.id} value={term.id}>
                   {term.label[language]}
                 </MenuItem>
               ))}
-          </Select>
+            </Select>
 
-          <span style={{ margin: 10 }}>{t('stats:showing')}</span>
+            <span style={{ margin: 10 }}>{t('stats:timePeriodStop')}</span>
+            <Select value={to} onChange={(e) => setTo(parseInt(e.target.value as string, 10))}>
+              {statistics.terms
+                .filter((trm) => trm.id >= from)
+                .map((term) => (
+                  <MenuItem key={term.id} value={term.id}>
+                    {term.label[language]}
+                  </MenuItem>
+                ))}
+            </Select>
 
-          <Select value={selectedFaculty} onChange={(e) => setFaculties(e.target.value as string)}>
-            {faculties.map((f) => (
-              <MenuItem key={f.code} value={f.code}>
-                {f.name[language]}
-              </MenuItem>
-            ))}
-          </Select>
+            <span style={{ margin: 10 }}>{t('stats:showing')}</span>
+
+            <Select value={selectedFaculty} onChange={(e) => setFaculties(e.target.value as string)}>
+              {faculties.map((f) => (
+                <MenuItem key={f.code} value={f.code}>
+                  {f.name[language]}
+                </MenuItem>
+              ))}
+            </Select>
           </div>
-          <a ref={dataDownloadLink} style={{display: 'none'}}/>
-          <IconButton  onClick={() => {handleXLSX()}} sx={{marginLeft: 'auto'}}><CloudDownloadIcon fontSize="large"/></IconButton>
-         </Stack>
+          <a ref={dataDownloadLink} style={{ display: 'none' }} />
+          <IconButton
+            onClick={() => {
+              handleXLSX()
+            }}
+            sx={{ marginLeft: 'auto' }}
+          >
+            <CloudDownloadIcon fontSize="large" />
+          </IconButton>
+        </Stack>
 
         <TableContainer component={Paper}>
           <Table>
