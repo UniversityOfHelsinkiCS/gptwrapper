@@ -6,7 +6,7 @@ import { Alert, Box, Tooltip, Typography } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
-import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, validModels } from '../../../config'
+import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, inProduction, validModels } from '../../../config'
 import type { FileSearchCompletedData } from '../../../shared/types'
 import { getLanguageValue } from '../../../shared/utils'
 import useCourse from '../../hooks/useCourse'
@@ -282,8 +282,10 @@ export const ChatV2 = () => {
 
     const { usage, limit, model: defaultCourseModel, models: courseModels } = userStatus
 
+    let allowedModels: string[] = []
+
     if (course && courseModels) {
-      setAllowedModels(courseModels)
+      allowedModels = courseModels
 
       if (courseModels.includes(activeModel)) {
         setActiveModel(activeModel)
@@ -291,9 +293,14 @@ export const ChatV2 = () => {
         setActiveModel(defaultCourseModel ?? courseModels[0])
       }
     } else {
-      const allowedModels = validModels.map((m) => m.name) // [gpt-4.1, gpt-4o, gpt-4o-mini] 25.6.2025
-      setAllowedModels(allowedModels)
+      allowedModels = validModels.map((m) => m.name) // [gpt-4.1, gpt-4o, gpt-4o-mini, mock] 23.7.2025
     }
+
+    // Mock model is only visible to admins in production
+    if (!user?.isAdmin && inProduction) {
+      allowedModels = allowedModels.filter((model) => model !== 'mock')
+    }
+    setAllowedModels(allowedModels)
 
     const tokenUseExceeded = usage >= limit
 
