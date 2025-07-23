@@ -1,3 +1,4 @@
+import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -24,11 +25,20 @@ if (inCI) {
 }
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    sentryVitePlugin({
+      disable: !inProduction, // Use this only when making the production build. This should only happen in CI with SENTRY_AUTH_TOKEN specified.
+      org: 'toska',
+      project: 'currechat-frontend',
+      url: 'https://toska.cs.helsinki.fi/',
+      telemetry: false,
+    }),
+  ],
   base,
   build: {
     minify: inCI ? false : 'esbuild',
-    sourcemap: inCI ? 'inline' : undefined,
+    sourcemap: inProduction,
   },
   server: {
     proxy: {
