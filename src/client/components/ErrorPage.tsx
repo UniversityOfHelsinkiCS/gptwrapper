@@ -4,10 +4,15 @@ import { useTranslation } from 'react-i18next'
 import { OutlineButtonBlack } from './ChatV2/generics/Buttons'
 import { ArrowBack, Replay } from '@mui/icons-material'
 import { useRouteError } from 'react-router-dom'
+import * as Sentry from '@sentry/react'
 
 export const ErrorPage = () => {
   const error = useRouteError() as Error
   const { t } = useTranslation()
+
+  React.useEffect(() => {
+    Sentry.captureException(error)
+  }, [error])
 
   const handleReload = () => {
     window.location.reload()

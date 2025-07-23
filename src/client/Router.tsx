@@ -1,4 +1,5 @@
 import { RouterProvider, Route, createBrowserRouter, createRoutesFromElements } from 'react-router-dom'
+import * as Sentry from '@sentry/react'
 
 import { PUBLIC_URL } from '../config'
 import App from './App'
@@ -16,7 +17,9 @@ import { RagFile } from './components/Rag/RagFile'
 import { NotFound } from './components/common/NotFound'
 import { ErrorPage } from './components/ErrorPage'
 
-const router = createBrowserRouter(
+const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
+
+const router = sentryCreateBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />} ErrorBoundary={ErrorPage}>
       <Route index element={<Chat />} />
