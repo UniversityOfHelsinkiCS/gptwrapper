@@ -1,19 +1,26 @@
+import * as Sentry from '@sentry/react'
 import { useQuery } from '@tanstack/react-query'
 
-import { User } from '../types'
+import type { User } from '../types'
 import apiClient from '../util/apiClient'
 
 const queryKey = ['login']
 
 const useCurrentUser = () => {
-  const queryFn = async (): Promise<User | null> => {
-    const res = await apiClient.get(`/users/login`)
+  const queryFn = async () => {
+    const res = await apiClient.get<User>(`/users/login`)
 
     if (res.status === 401) return null
 
-    const { data } = res
+    const { data: user } = res
 
-    return data
+    Sentry.setUser({
+      id: user.id,
+      username: user.username,
+      email: user.primaryEmail,
+    })
+
+    return user
   }
 
   const { data: user, ...rest } = useQuery({
