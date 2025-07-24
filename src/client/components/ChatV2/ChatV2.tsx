@@ -368,11 +368,7 @@ export const ChatV2 = () => {
       {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
       {!isEmbeddedMode && (
 <>
-
-   <OutlineButtonBlack startIcon={<SettingsIcon />} onClick={() => setChatLeftSidePanelOpen(true)} id="settings-button">
-                {t('chat:settings')}
-  </OutlineButtonBlack>
-                    <Drawer open={chatLeftSidePanelOpen} onClose={() => {setChatLeftSidePanelOpen(!chatLeftSidePanelOpen)}}>
+  <Drawer open={chatLeftSidePanelOpen} onClose={() => {setChatLeftSidePanelOpen(!chatLeftSidePanelOpen)}}>
         <Box
           sx={{
            flex: 1,
@@ -481,6 +477,8 @@ export const ChatV2 = () => {
             setFileName={setFileName}
             saveConsent={saveConsent}
             setSaveConsent={setSaveConsent}
+            setChatLeftSidePanelOpen = {setChatLeftSidePanelOpen}
+            chatLeftSidePanelOpen={chatLeftSidePanelOpen}
             tokenUsageWarning={tokenUsageWarning}
             tokenUsageAlertOpen={tokenUsageAlertOpen}
             saveChat={!!course && course.saveDiscussions}

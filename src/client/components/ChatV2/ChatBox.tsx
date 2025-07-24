@@ -3,6 +3,7 @@ import { HelpOutline, Send } from '@mui/icons-material'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
+import SettingsIcon from '@mui/icons-material/Settings'
 import { Box, Chip, IconButton, TextField, Tooltip, Typography, FormControlLabel, Switch, Alert } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useRef } from 'react'
@@ -10,7 +11,7 @@ import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import ModelSelector from './ModelSelector'
-import { BlueButton, GrayButton } from './generics/Buttons'
+import { BlueButton, GrayButton, OutlineButtonBlack } from './generics/Buttons'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 
 export const ChatBox = ({
@@ -23,6 +24,8 @@ export const ChatBox = ({
   tokenUsageAlertOpen,
   saveConsent,
   setSaveConsent,
+  setChatLeftSidePanelOpen,
+  chatLeftSidePanelOpen,
   saveChat,
   notOptoutSaving,
   setFileName,
@@ -41,6 +44,8 @@ export const ChatBox = ({
   tokenUsageAlertOpen: boolean
   saveConsent: boolean
   setSaveConsent: React.Dispatch<boolean>
+  setChatLeftSidePanelOpen: (open: boolean) => void,
+  chatLeftSidePanelOpen: boolean,
   saveChat: boolean
   notOptoutSaving: boolean
   setFileName: (name: string) => void
@@ -242,6 +247,9 @@ export const ChatBox = ({
             </Tooltip>
           </Box>
 
+ <OutlineButtonBlack startIcon={<SettingsIcon />} onClick={() => setChatLeftSidePanelOpen(true)} id="settings-button">
+                {t('chat:settings')}
+  </OutlineButtonBlack>
           <>
             {!notOptoutSaving && saveChat && (
               <FormControlLabel control={<Switch onChange={() => setSaveConsent(!saveConsent)} checked={saveConsent} />} label={t('chat:allowSave')} />
