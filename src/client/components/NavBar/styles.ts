@@ -12,7 +12,6 @@ const styles: { [key: string]: SxProps<Theme> } = {
     //     inset 0px 0px 10px 5px rgba(255, 255, 255, 0.025);
     //     /* Long subsurface effect */
     //     inset 0px 0px 40px 5px rgba(255, 255, 255, 0.025);`,
-    zIndex: (theme: Theme) => theme.zIndex.drawer + 1,
     borderBottom: '1px solid',
     borderColor: (theme: Theme) => theme.palette.divider,
   },

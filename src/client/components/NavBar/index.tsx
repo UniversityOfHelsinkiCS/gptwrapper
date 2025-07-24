@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AppBar, Toolbar, MenuItem, Box, Container, MenuList, Button, Paper, ClickAwayListener, Grow, Popper, Typography, Link as MuiLink } from '@mui/material'
+import { AppBar, Toolbar, MenuItem, Box, Container, MenuList, Button, Paper, ClickAwayListener, Grow, Popper, Typography, Link as MuiLink, Drawer, IconButton, Stack } from '@mui/material'
 import { Language, AdminPanelSettingsOutlined, BookmarksOutlined, GradeOutlined } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
+import MenuIcon from '@mui/icons-material/Menu';
 
 import useCurrentUser from '../../hooks/useCurrentUser'
 import hyLogo from '../../assets/hy_logo.svg'
@@ -11,8 +12,10 @@ import styles from './styles'
 const NavBar = () => {
   const { t, i18n } = useTranslation()
   const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
-  const anchorRef = useRef<HTMLButtonElement>(null)
 
+const [navPanelOpen, setNavPanelOpen] = useState(false)
+  const anchorRef = useRef<HTMLButtonElement>(null)
+ 
   const { language } = i18n
   const languages = ['fi', 'sv', 'en']
 
@@ -33,7 +36,7 @@ const NavBar = () => {
 
   const isV2 = window.location.pathname.startsWith('/v2') || window.location.pathname.startsWith('/chat/v2')
 
-  return (
+  return (<>
     <AppBar elevation={0} position="sticky" sx={styles.appbar} color="transparent">
       <Container maxWidth={false}>
         <Toolbar sx={styles.toolbar} disableGutters>
@@ -43,8 +46,54 @@ const NavBar = () => {
               <Typography sx={styles.appName}>{t('appName')}</Typography>
             </Box>
           </MuiLink>
-          <Box>
-            {!isV2 && (
+         <IconButton sx={{display: {sx: 'block', lg: 'none'}}} edge="start" color="inherit" aria-label="menu" onClick={() => {setNavPanelOpen(true)}}>
+            <MenuIcon />
+          </IconButton>
+          <Box sx={{display: {xs: 'none', lg: 'block'}}}>
+            <NavItems
+              isV2={isV2}
+              user={user}
+              t={t}
+              anchorRef={anchorRef}
+              openLanguageSelect={openLanguageSelect}
+              setOpenLanguageSelect={setOpenLanguageSelect}
+              languages={languages}
+              handleLanguageChange={handleLanguageChange}
+              language={language}
+              />
+
+           </Box>
+        </Toolbar>
+     </Container>
+         </AppBar>
+ <Drawer anchor="right" open={navPanelOpen} onClose={() => {setNavPanelOpen(false)}}>
+
+<Stack sx={{paddingTop: 4, paddingRight: 4}}>
+<NavItems
+  isV2={isV2}
+  user={user}
+  t={t}
+  anchorRef={anchorRef}
+  openLanguageSelect={openLanguageSelect}
+  setOpenLanguageSelect={setOpenLanguageSelect}
+  languages={languages}
+  handleLanguageChange={handleLanguageChange}
+  language={language}
+  />
+
+</Stack>
+        </Drawer>
+
+
+      </>
+   )
+}
+
+
+const NavItems = ({isV2, user, t, anchorRef, openLanguageSelect, setOpenLanguageSelect, languages, handleLanguageChange, language }) => {
+return(
+<>
+  {!isV2 && (
               <Link to="/v2" style={{ textDecoration: 'none' }}>
                 <Button>
                   <GradeOutlined sx={styles.icon} /> {t('tryNew')}
@@ -118,12 +167,6 @@ const NavBar = () => {
                   </Paper>
                 </Grow>
               )}
-            </Popper>
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
-  )
-}
-
+            </Popper> </>
+ )}
 export default NavBar
