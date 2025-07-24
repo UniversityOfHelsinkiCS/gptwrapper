@@ -334,7 +334,7 @@ export const Conversation = ({
             <LoadingMessage expandedNodeHeight={expandedNodeHeight} isFileSearching={isFileSearching} />
           ))}
       </Box>
-      {!reminderSeen && !isStreaming && messages.length > 10 && (
+      {!reminderSeen && !isStreaming && messages.length > 15 && (
         <Box sx={{ display: 'flex', gap: 2, justifyItems: 'center', fontStyle: 'italic' }}>
           <PriorityHigh sx={{ mt: 1 }} />
           <Typography>{t('chat:emptyReminder')}</Typography>

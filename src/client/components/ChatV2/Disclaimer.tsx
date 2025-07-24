@@ -47,8 +47,14 @@ export const DisclaimerModal = ({
     }
   }
 
+  const closeAccepted = () => {
+    if (termsAccepted) {
+      setDisclaimerStatus(false)
+    }
+  }
+
   return (
-    <Modal open={disclaimerStatus} onClose={() => setDisclaimerStatus(false)}>
+    <Modal open={disclaimerStatus} onClose={() => closeAccepted()}>
       <Box
         sx={{
           position: 'absolute',
@@ -69,7 +75,7 @@ export const DisclaimerModal = ({
           padding: '3rem',
         }}
       >
-        <IconButton id="close-disclaimer" onClick={() => setDisclaimerStatus(false)} sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500' }}>
+        <IconButton id="close-disclaimer" onClick={() => closeAccepted()} sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500' }}>
           <Close />
         </IconButton>
 
