@@ -1,18 +1,11 @@
 import type { Tiktoken } from '@dqbd/tiktoken'
 import type { Response } from 'express'
-import type {
-  FileSearchTool,
-  ResponseIncludable,
-  ResponseInput,
-  ResponseInputItem,
-  ResponseItemsPage,
-  ResponseStreamEvent,
-} from 'openai/resources/responses/responses'
+import type { FileSearchTool, ResponseIncludable, ResponseInputItem, ResponseItemsPage, ResponseStreamEvent } from 'openai/resources/responses/responses'
 import type { Stream } from 'openai/streaming'
 import { z } from 'zod/v4'
 import { validModels } from '../../../config'
 import type { ResponseStreamEventData } from '../../../shared/types'
-import type { APIError, User } from '../../types'
+import type { User } from '../../types'
 import logger from '../logger'
 import { createMockStream } from './mocks/MockStream'
 import { createFileSearchTool } from './util'
