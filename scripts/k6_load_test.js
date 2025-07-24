@@ -6,7 +6,7 @@ import { sleep, check } from 'k6'
  * run using: docker run --rm -i grafana/k6 run - <script.js
  */
 
-const staging = 'https://toska-staging.cs.helsinki.fi/gptwrapper/api//ai/stream'
+const staging = 'http://gptwrapper.gptwrapper.toska.svc.cluster.local/api/ai/stream'
 const local = 'http://172.17.0.1:3000/api//ai/stream'
 
 const vusit = 50
@@ -63,7 +63,7 @@ function tokensToText(tokenizedStr) {
 }
 
 export default function () {
-  const url = `${local}/v2`
+  const url = `${staging}/v2`
 
   for (const message of messages) {
     const dataCopy = { ...data }
