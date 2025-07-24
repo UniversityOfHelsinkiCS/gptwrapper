@@ -369,7 +369,10 @@ export const ChatV2 = () => {
       {!isEmbeddedMode && (
 <>
 
-        <Drawer open={chatLeftSidePanelOpen} onClose={() => {setChatLeftSidePanelOpen(!chatLeftSidePanelOpen)}}>
+   <OutlineButtonBlack startIcon={<SettingsIcon />} onClick={() => setChatLeftSidePanelOpen(true)} id="settings-button">
+                {t('chat:settings')}
+  </OutlineButtonBlack>
+                    <Drawer open={chatLeftSidePanelOpen} onClose={() => {setChatLeftSidePanelOpen(!chatLeftSidePanelOpen)}}>
         <Box
           sx={{
            flex: 1,

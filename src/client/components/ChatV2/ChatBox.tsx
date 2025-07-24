@@ -253,7 +253,6 @@ export const ChatBox = ({
             )}
           </>
 
-          <p>Settings</p>
         </Box>
       </Box>
     </Box>
