@@ -2,7 +2,7 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import EmailIcon from '@mui/icons-material/Email'
 import HelpIcon from '@mui/icons-material/Help'
 import SettingsIcon from '@mui/icons-material/Settings'
-import { Alert, Box, Tooltip, Typography } from '@mui/material'
+import { Alert, Box, Button, Drawer, Tooltip, Typography } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
@@ -63,7 +63,7 @@ export const ChatV2 = () => {
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
 
   const { user } = useCurrentUser()
-
+  
   // local storage states
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
   const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model')
@@ -89,7 +89,7 @@ export const ChatV2 = () => {
   const [allowedModels, setAllowedModels] = useState<string[]>([])
   const [saveConsent, setSaveConsent] = useState<boolean>(false)
   const [showAnnotations, setShowAnnotations] = useState<boolean>(false)
-
+  const [chatLeftSidePanelOpen, setChatLeftSidePanelOpen] = useState<boolean>(false)
   // RAG states
   const [ragIndexId, setRagIndexId] = useState<number | undefined>()
   const [activeFileSearchResult, setActiveFileSearchResult] = useState<FileSearchCompletedData | undefined>()
@@ -367,12 +367,15 @@ export const ChatV2 = () => {
     >
       {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
       {!isEmbeddedMode && (
+<>
+
+        <Drawer open={chatLeftSidePanelOpen} onClose={() => {setChatLeftSidePanelOpen(!chatLeftSidePanelOpen)}}>
         <Box
           sx={{
-            flex: 1,
-            minWidth: 300,
-            position: 'relative',
-            borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+           flex: 1,
+           minWidth: 300,
+           position: 'relative',
+           borderRight: '1px solid rgba(0, 0, 0, 0.12)',
           }}
         >
           <Box sx={{ position: 'sticky', top: 70, padding: '2rem 1.5rem' }}>
@@ -411,6 +414,8 @@ export const ChatV2 = () => {
             )}
           </Box>
         </Box>
+      </Drawer>
+</>
       )}
 
       {/* Chat view column ------------------------------------------------------------------------------------------------ */}

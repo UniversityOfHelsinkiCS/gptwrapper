@@ -252,6 +252,8 @@ export const ChatBox = ({
               </Alert>
             )}
           </>
+
+          <p>Settings</p>
         </Box>
       </Box>
     </Box>
