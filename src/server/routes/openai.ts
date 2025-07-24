@@ -98,7 +98,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
 
   const isFreeModel = model === FREE_MODEL
 
-  const usageAllowed = (courseId ? await checkCourseUsage(user, courseId) : isFreeModel) || (await checkUsage(user, model))
+  const usageAllowed = (course ? await checkCourseUsage(user, course) : isFreeModel) || (await checkUsage(user, model))
 
   if (!usageAllowed) {
     throw ApplicationError.Forbidden('Usage limit reached')
@@ -274,7 +274,20 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   options.options = { temperature: options.modelTemperature }
 
-  const usageAllowed = (courseId ? await checkCourseUsage(user, courseId) : model === FREE_MODEL) || (await checkUsage(user, model))
+  let course: ChatInstance | null = null
+
+  if (courseId) {
+    const found = await ChatInstance.findOne({
+      where: { courseId },
+    })
+    course = found ?? null
+  }
+
+  if (courseId && !course) {
+    throw ApplicationError.NotFound('Course not found')
+  }
+
+  const usageAllowed = (course ? await checkCourseUsage(user, course) : model === FREE_MODEL) || (await checkUsage(user, model))
 
   if (!usageAllowed) {
     throw ApplicationError.Forbidden('Usage limit reached')
@@ -347,13 +360,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
 
   res.locals.chatCompletionMeta = chatCompletionMeta
 
-  const course =
-    courseId &&
-    (await ChatInstance.findOne({
-      where: { courseId },
-    }))
-
-  const consentToSave = courseId && course.saveDiscussions && options.saveConsent
+  const consentToSave = course?.saveDiscussions && options.saveConsent
 
   if (consentToSave) {
     const discussion = {

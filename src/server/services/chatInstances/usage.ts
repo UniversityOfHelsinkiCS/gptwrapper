@@ -31,17 +31,7 @@ export const checkUsage = async ({ id, isPowerUser, isAdmin }: UserType, model: 
   return isAdmin || usage <= tokenLimit
 }
 
-export const checkCourseUsage = async (user: UserType, courseId: string): Promise<boolean> => {
-  const chatInstance = await ChatInstance.findOne({
-    where: {
-      courseId,
-    },
-  })
-
-  if (!chatInstance) {
-    throw ApplicationError.NotFound('Chat instance not found')
-  }
-
+export const checkCourseUsage = async (user: UserType, chatInstance: ChatInstance): Promise<boolean> => {
   const [chatInstanceUsage] = await UserChatInstanceUsage.findOrCreate({
     where: {
       userId: user.id,
