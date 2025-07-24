@@ -8,7 +8,7 @@ import express from 'express'
 import 'express-async-errors'
 
 import { PORT } from './util/config'
-import { inCI, inProduction, inStaging } from '../config'
+import { inProduction, inStaging } from '../config'
 import router from './routes'
 import logger from './util/logger'
 import { connectToDatabase } from './db/connection'
@@ -16,13 +16,8 @@ import seed from './db/seeders'
 import setupCron from './util/cron'
 import { updateLastRestart } from './util/lastRestart'
 import { readdirSync } from 'node:fs'
-import morgan from 'morgan'
 
 const app = express()
-
-if (inCI) {
-  app.use(morgan('tiny'))
-}
 
 app.use('/api', (req, res, next) => router(req, res, next))
 app.use('/api', (_, res) => {

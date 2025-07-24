@@ -72,7 +72,7 @@ const parseFileAndAddToLastMessage = async (options: PostStreamBody['options'], 
   return options.messages
 }
 
-openaiRouter.get('/stream/k6', async (r, res) => {
+openaiRouter.get('/stream/k6', async (_r, res) => {
   res.status(200).send('yahooo!')
 })
 
@@ -85,11 +85,15 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   // @todo were not checking if the user is enrolled?
   let course: ChatInstance | null = null
 
+  const timings: Record<string, number> = {}
+
   if (courseId) {
+    const start = Date.now()
     const found = await ChatInstance.findOne({
       where: { courseId },
     })
     course = found ?? null
+    timings['ChatInstance.findOne'] = Date.now() - start
   }
 
   if (courseId && !course) {
@@ -97,7 +101,10 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   }
 
   const isFreeModel = model === FREE_MODEL
+
+  let start = Date.now()
   const usageAllowed = (courseId ? await checkCourseUsage(user, courseId) : isFreeModel) || (await checkUsage(user, model))
+  timings['usage checks'] = Date.now() - start
 
   if (!usageAllowed) {
     throw ApplicationError.Forbidden('Usage limit reached')
@@ -105,7 +112,9 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
 
   // Check if the model is allowed for the course
   if (courseId) {
+    start = Date.now()
     const courseModel = await getCourseModel(courseId)
+    timings['getCourseModel'] = Date.now() - start
 
     if (options.model) {
       const allowedModels = getAllowedModels(courseModel)
@@ -122,7 +131,9 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
 
   try {
     if (req.file) {
+      start = Date.now()
       optionsMessagesWithFile = await parseFileAndAddToLastMessage(options, req.file)
+      timings['parseFileAndAddToLastMessage'] = Date.now() - start
     }
   } catch (error) {
     logger.error('Error parsing file', { error })
@@ -159,6 +170,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
       throw ApplicationError.Forbidden('User is not admin and trying to access non-course rag')
     }
 
+    start = Date.now()
     ragIndex =
       (await RagIndex.findByPk(ragIndexId, {
         include: {
@@ -167,6 +179,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
           where: courseId ? { courseId } : {},
         },
       })) ?? undefined
+    timings['RagIndex.findByPk'] = Date.now() - start
     if (ragIndex) {
       instructions = `${instructions} ${ragIndex.metadata.instructions ?? DEFAULT_RAG_SYSTEM_PROMPT}`
     }
@@ -188,20 +201,24 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   // Using the responses API, we only send the last message and the id to previous message
   const latestMessage = options.messages[options.messages.length - 1]
 
+  start = Date.now()
   const events = await responsesClient.createResponse({
     input: latestMessage,
     prevResponseId: options.prevResponseId,
     include: ragIndexId ? ['file_search_call.results'] : [],
   })
+  timings['responsesClient.createResponse'] = Date.now() - start
 
   // Prepare for streaming response
   res.setHeader('content-type', 'text/event-stream')
 
+  start = Date.now()
   const result = await responsesClient.handleResponse({
     events,
     encoding,
     res,
   })
+  timings['responsesClient.handleResponse'] = Date.now() - start
 
   tokenCount += result.tokenCount
 
@@ -213,25 +230,32 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
       userToCharge = req.hijackedBy
     }
 
+    start = Date.now()
     if (courseId) {
       await incrementCourseUsage(userToCharge, courseId, tokenCount)
     } else {
       await incrementUsage(userToCharge, tokenCount)
     }
+    timings['increment usage'] = Date.now() - start
   }
 
-  logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
+  const chatCompletionMeta = {
     tokenCount,
     model: options.model,
     user: user.username,
     courseId,
-  })
+  }
+
+  logger.info(`Stream ended. Total tokens: ${tokenCount}`, chatCompletionMeta)
+
+  res.locals.chatCompletionMeta = chatCompletionMeta
 
   // If course has saveDiscussion turned on and user has consented to saving the discussion, save the discussion
   const consentToSave = courseId && course?.saveDiscussions && options.saveConsent
-  console.log(`Consent to save discussion: ${options.saveConsent} ${user.username}`)
+
   if (consentToSave) {
     // @todo: should file search results also be saved?
+    start = Date.now()
     const discussion = {
       userId: user.id,
       courseId,
@@ -239,9 +263,12 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
       metadata: options,
     }
     await Discussion.create(discussion)
+    timings['Discussion.create'] = Date.now() - start
   }
 
   encoding.free()
+
+  console.log('TIMINGS', timings)
 
   res.end()
   return
@@ -331,12 +358,16 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     await incrementUsage(userToCharge, tokenCount)
   }
 
-  logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
+  const chatCompletionMeta = {
     tokenCount,
-    model,
+    model: options.model,
     user: user.username,
     courseId,
-  })
+  }
+
+  logger.info(`Stream ended. Total tokens: ${tokenCount}`, chatCompletionMeta)
+
+  res.locals.chatCompletionMeta = chatCompletionMeta
 
   const course =
     courseId &&
@@ -345,8 +376,6 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     }))
 
   const consentToSave = courseId && course.saveDiscussions && options.saveConsent
-
-  console.log('consentToSave', options.saveConsent, user.username)
 
   if (consentToSave) {
     const discussion = {

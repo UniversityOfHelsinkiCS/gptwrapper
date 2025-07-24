@@ -1,4 +1,4 @@
-import { Close } from '@mui/icons-material'
+import { Add, Close } from '@mui/icons-material'
 import { Box, Button, IconButton, Modal, Slider, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -15,7 +15,7 @@ import { SaveMyPromptModal } from './SaveMyPromptModal'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import apiClient from '../../util/apiClient'
 import { useSearchParams } from 'react-router-dom'
-import { BlueButton, OutlineButtonBlack } from './generics/Buttons'
+import { BlueButton, OutlineButtonBlack, OutlineButtonBlue } from './generics/Buttons'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 
 const useUrlPromptId = () => {
@@ -188,7 +188,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           />
           {!isPromptHidden && (
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <BlueButton onClick={() => setMyPromptModalOpen(true)}>{t('settings:saveMyPrompt')}</BlueButton>
+              <OutlineButtonBlack startIcon={<Add />} onClick={() => setMyPromptModalOpen(true)}>
+                {t('settings:saveMyPrompt')}
+              </OutlineButtonBlack>
             </Box>
           )}
 

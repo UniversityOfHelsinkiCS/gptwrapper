@@ -41,7 +41,6 @@
     "tryNew": "Prova den nya chattappen",
     "close": "Stänga"
   },
-
   "chats": {
     "header": "Öppna kurschattar",
     "codes": "Koda",
@@ -50,7 +49,6 @@
     "link": "Länk till chatt",
     "noChats": "Inga öppna chattar"
   },
-
   "stats": {
     "timePeriodStart": "Startande",
     "timePeriodStop": "Slut",
@@ -71,7 +69,8 @@
     "acceptDisclaimer": "Jag har läst och förstått bruksanvisningen"
   },
   "footer": {
-    "contactSupport": "Kontakta support: <mailTo>{{supportEmail}}</mailTo>"
+    "contactSupport": "Kontakta support: <mailTo>{{supportEmail}}</mailTo>",
+    "version": "Version {{version}}"
   },
   "chat": {
     "start": "Starta konversationen genom att skicka ett meddelande...",
@@ -103,7 +102,12 @@
     "readSources": "Läser källor",
     "failedSources": "Misslyckades att visa källor",
     "freeModel": "gratis",
-    "emptyReminder": "Observera att långa konversationer förbrukar fler tokens. Vi rekommenderar att du rensar konversationen när du byter samtalsämne."
+    "emptyReminder": "Observera att långa konversationer förbrukar fler tokens. Vi rekommenderar att du rensar konversationen när du byter samtalsämne.",
+    "modelDisabled": "Språkmodellen är inte tillgänglig",
+    "attachFile": "Bifoga fil",
+    "allowSave": "Diskussionen kan sparas",
+    "toBeSaved": "Diskussionen sparas anonymt",
+    "errorInstructions": "Det gick inte att generera ett svar. Vi rekommenderar att du sparar den aktuella konversationen och startar en ny. Du kan också prova en annan modell. Om problemet kvarstår, kontakta supporten."
   },
   "settings": {
     "prompt": "Samtalsstart",
@@ -116,7 +120,17 @@
     "temperatureAccurate": "Mer exakt",
     "temperatureRandom": "Slumpmässig",
     "resetDefault": "Återställ standardinställningar",
-    "resetConfirm": "Är du säker på att du vill återställa till standardinställningarna?"
+    "resetConfirm": "Är du säker på att du vill återställa till standardinställningarna?",
+    "saveMyPrompt": "Lägg till en ny prompt",
+    "confirmDeletePrompt": "Är du säker på att du vill ta bort frågan '{{name}}'?",
+    "choosePrompt": "Välj prompt",
+    "default": "Default",
+    "coursePrompts": "Kursprompter",
+    "myPrompts": "Mina prompter",
+    "saveMyPromptModalTitle": "Skapa eller uppdatera en prompt",
+    "saveMyPromptAs": "Spara prompt som",
+    "updatePrompt": "Uppdatera prompt",
+    "saveNewPrompt": "Skapa ny prompt"
   },
   "email": {
     "save": "Spara som e-post",
@@ -142,7 +156,10 @@
     "goHome": "Gå till startsidan",
     "reload": "Ladda om",
     "description": "Tyvärr, något gick fel. Vårt team har underrättats.",
-    "errorMessage": "Felmeddelande"
+    "errorMessage": "Felmeddelande",
+    "stackTrace": "Stack trace",
+    "cause": "Orsak",
+    "waitingForResponse": "Väntar på respons"
   },
   "admin": {
     "showing": "Visande",
@@ -207,7 +224,10 @@
     "email": "E-post",
     "studentNumber": "Studentnummer",
     "resetTokens": "Återställ tokens",
-    "typeMore": "Ange minst 5 tecken"
+    "typeMore": "Ange minst 5 tecken",
+    "updater": "Updater",
+    "feedbacks": "Användarfeedback",
+    "testing": "Testverktyg"
   },
   "course": {
     "courseUpdated": "Kursen uppdaterad",
@@ -242,9 +262,32 @@
     "enableCurre": "Aktivera CurreChat",
     "enableCurreModalTitle": "Aktivera CurreChat för kursen {{name}}?",
     "enableCurreModalText": "Språkmodellen {{defaultModel}} och {{defaultTokenLimit}} tokenanvändningsgränsen per elev är inställda som standardinställningar för kursen. CurreChat används under kursen {{activityPeriod}} (kursens längd + 1 månad). Du kan redigera dessa inställningar senare.",
-    "showActiveCourses": "Visa aktiva kurser"
+    "showActiveCourses": "Visa aktiva kurser",
+    "stats": "Statistik",
+    "discussions": "Diskussioner",
+    "prompts": "Prompter",
+    "rag": "RAG",
+    "reseachCourse": "Forskningskurs",
+    "isSavedNotOptOut": "Kursdiskussionerna sparas anonymt\\n\\nSparade diskussioner kan användas för forskningsändamål",
+    "isSavedForTeacherOptOut": "Kursdiskussionerna sparas anonymt om användaren ger tillstånd till detta. Sparade diskussioner kan användas för forskningsändamål.",
+    "isReseachCourse": "Kursen är en forskningskurs",
+    "canOptOut": "Det är inte möjligt att välja bort att spara diskussionerna",
+    "directPromptLink": "Länk för att chatta med denna prompt aktiv",
+    "copyDirectPromptLinkInfo": "Kopiera en länk för att chatta med denna prompt aktiv",
+    "isSavedOptOut": "Kursdiskussionerna sparas anonymt om du ger tillstånd till detta"
   },
   "tooltip": {
     "copied": "Kopierad!"
+  },
+  "feedback": {
+    "success": "Feedback skickad, tack!",
+    "error": "Det gick inte att skicka feedback",
+    "giveFeedback": "Ge feedback",
+    "title": "Ge feedback om CurreChat till utvecklarna",
+    "description": "Har du problem? Eller har du ett förslag på en funktion? Berätta om det nedan. Observera att feedbacken inte är anonym. Du kan också be om ett svar från utvecklarna.",
+    "message": "Skriv din feedback...",
+    "responseWanted": "Jag vill få ett svar på min feedback",
+    "cancel": "Avboka",
+    "submit": "Skicka till"
   }
 }

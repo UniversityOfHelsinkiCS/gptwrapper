@@ -2,6 +2,7 @@ import morgan from 'morgan'
 
 import { inProduction, inStaging } from '../../config'
 import logger from '../util/logger'
+import type { Response } from 'express'
 
 // Morgan excepts a log format string to be returned, but here a separate logger is used instead.
 // Override the first function argument to return void instead of a string.
@@ -9,9 +10,9 @@ type Morgan = typeof morgan
 type ReturnVoid = (...args: Parameters<Parameters<Morgan>[0]>) => void
 type AccessLogger = (arg0: ReturnVoid) => ReturnType<Morgan>
 
-const access = morgan as unknown as AccessLogger
+const requestMorganLogger = morgan as unknown as AccessLogger
 
-const accessLogger = access((tokens, req, res) => {
+const requestLogger = requestMorganLogger((tokens, req, res) => {
   const { uid } = req.headers
 
   const method = tokens.method(req, res)
@@ -22,7 +23,7 @@ const accessLogger = access((tokens, req, res) => {
 
   const message = `${method} ${url} ${status} - ${responseTime} ms`
 
-  const additionalInfo =
+  let additionalInfo =
     inProduction || inStaging
       ? {
           userId: uid,
@@ -35,7 +36,14 @@ const accessLogger = access((tokens, req, res) => {
         }
       : {}
 
+  if ((res as Response).locals.chatCompletionMeta) {
+    additionalInfo = {
+      ...additionalInfo,
+      ...((res as Response).locals.chatCompletionMeta as Record<string, unknown>),
+    }
+  }
+
   logger.info(message, additionalInfo)
 })
 
-export default accessLogger
+export default requestLogger

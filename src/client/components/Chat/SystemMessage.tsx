@@ -43,6 +43,7 @@ const SystemMessage = ({
     <Box>
       {showInfo && <Info infoText={infoText} creation />}
       <TextField
+        data-sentry-mask
         fullWidth
         multiline
         minRows={creation ? 5 : 1}

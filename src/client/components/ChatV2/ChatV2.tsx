@@ -145,6 +145,17 @@ export const ChatV2 = () => {
   })
 
   const handleSubmit = async (message: string, ignoreTokenUsageWarning: boolean) => {
+    if (!userStatus) return
+
+    const { usage, limit } = userStatus
+    const tokenUsageExceeded = usage >= limit
+
+    if (tokenUsageExceeded && activeModel !== FREE_MODEL) {
+      enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
+      handleCancel()
+      return
+    }
+
     const formData = new FormData()
 
     const file = fileInputRef.current?.files?.[0]

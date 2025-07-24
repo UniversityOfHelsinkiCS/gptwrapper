@@ -244,8 +244,8 @@ const MessageItem = ({
   if (message.role === 'assistant') {
     return (
       <Box
-        className={`message-role-assistant`}
         data-testid="assistant-message"
+        data-sentry-mask
         sx={{
           minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
         }}
@@ -261,7 +261,7 @@ const MessageItem = ({
     )
   } else {
     return (
-      <Box className="message-role-user" data-testid="user-message" sx={{ alignSelf: 'flex-end' }}>
+      <Box data-sentry-mask data-testid="user-message" sx={{ alignSelf: 'flex-end' }}>
         <UserMessage content={message.content} attachements={message.attachements ?? ''} />
       </Box>
     )
@@ -334,7 +334,7 @@ export const Conversation = ({
             <LoadingMessage expandedNodeHeight={expandedNodeHeight} isFileSearching={isFileSearching} />
           ))}
       </Box>
-      {!reminderSeen && !isStreaming && messages.length > 10 && (
+      {!reminderSeen && !isStreaming && messages.length > 15 && (
         <Box sx={{ display: 'flex', gap: 2, justifyItems: 'center', fontStyle: 'italic' }}>
           <PriorityHigh sx={{ mt: 1 }} />
           <Typography>{t('chat:emptyReminder')}</Typography>

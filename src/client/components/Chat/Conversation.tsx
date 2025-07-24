@@ -35,7 +35,7 @@ export const Response = ({ role, content, setMessage, id }: { role: Role; conten
               </>
             )}
             <Box pr={7} py={2}>
-              <div id={id}>
+              <div id={id} data-sentry-mask>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {
                     //the check avoids a bug when the AI answers with a formatted list.

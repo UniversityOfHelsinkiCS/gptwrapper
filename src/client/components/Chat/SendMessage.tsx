@@ -68,7 +68,7 @@ const SendMessage = ({
       <Box mb={1}>
         <Typography variant="h6">{t('chat:message')}</Typography>
       </Box>
-      <Box mb={2}>
+      <Box mb={2} data-sentry-mask>
         <TextField
           fullWidth
           multiline

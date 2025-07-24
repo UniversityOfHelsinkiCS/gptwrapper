@@ -17,7 +17,7 @@ export default function AssistantInstructionsInput({
   instructions,
   setInstructions,
 }: {
-  label: string,
+  label: string
   disabled: boolean
   hidden: boolean
   instructions: string
@@ -27,6 +27,7 @@ export default function AssistantInstructionsInput({
     <TextField disabled={true} label={<VisibilityOff />} />
   ) : (
     <TextField
+      data-sentry-mask
       multiline
       minRows={6}
       maxRows={10}
