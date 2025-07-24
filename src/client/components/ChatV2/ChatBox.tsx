@@ -196,7 +196,9 @@ export const ChatBox = ({
                 <input type="file" accept="*" hidden ref={fileInputRef} onChange={(e) => e.target.files?.[0] && handleFileTypeValidation(e.target.files[0])} />
               </IconButton>
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
-              {!isEmbedded && <ModelSelector currentModel={currentModel} setModel={setModel} availableModels={availableModels} />}
+              {!isEmbedded && (
+                <ModelSelector currentModel={currentModel} setModel={setModel} availableModels={availableModels} isTokenLimitExceeded={isTokenLimitExceeded} />
+              )}
               <Tooltip title={t('chat:emptyConversation')} arrow placement="right">
                 <IconButton onClick={handleReset}>
                   <RestartAltIcon />

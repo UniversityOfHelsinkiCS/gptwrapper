@@ -97,7 +97,8 @@
     "failedSources": "Failed to display sources",
     "freeModel": "free",
     "errorInstructions": "Generating a response failed. We recommended saving the current conversation and starting a new one. You can also try another model. If the problem persists, please contact support.",
-    "emptyReminder": "Please note that long conversations consume more tokens. We recommend that you clear the conversation whenever you change the topic of the conversation."
+    "emptyReminder": "Please note that long conversations consume more tokens. We recommend that you clear the conversation whenever you change the topic of the conversation.",
+    "modelDisabled": "Model is unavailable"
   },
   "settings": {
     "prompt": "Conversation prompt",

@@ -103,7 +103,8 @@
     "readSources": "Läser källor",
     "failedSources": "Misslyckades att visa källor",
     "freeModel": "gratis",
-    "emptyReminder": "Observera att långa konversationer förbrukar fler tokens. Vi rekommenderar att du rensar konversationen när du byter samtalsämne."
+    "emptyReminder": "Observera att långa konversationer förbrukar fler tokens. Vi rekommenderar att du rensar konversationen när du byter samtalsämne.",
+    "modelDisabled": "Språkmodellen är inte tillgänglig"
   },
   "settings": {
     "prompt": "Samtalsstart",
