@@ -98,15 +98,15 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
 
   const isFreeModel = model === FREE_MODEL
 
-  const usageAllowed = (course ? await checkCourseUsage(user, course) : isFreeModel) || (await checkUsage(user, model))
+  const usageAllowed = (course ? await checkCourseUsage(user, course) : isFreeModel) || checkUsage(user, model)
 
   if (!usageAllowed) {
     throw ApplicationError.Forbidden('Usage limit reached')
   }
 
   // Check if the model is allowed for the course
-  if (courseId) {
-    const courseModel = await getCourseModel(courseId)
+  if (course) {
+    const courseModel = course.model
 
     if (options.model) {
       const allowedModels = getAllowedModels(courseModel)
@@ -287,7 +287,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     throw ApplicationError.NotFound('Course not found')
   }
 
-  const usageAllowed = (course ? await checkCourseUsage(user, course) : model === FREE_MODEL) || (await checkUsage(user, model))
+  const usageAllowed = (course ? await checkCourseUsage(user, course) : model === FREE_MODEL) || checkUsage(user, model)
 
   if (!usageAllowed) {
     throw ApplicationError.Forbidden('Usage limit reached')

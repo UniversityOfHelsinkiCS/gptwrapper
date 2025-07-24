@@ -20,7 +20,7 @@ export const getUsage = async (userId: string) => {
   return user.usage
 }
 
-export const checkUsage = async (user: UserType, model: string): Promise<boolean> => {
+export const checkUsage = (user: UserType, model: string): boolean => {
   if (model === FREE_MODEL) return true
 
   // 10x token limit for power users
