@@ -29,15 +29,12 @@ export const checkUsage = (user: UserType, model: string): boolean => {
   return user.isAdmin || (user.usage ?? 0) <= tokenLimit
 }
 
-export const checkCourseUsage = async (user: UserType, chatInstance: ChatInstance): Promise<boolean> => {
-  const [chatInstanceUsage] = await UserChatInstanceUsage.findOrCreate({
-    where: {
-      userId: user.id,
-      chatInstanceId: chatInstance.id,
-    },
-  })
+export const checkCourseUsage = (user: UserType, chatInstance: ChatInstance): boolean => {
+  if (!chatInstance.currentUserUsage) {
+    throw ApplicationError.InternalServerError('chatInstance.currentUserUsage undefined. This shouldnt happen!')
+  }
 
-  if (!user.isAdmin && chatInstanceUsage.usageCount >= chatInstance.usageLimit) {
+  if (!user.isAdmin && chatInstance.currentUserUsage.usageCount >= chatInstance.usageLimit) {
     logger.info('Usage limit reached')
 
     return false
@@ -74,19 +71,11 @@ export const incrementUsage = async (user: UserType, tokenCount: number) => {
   })
 }
 
-export const incrementCourseUsage = async (user: UserType, chatInstance: ChatInstance, tokenCount: number) => {
-  const chatInstanceUsage = await UserChatInstanceUsage.findOne({
-    where: {
-      userId: user.id,
-      chatInstanceId: chatInstance.id,
-    },
-  })
-
-  if (!chatInstanceUsage) throw new Error('User chatInstance usage not found')
-
-  chatInstanceUsage.usageCount += tokenCount
-
-  await chatInstanceUsage.save()
+export const incrementCourseUsage = async (chatInstance: ChatInstance, tokenCount: number) => {
+  if (!chatInstance.currentUserUsage) {
+    throw ApplicationError.InternalServerError('chatInstance.currentUserUsage undefined. This shouldnt happen!')
+  }
+  await chatInstance.currentUserUsage.increment({ usageCount: tokenCount })
 }
 
 export const getUserStatus = async (user: UserType, courseId: string) => {

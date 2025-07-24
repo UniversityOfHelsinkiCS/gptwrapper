@@ -6,6 +6,7 @@ import type Prompt from './prompt'
 import type RagIndex from './ragIndex'
 import type Responsibility from './responsibilities'
 import type Enrolment from './enrolment'
+import type UserChatInstanceUsage from './userChatInstanceUsage'
 
 class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAttributes<ChatInstance>> {
   declare id: CreationOptional<string>
@@ -44,6 +45,8 @@ class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAtt
   declare prompts?: NonAttribute<Prompt[]>
 
   declare enrolments?: NonAttribute<Enrolment[]>
+
+  declare currentUserUsage?: NonAttribute<UserChatInstanceUsage>
 }
 
 ChatInstance.init(

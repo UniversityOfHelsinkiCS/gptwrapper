@@ -2,7 +2,7 @@ import express from 'express'
 import multer from 'multer'
 import { z } from 'zod/v4'
 import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction } from '../../config'
-import { ChatInstance, Discussion, RagIndex } from '../db/models'
+import { ChatInstance, Discussion, RagIndex, UserChatInstanceUsage } from '../db/models'
 import { calculateUsage, checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../services/chatInstances/usage'
 import type { RequestWithUser } from '../types'
 import { getCompletionEvents, streamCompletion } from '../util/azure/client'
@@ -86,19 +86,25 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   let course: ChatInstance | null = null
 
   if (courseId) {
-    const found = await ChatInstance.findOne({
+    course = await ChatInstance.findOne({
       where: { courseId },
     })
-    course = found ?? null
-  }
+    if (!course) {
+      throw ApplicationError.NotFound('Course not found')
+    }
 
-  if (courseId && !course) {
-    throw ApplicationError.NotFound('Course not found')
+    const [chatInstanceUsage] = await UserChatInstanceUsage.findOrCreate({
+      where: {
+        userId: user.id,
+        chatInstanceId: course.id,
+      },
+    })
+    course.currentUserUsage = chatInstanceUsage
   }
 
   const isFreeModel = model === FREE_MODEL
 
-  const usageAllowed = (course ? await checkCourseUsage(user, course) : isFreeModel) || checkUsage(user, model)
+  const usageAllowed = (course ? checkCourseUsage(user, course) : isFreeModel) || checkUsage(user, model)
 
   if (!usageAllowed) {
     throw ApplicationError.Forbidden('Usage limit reached')
@@ -204,6 +210,8 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     res,
   })
 
+  encoding.free()
+
   tokenCount += result.tokenCount
 
   // Increment user usage if not using free model
@@ -215,7 +223,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     }
 
     if (course) {
-      await incrementCourseUsage(userToCharge, course, tokenCount)
+      await incrementCourseUsage(course, tokenCount) // course.currentUserUsage.usage is incremented by tokenCount
     } else {
       await incrementUsage(userToCharge, tokenCount)
     }
@@ -246,8 +254,6 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     await Discussion.create(discussion)
   }
 
-  encoding.free()
-
   res.end()
   return
 })
@@ -277,17 +283,23 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   let course: ChatInstance | null = null
 
   if (courseId) {
-    const found = await ChatInstance.findOne({
+    course = await ChatInstance.findOne({
       where: { courseId },
     })
-    course = found ?? null
+    if (!course) {
+      throw ApplicationError.NotFound('Course not found')
+    }
+
+    const [chatInstanceUsage] = await UserChatInstanceUsage.findOrCreate({
+      where: {
+        userId: user.id,
+        chatInstanceId: course.id,
+      },
+    })
+    course.currentUserUsage = chatInstanceUsage
   }
 
-  if (courseId && !course) {
-    throw ApplicationError.NotFound('Course not found')
-  }
-
-  const usageAllowed = (course ? await checkCourseUsage(user, course) : model === FREE_MODEL) || checkUsage(user, model)
+  const usageAllowed = (course ? checkCourseUsage(user, course) : model === FREE_MODEL) || checkUsage(user, model)
 
   if (!usageAllowed) {
     throw ApplicationError.Forbidden('Usage limit reached')
@@ -344,7 +356,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
   }
 
   if (course) {
-    await incrementCourseUsage(userToCharge, course, tokenCount)
+    await incrementCourseUsage(course, tokenCount)
   } else if (model !== FREE_MODEL) {
     await incrementUsage(userToCharge, tokenCount)
   }
