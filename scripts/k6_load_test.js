@@ -42,7 +42,7 @@ const data = {
       },
     ],
     assistantInstructions: 'Olet avulias avustaja',
-    model: 'gpt-4o-mini',
+    model: 'mock',
     modelTemperature: 0.5,
     saveConsent: false,
     prevResponseId: '',
