@@ -98,7 +98,8 @@
     "freeModel": "free",
     "errorInstructions": "Generating a response failed. We recommended saving the current conversation and starting a new one. You can also try another model. If the problem persists, please contact support.",
     "emptyReminder": "Please note that long conversations consume more tokens. We recommend that you clear the conversation whenever you change the topic of the conversation.",
-    "modelDisabled": "Model is unavailable"
+    "modelDisabled": "Model is unavailable",
+    "attachFile": "Attach file"
   },
   "settings": {
     "prompt": "Conversation prompt",
@@ -114,7 +115,7 @@
     "resetConfirm": "Are you sure you want to reset to default settings?",
     "myPrompts": "My prompts",
     "coursePrompts": "Course prompts",
-    "saveMyPrompt": "Save to my prompts",
+    "saveMyPrompt": "Add a new prompt",
     "saveMyPromptModalTitle": "Create or update a prompt",
     "saveMyPromptAs": "Save prompt as",
     "saveNewPrompt": "Create a new prompt",
@@ -233,7 +234,7 @@
     "showDiscussions": "Show the saved discussions",
     "reseachCourse": "Research course",
     "isReseachCourse": "The course is a research course",
-    "canOptOut": "It is noit possible to opt out from saving the discussions",
+    "canOptOut": "It is not possible to opt out from saving the discussions",
     "percentageUsed": "Percentage of tokens used",
     "howToActive": "Go to Courses I teach to activate the chat",
     "coursePage": "To course page",
@@ -267,9 +268,9 @@
     "oneMandatoryPrompt": "Course can have only one mandatory prompt",
     "noCourses": "No courses",
     "showActiveCourses": "Show active courses",
-    "isSavedOptOut": "The course discussions will be saved anonymously if you give permission to save",
+    "isSavedOptOut": "The course discussions will be saved anonymously if you grant the permission to save",
     "isSavedNotOptOut": "The course discussions will be saved anonymously\n\nSaved discussions can be used for research purposes",
-    "isSavedForTeacherOptOut": "The course discussions will be saved anonymously if user gives permission to save. Saved discussions can be used for research purposes",
+    "isSavedForTeacherOptOut": "The course discussions will be saved anonymously if user grants the permission to save. Saved discussions can be used for research purposes",
     "directPromptLink": "Link to chat with this prompt active",
     "copyDirectPromptLinkInfo": "Copy a link to chat with this prompt active",
     "stats": "Statistics",
@@ -282,13 +283,13 @@
   },
   "feedback": {
     "giveFeedback": "Give feedback",
-    "success": "Feedback sent, thank you",
+    "success": "Feedback sent, thank you!",
     "error": "Sending feedback failed",
     "title": "Give feedback about CurreChat to the developers",
-    "message": "your feedback",
+    "message": "Write your feedback...",
     "cancel": "Cancel",
     "submit": "Send",
-    "description": "Facing problems? Or have a feature suggestion? Tell about it below. Note that the feedback is not anonymous. You can also ask for a reply from the developers.",
+    "description": "Facing problems? Or have a feature suggestion? Tell us about it below. Note that the feedback is not anonymous. You can also ask for a reply from the developers.",
     "responseWanted": "I want a reply to the feedback"
   }
 }

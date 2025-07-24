@@ -191,19 +191,27 @@ export const ChatBox = ({
             }}
           >
             <Box>
-              <IconButton component="label">
-                <AttachFileIcon />
-                <input type="file" accept="*" hidden ref={fileInputRef} onChange={(e) => e.target.files?.[0] && handleFileTypeValidation(e.target.files[0])} />
-              </IconButton>
-              {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
-              {!isEmbedded && (
-                <ModelSelector currentModel={currentModel} setModel={setModel} availableModels={availableModels} isTokenLimitExceeded={isTokenLimitExceeded} />
-              )}
-              <Tooltip title={t('chat:emptyConversation')} arrow placement="right">
+              <Tooltip title={t('chat:attachFile')} arrow placement="top">
+                <IconButton component="label">
+                  <AttachFileIcon />
+                  <input
+                    type="file"
+                    accept="*"
+                    hidden
+                    ref={fileInputRef}
+                    onChange={(e) => e.target.files?.[0] && handleFileTypeValidation(e.target.files[0])}
+                  />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title={t('chat:emptyConversation')} arrow placement="top">
                 <IconButton onClick={handleReset}>
                   <RestartAltIcon />
                 </IconButton>
               </Tooltip>
+              {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
+              {!isEmbedded && (
+                <ModelSelector currentModel={currentModel} setModel={setModel} availableModels={availableModels} isTokenLimitExceeded={isTokenLimitExceeded} />
+              )}
             </Box>
 
             {disabled ? (

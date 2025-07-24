@@ -98,7 +98,8 @@
     "freeModel": "ilmainen",
     "errorInstructions": "Vastauksen generointi ei onnistunut. Suosittelemme tallentamaan nykyisen keskustelun ja aloittamaan uuden. Voit myös kokeilla toista mallia. Jos ongelma jatkuu, ota yhteyttä tukeen.",
     "emptyReminder": "Huomaathan, että pitkät keskustelut kuluttavat enemmän tokeneita. Suosittelemme tyhjentämään keskustelun aina, kun vaihdat keskustelun aihetta.",
-    "modelDisabled": "Kielimalli ei ole käytettävissä"
+    "modelDisabled": "Kielimalli ei ole käytettävissä",
+    "attachFile": "Liitä tiedosto"
   },
   "settings": {
     "prompt": "Keskustelun alustus",
@@ -114,10 +115,10 @@
     "resetConfirm": "Oletko varma että haluat palauttaa oletusasetukset?",
     "myPrompts": "Omat alustukset",
     "coursePrompts": "Kurssin alustukset",
-    "saveMyPrompt": "Tallenna oma alustus",
+    "saveMyPrompt": "Lisää oma alustus",
     "saveMyPromptModalTitle": "Luo tai päivitä oma alustus",
     "saveMyPromptAs": "Tallenna alustus nimellä",
-    "saveNewPrompt": "Luo uusi oma alustus",
+    "saveNewPrompt": "Lisää oma alustus",
     "updatePrompt": "Päivitä alustus",
     "choosePrompt": "Valitse alustus",
     "default": "Oletus",
@@ -282,10 +283,10 @@
   },
   "feedback": {
     "giveFeedback": "Anna palautetta",
-    "success": "Palaute lähetetty, kiitos",
+    "success": "Palaute lähetetty, kiitos!",
     "error": "Palautteen lähetys ei onnistunut",
     "title": "Anna palautetta CurreChatistä kehittäjille",
-    "message": "palautteesi",
+    "message": "Kirjoita palaute...",
     "cancel": "Peru",
     "submit": "Lähetä",
     "description": "Törmäsitko ongelmiin? Onko sinulle kehitysehdotus? Kerro siitä tässä. Huom. palaute ei ole anonyymiä. Voit myös halutessasi pyytää vastausta kehittäjiltä.",
