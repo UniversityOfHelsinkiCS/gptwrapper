@@ -1,12 +1,13 @@
-import http from 'k6/http'
-import { sleep, check } from 'k6'
 /**
- * This script requires docker image grafana/k6
+ * This script requires the use of k6 docker image version
  *
  * run using: docker run --rm -i grafana/k6 run - <script.js
  */
 
-const staging = 'http://gptwrapper.toska.svc.cluster.local:8000/api/ai/stream'
+import http from 'k6/http'
+import { sleep, check } from 'k6'
+
+const staging = 'https://toska-staging.cs.helsinki.fi/gptwrapper/api//ai/stream'
 const local = 'http://172.17.0.1:3000/api//ai/stream'
 
 const vusit = 50
@@ -45,7 +46,9 @@ const data = {
     modelTemperature: 0.5,
     saveConsent: false,
     prevResponseId: '',
+    courseId: 'sandbox',
   },
+  courseId: 'sandbox',
 }
 
 function tokensToText(tokenizedStr) {
@@ -63,7 +66,7 @@ function tokensToText(tokenizedStr) {
 }
 
 export default function () {
-  const url = `${staging}/v2`
+  const url = `${local}/v2`
 
   for (const message of messages) {
     const dataCopy = { ...data }
