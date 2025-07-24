@@ -1,8 +1,8 @@
 import { Tiktoken } from '@dqbd/tiktoken'
 
-import { DEFAULT_TOKEN_LIMIT } from '../../../config'
+import { DEFAULT_TOKEN_LIMIT, FREE_MODEL } from '../../../config'
 import { tikeIam } from '../../util/config'
-import { User as UserType, StreamingOptions } from '../../types'
+import type { User as UserType, StreamingOptions } from '../../types'
 import { ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../../db/models'
 import { getAllowedModels } from '../../util/util'
 import logger from '../../util/logger'
@@ -20,15 +20,13 @@ export const getUsage = async (userId: string) => {
   return user.usage
 }
 
-export const checkUsage = async ({ id, isPowerUser, isAdmin }: UserType, model: string): Promise<boolean> => {
-  if (model === 'gpt-4o-mini') return true
-
-  const usage = await getUsage(id)
+export const checkUsage = async (user: UserType, model: string): Promise<boolean> => {
+  if (model === FREE_MODEL) return true
 
   // 10x token limit for power users
-  const tokenLimit = isPowerUser ? DEFAULT_TOKEN_LIMIT * 10 : DEFAULT_TOKEN_LIMIT
+  const tokenLimit = user.isPowerUser ? DEFAULT_TOKEN_LIMIT * 10 : DEFAULT_TOKEN_LIMIT
 
-  return isAdmin || usage <= tokenLimit
+  return user.isAdmin || (user.usage ?? 0) <= tokenLimit
 }
 
 export const checkCourseUsage = async (user: UserType, chatInstance: ChatInstance): Promise<boolean> => {
@@ -76,18 +74,7 @@ export const incrementUsage = async (user: UserType, tokenCount: number) => {
   })
 }
 
-export const incrementCourseUsage = async (user: UserType, courseId: string, tokenCount: number) => {
-  const chatInstance = await ChatInstance.findOne({
-    where: {
-      courseId,
-    },
-    attributes: ['id'],
-  })
-
-  if (!chatInstance) {
-    throw ApplicationError.NotFound('Chat instance not found')
-  }
-
+export const incrementCourseUsage = async (user: UserType, chatInstance: ChatInstance, tokenCount: number) => {
   const chatInstanceUsage = await UserChatInstanceUsage.findOne({
     where: {
       userId: user.id,

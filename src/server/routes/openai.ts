@@ -214,8 +214,8 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
       userToCharge = req.hijackedBy
     }
 
-    if (courseId) {
-      await incrementCourseUsage(userToCharge, courseId, tokenCount)
+    if (course) {
+      await incrementCourseUsage(userToCharge, course, tokenCount)
     } else {
       await incrementUsage(userToCharge, tokenCount)
     }
@@ -343,8 +343,8 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     userToCharge = req.hijackedBy
   }
 
-  if (courseId) {
-    await incrementCourseUsage(userToCharge, courseId, tokenCount)
+  if (course) {
+    await incrementCourseUsage(userToCharge, course, tokenCount)
   } else if (model !== FREE_MODEL) {
     await incrementUsage(userToCharge, tokenCount)
   }

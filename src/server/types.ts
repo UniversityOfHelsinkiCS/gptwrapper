@@ -16,6 +16,7 @@ export interface User {
   isPowerUser: boolean
   activeCourseIds?: string[]
   ownCourses?: string[]
+  usage?: number
   isStatsViewer: boolean
 }
 
