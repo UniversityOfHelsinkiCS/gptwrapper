@@ -195,7 +195,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   // Using the responses API, we only send the last message and the id to previous message
   const latestMessage = options.messages[options.messages.length - 1]
 
-  const events = await responsesClient.createResponse({
+  const stream = await responsesClient.createResponse({
     input: latestMessage,
     prevResponseId: options.prevResponseId,
     include: ragIndexId ? ['file_search_call.results'] : [],
@@ -205,7 +205,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
   res.setHeader('content-type', 'text/event-stream')
 
   const result = await responsesClient.handleResponse({
-    events,
+    stream,
     encoding,
     res,
   })

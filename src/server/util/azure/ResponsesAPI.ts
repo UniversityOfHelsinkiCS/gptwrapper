@@ -31,6 +31,7 @@ export class ResponsesClient {
   tools: FileSearchTool[]
   user: User
   ragIndex?: RagIndex
+  clientStreamError: Error | null = null
 
   constructor({
     model,
@@ -119,12 +120,15 @@ export class ResponsesClient {
     }
   }
 
-  async handleResponse({ events, encoding, res }: { events: Stream<ResponseStreamEvent>; encoding: Tiktoken; res: Response }) {
+  async handleResponse({ stream, encoding, res }: { stream: Stream<ResponseStreamEvent>; encoding: Tiktoken; res: Response }) {
     let tokenCount = 0
     const contents: string[] = []
 
-    for await (const event of events) {
-      // console.log('event type:', event.type)
+    for await (const event of stream) {
+      if (this.clientStreamError) {
+        // Should not try to write to the response stream. Client likely disconnected.
+        continue
+      }
 
       switch (event.type) {
         case 'response.output_text.delta': {
@@ -234,7 +238,8 @@ export class ResponsesClient {
     await new Promise((resolve) => {
       const success = res.write(`${JSON.stringify(data)}\n`, (err) => {
         if (err) {
-          logger.error('Streaming write error:', err)
+          logger.error('Streaming write error:', err.name)
+          this.clientStreamError = err
         }
       })
 
