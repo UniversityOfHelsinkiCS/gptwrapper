@@ -171,6 +171,7 @@ export const ChatBox = ({
             placeholder={t('chat:writeHere')}
             fullWidth
             multiline
+            data-sentry-mask
             maxRows={25}
             sx={{ padding: '0.5rem' }}
             variant="standard"

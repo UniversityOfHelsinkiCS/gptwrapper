@@ -28,7 +28,10 @@ const initializeSentry = () => {
         createRoutesFromChildren,
         matchRoutes,
       }),
-      Sentry.replayIntegration(),
+      Sentry.replayIntegration({
+        maskAllText: false, // data-sentry-mask will be masked.
+        maskAllInputs: false, // data-sentry-mask will be masked.
+      }),
     ],
     tracesSampleRate: 1.0,
     replaysSessionSampleRate: inDevelopment ? 1.0 : 0.25,
