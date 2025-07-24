@@ -241,7 +241,7 @@ export class ResponsesClient {
     await new Promise((resolve) => {
       const success = res.write(`${JSON.stringify(data)}\n`, (err) => {
         if (err) {
-          logger.error(err)
+          logger.error('Streaming write error:', err)
         }
       })
 
