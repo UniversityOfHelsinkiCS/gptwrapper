@@ -66,7 +66,7 @@ function tokensToText(tokenizedStr) {
 }
 
 export default function () {
-  const url = `${local}/v2`
+  const url = `${staging}/v2`
 
   for (const message of messages) {
     const dataCopy = { ...data }
