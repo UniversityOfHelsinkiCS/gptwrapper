@@ -402,7 +402,7 @@ export const ChatV2 = () => {
         ref={chatContainerRef}
         sx={{
           flex: 3,
-          minWidth: 800,
+          // minWidth: 800,
           width: '100%',
           display: 'flex',
           position: 'relative',
@@ -444,7 +444,7 @@ export const ChatV2 = () => {
             position: 'sticky',
             bottom: 0,
             width: '80%',
-            minWidth: 750,
+            // minWidth: 750,
             margin: 'auto',
           }}
         >

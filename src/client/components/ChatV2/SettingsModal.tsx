@@ -140,7 +140,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          minWidth: 600,
+          // minWidth: 600,
           width: '85vw',
           maxWidth: 1000,
           minHeight: '25vh',
