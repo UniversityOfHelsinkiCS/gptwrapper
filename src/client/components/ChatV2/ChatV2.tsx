@@ -383,7 +383,11 @@ export const ChatV2 = () => {
           setRagIndexId={setRagIndexId}
           ragIndices={ragIndices} />
    </Drawer>
-<LeftMenu sx = {{display: {xs: 'none', sm: 'block'}}}
+<LeftMenu sx = {{display: {xs: 'none', lg : 'block'}}}
+
+
+
+
    course={course}
           handleReset={handleReset}
           user={user}

@@ -247,7 +247,7 @@ export const ChatBox = ({
             </Tooltip>
           </Box>
 
- <OutlineButtonBlack sx={{display: {sx: 'block', md: 'none'}}} startIcon={<SettingsIcon />} onClick={() => setChatLeftSidePanelOpen(true)} id="settings-button">
+ <OutlineButtonBlack sx={{display: {xs: 'block', lg: 'none'}}} startIcon={<SettingsIcon />} onClick={() => setChatLeftSidePanelOpen(true)} id="settings-button">
                 {t('chat:settings')}
   </OutlineButtonBlack>
           <>
