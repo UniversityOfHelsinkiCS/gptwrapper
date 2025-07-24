@@ -6,7 +6,7 @@ import shibbolethMiddleware from '../middleware/shibboleth'
 import userMiddleware from '../middleware/user'
 import initializeSentry from '../util/sentry'
 import errorHandler from '../middleware/error'
-import accessLogger from '../middleware/access'
+import requestLogger from '../middleware/requestLogger'
 import openaiRouter from './openai'
 import ragRouter from './rag'
 import userRouter from './user'
@@ -30,7 +30,7 @@ router.use(express.json())
 router.use(shibbolethMiddleware)
 router.use(userMiddleware)
 
-router.use(accessLogger)
+router.use(requestLogger)
 
 router.get('/ping', (_, res) => {
   res.send('pong')

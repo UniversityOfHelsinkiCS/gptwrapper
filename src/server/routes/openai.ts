@@ -220,12 +220,16 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     }
   }
 
-  logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
+  const chatCompletionMeta = {
     tokenCount,
     model: options.model,
     user: user.username,
     courseId,
-  })
+  }
+
+  logger.info(`Stream ended. Total tokens: ${tokenCount}`, chatCompletionMeta)
+
+  res.locals.chatCompletionMeta = chatCompletionMeta
 
   // If course has saveDiscussion turned on and user has consented to saving the discussion, save the discussion
   const consentToSave = courseId && course?.saveDiscussions && options.saveConsent
@@ -331,12 +335,16 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     await incrementUsage(userToCharge, tokenCount)
   }
 
-  logger.info(`Stream ended. Total tokens: ${tokenCount}`, {
+  const chatCompletionMeta = {
     tokenCount,
-    model,
+    model: options.model,
     user: user.username,
     courseId,
-  })
+  }
+
+  logger.info(`Stream ended. Total tokens: ${tokenCount}`, chatCompletionMeta)
+
+  res.locals.chatCompletionMeta = chatCompletionMeta
 
   const course =
     courseId &&
@@ -345,8 +353,6 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     }))
 
   const consentToSave = courseId && course.saveDiscussions && options.saveConsent
-
-  console.log('consentToSave', options.saveConsent, user.username)
 
   if (consentToSave) {
     const discussion = {
