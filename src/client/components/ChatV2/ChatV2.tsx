@@ -1,5 +1,4 @@
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
-import EmailIcon from '@mui/icons-material/Email'
 import HelpIcon from '@mui/icons-material/Help'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { Alert, Box, Button, Drawer, Tooltip, Typography } from '@mui/material'
@@ -32,6 +31,7 @@ import Annotations from './Annotations'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { enqueueSnackbar } from 'notistack'
 import { useAnalyticsDispatch } from '../../stores/analytics'
+import EmailButton from './EmailButton'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -397,6 +397,7 @@ export const ChatV2 = () => {
               ragIndex={ragIndex}
               setRagIndexId={setRagIndexId}
               ragIndices={ragIndices}
+              messages={messages}
             />
           </Drawer>
           <LeftMenu
@@ -411,6 +412,7 @@ export const ChatV2 = () => {
             ragIndex={ragIndex}
             setRagIndexId={setRagIndexId}
             ragIndices={ragIndices}
+            messages={messages}
           />
         </>
       )}
@@ -535,7 +537,20 @@ export const ChatV2 = () => {
   )
 }
 
-const LeftMenu = ({ sx, course, handleReset, user, t, setSettingsModalOpen, setDisclaimerStatus, showRagSelector, ragIndex, setRagIndexId, ragIndices }) => {
+const LeftMenu = ({
+  sx,
+  course,
+  handleReset,
+  user,
+  t,
+  setSettingsModalOpen,
+  setDisclaimerStatus,
+  showRagSelector,
+  ragIndex,
+  setRagIndexId,
+  ragIndices,
+  messages,
+}) => {
   return (
     <Box sx={sx}>
       <Box
@@ -562,9 +577,7 @@ const LeftMenu = ({ sx, course, handleReset, user, t, setSettingsModalOpen, setD
               arrow
               placement="right"
             >
-              <OutlineButtonBlack startIcon={<EmailIcon />} onClick={() => alert('Not yet supported')}>
-                {t('email:save')}
-              </OutlineButtonBlack>
+              <EmailButton messages={messages} disabled={!messages?.length} />
             </Tooltip>
             <OutlineButtonBlack startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)} id="settings-button">
               {t('chat:settings')}
