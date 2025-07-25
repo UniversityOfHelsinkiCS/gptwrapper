@@ -179,7 +179,7 @@ const EmailButton = ({ messages, disabled }: { messages: Message[]; disabled: bo
   if (isLoading || !user?.email) return null
 
   const handleSend = async () => {
-    if (!user.email) {
+    if (!user.email || !messages.length) {
       enqueueSnackbar(t('email:failure'), { variant: 'error' })
       return
     }
@@ -194,8 +194,8 @@ const EmailButton = ({ messages, disabled }: { messages: Message[]; disabled: bo
   }
 
   return (
-    <Tooltip title={<Typography variant="body2">{t('info:email', { email: user.email })}</Typography>}>
-      <OutlineButtonBlack startIcon={<EmailIcon />} onClick={handleSend} disabled={disabled}>
+    <Tooltip placement="right" title={<Typography variant="body2">{t('chat:email', { email: user.email })}</Typography>}>
+      <OutlineButtonBlack startIcon={<EmailIcon />} onClick={handleSend}>
         {t('email:save')}
       </OutlineButtonBlack>
     </Tooltip>

@@ -568,17 +568,8 @@ const LeftMenu = ({
             <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} id="empty-conversation-button">
               {t('chat:emptyConversation')}
             </OutlineButtonBlack>
-            <Tooltip
-              title={
-                <Typography variant="body2" sx={{ p: 0.5 }}>
-                  {t('info:email', { email: user?.email })}
-                </Typography>
-              }
-              arrow
-              placement="right"
-            >
-              <EmailButton messages={messages} disabled={!messages?.length} />
-            </Tooltip>
+
+            <EmailButton messages={messages} disabled={!messages?.length} />
             <OutlineButtonBlack startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)} id="settings-button">
               {t('chat:settings')}
             </OutlineButtonBlack>

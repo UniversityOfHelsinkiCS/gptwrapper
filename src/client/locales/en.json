@@ -57,7 +57,6 @@
   "info": {
     "title": "Instructions",
     "usage": "Tokens reset every month. To reduce token consumption, you can choose a free language model or clear the conversation each time you change the topic.",
-    "email": "The conversation will be sent to {{email}}",
     "acceptDisclaimer": "I have read and understood these instructions"
   },
   "footer": {
@@ -99,7 +98,8 @@
     "errorInstructions": "Generating a response failed. We recommended saving the current conversation and starting a new one. You can also try another model. If the problem persists, please contact support.",
     "emptyReminder": "Please note that long conversations consume more tokens. We recommend that you clear the conversation whenever you change the topic of the conversation.",
     "modelDisabled": "Model is unavailable",
-    "attachFile": "Attach file"
+    "attachFile": "Attach file",
+    "email": "The conversation will be sent to {{email}}"
   },
   "settings": {
     "prompt": "Conversation prompt",

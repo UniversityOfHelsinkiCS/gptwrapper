@@ -65,7 +65,6 @@
   "info": {
     "title": "Bruksanvisning",
     "usage": "Lösenord nollställs varje månad. Du kan minska förbrukningen av token genom att välja en gratis språkmall eller genom att rensa konversationen varje gång du byter ämne.",
-    "email": "Konversationen kommer att skickas till {{email}}",
     "acceptDisclaimer": "Jag har läst och förstått bruksanvisningen"
   },
   "footer": {
@@ -107,7 +106,8 @@
     "attachFile": "Bifoga fil",
     "allowSave": "Diskussionen kan sparas",
     "toBeSaved": "Diskussionen sparas anonymt",
-    "errorInstructions": "Det gick inte att generera ett svar. Vi rekommenderar att du sparar den aktuella konversationen och startar en ny. Du kan också prova en annan modell. Om problemet kvarstår, kontakta supporten."
+    "errorInstructions": "Det gick inte att generera ett svar. Vi rekommenderar att du sparar den aktuella konversationen och startar en ny. Du kan också prova en annan modell. Om problemet kvarstår, kontakta supporten.",
+    "email": "Konversationen kommer att skickas till {{email}}"
   },
   "settings": {
     "prompt": "Samtalsstart",
