@@ -11,14 +11,14 @@ import { sleep, check } from 'k6'
 const staging = 'http://gptwrapper.toska.svc.cluster.local:8000/api/ai/stream'
 const local = 'http://172.17.0.1:3000/api//ai/stream'
 
+// k6 will pickup the options object internally.
 const vusit = 50
-
 export const options = {
   vus: vusit,
   iterations: vusit,
 }
 
-const headerParams = {
+const headers = {
   headers: {
     'Content-Type': 'application/json',
     uid: 'testUser',
@@ -28,8 +28,6 @@ const headerParams = {
     hygroupcn: 'grp-toska;hy-employees;grp-currechat-demostudents;grp-currechat-demoteachers',
   },
 }
-
-const messages = ['listaa viisi esinettä', 'kerro niistä jotain', 'anna esimerkki jokaisesta esineestä', 'kerro yksityiskohtaisemmin', 'tiivistä kertomasi']
 
 const data = {
   options: {
@@ -43,6 +41,8 @@ const data = {
   },
   courseId: 'sandbox',
 }
+
+const messages = ['listaa viisi esinettä', 'kerro niistä jotain', 'anna esimerkki jokaisesta esineestä', 'kerro yksityiskohtaisemmin', 'tiivistä kertomasi']
 
 function handleTokens(tokenizedStr) {
   let texts = []
@@ -83,7 +83,7 @@ export default function () {
       data: JSON.stringify(newData),
     })
 
-    let res = http.post(url, payload, headerParams)
+    let res = http.post(url, payload, headers)
     const { response, responseId } = handleTokens(res.body)
     prevResponseId = responseId
 
