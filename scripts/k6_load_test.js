@@ -11,12 +11,11 @@ import { sleep, check } from 'k6'
 const staging = 'http://gptwrapper.toska.svc.cluster.local:8000/api/ai/stream'
 const local = 'http://172.17.0.1:3000/api//ai/stream'
 
-const vusit = 1
+const vusit = 50
 
 export const options = {
   vus: vusit,
   iterations: vusit,
-  // duration: "1s",
 }
 
 const headerParams = {
@@ -46,7 +45,6 @@ const data = {
 }
 
 function handleTokens(tokenizedStr) {
-  // Collect all .text fields into an array
   let texts = []
   let responseId = ''
 
@@ -59,12 +57,12 @@ function handleTokens(tokenizedStr) {
         if (parsedLine.text) texts.push(parsedLine.text)
         if (parsedLine.prevResponseId) responseId = parsedLine.prevResponseId
       } catch {
-        // ignore parse errors
+        console.log('📌 error parsing line')
       }
     })
 
   const response = texts
-    .join('') // join all text fragments
+    .join('')
     .replace(/\n+/g, ' ')
     .replace(/\s{2,}/g, ' ')
     .trim()
