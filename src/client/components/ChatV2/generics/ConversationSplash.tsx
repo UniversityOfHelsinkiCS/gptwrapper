@@ -37,7 +37,7 @@ export const ConversationSplash = ({ courseName, courseDate }: { courseName?: st
         </>
       ) : (
         <Typography variant="h6" fontStyle="italic" sx={{ mb: 1, opacity: 0.5 }}>
-          {t("chat:start")}
+          {t('chat:start')}
         </Typography>
       )}
     </Box>

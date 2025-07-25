@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 const loadingDotStyle = (delay: number) => ({
@@ -19,14 +19,10 @@ const sourcesTextStyle = {
 }
 
 export const LoadingMessage = ({ expandedNodeHeight, isFileSearching }: { expandedNodeHeight: number; isFileSearching: boolean }) => {
-
   const { t } = useTranslation()
 
   return (
-    <div
-      className="message-role-assistant"
-      style={{ height: expandedNodeHeight }}
-    >
+    <div className="message-role-assistant" style={{ height: expandedNodeHeight }}>
       <style>
         {`
           @keyframes bounceWave {

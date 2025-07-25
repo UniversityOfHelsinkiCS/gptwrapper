@@ -63,7 +63,7 @@ export const ChatV2 = () => {
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
 
   const { user } = useCurrentUser()
-  
+
   // local storage states
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
   const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model')
@@ -378,38 +378,41 @@ export const ChatV2 = () => {
     >
       {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
       {!isEmbeddedMode && (
-<>
-
-  <Drawer open={chatLeftSidePanelOpen} onClose={() => {setChatLeftSidePanelOpen(!chatLeftSidePanelOpen)}}>
-        <LeftMenu
-          sx={{}}
-           course={course}
-          handleReset={handleReset}
-          user={user}
-          t={t}
-          setSettingsModalOpen={setSettingsModalOpen}
-          setDisclaimerStatus={setDisclaimerStatus}
-          showRagSelector={showRagSelector}
-          ragIndex={ragIndex}
-          setRagIndexId={setRagIndexId}
-          ragIndices={ragIndices} />
-   </Drawer>
-<LeftMenu sx = {{display: {xs: 'none', lg : 'block'}}}
-
-
-
-
-   course={course}
-          handleReset={handleReset}
-          user={user}
-          t={t}
-          setSettingsModalOpen={setSettingsModalOpen}
-          setDisclaimerStatus={setDisclaimerStatus}
-          showRagSelector={showRagSelector}
-          ragIndex={ragIndex}
-          setRagIndexId={setRagIndexId}
-          ragIndices={ragIndices} />
-</>
+        <>
+          <Drawer
+            open={chatLeftSidePanelOpen}
+            onClose={() => {
+              setChatLeftSidePanelOpen(!chatLeftSidePanelOpen)
+            }}
+          >
+            <LeftMenu
+              sx={{}}
+              course={course}
+              handleReset={handleReset}
+              user={user}
+              t={t}
+              setSettingsModalOpen={setSettingsModalOpen}
+              setDisclaimerStatus={setDisclaimerStatus}
+              showRagSelector={showRagSelector}
+              ragIndex={ragIndex}
+              setRagIndexId={setRagIndexId}
+              ragIndices={ragIndices}
+            />
+          </Drawer>
+          <LeftMenu
+            sx={{ display: { xs: 'none', lg: 'block' }, position: 'sticky', bottom: '0px' }}
+            course={course}
+            handleReset={handleReset}
+            user={user}
+            t={t}
+            setSettingsModalOpen={setSettingsModalOpen}
+            setDisclaimerStatus={setDisclaimerStatus}
+            showRagSelector={showRagSelector}
+            ragIndex={ragIndex}
+            setRagIndexId={setRagIndexId}
+            ragIndices={ragIndices}
+          />
+        </>
       )}
 
       {/* Chat view column ------------------------------------------------------------------------------------------------ */}
@@ -472,7 +475,7 @@ export const ChatV2 = () => {
             setFileName={setFileName}
             saveConsent={saveConsent}
             setSaveConsent={setSaveConsent}
-            setChatLeftSidePanelOpen = {setChatLeftSidePanelOpen}
+            setChatLeftSidePanelOpen={setChatLeftSidePanelOpen}
             chatLeftSidePanelOpen={chatLeftSidePanelOpen}
             tokenUsageWarning={tokenUsageWarning}
             tokenUsageAlertOpen={tokenUsageAlertOpen}
@@ -532,52 +535,54 @@ export const ChatV2 = () => {
   )
 }
 
-
-
-const LeftMenu = ({sx, course, handleReset, user, t, setSettingsModalOpen, setDisclaimerStatus, showRagSelector, ragIndex, setRagIndexId, ragIndices}) => {
-return (
-      <Box sx={sx}>
- <Box
-          sx={{
-           flex: 1,
-           minWidth: 300,
-           position: 'relative',
-           borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-          }}
-        >
-          <Box sx={{ position: 'sticky', top: 70, padding: '2rem 1.5rem' }}>
-            {course && <ChatInfo course={course} />}
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', mb: '2rem' }}>
-              <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} id="empty-conversation-button">
-                {t('chat:emptyConversation')}
-              </OutlineButtonBlack>
-              <Tooltip
-                title={
-                  <Typography variant="body2" sx={{ p: 0.5 }}>
-                    {t('info:email', { email: user?.email })}
-                  </Typography>
-                }
-                arrow
-                placement="right"
-              >
-                <OutlineButtonBlack startIcon={<EmailIcon />} onClick={() => alert('Not yet supported')}>
-                  {t('email:save')}
-                </OutlineButtonBlack>
-              </Tooltip>
-              <OutlineButtonBlack startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)} id="settings-button">
-                {t('chat:settings')}
-              </OutlineButtonBlack>
-              <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} id="help-button">
-                {t('info:title')}
-              </OutlineButtonBlack>
-            </Box>
-            {course && showRagSelector && (
-              <>
-                <Typography variant="h6" mb={'0.5rem'} fontWeight="bold">
-                  {t('settings:courseMaterials')}
+const LeftMenu = ({ sx, course, handleReset, user, t, setSettingsModalOpen, setDisclaimerStatus, showRagSelector, ragIndex, setRagIndexId, ragIndices }) => {
+  return (
+    <Box sx={sx}>
+      <Box
+        sx={{
+          flex: 1,
+          minWidth: 300,
+          position: 'relative',
+          height: '100%',
+          borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+        }}
+      >
+        <Box sx={{ position: 'sticky', top: 70, padding: '2rem 1.5rem' }}>
+          {course && <ChatInfo course={course} />}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', mb: '2rem' }}>
+            <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} id="empty-conversation-button">
+              {t('chat:emptyConversation')}
+            </OutlineButtonBlack>
+            <Tooltip
+              title={
+                <Typography variant="body2" sx={{ p: 0.5 }}>
+                  {t('info:email', { email: user?.email })}
                 </Typography>
-                <RagSelector currentRagIndex={ragIndex} setRagIndex={setRagIndexId} ragIndices={ragIndices ?? []} />
-              </>
-            )}
+              }
+              arrow
+              placement="right"
+            >
+              <OutlineButtonBlack startIcon={<EmailIcon />} onClick={() => alert('Not yet supported')}>
+                {t('email:save')}
+              </OutlineButtonBlack>
+            </Tooltip>
+            <OutlineButtonBlack startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)} id="settings-button">
+              {t('chat:settings')}
+            </OutlineButtonBlack>
+            <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} id="help-button">
+              {t('info:title')}
+            </OutlineButtonBlack>
           </Box>
-        </Box> </Box>)}
+          {course && showRagSelector && (
+            <>
+              <Typography variant="h6" mb={'0.5rem'} fontWeight="bold">
+                {t('settings:courseMaterials')}
+              </Typography>
+              <RagSelector currentRagIndex={ragIndex} setRagIndex={setRagIndexId} ragIndices={ragIndices ?? []} />
+            </>
+          )}
+        </Box>
+      </Box>{' '}
+    </Box>
+  )
+}

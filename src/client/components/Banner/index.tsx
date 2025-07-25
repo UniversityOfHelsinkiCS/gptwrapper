@@ -19,7 +19,7 @@ const Banner = ({ disclaimer }: { disclaimer: string }) => {
           overflowWrap: 'anywhere',
         }}
       >
-        <Typography variant='h5'>{t('info:title')}</Typography>
+        <Typography variant="h5">{t('info:title')}</Typography>
         <ShowMore text={disclaimer} expanded={showDisclaimer} />
       </Box>
     </Box>

@@ -44,8 +44,8 @@ export const ChatBox = ({
   tokenUsageAlertOpen: boolean
   saveConsent: boolean
   setSaveConsent: React.Dispatch<boolean>
-  setChatLeftSidePanelOpen: (open: boolean) => void,
-  chatLeftSidePanelOpen: boolean,
+  setChatLeftSidePanelOpen: (open: boolean) => void
+  chatLeftSidePanelOpen: boolean
   saveChat: boolean
   notOptoutSaving: boolean
   setFileName: (name: string) => void
@@ -258,9 +258,14 @@ export const ChatBox = ({
             </Tooltip>
           </Box>
 
- <OutlineButtonBlack sx={{display: {xs: 'block', lg: 'none'}}} startIcon={<SettingsIcon />} onClick={() => setChatLeftSidePanelOpen(true)} id="settings-button">
-                {t('chat:settings')}
-  </OutlineButtonBlack>
+          <OutlineButtonBlack
+            sx={{ display: { xs: 'block', lg: 'none' } }}
+            startIcon={<SettingsIcon />}
+            onClick={() => setChatLeftSidePanelOpen(true)}
+            id="settings-button"
+          >
+            {t('chat:settings')}
+          </OutlineButtonBlack>
           <>
             {!notOptoutSaving && saveChat && (
               <FormControlLabel control={<Switch onChange={() => setSaveConsent(!saveConsent)} checked={saveConsent} />} label={t('chat:allowSave')} />
@@ -271,7 +276,6 @@ export const ChatBox = ({
               </Alert>
             )}
           </>
-
         </Box>
       </Box>
     </Box>
