@@ -1,7 +1,8 @@
 /**
- * This script requires the use of k6 docker image version
+ * This script requires the use of k6 docker image and it needs to be run inside the docker container. Check the command below
+ * The k6 modules are imported from within the docker container. So it is not a dependency in Currechat
  *
- * run using: docker run --rm -i grafana/k6 run - <script.js
+ * run using: docker run --rm -i grafana/k6 run - <scripts/k6_load_test.js
  */
 
 import http from 'k6/http'
@@ -10,7 +11,7 @@ import { sleep, check } from 'k6'
 const staging = 'http://gptwrapper.toska.svc.cluster.local:8000/api/ai/stream'
 const local = 'http://172.17.0.1:3000/api//ai/stream'
 
-const vusit = 50
+const vusit = 1
 
 export const options = {
   vus: vusit,
@@ -18,31 +19,24 @@ export const options = {
   // duration: "1s",
 }
 
-const messages = [
-  'listaa viisi numeroa',
-  'listaa viisi väriä',
-  'listaa viisi esinettä',
-  'listaa viisi makua',
-  'listaa viisi huonekalua',
-  'listaa viisi presidenttiä',
-  'listaa viisi maata',
-  'listaa viisi ohjelmointikieltä',
-  'listaa viisi kaupunkia',
-  'listaa viisi vaatemerkkiä',
-  'listaa viisi urheilulajia',
-]
+const headerParams = {
+  headers: {
+    'Content-Type': 'application/json',
+    uid: 'testUser',
+    mail: 'veikko@toska.test.dev',
+    preferredlanguage: 'fi',
+    hypersonsisuid: 'hy-hlo-123',
+    hygroupcn: 'grp-toska;hy-employees;grp-currechat-demostudents;grp-currechat-demoteachers',
+  },
+}
+
+const messages = ['listaa viisi esinettä', 'kerro niistä jotain', 'anna esimerkki jokaisesta esineestä', 'kerro yksityiskohtaisemmin', 'tiivistä kertomasi']
 
 const data = {
   options: {
-    messages: [
-      { role: 'system', content: 'Olet avulias avustaja' },
-      {
-        role: 'user',
-        content: undefined, // will be substituted from messages list
-      },
-    ],
+    messages: [],
     assistantInstructions: 'Olet avulias avustaja',
-    model: 'mock',
+    model: 'gpt-4o-mini',
     modelTemperature: 0.5,
     saveConsent: false,
     prevResponseId: '',
@@ -51,50 +45,51 @@ const data = {
   courseId: 'sandbox',
 }
 
-function tokensToText(tokenizedStr) {
-  return tokenizedStr
+function handleTokens(tokenizedStr) {
+  // Collect all .text fields into an array
+  let texts = []
+  let responseId = ''
+
+  tokenizedStr
     .split('\n')
     .filter(Boolean)
-    .map((line) => {
+    .forEach((line) => {
       try {
-        return JSON.parse(line).text
+        const parsedLine = JSON.parse(line)
+        if (parsedLine.text) texts.push(parsedLine.text)
+        if (parsedLine.prevResponseId) responseId = parsedLine.prevResponseId
       } catch {
-        return ''
+        // ignore parse errors
       }
     })
-    .join('')
+
+  const response = texts
+    .join('') // join all text fragments
+    .replace(/\n+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+
+  return { response, responseId }
 }
 
 export default function () {
   const url = `${staging}/v2`
+  let prevResponseId = ''
 
   for (const message of messages) {
-    const dataCopy = { ...data }
-    dataCopy.options.messages = [
-      { role: 'system', content: 'Olet load testissä' },
-      {
-        role: 'user',
-        content: message,
-      },
-    ]
-    const updatedData = dataCopy
+    const newData = { ...data }
+    newData.options.messages = [{ role: 'user', content: message }]
+    newData.options.prevResponseId = prevResponseId
 
     const payload = JSON.stringify({
-      data: JSON.stringify(updatedData),
+      data: JSON.stringify(newData),
     })
-    const params = {
-      headers: {
-        'Content-Type': 'application/json',
-        uid: 'testUser',
-        mail: 'veikko@toska.test.dev',
-        preferredlanguage: 'fi',
-        hypersonsisuid: 'hy-hlo-123',
-        hygroupcn: 'grp-toska;hy-employees;grp-currechat-demostudents;grp-currechat-demoteachers',
-      },
-    }
 
-    let res = http.post(url, payload, params)
-    console.log('📌', tokensToText(res.body))
+    let res = http.post(url, payload, headerParams)
+    const { response, responseId } = handleTokens(res.body)
+    prevResponseId = responseId
+
+    console.log('📌 response:', response)
     check(res, { 'status is 200': (res) => res.status === 200 })
     sleep(5)
   }
