@@ -57,7 +57,6 @@
   "info": {
     "title": "Käyttöohje",
     "usage": "Tokenit nollaantuvat kuukauden välein. Vähentääksesi tokenien kulumista voit valita ilmaisen kielimallin tai tyhjentää keskustelun aina kun vaihdat keskustelun aihetta.",
-    "email": "Keskustelu lähetetään osoitteeseen {{email}}",
     "acceptDisclaimer": "Olen lukenut ja ymmärtänyt käyttöohjeet"
   },
   "footer": {
@@ -99,7 +98,8 @@
     "errorInstructions": "Vastauksen generointi ei onnistunut. Suosittelemme tallentamaan nykyisen keskustelun ja aloittamaan uuden. Voit myös kokeilla toista mallia. Jos ongelma jatkuu, ota yhteyttä tukeen.",
     "emptyReminder": "Huomaathan, että pitkät keskustelut kuluttavat enemmän tokeneita. Suosittelemme tyhjentämään keskustelun aina, kun vaihdat keskustelun aihetta.",
     "modelDisabled": "Kielimalli ei ole käytettävissä",
-    "attachFile": "Liitä tiedosto"
+    "attachFile": "Liitä tiedosto",
+    "email": "Keskustelu lähetetään osoitteeseen {{email}}"
   },
   "settings": {
     "prompt": "Keskustelun alustus",
