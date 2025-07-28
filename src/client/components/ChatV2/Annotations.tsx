@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Box, Typography, Chip, IconButton, Drawer } from '@mui/material'
+import { Box, Typography, Chip, IconButton, Drawer, useMediaQuery, useTheme } from '@mui/material'
 import { Close } from '@mui/icons-material'
 import { FileSearchCompletedData, FileSearchResultData } from '../../../shared/types'
 import { useTranslation } from 'react-i18next'
@@ -22,7 +22,7 @@ const AnnotationTruncated = ({
 }) => {
   const [isHovering, setIsHovering] = useState<boolean>(false)
 
-  const lineNum = 3
+  const lineNum = 5
   const multilineEllipsisTruncate = {
     // This is a trick to achieve a multu-line ellipsis truncation for max 3 rows of text.
     // -webkit-box is used to support legacy browsers and for WebkitBoxOrient
@@ -60,6 +60,7 @@ const AnnotationTruncated = ({
           backgroundColor: 'rgba(0,0,0,0.12)',
           width: 24,
           height: 24,
+          minWidth: 24,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -77,12 +78,14 @@ const AnnotationTruncated = ({
 const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: FileSearchResultData; relevanceOrder: number; isSelected: boolean }) => {
   const annotationRef = useRef<HTMLDivElement>(null)
   const [shouldFlash, setShouldFlash] = useState(false)
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   useEffect(() => {
     if (isSelected && annotationRef.current) {
       annotationRef.current.scrollIntoView({
         behavior: 'instant',
-        block: 'center',
+        block: 'start',
       })
       setShouldFlash(true)
     }
@@ -106,14 +109,31 @@ const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: FileSe
       >
         {relevanceOrder}
       </Box>
-      <Box>
-        <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box sx={{ flex: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 2,
+            mb: isMobile ? 2 : 3,
+            justifyContent: 'space-between',
+            flexDirection: isMobile ? 'column' : 'row',
+            alignItems: isMobile ? 'flex-start' : 'center',
+          }}
+        >
           <Typography fontWeight={600}>{data.filename}</Typography>
-          <Typography sx={{ opacity: 0.7, whiteSpace: 'nowrap', justifySelf: 'flex-end' }}>{`Score: ${data.score}`}</Typography>
+          <Typography
+            sx={{
+              opacity: 0.7,
+              whiteSpace: 'nowrap',
+              justifySelf: 'flex-end',
+            }}
+          >
+            {`Score: ${data.score}`}
+          </Typography>
         </Box>
         <Box
           sx={{
-            p: '0.5rem 2rem',
+            p: '0.5rem 1.5rem',
             borderRadius: '0.5rem',
             backgroundColor: '#f5f5f5',
             animation: shouldFlash ? 'flashIn 0.5s ease-out 0.4s 1' : undefined,
@@ -177,10 +197,12 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
   const [selectedAnnotation, setSelectedAnnotation] = useState<number | null>(null)
   const arrayResults = Array.isArray(results) ? results : []
   const { t } = useTranslation()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   return (
-    <Box p={2}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+    <Box p={isMobile ? 1 : 3} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: isMobile ? 2 : 3 }}>
         <Typography variant="h6" fontWeight={'bold'}>
           {t('chat:sources')}
         </Typography>
@@ -190,7 +212,7 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
       </Box>
       <Queries queries={fileSearchResult.queries} />
       {isResultsSuccess ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', minHeight: 400 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, minHeight: isMobile ? 'auto' : 400, flex: 1 }}>
           {arrayResults.map((result, i) => (
             <AnnotationTruncated key={i} data={result} relevanceOrder={i + 1} setIsDrawerOpen={setIsDrawerOpen} setSelectedAnnotation={setSelectedAnnotation} />
           ))}
@@ -209,7 +231,7 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
         <Typography>{t('chat:failedSources')}</Typography>
       )}
       <Drawer anchor={'right'} open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
-        <Box sx={{ maxWidth: '60vw', padding: '6rem 3rem' }}>
+        <Box sx={{ maxWidth: isMobile ? '100vw' : '60vw', padding: '2rem' }}>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
             <IconButton
               id="close-expanded-annotations"

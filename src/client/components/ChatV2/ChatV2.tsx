@@ -1,7 +1,7 @@
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import HelpIcon from '@mui/icons-material/Help'
 import SettingsIcon from '@mui/icons-material/Settings'
-import { Alert, Box, Button, Drawer, Tooltip, Typography } from '@mui/material'
+import { Alert, Box, Button, Drawer, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
@@ -55,6 +55,8 @@ function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, u
 export const ChatV2 = () => {
   const { courseId } = useParams()
   const isEmbeddedMode = useIsEmbedded()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   const { data: course } = useCourse(courseId)
 
@@ -140,7 +142,10 @@ export const ChatV2 = () => {
     },
     onFileSearchComplete: (fileSearch) => {
       setActiveFileSearchResult(fileSearch)
-      setShowAnnotations(true)
+      // Only auto-open annotations on desktop, not on mobile
+      if (!isMobile) {
+        setShowAnnotations(true)
+      }
       dispatchAnalytics({ type: 'INCREMENT_FILE_SEARCHES' })
     },
   })
@@ -257,7 +262,7 @@ export const ChatV2 = () => {
     // Scrolls to bottom on initial load only
     if (!appContainerRef?.current || !conversationRef.current || messages.length === 0) return
     if (!isStreaming) {
-     const container = appContainerRef?.current
+      const container = appContainerRef?.current
       if (container) {
         container.scrollTo({
           top: container.scrollHeight,
@@ -274,9 +279,8 @@ export const ChatV2 = () => {
     const lastNode = conversationRef.current.lastElementChild as HTMLElement
 
     if (lastNode.classList.contains('message-role-assistant') && isStreaming) {
-      if( endOfConversationRef?.current)
-      {
-        endOfConversationRef.current.scrollIntoView({behavior: 'smooth'})
+      if (endOfConversationRef?.current) {
+        endOfConversationRef.current.scrollIntoView({ behavior: 'smooth' })
       }
     }
   }, [isStreaming])
@@ -449,8 +453,7 @@ export const ChatV2 = () => {
             setActiveFileSearchResult={setActiveFileSearchResult}
             setShowAnnotations={setShowAnnotations}
           />
-        <div ref={endOfConversationRef} style={{height: '1em'}}></div>
-
+          <div ref={endOfConversationRef} style={{ height: '1em' }}></div>
         </Box>
 
         <Box
@@ -489,26 +492,55 @@ export const ChatV2 = () => {
 
       {/* Annotations columns ----------------------------------------------------------------------------------------------------- */}
 
-      <Box
-        sx={{
-          flex: 0,
-          position: 'relative',
-          transition: 'border 300ms',
-          borderLeft: '1px solid',
-          borderColor: showAnnotations ? 'rgba(0,0,0,0.12)' : 'rgba(0,0,0,0)',
-        }}
-      >
-        <Box
+      {isMobile && (
+        <Drawer
+          anchor="right"
+          open={showAnnotations}
+          onClose={() => setShowAnnotations(false)}
           sx={{
-            position: 'sticky',
-            top: 65,
-            transition: 'transform 250ms ease-in-out',
-            transform: showAnnotations ? 'translateX(0%)' : 'translate(100%)',
+            '& .MuiDrawer-paper': {
+              width: '100%',
+              maxWidth: '100%',
+              padding: 0,
+            },
           }}
         >
-          {activeFileSearchResult && <Annotations fileSearchResult={activeFileSearchResult} setShowAnnotations={setShowAnnotations} />}
+          <Box
+            sx={{
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              paddingTop: '1rem',
+              paddingX: '1rem',
+              paddingBottom: '1rem',
+              overflow: 'auto',
+            }}
+          >
+            {activeFileSearchResult && <Annotations fileSearchResult={activeFileSearchResult} setShowAnnotations={setShowAnnotations} />}
+          </Box>
+        </Drawer>
+      )}
+
+      {!isMobile && showAnnotations && activeFileSearchResult && (
+        <Box
+          sx={{
+            flex: 0,
+            position: 'relative',
+            borderLeft: '1px solid rgba(0,0,0,0.12)',
+            width: 400,
+            minWidth: 400,
+          }}
+        >
+          <Box
+            sx={{
+              position: 'sticky',
+              top: 20,
+            }}
+          >
+            <Annotations fileSearchResult={activeFileSearchResult} setShowAnnotations={setShowAnnotations} />
+          </Box>
         </Box>
-      </Box>
+      )}
 
       {/* Modals --------------------------------------*/}
       <SettingsModal

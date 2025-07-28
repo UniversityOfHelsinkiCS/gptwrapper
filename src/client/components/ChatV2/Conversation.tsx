@@ -31,6 +31,8 @@ const UserMessage = ({ content, attachements }: { content: string; attachements?
       boxShadow: '0px 2px 2px rgba(0, 0, 0, 0.2)',
       whiteSpace: 'pre-wrap', // 🧠 This preserves formatting
       wordBreak: 'break-word',
+      minWidth: { xs: 300, md: 'fit-content' },
+      maxWidth: { xs: 400, md: 'fit-content' },
     }}
   >
     {content}
