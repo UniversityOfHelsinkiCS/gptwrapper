@@ -19,6 +19,7 @@ const RagSelector = ({
         <InputLabel>RAG index</InputLabel>
         <Select
           label={'RAG index'}
+          id="rag-index-selector"
           value={String(currentRagIndex?.id ?? '')}
           onChange={(event: SelectChangeEvent) => setRagIndex(parseInt(event.target.value, 10))}
         >
@@ -27,7 +28,7 @@ const RagSelector = ({
           </MenuItem>
           {ragIndices.map((ragIndex) => (
             <MenuItem key={ragIndex.id} value={String(ragIndex.id)}>
-              {ragIndex.metadata.name} ({ragIndex.id})
+              {ragIndex.metadata.name}
             </MenuItem>
           ))}
         </Select>

@@ -10,22 +10,14 @@ const checkAdmin = (iamGroups: string[]) => iamGroups.some((iam) => adminIams.in
 
 const isPowerUser = (iamGroups: string[]) => iamGroups.includes(powerUserIam)
 
-const userMiddleware = async (req: any, _res: any, next: any) => {
-  let headers = req.headers
-  if (inDevelopment || inCI) {
-    headers = devUserHeaders
-  }
-  if (req.headers['x-test-user-index']) {
-    headers = getTestUserHeaders(req.headers['x-test-user-index'])
-  }
-
+export const headersToUser = (headers: any): User => {
   const { uid: username, mail: email, preferredlanguage: language, hypersonsisuid: id, hygroupcn } = headers
 
   const iamGroups = parseIamGroups(hygroupcn)
 
   const excludeFromAdmin = ['mluukkai2']
 
-  const acualUser: User = {
+  const user: User = {
     id: id || username,
     username,
     email,
@@ -35,6 +27,20 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
     isPowerUser: isPowerUser(iamGroups),
     isStatsViewer: checkAdmin(iamGroups) || statsViewerIams.some((iam) => iamGroups.includes(iam)),
   }
+
+  return user
+}
+
+const userMiddleware = async (req: any, _res: any, next: any) => {
+  let headers = req.headers
+  if (inDevelopment || inCI) {
+    headers = devUserHeaders
+  }
+  if (req.headers['x-test-user-index']) {
+    headers = getTestUserHeaders(req.headers['x-test-user-index'])
+  }
+
+  const acualUser = headersToUser(headers)
 
   const adminLoggedInAsId = req.headers['x-admin-logged-in-as']
 

@@ -1,6 +1,6 @@
-import { TEST_COURSES, TEST_USERS } from '../../util/config'
-import { ChatInstance, Enrolment, Responsibility, User as UserModel } from '../../db/models'
-import { User } from '../../types'
+import { type ChatInstance, Enrolment, Responsibility, User as UserModel } from '../../db/models'
+import type { User } from '../../types'
+import { TEST_COURSES, TEST_USERS } from '../../../shared/testData'
 
 const getUserById = async (id: string) => UserModel.findByPk(id)
 
@@ -48,7 +48,6 @@ export const getOwnCourses = async (user: User) => {
   // before we try to upsert the enrolments
   const teacherOfSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.teachers)
 
-  console.log('teacherOfSandbox', user.id, user.isAdmin, user.iamGroups, TEST_USERS.teachers, user.iamGroups.includes(TEST_USERS.teachers))
   if (teacherOfSandbox && (await getUserById(user.id))) {
     await Responsibility.upsert(
       {

@@ -1,6 +1,6 @@
 import { InferCreationAttributes } from 'sequelize'
 import { CourseUnit } from '../../types'
-import { TEST_COURSES } from '../../util/config'
+import { TEST_COURSES } from '../../../shared/testData'
 import { ChatInstance } from '../models'
 
 const chatInstances = [
@@ -14,16 +14,7 @@ const chatInstances = [
       endDate: '2023-12-31',
     },
   },
-  {
-    id: TEST_COURSES.EXAMPLE_COURSE.id,
-    name: { en: 'Example Course', sv: 'Example Course', fi: 'Example Course' },
-    description: '',
-    courseId: TEST_COURSES.EXAMPLE_COURSE.id,
-    activityPeriod: {
-      startDate: '2024-01-01',
-      endDate: '2024-08-31',
-    },
-  },
+  TEST_COURSES.TEST_COURSE,
   {
     id: TEST_COURSES.OTE_SANDBOX.id,
     name: TEST_COURSES.OTE_SANDBOX.name,

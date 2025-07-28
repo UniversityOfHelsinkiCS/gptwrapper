@@ -5,7 +5,7 @@ import { ChatInstance, ChatInstanceRagIndex, RagFile, RagIndex, Responsibility }
 import type { RequestWithUser, User } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import { getAzureOpenAIClient } from '../../util/azure/client'
-import { TEST_COURSES } from '../../util/config'
+import { TEST_COURSES } from '../../../shared/testData'
 import ragIndexRouter, { ragIndexMiddleware } from './ragIndex'
 import { randomUUID } from 'node:crypto'
 
@@ -48,6 +48,7 @@ router.post('/indices', async (req, res) => {
     throw ApplicationError.Forbidden('Cannot create index, user is not responsible for the course')
   }
 
+  // Only OTE_SANDBOX allows multiple rag indices
   if (chatInstance.courseId !== TEST_COURSES.OTE_SANDBOX.id && (chatInstance.ragIndices ?? []).length > 0) {
     throw ApplicationError.Forbidden('Cannot create index, index already exists on the course')
   }
