@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react'
-import { Outlet, useLocation, useParams } from 'react-router-dom'
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { SnackbarProvider } from 'notistack'
 import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
 import { ThemeProvider } from '@mui/material/styles'
@@ -18,7 +18,11 @@ import useCurrentUser from './hooks/useCurrentUser'
 import { EmbeddedProvider, useIsEmbedded } from './contexts/EmbeddedContext'
 import { Feedback } from './components/Feedback'
 import { AnalyticsProvider } from './stores/analytics'
+import { useTranslation } from 'react-i18next'
 
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
   if (user.isAdmin) return true
@@ -70,18 +74,67 @@ const AdminLoggedInAsBanner = () => {
     />
   )
 }
+const LanguageContext = createContext({});
 
+export function LanguageProvider({ children }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [lang, setLangState] = useState('fi'); // default
+
+  // Sync context state to URL
+  const setLang = (newLang) => {
+    setLangState(newLang);
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('lang', newLang);
+    navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
+  };
+
+  // Read URL param on initial load
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const urlLang = searchParams.get('lang');
+    if (urlLang) {
+      setLangState(urlLang);
+    }
+  }, [location.search]);
+
+  return (
+    <LanguageContext.Provider value={{ lang, setLang }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+export function useLanguage() {
+  return useContext(LanguageContext);
+}
 const App = () => {
   const theme = useTheme()
   const { courseId } = useParams()
   const location = useLocation()
-
+  const query = useQuery()
+  const langParam = query.get('lang')
+  const { t, i18n } = useTranslation()
+  const { language } = i18n
+  const languages = ['fi', 'sv', 'en']
   const { user, isLoading } = useCurrentUser()
-
+  
   useEffect(() => {
     initShibbolethPinger()
   }, [])
+  useEffect(() => {
+    if (!langParam && user && user.language && languages.includes(user.language)) {
+      i18n.changeLanguage(user.language)
+      
+    }
+  }, [user, i18n])
+  useEffect(() => {
+    if(langParam && languages.includes(langParam)){
 
+      i18n.changeLanguage(langParam)
+    }
+    
+  }, [langParam])
   const onNoAccessPage = location.pathname.includes('/noaccess')
 
   if (isLoading && !onNoAccessPage) return null
@@ -94,6 +147,7 @@ const App = () => {
   if (!user && !onNoAccessPage) return null
 
   return (
+    <LanguageProvider>
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
@@ -106,6 +160,7 @@ const App = () => {
         </SnackbarProvider>
       </LocalizationProvider>
     </ThemeProvider>
+  </LanguageProvider>
   )
 }
 

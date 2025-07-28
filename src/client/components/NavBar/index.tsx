@@ -37,12 +37,8 @@ const NavBar = () => {
   const languages = ['fi', 'sv', 'en']
 
   const { user, isLoading } = useCurrentUser()
-
-  useEffect(() => {
-    if (user && user.language && languages.includes(user.language)) i18n.changeLanguage(user.language)
-  }, [user, i18n])
-
-  const handleLanguageChange = (newLanguage: string) => {
+  // will be changed to use url to change language and moved up to app since language is global
+   const handleLanguageChange = (newLanguage: string) => {
     i18n.changeLanguage(newLanguage)
     setOpenLanguageSelect(false)
   }
