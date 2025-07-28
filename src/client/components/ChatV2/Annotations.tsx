@@ -38,6 +38,7 @@ const AnnotationTruncated = ({
 
   return (
     <Box
+      data-testid="sources-truncated-item"
       sx={{
         display: 'flex',
         gap: 2,
@@ -203,7 +204,7 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
   return (
     <Box p={isMobile ? 1 : 3} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: isMobile ? 2 : 3 }}>
-        <Typography variant="h6" fontWeight={'bold'}>
+        <Typography variant="h6" fontWeight={'bold'} data-testid="sources-header">
           {t('chat:sources')}
         </Typography>
         <IconButton id="close-annotations" onClick={() => setShowAnnotations(false)}>

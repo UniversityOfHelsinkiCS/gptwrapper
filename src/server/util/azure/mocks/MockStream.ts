@@ -1,4 +1,3 @@
-import { ApplicationError } from '../../ApplicationError'
 import {
   getBasicStreamMock,
   getCodeBlockStreamMock,
@@ -11,13 +10,13 @@ import {
   type MockResponseStreamEvent,
 } from './mockFunctions'
 
-class MockStream<T> {
-  private events: T[]
+class MockStream {
+  private events: MockResponseStreamEvent[]
   private index = 0
   // For testing stream aborting
   controller = new AbortController()
 
-  constructor(events: T[]) {
+  constructor(events: MockResponseStreamEvent[]) {
     this.events = events
   }
 
@@ -28,8 +27,10 @@ class MockStream<T> {
         await new Promise((r) => setTimeout(r, 800))
       }
 
-      await new Promise((r) => setTimeout(r, 30))
-      yield this.events[this.index++]
+      const event = this.events[this.index++]
+      const delay = event.delay ?? 30
+      yield event
+      await new Promise((r) => setTimeout(r, delay))
     }
   }
 }
@@ -71,5 +72,5 @@ export function createMockStream<T extends { content: string }>(input: T): Async
       break
   }
 
-  return new MockStream<MockResponseStreamEvent>(mockType)
+  return new MockStream(mockType)
 }

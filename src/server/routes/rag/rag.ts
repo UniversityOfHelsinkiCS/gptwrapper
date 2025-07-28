@@ -78,7 +78,7 @@ router.post('/indices', async (req, res) => {
 })
 
 const GetIndicesQuerySchema = z.object({
-  courseId: z.string().optional(),
+  chatInstanceId: z.string().optional(),
   includeExtras: z
     .string()
     .toLowerCase()
@@ -87,14 +87,13 @@ const GetIndicesQuerySchema = z.object({
 })
 
 router.get('/indices', async (req, res) => {
-  const { courseId, includeExtras } = GetIndicesQuerySchema.parse(req.query)
+  const { chatInstanceId, includeExtras } = GetIndicesQuerySchema.parse(req.query)
   const { user } = req as RequestWithUser
 
   // Check access
   let chatInstance: ChatInstance | null = null
-  if (courseId) {
-    chatInstance = await ChatInstance.findOne({
-      where: { courseId },
+  if (chatInstanceId) {
+    chatInstance = await ChatInstance.findByPk(chatInstanceId, {
       include: [
         { model: Responsibility, as: 'responsibilities' },
         { model: RagIndex, as: 'ragIndices' },

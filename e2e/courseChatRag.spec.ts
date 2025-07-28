@@ -29,6 +29,19 @@ test.describe('Course Chat v2', () => {
     await chatInput.fill('rag')
     await chatInput.press('Shift+Enter')
 
+    // Shows file search loading indicator
+    await expect(page.getByTestId('file-searching-message')).toBeVisible()
+
+    // Responds with RAG mock text
     await expect(page.getByTestId('assistant-message')).toContainText('This is a mock response for file search stream.')
+
+    // Source button is visible
+    await expect(page.getByTestId('file-search-sources')).toBeVisible()
+
+    // Sources drawer has been opened and title is visible
+    await expect(page.getByTestId('sources-header')).toBeVisible()
+
+    // Three source items should be visible
+    await expect(page.getByTestId('sources-truncated-item')).toHaveCount(3)
   })
 })

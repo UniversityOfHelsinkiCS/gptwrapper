@@ -3,6 +3,7 @@ import { mathTestContent, codeTestContent } from './mockContent'
 
 export interface MockResponseStreamEvent {
   type: ResponseStreamEvent['type'] // inferred Responses Stream event types
+  delay?: number
   [key: string]: any
 }
 
@@ -163,6 +164,7 @@ export const getFileSearchStreamMock = (): MockResponseStreamEvent[] => {
     },
     {
       type: 'response.file_search_call.in_progress',
+      delay: 1000,
     },
     {
       type: 'response.output_item.done',

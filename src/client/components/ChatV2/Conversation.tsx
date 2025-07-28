@@ -108,7 +108,6 @@ const AssistantMessage = ({
     strict: false, // disables logging katex warnings/errors – if debugging, turn these two on
   }
   let codeCount = 0
-  const [isHovering, setIsHovering] = useState<boolean>(false)
 
   const handleAnnotations = (fileSearchResult: FileSearchCompletedData) => {
     setActiveFileSearchResult(fileSearchResult)
@@ -196,35 +195,31 @@ const AssistantMessage = ({
         </Box>
       )}
       {fileSearchResult?.status === 'completed' && (
-        <>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 2,
-              fontStyle: 'italic',
-              opacity: '0.85',
-              mt: 3,
-              width: 'fit-content',
-              backgroundColor: isHovering ? '#efefef' : 'transparent',
-              transition: 'background-color 0.1s ease-in-out',
-              cursor: 'pointer',
-              padding: '0.6rem',
-              borderRadius: '0.6rem',
-            }}
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
-            onClick={() => {
-              handleAnnotations(fileSearchResult)
-            }}
-          >
-            <FormatQuoteIcon sx={{ fontSize: '2rem' }} />
-            <Typography variant="body2" sx={{ whiteSpace: 'pre', mr: 3 }}>
-              {`${t('chat:displaySources')}: `}
-              <em>{fileSearchResult?.searchedFiles?.join('\r\n')}</em>
-            </Typography>
-          </Box>
-        </>
+        <Box
+          data-testId="file-search-sources"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            fontStyle: 'italic',
+            opacity: '0.85',
+            mt: 3,
+            width: 'fit-content',
+            transition: 'background-color 0.1s ease-in-out',
+            cursor: 'pointer',
+            padding: '0.6rem',
+            borderRadius: '0.6rem',
+          }}
+          onClick={() => {
+            handleAnnotations(fileSearchResult)
+          }}
+        >
+          <FormatQuoteIcon sx={{ fontSize: '2rem' }} />
+          <Typography variant="body2" sx={{ whiteSpace: 'pre', mr: 3 }}>
+            {`${t('chat:displaySources')}: `}
+            <em>{fileSearchResult?.searchedFiles?.join('\r\n')}</em>
+          </Typography>
+        </Box>
       )}
     </Box>
   )
