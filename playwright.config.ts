@@ -13,7 +13,7 @@ const inCI = process.env.CI === 'true'
  */
 export default defineConfig({
   testDir: './e2e',
-  /* Run tests in files in parallel */
+  /* Run tests in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: inCI,
@@ -25,7 +25,7 @@ export default defineConfig({
     timeout: inCI ? 4_500 : 2_250,
   },
   /* Opt out of parallel tests on CI. */
-  workers: inCI ? 1 : undefined,
+  // workers: inCI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -43,7 +43,6 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
 
-  /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',

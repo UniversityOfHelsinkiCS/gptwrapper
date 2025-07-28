@@ -19,6 +19,9 @@ import facultyRouter from './faculty'
 import infoTextRouter from './infotext'
 import changeLogRouter from './changeLog'
 import feedbackRouter from './feedback'
+import testUtilsRouter from './testUtils'
+import { inProduction } from '../../config'
+import logger from '../util/logger'
 
 const router = express()
 
@@ -31,6 +34,11 @@ router.use(shibbolethMiddleware)
 router.use(userMiddleware)
 
 router.use(requestLogger)
+
+if (!inProduction) {
+  logger.info('Test router initialized')
+  router.use('/test', testUtilsRouter)
+}
 
 router.get('/ping', (_, res) => {
   res.send('pong')

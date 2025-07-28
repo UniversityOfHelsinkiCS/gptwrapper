@@ -7,7 +7,6 @@ import remarkGfm from 'remark-gfm'
 import { useState, useEffect } from 'react'
 import { useAcceptTermsMutation } from '../../hooks/useAcceptTermsMutation'
 import useCurrentUser from '../../hooks/useCurrentUser'
-import { ApplicationError } from '../../../server/util/ApplicationError'
 
 export const DisclaimerModal = ({
   disclaimer,
@@ -37,13 +36,9 @@ export const DisclaimerModal = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (hasRead) {
-      try {
-        await acceptTermsMutation.mutateAsync()
-        setDisclaimerStatus(false)
-      } catch (error) {
-        console.error('Failed to accept terms:', error)
-        throw ApplicationError.InternalServerError('Failed to accept terms')
-      }
+      // I think we can just close the disclaimer regardless of server response. No harm can be done really.
+      setDisclaimerStatus(false)
+      await acceptTermsMutation.mutateAsync()
     }
   }
 
@@ -88,11 +83,11 @@ export const DisclaimerModal = ({
             <FormControlLabel
               disabled={termsAccepted}
               sx={{ display: termsAccepted ? 'none' : '' }}
-              control={<Checkbox required checked={hasRead} onChange={handleToggle} />}
+              control={<Checkbox required checked={hasRead} onChange={handleToggle} id="accept-disclaimer" />}
               label={t('info:acceptDisclaimer')}
             />
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <BlueButton disabled={!(hasRead || termsAccepted) || acceptTermsMutation.isPending} type="submit">
+              <BlueButton disabled={!(hasRead || termsAccepted) || acceptTermsMutation.isPending} type="submit" id="submit-accept-disclaimer">
                 OK
               </BlueButton>
             </Box>

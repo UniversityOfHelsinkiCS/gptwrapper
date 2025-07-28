@@ -1,9 +1,11 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { acceptDisclaimer } from './utils/test-helpers'
+import { test } from './fixtures'
 
 test.describe('Chat v2 Conversation tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/v2')
-    await page.locator('#close-disclaimer').click()
+    await acceptDisclaimer(page)
   })
 
   test('Chat v2 mock response works', async ({ page }) => {

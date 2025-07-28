@@ -1,6 +1,7 @@
 import { inCI, inDevelopment } from '../../config'
+import { devUserHeaders, getTestUserHeaders } from '../../shared/testData'
 import { User as UserModel } from '../db/models'
-import { User } from '../types'
+import type { User } from '../types'
 import { adminIams, powerUserIam, statsViewerIams } from '../util/config'
 
 const parseIamGroups = (iamGroups: string) => iamGroups?.split(';').filter(Boolean) ?? []
@@ -9,16 +10,14 @@ const checkAdmin = (iamGroups: string[]) => iamGroups.some((iam) => adminIams.in
 
 const isPowerUser = (iamGroups: string[]) => iamGroups.includes(powerUserIam)
 
-const mockHeaders = {
-  uid: 'testUser',
-  mail: 'veikko@toska.test.dev',
-  preferredlanguage: 'fi',
-  hypersonsisuid: 'hy-hlo-123',
-  hygroupcn: 'grp-toska;hy-employees;grp-currechat-demostudents;grp-currechat-demoteachers',
-}
-
 const userMiddleware = async (req: any, _res: any, next: any) => {
-  const headers = inDevelopment || inCI ? mockHeaders : req.headers
+  let headers = req.headers
+  if (inDevelopment || inCI) {
+    headers = devUserHeaders
+  }
+  if (req.headers['x-test-user-index']) {
+    headers = getTestUserHeaders(req.headers['x-test-user-index'])
+  }
 
   const { uid: username, mail: email, preferredlanguage: language, hypersonsisuid: id, hygroupcn } = headers
 

@@ -15,7 +15,6 @@ import { connectToDatabase } from './db/connection'
 import seed from './db/seeders'
 import setupCron from './util/cron'
 import { updateLastRestart } from './util/lastRestart'
-import { readdirSync } from 'node:fs'
 
 const app = express()
 
@@ -26,10 +25,6 @@ app.use('/api', (_, res) => {
 
 if (inProduction || inStaging) {
   const DIST_PATH = path.resolve(dirname(fileURLToPath(import.meta.url)), '../../dist')
-
-  // Log contents of dist folder
-  const assetFiles = readdirSync(`${DIST_PATH}/assets`)
-  console.log('Contents of dist folder:', assetFiles)
 
   const INDEX_PATH = path.resolve(DIST_PATH, 'index.html')
 
