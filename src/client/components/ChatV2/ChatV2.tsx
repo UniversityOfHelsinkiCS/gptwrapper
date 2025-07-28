@@ -117,7 +117,7 @@ export const ChatV2 = () => {
   const conversationRef = useRef<HTMLElement | null>(null)
   const inputFieldRef = useRef<HTMLElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-
+  const endOfConversationRef = useRef<HTMLDivElement | null>(null)
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
 
   const { t, i18n } = useTranslation()
@@ -257,7 +257,7 @@ export const ChatV2 = () => {
     // Scrolls to bottom on initial load only
     if (!appContainerRef?.current || !conversationRef.current || messages.length === 0) return
     if (!isStreaming) {
-      const container = appContainerRef?.current
+     const container = appContainerRef?.current
       if (container) {
         container.scrollTo({
           top: container.scrollHeight,
@@ -274,18 +274,10 @@ export const ChatV2 = () => {
     const lastNode = conversationRef.current.lastElementChild as HTMLElement
 
     if (lastNode.classList.contains('message-role-assistant') && isStreaming) {
-      const container = appContainerRef.current
-
-      const containerRect = container.getBoundingClientRect()
-      const lastNodeRect = lastNode.getBoundingClientRect()
-
-      const scrollTopPadding = 200
-      const scrollOffset = lastNodeRect.top - containerRect.top + container.scrollTop - scrollTopPadding
-
-      container.scrollTo({
-        top: scrollOffset,
-        behavior: 'smooth',
-      })
+      if( endOfConversationRef?.current)
+      {
+        endOfConversationRef.current.scrollIntoView({behavior: 'smooth'})
+      }
     }
   }, [isStreaming])
 
@@ -457,6 +449,8 @@ export const ChatV2 = () => {
             setActiveFileSearchResult={setActiveFileSearchResult}
             setShowAnnotations={setShowAnnotations}
           />
+        <div ref={endOfConversationRef} style={{height: '1em'}}></div>
+
         </Box>
 
         <Box
