@@ -1,5 +1,5 @@
-import { InferCreationAttributes } from 'sequelize'
-import { CourseUnit } from '../../types'
+import type { InferCreationAttributes } from 'sequelize'
+import type { CourseUnit } from '../../types'
 import { TEST_COURSES } from '../../../shared/testData'
 import { ChatInstance } from '../models'
 

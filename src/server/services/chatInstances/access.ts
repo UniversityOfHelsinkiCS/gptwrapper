@@ -1,6 +1,7 @@
 import { type ChatInstance, Enrolment, Responsibility, User as UserModel } from '../../db/models'
 import type { User } from '../../types'
 import { TEST_COURSES, TEST_USERS } from '../../../shared/testData'
+import logger from '../../util/logger'
 
 const getUserById = async (id: string) => UserModel.findByPk(id)
 
@@ -49,36 +50,23 @@ export const getOwnCourses = async (user: User) => {
   const teacherOfSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.teachers)
 
   if (teacherOfSandbox && (await getUserById(user.id))) {
-    await Responsibility.upsert(
-      {
-        userId: user.id,
-        chatInstanceId: TEST_COURSES.OTE_SANDBOX.id,
-      },
-      // TS is wrong here. It expects fields in camelCase
-      // while the actual fields need to be in snake_case
-      // @ts-expect-error
-      { conflictFields: ['user_id', 'chat_instance_id'] },
-    )
-    await Responsibility.upsert(
-      {
-        userId: user.id,
-        chatInstanceId: TEST_COURSES.EXAMPLE_COURSE.id,
-      },
-      // TS is wrong here. It expects fields in camelCase
-      // while the actual fields need to be in snake_case
-      // @ts-expect-error
-      { conflictFields: ['user_id', 'chat_instance_id'] },
-    )
-    await Responsibility.upsert(
-      {
-        userId: user.id,
-        chatInstanceId: TEST_COURSES.TEST_COURSE.id,
-      },
-      // TS is wrong here. It expects fields in camelCase
-      // while the actual fields need to be in snake_case
-      // @ts-expect-error
-      { conflictFields: ['user_id', 'chat_instance_id'] },
-    )
+    const sandboxChatInstanceIds = Object.values(TEST_COURSES).map((course) => course.id)
+    for (const chatInstanceId of sandboxChatInstanceIds) {
+      try {
+        await Responsibility.upsert(
+          {
+            userId: user.id,
+            chatInstanceId,
+          },
+          // TS is wrong here. It expects fields in camelCase
+          // while the actual fields need to be in snake_case
+          // @ts-expect-error
+          { conflictFields: ['user_id', 'chat_instance_id'] },
+        )
+      } catch (err: unknown) {
+        logger.info(`Failed to upsert sandbox course responsibility for user ${user.id} on ${chatInstanceId}: ${(err as Error).message}`)
+      }
+    }
   }
 
   const responsibilities = (await Responsibility.findAll({
