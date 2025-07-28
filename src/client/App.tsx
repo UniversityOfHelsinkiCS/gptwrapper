@@ -8,7 +8,6 @@ import { fi } from 'date-fns/locale'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
 import { Box, Button, CssBaseline, Snackbar } from '@mui/material'
 import { AppContext } from './contexts/AppContext'
-
 import { PUBLIC_URL } from '../config'
 import type { User } from './types'
 import useTheme from './theme'
@@ -19,10 +18,10 @@ import { EmbeddedProvider, useIsEmbedded } from './contexts/EmbeddedContext'
 import { Feedback } from './components/Feedback'
 import { AnalyticsProvider } from './stores/analytics'
 import { useTranslation } from 'react-i18next'
+import { useUpdateUrlLang } from './hooks/useUpdateUrlLang.tsx'
 
-function useQuery() {
-  return new URLSearchParams(useLocation().search);
-}
+
+
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
   if (user.isAdmin) return true
@@ -74,72 +73,13 @@ const AdminLoggedInAsBanner = () => {
     />
   )
 }
-const LanguageContext = createContext({});
 
-export function LanguageProvider({ children }) {
-  const location = useLocation();
-  const query = useQuery()
-  const navigate = useNavigate();
-  const languages = ['fi', 'sv', 'en']
-  const { t, i18n } = useTranslation()
-  const { user, isLoading } = useCurrentUser()
 
-  const [lang, setLanguageState] = useState(localStorage.getItem('lang'))
-  const langParam = query.get('lang')
-  console.log('language is: ' + lang)
- useEffect(() => {
-    const updatedLangFromLocal = localStorage.getItem('lang')
-
-    //use users language as a default if there is no lang url
-    if (!langParam && !updatedLangFromLocal && user && user.language && languages.includes(user.language)) {
-      console.log("using default users language")
-      setLang(user.language)
-    }
-    // If there is a lang url, then update the lang state to match it
-    else if (langParam) {
-      console.log("lang parameter based update")
-      setLang(langParam)
-    }
-    else if(!langParam && updatedLangFromLocal )
-    {
-      console.log("using local storage language")
-    //there is a case where if there are two redirects after another even the useState gets wiped
-    // so lets use the local storage (example: see how admin page)
-      setLang(updatedLangFromLocal)
-    }
-  }, [location.pathname])
-   
-
-  // sets both the url and the local lang state to match the newlang if the newLang is supported
-  const setLang= (newLang) => {
-    if(!languages.includes(newLang)){
-      console.log("aborted lang update")
-     return
-    }
-    localStorage.setItem('lang', newLang)
-    setLanguageState(newLang)
-    i18n.changeLanguage(newLang)
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('lang', newLang);
-    navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
-  };
-
-  return (
-    <LanguageContext.Provider value={{ lang, setLang }}>
-      {children}
-    </LanguageContext.Provider>
-  );
-}
-
-export function useLanguage() {
-  return useContext(LanguageContext);
-}
 const App = () => {
+  const urlUpdater = useUpdateUrlLang() //DONT REMOVE, the hook creates 2 useEffects to keep the url param synced with user language changes
   const theme = useTheme()
   const { courseId } = useParams()
   const location = useLocation()
-  const query = useQuery()
-  const langParam = query.get('lang')
   const { user, isLoading } = useCurrentUser()
   
   useEffect(() => {
@@ -157,7 +97,6 @@ const App = () => {
   if (!user && !onNoAccessPage) return null
 
   return (
-    <LanguageProvider>
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
@@ -170,7 +109,6 @@ const App = () => {
         </SnackbarProvider>
       </LocalizationProvider>
     </ThemeProvider>
-  </LanguageProvider>
   )
 }
 
