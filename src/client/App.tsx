@@ -78,25 +78,51 @@ const LanguageContext = createContext({});
 
 export function LanguageProvider({ children }) {
   const location = useLocation();
+  const query = useQuery()
   const navigate = useNavigate();
-  const [lang, setLangState] = useState('fi'); // default
+  const languages = ['fi', 'sv', 'en']
+  const { t, i18n } = useTranslation()
+  const { user, isLoading } = useCurrentUser()
 
-  // Sync context state to URL
-  const setLang = (newLang) => {
-    setLangState(newLang);
+  const [lang, setLanguageState] = useState(localStorage.getItem('lang'))
+  const langParam = query.get('lang')
+  console.log('language is: ' + lang)
+ useEffect(() => {
+    const updatedLangFromLocal = localStorage.getItem('lang')
+
+    //use users language as a default if there is no lang url
+    if (!langParam && !updatedLangFromLocal && user && user.language && languages.includes(user.language)) {
+      console.log("using default users language")
+      setLang(user.language)
+    }
+    // If there is a lang url, then update the lang state to match it
+    else if (langParam) {
+      console.log("lang parameter based update")
+      setLang(langParam)
+    }
+    else if(!langParam && updatedLangFromLocal )
+    {
+      console.log("using local storage language")
+    //there is a case where if there are two redirects after another even the useState gets wiped
+    // so lets use the local storage (example: see how admin page)
+      setLang(updatedLangFromLocal)
+    }
+  }, [location.pathname])
+   
+
+  // sets both the url and the local lang state to match the newlang if the newLang is supported
+  const setLang= (newLang) => {
+    if(!languages.includes(newLang)){
+      console.log("aborted lang update")
+     return
+    }
+    localStorage.setItem('lang', newLang)
+    setLanguageState(newLang)
+    i18n.changeLanguage(newLang)
     const searchParams = new URLSearchParams(location.search);
     searchParams.set('lang', newLang);
     navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
   };
-
-  // Read URL param on initial load
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const urlLang = searchParams.get('lang');
-    if (urlLang) {
-      setLangState(urlLang);
-    }
-  }, [location.search]);
 
   return (
     <LanguageContext.Provider value={{ lang, setLang }}>
@@ -114,28 +140,12 @@ const App = () => {
   const location = useLocation()
   const query = useQuery()
   const langParam = query.get('lang')
-  const { t, i18n } = useTranslation()
-  const { language } = i18n
-  const languages = ['fi', 'sv', 'en']
   const { user, isLoading } = useCurrentUser()
   
   useEffect(() => {
     initShibbolethPinger()
   }, [])
-  useEffect(() => {
-    if (!langParam && user && user.language && languages.includes(user.language)) {
-      i18n.changeLanguage(user.language)
-      
-    }
-  }, [user, i18n])
-  useEffect(() => {
-    if(langParam && languages.includes(langParam)){
-
-      i18n.changeLanguage(langParam)
-    }
-    
-  }, [langParam])
-  const onNoAccessPage = location.pathname.includes('/noaccess')
+   const onNoAccessPage = location.pathname.includes('/noaccess')
 
   if (isLoading && !onNoAccessPage) return null
 
