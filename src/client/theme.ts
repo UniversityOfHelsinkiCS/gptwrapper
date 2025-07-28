@@ -63,6 +63,17 @@ const themeOptions: ThemeOptions = {
         },
       },
     },
+
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          fontSize: '0.875rem',
+          fontWeight: 400,
+          lineHeight: 1.43,
+          padding: '8px',
+        },
+      },
+    },
   },
 }
 

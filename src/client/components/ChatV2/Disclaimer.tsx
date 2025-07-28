@@ -63,19 +63,22 @@ export const DisclaimerModal = ({
           transform: 'translate(-50%, -50%)',
           display: 'flex',
           flexDirection: 'column',
-          minWidth: 600,
-          width: '85vw',
-          maxWidth: 1000,
-          height: 'fit-content',
-          maxHeight: '100vh',
+          width: { xs: '95vw', sm: '85vw' },
+          maxWidth: { xs: '95vw', sm: 1000 },
+          minHeight: '25vh',
+          maxHeight: { xs: '90vh', sm: '90vh' },
           bgcolor: 'background.paper',
           boxShadow: 24,
           borderRadius: '0.3rem',
           overflow: 'auto',
-          padding: '3rem',
+          padding: '2rem',
         }}
       >
-        <IconButton id="close-disclaimer" onClick={() => closeAccepted()} sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500' }}>
+        <IconButton
+          id="close-disclaimer"
+          onClick={() => closeAccepted()}
+          sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500', display: termsAccepted ? '' : 'none' }}
+        >
           <Close />
         </IconButton>
 

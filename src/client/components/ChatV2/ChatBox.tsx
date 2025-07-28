@@ -258,14 +258,19 @@ export const ChatBox = ({
             </Tooltip>
           </Box>
 
-          <OutlineButtonBlack
-            sx={{ display: { xs: 'block', lg: 'none' } }}
-            startIcon={<SettingsIcon />}
-            onClick={() => setChatLeftSidePanelOpen(true)}
-            id="settings-button"
+          <Tooltip
+            arrow
+            placement="top"
+            title={
+              <Typography variant="body2" sx={{ p: 1 }}>
+                {t('chat:settings')}
+              </Typography>
+            }
           >
-            {t('chat:settings')}
-          </OutlineButtonBlack>
+            <OutlineButtonBlack sx={{ display: { xs: 'block', lg: 'none' } }} onClick={() => setChatLeftSidePanelOpen(true)} id="settings-button">
+              <SettingsIcon sx={{ color: 'rgba(0, 0, 0, 0.7)' }} />
+            </OutlineButtonBlack>
+          </Tooltip>
           <>
             {!notOptoutSaving && saveChat && (
               <FormControlLabel control={<Switch onChange={() => setSaveConsent(!saveConsent)} checked={saveConsent} />} label={t('chat:allowSave')} />
