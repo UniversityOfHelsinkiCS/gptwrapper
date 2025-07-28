@@ -18,11 +18,25 @@ const ModelSelector = ({
   const validModel = availableModels.includes(currentModel) ? currentModel : ''
 
   return (
-    <FormControl sx={{ minWidth: 100, opacity: 0.7 }} size="small">
+    <FormControl
+      sx={{
+        minWidth: 100,
+        maxWidth: { xs: 60, md: 250 },
+        opacity: 0.7,
+      }}
+      size="small"
+    >
       <Select
         sx={{
           '& .MuiOutlinedInput-notchedOutline': {
             border: 'none',
+          },
+          '& .MuiSelect-select': {
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            paddingLeft: { xs: '4px !important', md: '10px !important' },
+            paddingRight: { xs: '20px !important', md: '30px !important' },
+            maxWidth: { xs: '50px', md: '240px' },
           },
         }}
         id="model-selector"

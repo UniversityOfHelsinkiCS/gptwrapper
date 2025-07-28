@@ -25,7 +25,16 @@ export const ConversationSplash = ({ courseName, courseDate }: { courseName?: st
         },
       }}
     >
-      <img src={hyLogo} alt="University of Helsinki" width="240" style={{ opacity: 0.2, marginBottom: '2rem' }} />
+      <Box
+        component="img"
+        src={hyLogo}
+        alt="University of Helsinki"
+        sx={{
+          width: { xs: '140px', sm: '240px', md: '300px' },
+          opacity: 0.2,
+          m: '2.5rem 0',
+        }}
+      />
       {courseName ? (
         <>
           <Typography variant="h4" fontWeight="bold" sx={{ mb: 1, opacity: 0.5 }}>

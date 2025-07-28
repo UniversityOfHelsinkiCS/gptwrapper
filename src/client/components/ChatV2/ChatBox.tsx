@@ -237,7 +237,7 @@ export const ChatBox = ({
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0rem' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.4rem 0' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography
               variant="body1"
@@ -247,14 +247,14 @@ export const ChatBox = ({
             </Typography>
             <Tooltip
               arrow
-              placement="right"
+              placement="top"
               title={
                 <Typography variant="body2" sx={{ p: 1 }}>
                   {t('info:usage')}
                 </Typography>
               }
             >
-              <HelpOutline fontSize="small" sx={{ color: 'inherit', opacity: 0.7, mt: 0.5 }} />
+              <HelpOutline fontSize="small" sx={{ color: 'inherit', opacity: 0.7, mt: 0.5, flex: 2, display: { xs: 'none', sm: 'block' } }} />
             </Tooltip>
           </Box>
 
