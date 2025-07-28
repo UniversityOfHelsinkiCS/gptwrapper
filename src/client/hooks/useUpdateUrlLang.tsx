@@ -35,8 +35,10 @@ export const useUpdateUrlLang  = () =>  {
 
 
    useEffect(() => {
+     console.log("lang changed!")
      if( i18n.language !== localStorage.getItem('lang')){
-       localStorage.setItem('lang', i18n.language)
+
+       setLang(i18n.language)
      }
    }, [i18n.language])
 
