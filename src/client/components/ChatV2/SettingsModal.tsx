@@ -200,9 +200,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <Typography variant="body1">{t('settings:temperatureInstructions')}</Typography>
 
           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Box sx={{ padding: '1.5rem 0' }}>
+            <Box sx={{ padding: '1.5rem 0', width: '100%', maxWidth: 600 }}>
               <Slider
-                sx={{ width: 800 }}
+                sx={{ width: '100%' }}
                 min={0.0}
                 max={1.0}
                 step={0.1}
@@ -245,7 +245,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           >
             {t('settings:resetDefault')}
           </OutlineButtonBlack>{' '}
-          <BlueButton onClick={() => setOpen(false)}>{t('common:close')}</BlueButton>
+          <BlueButton onClick={() => setOpen(false)}>OK</BlueButton>
         </Box>
         <SaveMyPromptModal
           isOpen={myPromptModalOpen}

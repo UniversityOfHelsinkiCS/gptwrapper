@@ -32,6 +32,7 @@ import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { enqueueSnackbar } from 'notistack'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import EmailButton from './EmailButton'
+import { Tune } from '@mui/icons-material'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -570,7 +571,7 @@ const LeftMenu = ({
             </OutlineButtonBlack>
 
             <EmailButton messages={messages} disabled={!messages?.length} />
-            <OutlineButtonBlack startIcon={<SettingsIcon />} onClick={() => setSettingsModalOpen(true)} id="settings-button">
+            <OutlineButtonBlack startIcon={<Tune />} onClick={() => setSettingsModalOpen(true)} id="settings-button">
               {t('chat:settings')}
             </OutlineButtonBlack>
             <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} id="help-button">

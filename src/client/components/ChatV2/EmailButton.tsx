@@ -194,7 +194,7 @@ const EmailButton = ({ messages, disabled }: { messages: Message[]; disabled: bo
   }
 
   return (
-    <Tooltip placement="right" title={<Typography variant="body2">{t('chat:email', { email: user.email })}</Typography>}>
+    <Tooltip placement="right" title={t('chat:email', { email: user.email })}>
       <OutlineButtonBlack startIcon={<EmailIcon />} onClick={handleSend}>
         {t('email:save')}
       </OutlineButtonBlack>
