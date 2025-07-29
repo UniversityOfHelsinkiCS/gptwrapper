@@ -33,6 +33,7 @@ import { enqueueSnackbar } from 'notistack'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import EmailButton from './EmailButton'
 import { Tune } from '@mui/icons-material'
+import { useChatScroll } from '../../hooks/useChatSroll'
 
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
@@ -61,7 +62,6 @@ export const ChatV2 = () => {
 
   const { data: course } = useCourse(courseId)
   const { ragIndices } = useRagIndices(courseId)
-   // const intervalId = setInterval(() => {scroll()}, 500)
   const { infoTexts } = useInfoTexts()
 
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
@@ -122,6 +122,8 @@ export const ChatV2 = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const endOfConversationRef = useRef<HTMLDivElement | null>(null)
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
+
+  const chatScroll = useChatScroll(appContainerRef, endOfConversationRef) //removing this will break chat autoscroll behavior
 
   const { t, i18n } = useTranslation()
 
@@ -258,65 +260,6 @@ export const ChatV2 = () => {
     setIsStreaming(false)
     clearRetryTimeout()
   }
-  const oldScrollValue = useRef(0)
-  const shouldScroll = useRef(true)
-  useEffect(() => {
-    // Scrolls to bottom on initial load only
-    console.log("hit")
-
-    if (!appContainerRef?.current || !conversationRef.current || messages.length === 0) return
-    appContainerRef.current.addEventListener("scroll",handleUserScroll)
-    const interval = setInterval(scroll, 500)
-    
-    if (!isStreaming) {
-      const container = appContainerRef?.current
-      if (container) {
-        container.scrollTo({
-          top: container.scrollHeight,
-          behavior: 'instant',
-        })
-      }
-    }
-    return () => {
-      clearInterval(interval)
-      appContainerRef?.current?.removeEventListener('scroll', handleUserScroll)
-    }
-  }, [])
-
-   function handleUserScroll(){
-     const bottomOffset = 10 // pixels
-     if ( !appContainerRef?.current){
-       return
-     }
-      const scrollValue: number | undefined = appContainerRef.current?.scrollTop
-      const maxScrollValue: number = appContainerRef.current?.scrollHeight - appContainerRef.current.clientHeight
-      if(!scrollValue){
-        return
-      }
-      // console.log('new scroll: ' + scrollValue)
-      // console.log('old scroll: ' + oldScrollValue.current)
-      // console.log('max scroll: ' + maxScrollValue)
-      if (scrollValue < oldScrollValue.current) {
-        // console.log('User scrolled upward cancelling the auto scroll down');
-        shouldScroll.current = false
-      }
-
-      if(scrollValue >= maxScrollValue - bottomOffset){
-          // console.log('User scrolled to the bottom, enabling autoscroll down')
-          shouldScroll.current = true
-      }
-
-      oldScrollValue.current = scrollValue != undefined ? scrollValue : 0
-   }
-
-  function scroll(){
-    
-  if(!endOfConversationRef?.current || !shouldScroll.current){
-      return
-    }
-    endOfConversationRef.current.scrollIntoView({behavior: 'smooth'});
-   }
-    // Scrolls to last assistant message on text generation  }, [isStreaming])
 
   useEffect(() => {
     if (!userStatus) return
