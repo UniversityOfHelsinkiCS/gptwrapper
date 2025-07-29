@@ -121,7 +121,7 @@ const Layout = () => {
           flexDirection: 'column',
           minHeight: '100vh',
           height: 'auto',
-          // overflowY: 'auto', // deleting this will break the auto scroll on chats
+          overflow: 'hidden', // deleting this will break the auto scroll on chats
         }}
         ref={appRef}
       >
