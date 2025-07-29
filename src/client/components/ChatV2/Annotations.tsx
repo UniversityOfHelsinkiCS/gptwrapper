@@ -202,7 +202,7 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   return (
-    <Box p={isMobile ? 1 : 3} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box p={isMobile ? 1 : 3} sx={{ height: '100vh', flexDirection: 'column',overflow:'hidden', overflowY: 'scroll' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: isMobile ? 2 : 3 }}>
         <Typography variant="h6" fontWeight={'bold'} data-testid="sources-header">
           {t('chat:sources')}

@@ -313,7 +313,7 @@ export const Conversation = ({
     <>
       <Box
         style={{
-          height: '100%',
+          height: 'auto',
           display: 'flex',
           flexDirection: 'column',
           gap: '2.5rem',

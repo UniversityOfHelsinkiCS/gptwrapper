@@ -121,9 +121,10 @@ export const ChatV2 = () => {
   const inputFieldRef = useRef<HTMLElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const endOfConversationRef = useRef<HTMLDivElement | null>(null)
+  const scrollRef = useRef<HTMLDivElement | null> (null)
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
 
-  const chatScroll = useChatScroll(appContainerRef, endOfConversationRef) //removing this will break chat autoscroll behavior
+  const chatScroll = useChatScroll(scrollRef, endOfConversationRef) //removing this will break chat autoscroll behavior
 
   const { t, i18n } = useTranslation()
 
@@ -409,16 +410,18 @@ export const ChatV2 = () => {
       >
         <Box
           sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%',
+            // display: 'flex',
+            // flexDirection: 'column',
+            height: '100vh',
             width: '80%',
             maxWidth: '80%',
             margin: 'auto',
             paddingTop: '1rem',
             paddingBottom: '2.5rem',
-            overflowY: 'visible',
+            overflow: 'hidden',
+            overflowY: 'scroll',
           }}
+          ref={scrollRef}
         >
           <Alert severity="info">{t('chat:testUseInfo')}</Alert>
           <Conversation
