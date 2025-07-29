@@ -43,6 +43,7 @@ export const TEST_COURSES = {
     },
     code: 'TEST-1234',
     model: 'mock',
+    usageLimit: 200_000,
   },
   EXAMPLE_COURSE: {
     id: 'esimerkit',
