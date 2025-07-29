@@ -88,7 +88,7 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
     attributes: ['id', 'usageLimit', 'courseId', 'model'],
   })
 
-  if (!chatInstance) throw new Error('Chat instance not found')
+  if (!chatInstance) throw ApplicationError.NotFound('Chat instance not found')
 
   // Get enrollment
   const enrollment = await Enrolment.findOne({
