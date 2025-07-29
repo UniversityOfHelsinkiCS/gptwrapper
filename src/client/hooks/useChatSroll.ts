@@ -34,7 +34,7 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
   }
   //is called by the setInterval call
   function autoScroll(){
-    if(!scrollEnabled.current || !endOfConversationRef?.current || !shouldScroll.current){
+    if(!endOfConversationRef?.current || !shouldScroll.current){
       return
     }
     endOfConversationRef.current.scrollIntoView({behavior: 'smooth'});
@@ -46,18 +46,18 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
 
     // if (!appContainerRef?.current || !endOfConversationRef.current) return
     appContainerRef.current.addEventListener("scroll",handleUserScroll)
-    const interval = setInterval(autoScroll, 500)
+    // const interval = setInterval(autoScroll, 500)
 
     //scroll to the bottom of the conversation at the start
     // endOfConversationRef.current.scrollIntoView({behavior: 'smooth'});
   
     return () => {
-      clearInterval(interval)
+      // clearInterval(interval)
       appContainerRef?.current?.removeEventListener('scroll', handleUserScroll)
     }
   }, [])
   return {
-    scrollEnabled,
+    shouldScroll,
     autoScroll
   }
  }

@@ -6,10 +6,12 @@ export const useChatStream = ({
   onFileSearchComplete,
   onComplete,
   onError,
+  onText
 }: {
   onFileSearchComplete: (data: FileSearchCompletedData) => void
   onComplete: ({ previousResponseId, message }: { previousResponseId: string | undefined; message: Message }) => void
   onError: (error: unknown) => void
+  onText: () => void
 }) => {
   const [completion, setCompletion] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
@@ -56,6 +58,7 @@ export const useChatStream = ({
 
           if (!parsedChunk) continue
 
+          onText()
           switch (parsedChunk.type) {
             case 'writing':
               setCompletion((prev) => prev + parsedChunk.text)

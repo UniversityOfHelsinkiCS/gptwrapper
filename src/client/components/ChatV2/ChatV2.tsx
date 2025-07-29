@@ -139,6 +139,9 @@ export const ChatV2 = () => {
         refetchStatus()
       }
     },
+    onText: () => {
+     chatScroll.autoScroll()
+    },
     onError: (error) => {
       handleCompletionStreamError(error, fileName)
       enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
@@ -156,6 +159,7 @@ export const ChatV2 = () => {
   const handleSubmit = async (message: string, ignoreTokenUsageWarning: boolean) => {
     if (!userStatus) return
 
+    chatScroll.shouldScroll.current = true
     const { usage, limit } = userStatus
     const tokenUsageExceeded = usage >= limit
 
