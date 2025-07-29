@@ -34,6 +34,7 @@ import { useAnalyticsDispatch } from '../../stores/analytics'
 import EmailButton from './EmailButton'
 import { Tune } from '@mui/icons-material'
 
+
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
   const [searchParams, setSearchParams] = useSearchParams()
@@ -57,8 +58,8 @@ export const ChatV2 = () => {
   const isEmbeddedMode = useIsEmbedded()
 
   const { data: course } = useCourse(courseId)
-
   const { ragIndices } = useRagIndices(courseId)
+   // const intervalId = setInterval(() => {scroll()}, 500)
   const { infoTexts } = useInfoTexts()
 
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
@@ -252,10 +253,15 @@ export const ChatV2 = () => {
     setIsStreaming(false)
     clearRetryTimeout()
   }
-
+  const oldScrollValue = useRef(0)
   useEffect(() => {
     // Scrolls to bottom on initial load only
+    console.log("hit")
+
     if (!appContainerRef?.current || !conversationRef.current || messages.length === 0) return
+    appContainerRef.current.addEventListener("scroll",handleUserScroll)
+
+    
     if (!isStreaming) {
      const container = appContainerRef?.current
       if (container) {
@@ -265,21 +271,39 @@ export const ChatV2 = () => {
         })
       }
     }
+    return () => appContainerRef?.current?.removeEventListener('scroll', handleUserScroll)
   }, [])
-
-  useEffect(() => {
-    // Scrolls to last assistant message on text generation
-    if (!appContainerRef?.current || !conversationRef.current || messages.length === 0) return
-
-    const lastNode = conversationRef.current.lastElementChild as HTMLElement
-
-    if (lastNode.classList.contains('message-role-assistant') && isStreaming) {
-      if( endOfConversationRef?.current)
-      {
-        endOfConversationRef.current.scrollIntoView({behavior: 'smooth'})
+   function handleUserScroll(){
+     const bottomOffset = 10 // pixels
+     if ( !appContainerRef?.current){
+       return
+     }
+      const scrollValue: number | undefined = appContainerRef.current?.scrollTop
+      const maxScrollValue: number = appContainerRef.current?.scrollHeight - appContainerRef.current.clientHeight
+      if(!scrollValue){
+        return
       }
+      console.log('new scroll: ' + scrollValue)
+      console.log('old scroll: ' + oldScrollValue.current)
+      console.log('max scroll: ' + maxScrollValue)
+      if (scrollValue < oldScrollValue.current) {
+        console.log('User scrolled upward cancelling the auto scroll down');
+      }
+
+      if(scrollValue >= maxScrollValue - bottomOffset){
+          console.log('User scrolled to the bottom, enabling autoscroll down')
+      }
+
+      oldScrollValue.current = scrollValue != undefined ? scrollValue : 0
+   }
+
+  function scroll(){
+    if(!endOfConversationRef?.current){
+      return
     }
-  }, [isStreaming])
+    endOfConversationRef.current.scrollIntoView({behavior: 'smooth'});
+     console.log('hi')}
+    // Scrolls to last assistant message on text generation  }, [isStreaming])
 
   useEffect(() => {
     if (!userStatus) return
