@@ -42,7 +42,19 @@ export const TEST_COURSES = {
     code: 'TEST-1234',
     model: 'mock',
   },
-  EXAMPLE_COURSE: { id: 'esimerkit' },
+  EXAMPLE_COURSE: {
+    id: 'esimerkit',
+    name: {
+      en: 'Example course',
+      sv: 'Exempelkurs',
+      fi: 'Esimerkkikurssi',
+    },
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2024-09-02',
+    },
+    code: 'ESI-1234',
+  },
 }
 
 export const TEST_USER_IDS = [

@@ -4,17 +4,8 @@ import { TEST_COURSES } from '../../../shared/testData'
 import { ChatInstance } from '../models'
 
 const chatInstances = [
-  {
-    id: TEST_COURSES.TEST_COURSE.id,
-    name: { en: 'Test Course', sv: 'Test Course', fi: 'Test Course' },
-    description: 'Course for testing purposes',
-    courseId: TEST_COURSES.TEST_COURSE.id,
-    activityPeriod: {
-      startDate: '2023-01-01',
-      endDate: '2023-12-31',
-    },
-  },
   TEST_COURSES.TEST_COURSE,
+  TEST_COURSES.EXAMPLE_COURSE,
   {
     id: TEST_COURSES.OTE_SANDBOX.id,
     name: TEST_COURSES.OTE_SANDBOX.name,
