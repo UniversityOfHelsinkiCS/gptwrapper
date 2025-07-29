@@ -16,7 +16,6 @@ import 'katex/dist/contrib/mhchem'
 import CopyToClipboardButton from '../Chat/CopyToClipboardButton'
 import { t } from 'i18next'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
-import { useState } from 'react'
 import { PriorityHigh } from '@mui/icons-material'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { OutlineButtonBlack } from './generics/Buttons'
@@ -195,31 +194,51 @@ const AssistantMessage = ({
         </Box>
       )}
       {fileSearchResult?.status === 'completed' && (
-        <Box
-          data-testId="file-search-sources"
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            fontStyle: 'italic',
-            opacity: '0.85',
-            mt: 3,
-            width: 'fit-content',
-            transition: 'background-color 0.1s ease-in-out',
-            cursor: 'pointer',
-            padding: '0.6rem',
-            borderRadius: '0.6rem',
-          }}
-          onClick={() => {
-            handleAnnotations(fileSearchResult)
-          }}
-        >
-          <FormatQuoteIcon sx={{ fontSize: '2rem' }} />
-          <Typography variant="body2" sx={{ whiteSpace: 'pre', mr: 3 }}>
-            {`${t('chat:displaySources')}: `}
-            <em>{fileSearchResult?.searchedFiles?.join('\r\n')}</em>
-          </Typography>
-        </Box>
+        <>
+          <Box
+            data-testId="file-search-sources"
+            sx={{
+              display: 'flex',
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              gap: 2,
+              fontStyle: 'italic',
+              maxWidth: 'fit-content',
+              opacity: '0.85',
+              mt: 3,
+              cursor: 'pointer',
+              padding: '0.6rem',
+              borderRadius: '0.6rem',
+            }}
+            onClick={() => {
+              handleAnnotations(fileSearchResult)
+            }}
+          >
+            <FormatQuoteIcon sx={{ fontSize: '2rem' }} />
+            <Box sx={{ minWidth: 0, mt: { xs: 0.5, md: 0 } }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    mr: 2,
+                    wordBreak: 'break-all',
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {`${t('chat:displaySources')}: `}
+
+                  <em>{fileSearchResult?.searchedFiles?.join('\r\n')}</em>
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        </>
       )}
     </Box>
   )

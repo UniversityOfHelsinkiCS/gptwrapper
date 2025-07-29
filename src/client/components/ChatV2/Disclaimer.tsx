@@ -72,7 +72,16 @@ export const DisclaimerModal = ({
         <IconButton
           id="close-disclaimer"
           onClick={() => closeAccepted()}
-          sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500', display: termsAccepted ? '' : 'none' }}
+          sx={{
+            position: 'absolute',
+            top: 20,
+            right: 20,
+            color: 'grey.500',
+            background: '#FFF',
+            opacity: 0.9,
+            zIndex: 1,
+            display: termsAccepted ? '' : 'none',
+          }}
         >
           <Close />
         </IconButton>
