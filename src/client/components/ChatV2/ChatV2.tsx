@@ -259,13 +259,14 @@ export const ChatV2 = () => {
     clearRetryTimeout()
   }
   const oldScrollValue = useRef(0)
+  const shouldScroll = useRef(true)
   useEffect(() => {
     // Scrolls to bottom on initial load only
     console.log("hit")
 
     if (!appContainerRef?.current || !conversationRef.current || messages.length === 0) return
     appContainerRef.current.addEventListener("scroll",handleUserScroll)
-
+    const interval = setInterval(scroll, 500)
     
     if (!isStreaming) {
       const container = appContainerRef?.current
@@ -276,8 +277,12 @@ export const ChatV2 = () => {
         })
       }
     }
-    return () => appContainerRef?.current?.removeEventListener('scroll', handleUserScroll)
+    return () => {
+      clearInterval(interval)
+      appContainerRef?.current?.removeEventListener('scroll', handleUserScroll)
+    }
   }, [])
+
    function handleUserScroll(){
      const bottomOffset = 10 // pixels
      if ( !appContainerRef?.current){
@@ -288,26 +293,29 @@ export const ChatV2 = () => {
       if(!scrollValue){
         return
       }
-      console.log('new scroll: ' + scrollValue)
-      console.log('old scroll: ' + oldScrollValue.current)
-      console.log('max scroll: ' + maxScrollValue)
+      // console.log('new scroll: ' + scrollValue)
+      // console.log('old scroll: ' + oldScrollValue.current)
+      // console.log('max scroll: ' + maxScrollValue)
       if (scrollValue < oldScrollValue.current) {
-        console.log('User scrolled upward cancelling the auto scroll down');
+        // console.log('User scrolled upward cancelling the auto scroll down');
+        shouldScroll.current = false
       }
 
       if(scrollValue >= maxScrollValue - bottomOffset){
-          console.log('User scrolled to the bottom, enabling autoscroll down')
+          // console.log('User scrolled to the bottom, enabling autoscroll down')
+          shouldScroll.current = true
       }
 
       oldScrollValue.current = scrollValue != undefined ? scrollValue : 0
    }
 
   function scroll(){
-    if(!endOfConversationRef?.current){
+    
+  if(!endOfConversationRef?.current || !shouldScroll.current){
       return
     }
     endOfConversationRef.current.scrollIntoView({behavior: 'smooth'});
-     console.log('hi')}
+   }
     // Scrolls to last assistant message on text generation  }, [isStreaming])
 
   useEffect(() => {
