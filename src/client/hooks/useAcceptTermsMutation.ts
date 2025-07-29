@@ -6,11 +6,14 @@ export const useAcceptTermsMutation = () => {
 
   return useMutation({
     mutationFn: async () => {
+      // Optimistic update
+      queryClient.setQueryData(['login'], (oldData: object) => ({
+        ...oldData,
+        termsAccepted: true,
+      }))
+
       const response = await apiClient.post('/users/accept-terms')
       return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['login'] })
     },
   })
 }

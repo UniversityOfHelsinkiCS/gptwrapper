@@ -5,7 +5,7 @@ import { ChatInstance, ChatInstanceRagIndex, RagFile, RagIndex, Responsibility }
 import type { RequestWithUser, User } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import { getAzureOpenAIClient } from '../../util/azure/client'
-import { TEST_COURSES } from '../../util/config'
+import { TEST_COURSES } from '../../../shared/testData'
 import ragIndexRouter, { ragIndexMiddleware } from './ragIndex'
 import { randomUUID } from 'node:crypto'
 
@@ -48,6 +48,7 @@ router.post('/indices', async (req, res) => {
     throw ApplicationError.Forbidden('Cannot create index, user is not responsible for the course')
   }
 
+  // Only OTE_SANDBOX allows multiple rag indices
   if (chatInstance.courseId !== TEST_COURSES.OTE_SANDBOX.id && (chatInstance.ragIndices ?? []).length > 0) {
     throw ApplicationError.Forbidden('Cannot create index, index already exists on the course')
   }
@@ -77,7 +78,7 @@ router.post('/indices', async (req, res) => {
 })
 
 const GetIndicesQuerySchema = z.object({
-  courseId: z.string().optional(),
+  chatInstanceId: z.string().optional(),
   includeExtras: z
     .string()
     .toLowerCase()
@@ -86,14 +87,13 @@ const GetIndicesQuerySchema = z.object({
 })
 
 router.get('/indices', async (req, res) => {
-  const { courseId, includeExtras } = GetIndicesQuerySchema.parse(req.query)
+  const { chatInstanceId, includeExtras } = GetIndicesQuerySchema.parse(req.query)
   const { user } = req as RequestWithUser
 
   // Check access
   let chatInstance: ChatInstance | null = null
-  if (courseId) {
-    chatInstance = await ChatInstance.findOne({
-      where: { courseId },
+  if (chatInstanceId) {
+    chatInstance = await ChatInstance.findByPk(chatInstanceId, {
       include: [
         { model: Responsibility, as: 'responsibilities' },
         { model: RagIndex, as: 'ragIndices' },

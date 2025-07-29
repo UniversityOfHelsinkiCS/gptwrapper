@@ -1,4 +1,4 @@
-import axios, { type AxiosError } from 'axios'
+import axios, { AxiosRequestHeaders, type AxiosError } from 'axios'
 import { PUBLIC_URL } from '../../config'
 
 export type ApiError = AxiosError<{ message: string }>
@@ -9,15 +9,18 @@ export const updaterApiClient = axios.create({
   baseURL: `${PUBLIC_URL}/updater/api`,
 })
 
-apiClient.interceptors.request.use((config) => {
-  const headers = {} as any
+const getCustomHeaders = () => {
+  const headers = {} as AxiosRequestHeaders
 
   const adminLoggedInAs = localStorage.getItem('adminLoggedInAs') // id
   if (adminLoggedInAs) {
     headers['x-admin-logged-in-as'] = adminLoggedInAs
   }
+  return headers
+}
 
-  const newConfig = { ...config, headers }
+apiClient.interceptors.request.use((config) => {
+  const newConfig = { ...config, headers: getCustomHeaders() }
 
   return newConfig
 })
@@ -25,15 +28,9 @@ apiClient.interceptors.request.use((config) => {
 export const postAbortableStream = async (path: string, formData: FormData, externalController?: AbortController) => {
   const controller = externalController ?? new AbortController()
 
-  const adminHeaders = {} as any
-  const adminLoggedInAs = localStorage.getItem('adminLoggedInAs')
-  if (adminLoggedInAs) {
-    adminHeaders['x-admin-logged-in-as'] = adminLoggedInAs
-  }
-
   const response = await fetch(`${PUBLIC_URL}/api/${path}`, {
     method: 'POST',
-    headers: adminHeaders,
+    headers: getCustomHeaders(),
     body: formData,
     signal: controller.signal,
   })
@@ -45,7 +42,7 @@ export const postAbortableStream = async (path: string, formData: FormData, exte
   let stream: ReadableStream<Uint8Array> | null = null
 
   const contentType = response.headers.get('content-type')
-  if (contentType && contentType.includes('application/json')) {
+  if (contentType?.includes('application/json')) {
     const json = await response.json()
     if (!('error' in json)) {
       tokenUsageAnalysis = json

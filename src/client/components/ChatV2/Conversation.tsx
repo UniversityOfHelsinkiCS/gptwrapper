@@ -16,7 +16,6 @@ import 'katex/dist/contrib/mhchem'
 import CopyToClipboardButton from '../Chat/CopyToClipboardButton'
 import { t } from 'i18next'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
-import { useState } from 'react'
 import { PriorityHigh } from '@mui/icons-material'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { OutlineButtonBlack } from './generics/Buttons'
@@ -31,6 +30,8 @@ const UserMessage = ({ content, attachements }: { content: string; attachements?
       boxShadow: '0px 2px 2px rgba(0, 0, 0, 0.2)',
       whiteSpace: 'pre-wrap', // 🧠 This preserves formatting
       wordBreak: 'break-word',
+      minWidth: { xs: 300, md: 'fit-content' },
+      maxWidth: { xs: 400, md: 'fit-content' },
     }}
   >
     {content}
@@ -106,7 +107,6 @@ const AssistantMessage = ({
     strict: false, // disables logging katex warnings/errors – if debugging, turn these two on
   }
   let codeCount = 0
-  const [isHovering, setIsHovering] = useState<boolean>(false)
 
   const handleAnnotations = (fileSearchResult: FileSearchCompletedData) => {
     setActiveFileSearchResult(fileSearchResult)
@@ -196,31 +196,47 @@ const AssistantMessage = ({
       {fileSearchResult?.status === 'completed' && (
         <>
           <Box
+            data-testId="file-search-sources"
             sx={{
               display: 'flex',
-              alignItems: 'center',
+              alignItems: { xs: 'flex-start', sm: 'center' },
               gap: 2,
               fontStyle: 'italic',
+              maxWidth: 'fit-content',
               opacity: '0.85',
               mt: 3,
-              width: 'fit-content',
-              backgroundColor: isHovering ? '#efefef' : 'transparent',
-              transition: 'background-color 0.1s ease-in-out',
               cursor: 'pointer',
               padding: '0.6rem',
               borderRadius: '0.6rem',
             }}
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
             onClick={() => {
               handleAnnotations(fileSearchResult)
             }}
           >
             <FormatQuoteIcon sx={{ fontSize: '2rem' }} />
-            <Typography variant="body2" sx={{ whiteSpace: 'pre', mr: 3 }}>
-              {`${t('chat:displaySources')}: `}
-              <em>{fileSearchResult?.searchedFiles?.join('\r\n')}</em>
-            </Typography>
+            <Box sx={{ minWidth: 0, mt: { xs: 0.5, md: 0 } }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    mr: 2,
+                    wordBreak: 'break-all',
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {`${t('chat:displaySources')}: `}
+
+                  <em>{fileSearchResult?.searchedFiles?.join('\r\n')}</em>
+                </Typography>
+              </Box>
+            </Box>
           </Box>
         </>
       )}

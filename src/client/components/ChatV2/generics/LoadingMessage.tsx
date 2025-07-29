@@ -33,7 +33,7 @@ export const LoadingMessage = ({ expandedNodeHeight, isFileSearching }: { expand
               transform: translateY(-8px);
             }
           }
-          
+
           @keyframes slideIn {
             0% {
               transform: translateX(-20px);
@@ -50,7 +50,11 @@ export const LoadingMessage = ({ expandedNodeHeight, isFileSearching }: { expand
         <div style={loadingDotStyle(0)} />
         <div style={loadingDotStyle(0.15)} />
         <div style={loadingDotStyle(0.3)} />
-        {isFileSearching && <Typography sx={sourcesTextStyle}>{t('chat:readSources')}</Typography>}
+        {isFileSearching && (
+          <Typography sx={sourcesTextStyle} data-testid="file-searching-message">
+            {t('chat:readSources')}
+          </Typography>
+        )}
       </div>
     </div>
   )

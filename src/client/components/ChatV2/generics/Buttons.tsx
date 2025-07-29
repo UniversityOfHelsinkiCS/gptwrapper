@@ -15,6 +15,8 @@ const BaseButton = styled(Button)({
   position: 'relative',
   padding: '.5rem 1rem',
   margin: '2px 0',
+  whiteSpace: 'nowrap',
+  minWidth: 'fit-content',
   '& .MuiButton-startIcon': {
     fontSize: '22px',
     margin: 0,

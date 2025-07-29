@@ -148,10 +148,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           bgcolor: 'background.paper',
           boxShadow: 24,
           borderRadius: '0.3rem',
-          overflow: 'hidden',
+          overflow: 'auto',
         }}
       >
-        <IconButton onClick={() => setOpen(false)} sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500' }} id="close-settings">
+        <IconButton
+          onClick={() => setOpen(false)}
+          sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500', background: '#FFF', opacity: 0.9, zIndex: 1 }}
+          id="close-settings"
+        >
           <Close />
         </IconButton>
 
@@ -163,7 +167,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             alignItems: 'stretch',
             gap: '1.2rem',
             overflowY: 'auto',
-            p: '3rem',
+            p: { xs: '1.5rem', md: '3rem' },
           }}
         >
           <Typography variant="h6" fontWeight={600}>
@@ -230,7 +234,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         <Box
           sx={{
-            padding: '2rem 3rem',
+            padding: { xs: '1rem', md: '2rem' },
             display: 'flex',
             justifyContent: 'flex-end',
             gap: 1,

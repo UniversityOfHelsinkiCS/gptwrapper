@@ -20,8 +20,6 @@ import { AnalyticsProvider } from './stores/analytics'
 import { useTranslation } from 'react-i18next'
 import { useUpdateUrlLang } from './hooks/useUpdateUrlLang.tsx'
 
-
-
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
   if (user.isAdmin) return true
@@ -74,18 +72,17 @@ const AdminLoggedInAsBanner = () => {
   )
 }
 
-
 const App = () => {
   const urlUpdater = useUpdateUrlLang() //DONT REMOVE, the hook creates 2 useEffects to keep the url param synced with user language changes
   const theme = useTheme()
   const { courseId } = useParams()
   const location = useLocation()
   const { user, isLoading } = useCurrentUser()
-  
+
   useEffect(() => {
     initShibbolethPinger()
   }, [])
-   const onNoAccessPage = location.pathname.includes('/noaccess')
+  const onNoAccessPage = location.pathname.includes('/noaccess')
 
   if (isLoading && !onNoAccessPage) return null
 
