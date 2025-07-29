@@ -44,7 +44,7 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
   useEffect(() => {
     // console.log("hit")
 
-    // if (!appContainerRef?.current || !endOfConversationRef.current) return
+    if (!appContainerRef?.current || !endOfConversationRef.current) return
     appContainerRef.current.addEventListener("scroll",handleUserScroll)
     // const interval = setInterval(autoScroll, 500)
 
