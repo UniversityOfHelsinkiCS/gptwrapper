@@ -17,6 +17,7 @@ export const getTestUserHeaders = (idx: string) => ({
 export const TEST_COURSES = {
   OTE_SANDBOX: {
     id: 'sandbox',
+    courseId: 'sandbox',
     name: {
       en: 'OTE sandbox',
       sv: 'OTE sandbox',
@@ -30,6 +31,7 @@ export const TEST_COURSES = {
   },
   TEST_COURSE: {
     id: 'test-course',
+    courseId: 'test-course',
     name: {
       en: 'Test course',
       sv: 'Testkurs',
@@ -41,9 +43,11 @@ export const TEST_COURSES = {
     },
     code: 'TEST-1234',
     model: 'mock',
+    usageLimit: 200_000,
   },
   EXAMPLE_COURSE: {
     id: 'esimerkit',
+    courseId: 'example',
     name: {
       en: 'Example course',
       sv: 'Exempelkurs',
