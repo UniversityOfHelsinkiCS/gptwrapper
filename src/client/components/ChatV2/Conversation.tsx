@@ -1,5 +1,5 @@
 import AttachFileIcon from '@mui/icons-material/AttachFile'
-import { Box, Typography } from '@mui/material'
+import { Box, Paper, Typography } from '@mui/material'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
@@ -16,9 +16,8 @@ import 'katex/dist/contrib/mhchem'
 import CopyToClipboardButton from '../Chat/CopyToClipboardButton'
 import { t } from 'i18next'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
-import { PriorityHigh } from '@mui/icons-material'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
-import { OutlineButtonBlack } from './generics/Buttons'
+import { BlueButton } from './generics/Buttons'
 
 const UserMessage = ({ content, attachements }: { content: string; attachements?: string }) => (
   <Box
@@ -351,11 +350,12 @@ export const Conversation = ({
           ))}
       </Box>
       {!reminderSeen && !isStreaming && messages.length > 15 && (
-        <Box sx={{ display: 'flex', gap: 2, justifyItems: 'center', fontStyle: 'italic' }}>
-          <PriorityHigh sx={{ mt: 1 }} />
+        <Paper variant="outlined" sx={{ display: 'flex', flexDirection: 'row', gap: 2, fontStyle: 'italic', alignItems: 'center', padding: 2 }}>
           <Typography>{t('chat:emptyReminder')}</Typography>
-          <OutlineButtonBlack onClick={() => setReminderSeen(true)}>OK</OutlineButtonBlack>
-        </Box>
+          <BlueButton sx={{ marginLeft: 'auto' }} onClick={() => setReminderSeen(true)}>
+            OK
+          </BlueButton>
+        </Paper>
       )}
     </>
   )

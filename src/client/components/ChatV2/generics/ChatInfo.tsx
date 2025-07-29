@@ -1,4 +1,4 @@
-import { Alert, Box, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Course } from '../../../types'
 import { formatDate } from '../../Courses/util'
@@ -17,12 +17,6 @@ export const ChatInfo = ({ course }: { course: Course }) => {
       </Typography>
 
       <Typography variant="body2">{formatDate(course.activityPeriod)}</Typography>
-
-      {course.saveDiscussions && (
-        <Alert severity="warning" style={{ marginTop: 20 }}>
-          <Typography variant="body1">{course.notOptoutSaving ? t('course:isSavedNotOptOut') : t('course:isSavedOptOut')}</Typography>
-        </Alert>
-      )}
     </Box>
   )
 }

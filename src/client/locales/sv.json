@@ -105,6 +105,7 @@
     "modelDisabled": "Språkmodellen är inte tillgänglig",
     "attachFile": "Bifoga fil",
     "allowSave": "Diskussionen kan sparas",
+    "denySave": "Diskussionen kanske inte sparas",
     "toBeSaved": "Diskussionen sparas anonymt",
     "errorInstructions": "Det gick inte att generera ett svar. Vi rekommenderar att du sparar den aktuella konversationen och startar en ny. Du kan också prova en annan modell. Om problemet kvarstår, kontakta supporten.",
     "email": "Konversationen kommer att skickas till {{email}}"
@@ -268,13 +269,13 @@
     "prompts": "Prompter",
     "rag": "RAG",
     "reseachCourse": "Forskningskurs",
-    "isSavedNotOptOut": "Kursdiskussionerna sparas anonymt\\n\\nSparade diskussioner kan användas för forskningsändamål",
+    "isSavedNotOptOut": "Kursdiskussionerna sparas anonymt.\\n\\nSparade diskussioner kan användas för forskningsändamål.",
     "isSavedForTeacherOptOut": "Kursdiskussionerna sparas anonymt om användaren ger tillstånd till detta. Sparade diskussioner kan användas för forskningsändamål.",
     "isReseachCourse": "Kursen är en forskningskurs",
     "canOptOut": "Det är inte möjligt att välja bort att spara diskussionerna",
     "directPromptLink": "Länk för att chatta med denna prompt aktiv",
     "copyDirectPromptLinkInfo": "Kopiera en länk för att chatta med denna prompt aktiv",
-    "isSavedOptOut": "Kursdiskussionerna sparas anonymt om du ger tillstånd till detta"
+    "isSavedOptOut": "Kursdiskussionerna sparas anonymt om du ger tillstånd till detta. Sparade diskussioner kan användas för forskningsändamål."
   },
   "tooltip": {
     "copied": "Kopierad!"

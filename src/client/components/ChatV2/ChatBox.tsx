@@ -271,16 +271,6 @@ export const ChatBox = ({
               <SettingsIcon sx={{ color: 'rgba(0, 0, 0, 0.7)' }} />
             </OutlineButtonBlack>
           </Tooltip>
-          <>
-            {!notOptoutSaving && saveChat && (
-              <FormControlLabel control={<Switch onChange={() => setSaveConsent(!saveConsent)} checked={saveConsent} />} label={t('chat:allowSave')} />
-            )}
-            {notOptoutSaving && saveChat && (
-              <Alert severity="warning" style={{ marginLeft: 20 }}>
-                <Typography>{t('chat:toBeSaved')}</Typography>
-              </Alert>
-            )}
-          </>
         </Box>
       </Box>
     </Box>

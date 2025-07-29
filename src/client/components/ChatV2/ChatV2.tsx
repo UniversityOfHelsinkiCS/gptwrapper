@@ -1,7 +1,6 @@
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import HelpIcon from '@mui/icons-material/Help'
-import SettingsIcon from '@mui/icons-material/Settings'
-import { Alert, Box, Button, Drawer, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Alert, Box, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
@@ -32,9 +31,8 @@ import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { enqueueSnackbar } from 'notistack'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import EmailButton from './EmailButton'
-import { Tune } from '@mui/icons-material'
+import { PriorityHigh, Tune } from '@mui/icons-material'
 import { useChatScroll } from '../../hooks/useChatSroll'
-
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -121,7 +119,7 @@ export const ChatV2 = () => {
   const inputFieldRef = useRef<HTMLElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const endOfConversationRef = useRef<HTMLDivElement | null>(null)
-  const scrollRef = useRef<HTMLDivElement | null> (null)
+  const scrollRef = useRef<HTMLDivElement | null>(null)
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
 
   const chatScroll = useChatScroll(scrollRef, endOfConversationRef) //removing this will break chat autoscroll behavior
@@ -141,7 +139,7 @@ export const ChatV2 = () => {
       }
     },
     onText: () => {
-     chatScroll.autoScroll()
+      chatScroll.autoScroll()
     },
     onError: (error) => {
       handleCompletionStreamError(error, fileName)
@@ -424,6 +422,25 @@ export const ChatV2 = () => {
           ref={scrollRef}
         >
           <Alert severity="info">{t('chat:testUseInfo')}</Alert>
+
+          {course?.saveDiscussions && (
+            <Paper variant="outlined" sx={{ padding: 2, mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <PriorityHigh sx={{ opacity: 0.8, mr: 1, display: { xs: 'none', md: 'block' } }} />
+                <Typography variant="body1" fontWeight={600}>
+                  {course?.notOptoutSaving ? t('course:isSavedNotOptOut') : t('course:isSavedOptOut')}
+                </Typography>
+              </Box>
+
+              {!course.notOptoutSaving && course.saveDiscussions && (
+                <FormControlLabel
+                  control={<Switch onChange={() => setSaveConsent(!saveConsent)} checked={saveConsent} />}
+                  label={saveConsent ? t('chat:allowSave') : t('chat:denySave')}
+                />
+              )}
+            </Paper>
+          )}
+
           <Conversation
             courseName={course && getLanguageValue(course.name, i18n.language)}
             courseDate={course?.activityPeriod}
