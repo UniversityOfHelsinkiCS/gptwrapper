@@ -12,13 +12,15 @@ interface CopyToClipboardButtonProps {
 }
 
 const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ copied, id, iconColor = 'primary', buttonStyle }) => {
-  const [open, setOpen] = useState(false)
   const { t } = useTranslation()
+  const [tooltipMessage, setTooltipMessage] = useState(t('chat:copyToClipboard'))
 
   const handleClick = () => {
     const element = document.getElementById(id)
     if (!element) return
-    setOpen(true)
+
+    setTooltipMessage(t('tooltip:copied'))
+
     const blobHtml = new Blob([element.innerHTML], {
       type: 'text/html',
     })
@@ -30,11 +32,15 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ copied, i
       }),
     ]
     navigator.clipboard.write(data)
+
+    setTimeout(() => {
+      setTooltipMessage(t('chat:copyToClipboard'))
+    }, 2000)
   }
 
   return (
     <Box>
-      <Tooltip title={t('chat:copyToClipboard')} arrow>
+      <Tooltip title={tooltipMessage} arrow leaveDelay={0} enterTouchDelay={300}>
         <IconButton
           onClick={handleClick}
           style={{
@@ -45,13 +51,6 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ copied, i
           <ContentCopy sx={{ color: iconColor }} />
         </IconButton>
       </Tooltip>
-      <Snackbar
-        message={t('tooltip:copied')}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        autoHideDuration={2000}
-        onClose={() => setOpen(false)}
-        open={open}
-      />
     </Box>
   )
 }

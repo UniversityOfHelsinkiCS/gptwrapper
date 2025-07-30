@@ -426,7 +426,6 @@ export const ChatV2 = () => {
           {course?.saveDiscussions && (
             <Paper variant="outlined" sx={{ padding: 2, mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <PriorityHigh sx={{ opacity: 0.8, mr: 1, display: { xs: 'none', md: 'block' } }} />
                 <Typography variant="body1" fontWeight={600}>
                   {course?.notOptoutSaving ? t('course:isSavedNotOptOut') : t('course:isSavedOptOut')}
                 </Typography>

@@ -114,10 +114,29 @@ const AssistantMessage = ({
 
   return (
     <Box
+      id="assistant-message"
       sx={{
         overflowX: 'auto',
+        position: 'relative',
+        '&:hover .copy-message-button': {
+          opacity: 0.8,
+        },
       }}
     >
+      <Box
+        className="copy-message-button"
+        sx={{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          opacity: { xs: 0.5, sm: 0 },
+          transition: 'opacity 0.2s ease-in-out',
+          background: '#fcfcfcff',
+          borderRadius: 4,
+        }}
+      >
+        <CopyToClipboardButton id={`assistant-message`} copied={content} />
+      </Box>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
         rehypePlugins={[[rehypeKatex, katexOptions]]}
