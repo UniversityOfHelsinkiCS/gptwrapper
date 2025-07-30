@@ -234,6 +234,7 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     model: options.model,
     user: user.username,
     courseId,
+    course: course?.name?.fi,
   }
 
   logger.info(`Stream ended. Total tokens: ${tokenCount}`, chatCompletionMeta)
@@ -366,6 +367,7 @@ openaiRouter.post('/stream', upload.single('file'), async (r, res) => {
     model: options.model,
     user: user.username,
     courseId,
+    course: course?.name?.fi,
   }
 
   logger.info(`Stream ended. Total tokens: ${tokenCount}`, chatCompletionMeta)
