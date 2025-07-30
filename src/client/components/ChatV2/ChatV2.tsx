@@ -157,8 +157,7 @@ export const ChatV2 = () => {
 
   const handleSubmit = async (message: string, ignoreTokenUsageWarning: boolean) => {
     if (!userStatus) return
-
-    chatScroll.shouldScroll.current = true
+    // chatScroll.setShouldScroll(true)
     const { usage, limit } = userStatus
     const tokenUsageExceeded = usage >= limit
 
@@ -410,11 +409,11 @@ export const ChatV2 = () => {
           sx={{
             // display: 'flex',
             // flexDirection: 'column',
-            height: '100vh',
+            height: '80vh',
             width: '80%',
             maxWidth: '80%',
             margin: 'auto',
-            paddingTop: '1rem',
+            paddingTop: '5rem',
             paddingBottom: '2.5rem',
             overflow: 'hidden',
             overflowY: 'scroll',
@@ -453,7 +452,7 @@ export const ChatV2 = () => {
             setActiveFileSearchResult={setActiveFileSearchResult}
             setShowAnnotations={setShowAnnotations}
           />
-          <div ref={endOfConversationRef} style={{ height: '1em' }}></div>
+          <div ref={endOfConversationRef} style={{height: '1vh', marginBottom: '2vh'}}></div>
         </Box>
 
         <Box
