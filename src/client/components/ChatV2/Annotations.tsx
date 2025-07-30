@@ -167,7 +167,7 @@ const Queries = ({ queries }: { queries: string[] }) => {
         mb: 5,
       }}
     >
-      <Typography fontWeight={'bold'}>{t('chat:searchTerms')}</Typography>
+      <Typography fontWeight={'500'}>{t('chat:searchTerms')}</Typography>
       {queries.map((q, idx) => (
         <Chip
           key={idx}
@@ -198,9 +198,9 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
   const { t } = useTranslation()
 
   return (
-    <Box p={{ xs: 1, md: 3 }} sx={{width: '100%', height: '90vh', display: 'flex', flexDirection: 'column',overflow:'hidden', overflowY: 'scroll' }}>
+    <Box p={{ xs: 1, md: 3 }} sx={{ width: '100%', height: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', overflowY: 'scroll' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 2, md: 3 } }}>
-        <Typography variant="h6" fontWeight={'bold'} data-testid="sources-header">
+        <Typography variant="h6" fontWeight={'600'} data-testid="sources-header">
           {t('chat:sources')}
         </Typography>
         <IconButton

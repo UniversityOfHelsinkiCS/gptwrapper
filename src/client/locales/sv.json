@@ -108,7 +108,8 @@
     "denySave": "Diskussionen kanske inte sparas",
     "toBeSaved": "Diskussionen sparas anonymt",
     "errorInstructions": "Det gick inte att generera ett svar. Vi rekommenderar att du sparar den aktuella konversationen och startar en ny. Du kan också prova en annan modell. Om problemet kvarstår, kontakta supporten.",
-    "email": "Konversationen kommer att skickas till {{email}}"
+    "email": "Konversationen kommer att skickas till {{email}}",
+    "cancelResponse": "Avbrytande av svar är för närvarande inaktiverat"
   },
   "settings": {
     "prompt": "Samtalsstart",

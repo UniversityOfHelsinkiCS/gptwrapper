@@ -100,7 +100,8 @@
     "emptyReminder": "Huomaathan, että pitkät keskustelut kuluttavat enemmän tokeneita. Suosittelemme tyhjentämään keskustelun aina, kun vaihdat keskustelun aihetta.",
     "modelDisabled": "Kielimalli ei ole käytettävissä",
     "attachFile": "Liitä tiedosto",
-    "email": "Keskustelu lähetetään osoitteeseen {{email}}"
+    "email": "Keskustelu lähetetään osoitteeseen {{email}}",
+    "cancelResponse": "Vastausten keskeyttäminen on toistaiseksi pois käytöstä."
   },
   "settings": {
     "prompt": "Keskustelun alustus",

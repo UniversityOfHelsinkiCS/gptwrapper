@@ -100,7 +100,8 @@
     "emptyReminder": "Please note that long conversations consume more tokens. We recommend that you clear the conversation whenever you change the topic of the conversation.",
     "modelDisabled": "Model is unavailable",
     "attachFile": "Attach file",
-    "email": "The conversation will be sent to {{email}}"
+    "email": "The conversation will be sent to {{email}}",
+    "cancelResponse": "Canceling responses is currently not supported"
   },
   "settings": {
     "prompt": "Conversation prompt",

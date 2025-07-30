@@ -27,10 +27,10 @@ const UserMessage = ({ content, attachements }: { content: string; attachements?
       marginLeft: 20,
       borderRadius: '1rem 0.0rem 1rem 1rem',
       boxShadow: '0px 2px 2px rgba(0, 0, 0, 0.2)',
-      whiteSpace: 'pre-wrap', // 🧠 This preserves formatting
+      whiteSpace: 'pre-wrap',
+      maxWidth: { xs: '90vw', sm: '60vw', md: '50vw' },
       wordBreak: 'break-word',
-      minWidth: { xs: 300, md: 'fit-content' },
-      maxWidth: { xs: 400, md: 'fit-content' },
+      width: 'fit-content',
     }}
   >
     {content}
@@ -116,10 +116,12 @@ const AssistantMessage = ({
     <Box
       id="assistant-message"
       sx={{
-        overflowX: 'auto',
         position: 'relative',
+        pr: 5,
+        maxWidth: '100%',
+        wordBreak: 'break-word',
         '&:hover .copy-message-button': {
-          opacity: 0.8,
+          opacity: 0.7,
         },
       }}
     >
@@ -127,9 +129,9 @@ const AssistantMessage = ({
         className="copy-message-button"
         sx={{
           position: 'absolute',
-          right: 0,
-          bottom: 0,
-          opacity: { xs: 0.5, sm: 0 },
+          right: 10,
+          bottom: -25,
+          opacity: { xs: 0.7, md: 0 },
           transition: 'opacity 0.2s ease-in-out',
           background: '#fcfcfcff',
           borderRadius: 4,
