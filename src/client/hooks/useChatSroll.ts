@@ -13,7 +13,7 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
        return
      }
     const scrollValue: number | undefined = appContainerRef.current?.scrollTop
-      console.log("it works")
+      // console.log("it works")
       const maxScrollValue: number = appContainerRef.current?.scrollHeight - appContainerRef.current.clientHeight
       if(!scrollValue){
         return
@@ -27,56 +27,71 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
       }
 
       if(scrollValue >= maxScrollValue - bottomOffset){
-          console.log('User scrolled to the bottom, enabling autoscroll down')
+          // console.log('User scrolled to the bottom, enabling autoscroll down')
           shouldScroll.current = true
       }
 
       oldScrollValue.current = scrollValue != undefined ? scrollValue : 0
   }
   //is called by the setInterval call
-  function autoScroll(){
+  async function autoScroll(){
    if(!endOfConversationRef?.current || shouldScroll.current === false){
      return
    }
-   smoothScrollTo(100)
+   //lets not start another animation if there is one already
+   if(scrollAnimationFrame.currentl){
+     return
+   }
+
+   
+   smoothScrollTo(1000)
 
   }
 
   const cancelScroll = () => {
     shouldScroll.current = false
-    console.log("CANCEL")
+    // console.log("CANCEL")
     if(scrollAnimationFrame?.current){
-      console.log("cancelled animation frame", scrollAnimationFrame.current)
+      // console.log("cancelled animation frame", scrollAnimationFrame.current)
 
       cancelAnimationFrame(scrollAnimationFrame.current)
       scrollAnimationFrame.current = null    
     }
             
   }
- const smoothScrollTo = (duration: number) => {
-    const startTime = performance.now()
+ const smoothScrollTo =  (duration: number) => {
+     // console.log("started smooth scroll!")
+    let startTime = null
     const startY = appContainerRef.current.scrollTop
     const targetY = endOfConversationRef.current.offsetTop
     const distance = targetY - startY
-    // console.log("starttime" + startTime)
+    let travel = startY
+    if(!startTime){
+        startTime = performance.now()
+      }
+      let elapsed = performance.now() - startTime
+      let progress = Math.min(elapsed / duration, 1)
+         // console.log("starttime" + startTime)
     function step(currentTime) {
       if(shouldScroll.current == false){
         return
       }
-      const elapsed = currentTime - startTime
-      const progress = Math.max(Math.min(elapsed / duration, 1), 0)
+      elapsed = performance.now() - startTime
+      progress = Math.min(elapsed / duration, 1)
       // console.log('ellapsed'+ elapsed)
       // console.log("progress"+ progress)
       // const ease = Math.max(1 - progress, 0) //speeds up in the start since progress grows from 0 -> 1, this drops from 1 -> 0
       // const ease = ellapsed <  ? 0.1
-      appContainerRef.current.scrollTo(0, startY + distance * progress)
+      travel += 10
+      appContainerRef.current.scrollTo(0, targetY * progress, {behauvior: 'smooth'} )
+
   
       if (progress < 1) {
         scrollAnimationFrame.current = requestAnimationFrame(step)
       }
     }
 
-    scrollAnimationFrame.current = requestAnimationFrame(step)
+   scrollAnimationFrame.current = requestAnimationFrame(step)
 
     }
 
@@ -85,14 +100,6 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
 
     if (!appContainerRef?.current || !endOfConversationRef.current) return
     appContainerRef.current.addEventListener("scroll",handleUserScroll)
-    // appContainerRef.current.addEventListener("wheel", () => {cancelScroll()})
-
-    // appContainerRef.current.addEventListener("touchstart", () => {cancelScroll()})
-    // appContainerRef.current.addEventListener("touchmove", () => {cancelScroll()})
-    // appContainerRef.current.addEventListener("mousedown", () => {cancelScroll()})
-    // appContainerRef.current.addEventListener("keydown", () => {cancelScroll()})
-
-
 
     // const interval = setInterval(autoScroll, 500)
 

@@ -157,7 +157,8 @@ export const ChatV2 = () => {
 
   const handleSubmit = async (message: string, ignoreTokenUsageWarning: boolean) => {
     if (!userStatus) return
-    // chatScroll.setShouldScroll(true)
+    chatScroll.shouldScroll.current = true
+    // await chatScroll.autoScroll()
     const { usage, limit } = userStatus
     const tokenUsageExceeded = usage >= limit
 
