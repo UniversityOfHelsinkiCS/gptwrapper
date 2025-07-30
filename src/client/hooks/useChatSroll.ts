@@ -3,7 +3,7 @@ import { MutableRefObject, useEffect, useRef, useState } from "react"
 export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
   
   const oldScrollValue = useRef(0)
-  const [shouldScroll, setShouldScroll] = useState(true)// modified by handleUserScroll to enable/disable if user is at the end of appContainerRef
+  const shouldScroll = useRef(true)
 
   const scrollAnimationFrame: MutableRefObject<number | null> = useRef(null)
   //is called by 'scroll' event listener
@@ -13,6 +13,7 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
        return
      }
     const scrollValue: number | undefined = appContainerRef.current?.scrollTop
+      console.log("it works")
       const maxScrollValue: number = appContainerRef.current?.scrollHeight - appContainerRef.current.clientHeight
       if(!scrollValue){
         return
@@ -22,29 +23,19 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
       // console.log('max scroll: ' + maxScrollValue)
       if (scrollValue + 10 < oldScrollValue.current) {
         console.log('User scrolled upward cancelling the auto scroll down');
-        if(shouldScroll){
-          
         cancelScroll()
-        }
       }
 
       if(scrollValue >= maxScrollValue - bottomOffset){
           console.log('User scrolled to the bottom, enabling autoscroll down')
-
-          if(!shouldScroll){
-            
-          setShouldScroll(true)
-          }
+          shouldScroll.current = true
       }
 
       oldScrollValue.current = scrollValue != undefined ? scrollValue : 0
   }
   //is called by the setInterval call
   function autoScroll(){
-    console.log("checking")
-    console.log(endOfConversationRef.current)
-    console.log(shouldScroll)
-   if(!endOfConversationRef?.current || shouldScroll === false){
+   if(!endOfConversationRef?.current || shouldScroll.current === false){
      return
    }
    smoothScrollTo(100)
@@ -52,10 +43,7 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
   }
 
   const cancelScroll = () => {
-    if( shouldScroll){
-      
-    setShouldScroll(false)
-    }
+    shouldScroll.current = false
     console.log("CANCEL")
     if(scrollAnimationFrame?.current){
       console.log("cancelled animation frame", scrollAnimationFrame.current)
@@ -72,6 +60,9 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
     const distance = targetY - startY
     // console.log("starttime" + startTime)
     function step(currentTime) {
+      if(shouldScroll.current == false){
+        return
+      }
       const elapsed = currentTime - startTime
       const progress = Math.max(Math.min(elapsed / duration, 1), 0)
       // console.log('ellapsed'+ elapsed)
@@ -80,7 +71,7 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
       // const ease = ellapsed <  ? 0.1
       appContainerRef.current.scrollTo(0, startY + distance * progress)
   
-      if (progress < 1 && shouldScroll) {
+      if (progress < 1) {
         scrollAnimationFrame.current = requestAnimationFrame(step)
       }
     }
@@ -94,12 +85,12 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
 
     if (!appContainerRef?.current || !endOfConversationRef.current) return
     appContainerRef.current.addEventListener("scroll",handleUserScroll)
-    appContainerRef.current.addEventListener("wheel", () => {cancelScroll()})
+    // appContainerRef.current.addEventListener("wheel", () => {cancelScroll()})
 
     // appContainerRef.current.addEventListener("touchstart", () => {cancelScroll()})
-    appContainerRef.current.addEventListener("touchmove", () => {cancelScroll()})
-    appContainerRef.current.addEventListener("mousedown", () => {cancelScroll()})
-    appContainerRef.current.addEventListener("keydown", () => {cancelScroll()})
+    // appContainerRef.current.addEventListener("touchmove", () => {cancelScroll()})
+    // appContainerRef.current.addEventListener("mousedown", () => {cancelScroll()})
+    // appContainerRef.current.addEventListener("keydown", () => {cancelScroll()})
 
 
 
@@ -115,7 +106,6 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
   }, [shouldScroll])
   return {
     shouldScroll,
-    setShouldScroll,
     autoScroll
   }
  }
