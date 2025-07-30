@@ -82,6 +82,7 @@ export const ChatV2 = () => {
 
   const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as Message[])
   const [prevResponseId, setPrevResponse] = useLocalStorageState(`${localStoragePrefix}-prev-response`, '')
+  const [saveConsent, setSaveConsent] = useLocalStorageState<boolean>('save-consent', false)
 
   // App States
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
@@ -89,7 +90,6 @@ export const ChatV2 = () => {
   const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
   const [tokenUsageAlertOpen, setTokenUsageAlertOpen] = useState<boolean>(false)
   const [allowedModels, setAllowedModels] = useState<string[]>([])
-  const [saveConsent, setSaveConsent] = useState<boolean>(false)
   const [showAnnotations, setShowAnnotations] = useState<boolean>(false)
   const [chatLeftSidePanelOpen, setChatLeftSidePanelOpen] = useState<boolean>(false)
   // RAG states
