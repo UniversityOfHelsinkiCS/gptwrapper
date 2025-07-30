@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Box, Typography, Chip, IconButton, Drawer } from '@mui/material'
-import { Close } from '@mui/icons-material'
+import { Close, MenuBookTwoTone } from '@mui/icons-material'
 import { FileSearchCompletedData, FileSearchResultData } from '../../../shared/types'
 import { useTranslation } from 'react-i18next'
 import { useFileSearchResults } from './api'
@@ -200,7 +200,8 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
   return (
     <Box p={{ xs: 1, md: 3 }} sx={{ width: '100%', height: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', overflowY: 'scroll' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 2, md: 3 } }}>
-        <Typography variant="h6" fontWeight={'600'} data-testid="sources-header">
+        <Typography variant="h5" fontWeight={'600'} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }} data-testid="sources-header">
+          <MenuBookTwoTone fontSize="large" sx={{ opacity: 0.6 }} />
           {t('chat:sources')}
         </Typography>
         <IconButton

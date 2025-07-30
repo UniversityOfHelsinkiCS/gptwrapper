@@ -29,6 +29,7 @@ const UserMessage = ({ content, attachements }: { content: string; attachements?
       boxShadow: '0px 2px 2px rgba(0, 0, 0, 0.2)',
       whiteSpace: 'pre-wrap',
       maxWidth: { xs: '90vw', sm: '60vw', md: '50vw' },
+      minWidth: { xs: '70vw', sm: 0 },
       wordBreak: 'break-word',
       width: 'fit-content',
     }}
@@ -130,7 +131,7 @@ const AssistantMessage = ({
         sx={{
           position: 'absolute',
           right: 10,
-          bottom: -25,
+          bottom: -15,
           opacity: { xs: 0.7, md: 0 },
           transition: 'opacity 0.2s ease-in-out',
           background: '#fcfcfcff',
@@ -333,12 +334,13 @@ export const Conversation = ({
     <>
       <Box
         style={{
-          height: 'auto',
+          height: messages.length === 0 ? '60vh' : 'auto',
           display: 'flex',
           flexDirection: 'column',
           gap: '2.5rem',
           padding: '1rem 0',
           flex: 1,
+          justifyContent: messages.length === 0 ? 'center' : 'flex-start',
         }}
         ref={conversationRef}
       >

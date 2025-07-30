@@ -14,6 +14,7 @@ export const ConversationSplash = ({ courseName, courseDate }: { courseName?: st
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
+        textAlign: 'center',
         alignItems: 'center',
         transition: 'opacity 0.6s, transform 0.6s',
         opacity: 1,
