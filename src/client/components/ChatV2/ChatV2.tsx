@@ -137,6 +137,7 @@ export const ChatV2 = () => {
         setMessages((prev: Message[]) => prev.concat(message))
         refetchStatus()
       }
+      chatScroll.autoScroll()
     },
     onText: () => {
       chatScroll.autoScroll()
@@ -157,8 +158,8 @@ export const ChatV2 = () => {
 
   const handleSubmit = async (message: string, ignoreTokenUsageWarning: boolean) => {
     if (!userStatus) return
-    chatScroll.shouldScroll.current = true
-    // await chatScroll.autoScroll()
+    // chatScroll.shouldScroll.current = true
+    // chatScroll.autoScroll()
     const { usage, limit } = userStatus
     const tokenUsageExceeded = usage >= limit
 
@@ -484,7 +485,13 @@ export const ChatV2 = () => {
             setModel={(model) => setActiveModel(model)}
             handleCancel={handleCancel}
             handleContinue={(newMessage) => handleSubmit(newMessage, true)}
-            handleSubmit={(newMessage) => handleSubmit(newMessage, false)}
+            handleSubmit={(newMessage) => {
+              console.log("handle submit called!")
+              chatScroll.shouldScroll.current = true
+              chatScroll.autoScroll()
+              handleSubmit(newMessage, false)
+            }}
+
             handleReset={handleReset}
           />
         </Box>

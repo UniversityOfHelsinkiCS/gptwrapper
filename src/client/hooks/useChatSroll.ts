@@ -4,7 +4,12 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
   
   const oldScrollValue = useRef(0)
   const shouldScroll = useRef(true)
-
+  const startTime = useRef(0)
+  const elapsed = useRef(0)
+    const progress = useRef(0)
+    const ticks = useRef(0)
+         // console.log("starttime" + startTime)
+    
   const scrollAnimationFrame: MutableRefObject<number | null> = useRef(null)
   //is called by 'scroll' event listener
   function handleUserScroll(){
@@ -39,7 +44,7 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
      return
    }
    //lets not start another animation if there is one already
-   if(scrollAnimationFrame.currentl){
+   if(scrollAnimationFrame.current){
      return
    }
 
@@ -59,37 +64,53 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
     }
             
   }
- const smoothScrollTo =  (duration: number) => {
-     // console.log("started smooth scroll!")
-    let startTime = null
-    const startY = appContainerRef.current.scrollTop
-    const targetY = endOfConversationRef.current.offsetTop
-    const distance = targetY - startY
-    let travel = startY
-    if(!startTime){
-        startTime = performance.now()
-      }
-      let elapsed = performance.now() - startTime
-      let progress = Math.min(elapsed / duration, 1)
-         // console.log("starttime" + startTime)
-    function step(currentTime) {
-      if(shouldScroll.current == false){
+function step(currentTime) {
+      if(shouldScroll.current === false){
+       startTime.current = null
+    // const startY = appContainerRef.current.scrollTop
+        elapsed.current = 1
+        progress.current = 0
+        ticks.current = 0
+        scrollAnimationFrame.current = null
         return
       }
-      elapsed = performance.now() - startTime
-      progress = Math.min(elapsed / duration, 1)
+
+
+    const duration = 1000
+     ticks.current++
+     console.log("tick"+ ticks.current)
+
+      if(!startTime.current){
+        startTime.current = performance.now()
+      }
+      elapsed.current = performance.now() - startTime.current
+      progress.current = Math.min(elapsed.current / duration, 1)
       // console.log('ellapsed'+ elapsed)
-      // console.log("progress"+ progress)
+      const targetY = endOfConversationRef.current.offsetTop
+      console.log("progress"+ progress.current)
+      console.log("start time is"+ startTime.current)
       // const ease = Math.max(1 - progress, 0) //speeds up in the start since progress grows from 0 -> 1, this drops from 1 -> 0
       // const ease = ellapsed <  ? 0.1
-      travel += 10
-      appContainerRef.current.scrollTo(0, targetY * progress, {behauvior: 'smooth'} )
-
+      appContainerRef.current.scrollTo(0, targetY * progress.current)
+    
   
-      if (progress < 1) {
+      if (progress.current < 1) {
         scrollAnimationFrame.current = requestAnimationFrame(step)
       }
+      else{
+        scrollAnimationFrame.current = null
+      }
     }
+
+    const smoothScrollTo =  (duration: number) => {
+     // console.log("started smooth scroll!")
+      startTime.current = null
+    // const startY = appContainerRef.current.scrollTop
+      elapsed.current = 1
+        progress.current = 0
+        ticks.current = 0
+         // console.log("starttime" + startTime)
+    
 
    scrollAnimationFrame.current = requestAnimationFrame(step)
 
