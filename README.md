@@ -15,6 +15,17 @@ Some key features include:
 - Copy `.env.template` as `.env` file and fill in the required values
 - Run `npm i` and `npm start` to setup and start the development environment
 
+## Azure setup
+
+Create an AI foundry resource (or something) and create deployment for the models you want to use (gpt4.1 for example). 
+
+Then populate .env with the following:
+```
+AZURE_RESOURCE=<name-of-the-resource-you-created>
+AZURE_API_KEY=<asd>
+GPT_41=<name-of-the-deployment-you-created>
+```
+
 ## Developers: things to know
 
 ### Debugging in production
