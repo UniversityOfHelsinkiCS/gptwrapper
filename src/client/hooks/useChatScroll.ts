@@ -24,7 +24,6 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
         return
       }
       if (scrollValue + 10 < oldScrollValue.current) {
-        console.log('User scrolled upward cancelling the auto scroll down');
         cancelScroll()
       }
 
@@ -67,7 +66,6 @@ function step(currentTime) {
 
       const duration = 10000
      ticks.current++
-     console.log("tick"+ ticks.current)
 
       if(!startTime.current){
         startTime.current = performance.now()
@@ -77,14 +75,7 @@ function step(currentTime) {
       const startY = appContainerRef.current.scrollTop
       const targetY = endOfConversationRef.current.offsetTop
       const distance = targetY - startY
-      console.log('s')
-      console.log(startY)
-      console.log("e")
-      console.log(targetY)
-      console.log("progress"+ progress.current)
-      console.log("start time is"+ startTime.current)
-      const viewPortHeight = appContainerRef.current.getBoundingClientRect().height;
-      console.log("container height: ", viewPortHeight)
+     const viewPortHeight = appContainerRef.current.getBoundingClientRect().height;
      appContainerRef.current.scrollTo(0, startY + distance * progress.current)
 
     
