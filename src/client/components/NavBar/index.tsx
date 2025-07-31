@@ -17,6 +17,7 @@ import {
   Drawer,
   IconButton,
   Stack,
+  Menu,
 } from '@mui/material'
 import { Language, AdminPanelSettingsOutlined, BookmarksOutlined, GradeOutlined } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
@@ -51,7 +52,7 @@ const NavBar = () => {
 
   return (
     <>
-      <AppBar elevation={0} position="sticky" sx={styles.appbar} color="transparent">
+      <AppBar elevation={0} position="fixed" sx={styles.appbar} color="transparent">
         <Container maxWidth={false}>
           <Toolbar sx={styles.toolbar} disableGutters>
             <MuiLink to="/" sx={styles.navBox} component={Link} reloadDocument>
@@ -150,45 +151,33 @@ const NavItems = ({ isV2, user, t, anchorRef, openLanguageSelect, setOpenLanguag
           </Button>
         </Link>
       )}
-      <Button
+    
+     <Button
         ref={anchorRef}
-        id="composition-button"
-        data-cy="language-select"
-        aria-controls={openLanguageSelect ? 'composition-menu' : undefined}
-        aria-expanded={openLanguageSelect ? 'true' : undefined}
+        id="basic-button"
+        aria-controls={openLanguageSelect ? 'basic-menu' : undefined}
         aria-haspopup="true"
-        onClick={() => setOpenLanguageSelect(!openLanguageSelect)}
+        aria-expanded={openLanguageSelect ? 'true' : undefined}
+        onClick={() => {setOpenLanguageSelect(true)}}
       >
-        <Language sx={styles.language} /> {language}
+        
+      valitse kieli
       </Button>
-      <Popper open={openLanguageSelect} anchorEl={anchorRef.current} role={undefined} placement="bottom-start" transition disablePortal>
-        {({ TransitionProps, placement }) => (
-          <Grow
-            {...TransitionProps}
-            style={{
-              transformOrigin: placement === 'bottom-start' ? 'left top' : 'left bottom',
-            }}
-          >
-            <Paper>
-              <ClickAwayListener onClickAway={() => setOpenLanguageSelect(!openLanguageSelect)}>
-                <MenuList autoFocusItem={openLanguageSelect} id="composition-menu" aria-labelledby="composition-button">
-                  {languages.map((l) => (
-                    <MenuItem
-                      key={l}
-                      sx={[styles.item, language === l && (styles.activeItem as any)]}
-                      onClick={() => {
-                        handleLanguageChange(l)
-                      }}
-                    >
-                      {l.toUpperCase()}
-                    </MenuItem>
-                  ))}
-                </MenuList>
-              </ClickAwayListener>
-            </Paper>
-          </Grow>
-        )}
-      </Popper>{' '}
+      <Menu
+        id="basic-menu"
+        anchorEl={anchorRef.current}
+        open={openLanguageSelect}
+        onClose={() => {setOpenLanguageSelect(false)}}
+        slotProps={{
+          list: {
+            'aria-labelledby': 'basic-button',
+          },
+        }}
+      >
+
+      {languages.map((l) => <MenuItem key={l}>{l.toUpperCase()}</MenuItem>)}
+     </Menu>
+    
     </>
   )
 }
