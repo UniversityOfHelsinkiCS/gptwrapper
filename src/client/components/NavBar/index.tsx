@@ -20,7 +20,7 @@ import {
   Menu,
   useMediaQuery,
 } from '@mui/material'
-import {useTheme} from '@mui/material/styles'
+import { useTheme } from '@mui/material/styles'
 import { Language, AdminPanelSettingsOutlined, BookmarksOutlined, GradeOutlined } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import MenuIcon from '@mui/icons-material/Menu'
@@ -39,7 +39,7 @@ const NavBar = () => {
   const languages = ['fi', 'sv', 'en']
   const { user, isLoading } = useCurrentUser()
   // will be changed to use url to change language and moved up to app since language is global
-   const handleLanguageChange = (newLanguage: string) => {
+  const handleLanguageChange = (newLanguage: string) => {
     i18n.changeLanguage(newLanguage)
   }
   useEffect(() => {
@@ -74,15 +74,9 @@ const NavBar = () => {
               <MenuIcon />
             </IconButton>
             <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
-              {isDesktopDevice && 
-              <NavItems
-                isV2={isV2}
-                user={user}
-                t={t}
-                languages={languages}
-                handleLanguageChange={handleLanguageChange}
-                language={language}
-              />}
+              {isDesktopDevice && (
+                <NavItems isV2={isV2} user={user} t={t} languages={languages} handleLanguageChange={handleLanguageChange} language={language} />
+              )}
             </Box>
           </Toolbar>
         </Container>
@@ -95,15 +89,7 @@ const NavBar = () => {
         }}
       >
         <Stack sx={{ paddingTop: 4, paddingRight: 4 }}>
-         {!isDesktopDevice && 
-          <NavItems
-            isV2={isV2}
-            user={user}
-            t={t}
-            languages={languages}
-            handleLanguageChange={handleLanguageChange}
-            language={language}
-          />}
+          {!isDesktopDevice && <NavItems isV2={isV2} user={user} t={t} languages={languages} handleLanguageChange={handleLanguageChange} language={language} />}
         </Stack>
       </Drawer>
     </>
@@ -150,7 +136,7 @@ const NavItems = ({ isV2, user, t, languages, handleLanguageChange, language }) 
           </Button>
         </Link>
       )}
-       <Button
+      <Button
         ref={anchorRef}
         id="composition-button"
         data-cy="language-select"
@@ -161,7 +147,7 @@ const NavItems = ({ isV2, user, t, languages, handleLanguageChange, language }) 
       >
         <Language sx={styles.language} /> {language}
       </Button>
-           <Popper open={openLanguageSelect} anchorEl={anchorRef.current} role={undefined} placement="bottom-start" transition disablePortal>
+      <Popper open={openLanguageSelect} anchorEl={anchorRef.current} role={undefined} placement="bottom-start" transition disablePortal>
         {({ TransitionProps, placement }) => (
           <Grow
             {...TransitionProps}
@@ -188,7 +174,7 @@ const NavItems = ({ isV2, user, t, languages, handleLanguageChange, language }) 
             </Paper>
           </Grow>
         )}
-      </Popper>{' '}    
+      </Popper>{' '}
     </>
   )
 }

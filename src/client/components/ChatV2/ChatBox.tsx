@@ -88,7 +88,7 @@ export const ChatBox = ({
     setFileName(file.name)
   }
 
-  const onSubmit =  (e: React.FormEvent) => {
+  const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     // This is here to prevent the form from submitting on disabled.

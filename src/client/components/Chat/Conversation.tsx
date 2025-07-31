@@ -19,7 +19,7 @@ export const Response = ({ role, content, setMessage, id }: { role: Role; conten
   const formattedContent: string = formatContent(content)
 
   return (
-    <Box mb={2} >
+    <Box mb={2}>
       <Box display="inline-block">
         <Paper variant="outlined">
           <Box display="flex">

@@ -419,7 +419,7 @@ export const ChatV2 = () => {
             paddingBottom: '2.5rem',
             overflow: 'hidden',
             overflowY: 'scroll',
-            scrollbarWidth: 'none'
+            scrollbarWidth: 'none',
           }}
           ref={scrollRef}
         >
@@ -486,12 +486,11 @@ export const ChatV2 = () => {
             handleCancel={handleCancel}
             handleContinue={(newMessage) => handleSubmit(newMessage, true)}
             handleSubmit={(newMessage) => {
-              console.log("handle submit called!")
+              console.log('handle submit called!')
               chatScroll.shouldScroll.current = true
               chatScroll.autoScroll()
               handleSubmit(newMessage, false)
             }}
-
             handleReset={handleReset}
           />
         </Box>

@@ -6,7 +6,7 @@ export const useChatStream = ({
   onFileSearchComplete,
   onComplete,
   onError,
-  onText
+  onText,
 }: {
   onFileSearchComplete: (data: FileSearchCompletedData) => void
   onComplete: ({ previousResponseId, message }: { previousResponseId: string | undefined; message: Message }) => void

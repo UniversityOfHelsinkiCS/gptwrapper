@@ -286,7 +286,7 @@ const MessageItem = ({
         data-sentry-mask
         sx={{
           // minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
-          height: 'auto'
+          height: 'auto',
         }}
       >
         <AssistantMessage
@@ -318,7 +318,7 @@ export const Conversation = ({
   isStreaming,
   setActiveFileSearchResult,
   setShowAnnotations,
-  endOfConversationRef
+  endOfConversationRef,
 }: {
   courseName?: string
   courseDate?: ActivityPeriod
@@ -329,8 +329,8 @@ export const Conversation = ({
   isFileSearching: boolean
   isStreaming: boolean
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
-  setShowAnnotations: (show: boolean) => void,
-  endOfConversationRef: MutableRefObject<HTMLDivElement | null> 
+  setShowAnnotations: (show: boolean) => void
+  endOfConversationRef: MutableRefObject<HTMLDivElement | null>
 }) => {
   const [reminderSeen, setReminderSeen] = useLocalStorageState<boolean>('reminderSeen', false)
 
@@ -362,7 +362,6 @@ export const Conversation = ({
             />
           )
         })}
-
 
         {isStreaming &&
           messages.length > 0 &&
