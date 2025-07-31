@@ -35,7 +35,9 @@ export const useChatScroll = (appContainerRef, endOfConversationRef) => {
   //is called by the setInterval call
   async function autoScroll() {
     if (!endOfConversationRef?.current || shouldScroll.current === false) {
+      cancelScroll()
       return
+
     }
     //lets not start another animation if there is one already
     if (scrollAnimationFrame.current) {
