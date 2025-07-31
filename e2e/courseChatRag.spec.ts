@@ -23,7 +23,7 @@ test.describe('Course Chat v2', () => {
   test('Course chat RAG feature', async ({ page }) => {
     const ragName = `rag-${test.info().workerIndex}`
     await page.locator('#rag-index-selector').first().click()
-    await page.getByRole('option', { name: ragName }).click()
+    await page.getByRole('menuitem', { name: ragName }).click()
 
     const chatInput = page.locator('#chat-input').first()
     await chatInput.fill('rag')

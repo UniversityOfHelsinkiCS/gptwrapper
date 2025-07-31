@@ -43,6 +43,7 @@ const RagSelector = ({
           width: '100%',
           justifyContent: 'space-between',
         }}
+        id="rag-index-selector"
       >
         {displayText}
       </OutlineButtonBlack>
