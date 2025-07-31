@@ -222,7 +222,7 @@ export const ChatBox = ({
             {disabled ? (
               // Stop signal is currently not supported due to OpenAI response cancel endpoint not working properly.
               // Try implementing this in the fall 2025.
-              <Tooltip title="Cancelling responses is currently not supported" arrow placement="top">
+              <Tooltip title={t('chat:cancelResponse')} arrow placement="top">
                 <IconButton disabled={!disabled}>
                   <StopIcon />
                 </IconButton>

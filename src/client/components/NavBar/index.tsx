@@ -17,7 +17,10 @@ import {
   Drawer,
   IconButton,
   Stack,
+  Menu,
+  useMediaQuery,
 } from '@mui/material'
+import {useTheme} from '@mui/material/styles'
 import { Language, AdminPanelSettingsOutlined, BookmarksOutlined, GradeOutlined } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import MenuIcon from '@mui/icons-material/Menu'
@@ -28,21 +31,20 @@ import styles from './styles'
 
 const NavBar = () => {
   const { t, i18n } = useTranslation()
-  const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
 
   const [navPanelOpen, setNavPanelOpen] = useState(false)
-  const anchorRef = useRef<HTMLButtonElement>(null)
-
+  const theme = useTheme()
+  const isDesktopDevice = useMediaQuery(theme.breakpoints.up('lg'))
   const { language } = i18n
   const languages = ['fi', 'sv', 'en']
-
   const { user, isLoading } = useCurrentUser()
   // will be changed to use url to change language and moved up to app since language is global
    const handleLanguageChange = (newLanguage: string) => {
     i18n.changeLanguage(newLanguage)
-    setOpenLanguageSelect(false)
   }
-
+  useEffect(() => {
+    setNavPanelOpen(false)
+  }, [isDesktopDevice])
   if (isLoading) return null
 
   if (!user) return null
@@ -51,7 +53,7 @@ const NavBar = () => {
 
   return (
     <>
-      <AppBar elevation={0} position="sticky" sx={styles.appbar} color="transparent">
+      <AppBar elevation={0} position="fixed" sx={styles.appbar} color="transparent">
         <Container maxWidth={false}>
           <Toolbar sx={styles.toolbar} disableGutters>
             <MuiLink to="/" sx={styles.navBox} component={Link} reloadDocument>
@@ -72,17 +74,15 @@ const NavBar = () => {
               <MenuIcon />
             </IconButton>
             <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
+              {isDesktopDevice && 
               <NavItems
                 isV2={isV2}
                 user={user}
                 t={t}
-                anchorRef={anchorRef}
-                openLanguageSelect={openLanguageSelect}
-                setOpenLanguageSelect={setOpenLanguageSelect}
                 languages={languages}
                 handleLanguageChange={handleLanguageChange}
                 language={language}
-              />
+              />}
             </Box>
           </Toolbar>
         </Container>
@@ -95,24 +95,24 @@ const NavBar = () => {
         }}
       >
         <Stack sx={{ paddingTop: 4, paddingRight: 4 }}>
+         {!isDesktopDevice && 
           <NavItems
             isV2={isV2}
             user={user}
             t={t}
-            anchorRef={anchorRef}
-            openLanguageSelect={openLanguageSelect}
-            setOpenLanguageSelect={setOpenLanguageSelect}
             languages={languages}
             handleLanguageChange={handleLanguageChange}
             language={language}
-          />
+          />}
         </Stack>
       </Drawer>
     </>
   )
 }
 
-const NavItems = ({ isV2, user, t, anchorRef, openLanguageSelect, setOpenLanguageSelect, languages, handleLanguageChange, language }) => {
+const NavItems = ({ isV2, user, t, languages, handleLanguageChange, language }) => {
+  const anchorRef = useRef<HTMLButtonElement>(null)
+  const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
   return (
     <>
       {!isV2 && (
@@ -150,7 +150,7 @@ const NavItems = ({ isV2, user, t, anchorRef, openLanguageSelect, setOpenLanguag
           </Button>
         </Link>
       )}
-      <Button
+       <Button
         ref={anchorRef}
         id="composition-button"
         data-cy="language-select"
@@ -161,7 +161,7 @@ const NavItems = ({ isV2, user, t, anchorRef, openLanguageSelect, setOpenLanguag
       >
         <Language sx={styles.language} /> {language}
       </Button>
-      <Popper open={openLanguageSelect} anchorEl={anchorRef.current} role={undefined} placement="bottom-start" transition disablePortal>
+           <Popper open={openLanguageSelect} anchorEl={anchorRef.current} role={undefined} placement="bottom-start" transition disablePortal>
         {({ TransitionProps, placement }) => (
           <Grow
             {...TransitionProps}
@@ -188,7 +188,7 @@ const NavItems = ({ isV2, user, t, anchorRef, openLanguageSelect, setOpenLanguag
             </Paper>
           </Grow>
         )}
-      </Popper>{' '}
+      </Popper>{' '}    
     </>
   )
 }

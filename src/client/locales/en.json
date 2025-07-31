@@ -100,7 +100,9 @@
     "emptyReminder": "Please note that long conversations consume more tokens. We recommend that you clear the conversation whenever you change the topic of the conversation.",
     "modelDisabled": "Model is unavailable",
     "attachFile": "Attach file",
-    "email": "The conversation will be sent to {{email}}"
+    "email": "The conversation will be sent to {{email}}",
+    "cancelResponse": "Canceling responses is currently not supported",
+    "searchResults": "Search results"
   },
   "settings": {
     "prompt": "Conversation prompt",
@@ -123,7 +125,9 @@
     "updatePrompt": "Update prompt",
     "choosePrompt": "Choose prompt",
     "default": "Default",
-    "confirmDeletePrompt": "Are you sure you want to delete the prompt '{{name}}'?"
+    "confirmDeletePrompt": "Are you sure you want to delete the prompt '{{name}}'?",
+    "selectedSource": "No selected source",
+    "sourceDescription": "Materials specified by the teacher can be used as a source in the course chat. You can select the source below."
   },
   "email": {
     "save": "Save as email",

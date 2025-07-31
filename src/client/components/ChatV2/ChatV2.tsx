@@ -31,7 +31,7 @@ import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { enqueueSnackbar } from 'notistack'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import EmailButton from './EmailButton'
-import { PriorityHigh, Tune } from '@mui/icons-material'
+import { MenuBookTwoTone, Tune } from '@mui/icons-material'
 import { useChatScroll } from '../../hooks/useChatSroll'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
@@ -82,6 +82,7 @@ export const ChatV2 = () => {
 
   const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as Message[])
   const [prevResponseId, setPrevResponse] = useLocalStorageState(`${localStoragePrefix}-prev-response`, '')
+  const [saveConsent, setSaveConsent] = useLocalStorageState<boolean>('save-consent', false)
 
   // App States
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
@@ -89,7 +90,6 @@ export const ChatV2 = () => {
   const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
   const [tokenUsageAlertOpen, setTokenUsageAlertOpen] = useState<boolean>(false)
   const [allowedModels, setAllowedModels] = useState<string[]>([])
-  const [saveConsent, setSaveConsent] = useState<boolean>(false)
   const [showAnnotations, setShowAnnotations] = useState<boolean>(false)
   const [chatLeftSidePanelOpen, setChatLeftSidePanelOpen] = useState<boolean>(false)
   // RAG states
@@ -418,6 +418,7 @@ export const ChatV2 = () => {
             paddingBottom: '2.5rem',
             overflow: 'hidden',
             overflowY: 'scroll',
+            scrollbarWidth: 'none'
           }}
           ref={scrollRef}
         >
@@ -426,7 +427,6 @@ export const ChatV2 = () => {
           {course?.saveDiscussions && (
             <Paper variant="outlined" sx={{ padding: 2, mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <PriorityHigh sx={{ opacity: 0.8, mr: 1, display: { xs: 'none', md: 'block' } }} />
                 <Typography variant="body1" fontWeight={600}>
                   {course?.notOptoutSaving ? t('course:isSavedNotOptOut') : t('course:isSavedOptOut')}
                 </Typography>
@@ -584,6 +584,7 @@ const LeftMenu = ({
         sx={{
           flex: 1,
           minWidth: 300,
+          maxWidth: { xs: 300, md: 400 },
           position: 'relative',
           height: '100%',
           borderRight: '1px solid rgba(0, 0, 0, 0.12)',
@@ -606,8 +607,12 @@ const LeftMenu = ({
           </Box>
           {course && showRagSelector && (
             <>
-              <Typography variant="h6" mb={'0.5rem'} fontWeight="bold">
-                {t('settings:courseMaterials')}
+              <Typography variant="h6" sx={{ mb: 1, display: 'flex', gap: 1, alignItems: 'center' }} fontWeight="bold">
+                <MenuBookTwoTone />
+                {t('chat:sources')}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                {t('settings:sourceDescription')}
               </Typography>
               <RagSelector currentRagIndex={ragIndex} setRagIndex={setRagIndexId} ragIndices={ragIndices ?? []} />
             </>

@@ -100,7 +100,9 @@
     "emptyReminder": "Huomaathan, että pitkät keskustelut kuluttavat enemmän tokeneita. Suosittelemme tyhjentämään keskustelun aina, kun vaihdat keskustelun aihetta.",
     "modelDisabled": "Kielimalli ei ole käytettävissä",
     "attachFile": "Liitä tiedosto",
-    "email": "Keskustelu lähetetään osoitteeseen {{email}}"
+    "email": "Keskustelu lähetetään osoitteeseen {{email}}",
+    "cancelResponse": "Vastausten keskeyttäminen on toistaiseksi pois käytöstä.",
+    "searchResults": "Hakutulokset"
   },
   "settings": {
     "prompt": "Keskustelun alustus",
@@ -122,8 +124,10 @@
     "saveNewPrompt": "Lisää oma alustus",
     "updatePrompt": "Päivitä alustus",
     "choosePrompt": "Valitse alustus",
+    "selectedSource": "Ei valittua lähdettä",
     "default": "Oletus",
-    "confirmDeletePrompt": "Haluatko varmasti poistaa alustuksen '{{name}}'?"
+    "confirmDeletePrompt": "Haluatko varmasti poistaa alustuksen '{{name}}'?",
+    "sourceDescription": "Kurssichatissa voidaan käyttää lähteenä opettajan määrittämiä materiaaleja. Voit valita lähteen alta."
   },
   "chats": {
     "header": "Auki olevat kurssichatit",
