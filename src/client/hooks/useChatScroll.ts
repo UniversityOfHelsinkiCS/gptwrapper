@@ -83,11 +83,13 @@ function step(currentTime) {
       console.log(targetY)
       console.log("progress"+ progress.current)
       console.log("start time is"+ startTime.current)
+      const viewPortHeight = appContainerRef.current.getBoundingClientRect().height;
+      console.log("container height: ", viewPortHeight)
      appContainerRef.current.scrollTo(0, startY + distance * progress.current)
 
     
   
-      if (progress.current < 1 && distance > 10) {
+      if (progress.current < 1 && distance > viewPortHeight) {
         scrollAnimationFrame.current = requestAnimationFrame(step)
       }
       else{
