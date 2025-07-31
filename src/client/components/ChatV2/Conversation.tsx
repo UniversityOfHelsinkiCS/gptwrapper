@@ -118,7 +118,7 @@ const AssistantMessage = ({
       id="assistant-message"
       sx={{
         position: 'relative',
-        pr: 5,
+        pr: 4,
         maxWidth: '100%',
         wordBreak: 'break-word',
         '&:hover .copy-message-button': {

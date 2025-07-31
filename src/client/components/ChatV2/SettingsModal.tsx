@@ -1,21 +1,17 @@
 import { Add, Close } from '@mui/icons-material'
-import { Box, Button, IconButton, Modal, Slider, Typography } from '@mui/material'
+import { Box, IconButton, Modal, Slider, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE } from '../../../config'
-// import ModelSelector from './ModelSelector'
-// import { validModels } from '../../../config'
-// import RagSelector from './RagSelector'
+import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE } from '../../../config'
 import type { RagIndexAttributes } from '../../../shared/types'
 import type { Course, Prompt } from '../../types'
 import AssistantInstructionsInput from './AssistantInstructionsInput'
 import PromptSelector from './PromptSelector'
-import RagSelector from './RagSelector'
 import { SaveMyPromptModal } from './SaveMyPromptModal'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import apiClient from '../../util/apiClient'
 import { useSearchParams } from 'react-router-dom'
-import { BlueButton, OutlineButtonBlack, OutlineButtonBlue } from './generics/Buttons'
+import { BlueButton, OutlineButtonBlack } from './generics/Buttons'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 
 const useUrlPromptId = () => {
@@ -34,7 +30,7 @@ interface SettingsModalProps {
   model: string
   setModel: (model: string) => void
   showRagSelector: boolean
-  setRagIndex: (ragIndex: number) => void
+  setRagIndex: (ragIndex: number | undefined) => void
   ragIndices?: RagIndexAttributes[]
   currentRagIndex?: RagIndexAttributes
   course?: Course
@@ -47,12 +43,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   setAssistantInstructions,
   modelTemperature,
   setModelTemperature,
-  model,
-  setModel,
-  showRagSelector,
-  setRagIndex,
-  ragIndices,
-  currentRagIndex,
   course,
 }) => {
   const urlPromptId = useUrlPromptId()
@@ -221,15 +211,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </Box>
             </Box>
           </Box>
-
-          {course && showRagSelector && (
-            <>
-              <Typography variant="h6" mb={'0.5rem'} fontWeight={600}>
-                {t('settings:courseMaterials')}
-              </Typography>
-              <RagSelector currentRagIndex={currentRagIndex} setRagIndex={setRagIndex} ragIndices={ragIndices ?? []} />
-            </>
-          )}
         </Box>
 
         <Box

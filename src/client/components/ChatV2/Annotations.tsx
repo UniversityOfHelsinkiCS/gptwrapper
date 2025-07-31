@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Box, Typography, Chip, IconButton, Drawer } from '@mui/material'
-import { Close, MenuBookTwoTone } from '@mui/icons-material'
+import { Close, Search } from '@mui/icons-material'
 import { FileSearchCompletedData, FileSearchResultData } from '../../../shared/types'
 import { useTranslation } from 'react-i18next'
 import { useFileSearchResults } from './api'
@@ -198,15 +198,48 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
   const { t } = useTranslation()
 
   return (
-    <Box p={{ xs: 1, md: 3 }} sx={{ width: '100%', height: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', overflowY: 'scroll' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 2, md: 3 } }}>
-        <Typography variant="h5" fontWeight={'600'} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }} data-testid="sources-header">
-          <MenuBookTwoTone fontSize="large" sx={{ opacity: 0.6 }} />
-          {t('chat:sources')}
+    <Box
+      p={{ xs: 1, md: 3 }}
+      sx={{
+        width: '100%',
+        height: '90vh',
+        display: 'flex',
+        flexDirection: 'column',
+        overflowY: 'scroll',
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: { xs: 2, md: 3 },
+        }}
+      >
+        <Typography
+          variant="h5"
+          fontWeight={600}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+          }}
+          data-testid="sources-header"
+        >
+          <Search fontSize="large" sx={{ opacity: 0.8 }} />
+          {t('chat:searchResults')}
         </Typography>
         <IconButton
           id="close-annotations"
-          sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500', background: '#FFF', opacity: 0.9, zIndex: 1 }}
+          sx={{
+            position: 'absolute',
+            top: 10,
+            right: 20,
+            color: 'grey.500',
+            background: '#FFF',
+            opacity: 0.9,
+            zIndex: 1,
+          }}
           onClick={() => setShowAnnotations(false)}
         >
           <Close />
@@ -214,12 +247,20 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
       </Box>
       <Queries queries={fileSearchResult.queries} />
       {isResultsSuccess ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, minHeight: { xs: 'auto', md: 400 }, flex: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            minHeight: { xs: 'auto', md: 400 },
+            flex: 1,
+          }}
+        >
           {arrayResults.map((result, i) => (
             <AnnotationTruncated key={i} data={result} relevanceOrder={i + 1} setIsDrawerOpen={setIsDrawerOpen} setSelectedAnnotation={setSelectedAnnotation} />
           ))}
           <OutlineButtonBlack
-            sx={{ margin: '1.5rem auto' }}
+            sx={{ margin: '1rem auto' }}
             startIcon={<SubjectIcon />}
             onClick={() => {
               setIsDrawerOpen(true)
@@ -232,21 +273,45 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
       ) : (
         <Typography>{t('chat:failedSources')}</Typography>
       )}
-      <Drawer anchor={'right'} open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
-        <Box sx={{ maxWidth: { xs: '100vw', md: '60vw' }, padding: '2rem' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+      <Drawer anchor="right" open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
+        <Box
+          sx={{
+            maxWidth: { xs: '100vw', md: '60vw' },
+            padding: '2rem',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              mb: 2,
+            }}
+          >
             <IconButton
               id="close-expanded-annotations"
               onClick={() => {
                 setIsDrawerOpen(false)
                 setSelectedAnnotation(null)
               }}
-              sx={{ position: 'fixed', top: 10, right: 10, color: 'grey.500', background: '#FFF', opacity: 0.9 }}
+              sx={{
+                position: 'fixed',
+                top: 10,
+                right: 10,
+                color: 'grey.500',
+                background: '#FFF',
+                opacity: 0.9,
+              }}
             >
               <Close />
             </IconButton>
           </Box>
-          <Box sx={{ display: 'flex', gap: '4rem', flexDirection: 'column' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              gap: '4rem',
+              flexDirection: 'column',
+            }}
+          >
             {arrayResults.map((result, i) => (
               <AnnotationExpanded key={i} data={result} relevanceOrder={i + 1} isSelected={selectedAnnotation === i + 1} />
             ))}

@@ -3,6 +3,7 @@ node_modules
 dist
 .vscode
 .env
+.env2
 backups
 my_username
 /test-results/
