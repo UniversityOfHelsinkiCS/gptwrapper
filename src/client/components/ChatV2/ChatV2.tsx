@@ -32,7 +32,7 @@ import { enqueueSnackbar } from 'notistack'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import EmailButton from './EmailButton'
 import { MenuBookTwoTone, Tune } from '@mui/icons-material'
-import { useChatScroll } from '../../hooks/useChatSroll'
+import { useChatScroll } from '../../hooks/useChatScroll'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
