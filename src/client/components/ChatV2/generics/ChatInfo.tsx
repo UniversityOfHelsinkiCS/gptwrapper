@@ -8,7 +8,7 @@ export const ChatInfo = ({ course }: { course: Course }) => {
   const { language } = i18n
 
   return (
-    <Box mb={5}>
+    <Box mb={3}>
       <Typography variant="body2" fontStyle="italic">
         {course.courseUnits.map((unit) => unit.code).join(', ')}
       </Typography>

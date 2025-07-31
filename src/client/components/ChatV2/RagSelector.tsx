@@ -1,6 +1,9 @@
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, MenuItem, FormControl, Select, SelectChangeEvent, InputLabel } from '@mui/material'
+import { Box, MenuItem, Menu, Typography } from '@mui/material'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import { useState } from 'react'
 import { RagIndexAttributes } from '../../../shared/types'
+import { OutlineButtonBlack } from './generics/Buttons'
 
 const RagSelector = ({
   currentRagIndex,
@@ -8,31 +11,61 @@ const RagSelector = ({
   ragIndices,
 }: {
   currentRagIndex?: RagIndexAttributes
-  setRagIndex: (ragIndex: number) => void
+  setRagIndex: (ragIndex: number | undefined) => void
   ragIndices: RagIndexAttributes[]
 }) => {
   const { t } = useTranslation()
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+
+  const displayText = currentRagIndex ? currentRagIndex.metadata.name : t('settings:selectedSource')
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
+
+  const handleSelect = (ragIndexId: number | undefined) => {
+    setRagIndex(ragIndexId)
+
+    handleClose()
+  }
 
   return (
     <Box mb={2}>
-      <FormControl sx={{ width: '200px' }}>
-        <InputLabel>RAG index</InputLabel>
-        <Select
-          label={'RAG index'}
-          id="rag-index-selector"
-          value={String(currentRagIndex?.id ?? '')}
-          onChange={(event: SelectChangeEvent) => setRagIndex(parseInt(event.target.value, 10))}
-        >
-          <MenuItem key={-1} value="none">
-            None
+      <OutlineButtonBlack
+        endIcon={<KeyboardArrowDownIcon />}
+        onClick={handleClick}
+        sx={{
+          width: '100%',
+          justifyContent: 'space-between',
+        }}
+      >
+        {displayText}
+      </OutlineButtonBlack>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        slotProps={{
+          paper: {
+            style: {
+              minWidth: anchorEl?.offsetWidth || 200,
+            },
+          },
+        }}
+      >
+        <MenuItem onClick={() => handleSelect(undefined)}>{t('settings:selectedSource')}</MenuItem>
+        {ragIndices.map((ragIndex) => (
+          <MenuItem key={ragIndex.id} onClick={() => handleSelect(ragIndex.id)}>
+            {ragIndex.metadata.name}
           </MenuItem>
-          {ragIndices.map((ragIndex) => (
-            <MenuItem key={ragIndex.id} value={String(ragIndex.id)}>
-              {ragIndex.metadata.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+        ))}
+      </Menu>
     </Box>
   )
 }

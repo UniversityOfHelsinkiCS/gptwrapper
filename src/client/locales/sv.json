@@ -109,7 +109,8 @@
     "toBeSaved": "Diskussionen sparas anonymt",
     "errorInstructions": "Det gick inte att generera ett svar. Vi rekommenderar att du sparar den aktuella konversationen och startar en ny. Du kan också prova en annan modell. Om problemet kvarstår, kontakta supporten.",
     "email": "Konversationen kommer att skickas till {{email}}",
-    "cancelResponse": "Avbrytande av svar är för närvarande inaktiverat"
+    "cancelResponse": "Avbrytande av svar är för närvarande inaktiverat",
+    "searchResults": "Sökresultat"
   },
   "settings": {
     "prompt": "Samtalsstart",
@@ -132,7 +133,9 @@
     "saveMyPromptModalTitle": "Skapa eller uppdatera en prompt",
     "saveMyPromptAs": "Spara prompt som",
     "updatePrompt": "Uppdatera prompt",
-    "saveNewPrompt": "Skapa ny prompt"
+    "saveNewPrompt": "Skapa ny prompt",
+    "selectedSource": "Ingen källa vald",
+    "sourceDescription": "Material som anges av läraren kan användas som källmaterial i kurschatten. Du kan välja källa nedan."
   },
   "email": {
     "save": "Spara som e-post",

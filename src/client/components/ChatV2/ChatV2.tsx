@@ -31,7 +31,7 @@ import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { enqueueSnackbar } from 'notistack'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import EmailButton from './EmailButton'
-import { PriorityHigh, Tune } from '@mui/icons-material'
+import { MenuBookTwoTone, Tune } from '@mui/icons-material'
 import { useChatScroll } from '../../hooks/useChatSroll'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
@@ -583,6 +583,7 @@ const LeftMenu = ({
         sx={{
           flex: 1,
           minWidth: 300,
+          maxWidth: { xs: 300, md: 400 },
           position: 'relative',
           height: '100%',
           borderRight: '1px solid rgba(0, 0, 0, 0.12)',
@@ -605,8 +606,12 @@ const LeftMenu = ({
           </Box>
           {course && showRagSelector && (
             <>
-              <Typography variant="h6" mb={'0.5rem'} fontWeight="bold">
-                {t('settings:courseMaterials')}
+              <Typography variant="h6" sx={{ mb: 1, display: 'flex', gap: 1, alignItems: 'center' }} fontWeight="bold">
+                <MenuBookTwoTone />
+                {t('chat:sources')}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                {t('settings:sourceDescription')}
               </Typography>
               <RagSelector currentRagIndex={ragIndex} setRagIndex={setRagIndexId} ragIndices={ragIndices ?? []} />
             </>
