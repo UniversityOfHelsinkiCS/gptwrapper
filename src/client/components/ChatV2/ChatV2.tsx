@@ -454,7 +454,7 @@ export const ChatV2 = () => {
             setActiveFileSearchResult={setActiveFileSearchResult}
             setShowAnnotations={setShowAnnotations}
           />
-          <div ref={endOfConversationRef} style={{height: '1vh', marginBottom: '2vh'}}></div>
+          <div ref={endOfConversationRef} style={{height: '1vh'}}></div>
         </Box>
 
         <Box

@@ -23,16 +23,12 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
       if(!scrollValue){
         return
       }
-      // console.log('new scroll: ' + scrollValue)
-      // console.log('old scroll: ' + oldScrollValue.current)
-      // console.log('max scroll: ' + maxScrollValue)
       if (scrollValue + 10 < oldScrollValue.current) {
         console.log('User scrolled upward cancelling the auto scroll down');
         cancelScroll()
       }
 
       if(scrollValue >= maxScrollValue - bottomOffset){
-          // console.log('User scrolled to the bottom, enabling autoscroll down')
           shouldScroll.current = true
       }
 
@@ -47,18 +43,16 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
    if(scrollAnimationFrame.current){
      return
    }
-
-   
-   smoothScrollTo(1000)
-
+    smoothScrollTo(1000)
   }
 
   const cancelScroll = () => {
+    startTime.current = null
+    elapsed.current = 1
+    progress.current = 0
+    ticks.current = 0
     shouldScroll.current = false
-    // console.log("CANCEL")
     if(scrollAnimationFrame?.current){
-      // console.log("cancelled animation frame", scrollAnimationFrame.current)
-
       cancelAnimationFrame(scrollAnimationFrame.current)
       scrollAnimationFrame.current = null    
     }
@@ -66,13 +60,8 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
   }
 function step(currentTime) {
       if(shouldScroll.current === false){
-       startTime.current = null
-    // const startY = appContainerRef.current.scrollTop
-        elapsed.current = 1
-        progress.current = 0
-        ticks.current = 0
-        scrollAnimationFrame.current = null
-        return
+         cancelScroll()
+         return
       }
 
 
@@ -85,50 +74,32 @@ function step(currentTime) {
       }
       elapsed.current = performance.now() - startTime.current
       progress.current = Math.min(elapsed.current / duration, 1)
-      // console.log('ellapsed'+ elapsed)
+      const startY = appContainerRef.current.scrollTop
       const targetY = endOfConversationRef.current.offsetTop
+      const distance = targetY - startY
       console.log("progress"+ progress.current)
       console.log("start time is"+ startTime.current)
-      // const ease = Math.max(1 - progress, 0) //speeds up in the start since progress grows from 0 -> 1, this drops from 1 -> 0
-      // const ease = ellapsed <  ? 0.1
-      appContainerRef.current.scrollTo(0, targetY * progress.current)
+     appContainerRef.current.scrollTo(0, startY + distance * progress.current)
+
     
   
       if (progress.current < 1) {
         scrollAnimationFrame.current = requestAnimationFrame(step)
       }
       else{
-        scrollAnimationFrame.current = null
+         cancelScroll()
       }
     }
 
     const smoothScrollTo =  (duration: number) => {
-     // console.log("started smooth scroll!")
-      startTime.current = null
-    // const startY = appContainerRef.current.scrollTop
-      elapsed.current = 1
-        progress.current = 0
-        ticks.current = 0
-         // console.log("starttime" + startTime)
-    
-
-   scrollAnimationFrame.current = requestAnimationFrame(step)
-
+      scrollAnimationFrame.current = requestAnimationFrame(step)
     }
 
     useEffect(() => {
-    // console.log("hit")
 
     if (!appContainerRef?.current || !endOfConversationRef.current) return
     appContainerRef.current.addEventListener("scroll",handleUserScroll)
-
-    // const interval = setInterval(autoScroll, 500)
-
-    //scroll to the bottom of the conversation at the start
-    // endOfConversationRef.current.scrollIntoView({behavior: 'smooth'});
-  
     return () => {
-      // clearInterval(interval)
       appContainerRef?.current?.removeEventListener('scroll', handleUserScroll)
     }
   }, [shouldScroll])

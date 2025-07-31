@@ -284,7 +284,8 @@ const MessageItem = ({
         data-testid="assistant-message"
         data-sentry-mask
         sx={{
-          minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
+          // minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
+          height: 'auto'
         }}
       >
         <AssistantMessage
@@ -334,7 +335,7 @@ export const Conversation = ({
     <>
       <Box
         style={{
-          height: messages.length === 0 ? '60vh' : 'auto',
+          height: 'auto',
           display: 'flex',
           flexDirection: 'column',
           gap: '2.5rem',
