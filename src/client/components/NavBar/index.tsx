@@ -168,6 +168,7 @@ const NavItems = ({ isV2, user, t, anchorRef, openLanguageSelect, setOpenLanguag
         anchorEl={anchorRef.current}
         open={openLanguageSelect}
         onClose={() => {setOpenLanguageSelect(false)}}
+        
         slotProps={{
           list: {
             'aria-labelledby': 'basic-button',
@@ -175,7 +176,12 @@ const NavItems = ({ isV2, user, t, anchorRef, openLanguageSelect, setOpenLanguag
         }}
       >
 
-      {languages.map((l) => <MenuItem key={l}>{l.toUpperCase()}</MenuItem>)}
+      {languages.map((l) => <MenuItem
+         // sx={[styles.item, language === 1 && (styles.activeItem as any)]}
+         onClick={() => {
+           handleLanguageChange(l)
+         }}
+         key={l}>{l.toUpperCase()}</MenuItem>)}
      </Menu>
     
     </>
