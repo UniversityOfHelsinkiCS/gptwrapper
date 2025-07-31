@@ -18,6 +18,7 @@ import { t } from 'i18next'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { BlueButton } from './generics/Buttons'
+import { MutableRefObject } from 'react'
 
 const UserMessage = ({ content, attachements }: { content: string; attachements?: string }) => (
   <Box
@@ -317,6 +318,7 @@ export const Conversation = ({
   isStreaming,
   setActiveFileSearchResult,
   setShowAnnotations,
+  endOfConversationRef
 }: {
   courseName?: string
   courseDate?: ActivityPeriod
@@ -327,7 +329,8 @@ export const Conversation = ({
   isFileSearching: boolean
   isStreaming: boolean
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
-  setShowAnnotations: (show: boolean) => void
+  setShowAnnotations: (show: boolean) => void,
+  endOfConversationRef: MutableRefObject<HTMLDivElement | null> 
 }) => {
   const [reminderSeen, setReminderSeen] = useLocalStorageState<boolean>('reminderSeen', false)
 
@@ -359,6 +362,8 @@ export const Conversation = ({
             />
           )
         })}
+
+
         {isStreaming &&
           messages.length > 0 &&
           (completion.length > 0 ? (
@@ -372,6 +377,7 @@ export const Conversation = ({
           ) : (
             <LoadingMessage expandedNodeHeight={expandedNodeHeight} isFileSearching={isFileSearching} />
           ))}
+        <div ref={endOfConversationRef}></div>
       </Box>
       {!reminderSeen && !isStreaming && messages.length > 15 && (
         <Paper variant="outlined" sx={{ display: 'flex', flexDirection: 'row', gap: 2, fontStyle: 'italic', alignItems: 'center', padding: 2 }}>

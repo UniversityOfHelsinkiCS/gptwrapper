@@ -17,7 +17,7 @@ export const useChatScroll = (appContainerRef,   endOfConversationRef) => {
      if ( !appContainerRef?.current){
        return
      }
-    const scrollValue: number | undefined = appContainerRef.current?.scrollTop
+         const scrollValue: number | undefined = appContainerRef.current?.scrollTop
       // console.log("it works")
       const maxScrollValue: number = appContainerRef.current?.scrollHeight - appContainerRef.current.clientHeight
       if(!scrollValue){
@@ -65,7 +65,7 @@ function step(currentTime) {
       }
 
 
-    const duration = 1000
+      const duration = 10000
      ticks.current++
      console.log("tick"+ ticks.current)
 
@@ -77,13 +77,17 @@ function step(currentTime) {
       const startY = appContainerRef.current.scrollTop
       const targetY = endOfConversationRef.current.offsetTop
       const distance = targetY - startY
+      console.log('s')
+      console.log(startY)
+      console.log("e")
+      console.log(targetY)
       console.log("progress"+ progress.current)
       console.log("start time is"+ startTime.current)
      appContainerRef.current.scrollTo(0, startY + distance * progress.current)
 
     
   
-      if (progress.current < 1) {
+      if (progress.current < 1 && distance > 10) {
         scrollAnimationFrame.current = requestAnimationFrame(step)
       }
       else{

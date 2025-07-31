@@ -140,7 +140,7 @@ export const ChatV2 = () => {
       chatScroll.autoScroll()
     },
     onText: () => {
-      chatScroll.autoScroll()
+      // chatScroll.autoScroll()
     },
     onError: (error) => {
       handleCompletionStreamError(error, fileName)
@@ -453,8 +453,8 @@ export const ChatV2 = () => {
             isFileSearching={isFileSearching}
             setActiveFileSearchResult={setActiveFileSearchResult}
             setShowAnnotations={setShowAnnotations}
+            endOfConversationRef={endOfConversationRef}
           />
-          <div ref={endOfConversationRef} style={{height: '1vh'}}></div>
         </Box>
 
         <Box
