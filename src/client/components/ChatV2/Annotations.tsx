@@ -206,6 +206,7 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
         display: 'flex',
         flexDirection: 'column',
         overflowY: 'scroll',
+        scrollBarWidth: 'none'
       }}
     >
       <Box

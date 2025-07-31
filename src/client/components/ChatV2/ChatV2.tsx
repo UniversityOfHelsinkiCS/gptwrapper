@@ -418,6 +418,7 @@ export const ChatV2 = () => {
             paddingBottom: '2.5rem',
             overflow: 'hidden',
             overflowY: 'scroll',
+            scrollbarWidth: 'none'
           }}
           ref={scrollRef}
         >
