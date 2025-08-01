@@ -24,7 +24,7 @@ const AnnotationTruncated = ({
 
   const lineNum = 5
   const multilineEllipsisTruncate = {
-    // This is a trick to achieve a multu-line ellipsis truncation for max 3 rows of text.
+    // This is a trick to achieve a responsive multi-line ellipsis truncation by <lineNum>.
     // -webkit-box is used to support legacy browsers and for WebkitBoxOrient
     overflow: 'hidden',
     flex: '1',
