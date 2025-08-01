@@ -99,7 +99,7 @@ export const ChatBox = ({
     if (message.trim()) {
       handleSubmit(message)
       setMessage('')
-      // refetchStatus()
+      refetchStatus()
     }
 
     if (textFieldRef.current) {
