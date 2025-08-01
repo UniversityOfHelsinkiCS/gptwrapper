@@ -12,7 +12,7 @@ const staging = 'http://gptwrapper.toska.svc.cluster.local:8000/api/ai/stream'
 const local = 'http://172.17.0.1:3000/api//ai/stream'
 
 // k6 will pickup the options object internally.
-const vusit = 50
+const vusit = 10
 export const options = {
   vus: vusit,
   iterations: vusit,
