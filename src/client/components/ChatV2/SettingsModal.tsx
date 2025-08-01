@@ -13,6 +13,7 @@ import apiClient from '../../util/apiClient'
 import { useSearchParams } from 'react-router-dom'
 import { BlueButton, OutlineButtonBlack } from './generics/Buttons'
 import { useAnalyticsDispatch } from '../../stores/analytics'
+import useLocalStorageState from '../../hooks/useLocalStorageState'
 
 const useUrlPromptId = () => {
   const [searchParams] = useSearchParams()
@@ -75,7 +76,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       refetch()
     },
   })
-  const [activePrompt, setActivePrompt] = useState<Prompt>()
+  //local storage prompt prevents the annoying case where the user refreshes the page and the chosen prompt is reset to default, and the textbox displays incorrect prompt information
+  const [localStoragePrompt, setLocalStoragePrompt] = useLocalStorageState< Prompt | undefined>('prompt', undefined)
+  const [activePrompt, setActivePrompt] = useState<Prompt | undefined>(localStoragePrompt)
   const [myPromptModalOpen, setMyPromptModalOpen] = useState<boolean>(false)
   const mandatoryPrompt = course?.prompts.find((p) => p.mandatory)
   const urlPrompt = course?.prompts.find((p) => p.id === urlPromptId)
@@ -102,12 +105,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     if (!newPrompt) {
       console.log('Setting default prompt')
       setActivePrompt(undefined)
+      setLocalStoragePrompt(undefined)
       setAssistantInstructions(DEFAULT_ASSISTANT_INSTRUCTIONS)
       return
     }
 
     setAssistantInstructions(newPrompt.systemMessage)
     setActivePrompt(newPrompt)
+    setLocalStoragePrompt(newPrompt)
   }
 
   useEffect(() => {
