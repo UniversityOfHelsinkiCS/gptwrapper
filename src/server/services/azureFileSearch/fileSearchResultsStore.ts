@@ -10,7 +10,7 @@ export const FileSearchResultsStore = {
   async saveResults(fileSearchId: string, results: FileSearchResultData[], user: User) {
     const key = this.getKey(user, fileSearchId)
     await redisClient.set(key, JSON.stringify(results), {
-      EX: 60 * 60 * 24, // 1 day expiration time
+      EX: 60 * 60 * 24 * 365, // 365 day expiration time
     })
   },
   async getResults(fileSearchId: string, user: User): Promise<FileSearchResultData[] | null> {
