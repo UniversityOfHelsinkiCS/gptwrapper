@@ -140,7 +140,7 @@ export const ChatV2 = () => {
       chatScroll.autoScroll()
     },
     onText: () => {
-      // chatScroll.autoScroll()
+      chatScroll.autoScroll()
     },
     onError: (error) => {
       handleCompletionStreamError(error, fileName)
