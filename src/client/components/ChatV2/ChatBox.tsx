@@ -62,8 +62,8 @@ export const ChatBox = ({
   const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
   const [disallowedFileType, setDisallowedFileType] = useState<string>('')
   const [fileTypeAlertOpen, setFileTypeAlertOpen] = useState<boolean>(false)
-  const [message, setMessage] = useState<string>('')
 
+  const [defaultMessage, setDefaultMessage] = useState<string>('') // <--- used to trigger re render only onSubmit to empty the textField, dont update this on every key press
   const textFieldRef = useRef<HTMLInputElement>(null)
 
   const { t } = useTranslation()
@@ -91,18 +91,22 @@ export const ChatBox = ({
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    const messageText = textFieldRef?.current ? textFieldRef.current.value : ''
+
+    console.log('message is: ' + messageText)
     // This is here to prevent the form from submitting on disabled.
     // It is done this way instead of explicitely disabling the textfield
     // so that it doesnt break the re-focus back on the text field after message is send
     if (disabled) return
 
-    if (message.trim()) {
-      handleSubmit(message)
-      setMessage('')
+    if (messageText.trim()) {
+      handleSubmit(messageText)
       refetchStatus()
+      setDefaultMessage('') //<--- just triggers the textField to go empty
     }
 
     if (textFieldRef.current) {
+      textFieldRef.current.value = ''
       textFieldRef.current.focus()
     }
   }
@@ -142,7 +146,7 @@ export const ChatBox = ({
               <GrayButton onClick={handleCancel} type="button">
                 {t('common:cancel')}
               </GrayButton>
-              <BlueButton onClick={() => handleContinue(message)} color="primary" type="button">
+              <BlueButton onClick={() => handleContinue(textFieldRef.current ? textFieldRef.current.value : '')} color="primary" type="button">
                 {t('common:continue')}
               </BlueButton>
             </Box>
@@ -169,10 +173,9 @@ export const ChatBox = ({
           }}
         >
           <TextField
-            ref={textFieldRef}
+            inputRef={textFieldRef}
             autoFocus
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            defaultValue={defaultMessage}
             placeholder={t('chat:writeHere')}
             fullWidth
             multiline
