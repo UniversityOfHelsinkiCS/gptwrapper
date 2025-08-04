@@ -11,6 +11,8 @@ class Responsibility extends Model<InferAttributes<Responsibility>, InferCreatio
   declare user?: NonAttribute<User>
 
   declare chatInstanceId: string
+
+  declare createdByUserId: CreationOptional<string>
 }
 
 Responsibility.init(
@@ -29,6 +31,10 @@ Responsibility.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    createdByUserId: { // tells who manually created the responsibility, (null = created by updater)
+      type: DataTypes.STRING,
+      allowNull: true
+    }
   },
   {
     underscored: true,
