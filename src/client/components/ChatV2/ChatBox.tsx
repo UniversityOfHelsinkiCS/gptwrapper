@@ -93,7 +93,6 @@ export const ChatBox = ({
 
     const messageText = textFieldRef?.current ? textFieldRef.current.value : ''
 
-    console.log('message is: ' + messageText)
     // This is here to prevent the form from submitting on disabled.
     // It is done this way instead of explicitely disabling the textfield
     // so that it doesnt break the re-focus back on the text field after message is send
