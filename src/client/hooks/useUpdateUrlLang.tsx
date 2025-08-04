@@ -1,14 +1,12 @@
 import { useTranslation } from 'react-i18next'
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useSearchParams } from 'react-router-dom'
 import useCurrentUser from '../hooks/useCurrentUser'
 import { useState, useEffect } from 'react'
 
 export const useUpdateUrlLang = () => {
-  const location = useLocation()
-  const navigate = useNavigate()
   const languages = ['fi', 'sv', 'en']
-  const { t, i18n } = useTranslation()
-  const { user, isLoading } = useCurrentUser()
+  const { i18n } = useTranslation()
+  const { user } = useCurrentUser()
   const [lang, setLanguageState] = useState(localStorage.getItem('lang'))
   const [params, setParams] = useSearchParams()
   const langParam = params.get('lang')
@@ -28,10 +26,9 @@ export const useUpdateUrlLang = () => {
       // so lets use the local storage (example: see how admin page)
       setLang(updatedLangFromLocal)
     }
-  }, [location.pathname])
+  }, [])
 
   useEffect(() => {
-    console.log('lang changed!')
     if (i18n.language !== localStorage.getItem('lang')) {
       setLang(i18n.language)
     }

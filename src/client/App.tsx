@@ -1,24 +1,22 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
-import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { SnackbarProvider } from 'notistack'
-import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
+import { Box, Button, CssBaseline, Snackbar } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { fi } from 'date-fns/locale'
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
-import { Box, Button, CssBaseline, Snackbar } from '@mui/material'
-import { AppContext } from './contexts/AppContext'
+import { SnackbarProvider } from 'notistack'
+import React, { useEffect, useRef } from 'react'
+import { Outlet, useLocation, useParams } from 'react-router-dom'
+import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
 import { PUBLIC_URL } from '../config'
-import type { User } from './types'
-import useTheme from './theme'
-import NavBar from './components/NavBar'
-import Footer from './components/Footer'
-import useCurrentUser from './hooks/useCurrentUser'
-import { EmbeddedProvider, useIsEmbedded } from './contexts/EmbeddedContext'
 import { Feedback } from './components/Feedback'
+import Footer from './components/Footer'
+import NavBar from './components/NavBar'
+import { AppContext } from './contexts/AppContext'
+import { EmbeddedProvider, useIsEmbedded } from './contexts/EmbeddedContext'
+import useCurrentUser from './hooks/useCurrentUser'
 import { AnalyticsProvider } from './stores/analytics'
-import { useTranslation } from 'react-i18next'
-import { useUpdateUrlLang } from './hooks/useUpdateUrlLang.tsx'
+import useTheme from './theme'
+import type { User } from './types'
 
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
@@ -73,7 +71,7 @@ const AdminLoggedInAsBanner = () => {
 }
 
 const App = () => {
-  const urlUpdater = useUpdateUrlLang() //DONT REMOVE, the hook creates 2 useEffects to keep the url param synced with user language changes
+  useUpdateUrlLang()
   const theme = useTheme()
   const { courseId } = useParams()
   const location = useLocation()

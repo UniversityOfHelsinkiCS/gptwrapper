@@ -10,7 +10,7 @@ import { getLanguageValue } from '../../../shared/utils'
 import useCourse from '../../hooks/useCourse'
 import useInfoTexts from '../../hooks/useInfoTexts'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
-import { useRagIndices } from '../../hooks/useRagIndices'
+import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
 import type { Message } from '../../types'
@@ -59,7 +59,7 @@ export const ChatV2 = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   const { data: course } = useCourse(courseId)
-  const { ragIndices } = useRagIndices(courseId)
+  const { ragIndices } = useCourseRagIndices(course?.id)
   const { infoTexts } = useInfoTexts()
 
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
