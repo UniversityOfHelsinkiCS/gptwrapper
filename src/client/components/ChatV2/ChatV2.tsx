@@ -399,27 +399,26 @@ export const ChatV2 = () => {
         ref={chatContainerRef}
         sx={{
           flex: 3,
-          // minWidth: 800,
           width: '100%',
           display: 'flex',
           position: 'relative',
           flexDirection: 'column',
           height: '100%',
+          overflowY: 'visible',
+          // Padding for navbar
+          paddingTop: !isEmbeddedMode ? '4rem' : '0',
         }}
       >
         <Box
           sx={{
-            // display: 'flex',
-            // flexDirection: 'column',
             height: '80vh',
             width: '80%',
             maxWidth: '80%',
             margin: 'auto',
-            paddingTop: '5rem',
-            paddingBottom: '2.5rem',
+            paddingRight: '1rem',
+            paddingTop: '1rem',
             overflow: 'hidden',
-            overflowY: 'scroll',
-            scrollbarWidth: 'none',
+            overflowY: 'auto',
           }}
           ref={scrollRef}
         >
@@ -463,7 +462,6 @@ export const ChatV2 = () => {
             position: 'sticky',
             bottom: 0,
             width: '80%',
-            // minWidth: 750,
             margin: 'auto',
           }}
         >
