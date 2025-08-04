@@ -158,7 +158,6 @@ export const ChatV2 = () => {
 
   const handleSubmit = async (message: string, ignoreTokenUsageWarning: boolean) => {
     if (!userStatus) return
-    // chatScroll.shouldScroll.current = true
     // chatScroll.autoScroll()
     const { usage, limit } = userStatus
     const tokenUsageExceeded = usage >= limit
@@ -197,6 +196,7 @@ export const ChatV2 = () => {
     setIsStreaming(true)
 
     try {
+      console.log('instructions are: ' + assistantInstructions)
       const { tokenUsageAnalysis, stream } = await getCompletionStream({
         assistantInstructions: assistantInstructions,
         messages: newMessages,

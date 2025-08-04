@@ -125,9 +125,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       handleChangePrompt(urlPrompt)
     }
   }, [mandatoryPrompt, urlPrompt])
-
+  const handleClose = async () => {
+    //handles if the user wants to update current promts
+    if (activePrompt) {
+      console.log('updating active promt')
+      await promptSaveMutation.mutateAsync({ name: activePrompt.name, promptToSave: activePrompt })
+    }
+    //default promt is not a saved promt so this handles the change to it
+    else if (instructionsInputFieldRef.current) {
+      setAssistantInstructions(instructionsInputFieldRef.current.value)
+    }
+    setOpen(false)
+  }
   return (
-    <Modal open={open} onClose={() => setOpen(false)}>
+    <Modal open={open} onClose={handleClose}>
       <Box
         sx={{
           position: 'absolute',
@@ -149,7 +160,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         }}
       >
         <IconButton
-          onClick={() => setOpen(false)}
+          onClick={handleClose}
           sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500', background: '#FFF', opacity: 0.9, zIndex: 1 }}
           id="close-settings"
         >
@@ -238,7 +249,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           >
             {t('settings:resetDefault')}
           </OutlineButtonBlack>{' '}
-          <BlueButton onClick={() => setOpen(false)}>OK</BlueButton>
+          <BlueButton onClick={handleClose}>OK</BlueButton>
         </Box>
         <SaveMyPromptModal
           isOpen={myPromptModalOpen}
