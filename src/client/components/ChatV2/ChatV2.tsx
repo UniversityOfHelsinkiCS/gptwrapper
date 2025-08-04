@@ -410,16 +410,30 @@ export const ChatV2 = () => {
         }}
       >
         <Box
-          sx={{
+          sx={(theme) => ({
             height: '80vh',
-            width: '80%',
-            maxWidth: '80%',
+
+            [theme.breakpoints.down('sm')]: {
+              width: '95%',
+              maxWidth: '95%',
+            },
+
+            [theme.breakpoints.down('md')]: {
+              width: '90%',
+              maxWidth: '90%',
+            },
+
+            [theme.breakpoints.up('md')]: {
+              width: '80%',
+              maxWidth: '80%',
+            },
+
             margin: 'auto',
             paddingRight: '1rem',
             paddingTop: '1rem',
             overflow: 'hidden',
             overflowY: 'auto',
-          }}
+          })}
           ref={scrollRef}
         >
           <Alert severity="info">{t('chat:testUseInfo')}</Alert>
@@ -461,7 +475,22 @@ export const ChatV2 = () => {
           sx={{
             position: 'sticky',
             bottom: 0,
-            width: '80%',
+
+            [theme.breakpoints.down('sm')]: {
+              width: '95%',
+              maxWidth: '95%',
+            },
+
+            [theme.breakpoints.down('md')]: {
+              width: '90%',
+              maxWidth: '90%',
+            },
+
+            [theme.breakpoints.up('md')]: {
+              width: '80%',
+              maxWidth: '80%',
+            },
+
             margin: 'auto',
           }}
         >
