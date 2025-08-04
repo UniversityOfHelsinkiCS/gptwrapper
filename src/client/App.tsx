@@ -17,6 +17,7 @@ import useCurrentUser from './hooks/useCurrentUser'
 import { AnalyticsProvider } from './stores/analytics'
 import useTheme from './theme'
 import type { User } from './types'
+import { useUpdateUrlLang } from './hooks/useUpdateUrlLang'
 
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
