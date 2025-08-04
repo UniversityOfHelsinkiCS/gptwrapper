@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, Link, Container } from '@mui/material'
 import { useNavigate, Link as RouterLink, useParams } from 'react-router-dom'
-import { useRagIndices } from '../../hooks/useRagIndices'
+import { useCourseRagIndices, useRagIndices } from '../../hooks/useRagIndices'
 import { useCreateRagIndexMutation } from './api'
 
 const Rag: React.FC = () => {
   const { id: chatInstanceId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { ragIndices } = useRagIndices(chatInstanceId, true)
+  const { ragIndices } = useCourseRagIndices(chatInstanceId, true)
   const createIndexMutation = useCreateRagIndexMutation()
   const [indexName, setIndexName] = useState('')
 

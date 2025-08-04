@@ -2,15 +2,15 @@ import { useTranslation } from 'react-i18next'
 import { useLocation, useSearchParams } from 'react-router-dom'
 import useCurrentUser from '../hooks/useCurrentUser'
 import { useState, useEffect } from 'react'
+import useLocalStorageState from './useLocalStorageState'
 
 export const useUpdateUrlLang = () => {
   const languages = ['fi', 'sv', 'en']
   const { i18n } = useTranslation()
   const { user } = useCurrentUser()
-  const [lang, setLanguageState] = useState(localStorage.getItem('lang'))
   const [params, setParams] = useSearchParams()
   const langParam = params.get('lang')
-
+ const [lang, setStorageLang] = useLocalStorageState('lang', 'en')
   useEffect(() => {
     const updatedLangFromLocal = localStorage.getItem('lang')
 
@@ -34,16 +34,19 @@ export const useUpdateUrlLang = () => {
     }
   }, [i18n.language])
 
-  // sets both the url and the local lang state to match the newlang if the newLang is supported
+  // sets the local lang state to match the newlang if the newLang is supported
   const setLang = (newLang: string) => {
     if (!languages.includes(newLang)) {
       console.log('aborted lang update')
       return
     }
-    localStorage.setItem('lang', newLang)
-    setLanguageState(newLang)
+    setStorageLang(newLang)
     i18n.changeLanguage(newLang)
-    setParams({ lang: newLang })
+
+    //we dont want ?lang=?? to stick around since it makes it annoying to navigate so clear the param
+
+    params.delete('lang')
+    setParams(params)
   }
   return {}
 }
