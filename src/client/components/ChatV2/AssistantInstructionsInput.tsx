@@ -1,5 +1,6 @@
 import { TextField, Typography } from '@mui/material'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+import { useEffect } from 'react'
 
 const VisibilityOff = () => (
   <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -25,6 +26,9 @@ export default function AssistantInstructionsInput({
   setInstructions: (instructions: string) => void
   instructionsInputFieldRef: any
 }): JSX.Element {
+  useEffect(() => {
+    instructionsInputFieldRef.current.value = instructions //this change will be seen since the assistantInstructions is also updated
+  }, [instructions])
   return hidden ? (
     <TextField disabled={true} label={<VisibilityOff />} />
   ) : (
