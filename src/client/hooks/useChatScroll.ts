@@ -1,13 +1,12 @@
 import { MutableRefObject, useEffect, useRef, useState } from 'react'
 
 export const useChatScroll = (appContainerRef, endOfConversationRef) => {
-  const oldScrollValue = useRef(0)
-  const shouldScroll = useRef(true)
-  const startTime = useRef(0)
-  const elapsed = useRef(0)
-  const progress = useRef(0)
-  const ticks = useRef(0)
-  // console.log("starttime" + startTime)
+  const oldScrollValue = useRef<number>(0)
+  const shouldScroll = useRef<boolean>(true)
+  const startTime = useRef<number | null>(0)
+  const elapsed = useRef<number>(0)
+  const progress = useRef<number>(0)
+  const ticks = useRef<number>(0)
 
   const scrollAnimationFrame: MutableRefObject<number | null> = useRef(null)
   //is called by 'scroll' event listener
