@@ -16,17 +16,20 @@ export default function AssistantInstructionsInput({
   hidden,
   instructions,
   setInstructions,
+  instructionsInputFieldRef,
 }: {
   label: string
   disabled: boolean
   hidden: boolean
   instructions: string
   setInstructions: (instructions: string) => void
+  instructionsInputFieldRef: any
 }): JSX.Element {
   return hidden ? (
     <TextField disabled={true} label={<VisibilityOff />} />
   ) : (
     <TextField
+      inputRef={instructionsInputFieldRef}
       data-sentry-mask
       multiline
       minRows={6}
@@ -34,8 +37,7 @@ export default function AssistantInstructionsInput({
       disabled={disabled}
       hidden={hidden}
       label={label}
-      value={instructions}
-      onChange={(e) => setInstructions(e.target.value)}
+      defaultValue={instructions}
     />
   )
 }

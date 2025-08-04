@@ -1,6 +1,6 @@
 import { Add, Close } from '@mui/icons-material'
 import { Box, IconButton, Modal, Slider, Typography } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE } from '../../../config'
 import type { RagIndexAttributes } from '../../../shared/types'
@@ -53,13 +53,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     queryKey: ['/prompts/my-prompts'],
     initialData: [],
   })
+  const instructionsInputFieldRef = useRef<HTMLInputElement>(null)
   const promptSaveMutation = useMutation({
     mutationFn: async ({ name, promptToSave }: { name: string; promptToSave?: Prompt }) => {
+      const promtMessage = instructionsInputFieldRef?.current ? instructionsInputFieldRef.current.value : ''
       const promptData = {
         name,
-        systemMessage: assistantInstructions,
+        systemMessage: promtMessage,
         type: 'PERSONAL',
       }
+      setAssistantInstructions(promtMessage) //<--- makes sure the defaultValue of promt content matches the new saved promt
       if (promptToSave) {
         const res = await apiClient.put<Prompt>(`/prompts/${promptToSave.id}`, promptData)
         setActivePrompt(res.data)
@@ -77,14 +80,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     },
   })
   //local storage prompt prevents the annoying case where the user refreshes the page and the chosen prompt is reset to default, and the textbox displays incorrect prompt information
-  const [localStoragePrompt, setLocalStoragePrompt] = useLocalStorageState< Prompt | undefined>('prompt', undefined)
+  const [localStoragePrompt, setLocalStoragePrompt] = useLocalStorageState<Prompt | undefined>('prompt', undefined)
   const [activePrompt, setActivePrompt] = useState<Prompt | undefined>(localStoragePrompt)
   const [myPromptModalOpen, setMyPromptModalOpen] = useState<boolean>(false)
   const mandatoryPrompt = course?.prompts.find((p) => p.mandatory)
   const urlPrompt = course?.prompts.find((p) => p.id === urlPromptId)
   const isPromptHidden = activePrompt?.hidden ?? false
   const isPromptEditable = activePrompt?.type !== 'CHAT_INSTANCE' && activePrompt?.type !== 'RAG_INDEX'
-
   const dispatchAnalytics = useAnalyticsDispatch()
   useEffect(() => {
     dispatchAnalytics({
@@ -184,6 +186,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             hidden={isPromptHidden}
             instructions={assistantInstructions}
             setInstructions={setAssistantInstructions}
+            instructionsInputFieldRef={instructionsInputFieldRef}
           />
           {!isPromptHidden && (
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -240,7 +243,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <SaveMyPromptModal
           isOpen={myPromptModalOpen}
           setIsOpen={setMyPromptModalOpen}
-          systemMessage={assistantInstructions}
+          systemMessage={instructionsInputFieldRef.current ? instructionsInputFieldRef.current.value : ''}
           myPrompts={myPrompts}
           existingName={activePrompt?.name}
           onSave={async (name, promptToSave) => {

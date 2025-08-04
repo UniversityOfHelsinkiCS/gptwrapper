@@ -37,7 +37,6 @@ export const useChatScroll = (appContainerRef, endOfConversationRef) => {
     if (!endOfConversationRef?.current || shouldScroll.current === false) {
       cancelScroll()
       return
-
     }
     //lets not start another animation if there is one already
     if (scrollAnimationFrame.current) {
