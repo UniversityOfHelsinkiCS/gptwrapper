@@ -282,7 +282,8 @@
     "discussions": "Keskustelut",
     "prompts": "Alustukset",
     "rag": "RAG",
-    "remove": "poista"
+    "remove": "poista",
+    "customResponsibility": "manuaalisesti lisätty"
   },
   "tooltip": {
     "copied": "Kopioitu!"

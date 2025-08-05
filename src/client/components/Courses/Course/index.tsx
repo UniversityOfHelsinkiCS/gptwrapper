@@ -1,5 +1,5 @@
 import { Edit, OpenInNew } from '@mui/icons-material'
-import { Alert, Box, Button, Checkbox, Container, FormControlLabel, Input, Modal, Paper, Skeleton, Tab, TextField, Tooltip, Typography } from '@mui/material'
+import { Alert, Box, Button, Checkbox, Container, FormControlLabel, Input, Modal, Paper, Skeleton, Stack, Tab, TextField, Tooltip, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -197,13 +197,15 @@ const Course = () => {
                     <TextField name="username" placeholder={'käyttäjänimi: '}></TextField>
                     <Button type={'submit'}>Lisää</Button>
                   </Form>
-                  <ul>
+                  <Stack sx={{margin: 1, padding: 1, borderColor: 'gray', borderWidth: 1, borderStyle: 'solid'}}>
+
                     {course.responsibilities.map((responsibility) => (
-                      <li key={responsibility.id}>
-                        {responsibility.user.last_name} {responsibility.user.first_names} <AssignedResponsibilityManagement handleRemove={() => {handleRemoveResponsibility(responsibility)}} responsibility={responsibility}/>
-                      </li>
+                      <Box  key={responsibility.id} sx={{display: 'flex', alignItems: 'center', padding: 1}}>
+                        <Typography>{responsibility.user.last_name} {responsibility.user.first_names}</Typography>
+                        <AssignedResponsibilityManagement handleRemove={() => {handleRemoveResponsibility(responsibility)}} responsibility={responsibility}/>
+                      </Box>
                     ))}
-                  </ul>
+                  </Stack>
                 </Box>
               )}
             </>
@@ -240,10 +242,10 @@ const AssignedResponsibilityManagement = ({responsibility, handleRemove}) => {
     return (<></>)
   }
   return (
-    <Box>
-      <Typography>{t('course:rag')}</Typography>
+    <Stack direction={'row'} sx={{marginLeft: 'auto', alignItems: 'center'}} >
+      <Typography>{t('course:customResponsibility')}</Typography>
       <Button onClick={handleRemove}>{t('course:remove')}</Button>
-    </Box>
+    </Stack>
   )
 }
 

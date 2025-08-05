@@ -282,7 +282,8 @@
     "discussions": "Discussions",
     "prompts": "Prompts",
     "rag": "RAG",
-    "remove": "remove"
+    "remove": "remove",
+    "customResponsibility": "manually added"
   },
   "tooltip": {
     "copied": "Copied!"
