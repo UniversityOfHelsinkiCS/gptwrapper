@@ -415,6 +415,10 @@ courseRouter.post('/:id/responsibilities/remove', async (req, res) => {
        chatInstanceId: chatInstanceId
      },
   })
+  if(!responsibilityToRemove?.createdByUserId){
+    res.status(400).send('Can only remove user that has been manually added')
+    return
+  }
 
   try{
     await responsibilityToRemove?.destroy()
