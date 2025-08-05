@@ -97,14 +97,14 @@ const NavItems = ({ user, t, languages, handleLanguageChange, language }) => {
   const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
   return (
     <>
-      {user.preferences.chatVersion !== 2 && (
+      {user?.preferences?.chatVersion !== 2 && (
         <Link to="/v2" style={{ textDecoration: 'none' }}>
           <Button>
             <GradeOutlined sx={styles.icon} /> {t('tryNew')}
           </Button>
         </Link>
       )}
-      {user.preferences.chatVersion !== 1 && (
+      {user?.preferences?.chatVersion !== 1 && (
         <Link to="/v1" style={{ textDecoration: 'none' }}>
           <Button>
             <GradeOutlined sx={styles.icon} /> {t('useOld')}
