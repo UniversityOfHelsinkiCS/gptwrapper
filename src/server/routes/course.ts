@@ -364,7 +364,19 @@ courseRouter.post('/:id/responsibilities/assign', async (req, res) => {
     createdByUserId: user.id,
   })
 
-  res.json(createdResponsibility)
+  const responsibilityToReturn = {
+    id: createdResponsibility.id,
+    createdByUserId: createdResponsibility.createdByUserId,
+    user: {
+      id: userToAssign.id,
+      first_names: userToAssign.firstNames,
+      last_name: userToAssign.lastName,
+      username: userToAssign.username
+    }
+  }
+  
+
+  res.json(responsibilityToReturn)
 })
 
 courseRouter.post('/:id/responsibilities/remove', async (req, res) => {

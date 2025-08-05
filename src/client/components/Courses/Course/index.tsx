@@ -1,7 +1,7 @@
 import { Edit, OpenInNew } from '@mui/icons-material'
 import { Alert, Box, Button, Checkbox, Container, FormControlLabel, Input, Modal, Paper, Skeleton, Stack, Tab, TextField, Tooltip, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Form, Link, Route, Routes, useParams } from 'react-router-dom'
 
@@ -10,7 +10,7 @@ import useCourse from '../../../hooks/useCourse'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import { useCreatePromptMutation, useDeletePromptMutation } from '../../../hooks/usePromptMutation'
 import usePrompts from '../../../hooks/usePrompts'
-import type { Message as MessageType } from '../../../types'
+import type { Message as MessageType, Responsebility } from '../../../types'
 import Conversation from '../../Chat/Conversation'
 import SystemMessage from '../../Chat/SystemMessage'
 import Rag from '../../Rag/Rag'
@@ -28,19 +28,23 @@ const Course = () => {
   const [showTeachers, setShowTeachers] = useState(false)
 
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
-
+  const [responsibilities, setResponsibilities] = useState<Responsebility[]>([])
   const { id } = useParams() as { id: string }
   const { t, i18n } = useTranslation()
 
   const { language } = i18n
 
   const { user, isLoading: userLoading } = useCurrentUser()
-
-  const { data: course, isSuccess: isCourseSuccess, error } = useCourse(id)
+  const { data: course, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(id)
   console.log(course)
   if (error) {
     return <ApiErrorView error={error} />
   }
+  useEffect(() => {
+    if(isCourseSuccess){
+      setResponsibilities(course?.responsibilities)
+    }
+  }, [isCourseSuccess])
 
   if (userLoading || !user || !isCourseSuccess) return null
 
@@ -103,10 +107,20 @@ const Course = () => {
   const handleAddResponsible = async (e) => {
     e.preventDefault()
     const username = e.target.username.value
-    apiClient.post(`/courses/${course.id}/responsibilities/assign`, { username: username })
+    const result = await apiClient.post(`/courses/${course.id}/responsibilities/assign`, { username: username })
+    if(result.status === 200){
+      const responsibility = result.data
+      setResponsibilities([...responsibilities, responsibility])
+      refetchCourse()
+    }
+
   }
-  const handleRemoveResponsibility = (responsibility) => {
-    apiClient.post(`/courses/${course.id}/responsibilities/remove`, { username: responsibility.user?.username })
+  const handleRemoveResponsibility = async (responsibility) => {
+    const result = await apiClient.post(`/courses/${course.id}/responsibilities/remove`, { username: responsibility.user?.username })
+    if(result.status === 200){
+      const filteredResponsibilities = responsibilities.filter((r) => r.id !== responsibility.id)
+      setResponsibilities(filteredResponsibilities)
+    }
   }
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
@@ -198,8 +212,7 @@ const Course = () => {
                     <Button type={'submit'}>Lisää</Button>
                   </Form>
                   <Stack sx={{margin: 1, padding: 1, borderColor: 'gray', borderWidth: 1, borderStyle: 'solid'}}>
-
-                    {course.responsibilities.map((responsibility) => (
+                    {responsibilities.map((responsibility) => (
                       <Box  key={responsibility.id} sx={{display: 'flex', alignItems: 'center', padding: 1}}>
                         <Typography>{responsibility.user.last_name} {responsibility.user.first_names}</Typography>
                         <AssignedResponsibilityManagement handleRemove={() => {handleRemoveResponsibility(responsibility)}} responsibility={responsibility}/>
@@ -239,10 +252,12 @@ const Course = () => {
 const AssignedResponsibilityManagement = ({responsibility, handleRemove}) => {
   const { t, i18n } = useTranslation()
   if(!responsibility.createdByUserId){
-    return (<></>)
-  }
+   return (
+    <Stack direction={'row'} sx={{marginLeft: 'auto', alignItems: 'center', height: '1rem'}} >
+    </Stack>
+  )}
   return (
-    <Stack direction={'row'} sx={{marginLeft: 'auto', alignItems: 'center'}} >
+    <Stack direction={'row'} sx={{marginLeft: 'auto', alignItems: 'center', height: '1rem'}} >
       <Typography>{t('course:customResponsibility')}</Typography>
       <Button onClick={handleRemove}>{t('course:remove')}</Button>
     </Stack>
