@@ -164,9 +164,9 @@ courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Re
 
 //checks if user is a admin or is responsible for the course, returns forbidden error if not
 const enforceUserHasFullAccess = async (user, chatInstance) => {
- const isResponsibleForCourse = userAssignedAsResponsible(user.id, chatInstance)
- const hasFullAccess = user.isAdmin || isResponsibleForCourse
- if (!hasFullAccess) {
+  const isResponsibleForCourse = userAssignedAsResponsible(user.id, chatInstance)
+  const hasFullAccess = user.isAdmin || isResponsibleForCourse
+  if (!hasFullAccess) {
     throw ApplicationError.Forbidden('Unauthorized')
   }
   return hasFullAccess
@@ -174,7 +174,6 @@ const enforceUserHasFullAccess = async (user, chatInstance) => {
 
 // returns a chatInstance, throws an chat instacne not found if not found
 const getChatInstance = async (id) => {
- 
   const chatInstance = await ChatInstance.findOne({
     where: { courseId: id },
     include: [
@@ -309,87 +308,84 @@ courseRouter.put('/:id', async (req, res) => {
   res.send(chatInstance)
 })
 
- const userAssignedAsResponsible =  (userId, chatInstance) => {
-  console.log("looking for: " + userId)
-  const isResponsible:boolean = chatInstance.responsibilities
-      ?.map((r) => {console.log(r); return r.user?.id})
-      .filter(Boolean)
-      .includes(userId)
+const userAssignedAsResponsible = (userId, chatInstance) => {
+  console.log('looking for: ' + userId)
+  const isResponsible: boolean = chatInstance.responsibilities
+    ?.map((r) => {
+      console.log(r)
+      return r.user?.id
+    })
+    .filter(Boolean)
+    .includes(userId)
   return isResponsible
- }
+}
 
-
- const getUser = async(id: string) => {
- 
-    const user = await User.findByPk(id)
-    if(!user){
-     throw ApplicationError.NotFound('User not found')
-     return null
-    }
-    return user
- }
-
+const getUser = async (id: string) => {
+  const user = await User.findByPk(id)
+  if (!user) {
+    throw ApplicationError.NotFound('User not found')
+    return null
+  }
+  return user
+}
 
 const getUserByUsername = async (username: string) => {
-  
- const user = await User.findOne({
-   where: {
-     username: username
-   },
-   raw: true
- })
- return user
+  const user = await User.findOne({
+    where: {
+      username: username,
+    },
+    raw: true,
+  })
+  return user
 }
 courseRouter.post('/:id/responsibilities/assign', async (req, res) => {
- const chatInstanceId = req.params.id
- const body = req.body as {
-   username : string
- }
- const assignedUserUsername:string = body.username
+  const chatInstanceId = req.params.id
+  const body = req.body as {
+    username: string
+  }
+  const assignedUserUsername: string = body.username
 
- const chatInstanceIdClean = cleanIdStringSchema.safeParse(chatInstanceId)
- if(!chatInstanceIdClean.success){
-   res.status(400).send('Malformed chat instance id')
-   return
- }
- //username also must be of similar format as the id only letters and numbers
- const assignedUserUsernameClean = cleanIdStringSchema.safeParse(assignedUserUsername)
- if(!assignedUserUsernameClean.success){
-   res.status(400).send('Malformed assigned user id')
-   return
- }
+  const chatInstanceIdClean = cleanIdStringSchema.safeParse(chatInstanceId)
+  if (!chatInstanceIdClean.success) {
+    res.status(400).send('Malformed chat instance id')
+    return
+  }
+  //username also must be of similar format as the id only letters and numbers
+  const assignedUserUsernameClean = cleanIdStringSchema.safeParse(assignedUserUsername)
+  if (!assignedUserUsernameClean.success) {
+    res.status(400).send('Malformed assigned user id')
+    return
+  }
 
- const request = req as unknown as RequestWithUser
-const {user} = request
- const chatInstance = await getChatInstance(chatInstanceId)
- const hasPermission = await enforceUserHasFullAccess(user, chatInstanceId)
+  const request = req as unknown as RequestWithUser
+  const { user } = request
+  const chatInstance = await getChatInstance(chatInstanceId)
+  const hasPermission = await enforceUserHasFullAccess(user, chatInstanceId)
 
- const userToAssign = await getUserByUsername(assignedUserUsername)
- if(!userToAssign){
-   res.status(400).send('User not found with username')
-   return
- }
+  const userToAssign = await getUserByUsername(assignedUserUsername)
+  if (!userToAssign) {
+    res.status(400).send('User not found with username')
+    return
+  }
 
- const assignedUserId = userToAssign.id
- const userAssignedAlready = await userAssignedAsResponsible(assignedUserId, chatInstance)
- if(userAssignedAlready){
-   res.status(400).send('User is already responsible for the course')
-   return
- }
+  const assignedUserId = userToAssign.id
+  const userAssignedAlready = await userAssignedAsResponsible(assignedUserId, chatInstance)
+  if (userAssignedAlready) {
+    res.status(400).send('User is already responsible for the course')
+    return
+  }
 
- if(hasPermission && userToAssign && !userAssignedAlready){
+  if (hasPermission && userToAssign && !userAssignedAlready) {
     const createdResponsibility = await Responsibility.create({
       userId: assignedUserId,
       chatInstanceId: chatInstance.id,
-      createdByUserId: user.id
+      createdByUserId: user.id,
     })
 
     res.json(createdResponsibility)
     return
   }
-   res.status(500).send('Unknown error occurred')
+  res.status(500).send('Unknown error occurred')
 })
-
-
 
 export default courseRouter

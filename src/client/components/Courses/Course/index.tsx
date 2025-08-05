@@ -101,7 +101,7 @@ const Course = () => {
   const handleAddResponsible = async (e) => {
     e.preventDefault()
     const username = e.target.username.value
-    apiClient.post(`/courses/${course.id}/responsibilities/assign`, {username: username})
+    apiClient.post(`/courses/${course.id}/responsibilities/assign`, { username: username })
   }
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
@@ -187,22 +187,19 @@ const Course = () => {
                 {showTeachers ? t('admin:hideTeachers') : t('admin:showTeachers')}
               </Button>
               {showTeachers && (
-              <Box>
-                <Form onSubmit={handleAddResponsible}>
-                  <TextField name="username" placeholder={"käyttäjänimi: "}></TextField>
-                  <Button type={"submit"}>
-                    Lisää
-                   </Button>
-
+                <Box>
+                  <Form onSubmit={handleAddResponsible}>
+                    <TextField name="username" placeholder={'käyttäjänimi: '}></TextField>
+                    <Button type={'submit'}>Lisää</Button>
                   </Form>
-                <ul>
-                  {course.responsibilities.map((responsibility) => (
-                    <li key={responsibility.id}>
-                      {responsibility.user.last_name} {responsibility.user.first_names}
-                    </li>
-                  ))}
-                </ul>
-              </Box>
+                  <ul>
+                    {course.responsibilities.map((responsibility) => (
+                      <li key={responsibility.id}>
+                        {responsibility.user.last_name} {responsibility.user.first_names}
+                      </li>
+                    ))}
+                  </ul>
+                </Box>
               )}
             </>
           )}

@@ -10,7 +10,7 @@ export const useUpdateUrlLang = () => {
   const { user } = useCurrentUser()
   const [params, setParams] = useSearchParams()
   const langParam = params.get('lang')
- const [lang, setStorageLang] = useLocalStorageState('lang', 'en')
+  const [lang, setStorageLang] = useLocalStorageState('lang', 'en')
   useEffect(() => {
     const updatedLangFromLocal = localStorage.getItem('lang')
 
