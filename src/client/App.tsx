@@ -18,6 +18,7 @@ import { AnalyticsProvider } from './stores/analytics'
 import useTheme from './theme'
 import type { User } from './types'
 import { useUpdateUrlLang } from './hooks/useUpdateUrlLang'
+import Styles from './GlobalStyles'
 
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
@@ -95,6 +96,7 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <Styles />
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
         <SnackbarProvider preventDuplicate autoHideDuration={15_000}>
           <EmbeddedProvider>

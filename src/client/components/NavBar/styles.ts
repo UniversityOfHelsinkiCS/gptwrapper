@@ -2,6 +2,7 @@ import { SxProps, Theme } from '@mui/material/styles'
 
 const styles: { [key: string]: SxProps<Theme> } = {
   appbar: {
+    height: '4rem',
     backgroundColor: 'white',
     // The world is not yet ready for this:
     // background: 'linear-gradient(to bottom, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.5) 100%)',

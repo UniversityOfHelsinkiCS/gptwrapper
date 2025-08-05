@@ -1,7 +1,8 @@
 import express from 'express'
 import z from 'zod/v4'
 import { ChatInstance, Prompt, RagIndex, Responsibility } from '../db/models'
-import type { RequestWithUser, User } from '../types'
+import type { RequestWithUser } from '../types'
+import type { User } from '../../shared/user'
 import { ApplicationError } from '../util/ApplicationError'
 import { InferAttributes } from 'sequelize'
 

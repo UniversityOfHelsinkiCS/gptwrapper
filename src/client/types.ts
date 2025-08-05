@@ -1,4 +1,5 @@
 import type { FileSearchCompletedData } from '../shared/types'
+import type { UserPreferences } from '../shared/user'
 
 export type SetState<T> = React.Dispatch<React.SetStateAction<T>>
 
@@ -54,6 +55,7 @@ export interface User {
   enrolledCourses: ChatInstance[]
   isStatsViewer: boolean
   termsAcceptedAt?: string | null
+  preferences?: UserPreferences
 }
 
 export type Prompt = {

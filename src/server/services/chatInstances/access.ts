@@ -1,5 +1,5 @@
 import { type ChatInstance, Enrolment, Responsibility, User as UserModel } from '../../db/models'
-import type { User } from '../../types'
+import type { User } from '../../../shared/user'
 import { TEST_COURSES, TEST_USERS } from '../../../shared/testData'
 import logger from '../../util/logger'
 

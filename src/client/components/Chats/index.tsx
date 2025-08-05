@@ -68,9 +68,6 @@ const Chats = () => {
                     <MuiLink component={RouterLink} to={`/${chat.courseId}`}>
                       <Typography variant="h6">{getLanguageValue(chat.name, language)}</Typography>
                     </MuiLink>
-                    <MuiLink component={RouterLink} to={`/v2/${chat.courseId}`}>
-                      <Typography variant="h6">{getLanguageValue(chat.name, language)} (v2 UI)</Typography>
-                    </MuiLink>
                   </TableCell>
                 </TableRow>
               ))}

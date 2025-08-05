@@ -33,6 +33,7 @@ import { useAnalyticsDispatch } from '../../stores/analytics'
 import EmailButton from './EmailButton'
 import { MenuBookTwoTone, Tune } from '@mui/icons-material'
 import { useChatScroll } from '../../hooks/useChatScroll'
+import { TestUseInfoV2 } from './TestUseInfo'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -196,7 +197,6 @@ export const ChatV2 = () => {
     setIsStreaming(true)
 
     try {
-      console.log('instructions are: ' + assistantInstructions)
       const { tokenUsageAnalysis, stream } = await getCompletionStream({
         assistantInstructions: assistantInstructions,
         messages: newMessages,
@@ -399,31 +399,44 @@ export const ChatV2 = () => {
         ref={chatContainerRef}
         sx={{
           flex: 3,
-          // minWidth: 800,
           width: '100%',
           display: 'flex',
           position: 'relative',
           flexDirection: 'column',
           height: '100%',
+          overflowY: 'visible',
+          // Padding for navbar
+          paddingTop: !isEmbeddedMode ? '4rem' : '0',
         }}
       >
         <Box
-          sx={{
-            // display: 'flex',
-            // flexDirection: 'column',
+          sx={(theme) => ({
             height: '80vh',
-            width: '80%',
-            maxWidth: '80%',
+
+            [theme.breakpoints.down('sm')]: {
+              width: '95%',
+              maxWidth: '95%',
+            },
+
+            [theme.breakpoints.down('md')]: {
+              width: '90%',
+              maxWidth: '90%',
+            },
+
+            [theme.breakpoints.up('md')]: {
+              width: '80%',
+              maxWidth: '80%',
+            },
+
             margin: 'auto',
-            paddingTop: '5rem',
-            paddingBottom: '2.5rem',
+            paddingRight: '1rem',
+            paddingTop: '1rem',
             overflow: 'hidden',
-            overflowY: 'scroll',
-            scrollbarWidth: 'none',
-          }}
+            overflowY: 'auto',
+          })}
           ref={scrollRef}
         >
-          <Alert severity="info">{t('chat:testUseInfo')}</Alert>
+          {user?.preferences?.chatVersion !== 2 && <TestUseInfoV2 />}
 
           {course?.saveDiscussions && (
             <Paper variant="outlined" sx={{ padding: 2, mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -462,8 +475,22 @@ export const ChatV2 = () => {
           sx={{
             position: 'sticky',
             bottom: 0,
-            width: '80%',
-            // minWidth: 750,
+
+            [theme.breakpoints.down('sm')]: {
+              width: '95%',
+              maxWidth: '95%',
+            },
+
+            [theme.breakpoints.down('md')]: {
+              width: '90%',
+              maxWidth: '90%',
+            },
+
+            [theme.breakpoints.up('md')]: {
+              width: '80%',
+              maxWidth: '80%',
+            },
+
             margin: 'auto',
           }}
         >

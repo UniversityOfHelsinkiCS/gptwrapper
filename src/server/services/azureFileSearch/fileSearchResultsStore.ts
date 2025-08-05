@@ -1,5 +1,5 @@
 import type { FileSearchResultData } from '../../../shared/types'
-import type { User } from '../../types'
+import type { User } from '../../../shared/user'
 import { redisClient } from '../../util/redis'
 
 export const FileSearchResultsStore = {

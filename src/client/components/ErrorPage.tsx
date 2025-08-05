@@ -11,6 +11,11 @@ export const ErrorPage = () => {
   const { t } = useTranslation()
 
   React.useEffect(() => {
+    Sentry.addBreadcrumb({
+      category: 'errorPage',
+      message: error.message,
+      level: 'fatal',
+    })
     Sentry.captureException(error)
   }, [error])
 

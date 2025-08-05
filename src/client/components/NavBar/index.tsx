@@ -49,8 +49,6 @@ const NavBar = () => {
 
   if (!user) return null
 
-  const isV2 = window.location.pathname.startsWith('/v2') || window.location.pathname.startsWith('/chat/v2')
-
   return (
     <>
       <AppBar elevation={0} position="fixed" sx={styles.appbar} color="transparent">
@@ -74,9 +72,7 @@ const NavBar = () => {
               <MenuIcon />
             </IconButton>
             <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
-              {isDesktopDevice && (
-                <NavItems isV2={isV2} user={user} t={t} languages={languages} handleLanguageChange={handleLanguageChange} language={language} />
-              )}
+              {isDesktopDevice && <NavItems user={user} t={t} languages={languages} handleLanguageChange={handleLanguageChange} language={language} />}
             </Box>
           </Toolbar>
         </Container>
@@ -89,22 +85,29 @@ const NavBar = () => {
         }}
       >
         <Stack sx={{ paddingTop: 4, paddingRight: 4 }}>
-          {!isDesktopDevice && <NavItems isV2={isV2} user={user} t={t} languages={languages} handleLanguageChange={handleLanguageChange} language={language} />}
+          {!isDesktopDevice && <NavItems user={user} t={t} languages={languages} handleLanguageChange={handleLanguageChange} language={language} />}
         </Stack>
       </Drawer>
     </>
   )
 }
 
-const NavItems = ({ isV2, user, t, languages, handleLanguageChange, language }) => {
+const NavItems = ({ user, t, languages, handleLanguageChange, language }) => {
   const anchorRef = useRef<HTMLButtonElement>(null)
   const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
   return (
     <>
-      {!isV2 && (
+      {user?.preferences?.chatVersion !== 2 && (
         <Link to="/v2" style={{ textDecoration: 'none' }}>
           <Button>
             <GradeOutlined sx={styles.icon} /> {t('tryNew')}
+          </Button>
+        </Link>
+      )}
+      {user?.preferences?.chatVersion !== 1 && (
+        <Link to="/v1" style={{ textDecoration: 'none' }}>
+          <Button>
+            <GradeOutlined sx={styles.icon} /> {t('useOld')}
           </Button>
         </Link>
       )}

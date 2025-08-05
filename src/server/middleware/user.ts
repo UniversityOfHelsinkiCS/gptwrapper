@@ -1,7 +1,7 @@
 import { inCI, inDevelopment } from '../../config'
 import { devUserHeaders, getTestUserHeaders } from '../../shared/testData'
 import { User as UserModel } from '../db/models'
-import type { User } from '../types'
+import type { User } from '../../shared/user'
 import { adminIams, powerUserIam, statsViewerIams } from '../util/config'
 
 const parseIamGroups = (iamGroups: string) => iamGroups?.split(';').filter(Boolean) ?? []
