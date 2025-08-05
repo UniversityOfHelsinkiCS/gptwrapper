@@ -296,5 +296,11 @@
     "submit": "Lähetä",
     "description": "Törmäsitko ongelmiin? Onko sinulle kehitysehdotus? Kerro siitä tässä. Huom. palaute ei ole anonyymiä. Voit myös halutessasi pyytää vastausta kehittäjiltä.",
     "responseWanted": "Haluan vastauksen palautteeseen"
+  },
+  "testUse": {
+    "titleV2": "Uusi chattinäkymä on vielä kehityksessä. Voit halutessasi valita sen oletukseksi.",
+    "buttonV2": "Ota käyttöön oletusarvoisena",
+    "titleV1": "Tämä on vanha chattinäkymä. Olet valinnut oletukseksi uuden näkymän mutta voit palauttaa vanhan tästä:",
+    "buttonV1": "Valitse oletusarvoksi"
   }
 }

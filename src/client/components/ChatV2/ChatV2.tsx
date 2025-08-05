@@ -33,6 +33,7 @@ import { useAnalyticsDispatch } from '../../stores/analytics'
 import EmailButton from './EmailButton'
 import { MenuBookTwoTone, Tune } from '@mui/icons-material'
 import { useChatScroll } from '../../hooks/useChatScroll'
+import { TestUseInfoV2 } from './TestUseInfo'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -196,7 +197,6 @@ export const ChatV2 = () => {
     setIsStreaming(true)
 
     try {
-      console.log('instructions are: ' + assistantInstructions)
       const { tokenUsageAnalysis, stream } = await getCompletionStream({
         assistantInstructions: assistantInstructions,
         messages: newMessages,
@@ -436,7 +436,7 @@ export const ChatV2 = () => {
           })}
           ref={scrollRef}
         >
-          <Alert severity="info">{t('chat:testUseInfo')}</Alert>
+          {user?.preferences?.chatVersion !== 2 && <TestUseInfoV2 />}
 
           {course?.saveDiscussions && (
             <Paper variant="outlined" sx={{ padding: 2, mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>

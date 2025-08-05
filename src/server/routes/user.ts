@@ -36,9 +36,19 @@ userRouter.get('/login', async (req, res) => {
   user.ownCourses = teacherCourses
   user.activeCourseIds = courses
 
+  let dbUser: User | null = null
+
+  // When acual user logs in, update the users info.
   if (!request.hijackedBy) {
     user.lastLoggedInAt = new Date()
-    await User.upsert(user)
+    ;[dbUser] = await User.upsert(user)
+  } else {
+    dbUser = await User.findByPk(id)
+
+    if (!dbUser) {
+      // <- this should not happen. Only if hijacking a nonexisting user somehow.
+      throw ApplicationError.NotFound('User to hijack not found')
+    }
   }
 
   const usage = await getUsage(id)
@@ -53,6 +63,7 @@ userRouter.get('/login', async (req, res) => {
     chatInstance.usageLimit > 0 && new Date() <= new Date(chatInstance.activityPeriod.endDate)
 
   res.send({
+    ...dbUser.toJSON(),
     ...user,
     usage,
     hasIamAccess: isAdmin || hasIamAccess,
@@ -64,7 +75,7 @@ userRouter.get('/login', async (req, res) => {
 })
 
 userRouter.get('/status', async (req, res) => {
-  const request = req as any as RequestWithUser
+  const request = req as RequestWithUser
   const { user } = request
   const { id } = user
 

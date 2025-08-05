@@ -296,5 +296,11 @@
     "submit": "Send",
     "description": "Facing problems? Or have a feature suggestion? Tell us about it below. Note that the feedback is not anonymous. You can also ask for a reply from the developers.",
     "responseWanted": "I want a reply to the feedback"
+  },
+  "testUse": {
+    "titleV2": "The new chat view is still in development. You can set it as your default if you wish.",
+    "buttonV2": "Select as default",
+    "titleV1": "This is the old chat view. You've selected the new view as default but can restore the old default here:",
+    "buttonV1": "Select as default"
   }
 }

@@ -31,7 +31,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
 
   declare termsAcceptedAt: CreationOptional<Date | null>
 
-  declare preferences: CreationOptional<Record<string, any>>
+  declare preferences: CreationOptional<Record<string, any> | null>
 
   declare lastLoggedInAt: CreationOptional<Date | null>
 }
