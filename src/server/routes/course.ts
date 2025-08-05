@@ -332,6 +332,7 @@ courseRouter.put('/:id', async (req, res) => {
     }
     return user
  }
+
 courseRouter.put('/:id/responsibilities/assign', async (req, res) => {
  const chatInstanceId = req.params.id
  const body = req.body as {
@@ -339,20 +340,29 @@ courseRouter.put('/:id/responsibilities/assign', async (req, res) => {
  }
  const assignedUserId:string = body.assignedUserId
 
-  const request = req as unknown as RequestWithUser
+ const request = req as unknown as RequestWithUser
  const {user} = request
  const chatInstance = await getChatInstance(chatInstanceId)
  const hasPermission = await enforceUserHasFullAccess(user, chatInstanceId)
 
  const userToAssign = await getUser(assignedUserId) 
- const userNotAssignedAlready = await !userAssignedAsResponsible(assignedUserId, chatInstance)
- if(hasPermission && userToAssign && userNotAssignedAlready){
-    await Responsibility.create({
+ const userAssignedAlready = await userAssignedAsResponsible(assignedUserId, chatInstance)
+ if(userAssignedAlready){
+   res.status(401).send('User is already responsible for the course')
+ }
+
+ if(hasPermission && userToAssign && !userAssignedAlready){
+    const createdResponsibility = await Responsibility.create({
       userId: assignedUserId,
       chatInstanceId: chatInstance.id,
       createdByUserId: user.id
     })
+
+    return res.json(createdResponsibility)
   }
+
+  
+   res.status(500).send('Unknown error occurred')
 })
 
 
