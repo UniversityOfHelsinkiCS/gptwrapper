@@ -349,6 +349,7 @@ courseRouter.put('/:id/responsibilities/assign', async (req, res) => {
  const userAssignedAlready = await userAssignedAsResponsible(assignedUserId, chatInstance)
  if(userAssignedAlready){
    res.status(401).send('User is already responsible for the course')
+   return
  }
 
  if(hasPermission && userToAssign && !userAssignedAlready){
@@ -358,7 +359,8 @@ courseRouter.put('/:id/responsibilities/assign', async (req, res) => {
       createdByUserId: user.id
     })
 
-    return res.json(createdResponsibility)
+    res.json(createdResponsibility)
+    return
   }
 
   
