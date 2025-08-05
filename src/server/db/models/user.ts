@@ -30,6 +30,10 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare primaryEmail: CreationOptional<string>
 
   declare termsAcceptedAt: CreationOptional<Date | null>
+
+  declare preferences: CreationOptional<Record<string, any>>
+
+  declare lastLoggedInAt: CreationOptional<Date | null>
 }
 
 User.init(
@@ -92,6 +96,16 @@ User.init(
       defaultValue: null,
     },
     termsAcceptedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: null,
+    },
+    preferences: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: {},
+    },
+    lastLoggedInAt: {
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: null,

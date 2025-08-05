@@ -3,22 +3,9 @@ import OpenAI from 'openai'
 import { ChatRequestMessage, GetChatCompletionsOptions } from '@azure/openai'
 import { ChatCompletionMessageParam } from 'openai/resources/chat'
 import { RequestOptions } from 'openai/core'
+import type { User } from '../shared/user'
 
 export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>
-
-export interface User {
-  id: string
-  username: string
-  language?: string
-  iamGroups: string[]
-  email?: string
-  isAdmin: boolean
-  isPowerUser: boolean
-  activeCourseIds?: string[]
-  ownCourses?: string[]
-  usage?: number
-  isStatsViewer: boolean
-}
 
 export interface RequestWithUser extends Request {
   user: User

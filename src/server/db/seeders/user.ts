@@ -1,4 +1,4 @@
-import { InferCreationAttributes } from 'sequelize'
+import type { InferCreationAttributes } from 'sequelize'
 import { User } from '../models'
 
 const users: InferCreationAttributes<User>[] = [
@@ -17,6 +17,8 @@ const users: InferCreationAttributes<User>[] = [
     studentNumber: '123456',
     activeCourseIds: [],
     termsAcceptedAt: null,
+    preferences: {},
+    lastLoggedInAt: new Date(),
   },
 ]
 

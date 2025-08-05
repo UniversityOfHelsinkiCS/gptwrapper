@@ -36,6 +36,7 @@ userRouter.get('/login', async (req, res) => {
   user.activeCourseIds = courses
 
   if (!request.hijackedBy) {
+    user.lastLoggedInAt = new Date()
     await User.upsert(user)
   }
 
