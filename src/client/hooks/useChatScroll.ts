@@ -83,8 +83,7 @@ export const useChatScroll = (appContainerRef, endOfConversationRef) => {
   }
 
   const smoothScrollTo = (duration: number) => {
-    if(!shouldScroll.current)
-    {
+    if (!shouldScroll.current) {
       return
     }
     //should scroll but there might be another scroll frame going so first it should be cancelled

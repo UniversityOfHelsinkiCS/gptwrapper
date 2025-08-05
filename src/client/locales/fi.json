@@ -282,7 +282,9 @@
     "stats": "Statistiikka",
     "discussions": "Keskustelut",
     "prompts": "Alustukset",
-    "rag": "RAG"
+    "rag": "RAG",
+    "remove": "poista",
+    "customResponsibility": "manuaalisesti lisätty"
   },
   "tooltip": {
     "copied": "Kopioitu!"

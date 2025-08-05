@@ -1,16 +1,16 @@
 import { Edit, OpenInNew } from '@mui/icons-material'
-import { Alert, Box, Button, Checkbox, Container, FormControlLabel, Input, Modal, Paper, Skeleton, Tab, Tooltip, Typography } from '@mui/material'
+import { Alert, Box, Button, Checkbox, Container, FormControlLabel, Input, Modal, Paper, Skeleton, Stack, Tab, TextField, Tooltip, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, Route, Routes, useParams } from 'react-router-dom'
+import { Form, Link, Route, Routes, useParams } from 'react-router-dom'
 
 import { PUBLIC_URL } from '../../../../config'
 import useCourse from '../../../hooks/useCourse'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import { useCreatePromptMutation, useDeletePromptMutation } from '../../../hooks/usePromptMutation'
 import usePrompts from '../../../hooks/usePrompts'
-import type { Message as MessageType } from '../../../types'
+import type { Message as MessageType, Responsebility } from '../../../types'
 import Conversation from '../../Chat/Conversation'
 import SystemMessage from '../../Chat/SystemMessage'
 import Rag from '../../Rag/Rag'
@@ -21,23 +21,30 @@ import Stats from './Stats'
 import { RouterTabs } from '../../common/RouterTabs'
 import Discussion from './Discussions'
 import { ApiErrorView } from '../../common/ApiErrorView'
+import apiClient from '../../../util/apiClient'
+import { t } from 'i18next'
 
 const Course = () => {
   const [showTeachers, setShowTeachers] = useState(false)
 
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
-
+  const [responsibilities, setResponsibilities] = useState<Responsebility[]>([])
   const { id } = useParams() as { id: string }
   const { t, i18n } = useTranslation()
 
   const { language } = i18n
 
   const { user, isLoading: userLoading } = useCurrentUser()
-
-  const { data: course, isSuccess: isCourseSuccess, error } = useCourse(id)
+  const { data: course, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(id)
+  console.log(course)
   if (error) {
     return <ApiErrorView error={error} />
   }
+  useEffect(() => {
+    if(isCourseSuccess){
+      setResponsibilities(course?.responsibilities)
+    }
+  }, [isCourseSuccess])
 
   if (userLoading || !user || !isCourseSuccess) return null
 
@@ -97,7 +104,24 @@ const Course = () => {
     boxSizing: 'borderBox',
     height: '40px',
   }
+  const handleAddResponsible = async (e) => {
+    e.preventDefault()
+    const username = e.target.username.value
+    const result = await apiClient.post(`/courses/${course.id}/responsibilities/assign`, { username: username })
+    if(result.status === 200){
+      const responsibility = result.data
+      setResponsibilities([...responsibilities, responsibility])
+      refetchCourse()
+    }
 
+  }
+  const handleRemoveResponsibility = async (responsibility) => {
+    const result = await apiClient.post(`/courses/${course.id}/responsibilities/remove`, { username: responsibility.user?.username })
+    if(result.status === 200){
+      const filteredResponsibilities = responsibilities.filter((r) => r.id !== responsibility.id)
+      setResponsibilities(filteredResponsibilities)
+    }
+  }
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Alert severity={getInfoSeverity()}>
@@ -182,13 +206,20 @@ const Course = () => {
                 {showTeachers ? t('admin:hideTeachers') : t('admin:showTeachers')}
               </Button>
               {showTeachers && (
-                <ul>
-                  {course.responsibilities.map((responsibility) => (
-                    <li key={responsibility.id}>
-                      {responsibility.user.last_name} {responsibility.user.first_names}
-                    </li>
-                  ))}
-                </ul>
+                <Box>
+                  <Form onSubmit={handleAddResponsible}>
+                    <TextField name="username" placeholder={'käyttäjänimi: '}></TextField>
+                    <Button type={'submit'}>Lisää</Button>
+                  </Form>
+                  <Stack sx={{margin: 1, padding: 1, borderColor: 'gray', borderWidth: 1, borderStyle: 'solid'}}>
+                    {responsibilities.map((responsibility) => (
+                      <Box  key={responsibility.id} sx={{display: 'flex', alignItems: 'center', padding: 1}}>
+                        <Typography>{responsibility.user.last_name} {responsibility.user.first_names}</Typography>
+                        <AssignedResponsibilityManagement handleRemove={() => {handleRemoveResponsibility(responsibility)}} responsibility={responsibility}/>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
               )}
             </>
           )}
@@ -215,6 +246,21 @@ const Course = () => {
         <Route path="/rag" element={<Rag />} />
       </Routes>
     </Container>
+  )
+}
+
+const AssignedResponsibilityManagement = ({responsibility, handleRemove}) => {
+  const { t, i18n } = useTranslation()
+  if(!responsibility.createdByUserId){
+   return (
+    <Stack direction={'row'} sx={{marginLeft: 'auto', alignItems: 'center', height: '1rem'}} >
+    </Stack>
+  )}
+  return (
+    <Stack direction={'row'} sx={{marginLeft: 'auto', alignItems: 'center', height: '1rem'}} >
+      <Typography>{t('course:customResponsibility')}</Typography>
+      <Button onClick={handleRemove}>{t('course:remove')}</Button>
+    </Stack>
   )
 }
 

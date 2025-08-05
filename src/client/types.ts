@@ -107,8 +107,9 @@ export interface Enrolment {
   }
 }
 
-interface Responsebility {
+export interface Responsebility {
   id: string
+  createdByUserId: string | null
   user: {
     id: string
     username: string

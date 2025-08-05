@@ -282,7 +282,9 @@
     "stats": "Statistics",
     "discussions": "Discussions",
     "prompts": "Prompts",
-    "rag": "RAG"
+    "rag": "RAG",
+    "remove": "remove",
+    "customResponsibility": "manually added"
   },
   "tooltip": {
     "copied": "Copied!"

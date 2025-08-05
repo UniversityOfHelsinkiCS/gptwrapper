@@ -9,6 +9,7 @@
     "dev": "concurrently \"npm run dev:server\" \"vite\"",
     "dev:server": "NODE_ENV=development tsx watch --clear-screen=false src/server/index.ts",
     "tsc": "tsc",
+    "tsc:on": "tsc --watch",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
     "format": "prettier --write 'src/**/*.{ts,tsx}'",
