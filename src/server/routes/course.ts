@@ -87,28 +87,7 @@ courseRouter.get('/statistics/:id', async (req, res) => {
 courseRouter.get('/:id', async (req, res) => {
   const { id } = req.params
 
-  const chatInstance = await ChatInstance.findOne({
-    where: { courseId: id },
-    include: [
-      {
-        model: Responsibility,
-        as: 'responsibilities',
-        attributes: ['id'],
-        include: [
-          {
-            model: User,
-            as: 'user',
-            attributes: ['id', 'username', 'last_name', 'first_names'],
-          },
-        ],
-      },
-      {
-        model: Prompt,
-        as: 'prompts',
-      },
-    ],
-  })
-
+  const chatInstance = await getChatInstance(id)
   if (!chatInstance) {
     throw ApplicationError.NotFound('Chat instance not found')
   }
@@ -165,14 +144,14 @@ courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Re
 //checks if user is a admin or is responsible for the course, returns forbidden error if not
 const enforceUserHasFullAccess = async (user, chatInstance) => {
   const isResponsibleForCourse = userAssignedAsResponsible(user.id, chatInstance)
-  const hasFullAccess = user.isAdmin || isResponsibleForCourse
+  const hasFullAccess: boolean = user.isAdmin || isResponsibleForCourse
   if (!hasFullAccess) {
     throw ApplicationError.Forbidden('Unauthorized')
   }
   return hasFullAccess
 }
 
-// returns a chatInstance, throws an chat instacne not found if not found
+// returns a chatInstance, throws an chat instance not found if not found
 const getChatInstance = async (id) => {
   const chatInstance = await ChatInstance.findOne({
     where: { courseId: id },
@@ -180,7 +159,7 @@ const getChatInstance = async (id) => {
       {
         model: Responsibility,
         as: 'responsibilities',
-        attributes: ['id'],
+        attributes: ['id', 'createdByUserId'],
         include: [
           {
             model: User,
@@ -320,7 +299,7 @@ const userAssignedAsResponsible = (userId, chatInstance) => {
   return isResponsible
 }
 
-const getUser = async (id: string) => {
+const getUser = async (id: string):Promise<User | null> => {
   const user = await User.findByPk(id)
   if (!user) {
     throw ApplicationError.NotFound('User not found')
@@ -329,7 +308,7 @@ const getUser = async (id: string) => {
   return user
 }
 
-const getUserByUsername = async (username: string) => {
+const getUserByUsername = async (username: string):Promise<User | null> => {
   const user = await User.findOne({
     where: {
       username: username,
@@ -361,6 +340,10 @@ courseRouter.post('/:id/responsibilities/assign', async (req, res) => {
   const { user } = request
   const chatInstance = await getChatInstance(chatInstanceId)
   const hasPermission = await enforceUserHasFullAccess(user, chatInstanceId)
+  if(!hasPermission){
+    res.status(401).send('Unauthorized')
+    return
+  }
 
   const userToAssign = await getUserByUsername(assignedUserUsername)
   if (!userToAssign) {
@@ -375,17 +358,70 @@ courseRouter.post('/:id/responsibilities/assign', async (req, res) => {
     return
   }
 
-  if (hasPermission && userToAssign && !userAssignedAlready) {
-    const createdResponsibility = await Responsibility.create({
-      userId: assignedUserId,
-      chatInstanceId: chatInstance.id,
-      createdByUserId: user.id,
-    })
+  const createdResponsibility = await Responsibility.create({
+    userId: assignedUserId,
+    chatInstanceId: chatInstance.id,
+    createdByUserId: user.id,
+  })
 
-    res.json(createdResponsibility)
-    return
-  }
-  res.status(500).send('Unknown error occurred')
+  res.json(createdResponsibility)
 })
 
+courseRouter.post('/:id/responsibilities/remove', async (req, res) => {
+  const chatInstanceId = req.params.id
+  const body = req.body as {
+    username: string
+  }
+  const assignedUserUsername: string = body.username
+
+  const chatInstanceIdClean = cleanIdStringSchema.safeParse(chatInstanceId)
+  if (!chatInstanceIdClean.success) {
+    res.status(400).send('Malformed chat instance id')
+    return
+  }
+
+  //username also must be of similar format as the id only letters and numbers
+  const assignedUserUsernameClean = cleanIdStringSchema.safeParse(assignedUserUsername)
+  if (!assignedUserUsernameClean.success) {
+    res.status(400).send('Malformed assigned user id')
+    return
+  }
+
+  const request = req as unknown as RequestWithUser
+  const { user } = request
+  const chatInstance = await getChatInstance(chatInstanceId)
+  const hasPermission = await enforceUserHasFullAccess(user, chatInstanceId)
+  if(!hasPermission){
+    res.status(401).send('Unauthorized')
+    return
+  }
+
+  const userToRemove: User | null = await getUserByUsername(assignedUserUsername)
+  if (!userToRemove) {
+    res.status(400).send('User not found with username')
+    return
+  }
+
+  const assignedUserId:string = userToRemove.id
+  const userAssignedAlready:boolean = await userAssignedAsResponsible(assignedUserId, chatInstance)
+  if (!userAssignedAlready) {
+    res.status(400).send('User to remove not found')
+    return
+  }
+
+  const responsibilityToRemove = await Responsibility.findOne({
+     where: {
+       userId: assignedUserId,
+       chatInstanceId: chatInstanceId
+     },
+  })
+
+  try{
+    await responsibilityToRemove?.destroy()
+    res.json({result: "success"})
+  }
+  catch{
+    res.status(500).send('Unknown error occurred')
+  }
+})
 export default courseRouter

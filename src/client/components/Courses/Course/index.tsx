@@ -36,6 +36,7 @@ const Course = () => {
   const { user, isLoading: userLoading } = useCurrentUser()
 
   const { data: course, isSuccess: isCourseSuccess, error } = useCourse(id)
+  console.log(course)
   if (error) {
     return <ApiErrorView error={error} />
   }
@@ -102,6 +103,9 @@ const Course = () => {
     e.preventDefault()
     const username = e.target.username.value
     apiClient.post(`/courses/${course.id}/responsibilities/assign`, { username: username })
+  }
+  const handleRemoveResponsibility = (responsibility) => {
+    apiClient.post(`/courses/${course.id}/responsibilities/remove`, { username: responsibility.user?.username })
   }
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
@@ -195,7 +199,7 @@ const Course = () => {
                   <ul>
                     {course.responsibilities.map((responsibility) => (
                       <li key={responsibility.id}>
-                        {responsibility.user.last_name} {responsibility.user.first_names}
+                        {responsibility.user.last_name} {responsibility.user.first_names} <AssignedResponsibilityManagement handleRemove={() => {handleRemoveResponsibility(responsibility)}} responsibility={responsibility}/>
                       </li>
                     ))}
                   </ul>
@@ -226,6 +230,18 @@ const Course = () => {
         <Route path="/rag" element={<Rag />} />
       </Routes>
     </Container>
+  )
+}
+
+const AssignedResponsibilityManagement = ({responsibility, handleRemove}) => {
+  if(!responsibility.createdByUserId){
+    return (<></>)
+  }
+  return (
+    <Box>
+      <Typography>manuaalisesti lisätty</Typography>
+      <Button onClick={handleRemove}>poista</Button>
+    </Box>
   )
 }
 
