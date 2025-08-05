@@ -22,6 +22,7 @@ import { RouterTabs } from '../../common/RouterTabs'
 import Discussion from './Discussions'
 import { ApiErrorView } from '../../common/ApiErrorView'
 import apiClient from '../../../util/apiClient'
+import { t } from 'i18next'
 
 const Course = () => {
   const [showTeachers, setShowTeachers] = useState(false)
@@ -234,13 +235,14 @@ const Course = () => {
 }
 
 const AssignedResponsibilityManagement = ({responsibility, handleRemove}) => {
+  const { t, i18n } = useTranslation()
   if(!responsibility.createdByUserId){
     return (<></>)
   }
   return (
     <Box>
-      <Typography>manuaalisesti lisätty</Typography>
-      <Button onClick={handleRemove}>poista</Button>
+      <Typography>{t('course:rag')}</Typography>
+      <Button onClick={handleRemove}>{t('course:remove')}</Button>
     </Box>
   )
 }

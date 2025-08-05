@@ -281,7 +281,8 @@
     "stats": "Statistics",
     "discussions": "Discussions",
     "prompts": "Prompts",
-    "rag": "RAG"
+    "rag": "RAG",
+    "remove": "remove"
   },
   "tooltip": {
     "copied": "Copied!"
