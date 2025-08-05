@@ -366,7 +366,7 @@ const Chat = () => {
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Banner disclaimer={disclaimer} />
       {course && <CourseInfo course={course} />}
-      {user?.preferences?.chatVersion !== 1 && <TestUseInfoV1 />}
+      {(user?.preferences?.chatVersion ?? 1) !== 1 && <TestUseInfoV1 />}
       <Box sx={{ mb: 3 }} />
 
       {hasPrompts && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}

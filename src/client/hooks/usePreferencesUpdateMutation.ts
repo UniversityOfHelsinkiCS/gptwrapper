@@ -13,7 +13,7 @@ export const usePreferencesUpdateMutation = () => {
         preferences,
       }))
 
-      const response = await apiClient.post<UserPreferences>('/users/preferences', preferences)
+      const response = await apiClient.put<UserPreferences>('/users/preferences', preferences)
       return response.data
     },
   })
