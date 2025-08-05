@@ -6,6 +6,7 @@ import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, User, Responsib
 import { getOwnCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
+import { cleanIdStringSchema } from '../util/zodSchemas'
 
 const courseRouter = express.Router()
 
@@ -340,6 +341,15 @@ courseRouter.put('/:id/responsibilities/assign', async (req, res) => {
  }
  const assignedUserId:string = body.assignedUserId
 
+ const chatInstanceIdClean = cleanIdStringSchema.safeParse(chatInstanceId)
+ if(!chatInstanceIdClean.success){
+   res.status(400).send('Malformed chat instance id')
+ }
+ const assignedUserIdClean = cleanIdStringSchema.safeParse(assignedUserId)
+ if(!assignedUserIdClean.success){
+   res.status(400).send('Malformed assigned user id')
+ }
+
  const request = req as unknown as RequestWithUser
  const {user} = request
  const chatInstance = await getChatInstance(chatInstanceId)
@@ -348,7 +358,7 @@ courseRouter.put('/:id/responsibilities/assign', async (req, res) => {
  const userToAssign = await getUser(assignedUserId) 
  const userAssignedAlready = await userAssignedAsResponsible(assignedUserId, chatInstance)
  if(userAssignedAlready){
-   res.status(401).send('User is already responsible for the course')
+   res.status(400).send('User is already responsible for the course')
    return
  }
 
