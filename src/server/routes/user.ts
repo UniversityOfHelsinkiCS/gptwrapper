@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { ChatInstance, ChatRequest } from '../types'
+import type { ChatInstance, RequestWithUser } from '../types'
 import logger from '../util/logger'
 import { getEnrolledCourseIds, getOwnCourses, getEnrolledCourses } from '../services/chatInstances/access'
 import { User } from '../db/models'
@@ -9,13 +9,14 @@ import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { getLastRestart } from '../util/lastRestart'
 import { accessIams } from '../util/config'
 import { ApplicationError } from '../util/ApplicationError'
+import { UserPreferencesSchema } from '../../shared/user'
 
 export const checkIamAccess = (iamGroups: string[]) => accessIams.some((iam) => iamGroups.includes(iam))
 
 const userRouter = express.Router()
 
 userRouter.get('/login', async (req, res) => {
-  const request = req as ChatRequest
+  const request = req as RequestWithUser
   const { user } = request
   const { id, isAdmin, iamGroups } = user
 
@@ -63,7 +64,7 @@ userRouter.get('/login', async (req, res) => {
 })
 
 userRouter.get('/status', async (req, res) => {
-  const request = req as any as ChatRequest
+  const request = req as any as RequestWithUser
   const { user } = request
   const { id } = user
 
@@ -81,7 +82,7 @@ userRouter.get('/status', async (req, res) => {
 
 userRouter.get('/status/:courseId', async (req, res) => {
   const { courseId } = req.params
-  const request = req as any as ChatRequest
+  const request = req as any as RequestWithUser
   const { user } = request
 
   const { usage, limit, model, models } = await getUserStatus(user, courseId)
@@ -96,13 +97,25 @@ userRouter.get('/status/:courseId', async (req, res) => {
 })
 
 userRouter.post('/accept-terms', async (req, res) => {
-  const request = req as ChatRequest
+  const request = req as RequestWithUser
   const { user } = request
   const { id } = user
 
   await User.update({ termsAcceptedAt: new Date() }, { where: { id } })
 
   res.status(200).send()
+})
+
+userRouter.put('/preferences', async (req, res) => {
+  const request = req as RequestWithUser
+  const { user } = request
+  const { id } = user
+
+  const preferences = UserPreferencesSchema.parse(req.body)
+
+  await User.update({ preferences }, { where: { id } })
+
+  res.status(200).send(preferences)
 })
 
 export default userRouter
