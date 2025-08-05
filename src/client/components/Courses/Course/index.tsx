@@ -1,9 +1,9 @@
 import { Edit, OpenInNew } from '@mui/icons-material'
-import { Alert, Box, Button, Checkbox, Container, FormControlLabel, Input, Modal, Paper, Skeleton, Tab, Tooltip, Typography } from '@mui/material'
+import { Alert, Box, Button, Checkbox, Container, FormControlLabel, Input, Modal, Paper, Skeleton, Tab, TextField, Tooltip, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, Route, Routes, useParams } from 'react-router-dom'
+import { Form, Link, Route, Routes, useParams } from 'react-router-dom'
 
 import { PUBLIC_URL } from '../../../../config'
 import useCourse from '../../../hooks/useCourse'
@@ -21,6 +21,7 @@ import Stats from './Stats'
 import { RouterTabs } from '../../common/RouterTabs'
 import Discussion from './Discussions'
 import { ApiErrorView } from '../../common/ApiErrorView'
+import apiClient from '../../../util/apiClient'
 
 const Course = () => {
   const [showTeachers, setShowTeachers] = useState(false)
@@ -97,7 +98,11 @@ const Course = () => {
     boxSizing: 'borderBox',
     height: '40px',
   }
-
+  const handleAddResponsible = async (e) => {
+    e.preventDefault()
+    const username = e.target.username.value
+    apiClient.post(`/courses/${course.id}/responsibilities/assign`, {username: username})
+  }
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Alert severity={getInfoSeverity()}>
@@ -182,6 +187,14 @@ const Course = () => {
                 {showTeachers ? t('admin:hideTeachers') : t('admin:showTeachers')}
               </Button>
               {showTeachers && (
+              <Box>
+                <Form onSubmit={handleAddResponsible}>
+                  <TextField name="username" placeholder={"käyttäjänimi: "}></TextField>
+                  <Button type={"submit"}>
+                    Lisää
+                   </Button>
+
+                  </Form>
                 <ul>
                   {course.responsibilities.map((responsibility) => (
                     <li key={responsibility.id}>
@@ -189,6 +202,7 @@ const Course = () => {
                     </li>
                   ))}
                 </ul>
+              </Box>
               )}
             </>
           )}
