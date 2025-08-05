@@ -81,7 +81,7 @@ const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptTyp
                     {t('course:directPromptLink')}
                   </Link>
                   <Tooltip title={t('course:copyDirectPromptLinkInfo')} placement="right">
-                    <IconButton size="small">
+                    <IconButton size="small" onClick={() => navigator.clipboard.writeText(directLink)}>
                       <ContentCopyOutlined fontSize="small" />
                     </IconButton>
                   </Tooltip>
