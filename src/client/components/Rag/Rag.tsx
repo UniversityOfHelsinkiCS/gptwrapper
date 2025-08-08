@@ -3,11 +3,13 @@ import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableR
 import { useNavigate, Link as RouterLink, useParams } from 'react-router-dom'
 import { useCourseRagIndices, useRagIndices } from '../../hooks/useRagIndices'
 import { useCreateRagIndexMutation } from './api'
+import useCourse from '../../hooks/useCourse'
 
 const Rag: React.FC = () => {
-  const { id: chatInstanceId } = useParams<{ id: string }>()
+  const { id: courseId } = useParams<{ id: string }>()
+  const { data: chatInstance } = useCourse(courseId)
   const navigate = useNavigate()
-  const { ragIndices } = useCourseRagIndices(chatInstanceId, true)
+  const { ragIndices } = useCourseRagIndices(chatInstance?.id, true)
   const createIndexMutation = useCreateRagIndexMutation()
   const [indexName, setIndexName] = useState('')
 
@@ -17,7 +19,7 @@ const Rag: React.FC = () => {
         <Typography variant="h4" mb="1rem">
           RAG Indices
         </Typography>
-        {chatInstanceId && (
+        {chatInstance?.id && (
           <Box sx={{ display: 'flex', gap: 2, marginBottom: 2 }}>
             <TextField
               label="Index Name"
@@ -32,7 +34,7 @@ const Rag: React.FC = () => {
               color="primary"
               onClick={async () => {
                 const newIndex = await createIndexMutation.mutateAsync({
-                  chatInstanceId,
+                  chatInstanceId: chatInstance?.id,
                   indexName,
                 })
                 setIndexName('')

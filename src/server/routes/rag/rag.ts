@@ -96,8 +96,8 @@ router.get('/indices', async (req, res) => {
   if (chatInstanceId) {
     chatInstance = await ChatInstance.findByPk(chatInstanceId, {
       include: [
-        { model: Responsibility, as: 'responsibilities' },
-        { model: RagIndex, as: 'ragIndices' },
+        { model: Responsibility, as: 'responsibilities', required: !user.isAdmin },
+        { model: RagIndex, as: 'ragIndices', required: false },
       ],
     })
 
