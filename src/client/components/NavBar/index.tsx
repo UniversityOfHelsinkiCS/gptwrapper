@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, matchPath, useLocation } from 'react-router-dom'
 import {
   AppBar,
   Toolbar,
@@ -91,53 +91,60 @@ const NavBar = () => {
     </>
   )
 }
+const NavItemButton = ({ children, to, path, current, icon }) => (
+  <Button
+    component={Link}
+    to={to}
+    size="small"
+    variant="text"
+    startIcon={icon}
+    sx={{
+      borderBottom: '2px solid',
+      borderBottomLeftRadius: '0',
+      borderBottomRightRadius: '0',
+      borderBottomColor: matchPath({ path: path }, current) ? 'primary.main' : 'transparent',
+    }}
+  >
+    {children}
+  </Button>
+)
 
 const NavItems = ({ user, t, languages, handleLanguageChange, language }) => {
   const anchorRef = useRef<HTMLButtonElement>(null)
+  const { pathname } = useLocation()
   const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
+
   return (
     <>
       {user?.preferences?.chatVersion !== 2 && (
-        <Link to="/v2" style={{ textDecoration: 'none' }}>
-          <Button>
-            <GradeOutlined sx={styles.icon} /> {t('tryNew')}
-          </Button>
-        </Link>
+        <NavItemButton to="/v2" path="v2/*" current={pathname} icon={<GradeOutlined sx={styles.icon} />}>
+          {t('tryNew')}
+        </NavItemButton>
       )}
       {user?.preferences?.chatVersion !== 1 && (
-        <Link to="/v1" style={{ textDecoration: 'none' }}>
-          <Button>
-            <GradeOutlined sx={styles.icon} /> {t('useOld')}
-          </Button>
-        </Link>
+        <NavItemButton to="/v1" path="v1/*" current={pathname} icon={<GradeOutlined sx={styles.icon} />}>
+          {t('useOld')}
+        </NavItemButton>
       )}
       {user.enrolledCourses.length > 0 && (
-        <Link to="/chats" style={{ textDecoration: 'none' }}>
-          <Button>
-            <BookmarksOutlined sx={styles.icon} /> {t('chats')}
-          </Button>
-        </Link>
+        <NavItemButton to="/chats" path="chats/*" current={pathname} icon={<BookmarksOutlined sx={styles.icon} />}>
+          {t('chats')}
+        </NavItemButton>
       )}
       {user.ownCourses.length > 0 && (
-        <Link to="/courses" style={{ textDecoration: 'none' }}>
-          <Button>
-            <BookmarksOutlined sx={styles.icon} /> {t('courses')}
-          </Button>
-        </Link>
+        <NavItemButton to="/courses" path="courses/*" current={pathname} icon={<BookmarksOutlined sx={styles.icon} />}>
+          {t('courses')}
+        </NavItemButton>
       )}
       {user.isStatsViewer && (
-        <Link to="/statistics" style={{ textDecoration: 'none' }}>
-          <Button>
-            <AdminPanelSettingsOutlined sx={styles.icon} /> {t('courseStats')}
-          </Button>
-        </Link>
+        <NavItemButton to="/statistics" path="statistics/*" current={pathname} icon={<AdminPanelSettingsOutlined sx={styles.icon} />}>
+          {t('courseStats')}
+        </NavItemButton>
       )}
       {user.isAdmin && (
-        <Link to="/admin" style={{ textDecoration: 'none' }}>
-          <Button>
-            <AdminPanelSettingsOutlined sx={styles.icon} /> {t('admin')}
-          </Button>
-        </Link>
+        <NavItemButton to="/admin" path="admin/*" current={pathname} icon={<AdminPanelSettingsOutlined sx={styles.icon} />}>
+          {t('admin')}
+        </NavItemButton>
       )}
       <Button
         ref={anchorRef}
