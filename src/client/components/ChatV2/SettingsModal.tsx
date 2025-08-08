@@ -3,7 +3,6 @@ import { Box, IconButton, Modal, Slider, Typography } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE } from '../../../config'
-import type { RagIndexAttributes } from '../../../shared/types'
 import type { Course, Prompt } from '../../types'
 import AssistantInstructionsInput from './AssistantInstructionsInput'
 import PromptSelector from './PromptSelector'
@@ -14,6 +13,7 @@ import { useSearchParams } from 'react-router-dom'
 import { BlueButton, OutlineButtonBlack } from './generics/Buttons'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
+import { IframeCopy } from '../common/IframeCopy'
 
 const useUrlPromptId = () => {
   const [searchParams] = useSearchParams()
@@ -28,12 +28,6 @@ interface SettingsModalProps {
   setAssistantInstructions: (instructions: string) => void
   modelTemperature: number
   setModelTemperature: (value: number) => void
-  model: string
-  setModel: (model: string) => void
-  showRagSelector: boolean
-  setRagIndex: (ragIndex: number | undefined) => void
-  ragIndices?: RagIndexAttributes[]
-  currentRagIndex?: RagIndexAttributes
   course?: Course
 }
 
@@ -105,7 +99,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const handleChangePrompt = (newPrompt: Prompt | undefined) => {
     if (!newPrompt) {
-      console.log('Setting default prompt')
       setActivePrompt(undefined)
       setLocalStoragePrompt(undefined)
       setAssistantInstructions(DEFAULT_ASSISTANT_INSTRUCTIONS)
@@ -121,14 +114,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     if (mandatoryPrompt) {
       handleChangePrompt(mandatoryPrompt)
     } else if (urlPrompt) {
-      console.log(`Using promptId=${urlPrompt.id} defined by URL search param`)
       handleChangePrompt(urlPrompt)
     }
   }, [mandatoryPrompt, urlPrompt])
   const handleClose = async () => {
     //handles if the user wants to update current promts
     if (activePrompt) {
-      console.log('updating active promt')
       await promptSaveMutation.mutateAsync({ name: activePrompt.name, promptToSave: activePrompt })
     }
     //default promt is not a saved promt so this handles the change to it

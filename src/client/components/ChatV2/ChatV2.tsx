@@ -583,12 +583,6 @@ export const ChatV2 = () => {
         setAssistantInstructions={(updatedInstructions) => setAssistantInstructions(updatedInstructions)}
         modelTemperature={parseFloat(modelTemperature)}
         setModelTemperature={(updatedTemperature) => setModelTemperature(String(updatedTemperature))}
-        model={activeModel}
-        setModel={(model) => setActiveModel(model)}
-        showRagSelector={showRagSelector}
-        setRagIndex={setRagIndexId}
-        ragIndices={ragIndices}
-        currentRagIndex={ragIndex}
         course={course}
       />
 

@@ -40,7 +40,8 @@
     "curreTitle": "Curre",
     "tryNew": "Kokeile uutta chattiä",
     "close": "Sulje",
-    "useOld": "Vanha chattinäkymä"
+    "useOld": "Vanha chattinäkymä",
+    "iframeCopy": "Kopioi upotettava iframe-elementti:\n\n{{- iframeHtml}}"
   },
   "stats": {
     "showing": "Näytetään",
