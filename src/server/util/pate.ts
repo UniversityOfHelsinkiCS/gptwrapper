@@ -1,5 +1,6 @@
 import { PATE_URL, API_TOKEN } from './config'
 import { inDevelopment } from '../../config'
+import logger from './logger'
 
 const settings = {
   hideToska: false,
@@ -21,6 +22,12 @@ const sendEmail = async (targets: string[], text: string, subject: string) => {
     emails,
     settings,
   }
+
+  const payload = JSON.stringify(mail)
+
+  const payloadSizeKb = Buffer.byteLength(payload, 'utf8') / 1024
+
+  logger.info(`Sending email with payload size ${payloadSizeKb.toFixed(2)} KB`)
 
   await fetch(`${PATE_URL}?token=${API_TOKEN}`, {
     method: 'POST',
