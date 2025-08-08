@@ -85,31 +85,33 @@ const NavBar = () => {
         }}
       >
         <Stack sx={{ paddingTop: 4, paddingRight: 4 }}>
-          {!isDesktopDevice && <NavItems user={user} t={t} languages={languages} handleLanguageChange={handleLanguageChange} language={language} />}
+          {!isDesktopDevice && <NavItems user={user} t={t} languages={languages} handleLanguageChange={handleLanguageChange} language={language} vertical />}
         </Stack>
       </Drawer>
     </>
   )
 }
-const NavItemButton = ({ children, to, path, current, icon }) => (
-  <Button
-    component={Link}
-    to={to}
-    size="small"
-    variant="text"
-    startIcon={icon}
-    sx={{
-      borderBottom: '2px solid',
-      borderBottomLeftRadius: '0',
-      borderBottomRightRadius: '0',
-      borderBottomColor: matchPath({ path: path }, current) ? 'primary.main' : 'transparent',
-    }}
-  >
-    {children}
-  </Button>
-)
+const NavItemButton = ({ children, to, path, current, icon, vertical }) => {
+  const borderSide = vertical ? 'Left' : 'Bottom'
+  return (
+    <Button
+      component={Link}
+      to={to}
+      size="small"
+      variant="text"
+      startIcon={icon}
+      sx={{
+        [`border${borderSide}`]: '2px solid',
+        borderRadius: '0',
+        [`border${borderSide}Color`]: matchPath({ path: path }, current) ? 'primary.main' : 'transparent',
+      }}
+    >
+      {children}
+    </Button>
+  )
+}
 
-const NavItems = ({ user, t, languages, handleLanguageChange, language }) => {
+const NavItems = ({ user, t, languages, handleLanguageChange, language, vertical = false }) => {
   const anchorRef = useRef<HTMLButtonElement>(null)
   const { pathname } = useLocation()
   const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
@@ -117,32 +119,32 @@ const NavItems = ({ user, t, languages, handleLanguageChange, language }) => {
   return (
     <>
       {user?.preferences?.chatVersion !== 2 && (
-        <NavItemButton to="/v2" path="v2/*" current={pathname} icon={<GradeOutlined sx={styles.icon} />}>
+        <NavItemButton to="/v2" path="v2/*" current={pathname} icon={<GradeOutlined sx={styles.icon} />} vertical={vertical}>
           {t('tryNew')}
         </NavItemButton>
       )}
       {user?.preferences?.chatVersion !== 1 && (
-        <NavItemButton to="/v1" path="v1/*" current={pathname} icon={<GradeOutlined sx={styles.icon} />}>
+        <NavItemButton to="/v1" path="v1/*" current={pathname} icon={<GradeOutlined sx={styles.icon} />} vertical={vertical}>
           {t('useOld')}
         </NavItemButton>
       )}
       {user.enrolledCourses.length > 0 && (
-        <NavItemButton to="/chats" path="chats/*" current={pathname} icon={<BookmarksOutlined sx={styles.icon} />}>
+        <NavItemButton to="/chats" path="chats/*" current={pathname} icon={<BookmarksOutlined sx={styles.icon} />} vertical={vertical}>
           {t('chats')}
         </NavItemButton>
       )}
       {user.ownCourses.length > 0 && (
-        <NavItemButton to="/courses" path="courses/*" current={pathname} icon={<BookmarksOutlined sx={styles.icon} />}>
+        <NavItemButton to="/courses" path="courses/*" current={pathname} icon={<BookmarksOutlined sx={styles.icon} />} vertical={vertical}>
           {t('courses')}
         </NavItemButton>
       )}
       {user.isStatsViewer && (
-        <NavItemButton to="/statistics" path="statistics/*" current={pathname} icon={<AdminPanelSettingsOutlined sx={styles.icon} />}>
+        <NavItemButton to="/statistics" path="statistics/*" current={pathname} icon={<AdminPanelSettingsOutlined sx={styles.icon} />} vertical={vertical}>
           {t('courseStats')}
         </NavItemButton>
       )}
       {user.isAdmin && (
-        <NavItemButton to="/admin" path="admin/*" current={pathname} icon={<AdminPanelSettingsOutlined sx={styles.icon} />}>
+        <NavItemButton to="/admin" path="admin/*" current={pathname} icon={<AdminPanelSettingsOutlined sx={styles.icon} />} vertical={vertical}>
           {t('admin')}
         </NavItemButton>
       )}
