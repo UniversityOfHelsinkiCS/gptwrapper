@@ -260,19 +260,21 @@ export const ChatBox = ({
             </Tooltip>
           </Box>
 
-          <Tooltip
-            arrow
-            placement="top"
-            title={
-              <Typography variant="body2" sx={{ p: 1 }}>
-                {t('chat:settings')}
-              </Typography>
-            }
-          >
-            <OutlineButtonBlack sx={{ display: { xs: 'block', lg: 'none' } }} onClick={() => setChatLeftSidePanelOpen(true)} id="left-panel-open">
-              <SettingsIcon sx={{ color: 'rgba(0, 0, 0, 0.7)' }} />
-            </OutlineButtonBlack>
-          </Tooltip>
+          {!isEmbedded && (
+            <Tooltip
+              arrow
+              placement="top"
+              title={
+                <Typography variant="body2" sx={{ p: 1 }}>
+                  {t('chat:settings')}
+                </Typography>
+              }
+            >
+              <OutlineButtonBlack sx={{ display: { xs: 'block', lg: 'none' } }} onClick={() => setChatLeftSidePanelOpen(true)} id="left-panel-open">
+                <SettingsIcon sx={{ color: 'rgba(0, 0, 0, 0.7)' }} />
+              </OutlineButtonBlack>
+            </Tooltip>
+          )}
         </Box>
       </Box>
     </Box>
