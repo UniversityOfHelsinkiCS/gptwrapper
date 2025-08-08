@@ -196,7 +196,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             disabled={!isPromptEditable}
             hidden={isPromptHidden}
             instructions={assistantInstructions}
-            setInstructions={setAssistantInstructions}
             instructionsInputFieldRef={instructionsInputFieldRef}
           />
           {!isPromptHidden && (
