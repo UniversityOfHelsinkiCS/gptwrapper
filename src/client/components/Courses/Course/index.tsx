@@ -267,6 +267,8 @@ const Course = () => {
             height: '80vh',
             background: 'white',
             padding: '2rem',
+            overflowY: 'scroll'
+
           }}
         >
           <ActionUserSearch
