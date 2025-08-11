@@ -513,7 +513,6 @@ export const ChatV2 = () => {
             handleCancel={handleCancel}
             handleContinue={(newMessage) => handleSubmit(newMessage, true)}
             handleSubmit={(newMessage) => {
-              console.log('handle submit called!')
               chatScroll.shouldScroll.current = true
               chatScroll.autoScroll()
               handleSubmit(newMessage, false)
@@ -562,6 +561,8 @@ export const ChatV2 = () => {
             borderLeft: '1px solid rgba(0,0,0,0.12)',
             width: 400,
             minWidth: 400,
+            // Padding for navbar
+            paddingTop: !isEmbeddedMode ? '4rem' : '0',
           }}
         >
           <Box
