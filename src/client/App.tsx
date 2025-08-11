@@ -126,10 +126,9 @@ const Layout = () => {
         ref={appRef}
       >
         {!isEmbedded && <NavBar />}
-        <Box sx={{ flex: 1 }}>
+        <Box sx={{ flex: 1, overscrollBehavior: 'none' }}>
           <Outlet />
         </Box>
-        {!isEmbedded && <Footer />}
         <Feedback />
       </Box>
       <AdminLoggedInAsBanner />

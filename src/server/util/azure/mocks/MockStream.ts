@@ -24,7 +24,7 @@ class MockStream {
     while (this.index < this.events.length) {
       // Longer delay for simulating responses creation
       if (this.index === 0) {
-        await new Promise((r) => setTimeout(r, 800))
+        await new Promise((r) => setTimeout(r, 400))
       }
 
       const event = this.events[this.index++]
