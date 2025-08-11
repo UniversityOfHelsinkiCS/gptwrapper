@@ -199,7 +199,7 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
 
   return (
     <Box
-      p={{ xs: 1, md: 3 }}
+      p="1rem"
       sx={{
         width: '100%',
         height: '100%',
@@ -232,9 +232,6 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
         <IconButton
           id="close-annotations"
           sx={{
-            position: 'absolute',
-            top: 10,
-            right: 20,
             color: 'grey.500',
             background: '#FFF',
             opacity: 0.9,

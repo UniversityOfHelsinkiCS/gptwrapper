@@ -35,10 +35,10 @@ const Footer = () => {
   return (
     <Box
       component="footer"
-      sx={(theme) => ({
+      sx={{
         mt: 'auto',
         width: '100%',
-      })}
+      }}
     >
       <Box sx={styles.supportBox}>
         <Box>
@@ -56,7 +56,7 @@ const Footer = () => {
 
         <Box>
           <Link href="https://toska.dev" target="_blank" rel="noopener" underline="hover">
-            <img src={toskaColor} alt="Toska" width="70" />
+            <img src={toskaColor} alt="Toska" width="40" />
           </Link>
         </Box>
       </Box>

@@ -126,7 +126,7 @@ const Layout = () => {
         ref={appRef}
       >
         {!isEmbedded && <NavBar />}
-        <Box sx={{ flex: 1, overscrollBehavior: 'none' }}>
+        <Box sx={{ flex: 1 }}>
           <Outlet />
         </Box>
         <Feedback />

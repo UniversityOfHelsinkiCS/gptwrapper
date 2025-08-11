@@ -348,11 +348,9 @@ export const ChatV2 = () => {
       sx={{
         display: 'flex',
         flexDirection: 'row',
-        // height: '100%',
         width: '100%',
         maxWidth: '100%',
         overflowX: 'clip',
-        overscrollBehavior: 'none',
       }}
     >
       {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
@@ -566,6 +564,7 @@ export const ChatV2 = () => {
             borderLeft: '1px solid rgba(0,0,0,0.12)',
             width: 400,
             minWidth: 400,
+            paddingTop: !isEmbeddedMode ? '4rem' : 0,
           }}
         >
           <Annotations fileSearchResult={activeFileSearchResult} setShowAnnotations={setShowAnnotations} />
