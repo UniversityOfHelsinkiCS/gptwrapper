@@ -114,16 +114,9 @@ const Course = () => {
       refetchCourse()
     }
   }
- const isAlreadyAssigned = (user: User) => {
-      const existsAlready: Responsebility | undefined = chatInstance.responsibilities.find((r: Responsebility) => {return r.user.id === user.id})
-      console.log(chatInstance.responsibilities)
-      console.log(user)
-      console.log(existsAlready)
-      return existsAlready != undefined
-  }
-
-  const drawActionComponent = (user: User) => {
-       const isResponsible = isAlreadyAssigned(user)
+   const drawActionComponent = (user: User) => {
+      const usersResponsibility: Responsebility | undefined = responsibilities.find((r: Responsebility) => {return r.user.id === user.id})
+       const isResponsible = usersResponsibility != undefined
     return (
       <>
       {!isResponsible ? 
@@ -132,8 +125,13 @@ const Course = () => {
 
       </Button>
     :
-    <Typography>vastuussa</Typography>
-      }
+     <AssignedResponsibilityManagement
+        handleRemove={() => {
+          handleRemoveResponsibility(usersResponsibility)
+        }}
+        responsibility={usersResponsibility}
+      />
+    }
       </>
     )
   }
@@ -269,8 +267,8 @@ const Course = () => {
       >
         <Box
           sx={{
-            width: '80vw',
-            height: '80vh',
+            width: '90vw',
+            height: '90vh',
             background: 'white',
             padding: '2rem',
             overflowY: 'scroll',
@@ -309,7 +307,7 @@ const Course = () => {
 const AssignedResponsibilityManagement = ({ responsibility, handleRemove }) => {
   const { t } = useTranslation()
   if (!responsibility.createdByUserId) {
-    return <Stack direction={'row'} sx={{ marginLeft: 'auto', alignItems: 'center', height: '1rem' }}></Stack>
+    return <Stack direction={'row'} sx={{ marginLeft: 'auto', alignItems: 'center', height: '1rem' }}>sisu</Stack>
   }
   return (
     <Stack direction={'row'} sx={{ marginLeft: 'auto', alignItems: 'center', height: '1rem' }}>
