@@ -285,7 +285,8 @@
     "prompts": "Prompts",
     "rag": "RAG",
     "remove": "remove",
-    "customResponsibility": "manually added"
+    "customResponsibility": "manually added",
+    "add": "add"
   },
   "tooltip": {
     "copied": "Copied!"

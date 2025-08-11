@@ -10,7 +10,7 @@ import useCourse from '../../../hooks/useCourse'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import { useCreatePromptMutation, useDeletePromptMutation } from '../../../hooks/usePromptMutation'
 import usePrompts from '../../../hooks/usePrompts'
-import type { Message as MessageType, Responsebility } from '../../../types'
+import type { Message as MessageType, Responsebility, User } from '../../../types'
 import Conversation from '../../Chat/Conversation'
 import SystemMessage from '../../Chat/SystemMessage'
 import Rag from '../../Rag/Rag'
@@ -23,10 +23,12 @@ import Discussion from './Discussions'
 import { ApiErrorView } from '../../common/ApiErrorView'
 import apiClient from '../../../util/apiClient'
 import { t } from 'i18next'
+import UserTable from '../../Admin/Usage/UserTable'
+import UserSearch, { ActionUserSearch } from '../../Admin/UserSearch'
 
 const Course = () => {
   const [showTeachers, setShowTeachers] = useState(false)
-
+  const [addTeacherViewOpen, setAddTeacherViewOpen] = useState(false)
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
   const [responsibilities, setResponsibilities] = useState<Responsebility[]>([])
   const { id } = useParams() as { id: string }
@@ -104,9 +106,8 @@ const Course = () => {
     boxSizing: 'borderBox',
     height: '40px',
   }
-  const handleAddResponsible = async (e) => {
-    e.preventDefault()
-    const username = e.target.username.value
+  const handleAddResponsible = async (user: User) => {
+    const username = user.username
     const result = await apiClient.post(`/courses/${course.id}/responsibilities/assign`, { username: username })
     if(result.status === 200){
       const responsibility = result.data
@@ -207,10 +208,7 @@ const Course = () => {
               </Button>
               {showTeachers && (
                 <Box>
-                  <Form onSubmit={handleAddResponsible}>
-                    <TextField name="username" placeholder={'käyttäjänimi: '}></TextField>
-                    <Button type={'submit'}>Lisää</Button>
-                  </Form>
+                    <Button onClick = {() => {setAddTeacherViewOpen(true)}}>{t('course:add')}</Button>
                   <Stack sx={{margin: 1, padding: 1, borderColor: 'gray', borderWidth: 1, borderStyle: 'solid'}}>
                     {responsibilities.map((responsibility) => (
                       <Box  key={responsibility.id} sx={{display: 'flex', alignItems: 'center', padding: 1}}>
@@ -225,6 +223,23 @@ const Course = () => {
           )}
         </Paper>
       </Box>
+
+      <Modal sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }} open={addTeacherViewOpen} onClose={() => setAddTeacherViewOpen(false)}>
+        <Box sx={{
+          width: '80vw',
+          height: '80vh',
+          background: 'white',
+          padding: '2rem'
+        }}>
+
+          <ActionUserSearch onSelect = {(user: User) => {handleAddResponsible(user)}} actionText={t('course:add')} actionButtonText={t('course:add')}/>
+
+        </Box>
+      </Modal>
 
       <Modal open={activityPeriodFormOpen} onClose={() => setActivityPeriodFormOpen(false)}>
         <EditCourseForm course={course} setOpen={setActivityPeriodFormOpen} user={user} />
