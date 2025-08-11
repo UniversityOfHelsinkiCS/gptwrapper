@@ -114,11 +114,27 @@ const Course = () => {
       refetchCourse()
     }
   }
+ const isAlreadyAssigned = (user: User) => {
+      const existsAlready: Responsebility | undefined = chatInstance.responsibilities.find((r: Responsebility) => {return r.user.id === user.id})
+      console.log(chatInstance.responsibilities)
+      console.log(user)
+      console.log(existsAlready)
+      return existsAlready != undefined
+  }
+
   const drawActionComponent = (user: User) => {
+       const isResponsible = isAlreadyAssigned(user)
     return (
+      <>
+      {!isResponsible ? 
       <Button onClick={() => handleAddResponsible(user)}>
         {t('course:add')}
+
       </Button>
+    :
+    <Typography>vastuussa</Typography>
+      }
+      </>
     )
   }
   const handleRemoveResponsibility = async (responsibility) => {
