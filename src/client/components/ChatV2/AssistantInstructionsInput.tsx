@@ -1,34 +1,38 @@
 import { TextField, Typography } from '@mui/material'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
-const VisibilityOff = () => (
-  <div style={{ display: 'flex', alignItems: 'center' }}>
-    <Typography variant="body1" color="textSecondary" style={{ marginRight: 8 }}>
-      Tämä alustus on piilotettu
-    </Typography>
-    <VisibilityOffIcon fontSize="small" />
-  </div>
-)
+const VisibilityOff = () => {
+  const { t } = useTranslation()
+  return (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <Typography variant="body1" color="textSecondary" style={{ marginRight: 8 }}>
+        {t('chatV2.hiddenInstructions')}
+      </Typography>
+      <VisibilityOffIcon fontSize="small" />
+    </div>
+  )
+}
 
 export default function AssistantInstructionsInput({
   label,
   disabled,
   hidden,
   instructions,
-  setInstructions,
   instructionsInputFieldRef,
 }: {
   label: string
   disabled: boolean
   hidden: boolean
   instructions: string
-  setInstructions: (instructions: string) => void
-  instructionsInputFieldRef: any
+  instructionsInputFieldRef: React.RefObject<HTMLInputElement>
 }): JSX.Element {
   useEffect(() => {
-    instructionsInputFieldRef.current.value = instructions //this change will be seen since the assistantInstructions is also updated
-  }, [instructions])
+    if (instructionsInputFieldRef.current) {
+      instructionsInputFieldRef.current.value = instructions
+    }
+  }, [instructions, instructionsInputFieldRef.current])
   return hidden ? (
     <TextField disabled={true} label={<VisibilityOff />} />
   ) : (

@@ -45,7 +45,7 @@ const styles: { [key: string]: SxProps<Theme> } = {
       backgroundColor: 'rgba(255, 255, 255, 0.22)',
     },
   },
-  icon: { mr: 1, fontSize: '1rem' },
+  icon: { fontSize: '1rem' },
   language: { mr: 1 },
   item: {
     flexGrow: 1,

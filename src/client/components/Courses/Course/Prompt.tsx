@@ -9,6 +9,7 @@ import { Response } from '../../Chat/Conversation'
 import SystemMessage from '../../Chat/SystemMessage'
 import { useEditPromptMutation } from '../../../hooks/usePromptMutation'
 import { useParams, Link as RouterLink } from 'react-router-dom'
+import { IframeCopy } from '../../common/IframeCopy'
 
 const ExpandButton = ({ expand, setExpand }: { expand: boolean; setExpand: SetState<boolean> }) => (
   <Button onClick={() => setExpand(!expand)}>{expand ? <ExpandLess /> : <ExpandMore />}</Button>
@@ -80,11 +81,12 @@ const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptTyp
                   <Link component={RouterLink} to={chatPath} variant="caption">
                     {t('course:directPromptLink')}
                   </Link>
-                  <Tooltip title={t('course:copyDirectPromptLinkInfo')} placement="right">
+                  <Tooltip title={t('course:copyDirectPromptLinkInfo')}>
                     <IconButton size="small" onClick={() => navigator.clipboard.writeText(directLink)}>
                       <ContentCopyOutlined fontSize="small" />
                     </IconButton>
                   </Tooltip>
+                  <IframeCopy courseId={courseId!} promptId={prompt.id} />
                 </Box>
               </Box>
             ) : (

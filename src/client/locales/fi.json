@@ -40,7 +40,8 @@
     "curreTitle": "Curre",
     "tryNew": "Kokeile uutta chattiä",
     "close": "Sulje",
-    "useOld": "Vanha chattinäkymä"
+    "useOld": "Vanha chattinäkymä",
+    "iframeCopy": "Kopioi upotettava iframe-elementti:\n\n{{- iframeHtml}}"
   },
   "stats": {
     "showing": "Näytetään",
@@ -107,7 +108,7 @@
   },
   "settings": {
     "prompt": "Keskustelun alustus",
-    "promptInstructions": "Alustuksella tarkoitetaan yleistason ohjeistusta keskustelulle. Kielimallia voi esimerkiksi pyytää käyttämään akateemista kieltä tai esittämään puutarhuria jota haastatellaan kaktusten hoidosta.",
+    "promptInstructions": "Alustuksella tarkoitetaan yleistason ohjeistusta keskustelulle. Kielimallia voi esimerkiksi pyytää käyttämään akateemista kieltä tai esittämään puutarhuria, jota haastatellaan kaktusten hoidosta.",
     "promptContent": "Alustuksen sisältö",
     "promptLocked": "lukittu",
     "courseMaterials": "Kurssichatin materiaalit",

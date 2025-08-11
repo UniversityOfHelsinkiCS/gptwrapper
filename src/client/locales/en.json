@@ -40,7 +40,8 @@
     "copy": "Copy",
     "tryNew": "Try the new chat",
     "close": "Close",
-    "useOld": "Old chat view"
+    "useOld": "Old chat view",
+    "iframeCopy": "Copy embeddable iframe element:\n\n{{- iframeHtml}}"
   },
   "stats": {
     "timePeriodStart": "Starting",

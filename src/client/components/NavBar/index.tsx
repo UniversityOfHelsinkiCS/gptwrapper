@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, matchPath, useLocation } from 'react-router-dom'
 import {
   AppBar,
   Toolbar,
@@ -85,59 +85,68 @@ const NavBar = () => {
         }}
       >
         <Stack sx={{ paddingTop: 4, paddingRight: 4 }}>
-          {!isDesktopDevice && <NavItems user={user} t={t} languages={languages} handleLanguageChange={handleLanguageChange} language={language} />}
+          {!isDesktopDevice && <NavItems user={user} t={t} languages={languages} handleLanguageChange={handleLanguageChange} language={language} vertical />}
         </Stack>
       </Drawer>
     </>
   )
 }
+const NavItemButton = ({ children, to, path, current, icon, vertical }) => {
+  const borderSide = vertical ? 'Left' : 'Bottom'
+  return (
+    <Button
+      component={Link}
+      to={to}
+      size="small"
+      variant="text"
+      startIcon={icon}
+      sx={{
+        [`border${borderSide}`]: '2px solid',
+        borderRadius: '0',
+        [`border${borderSide}Color`]: matchPath({ path: path }, current) ? 'primary.main' : 'transparent',
+      }}
+    >
+      {children}
+    </Button>
+  )
+}
 
-const NavItems = ({ user, t, languages, handleLanguageChange, language }) => {
+const NavItems = ({ user, t, languages, handleLanguageChange, language, vertical = false }) => {
   const anchorRef = useRef<HTMLButtonElement>(null)
+  const { pathname } = useLocation()
   const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
+
   return (
     <>
       {user?.preferences?.chatVersion !== 2 && (
-        <Link to="/v2" style={{ textDecoration: 'none' }}>
-          <Button>
-            <GradeOutlined sx={styles.icon} /> {t('tryNew')}
-          </Button>
-        </Link>
+        <NavItemButton to="/v2" path="v2/*" current={pathname} icon={<GradeOutlined sx={styles.icon} />} vertical={vertical}>
+          {t('tryNew')}
+        </NavItemButton>
       )}
       {user?.preferences?.chatVersion !== 1 && (
-        <Link to="/v1" style={{ textDecoration: 'none' }}>
-          <Button>
-            <GradeOutlined sx={styles.icon} /> {t('useOld')}
-          </Button>
-        </Link>
+        <NavItemButton to="/v1" path="v1/*" current={pathname} icon={<GradeOutlined sx={styles.icon} />} vertical={vertical}>
+          {t('useOld')}
+        </NavItemButton>
       )}
       {user.enrolledCourses.length > 0 && (
-        <Link to="/chats" style={{ textDecoration: 'none' }}>
-          <Button>
-            <BookmarksOutlined sx={styles.icon} /> {t('chats')}
-          </Button>
-        </Link>
+        <NavItemButton to="/chats" path="chats/*" current={pathname} icon={<BookmarksOutlined sx={styles.icon} />} vertical={vertical}>
+          {t('chats')}
+        </NavItemButton>
       )}
       {user.ownCourses.length > 0 && (
-        <Link to="/courses" style={{ textDecoration: 'none' }}>
-          <Button>
-            <BookmarksOutlined sx={styles.icon} /> {t('courses')}
-          </Button>
-        </Link>
+        <NavItemButton to="/courses" path="courses/*" current={pathname} icon={<BookmarksOutlined sx={styles.icon} />} vertical={vertical}>
+          {t('courses')}
+        </NavItemButton>
       )}
       {user.isStatsViewer && (
-        <Link to="/statistics" style={{ textDecoration: 'none' }}>
-          <Button>
-            <AdminPanelSettingsOutlined sx={styles.icon} /> {t('courseStats')}
-          </Button>
-        </Link>
+        <NavItemButton to="/statistics" path="statistics/*" current={pathname} icon={<AdminPanelSettingsOutlined sx={styles.icon} />} vertical={vertical}>
+          {t('courseStats')}
+        </NavItemButton>
       )}
       {user.isAdmin && (
-        <Link to="/admin" style={{ textDecoration: 'none' }}>
-          <Button>
-            <AdminPanelSettingsOutlined sx={styles.icon} /> {t('admin')}
-          </Button>
-        </Link>
+        <NavItemButton to="/admin" path="admin/*" current={pathname} icon={<AdminPanelSettingsOutlined sx={styles.icon} />} vertical={vertical}>
+          {t('admin')}
+        </NavItemButton>
       )}
       <Button
         ref={anchorRef}
