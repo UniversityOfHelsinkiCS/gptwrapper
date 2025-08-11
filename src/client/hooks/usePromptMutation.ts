@@ -17,6 +17,7 @@ interface NewPromptData {
 
 export const useCreatePromptMutation = () => {
   const mutationFn = async (data: NewPromptData) => {
+    console.log(data)
     const res = await apiClient.post(`/prompts`, data)
 
     const prompt = res.data

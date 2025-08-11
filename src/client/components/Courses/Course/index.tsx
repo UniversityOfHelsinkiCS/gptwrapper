@@ -1,5 +1,21 @@
 import { Edit, OpenInNew } from '@mui/icons-material'
-import { Alert, Box, Button, Checkbox, Container, FormControlLabel, Input, Modal, Paper, Skeleton, Stack, Tab, TextField, Tooltip, Typography } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  Container,
+  FormControlLabel,
+  Input,
+  Modal,
+  Paper,
+  Skeleton,
+  Stack,
+  Tab,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -35,22 +51,22 @@ const Course = () => {
   const { language } = i18n
 
   const { user, isLoading: userLoading } = useCurrentUser()
-  const { data: course, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(id)
-  console.log(course)
+  const { data: chatInstance, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(id)
+  console.log(chatInstance)
   if (error) {
     return <ApiErrorView error={error} />
   }
   useEffect(() => {
-    if(isCourseSuccess){
-      setResponsibilities(course?.responsibilities)
+    if (isCourseSuccess) {
+      setResponsibilities(chatInstance?.responsibilities)
     }
   }, [isCourseSuccess])
 
   if (userLoading || !user || !isCourseSuccess) return null
 
-  const studentLink = `${window.location.origin}${PUBLIC_URL}/${course.courseId}`
+  const studentLink = `${window.location.origin}${PUBLIC_URL}/${chatInstance.courseId}`
 
-  const amongResponsibles = course.responsibilities ? course.responsibilities.some((r) => r.user.id === user.id) : false
+  const amongResponsibles = chatInstance.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user.id) : false
 
   if (!user.isAdmin && !amongResponsibles) {
     return (
@@ -65,13 +81,14 @@ const Course = () => {
     enqueueSnackbar(t('linkCopied'), { variant: 'info' })
   }
 
-  const courseEnabled = course.usageLimit > 0
+  const courseEnabled = chatInstance.usageLimit > 0
 
-  const isCourseActive = courseEnabled && Date.parse(course.activityPeriod.endDate) > Date.now() && Date.parse(course.activityPeriod.startDate) <= Date.now()
+  const isCourseActive =
+    courseEnabled && Date.parse(chatInstance.activityPeriod.endDate) > Date.now() && Date.parse(chatInstance.activityPeriod.startDate) <= Date.now()
 
-  const willBeEnabled = courseEnabled && Date.parse(course.activityPeriod.startDate) > Date.now()
+  const willBeEnabled = courseEnabled && Date.parse(chatInstance.activityPeriod.startDate) > Date.now()
 
-  const wasEnabled = courseEnabled && Date.parse(course.activityPeriod.endDate) < Date.now()
+  const wasEnabled = courseEnabled && Date.parse(chatInstance.activityPeriod.endDate) < Date.now()
 
   const getInfoSeverity = () => {
     if (!courseEnabled) return 'warning'
@@ -82,8 +99,8 @@ const Course = () => {
   const getInfoMessage = () => {
     if (!courseEnabled) return t('course:curreNotOpen')
     if (isCourseActive) return t('course:curreOpen')
-    if (willBeEnabled) return `${t('course:curreWillBeOpen')} ${course.activityPeriod.startDate}`
-    if (wasEnabled) return `${t('course:curreWasOpen')} ${course.activityPeriod.endDate}`
+    if (willBeEnabled) return `${t('course:curreWillBeOpen')} ${chatInstance.activityPeriod.startDate}`
+    if (wasEnabled) return `${t('course:curreWasOpen')} ${chatInstance.activityPeriod.endDate}`
     return ''
   }
 
@@ -107,17 +124,16 @@ const Course = () => {
   const handleAddResponsible = async (e) => {
     e.preventDefault()
     const username = e.target.username.value
-    const result = await apiClient.post(`/courses/${course.id}/responsibilities/assign`, { username: username })
-    if(result.status === 200){
+    const result = await apiClient.post(`/courses/${chatInstance.id}/responsibilities/assign`, { username: username })
+    if (result.status === 200) {
       const responsibility = result.data
       setResponsibilities([...responsibilities, responsibility])
       refetchCourse()
     }
-
   }
   const handleRemoveResponsibility = async (responsibility) => {
-    const result = await apiClient.post(`/courses/${course.id}/responsibilities/remove`, { username: responsibility.user?.username })
-    if(result.status === 200){
+    const result = await apiClient.post(`/courses/${chatInstance.id}/responsibilities/remove`, { username: responsibility.user?.username })
+    if (result.status === 200) {
       const filteredResponsibilities = responsibilities.filter((r) => r.id !== responsibility.id)
       setResponsibilities(filteredResponsibilities)
     }
@@ -139,24 +155,24 @@ const Course = () => {
         >
           <div style={{ display: 'flex', flexWrap: 'wrap' }}>
             <div style={{ ...full, boxSizing: 'border-box', height: '50px' }}>
-              <Typography variant="h5">{course.name[language]}</Typography>
+              <Typography variant="h5">{chatInstance.name[language]}</Typography>
             </div>
 
             <div style={{ ...left, boxSizing: 'border-box', height: '50px' }}>
-              <Typography>{course.courseUnits.map((cu) => cu.code).join(', ')}</Typography>
+              <Typography>{chatInstance.courseUnits.map((cu) => cu.code).join(', ')}</Typography>
             </div>
             <div style={{ ...right, boxSizing: 'border-box', height: '50px' }}>
-              <Typography style={{ fontStyle: 'italic' }}>{getCurTypeLabel(course.courseUnitRealisationTypeUrn ?? '', language)}</Typography>
+              <Typography style={{ fontStyle: 'italic' }}>{getCurTypeLabel(chatInstance.courseUnitRealisationTypeUrn ?? '', language)}</Typography>
             </div>
 
             <div style={{ ...left, boxSizing: 'border-box' }}>
               <Typography>
-                {t('active')} {formatDate(course.activityPeriod)}
+                {t('active')} {formatDate(chatInstance.activityPeriod)}
               </Typography>
             </div>
 
             <div style={{ ...right, boxSizing: 'border-box' }}>
-              <Link to={`https://studies.helsinki.fi/kurssit/toteutus/${course.courseId}`} target="_blank">
+              <Link to={`https://studies.helsinki.fi/kurssit/toteutus/${chatInstance.courseId}`} target="_blank">
                 {t('course:coursePage')} <OpenInNew fontSize="small" />
               </Link>
             </div>
@@ -164,8 +180,8 @@ const Course = () => {
             {courseEnabled && (
               <div style={{ ...left, boxSizing: 'border-box' }}>
                 <Typography>
-                  {t('admin:model')}: {course.model} <span style={{ marginRight: 20 }} />
-                  {t('admin:usageLimit')}: {course.usageLimit}
+                  {t('admin:model')}: {chatInstance.model} <span style={{ marginRight: 20 }} />
+                  {t('admin:usageLimit')}: {chatInstance.usageLimit}
                 </Typography>
               </div>
             )}
@@ -211,11 +227,18 @@ const Course = () => {
                     <TextField name="username" placeholder={'käyttäjänimi: '}></TextField>
                     <Button type={'submit'}>Lisää</Button>
                   </Form>
-                  <Stack sx={{margin: 1, padding: 1, borderColor: 'gray', borderWidth: 1, borderStyle: 'solid'}}>
+                  <Stack sx={{ margin: 1, padding: 1, borderColor: 'gray', borderWidth: 1, borderStyle: 'solid' }}>
                     {responsibilities.map((responsibility) => (
-                      <Box  key={responsibility.id} sx={{display: 'flex', alignItems: 'center', padding: 1}}>
-                        <Typography>{responsibility.user.last_name} {responsibility.user.first_names}</Typography>
-                        <AssignedResponsibilityManagement handleRemove={() => {handleRemoveResponsibility(responsibility)}} responsibility={responsibility}/>
+                      <Box key={responsibility.id} sx={{ display: 'flex', alignItems: 'center', padding: 1 }}>
+                        <Typography>
+                          {responsibility.user.last_name} {responsibility.user.first_names}
+                        </Typography>
+                        <AssignedResponsibilityManagement
+                          handleRemove={() => {
+                            handleRemoveResponsibility(responsibility)
+                          }}
+                          responsibility={responsibility}
+                        />
                       </Box>
                     ))}
                   </Stack>
@@ -227,7 +250,7 @@ const Course = () => {
       </Box>
 
       <Modal open={activityPeriodFormOpen} onClose={() => setActivityPeriodFormOpen(false)}>
-        <EditCourseForm course={course} setOpen={setActivityPeriodFormOpen} user={user} />
+        <EditCourseForm course={chatInstance} setOpen={setActivityPeriodFormOpen} user={user} />
       </Modal>
 
       <Box my={2}>
@@ -242,29 +265,27 @@ const Course = () => {
       <Routes>
         <Route path="/" element={<Stats courseId={id} />} />
         <Route path={`/discussions/*`} element={<Discussion />} />
-        <Route path="/prompts" element={<Prompts courseId={id} />} />
+        <Route path="/prompts" element={<Prompts courseId={id} chatInstanceId={chatInstance.id} />} />
         <Route path="/rag" element={<Rag />} />
       </Routes>
     </Container>
   )
 }
 
-const AssignedResponsibilityManagement = ({responsibility, handleRemove}) => {
+const AssignedResponsibilityManagement = ({ responsibility, handleRemove }) => {
   const { t, i18n } = useTranslation()
-  if(!responsibility.createdByUserId){
-   return (
-    <Stack direction={'row'} sx={{marginLeft: 'auto', alignItems: 'center', height: '1rem'}} >
-    </Stack>
-  )}
+  if (!responsibility.createdByUserId) {
+    return <Stack direction={'row'} sx={{ marginLeft: 'auto', alignItems: 'center', height: '1rem' }}></Stack>
+  }
   return (
-    <Stack direction={'row'} sx={{marginLeft: 'auto', alignItems: 'center', height: '1rem'}} >
+    <Stack direction={'row'} sx={{ marginLeft: 'auto', alignItems: 'center', height: '1rem' }}>
       <Typography>{t('course:customResponsibility')}</Typography>
       <Button onClick={handleRemove}>{t('course:remove')}</Button>
     </Stack>
   )
 }
 
-const Prompts = ({ courseId }: { courseId: string }) => {
+const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceId: string }) => {
   const { t } = useTranslation()
   const [name, setName] = useState('')
   const [system, setSystem] = useState('')
@@ -290,7 +311,7 @@ const Prompts = ({ courseId }: { courseId: string }) => {
   const handleSave = async () => {
     try {
       await createMutation.mutateAsync({
-        chatInstanceId: courseId,
+        chatInstanceId,
         type: 'CHAT_INSTANCE',
         name,
         systemMessage: system,
