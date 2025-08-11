@@ -1,5 +1,21 @@
 import { Edit, OpenInNew } from '@mui/icons-material'
-import { Alert, Box, Button, Checkbox, Container, FormControlLabel, Input, Modal, Paper, Skeleton, Stack, Tab, TextField, Tooltip, Typography } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  Container,
+  FormControlLabel,
+  Input,
+  Modal,
+  Paper,
+  Skeleton,
+  Stack,
+  Tab,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -43,7 +59,7 @@ const Course = () => {
     return <ApiErrorView error={error} />
   }
   useEffect(() => {
-    if(isCourseSuccess){
+    if (isCourseSuccess) {
       setResponsibilities(course?.responsibilities)
     }
   }, [isCourseSuccess])
@@ -109,16 +125,15 @@ const Course = () => {
   const handleAddResponsible = async (user: User) => {
     const username = user.username
     const result = await apiClient.post(`/courses/${course.id}/responsibilities/assign`, { username: username })
-    if(result.status === 200){
+    if (result.status === 200) {
       const responsibility = result.data
       setResponsibilities([...responsibilities, responsibility])
       refetchCourse()
     }
-
   }
   const handleRemoveResponsibility = async (responsibility) => {
     const result = await apiClient.post(`/courses/${course.id}/responsibilities/remove`, { username: responsibility.user?.username })
-    if(result.status === 200){
+    if (result.status === 200) {
       const filteredResponsibilities = responsibilities.filter((r) => r.id !== responsibility.id)
       setResponsibilities(filteredResponsibilities)
     }
@@ -208,12 +223,25 @@ const Course = () => {
               </Button>
               {showTeachers && (
                 <Box>
-                    <Button onClick = {() => {setAddTeacherViewOpen(true)}}>{t('course:add')}</Button>
-                  <Stack sx={{margin: 1, padding: 1, borderColor: 'gray', borderWidth: 1, borderStyle: 'solid'}}>
+                  <Button
+                    onClick={() => {
+                      setAddTeacherViewOpen(true)
+                    }}
+                  >
+                    {t('course:add')}
+                  </Button>
+                  <Stack sx={{ margin: 1, padding: 1, borderColor: 'gray', borderWidth: 1, borderStyle: 'solid' }}>
                     {responsibilities.map((responsibility) => (
-                      <Box  key={responsibility.id} sx={{display: 'flex', alignItems: 'center', padding: 1}}>
-                        <Typography>{responsibility.user.last_name} {responsibility.user.first_names}</Typography>
-                        <AssignedResponsibilityManagement handleRemove={() => {handleRemoveResponsibility(responsibility)}} responsibility={responsibility}/>
+                      <Box key={responsibility.id} sx={{ display: 'flex', alignItems: 'center', padding: 1 }}>
+                        <Typography>
+                          {responsibility.user.last_name} {responsibility.user.first_names}
+                        </Typography>
+                        <AssignedResponsibilityManagement
+                          handleRemove={() => {
+                            handleRemoveResponsibility(responsibility)
+                          }}
+                          responsibility={responsibility}
+                        />
                       </Box>
                     ))}
                   </Stack>
@@ -224,20 +252,30 @@ const Course = () => {
         </Paper>
       </Box>
 
-      <Modal sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }} open={addTeacherViewOpen} onClose={() => setAddTeacherViewOpen(false)}>
-        <Box sx={{
-          width: '80vw',
-          height: '80vh',
-          background: 'white',
-          padding: '2rem'
-        }}>
-
-          <ActionUserSearch onSelect = {(user: User) => {handleAddResponsible(user)}} actionText={t('course:add')} actionButtonText={t('course:add')}/>
-
+      <Modal
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+        open={addTeacherViewOpen}
+        onClose={() => setAddTeacherViewOpen(false)}
+      >
+        <Box
+          sx={{
+            width: '80vw',
+            height: '80vh',
+            background: 'white',
+            padding: '2rem',
+          }}
+        >
+          <ActionUserSearch
+            onSelect={(user: User) => {
+              handleAddResponsible(user)
+            }}
+            actionText={t('course:add')}
+            actionButtonText={t('course:add')}
+          />
         </Box>
       </Modal>
 
@@ -264,15 +302,13 @@ const Course = () => {
   )
 }
 
-const AssignedResponsibilityManagement = ({responsibility, handleRemove}) => {
+const AssignedResponsibilityManagement = ({ responsibility, handleRemove }) => {
   const { t, i18n } = useTranslation()
-  if(!responsibility.createdByUserId){
-   return (
-    <Stack direction={'row'} sx={{marginLeft: 'auto', alignItems: 'center', height: '1rem'}} >
-    </Stack>
-  )}
+  if (!responsibility.createdByUserId) {
+    return <Stack direction={'row'} sx={{ marginLeft: 'auto', alignItems: 'center', height: '1rem' }}></Stack>
+  }
   return (
-    <Stack direction={'row'} sx={{marginLeft: 'auto', alignItems: 'center', height: '1rem'}} >
+    <Stack direction={'row'} sx={{ marginLeft: 'auto', alignItems: 'center', height: '1rem' }}>
       <Typography>{t('course:customResponsibility')}</Typography>
       <Button onClick={handleRemove}>{t('course:remove')}</Button>
     </Stack>

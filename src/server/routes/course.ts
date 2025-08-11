@@ -299,7 +299,7 @@ const userAssignedAsResponsible = (userId, chatInstance) => {
   return isResponsible
 }
 
-const getUser = async (id: string):Promise<User | null> => {
+const getUser = async (id: string): Promise<User | null> => {
   const user = await User.findByPk(id)
   if (!user) {
     throw ApplicationError.NotFound('User not found')
@@ -308,7 +308,7 @@ const getUser = async (id: string):Promise<User | null> => {
   return user
 }
 
-const getUserByUsername = async (username: string):Promise<User | null> => {
+const getUserByUsername = async (username: string): Promise<User | null> => {
   const user = await User.findOne({
     where: {
       username: username,
@@ -340,7 +340,7 @@ courseRouter.post('/:id/responsibilities/assign', async (req, res) => {
   const { user } = request
   const chatInstance = await getChatInstance(chatInstanceId)
   const hasPermission = await enforceUserHasFullAccess(user, chatInstanceId)
-  if(!hasPermission){
+  if (!hasPermission) {
     res.status(401).send('Unauthorized')
     return
   }
@@ -371,10 +371,9 @@ courseRouter.post('/:id/responsibilities/assign', async (req, res) => {
       id: userToAssign.id,
       first_names: userToAssign.firstNames,
       last_name: userToAssign.lastName,
-      username: userToAssign.username
-    }
+      username: userToAssign.username,
+    },
   }
-  
 
   res.json(responsibilityToReturn)
 })
@@ -403,7 +402,7 @@ courseRouter.post('/:id/responsibilities/remove', async (req, res) => {
   const { user } = request
   const chatInstance = await getChatInstance(chatInstanceId)
   const hasPermission = await enforceUserHasFullAccess(user, chatInstanceId)
-  if(!hasPermission){
+  if (!hasPermission) {
     res.status(401).send('Unauthorized')
     return
   }
@@ -414,29 +413,28 @@ courseRouter.post('/:id/responsibilities/remove', async (req, res) => {
     return
   }
 
-  const assignedUserId:string = userToRemove.id
-  const userAssignedAlready:boolean = await userAssignedAsResponsible(assignedUserId, chatInstance)
+  const assignedUserId: string = userToRemove.id
+  const userAssignedAlready: boolean = await userAssignedAsResponsible(assignedUserId, chatInstance)
   if (!userAssignedAlready) {
     res.status(400).send('User to remove not found')
     return
   }
 
   const responsibilityToRemove = await Responsibility.findOne({
-     where: {
-       userId: assignedUserId,
-       chatInstanceId: chatInstanceId
-     },
+    where: {
+      userId: assignedUserId,
+      chatInstanceId: chatInstanceId,
+    },
   })
-  if(!responsibilityToRemove?.createdByUserId){
+  if (!responsibilityToRemove?.createdByUserId) {
     res.status(400).send('Can only remove user that has been manually added')
     return
   }
 
-  try{
+  try {
     await responsibilityToRemove?.destroy()
-    res.json({result: "success"})
-  }
-  catch{
+    res.json({ result: 'success' })
+  } catch {
     res.status(500).send('Unknown error occurred')
   }
 })
