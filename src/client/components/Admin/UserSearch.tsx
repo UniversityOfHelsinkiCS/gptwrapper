@@ -154,13 +154,11 @@ const ActionUserTable = ({
                   <b>{t('admin:email')}</b>
                 </Typography>
               </TableCell>
-              <TableCell />
               <TableCell align="left">
                 <Typography variant="h6">
                   <b>{actionText}</b>
                 </Typography>
               </TableCell>
-              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>
