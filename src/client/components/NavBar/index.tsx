@@ -54,7 +54,7 @@ const NavBar = () => {
       <AppBar elevation={0} position="fixed" sx={styles.appbar} color="transparent">
         <Container maxWidth={false}>
           <Toolbar sx={styles.toolbar} disableGutters>
-            <MuiLink to="/" sx={styles.navBox} component={Link} reloadDocument>
+            <MuiLink to="/" sx={styles.navBox} component={Link}>
               <img src={hyLogo} alt="University of Helsinki" width="24" />
               <Box ml="1rem">
                 <Typography sx={styles.appName}>{t('appName')}</Typography>
