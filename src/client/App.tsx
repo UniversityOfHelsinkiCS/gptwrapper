@@ -129,7 +129,6 @@ const Layout = () => {
         <Box sx={{ flex: 1 }}>
           <Outlet />
         </Box>
-        {!isEmbedded && <Footer />}
         <Feedback />
       </Box>
       <AdminLoggedInAsBanner />

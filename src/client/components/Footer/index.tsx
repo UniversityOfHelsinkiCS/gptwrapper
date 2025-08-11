@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import toskaColor from '../../assets/toscalogo_color.svg'
 import { useQuery } from '@tanstack/react-query'
 import { maxBy } from 'lodash'
-import { Release } from '../../../shared/types'
+import type { Release } from '../../../shared/types'
 import { formatDistanceToNow } from 'date-fns'
 import { locales } from '../../locales/locales'
 
@@ -13,7 +13,7 @@ const supportEmail = 'opetusteknologia@helsinki.fi'
 const styles = {
   supportBox: {
     py: '1rem',
-    px: '3rem',
+    px: '1rem',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -42,12 +42,10 @@ const Footer = () => {
   return (
     <Box
       component="footer"
-      sx={(theme) => ({
-        backgroundColor: theme.palette.toskaDark.main,
-        color: theme.palette.toskaDark.contrastText,
+      sx={{
         mt: 'auto',
         width: '100%',
-      })}
+      }}
     >
       <Box sx={styles.supportBox}>
         <Box>
@@ -65,7 +63,7 @@ const Footer = () => {
 
         <Box sx={styles.imageBox}>
           <Link href="https://toska.dev" target="_blank" rel="noopener" underline="hover">
-            <img src={toskaColor} alt="Toska" width="70" />
+            <img src={toskaColor} alt="Toska" width="40" />
           </Link>
         </Box>
       </Box>

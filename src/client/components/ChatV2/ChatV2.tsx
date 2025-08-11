@@ -34,6 +34,7 @@ import EmailButton from './EmailButton'
 import { MenuBookTwoTone, Tune } from '@mui/icons-material'
 import { useChatScroll } from '../../hooks/useChatScroll'
 import { TestUseInfoV2 } from './TestUseInfo'
+import Footer from '../Footer'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -366,7 +367,6 @@ export const ChatV2 = () => {
               sx={{}}
               course={course}
               handleReset={handleReset}
-              user={user}
               t={t}
               setSettingsModalOpen={setSettingsModalOpen}
               setDisclaimerStatus={setDisclaimerStatus}
@@ -381,7 +381,6 @@ export const ChatV2 = () => {
             sx={{ display: { xs: 'none', lg: 'block' }, position: 'sticky', bottom: '0px' }}
             course={course}
             handleReset={handleReset}
-            user={user}
             t={t}
             setSettingsModalOpen={setSettingsModalOpen}
             setDisclaimerStatus={setDisclaimerStatus}
@@ -596,7 +595,6 @@ const LeftMenu = ({
   sx,
   course,
   handleReset,
-  user,
   t,
   setSettingsModalOpen,
   setDisclaimerStatus,
@@ -607,32 +605,34 @@ const LeftMenu = ({
   messages,
 }) => {
   return (
-    <Box sx={sx}>
-      <Box
-        sx={{
-          flex: 1,
-          minWidth: 300,
-          maxWidth: { xs: 300, md: 400 },
-          position: 'relative',
-          height: '100%',
-          borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-        }}
-      >
-        <Box sx={{ position: 'sticky', top: 70, padding: '2rem 1.5rem' }}>
-          {course && <ChatInfo course={course} />}
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', mb: '2rem' }}>
-            <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} id="empty-conversation-button">
-              {t('chat:emptyConversation')}
-            </OutlineButtonBlack>
+    <Box
+      sx={{
+        flex: 1,
+        minWidth: 300,
+        maxWidth: { xs: 300, md: 400 },
+        position: 'relative',
+        height: '100vh',
+        borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+        paddingTop: '4rem',
 
-            <EmailButton messages={messages} disabled={!messages?.length} />
-            <OutlineButtonBlack startIcon={<Tune />} onClick={() => setSettingsModalOpen(true)} id="settings-button">
-              {t('chat:settings')}
-            </OutlineButtonBlack>
-            <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} id="help-button">
-              {t('info:title')}
-            </OutlineButtonBlack>
-          </Box>
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <Box px="1rem">
+        {course && <ChatInfo course={course} />}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', mb: '2rem' }}>
+          <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} id="empty-conversation-button">
+            {t('chat:emptyConversation')}
+          </OutlineButtonBlack>
+
+          <EmailButton messages={messages} disabled={!messages?.length} />
+          <OutlineButtonBlack startIcon={<Tune />} onClick={() => setSettingsModalOpen(true)} id="settings-button">
+            {t('chat:settings')}
+          </OutlineButtonBlack>
+          <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} id="help-button">
+            {t('info:title')}
+          </OutlineButtonBlack>
           {course && showRagSelector && (
             <>
               <Typography variant="h6" sx={{ mb: 1, display: 'flex', gap: 1, alignItems: 'center' }} fontWeight="bold">
@@ -646,7 +646,8 @@ const LeftMenu = ({
             </>
           )}
         </Box>
-      </Box>{' '}
+      </Box>
+      <Footer />
     </Box>
   )
 }
