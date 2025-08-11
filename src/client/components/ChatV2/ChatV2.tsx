@@ -619,7 +619,7 @@ const LeftMenu = ({
         flexDirection: 'column',
       }}
     >
-      <Box px="1rem">
+      <Box p="1rem">
         {course && <ChatInfo course={course} />}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', mb: '2rem' }}>
           <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} id="empty-conversation-button">

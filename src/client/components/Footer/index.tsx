@@ -12,17 +12,9 @@ const supportEmail = 'opetusteknologia@helsinki.fi'
 
 const styles = {
   supportBox: {
-    py: '1rem',
-    px: '1rem',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  imageBox: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    rowGap: '1rem',
   },
 }
 
@@ -45,6 +37,8 @@ const Footer = () => {
       sx={{
         mt: 'auto',
         width: '100%',
+        py: '1rem',
+        px: '1rem',
       }}
     >
       <Box sx={styles.supportBox}>
@@ -60,12 +54,13 @@ const Footer = () => {
           </Typography>
           <Typography variant="caption">{t('footer:version', { version: changelog?.[0]?.version, publishedAgo })}</Typography>
         </Box>
+      </Box>
+      <Box display="flex" flexDirection="column">
+        {/*<Typography variant="caption">Locally and responsibly produced software from University of Helsinki.</Typography>*/}
 
-        <Box sx={styles.imageBox}>
-          <Link href="https://toska.dev" target="_blank" rel="noopener" underline="hover">
-            <img src={toskaColor} alt="Toska" width="40" />
-          </Link>
-        </Box>
+        <Link href="https://toska.dev" target="_blank" rel="noopener" underline="hover">
+          <img src={toskaColor} alt="Toska" width="40" />
+        </Link>
       </Box>
     </Box>
   )
