@@ -114,6 +114,13 @@ const Course = () => {
       refetchCourse()
     }
   }
+  const drawActionComponent = (user: User) => {
+    return (
+      <Button onClick={() => handleAddResponsible(user)}>
+        {t('course:add')}
+      </Button>
+    )
+  }
   const handleRemoveResponsibility = async (responsibility) => {
     const result = await apiClient.post(`/courses/${chatInstance.id}/responsibilities/remove`, { username: responsibility.user?.username })
     if (result.status === 200) {
@@ -254,11 +261,8 @@ const Course = () => {
           }}
         >
           <ActionUserSearch
-            onSelect={(user: User) => {
-              handleAddResponsible(user)
-            }}
             actionText={t('course:add')}
-            actionButtonText={t('course:add')}
+            drawActionComponent={drawActionComponent}
           />
         </Box>
       </Modal>
