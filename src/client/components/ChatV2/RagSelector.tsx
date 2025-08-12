@@ -3,7 +3,7 @@ import { Box, MenuItem, Menu, Typography } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { useState } from 'react'
 import { RagIndexAttributes } from '../../../shared/types'
-import { OutlineButtonBlack } from './generics/Buttons'
+import { OutlineButtonBlack } from './general/Buttons'
 
 const RagSelector = ({
   currentRagIndex,

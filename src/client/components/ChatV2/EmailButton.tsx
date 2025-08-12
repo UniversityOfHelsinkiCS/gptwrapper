@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Message } from '../../types'
 import { sendEmail } from '../../util/email'
-import { OutlineButtonBlack } from './generics/Buttons'
+import { OutlineButtonBlack } from './general/Buttons'
 
 const escapeHtml = (str: string): string =>
   str.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;')
@@ -158,7 +158,7 @@ const formatEmail = (messages: Message[], t: any): string => {
         <head>
             <meta charset="UTF-8">
             <style>
-                body { 
+                body {
                     color: rgba(0, 0, 0, 0.8);
                     line-height: 1.6;
                     margin: 0 auto;

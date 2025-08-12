@@ -7,7 +7,7 @@ import apiClient from '../util/apiClient'
 import { addJustInTimeFields, useAnalytics } from '../stores/analytics'
 import type { FeedbackPost } from '../../shared/feedback'
 import { useSnackbar } from 'notistack'
-import { BlueButton, OutlineButtonBlack, OutlineButtonBlue } from './ChatV2/generics/Buttons'
+import { BlueButton, OutlineButtonBlack, OutlineButtonBlue } from './ChatV2/general/Buttons'
 
 const useSubmitFeedbackMutation = () => {
   const analyticsMetadata = useAnalytics()

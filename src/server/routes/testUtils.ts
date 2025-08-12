@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { inProduction } from '../../config'
 import { ApplicationError } from '../util/ApplicationError'
-import { ChatInstanceRagIndex, Enrolment, RagIndex, User, UserChatInstanceUsage } from '../db/models'
+import { ChatInstanceRagIndex, Enrolment, Prompt, RagIndex, User, UserChatInstanceUsage } from '../db/models'
 import { getTestUserHeaders } from '../../shared/testData'
 import logger from '../util/logger'
 import { TEST_COURSES } from '../../shared/testData'
@@ -19,7 +19,12 @@ router.post('/reset-test-data', async (req, res) => {
   const testUserHeaders = getTestUserHeaders(testUserIdx)
   const userId = testUserHeaders.hypersonsisuid
 
-  logger.info('Resetting test data')
+  logger.info(`Resetting test data for user ${userId}`)
+  await Prompt.destroy({
+    where: {
+      userId,
+    },
+  })
   await ChatInstanceRagIndex.destroy({
     where: {
       userId,

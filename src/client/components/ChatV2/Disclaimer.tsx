@@ -1,7 +1,7 @@
 import { Modal, Box, IconButton, Checkbox, FormControlLabel, FormGroup } from '@mui/material'
 import { Close } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
-import { BlueButton } from './generics/Buttons'
+import { BlueButton } from './general/Buttons'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useState, useEffect } from 'react'

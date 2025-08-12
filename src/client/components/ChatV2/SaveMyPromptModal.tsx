@@ -2,7 +2,7 @@ import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typograph
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Prompt } from '../../types'
-import { BlueButton, OutlineButtonBlack } from './generics/Buttons'
+import { BlueButton, OutlineButtonBlack } from './general/Buttons'
 
 type SaveMyPromptModalProps = {
   isOpen: boolean

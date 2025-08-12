@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useFileSearchResults } from './api'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { OutlineButtonBlack } from './generics/Buttons'
+import { OutlineButtonBlack } from './general/Buttons'
 import SubjectIcon from '@mui/icons-material/Subject'
 
 const AnnotationTruncated = ({

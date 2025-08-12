@@ -1,6 +1,6 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material'
 import { useState } from 'react'
-import { BlueButton } from './generics/Buttons'
+import { BlueButton } from './general/Buttons'
 
 export const SystemPrompt = ({ content, setContent }: { content: string; setContent: (content: string) => void }) => {
   const [open, setOpen] = useState(false)

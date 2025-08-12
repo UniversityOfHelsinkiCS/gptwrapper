@@ -1,7 +1,7 @@
 import React from 'react'
 import { Box, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import { OutlineButtonBlack } from './ChatV2/generics/Buttons'
+import { OutlineButtonBlack } from './ChatV2/general/Buttons'
 import { ArrowBack, Replay } from '@mui/icons-material'
 import { useRouteError } from 'react-router-dom'
 import * as Sentry from '@sentry/react'

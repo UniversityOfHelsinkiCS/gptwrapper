@@ -11,7 +11,7 @@ import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import ModelSelector from './ModelSelector'
-import { BlueButton, GrayButton, OutlineButtonBlack } from './generics/Buttons'
+import { BlueButton, GrayButton, OutlineButtonBlack } from './general/Buttons'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 
 export const ChatBox = ({

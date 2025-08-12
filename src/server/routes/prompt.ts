@@ -185,7 +185,7 @@ promptRouter.post('/', async (req, res) => {
   if (potentialConflicts.some((p) => p.name === promptParams.name)) {
     throw ApplicationError.Conflict('Prompt name already exists')
   }
-
+  console.log(promptParams)
   const newPrompt = await Prompt.create(promptParams)
 
   res.status(201).send(newPrompt)

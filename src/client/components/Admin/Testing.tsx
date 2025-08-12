@@ -1,5 +1,5 @@
 import { Box } from '@mui/material'
-import { OutlineButtonBlack, OutlineButtonBlue } from '../ChatV2/generics/Buttons'
+import { OutlineButtonBlack, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import * as Sentry from '@sentry/react'
 import useCurrentUser from '../../hooks/useCurrentUser'
 

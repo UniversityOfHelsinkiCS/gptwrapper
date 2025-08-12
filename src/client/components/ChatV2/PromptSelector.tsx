@@ -3,6 +3,7 @@ import { Box, Button, Divider, IconButton, ListSubheader, Menu, MenuItem } from 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Prompt } from '../../types'
+import { OutlineButtonBlack } from './general/Buttons'
 
 const PromptSelector = ({
   coursePrompts,
@@ -36,9 +37,9 @@ const PromptSelector = ({
 
   return (
     <Box mb={'0.5rem'}>
-      <Button
+      <OutlineButtonBlack
+        id="prompt-selector-button"
         disabled={!!mandatoryPrompt}
-        variant="outlined"
         onClick={(event) => {
           setAnchorEl(event.currentTarget)
         }}
@@ -46,7 +47,7 @@ const PromptSelector = ({
       >
         {activePrompt?.name ?? t('settings:choosePrompt')}
         {!!mandatoryPrompt && ` - ${t('settings:promptLocked')}`}
-      </Button>
+      </OutlineButtonBlack>
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
         <MenuItem onClick={() => handleSelect(undefined)}>{t('settings:default')}</MenuItem>

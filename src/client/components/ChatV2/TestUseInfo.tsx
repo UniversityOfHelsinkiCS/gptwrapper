@@ -1,7 +1,7 @@
 import { Alert, AlertTitle, Box } from '@mui/material'
 import { usePreferencesUpdateMutation } from '../../hooks/usePreferencesUpdateMutation'
 import { useTranslation } from 'react-i18next'
-import { OutlineButtonBlue } from './generics/Buttons'
+import { OutlineButtonBlue } from './general/Buttons'
 
 export const TestUseInfoV2 = () => {
   const { t } = useTranslation()

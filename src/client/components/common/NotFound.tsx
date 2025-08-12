@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { OutlineButtonBlack } from '../ChatV2/generics/Buttons'
+import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
 
 export const NotFound = () => {
   const navigate = useNavigate()
