@@ -13,7 +13,6 @@ import { useSearchParams } from 'react-router-dom'
 import { BlueButton, OutlineButtonBlack } from './general/Buttons'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
-import { IframeCopy } from '../common/IframeCopy'
 
 const useUrlPromptId = () => {
   const [searchParams] = useSearchParams()

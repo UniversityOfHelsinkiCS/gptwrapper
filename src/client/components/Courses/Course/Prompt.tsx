@@ -79,9 +79,9 @@ const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptTyp
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <Link component={RouterLink} to={chatPath} variant="caption">
-                    {t('course:directPromptLink')}
+                    {t('course:directPromptLink', { name: prompt.name })}
                   </Link>
-                  <Tooltip title={t('course:copyDirectPromptLinkInfo')}>
+                  <Tooltip title={t('course:copyDirectPromptLinkInfo', { name: prompt.name })}>
                     <IconButton size="small" onClick={() => navigator.clipboard.writeText(directLink)}>
                       <ContentCopyOutlined fontSize="small" />
                     </IconButton>

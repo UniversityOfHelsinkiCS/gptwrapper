@@ -67,6 +67,7 @@ export type Prompt = {
   hidden: boolean
   mandatory: boolean
   type: 'CHAT_INSTANCE' | 'PERSONAL' | 'RAG_INDEX'
+  createdAt: string
 }
 
 export interface ChatInstance {

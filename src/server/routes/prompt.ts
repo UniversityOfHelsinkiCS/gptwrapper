@@ -34,7 +34,8 @@ promptRouter.get('/:courseId', async (req, res) => {
     include: {
       model: Prompt,
       as: 'prompts',
-      order: [['name', 'ASC']],
+      separate: true,
+      order: [['createdAt', 'ASC']],
     },
   })
 

@@ -14,7 +14,7 @@ const usePrompts = (chatInstanceId: string) => {
     return data
   }
 
-  const { data: prompts, ...rest } = useQuery({ queryKey, queryFn })
+  const { data: prompts, ...rest } = useQuery({ queryKey, queryFn, select: (data) => data.sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt)) })
 
   return { prompts: prompts || [], ...rest }
 }
