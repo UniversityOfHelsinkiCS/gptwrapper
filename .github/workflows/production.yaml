@@ -9,7 +9,7 @@ jobs:
     uses: ./.github/workflows/test.yaml
     secrets: inherit
 
-  build-and-push:
+  build-and-push-to-production:
     runs-on: ubuntu-latest
     needs: test
 
