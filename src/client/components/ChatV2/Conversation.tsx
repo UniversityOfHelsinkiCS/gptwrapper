@@ -318,7 +318,6 @@ export const Conversation = ({
   isStreaming,
   setActiveFileSearchResult,
   setShowAnnotations,
-  endOfConversationRef,
 }: {
   courseName?: string
   courseDate?: ActivityPeriod
@@ -330,7 +329,6 @@ export const Conversation = ({
   isStreaming: boolean
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
   setShowAnnotations: (show: boolean) => void
-  endOfConversationRef: MutableRefObject<HTMLDivElement | null>
 }) => {
   const [reminderSeen, setReminderSeen] = useLocalStorageState<boolean>('reminderSeen', false)
 
@@ -376,7 +374,6 @@ export const Conversation = ({
           ) : (
             <LoadingMessage expandedNodeHeight={expandedNodeHeight} isFileSearching={isFileSearching} />
           ))}
-        <div ref={endOfConversationRef}></div>
       </Box>
       {!reminderSeen && !isStreaming && messages.length > 15 && (
         <Paper variant="outlined" sx={{ display: 'flex', flexDirection: 'row', gap: 2, fontStyle: 'italic', alignItems: 'center', padding: 2 }}>
@@ -386,6 +383,9 @@ export const Conversation = ({
           </BlueButton>
         </Paper>
       )}
+
+      {/* Buffer element */}
+      <Box height="2rem" />
     </>
   )
 }

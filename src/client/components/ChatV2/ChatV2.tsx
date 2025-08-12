@@ -1,7 +1,7 @@
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import HelpIcon from '@mui/icons-material/Help'
-import { Alert, Box, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { Alert, Box, Drawer, Fab, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, inProduction, validModels } from '../../../config'
@@ -31,7 +31,7 @@ import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { enqueueSnackbar } from 'notistack'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import EmailButton from './EmailButton'
-import { MenuBookTwoTone, Tune } from '@mui/icons-material'
+import { ArrowDownward, MenuBookTwoTone, Tune } from '@mui/icons-material'
 import { useChatScroll } from '../../hooks/useChatScroll'
 import { TestUseInfoV2 } from './TestUseInfo'
 import Footer from '../Footer'
@@ -115,16 +115,14 @@ export const ChatV2 = () => {
   }, [messages, courseId, ragIndexId, activeModel, dispatchAnalytics])
 
   // Refs
-  const appContainerRef = useContext(AppContext)
   const chatContainerRef = useRef<HTMLDivElement | null>(null)
   const conversationRef = useRef<HTMLElement | null>(null)
   const inputFieldRef = useRef<HTMLElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const endOfConversationRef = useRef<HTMLDivElement | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
 
-  const chatScroll = useChatScroll(scrollRef, endOfConversationRef) //removing this will break chat autoscroll behavior
+  const chatScroll = useChatScroll()
 
   const { t, i18n } = useTranslation()
 
@@ -160,7 +158,6 @@ export const ChatV2 = () => {
 
   const handleSubmit = async (message: string, ignoreTokenUsageWarning: boolean) => {
     if (!userStatus) return
-    // chatScroll.autoScroll()
     const { usage, limit } = userStatus
     const tokenUsageExceeded = usage >= limit
 
@@ -196,6 +193,7 @@ export const ChatV2 = () => {
     }, 5000)
 
     setIsStreaming(true)
+    chatScroll.beginAutoscroll()
 
     try {
       const { tokenUsageAnalysis, stream } = await getCompletionStream({
@@ -354,8 +352,8 @@ export const ChatV2 = () => {
       }}
     >
       {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
-      {!isEmbeddedMode && (
-        <>
+      {!isEmbeddedMode &&
+        (isMobile ? (
           <Drawer
             open={chatLeftSidePanelOpen}
             onClose={() => {
@@ -377,22 +375,25 @@ export const ChatV2 = () => {
               messages={messages}
             />
           </Drawer>
-          <LeftMenu
-            sx={{ display: { xs: 'none', lg: 'flex' }, position: 'sticky', top: 0 }}
-            course={course}
-            handleReset={handleReset}
-            user={user}
-            t={t}
-            setSettingsModalOpen={setSettingsModalOpen}
-            setDisclaimerStatus={setDisclaimerStatus}
-            showRagSelector={showRagSelector}
-            ragIndex={ragIndex}
-            setRagIndexId={setRagIndexId}
-            ragIndices={ragIndices}
-            messages={messages}
-          />
-        </>
-      )}
+        ) : (
+          <>
+            <LeftMenu
+              sx={{ display: { xs: 'none', lg: 'flex' }, position: 'fixed', top: 0 }}
+              course={course}
+              handleReset={handleReset}
+              user={user}
+              t={t}
+              setSettingsModalOpen={setSettingsModalOpen}
+              setDisclaimerStatus={setDisclaimerStatus}
+              showRagSelector={showRagSelector}
+              ragIndex={ragIndex}
+              setRagIndexId={setRagIndexId}
+              ragIndices={ragIndices}
+              messages={messages}
+            />
+            <Box width={400} /> {/* Holds space for left menu */}
+          </>
+        ))}
 
       {/* Chat view column ------------------------------------------------------------------------------------------------ */}
       <Box
@@ -463,7 +464,6 @@ export const ChatV2 = () => {
             isFileSearching={isFileSearching}
             setActiveFileSearchResult={setActiveFileSearchResult}
             setShowAnnotations={setShowAnnotations}
-            endOfConversationRef={endOfConversationRef}
           />
         </Box>
 
@@ -510,15 +510,18 @@ export const ChatV2 = () => {
             handleCancel={handleCancel}
             handleContinue={(newMessage) => handleSubmit(newMessage, true)}
             handleSubmit={(newMessage) => {
-              console.log('handle submit called!')
-              chatScroll.shouldScroll.current = true
-              chatScroll.autoScroll()
               handleSubmit(newMessage, false)
             }}
             handleReset={handleReset}
           />
         </Box>
       </Box>
+
+      {!chatScroll.isAutoScrolling && (
+        <Fab sx={{ position: 'fixed', right: 32, bottom: '12rem' }} onClick={() => chatScroll.beginAutoscroll()}>
+          <ArrowDownward />
+        </Fab>
+      )}
 
       {/* Annotations columns ----------------------------------------------------------------------------------------------------- */}
 
@@ -612,7 +615,6 @@ const LeftMenu = ({
           height: '100vh',
           borderRight: '1px solid rgba(0, 0, 0, 0.12)',
           paddingTop: '4rem',
-
           display: 'flex',
           flexDirection: 'column',
         },
