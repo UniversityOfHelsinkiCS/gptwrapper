@@ -146,6 +146,7 @@ export class ResponsesClient {
         }
 
         case 'response.file_search_call.in_progress': {
+          logger.info('File search', { user: this.user.username, model: this.model, ragIndexName: this.ragIndex?.metadata.name })
           this.write(
             {
               type: 'fileSearchStarted',
