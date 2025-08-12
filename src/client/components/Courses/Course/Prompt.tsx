@@ -94,7 +94,7 @@ const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptTyp
             )}
           </Box>
           <Box>
-            <Button onClick={() => handleDelete(prompt.id)} color="error">
+            <Button onClick={() => handleDelete(prompt.id)} color="error" data-testId={`delete-prompt-${prompt.name}`}>
               {t('common:delete')}
             </Button>
             <ExpandButton expand={expand} setExpand={setExpand} />

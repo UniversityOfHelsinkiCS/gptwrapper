@@ -48,7 +48,7 @@ const Course = () => {
 
   if (userLoading || !user || !isCourseSuccess) return null
 
-  const studentLink = `${window.location.origin}${PUBLIC_URL}/${chatInstance.courseId}`
+  const studentLink = `${window.location.origin}${PUBLIC_URL}/v2/${chatInstance.courseId}`
 
   const amongResponsibles = chatInstance.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user.id) : false
 
@@ -114,24 +114,23 @@ const Course = () => {
       refetchCourse()
     }
   }
-   const drawActionComponent = (user: User) => {
-      const usersResponsibility: Responsebility | undefined = responsibilities.find((r: Responsebility) => {return r.user.id === user.id})
-       const isResponsible = usersResponsibility != undefined
+  const drawActionComponent = (user: User) => {
+    const usersResponsibility: Responsebility | undefined = responsibilities.find((r: Responsebility) => {
+      return r.user.id === user.id
+    })
+    const isResponsible = usersResponsibility != undefined
     return (
       <>
-      {!isResponsible ? 
-      <Button onClick={() => handleAddResponsible(user)}>
-        {t('course:add')}
-
-      </Button>
-    :
-     <AssignedResponsibilityManagement
-        handleRemove={() => {
-          handleRemoveResponsibility(usersResponsibility)
-        }}
-        responsibility={usersResponsibility}
-      />
-    }
+        {!isResponsible ? (
+          <Button onClick={() => handleAddResponsible(user)}>{t('course:add')}</Button>
+        ) : (
+          <AssignedResponsibilityManagement
+            handleRemove={() => {
+              handleRemoveResponsibility(usersResponsibility)
+            }}
+            responsibility={usersResponsibility}
+          />
+        )}
       </>
     )
   }
@@ -274,10 +273,7 @@ const Course = () => {
             overflowY: 'scroll',
           }}
         >
-          <ActionUserSearch
-            actionText={t('course:add')}
-            drawActionComponent={drawActionComponent}
-          />
+          <ActionUserSearch actionText={t('course:add')} drawActionComponent={drawActionComponent} />
         </Box>
       </Modal>
 
@@ -307,7 +303,11 @@ const Course = () => {
 const AssignedResponsibilityManagement = ({ responsibility, handleRemove }) => {
   const { t } = useTranslation()
   if (!responsibility.createdByUserId) {
-    return <Stack direction={'row'} sx={{ marginLeft: 'auto', alignItems: 'center', height: '1rem' }}>sisu</Stack>
+    return (
+      <Stack direction={'row'} sx={{ marginLeft: 'auto', alignItems: 'center', height: '1rem' }}>
+        sisu
+      </Stack>
+    )
   }
   return (
     <Stack direction={'row'} sx={{ marginLeft: 'auto', alignItems: 'center', height: '1rem' }}>

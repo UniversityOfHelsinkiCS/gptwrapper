@@ -23,9 +23,10 @@ promptRouter.get('/my-prompts', async (req, res) => {
   return
 })
 
-promptRouter.get('/:courseId', async (req, res) => {
+promptRouter.get('/for-course/:courseId', async (req, res) => {
   const { courseId } = req.params
 
+  // Note: we dont have any authorization checks here. Consider?
   const chatInstance = await ChatInstance.findOne({
     where: {
       courseId,
@@ -234,7 +235,6 @@ promptRouter.put('/:id', async (req, res) => {
   const updates = PromptUpdateableParams.parse(req.body)
   const { systemMessage, name, hidden, mandatory } = updates
 
-  console.log(id)
   const prompt = await Prompt.findByPk(id)
 
   if (!prompt) {
@@ -254,6 +254,21 @@ promptRouter.put('/:id', async (req, res) => {
   prompt.mandatory = mandatory
 
   await prompt.save()
+
+  res.send(prompt)
+})
+
+promptRouter.get('/:id', async (req, res) => {
+  const { id } = req.params
+
+  // Note: we dont have any authorization checks here. Consider?
+  const prompt = await Prompt.findByPk(id)
+
+  if (!prompt) {
+    // We dont throw error here, since this is expected behaviour when the prompt has been deleted but someone still has it in their local storage.
+    res.status(404).send('Prompt not found')
+    return
+  }
 
   res.send(prompt)
 })

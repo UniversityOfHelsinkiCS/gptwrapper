@@ -5,9 +5,9 @@ import apiClient from '../util/apiClient'
 
 export const queryKey = ['prompts']
 
-const usePrompts = (chatInstanceId: string) => {
+const usePrompts = (courseId: string) => {
   const queryFn = async (): Promise<Prompt[]> => {
-    const res = await apiClient.get(`/prompts/${chatInstanceId}`)
+    const res = await apiClient.get(`/prompts/for-course/${courseId}`)
 
     const { data } = res
 

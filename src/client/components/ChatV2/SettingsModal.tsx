@@ -13,6 +13,7 @@ import { useSearchParams } from 'react-router-dom'
 import { BlueButton, OutlineButtonBlack } from './general/Buttons'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
+import { isAxiosError } from 'axios'
 
 const useUrlPromptId = () => {
   const [searchParams] = useSearchParams()
@@ -72,9 +73,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       refetch()
     },
   })
-  //local storage prompt prevents the annoying case where the user refreshes the page and the chosen prompt is reset to default, and the textbox displays incorrect prompt information
-  const [localStoragePrompt, setLocalStoragePrompt] = useLocalStorageState<Prompt | undefined>('prompt', undefined)
-  const [activePrompt, setActivePrompt] = useState<Prompt | undefined>(localStoragePrompt)
+
+  // local storage prompt prevents the annoying case where the user refreshes the page and the chosen prompt is reset to default, and the textbox displays incorrect prompt information
+  const [activePrompt, setActivePrompt] = useLocalStorageState<Prompt | undefined>('prompt', undefined)
+
   const [myPromptModalOpen, setMyPromptModalOpen] = useState<boolean>(false)
   const mandatoryPrompt = course?.prompts.find((p) => p.mandatory)
   const urlPrompt = course?.prompts.find((p) => p.id === urlPromptId)
@@ -89,7 +91,29 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         promptName: activePrompt?.name,
       },
     })
-  }, [activePrompt?.id, dispatchAnalytics])
+  }, [activePrompt?.id])
+
+  // Time for a quick sync :D --- really this is what you get when using the local storage to hold some data that is also on the server. basically having to build our own sync engine lol.
+  useEffect(() => {
+    // Dont sync personal prompts for now...
+    if (!isPromptEditable && activePrompt) {
+      const sync = async () => {
+        try {
+          const serverActivePrompt = await apiClient.get<Prompt>(`/prompts/${activePrompt?.id}`)
+          setActivePrompt(serverActivePrompt.data)
+        } catch (error) {
+          if (isAxiosError(error)) {
+            if (error.status === 404) {
+              setActivePrompt(undefined) // The prompt has been deleted on the server.
+            }
+          } else {
+            console.error('Unexpected error syncing prompt:', error)
+          }
+        }
+      }
+      sync()
+    }
+  }, [])
 
   const resetSettings = () => {
     handleChangePrompt(undefined)
@@ -99,14 +123,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const handleChangePrompt = (newPrompt: Prompt | undefined) => {
     if (!newPrompt) {
       setActivePrompt(undefined)
-      setLocalStoragePrompt(undefined)
       setAssistantInstructions(DEFAULT_ASSISTANT_INSTRUCTIONS)
       return
     }
 
     setAssistantInstructions(newPrompt.systemMessage)
     setActivePrompt(newPrompt)
-    setLocalStoragePrompt(newPrompt)
   }
 
   useEffect(() => {
