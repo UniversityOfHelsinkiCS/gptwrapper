@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 
 let isUserDisabled = false
 
@@ -6,19 +6,37 @@ export const useChatScroll = () => {
   // Todo: on long conversations this state update is not optimal. Ideally move it down the component tree.
   const [isAutoScrolling, setIsAutoScrolling] = useState(false)
 
-  const autoScroll = () => {
-    if (isUserDisabled) return
+  const prevHeight = useRef(0)
 
-    window.scrollTo({
-      top: document.body.scrollHeight,
-    })
+  const [transitionPending, startTransition] = useTransition()
+
+  const autoScroll = () => {
+    if (isUserDisabled || transitionPending) {
+      console.log('skipped', isUserDisabled, transitionPending)
+      return
+    }
+
+    const heightDiff = document.body.scrollHeight - prevHeight.current
+
+    if (heightDiff > 0) {
+      startTransition(() => {
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: 'instant',
+        })
+        prevHeight.current = document.body.scrollHeight
+      })
+    }
   }
 
   const beginAutoscroll = () => {
-    isUserDisabled = false
-    setIsAutoScrolling(true)
-    window.scrollTo({
-      top: document.body.scrollHeight,
+    startTransition(() => {
+      isUserDisabled = false
+      setIsAutoScrolling(true)
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth',
+      })
     })
   }
 

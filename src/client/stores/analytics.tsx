@@ -17,7 +17,6 @@ type AnalyticsAction =
 const initialFeedbackMetadata: FeedbackMetadata = {}
 
 function analyticsReducer(state: FeedbackMetadata, action: AnalyticsAction): FeedbackMetadata {
-  console.log('analyticsReducer', action)
   switch (action.type) {
     case 'SET_ANALYTICS_DATA':
       return {
