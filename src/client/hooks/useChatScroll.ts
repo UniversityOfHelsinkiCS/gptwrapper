@@ -12,7 +12,6 @@ export const useChatScroll = () => {
 
   const autoScroll = () => {
     if (isUserDisabled || transitionPending) {
-      console.log('skipped', isUserDisabled, transitionPending)
       return
     }
 
@@ -71,7 +70,7 @@ export const useChatScroll = () => {
 
     const handleDetachScrollOnKeydown = (ev: KeyboardEvent) => {
       // Check that upwards scrolling key is pressed
-      if (ev.key === 'ArrowUp' || ev.key === 'PageUp') {
+      if (ev.key === 'ArrowUp' || ev.key === 'PageUp' || ev.key === 'Home') {
         detachAutoScroll()
       }
     }
