@@ -1,11 +1,12 @@
 import { IconButton, Tooltip } from '@mui/material'
 import HtmlIcon from '@mui/icons-material/Html'
 import { useTranslation } from 'react-i18next'
+import { PUBLIC_URL } from '../../../config'
 
 export const IframeCopy = ({ courseId, promptId, model }: { courseId: string; promptId?: string; model?: string }) => {
   const { t } = useTranslation()
 
-  let iframeSrc = `${window.location.origin}/${courseId}?embedded=true`
+  let iframeSrc = `${window.location.origin}${PUBLIC_URL}/${courseId}?embedded=true`
 
   if (promptId) {
     iframeSrc += `&promptId=${promptId}`

@@ -15,7 +15,7 @@ export default function Feedbacks() {
         <Paper key={f.id} sx={{ p: 1, my: 4, display: 'flex', gap: 2 }}>
           <Box sx={{ flex: 1 }}>
             <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
-              {f.user.firstNames} {f.user.lastName}, {f.user.primaryEmail}. {f.responseWanted ? 'Response wanted!' : ''}
+              {f.user.firstNames} {f.user.lastName}, {f.user.primaryEmail}. {f.responseWanted ? '- Response wanted!' : '- No response wanted.'}
             </Typography>
             <Typography variant="body1">{f.feedback}</Typography>
           </Box>
