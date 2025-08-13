@@ -129,7 +129,8 @@
     "selectedSource": "Ei valittua lähdettä",
     "default": "Oletus",
     "confirmDeletePrompt": "Haluatko varmasti poistaa alustuksen '{{name}}'?",
-    "sourceDescription": "Kurssichatissa voidaan käyttää lähteenä opettajan määrittämiä materiaaleja. Voit valita lähteen alta."
+    "sourceDescription": "Kurssichatissa voidaan käyttää lähteenä opettajan määrittämiä materiaaleja. Voit valita lähteen alta.",
+    "other": "Muut asetukset"
   },
   "chats": {
     "header": "Auki olevat kurssichatit",
@@ -307,5 +308,16 @@
     "buttonV2": "Ota käyttöön oletusarvoisena",
     "titleV1": "Tämä on vanha chattinäkymä. Olet valinnut oletukseksi uuden näkymän mutta voit palauttaa vanhan tästä:",
     "buttonV1": "Valitse oletusarvoksi"
+  },
+  "sendPreferenceConfigurator": {
+    "success": "Valinta päivitetty.",
+    "canChangeInSettings": "Voit muuttaa lähetyksen pikanäppäintä keskustelun asetuksissa.",
+    "title": "Millä näppäinyhdistelmällä haluat lähettää viestin jatkossa?",
+    "shift": "Shift",
+    "return": "Return",
+    "toSend": "lähettää viestin",
+    "toAddNewline": "lisää uuden rivin",
+    "ok": "Ok",
+    "openConfigurator": "Viestin lähetyksen näppäinyhdistelmä"
   }
 }

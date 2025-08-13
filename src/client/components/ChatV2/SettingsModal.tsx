@@ -1,4 +1,4 @@
-import { Add, Close } from '@mui/icons-material'
+import { Add, Close, Settings } from '@mui/icons-material'
 import { Box, IconButton, Modal, Slider, Typography } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -14,6 +14,7 @@ import { BlueButton, OutlineButtonBlack } from './general/Buttons'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { isAxiosError } from 'axios'
+import { SendPreferenceConfiguratorButton } from './SendPreferenceConfigurator'
 
 const useUrlPromptId = () => {
   const [searchParams] = useSearchParams()
@@ -241,6 +242,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </Box>
             </Box>
           </Box>
+
+          <Typography variant="h6" fontWeight={600} mt="2rem">
+            {t('settings:other')}
+          </Typography>
+          <div>
+            <SendPreferenceConfiguratorButton />
+          </div>
         </Box>
 
         <Box

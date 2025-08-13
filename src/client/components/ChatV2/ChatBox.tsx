@@ -13,6 +13,8 @@ import { useTranslation } from 'react-i18next'
 import ModelSelector from './ModelSelector'
 import { BlueButton, GrayButton, OutlineButtonBlack } from './general/Buttons'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
+import useCurrentUser from '../../hooks/useCurrentUser'
+import { SendPreferenceConfiguratorModal } from './SendPreferenceConfigurator'
 
 export const ChatBox = ({
   disabled,
@@ -57,11 +59,14 @@ export const ChatBox = ({
 }) => {
   const { courseId } = useParams()
   const isEmbedded = useIsEmbedded()
+  const { user } = useCurrentUser()
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
 
   const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
   const [disallowedFileType, setDisallowedFileType] = useState<string>('')
   const [fileTypeAlertOpen, setFileTypeAlertOpen] = useState<boolean>(false)
+  const [sendPreferenceConfiguratorOpen, setSendPreferenceConfiguratorOpen] = useState<boolean>(false)
+  const sendButtonRef = useRef<HTMLButtonElement>(null)
 
   const [defaultMessage, setDefaultMessage] = useState<string>('') // <--- used to trigger re render only onSubmit to empty the textField, dont update this on every key press
   const textFieldRef = useRef<HTMLInputElement>(null)
@@ -96,12 +101,14 @@ export const ChatBox = ({
     // This is here to prevent the form from submitting on disabled.
     // It is done this way instead of explicitely disabling the textfield
     // so that it doesnt break the re-focus back on the text field after message is send
-    if (disabled) return
+    if (disabled || !messageText.trim()) return
 
-    if (messageText.trim()) {
-      handleSubmit(messageText)
-      refetchStatus()
-      setDefaultMessage('') //<--- just triggers the textField to go empty
+    handleSubmit(messageText)
+    refetchStatus()
+    setDefaultMessage('') //<--- just triggers the textField to go empty
+
+    if (user && user.preferences?.sendShortcutMode === undefined) {
+      setSendPreferenceConfiguratorOpen(true)
     }
 
     if (textFieldRef.current) {
@@ -159,8 +166,16 @@ export const ChatBox = ({
         component="form"
         onSubmit={onSubmit}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' && e.shiftKey) {
-            onSubmit(e)
+          if (e.key === 'Enter') {
+            if (user?.preferences?.sendShortcutMode === 'enter') {
+              if (e.shiftKey) {
+                // Do nothing with this event, it will result in a newline being inserted
+              } else {
+                onSubmit(e)
+              }
+            } else if (e.shiftKey) {
+              onSubmit(e)
+            }
           }
         }}
       >
@@ -221,21 +236,17 @@ export const ChatBox = ({
               )}
             </Box>
 
-            {disabled ? (
-              // Stop signal is currently not supported due to OpenAI response cancel endpoint not working properly.
-              // Try implementing this in the fall 2025.
-              <Tooltip title={t('chat:cancelResponse')} arrow placement="top">
-                <IconButton disabled={!disabled}>
-                  <StopIcon />
-                </IconButton>
-              </Tooltip>
-            ) : (
-              <Tooltip title={t('chat:shiftEnter')} arrow placement="top">
-                <IconButton disabled={disabled} type="submit">
-                  <Send />
-                </IconButton>
-              </Tooltip>
-            )}
+            <Tooltip title={disabled ? t('chat:cancelResponse') : t('chat:shiftEnter')} arrow placement="top">
+              <IconButton type={disabled ? 'button' : 'submit'} ref={sendButtonRef}>
+                {disabled ? <StopIcon /> : <Send />}
+              </IconButton>
+            </Tooltip>
+            <SendPreferenceConfiguratorModal
+              open={sendPreferenceConfiguratorOpen}
+              onClose={() => setSendPreferenceConfiguratorOpen(false)}
+              anchorEl={sendButtonRef.current}
+              context="chat"
+            />
           </Box>
         </Box>
 
