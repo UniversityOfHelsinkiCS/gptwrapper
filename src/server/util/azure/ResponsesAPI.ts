@@ -32,6 +32,7 @@ export class ResponsesClient {
   user: User
   ragIndex?: RagIndex
   clientStreamError: Error | null = null
+  startTime?: number
 
   constructor({
     model,
@@ -78,6 +79,8 @@ export class ResponsesClient {
     include?: ResponseIncludable[]
     attemptNumber?: number
   }): Promise<Stream<ResponseStreamEvent>> {
+    this.startTime = Date.now()
+
     try {
       const sanitizedInput = validatedInputSchema.parse(input)
 
@@ -122,6 +125,8 @@ export class ResponsesClient {
 
   async handleResponse({ stream, encoding, res }: { stream: Stream<ResponseStreamEvent>; encoding: Tiktoken; res: Response }) {
     let tokenCount = 0
+    let firstTokenTS = 0
+    let timeToFirstToken: number | undefined = undefined
     const contents: string[] = []
 
     for await (const event of stream) {
@@ -142,6 +147,12 @@ export class ResponsesClient {
 
           contents.push(event.delta)
           tokenCount += encoding.encode(event.delta).length ?? 0
+
+          if (!timeToFirstToken && this.startTime) {
+            firstTokenTS = Date.now()
+            timeToFirstToken = firstTokenTS - this.startTime
+          }
+
           break
         }
 
@@ -229,8 +240,13 @@ export class ResponsesClient {
       }
     }
 
+    // Time from first token to completion
+    const tokenStreamingDuration = Date.now() - firstTokenTS
+
     return {
       tokenCount,
+      timeToFirstToken,
+      tokensPerSecond: timeToFirstToken ? tokenCount / tokenStreamingDuration : undefined,
       response: contents.join(''),
     }
   }

@@ -237,6 +237,8 @@ openaiRouter.post('/stream/v2', upload.single('file'), async (r, res) => {
     course: course?.name?.fi,
     ragIndexId: ragIndex?.id,
     fileSize: req.file?.size,
+    timeToFirstToken: result.timeToFirstToken,
+    tokensPerSecond: result.tokensPerSecond,
   }
 
   logger.info(`Stream ended. Total tokens: ${tokenCount}`, chatCompletionMeta)
