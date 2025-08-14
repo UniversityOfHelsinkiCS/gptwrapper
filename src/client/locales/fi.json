@@ -316,7 +316,7 @@
     "shift": "Shift",
     "return": "Return",
     "toSend": "lähettää viestin",
-    "toAddNewline": "lisää uuden rivin",
+    "toNewline": "lisää uuden rivin",
     "ok": "Ok",
     "openConfigurator": "Viestin lähetyksen näppäinyhdistelmä"
   }

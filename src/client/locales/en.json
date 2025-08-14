@@ -311,12 +311,12 @@
   },
   "sendPreferenceConfigurator": {
     "success": "Preference updated.",
-    "canChangeInSettings": "You can change the send shortcut in chat settings.",
+    "canChangeInSettings": "You can change the send keyboard shortcut in chat settings.",
     "title": "What key combination would you like to use to send a message?",
     "shift": "Shift",
     "return": "Return",
     "toSend": "to send a message",
-    "toAddNewline": "to add a new line",
+    "toNewline": "to add a new line",
     "ok": "Ok",
     "openConfigurator": "Keyboard shortcut for sending a message"
   }

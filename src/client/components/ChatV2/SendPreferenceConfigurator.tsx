@@ -8,6 +8,40 @@ import { UserPreferencesSchema } from '../../../shared/user'
 import { useSnackbar } from 'notistack'
 import { useState } from 'react'
 
+export const ShiftEnterToSend = ({ t }) => (
+  <Box display="flex" alignItems="center" gap={0.5}>
+    <strong>{t('sendPreferenceConfigurator:shift')}</strong>
+    <ArrowUpward fontSize="small" />+ <strong>{t('sendPreferenceConfigurator:return')}</strong>
+    <KeyboardReturn fontSize="small" />
+    {t('sendPreferenceConfigurator:toSend')}
+  </Box>
+)
+
+export const EnterToSend = ({ t }) => (
+  <Box display="flex" alignItems="center" gap={0.5}>
+    <strong>{t('sendPreferenceConfigurator:return')}</strong>
+    <KeyboardReturn fontSize="small" />
+    {t('sendPreferenceConfigurator:toSend')}
+  </Box>
+)
+
+export const ShiftEnterForNewline = ({ t }) => (
+  <Box display="flex" alignItems="center" gap={0.5}>
+    <strong>{t('sendPreferenceConfigurator:shift')}</strong>
+    <ArrowUpward fontSize="small" />+ <strong>{t('sendPreferenceConfigurator:return')}</strong>
+    <KeyboardReturn fontSize="small" />
+    {t('sendPreferenceConfigurator:toNewline')}
+  </Box>
+)
+
+export const EnterForNewline = ({ t }) => (
+  <Box display="flex" alignItems="center" gap={0.5}>
+    <strong>{t('sendPreferenceConfigurator:return')}</strong>
+    <KeyboardReturn fontSize="small" />
+    {t('sendPreferenceConfigurator:toNewline')}
+  </Box>
+)
+
 export const SendPreferenceConfiguratorModal = ({ open, onClose, anchorEl, context }) => {
   const { user } = useCurrentUser()
   const preferenceUpdate = usePreferencesUpdateMutation()
@@ -68,42 +102,24 @@ export const SendPreferenceConfiguratorModal = ({ open, onClose, anchorEl, conte
           <Typography>{t('sendPreferenceConfigurator:title')}</Typography>
           <RadioGroup value={value} onChange={handleChange} name="sendPreferenceConfigurator">
             <FormControlLabel
-              sx={{ my: 2 }}
+              sx={{ my: 2, fontSize: 'small' }}
               value="shift+enter"
               control={<Radio />}
               label={
                 <div>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <strong>{t('sendPreferenceConfigurator:shift')}</strong>
-                    <ArrowUpward fontSize="small" />+ <strong>{t('sendPreferenceConfigurator:return')}</strong>
-                    <KeyboardReturn fontSize="small" />
-                    {t('sendPreferenceConfigurator:toSend')}
-                  </Box>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <strong>{t('sendPreferenceConfigurator:return')}</strong>
-                    <KeyboardReturn fontSize="small" />
-                    {t('sendPreferenceConfigurator:toAddNewline')}
-                  </Box>
+                  <ShiftEnterToSend t={t} />
+                  <EnterForNewline t={t} />
                 </div>
               }
             />
             <FormControlLabel
-              sx={{ mb: 2 }}
+              sx={{ mb: 2, fontSize: 'small' }}
               value="enter"
               control={<Radio />}
               label={
                 <div>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <strong>{t('sendPreferenceConfigurator:return')}</strong>
-                    <KeyboardReturn fontSize="small" />
-                    {t('sendPreferenceConfigurator:toSend')}
-                  </Box>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <strong>{t('sendPreferenceConfigurator:shift')}</strong>
-                    <ArrowUpward fontSize="small" />+ <strong>{t('sendPreferenceConfigurator:return')}</strong>
-                    <KeyboardReturn fontSize="small" />
-                    {t('sendPreferenceConfigurator:toAddNewline')}
-                  </Box>
+                  <EnterToSend t={t} />
+                  <ShiftEnterForNewline t={t} />
                 </div>
               }
             />
