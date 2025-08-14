@@ -378,7 +378,7 @@ export const ChatV2 = () => {
         ) : (
           <>
             <LeftMenu
-              sx={{ display: { xs: 'none', lg: 'flex' }, position: 'fixed', top: 0 }}
+              sx={{ display: { sm: 'none', md: 'flex' }, position: 'fixed', top: 0 }}
               course={course}
               handleReset={handleReset}
               user={user}
@@ -391,7 +391,7 @@ export const ChatV2 = () => {
               ragIndices={ragIndices}
               messages={messages}
             />
-            <Box width={400} /> {/* Holds space for left menu */}
+            <Box sx={{ width: { md: 300, lg: 400 } }} /> {/* Holds space for left menu */}
           </>
         ))}
 
@@ -557,7 +557,7 @@ export const ChatV2 = () => {
       {!isMobile && showAnnotations && activeFileSearchResult && (
         <Box
           sx={{
-            maxWidth: { xs: 300, md: 400 },
+            width: { md: 300, lg: 400 },
             height: '100vh',
             display: 'flex',
             flexDirection: 'column',
@@ -565,8 +565,6 @@ export const ChatV2 = () => {
             position: 'sticky',
             top: 0,
             borderLeft: '1px solid rgba(0,0,0,0.12)',
-            width: 400,
-            minWidth: 400,
             paddingTop: !isEmbeddedMode ? '4rem' : 0,
           }}
         >
@@ -609,8 +607,7 @@ const LeftMenu = ({
       sx={[
         {
           flex: 1,
-          minWidth: 300,
-          maxWidth: { xs: 300, md: 400 },
+          width: { md: 300, lg: 400 },
           position: 'relative',
           height: '100vh',
           borderRight: '1px solid rgba(0, 0, 0, 0.12)',

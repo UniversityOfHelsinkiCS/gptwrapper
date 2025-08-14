@@ -274,7 +274,7 @@ export const ChatBox = ({
 
           <Typography
             sx={{
-              display: { xs: 'none', lg: 'block' },
+              display: { sm: 'none', md: 'block' },
               ml: 'auto',
               opacity: acuallyDisabled ? 0 : 1,
               transition: 'opacity 0.2s ease-in-out',
@@ -296,7 +296,7 @@ export const ChatBox = ({
                 </Typography>
               }
             >
-              <OutlineButtonBlack sx={{ display: { xs: 'block', lg: 'none' } }} onClick={() => setChatLeftSidePanelOpen(true)} id="left-panel-open">
+              <OutlineButtonBlack sx={{ display: { sm: 'block', md: 'none' } }} onClick={() => setChatLeftSidePanelOpen(true)} id="left-panel-open">
                 <SettingsIcon sx={{ color: 'rgba(0, 0, 0, 0.7)' }} />
               </OutlineButtonBlack>
             </Tooltip>
