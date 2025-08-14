@@ -124,7 +124,12 @@ userRouter.put('/preferences', async (req, res) => {
 
   const preferences = UserPreferencesSchema.parse(req.body)
 
-  await User.update({ preferences }, { where: { id } })
+  const newPreferences = {
+    ...(user.preferences ?? {}),
+    ...preferences,
+  }
+
+  await User.update({ preferences: newPreferences }, { where: { id } })
 
   res.status(200).send(preferences)
 })
