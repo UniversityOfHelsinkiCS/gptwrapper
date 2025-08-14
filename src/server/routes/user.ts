@@ -126,7 +126,13 @@ userRouter.put('/preferences', async (req, res) => {
 
   const newPreferences = {
     ...(user.preferences ?? {}),
-    ...preferences,
+  }
+
+  // Assign only defined values
+  for (const key in preferences) {
+    if (preferences[key] !== undefined) {
+      newPreferences[key] = preferences[key]
+    }
   }
 
   await User.update({ preferences: newPreferences }, { where: { id } })
