@@ -16,6 +16,9 @@ test.describe('Chat v2 Conversation tests', () => {
     await chatInput.fill('testinen morjens')
     await chatInput.press('Shift+Enter')
 
+    // Close send preference configurator
+    await page.locator('#send-preference-configurator-submit').click()
+
     await expect(page.getByTestId('user-message')).toContainText('testinen morjens')
     await expect(page.getByTestId('assistant-message')).toContainText('You are calling mock endpoint for streaming mock data')
   })
@@ -27,6 +30,9 @@ test.describe('Chat v2 Conversation tests', () => {
     const chatInput = page.locator('#chat-input').first()
     await chatInput.fill('tää tyhjennetään')
     await chatInput.press('Shift+Enter')
+
+    // Close send preference configurator
+    await page.locator('#send-preference-configurator-submit').click()
 
     await expect(page.getByTestId('user-message')).toContainText('tää tyhjennetään')
     await expect(page.getByTestId('assistant-message')).toContainText('OVER', { timeout: 5000 })

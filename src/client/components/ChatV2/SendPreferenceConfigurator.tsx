@@ -124,7 +124,9 @@ export const SendPreferenceConfiguratorModal = ({ open, onClose, anchorEl, conte
               }
             />
           </RadioGroup>
-          <OutlineButtonBlack type="submit">{t('sendPreferenceConfigurator:ok')}</OutlineButtonBlack>
+          <OutlineButtonBlack type="submit" id="send-preference-configurator-submit">
+            {t('sendPreferenceConfigurator:ok')}
+          </OutlineButtonBlack>
         </FormControl>
       </form>
     </Menu>
