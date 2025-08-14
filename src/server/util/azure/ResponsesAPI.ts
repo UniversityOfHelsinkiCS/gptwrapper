@@ -246,7 +246,7 @@ export class ResponsesClient {
     return {
       tokenCount,
       timeToFirstToken,
-      tokensPerSecond: timeToFirstToken ? tokenCount / tokenStreamingDuration : undefined,
+      tokensPerSecond: timeToFirstToken ? (tokenCount / tokenStreamingDuration) * 1000 : undefined,
       response: contents.join(''),
     }
   }
