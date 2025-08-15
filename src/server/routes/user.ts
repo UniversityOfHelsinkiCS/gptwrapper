@@ -124,8 +124,14 @@ userRouter.put('/preferences', async (req, res) => {
 
   const preferences = UserPreferencesSchema.parse(req.body)
 
+  const dbUser = await User.findByPk(user.id)
+
+  if (!dbUser) {
+    throw ApplicationError.InternalServerError('User not found')
+  }
+
   const newPreferences = {
-    ...(user.preferences ?? {}),
+    ...(dbUser.preferences ?? {}),
   }
 
   // Assign only defined values
