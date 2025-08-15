@@ -12,7 +12,7 @@ import { basicTestContent } from '../../util/azure/mocks/mockContent'
 export class MockModel extends FakeStreamingChatModel {
   constructor() {
     super({
-      sleep: 10,
+      sleep: 5,
     })
   }
 

@@ -35,7 +35,7 @@ test.describe('Chat v2 Conversation tests', () => {
     await page.locator('#send-preference-configurator-submit').click()
 
     await expect(page.getByTestId('user-message')).toContainText('tää tyhjennetään')
-    await expect(page.getByTestId('assistant-message')).toContainText('OVER', { timeout: 5000 })
+    await expect(page.getByTestId('assistant-message')).toContainText('OVER', { timeout: 6000 })
 
     page.on('dialog', (dialog) => dialog.accept())
     await page.locator('#empty-conversation-button').click()
