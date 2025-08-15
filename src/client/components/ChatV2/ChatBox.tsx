@@ -190,7 +190,6 @@ export const ChatBox = ({
             autoFocus
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            defaultValue=""
             placeholder={t('chat:writeHere')}
             fullWidth
             multiline
