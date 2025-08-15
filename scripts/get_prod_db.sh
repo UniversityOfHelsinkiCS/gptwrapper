@@ -8,7 +8,7 @@ FOLDER_NAME="gptwrapper"
 
 PROJECT_ROOT=$(dirname $(dirname $(realpath "$0")))
 BACKUPS=$PROJECT_ROOT/backups/
-DOCKER_COMPOSE=$PROJECT_ROOT/docker-compose.yml
+DOCKER_COMPOSE=$PROJECT_ROOT/compose.yaml
 
 S3_CONF=~/.s3cfg
 
