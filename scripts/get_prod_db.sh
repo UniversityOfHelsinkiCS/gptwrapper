@@ -65,5 +65,5 @@ docker-compose -f $DOCKER_COMPOSE up -d $SERVICE_NAME
 
 retry docker-compose -f $DOCKER_COMPOSE exec $SERVICE_NAME pg_isready --dbname=$DB_NAME
 
-echo "Populating Lomake"
+echo "Populating ${FOLDER_NAME}"
 docker exec -i $CONTAINER /bin/bash -c "gunzip | psql -U postgres" < ${BACKUPS}${FILE_NAME}
