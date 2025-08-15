@@ -58,7 +58,7 @@ jobs:
           SENTRY_URL: https://toska.cs.helsinki.fi/
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_TOKEN }}
           SENTRY_ORG: toska
-          SENTRY_PROJECT: gptwrapper
+          SENTRY_PROJECT: currechat-frontend
         with:
           environment: production
           set_commits: 'skip'
