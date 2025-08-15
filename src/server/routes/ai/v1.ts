@@ -13,6 +13,9 @@ import { upload } from './multer'
 import { parseFileAndAddToLastMessage } from './fileParsing'
 import type { MessageType } from './types'
 
+/**
+ * @deprecated In favor of v3. Kept alive since v2 is unreliable and v3 is not yet mature.
+ */
 const router = express.Router()
 
 router.post('/stream', upload.single('file'), async (r, res) => {

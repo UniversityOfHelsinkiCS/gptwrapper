@@ -13,6 +13,9 @@ import { parseFileAndAddToLastMessage } from './fileParsing'
 import { upload } from './multer'
 import { type MessageType, PostStreamSchemaV2 } from './types'
 
+/**
+ * @deprecated Uses the Responses API, which is unreliably implemented in azure. Keep v2 for reference until v3 reaches feature parity (sort of).
+ */
 const router = express.Router()
 
 router.post('/stream', upload.single('file'), async (r, res) => {
