@@ -10,8 +10,6 @@ export const GIT_SHA = process.env.REACT_APP_GIT_SHA || ''
 
 export const PUBLIC_URL = process.env.PUBLIC_URL || ''
 
-export const RAG_ENABLED = process.env.RAG_ENABLED === 'true'
-
 export const DEFAULT_TOKEN_LIMIT = Number(process.env.DEFAULT_TOKEN_LIMIT) || 150_000
 
 export const FREE_MODEL = process.env.FREE_MODEL || 'gpt-4o-mini' // as it was decided in 23th Sept 2024 meeting

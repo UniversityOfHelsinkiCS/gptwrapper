@@ -11,6 +11,8 @@ export const AZURE_RESOURCE = getEnv('AZURE_RESOURCE', 'placeholder')
 
 export const DATABASE_URL = getEnv('DATABASE_URL', 'placeholder-this-needs-to-be-set')
 
+export const CHROMADB_URL = getEnv('CHROMADB_URL', 'http://chromadb:8001')
+
 export const JAMI_URL =
   inProduction || inDevelopment ? 'https://api-toska.apps.ocp-prod-0.k8s.it.helsinki.fi/jami/' : 'https://api-toska.apps.ocp-test-0.k8s.it.helsinki.fi/jami'
 

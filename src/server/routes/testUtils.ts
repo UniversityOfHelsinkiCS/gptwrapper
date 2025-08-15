@@ -1,15 +1,14 @@
 import { Router } from 'express'
 import { inProduction } from '../../config'
-import { ApplicationError } from '../util/ApplicationError'
+import { getTestUserHeaders, TEST_COURSES } from '../../shared/testData'
 import { ChatInstanceRagIndex, Enrolment, Prompt, RagIndex, User, UserChatInstanceUsage } from '../db/models'
-import { getTestUserHeaders } from '../../shared/testData'
-import logger from '../util/logger'
-import { TEST_COURSES } from '../../shared/testData'
 import { headersToUser } from '../middleware/user'
-import { ResponsesClient } from '../util/azure/ResponsesAPI'
-import { RequestWithUser } from '../types'
-import getEncoding from '../util/tiktoken'
+import type { RequestWithUser } from '../types'
+import { ApplicationError } from '../util/ApplicationError'
 import { getCompletionEvents } from '../util/azure/client'
+import { ResponsesClient } from '../util/azure/ResponsesAPI'
+import logger from '../util/logger'
+import getEncoding from '../util/tiktoken'
 
 const router = Router()
 
@@ -67,7 +66,11 @@ router.post('/reset-test-data', async (req, res) => {
     },
     defaults: {
       userId,
-      metadata: { ragIndexFilterValue: 'mock', name: `rag-${testUserIdx}`, azureVectorStoreId: 'mock' },
+      metadata: {
+        ragIndexFilterValue: 'mock',
+        name: `rag-${testUserIdx}`,
+        azureVectorStoreId: 'mock',
+      },
     },
   })
   await ChatInstanceRagIndex.findOrCreate({
@@ -90,10 +93,10 @@ router.post('/reset-test-data', async (req, res) => {
 router.post('/responses-api', async (req, res) => {
   const { user } = req as RequestWithUser
 
-  const encoding = getEncoding('gpt-4o-mini')
+  const encoding = getEncoding('gpt-4.1')
 
   const responsesClient = new ResponsesClient({
-    model: 'gpt-4o-mini',
+    model: 'gpt-4.1',
     ragIndex: undefined,
     instructions: '',
     temperature: 0.9,
@@ -111,7 +114,11 @@ router.post('/responses-api', async (req, res) => {
 
   console.log('Stream Responses API started')
 
-  const result = await responsesClient.handleResponse({ stream, encoding, res })
+  const result = await responsesClient.handleResponse({
+    stream,
+    encoding,
+    res,
+  })
 
   console.log('Stream Responses API ended', result)
 })
@@ -127,7 +134,7 @@ router.post('/completions-api', async (req, res) => {
         content: 'Hello!, please explain the concept of artificial intelligence.',
       },
     ],
-    model: 'gpt-4o-mini',
+    model: 'gpt-4.1',
     options: {
       temperature: 0.9,
     },

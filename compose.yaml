@@ -6,6 +6,7 @@ services:
     image: gptwrapper_dev
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+      - CHROMADB_URL=http://chromadb:8001
     volumes:
       - ./:/opt/app-root/src
     ports:
@@ -30,6 +31,15 @@ services:
     # volumes:
     #   - redis_data:/data
 
+  chromadb:
+    image: chromadb/chroma
+    container_name: gptwrapper_chromadb
+    command: chroma run --port 8001
+    ports:
+      - 8001:8001
+    volumes:
+      - chromadb_data:/data
+
   # ollama:
   #   image: ollama/ollama
   #   ports:
@@ -39,5 +49,5 @@ services:
 
 volumes:
   pg_data:
-  # redis_data:
+  chromadb_data:
   ollama_data:

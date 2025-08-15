@@ -7,7 +7,7 @@ import userMiddleware from '../middleware/user'
 import initializeSentry from '../util/sentry'
 import errorHandler from '../middleware/error'
 import requestLogger from '../middleware/requestLogger'
-import openaiRouter from './openai'
+import aiRouter from './ai'
 import ragRouter from './rag'
 import userRouter from './user'
 import chatInstancesRouter from './chatInstance'
@@ -44,7 +44,7 @@ router.get('/ping', (_, res) => {
   res.send('pong')
 })
 
-router.use('/ai', openaiRouter)
+router.use('/ai', aiRouter)
 router.use('/rag', ragRouter)
 router.use('/users', userRouter)
 router.use('/chatinstances', chatInstancesRouter)

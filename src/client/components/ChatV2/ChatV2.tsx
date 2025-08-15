@@ -22,7 +22,7 @@ import { handleCompletionStreamError } from './error'
 import { ChatInfo } from './general/ChatInfo'
 import RagSelector from './RagSelector'
 import { SettingsModal } from './SettingsModal'
-import { getCompletionStream } from './util'
+import { getCompletionStream, getCompletionStreamV3 } from './util'
 import { OutlineButtonBlack } from './general/Buttons'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { useChatStream } from './useChatStream'
@@ -196,7 +196,7 @@ export const ChatV2 = () => {
     chatScroll.beginAutoscroll()
 
     try {
-      const { tokenUsageAnalysis, stream } = await getCompletionStream({
+      const { tokenUsageAnalysis, stream } = await getCompletionStreamV3({
         assistantInstructions: assistantInstructions,
         messages: newMessages,
         ragIndexId,
@@ -337,7 +337,8 @@ export const ChatV2 = () => {
     }
   }
 
-  const showRagSelector = (ragIndices?.length ?? 0) > 0
+  // @todo RAG feature disabled temporarily
+  const showRagSelector = false // (ragIndices?.length ?? 0) > 0
 
   if (statusLoading) return null
 

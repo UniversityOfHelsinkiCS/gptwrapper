@@ -42,7 +42,7 @@ export const getCompletionStream = async ({
 
   formData.set('data', JSON.stringify(data))
 
-  return postAbortableStream('/ai/stream', formData, abortController)
+  return postAbortableStream('/ai/v1/stream', formData, abortController)
 }
 
 interface GetCourseCompletionStreamProps {

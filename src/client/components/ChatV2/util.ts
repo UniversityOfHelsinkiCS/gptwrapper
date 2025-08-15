@@ -51,7 +51,39 @@ export const getCompletionStream = async ({
 
   formData.set('data', JSON.stringify(data))
 
-  return postAbortableStream('/ai/stream/v2', formData, abortController)
+  return postAbortableStream('/ai/v2/stream', formData, abortController)
+}
+
+export const getCompletionStreamV3 = async ({
+  courseId,
+  assistantInstructions,
+  messages,
+  model,
+  formData,
+  ragIndexId,
+  userConsent,
+  modelTemperature,
+  prevResponseId,
+  abortController,
+  saveConsent,
+}: GetCompletionStreamProps) => {
+  const data = {
+    courseId,
+    options: {
+      chatMessages: messages,
+      systemMessage: assistantInstructions,
+      ragIndexId,
+      model,
+      userConsent,
+      modelTemperature,
+      saveConsent,
+      prevResponseId,
+    },
+  }
+
+  formData.set('data', JSON.stringify(data))
+
+  return postAbortableStream('/ai/v3/stream', formData, abortController)
 }
 
 export const preprocessMath = (content: string): string => {

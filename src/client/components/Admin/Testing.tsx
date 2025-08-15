@@ -5,7 +5,7 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import apiClient from '../../util/apiClient'
 
 const testResponsesApi = async () => {
-  await apiClient.post('/test/responses-api')
+  await apiClient.post('/test/responses-api-minimal')
 }
 
 const testCompletionsApi = async () => {

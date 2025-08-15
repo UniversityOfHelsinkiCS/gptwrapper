@@ -8,6 +8,7 @@ import { ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } 
 import { getAllowedModels } from '../../util/util'
 import logger from '../../util/logger'
 import { ApplicationError } from '../../util/ApplicationError'
+import { Message } from '../../../shared/llmTypes'
 
 export const getUsage = async (userId: string) => {
   const user = await User.findByPk(userId, {
@@ -44,12 +45,7 @@ export const checkCourseUsage = (user: UserType, chatInstance: ChatInstance): bo
   return true
 }
 
-interface UsageOptions {
-  messages: StreamingOptions['messages']
-}
-export const calculateUsage = (options: UsageOptions, encoding: Tiktoken): number => {
-  const { messages } = options
-
+export const calculateUsage = (messages: Message[], encoding: Tiktoken): number => {
   let tokenCount = 0
   messages.forEach((message) => {
     let content: string = ''
