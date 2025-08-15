@@ -435,6 +435,9 @@ export const ChatV2 = () => {
           ref={scrollRef}
         >
           {user?.preferences?.chatVersion !== 2 && <TestUseInfoV2 />}
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            {t('chat:warning')}
+          </Alert>
 
           {course?.saveDiscussions && (
             <Paper variant="outlined" sx={{ padding: 2, mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
