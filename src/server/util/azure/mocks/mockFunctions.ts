@@ -1,5 +1,5 @@
 import type { ResponseStreamEvent } from 'openai/resources/responses/responses'
-import { mathTestContent, codeTestContent } from './mockContent'
+import { mathTestContent, codeTestContent, basicTestContent } from './mockContent'
 
 export interface MockResponseStreamEvent {
   type: ResponseStreamEvent['type'] // inferred Responses Stream event types
@@ -37,19 +37,7 @@ const chunkText = (text: string): string[] => {
 }
 
 export const getBasicStreamMock = (): MockResponseStreamEvent[] => {
-  // Writing in template literals preserves the formatting of the response text
-  const responseText = `### You are calling mock endpoint for streaming mock data.
-
-- To mock a failed response, write: **fail**
-- To mock a mid-sentence failed response, write: **midway fail**
-- To mock a incomplete response, write: **incomplete fail**
-- To mock a file search, write: **rag** -- _make sure to have a RAG index selected_
-- To mock a code block, write: **code block**
-- To mock a math block, write: **math block**
-OVER
-`
-
-  const chunkedResponseText = chunkText(responseText)
+  const chunkedResponseText = chunkText(basicTestContent)
 
   return [
     {

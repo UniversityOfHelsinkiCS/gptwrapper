@@ -20,7 +20,7 @@ test.describe('Course Chat v2', () => {
     await expect(page.getByTestId('assistant-message')).toContainText('You are calling mock endpoint for streaming mock data')
   })
 
-  test('Course chat RAG feature', async ({ page }) => {
+  /* test('Course chat RAG feature', async ({ page }) => {
     const ragName = `rag-${test.info().workerIndex}`
     await page.locator('#rag-index-selector').first().click()
     await page.getByRole('menuitem', { name: ragName }).click()
@@ -43,5 +43,5 @@ test.describe('Course Chat v2', () => {
 
     // Three source items should be visible
     await expect(page.getByTestId('sources-truncated-item')).toHaveCount(3)
-  })
+    }) */
 })

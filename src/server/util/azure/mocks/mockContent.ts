@@ -1,3 +1,14 @@
+export const basicTestContent = `### You are calling mock endpoint for streaming mock data.
+
+- To mock a failed response, write: **fail**
+- To mock a mid-sentence failed response, write: **midway fail**
+- To mock a incomplete response, write: **incomplete fail**
+- To mock a file search, write: **rag** -- _make sure to have a RAG index selected_
+- To mock a code block, write: **code block**
+- To mock a math block, write: **math block**
+OVER
+`
+
 export const mathTestContent = `
 ### Inline Math to be displayed (as display math)
 

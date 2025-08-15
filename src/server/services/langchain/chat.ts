@@ -7,11 +7,17 @@ import { AIMessageChunk } from '@langchain/core/messages'
 import { IterableReadableStream } from '@langchain/core/utils/stream'
 import { ResponseStreamEventData } from '../../../shared/types'
 import { Tiktoken } from '@dqbd/tiktoken'
+import { FakeStreamingChatModel } from '@langchain/core/utils/testing'
+import { MockModel } from './MockModel'
 
 const getChatModel = (model: string) => {
   const deploymentName = validModels.find((m) => m.name === model)?.deployment
   if (!deploymentName) {
     throw new Error(`Invalid model: ${model}`)
+  }
+
+  if (deploymentName === 'mock') {
+    return new MockModel()
   }
 
   return new AzureChatOpenAI({
