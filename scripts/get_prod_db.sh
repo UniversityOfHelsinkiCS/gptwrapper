@@ -4,20 +4,13 @@ CONTAINER=gptwrapper_db
 SERVICE_NAME=db
 DB_NAME=postgres
 
-GPTWRAPPER_FILE_NAME=gptwrapper.sql.gz
-
-SERVER=toska.cs.helsinki.fi
-SERVER_PATH=/home/toska_user/most_recent_backup_store/
-
-SERVER_FILE=${SERVER_PATH}${GPTWRAPPER_FILE_NAME}
+FOLDER_NAME="gptwrapper"
 
 PROJECT_ROOT=$(dirname $(dirname $(realpath "$0")))
 BACKUPS=$PROJECT_ROOT/backups/
-DOCKER_COMPOSE=$PROJECT_ROOT/compose.yaml
+DOCKER_COMPOSE=$PROJECT_ROOT/docker-compose.yml
 
-USER_DATA_FILE_PATH=$PROJECT_ROOT/scripts/my_username
-
-username=""
+S3_CONF=~/.s3cfg
 
 retry () {
     for i in {1..60}
@@ -26,39 +19,51 @@ retry () {
     done
 }
 
-get_username() {
-  # Check if username has already been set
-  [ -z "$username" ]|| return 0
-
-  # Check if username is saved to data file and ask it if not
-  if [ ! -f "$USER_DATA_FILE_PATH" ]; then
-    echo ""
-    echo "!! No previous username data found. Will ask it now !!"
-    echo "Enter your Uni Helsinki username:"
-    read username
-    echo $username > $USER_DATA_FILE_PATH
-    echo "Succesfully saved username"
-    echo ""
-  fi
-
-  # Set username
-  username=$(cat $USER_DATA_FILE_PATH | head -n 1)
-}
+if [ ! -f "$S3_CONF" ]; then
+  echo ""
+  echo "!! No config file for s3 bucket !!"
+  echo "Create file for path ~/.s3cfg and copy the credetials from version.helsinki.fi"
+  echo ""
+  return 0
+fi
 
 echo "Creating backups folder"
 mkdir -p ${BACKUPS}
 
-echo "Fetching a new dump"
-get_username
-scp -r -o ProxyCommand="ssh -l $username -W %h:%p melkki.cs.helsinki.fi" $username@$SERVER:$SERVER_FILE $BACKUPS
+echo "Listing available backups in S3 bucket..."
+backup_files=$(s3cmd -c "$S3_CONF" ls "s3://psyduck/${FOLDER_NAME}/" | awk '{print $4}' | grep '\.sql\.gz$')
+
+if [ -z "$backup_files" ]; then
+  echo "No backup files found in S3 bucket!"
+  exit 1
+fi
+
+echo "Available backups:"
+select chosen_backup in $backup_files; do
+  if [ -n "$chosen_backup" ]; then
+    echo "You selected: $chosen_backup"
+    FILE_NAME=$(basename "$chosen_backup")
+    break
+  else
+    echo "Invalid selection. Please select a valid backup number."
+  fi
+done
+
+echo "Fetching the selected dump: $FILE_NAME"
+s3cmd -c "$S3_CONF" get "$chosen_backup" "$BACKUPS"
+
+if [ ! -f "${BACKUPS}${FILE_NAME}" ]; then
+  echo "Download failed or file not found: ${BACKUPS}${FILE_NAME}"
+  exit 1
+fi
 
 echo "Removing database and related volume"
-docker compose -f $DOCKER_COMPOSE down -v
+docker-compose -f $DOCKER_COMPOSE down -v
 
 echo "Starting postgres in the background"
-docker compose -f $DOCKER_COMPOSE up -d $SERVICE_NAME $JAMI_DB
+docker-compose -f $DOCKER_COMPOSE up -d $SERVICE_NAME
 
-retry docker compose -f $DOCKER_COMPOSE exec $SERVICE_NAME pg_isready --dbname=$DB_NAME
+retry docker-compose -f $DOCKER_COMPOSE exec $SERVICE_NAME pg_isready --dbname=$DB_NAME
 
-echo "Populating Gptwrapper"
-docker exec -i $CONTAINER /bin/bash -c "gunzip | psql -U postgres" < ${BACKUPS}${GPTWRAPPER_FILE_NAME}
+echo "Populating Lomake"
+docker exec -i $CONTAINER /bin/bash -c "gunzip | psql -U postgres" < ${BACKUPS}${FILE_NAME}
