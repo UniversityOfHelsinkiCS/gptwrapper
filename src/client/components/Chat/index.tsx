@@ -313,8 +313,6 @@ const Chat = () => {
       saveConsent,
     }
 
-    console.log('getCompletionsArgs', getCompletionsArgs)
-
     // Retry the request if the server is stuck for WAIT_FOR_STREAM_TIMEOUT seconds
     setRetryTimeout(() => handleRetry(getCompletionsArgs, abortController), WAIT_FOR_STREAM_TIMEOUT)
 

@@ -24,7 +24,7 @@ const PreferenceRedirect = () => {
   const { user } = useCurrentUser()
   const { courseId } = useParams()
   const chatVersion = user?.preferences?.chatVersion ?? 1
-  return <Navigate to={chatVersion === 1 ? '/v1' : '/v2' + (courseId ? `/${courseId}` : '')} replace />
+  return <Navigate to={(chatVersion === 1 ? '/v1' : '/v2') + (courseId ? `/${courseId}` : '')} replace />
 }
 
 const router = sentryCreateBrowserRouter(
