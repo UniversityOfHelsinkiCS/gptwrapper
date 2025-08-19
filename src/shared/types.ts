@@ -1,11 +1,12 @@
 import type { ResponseFileSearchToolCall } from 'openai/resources/responses/responses'
 import type { VectorStoreFile } from 'openai/resources/vector-stores/files'
 import type { IngestionPipelineStageKey } from './constants'
+import { ChatToolDef } from './tools'
 
 export type RagIndexMetadata = {
   name: string
   dim?: number
-  azureVectorStoreId: string
+  azureVectorStoreId?: string
   ragIndexFilterValue: string
   instructions?: string
 }
@@ -47,40 +48,39 @@ export type FileCitation = {
   type: 'file_citation'
 }
 
-export type FileSearchCompletedData = Omit<ResponseFileSearchToolCall, 'results'> & {
-  searchedFiles: ResponseFileSearchToolCall.Result['filename'][]
+export type FileSearchCompletedData = {
+  id: string
+  queries: string[]
+  searchedFileNames: string[]
   ragIndexId: number
 }
 
-export type FileSearchResultData = NonNullable<ResponseFileSearchToolCall['results']>[number]
+export type FileSearchResultData = Record<string, unknown>
 
 export type ResponseStreamEventData =
-  | {
-      type: 'start'
-      vectorStoreId: string | null
-    }
   | {
       type: 'writing'
       text: string
     }
   | {
       type: 'complete'
-      prevResponseId: string
+      prevResponseId: string // Not yet sure what to put here in v3
     }
-  | {
-      type: 'fileSearchStarted'
-    }
-  | {
-      type: 'fileSearchDone'
-      fileSearch: FileSearchCompletedData
-    }
+  | ({
+      type: 'toolCallStarting'
+      id: string
+    } & Pick<ChatToolDef, 'name'>)
+  | ({
+      type: 'toolCallStarted'
+      id: string
+    } & Pick<ChatToolDef, 'name' | 'input'>)
+  | ({
+      type: 'toolCallCompleted'
+      id: string
+    } & Pick<ChatToolDef, 'name' | 'artifacts'>)
   | {
       type: 'error'
       error: string
-    }
-  | {
-      type: 'annotation'
-      annotation: FileCitation
     }
 
 export interface CourseAssistant {

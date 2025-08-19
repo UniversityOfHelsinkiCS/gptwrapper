@@ -5,6 +5,7 @@ import { CloudUpload } from '@mui/icons-material'
 import { orderBy } from 'lodash'
 import { RagFileInfo } from './RagFileDetails'
 import { useDeleteRagIndexMutation, useRagIndexDetails, useUploadMutation } from './api'
+import { Search } from './Search'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -36,7 +37,7 @@ export const RagIndex: React.FC = () => {
       <Typography variant="h3">{ragDetails?.metadata?.name}</Typography>
       <Box py={2}>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button component="label" role={undefined} variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
+          <Button component="label" variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
             {uploadMutation.isPending ? 'Uploading...' : 'Upload Files'}
             <VisuallyHiddenInput
               type="file"
@@ -64,6 +65,7 @@ export const RagIndex: React.FC = () => {
             Delete Index
           </Button>
         </Box>
+        <Search ragIndex={ragDetails} />
         <Box mt={2}>
           <Typography variant="h6">Files:</Typography>
           {orderBy(ragDetails?.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (

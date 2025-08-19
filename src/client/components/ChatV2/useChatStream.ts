@@ -1,6 +1,22 @@
 import { useState } from 'react'
 import type { FileSearchCompletedData, ResponseStreamEventData } from '../../../shared/types'
 import type { Message } from '../../types'
+import { ChatToolDef } from '../../../shared/tools'
+
+type ToolCallState = { id: string; name: ChatToolDef['name'] } & (
+  | {
+      status: 'starting'
+    }
+  | {
+      input: ChatToolDef['input']
+      status: 'started'
+    }
+  | {
+      status: 'completed'
+      input?: ChatToolDef['input'] // Have to allow optional because it is possible "started" state was not reached before completed.
+      artifacts: ChatToolDef['artifacts']
+    }
+)
 
 export const useChatStream = ({
   onFileSearchComplete,
@@ -15,7 +31,7 @@ export const useChatStream = ({
 }) => {
   const [completion, setCompletion] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
-  const [isFileSearching, setIsFileSearching] = useState(false)
+  const [toolCalls, setToolCalls] = useState<ToolCallState[]>([])
   const [streamController, setStreamController] = useState<AbortController>()
 
   const decoder = new TextDecoder()
@@ -65,18 +81,29 @@ export const useChatStream = ({
               content += parsedChunk.text
               break
 
-            case 'annotation':
-              console.log('Received annotation:', parsedChunk.annotation)
+            case 'toolCallStarting':
+              setToolCalls((prev) => [
+                ...prev,
+                {
+                  id: parsedChunk.id,
+                  name: parsedChunk.name,
+                  status: 'starting',
+                },
+              ])
               break
 
-            case 'fileSearchStarted':
-              setIsFileSearching(true)
+            case 'toolCallStarted':
+              setToolCalls((prev) =>
+                prev.map((call) =>
+                  call.id === parsedChunk.id && call.status === 'starting' ? { ...call, status: 'started', input: parsedChunk.input } : call,
+                ),
+              )
               break
 
-            case 'fileSearchDone':
-              fileSearch = parsedChunk.fileSearch
-              onFileSearchComplete(parsedChunk.fileSearch)
-              setIsFileSearching(false)
+            case 'toolCallCompleted':
+              setToolCalls((prev) =>
+                prev.map((call) => (call.id === parsedChunk.id ? { ...call, status: 'completed', artifacts: parsedChunk.artifacts } : call)),
+              )
               break
 
             case 'error':
@@ -98,7 +125,7 @@ export const useChatStream = ({
     } finally {
       setStreamController(undefined)
       setCompletion('')
-      setIsFileSearching(false)
+      setToolCalls([])
       setIsStreaming(false)
 
       onComplete({
@@ -118,7 +145,7 @@ export const useChatStream = ({
     completion,
     isStreaming,
     setIsStreaming,
-    isFileSearching,
+    toolCalls,
     streamController,
   }
 }

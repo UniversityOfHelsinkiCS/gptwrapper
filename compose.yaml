@@ -6,7 +6,8 @@ services:
     image: gptwrapper_dev
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
-      - CHROMADB_URL=http://chromadb:8001
+      - CHROMADB_URL=http://chromadb:8000
+      - OLLAMA_URL=host.docker.internal:11434
     volumes:
       - ./:/opt/app-root/src
     ports:
@@ -28,18 +29,16 @@ services:
   redis:
     image: redis/redis-stack-server
     container_name: gptwrapper_redis
-    # volumes:
-    #   - redis_data:/data
+    volumes:
+      - redis_data:/data
 
   chromadb:
     image: chromadb/chroma
     container_name: gptwrapper_chromadb
-    command: chroma run --port 8001
-    ports:
-      - 8001:8001
     volumes:
       - chromadb_data:/data
 
+  # Comment out if you use local ollama. Set OLLAMA_URL=host.docker.internal:11434 if using recent Docker Desktop.
   # ollama:
   #   image: ollama/ollama
   #   ports:
@@ -49,5 +48,6 @@ services:
 
 volumes:
   pg_data:
+  redis_data:
   chromadb_data:
   ollama_data:

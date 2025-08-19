@@ -4,7 +4,7 @@ export const pdfToText = async (fileBuffer: Buffer) => {
   try {
     const data = await pdf(fileBuffer)
 
-    return data.text
+    return data.text as string
   } catch (error) {
     console.log(error)
     throw new Error('Error parsing PDF')

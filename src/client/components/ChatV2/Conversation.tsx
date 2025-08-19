@@ -314,7 +314,7 @@ export const Conversation = ({
   expandedNodeHeight,
   messages,
   completion,
-  isFileSearching,
+  toolCalls,
   isStreaming,
   setActiveFileSearchResult,
   setShowAnnotations,
@@ -325,7 +325,7 @@ export const Conversation = ({
   expandedNodeHeight: number
   messages: Message[]
   completion: string
-  isFileSearching: boolean
+  toolCalls: { id: string; name?: string }[]
   isStreaming: boolean
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
   setShowAnnotations: (show: boolean) => void
@@ -372,7 +372,7 @@ export const Conversation = ({
               setShowAnnotations={setShowAnnotations}
             />
           ) : (
-            <LoadingMessage expandedNodeHeight={expandedNodeHeight} isFileSearching={isFileSearching} />
+            <LoadingMessage expandedNodeHeight={expandedNodeHeight} isFileSearching={toolCalls.length > 0} />
           ))}
       </Box>
       {!reminderSeen && !isStreaming && messages.length > 15 && (

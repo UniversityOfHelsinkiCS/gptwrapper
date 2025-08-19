@@ -9,6 +9,9 @@ export const AZURE_API_KEY = getEnv('AZURE_API_KEY', 'placeholder')
 
 export const AZURE_RESOURCE = getEnv('AZURE_RESOURCE', 'placeholder')
 
+export const AZURE_OPENAI_EMBEDDER_MODEL = getEnv('AZURE_OPENAI_EMBEDDER_MODEL', 'placeholder')
+export const AZURE_OPENAI_EMBEDDER_DEPLOYMENT = getEnv('AZURE_OPENAI_EMBEDDER_DEPLOYMENT', 'placeholder')
+
 export const DATABASE_URL = getEnv('DATABASE_URL', 'placeholder-this-needs-to-be-set')
 
 export const CHROMADB_URL = getEnv('CHROMADB_URL', 'http://chromadb:8001')
@@ -28,7 +31,8 @@ export const REDIS_HOST = getEnv('REDIS_HOST', 'redis')
 
 export const UPDATER_CRON_ENABLED = process.env.UPDATER_CRON_ENABLED === 'true'
 
-export const OLLAMA_URL = getEnv('OLLAMA_URL', 'http://ollama:11434/v1/')
+export const OLLAMA_URL = process.env.OLLAMA_URL
+export const OLLAMA_EMBEDDER_MODEL = getEnv('OLLAMA_EMBEDDER_MODEL', 'placeholder')
 
 export const LAAMA_API_URL = getEnv('LAAMA_API_URL', 'placeholder')
 export const LAAMA_API_TOKEN = getEnv('LAAMA_API_TOKEN', 'placeholder')

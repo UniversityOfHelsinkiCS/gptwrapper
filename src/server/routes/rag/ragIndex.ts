@@ -1,13 +1,14 @@
-import fs from 'node:fs'
 import { type NextFunction, type Request, type Response, Router } from 'express'
-import { ChatInstance, RagFile, RagIndex, Responsibility } from '../../db/models'
-import type { RequestWithUser } from '../../types'
-import z from 'zod/v4'
 import multer from 'multer'
-import { mkdir, rm, stat } from 'node:fs/promises'
-import { getAzureOpenAIClient } from '../../util/azure/client'
+import z from 'zod/v4'
 import { shouldRenderAsText } from '../../../shared/utils'
+import { ChatInstance, RagFile, RagIndex, Responsibility } from '../../db/models'
+import { FileStore } from '../../services/rag/fileStore'
+import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
+import { ingestRagFile } from '../../services/rag/ingestion'
+import { search } from '../../services/rag/search'
+import { getRedisVectorStore } from '../../services/rag/vectorStore'
 
 const ragIndexRouter = Router()
 
@@ -52,19 +53,15 @@ export async function ragIndexMiddleware(req: Request, res: Response, next: Next
   next()
 }
 
-const UPLOAD_DIR = 'uploads/rag'
-
 ragIndexRouter.delete('/', async (req, res) => {
   const ragIndexRequest = req as RagIndexRequest
   const ragIndex = ragIndexRequest.ragIndex
 
-  const uploadPath = `${UPLOAD_DIR}/${ragIndex.id}`
-  try {
-    await rm(uploadPath, { recursive: true, force: true })
-    console.log(`Upload directory ${uploadPath} deleted`)
-  } catch (error) {
-    console.warn(`Upload directory ${uploadPath} not found, nothing to delete --- `, error)
-  }
+  await FileStore.deleteRagIndexDocuments(ragIndex)
+
+  const vectorStore = getRedisVectorStore(ragIndex.id)
+
+  await vectorStore.dropIndex(true)
 
   await ragIndex.destroy() // Cascade deletes RagFiles
 
@@ -79,13 +76,15 @@ ragIndexRouter.get('/', async (req, res) => {
     where: { ragIndexId: ragIndex.id },
   })
 
+  /* @todo langchain impl
   const client = getAzureOpenAIClient()
   const vectorStore = await client.vectorStores.retrieve(ragIndex.metadata.azureVectorStoreId)
+  */
 
   res.json({
     ...ragIndex.toJSON(),
     ragFiles: ragFiles.map((file) => file.toJSON()),
-    vectorStore,
+    // vectorStore,
   })
 })
 
@@ -107,15 +106,8 @@ ragIndexRouter.get('/files/:fileId', async (req, res) => {
 
   let fileContent: string
 
-  if (shouldRenderAsText(ragFile.fileType)) {
-    // Read file content
-    const filePath = `${UPLOAD_DIR}/${ragIndex.id}/${ragFile.filename}`
-    try {
-      fileContent = await fs.promises.readFile(filePath, 'utf-8')
-    } catch (error) {
-      console.error(`Failed to read file ${filePath}:`, error)
-      throw ApplicationError.InternalServerError('Failed to read file content')
-    }
+  if (shouldRenderAsText(ragFile.fileType) || ragFile.fileType === 'application/pdf') {
+    fileContent = await FileStore.readRagFileTextContent(ragFile)
   } else {
     fileContent = 'this file cannot be displayed as readable text'
   }
@@ -149,15 +141,10 @@ ragIndexRouter.delete('/files/:fileId', async (req, res) => {
   )
 
   // Delete file from disk
-  const filePath = `${UPLOAD_DIR}/${ragIndex.id}/${ragFile.filename}`
-  try {
-    await fs.promises.unlink(filePath)
-  } catch (error) {
-    console.error(`Failed to delete file ${filePath}:`, error)
-    throw ApplicationError.InternalServerError('Failed to delete file')
-  }
+  await FileStore.deleteRagFileDocument(ragFile)
 
   // Delete from vector store
+  /* @todo langchain impl
   const client = getAzureOpenAIClient()
   try {
     if (ragFile.metadata?.vectorStoreFileId) {
@@ -167,6 +154,7 @@ ragIndexRouter.delete('/files/:fileId', async (req, res) => {
     console.error(`Failed to delete file from Azure vector store:`, error)
     throw ApplicationError.InternalServerError('Failed to delete file from vector store')
   }
+  */
 
   // Delete RagFile record
   await ragFile.destroy()
@@ -177,7 +165,7 @@ const upload = multer({
   storage: multer.diskStorage({
     destination: async (req, file, cb) => {
       const { ragIndex } = req as RagIndexRequest
-      const uploadPath = `${UPLOAD_DIR}/${ragIndex.id}`
+      const uploadPath = FileStore.getRagIndexPath(ragIndex)
       cb(null, uploadPath)
     },
     filename: (req, file, cb) => {
@@ -193,14 +181,7 @@ const uploadMiddleware = upload.array('files')
 
 const indexUploadDirMiddleware = async (req: Request, _res: Response, next: NextFunction) => {
   const { ragIndex } = req as RagIndexRequest
-  const uploadPath = `${UPLOAD_DIR}/${ragIndex.id}`
-  try {
-    await stat(uploadPath)
-    console.log(`RAG upload dir exists: ${uploadPath}`)
-  } catch (error) {
-    console.warn(`RAG upload dir not found, creating ${uploadPath}`)
-    await mkdir(uploadPath, { recursive: true })
-  }
+  await FileStore.createRagIndexDir(ragIndex)
   next()
 }
 
@@ -226,44 +207,29 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
     ),
   )
 
-  const client = getAzureOpenAIClient()
-
-  const uploadDirPath = `${UPLOAD_DIR}/${ragIndex.id}`
-
   await Promise.all(
-    ragFiles.map(async (ragFile) => {
-      const filePath = `${uploadDirPath}/${ragFile.filename}`
-      const stream = fs.createReadStream(filePath)
-
-      const uploadedFile = await client.files.create({
-        file: stream,
-        purpose: 'assistants',
-      })
-      const vectorStoreFile = await client.vectorStores.files.create(ragIndex.metadata.azureVectorStoreId, {
-        file_id: uploadedFile.id,
-        attributes: {
-          ragIndexFilter: ragIndex.metadata.ragIndexFilterValue,
-        },
-      })
-
-      console.log(`File ${filePath} uploaded to vector store`)
-      await RagFile.update(
-        {
-          pipelineStage: 'completed',
-          metadata: {
-            chunkingStrategy: vectorStoreFile.chunking_strategy?.type,
-            usageBytes: vectorStoreFile.usage_bytes,
-            vectorStoreFileId: vectorStoreFile.id,
-          },
-        },
-        {
-          where: { id: ragFile.id },
-        },
-      )
+    ragFiles.map(async (rf) => {
+      await ingestRagFile(rf)
+      rf.pipelineStage = 'completed'
+      await rf.save()
     }),
   )
 
   res.json({ message: 'Files uploaded successfully' })
+})
+
+const RagIndexSearchSchema = z.object({
+  query: z.string().min(1).max(1000),
+})
+
+ragIndexRouter.post('/search', async (req, res) => {
+  const ragIndexRequest = req as unknown as RagIndexRequest
+  const { ragIndex } = ragIndexRequest
+  const { query } = RagIndexSearchSchema.parse(req.body)
+
+  const results = await search(query, ragIndex)
+
+  res.json(results)
 })
 
 export default ragIndexRouter

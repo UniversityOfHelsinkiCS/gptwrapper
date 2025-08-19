@@ -1,7 +1,7 @@
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import HelpIcon from '@mui/icons-material/Help'
 import { Alert, Box, Drawer, Fab, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, inProduction, validModels } from '../../../config'
@@ -14,7 +14,6 @@ import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
 import type { Message } from '../../types'
-import { AppContext } from '../../contexts/AppContext'
 import { ChatBox } from './ChatBox'
 import { Conversation } from './Conversation'
 import { DisclaimerModal } from './Disclaimer'
@@ -22,11 +21,11 @@ import { handleCompletionStreamError } from './error'
 import { ChatInfo } from './general/ChatInfo'
 import RagSelector from './RagSelector'
 import { SettingsModal } from './SettingsModal'
-import { getCompletionStream, getCompletionStreamV3 } from './util'
+import { getCompletionStreamV3 } from './util'
 import { OutlineButtonBlack } from './general/Buttons'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { useChatStream } from './useChatStream'
-import Annotations from './Annotations'
+import FileSearchResults from './FileSearchResults'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { enqueueSnackbar } from 'notistack'
 import { useAnalyticsDispatch } from '../../stores/analytics'
@@ -92,7 +91,7 @@ export const ChatV2 = () => {
   const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
   const [tokenUsageAlertOpen, setTokenUsageAlertOpen] = useState<boolean>(false)
   const [allowedModels, setAllowedModels] = useState<string[]>([])
-  const [showAnnotations, setShowAnnotations] = useState<boolean>(false)
+  const [showFileSearchResults, setShowFileSearchResults] = useState<boolean>(false)
   const [chatLeftSidePanelOpen, setChatLeftSidePanelOpen] = useState<boolean>(false)
   // RAG states
   const [ragIndexId, setRagIndexId] = useState<number | undefined>()
@@ -128,7 +127,7 @@ export const ChatV2 = () => {
 
   const disclaimerInfo = infoTexts?.find((infoText) => infoText.name === 'disclaimer')?.text[i18n.language] ?? null
 
-  const { processStream, completion, isStreaming, setIsStreaming, isFileSearching, streamController } = useChatStream({
+  const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamController } = useChatStream({
     onComplete: ({ message, previousResponseId }) => {
       if (previousResponseId) {
         setPrevResponse(previousResponseId)
@@ -148,9 +147,9 @@ export const ChatV2 = () => {
     },
     onFileSearchComplete: (fileSearch) => {
       setActiveFileSearchResult(fileSearch)
-      // Only auto-open annotations on desktop, not on mobile
+      // Only auto-open FileSearchResults on desktop, not on mobile
       if (!isMobile) {
-        setShowAnnotations(true)
+        setShowFileSearchResults(true)
       }
       dispatchAnalytics({ type: 'INCREMENT_FILE_SEARCHES' })
     },
@@ -238,7 +237,7 @@ export const ChatV2 = () => {
   const handleReset = () => {
     if (window.confirm(t('chat:emptyConfirm'))) {
       setMessages([])
-      setShowAnnotations(false)
+      setShowFileSearchResults(false)
       setActiveFileSearchResult(undefined)
       setPrevResponse('')
       if (fileInputRef.current) {
@@ -337,8 +336,7 @@ export const ChatV2 = () => {
     }
   }
 
-  // @todo RAG feature disabled temporarily
-  const showRagSelector = false // (ragIndices?.length ?? 0) > 0
+  const showRagSelector = (ragIndices?.length ?? 0) > 0
 
   if (statusLoading) return null
 
@@ -462,9 +460,9 @@ export const ChatV2 = () => {
             messages={messages}
             completion={completion}
             isStreaming={isStreaming}
-            isFileSearching={isFileSearching}
+            toolCalls={toolCalls}
             setActiveFileSearchResult={setActiveFileSearchResult}
-            setShowAnnotations={setShowAnnotations}
+            setShowFileSearchResults={setShowFileSearchResults}
           />
         </Box>
 
@@ -524,13 +522,13 @@ export const ChatV2 = () => {
         </Fab>
       )}
 
-      {/* Annotations columns ----------------------------------------------------------------------------------------------------- */}
+      {/* FileSearchResults columns ----------------------------------------------------------------------------------------------------- */}
 
       {isMobile && (
         <Drawer
           anchor="right"
-          open={showAnnotations}
-          onClose={() => setShowAnnotations(false)}
+          open={showFileSearchResults}
+          onClose={() => setShowFileSearchResults(false)}
           sx={{
             '& .MuiDrawer-paper': {
               width: '100%',
@@ -550,12 +548,12 @@ export const ChatV2 = () => {
               overflow: 'auto',
             }}
           >
-            {activeFileSearchResult && <Annotations fileSearchResult={activeFileSearchResult} setShowAnnotations={setShowAnnotations} />}
+            {activeFileSearchResult && <FileSearchResults fileSearchResult={activeFileSearchResult} setShowFileSearchResults={setShowFileSearchResults} />}
           </Box>
         </Drawer>
       )}
 
-      {!isMobile && showAnnotations && activeFileSearchResult && (
+      {!isMobile && showFileSearchResults && activeFileSearchResult && (
         <Box
           sx={{
             width: { md: 300, lg: 400 },
@@ -569,7 +567,7 @@ export const ChatV2 = () => {
             paddingTop: !isEmbeddedMode ? '4rem' : 0,
           }}
         >
-          <Annotations fileSearchResult={activeFileSearchResult} setShowAnnotations={setShowAnnotations} />
+          <FileSearchResults fileSearchResult={activeFileSearchResult} setShowFileSearchResults={setShowFileSearchResults} />
         </Box>
       )}
 

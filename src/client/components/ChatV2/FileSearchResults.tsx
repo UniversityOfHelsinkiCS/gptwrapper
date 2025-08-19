@@ -138,15 +138,13 @@ const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: FileSe
             animation: shouldFlash ? 'flashIn 0.5s ease-out 0.4s 1' : undefined,
           }}
         >
-          <style>
-            {`
-                        @keyframes flashIn {
-                            0% { background-color: #f5f5f5; }
-                            50% { background-color:#cccccc; }
-                            100% { background-color: #f5f5f5; }
-                        }
-                        `}
-          </style>
+          <style>{`
+            @keyframes flashIn {
+              0% { background-color: #f5f5f5; }
+              50% { background-color:#cccccc; }
+              100% { background-color: #f5f5f5; }
+            }
+          `}</style>
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.text}</ReactMarkdown>
         </Box>
       </Box>
@@ -190,7 +188,13 @@ const Queries = ({ queries }: { queries: string[] }) => {
   )
 }
 
-const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResult: FileSearchCompletedData; setShowAnnotations: (show: boolean) => void }) => {
+const FileSearchResults = ({
+  fileSearchResult,
+  setShowFileSearchResults,
+}: {
+  fileSearchResult: FileSearchCompletedData
+  setShowFileSearchResults: (show: boolean) => void
+}) => {
   const { data: results, isSuccess: isResultsSuccess } = useFileSearchResults(fileSearchResult.id)
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
   const [selectedAnnotation, setSelectedAnnotation] = useState<number | null>(null)
@@ -237,7 +241,7 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
             opacity: 0.9,
             zIndex: 1,
           }}
-          onClick={() => setShowAnnotations(false)}
+          onClick={() => setShowFileSearchResults(false)}
         >
           <Close />
         </IconButton>
@@ -319,4 +323,4 @@ const Annotations = ({ fileSearchResult, setShowAnnotations }: { fileSearchResul
   )
 }
 
-export default Annotations
+export default FileSearchResults
