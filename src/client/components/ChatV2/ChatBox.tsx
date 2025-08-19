@@ -85,7 +85,7 @@ export const ChatBox = ({
     },
   }) // @todo what key combination to open model selector
 
-  const isShiftEnterSend = user?.preferences?.sendShortcutMode === 'shift+enter'
+  const isShiftEnterSend = user?.preferences?.sendShortcutMode === 'shift+enter' || !user?.preferences?.sendShortcutMode
 
   const handleDeleteFile = () => {
     if (fileInputRef.current) {
