@@ -9,7 +9,7 @@ test.describe('Chat v2 Conversation tests', () => {
   })
 
   test('Chat v2 mock response works', async ({ page }) => {
-    await page.locator('#model-selector').first().click()
+    await page.getByTestId('model-selector').first().click()
     await page.getByRole('option', { name: 'mock' }).click()
 
     const chatInput = page.locator('#chat-input').first()
@@ -24,7 +24,7 @@ test.describe('Chat v2 Conversation tests', () => {
   })
 
   test('Can empty conversation', async ({ page }) => {
-    await page.locator('#model-selector').first().click()
+    await page.getByTestId('model-selector').first().click()
     await page.getByRole('option', { name: 'mock' }).click()
 
     const chatInput = page.locator('#chat-input').first()

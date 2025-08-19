@@ -9,7 +9,7 @@ test.describe('Course Chat v2', () => {
   })
 
   test('Course chat works', async ({ page }) => {
-    await page.locator('#model-selector').first().click()
+    await page.getByTestId('model-selector').first().click()
     await page.getByRole('option', { name: 'mock' }).click()
 
     const chatInput = page.locator('#chat-input').first()

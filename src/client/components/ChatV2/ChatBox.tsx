@@ -15,7 +15,7 @@ import { BlueButton, GrayButton, OutlineButtonBlack } from './general/Buttons'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { SendPreferenceConfiguratorModal, ShiftEnterForNewline, ShiftEnterToSend } from './SendPreferenceConfigurator'
-import { useKeyboardCommands } from './keyboardCommands'
+import { KeyCombinations, useKeyboardCommands } from './useKeyboardCommands'
 
 export const ChatBox = ({
   disabled,
@@ -70,7 +70,6 @@ export const ChatBox = ({
   const [fileTypeAlertOpen, setFileTypeAlertOpen] = useState<boolean>(false)
   const [sendPreferenceConfiguratorOpen, setSendPreferenceConfiguratorOpen] = useState<boolean>(false)
   const sendButtonRef = useRef<HTMLButtonElement>(null)
-
   const textFieldRef = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState<string>('')
 
@@ -78,7 +77,13 @@ export const ChatBox = ({
 
   const { t } = useTranslation()
 
-  useKeyboardCommands({ resetChat: handleReset })
+  const [isModelSelectorOpen, setIsModelSelectorOpen] = useState<boolean>(false)
+  useKeyboardCommands({
+    resetChat: handleReset,
+    openModelSelector: () => {
+      setIsModelSelectorOpen(true)
+    },
+  }) // @todo what key combination to open model selector
 
   const isShiftEnterSend = user?.preferences?.sendShortcutMode === 'shift+enter'
 
@@ -173,7 +178,7 @@ export const ChatBox = ({
         onSubmit={onSubmit}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
-            if (user?.preferences?.sendShortcutMode === 'enter') {
+            if (!isShiftEnterSend) {
               if (e.shiftKey) {
                 // Do nothing with this event, it will result in a newline being inserted
               } else {
@@ -232,14 +237,26 @@ export const ChatBox = ({
                   />
                 </IconButton>
               </Tooltip>
-              <Tooltip title={t('chat:emptyConversationTooltip')} arrow placement="top">
+              <Tooltip title={t('chat:emptyConversationTooltip', { hint: KeyCombinations.RESET_CHAT?.hint })} arrow placement="top">
                 <IconButton onClick={handleReset}>
                   <RestartAltIcon />
                 </IconButton>
               </Tooltip>
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
               {!isEmbedded && (
-                <ModelSelector currentModel={currentModel} setModel={setModel} availableModels={availableModels} isTokenLimitExceeded={isTokenLimitExceeded} />
+                <ModelSelector
+                  currentModel={currentModel}
+                  setModel={setModel}
+                  availableModels={availableModels}
+                  isTokenLimitExceeded={isTokenLimitExceeded}
+                  isOpen={isModelSelectorOpen}
+                  setIsOpen={(open) => {
+                    setIsModelSelectorOpen(open)
+                    if (!open) {
+                      setTimeout(() => textFieldRef.current?.focus(), 0) // setTimeout required here...
+                    }
+                  }}
+                />
               )}
             </Box>
 
