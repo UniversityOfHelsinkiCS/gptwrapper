@@ -15,6 +15,7 @@ import { BlueButton, GrayButton, OutlineButtonBlack } from './general/Buttons'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { SendPreferenceConfiguratorModal, ShiftEnterForNewline, ShiftEnterToSend } from './SendPreferenceConfigurator'
+import { useKeyboardCommands } from './keyboardCommands'
 
 export const ChatBox = ({
   disabled,
@@ -76,6 +77,10 @@ export const ChatBox = ({
   const acuallyDisabled = disabled || message.length === 0
 
   const { t } = useTranslation()
+
+  useKeyboardCommands({ resetChat: handleReset })
+
+  const isShiftEnterSend = user?.preferences?.sendShortcutMode === 'shift+enter'
 
   const handleDeleteFile = () => {
     if (fileInputRef.current) {
@@ -227,7 +232,7 @@ export const ChatBox = ({
                   />
                 </IconButton>
               </Tooltip>
-              <Tooltip title={t('chat:emptyConversation')} arrow placement="top">
+              <Tooltip title={t('chat:emptyConversationTooltip')} arrow placement="top">
                 <IconButton onClick={handleReset}>
                   <RestartAltIcon />
                 </IconButton>
@@ -238,7 +243,7 @@ export const ChatBox = ({
               )}
             </Box>
 
-            <Tooltip title={disabled ? t('chat:cancelResponse') : t('chat:shiftEnter')} arrow placement="top">
+            <Tooltip title={disabled ? t('chat:cancelResponse') : isShiftEnterSend ? t('chat:shiftEnterSend') : t('chat:enterSend')} arrow placement="top">
               <IconButton type={disabled ? 'button' : 'submit'} ref={sendButtonRef}>
                 {disabled ? <StopIcon /> : <Send />}
               </IconButton>
@@ -285,7 +290,7 @@ export const ChatBox = ({
               variant="body1"
               color="textSecondary"
             >
-              {user?.preferences?.sendShortcutMode === 'enter' ? <ShiftEnterForNewline t={t} /> : <ShiftEnterToSend t={t} />}
+              {isShiftEnterSend ? <ShiftEnterToSend t={t} /> : <ShiftEnterForNewline t={t} />}
             </Typography>
           )}
 
