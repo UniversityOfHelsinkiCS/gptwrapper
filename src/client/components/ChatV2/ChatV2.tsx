@@ -514,6 +514,7 @@ export const ChatV2 = () => {
               handleSubmit(newMessage, false)
             }}
             handleReset={handleReset}
+            isMobile={isMobile}
           />
         </Box>
       </Box>

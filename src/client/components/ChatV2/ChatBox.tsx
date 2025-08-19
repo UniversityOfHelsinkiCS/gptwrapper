@@ -36,6 +36,7 @@ export const ChatBox = ({
   handleContinue,
   handleSubmit,
   handleReset,
+  isMobile,
 }: {
   disabled: boolean
   currentModel: string
@@ -56,6 +57,7 @@ export const ChatBox = ({
   handleContinue: (message: string) => void
   handleSubmit: (message: string) => void
   handleReset: () => void
+  isMobile: boolean
 }) => {
   const { courseId } = useParams()
   const isEmbedded = useIsEmbedded()
@@ -271,19 +273,21 @@ export const ChatBox = ({
             </Tooltip>
           </Box>
 
-          <Typography
-            sx={{
-              display: { sm: 'none', md: 'block' },
-              ml: 'auto',
-              opacity: acuallyDisabled ? 0 : 1,
-              transition: 'opacity 0.2s ease-in-out',
-              fontSize: '14px',
-            }}
-            variant="body1"
-            color="textSecondary"
-          >
-            {user?.preferences?.sendShortcutMode === 'enter' ? <ShiftEnterForNewline t={t} /> : <ShiftEnterToSend t={t} />}
-          </Typography>
+          {!isMobile && (
+            <Typography
+              sx={{
+                display: { sm: 'none', md: 'block' },
+                ml: 'auto',
+                opacity: acuallyDisabled ? 0 : 1,
+                transition: 'opacity 0.2s ease-in-out',
+                fontSize: '14px',
+              }}
+              variant="body1"
+              color="textSecondary"
+            >
+              {user?.preferences?.sendShortcutMode === 'enter' ? <ShiftEnterForNewline t={t} /> : <ShiftEnterToSend t={t} />}
+            </Typography>
+          )}
 
           {!isEmbedded && (
             <Tooltip
