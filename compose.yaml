@@ -32,11 +32,12 @@ services:
     volumes:
       - redis_data:/data
 
-  chromadb:
-    image: chromadb/chroma
-    container_name: gptwrapper_chromadb
-    volumes:
-      - chromadb_data:/data
+  # ChromaDB not currently in use
+  # chromadb:
+  #   image: chromadb/chroma
+  #   container_name: gptwrapper_chromadb
+  #   volumes:
+  #     - chromadb_data:/data
 
   # Comment out if you use local ollama. Set OLLAMA_URL=host.docker.internal:11434 if using recent Docker Desktop.
   # ollama:
