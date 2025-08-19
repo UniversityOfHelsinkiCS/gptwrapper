@@ -9,7 +9,7 @@ import { useSnackbar } from 'notistack'
 import { useState } from 'react'
 
 export const ShiftEnterToSend = ({ t }) => (
-  <Box display="flex" alignItems="center" gap={0.5}>
+  <Box display="flex" alignItems="center" gap={0.5} component="span">
     <strong>{t('sendPreferenceConfigurator:shift')}</strong>
     <ArrowUpward fontSize="small" />+ <strong>{t('sendPreferenceConfigurator:return')}</strong>
     <KeyboardReturn fontSize="small" />
@@ -18,7 +18,7 @@ export const ShiftEnterToSend = ({ t }) => (
 )
 
 export const EnterToSend = ({ t }) => (
-  <Box display="flex" alignItems="center" gap={0.5}>
+  <Box display="flex" alignItems="center" gap={0.5} component="span">
     <strong>{t('sendPreferenceConfigurator:return')}</strong>
     <KeyboardReturn fontSize="small" />
     {t('sendPreferenceConfigurator:toSend')}
@@ -26,7 +26,7 @@ export const EnterToSend = ({ t }) => (
 )
 
 export const ShiftEnterForNewline = ({ t }) => (
-  <Box display="flex" alignItems="center" gap={0.5}>
+  <Box display="flex" alignItems="center" gap={0.5} component="span">
     <strong>{t('sendPreferenceConfigurator:shift')}</strong>
     <ArrowUpward fontSize="small" />+ <strong>{t('sendPreferenceConfigurator:return')}</strong>
     <KeyboardReturn fontSize="small" />
@@ -35,7 +35,7 @@ export const ShiftEnterForNewline = ({ t }) => (
 )
 
 export const EnterForNewline = ({ t }) => (
-  <Box display="flex" alignItems="center" gap={0.5}>
+  <Box display="flex" alignItems="center" gap={0.5} component="span">
     <strong>{t('sendPreferenceConfigurator:return')}</strong>
     <KeyboardReturn fontSize="small" />
     {t('sendPreferenceConfigurator:toNewline')}

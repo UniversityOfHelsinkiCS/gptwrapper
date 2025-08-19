@@ -1,15 +1,14 @@
-import { Box, Button, CssBaseline, Snackbar } from '@mui/material'
+import { Box, Button, CircularProgress, CssBaseline, Snackbar } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { fi } from 'date-fns/locale'
 import { SnackbarProvider } from 'notistack'
 import React, { useEffect, useRef } from 'react'
-import { Outlet, useLocation, useParams } from 'react-router-dom'
+import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom'
 import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
 import { PUBLIC_URL } from '../config'
 import { Feedback } from './components/Feedback'
-import Footer from './components/Footer'
 import NavBar from './components/NavBar'
 import { AppContext } from './contexts/AppContext'
 import { EmbeddedProvider, useIsEmbedded } from './contexts/EmbeddedContext'
@@ -75,23 +74,10 @@ const AdminLoggedInAsBanner = () => {
 const App = () => {
   useUpdateUrlLang()
   const theme = useTheme()
-  const { courseId } = useParams()
-  const location = useLocation()
-  const { user, isLoading } = useCurrentUser()
 
   useEffect(() => {
     initShibbolethPinger()
   }, [])
-  const onNoAccessPage = location.pathname.includes('/noaccess')
-
-  if (isLoading && !onNoAccessPage) return null
-
-  if (!onNoAccessPage && !hasAccess(user, courseId)) {
-    window.location.href = PUBLIC_URL + getRedirect(user)
-    return null
-  }
-
-  if (!user && !onNoAccessPage) return null
 
   return (
     <ThemeProvider theme={theme}>
@@ -127,12 +113,34 @@ const Layout = () => {
       >
         {!isEmbedded && <NavBar />}
         <Box sx={{ flex: 1 }}>
-          <Outlet />
+          <Content />
         </Box>
         <Feedback />
       </Box>
       <AdminLoggedInAsBanner />
     </AppContext.Provider>
+  )
+}
+
+const Content = () => {
+  const { courseId } = useParams()
+  const location = useLocation()
+  const { user, isLoading } = useCurrentUser()
+
+  const onNoAccessPage = location.pathname.includes('/noaccess')
+
+  if (isLoading && !onNoAccessPage) return <CircularProgress sx={{ margin: 'auto' }} />
+
+  if (!onNoAccessPage && !hasAccess(user, courseId)) {
+    return <Navigate to={PUBLIC_URL + getRedirect(user)} />
+  }
+
+  if (!user && !onNoAccessPage) return null
+
+  return (
+    <Box sx={{ flex: 1 }}>
+      <Outlet />
+    </Box>
   )
 }
 

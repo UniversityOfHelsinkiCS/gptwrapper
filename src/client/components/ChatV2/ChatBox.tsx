@@ -15,6 +15,7 @@ import { BlueButton, GrayButton, OutlineButtonBlack } from './general/Buttons'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { SendPreferenceConfiguratorModal, ShiftEnterForNewline, ShiftEnterToSend } from './SendPreferenceConfigurator'
+import { KeyCombinations, useKeyboardCommands } from './useKeyboardCommands'
 
 export const ChatBox = ({
   disabled,
@@ -36,6 +37,7 @@ export const ChatBox = ({
   handleContinue,
   handleSubmit,
   handleReset,
+  isMobile,
 }: {
   disabled: boolean
   currentModel: string
@@ -56,6 +58,7 @@ export const ChatBox = ({
   handleContinue: (message: string) => void
   handleSubmit: (message: string) => void
   handleReset: () => void
+  isMobile: boolean
 }) => {
   const { courseId } = useParams()
   const isEmbedded = useIsEmbedded()
@@ -67,13 +70,22 @@ export const ChatBox = ({
   const [fileTypeAlertOpen, setFileTypeAlertOpen] = useState<boolean>(false)
   const [sendPreferenceConfiguratorOpen, setSendPreferenceConfiguratorOpen] = useState<boolean>(false)
   const sendButtonRef = useRef<HTMLButtonElement>(null)
-
   const textFieldRef = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState<string>('')
 
   const acuallyDisabled = disabled || message.length === 0
 
   const { t } = useTranslation()
+
+  const [isModelSelectorOpen, setIsModelSelectorOpen] = useState<boolean>(false)
+  useKeyboardCommands({
+    resetChat: handleReset,
+    openModelSelector: () => {
+      setIsModelSelectorOpen(true)
+    },
+  }) // @todo what key combination to open model selector
+
+  const isShiftEnterSend = user?.preferences?.sendShortcutMode === 'shift+enter' || !user?.preferences?.sendShortcutMode
 
   const handleDeleteFile = () => {
     if (fileInputRef.current) {
@@ -166,7 +178,7 @@ export const ChatBox = ({
         onSubmit={onSubmit}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
-            if (user?.preferences?.sendShortcutMode === 'enter') {
+            if (!isShiftEnterSend) {
               if (e.shiftKey) {
                 // Do nothing with this event, it will result in a newline being inserted
               } else {
@@ -225,18 +237,30 @@ export const ChatBox = ({
                   />
                 </IconButton>
               </Tooltip>
-              <Tooltip title={t('chat:emptyConversation')} arrow placement="top">
+              <Tooltip title={t('chat:emptyConversationTooltip', { hint: KeyCombinations.RESET_CHAT?.hint })} arrow placement="top">
                 <IconButton onClick={handleReset}>
                   <RestartAltIcon />
                 </IconButton>
               </Tooltip>
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
               {!isEmbedded && (
-                <ModelSelector currentModel={currentModel} setModel={setModel} availableModels={availableModels} isTokenLimitExceeded={isTokenLimitExceeded} />
+                <ModelSelector
+                  currentModel={currentModel}
+                  setModel={setModel}
+                  availableModels={availableModels}
+                  isTokenLimitExceeded={isTokenLimitExceeded}
+                  isOpen={isModelSelectorOpen}
+                  setIsOpen={(open) => {
+                    setIsModelSelectorOpen(open)
+                    if (!open) {
+                      setTimeout(() => textFieldRef.current?.focus(), 0) // setTimeout required here...
+                    }
+                  }}
+                />
               )}
             </Box>
 
-            <Tooltip title={disabled ? t('chat:cancelResponse') : t('chat:shiftEnter')} arrow placement="top">
+            <Tooltip title={disabled ? t('chat:cancelResponse') : isShiftEnterSend ? t('chat:shiftEnterSend') : t('chat:enterSend')} arrow placement="top">
               <IconButton type={disabled ? 'button' : 'submit'} ref={sendButtonRef}>
                 {disabled ? <StopIcon /> : <Send />}
               </IconButton>
@@ -271,19 +295,21 @@ export const ChatBox = ({
             </Tooltip>
           </Box>
 
-          <Typography
-            sx={{
-              display: { sm: 'none', md: 'block' },
-              ml: 'auto',
-              opacity: acuallyDisabled ? 0 : 1,
-              transition: 'opacity 0.2s ease-in-out',
-              fontSize: '14px',
-            }}
-            variant="body1"
-            color="textSecondary"
-          >
-            {user?.preferences?.sendShortcutMode === 'enter' ? <ShiftEnterForNewline t={t} /> : <ShiftEnterToSend t={t} />}
-          </Typography>
+          {!isMobile && (
+            <Typography
+              sx={{
+                display: { sm: 'none', md: 'block' },
+                ml: 'auto',
+                opacity: acuallyDisabled ? 0 : 1,
+                transition: 'opacity 0.2s ease-in-out',
+                fontSize: '14px',
+              }}
+              variant="body1"
+              color="textSecondary"
+            >
+              {isShiftEnterSend ? <ShiftEnterToSend t={t} /> : <ShiftEnterForNewline t={t} />}
+            </Typography>
+          )}
 
           {!isEmbedded && (
             <Tooltip
