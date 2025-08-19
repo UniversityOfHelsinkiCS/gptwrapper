@@ -209,7 +209,7 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
 
   await Promise.all(
     ragFiles.map(async (rf) => {
-      await ingestRagFile(rf)
+      await ingestRagFile(rf, ragIndex.metadata.language)
       rf.pipelineStage = 'completed'
       await rf.save()
     }),

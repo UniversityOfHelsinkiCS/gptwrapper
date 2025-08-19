@@ -9,6 +9,7 @@ export type RagIndexMetadata = {
   azureVectorStoreId?: string
   ragIndexFilterValue: string
   instructions?: string
+  language?: 'Finnish' | 'English'
 }
 
 export type RagFileMetadata = {

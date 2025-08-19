@@ -16,7 +16,7 @@ const markdownTextSplitter = new MarkdownTextSplitter({
 
 const isMarkdown = (mimetype: string) => mimetype === 'text/markdown'
 
-export const ingestRagFile = async (ragFile: RagFile) => {
+export const ingestRagFile = async (ragFile: RagFile, language: 'Finnish' | 'English' = 'English') => {
   console.time(`Ingestion ${ragFile.filename}`)
 
   const text = await FileStore.readRagFileTextContent(ragFile)
@@ -33,7 +33,8 @@ export const ingestRagFile = async (ragFile: RagFile) => {
     chunkDocument.id = `ragIndex-${ragFile.ragIndexId}-${ragFile.filename}-${idx}`
   })
 
-  const vectorStore = getRedisVectorStore(ragFile.ragIndexId)
+  console.log(language)
+  const vectorStore = getRedisVectorStore(ragFile.ragIndexId, language)
 
   await vectorStore.addDocuments(chunkDocuments)
   console.timeEnd(`Ingestion ${ragFile.filename}`)

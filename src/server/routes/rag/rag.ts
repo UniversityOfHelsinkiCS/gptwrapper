@@ -13,6 +13,7 @@ const router = Router()
 
 const IndexCreationSchema = z.object({
   name: z.string().min(1).max(100),
+  language: z.enum(['Finnish', 'English']).optional(),
   chatInstanceId: z.string().min(1).max(100),
   dim: z.number().min(EMBED_DIM).max(EMBED_DIM).default(EMBED_DIM),
 })
@@ -24,7 +25,7 @@ const hasChatInstanceRagPermission = (user: User, chatInstance: ChatInstance) =>
 
 router.post('/indices', async (req, res) => {
   const { user } = req as RequestWithUser
-  const { name, dim, chatInstanceId } = IndexCreationSchema.parse(req.body)
+  const { name, dim, chatInstanceId, language } = IndexCreationSchema.parse(req.body)
 
   const chatInstance = await ChatInstance.findByPk(chatInstanceId, {
     include: [
@@ -70,6 +71,7 @@ router.post('/indices', async (req, res) => {
       dim,
       // azureVectorStoreId: vectorStore.id,
       ragIndexFilterValue: randomUUID(),
+      language,
     },
   })
 

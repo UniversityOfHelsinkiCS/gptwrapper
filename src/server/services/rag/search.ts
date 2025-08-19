@@ -9,12 +9,12 @@ export const search = async (query: string, ragIndex: RagIndex): Promise<RagChun
   console.log('Searching', ragIndex.metadata.name, 'for query:', query)
   const vectorStore = getRedisVectorStore(ragIndex.id)
 
-  const vectorstoreRetriever = vectorStore.asRetriever(8)
+  // const vectorstoreRetriever = vectorStore.asRetriever(0)
   const ftSearchRetriever = new FTSearchRetriever(vectorStore.indexName)
 
   const retriever = new EnsembleRetriever({
-    retrievers: [vectorstoreRetriever, ftSearchRetriever],
-    weights: [0.3, 0.7],
+    retrievers: [ftSearchRetriever],
+    weights: [1],
   })
 
   const results0 = await retriever.invoke(query)
