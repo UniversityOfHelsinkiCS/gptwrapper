@@ -37,7 +37,7 @@ const NavBar = () => {
   const isDesktopDevice = useMediaQuery(theme.breakpoints.up('lg'))
   const { language } = i18n
   const languages = ['fi', 'sv', 'en']
-  const { user, isLoading } = useCurrentUser()
+  const { user } = useCurrentUser()
   // will be changed to use url to change language and moved up to app since language is global
   const handleLanguageChange = (newLanguage: string) => {
     i18n.changeLanguage(newLanguage)
@@ -45,9 +45,6 @@ const NavBar = () => {
   useEffect(() => {
     setNavPanelOpen(false)
   }, [isDesktopDevice])
-  if (isLoading) return null
-
-  if (!user) return null
 
   return (
     <>
@@ -116,14 +113,16 @@ const NavItems = ({ user, t, languages, handleLanguageChange, language, vertical
   const { pathname } = useLocation()
   const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
 
+  if (!user) return null
+
   return (
     <>
-      {user?.preferences?.chatVersion !== 2 && (
+      {user.preferences?.chatVersion !== 2 && (
         <NavItemButton to="/v2" path="v2/*" current={pathname} icon={<GradeOutlined sx={styles.icon} />} vertical={vertical}>
           {t('tryNew')}
         </NavItemButton>
       )}
-      {user?.preferences?.chatVersion !== 1 && (
+      {user.preferences?.chatVersion !== 1 && (
         <NavItemButton to="/v1" path="v1/*" current={pathname} icon={<GradeOutlined sx={styles.icon} />} vertical={vertical}>
           {t('useOld')}
         </NavItemButton>
