@@ -37,7 +37,6 @@ export const useUpdateUrlLang = () => {
   // sets the local lang state to match the newlang if the newLang is supported
   const setLang = (newLang: string) => {
     if (!languages.includes(newLang)) {
-      console.log('aborted lang update')
       return
     }
     setStorageLang(newLang)
