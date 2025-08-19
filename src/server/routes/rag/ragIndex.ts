@@ -6,7 +6,7 @@ import { ChatInstance, RagFile, RagIndex, Responsibility } from '../../db/models
 import { FileStore } from '../../services/rag/fileStore'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
-import { ingestRagFile } from '../../services/rag/ingestion'
+import { ingestRagFiles } from '../../services/rag/ingestion'
 import { search } from '../../services/rag/search'
 import { getRedisVectorStore } from '../../services/rag/vectorStore'
 
@@ -193,7 +193,7 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
     throw ApplicationError.BadRequest('No files uploaded')
   }
 
-  const ragFiles: RagFile[] = await Promise.all(
+  await Promise.all(
     req.files.map((file: Express.Multer.File) =>
       RagFile.create({
         userId: user.id,
@@ -207,13 +207,8 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
     ),
   )
 
-  await Promise.all(
-    ragFiles.map(async (rf) => {
-      await ingestRagFile(rf, ragIndex.metadata.language)
-      rf.pipelineStage = 'completed'
-      await rf.save()
-    }),
-  )
+  // @todo This should be a job
+  await ingestRagFiles(ragIndex)
 
   res.json({ message: 'Files uploaded successfully' })
 })

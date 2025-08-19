@@ -18,7 +18,6 @@ import { t } from 'i18next'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { BlueButton } from './general/Buttons'
-import { MutableRefObject } from 'react'
 
 const UserMessage = ({ content, attachements }: { content: string; attachements?: string }) => (
   <Box
@@ -60,13 +59,13 @@ const AssistantMessage = ({
   error,
   fileSearchResult,
   setActiveFileSearchResult,
-  setShowAnnotations,
+  setShowFileSearchResults,
 }: {
   content: string
   error?: string
   fileSearchResult?: FileSearchCompletedData
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
-  setShowAnnotations: (show: boolean) => void
+  setShowFileSearchResults: (show: boolean) => void
 }) => {
   const processedContent = preprocessMath(content)
   const katexOptions = {
@@ -109,9 +108,9 @@ const AssistantMessage = ({
   }
   let codeCount = 0
 
-  const handleAnnotations = (fileSearchResult: FileSearchCompletedData) => {
+  const handleFileSearchResult = (fileSearchResult: FileSearchCompletedData) => {
     setActiveFileSearchResult(fileSearchResult)
-    setShowAnnotations(true)
+    setShowFileSearchResults(true)
   }
 
   return (
@@ -232,7 +231,7 @@ const AssistantMessage = ({
               borderRadius: '0.6rem',
             }}
             onClick={() => {
-              handleAnnotations(fileSearchResult)
+              handleFileSearchResult(fileSearchResult)
             }}
           >
             <FormatQuoteIcon sx={{ fontSize: '2rem' }} />
@@ -255,7 +254,7 @@ const AssistantMessage = ({
                 >
                   {`${t('chat:displaySources')}: `}
 
-                  <em>{fileSearchResult?.searchedFiles?.join('\r\n')}</em>
+                  <em>{fileSearchResult?.searchedFileNames.join('\r\n')}</em>
                 </Typography>
               </Box>
             </Box>
@@ -271,13 +270,13 @@ const MessageItem = ({
   isLastAssistantNode,
   expandedNodeHeight,
   setActiveFileSearchResult,
-  setShowAnnotations,
+  setShowFileSearchResults,
 }: {
   message: Message
   isLastAssistantNode: boolean
   expandedNodeHeight: number
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
-  setShowAnnotations: (show: boolean) => void
+  setShowFileSearchResults: (show: boolean) => void
 }) => {
   if (message.role === 'assistant') {
     return (
@@ -294,7 +293,7 @@ const MessageItem = ({
           error={message.error}
           fileSearchResult={message.fileSearchResult}
           setActiveFileSearchResult={setActiveFileSearchResult}
-          setShowAnnotations={setShowAnnotations}
+          setShowFileSearchResults={setShowFileSearchResults}
         />
       </Box>
     )
@@ -317,7 +316,7 @@ export const Conversation = ({
   toolCalls,
   isStreaming,
   setActiveFileSearchResult,
-  setShowAnnotations,
+  setShowFileSearchResults,
 }: {
   courseName?: string
   courseDate?: ActivityPeriod
@@ -328,7 +327,7 @@ export const Conversation = ({
   toolCalls: { id: string; name?: string }[]
   isStreaming: boolean
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
-  setShowAnnotations: (show: boolean) => void
+  setShowFileSearchResults: (show: boolean) => void
 }) => {
   const [reminderSeen, setReminderSeen] = useLocalStorageState<boolean>('reminderSeen', false)
 
@@ -356,7 +355,7 @@ export const Conversation = ({
               isLastAssistantNode={isLastAssistantNode}
               expandedNodeHeight={expandedNodeHeight}
               setActiveFileSearchResult={setActiveFileSearchResult}
-              setShowAnnotations={setShowAnnotations}
+              setShowFileSearchResults={setShowFileSearchResults}
             />
           )
         })}
@@ -369,7 +368,7 @@ export const Conversation = ({
               isLastAssistantNode={true}
               expandedNodeHeight={expandedNodeHeight}
               setActiveFileSearchResult={setActiveFileSearchResult}
-              setShowAnnotations={setShowAnnotations}
+              setShowFileSearchResults={setShowFileSearchResults}
             />
           ) : (
             <LoadingMessage expandedNodeHeight={expandedNodeHeight} isFileSearching={toolCalls.length > 0} />

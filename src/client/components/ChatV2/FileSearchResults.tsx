@@ -71,7 +71,7 @@ const AnnotationTruncated = ({
       >
         {relevanceOrder}
       </Box>
-      <Typography sx={multilineEllipsisTruncate}>{data.text}</Typography>
+      <Typography sx={multilineEllipsisTruncate}>{'data.text'}</Typography> {/* @todo fix */}
     </Box>
   )
 }
@@ -119,7 +119,7 @@ const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: FileSe
             alignItems: { xs: 'flex-start', md: 'center' },
           }}
         >
-          <Typography fontWeight={600}>{data.filename}</Typography>
+          <Typography fontWeight={600}>{'data.filename'}</Typography> {/* @todo implement file preview */}
           <Typography
             sx={{
               opacity: 0.7,
@@ -145,7 +145,7 @@ const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: FileSe
               100% { background-color: #f5f5f5; }
             }
           `}</style>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.text}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{'data.text'}</ReactMarkdown> {/* @todo implement file preview */}
         </Box>
       </Box>
     </Box>

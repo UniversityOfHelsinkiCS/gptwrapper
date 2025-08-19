@@ -1,8 +1,8 @@
 import { Document } from '@langchain/core/documents'
-import { RecursiveCharacterTextSplitter, MarkdownTextSplitter } from '@langchain/textsplitters'
-import type { RagFile } from '../../db/models'
-import { getRedisVectorStore } from './vectorStore'
+import { MarkdownTextSplitter, RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
+import { RagFile, RagIndex } from '../../db/models'
 import { FileStore } from './fileStore'
+import { getRedisVectorStore } from './vectorStore'
 
 const defaultTextSplitter = new RecursiveCharacterTextSplitter({
   chunkSize: 800,
@@ -16,26 +16,44 @@ const markdownTextSplitter = new MarkdownTextSplitter({
 
 const isMarkdown = (mimetype: string) => mimetype === 'text/markdown'
 
-export const ingestRagFile = async (ragFile: RagFile, language: 'Finnish' | 'English' = 'English') => {
-  console.time(`Ingestion ${ragFile.filename}`)
+export const ingestRagFiles = async (ragIndex: RagIndex) => {
+  const ragFiles = await RagFile.findAll({ where: { ragIndexId: ragIndex.id } })
 
-  const text = await FileStore.readRagFileTextContent(ragFile)
+  if (ragFiles.length === 0) {
+    console.warn('No rag files given to ingestRagFiles')
+    return
+  }
 
-  const document = new Document({
-    pageContent: text,
-  })
+  const vectorStore = getRedisVectorStore(ragFiles[0].ragIndexId, ragIndex.metadata.language)
+  const allDocuments: Document[] = []
 
-  const splitter = isMarkdown(ragFile.fileType) ? markdownTextSplitter : defaultTextSplitter
+  for (const ragFile of ragFiles) {
+    console.time(`Ingestion ${ragFile.filename}`)
 
-  const chunkDocuments = await splitter.splitDocuments([document])
+    const text = await FileStore.readRagFileTextContent(ragFile)
 
-  chunkDocuments.forEach((chunkDocument, idx) => {
-    chunkDocument.id = `ragIndex-${ragFile.ragIndexId}-${ragFile.filename}-${idx}`
-  })
+    const document = new Document({
+      pageContent: text,
+    })
 
-  console.log(language)
-  const vectorStore = getRedisVectorStore(ragFile.ragIndexId, language)
+    const splitter = isMarkdown(ragFile.fileType) ? markdownTextSplitter : defaultTextSplitter
 
-  await vectorStore.addDocuments(chunkDocuments)
-  console.timeEnd(`Ingestion ${ragFile.filename}`)
+    const chunkDocuments = await splitter.splitDocuments([document])
+
+    chunkDocuments.forEach((chunkDocument, idx) => {
+      chunkDocument.id = `ragIndex-${ragFile.ragIndexId}-${ragFile.filename}-${idx}`
+    })
+
+    // console.log(await redisClient.ft.info(vectorStore.indexName))
+    allDocuments.push(...chunkDocuments)
+
+    console.timeEnd(`Ingestion ${ragFile.filename}`)
+    // console.log(await redisClient.ft.info(vectorStore.indexName))
+    //
+    ragFile.pipelineStage = 'completed'
+    await ragFile.save()
+  }
+
+  // @todo we can only call this once. How to handle new documents?
+  await vectorStore.addDocuments(allDocuments)
 }

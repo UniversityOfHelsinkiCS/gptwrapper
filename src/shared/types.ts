@@ -38,7 +38,7 @@ export type RagIndexAttributes = {
   createdAt: string
   updatedAt: string
   metadata: RagIndexMetadata
-  ragFileCount: number
+  ragFileCount?: number
   ragFiles?: RagFileAttributes[]
 }
 
@@ -50,6 +50,7 @@ export type FileCitation = {
 }
 
 export type FileSearchCompletedData = {
+  status: string
   id: string
   queries: string[]
   searchedFileNames: string[]

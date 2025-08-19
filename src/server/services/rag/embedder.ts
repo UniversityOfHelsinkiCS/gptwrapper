@@ -21,7 +21,7 @@ const _azureOpenAIEmbedder = new AzureOpenAIEmbeddings({
 
 const _ollamaEmbedder = new OllamaEmbeddings({
   model: OLLAMA_EMBEDDER_MODEL,
-  baseUrl: LAAMA_API_URL,
+  baseUrl: OLLAMA_URL,
   fetch: (input: RequestInfo | URL, init?: RequestInit) => {
     return fetch(input, {
       ...init,

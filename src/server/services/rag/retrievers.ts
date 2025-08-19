@@ -15,7 +15,7 @@ export class FTSearchRetriever extends BaseRetriever {
   }
 
   async _getRelevantDocuments(query: string, _callbacks?: CallbackManagerForRetrieverRun): Promise<DocumentInterface<Record<string, any>>[]> {
-    const redisQuery = `@content:${query}`
+    const redisQuery = `@content:"${query}"`
     const ftSearchResults = await redisClient.ft.search(this.indexName, redisQuery, {
       RETURN: ['content', 'metadata'],
     })
