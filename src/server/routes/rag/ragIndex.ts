@@ -1,6 +1,8 @@
 import { type NextFunction, type Request, type Response, Router } from 'express'
 import multer from 'multer'
 import z from 'zod/v4'
+import { S3Client } from '@aws-sdk/client-s3'
+import multerS3 from 'multer-s3'
 import { shouldRenderAsText } from '../../../shared/utils'
 import { ChatInstance, RagFile, RagIndex, Responsibility } from '../../db/models'
 import { FileStore } from '../../services/rag/fileStore'
@@ -10,6 +12,17 @@ import { ingestRagFiles } from '../../services/rag/ingestion'
 import { search } from '../../services/rag/search'
 import { getRedisVectorStore } from '../../services/rag/vectorStore'
 import { SearchSchema } from '../../../shared/rag'
+import { S3_ACCESS_KEY, S3_BUCKET, S3_HOST, S3_SECRET_ACCESS_KEY } from '../../util/config'
+
+export const s3Client = new S3Client({
+  region: "eu-north-1",
+  endpoint: S3_HOST,
+  forcePathStyle: true,
+  credentials: {
+    accessKeyId: S3_ACCESS_KEY,
+    secretAccessKey: S3_SECRET_ACCESS_KEY,
+  }
+})
 
 const ragIndexRouter = Router()
 
@@ -163,16 +176,21 @@ ragIndexRouter.delete('/files/:fileId', async (req, res) => {
 })
 
 const upload = multer({
-  storage: multer.diskStorage({
-    destination: async (req, file, cb) => {
+  storage: multerS3({
+    s3: s3Client,
+    bucket: S3_BUCKET,
+    endpoint: "https://s3.datacloud.helsinki.fi",
+    acl: "private",
+    metadata: (req, file, cb) => {
+      cb(null, { fieldName: file.fieldName })
+
+    },
+    key: (req, file, cb) => {
       const { ragIndex } = req as RagIndexRequest
-      const uploadPath = FileStore.getRagIndexPath(ragIndex)
-      cb(null, uploadPath)
-    },
-    filename: (req, file, cb) => {
       const uniqueFilename = file.originalname
-      cb(null, uniqueFilename)
-    },
+      const s3key = `uploads/rag/${ragIndex.id}/${uniqueFilename}`
+      cb(null, s3key)
+    }
   }),
   limits: {
     fileSize: 50 * 1024 * 1024, // 50 MB
@@ -203,6 +221,7 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
         filename: file.originalname,
         fileType: file.mimetype,
         fileSize: file.size,
+        // s3: file.s3Key,
         metadata: {},
       }),
     ),
