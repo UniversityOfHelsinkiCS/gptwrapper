@@ -68,9 +68,6 @@ router.post('/indices', async (req, res) => {
     userId: user.id,
     metadata: {
       name,
-      dim,
-      // azureVectorStoreId: vectorStore.id,
-      ragIndexFilterValue: randomUUID(),
       language,
     },
   })

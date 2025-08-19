@@ -9,6 +9,7 @@ import { ApplicationError } from '../../util/ApplicationError'
 import { ingestRagFiles } from '../../services/rag/ingestion'
 import { search } from '../../services/rag/search'
 import { getRedisVectorStore } from '../../services/rag/vectorStore'
+import { SearchSchema } from '../../../shared/rag'
 
 const ragIndexRouter = Router()
 
@@ -213,18 +214,14 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
   res.json({ message: 'Files uploaded successfully' })
 })
 
-const RagIndexSearchSchema = z.object({
-  query: z.string().min(1).max(1000),
-})
-
 ragIndexRouter.post('/search', async (req, res) => {
   const ragIndexRequest = req as unknown as RagIndexRequest
   const { ragIndex } = ragIndexRequest
-  const { query } = RagIndexSearchSchema.parse(req.body)
+  const searchParams = SearchSchema.parse(req.body)
 
-  const results = await search(query, ragIndex)
+  const { results, timings } = await search(ragIndex, searchParams)
 
-  res.json(results)
+  res.json({ results, timings })
 })
 
 export default ragIndexRouter

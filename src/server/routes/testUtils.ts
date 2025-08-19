@@ -66,9 +66,8 @@ router.post('/reset-test-data', async (req, res) => {
     defaults: {
       userId,
       metadata: {
-        ragIndexFilterValue: 'mock',
         name: `rag-${testUserIdx}`,
-        azureVectorStoreId: 'mock',
+        language: 'English',
       },
     },
   })

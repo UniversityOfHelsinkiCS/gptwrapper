@@ -1,20 +1,13 @@
-import type { ResponseFileSearchToolCall } from 'openai/resources/responses/responses'
-import type { VectorStoreFile } from 'openai/resources/vector-stores/files'
 import type { IngestionPipelineStageKey } from './constants'
-import { ChatToolDef } from './tools'
+import type { ChatToolDef } from './tools'
 
 export type RagIndexMetadata = {
   name: string
-  dim?: number
-  azureVectorStoreId?: string
-  ragIndexFilterValue: string
   instructions?: string
   language?: 'Finnish' | 'English'
 }
 
 export type RagFileMetadata = {
-  chunkingStrategy?: NonNullable<VectorStoreFile['chunking_strategy']>['type']
-  vectorStoreFileId?: string
   usageBytes?: number
 }
 

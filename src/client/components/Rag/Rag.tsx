@@ -84,7 +84,7 @@ const Rag: React.FC = () => {
                 <TableRow>
                   <TableCell>ID</TableCell>
                   <TableCell>Name</TableCell>
-                  <TableCell>Vector Dimensions</TableCell>
+                  <TableCell>Language</TableCell>
                   <TableCell>Number of files</TableCell>
                 </TableRow>
               </TableHead>
@@ -92,7 +92,7 @@ const Rag: React.FC = () => {
                 <TableRow>
                   <TableCell>{index.id}</TableCell>
                   <TableCell>{index.metadata?.name}</TableCell>
-                  <TableCell>{index.metadata?.dim}</TableCell>
+                  <TableCell>{index.metadata?.language}</TableCell>
                   <TableCell>{index.ragFileCount}</TableCell>
                 </TableRow>
               </TableBody>

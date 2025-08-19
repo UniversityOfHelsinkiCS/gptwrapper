@@ -42,6 +42,10 @@ export const ingestRagFiles = async (ragIndex: RagIndex) => {
 
     chunkDocuments.forEach((chunkDocument, idx) => {
       chunkDocument.id = `ragIndex-${ragFile.ragIndexId}-${ragFile.filename}-${idx}`
+      chunkDocument.metadata = {
+        ...chunkDocument.metadata,
+        ragFileName: ragFile.filename,
+      }
     })
 
     // console.log(await redisClient.ft.info(vectorStore.indexName))
