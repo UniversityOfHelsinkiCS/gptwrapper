@@ -15,13 +15,13 @@ import { SearchSchema } from '../../../shared/rag'
 import { S3_ACCESS_KEY, S3_BUCKET, S3_HOST, S3_SECRET_ACCESS_KEY } from '../../util/config'
 
 export const s3Client = new S3Client({
-  region: "eu-north-1",
+  region: 'eu-north-1',
   endpoint: S3_HOST,
   forcePathStyle: true,
   credentials: {
     accessKeyId: S3_ACCESS_KEY,
     secretAccessKey: S3_SECRET_ACCESS_KEY,
-  }
+  },
 })
 
 const ragIndexRouter = Router()
@@ -179,18 +179,16 @@ const upload = multer({
   storage: multerS3({
     s3: s3Client,
     bucket: S3_BUCKET,
-    endpoint: "https://s3.datacloud.helsinki.fi",
-    acl: "private",
+    acl: 'private',
     metadata: (req, file, cb) => {
       cb(null, { fieldName: file.fieldName })
-
     },
     key: (req, file, cb) => {
       const { ragIndex } = req as RagIndexRequest
       const uniqueFilename = file.originalname
-      const s3key = `uploads/rag/${ragIndex.id}/${uniqueFilename}`
+      const s3key = `uploads/rag/${ragIndex.id}/${uniqueFilename}` // @todo Implement unique key generation logic. ragIndex.id is not unique accross multiple different instances of currechat
       cb(null, s3key)
-    }
+    },
   }),
   limits: {
     fileSize: 50 * 1024 * 1024, // 50 MB

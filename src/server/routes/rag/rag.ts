@@ -7,7 +7,6 @@ import type { User } from '../../../shared/user'
 import { ApplicationError } from '../../util/ApplicationError'
 import { TEST_COURSES } from '../../../shared/testData'
 import ragIndexRouter, { ragIndexMiddleware } from './ragIndex'
-import { randomUUID } from 'node:crypto'
 
 const router = Router()
 
@@ -55,14 +54,6 @@ router.post('/indices', async (req, res) => {
   if (!isTestCourse && hasRagIndex) {
     throw ApplicationError.Forbidden(`Cannot create index, index already exists on the course ${chatInstance.courseId}`)
   }
-
-  // @todo langchain impl
-  /*
-  const client = getAzureOpenAIClient()
-  const vectorStore = await client.vectorStores.create({
-    name: `${name}-${user.id}-${chatInstance.id}`,
-  })
-   */
 
   const ragIndex = await RagIndex.create({
     userId: user.id,
@@ -136,9 +127,6 @@ router.get('/indices', async (req, res) => {
       })
 
   if (includeExtras) {
-    // @todo langchain impl
-    //
-    // Add ragFileCount to each index
     const indicesWithCount = await Promise.all(
       indices.map(async (index: any) => {
         const count = await RagFile.count({ where: { ragIndexId: index.id } })
