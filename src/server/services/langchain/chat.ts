@@ -1,22 +1,14 @@
-import { AzureChatOpenAI } from '@langchain/openai'
-import { AZURE_API_KEY, AZURE_RESOURCE } from '../../util/config'
-import { validModels } from '../../../config'
-import { ChatMessage, Message } from '../../../shared/llmTypes'
-import { Response } from 'express'
-import { AIMessageChunk, BaseMessage, BaseMessageLike } from '@langchain/core/messages'
-import { IterableReadableStream } from '@langchain/core/utils/stream'
-import { ResponseStreamEventData } from '../../../shared/types'
-import { Tiktoken } from '@dqbd/tiktoken'
-import { FakeStreamingChatModel } from '@langchain/core/utils/testing'
-import { MockModel } from './MockModel'
+import { BaseChatModel } from '@langchain/core/language_models/chat_models'
+import { AIMessageChunk, BaseMessageLike } from '@langchain/core/messages'
 import { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
-import { BaseChatModel } from '@langchain/core/language_models/chat_models'
-import { Runnable } from '@langchain/core/runnables'
-import logger from '../../util/logger'
-import { BaseLanguageModelInput } from '@langchain/core/language_models/base'
-import { ToolCall } from '@langchain/core/messages/tool'
+import { AzureChatOpenAI } from '@langchain/openai'
+import { validModels } from '../../../config'
+import { ChatEvent } from '../../../shared/chat'
+import { ChatMessage } from '../../../shared/llmTypes'
 import { ChatToolDef } from '../../../shared/tools'
+import { AZURE_API_KEY, AZURE_RESOURCE } from '../../util/config'
+import { MockModel } from './MockModel'
 
 const getChatModel = (model: string, tools: StructuredTool[]): BaseChatModel => {
   const deploymentName = validModels.find((m) => m.name === model)?.deployment
@@ -37,7 +29,7 @@ const getChatModel = (model: string, tools: StructuredTool[]): BaseChatModel => 
   }).bindTools(tools) as BaseChatModel
 }
 
-type WriteEventFunction = (data: ResponseStreamEventData) => Promise<void>
+type WriteEventFunction = (data: ChatEvent) => Promise<void>
 
 type ChatTool = StructuredTool<any, any, any, string>
 
@@ -115,9 +107,10 @@ const chatTurn = async (model: BaseChatModel, messages: BaseMessageLike[], tools
           status: 'pending',
         }
         await writeEvent({
-          type: 'toolCallStarting',
-          name: toolCall.name as ChatToolDef['name'],
-          id,
+          type: 'toolCallStatus',
+          toolName: toolCall.name as ChatToolDef['name'],
+          callId: id,
+          text: 'Starting',
         })
       }
     }
@@ -143,10 +136,10 @@ const chatTurn = async (model: BaseChatModel, messages: BaseMessageLike[], tools
     const input = toolCall.args as ChatToolDef['input']
     if (id && tool) {
       await writeEvent({
-        type: 'toolCallStarted',
-        name,
-        input,
-        id,
+        type: 'toolCallStatus',
+        toolName: name,
+        callId: id,
+        text: `Searching for '${input.query}'`,
       })
       const result = await tool.invoke(toolCall)
       messages.push(result)
@@ -154,10 +147,14 @@ const chatTurn = async (model: BaseChatModel, messages: BaseMessageLike[], tools
         status: 'completed',
       }
       await writeEvent({
-        type: 'toolCallCompleted',
-        name,
-        artifacts: result.artifact,
-        id,
+        type: 'toolCallStatus',
+        toolName: name,
+        callId: id,
+        text: 'Completed search',
+        result: {
+          artifacts: result.artifact,
+          input,
+        },
       })
     }
   }

@@ -181,7 +181,7 @@ const upload = multer({
     bucket: S3_BUCKET,
     acl: 'private',
     metadata: (req, file, cb) => {
-      cb(null, { fieldName: file.fieldName })
+      cb(null, { fieldName: file.fieldname })
     },
     key: (req, file, cb) => {
       const { ragIndex } = req as RagIndexRequest

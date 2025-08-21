@@ -1,22 +1,9 @@
 import { useState } from 'react'
-import type { FileSearchCompletedData, ResponseStreamEventData } from '../../../shared/types'
+import type { FileSearchCompletedData } from '../../../shared/types'
 import type { Message } from '../../types'
-import { ChatToolDef } from '../../../shared/tools'
+import { ChatEvent, ToolCallStatusEvent } from '../../../shared/chat'
 
-type ToolCallState = { id: string; name: ChatToolDef['name'] } & (
-  | {
-      status: 'starting'
-    }
-  | {
-      input: ChatToolDef['input']
-      status: 'started'
-    }
-  | {
-      status: 'completed'
-      input?: ChatToolDef['input'] // Have to allow optional because it is possible "started" state was not reached before completed.
-      artifacts: ChatToolDef['artifacts']
-    }
-)
+type ToolCallState = ToolCallStatusEvent
 
 export const useChatStream = ({
   onFileSearchComplete,
@@ -31,7 +18,7 @@ export const useChatStream = ({
 }) => {
   const [completion, setCompletion] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
-  const [toolCalls, setToolCalls] = useState<ToolCallState[]>([])
+  const [toolCalls, setToolCalls] = useState<{ [callId: string]: ToolCallState }>({})
   const [streamController, setStreamController] = useState<AbortController>()
 
   const decoder = new TextDecoder()
@@ -55,7 +42,7 @@ export const useChatStream = ({
         for (const chunk of data.split('\n')) {
           if (!chunk || chunk.trim().length === 0) continue
 
-          let parsedChunk: ResponseStreamEventData | undefined
+          let parsedChunk: ChatEvent | undefined
           try {
             parsedChunk = JSON.parse(chunk)
           } catch (e: any) {
@@ -81,29 +68,8 @@ export const useChatStream = ({
               content += parsedChunk.text
               break
 
-            case 'toolCallStarting':
-              setToolCalls((prev) => [
-                ...prev,
-                {
-                  id: parsedChunk.id,
-                  name: parsedChunk.name,
-                  status: 'starting',
-                },
-              ])
-              break
-
-            case 'toolCallStarted':
-              setToolCalls((prev) =>
-                prev.map((call) =>
-                  call.id === parsedChunk.id && call.status === 'starting' ? { ...call, status: 'started', input: parsedChunk.input } : call,
-                ),
-              )
-              break
-
-            case 'toolCallCompleted':
-              setToolCalls((prev) =>
-                prev.map((call) => (call.id === parsedChunk.id ? { ...call, status: 'completed', artifacts: parsedChunk.artifacts } : call)),
-              )
+            case 'toolCallStatus':
+              setToolCalls((prev) => ({ ...prev, [parsedChunk.callId]: parsedChunk }))
               break
 
             case 'error':
@@ -125,7 +91,7 @@ export const useChatStream = ({
     } finally {
       setStreamController(undefined)
       setCompletion('')
-      setToolCalls([])
+      setToolCalls({})
       setIsStreaming(false)
 
       onComplete({

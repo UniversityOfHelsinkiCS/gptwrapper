@@ -1,7 +1,6 @@
 import express from 'express'
 import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction } from '../../../config'
 import type { ChatMessage } from '../../../shared/llmTypes'
-import type { ResponseStreamEventData } from '../../../shared/types'
 import { ChatInstance, Discussion, RagIndex, UserChatInstanceUsage } from '../../db/models'
 import { calculateUsage, checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { streamChat } from '../../services/langchain/chat'
@@ -15,6 +14,7 @@ import { upload } from './multer'
 import { PostStreamSchemaV3 } from './types'
 import { StructuredTool } from '@langchain/core/tools'
 import { getRagIndexSearchTool } from '../../services/rag/searchTool'
+import { ChatEvent } from '../../../shared/chat'
 
 const router = express.Router()
 
@@ -137,7 +137,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     systemMessage: options.systemMessage,
     model: options.model,
     tools,
-    writeEvent: async (event: ResponseStreamEventData) => {
+    writeEvent: async (event: ChatEvent) => {
       await new Promise((resolve) => {
         const success = res.write(`${JSON.stringify(event)}\n`, (err) => {
           if (err) {

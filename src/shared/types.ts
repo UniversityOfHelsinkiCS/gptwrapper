@@ -52,39 +52,6 @@ export type FileSearchCompletedData = {
 
 export type FileSearchResultData = Record<string, unknown>
 
-export type ResponseStreamEventData =
-  | {
-      type: 'writing'
-      text: string
-    }
-  | {
-      type: 'complete'
-      prevResponseId: string // Not yet sure what to put here in v3
-    }
-  | ({
-      type: 'toolCallStarting'
-      id: string
-    } & Pick<ChatToolDef, 'name'>)
-  | ({
-      type: 'toolCallStarted'
-      id: string
-    } & Pick<ChatToolDef, 'name' | 'input'>)
-  | ({
-      type: 'toolCallCompleted'
-      id: string
-    } & Pick<ChatToolDef, 'name' | 'artifacts'>)
-  | {
-      type: 'error'
-      error: string
-    }
-
-export interface CourseAssistant {
-  course_id: string | null
-  name: string
-  assistant_instruction: string
-  vector_store_id: string | null
-}
-
 export type Locale = {
   fi?: string
   en?: string

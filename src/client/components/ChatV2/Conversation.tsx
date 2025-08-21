@@ -18,6 +18,7 @@ import { t } from 'i18next'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { BlueButton } from './general/Buttons'
+import { ToolCallStatusEvent } from '../../../shared/chat'
 
 const UserMessage = ({ content, attachements }: { content: string; attachements?: string }) => (
   <Box
@@ -324,7 +325,7 @@ export const Conversation = ({
   expandedNodeHeight: number
   messages: Message[]
   completion: string
-  toolCalls: { id: string; name?: string }[]
+  toolCalls: { [callId: string]: ToolCallStatusEvent }
   isStreaming: boolean
   setActiveFileSearchResult: (data: FileSearchCompletedData) => void
   setShowFileSearchResults: (show: boolean) => void
@@ -371,7 +372,7 @@ export const Conversation = ({
               setShowFileSearchResults={setShowFileSearchResults}
             />
           ) : (
-            <LoadingMessage expandedNodeHeight={expandedNodeHeight} isFileSearching={toolCalls.length > 0} />
+            <LoadingMessage expandedNodeHeight={expandedNodeHeight} isFileSearching={Object.values(toolCalls).some((call) => !!call.result)} />
           ))}
       </Box>
       {!reminderSeen && !isStreaming && messages.length > 15 && (

@@ -26,6 +26,7 @@ export const ingestRagFiles = async (ragIndex: RagIndex) => {
 
   const vectorStore = getRedisVectorStore(ragFiles[0].ragIndexId, ragIndex.metadata.language)
   const allDocuments: Document[] = []
+  const allEmbeddings: number[][] = []
 
   for (const ragFile of ragFiles) {
     console.time(`Ingestion ${ragFile.filename}`)
@@ -40,24 +41,27 @@ export const ingestRagFiles = async (ragIndex: RagIndex) => {
 
     const chunkDocuments = await splitter.splitDocuments([document])
 
-    chunkDocuments.forEach((chunkDocument, idx) => {
+    let idx = 0
+    for (const chunkDocument of chunkDocuments) {
       chunkDocument.id = `ragIndex-${ragFile.ragIndexId}-${ragFile.filename}-${idx}`
       chunkDocument.metadata = {
         ...chunkDocument.metadata,
         ragFileName: ragFile.filename,
       }
-    })
+      idx++
+    }
 
-    // console.log(await redisClient.ft.info(vectorStore.indexName))
+    const embeddings = await vectorStore.embeddings.embedDocuments(chunkDocuments.map((d) => d.pageContent))
+
     allDocuments.push(...chunkDocuments)
+    allEmbeddings.push(...embeddings)
 
     console.timeEnd(`Ingestion ${ragFile.filename}`)
-    // console.log(await redisClient.ft.info(vectorStore.indexName))
-    //
+
     ragFile.pipelineStage = 'completed'
     await ragFile.save()
   }
 
   // @todo we can only call this once. How to handle new documents?
-  await vectorStore.addDocuments(allDocuments)
+  await vectorStore.addVectors(allEmbeddings, allDocuments)
 }
