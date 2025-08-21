@@ -8,6 +8,6 @@ const aiRouter = express.Router()
 aiRouter.use('/v1', v1Router)
 aiRouter.use('/v3', v3Router)
 
-aiRouter.use('/fileSearchResults', fileSearchResultsRouter)
+aiRouter.use('/toolResults', fileSearchResultsRouter)
 
 export default aiRouter

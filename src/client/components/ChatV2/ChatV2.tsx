@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, inProduction, validModels } from '../../../config'
-import type { FileSearchCompletedData } from '../../../shared/types'
 import { getLanguageValue } from '../../../shared/utils'
 import useCourse from '../../hooks/useCourse'
 import useInfoTexts from '../../hooks/useInfoTexts'
@@ -34,6 +33,7 @@ import { ArrowDownward, MenuBookTwoTone, Tune } from '@mui/icons-material'
 import { useChatScroll } from '../../hooks/useChatScroll'
 import { TestUseInfoV2 } from './TestUseInfo'
 import Footer from '../Footer'
+import { ToolCallResultEvent } from '../../../shared/chat'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -91,11 +91,11 @@ export const ChatV2 = () => {
   const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
   const [tokenUsageAlertOpen, setTokenUsageAlertOpen] = useState<boolean>(false)
   const [allowedModels, setAllowedModels] = useState<string[]>([])
-  const [showFileSearchResults, setShowFileSearchResults] = useState<boolean>(false)
+  const [showToolResults, setShowToolResults] = useState<boolean>(false)
   const [chatLeftSidePanelOpen, setChatLeftSidePanelOpen] = useState<boolean>(false)
   // RAG states
   const [ragIndexId, setRagIndexId] = useState<number | undefined>()
-  const [activeFileSearchResult, setActiveFileSearchResult] = useState<FileSearchCompletedData | undefined>()
+  const [activeToolResult, setActiveToolResult] = useState<ToolCallResultEvent | undefined>()
   const ragIndex = ragIndices?.find((index) => index.id === ragIndexId)
 
   // Analytics
@@ -137,6 +137,7 @@ export const ChatV2 = () => {
         refetchStatus()
       }
       chatScroll.autoScroll()
+      console.log(message)
     },
     onText: () => {
       chatScroll.autoScroll()
@@ -145,14 +146,14 @@ export const ChatV2 = () => {
       handleCompletionStreamError(error, fileName)
       enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
     },
-    onFileSearchComplete: (fileSearch) => {
-      setActiveFileSearchResult(fileSearch)
+    /* @todo fix this: onFileSearchComplete: (fileSearch) => {
+      setActiveToolResult(fileSearch)
       // Only auto-open FileSearchResults on desktop, not on mobile
       if (!isMobile) {
-        setShowFileSearchResults(true)
+        setShowToolResults(true)
       }
       dispatchAnalytics({ type: 'INCREMENT_FILE_SEARCHES' })
-    },
+    }, */
   })
 
   const handleSubmit = async (message: string, ignoreTokenUsageWarning: boolean) => {
@@ -237,8 +238,8 @@ export const ChatV2 = () => {
   const handleReset = () => {
     if (window.confirm(t('chat:emptyConfirm'))) {
       setMessages([])
-      setShowFileSearchResults(false)
-      setActiveFileSearchResult(undefined)
+      setShowToolResults(false)
+      setActiveToolResult(undefined)
       setPrevResponse('')
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
@@ -461,8 +462,8 @@ export const ChatV2 = () => {
             completion={completion}
             isStreaming={isStreaming}
             toolCalls={toolCalls}
-            setActiveFileSearchResult={setActiveFileSearchResult}
-            setShowFileSearchResults={setShowFileSearchResults}
+            setActiveToolResult={setActiveToolResult}
+            setShowToolResults={setShowToolResults}
           />
         </Box>
 
@@ -528,8 +529,8 @@ export const ChatV2 = () => {
       {isMobile && (
         <Drawer
           anchor="right"
-          open={showFileSearchResults}
-          onClose={() => setShowFileSearchResults(false)}
+          open={showToolResults}
+          onClose={() => setShowToolResults(false)}
           sx={{
             '& .MuiDrawer-paper': {
               width: '100%',
@@ -549,12 +550,12 @@ export const ChatV2 = () => {
               overflow: 'auto',
             }}
           >
-            {activeFileSearchResult && <FileSearchResults fileSearchResult={activeFileSearchResult} setShowFileSearchResults={setShowFileSearchResults} />}
+            {activeToolResult && <FileSearchResults fileSearchResult={activeToolResult} setShowFileSearchResults={setShowToolResults} />}
           </Box>
         </Drawer>
       )}
 
-      {!isMobile && showFileSearchResults && activeFileSearchResult && (
+      {!isMobile && showToolResults && activeToolResult && (
         <Box
           sx={{
             width: { md: 300, lg: 400 },
@@ -568,7 +569,7 @@ export const ChatV2 = () => {
             paddingTop: !isEmbeddedMode ? '4rem' : 0,
           }}
         >
-          <FileSearchResults fileSearchResult={activeFileSearchResult} setShowFileSearchResults={setShowFileSearchResults} />
+          <FileSearchResults fileSearchResult={activeToolResult} setShowFileSearchResults={setShowToolResults} />
         </Box>
       )}
 

@@ -1,13 +1,16 @@
 import { useState, useRef, useEffect } from 'react'
 import { Box, Typography, Chip, IconButton, Drawer } from '@mui/material'
 import { Close, Search } from '@mui/icons-material'
-import { FileSearchCompletedData, FileSearchResultData } from '../../../shared/types'
+import { FileSearchResultData } from '../../../shared/types'
 import { useTranslation } from 'react-i18next'
-import { useFileSearchResults } from './api'
+import { useToolResults } from './api'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { OutlineButtonBlack } from './general/Buttons'
 import SubjectIcon from '@mui/icons-material/Subject'
+import { ChatToolResult } from '../../../shared/tools'
+import { ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
+import { RagChunk } from '../../../shared/rag'
 
 const AnnotationTruncated = ({
   data,
@@ -15,7 +18,7 @@ const AnnotationTruncated = ({
   setIsDrawerOpen,
   setSelectedAnnotation,
 }: {
-  data: FileSearchResultData
+  data: RagChunk
   relevanceOrder: number // By default the backend returns the RAG results in most relevant results first
   setIsDrawerOpen: (open: boolean) => void
   setSelectedAnnotation: (order: number) => void
@@ -71,12 +74,12 @@ const AnnotationTruncated = ({
       >
         {relevanceOrder}
       </Box>
-      <Typography sx={multilineEllipsisTruncate}>{'data.text'}</Typography> {/* @todo fix */}
+      <Typography sx={multilineEllipsisTruncate}>{data.content}</Typography>
     </Box>
   )
 }
 
-const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: FileSearchResultData; relevanceOrder: number; isSelected: boolean }) => {
+const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: RagChunk; relevanceOrder: number; isSelected: boolean }) => {
   const annotationRef = useRef<HTMLDivElement>(null)
   const [shouldFlash, setShouldFlash] = useState(false)
 
@@ -119,7 +122,7 @@ const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: FileSe
             alignItems: { xs: 'flex-start', md: 'center' },
           }}
         >
-          <Typography fontWeight={600}>{'data.filename'}</Typography> {/* @todo implement file preview */}
+          <Typography fontWeight={600}>{data.metadata.ragFileName}</Typography>
           <Typography
             sx={{
               opacity: 0.7,
@@ -127,7 +130,7 @@ const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: FileSe
               justifySelf: 'flex-end',
             }}
           >
-            {`Score: ${data.score}`}
+            {`Score: ${data.score ?? 'N/A'}`}
           </Typography>
         </Box>
         <Box
@@ -145,7 +148,7 @@ const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: FileSe
               100% { background-color: #f5f5f5; }
             }
           `}</style>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{'data.text'}</ReactMarkdown> {/* @todo implement file preview */}
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.content}</ReactMarkdown>
         </Box>
       </Box>
     </Box>
@@ -192,10 +195,10 @@ const FileSearchResults = ({
   fileSearchResult,
   setShowFileSearchResults,
 }: {
-  fileSearchResult: FileSearchCompletedData
+  fileSearchResult: ToolCallResultEvent
   setShowFileSearchResults: (show: boolean) => void
 }) => {
-  const { data: results, isSuccess: isResultsSuccess } = useFileSearchResults(fileSearchResult.id)
+  const { data: results, isSuccess: isResultsSuccess } = useToolResults(fileSearchResult.callId)
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
   const [selectedAnnotation, setSelectedAnnotation] = useState<number | null>(null)
   const arrayResults = Array.isArray(results) ? results : []
@@ -246,7 +249,7 @@ const FileSearchResults = ({
           <Close />
         </IconButton>
       </Box>
-      <Queries queries={fileSearchResult.queries} />
+      <Queries queries={[fileSearchResult.input?.query ?? '']} />
       {isResultsSuccess ? (
         <Box
           sx={{

@@ -1,5 +1,6 @@
 import { Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
+import type { ToolCallStatusEvent } from '../../../../shared/chat'
 
 const loadingDotStyle = (delay: number) => ({
   width: 5,
@@ -14,12 +15,14 @@ const loadingDotStyle = (delay: number) => ({
 const sourcesTextStyle = {
   fontStyle: 'italic',
   ml: '1rem',
-  color: 'rgba(0,0,0,0.6)',
+  color: 'rgba(0,0,0,0.8)',
   animation: 'slideIn 0.3s ease-out',
 }
 
-export const LoadingMessage = ({ expandedNodeHeight, isFileSearching }: { expandedNodeHeight: number; isFileSearching: boolean }) => {
+export const LoadingMessage = ({ expandedNodeHeight, toolCalls }: { expandedNodeHeight: number; toolCalls: Record<string, ToolCallStatusEvent> }) => {
   const { t } = useTranslation()
+
+  const toolCallMessages = Object.values(toolCalls)
 
   return (
     <div className="message-role-assistant" style={{ height: expandedNodeHeight }}>
@@ -50,11 +53,11 @@ export const LoadingMessage = ({ expandedNodeHeight, isFileSearching }: { expand
         <div style={loadingDotStyle(0)} />
         <div style={loadingDotStyle(0.15)} />
         <div style={loadingDotStyle(0.3)} />
-        {isFileSearching && (
-          <Typography sx={sourcesTextStyle} data-testid="file-searching-message">
-            {t('chat:readSources')}
+        {toolCallMessages.map((tc) => (
+          <Typography key={tc.callId} sx={sourcesTextStyle} data-testid="tool-call-message">
+            {tc.text}
           </Typography>
-        )}
+        ))}
       </div>
     </div>
   )

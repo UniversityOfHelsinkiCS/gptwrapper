@@ -1,24 +1,21 @@
 import { useState } from 'react'
-import type { FileSearchCompletedData } from '../../../shared/types'
 import type { Message } from '../../types'
-import { ChatEvent, ToolCallStatusEvent } from '../../../shared/chat'
+import type { ChatEvent, ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
 
 type ToolCallState = ToolCallStatusEvent
 
 export const useChatStream = ({
-  onFileSearchComplete,
   onComplete,
   onError,
   onText,
 }: {
-  onFileSearchComplete: (data: FileSearchCompletedData) => void
   onComplete: ({ previousResponseId, message }: { previousResponseId: string | undefined; message: Message }) => void
   onError: (error: unknown) => void
   onText: () => void
 }) => {
   const [completion, setCompletion] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
-  const [toolCalls, setToolCalls] = useState<{ [callId: string]: ToolCallState }>({})
+  const [toolCalls, setToolCalls] = useState<Record<string, ToolCallState>>({})
   const [streamController, setStreamController] = useState<AbortController>()
 
   const decoder = new TextDecoder()
@@ -26,7 +23,7 @@ export const useChatStream = ({
   const processStream = async (stream: ReadableStream) => {
     let content = ''
     let error = ''
-    let fileSearch: FileSearchCompletedData | undefined
+    const toolCallResultsAccum: Record<string, ToolCallResultEvent> = {}
     let previousResponseId: string | undefined
 
     try {
@@ -69,6 +66,9 @@ export const useChatStream = ({
               break
 
             case 'toolCallStatus':
+              if ('result' in parsedChunk) {
+                toolCallResultsAccum[parsedChunk.callId] = parsedChunk
+              }
               setToolCalls((prev) => ({ ...prev, [parsedChunk.callId]: parsedChunk }))
               break
 
@@ -100,7 +100,7 @@ export const useChatStream = ({
           role: 'assistant',
           content,
           error: error.length > 0 ? error : undefined,
-          fileSearchResult: fileSearch,
+          toolCalls: toolCallResultsAccum,
         },
       })
     }

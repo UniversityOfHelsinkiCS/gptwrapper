@@ -1,13 +1,15 @@
-import { BaseChatModel } from '@langchain/core/language_models/chat_models'
-import { AIMessageChunk, BaseMessageLike } from '@langchain/core/messages'
-import { StructuredTool } from '@langchain/core/tools'
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models'
+import type { AIMessageChunk, BaseMessageLike } from '@langchain/core/messages'
+import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
 import { AzureChatOpenAI } from '@langchain/openai'
 import { validModels } from '../../../config'
-import { ChatEvent } from '../../../shared/chat'
-import { ChatMessage } from '../../../shared/llmTypes'
-import { ChatToolDef } from '../../../shared/tools'
+import type { ChatEvent } from '../../../shared/chat'
+import type { ChatMessage } from '../../../shared/llmTypes'
+import type { ChatToolDef, ChatToolOutput } from '../../../shared/tools'
+import type { User } from '../../../shared/user'
 import { AZURE_API_KEY, AZURE_RESOURCE } from '../../util/config'
+import { ToolResultStore } from './fileSearchResultsStore'
 import { MockModel } from './MockModel'
 
 const getChatModel = (model: string, tools: StructuredTool[]): BaseChatModel => {
@@ -39,18 +41,20 @@ export const streamChat = async ({
   chatMessages,
   tools = [],
   writeEvent,
+  user,
 }: {
   model: string
   systemMessage: string
   chatMessages: ChatMessage[]
   tools?: ChatTool[]
   writeEvent: WriteEventFunction
+  user: User
 }) => {
   const toolsByName = Object.fromEntries(tools.map((tool) => [tool.name, tool]))
 
   const chatModel = getChatModel(model, tools)
 
-  const messages = [
+  const messages: BaseMessageLike[] = [
     {
       role: 'system',
       content: systemMessage,
@@ -58,10 +62,10 @@ export const streamChat = async ({
     ...chatMessages,
   ]
 
-  const result = await chatTurn(chatModel, messages, toolsByName, writeEvent)
+  const result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
 
   if (result.toolCalls.length > 0) {
-    const result2 = await chatTurn(chatModel, messages, toolsByName, writeEvent)
+    const result2 = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
 
     return {
       tokenCount: result2.tokenCount,
@@ -85,7 +89,13 @@ export const streamChat = async ({
   }
 }
 
-const chatTurn = async (model: BaseChatModel, messages: BaseMessageLike[], toolsByName: Record<string, ChatTool>, writeEvent: WriteEventFunction) => {
+const chatTurn = async (
+  model: BaseChatModel,
+  messages: BaseMessageLike[],
+  toolsByName: Record<string, ChatTool>,
+  writeEvent: WriteEventFunction,
+  user: User,
+) => {
   const stream = await model.stream(messages)
 
   const startTS = Date.now()
@@ -140,8 +150,11 @@ const chatTurn = async (model: BaseChatModel, messages: BaseMessageLike[], tools
         toolName: name,
         callId: id,
         text: `Searching for '${input.query}'`,
+        input,
       })
       const result = await tool.invoke(toolCall)
+      const artifact = result.artifact as ChatToolOutput
+      await ToolResultStore.saveResults(id, artifact, user)
       messages.push(result)
       toolCallStatuses[id] = {
         status: 'completed',
@@ -151,10 +164,8 @@ const chatTurn = async (model: BaseChatModel, messages: BaseMessageLike[], tools
         toolName: name,
         callId: id,
         text: 'Completed search',
-        result: {
-          artifacts: result.artifact,
-          input,
-        },
+        input,
+        result: { files: artifact.map((chunk) => ({ fileName: chunk.metadata.ragFileName, score: chunk.score })) },
       })
     }
   }

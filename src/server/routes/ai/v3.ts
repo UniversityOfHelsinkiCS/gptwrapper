@@ -133,6 +133,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   res.setHeader('content-type', 'text/event-stream')
 
   const result = await streamChat({
+    user,
     chatMessages: options.chatMessages,
     systemMessage: options.systemMessage,
     model: options.model,

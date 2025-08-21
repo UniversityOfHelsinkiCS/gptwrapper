@@ -1,14 +1,14 @@
 import { Router } from 'express'
-import { FileSearchResultsStore } from '../../services/azureFileSearch/fileSearchResultsStore'
+import { ToolResultStore } from '../../services/langchain/fileSearchResultsStore'
 import type { RequestWithUser } from '../../types'
 
 const router = Router()
 
-router.get('/:fileSearchId', async (req, res) => {
-  const { fileSearchId } = req.params
+router.get('/:toolResultId', async (req, res) => {
+  const { toolResultId } = req.params
   const { user } = req as unknown as RequestWithUser
 
-  const results = await FileSearchResultsStore.getResults(fileSearchId, user)
+  const results = await ToolResultStore.getResults(toolResultId, user)
 
   if (!results) {
     res.json({ expired: true })
