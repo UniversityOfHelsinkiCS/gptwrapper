@@ -6,7 +6,6 @@ import { headersToUser } from '../middleware/user'
 import type { RequestWithUser } from '../types'
 import { ApplicationError } from '../util/ApplicationError'
 import { getCompletionEvents } from '../util/azure/client'
-import { ResponsesClient } from '../util/azure/ResponsesAPI'
 import logger from '../util/logger'
 import getEncoding from '../util/tiktoken'
 
@@ -67,9 +66,8 @@ router.post('/reset-test-data', async (req, res) => {
     defaults: {
       userId,
       metadata: {
-        ragIndexFilterValue: 'mock',
         name: `rag-${testUserIdx}`,
-        azureVectorStoreId: 'mock',
+        language: 'English',
       },
     },
   })
@@ -88,39 +86,6 @@ router.post('/reset-test-data', async (req, res) => {
   logger.info('Test data reset successfully')
 
   res.status(200).json({ message: 'Test data reset successfully' })
-})
-
-router.post('/responses-api', async (req, res) => {
-  const { user } = req as RequestWithUser
-
-  const encoding = getEncoding('gpt-4.1')
-
-  const responsesClient = new ResponsesClient({
-    model: 'gpt-4.1',
-    ragIndex: undefined,
-    instructions: '',
-    temperature: 0.9,
-    user,
-  })
-
-  console.log('Starting Responses API stream')
-
-  const stream = await responsesClient.createResponse({
-    input: {
-      role: 'user',
-      content: 'Hello!, please explain the concept of artificial intelligence.',
-    },
-  })
-
-  console.log('Stream Responses API started')
-
-  const result = await responsesClient.handleResponse({
-    stream,
-    encoding,
-    res,
-  })
-
-  console.log('Stream Responses API ended', result)
 })
 
 router.post('/completions-api', async (req, res) => {

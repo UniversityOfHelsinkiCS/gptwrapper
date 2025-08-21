@@ -1,21 +1,21 @@
 import { useState } from 'react'
-import type { FileSearchCompletedData, ResponseStreamEventData } from '../../../shared/types'
 import type { Message } from '../../types'
+import type { ChatEvent, ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
+
+type ToolCallState = ToolCallStatusEvent
 
 export const useChatStream = ({
-  onFileSearchComplete,
   onComplete,
   onError,
   onText,
 }: {
-  onFileSearchComplete: (data: FileSearchCompletedData) => void
   onComplete: ({ previousResponseId, message }: { previousResponseId: string | undefined; message: Message }) => void
   onError: (error: unknown) => void
   onText: () => void
 }) => {
   const [completion, setCompletion] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
-  const [isFileSearching, setIsFileSearching] = useState(false)
+  const [toolCalls, setToolCalls] = useState<Record<string, ToolCallState>>({})
   const [streamController, setStreamController] = useState<AbortController>()
 
   const decoder = new TextDecoder()
@@ -23,7 +23,7 @@ export const useChatStream = ({
   const processStream = async (stream: ReadableStream) => {
     let content = ''
     let error = ''
-    let fileSearch: FileSearchCompletedData | undefined
+    const toolCallResultsAccum: Record<string, ToolCallResultEvent> = {}
     let previousResponseId: string | undefined
 
     try {
@@ -39,7 +39,7 @@ export const useChatStream = ({
         for (const chunk of data.split('\n')) {
           if (!chunk || chunk.trim().length === 0) continue
 
-          let parsedChunk: ResponseStreamEventData | undefined
+          let parsedChunk: ChatEvent | undefined
           try {
             parsedChunk = JSON.parse(chunk)
           } catch (e: any) {
@@ -65,18 +65,11 @@ export const useChatStream = ({
               content += parsedChunk.text
               break
 
-            case 'annotation':
-              console.log('Received annotation:', parsedChunk.annotation)
-              break
-
-            case 'fileSearchStarted':
-              setIsFileSearching(true)
-              break
-
-            case 'fileSearchDone':
-              fileSearch = parsedChunk.fileSearch
-              onFileSearchComplete(parsedChunk.fileSearch)
-              setIsFileSearching(false)
+            case 'toolCallStatus':
+              if ('result' in parsedChunk) {
+                toolCallResultsAccum[parsedChunk.callId] = parsedChunk
+              }
+              setToolCalls((prev) => ({ ...prev, [parsedChunk.callId]: parsedChunk }))
               break
 
             case 'error':
@@ -98,7 +91,7 @@ export const useChatStream = ({
     } finally {
       setStreamController(undefined)
       setCompletion('')
-      setIsFileSearching(false)
+      setToolCalls({})
       setIsStreaming(false)
 
       onComplete({
@@ -107,7 +100,7 @@ export const useChatStream = ({
           role: 'assistant',
           content,
           error: error.length > 0 ? error : undefined,
-          fileSearchResult: fileSearch,
+          toolCalls: toolCallResultsAccum,
         },
       })
     }
@@ -118,7 +111,7 @@ export const useChatStream = ({
     completion,
     isStreaming,
     setIsStreaming,
-    isFileSearching,
+    toolCalls,
     streamController,
   }
 }

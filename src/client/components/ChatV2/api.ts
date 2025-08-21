@@ -1,11 +1,11 @@
-import type { FileSearchResultData } from '../../../shared/types'
+import type { ChatToolOutput } from '../../../shared/tools'
 import { useGetQuery } from '../../hooks/apiHooks'
 
-export const useFileSearchResults = (fileSearchId: string) => {
-  return useGetQuery<FileSearchResultData[] | { expired: true }>({
-    queryKey: ['fileSearchResults', fileSearchId],
-    url: `/ai/fileSearchResults/${fileSearchId}`,
-    enabled: !!fileSearchId,
+export const useToolResults = (toolCallId: string) => {
+  return useGetQuery<ChatToolOutput | { expired: true }>({
+    queryKey: ['toolResults', toolCallId],
+    url: `/ai/toolResults/${toolCallId}`,
+    enabled: !!toolCallId,
     retry: false,
   })
 }

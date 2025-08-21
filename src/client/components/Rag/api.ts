@@ -4,10 +4,12 @@ import { RagFileAttributes, RagIndexAttributes } from '../../../shared/types'
 
 export const useCreateRagIndexMutation = () => {
   const mutation = useMutation({
-    mutationFn: async ({ chatInstanceId, indexName }: { chatInstanceId: string; indexName: string }) => {
+    mutationFn: async ({ chatInstanceId, indexName, language }: { chatInstanceId: string; indexName: string; language: string }) => {
+      console.log(language)
       const response = await apiClient.post('/rag/indices', {
         name: indexName,
         chatInstanceId,
+        language,
       })
       return response.data
     },

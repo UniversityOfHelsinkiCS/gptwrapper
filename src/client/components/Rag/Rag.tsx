@@ -1,5 +1,22 @@
 import React, { useState } from 'react'
-import { TextField, Button, Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, Link, Container } from '@mui/material'
+import {
+  TextField,
+  Button,
+  Box,
+  Typography,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Paper,
+  Link,
+  Container,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
+} from '@mui/material'
 import { useNavigate, Link as RouterLink, useParams } from 'react-router-dom'
 import { useCourseRagIndices, useRagIndices } from '../../hooks/useRagIndices'
 import { useCreateRagIndexMutation } from './api'
@@ -12,6 +29,7 @@ const Rag: React.FC = () => {
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, true)
   const createIndexMutation = useCreateRagIndexMutation()
   const [indexName, setIndexName] = useState('')
+  const [language, setLanguage] = useState<'Finnish' | 'English'>('English')
 
   return (
     <Container sx={{ display: 'flex', gap: 2, mt: '4rem', mb: '10rem' }} maxWidth="xl">
@@ -29,6 +47,13 @@ const Rag: React.FC = () => {
               onChange={(e) => setIndexName(e.target.value)}
               fullWidth
             />
+            <FormControl fullWidth>
+              <InputLabel id="language-label">Language</InputLabel>
+              <Select labelId="language-label" id="language-select" value={language} onChange={(e) => setLanguage(e.target.value as 'Finnish' | 'English')}>
+                <MenuItem value={'Finnish'}>Finnish</MenuItem>
+                <MenuItem value={'English'}>English</MenuItem>
+              </Select>
+            </FormControl>
             <Button
               variant="contained"
               color="primary"
@@ -36,6 +61,7 @@ const Rag: React.FC = () => {
                 const newIndex = await createIndexMutation.mutateAsync({
                   chatInstanceId: chatInstance?.id,
                   indexName,
+                  language,
                 })
                 setIndexName('')
                 navigate(`/rag/${newIndex.id}`)
@@ -58,7 +84,7 @@ const Rag: React.FC = () => {
                 <TableRow>
                   <TableCell>ID</TableCell>
                   <TableCell>Name</TableCell>
-                  <TableCell>Vector Dimensions</TableCell>
+                  <TableCell>Language</TableCell>
                   <TableCell>Number of files</TableCell>
                 </TableRow>
               </TableHead>
@@ -66,7 +92,7 @@ const Rag: React.FC = () => {
                 <TableRow>
                   <TableCell>{index.id}</TableCell>
                   <TableCell>{index.metadata?.name}</TableCell>
-                  <TableCell>{index.metadata?.dim}</TableCell>
+                  <TableCell>{index.metadata?.language}</TableCell>
                   <TableCell>{index.ragFileCount}</TableCell>
                 </TableRow>
               </TableBody>

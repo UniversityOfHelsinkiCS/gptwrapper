@@ -5,15 +5,14 @@ import { ChatInstance, ChatInstanceRagIndex, RagFile, RagIndex, Responsibility }
 import type { RequestWithUser } from '../../types'
 import type { User } from '../../../shared/user'
 import { ApplicationError } from '../../util/ApplicationError'
-import { getAzureOpenAIClient } from '../../util/azure/client'
 import { TEST_COURSES } from '../../../shared/testData'
 import ragIndexRouter, { ragIndexMiddleware } from './ragIndex'
-import { randomUUID } from 'node:crypto'
 
 const router = Router()
 
 const IndexCreationSchema = z.object({
   name: z.string().min(1).max(100),
+  language: z.enum(['Finnish', 'English']).optional(),
   chatInstanceId: z.string().min(1).max(100),
   dim: z.number().min(EMBED_DIM).max(EMBED_DIM).default(EMBED_DIM),
 })
@@ -25,7 +24,7 @@ const hasChatInstanceRagPermission = (user: User, chatInstance: ChatInstance) =>
 
 router.post('/indices', async (req, res) => {
   const { user } = req as RequestWithUser
-  const { name, dim, chatInstanceId } = IndexCreationSchema.parse(req.body)
+  const { name, dim, chatInstanceId, language } = IndexCreationSchema.parse(req.body)
 
   const chatInstance = await ChatInstance.findByPk(chatInstanceId, {
     include: [
@@ -49,23 +48,18 @@ router.post('/indices', async (req, res) => {
     throw ApplicationError.Forbidden('Cannot create index, user is not responsible for the course')
   }
 
-  // Only OTE_SANDBOX allows multiple rag indices
-  if (chatInstance.courseId !== TEST_COURSES.OTE_SANDBOX.id && (chatInstance.ragIndices ?? []).length > 0) {
-    throw ApplicationError.Forbidden('Cannot create index, index already exists on the course')
+  // Only TEST_COURSES allow multiple rag indices
+  const isTestCourse = Object.values(TEST_COURSES).some((course) => course.id === chatInstance.courseId)
+  const hasRagIndex = (chatInstance.ragIndices?.length ?? 0) > 0
+  if (!isTestCourse && hasRagIndex) {
+    throw ApplicationError.Forbidden(`Cannot create index, index already exists on the course ${chatInstance.courseId}`)
   }
-
-  const client = getAzureOpenAIClient()
-  const vectorStore = await client.vectorStores.create({
-    name: `${name}-${user.id}-${chatInstance.id}`,
-  })
 
   const ragIndex = await RagIndex.create({
     userId: user.id,
     metadata: {
       name,
-      dim,
-      azureVectorStoreId: vectorStore.id,
-      ragIndexFilterValue: randomUUID(),
+      language,
     },
   })
 
@@ -133,14 +127,10 @@ router.get('/indices', async (req, res) => {
       })
 
   if (includeExtras) {
-    const client = getAzureOpenAIClient()
-
-    // Add ragFileCount to each index
     const indicesWithCount = await Promise.all(
       indices.map(async (index: any) => {
-        const vectorStore = await client.vectorStores.retrieve(index.metadata.azureVectorStoreId)
         const count = await RagFile.count({ where: { ragIndexId: index.id } })
-        return { ...index.toJSON(), ragFileCount: count, vectorStore }
+        return { ...index.toJSON(), ragFileCount: count }
       }),
     )
 

@@ -1,4 +1,5 @@
-import type { FileSearchCompletedData } from '../shared/types'
+import type { ToolCallResultEvent, ToolCallStatusEvent } from '../shared/chat'
+import { ChatToolDef } from '../shared/tools'
 import type { UserPreferences } from '../shared/user'
 
 export type SetState<T> = React.Dispatch<React.SetStateAction<T>>
@@ -10,7 +11,7 @@ export interface Message {
   content: string
   error?: string
   attachements?: string
-  fileSearchResult?: FileSearchCompletedData
+  toolCalls?: Record<string, ToolCallResultEvent>
 }
 
 interface Term {

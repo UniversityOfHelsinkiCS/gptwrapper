@@ -6,7 +6,6 @@ import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
-import type { FileSearchCompletedData } from '../../../shared/types'
 import type { ActivityPeriod, Message } from '../../types'
 import { ConversationSplash } from './general/ConversationSplash'
 import { LoadingMessage } from './general/LoadingMessage'
@@ -18,7 +17,9 @@ import { t } from 'i18next'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { BlueButton } from './general/Buttons'
-import { MutableRefObject } from 'react'
+import type { ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
+import { ChatToolResult } from '../../../shared/tools'
+import { useMemo } from 'react'
 
 const UserMessage = ({ content, attachements }: { content: string; attachements?: string }) => (
   <Box
@@ -55,18 +56,67 @@ const UserMessage = ({ content, attachements }: { content: string; attachements?
   </Box>
 )
 
+const ToolResult = ({ toolResult, handleToolResult }: { toolResult: ToolCallResultEvent; handleToolResult: (toolResult: ToolCallResultEvent) => void }) => {
+  const sources = useMemo(() => Array.from(new Set<string>(toolResult.result.files.map((file) => file.fileName)).values()).join(', '), [])
+  return (
+    <Box
+      data-testId="file-search-sources"
+      sx={{
+        display: 'flex',
+        alignItems: { xs: 'flex-start', sm: 'center' },
+        gap: 2,
+        fontStyle: 'italic',
+        maxWidth: 'fit-content',
+        opacity: '0.85',
+        mt: 3,
+        cursor: 'pointer',
+        padding: '0.6rem',
+        borderRadius: '0.6rem',
+      }}
+      onClick={() => {
+        handleToolResult(toolResult)
+      }}
+    >
+      <FormatQuoteIcon sx={{ fontSize: '2rem' }} />
+      <Box sx={{ minWidth: 0, mt: { xs: 0.5, md: 0 } }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={{
+              mr: 2,
+              wordBreak: 'break-all',
+              textOverflow: 'ellipsis',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {`${t('chat:displaySources')}: `}
+
+            <em>{sources}</em>
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  )
+}
+
 const AssistantMessage = ({
   content,
   error,
-  fileSearchResult,
-  setActiveFileSearchResult,
-  setShowAnnotations,
+  toolResults,
+  setActiveToolResult,
+  setShowToolResults,
 }: {
   content: string
   error?: string
-  fileSearchResult?: FileSearchCompletedData
-  setActiveFileSearchResult: (data: FileSearchCompletedData) => void
-  setShowAnnotations: (show: boolean) => void
+  toolResults?: Record<string, ToolCallResultEvent>
+  setActiveToolResult: (data: ToolCallResultEvent) => void
+  setShowToolResults: (show: boolean) => void
 }) => {
   const processedContent = preprocessMath(content)
   const katexOptions = {
@@ -109,9 +159,10 @@ const AssistantMessage = ({
   }
   let codeCount = 0
 
-  const handleAnnotations = (fileSearchResult: FileSearchCompletedData) => {
-    setActiveFileSearchResult(fileSearchResult)
-    setShowAnnotations(true)
+  const handleToolResult = (toolResult: ToolCallResultEvent) => {
+    console.log(toolResult)
+    setActiveToolResult(toolResult)
+    setShowToolResults(true)
   }
 
   return (
@@ -215,53 +266,9 @@ const AssistantMessage = ({
           <Typography variant="body1" fontStyle="italic" color="#cc0000">{`\n\n ${error}`}</Typography>
         </Box>
       )}
-      {fileSearchResult?.status === 'completed' && (
-        <>
-          <Box
-            data-testId="file-search-sources"
-            sx={{
-              display: 'flex',
-              alignItems: { xs: 'flex-start', sm: 'center' },
-              gap: 2,
-              fontStyle: 'italic',
-              maxWidth: 'fit-content',
-              opacity: '0.85',
-              mt: 3,
-              cursor: 'pointer',
-              padding: '0.6rem',
-              borderRadius: '0.6rem',
-            }}
-            onClick={() => {
-              handleAnnotations(fileSearchResult)
-            }}
-          >
-            <FormatQuoteIcon sx={{ fontSize: '2rem' }} />
-            <Box sx={{ minWidth: 0, mt: { xs: 0.5, md: 0 } }}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  sx={{
-                    mr: 2,
-                    wordBreak: 'break-all',
-                    textOverflow: 'ellipsis',
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {`${t('chat:displaySources')}: `}
-
-                  <em>{fileSearchResult?.searchedFiles?.join('\r\n')}</em>
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-        </>
-      )}
+      {Object.values(toolResults ?? {}).map((toolResult) => (
+        <ToolResult key={toolResult.callId} toolResult={toolResult} handleToolResult={handleToolResult} />
+      ))}
     </Box>
   )
 }
@@ -270,14 +277,14 @@ const MessageItem = ({
   message,
   isLastAssistantNode,
   expandedNodeHeight,
-  setActiveFileSearchResult,
-  setShowAnnotations,
+  setActiveToolResult,
+  setShowToolResults,
 }: {
   message: Message
   isLastAssistantNode: boolean
   expandedNodeHeight: number
-  setActiveFileSearchResult: (data: FileSearchCompletedData) => void
-  setShowAnnotations: (show: boolean) => void
+  setActiveToolResult: (data: ToolCallResultEvent) => void
+  setShowToolResults: (show: boolean) => void
 }) => {
   if (message.role === 'assistant') {
     return (
@@ -292,9 +299,9 @@ const MessageItem = ({
         <AssistantMessage
           content={message.content}
           error={message.error}
-          fileSearchResult={message.fileSearchResult}
-          setActiveFileSearchResult={setActiveFileSearchResult}
-          setShowAnnotations={setShowAnnotations}
+          toolResults={message.toolCalls}
+          setActiveToolResult={setActiveToolResult}
+          setShowToolResults={setShowToolResults}
         />
       </Box>
     )
@@ -314,10 +321,10 @@ export const Conversation = ({
   expandedNodeHeight,
   messages,
   completion,
-  isFileSearching,
+  toolCalls,
   isStreaming,
-  setActiveFileSearchResult,
-  setShowAnnotations,
+  setActiveToolResult,
+  setShowToolResults,
 }: {
   courseName?: string
   courseDate?: ActivityPeriod
@@ -325,10 +332,10 @@ export const Conversation = ({
   expandedNodeHeight: number
   messages: Message[]
   completion: string
-  isFileSearching: boolean
+  toolCalls: { [callId: string]: ToolCallStatusEvent }
   isStreaming: boolean
-  setActiveFileSearchResult: (data: FileSearchCompletedData) => void
-  setShowAnnotations: (show: boolean) => void
+  setActiveToolResult: (data: ToolCallResultEvent) => void
+  setShowToolResults: (show: boolean) => void
 }) => {
   const [reminderSeen, setReminderSeen] = useLocalStorageState<boolean>('reminderSeen', false)
 
@@ -355,8 +362,8 @@ export const Conversation = ({
               message={message}
               isLastAssistantNode={isLastAssistantNode}
               expandedNodeHeight={expandedNodeHeight}
-              setActiveFileSearchResult={setActiveFileSearchResult}
-              setShowAnnotations={setShowAnnotations}
+              setActiveToolResult={setActiveToolResult}
+              setShowToolResults={setShowToolResults}
             />
           )
         })}
@@ -368,11 +375,11 @@ export const Conversation = ({
               message={{ role: 'assistant', content: completion }}
               isLastAssistantNode={true}
               expandedNodeHeight={expandedNodeHeight}
-              setActiveFileSearchResult={setActiveFileSearchResult}
-              setShowAnnotations={setShowAnnotations}
+              setActiveToolResult={setActiveToolResult}
+              setShowToolResults={setShowToolResults}
             />
           ) : (
-            <LoadingMessage expandedNodeHeight={expandedNodeHeight} isFileSearching={isFileSearching} />
+            <LoadingMessage expandedNodeHeight={expandedNodeHeight} toolCalls={toolCalls} />
           ))}
       </Box>
       {!reminderSeen && !isStreaming && messages.length > 15 && (

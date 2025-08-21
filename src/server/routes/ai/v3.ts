@@ -1,10 +1,9 @@
 import express from 'express'
 import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction } from '../../../config'
 import type { ChatMessage } from '../../../shared/llmTypes'
-import type { ResponseStreamEventData } from '../../../shared/types'
-import { ChatInstance, Discussion, UserChatInstanceUsage } from '../../db/models'
+import { ChatInstance, Discussion, RagIndex, UserChatInstanceUsage } from '../../db/models'
 import { calculateUsage, checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
-import { createChatStream, streamChatResponse } from '../../services/langchain/chat'
+import { streamChat } from '../../services/langchain/chat'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
@@ -13,13 +12,16 @@ import { getAllowedModels, getModelContextLimit } from '../../util/util'
 import { parseFileAndAddToLastMessage } from './fileParsing'
 import { upload } from './multer'
 import { PostStreamSchemaV3 } from './types'
+import { StructuredTool } from '@langchain/core/tools'
+import { getRagIndexSearchTool } from '../../services/rag/searchTool'
+import { ChatEvent } from '../../../shared/chat'
 
 const router = express.Router()
 
 router.post('/stream', upload.single('file'), async (r, res) => {
   const req = r as RequestWithUser
   const { options, courseId } = PostStreamSchemaV3.parse(JSON.parse(req.body.data))
-  const { model } = options
+  const { model, ragIndexId } = options
   const { user } = req
 
   // @todo were not checking if the user is enrolled?
@@ -80,6 +82,8 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   const encoding = getEncoding(options.model)
   let tokenCount = calculateUsage(options.chatMessages, encoding)
+  encoding.free()
+
   const tokenUsagePercentage = Math.round((tokenCount / DEFAULT_TOKEN_LIMIT) * 100)
 
   if (!isFreeModel && tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT) {
@@ -97,37 +101,60 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     throw ApplicationError.BadRequest('Model maximum context reached')
   }
 
-  const startTS = Date.now()
+  const tools: StructuredTool[] = []
 
-  const stream = await createChatStream({
-    chatMessages: options.chatMessages,
-    systemMessage: options.systemMessage,
-    model: options.model,
-  })
+  // Check rag index
+  let ragIndex: RagIndex | undefined
 
-  const write = async (event: ResponseStreamEventData) => {
-    await new Promise((resolve) => {
-      const success = res.write(`${JSON.stringify(event)}\n`, (err) => {
-        if (err) {
-          logger.error('Streaming write error:', err.name)
-        }
-      })
+  if (ragIndexId) {
+    if (!courseId && !user.isAdmin) {
+      throw ApplicationError.Forbidden('User is not admin and trying to access non-course rag')
+    }
 
-      if (!success) {
-        logger.info('res.write returned false, waiting for drain')
-        res.once('drain', resolve)
-      } else {
-        process.nextTick(resolve)
-      }
-    })
+    ragIndex =
+      (await RagIndex.findByPk(ragIndexId, {
+        include: {
+          model: ChatInstance,
+          as: 'chatInstances',
+          where: courseId ? { courseId } : {},
+        },
+      })) ?? undefined
+
+    if (!ragIndex) {
+      logger.error('RagIndex not found', { ragIndexId })
+      res.status(404).send('RagIndex not found')
+      return
+    }
+
+    tools.push(getRagIndexSearchTool(ragIndex))
   }
 
   // Prepare for streaming response
   res.setHeader('content-type', 'text/event-stream')
 
-  const result = await streamChatResponse(stream, write, encoding, startTS)
+  const result = await streamChat({
+    user,
+    chatMessages: options.chatMessages,
+    systemMessage: options.systemMessage,
+    model: options.model,
+    tools,
+    writeEvent: async (event: ChatEvent) => {
+      await new Promise((resolve) => {
+        const success = res.write(`${JSON.stringify(event)}\n`, (err) => {
+          if (err) {
+            logger.error('Streaming write error:', err.name)
+          }
+        })
 
-  encoding.free()
+        if (!success) {
+          logger.info('res.write returned false, waiting for drain')
+          res.once('drain', resolve)
+        } else {
+          process.nextTick(resolve)
+        }
+      })
+    },
+  })
 
   tokenCount += result.tokenCount
 
