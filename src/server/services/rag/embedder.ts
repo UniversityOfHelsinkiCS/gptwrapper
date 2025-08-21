@@ -8,7 +8,7 @@ import {
   LAAMA_API_TOKEN,
   LAAMA_API_URL,
   OLLAMA_EMBEDDER_MODEL,
-  OLLAMA_URL,
+  // OLLAMA_URL,
 } from '../../util/config'
 
 const _azureOpenAIEmbedder = new AzureOpenAIEmbeddings({
@@ -21,7 +21,7 @@ const _azureOpenAIEmbedder = new AzureOpenAIEmbeddings({
 
 const _ollamaEmbedder = new OllamaEmbeddings({
   model: OLLAMA_EMBEDDER_MODEL,
-  baseUrl: OLLAMA_URL,
+  baseUrl: LAAMA_API_URL,
   fetch: (input: RequestInfo | URL, init?: RequestInit) => {
     return fetch(input, {
       ...init,

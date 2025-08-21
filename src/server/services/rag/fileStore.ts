@@ -1,4 +1,4 @@
-import { GetObjectCommand, DeleteObjectCommand, S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { GetObjectCommand, DeleteObjectCommand, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand, ListObjectsV2CommandOutput } from '@aws-sdk/client-s3'
 import type { RagFile, RagIndex } from '../../db/models'
 import { ApplicationError } from '../../util/ApplicationError'
 import { pdfToText } from '../../util/pdfToText'
@@ -20,10 +20,27 @@ export const FileStore = {
   async deleteRagIndexDocuments(ragIndex: RagIndex) {
     const prefix = FileStore.getRagIndexPrefix(ragIndex)
     try {
-      // List all objects with the prefix and delete them
-      // This requires using ListObjectsV2Command and DeleteObjectsCommand from AWS SDK v3, omitted for brevity
-      console.log(`Delete all objects with prefix ${prefix} from S3 bucket ${S3_BUCKET}`)
-      // Implement listing and batch deletion if needed
+      let continuationToken: string | undefined = undefined
+      do {
+        const listCommand = new ListObjectsV2Command({
+          Bucket: S3_BUCKET,
+          Prefix: prefix,
+          ContinuationToken: continuationToken,
+        })
+        const listResponse = await s3Client.send(listCommand) as ListObjectsV2CommandOutput
+        const keys = (listResponse.Contents || []).map(obj => ({ Key: obj.Key! }))
+
+        if (keys.length > 0) {
+          const deleteCommand = new DeleteObjectsCommand({
+            Bucket: S3_BUCKET,
+            Delete: { Objects: keys }
+          })
+          const deleteResponse = await s3Client.send(deleteCommand)
+          console.log("Deleted:", deleteResponse.Deleted?.length, "objects.")
+        }
+
+        continuationToken = listResponse.NextContinuationToken
+      } while (continuationToken)
     } catch (error) {
       console.warn(`Failed to delete S3 objects with prefix ${prefix}:`, error)
     }
