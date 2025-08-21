@@ -29,6 +29,8 @@ export const IMPORTER_URL =
 
 export const REDIS_HOST = getEnv('REDIS_HOST', 'redis')
 
+export const REDIS_PORT = 6379
+
 export const UPDATER_CRON_ENABLED = process.env.UPDATER_CRON_ENABLED === 'true'
 
 export const OLLAMA_URL = process.env.OLLAMA_URL

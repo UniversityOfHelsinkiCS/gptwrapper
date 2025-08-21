@@ -1,7 +1,7 @@
 import { GetObjectCommand, DeleteObjectCommand, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand, ListObjectsV2CommandOutput } from '@aws-sdk/client-s3'
 import type { RagFile, RagIndex } from '../../db/models'
 import { ApplicationError } from '../../util/ApplicationError'
-import { pdfToText } from '../../util/pdfToText'
+import { pdfToTextWithVLM } from '../../util/pdfToText'
 import { S3_BUCKET } from '../../util/config'
 import { s3Client } from '../../routes/rag/ragIndex'
 
@@ -81,8 +81,7 @@ export const FileStore = {
         try {
           const fileObj = await s3Client.send(new GetObjectCommand({ Bucket: S3_BUCKET, Key: s3Key }))
           const buf = await streamToBuffer(fileObj.Body)
-          const text = await pdfToText(buf)
-          // Save extracted text to S3
+          const text = await pdfToTextWithVLM(buf)
           await s3Client.send(new PutObjectCommand({
             Bucket: S3_BUCKET,
             Key: pdfTextKey,
