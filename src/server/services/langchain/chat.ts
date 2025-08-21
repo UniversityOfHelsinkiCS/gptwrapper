@@ -120,7 +120,7 @@ const chatTurn = async (
           type: 'toolCallStatus',
           toolName: toolCall.name as ChatToolDef['name'],
           callId: id,
-          text: 'Starting',
+          text: 'Searching',
         })
       }
     }
@@ -163,7 +163,7 @@ const chatTurn = async (
         type: 'toolCallStatus',
         toolName: name,
         callId: id,
-        text: 'Completed search',
+        text: `Completed search for '${input.query}'`,
         input,
         result: { files: artifact.map((chunk) => ({ fileName: chunk.metadata.ragFileName, score: chunk.score })) },
       })

@@ -95,7 +95,7 @@ const ToolResult = ({ toolResult, handleToolResult }: { toolResult: ToolCallResu
               whiteSpace: 'nowrap',
             }}
           >
-            {`${t('chat:displaySources')}: `}
+            {`${t('chat:displaySources', { query: toolResult.input.query })}: `}
 
             <em>{sources}</em>
           </Typography>

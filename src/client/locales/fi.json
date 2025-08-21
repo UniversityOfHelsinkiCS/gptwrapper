@@ -97,7 +97,7 @@
     "confirmResetChat": "Oletko varma, että haluat tyhjentää tämän keskustelun?",
     "copyToClipboard": "Kopioi leikepöydälle",
     "sources": "Lähdemateriaali",
-    "displaySources": "Lähteet",
+    "displaySources": "Lähteet hakusanalla '{{query}}'",
     "readSources": "Luetaan lähteitä",
     "failedSources": "Lähteiden näyttäminen epäonnistui",
     "freeModel": "ilmainen",

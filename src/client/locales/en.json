@@ -97,7 +97,7 @@
     "confirmResetChat": "Are you sure you want to empty this conversation?",
     "copyToClipboard": "Copy to clipboard",
     "sources": "Source materials",
-    "displaySources": "Sources",
+    "displaySources": "Sources with query '{{query}}'",
     "readSources": "Reading sources",
     "failedSources": "Failed to display sources",
     "freeModel": "free",
