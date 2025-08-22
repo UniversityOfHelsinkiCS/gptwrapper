@@ -108,18 +108,22 @@ test.describe('Prompts', () => {
   })
 
   test('Own prompts work in course chat and normal chat', async ({ page }) => {
+    // First create own prompt in course chat view
     await page.goto('/v2/test-course')
     await acceptDisclaimer(page)
     await page.getByTestId('settings-button').click()
 
+    // Fill system message input
     const newPromptName = `test-own-prompt-${test.info().workerIndex}`
     const newPromptContent = `mocktest ${newPromptName} works`
     await page.getByTestId('assistant-instructions-input').fill(newPromptContent)
 
+    // Save as own prompt
     await page.getByTestId('save-my-prompt-button').click()
     await page.getByTestId('save-my-prompt-name').fill(newPromptName)
     await page.getByTestId('save-my-prompt-submit').click()
 
+    // It is active now with the correct name
     await expect(page.getByTestId('prompt-selector-button')).toContainText(newPromptName)
     await page.getByTestId('prompt-selector-button').click()
     await expect(page.getByText('My prompts')).toBeVisible()
