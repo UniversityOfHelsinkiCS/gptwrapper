@@ -33,7 +33,7 @@ import { ArrowDownward, MenuBookTwoTone, Tune } from '@mui/icons-material'
 import { useChatScroll } from '../../hooks/useChatScroll'
 import { TestUseInfoV2 } from './TestUseInfo'
 import Footer from '../Footer'
-import { ToolCallResultEvent } from '../../../shared/chat'
+import type { ToolCallResultEvent } from '../../../shared/chat'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)

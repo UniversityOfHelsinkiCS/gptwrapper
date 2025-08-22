@@ -32,6 +32,11 @@ export default function AssistantInstructionsInput({
   ) : (
     <TextField
       data-sentry-mask
+      slotProps={{
+        htmlInput: {
+          'data-testid': 'assistant-instructions-input',
+        },
+      }}
       multiline
       minRows={6}
       maxRows={10}

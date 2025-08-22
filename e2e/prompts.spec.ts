@@ -3,6 +3,54 @@ import { expect } from '@playwright/test'
 import { acceptDisclaimer } from './utils/test-helpers'
 
 test.describe('Prompts', () => {
+  test('Custom prompt text works', async ({ page }) => {
+    await page.goto('/v2')
+
+    await acceptDisclaimer(page)
+
+    // Select mock model
+    await page.getByTestId('model-selector').first().click()
+    await page.getByRole('option', { name: 'mock' }).click()
+
+    // Open settings
+    await page.getByRole('button', { name: 'Chat settings' }).click()
+
+    // Write prompt in input (mocktest is the keyword to toggle echoing)
+    await page.getByTestId('assistant-instructions-input').fill('mocktest testi onnistui')
+
+    // Close modal
+    await page.keyboard.press('Escape')
+
+    // Send something
+    let chatInput = page.locator('#chat-input').first()
+    await chatInput.fill('testinen morjens')
+    await chatInput.press('Shift+Enter')
+
+    // Close send preference configurator
+    await page.locator('#send-preference-configurator-submit').click()
+
+    // The result should be echo of prompt
+    await expect(page.getByTestId('assistant-message')).toContainText('mocktest testi onnistui')
+
+    // Clear chat
+    page.on('dialog', (dialog) => dialog.accept())
+    await page.locator('#empty-conversation-button').click()
+
+    // Reload page to ensure prompt is saved
+    await page.reload()
+
+    chatInput = page.locator('#chat-input').first()
+    await chatInput.fill('testinen morjens')
+    await chatInput.press('Shift+Enter')
+
+    // The result should be echo of prompt, again
+    await expect(page.getByTestId('assistant-message')).toContainText('mocktest testi onnistui')
+
+    // Also check the settings modal one more time
+    await page.getByRole('button', { name: 'Chat settings' }).click()
+    await expect(page.getByTestId('assistant-instructions-input')).toContainText('mocktest testi onnistui')
+  })
+
   test('Prompt creation, chat link with prompt, and deletion', async ({ page }) => {
     await page.goto('/courses/test-course/prompts')
 

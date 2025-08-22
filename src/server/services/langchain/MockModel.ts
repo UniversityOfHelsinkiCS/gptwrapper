@@ -1,4 +1,5 @@
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager'
+import { isSystemMessage } from '@langchain/core/messages'
 import { BaseMessage } from '@langchain/core/messages'
 import { ChatGenerationChunk, ChatResult } from '@langchain/core/outputs'
 import { FakeStreamingChatModel } from '@langchain/core/utils/testing'
@@ -17,8 +18,12 @@ export class MockModel extends FakeStreamingChatModel {
   }
 
   async _generate(messages: BaseMessage[], _options: this['ParsedCallOptions'], _runManager?: CallbackManagerForLLMRun): Promise<ChatResult> {
-    messages[0].content = basicTestContent
-    console.log(messages)
+    const firstMessage = messages[0]
+    if (isSystemMessage(firstMessage) && (firstMessage.content as string).startsWith('mocktest')) {
+      // Do nothing. FakeStreamingChatModel echoes the first message.
+    } else {
+      firstMessage.content = basicTestContent
+    }
     return super._generate(messages, _options, _runManager)
   }
 
@@ -27,8 +32,12 @@ export class MockModel extends FakeStreamingChatModel {
     _options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun,
   ): AsyncGenerator<ChatGenerationChunk> {
-    messages[0].content = basicTestContent
-    console.log(messages)
+    const firstMessage = messages[0]
+    if (isSystemMessage(firstMessage) && (firstMessage.content as string).startsWith('mocktest')) {
+      // Do nothing. FakeStreamingChatModel echoes the first message.
+    } else {
+      firstMessage.content = basicTestContent
+    }
     yield* super._streamResponseChunks(messages, _options, runManager)
   }
 }
