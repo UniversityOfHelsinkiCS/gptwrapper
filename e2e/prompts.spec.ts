@@ -51,13 +51,13 @@ test.describe('Prompts', () => {
     await expect(page.getByTestId('assistant-instructions-input')).toContainText('mocktest testi onnistui')
   })
 
-  test('Prompt creation, chat link with prompt, and deletion', async ({ page }) => {
+  test('Course prompt creation, chat link with prompt, and deletion', async ({ page }) => {
     await page.goto('/courses/test-course/prompts')
 
     const newPromptName = `testausprompti-${test.info().workerIndex}`
 
     await page.getByRole('textbox', { name: 'Prompt name' }).fill(newPromptName)
-    await page.getByRole('textbox', { name: 'e.g. You are a helpful' }).fill('sanot aina "testi onnistui"')
+    await page.getByRole('textbox', { name: 'e.g. You are a helpful' }).fill('mocktest kurssitesti onnistui')
     await page.getByRole('button', { name: 'Save' }).click()
 
     // Prompt is created and link is visible
@@ -74,6 +74,20 @@ test.describe('Prompts', () => {
     await page.locator('#prompt-selector-button').click()
     expect(await page.getByText(newPromptName).count()).toBe(2)
 
+    // Close selector
+    await page.keyboard.press('Escape')
+
+    // Close settings
+    await page.keyboard.press('Escape')
+
+    // Send something
+    const chatInput = page.locator('#chat-input').first()
+    await chatInput.fill('testinen morjens')
+    await chatInput.press('Shift+Enter')
+
+    // The result should be echo of the course prompt
+    await expect(page.getByTestId('assistant-message')).toContainText('mocktest kurssitesti onnistui')
+
     // Back to course page, delete the prompt
     await page.goto('/courses/test-course/prompts')
 
@@ -81,6 +95,7 @@ test.describe('Prompts', () => {
     await page.getByTestId(`delete-prompt-${newPromptName}`).click()
 
     // Prompt is not visible anymore
+    await page.reload() // <- 100% less flaky
     expect(page.getByText(newPromptName)).not.toBeVisible()
 
     // Go to student view from link
