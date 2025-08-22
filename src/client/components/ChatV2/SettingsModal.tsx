@@ -229,7 +229,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           />
           {!isPromptHidden && (
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <OutlineButtonBlack startIcon={<Add />} onClick={() => setMyPromptModalOpen(true)}>
+              <OutlineButtonBlack startIcon={<Add />} onClick={() => setMyPromptModalOpen(true)} data-testid="save-my-prompt-button">
                 {t('settings:saveMyPrompt')}
               </OutlineButtonBlack>
             </Box>

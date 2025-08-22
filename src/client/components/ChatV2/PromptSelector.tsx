@@ -38,7 +38,7 @@ const PromptSelector = ({
   return (
     <Box mb={'0.5rem'}>
       <OutlineButtonBlack
-        id="prompt-selector-button"
+        data-testid="prompt-selector-button"
         disabled={!!mandatoryPrompt}
         onClick={(event) => {
           setAnchorEl(event.currentTarget)

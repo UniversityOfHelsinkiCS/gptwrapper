@@ -42,7 +42,7 @@ export const SaveMyPromptModal = ({ isOpen, setIsOpen, onSave, systemMessage, ex
         <DialogTitle>{t('settings:saveMyPromptModalTitle')}</DialogTitle>
         <DialogContent sx={{ p: 3, display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'flex-start' }}>
           <TextField
-            slotProps={{ htmlInput: { minLength: 1 } }}
+            slotProps={{ htmlInput: { minLength: 1, 'data-testid': 'save-my-prompt-name' } }}
             value={name}
             onChange={(e) => setName(e.target.value)}
             label={t('settings:saveMyPromptAs')}
@@ -57,7 +57,7 @@ export const SaveMyPromptModal = ({ isOpen, setIsOpen, onSave, systemMessage, ex
           <OutlineButtonBlack type="button" onClick={() => setIsOpen(false)}>
             {t('common:cancel')}
           </OutlineButtonBlack>
-          <BlueButton type="submit" disabled={!name}>
+          <BlueButton type="submit" disabled={!name} data-testid="save-my-prompt-submit">
             {promptToSave ? t('settings:updatePrompt') : t('settings:saveNewPrompt')}
           </BlueButton>
         </DialogActions>

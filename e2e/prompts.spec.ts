@@ -13,7 +13,7 @@ test.describe('Prompts', () => {
     await page.getByRole('option', { name: 'mock' }).click()
 
     // Open settings
-    await page.getByRole('button', { name: 'Chat settings' }).click()
+    await page.getByTestId('settings-button').click()
 
     // Write prompt in input (mocktest is the keyword to toggle echoing)
     await page.getByTestId('assistant-instructions-input').fill('mocktest testi onnistui')
@@ -47,7 +47,7 @@ test.describe('Prompts', () => {
     await expect(page.getByTestId('assistant-message')).toContainText('mocktest testi onnistui')
 
     // Also check the settings modal one more time
-    await page.getByRole('button', { name: 'Chat settings' }).click()
+    await page.getByTestId('settings-button').click()
     await expect(page.getByTestId('assistant-instructions-input')).toContainText('mocktest testi onnistui')
   })
 
@@ -65,13 +65,13 @@ test.describe('Prompts', () => {
 
     // Now in chat view
     await acceptDisclaimer(page)
-    await page.getByRole('button', { name: 'Chat settings' }).click()
+    await page.getByTestId('settings-button').click()
 
     // The prompt is active.
     expect(page.getByText(newPromptName)).toBeVisible()
 
     // When prompt selector is opened, it is also visible in the list, so 2 times:
-    await page.locator('#prompt-selector-button').click()
+    await page.getByTestId('prompt-selector-button').click()
     expect(await page.getByText(newPromptName).count()).toBe(2)
 
     // Close selector
@@ -100,10 +100,57 @@ test.describe('Prompts', () => {
 
     // Go to student view from link
     await page.getByText('To student view').click()
-    await page.getByRole('button', { name: 'Chat settings' }).click()
-    await page.locator('#prompt-selector-button').click()
+    await page.getByTestId('settings-button').click()
+    await page.getByTestId('prompt-selector-button').click()
 
     // Prompt is not visible anymore in student view.
     expect(page.getByText(newPromptName)).not.toBeVisible()
+  })
+
+  test('Own prompts work in course chat and normal chat', async ({ page }) => {
+    await page.goto('/v2/test-course')
+    await acceptDisclaimer(page)
+    await page.getByTestId('settings-button').click()
+
+    const newPromptName = `test-own-prompt-${test.info().workerIndex}`
+    const newPromptContent = `mocktest ${newPromptName} works`
+    await page.getByTestId('assistant-instructions-input').fill(newPromptContent)
+
+    await page.getByTestId('save-my-prompt-button').click()
+    await page.getByTestId('save-my-prompt-name').fill(newPromptName)
+    await page.getByTestId('save-my-prompt-submit').click()
+
+    await expect(page.getByTestId('prompt-selector-button')).toContainText(newPromptName)
+    await page.getByTestId('prompt-selector-button').click()
+    await expect(page.getByText('My prompts')).toBeVisible()
+    await expect(page.getByText(newPromptName, { exact: true })).toHaveCount(2) // Visible in the button and in the menu list
+
+    // Now go to normal chat
+    await page.goto('/v2')
+    await page.getByTestId('settings-button').click()
+
+    // Own prompt is visible in normal chat
+    await page.getByTestId('prompt-selector-button').click()
+    await expect(page.getByText('My prompts')).toBeVisible()
+    const ownPromptInMenu = page.getByText(newPromptName, { exact: true })
+    await expect(ownPromptInMenu).toHaveCount(1) // Visible in the menu list
+
+    // Activate it
+    await ownPromptInMenu.click()
+    await expect(page.getByTestId('assistant-instructions-input')).toHaveValue(newPromptContent)
+
+    // Close settings
+    await page.keyboard.press('Escape')
+
+    // Send message, response should echo the prompt
+    const chatInput = page.locator('#chat-input').first()
+    await chatInput.fill('testinen morjens')
+    await chatInput.press('Shift+Enter')
+
+    // Close send preference configurator
+    await page.locator('#send-preference-configurator-submit').click()
+
+    // Own prompt echoed:
+    await expect(page.getByTestId('assistant-message')).toContainText(newPromptContent)
   })
 })

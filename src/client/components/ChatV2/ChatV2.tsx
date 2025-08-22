@@ -620,7 +620,7 @@ const LeftMenu = ({
           </OutlineButtonBlack>
 
           <EmailButton messages={messages} disabled={!messages?.length} />
-          <OutlineButtonBlack startIcon={<Tune />} onClick={() => setSettingsModalOpen(true)} id="settings-button">
+          <OutlineButtonBlack startIcon={<Tune />} onClick={() => setSettingsModalOpen(true)} data-testid="settings-button">
             {t('chat:settings')}
           </OutlineButtonBlack>
           <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} id="help-button">

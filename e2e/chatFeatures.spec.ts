@@ -25,7 +25,7 @@ test.describe('Chat v2 UI Features Tests', () => {
 
   test('Settings can be opened and closed', async ({ page }) => {
     await acceptDisclaimer(page)
-    await page.locator('#settings-button').click()
+    await page.getByTestId('settings-button').click()
     await expect(page.locator('#close-settings')).toBeVisible()
 
     await page.keyboard.press('Escape')
