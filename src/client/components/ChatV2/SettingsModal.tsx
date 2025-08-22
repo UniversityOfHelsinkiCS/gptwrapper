@@ -25,8 +25,10 @@ const useUrlPromptId = () => {
 interface SettingsModalProps {
   open: boolean
   setOpen: (open: boolean) => void
-  assistantInstructions: string
-  setAssistantInstructions: (instructions: string) => void
+  customSystemMessage: string
+  setCustomSystemMessage: (instructions: string) => void
+  activePrompt: Prompt | undefined
+  setActivePrompt: (prompt: Prompt | undefined) => void
   modelTemperature: number
   setModelTemperature: (value: number) => void
   course?: Course
@@ -35,8 +37,10 @@ interface SettingsModalProps {
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   open,
   setOpen,
-  assistantInstructions,
-  setAssistantInstructions,
+  customSystemMessage,
+  setCustomSystemMessage,
+  activePrompt,
+  setActivePrompt,
   modelTemperature,
   setModelTemperature,
   course,
@@ -48,18 +52,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     queryKey: ['/prompts/my-prompts'],
     initialData: [],
   })
-  const instructionsInputFieldRef = useRef<HTMLInputElement>(null)
-  const promptSaveMutation = useMutation({
+  const [systemMessage, setSystemMessage] = useState<string>('')
+
+  const ownPromptSaveMutation = useMutation({
     mutationFn: async ({ name, promptToSave }: { name: string; promptToSave?: Prompt }) => {
       if (promptToSave && promptToSave.type !== 'PERSONAL') return // Only do this for personal prompts
 
-      const promtMessage = instructionsInputFieldRef?.current ? instructionsInputFieldRef.current.value : ''
       const promptData = {
         name,
-        systemMessage: promtMessage,
+        systemMessage,
         type: 'PERSONAL',
       }
-      setAssistantInstructions(promtMessage) //<--- makes sure the defaultValue of promt content matches the new saved promt
+
       if (promptToSave) {
         const res = await apiClient.put<Prompt>(`/prompts/${promptToSave.id}`, promptData)
         setActivePrompt(res.data)
@@ -70,22 +74,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       refetch()
     },
   })
-  const promptDeleteMutation = useMutation({
+
+  const ownPromptDeleteMutation = useMutation({
     mutationFn: async (prompt: Prompt) => {
+      if (prompt.type !== 'PERSONAL') return // Only do this for personal prompts
+
       await apiClient.delete(`/prompts/${prompt.id}`)
       refetch()
     },
   })
 
-  // local storage prompt prevents the annoying case where the user refreshes the page and the chosen prompt is reset to default, and the textbox displays incorrect prompt information
-  const [activePrompt, setActivePrompt] = useLocalStorageState<Prompt | undefined>('prompt', undefined)
-
   const [myPromptModalOpen, setMyPromptModalOpen] = useState<boolean>(false)
   const mandatoryPrompt = course?.prompts.find((p) => p.mandatory)
   const urlPrompt = course?.prompts.find((p) => p.id === urlPromptId)
   const isPromptHidden = activePrompt?.hidden ?? false
-  const isPromptEditable = activePrompt?.type !== 'CHAT_INSTANCE' && activePrompt?.type !== 'RAG_INDEX'
+  const isPromptEditable = activePrompt === undefined || activePrompt?.type === 'PERSONAL'
   const dispatchAnalytics = useAnalyticsDispatch()
+
   useEffect(() => {
     dispatchAnalytics({
       type: 'SET_ANALYTICS_DATA',
@@ -94,6 +99,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         promptName: activePrompt?.name,
       },
     })
+
+    if (activePrompt) {
+      setSystemMessage(activePrompt?.systemMessage)
+    }
   }, [activePrompt?.id])
 
   // Time for a quick sync :D --- really this is what you get when using the local storage to hold some data that is also on the server. basically having to build our own sync engine lol.
@@ -120,17 +129,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const resetSettings = () => {
     handleChangePrompt(undefined)
+    setSystemMessage(DEFAULT_ASSISTANT_INSTRUCTIONS)
     setModelTemperature(DEFAULT_MODEL_TEMPERATURE)
   }
 
   const handleChangePrompt = (newPrompt: Prompt | undefined) => {
+    console.log('handleChangePrompt', newPrompt)
+
     if (!newPrompt) {
       setActivePrompt(undefined)
-      setAssistantInstructions(DEFAULT_ASSISTANT_INSTRUCTIONS)
+      setSystemMessage(DEFAULT_ASSISTANT_INSTRUCTIONS)
+      setCustomSystemMessage(DEFAULT_ASSISTANT_INSTRUCTIONS)
       return
     }
 
-    setAssistantInstructions(newPrompt.systemMessage)
+    setSystemMessage(newPrompt.systemMessage)
     setActivePrompt(newPrompt)
   }
 
@@ -141,17 +154,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       handleChangePrompt(urlPrompt)
     }
   }, [mandatoryPrompt, urlPrompt])
+
   const handleClose = async () => {
-    //handles if the user wants to update current promts
-    if (activePrompt) {
-      await promptSaveMutation.mutateAsync({ name: activePrompt.name, promptToSave: activePrompt })
-    }
-    //default promt is not a saved promt so this handles the change to it
-    else if (instructionsInputFieldRef.current) {
-      setAssistantInstructions(instructionsInputFieldRef.current.value)
+    console.log('handleClose', activePrompt, systemMessage)
+    // When no prompt is selected, set the custom system message to the value of the system message textfield
+    if (!activePrompt) {
+      setCustomSystemMessage(systemMessage)
+    } else if (activePrompt.type === 'PERSONAL') {
+      await ownPromptSaveMutation.mutateAsync({ name: activePrompt.name, promptToSave: activePrompt })
     }
     setOpen(false)
   }
+
   return (
     <Modal open={open} onClose={handleClose}>
       <Box
@@ -202,7 +216,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             myPrompts={myPrompts}
             activePrompt={activePrompt}
             setActivePrompt={handleChangePrompt}
-            handleDeletePrompt={(prompt) => promptDeleteMutation.mutateAsync(prompt)}
+            handleDeletePrompt={(prompt) => ownPromptDeleteMutation.mutateAsync(prompt)}
             mandatoryPrompt={mandatoryPrompt}
             urlPrompt={urlPrompt}
           />
@@ -210,8 +224,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             label={t('settings:promptContent')}
             disabled={!isPromptEditable}
             hidden={isPromptHidden}
-            instructions={assistantInstructions}
-            instructionsInputFieldRef={instructionsInputFieldRef}
+            systemMessage={systemMessage}
+            setSystemMessage={setSystemMessage}
           />
           {!isPromptHidden && (
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -275,11 +289,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <SaveMyPromptModal
           isOpen={myPromptModalOpen}
           setIsOpen={setMyPromptModalOpen}
-          systemMessage={instructionsInputFieldRef.current ? instructionsInputFieldRef.current.value : ''}
+          systemMessage={systemMessage}
           myPrompts={myPrompts}
           existingName={activePrompt?.name}
           onSave={async (name, promptToSave) => {
-            await promptSaveMutation.mutateAsync({ name, promptToSave })
+            await ownPromptSaveMutation.mutateAsync({ name, promptToSave })
           }}
         />
       </Box>

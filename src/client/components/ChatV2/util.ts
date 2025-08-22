@@ -54,9 +54,22 @@ export const getCompletionStream = async ({
   return postAbortableStream('/ai/v2/stream', formData, abortController)
 }
 
+interface GetCompletionStreamPropsV3 {
+  courseId?: string
+  systemMessage: string
+  messages: Message[]
+  model: string
+  formData: FormData
+  ragIndexId?: number
+  userConsent?: boolean
+  modelTemperature: number
+  prevResponseId?: string
+  abortController?: AbortController
+  saveConsent: boolean
+}
 export const getCompletionStreamV3 = async ({
   courseId,
-  assistantInstructions,
+  systemMessage,
   messages,
   model,
   formData,
@@ -66,12 +79,12 @@ export const getCompletionStreamV3 = async ({
   prevResponseId,
   abortController,
   saveConsent,
-}: GetCompletionStreamProps) => {
+}: GetCompletionStreamPropsV3) => {
   const data = {
     courseId,
     options: {
       chatMessages: messages,
-      systemMessage: assistantInstructions,
+      systemMessage,
       ragIndexId,
       model,
       userConsent,
@@ -80,6 +93,8 @@ export const getCompletionStreamV3 = async ({
       prevResponseId,
     },
   }
+
+  console.log('getCompletionStreamV3', data)
 
   formData.set('data', JSON.stringify(data))
 

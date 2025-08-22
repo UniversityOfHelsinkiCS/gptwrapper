@@ -1,6 +1,5 @@
 import { TextField, Typography } from '@mui/material'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
-import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const VisibilityOff = () => {
@@ -19,25 +18,19 @@ export default function AssistantInstructionsInput({
   label,
   disabled,
   hidden,
-  instructions,
-  instructionsInputFieldRef,
+  systemMessage,
+  setSystemMessage,
 }: {
   label: string
   disabled: boolean
   hidden: boolean
-  instructions: string
-  instructionsInputFieldRef: React.RefObject<HTMLInputElement>
+  systemMessage: string
+  setSystemMessage: (message: string) => void
 }): JSX.Element {
-  useEffect(() => {
-    if (instructionsInputFieldRef.current) {
-      instructionsInputFieldRef.current.value = instructions
-    }
-  }, [instructions, instructionsInputFieldRef.current])
   return hidden ? (
     <TextField disabled={true} label={<VisibilityOff />} />
   ) : (
     <TextField
-      inputRef={instructionsInputFieldRef}
       data-sentry-mask
       multiline
       minRows={6}
@@ -45,7 +38,8 @@ export default function AssistantInstructionsInput({
       disabled={disabled}
       hidden={hidden}
       label={label}
-      defaultValue={instructions}
+      value={systemMessage}
+      onChange={(event) => setSystemMessage(event.target.value)}
     />
   )
 }

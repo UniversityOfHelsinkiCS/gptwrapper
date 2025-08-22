@@ -12,7 +12,7 @@ import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
-import type { Message } from '../../types'
+import type { Message, Prompt } from '../../types'
 import { ChatBox } from './ChatBox'
 import { Conversation } from './Conversation'
 import { DisclaimerModal } from './Disclaimer'
@@ -71,10 +71,8 @@ export const ChatV2 = () => {
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
   const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model')
   const [disclaimerStatus, setDisclaimerStatus] = useLocalStorageState<boolean>('disclaimer-status', true)
-  const [assistantInstructions, setAssistantInstructions] = useLocalStorageState<string>(
-    `${localStoragePrefix}-chat-instructions`,
-    DEFAULT_ASSISTANT_INSTRUCTIONS,
-  )
+  const [customSystemMessage, setCustomSystemMessage] = useLocalStorageState<string>(`${localStoragePrefix}-chat-instructions`, DEFAULT_ASSISTANT_INSTRUCTIONS)
+  const [activePrompt, setActivePrompt] = useLocalStorageState<Prompt | undefined>(`${localStoragePrefix}-active-prompt`, undefined)
   const [modelTemperature, setModelTemperature] = useLocalStorageStateWithURLDefault(
     `${localStoragePrefix}-chat-model-temperature`,
     String(DEFAULT_MODEL_TEMPERATURE),
@@ -82,7 +80,6 @@ export const ChatV2 = () => {
   )
 
   const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as Message[])
-  const [prevResponseId, setPrevResponse] = useLocalStorageState(`${localStoragePrefix}-prev-response`, '')
   const [saveConsent, setSaveConsent] = useLocalStorageState<boolean>('save-consent', false)
 
   // App States
@@ -128,10 +125,7 @@ export const ChatV2 = () => {
   const disclaimerInfo = infoTexts?.find((infoText) => infoText.name === 'disclaimer')?.text[i18n.language] ?? null
 
   const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamController } = useChatStream({
-    onComplete: ({ message, previousResponseId }) => {
-      if (previousResponseId) {
-        setPrevResponse(previousResponseId)
-      }
+    onComplete: ({ message }) => {
       if (message.content.length > 0) {
         setMessages((prev: Message[]) => prev.concat(message))
         refetchStatus()
@@ -181,7 +175,6 @@ export const ChatV2 = () => {
     })
 
     setMessages(newMessages)
-    setPrevResponse('')
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -197,7 +190,7 @@ export const ChatV2 = () => {
 
     try {
       const { tokenUsageAnalysis, stream } = await getCompletionStreamV3({
-        assistantInstructions: assistantInstructions,
+        systemMessage: activePrompt?.systemMessage || customSystemMessage,
         messages: newMessages,
         ragIndexId,
         model: activeModel,
@@ -206,7 +199,6 @@ export const ChatV2 = () => {
         courseId,
         abortController: streamController,
         saveConsent,
-        prevResponseId,
       })
 
       if (!stream && !tokenUsageAnalysis) {
@@ -240,7 +232,6 @@ export const ChatV2 = () => {
       setMessages([])
       setShowToolResults(false)
       setActiveToolResult(undefined)
-      setPrevResponse('')
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
@@ -577,8 +568,10 @@ export const ChatV2 = () => {
       <SettingsModal
         open={settingsModalOpen}
         setOpen={setSettingsModalOpen}
-        assistantInstructions={assistantInstructions}
-        setAssistantInstructions={(updatedInstructions) => setAssistantInstructions(updatedInstructions)}
+        customSystemMessage={customSystemMessage}
+        setCustomSystemMessage={setCustomSystemMessage}
+        activePrompt={activePrompt}
+        setActivePrompt={setActivePrompt}
         modelTemperature={parseFloat(modelTemperature)}
         setModelTemperature={(updatedTemperature) => setModelTemperature(String(updatedTemperature))}
         course={course}
