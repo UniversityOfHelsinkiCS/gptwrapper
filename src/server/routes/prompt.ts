@@ -122,6 +122,7 @@ const authorizeChatInstancePromptResponsible = async (user: User, prompt: ChatIn
       {
         model: Responsibility,
         as: 'responsibilities',
+        attributes: ['id', 'userId'],
       },
     ],
   })
@@ -204,7 +205,7 @@ const authorizePromptUpdate = async (user: User, prompt: Prompt) => {
       break
     }
     case 'PERSONAL': {
-      if (!(user.id === prompt.userId)) {
+      if (user.id !== prompt.userId) {
         throw ApplicationError.Forbidden('Not allowed')
       }
       break
@@ -252,8 +253,6 @@ promptRouter.put('/:id', async (req, res) => {
   prompt.name = name
   prompt.hidden = hidden
   prompt.mandatory = mandatory
-
-  console.log('updates: ', updates)
 
   await prompt.save()
 
