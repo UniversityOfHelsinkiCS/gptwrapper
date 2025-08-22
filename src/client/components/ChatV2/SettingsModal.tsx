@@ -52,7 +52,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     queryKey: ['/prompts/my-prompts'],
     initialData: [],
   })
-  const [systemMessage, setSystemMessage] = useState<string>('')
+  const [systemMessage, setSystemMessage] = useState<string>(customSystemMessage)
 
   const ownPromptSaveMutation = useMutation({
     mutationFn: async ({ name, promptToSave }: { name: string; promptToSave?: Prompt }) => {
