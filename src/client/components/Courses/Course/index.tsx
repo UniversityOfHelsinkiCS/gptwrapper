@@ -36,15 +36,16 @@ const Course = () => {
 
   const { user, isLoading: userLoading } = useCurrentUser()
   const { data: chatInstance, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(id)
-  console.log(chatInstance)
-  if (error) {
-    return <ApiErrorView error={error} />
-  }
+
   useEffect(() => {
     if (isCourseSuccess) {
       setResponsibilities(chatInstance?.responsibilities)
     }
   }, [isCourseSuccess])
+
+  if (error) {
+    return <ApiErrorView error={error} />
+  }
 
   if (userLoading || !user || !isCourseSuccess) return null
 
