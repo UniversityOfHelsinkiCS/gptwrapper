@@ -51,6 +51,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const instructionsInputFieldRef = useRef<HTMLInputElement>(null)
   const promptSaveMutation = useMutation({
     mutationFn: async ({ name, promptToSave }: { name: string; promptToSave?: Prompt }) => {
+      if (promptToSave && promptToSave.type !== 'PERSONAL') return // Only do this for personal prompts
+
       const promtMessage = instructionsInputFieldRef?.current ? instructionsInputFieldRef.current.value : ''
       const promptData = {
         name,

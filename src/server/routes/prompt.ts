@@ -253,6 +253,8 @@ promptRouter.put('/:id', async (req, res) => {
   prompt.hidden = hidden
   prompt.mandatory = mandatory
 
+  console.log('updates: ', updates)
+
   await prompt.save()
 
   res.send(prompt)
