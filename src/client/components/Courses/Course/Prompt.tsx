@@ -10,6 +10,7 @@ import SystemMessage from '../../Chat/SystemMessage'
 import { useEditPromptMutation } from '../../../hooks/usePromptMutation'
 import { useParams, Link as RouterLink } from 'react-router-dom'
 import { IframeCopy } from '../../common/IframeCopy'
+import { PUBLIC_URL } from '../../../../config'
 
 const ExpandButton = ({ expand, setExpand }: { expand: boolean; setExpand: SetState<boolean> }) => (
   <Button onClick={() => setExpand(!expand)}>{expand ? <ExpandLess /> : <ExpandMore />}</Button>
@@ -29,7 +30,7 @@ const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptTyp
   const [updatedHidden, setUpdatedHidden] = useState(hidden)
   const [updatedMandatory, setUpdatedMandatory] = useState(mandatory)
   const chatPath = `/v2/${courseId}?promptId=${id}`
-  const directLink = `${window.location.origin}${chatPath}`
+  const directLink = `${window.location.origin}${PUBLIC_URL}/${chatPath}`
 
   const handleSave = async () => {
     const updatedPrompt = {
