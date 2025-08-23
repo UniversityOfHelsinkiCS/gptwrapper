@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test'
 import { teacherTest as test } from './fixtures'
-import { acceptDisclaimer } from './utils/test-helpers'
+import { acceptDisclaimer, closeSendPreference, sendChatMessage } from './utils/test-helpers'
 
 test.describe('Prompts', () => {
   test('Custom prompt text works', async ({ page }) => {
@@ -25,9 +25,7 @@ test.describe('Prompts', () => {
     let chatInput = page.getByTestId('chat-input').first()
     await chatInput.fill('testinen morjens')
     await chatInput.press('Shift+Enter')
-
-    // Close send preference configurator
-    await page.locator('#send-preference-configurator-submit').click()
+    await closeSendPreference(page)
 
     // The result should be echo of prompt
     await expect(page.getByTestId('assistant-message')).toContainText('mocktest testi onnistui')
@@ -81,9 +79,8 @@ test.describe('Prompts', () => {
     await page.keyboard.press('Escape')
 
     // Send something
-    const chatInput = page.getByTestId('chat-input').first()
-    await chatInput.fill('testinen morjens')
-    await chatInput.press('Shift+Enter')
+    await sendChatMessage(page, 'testinen morjens')
+    await closeSendPreference(page)
 
     // The result should be echo of the course prompt
     await expect(page.getByTestId('assistant-message')).toContainText('mocktest kurssitesti onnistui')
@@ -147,12 +144,8 @@ test.describe('Prompts', () => {
     await page.keyboard.press('Escape')
 
     // Send message, response should echo the prompt
-    const chatInput = page.getByTestId('chat-input').first()
-    await chatInput.fill('testinen morjens')
-    await chatInput.press('Shift+Enter')
-
-    // Close send preference configurator
-    await page.locator('#send-preference-configurator-submit').click()
+    await sendChatMessage(page, 'testinen morjens')
+    await closeSendPreference(page)
 
     // Own prompt echoed:
     await expect(page.getByTestId('assistant-message')).toContainText(newPromptContent)

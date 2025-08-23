@@ -58,7 +58,7 @@ export const RagIndex: React.FC = () => {
             onClick={async () => {
               if (window.confirm(`Are you sure you want to delete index ${ragDetails.metadata?.name}?`)) {
                 await deleteIndexMutation.mutateAsync(id)
-                navigate('/rag')
+                navigate(-1)
               }
             }}
           >

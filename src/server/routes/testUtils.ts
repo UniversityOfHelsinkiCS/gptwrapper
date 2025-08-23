@@ -21,6 +21,7 @@ router.post('/reset-test-data', async (req, res) => {
   const userId = testUserHeaders.hypersonsisuid
 
   logger.info(`Resetting test data for user ${userId}`)
+
   await Prompt.destroy({
     where: {
       userId,
@@ -53,35 +54,41 @@ router.post('/reset-test-data', async (req, res) => {
   })
 
   await User.create(headersToUser(testUserHeaders))
-  await Enrolment.create({
-    userId,
-    chatInstanceId: TEST_COURSES.TEST_COURSE.id,
-  })
 
-  const [ragIndex] = await RagIndex.findOrCreate({
-    where: {
+  if (testUserRole === 'student') {
+    await Enrolment.create({
       userId,
-    },
-    defaults: {
-      userId,
-      metadata: {
-        name: `rag-${testUserIdx}`,
-        language: 'English',
+      chatInstanceId: TEST_COURSES.TEST_COURSE.id,
+    })
+  }
+
+  if (testUserRole !== 'student') {
+    const [ragIndex] = await RagIndex.findOrCreate({
+      where: {
+        userId,
       },
-    },
-  })
-  await ChatInstanceRagIndex.findOrCreate({
-    where: {
-      userId,
-      chatInstanceId: TEST_COURSES.TEST_COURSE.id,
-      ragIndexId: ragIndex.id,
-    },
-    defaults: {
-      chatInstanceId: TEST_COURSES.TEST_COURSE.id,
-      ragIndexId: ragIndex.id,
-      userId,
-    },
-  })
+      defaults: {
+        userId,
+        metadata: {
+          name: `rag-${testUserIdx}`,
+          language: 'English',
+        },
+      },
+    })
+    await ChatInstanceRagIndex.findOrCreate({
+      where: {
+        userId,
+        chatInstanceId: TEST_COURSES.TEST_COURSE.id,
+        ragIndexId: ragIndex.id,
+      },
+      defaults: {
+        chatInstanceId: TEST_COURSES.TEST_COURSE.id,
+        ragIndexId: ragIndex.id,
+        userId,
+      },
+    })
+  }
+
   logger.info('Test data reset successfully')
 
   res.status(200).json({ message: 'Test data reset successfully' })

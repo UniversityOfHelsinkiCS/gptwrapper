@@ -80,3 +80,39 @@ export const getOwnCourses = async (user: User) => {
 
   return courseIds
 }
+
+/**
+ * @todo use this for authorization always.
+ */
+export const ChatInstanceAccess = {
+  ADMIN: 3,
+  TEACHER: 2,
+  STUDENT: 1,
+  NONE: 0,
+}
+
+export const getChatInstanceAccess = async (user: User, chatInstance: ChatInstance) => {
+  if (user.isAdmin) return ChatInstanceAccess.ADMIN
+
+  const [responsibilities, enrolments] = await Promise.all([
+    Responsibility.findAll({
+      attributes: ['id'],
+      where: {
+        userId: user.id,
+        chatInstanceId: chatInstance.id,
+      },
+    }),
+    Enrolment.findAll({
+      attributes: ['id'],
+      where: {
+        userId: user.id,
+        chatInstanceId: chatInstance.id,
+      },
+    }),
+  ])
+
+  if (responsibilities.length > 0) return ChatInstanceAccess.TEACHER
+  if (enrolments.length > 0) return ChatInstanceAccess.STUDENT
+
+  return ChatInstanceAccess.NONE
+}

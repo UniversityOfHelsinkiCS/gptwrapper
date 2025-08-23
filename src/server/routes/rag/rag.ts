@@ -1,12 +1,12 @@
 import { Router } from 'express'
 import z from 'zod/v4'
 import { EMBED_DIM } from '../../../config'
-import { ChatInstance, ChatInstanceRagIndex, RagFile, RagIndex, Responsibility } from '../../db/models'
+import { ChatInstance, ChatInstanceRagIndex, Enrolment, RagFile, RagIndex, Responsibility } from '../../db/models'
 import type { RequestWithUser } from '../../types'
-import type { User } from '../../../shared/user'
 import { ApplicationError } from '../../util/ApplicationError'
 import { TEST_COURSES } from '../../../shared/testData'
 import ragIndexRouter, { ragIndexMiddleware } from './ragIndex'
+import { ChatInstanceAccess, getChatInstanceAccess } from '../../services/chatInstances/access'
 
 const router = Router()
 
@@ -17,22 +17,12 @@ const IndexCreationSchema = z.object({
   dim: z.number().min(EMBED_DIM).max(EMBED_DIM).default(EMBED_DIM),
 })
 
-const hasChatInstanceRagPermission = (user: User, chatInstance: ChatInstance) => {
-  const isResponsible = chatInstance.responsibilities?.some((r) => r.userId === user.id)
-  return isResponsible || user.isAdmin
-}
-
 router.post('/indices', async (req, res) => {
   const { user } = req as RequestWithUser
   const { name, dim, chatInstanceId, language } = IndexCreationSchema.parse(req.body)
 
   const chatInstance = await ChatInstance.findByPk(chatInstanceId, {
     include: [
-      {
-        model: Responsibility,
-        as: 'responsibilities',
-        required: true, // Ensure the user is responsible for the course
-      },
       {
         model: RagIndex,
         as: 'ragIndices',
@@ -44,7 +34,7 @@ router.post('/indices', async (req, res) => {
     throw ApplicationError.NotFound('Invalid chat instance id')
   }
 
-  if (!hasChatInstanceRagPermission(user, chatInstance)) {
+  if ((await getChatInstanceAccess(user, chatInstance)) < ChatInstanceAccess.TEACHER) {
     throw ApplicationError.Forbidden('Cannot create index, user is not responsible for the course')
   }
 
@@ -89,10 +79,7 @@ router.get('/indices', async (req, res) => {
   let chatInstance: ChatInstance | null = null
   if (chatInstanceId) {
     chatInstance = await ChatInstance.findByPk(chatInstanceId, {
-      include: [
-        { model: Responsibility, as: 'responsibilities', required: !user.isAdmin },
-        { model: RagIndex, as: 'ragIndices', required: false },
-      ],
+      include: [{ model: RagIndex, as: 'ragIndices', required: false }],
     })
 
     if (!chatInstance) {
@@ -104,8 +91,8 @@ router.get('/indices', async (req, res) => {
       return
     }
 
-    if (!hasChatInstanceRagPermission(user, chatInstance)) {
-      throw ApplicationError.Forbidden('Forbidden')
+    if ((await getChatInstanceAccess(user, chatInstance)) < ChatInstanceAccess.STUDENT) {
+      throw ApplicationError.Forbidden('Not allowed to use rag index. You must be at least an enrolled student.')
     }
   } else {
     if (!user.isAdmin) {

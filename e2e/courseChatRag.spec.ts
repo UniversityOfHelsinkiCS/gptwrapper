@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { acceptDisclaimer } from './utils/test-helpers'
+import { acceptDisclaimer, closeSendPreference, sendChatMessage } from './utils/test-helpers'
 import { studentTest as test } from './fixtures'
 
 test.describe('Course Chat v2', () => {
@@ -12,9 +12,8 @@ test.describe('Course Chat v2', () => {
     await page.getByTestId('model-selector').first().click()
     await page.getByRole('option', { name: 'mock' }).click()
 
-    const chatInput = page.getByTestId('chat-input').first()
-    await chatInput.fill('testinen morjens')
-    await chatInput.press('Shift+Enter')
+    await sendChatMessage(page, 'testinen morjens')
+    await closeSendPreference(page)
 
     await expect(page.getByTestId('user-message')).toContainText('testinen morjens')
     await expect(page.getByTestId('assistant-message')).toContainText('You are calling mock endpoint for streaming mock data')
@@ -25,9 +24,8 @@ test.describe('Course Chat v2', () => {
     await page.locator('#rag-index-selector').first().click()
     await page.getByRole('menuitem', { name: ragName }).click()
 
-    const chatInput = page.getByTestId('chat-input').first()
-    await chatInput.fill('rag')
-    await chatInput.press('Shift+Enter')
+    await sendChatMessage(page, 'rag')
+    await closeSendPreference(page)
 
     // Shows file search loading indicator
     await expect(page.getByTestId('tool-call-message')).toBeVisible()

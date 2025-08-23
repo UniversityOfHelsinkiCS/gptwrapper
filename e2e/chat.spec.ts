@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { acceptDisclaimer } from './utils/test-helpers'
+import { acceptDisclaimer, closeSendPreference, sendChatMessage } from './utils/test-helpers'
 import { teacherTest as test } from './fixtures'
 
 test.describe('Chat v2 Conversation tests', () => {
@@ -12,12 +12,9 @@ test.describe('Chat v2 Conversation tests', () => {
     await page.getByTestId('model-selector').first().click()
     await page.getByRole('option', { name: 'mock' }).click()
 
-    const chatInput = page.getByTestId('chat-input').first()
-    await chatInput.fill('testinen morjens')
-    await chatInput.press('Shift+Enter')
+    await sendChatMessage(page, 'testinen morjens')
 
-    // Close send preference configurator
-    await page.locator('#send-preference-configurator-submit').click()
+    await closeSendPreference(page)
 
     await expect(page.getByTestId('user-message')).toContainText('testinen morjens')
     await expect(page.getByTestId('assistant-message')).toContainText('You are calling mock endpoint for streaming mock data')
@@ -27,12 +24,9 @@ test.describe('Chat v2 Conversation tests', () => {
     await page.getByTestId('model-selector').first().click()
     await page.getByRole('option', { name: 'mock' }).click()
 
-    const chatInput = page.getByTestId('chat-input').first()
-    await chatInput.fill('tää tyhjennetään')
-    await chatInput.press('Shift+Enter')
+    await sendChatMessage(page, 'tää tyhjennetään')
 
-    // Close send preference configurator
-    await page.locator('#send-preference-configurator-submit').click()
+    await closeSendPreference(page)
 
     await expect(page.getByTestId('user-message')).toContainText('tää tyhjennetään')
     await expect(page.getByTestId('assistant-message')).toContainText('OVER', { timeout: 6000 })
