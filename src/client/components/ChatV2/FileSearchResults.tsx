@@ -193,10 +193,10 @@ const Queries = ({ queries }: { queries: string[] }) => {
 
 const FileSearchResults = ({
   fileSearchResult,
-  setShowFileSearchResults,
+  setActiveToolResult,
 }: {
   fileSearchResult: ToolCallResultEvent
-  setShowFileSearchResults: (show: boolean) => void
+  setActiveToolResult: (result: ToolCallResultEvent | undefined) => void
 }) => {
   const { data: results, isSuccess: isResultsSuccess } = useToolResults(fileSearchResult.callId)
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
@@ -244,7 +244,7 @@ const FileSearchResults = ({
             opacity: 0.9,
             zIndex: 1,
           }}
-          onClick={() => setShowFileSearchResults(false)}
+          onClick={() => setActiveToolResult(undefined)}
         >
           <Close />
         </IconButton>

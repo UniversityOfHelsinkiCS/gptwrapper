@@ -59,7 +59,7 @@ const ToolResult = ({ toolResult, handleToolResult }: { toolResult: ToolCallResu
   const sources = useMemo(() => Array.from(new Set<string>(toolResult.result.files.map((file) => file.fileName)).values()).join(', '), [])
   return (
     <Box
-      data-testId="file-search-sources"
+      data-testid="file-search-sources"
       sx={{
         display: 'flex',
         alignItems: { xs: 'flex-start', sm: 'center' },
@@ -109,13 +109,11 @@ const AssistantMessage = ({
   error,
   toolResults,
   setActiveToolResult,
-  setShowToolResults,
 }: {
   content: string
   error?: string
   toolResults?: Record<string, ToolCallResultEvent>
   setActiveToolResult: (data: ToolCallResultEvent) => void
-  setShowToolResults: (show: boolean) => void
 }) => {
   const processedContent = preprocessMath(content)
   const katexOptions = {
@@ -161,7 +159,6 @@ const AssistantMessage = ({
   const handleToolResult = (toolResult: ToolCallResultEvent) => {
     console.log(toolResult)
     setActiveToolResult(toolResult)
-    setShowToolResults(true)
   }
 
   return (
@@ -270,15 +267,7 @@ const AssistantMessage = ({
   )
 }
 
-const MessageItem = ({
-  message,
-  setActiveToolResult,
-  setShowToolResults,
-}: {
-  message: Message
-  setActiveToolResult: (data: ToolCallResultEvent) => void
-  setShowToolResults: (show: boolean) => void
-}) => {
+const MessageItem = ({ message, setActiveToolResult }: { message: Message; setActiveToolResult: (data: ToolCallResultEvent) => void }) => {
   if (message.role === 'assistant') {
     return (
       <Box
@@ -287,13 +276,7 @@ const MessageItem = ({
           height: 'auto',
         }}
       >
-        <AssistantMessage
-          content={message.content}
-          error={message.error}
-          toolResults={message.toolCalls}
-          setActiveToolResult={setActiveToolResult}
-          setShowToolResults={setShowToolResults}
-        />
+        <AssistantMessage content={message.content} error={message.error} toolResults={message.toolCalls} setActiveToolResult={setActiveToolResult} />
       </Box>
     )
   } else {
@@ -314,7 +297,6 @@ export const Conversation = ({
   toolCalls,
   isStreaming,
   setActiveToolResult,
-  setShowToolResults,
 }: {
   courseName?: string
   courseDate?: ActivityPeriod
@@ -324,7 +306,6 @@ export const Conversation = ({
   toolCalls: { [callId: string]: ToolCallStatusEvent }
   isStreaming: boolean
   setActiveToolResult: (data: ToolCallResultEvent) => void
-  setShowToolResults: (show: boolean) => void
 }) => {
   const [reminderSeen, setReminderSeen] = useLocalStorageState<boolean>('reminderSeen', false)
 
@@ -344,17 +325,13 @@ export const Conversation = ({
       >
         {messages.length === 0 && <ConversationSplash courseName={courseName} courseDate={courseDate} />}
         {messages.map((message, idx) => {
-          return <MessageItem key={idx} message={message} setActiveToolResult={setActiveToolResult} setShowToolResults={setShowToolResults} />
+          return <MessageItem key={idx} message={message} setActiveToolResult={setActiveToolResult} />
         })}
 
         {isStreaming &&
           messages.length > 0 &&
           (completion.length > 0 ? (
-            <MessageItem
-              message={{ role: 'assistant', content: completion }}
-              setActiveToolResult={setActiveToolResult}
-              setShowToolResults={setShowToolResults}
-            />
+            <MessageItem message={{ role: 'assistant', content: completion }} setActiveToolResult={setActiveToolResult} />
           ) : (
             <LoadingMessage toolCalls={toolCalls} />
           ))}

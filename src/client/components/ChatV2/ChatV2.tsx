@@ -88,7 +88,6 @@ export const ChatV2 = () => {
   const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
   const [tokenUsageAlertOpen, setTokenUsageAlertOpen] = useState<boolean>(false)
   const [allowedModels, setAllowedModels] = useState<string[]>([])
-  const [showToolResults, setShowToolResults] = useState<boolean>(false)
   const [chatLeftSidePanelOpen, setChatLeftSidePanelOpen] = useState<boolean>(false)
   // RAG states
   const [ragIndexId, setRagIndexId] = useState<number | undefined>()
@@ -230,7 +229,6 @@ export const ChatV2 = () => {
   const handleReset = () => {
     if (window.confirm(t('chat:emptyConfirm'))) {
       setMessages([])
-      setShowToolResults(false)
       setActiveToolResult(undefined)
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
@@ -329,6 +327,8 @@ export const ChatV2 = () => {
   }
 
   const showRagSelector = (ragIndices?.length ?? 0) > 0
+  const rightMenuOpen = !!activeToolResult
+  const rightMenuWidth = rightMenuOpen ? '300px' : '0px'
 
   if (statusLoading) return null
 
@@ -405,7 +405,7 @@ export const ChatV2 = () => {
             paddingLeft: '1rem',
             paddingRight: '1rem',
             paddingTop: '1rem',
-            width: { sm: '100vw', md: 'calc(100vw - 300px)', lg: 'calc(100vw - 400px)' },
+            width: { sm: '100vw', md: `calc(100vw - 300px - ${rightMenuWidth})`, lg: `calc(100vw - 400px - ${rightMenuWidth})` },
           }}
           ref={scrollRef}
         >
@@ -437,7 +437,6 @@ export const ChatV2 = () => {
             isStreaming={isStreaming}
             toolCalls={toolCalls}
             setActiveToolResult={setActiveToolResult}
-            setShowToolResults={setShowToolResults}
           />
         </Box>
 
@@ -486,11 +485,11 @@ export const ChatV2 = () => {
 
       {/* FileSearchResults columns ----------------------------------------------------------------------------------------------------- */}
 
-      {isMobile && (
+      {isMobile ? (
         <Drawer
           anchor="right"
-          open={showToolResults}
-          onClose={() => setShowToolResults(false)}
+          open={!!activeToolResult}
+          onClose={() => setActiveToolResult(undefined)}
           sx={{
             '& .MuiDrawer-paper': {
               width: '100%',
@@ -510,27 +509,26 @@ export const ChatV2 = () => {
               overflow: 'auto',
             }}
           >
-            {activeToolResult && <FileSearchResults fileSearchResult={activeToolResult} setShowFileSearchResults={setShowToolResults} />}
+            {activeToolResult && <FileSearchResults fileSearchResult={activeToolResult} setActiveToolResult={setActiveToolResult} />}
           </Box>
         </Drawer>
-      )}
-
-      {!isMobile && showToolResults && activeToolResult && (
-        <Box
-          sx={{
-            width: { md: '40rem', lg: '40rem' },
-            height: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            flex: 1,
-            position: 'sticky',
-            top: 0,
-            borderLeft: '1px solid rgba(0,0,0,0.12)',
-            paddingTop: !isEmbeddedMode ? '4rem' : 0,
-          }}
-        >
-          <FileSearchResults fileSearchResult={activeToolResult} setShowFileSearchResults={setShowToolResults} />
-        </Box>
+      ) : (
+        !!activeToolResult && (
+          <Box
+            sx={{
+              width: rightMenuWidth,
+              height: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'sticky',
+              top: 0,
+              borderLeft: '1px solid rgba(0,0,0,0.12)',
+              paddingTop: !isEmbeddedMode ? '4rem' : 0,
+            }}
+          >
+            <FileSearchResults fileSearchResult={activeToolResult} setActiveToolResult={setActiveToolResult} />
+          </Box>
+        )
       )}
 
       {/* Modals --------------------------------------*/}
