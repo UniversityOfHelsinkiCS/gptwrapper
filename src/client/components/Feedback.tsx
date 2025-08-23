@@ -54,13 +54,13 @@ export const Feedback: React.FC = () => {
           aria-label="feedback"
           sx={(theme) => ({
             position: 'fixed',
-            bottom: { xs: 12, sm: 18 },
-            right: { xs: 12, sm: 18 },
+            bottom: '0.5rem',
+            right: { xs: '6rem', sm: '6rem', md: '1rem' },
             zIndex: theme.zIndex.modal + 1,
             opacity: 0.9,
-
             transition: 'opacity 0.2s',
           })}
+          size="small"
           onClick={() => setModalOpen(true)}
         >
           <FeedbackIcon />

@@ -1,7 +1,7 @@
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import HelpIcon from '@mui/icons-material/Help'
-import { Alert, Box, Drawer, Fab, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
-import { useEffect, useRef, useState } from 'react'
+import { Alert, Box, Drawer, Fab, FormControlLabel, Paper, Switch, SxProps, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, inProduction, validModels } from '../../../config'
@@ -12,7 +12,7 @@ import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
-import type { Message, Prompt } from '../../types'
+import type { Course, Message, Prompt } from '../../types'
 import { ChatBox } from './ChatBox'
 import { Conversation } from './Conversation'
 import { DisclaimerModal } from './Disclaimer'
@@ -29,11 +29,14 @@ import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { enqueueSnackbar } from 'notistack'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import EmailButton from './EmailButton'
-import { ArrowDownward, MenuBookTwoTone, Tune } from '@mui/icons-material'
+import { ArrowDownward, ChevronLeft, Close, MenuBookTwoTone, Tune } from '@mui/icons-material'
 import { useChatScroll } from '../../hooks/useChatScroll'
 import { TestUseInfoV2 } from './TestUseInfo'
 import Footer from '../Footer'
 import type { ToolCallResultEvent } from '../../../shared/chat'
+import { ChatToolResult } from '../../../shared/tools'
+import { TFunction } from 'i18next'
+import { RagIndexAttributes } from '../../../shared/types'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -91,7 +94,7 @@ export const ChatV2 = () => {
   const [chatLeftSidePanelOpen, setChatLeftSidePanelOpen] = useState<boolean>(false)
   // RAG states
   const [ragIndexId, setRagIndexId] = useState<number | undefined>()
-  const [activeToolResult, setActiveToolResult] = useState<ToolCallResultEvent | undefined>()
+  const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
   const ragIndex = ragIndices?.find((index) => index.id === ragIndexId)
 
   // Analytics
@@ -286,6 +289,33 @@ export const ChatV2 = () => {
     }
   }, [userStatus, course])
 
+  const showRagSelector = (ragIndices?.length ?? 0) > 0
+  const rightMenuOpen = !!activeToolResult
+  const rightMenuWidth = rightMenuOpen ? '300px' : '0px'
+
+  // Handle layout shift when right menu opens (tool result becomes visible)
+  const prevScrollYProportional = useRef(0)
+  const handleLayoutShift = useCallback(() => {
+    // Save the current proportional scroll position
+    prevScrollYProportional.current = window.scrollY / document.body.scrollHeight
+
+    console.log('New scroll position:', window.scrollY, document.body.scrollHeight)
+
+    // Set timeout to restore after layout change
+    setTimeout(() => {
+      const scrollY = prevScrollYProportional.current * document.body.scrollHeight
+      window.scrollTo(0, scrollY)
+      console.log('Restored scroll position:', scrollY, document.body.scrollHeight)
+    }, 0)
+  }, [])
+  const setActiveToolResult = useCallback(
+    (toolResult: ToolCallResultEvent | undefined) => {
+      handleLayoutShift()
+      setActiveToolResult0(toolResult)
+    },
+    [handleLayoutShift],
+  )
+
   if (course && course.usageLimit === 0) {
     return (
       <Box>
@@ -326,10 +356,6 @@ export const ChatV2 = () => {
     }
   }
 
-  const showRagSelector = (ragIndices?.length ?? 0) > 0
-  const rightMenuOpen = !!activeToolResult
-  const rightMenuWidth = rightMenuOpen ? '300px' : '0px'
-
   if (statusLoading) return null
 
   return (
@@ -352,10 +378,11 @@ export const ChatV2 = () => {
             }}
           >
             <LeftMenu
-              sx={{}}
               course={course}
               handleReset={handleReset}
-              user={user}
+              onClose={() => {
+                setChatLeftSidePanelOpen(false)
+              }}
               t={t}
               setSettingsModalOpen={setSettingsModalOpen}
               setDisclaimerStatus={setDisclaimerStatus}
@@ -371,7 +398,6 @@ export const ChatV2 = () => {
             sx={{ display: { sm: 'none', md: 'flex' }, position: 'fixed', top: 0 }}
             course={course}
             handleReset={handleReset}
-            user={user}
             t={t}
             setSettingsModalOpen={setSettingsModalOpen}
             setDisclaimerStatus={setDisclaimerStatus}
@@ -550,10 +576,10 @@ export const ChatV2 = () => {
 }
 
 const LeftMenu = ({
-  sx,
+  sx = {},
   course,
   handleReset,
-  user,
+  onClose,
   t,
   setSettingsModalOpen,
   setDisclaimerStatus,
@@ -562,6 +588,19 @@ const LeftMenu = ({
   setRagIndexId,
   ragIndices,
   messages,
+}: {
+  sx?: object
+  course?: Course
+  handleReset: () => void
+  onClose?: () => void
+  t: TFunction
+  setSettingsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+  setDisclaimerStatus: React.Dispatch<React.SetStateAction<boolean>>
+  showRagSelector: boolean
+  ragIndex?: RagIndexAttributes
+  setRagIndexId: React.Dispatch<React.SetStateAction<number | undefined>>
+  ragIndices?: RagIndexAttributes[]
+  messages: Message[]
 }) => {
   return (
     <Box
@@ -580,7 +619,7 @@ const LeftMenu = ({
     >
       <Box p="1rem">
         {course && <ChatInfo course={course} />}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', mb: '2rem' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
           <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} id="empty-conversation-button">
             {t('chat:emptyConversation')}
           </OutlineButtonBlack>
@@ -606,6 +645,11 @@ const LeftMenu = ({
           )}
         </Box>
       </Box>
+      {onClose && (
+        <OutlineButtonBlack sx={{ m: '1rem', mt: 'auto' }} onClick={onClose} startIcon={<ChevronLeft />}>
+          {t('common:close')}
+        </OutlineButtonBlack>
+      )}
       <Footer />
     </Box>
   )

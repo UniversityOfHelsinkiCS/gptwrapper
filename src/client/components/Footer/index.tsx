@@ -36,7 +36,6 @@ const Footer = () => {
     <Box
       component="footer"
       sx={{
-        mt: 'auto',
         width: '100%',
       }}
     >
