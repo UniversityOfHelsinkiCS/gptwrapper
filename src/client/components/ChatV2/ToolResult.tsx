@@ -1,16 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
 import { Box, Typography, Chip, IconButton, Drawer } from '@mui/material'
 import { Close, Search } from '@mui/icons-material'
-import { FileSearchResultData } from '../../../shared/types'
 import { useTranslation } from 'react-i18next'
 import { useToolResults } from './api'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { OutlineButtonBlack } from './general/Buttons'
 import SubjectIcon from '@mui/icons-material/Subject'
-import { ChatToolResult } from '../../../shared/tools'
-import { ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
-import { RagChunk } from '../../../shared/rag'
+import type { ToolCallResultEvent } from '../../../shared/chat'
+import type { RagChunk } from '../../../shared/rag'
 
 const AnnotationTruncated = ({
   data,
@@ -191,14 +189,14 @@ const Queries = ({ queries }: { queries: string[] }) => {
   )
 }
 
-const FileSearchResults = ({
-  fileSearchResult,
+const ToolResult = ({
+  toolResult,
   setActiveToolResult,
 }: {
-  fileSearchResult: ToolCallResultEvent
+  toolResult: ToolCallResultEvent
   setActiveToolResult: (result: ToolCallResultEvent | undefined) => void
 }) => {
-  const { data: results, isSuccess: isResultsSuccess } = useToolResults(fileSearchResult.callId)
+  const { data: results, isSuccess: isResultsSuccess } = useToolResults(toolResult.callId)
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
   const [selectedAnnotation, setSelectedAnnotation] = useState<number | null>(null)
   const arrayResults = Array.isArray(results) ? results : []
@@ -237,7 +235,7 @@ const FileSearchResults = ({
           {t('chat:searchResults')}
         </Typography>
         <IconButton
-          id="close-annotations"
+          data-testid="close-annotations"
           sx={{
             color: 'grey.500',
             background: '#FFF',
@@ -249,7 +247,7 @@ const FileSearchResults = ({
           <Close />
         </IconButton>
       </Box>
-      <Queries queries={[fileSearchResult.input?.query ?? '']} />
+      <Queries queries={[toolResult.input?.query ?? '']} />
       {isResultsSuccess ? (
         <Box
           sx={{
@@ -292,7 +290,7 @@ const FileSearchResults = ({
             }}
           >
             <IconButton
-              id="close-expanded-annotations"
+              data-testid="close-expanded-annotations"
               onClick={() => {
                 setIsDrawerOpen(false)
                 setSelectedAnnotation(null)
@@ -326,4 +324,4 @@ const FileSearchResults = ({
   )
 }
 
-export default FileSearchResults
+export default ToolResult

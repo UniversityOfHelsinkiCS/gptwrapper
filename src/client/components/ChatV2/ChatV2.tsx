@@ -28,7 +28,7 @@ import { Conversation } from './Conversation'
 import { DisclaimerModal } from './Disclaimer'
 import EmailButton from './EmailButton'
 import { handleCompletionStreamError } from './error'
-import FileSearchResults from './FileSearchResults'
+import ToolResult from './ToolResult'
 import { OutlineButtonBlack } from './general/Buttons'
 import { ChatInfo } from './general/ChatInfo'
 import RagSelector from './RagSelector'
@@ -545,7 +545,7 @@ export const ChatV2 = () => {
               overflow: 'auto',
             }}
           >
-            {activeToolResult && <FileSearchResults fileSearchResult={activeToolResult} setActiveToolResult={setActiveToolResult} />}
+            {activeToolResult && <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />}
           </Box>
         </Drawer>
       ) : (
@@ -562,7 +562,7 @@ export const ChatV2 = () => {
               paddingTop: !isEmbeddedMode ? '4rem' : 0,
             }}
           >
-            <FileSearchResults fileSearchResult={activeToolResult} setActiveToolResult={setActiveToolResult} />
+            <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />
           </Box>
         )
       )}
