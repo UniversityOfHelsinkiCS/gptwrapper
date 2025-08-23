@@ -289,6 +289,7 @@ export const ChatV2 = () => {
   const showRagSelector = (ragIndices?.length ?? 0) > 0
   const rightMenuOpen = !!activeToolResult
   const rightMenuWidth = rightMenuOpen ? '300px' : '0px'
+  const leftMenuWidth = !isEmbeddedMode ? { md: '300px', lg: '400px' } : { md: '0px', lg: '0px' }
 
   // Handle layout shift when right menu opens (tool result becomes visible)
   const prevScrollYProportional = useRef(0)
@@ -415,10 +416,8 @@ export const ChatV2 = () => {
           position: 'relative',
           flexDirection: 'column',
           overflowY: 'visible',
-          // Padding for navbar
-          marginTop: !isEmbeddedMode ? '4rem' : '0',
           // Padding for left menu
-          marginLeft: { md: '300px', lg: '400px' },
+          marginLeft: leftMenuWidth,
         }}
       >
         <Box
@@ -431,8 +430,8 @@ export const ChatV2 = () => {
             paddingTop: '1rem',
             width: {
               sm: '100vw',
-              md: `calc(100vw - 300px - ${rightMenuWidth})`,
-              lg: `calc(100vw - 400px - ${rightMenuWidth})`,
+              md: `calc(100vw - ${leftMenuWidth.md} - ${rightMenuWidth})`,
+              lg: `calc(100vw - ${leftMenuWidth.lg} - ${rightMenuWidth})`,
             },
           }}
           ref={scrollRef}
