@@ -282,7 +282,6 @@ const MessageItem = ({
   if (message.role === 'assistant') {
     return (
       <Box
-        data-testid="assistant-message"
         data-sentry-mask
         sx={{
           height: 'auto',
