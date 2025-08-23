@@ -18,17 +18,20 @@ const getChatModel = (model: string, tools: StructuredTool[]): BaseChatModel => 
     throw new Error(`Invalid model: ${model}`)
   }
 
-  if (deploymentName === 'mock') {
-    return new MockModel()
-  }
+  const chatModel =
+    deploymentName === 'mock'
+      ? new MockModel()
+      : new AzureChatOpenAI({
+          model,
+          azureOpenAIApiKey: AZURE_API_KEY,
+          azureOpenAIApiVersion: '2023-05-15',
+          azureOpenAIApiDeploymentName: deploymentName,
+          azureOpenAIApiInstanceName: AZURE_RESOURCE,
+        })
 
-  return new AzureChatOpenAI({
-    model,
-    azureOpenAIApiKey: AZURE_API_KEY,
-    azureOpenAIApiVersion: '2023-05-15',
-    azureOpenAIApiDeploymentName: deploymentName,
-    azureOpenAIApiInstanceName: AZURE_RESOURCE,
-  }).bindTools(tools) as BaseChatModel
+  chatModel.bindTools(tools)
+
+  return chatModel
 }
 
 type WriteEventFunction = (data: ChatEvent) => Promise<void>

@@ -1,7 +1,7 @@
 import type { RagChunk } from './rag'
 
 export type ChatToolDef = {
-  name: 'document_search'
+  name: 'document_search' | 'mock_document_search'
   input: { query: string }
   result: { files: { fileName: string; score?: number }[] }
   output: RagChunk[]

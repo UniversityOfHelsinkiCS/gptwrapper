@@ -1,7 +1,6 @@
-import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager'
-import { isSystemMessage } from '@langchain/core/messages'
-import { BaseMessage } from '@langchain/core/messages'
-import { ChatGenerationChunk, ChatResult } from '@langchain/core/outputs'
+import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager'
+import { AIMessage, AIMessageChunk, type BaseMessage, isHumanMessage, isSystemMessage, isToolMessage } from '@langchain/core/messages'
+import type { ChatGenerationChunk, ChatResult } from '@langchain/core/outputs'
 import { FakeStreamingChatModel } from '@langchain/core/utils/testing'
 import { basicTestContent } from '../../util/azure/mocks/mockContent'
 
@@ -17,13 +16,26 @@ export class MockModel extends FakeStreamingChatModel {
     })
   }
 
-  async _generate(messages: BaseMessage[], _options: this['ParsedCallOptions'], _runManager?: CallbackManagerForLLMRun): Promise<ChatResult> {
-    const firstMessage = messages[0]
-    if (isSystemMessage(firstMessage) && (firstMessage.content as string).startsWith('mocktest')) {
+  setupTestResponse(messages: BaseMessage[]) {
+    const firstSystemMessage = messages.find(isSystemMessage)
+    const lastHumanMessage = messages.findLast(isHumanMessage)
+    const toolMessage = isToolMessage(messages[messages.length - 1]) ? messages[messages.length - 1] : null
+
+    if (toolMessage) {
+      this.chunks = [new AIMessageChunk(`Ok! Got some great results from that mock tool call!: "${toolMessage.content}"`)]
+    } else if (firstSystemMessage && (firstSystemMessage.content as string).startsWith('mocktest')) {
+      // testing a system message
       // Do nothing. FakeStreamingChatModel echoes the first message.
+    } else if (((lastHumanMessage?.content ?? '') as string).startsWith('rag')) {
+      // Do a tool call
+      this.chunks = toolCallChunks
     } else {
-      firstMessage.content = basicTestContent
+      this.responses = defaultResponse
     }
+  }
+
+  async _generate(messages: BaseMessage[], _options: this['ParsedCallOptions'], _runManager?: CallbackManagerForLLMRun): Promise<ChatResult> {
+    this.setupTestResponse(messages)
     return super._generate(messages, _options, _runManager)
   }
 
@@ -32,12 +44,22 @@ export class MockModel extends FakeStreamingChatModel {
     _options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun,
   ): AsyncGenerator<ChatGenerationChunk> {
-    const firstMessage = messages[0]
-    if (isSystemMessage(firstMessage) && (firstMessage.content as string).startsWith('mocktest')) {
-      // Do nothing. FakeStreamingChatModel echoes the first message.
-    } else {
-      firstMessage.content = basicTestContent
-    }
+    this.setupTestResponse(messages)
     yield* super._streamResponseChunks(messages, _options, runManager)
   }
 }
+
+const defaultResponse = [new AIMessage(basicTestContent)]
+
+const toolCallChunks = [
+  new AIMessageChunk({
+    content: '',
+    tool_call_chunks: [
+      {
+        name: 'mock_document_search',
+        args: JSON.stringify({ query: 'mock test query' }),
+        id: 'mock_document_search_id',
+      },
+    ],
+  }),
+]

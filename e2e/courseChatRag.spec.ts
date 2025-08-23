@@ -20,7 +20,7 @@ test.describe('Course Chat v2', () => {
     await expect(page.getByTestId('assistant-message')).toContainText('You are calling mock endpoint for streaming mock data')
   })
 
-  /* test('Course chat RAG feature', async ({ page }) => {
+  test.only('Course chat RAG feature', async ({ page }) => {
     const ragName = `rag-${test.info().workerIndex}`
     await page.locator('#rag-index-selector').first().click()
     await page.getByRole('menuitem', { name: ragName }).click()
@@ -30,10 +30,10 @@ test.describe('Course Chat v2', () => {
     await chatInput.press('Shift+Enter')
 
     // Shows file search loading indicator
-    await expect(page.getByTestId('file-searching-message')).toBeVisible()
+    await expect(page.getByTestId('tool-call-message')).toBeVisible()
 
-    // Responds with RAG mock text
-    await expect(page.getByTestId('assistant-message')).toContainText('This is a mock response for file search stream.')
+    // Responds with RAG mock document text
+    await expect(page.getByTestId('assistant-message')).toContainText('This is the first mock document')
 
     // Source button is visible
     await expect(page.getByTestId('file-search-sources')).toBeVisible()
@@ -43,5 +43,5 @@ test.describe('Course Chat v2', () => {
 
     // Three source items should be visible
     await expect(page.getByTestId('sources-truncated-item')).toHaveCount(3)
-    }) */
+  })
 })

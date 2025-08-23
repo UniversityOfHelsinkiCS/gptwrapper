@@ -15,6 +15,7 @@ import { PostStreamSchemaV3 } from './types'
 import { StructuredTool } from '@langchain/core/tools'
 import { getRagIndexSearchTool } from '../../services/rag/searchTool'
 import { ChatEvent } from '../../../shared/chat'
+import { getMockRagIndexSearchTool } from '../../services/rag/mockSearchTool'
 
 const router = express.Router()
 
@@ -126,7 +127,11 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       return
     }
 
-    tools.push(getRagIndexSearchTool(ragIndex))
+    const searchTool = model === 'mock' ? getMockRagIndexSearchTool(ragIndex) : getRagIndexSearchTool(ragIndex)
+
+    console.log('Tool given: ' + searchTool.name)
+
+    tools.push(searchTool)
   }
 
   // Prepare for streaming response

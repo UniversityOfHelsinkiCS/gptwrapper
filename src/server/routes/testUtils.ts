@@ -3,11 +3,9 @@ import { inProduction } from '../../config'
 import { getTestUserHeaders, TEST_COURSES } from '../../shared/testData'
 import { ChatInstanceRagIndex, Enrolment, Prompt, RagIndex, User, UserChatInstanceUsage } from '../db/models'
 import { headersToUser } from '../middleware/user'
-import type { RequestWithUser } from '../types'
 import { ApplicationError } from '../util/ApplicationError'
 import { getCompletionEvents } from '../util/azure/client'
 import logger from '../util/logger'
-import getEncoding from '../util/tiktoken'
 
 const router = Router()
 
