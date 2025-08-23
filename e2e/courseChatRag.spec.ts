@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test'
 import { acceptDisclaimer } from './utils/test-helpers'
-import { test } from './fixtures'
+import { studentTest as test } from './fixtures'
 
 test.describe('Course Chat v2', () => {
   test.beforeEach(async ({ page }) => {

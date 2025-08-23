@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { studentTest as test } from './fixtures'
 
 test.describe('Health Check Tests', () => {
   test.beforeEach(async ({ page }) => {})

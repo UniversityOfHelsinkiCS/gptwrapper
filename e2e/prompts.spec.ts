@@ -1,5 +1,5 @@
-import { test } from './fixtures'
 import { expect } from '@playwright/test'
+import { teacherTest as test } from './fixtures'
 import { acceptDisclaimer } from './utils/test-helpers'
 
 test.describe('Prompts', () => {
