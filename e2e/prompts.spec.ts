@@ -22,7 +22,7 @@ test.describe('Prompts', () => {
     await page.keyboard.press('Escape')
 
     // Send something
-    let chatInput = page.locator('#chat-input').first()
+    let chatInput = page.getByTestId('chat-input').first()
     await chatInput.fill('testinen morjens')
     await chatInput.press('Shift+Enter')
 
@@ -39,7 +39,7 @@ test.describe('Prompts', () => {
     // Reload page to ensure prompt is saved
     await page.reload()
 
-    chatInput = page.locator('#chat-input').first()
+    chatInput = page.getByTestId('chat-input').first()
     await chatInput.fill('testinen morjens')
     await chatInput.press('Shift+Enter')
 
@@ -81,7 +81,7 @@ test.describe('Prompts', () => {
     await page.keyboard.press('Escape')
 
     // Send something
-    const chatInput = page.locator('#chat-input').first()
+    const chatInput = page.getByTestId('chat-input').first()
     await chatInput.fill('testinen morjens')
     await chatInput.press('Shift+Enter')
 
@@ -147,7 +147,7 @@ test.describe('Prompts', () => {
     await page.keyboard.press('Escape')
 
     // Send message, response should echo the prompt
-    const chatInput = page.locator('#chat-input').first()
+    const chatInput = page.getByTestId('chat-input').first()
     await chatInput.fill('testinen morjens')
     await chatInput.press('Shift+Enter')
 

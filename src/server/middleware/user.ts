@@ -36,8 +36,8 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
   if (inDevelopment || inCI) {
     headers = devUserHeaders
   }
-  if (req.headers['x-test-user-index']) {
-    headers = getTestUserHeaders(req.headers['x-test-user-index'])
+  if ((inDevelopment || inCI) && req.headers['x-test-user-index']) {
+    headers = getTestUserHeaders(req.headers['x-test-user-index'], req.headers['x-test-user-role'])
   }
 
   const acualUser = headersToUser(headers)

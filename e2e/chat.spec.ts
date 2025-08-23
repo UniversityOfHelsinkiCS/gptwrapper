@@ -12,7 +12,7 @@ test.describe('Chat v2 Conversation tests', () => {
     await page.getByTestId('model-selector').first().click()
     await page.getByRole('option', { name: 'mock' }).click()
 
-    const chatInput = page.locator('#chat-input').first()
+    const chatInput = page.getByTestId('chat-input').first()
     await chatInput.fill('testinen morjens')
     await chatInput.press('Shift+Enter')
 
@@ -27,7 +27,7 @@ test.describe('Chat v2 Conversation tests', () => {
     await page.getByTestId('model-selector').first().click()
     await page.getByRole('option', { name: 'mock' }).click()
 
-    const chatInput = page.locator('#chat-input').first()
+    const chatInput = page.getByTestId('chat-input').first()
     await chatInput.fill('tää tyhjennetään')
     await chatInput.press('Shift+Enter')
 

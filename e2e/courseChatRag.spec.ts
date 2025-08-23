@@ -12,7 +12,7 @@ test.describe('Course Chat v2', () => {
     await page.getByTestId('model-selector').first().click()
     await page.getByRole('option', { name: 'mock' }).click()
 
-    const chatInput = page.locator('#chat-input').first()
+    const chatInput = page.getByTestId('chat-input').first()
     await chatInput.fill('testinen morjens')
     await chatInput.press('Shift+Enter')
 
@@ -25,7 +25,7 @@ test.describe('Course Chat v2', () => {
     await page.locator('#rag-index-selector').first().click()
     await page.getByRole('menuitem', { name: ragName }).click()
 
-    const chatInput = page.locator('#chat-input').first()
+    const chatInput = page.getByTestId('chat-input').first()
     await chatInput.fill('rag')
     await chatInput.press('Shift+Enter')
 

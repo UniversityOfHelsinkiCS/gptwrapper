@@ -210,9 +210,11 @@ export const ChatBox = ({
             sx={{ padding: '0.5rem' }}
             variant="standard"
             slotProps={{
+              htmlInput: {
+                'data-testid': 'chat-input',
+              },
               input: {
                 disableUnderline: true,
-                id: 'chat-input',
               },
             }}
           />

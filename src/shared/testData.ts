@@ -6,13 +6,21 @@ export const devUserHeaders = {
   hygroupcn: 'grp-toska;hy-employees;grp-currechat-demostudents;grp-currechat-demoteachers',
 }
 
-export const getTestUserHeaders = (idx: string) => ({
-  uid: `testTestUser-${idx}`,
-  mail: `ben-${idx}@toska.test.test`,
-  preferredlanguage: 'fi',
-  hypersonsisuid: `test-hlo-${idx}`,
-  hygroupcn: 'grp-toska;hy-employees;grp-currechat-demostudents;grp-currechat-demoteachers',
-})
+const testRoleToIams = {
+  teacher: 'hy-employees;grp-currechat-demostudents;grp-currechat-demoteachers',
+  student: 'grp-students;',
+  admin: 'grp-toska;hy-employees;grp-currechat-demostudents;grp-currechat-demoteachers',
+}
+
+export const getTestUserHeaders = (idx: string, role: 'teacher' | 'student' | 'admin') => {
+  return {
+    uid: `testTestUser-${role}-${idx}`,
+    mail: `ben-${role}-${idx}@toska.test.test`,
+    preferredlanguage: 'en',
+    hypersonsisuid: `test-hlo-${role}-${idx}`,
+    hygroupcn: testRoleToIams[role],
+  }
+}
 
 export const TEST_COURSES = {
   OTE_SANDBOX: {

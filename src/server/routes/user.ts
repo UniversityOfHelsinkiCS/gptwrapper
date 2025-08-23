@@ -13,6 +13,9 @@ import { UserPreferencesSchema } from '../../shared/user'
 
 export const checkIamAccess = (iamGroups: string[]) => accessIams.some((iam) => iamGroups.includes(iam))
 
+const isNowOrInFuture = ({ chatInstance }: { chatInstance: ChatInstance }) =>
+  chatInstance.usageLimit > 0 && new Date() <= new Date(chatInstance.activityPeriod.endDate)
+
 const userRouter = express.Router()
 
 userRouter.get('/login', async (req, res) => {
@@ -58,9 +61,6 @@ userRouter.get('/login', async (req, res) => {
   const enrolledCourses = await getEnrolledCourses(user)
 
   const termsAccepted = await User.findByPk(id, { attributes: ['termsAcceptedAt'] })
-
-  const isNowOrInFuture = ({ chatInstance }: { chatInstance: ChatInstance }) =>
-    chatInstance.usageLimit > 0 && new Date() <= new Date(chatInstance.activityPeriod.endDate)
 
   res.send({
     ...dbUser.toJSON(),

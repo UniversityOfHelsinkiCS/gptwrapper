@@ -92,11 +92,11 @@ export const DisclaimerModal = ({
             <FormControlLabel
               disabled={termsAccepted}
               sx={{ display: termsAccepted ? 'none' : '' }}
-              control={<Checkbox required checked={hasRead} onChange={handleToggle} id="accept-disclaimer" />}
+              control={<Checkbox required checked={hasRead} onChange={handleToggle} data-testid="accept-disclaimer" />}
               label={t('info:acceptDisclaimer')}
             />
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <BlueButton disabled={!(hasRead || termsAccepted) || acceptTermsMutation.isPending} type="submit" id="submit-accept-disclaimer">
+              <BlueButton disabled={!(hasRead || termsAccepted) || acceptTermsMutation.isPending} type="submit" data-testid="submit-accept-disclaimer">
                 OK
               </BlueButton>
             </Box>

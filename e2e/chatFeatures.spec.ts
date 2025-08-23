@@ -8,19 +8,19 @@ test.describe('Chat v2 UI Features Tests', () => {
   })
 
   test('Disclaimer is visible', async ({ page }) => {
-    await expect(page.locator('#submit-accept-disclaimer')).toBeVisible()
+    await expect(page.getByTestId('submit-accept-disclaimer')).toBeVisible()
   })
 
   test('Disclaimer is not visible after accepting and reloading', async ({ page }) => {
     await acceptDisclaimer(page)
     await page.reload()
-    await expect(page.locator('#submit-accept-disclaimer')).not.toBeVisible()
+    await expect(page.getByTestId('submit-accept-disclaimer')).not.toBeVisible()
   })
 
   test('Disclaimer (help) can be opened manually', async ({ page }) => {
     await acceptDisclaimer(page)
     await page.getByTestId('help-button').click()
-    await expect(page.locator('#submit-accept-disclaimer')).toBeVisible()
+    await expect(page.getByTestId('submit-accept-disclaimer')).toBeVisible()
   })
 
   test('Settings can be opened and closed', async ({ page }) => {

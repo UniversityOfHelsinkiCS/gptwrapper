@@ -18,7 +18,8 @@ router.post('/reset-test-data', async (req, res) => {
 
   // Reset data of the test user that is mutated in tests
   const testUserIdx = req.body.testUserIdx as string
-  const testUserHeaders = getTestUserHeaders(testUserIdx)
+  const testUserRole = req.body.testUserRole as 'teacher' | 'student' | 'admin'
+  const testUserHeaders = getTestUserHeaders(testUserIdx, testUserRole)
   const userId = testUserHeaders.hypersonsisuid
 
   logger.info(`Resetting test data for user ${userId}`)

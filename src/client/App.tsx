@@ -20,6 +20,7 @@ import { useUpdateUrlLang } from './hooks/useUpdateUrlLang'
 import Styles from './GlobalStyles'
 
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
+  console.log(user, courseId)
   if (!user) return false
   if (user.isAdmin) return true
   if (courseId && !user.activeCourseIds.includes(courseId)) return false
@@ -112,7 +113,7 @@ const Layout = () => {
         ref={appRef}
       >
         {!isEmbedded && <NavBar />}
-        <Box sx={{ flex: 1 }}>
+        <Box sx={{ flex: 1, mt: '4rem' }}>
           <Content />
         </Box>
         <Feedback />
