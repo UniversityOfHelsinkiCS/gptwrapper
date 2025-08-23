@@ -78,8 +78,6 @@ export const streamCompletion = async (events: EventStream<ChatCompletions>, opt
     for (const choice of event.choices) {
       const delta = choice.delta?.content
 
-      if (!inProduction) logger.info(delta)
-
       if (delta) {
         await new Promise((resolve) => {
           if (

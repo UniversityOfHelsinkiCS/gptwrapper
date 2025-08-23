@@ -8,7 +8,6 @@ const feedbackRouter = express.Router()
 
 feedbackRouter.post('/', async (req, res) => {
   const { user } = req as RequestWithUser
-  console.log(req.body)
   const feedbackBody = FeedbackPostSchema.parse(req.body)
 
   const fb = await Feedback.create({

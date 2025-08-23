@@ -46,8 +46,6 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
     }
   }
 
-  console.log('admin', user.isAdmin)
-
   return (
     <Box ref={ref} display="flex" tabIndex={-1}>
       <Paper variant="outlined" sx={{ margin: 'auto', padding: 5, mt: '20vh' }}>

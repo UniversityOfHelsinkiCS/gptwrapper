@@ -129,8 +129,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
     const searchTool = model === 'mock' ? getMockRagIndexSearchTool(ragIndex) : getRagIndexSearchTool(ragIndex)
 
-    console.log('Tool given: ' + searchTool.name)
-
     tools.push(searchTool)
   }
 

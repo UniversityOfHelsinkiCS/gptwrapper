@@ -132,7 +132,6 @@ export const ChatV2 = () => {
         refetchStatus()
       }
       chatScroll.autoScroll()
-      console.log(message)
     },
     onText: () => {
       chatScroll.autoScroll()

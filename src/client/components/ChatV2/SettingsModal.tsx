@@ -134,8 +134,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   }
 
   const handleChangePrompt = (newPrompt: Prompt | undefined) => {
-    console.log('handleChangePrompt', newPrompt)
-
     if (!newPrompt) {
       setActivePrompt(undefined)
       setSystemMessage(DEFAULT_ASSISTANT_INSTRUCTIONS)

@@ -157,7 +157,6 @@ const AssistantMessage = ({
   let codeCount = 0
 
   const handleToolResult = (toolResult: ToolCallResultEvent) => {
-    console.log(toolResult)
     setActiveToolResult(toolResult)
   }
 
