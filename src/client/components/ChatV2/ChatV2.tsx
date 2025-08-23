@@ -1,42 +1,41 @@
-import RestartAltIcon from '@mui/icons-material/RestartAlt'
+import { ArrowDownward, ChevronLeft, MenuBookTwoTone, Tune } from '@mui/icons-material'
 import HelpIcon from '@mui/icons-material/Help'
-import { Alert, Box, Drawer, Fab, FormControlLabel, Paper, Switch, SxProps, Typography, useMediaQuery, useTheme } from '@mui/material'
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import RestartAltIcon from '@mui/icons-material/RestartAlt'
+import { Alert, Box, Drawer, Fab, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
+import type { TFunction } from 'i18next'
+import { enqueueSnackbar } from 'notistack'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, inProduction, validModels } from '../../../config'
+import type { ToolCallResultEvent } from '../../../shared/chat'
+import type { RagIndexAttributes } from '../../../shared/types'
 import { getLanguageValue } from '../../../shared/utils'
+import { useIsEmbedded } from '../../contexts/EmbeddedContext'
+import { useChatScroll } from '../../hooks/useChatScroll'
 import useCourse from '../../hooks/useCourse'
+import useCurrentUser from '../../hooks/useCurrentUser'
 import useInfoTexts from '../../hooks/useInfoTexts'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
+import { useAnalyticsDispatch } from '../../stores/analytics'
 import type { Course, Message, Prompt } from '../../types'
+import Footer from '../Footer'
 import { ChatBox } from './ChatBox'
 import { Conversation } from './Conversation'
 import { DisclaimerModal } from './Disclaimer'
+import EmailButton from './EmailButton'
 import { handleCompletionStreamError } from './error'
+import FileSearchResults from './FileSearchResults'
+import { OutlineButtonBlack } from './general/Buttons'
 import { ChatInfo } from './general/ChatInfo'
 import RagSelector from './RagSelector'
 import { SettingsModal } from './SettingsModal'
-import { getCompletionStreamV3 } from './util'
-import { OutlineButtonBlack } from './general/Buttons'
-import useCurrentUser from '../../hooks/useCurrentUser'
-import { useChatStream } from './useChatStream'
-import FileSearchResults from './FileSearchResults'
-import { useIsEmbedded } from '../../contexts/EmbeddedContext'
-import { enqueueSnackbar } from 'notistack'
-import { useAnalyticsDispatch } from '../../stores/analytics'
-import EmailButton from './EmailButton'
-import { ArrowDownward, ChevronLeft, Close, MenuBookTwoTone, Tune } from '@mui/icons-material'
-import { useChatScroll } from '../../hooks/useChatScroll'
 import { TestUseInfoV2 } from './TestUseInfo'
-import Footer from '../Footer'
-import type { ToolCallResultEvent } from '../../../shared/chat'
-import { ChatToolResult } from '../../../shared/tools'
-import { TFunction } from 'i18next'
-import { RagIndexAttributes } from '../../../shared/types'
+import { useChatStream } from './useChatStream'
+import { getCompletionStreamV3 } from './util'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -142,14 +141,12 @@ export const ChatV2 = () => {
       handleCompletionStreamError(error, fileName)
       enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
     },
-    /* @todo fix this: onFileSearchComplete: (fileSearch) => {
-      setActiveToolResult(fileSearch)
-      // Only auto-open FileSearchResults on desktop, not on mobile
+    onToolCallComplete: (toolResult) => {
       if (!isMobile) {
-        setShowToolResults(true)
+        setActiveToolResult(toolResult)
       }
       dispatchAnalytics({ type: 'INCREMENT_FILE_SEARCHES' })
-    }, */
+    },
   })
 
   const handleSubmit = async (message: string, ignoreTokenUsageWarning: boolean) => {
@@ -299,13 +296,10 @@ export const ChatV2 = () => {
     // Save the current proportional scroll position
     prevScrollYProportional.current = window.scrollY / document.body.scrollHeight
 
-    console.log('New scroll position:', window.scrollY, document.body.scrollHeight)
-
     // Set timeout to restore after layout change
     setTimeout(() => {
       const scrollY = prevScrollYProportional.current * document.body.scrollHeight
       window.scrollTo(0, scrollY)
-      console.log('Restored scroll position:', scrollY, document.body.scrollHeight)
     }, 0)
   }, [])
   const setActiveToolResult = useCallback(
@@ -395,7 +389,11 @@ export const ChatV2 = () => {
           </Drawer>
         ) : (
           <LeftMenu
-            sx={{ display: { sm: 'none', md: 'flex' }, position: 'fixed', top: 0 }}
+            sx={{
+              display: { sm: 'none', md: 'flex' },
+              position: 'fixed',
+              top: 0,
+            }}
             course={course}
             handleReset={handleReset}
             t={t}
@@ -431,14 +429,27 @@ export const ChatV2 = () => {
             paddingLeft: '1rem',
             paddingRight: '1rem',
             paddingTop: '1rem',
-            width: { sm: '100vw', md: `calc(100vw - 300px - ${rightMenuWidth})`, lg: `calc(100vw - 400px - ${rightMenuWidth})` },
+            width: {
+              sm: '100vw',
+              md: `calc(100vw - 300px - ${rightMenuWidth})`,
+              lg: `calc(100vw - 400px - ${rightMenuWidth})`,
+            },
           }}
           ref={scrollRef}
         >
           {user?.preferences?.chatVersion !== 2 && <TestUseInfoV2 />}
 
           {course?.saveDiscussions && (
-            <Paper variant="outlined" sx={{ padding: 2, mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Paper
+              variant="outlined"
+              sx={{
+                padding: 2,
+                mt: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+              }}
+            >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Typography variant="body1" fontWeight={600}>
                   {course?.notOptoutSaving ? t('course:isSavedNotOptOut') : t('course:isSavedOptOut')}
@@ -620,7 +631,7 @@ const LeftMenu = ({
       <Box p="1rem">
         {course && <ChatInfo course={course} />}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-          <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} id="empty-conversation-button">
+          <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} data-testid="empty-conversation-button">
             {t('chat:emptyConversation')}
           </OutlineButtonBlack>
 
@@ -628,7 +639,7 @@ const LeftMenu = ({
           <OutlineButtonBlack startIcon={<Tune />} onClick={() => setSettingsModalOpen(true)} data-testid="settings-button">
             {t('chat:settings')}
           </OutlineButtonBlack>
-          <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} id="help-button">
+          <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} data-testid="help-button">
             {t('info:title')}
           </OutlineButtonBlack>
           {course && showRagSelector && (

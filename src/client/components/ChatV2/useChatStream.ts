@@ -6,10 +6,12 @@ type ToolCallState = ToolCallStatusEvent
 
 export const useChatStream = ({
   onComplete,
+  onToolCallComplete,
   onError,
   onText,
 }: {
   onComplete: ({ previousResponseId, message }: { previousResponseId: string | undefined; message: Message }) => void
+  onToolCallComplete: (toolResult: ToolCallResultEvent) => void
   onError: (error: unknown) => void
   onText: () => void
 }) => {
@@ -68,6 +70,7 @@ export const useChatStream = ({
             case 'toolCallStatus':
               if ('result' in parsedChunk) {
                 toolCallResultsAccum[parsedChunk.callId] = parsedChunk
+                onToolCallComplete(parsedChunk)
               }
               setToolCalls((prev) => ({ ...prev, [parsedChunk.callId]: parsedChunk }))
               break

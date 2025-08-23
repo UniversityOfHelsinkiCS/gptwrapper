@@ -34,7 +34,7 @@ test.describe('Prompts', () => {
 
     // Clear chat
     page.on('dialog', (dialog) => dialog.accept())
-    await page.locator('#empty-conversation-button').click()
+    await page.getByTestId('empty-conversation-button').click()
 
     // Reload page to ensure prompt is saved
     await page.reload()

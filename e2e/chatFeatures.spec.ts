@@ -19,7 +19,7 @@ test.describe('Chat v2 UI Features Tests', () => {
 
   test('Disclaimer (help) can be opened manually', async ({ page }) => {
     await acceptDisclaimer(page)
-    await page.locator('#help-button').click()
+    await page.getByTestId('help-button').click()
     await expect(page.locator('#submit-accept-disclaimer')).toBeVisible()
   })
 

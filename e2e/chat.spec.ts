@@ -38,7 +38,7 @@ test.describe('Chat v2 Conversation tests', () => {
     await expect(page.getByTestId('assistant-message')).toContainText('OVER', { timeout: 6000 })
 
     page.on('dialog', (dialog) => dialog.accept())
-    await page.locator('#empty-conversation-button').click()
+    await page.getByTestId('empty-conversation-button').click()
 
     await expect(page.getByTestId('user-message')).not.toBeVisible()
     await expect(page.getByTestId('assistant-message')).not.toBeVisible()
