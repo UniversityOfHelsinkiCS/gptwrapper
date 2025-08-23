@@ -367,62 +367,46 @@ export const ChatV2 = () => {
             />
           </Drawer>
         ) : (
-          <>
-            <LeftMenu
-              sx={{ display: { sm: 'none', md: 'flex' }, position: 'fixed', top: 0 }}
-              course={course}
-              handleReset={handleReset}
-              user={user}
-              t={t}
-              setSettingsModalOpen={setSettingsModalOpen}
-              setDisclaimerStatus={setDisclaimerStatus}
-              showRagSelector={showRagSelector}
-              ragIndex={ragIndex}
-              setRagIndexId={setRagIndexId}
-              ragIndices={ragIndices}
-              messages={messages}
-            />
-            <Box sx={{ width: { md: 300, lg: 400 } }} /> {/* Holds space for left menu */}
-          </>
+          <LeftMenu
+            sx={{ display: { sm: 'none', md: 'flex' }, position: 'fixed', top: 0 }}
+            course={course}
+            handleReset={handleReset}
+            user={user}
+            t={t}
+            setSettingsModalOpen={setSettingsModalOpen}
+            setDisclaimerStatus={setDisclaimerStatus}
+            showRagSelector={showRagSelector}
+            ragIndex={ragIndex}
+            setRagIndexId={setRagIndexId}
+            ragIndices={ragIndices}
+            messages={messages}
+          />
         ))}
 
       {/* Chat view column ------------------------------------------------------------------------------------------------ */}
       <Box
         ref={chatContainerRef}
         sx={{
-          flex: 3,
-          width: '100%',
           display: 'flex',
           position: 'relative',
           flexDirection: 'column',
           overflowY: 'visible',
           // Padding for navbar
-          paddingTop: !isEmbeddedMode ? '4rem' : '0',
+          marginTop: !isEmbeddedMode ? '4rem' : '0',
+          // Padding for left menu
+          marginLeft: { md: '300px', lg: '400px' },
         }}
       >
         <Box
-          sx={(theme) => ({
-            [theme.breakpoints.down('sm')]: {
-              width: '95%',
-              maxWidth: '95%',
-            },
-
-            [theme.breakpoints.down('md')]: {
-              width: '90%',
-              maxWidth: '90%',
-            },
-
-            [theme.breakpoints.up('md')]: {
-              width: '80%',
-              maxWidth: '80%',
-            },
-
+          sx={{
             margin: 'auto',
-            paddingRight: '1rem',
-            paddingTop: '1rem',
             overflow: 'hidden',
             overflowY: 'auto',
-          })}
+            paddingLeft: '1rem',
+            paddingRight: '1rem',
+            paddingTop: '1rem',
+            width: { sm: '100vw', md: 'calc(100vw - 300px)', lg: 'calc(100vw - 400px)' },
+          }}
           ref={scrollRef}
         >
           {user?.preferences?.chatVersion !== 2 && <TestUseInfoV2 />}
@@ -448,7 +432,6 @@ export const ChatV2 = () => {
             courseName={course && getLanguageValue(course.name, i18n.language)}
             courseDate={course?.activityPeriod}
             conversationRef={conversationRef}
-            expandedNodeHeight={window.innerHeight - (inputFieldRef.current?.clientHeight ?? 0) - 300}
             messages={messages}
             completion={completion}
             isStreaming={isStreaming}
@@ -461,24 +444,10 @@ export const ChatV2 = () => {
         <Box
           ref={inputFieldRef}
           sx={{
+            width: '100%',
+            padding: '1rem 1rem 0rem 1rem',
             position: 'sticky',
             bottom: 0,
-
-            [theme.breakpoints.down('sm')]: {
-              width: '95%',
-              maxWidth: '95%',
-            },
-
-            [theme.breakpoints.down('md')]: {
-              width: '90%',
-              maxWidth: '90%',
-            },
-
-            [theme.breakpoints.up('md')]: {
-              width: '80%',
-              maxWidth: '80%',
-            },
-
             margin: 'auto',
           }}
         >
@@ -549,7 +518,7 @@ export const ChatV2 = () => {
       {!isMobile && showToolResults && activeToolResult && (
         <Box
           sx={{
-            width: { md: 300, lg: 400 },
+            width: { md: '40rem', lg: '40rem' },
             height: '100vh',
             display: 'flex',
             flexDirection: 'column',
@@ -600,7 +569,6 @@ const LeftMenu = ({
     <Box
       sx={[
         {
-          flex: 1,
           width: { md: 300, lg: 400 },
           position: 'relative',
           height: '100vh',

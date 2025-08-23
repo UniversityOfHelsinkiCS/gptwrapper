@@ -18,7 +18,6 @@ import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { BlueButton } from './general/Buttons'
 import type { ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
-import { ChatToolResult } from '../../../shared/tools'
 import { useMemo } from 'react'
 
 const UserMessage = ({ content, attachements }: { content: string; attachements?: string }) => (
@@ -31,7 +30,7 @@ const UserMessage = ({ content, attachements }: { content: string; attachements?
       boxShadow: '0px 2px 2px rgba(0, 0, 0, 0.2)',
       whiteSpace: 'pre-wrap',
       maxWidth: { xs: '90vw', sm: '60vw', md: '50vw' },
-      minWidth: { xs: '70vw', sm: 0 },
+      // minWidth: { xs: '70vw', sm: 0 },
       wordBreak: 'break-word',
       width: 'fit-content',
     }}
@@ -167,11 +166,10 @@ const AssistantMessage = ({
 
   return (
     <Box
-      id="assistant-message"
+      data-testid="assistant-message"
       sx={{
         position: 'relative',
         pr: 4,
-        maxWidth: '100%',
         wordBreak: 'break-word',
         '&:hover .copy-message-button': {
           opacity: 0.7,
@@ -209,7 +207,6 @@ const AssistantMessage = ({
                   sx={{
                     borderRadius: '0.5rem',
                     overflowX: 'auto',
-                    maxWidth: '100%',
                   }}
                 >
                   <Typography
@@ -275,14 +272,10 @@ const AssistantMessage = ({
 
 const MessageItem = ({
   message,
-  isLastAssistantNode,
-  expandedNodeHeight,
   setActiveToolResult,
   setShowToolResults,
 }: {
   message: Message
-  isLastAssistantNode: boolean
-  expandedNodeHeight: number
   setActiveToolResult: (data: ToolCallResultEvent) => void
   setShowToolResults: (show: boolean) => void
 }) => {
@@ -292,7 +285,6 @@ const MessageItem = ({
         data-testid="assistant-message"
         data-sentry-mask
         sx={{
-          // minHeight: isLastAssistantNode ? expandedNodeHeight : 'auto',
           height: 'auto',
         }}
       >
@@ -318,7 +310,6 @@ export const Conversation = ({
   courseName,
   courseDate,
   conversationRef,
-  expandedNodeHeight,
   messages,
   completion,
   toolCalls,
@@ -329,7 +320,6 @@ export const Conversation = ({
   courseName?: string
   courseDate?: ActivityPeriod
   conversationRef: React.RefObject<HTMLElement>
-  expandedNodeHeight: number
   messages: Message[]
   completion: string
   toolCalls: { [callId: string]: ToolCallStatusEvent }
@@ -343,29 +333,19 @@ export const Conversation = ({
     <>
       <Box
         style={{
+          maxWidth: '100%',
           height: 'auto',
           display: 'flex',
           flexDirection: 'column',
           gap: '2.5rem',
           padding: '1rem 0',
-          flex: 1,
           justifyContent: messages.length === 0 ? 'center' : 'flex-start',
         }}
         ref={conversationRef}
       >
         {messages.length === 0 && <ConversationSplash courseName={courseName} courseDate={courseDate} />}
         {messages.map((message, idx) => {
-          const isLastAssistantNode = idx === messages.length - 1 && message.role === 'assistant'
-          return (
-            <MessageItem
-              key={idx}
-              message={message}
-              isLastAssistantNode={isLastAssistantNode}
-              expandedNodeHeight={expandedNodeHeight}
-              setActiveToolResult={setActiveToolResult}
-              setShowToolResults={setShowToolResults}
-            />
-          )
+          return <MessageItem key={idx} message={message} setActiveToolResult={setActiveToolResult} setShowToolResults={setShowToolResults} />
         })}
 
         {isStreaming &&
@@ -373,13 +353,11 @@ export const Conversation = ({
           (completion.length > 0 ? (
             <MessageItem
               message={{ role: 'assistant', content: completion }}
-              isLastAssistantNode={true}
-              expandedNodeHeight={expandedNodeHeight}
               setActiveToolResult={setActiveToolResult}
               setShowToolResults={setShowToolResults}
             />
           ) : (
-            <LoadingMessage expandedNodeHeight={expandedNodeHeight} toolCalls={toolCalls} />
+            <LoadingMessage toolCalls={toolCalls} />
           ))}
       </Box>
       {!reminderSeen && !isStreaming && messages.length > 15 && (

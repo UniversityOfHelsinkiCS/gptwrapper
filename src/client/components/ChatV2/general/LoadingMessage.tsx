@@ -19,13 +19,13 @@ const sourcesTextStyle = {
   animation: 'slideIn 0.3s ease-out',
 }
 
-export const LoadingMessage = ({ expandedNodeHeight, toolCalls }: { expandedNodeHeight: number; toolCalls: Record<string, ToolCallStatusEvent> }) => {
+export const LoadingMessage = ({ toolCalls }: { toolCalls: Record<string, ToolCallStatusEvent> }) => {
   const { t } = useTranslation()
 
   const toolCallMessages = Object.values(toolCalls)
 
   return (
-    <div className="message-role-assistant" style={{ height: expandedNodeHeight }}>
+    <div className="message-role-assistant" style={{ height: 'inherit' }}>
       <style>
         {`
           @keyframes bounceWave {
