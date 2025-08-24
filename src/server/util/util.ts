@@ -1,8 +1,7 @@
 import crypto from 'crypto'
 
 import { CustomMessage } from '../types'
-import { DEFAULT_MODEL, DEFAUL_CONTEXT_LIMIT, validModels } from '../../config'
-import { ChatInstance } from '../db/models'
+import { DEFAUL_CONTEXT_LIMIT, validModels } from '../../config'
 
 /**
  * Filter out messages in a long conversation to save costs
@@ -16,17 +15,6 @@ export const getMessageContext = (messages: CustomMessage[]): CustomMessage[] =>
   const latestMessages = otherMessages.slice(-10)
 
   return systemMessages.concat(latestMessages)
-}
-
-export const getCourseModel = async (courseId: string): Promise<string> => {
-  const chatInstance = await ChatInstance.findOne({
-    where: {
-      courseId,
-    },
-    attributes: ['model'],
-  })
-
-  return chatInstance?.model || DEFAULT_MODEL
 }
 
 export const getAllowedModels = (model: string): string[] => {

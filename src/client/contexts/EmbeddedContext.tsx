@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-export const EmbeddedContext = createContext(false)
+const EmbeddedContext = createContext(false)
 
 export const EmbeddedProvider = ({ children }) => {
   const [searchParams] = useSearchParams()

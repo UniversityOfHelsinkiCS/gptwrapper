@@ -21,19 +21,20 @@ const connection = {
 const vlmQueue = new Queue('vlm-pdf-processing', { connection })
 const vlmQueueEvents = new QueueEvents('vlm-pdf-processing', { connection })
 
-const vlmWorker = new Worker('vlm-pdf-processing', async (job: Job) => {
-  const { pdfBuffer } = job.data
-  const result = await pdfToText(pdfBuffer)
+const vlmWorker = new Worker(
+  'vlm-pdf-processing',
+  async (job: Job) => {
+    const { pdfBuffer } = job.data
+    const result = await pdfToText(pdfBuffer)
 
-  return result
+    return result
+  },
+  { connection, autorun: false },
+)
 
-}, { connection, autorun: false })
-
-export const pdfToTextWithVLM = async (
-  fileBuffer: Buffer
-) => {
+export const pdfToTextWithVLM = async (fileBuffer: Buffer) => {
   const job = await vlmQueue.add('vlm-pdf-processing', {
-    pdfBuffer: fileBuffer
+    pdfBuffer: fileBuffer,
   })
 
   const result = await job.waitUntilFinished(vlmQueueEvents)
@@ -41,5 +42,3 @@ export const pdfToTextWithVLM = async (
 }
 
 vlmWorker.run()
-
-
