@@ -1,9 +1,8 @@
 import type { IngestionPipelineStageKey } from './constants'
-import type { ChatToolDef } from './tools'
 
 export type RagIndexMetadata = {
   name: string
-  instructions?: string
+  toolDescription?: string
   language?: 'Finnish' | 'English'
 }
 
@@ -34,23 +33,6 @@ export type RagIndexAttributes = {
   ragFileCount?: number
   ragFiles?: RagFileAttributes[]
 }
-
-export type FileCitation = {
-  file_id: string
-  filename: string
-  index: number
-  type: 'file_citation'
-}
-
-export type FileSearchCompletedData = {
-  status: string
-  id: string
-  queries: string[]
-  searchedFileNames: string[]
-  ragIndexId: number
-}
-
-export type FileSearchResultData = Record<string, unknown>
 
 export type Locale = {
   fi?: string

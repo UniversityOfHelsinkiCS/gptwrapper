@@ -1,7 +1,7 @@
 import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, NonAttribute } from 'sequelize'
 
 import { sequelize } from '../connection'
-import { RagIndexMetadata } from '../../../shared/types'
+import type { RagIndexMetadata } from '../../../shared/types'
 import type ChatInstance from './chatInstance'
 
 class RagIndex extends Model<InferAttributes<RagIndex>, InferCreationAttributes<RagIndex>> {

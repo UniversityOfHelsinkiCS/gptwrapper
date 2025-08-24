@@ -46,5 +46,5 @@ export const validModels = [
 
 export const DEFAULT_MODEL_ON_ENABLE = 'gpt-4.1'
 
-export const DEFAULT_ASSISTANT_INSTRUCTIONS = 'Olet avulias avustaja'
+export const DEFAULT_ASSISTANT_INSTRUCTIONS = '' // 11th August 2025 we decided it should be empty
 export const DEFAULT_MODEL_TEMPERATURE = 0.5
