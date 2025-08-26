@@ -1,4 +1,4 @@
-import type { BaseChatModel } from '@langchain/core/language_models/chat_models'
+import type { BaseChatModel, BaseChatModelCallOptions } from '@langchain/core/language_models/chat_models'
 import type { AIMessageChunk, BaseMessageLike } from '@langchain/core/messages'
 import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
@@ -11,8 +11,12 @@ import type { User } from '../../../shared/user'
 import { AZURE_API_KEY, AZURE_RESOURCE } from '../../util/config'
 import { ToolResultStore } from './fileSearchResultsStore'
 import { MockModel } from './MockModel'
+import { Runnable } from '@langchain/core/runnables'
+import { BaseLanguageModelInput } from '@langchain/core/language_models/base'
 
-const getChatModel = (model: string, tools: StructuredTool[]): BaseChatModel => {
+type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
+
+const getChatModel = (model: string, tools: StructuredTool[]): ChatModel => {
   const deploymentName = validModels.find((m) => m.name === model)?.deployment
   if (!deploymentName) {
     throw new Error(`Invalid model: ${model}`)
@@ -29,9 +33,7 @@ const getChatModel = (model: string, tools: StructuredTool[]): BaseChatModel => 
           azureOpenAIApiInstanceName: AZURE_RESOURCE,
         })
 
-  chatModel.bindTools(tools)
-
-  return chatModel
+  return chatModel.bindTools(tools)
 }
 
 type WriteEventFunction = (data: ChatEvent) => Promise<void>
@@ -92,13 +94,7 @@ export const streamChat = async ({
   }
 }
 
-const chatTurn = async (
-  model: BaseChatModel,
-  messages: BaseMessageLike[],
-  toolsByName: Record<string, ChatTool>,
-  writeEvent: WriteEventFunction,
-  user: User,
-) => {
+const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByName: Record<string, ChatTool>, writeEvent: WriteEventFunction, user: User) => {
   const stream = await model.stream(messages)
 
   const startTS = Date.now()
