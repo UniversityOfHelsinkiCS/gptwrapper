@@ -67,6 +67,21 @@ export const TEST_COURSES = {
     },
     code: 'ESI-1234',
   },
+  TOSKA: {
+    id: 'toska',
+    courseId: 'toska',
+    name: {
+      en: 'Toska',
+      sv: 'Toska',
+      fi: 'Toska',
+    },
+    activityPeriod: {
+      startDate: '2025-08-26',
+      endDate: '2100-08-26',
+    },
+    code: 'TOSKA-1234',
+    usageLimit: 2_000_000,
+  },
 }
 
 export const TEST_USER_IDS = [

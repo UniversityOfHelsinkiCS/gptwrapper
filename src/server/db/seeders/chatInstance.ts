@@ -3,29 +3,28 @@ import type { CourseUnit } from '../../types'
 import { TEST_COURSES } from '../../../shared/testData'
 import { ChatInstance } from '../models'
 
-const chatInstances = [
-  TEST_COURSES.TEST_COURSE,
-  TEST_COURSES.EXAMPLE_COURSE,
-  {
-    id: TEST_COURSES.OTE_SANDBOX.id,
-    name: TEST_COURSES.OTE_SANDBOX.name,
-    description: '',
-    courseId: TEST_COURSES.OTE_SANDBOX.id,
-    activityPeriod: TEST_COURSES.OTE_SANDBOX.activityPeriod,
-    courseUnits: [
-      {
-        code: TEST_COURSES.OTE_SANDBOX.code,
-        organisations: [
-          {
-            code: 'ote',
-            id: 'ote',
-            name: { en: 'OTE', fi: 'OTE', sv: 'OTE' },
-          },
-        ],
-      },
-    ] as CourseUnit[],
-  },
-] as InferCreationAttributes<ChatInstance>[]
+const chatInstances = Object.values(TEST_COURSES).map((course) => ({
+  id: course.id,
+  name: course.name,
+  description: '',
+  courseId: course.id,
+  activityPeriod: course.activityPeriod,
+  code: course.code,
+  model: 'model' in course ? course.model : undefined,
+  usageLimit: 'usageLimit' in course ? course.usageLimit : undefined,
+  courseUnits: [
+    {
+      code: course.code,
+      organisations: [
+        {
+          code: 'ote',
+          id: 'ote',
+          name: { en: 'OTE', fi: 'OTE', sv: 'OTE' },
+        },
+      ],
+    },
+  ] as CourseUnit[],
+})) as unknown as InferCreationAttributes<ChatInstance>[]
 
 const seedChatInstances = async () => {
   const operations: any[] = []

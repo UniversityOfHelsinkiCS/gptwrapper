@@ -22,6 +22,19 @@ export const getEnrolledCourses = async (user: User) => {
       // @ts-expect-error
       { conflictFields: ['user_id', 'chat_instance_id'] },
     )
+
+    if (user.iamGroups.includes('grp-toska')) {
+      await Enrolment.upsert(
+        {
+          userId: user.id,
+          chatInstanceId: TEST_COURSES.TOSKA.id,
+        },
+        // TS is wrong here. It expects fields in camelCase
+        // while the actual fields need to be in snake_case
+        // @ts-expect-error
+        { conflictFields: ['user_id', 'chat_instance_id'] },
+      )
+    }
   }
 
   const enrollments = (await Enrolment.findAll({
