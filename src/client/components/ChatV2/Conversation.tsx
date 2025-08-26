@@ -18,7 +18,7 @@ import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { BlueButton } from './general/Buttons'
 import type { ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
-import { useMemo } from 'react'
+import { useId, useMemo } from 'react'
 
 const UserMessage = ({ content, attachements }: { content: string; attachements?: string }) => (
   <Box
@@ -160,9 +160,12 @@ const AssistantMessage = ({
     setActiveToolResult(toolResult)
   }
 
+  const msgId = useId()
+
   return (
     <Box
       data-testid="assistant-message"
+      id={msgId}
       sx={{
         position: 'relative',
         pr: 4,
@@ -184,7 +187,7 @@ const AssistantMessage = ({
           borderRadius: 4,
         }}
       >
-        <CopyToClipboardButton id={`assistant-message`} copied={content} />
+        <CopyToClipboardButton id={msgId} copied={content} />
       </Box>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
