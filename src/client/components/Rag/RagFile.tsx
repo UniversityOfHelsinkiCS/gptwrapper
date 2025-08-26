@@ -7,6 +7,7 @@ import { RagFileInfo } from './RagFileDetails'
 import type { RagIndexAttributes } from '../../../server/db/models/ragIndex'
 import { Chunk } from './Chunk'
 import { useDeleteRagFileMutation } from './api'
+import { useTranslation } from 'react-i18next'
 
 type RagFile = RagFileAttributes & {
   fileContent: string
@@ -14,6 +15,7 @@ type RagFile = RagFileAttributes & {
 }
 
 export const RagFile: React.FC = () => {
+  const { t } = useTranslation()
   const { id, fileId } = useParams()
   const {
     data: ragFile,
@@ -41,9 +43,9 @@ export const RagFile: React.FC = () => {
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Link component={RouterLink} to={`/rag/${id}`}>
-        Back to RAG Index
+        {t('rag:backToCollection')}
       </Link>
-      <Typography variant="body1">RAG file</Typography>
+      <Typography variant="body1">{t('rag:file')}</Typography>
       <Typography variant="h3">
         {ragFile.ragIndex.metadata?.name} / {ragFile.filename}
       </Typography>
@@ -61,12 +63,12 @@ export const RagFile: React.FC = () => {
           }
         }}
       >
-        Delete File
+        {t('rag:deleteFile')}
       </Button>
       <RagFileInfo file={ragFile} />
-      <Typography variant="h4">Content</Typography>
+      <Typography variant="h4">{t('rag:content')}</Typography>
       {ragFile.fileContent.length === 0 ? (
-        <Typography variant="body1">No content</Typography>
+        <Typography variant="body1">{t('rag:noContent')}</Typography>
       ) : (
         <Chunk
           doc={{

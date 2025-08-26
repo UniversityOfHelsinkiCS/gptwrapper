@@ -287,7 +287,7 @@ const Course = () => {
           <Tab label={t('course:stats')} to={`/courses/${id}`} component={Link} />
           <Tab label={t('course:discussions')} to={`/courses/${id}/discussions`} component={Link} />
           <Tab label={t('course:prompts')} to={`/courses/${id}/prompts`} component={Link} />
-          <Tab label={t('course:rag')} to={`/courses/${id}/rag`} component={Link} />
+          <Tab label={t('course:sourceMaterials')} to={`/courses/${id}/rag`} component={Link} />
         </RouterTabs>
       </Box>
 

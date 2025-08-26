@@ -17,60 +17,26 @@ import {
   MenuItem,
   InputLabel,
 } from '@mui/material'
-import { useNavigate, Link as RouterLink, useParams } from 'react-router-dom'
-import { useCourseRagIndices, useRagIndices } from '../../hooks/useRagIndices'
-import { useCreateRagIndexMutation } from './api'
+import { Link as RouterLink, useParams } from 'react-router-dom'
+import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useCourse from '../../hooks/useCourse'
+import { RagCreator } from './RagCreator'
+import { useTranslation } from 'react-i18next'
 
 const Rag: React.FC = () => {
+  const { t } = useTranslation()
   const { id: courseId } = useParams<{ id: string }>()
   const { data: chatInstance } = useCourse(courseId)
-  const navigate = useNavigate()
+
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, true)
-  const createIndexMutation = useCreateRagIndexMutation()
-  const [indexName, setIndexName] = useState('')
-  const [language, setLanguage] = useState<'Finnish' | 'English'>('English')
 
   return (
     <Container sx={{ display: 'flex', gap: 2, mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Box>
         <Typography variant="h4" mb="1rem">
-          RAG Indices
+          {t('rag:sourceMaterials')}
         </Typography>
-        {chatInstance?.id && (
-          <Box sx={{ display: 'flex', gap: 2, marginBottom: 2 }}>
-            <TextField
-              label="Index Name"
-              helperText="Use a descriptive name. It is shown to users when RAG is used."
-              variant="outlined"
-              value={indexName}
-              onChange={(e) => setIndexName(e.target.value)}
-              fullWidth
-            />
-            <FormControl fullWidth>
-              <InputLabel id="language-label">Language</InputLabel>
-              <Select labelId="language-label" id="language-select" value={language} onChange={(e) => setLanguage(e.target.value as 'Finnish' | 'English')}>
-                <MenuItem value={'Finnish'}>Finnish</MenuItem>
-                <MenuItem value={'English'}>English</MenuItem>
-              </Select>
-            </FormControl>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={async () => {
-                const newIndex = await createIndexMutation.mutateAsync({
-                  chatInstanceId: chatInstance?.id,
-                  indexName,
-                  language,
-                })
-                setIndexName('')
-                navigate(`/rag/${newIndex.id}`)
-              }}
-            >
-              Create Index
-            </Button>
-          </Box>
-        )}
+        {chatInstance?.id && <RagCreator chatInstance={chatInstance} />}
         {ragIndices?.map((index) => (
           <Paper
             key={index.id}
@@ -82,10 +48,10 @@ const Rag: React.FC = () => {
             <Table sx={{ mb: 1 }}>
               <TableHead>
                 <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Language</TableCell>
-                  <TableCell>Number of files</TableCell>
+                  <TableCell>{t('rag:id')}</TableCell>
+                  <TableCell>{t('rag:name')}</TableCell>
+                  <TableCell>{t('rag:language')}</TableCell>
+                  <TableCell>{t('rag:numberOfFiles')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -99,7 +65,7 @@ const Rag: React.FC = () => {
             </Table>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <Link to={`/rag/${index.id}`} component={RouterLink} sx={{ ml: 'auto' }}>
-                View details
+                {t('rag:viewDetails')}
               </Link>
             </Box>
           </Paper>

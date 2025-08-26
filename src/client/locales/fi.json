@@ -291,7 +291,8 @@
     "rag": "RAG",
     "remove": "poista",
     "customResponsibility": "manuaalisesti lisätty",
-    "add": "lisää"
+    "add": "lisää",
+    "sourceMaterials": "Lähdemateriaalit"
   },
   "tooltip": {
     "copied": "Kopioitu!"
@@ -323,5 +324,30 @@
     "toNewline": "lisää uuden rivin",
     "ok": "Ok",
     "openConfigurator": "Viestin lähetyksen näppäinyhdistelmä"
+  },
+  "rag": {
+    "sourceMaterials": "Lähdemateriaalit",
+    "id": "ID",
+    "name": "Name",
+    "language": "Kieli",
+    "numberOfFiles": "Tiedostojen lukumäärä",
+    "viewDetails": "Lisätiedot",
+    "collection": "Lähdemateriaalikokoelma",
+    "deleteCollection": "Poista kokoelma",
+    "files": "Lähdemateriaalin tiedostot",
+    "backToCollection": "Takaisin kokoelmaan",
+    "file": "Lähdemateriaalin tiedosto",
+    "deleteFile": "Poista tiedosto",
+    "content": "Sisältö",
+    "noContent": "Ei sisältöä",
+    "creatorGuide": "Lähdemateriaalikokoelma on joukko tiedostoja, joista kielimalli voi hakea tietoa tarpeen mukaan. Opiskelija voi aktivoida lähdemateriaalikokoelman kurssichatissa, jolloin se tulee hakutyökaluna kielimallille näkyväksi. Kuvaava kokoelman nimi, kuvaus ja kieli ovat tärkeitä, koska kielimalli käyttää niitä hakukyselyn muodostamiseen ja päättelee niistä, milloin sen kannattaa tehdä lähdemateriaalihaku vastatakseen opiskelijalle.",
+    "uploading": "Ladataan",
+    "uploadFiles": "Lisää tiedostoja",
+    "createNewIndex": "Luo uusi kokoelma",
+    "finnish": "Suomi",
+    "english": "Englanti",
+    "createIndex": "Luo kokoelma",
+    "nameLabel": "Kokoelman nimi",
+    "nameHelperText": "Käytä kuvaavaa nimeä (esim. kurssin koko nimi)"
   }
 }

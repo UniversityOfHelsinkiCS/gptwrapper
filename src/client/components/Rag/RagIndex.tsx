@@ -6,6 +6,7 @@ import { orderBy } from 'lodash'
 import { RagFileInfo } from './RagFileDetails'
 import { useDeleteRagIndexMutation, useRagIndexDetails, useUploadMutation } from './api'
 import { Search } from './Search'
+import { useTranslation } from 'react-i18next'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -20,6 +21,7 @@ const VisuallyHiddenInput = styled('input')({
 })
 
 export const RagIndex: React.FC = () => {
+  const { t } = useTranslation()
   const { id: strId } = useParams() as { id: string }
   const navigate = useNavigate()
   const id = parseInt(strId, 10)
@@ -33,12 +35,12 @@ export const RagIndex: React.FC = () => {
 
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
-      <Typography variant="body1">RAG index</Typography>
+      <Typography variant="body1">{t('rag:collection')}</Typography>
       <Typography variant="h3">{ragDetails?.metadata?.name}</Typography>
       <Box py={2}>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button component="label" variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
-            {uploadMutation.isPending ? 'Uploading...' : 'Upload Files'}
+            {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
             <VisuallyHiddenInput
               type="file"
               onChange={async (event) => {
@@ -62,12 +64,12 @@ export const RagIndex: React.FC = () => {
               }
             }}
           >
-            Delete Index
+            {t('rag:deleteCollection')}
           </Button>
         </Box>
         <Search ragIndex={ragDetails} />
         <Box mt={2}>
-          <Typography variant="h6">Files:</Typography>
+          <Typography variant="h6">{t('rag:files')}</Typography>
           {orderBy(ragDetails?.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (
             <RagFileInfo key={file.id} file={file} link />
           ))}

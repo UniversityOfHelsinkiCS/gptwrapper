@@ -291,7 +291,8 @@
     "rag": "RAG",
     "remove": "remove",
     "customResponsibility": "manually added",
-    "add": "add"
+    "add": "add",
+    "sourceMaterials": "Source materials"
   },
   "tooltip": {
     "copied": "Copied!"
@@ -323,5 +324,30 @@
     "toNewline": "to add a new line",
     "ok": "Ok",
     "openConfigurator": "Keyboard shortcut for sending a message"
+  },
+  "rag": {
+    "sourceMaterials": "Source materials",
+    "id": "ID",
+    "name": "Name",
+    "language": "Language",
+    "numberOfFiles": "Number of files",
+    "viewDetails": "View details",
+    "collection": "Source material collection",
+    "deleteCollection": "Delete collection",
+    "files": "Source material files",
+    "backToCollection": "Back to collection",
+    "file": "Source material file",
+    "deleteFile": "Delete file",
+    "content": "Content",
+    "noContent": "No content",
+    "creatorGuide": "A RAG index is a collection of documents that are indexed for semantic search and retrieval. Students may activate it in the course chat, which gives the LLM a tool to retrieve relevant information from the index based on a query which it will base its response on. The index name, description and language are especially important as the LLM will use them to decide when to search the index and how to formulate the search query.",
+    "uploading": "Uploading",
+    "uploadFiles": "Upload files",
+    "createNewIndex": "Create a new collection",
+    "finnish": "Finnish",
+    "english": "English",
+    "createIndex": "Create collection",
+    "nameLabel": "Collection name",
+    "nameHelperText": "Use a descriptive name (for example the full name of the course)"
   }
 }
