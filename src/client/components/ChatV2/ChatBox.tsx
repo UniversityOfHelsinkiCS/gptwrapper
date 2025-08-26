@@ -263,7 +263,7 @@ export const ChatBox = ({
             </Box>
 
             <Tooltip title={disabled ? t('chat:cancelResponse') : isShiftEnterSend ? t('chat:shiftEnterSend') : t('chat:enterSend')} arrow placement="top">
-              <IconButton type={disabled ? 'button' : 'submit'} ref={sendButtonRef}>
+              <IconButton type={disabled ? 'button' : 'submit'} ref={sendButtonRef} data-testid="send-chat-message">
                 {disabled ? <StopIcon /> : <Send />}
               </IconButton>
             </Tooltip>

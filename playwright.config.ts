@@ -20,7 +20,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: inCI ? 1 : 0,
   /* Global timeout for each test */
-  timeout: 12_000,
+  timeout: inCI ? 15_000 : 12_000,
   expect: {
     timeout: inCI ? 4_500 : 3000,
   },

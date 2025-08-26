@@ -12,5 +12,6 @@ export const closeSendPreference = async (page: Page) => {
 export const sendChatMessage = async (page: Page, message: string) => {
   const chatInput = page.getByTestId('chat-input').first()
   await chatInput.fill(message)
-  await chatInput.press('Shift+Enter')
+  const sendBtn = page.getByTestId('send-chat-message')
+  await sendBtn.click()
 }
