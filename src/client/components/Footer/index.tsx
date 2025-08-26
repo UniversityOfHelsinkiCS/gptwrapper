@@ -50,13 +50,12 @@ const Footer = () => {
               }}
             />
           </Typography>
-          <Typography variant="caption">{t('footer:version', { version: changelog?.[0]?.version, publishedAgo })}</Typography>
-        </Box>
-
-        <Box>
-          <Link href="https://toska.dev" target="_blank" rel="noopener" underline="hover">
-            <img src={toskaColor} alt="Toska" width="40" />
-          </Link>
+          <Box display="flex" gap="1rem">
+            <Typography variant="caption">{t('footer:version', { version: changelog?.[0]?.version, publishedAgo })}</Typography>
+            <Link href="https://toska.dev" target="_blank" rel="noopener" underline="hover">
+              <img src={toskaColor} alt="Toska" width="40" />
+            </Link>
+          </Box>
         </Box>
       </Box>
     </Box>

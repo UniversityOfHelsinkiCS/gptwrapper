@@ -288,7 +288,7 @@ export const ChatV2 = () => {
   const showRagSelector = (ragIndices?.length ?? 0) > 0
   const rightMenuOpen = !!activeToolResult
   const rightMenuWidth = rightMenuOpen ? '300px' : '0px'
-  const leftMenuWidth = !isEmbeddedMode ? { md: '300px', lg: '400px' } : { md: '0px', lg: '0px' }
+  const leftMenuWidth = !isEmbeddedMode ? { md: '250px', lg: '300px' } : { md: '0px', lg: '0px' }
 
   // Handle layout shift when right menu opens (tool result becomes visible)
   const prevScrollYProportional = useRef(0)
@@ -615,7 +615,7 @@ const LeftMenu = ({
     <Box
       sx={[
         {
-          width: { md: 300, lg: 400 },
+          width: { md: 250, lg: 300 },
           position: 'relative',
           height: '100vh',
           borderRight: '1px solid rgba(0, 0, 0, 0.12)',
