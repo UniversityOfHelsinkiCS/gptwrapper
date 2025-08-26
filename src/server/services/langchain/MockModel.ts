@@ -3,6 +3,7 @@ import { AIMessage, AIMessageChunk, type BaseMessage, isHumanMessage, isSystemMe
 import type { ChatGenerationChunk, ChatResult } from '@langchain/core/outputs'
 import { FakeStreamingChatModel } from '@langchain/core/utils/testing'
 import { basicTestContent } from '../../util/azure/mocks/mockContent'
+import { StructuredTool } from '@langchain/core/tools'
 
 /**
  * See https://github.com/langchain-ai/langchainjs/blob/fe79533d36ddf92b830ea231297b522fce1c538f/langchain-core/src/utils/testing/index.ts#L219
@@ -10,10 +11,11 @@ import { basicTestContent } from '../../util/azure/mocks/mockContent'
  * FakeStreamingChatModel echoes the first input message out of the box.
  */
 export class MockModel extends FakeStreamingChatModel {
-  constructor() {
+  constructor(tools: StructuredTool[]) {
     super({
       sleep: 5,
     })
+    this.bindTools(tools)
   }
 
   setupTestResponse(messages: BaseMessage[]) {

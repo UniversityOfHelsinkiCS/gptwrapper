@@ -1,5 +1,7 @@
-import type { BaseChatModel, BaseChatModelCallOptions } from '@langchain/core/language_models/chat_models'
+import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
+import type { BaseChatModelCallOptions } from '@langchain/core/language_models/chat_models'
 import type { AIMessageChunk, BaseMessageLike } from '@langchain/core/messages'
+import type { Runnable } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
 import { AzureChatOpenAI } from '@langchain/openai'
@@ -11,8 +13,6 @@ import type { User } from '../../../shared/user'
 import { AZURE_API_KEY, AZURE_RESOURCE } from '../../util/config'
 import { ToolResultStore } from './fileSearchResultsStore'
 import { MockModel } from './MockModel'
-import { Runnable } from '@langchain/core/runnables'
-import { BaseLanguageModelInput } from '@langchain/core/language_models/base'
 
 type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
 
@@ -24,16 +24,16 @@ const getChatModel = (model: string, tools: StructuredTool[]): ChatModel => {
 
   const chatModel =
     deploymentName === 'mock'
-      ? new MockModel()
+      ? new MockModel(tools)
       : new AzureChatOpenAI({
           model,
           azureOpenAIApiKey: AZURE_API_KEY,
           azureOpenAIApiVersion: '2023-05-15',
           azureOpenAIApiDeploymentName: deploymentName,
           azureOpenAIApiInstanceName: AZURE_RESOURCE,
-        })
+        }).bindTools(tools)
 
-  return chatModel.bindTools(tools)
+  return chatModel
 }
 
 type WriteEventFunction = (data: ChatEvent) => Promise<void>
@@ -164,7 +164,12 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
         callId: id,
         text: `Completed search for '${input.query}'`,
         input,
-        result: { files: artifact.map((chunk) => ({ fileName: chunk.metadata.ragFileName, score: chunk.score })) },
+        result: {
+          files: artifact.map((chunk) => ({
+            fileName: chunk.metadata.ragFileName,
+            score: chunk.score,
+          })),
+        },
       })
     }
   }
