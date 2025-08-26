@@ -93,3 +93,9 @@ export const studentTest = base.extend<{ forEachTest: void }>({
     { auto: true },
   ], // automatically starts for every test.
 })
+
+export const TestByRole = {
+  student: studentTest,
+  teacher: teacherTest,
+  admin: adminTest,
+}

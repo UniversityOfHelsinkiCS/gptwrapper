@@ -1,40 +1,148 @@
 import { expect } from '@playwright/test'
-import { acceptDisclaimer, closeSendPreference, sendChatMessage } from './utils/test-helpers'
-import { teacherTest as test } from './fixtures'
+import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from './utils/test-helpers'
+import { TestByRole } from './fixtures'
 
-test.describe('Chat v2 Conversation tests', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/v2')
-    await acceptDisclaimer(page)
-  })
+// Matrix of tests
+const testMatrix: { role: keyof typeof TestByRole; courses: (string | undefined)[] }[] = [
+  { role: 'student', courses: ['test-course'] },
+  { role: 'teacher', courses: ['test-course', undefined] },
+  { role: 'admin', courses: ['test-course', undefined] },
+]
 
-  test('Chat v2 mock response works', async ({ page }) => {
-    await page.getByTestId('model-selector').first().click()
-    await page.getByRole('option', { name: 'mock' }).click()
+testMatrix.forEach((testConfig) => {
+  const test = TestByRole[testConfig.role]
 
-    await sendChatMessage(page, 'testinen morjens')
+  testConfig.courses.forEach((course) => {
+    test.describe(`${course ? `Course` : 'General'} chat test for ${testConfig.role}`, () => {
+      test.beforeEach(async ({ page }) => {
+        await page.goto(`/v2/${course || ''}`)
+      })
 
-    await closeSendPreference(page)
+      test('Disclaimer is visible', async ({ page }) => {
+        await expect(page.getByTestId('submit-accept-disclaimer')).toBeVisible()
+      })
 
-    await expect(page.getByTestId('user-message')).toContainText('testinen morjens')
-    await expect(page.getByTestId('assistant-message')).toContainText('You are calling mock endpoint for streaming mock data')
-  })
+      test('Disclaimer is not visible after accepting and reloading', async ({ page }) => {
+        await acceptDisclaimer(page)
+        await page.reload()
+        await expect(page.getByTestId('submit-accept-disclaimer')).not.toBeVisible()
+      })
 
-  test('Can empty conversation', async ({ page }) => {
-    await page.getByTestId('model-selector').first().click()
-    await page.getByRole('option', { name: 'mock' }).click()
+      test('Disclaimer (help) can be opened manually', async ({ page }) => {
+        await acceptDisclaimer(page)
+        await page.getByTestId('help-button').click()
+        await expect(page.getByTestId('submit-accept-disclaimer')).toBeVisible()
+      })
 
-    await sendChatMessage(page, 'tää tyhjennetään')
+      test('Settings can be opened and closed', async ({ page }) => {
+        await acceptDisclaimer(page)
+        await page.getByTestId('settings-button').click()
+        await expect(page.locator('#close-settings')).toBeVisible()
 
-    await closeSendPreference(page)
+        await page.keyboard.press('Escape')
+        await expect(page.locator('#close-settings')).not.toBeVisible()
+      })
 
-    await expect(page.getByTestId('user-message')).toContainText('tää tyhjennetään')
-    await expect(page.getByTestId('assistant-message')).toContainText('OVER', { timeout: 6000 })
+      test('Can select model', async ({ page }) => {
+        await acceptDisclaimer(page)
+        await useMockModel(page)
+      })
 
-    page.on('dialog', (dialog) => dialog.accept())
-    await page.getByTestId('empty-conversation-button').click()
+      test('Chat v2 mock response works', async ({ page }) => {
+        await acceptDisclaimer(page)
+        await useMockModel(page)
 
-    await expect(page.getByTestId('user-message')).not.toBeVisible()
-    await expect(page.getByTestId('assistant-message')).not.toBeVisible()
+        await sendChatMessage(page, 'testinen morjens')
+
+        await closeSendPreference(page)
+
+        await expect(page.getByTestId('user-message')).toContainText('testinen morjens')
+        await expect(page.getByTestId('assistant-message')).toContainText('You are calling mock endpoint for streaming mock data')
+      })
+
+      test('Can empty conversation', async ({ page }) => {
+        await acceptDisclaimer(page)
+        await useMockModel(page)
+
+        await sendChatMessage(page, 'tää tyhjennetään')
+
+        await closeSendPreference(page)
+
+        await expect(page.getByTestId('user-message')).toContainText('tää tyhjennetään')
+        await expect(page.getByTestId('assistant-message')).toContainText('OVER', { timeout: 6000 })
+
+        page.on('dialog', (dialog) => dialog.accept())
+        await page.getByTestId('empty-conversation-button').click()
+
+        await expect(page.getByTestId('user-message')).not.toBeVisible()
+        await expect(page.getByTestId('assistant-message')).not.toBeVisible()
+      })
+
+      test('Custom system prompt can be changed', async ({ page }) => {
+        await acceptDisclaimer(page)
+        await useMockModel(page)
+        await page.getByTestId('settings-button').click()
+
+        const systemPrompt = 'mocktest this is the system prompt'
+        await page.getByTestId('assistant-instructions-input').fill(systemPrompt)
+        await page.getByTestId('settings-ok-button').click()
+
+        await sendChatMessage(page, 'I can send anything now, the model just echoes the system prompt since it begins with mocktest.')
+        await closeSendPreference(page)
+
+        await expect(page.getByTestId('assistant-message')).toContainText(systemPrompt)
+      })
+
+      test('Default temperature is 0.5 and can adjust temperature', async ({ page }) => {
+        await acceptDisclaimer(page)
+        await useMockModel(page)
+
+        await sendChatMessage(page, 'temperature')
+        await closeSendPreference(page)
+        await expect(page.getByTestId('assistant-message').first()).toContainText('Temperature: 0.5')
+
+        await page.getByTestId('settings-button').click()
+
+        const slider = page.getByRole('slider').first()
+        // Move right 6 times
+        for (let i = 0; i < 6; i++) {
+          await slider.press('ArrowRight')
+        }
+
+        // Close settings
+        await page.getByTestId('settings-ok-button').click()
+
+        await sendChatMessage(page, 'temperature')
+        await expect(page.getByTestId('assistant-message').last()).toContainText('Temperature: 1')
+      })
+
+      if (course)
+        test('Course chat RAG feature', async ({ page }) => {
+          await acceptDisclaimer(page)
+          await useMockModel(page)
+
+          const ragName = `rag-${test.info().workerIndex}-${testConfig.role}`
+          await page.locator('#rag-index-selector').first().click()
+          await page.getByRole('menuitem', { name: ragName, exact: true }).click()
+
+          await sendChatMessage(page, 'rag')
+          await closeSendPreference(page)
+
+          // Shows file search loading indicator
+          await expect(page.getByTestId('tool-call-message')).toBeVisible()
+
+          // Responds with RAG mock document text
+          await expect(page.getByTestId('assistant-message')).toContainText('This is the first mock document')
+
+          // Source button is visible
+          await expect(page.getByTestId('file-search-sources')).toBeVisible()
+
+          // Sources drawer has been opened and title is visible
+          await expect(page.getByTestId('sources-header')).toBeVisible()
+
+          // Three source items should be visible
+          await expect(page.getByTestId('sources-truncated-item')).toHaveCount(3)
+        })
+    })
   })
 })

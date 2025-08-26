@@ -1,11 +1,12 @@
 import { Router } from 'express'
 import { inProduction } from '../../config'
 import { getTestUserHeaders, TEST_COURSES } from '../../shared/testData'
-import { ChatInstanceRagIndex, Enrolment, Prompt, RagIndex, User, UserChatInstanceUsage } from '../db/models'
+import { ChatInstanceRagIndex, Enrolment, Prompt, RagIndex, Responsibility, User, UserChatInstanceUsage } from '../db/models'
 import { headersToUser } from '../middleware/user'
 import { ApplicationError } from '../util/ApplicationError'
 import { getCompletionEvents } from '../util/azure/client'
 import logger from '../util/logger'
+import { Op } from 'sequelize'
 
 const router = Router()
 
@@ -20,40 +21,68 @@ router.post('/reset-test-data', async (req, res) => {
   const testUserHeaders = getTestUserHeaders(testUserIdx, testUserRole)
   const userId = testUserHeaders.hypersonsisuid
 
+  // Create one temporal teacher for the test user
+  const temporalTeacherHeaders = Object.fromEntries(
+    Object.entries(getTestUserHeaders(testUserIdx, 'teacher')).map(([key, value]) => [key, `temporal_teacher_${value}`]),
+  )
+  const temporalTeacherId = temporalTeacherHeaders.hypersonsisuid
+
+  const testUserIds = [userId, temporalTeacherId]
+
   logger.info(`Resetting test data for user ${userId}`)
 
   await Prompt.destroy({
     where: {
-      userId,
+      userId: {
+        [Op.in]: testUserIds,
+      },
     },
   })
   await ChatInstanceRagIndex.destroy({
     where: {
-      userId,
+      userId: {
+        [Op.in]: testUserIds,
+      },
     },
   })
   await RagIndex.destroy({
     where: {
-      userId,
+      userId: {
+        [Op.in]: testUserIds,
+      },
     },
   })
   await Enrolment.destroy({
     where: {
-      userId,
+      userId: {
+        [Op.in]: testUserIds,
+      },
+    },
+  })
+  await Responsibility.destroy({
+    where: {
+      userId: {
+        [Op.in]: testUserIds,
+      },
     },
   })
   await UserChatInstanceUsage.destroy({
     where: {
-      userId,
+      userId: {
+        [Op.in]: testUserIds,
+      },
     },
   })
   await User.destroy({
     where: {
-      id: userId,
+      id: {
+        [Op.in]: testUserIds,
+      },
     },
   })
 
   await User.create(headersToUser(testUserHeaders))
+  await User.create(headersToUser(temporalTeacherHeaders))
 
   if (testUserRole === 'student') {
     await Enrolment.create({
@@ -62,32 +91,18 @@ router.post('/reset-test-data', async (req, res) => {
     })
   }
 
-  if (testUserRole !== 'student') {
-    const [ragIndex] = await RagIndex.findOrCreate({
-      where: {
-        userId,
-      },
-      defaults: {
-        userId,
-        metadata: {
-          name: `rag-${testUserIdx}`,
-          language: 'English',
-        },
-      },
-    })
-    await ChatInstanceRagIndex.findOrCreate({
-      where: {
-        userId,
-        chatInstanceId: TEST_COURSES.TEST_COURSE.id,
-        ragIndexId: ragIndex.id,
-      },
-      defaults: {
-        chatInstanceId: TEST_COURSES.TEST_COURSE.id,
-        ragIndexId: ragIndex.id,
-        userId,
-      },
-    })
-  }
+  const ragIndex = await RagIndex.create({
+    userId: temporalTeacherId,
+    metadata: {
+      name: `rag-${testUserIdx}-${testUserRole}`,
+      language: 'English',
+    },
+  })
+  await ChatInstanceRagIndex.create({
+    userId: temporalTeacherId,
+    chatInstanceId: TEST_COURSES.TEST_COURSE.id,
+    ragIndexId: ragIndex.id,
+  })
 
   logger.info('Test data reset successfully')
 

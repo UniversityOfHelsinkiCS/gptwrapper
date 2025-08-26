@@ -248,6 +248,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 value={modelTemperature}
                 marks
                 valueLabelDisplay="auto"
+                name="Temperature"
                 onChange={(_event, value) => setModelTemperature(typeof value === 'number' ? value : modelTemperature)}
               />
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -282,7 +283,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           >
             {t('settings:resetDefault')}
           </OutlineButtonBlack>{' '}
-          <BlueButton onClick={handleClose}>OK</BlueButton>
+          <BlueButton onClick={handleClose} data-testid="settings-ok-button">
+            OK
+          </BlueButton>
         </Box>
         <SaveMyPromptModal
           isOpen={myPromptModalOpen}

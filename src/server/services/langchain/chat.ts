@@ -16,7 +16,7 @@ import { MockModel } from './MockModel'
 
 type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
 
-const getChatModel = (model: string, tools: StructuredTool[]): ChatModel => {
+const getChatModel = (model: string, tools: StructuredTool[], temperature: number): ChatModel => {
   const deploymentName = validModels.find((m) => m.name === model)?.deployment
   if (!deploymentName) {
     throw new Error(`Invalid model: ${model}`)
@@ -24,13 +24,14 @@ const getChatModel = (model: string, tools: StructuredTool[]): ChatModel => {
 
   const chatModel =
     deploymentName === 'mock'
-      ? new MockModel(tools)
+      ? new MockModel({ tools, temperature })
       : new AzureChatOpenAI({
           model,
           azureOpenAIApiKey: AZURE_API_KEY,
           azureOpenAIApiVersion: '2023-05-15',
           azureOpenAIApiDeploymentName: deploymentName,
           azureOpenAIApiInstanceName: AZURE_RESOURCE,
+          temperature,
         }).bindTools(tools)
 
   return chatModel
@@ -42,6 +43,7 @@ type ChatTool = StructuredTool<any, any, any, string>
 
 export const streamChat = async ({
   model,
+  temperature,
   systemMessage,
   chatMessages,
   tools = [],
@@ -49,6 +51,7 @@ export const streamChat = async ({
   user,
 }: {
   model: string
+  temperature: number
   systemMessage: string
   chatMessages: ChatMessage[]
   tools?: ChatTool[]
@@ -57,7 +60,7 @@ export const streamChat = async ({
 }) => {
   const toolsByName = Object.fromEntries(tools.map((tool) => [tool.name, tool]))
 
-  const chatModel = getChatModel(model, tools)
+  const chatModel = getChatModel(model, tools, temperature)
 
   const messages: BaseMessageLike[] = [
     {

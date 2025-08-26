@@ -11,16 +11,19 @@ import { StructuredTool } from '@langchain/core/tools'
  * FakeStreamingChatModel echoes the first input message out of the box.
  */
 export class MockModel extends FakeStreamingChatModel {
-  constructor(tools: StructuredTool[]) {
+  temperature: number
+
+  constructor({ tools, temperature }: { tools: StructuredTool[]; temperature: number }) {
     super({
       sleep: 5,
     })
     this.bindTools(tools)
+    this.temperature = temperature
   }
 
   setupTestResponse(messages: BaseMessage[]) {
     const firstSystemMessage = messages.find(isSystemMessage)
-    const lastHumanMessage = messages.findLast(isHumanMessage)
+    const lastHumanMessage = (messages.findLast(isHumanMessage)?.content ?? '') as string
     const toolMessage = isToolMessage(messages[messages.length - 1]) ? messages[messages.length - 1] : null
 
     if (toolMessage) {
@@ -28,9 +31,12 @@ export class MockModel extends FakeStreamingChatModel {
     } else if (firstSystemMessage && (firstSystemMessage.content as string).startsWith('mocktest')) {
       // testing a system message
       // Do nothing. FakeStreamingChatModel echoes the first message.
-    } else if (((lastHumanMessage?.content ?? '') as string).startsWith('rag')) {
+    } else if (lastHumanMessage.startsWith('rag')) {
       // Do a tool call
       this.chunks = toolCallChunks
+    } else if (lastHumanMessage.startsWith('temperature')) {
+      // Echo the temperature
+      this.chunks = [new AIMessageChunk(`Temperature: ${this.temperature}`)]
     } else {
       this.responses = defaultResponse
     }

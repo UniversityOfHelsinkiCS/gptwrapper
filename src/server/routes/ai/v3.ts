@@ -140,6 +140,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     chatMessages: options.chatMessages,
     systemMessage: options.systemMessage,
     model: options.model,
+    temperature: options.modelTemperature,
     tools,
     writeEvent: async (event: ChatEvent) => {
       await new Promise((resolve) => {

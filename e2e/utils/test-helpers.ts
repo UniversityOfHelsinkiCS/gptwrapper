@@ -15,3 +15,8 @@ export const sendChatMessage = async (page: Page, message: string) => {
   const sendBtn = page.getByTestId('send-chat-message')
   await sendBtn.click()
 }
+
+export const useMockModel = async (page: Page) => {
+  await page.getByTestId('model-selector').first().click()
+  await page.getByRole('option', { name: 'mock' }).click()
+}
