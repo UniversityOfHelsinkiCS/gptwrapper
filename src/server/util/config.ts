@@ -9,9 +9,6 @@ export const AZURE_API_KEY = getEnv('AZURE_API_KEY', 'placeholder')
 
 export const AZURE_RESOURCE = getEnv('AZURE_RESOURCE', 'placeholder')
 
-export const AZURE_OPENAI_EMBEDDER_MODEL = getEnv('AZURE_OPENAI_EMBEDDER_MODEL', 'placeholder')
-export const AZURE_OPENAI_EMBEDDER_DEPLOYMENT = getEnv('AZURE_OPENAI_EMBEDDER_DEPLOYMENT', 'placeholder')
-
 export const DATABASE_URL = getEnv('DATABASE_URL', 'placeholder-this-needs-to-be-set')
 
 export const CHROMADB_URL = getEnv('CHROMADB_URL', 'http://chromadb:8001')
