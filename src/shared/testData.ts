@@ -84,14 +84,6 @@ export const TEST_COURSES = {
   },
 }
 
-export const TEST_USER_IDS = [
-  'hy-hlo-95971222',
-  'hy-hlo-1442996',
-  'otm-688bac31-4ddf-4b81-a562-6cea8260262a',
-  'hy-hlo-129129327',
-  'hy-hlo-45702058',
-  'hy-hlo-1397482',
-]
 export const TEST_USERS = {
   enrolled: 'grp-currechat-demostudents',
   teachers: 'grp-currechat-demoteachers',
