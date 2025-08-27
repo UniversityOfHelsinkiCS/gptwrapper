@@ -1,4 +1,11 @@
-import { GetObjectCommand, DeleteObjectCommand, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand, ListObjectsV2CommandOutput } from '@aws-sdk/client-s3'
+import {
+  GetObjectCommand,
+  DeleteObjectCommand,
+  PutObjectCommand,
+  ListObjectsV2Command,
+  DeleteObjectsCommand,
+  ListObjectsV2CommandOutput,
+} from '@aws-sdk/client-s3'
 import type { RagFile, RagIndex } from '../../db/models'
 import { ApplicationError } from '../../util/ApplicationError'
 import { pdfToText, pdfToTextWithVLM } from '../../util/pdfToText'
@@ -27,16 +34,16 @@ export const FileStore = {
           Prefix: prefix,
           ContinuationToken: continuationToken,
         })
-        const listResponse = await s3Client.send(listCommand) as ListObjectsV2CommandOutput
-        const keys = (listResponse.Contents || []).map(obj => ({ Key: obj.Key! }))
+        const listResponse = (await s3Client.send(listCommand)) as ListObjectsV2CommandOutput
+        const keys = (listResponse.Contents || []).map((obj) => ({ Key: obj.Key! }))
 
         if (keys.length > 0) {
           const deleteCommand = new DeleteObjectsCommand({
             Bucket: S3_BUCKET,
-            Delete: { Objects: keys }
+            Delete: { Objects: keys },
           })
           const deleteResponse = await s3Client.send(deleteCommand)
-          console.log("Deleted:", deleteResponse.Deleted?.length, "objects.")
+          console.log('Deleted:', deleteResponse.Deleted?.length, 'objects.')
         }
 
         continuationToken = listResponse.NextContinuationToken
@@ -81,13 +88,15 @@ export const FileStore = {
         try {
           const fileObj = await s3Client.send(new GetObjectCommand({ Bucket: S3_BUCKET, Key: s3Key }))
           const buf = await streamToBuffer(fileObj.Body)
-          const text = await pdfToTextWithVLM(buf)
-          await s3Client.send(new PutObjectCommand({
-            Bucket: S3_BUCKET,
-            Key: pdfTextKey,
-            Body: JSON.stringify(text, null, 2),
-            ContentType: 'text/plain',
-          }))
+          const text = await pdfToText(buf)
+          await s3Client.send(
+            new PutObjectCommand({
+              Bucket: S3_BUCKET,
+              Key: pdfTextKey,
+              Body: JSON.stringify(text, null, 2),
+              ContentType: 'text/plain',
+            }),
+          )
           return text
         } catch (error) {
           console.error(`Failed to create PDF text file ${pdfTextKey} in S3:`, error)
@@ -114,12 +123,14 @@ export const FileStore = {
 
   async saveText(s3Key: string, text: string) {
     try {
-      await s3Client.send(new PutObjectCommand({
-        Bucket: S3_BUCKET,
-        Key: s3Key,
-        Body: text,
-        ContentType: 'text/plain',
-      }))
+      await s3Client.send(
+        new PutObjectCommand({
+          Bucket: S3_BUCKET,
+          Key: s3Key,
+          Body: text,
+          ContentType: 'text/plain',
+        }),
+      )
     } catch (error) {
       console.error(`Failed to save text content to ${s3Key} in S3:`, error)
       throw ApplicationError.InternalServerError(`Failed to save text content`)
@@ -136,7 +147,6 @@ const streamToString = (stream: any): Promise<string> => {
   })
 }
 
-
 const streamToBuffer = (stream: any): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
     const chunks: any[] = []
@@ -145,4 +155,3 @@ const streamToBuffer = (stream: any): Promise<Buffer> => {
     stream.on('end', () => resolve(Buffer.concat(chunks)))
   })
 }
-
