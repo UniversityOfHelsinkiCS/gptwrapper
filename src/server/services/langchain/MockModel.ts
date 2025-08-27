@@ -2,7 +2,7 @@ import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager
 import { AIMessage, AIMessageChunk, type BaseMessage, isHumanMessage, isSystemMessage, isToolMessage } from '@langchain/core/messages'
 import type { ChatGenerationChunk, ChatResult } from '@langchain/core/outputs'
 import { FakeStreamingChatModel } from '@langchain/core/utils/testing'
-import { basicTestContent } from '../../util/azure/mocks/mockContent'
+import { basicTestContent } from './mockContent'
 import { StructuredTool } from '@langchain/core/tools'
 
 /**

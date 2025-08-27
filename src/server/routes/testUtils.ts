@@ -4,7 +4,7 @@ import { getTestUserHeaders, TEST_COURSES } from '../../shared/testData'
 import { ChatInstanceRagIndex, Enrolment, Prompt, RagIndex, Responsibility, User, UserChatInstanceUsage } from '../db/models'
 import { headersToUser } from '../middleware/user'
 import { ApplicationError } from '../util/ApplicationError'
-import { getCompletionEvents } from '../util/azure/client'
+import { getCompletionEvents } from '../util/oldAzureClient'
 import logger from '../util/logger'
 import { Op } from 'sequelize'
 

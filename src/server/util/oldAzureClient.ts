@@ -2,10 +2,10 @@ import { OpenAIClient, AzureKeyCredential, EventStream, ChatCompletions } from '
 import { Tiktoken } from '@dqbd/tiktoken'
 import { Response } from 'express'
 
-import { AzureOptions, APIError } from '../../types'
-import { AZURE_RESOURCE, AZURE_API_KEY } from '../config'
-import { validModels, inProduction } from '../../../config'
-import logger from '../logger'
+import { AzureOptions, APIError } from '../types'
+import { AZURE_RESOURCE, AZURE_API_KEY } from './config'
+import { validModels, inProduction } from '../../config'
+import logger from './logger'
 import { AzureOpenAI } from 'openai'
 
 const endpoint = `https://${AZURE_RESOURCE}.openai.azure.com/`
