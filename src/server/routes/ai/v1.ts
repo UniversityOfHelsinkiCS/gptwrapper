@@ -2,10 +2,9 @@ import express from 'express'
 import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction } from '../../../config'
 import { ChatInstance, Discussion, UserChatInstanceUsage } from '../../db/models'
 import { calculateUsage, checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
-import type { RequestWithUser } from '../../types'
+import type { APIError, RequestWithUser } from '../../types'
 import { getCompletionEvents, streamCompletion } from '../../util/azure/client'
 import logger from '../../util/logger'
-import { isError } from '../../util/isError'
 import getEncoding from '../../util/tiktoken'
 import { getMessageContext, getModelContextLimit } from '../../util/util'
 import { ApplicationError } from '../../util/ApplicationError'
@@ -86,6 +85,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   const events = await getCompletionEvents(options)
 
+  const isError = (events: any): events is APIError => 'error' in events
   if (isError(events)) {
     throw new ApplicationError('Error creating a response stream', 424)
   }

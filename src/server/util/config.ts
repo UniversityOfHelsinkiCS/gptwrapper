@@ -62,9 +62,3 @@ const grandFunded = 'hy-grant-funded-researchers'
 export const accessIams = [basicUserIam, powerUserIam, employeeIam, grandFunded]
 
 export const tikeIam = 'hy-tike-allstaff'
-
-export const DEFAULT_RAG_SYSTEM_PROMPT = `
-You are a helpful AI assistant designed to answer questions related to the course material, which you can access using the file search tool. Your responses should be concise, relevant, and based on the provided course files.
-If you cannot find the answer in the files, you should indicate that you do not have enough information to answer the question.
-You can still give your best guess based on your training, but make it clear that the answer is not based on the course material.
-`
