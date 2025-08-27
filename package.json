@@ -72,7 +72,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.864.0",
     "@azure/openai": "^1.0.0-beta.11",
-    "@dqbd/tiktoken": "^1.0.16",
+    "@dqbd/tiktoken": "^1.0.22",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@langchain/community": "^0.3.50",

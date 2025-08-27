@@ -31,7 +31,12 @@ const getChatModel = (model: string, tools: StructuredTool[], temperature: numbe
           azureOpenAIApiVersion: '2023-05-15',
           azureOpenAIApiDeploymentName: model, // In Azure, always use the acual model name as the deployment name
           azureOpenAIApiInstanceName: AZURE_RESOURCE,
-          temperature,
+          temperature: modelConfig.temperature ?? temperature, // If model config specifies a temperature, use it; otherwise, use the user supplied temperature.
+          reasoning: {
+            effort: 'minimal',
+            summary: null,
+            generate_summary: null,
+          },
         }).bindTools(tools)
 
   return chatModel

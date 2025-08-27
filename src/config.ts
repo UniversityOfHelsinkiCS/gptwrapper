@@ -35,6 +35,7 @@ export const validModels = [
   {
     name: 'gpt-5',
     context: 128_000,
+    temperature: 1.0,
   },
   {
     name: 'mock',
