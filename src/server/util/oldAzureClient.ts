@@ -44,14 +44,14 @@ const getMockCompletionEvents: () => Promise<EventStream<ChatCompletions>> = asy
 }
 
 export const getCompletionEvents = async ({ model, messages, options }: AzureOptions) => {
-  const deploymentId = validModels.find((m) => m.name === model)?.deployment
+  const modelConfig = validModels.find((m) => m.name === model)
 
-  if (!deploymentId) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
+  if (!modelConfig) throw new Error(`Invalid model: ${model}, not one of ${validModels.map((m) => m.name).join(', ')}`)
 
-  if (deploymentId === 'mock') return getMockCompletionEvents()
+  if (modelConfig.name === 'mock') return getMockCompletionEvents()
 
   try {
-    const events = await oldClient.streamChatCompletions(deploymentId, messages, options)
+    const events = await oldClient.streamChatCompletions(modelConfig.name, messages, options)
 
     return events
   } catch (error: any) {

@@ -120,7 +120,7 @@ router.post('/completions-api', async (req, res) => {
         content: 'Hello!, please explain the concept of artificial intelligence.',
       },
     ],
-    model: 'gpt-4.1',
+    model: 'gpt-5',
     options: {
       temperature: 0.9,
     },

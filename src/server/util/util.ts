@@ -22,12 +22,12 @@ export const getAllowedModels = (model: string): string[] => {
 
   // Logic: allowed models are selected by the pricing of the model
   // gpt-4o is the most expensive, so it is allowed for all
-  // gpt-4.1 is cheaper, so all models cheaper than it are allowed
+  // gpt-5 is cheaper, so all models cheaper than it are allowed
   // pricings: https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/?cdn=disable
 
   if (model === 'gpt-4o') return allModels
 
-  if (model === 'gpt-4.1') return ['gpt-4.1', 'gpt-4o-mini']
+  if (model === 'gpt-5') return ['gpt-5', 'gpt-4o-mini']
 
   if (model === 'mock') return ['mock']
 

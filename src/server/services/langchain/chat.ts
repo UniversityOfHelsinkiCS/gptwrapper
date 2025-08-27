@@ -17,19 +17,19 @@ import { MockModel } from './MockModel'
 type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
 
 const getChatModel = (model: string, tools: StructuredTool[], temperature: number): ChatModel => {
-  const deploymentName = validModels.find((m) => m.name === model)?.deployment
-  if (!deploymentName) {
+  const modelConfig = validModels.find((m) => m.name === model)
+  if (!modelConfig) {
     throw new Error(`Invalid model: ${model}`)
   }
 
   const chatModel =
-    deploymentName === 'mock'
+    modelConfig.name === 'mock'
       ? new MockModel({ tools, temperature })
       : new AzureChatOpenAI({
           model,
           azureOpenAIApiKey: AZURE_API_KEY,
           azureOpenAIApiVersion: '2023-05-15',
-          azureOpenAIApiDeploymentName: deploymentName,
+          azureOpenAIApiDeploymentName: model, // In Azure, always use the acual model name as the deployment name
           azureOpenAIApiInstanceName: AZURE_RESOURCE,
           temperature,
         }).bindTools(tools)

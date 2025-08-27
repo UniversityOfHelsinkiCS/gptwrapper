@@ -268,7 +268,7 @@ export const ChatV2 = () => {
         setActiveModel(defaultCourseModel ?? courseModels[0])
       }
     } else {
-      allowedModels = validModels.map((m) => m.name) // [gpt-4.1, gpt-4o, gpt-4o-mini, mock] 23.7.2025
+      allowedModels = validModels.map((m) => m.name) // [gpt-5, gpt-4o, gpt-4o-mini, mock] 23.7.2025
     }
 
     // Mock model is only visible to admins in production
