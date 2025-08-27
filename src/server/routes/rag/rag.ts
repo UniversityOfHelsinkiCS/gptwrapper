@@ -38,11 +38,11 @@ router.post('/indices', async (req, res) => {
     throw ApplicationError.Forbidden('Cannot create index, user is not responsible for the course')
   }
 
-  // Only TEST_COURSES allow multiple rag indices
+  // Only TEST_COURSES allow > 5 rag indices
   const isTestCourse = Object.values(TEST_COURSES).some((course) => course.id === chatInstance.courseId)
-  const hasRagIndex = (chatInstance.ragIndices?.length ?? 0) > 0
-  if (!isTestCourse && hasRagIndex) {
-    throw ApplicationError.Forbidden(`Cannot create index, index already exists on the course ${chatInstance.courseId}`)
+  const hasMaxRagIndices = (chatInstance.ragIndices?.length ?? 0) > 5
+  if (!isTestCourse && hasMaxRagIndices) {
+    throw ApplicationError.Forbidden(`Cannot create index, 5 already exists on the course ${chatInstance.courseId}`)
   }
 
   const ragIndex = await RagIndex.create({
