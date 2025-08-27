@@ -1,6 +1,5 @@
 import { Router } from 'express'
 import z from 'zod/v4'
-import { EMBED_DIM } from '../../../config'
 import { ChatInstance, ChatInstanceRagIndex, Enrolment, RagFile, RagIndex, Responsibility } from '../../db/models'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
@@ -14,12 +13,11 @@ const IndexCreationSchema = z.object({
   name: z.string().min(1).max(100),
   language: z.enum(['Finnish', 'English']).optional(),
   chatInstanceId: z.string().min(1).max(100),
-  dim: z.number().min(EMBED_DIM).max(EMBED_DIM).default(EMBED_DIM),
 })
 
 router.post('/indices', async (req, res) => {
   const { user } = req as RequestWithUser
-  const { name, dim, chatInstanceId, language } = IndexCreationSchema.parse(req.body)
+  const { name, chatInstanceId, language } = IndexCreationSchema.parse(req.body)
 
   const chatInstance = await ChatInstance.findByPk(chatInstanceId, {
     include: [
