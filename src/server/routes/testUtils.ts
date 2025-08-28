@@ -4,7 +4,6 @@ import { getTestUserHeaders, TEST_COURSES } from '../../shared/testData'
 import { ChatInstanceRagIndex, Enrolment, Prompt, RagIndex, Responsibility, User, UserChatInstanceUsage } from '../db/models'
 import { headersToUser } from '../middleware/user'
 import { ApplicationError } from '../util/ApplicationError'
-import { getCompletionEvents } from '../util/oldAzureClient'
 import logger from '../util/logger'
 import { Op } from 'sequelize'
 
@@ -107,31 +106,6 @@ router.post('/reset-test-data', async (req, res) => {
   logger.info('Test data reset successfully')
 
   res.status(200).json({ message: 'Test data reset successfully' })
-})
-
-router.post('/completions-api', async (req, res) => {
-  console.log('Starting Completions API')
-
-  const result = await getCompletionEvents({
-    messages: [
-      {
-        role: 'user',
-        // @ts-expect-error whatever
-        content: 'Hello!, please explain the concept of artificial intelligence.',
-      },
-    ],
-    model: 'gpt-5',
-    options: {
-      temperature: 0.9,
-    },
-  })
-
-  // @ts-expect-error whatever
-  for await (const chunk of result) {
-    console.log('Completions API chunk:', chunk)
-  }
-
-  console.log('Completions API result:', result)
 })
 
 export default router

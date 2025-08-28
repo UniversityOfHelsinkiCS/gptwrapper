@@ -11,7 +11,7 @@ import { accessIams } from '../util/config'
 import { ApplicationError } from '../util/ApplicationError'
 import { UserPreferencesSchema } from '../../shared/user'
 
-export const checkIamAccess = (iamGroups: string[]) => accessIams.some((iam) => iamGroups.includes(iam))
+const checkIamAccess = (iamGroups: string[]) => accessIams.some((iam) => iamGroups.includes(iam))
 
 const isNowOrInFuture = ({ chatInstance }: { chatInstance: ChatInstance }) =>
   chatInstance.usageLimit > 0 && new Date() <= new Date(chatInstance.activityPeriod.endDate)
@@ -44,7 +44,7 @@ userRouter.get('/login', async (req, res) => {
   // When acual user logs in, update the users info.
   if (!request.hijackedBy) {
     user.lastLoggedInAt = new Date()
-    ;[dbUser] = await User.upsert(user)
+      ;[dbUser] = await User.upsert(user)
   } else {
     dbUser = await User.findByPk(id)
 
