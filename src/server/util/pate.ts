@@ -1,5 +1,5 @@
 import { PATE_URL, API_TOKEN } from './config'
-import { inDevelopment } from '../../config'
+import { inDevelopment, inCI } from '../../config'
 import logger from './logger'
 
 const settings = {
@@ -28,6 +28,11 @@ const sendEmail = async (targets: string[], text: string, subject: string) => {
   const payloadSizeKb = Buffer.byteLength(payload, 'utf8') / 1024
 
   logger.info(`Sending email with payload size ${payloadSizeKb.toFixed(2)} KB`)
+
+  if (inCI) {
+    logger.info('Skipping email sending in CI')
+    return
+  }
 
   await fetch(`${PATE_URL}?token=${API_TOKEN}`, {
     method: 'POST',
