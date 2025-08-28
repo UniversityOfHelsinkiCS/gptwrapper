@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test'
 import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from './utils/test-helpers'
 import { TestByRole } from './fixtures'
+import { FREE_MODEL, validModels } from '../src/config'
 
 // Matrix of tests
 const testMatrix: { role: keyof typeof TestByRole; courses: (string | undefined)[] }[] = [
@@ -93,6 +94,11 @@ testMatrix.forEach((testConfig) => {
         await expect(page.getByTestId('user-message')).toContainText('tää tyhjennetään')
         await expect(page.getByTestId('assistant-message')).toContainText('OVER', { timeout: 6000 })
 
+        await sendChatMessage(page, 'ja tämä')
+
+        await expect(page.getByTestId('user-message')).toContainText('ja tämä')
+        await expect(page.getByTestId('assistant-message')).toContainText('OVER', { timeout: 6000 })
+
         page.on('dialog', (dialog) => dialog.accept())
         await page.getByTestId('empty-conversation-button').click()
 
@@ -154,7 +160,7 @@ testMatrix.forEach((testConfig) => {
         await expect(page.getByTestId('assistant-message').last()).toContainText('Temperature: 1')
       })
 
-      if (course)
+      if (course) {
         test('Course chat RAG feature', async ({ page }) => {
           await acceptDisclaimer(page)
           await useMockModel(page)
@@ -181,6 +187,20 @@ testMatrix.forEach((testConfig) => {
           // Three source items should be visible
           await expect(page.getByTestId('sources-truncated-item')).toHaveCount(3)
         })
+      }
+
+      if (!course) {
+        test('Every validModel is available in general chat', async ({ page }) => {
+          await acceptDisclaimer(page)
+          await page.getByTestId('model-selector').first().click()
+
+          const modelNames = validModels.map((modelConfig) => (modelConfig.name + FREE_MODEL === modelConfig.name ? ' (free)' : ''))
+
+          for (const name of modelNames) {
+            await expect(page.getByText(name, { exact: true }).first()).toBeVisible()
+          }
+        })
+      }
     })
   })
 })
