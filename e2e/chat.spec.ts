@@ -48,7 +48,7 @@ testMatrix.forEach((testConfig) => {
         await useMockModel(page)
       })
 
-      test('Chat v2 mock response works', async ({ page }) => {
+      test('One message works', async ({ page }) => {
         await acceptDisclaimer(page)
         await useMockModel(page)
 
@@ -58,6 +58,28 @@ testMatrix.forEach((testConfig) => {
 
         await expect(page.getByTestId('user-message')).toContainText('testinen morjens')
         await expect(page.getByTestId('assistant-message')).toContainText('You are calling mock endpoint for streaming mock data')
+      })
+
+      test('Multiple messages work', async ({ page }) => {
+        await acceptDisclaimer(page)
+        await useMockModel(page)
+
+        await sendChatMessage(page, 'say perkele')
+
+        await closeSendPreference(page)
+
+        await expect(page.getByTestId('user-message').first()).toContainText('say perkele')
+        await expect(page.getByTestId('assistant-message').first()).toContainText('perkele')
+
+        await sendChatMessage(page, 'say minttuista')
+
+        await expect(page.getByTestId('user-message').nth(1)).toContainText('say minttuista')
+        await expect(page.getByTestId('assistant-message').nth(1)).toContainText('minttuista')
+
+        await sendChatMessage(page, 'say settiä')
+
+        await expect(page.getByTestId('user-message').nth(2)).toContainText('say settiä')
+        await expect(page.getByTestId('assistant-message').nth(2)).toContainText('settiä')
       })
 
       test('Can empty conversation', async ({ page }) => {
@@ -76,6 +98,22 @@ testMatrix.forEach((testConfig) => {
 
         await expect(page.getByTestId('user-message')).not.toBeVisible()
         await expect(page.getByTestId('assistant-message')).not.toBeVisible()
+      })
+
+      test('Can save as email', async ({ page }) => {
+        await acceptDisclaimer(page)
+        await useMockModel(page)
+
+        await sendChatMessage(page, 'tää tyhjennetään')
+
+        await closeSendPreference(page)
+
+        await expect(page.getByTestId('user-message')).toContainText('tää tyhjennetään')
+        await expect(page.getByTestId('assistant-message')).toContainText('OVER', { timeout: 6000 })
+
+        await page.getByTestId('email-button').click()
+
+        await expect(page.getByText('Email sent')).toBeVisible()
       })
 
       test('Custom system prompt can be changed', async ({ page }) => {

@@ -31,6 +31,9 @@ export class MockModel extends FakeStreamingChatModel {
     } else if (firstSystemMessage && (firstSystemMessage.content as string).startsWith('mocktest')) {
       // testing a system message
       // Do nothing. FakeStreamingChatModel echoes the first message.
+    } else if (lastHumanMessage.startsWith('say ')) {
+      const msg = lastHumanMessage.replace('say ', '')
+      this.chunks = [new AIMessageChunk(msg)]
     } else if (lastHumanMessage.startsWith('rag')) {
       // Do a tool call
       this.chunks = toolCallChunks
