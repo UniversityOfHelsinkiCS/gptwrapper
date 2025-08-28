@@ -63,7 +63,10 @@
   },
   "footer": {
     "contactSupport": "Contact support: <mailTo>{{supportEmail}}</mailTo>",
-    "version": "Version {{version}}"
+    "server": "Server version {{version}}",
+    "client": "Client version {{version}}",
+    "uptime": "Uptime: {{uptime}}",
+    "mismatch": "Reload for latest changes"
   },
   "chat": {
     "start": "Start the conversation by sending a message...",

@@ -63,7 +63,10 @@
   },
   "footer": {
     "contactSupport": "Ota yhteyttä tukeen: <mailTo>{{supportEmail}}</mailTo>",
-    "version": "Versio {{version}} - julkaistu {{publishedAgo}}"
+    "server": "Palvelinversio {{version}}",
+    "client": "Selainversio {{version}}",
+    "uptime": "Uptime: {{uptime}}",
+    "mismatch": "Lataa sivu uudelleen"
   },
   "chat": {
     "start": "Aloita keskustelu lähettämällä viesti...",

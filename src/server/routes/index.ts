@@ -17,7 +17,6 @@ import emailRouter from './email'
 import adminRouter from './admin'
 import facultyRouter from './faculty'
 import infoTextRouter from './infotext'
-import changeLogRouter from './changeLog'
 import feedbackRouter from './feedback'
 import testUtilsRouter from './testUtils'
 import { inProduction } from '../../config'
@@ -54,7 +53,6 @@ router.use('/email', emailRouter)
 router.use('/admin', adminRouter)
 router.use('/faculties', facultyRouter)
 router.use('/infotexts', infoTextRouter)
-router.use('/changelog', changeLogRouter)
 router.use('/feedback', feedbackRouter)
 
 Sentry.setupExpressErrorHandler(router)

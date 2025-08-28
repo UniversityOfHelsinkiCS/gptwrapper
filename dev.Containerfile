@@ -4,6 +4,9 @@ ENV TZ="Europe/Helsinki"
 
 WORKDIR /opt/app-root/src
 
+ENV VERSION=development
+ENV VITE_VERSION=development
+
 COPY package* ./
 RUN npm i
 

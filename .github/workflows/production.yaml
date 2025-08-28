@@ -28,6 +28,7 @@ jobs:
             BASE_PATH=/chat
             GIT_SHA=${{ github.sha }}
             STAGING=false
+            VERSION=${{ github.ref_name }}
           extra-args: --ulimit nofile=4096:4096
 
       - name: Push to quay.io

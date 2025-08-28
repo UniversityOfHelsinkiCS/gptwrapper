@@ -57,6 +57,7 @@ export interface User {
   isStatsViewer: boolean
   termsAcceptedAt?: string | null
   preferences?: UserPreferences
+  serverVersion?: string
 }
 
 export type Prompt = {

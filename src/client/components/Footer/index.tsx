@@ -2,11 +2,9 @@ import { Box, Typography, Link } from '@mui/material'
 import { Trans, useTranslation } from 'react-i18next'
 
 import toskaColor from '../../assets/toscalogo_color.svg'
-import { useQuery } from '@tanstack/react-query'
-import { maxBy } from 'lodash'
-import { Release } from '../../../shared/types'
-import { formatDistanceToNow } from 'date-fns'
+import { formatDistanceToNow, formatDuration, interval } from 'date-fns'
 import { locales } from '../../locales/locales'
+import useCurrentUser from '../../hooks/useCurrentUser'
 
 const supportEmail = 'opetusteknologia@helsinki.fi'
 
@@ -21,16 +19,11 @@ const styles = {
 
 const Footer = () => {
   const { t, i18n } = useTranslation()
+  const { user } = useCurrentUser()
 
-  const { data: changelog } = useQuery<Release[]>({
-    queryKey: ['/changelog'],
-    select: (data) => {
-      const last = maxBy(data, (d) => Date.parse(d.time))
-      return last ? [last] : []
-    },
-  })
-
-  const publishedAgo = formatDistanceToNow(changelog?.[0]?.time ?? new Date().getTime(), { addSuffix: true, locale: locales[i18n.language] })
+  const uptime = formatDistanceToNow(user?.lastRestart ?? Date.now(), { locale: locales[i18n.language] })
+  const serverVersion = user?.serverVersion
+  const clientVersion = import.meta.env.VITE_VERSION as string | undefined
 
   return (
     <Box
@@ -50,8 +43,13 @@ const Footer = () => {
               }}
             />
           </Typography>
-          <Box display="flex" gap="1rem">
-            <Typography variant="caption">{t('footer:version', { version: changelog?.[0]?.version, publishedAgo })}</Typography>
+          <Box display="flex" gap="1rem" mt="1rem">
+            <Box display="flex" flexDirection="column">
+              <Typography variant="caption">{t('footer:server', { version: serverVersion })}</Typography>
+              <Typography variant="caption">{t('footer:client', { version: clientVersion })}</Typography>
+              {user?.isAdmin && <Typography variant="caption">{t('footer:uptime', { uptime })}</Typography>}
+              {serverVersion !== clientVersion && <Typography variant="caption">{t('footer:mismatch')}</Typography>}
+            </Box>
             <Link href="https://toska.dev" target="_blank" rel="noopener" underline="hover">
               <img src={toskaColor} alt="Toska" width="40" />
             </Link>

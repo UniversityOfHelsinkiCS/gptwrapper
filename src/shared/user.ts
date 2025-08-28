@@ -22,4 +22,5 @@ export interface User {
   isStatsViewer: boolean
   preferences?: UserPreferences
   lastLoggedInAt?: Date
+  serverVersion?: string
 }

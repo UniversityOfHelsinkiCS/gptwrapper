@@ -69,7 +69,10 @@
   },
   "footer": {
     "contactSupport": "Kontakta support: <mailTo>{{supportEmail}}</mailTo>",
-    "version": "Version {{version}}"
+    "server": "Server version {{version}}",
+    "client": "Klient version {{version}}",
+    "uptime": "Uptime: {{uptime}}",
+    "mismatch": "Ladda sida om"
   },
   "chat": {
     "start": "Starta konversationen genom att skicka ett meddelande...",

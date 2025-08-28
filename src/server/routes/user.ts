@@ -68,6 +68,7 @@ userRouter.get('/login', async (req, res) => {
     usage,
     hasIamAccess: isAdmin || hasIamAccess,
     lastRestart,
+    serverVersion: process.env.VERSION,
     enrolledCourses: enrolledCourses.filter(isNowOrInFuture).map((enrollment) => enrollment.chatInstance),
     termsAcceptedAt: termsAccepted?.termsAcceptedAt,
   })
