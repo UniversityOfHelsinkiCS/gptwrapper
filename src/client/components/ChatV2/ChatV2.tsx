@@ -33,7 +33,6 @@ import { OutlineButtonBlack } from './general/Buttons'
 import { ChatInfo } from './general/ChatInfo'
 import RagSelector from './RagSelector'
 import { SettingsModal } from './SettingsModal'
-import { TestUseInfoV2 } from './TestUseInfo'
 import { useChatStream } from './useChatStream'
 import { getCompletionStreamV3 } from './util'
 
@@ -435,8 +434,6 @@ export const ChatV2 = () => {
           }}
           ref={scrollRef}
         >
-          {user?.preferences?.chatVersion !== 2 && <TestUseInfoV2 />}
-
           {course?.saveDiscussions && (
             <Paper
               variant="outlined"

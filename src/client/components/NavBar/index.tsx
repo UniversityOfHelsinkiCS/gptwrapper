@@ -117,16 +117,6 @@ const NavItems = ({ user, t, languages, handleLanguageChange, language, vertical
 
   return (
     <>
-      {user.preferences?.chatVersion !== 2 && (
-        <NavItemButton to="/v2" path="v2/*" current={pathname} icon={<GradeOutlined sx={styles.icon} />} vertical={vertical}>
-          {t('tryNew')}
-        </NavItemButton>
-      )}
-      {user.preferences?.chatVersion !== 1 && (
-        <NavItemButton to="/v1" path="v1/*" current={pathname} icon={<GradeOutlined sx={styles.icon} />} vertical={vertical}>
-          {t('useOld')}
-        </NavItemButton>
-      )}
       {user.enrolledCourses.length > 0 && (
         <NavItemButton to="/chats" path="chats/*" current={pathname} icon={<BookmarksOutlined sx={styles.icon} />} vertical={vertical}>
           {t('chats')}

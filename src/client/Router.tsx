@@ -4,7 +4,6 @@ import { createBrowserRouter, createRoutesFromElements, Navigate, Route, RouterP
 import { PUBLIC_URL } from '../config'
 import App from './App'
 import Admin from './components/Admin'
-import Chat from './components/Chat'
 import Chats from './components/Chats'
 import { ChatV2 } from './components/ChatV2/ChatV2'
 import Courses from './components/Courses'
@@ -16,28 +15,24 @@ import Rag from './components/Rag/Rag'
 import { RagFile } from './components/Rag/RagFile'
 import { RagIndex } from './components/Rag/RagIndex'
 import Statistics from './components/Statistics'
-import useCurrentUser from './hooks/useCurrentUser'
 
 const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
 
 const PreferenceRedirect = () => {
-  const { user } = useCurrentUser()
   const { courseId } = useParams()
-  const chatVersion = user?.preferences?.chatVersion ?? 1
-  return <Navigate to={(chatVersion === 1 ? '/v1' : '/v2') + (courseId ? `/${courseId}` : '')} replace />
+  return <Navigate to={'/v2' + (courseId ? `/${courseId}` : '')} replace />
 }
 
 const router = sentryCreateBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />} ErrorBoundary={ErrorPage}>
       <Route index element={<PreferenceRedirect />} />
-      <Route path="/v1" element={<Chat />} />
+      <Route path="/v1" element={<Navigate to="/v2" replace />} />
       <Route path="/v2" element={<ChatV2 />} />
 
       <Route path="/:courseId" element={<PreferenceRedirect />} />
       <Route path="/v2/:courseId" element={<ChatV2 />} />
-      <Route path="/v1/:courseId" element={<Chat />} />
-
+      <Route path="/v1/:courseId" element={<Navigate to="/v2:courseId" replace />} />
       <Route path="/courses" element={<Courses />} />
       <Route path="/courses/:id/*" element={<Course />} />
       <Route path="/admin/*" element={<Admin />} />

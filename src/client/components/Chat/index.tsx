@@ -21,7 +21,6 @@ import useUserStatus from '../../hooks/useUserStatus'
 import { handleCompletionStreamError } from './error'
 import PromptSelector from './PromptSelector'
 import TokenUsageWarning from './TokenUsageWarning'
-import { TestUseInfoV1 } from '../ChatV2/TestUseInfo'
 import useCurrentUser from '../../hooks/useCurrentUser'
 
 const WAIT_FOR_STREAM_TIMEOUT = 4000
@@ -298,11 +297,11 @@ const Chat = () => {
         userConsent
           ? []
           : [
-              {
-                role: 'user',
-                content: message + (file ? '\n\nFile content:\n\n' : ''),
-              },
-            ],
+            {
+              role: 'user',
+              content: message + (file ? '\n\nFile content:\n\n' : ''),
+            },
+          ],
       ),
       model,
       formData,
@@ -364,7 +363,6 @@ const Chat = () => {
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Banner disclaimer={disclaimer} />
       {course && <CourseInfo course={course} />}
-      {(user?.preferences?.chatVersion ?? 1) !== 1 && <TestUseInfoV1 />}
       <Box sx={{ mb: 3 }} />
 
       {hasPrompts && <PromptSelector prompts={course.prompts} activePrompt={activePromptId} setActivePrompt={handleChangePrompt} />}

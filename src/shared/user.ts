@@ -2,7 +2,6 @@ import { z } from 'zod/v4'
 
 export const UserPreferencesSchema = z
   .object({
-    chatVersion: z.number().min(1).max(2).default(1),
     sendShortcutMode: z.enum(['shift+enter', 'enter']).default('shift+enter'),
   })
   .partial()
