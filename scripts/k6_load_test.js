@@ -71,7 +71,7 @@ function handleTokens(tokenizedStr) {
 }
 
 export default function () {
-  const url = `${staging}/v2`
+  const url = `${staging}/`
   let prevResponseId = ''
 
   for (const message of messages) {

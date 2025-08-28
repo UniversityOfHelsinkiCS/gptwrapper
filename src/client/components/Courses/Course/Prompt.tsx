@@ -29,7 +29,7 @@ const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptTyp
   const [updatedName, setUpdatedName] = useState(name)
   const [updatedHidden, setUpdatedHidden] = useState(hidden)
   const [updatedMandatory, setUpdatedMandatory] = useState(mandatory)
-  const chatPath = `/v2/${courseId}?promptId=${id}`
+  const chatPath = `/${courseId}?promptId=${id}`
   const directLink = `${window.location.origin}${PUBLIC_URL}/${chatPath}`
 
   const handleSave = async () => {
@@ -107,7 +107,7 @@ const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptTyp
             {!editPrompt ? (
               <>
                 <Box width="80%">
-                  <SystemMessage system={systemMessage} setSystem={() => { }} showInfo={false} disabled />
+                  <SystemMessage system={systemMessage} setSystem={() => {}} showInfo={false} disabled />
                 </Box>
                 <Box>
                   {messages.map(({ role, content }, index) => (

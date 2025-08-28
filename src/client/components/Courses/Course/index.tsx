@@ -49,7 +49,7 @@ const Course = () => {
 
   if (userLoading || !user || !isCourseSuccess) return null
 
-  const studentLink = `${window.location.origin}${PUBLIC_URL}/v2/${chatInstance.courseId}`
+  const studentLink = `${window.location.origin}${PUBLIC_URL}/${chatInstance.courseId}`
 
   const amongResponsibles = chatInstance.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user.id) : false
 

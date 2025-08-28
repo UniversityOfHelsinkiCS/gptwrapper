@@ -4,7 +4,7 @@ import { acceptDisclaimer, closeSendPreference, sendChatMessage } from './utils/
 
 test.describe('Prompts', () => {
   test('Custom prompt text works', async ({ page }) => {
-    await page.goto('/v2')
+    await page.goto('/')
 
     await acceptDisclaimer(page)
 
@@ -66,7 +66,7 @@ test.describe('Prompts', () => {
     await page.getByTestId('settings-button').click()
 
     // The prompt is active.
-    expect(page.getByText(newPromptName)).toBeVisible()
+    await expect(page.getByText(newPromptName)).toBeVisible()
 
     // When prompt selector is opened, it is also visible in the list, so 2 times:
     await page.getByTestId('prompt-selector-button').click()
@@ -106,7 +106,7 @@ test.describe('Prompts', () => {
 
   test('Own prompts work in course chat and normal chat', async ({ page }) => {
     // First create own prompt in course chat view
-    await page.goto('/v2/test-course')
+    await page.goto('/test-course')
     await acceptDisclaimer(page)
     await page.getByTestId('settings-button').click()
 
@@ -127,7 +127,7 @@ test.describe('Prompts', () => {
     await expect(page.getByText(newPromptName, { exact: true })).toHaveCount(2) // Visible in the button and in the menu list
 
     // Now go to normal chat
-    await page.goto('/v2')
+    await page.goto('/')
     await page.getByTestId('settings-button').click()
 
     // Own prompt is visible in normal chat

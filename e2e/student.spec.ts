@@ -4,7 +4,7 @@ import { studentTest as test } from './fixtures'
 
 test.describe('Student', () => {
   test('Enrolled chat works', async ({ page }) => {
-    await page.goto('/v2/test-course')
+    await page.goto('/test-course')
     await acceptDisclaimer(page)
 
     await page.getByTestId('model-selector').first().click()
@@ -19,17 +19,17 @@ test.describe('Student', () => {
 
   test('is sent to chats page from general chat', async ({ page }) => {
     // Tries to access general chat
-    await page.goto('/v2')
+    await page.goto('/')
     // Student is sent to chats page
-    await expect(page).not.toHaveURL(/v2\/sandbox/)
+    await expect(page).not.toHaveURL(/sandbox/)
     await expect(page).toHaveURL(/chats/)
   })
 
   test('is sent to chats page from non-enrolled course', async ({ page }) => {
     // Tries to access sandbox course
-    await page.goto('/v2/sandbox')
+    await page.goto('/sandbox')
     // Student is sent to chats page
-    await expect(page).not.toHaveURL(/v2\/sandbox/)
+    await expect(page).not.toHaveURL(/sandbox/)
     await expect(page).toHaveURL(/chats/)
   })
 })

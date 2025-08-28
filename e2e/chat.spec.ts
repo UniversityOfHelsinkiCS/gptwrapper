@@ -16,7 +16,7 @@ testMatrix.forEach((testConfig) => {
   testConfig.courses.forEach((course) => {
     test.describe(`${course ? `Course` : 'General'} chat test for ${testConfig.role}`, () => {
       test.beforeEach(async ({ page }) => {
-        await page.goto(`/v2/${course || ''}`)
+        await page.goto(`/${course || ''}`)
       })
 
       test('Disclaimer is visible', async ({ page }) => {
@@ -87,17 +87,17 @@ testMatrix.forEach((testConfig) => {
         await acceptDisclaimer(page)
         await useMockModel(page)
 
-        await sendChatMessage(page, 'tää tyhjennetään')
+        await sendChatMessage(page, 'say minttujam')
 
         await closeSendPreference(page)
 
-        await expect(page.getByTestId('user-message')).toContainText('tää tyhjennetään')
-        await expect(page.getByTestId('assistant-message')).toContainText('OVER', { timeout: 6000 })
+        await expect(page.getByTestId('user-message')).toContainText('say minttujam')
+        await expect(page.getByTestId('assistant-message')).toContainText('minttujam')
 
-        await sendChatMessage(page, 'ja tämä')
+        await sendChatMessage(page, 'say minttujam2')
 
-        await expect(page.getByTestId('user-message')).toContainText('ja tämä')
-        await expect(page.getByTestId('assistant-message')).toContainText('OVER', { timeout: 6000 })
+        await expect(page.getByTestId('user-message').nth(1)).toContainText('say minttujam2')
+        await expect(page.getByTestId('assistant-message').nth(1)).toContainText('minttujam2')
 
         page.on('dialog', (dialog) => dialog.accept())
         await page.getByTestId('empty-conversation-button').click()
