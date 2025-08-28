@@ -18,21 +18,22 @@ import Statistics from './components/Statistics'
 
 const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
 
-const PreferenceRedirect = () => {
+const CourseRedirect = () => {
   const { courseId } = useParams()
-  return <Navigate to={'/v2' + (courseId ? `/${courseId}` : '')} replace />
+  return <Navigate to={`/${courseId}`} replace />
 }
 
 const router = sentryCreateBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />} ErrorBoundary={ErrorPage}>
-      <Route index element={<PreferenceRedirect />} />
-      <Route path="/v1" element={<Navigate to="/v2" replace />} />
-      <Route path="/v2" element={<ChatV2 />} />
+      <Route index element={<ChatV2 />} />
+      <Route path="/v1" element={<Navigate to="/" replace />} />
+      <Route path="/v2" element={<Navigate to="/" />} />
 
-      <Route path="/:courseId" element={<PreferenceRedirect />} />
-      <Route path="/v2/:courseId" element={<ChatV2 />} />
-      <Route path="/v1/:courseId" element={<Navigate to="/v2:courseId" replace />} />
+
+      <Route path="/:courseId" element={<ChatV2 />} />
+      <Route path="/v2/:courseId" element={<CourseRedirect />} />
+      <Route path="/v1/:courseId" element={<CourseRedirect />} />
       <Route path="/courses" element={<Courses />} />
       <Route path="/courses/:id/*" element={<Course />} />
       <Route path="/admin/*" element={<Admin />} />
