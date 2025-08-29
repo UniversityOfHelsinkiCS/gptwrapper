@@ -1,11 +1,12 @@
-import { DeleteOutline, KeyboardArrowDown, Lock } from '@mui/icons-material'
-import { Box, Button, Divider, IconButton, ListSubheader, Menu, MenuItem } from '@mui/material'
+import { DeleteOutline, KeyboardArrowDown, Lock, AutoAwesome } from '@mui/icons-material'
+import { Box, Divider, IconButton, ListSubheader, Menu, MenuItem } from '@mui/material'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Prompt } from '../../types'
 import { OutlineButtonBlack } from './general/Buttons'
 
 const PromptSelector = ({
+  sx = {},
   coursePrompts,
   myPrompts,
   activePrompt,
@@ -13,11 +14,12 @@ const PromptSelector = ({
   handleDeletePrompt,
   mandatoryPrompt,
 }: {
+  sx?: object
   coursePrompts: Prompt[]
   myPrompts: Prompt[]
   activePrompt?: Prompt
   setActivePrompt: (prompt: Prompt | undefined) => void
-  handleDeletePrompt: (prompt: Prompt) => void
+  handleDeletePrompt?: ((prompt: Prompt) => void)
   mandatoryPrompt?: Prompt
   urlPrompt?: Prompt
 }) => {
@@ -32,12 +34,15 @@ const PromptSelector = ({
 
   const handleDelete = (event: React.MouseEvent<HTMLButtonElement>, prompt: Prompt) => {
     event.stopPropagation()
-    if (confirm(t('settings:confirmDeletePrompt', { name: prompt.name }))) handleDeletePrompt(prompt)
+    if (handleDeletePrompt)
+      if (confirm(t('settings:confirmDeletePrompt', { name: prompt.name }))) handleDeletePrompt(prompt)
   }
 
   return (
-    <Box mb={'0.5rem'}>
+    <Box sx={{ marginBottom: '0.5rem' }}>
       <OutlineButtonBlack
+        sx={sx}
+        startIcon={<AutoAwesome />}
         data-testid="prompt-selector-button"
         disabled={!!mandatoryPrompt}
         onClick={(event) => {
@@ -48,8 +53,17 @@ const PromptSelector = ({
         {activePrompt?.name ?? t('settings:choosePrompt')}
         {!!mandatoryPrompt && ` - ${t('settings:promptLocked')}`}
       </OutlineButtonBlack>
-
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+        slotProps={{
+          paper: {
+            style: {
+              minWidth: anchorEl?.offsetWidth || 200,
+            },
+          },
+        }}>
         <MenuItem onClick={() => handleSelect(undefined)}>{t('settings:default')}</MenuItem>
         {coursePrompts.length > 0 && (
           <>
@@ -70,9 +84,11 @@ const PromptSelector = ({
               <MenuItem key={prompt.id} selected={prompt.id === activePrompt?.id} onClick={() => handleSelect(prompt)}>
                 <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                   {prompt.name}
-                  <IconButton onClick={(event) => handleDelete(event, prompt)} size="small" sx={{ ml: 'auto' }}>
-                    <DeleteOutline fontSize="small" />
-                  </IconButton>
+                  {handleDeletePrompt &&
+                    <IconButton onClick={(event) => handleDelete(event, prompt)} size="small" sx={{ ml: 'auto' }}>
+                      <DeleteOutline fontSize="small" />
+                    </IconButton>
+                  }
                 </Box>
               </MenuItem>
             ))}

@@ -1,6 +1,6 @@
-import { Add, Close, Settings } from '@mui/icons-material'
+import { Add, Close } from '@mui/icons-material'
 import { Box, IconButton, Modal, Slider, Typography } from '@mui/material'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL_TEMPERATURE } from '../../../config'
 import type { Course, Prompt } from '../../types'
@@ -12,11 +12,10 @@ import apiClient from '../../util/apiClient'
 import { useSearchParams } from 'react-router-dom'
 import { BlueButton, OutlineButtonBlack } from './general/Buttons'
 import { useAnalyticsDispatch } from '../../stores/analytics'
-import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { isAxiosError } from 'axios'
 import { SendPreferenceConfiguratorButton } from './SendPreferenceConfigurator'
 
-const useUrlPromptId = () => {
+export const useUrlPromptId = () => {
   const [searchParams] = useSearchParams()
   const promptId = searchParams.get('promptId')
   return promptId

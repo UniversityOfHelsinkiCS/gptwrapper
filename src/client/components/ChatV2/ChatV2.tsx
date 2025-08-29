@@ -1,6 +1,7 @@
-import { ArrowDownward, ChevronLeft, MenuBookTwoTone, Tune } from '@mui/icons-material'
+import { ArrowDownward, ChevronLeft, MenuBookTwoTone, Tune, WidthFull } from '@mui/icons-material'
 import HelpIcon from '@mui/icons-material/Help'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
+
 import { Alert, Box, Drawer, Fab, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
 import type { TFunction } from 'i18next'
 import { enqueueSnackbar } from 'notistack'
@@ -32,9 +33,13 @@ import ToolResult from './ToolResult'
 import { OutlineButtonBlack } from './general/Buttons'
 import { ChatInfo } from './general/ChatInfo'
 import RagSelector from './RagSelector'
-import { SettingsModal } from './SettingsModal'
+import { SettingsModal, useUrlPromptId } from './SettingsModal'
 import { useChatStream } from './useChatStream'
 import { getCompletionStreamV3 } from './util'
+import PromptSelector from './PromptSelector'
+import { useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
+import apiClient from '../../util/apiClient'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -384,6 +389,8 @@ export const ChatV2 = () => {
               setRagIndexId={setRagIndexId}
               ragIndices={ragIndices}
               messages={messages}
+              activePrompt={activePrompt}
+              setActivePrompt={setActivePrompt}
             />
           </Drawer>
         ) : (
@@ -403,6 +410,8 @@ export const ChatV2 = () => {
             setRagIndexId={setRagIndexId}
             ragIndices={ragIndices}
             messages={messages}
+            activePrompt={activePrompt}
+            setActivePrompt={setActivePrompt}
           />
         ))}
 
@@ -594,6 +603,8 @@ const LeftMenu = ({
   setRagIndexId,
   ragIndices,
   messages,
+  activePrompt,
+  setActivePrompt,
 }: {
   sx?: object
   course?: Course
@@ -607,7 +618,15 @@ const LeftMenu = ({
   setRagIndexId: React.Dispatch<React.SetStateAction<number | undefined>>
   ragIndices?: RagIndexAttributes[]
   messages: Message[]
+  activePrompt: Prompt | undefined
+  setActivePrompt: (prompt: Prompt | undefined) => void
 }) => {
+  const urlPromptId = useUrlPromptId()
+  const { data: myPrompts, refetch } = useQuery<Prompt[]>({
+    queryKey: ['/prompts/my-prompts'],
+    initialData: [],
+  })
+
   return (
     <Box
       sx={[
@@ -637,6 +656,15 @@ const LeftMenu = ({
           <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} data-testid="help-button">
             {t('info:title')}
           </OutlineButtonBlack>
+          <PromptSelector
+            sx={{ width: '100%' }}
+            coursePrompts={course?.prompts ?? []}
+            myPrompts={myPrompts}
+            activePrompt={activePrompt}
+            setActivePrompt={setActivePrompt}
+            mandatoryPrompt={course?.prompts.find((p) => p.mandatory)}
+            urlPrompt={course?.prompts.find((p) => p.id === urlPromptId)}
+          />
           {course && showRagSelector && (
             <>
               <Typography variant="h6" sx={{ mb: 1, display: 'flex', gap: 1, alignItems: 'center' }} fontWeight="bold">
