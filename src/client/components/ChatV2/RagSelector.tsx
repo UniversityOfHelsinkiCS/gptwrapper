@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import { Box, MenuItem, Menu, Typography } from '@mui/material'
+import { Box, MenuItem, Menu } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { useState } from 'react'
 import { RagIndexAttributes } from '../../../shared/types'
 import { OutlineButtonBlack } from './general/Buttons'
+import { MenuBook } from '@mui/icons-material'
 
 const RagSelector = ({
   currentRagIndex,

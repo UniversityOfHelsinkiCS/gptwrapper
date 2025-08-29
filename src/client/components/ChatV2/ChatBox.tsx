@@ -4,13 +4,12 @@ import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import SettingsIcon from '@mui/icons-material/Settings'
-import { Box, Chip, IconButton, TextField, Tooltip, Typography, FormControlLabel, Switch, Alert } from '@mui/material'
+import { Box, Chip, IconButton, TextField, Tooltip, Typography, Alert } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useRef } from 'react'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import ModelSelector from './ModelSelector'
 import { BlueButton, GrayButton, OutlineButtonBlack } from './general/Buttons'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import useCurrentUser from '../../hooks/useCurrentUser'
@@ -19,10 +18,8 @@ import { KeyCombinations, useKeyboardCommands } from './useKeyboardCommands'
 
 export const ChatBox = ({
   disabled,
-  currentModel,
   fileInputRef,
   fileName,
-  availableModels,
   tokenUsageWarning,
   tokenUsageAlertOpen,
   saveConsent,
@@ -32,7 +29,6 @@ export const ChatBox = ({
   saveChat,
   notOptoutSaving,
   setFileName,
-  setModel,
   handleCancel,
   handleContinue,
   handleSubmit,
@@ -40,10 +36,8 @@ export const ChatBox = ({
   isMobile,
 }: {
   disabled: boolean
-  currentModel: string
   fileInputRef: React.RefObject<HTMLInputElement>
   fileName: string
-  availableModels: string[]
   tokenUsageWarning: string
   tokenUsageAlertOpen: boolean
   saveConsent: boolean
@@ -53,7 +47,6 @@ export const ChatBox = ({
   saveChat: boolean
   notOptoutSaving: boolean
   setFileName: (name: string) => void
-  setModel: (model: string) => void
   handleCancel: () => void
   handleContinue: (message: string) => void
   handleSubmit: (message: string) => void
@@ -77,13 +70,12 @@ export const ChatBox = ({
 
   const { t } = useTranslation()
 
-  const [isModelSelectorOpen, setIsModelSelectorOpen] = useState<boolean>(false)
-  useKeyboardCommands({
-    resetChat: handleReset,
-    openModelSelector: () => {
-      setIsModelSelectorOpen(true)
-    },
-  }) // @todo what key combination to open model selector
+  // useKeyboardCommands({
+  //   resetChat: handleReset,
+  //   openModelSelector: () => {
+  //     setIsModelSelectorOpen(true)
+  //   },
+  // }) // @todo what key combination to open model selector
 
   const isShiftEnterSend = user?.preferences?.sendShortcutMode === 'shift+enter' || !user?.preferences?.sendShortcutMode
 
@@ -245,23 +237,7 @@ export const ChatBox = ({
                 </IconButton>
               </Tooltip>
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
-              {!isEmbedded && (
-                <ModelSelector
-                  currentModel={currentModel}
-                  setModel={setModel}
-                  availableModels={availableModels}
-                  isTokenLimitExceeded={isTokenLimitExceeded}
-                  isOpen={isModelSelectorOpen}
-                  setIsOpen={(open) => {
-                    setIsModelSelectorOpen(open)
-                    if (!open) {
-                      setTimeout(() => textFieldRef.current?.focus(), 0) // setTimeout required here...
-                    }
-                  }}
-                />
-              )}
             </Box>
-
             <Tooltip title={disabled ? t('chat:cancelResponse') : isShiftEnterSend ? t('chat:shiftEnterSend') : t('chat:enterSend')} arrow placement="top">
               <IconButton type={disabled ? 'button' : 'submit'} ref={sendButtonRef} data-testid="send-chat-message">
                 {disabled ? <StopIcon /> : <Send />}

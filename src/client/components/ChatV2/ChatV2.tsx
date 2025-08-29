@@ -40,6 +40,7 @@ import PromptSelector from './PromptSelector'
 import { useQuery } from '@tanstack/react-query'
 import { useMutation } from '@tanstack/react-query'
 import apiClient from '../../util/apiClient'
+import ModelSelector from './ModelSelector'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -391,6 +392,9 @@ export const ChatV2 = () => {
               messages={messages}
               activePrompt={activePrompt}
               setActivePrompt={setActivePrompt}
+              currentModel={activeModel}
+              setModel={setActiveModel}
+              availableModels={allowedModels}
             />
           </Drawer>
         ) : (
@@ -412,6 +416,9 @@ export const ChatV2 = () => {
             messages={messages}
             activePrompt={activePrompt}
             setActivePrompt={setActivePrompt}
+            currentModel={activeModel}
+            setModel={setActiveModel}
+            availableModels={allowedModels}
           />
         ))}
 
@@ -493,8 +500,6 @@ export const ChatV2 = () => {
         >
           <ChatBox
             disabled={isStreaming}
-            currentModel={activeModel}
-            availableModels={allowedModels}
             fileInputRef={fileInputRef}
             fileName={fileName}
             setFileName={setFileName}
@@ -506,7 +511,6 @@ export const ChatV2 = () => {
             tokenUsageAlertOpen={tokenUsageAlertOpen}
             saveChat={!!course && course.saveDiscussions}
             notOptoutSaving={!!course && course.notOptoutSaving}
-            setModel={(model) => setActiveModel(model)}
             handleCancel={handleCancel}
             handleContinue={(newMessage) => handleSubmit(newMessage, true)}
             handleSubmit={(newMessage) => {
@@ -605,6 +609,10 @@ const LeftMenu = ({
   messages,
   activePrompt,
   setActivePrompt,
+  currentModel,
+  setModel,
+  availableModels,
+
 }: {
   sx?: object
   course?: Course
@@ -620,12 +628,25 @@ const LeftMenu = ({
   messages: Message[]
   activePrompt: Prompt | undefined
   setActivePrompt: (prompt: Prompt | undefined) => void
+
+  currentModel: string
+  setModel: (model: string) => void
+  availableModels: string[]
 }) => {
+  const { courseId } = useParams()
+  const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
+  const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
+  const [isOpen, setIsOpen] = useState<boolean>(false)
   const urlPromptId = useUrlPromptId()
-  const { data: myPrompts, refetch } = useQuery<Prompt[]>({
+  const { data: myPrompts } = useQuery<Prompt[]>({
     queryKey: ['/prompts/my-prompts'],
     initialData: [],
   })
+
+  useEffect(() => {
+    if (!userStatus) return
+    setIsTokenLimitExceeded(userStatus.usage > userStatus.limit)
+  }, [statusLoading, userStatus])
 
   return (
     <Box
@@ -648,14 +669,12 @@ const LeftMenu = ({
           <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} data-testid="empty-conversation-button">
             {t('chat:emptyConversation')}
           </OutlineButtonBlack>
-
-          <EmailButton messages={messages} disabled={!messages?.length} />
-          <OutlineButtonBlack startIcon={<Tune />} onClick={() => setSettingsModalOpen(true)} data-testid="settings-button">
-            {t('chat:settings')}
-          </OutlineButtonBlack>
-          <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} data-testid="help-button">
-            {t('info:title')}
-          </OutlineButtonBlack>
+          <ModelSelector
+            currentModel={currentModel}
+            setModel={setModel}
+            availableModels={availableModels}
+            isTokenLimitExceeded={isTokenLimitExceeded}
+          />
           <PromptSelector
             sx={{ width: '100%' }}
             coursePrompts={course?.prompts ?? []}
@@ -665,6 +684,13 @@ const LeftMenu = ({
             mandatoryPrompt={course?.prompts.find((p) => p.mandatory)}
             urlPrompt={course?.prompts.find((p) => p.id === urlPromptId)}
           />
+          <EmailButton messages={messages} disabled={!messages?.length} />
+          <OutlineButtonBlack startIcon={<Tune />} onClick={() => setSettingsModalOpen(true)} data-testid="settings-button">
+            {t('chat:settings')}
+          </OutlineButtonBlack>
+          <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} data-testid="help-button">
+            {t('info:title')}
+          </OutlineButtonBlack>
           {course && showRagSelector && (
             <>
               <Typography variant="h6" sx={{ mb: 1, display: 'flex', gap: 1, alignItems: 'center' }} fontWeight="bold">

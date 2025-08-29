@@ -39,7 +39,7 @@ const PromptSelector = ({
   }
 
   return (
-    <Box sx={{ marginBottom: '0.5rem' }}>
+    <Box>
       <OutlineButtonBlack
         sx={sx}
         startIcon={<AutoAwesome />}
