@@ -9,7 +9,7 @@ import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom'
 import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
 import { PUBLIC_URL } from '../config'
 import { Feedback } from './components/Feedback'
-import NavBar from './components/NavBar'
+import NavBar, { EmbeddedNavBar } from './components/NavBar'
 import { AppContext } from './contexts/AppContext'
 import { EmbeddedProvider, useIsEmbedded } from './contexts/EmbeddedContext'
 import useCurrentUser from './hooks/useCurrentUser'
@@ -111,7 +111,7 @@ const Layout = () => {
         }}
         ref={appRef}
       >
-        {!isEmbedded && <NavBar />}
+        {isEmbedded ? <EmbeddedNavBar /> : <NavBar />}
         <Box sx={{ flex: 1, mt: '4rem' }}>
           <Content />
         </Box>

@@ -21,13 +21,32 @@ import {
   useMediaQuery,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Language, AdminPanelSettingsOutlined, BookmarksOutlined, GradeOutlined } from '@mui/icons-material'
+import { Language, AdminPanelSettingsOutlined, BookmarksOutlined, GradeOutlined, OpenInNew } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import MenuIcon from '@mui/icons-material/Menu'
 
 import useCurrentUser from '../../hooks/useCurrentUser'
 import hyLogo from '../../assets/hy_logo.svg'
 import styles from './styles'
+
+export const EmbeddedNavBar = () => {
+  const { t } = useTranslation()
+
+  return (
+    <MuiLink
+      to="/"
+      sx={{ display: 'flex', alignItems: 'center', color: 'inherit', textDecoration: 'none', position: 'fixed', top: 0, left: 0, p: 1, zIndex: 1000 }}
+      component={Link}
+      target="_blank"
+    >
+      <img src={hyLogo} alt="University of Helsinki" width="18" />
+      <Box mx="1rem">
+        <Typography sx={{ ...styles.appName, fontSize: '1.1rem' }}>{t('appName')}</Typography>
+      </Box>
+      <OpenInNew sx={{ fontSize: '1.1rem' }} />
+    </MuiLink>
+  )
+}
 
 const NavBar = () => {
   const { t, i18n } = useTranslation()
