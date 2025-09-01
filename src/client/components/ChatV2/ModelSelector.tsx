@@ -53,7 +53,11 @@ const ModelSelector = ({
         }}
       >
         {availableModels.map((model) => (
-          <MenuItem key={model} value={model} onClick={() => handleSelect(model)} disabled={isTokenLimitExceeded && model !== FREE_MODEL}>
+          <MenuItem
+            key={model}
+            value={model}
+            onClick={() => handleSelect(model)} disabled={isTokenLimitExceeded && model !== FREE_MODEL}
+            data-testid={`${model}-option`}>
             <Typography>
               {model}
               {model === FREE_MODEL && (

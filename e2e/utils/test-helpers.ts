@@ -18,5 +18,5 @@ export const sendChatMessage = async (page: Page, message: string) => {
 
 export const useMockModel = async (page: Page) => {
   await page.getByTestId('model-selector').first().click()
-  await page.getByRole('option', { name: 'mock' }).click()
+  await page.getByTestId('mock-option').first().click()
 }
