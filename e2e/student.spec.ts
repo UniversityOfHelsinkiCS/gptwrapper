@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { acceptDisclaimer, closeSendPreference, sendChatMessage } from './utils/test-helpers'
+import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from './utils/test-helpers'
 import { studentTest as test } from './fixtures'
 
 test.describe('Student', () => {
@@ -7,8 +7,7 @@ test.describe('Student', () => {
     await page.goto('/test-course')
     await acceptDisclaimer(page)
 
-    await page.getByTestId('model-selector').first().click()
-    await page.getByRole('option', { name: 'mock' }).click()
+    await useMockModel(page)
 
     await sendChatMessage(page, 'testinen morjens')
     await closeSendPreference(page)
