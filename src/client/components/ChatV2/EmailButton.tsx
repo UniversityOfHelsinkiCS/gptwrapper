@@ -141,11 +141,10 @@ const formatEmail = (messages: Message[], t: any): string => {
       const formattedContent = role === 'assistant' ? formatEmailContent(content) : escapeHtml(content)
 
       return `
-      <div style="padding: 2rem; ${
-        role === 'user'
+      <div style="padding: 2rem; ${role === 'user'
           ? 'background: #efefef; margin-left: 100px; border-radius: 0.6rem; box-shadow: 0px 2px 2px rgba(0,0,0,0.2); white-space: pre-wrap; word-break: break-word; '
           : 'margin-right: 2rem;'
-      }">
+        }">
         <h3 style="font-style: italic; margin: 0; ${role === 'user' ? 'color: rgba(0, 0, 0, 0.8)' : 'color: #107eab'}">${t(`email:${role}`)}:</h3>
         ${formattedContent}
       </div>

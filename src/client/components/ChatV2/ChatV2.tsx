@@ -636,7 +636,6 @@ const LeftMenu = ({
   const { courseId } = useParams()
   const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
   const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
-  const [isOpen, setIsOpen] = useState<boolean>(false)
   const urlPromptId = useUrlPromptId()
   const { data: myPrompts } = useQuery<Prompt[]>({
     queryKey: ['/prompts/my-prompts'],

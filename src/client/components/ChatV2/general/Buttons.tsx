@@ -26,6 +26,12 @@ const BaseButton = styled(Button)({
   '& .MuiButton-startIcon > *:nth-of-type(1)': {
     fontSize: '22px',
   },
+  '& .MuiButton-endIcon': {
+    fontSize: '22px',
+    margin: 0,
+    position: 'absolute',
+    right: '1rem',
+  },
   '&:has(.MuiButton-startIcon)': {
     paddingLeft: '2.75rem',
   },
