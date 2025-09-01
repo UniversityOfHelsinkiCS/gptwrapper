@@ -62,12 +62,11 @@ test.describe('Prompts', () => {
 
     // Now in chat view
     await acceptDisclaimer(page)
-    await page.getByTestId('settings-button').click()
 
     // The prompt is active.
-    await expect(page.getByText(newPromptName)).toBeVisible()
+    await expect(page.getByTestId('prompt-selector-button').first()).toContainText(newPromptName)
 
-    // When prompt selector is opened, it is also visible in the list, so 2 times:
+    // When prompt selector is opened, it is also visible in the list, so 2 times.
     await page.getByTestId('prompt-selector-button').click()
     expect(await page.getByText(newPromptName).count()).toBe(2)
 
@@ -96,7 +95,6 @@ test.describe('Prompts', () => {
 
     // Go to student view from link
     await page.getByText('To student view').click()
-    await page.getByTestId('settings-button').click()
     await page.getByTestId('prompt-selector-button').click()
 
     // Prompt is not visible anymore in student view.
@@ -108,26 +106,28 @@ test.describe('Prompts', () => {
     await page.goto('/test-course')
     await acceptDisclaimer(page)
     await page.getByTestId('settings-button').click()
+    const modal = page.getByTestId('settings-modal')
 
     // Fill system message input
     const newPromptName = `test-own-prompt-${test.info().workerIndex}`
     const newPromptContent = `mocktest ${newPromptName} works`
-    await page.getByTestId('assistant-instructions-input').fill(newPromptContent)
+    await modal.getByTestId('assistant-instructions-input').fill(newPromptContent)
 
     // Save as own prompt
-    await page.getByTestId('save-my-prompt-button').click()
+    await modal.getByTestId('save-my-prompt-button').click()
     await page.getByTestId('save-my-prompt-name').fill(newPromptName)
     await page.getByTestId('save-my-prompt-submit').click()
 
     // It is active now with the correct name
-    await expect(page.getByTestId('prompt-selector-button')).toContainText(newPromptName)
-    await page.getByTestId('prompt-selector-button').click()
+    await expect(modal.getByTestId('prompt-selector-button')).toContainText(newPromptName)
+    // Close settings and check sidebar
+    await modal.getByTestId('close-settings').click()
+    await page.getByTestId('prompt-selector-button').first().click()
     await expect(page.getByText('My prompts')).toBeVisible()
     await expect(page.getByText(newPromptName, { exact: true })).toHaveCount(2) // Visible in the button and in the menu list
 
     // Now go to normal chat
     await page.goto('/')
-    await page.getByTestId('settings-button').click()
 
     // Own prompt is visible in normal chat
     await page.getByTestId('prompt-selector-button').click()
@@ -137,10 +137,11 @@ test.describe('Prompts', () => {
 
     // Activate it
     await ownPromptInMenu.click()
-    await expect(page.getByTestId('assistant-instructions-input')).toHaveValue(newPromptContent)
 
-    // Close settings
-    await page.keyboard.press('Escape')
+    // Check its content
+    await page.getByTestId('settings-button').click()
+    await expect(page.getByTestId('assistant-instructions-input')).toHaveValue(newPromptContent)
+    await page.getByTestId('close-settings').click()
 
     // Send message, response should echo the prompt
     await sendChatMessage(page, 'testinen morjens')

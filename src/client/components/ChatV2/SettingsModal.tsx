@@ -164,7 +164,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   }
 
   return (
-    <Modal open={open} onClose={handleClose}>
+    <Modal open={open} onClose={handleClose} data-testid="settings-modal">
       <Box
         sx={{
           position: 'absolute',
@@ -188,7 +188,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <IconButton
           onClick={handleClose}
           sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500', background: '#FFF', opacity: 0.9, zIndex: 1 }}
-          id="close-settings"
+          data-testid="close-settings"
         >
           <Close />
         </IconButton>

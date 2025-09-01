@@ -19,7 +19,7 @@ const PromptSelector = ({
   myPrompts: Prompt[]
   activePrompt?: Prompt
   setActivePrompt: (prompt: Prompt | undefined) => void
-  handleDeletePrompt?: ((prompt: Prompt) => void)
+  handleDeletePrompt?: (prompt: Prompt) => void
   mandatoryPrompt?: Prompt
   urlPrompt?: Prompt
 }) => {
@@ -34,8 +34,7 @@ const PromptSelector = ({
 
   const handleDelete = (event: React.MouseEvent<HTMLButtonElement>, prompt: Prompt) => {
     event.stopPropagation()
-    if (handleDeletePrompt)
-      if (confirm(t('settings:confirmDeletePrompt', { name: prompt.name }))) handleDeletePrompt(prompt)
+    if (handleDeletePrompt) if (confirm(t('settings:confirmDeletePrompt', { name: prompt.name }))) handleDeletePrompt(prompt)
   }
 
   return (
@@ -43,7 +42,7 @@ const PromptSelector = ({
       <OutlineButtonBlack
         sx={sx}
         startIcon={<AutoAwesome />}
-        data-testid={`prompt-selector-button-${activePrompt}`}
+        data-testid={`prompt-selector-button`}
         disabled={!!mandatoryPrompt}
         onClick={(event) => {
           setAnchorEl(event.currentTarget)
@@ -63,7 +62,8 @@ const PromptSelector = ({
               minWidth: anchorEl?.offsetWidth || 200,
             },
           },
-        }}>
+        }}
+      >
         <MenuItem onClick={() => handleSelect(undefined)}>{t('settings:default')}</MenuItem>
         {coursePrompts.length > 0 && (
           <>
@@ -84,11 +84,11 @@ const PromptSelector = ({
               <MenuItem key={prompt.id} selected={prompt.id === activePrompt?.id} onClick={() => handleSelect(prompt)}>
                 <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                   {prompt.name}
-                  {handleDeletePrompt &&
+                  {handleDeletePrompt && (
                     <IconButton onClick={(event) => handleDelete(event, prompt)} size="small" sx={{ ml: 'auto' }}>
                       <DeleteOutline fontSize="small" />
                     </IconButton>
-                  }
+                  )}
                 </Box>
               </MenuItem>
             ))}
