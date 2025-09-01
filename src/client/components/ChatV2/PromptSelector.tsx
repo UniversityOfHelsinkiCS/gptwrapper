@@ -43,7 +43,7 @@ const PromptSelector = ({
       <OutlineButtonBlack
         sx={sx}
         startIcon={<AutoAwesome />}
-        data-testid="prompt-selector-button"
+        data-testid={`prompt-selector-button-${activePrompt}`}
         disabled={!!mandatoryPrompt}
         onClick={(event) => {
           setAnchorEl(event.currentTarget)
