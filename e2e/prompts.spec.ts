@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test'
 import { teacherTest as test } from './fixtures'
-import { acceptDisclaimer, closeSendPreference, sendChatMessage } from './utils/test-helpers'
+import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from './utils/test-helpers'
 
 test.describe('Prompts', () => {
   test('Custom prompt text works', async ({ page }) => {
@@ -9,8 +9,7 @@ test.describe('Prompts', () => {
     await acceptDisclaimer(page)
 
     // Select mock model
-    await page.getByTestId('model-selector').first().click()
-    await page.getByRole('option', { name: 'mock' }).click()
+    await useMockModel(page)
 
     // Open settings
     await page.getByTestId('settings-button').click()
