@@ -282,7 +282,8 @@
     "canOptOut": "Det är inte möjligt att välja bort att spara diskussionerna",
     "directPromptLink": "Länk för att chatta med denna prompt aktiv",
     "copyDirectPromptLinkInfo": "Kopiera en länk för att chatta med denna prompt aktiv",
-    "isSavedOptOut": "Kursdiskussionerna sparas anonymt om du ger tillstånd till detta. Sparade diskussioner kan användas för forskningsändamål."
+    "isSavedOptOut": "Kursdiskussionerna sparas anonymt om du ger tillstånd till detta. Sparade diskussioner kan användas för forskningsändamål.",
+    "settings": "kursinställningar"
   },
   "tooltip": {
     "copied": "Kopierad!"

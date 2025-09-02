@@ -295,7 +295,8 @@
     "remove": "remove",
     "customResponsibility": "manually added",
     "add": "add",
-    "sourceMaterials": "Source materials"
+    "sourceMaterials": "Source materials",
+    "settings": "course settings"
   },
   "tooltip": {
     "copied": "Copied!"

@@ -23,7 +23,7 @@ export const ChatInfo = ({ course }: { course: Course }) => {
       <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {course?.name[language] || 'undefined course'}
         {(user.isAdmin && amongResponsibles) && (<Link href={`/courses/${course.courseId}`}>
-          <Settings />
+          <Typography variant="body2">{t('course:settings')}</Typography>
         </Link>)
         }
       </Typography>

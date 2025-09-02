@@ -295,7 +295,8 @@
     "remove": "poista",
     "customResponsibility": "manuaalisesti lisätty",
     "add": "lisää",
-    "sourceMaterials": "Lähdemateriaalit"
+    "sourceMaterials": "Lähdemateriaalit",
+    "settings": "kurssin asetukset"
   },
   "tooltip": {
     "copied": "Kopioitu!"
