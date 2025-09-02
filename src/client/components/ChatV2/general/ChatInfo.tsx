@@ -5,6 +5,7 @@ import { formatDate } from '../../Courses/util'
 import { Settings } from '@mui/icons-material'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import useCourse from '../../../hooks/useCourse'
+import { PUBLIC_URL } from '../../../../config'
 
 export const ChatInfo = ({ course }: { course: Course }) => {
   const { user } = useCurrentUser()
@@ -22,7 +23,7 @@ export const ChatInfo = ({ course }: { course: Course }) => {
       </Typography>
       <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {course?.name[language] || 'undefined course'}
-        {(user.isAdmin && amongResponsibles) && (<Link href={`/courses/${course.courseId}`}>
+        {(user.isAdmin && amongResponsibles) && (<Link href={`${PUBLIC_URL}/courses/${course.courseId}`}>
           <Typography variant="body2">{t('course:settings')}</Typography>
         </Link>)
         }
