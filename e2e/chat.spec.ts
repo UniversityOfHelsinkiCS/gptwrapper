@@ -38,10 +38,10 @@ testMatrix.forEach((testConfig) => {
       test('Settings can be opened and closed', async ({ page }) => {
         await acceptDisclaimer(page)
         await page.getByTestId('settings-button').click()
-        await expect(page.locator('#close-settings')).toBeVisible()
+        await expect(page.getByTestId('close-settings')).toBeVisible()
 
         await page.keyboard.press('Escape')
-        await expect(page.locator('#close-settings')).not.toBeVisible()
+        await expect(page.getByTestId('close-settings')).not.toBeVisible()
       })
 
       test('Can select model', async ({ page }) => {
