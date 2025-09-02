@@ -3,7 +3,7 @@ import { type CreationOptional, DataTypes, type InferAttributes, type InferCreat
 import type { CustomMessage } from '../../types'
 import { sequelize } from '../connection'
 
-export const PromptTypeValues = ['CHAT_INSTANCE', 'PERSONAL', 'RAG_INDEX'] as const
+export const PromptTypeValues = ['CHAT_INSTANCE', 'PERSONAL'] as const
 export type PromptType = (typeof PromptTypeValues)[number]
 
 class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prompt>> {

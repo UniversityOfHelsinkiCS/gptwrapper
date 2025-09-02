@@ -4,7 +4,7 @@ import { ChatInstance, Prompt, RagIndex, Responsibility } from '../db/models'
 import type { RequestWithUser } from '../types'
 import type { User } from '../../shared/user'
 import { ApplicationError } from '../util/ApplicationError'
-import { InferAttributes } from 'sequelize'
+import type { InferAttributes } from 'sequelize'
 
 const promptRouter = express.Router()
 
@@ -51,6 +51,7 @@ const PromptUpdateableParams = z.object({
   systemMessage: z.string().max(20_000),
   hidden: z.boolean().default(false),
   mandatory: z.boolean().default(false),
+  ragIndexId: z.number().min(1).optional(),
 })
 
 const PromptCreationParams = z.intersection(
@@ -73,11 +74,6 @@ const PromptCreationParams = z.intersection(
     z.object({
       type: z.literal('PERSONAL'),
     }),
-    z.object({
-      type: z.literal('RAG_INDEX'),
-      ragIndexId: z.number().min(1),
-      chatInstanceId: z.string().min(1).optional(),
-    }),
   ]),
 )
 
@@ -98,14 +94,6 @@ const getPotentialNameConflicts = async (prompt: InferAttributes<Prompt, { omit:
         attributes: ['id', 'name'],
         where: {
           userId: prompt.userId,
-        },
-      })
-    }
-    case 'RAG_INDEX': {
-      return Prompt.findAll({
-        attributes: ['id', 'name'],
-        where: {
-          ragIndexId: prompt.ragIndexId,
         },
       })
     }
@@ -138,31 +126,10 @@ const authorizeChatInstancePromptResponsible = async (user: User, prompt: ChatIn
   }
 }
 
-interface RagIndexPrompt {
-  ragIndexId: number
-  chatInstanceId?: string
-}
-
-const authorizeRagIndexPromptResponsible = async (user: User, prompt: RagIndexPrompt) => {
-  const ragIndex = await RagIndex.findByPk(prompt.ragIndexId)
-  const isAuthor = ragIndex?.userId === user.id
-
-  if (!isAuthor && !user.isAdmin) {
-    if (!prompt.chatInstanceId) {
-      throw ApplicationError.Forbidden('Not allowed')
-    }
-    await authorizeChatInstancePromptResponsible(user, prompt as ChatInstancePrompt)
-  }
-}
-
 const authorizePromptCreation = async (user: User, promptParams: PromptCreationParamsType) => {
   switch (promptParams.type) {
     case 'CHAT_INSTANCE': {
       await authorizeChatInstancePromptResponsible(user, promptParams)
-      break
-    }
-    case 'RAG_INDEX': {
-      await authorizeRagIndexPromptResponsible(user, promptParams)
       break
     }
     case 'PERSONAL': {
@@ -172,6 +139,9 @@ const authorizePromptCreation = async (user: User, promptParams: PromptCreationP
         throw ApplicationError.Forbidden('Maximum number of prompts reached')
       }
       break
+    }
+    default: {
+      throw ApplicationError.InternalServerError('Unknown prompt type')
     }
   }
 }
@@ -200,15 +170,14 @@ const authorizePromptUpdate = async (user: User, prompt: Prompt) => {
       await authorizeChatInstancePromptResponsible(user, prompt as ChatInstancePrompt)
       break
     }
-    case 'RAG_INDEX': {
-      await authorizeRagIndexPromptResponsible(user, prompt as RagIndexPrompt)
-      break
-    }
     case 'PERSONAL': {
       if (user.id !== prompt.userId) {
         throw ApplicationError.Forbidden('Not allowed')
       }
       break
+    }
+    default: {
+      throw ApplicationError.InternalServerError('Unknown prompt type')
     }
   }
 }
@@ -234,7 +203,7 @@ promptRouter.put('/:id', async (req, res) => {
   const { id } = req.params
   const { user } = req as unknown as RequestWithUser
   const updates = PromptUpdateableParams.parse(req.body)
-  const { systemMessage, name, hidden, mandatory } = updates
+  const { systemMessage, name, hidden, mandatory, ragIndexId } = updates
 
   const prompt = await Prompt.findByPk(id)
 
@@ -249,6 +218,7 @@ promptRouter.put('/:id', async (req, res) => {
     throw ApplicationError.Conflict('Prompt name already exists')
   }
 
+  prompt.ragIndexId = ragIndexId
   prompt.systemMessage = systemMessage
   prompt.name = name
   prompt.hidden = hidden
@@ -263,7 +233,14 @@ promptRouter.get('/:id', async (req, res) => {
   const { id } = req.params
 
   // Note: we dont have any authorization checks here. Consider?
-  const prompt = await Prompt.findByPk(id)
+  const prompt = await Prompt.findByPk(id, {
+    include: [
+      {
+        model: RagIndex,
+        as: 'ragIndex',
+      },
+    ],
+  })
 
   if (!prompt) {
     // We dont throw error here, since this is expected behaviour when the prompt has been deleted but someone still has it in their local storage.
