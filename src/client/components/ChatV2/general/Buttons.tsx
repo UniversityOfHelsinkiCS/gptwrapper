@@ -19,21 +19,15 @@ const BaseButton = styled(Button)({
   minWidth: 'fit-content',
   '& .MuiButton-startIcon': {
     fontSize: '22px',
-    margin: 0,
-    position: 'absolute',
-    left: '1rem',
   },
   '& .MuiButton-startIcon > *:nth-of-type(1)': {
     fontSize: '22px',
   },
   '& .MuiButton-endIcon': {
     fontSize: '22px',
-    margin: 0,
-    position: 'absolute',
-    right: '1rem',
   },
-  '&:has(.MuiButton-startIcon)': {
-    paddingLeft: '2.75rem',
+  '&:has(.MuiButton-startIcon):has(.MuiButton-endIcon)': {
+    justifyContent: 'space-between',
   },
   '&.Mui-disabled': {
     backgroundColor: '#e0e0e0',
