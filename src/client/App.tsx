@@ -132,7 +132,7 @@ const Content = () => {
   if (isLoading && !onNoAccessPage) return <CircularProgress sx={{ margin: 'auto' }} />
 
   if (!onNoAccessPage && !hasAccess(user, courseId)) {
-    return <Navigate to={PUBLIC_URL + getRedirect(user)} />
+    return <Navigate to={getRedirect(user)} />
   }
 
   if (!user && !onNoAccessPage) return null
