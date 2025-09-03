@@ -23,6 +23,8 @@ import Discussion from './Discussions'
 import { ApiErrorView } from '../../common/ApiErrorView'
 import apiClient from '../../../util/apiClient'
 import { ActionUserSearch } from '../../Admin/UserSearch'
+import { useCourseRagIndices } from '../../../hooks/useRagIndices'
+import RagSelector, { RagSelectorDescription } from '../../ChatV2/RagSelector'
 
 const Course = () => {
   const [showTeachers, setShowTeachers] = useState(false)
@@ -320,11 +322,13 @@ const AssignedResponsibilityManagement = ({ responsibility, handleRemove }) => {
 
 const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceId: string }) => {
   const { t } = useTranslation()
+  const { ragIndices } = useCourseRagIndices(courseId)
   const [name, setName] = useState('')
   const [system, setSystem] = useState('')
   const [messages, setMessages] = useState<MessageType[]>([])
   const [hidden, setHidden] = useState(false)
   const [mandatory, setMandatory] = useState(false)
+  const [ragIndexId, setRagIndexId] = useState<number | undefined>(undefined)
 
   const createMutation = useCreatePromptMutation()
   const deleteMutation = useDeletePromptMutation()
@@ -351,6 +355,7 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
         messages,
         hidden,
         mandatory,
+        ragIndexId,
       })
       enqueueSnackbar('Prompt created', { variant: 'success' })
       handleReset()
@@ -397,7 +402,7 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
 
         <Conversation messages={messages} completion="" />
 
-        <Box sx={{ paddingBottom: 2 }}>
+        <Box sx={{ py: 2, display: 'flex', alignItems: 'start' }}>
           {!mandatoryPromptId ? (
             <FormControlLabel
               control={<Checkbox checked={mandatory} onChange={() => setMandatory((prev) => !prev)} />}
@@ -411,6 +416,12 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
           )}
           <FormControlLabel control={<Checkbox value={hidden} onChange={() => setHidden((prev) => !prev)} />} label={t('hidePrompt')} />
         </Box>
+        {ragIndices && (
+          <div>
+            <RagSelectorDescription />
+            <RagSelector ragIndices={ragIndices} setRagIndex={setRagIndexId} currentRagIndex={ragIndices.find((rag) => rag.id === ragIndexId)} />
+          </div>
+        )}
         <Button variant="contained" onClick={handleSave} sx={{ mr: 2 }}>
           {t('common:save')}
         </Button>

@@ -13,6 +13,7 @@ interface NewPromptData {
   messages: Message[]
   hidden: boolean
   mandatory: boolean
+  ragIndexId: number | undefined
 }
 
 export const useCreatePromptMutation = () => {

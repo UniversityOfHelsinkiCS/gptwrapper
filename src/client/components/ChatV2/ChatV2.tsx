@@ -32,14 +32,12 @@ import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
 import { OutlineButtonBlack } from './general/Buttons'
 import { ChatInfo } from './general/ChatInfo'
-import RagSelector from './RagSelector'
+import RagSelector, { RagSelectorDescription } from './RagSelector'
 import { SettingsModal, useUrlPromptId } from './SettingsModal'
 import { useChatStream } from './useChatStream'
 import { getCompletionStreamV3 } from './util'
 import PromptSelector from './PromptSelector'
 import { useQuery } from '@tanstack/react-query'
-import { useMutation } from '@tanstack/react-query'
-import apiClient from '../../util/apiClient'
 import ModelSelector from './ModelSelector'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
@@ -382,7 +380,6 @@ export const ChatV2 = () => {
               onClose={() => {
                 setChatLeftSidePanelOpen(false)
               }}
-              t={t}
               setSettingsModalOpen={setSettingsModalOpen}
               setDisclaimerStatus={setDisclaimerStatus}
               showRagSelector={showRagSelector}
@@ -406,7 +403,6 @@ export const ChatV2 = () => {
             }}
             course={course}
             handleReset={handleReset}
-            t={t}
             setSettingsModalOpen={setSettingsModalOpen}
             setDisclaimerStatus={setDisclaimerStatus}
             showRagSelector={showRagSelector}
@@ -599,7 +595,6 @@ const LeftMenu = ({
   course,
   handleReset,
   onClose,
-  t,
   setSettingsModalOpen,
   setDisclaimerStatus,
   showRagSelector,
@@ -612,13 +607,11 @@ const LeftMenu = ({
   currentModel,
   setModel,
   availableModels,
-
 }: {
   sx?: object
   course?: Course
   handleReset: () => void
   onClose?: () => void
-  t: TFunction
   setSettingsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
   setDisclaimerStatus: React.Dispatch<React.SetStateAction<boolean>>
   showRagSelector: boolean
@@ -628,11 +621,11 @@ const LeftMenu = ({
   messages: Message[]
   activePrompt: Prompt | undefined
   setActivePrompt: (prompt: Prompt | undefined) => void
-
   currentModel: string
   setModel: (model: string) => void
   availableModels: string[]
 }) => {
+  const { t } = useTranslation()
   const { courseId } = useParams()
   const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
   const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
@@ -668,12 +661,7 @@ const LeftMenu = ({
           <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} data-testid="empty-conversation-button">
             {t('chat:emptyConversation')}
           </OutlineButtonBlack>
-          <ModelSelector
-            currentModel={currentModel}
-            setModel={setModel}
-            availableModels={availableModels}
-            isTokenLimitExceeded={isTokenLimitExceeded}
-          />
+          <ModelSelector currentModel={currentModel} setModel={setModel} availableModels={availableModels} isTokenLimitExceeded={isTokenLimitExceeded} />
           <PromptSelector
             sx={{ width: '100%' }}
             coursePrompts={course?.prompts ?? []}
@@ -692,13 +680,7 @@ const LeftMenu = ({
           </OutlineButtonBlack>
           {course && showRagSelector && (
             <>
-              <Typography variant="h6" sx={{ mb: 1, display: 'flex', gap: 1, alignItems: 'center' }} fontWeight="bold">
-                <MenuBookTwoTone />
-                {t('chat:sources')}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                {t('settings:sourceDescription')}
-              </Typography>
+              <RagSelectorDescription />
               <RagSelector currentRagIndex={ragIndex} setRagIndex={setRagIndexId} ragIndices={ragIndices ?? []} />
             </>
           )}

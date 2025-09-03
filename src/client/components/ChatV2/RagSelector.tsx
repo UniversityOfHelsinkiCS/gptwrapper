@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import { Box, MenuItem, Menu } from '@mui/material'
+import { Box, MenuItem, Menu, Typography } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { useState } from 'react'
 import { RagIndexAttributes } from '../../../shared/types'
 import { OutlineButtonBlack } from './general/Buttons'
-import { MenuBook } from '@mui/icons-material'
+import { MenuBook, MenuBookTwoTone } from '@mui/icons-material'
 
 const RagSelector = ({
   currentRagIndex,
@@ -69,6 +69,22 @@ const RagSelector = ({
         ))}
       </Menu>
     </Box>
+  )
+}
+
+export const RagSelectorDescription = () => {
+  const { t } = useTranslation()
+
+  return (
+    <>
+      <Typography variant="h6" sx={{ mb: 1, display: 'flex', gap: 1, alignItems: 'center' }} fontWeight="bold">
+        <MenuBookTwoTone />
+        {t('chat:sources')}
+      </Typography>
+      <Typography variant="body2" sx={{ mb: 2 }}>
+        {t('settings:sourceDescription')}
+      </Typography>
+    </>
   )
 }
 
