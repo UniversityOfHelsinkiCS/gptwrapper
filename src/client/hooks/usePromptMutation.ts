@@ -1,16 +1,17 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { Message, Prompt } from '../types'
+import type { Prompt } from '../types'
 import queryClient from '../util/queryClient'
 import { queryKey } from './usePrompts'
 import apiClient from '../util/apiClient'
+import type { ChatMessage } from '../../shared/chat'
 
 interface NewPromptData {
   chatInstanceId: string
   type: 'CHAT_INSTANCE' | 'PERSONAL' | 'RAG_INDEX'
   name: string
   systemMessage: string
-  messages: Message[]
+  messages: ChatMessage[]
   hidden: boolean
   mandatory: boolean
   ragIndexId: number | undefined

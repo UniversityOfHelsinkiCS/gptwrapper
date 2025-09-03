@@ -1,10 +1,10 @@
-import type { Message } from '../../types'
+import type { ChatMessage } from '../../../shared/chat'
 import { postAbortableStream } from '../../util/apiClient'
 
 interface GetCompletionStreamProps {
   courseId?: string
   assistantInstructions: string
-  messages: Message[]
+  messages: ChatMessage[]
   model: string
   formData: FormData
   ragIndexId?: number
@@ -55,7 +55,7 @@ export const getCompletionStream = async ({
 interface GetCompletionStreamPropsV3 {
   courseId?: string
   systemMessage: string
-  messages: Message[]
+  messages: ChatMessage[]
   model: string
   formData: FormData
   ragIndexId?: number

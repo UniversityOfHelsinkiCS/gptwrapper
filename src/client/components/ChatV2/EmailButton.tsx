@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 import useCurrentUser from '../../hooks/useCurrentUser'
-import type { Message } from '../../types'
+import type { ChatMessage } from '../../../shared/chat'
 import { sendEmail } from '../../util/email'
 import { OutlineButtonBlack } from './general/Buttons'
 
@@ -135,16 +135,17 @@ const formatEmailContent = (content: string): string => {
   }
 }
 
-const formatEmail = (messages: Message[], t: any): string => {
+const formatEmail = (messages: ChatMessage[], t: any): string => {
   const emailContent = messages
     .map(({ role, content }) => {
       const formattedContent = role === 'assistant' ? formatEmailContent(content) : escapeHtml(content)
 
       return `
-      <div style="padding: 2rem; ${role === 'user'
+      <div style="padding: 2rem; ${
+        role === 'user'
           ? 'background: #efefef; margin-left: 100px; border-radius: 0.6rem; box-shadow: 0px 2px 2px rgba(0,0,0,0.2); white-space: pre-wrap; word-break: break-word; '
           : 'margin-right: 2rem;'
-        }">
+      }">
         <h3 style="font-style: italic; margin: 0; ${role === 'user' ? 'color: rgba(0, 0, 0, 0.8)' : 'color: #107eab'}">${t(`email:${role}`)}:</h3>
         ${formattedContent}
       </div>
@@ -171,7 +172,7 @@ const formatEmail = (messages: Message[], t: any): string => {
 `
 }
 
-const EmailButton = ({ messages, disabled }: { messages: Message[]; disabled: boolean }) => {
+const EmailButton = ({ messages, disabled }: { messages: ChatMessage[]; disabled: boolean }) => {
   const { t } = useTranslation()
   const { user, isLoading } = useCurrentUser()
 

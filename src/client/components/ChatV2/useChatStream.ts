@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import type { Message } from '../../types'
-import type { ChatEvent, ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
+import type { AssistantMessage, ChatEvent, ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
 
 type ToolCallState = ToolCallStatusEvent
 
@@ -10,7 +9,7 @@ export const useChatStream = ({
   onError,
   onText,
 }: {
-  onComplete: ({ previousResponseId, message }: { previousResponseId: string | undefined; message: Message }) => void
+  onComplete: ({ previousResponseId, message }: { previousResponseId: string | undefined; message: AssistantMessage }) => void
   onToolCallComplete: (toolResult: ToolCallResultEvent) => void
   onError: (error: unknown) => void
   onText: () => void

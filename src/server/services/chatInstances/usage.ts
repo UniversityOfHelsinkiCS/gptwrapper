@@ -2,13 +2,12 @@ import { Tiktoken } from '@dqbd/tiktoken'
 
 import { DEFAULT_TOKEN_LIMIT, FREE_MODEL } from '../../../config'
 import { tikeIam } from '../../util/config'
-import type { StreamingOptions } from '../../types'
 import type { User as UserType } from '../../../shared/user'
 import { ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../../db/models'
 import { getAllowedModels } from '../../util/util'
 import logger from '../../util/logger'
 import { ApplicationError } from '../../util/ApplicationError'
-import { Message } from '../../../shared/llmTypes'
+import type { Message } from '../../../shared/chat'
 
 export const getUsage = async (userId: string) => {
   const user = await User.findByPk(userId, {

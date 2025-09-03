@@ -3,10 +3,10 @@ import { Box, Button, Paper, Stack, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import type { Message, Role } from '../../types'
 import CopyToClipboardButton from './CopyToClipboardButton'
+import { ChatMessage, ChatRole } from '../../../shared/chat'
 
-export const Response = ({ role, content, setMessage, id }: { role: Role; content: string; setMessage?: any; id: string }) => {
+export const Response = ({ role, content, setMessage, id }: { role: ChatRole; content: string; setMessage?: any; id: string }) => {
   const isUser = role === 'user'
 
   //Formats input string to have correctly formatted spaces and linebreaks.
@@ -57,7 +57,7 @@ const Conversation = ({
   handleStop = () => {},
   setMessage,
 }: {
-  messages: Message[]
+  messages: ChatMessage[]
   completion: string
   handleStop?: () => void
   setMessage?: any

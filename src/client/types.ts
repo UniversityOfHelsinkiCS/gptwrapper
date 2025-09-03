@@ -1,18 +1,12 @@
-import type { ToolCallResultEvent, ToolCallStatusEvent } from '../shared/chat'
-import { ChatToolDef } from '../shared/tools'
+import type { ChatMessage } from '../shared/chat'
 import type { UserPreferences } from '../shared/user'
 
+/*
+ * Important: This file contains types used in the client, but we should consider moving them to shared.
+ * Before adding new types, consider whether they are already defined in shared or if they should be moved there.
+ */
+
 export type SetState<T> = React.Dispatch<React.SetStateAction<T>>
-
-export type Role = 'system' | 'assistant' | 'user'
-
-export interface Message {
-  role: Role
-  content: string
-  error?: string
-  attachements?: string
-  toolCalls?: Record<string, ToolCallResultEvent>
-}
 
 interface Term {
   label: Locales[]
@@ -65,10 +59,10 @@ export type Prompt = {
   name: string
   chatInstanceId: string
   systemMessage: string
-  messages: Message[]
+  messages: ChatMessage[]
   hidden: boolean
   mandatory: boolean
-  type: 'CHAT_INSTANCE' | 'PERSONAL' | 'RAG_INDEX'
+  type: 'CHAT_INSTANCE' | 'PERSONAL'
   createdAt: string
 }
 

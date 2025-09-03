@@ -1,15 +1,14 @@
-import { ArrowDownward, ChevronLeft, MenuBookTwoTone, Tune, WidthFull } from '@mui/icons-material'
+import { ArrowDownward, ChevronLeft, Tune } from '@mui/icons-material'
 import HelpIcon from '@mui/icons-material/Help'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 
 import { Alert, Box, Drawer, Fab, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
-import type { TFunction } from 'i18next'
 import { enqueueSnackbar } from 'notistack'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, inProduction, validModels } from '../../../config'
-import type { ToolCallResultEvent } from '../../../shared/chat'
+import type { ChatMessage, Message, ToolCallResultEvent } from '../../../shared/chat'
 import type { RagIndexAttributes } from '../../../shared/types'
 import { getLanguageValue } from '../../../shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
@@ -22,7 +21,7 @@ import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useAnalyticsDispatch } from '../../stores/analytics'
-import type { Course, Message, Prompt } from '../../types'
+import type { Course, Prompt } from '../../types'
 import Footer from '../Footer'
 import { ChatBox } from './ChatBox'
 import { Conversation } from './Conversation'
@@ -84,7 +83,7 @@ export const ChatV2 = () => {
     'temperature',
   )
 
-  const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as Message[])
+  const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as ChatMessage[])
   const [saveConsent, setSaveConsent] = useLocalStorageState<boolean>('save-consent', false)
 
   // App States
@@ -131,7 +130,7 @@ export const ChatV2 = () => {
   const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamController } = useChatStream({
     onComplete: ({ message }) => {
       if (message.content.length > 0) {
-        setMessages((prev: Message[]) => prev.concat(message))
+        setMessages((prev: ChatMessage[]) => prev.concat(message))
         refetchStatus()
       }
       chatScroll.autoScroll()
@@ -172,7 +171,7 @@ export const ChatV2 = () => {
     const newMessages = messages.concat({
       role: 'user',
       content: message,
-      attachements: file && fileName ? fileName : undefined,
+      attachments: file && fileName ? fileName : undefined,
     })
 
     setMessages(newMessages)
@@ -618,7 +617,7 @@ const LeftMenu = ({
   ragIndex?: RagIndexAttributes
   setRagIndexId: React.Dispatch<React.SetStateAction<number | undefined>>
   ragIndices?: RagIndexAttributes[]
-  messages: Message[]
+  messages: ChatMessage[]
   activePrompt: Prompt | undefined
   setActivePrompt: (prompt: Prompt | undefined) => void
   currentModel: string

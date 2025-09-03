@@ -1,9 +1,12 @@
+import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
 import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction } from '../../../config'
-import type { ChatMessage } from '../../../shared/llmTypes'
+import type { ChatEvent, ChatMessage } from '../../../shared/chat'
 import { ChatInstance, Discussion, RagIndex, UserChatInstanceUsage } from '../../db/models'
 import { calculateUsage, checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { streamChat } from '../../services/langchain/chat'
+import { getMockRagIndexSearchTool } from '../../services/rag/mockSearchTool'
+import { getRagIndexSearchTool } from '../../services/rag/searchTool'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
@@ -12,10 +15,6 @@ import { getAllowedModels, getModelContextLimit } from '../../util/util'
 import { parseFileAndAddToLastMessage } from './fileParsing'
 import { upload } from './multer'
 import { PostStreamSchemaV3 } from './types'
-import { StructuredTool } from '@langchain/core/tools'
-import { getRagIndexSearchTool } from '../../services/rag/searchTool'
-import { ChatEvent } from '../../../shared/chat'
-import { getMockRagIndexSearchTool } from '../../services/rag/mockSearchTool'
 
 const router = express.Router()
 
@@ -68,7 +67,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   }
 
   // Check file
-  let optionsMessagesWithFile: ChatMessage[] | undefined = undefined
+  let optionsMessagesWithFile: ChatMessage[] | undefined
 
   try {
     if (req.file) {

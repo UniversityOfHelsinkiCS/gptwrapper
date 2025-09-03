@@ -1,7 +1,7 @@
-import { Message } from '../../../shared/llmTypes'
+import type { ChatMessage } from '../../../shared/chat'
 import { pdfToText } from '../../util/pdfToText'
 
-export const parseFileAndAddToLastMessage = async (messages: Message[], file: Express.Multer.File) => {
+export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file: Express.Multer.File) => {
   let fileContent = ''
 
   const textFileTypes = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'text/md']

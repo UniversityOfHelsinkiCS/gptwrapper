@@ -32,3 +32,42 @@ export type ErrorEvent = {
 }
 
 export type ChatEvent = WritingEvent | CompleteEvent | ToolCallStatusEvent | ToolCallResultEvent | ErrorEvent
+
+export type SystemMessage = {
+  role: 'system'
+  content: string
+}
+
+export type UserMessage = {
+  role: 'user'
+  content: string
+  attachments?: string
+}
+
+export type AssistantMessage = {
+  role: 'assistant'
+  content: string
+  error?: string
+  toolCalls?: Record<string, ToolCallResultEvent>
+  promptInfo?: MessagePromptInfo
+}
+
+export type Message = SystemMessage | UserMessage | AssistantMessage
+
+export type MessageRole = Message['role']
+
+export type ChatMessage = UserMessage | AssistantMessage
+
+export type ChatRole = ChatMessage['role']
+
+export type MessagePromptInfo =
+  | {
+      type: 'saved'
+      id: string
+      name: string
+      systemMessage?: string
+    }
+  | {
+      type: 'custom'
+      systemMessage: string
+    }

@@ -6,7 +6,7 @@ import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
-import type { ActivityPeriod, Message } from '../../types'
+import type { ActivityPeriod } from '../../types'
 import { ConversationSplash } from './general/ConversationSplash'
 import { LoadingMessage } from './general/LoadingMessage'
 import { preprocessMath } from './util'
@@ -17,10 +17,10 @@ import { t } from 'i18next'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { BlueButton } from './general/Buttons'
-import type { ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
+import type { ChatMessage, Message, ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
 import { useId, useMemo } from 'react'
 
-const UserMessage = ({ content, attachements }: { content: string; attachements?: string }) => (
+const UserMessage = ({ content, attachments }: { content: string; attachments?: string }) => (
   <Box
     sx={{
       backgroundColor: '#efefef',
@@ -37,7 +37,7 @@ const UserMessage = ({ content, attachements }: { content: string; attachements?
   >
     {content}
 
-    {attachements && (
+    {attachments && (
       <Typography
         variant="body2"
         sx={{
@@ -49,7 +49,7 @@ const UserMessage = ({ content, attachements }: { content: string; attachements?
         }}
       >
         <AttachFileIcon fontSize="small" />
-        {attachements}
+        {attachments}
       </Typography>
     )}
   </Box>
@@ -269,7 +269,7 @@ const AssistantMessage = ({
   )
 }
 
-const MessageItem = ({ message, setActiveToolResult }: { message: Message; setActiveToolResult: (data: ToolCallResultEvent) => void }) => {
+const MessageItem = ({ message, setActiveToolResult }: { message: ChatMessage; setActiveToolResult: (data: ToolCallResultEvent) => void }) => {
   if (message.role === 'assistant') {
     return (
       <Box
@@ -284,7 +284,7 @@ const MessageItem = ({ message, setActiveToolResult }: { message: Message; setAc
   } else {
     return (
       <Box data-sentry-mask data-testid="user-message" sx={{ alignSelf: 'flex-end' }}>
-        <UserMessage content={message.content} attachements={message.attachements ?? ''} />
+        <UserMessage content={message.content} attachments={message.attachments ?? ''} />
       </Box>
     )
   }
@@ -303,7 +303,7 @@ export const Conversation = ({
   courseName?: string
   courseDate?: ActivityPeriod
   conversationRef: React.RefObject<HTMLElement>
-  messages: Message[]
+  messages: ChatMessage[]
   completion: string
   toolCalls: { [callId: string]: ToolCallStatusEvent }
   isStreaming: boolean
