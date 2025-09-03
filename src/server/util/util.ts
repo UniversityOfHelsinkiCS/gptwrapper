@@ -1,21 +1,6 @@
 import crypto from 'crypto'
 
-import { CustomMessage } from '../types'
 import { DEFAUL_CONTEXT_LIMIT, validModels } from '../../config'
-
-/**
- * Filter out messages in a long conversation to save costs
- * and to stay within context limit.
- * Always keep system messages and last 10 messages
- */
-export const getMessageContext = (messages: CustomMessage[]): CustomMessage[] => {
-  const systemMessages = messages.filter((message) => message.role === 'system')
-  const otherMessages = messages.filter((message) => message.role !== 'system')
-
-  const latestMessages = otherMessages.slice(-10)
-
-  return systemMessages.concat(latestMessages)
-}
 
 export const getAllowedModels = (model: string): string[] => {
   const allModels = validModels.map(({ name }) => name)

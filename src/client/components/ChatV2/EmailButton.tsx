@@ -1,4 +1,4 @@
-import { Tooltip, Typography } from '@mui/material'
+import { Tooltip } from '@mui/material'
 import EmailIcon from '@mui/icons-material/Email'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'

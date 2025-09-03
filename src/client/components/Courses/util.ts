@@ -20,14 +20,6 @@ export const formatDate = (activityPeriod?: ActivityPeriod) => {
 
 export const formatDateTime = (date: string) => `${format(new Date(date), 'dd.MM.yyyy hh:mm:ss')}`
 
-export const sortCourses = (a: Course, b: Course) => {
-  if (!a.activityPeriod || !b.activityPeriod) return 0
-
-  const getStartTime = (course: Course) => new Date(course.activityPeriod.startDate).getTime()
-
-  return getStartTime(b) - getStartTime(a)
-}
-
 export const filterUsages = (maxTokenLimit: number, usages: ChatInstanceUsage[]) => {
   const limit = maxTokenLimit * 0.9
 
