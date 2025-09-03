@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import { enqueueSnackbar } from 'notistack'
 import { Prompt as PromptType, SetState } from '../../../types'
-import { Response } from '../../ChatV2/ConversationV1'
+import { MessageItem } from '../../ChatV2/Conversation'
 import SystemMessage from '../../ChatV2/SystemMessage'
 import { useEditPromptMutation } from '../../../hooks/usePromptMutation'
 import { useParams, Link as RouterLink } from 'react-router-dom'
@@ -110,8 +110,8 @@ const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptTyp
                   <SystemMessage system={systemMessage} setSystem={() => {}} showInfo={false} disabled />
                 </Box>
                 <Box>
-                  {messages.map(({ role, content }, index) => (
-                    <Response key={content} role={role} content={content} id={`message-${index}`} />
+                  {messages.map((msg) => (
+                    <MessageItem key={msg.content} message={msg} setActiveToolResult={(_d) => {}} />
                   ))}
                 </Box>
               </>

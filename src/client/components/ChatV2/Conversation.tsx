@@ -6,8 +6,6 @@ import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
-import type { ActivityPeriod } from '../../types'
-import { ConversationSplash } from './general/ConversationSplash'
 import { LoadingMessage } from './general/LoadingMessage'
 import { preprocessMath } from './util'
 import 'katex/dist/katex.min.css'
@@ -17,7 +15,7 @@ import { t } from 'i18next'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { BlueButton } from './general/Buttons'
-import type { ChatMessage, Message, ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
+import type { ChatMessage, ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
 import { useId, useMemo } from 'react'
 
 const UserMessage = ({ content, attachments }: { content: string; attachments?: string }) => (
@@ -269,7 +267,7 @@ const AssistantMessage = ({
   )
 }
 
-const MessageItem = ({ message, setActiveToolResult }: { message: ChatMessage; setActiveToolResult: (data: ToolCallResultEvent) => void }) => {
+export const MessageItem = ({ message, setActiveToolResult }: { message: ChatMessage; setActiveToolResult: (data: ToolCallResultEvent) => void }) => {
   if (message.role === 'assistant') {
     return (
       <Box
@@ -291,23 +289,19 @@ const MessageItem = ({ message, setActiveToolResult }: { message: ChatMessage; s
 }
 
 export const Conversation = ({
-  courseName,
-  courseDate,
-  conversationRef,
   messages,
   completion,
   toolCalls,
   isStreaming,
   setActiveToolResult,
+  initial,
 }: {
-  courseName?: string
-  courseDate?: ActivityPeriod
-  conversationRef: React.RefObject<HTMLElement>
   messages: ChatMessage[]
   completion: string
   toolCalls: { [callId: string]: ToolCallStatusEvent }
   isStreaming: boolean
   setActiveToolResult: (data: ToolCallResultEvent) => void
+  initial?: React.ReactElement
 }) => {
   const [reminderSeen, setReminderSeen] = useLocalStorageState<boolean>('reminderSeen', false)
 
@@ -323,9 +317,8 @@ export const Conversation = ({
           padding: '1rem 0',
           justifyContent: messages.length === 0 ? 'center' : 'flex-start',
         }}
-        ref={conversationRef}
       >
-        {messages.length === 0 && <ConversationSplash courseName={courseName} courseDate={courseDate} />}
+        {messages.length === 0 && initial}
         {messages.map((message, idx) => {
           return <MessageItem key={idx} message={message} setActiveToolResult={setActiveToolResult} />
         })}

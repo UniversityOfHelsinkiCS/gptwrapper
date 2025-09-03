@@ -38,6 +38,7 @@ import { getCompletionStreamV3 } from './util'
 import PromptSelector from './PromptSelector'
 import { useQuery } from '@tanstack/react-query'
 import ModelSelector from './ModelSelector'
+import { ConversationSplash } from './general/ConversationSplash'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -115,7 +116,6 @@ export const ChatV2 = () => {
 
   // Refs
   const chatContainerRef = useRef<HTMLDivElement | null>(null)
-  const conversationRef = useRef<HTMLElement | null>(null)
   const inputFieldRef = useRef<HTMLElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
@@ -472,9 +472,7 @@ export const ChatV2 = () => {
           )}
 
           <Conversation
-            courseName={course && getLanguageValue(course.name, i18n.language)}
-            courseDate={course?.activityPeriod}
-            conversationRef={conversationRef}
+            initial={<ConversationSplash courseName={course && getLanguageValue(course.name, i18n.language)} courseDate={course?.activityPeriod} />}
             messages={messages}
             completion={completion}
             isStreaming={isStreaming}

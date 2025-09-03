@@ -11,7 +11,7 @@ import useCurrentUser from '../../../hooks/useCurrentUser'
 import { useCreatePromptMutation, useDeletePromptMutation } from '../../../hooks/usePromptMutation'
 import usePrompts from '../../../hooks/usePrompts'
 import type { Responsebility, User } from '../../../types'
-import Conversation from '../../ChatV2/ConversationV1'
+import { Conversation } from '../../ChatV2/Conversation'
 import SystemMessage from '../../ChatV2/SystemMessage'
 import Rag from '../../Rag/Rag'
 import { formatDate, getCurTypeLabel } from '../util'
@@ -25,7 +25,7 @@ import apiClient from '../../../util/apiClient'
 import { ActionUserSearch } from '../../Admin/UserSearch'
 import { useCourseRagIndices } from '../../../hooks/useRagIndices'
 import RagSelector, { RagSelectorDescription } from '../../ChatV2/RagSelector'
-import { ChatMessage } from '../../../../shared/chat'
+import type { ChatMessage } from '../../../../shared/chat'
 
 const Course = () => {
   const [showTeachers, setShowTeachers] = useState(false)
@@ -401,7 +401,7 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
 
         <SystemMessage system={system} setSystem={setSystem} disabled={false} creation />
 
-        <Conversation messages={messages} completion="" />
+        <Conversation messages={messages} completion="" toolCalls={{}} isStreaming={false} setActiveToolResult={(_d) => {}} />
 
         <Box sx={{ py: 2, display: 'flex', alignItems: 'start' }}>
           {!mandatoryPromptId ? (
