@@ -94,6 +94,7 @@ const PromptSelector = ({
             ))}
           </>
         )}
+        {myPrompts.length === 0 && coursePrompts.length === 0 && <MenuItem disabled>{t('settings:noPrompts')}</MenuItem>}
       </Menu>
     </Box>
   )

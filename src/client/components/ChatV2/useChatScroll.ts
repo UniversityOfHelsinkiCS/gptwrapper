@@ -2,9 +2,15 @@ import { useEffect, useRef, useState, useTransition } from 'react'
 
 let isUserDisabled = false
 
+const isAtBottom = () => {
+  const element = document.documentElement
+  const dist = element.scrollHeight - element.clientHeight - element.scrollTop
+  return Math.abs(dist) <= 3
+}
+
 export const useChatScroll = () => {
   // Todo: on long conversations this state update is not optimal. Ideally move it down the component tree.
-  const [isAutoScrolling, setIsAutoScrolling] = useState(false)
+  const [isAutoScrolling, setIsAutoScrolling] = useState(true)
 
   const prevHeight = useRef(0)
 
@@ -40,10 +46,15 @@ export const useChatScroll = () => {
   }
 
   useEffect(() => {
+    // Check scroll status after a delay
+    setTimeout(() => {
+      if (!isAtBottom()) {
+        setIsAutoScrolling(false)
+      }
+    }, 100)
+
     const handleAttachAutoScroll = () => {
-      const element = document.documentElement
-      const isAtBottom = Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop) <= 3
-      if (isAtBottom) {
+      if (isAtBottom()) {
         setIsAutoScrolling(true)
         isUserDisabled = false
       }

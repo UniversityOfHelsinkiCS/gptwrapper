@@ -12,7 +12,7 @@ import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '..
 import type { RagIndexAttributes } from '../../../shared/types'
 import { getLanguageValue } from '../../../shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
-import { useChatScroll } from '../../hooks/useChatScroll'
+import { useChatScroll } from './useChatScroll'
 import useCourse from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import useInfoTexts from '../../hooks/useInfoTexts'
@@ -503,14 +503,9 @@ export const ChatV2 = () => {
             fileInputRef={fileInputRef}
             fileName={fileName}
             setFileName={setFileName}
-            saveConsent={saveConsent}
-            setSaveConsent={setSaveConsent}
             setChatLeftSidePanelOpen={setChatLeftSidePanelOpen}
-            chatLeftSidePanelOpen={chatLeftSidePanelOpen}
             tokenUsageWarning={tokenUsageWarning}
             tokenUsageAlertOpen={tokenUsageAlertOpen}
-            saveChat={!!course && course.saveDiscussions}
-            notOptoutSaving={!!course && course.notOptoutSaving}
             handleCancel={handleCancel}
             handleContinue={(newMessage) => handleSubmit(newMessage, true)}
             handleSubmit={(newMessage) => {

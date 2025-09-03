@@ -137,7 +137,8 @@
     "default": "Oletus",
     "confirmDeletePrompt": "Haluatko varmasti poistaa alustuksen '{{name}}'?",
     "sourceDescription": "Kurssichatissa voidaan käyttää lähteenä opettajan määrittämiä materiaaleja. Voit valita lähteen alta.",
-    "other": "Muut asetukset"
+    "other": "Muut asetukset",
+    "noPrompts": "Ei alustuksia"
   },
   "chats": {
     "header": "Auki olevat kurssichatit",

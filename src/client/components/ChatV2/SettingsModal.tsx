@@ -153,7 +153,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   }, [mandatoryPrompt, urlPrompt])
 
   const handleClose = async () => {
-    console.log('handleClose', activePrompt, systemMessage)
     // When no prompt is selected, set the custom system message to the value of the system message textfield
     if (!activePrompt) {
       setCustomSystemMessage(systemMessage)

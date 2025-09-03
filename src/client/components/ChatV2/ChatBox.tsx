@@ -22,12 +22,7 @@ export const ChatBox = ({
   fileName,
   tokenUsageWarning,
   tokenUsageAlertOpen,
-  saveConsent,
-  setSaveConsent,
   setChatLeftSidePanelOpen,
-  chatLeftSidePanelOpen,
-  saveChat,
-  notOptoutSaving,
   setFileName,
   handleCancel,
   handleContinue,
@@ -40,12 +35,7 @@ export const ChatBox = ({
   fileName: string
   tokenUsageWarning: string
   tokenUsageAlertOpen: boolean
-  saveConsent: boolean
-  setSaveConsent: React.Dispatch<boolean>
   setChatLeftSidePanelOpen: (open: boolean) => void
-  chatLeftSidePanelOpen: boolean
-  saveChat: boolean
-  notOptoutSaving: boolean
   setFileName: (name: string) => void
   handleCancel: () => void
   handleContinue: (message: string) => void
@@ -70,12 +60,12 @@ export const ChatBox = ({
 
   const { t } = useTranslation()
 
-  // useKeyboardCommands({
-  //   resetChat: handleReset,
-  //   openModelSelector: () => {
-  //     setIsModelSelectorOpen(true)
-  //   },
-  // }) // @todo what key combination to open model selector
+  useKeyboardCommands({
+    resetChat: handleReset,
+    openModelSelector: () => {
+      // setIsModelSelectorOpen(true) // @todo what key combination to open model selector
+    },
+  })
 
   const isShiftEnterSend = user?.preferences?.sendShortcutMode === 'shift+enter' || !user?.preferences?.sendShortcutMode
 

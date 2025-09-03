@@ -265,8 +265,6 @@ courseRouter.put('/:id', async (req, res) => {
     notOptoutSaving: boolean
   }
 
-  console.log('->', saveDiscussions, notOptoutSaving)
-
   const chatInstance = await ChatInstance.findOne({
     where: { courseId: id },
   })
@@ -287,10 +285,8 @@ courseRouter.put('/:id', async (req, res) => {
 })
 
 const userAssignedAsResponsible = (userId, chatInstance) => {
-  console.log('looking for: ' + userId)
   const isResponsible: boolean = chatInstance.responsibilities
     ?.map((r) => {
-      console.log(r)
       return r.user?.id
     })
     .filter(Boolean)

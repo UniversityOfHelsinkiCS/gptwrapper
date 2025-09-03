@@ -45,7 +45,6 @@ export const RagIndex: React.FC = () => {
               type="file"
               onChange={async (event) => {
                 const files = event.target.files
-                console.log('Files selected:', files)
                 if (files && files.length > 0) {
                   await uploadMutation.mutateAsync(files)
                   refetch()

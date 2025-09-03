@@ -32,7 +32,6 @@ export const SaveMyPromptModal = ({ isOpen, setIsOpen, onSave, systemMessage, ex
     >
       <form
         onSubmit={async (e) => {
-          console.log('Saving', name)
           e.preventDefault()
           await onSave(name, promptToSave)
           setIsOpen(false)
