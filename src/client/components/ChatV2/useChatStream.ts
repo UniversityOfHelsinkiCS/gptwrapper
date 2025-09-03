@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { AssistantMessage, ChatEvent, ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
+import type { AssistantMessage, ChatEvent, MessageGenerationInfo, ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
 
 type ToolCallState = ToolCallStatusEvent
 
@@ -15,16 +15,18 @@ export const useChatStream = ({
   onText: () => void
 }) => {
   const [completion, setCompletion] = useState('')
+  const [generationInfo, setGenerationInfo] = useState<MessageGenerationInfo | undefined>()
   const [isStreaming, setIsStreaming] = useState(false)
   const [toolCalls, setToolCalls] = useState<Record<string, ToolCallState>>({})
   const [streamController, setStreamController] = useState<AbortController>()
 
   const decoder = new TextDecoder()
 
-  const processStream = async (stream: ReadableStream) => {
+  const processStream = async (stream: ReadableStream, baseGenerationInfo: MessageGenerationInfo) => {
     let content = ''
     let error = ''
     const toolCallResultsAccum: Record<string, ToolCallResultEvent> = {}
+    setGenerationInfo(baseGenerationInfo)
 
     try {
       const reader = stream.getReader()
@@ -90,6 +92,7 @@ export const useChatStream = ({
       setCompletion('')
       setToolCalls({})
       setIsStreaming(false)
+      setGenerationInfo(undefined)
 
       onComplete({
         message: {
@@ -97,6 +100,7 @@ export const useChatStream = ({
           content,
           error: error.length > 0 ? error : undefined,
           toolCalls: toolCallResultsAccum,
+          generationInfo: baseGenerationInfo,
         },
       })
     }
@@ -105,6 +109,7 @@ export const useChatStream = ({
   return {
     processStream,
     completion,
+    generationInfo,
     isStreaming,
     setIsStreaming,
     toolCalls,

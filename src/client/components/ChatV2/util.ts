@@ -1,11 +1,10 @@
-import type { ChatMessage } from '../../../shared/chat'
+import type { ChatMessage, MessageGenerationInfo } from '../../../shared/chat'
 import { postAbortableStream } from '../../util/apiClient'
 
 interface GetCompletionStreamProps {
+  generationInfo: MessageGenerationInfo
   courseId?: string
-  systemMessage: string
   messages: ChatMessage[]
-  model: string
   formData: FormData
   ragIndexId?: number
   userConsent?: boolean
@@ -15,10 +14,9 @@ interface GetCompletionStreamProps {
   saveConsent: boolean
 }
 export const getCompletionStreamV3 = async ({
+  generationInfo,
   courseId,
-  systemMessage,
   messages,
-  model,
   formData,
   ragIndexId,
   userConsent,
@@ -31,9 +29,9 @@ export const getCompletionStreamV3 = async ({
     courseId,
     options: {
       chatMessages: messages,
-      systemMessage,
+      systemMessage: generationInfo.promptInfo.systemMessage,
+      model: generationInfo.model,
       ragIndexId,
-      model,
       userConsent,
       modelTemperature,
       saveConsent,

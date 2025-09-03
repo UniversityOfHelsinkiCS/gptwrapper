@@ -187,8 +187,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     tokensPerSecond: result.tokensPerSecond,
   }
 
-  logger.info(`Stream ended. Total tokens: ${tokenCount}`, chatCompletionMeta)
-
   res.locals.chatCompletionMeta = chatCompletionMeta
 
   // If course has saveDiscussion turned on and user has consented to saving the discussion, save the discussion

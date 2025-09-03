@@ -15,10 +15,11 @@ import { t } from 'i18next'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { BlueButton } from './general/Buttons'
-import type { ChatMessage, ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
+import type { AssistantMessage, ChatMessage, MessageGenerationInfo, ToolCallResultEvent, ToolCallStatusEvent, UserMessage } from '../../../shared/chat'
 import { useId, useMemo } from 'react'
+import { ArrowRight } from '@mui/icons-material'
 
-const UserMessage = ({ content, attachments }: { content: string; attachments?: string }) => (
+const UserMessageItem = ({ message }: { message: UserMessage }) => (
   <Box
     sx={{
       backgroundColor: '#efefef',
@@ -33,9 +34,9 @@ const UserMessage = ({ content, attachments }: { content: string; attachments?: 
       width: 'fit-content',
     }}
   >
-    {content}
+    {message.content}
 
-    {attachments && (
+    {message.attachments && (
       <Typography
         variant="body2"
         sx={{
@@ -47,7 +48,7 @@ const UserMessage = ({ content, attachments }: { content: string; attachments?: 
         }}
       >
         <AttachFileIcon fontSize="small" />
-        {attachments}
+        {message.attachments}
       </Typography>
     )}
   </Box>
@@ -102,18 +103,24 @@ const ToolResult = ({ toolResult, handleToolResult }: { toolResult: ToolCallResu
   )
 }
 
-const AssistantMessage = ({
-  content,
-  error,
-  toolResults,
-  setActiveToolResult,
-}: {
-  content: string
-  error?: string
-  toolResults?: Record<string, ToolCallResultEvent>
-  setActiveToolResult: (data: ToolCallResultEvent) => void
-}) => {
-  const processedContent = preprocessMath(content)
+const AssistantMessageInfo = ({ message }: { message: AssistantMessage }) => {
+  if (!message.generationInfo) return null
+
+  const title =
+    message.generationInfo.promptInfo.type === 'saved'
+      ? `${message.generationInfo.promptInfo.name} (${message.generationInfo.model})`
+      : `${message.generationInfo.model}`
+
+  return (
+    <Box sx={{ display: 'flex', opacity: 0.7, alignItems: 'center' }}>
+      <ArrowRight fontSize="small" />
+      <Typography fontSize="small">{title}</Typography>
+    </Box>
+  )
+}
+
+const AssistantMessageItem = ({ message, setActiveToolResult }: { message: AssistantMessage; setActiveToolResult: (data: ToolCallResultEvent) => void }) => {
+  const processedContent = preprocessMath(message.content)
   const katexOptions = {
     macros: {
       '\\abs': '\\left|#1\\right|',
@@ -185,8 +192,9 @@ const AssistantMessage = ({
           borderRadius: 4,
         }}
       >
-        <CopyToClipboardButton id={msgId} copied={content} />
+        <CopyToClipboardButton id={msgId} copied={message.content} />
       </Box>
+      <AssistantMessageInfo message={message} />
       <ReactMarkdown
         remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
         rehypePlugins={[[rehypeKatex, katexOptions]]}
@@ -255,12 +263,12 @@ const AssistantMessage = ({
       >
         {processedContent}
       </ReactMarkdown>
-      {error && (
+      {message.error && (
         <Box>
-          <Typography variant="body1" fontStyle="italic" color="#cc0000">{`\n\n ${error}`}</Typography>
+          <Typography variant="body1" fontStyle="italic" color="#cc0000">{`\n\n ${message.error}`}</Typography>
         </Box>
       )}
-      {Object.values(toolResults ?? {}).map((toolResult) => (
+      {Object.values(message.toolCalls ?? {}).map((toolResult) => (
         <ToolResult key={toolResult.callId} toolResult={toolResult} handleToolResult={handleToolResult} />
       ))}
     </Box>
@@ -276,13 +284,13 @@ export const MessageItem = ({ message, setActiveToolResult }: { message: ChatMes
           height: 'auto',
         }}
       >
-        <AssistantMessage content={message.content} error={message.error} toolResults={message.toolCalls} setActiveToolResult={setActiveToolResult} />
+        <AssistantMessageItem message={message} setActiveToolResult={setActiveToolResult} />
       </Box>
     )
   } else {
     return (
       <Box data-sentry-mask data-testid="user-message" sx={{ alignSelf: 'flex-end' }}>
-        <UserMessage content={message.content} attachments={message.attachments ?? ''} />
+        <UserMessageItem message={message} />
       </Box>
     )
   }
@@ -291,6 +299,7 @@ export const MessageItem = ({ message, setActiveToolResult }: { message: ChatMes
 export const Conversation = ({
   messages,
   completion,
+  generationInfo,
   toolCalls,
   isStreaming,
   setActiveToolResult,
@@ -298,6 +307,7 @@ export const Conversation = ({
 }: {
   messages: ChatMessage[]
   completion: string
+  generationInfo?: MessageGenerationInfo
   toolCalls: { [callId: string]: ToolCallStatusEvent }
   isStreaming: boolean
   setActiveToolResult: (data: ToolCallResultEvent) => void
@@ -326,7 +336,7 @@ export const Conversation = ({
         {isStreaming &&
           messages.length > 0 &&
           (completion.length > 0 ? (
-            <MessageItem message={{ role: 'assistant', content: completion }} setActiveToolResult={setActiveToolResult} />
+            <MessageItem message={{ role: 'assistant', content: completion, generationInfo }} setActiveToolResult={setActiveToolResult} />
           ) : (
             <LoadingMessage toolCalls={toolCalls} />
           ))}

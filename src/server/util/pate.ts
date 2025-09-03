@@ -29,8 +29,8 @@ const sendEmail = async (targets: string[], text: string, subject: string) => {
 
   logger.info(`Sending email with payload size ${payloadSizeKb.toFixed(2)} KB`)
 
-  if (inCI) {
-    logger.info('Skipping email sending in CI')
+  if (inCI || inDevelopment) {
+    logger.info('Skipping email sending in CI or development')
     return
   }
 

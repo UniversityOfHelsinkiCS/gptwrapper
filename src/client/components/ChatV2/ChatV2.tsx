@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, inProduction, validModels } from '../../../config'
-import type { ChatMessage, ToolCallResultEvent } from '../../../shared/chat'
+import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '../../../shared/chat'
 import type { RagIndexAttributes } from '../../../shared/types'
 import { getLanguageValue } from '../../../shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
@@ -127,7 +127,7 @@ export const ChatV2 = () => {
 
   const disclaimerInfo = infoTexts?.find((infoText) => infoText.name === 'disclaimer')?.text[i18n.language] ?? null
 
-  const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamController } = useChatStream({
+  const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamController, generationInfo } = useChatStream({
     onComplete: ({ message }) => {
       if (message.content.length > 0) {
         setMessages((prev: ChatMessage[]) => prev.concat(message))
@@ -188,12 +188,18 @@ export const ChatV2 = () => {
     setIsStreaming(true)
     chatScroll.beginAutoscroll()
 
+    const generationInfo: MessageGenerationInfo = {
+      model: activeModel,
+      promptInfo: activePrompt
+        ? { id: activePrompt.id, name: activePrompt.name, type: 'saved', systemMessage: activePrompt.systemMessage }
+        : { type: 'custom', systemMessage: customSystemMessage },
+    }
+
     try {
       const { tokenUsageAnalysis, stream } = await getCompletionStreamV3({
-        systemMessage: activePrompt?.systemMessage || customSystemMessage,
+        generationInfo,
         messages: newMessages,
         ragIndexId,
-        model: activeModel,
         formData,
         modelTemperature: parseFloat(modelTemperature),
         courseId,
@@ -219,7 +225,7 @@ export const ChatV2 = () => {
 
       clearRetryTimeout()
       if (stream) {
-        await processStream(stream)
+        await processStream(stream, generationInfo)
       }
     } catch (err: any) {
       console.error(err)
@@ -475,6 +481,7 @@ export const ChatV2 = () => {
             initial={<ConversationSplash courseName={course && getLanguageValue(course.name, i18n.language)} courseDate={course?.activityPeriod} />}
             messages={messages}
             completion={completion}
+            generationInfo={generationInfo}
             isStreaming={isStreaming}
             toolCalls={toolCalls}
             setActiveToolResult={setActiveToolResult}

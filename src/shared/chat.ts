@@ -44,7 +44,7 @@ export type AssistantMessage = {
   content: string
   error?: string
   toolCalls?: Record<string, ToolCallResultEvent>
-  promptInfo?: MessagePromptInfo
+  generationInfo?: MessageGenerationInfo
 }
 
 export type Message = SystemMessage | UserMessage | AssistantMessage
@@ -55,14 +55,17 @@ export type ChatMessage = UserMessage | AssistantMessage
 
 export type ChatRole = ChatMessage['role']
 
-export type MessagePromptInfo =
-  | {
-      type: 'saved'
-      id: string
-      name: string
-      systemMessage?: string
-    }
-  | {
-      type: 'custom'
-      systemMessage: string
-    }
+export type MessageGenerationInfo = {
+  model: string
+  promptInfo:
+    | {
+        type: 'saved'
+        id: string
+        name: string
+        systemMessage: string
+      }
+    | {
+        type: 'custom'
+        systemMessage: string
+      }
+}

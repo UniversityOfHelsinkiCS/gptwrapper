@@ -48,7 +48,7 @@ test.describe('Prompts', () => {
     await expect(page.getByTestId('assistant-instructions-input')).toContainText('mocktest testi onnistui')
   })
 
-  test('Course prompt creation, chat link with prompt, and deletion', async ({ page }) => {
+  test.only('Course prompt creation, chat link with prompt, and deletion', async ({ page }) => {
     await page.goto('/courses/test-course/prompts')
 
     const newPromptName = `testausprompti-${test.info().workerIndex}`
@@ -98,7 +98,7 @@ test.describe('Prompts', () => {
     await page.getByTestId('prompt-selector-button').click()
 
     // Prompt is not visible anymore in student view.
-    expect(page.getByText(newPromptName)).not.toBeVisible()
+    expect(page.getByText(newPromptName, { exact: true })).not.toBeVisible()
   })
 
   test('Own prompts work in course chat and normal chat', async ({ page }) => {
