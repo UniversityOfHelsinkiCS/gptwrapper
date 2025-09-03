@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { MenuItem, Typography, Tooltip, Menu } from '@mui/material'
 import { KeyboardArrowDown, SmartToy } from '@mui/icons-material'
-import { FREE_MODEL } from '../../../config'
+import { FREE_MODEL, ValidModelName } from '../../../config'
 import { OutlineButtonBlack } from './general/Buttons'
 
 const ModelSelector = ({
@@ -11,9 +11,9 @@ const ModelSelector = ({
   availableModels,
   isTokenLimitExceeded,
 }: {
-  currentModel: string
-  setModel: (model: string) => void
-  availableModels: string[]
+  currentModel: ValidModelName
+  setModel: (model: ValidModelName) => void
+  availableModels: ValidModelName[]
   isTokenLimitExceeded: boolean
 }) => {
   const { t } = useTranslation()
@@ -25,19 +25,14 @@ const ModelSelector = ({
     setAnchorEl(event.currentTarget)
   }
 
-  const handleSelect = (model: string) => {
+  const handleSelect = (model: ValidModelName) => {
     setModel(model)
     setAnchorEl(null)
   }
 
   return (
     <>
-      <OutlineButtonBlack
-        startIcon={<SmartToy />}
-        endIcon={<KeyboardArrowDown />}
-        onClick={handleClick}
-        data-testid="model-selector"
-      >
+      <OutlineButtonBlack startIcon={<SmartToy />} endIcon={<KeyboardArrowDown />} onClick={handleClick} data-testid="model-selector">
         {`${t('admin:model')}: ${validModel}`}
       </OutlineButtonBlack>
       <Menu
@@ -56,8 +51,10 @@ const ModelSelector = ({
           <MenuItem
             key={model}
             value={model}
-            onClick={() => handleSelect(model)} disabled={isTokenLimitExceeded && model !== FREE_MODEL}
-            data-testid={`${model}-option`}>
+            onClick={() => handleSelect(model)}
+            disabled={isTokenLimitExceeded && model !== FREE_MODEL}
+            data-testid={`${model}-option`}
+          >
             <Typography>
               {model}
               {model === FREE_MODEL && (

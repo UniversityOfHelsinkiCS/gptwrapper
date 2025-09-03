@@ -1,8 +1,8 @@
 import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
-import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction } from '../../../config'
-import type { ChatEvent, ChatMessage } from '../../../shared/chat'
-import { ChatInstance, Discussion, RagIndex, UserChatInstanceUsage } from '../../db/models'
+import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction, validModels } from '../../../config'
+import { PostStreamSchemaV3, type ChatEvent, type ChatMessage } from '../../../shared/chat'
+import { ChatInstance, Discussion, Prompt, RagIndex, UserChatInstanceUsage } from '../../db/models'
 import { calculateUsage, checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { streamChat } from '../../services/langchain/chat'
 import { getMockRagIndexSearchTool } from '../../services/rag/mockSearchTool'
@@ -14,19 +14,19 @@ import getEncoding from '../../util/tiktoken'
 import { getAllowedModels, getModelContextLimit } from '../../util/util'
 import { parseFileAndAddToLastMessage } from './fileParsing'
 import { upload } from './multer'
-import { PostStreamSchemaV3 } from './types'
 
 const router = express.Router()
 
 router.post('/stream', upload.single('file'), async (r, res) => {
   const req = r as RequestWithUser
   const { options, courseId } = PostStreamSchemaV3.parse(JSON.parse(req.body.data))
-  const { model, ragIndexId } = options
+  const { generationInfo } = options
   const { user } = req
 
   // @todo were not checking if the user is enrolled?
   let course: ChatInstance | null = null
 
+  // Find course
   if (courseId) {
     course = await ChatInstance.findOne({
       where: { courseId },
@@ -44,9 +44,9 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     course.currentUserUsage = chatInstanceUsage
   }
 
-  const isFreeModel = model === FREE_MODEL
+  const isFreeModel = generationInfo.model === FREE_MODEL
 
-  const usageAllowed = (course ? checkCourseUsage(user, course) : isFreeModel) || checkUsage(user, model)
+  const usageAllowed = (course ? checkCourseUsage(user, course) : isFreeModel) || checkUsage(user, generationInfo.model)
 
   if (!usageAllowed) {
     throw ApplicationError.Forbidden('Usage limit reached')
@@ -56,13 +56,13 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   if (course) {
     const courseModel = course.model
 
-    if (options.model) {
+    if (generationInfo.model) {
       const allowedModels = getAllowedModels(courseModel)
-      if (!allowedModels.includes(options.model)) {
+      if (!allowedModels.includes(generationInfo.model)) {
         throw ApplicationError.Forbidden('Model not allowed')
       }
     } else {
-      options.model = courseModel
+      generationInfo.model = courseModel as (typeof validModels)[number]['name']
     }
   }
 
@@ -80,7 +80,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   options.chatMessages = optionsMessagesWithFile || options.chatMessages
 
-  const encoding = getEncoding(options.model)
+  const encoding = getEncoding(generationInfo.model)
   let tokenCount = calculateUsage(options.chatMessages, encoding)
   encoding.free()
 
@@ -95,40 +95,47 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   }
 
   // Check context limit
-  const contextLimit = getModelContextLimit(options.model)
+  const contextLimit = getModelContextLimit(generationInfo.model)
 
   if (tokenCount > contextLimit) {
     throw ApplicationError.BadRequest('Model maximum context reached')
   }
 
+  // Find prompt if using a saved prompt
+  let prompt: Prompt | null = null
+
+  let systemMessage = ''
   const tools: StructuredTool[] = []
 
-  // Check rag index
-  let ragIndex: RagIndex | undefined
-
-  if (ragIndexId) {
-    if (!courseId && !user.isAdmin) {
-      throw ApplicationError.Forbidden('User is not admin and trying to access non-course rag')
-    }
-
-    ragIndex =
-      (await RagIndex.findByPk(ragIndexId, {
-        include: {
+  if (generationInfo.promptInfo.type === 'saved') {
+    prompt = await Prompt.findByPk(generationInfo.promptInfo.id, {
+      include: [
+        {
           model: ChatInstance,
+          attributes: ['id'],
           as: 'chatInstances',
           where: courseId ? { courseId } : {},
         },
-      })) ?? undefined
+        {
+          model: RagIndex,
+          as: 'ragIndex',
+          where: courseId ? { courseId } : {},
+        },
+      ],
+    })
 
-    if (!ragIndex) {
-      logger.error('RagIndex not found', { ragIndexId })
-      res.status(404).send('RagIndex not found')
-      return
+    if (!prompt) {
+      throw ApplicationError.NotFound('Prompt not found')
     }
 
-    const searchTool = model === 'mock' ? getMockRagIndexSearchTool(ragIndex) : getRagIndexSearchTool(ragIndex)
+    systemMessage = prompt.systemMessage
 
-    tools.push(searchTool)
+    if (prompt.ragIndex) {
+      const searchTool = generationInfo.model === 'mock' ? getMockRagIndexSearchTool(prompt.ragIndex) : getRagIndexSearchTool(prompt.ragIndex)
+      tools.push(searchTool)
+    }
+  } else {
+    systemMessage = generationInfo.promptInfo.systemMessage
   }
 
   // Prepare for streaming response
@@ -137,8 +144,8 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   const result = await streamChat({
     user,
     chatMessages: options.chatMessages,
-    systemMessage: options.systemMessage,
-    model: options.model,
+    systemMessage,
+    model: generationInfo.model,
     temperature: options.modelTemperature,
     tools,
     writeEvent: async (event: ChatEvent) => {
@@ -178,13 +185,14 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   const chatCompletionMeta = {
     tokenCount,
-    model: options.model,
+    model: generationInfo.model,
     user: user.username,
     courseId,
     course: course?.name?.fi,
     fileSize: req.file?.size,
     timeToFirstToken: result.timeToFirstToken,
     tokensPerSecond: result.tokensPerSecond,
+    tools: tools.length,
   }
 
   res.locals.chatCompletionMeta = chatCompletionMeta

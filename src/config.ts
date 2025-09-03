@@ -1,3 +1,5 @@
+import z from 'zod/v4'
+
 export const inDevelopment = process.env.NODE_ENV === 'development'
 
 export const inStaging = process.env.STAGING === 'true'
@@ -12,8 +14,6 @@ export const PUBLIC_URL = process.env.PUBLIC_URL || ''
 
 export const DEFAULT_TOKEN_LIMIT = Number(process.env.DEFAULT_TOKEN_LIMIT) || 150_000
 
-export const FREE_MODEL = process.env.FREE_MODEL || 'gpt-4o-mini' // as it was decided in 23th Sept 2024 meeting
-export const DEFAULT_MODEL = process.env.DEFAUL_MODEL || 'gpt-4o-mini'
 export const DEFAUL_CONTEXT_LIMIT = Number(process.env.DEFAUL_CONTEXT_LIMIT) || 4_096
 
 export const DEFAULT_RESET_CRON = process.env.DEFAULT_RESET_CRON || '0 0 1 */3 *'
@@ -41,7 +41,15 @@ export const validModels = [
     name: 'mock',
     context: 128_000,
   },
-]
+] as const
+
+export const ValidModelNameSchema = z.union(validModels.map((model) => z.literal(model.name)))
+
+export type ValidModelName = z.infer<typeof ValidModelNameSchema>
+
+export const DEFAULT_MODEL = ValidModelNameSchema.parse(process.env.DEFAULT_MODEL || 'gpt-4o-mini')
+
+export const FREE_MODEL = ValidModelNameSchema.parse(process.env.FREE_MODEL || 'gpt-4o-mini') // as it was decided in 23th Sept 2024 meeting
 
 export const DEFAULT_MODEL_ON_ENABLE = 'gpt-5'
 

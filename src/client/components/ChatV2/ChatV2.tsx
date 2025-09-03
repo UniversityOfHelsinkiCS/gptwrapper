@@ -7,9 +7,8 @@ import { enqueueSnackbar } from 'notistack'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
-import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, inProduction, validModels } from '../../../config'
+import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, inProduction, ValidModelName, ValidModelNameSchema, validModels } from '../../../config'
 import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '../../../shared/chat'
-import type { RagIndexAttributes } from '../../../shared/types'
 import { getLanguageValue } from '../../../shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { useChatScroll } from './useChatScroll'
@@ -17,7 +16,6 @@ import useCourse from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import useInfoTexts from '../../hooks/useInfoTexts'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
-import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useAnalyticsDispatch } from '../../stores/analytics'
@@ -31,7 +29,6 @@ import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
 import { OutlineButtonBlack } from './general/Buttons'
 import { ChatInfo } from './general/ChatInfo'
-import RagSelector, { RagSelectorDescription } from './RagSelector'
 import { SettingsModal } from './SettingsModal'
 import { useChatStream } from './useChatStream'
 import { postCompletionStreamV3 } from './api'
@@ -39,23 +36,30 @@ import PromptSelector from './PromptSelector'
 import ModelSelector from './ModelSelector'
 import { ConversationSplash } from './general/ConversationSplash'
 import { PromptStateProvider, usePromptState } from './PromptState'
+import z from 'zod/v4'
 
-function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
+function useLocalStorageStateWithURLDefault<T>(key: string, defaultValue: string, urlKey: string, schema: z.ZodType<T>) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
   const [searchParams, setSearchParams] = useSearchParams()
   const urlValue = searchParams.get(urlKey)
 
   // If urlValue is defined, it overrides the localStorage setting.
   // However if user changes the setting, the urlValue is removed.
-  const modifiedSetValue = (newValue: string) => {
+  const modifiedSetValue = (newValue: T) => {
     if (newValue !== urlValue) {
-      setValue(newValue)
+      if (typeof newValue === 'string') {
+        setValue(newValue)
+      } else {
+        setValue(String(newValue))
+      }
       searchParams.delete(urlKey)
       setSearchParams(searchParams)
     }
   }
 
-  return [urlValue ?? value, modifiedSetValue] as const
+  const parsedValue = schema.parse(urlValue ?? value)
+
+  return [parsedValue, modifiedSetValue] as const
 }
 
 const ChatV2Content = () => {
@@ -65,7 +69,6 @@ const ChatV2Content = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   const { data: course } = useCourse(courseId)
-  const { ragIndices } = useCourseRagIndices(course?.id)
   const { infoTexts } = useInfoTexts()
 
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
@@ -74,12 +77,13 @@ const ChatV2Content = () => {
 
   // local storage states
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
-  const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model')
+  const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model', ValidModelNameSchema)
   const [disclaimerStatus, setDisclaimerStatus] = useLocalStorageState<boolean>('disclaimer-status', true)
   const [modelTemperature, setModelTemperature] = useLocalStorageStateWithURLDefault(
     `${localStoragePrefix}-chat-model-temperature`,
     String(DEFAULT_MODEL_TEMPERATURE),
     'temperature',
+    z.number(),
   )
 
   const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as ChatMessage[])
@@ -90,12 +94,9 @@ const ChatV2Content = () => {
   const [fileName, setFileName] = useState<string>('')
   const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
   const [tokenUsageAlertOpen, setTokenUsageAlertOpen] = useState<boolean>(false)
-  const [allowedModels, setAllowedModels] = useState<string[]>([])
+  const [allowedModels, setAllowedModels] = useState<ValidModelName[]>([])
   const [chatLeftSidePanelOpen, setChatLeftSidePanelOpen] = useState<boolean>(false)
-  // RAG states
-  const [ragIndexId, _setRagIndexId] = useState<number | undefined>()
   const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
-  const ragIndex = ragIndices?.find((index) => index.id === ragIndexId)
 
   // Analytics
   const dispatchAnalytics = useAnalyticsDispatch()
@@ -106,11 +107,9 @@ const ChatV2Content = () => {
         model: activeModel,
         courseId,
         nMessages: messages.length,
-        ragIndexId,
-        ragIndexName: ragIndex?.metadata.name,
       },
     })
-  }, [messages, courseId, ragIndexId, activeModel, dispatchAnalytics])
+  }, [messages, courseId, activeModel, dispatchAnalytics])
 
   // Refs
   const chatContainerRef = useRef<HTMLDivElement | null>(null)
@@ -194,16 +193,23 @@ const ChatV2Content = () => {
     }
 
     try {
-      const { tokenUsageAnalysis, stream } = await postCompletionStreamV3({
-        generationInfo,
-        messages: newMessages,
-        ragIndexId,
+      if (!streamController) {
+        throw new Error('streamController is not defined')
+      }
+
+      const { tokenUsageAnalysis, stream } = await postCompletionStreamV3(
         formData,
-        modelTemperature: parseFloat(modelTemperature),
-        courseId,
-        abortController: streamController,
-        saveConsent,
-      })
+        {
+          options: {
+            generationInfo,
+            chatMessages: newMessages,
+            modelTemperature,
+            saveConsent,
+          },
+          courseId,
+        },
+        streamController,
+      )
 
       if (!stream && !tokenUsageAnalysis) {
         console.error('getCompletionStream did not return a stream or token usage analysis')
@@ -263,7 +269,7 @@ const ChatV2Content = () => {
 
     const { usage, limit, model: defaultCourseModel, models: courseModels } = userStatus
 
-    let allowedModels: string[] = []
+    let allowedModels: ValidModelName[] = []
 
     if (course && courseModels) {
       allowedModels = courseModels
@@ -558,8 +564,8 @@ const ChatV2Content = () => {
       <SettingsModal
         open={settingsModalOpen}
         setOpen={setSettingsModalOpen}
-        modelTemperature={parseFloat(modelTemperature)}
-        setModelTemperature={(updatedTemperature) => setModelTemperature(String(updatedTemperature))}
+        modelTemperature={modelTemperature}
+        setModelTemperature={(updatedTemperature) => setModelTemperature(updatedTemperature)}
       />
 
       <DisclaimerModal disclaimer={disclaimerInfo} disclaimerStatus={disclaimerStatus} setDisclaimerStatus={setDisclaimerStatus} />
@@ -586,9 +592,9 @@ const LeftMenu = ({
   setSettingsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
   setDisclaimerStatus: React.Dispatch<React.SetStateAction<boolean>>
   messages: ChatMessage[]
-  currentModel: string
-  setModel: (model: string) => void
-  availableModels: string[]
+  currentModel: ValidModelName
+  setModel: (model: ValidModelName) => void
+  availableModels: ValidModelName[]
 }) => {
   const { t } = useTranslation()
   const { courseId } = useParams()

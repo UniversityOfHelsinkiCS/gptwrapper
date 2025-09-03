@@ -1,4 +1,6 @@
+import z from 'zod/v4'
 import type { ChatToolDef } from './tools'
+import { validModels } from '../config'
 
 /**
  * Event emitted when text is added to a chat message
@@ -55,17 +57,39 @@ export type ChatMessage = UserMessage | AssistantMessage
 
 export type ChatRole = ChatMessage['role']
 
-export type MessageGenerationInfo = {
-  model: string
-  promptInfo:
-    | {
-        type: 'saved'
-        id: string
-        name: string
-        systemMessage: string
-      }
-    | {
-        type: 'custom'
-        systemMessage: string
-      }
-}
+export const MessageGenerationInfoSchema = z.object({
+  model: z.union(validModels.map((m) => z.literal(m.name))),
+  promptInfo: z.discriminatedUnion('type', [
+    z.object({
+      type: z.literal('saved'),
+      id: z.string(),
+      name: z.string(),
+      systemMessage: z.string().optional(),
+    }),
+    z.object({
+      type: z.literal('custom'),
+      systemMessage: z.string(),
+    }),
+  ]),
+})
+
+export type MessageGenerationInfo = z.Infer<typeof MessageGenerationInfoSchema>
+
+const ChatMessageSchema = z.object({
+  role: z.enum(['user', 'assistant']),
+  content: z.string().min(0).max(400_000),
+})
+
+export const PostStreamSchemaV3 = z.object({
+  options: z.object({
+    chatMessages: z.array(ChatMessageSchema),
+    generationInfo: MessageGenerationInfoSchema,
+    userConsent: z.boolean().optional(),
+    modelTemperature: z.number().min(0).max(2),
+    saveConsent: z.boolean().optional(),
+    courseId: z.string().optional(),
+  }),
+  courseId: z.string().optional(),
+})
+
+export type PostStreamSchemaV3Type = z.input<typeof PostStreamSchemaV3>

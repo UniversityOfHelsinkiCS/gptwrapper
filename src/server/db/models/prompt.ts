@@ -1,7 +1,8 @@
-import { type CreationOptional, DataTypes, type InferAttributes, type InferCreationAttributes, Model } from 'sequelize'
+import { type CreationOptional, DataTypes, type InferAttributes, type InferCreationAttributes, Model, NonAttribute } from 'sequelize'
 
 import type { CustomMessage } from '../../types'
 import { sequelize } from '../connection'
+import type RagIndex from './ragIndex'
 
 export const PromptTypeValues = ['CHAT_INSTANCE', 'PERSONAL'] as const
 export type PromptType = (typeof PromptTypeValues)[number]
@@ -26,6 +27,8 @@ class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prom
   declare hidden: CreationOptional<boolean>
 
   declare mandatory: CreationOptional<boolean>
+
+  declare ragIndex?: NonAttribute<RagIndex>
 }
 
 Prompt.init(

@@ -4,6 +4,7 @@ import { ChatRequestMessage, GetChatCompletionsOptions } from '@azure/openai'
 import { ChatCompletionMessageParam } from 'openai/resources/chat'
 import { RequestOptions } from 'openai/core'
 import type { User } from '../shared/user'
+import { ValidModelName } from '../config'
 
 export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>
 
@@ -36,7 +37,7 @@ export type Role = 'system' | 'assistant' | 'user'
 export type StreamingOptions = OpenAI.Chat.Completions.CompletionCreateParamsStreaming
 
 export type AzureOptions = {
-  model: string
+  model: ValidModelName
   messages: ChatRequestMessage[]
   options: GetChatCompletionsOptions
 }

@@ -1,8 +1,8 @@
 import crypto from 'crypto'
 
-import { DEFAUL_CONTEXT_LIMIT, validModels } from '../../config'
+import { DEFAUL_CONTEXT_LIMIT, ValidModelName, validModels } from '../../config'
 
-export const getAllowedModels = (model: string): string[] => {
+export const getAllowedModels = (model: string): ValidModelName[] => {
   const allModels = validModels.map(({ name }) => name)
 
   // Logic: allowed models are selected by the pricing of the model

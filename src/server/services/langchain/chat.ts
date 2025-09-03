@@ -5,7 +5,7 @@ import type { Runnable } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
 import { AzureChatOpenAI } from '@langchain/openai'
-import { validModels } from '../../../config'
+import { ValidModelName, validModels } from '../../../config'
 import type { ChatEvent } from '../../../shared/chat'
 import type { ChatMessage } from '../../../shared/chat'
 import type { ChatToolDef, ChatToolOutput } from '../../../shared/tools'
@@ -16,7 +16,7 @@ import { MockModel } from './MockModel'
 
 type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
 
-const getChatModel = (model: string, tools: StructuredTool[], temperature: number): ChatModel => {
+const getChatModel = (model: ValidModelName, tools: StructuredTool[], temperature: number): ChatModel => {
   const modelConfig = validModels.find((m) => m.name === model)
   if (!modelConfig) {
     throw new Error(`Invalid model: ${model}`)
@@ -31,7 +31,7 @@ const getChatModel = (model: string, tools: StructuredTool[], temperature: numbe
           azureOpenAIApiVersion: '2023-05-15',
           azureOpenAIApiDeploymentName: model, // In Azure, always use the acual model name as the deployment name
           azureOpenAIApiInstanceName: AZURE_RESOURCE,
-          temperature: modelConfig.temperature ?? temperature, // If model config specifies a temperature, use it; otherwise, use the user supplied temperature.
+          temperature: 'temperature' in modelConfig ? modelConfig.temperature : temperature, // If model config specifies a temperature, use it; otherwise, use the user supplied temperature.
           reasoning: {
             effort: 'minimal',
             summary: null,
@@ -55,7 +55,7 @@ export const streamChat = async ({
   writeEvent,
   user,
 }: {
-  model: string
+  model: ValidModelName
   temperature: number
   systemMessage: string
   chatMessages: ChatMessage[]

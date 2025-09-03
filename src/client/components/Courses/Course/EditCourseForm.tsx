@@ -7,7 +7,7 @@ import { enqueueSnackbar } from 'notistack'
 
 import { Course, SetState, User } from '../../../types'
 import { useEditCourseMutation } from '../../../hooks/useCourseMutation'
-import { validModels } from '../../../../config'
+import { ValidModelName, validModels } from '../../../../config'
 
 const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; setOpen: SetState<boolean>; user: User }, ref) => {
   const { t } = useTranslation()
@@ -64,7 +64,7 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
               {t('admin:model')}
             </Typography>
             <Typography mb={1}>{t('admin:modelInfo')}</Typography>
-            <Select sx={{ m: 1, width: '300px' }} value={model} onChange={(e) => setModel(e.target.value)}>
+            <Select sx={{ m: 1, width: '300px' }} value={model} onChange={(e) => setModel(e.target.value as ValidModelName)}>
               {validModels.map(({ name: modelName }) => (
                 <MenuItem key={modelName} value={modelName}>
                   {modelName}

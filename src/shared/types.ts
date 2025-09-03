@@ -1,3 +1,4 @@
+import { ValidModelName } from '../config'
 import type { IngestionPipelineStageKey } from './constants'
 
 export type RagIndexMetadata = {
@@ -46,7 +47,7 @@ export type Discussion = {
   courseId: string
   response: string
   metadata: {
-    model: string
+    model: ValidModelName
     messages: {
       role: string
       content: string

@@ -6,6 +6,7 @@ import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, User, Responsib
 import { getOwnCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
+import { ValidModelName } from '../../config'
 
 const courseRouter = express.Router()
 
@@ -259,7 +260,7 @@ courseRouter.put('/:id', async (req, res) => {
   const { id } = req.params
   const { activityPeriod, model, usageLimit, saveDiscussions, notOptoutSaving } = req.body as {
     activityPeriod: ActivityPeriod
-    model: string
+    model: ValidModelName
     usageLimit: number
     saveDiscussions: boolean
     notOptoutSaving: boolean

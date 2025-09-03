@@ -12,6 +12,7 @@ import { statsViewerIams } from '../util/config'
 import { generateTerms } from '../util/util'
 import { Where } from 'sequelize/types/utils'
 import { ApplicationError } from '../util/ApplicationError'
+import { ValidModelName } from '../../config'
 
 const adminRouter = express.Router()
 
@@ -30,7 +31,7 @@ adminRouter.use((req, _, next) => {
 interface NewChatInstanceData {
   name: string
   description: string
-  model: string
+  model: ValidModelName
   usageLimit: number
   courseId: string
 }
@@ -161,7 +162,7 @@ adminRouter.get('/statistics', async (req, res) => {
 interface UpdatedChatInstanceData {
   name: string
   description: string
-  model: string
+  model: ValidModelName
   usageLimit: number
   courseId: string
 }

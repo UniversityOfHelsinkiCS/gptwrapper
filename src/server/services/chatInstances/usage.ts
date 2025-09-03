@@ -1,6 +1,6 @@
 import { Tiktoken } from '@dqbd/tiktoken'
 
-import { DEFAULT_TOKEN_LIMIT, FREE_MODEL } from '../../../config'
+import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, ValidModelName } from '../../../config'
 import { tikeIam } from '../../util/config'
 import type { User as UserType } from '../../../shared/user'
 import { ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../../db/models'
@@ -21,7 +21,7 @@ export const getUsage = async (userId: string) => {
   return user.usage
 }
 
-export const checkUsage = (user: UserType, model: string): boolean => {
+export const checkUsage = (user: UserType, model: ValidModelName): boolean => {
   if (model === FREE_MODEL) return true
 
   // 10x token limit for power users

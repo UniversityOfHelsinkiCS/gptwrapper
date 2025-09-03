@@ -1,3 +1,4 @@
+import { ValidModelName } from '../config'
 import type { ChatMessage } from '../shared/chat'
 import type { UserPreferences } from '../shared/user'
 
@@ -71,7 +72,7 @@ export interface ChatInstance {
   id: string
   name: Locales
   description: string
-  model: string
+  model: ValidModelName
   usageLimit: number
   resetCron?: string
   courseId?: string
@@ -83,7 +84,7 @@ export interface ChatInstance {
 export interface AccessGroup {
   id: string
   iamGroup: string
-  model: string
+  model: ValidModelName
   usageLimit: number | null
   resetCron: string | null
 }
@@ -139,8 +140,8 @@ export type ChatInstanceUsage = {
 }
 
 export type UserStatus = {
-  model: string
-  models: string[]
+  model: ValidModelName
+  models: ValidModelName[]
   usage: number
   limit: number
   isTike: boolean
