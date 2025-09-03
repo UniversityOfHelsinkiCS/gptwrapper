@@ -139,7 +139,8 @@
     "sourceDescription": "Materials specified by the teacher can be used as a source in the course chat. You can select the source below.",
     "other": "Other settings",
     "noPrompts": "No prompts",
-    "emptyPrompt": "Empty"
+    "emptyPrompt": "Empty",
+    "confirmClearCustomPrompt": "Warning: This action will clear your custom prompt: \n\"{{customSystemMessage}}\""
   },
   "email": {
     "save": "Save as email",

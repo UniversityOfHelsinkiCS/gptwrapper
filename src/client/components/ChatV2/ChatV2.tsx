@@ -7,7 +7,7 @@ import { enqueueSnackbar } from 'notistack'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
-import { DEFAULT_ASSISTANT_INSTRUCTIONS, DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, inProduction, validModels } from '../../../config'
+import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, inProduction, validModels } from '../../../config'
 import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '../../../shared/chat'
 import type { RagIndexAttributes } from '../../../shared/types'
 import { getLanguageValue } from '../../../shared/utils'
@@ -21,7 +21,7 @@ import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useAnalyticsDispatch } from '../../stores/analytics'
-import type { Course, Prompt } from '../../types'
+import type { Course } from '../../types'
 import Footer from '../Footer'
 import { ChatBox } from './ChatBox'
 import { Conversation } from './Conversation'
@@ -32,13 +32,13 @@ import ToolResult from './ToolResult'
 import { OutlineButtonBlack } from './general/Buttons'
 import { ChatInfo } from './general/ChatInfo'
 import RagSelector, { RagSelectorDescription } from './RagSelector'
-import { SettingsModal, useUrlPromptId } from './SettingsModal'
+import { SettingsModal } from './SettingsModal'
 import { useChatStream } from './useChatStream'
-import { getCompletionStreamV3 } from './util'
+import { postCompletionStreamV3 } from './api'
 import PromptSelector from './PromptSelector'
-import { useQuery } from '@tanstack/react-query'
 import ModelSelector from './ModelSelector'
 import { ConversationSplash } from './general/ConversationSplash'
+import { PromptStateProvider, usePromptState } from './PromptState'
 
 function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, urlKey: string) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -58,7 +58,7 @@ function useLocalStorageStateWithURLDefault(key: string, defaultValue: string, u
   return [urlValue ?? value, modifiedSetValue] as const
 }
 
-export const ChatV2 = () => {
+const ChatV2Content = () => {
   const { courseId } = useParams()
   const isEmbeddedMode = useIsEmbedded()
   const theme = useTheme()
@@ -76,8 +76,6 @@ export const ChatV2 = () => {
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
   const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model')
   const [disclaimerStatus, setDisclaimerStatus] = useLocalStorageState<boolean>('disclaimer-status', true)
-  const [customSystemMessage, setCustomSystemMessage] = useLocalStorageState<string>(`${localStoragePrefix}-chat-instructions`, DEFAULT_ASSISTANT_INSTRUCTIONS)
-  const [activePrompt, setActivePrompt] = useLocalStorageState<Prompt | undefined>(`${localStoragePrefix}-active-prompt`, undefined)
   const [modelTemperature, setModelTemperature] = useLocalStorageStateWithURLDefault(
     `${localStoragePrefix}-chat-model-temperature`,
     String(DEFAULT_MODEL_TEMPERATURE),
@@ -95,7 +93,7 @@ export const ChatV2 = () => {
   const [allowedModels, setAllowedModels] = useState<string[]>([])
   const [chatLeftSidePanelOpen, setChatLeftSidePanelOpen] = useState<boolean>(false)
   // RAG states
-  const [ragIndexId, setRagIndexId] = useState<number | undefined>()
+  const [ragIndexId, _setRagIndexId] = useState<number | undefined>()
   const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
   const ragIndex = ragIndices?.find((index) => index.id === ragIndexId)
 
@@ -124,6 +122,8 @@ export const ChatV2 = () => {
   const chatScroll = useChatScroll()
 
   const { t, i18n } = useTranslation()
+
+  const { promptInfo } = usePromptState()
 
   const disclaimerInfo = infoTexts?.find((infoText) => infoText.name === 'disclaimer')?.text[i18n.language] ?? null
 
@@ -190,13 +190,11 @@ export const ChatV2 = () => {
 
     const generationInfo: MessageGenerationInfo = {
       model: activeModel,
-      promptInfo: activePrompt
-        ? { id: activePrompt.id, name: activePrompt.name, type: 'saved', systemMessage: activePrompt.systemMessage }
-        : { type: 'custom', systemMessage: customSystemMessage },
+      promptInfo,
     }
 
     try {
-      const { tokenUsageAnalysis, stream } = await getCompletionStreamV3({
+      const { tokenUsageAnalysis, stream } = await postCompletionStreamV3({
         generationInfo,
         messages: newMessages,
         ragIndexId,
@@ -293,7 +291,6 @@ export const ChatV2 = () => {
     }
   }, [userStatus, course])
 
-  const showRagSelector = (ragIndices?.length ?? 0) > 0
   const rightMenuOpen = !!activeToolResult
   const rightMenuWidth = rightMenuOpen ? '300px' : '0px'
   const leftMenuWidth = !isEmbeddedMode ? { md: '250px', lg: '300px' } : { md: '0px', lg: '0px' }
@@ -380,20 +377,13 @@ export const ChatV2 = () => {
             }}
           >
             <LeftMenu
-              course={course}
               handleReset={handleReset}
               onClose={() => {
                 setChatLeftSidePanelOpen(false)
               }}
               setSettingsModalOpen={setSettingsModalOpen}
               setDisclaimerStatus={setDisclaimerStatus}
-              showRagSelector={showRagSelector}
-              ragIndex={ragIndex}
-              setRagIndexId={setRagIndexId}
-              ragIndices={ragIndices}
               messages={messages}
-              activePrompt={activePrompt}
-              setActivePrompt={setActivePrompt}
               currentModel={activeModel}
               setModel={setActiveModel}
               availableModels={allowedModels}
@@ -406,17 +396,10 @@ export const ChatV2 = () => {
               position: 'fixed',
               top: 0,
             }}
-            course={course}
             handleReset={handleReset}
             setSettingsModalOpen={setSettingsModalOpen}
             setDisclaimerStatus={setDisclaimerStatus}
-            showRagSelector={showRagSelector}
-            ragIndex={ragIndex}
-            setRagIndexId={setRagIndexId}
-            ragIndices={ragIndices}
             messages={messages}
-            activePrompt={activePrompt}
-            setActivePrompt={setActivePrompt}
             currentModel={activeModel}
             setModel={setActiveModel}
             availableModels={allowedModels}
@@ -575,13 +558,8 @@ export const ChatV2 = () => {
       <SettingsModal
         open={settingsModalOpen}
         setOpen={setSettingsModalOpen}
-        customSystemMessage={customSystemMessage}
-        setCustomSystemMessage={setCustomSystemMessage}
-        activePrompt={activePrompt}
-        setActivePrompt={setActivePrompt}
         modelTemperature={parseFloat(modelTemperature)}
         setModelTemperature={(updatedTemperature) => setModelTemperature(String(updatedTemperature))}
-        course={course}
       />
 
       <DisclaimerModal disclaimer={disclaimerInfo} disclaimerStatus={disclaimerStatus} setDisclaimerStatus={setDisclaimerStatus} />
@@ -596,13 +574,7 @@ const LeftMenu = ({
   onClose,
   setSettingsModalOpen,
   setDisclaimerStatus,
-  showRagSelector,
-  ragIndex,
-  setRagIndexId,
-  ragIndices,
   messages,
-  activePrompt,
-  setActivePrompt,
   currentModel,
   setModel,
   availableModels,
@@ -613,13 +585,7 @@ const LeftMenu = ({
   onClose?: () => void
   setSettingsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
   setDisclaimerStatus: React.Dispatch<React.SetStateAction<boolean>>
-  showRagSelector: boolean
-  ragIndex?: RagIndexAttributes
-  setRagIndexId: React.Dispatch<React.SetStateAction<number | undefined>>
-  ragIndices?: RagIndexAttributes[]
   messages: ChatMessage[]
-  activePrompt: Prompt | undefined
-  setActivePrompt: (prompt: Prompt | undefined) => void
   currentModel: string
   setModel: (model: string) => void
   availableModels: string[]
@@ -628,11 +594,6 @@ const LeftMenu = ({
   const { courseId } = useParams()
   const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
   const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
-  const urlPromptId = useUrlPromptId()
-  const { data: myPrompts } = useQuery<Prompt[]>({
-    queryKey: ['/prompts/my-prompts'],
-    initialData: [],
-  })
 
   useEffect(() => {
     if (!userStatus) return
@@ -661,15 +622,7 @@ const LeftMenu = ({
             {t('chat:emptyConversation')}
           </OutlineButtonBlack>
           <ModelSelector currentModel={currentModel} setModel={setModel} availableModels={availableModels} isTokenLimitExceeded={isTokenLimitExceeded} />
-          <PromptSelector
-            sx={{ width: '100%' }}
-            coursePrompts={course?.prompts ?? []}
-            myPrompts={myPrompts}
-            activePrompt={activePrompt}
-            setActivePrompt={setActivePrompt}
-            mandatoryPrompt={course?.prompts.find((p) => p.mandatory)}
-            urlPrompt={course?.prompts.find((p) => p.id === urlPromptId)}
-          />
+          <PromptSelector sx={{ width: '100%' }} />
           <EmailButton messages={messages} disabled={!messages?.length} />
           <OutlineButtonBlack startIcon={<Tune />} onClick={() => setSettingsModalOpen(true)} data-testid="settings-button">
             {t('chat:settings')}
@@ -677,12 +630,6 @@ const LeftMenu = ({
           <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} data-testid="help-button">
             {t('info:title')}
           </OutlineButtonBlack>
-          {course && showRagSelector && (
-            <>
-              <RagSelectorDescription />
-              <RagSelector currentRagIndex={ragIndex} setRagIndex={setRagIndexId} ragIndices={ragIndices ?? []} />
-            </>
-          )}
         </Box>
       </Box>
       {onClose && (
@@ -694,3 +641,9 @@ const LeftMenu = ({
     </Box>
   )
 }
+
+export const ChatV2 = () => (
+  <PromptStateProvider>
+    <ChatV2Content />
+  </PromptStateProvider>
+)

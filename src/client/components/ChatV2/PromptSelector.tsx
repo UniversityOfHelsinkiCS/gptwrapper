@@ -4,31 +4,17 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Prompt } from '../../types'
 import { OutlineButtonBlack } from './general/Buttons'
+import { usePromptState } from './PromptState'
 
-const PromptSelector = ({
-  sx = {},
-  coursePrompts,
-  myPrompts,
-  activePrompt,
-  setActivePrompt,
-  handleDeletePrompt,
-  mandatoryPrompt,
-}: {
-  sx?: object
-  coursePrompts: Prompt[]
-  myPrompts: Prompt[]
-  activePrompt?: Prompt
-  setActivePrompt: (prompt: Prompt | undefined) => void
-  handleDeletePrompt?: (prompt: Prompt) => void
-  mandatoryPrompt?: Prompt
-  urlPrompt?: Prompt
-}) => {
+const PromptSelector = ({ sx = {}, handleDeletePrompt }: { sx?: object; handleDeletePrompt?: (prompt: Prompt) => void }) => {
+  const { activePrompt, handleChangePrompt, mandatoryPrompt, coursePrompts, myPrompts } = usePromptState()
+
   const { t } = useTranslation()
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   const handleSelect = (prompt?: Prompt) => {
-    setActivePrompt(prompt)
+    handleChangePrompt(prompt)
     setAnchorEl(null)
   }
 

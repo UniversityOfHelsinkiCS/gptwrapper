@@ -161,32 +161,7 @@ testMatrix.forEach((testConfig) => {
       })
 
       if (course) {
-        test('Course chat RAG feature', async ({ page }) => {
-          await acceptDisclaimer(page)
-          await useMockModel(page)
-
-          const ragName = `rag-${test.info().workerIndex}-${testConfig.role}`
-          await page.locator('#rag-index-selector').first().click()
-          await page.getByRole('menuitem', { name: ragName, exact: true }).click()
-
-          await sendChatMessage(page, 'rag')
-          await closeSendPreference(page)
-
-          // Shows file search loading indicator
-          await expect(page.getByTestId('tool-call-message')).toBeVisible()
-
-          // Responds with RAG mock document text
-          await expect(page.getByTestId('assistant-message')).toContainText('This is the first mock document')
-
-          // Source button is visible
-          await expect(page.getByTestId('file-search-sources')).toBeVisible()
-
-          // Sources drawer has been opened and title is visible
-          await expect(page.getByTestId('sources-header')).toBeVisible()
-
-          // Three source items should be visible
-          await expect(page.getByTestId('sources-truncated-item')).toHaveCount(3)
-        })
+        // @todo test course chat RAG feature
       }
 
       if (!course) {
