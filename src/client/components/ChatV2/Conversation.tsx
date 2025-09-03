@@ -10,14 +10,15 @@ import { LoadingMessage } from './general/LoadingMessage'
 import { preprocessMath } from './util'
 import 'katex/dist/katex.min.css'
 import 'katex/dist/contrib/mhchem'
-import CopyToClipboardButton from './CopyToClipboardButton'
-import { t } from 'i18next'
-import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
-import useLocalStorageState from '../../hooks/useLocalStorageState'
-import { BlueButton } from './general/Buttons'
-import type { AssistantMessage, ChatMessage, MessageGenerationInfo, ToolCallResultEvent, ToolCallStatusEvent, UserMessage } from '../../../shared/chat'
-import { useId, useMemo } from 'react'
 import { ArrowRight } from '@mui/icons-material'
+import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
+import { t } from 'i18next'
+import { useId, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { AssistantMessage, ChatMessage, MessageGenerationInfo, ToolCallResultEvent, ToolCallStatusEvent, UserMessage } from '../../../shared/chat'
+import useLocalStorageState from '../../hooks/useLocalStorageState'
+import CopyToClipboardButton from './CopyToClipboardButton'
+import { BlueButton } from './general/Buttons'
 
 const UserMessageItem = ({ message }: { message: UserMessage }) => (
   <Box
@@ -104,12 +105,13 @@ const ToolResult = ({ toolResult, handleToolResult }: { toolResult: ToolCallResu
 }
 
 const AssistantMessageInfo = ({ message }: { message: AssistantMessage }) => {
+  const { t } = useTranslation()
   if (!message.generationInfo) return null
 
   const title =
     message.generationInfo.promptInfo.type === 'saved'
       ? `${message.generationInfo.promptInfo.name} (${message.generationInfo.model})`
-      : `${message.generationInfo.model}`
+      : `${message.generationInfo.model}` + (message.generationInfo.promptInfo.systemMessage.length > 0 ? ` (${t('chat:customPrompt')})` : '')
 
   return (
     <Box sx={{ display: 'flex', opacity: 0.7, alignItems: 'center' }}>
@@ -246,7 +248,11 @@ const AssistantMessageItem = ({ message, setActiveToolResult }: { message: Assis
                       id={codeBlockId}
                       copied={String(children)}
                       iconColor="#FFF"
-                      buttonStyle={{ position: 'absolute', top: '8px', right: '8px' }}
+                      buttonStyle={{
+                        position: 'absolute',
+                        top: '8px',
+                        right: '8px',
+                      }}
                     />
                   </Box>
                 </Box>
@@ -336,13 +342,30 @@ export const Conversation = ({
         {isStreaming &&
           messages.length > 0 &&
           (completion.length > 0 ? (
-            <MessageItem message={{ role: 'assistant', content: completion, generationInfo }} setActiveToolResult={setActiveToolResult} />
+            <MessageItem
+              message={{
+                role: 'assistant',
+                content: completion,
+                generationInfo,
+              }}
+              setActiveToolResult={setActiveToolResult}
+            />
           ) : (
             <LoadingMessage toolCalls={toolCalls} />
           ))}
       </Box>
       {!reminderSeen && !isStreaming && messages.length > 15 && (
-        <Paper variant="outlined" sx={{ display: 'flex', flexDirection: 'row', gap: 2, fontStyle: 'italic', alignItems: 'center', padding: 2 }}>
+        <Paper
+          variant="outlined"
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 2,
+            fontStyle: 'italic',
+            alignItems: 'center',
+            padding: 2,
+          }}
+        >
           <Typography>{t('chat:emptyReminder')}</Typography>
           <BlueButton sx={{ marginLeft: 'auto' }} onClick={() => setReminderSeen(true)}>
             OK

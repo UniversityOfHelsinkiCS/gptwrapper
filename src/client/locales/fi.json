@@ -111,7 +111,8 @@
     "email": "Keskustelu lähetetään osoitteeseen {{email}}",
     "cancelResponse": "Vastausten keskeyttäminen on toistaiseksi pois käytöstä.",
     "searchResults": "Hakutulokset",
-    "warning": "Uudessa chattinäkymässä on tällä hetkellä ongelmia ja vastausten generointi on hidastunut. Vanha chattinäkymä toimii normaalisti."
+    "warning": "Uudessa chattinäkymässä on tällä hetkellä ongelmia ja vastausten generointi on hidastunut. Vanha chattinäkymä toimii normaalisti.",
+    "customPrompt": "Kustomoitu alustus"
   },
   "settings": {
     "prompt": "Keskustelun alustus",

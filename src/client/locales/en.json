@@ -111,7 +111,8 @@
     "email": "The conversation will be sent to {{email}}",
     "cancelResponse": "Canceling responses is currently not supported",
     "searchResults": "Search results",
-    "warning": "The new chat view is experiencing problems and the response generation is very slow. The old chat view is working normally."
+    "warning": "The new chat view is experiencing problems and the response generation is very slow. The old chat view is working normally.",
+    "customPrompt": "custom prompt"
   },
   "settings": {
     "prompt": "Conversation prompt",
