@@ -8,11 +8,6 @@ export type WritingEvent = {
   text: string
 }
 
-export type CompleteEvent = {
-  type: 'complete'
-  prevResponseId: string // Not yet sure what to put here in v3
-}
-
 export type ToolCallStatusEvent = {
   type: 'toolCallStatus'
   callId: string
@@ -31,7 +26,7 @@ export type ErrorEvent = {
   error: string
 }
 
-export type ChatEvent = WritingEvent | CompleteEvent | ToolCallStatusEvent | ToolCallResultEvent | ErrorEvent
+export type ChatEvent = WritingEvent | ToolCallStatusEvent | ToolCallResultEvent | ErrorEvent
 
 export type SystemMessage = {
   role: 'system'

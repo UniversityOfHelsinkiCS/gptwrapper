@@ -9,7 +9,7 @@ export const useChatStream = ({
   onError,
   onText,
 }: {
-  onComplete: ({ previousResponseId, message }: { previousResponseId: string | undefined; message: AssistantMessage }) => void
+  onComplete: ({ message }: { message: AssistantMessage }) => void
   onToolCallComplete: (toolResult: ToolCallResultEvent) => void
   onError: (error: unknown) => void
   onText: () => void
@@ -25,7 +25,6 @@ export const useChatStream = ({
     let content = ''
     let error = ''
     const toolCallResultsAccum: Record<string, ToolCallResultEvent> = {}
-    let previousResponseId: string | undefined
 
     try {
       const reader = stream.getReader()
@@ -78,10 +77,6 @@ export const useChatStream = ({
               error += parsedChunk.error
               break
 
-            case 'complete':
-              previousResponseId = parsedChunk.prevResponseId
-              break
-
             default:
               break
           }
@@ -97,7 +92,6 @@ export const useChatStream = ({
       setIsStreaming(false)
 
       onComplete({
-        previousResponseId,
         message: {
           role: 'assistant',
           content,
