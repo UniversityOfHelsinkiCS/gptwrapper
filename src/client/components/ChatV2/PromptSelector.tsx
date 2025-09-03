@@ -64,7 +64,7 @@ const PromptSelector = ({
           },
         }}
       >
-        <MenuItem onClick={() => handleSelect(undefined)}>{t('settings:default')}</MenuItem>
+        <MenuItem onClick={() => handleSelect(undefined)}>{t('settings:emptyPrompt')}</MenuItem>
         {coursePrompts.length > 0 && (
           <>
             <Divider />

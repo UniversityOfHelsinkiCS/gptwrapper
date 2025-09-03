@@ -138,7 +138,8 @@
     "confirmDeletePrompt": "Haluatko varmasti poistaa alustuksen '{{name}}'?",
     "sourceDescription": "Kurssichatissa voidaan käyttää lähteenä opettajan määrittämiä materiaaleja. Voit valita lähteen alta.",
     "other": "Muut asetukset",
-    "noPrompts": "Ei alustuksia"
+    "noPrompts": "Ei alustuksia",
+    "emptyPrompt": "Tyhjä"
   },
   "chats": {
     "header": "Auki olevat kurssichatit",

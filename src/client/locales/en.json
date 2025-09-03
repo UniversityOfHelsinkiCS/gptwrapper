@@ -138,7 +138,8 @@
     "selectedSource": "No selected source",
     "sourceDescription": "Materials specified by the teacher can be used as a source in the course chat. You can select the source below.",
     "other": "Other settings",
-    "noPrompts": "No prompts"
+    "noPrompts": "No prompts",
+    "emptyPrompt": "Empty"
   },
   "email": {
     "save": "Save as email",
