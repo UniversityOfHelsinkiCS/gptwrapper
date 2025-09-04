@@ -48,6 +48,7 @@ RagIndex.init(
   },
   {
     underscored: true,
+    tableName: 'rag_indices',
     sequelize,
   },
 )

@@ -2,7 +2,7 @@ import { type CreationOptional, DataTypes, type InferAttributes, type InferCreat
 
 import type { CustomMessage } from '../../types'
 import { sequelize } from '../connection'
-import type RagIndex from './ragIndex'
+import RagIndex from './ragIndex'
 
 export const PromptTypeValues = ['CHAT_INSTANCE', 'PERSONAL'] as const
 export type PromptType = (typeof PromptTypeValues)[number]
@@ -58,6 +58,10 @@ Prompt.init(
     ragIndexId: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: RagIndex,
+        key: 'id',
+      },
     },
     systemMessage: {
       type: DataTypes.TEXT,

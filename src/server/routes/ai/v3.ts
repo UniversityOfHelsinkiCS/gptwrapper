@@ -119,7 +119,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
         {
           model: RagIndex,
           as: 'ragIndex',
-          where: courseId ? { courseId } : {},
         },
       ],
     })

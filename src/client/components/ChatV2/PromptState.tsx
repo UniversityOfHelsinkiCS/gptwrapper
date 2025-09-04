@@ -103,7 +103,7 @@ export const PromptStateProvider: React.FC<{
       }
       sync()
     }
-  }, [isPromptEditable, activePrompt, setActivePrompt])
+  }, [activePrompt?.id])
 
   // Just the analytics dispatch.
   useEffect(() => {

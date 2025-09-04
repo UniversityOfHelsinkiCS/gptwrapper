@@ -60,6 +60,8 @@ RagFile.belongsTo(RagIndex, { as: 'ragIndex' })
 
 RagIndex.hasMany(RagFile, { as: 'ragFiles' })
 
+RagIndex.hasMany(Prompt, { as: 'prompts' })
+
 RagFile.belongsTo(User, { as: 'user' })
 
 /**
