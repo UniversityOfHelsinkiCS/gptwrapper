@@ -11,7 +11,6 @@ import useCurrentUser from '../../../hooks/useCurrentUser'
 import { useCreatePromptMutation, useDeletePromptMutation } from '../../../hooks/usePromptMutation'
 import usePrompts from '../../../hooks/usePrompts'
 import type { Responsebility, User } from '../../../types'
-import { Conversation } from '../../ChatV2/Conversation'
 import SystemMessage from '../../ChatV2/SystemMessage'
 import Rag from '../../Rag/Rag'
 import { formatDate, getCurTypeLabel } from '../util'
@@ -25,7 +24,6 @@ import apiClient from '../../../util/apiClient'
 import { ActionUserSearch } from '../../Admin/UserSearch'
 import { useCourseRagIndices } from '../../../hooks/useRagIndices'
 import RagSelector, { RagSelectorDescription } from '../../ChatV2/RagSelector'
-import type { ChatMessage } from '../../../../shared/chat'
 
 const Course = () => {
   const [showTeachers, setShowTeachers] = useState(false)
@@ -326,7 +324,6 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
   const { ragIndices } = useCourseRagIndices(courseId)
   const [name, setName] = useState('')
   const [system, setSystem] = useState('')
-  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [hidden, setHidden] = useState(false)
   const [mandatory, setMandatory] = useState(false)
   const [ragIndexId, setRagIndexId] = useState<number | undefined>(undefined)
@@ -335,7 +332,6 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
   const deleteMutation = useDeletePromptMutation()
 
   const handleReset = () => {
-    setMessages([])
     setName('')
     setSystem('')
     setHidden(false)
@@ -353,7 +349,7 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
         type: 'CHAT_INSTANCE',
         name,
         systemMessage: system,
-        messages,
+        messages: [],
         hidden,
         mandatory,
         ragIndexId,
@@ -400,8 +396,6 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
         <Input sx={{ mr: 2, mb: 2 }} placeholder={t('promptName') as string} value={name} onChange={({ target }) => setName(target.value)} />
 
         <SystemMessage system={system} setSystem={setSystem} disabled={false} creation />
-
-        <Conversation messages={messages} completion="" toolCalls={{}} isStreaming={false} setActiveToolResult={(_d) => {}} />
 
         <Box sx={{ py: 2, display: 'flex', alignItems: 'start' }}>
           {!mandatoryPromptId ? (

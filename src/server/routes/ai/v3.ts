@@ -109,16 +109,12 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   if (generationInfo.promptInfo.type === 'saved') {
     prompt = await Prompt.findByPk(generationInfo.promptInfo.id, {
+      ...(course ? { where: { chatInstanceId: course.id } } : {}),
       include: [
-        {
-          model: ChatInstance,
-          attributes: ['id'],
-          as: 'chatInstance',
-          where: courseId ? { courseId } : {},
-        },
         {
           model: RagIndex,
           as: 'ragIndex',
+          required: false,
         },
       ],
     })
