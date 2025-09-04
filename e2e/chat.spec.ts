@@ -61,7 +61,7 @@ testMatrix.forEach((testConfig) => {
         await expect(page.getByTestId('assistant-message')).toContainText('You are calling mock endpoint for streaming mock data')
       })
 
-      test.only('Multiple messages work', async ({ page }) => {
+      test('Multiple messages work', async ({ page }) => {
         await acceptDisclaimer(page)
         await useMockModel(page)
 
