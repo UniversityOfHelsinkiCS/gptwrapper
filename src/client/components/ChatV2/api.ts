@@ -12,7 +12,7 @@ export const useToolResults = (toolCallId: string) => {
   })
 }
 
-export const postCompletionStreamV3 = async (formData: FormData, input: PostStreamSchemaV3Type, abortController: AbortController) => {
+export const postCompletionStreamV3 = async (formData: FormData, input: PostStreamSchemaV3Type, abortController?: AbortController) => {
   formData.set('data', JSON.stringify(input))
 
   return postAbortableStream('/ai/v3/stream', formData, abortController)

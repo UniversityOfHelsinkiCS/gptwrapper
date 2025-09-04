@@ -113,7 +113,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
         {
           model: ChatInstance,
           attributes: ['id'],
-          as: 'chatInstances',
+          as: 'chatInstance',
           where: courseId ? { courseId } : {},
         },
         {

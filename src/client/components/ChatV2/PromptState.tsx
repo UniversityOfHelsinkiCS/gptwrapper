@@ -1,13 +1,13 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
+import React, { createContext, useContext, ReactNode, useEffect } from 'react'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { useParams, useSearchParams } from 'react-router-dom'
-import { Prompt } from '../../types'
-import apiClient, { ApiError } from '../../util/apiClient'
+import type { Prompt } from '../../types'
+import apiClient, { type ApiError } from '../../util/apiClient'
 import { isAxiosError } from 'axios'
-import { UseMutateAsyncFunction, useMutation, useQuery } from '@tanstack/react-query'
+import { type UseMutateAsyncFunction, useMutation, useQuery } from '@tanstack/react-query'
 import useCourse from '../../hooks/useCourse'
 import { useAnalyticsDispatch } from '../../stores/analytics'
-import { MessageGenerationInfo } from '../../../shared/chat'
+import type { MessageGenerationInfo } from '../../../shared/chat'
 import { useTranslation } from 'react-i18next'
 
 const useUrlPromptId = () => {

@@ -7,7 +7,7 @@ import { enqueueSnackbar } from 'notistack'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
-import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, inProduction, ValidModelName, ValidModelNameSchema, validModels } from '../../../config'
+import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, inProduction, type ValidModelName, ValidModelNameSchema, validModels } from '../../../config'
 import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '../../../shared/chat'
 import { getLanguageValue } from '../../../shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
@@ -83,7 +83,7 @@ const ChatV2Content = () => {
     `${localStoragePrefix}-chat-model-temperature`,
     String(DEFAULT_MODEL_TEMPERATURE),
     'temperature',
-    z.number(),
+    z.coerce.number(),
   )
 
   const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as ChatMessage[])
@@ -193,10 +193,6 @@ const ChatV2Content = () => {
     }
 
     try {
-      if (!streamController) {
-        throw new Error('streamController is not defined')
-      }
-
       const { tokenUsageAnalysis, stream } = await postCompletionStreamV3(
         formData,
         {
