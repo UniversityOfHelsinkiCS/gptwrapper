@@ -160,10 +160,6 @@ testMatrix.forEach((testConfig) => {
         await expect(page.getByTestId('assistant-message').last()).toContainText('Temperature: 1')
       })
 
-      if (course) {
-        // @todo test course chat RAG feature
-      }
-
       if (!course) {
         test('Every validModel is available in general chat', async ({ page }) => {
           await acceptDisclaimer(page)

@@ -105,6 +105,40 @@ test.describe('Prompts', () => {
     expect(page.getByText(newPromptName, { exact: true })).not.toBeVisible()
   })
 
+  test('Prompt with RAG works', async ({ page }) => {
+    await page.goto('/courses/test-course/prompts')
+
+    const newPromptName = `testausprompti-${test.info().workerIndex}-rag`
+
+    await page.getByTestId('create-prompt-button').click()
+
+    await page.getByTestId('prompt-name-input').fill(newPromptName)
+    await page.getByTestId('system-message-input').fill('what ever')
+    await page.getByTestId('rag-select').click()
+    await page.getByTestId(`source-material-rag-${test.info().workerIndex}-teacher`).click()
+    await page.getByRole('button', { name: 'Save' }).click()
+
+    await page.getByTestId('close-prompt-editor').click()
+
+    // Prompt is created and link is visible
+    await page.getByText(`Link to chat with the prompt '${newPromptName}' active`).click()
+
+    // Now in chat view
+    await acceptDisclaimer(page)
+
+    // The prompt is active.
+    await expect(page.getByTestId('prompt-selector-button').first()).toContainText(newPromptName)
+
+    // Send something
+    await sendChatMessage(page, 'rag')
+    await closeSendPreference(page)
+
+    // The result should be echo of the course prompt
+    await expect(page.getByTestId('assistant-message')).toContainText('Ok! Got some great results from that mock tool call!')
+
+    await expect(page.getByTestId('sources-header')).toBeVisible()
+  })
+
   test('Own prompts work in course chat and normal chat', async ({ page }) => {
     // First create own prompt in course chat view
     await page.goto('/test-course')

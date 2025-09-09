@@ -12,7 +12,7 @@ export const adminTest = base.extend<{ forEachTest: void }>({
        * Parallel worker isolation: each worker has its own test user identified by the worker index.
        */
 
-      const testUserIdx = studentTest.info().workerIndex
+      const testUserIdx = adminTest.info().workerIndex
       const testUserRole = 'admin'
 
       page.context().setExtraHTTPHeaders({
