@@ -39,8 +39,6 @@ const ModelSelector = ({
     return models.filter((model) => !isTokenLimitExceeded || model === FREE_MODEL).filter((model) => user?.isAdmin || !inProduction || model !== 'mock')
   }, [isTokenLimitExceeded, user, activePrompt])
 
-  console.log(availableModels, activePrompt)
-
   return (
     <>
       <OutlineButtonBlack
