@@ -1,10 +1,10 @@
 import express from 'express'
-import z from 'zod/v4'
+import type { InferAttributes } from 'sequelize'
+import { type PromptCreationParams, PromptCreationParamsSchema, PromptUpdateableParamsSchema } from '../../shared/prompt'
+import type { User } from '@shared/user'
 import { ChatInstance, Prompt, RagIndex, Responsibility } from '../db/models'
 import type { RequestWithUser } from '../types'
-import type { User } from '../../shared/user'
 import { ApplicationError } from '../util/ApplicationError'
-import type { InferAttributes } from 'sequelize'
 
 const promptRouter = express.Router()
 
@@ -45,39 +45,6 @@ promptRouter.get('/for-course/:courseId', async (req, res) => {
   res.send(prompts)
   return
 })
-
-const PromptUpdateableParams = z.object({
-  name: z.string().min(1).max(255),
-  systemMessage: z.string().max(20_000),
-  hidden: z.boolean().default(false),
-  mandatory: z.boolean().default(false),
-  ragIndexId: z.number().min(1).optional(),
-})
-
-const PromptCreationParams = z.intersection(
-  PromptUpdateableParams.extend({
-    userId: z.string().min(1),
-    messages: z
-      .array(
-        z.object({
-          role: z.enum(['system', 'assistant', 'user']),
-          content: z.string().min(1),
-        }),
-      )
-      .default([]),
-  }),
-  z.discriminatedUnion('type', [
-    z.object({
-      type: z.literal('CHAT_INSTANCE'),
-      chatInstanceId: z.string().min(1),
-    }),
-    z.object({
-      type: z.literal('PERSONAL'),
-    }),
-  ]),
-)
-
-type PromptCreationParamsType = z.infer<typeof PromptCreationParams>
 
 const getPotentialNameConflicts = async (prompt: InferAttributes<Prompt, { omit: 'id' }>) => {
   switch (prompt.type) {
@@ -126,7 +93,7 @@ const authorizeChatInstancePromptResponsible = async (user: User, prompt: ChatIn
   }
 }
 
-const authorizePromptCreation = async (user: User, promptParams: PromptCreationParamsType) => {
+const authorizePromptCreation = async (user: User, promptParams: PromptCreationParams) => {
   switch (promptParams.type) {
     case 'CHAT_INSTANCE': {
       await authorizeChatInstancePromptResponsible(user, promptParams)
@@ -150,7 +117,7 @@ promptRouter.post('/', async (req, res) => {
   const { user } = req as RequestWithUser
   const input = req.body
   input.userId = user.id
-  const promptParams = PromptCreationParams.parse(input)
+  const promptParams = PromptCreationParamsSchema.parse(input)
 
   await authorizePromptCreation(user, promptParams)
 
@@ -202,7 +169,7 @@ promptRouter.delete('/:id', async (req, res) => {
 promptRouter.put('/:id', async (req, res) => {
   const { id } = req.params
   const { user } = req as unknown as RequestWithUser
-  const updates = PromptUpdateableParams.parse(req.body)
+  const updates = PromptUpdateableParamsSchema.parse(req.body)
   const { systemMessage, name, hidden, mandatory, ragIndexId } = updates
 
   const prompt = await Prompt.findByPk(id)

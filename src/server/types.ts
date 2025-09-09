@@ -1,10 +1,8 @@
 import { Request } from 'express'
 import OpenAI from 'openai'
 import { ChatRequestMessage, GetChatCompletionsOptions } from '@azure/openai'
-import { ChatCompletionMessageParam } from 'openai/resources/chat'
-import { RequestOptions } from 'openai/core'
-import type { User } from '../shared/user'
-import { ValidModelName } from '../config'
+import type { User } from '@shared/user'
+import type { ValidModelName } from '@config'
 
 export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>
 

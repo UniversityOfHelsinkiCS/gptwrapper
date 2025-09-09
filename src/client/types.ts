@@ -1,6 +1,6 @@
 import { ValidModelName } from '../config'
-import type { ChatMessage } from '../shared/chat'
-import type { UserPreferences } from '../shared/user'
+import type { ChatMessage } from '@shared/chat'
+import type { UserPreferences } from '@shared/user'
 
 /*
  * Important: This file contains types used in the client, but we should consider moving them to shared.
@@ -65,6 +65,7 @@ export type Prompt = {
   mandatory: boolean
   type: 'CHAT_INSTANCE' | 'PERSONAL'
   createdAt: string
+  ragIndexId?: number
 }
 
 export interface ChatInstance {

@@ -1,24 +1,12 @@
 import { useMutation } from '@tanstack/react-query'
 
-import type { Prompt } from '../types'
 import queryClient from '../util/queryClient'
 import { queryKey } from './usePrompts'
 import apiClient from '../util/apiClient'
-import type { ChatMessage } from '../../shared/chat'
-
-interface NewPromptData {
-  chatInstanceId: string
-  type: 'CHAT_INSTANCE' | 'PERSONAL' | 'RAG_INDEX'
-  name: string
-  systemMessage: string
-  messages: ChatMessage[]
-  hidden: boolean
-  mandatory: boolean
-  ragIndexId: number | undefined
-}
+import type { PromptEditableParams, PromptCreationParams } from '@shared/prompt'
 
 export const useCreatePromptMutation = () => {
-  const mutationFn = async (data: NewPromptData) => {
+  const mutationFn = async (data: Omit<PromptCreationParams, 'userId'>) => {
     const res = await apiClient.post(`/prompts`, data)
 
     const prompt = res.data
@@ -56,7 +44,7 @@ export const useDeletePromptMutation = () => {
 }
 
 export const useEditPromptMutation = () => {
-  const mutationFn = async (data: Prompt) => {
+  const mutationFn = async (data: PromptEditableParams & { id: string }) => {
     const res = await apiClient.put(`/prompts/${data.id}`, data)
     const prompt = res.data
     return prompt

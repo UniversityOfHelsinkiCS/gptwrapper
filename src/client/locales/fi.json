@@ -41,7 +41,8 @@
     "tryNew": "Kokeile uutta chattiä",
     "close": "Sulje",
     "useOld": "Vanha chattinäkymä",
-    "iframeCopy": "Kopioi upotettava iframe-elementti:\n\n{{- iframeHtml}}"
+    "iframeCopy": "Kopioi upotettava iframe-elementti:\n\n{{- iframeHtml}}",
+    "model": "Kielimalli"
   },
   "stats": {
     "showing": "Näytetään",
@@ -301,6 +302,15 @@
     "add": "lisää",
     "sourceMaterials": "Lähdemateriaalit",
     "settings": "kurssin asetukset"
+  },
+  "prompt": {
+    "createNew": "Luo uusi alustus",
+    "editPrompt": "Muokkaa alustusta \"{{name}}\"",
+    "modelFreeToChoose": "Malli vapaasti valittavissa",
+    "systemMessage": "Ohjeistus",
+    "hidePrompt": "Piilota alustuksen sisältö opiskelijoilta",
+    "editMandatoryPrompt": "Tee alustuksesta pakollinen",
+    "noSourceMaterials": "Ei lähdemateriaaleja"
   },
   "tooltip": {
     "copied": "Kopioitu!"

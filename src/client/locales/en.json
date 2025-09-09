@@ -27,7 +27,6 @@
     "confirmDeletePrompt": "Are you sure you want to delete this prompt?",
     "active": "Open: ",
     "prompt": "Prompt",
-    "hidePrompt": "Hide prompt text from students",
     "hiddenPromptInfo": "Prompt text is not visible to students",
     "visiblePromptInfo": "Prompt text is visible to students",
     "promptName": "Prompt name",
@@ -41,7 +40,8 @@
     "tryNew": "Try the new chat",
     "close": "Close",
     "useOld": "Old chat view",
-    "iframeCopy": "Copy embeddable iframe element:\n\n{{- iframeHtml}}"
+    "iframeCopy": "Copy embeddable iframe element:\n\n{{- iframeHtml}}",
+    "model": "Language model"
   },
   "stats": {
     "timePeriodStart": "Starting",
@@ -283,7 +283,6 @@
     "usagePercentage": "Percentage of students who have used CurreChat: ",
     "usageChartTitle": "Student token usages as percentages",
     "noData": "No data",
-    "editMandatoryPrompt": "Make prompt mandatory",
     "oneMandatoryPrompt": "Course can have only one mandatory prompt",
     "noCourses": "No courses",
     "showActiveCourses": "Show active courses",
@@ -301,6 +300,15 @@
     "add": "add",
     "sourceMaterials": "Source materials",
     "settings": "course settings"
+  },
+  "prompt": {
+    "hidePrompt": "Hide prompt text from students",
+    "editMandatoryPrompt": "Make prompt mandatory",
+    "noSourceMaterials": "No source materials",
+    "createNew": "Create new prompt",
+    "editPrompt": "Edit prompt '{{name}}'",
+    "systemMessage": "Instructions",
+    "modelFreeToChoose": "Model free to choose"
   },
   "tooltip": {
     "copied": "Copied!"

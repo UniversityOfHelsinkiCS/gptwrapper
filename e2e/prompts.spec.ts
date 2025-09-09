@@ -53,9 +53,13 @@ test.describe('Prompts', () => {
 
     const newPromptName = `testausprompti-${test.info().workerIndex}`
 
-    await page.getByRole('textbox', { name: 'Prompt name' }).fill(newPromptName)
-    await page.getByRole('textbox', { name: 'e.g. You are a helpful' }).fill('mocktest kurssitesti onnistui')
+    await page.getByTestId('create-prompt-button').click()
+
+    await page.getByTestId('prompt-name-input').fill(newPromptName)
+    await page.getByTestId('system-message-input').fill('mocktest kurssitesti onnistui')
     await page.getByRole('button', { name: 'Save' }).click()
+
+    await page.getByTestId('close-prompt-editor').click()
 
     // Prompt is created and link is visible
     await page.getByText(`Link to chat with the prompt '${newPromptName}' active`).click()

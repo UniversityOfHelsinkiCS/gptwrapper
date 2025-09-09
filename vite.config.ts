@@ -58,4 +58,10 @@ export default defineConfig({
   define: {
     'process.env': process.env,
   },
+  resolve: {
+    alias: {
+      '@shared': '/src/shared',
+      '@config': '/src/config.ts',
+    },
+  },
 })

@@ -1,5 +1,24 @@
-import { Edit, OpenInNew } from '@mui/icons-material'
-import { Alert, Box, Button, Checkbox, Container, FormControlLabel, Input, Modal, Paper, Skeleton, Stack, Tab, Tooltip, Typography } from '@mui/material'
+import { Close, Edit, OpenInNew } from '@mui/icons-material'
+import {
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  Container,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  IconButton,
+  Input,
+  Modal,
+  Paper,
+  Skeleton,
+  Stack,
+  Tab,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -10,8 +29,7 @@ import useCourse from '../../../hooks/useCourse'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import { useCreatePromptMutation, useDeletePromptMutation } from '../../../hooks/usePromptMutation'
 import usePrompts from '../../../hooks/usePrompts'
-import type { Responsebility, User } from '../../../types'
-import SystemMessage from '../../ChatV2/SystemMessage'
+import type { Prompt as PromptType, Responsebility, User } from '../../../types'
 import Rag from '../../Rag/Rag'
 import { formatDate, getCurTypeLabel } from '../util'
 import EditCourseForm from './EditCourseForm'
@@ -23,7 +41,8 @@ import { ApiErrorView } from '../../common/ApiErrorView'
 import apiClient from '../../../util/apiClient'
 import { ActionUserSearch } from '../../Admin/UserSearch'
 import { useCourseRagIndices } from '../../../hooks/useRagIndices'
-import RagSelector, { RagSelectorDescription } from '../../ChatV2/RagSelector'
+import { PromptEditor } from '../../Prompt/PromptEditor'
+import { OutlineButtonBlack } from '../../ChatV2/general/Buttons'
 
 const Course = () => {
   const [showTeachers, setShowTeachers] = useState(false)
@@ -322,105 +341,53 @@ const AssignedResponsibilityManagement = ({ responsibility, handleRemove }) => {
 const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceId: string }) => {
   const { t } = useTranslation()
   const { ragIndices } = useCourseRagIndices(courseId)
-  const [name, setName] = useState('')
-  const [system, setSystem] = useState('')
-  const [hidden, setHidden] = useState(false)
-  const [mandatory, setMandatory] = useState(false)
-  const [ragIndexId, setRagIndexId] = useState<number | undefined>(undefined)
-
-  const createMutation = useCreatePromptMutation()
-  const deleteMutation = useDeletePromptMutation()
-
-  const handleReset = () => {
-    setName('')
-    setSystem('')
-    setHidden(false)
-    setMandatory(false)
-  }
 
   const { prompts, isLoading: promptsLoading } = usePrompts(courseId)
 
-  const mandatoryPromptId = prompts?.find((prompt) => prompt.mandatory)?.id
-
-  const handleSave = async () => {
-    try {
-      await createMutation.mutateAsync({
-        chatInstanceId,
-        type: 'CHAT_INSTANCE',
-        name,
-        systemMessage: system,
-        messages: [],
-        hidden,
-        mandatory,
-        ragIndexId,
-      })
-      enqueueSnackbar('Prompt created', { variant: 'success' })
-      handleReset()
-    } catch (error: any) {
-      enqueueSnackbar(error.message, { variant: 'error' })
-    }
-  }
-
-  const handleDelete = (promptId: string) => {
-    if (!window.confirm(t('confirmDeletePrompt') as string)) return
-
-    try {
-      deleteMutation.mutate(promptId)
-      enqueueSnackbar('Prompt deleted', { variant: 'success' })
-    } catch (error: any) {
-      enqueueSnackbar(error.message, { variant: 'error' })
-    }
-  }
+  const [editorOpen, setEditorOpen] = useState(false)
+  const [promptToEdit, setPromptToEdit] = useState<PromptType>()
 
   return (
     <>
-      {promptsLoading ? ( // @todo separate prompts into its own component, like <Rag />
-        <Skeleton />
-      ) : (
-        prompts.map((prompt) => <Prompt key={prompt.id} prompt={prompt} handleDelete={handleDelete} mandatoryPromptId={mandatoryPromptId} />)
-      )}
-
-      <Paper
-        variant="outlined"
-        sx={{
-          padding: '5% 10%',
-          mt: 2,
+      <OutlineButtonBlack
+        data-testid="create-prompt-button"
+        onClick={() => {
+          setEditorOpen(true)
+          setPromptToEdit(undefined)
         }}
       >
-        <Box mb={2}>
-          <Typography variant="h5" display="inline">
-            {t('common:newPrompt')}
-          </Typography>
-        </Box>
+        {t('prompt:createNew')}
+      </OutlineButtonBlack>
+      {promptsLoading ? (
+        <Skeleton />
+      ) : (
+        prompts.map((prompt) => (
+          <Prompt
+            key={prompt.id}
+            prompt={prompt}
+            handleEdit={() => {
+              setPromptToEdit(prompt)
+              setEditorOpen(true)
+            }}
+          />
+        ))
+      )}
 
-        <Input sx={{ mr: 2, mb: 2 }} placeholder={t('promptName') as string} value={name} onChange={({ target }) => setName(target.value)} />
-
-        <SystemMessage system={system} setSystem={setSystem} disabled={false} creation />
-
-        <Box sx={{ py: 2, display: 'flex', alignItems: 'start' }}>
-          {!mandatoryPromptId ? (
-            <FormControlLabel
-              control={<Checkbox checked={mandatory} onChange={() => setMandatory((prev) => !prev)} />}
-              label={t('course:editMandatoryPrompt')}
-              sx={{ mr: 5 }}
-            />
-          ) : (
-            <Tooltip title={t('course:oneMandatoryPrompt')}>
-              <FormControlLabel control={<Checkbox checked={mandatory} disabled />} label={t('course:editMandatoryPrompt')} sx={{ mr: 5 }} />
-            </Tooltip>
-          )}
-          <FormControlLabel control={<Checkbox value={hidden} onChange={() => setHidden((prev) => !prev)} />} label={t('hidePrompt')} />
-        </Box>
-        {ragIndices && (
-          <div>
-            <RagSelectorDescription />
-            <RagSelector ragIndices={ragIndices} setRagIndex={setRagIndexId} currentRagIndex={ragIndices.find((rag) => rag.id === ragIndexId)} />
-          </div>
-        )}
-        <Button variant="contained" onClick={handleSave} sx={{ mr: 2 }}>
-          {t('common:save')}
-        </Button>
-      </Paper>
+      <Dialog open={editorOpen} onClose={() => setEditorOpen(false)}>
+        <DialogTitle>
+          {promptToEdit ? t('prompt:editPrompt', { name: promptToEdit.name }) : t('prompt:createNew')}
+          <IconButton
+            onClick={() => setEditorOpen(false)}
+            sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500', background: '#FFF', opacity: 0.9, zIndex: 1 }}
+            data-testid="close-prompt-editor"
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <PromptEditor ragIndices={ragIndices} type="CHAT_INSTANCE" chatInstanceId={chatInstanceId} prompt={promptToEdit} />
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

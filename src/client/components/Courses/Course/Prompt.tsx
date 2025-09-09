@@ -1,50 +1,32 @@
-import { useState } from 'react'
-import { Box, Paper, Typography, Button, Tooltip, TextField, Stack, FormControlLabel, Checkbox, IconButton, Link } from '@mui/material'
-import { ExpandLess, ExpandMore, Visibility, VisibilityOff, PriorityHigh, ContentCopyOutlined } from '@mui/icons-material'
+import { Box, Paper, Typography, Button, Tooltip, IconButton, Link } from '@mui/material'
+import { Visibility, VisibilityOff, PriorityHigh, ContentCopyOutlined, Delete, DeleteOutline, Book, BookOutlined, MenuBookOutlined } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
 import { enqueueSnackbar } from 'notistack'
-import { Prompt as PromptType, SetState } from '../../../types'
-import { MessageItem } from '../../ChatV2/Conversation'
-import SystemMessage from '../../ChatV2/SystemMessage'
-import { useEditPromptMutation } from '../../../hooks/usePromptMutation'
+import type { Prompt as PromptType } from '../../../types'
+import { useDeletePromptMutation } from '../../../hooks/usePromptMutation'
 import { useParams, Link as RouterLink } from 'react-router-dom'
 import { IframeCopy } from '../../common/IframeCopy'
-import { PUBLIC_URL } from '../../../../config'
+import { PUBLIC_URL } from '@config'
+import { OutlineButtonBlack } from '../../ChatV2/general/Buttons'
 
-const ExpandButton = ({ expand, setExpand }: { expand: boolean; setExpand: SetState<boolean> }) => (
-  <Button onClick={() => setExpand(!expand)}>{expand ? <ExpandLess /> : <ExpandMore />}</Button>
-)
-
-const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptType; handleDelete: (promptId: string) => void; mandatoryPromptId?: string }) => {
+const Prompt = ({ prompt, handleEdit }: { prompt: PromptType; handleEdit: () => void }) => {
   const { t } = useTranslation()
   const { id: courseId } = useParams()
-  const mutation = useEditPromptMutation()
 
-  const { id, name, systemMessage, messages, hidden, mandatory } = prompt
+  const { id, name, hidden, mandatory, ragIndexId } = prompt
 
-  const [expand, setExpand] = useState(false)
-  const [editPrompt, setEditPrompt] = useState(false)
-  const [message, setMessage] = useState(systemMessage)
-  const [updatedName, setUpdatedName] = useState(name)
-  const [updatedHidden, setUpdatedHidden] = useState(hidden)
-  const [updatedMandatory, setUpdatedMandatory] = useState(mandatory)
   const chatPath = `/${courseId}?promptId=${id}`
   const directLink = `${window.location.origin}${PUBLIC_URL}/${chatPath}`
 
-  const handleSave = async () => {
-    const updatedPrompt = {
-      ...prompt,
-      systemMessage: message,
-      name: updatedName,
-      hidden: updatedHidden,
-      mandatory: updatedMandatory,
-    }
+  const deleteMutation = useDeletePromptMutation()
+
+  const handleDelete = (promptId: string) => {
+    if (!window.confirm(t('confirmDeletePrompt') as string)) return
 
     try {
-      await mutation.mutateAsync(updatedPrompt)
-      setEditPrompt(false)
-      enqueueSnackbar('Prompt updated', { variant: 'success' })
+      deleteMutation.mutate(promptId)
+      enqueueSnackbar('Prompt deleted', { variant: 'success' })
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     }
@@ -52,7 +34,7 @@ const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptTyp
 
   return (
     <Box key={id} pt={2}>
-      <Paper variant="outlined" sx={{ padding: '2%' }}>
+      <Paper sx={{ py: '1rem', px: '2rem' }}>
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box>
             <Box display="inline" mr={2}>
@@ -73,82 +55,40 @@ const Prompt = ({ prompt, handleDelete, mandatoryPromptId }: { prompt: PromptTyp
                 </Tooltip>
               </Box>
             )}
-            {!editPrompt ? (
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <Typography variant="h6" display="inline">
-                  {name}
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Link component={RouterLink} to={chatPath} variant="caption">
-                    {t('course:directPromptLink', { name: prompt.name })}
-                  </Link>
-                  <Tooltip title={t('course:copyDirectPromptLinkInfo', { name: prompt.name })}>
-                    <IconButton size="small" onClick={() => navigator.clipboard.writeText(directLink)}>
-                      <ContentCopyOutlined fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                  <IframeCopy courseId={courseId!} promptId={prompt.id} />
-                </Box>
+            {ragIndexId && (
+              <Box display="inline" mr={2}>
+                <Tooltip title={t('rag:sourceMaterials')}>
+                  <MenuBookOutlined />
+                </Tooltip>
               </Box>
-            ) : (
-              <TextField defaultValue={updatedName} sx={{ width: '650px' }} onChange={(e) => setUpdatedName(e.target.value)} />
             )}
+
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <Typography variant="h6" display="inline">
+                {name}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Link component={RouterLink} to={chatPath} variant="caption">
+                  {t('course:directPromptLink', { name: prompt.name })}
+                </Link>
+                <Tooltip title={t('course:copyDirectPromptLinkInfo', { name: prompt.name })}>
+                  <IconButton size="small" onClick={() => navigator.clipboard.writeText(directLink)}>
+                    <ContentCopyOutlined fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <IframeCopy courseId={courseId!} promptId={prompt.id} />
+              </Box>
+            </Box>
           </Box>
-          <Box>
-            <Button onClick={() => handleDelete(prompt.id)} color="error" data-testid={`delete-prompt-${prompt.name}`}>
-              {t('common:delete')}
-            </Button>
-            <ExpandButton expand={expand} setExpand={setExpand} />
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton onClick={() => handleDelete(prompt.id)} color="error" data-testid={`delete-prompt-${prompt.name}`} aria-label={t('course:remove')}>
+              <DeleteOutline />
+            </IconButton>
+            <OutlineButtonBlack onClick={handleEdit} color="primary" data-testid={`edit-prompt-${prompt.name}`} aria-label={t('common:edit')}>
+              {t('common:edit')}
+            </OutlineButtonBlack>
           </Box>
         </Box>
-
-        {expand && (
-          <Box mt={2}>
-            {!editPrompt ? (
-              <>
-                <Box width="80%">
-                  <SystemMessage system={systemMessage} setSystem={() => {}} showInfo={false} disabled />
-                </Box>
-                <Box>
-                  {messages.map((msg) => (
-                    <MessageItem key={msg.content} message={msg} setActiveToolResult={(_d) => {}} />
-                  ))}
-                </Box>
-              </>
-            ) : (
-              <>
-                <TextField defaultValue={systemMessage} sx={{ width: '80%' }} multiline onChange={(e) => setMessage(e.target.value)} />
-                {!mandatoryPromptId || mandatoryPromptId === prompt.id ? (
-                  <FormControlLabel
-                    control={<Checkbox checked={updatedMandatory} onChange={() => setUpdatedMandatory((prev) => !prev)} />}
-                    label="Tee alustuksesta pakollinen opiskelijoille"
-                    sx={{ mr: 5 }}
-                  />
-                ) : (
-                  <Tooltip title="Kurssilla voi olla vain yksi pakollinen alustus">
-                    <FormControlLabel
-                      control={<Checkbox checked={updatedMandatory} disabled />}
-                      label="Tee alustuksesta pakollinen opiskelijoille"
-                      sx={{ mr: 5 }}
-                    />
-                  </Tooltip>
-                )}
-
-                <FormControlLabel control={<Checkbox checked={updatedHidden} onChange={() => setUpdatedHidden((prev) => !prev)} />} label={t('hidePrompt')} />
-              </>
-            )}
-            <Stack direction="row" spacing={2} marginTop={2}>
-              {editPrompt && (
-                <Button onClick={handleSave} variant="outlined">
-                  {t('common:save')}
-                </Button>
-              )}
-              <Button variant="outlined" onClick={() => setEditPrompt(!editPrompt)}>
-                {editPrompt ? t('common:cancel') : t('common:edit')}
-              </Button>
-            </Stack>
-          </Box>
-        )}
       </Paper>
     </Box>
   )
