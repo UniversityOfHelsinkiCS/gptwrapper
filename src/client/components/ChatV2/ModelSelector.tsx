@@ -2,24 +2,25 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { MenuItem, Typography, Tooltip, Menu } from '@mui/material'
 import { KeyboardArrowDown, SmartToy } from '@mui/icons-material'
-import { FREE_MODEL, ValidModelName } from '../../../config'
+import { FREE_MODEL, ValidModelName, validModels } from '../../../config'
 import { OutlineButtonBlack } from './general/Buttons'
+import { usePromptState } from './PromptState'
+import useCurrentUser from '../../hooks/useCurrentUser'
 
 const ModelSelector = ({
   currentModel,
   setModel,
-  availableModels,
   isTokenLimitExceeded,
 }: {
   currentModel: ValidModelName
   setModel: (model: ValidModelName) => void
-  availableModels: ValidModelName[]
   isTokenLimitExceeded: boolean
 }) => {
   const { t } = useTranslation()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
-  const validModel = availableModels.includes(currentModel) ? currentModel : ''
+  const { user } = useCurrentUser()
+  const { activePrompt } = usePromptState()
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -30,10 +31,26 @@ const ModelSelector = ({
     setAnchorEl(null)
   }
 
+  const availableModels = React.useMemo(() => {
+    if (activePrompt?.model) {
+      return [activePrompt.model]
+    }
+    const models = validModels.map((model) => model.name)
+    return models.filter((model) => !isTokenLimitExceeded || model === FREE_MODEL).filter((model) => user?.isAdmin || model !== 'mock')
+  }, [isTokenLimitExceeded, user, activePrompt])
+
+  console.log(availableModels, activePrompt)
+
   return (
     <>
-      <OutlineButtonBlack startIcon={<SmartToy />} endIcon={<KeyboardArrowDown />} onClick={handleClick} data-testid="model-selector">
-        {`${t('admin:model')}: ${validModel}`}
+      <OutlineButtonBlack
+        startIcon={<SmartToy />}
+        endIcon={<KeyboardArrowDown />}
+        onClick={handleClick}
+        data-testid="model-selector"
+        disabled={availableModels.length === 1}
+      >
+        {`${t('admin:model')}: ${currentModel}`}
       </OutlineButtonBlack>
       <Menu
         anchorEl={anchorEl}
@@ -48,13 +65,7 @@ const ModelSelector = ({
         }}
       >
         {availableModels.map((model) => (
-          <MenuItem
-            key={model}
-            value={model}
-            onClick={() => handleSelect(model)}
-            disabled={isTokenLimitExceeded && model !== FREE_MODEL}
-            data-testid={`${model}-option`}
-          >
+          <MenuItem key={model} value={model} onClick={() => handleSelect(model)} data-testid={`${model}-option`}>
             <Typography>
               {model}
               {model === FREE_MODEL && (

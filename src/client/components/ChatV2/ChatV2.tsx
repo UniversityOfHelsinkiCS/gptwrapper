@@ -94,7 +94,6 @@ const ChatV2Content = () => {
   const [fileName, setFileName] = useState<string>('')
   const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
   const [tokenUsageAlertOpen, setTokenUsageAlertOpen] = useState<boolean>(false)
-  const [allowedModels, setAllowedModels] = useState<ValidModelName[]>([])
   const [chatLeftSidePanelOpen, setChatLeftSidePanelOpen] = useState<boolean>(false)
   const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
 
@@ -263,27 +262,7 @@ const ChatV2Content = () => {
   useEffect(() => {
     if (!userStatus) return
 
-    const { usage, limit, model: defaultCourseModel, models: courseModels } = userStatus
-
-    let allowedModels: ValidModelName[] = []
-
-    if (course && courseModels) {
-      allowedModels = courseModels
-
-      if (courseModels.includes(activeModel)) {
-        setActiveModel(activeModel)
-      } else {
-        setActiveModel(defaultCourseModel ?? courseModels[0])
-      }
-    } else {
-      allowedModels = validModels.map((m) => m.name) // [gpt-5, gpt-4o, gpt-4o-mini, mock] 23.7.2025
-    }
-
-    // Mock model is only visible to admins in production
-    if (!user?.isAdmin && inProduction) {
-      allowedModels = allowedModels.filter((model) => model !== 'mock')
-    }
-    setAllowedModels(allowedModels)
+    const { usage, limit } = userStatus
 
     const tokenUseExceeded = usage >= limit
 
@@ -388,7 +367,6 @@ const ChatV2Content = () => {
               messages={messages}
               currentModel={activeModel}
               setModel={setActiveModel}
-              availableModels={allowedModels}
             />
           </Drawer>
         ) : (
@@ -404,7 +382,6 @@ const ChatV2Content = () => {
             messages={messages}
             currentModel={activeModel}
             setModel={setActiveModel}
-            availableModels={allowedModels}
           />
         ))}
 
@@ -579,7 +556,6 @@ const LeftMenu = ({
   messages,
   currentModel,
   setModel,
-  availableModels,
 }: {
   sx?: object
   course?: Course
@@ -590,7 +566,6 @@ const LeftMenu = ({
   messages: ChatMessage[]
   currentModel: ValidModelName
   setModel: (model: ValidModelName) => void
-  availableModels: ValidModelName[]
 }) => {
   const { t } = useTranslation()
   const { courseId } = useParams()
@@ -623,7 +598,7 @@ const LeftMenu = ({
           <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} data-testid="empty-conversation-button">
             {t('chat:emptyConversation')}
           </OutlineButtonBlack>
-          <ModelSelector currentModel={currentModel} setModel={setModel} availableModels={availableModels} isTokenLimitExceeded={isTokenLimitExceeded} />
+          <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} />
           <PromptSelector sx={{ width: '100%' }} />
           <EmailButton messages={messages} disabled={!messages?.length} />
           <OutlineButtonBlack startIcon={<Tune />} onClick={() => setSettingsModalOpen(true)} data-testid="settings-button">

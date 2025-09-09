@@ -44,12 +44,6 @@ const headCells: readonly HeadCell[] = [
     label: 'Description',
   },
   {
-    id: 'model',
-    numeric: true,
-    disablePadding: false,
-    label: 'Model',
-  },
-  {
     id: 'usageLimit',
     numeric: true,
     disablePadding: false,
@@ -139,7 +133,6 @@ const ChatInstanceTableChatInstanceWithTokens = React.memo(
                   </Link>
                 </TableCell>
                 <TableCell align="right">{row.description}</TableCell>
-                <TableCell align="right">{row.model}</TableCell>
                 <TableCell sx={{ fontFamily: 'monospace' }} align="right">
                   {row.usageLimit}
                 </TableCell>

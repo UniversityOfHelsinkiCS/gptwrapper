@@ -66,6 +66,7 @@ export type Prompt = {
   type: 'CHAT_INSTANCE' | 'PERSONAL'
   createdAt: string
   ragIndexId?: number
+  model?: ValidModelName
 }
 
 export interface ChatInstance {
@@ -73,21 +74,12 @@ export interface ChatInstance {
   id: string
   name: Locales
   description: string
-  model: ValidModelName
   usageLimit: number
   resetCron?: string
   courseId?: string
   prompts: Prompt[]
   courseUnitRealisationTypeUrn?: string
   activityPeriod: ActivityPeriod
-}
-
-export interface AccessGroup {
-  id: string
-  iamGroup: string
-  model: ValidModelName
-  usageLimit: number | null
-  resetCron: string | null
 }
 
 export type ActivityPeriod = {

@@ -1,12 +1,11 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { ActivityPeriod } from '../types'
+import type { ActivityPeriod } from '../types'
 import queryClient from '../util/queryClient'
 import apiClient from '../util/apiClient'
 
 interface UpdatedCourseData {
   activityPeriod: ActivityPeriod
-  model: string
   usageLimit: number
   saveDiscussions: boolean
   notOptoutSaving: boolean

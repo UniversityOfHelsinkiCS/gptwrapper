@@ -139,7 +139,7 @@ const Course = () => {
     const usersResponsibility: Responsebility | undefined = responsibilities.find((r: Responsebility) => {
       return r.user.id === user.id
     })
-    const isResponsible = usersResponsibility != undefined
+    const isResponsible = usersResponsibility !== undefined
     return (
       <>
         {!isResponsible ? (
@@ -204,7 +204,6 @@ const Course = () => {
             {courseEnabled && (
               <div style={{ ...left, boxSizing: 'border-box' }}>
                 <Typography>
-                  {t('admin:model')}: {chatInstance.model} <span style={{ marginRight: 20 }} />
                   {t('admin:usageLimit')}: {chatInstance.usageLimit}
                 </Typography>
               </div>

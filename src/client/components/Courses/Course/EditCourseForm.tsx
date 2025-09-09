@@ -13,14 +13,13 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
   const { t } = useTranslation()
   const mutation = useEditCourseMutation(course?.courseId as string)
 
-  const { model: currentModel, usageLimit: currentUsageLimit } = course
+  const { usageLimit: currentUsageLimit } = course
 
   const currentDate = new Date().toISOString()
   const { startDate: defaultStart, endDate: defaultEnd } = course?.activityPeriod || { startDate: currentDate, endDate: currentDate }
 
   const [startDate, setStartDate] = useState(new Date(defaultStart))
   const [endDate, setEndDate] = useState(new Date(defaultEnd))
-  const [model, setModel] = useState(currentModel)
   const [usageLimit, setUsageLimit] = useState(currentUsageLimit)
   const [saveDiscussions, setSaveDiscussions] = useState(course.saveDiscussions)
   const [notOptoutSaving, setNotOptoutSaving] = useState(course.notOptoutSaving)
@@ -35,7 +34,6 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
     try {
       mutation.mutate({
         activityPeriod,
-        model,
         usageLimit,
         saveDiscussions,
         notOptoutSaving,
@@ -59,27 +57,11 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
         </Box>
 
         <Box my={3} display="flex" justifyContent="space-between" flexDirection="row">
-          <Box>
-            <Typography mb={1} variant="h5">
-              {t('admin:model')}
-            </Typography>
-            <Typography mb={1}>{t('admin:modelInfo')}</Typography>
-            <Select sx={{ m: 1, width: '300px' }} value={model} onChange={(e) => setModel(e.target.value as ValidModelName)}>
-              {validModels.map(({ name: modelName }) => (
-                <MenuItem key={modelName} value={modelName}>
-                  {modelName}
-                </MenuItem>
-              ))}
-            </Select>
-          </Box>
-
-          <Box>
-            <Typography mb={1} variant="h5">
-              {t('admin:usageLimit')}
-            </Typography>
-            <Typography mb={1}>{t('admin:usageLimitInfo')}</Typography>
-            <TextField sx={{ m: 1, width: '300px' }} value={usageLimit} type="number" onChange={(e) => setUsageLimit(Number(e.target.value))} />
-          </Box>
+          <Typography mb={1} variant="h5">
+            {t('admin:usageLimit')}
+          </Typography>
+          <Typography mb={1}>{t('admin:usageLimitInfo')}</Typography>
+          <TextField sx={{ m: 1, width: '300px' }} value={usageLimit} type="number" onChange={(e) => setUsageLimit(Number(e.target.value))} />
         </Box>
 
         {user.isAdmin && (
