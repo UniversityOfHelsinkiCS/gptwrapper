@@ -133,11 +133,8 @@ export type ChatInstanceUsage = {
 }
 
 export type UserStatus = {
-  model: ValidModelName
-  models: ValidModelName[]
   usage: number
   limit: number
-  isTike: boolean
 }
 
 export type InfoText = {

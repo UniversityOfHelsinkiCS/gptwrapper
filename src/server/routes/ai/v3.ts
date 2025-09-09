@@ -52,20 +52,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     throw ApplicationError.Forbidden('Usage limit reached')
   }
 
-  // Check if the model is allowed for the course
-  if (course) {
-    const courseModel = course.model
-
-    if (generationInfo.model) {
-      const allowedModels = getAllowedModels(courseModel)
-      if (!allowedModels.includes(generationInfo.model)) {
-        throw ApplicationError.Forbidden('Model not allowed')
-      }
-    } else {
-      generationInfo.model = courseModel as (typeof validModels)[number]['name']
-    }
-  }
-
   // Check file
   let optionsMessagesWithFile: ChatMessage[] | undefined
 
@@ -140,7 +126,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     user,
     chatMessages: options.chatMessages,
     systemMessage,
-    model: generationInfo.model,
+    model: prompt?.model ?? generationInfo.model,
     temperature: options.modelTemperature,
     tools,
     writeEvent: async (event: ChatEvent) => {

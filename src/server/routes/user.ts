@@ -44,7 +44,7 @@ userRouter.get('/login', async (req, res) => {
   // When acual user logs in, update the users info.
   if (!request.hijackedBy) {
     user.lastLoggedInAt = new Date()
-      ;[dbUser] = await User.upsert(user)
+    ;[dbUser] = await User.upsert(user)
   } else {
     dbUser = await User.findByPk(id)
 
@@ -97,13 +97,11 @@ userRouter.get('/status/:courseId', async (req, res) => {
   const request = req as any as RequestWithUser
   const { user } = request
 
-  const { usage, limit, model, models } = await getUserStatus(user, courseId)
+  const { usage, limit } = await getUserStatus(user, courseId)
 
   res.send({
     usage,
     limit,
-    model,
-    models,
   })
   return
 })

@@ -6,7 +6,6 @@ import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, User, Responsib
 import { getOwnCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
-import { ValidModelName } from '../../config'
 
 const courseRouter = express.Router()
 
@@ -258,9 +257,8 @@ courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {
 
 courseRouter.put('/:id', async (req, res) => {
   const { id } = req.params
-  const { activityPeriod, model, usageLimit, saveDiscussions, notOptoutSaving } = req.body as {
+  const { activityPeriod, usageLimit, saveDiscussions, notOptoutSaving } = req.body as {
     activityPeriod: ActivityPeriod
-    model: ValidModelName
     usageLimit: number
     saveDiscussions: boolean
     notOptoutSaving: boolean
@@ -273,7 +271,6 @@ courseRouter.put('/:id', async (req, res) => {
   if (!chatInstance) throw ApplicationError.NotFound('ChatInstance not found')
 
   chatInstance.activityPeriod = activityPeriod
-  chatInstance.model = model
   chatInstance.usageLimit = usageLimit
   if (saveDiscussions !== undefined) {
     chatInstance.saveDiscussions = saveDiscussions
@@ -293,15 +290,6 @@ const userAssignedAsResponsible = (userId, chatInstance) => {
     .filter(Boolean)
     .includes(userId)
   return isResponsible
-}
-
-const getUser = async (id: string): Promise<User | null> => {
-  const user = await User.findByPk(id)
-  if (!user) {
-    throw ApplicationError.NotFound('User not found')
-    return null
-  }
-  return user
 }
 
 const getUserByUsername = async (username: string): Promise<User | null> => {

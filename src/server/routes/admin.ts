@@ -10,9 +10,7 @@ import { run as runUpdater } from '../updater'
 import InfoText from '../db/models/infotext'
 import { statsViewerIams } from '../util/config'
 import { generateTerms } from '../util/util'
-import { Where } from 'sequelize/types/utils'
 import { ApplicationError } from '../util/ApplicationError'
-import { ValidModelName } from '../../config'
 
 const adminRouter = express.Router()
 
@@ -31,14 +29,13 @@ adminRouter.use((req, _, next) => {
 interface NewChatInstanceData {
   name: string
   description: string
-  model: ValidModelName
   usageLimit: number
   courseId: string
 }
 
 adminRouter.post('/chatinstances', async (req, res) => {
   const data = req.body as NewChatInstanceData
-  const { name, description, model, usageLimit, courseId } = data
+  const { name, description, usageLimit, courseId } = data
 
   const course = await getCourse(courseId)
   if (!course) {
@@ -48,7 +45,6 @@ adminRouter.post('/chatinstances', async (req, res) => {
   const newChatInstance = await ChatInstance.create({
     name: { en: name, fi: name, sv: name },
     description,
-    model,
     usageLimit,
     courseId,
     activityPeriod: course.activityPeriod,
@@ -162,7 +158,6 @@ adminRouter.get('/statistics', async (req, res) => {
 interface UpdatedChatInstanceData {
   name: string
   description: string
-  model: ValidModelName
   usageLimit: number
   courseId: string
 }
@@ -170,7 +165,7 @@ interface UpdatedChatInstanceData {
 adminRouter.put('/chatinstances/:id', async (req, res) => {
   const { id } = req.params
   const data = req.body as UpdatedChatInstanceData
-  const { description, model, usageLimit, courseId, name } = data
+  const { description, usageLimit, courseId, name } = data
 
   const chatInstance = await ChatInstance.findByPk(id)
 
@@ -180,7 +175,6 @@ adminRouter.put('/chatinstances/:id', async (req, res) => {
 
   chatInstance.name = { en: name, fi: name, sv: name }
   chatInstance.description = description
-  chatInstance.model = model
   chatInstance.usageLimit = usageLimit
   chatInstance.courseId = courseId
 

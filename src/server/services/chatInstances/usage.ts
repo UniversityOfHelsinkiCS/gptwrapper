@@ -75,8 +75,6 @@ export const incrementCourseUsage = async (chatInstance: ChatInstance, tokenCoun
 }
 
 export const getUserStatus = async (user: UserType, courseId: string) => {
-  const isTike = user.iamGroups.some((iam) => iam.includes(tikeIam))
-
   const chatInstance = await ChatInstance.findOne({
     where: {
       courseId,
@@ -109,9 +107,6 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
     return {
       usage: 0,
       limit: 0,
-      model: '',
-      models: [],
-      isTike,
     }
   }
 
@@ -127,15 +122,8 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
     attributes: ['usageCount'],
   })
 
-  const model = chatInstance.model ?? ''
-
-  const models = getAllowedModels(model)
-
   return {
     usage: chatInstanceUsage?.usageCount ?? 0,
     limit: chatInstance?.usageLimit ?? 0,
-    model,
-    models,
-    isTike,
   }
 }

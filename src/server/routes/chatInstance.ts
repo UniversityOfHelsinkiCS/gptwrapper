@@ -3,7 +3,7 @@ import { Op } from 'sequelize'
 import { addMonths } from 'date-fns'
 
 import { ChatInstance, User, UserChatInstanceUsage } from '../db/models'
-import { DEFAULT_MODEL_ON_ENABLE, DEFAULT_TOKEN_LIMIT } from '../../config'
+import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { sequelize } from '../db/connection'
 import { ApplicationError } from '../util/ApplicationError'
 
@@ -102,7 +102,6 @@ chatInstanceRouter.post('/:id/enable', async (req, res) => {
 
   chatInstance.usageLimit = DEFAULT_TOKEN_LIMIT
   chatInstance.activityPeriod = defaultActivityPeriod
-  chatInstance.model = DEFAULT_MODEL_ON_ENABLE
 
   await chatInstance.save()
 

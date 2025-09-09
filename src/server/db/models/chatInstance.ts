@@ -15,8 +15,6 @@ class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAtt
 
   declare description: CreationOptional<string>
 
-  declare model: CreationOptional<string>
-
   declare usageLimit: CreationOptional<number>
 
   declare resetCron: CreationOptional<string | null>
@@ -65,11 +63,6 @@ ChatInstance.init(
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: 'No description',
-    },
-    model: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: 'gpt-4o',
     },
     usageLimit: {
       type: DataTypes.INTEGER,
