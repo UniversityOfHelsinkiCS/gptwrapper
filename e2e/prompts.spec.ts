@@ -80,6 +80,8 @@ test.describe('Prompts', () => {
     // Close settings
     await page.keyboard.press('Escape')
 
+    await useMockModel(page)
+
     // Send something
     await sendChatMessage(page, 'testinen morjens')
     await closeSendPreference(page)
@@ -128,6 +130,8 @@ test.describe('Prompts', () => {
 
     // The prompt is active.
     await expect(page.getByTestId('prompt-selector-button').first()).toContainText(newPromptName)
+
+    await useMockModel(page)
 
     // Send something
     await sendChatMessage(page, 'rag')
@@ -180,6 +184,8 @@ test.describe('Prompts', () => {
     await page.getByTestId('settings-button').click()
     await expect(page.getByTestId('assistant-instructions-input')).toHaveValue(newPromptContent)
     await page.getByTestId('close-settings').click()
+
+    await useMockModel(page)
 
     // Send message, response should echo the prompt
     await sendChatMessage(page, 'testinen morjens')

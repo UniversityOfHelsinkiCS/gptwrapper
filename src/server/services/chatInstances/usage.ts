@@ -79,7 +79,7 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
     where: {
       courseId,
     },
-    attributes: ['id', 'usageLimit', 'courseId', 'model'],
+    attributes: ['id', 'usageLimit', 'courseId'],
   })
 
   if (!chatInstance) throw ApplicationError.NotFound('Chat instance not found')

@@ -10,7 +10,6 @@ const chatInstances = Object.values(TEST_COURSES).map((course) => ({
   courseId: course.id,
   activityPeriod: course.activityPeriod,
   code: course.code,
-  model: 'model' in course ? course.model : undefined,
   usageLimit: 'usageLimit' in course ? course.usageLimit : undefined,
   courseUnits: [
     {

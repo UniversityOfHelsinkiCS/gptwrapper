@@ -86,8 +86,6 @@ userRouter.get('/status', async (req, res) => {
   res.send({
     usage,
     limit,
-    // model,
-    // models,
   })
   return
 })

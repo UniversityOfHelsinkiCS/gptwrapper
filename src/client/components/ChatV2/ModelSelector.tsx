@@ -1,8 +1,8 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { MenuItem, Typography, Tooltip, Menu } from '@mui/material'
+import { MenuItem, Typography, Menu } from '@mui/material'
 import { KeyboardArrowDown, SmartToy } from '@mui/icons-material'
-import { FREE_MODEL, ValidModelName, validModels } from '../../../config'
+import { FREE_MODEL, inProduction, ValidModelName, validModels } from '@config'
 import { OutlineButtonBlack } from './general/Buttons'
 import { usePromptState } from './PromptState'
 import useCurrentUser from '../../hooks/useCurrentUser'
@@ -36,7 +36,7 @@ const ModelSelector = ({
       return [activePrompt.model]
     }
     const models = validModels.map((model) => model.name)
-    return models.filter((model) => !isTokenLimitExceeded || model === FREE_MODEL).filter((model) => user?.isAdmin || model !== 'mock')
+    return models.filter((model) => !isTokenLimitExceeded || model === FREE_MODEL).filter((model) => user?.isAdmin || !inProduction || model !== 'mock')
   }, [isTokenLimitExceeded, user, activePrompt])
 
   console.log(availableModels, activePrompt)
