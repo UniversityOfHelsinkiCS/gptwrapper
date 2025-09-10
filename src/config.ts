@@ -20,6 +20,14 @@ export const DEFAULT_RESET_CRON = process.env.DEFAULT_RESET_CRON || '0 0 1 */3 *
 
 export const EMBED_MODEL = process.env.EMBED_MODEL ?? 'text-embedding-small'
 
+export const formatInstructions = `
+        Always format responses in plain Markdown.
+        Use Markdown headings (#, ##, ###) for structure, even for normal text.
+        Use lists, tables, and blockquotes where useful.
+        Put math in $$ ... $$ for LaTeX rendering.
+        Wrap code in triple backticks with the correct language tag (js, ts, py, etc.) so syntax highlighting and rendering work.
+      `
+
 /**
  * name: the acual model name, which is shown to users, configures the model to be used and is also the azure deployment name.
  */
@@ -36,6 +44,7 @@ export const validModels = [
     name: 'gpt-5',
     context: 128_000,
     temperature: 1.0,
+    instructions: formatInstructions,
   },
   {
     name: 'mock',
@@ -55,11 +64,3 @@ export const DEFAULT_MODEL_ON_ENABLE = 'gpt-5'
 
 export const DEFAULT_ASSISTANT_INSTRUCTIONS = '' // 11th August 2025 we decided it should be empty
 export const DEFAULT_MODEL_TEMPERATURE = 0.5
-
-export const formatInstructions = `
-        Always format responses in plain Markdown.
-        Use Markdown headings (#, ##, ###) for structure, even for normal text.
-        Use lists, tables, and blockquotes where useful.
-        Put math in $$ ... $$ for LaTeX rendering.
-        Wrap code in triple backticks with the correct language tag (js, ts, py, etc.) so syntax highlighting and rendering work.
-      `

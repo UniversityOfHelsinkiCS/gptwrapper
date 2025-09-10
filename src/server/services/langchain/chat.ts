@@ -4,8 +4,8 @@ import type { AIMessageChunk, BaseMessageLike } from '@langchain/core/messages'
 import type { Runnable } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
-import { AzureChatOpenAI } from '@langchain/openai'
-import { formatInstructions, ValidModelName, validModels } from '../../../config'
+import { AzureChatOpenAI, ChatOpenAICallOptions } from '@langchain/openai'
+import { ValidModelName, validModels } from '../../../config'
 import type { ChatEvent } from '../../../shared/chat'
 import type { ChatMessage } from '../../../shared/chat'
 import type { ChatToolDef, ChatToolOutput } from '../../../shared/tools'
@@ -16,20 +16,15 @@ import { MockModel } from './MockModel'
 
 type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
 
-const getChatModel = (model: ValidModelName, tools: StructuredTool[], temperature: number): ChatModel => {
-  const modelConfig = validModels.find((m) => m.name === model)
-  if (!modelConfig) {
-    throw new Error(`Invalid model: ${model}`)
-  }
-
+const getChatModel = (modelConfig: (typeof validModels)[number], tools: StructuredTool[], temperature: number): ChatModel => {
   const chatModel =
     modelConfig.name === 'mock'
       ? new MockModel({ tools, temperature })
-      : new AzureChatOpenAI({
-          model,
+      : new AzureChatOpenAI<ChatOpenAICallOptions>({
+          model: modelConfig.name,
           azureOpenAIApiKey: AZURE_API_KEY,
           azureOpenAIApiVersion: '2023-05-15',
-          azureOpenAIApiDeploymentName: model, // In Azure, always use the acual model name as the deployment name
+          azureOpenAIApiDeploymentName: modelConfig.name, // In Azure, always use the acual model name as the deployment name
           azureOpenAIApiInstanceName: AZURE_RESOURCE,
           temperature: 'temperature' in modelConfig ? modelConfig.temperature : temperature, // If model config specifies a temperature, use it; otherwise, use the user supplied temperature.
           reasoning: {
@@ -65,19 +60,23 @@ export const streamChat = async ({
 }) => {
   const toolsByName = Object.fromEntries(tools.map((tool) => [tool.name, tool]))
 
-  const chatModel = getChatModel(model, tools, temperature)
+  const modelConfig = validModels.find((m) => m.name === model)
+  if (!modelConfig) {
+    throw new Error(`Invalid model: ${model}`)
+  }
+
+  const chatModel = getChatModel(modelConfig, tools, temperature)
 
   const messages: BaseMessageLike[] = [
-    {
-      role: 'system',
-      content: formatInstructions,
-    },
+    ...('instructions' in modelConfig ? [{ role: 'system', content: modelConfig.instructions }] : []),
     {
       role: 'system',
       content: systemMessage,
     },
     ...chatMessages,
   ]
+
+  console.log('📌 messages', messages)
 
   const result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
 
