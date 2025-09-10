@@ -73,8 +73,6 @@ const ChatV2Content = () => {
 
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
 
-  const { user } = useCurrentUser()
-
   // local storage states
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
   const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model', ValidModelNameSchema)

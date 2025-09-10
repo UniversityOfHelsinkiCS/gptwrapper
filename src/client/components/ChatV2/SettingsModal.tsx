@@ -135,11 +135,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, setOpen, mod
                 min={0.0}
                 max={1.0}
                 step={0.1}
-                value={modelTemperature}
+                value={activePrompt?.temperature ?? modelTemperature}
                 marks
                 valueLabelDisplay="auto"
                 name="Temperature"
                 onChange={(_event, value) => setModelTemperature(typeof value === 'number' ? value : modelTemperature)}
+                disabled={!!activePrompt?.temperature}
               />
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography>{t('settings:temperatureAccurate')}</Typography>

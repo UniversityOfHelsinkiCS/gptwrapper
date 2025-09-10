@@ -67,6 +67,7 @@ export type Prompt = {
   createdAt: string
   ragIndexId?: number
   model?: ValidModelName
+  temperature?: number
 }
 
 export interface ChatInstance {
