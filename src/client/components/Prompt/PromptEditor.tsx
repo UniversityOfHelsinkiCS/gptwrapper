@@ -115,23 +115,16 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
 
       <FormControl fullWidth margin="normal">
         <InputLabel>{t('rag:sourceMaterials')}</InputLabel>
-        {ragIndices && (
-          <Select
-            data-testid="rag-select"
-            value={ragIndexId || ''}
-            onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}
-            disabled={ragIndices === undefined || ragIndices.length === 0}
-          >
-            <MenuItem value="" data-testid="no-source-materials">
-              <em>{t('prompt:noSourceMaterials')}</em>
+        <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
+          <MenuItem value="" data-testid="no-source-materials">
+            <em>{t('prompt:noSourceMaterials')}</em>
+          </MenuItem>
+          {ragIndices?.map((index) => (
+            <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
+              {index.metadata.name}
             </MenuItem>
-            {ragIndices?.map((index) => (
-              <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
-                {index.metadata.name}
-              </MenuItem>
-            ))}
-          </Select>
-        )}
+          ))}
+        </Select>
       </FormControl>
       <FormControl fullWidth margin="normal">
         <InputLabel>{t('common:model')}</InputLabel>

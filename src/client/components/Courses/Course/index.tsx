@@ -339,7 +339,7 @@ const AssignedResponsibilityManagement = ({ responsibility, handleRemove }) => {
 
 const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceId: string }) => {
   const { t } = useTranslation()
-  const { ragIndices } = useCourseRagIndices(courseId)
+  const { ragIndices } = useCourseRagIndices(chatInstanceId)
 
   const { prompts, isLoading: promptsLoading } = usePrompts(courseId)
 
