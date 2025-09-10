@@ -156,7 +156,14 @@ export const PromptStateProvider: React.FC<{
   })
 
   const promptInfo: MessageGenerationInfo['promptInfo'] = activePrompt
-    ? { id: activePrompt.id, name: activePrompt.name, type: 'saved', systemMessage: activePrompt.systemMessage }
+    ? {
+        id: activePrompt.id,
+        name: activePrompt.name,
+        type: 'saved',
+        systemMessage: activePrompt.systemMessage,
+        model: activePrompt.model,
+        temperature: activePrompt.temperature,
+      }
     : { type: 'custom', systemMessage: customSystemMessage }
 
   const value = {

@@ -48,7 +48,7 @@ const ModelSelector = ({
         data-testid="model-selector"
         disabled={availableModels.length === 1}
       >
-        {`${t('admin:model')}: ${currentModel}`}
+        {`${t('admin:model')}: ${activePrompt?.model ?? currentModel}`}
       </OutlineButtonBlack>
       <Menu
         anchorEl={anchorEl}

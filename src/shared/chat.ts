@@ -65,6 +65,8 @@ export const MessageGenerationInfoSchema = z.object({
       id: z.string(),
       name: z.string(),
       systemMessage: z.string().optional(),
+      model: z.string().optional(),
+      temperature: z.number().min(0).max(1).optional(),
     }),
     z.object({
       type: z.literal('custom'),
