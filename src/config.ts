@@ -55,3 +55,11 @@ export const DEFAULT_MODEL_ON_ENABLE = 'gpt-5'
 
 export const DEFAULT_ASSISTANT_INSTRUCTIONS = '' // 11th August 2025 we decided it should be empty
 export const DEFAULT_MODEL_TEMPERATURE = 0.5
+
+export const formatInstructions = `
+        Always format responses in plain Markdown.
+        Use Markdown headings (#, ##, ###) for structure, even for normal text.
+        Use lists, tables, and blockquotes where useful.
+        Put math in $$ ... $$ for LaTeX rendering.
+        Wrap code in triple backticks with the correct language tag (js, ts, py, etc.) so syntax highlighting and rendering work.
+      `

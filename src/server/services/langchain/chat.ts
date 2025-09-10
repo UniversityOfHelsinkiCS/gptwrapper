@@ -5,7 +5,7 @@ import type { Runnable } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
 import { AzureChatOpenAI } from '@langchain/openai'
-import { ValidModelName, validModels } from '../../../config'
+import { formatInstructions, ValidModelName, validModels } from '../../../config'
 import type { ChatEvent } from '../../../shared/chat'
 import type { ChatMessage } from '../../../shared/chat'
 import type { ChatToolDef, ChatToolOutput } from '../../../shared/tools'
@@ -68,6 +68,10 @@ export const streamChat = async ({
   const chatModel = getChatModel(model, tools, temperature)
 
   const messages: BaseMessageLike[] = [
+    {
+      role: 'system',
+      content: formatInstructions,
+    },
     {
       role: 'system',
       content: systemMessage,
