@@ -76,8 +76,6 @@ export const streamChat = async ({
     ...chatMessages,
   ]
 
-  console.log('📌 messages', messages)
-
   const result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
 
   if (result.toolCalls.length > 0) {
