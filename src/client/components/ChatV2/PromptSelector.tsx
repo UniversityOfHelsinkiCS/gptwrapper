@@ -26,7 +26,7 @@ const PromptSelector = ({ sx = {}, handleDeletePrompt }: { sx?: object; handleDe
   return (
     <Box>
       <OutlineButtonBlack
-        sx={sx}
+        sx={{ width: '100%' }}
         startIcon={<AutoAwesome />}
         data-testid={`prompt-selector-button`}
         disabled={!!mandatoryPrompt}
@@ -35,8 +35,13 @@ const PromptSelector = ({ sx = {}, handleDeletePrompt }: { sx?: object; handleDe
         }}
         endIcon={mandatoryPrompt ? <Lock /> : <KeyboardArrowDown />}
       >
-        {activePrompt?.name ?? t('settings:choosePrompt')}
-        {!!mandatoryPrompt && ` - ${t('settings:promptLocked')}`}
+        <Box sx={{
+          overflow: 'hidden',
+          width: { md: 140, lg: 160 },
+          textOverflow: 'ellipsis',
+        }}>
+          {activePrompt?.name ?? t('settings:choosePrompt')}
+        </Box>
       </OutlineButtonBlack>
       <Menu
         anchorEl={anchorEl}

@@ -597,7 +597,7 @@ const LeftMenu = ({
             {t('chat:emptyConversation')}
           </OutlineButtonBlack>
           <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} />
-          <PromptSelector sx={{ width: '100%' }} />
+          <PromptSelector />
           <EmailButton messages={messages} disabled={!messages?.length} />
           <OutlineButtonBlack startIcon={<Tune />} onClick={() => setSettingsModalOpen(true)} data-testid="settings-button">
             {t('chat:settings')}
