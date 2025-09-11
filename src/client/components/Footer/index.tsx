@@ -5,8 +5,7 @@ import toskaColor from '../../assets/toscalogo_color.svg'
 import { formatDistanceToNow, formatDuration, interval } from 'date-fns'
 import { locales } from '../../locales/locales'
 import useCurrentUser from '../../hooks/useCurrentUser'
-
-const supportEmail = 'opetusteknologia@helsinki.fi'
+import { supportEmail } from '@config'
 
 const styles = {
   supportBox: {

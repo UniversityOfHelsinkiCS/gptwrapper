@@ -321,8 +321,9 @@
     "message": "Write your feedback...",
     "cancel": "Cancel",
     "submit": "Send",
-    "description": "Facing problems? Or have a feature suggestion? Tell us about it below. Note that the feedback is not anonymous. You can also ask for a reply from the developers.",
-    "responseWanted": "I want a reply to the feedback"
+    "description": "Noticed something we should improve? Or have a feature suggestion? Tell us about it below. Note that the feedback is not anonymous. You can also ask for a reply from the developers.",
+    "responseWanted": "I want a reply to the feedback",
+    "supportInfo": "If you need help, contact support: <mailTo>{{supportEmail}}</mailTo>"
   },
   "testUse": {
     "titleV2": "The new chat view is still in development. You can set it as your default if you wish.",

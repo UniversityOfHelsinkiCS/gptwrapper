@@ -1,13 +1,27 @@
 import FeedbackIcon from '@mui/icons-material/Feedback'
-import { Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fab, FormControlLabel, TextField, Tooltip } from '@mui/material'
+import {
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Fab,
+  FormControlLabel,
+  Link,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import apiClient from '../util/apiClient'
 import { addJustInTimeFields, useAnalytics } from '../stores/analytics'
 import type { FeedbackPost } from '../../shared/feedback'
 import { useSnackbar } from 'notistack'
 import { BlueButton, OutlineButtonBlack } from './ChatV2/general/Buttons'
+import { supportEmail } from '@config'
 
 const useSubmitFeedbackMutation = () => {
   const analyticsMetadata = useAnalytics()
@@ -75,6 +89,15 @@ export const Feedback: React.FC = () => {
             control={<Checkbox checked={responseWanted} onChange={(ev) => setResponseWanted(ev.target.checked)} />}
             label={t('feedback:responseWanted')}
           />
+          <DialogContentText>
+            <Trans
+              i18nKey="feedback:supportInfo"
+              values={{ supportEmail }}
+              components={{
+                mailTo: <Link href={`mailto:${supportEmail}`} underline="hover" color="toskaPrimary.main" />,
+              }}
+            />
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <OutlineButtonBlack onClick={() => setModalOpen(false)}>{t('feedback:cancel')}</OutlineButtonBlack>

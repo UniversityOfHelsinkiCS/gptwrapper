@@ -64,3 +64,5 @@ export const DEFAULT_MODEL_ON_ENABLE = 'gpt-5'
 
 export const DEFAULT_ASSISTANT_INSTRUCTIONS = '' // 11th August 2025 we decided it should be empty
 export const DEFAULT_MODEL_TEMPERATURE = 0.5
+
+export const supportEmail = 'opetusteknologia@helsinki.fi'
