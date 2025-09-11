@@ -28,6 +28,16 @@ export const REDIS_HOST = getEnv('REDIS_HOST', 'redis')
 
 export const REDIS_PORT = 6379
 
+export const BMQ_REDIS_HOST = getEnv('BMQ_REDIS_HOST', 'placeholder')
+
+export const BMQ_REDIS_PORT = 443
+
+export const BMQ_REDIS_CA = getEnv('BMQ_REDIS_CA', 'placeholder')
+
+export const BMQ_REDIS_CERT = getEnv('BMQ_REDIS_CERT', 'placeholder')
+
+export const BMQ_REDIS_KEY = getEnv('BMQ_REDIS_KEY', 'placeholder')
+
 export const UPDATER_CRON_ENABLED = process.env.UPDATER_CRON_ENABLED === 'true'
 
 export const OLLAMA_URL = process.env.OLLAMA_URL

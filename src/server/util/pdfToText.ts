@@ -1,14 +1,7 @@
 import pdf from 'pdf-parse-fork'
-import axios from 'axios'
-import { LAAMA_API_TOKEN, REDIS_HOST, REDIS_PORT } from './config'
-import { Queue, QueueEvents, Worker, Job } from 'bullmq'
-
-const dalaiClient = axios.create({
-  baseURL: "https://api-gateway-toska.apps.ocp-bm-0.k8s.it.helsinki.fi/dalai",
-  params: {
-    token: LAAMA_API_TOKEN,
-  },
-})
+import IORedis from 'ioredis'
+import { BMQ_REDIS_CA, BMQ_REDIS_CERT, BMQ_REDIS_HOST, BMQ_REDIS_KEY, BMQ_REDIS_PORT, S3_BUCKET } from './config'
+import { Queue, QueueEvents } from 'bullmq'
 
 export const pdfToText = async (fileBuffer: Buffer) => {
   try {
@@ -21,37 +14,34 @@ export const pdfToText = async (fileBuffer: Buffer) => {
   }
 }
 
-// const connection = {
-//   host: REDIS_HOST,
-//   port: REDIS_PORT,
-// }
+const connection = new IORedis({
+  host: 'redis',
+  port: 6379,
+  // tls: {
+  //   ca: BMQ_REDIS_CA,
+  //   cert: BMQ_REDIS_CERT,
+  //   key: BMQ_REDIS_KEY,
+  //   servername: BMQ_REDIS_HOST,
+  // }
+})
 
-// const vlmQueue = new Queue('vlm-pdf-processing', { connection })
-// const vlmQueueEvents = new QueueEvents('vlm-pdf-processing', { connection })
+const queue = new Queue('llama-scan-queue', {
+  connection
+})
 
-// const vlmWorker = new Worker(
-//   'vlm-pdf-processing',
-//   async (job: Job) => {
-//     const { pdfBuffer } = job.data
-//     const result = await dalaiClient.post(pdfBuffer)
+export const pdfToTextWithVLM = async (filename: string, prefix: string) => {
+  const jobId = `scan:${S3_BUCKET}/${filename}/${prefix}`
 
-//     return result
-//   },
-//   { connection, autorun: false },
-// )
-
-export const pdfToTextWithVLM = async (fileBuffer: Buffer) => {
-  const form = new FormData()
-
-  const pdfBlob = new Blob([fileBuffer], { type: "application/pdf" })
-  form.append('file', pdfBlob, 'file.pdf')
-
-  const response = await dalaiClient.post(
-    '/scan',
-    form,
-    // @ts-ignore
-    { headers: {} }
+  const job = await queue.add(
+    'llama-scan-queue',
+    {
+      s3Bucket: S3_BUCKET,
+      s3Key: filename,
+      outputBucket: S3_BUCKET,
+      outputPrefix: prefix,
+    },
+    { jobId }
   )
 
-  return response.data
+  return job
 }

@@ -97,6 +97,8 @@ export const FileStore = {
               ContentType: 'text/plain',
             }),
           )
+          const job = await pdfToTextWithVLM(s3Key, '')
+          console.log(job)
           return text
         } catch (error) {
           console.error(`Failed to create PDF text file ${pdfTextKey} in S3:`, error)
