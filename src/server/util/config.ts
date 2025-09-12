@@ -26,9 +26,9 @@ export const REDIS_HOST = getEnv('REDIS_HOST', 'redis')
 
 export const REDIS_PORT = 6379
 
-export const BMQ_REDIS_HOST = getEnv('BMQ_REDIS_HOST', 'placeholder')
+export const BMQ_REDIS_HOST = getEnv('BMQ_REDIS_HOST', REDIS_HOST)
 
-export const BMQ_REDIS_PORT = getEnv('BMQ_REDIS_PORT', 'placeholder')
+export const BMQ_REDIS_PORT = getEnv('BMQ_REDIS_PORT', String(REDIS_PORT))
 
 export const BMQ_REDIS_CA = getEnv('BMQ_REDIS_CA', 'none')
 

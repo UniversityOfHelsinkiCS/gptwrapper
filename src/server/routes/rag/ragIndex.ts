@@ -1,7 +1,6 @@
 import { type NextFunction, type Request, type Response, Router } from 'express'
 import multer from 'multer'
 import z from 'zod/v4'
-import { S3Client } from '@aws-sdk/client-s3'
 import multerS3 from 'multer-s3'
 import { shouldRenderAsText } from '../../../shared/utils'
 import { ChatInstance, RagFile, RagIndex, Responsibility } from '../../db/models'
@@ -12,17 +11,8 @@ import { ingestRagFiles } from '../../services/rag/ingestion'
 import { search } from '../../services/rag/search'
 import { getRedisVectorStore } from '../../services/rag/vectorStore'
 import { SearchSchema } from '../../../shared/rag'
-import { S3_ACCESS_KEY, S3_BUCKET, S3_HOST, S3_SECRET_ACCESS_KEY } from '../../util/config'
-
-export const s3Client = new S3Client({
-  region: 'us-east-1',
-  endpoint: S3_HOST,
-  forcePathStyle: true,
-  credentials: {
-    accessKeyId: S3_ACCESS_KEY,
-    secretAccessKey: S3_SECRET_ACCESS_KEY,
-  },
-})
+import { S3_BUCKET } from '../../util/config'
+import { s3Client } from '../../util/s3client'
 
 const ragIndexRouter = Router()
 

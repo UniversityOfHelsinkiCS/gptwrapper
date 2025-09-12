@@ -10,7 +10,7 @@ import type { RagFile, RagIndex } from '../../db/models'
 import { ApplicationError } from '../../util/ApplicationError'
 import { pdfToText, pdfToTextWithVLM } from '../../util/pdfToText'
 import { S3_BUCKET } from '../../util/config'
-import { s3Client } from '../../routes/rag/ragIndex'
+import { s3Client } from '../../util/s3client'
 
 const isPdf = (filePath: string) => filePath.endsWith('.pdf')
 const getPdfTextKey = (s3Key: string) => `${s3Key}.txt`
