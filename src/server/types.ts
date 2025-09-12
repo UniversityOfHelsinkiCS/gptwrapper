@@ -1,5 +1,4 @@
 import { Request } from 'express'
-import OpenAI from 'openai'
 import { ChatRequestMessage, GetChatCompletionsOptions } from '@azure/openai'
 import type { User } from '@shared/user'
 import type { ValidModelName } from '@config'
@@ -11,38 +10,16 @@ export interface RequestWithUser extends Request {
   hijackedBy?: User
 }
 
-export interface ChatRequest extends RequestWithUser {
-  body: RequestBody
-}
-
-export interface CourseChatRequest extends ChatRequest {
-  params: {
-    courseId: string
-  }
-}
-
-export type APIError = typeof OpenAI.APIError
-
-export type OpenAIStream = ReturnType<typeof OpenAI.prototype.chat.completions.create>
-
-export type Message = OpenAI.Chat.ChatCompletionMessage
 export interface CustomMessage {
   role: Role
   content: string
 }
 export type Role = 'system' | 'assistant' | 'user'
 
-export type StreamingOptions = OpenAI.Chat.Completions.CompletionCreateParamsStreaming
-
 export type AzureOptions = {
   model: ValidModelName
   messages: ChatRequestMessage[]
   options: GetChatCompletionsOptions
-}
-
-interface RequestBody {
-  id?: string
-  options?: StreamingOptions
 }
 
 export interface ChatInstance {
@@ -70,13 +47,6 @@ export type Enrollment = {
   personId: string
   state: string
   courseUnitRealisation: CourseUnitRealisation
-}
-
-export type Prompt = {
-  id: string
-  chatInstanceId: string
-  systemMessage: string
-  messages: Message[]
 }
 
 export type Locales = {
