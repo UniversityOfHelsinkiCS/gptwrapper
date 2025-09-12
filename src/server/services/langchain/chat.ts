@@ -15,6 +15,14 @@ import { MockModel } from './MockModel'
 
 type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
 
+/**
+ * Gets a chat model instance based on the provided configuration.
+ * Can be a MockModel for testing or an AzureChatOpenAI model.
+ * @param modelConfig The configuration for the model.
+ * @param tools The structured tools the model can use.
+ * @param temperature The temperature for the model's responses.
+ * @returns A chat model instance.
+ */
 const getChatModel = (modelConfig: (typeof validModels)[number], tools: StructuredTool[], temperature: number): ChatModel => {
   const chatModel =
     modelConfig.name === 'mock'
@@ -31,7 +39,7 @@ const getChatModel = (modelConfig: (typeof validModels)[number], tools: Structur
             summary: null,
             generate_summary: null,
           },
-        }).bindTools(tools)
+        }).bindTools(tools) // Make tools available to the model.
 
   return chatModel
 }
@@ -40,6 +48,23 @@ type WriteEventFunction = (data: ChatEvent) => Promise<void>
 
 type ChatTool = StructuredTool<any, any, any, string>
 
+/**
+ * Handles the main chat streaming logic.
+ * It takes the chat history, model configuration, and a set of tools,
+ * and streams the response from the language model, handling tool calls
+ * and sending events back to the client.
+ *
+ * This function can perform two chat turns if the first one results in tool calls.
+ *
+ * @param model The name of the model to use.
+ * @param temperature The temperature for the model's responses.
+ * @param systemMessage The system message to prepend to the chat history.
+ * @param chatMessages The history of chat messages.
+ * @param tools The structured tools available to the model.
+ * @param writeEvent A function to write chat events to the client.
+ * @param user The user initiating the chat.
+ * @returns An object containing response statistics and the final response message.
+ */
 export const streamChat = async ({
   model,
   temperature,
@@ -77,6 +102,7 @@ export const streamChat = async ({
 
   const result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
 
+  // If the model decided to call tools, execute them and send the results back to the model in a second turn.
   if (result.toolCalls.length > 0) {
     const result2 = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
 
@@ -102,6 +128,17 @@ export const streamChat = async ({
   }
 }
 
+/**
+ * Executes a single turn of the chat.
+ * It streams the model's response, handles tool calls, and sends events.
+ *
+ * @param model The chat model instance.
+ * @param messages The messages to send to the model.
+ * @param toolsByName A record of available tools, keyed by name.
+ * @param writeEvent A function to write chat events to the client.
+ * @param user The user for whom the tool results are stored.
+ * @returns An object with statistics about the chat turn and any tool calls made.
+ */
 const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByName: Record<string, ChatTool>, writeEvent: WriteEventFunction, user: User) => {
   const stream = await model.stream(messages)
 
@@ -140,9 +177,11 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
       })
     }
 
+    // Append the chunk to the full response.
     fullOutput = fullOutput !== undefined ? concat(fullOutput, chunk) : chunk
   }
 
+  // Add the assistant's full response to the message history.
   messages.push(fullOutput as AIMessageChunk)
 
   const toolCalls = fullOutput?.tool_calls ?? []
@@ -162,6 +201,7 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
       const result = await tool.invoke(toolCall)
       const artifact = result.artifact as ChatToolOutput
       await ToolResultStore.saveResults(id, artifact, user)
+      // Add the tool's output to the message history for the next turn.
       messages.push(result)
       toolCallStatuses[id] = {
         status: 'completed',
@@ -182,6 +222,7 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
     }
   }
 
+  // Calculate statistics about the response generation.
   const tokenCount = fullOutput?.usage_metadata?.output_tokens ?? 0
   const inputTokenCount = fullOutput?.usage_metadata?.input_tokens ?? 0
   const tokenStreamingDuration = Date.now() - firstTokenTS
