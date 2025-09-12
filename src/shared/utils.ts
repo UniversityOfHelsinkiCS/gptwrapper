@@ -1,4 +1,4 @@
-import { Locale } from './types'
+import { Locale } from './lang'
 
 // coded by ai-mluukkai
 export function shouldRenderAsText(mimetype: string): boolean {

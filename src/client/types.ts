@@ -1,5 +1,6 @@
 import { ValidModelName } from '../config'
 import type { ChatMessage } from '@shared/chat'
+import { Locale } from '@shared/lang'
 import type { UserPreferences } from '@shared/user'
 
 /*
@@ -34,7 +35,7 @@ export interface StatisticResponse {
 export interface User {
   id: string
   username: string
-  language?: string
+  language?: keyof Locale
   iamGroups: string[]
   email?: string
   firstNames: string

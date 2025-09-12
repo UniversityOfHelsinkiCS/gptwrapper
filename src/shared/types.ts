@@ -35,12 +35,6 @@ export type RagIndexAttributes = {
   ragFiles?: RagFileAttributes[]
 }
 
-export type Locale = {
-  fi?: string
-  en?: string
-  sv?: string
-}
-
 export type Discussion = {
   id: string
   userId: string

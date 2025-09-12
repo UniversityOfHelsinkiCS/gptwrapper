@@ -28,6 +28,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import hyLogo from '../../assets/hy_logo.svg'
 import styles from './styles'
+import { LANGUAGES, Locale } from '@shared/lang'
 
 export const EmbeddedNavBar = () => {
   const { t } = useTranslation()
@@ -55,12 +56,13 @@ const NavBar = () => {
   const theme = useTheme()
   const isDesktopDevice = useMediaQuery(theme.breakpoints.up('lg'))
   const { language } = i18n
-  const languages = ['fi', 'sv', 'en']
   const { user } = useCurrentUser()
-  // will be changed to use url to change language and moved up to app since language is global
-  const handleLanguageChange = (newLanguage: string) => {
+
+  const handleLanguageChange = (newLanguage: keyof Locale) => {
     i18n.changeLanguage(newLanguage)
+    localStorage.setItem('lang', newLanguage)
   }
+
   useEffect(() => {
     setNavPanelOpen(false)
   }, [isDesktopDevice])
@@ -88,7 +90,7 @@ const NavBar = () => {
               <MenuIcon />
             </IconButton>
             <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
-              {isDesktopDevice && <NavItems user={user} t={t} languages={languages} handleLanguageChange={handleLanguageChange} language={language} />}
+              {isDesktopDevice && <NavItems user={user} handleLanguageChange={handleLanguageChange} language={language} />}
             </Box>
           </Toolbar>
         </Container>
@@ -101,7 +103,7 @@ const NavBar = () => {
         }}
       >
         <Stack sx={{ paddingTop: 4, paddingRight: 4 }}>
-          {!isDesktopDevice && <NavItems user={user} t={t} languages={languages} handleLanguageChange={handleLanguageChange} language={language} vertical />}
+          {!isDesktopDevice && <NavItems user={user} handleLanguageChange={handleLanguageChange} language={language} vertical />}
         </Stack>
       </Drawer>
     </>
@@ -127,7 +129,8 @@ const NavItemButton = ({ children, to, path, current, icon, vertical }) => {
   )
 }
 
-const NavItems = ({ user, t, languages, handleLanguageChange, language, vertical = false }) => {
+const NavItems = ({ user, handleLanguageChange, language, vertical = false }) => {
+  const { t } = useTranslation()
   const anchorRef = useRef<HTMLButtonElement>(null)
   const { pathname } = useLocation()
   const [openLanguageSelect, setOpenLanguageSelect] = useState(false)
@@ -178,7 +181,7 @@ const NavItems = ({ user, t, languages, handleLanguageChange, language, vertical
             <Paper>
               <ClickAwayListener onClickAway={() => setOpenLanguageSelect(!openLanguageSelect)}>
                 <MenuList autoFocusItem={openLanguageSelect} id="composition-menu" aria-labelledby="composition-button">
-                  {languages.map((l) => (
+                  {LANGUAGES.map((l) => (
                     <MenuItem
                       key={l}
                       sx={[styles.item, language === l && (styles.activeItem as any)]}
