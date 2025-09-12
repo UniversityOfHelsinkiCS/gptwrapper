@@ -10,7 +10,6 @@ const schema = z.object({
 
 export const getRagIndexSearchTool = (ragIndex: RagIndex) =>
   tool(
-    // @ts-expect-error Langchain types seem slightly broken, "cannot assign unknown to { query: string }"
     async ({ query }: { query: string }) => {
       console.log('Search tool invoked with query:', query)
       const { results: documents } = await search(ragIndex, SearchSchema.parse({ query }))

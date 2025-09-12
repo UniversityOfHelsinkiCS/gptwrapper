@@ -27,7 +27,6 @@ const mockSearch: typeof search = async (_index: RagIndex, _params: { query: str
 
 export const getMockRagIndexSearchTool: typeof getRagIndexSearchTool = (ragIndex: RagIndex) =>
   tool(
-    // @ts-expect-error Langchain types seem slightly broken, "cannot assign unknown to { query: string }"
     async ({ query }: { query: string }) => {
       console.log('Mock search tool invoked with query:', query)
       const { results: documents } = await mockSearch(ragIndex, SearchSchema.parse({ query }))
