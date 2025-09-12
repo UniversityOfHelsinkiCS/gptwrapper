@@ -1,0 +1,70 @@
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: dev.Containerfile
+    image: gptwrapper_dev
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+      - OLLAMA_URL=host.docker.internal:11434
+    volumes:
+      - ./:/opt/app-root/src
+    ports:
+      - 3000:3000
+      - 8000:8000
+    container_name: gptwrapper_dev
+    depends_on:
+      - redis
+
+  db:
+    image: docker.io/postgres:15.8-alpine
+    environment:
+      - PGDATA=/data
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5433:5432
+    volumes:
+      - pg_data:/data
+    container_name: gptwrapper_db
+
+  redis:
+    image: redis/redis-stack-server
+    container_name: gptwrapper_redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+
+  # Comment out if you use local ollama. Set OLLAMA_URL=host.docker.internal:11434 if using recent Docker Desktop.
+  ollama:
+    image: ollama/ollama
+    ports:
+      - 11434:11434  # expose the Ollama API to the host
+    volumes:
+      - ollama_data:/root/.ollama  # persistent model storage
+
+  dalai:
+    # image: toska/dalai:latest
+    build:
+      context: ../dalai
+      dockerfile: ../dalai/Dockerfile
+    environment:
+      - LAAMA_URL=ollama:11434
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - S3_HOST=
+      - S3_ACCESS_KEY=
+      - S3_SECRET_ACCESS_KEY=
+    volumes:
+      - ../dalai/:/opt/app-root/src
+      - dalai_data:/app
+    container_name: gptwrapper_dalai
+    depends_on:
+      - redis
+
+volumes:
+  pg_data:
+  redis_data:
+  chromadb_data:
+  ollama_data:
+  dalai_data:
