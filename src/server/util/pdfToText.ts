@@ -14,16 +14,26 @@ export const pdfToText = async (fileBuffer: Buffer) => {
   }
 }
 
-const connection = new IORedis({
-  host: 'redis',
-  port: 6379,
-  // tls: {
-  //   ca: BMQ_REDIS_CA,
-  //   cert: BMQ_REDIS_CERT,
-  //   key: BMQ_REDIS_KEY,
-  //   servername: BMQ_REDIS_HOST,
-  // }
-})
+let creds: Record<string, any> = {
+  host: BMQ_REDIS_HOST,
+  port: BMQ_REDIS_PORT,
+}
+
+
+if (BMQ_REDIS_CA !== 'none') {
+  creds = {
+    ...creds,
+    tls: {
+      ca: BMQ_REDIS_CA,
+      cert: BMQ_REDIS_CERT,
+      key: BMQ_REDIS_KEY,
+      servername: BMQ_REDIS_HOST,
+    }
+  }
+}
+
+const connection = new IORedis(creds)
+
 
 const queue = new Queue('llama-scan-queue', {
   connection

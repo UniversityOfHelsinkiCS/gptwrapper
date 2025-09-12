@@ -11,8 +11,6 @@ export const AZURE_RESOURCE = getEnv('AZURE_RESOURCE', 'placeholder')
 
 export const DATABASE_URL = getEnv('DATABASE_URL', 'placeholder-this-needs-to-be-set')
 
-export const CHROMADB_URL = getEnv('CHROMADB_URL', 'http://chromadb:8001')
-
 export const JAMI_URL =
   inProduction || inDevelopment ? 'https://api-toska.apps.ocp-prod-0.k8s.it.helsinki.fi/jami/' : 'https://api-toska.apps.ocp-test-0.k8s.it.helsinki.fi/jami'
 
@@ -30,9 +28,9 @@ export const REDIS_PORT = 6379
 
 export const BMQ_REDIS_HOST = getEnv('BMQ_REDIS_HOST', 'placeholder')
 
-export const BMQ_REDIS_PORT = 443
+export const BMQ_REDIS_PORT = getEnv('BMQ_REDIS_PORT', 'placeholder')
 
-export const BMQ_REDIS_CA = getEnv('BMQ_REDIS_CA', 'placeholder')
+export const BMQ_REDIS_CA = getEnv('BMQ_REDIS_CA', 'none')
 
 export const BMQ_REDIS_CERT = getEnv('BMQ_REDIS_CERT', 'placeholder')
 

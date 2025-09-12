@@ -15,7 +15,7 @@ import { SearchSchema } from '../../../shared/rag'
 import { S3_ACCESS_KEY, S3_BUCKET, S3_HOST, S3_SECRET_ACCESS_KEY } from '../../util/config'
 
 export const s3Client = new S3Client({
-  region: 'eu-north-1',
+  region: 'us-east-1',
   endpoint: S3_HOST,
   forcePathStyle: true,
   credentials: {
