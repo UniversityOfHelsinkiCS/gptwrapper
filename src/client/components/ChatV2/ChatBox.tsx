@@ -31,7 +31,7 @@ export const ChatBox = ({
   isMobile,
 }: {
   disabled: boolean
-  fileInputRef: React.RefObject<HTMLInputElement>
+  fileInputRef: React.RefObject<HTMLInputElement | null>
   fileName: string
   tokenUsageWarning: string
   tokenUsageAlertOpen: boolean

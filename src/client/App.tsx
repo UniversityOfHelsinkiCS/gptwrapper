@@ -1,16 +1,14 @@
 import { Box, Button, CircularProgress, CssBaseline, Snackbar } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { fi } from 'date-fns/locale'
 import { SnackbarProvider } from 'notistack'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom'
 import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
-import { PUBLIC_URL } from '../config'
 import { Feedback } from './components/Feedback'
 import NavBar, { EmbeddedNavBar } from './components/NavBar'
-import { AppContext } from './contexts/AppContext'
 import { EmbeddedProvider, useIsEmbedded } from './contexts/EmbeddedContext'
 import useCurrentUser from './hooks/useCurrentUser'
 import { AnalyticsProvider } from './stores/analytics'
@@ -97,11 +95,10 @@ const App = () => {
 }
 
 const Layout = () => {
-  const appRef = useRef<HTMLDivElement>(null)
   const isEmbedded = useIsEmbedded()
 
   return (
-    <AppContext.Provider value={appRef}>
+    <>
       <Box
         sx={{
           display: 'flex',
@@ -109,7 +106,6 @@ const Layout = () => {
           minHeight: '100vh',
           height: 'auto',
         }}
-        ref={appRef}
       >
         {isEmbedded ? <EmbeddedNavBar /> : <NavBar />}
         <Box sx={{ flex: 1, mt: '4rem' }}>
@@ -118,7 +114,7 @@ const Layout = () => {
         <Feedback />
       </Box>
       <AdminLoggedInAsBanner />
-    </AppContext.Provider>
+    </>
   )
 }
 

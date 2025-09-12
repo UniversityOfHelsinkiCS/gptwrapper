@@ -4,8 +4,13 @@ import { RagIndex } from '../../db/models'
 import { search } from './search'
 import { SearchSchema } from '../../../shared/rag'
 
+const schema = z.object({
+  query: z.string().describe('the query to search for'),
+})
+
 export const getRagIndexSearchTool = (ragIndex: RagIndex) =>
   tool(
+    // @ts-expect-error Langchain types seem slightly broken, "cannot assign unknown to { query: string }"
     async ({ query }: { query: string }) => {
       console.log('Search tool invoked with query:', query)
       const { results: documents } = await search(ragIndex, SearchSchema.parse({ query }))
@@ -15,9 +20,7 @@ export const getRagIndexSearchTool = (ragIndex: RagIndex) =>
     {
       name: `document_search`, // Gotcha: function name must match '^[a-zA-Z0-9_\.-]+$' at least in AzureOpenAI. This name must satisfy the name in ChatToolDef type
       description: `Search documents in the materials (titled '${ragIndex.metadata.name}'). Prefer ${ragIndex.metadata.language}, which is the language used in the documents.`,
-      schema: z.object({
-        query: z.string().describe('the query to search for'),
-      }),
+      schema,
       responseFormat: 'content_and_artifact',
     },
   )

@@ -2,7 +2,8 @@ import { KeyboardReturn } from '@mui/icons-material'
 import { Accordion, AccordionActions, AccordionSummary, Box, Button, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useTranslation } from 'react-i18next'
-import { User } from '../../../types'
+import type { User } from '../../../types'
+import type { JSX } from 'react'
 
 const UserAccordion = ({
   user,
