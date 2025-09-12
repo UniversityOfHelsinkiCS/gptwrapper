@@ -1,7 +1,5 @@
-import { Request } from 'express'
-import { ChatRequestMessage, GetChatCompletionsOptions } from '@azure/openai'
 import type { User } from '@shared/user'
-import type { ValidModelName } from '@config'
+import type { Request } from 'express'
 
 export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>
 
@@ -15,12 +13,6 @@ export interface CustomMessage {
   content: string
 }
 export type Role = 'system' | 'assistant' | 'user'
-
-export type AzureOptions = {
-  model: ValidModelName
-  messages: ChatRequestMessage[]
-  options: GetChatCompletionsOptions
-}
 
 export interface ChatInstance {
   id: string
