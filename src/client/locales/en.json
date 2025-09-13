@@ -309,7 +309,9 @@
     "editPrompt": "Edit prompt '{{name}}'",
     "systemMessage": "Instructions",
     "modelFreeToChoose": "Model free to choose",
-    "ragSystemMessage": "Source material instructions"
+    "ragSystemMessage": "Source material instructions",
+    "basicInformation": "Basic information",
+    "context": "Context"
   },
   "tooltip": {
     "copied": "Copied!"

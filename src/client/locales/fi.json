@@ -311,7 +311,9 @@
     "hidePrompt": "Piilota alustuksen sisältö opiskelijoilta",
     "editMandatoryPrompt": "Tee alustuksesta pakollinen",
     "noSourceMaterials": "Ei lähdemateriaaleja",
-    "ragSystemMessage": "Lähdemateriaaliohjeistus"
+    "ragSystemMessage": "Lähdemateriaaliohjeistus",
+    "basicInformation": "Perustiedot",
+    "context": "Konteksti"
   },
   "tooltip": {
     "copied": "Kopioitu!"

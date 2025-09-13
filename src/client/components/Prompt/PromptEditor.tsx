@@ -1,7 +1,21 @@
 import { useEffect, useState } from 'react'
 import type { PromptCreationParams, PromptEditableParams } from '@shared/prompt'
 import type { ValidModelName } from '@config'
-import { TextField, Box, Checkbox, FormControlLabel, FormControl, InputLabel, Select, MenuItem, Slider, DialogActions, Grow, Collapse } from '@mui/material'
+import {
+  TextField,
+  Box,
+  Checkbox,
+  FormControlLabel,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Slider,
+  DialogActions,
+  Grow,
+  Collapse,
+  Typography,
+} from '@mui/material'
 import { DEFAULT_RAG_SYSTEM_MESSAGE, validModels } from '@config'
 import { useTranslation } from 'react-i18next'
 import type { RagIndexAttributes } from '@shared/types'
@@ -19,14 +33,14 @@ interface PromptEditorProps {
 
 export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: PromptEditorProps) => {
   const { t } = useTranslation()
-
+  console.log(prompt)
   const editMutation = useEditPromptMutation()
   const createMutation = useCreatePromptMutation()
 
   const [name, setName] = useState<string>(prompt?.name ?? '')
   const [systemMessage, setSystemMessage] = useState<string>(prompt?.systemMessage ?? '')
   const [ragSystemMessage, setRagSystemMessage] = useState<string>(() =>
-    prompt ? prompt.messages?.find((m) => m.role === 'assistant')?.content || '' : DEFAULT_RAG_SYSTEM_MESSAGE,
+    prompt ? prompt.messages?.find((m) => m.role === 'system')?.content || '' : DEFAULT_RAG_SYSTEM_MESSAGE,
   )
   const [hidden, setHidden] = useState<boolean>(prompt?.hidden ?? false)
   const [mandatory, setMandatory] = useState<boolean>(prompt?.mandatory ?? false)
@@ -89,7 +103,10 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
   return (
     <form onSubmit={handleSubmit}>
       <Box sx={{ mt: 2, display: 'flex', gap: '1rem' }}>
-        <Box sx={{ flex: 1 }}>
+        <Box sx={{ flex: 1 }} component="section">
+          <Typography component="h3" gutterBottom>
+            {t('prompt:basicInformation')}
+          </Typography>
           <TextField
             slotProps={{
               htmlInput: {
@@ -108,20 +125,6 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
             control={<Checkbox checked={mandatory} onChange={(e) => setMandatory(e.target.checked)} />}
             label={t('prompt:editMandatoryPrompt')}
           />
-
-          <FormControl fullWidth margin="normal">
-            <InputLabel>{t('rag:sourceMaterials')}</InputLabel>
-            <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
-              <MenuItem value="" data-testid="no-source-materials">
-                <em>{t('prompt:noSourceMaterials')}</em>
-              </MenuItem>
-              {ragIndices?.map((index) => (
-                <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
-                  {index.metadata.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
           <FormControl fullWidth margin="normal">
             <InputLabel>{t('common:model')}</InputLabel>
             <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
@@ -159,7 +162,23 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
             />
           </Collapse>
         </Box>
-        <Box sx={{ flex: 2 }}>
+        <Box sx={{ flex: 2 }} component="section">
+          <Typography component="h3" gutterBottom>
+            {t('prompt:context')}
+          </Typography>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>{t('rag:sourceMaterials')}</InputLabel>
+            <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
+              <MenuItem value="" data-testid="no-source-materials">
+                <em>{t('prompt:noSourceMaterials')}</em>
+              </MenuItem>
+              {ragIndices?.map((index) => (
+                <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
+                  {index.metadata.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <Collapse in={!!ragIndexId}>
             <OpenableTextfield
               slotProps={{

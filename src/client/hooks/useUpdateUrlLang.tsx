@@ -12,7 +12,6 @@ export const useUpdateUrlLang = () => {
   // sets the local lang state to match the newlang if the newLang is supported
   const setLang = useCallback(
     (newLang: keyof Locale) => {
-      console.log('SET LANG', newLang)
       if (!LANGUAGES.includes(newLang)) {
         console.error('Invalid language', newLang)
         return
@@ -31,8 +30,6 @@ export const useUpdateUrlLang = () => {
   useEffect(() => {
     const updatedLangFromLocal = LanguageSchema.safeParse(localStorage.getItem('lang'))
     const langParam = LanguageSchema.safeParse(params.get('lang'))
-
-    console.log(updatedLangFromLocal, langParam)
 
     if (langParam.success) {
       setLang(langParam.data)
