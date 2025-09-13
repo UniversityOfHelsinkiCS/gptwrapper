@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import type { PromptCreationParams, PromptEditableParams } from '@shared/prompt'
 import type { ValidModelName } from '@config'
-import { TextField, Box, Checkbox, FormControlLabel, FormControl, InputLabel, Select, MenuItem, Slider } from '@mui/material'
-import { validModels } from '@config'
+import { TextField, Box, Checkbox, FormControlLabel, FormControl, InputLabel, Select, MenuItem, Slider, DialogActions, Grow, Collapse } from '@mui/material'
+import { DEFAULT_RAG_SYSTEM_MESSAGE, validModels } from '@config'
 import { useTranslation } from 'react-i18next'
 import type { RagIndexAttributes } from '@shared/types'
 import { useCreatePromptMutation, useEditPromptMutation } from '../../hooks/usePromptMutation'
 import { enqueueSnackbar } from 'notistack'
 import { BlueButton } from '../ChatV2/general/Buttons'
+import OpenableTextfield from '../common/OpenableTextfield'
 
 interface PromptEditorProps {
   prompt?: PromptEditableParams & { id: string }
@@ -24,6 +25,9 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
 
   const [name, setName] = useState<string>(prompt?.name ?? '')
   const [systemMessage, setSystemMessage] = useState<string>(prompt?.systemMessage ?? '')
+  const [ragSystemMessage, setRagSystemMessage] = useState<string>(() =>
+    prompt ? prompt.messages?.find((m) => m.role === 'assistant')?.content || '' : DEFAULT_RAG_SYSTEM_MESSAGE,
+  )
   const [hidden, setHidden] = useState<boolean>(prompt?.hidden ?? false)
   const [mandatory, setMandatory] = useState<boolean>(prompt?.mandatory ?? false)
   const [ragIndexId, setRagIndexId] = useState<number | undefined>(prompt?.ragIndexId)
@@ -50,6 +54,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
           id: prompt.id,
           name,
           systemMessage,
+          messages: [{ role: 'system', content: ragSystemMessage }],
           hidden,
           mandatory,
           ragIndexId,
@@ -63,6 +68,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
           type,
           ...(type === 'CHAT_INSTANCE' ? { chatInstanceId } : {}),
           systemMessage,
+          messages: [{ role: 'system', content: ragSystemMessage }],
           hidden,
           mandatory,
           ragIndexId,
@@ -81,92 +87,120 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
   const modelHasTemperature = selectedModel && 'temperature' in (validModels.find((m) => m.name === selectedModel) ?? {})
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-      <TextField
-        slotProps={{
-          htmlInput: {
-            'data-testid': 'prompt-name-input',
-            minLength: 3,
-          },
-        }}
-        label={t('common:promptName')}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        fullWidth
-        margin="normal"
-      />
-      <TextField
-        slotProps={{
-          htmlInput: {
-            'data-testid': 'system-message-input',
-          },
-        }}
-        label={t('prompt:systemMessage')}
-        value={systemMessage}
-        onChange={(e) => setSystemMessage(e.target.value)}
-        fullWidth
-        margin="normal"
-        multiline
-        minRows={4}
-        maxRows={24}
-      />
-      <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />
-      <FormControlLabel control={<Checkbox checked={mandatory} onChange={(e) => setMandatory(e.target.checked)} />} label={t('prompt:editMandatoryPrompt')} />
+    <form onSubmit={handleSubmit}>
+      <Box sx={{ mt: 2, display: 'flex', gap: '1rem' }}>
+        <Box sx={{ flex: 1 }}>
+          <TextField
+            slotProps={{
+              htmlInput: {
+                'data-testid': 'prompt-name-input',
+                minLength: 3,
+              },
+            }}
+            label={t('common:promptName')}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            fullWidth
+            margin="normal"
+          />
+          <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />
+          <FormControlLabel
+            control={<Checkbox checked={mandatory} onChange={(e) => setMandatory(e.target.checked)} />}
+            label={t('prompt:editMandatoryPrompt')}
+          />
 
-      <FormControl fullWidth margin="normal">
-        <InputLabel>{t('rag:sourceMaterials')}</InputLabel>
-        <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
-          <MenuItem value="" data-testid="no-source-materials">
-            <em>{t('prompt:noSourceMaterials')}</em>
-          </MenuItem>
-          {ragIndices?.map((index) => (
-            <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
-              {index.metadata.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl fullWidth margin="normal">
-        <InputLabel>{t('common:model')}</InputLabel>
-        <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
-          <MenuItem value="none">
-            <em>{t('prompt:modelFreeToChoose')}</em>
-          </MenuItem>
-          {validModels.map((m) => (
-            <MenuItem key={m.name} value={m.name}>
-              {m.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <Box>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={temperatureDefined && !modelHasTemperature}
-              onChange={(e) => setTemperatureDefined(e.target.checked)}
+          <FormControl fullWidth margin="normal">
+            <InputLabel>{t('rag:sourceMaterials')}</InputLabel>
+            <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
+              <MenuItem value="" data-testid="no-source-materials">
+                <em>{t('prompt:noSourceMaterials')}</em>
+              </MenuItem>
+              {ragIndices?.map((index) => (
+                <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
+                  {index.metadata.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>{t('common:model')}</InputLabel>
+            <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
+              <MenuItem value="none">
+                <em>{t('prompt:modelFreeToChoose')}</em>
+              </MenuItem>
+              {validModels.map((m) => (
+                <MenuItem key={m.name} value={m.name}>
+                  {m.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={temperatureDefined && !modelHasTemperature}
+                onChange={(e) => setTemperatureDefined(e.target.checked)}
+                disabled={modelHasTemperature}
+              />
+            }
+            label={t('chat:temperature')}
+          />
+          <Collapse in={temperatureDefined && !modelHasTemperature}>
+            <Slider
+              value={temperature}
+              onChange={(_, newValue) => setTemperature(newValue as number)}
+              aria-labelledby="temperature-slider"
+              valueLabelDisplay="auto"
+              step={0.1}
+              marks
+              min={0}
+              max={1}
               disabled={modelHasTemperature}
             />
-          }
-          label={t('chat:temperature')}
-        />
-        {temperatureDefined && !modelHasTemperature && (
-          <Slider
-            value={temperature}
-            onChange={(_, newValue) => setTemperature(newValue as number)}
-            aria-labelledby="temperature-slider"
-            valueLabelDisplay="auto"
-            step={0.1}
-            marks
-            min={0}
-            max={1}
-            disabled={modelHasTemperature}
+          </Collapse>
+        </Box>
+        <Box sx={{ flex: 2 }}>
+          <Collapse in={!!ragIndexId}>
+            <OpenableTextfield
+              slotProps={{
+                htmlInput: {
+                  'data-testid': 'rag-system-message-input',
+                },
+              }}
+              label={t('prompt:ragSystemMessage')}
+              value={ragSystemMessage}
+              onChange={(e) => setRagSystemMessage(e.target.value)}
+              fullWidth
+              margin="normal"
+              multiline
+              minRows={3}
+              maxRows={18}
+            />
+          </Collapse>
+          <TextField
+            slotProps={{
+              htmlInput: {
+                'data-testid': 'system-message-input',
+              },
+            }}
+            label={t('prompt:systemMessage')}
+            value={systemMessage}
+            onChange={(e) => setSystemMessage(e.target.value)}
+            fullWidth
+            margin="normal"
+            multiline
+            minRows={12}
+            maxRows={48}
+            sx={{ flex: 1 }}
           />
-        )}
+        </Box>
       </Box>
-      <BlueButton type="submit" variant="contained" sx={{ mt: 2 }}>
-        {t('common:save')}
-      </BlueButton>
-    </Box>
+
+      <DialogActions>
+        <BlueButton type="submit" variant="contained" sx={{ mt: 2 }}>
+          {t('common:save')}
+        </BlueButton>
+      </DialogActions>
+    </form>
   )
 }

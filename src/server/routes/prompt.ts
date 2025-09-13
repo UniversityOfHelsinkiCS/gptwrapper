@@ -170,7 +170,6 @@ promptRouter.put('/:id', async (req, res) => {
   const { id } = req.params
   const { user } = req as unknown as RequestWithUser
   const updates = PromptUpdateableParamsSchema.parse(req.body)
-  const { systemMessage, name, hidden, mandatory, ragIndexId, model, temperature } = updates
 
   const prompt = await Prompt.findByPk(id)
 
@@ -181,17 +180,11 @@ promptRouter.put('/:id', async (req, res) => {
   await authorizePromptUpdate(user, prompt)
 
   const potentialConflicts = await getPotentialNameConflicts(prompt)
-  if (potentialConflicts.some((p) => p.name === name && p.id !== prompt.id)) {
+  if (potentialConflicts.some((p) => p.name === updates.name && p.id !== prompt.id)) {
     throw ApplicationError.Conflict('Prompt name already exists')
   }
 
-  prompt.ragIndexId = ragIndexId
-  prompt.systemMessage = systemMessage
-  prompt.name = name
-  prompt.hidden = hidden
-  prompt.mandatory = mandatory
-  prompt.model = model
-  prompt.temperature = temperature
+  Object.assign(prompt, updates)
 
   await prompt.save()
 

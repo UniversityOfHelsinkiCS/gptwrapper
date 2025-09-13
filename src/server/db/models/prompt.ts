@@ -1,6 +1,6 @@
 import { type CreationOptional, DataTypes, type InferAttributes, type InferCreationAttributes, Model, NonAttribute } from 'sequelize'
 
-import type { CustomMessage } from '../../types'
+import type { Message } from '@shared/chat'
 import { sequelize } from '../connection'
 import RagIndex from './ragIndex'
 import type { ValidModelName } from '@config'
@@ -23,7 +23,7 @@ class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prom
 
   declare systemMessage: string
 
-  declare messages: CreationOptional<CustomMessage[]>
+  declare messages: CreationOptional<Message[]>
 
   declare hidden: CreationOptional<boolean>
 

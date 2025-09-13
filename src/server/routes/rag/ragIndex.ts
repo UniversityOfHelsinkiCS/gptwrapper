@@ -176,7 +176,7 @@ const upload = multer({
     key: (req, file, cb) => {
       const { ragIndex } = req as RagIndexRequest
       const uniqueFilename = file.originalname
-      const s3key = `uploads/rag/${ragIndex.id}/${uniqueFilename}` // @todo Implement unique key generation logic. ragIndex.id is not unique accross multiple different instances of currechat
+      const s3key = `uploads/rag/${ragIndex.id}/${uniqueFilename}`
       cb(null, s3key)
     },
   }),

@@ -3,14 +3,11 @@ import {
   Alert,
   Box,
   Button,
-  Checkbox,
   Container,
   Dialog,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
   IconButton,
-  Input,
   Modal,
   Paper,
   Skeleton,
@@ -27,7 +24,6 @@ import { Link, Route, Routes, useParams } from 'react-router-dom'
 import { PUBLIC_URL } from '../../../../config'
 import useCourse from '../../../hooks/useCourse'
 import useCurrentUser from '../../../hooks/useCurrentUser'
-import { useCreatePromptMutation, useDeletePromptMutation } from '../../../hooks/usePromptMutation'
 import usePrompts from '../../../hooks/usePrompts'
 import type { Prompt as PromptType, Responsebility, User } from '../../../types'
 import Rag from '../../Rag/Rag'
@@ -372,7 +368,7 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
         ))
       )}
 
-      <Dialog open={editorOpen} onClose={() => setEditorOpen(false)}>
+      <Dialog open={editorOpen} onClose={() => setEditorOpen(false)} fullWidth maxWidth="lg">
         <DialogTitle>
           {promptToEdit ? t('prompt:editPrompt', { name: promptToEdit.name }) : t('prompt:createNew')}
           <IconButton

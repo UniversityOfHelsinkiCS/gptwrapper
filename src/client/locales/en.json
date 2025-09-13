@@ -308,7 +308,8 @@
     "createNew": "Create new prompt",
     "editPrompt": "Edit prompt '{{name}}'",
     "systemMessage": "Instructions",
-    "modelFreeToChoose": "Model free to choose"
+    "modelFreeToChoose": "Model free to choose",
+    "ragSystemMessage": "Source material instructions"
   },
   "tooltip": {
     "copied": "Copied!"

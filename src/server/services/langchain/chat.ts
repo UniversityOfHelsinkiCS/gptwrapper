@@ -5,10 +5,10 @@ import type { Runnable } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
 import { AzureChatOpenAI, type ChatOpenAICallOptions } from '@langchain/openai'
-import { type ValidModelName, validModels } from '../../../config'
-import type { ChatEvent, ChatMessage } from '../../../shared/chat'
-import type { ChatToolDef, ChatToolOutput } from '../../../shared/tools'
-import type { User } from '../../../shared/user'
+import { type ValidModelName, validModels } from '@config'
+import type { ChatEvent, ChatMessage, Message } from '@shared/chat'
+import type { ChatToolDef, ChatToolOutput } from '@shared/tools'
+import type { User } from '@shared/user'
 import { AZURE_API_KEY, AZURE_RESOURCE } from '../../util/config'
 import { ToolResultStore } from './fileSearchResultsStore'
 import { MockModel } from './MockModel'
@@ -60,6 +60,7 @@ type ChatTool = StructuredTool<any, any, any, string>
  * @param temperature The temperature for the model's responses.
  * @param systemMessage The system message to prepend to the chat history.
  * @param chatMessages The history of chat messages.
+ * @param promptMessages The messages defined in the prompt, will be prepended to the chat history.
  * @param tools The structured tools available to the model.
  * @param writeEvent A function to write chat events to the client.
  * @param user The user initiating the chat.
@@ -70,6 +71,7 @@ export const streamChat = async ({
   temperature,
   systemMessage,
   chatMessages,
+  promptMessages = [],
   tools = [],
   writeEvent,
   user,
@@ -78,6 +80,7 @@ export const streamChat = async ({
   temperature: number
   systemMessage: string
   chatMessages: ChatMessage[]
+  promptMessages?: Message[]
   tools?: ChatTool[]
   writeEvent: WriteEventFunction
   user: User
@@ -93,6 +96,7 @@ export const streamChat = async ({
 
   const messages: BaseMessageLike[] = [
     ...('instructions' in modelConfig ? [{ role: 'system', content: modelConfig.instructions }] : []),
+    ...promptMessages,
     {
       role: 'system',
       content: systemMessage,

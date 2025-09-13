@@ -310,7 +310,8 @@
     "systemMessage": "Ohjeistus",
     "hidePrompt": "Piilota alustuksen sisältö opiskelijoilta",
     "editMandatoryPrompt": "Tee alustuksesta pakollinen",
-    "noSourceMaterials": "Ei lähdemateriaaleja"
+    "noSourceMaterials": "Ei lähdemateriaaleja",
+    "ragSystemMessage": "Lähdemateriaaliohjeistus"
   },
   "tooltip": {
     "copied": "Kopioitu!"

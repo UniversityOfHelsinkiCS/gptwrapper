@@ -1,6 +1,6 @@
 import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
-import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction, validModels } from '../../../config'
+import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction } from '../../../config'
 import { PostStreamSchemaV3, type ChatEvent, type ChatMessage } from '../../../shared/chat'
 import { ChatInstance, Discussion, Prompt, RagIndex, UserChatInstanceUsage } from '../../db/models'
 import { calculateUsage, checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
@@ -11,7 +11,7 @@ import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
 import getEncoding from '../../util/tiktoken'
-import { getAllowedModels, getModelContextLimit } from '../../util/util'
+import { getModelContextLimit } from '../../util/util'
 import { parseFileAndAddToLastMessage } from './fileParsing'
 import { upload } from './multer'
 
@@ -126,6 +126,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     user,
     chatMessages: options.chatMessages,
     systemMessage,
+    promptMessages: prompt?.messages,
     model: prompt?.model ?? generationInfo.model,
     temperature: prompt?.temperature ?? options.modelTemperature,
     tools,
