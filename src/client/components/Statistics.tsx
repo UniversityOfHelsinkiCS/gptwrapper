@@ -78,7 +78,15 @@ const Statistics = () => {
     const url = URL.createObjectURL(blob)
     if (dataDownloadLink?.current) {
       dataDownloadLink.current.href = url
-      dataDownloadLink.current.download = 'data.csv'
+      const fromTerm = statistics.terms.find((term) => term.id === from)
+      const fromTermName = fromTerm?.label[language]
+
+      const toTerm = statistics.terms.find((term) => term.id === to)
+      const toTermName = toTerm?.label[language]
+  
+      const filename = 'currechat_'+fromTermName+'_'+toTermName+'_'+selectedFaculty
+      dataDownloadLink.current.download = filename
+
       dataDownloadLink.current.click()
     }
   }
