@@ -45,9 +45,9 @@ services:
   ollama:
     image: ollama/ollama
     ports:
-      - 11434:11434  # expose the Ollama API to the host
+      - 11434:11434 # expose the Ollama API to the host
     volumes:
-      - ollama_data:/root/.ollama  # persistent model storage
+      - ollama_data:/root/.ollama # persistent model storage
 
   dalai:
     # image: toska/dalai:latest
@@ -55,7 +55,7 @@ services:
       context: ../dalai
       dockerfile: ../dalai/dev.Dockerfile
     environment:
-      - LAAMA_URL=ollama:11434
+      - LAAMA_URL=ollama:11434 # http://host.docker.internal:11434
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - S3_HOST=http://minio:9000
@@ -73,15 +73,15 @@ services:
     container_name: minio
     command: server /data --console-address ":9001"
     ports:
-      - "9000:9000"
-      - "9001:9001" # MinIO web console
+      - '9000:9000'
+      - '9001:9001' # MinIO web console
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     volumes:
       - ./minio-data:/data
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9000/minio/health/ready"]
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:9000/minio/health/ready']
       interval: 10s
       timeout: 5s
       retries: 5

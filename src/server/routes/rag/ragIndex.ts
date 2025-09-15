@@ -7,12 +7,12 @@ import { ChatInstance, RagFile, RagIndex, Responsibility } from '../../db/models
 import { FileStore } from '../../services/rag/fileStore'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
-import { ingestRagFiles } from '../../services/rag/ingestion'
 import { search } from '../../services/rag/search'
 import { getRedisVectorStore } from '../../services/rag/vectorStore'
 import { SearchSchema } from '../../../shared/rag'
 import { S3_BUCKET } from '../../util/config'
 import { s3Client } from '../../util/s3client'
+import { ingestRagFiles } from '../../services/rag/ingestion'
 
 const ragIndexRouter = Router()
 
@@ -137,13 +137,6 @@ ragIndexRouter.delete('/files/:fileId', async (req, res) => {
     throw ApplicationError.NotFound('File not found')
   }
 
-  await RagFile.update(
-    { pipelineStage: 'deleting' },
-    {
-      where: { id: ragFile.id },
-    },
-  )
-
   // Delete file from disk
   await FileStore.deleteRagFileDocument(ragFile)
 
@@ -205,7 +198,7 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
       RagFile.create({
         userId: user.id,
         ragIndexId: ragIndex.id,
-        pipelineStage: 'upload',
+        pipelineStage: 'uploaded',
         filename: file.originalname,
         fileType: file.mimetype,
         fileSize: file.size,
@@ -215,8 +208,9 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
     ),
   )
 
-  // @todo This should be a job
-  await ingestRagFiles(ragIndex)
+  ingestRagFiles(ragIndex).catch((error) => {
+    console.error('Error ingesting RAG files:', error)
+  })
 
   res.json({ message: 'Files uploaded successfully' })
 })

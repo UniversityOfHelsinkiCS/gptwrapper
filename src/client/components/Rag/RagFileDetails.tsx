@@ -1,16 +1,16 @@
 import { Box, LinearProgress, Link, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
-import { IngestionPipelineStageKeys, IngestionPipelineStages } from '../../../shared/constants'
+import { IngestionPipelineStageKeys, IngestionPipelineStages } from '@shared/ingestion'
 import { Link as RouterLink } from 'react-router-dom'
-import type { RagFileAttributes } from '../../../shared/types'
+import type { RagFileAttributes } from '@shared/types'
 
 export const RagFileInfo: React.FC<{
   file: RagFileAttributes
   link?: boolean
 }> = ({ file, link = false }) => {
-  const inProgress = file.pipelineStage !== 'completed' && file.pipelineStage !== 'pending'
+  const inProgress = file.pipelineStage !== 'completed' && file.pipelineStage !== 'error'
   const progressIdx = IngestionPipelineStageKeys.findIndex((stage) => stage === file.pipelineStage) - 1
   const progressNextIdx = inProgress ? progressIdx + 1 : progressIdx
-  const numSteps = IngestionPipelineStageKeys.length - 2
+  const numSteps = IngestionPipelineStageKeys.length - 1
 
   return (
     <Paper sx={{ padding: 2, marginBottom: 2 }} elevation={3}>
@@ -46,11 +46,11 @@ export const RagFileInfo: React.FC<{
                 {JSON.stringify(file.metadata)}
               </Typography>
             </TableCell>
-            <TableCell>{IngestionPipelineStages[file.pipelineStage].name}</TableCell>
+            <TableCell>{IngestionPipelineStages[file.pipelineStage]}</TableCell>
           </TableRow>
         </TableBody>
       </Table>
-      {file.pipelineStage !== 'completed' && file.pipelineStage !== 'pending' && (
+      {file.pipelineStage !== 'completed' && file.pipelineStage !== 'error' && (
         <LinearProgress variant="buffer" value={(progressIdx * 100) / numSteps} valueBuffer={(progressNextIdx * 100) / numSteps} />
       )}
       {file.error && (

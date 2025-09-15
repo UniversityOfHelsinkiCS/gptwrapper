@@ -8,7 +8,7 @@ import {
 } from '@aws-sdk/client-s3'
 import type { RagFile, RagIndex } from '../../db/models'
 import { ApplicationError } from '../../util/ApplicationError'
-import { pdfToText, pdfToTextWithVLM } from '../../util/pdfToText'
+import { pdfToText } from '../../util/pdfToText'
 import { S3_BUCKET } from '../../util/config'
 import { s3Client } from '../../util/s3client'
 
@@ -82,27 +82,9 @@ export const FileStore = {
         const textObj = await s3Client.send(new GetObjectCommand({ Bucket: S3_BUCKET, Key: pdfTextKey }))
         const text = await streamToString(textObj.Body)
         return text
-      } catch (_error) {
-        console.log(`Creating PDF text file ${pdfTextKey} in S3`)
-
-        try {
-          const fileObj = await s3Client.send(new GetObjectCommand({ Bucket: S3_BUCKET, Key: s3Key }))
-          const buf = await streamToBuffer(fileObj.Body)
-          const text = await pdfToText(buf)
-          await s3Client.send(
-            new PutObjectCommand({
-              Bucket: S3_BUCKET,
-              Key: pdfTextKey,
-              Body: JSON.stringify(text, null, 2),
-              ContentType: 'text/plain',
-            }),
-          )
-          const job = await pdfToTextWithVLM(s3Key, '')
-          return text
-        } catch (error) {
-          console.error(`Failed to create PDF text file ${pdfTextKey} in S3:`, error)
-          throw ApplicationError.InternalServerError('Failed to create PDF text file')
-        }
+      } catch (error) {
+        console.error(`Failed to read PDF text file ${pdfTextKey} in S3:`, error)
+        throw ApplicationError.InternalServerError('Failed to read PDF text file')
       }
     }
 

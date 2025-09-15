@@ -1,5 +1,5 @@
 import { ValidModelName } from '../config'
-import type { IngestionPipelineStageKey } from './constants'
+import type { IngestionPipelineStageKey } from './ingestion'
 
 export type RagIndexMetadata = {
   name: string

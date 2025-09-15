@@ -1,22 +1,5 @@
-import React, { useState } from 'react'
-import {
-  TextField,
-  Button,
-  Box,
-  Typography,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  Paper,
-  Link,
-  Container,
-  FormControl,
-  Select,
-  MenuItem,
-  InputLabel,
-} from '@mui/material'
+import React from 'react'
+import { Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, Link, Container } from '@mui/material'
 import { Link as RouterLink, useParams } from 'react-router-dom'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useCourse from '../../hooks/useCourse'
@@ -41,14 +24,13 @@ const Rag: React.FC = () => {
           <Paper
             key={index.id}
             sx={{
-              mb: 2,
+              mt: 2,
               p: 1,
             }}
           >
             <Table sx={{ mb: 1 }}>
               <TableHead>
                 <TableRow>
-                  <TableCell>{t('rag:id')}</TableCell>
                   <TableCell>{t('rag:name')}</TableCell>
                   <TableCell>{t('rag:language')}</TableCell>
                   <TableCell>{t('rag:numberOfFiles')}</TableCell>
@@ -56,7 +38,6 @@ const Rag: React.FC = () => {
               </TableHead>
               <TableBody>
                 <TableRow>
-                  <TableCell>{index.id}</TableCell>
                   <TableCell>{index.metadata?.name}</TableCell>
                   <TableCell>{index.metadata?.language}</TableCell>
                   <TableCell>{index.ragFileCount}</TableCell>

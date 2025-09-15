@@ -1,16 +1,15 @@
-import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
-
+import type { IngestionPipelineStageKey } from '@shared/ingestion'
+import type { RagFileMetadata } from '@shared/types'
+import { type CreationOptional, DataTypes, type InferAttributes, type InferCreationAttributes, Model } from 'sequelize'
 import { sequelize } from '../connection'
-import { IngestionPipelineStageKey } from '../../../shared/constants'
-import RagIndex from './ragIndex'
-import { RagFileMetadata } from '../../../shared/types'
+import type RagIndex from './ragIndex'
 
 class RagFile extends Model<InferAttributes<RagFile>, InferCreationAttributes<RagFile>> {
   declare id: CreationOptional<number>
 
   declare ragIndexId: number
 
-  declare pipelineStage: CreationOptional<IngestionPipelineStageKey>
+  declare pipelineStage: IngestionPipelineStageKey
 
   declare error: CreationOptional<string | null>
 
@@ -58,7 +57,6 @@ RagFile.init(
     pipelineStage: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 'pending',
     },
     error: {
       type: DataTypes.STRING,

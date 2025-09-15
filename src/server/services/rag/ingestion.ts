@@ -3,6 +3,7 @@ import { MarkdownTextSplitter, RecursiveCharacterTextSplitter } from '@langchain
 import { RagFile, RagIndex } from '../../db/models'
 import { FileStore } from './fileStore'
 import { getRedisVectorStore } from './vectorStore'
+import { pdfQueueEvents, submitPdfParsingJob } from '../jobs/pdfParsing.job'
 
 const defaultTextSplitter = new RecursiveCharacterTextSplitter({
   chunkSize: 800,
@@ -28,40 +29,57 @@ export const ingestRagFiles = async (ragIndex: RagIndex) => {
   const allDocuments: Document[] = []
   const allEmbeddings: number[][] = []
 
-  for (const ragFile of ragFiles) {
-    console.time(`Ingestion ${ragFile.filename}`)
+  await Promise.all(
+    ragFiles.map(async (ragFile) => {
+      console.time(`Ingestion ${ragFile.filename}`)
 
-    const text = await FileStore.readRagFileTextContent(ragFile)
+      await ragFile.save()
 
-    const document = new Document({
-      pageContent: text,
-    })
+      const job = await submitPdfParsingJob(ragFile)
 
-    const splitter = isMarkdown(ragFile.fileType) ? markdownTextSplitter : defaultTextSplitter
-
-    const chunkDocuments = await splitter.splitDocuments([document])
-
-    let idx = 0
-    for (const chunkDocument of chunkDocuments) {
-      chunkDocument.id = `ragIndex-${ragFile.ragIndexId}-${ragFile.filename}-${idx}`
-      chunkDocument.metadata = {
-        ...chunkDocument.metadata,
-        ragFileName: ragFile.filename,
+      try {
+        await job.waitUntilFinished(pdfQueueEvents)
+      } catch (error: any) {
+        console.error('Error waiting for PDF parsing job to finish:', error)
+        ragFile.pipelineStage = 'error'
+        ragFile.error = 'PDF parsing failed'
+        await ragFile.save()
+        return
       }
-      idx++
-    }
 
-    const embeddings = await vectorStore.embeddings.embedDocuments(chunkDocuments.map((d) => d.pageContent))
+      const text = await FileStore.readRagFileTextContent(ragFile)
 
-    allDocuments.push(...chunkDocuments)
-    allEmbeddings.push(...embeddings)
+      ragFile.pipelineStage = 'parsed'
 
-    console.timeEnd(`Ingestion ${ragFile.filename}`)
+      const document = new Document({
+        pageContent: text,
+      })
 
-    ragFile.pipelineStage = 'completed'
-    await ragFile.save()
-  }
+      const splitter = isMarkdown(ragFile.fileType) ? markdownTextSplitter : defaultTextSplitter
+
+      const chunkDocuments = await splitter.splitDocuments([document])
+
+      let idx = 0
+      for (const chunkDocument of chunkDocuments) {
+        chunkDocument.id = `ragIndex-${ragFile.ragIndexId}-${ragFile.filename}-${idx}`
+        chunkDocument.metadata = {
+          ...chunkDocument.metadata,
+          ragFileName: ragFile.filename,
+        }
+        idx++
+      }
+
+      const embeddings = await vectorStore.embeddings.embedDocuments(chunkDocuments.map((d) => d.pageContent))
+
+      allDocuments.push(...chunkDocuments)
+      allEmbeddings.push(...embeddings)
+
+      console.timeEnd(`Ingestion ${ragFile.filename}`)
+    }),
+  )
 
   // @todo we can only call this once. How to handle new documents?
   await vectorStore.addVectors(allEmbeddings, allDocuments)
+
+  await RagFile.update({ pipelineStage: 'completed' }, { where: { ragIndexId: ragIndex.id } })
 }
