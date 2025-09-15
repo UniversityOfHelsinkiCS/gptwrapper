@@ -79,10 +79,10 @@ const Statistics = () => {
     if (dataDownloadLink?.current) {
       dataDownloadLink.current.href = url
       const fromTerm = statistics.terms.find((term) => term.id === from)
-      const fromTermName = fromTerm?.label[language]
+      const fromTermName = fromTerm?.label[language].replace(/ /g, "_")
 
       const toTerm = statistics.terms.find((term) => term.id === to)
-      const toTermName = toTerm?.label[language]
+      const toTermName = toTerm?.label[language].replace(/ /g, "_")
   
       const filename = 'currechat_from_'+fromTermName+'_to_'+toTermName+'_'+selectedFaculty
       dataDownloadLink.current.download = filename
