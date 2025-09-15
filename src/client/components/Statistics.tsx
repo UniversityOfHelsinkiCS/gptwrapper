@@ -84,7 +84,7 @@ const Statistics = () => {
       const toTerm = statistics.terms.find((term) => term.id === to)
       const toTermName = toTerm?.label[language]
   
-      const filename = 'currechat_'+fromTermName+'_'+toTermName+'_'+selectedFaculty
+      const filename = 'currechat_from_'+fromTermName+'_to_'+toTermName+'_'+selectedFaculty
       dataDownloadLink.current.download = filename
 
       dataDownloadLink.current.click()
