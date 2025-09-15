@@ -55,7 +55,8 @@
     "promptCount": "Kehotteita",
     "programCodes": "Ohjelmat",
     "studentCount": "Opis",
-    "courseCodes": "Kurssikoodit"
+    "courseCodes": "Kurssikoodit",
+    "sum": "Summa:"
   },
   "info": {
     "title": "Käyttöohje",

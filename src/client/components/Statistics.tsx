@@ -188,7 +188,7 @@ const handleFromChange = (e) => {
               <TableRow>
               <TableCell align="left">
                  <Typography variant="h6">
-                  yhteensä
+                  {t('stats:sum')}
                 </Typography>
               </TableCell>
               <TableCell>

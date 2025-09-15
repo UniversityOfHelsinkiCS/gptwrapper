@@ -54,7 +54,8 @@
     "courseTerms": "Terms",
     "usageCount": "Usage count",
     "promptCount": "Prompts",
-    "courseStats": "Course stats"
+    "courseStats": "Course stats",
+    "sum": "Sum:"
   },
   "info": {
     "title": "Instructions",
