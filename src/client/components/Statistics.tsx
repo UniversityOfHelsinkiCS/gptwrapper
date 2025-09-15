@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -106,6 +106,23 @@ const Statistics = () => {
     exportToCSV(mangledStatistics)
   }
 
+
+  const handleToChange = (e) => {
+   // in case of: from: 2026 and to 2024, lets change to into from
+   const newVal = parseInt(e.target.value as string, 10)   
+   if(from > newVal){
+     setTo(from)
+   }else{
+    setTo(newVal)
+   }
+ }
+const handleFromChange = (e) => {
+   const newVal = parseInt(e.target.value as string, 10)   // in case of: from: 2026 and to 2024, lets change to into from
+   if(newVal > to){
+     setTo(newVal)
+  }
+  setFrom(newVal)
+ }
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Box my={2}>
@@ -113,7 +130,7 @@ const Statistics = () => {
           <div>
             <span style={{ marginRight: 10 }}>{t('stats:timePeriodStart')}</span>
 
-            <Select value={from} onChange={(e) => setFrom(parseInt(e.target.value as string, 10))}>
+            <Select value={from} onChange={handleFromChange}>
               {statistics.terms.map((term) => (
                 <MenuItem key={term.id} value={term.id}>
                   {term.label[language]}
@@ -122,7 +139,7 @@ const Statistics = () => {
             </Select>
 
             <span style={{ margin: 10 }}>{t('stats:timePeriodStop')}</span>
-            <Select value={to} onChange={(e) => setTo(parseInt(e.target.value as string, 10))}>
+            <Select value={to} onChange={handleToChange}>
               {statistics.terms
                 .filter((trm) => trm.id >= from)
                 .map((term) => (
