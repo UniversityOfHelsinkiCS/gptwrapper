@@ -123,6 +123,18 @@ const handleFromChange = (e) => {
   }
   setFrom(newVal)
  }
+
+ const columnSum = (column: string) => {
+   if(!statsToShow){
+     return 0
+   }
+   const columnValues = statsToShow.map((chat) => chat[column])
+   if(columnValues.length > 0){
+     return columnValues.reduce((a, b) => a + b)
+   }else{
+     return 0
+   }
+ }
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Box my={2}>
@@ -174,6 +186,34 @@ const handleFromChange = (e) => {
           <Table>
             <TableHead>
               <TableRow>
+              <TableCell align="left">
+                 <Typography variant="h6">
+                  yhteensä
+                </Typography>
+              </TableCell>
+              <TableCell>
+              </TableCell>
+              <TableCell align="left">
+              </TableCell>
+              <TableCell align="left">
+             </TableCell>
+              <TableCell align="left">
+                <Typography variant="h6">
+                  {columnSum('students')}
+                </Typography>
+              </TableCell>
+              <TableCell align="left">
+                <Typography variant="h6">
+                  {columnSum('usedTokens')}
+                </Typography>
+              </TableCell>
+              <TableCell align="left">
+                <Typography variant="h6">
+                  {columnSum('promptCount')}
+                </Typography>
+              </TableCell>
+            </TableRow>
+            <TableRow>
                 <TableCell align="left">
                   <Typography variant="h6">
                     <b>{t('stats:courseCodes')}</b>
@@ -210,7 +250,7 @@ const handleFromChange = (e) => {
                   </Typography>
                 </TableCell>
               </TableRow>
-            </TableHead>
+           </TableHead>
             <TableBody>
               {statsToShow.map((chat) => (
                 <TableRow key={chat.id}>
