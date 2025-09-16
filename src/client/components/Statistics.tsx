@@ -101,6 +101,7 @@ const Statistics = () => {
         Students: chat.students,
         UsedTokens: chat.usedTokens,
         PromptCount: chat.promptCount,
+        RagIndicesCount: chat.ragIndicesCount
       }
     })
     exportToCSV(mangledStatistics)
