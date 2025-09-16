@@ -19,7 +19,7 @@ class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prom
 
   declare userId?: string
 
-  declare ragIndexId?: number
+  declare ragIndexId?: number | null
 
   declare systemMessage: string
 

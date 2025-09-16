@@ -42,7 +42,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
   )
   const [hidden, setHidden] = useState<boolean>(prompt?.hidden ?? false)
   const [mandatory, setMandatory] = useState<boolean>(prompt?.mandatory ?? false)
-  const [ragIndexId, setRagIndexId] = useState<number | undefined>(prompt?.ragIndexId)
+  const [ragIndexId, setRagIndexId] = useState<number | undefined | null>(prompt?.ragIndexId)
 
   const [selectedModel, setModel] = useState<ValidModelName | 'none'>(prompt?.model ?? 'none')
 
