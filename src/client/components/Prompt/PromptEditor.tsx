@@ -22,6 +22,7 @@ import { useCreatePromptMutation, useEditPromptMutation } from '../../hooks/useP
 import { enqueueSnackbar } from 'notistack'
 import { BlueButton } from '../ChatV2/general/Buttons'
 import OpenableTextfield from '../common/OpenableTextfield'
+import { Message } from '@shared/chat'
 
 interface PromptEditorProps {
   prompt?: PromptEditableParams & { id: string }
@@ -60,13 +61,16 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const model = selectedModel !== 'none' ? selectedModel : undefined
+
+    const messages: Message[] = ragIndexId && ragSystemMessage.length > 0 ? [{ role: 'system', content: ragSystemMessage }] : []
+
     try {
       if (prompt) {
         await editMutation.mutateAsync({
           id: prompt.id,
           name,
           systemMessage,
-          messages: [{ role: 'system', content: ragSystemMessage }],
+          messages,
           hidden,
           mandatory,
           ragIndexId,
@@ -80,7 +84,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
           type,
           ...(type === 'CHAT_INSTANCE' ? { chatInstanceId } : {}),
           systemMessage,
-          messages: [{ role: 'system', content: ragSystemMessage }],
+          messages,
           hidden,
           mandatory,
           ragIndexId,

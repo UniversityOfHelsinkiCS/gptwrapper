@@ -25,7 +25,7 @@ export class MockModel extends FakeStreamingChatModel {
     const firstSystemMessage = messages.find(isSystemMessage)
     const lastHumanMessage = (messages.findLast(isHumanMessage)?.content ?? '') as string
     const toolMessage = isToolMessage(messages[messages.length - 1]) ? messages[messages.length - 1] : null
-
+    // console.log(messages)
     if (toolMessage) {
       this.chunks = [new AIMessageChunk(`Ok! Got some great results from that mock tool call!: "${toolMessage.content}"`)]
     } else if (firstSystemMessage && (firstSystemMessage.content as string).startsWith('mocktest')) {
