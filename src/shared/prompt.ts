@@ -4,7 +4,7 @@ import { ValidModelNameSchema } from '../config'
 export const PromptMessagesSchema = z.array(
   z.object({
     role: z.enum(['system', 'assistant', 'user']),
-    content: z.string().min(1),
+    content: z.string().min(0),
   }),
 )
 
@@ -14,7 +14,7 @@ export const PromptUpdateableParamsSchema = z.object({
   messages: PromptMessagesSchema.optional().default([]),
   hidden: z.boolean().default(false),
   mandatory: z.boolean().default(false),
-  ragIndexId: z.number().min(1).optional(),
+  ragIndexId: z.number().min(1).optional().nullable(),
   model: ValidModelNameSchema.optional(),
   temperature: z.number().min(0).max(1).optional(),
 })
