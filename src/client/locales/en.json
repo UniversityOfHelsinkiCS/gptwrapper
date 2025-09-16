@@ -304,13 +304,15 @@
     "settings": "course settings"
   },
   "prompt": {
+    "createNew": "Create new prompt",
+    "editPrompt": "Edit prompt '{{name}}'",
+    "createdPrompt": "Prompt \"{{name}}\" created",
+    "updatedPrompt": "Prompt \"{{name}}\" updated",
+    "modelFreeToChoose": "Model free to choose",
+    "systemMessage": "Instructions",
     "hidePrompt": "Hide prompt text from students",
     "editMandatoryPrompt": "Make prompt mandatory",
     "noSourceMaterials": "No source materials",
-    "createNew": "Create new prompt",
-    "editPrompt": "Edit prompt '{{name}}'",
-    "systemMessage": "Instructions",
-    "modelFreeToChoose": "Model free to choose",
     "ragSystemMessage": "Source material instructions",
     "basicInformation": "Basic information",
     "context": "Context"

@@ -308,6 +308,8 @@
   "prompt": {
     "createNew": "Luo uusi alustus",
     "editPrompt": "Muokkaa alustusta \"{{name}}\"",
+    "createdPrompt": "Alustus \"{{name}}\" luotu",
+    "updatedPrompt": "Alustus \"{{name}}\" muokattu",
     "modelFreeToChoose": "Malli vapaasti valittavissa",
     "systemMessage": "Ohjeistus",
     "hidePrompt": "Piilota alustuksen sisältö opiskelijoilta",

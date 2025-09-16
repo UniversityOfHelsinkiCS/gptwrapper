@@ -285,6 +285,20 @@
     "isSavedOptOut": "Kursdiskussionerna sparas anonymt om du ger tillstånd till detta. Sparade diskussioner kan användas för forskningsändamål.",
     "settings": "kursinställningar"
   },
+  "prompt": {
+    "createNew": "Skapa ny prompt",
+    "editPrompt": "Redigera prompt '{{name}}'",
+    "createdPrompt": "Prompt \"{{name}}\" skapad",
+    "updatedPrompt": "Prompt \"{{name}}\" uppdaterad",
+    "modelFreeToChoose": "Modell fri att välja",
+    "systemMessage": "Instruktioner",
+    "hidePrompt": "Dölj prompttext för studenter",
+    "editMandatoryPrompt": "Gör prompt obligatorisk",
+    "noSourceMaterials": "Inga källmaterial",
+    "ragSystemMessage": "Instruktioner för källmaterial",
+    "basicInformation": "Grundläggande information",
+    "context": "Sammanhang"
+  },
   "tooltip": {
     "copied": "Kopierad!"
   },

@@ -77,7 +77,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
           model,
           temperature,
         })
-        enqueueSnackbar('Prompt updated', { variant: 'success' })
+        enqueueSnackbar(t('prompt:updatedPrompt', { name }), { variant: 'success' })
       } else {
         await createMutation.mutateAsync({
           name,
@@ -91,6 +91,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
           model,
           temperature,
         })
+        enqueueSnackbar(t('prompt:createdPrompt', { name }), { variant: 'success' })
       }
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
