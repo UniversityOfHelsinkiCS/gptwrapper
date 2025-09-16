@@ -42,12 +42,12 @@ services:
       - redis_data:/data
 
   # Comment out if you use local ollama. Set OLLAMA_URL=host.docker.internal:11434 if using recent Docker Desktop.
-  ollama:
-    image: ollama/ollama
-    ports:
-      - 11434:11434 # expose the Ollama API to the host
-    volumes:
-      - ollama_data:/root/.ollama # persistent model storage
+  # ollama:
+  #   image: ollama/ollama
+  #   ports:
+  #     - 11434:11434 # expose the Ollama API to the host
+  #   volumes:
+  #     - ollama_data:/root/.ollama # persistent model storage
 
   dalai:
     # image: toska/dalai:latest
@@ -55,7 +55,7 @@ services:
       context: ../dalai
       dockerfile: ../dalai/dev.Dockerfile
     environment:
-      - LAAMA_URL=ollama:11434 # http://host.docker.internal:11434
+      - OLLAMA_URL=http://host.docker.internal:11434 # ollama:11434
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - S3_HOST=http://minio:9000

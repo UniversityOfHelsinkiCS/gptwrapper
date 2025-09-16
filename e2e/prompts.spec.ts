@@ -48,7 +48,7 @@ test.describe('Prompts', () => {
     await expect(page.getByTestId('assistant-instructions-input')).toContainText('mocktest testi onnistui')
   })
 
-  test.only('Course prompt creation, chat link with prompt, and deletion', async ({ page }) => {
+  test('Course prompt creation, chat link with prompt, and deletion', async ({ page }) => {
     await page.goto('/courses/test-course/prompts')
 
     const newPromptName = `testausprompti-${test.info().workerIndex}`
