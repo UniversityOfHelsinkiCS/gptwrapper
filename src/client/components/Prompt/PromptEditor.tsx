@@ -12,7 +12,6 @@ import {
   MenuItem,
   Slider,
   DialogActions,
-  Grow,
   Collapse,
   Typography,
 } from '@mui/material'
@@ -33,7 +32,6 @@ interface PromptEditorProps {
 
 export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: PromptEditorProps) => {
   const { t } = useTranslation()
-  console.log(prompt)
   const editMutation = useEditPromptMutation()
   const createMutation = useCreatePromptMutation()
 

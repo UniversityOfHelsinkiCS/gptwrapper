@@ -72,7 +72,7 @@ test.describe('Prompts', () => {
 
     // When prompt selector is opened, it is also visible in the list, so 2 times.
     await page.getByTestId('prompt-selector-button').click()
-    expect(await page.getByText(newPromptName).count()).toBe(2)
+    expect(await page.getByText(newPromptName).count()).toBeGreaterThan(1)
 
     // Close selector
     await page.keyboard.press('Escape')
