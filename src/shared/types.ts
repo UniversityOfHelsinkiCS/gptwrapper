@@ -66,7 +66,7 @@ export type Release = {
 
 
 export interface Term {
-  label: Locales[]
+  label: Locales
   id: number
 }
 

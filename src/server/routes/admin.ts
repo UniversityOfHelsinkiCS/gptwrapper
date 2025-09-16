@@ -93,7 +93,7 @@ adminRouter.get('/statistics', async (req, res) => {
       courses[usage.chatInstanceId].usedTokens += usage.usageCount
     }
 
-    const getTermsOf = ({ courseActivityPeriod }) => {
+    const getTermsOf = ({ courseActivityPeriod }): Term[] => {
       const checkDateOverlap = (term, course) =>
         new Date(term.startDate) <= new Date(course.endDate || '2112-12-21') && new Date(term.endDate) >= new Date(course.startDate)
 
@@ -111,7 +111,7 @@ adminRouter.get('/statistics', async (req, res) => {
       }, [])
     }
 
-    const extractFields = async (chatInstance: ChatInstance & { prompts: any[] }): Promise<any> => {
+    const extractFields = async (chatInstance: ChatInstance & { prompts: any[] }): Promise<Statistic> => {
       
       const ragIndices = await ChatInstanceRagIndex.findAll({
         where:
@@ -125,11 +125,12 @@ adminRouter.get('/statistics', async (req, res) => {
 
       const codes = units.map((u) => u.code)
       const programmes = units.flatMap((item) => item.organisations.map((org) => org.code))
+      const terms: Term[] = getTermsOf(chatInstance)
       return {
         startDate: chatInstance.activityPeriod?.startDate,
         endDate: chatInstance.activityPeriod?.endDate,
-        terms: getTermsOf(chatInstance),
-        id: chatInstance.courseId,
+        terms: terms,
+        id: chatInstance.courseId as string,
         name: chatInstance.name,
         codes: getUniqueValues(codes),
         programmes: getUniqueValues(programmes),
