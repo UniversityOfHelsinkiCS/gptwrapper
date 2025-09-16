@@ -55,7 +55,8 @@ services:
       context: ../dalai
       dockerfile: ../dalai/dev.Dockerfile
     environment:
-      - OLLAMA_URL=http://host.docker.internal:11434 # ollama:11434
+      - OLLAMA_URL=http://host.docker.internal:11434
+      #- OLLAMA_URL=http://ollama:11434
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - S3_HOST=http://minio:9000

@@ -13,7 +13,7 @@ import { S3_BUCKET } from '../../util/config'
 import { s3Client } from '../../util/s3client'
 
 const isPdf = (filePath: string) => filePath.endsWith('.pdf')
-const getPdfTextKey = (s3Key: string) => `${s3Key}.txt`
+const getPdfTextKey = (s3Key: string) => `${s3Key}.md`
 
 export const FileStore = {
   getRagIndexPrefix(ragIndex: RagIndex) {
