@@ -1,3 +1,4 @@
+import { Locales } from '@shared/types'
 import type { User } from '@shared/user'
 import type { Request } from 'express'
 
@@ -39,12 +40,6 @@ export type Enrollment = {
   personId: string
   state: string
   courseUnitRealisation: CourseUnitRealisation
-}
-
-export type Locales = {
-  fi: string
-  en: string
-  sv: string
 }
 
 export interface CourseUnit {

@@ -1,6 +1,13 @@
 import { ValidModelName } from '../config'
 import type { IngestionPipelineStageKey } from './ingestion'
 
+
+export type Locales = {
+  fi: string
+  en: string
+  sv: string
+}
+
 export type RagIndexMetadata = {
   name: string
   toolDescription?: string
@@ -56,3 +63,24 @@ export type Release = {
   title: string
   version: string
 }
+
+
+export interface Term {
+  label: Locales[]
+  id: number
+}
+
+export interface Statistic {
+  startDate: string
+  endDate: string
+  terms: Term[]
+  id: string
+  name: Locales
+  codes: string[]
+  programmes: string[]
+  students: number
+  usedTokens: number
+  promptCount: number
+  ragIndicesCount: number
+}
+

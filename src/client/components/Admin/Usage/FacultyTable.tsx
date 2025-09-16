@@ -2,7 +2,8 @@ import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, Tab
 import { useTranslation } from 'react-i18next'
 import useFaculties from '../../../hooks/useFaculties'
 import useUsers from '../../../hooks/useUsers'
-import type { Faculty, Locales, User } from '../../../types'
+import type { Faculty, User } from '../../../types'
+import { Locales } from '@shared/types'
 
 const calculateFacultyUsage = (users: User[], faculties: Faculty[]) => {
   const facultyUsage = faculties.map((faculty) => ({

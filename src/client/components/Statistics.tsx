@@ -20,12 +20,12 @@ import {
 } from '@mui/material'
 import { redirect, Link as RouterLink } from 'react-router-dom'
 import useStatistics from '../hooks/useStatistics'
-import { Statistic } from '../types'
 import programme from '../locales/programme.json'
 import faculties from '../locales/faculties.json'
 import useCurrentUser from '../hooks/useCurrentUser'
 import * as xlsx from 'xlsx'
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
+import { Statistic } from '@shared/types'
 
 const Statistics = () => {
   const [from, setFrom] = useState(1)
@@ -174,7 +174,7 @@ const handleFromChange = (e) => {
 
         <TableContainer component={Paper}>
           <Table>
-            <TableHead>
+          <TableHead>
            <TableRow>
                 <TableCell align="left">
                   <Typography variant="h6">
@@ -209,6 +209,11 @@ const handleFromChange = (e) => {
                 <TableCell align="left">
                   <Typography variant="h6">
                     <b>{t('stats:promptCount')}</b>
+                  </Typography>
+                </TableCell>
+                 <TableCell align="left">
+                  <Typography variant="h6">
+                    <b>{t('stats:rags')}</b>
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -247,6 +252,9 @@ const handleFromChange = (e) => {
                   </TableCell>
                   <TableCell align="left">
                     <Typography>{chat.promptCount}</Typography>
+                  </TableCell>
+                  <TableCell align="left">
+                    <Typography>{chat.ragIndicesCount}</Typography>
                   </TableCell>
                 </TableRow>
               ))}
@@ -298,7 +306,12 @@ const SumRow = ({statsToShow}) => {
           {columnSum('promptCount')}
         </Typography>
       </TableCell>
+      <TableCell align="left">
+        <Typography variant="h6">
+          {columnSum('ragIndicesCount')}
+        </Typography>
+      </TableCell>
     </TableRow>
   )
 }
-     export default Statistics
+export default Statistics

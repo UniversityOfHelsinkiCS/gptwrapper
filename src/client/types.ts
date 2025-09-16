@@ -1,6 +1,7 @@
 import { ValidModelName } from '../config'
 import type { ChatMessage } from '@shared/chat'
 import { Locale } from '@shared/lang'
+import { Locales, Statistic, Term } from '@shared/types'
 import type { UserPreferences } from '@shared/user'
 
 /*
@@ -9,23 +10,6 @@ import type { UserPreferences } from '@shared/user'
  */
 
 export type SetState<T> = React.Dispatch<React.SetStateAction<T>>
-
-interface Term {
-  label: Locales[]
-  id: number
-}
-export interface Statistic {
-  startDate: string
-  endDate: string
-  terms: Term[]
-  id: string
-  name: Locales
-  codes: string[]
-  programmes: string[]
-  students: number
-  usedTokens: number
-  promptCount: number
-}
 
 export interface StatisticResponse {
   data: Statistic[]
@@ -143,12 +127,6 @@ export type InfoText = {
   id: string
   name: string
   text: Locales
-}
-
-export type Locales = {
-  fi: string
-  en: string
-  sv: string
 }
 
 export interface Faculty {

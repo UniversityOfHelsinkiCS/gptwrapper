@@ -4,13 +4,14 @@ import { Op, WhereOptions } from 'sequelize'
 import { sequelize } from '../db/connection'
 
 import { RequestWithUser } from '../types'
-import { ChatInstance, UserChatInstanceUsage, User, Prompt } from '../db/models'
+import { ChatInstance, UserChatInstanceUsage, User, Prompt, ChatInstanceRagIndex } from '../db/models'
 import { getCourse } from '../util/importer'
 import { run as runUpdater } from '../updater'
 import InfoText from '../db/models/infotext'
 import { statsViewerIams } from '../util/config'
 import { generateTerms } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
+import { Statistic, Term } from 'src/shared/types'
 
 const adminRouter = express.Router()
 
@@ -110,12 +111,20 @@ adminRouter.get('/statistics', async (req, res) => {
       }, [])
     }
 
-    const extractFields = (chatInstance: ChatInstance & { prompts: any[] }) => {
+    const extractFields = async (chatInstance: ChatInstance & { prompts: any[] }): Promise<any> => {
+      
+      const ragIndices = await ChatInstanceRagIndex.findAll({
+        where:
+        {
+          chatInstanceId: chatInstance.id
+        },
+        raw: true
+      })
+      const ragIndicesCount = ragIndices ? ragIndices.length : 0
       const units = chatInstance.courseUnits
 
       const codes = units.map((u) => u.code)
       const programmes = units.flatMap((item) => item.organisations.map((org) => org.code))
-
       return {
         startDate: chatInstance.activityPeriod?.startDate,
         endDate: chatInstance.activityPeriod?.endDate,
@@ -127,10 +136,11 @@ adminRouter.get('/statistics', async (req, res) => {
         students: courses[chatInstance.id].students,
         usedTokens: courses[chatInstance.id].usedTokens,
         promptCount: chatInstance.prompts.length,
+        ragIndicesCount: ragIndicesCount
       }
     }
 
-    const datas = [] as ReturnType<typeof extractFields>[]
+    const datas: any[] = []
 
     for (const courseId of Object.keys(courses)) {
       const chatInstance = (await ChatInstance.findByPk(courseId, {
@@ -142,8 +152,8 @@ adminRouter.get('/statistics', async (req, res) => {
           },
         ],
       })) as ChatInstance & { prompts: any[] }
-
-      datas.push(extractFields(chatInstance))
+      const data: any = await extractFields(chatInstance)
+      datas.push(data)
     }
 
     return datas

@@ -56,7 +56,8 @@
     "programCodes": "Ohjelmat",
     "studentCount": "Opis",
     "courseCodes": "Kurssikoodit",
-    "sum": "YHTEENSÄ:"
+    "sum": "YHTEENSÄ:",
+    "rags": "Lähdemateriaalit"
   },
   "info": {
     "title": "Käyttöohje",

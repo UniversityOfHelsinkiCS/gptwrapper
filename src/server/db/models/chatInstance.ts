@@ -1,12 +1,13 @@
 import { type CreationOptional, DataTypes, type InferAttributes, type InferCreationAttributes, Model, type NonAttribute } from 'sequelize'
 
-import type { ActivityPeriod, CourseUnit, Locales } from '../../types'
+import type { ActivityPeriod, CourseUnit } from '../../types'
 import { sequelize } from '../connection'
 import type Prompt from './prompt'
 import type RagIndex from './ragIndex'
 import type Responsibility from './responsibilities'
 import type Enrolment from './enrolment'
 import type UserChatInstanceUsage from './userChatInstanceUsage'
+import { Locales } from '@shared/types'
 
 class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAttributes<ChatInstance>> {
   declare id: CreationOptional<string>
