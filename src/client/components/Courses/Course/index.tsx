@@ -380,7 +380,7 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          <PromptEditor ragIndices={ragIndices} type="CHAT_INSTANCE" chatInstanceId={chatInstanceId} prompt={promptToEdit} />
+          <PromptEditor ragIndices={ragIndices} setEditorOpen={setEditorOpen} type="CHAT_INSTANCE" chatInstanceId={chatInstanceId} prompt={promptToEdit} />
         </DialogContent>
       </Dialog>
     </>

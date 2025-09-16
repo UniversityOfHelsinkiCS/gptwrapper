@@ -14,6 +14,7 @@ import {
   DialogActions,
   Collapse,
   Typography,
+  CircularProgress,
 } from '@mui/material'
 import { DEFAULT_RAG_SYSTEM_MESSAGE, validModels } from '@config'
 import { useTranslation } from 'react-i18next'
@@ -29,9 +30,10 @@ interface PromptEditorProps {
   ragIndices?: RagIndexAttributes[]
   type: PromptCreationParams['type']
   chatInstanceId?: string
+  setEditorOpen: (open: boolean) => void
 }
 
-export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: PromptEditorProps) => {
+export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEditorOpen }: PromptEditorProps) => {
   const { t } = useTranslation()
   const editMutation = useEditPromptMutation()
   const createMutation = useCreatePromptMutation()
@@ -50,6 +52,8 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
   const [temperatureDefined, setTemperatureDefined] = useState<boolean>(prompt?.temperature !== undefined)
   const [temperature, setTemperature] = useState<number>(prompt?.temperature ?? 0.5)
 
+  const [loading, setLoading] = useState<boolean>(false)
+
   useEffect(() => {
     const selectedModelConfig = validModels.find((m) => m.name === selectedModel)
     if (selectedModelConfig && 'temperature' in selectedModelConfig) {
@@ -60,6 +64,8 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    setLoading(true)
+
     const model = selectedModel !== 'none' ? selectedModel : undefined
 
     const messages: Message[] = ragIndexId && ragSystemMessage.length > 0 ? [{ role: 'system', content: ragSystemMessage }] : []
@@ -78,6 +84,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
           temperature,
         })
         enqueueSnackbar(t('prompt:updatedPrompt', { name }), { variant: 'success' })
+        setEditorOpen(false)
       } else {
         await createMutation.mutateAsync({
           name,
@@ -92,9 +99,12 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
           temperature,
         })
         enqueueSnackbar(t('prompt:createdPrompt', { name }), { variant: 'success' })
+        setEditorOpen(false)
       }
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -219,7 +229,8 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId }: Promp
       </Box>
 
       <DialogActions>
-        <BlueButton type="submit" variant="contained" sx={{ mt: 2 }}>
+        {loading && <CircularProgress color='secondary' />}
+        <BlueButton disabled={loading} type="submit" variant="contained" sx={{ mt: 2 }}>
           {t('common:save')}
         </BlueButton>
       </DialogActions>
