@@ -28,7 +28,10 @@ Put math in $$ ... $$ for LaTeX rendering.
 Wrap code in triple backticks with the correct language tag (js, ts, py, etc.) so syntax highlighting and rendering work.
 `
 
-export const DEFAULT_RAG_SYSTEM_MESSAGE = `Use the document_search tool to find information in the provided source materials to answer the user's question.`
+// EXAMPLE: with localize translation -> t(DEFAULT_RAG_SYSTEM_MESSAGE)
+export const DEFAULT_RAG_SYSTEM_MESSAGE = 'prompt:defaultRagMessage'
+export const ENFORCE_RAG_SYSTEM_MESSAGE = 'prompt:enforceRagMessage'
+export const UNKNOWN_RAG_SYSTEM_MESSAGE = 'prompt:unknownRagMessage'
 
 /**
  * name: the acual model name, which is shown to users, configures the model to be used and is also the azure deployment name.

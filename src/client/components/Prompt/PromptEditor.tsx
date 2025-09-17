@@ -41,7 +41,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEdit
   const [name, setName] = useState<string>(prompt?.name ?? '')
   const [systemMessage, setSystemMessage] = useState<string>(prompt?.systemMessage ?? '')
   const [ragSystemMessage, setRagSystemMessage] = useState<string>(() =>
-    prompt ? prompt.messages?.find((m) => m.role === 'system')?.content || '' : DEFAULT_RAG_SYSTEM_MESSAGE,
+    prompt ? prompt.messages?.find((m) => m.role === 'system')?.content || '' : t(DEFAULT_RAG_SYSTEM_MESSAGE),
   )
   const [hidden, setHidden] = useState<boolean>(prompt?.hidden ?? false)
   const [mandatory, setMandatory] = useState<boolean>(prompt?.mandatory ?? false)
@@ -194,19 +194,18 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEdit
           </FormControl>
           <Collapse in={!!ragIndexId}>
             <OpenableTextfield
-              slotProps={{
-                htmlInput: {
-                  'data-testid': 'rag-system-message-input',
-                },
-              }}
-              label={t('prompt:ragSystemMessage')}
               value={ragSystemMessage}
               onChange={(e) => setRagSystemMessage(e.target.value)}
+              onAppend={(text) => setRagSystemMessage(prev => prev + (prev.trim().length ? ' ' : '') + text)}
+              slotProps={{
+                htmlInput: { 'data-testid': 'rag-system-message-input' },
+              }}
+              label={t('prompt:ragSystemMessage')}
               fullWidth
               margin="normal"
               multiline
-              minRows={3}
-              maxRows={18}
+              minRows={2}
+              maxRows={12}
             />
           </Collapse>
           <TextField

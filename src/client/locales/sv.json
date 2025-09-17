@@ -291,13 +291,19 @@
     "createdPrompt": "Prompt \"{{name}}\" skapad",
     "updatedPrompt": "Prompt \"{{name}}\" uppdaterad",
     "modelFreeToChoose": "Modell fri att välja",
-    "systemMessage": "Instruktioner",
+    "systemMessage": "Instruktioner för språkmodellen",
     "hidePrompt": "Dölj prompttext för studenter",
     "editMandatoryPrompt": "Gör prompt obligatorisk",
     "noSourceMaterials": "Inga källmaterial",
     "ragSystemMessage": "Instruktioner för källmaterial",
     "basicInformation": "Grundläggande information",
-    "context": "Sammanhang"
+    "context": "Sammanhang",
+    "defaultRagLabel": "använd källor",
+    "enforceRagLabel": "måste använda källor",
+    "unknownRagLabel": "säg om inte hittas",
+    "defaultRagMessage": "Du har nu källmaterial tillgängligt. Använd det när användaren ställer en fråga.",
+    "enforceRagMessage": "Du måste använda källorna för att svara. Hitta inte på information.",
+    "unknownRagMessage": "Om svaret inte finns i källorna, säg det."
   },
   "tooltip": {
     "copied": "Kopierad!"

@@ -311,13 +311,19 @@
     "createdPrompt": "Alustus \"{{name}}\" luotu",
     "updatedPrompt": "Alustus \"{{name}}\" muokattu",
     "modelFreeToChoose": "Malli vapaasti valittavissa",
-    "systemMessage": "Ohjeistus",
+    "systemMessage": "Kielimallin ohjeistus",
     "hidePrompt": "Piilota alustuksen sisältö opiskelijoilta",
     "editMandatoryPrompt": "Tee alustuksesta pakollinen",
     "noSourceMaterials": "Ei lähdemateriaaleja",
     "ragSystemMessage": "Lähdemateriaaliohjeistus",
     "basicInformation": "Perustiedot",
-    "context": "Konteksti"
+    "context": "Konteksti",
+    "defaultRagLabel": "käytä lähteitä",
+    "enforceRagLabel": "pakko käyttää lähteitä",
+    "unknownRagLabel": "kerro jos ei löydy",
+    "defaultRagMessage": "Sinulla on nyt lähdemateriaalit käytössä. Hyödynnä niitä, kun käyttäjä kysyy jotain.",
+    "enforceRagMessage": "Sinun täytyy käyttää lähteitä vastauksessa. Älä keksi tietoa.",
+    "unknownRagMessage": "Jos vastausta ei löydy lähteistä, kerro se."
   },
   "tooltip": {
     "copied": "Kopioitu!"

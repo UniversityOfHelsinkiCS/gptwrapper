@@ -309,13 +309,19 @@
     "createdPrompt": "Prompt \"{{name}}\" created",
     "updatedPrompt": "Prompt \"{{name}}\" updated",
     "modelFreeToChoose": "Model free to choose",
-    "systemMessage": "Instructions",
+    "systemMessage": "Instructions for the language model",
     "hidePrompt": "Hide prompt text from students",
     "editMandatoryPrompt": "Make prompt mandatory",
     "noSourceMaterials": "No source materials",
     "ragSystemMessage": "Source material instructions",
     "basicInformation": "Basic information",
-    "context": "Context"
+    "context": "Context",
+    "defaultRagLabel": "use sources",
+    "enforceRagLabel": "must use sources",
+    "unknownRagLabel": "say if not found",
+    "defaultRagMessage": "You now have source materials available. Use them when the user asks a question.",
+    "enforceRagMessage": "You must use the sources to answer. Do not invent information.",
+    "unknownRagMessage": "If the answer is not in the sources, say so."
   },
   "tooltip": {
     "copied": "Copied!"
