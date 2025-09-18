@@ -108,6 +108,10 @@ When running the tests, the headers `x-test-user-idx` and `x-test-user-role` are
 
 The tests are isolated so that each (should at least) modifies their own data discriminated by the user's id. This allows parallel execution.
 
+## Deployment pipeline
+
+We use the free-tier blacksmith actions runner. If any problems with action workflows arises, just revert https://github.com/UniversityOfHelsinkiCS/gptwrapper/pull/383.
+
 ## Trivia
 
 The terms `course` and `chatInstance` refer to the same thing in the codebase. However, only `chatInstance` is correct, always prefer it.
