@@ -10,7 +10,7 @@ jobs:
     secrets: inherit
 
   build-and-push-to-production:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: test
 
     steps:
@@ -41,7 +41,7 @@ jobs:
           password: ${{ secrets.QUAY_IO_TOKEN }}
 
   sentry-release:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: build-and-push-to-production
 
     steps:

@@ -11,7 +11,7 @@ jobs:
     secrets: inherit
 
   build-and-push-to-staging:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: test
 
     steps:
