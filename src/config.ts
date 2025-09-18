@@ -46,6 +46,10 @@ export const validModels = [
     context: 128_000,
   },
   {
+    name: 'gpt-4.1',
+    context: 128_000,
+  },
+  {
     name: 'gpt-5',
     context: 128_000,
     temperature: 1.0,
