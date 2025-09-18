@@ -16,7 +16,7 @@ import {
   Typography,
   CircularProgress,
 } from '@mui/material'
-import { DEFAULT_RAG_SYSTEM_MESSAGE, validModels } from '@config'
+import { validModels } from '@config'
 import { useTranslation } from 'react-i18next'
 import type { RagIndexAttributes } from '@shared/types'
 import { useCreatePromptMutation, useEditPromptMutation } from '../../hooks/usePromptMutation'
@@ -41,7 +41,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEdit
   const [name, setName] = useState<string>(prompt?.name ?? '')
   const [systemMessage, setSystemMessage] = useState<string>(prompt?.systemMessage ?? '')
   const [ragSystemMessage, setRagSystemMessage] = useState<string>(() =>
-    prompt ? prompt.messages?.find((m) => m.role === 'system')?.content || '' : t(DEFAULT_RAG_SYSTEM_MESSAGE),
+    prompt ? prompt.messages?.find((m) => m.role === 'system')?.content || '' : t('prompt:defaultRagMessage'),
   )
   const [hidden, setHidden] = useState<boolean>(prompt?.hidden ?? false)
   const [mandatory, setMandatory] = useState<boolean>(prompt?.mandatory ?? false)
@@ -196,7 +196,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEdit
             <OpenableTextfield
               value={ragSystemMessage}
               onChange={(e) => setRagSystemMessage(e.target.value)}
-              onAppend={(text) => setRagSystemMessage(prev => prev + (prev.trim().length ? ' ' : '') + text)}
+              onAppend={(text) => setRagSystemMessage((prev) => prev + (prev.trim().length ? ' ' : '') + text)}
               slotProps={{
                 htmlInput: { 'data-testid': 'rag-system-message-input' },
               }}
@@ -228,7 +228,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEdit
       </Box>
 
       <DialogActions>
-        {loading && <CircularProgress color='secondary' />}
+        {loading && <CircularProgress color="secondary" />}
         <BlueButton disabled={loading} type="submit" variant="contained" sx={{ mt: 2 }}>
           {t('common:save')}
         </BlueButton>
