@@ -279,14 +279,19 @@ const SumRow = ({statsToShow}) => {
        return 0
      }
   }
+  const statsToShowLength = statsToShow ? statsToShow.length : 0
+  const statsMessage = t('stats:sum')
    return(
     <TableRow>
       <TableCell align="left">
          <Typography variant="h6">
-          {t('stats:sum')}
+          {statsMessage}
         </Typography>
       </TableCell>
       <TableCell>
+         <Typography variant="h6">
+            {statsToShowLength}
+        </Typography>
       </TableCell>
       <TableCell align="left">
       </TableCell>
