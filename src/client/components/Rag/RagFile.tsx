@@ -8,6 +8,7 @@ import type { RagIndexAttributes } from '../../../server/db/models/ragIndex'
 import { Chunk } from './Chunk'
 import { useDeleteRagFileMutation } from './api'
 import { useTranslation } from 'react-i18next'
+import Markdown from 'react-markdown'
 
 type RagFile = RagFileAttributes & {
   fileContent: string
@@ -69,14 +70,12 @@ export const RagFile: React.FC = () => {
       <Typography variant="h4">{t('rag:content')}</Typography>
       {ragFile.fileContent.length === 0 ? (
         <Typography variant="body1">{t('rag:noContent')}</Typography>
+      ) : ragFile.fileType === 'application/pdf' || ragFile.fileType === 'text/markdown' ? (
+        <Markdown>{ragFile.fileContent}</Markdown>
       ) : (
-        <Chunk
-          doc={{
-            title: ragFile.filename,
-            content: ragFile.fileContent,
-            metadata: ragFile.metadata,
-          }}
-        />
+        <Typography variant="body1" style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
+          {ragFile.fileContent}
+        </Typography>
       )}
     </Container>
   )

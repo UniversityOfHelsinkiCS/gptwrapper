@@ -16,7 +16,7 @@ export const Chunk: React.FC<{
     <Typography variant="subtitle1" fontFamily="monospace" mb={2}>
       {JSON.stringify(doc.metadata, null, 2)}
     </Typography>
-    {doc.metadata?.type === 'md' ? (
+    {doc.metadata?.type === 'md' || doc.metadata?.type === 'pdf' ? (
       <Markdown>{doc.content}</Markdown>
     ) : (
       <Typography whiteSpace="pre-line" variant="body1">
