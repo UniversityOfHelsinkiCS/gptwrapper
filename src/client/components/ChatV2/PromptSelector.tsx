@@ -57,7 +57,7 @@ const PromptSelector = ({ sx = {}, handleDeletePrompt }: { sx?: object; handleDe
       >
         <MenuItem onClick={() => handleSelect(undefined)}>{t('settings:emptyPrompt')}</MenuItem>
         {coursePrompts.length > 0 && (
-          <>
+          <div>
             <Divider />
             <ListSubheader>{t('settings:coursePrompts')}</ListSubheader>
             {coursePrompts.map((prompt) => (
@@ -65,10 +65,10 @@ const PromptSelector = ({ sx = {}, handleDeletePrompt }: { sx?: object; handleDe
                 {prompt.name}
               </MenuItem>
             ))}
-          </>
+          </div>
         )}
         {myPrompts.length > 0 && (
-          <>
+          <div>
             <Divider />
             <ListSubheader>{t('settings:myPrompts')}</ListSubheader>
             {myPrompts.map((prompt) => (
@@ -83,7 +83,7 @@ const PromptSelector = ({ sx = {}, handleDeletePrompt }: { sx?: object; handleDe
                 </Box>
               </MenuItem>
             ))}
-          </>
+          </div>
         )}
         {myPrompts.length === 0 && coursePrompts.length === 0 && <MenuItem disabled>{t('settings:noPrompts')}</MenuItem>}
       </Menu>
