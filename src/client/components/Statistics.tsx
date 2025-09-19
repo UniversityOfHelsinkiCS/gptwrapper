@@ -290,7 +290,7 @@ const SumRow = ({statsToShow}) => {
       </TableCell>
       <TableCell>
          <Typography variant="h6">
-            {statsToShowLength}
+            {statsToShowLength + ' '+t('stats:courses')}
         </Typography>
       </TableCell>
       <TableCell align="left">

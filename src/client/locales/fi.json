@@ -57,7 +57,8 @@
     "studentCount": "Opis",
     "courseCodes": "Kurssikoodit",
     "sum": "YHTEENSÄ:",
-    "rags": "Lähdemateriaalit"
+    "rags": "Lähdemateriaalit",
+    "courses": "kurssia"
   },
   "info": {
     "title": "Käyttöohje",

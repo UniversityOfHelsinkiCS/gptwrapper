@@ -56,7 +56,8 @@
     "promptCount": "Prompts",
     "courseStats": "Course stats",
     "sum": "SUM:",
-    "rags": "Source materials"
+    "rags": "Source materials",
+    "courses": "courses"
   },
   "info": {
     "title": "Instructions",
