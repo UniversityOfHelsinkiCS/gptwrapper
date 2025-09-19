@@ -28,14 +28,28 @@ import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
 import { Statistic } from '@shared/types'
 
 const Statistics = () => {
-  const [from, setFrom] = useState(1)
-  const [to, setTo] = useState(4)
+  const [from, setFrom] = useState<number | null>(null)
+  const [to, setTo] = useState<number | null>(null)
   const [selectedFaculty, setFaculties] = useState('H00')
   const { data: statistics, isSuccess } = useStatistics()
   const { t, i18n } = useTranslation()
   const { language } = i18n
   const { user, isLoading: isUserLoading } = useCurrentUser()
   const dataDownloadLink = useRef<HTMLAnchorElement | null>(null)
+
+  useEffect(() => {
+    if(isSuccess){
+      // sets the default to be the current year, the highest id is the end of the current year and the one below that is the start of current year
+      const statisticsSortedById = statistics.terms.sort((a, b,) => b.id - a.id)
+      if(statisticsSortedById.length >= 2){
+        const fromId = statisticsSortedById[1]
+        const toId = statisticsSortedById[0]
+        setFrom(fromId.id)
+        setTo(toId.id)
+      }
+     console.log(statisticsSortedById)
+    }
+  }, [isSuccess])
 
   if (!isSuccess || isUserLoading) return null
 
@@ -46,7 +60,13 @@ const Statistics = () => {
     return codes.map((c) => (programme[c] ? programme[c][language] : c)).join(', ')
   }
 
-  const selectedTerms = Array.from({ length: to - from + 1 }, (_, i) => i + from)
+  const selectTerms = () => {
+    if(!to || !from){
+      return []
+    }
+    return Array.from({ length: to - from + 1 }, (_, i) => i + from)
+  }
+  const selectedTerms = selectTerms()
 
   const byUsage = (a, b) => b.usedTokens - a.usedTokens
 
@@ -106,12 +126,12 @@ const Statistics = () => {
     })
     exportToCSV(mangledStatistics)
   }
-
+  
 
   const handleToChange = (e) => {
    // in case of: from: 2026 and to 2024, lets change to into from
    const newVal = parseInt(e.target.value as string, 10)   
-   if(from > newVal){
+   if(from && from > newVal){
      setTo(from)
    }else{
     setTo(newVal)
@@ -119,13 +139,20 @@ const Statistics = () => {
  }
 const handleFromChange = (e) => {
    const newVal = parseInt(e.target.value as string, 10)   // in case of: from: 2026 and to 2024, lets change to into from
-   if(newVal > to){
+   if(to && newVal > to){
      setTo(newVal)
   }
   setFrom(newVal)
  }
 
- 
+  const readTermFilter = (term) => {
+    if(term){
+      return term
+    }
+    else{
+      return 0 
+    }
+  }
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Box my={2}>
@@ -144,7 +171,7 @@ const handleFromChange = (e) => {
             <span style={{ margin: 10 }}>{t('stats:timePeriodStop')}</span>
             <Select value={to} onChange={handleToChange}>
               {statistics.terms
-                .filter((trm) => trm.id >= from)
+                .filter((trm) => trm.id >= readTermFilter(from))
                 .map((term) => (
                   <MenuItem key={term.id} value={term.id}>
                     {term.label[language]}
