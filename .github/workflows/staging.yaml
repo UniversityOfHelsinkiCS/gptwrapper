@@ -13,6 +13,7 @@ jobs:
   build-and-push-to-staging:
     runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: test
+    timeout-minutes: 8
 
     steps:
       - uses: actions/checkout@v4
