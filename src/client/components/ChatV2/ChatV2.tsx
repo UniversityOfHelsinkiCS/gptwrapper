@@ -359,6 +359,7 @@ const ChatV2Content = () => {
               onClose={() => {
                 setChatLeftSidePanelOpen(false)
               }}
+              course={course}
               setSettingsModalOpen={setSettingsModalOpen}
               setDisclaimerStatus={setDisclaimerStatus}
               messages={messages}
@@ -373,6 +374,7 @@ const ChatV2Content = () => {
               position: 'fixed',
               top: 0,
             }}
+            course={course}
             handleReset={handleReset}
             setSettingsModalOpen={setSettingsModalOpen}
             setDisclaimerStatus={setDisclaimerStatus}
@@ -555,7 +557,7 @@ const LeftMenu = ({
   setModel,
 }: {
   sx?: object
-  course?: Course
+  course: Course | undefined
   handleReset: () => void
   onClose?: () => void
   setSettingsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
