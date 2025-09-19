@@ -42,21 +42,26 @@ services:
       - redis_data:/data
 
   # Comment out if you use local ollama. Set OLLAMA_URL=host.docker.internal:11434 if using recent Docker Desktop.
-  # ollama:
-  #   image: ollama/ollama
-  #   ports:
-  #     - 11434:11434 # expose the Ollama API to the host
-  #   volumes:
-  #     - ollama_data:/root/.ollama # persistent model storage
+  ollama:
+    image: ollama/ollama
+    ports:
+      - 11434:11434 # expose the Ollama API to the host
+    volumes:
+      - ollama_data:/root/.ollama # persistent model storage
+    entrypoint: ["/bin/bash", "-c", "\
+      ollama serve & \
+      sleep 5 && \
+      ollama pull qwen2.5vl:7b && \
+      wait"]
 
   dalai:
-    # image: toska/dalai:latest
+  #   # image: toska/dalai:latest
     build:
       context: ../dalai
       dockerfile: ../dalai/dev.Dockerfile
     environment:
-      - OLLAMA_URL=http://host.docker.internal:11434
-      #- OLLAMA_URL=http://ollama:11434
+    # - OLLAMA_URL=http://host.docker.internal:11434
+      - OLLAMA_URL=http://ollama:11434
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - S3_HOST=http://minio:9000
@@ -67,7 +72,7 @@ services:
       - dalai_data:/app
     container_name: gptwrapper_dalai
     depends_on:
-      - redis
+    - redis
 
   minio:
     image: minio/minio:latest
@@ -95,7 +100,7 @@ services:
       /bin/sh -c "
       set -e;
       until (mc alias set local http://minio:9000 minioadmin minioadmin); do
-        echo 'Waiting for MinIO...'; sleep 10;
+        echo 'Waiting for MinIO...'; sleep 2;
       done;
       mc mb --ignore-existing local/mybucket;
       tail -f /dev/null

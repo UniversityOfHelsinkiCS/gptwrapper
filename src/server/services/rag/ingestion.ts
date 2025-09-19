@@ -34,17 +34,26 @@ export const ingestRagFiles = async (ragIndex: RagIndex) => {
       console.time(`Ingestion ${ragFile.filename}`)
 
       await ragFile.save()
-
-      const job = await submitPdfParsingJob(ragFile)
+      let needToParse = false
 
       try {
-        await job.waitUntilFinished(pdfQueueEvents)
-      } catch (error: any) {
-        console.error('Error waiting for PDF parsing job to finish:', error)
-        ragFile.pipelineStage = 'error'
-        ragFile.error = 'PDF parsing failed'
-        await ragFile.save()
-        return
+        await FileStore.readRagFileTextContent(ragFile)
+      } catch (error) {
+        needToParse = true
+      }
+
+      if (needToParse) {
+        const job = await submitPdfParsingJob(ragFile)
+
+        try {
+          await job.waitUntilFinished(pdfQueueEvents)
+        } catch (error: any) {
+          console.error('Error waiting for PDF parsing job to finish:', error)
+          ragFile.pipelineStage = 'error'
+          ragFile.error = 'PDF parsing failed'
+          await ragFile.save()
+          return
+        }
       }
 
       const text = await FileStore.readRagFileTextContent(ragFile)

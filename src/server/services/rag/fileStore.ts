@@ -8,7 +8,6 @@ import {
 } from '@aws-sdk/client-s3'
 import type { RagFile, RagIndex } from '../../db/models'
 import { ApplicationError } from '../../util/ApplicationError'
-import { pdfToText } from '../../util/pdfToText'
 import { S3_BUCKET } from '../../util/config'
 import { s3Client } from '../../util/s3client'
 
@@ -127,14 +126,5 @@ const streamToString = (stream: any): Promise<string> => {
     stream.on('data', (chunk: any) => chunks.push(chunk))
     stream.on('error', reject)
     stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')))
-  })
-}
-
-const streamToBuffer = (stream: any): Promise<Buffer> => {
-  return new Promise((resolve, reject) => {
-    const chunks: any[] = []
-    stream.on('data', (chunk: any) => chunks.push(chunk))
-    stream.on('error', reject)
-    stream.on('end', () => resolve(Buffer.concat(chunks)))
   })
 }

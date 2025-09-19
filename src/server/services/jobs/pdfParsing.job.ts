@@ -31,9 +31,8 @@ const queue = new Queue('llama-scan-queue', {
 export const pdfQueueEvents = new QueueEvents('llama-scan-queue', { connection })
 
 /**
- * Adds a pdf parsing job to the queue. The file must be uploaded to S3 beforehand. The jobId is based on the filename and prefix - resubmitting with the same jobId while the previous job is running has no effect.
- * @param filename
- * @param prefix
+ * Adds a pdf parsing job to the queue. The file must be uploaded to S3 beforehand. The jobId is based on the ragFile - resubmitting with the same jobId while the previous job is running has no effect.
+ * @param ragFile
  * @returns the job
  */
 export const submitPdfParsingJob = async (ragFile: RagFile) => {
