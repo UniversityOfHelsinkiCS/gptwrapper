@@ -3,6 +3,8 @@ import { IngestionPipelineStageKey, IngestionPipelineStageKeys, IngestionPipelin
 import { Link as RouterLink } from 'react-router-dom'
 import type { RagFileAttributes } from '@shared/types'
 import { Check, CloudUpload, DocumentScanner, ErrorOutline, HorizontalSplit } from '@mui/icons-material'
+import { locales } from '../../locales/locales'
+import { useTranslation } from 'react-i18next'
 
 const ProgressIcon: Record<IngestionPipelineStageKey, React.ReactNode> = {
   completed: <Check fontSize="small" />,
@@ -16,6 +18,7 @@ export const RagFileInfo: React.FC<{
   file: RagFileAttributes
   link?: boolean
 }> = ({ file, link = false }) => {
+  const { t, i18n } = useTranslation()
   const inProgress = file.pipelineStage !== 'completed' && file.pipelineStage !== 'error'
   const progressIdx = IngestionPipelineStageKeys.indexOf(file.pipelineStage)
   const progressNextIdx = inProgress ? progressIdx + 1 : progressIdx
@@ -32,15 +35,15 @@ export const RagFileInfo: React.FC<{
           <Typography variant="subtitle1">{file.filename}</Typography>
         )}
         <Typography variant="body2" color="text.secondary" sx={{ marginLeft: 'auto' }}>
-          Added {new Date(file.createdAt).toLocaleString()}
+          {t('common:added')} {new Date(file.createdAt).toLocaleString(locales[i18n.language].code)}
         </Typography>
       </Box>
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell>Type</TableCell>
-            <TableCell>Size (characters)</TableCell>
-            <TableCell>Status</TableCell>
+            <TableCell>{t('common:fileType')}</TableCell>
+            <TableCell>{t('rag:fileSize')}</TableCell>
+            <TableCell>{t('rag:fileStatus')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -59,9 +62,9 @@ export const RagFileInfo: React.FC<{
       {file.pipelineStage !== 'completed' && file.pipelineStage !== 'error' && (
         <LinearProgress variant="buffer" value={(progressIdx * 100) / numSteps} valueBuffer={(progressNextIdx * 100) / numSteps} />
       )}
-      {file.error && (
+      {file.pipelineStage === 'error' && file.error && (
         <Typography variant="body2" color="error">
-          Error: {JSON.stringify(file.error)}
+          {t('error:errorMessage')}: {file.error}
         </Typography>
       )}
     </Paper>

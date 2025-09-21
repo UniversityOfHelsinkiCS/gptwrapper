@@ -41,7 +41,9 @@
     "close": "Close",
     "useOld": "Old chat view",
     "iframeCopy": "Copy embeddable iframe element:\n\n{{- iframeHtml}}",
-    "model": "Language model"
+    "model": "Language model",
+    "added": "Added",
+    "fileType": "File type"
   },
   "stats": {
     "timePeriodStart": "Starting",
@@ -386,6 +388,8 @@
     "backToCourse": "Back to course",
     "testRetrievalButton": "Test retrieval",
     "testRetrieval": "Test retrieval",
-    "searchDescription": "With this search tool you can test what kind of search results the language model will receive when it uses the document_search-tool. This search is only for testing."
+    "searchDescription": "With this search tool you can test what kind of search results the language model will receive when it uses the document_search-tool. This search is only for testing.",
+    "fileSize": "File size (characters)",
+    "fileStatus": "Status"
   }
 }

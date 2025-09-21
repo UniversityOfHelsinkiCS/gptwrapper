@@ -42,7 +42,9 @@
     "close": "Sulje",
     "useOld": "Vanha chattinäkymä",
     "iframeCopy": "Kopioi upotettava iframe-elementti:\n\n{{- iframeHtml}}",
-    "model": "Kielimalli"
+    "model": "Kielimalli",
+    "added": "Lisätty",
+    "fileType": "Tiedostomuoto"
   },
   "stats": {
     "showing": "Näytetään",
@@ -388,6 +390,8 @@
     "backToCourse": "Takaisin kurssisivulle",
     "testRetrievalButton": "Testaa hakua",
     "testRetrieval": "Testaa hakua",
-    "searchDescription": "Tällä hakutyökalulla voit kokeilla, minkälaisia hakutuloksia kielimalli saa sen käyttäessä document_search-työkalua. Haku on vain testauskäyttöä varten."
+    "searchDescription": "Tällä hakutyökalulla voit kokeilla, minkälaisia hakutuloksia kielimalli saa sen käyttäessä document_search-työkalua. Haku on vain testauskäyttöä varten.",
+    "fileSize": "Tiedoston koko (merkkiä)",
+    "fileStatus": "Tila"
   }
 }

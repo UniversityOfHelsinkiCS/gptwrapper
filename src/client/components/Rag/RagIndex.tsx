@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Box, Typography, styled, LinearProgress, Container, DialogTitle, DialogContent, Dialog, Link } from '@mui/material'
+import { Button, Box, Typography, styled, LinearProgress, Container, DialogTitle, DialogContent, Dialog, Link, CircularProgress } from '@mui/material'
 import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom'
 import { ArrowBackOutlined, CloudUpload, DeleteOutline, FindInPage, SearchOutlined } from '@mui/icons-material'
 import { orderBy } from 'lodash'
@@ -88,7 +88,8 @@ export const RagIndex: React.FC = () => {
             </DialogContent>
           </Dialog>
           <Button
-            startIcon={<DeleteOutline />}
+            startIcon={deleteIndexMutation.isPending ? <CircularProgress /> : <DeleteOutline />}
+            disabled={deleteIndexMutation.isPending}
             variant="text"
             color="error"
             onClick={async () => {
