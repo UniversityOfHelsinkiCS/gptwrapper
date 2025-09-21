@@ -98,7 +98,13 @@ export const ingestRagFiles = async (ragIndex: RagIndex) => {
   }
 
   // @todo we can only call this once. How to handle new documents?
+  // Now there is a possibility of weird concurrency bugs.
   await vectorStore.addVectors(allEmbeddings, allDocuments)
 
-  await RagFile.update({ pipelineStage: 'completed' }, { where: { ragIndexId: ragIndex.id } })
+  await Promise.all(
+    ragFiles.map(async (ragFile) => {
+      ragFile.pipelineStage = 'completed'
+      await ragFile.save()
+    }),
+  )
 }
