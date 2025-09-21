@@ -5,10 +5,12 @@ import apiClient from '../../util/apiClient'
 import { Box, Checkbox, Fade, FormControl, FormControlLabel, Grow, LinearProgress, TextField, Typography, Zoom } from '@mui/material'
 import { OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { amber, green, blue } from '@mui/material/colors'
+import { useTranslation } from 'react-i18next'
 
 const TimeLineColors = [blue[200], amber[300], green[300]]
 
 export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [vector, setVector] = useState(true)
   const [ft, setFt] = useState(true)
@@ -48,12 +50,15 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
           <FormControlLabel control={<Checkbox checked={rerank} onChange={(e) => setRerank(e.target.checked)} />} label="Use reranking" />
         </FormControl>
         <OutlineButtonBlue type="submit">Search</OutlineButtonBlue>
+        <Typography variant="body2" mt="2rem">
+          {t('rag:searchDescription')}
+        </Typography>
       </form>
       <Box flex={2}>
         {isLoading && <LinearProgress />}
         <Fade in={!!results?.timings}>
           {results?.timings ? (
-            <Box mb="2rem">
+            <Box mb="2rem" width="80%">
               <Typography variant="h6">Timings</Typography>
               <Box display="flex">
                 {Object.entries(results?.timings ?? {}).map(([key, value], idx) => (

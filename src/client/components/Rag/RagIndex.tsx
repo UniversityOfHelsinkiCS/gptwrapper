@@ -78,7 +78,7 @@ export const RagIndex: React.FC = () => {
               multiple
             />
           </BlueButton>
-          <OutlineButtonBlack startIcon={<FindInPage />} onClick={() => setSearchOpen(true)}>
+          <OutlineButtonBlack startIcon={<FindInPage />} onClick={() => setSearchOpen(true)} disabled={ragDetails.ragFiles.length === 0}>
             {t('rag:testRetrievalButton')}
           </OutlineButtonBlack>
           <Dialog open={searchOpen} onClose={() => setSearchOpen(false)} fullWidth maxWidth="md">

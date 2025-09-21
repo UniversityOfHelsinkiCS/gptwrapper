@@ -7,7 +7,6 @@ import { BM25Retriever } from '@langchain/community/retrievers/bm25'
 import type { BaseRetriever } from '@langchain/core/retrievers'
 
 export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Promise<{ results: RagChunk[]; timings: Record<string, number> }> => {
-  console.log('Searching', ragIndex.metadata.name, 'for query:', searchParams.query)
   const timings: Record<string, number> = {}
 
   const vectorStore = getRedisVectorStore(ragIndex.id)

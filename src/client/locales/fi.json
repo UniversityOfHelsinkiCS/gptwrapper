@@ -387,6 +387,7 @@
     "processingFailures": "Joidenkin tiedostojen lataus ei onnistunut",
     "backToCourse": "Takaisin kurssisivulle",
     "testRetrievalButton": "Testaa hakua",
-    "testRetrieval": "Testaa hakua"
+    "testRetrieval": "Testaa hakua",
+    "searchDescription": "Tällä hakutyökalulla voit kokeilla, minkälaisia hakutuloksia kielimalli saa sen käyttäessä document_search-työkalua. Haku on vain testauskäyttöä varten."
   }
 }

@@ -48,7 +48,10 @@ export const RagFileInfo: React.FC<{
             <TableCell>{file.fileType}</TableCell>
             <TableCell>{file.fileSize}</TableCell>
             <TableCell>
-              {IngestionPipelineStages[file.pipelineStage]} {ProgressIcon[file.pipelineStage]}
+              <Box display="flex" alignItems="end" gap={1}>
+                {IngestionPipelineStages[file.pipelineStage]}
+                {ProgressIcon[file.pipelineStage]}
+              </Box>
             </TableCell>
           </TableRow>
         </TableBody>

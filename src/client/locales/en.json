@@ -385,6 +385,7 @@
     "processingFailures": "Some files failed to process",
     "backToCourse": "Back to course",
     "testRetrievalButton": "Test retrieval",
-    "testRetrieval": "Test retrieval"
+    "testRetrieval": "Test retrieval",
+    "searchDescription": "With this search tool you can test what kind of search results the language model will receive when it uses the document_search-tool. This search is only for testing."
   }
 }
