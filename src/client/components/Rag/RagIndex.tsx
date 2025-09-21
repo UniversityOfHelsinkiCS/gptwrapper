@@ -1,13 +1,13 @@
 import React from 'react'
 import { Button, Box, Typography, styled, LinearProgress, Container, DialogTitle, DialogContent, Dialog, Link, CircularProgress } from '@mui/material'
 import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom'
-import { ArrowBackOutlined, CloudUpload, DeleteOutline, FindInPage, SearchOutlined } from '@mui/icons-material'
+import { ArrowBackOutlined, CloudUpload, DeleteOutline, FindInPage } from '@mui/icons-material'
 import { orderBy } from 'lodash'
 import { RagFileInfo } from './RagFileDetails'
 import { useDeleteRagIndexMutation, useRagIndexDetails, useUploadMutation } from './api'
 import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
-import { BlueButton, OutlineButtonBlack, OutlineButtonBlue } from '../ChatV2/general/Buttons'
+import { BlueButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -29,10 +29,13 @@ export const RagIndex: React.FC = () => {
   const [searchOpen, setSearchOpen] = React.useState(false)
   const deleteIndexMutation = useDeleteRagIndexMutation()
   const [refetchInterval, setRefetchInterval] = React.useState(60 * 1000)
+  const [uploadProgress, setUploadProgress] = React.useState(0)
   const { data: ragDetails, isSuccess, refetch } = useRagIndexDetails(id, refetchInterval)
-  const uploadMutation = useUploadMutation(ragDetails)
+  const uploadMutation = useUploadMutation({ index: ragDetails, onUploadProgress: setUploadProgress })
 
-  const isComplete = ragDetails ? ragDetails.ragFiles.every((file) => file.pipelineStage === 'completed' || file.pipelineStage === 'error') : false
+  const isComplete = ragDetails
+    ? ragDetails.ragFiles.every((file) => file.pipelineStage === 'completed' || file.pipelineStage === 'error') && !uploadMutation.isPending
+    : false
   const hasErrors = ragDetails ? ragDetails.ragFiles.some((file) => file.pipelineStage === 'error') : false
 
   React.useEffect(() => {
@@ -48,6 +51,7 @@ export const RagIndex: React.FC = () => {
   }
 
   const handleUpload = async (files: File[]) => {
+    setUploadProgress(0)
     await uploadMutation.mutateAsync(Array.from(files))
     refetch()
   }
@@ -129,7 +133,7 @@ export const RagIndex: React.FC = () => {
               </>
             )}
           </Box>
-          {uploadMutation.isPending && <LinearProgress />}
+          {uploadMutation.isPending && <LinearProgress value={uploadProgress} variant="determinate" />}
           {orderBy(ragDetails.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (
             <RagFileInfo key={file.id} file={file} link />
           ))}

@@ -42,7 +42,7 @@ export const useDeleteRagIndexMutation = () => {
   return mutation
 }
 
-export const useUploadMutation = (index?: RagIndexDetails) => {
+export const useUploadMutation = ({ index, onUploadProgress = () => {} }: { index?: RagIndexAttributes; onUploadProgress?: (progress: number) => void }) => {
   const mutation = useMutation({
     mutationFn: async (files: File[]) => {
       if (!index) {
@@ -54,7 +54,14 @@ export const useUploadMutation = (index?: RagIndexDetails) => {
         formData.append('files', file)
       })
 
-      const res = await apiClient.post(`/rag/indices/${index.id}/upload`, formData)
+      const res = await apiClient.post(`/rag/indices/${index.id}/upload`, formData, {
+        onUploadProgress: (progressEvent) => {
+          const total = progressEvent.total || 1
+          const current = progressEvent.loaded
+          const percentCompleted = Math.round((current / total) * 100)
+          onUploadProgress(percentCompleted)
+        },
+      })
 
       return res.data
     },
