@@ -20,7 +20,7 @@ type RagIndexDetails = Omit<RagIndexAttributes, 'ragFileCount'> & {
   ragFiles: RagFileAttributes[]
 }
 
-export const useRagIndexDetails = (indexId: number | null) => {
+export const useRagIndexDetails = (indexId: number | null, refetchInterval: number) => {
   return useQuery<RagIndexDetails>({
     queryKey: ['ragIndex', indexId],
     queryFn: async () => {
@@ -28,6 +28,7 @@ export const useRagIndexDetails = (indexId: number | null) => {
       return response.data
     },
     enabled: !!indexId,
+    refetchInterval,
   })
 }
 

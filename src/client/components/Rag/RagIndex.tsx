@@ -27,15 +27,28 @@ export const RagIndex: React.FC = () => {
   const navigate = useNavigate()
   const id = parseInt(strId, 10)
   const deleteIndexMutation = useDeleteRagIndexMutation()
-  const { data: ragDetails, isSuccess, refetch } = useRagIndexDetails(id)
+  const [refetchInterval, setRefetchInterval] = React.useState(60 * 1000)
+  const { data: ragDetails, isSuccess, refetch } = useRagIndexDetails(id, refetchInterval)
   const uploadMutation = useUploadMutation(ragDetails)
+
+  const isComplete = ragDetails ? ragDetails.ragFiles.every((file) => file.pipelineStage === 'completed' || file.pipelineStage === 'error') : false
+  const hasErrors = ragDetails ? ragDetails.ragFiles.some((file) => file.pipelineStage === 'error') : false
+
+  React.useEffect(() => {
+    if (isComplete) {
+      setRefetchInterval(60 * 1000)
+    }
+  }, [isComplete])
 
   if (!isSuccess) {
     return <LinearProgress />
   }
 
-  const isComplete = ragDetails.ragFiles.every((file) => file.pipelineStage === 'completed' || file.pipelineStage === 'error')
-  const hasErrors = ragDetails.ragFiles.some((file) => file.pipelineStage === 'error')
+  const handleUpload = async (files: File[]) => {
+    await uploadMutation.mutateAsync(Array.from(files))
+    refetch()
+    setRefetchInterval(1 * 1000)
+  }
 
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
@@ -48,11 +61,10 @@ export const RagIndex: React.FC = () => {
             {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
             <VisuallyHiddenInput
               type="file"
-              onChange={async (event) => {
-                const files = event.target.files
+              onChange={async (e) => {
+                const files = e.target.files
                 if (files && files.length > 0) {
-                  await uploadMutation.mutateAsync(Array.from(files))
-                  refetch()
+                  await handleUpload(Array.from(files))
                 }
               }}
               multiple
@@ -91,7 +103,7 @@ export const RagIndex: React.FC = () => {
                 <OutlineButtonBlack
                   sx={{ ml: 2 }}
                   onClick={async () => {
-                    await uploadMutation.mutateAsync([])
+                    await handleUpload([])
                   }}
                 >
                   {t('rag:retryFailedFiles')}
