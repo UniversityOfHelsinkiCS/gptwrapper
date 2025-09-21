@@ -381,6 +381,8 @@
     "english": "Englanti",
     "createIndex": "Luo kokoelma",
     "nameLabel": "Kokoelman nimi",
-    "nameHelperText": "Käytä kuvaavaa nimeä (esim. kurssin koko nimi)"
+    "nameHelperText": "Käytä kuvaavaa nimeä (esim. kurssin koko nimi)",
+    "allFilesProcessedSuccessfully": "Tiedostot ladattu",
+    "retryFailedFiles": "Yritä uudestaan"
   }
 }

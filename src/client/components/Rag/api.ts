@@ -43,13 +43,13 @@ export const useDeleteRagIndexMutation = () => {
 
 export const useUploadMutation = (index?: RagIndexDetails) => {
   const mutation = useMutation({
-    mutationFn: async (files: FileList) => {
+    mutationFn: async (files: File[]) => {
       if (!index) {
         throw new Error('Index is required')
       }
       const formData = new FormData()
       // Append each file individually
-      Array.from(files).forEach((file) => {
+      files.forEach((file) => {
         formData.append('files', file)
       })
 

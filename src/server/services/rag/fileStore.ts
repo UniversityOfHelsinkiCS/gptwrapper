@@ -5,6 +5,7 @@ import {
   ListObjectsV2Command,
   DeleteObjectsCommand,
   ListObjectsV2CommandOutput,
+  NoSuchKey,
 } from '@aws-sdk/client-s3'
 import type { RagFile, RagIndex } from '../../db/models'
 import { ApplicationError } from '../../util/ApplicationError'
@@ -82,6 +83,11 @@ export const FileStore = {
         const text = await streamToString(textObj.Body)
         return text
       } catch (error) {
+        // Check if key does not exist
+        if (error instanceof NoSuchKey) {
+          return null
+        }
+
         console.error(`Failed to read PDF text file ${pdfTextKey} in S3:`, error)
         throw ApplicationError.InternalServerError('Failed to read PDF text file')
       }
@@ -92,6 +98,11 @@ export const FileStore = {
       const text = await streamToString(fileObj.Body)
       return text
     } catch (error) {
+      // Check if key does not exist
+      if (error instanceof NoSuchKey) {
+        return null
+      }
+
       console.error(`Failed to read file ${s3Key} from S3:`, error)
       throw ApplicationError.InternalServerError('Failed to read file content')
     }

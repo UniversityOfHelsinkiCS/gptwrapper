@@ -1,9 +1,9 @@
 import { Document } from '@langchain/core/documents'
 import { MarkdownTextSplitter, RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
-import { RagFile, RagIndex } from '../../db/models'
+import { RagFile, type RagIndex } from '../../db/models'
+import { pdfQueueEvents, submitPdfParsingJob } from '../jobs/pdfParsing.job'
 import { FileStore } from './fileStore'
 import { getRedisVectorStore } from './vectorStore'
-import { pdfQueueEvents, submitPdfParsingJob } from '../jobs/pdfParsing.job'
 
 const defaultTextSplitter = new RecursiveCharacterTextSplitter({
   chunkSize: 800,
@@ -33,16 +33,12 @@ export const ingestRagFiles = async (ragIndex: RagIndex) => {
     ragFiles.map(async (ragFile) => {
       console.time(`Ingestion ${ragFile.filename}`)
 
-      await ragFile.save()
-      let needToParse = false
-
-      try {
-        await FileStore.readRagFileTextContent(ragFile)
-      } catch (error) {
-        needToParse = true
-      }
+      const needToParse = (await FileStore.readRagFileTextContent(ragFile)) === null
 
       if (needToParse) {
+        ragFile.pipelineStage = 'parsing'
+        await ragFile.save()
+
         const job = await submitPdfParsingJob(ragFile)
 
         try {
@@ -58,7 +54,16 @@ export const ingestRagFiles = async (ragIndex: RagIndex) => {
 
       const text = await FileStore.readRagFileTextContent(ragFile)
 
-      ragFile.pipelineStage = 'parsed'
+      if (text === null) {
+        console.error('Error reading rag file text: file does not exist')
+        ragFile.pipelineStage = 'error'
+        ragFile.error = 'Error reading rag file text: file does not exist'
+        await ragFile.save()
+        return
+      }
+
+      ragFile.pipelineStage = 'indexing'
+      await ragFile.save()
 
       const document = new Document({
         pageContent: text,
@@ -86,6 +91,11 @@ export const ingestRagFiles = async (ragIndex: RagIndex) => {
       console.timeEnd(`Ingestion ${ragFile.filename}`)
     }),
   )
+
+  if (allDocuments.length === 0 || allEmbeddings.length !== allDocuments.length) {
+    console.warn('No documents or embeddings to add to vector store')
+    return
+  }
 
   // @todo we can only call this once. How to handle new documents?
   await vectorStore.addVectors(allEmbeddings, allDocuments)

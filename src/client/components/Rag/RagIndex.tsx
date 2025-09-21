@@ -7,6 +7,7 @@ import { RagFileInfo } from './RagFileDetails'
 import { useDeleteRagIndexMutation, useRagIndexDetails, useUploadMutation } from './api'
 import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
+import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -33,6 +34,9 @@ export const RagIndex: React.FC = () => {
     return <LinearProgress />
   }
 
+  const isComplete = ragDetails.ragFiles.every((file) => file.pipelineStage === 'completed' || file.pipelineStage === 'error')
+  const hasErrors = ragDetails.ragFiles.some((file) => file.pipelineStage === 'error')
+
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       <Typography variant="body1">{t('rag:collection')}</Typography>
@@ -46,7 +50,7 @@ export const RagIndex: React.FC = () => {
               onChange={async (event) => {
                 const files = event.target.files
                 if (files && files.length > 0) {
-                  await uploadMutation.mutateAsync(files)
+                  await uploadMutation.mutateAsync(Array.from(files))
                   refetch()
                 }
               }}
@@ -59,7 +63,10 @@ export const RagIndex: React.FC = () => {
             onClick={async () => {
               if (window.confirm(`Are you sure you want to delete index ${ragDetails.metadata?.name}?`)) {
                 await deleteIndexMutation.mutateAsync(id)
-                navigate(-1)
+                const chatInstance = ragDetails.chatInstances?.[0]
+                if (chatInstance) {
+                  navigate(`/courses/${chatInstance.id}/rag`)
+                }
               }
             }}
           >
@@ -68,8 +75,25 @@ export const RagIndex: React.FC = () => {
         </Box>
         <Search ragIndex={ragDetails} />
         <Box mt={2}>
-          <Typography variant="h6">{t('rag:files')}</Typography>
-          {orderBy(ragDetails?.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (
+          <Box display="flex" alignItems="center" mb={1}>
+            <Typography variant="h6">{t('rag:files')}</Typography>
+            {isComplete && !hasErrors && (
+              <Typography variant="body2" color="success.main" sx={{ ml: 2 }}>
+                {t('rag:allFilesProcessedSuccessfully')}
+              </Typography>
+            )}
+            {isComplete && hasErrors && (
+              <OutlineButtonBlack
+                sx={{ ml: 2 }}
+                onClick={async () => {
+                  await uploadMutation.mutateAsync([])
+                }}
+              >
+                {t('rag:retryFailedFiles')}
+              </OutlineButtonBlack>
+            )}
+          </Box>
+          {orderBy(ragDetails.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (
             <RagFileInfo key={file.id} file={file} link />
           ))}
         </Box>

@@ -379,6 +379,8 @@
     "english": "English",
     "createIndex": "Create collection",
     "nameLabel": "Collection name",
-    "nameHelperText": "Use a descriptive name (for example the full name of the course)"
+    "nameHelperText": "Use a descriptive name (for example the full name of the course)",
+    "allFilesProcessedSuccessfully": "Files processed",
+    "retryFailedFiles": "Try again"
   }
 }

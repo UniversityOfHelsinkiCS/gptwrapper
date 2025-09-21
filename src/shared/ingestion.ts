@@ -1,6 +1,7 @@
 export const IngestionPipelineStages = {
-  uploaded: 'Uploaded',
-  parsed: 'Parsed',
+  uploading: 'Uploading',
+  parsing: 'Parsing',
+  indexing: 'Indexing',
   completed: 'Completed',
   error: 'Error',
 } as const

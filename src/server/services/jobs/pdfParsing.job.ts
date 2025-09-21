@@ -46,7 +46,7 @@ export const submitPdfParsingJob = async (ragFile: RagFile) => {
       s3Key,
       outputBucket: S3_BUCKET,
     },
-    { jobId, removeOnComplete: true, removeOnFail: false },
+    { jobId, removeOnComplete: true, removeOnFail: true },
   )
 
   return job

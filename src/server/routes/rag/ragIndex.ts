@@ -111,7 +111,12 @@ ragIndexRouter.get('/files/:fileId', async (req, res) => {
   let fileContent: string
 
   if (shouldRenderAsText(ragFile.fileType) || ragFile.fileType === 'application/pdf') {
-    fileContent = await FileStore.readRagFileTextContent(ragFile)
+    const fileContentText = await FileStore.readRagFileTextContent(ragFile)
+    if (fileContentText === null) {
+      fileContent = 'File content is not available'
+    } else {
+      fileContent = fileContentText
+    }
   } else {
     fileContent = 'this file cannot be displayed as readable text'
   }
@@ -189,20 +194,15 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
   const ragIndexRequest = req as unknown as RagIndexRequest
   const { ragIndex, user } = ragIndexRequest
 
-  if (!req.files || req.files.length === 0) {
-    throw ApplicationError.BadRequest('No files uploaded')
-  }
-
   await Promise.all(
     req.files.map((file: Express.Multer.File) =>
       RagFile.create({
         userId: user.id,
         ragIndexId: ragIndex.id,
-        pipelineStage: 'uploaded',
+        pipelineStage: 'uploading',
         filename: file.originalname,
         fileType: file.mimetype,
         fileSize: file.size,
-        // s3: file.s3Key,
         metadata: {},
       }),
     ),
