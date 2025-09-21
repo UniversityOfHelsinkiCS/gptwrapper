@@ -1,16 +1,25 @@
 import { Box, LinearProgress, Link, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
-import { IngestionPipelineStageKeys, IngestionPipelineStages } from '@shared/ingestion'
+import { IngestionPipelineStageKey, IngestionPipelineStageKeys, IngestionPipelineStages } from '@shared/ingestion'
 import { Link as RouterLink } from 'react-router-dom'
 import type { RagFileAttributes } from '@shared/types'
+import { Check, CloudUpload, DocumentScanner, ErrorOutline, HorizontalSplit } from '@mui/icons-material'
+
+const ProgressIcon: Record<IngestionPipelineStageKey, React.ReactNode> = {
+  completed: <Check fontSize="small" />,
+  error: <ErrorOutline fontSize="small" />,
+  uploading: <CloudUpload fontSize="small" />,
+  parsing: <DocumentScanner fontSize="small" />,
+  indexing: <HorizontalSplit fontSize="small" />,
+}
 
 export const RagFileInfo: React.FC<{
   file: RagFileAttributes
   link?: boolean
 }> = ({ file, link = false }) => {
   const inProgress = file.pipelineStage !== 'completed' && file.pipelineStage !== 'error'
-  const progressIdx = IngestionPipelineStageKeys.findIndex((stage) => stage === file.pipelineStage) - 1
+  const progressIdx = IngestionPipelineStageKeys.indexOf(file.pipelineStage)
   const progressNextIdx = inProgress ? progressIdx + 1 : progressIdx
-  const numSteps = IngestionPipelineStageKeys.length - 1
+  const numSteps = IngestionPipelineStageKeys.length - 2
 
   return (
     <Paper sx={{ padding: 2, marginBottom: 2 }} elevation={3}>
@@ -31,8 +40,6 @@ export const RagFileInfo: React.FC<{
           <TableRow>
             <TableCell>Type</TableCell>
             <TableCell>Size (characters)</TableCell>
-            <TableCell>Chunks</TableCell>
-            <TableCell>Meta</TableCell>
             <TableCell>Status</TableCell>
           </TableRow>
         </TableHead>
@@ -40,13 +47,9 @@ export const RagFileInfo: React.FC<{
           <TableRow>
             <TableCell>{file.fileType}</TableCell>
             <TableCell>{file.fileSize}</TableCell>
-            <TableCell>{file.numChunks}</TableCell>
             <TableCell>
-              <Typography variant="caption" fontFamily="monospace">
-                {JSON.stringify(file.metadata)}
-              </Typography>
+              {IngestionPipelineStages[file.pipelineStage]} {ProgressIcon[file.pipelineStage]}
             </TableCell>
-            <TableCell>{IngestionPipelineStages[file.pipelineStage]}</TableCell>
           </TableRow>
         </TableBody>
       </Table>

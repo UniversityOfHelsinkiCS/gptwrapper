@@ -1,7 +1,7 @@
 import React from 'react'
-import { Button, Box, Typography, styled, LinearProgress, Container } from '@mui/material'
-import { useNavigate, useParams } from 'react-router-dom'
-import { CloudUpload } from '@mui/icons-material'
+import { Button, Box, Typography, styled, LinearProgress, Container, DialogTitle, DialogContent, Dialog, Link } from '@mui/material'
+import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom'
+import { ArrowBackOutlined, CloudUpload, DeleteOutline, FindInPage, SearchOutlined } from '@mui/icons-material'
 import { orderBy } from 'lodash'
 import { RagFileInfo } from './RagFileDetails'
 import { useDeleteRagIndexMutation, useRagIndexDetails, useUploadMutation } from './api'
@@ -26,6 +26,7 @@ export const RagIndex: React.FC = () => {
   const { id: strId } = useParams() as { id: string }
   const navigate = useNavigate()
   const id = parseInt(strId, 10)
+  const [searchOpen, setSearchOpen] = React.useState(false)
   const deleteIndexMutation = useDeleteRagIndexMutation()
   const [refetchInterval, setRefetchInterval] = React.useState(60 * 1000)
   const { data: ragDetails, isSuccess, refetch } = useRagIndexDetails(id, refetchInterval)
@@ -37,6 +38,8 @@ export const RagIndex: React.FC = () => {
   React.useEffect(() => {
     if (isComplete) {
       setRefetchInterval(60 * 1000)
+    } else {
+      setRefetchInterval(1 * 1000)
     }
   }, [isComplete])
 
@@ -47,11 +50,16 @@ export const RagIndex: React.FC = () => {
   const handleUpload = async (files: File[]) => {
     await uploadMutation.mutateAsync(Array.from(files))
     refetch()
-    setRefetchInterval(1 * 1000)
   }
+
+  const coursePagePath = ragDetails?.chatInstances?.[0] ? `/courses/${ragDetails.chatInstances[0].id}/rag` : '/rag'
 
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
+      <Link to={coursePagePath} component={RouterLink}>
+        <ArrowBackOutlined />
+        {t('rag:backToCourse')}
+      </Link>
       <Typography variant="body1">{t('rag:collection')}</Typography>
       <Typography variant="h3">{ragDetails?.metadata?.name}</Typography>
       <Box py={2}>
@@ -70,7 +78,17 @@ export const RagIndex: React.FC = () => {
               multiple
             />
           </BlueButton>
+          <OutlineButtonBlack startIcon={<FindInPage />} onClick={() => setSearchOpen(true)}>
+            {t('rag:testRetrievalButton')}
+          </OutlineButtonBlack>
+          <Dialog open={searchOpen} onClose={() => setSearchOpen(false)} fullWidth maxWidth="md">
+            <DialogTitle>{t('rag:testRetrieval', { name: ragDetails.metadata.name })}</DialogTitle>
+            <DialogContent>
+              <Search ragIndex={ragDetails} />
+            </DialogContent>
+          </Dialog>
           <Button
+            startIcon={<DeleteOutline />}
             variant="text"
             color="error"
             onClick={async () => {
@@ -86,8 +104,7 @@ export const RagIndex: React.FC = () => {
             {t('rag:deleteCollection')}
           </Button>
         </Box>
-        <Search ragIndex={ragDetails} />
-        <Box mt={2}>
+        <Box mt={4}>
           <Typography variant="h6">{t('rag:files')}</Typography>
           <Box display="flex" alignItems="center" my={1}>
             {isComplete && !hasErrors && ragDetails.ragFiles.length > 0 && (
@@ -111,6 +128,7 @@ export const RagIndex: React.FC = () => {
               </>
             )}
           </Box>
+          {uploadMutation.isPending && <LinearProgress />}
           {orderBy(ragDetails.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (
             <RagFileInfo key={file.id} file={file} link />
           ))}

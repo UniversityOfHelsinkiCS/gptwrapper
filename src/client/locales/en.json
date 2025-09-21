@@ -382,6 +382,9 @@
     "nameHelperText": "Use a descriptive name (for example the full name of the course)",
     "allFilesProcessedSuccessfully": "Files processed",
     "retryFailedFiles": "Try again",
-    "processingFailures": "Some files failed to process"
+    "processingFailures": "Some files failed to process",
+    "backToCourse": "Back to course",
+    "testRetrievalButton": "Test retrieval",
+    "testRetrieval": "Test retrieval"
   }
 }

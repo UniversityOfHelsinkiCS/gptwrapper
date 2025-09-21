@@ -384,6 +384,9 @@
     "nameHelperText": "Käytä kuvaavaa nimeä (esim. kurssin koko nimi)",
     "allFilesProcessedSuccessfully": "Tiedostot ladattu",
     "retryFailedFiles": "Yritä uudestaan",
-    "processingFailures": "Joidenkin tiedostojen lataus ei onnistunut"
+    "processingFailures": "Joidenkin tiedostojen lataus ei onnistunut",
+    "backToCourse": "Takaisin kurssisivulle",
+    "testRetrievalButton": "Testaa hakua",
+    "testRetrieval": "Testaa hakua"
   }
 }
