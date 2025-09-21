@@ -381,6 +381,7 @@
     "nameLabel": "Collection name",
     "nameHelperText": "Use a descriptive name (for example the full name of the course)",
     "allFilesProcessedSuccessfully": "Files processed",
-    "retryFailedFiles": "Try again"
+    "retryFailedFiles": "Try again",
+    "processingFailures": "Some files failed to process"
   }
 }

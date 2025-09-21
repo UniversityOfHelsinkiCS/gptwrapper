@@ -383,6 +383,7 @@
     "nameLabel": "Kokoelman nimi",
     "nameHelperText": "Käytä kuvaavaa nimeä (esim. kurssin koko nimi)",
     "allFilesProcessedSuccessfully": "Tiedostot ladattu",
-    "retryFailedFiles": "Yritä uudestaan"
+    "retryFailedFiles": "Yritä uudestaan",
+    "processingFailures": "Joidenkin tiedostojen lataus ei onnistunut"
   }
 }

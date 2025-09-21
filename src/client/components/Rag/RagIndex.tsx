@@ -7,7 +7,7 @@ import { RagFileInfo } from './RagFileDetails'
 import { useDeleteRagIndexMutation, useRagIndexDetails, useUploadMutation } from './api'
 import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
-import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
+import { BlueButton, OutlineButtonBlack, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -43,7 +43,8 @@ export const RagIndex: React.FC = () => {
       <Typography variant="h3">{ragDetails?.metadata?.name}</Typography>
       <Box py={2}>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button component="label" variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
+          {/* @ts-expect-error component somehow not valid prop but it works */}
+          <BlueButton component="label" variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
             {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
             <VisuallyHiddenInput
               type="file"
@@ -56,7 +57,7 @@ export const RagIndex: React.FC = () => {
               }}
               multiple
             />
-          </Button>
+          </BlueButton>
           <Button
             variant="text"
             color="error"
@@ -75,22 +76,27 @@ export const RagIndex: React.FC = () => {
         </Box>
         <Search ragIndex={ragDetails} />
         <Box mt={2}>
-          <Box display="flex" alignItems="center" mb={1}>
-            <Typography variant="h6">{t('rag:files')}</Typography>
-            {isComplete && !hasErrors && (
-              <Typography variant="body2" color="success.main" sx={{ ml: 2 }}>
+          <Typography variant="h6">{t('rag:files')}</Typography>
+          <Box display="flex" alignItems="center" my={1}>
+            {isComplete && !hasErrors && ragDetails.ragFiles.length > 0 && (
+              <Typography variant="body2" color="success.main">
                 {t('rag:allFilesProcessedSuccessfully')}
               </Typography>
             )}
             {isComplete && hasErrors && (
-              <OutlineButtonBlack
-                sx={{ ml: 2 }}
-                onClick={async () => {
-                  await uploadMutation.mutateAsync([])
-                }}
-              >
-                {t('rag:retryFailedFiles')}
-              </OutlineButtonBlack>
+              <>
+                <Typography variant="body2" color="error">
+                  {t('rag:processingFailures')}
+                </Typography>
+                <OutlineButtonBlack
+                  sx={{ ml: 2 }}
+                  onClick={async () => {
+                    await uploadMutation.mutateAsync([])
+                  }}
+                >
+                  {t('rag:retryFailedFiles')}
+                </OutlineButtonBlack>
+              </>
             )}
           </Box>
           {orderBy(ragDetails.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (
