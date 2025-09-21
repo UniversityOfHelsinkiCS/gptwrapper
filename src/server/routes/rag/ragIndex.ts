@@ -145,21 +145,14 @@ ragIndexRouter.delete('/files/:fileId', async (req, res) => {
   // Delete file from disk
   await FileStore.deleteRagFileDocument(ragFile)
 
-  // Delete from vector store
-  /* @todo langchain impl
-  const client = getAzureOpenAIClient()
-  try {
-    if (ragFile.metadata?.vectorStoreFileId) {
-      await client.vectorStores.files.del(ragIndex.metadata.azureVectorStoreId, ragFile.metadata?.vectorStoreFileId)
-    }
-  } catch (error) {
-    console.error(`Failed to delete file from Azure vector store:`, error)
-    throw ApplicationError.InternalServerError('Failed to delete file from vector store')
-  }
-  */
-
   // Delete RagFile record
   await ragFile.destroy()
+
+  // Now we need to re-ingest
+  ingestRagFiles(ragIndex).catch((error) => {
+    console.error('Error ingesting RAG files:', error)
+  })
+
   res.json({ message: 'File deleted successfully' })
 })
 
