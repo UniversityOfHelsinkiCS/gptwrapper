@@ -301,9 +301,9 @@
     "defaultRagLabel": "använd källor",
     "enforceRagLabel": "måste använda källor",
     "unknownRagLabel": "säg om inte hittas",
-    "defaultRagMessage": "Du har nu källmaterial tillgängligt. Använd det när användaren ställer en fråga.",
-    "enforceRagMessage": "Du måste använda källorna för att svara. Hitta inte på information.",
-    "unknownRagMessage": "Om svaret inte finns i källorna, säg det."
+    "defaultRagMessage": "Om användaren hänvisar till källmaterial eller nämner 'material', använd document_search-verktyget för att hämta information från källorna. Använd resultaten i ditt svar.",
+    "enforceRagMessage": "Alla svar måste baseras på källmaterialet. Använd alltid document_search-verktyget och lägg inte till information som inte finns i källorna.",
+    "unknownRagMessage": "Om svaret inte finns i källmaterialet, tala om för användaren direkt att inget svar är tillgängligt från källorna."
   },
   "tooltip": {
     "copied": "Kopierad!"

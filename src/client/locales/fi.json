@@ -324,9 +324,9 @@
     "defaultRagLabel": "käytä lähteitä",
     "enforceRagLabel": "pakko käyttää lähteitä",
     "unknownRagLabel": "kerro jos ei löydy",
-    "defaultRagMessage": "Sinulla on nyt lähdemateriaalit käytössä. Hyödynnä niitä, kun käyttäjä kysyy jotain.",
-    "enforceRagMessage": "Sinun täytyy käyttää lähteitä vastauksessa. Älä keksi tietoa.",
-    "unknownRagMessage": "Jos vastausta ei löydy lähteistä, kerro se."
+    "defaultRagMessage": "Jos käyttäjä viittaa lähdemateriaaleihin tai mainitsee 'materiaalit', käytä document_search -työkalua hakeaksesi tietoa lähteistä. Hyödynnä tuloksia vastauksessa.",
+    "enforceRagMessage": "Kaikkien vastausten on perustuttava lähdemateriaaleihin. Käytä aina document_search -työkalua ja älä lisää tietoa, jota ei löydy lähteistä.",
+    "unknownRagMessage": "Jos vastausta ei löydy lähdemateriaaleista, kerro käyttäjälle suoraan ettei vastausta ole saatavilla lähteistä."
   },
   "tooltip": {
     "copied": "Kopioitu!"

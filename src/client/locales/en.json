@@ -322,9 +322,9 @@
     "defaultRagLabel": "use sources",
     "enforceRagLabel": "must use sources",
     "unknownRagLabel": "say if not found",
-    "defaultRagMessage": "You now have source materials available. Use them when the user asks a question.",
-    "enforceRagMessage": "You must use the sources to answer. Do not invent information.",
-    "unknownRagMessage": "If the answer is not in the sources, say so."
+    "defaultRagMessage": "If the user refers to source materials or mentions 'materials', use the document_search tool to retrieve information from the sources. Incorporate the results into your answer.",
+    "enforceRagMessage": "All answers must be based on the source materials. Always use the document_search tool and do not add information that is not found in the sources.",
+    "unknownRagMessage": "If the answer cannot be found in the source materials, tell the user directly that no answer is available from the sources."
   },
   "tooltip": {
     "copied": "Copied!"
