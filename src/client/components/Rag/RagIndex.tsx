@@ -114,19 +114,18 @@ export const RagIndex: React.FC = () => {
           </Button>
         </Box>
         <Box mt={4}>
-          <Box display="flex" alignItems="center" my={1}>
+          <Box display="flex" alignItems="center" my={1} gap={2}>
             {isComplete && !hasErrors && ragDetails.ragFiles.length > 0 && (
               <Typography variant="body2" color="success.main">
                 {t('rag:allFilesProcessedSuccessfully')}
               </Typography>
             )}
-            {((isComplete && hasErrors) || user?.isAdmin) && (
+            {isComplete && hasErrors && (
               <>
                 <Typography variant="body2" color="error">
                   {t('rag:processingFailures')}
                 </Typography>
                 <OutlineButtonBlack
-                  sx={{ ml: 2 }}
                   onClick={async () => {
                     await handleUpload([])
                   }}
@@ -134,6 +133,15 @@ export const RagIndex: React.FC = () => {
                   {t('rag:retryFailedFiles')}
                 </OutlineButtonBlack>
               </>
+            )}
+            {user?.isAdmin && (
+              <OutlineButtonBlack
+                onClick={async () => {
+                  await handleUpload([])
+                }}
+              >
+                Force retry (admin only)
+              </OutlineButtonBlack>
             )}
           </Box>
           {uploadMutation.isPending && <LinearProgress value={uploadProgress} variant="determinate" />}
