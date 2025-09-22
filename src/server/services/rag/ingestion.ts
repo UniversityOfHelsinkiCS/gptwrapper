@@ -62,7 +62,7 @@ export const ingestRagFiles = async (ragIndex: RagIndex) => {
         return
       }
 
-      ragFile.pipelineStage = 'indexing'
+      ragFile.pipelineStage = 'embedding'
       await ragFile.save()
 
       const document = new Document({
@@ -87,6 +87,9 @@ export const ingestRagFiles = async (ragIndex: RagIndex) => {
 
       allDocuments.push(...chunkDocuments)
       allEmbeddings.push(...embeddings)
+
+      ragFile.pipelineStage = 'storing'
+      await ragFile.save()
 
       console.timeEnd(`Ingestion ${ragFile.filename}`)
     }),

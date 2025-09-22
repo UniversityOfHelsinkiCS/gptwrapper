@@ -2,16 +2,17 @@ import { Box, LinearProgress, Link, Paper, Table, TableBody, TableCell, TableHea
 import { IngestionPipelineStageKey, IngestionPipelineStageKeys, IngestionPipelineStages } from '@shared/ingestion'
 import { Link as RouterLink } from 'react-router-dom'
 import type { RagFileAttributes } from '@shared/types'
-import { Check, CloudUpload, DocumentScanner, ErrorOutline, HorizontalSplit } from '@mui/icons-material'
+import { Archive, BlurOn, CloudUpload, DocumentScanner, DownloadDone, ErrorOutline } from '@mui/icons-material'
 import { locales } from '../../locales/locales'
 import { useTranslation } from 'react-i18next'
 
 const ProgressIcon: Record<IngestionPipelineStageKey, React.ReactNode> = {
-  completed: <Check fontSize="small" />,
+  completed: <DownloadDone fontSize="small" />,
   error: <ErrorOutline fontSize="small" />,
   uploading: <CloudUpload fontSize="small" />,
   parsing: <DocumentScanner fontSize="small" />,
-  indexing: <HorizontalSplit fontSize="small" />,
+  embedding: <BlurOn fontSize="small" />,
+  storing: <Archive fontSize="small" />,
 }
 
 export const RagFileInfo: React.FC<{
