@@ -59,7 +59,7 @@ export const RagIndex: React.FC = () => {
     refetch()
   }
 
-  const coursePagePath = ragDetails?.chatInstances?.[0] ? `/courses/${ragDetails.chatInstances[0].id}/rag` : '/rag'
+  const coursePagePath = ragDetails?.chatInstances?.[0] ? `/courses/${ragDetails.chatInstances[0].courseId}/rag` : '/rag'
 
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
