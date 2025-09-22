@@ -12,6 +12,8 @@ await redisClient.connect().catch((err) => {
   console.error('Redis connection error:', err)
 })
 
+redisClient.on('error', (err) => console.error('Redis Client Error', err))
+
 export const set = async (key: string, value: any) => {
   const ttl = 60 * 60
   await redisClient.set(key, JSON.stringify(value), { EX: ttl })
