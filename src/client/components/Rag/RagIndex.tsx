@@ -9,6 +9,7 @@ import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
 import { BlueButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import { enqueueSnackbar } from 'notistack'
+import useCurrentUser from '../../hooks/useCurrentUser'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -23,6 +24,7 @@ const VisuallyHiddenInput = styled('input')({
 })
 
 export const RagIndex: React.FC = () => {
+  const { user } = useCurrentUser()
   const { t } = useTranslation()
   const { id: strId } = useParams() as { id: string }
   const navigate = useNavigate()
@@ -118,7 +120,7 @@ export const RagIndex: React.FC = () => {
                 {t('rag:allFilesProcessedSuccessfully')}
               </Typography>
             )}
-            {isComplete && hasErrors && (
+            {((isComplete && hasErrors) || user?.isAdmin) && (
               <>
                 <Typography variant="body2" color="error">
                   {t('rag:processingFailures')}
