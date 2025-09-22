@@ -392,6 +392,8 @@
     "testRetrieval": "Testaa hakua",
     "searchDescription": "Tällä hakutyökalulla voit kokeilla, minkälaisia hakutuloksia kielimalli saa sen käyttäessä document_search-työkalua. Haku on vain testauskäyttöä varten.",
     "fileSize": "Tiedoston koko (merkkiä)",
-    "fileStatus": "Tila"
+    "fileStatus": "Tila",
+    "collectionDeleted": "Kokoelma poistettu",
+    "fileDeleted": "Tiedosto poistettu"
   }
 }

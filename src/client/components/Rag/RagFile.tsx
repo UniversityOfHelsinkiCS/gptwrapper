@@ -9,6 +9,7 @@ import { Chunk } from './Chunk'
 import { useDeleteRagFileMutation } from './api'
 import { useTranslation } from 'react-i18next'
 import Markdown from 'react-markdown'
+import { enqueueSnackbar } from 'notistack'
 
 type RagFile = RagFileAttributes & {
   fileContent: string
@@ -60,6 +61,8 @@ export const RagFile: React.FC = () => {
               indexId: ragFile.ragIndex.id,
               fileId: ragFile.id,
             })
+            enqueueSnackbar(t('rag:fileDeleted'), { variant: 'success' })
+
             navigate(`/rag/${ragFile.ragIndex.id}`)
           }
         }}

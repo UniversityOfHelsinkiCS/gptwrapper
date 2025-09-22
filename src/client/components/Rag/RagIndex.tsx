@@ -8,6 +8,7 @@ import { useDeleteRagIndexMutation, useRagIndexDetails, useUploadMutation } from
 import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
 import { BlueButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
+import { enqueueSnackbar } from 'notistack'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -103,6 +104,7 @@ export const RagIndex: React.FC = () => {
                 if (chatInstance) {
                   navigate(`/courses/${chatInstance.id}/rag`)
                 }
+                enqueueSnackbar(t('rag:collectionDeleted'), { variant: 'success' })
               }
             }}
           >
@@ -110,7 +112,6 @@ export const RagIndex: React.FC = () => {
           </Button>
         </Box>
         <Box mt={4}>
-          <Typography variant="h6">{t('rag:files')}</Typography>
           <Box display="flex" alignItems="center" my={1}>
             {isComplete && !hasErrors && ragDetails.ragFiles.length > 0 && (
               <Typography variant="body2" color="success.main">
