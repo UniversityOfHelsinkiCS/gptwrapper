@@ -118,6 +118,7 @@ export const streamChat = async ({
       timeToFirstToken: result2.timeToFirstToken,
       tokensPerSecond: result2.tokensPerSecond,
       response: (result2.fullOutput?.content ?? '') as string,
+      toolCalls: JSON.stringify(result.toolCalls.map((t) => t.name)),
     }
   }
 

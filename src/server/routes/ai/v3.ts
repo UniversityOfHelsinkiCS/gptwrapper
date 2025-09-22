@@ -174,7 +174,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     fileSize: req.file?.size,
     timeToFirstToken: result.timeToFirstToken,
     tokensPerSecond: result.tokensPerSecond,
-    tools: tools.length,
+    toolCalls: result.toolCalls,
   }
 
   res.locals.chatCompletionMeta = chatCompletionMeta
