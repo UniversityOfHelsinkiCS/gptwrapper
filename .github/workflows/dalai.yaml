@@ -6,6 +6,7 @@ on:
       - "main"
     paths:
       - 'dalai/**'
+      - '.github/workflows/dalai.yaml'
 
 jobs:
   build-and-push:
