@@ -1,0 +1,33 @@
+name: Build and push docker image
+
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - 'dalai/**'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build and push the Docker image
+        env:
+          IMAGE: toska/dalai
+          SHA: ${{ github.sha }}
+        run: |-
+          docker build -t $IMAGE:build ./dalai
+
+          docker tag $IMAGE:build $IMAGE:latest
+          docker tag $IMAGE:build $IMAGE:$SHA
+
+          docker push $IMAGE:latest
+          docker push $IMAGE:$SHA
