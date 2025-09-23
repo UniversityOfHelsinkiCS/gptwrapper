@@ -167,6 +167,10 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   const chatCompletionMeta = {
     tokenCount,
+    outputTokenCount: result.tokenCount,
+    inputTokenCount: result.inputTokenCount,
+    promptId: prompt?.id,
+    promptName: prompt?.name,
     model: generationInfo.model,
     user: user.username,
     courseId,
