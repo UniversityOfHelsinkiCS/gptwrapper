@@ -3,9 +3,10 @@ import path from 'node:path'
 import fs from 'node:fs/promises'
 import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 import { pipeline } from 'node:stream'
-import { createWriteStream } from 'node:fs'
-import Redis, { RedisOptions } from 'ioredis'
-import { pdfToPng, PngPageOutput } from 'pdf-to-png-converter'
+import { createWriteStream, createReadStream } from 'node:fs'
+import Redis from 'ioredis'
+import { pdfToPng } from 'pdf-to-png-converter'
+import { v4 as uuidv4 } from 'uuid'
 import { promisify } from 'node:util'
 import pdfToText from 'pdf-parse-fork'
 import dotenv from 'dotenv'
@@ -14,18 +15,18 @@ dotenv.config()
 
 const pipelineAsync = promisify(pipeline)
 
-const downloadS3ToFile = async (s3, bucket, key, destPath) => {
+async function downloadS3ToFile(s3, bucket, key, destPath) {
   const res = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }))
   await fs.mkdir(path.dirname(destPath), { recursive: true })
   await pipelineAsync(res.Body, createWriteStream(destPath))
 }
 
-const uploadFileToS3 = async (s3, bucket, key, filePath, contentType) => {
+async function uploadFileToS3(s3, bucket, key, filePath, contentType) {
   const Body = await fs.readFile(filePath)
   await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body, ContentType: contentType }))
 }
 
-const pathExists = async (p) => {
+async function pathExists(p) {
   try {
     await fs.access(p)
     return true
@@ -34,7 +35,7 @@ const pathExists = async (p) => {
   }
 }
 
-const guessContentType = (filePath: string) => {
+function guessContentType(filePath) {
   const ext = path.extname(filePath).toLowerCase()
   if (ext === '.txt') return 'text/plain charset=utf-8'
   if (ext === '.json') return 'application/json'
@@ -48,19 +49,19 @@ const guessContentType = (filePath: string) => {
 
 // --- Config ---
 
-const REDIS_HOST = process.env.REDIS_HOST ?? ''
-const REDIS_PORT = parseInt(process.env.REDIS_PORT ?? '6379')
-const CA = process.env.CA ?? ''
-const CERT = process.env.CERT ?? ''
-const KEY = process.env.KEY ?? ''
+const REDIS_HOST = process.env.REDIS_HOST
+const REDIS_PORT = process.env.REDIS_PORT
+const CA = process.env.CA || undefined
+const CERT = process.env.CERT
+const KEY = process.env.KEY
 
-let creds: RedisOptions = {
+let creds = {
   host: REDIS_HOST,
   port: REDIS_PORT,
   maxRetriesPerRequest: null,
 }
 
-if (CA.length > 0) {
+if (CA !== undefined) {
   creds = {
     ...creds,
     tls: {
@@ -76,12 +77,12 @@ const RETRY_COUNT = 1
 
 const connection = new Redis(creds)
 
-const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE ?? 'llama-scan-queue'
-const S3_HOST = process.env.S3_HOST ?? ''
-const S3_ACCESS_KEY = process.env.S3_ACCESS_KEY ?? ''
-const S3_SECRET_ACCESS_KEY = process.env.S3_SECRET_ACCESS_KEY ?? ''
+const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE || 'llama-scan-queue'
+const S3_HOST = process.env.S3_HOST || ''
+const S3_ACCESS_KEY = process.env.S3_ACCESS_KEY
+const S3_SECRET_ACCESS_KEY = process.env.S3_SECRET_ACCESS_KEY
 const OLLAMA_URL = process.env.LAAMA_API_URL ?? process.env.OLLAMA_URL
-const LAAMA_API_TOKEN = process.env.LAAMA_API_TOKEN ?? ''
+const LAAMA_API_TOKEN = process.LAAMA_API_TOKEN ?? ''
 
 const s3 = new S3Client({
   region: 'eu-north-1',
@@ -93,8 +94,8 @@ const s3 = new S3Client({
   },
 })
 
-const retryOllamaCall = async (fn: Function, maxRetries = 3) => {
-  let lastError: Error | undefined = undefined
+async function retryOllamaCall(fn, maxRetries = 3) {
+  let lastError
   for (let i = 0; i < maxRetries; i++) {
     // Health check before each attempt
     try {
@@ -127,7 +128,7 @@ const worker = new Worker(
       throw new Error('outputBucket is required in job data')
     }
 
-    const jobIdPath = job?.id?.replace('\//g', '_') ?? ''
+    const jobIdPath = job.id.replaceAll('\/', '_')
 
     const uploadsDir = './uploads'
     const jobRootDir = path.join(uploadsDir, jobIdPath)
@@ -155,7 +156,7 @@ const worker = new Worker(
       /**
       * Convert PDF pages to text
       */
-      const pagerender = (pageData) => {
+      function pagerender(pageData) {
         let render_options = {
           normalizeWhitespace: false,
           disableCombineTextItems: false,
@@ -198,12 +199,12 @@ const worker = new Worker(
       /**
        * Convert PDF pages to PNG images
        */
-      let pngPages: PngPageOutput[]
+      let pngPages
       try {
         pngPages = await pdfToPng(inputLocalPath, {
           outputFileMaskFunc: (pageNumber) => `page_${pageNumber}.png`,
           outputFolder: outputImagesDir,
-        })
+        });
       } catch (error) {
         console.error(`Job ${job.id} failed: PDF to PNG conversion failed`, error)
         throw new Error('PDF to PNG conversion failed')
@@ -293,8 +294,8 @@ const worker = new Worker(
               text = text.replace(/^```markdown/, '').replace(/```$/, '').trim()
             }
             // Add page number to the end of the first line if it's a heading
-            const appendToFirstLine = (content: string, suffix: string) => {
-              return content.replace(/^[^\r\n]*/, (match: string) => match + suffix)
+            function appendToFirstLine(content, suffix) {
+              return content.replace(/^[^\r\n]*/, (match) => match + suffix)
             }
             if (text.trim().startsWith('#')) {
               text = appendToFirstLine(text, ` (Page ${pngPage.pageNumber})`)
@@ -342,7 +343,7 @@ const worker = new Worker(
 
 console.log(`Worker started. Listening to queue "${QUEUE_NAME}"...`)
 
-worker.on('completed', (job, _result) => {
+worker.on('completed', (job, result) => {
   console.log(`Job ${job.id} completed.`)
 })
 
@@ -350,7 +351,7 @@ worker.on('failed', (job, err) => {
   console.error(`Job ${job?.id} failed:`, err)
 })
 
-const shutdown = async () => {
+async function shutdown() {
   console.log('Shutting down worker...')
   try { await worker.close() } catch { }
   process.exit(0)
