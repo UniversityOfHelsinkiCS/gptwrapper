@@ -58,7 +58,7 @@ services:
   #   # image: toska/dalai:latest
     build:
       context: ./dalai
-      dockerfile: ./dalai/dev.Dockerfile
+      dockerfile: dev.Dockerfile
     environment:
     # - OLLAMA_URL=http://host.docker.internal:11434
       - OLLAMA_URL=http://ollama:11434
