@@ -1,6 +1,7 @@
 {
   "type": "module",
   "scripts": {
+    "start": "tsx worker.ts",
     "dev": "tsx watch worker.ts"
   },
   "dependencies": {

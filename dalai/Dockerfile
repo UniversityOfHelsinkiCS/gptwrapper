@@ -12,4 +12,4 @@ RUN chmod 777 -R .
 
 USER 1001
 
-CMD ["tsx", "worker.ts"]
+CMD ["npm", "run", "start"]
