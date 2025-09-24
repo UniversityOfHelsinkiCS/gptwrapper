@@ -364,7 +364,7 @@
     "sourceMaterials": "Lähdemateriaalit",
     "id": "ID",
     "name": "Nimi",
-    "language": "Kieli",
+    "language": "Materiaalin kieli",
     "numberOfFiles": "Tiedostojen lukumäärä",
     "viewDetails": "Lisätiedot",
     "collection": "Lähdemateriaalikokoelma",

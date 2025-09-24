@@ -362,7 +362,7 @@
     "sourceMaterials": "Source materials",
     "id": "ID",
     "name": "Name",
-    "language": "Language",
+    "language": "Language used in the materials",
     "numberOfFiles": "Number of files",
     "viewDetails": "View details",
     "collection": "Source material collection",
