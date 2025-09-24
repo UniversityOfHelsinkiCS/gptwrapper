@@ -56,9 +56,15 @@ function useLocalStorageStateWithURLDefault<T>(key: string, defaultValue: string
     }
   }
 
-  const parsedValue = schema.parse(urlValue ?? value)
+  const parsedValue = schema.safeParse(urlValue ?? value)
 
-  return [parsedValue, modifiedSetValue] as const
+  if (parsedValue.success) {
+    return [parsedValue.data, modifiedSetValue] as const
+  }
+
+  // if the value in localStorage is invalid then revert back to default 
+  setValue(defaultValue)
+  return [defaultValue as T, modifiedSetValue] as const
 }
 
 const ChatV2Content = () => {
@@ -74,6 +80,7 @@ const ChatV2Content = () => {
 
   // local storage states
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
+
   const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model', ValidModelNameSchema)
   const [disclaimerStatus, setDisclaimerStatus] = useLocalStorageState<boolean>('disclaimer-status', true)
   const [modelTemperature, setModelTemperature] = useLocalStorageStateWithURLDefault(
