@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Box, Paper, Typography, TableBody, TableCell, TableHead, TableRow, Table, Button } from '@mui/material'
+import { Box, Paper, Typography, TableBody, TableCell, TableHead, TableRow, Table, Button, Tooltip as MUITooltip } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { BarChart, Bar, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import useCourse, { useCourseEnrolments, useCourseStatistics } from '../../../hooks/useCourse'
 import MaxTokenUsageStudents from './MaxTokenUsageStudents'
+import { HelpOutline } from '@mui/icons-material'
 
 const Stats = ({ courseId }: { courseId: string }) => {
   const { t } = useTranslation()
@@ -47,11 +48,11 @@ const Stats = ({ courseId }: { courseId: string }) => {
       </Typography>
 
       <Typography sx={{ my: 1 }}>
-        {t('course:averageTokenUsage')} {Math.round(average) ?? t('course:noData')}
+        {t('course:averageTokenUsage')}: <strong>{Math.round(average) ?? t('course:noData')}</strong>
       </Typography>
 
       <Typography>
-        {t('course:usagePercentage')} {usagePercentage ? `${Math.round(usagePercentage * 100 * 10) / 10}%` : t('course:noData')}
+        {t('course:usagePercentage')}: <strong>{usagePercentage ? `${Math.round(usagePercentage * 100 * 10) / 10}%` : t('course:noData')}</strong>
       </Typography>
 
       {usages && usages.length > 3 && usagePercentage > 0.2 && (
@@ -102,8 +103,38 @@ const Stats = ({ courseId }: { courseId: string }) => {
                   <TableCell>
                     <strong>{t('admin:firstNames')}</strong>
                   </TableCell>
-                  <TableCell>
-                    <strong>{t('admin:usage')}</strong>
+                  <TableCell align='right'>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
+                      <strong>{t('admin:usage')}</strong>
+                      <MUITooltip
+                        arrow
+                        placement="top"
+                        title={
+                          <Typography variant="body2" sx={{ p: 1 }}>
+                            {t('course:usageToolTip')}
+                          </Typography>
+                        }
+                      >
+                        <HelpOutline fontSize="small" sx={{ color: 'inherit', opacity: 0.7 }} />
+                      </MUITooltip>
+                    </Box>
+                  </TableCell>
+
+                  <TableCell align='right'>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
+                      <strong>{t('admin:totalUsage')}</strong>
+                      <MUITooltip
+                        arrow
+                        placement="top"
+                        title={
+                          <Typography variant="body2" sx={{ p: 1 }}>
+                            {t('course:totalUsageToolTip')}
+                          </Typography>
+                        }
+                      >
+                        <HelpOutline fontSize="small" sx={{ color: 'inherit', opacity: 0.7 }} />
+                      </MUITooltip>
+                    </Box>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -113,7 +144,8 @@ const Stats = ({ courseId }: { courseId: string }) => {
                     <TableCell>{enrolled.student_number}</TableCell>
                     <TableCell>{enrolled.last_name}</TableCell>
                     <TableCell>{enrolled.first_names}</TableCell>
-                    <TableCell>{usageByUser[enrolled.id] ? usageByUser[enrolled.id].usageCount : 0}</TableCell>
+                    <TableCell align='right'>{usageByUser[enrolled.id] ? usageByUser[enrolled.id].usageCount : 0}</TableCell>
+                    <TableCell align='right'>{usageByUser[enrolled.id] ? usageByUser[enrolled.id].totalUsageCount : 0}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

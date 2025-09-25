@@ -69,11 +69,11 @@ courseRouter.get('/statistics/:id', async (req, res) => {
     where: { chatInstanceId: chatInstance.id },
   })
 
-  const enrolledUsages = usages.filter((usage) => enrolments.map((e) => e.userId).includes(usage.userId)).filter((u) => u.usageCount > 0)
+  const enrolledUsages = usages.filter((usage) => enrolments.map((e) => e.userId).includes(usage.userId)).filter((u) => u.totalUsageCount > 0)
 
   const usagePercentage = enrolledUsages.length / enrolments.length
 
-  const average = enrolledUsages.map((u) => u.usageCount).reduce((a, b) => a + b, 0) / enrolledUsages.length
+  const average = enrolledUsages.map((u) => u.totalUsageCount).reduce((a, b) => a + b, 0) / enrolledUsages.length
 
   const normalizedUsage = enrolledUsages.map((usage) => ({
     ...usage,
