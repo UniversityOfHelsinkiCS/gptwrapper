@@ -10,6 +10,8 @@ class UserChatInstanceUsage extends Model<InferAttributes<UserChatInstanceUsage>
   declare chatInstanceId: string
 
   declare usageCount: CreationOptional<number>
+
+  declare totalUsageCount: CreationOptional<number>
 }
 
 UserChatInstanceUsage.init(
@@ -29,6 +31,11 @@ UserChatInstanceUsage.init(
       allowNull: false,
     },
     usageCount: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    totalUsageCount: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
