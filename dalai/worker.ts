@@ -1,27 +1,29 @@
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { Worker } from 'bullmq'
-import path from 'node:path'
+import dotenv from 'dotenv'
+import Redis, { type RedisOptions } from 'ioredis'
+import { createWriteStream } from 'node:fs'
 import fs from 'node:fs/promises'
-import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
+import path from 'node:path'
 import { pipeline } from 'node:stream'
-import { createWriteStream, createReadStream } from 'node:fs'
-import Redis from 'ioredis'
-import { pdfToPng } from 'pdf-to-png-converter'
-import { v4 as uuidv4 } from 'uuid'
 import { promisify } from 'node:util'
 import pdfToText from 'pdf-parse-fork'
-import dotenv from 'dotenv'
+import { pdfToPng, type PngPageOutput } from 'pdf-to-png-converter'
 
 dotenv.config()
 
 const pipelineAsync = promisify(pipeline)
 
-async function downloadS3ToFile(s3, bucket, key, destPath) {
+async function downloadS3ToFile(s3: S3Client, bucket, key: string, destPath: string) {
   const res = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }))
   await fs.mkdir(path.dirname(destPath), { recursive: true })
+  if (!res.Body) {
+    throw new Error('No Body in S3 GetObject response')
+  }
   await pipelineAsync(res.Body, createWriteStream(destPath))
 }
 
-async function uploadFileToS3(s3, bucket, key, filePath, contentType) {
+async function uploadFileToS3(s3: S3Client, bucket, key: string, filePath: string, contentType: string) {
   const Body = await fs.readFile(filePath)
   await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body, ContentType: contentType }))
 }
@@ -35,7 +37,7 @@ async function pathExists(p) {
   }
 }
 
-function guessContentType(filePath) {
+function guessContentType(filePath: string) {
   const ext = path.extname(filePath).toLowerCase()
   if (ext === '.txt') return 'text/plain charset=utf-8'
   if (ext === '.json') return 'application/json'
@@ -55,9 +57,9 @@ const CA = process.env.CA || undefined
 const CERT = process.env.CERT
 const KEY = process.env.KEY
 
-let creds = {
+let creds: RedisOptions = {
   host: REDIS_HOST,
-  port: REDIS_PORT,
+  port: Number(REDIS_PORT) || 6379,
   maxRetriesPerRequest: null,
 }
 
@@ -69,7 +71,7 @@ if (CA !== undefined) {
       cert: CERT,
       key: KEY,
       servername: REDIS_HOST,
-    }
+    },
   }
 }
 
@@ -79,10 +81,10 @@ const connection = new Redis(creds)
 
 const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE || 'llama-scan-queue'
 const S3_HOST = process.env.S3_HOST || ''
-const S3_ACCESS_KEY = process.env.S3_ACCESS_KEY
-const S3_SECRET_ACCESS_KEY = process.env.S3_SECRET_ACCESS_KEY
+const S3_ACCESS_KEY = process.env.S3_ACCESS_KEY || ''
+const S3_SECRET_ACCESS_KEY = process.env.S3_SECRET_ACCESS_KEY || ''
 const OLLAMA_URL = process.env.LAAMA_API_URL ?? process.env.OLLAMA_URL
-const LAAMA_API_TOKEN = process.LAAMA_API_TOKEN ?? ''
+const LAAMA_API_TOKEN = process.env.LAAMA_API_TOKEN ?? ''
 
 const s3 = new S3Client({
   region: 'eu-north-1',
@@ -94,15 +96,15 @@ const s3 = new S3Client({
   },
 })
 
-async function retryOllamaCall(fn, maxRetries = 3) {
-  let lastError
+async function retryOllamaCall<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
+  let lastError: any
   for (let i = 0; i < maxRetries; i++) {
     // Health check before each attempt
     try {
       return await fn()
     } catch (err) {
       lastError = err
-      await new Promise(r => setTimeout(r, 1000 * (i + 1)))
+      await new Promise((r) => setTimeout(r, 1000 * (i + 1)))
     }
   }
   throw lastError
@@ -113,11 +115,7 @@ async function retryOllamaCall(fn, maxRetries = 3) {
 const worker = new Worker(
   QUEUE_NAME,
   async (job) => {
-    const {
-      s3Bucket,
-      s3Key,
-      outputBucket,
-    } = job.data || {}
+    const { s3Bucket, s3Key, outputBucket } = job.data || {}
 
     console.log(`Processing job ${job.id}`)
 
@@ -128,7 +126,11 @@ const worker = new Worker(
       throw new Error('outputBucket is required in job data')
     }
 
-    const jobIdPath = job.id.replaceAll('\/', '_')
+    const jobId = job.id
+    if (!jobId) {
+      throw new Error('Job ID is missing')
+    }
+    const jobIdPath = jobId.replaceAll('\/', '_')
 
     const uploadsDir = './uploads'
     const jobRootDir = path.join(uploadsDir, jobIdPath)
@@ -154,24 +156,25 @@ const worker = new Worker(
       }
 
       /**
-      * Convert PDF pages to text
-      */
+       * Convert PDF pages to text
+       */
       function pagerender(pageData) {
         let render_options = {
           normalizeWhitespace: false,
           disableCombineTextItems: false,
         }
         return pageData.getTextContent(render_options).then((textContent) => {
-          let lastY, text = ''
+          let lastY: number | null = null,
+            text = ''
           for (let item of textContent.items) {
-            if (lastY == item.transform[5] || !lastY) {
+            if (lastY === item.transform[5] || !lastY) {
               text += item.str
             } else {
-              text += "\n" + item.str
+              text += '\n' + item.str
             }
             lastY = item.transform[5]
           }
-          return `${JSON.stringify({ text, pageNumber: pageData.pageNumber })}\n`;
+          return `${JSON.stringify({ text, pageNumber: pageData.pageNumber })}\n`
         })
       }
 
@@ -180,16 +183,19 @@ const worker = new Worker(
       try {
         const dataBuffer = await fs.readFile(inputLocalPath)
         const data = await pdfToText(dataBuffer, { pagerender })
-        const jsonObjStrs = data.text.split('\n').filter(line => line.trim().startsWith('{') && line.trim().endsWith('}'))
-        jsonObjStrs.map(line => {
-          try {
-            return JSON.parse(line)
-          } catch {
-            return null
-          }
-        }).filter(page => page !== null && typeof page.pageNumber === 'number' && typeof page.text === 'string').forEach(page => {
-          pages[page.pageNumber] = page.text
-        })
+        const jsonObjStrs = data.text.split('\n').filter((line) => line.trim().startsWith('{') && line.trim().endsWith('}'))
+        jsonObjStrs
+          .map((line) => {
+            try {
+              return JSON.parse(line)
+            } catch {
+              return null
+            }
+          })
+          .filter((page) => page !== null && typeof page.pageNumber === 'number' && typeof page.text === 'string')
+          .forEach((page) => {
+            pages[page.pageNumber] = page.text
+          })
         console.log(`Job ${job.id}: PDF to text conversion complete`)
       } catch (error) {
         console.error(`Job ${job.id} failed: PDF to text conversion failed`, error)
@@ -199,12 +205,12 @@ const worker = new Worker(
       /**
        * Convert PDF pages to PNG images
        */
-      let pngPages
+      let pngPages: PngPageOutput[] = []
       try {
         pngPages = await pdfToPng(inputLocalPath, {
           outputFileMaskFunc: (pageNumber) => `page_${pageNumber}.png`,
           outputFolder: outputImagesDir,
-        });
+        })
       } catch (error) {
         console.error(`Job ${job.id} failed: PDF to PNG conversion failed`, error)
         throw new Error('PDF to PNG conversion failed')
@@ -251,8 +257,8 @@ const worker = new Worker(
                   But you are always obligated to keep the **image** tags intact.`,
                 prompt: `Parsed PDF text:\n${pdfText}\n\nImage transcription:`,
                 stream: false,
-                images: [image.toString('base64')]
-              })
+                images: [image.toString('base64')],
+              }),
             })
             if (!response.ok) {
               const errorBody = await response.text()
@@ -269,7 +275,7 @@ const worker = new Worker(
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'token': LAAMA_API_TOKEN
+                token: LAAMA_API_TOKEN,
               },
               body: JSON.stringify({
                 model: 'qwen2.5vl:7b',
@@ -282,7 +288,7 @@ const worker = new Worker(
                   Remeber you are always obligated to keep the **image** tags and tags insides intact.`,
                 prompt: `Transcription:\n${transcription}\n\nPDF:\n${pdfText}\n\nCombined Markdown:`,
                 stream: false,
-              })
+              }),
             })
             if (!response2.ok) {
               const errorBody = await response2.text()
@@ -290,8 +296,11 @@ const worker = new Worker(
             }
             const data2 = await response2.json()
             let text = data2?.response || ''
-            if (text.trim().startsWith("```markdown")) {
-              text = text.replace(/^```markdown/, '').replace(/```$/, '').trim()
+            if (text.trim().startsWith('```markdown')) {
+              text = text
+                .replace(/^```markdown/, '')
+                .replace(/```$/, '')
+                .trim()
             }
             // Add page number to the end of the first line if it's a heading
             function appendToFirstLine(content, suffix) {
@@ -312,7 +321,6 @@ const worker = new Worker(
         }
 
         resultingMarkdown += `\n\n${finalText}`
-
       }
 
       const resultFileName = `${inputFileName}.md`
@@ -333,12 +341,14 @@ const worker = new Worker(
         output: { bucket: outputBucket },
       }
     } finally {
-      try { await fs.rm(jobRootDir, { recursive: true, force: true }) } catch { }
+      try {
+        await fs.rm(jobRootDir, { recursive: true, force: true })
+      } catch {}
     }
   },
   {
     connection,
-  }
+  },
 )
 
 console.log(`Worker started. Listening to queue "${QUEUE_NAME}"...`)
@@ -353,7 +363,9 @@ worker.on('failed', (job, err) => {
 
 async function shutdown() {
   console.log('Shutting down worker...')
-  try { await worker.close() } catch { }
+  try {
+    await worker.close()
+  } catch {}
   process.exit(0)
 }
 process.on('SIGINT', shutdown)
