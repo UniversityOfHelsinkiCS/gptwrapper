@@ -394,6 +394,9 @@
     "fileSize": "Tiedoston koko (merkkiä)",
     "fileStatus": "Tila",
     "collectionDeleted": "Kokoelma poistettu",
-    "fileDeleted": "Tiedosto poistettu"
+    "fileDeleted": "Tiedosto poistettu",
+    "fileTextDeleted": "Uudelleenskannaus aloitettu",
+    "deleteFileText": "Skannaa PDF uudestaan",
+    "onlyPdf": "a"
   }
 }

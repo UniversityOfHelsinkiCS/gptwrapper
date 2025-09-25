@@ -142,7 +142,7 @@ ragIndexRouter.delete('/files/:fileId', async (req, res) => {
     throw ApplicationError.NotFound('File not found')
   }
 
-  // Delete file from disk
+  // Delete file from s3
   await FileStore.deleteRagFileDocument(ragFile)
 
   // Delete RagFile record
@@ -153,7 +153,31 @@ ragIndexRouter.delete('/files/:fileId', async (req, res) => {
     console.error('Error ingesting RAG files:', error)
   })
 
-  res.json({ message: 'File deleted successfully' })
+  res.json({ message: 'File deleted successfully, re-ingesting' })
+})
+
+ragIndexRouter.delete('/files/:fileId/text', async (req, res) => {
+  const ragIndexRequest = req as unknown as RagIndexRequest
+  const ragIndex = ragIndexRequest.ragIndex
+  const fileId = RagFileIdSchema.parse(req.params.fileId)
+
+  const ragFile = await RagFile.findOne({
+    where: { id: fileId, ragIndexId: ragIndex.id },
+  })
+
+  if (!ragFile) {
+    throw ApplicationError.NotFound('File not found')
+  }
+
+  // Delete the text version file from s3 if it exists
+  await FileStore.deleteRagFileText(ragFile)
+
+  // Now we need to re-ingest
+  ingestRagFiles(ragIndex).catch((error) => {
+    console.error('Error ingesting RAG files:', error)
+  })
+
+  res.json({ message: 'File text version deleted successfully, re-ingesting' })
 })
 
 const upload = multer({

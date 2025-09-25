@@ -392,6 +392,9 @@
     "fileSize": "File size (characters)",
     "fileStatus": "Status",
     "collectionDeleted": "Collection deleted",
-    "fileDeleted": "File deleted"
+    "fileDeleted": "File deleted",
+    "fileTextDeleted": "Rescanning started",
+    "deleteFileText": "Rescan PDF",
+    "onlyPdf": "a"
   }
 }

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button, Box, Typography, styled, LinearProgress, Container, DialogTitle, DialogContent, Dialog, Link, CircularProgress } from '@mui/material'
 import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom'
-import { ArrowBackOutlined, CloudUpload, DeleteOutline, FindInPage } from '@mui/icons-material'
+import { ArrowBackOutlined, Autorenew, CloudUpload, DeleteOutline, FindInPage } from '@mui/icons-material'
 import { orderBy } from 'lodash'
 import { RagFileInfo } from './RagFileDetails'
 import { useDeleteRagIndexMutation, useRagIndexDetails, useUploadMutation } from './api'
@@ -126,6 +126,7 @@ export const RagIndex: React.FC = () => {
                   {t('rag:processingFailures')}
                 </Typography>
                 <OutlineButtonBlack
+                  startIcon={<Autorenew />}
                   onClick={async () => {
                     await handleUpload([])
                   }}
@@ -136,6 +137,7 @@ export const RagIndex: React.FC = () => {
             )}
             {user?.isAdmin && (
               <OutlineButtonBlack
+                startIcon={<Autorenew />}
                 onClick={async () => {
                   await handleUpload([])
                 }}

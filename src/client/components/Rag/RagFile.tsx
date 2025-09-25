@@ -2,14 +2,16 @@ import { useQuery } from '@tanstack/react-query'
 import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom'
 import apiClient from '../../util/apiClient'
 import type { RagFileAttributes } from '../../../shared/types'
-import { Button, Container, Link, Typography } from '@mui/material'
+import { Box, Button, Container, Link, Typography } from '@mui/material'
 import { RagFileInfo } from './RagFileDetails'
 import type { RagIndexAttributes } from '../../../server/db/models/ragIndex'
 import { Chunk } from './Chunk'
-import { useDeleteRagFileMutation } from './api'
+import { useDeleteRagFileMutation, useDeleteRagFileTextMutation } from './api'
 import { useTranslation } from 'react-i18next'
 import Markdown from 'react-markdown'
 import { enqueueSnackbar } from 'notistack'
+import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
+import { Autorenew } from '@mui/icons-material'
 
 type RagFile = RagFileAttributes & {
   fileContent: string
@@ -32,6 +34,7 @@ export const RagFile: React.FC = () => {
     },
   })
   const deleteMutation = useDeleteRagFileMutation()
+  const deleteTextMutation = useDeleteRagFileTextMutation()
   const navigate = useNavigate()
 
   if (isError) {
@@ -51,24 +54,42 @@ export const RagFile: React.FC = () => {
       <Typography variant="h3">
         {ragFile.ragIndex.metadata?.name} / {ragFile.filename}
       </Typography>
-      <Button
-        variant="text"
-        color="error"
-        sx={{ my: 2 }}
-        onClick={async () => {
-          if (window.confirm('Are you sure you want to delete this file?')) {
-            await deleteMutation.mutateAsync({
-              indexId: ragFile.ragIndex.id,
-              fileId: ragFile.id,
-            })
-            enqueueSnackbar(t('rag:fileDeleted'), { variant: 'success' })
+      <Box sx={{ my: 2, display: 'flex', gap: 2 }}>
+        {ragFile.fileType === 'application/pdf' && (
+          <OutlineButtonBlack
+            startIcon={<Autorenew />}
+            onClick={async () => {
+              await deleteTextMutation.mutateAsync({
+                indexId: ragFile.ragIndex.id,
+                fileId: ragFile.id,
+              })
+              enqueueSnackbar(t('rag:fileTextDeleted'), { variant: 'success' })
 
-            navigate(`/rag/${ragFile.ragIndex.id}`)
-          }
-        }}
-      >
-        {t('rag:deleteFile')}
-      </Button>
+              navigate(`/rag/${ragFile.ragIndex.id}`)
+            }}
+            sx={{ my: 2 }}
+          >
+            {t('rag:deleteFileText')}
+          </OutlineButtonBlack>
+        )}
+        <Button
+          variant="text"
+          color="error"
+          onClick={async () => {
+            if (window.confirm('Are you sure you want to delete this file?')) {
+              await deleteMutation.mutateAsync({
+                indexId: ragFile.ragIndex.id,
+                fileId: ragFile.id,
+              })
+              enqueueSnackbar(t('rag:fileDeleted'), { variant: 'success' })
+
+              navigate(`/rag/${ragFile.ragIndex.id}`)
+            }
+          }}
+        >
+          {t('rag:deleteFile')}
+        </Button>
+      </Box>
       <RagFileInfo file={ragFile} />
       <Typography variant="h4">{t('rag:content')}</Typography>
       {ragFile.fileContent.length === 0 ? (

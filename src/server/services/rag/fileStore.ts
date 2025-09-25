@@ -53,17 +53,26 @@ export const FileStore = {
     }
   },
 
-  async deleteRagFileDocument(ragFile: RagFile) {
+  async deleteRagFileText(ragFile: RagFile) {
     const s3Key = FileStore.getRagFileKey(ragFile)
 
     try {
       if (isPdf(s3Key)) {
         const pdfTextKey = getPdfTextKey(s3Key)
         await s3Client.send(new DeleteObjectCommand({ Bucket: S3_BUCKET, Key: pdfTextKey }))
+        return true
       }
     } catch (error) {
       console.error(`Failed to delete file ${getPdfTextKey(s3Key)} from S3:`, error)
     }
+
+    return false
+  },
+
+  async deleteRagFileDocument(ragFile: RagFile) {
+    await FileStore.deleteRagFileText(ragFile)
+
+    const s3Key = FileStore.getRagFileKey(ragFile)
 
     try {
       await s3Client.send(new DeleteObjectCommand({ Bucket: S3_BUCKET, Key: s3Key }))

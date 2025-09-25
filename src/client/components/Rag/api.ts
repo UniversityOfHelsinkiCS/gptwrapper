@@ -78,3 +78,13 @@ export const useDeleteRagFileMutation = () => {
   })
   return mutation
 }
+
+export const useDeleteRagFileTextMutation = () => {
+  const mutation = useMutation({
+    mutationFn: async ({ indexId, fileId }: { indexId: number; fileId: number }) => {
+      const response = await apiClient.delete(`/rag/indices/${indexId}/files/${fileId}/text`)
+      return response.data
+    },
+  })
+  return mutation
+}
