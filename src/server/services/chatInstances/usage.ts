@@ -71,7 +71,7 @@ export const incrementCourseUsage = async (chatInstance: ChatInstance, tokenCoun
   if (!chatInstance.currentUserUsage) {
     throw ApplicationError.InternalServerError('chatInstance.currentUserUsage undefined. This shouldnt happen!')
   }
-  await chatInstance.currentUserUsage.increment({ usageCount: tokenCount })
+  await chatInstance.currentUserUsage.increment({ usageCount: tokenCount, totalUsageCount: tokenCount })
 }
 
 export const getUserStatus = async (user: UserType, courseId: string) => {
