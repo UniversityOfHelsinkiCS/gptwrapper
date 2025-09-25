@@ -14,7 +14,7 @@ dotenv.config()
 
 const pipelineAsync = promisify(pipeline)
 
-async function downloadS3ToFile(s3: S3Client, bucket, key: string, destPath: string) {
+async function downloadS3ToFile(s3: S3Client, bucket: string, key: string, destPath: string) {
   const res = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }))
   await fs.mkdir(path.dirname(destPath), { recursive: true })
   if (!res.Body) {
@@ -23,7 +23,7 @@ async function downloadS3ToFile(s3: S3Client, bucket, key: string, destPath: str
   await pipelineAsync(res.Body, createWriteStream(destPath))
 }
 
-async function uploadFileToS3(s3: S3Client, bucket, key: string, filePath: string, contentType: string) {
+async function uploadFileToS3(s3: S3Client, bucket: string, key: string, filePath: string, contentType: string) {
   const Body = await fs.readFile(filePath)
   await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body, ContentType: contentType }))
 }
