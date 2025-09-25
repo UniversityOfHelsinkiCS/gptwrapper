@@ -11,6 +11,8 @@ class RagFile extends Model<InferAttributes<RagFile>, InferCreationAttributes<Ra
 
   declare pipelineStage: IngestionPipelineStageKey
 
+  declare progress: CreationOptional<number | null>
+
   declare error: CreationOptional<string | null>
 
   declare filename: string
@@ -57,6 +59,10 @@ RagFile.init(
     pipelineStage: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    progress: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
     },
     error: {
       type: DataTypes.STRING,

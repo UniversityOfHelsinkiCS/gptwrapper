@@ -54,6 +54,7 @@ export const RagFileInfo: React.FC<{
             <TableCell>
               <Box display="flex" alignItems="end" gap={1}>
                 {IngestionPipelineStages[file.pipelineStage]}
+                {file.pipelineStage === 'parsing' ? file.progress && ` (${file.progress.toFixed()}%)` : null}
                 {ProgressIcon[file.pipelineStage]}
               </Box>
             </TableCell>

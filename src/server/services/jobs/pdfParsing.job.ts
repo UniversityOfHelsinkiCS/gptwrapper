@@ -1,6 +1,6 @@
 import IORedis from 'ioredis'
 import { BMQ_REDIS_CA, BMQ_REDIS_CERT, BMQ_REDIS_HOST, BMQ_REDIS_KEY, BMQ_REDIS_PORT, S3_BUCKET } from '../../util/config'
-import { Queue, QueueEvents } from 'bullmq'
+import { Job, Queue, QueueEvents } from 'bullmq'
 import { FileStore } from '../rag/fileStore'
 import { RagFile } from '../../db/models'
 
@@ -24,11 +24,28 @@ if (BMQ_REDIS_CA !== 'none') {
 
 const connection = new IORedis(creds)
 
-const queue = new Queue('llama-scan-queue', {
+export const queue = new Queue('llama-scan-queue', {
   connection,
 })
 
+export const getPdfParsingJobId = (ragFile: RagFile) => {
+  const s3Key = FileStore.getRagFileKey(ragFile)
+  return `scan:${S3_BUCKET}/${s3Key}`
+}
+
 export const pdfQueueEvents = new QueueEvents('llama-scan-queue', { connection })
+
+pdfQueueEvents.on('progress', async (progressEvent) => {
+  const data = progressEvent.data as { ragFileId: number; progress: number }
+  await RagFile.update({ progress: data.progress }, { where: { id: data.ragFileId } })
+})
+
+type PDFJobData = {
+  s3Bucket: string
+  s3Key: string
+  outputBucket: string
+  ragFileId: number
+}
 
 /**
  * Adds a pdf parsing job to the queue. The file must be uploaded to S3 beforehand. The jobId is based on the ragFile - resubmitting with the same jobId while the previous job is running has no effect.
@@ -37,17 +54,15 @@ export const pdfQueueEvents = new QueueEvents('llama-scan-queue', { connection }
  */
 export const submitPdfParsingJob = async (ragFile: RagFile) => {
   const s3Key = FileStore.getRagFileKey(ragFile)
-  const jobId = `scan:${S3_BUCKET}/${s3Key}`
+  const jobId = getPdfParsingJobId(ragFile)
   console.log(`Submitting PDF parsing job ${jobId}`)
-  const job = await queue.add(
-    jobId,
-    {
-      s3Bucket: S3_BUCKET,
-      s3Key,
-      outputBucket: S3_BUCKET,
-    },
-    { jobId, removeOnComplete: true, removeOnFail: true },
-  )
+  const jobData: PDFJobData = {
+    s3Bucket: S3_BUCKET,
+    s3Key,
+    outputBucket: S3_BUCKET,
+    ragFileId: ragFile.id,
+  }
+  const job = await queue.add(jobId, jobData, { jobId, removeOnComplete: true, removeOnFail: true })
 
   return job
 }

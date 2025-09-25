@@ -24,6 +24,7 @@ export type RagFileAttributes = {
   updatedAt: string
   ragIndexId: number
   pipelineStage: IngestionPipelineStageKey
+  progress: number | null
   fileType: string
   fileSize: number
   numChunks: number | null

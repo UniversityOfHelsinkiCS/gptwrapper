@@ -117,6 +117,25 @@ const worker = new Worker(
   async (job) => {
     const { s3Bucket, s3Key, outputBucket } = job.data || {}
 
+    /**
+     *  Full progress from 0 to 100
+     */
+    let _progress = 0
+    /**
+     *
+     * @param progress fraction (0-1) of progress of the current section
+     * @param sectionSize the size of the section as a percentage of the whole job (0-100). All section sizes should add up to 100.
+     */
+    const incrementProgress = (progress: number, sectionSize: number) => {
+      _progress += progress * sectionSize
+      job
+        .updateProgress({
+          ragFileId: job.data.ragFileId,
+          progress: _progress,
+        })
+        .catch(() => {})
+    }
+
     console.log(`Processing job ${job.id}`)
 
     if (!s3Bucket || !s3Key) {
@@ -146,6 +165,8 @@ const worker = new Worker(
       await fs.mkdir(outputTextDir, { recursive: true })
       await fs.mkdir(outputImagesDir, { recursive: true })
 
+      incrementProgress(1, 1) // 1% - Setup directories
+
       /**
        * Download the pdf
        */
@@ -154,6 +175,8 @@ const worker = new Worker(
       } catch (err) {
         throw new Error(`Failed to download s3://${s3Bucket}/${s3Key}: ${err.message || err}`)
       }
+
+      incrementProgress(1, 1) // 1% - Download PDF
 
       /**
        * Convert PDF pages to text
@@ -202,6 +225,8 @@ const worker = new Worker(
         throw new Error('PDF to text conversion failed')
       }
 
+      incrementProgress(1, 2) // 2% - PDF to text
+
       /**
        * Convert PDF pages to PNG images
        */
@@ -215,6 +240,8 @@ const worker = new Worker(
         console.error(`Job ${job.id} failed: PDF to PNG conversion failed`, error)
         throw new Error('PDF to PNG conversion failed')
       }
+
+      incrementProgress(1, 6) // 6% - PDF to PNGs. Total so far: 10%
 
       /**
        * Transcription & Markdown Generation (with Ollama health/retry, fallback to PDF text)
@@ -268,6 +295,10 @@ const worker = new Worker(
             const txt = data?.response || ''
             await fs.writeFile(existingTxtPath, txt, 'utf-8')
             console.log(`Job ${job.id}: transcription complete for page ${pngPage.pageNumber}/${pngPages.length}`)
+
+            const pageProgress = 0.5 / pngPages.length // Halfway through the page processing
+            incrementProgress(pageProgress, 87) // 87% - VLM & Markdown
+
             return txt
           }, RETRY_COUNT)
           finalText = await retryOllamaCall(async () => {
@@ -311,6 +342,7 @@ const worker = new Worker(
             }
             await fs.writeFile(existingMdPath, text, 'utf-8')
             console.log(`Job ${job.id}: markdown generation complete for page ${pngPage.pageNumber}/${pngPages.length}`)
+
             return text
           }, RETRY_COUNT)
         } catch (error) {
@@ -319,6 +351,9 @@ const worker = new Worker(
           finalText = pdfText ? `# Page ${pngPage.pageNumber}\n\n${pdfText}` : `# Page ${pngPage.pageNumber}\n\n**Page could not be processed.**`
           await fs.writeFile(existingMdPath, finalText, 'utf-8')
         }
+
+        const pageProgress = 0.5 / pngPages.length // Second half of the page processing done
+        incrementProgress(pageProgress, 87) // 87% - VLM & Markdown. Total so far: 97%
 
         resultingMarkdown += `\n\n${finalText}`
       }
@@ -335,6 +370,8 @@ const worker = new Worker(
         console.error('Failed uploading outputs to S3:', err)
         throw new Error(`Failed uploading outputs to s3://${outputBucket}: ${err.message || err}`)
       }
+
+      incrementProgress(1, 3) // 97 + 3 = 100% - Upload results
 
       return {
         input: { bucket: s3Bucket, key: s3Key },

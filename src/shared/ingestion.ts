@@ -2,7 +2,7 @@ export const IngestionPipelineStages = {
   uploading: 'Uploading',
   parsing: 'Scanning',
   embedding: 'Creating embeddings',
-  storing: 'Storing',
+  storing: 'Waiting',
   completed: 'Completed',
   error: 'Error',
 } as const

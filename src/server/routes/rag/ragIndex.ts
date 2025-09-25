@@ -13,6 +13,7 @@ import { SearchSchema } from '../../../shared/rag'
 import { S3_BUCKET } from '../../util/config'
 import { s3Client } from '../../util/s3client'
 import { ingestRagFiles } from '../../services/rag/ingestion'
+import { getPdfParsingJobId, queue } from 'src/server/services/jobs/pdfParsing.job'
 
 const ragIndexRouter = Router()
 
