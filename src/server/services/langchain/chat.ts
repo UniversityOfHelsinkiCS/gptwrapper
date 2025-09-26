@@ -30,7 +30,7 @@ const getChatModel = (modelConfig: (typeof validModels)[number], tools: Structur
       : new AzureChatOpenAI<ChatOpenAICallOptions>({
           model: modelConfig.name,
           azureOpenAIApiKey: AZURE_API_KEY,
-          azureOpenAIApiVersion: '2023-05-15',
+          azureOpenAIApiVersion: '2024-10-21',
           azureOpenAIApiDeploymentName: modelConfig.name, // In Azure, always use the acual model name as the deployment name
           azureOpenAIApiInstanceName: AZURE_RESOURCE,
           temperature: 'temperature' in modelConfig ? modelConfig.temperature : temperature, // If model config specifies a temperature, use it; otherwise, use the user supplied temperature.
@@ -39,6 +39,7 @@ const getChatModel = (modelConfig: (typeof validModels)[number], tools: Structur
             summary: null,
             generate_summary: null,
           },
+          streaming: true,
         }).bindTools(tools) // Make tools available to the model.
 
   return chatModel
