@@ -9,6 +9,7 @@ import { pipeline } from 'node:stream'
 import { promisify } from 'node:util'
 import pdfToText from 'pdf-parse-fork'
 import { pdfToPng, type PngPageOutput } from 'pdf-to-png-converter'
+import logger from './logger'
 
 dotenv.config()
 
@@ -133,10 +134,10 @@ const worker = new Worker(
           ragFileId: job.data.ragFileId,
           progress: _progress,
         })
-        .catch(() => {})
+        .catch(() => { })
     }
 
-    console.log(`Processing job ${job.id}`)
+    logger.info(`Processing job ${job.id}`)
 
     if (!s3Bucket || !s3Key) {
       throw new Error('s3Bucket and s3Key are required in job data')
@@ -219,9 +220,9 @@ const worker = new Worker(
           .forEach((page) => {
             pages[page.pageNumber] = page.text
           })
-        console.log(`Job ${job.id}: PDF to text conversion complete`)
+        logger.info(`Job ${job.id}: PDF to text conversion complete`)
       } catch (error) {
-        console.error(`Job ${job.id} failed: PDF to text conversion failed`, error)
+        logger.error(`Job ${job.id} failed: PDF to text conversion failed`, error)
         throw new Error('PDF to text conversion failed')
       }
 
@@ -237,7 +238,7 @@ const worker = new Worker(
           outputFolder: outputImagesDir,
         })
       } catch (error) {
-        console.error(`Job ${job.id} failed: PDF to PNG conversion failed`, error)
+        logger.error(`Job ${job.id} failed: PDF to PNG conversion failed`, error)
         throw new Error('PDF to PNG conversion failed')
       }
 
@@ -252,12 +253,12 @@ const worker = new Worker(
         const existingMdPath = path.join(outputTextDir, `${inputFileName}_page_${pngPage.pageNumber}.md`)
         if (await pathExists(existingMdPath)) {
           const existingMd = await fs.readFile(existingMdPath, 'utf-8')
-          console.log(`Job ${job.id}: using existing markdown for page ${pngPage.pageNumber}/${pngPages.length}`)
+          logger.info(`Job ${job.id}: using existing markdown for page ${pngPage.pageNumber}/${pngPages.length}`)
           resultingMarkdown += `\n\n${existingMd}`
           continue
         }
 
-        console.log(`Job ${job.id}: processing page ${pngPage.pageNumber}/${pngPages.length} (${pngPage.path})`)
+        logger.info(`Job ${job.id}: processing page ${pngPage.pageNumber}/${pngPages.length} (${pngPage.path})`)
         const pdfText = pages[pngPage.pageNumber] || ''
         let transcription = ''
         const existingTxtPath = path.join(outputTextDir, `${inputFileName}_page_${pngPage.pageNumber}.transcription.txt`)
@@ -266,7 +267,7 @@ const worker = new Worker(
           transcription = await retryOllamaCall(async () => {
             if (await pathExists(existingTxtPath)) {
               const txt = await fs.readFile(existingTxtPath, 'utf-8')
-              console.log(`Job ${job.id}: using existing transcription for page ${pngPage.pageNumber}/${pngPages.length}`)
+              logger.info(`Job ${job.id}: using existing transcription for page ${pngPage.pageNumber}/${pngPages.length}`)
               return txt
             }
             const image = await fs.readFile(pngPage.path)
@@ -294,7 +295,7 @@ const worker = new Worker(
             const data = await response.json()
             const txt = data?.response || ''
             await fs.writeFile(existingTxtPath, txt, 'utf-8')
-            console.log(`Job ${job.id}: transcription complete for page ${pngPage.pageNumber}/${pngPages.length}`)
+            logger.info(`Job ${job.id}: transcription complete for page ${pngPage.pageNumber}/${pngPages.length}`)
 
             const pageProgress = 0.5 / pngPages.length // Halfway through the page processing
             incrementProgress(pageProgress, 87) // 87% - VLM & Markdown
@@ -341,12 +342,12 @@ const worker = new Worker(
               text = appendToFirstLine(text, ` (Page ${pngPage.pageNumber})`)
             }
             await fs.writeFile(existingMdPath, text, 'utf-8')
-            console.log(`Job ${job.id}: markdown generation complete for page ${pngPage.pageNumber}/${pngPages.length}`)
+            logger.info(`Job ${job.id}: markdown generation complete for page ${pngPage.pageNumber}/${pngPages.length}`)
 
             return text
           }, RETRY_COUNT)
         } catch (error) {
-          console.warn(`Job ${job.id} VLM/Markdown failed ${RETRY_COUNT} times, falling back to PDF text for page ${pngPage.pageNumber}`, error)
+          logger.warn(`Job ${job.id} VLM/Markdown failed ${RETRY_COUNT} times, falling back to PDF text for page ${pngPage.pageNumber}`, error)
           // Fallback to PDF text as Markdown
           finalText = pdfText ? `# Page ${pngPage.pageNumber}\n\n${pdfText}` : `# Page ${pngPage.pageNumber}\n\n**Page could not be processed.**`
           await fs.writeFile(existingMdPath, finalText, 'utf-8')
@@ -365,9 +366,9 @@ const worker = new Worker(
       try {
         const resultS3Key = s3Key + '.md'
         await uploadFileToS3(s3, outputBucket, resultS3Key, resultFilePath, guessContentType(resultFilePath))
-        console.log(`Job ${job.id}: uploaded results to s3://${outputBucket}/${resultFileName}`)
+        logger.info(`Job ${job.id}: uploaded results to s3://${outputBucket}/${resultFileName}`)
       } catch (err) {
-        console.error('Failed uploading outputs to S3:', err)
+        logger.error('Failed uploading outputs to S3:', err)
         throw new Error(`Failed uploading outputs to s3://${outputBucket}: ${err.message || err}`)
       }
 
@@ -380,7 +381,7 @@ const worker = new Worker(
     } finally {
       try {
         await fs.rm(jobRootDir, { recursive: true, force: true })
-      } catch {}
+      } catch { }
     }
   },
   {
@@ -388,21 +389,21 @@ const worker = new Worker(
   },
 )
 
-console.log(`Worker started. Listening to queue "${QUEUE_NAME}"...`)
+logger.info(`Worker started. Listening to queue "${QUEUE_NAME}"...`)
 
 worker.on('completed', (job, result) => {
-  console.log(`Job ${job.id} completed.`)
+  logger.info(`Job ${job.id} completed.`)
 })
 
 worker.on('failed', (job, err) => {
-  console.error(`Job ${job?.id} failed:`, err)
+  logger.error(`Job ${job?.id} failed:`, err)
 })
 
 async function shutdown() {
-  console.log('Shutting down worker...')
+  logger.info('Shutting down worker...')
   try {
     await worker.close()
-  } catch {}
+  } catch { }
   process.exit(0)
 }
 process.on('SIGINT', shutdown)
