@@ -23,6 +23,12 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   const { generationInfo } = options
   const { user } = req
 
+  res.locals.chatCompletionMeta = {
+    courseId,
+    model: generationInfo.model,
+    fileSize: req.file?.size,
+  }
+
   // @todo were not checking if the user is enrolled?
   let course: ChatInstance | null = null
 
@@ -42,6 +48,8 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       },
     })
     course.currentUserUsage = chatInstanceUsage
+
+    res.locals.chatCompletionMeta.course = course.name?.fi
   }
 
   const isFreeModel = generationInfo.model === FREE_MODEL
@@ -69,6 +77,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   const encoding = getEncoding(generationInfo.model)
   let tokenCount = calculateUsage(options.chatMessages, encoding)
   encoding.free()
+  res.locals.chatCompletionMeta.inputTokenCount = tokenCount
 
   const tokenUsagePercentage = Math.round((tokenCount / DEFAULT_TOKEN_LIMIT) * 100)
 
@@ -115,9 +124,14 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       const searchTool = generationInfo.model === 'mock' ? getMockRagIndexSearchTool(prompt.ragIndex) : getRagIndexSearchTool(prompt.ragIndex)
       tools.push(searchTool)
     }
+
+    res.locals.chatCompletionMeta.promptId = prompt.id
+    res.locals.chatCompletionMeta.promptName = prompt.name
   } else {
     systemMessage = generationInfo.promptInfo.systemMessage
   }
+
+  res.locals.chatCompletionMeta.tools = tools.map((t) => t.name)
 
   // Prepare for streaming response
   res.setHeader('content-type', 'text/event-stream')
@@ -165,23 +179,14 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     }
   }
 
-  const chatCompletionMeta = {
+  Object.assign(res.locals.chatCompletionMeta, {
     tokenCount,
     outputTokenCount: result.tokenCount,
     inputTokenCount: result.inputTokenCount,
-    promptId: prompt?.id,
-    promptName: prompt?.name,
-    model: generationInfo.model,
-    user: user.username,
-    courseId,
-    course: course?.name?.fi,
-    fileSize: req.file?.size,
     timeToFirstToken: result.timeToFirstToken,
     tokensPerSecond: result.tokensPerSecond,
     toolCalls: result.toolCalls,
-  }
-
-  res.locals.chatCompletionMeta = chatCompletionMeta
+  })
 
   // If course has saveDiscussion turned on and user has consented to saving the discussion, save the discussion
   const consentToSave = courseId && course?.saveDiscussions && options.saveConsent
