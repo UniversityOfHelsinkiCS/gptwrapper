@@ -9,7 +9,7 @@ import { pipeline } from 'node:stream'
 import { promisify } from 'node:util'
 import pdfToText from 'pdf-parse-fork'
 import { pdfToPng, type PngPageOutput } from 'pdf-to-png-converter'
-import logger from './logger'
+import logger from './logger.ts'
 
 dotenv.config()
 
