@@ -26,8 +26,7 @@ export const ingestRagFiles = async (ragIndex: RagIndex) => {
   }
 
   const vectorStore = getRedisVectorStore(ragFiles[0].ragIndexId, ragIndex.metadata.language)
-  const allDocuments: Document[] = []
-  const allEmbeddings: number[][] = []
+  await vectorStore.dropIndex()
 
   await Promise.all(
     ragFiles.map(async (ragFile) => {
@@ -85,27 +84,13 @@ export const ingestRagFiles = async (ragIndex: RagIndex) => {
 
       const embeddings = await vectorStore.embeddings.embedDocuments(chunkDocuments.map((d) => d.pageContent))
 
-      allDocuments.push(...chunkDocuments)
-      allEmbeddings.push(...embeddings)
-
       ragFile.pipelineStage = 'storing'
       await ragFile.save()
 
       console.timeEnd(`Ingestion ${ragFile.filename}`)
-    }),
-  )
 
-  if (allDocuments.length === 0 || allEmbeddings.length !== allDocuments.length) {
-    console.warn('No documents or embeddings to add to vector store')
-    return
-  }
+      await vectorStore.addVectors(embeddings, chunkDocuments)
 
-  // @todo we can only call this once. How to handle new documents?
-  // Now there is a possibility of weird concurrency bugs.
-  await vectorStore.addVectors(allEmbeddings, allDocuments)
-
-  await Promise.all(
-    ragFiles.map(async (ragFile) => {
       ragFile.pipelineStage = 'completed'
       await ragFile.save()
     }),
