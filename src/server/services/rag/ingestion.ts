@@ -4,95 +4,104 @@ import { RagFile, type RagIndex } from '../../db/models'
 import { pdfQueueEvents, submitPdfParsingJob } from '../jobs/pdfParsing.job'
 import { FileStore } from './fileStore'
 import { getRedisVectorStore } from './vectorStore'
+import { ingestionQueueEvents, submitIngestionJob } from '../jobs/ingestion.job'
+import { Job } from 'bullmq'
 
 const defaultTextSplitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 800,
+  chunkSize: 1000,
   chunkOverlap: 200,
 })
 
 const markdownTextSplitter = new MarkdownTextSplitter({
-  chunkSize: 800,
+  chunkSize: 1000,
   chunkOverlap: 200,
 })
 
 const isMarkdown = (mimetype: string) => mimetype === 'text/markdown'
 
-export const ingestRagFiles = async (ragIndex: RagIndex) => {
-  const ragFiles = await RagFile.findAll({ where: { ragIndexId: ragIndex.id } })
+export const ingestRagFiles = async (ragIndex: RagIndex, ragFiles?: RagFile[]) => {
+  if (!ragFiles) {
+    ragFiles = await RagFile.findAll({ where: { ragIndexId: ragIndex.id } })
+  }
 
   if (ragFiles.length === 0) {
     console.warn('No rag files given to ingestRagFiles')
     return
   }
 
-  const vectorStore = getRedisVectorStore(ragFiles[0].ragIndexId, ragIndex.metadata.language)
+  const vectorStore = getRedisVectorStore(ragIndex.id, ragIndex.metadata.language)
   await vectorStore.dropIndex()
 
   await Promise.all(
-    ragFiles.map(async (ragFile) => {
-      console.time(`Ingestion ${ragFile.filename}`)
-
-      const needToParse = (await FileStore.readRagFileTextContent(ragFile)) === null
-
-      if (needToParse) {
-        ragFile.pipelineStage = 'parsing'
-        await ragFile.save()
-
-        const job = await submitPdfParsingJob(ragFile)
-
-        try {
-          await job.waitUntilFinished(pdfQueueEvents)
-        } catch (error: any) {
-          console.error('Error waiting for PDF parsing job to finish:', error)
-          ragFile.pipelineStage = 'error'
-          ragFile.error = 'PDF parsing failed'
-          await ragFile.save()
-          return
-        }
-      }
-
-      const text = await FileStore.readRagFileTextContent(ragFile)
-
-      if (text === null) {
-        console.error('Error reading rag file text: file does not exist')
-        ragFile.pipelineStage = 'error'
-        ragFile.error = 'Error reading rag file text: file does not exist'
-        await ragFile.save()
-        return
-      }
-
-      ragFile.pipelineStage = 'embedding'
-      await ragFile.save()
-
-      const document = new Document({
-        pageContent: text,
-      })
-
-      const splitter = isMarkdown(ragFile.fileType) ? markdownTextSplitter : defaultTextSplitter
-
-      const chunkDocuments = await splitter.splitDocuments([document])
-
-      let idx = 0
-      for (const chunkDocument of chunkDocuments) {
-        chunkDocument.id = `ragIndex-${ragFile.ragIndexId}-${ragFile.filename}-${idx}`
-        chunkDocument.metadata = {
-          ...chunkDocument.metadata,
-          ragFileName: ragFile.filename,
-        }
-        idx++
-      }
-
-      const embeddings = await vectorStore.embeddings.embedDocuments(chunkDocuments.map((d) => d.pageContent))
-
-      ragFile.pipelineStage = 'storing'
-      await ragFile.save()
-
-      console.timeEnd(`Ingestion ${ragFile.filename}`)
-
-      await vectorStore.addVectors(embeddings, chunkDocuments)
-
-      ragFile.pipelineStage = 'completed'
-      await ragFile.save()
+    ragFiles.map(async (rf) => {
+      const job = await submitIngestionJob(rf)
+      await job.waitUntilFinished(ingestionQueueEvents)
     }),
   )
+}
+
+export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, job: Job) => {
+  console.time(`Ingestion ${ragFile.filename}`)
+
+  await ragFile.update({ error: null, pipelineStage: 'ingesting' })
+
+  const vectorStore = getRedisVectorStore(ragFile.ragIndexId, ragIndex.metadata.language)
+
+  const needToParse = (await FileStore.readRagFileTextContent(ragFile)) === null
+
+  let progress = 2.5
+  await job.updateProgress({ progress, message: 'Scanning file' })
+
+  if (needToParse) {
+    const pdfJob = await submitPdfParsingJob(ragFile)
+
+    try {
+      await pdfJob.waitUntilFinished(pdfQueueEvents)
+
+      progress = 97.5
+    } catch (error: any) {
+      console.error('Error waiting for PDF parsing job to finish:', error)
+      await ragFile.update({ error: 'PDF parsing failed', pipelineStage: 'error' })
+      return
+    }
+  } else {
+    progress = 50
+  }
+  await job.updateProgress({ progress, message: 'Embedding', eta: 2000 })
+
+  const text = await FileStore.readRagFileTextContent(ragFile)
+
+  if (text === null) {
+    console.error('Error reading rag file text: file does not exist')
+    await ragFile.update({ error: 'Error reading rag file text: file does not exist' })
+    return
+  }
+
+  const document = new Document({
+    pageContent: text,
+  })
+
+  const splitter = isMarkdown(ragFile.fileType) ? markdownTextSplitter : defaultTextSplitter
+
+  const chunkDocuments = await splitter.splitDocuments([document])
+
+  await job.updateProgress({ progress, message: 'Embedding', eta: chunkDocuments.length * 25 })
+
+  let idx = 0
+  for (const chunkDocument of chunkDocuments) {
+    chunkDocument.id = `ragIndex-${ragFile.ragIndexId}-${ragFile.filename}-${idx}`
+    chunkDocument.metadata = {
+      ...chunkDocument.metadata,
+      ragFileName: ragFile.filename,
+    }
+    idx++
+  }
+
+  const embeddings = await vectorStore.embeddings.embedDocuments(chunkDocuments.map((d) => d.pageContent))
+
+  console.timeEnd(`Ingestion ${ragFile.filename}`)
+
+  await vectorStore.addVectors(embeddings, chunkDocuments)
+
+  await ragFile.update({ pipelineStage: 'completed' })
 }

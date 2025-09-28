@@ -1,5 +1,5 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import { Worker } from 'bullmq'
+import { Job, Worker } from 'bullmq'
 import dotenv from 'dotenv'
 import Redis, { type RedisOptions } from 'ioredis'
 import { createWriteStream } from 'node:fs'
@@ -111,31 +111,50 @@ async function retryOllamaCall<T>(fn: () => Promise<T>, maxRetries = 3): Promise
   throw lastError
 }
 
+class ProgressManager {
+  job: Job
+  constantTimeEstimate: number
+  rollingAvgWindows = {
+    transcribe: [6000],
+    generate: [3000],
+  }
+  iterations = 5
+
+  constructor(job: Job) {
+    this.job = job
+    this.constantTimeEstimate = 5000 // ms
+  }
+
+  updateIterationTimeEstimate(section: keyof typeof this.rollingAvgWindows, latestIterationTime: number) {
+    this.rollingAvgWindows[section].push(latestIterationTime)
+    if (this.rollingAvgWindows[section].length > 5) {
+      this.rollingAvgWindows[section].shift()
+    }
+  }
+
+  async updateProgress(constantProgress: number, iterationsProgress: number, message: string) {
+    const avgIterationTimeEstimate = Object.values(this.rollingAvgWindows)
+      .map((rollingAvgWindow) => rollingAvgWindow.reduce((a, b) => a + b, 0) / rollingAvgWindow.length)
+      .reduce((a, b) => a + b, 0)
+
+    const totalIterationsTimeEstimate = avgIterationTimeEstimate * this.iterations
+    const totalEstimate = this.constantTimeEstimate + totalIterationsTimeEstimate
+    const totalProgress = constantProgress * this.constantTimeEstimate + iterationsProgress * totalIterationsTimeEstimate
+
+    await this.job.updateProgress({ progress: (totalProgress / totalEstimate) * 100, message, eta: totalEstimate - totalProgress })
+  }
+}
+
 // --- Worker ---
 
 const worker = new Worker(
   QUEUE_NAME,
   async (job) => {
+    const startTime = Date.now()
     const { s3Bucket, s3Key, outputBucket } = job.data || {}
 
-    /**
-     *  Full progress from 0 to 100
-     */
-    let _progress = 0
-    /**
-     *
-     * @param progress fraction (0-1) of progress of the current section
-     * @param sectionSize the size of the section as a percentage of the whole job (0-100). All section sizes should add up to 100.
-     */
-    const incrementProgress = (progress: number, sectionSize: number) => {
-      _progress += progress * sectionSize
-      job
-        .updateProgress({
-          ragFileId: job.data.ragFileId,
-          progress: _progress,
-        })
-        .catch(() => { })
-    }
+    const progressManager = new ProgressManager(job)
+    await progressManager.updateProgress(0, 0, 'Starting transcription')
 
     logger.info(`Processing job ${job.id}`)
 
@@ -166,8 +185,6 @@ const worker = new Worker(
       await fs.mkdir(outputTextDir, { recursive: true })
       await fs.mkdir(outputImagesDir, { recursive: true })
 
-      incrementProgress(1, 1) // 1% - Setup directories
-
       /**
        * Download the pdf
        */
@@ -177,7 +194,7 @@ const worker = new Worker(
         throw new Error(`Failed to download s3://${s3Bucket}/${s3Key}: ${err.message || err}`)
       }
 
-      incrementProgress(1, 1) // 1% - Download PDF
+      await progressManager.updateProgress(0.1, 0, 'Processing PDF')
 
       /**
        * Convert PDF pages to text
@@ -226,7 +243,12 @@ const worker = new Worker(
         throw new Error('PDF to text conversion failed')
       }
 
-      incrementProgress(1, 2) // 2% - PDF to text
+      /*
+      Now we know the number of pages and can start giving progress updates
+      */
+      const totalPages = Object.keys(pages).length || 1
+      progressManager.iterations = totalPages
+      await progressManager.updateProgress(0.2, 0, 'Processing PDF')
 
       /**
        * Convert PDF pages to PNG images
@@ -242,19 +264,23 @@ const worker = new Worker(
         throw new Error('PDF to PNG conversion failed')
       }
 
-      incrementProgress(1, 6) // 6% - PDF to PNGs. Total so far: 10%
-
       /**
        * Transcription & Markdown Generation (with Ollama health/retry, fallback to PDF text)
        */
       let resultingMarkdown = ''
       for (const pngPage of pngPages) {
+        const pageStartTime = Date.now()
+
+        await progressManager.updateProgress(0.9, (pngPage.pageNumber - 1) / totalPages, `Transcribing (page ${pngPage.pageNumber}/${pngPages.length})`)
+
         let finalText = ''
         const existingMdPath = path.join(outputTextDir, `${inputFileName}_page_${pngPage.pageNumber}.md`)
         if (await pathExists(existingMdPath)) {
           const existingMd = await fs.readFile(existingMdPath, 'utf-8')
           logger.info(`Job ${job.id}: using existing markdown for page ${pngPage.pageNumber}/${pngPages.length}`)
           resultingMarkdown += `\n\n${existingMd}`
+          progressManager.updateIterationTimeEstimate('transcribe', 0)
+          progressManager.updateIterationTimeEstimate('generate', Date.now() - pageStartTime)
           continue
         }
 
@@ -264,6 +290,7 @@ const worker = new Worker(
         const existingTxtPath = path.join(outputTextDir, `${inputFileName}_page_${pngPage.pageNumber}.transcription.txt`)
         // ========== VLM section (with health/retry/fallback) ==========
         try {
+          const startTranscribe = Date.now()
           transcription = await retryOllamaCall(async () => {
             if (await pathExists(existingTxtPath)) {
               const txt = await fs.readFile(existingTxtPath, 'utf-8')
@@ -297,11 +324,13 @@ const worker = new Worker(
             await fs.writeFile(existingTxtPath, txt, 'utf-8')
             logger.info(`Job ${job.id}: transcription complete for page ${pngPage.pageNumber}/${pngPages.length}`)
 
-            const pageProgress = 0.5 / pngPages.length // Halfway through the page processing
-            incrementProgress(pageProgress, 87) // 87% - VLM & Markdown
-
             return txt
           }, RETRY_COUNT)
+
+          progressManager.updateIterationTimeEstimate('transcribe', Date.now() - startTranscribe)
+          await progressManager.updateProgress(0.9, (pngPage.pageNumber - 0.5) / totalPages, `Transcribing (page ${pngPage.pageNumber}/${pngPages.length})`)
+
+          const startGenerate = Date.now()
           finalText = await retryOllamaCall(async () => {
             const response2 = await fetch(`${OLLAMA_URL}/api/generate`, {
               method: 'POST',
@@ -346,18 +375,22 @@ const worker = new Worker(
 
             return text
           }, RETRY_COUNT)
+
+          progressManager.updateIterationTimeEstimate('generate', Date.now() - startGenerate)
         } catch (error) {
           logger.warn(`Job ${job.id} VLM/Markdown failed ${RETRY_COUNT} times, falling back to PDF text for page ${pngPage.pageNumber}`, error)
           // Fallback to PDF text as Markdown
           finalText = pdfText ? `# Page ${pngPage.pageNumber}\n\n${pdfText}` : `# Page ${pngPage.pageNumber}\n\n**Page could not be processed.**`
           await fs.writeFile(existingMdPath, finalText, 'utf-8')
-        }
 
-        const pageProgress = 0.5 / pngPages.length // Second half of the page processing done
-        incrementProgress(pageProgress, 87) // 87% - VLM & Markdown. Total so far: 97%
+          progressManager.updateIterationTimeEstimate('transcribe', 0)
+          progressManager.updateIterationTimeEstimate('generate', Date.now() - pageStartTime)
+        }
 
         resultingMarkdown += `\n\n${finalText}`
       }
+
+      await progressManager.updateProgress(0.9, 1, 'Finalizing output')
 
       const resultFileName = `${inputFileName}.md`
       const resultFilePath = path.join(outputTextDir, `${inputFileName}.md`)
@@ -372,7 +405,7 @@ const worker = new Worker(
         throw new Error(`Failed uploading outputs to s3://${outputBucket}: ${err.message || err}`)
       }
 
-      incrementProgress(1, 3) // 97 + 3 = 100% - Upload results
+      await progressManager.updateProgress(1, 1, 'Done')
 
       return {
         input: { bucket: s3Bucket, key: s3Key },
@@ -381,7 +414,7 @@ const worker = new Worker(
     } finally {
       try {
         await fs.rm(jobRootDir, { recursive: true, force: true })
-      } catch { }
+      } catch {}
     }
   },
   {
@@ -403,7 +436,7 @@ async function shutdown() {
   logger.info('Shutting down worker...')
   try {
     await worker.close()
-  } catch { }
+  } catch {}
   process.exit(0)
 }
 process.on('SIGINT', shutdown)
