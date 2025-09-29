@@ -17,7 +17,7 @@ if (inProduction) {
 
 const initializeSentry = () => {
   Sentry.init({
-    dsn: 'https://fdfc80050182461ff686cd6c96129256@toska.cs.helsinki.fi/27',
+    dsn: 'https://4b537128872afe9f440a22b0824c9026@toska.it.helsinki.fi/3',
     release: GIT_SHA,
     environment,
     integrations: [
