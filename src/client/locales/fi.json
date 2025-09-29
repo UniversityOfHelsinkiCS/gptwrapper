@@ -400,6 +400,9 @@
     "fileDeleted": "Tiedosto poistettu",
     "fileTextDeleted": "Uudelleenskannaus aloitettu",
     "deleteFileText": "Skannaa PDF uudestaan",
-    "onlyPdf": "a"
+    "onlyPdf": "a",
+    "waitForUpload": "Odota, tiedostoja ladataan palvelimelle",
+    "filesIngesting": "Tiedostoja käsitellään. Voit poistua sivulta.",
+    "allCompleted": "Tiedostot käsitelty."
   }
 }

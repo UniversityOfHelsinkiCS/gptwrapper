@@ -398,6 +398,9 @@
     "fileDeleted": "File deleted",
     "fileTextDeleted": "Rescanning started",
     "deleteFileText": "Rescan PDF",
-    "onlyPdf": "a"
+    "onlyPdf": "a",
+    "waitForUpload": "Please wait, uploading files to the server",
+    "filesIngesting": "Processing files. You can leave the page.",
+    "allCompleted": "Done processing."
   }
 }

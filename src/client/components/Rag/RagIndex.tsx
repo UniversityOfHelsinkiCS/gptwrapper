@@ -12,6 +12,7 @@ import { enqueueSnackbar } from 'notistack'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import queryClient from '../../util/queryClient'
 import { IngestionPipelineStageKey } from '@shared/ingestion'
+import { RagFilesStatus } from './RagFilesStatus'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -95,8 +96,9 @@ export const RagIndex: React.FC = () => {
       </Link>
       <Typography variant="body1">{t('rag:collection')}</Typography>
       <Typography variant="h3">{ragDetails?.metadata?.name}</Typography>
+
       <Box py={2}>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
           {/* @ts-expect-error component somehow not valid prop but it works */}
           <BlueButton component="label" variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
             {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
@@ -135,31 +137,23 @@ export const RagIndex: React.FC = () => {
                 enqueueSnackbar(t('rag:collectionDeleted'), { variant: 'success' })
               }
             }}
+            sx={{ mr: 'auto' }}
           >
             {t('rag:deleteCollection')}
           </Button>
+          <RagFilesStatus ragFileStatuses={ragFileStatuses ?? []} ragFiles={ragDetails?.ragFiles ?? []} />
         </Box>
         <Box mt={4}>
-          <Box display="flex" alignItems="center" my={1} gap={2}>
-            {isComplete && !hasErrors && ragDetails.ragFiles.length > 0 && (
-              <Typography variant="body2" color="success.main">
-                {t('rag:allFilesProcessedSuccessfully')}
-              </Typography>
-            )}
+          <Box display="flex" alignItems="center" mb={2} gap={2}>
             {isComplete && hasErrors && (
-              <>
-                <Typography variant="body2" color="error">
-                  {t('rag:processingFailures')}
-                </Typography>
-                <OutlineButtonBlack
-                  startIcon={<Autorenew />}
-                  onClick={async () => {
-                    await handleUpload([])
-                  }}
-                >
-                  {t('rag:retryFailedFiles')}
-                </OutlineButtonBlack>
-              </>
+              <OutlineButtonBlack
+                startIcon={<Autorenew />}
+                onClick={async () => {
+                  await handleUpload([])
+                }}
+              >
+                {t('rag:retryFailedFiles')}
+              </OutlineButtonBlack>
             )}
             {user?.isAdmin && (
               <OutlineButtonBlack

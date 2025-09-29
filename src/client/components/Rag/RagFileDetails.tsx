@@ -6,6 +6,7 @@ import { CloudUpload, DownloadDone, ErrorOutline, PendingOutlined, SettingsOutli
 import { locales } from '../../locales/locales'
 import { useTranslation } from 'react-i18next'
 import { formatDistanceStrict } from 'date-fns'
+import { CircularProgressWithLabel } from '../common/CircularProgressWithLabel'
 
 type FileStage = IngestionPipelineStageKey | 'uploading' | 'queued'
 
@@ -47,7 +48,7 @@ export const RagFileInfo: React.FC<{
 
   const fileStage = isUploading ? 'uploading' : isSuccess ? 'completed' : isError ? 'error' : status?.message ? 'ingesting' : 'queued'
 
-  const accentColor = isSuccess ? 'success.main' : isError ? 'error.main' : 'info.main'
+  const accentColor = isSuccess ? 'success' : isError ? 'error' : 'info'
   const error = status?.error ?? file.error
   const message = isSuccess ? 'Completed' : isError ? 'Error' : isUploading ? 'Uploading' : (status?.message ?? 'Queued')
   const progress = isSuccess ? 100 : isUploading ? uploadProgress : (status?.progress ?? 0)
@@ -86,7 +87,7 @@ export const RagFileInfo: React.FC<{
           </Table>
         </Box>
         <Box sx={{ ml: '2rem', flex: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Box display="flex" alignItems="center" gap={1} color={accentColor}>
+          <Box display="flex" alignItems="center" gap={1} color={`${accentColor}.main`}>
             {progressIcon}
             <div>
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
@@ -105,25 +106,7 @@ export const RagFileInfo: React.FC<{
             </div>
           </Box>
         </Box>
-        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-          <CircularProgress variant="determinate" value={progress} size="6rem" sx={{ color: accentColor }} />
-          <Box
-            sx={{
-              top: 0,
-              left: 0,
-              bottom: 0,
-              right: 0,
-              position: 'absolute',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Box display="flex" flexDirection="column" alignItems="center" width="5rem">
-              <Typography variant="body2" component="div" sx={{ color: 'text.secondary' }}>{`${Math.round(progress)}%`}</Typography>
-            </Box>
-          </Box>
-        </Box>
+        <CircularProgressWithLabel progress={progress} accentColor={accentColor} />
       </Box>
     </Paper>
   )
