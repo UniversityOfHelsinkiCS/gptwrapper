@@ -13,7 +13,9 @@ import { SearchSchema } from '../../../shared/rag'
 import { S3_BUCKET } from '../../util/config'
 import { s3Client } from '../../util/s3client'
 import { ingestRagFiles } from '../../services/rag/ingestion'
-import { getPdfParsingJobId, queue } from 'src/server/services/jobs/pdfParsing.job'
+import { getIngestionJobId, queue as ingestionQueue } from '../../services/jobs/ingestion.job'
+import { getPdfParsingJobId, queue as pdfParsingQueue } from 'src/server/services/jobs/pdfParsing.job'
+import { IngestionJobStatus } from '@shared/ingestion'
 
 const ragIndexRouter = Router()
 
@@ -33,12 +35,14 @@ export async function ragIndexMiddleware(req: Request, res: Response, next: Next
   const reqWithUser = req as RequestWithUser
   const user = reqWithUser.user
   const { ragIndexId } = RagIndexIdSchema.parse(req.params)
-  const responsibilities = await Responsibility.findAll({
-    where: { userId: user.id },
-  })
-  const ragIndex = await RagIndex.findByPk(ragIndexId, {
-    include: { model: ChatInstance, as: 'chatInstances' },
-  })
+  const [responsibilities, ragIndex] = await Promise.all([
+    Responsibility.findAll({
+      where: { userId: user.id },
+    }),
+    RagIndex.findByPk(ragIndexId, {
+      include: { model: ChatInstance, as: 'chatInstances' },
+    }),
+  ])
 
   if (!ragIndex) {
     throw ApplicationError.NotFound('RagIndex not found')
@@ -81,16 +85,44 @@ ragIndexRouter.get('/', async (req, res) => {
     where: { ragIndexId: ragIndex.id },
   })
 
-  /* @todo langchain impl
-  const client = getAzureOpenAIClient()
-  const vectorStore = await client.vectorStores.retrieve(ragIndex.metadata.azureVectorStoreId)
-  */
-
   res.json({
     ...ragIndex.toJSON(),
     ragFiles: ragFiles.map((file) => file.toJSON()),
-    // vectorStore,
   })
+})
+
+ragIndexRouter.get('/jobs', async (req, res) => {
+  const ragIndexRequest = req as RagIndexRequest
+  const ragIndex = ragIndexRequest.ragIndex
+
+  const ragFiles = await RagFile.findAll({
+    where: { ragIndexId: ragIndex.id },
+  })
+
+  const ragFileStatuses: IngestionJobStatus[] = await Promise.all(
+    ragFiles.map(async (rf) => {
+      const ingestionJob = await ingestionQueue.getJob(getIngestionJobId(rf))
+      const pdfJob = await pdfParsingQueue.getJob(getPdfParsingJobId(rf))
+      const ingestionJobProgress = (ingestionJob?.progress as { progress: number; message: string; eta: number }) || {}
+      const pdfJobProgress = (pdfJob?.progress as { progress: number; message: string; eta: number }) || {}
+      const ingestionJobProgressNumber = ingestionJobProgress.progress || 0
+      const pdfJobProgressNumber = (pdfJobProgress.progress || 0) * 0.95 // PDF parsing is 95% of the work
+      const currentProgress = ingestionJobProgressNumber + pdfJobProgressNumber // This works because when pdf job is done, it is removed.
+
+      const status: IngestionJobStatus = {
+        ragFileId: rf.id,
+        message: pdfJobProgress.message || ingestionJobProgress.message,
+        progress: currentProgress,
+        eta: pdfJobProgress.eta || ingestionJobProgress.eta,
+        pipelineStage: rf.pipelineStage,
+        error: rf.error,
+      }
+
+      return status
+    }),
+  )
+
+  res.json(ragFileStatuses)
 })
 
 const RagFileIdSchema = z.coerce.number().min(1)
@@ -212,12 +244,12 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
   const ragIndexRequest = req as unknown as RagIndexRequest
   const { ragIndex, user } = ragIndexRequest
 
-  await Promise.all(
+  const ragFiles = await Promise.all(
     req.files.map((file: Express.Multer.File) =>
       RagFile.create({
         userId: user.id,
         ragIndexId: ragIndex.id,
-        pipelineStage: 'uploading',
+        pipelineStage: 'ingesting',
         filename: file.originalname,
         fileType: file.mimetype,
         fileSize: file.size,
@@ -226,7 +258,7 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
     ),
   )
 
-  ingestRagFiles(ragIndex).catch((error) => {
+  ingestRagFiles(ragIndex, ragFiles).catch((error) => {
     console.error('Error ingesting RAG files:', error)
   })
 

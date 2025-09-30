@@ -4,12 +4,15 @@ import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom'
 import { ArrowBackOutlined, Autorenew, CloudUpload, DeleteOutline, FindInPage } from '@mui/icons-material'
 import { orderBy } from 'lodash'
 import { RagFileInfo } from './RagFileDetails'
-import { useDeleteRagIndexMutation, useRagIndexDetails, useUploadMutation } from './api'
+import { RagIndexDetails, useDeleteRagIndexMutation, useRagIndexDetails, useRagIndexJobs, useUploadMutation } from './api'
 import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
 import { BlueButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import { enqueueSnackbar } from 'notistack'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import queryClient from '../../util/queryClient'
+import { IngestionPipelineStageKey } from '@shared/ingestion'
+import { RagFilesStatus } from './RagFilesStatus'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -33,13 +36,12 @@ export const RagIndex: React.FC = () => {
   const deleteIndexMutation = useDeleteRagIndexMutation()
   const [refetchInterval, setRefetchInterval] = React.useState(60 * 1000)
   const [uploadProgress, setUploadProgress] = React.useState(0)
-  const { data: ragDetails, isSuccess, refetch } = useRagIndexDetails(id, refetchInterval)
+  const { data: ragDetails, isSuccess, refetch } = useRagIndexDetails(id)
+  const { data: ragFileStatuses, refetch: refetchStatuses } = useRagIndexJobs(id, refetchInterval)
   const uploadMutation = useUploadMutation({ index: ragDetails, onUploadProgress: setUploadProgress })
 
-  const isComplete = ragDetails
-    ? ragDetails.ragFiles.every((file) => file.pipelineStage === 'completed' || file.pipelineStage === 'error') && !uploadMutation.isPending
-    : false
-  const hasErrors = ragDetails ? ragDetails.ragFiles.some((file) => file.pipelineStage === 'error') : false
+  const isComplete = ragFileStatuses ? ragFileStatuses.every(({ pipelineStage }) => pipelineStage !== 'ingesting') && !uploadMutation.isPending : false
+  const hasErrors = ragFileStatuses ? ragFileStatuses.some(({ pipelineStage }) => pipelineStage === 'error') : false
 
   React.useEffect(() => {
     if (isComplete) {
@@ -55,8 +57,33 @@ export const RagIndex: React.FC = () => {
 
   const handleUpload = async (files: File[]) => {
     setUploadProgress(0)
+    queryClient.setQueryData<RagIndexDetails>(['ragIndex', id], (old) => {
+      if (!old) return old
+      return {
+        ...old,
+        ragFiles: [
+          ...old.ragFiles,
+          ...files.map((f) => ({
+            id: Math.random() * -1000, // Temporary ID
+            ragIndexId: id,
+            filename: f.name,
+            fileType: f.type,
+            fileSize: f.size,
+            createdAt: new Date().toString(),
+            updatedAt: new Date().toString(),
+            pipelineStage: 'ingesting' as IngestionPipelineStageKey,
+            progress: 0,
+            numChunks: null,
+            userId: user?.id || '',
+            metadata: null,
+            error: null,
+          })),
+        ],
+      }
+    })
     await uploadMutation.mutateAsync(Array.from(files))
     refetch()
+    refetchStatuses()
   }
 
   const coursePagePath = ragDetails?.chatInstances?.[0] ? `/courses/${ragDetails.chatInstances[0].courseId}/rag` : '/rag'
@@ -69,8 +96,9 @@ export const RagIndex: React.FC = () => {
       </Link>
       <Typography variant="body1">{t('rag:collection')}</Typography>
       <Typography variant="h3">{ragDetails?.metadata?.name}</Typography>
+
       <Box py={2}>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
           {/* @ts-expect-error component somehow not valid prop but it works */}
           <BlueButton component="label" variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
             {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
@@ -109,31 +137,23 @@ export const RagIndex: React.FC = () => {
                 enqueueSnackbar(t('rag:collectionDeleted'), { variant: 'success' })
               }
             }}
+            sx={{ mr: 'auto' }}
           >
             {t('rag:deleteCollection')}
           </Button>
+          <RagFilesStatus ragFileStatuses={ragFileStatuses ?? []} ragFiles={ragDetails?.ragFiles ?? []} />
         </Box>
         <Box mt={4}>
-          <Box display="flex" alignItems="center" my={1} gap={2}>
-            {isComplete && !hasErrors && ragDetails.ragFiles.length > 0 && (
-              <Typography variant="body2" color="success.main">
-                {t('rag:allFilesProcessedSuccessfully')}
-              </Typography>
-            )}
+          <Box display="flex" alignItems="center" mb={2} gap={2}>
             {isComplete && hasErrors && (
-              <>
-                <Typography variant="body2" color="error">
-                  {t('rag:processingFailures')}
-                </Typography>
-                <OutlineButtonBlack
-                  startIcon={<Autorenew />}
-                  onClick={async () => {
-                    await handleUpload([])
-                  }}
-                >
-                  {t('rag:retryFailedFiles')}
-                </OutlineButtonBlack>
-              </>
+              <OutlineButtonBlack
+                startIcon={<Autorenew />}
+                onClick={async () => {
+                  await handleUpload([])
+                }}
+              >
+                {t('rag:retryFailedFiles')}
+              </OutlineButtonBlack>
             )}
             {user?.isAdmin && (
               <OutlineButtonBlack
@@ -146,9 +166,14 @@ export const RagIndex: React.FC = () => {
               </OutlineButtonBlack>
             )}
           </Box>
-          {uploadMutation.isPending && <LinearProgress value={uploadProgress} variant="determinate" />}
           {orderBy(ragDetails.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (
-            <RagFileInfo key={file.id} file={file} link />
+            <RagFileInfo
+              key={file.id}
+              file={file}
+              status={ragFileStatuses?.find((rfs) => rfs.ragFileId === file.id)}
+              link
+              uploadProgress={uploadMutation.isPending ? uploadProgress : undefined}
+            />
           ))}
         </Box>
       </Box>

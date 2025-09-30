@@ -6,7 +6,7 @@ const initializeSentry = () => {
   if (inDevelopment || inStaging) return
 
   Sentry.init({
-    dsn: 'https://9dde7af6dc3bc7deaf1e53c7def25c28@toska.cs.helsinki.fi/21',
+    dsn: 'https://7486caafc9ff5451fa4db6de8ca5e03d@toska.it.helsinki.fi/2',
     release: GIT_SHA,
     integrations: [Sentry.httpIntegration({ breadcrumbs: true }), Sentry.expressIntegration()],
     tracesSampleRate: 1.0,

@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import apiClient from '../../util/apiClient'
 import { RagFileAttributes, RagIndexAttributes } from '../../../shared/types'
+import { IngestionJobStatus } from '@shared/ingestion'
 
 export const useCreateRagIndexMutation = () => {
   const mutation = useMutation({
@@ -16,15 +17,26 @@ export const useCreateRagIndexMutation = () => {
   return mutation
 }
 
-type RagIndexDetails = Omit<RagIndexAttributes, 'ragFileCount'> & {
+export type RagIndexDetails = Omit<RagIndexAttributes, 'ragFileCount'> & {
   ragFiles: RagFileAttributes[]
 }
 
-export const useRagIndexDetails = (indexId: number | null, refetchInterval: number) => {
+export const useRagIndexDetails = (indexId: number | null) => {
   return useQuery<RagIndexDetails>({
     queryKey: ['ragIndex', indexId],
     queryFn: async () => {
       const response = await apiClient.get(`/rag/indices/${indexId}`)
+      return response.data
+    },
+    enabled: !!indexId,
+  })
+}
+
+export const useRagIndexJobs = (indexId: number | null, refetchInterval: number) => {
+  return useQuery<IngestionJobStatus[]>({
+    queryKey: ['ragIndex', indexId, 'jobs'],
+    queryFn: async () => {
+      const response = await apiClient.get(`/rag/indices/${indexId}/jobs`)
       return response.data
     },
     enabled: !!indexId,

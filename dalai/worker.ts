@@ -1,5 +1,5 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import { Worker } from 'bullmq'
+import { Job, Worker } from 'bullmq'
 import dotenv from 'dotenv'
 import Redis, { type RedisOptions } from 'ioredis'
 import { createWriteStream } from 'node:fs'
@@ -9,6 +9,7 @@ import { pipeline } from 'node:stream'
 import { promisify } from 'node:util'
 import pdfToText from 'pdf-parse-fork'
 import { pdfToPng, type PngPageOutput } from 'pdf-to-png-converter'
+import logger from './logger.ts'
 
 dotenv.config()
 
@@ -110,33 +111,55 @@ async function retryOllamaCall<T>(fn: () => Promise<T>, maxRetries = 3): Promise
   throw lastError
 }
 
+class ProgressManager {
+  job: Job
+  constantTimeEstimate: number
+  rollingAvgWindows = {
+    transcribe: [6000],
+    generate: [3000],
+  }
+  iterations = 5
+
+  constructor(job: Job) {
+    this.job = job
+    this.constantTimeEstimate = 5000 // ms
+  }
+
+  updateIterationTimeEstimate(section: keyof typeof this.rollingAvgWindows, latestIterationTime: number) {
+    this.rollingAvgWindows[section].push(latestIterationTime)
+    if (this.rollingAvgWindows[section].length > 5) {
+      this.rollingAvgWindows[section].shift()
+    }
+  }
+
+  async updateProgress(constantProgress: number, iterationsProgress: number, message: string) {
+    const avgIterationTimeEstimate = Object.values(this.rollingAvgWindows)
+      .map((rollingAvgWindow) => rollingAvgWindow.reduce((a, b) => a + b, 0) / rollingAvgWindow.length)
+      .reduce((a, b) => a + b, 0)
+
+    const totalIterationsTimeEstimate = avgIterationTimeEstimate * this.iterations
+    const totalEstimate = this.constantTimeEstimate + totalIterationsTimeEstimate
+    const totalProgress = constantProgress * this.constantTimeEstimate + iterationsProgress * totalIterationsTimeEstimate
+
+    await this.job.updateProgress({ progress: (totalProgress / totalEstimate) * 100, message, eta: totalEstimate - totalProgress })
+  }
+}
+
 // --- Worker ---
+
+let ACTIVE_COUNT = 0
 
 const worker = new Worker(
   QUEUE_NAME,
   async (job) => {
+    ACTIVE_COUNT++
+    const startTime = Date.now()
     const { s3Bucket, s3Key, outputBucket } = job.data || {}
 
-    /**
-     *  Full progress from 0 to 100
-     */
-    let _progress = 0
-    /**
-     *
-     * @param progress fraction (0-1) of progress of the current section
-     * @param sectionSize the size of the section as a percentage of the whole job (0-100). All section sizes should add up to 100.
-     */
-    const incrementProgress = (progress: number, sectionSize: number) => {
-      _progress += progress * sectionSize
-      job
-        .updateProgress({
-          ragFileId: job.data.ragFileId,
-          progress: _progress,
-        })
-        .catch(() => {})
-    }
+    const progressManager = new ProgressManager(job)
+    await progressManager.updateProgress(0, 0, 'Starting transcription')
 
-    console.log(`Processing job ${job.id}`)
+    logger.info(`Processing job ${job.id}`)
 
     if (!s3Bucket || !s3Key) {
       throw new Error('s3Bucket and s3Key are required in job data')
@@ -165,8 +188,6 @@ const worker = new Worker(
       await fs.mkdir(outputTextDir, { recursive: true })
       await fs.mkdir(outputImagesDir, { recursive: true })
 
-      incrementProgress(1, 1) // 1% - Setup directories
-
       /**
        * Download the pdf
        */
@@ -176,7 +197,7 @@ const worker = new Worker(
         throw new Error(`Failed to download s3://${s3Bucket}/${s3Key}: ${err.message || err}`)
       }
 
-      incrementProgress(1, 1) // 1% - Download PDF
+      await progressManager.updateProgress(0.1, 0, 'Processing PDF')
 
       /**
        * Convert PDF pages to text
@@ -219,13 +240,18 @@ const worker = new Worker(
           .forEach((page) => {
             pages[page.pageNumber] = page.text
           })
-        console.log(`Job ${job.id}: PDF to text conversion complete`)
+        logger.info(`Job ${job.id}: PDF to text conversion complete`)
       } catch (error) {
-        console.error(`Job ${job.id} failed: PDF to text conversion failed`, error)
+        logger.error(`Job ${job.id} failed: PDF to text conversion failed`, error)
         throw new Error('PDF to text conversion failed')
       }
 
-      incrementProgress(1, 2) // 2% - PDF to text
+      /*
+      Now we know the number of pages and can start giving progress updates
+      */
+      const totalPages = Object.keys(pages).length || 1
+      progressManager.iterations = totalPages
+      await progressManager.updateProgress(0.2, 0, 'Processing PDF')
 
       /**
        * Convert PDF pages to PNG images
@@ -236,37 +262,43 @@ const worker = new Worker(
           outputFileMaskFunc: (pageNumber) => `page_${pageNumber}.png`,
           outputFolder: outputImagesDir,
         })
+        logger.info(`PDF to PNG conversion success: ${job.id}`)
       } catch (error) {
-        console.error(`Job ${job.id} failed: PDF to PNG conversion failed`, error)
+        logger.error(`Job ${job.id} failed: PDF to PNG conversion failed`, error)
         throw new Error('PDF to PNG conversion failed')
       }
-
-      incrementProgress(1, 6) // 6% - PDF to PNGs. Total so far: 10%
 
       /**
        * Transcription & Markdown Generation (with Ollama health/retry, fallback to PDF text)
        */
       let resultingMarkdown = ''
       for (const pngPage of pngPages) {
+        const pageStartTime = Date.now()
+
+        await progressManager.updateProgress(0.9, (pngPage.pageNumber - 1) / totalPages, `Transcribing (page ${pngPage.pageNumber}/${pngPages.length})`)
+
         let finalText = ''
         const existingMdPath = path.join(outputTextDir, `${inputFileName}_page_${pngPage.pageNumber}.md`)
         if (await pathExists(existingMdPath)) {
           const existingMd = await fs.readFile(existingMdPath, 'utf-8')
-          console.log(`Job ${job.id}: using existing markdown for page ${pngPage.pageNumber}/${pngPages.length}`)
+          logger.info(`Job ${job.id}: using existing markdown for page ${pngPage.pageNumber}/${pngPages.length}`)
           resultingMarkdown += `\n\n${existingMd}`
+          progressManager.updateIterationTimeEstimate('transcribe', 0)
+          progressManager.updateIterationTimeEstimate('generate', Date.now() - pageStartTime)
           continue
         }
 
-        console.log(`Job ${job.id}: processing page ${pngPage.pageNumber}/${pngPages.length} (${pngPage.path})`)
+        logger.info(`Job ${job.id}: processing page ${pngPage.pageNumber}/${pngPages.length} (${pngPage.path})`)
         const pdfText = pages[pngPage.pageNumber] || ''
         let transcription = ''
         const existingTxtPath = path.join(outputTextDir, `${inputFileName}_page_${pngPage.pageNumber}.transcription.txt`)
         // ========== VLM section (with health/retry/fallback) ==========
         try {
+          const startTranscribe = Date.now()
           transcription = await retryOllamaCall(async () => {
             if (await pathExists(existingTxtPath)) {
               const txt = await fs.readFile(existingTxtPath, 'utf-8')
-              console.log(`Job ${job.id}: using existing transcription for page ${pngPage.pageNumber}/${pngPages.length}`)
+              logger.info(`Job ${job.id}: using existing transcription for page ${pngPage.pageNumber}/${pngPages.length}`)
               return txt
             }
             const image = await fs.readFile(pngPage.path)
@@ -277,6 +309,7 @@ const worker = new Worker(
                 model: 'qwen2.5vl:7b',
                 system: `Your task is to transcribe the content of a PDF page given to you as an image.
                   If the given PDF page contains an image, or a diagram, describe it in detail.
+                  IMPORTANT: If an image includes text, interpret that text as precisely as possible.
                   Enclose the description in an **image** tag. For example: **image** This is an image of a cat. **image**.
                   You are also given the text extracted from the PDF using a PDF parser.
                   Your task is to combine these two sources of information to produce the most accurate transcription possible.
@@ -294,13 +327,15 @@ const worker = new Worker(
             const data = await response.json()
             const txt = data?.response || ''
             await fs.writeFile(existingTxtPath, txt, 'utf-8')
-            console.log(`Job ${job.id}: transcription complete for page ${pngPage.pageNumber}/${pngPages.length}`)
-
-            const pageProgress = 0.5 / pngPages.length // Halfway through the page processing
-            incrementProgress(pageProgress, 87) // 87% - VLM & Markdown
+            logger.info(`Job ${job.id}: transcription complete for page ${pngPage.pageNumber}/${pngPages.length}`)
 
             return txt
           }, RETRY_COUNT)
+
+          progressManager.updateIterationTimeEstimate('transcribe', Date.now() - startTranscribe)
+          await progressManager.updateProgress(0.9, (pngPage.pageNumber - 0.5) / totalPages, `Transcribing (page ${pngPage.pageNumber}/${pngPages.length})`)
+
+          const startGenerate = Date.now()
           finalText = await retryOllamaCall(async () => {
             const response2 = await fetch(`${OLLAMA_URL}/api/generate`, {
               method: 'POST',
@@ -341,22 +376,26 @@ const worker = new Worker(
               text = appendToFirstLine(text, ` (Page ${pngPage.pageNumber})`)
             }
             await fs.writeFile(existingMdPath, text, 'utf-8')
-            console.log(`Job ${job.id}: markdown generation complete for page ${pngPage.pageNumber}/${pngPages.length}`)
+            logger.info(`Job ${job.id}: markdown generation complete for page ${pngPage.pageNumber}/${pngPages.length}`)
 
             return text
           }, RETRY_COUNT)
+
+          progressManager.updateIterationTimeEstimate('generate', Date.now() - startGenerate)
         } catch (error) {
-          console.warn(`Job ${job.id} VLM/Markdown failed ${RETRY_COUNT} times, falling back to PDF text for page ${pngPage.pageNumber}`, error)
+          logger.warn(`Job ${job.id} VLM/Markdown failed ${RETRY_COUNT} times, falling back to PDF text for page ${pngPage.pageNumber}`, error)
           // Fallback to PDF text as Markdown
           finalText = pdfText ? `# Page ${pngPage.pageNumber}\n\n${pdfText}` : `# Page ${pngPage.pageNumber}\n\n**Page could not be processed.**`
           await fs.writeFile(existingMdPath, finalText, 'utf-8')
-        }
 
-        const pageProgress = 0.5 / pngPages.length // Second half of the page processing done
-        incrementProgress(pageProgress, 87) // 87% - VLM & Markdown. Total so far: 97%
+          progressManager.updateIterationTimeEstimate('transcribe', 0)
+          progressManager.updateIterationTimeEstimate('generate', Date.now() - pageStartTime)
+        }
 
         resultingMarkdown += `\n\n${finalText}`
       }
+
+      await progressManager.updateProgress(0.9, 1, 'Finalizing output')
 
       const resultFileName = `${inputFileName}.md`
       const resultFilePath = path.join(outputTextDir, `${inputFileName}.md`)
@@ -365,13 +404,13 @@ const worker = new Worker(
       try {
         const resultS3Key = s3Key + '.md'
         await uploadFileToS3(s3, outputBucket, resultS3Key, resultFilePath, guessContentType(resultFilePath))
-        console.log(`Job ${job.id}: uploaded results to s3://${outputBucket}/${resultFileName}`)
+        logger.info(`Job ${job.id}: uploaded results to s3://${outputBucket}/${resultFileName}`)
       } catch (err) {
-        console.error('Failed uploading outputs to S3:', err)
+        logger.error('Failed uploading outputs to S3:', err)
         throw new Error(`Failed uploading outputs to s3://${outputBucket}: ${err.message || err}`)
       }
 
-      incrementProgress(1, 3) // 97 + 3 = 100% - Upload results
+      await progressManager.updateProgress(1, 1, 'Done')
 
       return {
         input: { bucket: s3Bucket, key: s3Key },
@@ -380,7 +419,7 @@ const worker = new Worker(
     } finally {
       try {
         await fs.rm(jobRootDir, { recursive: true, force: true })
-      } catch {}
+      } catch { }
     }
   },
   {
@@ -388,21 +427,23 @@ const worker = new Worker(
   },
 )
 
-console.log(`Worker started. Listening to queue "${QUEUE_NAME}"...`)
+logger.info(`Worker started. Listening to queue "${QUEUE_NAME}"...`)
 
 worker.on('completed', (job, result) => {
-  console.log(`Job ${job.id} completed.`)
+  ACTIVE_COUNT--
+  logger.info(`Job ${job.id} completed.`)
 })
 
 worker.on('failed', (job, err) => {
-  console.error(`Job ${job?.id} failed:`, err)
+  ACTIVE_COUNT--
+  logger.error(`Job ${job?.id} failed:`, err)
 })
 
 async function shutdown() {
-  console.log('Shutting down worker...')
+  logger.info('Shutting down worker...')
   try {
-    await worker.close()
-  } catch {}
+    if (ACTIVE_COUNT <= 0) await worker.close()
+  } catch { }
   process.exit(0)
 }
 process.on('SIGINT', shutdown)

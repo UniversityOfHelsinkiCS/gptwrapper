@@ -1,6 +1,6 @@
 import IORedis from 'ioredis'
 import { BMQ_REDIS_CA, BMQ_REDIS_CERT, BMQ_REDIS_HOST, BMQ_REDIS_KEY, BMQ_REDIS_PORT, S3_BUCKET } from '../../util/config'
-import { Job, Queue, QueueEvents } from 'bullmq'
+import { BaseJobOptions, Queue, QueueEvents } from 'bullmq'
 import { FileStore } from '../rag/fileStore'
 import { RagFile } from '../../db/models'
 
@@ -35,12 +35,8 @@ export const getPdfParsingJobId = (ragFile: RagFile) => {
 
 export const pdfQueueEvents = new QueueEvents('llama-scan-queue', { connection })
 
-pdfQueueEvents.on('progress', async (progressEvent) => {
-  const data = progressEvent.data as { ragFileId: number; progress: number }
-  await RagFile.update({ progress: data.progress }, { where: { id: data.ragFileId } })
-})
-
 type PDFJobData = {
+  type: 'pdf-parsing'
   s3Bucket: string
   s3Key: string
   outputBucket: string
@@ -57,6 +53,7 @@ export const submitPdfParsingJob = async (ragFile: RagFile) => {
   const jobId = getPdfParsingJobId(ragFile)
   console.log(`Submitting PDF parsing job ${jobId}`)
   const jobData: PDFJobData = {
+    type: 'pdf-parsing',
     s3Bucket: S3_BUCKET,
     s3Key,
     outputBucket: S3_BUCKET,
