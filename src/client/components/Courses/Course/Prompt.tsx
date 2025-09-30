@@ -1,5 +1,5 @@
-import { Box, Paper, Typography, Button, Tooltip, IconButton, Link } from '@mui/material'
-import { Visibility, VisibilityOff, PriorityHigh, ContentCopyOutlined, Delete, DeleteOutline, Book, BookOutlined, MenuBookOutlined } from '@mui/icons-material'
+import { Box, Paper, Typography, Tooltip, IconButton, Link } from '@mui/material'
+import { Visibility, VisibilityOff, ContentCopyOutlined, DeleteOutline, MenuBookOutlined } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
 import { enqueueSnackbar } from 'notistack'
@@ -14,7 +14,7 @@ const Prompt = ({ prompt, handleEdit }: { prompt: PromptType; handleEdit: () => 
   const { t } = useTranslation()
   const { id: courseId } = useParams()
 
-  const { id, name, hidden, mandatory, ragIndexId } = prompt
+  const { id, name, hidden, ragIndexId } = prompt
 
   const chatPath = `/${courseId}?promptId=${id}`
   const directLink = `${window.location.origin}${PUBLIC_URL}/${chatPath}`
@@ -48,13 +48,6 @@ const Prompt = ({ prompt, handleEdit }: { prompt: PromptType; handleEdit: () => 
                 </Tooltip>
               )}
             </Box>
-            {mandatory && (
-              <Box display="inline" mr={2}>
-                <Tooltip title="Alustus on pakollinen opiskelijoille">
-                  <PriorityHigh />
-                </Tooltip>
-              </Box>
-            )}
             {ragIndexId && (
               <Box display="inline" mr={2}>
                 <Tooltip title={t('rag:sourceMaterials')}>

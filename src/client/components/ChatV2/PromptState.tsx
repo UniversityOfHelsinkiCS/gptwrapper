@@ -23,7 +23,6 @@ interface PromptSelectorStateType {
   handleChangePrompt: (newPrompt: Prompt | undefined) => void
   coursePrompts: Prompt[]
   myPrompts: Prompt[]
-  mandatoryPrompt: Prompt | undefined
   urlPrompt: Prompt | undefined
   isPromptHidden: boolean
   isPromptEditable: boolean
@@ -62,7 +61,6 @@ export const PromptStateProvider: React.FC<{
   const [customSystemMessage, setCustomSystemMessage] = useLocalStorageState<string>(`${localStoragePrefix}-chat-instructions`, '')
   const [activePrompt, setActivePrompt] = useLocalStorageState<Prompt | undefined>(`${localStoragePrefix}-active-prompt`, undefined)
 
-  const mandatoryPrompt = course?.prompts.find((p) => p.mandatory)
   const urlPrompt = course?.prompts.find((p) => p.id === urlPromptId)
   const isPromptHidden = activePrompt?.hidden ?? false
   const isPromptEditable = activePrompt === undefined || activePrompt?.type === 'PERSONAL'
@@ -116,15 +114,6 @@ export const PromptStateProvider: React.FC<{
     })
   }, [activePrompt?.id])
 
-  // If there is a mandatory prompt, change to that.
-  useEffect(() => {
-    if (mandatoryPrompt) {
-      handleChangePrompt(mandatoryPrompt)
-    } else if (urlPrompt) {
-      handleChangePrompt(urlPrompt)
-    }
-  }, [mandatoryPrompt, urlPrompt])
-
   const ownPromptSaveMutation = useMutation({
     mutationFn: async ({ name, promptToSave, systemMessage }: { name: string; promptToSave?: Prompt; systemMessage: string }) => {
       if (promptToSave && promptToSave.type !== 'PERSONAL') return // Only do this for personal prompts
@@ -173,7 +162,6 @@ export const PromptStateProvider: React.FC<{
     handleChangePrompt,
     coursePrompts: course?.prompts || [],
     myPrompts,
-    mandatoryPrompt,
     urlPrompt,
     promptInfo,
     isPromptHidden,

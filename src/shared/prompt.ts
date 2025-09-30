@@ -13,7 +13,6 @@ export const PromptUpdateableParamsSchema = z.object({
   systemMessage: z.string().max(20_000),
   messages: PromptMessagesSchema.optional().default([]),
   hidden: z.boolean().default(false),
-  mandatory: z.boolean().default(false),
   ragIndexId: z.number().min(1).optional().nullable(),
   model: ValidModelNameSchema.optional(),
   temperature: z.number().min(0).max(1).optional(),

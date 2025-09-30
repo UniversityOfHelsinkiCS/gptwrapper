@@ -47,7 +47,6 @@ export type Prompt = {
   systemMessage: string
   messages: ChatMessage[]
   hidden: boolean
-  mandatory: boolean
   type: 'CHAT_INSTANCE' | 'PERSONAL'
   createdAt: string
   ragIndexId?: number

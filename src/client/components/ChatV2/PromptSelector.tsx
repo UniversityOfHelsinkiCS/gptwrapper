@@ -1,4 +1,4 @@
-import { DeleteOutline, KeyboardArrowDown, Lock, AutoAwesome } from '@mui/icons-material'
+import { DeleteOutline, KeyboardArrowDown, AutoAwesome } from '@mui/icons-material'
 import { Box, Divider, IconButton, ListSubheader, Menu, MenuItem } from '@mui/material'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -6,8 +6,8 @@ import type { Prompt } from '../../types'
 import { OutlineButtonBlack } from './general/Buttons'
 import { usePromptState } from './PromptState'
 
-const PromptSelector = ({ sx = {}, handleDeletePrompt }: { sx?: object; handleDeletePrompt?: (prompt: Prompt) => void }) => {
-  const { activePrompt, handleChangePrompt, mandatoryPrompt, coursePrompts, myPrompts } = usePromptState()
+const PromptSelector = ({ handleDeletePrompt }: { sx?: object; handleDeletePrompt?: (prompt: Prompt) => void }) => {
+  const { activePrompt, handleChangePrompt, coursePrompts, myPrompts } = usePromptState()
 
   const { t } = useTranslation()
 
@@ -29,11 +29,10 @@ const PromptSelector = ({ sx = {}, handleDeletePrompt }: { sx?: object; handleDe
         sx={{ width: '100%' }}
         startIcon={<AutoAwesome />}
         data-testid={`prompt-selector-button`}
-        disabled={!!mandatoryPrompt}
         onClick={(event) => {
           setAnchorEl(event.currentTarget)
         }}
-        endIcon={mandatoryPrompt ? <Lock /> : <KeyboardArrowDown />}
+        endIcon={<KeyboardArrowDown />}
       >
         <Box sx={{
           overflow: 'hidden',

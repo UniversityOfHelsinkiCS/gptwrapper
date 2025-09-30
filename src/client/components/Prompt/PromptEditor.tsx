@@ -44,7 +44,6 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEdit
     prompt ? prompt.messages?.find((m) => m.role === 'system')?.content || '' : t('prompt:defaultRagMessage'),
   )
   const [hidden, setHidden] = useState<boolean>(prompt?.hidden ?? false)
-  const [mandatory, setMandatory] = useState<boolean>(prompt?.mandatory ?? false)
   const [ragIndexId, setRagIndexId] = useState<number | undefined | null>(prompt?.ragIndexId)
 
   const [selectedModel, setModel] = useState<ValidModelName | 'none'>(prompt?.model ?? 'none')
@@ -78,7 +77,6 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEdit
           systemMessage,
           messages,
           hidden,
-          mandatory,
           ragIndexId,
           model,
           temperature,
@@ -93,7 +91,6 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEdit
           systemMessage,
           messages,
           hidden,
-          mandatory,
           ragIndexId,
           model,
           temperature,
@@ -134,10 +131,6 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEdit
             margin="normal"
           />
           <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />
-          <FormControlLabel
-            control={<Checkbox checked={mandatory} onChange={(e) => setMandatory(e.target.checked)} />}
-            label={t('prompt:editMandatoryPrompt')}
-          />
           <FormControl fullWidth margin="normal">
             <InputLabel>{t('common:model')}</InputLabel>
             <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
