@@ -147,9 +147,12 @@ class ProgressManager {
 
 // --- Worker ---
 
+let ACTIVE_COUNT = 0
+
 const worker = new Worker(
   QUEUE_NAME,
   async (job) => {
+    ACTIVE_COUNT++
     const startTime = Date.now()
     const { s3Bucket, s3Key, outputBucket } = job.data || {}
 
@@ -426,17 +429,19 @@ const worker = new Worker(
 logger.info(`Worker started. Listening to queue "${QUEUE_NAME}"...`)
 
 worker.on('completed', (job, result) => {
+  ACTIVE_COUNT--
   logger.info(`Job ${job.id} completed.`)
 })
 
 worker.on('failed', (job, err) => {
+  ACTIVE_COUNT--
   logger.error(`Job ${job?.id} failed:`, err)
 })
 
 async function shutdown() {
   logger.info('Shutting down worker...')
   try {
-    await worker.close()
+    if (ACTIVE_COUNT <= 0) await worker.close()
   } catch { }
   process.exit(0)
 }
