@@ -309,6 +309,7 @@ const worker = new Worker(
                 model: 'qwen2.5vl:7b',
                 system: `Your task is to transcribe the content of a PDF page given to you as an image.
                   If the given PDF page contains an image, or a diagram, describe it in detail.
+                  IMPORTANT: If an image includes text, interpret that text as precisely as possible.
                   Enclose the description in an **image** tag. For example: **image** This is an image of a cat. **image**.
                   You are also given the text extracted from the PDF using a PDF parser.
                   Your task is to combine these two sources of information to produce the most accurate transcription possible.
