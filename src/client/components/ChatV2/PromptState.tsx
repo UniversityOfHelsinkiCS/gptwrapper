@@ -10,12 +10,6 @@ import { useAnalyticsDispatch } from '../../stores/analytics'
 import type { MessageGenerationInfo } from '../../../shared/chat'
 import { useTranslation } from 'react-i18next'
 
-const useUrlPromptId = () => {
-  const [searchParams] = useSearchParams()
-  const promptId = searchParams.get('promptId')
-  return promptId
-}
-
 interface PromptSelectorStateType {
   customSystemMessage: string
   setCustomSystemMessage: (message: string) => void
@@ -46,7 +40,8 @@ export const PromptStateProvider: React.FC<{
   children: ReactNode
 }> = ({ children }) => {
   const { t } = useTranslation()
-  const urlPromptId = useUrlPromptId()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const urlPromptId = searchParams.get('promptId')
   const { courseId } = useParams()
 
   const { data: course } = useCourse(courseId)
@@ -79,29 +74,21 @@ export const PromptStateProvider: React.FC<{
     }
 
     setActivePrompt(newPrompt)
+
+    // If new prompt is not the url prompt, remove promptId from url
+    if (newPrompt.id !== urlPromptId) {
+      searchParams.delete('promptId')
+      setSearchParams(searchParams)
+    }
   }
 
-  // Time for a quick sync :D --- really this is what you get when using the local storage to hold some data that is also on the server. basically having to build our own sync engine lol.
+  // Url prompt?
   useEffect(() => {
-    // Dont sync personal prompts for now...
-    if (!isPromptEditable && activePrompt) {
-      const sync = async () => {
-        try {
-          const serverActivePrompt = await apiClient.get<Prompt>(`/prompts/${activePrompt?.id}`)
-          setActivePrompt(serverActivePrompt.data)
-        } catch (error) {
-          if (isAxiosError(error)) {
-            if (error.status === 404) {
-              setActivePrompt(undefined) // The prompt has been deleted on the server.
-            }
-          } else {
-            console.error('Unexpected error syncing prompt:', error)
-          }
-        }
-      }
-      sync()
+    console.log('URL PROMPT EFFECT', { urlPromptId, urlPrompt })
+    if (urlPrompt) {
+      handleChangePrompt(urlPrompt)
     }
-  }, [activePrompt?.id])
+  }, [urlPrompt?.id])
 
   // Just the analytics dispatch.
   useEffect(() => {

@@ -152,7 +152,7 @@ const ChatV2Content = () => {
     },
   })
 
-  const handleSubmit = async (message: string, ignoreTokenUsageWarning: boolean) => {
+  const handleSendMessage = async (message: string, ignoreTokenUsageWarning: boolean) => {
     if (!userStatus) return
     const { usage, limit } = userStatus
     const tokenUsageExceeded = usage >= limit
@@ -477,9 +477,9 @@ const ChatV2Content = () => {
             tokenUsageWarning={tokenUsageWarning}
             tokenUsageAlertOpen={tokenUsageAlertOpen}
             handleCancel={handleCancel}
-            handleContinue={(newMessage) => handleSubmit(newMessage, true)}
+            handleContinue={(newMessage) => handleSendMessage(newMessage, true)}
             handleSubmit={(newMessage) => {
-              handleSubmit(newMessage, false)
+              handleSendMessage(newMessage, false)
             }}
             handleReset={handleReset}
             isMobile={isMobile}
