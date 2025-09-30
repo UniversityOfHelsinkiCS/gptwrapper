@@ -58,7 +58,10 @@ export type ChatMessage = UserMessage | AssistantMessage
 export type ChatRole = ChatMessage['role']
 
 export const MessageGenerationInfoSchema = z.object({
-  model: z.union(validModels.map((m) => z.literal(m.name))),
+  // May be overridden by prompt
+  model: ValidModelNameSchema,
+  // May be overridden by prompt
+  temperature: z.number().min(0).max(1).optional().nullable(),
   promptInfo: z.discriminatedUnion('type', [
     z.object({
       type: z.literal('saved'),
@@ -87,7 +90,6 @@ export const PostStreamSchemaV3 = z.object({
     chatMessages: z.array(ChatMessageSchema),
     generationInfo: MessageGenerationInfoSchema,
     userConsent: z.boolean().optional(),
-    modelTemperature: z.number().min(0).max(2),
     saveConsent: z.boolean().optional(),
     courseId: z.string().optional(),
   }),

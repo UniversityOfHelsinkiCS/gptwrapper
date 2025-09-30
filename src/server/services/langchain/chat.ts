@@ -23,7 +23,7 @@ type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelC
  * @param temperature The temperature for the model's responses.
  * @returns A chat model instance.
  */
-const getChatModel = (modelConfig: (typeof validModels)[number], tools: StructuredTool[], temperature: number): ChatModel => {
+const getChatModel = (modelConfig: (typeof validModels)[number], tools: StructuredTool[], temperature?: number): ChatModel => {
   const chatModel =
     modelConfig.name === 'mock'
       ? new MockModel({ tools, temperature })
@@ -78,7 +78,7 @@ export const streamChat = async ({
   user,
 }: {
   model: ValidModelName
-  temperature: number
+  temperature?: number
   systemMessage: string
   chatMessages: ChatMessage[]
   promptMessages?: Message[]

@@ -194,6 +194,7 @@ const ChatV2Content = () => {
 
     const generationInfo: MessageGenerationInfo = {
       model: acualModel,
+      temperature: modelTemperature,
       promptInfo,
     }
 
@@ -204,7 +205,6 @@ const ChatV2Content = () => {
           options: {
             generationInfo,
             chatMessages: newMessages,
-            modelTemperature,
             saveConsent,
           },
           courseId,

@@ -11,9 +11,9 @@ import { StructuredTool } from '@langchain/core/tools'
  * FakeStreamingChatModel echoes the first input message out of the box.
  */
 export class MockModel extends FakeStreamingChatModel {
-  temperature: number
+  temperature?: number | null
 
-  constructor({ tools, temperature }: { tools: StructuredTool[]; temperature: number }) {
+  constructor({ tools, temperature }: { tools: StructuredTool[]; temperature?: number | null }) {
     super({
       sleep: 5,
     })
