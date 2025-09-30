@@ -157,7 +157,9 @@ const ChatV2Content = () => {
     const { usage, limit } = userStatus
     const tokenUsageExceeded = usage >= limit
 
-    if (tokenUsageExceeded && activeModel !== FREE_MODEL) {
+    const acualModel = (promptInfo.type === 'saved' ? promptInfo.model : null) ?? activeModel
+
+    if (tokenUsageExceeded && acualModel !== FREE_MODEL) {
       enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
       handleCancel()
       return
@@ -191,7 +193,7 @@ const ChatV2Content = () => {
     chatScroll.beginAutoscroll()
 
     const generationInfo: MessageGenerationInfo = {
-      model: activeModel,
+      model: acualModel,
       promptInfo,
     }
 

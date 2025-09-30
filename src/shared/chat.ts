@@ -1,6 +1,6 @@
 import z from 'zod/v4'
 import type { ChatToolDef } from './tools'
-import { validModels } from '../config'
+import { ValidModelNameSchema, validModels } from '../config'
 
 /**
  * Event emitted when text is added to a chat message
@@ -65,7 +65,7 @@ export const MessageGenerationInfoSchema = z.object({
       id: z.string(),
       name: z.string(),
       systemMessage: z.string().optional(),
-      model: z.string().optional().nullable(),
+      model: ValidModelNameSchema.optional().nullable(),
       temperature: z.number().min(0).max(1).optional().nullable(),
     }),
     z.object({
