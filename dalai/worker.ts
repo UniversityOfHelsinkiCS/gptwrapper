@@ -259,6 +259,7 @@ const worker = new Worker(
           outputFileMaskFunc: (pageNumber) => `page_${pageNumber}.png`,
           outputFolder: outputImagesDir,
         })
+        logger.info(`PDF to PNG conversion success: ${job.id}`)
       } catch (error) {
         logger.error(`Job ${job.id} failed: PDF to PNG conversion failed`, error)
         throw new Error('PDF to PNG conversion failed')
@@ -414,7 +415,7 @@ const worker = new Worker(
     } finally {
       try {
         await fs.rm(jobRootDir, { recursive: true, force: true })
-      } catch {}
+      } catch { }
     }
   },
   {
@@ -436,7 +437,7 @@ async function shutdown() {
   logger.info('Shutting down worker...')
   try {
     await worker.close()
-  } catch {}
+  } catch { }
   process.exit(0)
 }
 process.on('SIGINT', shutdown)
