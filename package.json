@@ -17,7 +17,8 @@
     "prepare": "husky install",
     "test:e2e": "playwright test",
     "test:record": "playwright codegen -o e2e/recorded.spec.ts localhost:3000",
-    "translations": "node scripts/analyzeTranslations.js"
+    "translations": "node scripts/analyzeTranslations.js",
+    "migrations": "node scripts/analyzeMigrationNames.js"
   },
   "repository": {
     "type": "git",

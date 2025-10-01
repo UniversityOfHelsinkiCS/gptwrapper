@@ -1,4 +1,5 @@
 
 npx lint-staged
 npm run translations -- --lang fi,en --quiet
+npm run migrations
 npm run tsc
