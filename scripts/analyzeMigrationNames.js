@@ -21,8 +21,16 @@ const regDate = /^(\d{4})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])_/
 // - underscore
 const regPrefix = /^\d{8}_\d{2}_/
 
-// Correct date + prefix and filename snake cased
+// Full migration name format:
+// - YYYYMMDD_NN_
+// - then any filename-safe characters (no slashes)
 const regFull = /^(?:\d{4})(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])_\d{2}_[^\\/]+$/
+
+// Date validity check using JS Date
+function isValidDate(year, month, day) {
+  const d = new Date(year, month - 1, day)
+  return d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day
+}
 
 const MIGRATIONS_PATH = './src/server/db/migrations'
 const dirPath = path.join(process.cwd(), MIGRATIONS_PATH)
@@ -35,10 +43,21 @@ for (const file of files) {
     errors.push(`${FgRed}${Bright}✗${Reset} ${file} ${FgYellow}→ must start with YYYYMMDD_NN_${Reset}`)
     continue
   }
-  if (!regDate.test(file)) {
+
+  const match = file.match(regDate)
+  if (!match) {
     errors.push(`${FgRed}${Bright}✗${Reset} ${file} ${FgYellow}→ invalid date format${Reset}`)
     continue
+  } else {
+    const year = parseInt(match[1], 10)
+    const month = parseInt(match[2], 10)
+    const day = parseInt(match[3], 10)
+    if (!isValidDate(year, month, day)) {
+      errors.push(`${FgRed}${Bright}✗${Reset} ${file} ${FgYellow}→ impossible calendar date${Reset}`)
+      continue
+    }
   }
+
   if (!regFull.test(file)) {
     errors.push(`${FgRed}${Bright}✗${Reset} ${file} ${FgYellow}→ contains invalid characters${Reset}`)
   }
