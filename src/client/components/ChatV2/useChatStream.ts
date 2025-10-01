@@ -1,5 +1,19 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { AssistantMessage, ChatEvent, MessageGenerationInfo, ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
+
+export type StreamAbortReason = 'timeout_error' | 'user_aborted' | 'conversation_cleared' | 'error'
+export class TypedAbortController<Reason extends string> {
+  private inner = new AbortController()
+  signal: AbortSignal
+
+  constructor() {
+    this.signal = this.inner.signal
+  }
+
+  abort(reason: Reason) {
+    this.inner.abort(reason)
+  }
+}
 
 type ToolCallState = ToolCallStatusEvent
 
@@ -18,7 +32,7 @@ export const useChatStream = ({
   const [generationInfo, setGenerationInfo] = useState<MessageGenerationInfo | undefined>()
   const [isStreaming, setIsStreaming] = useState(false)
   const [toolCalls, setToolCalls] = useState<Record<string, ToolCallState>>({})
-  const [streamController, setStreamController] = useState<AbortController>()
+  const streamControllerRef = useRef<TypedAbortController<StreamAbortReason>>(null)
 
   const decoder = new TextDecoder()
 
@@ -84,15 +98,6 @@ export const useChatStream = ({
           }
         }
       }
-    } catch (err: unknown) {
-      error += '\nResponse stream was interrupted'
-      onError(err)
-    } finally {
-      setStreamController(undefined)
-      setCompletion('')
-      setToolCalls({})
-      setIsStreaming(false)
-      setGenerationInfo(undefined)
 
       onComplete({
         message: {
@@ -103,6 +108,42 @@ export const useChatStream = ({
           generationInfo: baseGenerationInfo,
         },
       })
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        const reason = streamControllerRef.current?.signal.reason as StreamAbortReason | undefined
+
+        switch (reason) {
+          case 'timeout_error':
+            error += '\nTimeout error'
+            break
+
+          case 'user_aborted':
+            onComplete({
+              message: {
+                role: 'assistant',
+                content,
+                error: error.length > 0 ? error : undefined,
+                toolCalls: toolCallResultsAccum,
+                generationInfo: baseGenerationInfo,
+              },
+            })
+            return
+
+          case 'conversation_cleared':
+            setCompletion('')
+            return
+        }
+      } else {
+        error += '\nResponse stream was interrupted'
+      }
+
+      onError(err)
+    } finally {
+      streamControllerRef.current = null
+      setCompletion('')
+      setToolCalls({})
+      setIsStreaming(false)
+      setGenerationInfo(undefined)
     }
   }
 
@@ -113,6 +154,6 @@ export const useChatStream = ({
     isStreaming,
     setIsStreaming,
     toolCalls,
-    streamController,
+    streamControllerRef,
   }
 }

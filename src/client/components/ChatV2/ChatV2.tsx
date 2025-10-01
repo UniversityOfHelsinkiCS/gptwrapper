@@ -29,7 +29,7 @@ import ToolResult from './ToolResult'
 import { OutlineButtonBlack } from './general/Buttons'
 import { ChatInfo } from './general/ChatInfo'
 import { SettingsModal } from './SettingsModal'
-import { useChatStream } from './useChatStream'
+import { StreamAbortReason, TypedAbortController, useChatStream } from './useChatStream'
 import { postCompletionStreamV3 } from './api'
 import PromptSelector from './PromptSelector'
 import ModelSelector from './ModelSelector'
@@ -129,7 +129,7 @@ const ChatV2Content = () => {
 
   const disclaimerInfo = infoTexts?.find((infoText) => infoText.name === 'disclaimer')?.text[i18n.language] ?? null
 
-  const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamController, generationInfo } = useChatStream({
+  const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo } = useChatStream({
     onComplete: ({ message }) => {
       if (message.content.length > 0) {
         setMessages((prev: ChatMessage[]) => prev.concat(message))
@@ -165,6 +165,8 @@ const ChatV2Content = () => {
       return
     }
 
+    streamControllerRef.current = new TypedAbortController<StreamAbortReason>()
+
     const formData = new FormData()
 
     const file = fileInputRef.current?.files?.[0]
@@ -184,8 +186,8 @@ const ChatV2Content = () => {
     }
     setFileName('')
     setRetryTimeout(() => {
-      if (streamController) {
-        streamController.abort()
+      if (streamControllerRef.current) {
+        streamControllerRef.current.abort("timeout_error")
       }
     }, 5000)
 
@@ -209,7 +211,7 @@ const ChatV2Content = () => {
           },
           courseId,
         },
-        streamController,
+        streamControllerRef.current,
       )
 
       if (!stream && !tokenUsageAnalysis) {
@@ -240,6 +242,7 @@ const ChatV2Content = () => {
 
   const handleReset = () => {
     if (window.confirm(t('chat:emptyConfirm'))) {
+      streamControllerRef.current?.abort("conversation_cleared")
       setMessages([])
       setActiveToolResult(undefined)
       if (fileInputRef.current) {
@@ -248,11 +251,6 @@ const ChatV2Content = () => {
       setFileName('')
       setTokenUsageWarning('')
       setTokenUsageAlertOpen(false)
-      setRetryTimeout(() => {
-        if (streamController) {
-          streamController.abort()
-        }
-      }, 5000)
       clearRetryTimeout()
       dispatchAnalytics({ type: 'RESET_CHAT' })
     }
@@ -482,6 +480,7 @@ const ChatV2Content = () => {
               handleSendMessage(newMessage, false)
             }}
             handleReset={handleReset}
+            handleStop={() => streamControllerRef.current?.abort("user_aborted")}
             isMobile={isMobile}
           />
         </Box>

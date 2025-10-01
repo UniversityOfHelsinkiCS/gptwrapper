@@ -28,6 +28,7 @@ export const ChatBox = ({
   handleContinue,
   handleSubmit,
   handleReset,
+  handleStop,
   isMobile,
 }: {
   disabled: boolean
@@ -41,6 +42,7 @@ export const ChatBox = ({
   handleContinue: (message: string) => void
   handleSubmit: (message: string) => void
   handleReset: () => void
+  handleStop: () => void
   isMobile: boolean
 }) => {
   const { courseId } = useParams()
@@ -229,9 +231,16 @@ export const ChatBox = ({
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
             </Box>
             <Tooltip title={disabled ? t('chat:cancelResponse') : isShiftEnterSend ? t('chat:shiftEnterSend') : t('chat:enterSend')} arrow placement="top">
-              <IconButton type={disabled ? 'button' : 'submit'} ref={sendButtonRef} data-testid="send-chat-message">
-                {disabled ? <StopIcon /> : <Send />}
-              </IconButton>
+              {
+                disabled ?
+                  <IconButton onClick={handleStop}>
+                    <StopIcon />
+                  </IconButton>
+                  :
+                  <IconButton type={'submit'} ref={sendButtonRef} data-testid="send-chat-message">
+                    <Send />
+                  </IconButton>
+              }
             </Tooltip>
             <SendPreferenceConfiguratorModal
               open={sendPreferenceConfiguratorOpen}
