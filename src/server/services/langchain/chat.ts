@@ -1,6 +1,6 @@
 import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
 import type { BaseChatModelCallOptions } from '@langchain/core/language_models/chat_models'
-import type { AIMessageChunk, BaseMessageLike } from '@langchain/core/messages'
+import { AIMessageChunk, BaseMessageLike } from '@langchain/core/messages'
 import type { Runnable } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
@@ -146,7 +146,7 @@ export const streamChat = async ({
  * @returns An object with statistics about the chat turn and any tool calls made.
  */
 const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByName: Record<string, ChatTool>, writeEvent: WriteEventFunction, user: User) => {
-  const stream = await model.stream(messages)
+  const stream = await safelyStreamMessages(model, messages)
 
   const startTS = Date.now()
   let firstTokenTS = 0
@@ -242,5 +242,28 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
     tokenStreamingDuration,
     toolCalls,
     fullOutput,
+  }
+}
+
+const safelyStreamMessages = async (model: ChatModel, messages: BaseMessageLike[]) => {
+  try {
+    return await model.stream(messages)
+  } catch (error) {
+    if (error instanceof Error) {
+      // Handle API errors specifically.
+      // Handle content filter:
+      if ("code" in error && error.code === 'content_filter') {
+        const innerError = "error" in error ? error.error as { message: string } : null
+
+        const extraAzureInfo = innerError?.message ??
+           'The response was not generated due to the prompt triggering content filters. No further details available.'
+
+        return [new AIMessageChunk({
+          content: extraAzureInfo,
+        })]
+      }
+    }
+
+    throw error
   }
 }
