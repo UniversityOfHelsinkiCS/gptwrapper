@@ -123,8 +123,9 @@ const Course = () => {
     height: '40px',
   }
   const handleAddResponsible = async (user: User) => {
+
     const username = user.username
-    const result = await apiClient.post(`/courses/${chatInstance.id}/responsibilities/assign`, { username: username })
+    const result = await apiClient.post(`/courses/${id}/responsibilities/assign`, { username: username })
     if (result.status === 200) {
       const responsibility = result.data
       setResponsibilities([...responsibilities, responsibility])
@@ -152,7 +153,7 @@ const Course = () => {
     )
   }
   const handleRemoveResponsibility = async (responsibility) => {
-    const result = await apiClient.post(`/courses/${chatInstance.id}/responsibilities/remove`, { username: responsibility.user?.username })
+    const result = await apiClient.post(`/courses/${id}/responsibilities/remove`, { username: responsibility.user?.username })
     if (result.status === 200) {
       const filteredResponsibilities = responsibilities.filter((r) => r.id !== responsibility.id)
       setResponsibilities(filteredResponsibilities)

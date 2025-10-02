@@ -142,7 +142,7 @@ courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Re
 
 //checks if user is a admin or is responsible for the course, returns forbidden error if not
 const enforceUserHasFullAccess = async (user, chatInstance) => {
-  const isResponsibleForCourse = userAssignedAsResponsible(user.id, chatInstance)
+  const isResponsibleForCourse: boolean = userAssignedAsResponsible(user.id, chatInstance)
   const hasFullAccess: boolean = user.isAdmin || isResponsibleForCourse
   if (!hasFullAccess) {
     throw ApplicationError.Forbidden('Unauthorized')
@@ -151,9 +151,9 @@ const enforceUserHasFullAccess = async (user, chatInstance) => {
 }
 
 // returns a chatInstance, throws an chat instance not found if not found
-const getChatInstance = async (id) => {
+const getChatInstance = async (courseId) => {
   const chatInstance = await ChatInstance.findOne({
-    where: { courseId: id },
+    where: { courseId: courseId },
     include: [
       {
         model: Responsibility,
@@ -302,7 +302,7 @@ const getUserByUsername = async (username: string): Promise<User | null> => {
   return user
 }
 courseRouter.post('/:id/responsibilities/assign', async (req, res) => {
-  const chatInstanceId = req.params.id
+  const courseId = req.params.id
   const body = req.body as {
     username: string
   }
@@ -310,8 +310,8 @@ courseRouter.post('/:id/responsibilities/assign', async (req, res) => {
 
   const request = req as unknown as RequestWithUser
   const { user } = request
-  const chatInstance = await getChatInstance(chatInstanceId)
-  const hasPermission = await enforceUserHasFullAccess(user, chatInstanceId)
+  const chatInstance = await getChatInstance(courseId)
+  const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
   if (!hasPermission) {
     res.status(401).send('Unauthorized')
     return
@@ -351,7 +351,7 @@ courseRouter.post('/:id/responsibilities/assign', async (req, res) => {
 })
 
 courseRouter.post('/:id/responsibilities/remove', async (req, res) => {
-  const chatInstanceId = req.params.id
+  const courseId = req.params.id
   const body = req.body as {
     username: string
   }
@@ -359,8 +359,8 @@ courseRouter.post('/:id/responsibilities/remove', async (req, res) => {
 
   const request = req as unknown as RequestWithUser
   const { user } = request
-  const chatInstance = await getChatInstance(chatInstanceId)
-  const hasPermission = await enforceUserHasFullAccess(user, chatInstanceId)
+  const chatInstance = await getChatInstance(courseId)
+  const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
   if (!hasPermission) {
     res.status(401).send('Unauthorized')
     return
@@ -382,9 +382,10 @@ courseRouter.post('/:id/responsibilities/remove', async (req, res) => {
   const responsibilityToRemove = await Responsibility.findOne({
     where: {
       userId: assignedUserId,
-      chatInstanceId: chatInstanceId,
+      chatInstanceId: chatInstance.id,
     },
   })
+
   if (!responsibilityToRemove?.createdByUserId) {
     res.status(400).send('Can only remove user that has been manually added')
     return
