@@ -2,7 +2,7 @@ import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager
 import { AIMessage, AIMessageChunk, type BaseMessage, isHumanMessage, isSystemMessage, isToolMessage } from '@langchain/core/messages'
 import type { ChatGenerationChunk, ChatResult } from '@langchain/core/outputs'
 import { FakeStreamingChatModel } from '@langchain/core/utils/testing'
-import { basicTestContent } from './mockContent'
+import { basicTestContent, mathTestContent, mathTestContent2 } from './mockContent'
 import { StructuredTool } from '@langchain/core/tools'
 
 /**
@@ -37,6 +37,9 @@ export class MockModel extends FakeStreamingChatModel {
     } else if (lastHumanMessage.startsWith('rag')) {
       // Do a tool call
       this.chunks = toolCallChunks
+    } else if (lastHumanMessage.startsWith('math')) {
+      // Do a tool call
+      this.chunks = mathChunks
     } else if (lastHumanMessage.startsWith('temperature')) {
       // Echo the temperature
       this.chunks = [new AIMessageChunk(`Temperature: ${this.temperature}`)]
@@ -72,5 +75,11 @@ const toolCallChunks = [
         id: 'mock_document_search_id',
       },
     ],
+  }),
+]
+
+const mathChunks = [
+  new AIMessageChunk({
+    content: mathTestContent,
   }),
 ]

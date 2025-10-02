@@ -45,22 +45,22 @@ And for some general variables:
 ### Matrix Examples
 
 A simple 2x2 matrix:
-\\begin{bmatrix}
+\\[\\begin{bmatrix}
   1 & 0 \\
   0 & 1
-\\end{bmatrix}
+\\end{bmatrix}\\]
 
 A determinant:
-\\begin{vmatrix}
+\\[\\begin{vmatrix}
   a & b \\
   c & d
-\\end{vmatrix}
+\\end{vmatrix}\\]
 
 A general matrix with fractions:
-\\begin{pmatrix}
+\\[\\begin{pmatrix}
   \\frac{1}{3} & \\sqrt{3} \\\\
   \\sin(\\theta) & \\cos(\\phi)
-\\end{pmatrix}
+\\end{pmatrix}\\]
 
 ---
 
@@ -102,10 +102,10 @@ Now for an alignment:
 \\end{align*}
 
 And finally, a small matrix:
-\\begin{pmatrix}
+\\[\\begin{pmatrix}
   5 & 6 \\\\
   7 & 8
-\\end{pmatrix}
+\\end{pmatrix}\\]
 
 ---
 
@@ -127,6 +127,89 @@ A simple chemical reaction: \\(\\ch{H2 + Cl2 -> 2HCl}\\).
 An ion with charge: \\(\\ch{Fe^3+}\\) and an isotope \\(\\ch{^238U}\\).
 
 `
+
+export const mathTestContent2 = `
+---
+
+**1. Vector Addition**
+
+\\[
+\\mathbf{a} + \\mathbf{b} = 
+\\begin{pmatrix}
+a_1 \\\\ a_2 \\\\ a_3
+\\end{pmatrix}
++
+\\begin{pmatrix}
+b_1 \\\\ b_2 \\\\ b_3
+\\end{pmatrix}
+=
+\\begin{pmatrix}
+a_1 + b_1 \\\\ a_2 + b_2 \\\\ a_3 + b_3
+\\end{pmatrix}
+\\]
+
+---
+
+**2. Matrix Multiplication**
+
+\\[
+AB = 
+\\begin{pmatrix}
+1 & 2 \\\\
+3 & 4
+\\end{pmatrix}
+\\begin{pmatrix}
+5 & 6 \\\\
+7 & 8
+\\end{pmatrix}
+=
+\\begin{pmatrix}
+1 \\times 5 + 2 \\times 7 & 1 \\times 6 + 2 \\times 8 \\\\
+3 \\times 5 + 4 \\times 7 & 3 \\times 6 + 4 \\times 8
+\\end{pmatrix}
+=
+\\begin{pmatrix}
+19 & 22 \\\\
+43 & 50
+\\end{pmatrix}
+\\]
+
+---
+
+**3. Solving a System of Linear Equations**
+
+\\[
+\\begin{cases}
+2x + 3y = 5 \\\\
+4x - y = 11
+\\end{cases}
+\\]
+
+---
+
+**4. Eigenvalue Equation**
+
+\\[
+A\\mathbf{v} = \\lambda \\mathbf{v}
+\\]
+
+where \\( A \\) is a matrix, \\( \\mathbf{v} \\) is an eigenvector, and \\( \\lambda \\) is an eigenvalue.
+
+---
+
+**5. Determinant of a 2x2 Matrix**
+
+\\[
+\\det
+\\begin{pmatrix}
+a & b \\\\
+c & d
+\\end{pmatrix}
+= ad - bc
+\\]
+
+---`
+
 export const codeTestContent = `
 ### ✅ JavaScript
 

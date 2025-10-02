@@ -1,4 +1,11 @@
 export const preprocessMath = (content: string): string => {
+  // console.time('preprocessMath')
+  const result = _preprocessMath(content)
+  // console.timeEnd('preprocessMath')
+  return result
+}
+
+const _preprocessMath = (content: string): string => {
   // For preprocessing math in assistant messages from LaTex(-ish :D) format to KaTex-recognizable format
   // Consider upgrading to MathJax for more consistent formatting support if problems arise
 
@@ -17,6 +24,7 @@ export const preprocessMath = (content: string): string => {
   })
 
   processedContent = processedContent
+
     // Convert Latex align environments -> Katex aligned display math
     .replace(/\\begin\{(?:align\*?|aligned)\}([\s\S]*?)\\end\{(?:align\*?|aligned)\}/g, (_, innerContent) => {
       const alignedLines = innerContent
@@ -28,35 +36,20 @@ export const preprocessMath = (content: string): string => {
     })
 
     // Convert Latex display math \[...\] -> Katex display math `$$...$$`
-    .replace(/\\\[([\s\S]*?)\\\]/g, (match, innerContent) => {
-      return `$$${innerContent.trim()}$$`
+    .replace(/\\\[([\s\S]*?)\\\]/g, (match, innerContent: string) => {
+      return `\n$$\n${innerContent.replaceAll('\n', ' ').trim()}\n$$\n`
     })
 
     // Convert Latex inline math \(...\) -> Katex display math `$$...$$`
-    .replace(/\\\(([\s\S]*?)\\\)/g, (match, innerContent) => {
-      return `$$${innerContent.trim()}$$`
+    .replace(/\\\(([\s\S]*?)\\\)/g, (match, innerContent: string) => {
+      return `$$ ${innerContent.replaceAll('\n', ' ').trim()} $$`
     })
 
     // Convert text mode parentheses
     .replace(/\\text\{([^}]*\([^}]*\)[^}]*)\}/g, (match, innerContent) => {
       return `\\text{${innerContent.replace(/\(/g, '\\(').replace(/\)/g, '\\)')}}`
     })
-
-    // Support for matrix environments
-    .replace(/\\begin\{(p|b|v|V)?matrix\*?\}([\s\S]*?)\\end\{(p|b|v|V)?matrix\*?\}/g, (match, matrixTypeGroup, innerContent) => {
-      const matrixType = matrixTypeGroup || ''
-
-      const matrixContent = innerContent
-        .split('\n')
-        .map((line) => line.trim())
-        .filter((line) => line.length > 0)
-        .join(' \\\\\n')
-
-      const kaTeXEnv = `\\begin{${matrixType}matrix}`
-      const kaTeXEndEnv = `\\end{${matrixType}matrix}`
-
-      return `$$\n${kaTeXEnv}\n${matrixContent}\n${kaTeXEndEnv}\n$$`
-    })
+      
 
   codeBlocks.forEach((block, index) => {
     processedContent = processedContent.replace(`__CODE_BLOCK_${index}__`, block)

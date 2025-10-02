@@ -13,7 +13,7 @@ import 'katex/dist/contrib/mhchem'
 import { ArrowRight } from '@mui/icons-material'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import { t } from 'i18next'
-import { useId, useMemo } from 'react'
+import React, { useId, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AssistantMessage, ChatMessage, MessageGenerationInfo, ToolCallResultEvent, ToolCallStatusEvent, UserMessage } from '../../../shared/chat'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
@@ -122,7 +122,7 @@ const AssistantMessageInfo = ({ message }: { message: AssistantMessage }) => {
 }
 
 const AssistantMessageItem = ({ message, setActiveToolResult }: { message: AssistantMessage; setActiveToolResult: (data: ToolCallResultEvent) => void }) => {
-  const processedContent = preprocessMath(message.content)
+  const processedContent = React.useMemo(() => preprocessMath(message.content), [message.content])
   const katexOptions = {
     macros: {
       '\\abs': '\\left|#1\\right|',
@@ -158,8 +158,8 @@ const AssistantMessageItem = ({ message, setActiveToolResult }: { message: Assis
     extensions: ['mhchem.js'],
     output: 'htmlAndMathml',
     errorColor: '#cc0000',
-    throwOnError: false,
-    strict: false, // disables logging katex warnings/errors – if debugging, turn these two on
+    throwOnError: true,
+    strict: "error", // disables logging katex warnings/errors – if debugging, turn these two on
   }
   let codeCount = 0
 
