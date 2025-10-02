@@ -82,7 +82,7 @@ export type MessageGenerationInfo = z.Infer<typeof MessageGenerationInfoSchema>
 
 const ChatMessageSchema = z.object({
   role: z.enum(['user', 'assistant']),
-  content: z.string().min(0).max(400_000),
+  content: z.string().min(0).max(1_200_000),
 })
 
 export const PostStreamSchemaV3 = z.object({
