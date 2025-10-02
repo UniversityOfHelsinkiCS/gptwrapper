@@ -115,7 +115,7 @@
     "modelDisabled": "Kielimalli ei ole käytettävissä",
     "attachFile": "Liitä tiedosto",
     "email": "Keskustelu lähetetään osoitteeseen {{email}}",
-    "cancelResponse": "Vastausten keskeyttäminen on toistaiseksi pois käytöstä.",
+    "cancelResponse": "Keskeytä vastauksen generointi",
     "searchResults": "Hakutulokset",
     "warning": "Uudessa chattinäkymässä on tällä hetkellä ongelmia ja vastausten generointi on hidastunut. Vanha chattinäkymä toimii normaalisti.",
     "customPrompt": "Kustomoitu alustus"
