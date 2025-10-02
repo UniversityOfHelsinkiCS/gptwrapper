@@ -24,17 +24,6 @@ const _preprocessMath = (content: string): string => {
   })
 
   processedContent = processedContent
-
-    // Convert Latex align environments -> Katex aligned display math
-    .replace(/\\begin\{(?:align\*?|aligned)\}([\s\S]*?)\\end\{(?:align\*?|aligned)\}/g, (_, innerContent) => {
-      const alignedLines = innerContent
-        .split('\n')
-        .map((line) => line.trim())
-        .filter((line) => line.length > 0)
-        .join(' \\\\\n')
-      return `$$\n\\begin{aligned}\n${alignedLines}\n\\end{aligned}\n$$`
-    })
-
     // Convert Latex display math \[...\] -> Katex display math `$$...$$`
     .replace(/\\\[([\s\S]*?)\\\]/g, (match, innerContent: string) => {
       return `\n$$\n${innerContent.replaceAll('\n', ' ').trim()}\n$$\n`
