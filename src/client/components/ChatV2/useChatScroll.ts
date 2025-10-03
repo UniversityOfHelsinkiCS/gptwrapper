@@ -38,10 +38,18 @@ export const useChatScroll = () => {
     startTransition(() => {
       isUserDisabled = false
       setIsAutoScrolling(true)
+      // Immediate scroll to show loading dots right away for better UX
       window.scrollTo({
         top: document.body.scrollHeight,
-        behavior: 'smooth',
+        behavior: 'instant',
       })
+      // Follow up with smooth scroll after a brief delay to maintain smooth UX
+      setTimeout(() => {
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: 'smooth',
+        })
+      }, 50)
     })
   }
 

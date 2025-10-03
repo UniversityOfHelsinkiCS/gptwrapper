@@ -192,7 +192,12 @@ const ChatV2Content = () => {
     }, 5000)
 
     setIsStreaming(true)
-    chatScroll.beginAutoscroll()
+    
+    // Scroll immediately to show loading dots for better UX feedback
+    // Small delay ensures React has rendered the loading message
+    setTimeout(() => {
+      chatScroll.beginAutoscroll()
+    }, 10)
 
     const generationInfo: MessageGenerationInfo = {
       model: acualModel,
