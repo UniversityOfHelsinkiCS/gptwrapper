@@ -41,29 +41,29 @@ jobs:
           username: toska+github
           password: ${{ secrets.QUAY_IO_TOKEN }}
 
-  # sentry-release:
-  #   runs-on: blacksmith-4vcpu-ubuntu-2404
-  #   needs: build-and-push-to-production
-  #   timeout-minutes: 2
+  sentry-release:
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    needs: build-and-push-to-production
+    timeout-minutes: 2
 
-  #   steps:
-  #     - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Pull image and create a container
-  #       run: docker create --name gptwrapper quay.io/toska/gptwrapper:production
+      - name: Pull image and create a container
+        run: docker create --name gptwrapper quay.io/toska/gptwrapper:production
 
-  #     - name: Copy assets from the container
-  #       run: docker cp gptwrapper:/opt/app-root/src/dist ./dist
+      - name: Copy assets from the container
+        run: docker cp gptwrapper:/opt/app-root/src/dist ./dist
 
-  #     - name: Create Sentry release
-  #       uses: getsentry/action-release@v1
-  #       env:
-  #         SENTRY_URL: https://toska.cs.helsinki.fi/
-  #         SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_TOKEN }}
-  #         SENTRY_ORG: toska
-  #         SENTRY_PROJECT: currechat-frontend
-  #       with:
-  #         environment: production
-  #         set_commits: 'skip'
-  #         sourcemaps: ./dist/assets
-  #         url_prefix: '~/assets'
+      - name: Create Sentry release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_URL: ${{ secrets.SENTRY_URL }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_TOKEN }}
+          SENTRY_ORG: sentry
+          SENTRY_PROJECT: currechat-frontend
+        with:
+          environment: production
+          set_commits: 'skip'
+          sourcemaps: ./dist/assets
+          url_prefix: '~/assets'
