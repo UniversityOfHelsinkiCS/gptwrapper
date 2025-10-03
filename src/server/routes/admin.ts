@@ -62,13 +62,14 @@ const getUsages = async () => {
     FROM user_chat_instance_usages u
     LEFT JOIN responsibilities r
     ON u.user_id = r.user_id AND u.chat_instance_id = r.chat_instance_id
-    WHERE r.user_id IS NULL AND usage_count > 0;
+    WHERE r.user_id IS NULL AND total_usage_count > 0;
   `)) as any[]
 
   return usages.map((usage) => ({
     id: usage.id,
     userId: usage.user_id,
-    usageCount: usage.usage_count,
+    usageCount: usage.usage_count, //<--- this get reset
+    totalUsageCount: usage.total_usage_count, //<--- this wont get reset
     chatInstanceId: usage.chat_instance_id,
   }))
 }
@@ -90,7 +91,7 @@ adminRouter.get('/statistics', async (req, res) => {
         }
       }
       courses[usage.chatInstanceId].students += 1
-      courses[usage.chatInstanceId].usedTokens += usage.usageCount
+      courses[usage.chatInstanceId].usedTokens += usage.totalUsageCount //we are interested in how many tokens totally are used in a course
     }
 
     const getTermsOf = ({ courseActivityPeriod }): Term[] => {
