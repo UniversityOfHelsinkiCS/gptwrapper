@@ -39,7 +39,6 @@ type IngestionJobData = {
 export const submitIngestionJob = async (ragFile: RagFile) => {
   const s3Key = FileStore.getRagFileKey(ragFile)
   const jobId = getIngestionJobId(ragFile)
-  console.log(`Submitting Ingestion job ${jobId}`)
   const jobData: IngestionJobData = {
     type: 'ingestion',
     s3Bucket: S3_BUCKET,

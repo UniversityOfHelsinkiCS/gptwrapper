@@ -1,8 +1,57 @@
 import IORedis from 'ioredis'
 import { BMQ_REDIS_CA, BMQ_REDIS_CERT, BMQ_REDIS_HOST, BMQ_REDIS_KEY, BMQ_REDIS_PORT, S3_BUCKET } from '../../util/config'
-import { BaseJobOptions, Queue, QueueEvents } from 'bullmq'
+import { Job, Queue, QueueEvents } from 'bullmq'
 import { FileStore } from '../rag/fileStore'
 import { RagFile } from '../../db/models'
+import { getDocument, PDFPageProxy } from 'pdfjs-dist/legacy/build/pdf.mjs'
+import logger from 'src/server/util/logger'
+import { ApplicationError } from 'src/server/util/ApplicationError'
+
+const extractPageText = async (page: PDFPageProxy): Promise<string> => {
+  const textContent = await page.getTextContent()
+  const parts: string[] = []
+  for (const item of textContent.items as any[]) {
+    if (typeof item.str === 'string' && item.str.length > 0) {
+      parts.push(item.str)
+    }
+  }
+  const text = parts.join(' ')
+  return text.trim()
+}
+
+type PageInfo = {
+  text: string
+  png: Uint8Array
+  job?: Job
+}
+
+const analyzeAndPreparePDFPages = async (pdfBytes: Uint8Array, scale = 1.0) => {
+  const loadingTask = getDocument({ data: pdfBytes })
+  const pdf = await loadingTask.promise
+  const pageCount = pdf.numPages
+
+  const pageInfo: PageInfo[] = []
+
+  for (let i = 1; i <= pageCount; i++) {
+    const page = await pdf.getPage(i)
+
+    const viewport = page.getViewport({ scale })
+    const canvasFactory = pdf.canvasFactory
+    //@ts-expect-error
+    const canvasAndContext = canvasFactory.create(viewport.width, viewport.height)
+
+    await page.render({ canvasContext: canvasAndContext.context, viewport } as any).promise
+    const pngBuffer = canvasAndContext.canvas.toBuffer('image/png')
+
+    const text = await extractPageText(page)
+    pageInfo.push({
+      text,
+      png: new Uint8Array(pngBuffer)
+    })
+  }
+
+  return pageInfo
+}
 
 let creds: Record<string, any> = {
   host: BMQ_REDIS_HOST,
@@ -24,7 +73,7 @@ if (BMQ_REDIS_CA !== 'none') {
 
 const connection = new IORedis(creds)
 
-export const queue = new Queue('llama-scan-queue', {
+export const queue = new Queue('vlm-queue', {
   connection,
 })
 
@@ -33,14 +82,14 @@ export const getPdfParsingJobId = (ragFile: RagFile) => {
   return `scan:${S3_BUCKET}/${s3Key}`
 }
 
-export const pdfQueueEvents = new QueueEvents('llama-scan-queue', { connection })
+export const pdfQueueEvents = new QueueEvents('vlm-queue', { connection })
 
-type PDFJobData = {
-  type: 'pdf-parsing'
-  s3Bucket: string
-  s3Key: string
-  outputBucket: string
+type VLMJobData = {
+  type: 'vlm-job'
   ragFileId: number
+  pageNumber: number
+  bytes: string
+  text: string
 }
 
 /**
@@ -48,18 +97,34 @@ type PDFJobData = {
  * @param ragFile
  * @returns the job
  */
-export const submitPdfParsingJob = async (ragFile: RagFile) => {
-  const s3Key = FileStore.getRagFileKey(ragFile)
-  const jobId = getPdfParsingJobId(ragFile)
-  console.log(`Submitting PDF parsing job ${jobId}`)
-  const jobData: PDFJobData = {
-    type: 'pdf-parsing',
-    s3Bucket: S3_BUCKET,
-    s3Key,
-    outputBucket: S3_BUCKET,
-    ragFileId: ragFile.id,
-  }
-  const job = await queue.add(jobId, jobData, { jobId, removeOnComplete: true, removeOnFail: true })
+export const submitPdfParsingJobs = async (ragFile: RagFile) => {
+  const pdfBytes = await FileStore.readRagFileContextToBytes(ragFile)
 
-  return job
+  if (!pdfBytes) {
+    console.error(`Failed to read PDF text file ${ragFile.filename} in S3`)
+    throw ApplicationError.InternalServerError('Failed to read PDF text file')
+  }
+  const pages = await analyzeAndPreparePDFPages(pdfBytes)
+
+  const baseJobId = getPdfParsingJobId(ragFile)
+
+  for (let i = 0; i < pages.length; i++) {
+    const pageNumber = i + 1
+    const info = pages[i]
+    const jobId = `${baseJobId}:page:${pageNumber}`
+
+    const jobData: VLMJobData = {
+      type: 'vlm-job',
+      ragFileId: ragFile.id,
+      pageNumber,
+      bytes: Buffer.from(info.png).toString('base64'),
+      text: info.text,
+    }
+
+    logger.info(`Submitting PDF parsing job ${jobId}`)
+
+    info.job = await queue.add(jobId, jobData)
+  }
+
+  return pages
 }

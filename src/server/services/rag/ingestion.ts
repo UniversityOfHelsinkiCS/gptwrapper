@@ -1,7 +1,7 @@
 import { Document } from '@langchain/core/documents'
 import { MarkdownTextSplitter, RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
 import { RagFile, type RagIndex } from '../../db/models'
-import { pdfQueueEvents, submitPdfParsingJob } from '../jobs/pdfParsing.job'
+import { pdfQueueEvents, submitPdfParsingJobs } from '../jobs/pdfParsing.job'
 import { FileStore } from './fileStore'
 import { getRedisVectorStore } from './vectorStore'
 import { ingestionQueueEvents, submitIngestionJob } from '../jobs/ingestion.job'
@@ -53,14 +53,30 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, job: J
   await job.updateProgress({ progress, message: 'Scanning file' })
 
   if (needToParse) {
-    const pdfJob = await submitPdfParsingJob(ragFile)
+    const pages = await submitPdfParsingJobs(ragFile)
 
     try {
-      await pdfJob.waitUntilFinished(pdfQueueEvents)
+
+      const results = await Promise.all(
+        pages.map(p => {
+          return (p.job!.waitUntilFinished(pdfQueueEvents))
+        })
+      )
+
+      const transcriptions: string[] = results.map(r => r.transcription ?? '')
+      const combinedText = transcriptions.join('\n\n')
+
+      await FileStore.writeRagFileTextContent(ragFile, combinedText)
+
+      // for removing dangling jobs
+      await Promise.allSettled(
+        pages
+          .map(p => p.job!.remove())
+      )
 
       progress = 97.5
     } catch (error: any) {
-      console.error('Error waiting for PDF parsing job to finish:', error)
+      console.error('Error waiting for PDF parsing jobs to finish:', error)
       await ragFile.update({ error: 'PDF parsing failed', pipelineStage: 'error' })
       return
     }

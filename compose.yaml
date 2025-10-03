@@ -53,14 +53,19 @@ services:
   #     sleep 5 && \
   #     ollama pull qwen2.5vl:7b && \
   #     wait"]
+  #   healthcheck:
+  #     test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:11434/api/tags']
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
 
   dalai:
     build:
       context: ./dalai
       dockerfile: dev.Dockerfile
     environment:
-      - OLLAMA_URL=http://host.docker.internal:11434
-      #  - OLLAMA_URL=http://ollama:11434
+      # - OLLAMA_URL=http://host.docker.internal:11434
+      - OLLAMA_URL=http://ollama:11434
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - S3_HOST=http://minio:9000

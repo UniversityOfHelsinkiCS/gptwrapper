@@ -109,6 +109,7 @@
     "notistack": "^3.0.1",
     "openai": "4.102.0",
     "pdf-parse-fork": "^1.2.0",
+    "pdfjs-dist": "^5.4.149",
     "pg": "^8.11.3",
     "react": "19.1.1",
     "react-dom": "19.1.1",

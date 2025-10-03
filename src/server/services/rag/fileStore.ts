@@ -123,19 +123,27 @@ export const FileStore = {
     return
   },
 
-  async saveText(s3Key: string, text: string) {
+  async readRagFileContextToBytes(ragFile: RagFile) {
+    const s3Key = FileStore.getRagFileKey(ragFile)
     try {
-      await s3Client.send(
-        new PutObjectCommand({
-          Bucket: S3_BUCKET,
-          Key: s3Key,
-          Body: text,
-          ContentType: 'text/plain',
-        }),
-      )
+      const obj = await s3Client.send(new GetObjectCommand({ Bucket: S3_BUCKET, Key: s3Key }))
+      const buffer = await streamToBuffer(obj.Body as NodeJS.ReadableStream)
+      return new Uint8Array(buffer)
     } catch (error) {
-      console.error(`Failed to save text content to ${s3Key} in S3:`, error)
-      throw ApplicationError.InternalServerError(`Failed to save text content`)
+      // Check if key does not exist
+      if (error instanceof NoSuchKey) {
+        return null
+      }
+    }
+  },
+
+  async writeRagFileTextContent(ragFile: RagFile, textContent: string) {
+    const s3Key = FileStore.getRagFileKey(ragFile)
+    const pdfTextKey = getPdfTextKey(s3Key)
+    try {
+      await s3Client.send(new PutObjectCommand({ Bucket: S3_BUCKET, Key: pdfTextKey, Body: textContent, ContentType: 'text/markdown charset=utf-8' }))
+    } catch (error) {
+      console.error(`Error while uploading file to s3: ${error}`)
     }
   },
 }
@@ -147,4 +155,13 @@ const streamToString = (stream: any): Promise<string> => {
     stream.on('error', reject)
     stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')))
   })
+}
+
+
+const streamToBuffer = async (stream: NodeJS.ReadableStream): Promise<Buffer> => {
+  const chunks: Buffer[] = []
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+  }
+  return Buffer.concat(chunks)
 }
