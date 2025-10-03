@@ -122,6 +122,12 @@ const Course = () => {
     boxSizing: 'borderBox',
     height: '40px',
   }
+
+  const isAdminOrResponsible = () => {
+    return user.isAdmin || chatInstance.responsibilities.find((r) => r.user.username === user.username)
+  }
+  const userIsAdminOrResponsible = isAdminOrResponsible()
+
   const handleAddResponsible = async (user: User) => {
 
     const username = user.username
@@ -236,7 +242,7 @@ const Course = () => {
             )}
           </div>
 
-          {user.isAdmin && (
+          {userIsAdminOrResponsible && (
             <>
               <Button onClick={() => setShowTeachers(!showTeachers)} style={{ marginTop: 10, marginLeft: -8 }}>
                 {showTeachers ? t('admin:hideTeachers') : t('admin:showTeachers')}
