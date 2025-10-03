@@ -28,17 +28,16 @@ export default defineConfig({
   plugins: [
     react(),
     sentryVitePlugin({
-      disable: !inProduction, // Use this only when making the production build. This should only happen in CI with SENTRY_AUTH_TOKEN specified.
-      org: 'toska',
+      org: 'sentry',
       project: 'currechat-frontend',
-      url: 'https://toska.cs.helsinki.fi/',
+      url: 'https://toska.it.helsinki.fi/',
       telemetry: false,
     }),
   ],
   base,
   build: {
     minify: inCI ? false : 'esbuild',
-    sourcemap: inProduction,
+    sourcemap: true,
   },
   server: {
     proxy: {

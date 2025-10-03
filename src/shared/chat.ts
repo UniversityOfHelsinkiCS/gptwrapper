@@ -1,6 +1,6 @@
 import z from 'zod/v4'
 import type { ChatToolDef } from './tools'
-import { ValidModelNameSchema, validModels } from '../config'
+import { ValidModelNameSchema } from '../config'
 
 /**
  * Event emitted when text is added to a chat message
