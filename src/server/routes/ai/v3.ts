@@ -123,6 +123,9 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     if (prompt.ragIndex) {
       const searchTool = generationInfo.model === 'mock' ? getMockRagIndexSearchTool(prompt.ragIndex) : getRagIndexSearchTool(prompt.ragIndex)
       tools.push(searchTool)
+
+      res.locals.chatCompletionMeta.ragIndexId = prompt.ragIndex.id
+      res.locals.chatCompletionMeta.ragIndex = prompt.ragIndex.metadata.name
     }
 
     res.locals.chatCompletionMeta.promptId = prompt.id
