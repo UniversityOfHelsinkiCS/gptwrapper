@@ -52,6 +52,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, job: J
   let progress = 2.5
   await job.updateProgress({ progress, message: 'Scanning file' })
 
+  let finalText: string | null = null
   if (needToParse) {
     const pages = await submitPdfParsingJobs(ragFile)
 
@@ -62,10 +63,11 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, job: J
       const total = pages.length || 1
       let completed = 0
 
-      const results: Array<{ transcription?: string }> = []
+      const transcriptions: Array<string> = []
       for (const p of pages) {
-        await p.job!.waitUntilFinished(pdfQueueEvents)
-        results.push({ transcription: p.job!.returnvalue?.transcription ?? '' })
+        transcriptions.push(
+          await p.job!.waitUntilFinished(pdfQueueEvents) ?? ''
+        )
         completed += 1
         const fraction = completed / total
         const pct = Math.round(start + (end - start) * fraction)
@@ -73,10 +75,9 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, job: J
       }
 
 
-      const transcriptions: string[] = results.map(r => r.transcription ?? '')
-      const combinedText = transcriptions.join('\n\n')
+      finalText = transcriptions.join('\n\n')
 
-      await FileStore.writeRagFileTextContent(ragFile, combinedText)
+      await FileStore.writeRagFileTextContent(ragFile, finalText)
 
       // for removing dangling jobs
       await Promise.allSettled(
@@ -91,19 +92,18 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, job: J
     }
   } else {
     progress = 50
+    finalText = await FileStore.readRagFileTextContent(ragFile)
   }
   await job.updateProgress({ progress, message: 'Embedding', eta: 2000 })
 
-  const text = await FileStore.readRagFileTextContent(ragFile)
-
-  if (text === null) {
+  if (finalText === null) {
     console.error('Error reading rag file text: file does not exist')
     await ragFile.update({ error: 'Error reading rag file text: file does not exist' })
     return
   }
 
   const document = new Document({
-    pageContent: text,
+    pageContent: finalText,
   })
 
   const splitter = isMarkdown(ragFile.fileType) ? markdownTextSplitter : defaultTextSplitter
@@ -123,10 +123,10 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, job: J
   }
 
   const embeddings = await vectorStore.embeddings.embedDocuments(chunkDocuments.map((d) => d.pageContent))
+  
+  await vectorStore.addVectors(embeddings, chunkDocuments)
+  
+  await ragFile.update({ pipelineStage: 'completed' })
 
   console.timeEnd(`Ingestion ${ragFile.filename}`)
-
-  await vectorStore.addVectors(embeddings, chunkDocuments)
-
-  await ragFile.update({ pipelineStage: 'completed' })
 }
