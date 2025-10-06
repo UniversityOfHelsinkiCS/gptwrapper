@@ -1,5 +1,5 @@
 import express from 'express'
-import { Op, Sequelize } from 'sequelize'
+import { Op, Sequelize, WhereOptions } from 'sequelize'
 
 import type { ActivityPeriod, RequestWithUser } from '../types'
 import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, User, Responsibility, Discussion } from '../db/models'
@@ -282,9 +282,14 @@ courseRouter.put('/:id', async (req, res) => {
   res.send(chatInstance)
 })
 
-const userAssignedAsResponsible = (userId, chatInstance) => {
-  const isResponsible: boolean = chatInstance.responsibilities
-    ?.map((r) => {
+const userAssignedAsResponsible = (userId, chatInstance: ChatInstance) => {
+  const responsibilities = chatInstance.responsibilities
+  if(!responsibilities){
+    return false
+  }
+
+  const isResponsible = responsibilities
+    .map((r: Responsibility) => {
       return r.user?.id
     })
     .filter(Boolean)
@@ -398,4 +403,72 @@ courseRouter.post('/:id/responsibilities/remove', async (req, res) => {
     res.status(500).send('Unknown error occurred')
   }
 })
+
+
+courseRouter.get('/:id/responsibilities/users/:search', async (req, res) => {
+
+  const {id: courseId, search: search } = req.params
+
+  const request = req as unknown as RequestWithUser
+  const { user } = request
+  const chatInstance = await getChatInstance(courseId)
+  const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
+  if (!hasPermission) {
+    res.status(401).send('Unauthorized')
+    return
+  }
+
+  let where = {} as WhereOptions<User>
+
+  if (search.split(' ').length > 1) {
+    const firstNames = search.split(' ')[0]
+    const lastName = search.split(' ')[1]
+
+    where = {
+      firstNames: {
+        [Op.iLike]: `%${firstNames}%`,
+      },
+      lastName: {
+        [Op.iLike]: `%${lastName}%`,
+      },
+    }
+  } else {
+    where = {
+      [Op.or]: [
+        {
+          username: {
+            [Op.iLike]: `%${search}%`,
+          },
+        },
+        {
+          studentNumber: {
+            [Op.iLike]: `%${search}%`,
+          },
+        },
+        {
+          primaryEmail: {
+            [Op.iLike]: `%${search}%`,
+          },
+        },
+      ],
+    }
+  }
+
+  const matches = await User.findAll({
+    where,
+    limit: 20,
+  })
+
+  const results = matches.map((user: User) =>{return  {
+    id: user.id,
+    username: user.username,
+    primaryEmail: user.primaryEmail,
+    firstNames: user.firstNames,
+    lastName: user.lastName,
+  
+  }})
+
+  res.send(matches)
+})
+
 export default courseRouter

@@ -6,6 +6,7 @@ import useResetUsageMutation from '../../hooks/useResetUsageMutation'
 import useUserSearch from '../../hooks/useUserSearch'
 
 import type { User } from '../../types'
+import useResponsibilityUserSearch from '../../hooks/useResponsibilityUserSearch'
 
 const handleLoginAs = (user: User) => () => {
   localStorage.setItem('adminLoggedInAs', user.id)
@@ -113,9 +114,9 @@ const ActionUserTable = ({
   actionText,
   drawActionComponent
 }: {
-  users: User[]
+  users: User[] | any
   actionText: string
-  drawActionComponent: (user: User) => any
+  drawActionComponent: (user: User | any) => any
 }) => {
   const { t } = useTranslation()
   if (!users || users.length === 0) return null
@@ -212,9 +213,10 @@ const UserSearch = () => {
 //a component which allows users to be searched in order to perform some kind of action with the user
 export const ActionUserSearch = ({
   actionText,
-  drawActionComponent }: {
+  drawActionComponent,
+  }: {
   actionText: string
-  drawActionComponent: (user: User) => any
+  drawActionComponent: (user: any) => any
 }) => {
   const [search, setSearch] = useState('')
   const { users, isLoading, refetch } = useUserSearch(search)
@@ -222,7 +224,39 @@ export const ActionUserSearch = ({
 
   useEffect(() => {
     if (search && search.length > 4) {
-      refetch()
+        refetch()
+    }
+  }, [search])
+
+  return (
+    <Box>
+      <Input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('admin:searchUsers')} />
+
+      {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
+
+      {isLoading && <div>Loading...</div>}
+      {users && <ActionUserTable users={users}  actionText={actionText} drawActionComponent={drawActionComponent} />}
+    </Box>
+  )
+}
+
+//component that also allows an action to be done on a user, by an admin or by an user that is responsible for a course
+export const ResponsibilityActionUserSearch = ({
+  actionText,
+  drawActionComponent,
+  courseId
+  }: {
+  actionText: string
+  drawActionComponent: (user: any) => any
+  courseId: string
+  }) => {
+  const [search, setSearch] = useState('')
+  const { users, isLoading, refetch} = useResponsibilityUserSearch(search, courseId)
+  const { t } = useTranslation()
+
+  useEffect(() => {
+    if (search && search.length > 4) {
+        refetch()
     }
   }, [search])
 

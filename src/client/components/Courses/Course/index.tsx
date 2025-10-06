@@ -35,7 +35,7 @@ import { RouterTabs } from '../../common/RouterTabs'
 import Discussion from './Discussions'
 import { ApiErrorView } from '../../common/ApiErrorView'
 import apiClient from '../../../util/apiClient'
-import { ActionUserSearch } from '../../Admin/UserSearch'
+import { ActionUserSearch, ResponsibilityActionUserSearch } from '../../Admin/UserSearch'
 import { useCourseRagIndices } from '../../../hooks/useRagIndices'
 import { PromptEditor } from '../../Prompt/PromptEditor'
 import { OutlineButtonBlack } from '../../ChatV2/general/Buttons'
@@ -296,7 +296,7 @@ const Course = () => {
             overflowY: 'scroll',
           }}
         >
-          <ActionUserSearch actionText={t('course:add')} drawActionComponent={drawActionComponent} />
+          <ResponsibilityActionUserSearch courseId={id} actionText={t('course:add')} drawActionComponent={drawActionComponent} />
         </Box>
       </Modal>
 
