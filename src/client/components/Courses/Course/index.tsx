@@ -159,6 +159,10 @@ const Course = () => {
     )
   }
   const handleRemoveResponsibility = async (responsibility) => {
+    const confirmation = window.confirm(t('course:confirmRemoval'))
+    if(!confirmation){
+      return
+    }
     const result = await apiClient.post(`/courses/${id}/responsibilities/remove`, { username: responsibility.user?.username })
     if (result.status === 200) {
       const filteredResponsibilities = responsibilities.filter((r) => r.id !== responsibility.id)

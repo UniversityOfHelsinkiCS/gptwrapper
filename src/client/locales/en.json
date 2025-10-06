@@ -306,7 +306,8 @@
     "customResponsibility": "manually added",
     "add": "add",
     "sourceMaterials": "Source materials",
-    "settings": "course settings"
+    "settings": "course settings",
+    "confirmRemoval": "Confirm removal"
   },
   "prompt": {
     "createNew": "Create new prompt",

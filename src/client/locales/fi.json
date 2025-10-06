@@ -307,7 +307,8 @@
     "customResponsibility": "manuaalisesti lisätty",
     "add": "lisää",
     "sourceMaterials": "Lähdemateriaalit",
-    "settings": "kurssin asetukset"
+    "settings": "kurssin asetukset",
+    "confirmRemoval": "Vahvista poistaminen"
   },
   "prompt": {
     "createNew": "Luo uusi alustus",
