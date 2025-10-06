@@ -57,11 +57,21 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, job: J
 
     try {
 
-      const results = await Promise.all(
-        pages.map(p => {
-          return (p.job!.waitUntilFinished(pdfQueueEvents))
-        })
-      )
+      const start = 5
+      const end = 97.5
+      const total = pages.length || 1
+      let completed = 0
+
+      const results: Array<{ transcription?: string }> = []
+      for (const p of pages) {
+        await p.job!.waitUntilFinished(pdfQueueEvents)
+        results.push({ transcription: p.job!.returnvalue?.transcription ?? '' })
+        completed += 1
+        const fraction = completed / total
+        const pct = Math.round(start + (end - start) * fraction)
+        await job.updateProgress({ progress: pct, message: 'Parsing' })
+      }
+
 
       const transcriptions: string[] = results.map(r => r.transcription ?? '')
       const combinedText = transcriptions.join('\n\n')
@@ -74,7 +84,6 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, job: J
           .map(p => p.job!.remove())
       )
 
-      progress = 97.5
     } catch (error: any) {
       console.error('Error waiting for PDF parsing jobs to finish:', error)
       await ragFile.update({ error: 'PDF parsing failed', pipelineStage: 'error' })
