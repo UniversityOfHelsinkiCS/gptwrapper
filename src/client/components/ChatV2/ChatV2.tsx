@@ -36,6 +36,7 @@ import ModelSelector from './ModelSelector'
 import { ConversationSplash } from './general/ConversationSplash'
 import { PromptStateProvider, usePromptState } from './PromptState'
 import z from 'zod/v4'
+import useCurrentUser from '../../hooks/useCurrentUser'
 
 function useLocalStorageStateWithURLDefault<T>(key: string, defaultValue: string, urlKey: string, schema: z.ZodType<T>) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -75,6 +76,7 @@ const ChatV2Content = () => {
 
   const { data: course } = useCourse(courseId)
   const { infoTexts } = useInfoTexts()
+  const { user } = useCurrentUser()
 
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
 
@@ -317,12 +319,14 @@ const ChatV2Content = () => {
   }
 
   if (course?.activityPeriod) {
+    const isResponsible = course.responsibilities?.some((r) => r.user.id === user?.id)
+
     const { startDate, endDate } = course.activityPeriod
     const start = new Date(startDate)
     const end = new Date(endDate)
     const now = new Date()
 
-    if (now < start) {
+    if (now < start && !isResponsible) {
       return (
         <Box>
           <ChatInfo course={course} />
@@ -333,7 +337,7 @@ const ChatV2Content = () => {
       )
     }
 
-    if (now > end) {
+    if (now > end && !isResponsible) {
       return (
         <Box>
           <ChatInfo course={course} />
