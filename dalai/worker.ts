@@ -111,7 +111,7 @@ const worker = new Worker(
     } catch (error) {
       logger.error(`Job ${job.id}: transcription got error: ${error}`)
     }
-    return { transcription }
+    return transcription
   },
   {
     connection
