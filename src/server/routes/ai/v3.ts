@@ -2,7 +2,7 @@ import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
 import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction } from '../../../config'
 import { PostStreamSchemaV3, type ChatEvent, type ChatMessage } from '../../../shared/chat'
-import { ChatInstance, Discussion, Prompt, RagIndex, UserChatInstanceUsage } from '../../db/models'
+import { ChatInstance, Discussion, Enrolment, Prompt, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
 import { calculateUsage, checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { streamChat } from '../../services/langchain/chat'
 import { getMockRagIndexSearchTool } from '../../services/rag/mockSearchTool'
@@ -14,6 +14,8 @@ import getEncoding from '../../util/tiktoken'
 import { getModelContextLimit } from '../../util/util'
 import { parseFileAndAddToLastMessage } from './fileParsing'
 import { upload } from './multer'
+import { checkIamAccess } from 'src/server/util/iams'
+import { getOwnCourses } from 'src/server/services/chatInstances/access'
 
 const router = express.Router()
 
@@ -36,9 +38,18 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   if (courseId) {
     course = await ChatInstance.findOne({
       where: { courseId },
+      include: [
+        { model: Enrolment, as: 'enrolments', where: { userId: user.id }, required: false },
+        { model: Responsibility, as: 'responsibilities', where: { userId: user.id }, required: false },
+      ],
     })
     if (!course) {
       throw ApplicationError.NotFound('Course not found')
+    }
+
+    // Authorize course user
+    if (!user.isAdmin && !course?.responsibilities?.length && !course?.enrolments?.length) {
+      throw ApplicationError.Forbidden('Not authorized for this course')
     }
 
     const [chatInstanceUsage] = await UserChatInstanceUsage.findOrCreate({
@@ -50,6 +61,11 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     course.currentUserUsage = chatInstanceUsage
 
     res.locals.chatCompletionMeta.course = course.name?.fi
+  } else {
+    // If using general chat, user must be a teacher on some course, have IAM access, or be admin
+    if (!user.isAdmin && !checkIamAccess(user.iamGroups) && !(await getOwnCourses(user)).length) {
+      throw ApplicationError.Forbidden('Not authorized for general chat')
+    }
   }
 
   const isFreeModel = generationInfo.model === FREE_MODEL

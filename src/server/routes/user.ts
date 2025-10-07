@@ -7,11 +7,9 @@ import { User } from '../db/models'
 import { getUserStatus, getUsage } from '../services/chatInstances/usage'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { getLastRestart } from '../util/lastRestart'
-import { accessIams } from '../util/config'
 import { ApplicationError } from '../util/ApplicationError'
 import { UserPreferencesSchema } from '../../shared/user'
-
-const checkIamAccess = (iamGroups: string[]) => accessIams.some((iam) => iamGroups.includes(iam))
+import { checkIamAccess } from '../util/iams'
 
 const isNowOrInFuture = ({ chatInstance }: { chatInstance: ChatInstance }) =>
   chatInstance.usageLimit > 0 && new Date() <= new Date(chatInstance.activityPeriod.endDate)
@@ -25,8 +23,10 @@ userRouter.get('/login', async (req, res) => {
 
   const hasIamAccess = checkIamAccess(iamGroups)
 
-  const enrolledCourseIds = await getEnrolledCourseIds(user)
-  const teacherCourses = await getOwnCourses(user)
+  const [enrolledCourseIds, teacherCourses] = await Promise.all([
+    getEnrolledCourseIds(user),
+    getOwnCourses(user),
+  ])
 
   const courses = enrolledCourseIds.concat(teacherCourses)
   const hasCourseAccess = courses.length > 0
