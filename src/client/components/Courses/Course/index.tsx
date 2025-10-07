@@ -1,4 +1,6 @@
-import { Close, Edit, OpenInNew } from '@mui/icons-material'
+import Close from '@mui/icons-material/Close'
+import Edit from '@mui/icons-material/Edit'
+import OpenInNew from '@mui/icons-material/OpenInNew'
 import {
   Alert,
   Box,
@@ -35,12 +37,16 @@ import { RouterTabs } from '../../common/RouterTabs'
 import Discussion from './Discussions'
 import { ApiErrorView } from '../../common/ApiErrorView'
 import apiClient from '../../../util/apiClient'
-import { ActionUserSearch, ResponsibilityActionUserSearch } from '../../Admin/UserSearch'
+import { ResponsibilityActionUserSearch } from '../../Admin/UserSearch'
 import { useCourseRagIndices } from '../../../hooks/useRagIndices'
 import { PromptEditor } from '../../Prompt/PromptEditor'
 import { OutlineButtonBlack } from '../../ChatV2/general/Buttons'
 
-const Course = () => {
+/**
+ * React-router compatible lazy loaded component for Course page
+ */
+
+export function Component() {
   const [showTeachers, setShowTeachers] = useState(false)
   const [addTeacherViewOpen, setAddTeacherViewOpen] = useState(false)
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
@@ -397,5 +403,3 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
     </>
   )
 }
-
-export default Course

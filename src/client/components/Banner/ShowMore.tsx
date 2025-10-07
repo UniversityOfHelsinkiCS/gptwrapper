@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { IconButton, Collapse } from '@mui/material'
-import { ExpandLess, ExpandMore, HelpOutline } from '@mui/icons-material'
+import ExpandLess from '@mui/icons-material/ExpandLess'
+import ExpandMore from '@mui/icons-material/ExpandMore'
+import HelpOutline from '@mui/icons-material/HelpOutline'
 
 import Markdown from './Markdown'
 

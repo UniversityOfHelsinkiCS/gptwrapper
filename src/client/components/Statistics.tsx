@@ -18,7 +18,7 @@ import {
   IconButton,
   Stack,
 } from '@mui/material'
-import { redirect, Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
 import useStatistics from '../hooks/useStatistics'
 import programme from '../locales/programme.json'
 import faculties from '../locales/faculties.json'
@@ -27,7 +27,11 @@ import * as xlsx from 'xlsx'
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
 import { Statistic } from '@shared/types'
 
-const Statistics = () => {
+/**
+ * React-router compatible lazy loaded component for Statistics page
+ */
+
+export function Component() {
   const [from, setFrom] = useState<number | null>(null)
   const [to, setTo] = useState<number | null>(null)
   const [selectedFaculty, setFaculties] = useState('H00')
@@ -293,6 +297,7 @@ const handleFromChange = (e) => {
     </Container>
   )
 }
+
 const SumRow = ({statsToShow}) => {
   const { t, i18n } = useTranslation()
   const columnSum = (column: string) => {
@@ -347,4 +352,3 @@ const SumRow = ({statsToShow}) => {
     </TableRow>
   )
 }
-export default Statistics

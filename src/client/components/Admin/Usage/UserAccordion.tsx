@@ -1,4 +1,4 @@
-import { KeyboardReturn } from '@mui/icons-material'
+import KeyboardReturn from '@mui/icons-material/KeyboardReturn'
 import { Accordion, AccordionActions, AccordionSummary, Box, Button, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useTranslation } from 'react-i18next'

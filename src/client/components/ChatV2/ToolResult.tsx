@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Box, Typography, Chip, IconButton, Drawer } from '@mui/material'
-import { Close, Search } from '@mui/icons-material'
+import Close from '@mui/icons-material/Close'
+import Search from '@mui/icons-material/Search'
 import { useTranslation } from 'react-i18next'
 import { useToolResults } from './api'
 import ReactMarkdown from 'react-markdown'

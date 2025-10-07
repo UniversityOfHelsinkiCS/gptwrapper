@@ -10,7 +10,7 @@ import { LoadingMessage } from './general/LoadingMessage'
 import { preprocessMath } from './util'
 import 'katex/dist/katex.min.css'
 import 'katex/dist/contrib/mhchem'
-import { ArrowRight } from '@mui/icons-material'
+import ArrowRight from '@mui/icons-material/ArrowRight'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import { t } from 'i18next'
 import React, { useId, useMemo } from 'react'
@@ -302,7 +302,7 @@ export const MessageItem = ({ message, setActiveToolResult }: { message: ChatMes
   }
 }
 
-export const Conversation = ({
+const Conversation = ({
   messages,
   completion,
   generationInfo,
@@ -378,3 +378,5 @@ export const Conversation = ({
     </>
   )
 }
+
+export default Conversation

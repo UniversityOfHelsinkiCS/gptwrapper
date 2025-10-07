@@ -1,4 +1,6 @@
-import { DeleteOutline, KeyboardArrowDown, AutoAwesome } from '@mui/icons-material'
+import DeleteOutline from '@mui/icons-material/DeleteOutline'
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
+import AutoAwesome from '@mui/icons-material/AutoAwesome'
 import { Box, Divider, IconButton, ListSubheader, Menu, MenuItem } from '@mui/material'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'

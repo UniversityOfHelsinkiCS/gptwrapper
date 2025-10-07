@@ -1,4 +1,5 @@
-import { Add, Close } from '@mui/icons-material'
+import Add from '@mui/icons-material/Add'
+import Close from '@mui/icons-material/Close'
 import { Box, IconButton, Modal, Slider, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'

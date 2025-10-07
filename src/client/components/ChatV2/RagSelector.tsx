@@ -4,7 +4,8 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { useState } from 'react'
 import { RagIndexAttributes } from '../../../shared/types'
 import { OutlineButtonBlack } from './general/Buttons'
-import { MenuBook, MenuBookTwoTone } from '@mui/icons-material'
+import MenuBook from '@mui/icons-material/MenuBook'
+import MenuBookTwoTone from '@mui/icons-material/MenuBookTwoTone'
 
 const RagSelector = ({
   currentRagIndex,

@@ -21,7 +21,11 @@ import {
   useMediaQuery,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Language, AdminPanelSettingsOutlined, BookmarksOutlined, GradeOutlined, OpenInNew } from '@mui/icons-material'
+import Language from '@mui/icons-material/Language'
+import AdminPanelSettingsOutlined from '@mui/icons-material/AdminPanelSettingsOutlined'
+import BookmarksOutlined from '@mui/icons-material/BookmarksOutlined'
+import GradeOutlined from '@mui/icons-material/GradeOutlined'
+import OpenInNew from '@mui/icons-material/OpenInNew'
 import { useTranslation } from 'react-i18next'
 import MenuIcon from '@mui/icons-material/Menu'
 

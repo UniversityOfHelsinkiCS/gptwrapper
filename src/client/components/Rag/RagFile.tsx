@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import Markdown from 'react-markdown'
 import { enqueueSnackbar } from 'notistack'
 import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
-import { Autorenew } from '@mui/icons-material'
+import Autorenew from '@mui/icons-material/Autorenew'
 
 type RagFile = RagFileAttributes & {
   fileContent: string

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { TableBody, TableCell, TableHead, TableRow, Table, Link, Paper, Typography, Alert } from '@mui/material'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import useCourse, { useCourseDiscussers } from '../../../hooks/useCourse'
-import { OpenInNew } from '@mui/icons-material'
+import OpenInNew from '@mui/icons-material/OpenInNew'
 
 const Discussion = () => {
   const { t, i18n } = useTranslation()

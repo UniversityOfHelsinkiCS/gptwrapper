@@ -12,7 +12,11 @@ import { RouterTabs } from '../common/RouterTabs'
 import Feedbacks from './Feedbacks'
 import Testing from './Testing'
 
-const Admin = () => {
+/**
+ * React-router compatible lazy loaded component for Admin page
+ */
+
+export function Component() {
   const { t } = useTranslation()
   const { user } = useCurrentUser()
   if (!user) return null
@@ -49,5 +53,3 @@ const Admin = () => {
     </Container>
   )
 }
-
-export default Admin

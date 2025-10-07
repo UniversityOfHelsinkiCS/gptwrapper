@@ -6,7 +6,7 @@ import { BarChart, Bar, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import useCourse, { useCourseEnrolments, useCourseStatistics } from '../../../hooks/useCourse'
 import MaxTokenUsageStudents from './MaxTokenUsageStudents'
-import { HelpOutline } from '@mui/icons-material'
+import HelpOutline from '@mui/icons-material/HelpOutline'
 
 const Stats = ({ courseId }: { courseId: string }) => {
   const { t } = useTranslation()

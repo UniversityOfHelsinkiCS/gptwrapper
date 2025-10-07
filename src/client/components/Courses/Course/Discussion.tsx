@@ -1,7 +1,8 @@
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Box, Paper, Divider, Container } from '@mui/material'
-import { Person, Assistant } from '@mui/icons-material'
+import Person from '@mui/icons-material/Person'
+import Assistant from '@mui/icons-material/Assistant'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 

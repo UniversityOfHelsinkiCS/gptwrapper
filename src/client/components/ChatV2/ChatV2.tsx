@@ -1,10 +1,12 @@
-import { ArrowDownward, ChevronLeft, Tune } from '@mui/icons-material'
+import ArrowDownward from '@mui/icons-material/ArrowDownward'
+import ChevronLeft from '@mui/icons-material/ChevronLeft'
+import Tune from '@mui/icons-material/Tune'
 import HelpIcon from '@mui/icons-material/Help'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 
 import { Alert, Box, Drawer, Fab, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, type ValidModelName, ValidModelNameSchema } from '../../../config'
@@ -20,7 +22,6 @@ import { useAnalyticsDispatch } from '../../stores/analytics'
 import type { Course } from '../../types'
 import Footer from '../Footer'
 import { ChatBox } from './ChatBox'
-import { Conversation } from './Conversation'
 import { DisclaimerModal } from './Disclaimer'
 import EmailButton from './EmailButton'
 import { handleCompletionStreamError } from './error'
@@ -37,6 +38,10 @@ import { PromptStateProvider, usePromptState } from './PromptState'
 import z from 'zod/v4'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { InfoTexts } from '../../locales/infoTexts'
+/**
+ * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
+ */
+const Conversation = lazy(() => import('./Conversation'))
 
 function useLocalStorageStateWithURLDefault<T>(key: string, defaultValue: string, urlKey: string, schema: z.ZodType<T>) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)

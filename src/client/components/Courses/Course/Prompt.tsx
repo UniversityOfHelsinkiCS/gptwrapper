@@ -1,5 +1,9 @@
 import { Box, Paper, Typography, Tooltip, IconButton, Link } from '@mui/material'
-import { Visibility, VisibilityOff, ContentCopyOutlined, DeleteOutline, MenuBookOutlined } from '@mui/icons-material'
+import Visibility from '@mui/icons-material/Visibility'
+import VisibilityOff from '@mui/icons-material/VisibilityOff'
+import ContentCopyOutlined from '@mui/icons-material/ContentCopyOutlined'
+import DeleteOutline from '@mui/icons-material/DeleteOutline'
+import MenuBookOutlined from '@mui/icons-material/MenuBookOutlined'
 import { useTranslation } from 'react-i18next'
 
 import { enqueueSnackbar } from 'notistack'

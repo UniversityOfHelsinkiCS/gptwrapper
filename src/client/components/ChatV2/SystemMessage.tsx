@@ -1,7 +1,7 @@
 import { Box, TextField, Typography, Tooltip } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
-import { HelpOutline } from '@mui/icons-material'
+import HelpOutline from '@mui/icons-material/HelpOutline'
 import { SetState } from '../../types'
 
 const Info = ({ infoText, creation = false }: { infoText: string; creation?: boolean }) => {

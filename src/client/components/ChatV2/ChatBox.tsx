@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { HelpOutline, Send } from '@mui/icons-material'
+import HelpOutline from '@mui/icons-material/HelpOutline'
+import Send from '@mui/icons-material/Send'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
