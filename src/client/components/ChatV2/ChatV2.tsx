@@ -13,7 +13,6 @@ import { getLanguageValue } from '@shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { useChatScroll } from './useChatScroll'
 import useCourse from '../../hooks/useCourse'
-import useInfoTexts from '../../hooks/useInfoTexts'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
@@ -37,6 +36,7 @@ import { ConversationSplash } from './general/ConversationSplash'
 import { PromptStateProvider, usePromptState } from './PromptState'
 import z from 'zod/v4'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import { InfoTexts } from '../../locales/infoTexts'
 
 function useLocalStorageStateWithURLDefault<T>(key: string, defaultValue: string, urlKey: string, schema: z.ZodType<T>) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -75,7 +75,6 @@ const ChatV2Content = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   const { data: course } = useCourse(courseId)
-  const { infoTexts } = useInfoTexts()
   const { user } = useCurrentUser()
 
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
@@ -129,7 +128,7 @@ const ChatV2Content = () => {
 
   const { promptInfo } = usePromptState()
 
-  const disclaimerInfo = infoTexts?.find((infoText) => infoText.name === 'disclaimer')?.text[i18n.language] ?? null
+  const disclaimerInfo = InfoTexts.disclaimer[i18n.language]
 
   const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo } = useChatStream({
     onComplete: ({ message }) => {

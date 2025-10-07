@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 import Redis, { type RedisOptions } from 'ioredis'
 import logger from './logger.ts'
 
-dotenv.config()
+dotenv.config({ path: '../.env' })
 
 // --- Config ---
 
@@ -72,7 +72,7 @@ const worker = new Worker(
       transcription = await retryOllamaCall(async () => {
         const response = await fetch(`${OLLAMA_URL}/api/generate`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'token': process.env.LAAMA_TOKEN ?? '' },
           body: JSON.stringify({
             model: 'qwen2.5vl:7b',
             system: `Objective

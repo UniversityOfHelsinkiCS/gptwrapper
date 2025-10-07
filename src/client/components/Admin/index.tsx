@@ -6,7 +6,6 @@ import { format } from 'date-fns'
 import ChatInstances from './ChatInstances'
 import Usage from './Usage'
 import Updater from './Updater'
-import EditTexts from './EditTexts'
 import UserSearch from './UserSearch'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { RouterTabs } from '../common/RouterTabs'
@@ -33,7 +32,6 @@ const Admin = () => {
           <Tab label={t('admin:courses')} to="/admin/chatinstances" component={Link} />
           <Tab label={t('admin:usage')} to="/admin/usage" component={Link} />
           {user.iamGroups.includes('grp-toska') && <Tab label={t('admin:updater')} to="/admin/updater" component={Link} />}
-          <Tab label={t('admin:editTexts')} to="/admin/edit-texts" component={Link} />
           <Tab label={t('admin:searchUsers')} to="/admin/usersearch" component={Link} />
           <Tab label={t('admin:feedbacks')} to="/admin/feedbacks" component={Link} />
           <Tab label={t('admin:testing')} to="/admin/testing" component={Link} />
@@ -44,7 +42,6 @@ const Admin = () => {
         <Route path="/chatinstances" element={<ChatInstances />} />
         <Route path="/usage" element={<Usage />} />
         {user.iamGroups.includes('grp-toska') && <Route path="/updater" element={<Updater />} />}
-        <Route path="/edit-texts" element={<EditTexts />} />
         <Route path="/usersearch" element={<UserSearch />} />
         <Route path="/feedbacks" element={<Feedbacks />} />
         <Route path="/testing" element={<Testing />} />
