@@ -15,7 +15,7 @@ const extractPageText = async (page: PDFPageProxy): Promise<string> => {
       parts.push(item.str)
     }
   }
-  const text = parts.join(' ')
+  const text = parts.join('\n\n')
   return text.trim()
 }
 
@@ -25,7 +25,7 @@ type PageInfo = {
   job?: Job
 }
 
-const analyzeAndPreparePDFPages = async (pdfBytes: Uint8Array, scale = 1.0) => {
+const analyzeAndPreparePDFPages = async (pdfBytes: Uint8Array, scale = 2.0) => { //scale at 2.0 to keep closer to 200dpi which is ideal for vlms
   const loadingTask = getDocument({ data: pdfBytes })
   const pdf = await loadingTask.promise
   const pageCount = pdf.numPages
@@ -95,7 +95,7 @@ type VLMJobData = {
 /**
  * Adds a pdf parsing job to the queue. The file must be uploaded to S3 beforehand. The jobId is based on the ragFile - resubmitting with the same jobId while the previous job is running has no effect.
  * @param ragFile
- * @returns the job
+ * @returns the pages which is array of PageInfo objects 
  */
 export const submitPdfParsingJobs = async (ragFile: RagFile) => {
   const pdfBytes = await FileStore.readRagFileContextToBytes(ragFile)
@@ -123,7 +123,7 @@ export const submitPdfParsingJobs = async (ragFile: RagFile) => {
 
     logger.info(`Submitting PDF parsing job ${jobId}`)
 
-    info.job = await queue.add(jobId, jobData)
+    info.job = await queue.add(jobId, jobData, { jobId, removeOnComplete: 2000, removeOnFail: 2000 })
   }
 
   return pages

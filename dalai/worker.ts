@@ -31,25 +31,10 @@ if (CA !== undefined) {
   }
 }
 
-const RETRY_COUNT = 2
-
 const connection = new Redis(creds)
 
 const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE ?? 'vlm-queue'
 const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://laama-svc:11434'
-
-async function retryOllamaCall<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
-  let lastError: any
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      return await fn()
-    } catch (err) {
-      lastError = err
-      await new Promise((r) => setTimeout(r, 1000 * (i + 1)))
-    }
-  }
-  throw lastError
-}
 
 // --- Worker ---
 
@@ -67,15 +52,15 @@ const worker = new Worker(
     if (!jobId) {
       throw new Error('Job ID is missing')
     }
-    let transcription = ''
+
     try {
-      transcription = await retryOllamaCall(async () => {
-        const response = await fetch(`${OLLAMA_URL}/api/generate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'token': process.env.LAAMA_TOKEN ?? '' },
-          body: JSON.stringify({
-            model: 'qwen2.5vl:7b',
-            system: `Objective
+      const response = await fetch(`${OLLAMA_URL}/api/generate`, {
+        method: 'POST',
+        signal: AbortSignal.timeout(30_000), // abort request after 30s
+        headers: { 'Content-Type': 'application/json', 'token': process.env.LAAMA_TOKEN ?? '' },
+        body: JSON.stringify({
+          model: 'qwen2.5vl:7b',
+          system: `Objective
                     Produce the most accurate, well-structured Markdown transcription of a PDF page by combining a rasterized image of the PDF page (such as PNG or JPEG) and the parsed text extracted from the PDF.
                     Rules and Priorities
                     Treat the parsed PDF text as the primary source of truth for all textual content. If the page contains an image or diagram, provide a detailed description. If an image contains text, transcribe that text as precisely as possible. When discrepancies occur between image-derived transcription and the parsed PDF text, always prioritize the parsed PDF text. Always include image or diagram descriptions enclosed in image tags, for example: image This is an image of a cat with the caption “Feline.” image. Merge similar content from both sources to create the most comprehensive and accurate result. The final output must be clean, well-structured Markdown using headings, paragraphs, tables, emphasis, and math formatting as appropriate. Do not output anything other than Markdown, and do not wrap the entire output in a code block.
@@ -87,46 +72,45 @@ const worker = new Worker(
                     Ensure quality and consistency. Remove OCR artifacts, duplicated lines, and hyphenation across line breaks. Normalize whitespace and punctuation. Render equations faithfully within ...... when present. Correct obvious transcription errors, always prioritizing the parsed PDF text.
                     Output Requirements
                     Produce only Markdown, with no extra commentary. Include image descriptions wrapped with image and image tags if any visual content exists. Deliver a cohesive, readable, and accurate transcription that reflects the parsed PDF as the source of truth, enhanced by precise and detailed information derived from the image`,
-            prompt: `Parsed PDF text:\n${text}\n\nImage transcription:`,
-            stream: false,
-            images: [bytes]
-          }),
-        })
-        if (!response.ok) {
-          const errorBody = await response.text()
-          throw new Error(`Ollama API request failed with status ${response.status}: ${errorBody}`)
-        }
-        const data = await response.json()
-        let txt = data?.response || ''
-        if (txt.trim().startsWith('```markdown')) {
-          txt = txt
-            .replace(/^```markdown/, '')
-            .replace(/```$/, '')
-            .trim()
-        }
-        logger.info(`Job ${job.id}: transcription complete for page ${pageNumber}`)
+          prompt: `Parsed PDF text:\n${text}\n\nImage transcription:`,
+          stream: false,
+          images: [bytes],
+        }),
+      })
+      if (!response.ok) {
+        const errorBody = await response.text()
+        throw new Error(`Ollama API request failed with status ${response.status}: ${errorBody}`)
+      }
 
-        return txt
-      }, RETRY_COUNT)
+      const data = await response.json()
+      let txt = data?.response || ''
+      if (txt.trim().startsWith('```markdown')) {
+        txt = txt
+          .replace(/^```markdown/, '')
+          .replace(/```$/, '')
+          .trim()
+      }
+
+      logger.info(`Job ${job.id}: transcription complete for page ${pageNumber}`)
+
+      return txt
     } catch (error) {
       logger.error(`Job ${job.id}: transcription got error: ${error}`)
+      throw error
+    } finally {
+      ACTIVE_COUNT--
     }
-    return transcription
   },
-  {
-    connection
-  },
+  { connection },
 )
 
 logger.info(`Worker started. Listening to queue "${QUEUE_NAME}"...`)
 
 worker.on('completed', (job, result) => {
-  ACTIVE_COUNT--
   logger.info(`Job ${job.id} completed.`)
 })
 
 worker.on('failed', (job, err) => {
-  ACTIVE_COUNT--
   logger.error(`Job ${job?.id} failed:`, err)
 })
 

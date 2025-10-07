@@ -65,25 +65,24 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, job: J
 
       const transcriptions: Array<string> = []
       for (const p of pages) {
-        transcriptions.push(
-          await p.job!.waitUntilFinished(pdfQueueEvents) ?? ''
-        )
-        completed += 1
-        const fraction = completed / total
-        const pct = Math.round(start + (end - start) * fraction)
-        await job.updateProgress({ progress: pct, message: 'Parsing' })
+        let text = ''
+        try {
+          text = await p.job!.waitUntilFinished(pdfQueueEvents)
+        } catch (error) {
+          console.error('Page job failed: ', p.job!.id, error)
+          text = p.text
+        } finally {
+          transcriptions.push(text)
+          completed += 1
+          const fraction = completed / total
+          const pct = Math.round(start + (end - start) * fraction)
+          await job.updateProgress({ progress: pct, message: 'Parsing' })
+        }
       }
-
 
       finalText = transcriptions.join('\n\n')
 
       await FileStore.writeRagFileTextContent(ragFile, finalText)
-
-      // for removing dangling jobs
-      await Promise.allSettled(
-        pages
-          .map(p => p.job!.remove())
-      )
 
     } catch (error: any) {
       console.error('Error waiting for PDF parsing jobs to finish:', error)
@@ -123,9 +122,9 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, job: J
   }
 
   const embeddings = await vectorStore.embeddings.embedDocuments(chunkDocuments.map((d) => d.pageContent))
-  
+
   await vectorStore.addVectors(embeddings, chunkDocuments)
-  
+
   await ragFile.update({ pipelineStage: 'completed' })
 
   console.timeEnd(`Ingestion ${ragFile.filename}`)
