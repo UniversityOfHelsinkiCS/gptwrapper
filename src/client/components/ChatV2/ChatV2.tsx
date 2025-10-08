@@ -198,7 +198,6 @@ const ChatV2Content = () => {
     }, 5000)
 
     setIsStreaming(true)
-    
     // Scroll immediately to show loading dots for better UX feedback
     // Small delay ensures React has rendered the loading message
     setTimeout(() => {
@@ -323,7 +322,7 @@ const ChatV2Content = () => {
   }
 
   if (course?.activityPeriod) {
-    const isResponsible = course.responsibilities?.some((r) => r.user.id === user?.id)
+    const isResponsible = user?.isAdmin || course.responsibilities?.some((r) => r.user.id === user?.id)
 
     const { startDate, endDate } = course.activityPeriod
     const start = new Date(startDate)
