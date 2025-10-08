@@ -40,7 +40,7 @@ export const postAbortableStream = async (path: string, formData: FormData, exte
 
   if (contentType?.includes('application/json')) {
     const json = await response.json()
-    if ("warning" in json) {
+    if ("warnings" in json) {
       return {
         ...json,
         controller,

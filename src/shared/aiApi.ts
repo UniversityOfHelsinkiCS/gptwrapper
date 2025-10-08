@@ -1,8 +1,12 @@
-export type WarningType = 'usage' | 'contextLimit'
+import { z } from "zod/v4"
+
+export const WarningTypes = z.enum(['usage', 'contextLimit'])
+
+export type WarningType = z.infer<typeof WarningTypes>
 
 export type AiApiStreamResponse = { stream: ReadableStream<Uint8Array> }
 
-export type AiApiJsonResponse = {
+export type AiApiWarning = {
   warningType: 'usage'
   warning: string
   canIgnore: boolean
@@ -12,6 +16,10 @@ export type AiApiJsonResponse = {
   tokenCount: number
   warning: string
   canIgnore: boolean
+}
+
+export type AiApiJsonResponse = {
+  warnings: AiApiWarning[]
 } | {
   error: string
 }

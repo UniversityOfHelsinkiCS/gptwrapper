@@ -16,6 +16,7 @@ import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { SendPreferenceConfiguratorModal, ShiftEnterForNewline, ShiftEnterToSend } from './SendPreferenceConfigurator'
 import { KeyCombinations, useKeyboardCommands } from './useKeyboardCommands'
+import { WarningType } from '@shared/aiApi'
 
 export const ChatBox = ({
   disabled,
@@ -34,11 +35,11 @@ export const ChatBox = ({
   disabled: boolean
   fileInputRef: React.RefObject<HTMLInputElement | null>
   fileName: string
-  messageWarning: string
+  messageWarning: { [key in WarningType]?: { message: string, ignored: boolean } }
   setChatLeftSidePanelOpen: (open: boolean) => void
   setFileName: (name: string) => void
   handleCancel: () => void
-  handleContinue: (message: string) => void
+  handleContinue: (message: string, ignoredWarnings: WarningType[]) => void
   handleSubmit: (message: string) => void
   handleReset: () => void
   handleStop: () => void
@@ -123,6 +124,9 @@ export const ChatBox = ({
       </Box>
     )
   }
+
+  const activeMessageWarnings = Object.values(messageWarning).filter((warning) => !warning.ignored)
+
   return (
     <Box
       sx={{
@@ -137,7 +141,7 @@ export const ChatBox = ({
           <Typography>{`Currenlty there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}</Typography>
         </Alert>
       )}
-      {messageWarning && (
+      {activeMessageWarnings.length > 0 && (
         <Alert
           severity="warning"
           sx={{ my: '0.2rem' }}
@@ -146,15 +150,19 @@ export const ChatBox = ({
               <GrayButton onClick={handleCancel} type="button">
                 {t('common:cancel')}
               </GrayButton>
-              <BlueButton onClick={() => handleContinue(message)} color="primary" type="button">
+              <BlueButton onClick={() => handleContinue('', Object.keys(messageWarning) as WarningType[])} color="primary" type="button">
                 {t('common:continue')}
               </BlueButton>
             </Box>
           }
-        >
-          {messageWarning}
+          >
+          {Object.entries(messageWarning).filter(([, warning]) => !warning.ignored).map(([type, warning]) => (
+            <Box key={type} sx={{ mb: 0.5 }}>
+              {warning.message}
+            </Box>
+          ))}
         </Alert>
-      )}
+        )}
 
       <Box
         component="form"

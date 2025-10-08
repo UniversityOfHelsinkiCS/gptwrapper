@@ -1,6 +1,7 @@
 import z from 'zod/v4'
 import type { ChatToolDef } from './tools'
 import { ValidModelNameSchema } from '../config'
+import { WarningTypes } from './aiApi'
 
 /**
  * Event emitted when text is added to a chat message
@@ -89,7 +90,7 @@ export const PostStreamSchemaV3 = z.object({
   options: z.object({
     chatMessages: z.array(ChatMessageSchema),
     generationInfo: MessageGenerationInfoSchema,
-    ignoreWarning: z.boolean().optional(),
+    ignoredWarnings: WarningTypes.array().optional(),
     saveConsent: z.boolean().optional(),
     courseId: z.string().optional(),
   }),

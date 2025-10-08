@@ -38,6 +38,7 @@ import { PromptStateProvider, usePromptState } from './PromptState'
 import z from 'zod/v4'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { InfoTexts } from '../../locales/infoTexts'
+import { WarningType } from '@shared/aiApi'
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
  */
@@ -102,7 +103,7 @@ const ChatV2Content = () => {
   // App States
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
   const [fileName, setFileName] = useState<string>('')
-  const [messageWarning, setMessageWarning] = useState<string>('')
+  const [messageWarning, setMessageWarning] = useState<{ [key in WarningType]?: { message: string, ignored: boolean } }>({})
   const [chatLeftSidePanelOpen, setChatLeftSidePanelOpen] = useState<boolean>(false)
   const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
 
@@ -157,7 +158,7 @@ const ChatV2Content = () => {
     },
   })
 
-  const handleSendMessage = async (message: string, resendPrevious: boolean, ignoreWarning: boolean) => {
+  const handleSendMessage = async (message: string, resendPrevious: boolean, ignoredWarnings: WarningType[]) => {
     if (!userStatus) return
     const { usage, limit } = userStatus
     const tokenUsageExceeded = usage >= limit
@@ -218,7 +219,7 @@ const ChatV2Content = () => {
             generationInfo,
             chatMessages: newMessages,
             saveConsent,
-            ignoreWarning,
+            ignoredWarnings,
           },
           courseId,
         },
@@ -232,10 +233,24 @@ const ChatV2Content = () => {
         return
       }
 
-      if (ignoreWarning) {
-        setMessageWarning('')
-      } else if ("warning" in res) {
-        setMessageWarning(res.warning)
+      const newWarnings = { ...messageWarning }
+
+      if ("warnings" in res) {
+        res.warnings.forEach(warning => {
+          newWarnings[warning.warningType] = { message: warning.warning, ignored: false }
+        })
+      }
+
+      console.log('New warnings:', newWarnings)
+      console.log('Ignored warnings:', ignoredWarnings)
+      ignoredWarnings.forEach((type) => {
+        if (newWarnings[type]) {
+          delete newWarnings[type]
+        }
+      })
+      setMessageWarning(newWarnings)
+
+      if (Object.keys(newWarnings).length > 0) {
         return
       }
 
@@ -263,14 +278,14 @@ const ChatV2Content = () => {
         fileInputRef.current.value = ''
       }
       setFileName('')
-      setMessageWarning('')
+      setMessageWarning({})
       clearRetryTimeout()
       dispatchAnalytics({ type: 'RESET_CHAT' })
     }
   }
 
   const handleCancel = () => {
-    setMessageWarning('')
+    setMessageWarning({})
     setIsStreaming(false)
     clearRetryTimeout()
   }
@@ -488,9 +503,9 @@ const ChatV2Content = () => {
             setChatLeftSidePanelOpen={setChatLeftSidePanelOpen}
             messageWarning={messageWarning}
             handleCancel={handleCancel}
-            handleContinue={() => handleSendMessage('', true, true)}
+            handleContinue={(_, ignoredWarnings) => handleSendMessage('', true, ignoredWarnings)}
             handleSubmit={(newMessage) => {
-              handleSendMessage(newMessage, false, false)
+              handleSendMessage(newMessage, false, [])
             }}
             handleReset={handleReset}
             handleStop={() => streamControllerRef.current?.abort("user_aborted")}

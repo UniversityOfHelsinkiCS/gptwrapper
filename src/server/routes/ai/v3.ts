@@ -15,13 +15,9 @@ import { parseFileAndAddToLastMessage } from './fileParsing'
 import { upload } from './multer'
 import { checkIamAccess } from 'src/server/util/iams'
 import { getOwnCourses } from 'src/server/services/chatInstances/access'
-import { AiApiJsonResponse } from '@shared/aiApi'
+import { AiApiWarning } from '@shared/aiApi'
 
 const router = express.Router()
-
-const sendJsonResponse = (warning: AiApiJsonResponse, res: express.Response) => {
-  res.status(201).json(warning)
-}
 
 router.post('/stream', upload.single('file'), async (r, res) => {
   const req = r as RequestWithUser
@@ -99,31 +95,41 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   encoding.free()
   res.locals.chatCompletionMeta.inputTokenCount = tokenCount
 
+  const warnings: AiApiWarning[] = []
+
   // Warn about usage if over 10% of limit
   const tokenUsagePercentage = Math.round((tokenCount / DEFAULT_TOKEN_LIMIT) * 100)
 
-  if (!isFreeModel && tokenUsagePercentage > 10 && !options.ignoreWarning) {
+  console.log(options.ignoredWarnings)
+
+  if (!isFreeModel && tokenUsagePercentage > 10 && !options.ignoredWarnings?.includes('usage')) {
     res.locals.chatCompletionMeta.warning = 'usage'
-    sendJsonResponse({
+    warnings.push({
       warningType: 'usage',
       warning: `You are about to use ${tokenUsagePercentage}% of your monthly CurreChat usage`,
       canIgnore: true,
-    }, res)
-    return
+    })
   }
 
   // Check context limit
   const contextLimit = validModels.find((m) => m.name === generationInfo.model)?.context || DEFAUL_CONTEXT_LIMIT
 
-  if (tokenCount > contextLimit && !options.ignoreWarning) {
+  if (tokenCount > contextLimit && !options.ignoredWarnings?.includes('contextLimit')) {
     res.locals.chatCompletionMeta.warning = 'contextLimit'
-    sendJsonResponse({
+    warnings.push({
       warningType: 'contextLimit',
       warning: `The messages you have sent exceed the context limit of ${contextLimit} tokens for the selected model. Your messages have ${tokenCount} tokens. Clicking continue will truncate the oldest messages.`,
       contextLimit,
       tokenCount,
       canIgnore: true,
-    }, res)
+    })
+  }
+
+  if (warnings.length > 0) {
+    console.log('Warnings:', warnings)
+    res.status(201).json({
+      warnings,
+    })
     return
   }
 
