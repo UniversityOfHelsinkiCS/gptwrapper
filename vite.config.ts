@@ -32,6 +32,9 @@ export default defineConfig({
       project: 'currechat-frontend',
       url: 'https://toska.it.helsinki.fi/',
       telemetry: false,
+      bundleSizeOptimizations: {
+        excludeDebugStatements: true,
+      },
     }),
   ],
   base,

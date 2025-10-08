@@ -21,8 +21,7 @@ export const ChatBox = ({
   disabled,
   fileInputRef,
   fileName,
-  tokenUsageWarning,
-  tokenUsageAlertOpen,
+  messageWarning,
   setChatLeftSidePanelOpen,
   setFileName,
   handleCancel,
@@ -35,8 +34,7 @@ export const ChatBox = ({
   disabled: boolean
   fileInputRef: React.RefObject<HTMLInputElement | null>
   fileName: string
-  tokenUsageWarning: string
-  tokenUsageAlertOpen: boolean
+  messageWarning: string
   setChatLeftSidePanelOpen: (open: boolean) => void
   setFileName: (name: string) => void
   handleCancel: () => void
@@ -139,7 +137,7 @@ export const ChatBox = ({
           <Typography>{`Currenlty there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}</Typography>
         </Alert>
       )}
-      {tokenUsageAlertOpen && (
+      {messageWarning && (
         <Alert
           severity="warning"
           sx={{ my: '0.2rem' }}
@@ -154,7 +152,7 @@ export const ChatBox = ({
             </Box>
           }
         >
-          {tokenUsageWarning}
+          {messageWarning}
         </Alert>
       )}
 

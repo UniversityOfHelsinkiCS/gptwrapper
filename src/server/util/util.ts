@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-import { DEFAUL_CONTEXT_LIMIT, ValidModelName, validModels } from '../../config'
+import { ValidModelName, validModels } from '../../config'
 
 export const getAllowedModels = (model: string): ValidModelName[] => {
   const allModels = validModels.map(({ name }) => name)
@@ -17,14 +17,6 @@ export const getAllowedModels = (model: string): ValidModelName[] => {
   if (model === 'mock') return ['mock']
 
   return ['gpt-4o-mini']
-}
-
-export const getModelContextLimit = (modelName: string) => {
-  const model = validModels.find(({ name }) => name === modelName)
-
-  if (!model) return DEFAUL_CONTEXT_LIMIT
-
-  return model.context
 }
 
 export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))

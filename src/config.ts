@@ -12,7 +12,7 @@ export const GIT_SHA = process.env.REACT_APP_GIT_SHA || ''
 
 export const PUBLIC_URL = process.env.PUBLIC_URL || ''
 
-export const DEFAULT_TOKEN_LIMIT = Number(process.env.DEFAULT_TOKEN_LIMIT) || 150_000
+export const DEFAULT_TOKEN_LIMIT = Number(process.env.DEFAULT_TOKEN_LIMIT) || 200_000
 
 export const DEFAUL_CONTEXT_LIMIT = Number(process.env.DEFAUL_CONTEXT_LIMIT) || 4_096
 

@@ -89,7 +89,7 @@ export const PostStreamSchemaV3 = z.object({
   options: z.object({
     chatMessages: z.array(ChatMessageSchema),
     generationInfo: MessageGenerationInfoSchema,
-    userConsent: z.boolean().optional(),
+    ignoreWarning: z.boolean().optional(),
     saveConsent: z.boolean().optional(),
     courseId: z.string().optional(),
   }),

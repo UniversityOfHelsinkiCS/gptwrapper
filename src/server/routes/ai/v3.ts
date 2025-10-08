@@ -1,6 +1,6 @@
 import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
-import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction } from '../../../config'
+import { DEFAUL_CONTEXT_LIMIT, DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction, validModels } from '../../../config'
 import { PostStreamSchemaV3, type ChatEvent, type ChatMessage } from '../../../shared/chat'
 import { ChatInstance, Discussion, Enrolment, Prompt, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
 import { calculateUsage, checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
@@ -11,13 +11,17 @@ import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
 import getEncoding from '../../util/tiktoken'
-import { getModelContextLimit } from '../../util/util'
 import { parseFileAndAddToLastMessage } from './fileParsing'
 import { upload } from './multer'
 import { checkIamAccess } from 'src/server/util/iams'
 import { getOwnCourses } from 'src/server/services/chatInstances/access'
+import { AiApiJsonResponse } from '@shared/aiApi'
 
 const router = express.Router()
+
+const sendJsonResponse = (warning: AiApiJsonResponse, res: express.Response) => {
+  res.status(201).json(warning)
+}
 
 router.post('/stream', upload.single('file'), async (r, res) => {
   const req = r as RequestWithUser
@@ -95,21 +99,32 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   encoding.free()
   res.locals.chatCompletionMeta.inputTokenCount = tokenCount
 
+  // Warn about usage if over 10% of limit
   const tokenUsagePercentage = Math.round((tokenCount / DEFAULT_TOKEN_LIMIT) * 100)
 
-  if (!isFreeModel && tokenCount > 0.1 * DEFAULT_TOKEN_LIMIT) {
-    res.status(201).json({
-      tokenConsumtionWarning: true,
-      message: `You are about to use ${tokenUsagePercentage}% of your monthly CurreChat usage`,
-    })
+  if (!isFreeModel && tokenUsagePercentage > 10 && !options.ignoreWarning) {
+    res.locals.chatCompletionMeta.warning = 'usage'
+    sendJsonResponse({
+      warningType: 'usage',
+      warning: `You are about to use ${tokenUsagePercentage}% of your monthly CurreChat usage`,
+      canIgnore: true,
+    }, res)
     return
   }
 
   // Check context limit
-  const contextLimit = getModelContextLimit(generationInfo.model)
+  const contextLimit = validModels.find((m) => m.name === generationInfo.model)?.context || DEFAUL_CONTEXT_LIMIT
 
-  if (tokenCount > contextLimit) {
-    throw ApplicationError.BadRequest('Model maximum context reached')
+  if (tokenCount > contextLimit && !options.ignoreWarning) {
+    res.locals.chatCompletionMeta.warning = 'contextLimit'
+    sendJsonResponse({
+      warningType: 'contextLimit',
+      warning: `The messages you have sent exceed the context limit of ${contextLimit} tokens for the selected model. Your messages have ${tokenCount} tokens. Clicking continue will truncate the oldest messages.`,
+      contextLimit,
+      tokenCount,
+      canIgnore: true,
+    }, res)
+    return
   }
 
   // Find prompt if using a saved prompt

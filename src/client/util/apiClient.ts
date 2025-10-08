@@ -1,5 +1,6 @@
 import axios, { AxiosRequestHeaders, type AxiosError } from 'axios'
 import { PUBLIC_URL } from '../../config'
+import { AiApiResponse } from '@shared/aiApi'
 
 export type ApiError = AxiosError<{ message: string }>
 
@@ -25,7 +26,7 @@ apiClient.interceptors.request.use((config) => {
   return newConfig
 })
 
-export const postAbortableStream = async (path: string, formData: FormData, externalController?: AbortController) => {
+export const postAbortableStream = async (path: string, formData: FormData, externalController?: AbortController): Promise<AiApiResponse & { controller: AbortController }> => {
   const controller = externalController ?? new AbortController()
 
   const response = await fetch(`${PUBLIC_URL}/api/${path}`, {
@@ -35,24 +36,32 @@ export const postAbortableStream = async (path: string, formData: FormData, exte
     signal: controller.signal,
   })
 
-  let tokenUsageAnalysis: {
-    tokenUsageWarning: boolean
-    message: string
-  } | null = null
-  let stream: ReadableStream<Uint8Array> | null = null
-
   const contentType = response.headers.get('content-type')
+
   if (contentType?.includes('application/json')) {
     const json = await response.json()
-    if (!('error' in json)) {
-      tokenUsageAnalysis = json
+    if ("warning" in json) {
+      return {
+        ...json,
+        controller,
+      }
+    } else {
+      return {
+        error: json.error || 'Unknown error from server',
+        controller,
+      }
     }
-  } else {
-    const clonedResponse = response.clone()
-    stream = clonedResponse.body
+  } else if (contentType?.includes('text/event-stream')) {
+    return {
+      stream: response.body as ReadableStream<Uint8Array>,
+      controller,
+    }
   }
 
-  return { tokenUsageAnalysis, stream, controller }
+  return {
+    error: 'Unknown response from server',
+    controller,
+  }
 }
 
 export default apiClient

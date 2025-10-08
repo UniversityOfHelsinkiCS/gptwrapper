@@ -1,10 +1,8 @@
 import { Tiktoken } from '@dqbd/tiktoken'
 
 import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, ValidModelName } from '../../../config'
-import { tikeIam } from '../../util/config'
 import type { User as UserType } from '../../../shared/user'
 import { ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../../db/models'
-import { getAllowedModels } from '../../util/util'
 import logger from '../../util/logger'
 import { ApplicationError } from '../../util/ApplicationError'
 import type { Message } from '../../../shared/chat'

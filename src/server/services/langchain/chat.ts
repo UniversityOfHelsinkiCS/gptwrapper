@@ -13,7 +13,7 @@ import { AZURE_API_KEY, AZURE_RESOURCE } from '../../util/config'
 import { ToolResultStore } from './fileSearchResultsStore'
 import { MockModel } from './MockModel'
 
-type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
+export type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
 
 /**
  * Gets a chat model instance based on the provided configuration.

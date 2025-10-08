@@ -15,7 +15,7 @@ if (inProduction) {
   environment = 'production'
 }
 
-const initializeSentry = () => {
+export const initializeSentry = () => {
   Sentry.init({
     dsn: 'https://4b537128872afe9f440a22b0824c9026@toska.it.helsinki.fi/3',
     release: GIT_SHA,
@@ -40,4 +40,3 @@ const initializeSentry = () => {
   })
 }
 
-export default initializeSentry

@@ -102,8 +102,7 @@ const ChatV2Content = () => {
   // App States
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
   const [fileName, setFileName] = useState<string>('')
-  const [tokenUsageWarning, setTokenUsageWarning] = useState<string>('')
-  const [tokenUsageAlertOpen, setTokenUsageAlertOpen] = useState<boolean>(false)
+  const [messageWarning, setMessageWarning] = useState<string>('')
   const [chatLeftSidePanelOpen, setChatLeftSidePanelOpen] = useState<boolean>(false)
   const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
 
@@ -158,7 +157,7 @@ const ChatV2Content = () => {
     },
   })
 
-  const handleSendMessage = async (message: string, ignoreTokenUsageWarning: boolean) => {
+  const handleSendMessage = async (message: string, resendPrevious: boolean, ignoreWarning: boolean) => {
     if (!userStatus) return
     const { usage, limit } = userStatus
     const tokenUsageExceeded = usage >= limit
@@ -179,14 +178,15 @@ const ChatV2Content = () => {
     if (file) {
       formData.append('file', file)
     }
-
-    const newMessages = messages.concat({
+    
+    const newMessages = resendPrevious ? messages : messages.concat({
       role: 'user',
       content: message,
       attachments: file && fileName ? fileName : undefined,
     })
 
     setMessages(newMessages)
+
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -211,38 +211,42 @@ const ChatV2Content = () => {
     }
 
     try {
-      const { tokenUsageAnalysis, stream } = await postCompletionStreamV3(
+      const res = await postCompletionStreamV3(
         formData,
         {
           options: {
             generationInfo,
             chatMessages: newMessages,
             saveConsent,
+            ignoreWarning,
           },
           courseId,
         },
         streamControllerRef.current,
       )
 
-      if (!stream && !tokenUsageAnalysis) {
-        console.error('getCompletionStream did not return a stream or token usage analysis')
+      if ("error" in res) {
+        console.error('API error:', res.error)
         handleCancel()
         enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
         return
       }
 
-      if (ignoreTokenUsageWarning) {
-        setTokenUsageWarning('')
-        setTokenUsageAlertOpen(false)
-      } else if (tokenUsageAnalysis?.tokenUsageWarning) {
-        setTokenUsageWarning(tokenUsageAnalysis.message)
-        setTokenUsageAlertOpen(true)
+      if (ignoreWarning) {
+        setMessageWarning('')
+      } else if ("warning" in res) {
+        setMessageWarning(res.warning)
         return
       }
 
       clearRetryTimeout()
-      if (stream) {
-        await processStream(stream, generationInfo)
+
+      if ('stream' in res) {
+        await processStream(res.stream, generationInfo)
+      } else {
+        console.error('API error: No stream in response')
+        handleCancel()
+        enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
       }
     } catch (err: any) {
       console.error(err)
@@ -259,16 +263,14 @@ const ChatV2Content = () => {
         fileInputRef.current.value = ''
       }
       setFileName('')
-      setTokenUsageWarning('')
-      setTokenUsageAlertOpen(false)
+      setMessageWarning('')
       clearRetryTimeout()
       dispatchAnalytics({ type: 'RESET_CHAT' })
     }
   }
 
   const handleCancel = () => {
-    setTokenUsageWarning('')
-    setTokenUsageAlertOpen(false)
+    setMessageWarning('')
     setIsStreaming(false)
     clearRetryTimeout()
   }
@@ -484,12 +486,11 @@ const ChatV2Content = () => {
             fileName={fileName}
             setFileName={setFileName}
             setChatLeftSidePanelOpen={setChatLeftSidePanelOpen}
-            tokenUsageWarning={tokenUsageWarning}
-            tokenUsageAlertOpen={tokenUsageAlertOpen}
+            messageWarning={messageWarning}
             handleCancel={handleCancel}
-            handleContinue={(newMessage) => handleSendMessage(newMessage, true)}
+            handleContinue={() => handleSendMessage('', true, true)}
             handleSubmit={(newMessage) => {
-              handleSendMessage(newMessage, false)
+              handleSendMessage(newMessage, false, false)
             }}
             handleReset={handleReset}
             handleStop={() => streamControllerRef.current?.abort("user_aborted")}
