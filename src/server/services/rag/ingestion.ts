@@ -53,6 +53,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, job: J
   await job.updateProgress({ progress, message: 'Scanning file' })
 
   let finalText: string | null = null
+
   if (needToParse) {
     const pages = await submitPdfParsingJobs(ragFile)
 

@@ -15,7 +15,7 @@ const extractPageText = async (page: PDFPageProxy): Promise<string> => {
       parts.push(item.str)
     }
   }
-  const text = parts.join('\n\n')
+  const text = parts.join(' ')
   return text.trim()
 }
 
@@ -123,7 +123,7 @@ export const submitPdfParsingJobs = async (ragFile: RagFile) => {
 
     logger.info(`Submitting PDF parsing job ${jobId}`)
 
-    info.job = await queue.add(jobId, jobData, { jobId, removeOnComplete: 2000, removeOnFail: 2000 })
+    info.job = await queue.add(jobId, jobData, { jobId, removeOnComplete: 1000, removeOnFail: 1000 })
   }
 
   return pages
