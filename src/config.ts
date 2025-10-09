@@ -52,7 +52,7 @@ export const validModels = [
   },
   {
     name: 'mock',
-    context: 128_00,
+    context: 1024,
   },
 ] as const
 

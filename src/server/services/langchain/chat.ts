@@ -5,45 +5,19 @@ import type { Runnable } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
 import { AzureChatOpenAI, type ChatOpenAICallOptions } from '@langchain/openai'
-import { type ValidModelName, validModels } from '@config'
+import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, type ValidModelName, validModels } from '@config'
 import type { ChatEvent, ChatMessage, Message } from '@shared/chat'
 import type { ChatToolDef, ChatToolOutput } from '@shared/tools'
 import type { User } from '@shared/user'
 import { AZURE_API_KEY, AZURE_RESOURCE } from '../../util/config'
 import { ToolResultStore } from './fileSearchResultsStore'
 import { MockModel } from './MockModel'
+import { AiApiWarning, WarningType } from '@shared/aiApi'
+import getEncoding from 'src/server/util/tiktoken'
+import { calculateUsage } from '../chatInstances/usage'
+import { truncateMessages } from './truncateMessages'
 
 export type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
-
-/**
- * Gets a chat model instance based on the provided configuration.
- * Can be a MockModel for testing or an AzureChatOpenAI model.
- * @param modelConfig The configuration for the model.
- * @param tools The structured tools the model can use.
- * @param temperature The temperature for the model's responses.
- * @returns A chat model instance.
- */
-const getChatModel = (modelConfig: (typeof validModels)[number], tools: StructuredTool[], temperature?: number): ChatModel => {
-  const chatModel =
-    modelConfig.name === 'mock'
-      ? new MockModel({ tools, temperature })
-      : new AzureChatOpenAI<ChatOpenAICallOptions>({
-          model: modelConfig.name,
-          azureOpenAIApiKey: AZURE_API_KEY,
-          azureOpenAIApiVersion: '2024-10-21',
-          azureOpenAIApiDeploymentName: modelConfig.name, // In Azure, always use the acual model name as the deployment name
-          azureOpenAIApiInstanceName: AZURE_RESOURCE,
-          temperature: 'temperature' in modelConfig ? modelConfig.temperature : temperature, // If model config specifies a temperature, use it; otherwise, use the user supplied temperature.
-          reasoning: {
-            effort: 'minimal',
-            summary: null,
-            generate_summary: null,
-          },
-          streaming: true,
-        }).bindTools(tools) // Make tools available to the model.
-
-  return chatModel
-}
 
 type WriteEventFunction = (data: ChatEvent) => Promise<void>
 
@@ -76,6 +50,7 @@ export const streamChat = async ({
   tools = [],
   writeEvent,
   user,
+  ignoredWarnings,
 }: {
   model: ValidModelName
   temperature?: number
@@ -84,8 +59,21 @@ export const streamChat = async ({
   promptMessages?: Message[]
   tools?: ChatTool[]
   writeEvent: WriteEventFunction
-  user: User
-}) => {
+  user: User,
+  ignoredWarnings?: WarningType[],
+}): Promise<{
+  warnings: AiApiWarning[]
+  inputTokenCount: number
+} | {
+  tokenCount: number
+  firstTokenTS: number
+  inputTokenCount: number
+  tokenStreamingDuration: number
+  timeToFirstToken?: number
+  tokensPerSecond: number
+  response: string
+  toolCalls?: string
+}> => {
   const toolsByName = Object.fromEntries(tools.map((tool) => [tool.name, tool]))
 
   const modelConfig = validModels.find((m) => m.name === model)
@@ -95,15 +83,19 @@ export const streamChat = async ({
 
   const chatModel = getChatModel(modelConfig, tools, temperature)
 
-  const messages: BaseMessageLike[] = [
-    ...('instructions' in modelConfig ? [{ role: 'system', content: modelConfig.instructions }] : []),
+  const { messages, warnings, inputTokenCount } = handleWarnings(modelConfig, [
+    ...('instructions' in modelConfig ? [{ role: 'system' as const, content: modelConfig.instructions }] : []),
     ...promptMessages,
     {
       role: 'system',
       content: systemMessage,
     },
     ...chatMessages,
-  ]
+  ], ignoredWarnings)
+
+  if (warnings.length > 0) {
+    return { warnings, inputTokenCount }
+  }
 
   const result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
 
@@ -243,6 +235,79 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
     toolCalls,
     fullOutput,
   }
+}
+
+
+/**
+ * Gets a chat model instance based on the provided configuration.
+ * Can be a MockModel for testing or an AzureChatOpenAI model.
+ * @param modelConfig The configuration for the model.
+ * @param tools The structured tools the model can use.
+ * @param temperature The temperature for the model's responses.
+ * @returns A chat model instance.
+ */
+const getChatModel = (modelConfig: (typeof validModels)[number], tools: StructuredTool[], temperature?: number): ChatModel => {
+  const chatModel =
+    modelConfig.name === 'mock'
+      ? new MockModel({ tools, temperature })
+      : new AzureChatOpenAI<ChatOpenAICallOptions>({
+          model: modelConfig.name,
+          azureOpenAIApiKey: AZURE_API_KEY,
+          azureOpenAIApiVersion: '2024-10-21',
+          azureOpenAIApiDeploymentName: modelConfig.name, // In Azure, always use the acual model name as the deployment name
+          azureOpenAIApiInstanceName: AZURE_RESOURCE,
+          temperature: 'temperature' in modelConfig ? modelConfig.temperature : temperature, // If model config specifies a temperature, use it; otherwise, use the user supplied temperature.
+          reasoning: {
+            effort: 'minimal',
+            summary: null,
+            generate_summary: null,
+          },
+          streaming: true,
+        }).bindTools(tools) // Make tools available to the model.
+
+  return chatModel
+}
+
+const handleWarnings = (modelConfig: (typeof validModels)[number], messages: Message[], ignoredWarnings?: WarningType[]): { warnings: AiApiWarning[], messages: Message[], inputTokenCount: number } => {
+  const encoding = getEncoding(modelConfig.name)
+  const tokenCount = calculateUsage(messages, encoding)
+  encoding.free()
+
+  let messagesToReturn = messages
+  const warnings: AiApiWarning[] = []
+
+  // Warn about usage if over 10% of limit
+  const tokenUsagePercentage = Math.round((tokenCount / DEFAULT_TOKEN_LIMIT) * 100)
+
+  const isFreeModel = modelConfig.name === FREE_MODEL
+
+  if (!isFreeModel && tokenUsagePercentage > 10 && !ignoredWarnings?.includes('usage')) {
+    warnings.push({
+      warningType: 'usage',
+      warning: `You are about to use ${tokenUsagePercentage}% of your monthly CurreChat usage`,
+      canIgnore: true,
+    })
+  }
+
+  // Check context limit
+  const contextLimit = modelConfig.context
+
+  if (tokenCount > contextLimit) {
+
+    if (!ignoredWarnings?.includes('contextLimit')) {
+      warnings.push({
+        warningType: 'contextLimit',
+        warning: `The conversation exceeds the context limit of ${contextLimit} tokens for the selected model. Your conversation has ${tokenCount} tokens. Clicking continue will truncate the oldest messages. It is recommended to start a new conversation.`,
+        contextLimit,
+        tokenCount,
+        canIgnore: true,
+      })
+    } else {
+      messagesToReturn = truncateMessages(modelConfig, messages)
+    }
+  }
+
+  return { warnings, messages: messagesToReturn, inputTokenCount: tokenCount }
 }
 
 const safelyStreamMessages = async (model: ChatModel, messages: BaseMessageLike[]) => {

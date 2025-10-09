@@ -1,11 +1,24 @@
 import getEncoding from "src/server/util/tiktoken";
-import { ValidModelName } from "@config";
+import { validModels } from "@config";
 import { Message } from "@shared/chat";
 
-export const truncateMessages = (modelName: ValidModelName, messages: Message[], contextLimit: number): { truncatedMessages: Message[]; tokenCount: number } => {
+export const truncateMessages = (modelConfig: typeof validModels[number], messages: Message[]): Message[] => {
   let tokenCount = 0
-  const encoding = getEncoding(modelName)
+  const encoding = getEncoding(modelConfig.name)
   const truncatedMessages: Message[] = []
+
+  // First, add all system messages
+  messages.forEach((message) => {
+    if (message.role === 'system') {
+      truncatedMessages.push(message)
+      let content: string = ''
+      if (typeof message.content === 'string') {
+        content = message.content
+      }
+      const encoded = encoding.encode(content)
+      tokenCount += encoded.length
+    }
+  })
 
   // Start from the end and work backwards to keep the most recent messages
   for (let i = messages.length - 1; i >= 0; i--) {
@@ -17,7 +30,7 @@ export const truncateMessages = (modelName: ValidModelName, messages: Message[],
     const encoded = encoding.encode(content)
     const messageTokenCount = encoded.length
 
-    if (tokenCount + messageTokenCount <= contextLimit) {
+    if (tokenCount + messageTokenCount <= modelConfig.context) {
       truncatedMessages.unshift(message) // Add to the start since we're iterating backwards
       tokenCount += messageTokenCount
     } else {
@@ -27,5 +40,5 @@ export const truncateMessages = (modelName: ValidModelName, messages: Message[],
 
   encoding.free()
 
-  return { truncatedMessages, tokenCount }
+  return truncatedMessages
 }

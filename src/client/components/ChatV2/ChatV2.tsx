@@ -235,6 +235,8 @@ const ChatV2Content = () => {
 
       const newWarnings = { ...messageWarning }
 
+      console.log(res)
+
       if ("warnings" in res) {
         res.warnings.forEach(warning => {
           newWarnings[warning.warningType] = { message: warning.warning, ignored: false }

@@ -1,21 +1,19 @@
 import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
-import { DEFAUL_CONTEXT_LIMIT, DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction, validModels } from '../../../config'
+import { FREE_MODEL, inProduction } from '../../../config'
 import { PostStreamSchemaV3, type ChatEvent, type ChatMessage } from '../../../shared/chat'
 import { ChatInstance, Discussion, Enrolment, Prompt, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
-import { calculateUsage, checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
+import { checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { streamChat } from '../../services/langchain/chat'
 import { getMockRagIndexSearchTool } from '../../services/rag/mockSearchTool'
 import { getRagIndexSearchTool } from '../../services/rag/searchTool'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
-import getEncoding from '../../util/tiktoken'
 import { parseFileAndAddToLastMessage } from './fileParsing'
 import { upload } from './multer'
-import { checkIamAccess } from 'src/server/util/iams'
-import { getOwnCourses } from 'src/server/services/chatInstances/access'
-import { AiApiWarning } from '@shared/aiApi'
+import { checkIamAccess } from '../../util/iams'
+import { getOwnCourses } from '../../services/chatInstances/access'
 
 const router = express.Router()
 
@@ -68,70 +66,19 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     }
   }
 
-  const isFreeModel = generationInfo.model === FREE_MODEL
-
-  const usageAllowed = (course ? checkCourseUsage(user, course) : isFreeModel) || checkUsage(user, generationInfo.model)
-
-  if (!usageAllowed) {
-    throw ApplicationError.Forbidden('Usage limit reached')
-  }
-
-  // Check file
-  let optionsMessagesWithFile: ChatMessage[] | undefined
-
+  // Add file to last message if exists
   try {
     if (req.file) {
-      optionsMessagesWithFile = (await parseFileAndAddToLastMessage(options.chatMessages, req.file)) as ChatMessage[]
+      options.chatMessages = (await parseFileAndAddToLastMessage(options.chatMessages, req.file)) as ChatMessage[]
     }
   } catch (error) {
     logger.error('Error parsing file', { error })
     throw ApplicationError.BadRequest('Error parsing file')
   }
 
-  options.chatMessages = optionsMessagesWithFile || options.chatMessages
-
-  const encoding = getEncoding(generationInfo.model)
-  let tokenCount = calculateUsage(options.chatMessages, encoding)
-  encoding.free()
-  res.locals.chatCompletionMeta.inputTokenCount = tokenCount
-
-  const warnings: AiApiWarning[] = []
-
-  // Warn about usage if over 10% of limit
-  const tokenUsagePercentage = Math.round((tokenCount / DEFAULT_TOKEN_LIMIT) * 100)
-
-  console.log(options.ignoredWarnings)
-
-  if (!isFreeModel && tokenUsagePercentage > 10 && !options.ignoredWarnings?.includes('usage')) {
-    res.locals.chatCompletionMeta.warning = 'usage'
-    warnings.push({
-      warningType: 'usage',
-      warning: `You are about to use ${tokenUsagePercentage}% of your monthly CurreChat usage`,
-      canIgnore: true,
-    })
-  }
-
-  // Check context limit
-  const contextLimit = validModels.find((m) => m.name === generationInfo.model)?.context || DEFAUL_CONTEXT_LIMIT
-
-  if (tokenCount > contextLimit && !options.ignoredWarnings?.includes('contextLimit')) {
-    res.locals.chatCompletionMeta.warning = 'contextLimit'
-    warnings.push({
-      warningType: 'contextLimit',
-      warning: `The messages you have sent exceed the context limit of ${contextLimit} tokens for the selected model. Your messages have ${tokenCount} tokens. Clicking continue will truncate the oldest messages.`,
-      contextLimit,
-      tokenCount,
-      canIgnore: true,
-    })
-  }
-
-  if (warnings.length > 0) {
-    console.log('Warnings:', warnings)
-    res.status(201).json({
-      warnings,
-    })
-    return
-  }
+  // Model and temperature might be overridden by prompt settings
+  let model = generationInfo.model
+  let temperature = generationInfo.temperature
 
   // Find prompt if using a saved prompt
   let prompt: Prompt | null = null
@@ -157,6 +104,14 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
     systemMessage = prompt.systemMessage
 
+    if (prompt.model) {
+      model = prompt.model
+    }
+
+    if (prompt.temperature) {
+      temperature = prompt.temperature
+    }
+
     if (prompt.ragIndex) {
       const searchTool = generationInfo.model === 'mock' ? getMockRagIndexSearchTool(prompt.ragIndex) : getRagIndexSearchTool(prompt.ragIndex)
       tools.push(searchTool)
@@ -171,6 +126,14 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     systemMessage = generationInfo.promptInfo.systemMessage
   }
 
+  const isFreeModel = model === FREE_MODEL
+
+  const usageAllowed = (course ? checkCourseUsage(user, course) : isFreeModel) || checkUsage(user, generationInfo.model)
+
+  if (!usageAllowed) {
+    throw ApplicationError.Forbidden('Usage limit reached')
+  }
+
   res.locals.chatCompletionMeta.tools = tools.map((t) => t.name)
 
   // Prepare for streaming response
@@ -181,8 +144,9 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     chatMessages: options.chatMessages,
     systemMessage,
     promptMessages: prompt?.messages,
-    model: prompt?.model ?? generationInfo.model,
-    temperature: prompt?.temperature ?? generationInfo.temperature ?? undefined,
+    model,
+    temperature: temperature ?? undefined,
+    ignoredWarnings: options.ignoredWarnings,
     tools,
     writeEvent: async (event: ChatEvent) => {
       await new Promise((resolve) => {
@@ -202,7 +166,18 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     },
   })
 
-  tokenCount += result.tokenCount
+  res.locals.chatCompletionMeta.inputTokenCount = result.inputTokenCount
+
+  if ('warnings' in result) {
+    console.log('Warnings:', result.warnings)
+    res.locals.chatCompletionMeta.warnings = result.warnings.map((w) => w.warningType)
+    // No stream after all.
+    res.setHeader('content-type', 'application/json')
+    res.status(201).json({
+      warnings: result.warnings,
+    })
+    return
+  }
 
   // Increment user usage if not using free model
   // If the user is hijacked by admin in production, charge the admin instead
@@ -213,16 +188,15 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     }
 
     if (course) {
-      await incrementCourseUsage(course, tokenCount) // course.currentUserUsage.usage is incremented by tokenCount
+      await incrementCourseUsage(course, result.tokenCount) // course.currentUserUsage.usage is incremented by tokenCount
     } else {
-      await incrementUsage(userToCharge, tokenCount)
+      await incrementUsage(userToCharge, result.tokenCount)
     }
   }
 
   Object.assign(res.locals.chatCompletionMeta, {
-    tokenCount,
+    tokenCount: result.tokenCount,
     outputTokenCount: result.tokenCount,
-    inputTokenCount: result.inputTokenCount,
     timeToFirstToken: result.timeToFirstToken,
     tokensPerSecond: result.tokensPerSecond,
     toolCalls: result.toolCalls,
