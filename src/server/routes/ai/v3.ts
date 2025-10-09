@@ -169,7 +169,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   res.locals.chatCompletionMeta.inputTokenCount = result.inputTokenCount
 
   if ('warnings' in result) {
-    console.log('Warnings:', result.warnings)
     res.locals.chatCompletionMeta.warnings = result.warnings.map((w) => w.warningType)
     // No stream after all.
     res.setHeader('content-type', 'application/json')

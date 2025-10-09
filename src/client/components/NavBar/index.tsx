@@ -17,14 +17,12 @@ import {
   Drawer,
   IconButton,
   Stack,
-  Menu,
   useMediaQuery,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import Language from '@mui/icons-material/Language'
 import AdminPanelSettingsOutlined from '@mui/icons-material/AdminPanelSettingsOutlined'
 import BookmarksOutlined from '@mui/icons-material/BookmarksOutlined'
-import GradeOutlined from '@mui/icons-material/GradeOutlined'
 import OpenInNew from '@mui/icons-material/OpenInNew'
 import { useTranslation } from 'react-i18next'
 import MenuIcon from '@mui/icons-material/Menu'
@@ -73,30 +71,43 @@ const NavBar = () => {
 
   return (
     <>
-      <AppBar elevation={0} position="fixed" sx={styles.appbar} color="transparent">
-        <Container maxWidth={false}>
-          <Toolbar sx={styles.toolbar} disableGutters>
-            <MuiLink to="/" sx={styles.navBox} component={Link}>
-              <img src={hyLogo} alt="University of Helsinki" width="24" />
-              <Box ml="1rem">
-                <Typography sx={styles.appName}>{t('appName')}</Typography>
-              </Box>
-            </MuiLink>
-            <IconButton
-              sx={{ display: { sx: 'block', lg: 'none' } }}
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              onClick={() => {
-                setNavPanelOpen(true)
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
-              {isDesktopDevice && <NavItems user={user} handleLanguageChange={handleLanguageChange} language={language} />}
+      <AppBar elevation={0} position="fixed" sx={{
+        height: 0, // Seems hacky, but this way the AppBar surface, which is transparent, does not block interaction of the elements "under" it. (Well nothing is actually under it because its height is 0)
+        mt: '2rem', // This is then required so the appbar is correctly positioned
+      }} color="transparent">
+        <Container maxWidth={false} sx={{ display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
+          <MuiLink to="/" 
+            sx={{...styles.navBox, 
+              backgroundColor: 'white',
+              borderRadius: 1,
+              boxShadow: '0 0 15px 15px white',
+              zIndex: 2,
+            }} 
+            component={Link}
+          >
+            <img src={hyLogo} alt="University of Helsinki" width="24" />
+            <Box ml="1rem" >
+              <Typography sx={styles.appName}>{t('appName')}</Typography>
             </Box>
-          </Toolbar>
+          </MuiLink>
+          <IconButton
+            sx={{ display: { sx: 'block', lg: 'none' },
+              backgroundColor: 'white',
+              borderRadius: 1,
+              boxShadow: '0 0 15px 15px white',
+            }}
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            onClick={() => {
+              setNavPanelOpen(true)
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
+            {isDesktopDevice && <NavItems user={user} handleLanguageChange={handleLanguageChange} language={language} />}
+          </Box>
         </Container>
       </AppBar>
       <Drawer
@@ -106,7 +117,7 @@ const NavBar = () => {
           setNavPanelOpen(false)
         }}
       >
-        <Stack sx={{ paddingTop: 4, paddingRight: 4 }}>
+        <Stack sx={{ py: 4, px: 4 }}>
           {!isDesktopDevice && <NavItems user={user} handleLanguageChange={handleLanguageChange} language={language} vertical />}
         </Stack>
       </Drawer>
@@ -124,7 +135,7 @@ const NavItemButton = ({ children, to, path, current, icon, vertical }) => {
       startIcon={icon}
       sx={{
         [`border${borderSide}`]: '2px solid',
-        borderRadius: '0',
+        borderRadius: 0,
         [`border${borderSide}Color`]: matchPath({ path: path }, current) ? 'primary.main' : 'transparent',
       }}
     >
@@ -142,7 +153,15 @@ const NavItems = ({ user, handleLanguageChange, language, vertical = false }) =>
   if (!user) return null
 
   return (
-    <>
+    <Box sx={{
+      backgroundColor: 'white',
+      borderRadius: 1,
+      boxShadow: '0 0 15px 15px white',
+      display: 'flex',
+      flexDirection: vertical ? 'column' : 'row',
+      alignItems: 'start',
+      gap: 1,
+    }}>
       {user.enrolledCourses.length > 0 && (
         <NavItemButton to="/chats" path="chats/*" current={pathname} icon={<BookmarksOutlined sx={styles.icon} />} vertical={vertical}>
           {t('chats')}
@@ -202,7 +221,7 @@ const NavItems = ({ user, handleLanguageChange, language, vertical = false }) =>
           </Grow>
         )}
       </Popper>{' '}
-    </>
+    </Box>
   )
 }
 export default NavBar
