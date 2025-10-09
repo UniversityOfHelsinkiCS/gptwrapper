@@ -47,7 +47,7 @@ jobs:
     timeout-minutes: 2
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Pull image and create a container
         run: docker create --name gptwrapper quay.io/toska/gptwrapper:production
