@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
       - name: Setup Blacksmith Builder
         uses: useblacksmith/setup-docker-builder@v1
