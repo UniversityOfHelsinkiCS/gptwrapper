@@ -13,8 +13,6 @@ import { SearchSchema } from '../../../shared/rag'
 import { S3_BUCKET } from '../../util/config'
 import { s3Client } from '../../util/s3client'
 import { ingestRagFiles } from '../../services/rag/ingestion'
-import { getIngestionJobId, queue as ingestionQueue } from '../../services/jobs/ingestion.job'
-import { getPdfParsingJobId, queue as pdfParsingQueue } from 'src/server/services/jobs/pdfParsing.job'
 import { IngestionJobStatus } from '@shared/ingestion'
 
 const ragIndexRouter = Router()
@@ -101,21 +99,15 @@ ragIndexRouter.get('/jobs', async (req, res) => {
 
   const ragFileStatuses: IngestionJobStatus[] = await Promise.all(
     ragFiles.map(async (rf) => {
-      const ingestionJob = await ingestionQueue.getJob(getIngestionJobId(rf))
-      const pdfJob = await pdfParsingQueue.getJob(getPdfParsingJobId(rf))
-      const ingestionJobProgress = (ingestionJob?.progress as { progress: number; message: string; eta: number }) || {}
-      const pdfJobProgress = (pdfJob?.progress as { progress: number; message: string; eta: number }) || {}
-      const ingestionJobProgressNumber = ingestionJobProgress.progress || 0
-      const pdfJobProgressNumber = (pdfJobProgress.progress || 0) * 0.95 // PDF parsing is 95% of the work
-      const currentProgress = ingestionJobProgressNumber + pdfJobProgressNumber // This works because when pdf job is done, it is removed.
+      const meta = (rf.metadata)
 
       const status: IngestionJobStatus = {
         ragFileId: rf.id,
-        message: pdfJobProgress.message || ingestionJobProgress.message,
-        progress: currentProgress,
-        eta: pdfJobProgress.eta || ingestionJobProgress.eta,
+        message: meta?.message,
+        progress: rf.progress,
+        eta: meta?.eta,
         pipelineStage: rf.pipelineStage,
-        error: rf.error,
+        error: rf.error ?? undefined,
       }
 
       return status
@@ -204,6 +196,8 @@ ragIndexRouter.delete('/files/:fileId/text', async (req, res) => {
 
   // Delete the text version file from s3 if it exists
   await FileStore.deleteRagFileText(ragFile)
+
+  console.log(ragIndex, "RAG INDEX ON DELETE TEXT FROM SINGLE FILE")
 
   // Now we need to re-ingest
   ingestRagFiles(ragIndex).catch((error) => {

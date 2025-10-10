@@ -11,8 +11,8 @@ export type IngestionPipelineStageKey = keyof typeof IngestionPipelineStages
 export type IngestionJobStatus = {
   ragFileId: number
   progress: number | null
-  eta: number | null
+  eta?: number
   message?: string
   pipelineStage: IngestionPipelineStageKey
-  error?: string | null
+  error?: string
 }

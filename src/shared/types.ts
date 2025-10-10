@@ -15,6 +15,8 @@ export type RagIndexMetadata = {
 
 export type RagFileMetadata = {
   usageBytes?: number
+  message?: string
+  eta?: number
 }
 
 export type RagFileAttributes = {
@@ -31,6 +33,7 @@ export type RagFileAttributes = {
   userId: string
   metadata: Record<string, unknown> | null
   error: string | null
+  message: string | null
 }
 
 export type RagIndexAttributes = {

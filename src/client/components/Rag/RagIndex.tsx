@@ -81,6 +81,7 @@ export const RagIndex: React.FC = () => {
             userId: user?.id || '',
             metadata: null,
             error: null,
+            message: '',
           })),
         ],
       }

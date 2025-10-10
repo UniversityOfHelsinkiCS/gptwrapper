@@ -1,6 +1,7 @@
 import IORedis from 'ioredis'
 import { BMQ_REDIS_CA, BMQ_REDIS_CERT, BMQ_REDIS_HOST, BMQ_REDIS_KEY, BMQ_REDIS_PORT, S3_BUCKET } from '../../util/config'
 import { Job, Queue, QueueEvents } from 'bullmq'
+import crypto from 'crypto'
 import { FileStore } from '../rag/fileStore'
 import { RagFile } from '../../db/models'
 import { getDocument, PDFPageProxy } from 'pdfjs-dist/legacy/build/pdf.mjs'
@@ -106,7 +107,7 @@ export const submitPdfParsingJobs = async (ragFile: RagFile) => {
   }
   const pages = await analyzeAndPreparePDFPages(pdfBytes)
 
-  const baseJobId = getPdfParsingJobId(ragFile)
+  const baseJobId = crypto.randomBytes(20).toString('hex')
 
   for (let i = 0; i < pages.length; i++) {
     const pageNumber = i + 1
