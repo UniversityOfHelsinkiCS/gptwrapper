@@ -8,6 +8,9 @@ import Router from './Router'
 import initializeI18n from './util/i18n'
 import queryClient from './util/queryClient'
 import { inCI, inDevelopment, inStaging } from '../config'
+import { setupWindowMessageListeners } from './util/windowMessages'
+
+setupWindowMessageListeners()
 
 const ReactQueryDevtoolsProduction = inDevelopment
   ? ReactQueryDevtools
@@ -25,22 +28,6 @@ if (!inDevelopment && !inStaging && !inCI) {
 }
 
 initializeI18n()
-
-if (inCI) {
-  console.log('Adding global error handlers...')
-
-  // Add global error handler to prevent app crashes from network errors
-  window.addEventListener('error', (event) => {
-    console.warn('Network error caught and prevented from crashing app:', event.error)
-    event.preventDefault()
-  })
-
-  // Add unhandled promise rejection handler
-  window.addEventListener('unhandledrejection', (event) => {
-    console.warn('Unhandled promise rejection caught:', event.reason)
-    event.preventDefault()
-  })
-}
 
 const Main = () => {
   const [showDevtools, setShowDevtools] = React.useState(false)

@@ -21,11 +21,36 @@
     const iframe = document.getElementById("cc-iframe")
     let successLoading = false
 
-    iframe.onload = () => {
-      console.log(iframe.srcdoc)
+    iframe.onload = async () => {
       if (successLoading) {
+        console.log("Iframe already loaded successfully, skipping")
         return
       }
+      // Listen for a pong message from the iframe
+
+      window.addEventListener("message", function handler(event) {
+        if (event.origin !== "https://curre.helsinki.fi") {
+          return
+        }
+
+        console.log("Received message", event.data)
+
+        if (event.data.type === 'pong') {
+          successLoading = true
+          console.log("Pong message received, iframe loaded successfully")
+          window.removeEventListener("message", handler)
+          document.getElementById("login-popup-info").style.display = "none"
+        }
+      })
+
+      iframe.contentWindow?.postMessage({ type: "ping" }, "https://curre.helsinki.fi")
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      if (successLoading) {
+        console.log("Iframe responded, no need to login")
+        return
+      }
+      console.log("No response from iframe, opening login popup")
 
       // Open CC in a new window and do a handshake with it
 
@@ -36,16 +61,7 @@
         document.getElementById("popup-blocked-info").style.display = "block"
       }
 
-      window.addEventListener("beforeunload", () => {
-        windowProxy?.close()
-      })
-
-      window.addEventListener("focus", function handler() {
-        // Reload the iframe to reflect the new login state
-        iframe.src = iframe.src
-        document.getElementById("login-popup-info").style.display = "none"
-        windowProxy?.close()
-      })
+      // Listen for message from the popup window
 
       const nonce = crypto.randomUUID()
 
@@ -67,6 +83,19 @@
         }
       })
 
+      window.addEventListener("beforeunload", () => {
+        windowProxy?.close()
+      })
+
+      window.addEventListener("focus", function handler() {
+        // Reload the iframe to reflect the new login state
+        iframe.src = iframe.src
+        document.getElementById("login-popup-info").style.display = "none"
+        windowProxy?.close()
+      })
+
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      
       console.log("Sending login-query message with nonce", nonce)
       windowProxy?.postMessage({ type: "login-query", nonce }, "https://curre.helsinki.fi")
     }
