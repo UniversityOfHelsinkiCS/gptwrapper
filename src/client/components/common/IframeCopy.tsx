@@ -28,6 +28,7 @@ export const IframeCopy = ({ courseId, promptId, model }: { courseId: string; pr
 const iframeSrcCode = (courseId: string, promptId?: string, model?: string) => /*html*/`
 <div translate="yes" lang="fi" style="position: relative;">
   <iframe
+    style="border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 0.3rem;
     id="cc-iframe"
     src="https://curre.helsinki.fi/chat/${courseId}?embedded=true${promptId ? `&amp;promptId=${promptId}` : ''}${model ? `&amp;model=${model}` : ''}"
     width="100%" height="500px">
