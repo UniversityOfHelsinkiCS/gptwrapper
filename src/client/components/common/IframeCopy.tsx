@@ -1,26 +1,13 @@
 import { IconButton, Tooltip } from '@mui/material'
 import HtmlIcon from '@mui/icons-material/Html'
 import { useTranslation } from 'react-i18next'
-import { PUBLIC_URL } from '../../../config'
 
 export const IframeCopy = ({ courseId, promptId, model }: { courseId: string; promptId?: string; model?: string }) => {
   const { t } = useTranslation()
 
-  let iframeSrc = `${window.location.origin}${PUBLIC_URL}/${courseId}?embedded=true`
-
-  if (promptId) {
-    iframeSrc += `&promptId=${promptId}`
-  }
-
-  if (model) {
-    iframeSrc += `&model=${model}`
-  }
-
-  const iframeHtml = `<iframe src="${iframeSrc}" width="100%" height="500px"></iframe>`
-
   return (
     <Tooltip
-      title={t('common:iframeCopy', { iframeHtml })}
+      title={t('common:iframeCopy')}
       slotProps={{
         tooltip: {
           sx: {
@@ -31,9 +18,120 @@ export const IframeCopy = ({ courseId, promptId, model }: { courseId: string; pr
         },
       }}
     >
-      <IconButton onClick={() => navigator.clipboard.writeText(iframeHtml)}>
+      <IconButton onClick={() => navigator.clipboard.writeText(iframeSrcCode(courseId, promptId, model))}>
         <HtmlIcon />
       </IconButton>
     </Tooltip>
   )
 }
+
+const iframeSrcCode = (courseId: string, promptId?: string, model?: string) => /*html*/`
+<div translate="yes" lang="fi" style="position: relative;">
+  <iframe
+    id="cc-iframe"
+    src="https://curre.helsinki.fi/chat/${courseId}?embedded=true${promptId ? `&amp;promptId=${promptId}` : ''}${model ? `&amp;model=${model}` : ''}"
+    width="100%" height="500px">
+  </iframe>
+  <div id="login-popup-info" style="position: absolute; top: 0; left: 0; display: none; padding: 4rem; white-space: pre-line;">
+    <p>Sinun pitää uudistaa kirjautumissessiosi käyttääksesi CurreChattiä. 
+      Kirjautuminen avautuu uuteen ikkunaan. 
+      Jos niin ei tapahtunut, <a href="https://curre.helsinki.fi/chat/login-helper" target="_blank" rel="opener">paina tästä</a>.
+    </p>
+    <p id="popup-blocked-info" style="display: none; margin-top: 1rem;">
+      Ponnahdusikkunaa ei voitu avata, joten käytä yllä olevaa linkkiä.
+    </p>
+  </div>
+  <script>
+
+    /**
+     * @type {HTMLIFrameElement}
+    */
+    const iframe = document.getElementById("cc-iframe")
+    let successLoading = false
+
+    const toggleLoginInfo = (show) => {
+      document.getElementById("login-popup-info").style.display = show ? "block" : "none"
+    }
+
+    iframe.onload = async () => {
+      if (successLoading) {
+        console.log("Iframe already loaded successfully, skipping")
+        return
+      }
+      // Listen for a pong message from the iframe
+
+      toggleLoginInfo(true)
+
+      window.addEventListener("message", function handler(event) {
+        if (event.origin !== "https://curre.helsinki.fi") {
+          return
+        }
+
+        console.log("Received message", event.data)
+
+        if (event.data.type === 'pong') {
+          successLoading = true
+          console.log("Pong message received, iframe loaded successfully")
+          window.removeEventListener("message", handler)
+          toggleLoginInfo(false)
+        }
+      })
+
+      iframe.contentWindow?.postMessage({ type: "ping" }, "https://curre.helsinki.fi")
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      if (successLoading) {
+        console.log("Iframe responded, no need to login")
+        toggleLoginInfo(false)
+        return
+      }
+      console.log("No response from iframe, opening login popup")
+
+      // Open CC in a new window and do a handshake with it
+
+      const windowProxy = window.open("https://curre.helsinki.fi/chat/login-helper", "_blank", "width=600,height=400,rel=opener")
+      if (!windowProxy) {
+        document.getElementById("popup-blocked-info").style.display = "block"
+      }
+
+      // Listen for message from the popup window
+
+      const nonce = crypto.randomUUID()
+
+      window.addEventListener("message", function handler(event) {
+        if (event.origin !== "https://curre.helsinki.fi") {
+          return
+        }
+
+        console.log("Received message", event.data)
+
+        if (event.data.type === "login-success" && event.data.nonce === nonce) {
+          // Reload the iframe to reflect the new login state
+          console.log("Login success message received with correct nonce", nonce)
+          successLoading = true
+          iframe.src = iframe.src
+          document.getElementById("login-popup-info").style.display = "none"
+          windowProxy?.close()
+          window.removeEventListener("message", handler)
+        }
+      })
+
+      window.addEventListener("beforeunload", () => {
+        windowProxy?.close()
+      })
+
+      window.addEventListener("focus", function handler() {
+        // Reload the iframe to reflect the new login state
+        iframe.src = iframe.src
+        toggleLoginInfo(false)
+        windowProxy?.close()
+      })
+
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      
+      console.log("Sending login-query message with nonce", nonce)
+      windowProxy?.postMessage({ type: "login-query", nonce }, "https://curre.helsinki.fi")
+    }
+  </script>
+</div>
+`

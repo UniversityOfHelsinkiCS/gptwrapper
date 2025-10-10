@@ -3,7 +3,6 @@ import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { useParams, useSearchParams } from 'react-router-dom'
 import type { Prompt } from '../../types'
 import apiClient, { type ApiError } from '../../util/apiClient'
-import { isAxiosError } from 'axios'
 import { type UseMutateAsyncFunction, useMutation, useQuery } from '@tanstack/react-query'
 import useCourse from '../../hooks/useCourse'
 import { useAnalyticsDispatch } from '../../stores/analytics'
@@ -84,7 +83,6 @@ export const PromptStateProvider: React.FC<{
 
   // Url prompt?
   useEffect(() => {
-    console.log('URL PROMPT EFFECT', { urlPromptId, urlPrompt })
     if (urlPrompt) {
       handleChangePrompt(urlPrompt)
     }

@@ -11,7 +11,6 @@ import {
   Link,
   TextField,
   Tooltip,
-  Typography,
 } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -22,7 +21,6 @@ import type { FeedbackPost } from '../../shared/feedback'
 import { useSnackbar } from 'notistack'
 import { BlueButton, OutlineButtonBlack } from './ChatV2/general/Buttons'
 import { supportEmail } from '@config'
-import { useIsEmbedded } from '../contexts/EmbeddedContext'
 
 const useSubmitFeedbackMutation = () => {
   const analyticsMetadata = useAnalytics()

@@ -7,7 +7,7 @@
   <div id="login-popup-info" style="position: absolute; top: 0; left: 0; display: none; padding: 4rem; white-space: pre-line;">
     <p>Sinun pitää uudistaa kirjautumissessiosi käyttääksesi CurreChattiä. 
       Kirjautuminen avautuu uuteen ikkunaan. 
-      Jos niin ei tapahtunut, <a href="https://curre.helsinki.fi/chat" target="_blank" rel="opener">paina tästä</a>.
+      Jos niin ei tapahtunut, <a href="https://curre.helsinki.fi/chat/login-helper" target="_blank" rel="opener">paina tästä</a>.
     </p>
     <p id="popup-blocked-info" style="display: none; margin-top: 1rem;">
       Ponnahdusikkunaa ei voitu avata, joten käytä yllä olevaa linkkiä.
@@ -21,12 +21,18 @@
     const iframe = document.getElementById("cc-iframe")
     let successLoading = false
 
+    const toggleLoginInfo = (show) => {
+      document.getElementById("login-popup-info").style.display = show ? "block" : "none"
+    }
+
     iframe.onload = async () => {
       if (successLoading) {
         console.log("Iframe already loaded successfully, skipping")
         return
       }
       // Listen for a pong message from the iframe
+
+      toggleLoginInfo(true)
 
       window.addEventListener("message", function handler(event) {
         if (event.origin !== "https://curre.helsinki.fi") {
@@ -39,7 +45,7 @@
           successLoading = true
           console.log("Pong message received, iframe loaded successfully")
           window.removeEventListener("message", handler)
-          document.getElementById("login-popup-info").style.display = "none"
+          toggleLoginInfo(false)
         }
       })
 
@@ -48,13 +54,12 @@
 
       if (successLoading) {
         console.log("Iframe responded, no need to login")
+        toggleLoginInfo(false)
         return
       }
       console.log("No response from iframe, opening login popup")
 
       // Open CC in a new window and do a handshake with it
-
-      document.getElementById("login-popup-info").style.display = "block"
 
       const windowProxy = window.open("https://curre.helsinki.fi/chat/login-helper", "_blank", "width=600,height=400,rel=opener")
       if (!windowProxy) {
@@ -90,7 +95,7 @@
       window.addEventListener("focus", function handler() {
         // Reload the iframe to reflect the new login state
         iframe.src = iframe.src
-        document.getElementById("login-popup-info").style.display = "none"
+        toggleLoginInfo(false)
         windowProxy?.close()
       })
 
