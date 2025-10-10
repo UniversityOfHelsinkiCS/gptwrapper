@@ -221,7 +221,7 @@ export const ChatBox = ({
               mt: '0.5rem',
             }}
           >
-            <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Tooltip title={t('chat:attachFile')} arrow placement="top">
                 <IconButton component="label">
                   <AttachFileIcon />
@@ -260,23 +260,6 @@ export const ChatBox = ({
                     <HelpOutline fontSize="small" sx={{ color: 'inherit', opacity: 0.7, mt: 0.5, flex: 2, display: { xs: 'none', sm: 'block' } }} />
                   </Tooltip>
                 </Box>
-
-                {!isMobile && (
-                  <Typography
-                    sx={{
-                      display: { sm: 'none', md: 'block' },
-                      ml: 'auto',
-                      opacity: acuallyDisabled ? 0 : 1,
-                      transition: 'opacity 0.2s ease-in-out',
-                      fontSize: '14px',
-                    }}
-                    variant="body1"
-                    color="textSecondary"
-                  >
-                    {isShiftEnterSend ? <ShiftEnterToSend t={t} /> : <ShiftEnterForNewline t={t} />}
-                  </Typography>
-                )}
-
                 {!isEmbedded && (
                   <Tooltip
                     arrow
@@ -298,6 +281,22 @@ export const ChatBox = ({
                 )}
               </Box>
             </Box>
+            {!isMobile && (
+              <Typography
+                sx={{
+                  display: { sm: 'none', md: 'block' },
+                  ml: 'auto',
+                  mr: '1rem',
+                  opacity: acuallyDisabled ? 0 : 1,
+                  transition: 'opacity 0.2s ease-in-out',
+                  fontSize: '14px',
+                }}
+                color="textSecondary"
+              >
+                {isShiftEnterSend ? <ShiftEnterToSend t={t} /> : <ShiftEnterForNewline t={t} />}
+              </Typography>
+            )}
+
             <Tooltip title={disabled ? t('chat:cancelResponse') : isShiftEnterSend ? t('chat:shiftEnterSend') : t('chat:enterSend')} arrow placement="top">
               {disabled ? (
                 <IconButton onClick={handleStop}>
