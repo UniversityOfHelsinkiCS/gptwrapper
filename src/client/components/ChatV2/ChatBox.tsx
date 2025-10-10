@@ -193,8 +193,8 @@ export const ChatBox = ({
           }}
         >
           <TextField
+            autoFocus={!isEmbedded}
             inputRef={textFieldRef}
-            autoFocus
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder={t('chat:writeHere')}
