@@ -38,7 +38,7 @@ const Courses = () => {
   const activeCourses = courses.filter((course) => !course.isExpired)
 
   return (
-    <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
+    <Container sx={{ mt: '8rem', mb: '10rem' }} maxWidth="xl">
       <Box display="flex" gap={2}>
         <Typography variant="h5" display="inline" mb={1}>
           {t('common:courses')}

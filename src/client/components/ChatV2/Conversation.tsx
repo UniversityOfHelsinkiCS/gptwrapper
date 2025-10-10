@@ -326,11 +326,11 @@ const Conversation = ({
       <Box
         style={{
           maxWidth: '100%',
-          height: 'auto',
+          height: '100%',
           display: 'flex',
           flexDirection: 'column',
           gap: '2.5rem',
-          padding: '1rem 0',
+          padding: '4rem 2rem',
           justifyContent: messages.length === 0 ? 'center' : 'flex-start',
         }}
       >

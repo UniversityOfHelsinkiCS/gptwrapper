@@ -108,7 +108,7 @@ const Layout = () => {
         }}
       >
         {isEmbedded ? <EmbeddedNavBar /> : <NavBar />}
-        <Box sx={{ flex: 1, mt: '4rem' }}>
+        <Box>
           <Content />
         </Box>
         {!isEmbedded && <Feedback />}

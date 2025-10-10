@@ -22,7 +22,7 @@ const Chats = () => {
   }
 
   return (
-    <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
+    <Container sx={{ mt: '8rem', mb: '10rem' }} maxWidth="xl">
       <h2>{t('chats:header')}</h2>
 
       <Box my={2}>

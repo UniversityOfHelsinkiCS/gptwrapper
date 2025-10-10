@@ -179,7 +179,7 @@ const ChatV2Content = () => {
     if (file) {
       formData.append('file', file)
     }
-    
+
     const newMessages = resendPrevious ? messages : messages.concat({
       role: 'user',
       content: message,
@@ -372,6 +372,8 @@ const ChatV2Content = () => {
   return (
     <Box
       sx={{
+        minHeight: '100vh',
+        position: 'relative',
         display: 'flex',
         flexDirection: 'row',
         width: '100%',
@@ -423,18 +425,14 @@ const ChatV2Content = () => {
         ref={chatContainerRef}
         sx={{
           display: 'flex',
-          position: 'relative',
           flexDirection: 'column',
-          overflowY: 'visible',
-          // Padding for left menu
           marginLeft: leftMenuWidth,
         }}
       >
         <Box
           sx={{
-            margin: 'auto',
+            height: '100%',
             overflow: 'hidden',
-            overflowY: 'auto',
             paddingLeft: '1rem',
             paddingRight: '1rem',
             paddingTop: '1rem',
@@ -486,11 +484,11 @@ const ChatV2Content = () => {
         <Box
           ref={inputFieldRef}
           sx={{
+            backgroundColor: 'white',
             width: '100%',
-            padding: '1rem 1rem 0rem 1rem',
+            padding: '0rem 2rem 2rem 2rem',
             position: 'sticky',
             bottom: 0,
-            margin: 'auto',
           }}
         >
           <ChatBox

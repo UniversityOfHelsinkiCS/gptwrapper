@@ -24,7 +24,7 @@ export function Component() {
   const lastRestart = format(new Date(user?.lastRestart), 'dd/MM/yyyy HH.mm.ss')
 
   return (
-    <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
+    <Container sx={{ mt: '8rem', mb: '10rem' }} maxWidth="xl">
       <Box m={2}>
         <Typography variant="body1">
           {t('admin:lastUpdate')}
