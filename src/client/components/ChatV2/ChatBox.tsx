@@ -304,7 +304,7 @@ export const ChatBox = ({
                   <StopIcon />
                 </IconButton>
               ) : (
-                <IconButton type={'submit'} ref={sendButtonRef} data-testid="send-chat-message">
+                <IconButton type='submit' ref={sendButtonRef} data-testid="send-chat-message">
                   <Send />
                 </IconButton>
               )}

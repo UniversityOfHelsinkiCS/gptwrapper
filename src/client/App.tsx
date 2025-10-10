@@ -111,7 +111,7 @@ const Layout = () => {
         <Box sx={{ flex: 1, mt: '4rem' }}>
           <Content />
         </Box>
-        <Feedback />
+        {/* <Feedback /> */}
       </Box>
       <AdminLoggedInAsBanner />
     </>

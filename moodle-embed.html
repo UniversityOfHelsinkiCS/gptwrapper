@@ -22,6 +22,7 @@
     let successLoading = false
 
     iframe.onload = () => {
+      console.log(iframe.srcdoc)
       if (successLoading) {
         return
       }
@@ -53,8 +54,12 @@
           return
         }
 
+        console.log("Received message", event.data)
+
         if (event.data.type === "login-success" && event.data.nonce === nonce) {
           // Reload the iframe to reflect the new login state
+          console.log("Login success message received with correct nonce", nonce)
+          successLoading = true
           iframe.src = iframe.src
           document.getElementById("login-popup-info").style.display = "none"
           windowProxy?.close()
@@ -62,6 +67,7 @@
         }
       })
 
+      console.log("Sending login-query message with nonce", nonce)
       windowProxy?.postMessage({ type: "login-query", nonce }, "https://curre.helsinki.fi")
     }
   </script>
