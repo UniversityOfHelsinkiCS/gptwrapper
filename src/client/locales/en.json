@@ -401,5 +401,8 @@
     "waitForUpload": "Please wait, uploading files to the server",
     "filesIngesting": "Processing files. You can leave the page.",
     "allCompleted": "Done processing."
+  },
+  "embeddedLogin": {
+    "helpText": "Successfully logged in. You may close this window."
   }
 }

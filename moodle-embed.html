@@ -1,0 +1,68 @@
+<div translate="yes" lang="fi" style="position: relative;">
+  <iframe
+    id="cc-iframe"
+    src="https://curre.helsinki.fi/chat/toska?embedded=true&amp;promptId=459cd6c8-2c65-4196-9c0b-0d469f254ddb"
+    width="100%" height="500px">
+  </iframe>
+  <div id="login-popup-info" style="position: absolute; top: 0; left: 0; display: none; padding: 4rem; white-space: pre-line;">
+    <p>Sinun pitää uudistaa kirjautumissessiosi käyttääksesi CurreChattiä. 
+      Kirjautuminen avautuu uuteen ikkunaan. 
+      Jos niin ei tapahtunut, <a href="https://curre.helsinki.fi/chat" target="_blank" rel="opener">paina tästä</a>.
+    </p>
+    <p id="popup-blocked-info" style="display: none; margin-top: 1rem;">
+      Ponnahdusikkunaa ei voitu avata, joten käytä yllä olevaa linkkiä.
+    </p>
+  </div>
+  <script>
+
+    /**
+     * @type {HTMLIFrameElement}
+    */
+    const iframe = document.getElementById("cc-iframe")
+    let successLoading = false
+
+    iframe.onload = () => {
+      if (successLoading) {
+        return
+      }
+
+      // Open CC in a new window and do a handshake with it
+
+      document.getElementById("login-popup-info").style.display = "block"
+
+      const windowProxy = window.open("https://curre.helsinki.fi/chat/login-helper", "_blank", "width=600,height=400,rel=opener")
+      if (!windowProxy) {
+        document.getElementById("popup-blocked-info").style.display = "block"
+      }
+
+      window.addEventListener("beforeunload", () => {
+        windowProxy?.close()
+      })
+
+      window.addEventListener("focus", function handler() {
+        // Reload the iframe to reflect the new login state
+        iframe.src = iframe.src
+        document.getElementById("login-popup-info").style.display = "none"
+        windowProxy?.close()
+      })
+
+      const nonce = crypto.randomUUID()
+
+      window.addEventListener("message", function handler(event) {
+        if (event.origin !== "https://curre.helsinki.fi") {
+          return
+        }
+
+        if (event.data.type === "login-success" && event.data.nonce === nonce) {
+          // Reload the iframe to reflect the new login state
+          iframe.src = iframe.src
+          document.getElementById("login-popup-info").style.display = "none"
+          windowProxy?.close()
+          window.removeEventListener("message", handler)
+        }
+      })
+
+      windowProxy?.postMessage({ type: "login-query", nonce }, "https://curre.helsinki.fi")
+    }
+  </script>
+</div>

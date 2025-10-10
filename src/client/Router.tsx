@@ -12,6 +12,7 @@ import NoAccess from './components/NoAccess'
 import Rag from './components/Rag/Rag'
 import { RagFile } from './components/Rag/RagFile'
 import { RagIndex } from './components/Rag/RagIndex'
+import { EmbeddedLoginHelper } from './components/EmbeddedLoginHelper'
 
 const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
 
@@ -39,6 +40,7 @@ const router = sentryCreateBrowserRouter(
       <Route path="/rag" element={<Rag />} />
       <Route path="/rag/:id" element={<RagIndex />} />
       <Route path="/rag/:id/files/:fileId" element={<RagFile />} />
+      <Route path="/login-helper" element={<EmbeddedLoginHelper />} />
       <Route path="*" element={<NotFound />} />
     </Route>,
   ),

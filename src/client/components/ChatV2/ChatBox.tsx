@@ -35,7 +35,7 @@ export const ChatBox = ({
   disabled: boolean
   fileInputRef: React.RefObject<HTMLInputElement | null>
   fileName: string
-  messageWarning: { [key in WarningType]?: { message: string, ignored: boolean } }
+  messageWarning: { [key in WarningType]?: { message: string; ignored: boolean } }
   setChatLeftSidePanelOpen: (open: boolean) => void
   setFileName: (name: string) => void
   handleCancel: () => void
@@ -133,6 +133,8 @@ export const ChatBox = ({
         background: 'white',
         borderTopRightRadius: '0.3rem',
         borderTopLeftRadius: '0.3rem',
+        mb: 1,
+        boxShadow: '0px 10px 0px white', // Cover up the small space below
       }}
     >
       {fileTypeAlertOpen && (
@@ -155,14 +157,16 @@ export const ChatBox = ({
               </BlueButton>
             </Box>
           }
-          >
-          {Object.entries(messageWarning).filter(([, warning]) => !warning.ignored).map(([type, warning]) => (
-            <Box key={type} sx={{ mb: 0.5 }}>
-              {warning.message}
-            </Box>
-          ))}
+        >
+          {Object.entries(messageWarning)
+            .filter(([, warning]) => !warning.ignored)
+            .map(([type, warning]) => (
+              <Box key={type} sx={{ mb: 0.5 }}>
+                {warning.message}
+              </Box>
+            ))}
         </Alert>
-        )}
+      )}
 
       <Box
         component="form"
@@ -236,18 +240,74 @@ export const ChatBox = ({
                 </IconButton>
               </Tooltip>
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
+              <Box sx={{ display: 'inline-flex', justifyContent: 'space-between', alignItems: 'center', ml: 4 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ padding: '0.5rem 0', opacity: isTokenLimitExceeded ? 1 : 0.6, color: isTokenLimitExceeded ? '#cc0000' : 'inherit' }}
+                  >
+                    {userStatus?.usage ?? '-'} / {userStatus?.limit ?? '-'} {t('status:tokensUsed')}
+                  </Typography>
+                  <Tooltip
+                    arrow
+                    placement="top"
+                    title={
+                      <Typography variant="body2" sx={{ p: 1 }}>
+                        {t('info:usage')}
+                      </Typography>
+                    }
+                  >
+                    <HelpOutline fontSize="small" sx={{ color: 'inherit', opacity: 0.7, mt: 0.5, flex: 2, display: { xs: 'none', sm: 'block' } }} />
+                  </Tooltip>
+                </Box>
+
+                {!isMobile && (
+                  <Typography
+                    sx={{
+                      display: { sm: 'none', md: 'block' },
+                      ml: 'auto',
+                      opacity: acuallyDisabled ? 0 : 1,
+                      transition: 'opacity 0.2s ease-in-out',
+                      fontSize: '14px',
+                    }}
+                    variant="body1"
+                    color="textSecondary"
+                  >
+                    {isShiftEnterSend ? <ShiftEnterToSend t={t} /> : <ShiftEnterForNewline t={t} />}
+                  </Typography>
+                )}
+
+                {!isEmbedded && (
+                  <Tooltip
+                    arrow
+                    placement="top"
+                    title={
+                      <Typography variant="body2" sx={{ p: 1 }}>
+                        {t('chat:settings')}
+                      </Typography>
+                    }
+                  >
+                    <OutlineButtonBlack
+                      sx={{ display: { sm: 'block', md: 'none' } }}
+                      onClick={() => setChatLeftSidePanelOpen(true)}
+                      data-testid="left-panel-open"
+                    >
+                      <SettingsIcon sx={{ color: 'rgba(0, 0, 0, 0.7)' }} />
+                    </OutlineButtonBlack>
+                  </Tooltip>
+                )}
+              </Box>
             </Box>
             <Tooltip title={disabled ? t('chat:cancelResponse') : isShiftEnterSend ? t('chat:shiftEnterSend') : t('chat:enterSend')} arrow placement="top">
-              {
-                disabled ?
-                  <IconButton onClick={handleStop}>
-                    <StopIcon />
-                  </IconButton>
-                  :
-                  <IconButton type={'submit'} ref={sendButtonRef} data-testid="send-chat-message">
-                    <Send />
-                  </IconButton>
-              }
+              {disabled ? (
+                <IconButton onClick={handleStop}>
+                  <StopIcon />
+                </IconButton>
+              ) : (
+                <IconButton type={'submit'} ref={sendButtonRef} data-testid="send-chat-message">
+                  <Send />
+                </IconButton>
+              )}
             </Tooltip>
             <SendPreferenceConfiguratorModal
               open={sendPreferenceConfiguratorOpen}
@@ -256,60 +316,6 @@ export const ChatBox = ({
               context="chat"
             />
           </Box>
-        </Box>
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.4rem 0' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography
-              variant="body1"
-              sx={{ padding: '0.5rem 0', opacity: isTokenLimitExceeded ? 1 : 0.7, color: isTokenLimitExceeded ? '#cc0000' : 'inherit' }}
-            >
-              {userStatus?.usage ?? '-'} / {userStatus?.limit ?? '-'} {t('status:tokensUsed')}
-            </Typography>
-            <Tooltip
-              arrow
-              placement="top"
-              title={
-                <Typography variant="body2" sx={{ p: 1 }}>
-                  {t('info:usage')}
-                </Typography>
-              }
-            >
-              <HelpOutline fontSize="small" sx={{ color: 'inherit', opacity: 0.7, mt: 0.5, flex: 2, display: { xs: 'none', sm: 'block' } }} />
-            </Tooltip>
-          </Box>
-
-          {!isMobile && (
-            <Typography
-              sx={{
-                display: { sm: 'none', md: 'block' },
-                ml: 'auto',
-                opacity: acuallyDisabled ? 0 : 1,
-                transition: 'opacity 0.2s ease-in-out',
-                fontSize: '14px',
-              }}
-              variant="body1"
-              color="textSecondary"
-            >
-              {isShiftEnterSend ? <ShiftEnterToSend t={t} /> : <ShiftEnterForNewline t={t} />}
-            </Typography>
-          )}
-
-          {!isEmbedded && (
-            <Tooltip
-              arrow
-              placement="top"
-              title={
-                <Typography variant="body2" sx={{ p: 1 }}>
-                  {t('chat:settings')}
-                </Typography>
-              }
-            >
-              <OutlineButtonBlack sx={{ display: { sm: 'block', md: 'none' } }} onClick={() => setChatLeftSidePanelOpen(true)} data-testid="left-panel-open">
-                <SettingsIcon sx={{ color: 'rgba(0, 0, 0, 0.7)' }} />
-              </OutlineButtonBlack>
-            </Tooltip>
-          )}
         </Box>
       </Box>
     </Box>

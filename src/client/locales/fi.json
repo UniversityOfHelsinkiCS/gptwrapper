@@ -402,5 +402,8 @@
     "waitForUpload": "Odota, tiedostoja ladataan palvelimelle",
     "filesIngesting": "Tiedostoja käsitellään. Voit poistua sivulta.",
     "allCompleted": "Tiedostot käsitelty."
+  },
+  "embeddedLogin": {
+    "helpText": "Kirjauduttu. Voit sulkea tämän ikkunan."
   }
 }

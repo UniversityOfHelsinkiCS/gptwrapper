@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, matchPath, useLocation } from 'react-router-dom'
 import {
   AppBar,
-  Toolbar,
   MenuItem,
   Box,
   Container,
