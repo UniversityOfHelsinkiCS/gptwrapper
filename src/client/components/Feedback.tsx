@@ -22,6 +22,7 @@ import type { FeedbackPost } from '../../shared/feedback'
 import { useSnackbar } from 'notistack'
 import { BlueButton, OutlineButtonBlack } from './ChatV2/general/Buttons'
 import { supportEmail } from '@config'
+import { useIsEmbedded } from '../contexts/EmbeddedContext'
 
 const useSubmitFeedbackMutation = () => {
   const analyticsMetadata = useAnalytics()
@@ -69,7 +70,7 @@ export const Feedback: React.FC = () => {
           sx={(theme) => ({
             position: 'fixed',
             bottom: '0.5rem',
-            right: { xs: '6rem', sm: '6rem', md: '1rem' },
+            left: { xs: '6rem', sm: '6rem', md: '1rem' },
             zIndex: theme.zIndex.modal + 1,
             opacity: 0.9,
             transition: 'opacity 0.2s',

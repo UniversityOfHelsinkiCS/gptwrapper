@@ -63,7 +63,7 @@ const Main = () => {
       <Router />
       {showDevtools && (
         <React.Suspense fallback={null}>
-          <ReactQueryDevtoolsProduction />
+          <ReactQueryDevtoolsProduction buttonPosition='bottom-left' />
         </React.Suspense>
       )}
     </QueryClientProvider>
