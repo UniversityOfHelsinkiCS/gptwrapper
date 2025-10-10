@@ -1,10 +1,9 @@
-import ArrowDownward from '@mui/icons-material/ArrowDownward'
 import ChevronLeft from '@mui/icons-material/ChevronLeft'
 import Tune from '@mui/icons-material/Tune'
 import HelpIcon from '@mui/icons-material/Help'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 
-import { Alert, Box, Drawer, Fab, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Alert, Box, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -509,12 +508,6 @@ const ChatV2Content = () => {
           />
         </Box>
       </Box>
-
-      {!chatScroll.isAutoScrolling && (
-        <Fab sx={{ position: 'fixed', right: 32, bottom: '12rem' }} onClick={() => chatScroll.beginAutoscroll()}>
-          <ArrowDownward />
-        </Fab>
-      )}
 
       {/* FileSearchResults columns ----------------------------------------------------------------------------------------------------- */}
 
