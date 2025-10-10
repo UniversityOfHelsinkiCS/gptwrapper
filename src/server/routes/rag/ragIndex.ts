@@ -197,8 +197,6 @@ ragIndexRouter.delete('/files/:fileId/text', async (req, res) => {
   // Delete the text version file from s3 if it exists
   await FileStore.deleteRagFileText(ragFile)
 
-  console.log(ragIndex, "RAG INDEX ON DELETE TEXT FROM SINGLE FILE")
-
   // Now we need to re-ingest
   ingestRagFiles(ragIndex).catch((error) => {
     console.error('Error ingesting RAG files:', error)
