@@ -5,9 +5,9 @@ import { FREE_MODEL, validModels } from '../src/config'
 
 // Matrix of tests
 const testMatrix: { role: keyof typeof TestByRole; courses: (string | undefined)[] }[] = [
-  { role: 'student', courses: ['test-course'] },
-  { role: 'teacher', courses: ['test-course', undefined] },
-  // { role: 'admin', courses: ['test-course', undefined] },
+  { role: 'student', courses: ['test-course-course-id'] },
+  { role: 'teacher', courses: ['test-course-course-id', undefined] },
+  // { role: 'admin', courses: ['test-course-course-id', undefined] },
 ]
 
 testMatrix.forEach((testConfig) => {

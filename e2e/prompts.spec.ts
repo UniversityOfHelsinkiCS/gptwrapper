@@ -49,7 +49,7 @@ test.describe('Prompts', () => {
   })
 
   test('Course prompt creation, chat link with prompt, and deletion', async ({ page }) => {
-    await page.goto('/courses/test-course/prompts')
+    await page.goto('/courses/test-course-course-id/prompts')
 
     const newPromptName = `testausprompti-${test.info().workerIndex}`
 
@@ -90,7 +90,7 @@ test.describe('Prompts', () => {
     await expect(page.getByTestId('assistant-message')).toContainText('mocktest kurssitesti onnistui')
 
     // Back to course page, delete the prompt
-    await page.goto('/courses/test-course/prompts')
+    await page.goto('/courses/test-course-course-id/prompts')
 
     page.on('dialog', (dialog) => dialog.accept())
     await page.getByTestId(`delete-prompt-${newPromptName}`).click()
@@ -110,7 +110,7 @@ test.describe('Prompts', () => {
   })
 
   test('Prompt with RAG works', async ({ page }) => {
-    await page.goto('/courses/test-course/prompts')
+    await page.goto('/courses/test-course-course-id/prompts')
 
     const newPromptName = `testausprompti-${test.info().workerIndex}-rag`
 
@@ -147,7 +147,7 @@ test.describe('Prompts', () => {
 
   test('Own prompts work in course chat and normal chat', async ({ page }) => {
     // First create own prompt in course chat view
-    await page.goto('/test-course')
+    await page.goto('/test-course-course-id')
     await acceptDisclaimer(page)
     await page.getByTestId('settings-button').click()
     const modal = page.getByTestId('settings-modal')

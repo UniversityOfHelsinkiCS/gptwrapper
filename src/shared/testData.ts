@@ -39,7 +39,7 @@ export const TEST_COURSES = {
   },
   TEST_COURSE: {
     id: 'test-course',
-    courseId: 'test-course',
+    courseId: 'test-course-course-id',
     name: {
       en: 'Test course',
       sv: 'Testkurs',
@@ -55,7 +55,7 @@ export const TEST_COURSES = {
   },
   EXAMPLE_COURSE: {
     id: 'esimerkit',
-    courseId: 'example',
+    courseId: 'example-course-id',
     name: {
       en: 'Example course',
       sv: 'Exempelkurs',
@@ -69,7 +69,7 @@ export const TEST_COURSES = {
   },
   TOSKA: {
     id: 'toska',
-    courseId: 'toska',
+    courseId: 'toska-course-id',
     name: {
       en: 'Toska',
       sv: 'Toska',

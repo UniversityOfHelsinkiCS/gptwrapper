@@ -7,7 +7,7 @@ const chatInstances = Object.values(TEST_COURSES).map((course) => ({
   id: course.id,
   name: course.name,
   description: '',
-  courseId: course.id,
+  courseId: course.courseId,
   activityPeriod: course.activityPeriod,
   code: course.code,
   usageLimit: 'usageLimit' in course ? course.usageLimit : undefined,

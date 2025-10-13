@@ -4,7 +4,7 @@ import { studentTest as test } from './fixtures'
 
 test.describe('Student', () => {
   test('Enrolled chat works', async ({ page }) => {
-    await page.goto('/test-course')
+    await page.goto('/test-course-course-id')
     await acceptDisclaimer(page)
 
     await useMockModel(page)
