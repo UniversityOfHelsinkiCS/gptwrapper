@@ -137,7 +137,7 @@ export const RagIndex: React.FC = () => {
                 await deleteIndexMutation.mutateAsync(id)
                 const chatInstance = ragDetails.chatInstances?.[0]
                 if (chatInstance) {
-                  navigate(`/courses/${chatInstance.id}/rag`)
+                  navigate(`/courses/${chatInstance.courseId}/rag`)
                 }
                 enqueueSnackbar(t('rag:collectionDeleted'), { variant: 'success' })
               }
