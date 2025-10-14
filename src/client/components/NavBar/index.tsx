@@ -161,7 +161,7 @@ const NavItems = ({ user, handleLanguageChange, language, vertical = false }) =>
       alignItems: 'start',
       gap: 1,
     }}>
-      {user.enrolledCourses.length > 0 && (
+      {user.enrolledCourses?.length > 0 && (
         <NavItemButton to="/chats" path="chats/*" current={pathname} icon={<BookmarksOutlined sx={styles.icon} />} vertical={vertical}>
           {t('chats')}
         </NavItemButton>
