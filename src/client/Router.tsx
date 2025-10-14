@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react'
-import { createBrowserRouter, createRoutesFromElements, Navigate, Route, RouterProvider, useParams } from 'react-router-dom'
+import { createBrowserRouter, createRoutesFromElements, Navigate, Route, RouterProvider, useParams, } from 'react-router-dom'
 
 import { PUBLIC_URL } from '../config'
 import App from './App'
@@ -25,6 +25,7 @@ const router = sentryCreateBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />} ErrorBoundary={ErrorPage}>
       <Route index element={<ChatV2 />} />
+      <Route path="/chat" element={<Navigate to="/"/>}/>
       <Route path="/v1" element={<Navigate to="/" replace />} />
       <Route path="/v2" element={<Navigate to="/" />} />
  
