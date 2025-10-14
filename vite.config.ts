@@ -8,7 +8,7 @@ import { inProduction, inStaging, inCI } from './src/config'
 const ciBase = '/'
 const developmentBase = '/'
 const stagingBase = '/gptwrapper'
-const productionBase = '/'
+const productionBase = '/chat'
 
 let base = developmentBase
 

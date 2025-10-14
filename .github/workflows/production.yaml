@@ -26,7 +26,7 @@ jobs:
           containerfiles: |
             ./Containerfile
           build-args: |
-            BASE_PATH=
+            BASE_PATH=/chat
             GIT_SHA=${{ github.sha }}
             STAGING=false
             VERSION=${{ github.ref_name }}
