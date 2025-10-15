@@ -99,8 +99,8 @@ testMatrix.forEach((testConfig) => {
         await expect(page.getByTestId('user-message').nth(1)).toContainText('say minttujam2')
         await expect(page.getByTestId('assistant-message').nth(1)).toContainText('minttujam2')
 
-        page.on('dialog', (dialog) => dialog.accept())
         await page.getByTestId('empty-conversation-button').click()
+        await page.getByTestId('submit-confirm-reset').click()
 
         await expect(page.getByTestId('user-message')).not.toBeVisible()
         await expect(page.getByTestId('assistant-message')).not.toBeVisible()
