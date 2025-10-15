@@ -117,7 +117,9 @@
     "cancelResponse": "Cancel the generation of the response",
     "searchResults": "Search results",
     "warning": "The new chat view is experiencing problems and the response generation is very slow. The old chat view is working normally.",
-    "customPrompt": "custom prompt"
+    "customPrompt": "custom prompt",
+    "confirmResetTitle": "Are you sure you want to clear the conversation?",
+    "confirmResetMessage": "The conversation will be deleted. You can send a copy of it to your email using the checkbox."
   },
   "settings": {
     "prompt": "Conversation prompt",

@@ -29,7 +29,7 @@ import { OutlineButtonBlack } from './general/Buttons'
 import { ChatInfo } from './general/ChatInfo'
 import { SettingsModal } from './SettingsModal'
 import { StreamAbortReason, TypedAbortController, useChatStream } from './useChatStream'
-import { postCompletionStreamV3 } from './api'
+import { postCompletionStreamV3, sendConversationEmail } from './api'
 import PromptSelector from './PromptSelector'
 import ModelSelector from './ModelSelector'
 import { ConversationSplash } from './general/ConversationSplash'
@@ -38,6 +38,7 @@ import z from 'zod/v4'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { InfoTexts } from '../../locales/infoTexts'
 import { WarningType } from '@shared/aiApi'
+import { ResetConfirmModal } from './ResetConfirmModal'
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
  */
@@ -125,6 +126,8 @@ const ChatV2Content = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
+
+  const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
 
   const chatScroll = useChatScroll()
 
@@ -266,19 +269,29 @@ const ChatV2Content = () => {
     }
   }
 
-  const handleReset = () => {
-    if (window.confirm(t('chat:emptyConfirm'))) {
-      streamControllerRef.current?.abort("conversation_cleared")
-      setMessages([])
-      setActiveToolResult(undefined)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
+  const handleReset = async ({ sendEmail }: { sendEmail: boolean }) => {
+    if (sendEmail && user?.email) {
+      try {
+        await sendConversationEmail(user.email, messages, t)
+        enqueueSnackbar(t('email:success'), { variant: 'success' })
+      } catch (error) {
+        console.error('Failed to send conversation email:', error)
+        enqueueSnackbar(t('email:failure'), { variant: 'error' })
       }
-      setFileName('')
-      setMessageWarning({})
-      clearRetryTimeout()
-      dispatchAnalytics({ type: 'RESET_CHAT' })
     }
+
+    setResetConfirmModalOpen(false)
+
+    streamControllerRef.current?.abort("conversation_cleared")
+    setMessages([])
+    setActiveToolResult(undefined)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    setFileName('')
+    setMessageWarning({})
+    clearRetryTimeout()
+    dispatchAnalytics({ type: 'RESET_CHAT' })
   }
 
   const handleCancel = () => {
@@ -390,7 +403,7 @@ const ChatV2Content = () => {
             }}
           >
             <LeftMenu
-              handleReset={handleReset}
+              handleReset={() => setResetConfirmModalOpen(true)}
               onClose={() => {
                 setChatLeftSidePanelOpen(false)
               }}
@@ -410,7 +423,7 @@ const ChatV2Content = () => {
               top: 0,
             }}
             course={course}
-            handleReset={handleReset}
+            handleReset={() => setResetConfirmModalOpen(true)}
             setSettingsModalOpen={setSettingsModalOpen}
             setDisclaimerStatus={setDisclaimerStatus}
             messages={messages}
@@ -502,7 +515,7 @@ const ChatV2Content = () => {
             handleSubmit={(newMessage) => {
               handleSendMessage(newMessage, false, [])
             }}
-            handleReset={handleReset}
+            handleReset={() => setResetConfirmModalOpen(true)}
             handleStop={() => streamControllerRef.current?.abort("user_aborted")}
             isMobile={isMobile}
           />
@@ -566,6 +579,8 @@ const ChatV2Content = () => {
       />
 
       <DisclaimerModal disclaimer={disclaimerInfo} disclaimerStatus={disclaimerStatus} setDisclaimerStatus={setDisclaimerStatus} />
+
+      <ResetConfirmModal open={resetConfirmModalOpen} setOpen={setResetConfirmModalOpen} onConfirm={handleReset} />
     </Box>
   )
 }
