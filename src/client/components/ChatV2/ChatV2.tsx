@@ -3,7 +3,7 @@ import Tune from '@mui/icons-material/Tune'
 import HelpIcon from '@mui/icons-material/Help'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 
-import { Alert, Box, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Alert, Box, Divider, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -25,7 +25,7 @@ import { DisclaimerModal } from './Disclaimer'
 import EmailButton from './EmailButton'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
-import { OutlineButtonBlack } from './general/Buttons'
+import { OutlineButtonBlack, TextButton } from './general/Buttons'
 import { ChatInfo } from './general/ChatInfo'
 import { SettingsModal } from './SettingsModal'
 import { StreamAbortReason, TypedAbortController, useChatStream } from './useChatStream'
@@ -39,6 +39,10 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import { InfoTexts } from '../../locales/infoTexts'
 import { WarningType } from '@shared/aiApi'
 import { ResetConfirmModal } from './ResetConfirmModal'
+import MapsUgcIcon from '@mui/icons-material/MapsUgc';
+import SaveAltIcon from '@mui/icons-material/SaveAlt';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
  */
@@ -381,6 +385,8 @@ const ChatV2Content = () => {
 
   if (statusLoading) return null
 
+  const isAdmin = true
+
   return (
     <Box
       sx={{
@@ -402,35 +408,67 @@ const ChatV2Content = () => {
               setChatLeftSidePanelOpen(!chatLeftSidePanelOpen)
             }}
           >
+            {
+              isAdmin ?
+                <LeftMenu
+                  handleReset={() => setResetConfirmModalOpen(true)}
+                  onClose={() => {
+                    setChatLeftSidePanelOpen(false)
+                  }}
+                  course={course}
+                  setSettingsModalOpen={setSettingsModalOpen}
+                  setDisclaimerStatus={setDisclaimerStatus}
+                  messages={messages}
+                  currentModel={activeModel}
+                  setModel={setActiveModel}
+                />
+                :
+                <LeftMenu2
+                  handleReset={() => setResetConfirmModalOpen(true)}
+                  onClose={() => {
+                    setChatLeftSidePanelOpen(false)
+                  }}
+                  course={course}
+                  setSettingsModalOpen={setSettingsModalOpen}
+                  setDisclaimerStatus={setDisclaimerStatus}
+                  messages={messages}
+                  currentModel={activeModel}
+                  setModel={setActiveModel}
+                />
+            }
+          </Drawer>
+        ) : isAdmin ?
+          (
+            <div style={{ backgroundColor: '' }}>
+
+              <LeftMenu2
+                course={course}
+                handleReset={() => setResetConfirmModalOpen(true)}
+                setSettingsModalOpen={setSettingsModalOpen}
+                setDisclaimerStatus={setDisclaimerStatus}
+                messages={messages}
+                currentModel={activeModel}
+                setModel={setActiveModel}
+              />
+            </div>
+          )
+          :
+          (
             <LeftMenu
-              handleReset={() => setResetConfirmModalOpen(true)}
-              onClose={() => {
-                setChatLeftSidePanelOpen(false)
+              sx={{
+                display: { sm: 'none', md: 'flex' },
+                position: 'fixed',
+                top: 0,
               }}
               course={course}
+              handleReset={() => setResetConfirmModalOpen(true)}
               setSettingsModalOpen={setSettingsModalOpen}
               setDisclaimerStatus={setDisclaimerStatus}
               messages={messages}
               currentModel={activeModel}
               setModel={setActiveModel}
             />
-          </Drawer>
-        ) : (
-          <LeftMenu
-            sx={{
-              display: { sm: 'none', md: 'flex' },
-              position: 'fixed',
-              top: 0,
-            }}
-            course={course}
-            handleReset={() => setResetConfirmModalOpen(true)}
-            setSettingsModalOpen={setSettingsModalOpen}
-            setDisclaimerStatus={setDisclaimerStatus}
-            messages={messages}
-            currentModel={activeModel}
-            setModel={setActiveModel}
-          />
-        ))}
+          ))}
 
       {/* Chat view column ------------------------------------------------------------------------------------------------ */}
       <Box
@@ -657,6 +695,133 @@ const LeftMenu = ({
     </Box>
   )
 }
+
+
+// WORKING AREA START -------------------------------------------------------
+
+
+const LeftMenu2 = ({
+  course,
+  handleReset,
+  onClose,
+  setSettingsModalOpen,
+  setDisclaimerStatus,
+  messages,
+  currentModel,
+  setModel,
+}: {
+  course: Course | undefined
+  handleReset: () => void
+  onClose?: () => void
+  setSettingsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+  setDisclaimerStatus: React.Dispatch<React.SetStateAction<boolean>>
+  messages: ChatMessage[]
+  currentModel: ValidModelName
+  setModel: (model: ValidModelName) => void
+}) => {
+  const { t } = useTranslation()
+  const { courseId } = useParams()
+  const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
+  const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (!userStatus) return
+    setIsTokenLimitExceeded(userStatus.usage > userStatus.limit)
+  }, [statusLoading, userStatus])
+
+  return (
+    <Box
+      sx={{
+        width: 350,
+        position: 'relative',
+        height: '100vh',
+        borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+        paddingTop: '4rem',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+
+      <Box p={4}>
+        <Typography color='textSecondary'>{"kurssi".toUpperCase()}</Typography>
+        <TextButton startIcon={<ChevronRightIcon />}>
+          <Typography variant='h6'>Ei valittua kurssia</Typography>
+        </TextButton>
+      </Box>
+      <Divider />
+      <Box p={4}>
+        <Typography color='textSecondary' >{"alustus".toUpperCase()}</Typography>
+        <TextButton startIcon={<ChevronRightIcon />}>
+          <Typography variant='h6'>Ei alustusta</Typography>
+        </TextButton>
+      </Box>
+      <Divider />
+      <Box p={4}>
+        <Typography color='textSecondary'>{"kielimalli".toUpperCase()}</Typography>
+        <TextButton startIcon={<ChevronRightIcon />}>
+          <Typography variant='h6'>GPT-5</Typography>
+        </TextButton>
+      </Box>
+      <Divider />
+      <Box p={4}>
+        <TextButton startIcon={<MapsUgcIcon />} size='large'>
+          Uusi keskustelu
+        </TextButton>
+        <TextButton startIcon={<SaveAltIcon />} size='large'>
+          Tallenna sähköpostina
+        </TextButton>
+      </Box>
+
+      {/* <Box p="1rem">
+        {course && <ChatInfo course={course} />}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} data-testid="empty-conversation-button">
+            {t('chat:emptyConversation')}
+          </OutlineButtonBlack>
+          <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} />
+          <PromptSelector />
+          <EmailButton messages={messages} disabled={!messages?.length} />
+          <OutlineButtonBlack startIcon={<Tune />} onClick={() => setSettingsModalOpen(true)} data-testid="settings-button">
+            {t('chat:settings')}
+          </OutlineButtonBlack>
+          <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} data-testid="help-button">
+            {t('info:title')}
+          </OutlineButtonBlack>
+        </Box>
+      </Box> */}
+      {/* {onClose && (
+        <OutlineButtonBlack sx={{ m: '1rem', mt: 'auto' }} onClick={onClose} startIcon={<ChevronLeft />}>
+          {t('common:close')}
+        </OutlineButtonBlack>
+      )} */}
+      {/* <Footer /> */}
+    </Box>
+  )
+}
+
+// WORKING AREA END -----------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export const ChatV2 = () => (
   <PromptStateProvider>

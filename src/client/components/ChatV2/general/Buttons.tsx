@@ -4,13 +4,12 @@ import { styled } from '@mui/material'
 const BaseButton = styled(Button)({
   color: 'rgba(0, 0, 0, 0.86)',
   textTransform: 'none',
-  borderRadius: '30px',
+  borderRadius: '1rem',
   boxShadow: '0 1px 2px lightgray',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   padding: '.5rem 1rem',
-  margin: '2px 0',
   whiteSpace: 'nowrap',
   minWidth: 'fit-content',
   '& .MuiButton-startIcon': {
@@ -69,6 +68,6 @@ export const TextButton = styled(BaseButton)({
   boxShadow: 'none',
   border: 'none',
   '&:hover': {
-    backgroundColor: 'rgba(0,0,0,0.1)',
+    backgroundColor: 'rgba(0,0,0,0.08)',
   },
 })
