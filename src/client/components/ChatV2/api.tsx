@@ -158,18 +158,29 @@ const formatEmailContent = (content: string): string => {
   }
 }
 
-const formatEmail = (messages: ChatMessage[], t: any): string => {
+const formatEmail = (messages: ChatMessage[], t): string => {
   const emailContent = messages
-    .map(({ role, content }) => {
-      const formattedContent = role === 'assistant' ? formatEmailContent(content) : escapeHtml(content)
+    .map((msg) => {
+      const formattedContent = msg.role === 'assistant' ? formatEmailContent(msg.content) : escapeHtml(msg.content)
+
+      let title = ''
+      if (msg.role === 'assistant') {
+        title = t('email:assistant')
+        if (msg.generationInfo) {
+          title = msg.generationInfo.model
+          if (msg.generationInfo.promptInfo.type === 'saved') {
+            title = `${msg.generationInfo.promptInfo.name} (${msg.generationInfo.model})`
+          }
+        }
+      }
 
       return `
-      <div style="padding: 2rem; ${
-        role === 'user'
+      <div style="padding: 1rem; ${
+        msg.role === 'user'
           ? 'background: #efefef; margin-left: 100px; border-radius: 0.6rem; box-shadow: 0px 2px 2px rgba(0,0,0,0.2); white-space: pre-wrap; word-break: break-word; '
           : 'margin-right: 2rem;'
       }">
-        <h3 style="font-style: italic; margin: 0; ${role === 'user' ? 'color: rgba(0, 0, 0, 0.8)' : 'color: #107eab'}">${t(`email:${role}`)}:</h3>
+        ${title ? `<h3 style="font-style: italic; margin: 0; color: #107eab">${title}:</h3>` : ''}
         ${formattedContent}
       </div>
     `
