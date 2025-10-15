@@ -4,22 +4,22 @@ import { styled } from '@mui/material'
 const BaseButton = styled(Button)({
   color: 'rgba(0, 0, 0, 0.86)',
   textTransform: 'none',
-  borderRadius: '1rem',
+  borderRadius: '0.8rem',
   boxShadow: '0 1px 2px lightgray',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: '.5rem 1rem',
+  padding: '.4rem .8rem',
   whiteSpace: 'nowrap',
   minWidth: 'fit-content',
   '& .MuiButton-startIcon': {
-    fontSize: '22px',
+    fontSize: '1.2rem',
   },
   '& .MuiButton-startIcon > *:nth-of-type(1)': {
-    fontSize: '22px',
+    fontSize: '1.2rem',
   },
   '& .MuiButton-endIcon': {
-    fontSize: '22px',
+    fontSize: '1.2rem',
   },
   '&:has(.MuiButton-startIcon):has(.MuiButton-endIcon)': {
     justifyContent: 'space-between',

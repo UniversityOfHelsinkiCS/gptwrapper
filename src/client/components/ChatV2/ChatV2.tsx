@@ -1,8 +1,3 @@
-import ChevronLeft from '@mui/icons-material/ChevronLeft'
-import Tune from '@mui/icons-material/Tune'
-import HelpIcon from '@mui/icons-material/Help'
-import RestartAltIcon from '@mui/icons-material/RestartAlt'
-
 import { Alert, Box, Divider, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
@@ -26,7 +21,7 @@ import EmailButton from './EmailButton'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
 import { OutlineButtonBlack, TextButton } from './general/Buttons'
-import { ChatInfo } from './general/ChatInfo'
+import { ChatInfo, ChatInfo2 } from './general/ChatInfo'
 import { SettingsModal } from './SettingsModal'
 import { StreamAbortReason, TypedAbortController, useChatStream } from './useChatStream'
 import { postCompletionStreamV3, sendConversationEmail } from './api'
@@ -42,6 +37,17 @@ import { ResetConfirmModal } from './ResetConfirmModal'
 import MapsUgcIcon from '@mui/icons-material/MapsUgc';
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ArticleIcon from '@mui/icons-material/Article';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+import LogoutIcon from '@mui/icons-material/Logout';
+import ChevronLeft from '@mui/icons-material/ChevronLeft'
+import TuneIcon from '@mui/icons-material/Tune'
+import HelpIcon from '@mui/icons-material/Help'
+import RestartAltIcon from '@mui/icons-material/RestartAlt'
+import HelpCenterIcon from '@mui/icons-material/HelpCenter';
+import AppsIcon from '@mui/icons-material/Apps';
+
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
@@ -678,7 +684,7 @@ const LeftMenu = ({
           <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} />
           <PromptSelector />
           <EmailButton messages={messages} disabled={!messages?.length} />
-          <OutlineButtonBlack startIcon={<Tune />} onClick={() => setSettingsModalOpen(true)} data-testid="settings-button">
+          <OutlineButtonBlack startIcon={<TuneIcon />} onClick={() => setSettingsModalOpen(true)} data-testid="settings-button">
             {t('chat:settings')}
           </OutlineButtonBlack>
           <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} data-testid="help-button">
@@ -729,10 +735,16 @@ const LeftMenu2 = ({
     setIsTokenLimitExceeded(userStatus.usage > userStatus.limit)
   }, [statusLoading, userStatus])
 
+  useEffect(() => {
+    console.log("📌 course", course)
+  }, [course])
+
+  const isAdminOrTeacher = true
+
   return (
     <Box
       sx={{
-        width: 350,
+        width: 400,
         position: 'relative',
         height: '100vh',
         borderRight: '1px solid rgba(0, 0, 0, 0.12)',
@@ -742,22 +754,45 @@ const LeftMenu2 = ({
       }}
     >
 
+      <Box px={4} py={3}>
+        <Typography mb={0.5} color='textSecondary'>{"kurssi".toUpperCase()}</Typography>
+        {
+          course ?
+            <>
+              <ChatInfo2 course={course} />
+              {isAdminOrTeacher && <TextButton startIcon={<SettingsIcon />}>Kurssin asetukset</TextButton>}
+              <TextButton startIcon={<ArticleIcon />}>Kurssisivu</TextButton>
+              <TextButton startIcon={<LibraryBooksIcon />}>Vaihda kurssia</TextButton>
+              {isAdminOrTeacher && <TextButton startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>Poistu kurssinäkymästä</TextButton>}
+            </>
+            :
+            <TextButton startIcon={<ChevronRightIcon />}>
+              <Typography variant='h6'>Ei valittua kurssia</Typography>
+            </TextButton>
+        }
+      </Box>
+
+      <Divider />
+
       <Box p={4}>
-        <Typography color='textSecondary'>{"kurssi".toUpperCase()}</Typography>
-        <TextButton startIcon={<ChevronRightIcon />}>
-          <Typography variant='h6'>Ei valittua kurssia</Typography>
-        </TextButton>
+        <Typography mb={0.5} color='textSecondary' >{"alustus".toUpperCase()}</Typography>
+        {
+          course ?
+            <>
+              <Typography mb={2}>Aivan erikoiset ohjeet</Typography>
+              {isAdminOrTeacher && <TextButton startIcon={<TuneIcon />}>Muokkaa alustusta</TextButton>}
+              <TextButton startIcon={<HelpCenterIcon />}>Alustuksen tiedot</TextButton>
+              <TextButton startIcon={<AppsIcon />}>Valitse alustus</TextButton>
+            </>
+            :
+            <TextButton startIcon={<ChevronRightIcon />}>
+              <Typography variant='h6'>Ei alustusta</Typography>
+            </TextButton>
+        }
       </Box>
       <Divider />
       <Box p={4}>
-        <Typography color='textSecondary' >{"alustus".toUpperCase()}</Typography>
-        <TextButton startIcon={<ChevronRightIcon />}>
-          <Typography variant='h6'>Ei alustusta</Typography>
-        </TextButton>
-      </Box>
-      <Divider />
-      <Box p={4}>
-        <Typography color='textSecondary'>{"kielimalli".toUpperCase()}</Typography>
+        <Typography mb={0.5} color='textSecondary'>{"kielimalli".toUpperCase()}</Typography>
         <TextButton startIcon={<ChevronRightIcon />}>
           <Typography variant='h6'>GPT-5</Typography>
         </TextButton>
