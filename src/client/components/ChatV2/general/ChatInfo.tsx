@@ -35,3 +35,19 @@ export const ChatInfo = ({ course }: { course: Course }) => {
     </Box >
   )
 }
+
+export const ChatInfo2 = ({ course }: { course: Course }) => {
+  const { i18n } = useTranslation()
+  const { language } = i18n
+
+  return (
+    <Box mb={3}>
+      <Typography variant="h5" my={0.5} fontWeight="bold">
+        {course?.name[language] || 'undefined course'}
+      </Typography>
+      <Typography variant="body2" color='textSecondary'>
+        {`${course.id} | ${formatDate(course.activityPeriod)}`}
+      </Typography>
+    </Box >
+  )
+}
