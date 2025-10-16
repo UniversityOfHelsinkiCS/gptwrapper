@@ -25,7 +25,7 @@ const UserMessageItem = ({ message }: { message: UserMessage }) => (
     sx={{
       backgroundColor: '#efefef',
       padding: '1rem 1.5rem',
-      marginLeft: 20,
+      marginLeft: 10, //applies only in mobile
       borderRadius: '1rem 0.0rem 1rem 1rem',
       boxShadow: '0px 2px 2px rgba(0, 0, 0, 0.2)',
       whiteSpace: 'pre-wrap',
@@ -310,6 +310,7 @@ const Conversation = ({
   isStreaming,
   setActiveToolResult,
   initial,
+  isMobile,
 }: {
   messages: ChatMessage[]
   completion: string
@@ -318,6 +319,7 @@ const Conversation = ({
   isStreaming: boolean
   setActiveToolResult: (data: ToolCallResultEvent) => void
   initial?: React.ReactElement
+  isMobile: boolean
 }) => {
   const [reminderSeen, setReminderSeen] = useLocalStorageState<boolean>('reminderSeen', false)
 
@@ -330,7 +332,7 @@ const Conversation = ({
           display: 'flex',
           flexDirection: 'column',
           gap: '2.5rem',
-          padding: '4rem 2rem',
+          padding: isMobile ? '4rem 0rem' : '4rem 1rem',
           justifyContent: messages.length === 0 ? 'center' : 'flex-start',
         }}
       >

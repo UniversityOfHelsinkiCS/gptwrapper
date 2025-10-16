@@ -4,14 +4,13 @@ import Send from '@mui/icons-material/Send'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
-import SettingsIcon from '@mui/icons-material/Settings'
 import { Box, Chip, IconButton, TextField, Tooltip, Typography, Alert } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useRef } from 'react'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BlueButton, GrayButton, OutlineButtonBlack } from './general/Buttons'
+import { BlueButton, GrayButton } from './general/Buttons'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { SendPreferenceConfiguratorModal, ShiftEnterForNewline, ShiftEnterToSend } from './SendPreferenceConfigurator'
@@ -23,7 +22,6 @@ export const ChatBox = ({
   fileInputRef,
   fileName,
   messageWarning,
-  setChatLeftSidePanelOpen,
   setFileName,
   handleCancel,
   handleContinue,
@@ -36,7 +34,6 @@ export const ChatBox = ({
   fileInputRef: React.RefObject<HTMLInputElement | null>
   fileName: string
   messageWarning: { [key in WarningType]?: { message: string; ignored: boolean } }
-  setChatLeftSidePanelOpen: (open: boolean) => void
   setFileName: (name: string) => void
   handleCancel: () => void
   handleContinue: (message: string, ignoredWarnings: WarningType[]) => void
@@ -187,10 +184,9 @@ export const ChatBox = ({
       >
         <Box
           sx={{
-            boxShadow: '0px 6px 12px rgba(0,0,0,0.08)',
-            border: '1px solid rgba(0,0,0,0.2)',
-            borderRadius: '0.6rem',
-            padding: '0.5rem 1rem',
+            border: '1px solid rgba(0,0,0,0.3)',
+            borderRadius: '1rem',
+            padding: isMobile ? '0.2rem 0.2rem' : '0.5rem 1rem'
           }}
         >
           <TextField
@@ -247,7 +243,7 @@ export const ChatBox = ({
                     variant="body2"
                     sx={{ padding: '0.5rem 0', opacity: isTokenLimitExceeded ? 1 : 0.6, color: isTokenLimitExceeded ? '#cc0000' : 'inherit' }}
                   >
-                    {userStatus?.usage ?? '-'} / {userStatus?.limit ?? '-'} {t('status:tokensUsed')}
+                    {userStatus?.usage ?? '-'} / {userStatus?.limit ?? '-'} {!isMobile && (t('status:tokensUsed'))}
                   </Typography>
                   <Tooltip
                     arrow
@@ -261,25 +257,6 @@ export const ChatBox = ({
                     <HelpOutline fontSize="small" sx={{ color: 'inherit', opacity: 0.7, mt: 0.5, flex: 2, display: { xs: 'none', sm: 'block' } }} />
                   </Tooltip>
                 </Box>
-                {!isEmbedded && (
-                  <Tooltip
-                    arrow
-                    placement="top"
-                    title={
-                      <Typography variant="body2" sx={{ p: 1 }}>
-                        {t('chat:settings')}
-                      </Typography>
-                    }
-                  >
-                    <OutlineButtonBlack
-                      sx={{ display: { sm: 'block', md: 'none' } }}
-                      onClick={() => setChatLeftSidePanelOpen(true)}
-                      data-testid="left-panel-open"
-                    >
-                      <SettingsIcon sx={{ color: 'rgba(0, 0, 0, 0.7)' }} />
-                    </OutlineButtonBlack>
-                  </Tooltip>
-                )}
               </Box>
             </Box>
             {!isMobile && (

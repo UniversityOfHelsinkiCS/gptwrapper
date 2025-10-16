@@ -1,4 +1,10 @@
 import { Alert, Box, Button, Divider, Drawer, FormControlLabel, IconButton, Link, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
+import ChevronLeft from '@mui/icons-material/ChevronLeft'
+import Tune from '@mui/icons-material/Tune'
+import HelpIcon from '@mui/icons-material/Help'
+import RestartAltIcon from '@mui/icons-material/RestartAlt'
+import SettingsIcon from '@mui/icons-material/Settings'
+import { Alert, Box, Drawer, FormControlLabel, IconButton, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -21,6 +27,7 @@ import EmailButton from './EmailButton'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
 import { OutlineButtonBlack, TextButton } from './general/Buttons'
+import { GrayButton, OutlineButtonBlack } from './general/Buttons'
 import { ChatInfo } from './general/ChatInfo'
 import { SettingsModal } from './SettingsModal'
 import { StreamAbortReason, TypedAbortController, useChatStream } from './useChatStream'
@@ -486,6 +493,18 @@ const ChatV2Content = () => {
           flexDirection: 'column',
         }}
       >
+        {isMobile && (<GrayButton
+          sx={{
+            position: 'fixed',
+            left: 0,
+            top: '50%',
+            transform: 'translate(-50%) rotate(-90deg)',
+          }}
+          onClick={() => setChatLeftSidePanelOpen(true)}
+          data-testid="left-panel-open"
+        >
+          <SettingsIcon />
+        </GrayButton>)}
         <Box
           sx={{
             height: '100%',
@@ -532,9 +551,9 @@ const ChatV2Content = () => {
             isStreaming={isStreaming}
             toolCalls={toolCalls}
             setActiveToolResult={setActiveToolResult}
+            isMobile={isMobile}
           />
         </Box>
-
         <Box
           ref={inputFieldRef}
           sx={{
@@ -542,6 +561,8 @@ const ChatV2Content = () => {
             width: '85%',
             margin: '0 auto',
             paddingBottom: '2rem',
+            width: '100%',
+            padding: isMobile ? '0rem 1rem 1rem 1rem' : '0rem 2rem 2rem 2rem',
             position: 'sticky',
             bottom: 0,
           }}
@@ -551,7 +572,6 @@ const ChatV2Content = () => {
             fileInputRef={fileInputRef}
             fileName={fileName}
             setFileName={setFileName}
-            setChatLeftSidePanelOpen={setChatLeftSidePanelOpen}
             messageWarning={messageWarning}
             handleCancel={handleCancel}
             handleContinue={(_, ignoredWarnings) => handleSendMessage('', true, ignoredWarnings)}
@@ -567,51 +587,53 @@ const ChatV2Content = () => {
 
       {/* FileSearchResults columns ----------------------------------------------------------------------------------------------------- */}
 
-      {isMobile ? (
-        <Drawer
-          anchor="right"
-          open={!!activeToolResult}
-          onClose={() => setActiveToolResult(undefined)}
-          sx={{
-            '& .MuiDrawer-paper': {
-              width: '100%',
-              maxWidth: '100%',
-              padding: 0,
-            },
-          }}
-        >
-          <Box
+      {
+        isMobile ? (
+          <Drawer
+            anchor="right"
+            open={!!activeToolResult}
+            onClose={() => setActiveToolResult(undefined)}
             sx={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              paddingTop: '1rem',
-              paddingX: '1rem',
-              paddingBottom: '1rem',
-              overflow: 'auto',
+              '& .MuiDrawer-paper': {
+                width: '100%',
+                maxWidth: '100%',
+                padding: 0,
+              },
             }}
           >
-            {activeToolResult && <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />}
-          </Box>
-        </Drawer>
-      ) : (
-        !!activeToolResult && (
-          <Box
-            sx={{
-              width: rightMenuWidth,
-              height: '100vh',
-              display: 'flex',
-              flexDirection: 'column',
-              position: 'sticky',
-              top: 0,
-              borderLeft: '1px solid rgba(0,0,0,0.12)',
-              paddingTop: !isEmbeddedMode ? '4rem' : 0,
-            }}
-          >
-            <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />
-          </Box>
+            <Box
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                paddingTop: '1rem',
+                paddingX: '1rem',
+                paddingBottom: '1rem',
+                overflow: 'auto',
+              }}
+            >
+              {activeToolResult && <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />}
+            </Box>
+          </Drawer>
+        ) : (
+          !!activeToolResult && (
+            <Box
+              sx={{
+                width: rightMenuWidth,
+                height: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                position: 'sticky',
+                top: 0,
+                borderLeft: '1px solid rgba(0,0,0,0.12)',
+                paddingTop: !isEmbeddedMode ? '4rem' : 0,
+              }}
+            >
+              <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />
+            </Box>
+          )
         )
-      )}
+      }
 
       {/* Modals --------------------------------------*/}
       <SettingsModal
@@ -624,7 +646,7 @@ const ChatV2Content = () => {
       <DisclaimerModal disclaimer={disclaimerInfo} disclaimerStatus={disclaimerStatus} setDisclaimerStatus={setDisclaimerStatus} />
 
       <ResetConfirmModal open={resetConfirmModalOpen} setOpen={setResetConfirmModalOpen} onConfirm={handleReset} />
-    </Box>
+    </Box >
   )
 }
 
