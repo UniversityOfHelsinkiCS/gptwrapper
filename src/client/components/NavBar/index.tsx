@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, matchPath, useLocation } from 'react-router-dom'
+import { Link, matchPath, useLocation, useMatch } from 'react-router-dom'
 import {
   AppBar,
   MenuItem,
@@ -58,6 +58,7 @@ const NavBar = () => {
   const isDesktopDevice = useMediaQuery(theme.breakpoints.up('lg'))
   const { language } = i18n
   const { user } = useCurrentUser()
+  const isChat = useMatch("/") || useMatch("/:courseId")
 
   const handleLanguageChange = (newLanguage: keyof Locale) => {
     i18n.changeLanguage(newLanguage)
@@ -68,6 +69,8 @@ const NavBar = () => {
     setNavPanelOpen(false)
   }, [isDesktopDevice])
 
+  if (isChat) return // chat screens have their own menu.
+
   return (
     <>
       <AppBar elevation={0} position="fixed" sx={{
@@ -75,13 +78,14 @@ const NavBar = () => {
         mt: '2rem', // This is then required so the appbar is correctly positioned
       }} color="transparent">
         <Container maxWidth={false} sx={{ display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
-          <MuiLink to="/" 
-            sx={{...styles.navBox, 
+          <MuiLink to="/"
+            sx={{
+              ...styles.navBox,
               backgroundColor: 'white',
               borderRadius: 1,
               boxShadow: '0 0 15px 15px white',
               zIndex: 2,
-            }} 
+            }}
             component={Link}
           >
             <img src={hyLogo} alt="University of Helsinki" width="24" />
@@ -90,7 +94,8 @@ const NavBar = () => {
             </Box>
           </MuiLink>
           <IconButton
-            sx={{ display: { sx: 'block', lg: 'none' },
+            sx={{
+              display: { sx: 'block', lg: 'none' },
               backgroundColor: 'white',
               borderRadius: 1,
               boxShadow: '0 0 15px 15px white',

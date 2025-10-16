@@ -1,4 +1,4 @@
-import { Alert, Box, Divider, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Alert, Box, Button, Divider, Drawer, FormControlLabel, IconButton, Link, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -21,7 +21,7 @@ import EmailButton from './EmailButton'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
 import { OutlineButtonBlack, TextButton } from './general/Buttons'
-import { ChatInfo, ChatInfo2 } from './general/ChatInfo'
+import { ChatInfo } from './general/ChatInfo'
 import { SettingsModal } from './SettingsModal'
 import { StreamAbortReason, TypedAbortController, useChatStream } from './useChatStream'
 import { postCompletionStreamV3, sendConversationEmail } from './api'
@@ -34,19 +34,13 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import { InfoTexts } from '../../locales/infoTexts'
 import { WarningType } from '@shared/aiApi'
 import { ResetConfirmModal } from './ResetConfirmModal'
-import MapsUgcIcon from '@mui/icons-material/MapsUgc';
-import SaveAltIcon from '@mui/icons-material/SaveAlt';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import SettingsIcon from '@mui/icons-material/Settings';
-import ArticleIcon from '@mui/icons-material/Article';
-import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
-import LogoutIcon from '@mui/icons-material/Logout';
 import ChevronLeft from '@mui/icons-material/ChevronLeft'
 import TuneIcon from '@mui/icons-material/Tune'
 import HelpIcon from '@mui/icons-material/Help'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
-import HelpCenterIcon from '@mui/icons-material/HelpCenter';
-import AppsIcon from '@mui/icons-material/Apps';
+
+import SideBar from './SideBar'
+import ChatMenu from './ChatMenu'
 
 
 /**
@@ -399,12 +393,12 @@ const ChatV2Content = () => {
         minHeight: '100vh',
         position: 'relative',
         display: 'flex',
-        flexDirection: 'row',
-        width: '100%',
-        maxWidth: '100%',
-        overflowX: 'clip',
       }}
     >
+
+      <ChatMenu />
+
+
       {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
       {!isEmbeddedMode &&
         (isMobile ? (
@@ -429,7 +423,7 @@ const ChatV2Content = () => {
                   setModel={setActiveModel}
                 />
                 :
-                <LeftMenu2
+                <SideBar
                   handleReset={() => setResetConfirmModalOpen(true)}
                   onClose={() => {
                     setChatLeftSidePanelOpen(false)
@@ -445,18 +439,15 @@ const ChatV2Content = () => {
           </Drawer>
         ) : isAdmin ?
           (
-            <div style={{ backgroundColor: '' }}>
-
-              <LeftMenu2
-                course={course}
-                handleReset={() => setResetConfirmModalOpen(true)}
-                setSettingsModalOpen={setSettingsModalOpen}
-                setDisclaimerStatus={setDisclaimerStatus}
-                messages={messages}
-                currentModel={activeModel}
-                setModel={setActiveModel}
-              />
-            </div>
+            <SideBar
+              course={course}
+              handleReset={() => setResetConfirmModalOpen(true)}
+              setSettingsModalOpen={setSettingsModalOpen}
+              setDisclaimerStatus={setDisclaimerStatus}
+              messages={messages}
+              currentModel={activeModel}
+              setModel={setActiveModel}
+            />
           )
           :
           (
@@ -480,23 +471,20 @@ const ChatV2Content = () => {
       <Box
         ref={chatContainerRef}
         sx={{
+          flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          marginLeft: leftMenuWidth,
         }}
       >
         <Box
           sx={{
             height: '100%',
+            width: '85%',
+            margin: '0 auto',
             overflow: 'hidden',
             paddingLeft: '1rem',
             paddingRight: '1rem',
             paddingTop: '1rem',
-            width: {
-              sm: '100vw',
-              md: `calc(100vw - ${leftMenuWidth.md} - ${rightMenuWidth})`,
-              lg: `calc(100vw - ${leftMenuWidth.lg} - ${rightMenuWidth})`,
-            },
           }}
           ref={scrollRef}
         >
@@ -541,8 +529,9 @@ const ChatV2Content = () => {
           ref={inputFieldRef}
           sx={{
             backgroundColor: 'white',
-            width: '100%',
-            padding: '0rem 2rem 2rem 2rem',
+            width: '85%',
+            margin: '0 auto',
+            paddingBottom: '2rem',
             position: 'sticky',
             bottom: 0,
           }}
@@ -701,162 +690,6 @@ const LeftMenu = ({
     </Box>
   )
 }
-
-
-// WORKING AREA START -------------------------------------------------------
-
-
-const LeftMenu2 = ({
-  course,
-  handleReset,
-  onClose,
-  setSettingsModalOpen,
-  setDisclaimerStatus,
-  messages,
-  currentModel,
-  setModel,
-}: {
-  course: Course | undefined
-  handleReset: () => void
-  onClose?: () => void
-  setSettingsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
-  setDisclaimerStatus: React.Dispatch<React.SetStateAction<boolean>>
-  messages: ChatMessage[]
-  currentModel: ValidModelName
-  setModel: (model: ValidModelName) => void
-}) => {
-  const { t } = useTranslation()
-  const { courseId } = useParams()
-  const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
-  const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
-
-  useEffect(() => {
-    if (!userStatus) return
-    setIsTokenLimitExceeded(userStatus.usage > userStatus.limit)
-  }, [statusLoading, userStatus])
-
-  useEffect(() => {
-    console.log("📌 course", course)
-  }, [course])
-
-  const isAdminOrTeacher = true
-
-  return (
-    <Box
-      sx={{
-        width: 400,
-        position: 'relative',
-        height: '100vh',
-        borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-        paddingTop: '4rem',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-
-      <Box px={4} py={3}>
-        <Typography mb={0.5} color='textSecondary'>{"kurssi".toUpperCase()}</Typography>
-        {
-          course ?
-            <>
-              <ChatInfo2 course={course} />
-              {isAdminOrTeacher && <TextButton startIcon={<SettingsIcon />}>Kurssin asetukset</TextButton>}
-              <TextButton startIcon={<ArticleIcon />}>Kurssisivu</TextButton>
-              <TextButton startIcon={<LibraryBooksIcon />}>Vaihda kurssia</TextButton>
-              {isAdminOrTeacher && <TextButton startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>Poistu kurssinäkymästä</TextButton>}
-            </>
-            :
-            <TextButton startIcon={<ChevronRightIcon />}>
-              <Typography variant='h6'>Ei valittua kurssia</Typography>
-            </TextButton>
-        }
-      </Box>
-
-      <Divider />
-
-      <Box p={4}>
-        <Typography mb={0.5} color='textSecondary' >{"alustus".toUpperCase()}</Typography>
-        {
-          course ?
-            <>
-              <Typography mb={2}>Aivan erikoiset ohjeet</Typography>
-              {isAdminOrTeacher && <TextButton startIcon={<TuneIcon />}>Muokkaa alustusta</TextButton>}
-              <TextButton startIcon={<HelpCenterIcon />}>Alustuksen tiedot</TextButton>
-              <TextButton startIcon={<AppsIcon />}>Valitse alustus</TextButton>
-            </>
-            :
-            <TextButton startIcon={<ChevronRightIcon />}>
-              <Typography variant='h6'>Ei alustusta</Typography>
-            </TextButton>
-        }
-      </Box>
-      <Divider />
-      <Box p={4}>
-        <Typography mb={0.5} color='textSecondary'>{"kielimalli".toUpperCase()}</Typography>
-        <TextButton startIcon={<ChevronRightIcon />}>
-          <Typography variant='h6'>GPT-5</Typography>
-        </TextButton>
-      </Box>
-      <Divider />
-      <Box p={4}>
-        <TextButton startIcon={<MapsUgcIcon />} size='large'>
-          Uusi keskustelu
-        </TextButton>
-        <TextButton startIcon={<SaveAltIcon />} size='large'>
-          Tallenna sähköpostina
-        </TextButton>
-      </Box>
-
-      {/* <Box p="1rem">
-        {course && <ChatInfo course={course} />}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-          <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} data-testid="empty-conversation-button">
-            {t('chat:emptyConversation')}
-          </OutlineButtonBlack>
-          <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} />
-          <PromptSelector />
-          <EmailButton messages={messages} disabled={!messages?.length} />
-          <OutlineButtonBlack startIcon={<Tune />} onClick={() => setSettingsModalOpen(true)} data-testid="settings-button">
-            {t('chat:settings')}
-          </OutlineButtonBlack>
-          <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} data-testid="help-button">
-            {t('info:title')}
-          </OutlineButtonBlack>
-        </Box>
-      </Box> */}
-      {/* {onClose && (
-        <OutlineButtonBlack sx={{ m: '1rem', mt: 'auto' }} onClick={onClose} startIcon={<ChevronLeft />}>
-          {t('common:close')}
-        </OutlineButtonBlack>
-      )} */}
-      {/* <Footer /> */}
-    </Box>
-  )
-}
-
-// WORKING AREA END -----------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 export const ChatV2 = () => (
   <PromptStateProvider>
