@@ -128,10 +128,11 @@ export const ChatBox = ({
     <Box
       sx={{
         background: 'white',
-        borderTopRightRadius: '0.3rem',
-        borderTopLeftRadius: '0.3rem',
         mb: 1,
-        boxShadow: '0px 10px 0px white', // Cover up the small space below
+        border: '1px solid rgba(0,0,0,0.3)',
+        borderRadius: '1.25rem',
+        padding: isMobile ? '0.2rem 0.2rem' : '0.5rem 1rem',
+        backdropFilter: 'blur(5px)',
       }}
     >
       {fileTypeAlertOpen && (
@@ -140,30 +141,32 @@ export const ChatBox = ({
           <Typography>{`Currenlty there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}</Typography>
         </Alert>
       )}
-      {activeMessageWarnings.length > 0 && (
-        <Alert
-          severity="warning"
-          sx={{ my: '0.2rem' }}
-          action={
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <GrayButton onClick={handleCancel} type="button">
-                {t('common:cancel')}
-              </GrayButton>
-              <BlueButton onClick={() => handleContinue('', Object.keys(messageWarning) as WarningType[])} color="primary" type="button">
-                {t('common:continue')}
-              </BlueButton>
-            </Box>
-          }
-        >
-          {Object.entries(messageWarning)
-            .filter(([, warning]) => !warning.ignored)
-            .map(([type, warning]) => (
-              <Box key={type} sx={{ mb: 0.5 }}>
-                {warning.message}
+      {
+        activeMessageWarnings.length > 0 && (
+          <Alert
+            severity="warning"
+            sx={{ my: '0.2rem' }}
+            action={
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <GrayButton onClick={handleCancel} type="button">
+                  {t('common:cancel')}
+                </GrayButton>
+                <BlueButton onClick={() => handleContinue('', Object.keys(messageWarning) as WarningType[])} color="primary" type="button">
+                  {t('common:continue')}
+                </BlueButton>
               </Box>
-            ))}
-        </Alert>
-      )}
+            }
+          >
+            {Object.entries(messageWarning)
+              .filter(([, warning]) => !warning.ignored)
+              .map(([type, warning]) => (
+                <Box key={type} sx={{ mb: 0.5 }}>
+                  {warning.message}
+                </Box>
+              ))}
+          </Alert>
+        )
+      }
 
       <Box
         component="form"
@@ -182,13 +185,7 @@ export const ChatBox = ({
           }
         }}
       >
-        <Box
-          sx={{
-            border: '1px solid rgba(0,0,0,0.3)',
-            borderRadius: '1.25rem',
-            padding: isMobile ? '0.2rem 0.2rem' : '0.5rem 1rem'
-          }}
-        >
+        <Box>
           <TextField
             autoFocus={!isEmbedded}
             inputRef={textFieldRef}
@@ -295,6 +292,6 @@ export const ChatBox = ({
           </Box>
         </Box>
       </Box>
-    </Box>
+    </Box >
   )
 }

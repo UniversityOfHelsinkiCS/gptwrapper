@@ -402,9 +402,9 @@ const ChatV2Content = () => {
       }}
     >
 
-      <Box sx={{ position: 'fixed', top: 30, right: 30, zIndex: 999 }}>
+      <Box sx={{ position: 'fixed', top: 20, right: 20, zIndex: 999 }}>
         <ChatMenu newSideBar={newSideBar} />
-        {!isMobile && <Button onClick={() => setNewSidebar(prev => !prev)} sx={{ position: 'absolute', left: -250, top: 50 }} variant='contained'>Admins: toggle old sidebar</Button>}
+        {!isMobile && <OutlineButtonBlack onClick={() => setNewSidebar(prev => !prev)} sx={{ position: 'absolute', left: -500, top: 0 }} variant='contained'>Admins: toggle old sidebar</OutlineButtonBlack>}
       </Box>
 
 
@@ -536,8 +536,7 @@ const ChatV2Content = () => {
           sx={{
             backgroundColor: 'white',
             width: '100%',
-            // margin: '0 auto',
-            paddingBottom: '2rem',
+            paddingBottom: '2rem',            // margin: '0 auto',
             padding: isMobile ? '0rem 1rem 1rem 1rem' : '0rem 2rem 2rem 2rem',
             position: 'sticky',
             bottom: 0,

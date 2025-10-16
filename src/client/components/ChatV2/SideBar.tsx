@@ -76,22 +76,18 @@ const SideBar = ({
 
         <Box sx={{
           position: 'absolute',
-          right: -80,
+          right: -112,
           display: 'flex',
           alignItems: 'center',
           gap: 1,
           color: 'text.secondary',
           '& .chevron': {
-            opacity: 0,
-            transition: 'opacity 0.2s',
-          },
-          '&:hover .chevron': {
             opacity: 1,
           },
         }}>
-          <TextButton
+          <OutlineButtonBlack
+            variant='contained'
             onClick={() => setCollapsed(prev => !prev)}
-
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <ViewSidebarOutlinedIcon sx={{ transform: 'scaleX(-1)' }} />
@@ -99,7 +95,7 @@ const SideBar = ({
                 {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
               </Box>
             </Box>
-          </TextButton>
+          </OutlineButtonBlack>
         </Box>
 
 

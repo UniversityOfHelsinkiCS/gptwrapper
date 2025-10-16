@@ -48,6 +48,7 @@ export const BlueButton = styled(BaseButton)({
 
 export const OutlineButtonBlack = styled(BaseButton)({
   backgroundColor: 'transparent',
+  backdropFilter: 'blur(5px)',
   border: '1px solid #a5a5a5',
   '&:hover': {
     backgroundColor: 'rgba(0, 0, 0, 0.04)',

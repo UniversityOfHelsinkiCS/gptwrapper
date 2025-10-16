@@ -29,23 +29,17 @@ export default function ChatMenu({ newSideBar }: { newSideBar: boolean }) {
   if (!newSideBar) return (<NavBar />)
 
   return (
-    <div style={{ position: 'fixed', top: 20, right: 0 }}>
-      <Button
-        variant='contained'
+    <div style={{ position: 'fixed', top: 20, right: 30 }}>
+      <OutlineButtonBlack
         id="basic-button"
         aria-controls={open ? 'basic-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
 
         onClick={handleClick}
-        sx={{
-          backdropFilter: 'blur(2px)',
-          borderRadius: '1.25rem',
-          backgroundColor: 'transparent'
-        }}
       >
         <MenuIcon sx={{ color: 'text.primary' }} />
-      </Button>
+      </OutlineButtonBlack>
       <Menu
         id="basic-menu"
         anchorEl={anchorEl}
@@ -55,7 +49,13 @@ export default function ChatMenu({ newSideBar }: { newSideBar: boolean }) {
           list: {
             'aria-labelledby': 'basic-button',
           },
-          paper: { sx: { boxShadow: '2px 2px 12px rgba(0,0,0,0.1)', border: '1px solid rgba(0,0,0,0.2)' }, elevation: 1 },
+          paper: {
+            sx: {
+              boxShadow: '2px 2px 12px rgba(0,0,0,0.1)',
+              border: '1px solid rgba(0,0,0,0.2)',
+              borderRadius: '1.25rem',
+            }, elevation: 1
+          },
         }}
       >
         <MenuList>
