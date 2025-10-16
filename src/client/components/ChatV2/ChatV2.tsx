@@ -345,7 +345,7 @@ const ChatV2Content = () => {
 
   // For new sidebar revamp dev
   const isAdmin = user?.isAdmin
-  const [newSideBar, setNewSidebar] = useState(true)
+  const [newSideBar, setNewSidebar] = useState(false)
 
   if (course && course.usageLimit === 0) {
     return (
@@ -403,7 +403,7 @@ const ChatV2Content = () => {
 
       <Box sx={{ position: 'fixed', top: 30, right: 30, zIndex: 999 }}>
         <ChatMenu newSideBar={newSideBar} />
-        <Button onClick={() => setNewSidebar(prev => !prev)} sx={{ position: 'absolute', left: -250, top: 50 }} variant='contained'>Admins: toggle old sidebar</Button>
+        {!isMobile && <Button onClick={() => setNewSidebar(prev => !prev)} sx={{ position: 'absolute', left: -250, top: 50 }} variant='contained'>Admins: toggle old sidebar</Button>}
       </Box>
 
 
