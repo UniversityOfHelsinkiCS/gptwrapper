@@ -402,8 +402,8 @@ const ChatV2Content = () => {
     >
 
       <Box sx={{ position: 'fixed', top: 30, right: 30, zIndex: 999 }}>
-        <ChatMenu />
-        <Button onClick={() => setNewSidebar(prev => !prev)} sx={{ position: 'absolute', left: -300 }} variant='contained'>Admins: toggle old sidebar</Button>
+        <ChatMenu newSideBar={newSideBar} />
+        <Button onClick={() => setNewSidebar(prev => !prev)} sx={{ position: 'absolute', left: -250, top: 50 }} variant='contained'>Admins: toggle old sidebar</Button>
       </Box>
 
 
@@ -432,6 +432,7 @@ const ChatV2Content = () => {
                 />
                 :
                 <SideBar
+                  isAdmin={isAdmin}
                   handleReset={() => setResetConfirmModalOpen(true)}
                   onClose={() => {
                     setChatLeftSidePanelOpen(false)
@@ -448,6 +449,7 @@ const ChatV2Content = () => {
         ) : isAdmin && newSideBar ?
           (
             <SideBar
+              isAdmin={isAdmin}
               course={course}
               handleReset={() => setResetConfirmModalOpen(true)}
               setSettingsModalOpen={setSettingsModalOpen}
@@ -665,21 +667,13 @@ const LeftMenu = ({
           position: 'relative',
           height: '100vh',
           borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-          paddingTop: 3,
+          paddingTop: '4rem',
           display: 'flex',
           flexDirection: 'column',
         },
         sx,
       ]}
     >
-      <Link
-        href="/"
-        sx={{ px: 2, mb: 2, display: 'flex', gap: 1, textDecoration: 'none', alignItems: 'center' }}
-      >
-        <img src={hyLogo} alt="University of Helsinki" width="36" />
-        <Typography fontWeight="bold" color='textPrimary' >{t('appName').toUpperCase()}</Typography>
-      </Link>
-
 
       <Box p="1rem">
         {course && <ChatInfo course={course} />}
