@@ -18,7 +18,6 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import TuneIcon from '@mui/icons-material/Tune'
 import HelpCenterIcon from '@mui/icons-material/HelpCenter';
 import AppsIcon from '@mui/icons-material/Apps';
-import ViewSidebarRoundedIcon from '@mui/icons-material/ViewSidebarRounded';
 import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined';
 
 import hyLogo from '../../assets/hy_logo.svg'
@@ -67,6 +66,7 @@ const SideBar = ({
                 position: 'sticky',
                 top: 0,
                 py: 3,
+                height: '100vh',
                 width: collapsed ? 60 : 400,
                 borderRight: '1px solid rgba(0, 0, 0, 0.15)',
             }}>
@@ -100,10 +100,18 @@ const SideBar = ({
 
                 {
                     collapsed ?
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', height: '100vh' }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', opacity: 0.86 }}>
                             <Link href="/">
                                 <img src={hyLogo} alt="University of Helsinki" width="30" />
                             </Link>
+                            <Divider flexItem />
+                            <SettingsIcon fontSize='small' />
+                            <ArticleIcon fontSize='small' />
+                            <LibraryBooksIcon fontSize='small' />
+                            <LogoutIcon sx={{ transform: 'scaleX(-1)' }} fontSize='small' />
+                            <Divider flexItem />
+                            <MapsUgcIcon fontSize='small' />
+                            <SaveAltIcon fontSize='small' />
                         </Box>
                         :
                         <Box>
