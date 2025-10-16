@@ -42,6 +42,8 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import SideBar from './SideBar'
 import ChatMenu from './ChatMenu'
 
+import hyLogo from '../../assets/hy_logo.svg'
+
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
@@ -341,6 +343,10 @@ const ChatV2Content = () => {
     [handleLayoutShift],
   )
 
+  // For new sidebar revamp dev
+  const isAdmin = user?.isAdmin
+  const [newSideBar, setNewSidebar] = useState(true)
+
   if (course && course.usageLimit === 0) {
     return (
       <Box>
@@ -385,7 +391,6 @@ const ChatV2Content = () => {
 
   if (statusLoading) return null
 
-  const isAdmin = true
 
   return (
     <Box
@@ -396,7 +401,10 @@ const ChatV2Content = () => {
       }}
     >
 
-      <ChatMenu />
+      <Box sx={{ position: 'fixed', top: 30, right: 30, zIndex: 999 }}>
+        <ChatMenu />
+        <Button onClick={() => setNewSidebar(prev => !prev)} sx={{ position: 'absolute', left: -300 }} variant='contained'>Admins: toggle old sidebar</Button>
+      </Box>
 
 
       {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
@@ -409,7 +417,7 @@ const ChatV2Content = () => {
             }}
           >
             {
-              isAdmin ?
+              isAdmin && newSideBar ?
                 <LeftMenu
                   handleReset={() => setResetConfirmModalOpen(true)}
                   onClose={() => {
@@ -437,7 +445,7 @@ const ChatV2Content = () => {
                 />
             }
           </Drawer>
-        ) : isAdmin ?
+        ) : isAdmin && newSideBar ?
           (
             <SideBar
               course={course}
@@ -454,7 +462,7 @@ const ChatV2Content = () => {
             <LeftMenu
               sx={{
                 display: { sm: 'none', md: 'flex' },
-                position: 'fixed',
+                position: 'sticky',
                 top: 0,
               }}
               course={course}
@@ -657,13 +665,22 @@ const LeftMenu = ({
           position: 'relative',
           height: '100vh',
           borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-          paddingTop: '4rem',
+          paddingTop: 3,
           display: 'flex',
           flexDirection: 'column',
         },
         sx,
       ]}
     >
+      <Link
+        href="/"
+        sx={{ px: 2, mb: 2, display: 'flex', gap: 1, textDecoration: 'none', alignItems: 'center' }}
+      >
+        <img src={hyLogo} alt="University of Helsinki" width="36" />
+        <Typography fontWeight="bold" color='textPrimary' >{t('appName').toUpperCase()}</Typography>
+      </Link>
+
+
       <Box p="1rem">
         {course && <ChatInfo course={course} />}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
