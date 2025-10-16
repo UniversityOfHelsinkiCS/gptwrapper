@@ -1,4 +1,4 @@
-import { Box, Divider, Link, Typography } from '@mui/material'
+import { Box, Button, Divider, Link, Typography } from '@mui/material'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
@@ -69,33 +69,38 @@ const SideBar = ({
                 height: '100vh',
                 width: collapsed ? 60 : 400,
                 borderRight: '1px solid rgba(0, 0, 0, 0.15)',
+                zIndex: 999
             }}>
 
-                <TextButton
-                    onClick={() => setCollapsed(prev => !prev)}
-                    sx={{
-                        position: 'absolute',
-                        right: -80,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        color: 'text.secondary',
-                        '& .chevron': {
-                            opacity: 0,
-                            transition: 'opacity 0.2s',
-                        },
-                        '&:hover .chevron': {
-                            opacity: 1,
-                        },
-                    }}
-                >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <ViewSidebarOutlinedIcon sx={{ transform: 'scaleX(-1)' }} />
-                        <Box className="chevron" sx={{ display: 'flex', alignItems: 'center' }}>
-                            {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                <Box sx={{
+                    position: 'absolute',
+                    right: -330,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    color: 'text.secondary',
+                    '& .chevron': {
+                        opacity: 0,
+                        transition: 'opacity 0.2s',
+                    },
+                    '&:hover .chevron': {
+                        opacity: 1,
+                    },
+                }}>
+                    <TextButton
+                        onClick={() => setCollapsed(prev => !prev)}
+
+                    >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <ViewSidebarOutlinedIcon sx={{ transform: 'scaleX(-1)' }} />
+                            <Box className="chevron" sx={{ display: 'flex', alignItems: 'center' }}>
+                                {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                            </Box>
                         </Box>
-                    </Box>
-                </TextButton>
+                    </TextButton>
+
+                    <Button variant='contained'>Admins: toggle old sidebar</Button>
+                </Box>
 
 
                 {
