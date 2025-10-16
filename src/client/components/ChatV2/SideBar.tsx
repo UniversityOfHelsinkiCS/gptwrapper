@@ -32,6 +32,7 @@ const SideBar = ({
     messages,
     currentModel,
     setModel,
+    isAdmin,
 }: {
     course: Course | undefined
     handleReset: () => void
@@ -41,6 +42,7 @@ const SideBar = ({
     messages: ChatMessage[]
     currentModel: ValidModelName
     setModel: (model: ValidModelName) => void
+    isAdmin: boolean | undefined,
 }) => {
     const { courseId } = useParams()
     const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
@@ -54,7 +56,7 @@ const SideBar = ({
         setIsTokenLimitExceeded(userStatus.usage > userStatus.limit)
     }, [statusLoading, userStatus])
 
-    const isAdminOrTeacher = true
+    const isAdminOrTeacher = isAdmin
 
     return (
         <Box
