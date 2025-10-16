@@ -417,35 +417,18 @@ const ChatV2Content = () => {
               setChatLeftSidePanelOpen(!chatLeftSidePanelOpen)
             }}
           >
-            {
-              isAdmin && newSideBar ?
-                <LeftMenu
-                  handleReset={() => setResetConfirmModalOpen(true)}
-                  onClose={() => {
-                    setChatLeftSidePanelOpen(false)
-                  }}
-                  course={course}
-                  setSettingsModalOpen={setSettingsModalOpen}
-                  setDisclaimerStatus={setDisclaimerStatus}
-                  messages={messages}
-                  currentModel={activeModel}
-                  setModel={setActiveModel}
-                />
-                :
-                <SideBar
-                  isAdmin={isAdmin}
-                  handleReset={() => setResetConfirmModalOpen(true)}
-                  onClose={() => {
-                    setChatLeftSidePanelOpen(false)
-                  }}
-                  course={course}
-                  setSettingsModalOpen={setSettingsModalOpen}
-                  setDisclaimerStatus={setDisclaimerStatus}
-                  messages={messages}
-                  currentModel={activeModel}
-                  setModel={setActiveModel}
-                />
-            }
+            <LeftMenu
+              handleReset={() => setResetConfirmModalOpen(true)}
+              onClose={() => {
+                setChatLeftSidePanelOpen(false)
+              }}
+              course={course}
+              setSettingsModalOpen={setSettingsModalOpen}
+              setDisclaimerStatus={setDisclaimerStatus}
+              messages={messages}
+              currentModel={activeModel}
+              setModel={setActiveModel}
+            />
           </Drawer>
         ) : isAdmin && newSideBar ?
           (
