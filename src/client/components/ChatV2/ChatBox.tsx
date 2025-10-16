@@ -187,8 +187,9 @@ export const ChatBox = ({
       >
         <Box
           sx={{
-            border: '1px solid rgba(0,0,0,0.3)',
-            borderRadius: '0.3rem',
+            boxShadow: '0px 6px 12px rgba(0,0,0,0.08)',
+            border: '1px solid rgba(0,0,0,0.2)',
+            borderRadius: '0.6rem',
             padding: '0.5rem 1rem',
           }}
         >
