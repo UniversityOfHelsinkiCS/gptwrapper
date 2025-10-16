@@ -4,7 +4,7 @@ import { styled } from '@mui/material'
 const BaseButton = styled(Button)({
   color: 'rgba(0, 0, 0, 0.86)',
   textTransform: 'none',
-  borderRadius: '0.8rem',
+  borderRadius: '1.25rem',
   boxShadow: '0 1px 2px lightgray',
   display: 'flex',
   alignItems: 'center',

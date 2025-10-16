@@ -4,7 +4,6 @@ import Tune from '@mui/icons-material/Tune'
 import HelpIcon from '@mui/icons-material/Help'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import SettingsIcon from '@mui/icons-material/Settings'
-import { Alert, Box, Drawer, FormControlLabel, IconButton, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -26,8 +25,7 @@ import { DisclaimerModal } from './Disclaimer'
 import EmailButton from './EmailButton'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
-import { OutlineButtonBlack, TextButton } from './general/Buttons'
-import { GrayButton, OutlineButtonBlack } from './general/Buttons'
+import { OutlineButtonBlack, TextButton, GrayButton } from './general/Buttons'
 import { ChatInfo } from './general/ChatInfo'
 import { SettingsModal } from './SettingsModal'
 import { StreamAbortReason, TypedAbortController, useChatStream } from './useChatStream'
@@ -41,10 +39,7 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import { InfoTexts } from '../../locales/infoTexts'
 import { WarningType } from '@shared/aiApi'
 import { ResetConfirmModal } from './ResetConfirmModal'
-import ChevronLeft from '@mui/icons-material/ChevronLeft'
 import TuneIcon from '@mui/icons-material/Tune'
-import HelpIcon from '@mui/icons-material/Help'
-import RestartAltIcon from '@mui/icons-material/RestartAlt'
 
 import SideBar from './SideBar'
 import ChatMenu from './ChatMenu'
@@ -328,7 +323,6 @@ const ChatV2Content = () => {
 
   const rightMenuOpen = !!activeToolResult
   const rightMenuWidth = rightMenuOpen ? '300px' : '0px'
-  const leftMenuWidth = !isEmbeddedMode ? { md: '250px', lg: '300px' } : { md: '0px', lg: '0px' }
 
   // Handle layout shift when right menu opens (tool result becomes visible)
   const prevScrollYProportional = useRef(0)
@@ -508,7 +502,7 @@ const ChatV2Content = () => {
         <Box
           sx={{
             height: '100%',
-            width: '85%',
+            width: '100%',
             margin: '0 auto',
             overflow: 'hidden',
             paddingLeft: '1rem',
@@ -558,10 +552,9 @@ const ChatV2Content = () => {
           ref={inputFieldRef}
           sx={{
             backgroundColor: 'white',
-            width: '85%',
-            margin: '0 auto',
-            paddingBottom: '2rem',
             width: '100%',
+            // margin: '0 auto',
+            paddingBottom: '2rem',
             padding: isMobile ? '0rem 1rem 1rem 1rem' : '0rem 2rem 2rem 2rem',
             position: 'sticky',
             bottom: 0,
