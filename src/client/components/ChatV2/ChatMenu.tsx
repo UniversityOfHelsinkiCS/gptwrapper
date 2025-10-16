@@ -26,7 +26,7 @@ export default function ChatMenu() {
     };
 
     return (
-        <div style={{ position: 'absolute', top: 30, right: 30 }}>
+        <div style={{ position: 'fixed', top: 30, right: 30 }}>
             <Button
                 id="basic-button"
                 aria-controls={open ? 'basic-menu' : undefined}
@@ -53,7 +53,7 @@ export default function ChatMenu() {
                         <ListItemIcon>
                             <SettingsIcon fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText>Asetukest</ListItemText>
+                        <ListItemText>Asetukset</ListItemText>
 
                     </MenuItem>
                     <MenuItem>
