@@ -74,7 +74,7 @@ const SideBar = ({
 
                 <Box sx={{
                     position: 'absolute',
-                    right: -330,
+                    right: -80,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
@@ -98,8 +98,6 @@ const SideBar = ({
                             </Box>
                         </Box>
                     </TextButton>
-
-                    <Button variant='contained'>Admins: toggle old sidebar</Button>
                 </Box>
 
 
@@ -122,7 +120,7 @@ const SideBar = ({
                         <Box>
                             <Link
                                 href="/"
-                                sx={{ px: 4, mb: 2, display: 'flex', gap: 1, textDecoration: 'none', alignItems: 'center' }}
+                                sx={{ px: 4, mb: 1, display: 'flex', gap: 1, textDecoration: 'none', alignItems: 'center' }}
                             >
                                 <img src={hyLogo} alt="University of Helsinki" width="36" />
                                 <Typography fontWeight="bold" color='textPrimary' >{t('appName').toUpperCase()}</Typography>
