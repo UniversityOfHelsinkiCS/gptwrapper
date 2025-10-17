@@ -24,6 +24,7 @@ const Discussion = () => {
             padding: '2%',
             mt: 2,
             width: '100%',
+            borderRadius: '1.25rem',
           }}
         >
           <Typography variant="h6">{t('course:reseachCourse')}</Typography>

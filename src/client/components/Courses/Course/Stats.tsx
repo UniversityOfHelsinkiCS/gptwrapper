@@ -7,6 +7,7 @@ import useCurrentUser from '../../../hooks/useCurrentUser'
 import useCourse, { useCourseEnrolments, useCourseStatistics } from '../../../hooks/useCourse'
 import MaxTokenUsageStudents from './MaxTokenUsageStudents'
 import HelpOutline from '@mui/icons-material/HelpOutline'
+import { BlueButton, OutlineButtonBlue } from '../../ChatV2/general/Buttons'
 
 const Stats = ({ courseId }: { courseId: string }) => {
   const { t } = useTranslation()
@@ -41,6 +42,7 @@ const Stats = ({ courseId }: { courseId: string }) => {
         padding: '2%',
         mt: 2,
         width: '100%',
+        borderRadius: '1.25rem',
       }}
     >
       <Typography variant="h5" display="inline">
@@ -87,9 +89,9 @@ const Stats = ({ courseId }: { courseId: string }) => {
 
       {usages && !course.saveDiscussions && (
         <>
-          <Button onClick={() => setStudentListOpen(!studentListOpen)} sx={{ mt: 1 }} color="primary" style={{ marginTop: 10, marginLeft: -8 }}>
+          <OutlineButtonBlue onClick={() => setStudentListOpen(!studentListOpen)} sx={{ mt: 1 }} color="primary" style={{ marginTop: 10 }}>
             {studentListOpen ? t('admin:hideStudentList') : t('admin:showStudentList')}
-          </Button>
+          </OutlineButtonBlue>
           {studentListOpen && (
             <Table>
               <TableHead>

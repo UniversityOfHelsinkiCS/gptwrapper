@@ -25,7 +25,8 @@ const Rag: React.FC = () => {
             key={index.id}
             sx={{
               mt: 2,
-              p: 1,
+              p: 2,
+              borderRadius: '1.25rem'
             }}
           >
             <Table sx={{ mb: 1 }}>
@@ -34,6 +35,7 @@ const Rag: React.FC = () => {
                   <TableCell>{t('rag:name')}</TableCell>
                   <TableCell>{t('rag:language')}</TableCell>
                   <TableCell>{t('rag:numberOfFiles')}</TableCell>
+                  <TableCell>{}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -41,14 +43,16 @@ const Rag: React.FC = () => {
                   <TableCell>{index.metadata?.name}</TableCell>
                   <TableCell>{index.metadata?.language}</TableCell>
                   <TableCell>{index.ragFileCount}</TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                      <Link to={`/rag/${index.id}`} component={RouterLink} sx={{ ml: 'auto' }}>
+                        {t('rag:viewDetails')}
+                      </Link>
+                    </Box>
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <Link to={`/rag/${index.id}`} component={RouterLink} sx={{ ml: 'auto' }}>
-                {t('rag:viewDetails')}
-              </Link>
-            </Box>
           </Paper>
         ))}
       </Box>

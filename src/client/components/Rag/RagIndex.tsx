@@ -95,10 +95,12 @@ export const RagIndex: React.FC = () => {
 
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
-      <Link to={coursePagePath} component={RouterLink}>
-        <ArrowBackOutlined />
-        {t('rag:backToCourse')}
-      </Link>
+      <OutlineButtonBlack sx={{ mb: 2 }}>
+        <Link to={coursePagePath} component={RouterLink} sx={{ display: 'flex' }}>
+          <ArrowBackOutlined />
+          {t('rag:backToCourse')}
+        </Link>
+      </OutlineButtonBlack>
       <Typography variant="body1">{t('rag:collection')}</Typography>
       <Typography variant="h3">{ragDetails?.metadata?.name}</Typography>
 

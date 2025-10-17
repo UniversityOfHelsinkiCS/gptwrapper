@@ -38,7 +38,7 @@ const Prompt = ({ prompt, handleEdit }: { prompt: PromptType; handleEdit: () => 
 
   return (
     <Box key={id} pt={2}>
-      <Paper sx={{ py: '1rem', px: '2rem' }}>
+      <Paper sx={{ py: '1rem', px: '2rem', borderRadius: '1.25rem' }}>
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box>
             <Box display="inline" mr={2}>

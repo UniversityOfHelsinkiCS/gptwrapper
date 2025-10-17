@@ -40,7 +40,7 @@ import apiClient from '../../../util/apiClient'
 import { ResponsibilityActionUserSearch } from '../../Admin/UserSearch'
 import { useCourseRagIndices } from '../../../hooks/useRagIndices'
 import { PromptEditor } from '../../Prompt/PromptEditor'
-import { OutlineButtonBlack } from '../../ChatV2/general/Buttons'
+import { OutlineButtonBlack, OutlineButtonBlue } from '../../ChatV2/general/Buttons'
 
 /**
  * React-router compatible lazy loaded component for Course page
@@ -166,7 +166,7 @@ export function Component() {
   }
   const handleRemoveResponsibility = async (responsibility) => {
     const confirmation = window.confirm(t('course:confirmRemoval'))
-    if(!confirmation){
+    if (!confirmation) {
       return
     }
     const result = await apiClient.post(`/courses/${id}/responsibilities/remove`, { username: responsibility.user?.username })
@@ -188,6 +188,7 @@ export function Component() {
             padding: '2%',
             mt: 2,
             width: '100%',
+            borderRadius: '1.25rem',
           }}
         >
           <div style={{ display: 'flex', flexWrap: 'wrap' }}>
@@ -232,9 +233,9 @@ export function Component() {
 
             <div style={{ ...left, boxSizing: 'border-box' }}>
               {courseEnabled && (
-                <Button onClick={() => setActivityPeriodFormOpen(true)} style={{ marginLeft: -8 }}>
+                <OutlineButtonBlue onClick={() => setActivityPeriodFormOpen(true)}>
                   {t('course:editCourse')} <Edit />
-                </Button>
+                </OutlineButtonBlue>
               )}
               {!courseEnabled && <Typography style={{ fontStyle: 'italic' }}>{t('course:howToActive')}</Typography>}
             </div>
@@ -244,7 +245,7 @@ export function Component() {
             {courseEnabled && (
               <Tooltip title={t('copy')} placement="right">
                 <Button sx={{ p: 0 }} color="inherit">
-                  <Typography style={{ textTransform: 'lowercase' }} onClick={() => handleCopyLink(studentLink)}>
+                  <Typography style={{ textTransform: 'lowercase', color: 'blue' }} onClick={() => handleCopyLink(studentLink)}>
                     {studentLink}
                   </Typography>
                 </Button>
@@ -254,19 +255,20 @@ export function Component() {
 
           {userIsAdminOrResponsible && (
             <>
-              <Button onClick={() => setShowTeachers(!showTeachers)} style={{ marginTop: 10, marginLeft: -8 }}>
+              <OutlineButtonBlue onClick={() => setShowTeachers(!showTeachers)} style={{ marginTop: 10 }}>
                 {showTeachers ? t('admin:hideTeachers') : t('admin:showTeachers')}
-              </Button>
+              </OutlineButtonBlue>
               {showTeachers && (
                 <Box>
                   <Button
                     onClick={() => {
                       setAddTeacherViewOpen(true)
                     }}
+                    sx={{ borderRadius: '1.25rem' }}
                   >
                     {t('course:add')}
                   </Button>
-                  <Stack sx={{ margin: 1, padding: 1, borderColor: 'gray', borderWidth: 1, borderStyle: 'solid' }}>
+                  <Stack sx={{ mb: 0, padding: 1, borderColor: 'gray', borderWidth: 1, borderStyle: 'solid', borderRadius: '0.5rem' }}>
                     {responsibilities.map((responsibility) => (
                       <Box key={responsibility.id} sx={{ display: 'flex', alignItems: 'center', padding: 1 }}>
                         <Typography>
@@ -384,7 +386,6 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
           />
         ))
       )}
-
       <Dialog open={editorOpen} onClose={() => setEditorOpen(false)} fullWidth maxWidth="lg">
         <DialogTitle>
           {promptToEdit ? t('prompt:editPrompt', { name: promptToEdit.name }) : t('prompt:createNew')}

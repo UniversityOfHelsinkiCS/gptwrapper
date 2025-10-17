@@ -46,6 +46,14 @@ export const BlueButton = styled(BaseButton)({
   },
 })
 
+export const RedButton = styled(BaseButton)({
+  backgroundColor: 'red',
+  color: 'white',
+  '&:hover': {
+    backgroundColor: 'darkred',
+  },
+})
+
 export const OutlineButtonBlack = styled(BaseButton)({
   backgroundColor: 'transparent',
   backdropFilter: 'blur(5px)',

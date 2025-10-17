@@ -11,6 +11,7 @@ import { useEnableCourse } from './useEnableCourse'
 import { formatDate, getCurTypeLabel } from './util'
 import { Course as CourseType } from '../../types'
 import { DEFAULT_MODEL_ON_ENABLE, DEFAULT_TOKEN_LIMIT, PUBLIC_URL } from '../../../config'
+import { BlueButton, OutlineButtonBlue, RedButton } from '../ChatV2/general/Buttons'
 
 const Course = ({
   course,
@@ -40,7 +41,7 @@ const Course = ({
 
   return (
     <Box mb="1rem">
-      <Paper variant="outlined" sx={{ p: 2, display: 'flex', alignItems: 'stretch' }}>
+      <Paper variant="outlined" sx={{ p: 2, display: 'flex', alignItems: 'stretch', borderRadius: '1.25rem' }}>
         <Box mr="auto">
           <Typography variant="body1">{formatDate(activityPeriod)}</Typography>
 
@@ -67,18 +68,18 @@ const Course = ({
           {isActive && (
             <>
               <Typography>{t('course:curreEnabled')}</Typography>
-              <Button variant="contained" color="error" sx={{ mt: 'auto' }} onClick={() => onDisable(course)}>
+              <RedButton variant="contained" color="error" sx={{ mt: 'auto' }} onClick={() => onDisable(course)}>
                 {t('course:disableCurre')}
-              </Button>
+              </RedButton>
             </>
           )}
           {isExpired && <Typography>{t('course:curreExpired')}</Typography>}
           {!isActive && !isExpired && (
             <>
               <Typography>{t('course:curreNotEnabled')}</Typography>
-              <Button variant="contained" sx={{ mt: 'auto' }} onClick={() => onEnable(course)}>
+              <BlueButton variant="contained" sx={{ mt: 'auto' }} onClick={() => onEnable(course)}>
                 {t('course:enableCurre')}
-              </Button>
+              </BlueButton>
             </>
           )}
         </Box>
@@ -98,9 +99,9 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
 
   const defaultActivityPeriod = courseToEnable
     ? {
-        startDate: courseToEnable.activityPeriod.startDate,
-        endDate: addMonths(courseToEnable.activityPeriod.endDate, 1).toDateString(),
-      }
+      startDate: courseToEnable.activityPeriod.startDate,
+      endDate: addMonths(courseToEnable.activityPeriod.endDate, 1).toDateString(),
+    }
     : undefined
 
   const activityPeriodString = courseToEnable ? formatDate(defaultActivityPeriod) : null
@@ -137,8 +138,8 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCourseToEnable(null)}>{t('cancel')}</Button>
-          <Button
+          <OutlineButtonBlue onClick={() => setCourseToEnable(null)}>{t('cancel')}</OutlineButtonBlue>
+          <BlueButton
             onClick={() => {
               if (!courseToEnable) return
               enableMutation.mutate({ id: courseToEnable.id })
@@ -148,7 +149,7 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
             variant="contained"
           >
             {t('enable')}
-          </Button>
+          </BlueButton>
         </DialogActions>
       </Dialog>
       <Dialog open={courseToDisable !== null} onClose={() => setCourseToDisable(null)}>
@@ -158,7 +159,7 @@ const CourseList = ({ courseUnits }: { courseUnits: CoursesViewCourse[] }) => {
           })}
         </DialogTitle>
         <DialogActions>
-          <Button onClick={() => setCourseToDisable(null)}>{t('cancel')}</Button>
+          <OutlineButtonBlue onClick={() => setCourseToDisable(null)}>{t('cancel')}</OutlineButtonBlue>
           <Button
             onClick={() => {
               if (!courseToDisable) return

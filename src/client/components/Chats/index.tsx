@@ -26,7 +26,7 @@ const Chats = () => {
       <h2>{t('chats:header')}</h2>
 
       <Box my={2}>
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} sx={{ borderRadius: '1.25rem' }}>
           <Table>
             <TableHead>
               <TableRow>
