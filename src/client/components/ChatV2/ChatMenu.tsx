@@ -11,7 +11,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import InfoIcon from '@mui/icons-material/Info'
 import ReviewsIcon from '@mui/icons-material/Reviews'
 import LanguageIcon from '@mui/icons-material/Language'
-import { GrayButton, OutlineButtonBlack, TextButton } from './general/Buttons'
+import { OutlineButtonBlack, TextButton } from './general/Buttons'
 import { Box } from '@mui/material'
 
 export default function ChatMenu({ newSideBar }: { newSideBar: boolean }) {
@@ -19,18 +19,16 @@ export default function ChatMenu({ newSideBar }: { newSideBar: boolean }) {
   const open = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
-  };
+  }
   const handleClose = () => {
     setAnchorEl(null)
-  };
-
-
+  }
 
   return (
     <>
-      <NavBar newSideBar={newSideBar} />
+      <ChatNavBar newSideBar={newSideBar} />
       {newSideBar && (
-        <div style={{ position: 'fixed', top: 20, right: 30 }}>
+        <div style={{ position: 'fixed', top: 64, right: 30 }}>
           <OutlineButtonBlack
             id="basic-button"
             aria-controls={open ? 'basic-menu' : undefined}
@@ -156,7 +154,7 @@ export const EmbeddedNavBar = () => {
   )
 }
 
-const NavBar = ({ newSideBar = false }: { newSideBar: boolean }) => {
+const ChatNavBar = ({ newSideBar = false }: { newSideBar: boolean }) => {
   const { t, i18n } = useTranslation()
 
   const [navPanelOpen, setNavPanelOpen] = useState(false)

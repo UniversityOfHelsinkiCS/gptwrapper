@@ -402,7 +402,7 @@ const ChatV2Content = () => {
       }}
     >
 
-      <Box sx={{ position: 'fixed', top: 20, right: 20, zIndex: 999 }}>
+      <Box sx={{ position: 'absolute', top: 64, right: 20, zIndex: 999 }}>
         <ChatMenu newSideBar={newSideBar} />
         {!isMobile && <OutlineButtonBlack onClick={() => setNewSidebar(prev => !prev)} sx={{ position: 'absolute', left: -500, top: 0 }} variant='contained'>Admins: toggle old sidebar</OutlineButtonBlack>}
       </Box>

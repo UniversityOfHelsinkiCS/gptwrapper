@@ -58,7 +58,6 @@ const NavBar = () => {
   const isDesktopDevice = useMediaQuery(theme.breakpoints.up('lg'))
   const { language } = i18n
   const { user } = useCurrentUser()
-  const isChat = useMatch("/") || useMatch("/:courseId")
 
   const handleLanguageChange = (newLanguage: keyof Locale) => {
     i18n.changeLanguage(newLanguage)
@@ -68,8 +67,6 @@ const NavBar = () => {
   useEffect(() => {
     setNavPanelOpen(false)
   }, [isDesktopDevice])
-
-  if (isChat) return // chat screens have their own menu.
 
   return (
     <>

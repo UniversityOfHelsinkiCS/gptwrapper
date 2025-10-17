@@ -66,7 +66,7 @@ const SideBar = ({
     >
       <Box sx={{
         position: 'sticky',
-        top: 0,
+        top: 40,
         py: 3,
         height: '100vh',
         width: collapsed ? 60 : 300,
