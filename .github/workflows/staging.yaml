@@ -30,7 +30,7 @@ jobs:
           containerfiles: |
             ./Containerfile
           build-args: |
-            BASE_PATH=/gptwrapper
+            BASE_PATH=
             GIT_SHA=${{ github.sha }}
             STAGING=true
           # Extra args are needed to increase the number of open files
