@@ -69,7 +69,7 @@ const SideBar = ({
         top: 0,
         py: 3,
         height: '100vh',
-        width: collapsed ? 60 : 400,
+        width: collapsed ? 60 : 300,
         borderRight: '1px solid rgba(0, 0, 0, 0.15)',
         zIndex: 999
       }}>
