@@ -73,38 +73,22 @@ const SideBar = ({
         borderRight: '1px solid rgba(0, 0, 0, 0.15)',
         zIndex: 999
       }}>
-
-        <Box sx={{
-          position: 'absolute',
-          right: -112,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          color: 'text.secondary',
-          '& .chevron': {
-            opacity: 1,
-          },
-        }}>
-          <OutlineButtonBlack
-            variant='contained'
-            onClick={() => setCollapsed(prev => !prev)}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ViewSidebarOutlinedIcon sx={{ transform: 'scaleX(-1)' }} />
-              <Box className="chevron" sx={{ display: 'flex', alignItems: 'center' }}>
-                {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-              </Box>
-            </Box>
-          </OutlineButtonBlack>
-        </Box>
-
-
         {
           collapsed ?
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', opacity: 0.86 }}>
               <Link href="/">
                 <img src={hyLogo} alt="University of Helsinki" width="30" />
               </Link>
+              <TextButton
+                onClick={() => setCollapsed(prev => !prev)}
+              >
+                <Box sx={{}}>
+                  <ViewSidebarOutlinedIcon sx={{ transform: 'scaleX(-1)' }} />
+                  <Box className="chevron" sx={{ display: 'flex', alignItems: 'center' }}>
+                    <ChevronRightIcon />
+                  </Box>
+                </Box>
+              </TextButton>
               <Divider flexItem />
               <SettingsIcon fontSize='small' />
               <ArticleIcon fontSize='small' />
@@ -116,6 +100,28 @@ const SideBar = ({
             </Box>
             :
             <Box>
+              <Box sx={{
+                position: 'absolute',
+                right: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                color: 'text.secondary',
+                '& .chevron': {
+                  opacity: 1,
+                },
+              }}>
+                <TextButton
+                  onClick={() => setCollapsed(prev => !prev)}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <ViewSidebarOutlinedIcon sx={{ transform: 'scaleX(-1)' }} />
+                    <Box className="chevron" sx={{ display: 'flex', alignItems: 'center' }}>
+                      <ChevronLeftIcon />
+                    </Box>
+                  </Box>
+                </TextButton>
+              </Box>
               <Link
                 href="/"
                 sx={{ px: 4, mb: 1, display: 'flex', gap: 1, textDecoration: 'none', alignItems: 'center' }}

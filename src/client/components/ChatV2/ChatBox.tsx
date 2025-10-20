@@ -3,7 +3,7 @@ import HelpOutline from '@mui/icons-material/HelpOutline'
 import Send from '@mui/icons-material/Send'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
-import RestartAltIcon from '@mui/icons-material/RestartAlt'
+import MapsUgcIcon from '@mui/icons-material/MapsUgc'
 import { Box, Chip, IconButton, TextField, Tooltip, Typography, Alert } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useRef } from 'react'
@@ -230,7 +230,7 @@ export const ChatBox = ({
               </Tooltip>
               <Tooltip title={t('chat:emptyConversationTooltip', { hint: KeyCombinations.RESET_CHAT?.hint })} arrow placement="top">
                 <IconButton onClick={handleReset}>
-                  <RestartAltIcon />
+                  <MapsUgcIcon />
                 </IconButton>
               </Tooltip>
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
