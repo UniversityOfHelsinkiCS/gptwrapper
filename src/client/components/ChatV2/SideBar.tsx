@@ -33,6 +33,7 @@ const SideBar = ({
   currentModel,
   setModel,
   isAdmin,
+  setNewSidebar,
 }: {
   course: Course | undefined
   handleReset: () => void
@@ -43,6 +44,7 @@ const SideBar = ({
   currentModel: ValidModelName
   setModel: (model: ValidModelName) => void
   isAdmin: boolean | undefined,
+  setNewSidebar: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
   const { courseId } = useParams()
   const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
@@ -192,6 +194,8 @@ const SideBar = ({
                 <TextButton startIcon={<SaveAltIcon />} size='large'>
                   Tallenna sähköpostina
                 </TextButton>
+
+                <OutlineButtonBlack onClick={() => setNewSidebar(prev => !prev)}>Admins: toggle old sidebar</OutlineButtonBlack>
               </Box>
 
               {/* Legacy ----- */}

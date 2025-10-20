@@ -404,7 +404,6 @@ const ChatV2Content = () => {
 
       <Box sx={{ position: 'fixed', top: 64, right: 20, zIndex: 999 }}>
         <ChatMenu newSideBar={newSideBar} />
-        {!isMobile && <OutlineButtonBlack onClick={() => setNewSidebar(prev => !prev)} sx={{ position: 'absolute', left: -500, top: 0 }} variant='contained'>Admins: toggle old sidebar</OutlineButtonBlack>}
       </Box>
 
 
@@ -428,6 +427,7 @@ const ChatV2Content = () => {
               messages={messages}
               currentModel={activeModel}
               setModel={setActiveModel}
+              setNewSidebar={setNewSidebar}
             />
           </Drawer>
         ) : isAdmin && newSideBar ?
@@ -441,6 +441,7 @@ const ChatV2Content = () => {
               messages={messages}
               currentModel={activeModel}
               setModel={setActiveModel}
+              setNewSidebar={setNewSidebar}
             />
           )
           :
@@ -458,6 +459,7 @@ const ChatV2Content = () => {
               messages={messages}
               currentModel={activeModel}
               setModel={setActiveModel}
+              setNewSidebar={setNewSidebar}
             />
           ))}
 
@@ -635,6 +637,7 @@ const LeftMenu = ({
   messages,
   currentModel,
   setModel,
+  setNewSidebar,
 }: {
   sx?: object
   course: Course | undefined
@@ -645,6 +648,7 @@ const LeftMenu = ({
   messages: ChatMessage[]
   currentModel: ValidModelName
   setModel: (model: ValidModelName) => void
+  setNewSidebar: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
   const { t } = useTranslation()
   const { courseId } = useParams()
@@ -687,15 +691,19 @@ const LeftMenu = ({
           <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} data-testid="help-button">
             {t('info:title')}
           </OutlineButtonBlack>
+
+          <OutlineButtonBlack onClick={() => setNewSidebar(prev => !prev)}>Admins: toggle old sidebar</OutlineButtonBlack>
         </Box>
       </Box>
-      {onClose && (
-        <OutlineButtonBlack sx={{ m: '1rem', mt: 'auto' }} onClick={onClose} startIcon={<ChevronLeft />}>
-          {t('common:close')}
-        </OutlineButtonBlack>
-      )}
+      {
+        onClose && (
+          <OutlineButtonBlack sx={{ m: '1rem', mt: 'auto' }} onClick={onClose} startIcon={<ChevronLeft />}>
+            {t('common:close')}
+          </OutlineButtonBlack>
+        )
+      }
       <Footer />
-    </Box>
+    </Box >
   )
 }
 
