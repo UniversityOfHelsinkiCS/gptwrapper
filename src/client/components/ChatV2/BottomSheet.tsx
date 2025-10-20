@@ -2,32 +2,38 @@ import { Box, Typography } from '@mui/material'
 import React from 'react'
 import { OutlineButtonBlack } from './general/Buttons'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { BottomSheetContent } from 'src/client/types';
+import { ModalMap } from 'src/client/types';
 
 
 
 export default function BottomSheet({
     modalsRegister,
-    bottomSheetContent,
-    setBottomSheetContent,
+    bottomSheetContentId,
+    setBottomSheetContentId,
 }: {
-    modalsRegister: Record<string, React.ComponentType>,
-    bottomSheetContent: BottomSheetContent | null
-    setBottomSheetContent: React.Dispatch<React.SetStateAction<BottomSheetContent | null>>
+    modalsRegister: ModalMap,
+    bottomSheetContentId: string | null
+    setBottomSheetContentId: React.Dispatch<React.SetStateAction<string | null>>
 }) {
-    const Content = bottomSheetContent ? modalsRegister[bottomSheetContent.id] : null
+    const modal = bottomSheetContentId ? modalsRegister[bottomSheetContentId] : null
+
+    if (!bottomSheetContentId || !modal) return (
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', p: '2rem' }}>
+            <Typography variant='h6'>Invalid modal register</Typography>
+        </Box>
+    )
 
     return (
-        <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', p: '2rem' }}>
-                <Typography variant="h6">{bottomSheetContent?.name}</Typography>
-                <OutlineButtonBlack onClick={() => setBottomSheetContent(null)}>
+        <Box sx={{ p: '2rem' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', pb: '2rem' }}>
+                <Typography variant="h6">{modal.name}</Typography>
+                <OutlineButtonBlack onClick={() => setBottomSheetContentId(null)}>
                     <ExpandMoreIcon />
                 </OutlineButtonBlack>
             </Box>
 
-            <Box sx={{ px: '2rem' }}>
-                {Content ? <Content /> : 'undefined modal'}
+            <Box>
+                {React.createElement(modal.component)}
             </Box>
         </Box>
     )

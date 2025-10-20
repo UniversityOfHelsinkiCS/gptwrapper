@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, type ValidModelName, ValidModelNameSchema } from '../../../config'
 import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import useUserStatus from '../../hooks/useUserStatus'
-import type { Course, BottomSheetContent } from '../../types'
+import type { Course } from '../../types'
 import { OutlineButtonBlack, TextButton } from './general/Buttons'
 import MapsUgcIcon from '@mui/icons-material/MapsUgc';
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
@@ -28,7 +28,7 @@ const SideBar = ({
   handleReset,
   onClose,
   setSettingsModalOpen,
-  setBottomSheetContent,
+  setBottomSheetContentId,
   setDisclaimerStatus,
   messages,
   currentModel,
@@ -39,7 +39,7 @@ const SideBar = ({
   course: Course | undefined
   handleReset: () => void
   onClose?: () => void
-  setBottomSheetContent: React.Dispatch<React.SetStateAction<BottomSheetContent | null>>,
+  setBottomSheetContentId: React.Dispatch<React.SetStateAction<string | null>>,
   setSettingsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
   setDisclaimerStatus: React.Dispatch<React.SetStateAction<boolean>>
   messages: ChatMessage[]
@@ -153,7 +153,7 @@ const SideBar = ({
                       {isAdminOrTeacher && <TextButton startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>Poistu kurssinäkymästä</TextButton>}
                     </>
                     :
-                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => setBottomSheetContent(prev => prev?.id === 'course' ? null : { name: 'Jotain kursseja', id: 'course' })}>
+                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'course' ? null : 'course')}>
                       <Typography>Ei valittua kurssia</Typography>
                     </TextButton>
                 }
@@ -172,7 +172,7 @@ const SideBar = ({
                       <TextButton startIcon={<AppsIcon />}>Valitse alustus</TextButton>
                     </>
                     :
-                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => setBottomSheetContent(prev => prev?.id === 'prompt' ? null : { name: 'Alustuksia kai täällä', id: 'prompt' })}>
+                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'prompt' ? null : 'prompt')}>
                       <Typography>Ei alustusta</Typography>
                     </TextButton>
                 }

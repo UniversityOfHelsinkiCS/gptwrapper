@@ -148,7 +148,9 @@ export interface CourseStatistics {
   }[]
 }
 
-export interface BottomSheetContent {
-  name: string
-  id: string
+export type ModalMap = {
+  [key: string]: {
+    name: string
+    component: React.ComponentType
+  }
 }

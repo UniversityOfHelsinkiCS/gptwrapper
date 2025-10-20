@@ -18,7 +18,7 @@ import useLocalStorageState from '../../hooks/useLocalStorageState'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useAnalyticsDispatch } from '../../stores/analytics'
-import type { Course, BottomSheetContent } from '../../types'
+import type { Course, ModalMap } from '../../types'
 import Footer from '../Footer'
 import { ChatBox } from './ChatBox'
 import { DisclaimerModal } from './Disclaimer'
@@ -65,10 +65,11 @@ const ExampleModalPrompt = () => {
   )
 }
 
-const modalsRegister: Record<string, React.ComponentType> = {
-  'course': ExampleModalCourse,
-  'prompt': ExampleModalPrompt,
+const modalsRegister: ModalMap = {
+  'course': { name: 'Jotain kursseja täällä', component: ExampleModalCourse },
+  'prompt': { name: 'Mahtavia alustuksia', component: ExampleModalPrompt },
 }
+
 
 function useLocalStorageStateWithURLDefault<T>(key: string, defaultValue: string, urlKey: string, schema: z.ZodType<T>) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -365,7 +366,7 @@ const ChatV2Content = () => {
   // For new sidebar revamp dev
   const isAdmin = user?.isAdmin
   const [newSideBar, setNewSidebar] = useState(false)
-  const [bottomSheetContent, setBottomSheetContent] = useState<BottomSheetContent | null>(null)
+  const [bottomSheetContentId, setBottomSheetContentId] = useState<string | null>(null)
 
   if (course && course.usageLimit === 0) {
     return (
@@ -455,7 +456,7 @@ const ChatV2Content = () => {
               isAdmin={isAdmin}
               course={course}
               handleReset={() => setResetConfirmModalOpen(true)}
-              setBottomSheetContent={setBottomSheetContent}
+              setBottomSheetContentId={setBottomSheetContentId}
               setSettingsModalOpen={setSettingsModalOpen}
               setDisclaimerStatus={setDisclaimerStatus}
               messages={messages}
@@ -584,12 +585,12 @@ const ChatV2Content = () => {
             />
           </Box>
           <Box sx={{
-            height: bottomSheetContent ? '60vh' : 0,
-            borderTop: bottomSheetContent ? '1px solid rgba(0,0,0,0.15)' : 'none',
+            height: bottomSheetContentId ? '60vh' : 0,
+            borderTop: bottomSheetContentId ? '1px solid rgba(0,0,0,0.15)' : 'none',
             overflow: 'hidden',
             transition: 'height 0.3s ease',
           }}>
-            <BottomSheet modalsRegister={modalsRegister} bottomSheetContent={bottomSheetContent} setBottomSheetContent={setBottomSheetContent} />
+            <BottomSheet modalsRegister={modalsRegister} bottomSheetContentId={bottomSheetContentId} setBottomSheetContentId={setBottomSheetContentId} />
           </Box>
         </Box>
       </Box>
