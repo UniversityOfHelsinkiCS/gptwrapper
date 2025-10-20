@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, type ValidModelName, ValidModelNameSchema } from '../../../config'
 import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import useUserStatus from '../../hooks/useUserStatus'
-import type { Course } from '../../types'
+import type { Course, BottomSheetContent } from '../../types'
 import { OutlineButtonBlack, TextButton } from './general/Buttons'
 import MapsUgcIcon from '@mui/icons-material/MapsUgc';
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
@@ -28,6 +28,7 @@ const SideBar = ({
   handleReset,
   onClose,
   setSettingsModalOpen,
+  setBottomSheetContent,
   setDisclaimerStatus,
   messages,
   currentModel,
@@ -38,6 +39,7 @@ const SideBar = ({
   course: Course | undefined
   handleReset: () => void
   onClose?: () => void
+  setBottomSheetContent: React.Dispatch<React.SetStateAction<BottomSheetContent | null>>,
   setSettingsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
   setDisclaimerStatus: React.Dispatch<React.SetStateAction<boolean>>
   messages: ChatMessage[]
@@ -151,7 +153,7 @@ const SideBar = ({
                       {isAdminOrTeacher && <TextButton startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>Poistu kurssinäkymästä</TextButton>}
                     </>
                     :
-                    <TextButton startIcon={<ChevronRightIcon />}>
+                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => setBottomSheetContent(prev => prev?.id === 'course' ? null : { name: 'Jotain kursseja', id: 'course' })}>
                       <Typography>Ei valittua kurssia</Typography>
                     </TextButton>
                 }
@@ -170,7 +172,7 @@ const SideBar = ({
                       <TextButton startIcon={<AppsIcon />}>Valitse alustus</TextButton>
                     </>
                     :
-                    <TextButton startIcon={<ChevronRightIcon />}>
+                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => setBottomSheetContent(prev => prev?.id === 'prompt' ? null : { name: 'Alustuksia kai täällä', id: 'prompt' })}>
                       <Typography>Ei alustusta</Typography>
                     </TextButton>
                 }
@@ -197,32 +199,6 @@ const SideBar = ({
 
                 <OutlineButtonBlack onClick={() => setNewSidebar(prev => !prev)}>Admins: toggle old sidebar</OutlineButtonBlack>
               </Box>
-
-              {/* Legacy ----- */}
-
-              {/* <Box p="1rem">
-        {course && <ChatInfo course={course} />}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-          <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} data-testid="empty-conversation-button">
-            {t('chat:emptyConversation')}
-          </OutlineButtonBlack>
-          <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} />
-          <PromptSelector />
-          <EmailButton messages={messages} disabled={!messages?.length} />
-          <OutlineButtonBlack startIcon={<Tune />} onClick={() => setSettingsModalOpen(true)} data-testid="settings-button">
-            {t('chat:settings')}
-          </OutlineButtonBlack>
-          <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} data-testid="help-button">
-            {t('info:title')}
-          </OutlineButtonBlack>
-        </Box>
-      </Box> */}
-              {/* {onClose && (
-        <OutlineButtonBlack sx={{ m: '1rem', mt: 'auto' }} onClick={onClose} startIcon={<ChevronLeft />}>
-          {t('common:close')}
-        </OutlineButtonBlack>
-      )} */}
-              {/* <Footer /> */}
             </Box>
         }
       </Box>

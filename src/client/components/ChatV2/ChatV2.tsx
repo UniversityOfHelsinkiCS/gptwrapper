@@ -18,7 +18,7 @@ import useLocalStorageState from '../../hooks/useLocalStorageState'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useAnalyticsDispatch } from '../../stores/analytics'
-import type { Course } from '../../types'
+import type { Course, BottomSheetContent } from '../../types'
 import Footer from '../Footer'
 import { ChatBox } from './ChatBox'
 import { DisclaimerModal } from './Disclaimer'
@@ -45,12 +45,30 @@ import SideBar from './SideBar'
 import ChatMenu from './ChatMenu'
 
 import hyLogo from '../../assets/hy_logo.svg'
+import BottomSheet from './BottomSheet'
 
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
  */
 const Conversation = lazy(() => import('./Conversation'))
+
+const ExampleModalCourse = () => {
+  return (
+    <Box>helou course</Box>
+  )
+}
+
+const ExampleModalPrompt = () => {
+  return (
+    <Box>helou prompt</Box>
+  )
+}
+
+const modalsRegister: Record<string, React.ComponentType> = {
+  'course': ExampleModalCourse,
+  'prompt': ExampleModalPrompt,
+}
 
 function useLocalStorageStateWithURLDefault<T>(key: string, defaultValue: string, urlKey: string, schema: z.ZodType<T>) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -347,6 +365,7 @@ const ChatV2Content = () => {
   // For new sidebar revamp dev
   const isAdmin = user?.isAdmin
   const [newSideBar, setNewSidebar] = useState(false)
+  const [bottomSheetContent, setBottomSheetContent] = useState<BottomSheetContent | null>(null)
 
   if (course && course.usageLimit === 0) {
     return (
@@ -436,6 +455,7 @@ const ChatV2Content = () => {
               isAdmin={isAdmin}
               course={course}
               handleReset={() => setResetConfirmModalOpen(true)}
+              setBottomSheetContent={setBottomSheetContent}
               setSettingsModalOpen={setSettingsModalOpen}
               setDisclaimerStatus={setDisclaimerStatus}
               messages={messages}
@@ -538,27 +558,39 @@ const ChatV2Content = () => {
           sx={{
             backgroundColor: 'white',
             width: '100%',
-            paddingBottom: '2rem',            // margin: '0 auto',
-            padding: isMobile ? '0rem 1rem 1rem 1rem' : '0rem 2rem 2rem 2rem',
             position: 'sticky',
             bottom: 0,
           }}
         >
-          <ChatBox
-            disabled={isStreaming}
-            fileInputRef={fileInputRef}
-            fileName={fileName}
-            setFileName={setFileName}
-            messageWarning={messageWarning}
-            handleCancel={handleCancel}
-            handleContinue={(_, ignoredWarnings) => handleSendMessage('', true, ignoredWarnings)}
-            handleSubmit={(newMessage) => {
-              handleSendMessage(newMessage, false, [])
-            }}
-            handleReset={() => setResetConfirmModalOpen(true)}
-            handleStop={() => streamControllerRef.current?.abort("user_aborted")}
-            isMobile={isMobile}
-          />
+          <Box sx={{
+            paddingBottom: '2rem',
+            padding: isMobile ? '0rem 1rem 1rem 1rem' : '0rem 2rem 2rem 2rem',
+          }}>
+
+            <ChatBox
+              disabled={isStreaming}
+              fileInputRef={fileInputRef}
+              fileName={fileName}
+              setFileName={setFileName}
+              messageWarning={messageWarning}
+              handleCancel={handleCancel}
+              handleContinue={(_, ignoredWarnings) => handleSendMessage('', true, ignoredWarnings)}
+              handleSubmit={(newMessage) => {
+                handleSendMessage(newMessage, false, [])
+              }}
+              handleReset={() => setResetConfirmModalOpen(true)}
+              handleStop={() => streamControllerRef.current?.abort("user_aborted")}
+              isMobile={isMobile}
+            />
+          </Box>
+          <Box sx={{
+            height: bottomSheetContent ? '60vh' : 0,
+            borderTop: bottomSheetContent ? '1px solid rgba(0,0,0,0.15)' : 'none',
+            overflow: 'hidden',
+            transition: 'height 0.3s ease',
+          }}>
+            <BottomSheet modalsRegister={modalsRegister} bottomSheetContent={bottomSheetContent} setBottomSheetContent={setBottomSheetContent} />
+          </Box>
         </Box>
       </Box>
 

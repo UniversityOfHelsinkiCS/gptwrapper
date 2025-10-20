@@ -147,3 +147,8 @@ export interface CourseStatistics {
     }
   }[]
 }
+
+export interface BottomSheetContent {
+  name: string
+  id: string
+}
