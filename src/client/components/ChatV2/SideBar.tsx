@@ -200,7 +200,7 @@ const SideBar = ({
                   course ?
                     <>
                       <Typography mb={2}>{activePrompt ? activePrompt.name : 'Ei valittua alustusta'}</Typography>
-                      {(isAdminOrTeacher && activePrompt) && <TextButton startIcon={<TuneIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'editPrompt' ? null : 'editPrompt')}>Muokkaa alustusta</TextButton>}
+                      {activePrompt && <TextButton startIcon={<TuneIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'editPrompt' ? null : 'editPrompt')}>Muokkaa alustusta</TextButton>}
                       <TextButton startIcon={<HelpCenterIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'showPrompt' ? null : 'showPrompt')}>Alustuksen tiedot</TextButton>
                       <TextButton startIcon={<AppsIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'selectPrompt' ? null : 'selectPrompt')}>Valitse alustus</TextButton>
                     </>
