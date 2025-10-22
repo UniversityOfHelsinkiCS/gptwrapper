@@ -79,4 +79,9 @@ export const TextButton = styled(BaseButton)({
   '&:hover': {
     backgroundColor: 'rgba(0,0,0,0.08)',
   },
+  '&.Mui-disabled': {
+    backgroundColor: 'transparent',
+    color: 'rgba(0, 0, 0, 0.3)',
+    boxShadow: 'none',
+  },
 })
