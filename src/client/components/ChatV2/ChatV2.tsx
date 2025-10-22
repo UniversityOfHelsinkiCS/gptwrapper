@@ -22,7 +22,7 @@ import type { Course, ModalMap } from '../../types'
 import Footer from '../Footer'
 import { ChatBox } from './ChatBox'
 import { DisclaimerModal } from './Disclaimer'
-import EmailButton from './EmailButton'
+import { EmailButtonOLD } from './EmailButton'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
 import { OutlineButtonBlack, TextButton, GrayButton } from './general/Buttons'
@@ -717,7 +717,7 @@ const LeftMenu = ({
           </OutlineButtonBlack>
           <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} />
           <PromptSelector />
-          <EmailButton messages={messages} disabled={!messages?.length} />
+          <EmailButtonOLD messages={messages} disabled={!messages?.length} />
           <OutlineButtonBlack startIcon={<TuneIcon />} onClick={() => setSettingsModalOpen(true)} data-testid="settings-button">
             {t('chat:settings')}
           </OutlineButtonBlack>

@@ -8,7 +8,6 @@ import useUserStatus from '../../hooks/useUserStatus'
 import type { Course } from '../../types'
 import { OutlineButtonBlack, TextButton } from './general/Buttons'
 import MapsUgcIcon from '@mui/icons-material/MapsUgc';
-import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -22,6 +21,7 @@ import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined';
 
 import hyLogo from '../../assets/hy_logo.svg'
 import { formatDate } from '../Courses/util'
+import EmailButton from './EmailButton'
 
 const SideBar = ({
   course,
@@ -60,6 +60,7 @@ const SideBar = ({
     setIsTokenLimitExceeded(userStatus.usage > userStatus.limit)
   }, [statusLoading, userStatus])
 
+  // Make teachers see teacher things
   const isAdminOrTeacher = isAdmin
 
   return (
@@ -79,7 +80,7 @@ const SideBar = ({
       }}>
         {
           collapsed ?
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', opacity: 0.86 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
               <Link href="/">
                 <img src={hyLogo} alt="University of Helsinki" width="30" />
               </Link>
@@ -93,14 +94,28 @@ const SideBar = ({
                   </Box>
                 </Box>
               </TextButton>
+
               <Divider flexItem />
-              <SettingsIcon fontSize='small' />
-              <ArticleIcon fontSize='small' />
-              <LibraryBooksIcon fontSize='small' />
-              <LogoutIcon sx={{ transform: 'scaleX(-1)' }} fontSize='small' />
+
+              <TextButton>
+                <SettingsIcon fontSize='small' />
+              </TextButton>
+              <TextButton>
+                <ArticleIcon fontSize='small' />
+              </TextButton>
+              <TextButton>
+                <LibraryBooksIcon fontSize='small' />
+              </TextButton>
+              <TextButton>
+                <LogoutIcon sx={{ transform: 'scaleX(-1)' }} fontSize='small' />
+              </TextButton>
+
               <Divider flexItem />
-              <MapsUgcIcon fontSize='small' />
-              <SaveAltIcon fontSize='small' />
+
+              <TextButton>
+                <MapsUgcIcon fontSize='small' />
+              </TextButton>
+              <EmailButton messages={messages} disabled={!messages.length} collapsed />
             </Box>
             :
             <Box>
@@ -193,9 +208,8 @@ const SideBar = ({
                 <TextButton startIcon={<MapsUgcIcon />} onClick={handleReset} size='large'>
                   Uusi keskustelu
                 </TextButton>
-                <TextButton startIcon={<SaveAltIcon />} size='large'>
-                  Tallenna sähköpostina
-                </TextButton>
+
+                <EmailButton messages={messages} disabled={!messages.length} />
 
                 <OutlineButtonBlack sx={{ mt: '2rem' }} onClick={() => setNewSidebar(prev => !prev)}>Admins: toggle old/new sidebar</OutlineButtonBlack>
               </Box>

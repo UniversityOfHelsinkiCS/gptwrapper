@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { ChatMessage } from '../../../shared/chat'
 import { sendEmail } from '../../util/email'
-import { OutlineButtonBlack } from './general/Buttons'
+import { OutlineButtonBlack, TextButton } from './general/Buttons'
 
 const escapeHtml = (str: string): string =>
   str.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;')
@@ -141,11 +141,10 @@ const formatEmail = (messages: ChatMessage[], t: any): string => {
       const formattedContent = role === 'assistant' ? formatEmailContent(content) : escapeHtml(content)
 
       return `
-      <div style="padding: 2rem; ${
-        role === 'user'
+      <div style="padding: 2rem; ${role === 'user'
           ? 'background: #efefef; margin-left: 100px; border-radius: 0.6rem; box-shadow: 0px 2px 2px rgba(0,0,0,0.2); white-space: pre-wrap; word-break: break-word; '
           : 'margin-right: 2rem;'
-      }">
+        }">
         <h3 style="font-style: italic; margin: 0; ${role === 'user' ? 'color: rgba(0, 0, 0, 0.8)' : 'color: #107eab'}">${t(`email:${role}`)}:</h3>
         ${formattedContent}
       </div>
@@ -172,7 +171,48 @@ const formatEmail = (messages: ChatMessage[], t: any): string => {
 `
 }
 
-const EmailButton = ({ messages, disabled }: { messages: ChatMessage[]; disabled: boolean }) => {
+
+
+const EmailButton = ({ messages, disabled, collapsed = false }: { messages: ChatMessage[]; disabled: boolean, collapsed?: boolean }) => {
+  const { t } = useTranslation()
+  const { user, isLoading } = useCurrentUser()
+
+  if (isLoading || !user?.email) return null
+
+  const handleSend = async () => {
+    if (!user.email || !messages.length) {
+      enqueueSnackbar(t('email:failure'), { variant: 'error' })
+      return
+    }
+
+    const date = new Date()
+    const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
+    const subject = `${t('chat:conversation')} ${formattedDate}`
+    const text = formatEmail(messages, t)
+
+    const response = await sendEmail(user.email, text, subject)
+    enqueueSnackbar(t(response.ok ? 'email:success' : 'email:failure'), { variant: response.ok ? 'success' : 'error' })
+  }
+
+  return (
+    <Tooltip arrow placement="right" title={t('chat:email', { email: user.email })}>
+      <TextButton startIcon={!collapsed && <EmailIcon />} onClick={handleSend} data-testid="email-button" size='large' disabled={disabled}>
+        {collapsed ?
+          <EmailIcon fontSize='small' />
+          :
+          t('email:save')
+        }
+      </TextButton>
+    </Tooltip>
+  )
+}
+
+export default EmailButton
+
+
+// -----------------------------------------------------------------------------------------------------
+// This old email button is used in the old sidebar. Get rid of it as soon as the old sidebar is deleted
+const EmailButtonOLD = ({ messages, disabled }: { messages: ChatMessage[]; disabled: boolean }) => {
   const { t } = useTranslation()
   const { user, isLoading } = useCurrentUser()
 
@@ -201,5 +241,4 @@ const EmailButton = ({ messages, disabled }: { messages: ChatMessage[]; disabled
     </Tooltip>
   )
 }
-
-export default EmailButton
+export { EmailButtonOLD }
