@@ -197,7 +197,7 @@ const SideBar = ({
                   Tallenna sähköpostina
                 </TextButton>
 
-                <OutlineButtonBlack onClick={() => setNewSidebar(prev => !prev)}>Admins: toggle old sidebar</OutlineButtonBlack>
+                <OutlineButtonBlack sx={{ mt: '2rem' }} onClick={() => setNewSidebar(prev => !prev)}>Admins: toggle old/new sidebar</OutlineButtonBlack>
               </Box>
             </Box>
         }

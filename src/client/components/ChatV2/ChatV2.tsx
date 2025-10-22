@@ -725,7 +725,7 @@ const LeftMenu = ({
             {t('info:title')}
           </OutlineButtonBlack>
 
-          <OutlineButtonBlack onClick={() => setNewSidebar(prev => !prev)}>Admins: toggle old sidebar</OutlineButtonBlack>
+          <OutlineButtonBlack onClick={() => setNewSidebar(prev => !prev)}>Admins: toggle old/new sidebar</OutlineButtonBlack>
         </Box>
       </Box>
       {
