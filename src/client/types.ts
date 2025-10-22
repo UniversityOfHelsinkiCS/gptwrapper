@@ -151,6 +151,7 @@ export interface CourseStatistics {
 export type ModalMap = {
   [key: string]: {
     name: string
-    component: React.ComponentType
+    component: React.ComponentType<any>
+    props?: Record<string, any>
   }
 }

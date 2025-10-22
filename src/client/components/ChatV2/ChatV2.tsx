@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Divider, Drawer, FormControlLabel, IconButton, Link, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Alert, Box, Button, Divider, Drawer, FormControlLabel, IconButton, Link, Paper, Switch, Tabs, Tab, Typography, useMediaQuery, useTheme } from '@mui/material'
 import ChevronLeft from '@mui/icons-material/ChevronLeft'
 import Tune from '@mui/icons-material/Tune'
 import HelpIcon from '@mui/icons-material/Help'
@@ -17,6 +17,7 @@ import useCourse from '../../hooks/useCourse'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
+import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import type { Course, ModalMap } from '../../types'
 import Footer from '../Footer'
@@ -46,6 +47,9 @@ import ChatMenu from './ChatMenu'
 
 import hyLogo from '../../assets/hy_logo.svg'
 import BottomSheet from './BottomSheet'
+import PromptModal from './PromptModal'
+import { PromptEditor } from '../Prompt/PromptEditor'
+import { VolunteerActivismTwoTone } from '@mui/icons-material'
 
 
 /**
@@ -59,16 +63,6 @@ const ExampleModalCourse = () => {
   )
 }
 
-const ExampleModalPrompt = () => {
-  return (
-    <Box>helou prompt</Box>
-  )
-}
-
-const modalsRegister: ModalMap = {
-  'course': { name: 'Jotain kursseja täällä', component: ExampleModalCourse },
-  'prompt': { name: 'Mahtavia alustuksia', component: ExampleModalPrompt },
-}
 
 
 function useLocalStorageStateWithURLDefault<T>(key: string, defaultValue: string, urlKey: string, schema: z.ZodType<T>) {
@@ -160,7 +154,8 @@ const ChatV2Content = () => {
 
   const { t, i18n } = useTranslation()
 
-  const { promptInfo } = usePromptState()
+  const { promptInfo, activePrompt } = usePromptState()
+  const { ragIndices } = useCourseRagIndices(course?.id)
 
   const disclaimerInfo = InfoTexts.disclaimer[i18n.language]
 
@@ -413,6 +408,15 @@ const ChatV2Content = () => {
   if (statusLoading) return null
 
 
+  const modalsRegister: ModalMap = {
+    'course': { name: 'Jotain kursseja täällä', component: ExampleModalCourse },
+    'prompt': { name: 'Valitse alustus', component: PromptModal },
+    'editPrompt': { name: 'Muokkaa alustusta', component: PromptEditor, props: { prompt: activePrompt, ragIndices, type: promptInfo?.type, chatInstanceId: course?.id } },
+    'showPrompt': { name: 'Alustuksen tiedot', component: Box },
+    'selectPrompt': { name: 'Valitse alustus', component: PromptModal, props: { course } },
+  }
+
+
   return (
     <Box
       sx={{
@@ -463,6 +467,7 @@ const ChatV2Content = () => {
               currentModel={activeModel}
               setModel={setActiveModel}
               setNewSidebar={setNewSidebar}
+              activePrompt={activePrompt}
             />
           )
           :

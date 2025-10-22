@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, type ValidModelName, ValidModelNameSchema } from '../../../config'
 import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import useUserStatus from '../../hooks/useUserStatus'
-import type { Course } from '../../types'
+import type { Course, Prompt } from '../../types'
 import { OutlineButtonBlack, TextButton } from './general/Buttons'
 import MapsUgcIcon from '@mui/icons-material/MapsUgc';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -37,6 +37,7 @@ const SideBar = ({
   setModel,
   isAdmin,
   setNewSidebar,
+  activePrompt,
 }: {
   course: Course | undefined
   handleReset: () => void
@@ -49,6 +50,7 @@ const SideBar = ({
   setModel: (model: ValidModelName) => void
   isAdmin: boolean | undefined,
   setNewSidebar: React.Dispatch<React.SetStateAction<boolean>>
+  activePrompt: Prompt | undefined
 }) => {
   const { courseId } = useParams()
   const { user } = useCurrentUser()
@@ -67,6 +69,7 @@ const SideBar = ({
   }, [statusLoading, userStatus])
 
   const amongResponsibles = isAdmin ?? chatInstance?.responsibilities.some((r) => r.user.id === user?.id)
+
 
 
   return (
@@ -196,10 +199,10 @@ const SideBar = ({
                 {
                   course ?
                     <>
-                      <Typography mb={2}>Aivan erikoiset ohjeet</Typography>
-                      {amongResponsibles && <TextButton startIcon={<TuneIcon />}>Muokkaa alustusta</TextButton>}
-                      <TextButton startIcon={<HelpCenterIcon />}>Alustuksen tiedot</TextButton>
-                      <TextButton startIcon={<AppsIcon />}>Valitse alustus</TextButton>
+                      <Typography mb={2}>{activePrompt ? activePrompt.name : 'Ei valittua alustusta'}</Typography>
+                      {(isAdminOrTeacher && activePrompt) && <TextButton startIcon={<TuneIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'editPrompt' ? null : 'editPrompt')}>Muokkaa alustusta</TextButton>}
+                      <TextButton startIcon={<HelpCenterIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'showPrompt' ? null : 'showPrompt')}>Alustuksen tiedot</TextButton>
+                      <TextButton startIcon={<AppsIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'selectPrompt' ? null : 'selectPrompt')}>Valitse alustus</TextButton>
                     </>
                     :
                     <TextButton startIcon={<ChevronRightIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'prompt' ? null : 'prompt')}>
