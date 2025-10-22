@@ -16,6 +16,7 @@ import useTheme from './theme'
 import type { User } from './types'
 import { useUpdateUrlLang } from './hooks/useUpdateUrlLang'
 import Styles from './GlobalStyles'
+import './styles.css'
 
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false

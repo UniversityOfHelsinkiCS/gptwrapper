@@ -67,17 +67,21 @@ const SideBar = ({
     <Box
       sx={{
         position: 'relative',
+        height: '100vh',
       }}
     >
-      <Box sx={{
-        position: 'sticky',
-        top: 40,
-        py: 3,
-        height: '100vh',
-        width: collapsed ? 60 : 300,
-        borderRight: '1px solid rgba(0, 0, 0, 0.15)',
-        zIndex: 999
-      }}>
+      <Box
+        sx={{
+          position: 'sticky',
+          top: 40,
+          py: 2,
+          height: '100%',
+          width: collapsed ? 60 : 340,
+          borderRight: '1px solid rgba(0, 0, 0, 0.15)',
+          zIndex: 999
+        }}
+        className="scrollable-styled"
+      >
         {
           collapsed ?
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>

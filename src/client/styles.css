@@ -39,3 +39,12 @@
       100% 100%;
   }
 }
+
+.scrollable-styled {
+  overflow-y: auto;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.scrollable-styled:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.4) transparent;
+}
