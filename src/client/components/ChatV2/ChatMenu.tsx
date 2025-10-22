@@ -12,8 +12,11 @@ import ReviewsIcon from '@mui/icons-material/Reviews'
 import LanguageIcon from '@mui/icons-material/Language'
 import { OutlineButtonBlack, TextButton } from './general/Buttons'
 import { Box } from '@mui/material'
+import { useTranslation } from 'react-i18next'
+import { Locale } from '@shared/lang'
 
 export default function ChatMenu({ newSideBar }: { newSideBar: boolean }) {
+  const { t, i18n } = useTranslation()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -21,6 +24,10 @@ export default function ChatMenu({ newSideBar }: { newSideBar: boolean }) {
   }
   const handleClose = () => {
     setAnchorEl(null)
+  }
+  const handleLanguageChange = (newLanguage: keyof Locale) => {
+    i18n.changeLanguage(newLanguage)
+    localStorage.setItem('lang', newLanguage)
   }
 
   return (
@@ -90,11 +97,11 @@ export default function ChatMenu({ newSideBar }: { newSideBar: boolean }) {
                   <LanguageIcon fontSize="small" />
                 </ListItemIcon>
                 <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
-                  <TextButton>Fi</TextButton>
+                  <TextButton onClick={() => handleLanguageChange("fi")}>Fi</TextButton>
                   <Divider orientation="vertical" flexItem />
-                  <TextButton>En</TextButton>
+                  <TextButton onClick={() => handleLanguageChange("en")}>En</TextButton>
                   <Divider orientation="vertical" flexItem />
-                  <TextButton>Sv</TextButton>
+                  <TextButton onClick={() => handleLanguageChange("sv")}>Sv</TextButton>
                 </Box>
               </MenuItem>
             </MenuList>
