@@ -22,6 +22,8 @@ import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined';
 import hyLogo from '../../assets/hy_logo.svg'
 import { formatDate } from '../Courses/util'
 import EmailButton from './EmailButton'
+import useCourse from '../../hooks/useCourse'
+import useCurrentUser from '../../hooks/useCurrentUser'
 
 const SideBar = ({
   course,
@@ -49,19 +51,23 @@ const SideBar = ({
   setNewSidebar: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
   const { courseId } = useParams()
+  const { user } = useCurrentUser()
+  const { data: chatInstance } = useCourse(courseId)
   const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
   const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
   const { t, i18n } = useTranslation()
   const { language } = i18n
   const [collapsed, setCollapsed] = useState<boolean>(false)
 
+
+
   useEffect(() => {
     if (!userStatus) return
     setIsTokenLimitExceeded(userStatus.usage > userStatus.limit)
   }, [statusLoading, userStatus])
 
-  // Make teachers see teacher things
-  const isAdminOrTeacher = isAdmin
+  const amongResponsibles = isAdmin ?? chatInstance?.responsibilities.some((r) => r.user.id === user?.id)
+
 
   return (
     <Box
@@ -171,10 +177,10 @@ const SideBar = ({
                           {`${course.id} | ${formatDate(course.activityPeriod)}`}
                         </Typography>
                       </Box >
-                      {isAdminOrTeacher && <TextButton startIcon={<SettingsIcon />}>Kurssin asetukset</TextButton>}
+                      {amongResponsibles && <TextButton startIcon={<SettingsIcon />}>Kurssin asetukset</TextButton>}
                       <TextButton startIcon={<ArticleIcon />}>Kurssisivu</TextButton>
                       <TextButton startIcon={<LibraryBooksIcon />}>Vaihda kurssia</TextButton>
-                      {isAdminOrTeacher && <TextButton startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>Poistu kurssinäkymästä</TextButton>}
+                      {amongResponsibles && <TextButton startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>Poistu kurssinäkymästä</TextButton>}
                     </>
                     :
                     <TextButton startIcon={<ChevronRightIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'course' ? null : 'course')}>
@@ -191,7 +197,7 @@ const SideBar = ({
                   course ?
                     <>
                       <Typography mb={2}>Aivan erikoiset ohjeet</Typography>
-                      {isAdminOrTeacher && <TextButton startIcon={<TuneIcon />}>Muokkaa alustusta</TextButton>}
+                      {amongResponsibles && <TextButton startIcon={<TuneIcon />}>Muokkaa alustusta</TextButton>}
                       <TextButton startIcon={<HelpCenterIcon />}>Alustuksen tiedot</TextButton>
                       <TextButton startIcon={<AppsIcon />}>Valitse alustus</TextButton>
                     </>
