@@ -29,6 +29,7 @@ app.use('/api', (_, res) => {
 if (inProduction || inStaging) {
   const DIST_PATH = path.resolve(dirname(fileURLToPath(import.meta.url)), '../../dist')
 
+  console.log(DIST_PATH)
   const INDEX_PATH = path.resolve(DIST_PATH, 'index.html')
 
   app.use(express.static(DIST_PATH))
