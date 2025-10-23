@@ -467,7 +467,6 @@ const ChatV2Content = () => {
               currentModel={activeModel}
               setModel={setActiveModel}
               setNewSidebar={setNewSidebar}
-              activePrompt={activePrompt}
             />
           )
           :
@@ -590,7 +589,7 @@ const ChatV2Content = () => {
             />
           </Box>
           <Box sx={{
-            height: bottomSheetContentId ? '60vh' : 0,
+            height: bottomSheetContentId ? '66vh' : 0,
             borderTop: bottomSheetContentId ? '1px solid rgba(0,0,0,0.15)' : 'none',
             overflow: 'hidden',
             transition: 'height 0.3s ease',

@@ -25,8 +25,8 @@ export default function BottomSheet({
   const { name: name, component: Component, props = {} } = entry
   return (
     <Box sx={{ p: '2rem' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', pb: '2rem' }}>
-        <Typography variant="h6">{name}</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', pb: 2 }}>
+        <Typography variant="h5">{name}</Typography>
         <OutlineButtonBlack onClick={() => setBottomSheetContentId(null)}>
           <ExpandMoreIcon />
         </OutlineButtonBlack>

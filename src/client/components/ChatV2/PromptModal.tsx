@@ -28,9 +28,9 @@ const PromptModal = ({ handleDeletePrompt, course }: { sx?: object; handleDelete
 
   return (
     <Box>
-      <OutlineButtonBlack onClick={() => setCreateNewOpen(prev => !prev)}>{'Luo uusi kurssialustus'}</OutlineButtonBlack>
+      <OutlineButtonBlack sx={{ mb: 2 }} onClick={() => setCreateNewOpen(prev => !prev)}>{'Luo uusi kurssialustus'}</OutlineButtonBlack>
       {createNewOpen && <PromptEditor ragIndices={ragIndices} chatInstanceId={course?.id} type='CHAT_INSTANCE' setEditorOpen={setCreateNewOpen} />}
-      <MenuItem sx={{ borderRadius: '1.25rem' }} onClick={() => handleSelect(undefined)}>{t('settings:emptyPrompt')}</MenuItem>
+      <MenuItem sx={{ borderRadius: '1.25rem' }} onClick={() => handleSelect(undefined)}>{t('settings:noPrompt')}</MenuItem>
       {coursePrompts.length > 0 && (
         <div>
           <Divider />

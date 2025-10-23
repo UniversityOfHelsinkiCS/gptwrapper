@@ -138,6 +138,7 @@
     "updatePrompt": "Uppdatera prompt",
     "saveNewPrompt": "Skapa ny prompt",
     "selectedSource": "Ingen källa vald",
+    "noPrompt": "Ingen prompt",
     "sourceDescription": "Material som anges av läraren kan användas som källmaterial i kurschatten. Du kan välja källa nedan."
   },
   "email": {

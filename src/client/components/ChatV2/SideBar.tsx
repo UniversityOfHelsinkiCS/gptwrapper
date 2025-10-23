@@ -18,12 +18,14 @@ import TuneIcon from '@mui/icons-material/Tune'
 import HelpCenterIcon from '@mui/icons-material/HelpCenter';
 import AppsIcon from '@mui/icons-material/Apps';
 import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined';
+import ExtensionOffIcon from '@mui/icons-material/ExtensionOff';
 
 import hyLogo from '../../assets/hy_logo.svg'
 import { formatDate } from '../Courses/util'
 import EmailButton from './EmailButton'
 import useCourse from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import { usePromptState } from './PromptState'
 
 const SideBar = ({
   course,
@@ -37,7 +39,6 @@ const SideBar = ({
   setModel,
   isAdmin,
   setNewSidebar,
-  activePrompt,
 }: {
   course: Course | undefined
   handleReset: () => void
@@ -50,17 +51,17 @@ const SideBar = ({
   setModel: (model: ValidModelName) => void
   isAdmin: boolean | undefined,
   setNewSidebar: React.Dispatch<React.SetStateAction<boolean>>
-  activePrompt: Prompt | undefined
 }) => {
   const { courseId } = useParams()
+  const { t, i18n } = useTranslation()
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
   const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
+  const { activePrompt, handleChangePrompt } = usePromptState()
+
   const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
-  const { t, i18n } = useTranslation()
   const { language } = i18n
   const [collapsed, setCollapsed] = useState<boolean>(false)
-
 
 
   useEffect(() => {
@@ -196,12 +197,13 @@ const SideBar = ({
               <Box p={4}>
                 <Typography mb={0.5} color='textSecondary' >{"alustus".toUpperCase()}</Typography>
                 {
-                  course ?
+                  activePrompt ?
                     <>
-                      <Typography mb={2}>{activePrompt ? activePrompt.name : 'Ei valittua alustusta'}</Typography>
-                      {activePrompt && <TextButton startIcon={<TuneIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'editPrompt' ? null : 'editPrompt')}>Muokkaa alustusta</TextButton>}
-                      <TextButton startIcon={<HelpCenterIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'showPrompt' ? null : 'showPrompt')}>Alustuksen tiedot</TextButton>
+                      <Typography fontWeight='bold' mb={2}>{activePrompt.name}</Typography>
+                      <TextButton startIcon={<TuneIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'editPrompt' ? null : 'editPrompt')}>Muokkaa alustusta</TextButton>
+                      {!amongResponsibles && <TextButton startIcon={<HelpCenterIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'showPrompt' ? null : 'showPrompt')}>Alustuksen tiedot</TextButton>}
                       <TextButton startIcon={<AppsIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'selectPrompt' ? null : 'selectPrompt')}>Valitse alustus</TextButton>
+                      <TextButton startIcon={<ExtensionOffIcon />} onClick={() => handleChangePrompt(undefined)}>Ei alustusta</TextButton>
                     </>
                     :
                     <TextButton startIcon={<ChevronRightIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'prompt' ? null : 'prompt')}>
