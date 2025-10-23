@@ -27,6 +27,9 @@ import useCourse from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { usePromptState } from './PromptState'
 
+import { useNavigate } from 'react-router-dom';
+
+
 const SideBar = ({
   course,
   handleReset,
@@ -52,6 +55,7 @@ const SideBar = ({
   isAdmin: boolean | undefined,
   setNewSidebar: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
+  const navigate = useNavigate();
   const { courseId } = useParams()
   const { t, i18n } = useTranslation()
   const { user } = useCurrentUser()
@@ -183,7 +187,7 @@ const SideBar = ({
                       {amongResponsibles && <TextButton startIcon={<SettingsIcon />}>Kurssin asetukset</TextButton>}
                       <TextButton startIcon={<ArticleIcon />}>Kurssisivu</TextButton>
                       <TextButton startIcon={<LibraryBooksIcon />}>Vaihda kurssia</TextButton>
-                      {amongResponsibles && <TextButton startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>Poistu kurssinäkymästä</TextButton>}
+                      {amongResponsibles && <TextButton onClick={() => navigate("/")} startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>Poistu kurssinäkymästä</TextButton>}
                     </>
                     :
                     <TextButton startIcon={<ChevronRightIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'course' ? null : 'course')}>
