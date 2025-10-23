@@ -33,7 +33,7 @@ export default function ChatMenu({ newSideBar }: { newSideBar: boolean }) {
   return (
     <>
       {newSideBar && (
-        <div style={{ position: 'fixed', top: 64, right: 30 }}>
+        <div style={{ position: 'fixed', top: 30, right: 30 }}>
           <OutlineButtonBlack
             id="basic-button"
             aria-controls={open ? 'basic-menu' : undefined}

@@ -83,7 +83,7 @@ const SideBar = ({
     >
       <Box
         sx={{
-          py: 2,
+          pt: 3,
           height: '100%',
           width: collapsed ? 60 : 340,
           borderRight: '1px solid rgba(0, 0, 0, 0.15)',

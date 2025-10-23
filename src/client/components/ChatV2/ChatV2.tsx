@@ -50,6 +50,7 @@ import BottomSheet from './BottomSheet'
 import PromptModal from './PromptModal'
 import { PromptEditor } from '../Prompt/PromptEditor'
 import { VolunteerActivismTwoTone } from '@mui/icons-material'
+import GeneralModal from './GeneralModal'
 
 
 /**
@@ -426,7 +427,7 @@ const ChatV2Content = () => {
       }}
     >
 
-      <Box sx={{ position: 'fixed', top: 64, right: 20, zIndex: 999 }}>
+      <Box sx={{ position: 'fixed', top: 20, right: 20, zIndex: 999 }}>
         <ChatMenu newSideBar={newSideBar} />
       </Box>
 
@@ -588,14 +589,14 @@ const ChatV2Content = () => {
               isMobile={isMobile}
             />
           </Box>
-          <Box sx={{
+          {/* <Box sx={{
             height: bottomSheetContentId ? '66vh' : 0,
             borderTop: bottomSheetContentId ? '1px solid rgba(0,0,0,0.15)' : 'none',
             overflow: 'hidden',
             transition: 'height 0.3s ease',
           }}>
             <BottomSheet modalsRegister={modalsRegister} bottomSheetContentId={bottomSheetContentId} setBottomSheetContentId={setBottomSheetContentId} />
-          </Box>
+          </Box> */}
         </Box>
       </Box>
 
@@ -650,6 +651,8 @@ const ChatV2Content = () => {
       }
 
       {/* Modals --------------------------------------*/}
+      <GeneralModal open={!!bottomSheetContentId} setOpen={() => setBottomSheetContentId(null)} modalsRegister={modalsRegister} bottomSheetContentId={bottomSheetContentId} setBottomSheetContentId={setBottomSheetContentId} />
+
       <SettingsModal
         open={settingsModalOpen}
         setOpen={setSettingsModalOpen}
@@ -660,6 +663,7 @@ const ChatV2Content = () => {
       <DisclaimerModal disclaimer={disclaimerInfo} disclaimerStatus={disclaimerStatus} setDisclaimerStatus={setDisclaimerStatus} />
 
       <ResetConfirmModal open={resetConfirmModalOpen} setOpen={setResetConfirmModalOpen} onConfirm={handleReset} />
+
     </Box >
   )
 }

@@ -77,7 +77,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, setOpen, mod
           // minWidth: 600,
           width: '85vw',
           maxWidth: 1000,
-          minHeight: '25vh',
+          minHeight: '40vh',
           maxHeight: '80vh',
           bgcolor: 'background.paper',
           boxShadow: 24,
