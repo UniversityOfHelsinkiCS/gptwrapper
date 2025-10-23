@@ -7,12 +7,12 @@ import {
   ListObjectsV2CommandOutput,
   NoSuchKey,
 } from '@aws-sdk/client-s3'
-import type { RagFile, RagIndex } from '../../db/models'
+import { RagFile, RagIndex } from '../../db/models'
 import { ApplicationError } from '../../util/ApplicationError'
 import { S3_BUCKET } from '../../util/config'
 import { s3Client } from '../../util/s3client'
 
-const isPdf = (filePath: string) => filePath.endsWith('.pdf')
+const isPdf = (ragFile: RagFile) => ragFile.fileType === 'application/pdf'
 const getPdfTextKey = (s3Key: string) => `${s3Key}.md`
 
 export const FileStore = {
@@ -21,6 +21,7 @@ export const FileStore = {
   },
 
   getRagFileKey(ragFile: RagFile) {
+    if (ragFile.s3Key) return ragFile.s3Key
     return `uploads/rag/${ragFile.ragIndexId}/${ragFile.filename}`
   },
 
@@ -45,9 +46,14 @@ export const FileStore = {
           const deleteResponse = await s3Client.send(deleteCommand)
           console.log('Deleted:', deleteResponse.Deleted?.length, 'objects.')
         }
-
         continuationToken = listResponse.NextContinuationToken
       } while (continuationToken)
+
+      const ragIndexId = ragIndex.id
+      const ragFiles = await RagFile.findAll({ where: { ragIndexId } })
+      const deletions = ragFiles.filter((rf) => rf.s3Key && rf.s3Key.length > 0)
+        .map((rf) => FileStore.deleteRagFileDocument(rf))
+      await Promise.allSettled(deletions)
     } catch (error) {
       console.warn(`Failed to delete S3 objects with prefix ${prefix}:`, error)
     }
@@ -57,7 +63,7 @@ export const FileStore = {
     const s3Key = FileStore.getRagFileKey(ragFile)
 
     try {
-      if (isPdf(s3Key)) {
+      if (isPdf(ragFile)) {
         const pdfTextKey = getPdfTextKey(s3Key)
         await s3Client.send(new DeleteObjectCommand({ Bucket: S3_BUCKET, Key: pdfTextKey }))
         return true
@@ -85,7 +91,7 @@ export const FileStore = {
   async readRagFileTextContent(ragFile: RagFile) {
     const s3Key = FileStore.getRagFileKey(ragFile)
 
-    if (isPdf(s3Key)) {
+    if (isPdf(ragFile)) {
       const pdfTextKey = getPdfTextKey(s3Key)
       try {
         const textObj = await s3Client.send(new GetObjectCommand({ Bucket: S3_BUCKET, Key: pdfTextKey }))

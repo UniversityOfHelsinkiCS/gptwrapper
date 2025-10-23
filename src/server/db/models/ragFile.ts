@@ -33,6 +33,8 @@ class RagFile extends Model<InferAttributes<RagFile>, InferCreationAttributes<Ra
 
   declare ragIndex?: RagIndex
 
+  declare s3Key?: string
+
   getRedisKeyPrefix(): string {
     return `${this.id}-${this.filename}`
   }
@@ -87,6 +89,10 @@ RagFile.init(
     userId: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    s3Key: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     metadata: {
       type: DataTypes.JSONB,

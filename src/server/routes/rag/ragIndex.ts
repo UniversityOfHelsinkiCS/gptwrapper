@@ -1,5 +1,6 @@
 import { type NextFunction, type Request, type Response, Router } from 'express'
 import multer from 'multer'
+import crypto from 'crypto'
 import z from 'zod/v4'
 import multerS3 from 'multer-s3'
 import { shouldRenderAsText } from '../../../shared/utils'
@@ -20,6 +21,14 @@ const ragIndexRouter = Router()
 interface RagIndexRequest extends RequestWithUser {
   ragIndex: RagIndex
 }
+
+// eclare global {
+//   namespace Express {
+//     interface Request {
+//       uploadedS3Keys?: string[]
+//     }
+//   }
+// }
 
 const RagIndexIdSchema = z.object({
   ragIndexId: z.coerce.number().min(1),
@@ -205,18 +214,23 @@ ragIndexRouter.delete('/files/:fileId/text', async (req, res) => {
   res.json({ message: 'File text version deleted successfully, re-ingesting' })
 })
 
+interface ReqWithS3Keys extends Request {
+  uploadedS3Keys?: string[]
+}
+
 const upload = multer({
   storage: multerS3({
     s3: s3Client,
     bucket: S3_BUCKET,
     acl: 'private',
-    metadata: (req, file, cb) => {
+    metadata: (_req, file, cb) => {
       cb(null, { fieldName: file.fieldname })
     },
-    key: (req, file, cb) => {
-      const { ragIndex } = req as RagIndexRequest
-      const uniqueFilename = file.originalname
-      const s3key = `uploads/rag/${ragIndex.id}/${uniqueFilename}`
+    key: (req, _file, cb) => {
+      const r = req as ReqWithS3Keys
+      const s3key = crypto.randomBytes(20).toString('hex')
+      r.uploadedS3Keys = r.uploadedS3Keys || []
+      r.uploadedS3Keys.push(s3key)
       cb(null, s3key)
     },
   }),
@@ -236,8 +250,10 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
   const ragIndexRequest = req as unknown as RagIndexRequest
   const { ragIndex, user } = ragIndexRequest
 
+  const s3keys = req.uploadedS3Keys || []
+
   const ragFiles = await Promise.all(
-    req.files.map((file: Express.Multer.File) =>
+    req.files.map((file: Express.Multer.File, idx) =>
       RagFile.create({
         userId: user.id,
         ragIndexId: ragIndex.id,
@@ -245,6 +261,7 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
         filename: file.originalname,
         fileType: file.mimetype,
         fileSize: file.size,
+        s3Key: s3keys[idx],
         metadata: {},
       }),
     ),
