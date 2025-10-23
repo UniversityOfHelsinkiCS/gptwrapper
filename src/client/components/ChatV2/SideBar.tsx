@@ -234,7 +234,7 @@ const SideBar = ({
 
                 <EmailButton messages={messages} disabled={!messages.length} />
 
-                <OutlineButtonBlack sx={{ mt: '2rem' }} onClick={() => setNewSidebar(prev => !prev)}>Admins: toggle old/new sidebar</OutlineButtonBlack>
+                {isAdmin && <OutlineButtonBlack sx={{ mt: '2rem' }} onClick={() => setNewSidebar(prev => !prev)}>Admins: toggle old/new sidebar</OutlineButtonBlack>}
               </Box>
             </Box>
         }
