@@ -5,6 +5,7 @@ import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import express from 'express'
+import cors from 'cors'
 import 'express-async-errors'
 
 import { PORT } from './util/config'
@@ -17,6 +18,8 @@ import setupCron from './util/cron'
 import { updateLastRestart } from './util/lastRestart'
 
 const app = express()
+
+app.use(cors())
 
 app.use('/api', (req, res, next) => router(req, res, next))
 app.use('/api', (_, res) => {
