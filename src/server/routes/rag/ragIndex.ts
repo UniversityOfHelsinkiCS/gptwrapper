@@ -20,15 +20,8 @@ const ragIndexRouter = Router()
 
 interface RagIndexRequest extends RequestWithUser {
   ragIndex: RagIndex
+  uploadedS3Keys?: string[]
 }
-
-// eclare global {
-//   namespace Express {
-//     interface Request {
-//       uploadedS3Keys?: string[]
-//     }
-//   }
-// }
 
 const RagIndexIdSchema = z.object({
   ragIndexId: z.coerce.number().min(1),
@@ -214,10 +207,6 @@ ragIndexRouter.delete('/files/:fileId/text', async (req, res) => {
   res.json({ message: 'File text version deleted successfully, re-ingesting' })
 })
 
-interface ReqWithS3Keys extends Request {
-  uploadedS3Keys?: string[]
-}
-
 const upload = multer({
   storage: multerS3({
     s3: s3Client,
@@ -227,7 +216,7 @@ const upload = multer({
       cb(null, { fieldName: file.fieldname })
     },
     key: (req, _file, cb) => {
-      const r = req as ReqWithS3Keys
+      const r = req as RagIndexRequest
       const s3key = crypto.randomBytes(20).toString('hex')
       r.uploadedS3Keys = r.uploadedS3Keys || []
       r.uploadedS3Keys.push(s3key)
@@ -248,9 +237,7 @@ const indexUploadDirMiddleware = async (req: Request, _res: Response, next: Next
 
 ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], async (req, res) => {
   const ragIndexRequest = req as unknown as RagIndexRequest
-  const { ragIndex, user } = ragIndexRequest
-
-  const s3keys = req.uploadedS3Keys || []
+  const { ragIndex, user, uploadedS3Keys = [] } = ragIndexRequest
 
   const ragFiles = await Promise.all(
     req.files.map((file: Express.Multer.File, idx) =>
@@ -261,7 +248,7 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
         filename: file.originalname,
         fileType: file.mimetype,
         fileSize: file.size,
-        s3Key: s3keys[idx],
+        s3Key: uploadedS3Keys[idx],
         metadata: {},
       }),
     ),
