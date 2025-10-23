@@ -8,7 +8,7 @@ import { getDocument, PDFPageProxy } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import logger from 'src/server/util/logger'
 import { ApplicationError } from 'src/server/util/ApplicationError'
 
-const extractPageText = async (page: PDFPageProxy): Promise<string> => {
+export const extractPageText = async (page: PDFPageProxy): Promise<string> => {
   const textContent = await page.getTextContent()
   const parts: string[] = []
   for (const item of textContent.items as any[]) {

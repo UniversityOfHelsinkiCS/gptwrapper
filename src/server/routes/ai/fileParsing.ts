@@ -1,5 +1,6 @@
+import { extractPageText } from 'src/server/services/jobs/pdfParsing.job'
 import type { ChatMessage } from '../../../shared/chat'
-import { pdfToText } from '../../util/pdfToText'
+import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
 
 export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file: Express.Multer.File) => {
   let fileContent = ''
@@ -11,7 +12,13 @@ export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file
   }
 
   if (file.mimetype === 'application/pdf') {
-    fileContent = await pdfToText(file.buffer)
+    const data = new Uint8Array(file.buffer)
+    const loadingTask = getDocument({ data })
+    const pdf = await loadingTask.promise
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i)
+      fileContent += await extractPageText(page)
+    }
   }
 
   const messageToAddFileTo = messages[messages.length - 1]
