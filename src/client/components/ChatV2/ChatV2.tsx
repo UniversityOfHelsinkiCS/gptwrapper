@@ -150,6 +150,7 @@ const ChatV2Content = () => {
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
 
   const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false)
 
   const chatScroll = useChatScroll()
 
@@ -458,6 +459,8 @@ const ChatV2Content = () => {
         ) : isAdmin && newSideBar ?
           (
             <SideBar
+              collapsed={sidebarCollapsed}
+              setCollapsed={setSidebarCollapsed}
               isAdmin={isAdmin}
               course={course}
               handleReset={() => setResetConfirmModalOpen(true)}
@@ -496,6 +499,8 @@ const ChatV2Content = () => {
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
+          // magical -10px prevents horizontal overflow when vertical scrollbar appears
+          maxWidth: isMobile ? '100%' : `calc(100vw - 10px - var(${sidebarCollapsed ? '--sidebar-width-collapsed' : '--sidebar-width'}))`
         }}
       >
         {isMobile && (<GrayButton
@@ -705,7 +710,8 @@ const LeftMenu = ({
     <Box
       sx={[
         {
-          width: { md: 250, lg: 300 },
+          width: 'var(--sidebar-width)',
+          minWidth: 'var(--sidebar-width)',
           position: 'relative',
           height: '100vh',
           borderRight: '1px solid rgba(0, 0, 0, 0.12)',

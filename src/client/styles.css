@@ -1,3 +1,8 @@
+:root {
+  --sidebar-width: 340px;
+  --sidebar-width-collapsed: 60px;
+}
+
 .line-break-markdown {
   white-space: pre-line;
 }
@@ -47,4 +52,13 @@
 
 .scrollable-styled:hover {
   scrollbar-color: rgba(0, 0, 0, 0.4) transparent;
+}
+
+.scrollable-code-highlight {
+  overflow-y: auto;
+  scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+}
+
+.scrollable-code-highlight:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.8) transparent;
 }

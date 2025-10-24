@@ -213,7 +213,7 @@ const AssistantMessageItem = ({ message, setActiveToolResult }: { message: Assis
                 <Box
                   sx={{
                     borderRadius: '0.5rem',
-                    overflowX: 'auto',
+                    overflowX: 'auto'
                   }}
                 >
                   <Typography
@@ -234,7 +234,7 @@ const AssistantMessageItem = ({ message, setActiveToolResult }: { message: Assis
                       children={String(children)}
                       language={language}
                       customStyle={{
-                        padding: '1rem',
+                        padding: '1rem 4rem 1rem 1rem', // 4rem keeps the CopyToClipboard button visible
                         margin: 0,
                         fontSize: '15px',
                         wordBreak: 'break-all',
@@ -242,6 +242,7 @@ const AssistantMessageItem = ({ message, setActiveToolResult }: { message: Assis
                         whiteSpace: 'pre-wrap',
                       }}
                       style={oneDark}
+                      className="scrollable-code-highlight"
                       id={codeBlockId}
                     />
                     <CopyToClipboardButton

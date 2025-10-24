@@ -31,6 +31,8 @@ import { useNavigate } from 'react-router-dom';
 
 
 const SideBar = ({
+  collapsed,
+  setCollapsed,
   course,
   handleReset,
   onClose,
@@ -43,6 +45,8 @@ const SideBar = ({
   isAdmin,
   setNewSidebar,
 }: {
+  collapsed: boolean,
+  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>
   course: Course | undefined
   handleReset: () => void
   onClose?: () => void
@@ -65,7 +69,6 @@ const SideBar = ({
 
   const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
   const { language } = i18n
-  const [collapsed, setCollapsed] = useState<boolean>(false)
 
 
   useEffect(() => {
@@ -74,8 +77,6 @@ const SideBar = ({
   }, [statusLoading, userStatus])
 
   const amongResponsibles = isAdmin ?? chatInstance?.responsibilities.some((r) => r.user.id === user?.id)
-
-
 
   return (
     <Box
@@ -89,7 +90,7 @@ const SideBar = ({
         sx={{
           pt: 3,
           height: '100%',
-          width: collapsed ? 60 : 340,
+          width: collapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)',
           borderRight: '1px solid rgba(0, 0, 0, 0.15)',
           zIndex: 999
         }}
