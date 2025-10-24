@@ -6,6 +6,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile'
 import MapsUgcIcon from '@mui/icons-material/MapsUgc'
 import { Box, Chip, IconButton, TextField, Tooltip, Typography, Alert } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
+import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import { useRef } from 'react'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
@@ -230,7 +231,7 @@ export const ChatBox = ({
               </Tooltip>
               <Tooltip title={t('chat:emptyConversationTooltip', { hint: KeyCombinations.RESET_CHAT?.hint })} arrow placement="top">
                 <IconButton onClick={handleReset}>
-                  <MapsUgcIcon />
+                  <RestartAltIcon />
                 </IconButton>
               </Tooltip>
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
