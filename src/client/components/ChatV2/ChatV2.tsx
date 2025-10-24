@@ -338,7 +338,6 @@ const ChatV2Content = () => {
   }, [userStatus, course])
 
   const rightMenuOpen = !!activeToolResult
-  const rightMenuWidth = rightMenuOpen ? '300px' : '0px'
 
   // Handle layout shift when right menu opens (tool result becomes visible)
   const prevScrollYProportional = useRef(0)
@@ -500,7 +499,7 @@ const ChatV2Content = () => {
           display: 'flex',
           flexDirection: 'column',
           // magical -10px prevents horizontal overflow when vertical scrollbar appears
-          maxWidth: isMobile ? '100%' : `calc(100vw - 10px - var(${sidebarCollapsed ? '--sidebar-width-collapsed' : '--sidebar-width'}))`
+          width: `calc(${isMobile ? '100%' : `100vw - 10px - var(${sidebarCollapsed ? '--sidebar-width-collapsed' : '--sidebar-width'}) - var(${rightMenuOpen ? '--right-menu-width' : '0px'})`})`
         }}
       >
         {isMobile && (<GrayButton
@@ -639,7 +638,7 @@ const ChatV2Content = () => {
           !!activeToolResult && (
             <Box
               sx={{
-                width: rightMenuWidth,
+                width: rightMenuOpen ? 'var(--right-menu-width)' : '0px',
                 height: '100vh',
                 display: 'flex',
                 flexDirection: 'column',

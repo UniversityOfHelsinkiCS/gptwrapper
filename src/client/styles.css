@@ -1,6 +1,7 @@
 :root {
   --sidebar-width: 340px;
   --sidebar-width-collapsed: 60px;
+  --right-menu-width: 340px;
 }
 
 .line-break-markdown {
