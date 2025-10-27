@@ -5,13 +5,14 @@ import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import { useNavigate } from 'react-router-dom'
 import type { Course } from '../../types'
 import { useTranslation } from 'react-i18next'
+import { RAG_LANGUAGES } from '@shared/lang'
 
 export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const createIndexMutation = useCreateRagIndexMutation()
   const [indexName, setIndexName] = useState('')
-  const [language, setLanguage] = useState<'Finnish' | 'English'>('English')
+  const [language, setLanguage] = useState<'Finnish' | 'English' | 'Swedish'>('English')
   const [open, setOpen] = useState(false)
 
   return (
@@ -55,9 +56,15 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
           />
           <FormControl fullWidth sx={{ my: '2rem' }}>
             <InputLabel id="language-label">{t('rag:language')}</InputLabel>
-            <Select labelId="language-label" id="language-select" value={language} onChange={(e) => setLanguage(e.target.value as 'Finnish' | 'English')}>
-              <MenuItem value={'Finnish'}>{t('rag:finnish')}</MenuItem>
-              <MenuItem value={'English'}>{t('rag:english')}</MenuItem>
+            <Select
+              labelId="language-label"
+              id="language-select"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as typeof RAG_LANGUAGES[number])}
+            >
+              <MenuItem value={RAG_LANGUAGES[0]}>{t('rag:finnish')}</MenuItem>
+              <MenuItem value={RAG_LANGUAGES[1]}>{t('rag:english')}</MenuItem>
+              <MenuItem value={RAG_LANGUAGES[2]}>{t('rag:swedish')}</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>

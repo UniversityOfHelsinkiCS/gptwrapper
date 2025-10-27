@@ -403,7 +403,8 @@
     "onlyPdf": "a",
     "waitForUpload": "Please wait, uploading files to the server",
     "filesIngesting": "Processing files. You can leave the page.",
-    "allCompleted": "Done processing."
+    "allCompleted": "Done processing.",
+    "swedish": "Swedish"
   },
   "embeddedLogin": {
     "helpText": "Successfully logged in. You may close this window."

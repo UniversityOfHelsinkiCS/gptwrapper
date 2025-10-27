@@ -1,11 +1,12 @@
 import { Router } from 'express'
 import z from 'zod/v4'
-import { ChatInstance, ChatInstanceRagIndex, Enrolment, RagFile, RagIndex, Responsibility } from '../../db/models'
+import { ChatInstance, ChatInstanceRagIndex, RagFile, RagIndex } from '../../db/models'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import { TEST_COURSES } from '../../../shared/testData'
 import ragIndexRouter, { ragIndexMiddleware } from './ragIndex'
 import { ChatInstanceAccess, getChatInstanceAccess } from '../../services/chatInstances/access'
+import { getRedisVectorStore } from '../../services/rag/vectorStore'
 
 const router = Router()
 
@@ -36,11 +37,11 @@ router.post('/indices', async (req, res) => {
     throw ApplicationError.Forbidden('Cannot create index, user is not responsible for the course')
   }
 
-  // Only TEST_COURSES allow > 5 rag indices
+  // Only TEST_COURSES allow > 10 rag indices
   const isTestCourse = Object.values(TEST_COURSES).some((course) => course.id === chatInstance.courseId)
-  const hasMaxRagIndices = (chatInstance.ragIndices?.length ?? 0) > 5
+  const hasMaxRagIndices = (chatInstance.ragIndices?.length ?? 0) > 10
   if (!isTestCourse && hasMaxRagIndices) {
-    throw ApplicationError.Forbidden(`Cannot create index, 5 already exists on the course ${chatInstance.courseId}`)
+    throw ApplicationError.Forbidden(`Cannot create index, 10 already exists on the course ${chatInstance.courseId}`)
   }
 
   const ragIndex = await RagIndex.create({
@@ -56,6 +57,9 @@ router.post('/indices', async (req, res) => {
     ragIndexId: ragIndex.id,
     userId: user.id,
   })
+
+  const vectorStore = getRedisVectorStore(ragIndex.id, language)
+  await vectorStore.createIndex()
 
   res.json(ragIndex)
 })

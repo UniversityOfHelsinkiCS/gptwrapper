@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react'
-import { createBrowserRouter, createRoutesFromElements, Navigate, Route, RouterProvider, useParams, } from 'react-router-dom'
+import { createBrowserRouter, createRoutesFromElements, Navigate, Route, RouterProvider, useParams } from 'react-router-dom'
 
 import { PUBLIC_URL } from '../config'
 import App from './App'
@@ -27,12 +27,11 @@ const router = sentryCreateBrowserRouter(
       <Route index element={<ChatV2 />} />
       <Route path="/v1" element={<Navigate to="/" replace />} />
       <Route path="/v2" element={<Navigate to="/" />} />
- 
       <Route path="/:courseId" element={<ChatV2 />} />
       <Route path="/v2/:courseId" element={<CourseRedirect />} />
       <Route path="/v1/:courseId" element={<CourseRedirect />} />
       <Route path="/courses" element={<Courses />} />
-      <Route path="/courses/:id/*" lazy={() => import('./components/Courses/Course') } />
+      <Route path="/courses/:id/*" lazy={() => import('./components/Courses/Course')} />
       <Route path="/admin/*" lazy={() => import('./components/Admin')} />
       <Route path="/noaccess" element={<NoAccess />} />
       <Route path="/chats" element={<Chats />} />

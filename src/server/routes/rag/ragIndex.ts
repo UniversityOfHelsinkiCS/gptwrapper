@@ -101,7 +101,7 @@ ragIndexRouter.get('/jobs', async (req, res) => {
 
   const ragFileStatuses: IngestionJobStatus[] = await Promise.all(
     ragFiles.map(async (rf) => {
-      const meta = (rf.metadata)
+      const meta = rf.metadata
 
       const status: IngestionJobStatus = {
         ragFileId: rf.id,

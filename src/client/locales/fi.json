@@ -404,7 +404,8 @@
     "onlyPdf": "a",
     "waitForUpload": "Odota, tiedostoja ladataan palvelimelle",
     "filesIngesting": "Tiedostoja käsitellään. Voit poistua sivulta.",
-    "allCompleted": "Tiedostot käsitelty."
+    "allCompleted": "Tiedostot käsitelty.",
+    "swedish": "Ruotsi"
   },
   "embeddedLogin": {
     "helpText": "Kirjauduttu. Voit sulkea tämän ikkunan."
