@@ -3,10 +3,11 @@ import { MarkdownTextSplitter, RecursiveCharacterTextSplitter } from '@langchain
 import { RagFile, type RagIndex } from '../../db/models'
 import { pdfQueueEvents, submitPdfParsingJobs } from '../jobs/pdfParsing.job'
 import { FileStore } from './fileStore'
-import { getRedisVectorStore } from './vectorStore'
 import logger from 'src/server/util/logger'
-import { IngestionJobStatus, IngestionPipelineStageKey } from '@shared/ingestion'
-import { RagFileMetadata } from '@shared/types'
+import type { IngestionJobStatus, IngestionPipelineStageKey } from '@shared/ingestion'
+import type { RagFileMetadata } from '@shared/types'
+import { RedisVectorStore } from './vectorStore'
+import { getEmbedder } from './embedder'
 
 const defaultTextSplitter = new RecursiveCharacterTextSplitter({
   chunkSize: 1000,
@@ -30,26 +31,22 @@ export const ingestRagFiles = async (ragIndex: RagIndex, ragFiles?: RagFile[]) =
     return
   }
 
-  const vectorStore = getRedisVectorStore(ragIndex.id, ragIndex.metadata.language)
-  await vectorStore.dropIndex()
-
-  ragFiles.map(async (rf) => {
+  for await (const rf of ragFiles) {
     try {
       await ingestRagFile(rf, ragIndex)
     } catch (error: any) {
-
       logger.error(`Ingestion failed for ${rf.filename}:`, error)
       await updateRagFileStatus(rf, { ragFileId: rf.id, progress: 100, eta: 0, message: 'Ingestion failed', pipelineStage: 'error', error: error.message })
     }
-  })
+  }
 }
 
-export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, /*job: Job*/) => {
+export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
   console.time(`Ingestion ${ragFile.filename}`)
 
   await ragFile.update({ error: null, pipelineStage: 'ingesting' })
 
-  const vectorStore = getRedisVectorStore(ragFile.ragIndexId, ragIndex.metadata.language)
+  const vectorStore = new RedisVectorStore(`ragIndex-${ragIndex.id}`)
 
   let progress = 2.5
   const update = {
@@ -76,7 +73,6 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, /*job:
       const total = pages.length || 1
       let completed = 0
 
-
       await updateRagFileStatus(ragFile, {
         ...update,
         message: total > 1 ? `Parsing ${total} pages` : 'Parsing',
@@ -84,7 +80,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, /*job:
       })
 
       const transcriptions: Array<string> = []
-      for (const p of pages) {
+      for await (const p of pages) {
         let text = ''
         try {
           text = await p.job!.waitUntilFinished(pdfQueueEvents)
@@ -96,9 +92,8 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, /*job:
           completed += 1
           const fraction = completed / total
 
-          const pct = Math.round(start + (end - start) * fraction);
+          const pct = Math.round(start + (end - start) * fraction)
           progress = pct
-
 
           await updateRagFileStatus(ragFile, {
             ...update,
@@ -112,7 +107,6 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, /*job:
       finalText = transcriptions.join('\n\n')
 
       await FileStore.writeRagFileTextContent(ragFile, finalText)
-
     } catch (error: any) {
       logger.error('Error waiting for PDF parsing jobs to finish:', error)
       await ragFile.update({ error: 'PDF parsing failed', pipelineStage: 'error' })
@@ -121,7 +115,6 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, /*job:
   } else {
     progress = 50
     finalText = await FileStore.readRagFileTextContent(ragFile)
-
 
     await updateRagFileStatus(ragFile, {
       ...update,
@@ -136,7 +129,6 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, /*job:
     await ragFile.update({ error: 'Error reading rag file text: file does not exist' })
     return
   }
-
 
   await updateRagFileStatus(ragFile, {
     ...update,
@@ -155,7 +147,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, /*job:
 
   let idx = 0
   for (const chunkDocument of chunkDocuments) {
-    chunkDocument.id = `ragIndex-${ragFile.ragIndexId}-${ragFile.filename}-${idx}`
+    chunkDocument.id = `${ragFile.filename}:${idx}`
     chunkDocument.metadata = {
       ...chunkDocument.metadata,
       ragFileName: ragFile.filename,
@@ -170,8 +162,8 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, /*job:
     eta: 5000,
   })
 
-  const embeddings = await vectorStore.embeddings.embedDocuments(chunkDocuments.map((d) => d.pageContent))
-
+  const embedder = getEmbedder()
+  const embeddings = await embedder.embedDocuments(chunkDocuments.map((d) => d.pageContent))
 
   await updateRagFileStatus(ragFile, {
     ...update,
@@ -180,7 +172,12 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, /*job:
     eta: 1000,
   })
 
-  await vectorStore.addVectors(embeddings, chunkDocuments)
+  await vectorStore.addDocuments(chunkDocuments.map((doc, i) => ({
+    id: doc.id!,
+    content: doc.pageContent,
+    metadata: JSON.stringify(doc.metadata),
+    content_vector: embeddings[i],
+  })))
 
   await updateRagFileStatus(ragFile, {
     ...update,
@@ -189,7 +186,6 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex, /*job:
     progress: 100,
     eta: undefined,
   })
-
 
   console.timeEnd(`Ingestion ${ragFile.filename}`)
 }

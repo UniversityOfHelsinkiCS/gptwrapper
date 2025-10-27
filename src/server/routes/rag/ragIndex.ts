@@ -9,12 +9,12 @@ import { FileStore } from '../../services/rag/fileStore'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import { search } from '../../services/rag/search'
-import { getRedisVectorStore } from '../../services/rag/vectorStore'
 import { SearchSchema } from '../../../shared/rag'
 import { S3_BUCKET } from '../../util/config'
 import { s3Client } from '../../util/s3client'
 import { ingestRagFiles } from '../../services/rag/ingestion'
 import { IngestionJobStatus } from '@shared/ingestion'
+import { RedisVectorStore } from '../../services/rag/vectorStore'
 
 const ragIndexRouter = Router()
 
@@ -68,9 +68,7 @@ ragIndexRouter.delete('/', async (req, res) => {
 
   await FileStore.deleteRagIndexDocuments(ragIndex)
 
-  const vectorStore = getRedisVectorStore(ragIndex.id)
-
-  await vectorStore.dropIndex(true)
+  await new RedisVectorStore(`ragIndex-${ragIndex.id}`).dropIndex()
 
   await ragIndex.destroy() // Cascade deletes RagFiles
 

@@ -1,7 +1,6 @@
 import { RagChunk, SearchParams } from '../../../shared/rag'
 import type { RagIndex } from '../../db/models'
-import { getRedisVectorStore } from './vectorStore'
-import { getAndFTSearchRetriever, getOrFTSearchRetriever, getPhraseFTSearchRetriever } from './retrievers'
+import { getAndFTSearchRetriever, getOrFTSearchRetriever, getPhraseFTSearchRetriever, getVectorSearchRetriever } from './retrievers'
 import { EnsembleRetriever } from 'langchain/retrievers/ensemble'
 import { BM25Retriever } from '@langchain/community/retrievers/bm25'
 import type { BaseRetriever } from '@langchain/core/retrievers'
@@ -9,9 +8,7 @@ import type { BaseRetriever } from '@langchain/core/retrievers'
 export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Promise<{ results: RagChunk[]; timings: Record<string, number> }> => {
   const timings: Record<string, number> = {}
 
-  const vectorStore = getRedisVectorStore(ragIndex.id)
-
-  const vectorstoreRetriever = vectorStore.asRetriever(searchParams.vectorK)
+  const vectorstoreRetriever = getVectorSearchRetriever(`ragIndex-${ragIndex.id}`)
 
   const retrievers: BaseRetriever[] = []
   const weights: number[] = []

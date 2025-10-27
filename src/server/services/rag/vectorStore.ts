@@ -1,16 +1,102 @@
-import { RedisVectorStore } from '@langchain/redis'
+import { createClient } from 'redis'
 import { redisClient } from '../../util/redis'
-import { getEmbedder } from './embedder'
-import { RAG_LANGUAGES } from '@shared/lang'
 
-export const getRedisVectorStore = (ragIndexId: number, language?: string) => {
-  return new RedisVectorStore(getEmbedder(), {
-    // @ts-expect-error something wrong with typing, but it should actually match the signature.
-    redisClient,
-    indexName: `ragIndex-${String(ragIndexId)}`,
-    createIndexOptions: {
-      LANGUAGE: language as typeof RAG_LANGUAGES[number] | undefined,
-      LANGUAGE_FIELD: '@content',
-    },
-  })
+const SCHEMA = {
+  content: {
+    type: 'TEXT',
+  },
+  metadata: {
+    type: 'TEXT',
+  },
+  content_vector: {
+    type: 'VECTOR',
+    ALGORITHM: 'HNSW',
+    TYPE: 'FLOAT32',
+    DIM: 1024,
+    DISTANCE_METRIC: 'COSINE',
+  },
+} as const
+
+export type RedisDocument = {
+  id?: string
+  content: string
+  metadata: string
+  content_vector: number[]
+}
+
+export class RedisVectorStore {
+  client: ReturnType<typeof createClient>
+  indexName: string
+
+  constructor(indexName: string) {
+    this.client = redisClient
+    this.indexName = indexName
+  }
+
+  async createIndex() {
+    try {
+      await this.client.ft.create(this.indexName, SCHEMA, {
+        ON: 'HASH',
+        PREFIX: `doc:${this.indexName}:`,
+      })
+    } catch (e) {
+      const err = e instanceof Error ? e : new Error(String(e));
+      if (err.message === 'Index already exists') {
+        console.log('Index exists already, skipping creation.')
+      } else {
+        throw err
+      }
+    }
+  }
+
+  async addDocuments(documents: RedisDocument[]) {
+    if (!this.client.isOpen) {
+      await this.client.connect()
+    }
+    const pipeline = this.client.multi()
+
+    for (const doc of documents) {
+      if (!doc.id) {
+        throw new Error('Document must have an id')
+      }
+      const docId = `doc:${this.indexName}:${doc.id}`
+      pipeline.hSet(docId, {
+        content: doc.content,
+        metadata: doc.metadata,
+        content_vector: Buffer.from(new Float32Array(doc.content_vector).buffer),
+      })
+    }
+    await pipeline.exec()
+  }
+
+  async deleteAllDocuments() {
+    if (!this.client.isOpen) {
+      await this.client.connect()
+    }
+    let cursor = '0'
+    do {
+      const reply = await this.client.scan(cursor, {
+        MATCH: `doc:${this.indexName}:*`,
+        COUNT: 100,
+      })
+      cursor = reply.cursor
+      if (reply.keys.length > 0) {
+        await this.client.del(reply.keys)
+      }
+    } while (cursor !== '0')
+  }
+
+  async dropIndex() {
+    await this.deleteAllDocuments()
+    try {
+      await this.client.ft.dropIndex(this.indexName)
+    } catch (e) {
+      const err = e instanceof Error ? e : new Error(String(e));
+      if (err.message === 'Unknown Index name') {
+        console.log('Index does not exist, skipping drop.')
+      } else {
+        throw err
+      }
+    }
+  }
 }

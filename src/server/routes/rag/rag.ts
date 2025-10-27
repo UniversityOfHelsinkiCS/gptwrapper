@@ -6,7 +6,7 @@ import { ApplicationError } from '../../util/ApplicationError'
 import { TEST_COURSES } from '../../../shared/testData'
 import ragIndexRouter, { ragIndexMiddleware } from './ragIndex'
 import { ChatInstanceAccess, getChatInstanceAccess } from '../../services/chatInstances/access'
-import { getRedisVectorStore } from '../../services/rag/vectorStore'
+import { RedisVectorStore } from 'src/server/services/rag/vectorStore'
 
 const router = Router()
 
@@ -58,8 +58,7 @@ router.post('/indices', async (req, res) => {
     userId: user.id,
   })
 
-  const vectorStore = getRedisVectorStore(ragIndex.id, language)
-  await vectorStore.createIndex()
+  await new RedisVectorStore(`ragIndex-${ragIndex.id}`).createIndex()
 
   res.json(ragIndex)
 })

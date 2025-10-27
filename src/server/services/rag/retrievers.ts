@@ -3,6 +3,8 @@ import { Document, DocumentInterface } from '@langchain/core/documents'
 import { BaseRetriever } from '@langchain/core/retrievers'
 import { SearchReply } from 'redis'
 import { redisClient } from '../../util/redis'
+import { Embeddings } from '@langchain/core/embeddings'
+import { getEmbedder } from './embedder'
 
 export const getPhraseFTSearchRetriever = (indexName: string, language?: string) => new FTSearchRetriever(indexName, (q) => `"${q}"`, language)
 export const getAndFTSearchRetriever = (indexName: string, language?: string) => new FTSearchRetriever(indexName, (q) => q, language)
@@ -48,3 +50,61 @@ class FTSearchRetriever extends BaseRetriever {
 
   lc_namespace: string[] = ['currechat', 'services', 'rag', 'retrievers']
 }
+
+class VectorSearchRetriever extends BaseRetriever {
+  indexName: string
+  k: number
+  embedder: Embeddings
+
+  constructor(indexName: string, k = 6) {
+    super()
+    this.indexName = indexName
+    this.k = k
+    this.embedder = getEmbedder()
+  }
+
+  async _getRelevantDocuments(query: string, _callbacks?: CallbackManagerForRetrieverRun): Promise<DocumentInterface<Record<string, any>>[]> {
+    const queryEmbedding = await this.embedder.embedQuery(query)
+
+    const redisQuery = `* => [KNN ${this.k} @content_vector $vector AS vector_score]`
+
+    try {
+      const results = await redisClient.ft.search(this.indexName, redisQuery, {
+        RETURN: ['content', 'metadata', 'vector_score'],
+        SORTBY: `vector_score`,
+        DIALECT: 2,
+        PARAMS: {
+          vector: Buffer.from(new Float32Array(queryEmbedding).buffer),
+        },
+        LIMIT: {
+          from: 0,
+          size: this.k,
+        },
+      })
+
+      // Type narrowing
+      if (!results || typeof results !== 'object' || !('documents' in results) || !Array.isArray(results.documents)) {
+        console.warn('ft.search did not return documents for vector query:', query, 'index:', this.indexName)
+        return []
+      }
+
+      // Make sure sorted correctly
+      // console.log((results as SearchReply).documents.map((doc) => doc.value.vector_score))
+
+      return (results as SearchReply).documents.map(
+        (doc) =>
+          new Document({
+            pageContent: doc.value.content as string,
+            metadata: doc.value.metadata as Record<string, any>,
+          }),
+      )
+    } catch (error) {
+      console.error('Error during vector search:', error)
+      return []
+    }
+  }
+
+  lc_namespace: string[] = ['currechat', 'services', 'rag', 'retrievers']
+}
+
+export const getVectorSearchRetriever = (indexName: string, k = 6) => new VectorSearchRetriever(indexName, k)
