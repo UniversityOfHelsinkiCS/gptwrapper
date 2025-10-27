@@ -55,7 +55,9 @@ export const curateDocuments = async (documents: Document[], query: string) => {
     };
   }));
 
-  logger.info(`Curation LLM call ended.`, { inputTokens, outputTokens, numDocuments: documents.length });
+  const newDocuments = curatedResults.filter(r => r.relevanceScore > 0.2).sort((a, b) => b.relevanceScore - a.relevanceScore).map(r => r.document);
 
-  return curatedResults.filter(r => r.relevanceScore > 0.2).sort((a, b) => b.relevanceScore - a.relevanceScore).map(r => r.document);
+  logger.info(`Curation LLM call ended.`, { query, inputTokens, outputTokens, numDocuments: documents.length, numCuratedDocuments: newDocuments.length });
+
+  return newDocuments;
 };
