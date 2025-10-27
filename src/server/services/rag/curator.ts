@@ -57,5 +57,5 @@ export const curateDocuments = async (documents: Document[], query: string) => {
 
   logger.info(`Curation LLM call ended.`, { inputTokens, outputTokens, numDocuments: documents.length });
 
-  return curatedResults.filter(r => r.relevanceScore > 0.0001).sort((a, b) => b.relevanceScore - a.relevanceScore).map(r => r.document);
+  return curatedResults.filter(r => r.relevanceScore > 0.2).sort((a, b) => b.relevanceScore - a.relevanceScore).map(r => r.document);
 };
