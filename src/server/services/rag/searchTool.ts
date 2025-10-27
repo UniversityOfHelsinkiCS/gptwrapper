@@ -17,7 +17,7 @@ export const getRagIndexSearchTool = (ragIndex: RagIndex) =>
       const startTime = Date.now()
 
       try {
-        const { results: documents } = await search(ragIndex, SearchSchema.parse({ query }))
+        const { results: documents } = await search(ragIndex, SearchSchema.parse({ query, curate: true }))
         // With responseFormat: content_and_artifact, return content and artifact like this:
         //
         logger.info('ToolCall', {

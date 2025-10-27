@@ -4,6 +4,7 @@ import { getAndFTSearchRetriever, getOrFTSearchRetriever, getPhraseFTSearchRetri
 import { EnsembleRetriever } from 'langchain/retrievers/ensemble'
 import { BM25Retriever } from '@langchain/community/retrievers/bm25'
 import type { BaseRetriever } from '@langchain/core/retrievers'
+import { curateDocuments } from './curator'
 
 export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Promise<{ results: RagChunk[]; timings: Record<string, number> }> => {
   const timings: Record<string, number> = {}
@@ -43,6 +44,12 @@ export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Pr
     const reranker = BM25Retriever.fromDocuments(results, { k: searchParams.rerankK })
     results = await reranker.invoke(searchParams.query)
     timings.rerank = Date.now() - timings.rerank
+  }
+
+  if (searchParams.curate) {
+    timings.curation = Date.now()
+    results = await curateDocuments(results, searchParams.query)
+    timings.curation = Date.now() - timings.curation
   }
 
   return {

@@ -16,6 +16,7 @@ import { AiApiWarning, WarningType } from '@shared/aiApi'
 import getEncoding from 'src/server/util/tiktoken'
 import { calculateUsage } from '../chatInstances/usage'
 import { truncateMessages } from './truncateMessages'
+import { getAzureChatOpenAI } from './azure'
 
 export type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
 
@@ -59,21 +60,24 @@ export const streamChat = async ({
   promptMessages?: Message[]
   tools?: ChatTool[]
   writeEvent: WriteEventFunction
-  user: User,
-  ignoredWarnings?: WarningType[],
-}): Promise<{
-  warnings: AiApiWarning[]
-  inputTokenCount: number
-} | {
-  tokenCount: number
-  firstTokenTS: number
-  inputTokenCount: number
-  tokenStreamingDuration: number
-  timeToFirstToken?: number
-  tokensPerSecond: number
-  response: string
-  toolCalls?: string
-}> => {
+  user: User
+  ignoredWarnings?: WarningType[]
+}): Promise<
+  | {
+      warnings: AiApiWarning[]
+      inputTokenCount: number
+    }
+  | {
+      tokenCount: number
+      firstTokenTS: number
+      inputTokenCount: number
+      tokenStreamingDuration: number
+      timeToFirstToken?: number
+      tokensPerSecond: number
+      response: string
+      toolCalls?: string
+    }
+> => {
   const toolsByName = Object.fromEntries(tools.map((tool) => [tool.name, tool]))
 
   const modelConfig = validModels.find((m) => m.name === model)
@@ -83,15 +87,19 @@ export const streamChat = async ({
 
   const chatModel = getChatModel(modelConfig, tools, temperature)
 
-  const { messages, warnings, inputTokenCount } = handleWarnings(modelConfig, [
-    ...('instructions' in modelConfig ? [{ role: 'system' as const, content: modelConfig.instructions }] : []),
-    ...promptMessages,
-    {
-      role: 'system',
-      content: systemMessage,
-    },
-    ...chatMessages,
-  ], ignoredWarnings)
+  const { messages, warnings, inputTokenCount } = handleWarnings(
+    modelConfig,
+    [
+      ...('instructions' in modelConfig ? [{ role: 'system' as const, content: modelConfig.instructions }] : []),
+      ...promptMessages,
+      {
+        role: 'system',
+        content: systemMessage,
+      },
+      ...chatMessages,
+    ],
+    ignoredWarnings,
+  )
 
   if (warnings.length > 0) {
     return { warnings, inputTokenCount }
@@ -237,7 +245,6 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
   }
 }
 
-
 /**
  * Gets a chat model instance based on the provided configuration.
  * Can be a MockModel for testing or an AzureChatOpenAI model.
@@ -250,25 +257,20 @@ const getChatModel = (modelConfig: (typeof validModels)[number], tools: Structur
   const chatModel =
     modelConfig.name === 'mock'
       ? new MockModel({ tools, temperature })
-      : new AzureChatOpenAI<ChatOpenAICallOptions>({
-          model: modelConfig.name,
-          azureOpenAIApiKey: AZURE_API_KEY,
-          azureOpenAIApiVersion: '2024-10-21',
-          azureOpenAIApiDeploymentName: modelConfig.name, // In Azure, always use the acual model name as the deployment name
-          azureOpenAIApiInstanceName: AZURE_RESOURCE,
-          temperature: 'temperature' in modelConfig ? modelConfig.temperature : temperature, // If model config specifies a temperature, use it; otherwise, use the user supplied temperature.
-          reasoning: {
-            effort: 'minimal',
-            summary: null,
-            generate_summary: null,
-          },
+      : getAzureChatOpenAI({
+          name: modelConfig.name,
+          temperature: 'temperature' in modelConfig ? modelConfig.temperature : temperature ?? 0.7,
           streaming: true,
         }).bindTools(tools) // Make tools available to the model.
 
   return chatModel
 }
 
-const handleWarnings = (modelConfig: (typeof validModels)[number], messages: Message[], ignoredWarnings?: WarningType[]): { warnings: AiApiWarning[], messages: Message[], inputTokenCount: number } => {
+const handleWarnings = (
+  modelConfig: (typeof validModels)[number],
+  messages: Message[],
+  ignoredWarnings?: WarningType[],
+): { warnings: AiApiWarning[]; messages: Message[]; inputTokenCount: number } => {
   const encoding = getEncoding(modelConfig.name)
   const tokenCount = calculateUsage(messages, encoding)
   encoding.free()
@@ -293,7 +295,6 @@ const handleWarnings = (modelConfig: (typeof validModels)[number], messages: Mes
   const contextLimit = modelConfig.context
 
   if (tokenCount > contextLimit) {
-
     if (!ignoredWarnings?.includes('contextLimit')) {
       warnings.push({
         warningType: 'contextLimit',
@@ -317,15 +318,17 @@ const safelyStreamMessages = async (model: ChatModel, messages: BaseMessageLike[
     if (error instanceof Error) {
       // Handle API errors specifically.
       // Handle content filter:
-      if ("code" in error && error.code === 'content_filter') {
-        const innerError = "error" in error ? error.error as { message: string } : null
+      if ('code' in error && error.code === 'content_filter') {
+        const innerError = 'error' in error ? (error.error as { message: string }) : null
 
-        const extraAzureInfo = innerError?.message ??
-           'The response was not generated due to the prompt triggering content filters. No further details available.'
+        const extraAzureInfo =
+          innerError?.message ?? 'The response was not generated due to the prompt triggering content filters. No further details available.'
 
-        return [new AIMessageChunk({
-          content: extraAzureInfo,
-        })]
+        return [
+          new AIMessageChunk({
+            content: extraAzureInfo,
+          }),
+        ]
       }
     }
 

@@ -15,6 +15,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
   const [vector, setVector] = useState(true)
   const [ft, setFt] = useState(true)
   const [rerank, setRerank] = useState(true)
+  const [curate, setCurate] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [results, setResults] = useState<{ results: RagChunk[]; timings: Record<string, number> }>()
 
@@ -25,6 +26,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
       vector,
       ft,
       rerank,
+      curate,
     }
     setIsLoading(true)
     setResults(undefined)
@@ -48,6 +50,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
           <FormControlLabel control={<Checkbox checked={vector} onChange={(e) => setVector(e.target.checked)} />} label="Use semantic search" />
           <FormControlLabel control={<Checkbox checked={ft} onChange={(e) => setFt(e.target.checked)} />} label="Use keyword search" />
           <FormControlLabel control={<Checkbox checked={rerank} onChange={(e) => setRerank(e.target.checked)} />} label="Use reranking" />
+          <FormControlLabel control={<Checkbox checked={curate} onChange={(e) => setCurate(e.target.checked)} />} label="Use curation" />
         </FormControl>
         <OutlineButtonBlue type="submit">Search</OutlineButtonBlue>
         <Typography variant="body2" mt="2rem">

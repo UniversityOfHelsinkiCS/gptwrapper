@@ -17,6 +17,7 @@ export const SearchSchema = z.object({
   vectorK: z.number().min(1).max(20).default(8),
   rerank: z.boolean().default(true),
   rerankK: z.number().min(1).max(20).default(5),
+  curate: z.boolean().default(false),
 })
 
 export type SearchInputParams = z.input<typeof SearchSchema>

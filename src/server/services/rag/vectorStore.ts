@@ -12,7 +12,7 @@ const SCHEMA = {
     type: 'VECTOR',
     ALGORITHM: 'HNSW',
     TYPE: 'FLOAT32',
-    DIM: 1024,
+    DIM: 1024, // Check that this matches the embedder output dimension. For example if the model is changed, may need to change this.
     DISTANCE_METRIC: 'COSINE',
   },
 } as const
