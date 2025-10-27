@@ -10,7 +10,7 @@ export type Locales = {
 export type RagIndexMetadata = {
   name: string
   toolDescription?: string
-  language?: 'Finnish' | 'English'
+  language?: 'Finnish' | 'English' | 'Swedish'
 }
 
 export type RagFileMetadata = {

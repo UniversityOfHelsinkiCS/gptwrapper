@@ -12,7 +12,7 @@ const router = Router()
 
 const IndexCreationSchema = z.object({
   name: z.string().min(1).max(100),
-  language: z.enum(['Finnish', 'English']).optional(),
+  language: z.enum(['Finnish', 'English', 'Swedish']).optional(),
   chatInstanceId: z.string().min(1).max(100),
 })
 
