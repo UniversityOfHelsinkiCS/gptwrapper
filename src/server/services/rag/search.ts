@@ -1,7 +1,7 @@
 import { RagChunk, SearchParams } from '../../../shared/rag'
 import type { RagIndex } from '../../db/models'
 import { getRedisVectorStore } from './vectorStore'
-import { FTSearchRetriever } from './retrievers'
+import { getAndFTSearchRetriever, getOrFTSearchRetriever, getPhraseFTSearchRetriever } from './retrievers'
 import { EnsembleRetriever } from 'langchain/retrievers/ensemble'
 import { BM25Retriever } from '@langchain/community/retrievers/bm25'
 import type { BaseRetriever } from '@langchain/core/retrievers'
@@ -12,7 +12,6 @@ export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Pr
   const vectorStore = getRedisVectorStore(ragIndex.id)
 
   const vectorstoreRetriever = vectorStore.asRetriever(searchParams.vectorK)
-  const ftSearchRetriever = new FTSearchRetriever(vectorStore.indexName)
 
   const retrievers: BaseRetriever[] = []
   const weights: number[] = []
@@ -23,8 +22,14 @@ export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Pr
   }
 
   if (searchParams.ft) {
-    retrievers.push(ftSearchRetriever)
-    weights.push(0.7)
+    retrievers.push(
+      ...[
+        getPhraseFTSearchRetriever(`ragIndex-${ragIndex.id}`, ragIndex.metadata.language),
+        getAndFTSearchRetriever(`ragIndex-${ragIndex.id}`, ragIndex.metadata.language),
+        getOrFTSearchRetriever(`ragIndex-${ragIndex.id}`, ragIndex.metadata.language),
+      ],
+    )
+    weights.push(...[0.7, 0.2, 0.1])
   }
 
   const retriever = new EnsembleRetriever({

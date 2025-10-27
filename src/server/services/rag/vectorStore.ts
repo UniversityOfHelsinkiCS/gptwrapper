@@ -1,6 +1,7 @@
 import { RedisVectorStore } from '@langchain/redis'
 import { redisClient } from '../../util/redis'
 import { getEmbedder } from './embedder'
+import { RAG_LANGUAGES } from '@shared/lang'
 
 export const getRedisVectorStore = (ragIndexId: number, language?: string) => {
   return new RedisVectorStore(getEmbedder(), {
@@ -8,7 +9,7 @@ export const getRedisVectorStore = (ragIndexId: number, language?: string) => {
     redisClient,
     indexName: `ragIndex-${String(ragIndexId)}`,
     createIndexOptions: {
-      LANGUAGE: language as 'Finnish' | 'English' | undefined,
+      LANGUAGE: language as typeof RAG_LANGUAGES[number] | undefined,
       LANGUAGE_FIELD: '@content',
     },
   })

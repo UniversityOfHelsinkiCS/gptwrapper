@@ -4,29 +4,24 @@ import { BaseRetriever } from '@langchain/core/retrievers'
 import { SearchReply } from 'redis'
 import { redisClient } from '../../util/redis'
 
-export class FTSearchRetriever extends BaseRetriever {
+export const getPhraseFTSearchRetriever = (indexName: string, language?: string) => new FTSearchRetriever(indexName, (q) => `"${q}"`, language)
+export const getAndFTSearchRetriever = (indexName: string, language?: string) => new FTSearchRetriever(indexName, (q) => q, language)
+export const getOrFTSearchRetriever = (indexName: string, language?: string) => new FTSearchRetriever(indexName, (q) => q.split(' ').join(' | '), language)
+
+class FTSearchRetriever extends BaseRetriever {
   indexName: string
   language?: string
+  queryTransform: (query: string) => string
 
-  constructor(indexName: string, language?: string) {
+  constructor(indexName: string, queryTransform: (query: string) => string, language?: string) {
     super()
     this.indexName = indexName
     this.language = language
+    this.queryTransform = queryTransform
   }
 
   async _getRelevantDocuments(query: string, _callbacks?: CallbackManagerForRetrieverRun): Promise<DocumentInterface<Record<string, any>>[]> {
-    const redisQuery = `@content:"${query}"`
-    const ftSearchResults = await redisClient.ft.search(this.indexName, redisQuery, {
-      RETURN: ['content', 'metadata'],
-    })
-
-    // Type narrowing
-    if (!ftSearchResults || typeof ftSearchResults !== 'object' || !('documents' in ftSearchResults) || !Array.isArray(ftSearchResults.documents)) {
-      console.warn('ft.search did not return documents for query:', query, 'index:', this.indexName)
-      return []
-    }
-
-    const documents = (ftSearchResults as SearchReply).documents
+    const documents = await this.redisQuery(this.queryTransform(query))
 
     return documents.map(
       (doc) =>
@@ -35,6 +30,20 @@ export class FTSearchRetriever extends BaseRetriever {
           metadata: doc.value.metadata as Record<string, any>,
         }),
     )
+  }
+
+  async redisQuery(query: string): Promise<SearchReply['documents']> {
+    const results = await redisClient.ft.search(this.indexName, query, {
+      RETURN: ['content', 'metadata'],
+    })
+
+    // Type narrowing
+    if (!results || typeof results !== 'object' || !('documents' in results) || !Array.isArray(results.documents)) {
+      console.warn('ft.search did not return documents for query:', query, 'index:', this.indexName)
+      return []
+    }
+
+    return (results as SearchReply).documents
   }
 
   lc_namespace: string[] = ['currechat', 'services', 'rag', 'retrievers']
