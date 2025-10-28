@@ -1,4 +1,3 @@
-import { expect, request } from '@playwright/test'
 import { adminTest as test } from '../e2e/fixtures'
 import { RagChunk, SearchInputParams } from '../src/shared/rag'
 
@@ -43,19 +42,25 @@ const tests = [
   },
 ]
 
-const testResults: { name: string; query: string, result: '✅' | '❌' | '⚠️', successRate: string }[] = []
+const testResults: { query: string, successRate: number }[] = []
 
 test.afterAll(() => {
-  console.table(testResults)
-  console.log('Summary:')
-  console.log(`Passed: ${testResults.filter((r) => r.result === '✅').length} / ${testResults.length}`)
+  const totalSuccessRate = testResults.reduce((acc, r) => acc + r.successRate, 0) / testResults.length
+  testResults.push({
+    query: '** Summary **',
+    successRate: totalSuccessRate,
+  })
+  console.table(testResults.map(r => ({
+    query: r.query,
+    result: r.successRate === 1 ? '✅' : r.successRate > 0 ? '⚠️' : '❌',
+    successRate: (r.successRate * 100).toFixed(0) + '%',
+  })))
 })
 
-for (const t of tests) {
-  test.describe(t.name, () => {
-    for (const query of t.query) {
-      test(`query: "${query}"`, async ({ page, request }) => {
-
+test.describe('RAG Retrieval evals', () => {
+  for (const t of tests) {
+    test(t.name, async ({ request }) => {
+      for (const query of t.query) {
         const params: SearchInputParams = {
           query,
           curate: false,
@@ -78,12 +83,10 @@ for (const t of tests) {
         const successRate = successes / t.expected.length
         
         testResults.push({
-          name: t.name,
           query,
-          result: successRate === 1 ? '✅' : successRate > 0 ? '⚠️' : '❌',
-          successRate: `${(successRate * 100).toFixed(2)}%`,
+          successRate,
         })
-      })
-    }
-  })
-}
+      }
+    })
+  }
+})
