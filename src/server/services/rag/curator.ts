@@ -5,8 +5,9 @@ import { z } from "zod/v4";
 import logger from "src/server/util/logger";
 
 const CurationOutputSchema = z.object({
-  relevanceScore: z.number().min(0).max(1),
-  reason: z.string().min(1).max(500),
+  reason: z.string().min(1).max(500).describe("A brief explanation of the relevance score assigned to the document."),
+  relevanceScore: z.number().min(0).max(1).describe("A score from 0 to 1 indicating the relevance of the document to the user query."),
+  shouldBeIncluded: z.boolean().describe("Indicates whether the document should be included in the final curated list."),
 })
 
 /**
@@ -34,9 +35,9 @@ export const curateDocuments = async (documents: Document[], query: string) => {
   const promptTemplate = ChatPromptTemplate.fromMessages<{ documentName: string, content: string, query: string }>([
     [
       "system",
-      "You are an expert at evaluating the relevance of documents to user search queries. Given a user query and a document, your task is to rate document's relevance to the query on a scale from 0 to 1, where 0 means completely irrelevant and 1 means highly relevant. Provide a brief reason for your rating.",
+      "You are an expert at evaluating the relevance of documents to user search queries. Given a user query and a document, your task is to rate document's relevance to the query and decide whether to include it in the curated list.",
     ],
-    ["human", "Document {documentName}:\n\"{content}\"\n\nUser Query: \"{query}\"\n\nRate the relevance of the document to the user query."],
+    ["human", "Document {documentName}:\n\"{content}\"\n\nUser Query: \"{query}\"\n\nRate the relevance of the document to the user query and decide if it should be included."],
   ]);
 
   const curator = promptTemplate.pipe(model)
@@ -52,10 +53,11 @@ export const curateDocuments = async (documents: Document[], query: string) => {
       document: doc,
       relevanceScore: response.relevanceScore,
       reason: response.reason,
+      shouldBeIncluded: response.shouldBeIncluded,
     };
   }));
 
-  const newDocuments = curatedResults.filter(r => r.relevanceScore > 0.2).sort((a, b) => b.relevanceScore - a.relevanceScore).map(r => r.document);
+  const newDocuments = curatedResults.filter(r => r.shouldBeIncluded).sort((a, b) => b.relevanceScore - a.relevanceScore).map(r => r.document);
 
   logger.info(`Curation LLM call ended.`, { query, inputTokens, outputTokens, numDocuments: documents.length, numCuratedDocuments: newDocuments.length });
 
