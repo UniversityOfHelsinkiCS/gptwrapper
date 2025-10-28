@@ -23,15 +23,14 @@ import { enqueueSnackbar } from 'notistack'
 import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import OpenableTextfield from '../common/OpenableTextfield'
 import { Message } from '@shared/chat'
-import { Course } from 'src/client/types'
-import { CreatePromptMutation, EditPromptMutation, usePromptState } from '../ChatV2/PromptState'
+import { CreatePromptMutation, EditPromptMutation } from '../ChatV2/PromptState'
 
 interface PromptEditorProps {
   prompt?: PromptEditableParams & { id: string }
   ragIndices?: RagIndexAttributes[]
   type: PromptCreationParams['type']
   chatInstanceId?: string
-  setEditorOpen: (open: boolean) => void
+  setEditorOpen?: (open: boolean) => void
   createPromptMutation: CreatePromptMutation
   editPromptMutation: EditPromptMutation
 }
@@ -91,7 +90,7 @@ export const PromptEditor = ({
           temperature,
         })
         enqueueSnackbar(t('prompt:updatedPrompt', { name }), { variant: 'success' })
-        setEditorOpen(false)
+        if (setEditorOpen) setEditorOpen(false)
       } else {
         await createPromptMutation({
           name,
@@ -105,7 +104,7 @@ export const PromptEditor = ({
           temperature,
         })
         enqueueSnackbar(t('prompt:createdPrompt', { name }), { variant: 'success' })
-        setEditorOpen(false)
+        if (setEditorOpen) setEditorOpen(false)
       }
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
@@ -231,9 +230,9 @@ export const PromptEditor = ({
       <DialogActions >
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
           {loading && <CircularProgress color="secondary" />}
-          <OutlineButtonBlue onClick={() => setEditorOpen(false)}>
+          {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>
             {t('common:cancel')}
-          </OutlineButtonBlue>
+          </OutlineButtonBlue>}
           <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
             {t('common:save')}
           </BlueButton>
