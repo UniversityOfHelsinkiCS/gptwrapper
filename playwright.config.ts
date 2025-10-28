@@ -7,12 +7,12 @@ import { defineConfig, devices } from '@playwright/test'
  */
 // require('dotenv').config();
 const inCI = process.env.CI === 'true'
+const evals = process.env.EVALS === 'true'
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './e2e',
   /* Run tests in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -44,8 +44,13 @@ export default defineConfig({
   },
 
   projects: [
-    {
-      name: 'chromium',
+    evals ? {
+      name: 'rag eval benchmark',
+      testDir: './evals',
+      use: { ...devices['Desktop Chrome'] },
+    } : {
+      name: 'e2e',
+      testDir: './e2e',
       use: { ...devices['Desktop Chrome'] },
     },
 

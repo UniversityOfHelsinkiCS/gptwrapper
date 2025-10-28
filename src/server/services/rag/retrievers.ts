@@ -106,6 +106,7 @@ class VectorSearchRetriever extends BaseRetriever {
 
       // Make sure sorted correctly
       // console.log((results as SearchReply).documents.map((doc) => doc.value.vector_score))
+      console.log('VectorSearchRetriever results:', results.documents.length)
 
       return (results as SearchReply).documents.map(
         (doc) =>

@@ -8,14 +8,14 @@ import { curateDocuments } from './curator'
 export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Promise<{ results: RagChunk[]; timings: Record<string, number> }> => {
   const timings: Record<string, number> = {}
 
-  const vectorstoreRetriever = getVectorSearchRetriever(`ragIndex-${ragIndex.id}`, 8)
+  const vectorstoreRetriever = getVectorSearchRetriever(`ragIndex-${ragIndex.id}`, 12)
 
   const retrievers: BaseRetriever[] = []
   const weights: number[] = []
 
   if (searchParams.vector) {
     retrievers.push(vectorstoreRetriever)
-    weights.push(0.3)
+    weights.push(0.4)
   }
 
   if (searchParams.ft) {
@@ -40,8 +40,8 @@ export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Pr
   let results = await retriever.invoke(searchParams.query)
   timings.search = Date.now() - timings.search
 
-  // Take top 10 results before curation
-  results = results.slice(0, 10)
+  // Take top 15 results before curation
+  results = results.slice(0, 15)
 
   if (searchParams.curate) {
     timings.curation = Date.now()

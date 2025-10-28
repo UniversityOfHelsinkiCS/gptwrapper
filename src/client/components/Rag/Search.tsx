@@ -89,7 +89,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
               <Typography variant="h6" mb="1rem">
                 Results
               </Typography>
-              <Box>
+              <Box data-testid="rag-search-results">
                 {results?.results?.map((chunk) => (
                   <Box key={chunk.id} my="1rem">
                     <Typography variant="subtitle2" color="text.secondary">
