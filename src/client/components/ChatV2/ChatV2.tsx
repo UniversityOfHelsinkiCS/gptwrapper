@@ -695,6 +695,8 @@ const LeftMenu = ({
   setModel: (model: ValidModelName) => void
   setNewSidebar: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
+  const { user } = useCurrentUser()
+  const isAdmin = user?.isAdmin
   const { t } = useTranslation()
   const { courseId } = useParams()
   const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
@@ -738,7 +740,7 @@ const LeftMenu = ({
             {t('info:title')}
           </OutlineButtonBlack>
 
-          <OutlineButtonBlack onClick={() => setNewSidebar(prev => !prev)}>Admins: toggle old/new sidebar</OutlineButtonBlack>
+          {isAdmin && <OutlineButtonBlack onClick={() => setNewSidebar(prev => !prev)}>Admins: toggle old/new sidebar</OutlineButtonBlack>}
         </Box>
       </Box>
       {
