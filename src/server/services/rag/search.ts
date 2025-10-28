@@ -2,21 +2,20 @@ import { RagChunk, SearchParams } from '../../../shared/rag'
 import type { RagIndex } from '../../db/models'
 import { getAndFTSearchRetriever, getOrFTSearchRetriever, getPhraseFTSearchRetriever, getVectorSearchRetriever } from './retrievers'
 import { EnsembleRetriever } from 'langchain/retrievers/ensemble'
-import { BM25Retriever } from '@langchain/community/retrievers/bm25'
 import type { BaseRetriever } from '@langchain/core/retrievers'
 import { curateDocuments } from './curator'
 
 export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Promise<{ results: RagChunk[]; timings: Record<string, number> }> => {
   const timings: Record<string, number> = {}
 
-  const vectorstoreRetriever = getVectorSearchRetriever(`ragIndex-${ragIndex.id}`)
+  const vectorstoreRetriever = getVectorSearchRetriever(`ragIndex-${ragIndex.id}`, 12)
 
   const retrievers: BaseRetriever[] = []
   const weights: number[] = []
 
   if (searchParams.vector) {
     retrievers.push(vectorstoreRetriever)
-    weights.push(0.3)
+    weights.push(0.5)
   }
 
   if (searchParams.ft) {
@@ -27,7 +26,7 @@ export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Pr
         getOrFTSearchRetriever(`ragIndex-${ragIndex.id}`, ragIndex.metadata.language),
       ],
     )
-    weights.push(...[0.7, 0.2, 0.1])
+    weights.push(...[0.7, 0.4, 0.2])
   }
 
   const retriever = new EnsembleRetriever({
@@ -39,12 +38,8 @@ export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Pr
   let results = await retriever.invoke(searchParams.query)
   timings.search = Date.now() - timings.search
 
-  if (searchParams.rerank) {
-    timings.rerank = Date.now()
-    const reranker = BM25Retriever.fromDocuments(results, { k: searchParams.rerankK })
-    results = await reranker.invoke(searchParams.query)
-    timings.rerank = Date.now() - timings.rerank
-  }
+  // Take top 8 results before curation
+  results = results.slice(0, 8)
 
   if (searchParams.curate) {
     timings.curation = Date.now()

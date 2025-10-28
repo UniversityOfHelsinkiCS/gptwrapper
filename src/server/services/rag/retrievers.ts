@@ -107,4 +107,4 @@ class VectorSearchRetriever extends BaseRetriever {
   lc_namespace: string[] = ['currechat', 'services', 'rag', 'retrievers']
 }
 
-export const getVectorSearchRetriever = (indexName: string, k = 6) => new VectorSearchRetriever(indexName, k)
+export const getVectorSearchRetriever = (indexName: string, k: number) => new VectorSearchRetriever(indexName, k)

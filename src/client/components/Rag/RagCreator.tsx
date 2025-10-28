@@ -63,8 +63,8 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
               onChange={(e) => setLanguage(e.target.value as typeof RAG_LANGUAGES[number])}
             >
               <MenuItem value={RAG_LANGUAGES[0]}>{t('rag:finnish')}</MenuItem>
-              <MenuItem value={RAG_LANGUAGES[1]}>{t('rag:english')}</MenuItem>
-              <MenuItem value={RAG_LANGUAGES[2]}>{t('rag:swedish')}</MenuItem>
+              <MenuItem value={RAG_LANGUAGES[1]}>{t('rag:swedish')}</MenuItem>
+              <MenuItem value={RAG_LANGUAGES[2]}>{t('rag:english')}</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>
