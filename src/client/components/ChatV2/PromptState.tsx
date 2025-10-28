@@ -4,10 +4,17 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import type { Prompt } from '../../types'
 import apiClient, { type ApiError } from '../../util/apiClient'
 import { type UseMutateAsyncFunction, useMutation, useQuery } from '@tanstack/react-query'
-import useCourse from '../../hooks/useCourse'
+import useChatInstance from '../../hooks/useCourse'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import type { MessageGenerationInfo } from '../../../shared/chat'
 import { useTranslation } from 'react-i18next'
+import { PromptCreationParams, PromptEditableParams } from '@shared/prompt'
+import { useDeletePromptMutation } from 'src/client/hooks/usePromptMutation'
+
+
+export type CreatePromptMutation = UseMutateAsyncFunction<void, ApiError, Omit<PromptCreationParams, 'userId'>, unknown>
+export type DeletePromptMutation = UseMutateAsyncFunction<void, ApiError, string, unknown>
+export type EditPromptMutation = UseMutateAsyncFunction<void, ApiError, PromptEditableParams & { id: string }, unknown>
 
 interface PromptSelectorStateType {
   customSystemMessage: string
@@ -31,6 +38,9 @@ interface PromptSelectorStateType {
     unknown
   >
   deleteOwnPrompt: UseMutateAsyncFunction<void, ApiError, Prompt, unknown>
+  createPromptMutation: CreatePromptMutation
+  deletePromptMutation: DeletePromptMutation
+  editPromptMutation: EditPromptMutation
 }
 
 const PromptStateContext = createContext<PromptSelectorStateType | undefined>(undefined)
@@ -43,7 +53,7 @@ export const PromptStateProvider: React.FC<{
   const urlPromptId = searchParams.get('promptId')
   const { courseId } = useParams()
 
-  const { data: course } = useCourse(courseId)
+  const { data: course, refetch: refetchCourse } = useChatInstance(courseId)
 
   const { data: myPrompts, refetch } = useQuery<Prompt[]>({
     queryKey: ['/prompts/my-prompts'],
@@ -107,6 +117,7 @@ export const PromptStateProvider: React.FC<{
         name,
         systemMessage,
         type: 'PERSONAL',
+
       }
 
       if (promptToSave) {
@@ -129,15 +140,42 @@ export const PromptStateProvider: React.FC<{
     },
   })
 
+  const createPromptMutation = useMutation({
+    mutationFn: async (data: Omit<PromptCreationParams, 'userId'>) => {
+      const res = await apiClient.post(`/prompts`, data)
+      setActivePrompt(res.data)
+      refetch()
+      refetchCourse()
+    }
+  })
+
+  const deletePromptMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.delete(`/prompts/${id}`)
+      refetch()
+      refetchCourse()
+    }
+  })
+
+  const editPromptMutation = useMutation({
+    mutationFn: async (data: PromptEditableParams & { id: string }) => {
+      const res = await apiClient.put(`prompts/${data.id}`, data)
+      setActivePrompt(res.data)
+      refetch()
+      refetchCourse()
+    }
+  })
+
+
   const promptInfo: MessageGenerationInfo['promptInfo'] = activePrompt
     ? {
-        id: activePrompt.id,
-        name: activePrompt.name,
-        type: 'saved',
-        systemMessage: activePrompt.systemMessage,
-        model: activePrompt.model,
-        temperature: activePrompt.temperature,
-      }
+      id: activePrompt.id,
+      name: activePrompt.name,
+      type: 'saved',
+      systemMessage: activePrompt.systemMessage,
+      model: activePrompt.model,
+      temperature: activePrompt.temperature,
+    }
     : { type: 'custom', systemMessage: customSystemMessage }
 
   const value = {
@@ -153,6 +191,9 @@ export const PromptStateProvider: React.FC<{
     isPromptEditable,
     saveOwnPrompt: ownPromptSaveMutation.mutateAsync,
     deleteOwnPrompt: ownPromptDeleteMutation.mutateAsync,
+    createPromptMutation: createPromptMutation.mutateAsync,
+    deletePromptMutation: deletePromptMutation.mutateAsync,
+    editPromptMutation: editPromptMutation.mutateAsync,
   }
 
   return <PromptStateContext.Provider value={value}>{children}</PromptStateContext.Provider>

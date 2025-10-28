@@ -4,7 +4,7 @@ import type { Course, CourseStatistics, Enrolment } from '../types'
 import apiClient from '../util/apiClient'
 import { useGetQuery } from './apiHooks'
 
-const useCourse = (courseId?: string) => {
+const useChatInstance = (courseId?: string) => {
   const queryKey = ['course', courseId]
 
   const queryFn = async () => {
@@ -91,4 +91,4 @@ export const useCourseStatistics = (courseId?: string) => {
   return { stats, ...rest }
 }
 
-export default useCourse
+export default useChatInstance

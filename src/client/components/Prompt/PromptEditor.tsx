@@ -19,11 +19,12 @@ import {
 import { validModels } from '@config'
 import { useTranslation } from 'react-i18next'
 import type { RagIndexAttributes } from '@shared/types'
-import { useCreatePromptMutation, useEditPromptMutation } from '../../hooks/usePromptMutation'
 import { enqueueSnackbar } from 'notistack'
-import { BlueButton } from '../ChatV2/general/Buttons'
+import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import OpenableTextfield from '../common/OpenableTextfield'
 import { Message } from '@shared/chat'
+import { Course } from 'src/client/types'
+import { CreatePromptMutation, EditPromptMutation, usePromptState } from '../ChatV2/PromptState'
 
 interface PromptEditorProps {
   prompt?: PromptEditableParams & { id: string }
@@ -31,12 +32,20 @@ interface PromptEditorProps {
   type: PromptCreationParams['type']
   chatInstanceId?: string
   setEditorOpen: (open: boolean) => void
+  createPromptMutation: CreatePromptMutation
+  editPromptMutation: EditPromptMutation
 }
 
-export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEditorOpen }: PromptEditorProps) => {
+export const PromptEditor = ({
+  prompt,
+  ragIndices,
+  type,
+  chatInstanceId,
+  setEditorOpen,
+  createPromptMutation,
+  editPromptMutation,
+}: PromptEditorProps) => {
   const { t } = useTranslation()
-  const editMutation = useEditPromptMutation()
-  const createMutation = useCreatePromptMutation()
 
   const [name, setName] = useState<string>(prompt?.name ?? '')
   const [systemMessage, setSystemMessage] = useState<string>(prompt?.systemMessage ?? '')
@@ -71,7 +80,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEdit
 
     try {
       if (prompt) {
-        await editMutation.mutateAsync({
+        await editPromptMutation({
           id: prompt.id,
           name,
           systemMessage,
@@ -84,7 +93,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEdit
         enqueueSnackbar(t('prompt:updatedPrompt', { name }), { variant: 'success' })
         setEditorOpen(false)
       } else {
-        await createMutation.mutateAsync({
+        await createPromptMutation({
           name,
           type,
           ...(type === 'CHAT_INSTANCE' ? { chatInstanceId } : {}),
@@ -130,7 +139,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEdit
             fullWidth
             margin="normal"
           />
-          <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />
+          {!!chatInstanceId && <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />}
           <FormControl fullWidth margin="normal">
             <InputLabel>{t('common:model')}</InputLabel>
             <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
@@ -172,7 +181,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEdit
           <Typography component="h3" gutterBottom>
             {t('prompt:context')}
           </Typography>
-          <FormControl fullWidth margin="normal">
+          {!!chatInstanceId && <FormControl fullWidth margin="normal">
             <InputLabel>{t('rag:sourceMaterials')}</InputLabel>
             <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
               <MenuItem value="" data-testid="no-source-materials">
@@ -184,7 +193,7 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEdit
                 </MenuItem>
               ))}
             </Select>
-          </FormControl>
+          </FormControl>}
           <Collapse in={!!ragIndexId}>
             <OpenableTextfield
               value={ragSystemMessage}
@@ -219,12 +228,16 @@ export const PromptEditor = ({ prompt, ragIndices, type, chatInstanceId, setEdit
           />
         </Box>
       </Box>
-
-      <DialogActions>
-        {loading && <CircularProgress color="secondary" />}
-        <BlueButton disabled={loading} type="submit" variant="contained" sx={{ mt: 2 }}>
-          {t('common:save')}
-        </BlueButton>
+      <DialogActions >
+        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+          {loading && <CircularProgress color="secondary" />}
+          <OutlineButtonBlue onClick={() => setEditorOpen(false)}>
+            {t('common:cancel')}
+          </OutlineButtonBlue>
+          <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
+            {t('common:save')}
+          </BlueButton>
+        </Box>
       </DialogActions>
     </form>
   )

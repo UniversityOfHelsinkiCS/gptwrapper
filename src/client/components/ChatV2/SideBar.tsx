@@ -23,7 +23,7 @@ import ExtensionOffIcon from '@mui/icons-material/ExtensionOff';
 import hyLogo from '../../assets/hy_logo.svg'
 import { formatDate } from '../Courses/util'
 import EmailButton from './EmailButton'
-import useCourse from '../../hooks/useCourse'
+import useChatInstance from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { usePromptState } from './PromptState'
 
@@ -63,7 +63,7 @@ const SideBar = ({
   const { courseId } = useParams()
   const { t, i18n } = useTranslation()
   const { user } = useCurrentUser()
-  const { data: chatInstance } = useCourse(courseId)
+  const { data: chatInstance } = useChatInstance(courseId)
   const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
   const { activePrompt, handleChangePrompt } = usePromptState()
 

@@ -24,7 +24,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, Route, Routes, useParams } from 'react-router-dom'
 
 import { PUBLIC_URL } from '../../../../config'
-import useCourse from '../../../hooks/useCourse'
+import useChatInstance from '../../../hooks/useCourse'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import usePrompts from '../../../hooks/usePrompts'
 import type { Prompt as PromptType, Responsebility, User } from '../../../types'
@@ -39,6 +39,7 @@ import { ApiErrorView } from '../../common/ApiErrorView'
 import apiClient from '../../../util/apiClient'
 import { ResponsibilityActionUserSearch } from '../../Admin/UserSearch'
 import { useCourseRagIndices } from '../../../hooks/useRagIndices'
+import { useCreatePromptMutation, useEditPromptMutation } from '../../../hooks/usePromptMutation'
 import { PromptEditor } from '../../Prompt/PromptEditor'
 import { OutlineButtonBlack, OutlineButtonBlue } from '../../ChatV2/general/Buttons'
 
@@ -53,11 +54,10 @@ export function Component() {
   const [responsibilities, setResponsibilities] = useState<Responsebility[]>([])
   const { id } = useParams() as { id: string }
   const { t, i18n } = useTranslation()
-
   const { language } = i18n
 
   const { user, isLoading: userLoading } = useCurrentUser()
-  const { data: chatInstance, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(id)
+  const { data: chatInstance, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useChatInstance(id)
 
   useEffect(() => {
     if (isCourseSuccess) {
@@ -355,6 +355,9 @@ const AssignedResponsibilityManagement = ({ responsibility, handleRemove }) => {
 const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceId: string }) => {
   const { t } = useTranslation()
   const { ragIndices } = useCourseRagIndices(chatInstanceId)
+  const editMutation = useEditPromptMutation()
+  const createMutation = useCreatePromptMutation()
+
 
   const { prompts, isLoading: promptsLoading } = usePrompts(courseId)
 
@@ -398,7 +401,7 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          <PromptEditor ragIndices={ragIndices} setEditorOpen={setEditorOpen} type="CHAT_INSTANCE" chatInstanceId={chatInstanceId} prompt={promptToEdit} />
+          <PromptEditor ragIndices={ragIndices} setEditorOpen={setEditorOpen} type="CHAT_INSTANCE" chatInstanceId={chatInstanceId} prompt={promptToEdit} createPromptMutation={createMutation.mutateAsync} editPromptMutation={editMutation.mutateAsync} />
         </DialogContent>
       </Dialog>
     </>

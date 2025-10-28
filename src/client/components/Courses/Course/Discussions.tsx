@@ -2,7 +2,7 @@ import { useParams, Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { TableBody, TableCell, TableHead, TableRow, Table, Link, Paper, Typography, Alert } from '@mui/material'
 import useCurrentUser from '../../../hooks/useCurrentUser'
-import useCourse, { useCourseDiscussers } from '../../../hooks/useCourse'
+import useChatInstance, { useCourseDiscussers } from '../../../hooks/useCourse'
 import OpenInNew from '@mui/icons-material/OpenInNew'
 
 const Discussion = () => {
@@ -10,7 +10,7 @@ const Discussion = () => {
   const { language } = i18n
   const { id } = useParams()
   const { user, isLoading: isUserLoading } = useCurrentUser()
-  const { data: course, isSuccess: isCourseSuccess } = useCourse(id)
+  const { data: course, isSuccess: isCourseSuccess } = useChatInstance(id)
   const { discussers, isLoading: discussersLoading } = useCourseDiscussers(id)
 
   if (!course || !isCourseSuccess || isUserLoading || !user || discussersLoading) return null

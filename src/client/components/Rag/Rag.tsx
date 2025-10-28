@@ -2,14 +2,14 @@ import React from 'react'
 import { Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, Link, Container } from '@mui/material'
 import { Link as RouterLink, useParams } from 'react-router-dom'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
-import useCourse from '../../hooks/useCourse'
+import useChatInstance from '../../hooks/useCourse'
 import { RagCreator } from './RagCreator'
 import { useTranslation } from 'react-i18next'
 
 const Rag: React.FC = () => {
   const { t } = useTranslation()
   const { id: courseId } = useParams<{ id: string }>()
-  const { data: chatInstance } = useCourse(courseId)
+  const { data: chatInstance } = useChatInstance(courseId)
 
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, true)
 

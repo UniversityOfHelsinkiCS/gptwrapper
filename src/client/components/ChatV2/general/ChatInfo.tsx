@@ -4,13 +4,13 @@ import { Course } from '../../../types'
 import { formatDate } from '../../Courses/util'
 import Settings from '@mui/icons-material/Settings'
 import useCurrentUser from '../../../hooks/useCurrentUser'
-import useCourse from '../../../hooks/useCourse'
+import useChatInstance from '../../../hooks/useCourse'
 import { PUBLIC_URL } from '../../../../config'
 
 export const ChatInfo = ({ course }: { course: Course }) => {
 
   const { user } = useCurrentUser()
-  const { data: chatInstance } = useCourse(course.courseId)
+  const { data: chatInstance } = useChatInstance(course.courseId)
   const { t, i18n } = useTranslation()
   const { language } = i18n
 

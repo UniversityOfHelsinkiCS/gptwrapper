@@ -13,7 +13,7 @@ import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '@s
 import { getLanguageValue } from '@shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { useChatScroll } from './useChatScroll'
-import useCourse from '../../hooks/useCourse'
+import useChatInstance from '../../hooks/useCourse'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
@@ -102,7 +102,7 @@ const ChatV2Content = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
-  const { data: course } = useCourse(courseId)
+  const { data: chatInstance } = useChatInstance(courseId)
   const { user } = useCurrentUser()
 
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
@@ -157,7 +157,7 @@ const ChatV2Content = () => {
   const { t, i18n } = useTranslation()
 
   const { promptInfo, activePrompt } = usePromptState()
-  const { ragIndices } = useCourseRagIndices(course?.id)
+  const { ragIndices } = useCourseRagIndices(chatInstance?.id)
 
   const disclaimerInfo = InfoTexts.disclaimer[i18n.language]
 
@@ -335,7 +335,7 @@ const ChatV2Content = () => {
       setActiveModel(FREE_MODEL)
       return
     }
-  }, [userStatus, course])
+  }, [userStatus, chatInstance])
 
   const rightMenuOpen = !!activeToolResult
 
@@ -364,10 +364,10 @@ const ChatV2Content = () => {
   const [newSideBar, setNewSidebar] = useState(false)
   const [bottomSheetContentId, setBottomSheetContentId] = useState<string | null>(null)
 
-  if (course && course.usageLimit === 0) {
+  if (chatInstance && chatInstance.usageLimit === 0) {
     return (
       <Box>
-        <ChatInfo course={course} />
+        <ChatInfo course={chatInstance} />
         <Alert severity="warning" style={{ marginTop: 20 }}>
           <Typography variant="h6">{t('course:curreNotOpen')}</Typography>
         </Alert>
@@ -375,10 +375,10 @@ const ChatV2Content = () => {
     )
   }
 
-  if (course?.activityPeriod) {
-    const isResponsible = user?.isAdmin || course.responsibilities?.some((r) => r.user.id === user?.id)
+  if (chatInstance?.activityPeriod) {
+    const isResponsible = user?.isAdmin || chatInstance.responsibilities?.some((r) => r.user.id === user?.id)
 
-    const { startDate, endDate } = course.activityPeriod
+    const { startDate, endDate } = chatInstance.activityPeriod
     const start = new Date(startDate)
     const end = new Date(endDate)
     const now = new Date()
@@ -386,7 +386,7 @@ const ChatV2Content = () => {
     if (now < start && !isResponsible) {
       return (
         <Box>
-          <ChatInfo course={course} />
+          <ChatInfo course={chatInstance} />
           <Alert severity="warning" style={{ marginTop: 20 }}>
             <Typography variant="h6">{t('course:curreNotStarted')}</Typography>
           </Alert>
@@ -397,7 +397,7 @@ const ChatV2Content = () => {
     if (now > end && !isResponsible) {
       return (
         <Box>
-          <ChatInfo course={course} />
+          <ChatInfo course={chatInstance} />
           <Alert severity="warning" style={{ marginTop: 20 }}>
             <Typography variant="h6">{t('course:curreExpired')}</Typography>
           </Alert>
@@ -411,10 +411,10 @@ const ChatV2Content = () => {
 
   const modalsRegister: ModalMap = {
     'course': { name: 'Jotain kursseja täällä', component: ExampleModalCourse },
-    'prompt': { name: 'Valitse alustus', component: PromptModal },
-    'editPrompt': { name: 'Muokkaa alustusta', component: PromptEditor, props: { prompt: activePrompt, ragIndices, type: promptInfo?.type, chatInstanceId: course?.id } },
+    'prompt': { name: 'Valitse alustus', component: PromptModal, props: { chatInstanceId: chatInstance?.id } },
+    'editPrompt': { name: 'Muokkaa alustusta', component: PromptEditor, props: { prompt: activePrompt, ragIndices, type: promptInfo?.type, chatInstanceId: chatInstance?.id } },
     'showPrompt': { name: 'Alustuksen tiedot', component: Box },
-    'selectPrompt': { name: 'Valitse alustus', component: PromptModal, props: { course } },
+    'selectPrompt': { name: 'Valitse alustus', component: PromptModal, props: { chatInstanceId: chatInstance?.id } },
   }
 
 
@@ -446,7 +446,7 @@ const ChatV2Content = () => {
               onClose={() => {
                 setChatLeftSidePanelOpen(false)
               }}
-              course={course}
+              course={chatInstance}
               setSettingsModalOpen={setSettingsModalOpen}
               setDisclaimerStatus={setDisclaimerStatus}
               messages={messages}
@@ -461,7 +461,7 @@ const ChatV2Content = () => {
               collapsed={sidebarCollapsed}
               setCollapsed={setSidebarCollapsed}
               isAdmin={isAdmin}
-              course={course}
+              course={chatInstance}
               handleReset={() => setResetConfirmModalOpen(true)}
               setBottomSheetContentId={setBottomSheetContentId}
               setSettingsModalOpen={setSettingsModalOpen}
@@ -480,7 +480,7 @@ const ChatV2Content = () => {
                 position: 'sticky',
                 top: 0,
               }}
-              course={course}
+              course={chatInstance}
               handleReset={() => setResetConfirmModalOpen(true)}
               setSettingsModalOpen={setSettingsModalOpen}
               setDisclaimerStatus={setDisclaimerStatus}
@@ -526,7 +526,7 @@ const ChatV2Content = () => {
           }}
           ref={scrollRef}
         >
-          {course?.saveDiscussions && (
+          {chatInstance?.saveDiscussions && (
             <Paper
               variant="outlined"
               sx={{
@@ -539,11 +539,11 @@ const ChatV2Content = () => {
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Typography variant="body1" fontWeight={600}>
-                  {course?.notOptoutSaving ? t('course:isSavedNotOptOut') : t('course:isSavedOptOut')}
+                  {chatInstance?.notOptoutSaving ? t('course:isSavedNotOptOut') : t('course:isSavedOptOut')}
                 </Typography>
               </Box>
 
-              {!course.notOptoutSaving && course.saveDiscussions && (
+              {!chatInstance.notOptoutSaving && chatInstance.saveDiscussions && (
                 <FormControlLabel
                   control={<Switch onChange={() => setSaveConsent(!saveConsent)} checked={saveConsent} />}
                   label={saveConsent ? t('chat:allowSave') : t('chat:denySave')}
@@ -553,7 +553,7 @@ const ChatV2Content = () => {
           )}
 
           <Conversation
-            initial={<ConversationSplash courseName={course && getLanguageValue(course.name, i18n.language)} courseDate={course?.activityPeriod} />}
+            initial={<ConversationSplash courseName={chatInstance && getLanguageValue(chatInstance.name, i18n.language)} courseDate={chatInstance?.activityPeriod} />}
             messages={messages}
             completion={completion}
             generationInfo={generationInfo}
