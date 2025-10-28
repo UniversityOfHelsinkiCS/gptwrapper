@@ -1,9 +1,17 @@
-import { createClient } from 'redis'
+import { createClient, RediSearchSchema } from 'redis'
 import { redisClient } from '../../util/redis'
+import { RAG_LANGUAGES } from '@shared/lang'
+import type { RagIndex } from '../../db/models'
 
-const SCHEMA = {
+const SCHEMA: RediSearchSchema = {
   content: {
     type: 'TEXT',
+  },
+  content_exact: {
+    type: 'TEXT',
+    WEIGHT: 2.0,
+    NOSTEM: true,
+    WITHSUFFIXTRIE: true,
   },
   metadata: {
     type: 'TEXT',
@@ -27,10 +35,16 @@ export type RedisDocument = {
 export class RedisVectorStore {
   client: ReturnType<typeof createClient>
   indexName: string
+  language: typeof RAG_LANGUAGES[number]
 
-  constructor(indexName: string) {
+  constructor(indexName: string, language: typeof RAG_LANGUAGES[number]) {
     this.client = redisClient
     this.indexName = indexName
+    this.language = language
+  }
+
+  static fromRagIndex(ragIndex: RagIndex) {
+    return new RedisVectorStore(`ragIndex-${ragIndex.id}`, ragIndex.metadata.language ?? 'English')
   }
 
   async createIndex() {
@@ -38,6 +52,7 @@ export class RedisVectorStore {
       await this.client.ft.create(this.indexName, SCHEMA, {
         ON: 'HASH',
         PREFIX: `doc:${this.indexName}:`,
+        LANGUAGE: this.language,
       })
     } catch (e) {
       const err = e instanceof Error ? e : new Error(String(e));
@@ -62,6 +77,7 @@ export class RedisVectorStore {
       const docId = `doc:${this.indexName}:${doc.id}`
       pipeline.hSet(docId, {
         content: doc.content,
+        content_exact: doc.content,
         metadata: doc.metadata,
         content_vector: Buffer.from(new Float32Array(doc.content_vector).buffer),
       })

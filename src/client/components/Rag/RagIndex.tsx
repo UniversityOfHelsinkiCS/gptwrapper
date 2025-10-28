@@ -17,6 +17,7 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import queryClient from '../../util/queryClient'
 import { IngestionPipelineStageKey } from '@shared/ingestion'
 import { RagFilesStatus } from './RagFilesStatus'
+import apiClient from '../../util/apiClient'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -87,6 +88,12 @@ export const RagIndex: React.FC = () => {
       }
     })
     await uploadMutation.mutateAsync(Array.from(files))
+    refetch()
+    refetchStatuses()
+  }
+
+  const handleReset = async () => {
+    await apiClient.post(`/rag/indices/${id}/reset`)
     refetch()
     refetchStatuses()
   }
@@ -165,11 +172,9 @@ export const RagIndex: React.FC = () => {
             {user?.isAdmin && (
               <OutlineButtonBlack
                 startIcon={<Autorenew />}
-                onClick={async () => {
-                  await handleUpload([])
-                }}
+                onClick={handleReset}
               >
-                Force retry (admin only)
+                Reset (admin only)
               </OutlineButtonBlack>
             )}
           </Box>

@@ -68,7 +68,7 @@ ragIndexRouter.delete('/', async (req, res) => {
 
   await FileStore.deleteRagIndexDocuments(ragIndex)
 
-  await new RedisVectorStore(`ragIndex-${ragIndex.id}`).dropIndex()
+  await RedisVectorStore.fromRagIndex(ragIndex).dropIndex()
 
   await ragIndex.destroy() // Cascade deletes RagFiles
 
@@ -257,6 +257,29 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
   })
 
   res.json({ message: 'Files uploaded successfully' })
+})
+
+ragIndexRouter.post('/reset', async (req, res) => {
+  const ragIndexRequest = req as unknown as RagIndexRequest
+  const { ragIndex } = ragIndexRequest
+
+  const vectorStore = RedisVectorStore.fromRagIndex(ragIndex)
+
+  await RagFile.update({
+    pipelineStage: 'ingesting',
+  }, {
+    where: { ragIndexId: ragIndex.id },
+  })
+  
+  await vectorStore.dropIndex()
+  await vectorStore.createIndex()
+  
+  // Now we need to re-ingest
+  ingestRagFiles(ragIndex).catch((error) => {
+    console.error('Error ingesting RAG files:', error)
+  })
+
+  res.json({ message: 'RAG index reset successfully' })
 })
 
 ragIndexRouter.post('/search', async (req, res) => {

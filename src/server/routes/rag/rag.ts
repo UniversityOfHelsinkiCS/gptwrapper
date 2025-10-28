@@ -58,7 +58,7 @@ router.post('/indices', async (req, res) => {
     userId: user.id,
   })
 
-  await new RedisVectorStore(`ragIndex-${ragIndex.id}`).createIndex()
+  await RedisVectorStore.fromRagIndex(ragIndex).createIndex()
 
   res.json(ragIndex)
 })

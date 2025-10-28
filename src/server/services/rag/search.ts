@@ -1,6 +1,6 @@
 import { RagChunk, SearchParams } from '../../../shared/rag'
 import type { RagIndex } from '../../db/models'
-import { getAndFTSearchRetriever, getOrFTSearchRetriever, getPhraseFTSearchRetriever, getVectorSearchRetriever } from './retrievers'
+import { getAndFTSearchRetriever, getOrFTSearchRetriever, getExactFTSearchRetriever, getSubstringFTSearchRetriever, getVectorSearchRetriever } from './retrievers'
 import { EnsembleRetriever } from 'langchain/retrievers/ensemble'
 import type { BaseRetriever } from '@langchain/core/retrievers'
 import { curateDocuments } from './curator'
@@ -21,12 +21,14 @@ export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Pr
   if (searchParams.ft) {
     retrievers.push(
       ...[
-        getPhraseFTSearchRetriever(`ragIndex-${ragIndex.id}`, ragIndex.metadata.language),
+        getExactFTSearchRetriever(`ragIndex-${ragIndex.id}`, ragIndex.metadata.language),
+        getSubstringFTSearchRetriever(`ragIndex-${ragIndex.id}`, ragIndex.metadata.language),
         getAndFTSearchRetriever(`ragIndex-${ragIndex.id}`, ragIndex.metadata.language),
         getOrFTSearchRetriever(`ragIndex-${ragIndex.id}`, ragIndex.metadata.language),
       ],
     )
-    weights.push(...[0.7, 0.4, 0.2])
+    // weights.push(0.4)
+    weights.push(...[1.0, 0.4, 0.4, 0.4])
   }
 
   const retriever = new EnsembleRetriever({
@@ -36,6 +38,7 @@ export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Pr
 
   timings.search = Date.now()
   let results = await retriever.invoke(searchParams.query)
+  console.log('Search found results:', results.length)
   timings.search = Date.now() - timings.search
 
   // Take top 9 results before curation

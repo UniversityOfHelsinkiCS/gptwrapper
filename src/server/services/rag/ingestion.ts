@@ -46,7 +46,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
 
   await ragFile.update({ error: null, pipelineStage: 'ingesting' })
 
-  const vectorStore = new RedisVectorStore(`ragIndex-${ragIndex.id}`)
+  const vectorStore = RedisVectorStore.fromRagIndex(ragIndex)
 
   let progress = 2.5
   const update = {
