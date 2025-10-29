@@ -494,7 +494,7 @@ const ChatV2Content = () => {
           display: 'flex',
           flexDirection: 'column',
           // magical -10px prevents horizontal overflow when vertical scrollbar appears
-          width: `calc(${isMobile ? '100%' : `100vw - 10px - var(${sidebarCollapsed ? '--sidebar-width-collapsed' : '--sidebar-width'}) - var(${rightMenuOpen ? '--right-menu-width' : '0px'})`})`
+          maxWidth: isMobile ? '100%' : `calc(100vw - 10px - ${sidebarCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'} - ${rightMenuOpen ? 'var(--right-menu-width)' : '0px'})`
         }}
       >
         {isMobile && (<GrayButton
