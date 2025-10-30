@@ -6,21 +6,23 @@ import { redisClient } from '../../util/redis'
 import { Embeddings } from '@langchain/core/embeddings'
 import { getEmbedder } from './embedder'
 
-export const getExactFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => `@content_exact:"${q}"`, language)
-export const getSubstringFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => `*${q}*`, language)
-export const getAndFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => q, language)
-export const getOrFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => q.split(' ').join(' | '), language)
+export const getExactFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => `@content_exact:"${q}"`, language, 'exact')
+export const getSubstringFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => `*${q}*`, language, 'substring')
+export const getAndFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => q, language, 'and')
+export const getOrFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => q.split(' ').join(' | '), language, 'or')
 
 class FTSearchRetriever extends BaseRetriever {
+  name?: string
   indexName: string
   language?: RediSearchLanguage
   queryTransform: (query: string) => string
 
-  constructor(indexName: string, queryTransform: (query: string) => string, language?: RediSearchLanguage) {
+  constructor(indexName: string, queryTransform: (query: string) => string, language?: RediSearchLanguage, name?: string) {
     super()
     this.indexName = indexName
     this.language = language
     this.queryTransform = queryTransform
+    this.name = name
   }
 
   async _getRelevantDocuments(query: string, _callbacks?: CallbackManagerForRetrieverRun): Promise<DocumentInterface<Record<string, any>>[]> {
@@ -36,7 +38,6 @@ class FTSearchRetriever extends BaseRetriever {
   }
 
   async redisQuery(query: string): Promise<SearchReply['documents']> {
-    console.log('FTSearchRetriever querying:', query, 'on index:', this.indexName)
     const results = await redisClient.ft.search(this.indexName, query, {
       RETURN: ['content', 'metadata'],
       HIGHLIGHT: {
@@ -59,7 +60,7 @@ class FTSearchRetriever extends BaseRetriever {
       return []
     }
 
-    console.log('FTSearchRetriever results:', results.documents.length)
+    console.log(`FTSearchRetriever ${this.name ? `(${this.name}) ` : ''}results:`, results.documents.length)
 
     return (results as SearchReply).documents
   }

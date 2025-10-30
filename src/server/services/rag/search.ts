@@ -8,7 +8,7 @@ import { curateDocuments } from './curator'
 export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Promise<{ results: RagChunk[]; timings: Record<string, number> }> => {
   const timings: Record<string, number> = {}
 
-  const vectorstoreRetriever = getVectorSearchRetriever(`ragIndex-${ragIndex.id}`, 12)
+  const vectorstoreRetriever = getVectorSearchRetriever(`ragIndex-${ragIndex.id}`, 15)
 
   const retrievers: BaseRetriever[] = []
   const weights: number[] = []

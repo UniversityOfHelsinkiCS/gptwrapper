@@ -5,7 +5,7 @@ import { z } from "zod/v4";
 import logger from "src/server/util/logger";
 
 const CurationOutputSchema = z.object({
-  reason: z.string().min(1).max(500).describe("A brief explanation of the relevance score assigned to the document."),
+  // reason: z.string().min(1).max(500).describe("A brief explanation of the relevance score assigned to the document."),
   relevanceScore: z.number().min(0).max(1).describe("A score from 0 to 1 indicating the relevance of the document to the user query."),
   shouldBeIncluded: z.boolean().describe("Indicates whether the document should be included in the final curated list."),
 })
@@ -52,7 +52,7 @@ export const curateDocuments = async (documents: Document[], query: string) => {
     return {
       document: doc,
       relevanceScore: response.relevanceScore,
-      reason: response.reason,
+      // reason: response.reason,
       shouldBeIncluded: response.shouldBeIncluded,
     };
   }));

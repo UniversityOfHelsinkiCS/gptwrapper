@@ -42,10 +42,4 @@ export default [
       },
     },
   },
-  {
-    files: ['**/*.integration-test.*', '**/*.test.*'],
-    languageOptions: {
-      globals: globals.jest,
-    },
-  },
 ]

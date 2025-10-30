@@ -130,7 +130,7 @@ export const RagIndex: React.FC = () => {
           <OutlineButtonBlack startIcon={<FindInPage />} onClick={() => setSearchOpen(true)} disabled={ragDetails.ragFiles.length === 0}>
             {t('rag:testRetrievalButton')}
           </OutlineButtonBlack>
-          <Dialog open={searchOpen} onClose={() => setSearchOpen(false)} fullWidth maxWidth="md">
+          <Dialog open={searchOpen} onClose={() => setSearchOpen(false)} fullWidth maxWidth="lg">
             <DialogTitle>{t('rag:testRetrieval', { name: ragDetails.metadata.name })}</DialogTitle>
             <DialogContent>
               <Search ragIndex={ragDetails} />

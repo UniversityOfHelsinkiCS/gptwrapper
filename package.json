@@ -16,7 +16,7 @@
     "build": "vite build",
     "prepare": "husky install",
     "test:e2e": "playwright test",
-    "test:evals": "export EVALS=true && playwright test",
+    "test:evals": "node evals/rag-eval.spec.ts",
     "test:record": "playwright codegen -o e2e/recorded.spec.ts localhost:3000",
     "translations": "node scripts/analyzeTranslations.js",
     "migrations": "node scripts/analyzeMigrationNames.js"
