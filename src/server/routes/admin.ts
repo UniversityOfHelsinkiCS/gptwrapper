@@ -4,7 +4,7 @@ import { Op, WhereOptions } from 'sequelize'
 import { sequelize } from '../db/connection'
 
 import { RequestWithUser } from '../types'
-import { ChatInstance, UserChatInstanceUsage, User, Prompt, ChatInstanceRagIndex } from '../db/models'
+import { ChatInstance, UserChatInstanceUsage, User, Prompt, ChatInstanceRagIndex, RagIndex } from '../db/models'
 import { getCourse } from '../util/importer'
 import { run as runUpdater } from '../updater'
 import { statsViewerIams } from '../util/config'
@@ -112,15 +112,10 @@ adminRouter.get('/statistics', async (req, res) => {
     }
 
     const extractFields = async (chatInstance: ChatInstance & { prompts: any[] }): Promise<Statistic> => {
-      
-      const ragIndices = await ChatInstanceRagIndex.findAll({
-        where:
-        {
-          chatInstanceId: chatInstance.id
-        },
-        raw: true
-      })
-      const ragIndicesCount = ragIndices ? ragIndices.length : 0
+
+      const ragIndicesLength = chatInstance.ragIndices?.length
+      const ragIndicesCount = ragIndicesLength ? ragIndicesLength : 0 
+
       const units = chatInstance.courseUnits
 
       const codes = units.map((u) => u.code)
@@ -151,7 +146,12 @@ adminRouter.get('/statistics', async (req, res) => {
             as: 'prompts',
             attributes: ['id'],
           },
-        ],
+          {
+            model: RagIndex,
+            as: 'ragIndices',
+            required: false
+          }],
+
       })) as ChatInstance & { prompts: any[] }
       const data: any = await extractFields(chatInstance)
       datas.push(data)
