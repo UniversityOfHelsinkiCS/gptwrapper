@@ -6,10 +6,10 @@ import { redisClient } from '../../util/redis'
 import { Embeddings } from '@langchain/core/embeddings'
 import { getEmbedder } from './embedder'
 
-export const getExactFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => `@content_exact:"${q}"`, language, 'exact')
-export const getSubstringFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => `*${q}*`, language, 'substring')
-export const getAndFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => q, language, 'and')
-export const getOrFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => q.split(' ').join(' | '), language, 'or')
+export const getExactFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => `@content_exact:"${q.trim()}"`, language, 'exact')
+export const getSubstringFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => `*${q.trim()}*`, language, 'substring')
+export const getAndFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => q.trim(), language, 'and')
+export const getOrFTSearchRetriever = (indexName: string, language?: RediSearchLanguage) => new FTSearchRetriever(indexName, (q) => q.split(' ').map(word => word.trim()).filter(word => word.length > 0).join(' | '), language, 'or')
 
 class FTSearchRetriever extends BaseRetriever {
   name?: string
