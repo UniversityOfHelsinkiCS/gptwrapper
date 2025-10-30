@@ -73,8 +73,6 @@ export const PromptEditor = ({
     event.preventDefault()
     setLoading(true)
 
-    const model = selectedModel !== 'none' ? selectedModel : undefined
-
     const messages: Message[] = ragIndexId && ragSystemMessage.length > 0 ? [{ role: 'system', content: ragSystemMessage }] : []
 
     try {
@@ -86,7 +84,7 @@ export const PromptEditor = ({
           messages,
           hidden,
           ragIndexId,
-          model,
+          model: selectedModel,
           temperature,
         })
         enqueueSnackbar(t('prompt:updatedPrompt', { name }), { variant: 'success' })
@@ -100,7 +98,7 @@ export const PromptEditor = ({
           messages,
           hidden,
           ragIndexId,
-          model,
+          model: selectedModel,
           temperature,
         })
         enqueueSnackbar(t('prompt:createdPrompt', { name }), { variant: 'success' })

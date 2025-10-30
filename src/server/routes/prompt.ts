@@ -1,10 +1,11 @@
 import express from 'express'
 import type { InferAttributes } from 'sequelize'
-import { type PromptCreationParams, PromptCreationParamsSchema, PromptUpdateableParamsSchema } from '../../shared/prompt'
+import { PromptCreationParamsSchema, PromptUpdateableParamsSchema } from '../../shared/prompt'
 import type { User } from '@shared/user'
 import { ChatInstance, Prompt, RagIndex, Responsibility } from '../db/models'
 import type { RequestWithUser } from '../types'
 import { ApplicationError } from '../util/ApplicationError'
+import { z } from 'zod/v4'
 
 const promptRouter = express.Router()
 
@@ -93,7 +94,7 @@ const authorizeChatInstancePromptResponsible = async (user: User, prompt: ChatIn
   }
 }
 
-const authorizePromptCreation = async (user: User, promptParams: PromptCreationParams) => {
+const authorizePromptCreation = async (user: User, promptParams: z.output<typeof PromptCreationParamsSchema>) => {
   switch (promptParams.type) {
     case 'CHAT_INSTANCE': {
       await authorizeChatInstancePromptResponsible(user, promptParams)

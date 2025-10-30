@@ -27,7 +27,7 @@ class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prom
 
   declare hidden: CreationOptional<boolean>
 
-  declare model?: CreationOptional<ValidModelName>
+  declare model?: CreationOptional<ValidModelName | null>
 
   declare temperature?: CreationOptional<number>
 

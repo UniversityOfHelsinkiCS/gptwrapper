@@ -9,7 +9,6 @@ import { useAnalyticsDispatch } from '../../stores/analytics'
 import type { MessageGenerationInfo } from '../../../shared/chat'
 import { useTranslation } from 'react-i18next'
 import { PromptCreationParams, PromptEditableParams } from '@shared/prompt'
-import { useDeletePromptMutation } from 'src/client/hooks/usePromptMutation'
 
 
 export type CreatePromptMutation = UseMutateAsyncFunction<void, ApiError, Omit<PromptCreationParams, 'userId'>, unknown>
