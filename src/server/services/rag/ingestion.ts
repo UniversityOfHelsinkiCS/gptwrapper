@@ -79,29 +79,33 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
         eta: total * 10000,
       })
 
-      const transcriptions: Array<string> = []
-      for await (const p of pages) {
-        let text = ''
+      const jobPromises = pages.map(async (p, index) => {
         try {
-          text = await p.job!.waitUntilFinished(pdfQueueEvents)
+          const text = await p.job!.waitUntilFinished(pdfQueueEvents)
+          return { index, text, success: true }
         } catch (error) {
           logger.error('Page job failed: ', p.job!.id, error)
-          text = p.text
-        } finally {
-          transcriptions.push(text)
-          completed += 1
-          const fraction = completed / total
-
-          const pct = Math.round(start + (end - start) * fraction)
-          progress = pct
-
-          await updateRagFileStatus(ragFile, {
-            ...update,
-            progress,
-            message: `Parsing (${completed}/${total})`,
-            eta: Math.round((total - completed) * 6000),
-          })
+          return { index, text: p.text, success: false }
         }
+      })
+
+      const transcriptions: Array<string> = new Array(total)
+
+      for await (const result of jobPromises.map(p => p.then(r => r))) {
+        transcriptions[result.index] = result.text
+        completed += 1
+
+        const fraction = completed / total
+
+        const pct = Math.round(start + (end - start) * fraction)
+        progress = pct
+
+        await updateRagFileStatus(ragFile, {
+          ...update,
+          progress,
+          message: `Parsing (${completed}/${total})`,
+          eta: Math.round((total - completed) * 6000),
+        })
       }
 
       finalText = transcriptions.join('\n\n')
