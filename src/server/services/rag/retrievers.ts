@@ -6,10 +6,20 @@ import { redisClient } from '../../util/redis'
 import { Embeddings } from '@langchain/core/embeddings'
 import { getEmbedder } from './embedder'
 
-export const getExactFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `@content_exact:"${q.trim()}"`, language, 'exact', highlight)
-export const getSubstringFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `*${q.trim()}*`, language, 'substring', highlight)
-export const getAndFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => q.trim(), language, 'and', highlight)
+export const getExactFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `@content_exact:"${q}"`, language, 'exact', highlight)
+export const getSubstringFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `*${q}*`, language, 'substring', highlight)
+export const getAndFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => q, language, 'and', highlight)
 export const getOrFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => q.split(' ').map(word => word.trim()).filter(word => word.length > 0).join(' | '), language, 'or', highlight)
+
+
+const normalizeWhitespace = (str: string) => {
+  return str.replace(/\s+/g, ' ').trim();
+}
+
+const removeIllegalCharacters = (str: string) => {
+  // Remove non-word characters except spaces
+  return str.replace(/[^\w\s]/g, '');
+}
 
 class FTSearchRetriever extends BaseRetriever {
   name?: string
@@ -28,7 +38,9 @@ class FTSearchRetriever extends BaseRetriever {
   }
 
   async _getRelevantDocuments(query: string, _callbacks?: CallbackManagerForRetrieverRun): Promise<DocumentInterface<Record<string, any>>[]> {
-    const documents = await this.redisQuery(this.queryTransform(query))
+    const documents = await this.redisQuery(
+      this.queryTransform(removeIllegalCharacters(normalizeWhitespace(query)))
+    )
 
     return documents.map(
       (doc) =>
@@ -62,7 +74,7 @@ class FTSearchRetriever extends BaseRetriever {
       return []
     }
 
-    console.log(`FTSearchRetriever ${this.name ? `(${this.name}) ` : ''}results:`, results.documents.length)
+    // console.log(`${query} ${this.name ? `(${this.name}) ` : ''}results:`, results.documents.length)
 
     return (results as SearchReply).documents
   }
