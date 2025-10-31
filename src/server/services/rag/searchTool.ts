@@ -43,7 +43,7 @@ export const getRagIndexSearchTool = (ragIndex: RagIndex) =>
     },
     {
       name: TOOL_NAME, // Gotcha: function name must match '^[a-zA-Z0-9_\.-]+$' at least in AzureOpenAI. This name must satisfy the name in ChatToolDef type
-      description: `Search documents in the materials (titled '${ragIndex.metadata.name}'). Prefer ${ragIndex.metadata.language}, which is the language used in the documents.`,
+      description: `Search documents in the materials (titled '${ragIndex.metadata.name}'). Prefer ${ragIndex.metadata.language}, which is the language used in the documents. Multiple queries may be comma-separated.`,
       schema,
       responseFormat: 'content_and_artifact',
     },

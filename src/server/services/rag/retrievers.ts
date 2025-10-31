@@ -16,9 +16,12 @@ const normalizeWhitespace = (str: string) => {
   return str.replace(/\s+/g, ' ').trim();
 }
 
+const TOKEN_RE = new RegExp(
+  /[,.<>{}[\]"':;!@#$%^&*()\-+=~]/g
+);
+
 const removeIllegalCharacters = (str: string) => {
-  // Remove non-word characters except spaces
-  return str.replace(/[^\w\s]/g, '');
+  return str.replace(TOKEN_RE, ' ');
 }
 
 class FTSearchRetriever extends BaseRetriever {
