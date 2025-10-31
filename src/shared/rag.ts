@@ -12,12 +12,16 @@ export type RagChunk = {
 
 export const SearchSchema = z.object({
   query: z.string().min(1).max(1000),
-  ft: z.boolean().default(true),
+  ftExact: z.boolean().default(true),
+  ftSubstring: z.boolean().default(true),
+  ftAnd: z.boolean().default(true),
+  ftOr: z.boolean().default(true),
   vector: z.boolean().default(true),
-  vectorK: z.number().min(1).max(20).default(8),
+  vectorK: z.number().min(5).max(20).default(10),
   rerank: z.boolean().default(true),
-  rerankK: z.number().min(1).max(20).default(5),
+  rerankK: z.number().min(5).max(20).default(15),
   curate: z.boolean().default(false),
+  highlight: z.boolean().default(false),
 })
 
 export type SearchInputParams = z.input<typeof SearchSchema>

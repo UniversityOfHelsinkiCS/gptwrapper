@@ -24,7 +24,10 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
     const searchParams: SearchInputParams = {
       query,
       vector,
-      ft,
+      ftExact: ft,
+      ftSubstring: ft,
+      ftAnd: ft,
+      ftOr: ft,
       rerank,
       curate,
     }

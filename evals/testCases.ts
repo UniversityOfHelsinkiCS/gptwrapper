@@ -95,4 +95,42 @@ export const cases = [
     expected: ['Jokaisesta sprintistä on jaossa ryhmälle 2.5 kurssipistettä, eli maksimissaan neljästä sprintistä ryhmä voi saada 10 pistettä', 'Sprintin maksimi on 2.5 pistettä.', 'Kannattaa esitellä tärkein toiminnallisuus, aikaa demossa on vähän joten ei kannata rönsyillä'],
     source: 'osa0.txt',
   },
+  {
+    name: "Hyvä User Story",
+    searchStrings: [
+      'user story',
+      'user story määritelmä',
+      'mikä on hyvä user story',
+      'mitkä ovat hyvän user storyn kriteerit',
+      'minkälainen on hyvä user story',
+      'hyvän user storyn kriteerit',
+      'miten kirjoitetaan hyvä user story',
+      'hyvä user story mitä sisältää INVEST kriteerit product backlog käyttäjätarina määritelmä ohjelmistotuotanto'
+    ],
+    expected: [
+      'INVEST',
+      'As a type of user, I want functionality so that business value',
+    ],
+  },
+  {
+    name: "Lean waste (hukka) -käsitteen määritelmä",
+    searchStrings: [
+      'hukka',
+      'waste',
+      'lean waste',
+      'lean hukka',
+      'lean waste määritelmä',
+      'lean hukka käsite',
+      'hukan minimointi',
+      'lean waste minimointi',
+      'lean software development waste',
+    ],
+    expected: [
+      'Lean-ajattelun taustalla on idea hukan (engl. waste, jap. muda) eli arvoa tuottamattomien asioiden',
+      'Leanin mukaan on olemassa kolmen eri tyypin hukkaa: muri, mura ja muda.',
+      'Pyrkimyksenä oli eliminoida kaikki mahdollinen hukka (engl. waste),',
+      'Kaikki ylimääräiset työvaiheet, mitkä eivät ole välttämättömiä riittävän laadukkaaseen lopputulokseen ovat myös hukkaa.',
+      'Näin kysymällä toistuvasti (noin viisi kertaa) miksi on mahdollista päästä ongelman perimmäisen syyn lähteille, eli sinne, mitä korjaamalla hukka saadaan toivon mukaan eliminoitua.',
+    ],
+  }
 ]
