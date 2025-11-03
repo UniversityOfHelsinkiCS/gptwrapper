@@ -1,8 +1,8 @@
 import { RagChunk, SearchParams } from '../../../shared/rag'
 import type { RagIndex } from '../../db/models'
-import { getAndFTSearchRetriever, getOrFTSearchRetriever, getExactFTSearchRetriever, getSubstringFTSearchRetriever, getVectorSearchRetriever } from './retrievers'
+import { getAndFTSearchRetriever, getOrFTSearchRetriever, getExactFTSearchRetriever, getSubstringFTSearchRetriever, getVectorSearchRetriever, getMultiQueryEnsembleRetriever } from './retrievers'
 import { EnsembleRetriever } from 'langchain/retrievers/ensemble'
-import type { BaseRetriever } from '@langchain/core/retrievers'
+import { BaseRetriever } from '@langchain/core/retrievers'
 import { curateDocuments } from './curator'
 
 export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Promise<{ results: RagChunk[]; timings: Record<string, number> }> => {
@@ -32,14 +32,14 @@ export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Pr
     weights.push(0.4)
   }
 
-  const retriever = new EnsembleRetriever({
+  const baseEnsembleRetriever = new EnsembleRetriever({
     retrievers,
     weights,
   })
 
-  timings.search = Date.now()
-  let results = await retriever.invoke(searchParams.query)
-  timings.search = Date.now() - timings.search
+  const multiQueryRetriever = getMultiQueryEnsembleRetriever(baseEnsembleRetriever, timings, { generateSynonyms: searchParams.generateSynonyms })
+
+  let results = await multiQueryRetriever.invoke(searchParams.query)
 
   // Take top 15 results before curation
   results = results.slice(0, searchParams.rerankK)

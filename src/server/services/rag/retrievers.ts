@@ -5,6 +5,8 @@ import { RediSearchLanguage, SearchReply } from 'redis'
 import { redisClient } from '../../util/redis'
 import { Embeddings } from '@langchain/core/embeddings'
 import { getEmbedder } from './embedder'
+import { transformQuery, TransformQueryOptions } from './queryTransformer'
+import { EnsembleRetriever } from 'langchain/retrievers/ensemble'
 
 export const getExactFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `@content_exact:"${q}"`, language, 'exact', highlight)
 export const getSubstringFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `*${q}*`, language, 'substring', highlight)
@@ -77,7 +79,7 @@ class FTSearchRetriever extends BaseRetriever {
       return []
     }
 
-    // console.log(`${query} ${this.name ? `(${this.name}) ` : ''}results:`, results.documents.length)
+    console.log(`${query} ${this.name ? `(${this.name}) ` : ''}results:`, results.documents.length)
 
     return (results as SearchReply).documents
   }
@@ -143,3 +145,40 @@ class VectorSearchRetriever extends BaseRetriever {
 }
 
 export const getVectorSearchRetriever = (indexName: string, k: number) => new VectorSearchRetriever(indexName, k)
+
+export const retrieverFrom = (fn: (query: string) => Promise<DocumentInterface<Record<string, any>>[]>) => {
+  return new FunctionRetriever(fn)
+}
+
+class FunctionRetriever extends BaseRetriever {
+  fn: (query: string) => Promise<DocumentInterface<Record<string, any>>[]>
+
+  constructor(fn: (query: string) => Promise<DocumentInterface<Record<string, any>>[]>) {
+    super()
+    this.fn = fn
+  }
+
+  async _getRelevantDocuments(query: string, _callbacks?: CallbackManagerForRetrieverRun): Promise<DocumentInterface<Record<string, any>>[]> {
+    return this.fn(query)
+  }
+
+  lc_namespace: string[] = ['currechat', 'services', 'rag', 'retrievers']
+}
+
+export const getMultiQueryEnsembleRetriever = (baseRetriever: BaseRetriever, timings: Record<string, number>, transformQueryOptions: TransformQueryOptions = {}) => retrieverFrom(async (query: string) => {
+
+  timings.transformQuery = Date.now()
+  const queries = await transformQuery(query, transformQueryOptions)
+  timings.transformQuery = Date.now() - timings.transformQuery
+
+  const ensemble = new EnsembleRetriever({
+    retrievers: queries.map((q) => retrieverFrom((_) => baseRetriever.invoke(q))),
+    weights: queries.map(() => 1.0),
+  })
+
+  timings.search = Date.now()
+  const result = ensemble.invoke('')
+  timings.search = Date.now() - timings.search
+  
+  return result
+})

@@ -11,7 +11,7 @@ export type RagChunk = {
 }
 
 export const SearchSchema = z.object({
-  query: z.string().min(1).max(1000),
+  query: z.string().min(1).max(2000),
   ftExact: z.boolean().default(true),
   ftSubstring: z.boolean().default(true),
   ftAnd: z.boolean().default(true),
@@ -21,6 +21,7 @@ export const SearchSchema = z.object({
   rerank: z.boolean().default(true),
   rerankK: z.number().min(5).max(20).default(15),
   curate: z.boolean().default(false),
+  generateSynonyms: z.boolean().default(false),
   highlight: z.boolean().default(false),
 })
 

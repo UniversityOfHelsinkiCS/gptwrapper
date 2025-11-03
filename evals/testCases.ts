@@ -132,5 +132,17 @@ export const cases = [
       'Kaikki ylimääräiset työvaiheet, mitkä eivät ole välttämättömiä riittävän laadukkaaseen lopputulokseen ovat myös hukkaa.',
       'Näin kysymällä toistuvasti (noin viisi kertaa) miksi on mahdollista päästä ongelman perimmäisen syyn lähteille, eli sinne, mitä korjaamalla hukka saadaan toivon mukaan eliminoitua.',
     ],
+  },
+  {
+    name: "Apua tehtävien tekoon",
+    searchStrings: [
+      "mistä saa apua tehtävien tekoon",
+      "tehtävien teko apu",
+      "tehtävät apu",
+    ],
+    expected: [
+      'kampuksella pajassa BK107',
+      'pe 12-14',
+    ]
   }
 ]

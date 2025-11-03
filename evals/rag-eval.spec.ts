@@ -8,14 +8,15 @@ const TEST_RAG_ID = 1098
 
 const params: Omit<SearchInputParams, "query">[] = [{
   ftExact: true,
-  ftSubstring: false,
-  ftAnd: false,
-  ftOr: false,
+  ftSubstring: true,
+  ftAnd: true,
+  ftOr: true,
   vector: true,
   vectorK: 10,
   rerank: true,
   rerankK: 15,
   curate: false,
+  // generateSynonyms: true,
 }]
 
 function normalizeWhitespace(str: string): string {

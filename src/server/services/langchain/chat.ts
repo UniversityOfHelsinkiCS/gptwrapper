@@ -4,12 +4,10 @@ import { AIMessageChunk, BaseMessageLike } from '@langchain/core/messages'
 import type { Runnable } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
-import { AzureChatOpenAI, type ChatOpenAICallOptions } from '@langchain/openai'
 import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, type ValidModelName, validModels } from '@config'
 import type { ChatEvent, ChatMessage, Message } from '@shared/chat'
 import type { ChatToolDef, ChatToolOutput } from '@shared/tools'
 import type { User } from '@shared/user'
-import { AZURE_API_KEY, AZURE_RESOURCE } from '../../util/config'
 import { ToolResultStore } from './fileSearchResultsStore'
 import { MockModel } from './MockModel'
 import { AiApiWarning, WarningType } from '@shared/aiApi'
@@ -105,22 +103,13 @@ export const streamChat = async ({
     return { warnings, inputTokenCount }
   }
 
-  const result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
+  let iterations = 2
+  let result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
 
-  // If the model decided to call tools, execute them and send the results back to the model in a second turn.
-  if (result.toolCalls.length > 0) {
-    const result2 = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
-
-    return {
-      tokenCount: result2.tokenCount,
-      firstTokenTS: result2.firstTokenTS,
-      inputTokenCount: result2.inputTokenCount,
-      tokenStreamingDuration: result2.tokenStreamingDuration,
-      timeToFirstToken: result2.timeToFirstToken,
-      tokensPerSecond: result2.tokensPerSecond,
-      response: (result2.fullOutput?.content ?? '') as string,
-      toolCalls: JSON.stringify(result.toolCalls.map((t) => t.name)),
-    }
+  // If the model decided to call tools, execute them and send the results back to the model in subsequent turns.
+  while (result.toolCalls.length > 0 && iterations > 0) {
+    result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
+    iterations--
   }
 
   return {
@@ -131,6 +120,7 @@ export const streamChat = async ({
     timeToFirstToken: result.timeToFirstToken,
     tokensPerSecond: result.tokensPerSecond,
     response: (result.fullOutput?.content ?? '') as string,
+    toolCalls: result.toolCalls.length > 0 ? JSON.stringify(result.toolCalls.map((t) => t.name)) : undefined,
   }
 }
 
@@ -191,12 +181,16 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
   messages.push(fullOutput as AIMessageChunk)
 
   const toolCalls = fullOutput?.tool_calls ?? []
+
   for (const toolCall of toolCalls) {
+
     const tool = toolsByName[toolCall.name]
     const id = toolCall.id
     const name = toolCall.name as ChatToolDef['name']
     const input = toolCall.args as ChatToolDef['input']
+
     if (id && tool) {
+
       await writeEvent({
         type: 'toolCallStatus',
         toolName: name,
@@ -204,14 +198,17 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
         text: `Searching for '${input.query}'`,
         input,
       })
+
       const result = await tool.invoke(toolCall)
       const artifact = result.artifact as ChatToolOutput
       await ToolResultStore.saveResults(id, artifact, user)
+
       // Add the tool's output to the message history for the next turn.
       messages.push(result)
       toolCallStatuses[id] = {
         status: 'completed',
       }
+
       await writeEvent({
         type: 'toolCallStatus',
         toolName: name,
