@@ -8,12 +8,6 @@ import { getEmbedder } from './embedder'
 import { transformQuery, TransformQueryOptions } from './queryTransformer'
 import { EnsembleRetriever } from 'langchain/retrievers/ensemble'
 
-export const getExactFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `@content_exact:"${q}"`, language, 'exact', highlight)
-export const getSubstringFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `*${q}*`, language, 'substring', highlight)
-export const getAndFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => q, language, 'and', highlight)
-export const getOrFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => q.split(' ').map(word => word.trim()).filter(word => word.length > 0).join(' | '), language, 'or', highlight)
-
-
 const normalizeWhitespace = (str: string) => {
   return str.replace(/\s+/g, ' ').trim();
 }
@@ -23,8 +17,13 @@ const TOKEN_RE = new RegExp(
 );
 
 const removeIllegalCharacters = (str: string) => {
-  return str.replace(TOKEN_RE, ' ');
+  return str.replace(TOKEN_RE, '');
 }
+
+export const getExactFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `@content_exact:"${q}"`, language, 'exact', highlight)
+export const getSubstringFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `*${removeIllegalCharacters(q)}*`, language, 'substring', highlight)
+export const getAndFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => removeIllegalCharacters(q), language, 'and', highlight)
+export const getOrFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => q.split(' ').map(word => word.trim()).filter(word => word.length > 0).join(' | '), language, 'or', highlight)
 
 class FTSearchRetriever extends BaseRetriever {
   name?: string
@@ -44,7 +43,7 @@ class FTSearchRetriever extends BaseRetriever {
 
   async _getRelevantDocuments(query: string, _callbacks?: CallbackManagerForRetrieverRun): Promise<DocumentInterface<Record<string, any>>[]> {
     const documents = await this.redisQuery(
-      this.queryTransform(removeIllegalCharacters(normalizeWhitespace(query)))
+      this.queryTransform(normalizeWhitespace(query))
     )
 
     return documents.map(
