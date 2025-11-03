@@ -37,11 +37,8 @@ export default function ModalTemplate({
 
   return (
     <Modal open={open} onClose={handleClose}>
-
-
       <Box sx={{
         position: 'absolute',
-        p: '2rem',
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
@@ -57,14 +54,14 @@ export default function ModalTemplate({
         borderRadius: '0.3rem',
         overflow: 'auto',
       }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', pb: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', p: '2rem', position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 999 }}>
           <Typography variant="h5">{name}</Typography>
           <TextButton onClick={() => setBottomSheetContentId(null)}>
             <CloseIcon />
           </TextButton>
         </Box>
 
-        <Box>
+        <Box sx={{ p: '0 2rem 2rem 2rem' }}>
           <Component {...props} />
         </Box>
       </Box>
