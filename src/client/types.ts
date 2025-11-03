@@ -150,6 +150,7 @@ export interface CourseStatistics {
 
 export type ModalInjectedProps = {
   closeModal: () => void
+  nextModal: (modalId: string) => void
 }
 
 export type ModalEntry<P = any> = {

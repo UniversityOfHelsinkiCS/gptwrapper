@@ -37,7 +37,7 @@ const CustomTabPanel = (props: TabPanelProps) => {
     )
 }
 
-const CoursesModal = ({ closeModal }: ModalInjectedProps) => {
+const CoursesModal = ({ closeModal, nextModal }: ModalInjectedProps) => {
     const { t } = useTranslation()
     const { courses, isLoading } = useUserCourses()
 
@@ -65,13 +65,13 @@ const CoursesModal = ({ closeModal }: ModalInjectedProps) => {
                 <Tab label="Menneet kurssit" />
             </Tabs>
             <CustomTabPanel value={value} index={0}>
-                <CourseList courseUnits={curreEnabled} type="enabled" closeModal={closeModal} />
+                <CourseList courseUnits={curreEnabled} type="enabled" closeModal={closeModal} nextModal={nextModal} />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-                <CourseList courseUnits={activeCourses} type="disabled" closeModal={closeModal} />
+                <CourseList courseUnits={activeCourses} type="disabled" closeModal={closeModal} nextModal={nextModal} />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
-                <CourseList courseUnits={ended} type="ended" closeModal={closeModal} />
+                <CourseList courseUnits={ended} type="ended" closeModal={closeModal} nextModal={nextModal} />
             </CustomTabPanel>
         </Box>
     )
@@ -81,7 +81,7 @@ const CoursesModal = ({ closeModal }: ModalInjectedProps) => {
 type Order = 'asc' | 'desc'
 type OrderBy = 'name' | 'code' | 'activityPeriod'
 
-const CourseList = ({ courseUnits, type, closeModal }: { courseUnits: CoursesViewCourse[], type: "enabled" | "disabled" | "ended", closeModal: () => void }) => {
+const CourseList = ({ courseUnits, type, closeModal, nextModal }: { courseUnits: CoursesViewCourse[], type: "enabled" | "disabled" | "ended", closeModal: () => void, nextModal: (modalId: string) => void }) => {
     const { t, i18n } = useTranslation()
     const navigate = useNavigate()
     const { language } = i18n
@@ -97,6 +97,11 @@ const CourseList = ({ courseUnits, type, closeModal }: { courseUnits: CoursesVie
 
     const handleChatLink = (courseId: string) => {
         closeModal()
+        navigate(`/${courseId}`)
+    }
+
+    const handleCourseSettings = (courseId: string) => {
+        nextModal("courseSettings")
         navigate(`/${courseId}`)
     }
 
@@ -187,9 +192,9 @@ const CourseList = ({ courseUnits, type, closeModal }: { courseUnits: CoursesVie
                                                     Kurssisivulle
                                                 </GrayButton>
                                                 {type === 'enabled' ? (
-                                                    <BlueButton size="small">Muokkaa</BlueButton>
+                                                    <BlueButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>Muokkaa</BlueButton>
                                                 ) : (
-                                                    <GreenButton size="small">Aktivoi</GreenButton>
+                                                    <GreenButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>Aktivoi</GreenButton>
                                                 )}
                                             </>
                                         )}

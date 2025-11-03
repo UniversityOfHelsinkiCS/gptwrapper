@@ -27,6 +27,10 @@ export default function ModalTemplate({
     setModalContentId(null)
   }
 
+  const handleNextModal = (modalId: string) => {
+    setModalContentId(modalId)
+  }
+
   return (
     <Modal open={open} onClose={handleClose}>
       <Box
@@ -64,7 +68,7 @@ export default function ModalTemplate({
         </Box>
 
         <Box sx={{ p: '0 2rem 2rem 2rem' }}>
-          <Component {...props} closeModal={handleClose} />
+          <Component {...props} closeModal={handleClose} nextModal={handleNextModal} />
         </Box>
       </Box>
     </Modal>
