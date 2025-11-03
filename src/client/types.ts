@@ -148,10 +148,14 @@ export interface CourseStatistics {
   }[]
 }
 
-export type ModalMap = {
-  [key: string]: {
-    name: string
-    component: React.ComponentType<any>
-    props?: Record<string, any>
-  }
+export type ModalInjectedProps = {
+  closeModal: () => void
 }
+
+export type ModalEntry<P = any> = {
+  name: string
+  component: React.ComponentType<P & ModalInjectedProps>
+  props?: Record<string, any>
+}
+
+export type ModalMap = Record<string, ModalEntry<any>>

@@ -178,16 +178,21 @@ const SideBar = ({
                   course ?
                     <>
                       <Box mb={3}>
-                        <Typography variant="h5" my={0.5} fontWeight="bold">
+                        <Typography
+                          variant="h6"
+                          my={0.5}
+                          fontWeight="bold"
+                          sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
+                        >
                           {course?.name[language] || 'undefined course'}
                         </Typography>
                         <Typography variant="body2" color='textSecondary'>
-                          {`${course.id} | ${formatDate(course.activityPeriod)}`}
+                          {`${course.courseUnits[0].code} | ${formatDate(course.activityPeriod)}`}
                         </Typography>
                       </Box >
                       {amongResponsibles && <TextButton startIcon={<SettingsIcon />}>Kurssin asetukset</TextButton>}
                       <TextButton startIcon={<ArticleIcon />}>Kurssisivu</TextButton>
-                      <TextButton startIcon={<LibraryBooksIcon />}>Vaihda kurssia</TextButton>
+                      <TextButton startIcon={<LibraryBooksIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'course' ? null : 'course')}>Vaihda kurssia</TextButton>
                       {amongResponsibles && <TextButton onClick={() => navigate("/")} startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>Poistu kurssinäkymästä</TextButton>}
                     </>
                     :

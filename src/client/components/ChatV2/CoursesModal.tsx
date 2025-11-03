@@ -4,11 +4,10 @@ import { useTranslation } from 'react-i18next'
 import useUserCourses, { CoursesViewCourse } from '../../hooks/useUserCourses'
 import { useMemo, useState } from 'react'
 import TableSortLabel from '@mui/material/TableSortLabel'
+import { useNavigate } from 'react-router-dom'
 
-// import CourseList from '../Courses/CourseList'
 import { formatDate, getGroupedCourses } from './util'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import EditIcon from '@mui/icons-material/Edit';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -19,6 +18,7 @@ import TableRow from '@mui/material/TableRow';
 import { BlueButton, GrayButton, GreenButton, OutlineButtonBlack } from './general/Buttons'
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import Skeleton from '@mui/material/Skeleton'
+import { ModalInjectedProps } from 'src/client/types'
 
 
 interface TabPanelProps {
@@ -37,7 +37,7 @@ const CustomTabPanel = (props: TabPanelProps) => {
     )
 }
 
-const CoursesModal = () => {
+const CoursesModal = ({ closeModal }: ModalInjectedProps) => {
     const { t } = useTranslation()
     const { courses, isLoading } = useUserCourses()
 
@@ -65,13 +65,13 @@ const CoursesModal = () => {
                 <Tab label="Menneet kurssit" />
             </Tabs>
             <CustomTabPanel value={value} index={0}>
-                <CourseList courseUnits={curreEnabled} type="enabled" />
+                <CourseList courseUnits={curreEnabled} type="enabled" closeModal={closeModal} />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-                <CourseList courseUnits={activeCourses} type="disabled" />
+                <CourseList courseUnits={activeCourses} type="disabled" closeModal={closeModal} />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
-                <CourseList courseUnits={ended} type="ended" />
+                <CourseList courseUnits={ended} type="ended" closeModal={closeModal} />
             </CustomTabPanel>
         </Box>
     )
@@ -79,10 +79,11 @@ const CoursesModal = () => {
 
 
 type Order = 'asc' | 'desc'
-type OrderBy = 'name' | 'courseId' | 'startDate'
+type OrderBy = 'name' | 'code' | 'activityPeriod'
 
-const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], type: "enabled" | "disabled" | "ended" }) => {
+const CourseList = ({ courseUnits, type, closeModal }: { courseUnits: CoursesViewCourse[], type: "enabled" | "disabled" | "ended", closeModal: () => void }) => {
     const { t, i18n } = useTranslation()
+    const navigate = useNavigate()
     const { language } = i18n
 
     const [order, setOrder] = useState<Order>('asc')
@@ -94,6 +95,11 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
         setOrderBy(property)
     }
 
+    const handleChatLink = (courseId: string) => {
+        closeModal()
+        navigate(`/${courseId}`)
+    }
+
     const sorted = useMemo(() => {
         const compare = (a: CoursesViewCourse, b: CoursesViewCourse) => {
             let av: string | number = ''
@@ -101,7 +107,7 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
             if (orderBy === 'name') {
                 av = a.name[language] || ''
                 bv = b.name[language] || ''
-            } else if (orderBy === 'courseId') {
+            } else if (orderBy === 'code') {
                 av = a.courseId || ''
                 bv = b.courseId || ''
             } else {
@@ -132,18 +138,18 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
                             </TableCell>
                             <TableCell align="right" sx={{ fontWeight: 'bold' }}>
                                 <TableSortLabel
-                                    active={orderBy === 'courseId'}
-                                    direction={orderBy === 'courseId' ? order : 'asc'}
-                                    onClick={() => handleRequestSort('courseId')}
+                                    active={orderBy === 'code'}
+                                    direction={orderBy === 'code' ? order : 'asc'}
+                                    onClick={() => handleRequestSort('code')}
                                 >
                                     Koodi
                                 </TableSortLabel>
                             </TableCell>
                             <TableCell align="right" sx={{ fontWeight: 'bold' }}>
                                 <TableSortLabel
-                                    active={orderBy === 'startDate'}
-                                    direction={orderBy === 'startDate' ? order : 'asc'}
-                                    onClick={() => handleRequestSort('startDate')}
+                                    active={orderBy === 'activityPeriod'}
+                                    direction={orderBy === 'activityPeriod' ? order : 'asc'}
+                                    onClick={() => handleRequestSort('activityPeriod')}
                                 >
                                     Aika
                                 </TableSortLabel>
@@ -169,7 +175,12 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
                                         )}
                                         {type !== 'ended' && (
                                             <>
-                                                <GrayButton size="small" endIcon={<ChatBubbleOutlineIcon />}>
+                                                <GrayButton
+                                                    disabled={!course.courseId}
+                                                    size="small"
+                                                    endIcon={<ChatBubbleOutlineIcon />}
+                                                    onClick={() => handleChatLink(course.courseId!)}
+                                                >
                                                     Chat
                                                 </GrayButton>
                                                 <GrayButton size="small" endIcon={<OpenInNewIcon />}>
