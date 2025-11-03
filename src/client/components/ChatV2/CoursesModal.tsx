@@ -17,6 +17,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { BlueButton, GrayButton, GreenButton, OutlineButtonBlack } from './general/Buttons'
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import Skeleton from '@mui/material/Skeleton'
 
 
@@ -119,7 +120,7 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
             <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
                 <Table>
                     <TableHead>
-                        <TableRow sx={{ backgroundColor: 'rgba(0,0,0,0.06)' }}>
+                        <TableRow sx={{ backgroundColor: 'rgba(0,0,0,0.03)' }}>
                             <TableCell sx={{ fontWeight: 'bold' }}>
                                 <TableSortLabel
                                     active={orderBy === 'name'}
@@ -160,7 +161,7 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
                                 <TableCell align="right">{course.courseUnits[0]?.code ?? '--'}</TableCell>
                                 <TableCell align="right">{formatDate(course.activityPeriod)}</TableCell>
                                 <TableCell align="right" sx={{ width: 0 }}>
-                                    <Box sx={{ display: 'inline-flex', gap: 2, pl: '2rem' }}>
+                                    <Box sx={{ display: 'inline-flex', gap: 2, pl: '3rem' }}>
                                         {type === 'ended' && (
                                             <Box component="span" sx={{ color: 'error.main', whiteSpace: 'nowrap' }}>
                                                 Kurssi on päättynyt
@@ -168,13 +169,16 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
                                         )}
                                         {type !== 'ended' && (
                                             <>
-                                                <OutlineButtonBlack size="small" endIcon={<OpenInNewIcon />}>
+                                                <GrayButton size="small" endIcon={<ChatBubbleOutlineIcon />}>
+                                                    Chat
+                                                </GrayButton>
+                                                <GrayButton size="small" endIcon={<OpenInNewIcon />}>
                                                     Kurssisivulle
-                                                </OutlineButtonBlack>
+                                                </GrayButton>
                                                 {type === 'active' ? (
-                                                    <BlueButton size="small" endIcon={<EditIcon />}>Muokkaa</BlueButton>
+                                                    <BlueButton size="small">Muokkaa</BlueButton>
                                                 ) : (
-                                                    <GreenButton size="small" endIcon={<EditIcon />}>Aktivoi</GreenButton>
+                                                    <GreenButton size="small">Aktivoi</GreenButton>
                                                 )}
                                             </>
                                         )}
