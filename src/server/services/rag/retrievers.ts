@@ -57,31 +57,36 @@ class FTSearchRetriever extends BaseRetriever {
   }
 
   async redisQuery(query: string): Promise<SearchReply['documents']> {
-    const results = await redisClient.ft.search(this.indexName, query, {
-      RETURN: ['content', 'metadata'],
-      ...(this.highlight ? { HIGHLIGHT: {
-        TAGS: {
-          open: '**',
-          close: '**',
+    try {
+      const results = await redisClient.ft.search(this.indexName, query, {
+        RETURN: ['content', 'metadata'],
+        ...(this.highlight ? { HIGHLIGHT: {
+          TAGS: {
+            open: '**',
+            close: '**',
+          },
+        }} : {}),
+        DIALECT: 2,
+        LIMIT: {
+          from: 0,
+          size: 16,
         },
-      }} : {}),
-      DIALECT: 2,
-      LIMIT: {
-        from: 0,
-        size: 16,
-      },
-      ...(this.language ? { LANGUAGE: this.language } : {}),
-    })
+        ...(this.language ? { LANGUAGE: this.language } : {}),
+      })
 
-    // Type narrowing
-    if (!results || typeof results !== 'object' || !('documents' in results) || !Array.isArray(results.documents)) {
-      console.warn('ft.search did not return documents for query:', query, 'index:', this.indexName)
+      // Type narrowing
+      if (!results || typeof results !== 'object' || !('documents' in results) || !Array.isArray(results.documents)) {
+        console.warn('ft.search did not return documents for query:', query, 'index:', this.indexName)
+        return []
+      }
+
+      console.log(`${query} ${this.name ? `(${this.name}) ` : ''}results:`, results.documents.length)
+
+      return (results as SearchReply).documents
+    } catch (error) {
+      console.error(`Error during FT search (${this.name}, '${query}'):`, error)
       return []
     }
-
-    console.log(`${query} ${this.name ? `(${this.name}) ` : ''}results:`, results.documents.length)
-
-    return (results as SearchReply).documents
   }
 
   lc_namespace: string[] = ['currechat', 'services', 'rag', 'retrievers']
@@ -179,6 +184,6 @@ export const getMultiQueryEnsembleRetriever = (baseRetriever: BaseRetriever, tim
   timings.search = Date.now()
   const result = ensemble.invoke('')
   timings.search = Date.now() - timings.search
-  
+
   return result
 })
