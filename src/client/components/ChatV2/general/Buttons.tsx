@@ -46,6 +46,12 @@ export const BlueButton = styled(BaseButton)({
   },
 })
 
+export const GreenButton = styled(BaseButton)({
+  backgroundColor: '#43A047',
+  color: 'white',
+  '&:hover': { backgroundColor: '#388E3C' }
+})
+
 export const RedButton = styled(BaseButton)({
   backgroundColor: 'red',
   color: 'white',
