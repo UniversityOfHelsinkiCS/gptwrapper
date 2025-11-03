@@ -49,7 +49,7 @@ export default function ModalTemplate({
         maxHeight: '80vh',
         bgcolor: 'background.paper',
         boxShadow: 24,
-        borderRadius: '0.3rem',
+        borderRadius: '0.5rem',
         overflow: 'auto',
       }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', p: '2rem', position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 999 }}>

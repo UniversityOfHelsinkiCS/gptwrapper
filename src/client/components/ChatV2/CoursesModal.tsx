@@ -17,6 +17,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { BlueButton, GrayButton, GreenButton, OutlineButtonBlack } from './general/Buttons'
+import Skeleton from '@mui/material/Skeleton'
 
 
 interface TabPanelProps {
@@ -41,7 +42,7 @@ const CoursesModal = () => {
 
     const [value, setValue] = React.useState(0)
 
-    if (!courses || isLoading) return null
+    if (!courses || isLoading) return <CoursesSkeleton />
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue)
@@ -114,7 +115,7 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
     }, [courseUnits, order, orderBy, language])
 
     return (
-        <Box sx={{ py: 2, overflow: 'auto' }}>
+        <Box sx={{ py: 3, overflow: 'auto' }}>
             <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
                 <Table>
                     <TableHead>
@@ -187,6 +188,53 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
         </Box>
     )
 }
+
+const CoursesSkeleton = () => (
+    <Box>
+        <Tabs
+            value={0}
+            slotProps={{
+                indicator: {
+                    sx: { backgroundColor: 'rgba(0,0,0,0.1)', height: 3, borderRadius: 1 },
+                },
+            }}
+        >
+            <Tab label={<Skeleton width={100} />} />
+            <Tab label={<Skeleton width={100} />} />
+            <Tab label={<Skeleton width={120} />} />
+        </Tabs>
+
+        <Box sx={{ py: 2 }}>
+            <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
+                <Table>
+                    <TableHead>
+                        <TableRow sx={{ backgroundColor: 'rgba(0,0,0,0.06)' }}>
+                            <TableCell sx={{ fontWeight: 'bold' }}><Skeleton width={80} /></TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 'bold' }}><Skeleton width={60} /></TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 'bold' }}><Skeleton width={60} /></TableCell>
+                            <TableCell />
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <TableRow key={i}>
+                                <TableCell><Skeleton width={240} /></TableCell>
+                                <TableCell align="right"><Skeleton width={80} /></TableCell>
+                                <TableCell align="right"><Skeleton width={120} /></TableCell>
+                                <TableCell align="right" sx={{ width: 0 }}>
+                                    <Box sx={{ display: 'inline-flex', gap: 2, pl: '2rem' }}>
+                                        <Skeleton variant="rounded" width={110} height={32} />
+                                        <Skeleton variant="rounded" width={90} height={32} />
+                                    </Box>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </Box>
+    </Box>
+)
 
 
 
