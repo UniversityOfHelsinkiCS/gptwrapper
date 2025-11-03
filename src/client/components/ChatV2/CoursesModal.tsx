@@ -2,8 +2,11 @@ import React from 'react'
 import { Box, Tab, Tabs, Typography, Container } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import useUserCourses, { CoursesViewCourse } from '../../hooks/useUserCourses'
+import { useMemo, useState } from 'react'
+import TableSortLabel from '@mui/material/TableSortLabel'
+
 // import CourseList from '../Courses/CourseList'
-import { getGroupedCourses } from './util'
+import { formatDate, getGroupedCourses } from './util'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import EditIcon from '@mui/icons-material/Edit';
 
@@ -73,31 +76,88 @@ const CoursesModal = () => {
 }
 
 
+type Order = 'asc' | 'desc'
+type OrderBy = 'name' | 'courseId' | 'startDate'
 
 const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], type: "active" | "inactive" | "ended" }) => {
     const { t, i18n } = useTranslation()
     const { language } = i18n
 
+    const [order, setOrder] = useState<Order>('asc')
+    const [orderBy, setOrderBy] = useState<OrderBy>('name')
+
+    const handleRequestSort = (property: OrderBy) => {
+        const isAsc = orderBy === property && order === 'asc'
+        setOrder(isAsc ? 'desc' : 'asc')
+        setOrderBy(property)
+    }
+
+    const sorted = useMemo(() => {
+        const compare = (a: CoursesViewCourse, b: CoursesViewCourse) => {
+            let av: string | number = ''
+            let bv: string | number = ''
+            if (orderBy === 'name') {
+                av = a.name[language] || ''
+                bv = b.name[language] || ''
+            } else if (orderBy === 'courseId') {
+                av = a.courseId || ''
+                bv = b.courseId || ''
+            } else {
+                av = new Date(a.activityPeriod.startDate).getTime()
+                bv = new Date(b.activityPeriod.startDate).getTime()
+            }
+            if (av < bv) return order === 'asc' ? -1 : 1
+            if (av > bv) return order === 'asc' ? 1 : -1
+            return 0
+        }
+        return [...courseUnits].sort(compare)
+    }, [courseUnits, order, orderBy, language])
+
     return (
-        <Box sx={{ py: 2, overflowX: 'auto' }}>
+        <Box sx={{ py: 2, overflow: 'auto' }}>
             <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
                 <Table>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: 'rgba(0,0,0,0.06)' }}>
-                            <TableCell sx={{ fontWeight: 'bold' }}>Nimi</TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 'bold' }}>Koodi</TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 'bold' }}>Aika</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>
+                                <TableSortLabel
+                                    active={orderBy === 'name'}
+                                    direction={orderBy === 'name' ? order : 'asc'}
+                                    onClick={() => handleRequestSort('name')}
+                                >
+                                    Nimi
+                                </TableSortLabel>
+                            </TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                                <TableSortLabel
+                                    active={orderBy === 'courseId'}
+                                    direction={orderBy === 'courseId' ? order : 'asc'}
+                                    onClick={() => handleRequestSort('courseId')}
+                                >
+                                    Koodi
+                                </TableSortLabel>
+                            </TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                                <TableSortLabel
+                                    active={orderBy === 'startDate'}
+                                    direction={orderBy === 'startDate' ? order : 'asc'}
+                                    onClick={() => handleRequestSort('startDate')}
+                                >
+                                    Aika
+                                </TableSortLabel>
+                            </TableCell>
                             <TableCell />
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
-                        {courseUnits.map((course) => (
+                        {sorted.map((course) => (
                             <TableRow key={course.courseId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                                 <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
                                     {course.name[language]}
                                 </TableCell>
-                                <TableCell align="right">{course.courseId}</TableCell>
-                                <TableCell align="right">{course.activityPeriod.startDate}</TableCell>
+                                <TableCell align="right">{course.courseUnits[0]?.code ?? '--'}</TableCell>
+                                <TableCell align="right">{formatDate(course.activityPeriod)}</TableCell>
                                 <TableCell align="right" sx={{ width: 0 }}>
                                     <Box sx={{ display: 'inline-flex', gap: 2, pl: '2rem' }}>
                                         {type === 'ended' && (
@@ -105,13 +165,11 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
                                                 Kurssi on päättynyt
                                             </Box>
                                         )}
-
                                         {type !== 'ended' && (
                                             <>
                                                 <OutlineButtonBlack size="small" endIcon={<OpenInNewIcon />}>
                                                     Kurssisivulle
                                                 </OutlineButtonBlack>
-
                                                 {type === 'active' ? (
                                                     <BlueButton size="small" endIcon={<EditIcon />}>Muokkaa</BlueButton>
                                                 ) : (
@@ -129,6 +187,7 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
         </Box>
     )
 }
+
 
 
 export default CoursesModal
