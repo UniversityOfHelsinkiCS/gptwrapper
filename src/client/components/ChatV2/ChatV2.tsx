@@ -44,21 +44,17 @@ import TuneIcon from '@mui/icons-material/Tune'
 import SideBar from './SideBar'
 import ChatMenu from './ChatMenu'
 
-import PromptModal from './PromptModal'
 import { PromptEditor } from '../Prompt/PromptEditor'
-import GeneralModal from './GeneralModal'
+
+import TemplateModal from './TemplateModal'
+import PromptModal from './PromptModal'
+import CoursesModal from './CoursesModal'
 
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
  */
 const Conversation = lazy(() => import('./Conversation'))
-
-const ExampleModalCourse = () => {
-  return (
-    <Box>helou course</Box>
-  )
-}
 
 
 
@@ -406,7 +402,7 @@ const ChatV2Content = () => {
 
   //TODO: Restrict access when necessary
   const modalsRegister: ModalMap = {
-    'course': { name: 'Jotain kursseja täällä', component: ExampleModalCourse },
+    'course': { name: 'Omat kurssini', component: CoursesModal },
     'prompt': { name: 'Valitse alustus', component: PromptModal, props: { chatInstanceId: chatInstance?.id } },
     'editPrompt': { name: 'Muokkaa alustusta', component: PromptEditor, props: { prompt: activePrompt, ragIndices, type: activePrompt?.type, chatInstanceId: activePrompt?.chatInstanceId, createPromptMutation, editPromptMutation } },
     'selectPrompt': { name: 'Valitse alustus', component: PromptModal, props: { chatInstanceId: chatInstance?.id } },
@@ -650,7 +646,7 @@ const ChatV2Content = () => {
       }
 
       {/* Modals --------------------------------------*/}
-      <GeneralModal open={!!bottomSheetContentId} setOpen={() => setBottomSheetContentId(null)} modalsRegister={modalsRegister} bottomSheetContentId={bottomSheetContentId} setBottomSheetContentId={setBottomSheetContentId} />
+      <TemplateModal open={!!bottomSheetContentId} setOpen={() => setBottomSheetContentId(null)} modalsRegister={modalsRegister} bottomSheetContentId={bottomSheetContentId} setBottomSheetContentId={setBottomSheetContentId} />
 
       <SettingsModal
         open={settingsModalOpen}

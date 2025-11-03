@@ -1,12 +1,12 @@
 import { Box, Modal, Typography } from '@mui/material'
 import React from 'react'
-import { OutlineButtonBlack } from './general/Buttons'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { TextButton } from './general/Buttons'
 import { ModalMap } from 'src/client/types';
+import CloseIcon from '@mui/icons-material/Close';
 
 
 
-export default function GeneralModal({
+export default function ModalTemplate({
   open,
   setOpen,
   modalsRegister,
@@ -47,11 +47,10 @@ export default function GeneralModal({
         transform: 'translate(-50%, -50%)',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
         // minWidth: 600,
         width: '85vw',
-        maxWidth: 1000,
-        minHeight: '25vh',
+        maxWidth: 1200,
+        minHeight: '80vh',
         maxHeight: '80vh',
         bgcolor: 'background.paper',
         boxShadow: 24,
@@ -60,9 +59,9 @@ export default function GeneralModal({
       }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', pb: 2 }}>
           <Typography variant="h5">{name}</Typography>
-          <OutlineButtonBlack onClick={() => setBottomSheetContentId(null)}>
-            <ExpandMoreIcon />
-          </OutlineButtonBlack>
+          <TextButton onClick={() => setBottomSheetContentId(null)}>
+            <CloseIcon />
+          </TextButton>
         </Box>
 
         <Box>
