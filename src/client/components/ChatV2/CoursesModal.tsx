@@ -65,10 +65,10 @@ const CoursesModal = () => {
                 <Tab label="Menneet kurssit" />
             </Tabs>
             <CustomTabPanel value={value} index={0}>
-                <CourseList courseUnits={activeCourses} type="active" />
+                <CourseList courseUnits={curreEnabled} type="enabled" />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-                <CourseList courseUnits={curreEnabled} type="inactive" />
+                <CourseList courseUnits={activeCourses} type="disabled" />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
                 <CourseList courseUnits={ended} type="ended" />
@@ -81,7 +81,7 @@ const CoursesModal = () => {
 type Order = 'asc' | 'desc'
 type OrderBy = 'name' | 'courseId' | 'startDate'
 
-const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], type: "active" | "inactive" | "ended" }) => {
+const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], type: "enabled" | "disabled" | "ended" }) => {
     const { t, i18n } = useTranslation()
     const { language } = i18n
 
@@ -175,7 +175,7 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
                                                 <GrayButton size="small" endIcon={<OpenInNewIcon />}>
                                                     Kurssisivulle
                                                 </GrayButton>
-                                                {type === 'active' ? (
+                                                {type === 'enabled' ? (
                                                     <BlueButton size="small">Muokkaa</BlueButton>
                                                 ) : (
                                                     <GreenButton size="small">Aktivoi</GreenButton>
