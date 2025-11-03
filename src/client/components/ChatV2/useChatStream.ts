@@ -32,6 +32,8 @@ export const useChatStream = ({
   const [generationInfo, setGenerationInfo] = useState<MessageGenerationInfo | undefined>()
   const [isStreaming, setIsStreaming] = useState(false)
   const [toolCalls, setToolCalls] = useState<Record<string, ToolCallState>>({})
+  const [errorTimeoutId, setErrorTimeoutId] = useState<NodeJS.Timeout | null>(null)
+
   const streamControllerRef = useRef<TypedAbortController<StreamAbortReason>>(null)
 
   const decoder = new TextDecoder()
@@ -75,6 +77,11 @@ export const useChatStream = ({
           if (!parsedChunk) continue
 
           onText()
+
+          // Successfully received something, so clear any existing error timeout
+          if (errorTimeoutId) clearTimeout(errorTimeoutId)
+          setErrorTimeoutId(null)
+
           switch (parsedChunk.type) {
             case 'writing':
               setCompletion((prev) => prev + parsedChunk.text)
@@ -90,7 +97,15 @@ export const useChatStream = ({
               break
 
             case 'error':
+              console.log('Streamed error:', parsedChunk)
               error += parsedChunk.error
+
+              // Begin timeout to abort stream if error persists
+              setErrorTimeoutId(setTimeout(() => {
+                console.error('Error timeout:', parsedChunk)
+                streamControllerRef.current?.abort('error')
+              }, 3000))
+
               break
 
             default:
@@ -138,6 +153,17 @@ export const useChatStream = ({
       }
 
       onError(err)
+      if (content.length > 0) {
+        onComplete({
+          message: {
+            role: 'assistant',
+            content,
+            error: error.length > 0 ? error : undefined,
+            toolCalls: toolCallResultsAccum,
+            generationInfo: baseGenerationInfo,
+          },
+        })
+      }
     } finally {
       streamControllerRef.current = null
       setCompletion('')
@@ -155,5 +181,6 @@ export const useChatStream = ({
     setIsStreaming,
     toolCalls,
     streamControllerRef,
+    hasPotentialError: errorTimeoutId !== null,
   }
 }

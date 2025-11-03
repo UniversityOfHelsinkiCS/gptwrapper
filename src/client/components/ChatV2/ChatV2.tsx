@@ -153,7 +153,7 @@ const ChatV2Content = () => {
 
   const disclaimerInfo = InfoTexts.disclaimer[i18n.language]
 
-  const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo } = useChatStream({
+  const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo, hasPotentialError } = useChatStream({
     onComplete: ({ message }) => {
       if (message.content.length > 0) {
         setMessages((prev: ChatMessage[]) => prev.concat(message))
@@ -546,7 +546,7 @@ const ChatV2Content = () => {
           <Conversation
             initial={<ConversationSplash courseName={chatInstance && getLanguageValue(chatInstance.name, i18n.language)} courseDate={chatInstance?.activityPeriod} />}
             messages={messages}
-            completion={completion}
+            completion={hasPotentialError ? `${completion} ⚠️` : completion}
             generationInfo={generationInfo}
             isStreaming={isStreaming}
             toolCalls={toolCalls}

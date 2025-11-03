@@ -83,7 +83,17 @@ export const streamChat = async ({
     throw new Error(`Invalid model: ${model}`)
   }
 
-  const chatModel = getChatModel(modelConfig, tools, temperature)
+  const chatModel = getChatModel(modelConfig, tools, temperature).withConfig({
+    callbacks: [{
+      handleLLMError(err) {
+        console.error('Chat model error:', err)
+        writeEvent({
+          type: 'error',
+          error: 'Error while generating response',
+        })
+      },
+    }],
+  })
 
   const { messages, warnings, inputTokenCount } = handleWarnings(
     modelConfig,

@@ -2,7 +2,7 @@ import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager
 import { AIMessage, AIMessageChunk, type BaseMessage, isHumanMessage, isSystemMessage, isToolMessage } from '@langchain/core/messages'
 import type { ChatGenerationChunk, ChatResult } from '@langchain/core/outputs'
 import { FakeStreamingChatModel } from '@langchain/core/utils/testing'
-import { basicTestContent, mathTestContent, mathTestContent2 } from './mockContent'
+import { basicTestContent, mathTestContent } from './mockContent'
 import { StructuredTool } from '@langchain/core/tools'
 
 /**
@@ -12,6 +12,7 @@ import { StructuredTool } from '@langchain/core/tools'
  */
 export class MockModel extends FakeStreamingChatModel {
   temperature?: number | null
+  midwayErrorInjected: boolean = false
 
   constructor({ tools, temperature }: { tools: StructuredTool[]; temperature?: number | null }) {
     super({
@@ -43,6 +44,15 @@ export class MockModel extends FakeStreamingChatModel {
     } else if (lastHumanMessage.startsWith('temperature')) {
       // Echo the temperature
       this.chunks = [new AIMessageChunk(`Temperature: ${this.temperature}`)]
+    } else if (lastHumanMessage.startsWith('midway fail')) {
+      // Simulate an error midway through streaming
+      this.midwayErrorInjected = true
+      this.chunks = [
+        new AIMessageChunk('After four hundred years of computations, '),
+        // Error will be thrown after this chunk
+        new AIMessageChunk('I\'ve determined that the answer to the ultimate question of life, the universe, and everything is '),
+        new AIMessageChunk('42'),
+      ]
     } else {
       this.responses = defaultResponse
     }
@@ -59,7 +69,14 @@ export class MockModel extends FakeStreamingChatModel {
     runManager?: CallbackManagerForLLMRun,
   ): AsyncGenerator<ChatGenerationChunk> {
     this.setupTestResponse(messages)
-    yield* super._streamResponseChunks(messages, _options, runManager)
+    let i = 0
+    for await (const chunk of super._streamResponseChunks(messages, _options, runManager)) {
+      if (this.midwayErrorInjected && i === 2) {
+        throw new Error('Midway error injected')
+      }
+      yield chunk
+      i++
+    }
   }
 }
 
