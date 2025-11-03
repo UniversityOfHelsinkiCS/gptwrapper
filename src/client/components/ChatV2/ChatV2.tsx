@@ -56,7 +56,11 @@ import CoursesModal from './CoursesModal'
  */
 const Conversation = lazy(() => import('./Conversation'))
 
-
+const ExampleModal = () => {
+  return (
+    <Box>helou</Box>
+  )
+}
 
 function useLocalStorageStateWithURLDefault<T>(key: string, defaultValue: string, urlKey: string, schema: z.ZodType<T>) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -354,7 +358,7 @@ const ChatV2Content = () => {
   // For new sidebar revamp dev
   const isAdmin = user?.isAdmin
   const [newSideBar, setNewSidebar] = useState(false)
-  const [bottomSheetContentId, setBottomSheetContentId] = useState<string | null>(null)
+  const [modalContentId, setModalContentId] = useState<string | null>(null)
 
   if (chatInstance && chatInstance.usageLimit === 0) {
     return (
@@ -403,6 +407,7 @@ const ChatV2Content = () => {
   //TODO: Restrict access when necessary
   const modalsRegister: ModalMap = {
     'course': { name: 'Omat kurssini', component: CoursesModal },
+    'courseSettings': { name: 'Kurssin asetukset', component: ExampleModal },
     'prompt': { name: 'Valitse alustus', component: PromptModal, props: { chatInstanceId: chatInstance?.id } },
     'editPrompt': { name: 'Muokkaa alustusta', component: PromptEditor, props: { prompt: activePrompt, ragIndices, type: activePrompt?.type, chatInstanceId: activePrompt?.chatInstanceId, createPromptMutation, editPromptMutation } },
     'selectPrompt': { name: 'Valitse alustus', component: PromptModal, props: { chatInstanceId: chatInstance?.id } },
@@ -454,7 +459,7 @@ const ChatV2Content = () => {
               isAdmin={isAdmin}
               course={chatInstance}
               handleReset={() => setResetConfirmModalOpen(true)}
-              setBottomSheetContentId={setBottomSheetContentId}
+              setModalContentId={setModalContentId}
               setSettingsModalOpen={setSettingsModalOpen}
               setDisclaimerStatus={setDisclaimerStatus}
               messages={messages}
@@ -585,12 +590,12 @@ const ChatV2Content = () => {
             />
           </Box>
           {/* <Box sx={{
-            height: bottomSheetContentId ? '66vh' : 0,
-            borderTop: bottomSheetContentId ? '1px solid rgba(0,0,0,0.15)' : 'none',
+            height: modalContentId ? '66vh' : 0,
+            borderTop: modalContentId ? '1px solid rgba(0,0,0,0.15)' : 'none',
             overflow: 'hidden',
             transition: 'height 0.3s ease',
           }}>
-            <BottomSheet modalsRegister={modalsRegister} bottomSheetContentId={bottomSheetContentId} setBottomSheetContentId={setBottomSheetContentId} />
+            <BottomSheet modalsRegister={modalsRegister} modalContentId={modalContentId} setModalContentId={setModalContentId} />
           </Box> */}
         </Box>
       </Box>
@@ -646,7 +651,7 @@ const ChatV2Content = () => {
       }
 
       {/* Modals --------------------------------------*/}
-      <TemplateModal open={!!bottomSheetContentId} setOpen={() => setBottomSheetContentId(null)} modalsRegister={modalsRegister} bottomSheetContentId={bottomSheetContentId} setBottomSheetContentId={setBottomSheetContentId} />
+      <TemplateModal open={!!modalContentId} setOpen={() => setModalContentId(null)} modalsRegister={modalsRegister} modalContentId={modalContentId} setModalContentId={setModalContentId} />
 
       <SettingsModal
         open={settingsModalOpen}

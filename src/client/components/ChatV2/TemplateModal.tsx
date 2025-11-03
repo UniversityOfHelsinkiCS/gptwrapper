@@ -8,23 +8,23 @@ export default function ModalTemplate({
   open,
   setOpen,
   modalsRegister,
-  bottomSheetContentId,
-  setBottomSheetContentId,
+  modalContentId,
+  setModalContentId,
 }: {
   open: boolean
   setOpen: (open: boolean) => void
   modalsRegister: ModalMap
-  bottomSheetContentId: string | null
-  setBottomSheetContentId: React.Dispatch<React.SetStateAction<string | null>>
+  modalContentId: string | null
+  setModalContentId: React.Dispatch<React.SetStateAction<string | null>>
 }) {
-  const entry = bottomSheetContentId ? modalsRegister[bottomSheetContentId] : null
-  if (!bottomSheetContentId || !entry) return null
+  const entry = modalContentId ? modalsRegister[modalContentId] : null
+  if (!modalContentId || !entry) return null
 
   const { name, component: Component, props = {} } = entry
 
   const handleClose = () => {
     setOpen(false)
-    setBottomSheetContentId(null)
+    setModalContentId(null)
   }
 
   return (

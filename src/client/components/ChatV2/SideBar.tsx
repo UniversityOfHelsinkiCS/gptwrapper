@@ -37,7 +37,7 @@ const SideBar = ({
   handleReset,
   onClose,
   setSettingsModalOpen,
-  setBottomSheetContentId,
+  setModalContentId,
   setDisclaimerStatus,
   messages,
   currentModel,
@@ -50,7 +50,7 @@ const SideBar = ({
   course: Course | undefined
   handleReset: () => void
   onClose?: () => void
-  setBottomSheetContentId: React.Dispatch<React.SetStateAction<string | null>>,
+  setModalContentId: React.Dispatch<React.SetStateAction<string | null>>,
   setSettingsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
   setDisclaimerStatus: React.Dispatch<React.SetStateAction<boolean>>
   messages: ChatMessage[]
@@ -190,13 +190,13 @@ const SideBar = ({
                           {`${course.courseUnits[0].code} | ${formatDate(course.activityPeriod)}`}
                         </Typography>
                       </Box >
-                      {amongResponsibles && <TextButton startIcon={<SettingsIcon />}>Kurssin asetukset</TextButton>}
+                      {amongResponsibles && <TextButton startIcon={<SettingsIcon />} onClick={() => setModalContentId(prev => prev === 'courseSettings' ? null : 'courseSettings')}>Kurssin asetukset</TextButton>}
                       <TextButton startIcon={<ArticleIcon />}>Kurssisivu</TextButton>
-                      <TextButton startIcon={<LibraryBooksIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'course' ? null : 'course')}>Vaihda kurssia</TextButton>
+                      <TextButton startIcon={<LibraryBooksIcon />} onClick={() => setModalContentId(prev => prev === 'course' ? null : 'course')}>Vaihda kurssia</TextButton>
                       {amongResponsibles && <TextButton onClick={() => navigate("/")} startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>Poistu kurssinäkymästä</TextButton>}
                     </>
                     :
-                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'course' ? null : 'course')}>
+                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => setModalContentId(prev => prev === 'course' ? null : 'course')}>
                       <Typography>Ei valittua kurssia</Typography>
                     </TextButton>
                 }
@@ -210,13 +210,13 @@ const SideBar = ({
                   activePrompt ?
                     <>
                       <Typography fontWeight='bold' mb={2}>{activePrompt.name}</Typography>
-                      <TextButton startIcon={<TuneIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'editPrompt' ? null : 'editPrompt')}>Muokkaa alustusta</TextButton>
-                      {!amongResponsibles && <TextButton startIcon={<HelpCenterIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'showPrompt' ? null : 'showPrompt')}>Alustuksen tiedot</TextButton>}
-                      <TextButton startIcon={<AppsIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'selectPrompt' ? null : 'selectPrompt')}>Valitse alustus</TextButton>
+                      <TextButton startIcon={<TuneIcon />} onClick={() => setModalContentId(prev => prev === 'editPrompt' ? null : 'editPrompt')}>Muokkaa alustusta</TextButton>
+                      {!amongResponsibles && <TextButton startIcon={<HelpCenterIcon />} onClick={() => setModalContentId(prev => prev === 'showPrompt' ? null : 'showPrompt')}>Alustuksen tiedot</TextButton>}
+                      <TextButton startIcon={<AppsIcon />} onClick={() => setModalContentId(prev => prev === 'selectPrompt' ? null : 'selectPrompt')}>Valitse alustus</TextButton>
                       <TextButton startIcon={<ExtensionOffIcon />} onClick={() => handleChangePrompt(undefined)}>Ei alustusta</TextButton>
                     </>
                     :
-                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => setBottomSheetContentId(prev => prev === 'prompt' ? null : 'prompt')}>
+                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => setModalContentId(prev => prev === 'prompt' ? null : 'prompt')}>
                       <Typography>Ei alustusta</Typography>
                     </TextButton>
                 }
