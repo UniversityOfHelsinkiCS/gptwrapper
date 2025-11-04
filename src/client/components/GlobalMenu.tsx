@@ -20,8 +20,10 @@ import { AdminPanelSettings, BarChart } from '@mui/icons-material'
 
 export default function GlobalMenu({
   openDisclaimer,
+  openSettings,
 }: {
   openDisclaimer: () => void
+  openSettings: () => void
 }) {
   const { t, i18n } = useTranslation()
   const { user } = useCurrentUser()
@@ -69,7 +71,12 @@ export default function GlobalMenu({
         }}
       >
         <MenuList>
-          <MenuItem>
+          <MenuItem
+            onClick={() => {
+              openSettings()
+              handleClose()
+            }}
+          >
             <ListItemIcon>
               <SettingsIcon fontSize="small" />
             </ListItemIcon>

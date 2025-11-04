@@ -440,5 +440,8 @@
   },
   "embeddedLogin": {
     "helpText": "Kirjauduttu. Voit sulkea tämän ikkunan."
+  },
+  "globalSettings": {
+    "title": "Yleisasetukset"
   }
 }

@@ -440,5 +440,8 @@
   },
   "embeddedLogin": {
     "helpText": "Successfully logged in. You may close this window."
+  },
+  "globalSettings": {
+    "title": "General settings"
   }
 }

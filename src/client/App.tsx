@@ -18,6 +18,7 @@ import './styles.css'
 import GlobalMenu from './components/GlobalMenu'
 import HYLoadingSpinner from './components/ChatV2/general/HYLoadingSpinner'
 import { DisclaimerModal } from './components/Disclaimer'
+import { GlobalSettings } from './components/GlobalSettings'
 
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
@@ -99,6 +100,7 @@ const App = () => {
 const Layout = () => {
 
   const { user } = useCurrentUser()
+  const [settingsOpen, setSettingsOpen] = React.useState(false)
   const [disclaimerStatus, setDisclaimerStatus] = React.useState(false)
   useEffect(() => {
     if (user && !user.termsAcceptedAt) {
@@ -116,9 +118,10 @@ const Layout = () => {
           height: 'auto',
         }}
       >
+        <GlobalSettings open={settingsOpen} setOpen={setSettingsOpen} />
         <DisclaimerModal disclaimerStatus={disclaimerStatus} setDisclaimerStatus={setDisclaimerStatus} />
         <Box sx={{ top: 20, right: 20, zIndex: 999, position: 'fixed' }}>
-          <GlobalMenu openDisclaimer={() => setDisclaimerStatus(true)} />
+          <GlobalMenu openDisclaimer={() => setDisclaimerStatus(true)} openSettings={() => setSettingsOpen(true)} />
         </Box>
         <Content />
       </Box>
