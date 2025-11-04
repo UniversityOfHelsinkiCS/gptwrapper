@@ -39,7 +39,8 @@
     "curreUrl": "https://curre.helsinki.fi/",
     "curreTitle": "Curre",
     "tryNew": "Prova den nya chattappen",
-    "close": "Stänga"
+    "close": "Stänga",
+    "loading": "Belastning"
   },
   "chats": {
     "header": "Öppna kurschattar",

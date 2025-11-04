@@ -46,7 +46,8 @@
     "added": "Lisätty",
     "fileType": "Tiedostomuoto",
     "settings": "Asetukset",
-    "about_service": "Tietoa palvelusta"
+    "about_service": "Tietoa palvelusta",
+    "loading": "Ladataan"
   },
   "stats": {
     "showing": "Näytetään",

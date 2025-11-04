@@ -45,7 +45,8 @@
     "added": "Added",
     "fileType": "File type",
     "settings": "Settings",
-    "about_service": "About service"
+    "about_service": "About service",
+    "loading": "Loading"
   },
   "stats": {
     "timePeriodStart": "Starting",
