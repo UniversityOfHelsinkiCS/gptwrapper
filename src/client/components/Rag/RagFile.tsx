@@ -53,7 +53,7 @@ export const RagFile = ({ ragIndexId, fileId, setFileId }: { ragIndexId?: number
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
       {!ragIndexId ? <Link component={RouterLink} to={`/rag/${indexId}`}>
         {t('rag:backToCollection')}
-      </Link> : <OutlineButtonBlack onClick={() => setFileId(undefined)} />}
+      </Link> : <OutlineButtonBlack onClick={() => setFileId?.(undefined)} />}
 
       <Typography variant="body1">{t('rag:file')}</Typography>
       <Typography variant="h3">
