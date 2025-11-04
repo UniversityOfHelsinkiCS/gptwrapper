@@ -151,6 +151,22 @@
     "emptyPrompt": "Empty",
     "confirmClearCustomPrompt": "Warning: This action will clear your custom prompt: \n\"{{customSystemMessage}}\""
   },
+  "sidebar": {
+    "courseTitle": "Kurssi",
+    "courseSettings": "Kurssin asetukset",
+    "coursePage": "Kurssisivu",
+    "courseChange": "Vaihda kurssia",
+    "courseExit": "Poistu kurssinäkymästä",
+    "noCourse": "Ei valittua kurssia",
+    "promptTitle": "Alustus",
+    "promptEdit": "Muokkaa alustusta",
+    "promptDetails": "Alustuksen tiedot",
+    "promptSelect": "Valitse alustus",
+    "promptNone": "Ei alustusta",
+    "modelTitle": "Kielimalli",
+    "chatNew": "Uusi keskustelu",
+    "chatEmail": "Sähköposti"
+  },
   "email": {
     "save": "Save as email",
     "user": "User",

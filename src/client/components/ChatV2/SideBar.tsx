@@ -173,7 +173,7 @@ const SideBar = ({
               </Link>
 
               <Box p={4}>
-                <Typography mb={0.5} color='textSecondary'>{"kurssi".toUpperCase()}</Typography>
+                <Typography mb={0.5} color='textSecondary'>{t("sidebar:coursePage").toUpperCase()}</Typography>
                 {
                   course ?
                     <>
@@ -190,14 +190,14 @@ const SideBar = ({
                           {`${course.courseUnits[0].code} | ${formatDate(course.activityPeriod)}`}
                         </Typography>
                       </Box >
-                      {amongResponsibles && <TextButton startIcon={<SettingsIcon />} onClick={() => setModalContentId(prev => prev === 'courseSettings' ? null : 'courseSettings')}>Kurssin asetukset</TextButton>}
-                      <TextButton startIcon={<ArticleIcon />}>Kurssisivu</TextButton>
-                      <TextButton startIcon={<LibraryBooksIcon />} onClick={() => setModalContentId(prev => prev === 'course' ? null : 'course')}>Vaihda kurssia</TextButton>
-                      {amongResponsibles && <TextButton onClick={() => navigate("/")} startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>Poistu kurssinäkymästä</TextButton>}
+                      {amongResponsibles && <TextButton startIcon={<SettingsIcon />} onClick={() => setModalContentId(prev => prev === 'courseSettings' ? null : 'courseSettings')}>{t("sidebar:courseSettings")}</TextButton>}
+                      <TextButton startIcon={<ArticleIcon />}>{t("sidebar:coursePage")}</TextButton>
+                      <TextButton startIcon={<LibraryBooksIcon />} onClick={() => setModalContentId(prev => prev === 'course' ? null : 'course')}>{t("sidebar:courseChange")}</TextButton>
+                      {amongResponsibles && <TextButton onClick={() => navigate("/")} startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>{t("sidebar:courseExit")}</TextButton>}
                     </>
                     :
                     <TextButton startIcon={<ChevronRightIcon />} onClick={() => setModalContentId(prev => prev === 'course' ? null : 'course')}>
-                      <Typography>Ei valittua kurssia</Typography>
+                      <Typography>{t("sidebar:noCourse")}  </Typography>
                     </TextButton>
                 }
               </Box>
@@ -205,19 +205,19 @@ const SideBar = ({
               <Divider />
 
               <Box p={4}>
-                <Typography mb={0.5} color='textSecondary' >{"alustus".toUpperCase()}</Typography>
+                <Typography mb={0.5} color='textSecondary' >{t("sidebar:promptTitle").toUpperCase()}</Typography>
                 {
                   activePrompt ?
                     <>
                       <Typography fontWeight='bold' mb={2}>{activePrompt.name}</Typography>
-                      <TextButton startIcon={<TuneIcon />} onClick={() => setModalContentId(prev => prev === 'editPrompt' ? null : 'editPrompt')}>Muokkaa alustusta</TextButton>
-                      {!amongResponsibles && <TextButton startIcon={<HelpCenterIcon />} onClick={() => setModalContentId(prev => prev === 'showPrompt' ? null : 'showPrompt')}>Alustuksen tiedot</TextButton>}
-                      <TextButton startIcon={<AppsIcon />} onClick={() => setModalContentId(prev => prev === 'selectPrompt' ? null : 'selectPrompt')}>Valitse alustus</TextButton>
-                      <TextButton startIcon={<ExtensionOffIcon />} onClick={() => handleChangePrompt(undefined)}>Ei alustusta</TextButton>
+                      <TextButton startIcon={<TuneIcon />} onClick={() => setModalContentId(prev => prev === 'editPrompt' ? null : 'editPrompt')}>{t("sidebar:promptEdit")}</TextButton>
+                      {!amongResponsibles && <TextButton startIcon={<HelpCenterIcon />} onClick={() => setModalContentId(prev => prev === 'showPrompt' ? null : 'showPrompt')}>{t("sidebar:promptDetails")}</TextButton>}
+                      <TextButton startIcon={<AppsIcon />} onClick={() => setModalContentId(prev => prev === 'selectPrompt' ? null : 'selectPrompt')}>{t("sidebar:promptSelect")}</TextButton>
+                      <TextButton startIcon={<ExtensionOffIcon />} onClick={() => handleChangePrompt(undefined)}>{t("sidebar:promptNone")}</TextButton>
                     </>
                     :
                     <TextButton startIcon={<ChevronRightIcon />} onClick={() => setModalContentId(prev => prev === 'prompt' ? null : 'prompt')}>
-                      <Typography>Ei alustusta</Typography>
+                      <Typography>{t("sidebar:promptNone")}</Typography>
                     </TextButton>
                 }
               </Box>
@@ -225,7 +225,7 @@ const SideBar = ({
               <Divider />
 
               <Box p={4}>
-                <Typography mb={0.5} color='textSecondary'>{"kielimalli".toUpperCase()}</Typography>
+                <Typography mb={0.5} color='textSecondary'>{t("sidebar:modelTitle").toUpperCase()}</Typography>
                 <TextButton startIcon={<ChevronRightIcon />}>
                   <Typography>GPT-5</Typography>
                 </TextButton>
@@ -235,7 +235,7 @@ const SideBar = ({
 
               <Box p={4}>
                 <TextButton startIcon={<MapsUgcIcon />} onClick={handleReset} size='large'>
-                  Uusi keskustelu
+                  {t("sidebar:chatNew")}
                 </TextButton>
 
                 <EmailButton messages={messages} disabled={!messages.length} />
