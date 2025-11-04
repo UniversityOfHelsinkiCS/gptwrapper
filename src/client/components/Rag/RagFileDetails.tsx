@@ -11,6 +11,7 @@ import { locales } from '../../locales/locales'
 import { useTranslation } from 'react-i18next'
 import { formatDistanceStrict } from 'date-fns'
 import { CircularProgressWithLabel } from '../common/CircularProgressWithLabel'
+import { TextButton } from '../ChatV2/general/Buttons'
 
 type FileStage = IngestionPipelineStageKey | 'uploading' | 'queued'
 
@@ -41,7 +42,8 @@ export const RagFileInfo: React.FC<{
   link?: boolean
   status?: IngestionJobStatus
   uploadProgress?: number
-}> = ({ file, link = false, status, uploadProgress }) => {
+  setFileId: React.Dispatch<number | undefined>
+}> = ({ file, link = false, status, uploadProgress, setFileId }) => {
   const { t, i18n } = useTranslation()
 
   const pipelineStage = status?.pipelineStage ?? file.pipelineStage
@@ -69,7 +71,7 @@ export const RagFileInfo: React.FC<{
                 <Typography variant="subtitle1">{file.filename}</Typography>
               </Link>
             ) : (
-              <Typography variant="subtitle1">{file.filename}</Typography>
+              <TextButton onClick={() => setFileId(file.id)}>{file.filename}</TextButton>
             )}
             <Typography variant="body2" color="text.secondary" sx={{ marginLeft: 'auto' }}>
               {t('common:added')} {new Date(file.createdAt).toLocaleString(locales[i18n.language].code)}

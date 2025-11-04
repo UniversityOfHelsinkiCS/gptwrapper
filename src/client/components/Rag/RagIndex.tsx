@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Button, Box, Typography, styled, LinearProgress, Container, DialogTitle, DialogContent, Dialog, Link, CircularProgress } from '@mui/material'
 import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom'
 import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined'
@@ -18,6 +18,7 @@ import queryClient from '../../util/queryClient'
 import { IngestionPipelineStageKey } from '@shared/ingestion'
 import { RagFilesStatus } from './RagFilesStatus'
 import apiClient from '../../util/apiClient'
+import { RagFile } from './RagFile'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -44,6 +45,7 @@ export const RagIndex = ({ ragIndexId, setRagIndexId }: { ragIndexId?: number, s
   const { data: ragDetails, isSuccess, refetch } = useRagIndexDetails(id)
   const { data: ragFileStatuses, refetch: refetchStatuses } = useRagIndexJobs(id, refetchInterval)
   const uploadMutation = useUploadMutation({ index: ragDetails, onUploadProgress: setUploadProgress })
+  const [fileId, setFileId] = useState<number | undefined>(undefined)
 
   const isComplete = ragFileStatuses ? ragFileStatuses.every(({ pipelineStage }) => pipelineStage !== 'ingesting') && !uploadMutation.isPending : false
   const hasErrors = ragFileStatuses ? ragFileStatuses.some(({ pipelineStage }) => pipelineStage === 'error') : false
@@ -99,6 +101,10 @@ export const RagIndex = ({ ragIndexId, setRagIndexId }: { ragIndexId?: number, s
   }
 
   const coursePagePath = ragDetails?.chatInstances?.[0] ? `/courses/${ragDetails.chatInstances[0].courseId}/rag` : '/rag'
+
+  if (fileId) return (
+    <RagFile ragIndexId={id} fileId={fileId} setFileId={setFileId} />
+  )
 
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
@@ -184,8 +190,9 @@ export const RagIndex = ({ ragIndexId, setRagIndexId }: { ragIndexId?: number, s
               key={file.id}
               file={file}
               status={ragFileStatuses?.find((rfs) => rfs.ragFileId === file.id)}
-              link
+              link={!ragIndexId}
               uploadProgress={uploadMutation.isPending ? uploadProgress : undefined}
+              setFileId={setFileId}
             />
           ))}
         </Box>

@@ -17,18 +17,23 @@ type RagFile = RagFileAttributes & {
   ragIndex: RagIndexAttributes
 }
 
-export const RagFile: React.FC = () => {
+export const RagFile = ({ ragIndexId, fileId, setFileId }: { ragIndexId?: number, fileId?: number, setFileId?: React.Dispatch<number | undefined> }) => {
   const { t } = useTranslation()
-  const { id, fileId } = useParams()
+  const params = useParams<{ id: string; fileId: string }>()
+
+  // Use props if provided, otherwise fall back to URL params
+  const indexId = ragIndexId ?? (params.id ? parseInt(params.id, 10) : undefined)
+  const finalFileId = fileId ?? (params.fileId ? parseInt(params.fileId, 10) : undefined)
+
   const {
     data: ragFile,
     isSuccess,
     isError,
     error,
   } = useQuery({
-    queryKey: ['ragFile', id],
+    queryKey: ['ragFile', indexId],
     queryFn: async () => {
-      const res = await apiClient.get<RagFile>(`/rag/indices/${id}/files/${fileId}`)
+      const res = await apiClient.get<RagFile>(`/rag/indices/${indexId}/files/${finalFileId}`)
       return res.data
     },
   })
@@ -46,9 +51,10 @@ export const RagFile: React.FC = () => {
 
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
-      <Link component={RouterLink} to={`/rag/${id}`}>
+      {!ragIndexId ? <Link component={RouterLink} to={`/rag/${indexId}`}>
         {t('rag:backToCollection')}
-      </Link>
+      </Link> : <OutlineButtonBlack onClick={() => setFileId(undefined)} />}
+
       <Typography variant="body1">{t('rag:file')}</Typography>
       <Typography variant="h3">
         {ragFile.ragIndex.metadata?.name} / {ragFile.filename}
@@ -89,7 +95,7 @@ export const RagFile: React.FC = () => {
           {t('rag:deleteFile')}
         </Button>
       </Box>
-      <RagFileInfo file={ragFile} />
+      <RagFileInfo file={ragFile} setFileId={() => null} />
       <Typography variant="h4">{t('rag:content')}</Typography>
       {ragFile.fileContent.length === 0 ? (
         <Typography variant="body1">{t('rag:noContent')}</Typography>
