@@ -31,12 +31,12 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 })
 
-export const RagIndex: React.FC = () => {
+export const RagIndex = ({ ragIndexId }: { ragIndexId?: number }) => {
   const { user } = useCurrentUser()
   const { t } = useTranslation()
   const { id: strId } = useParams() as { id: string }
   const navigate = useNavigate()
-  const id = parseInt(strId, 10)
+  const id = parseInt(strId, 10) || ragIndexId as number
   const [searchOpen, setSearchOpen] = React.useState(false)
   const deleteIndexMutation = useDeleteRagIndexMutation()
   const [refetchInterval, setRefetchInterval] = React.useState(60 * 1000)

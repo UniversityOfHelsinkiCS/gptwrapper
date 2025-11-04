@@ -12,7 +12,7 @@ import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '@s
 import { getLanguageValue } from '@shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { useChatScroll } from './useChatScroll'
-import useChatInstance from '../../hooks/useCourse'
+import useCourse from '../../hooks/useCourse'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
@@ -24,6 +24,7 @@ import { ChatBox } from './ChatBox'
 import { DisclaimerModal } from './Disclaimer'
 import { EmailButtonOLD } from './EmailButton'
 import { GrayButton, OutlineButtonBlack } from './general/Buttons'
+import { CourseSettingsModal } from './CourseSettingsModal'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
 import { ChatInfo } from './general/ChatInfo'
@@ -54,12 +55,6 @@ import CoursesModal from './CoursesModal'
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
  */
 const Conversation = lazy(() => import('./Conversation'))
-
-const ExampleModal = () => {
-  return (
-    <Box>helou</Box>
-  )
-}
 
 function useLocalStorageStateWithURLDefault<T>(key: string, defaultValue: string, urlKey: string, schema: z.ZodType<T>) {
   const [value, setValue] = useLocalStorageState(key, defaultValue)
@@ -97,7 +92,7 @@ const ChatV2Content = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
-  const { data: chatInstance } = useChatInstance(courseId)
+  const { data: chatInstance } = useCourse(courseId)
   const { user } = useCurrentUser()
 
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
@@ -406,7 +401,7 @@ const ChatV2Content = () => {
   //TODO: Restrict access when necessary
   const modalsRegister: ModalMap = {
     'course': { name: 'Omat kurssini', component: CoursesModal },
-    'courseSettings': { name: 'Kurssin asetukset', component: ExampleModal },
+    'courseSettings': { name: 'Kurssin asetukset', component: CourseSettingsModal, props: { courseId: courseId } },
     'prompt': { name: 'Valitse alustus', component: PromptModal, props: { chatInstanceId: chatInstance?.id } },
     'editPrompt': { name: 'Muokkaa alustusta', component: PromptEditor, props: { prompt: activePrompt, ragIndices, type: activePrompt?.type, chatInstanceId: activePrompt?.chatInstanceId, createPromptMutation, editPromptMutation } },
     'selectPrompt': { name: 'Valitse alustus', component: PromptModal, props: { chatInstanceId: chatInstance?.id } },

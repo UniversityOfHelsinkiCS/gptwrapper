@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { BarChart, Bar, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 import useCurrentUser from '../../../hooks/useCurrentUser'
-import useChatInstance, { useCourseEnrolments, useCourseStatistics } from '../../../hooks/useCourse'
+import useCourse, { useCourseEnrolments, useCourseStatistics } from '../../../hooks/useCourse'
 import MaxTokenUsageStudents from './MaxTokenUsageStudents'
 import HelpOutline from '@mui/icons-material/HelpOutline'
 import { BlueButton, OutlineButtonBlue } from '../../ChatV2/general/Buttons'
@@ -15,7 +15,7 @@ const Stats = ({ courseId }: { courseId: string }) => {
   const [studentListOpen, setStudentListOpen] = useState(false)
 
   const { stats, isLoading } = useCourseStatistics(courseId)
-  const { data: course, isSuccess: isCourseSuccess } = useChatInstance(courseId)
+  const { data: course, isSuccess: isCourseSuccess } = useCourse(courseId)
   const { data: enrolments } = useCourseEnrolments(courseId)
 
   if (!stats || !user || isLoading || isUserLoading || !isCourseSuccess) return null

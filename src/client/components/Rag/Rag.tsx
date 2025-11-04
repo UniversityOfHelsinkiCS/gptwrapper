@@ -1,15 +1,18 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, Link, Container } from '@mui/material'
 import { Link as RouterLink, useParams } from 'react-router-dom'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
-import useChatInstance from '../../hooks/useCourse'
+import useCourse from '../../hooks/useCourse'
 import { RagCreator } from './RagCreator'
 import { useTranslation } from 'react-i18next'
+import { RagIndex } from './RagIndex'
+import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
 
-const Rag: React.FC = () => {
+const Rag = ({ courseId }: { courseId?: string }) => {
   const { t } = useTranslation()
-  const { id: courseId } = useParams<{ id: string }>()
-  const { data: chatInstance } = useChatInstance(courseId)
+  const { id } = useParams<{ id: string }>()
+  const { data: chatInstance } = useCourse(courseId ?? id)
+  const [ragIndexId, setRagIndexId] = useState<number | undefined>(undefined)
 
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, true)
 
@@ -45,9 +48,13 @@ const Rag: React.FC = () => {
                   <TableCell>{index.ragFileCount}</TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                      <Link to={`/rag/${index.id}`} component={RouterLink} sx={{ ml: 'auto' }}>
-                        {t('rag:viewDetails')}
-                      </Link>
+                      {courseId ?
+                        (<OutlineButtonBlack onClick={() => setRagIndexId(index.id)}>
+                          {t('rag:viewDetails')}
+                        </OutlineButtonBlack>) :
+                        (<Link to={`/rag/${index.id}`} component={RouterLink} sx={{ ml: 'auto' }}>
+                          {t('rag:viewDetails')}
+                        </Link>)}
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -56,6 +63,9 @@ const Rag: React.FC = () => {
           </Paper>
         ))}
       </Box>
+      {(courseId && !!ragIndexId) &&
+        <RagIndex ragIndexId={ragIndexId} />
+      }
     </Container>
   )
 }

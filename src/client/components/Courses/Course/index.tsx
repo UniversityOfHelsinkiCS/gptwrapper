@@ -24,7 +24,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, Route, Routes, useParams } from 'react-router-dom'
 
 import { PUBLIC_URL } from '../../../../config'
-import useChatInstance from '../../../hooks/useCourse'
+import useCourse from '../../../hooks/useCourse'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import usePrompts from '../../../hooks/usePrompts'
 import type { Prompt as PromptType, Responsebility, User } from '../../../types'
@@ -57,7 +57,7 @@ export function Component() {
   const { language } = i18n
 
   const { user, isLoading: userLoading } = useCurrentUser()
-  const { data: chatInstance, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useChatInstance(id)
+  const { data: chatInstance, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(id)
 
   useEffect(() => {
     if (isCourseSuccess) {

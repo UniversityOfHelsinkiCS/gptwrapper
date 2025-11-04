@@ -8,7 +8,7 @@ import remarkGfm from 'remark-gfm'
 
 import { formatDateTime } from '../util'
 import useCurrentUser from '../../../hooks/useCurrentUser'
-import useChatInstance, { useCourseDiscussion } from '../../../hooks/useCourse'
+import useCourse, { useCourseDiscussion } from '../../../hooks/useCourse'
 import type { Discussion } from '../../../../shared/types'
 
 const Message = ({ message }: { message: Discussion }) => {
@@ -44,7 +44,7 @@ const UserDiscussion = () => {
 
   const { id, user_id } = useParams()
   const { user, isLoading: isUserLoading } = useCurrentUser()
-  const { data: course, isSuccess: isCourseSuccess } = useChatInstance(id)
+  const { data: course, isSuccess: isCourseSuccess } = useCourse(id)
   const { data: discussion, isSuccess: isDiscussionSuccess } = useCourseDiscussion(id, user_id)
 
   if (!course || !isCourseSuccess || !isDiscussionSuccess || isUserLoading || !user) return null

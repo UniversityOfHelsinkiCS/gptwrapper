@@ -4,7 +4,7 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import type { Prompt } from '../../types'
 import apiClient, { type ApiError } from '../../util/apiClient'
 import { type UseMutateAsyncFunction, useMutation, useQuery } from '@tanstack/react-query'
-import useChatInstance from '../../hooks/useCourse'
+import useCourse from '../../hooks/useCourse'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import type { MessageGenerationInfo } from '../../../shared/chat'
 import { useTranslation } from 'react-i18next'
@@ -52,7 +52,7 @@ export const PromptStateProvider: React.FC<{
   const urlPromptId = searchParams.get('promptId')
   const { courseId } = useParams()
 
-  const { data: course, refetch: refetchCourse } = useChatInstance(courseId)
+  const { data: course, refetch: refetchCourse } = useCourse(courseId)
 
   const { data: myPrompts, refetch } = useQuery<Prompt[]>({
     queryKey: ['/prompts/my-prompts'],
