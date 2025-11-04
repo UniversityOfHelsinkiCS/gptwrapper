@@ -57,6 +57,7 @@ const LANGUAGES = ['fi', 'sv', 'en']
 const MAX_CONTEXT_EXAMPLES = 3
 const OPENAI_TEMPERATURE = 0.3
 const OPENAI_MAX_TOKENS = 200
+const ERROR_MESSAGE_PREVIEW_LENGTH = 100
 
 const log0 = (...msg) => {
   if (!args.quiet) {
@@ -303,7 +304,7 @@ const createMissingTranslations = async missingByLang => {
     let contextExamples = ''
     if (keyParts.length > 1) {
       const namespace = keyParts[0]
-      const existingKeys = Object.keys(locales['en'][namespace] || {}).slice(0, MAX_CONTEXT_EXAMPLES)
+      const existingKeys = Object.keys(locales['en']?.[namespace] || {}).slice(0, MAX_CONTEXT_EXAMPLES)
       if (existingKeys.length > 0) {
         contextExamples = '\n\nExisting translations in this namespace for context:'
         existingKeys.forEach(ek => {
@@ -361,7 +362,7 @@ Make translations brief, appropriate for UI labels, and consistent with the cont
         translations = JSON.parse(content)
       } catch (parseError) {
         console.log(`  ${FgRed}Failed to parse OpenAI response as JSON${Reset}`)
-        console.log(`  Response was: ${content.substring(0, 100)}...`)
+        console.log(`  Response was: ${content.substring(0, ERROR_MESSAGE_PREVIEW_LENGTH)}...`)
         continue
       }
       
