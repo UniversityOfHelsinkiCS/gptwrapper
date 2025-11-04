@@ -76,15 +76,14 @@ export const filterUsages = (maxTokenLimit: number, usages: ChatInstanceUsage[])
   return closeToMaxTokenLimit
 }
 
-export const getGroupedCourses = (courses: CoursesViewCourse[]) => {
-  const normalizedCourseUnits = courses ?? []
-
-  const curreEnabled = normalizedCourseUnits.filter((course) => course.isActive)
-
-  const ended = normalizedCourseUnits.filter((course) => course.isExpired)
+export const getGroupedCourses = (courses: CoursesViewCourse[] = []) => {
+  const curreEnabled = courses.filter((course) => course.isActive)
+  const curreDisabled = courses.filter((course) => !course.isActive && !course.isExpired)
+  const ended = courses.filter((course) => course.isExpired)
 
   return {
     curreEnabled,
+    curreDisabled,
     ended,
   }
 }

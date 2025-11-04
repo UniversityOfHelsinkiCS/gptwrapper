@@ -2,6 +2,7 @@ import React from 'react'
 import { Box, Tab, Tabs, Typography, Container } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import useUserCourses, { CoursesViewCourse } from '../../hooks/useUserCourses'
+import useCurrentUser from '../../hooks/useCurrentUser'
 import { useMemo, useState } from 'react'
 import TableSortLabel from '@mui/material/TableSortLabel'
 import { useNavigate } from 'react-router-dom'
@@ -40,6 +41,9 @@ const CustomTabPanel = (props: TabPanelProps) => {
 const CoursesModal = ({ closeModal, nextModal }: ModalInjectedProps) => {
     const { t } = useTranslation()
     const { courses, isLoading } = useUserCourses()
+    const { user } = useCurrentUser()
+
+    const isTeacherOrAdmin = user?.isAdmin || user?.ownCourses?.length
 
     const [value, setValue] = React.useState(0)
 
@@ -49,30 +53,37 @@ const CoursesModal = ({ closeModal, nextModal }: ModalInjectedProps) => {
         setValue(newValue)
     }
 
-    const { curreEnabled, ended } = getGroupedCourses(courses)
+    const { curreEnabled, curreDisabled, ended, } = getGroupedCourses(courses)
 
-    const activeCourses = courses.filter((course) => !course.isExpired)
+
+    if (isTeacherOrAdmin) {
+        return (
+            <Box>
+                <Tabs value={value} onChange={handleChange}>
+                    {/* <Tab label={t('course:activeTab')} />
+                    <Tab label={t('course:curreEnabledTab')} />
+                    <Tab label={t('course:endedTab')} /> */}
+                    <Tab label={t('course:activeTab')} />
+                    {/* <Tab label={t('course:curreEnabledTab')} /> */}
+                    <Tab label="Aktivoimatta" />
+                    <Tab label="Menneet kurssit" />
+                </Tabs>
+                <CustomTabPanel value={value} index={0}>
+                    <CourseList courseUnits={curreEnabled} type="enabled" closeModal={closeModal} nextModal={nextModal} />
+                </CustomTabPanel>
+                <CustomTabPanel value={value} index={1}>
+                    <CourseList courseUnits={curreDisabled} type="disabled" closeModal={closeModal} nextModal={nextModal} />
+                </CustomTabPanel>
+                <CustomTabPanel value={value} index={2}>
+                    <CourseList courseUnits={ended} type="ended" closeModal={closeModal} nextModal={nextModal} />
+                </CustomTabPanel>
+            </Box>
+        )
+    }
 
     return (
         <Box>
-            <Tabs value={value} onChange={handleChange}>
-                {/* <Tab label={t('course:activeTab')} />
-                <Tab label={t('course:curreEnabledTab')} />
-                <Tab label={t('course:endedTab')} /> */}
-                <Tab label={t('course:activeTab')} />
-                {/* <Tab label={t('course:curreEnabledTab')} /> */}
-                <Tab label="Aktivoimatta" />
-                <Tab label="Menneet kurssit" />
-            </Tabs>
-            <CustomTabPanel value={value} index={0}>
-                <CourseList courseUnits={curreEnabled} type="enabled" closeModal={closeModal} nextModal={nextModal} />
-            </CustomTabPanel>
-            <CustomTabPanel value={value} index={1}>
-                <CourseList courseUnits={activeCourses} type="disabled" closeModal={closeModal} nextModal={nextModal} />
-            </CustomTabPanel>
-            <CustomTabPanel value={value} index={2}>
-                <CourseList courseUnits={ended} type="ended" closeModal={closeModal} nextModal={nextModal} />
-            </CustomTabPanel>
+            <CourseList courseUnits={curreEnabled} type="enabled" closeModal={closeModal} nextModal={nextModal} />
         </Box>
     )
 }
@@ -125,6 +136,8 @@ const CourseList = ({ courseUnits, type, closeModal, nextModal }: { courseUnits:
         }
         return [...courseUnits].sort(compare)
     }, [courseUnits, order, orderBy, language])
+
+
 
     return (
         <Box sx={{ py: 3, overflow: 'auto' }}>
