@@ -362,7 +362,10 @@ Make translations brief, appropriate for UI labels, and consistent with the cont
         translations = JSON.parse(content)
       } catch (parseError) {
         console.log(`  ${FgRed}Failed to parse OpenAI response as JSON${Reset}`)
-        console.log(`  Response was: ${content.substring(0, ERROR_MESSAGE_PREVIEW_LENGTH)}...`)
+        const preview = content.length > ERROR_MESSAGE_PREVIEW_LENGTH 
+          ? `${content.substring(0, ERROR_MESSAGE_PREVIEW_LENGTH)}...`
+          : content
+        console.log(`  Response was: ${preview}`)
         continue
       }
       
