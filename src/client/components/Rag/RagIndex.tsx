@@ -31,7 +31,7 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 })
 
-export const RagIndex = ({ ragIndexId }: { ragIndexId?: number }) => {
+export const RagIndex = ({ ragIndexId, setRagIndexId }: { ragIndexId?: number, setRagIndexId?: React.Dispatch<number | undefined> }) => {
   const { user } = useCurrentUser()
   const { t } = useTranslation()
   const { id: strId } = useParams() as { id: string }
@@ -102,11 +102,12 @@ export const RagIndex = ({ ragIndexId }: { ragIndexId?: number }) => {
 
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
-      <OutlineButtonBlack sx={{ mb: 2 }}>
-        <Link to={coursePagePath} component={RouterLink} sx={{ display: 'flex' }}>
-          <ArrowBackOutlined />
+      {/* @ts-ignore */}
+      <OutlineButtonBlack onClick={() => setRagIndexId(undefined)} sx={{ mb: 2 }}>
+        <ArrowBackOutlined />
+        {!ragIndexId && <Link to={coursePagePath} component={RouterLink} sx={{ display: 'flex' }}>
           {t('rag:backToCourse')}
-        </Link>
+        </Link>}
       </OutlineButtonBlack>
       <Typography variant="body1">{t('rag:collection')}</Typography>
       <Typography variant="h3">{ragDetails?.metadata?.name}</Typography>
@@ -189,6 +190,6 @@ export const RagIndex = ({ ragIndexId }: { ragIndexId?: number }) => {
           ))}
         </Box>
       </Box>
-    </Container>
+    </Container >
   )
 }
