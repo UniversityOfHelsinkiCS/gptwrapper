@@ -1,4 +1,3 @@
-import FeedbackIcon from '@mui/icons-material/Feedback'
 import {
   Checkbox,
   Dialog,
@@ -6,11 +5,9 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Fab,
   FormControlLabel,
   Link,
   TextField,
-  Tooltip,
 } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -39,17 +36,21 @@ const useSubmitFeedbackMutation = () => {
   })
 }
 
-export const Feedback: React.FC = () => {
+export const Feedback: React.FC<{
+  open: boolean
+  onClose: () => void
+}> = ({
+  open, onClose
+}) => {
   const { t } = useTranslation()
   const { enqueueSnackbar } = useSnackbar()
-  const [modalOpen, setModalOpen] = useState(false)
   const [feedback, setFeedback] = useState('')
   const [responseWanted, setResponseWanted] = useState(false)
 
   const submitFeedback = useSubmitFeedbackMutation()
 
   const handleSubmit = async () => {
-    setModalOpen(false)
+    onClose()
     try {
       await submitFeedback.mutateAsync({ feedback, responseWanted })
       enqueueSnackbar(t('feedback:success'), { variant: 'success' })
@@ -60,49 +61,29 @@ export const Feedback: React.FC = () => {
   }
 
   return (
-    <>
-      <Tooltip arrow title={t('feedback:giveFeedback')} placement="top">
-        <Fab
-          color="default"
-          aria-label="feedback"
-          sx={(theme) => ({
-            position: 'fixed',
-            bottom: '0.5rem',
-            left: { xs: '6rem', sm: '6rem', md: '1rem' },
-            zIndex: theme.zIndex.modal + 1,
-            opacity: 0.9,
-            transition: 'opacity 0.2s',
-          })}
-          size="small"
-          onClick={() => setModalOpen(true)}
-        >
-          <FeedbackIcon />
-        </Fab>
-      </Tooltip>
-      <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
-        <DialogTitle>{t('feedback:title')}</DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ mb: 2 }}>{t('feedback:description')}</DialogContentText>
-          <TextField label={t('feedback:message')} multiline rows={4} fullWidth value={feedback} onChange={(e) => setFeedback(e.target.value)} />
-          <FormControlLabel
-            control={<Checkbox checked={responseWanted} onChange={(ev) => setResponseWanted(ev.target.checked)} />}
-            label={t('feedback:responseWanted')}
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>{t('feedback:title')}</DialogTitle>
+      <DialogContent>
+        <DialogContentText sx={{ mb: 2 }}>{t('feedback:description')}</DialogContentText>
+        <TextField label={t('feedback:message')} multiline rows={4} fullWidth value={feedback} onChange={(e) => setFeedback(e.target.value)} />
+        <FormControlLabel
+          control={<Checkbox checked={responseWanted} onChange={(ev) => setResponseWanted(ev.target.checked)} />}
+          label={t('feedback:responseWanted')}
+        />
+        <DialogContentText>
+          <Trans
+            i18nKey="feedback:supportInfo"
+            values={{ supportEmail }}
+            components={{
+              mailTo: <Link href={`mailto:${supportEmail}`} underline="hover" color="toskaPrimary.main" />,
+            }}
           />
-          <DialogContentText>
-            <Trans
-              i18nKey="feedback:supportInfo"
-              values={{ supportEmail }}
-              components={{
-                mailTo: <Link href={`mailto:${supportEmail}`} underline="hover" color="toskaPrimary.main" />,
-              }}
-            />
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <OutlineButtonBlack onClick={() => setModalOpen(false)}>{t('feedback:cancel')}</OutlineButtonBlack>
-          <BlueButton onClick={handleSubmit}>{t('feedback:submit')}</BlueButton>
-        </DialogActions>
-      </Dialog>
-    </>
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <OutlineButtonBlack onClick={onClose}>{t('feedback:cancel')}</OutlineButtonBlack>
+        <BlueButton onClick={handleSubmit}>{t('feedback:submit')}</BlueButton>
+      </DialogActions>
+    </Dialog>
   )
 }

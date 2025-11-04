@@ -19,6 +19,7 @@ import GlobalMenu from './components/GlobalMenu'
 import HYLoadingSpinner from './components/ChatV2/general/HYLoadingSpinner'
 import { DisclaimerModal } from './components/Disclaimer'
 import { GlobalSettings } from './components/GlobalSettings'
+import { Feedback } from './components/Feedback'
 
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
@@ -100,6 +101,7 @@ const App = () => {
 const Layout = () => {
 
   const { user } = useCurrentUser()
+  const [feedbackOpen, setFeedbackOpen] = React.useState(false)
   const [settingsOpen, setSettingsOpen] = React.useState(false)
   const [disclaimerStatus, setDisclaimerStatus] = React.useState(false)
   useEffect(() => {
@@ -118,10 +120,11 @@ const Layout = () => {
           height: 'auto',
         }}
       >
+        <Feedback open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
         <GlobalSettings open={settingsOpen} setOpen={setSettingsOpen} />
         <DisclaimerModal disclaimerStatus={disclaimerStatus} setDisclaimerStatus={setDisclaimerStatus} />
         <Box sx={{ top: 20, right: 20, zIndex: 999, position: 'fixed' }}>
-          <GlobalMenu openDisclaimer={() => setDisclaimerStatus(true)} openSettings={() => setSettingsOpen(true)} />
+          <GlobalMenu openDisclaimer={() => setDisclaimerStatus(true)} openSettings={() => setSettingsOpen(true)} openFeedback={() => setFeedbackOpen(true)} />
         </Box>
         <Content />
       </Box>

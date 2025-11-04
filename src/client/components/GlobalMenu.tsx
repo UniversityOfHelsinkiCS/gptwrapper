@@ -21,9 +21,11 @@ import { AdminPanelSettings, BarChart } from '@mui/icons-material'
 export default function GlobalMenu({
   openDisclaimer,
   openSettings,
+  openFeedback,
 }: {
   openDisclaimer: () => void
-  openSettings: () => void
+  openSettings: () => void,
+  openFeedback: () => void
 }) {
   const { t, i18n } = useTranslation()
   const { user } = useCurrentUser()
@@ -93,7 +95,10 @@ export default function GlobalMenu({
             <ListItemText>{t('about_service')}</ListItemText>
 
           </MenuItem>
-          <MenuItem>
+          <MenuItem onClick={() => {
+            openFeedback()
+            handleClose()
+          }}>
             <ListItemIcon>
               <ReviewsIcon fontSize="small" />
             </ListItemIcon>
