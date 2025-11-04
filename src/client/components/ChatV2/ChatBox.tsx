@@ -112,13 +112,7 @@ export const ChatBox = ({
     setIsTokenLimitExceeded(userStatus.usage > userStatus.limit)
   }, [statusLoading, userStatus])
 
-  if (statusLoading) {
-    return (
-      <Box sx={{ display: 'flex' }}>
-        <CircularProgress />
-      </Box>
-    )
-  }
+  if (statusLoading) return null
 
   const activeMessageWarnings = Object.values(messageWarning).filter((warning) => !warning.ignored)
 

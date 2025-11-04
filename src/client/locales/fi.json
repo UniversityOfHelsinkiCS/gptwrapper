@@ -339,7 +339,9 @@
     "toCoursePage": "Kurssisivulle",
     "edit": "Muokkaa",
     "activate": "Aktivoi",
-    "noResults": "Ei tuloksia."
+    "noResults": "Ei tuloksia.",
+    "teachers": "Opettajat",
+    "students": "Opiskelijat"
   },
   "prompt": {
     "createNew": "Luo uusi alustus",

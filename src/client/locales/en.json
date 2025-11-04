@@ -339,7 +339,9 @@
     "toCoursePage": "To course page",
     "edit": "Edit",
     "activate": "Activate",
-    "noResults": "No results."
+    "noResults": "No results.",
+    "teachers": "Teachers",
+    "students": "Students"
   },
   "prompt": {
     "createNew": "Create new prompt",

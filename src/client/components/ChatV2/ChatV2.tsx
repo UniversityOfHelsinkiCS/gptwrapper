@@ -1,4 +1,4 @@
-import { Alert, Box, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Alert, Box, CircularProgress, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
 import ChevronLeft from '@mui/icons-material/ChevronLeft'
 import HelpIcon from '@mui/icons-material/Help'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
@@ -49,6 +49,7 @@ import { PromptEditor } from '../Prompt/PromptEditor'
 import TemplateModal from './TemplateModal'
 import PromptModal from './PromptModal'
 import CoursesModal from './CoursesModal'
+import HYLoadingSpinner from './general/HYLoadingSpinner'
 
 
 /**
@@ -90,12 +91,14 @@ const ChatV2Content = () => {
   const { courseId } = useParams()
   const isEmbeddedMode = useIsEmbedded()
   const theme = useTheme()
+  const chatScroll = useChatScroll()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const { t, i18n } = useTranslation()
 
-  const { data: chatInstance } = useCourse(courseId)
-  const { user } = useCurrentUser()
-
+  const { data: chatInstance, isLoading: instanceLoading } = useCourse(courseId)
+  const { user, isLoading: userLoading } = useCurrentUser()
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
+
 
   // local storage states
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
@@ -141,10 +144,6 @@ const ChatV2Content = () => {
 
   const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false)
-
-  const chatScroll = useChatScroll()
-
-  const { t, i18n } = useTranslation()
 
   const { promptInfo, activePrompt, createPromptMutation, editPromptMutation } = usePromptState()
   const { ragIndices } = useCourseRagIndices(chatInstance?.id)
@@ -354,6 +353,9 @@ const ChatV2Content = () => {
   const [newSideBar, setNewSidebar] = useState(false)
   const [modalContentId, setModalContentId] = useState<string | null>(null)
 
+  if (statusLoading || userLoading || instanceLoading) return <HYLoadingSpinner />
+
+
   if (chatInstance && chatInstance.usageLimit === 0) {
     return (
       <Box>
@@ -395,9 +397,6 @@ const ChatV2Content = () => {
       )
     }
   }
-
-  if (statusLoading) return null
-
   //TODO: Restrict access when necessary
   const modalsRegister: ModalMap = {
     'course': { name: 'Omat kurssini', component: CoursesModal },

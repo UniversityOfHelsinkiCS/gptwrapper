@@ -16,6 +16,7 @@ import { useUpdateUrlLang } from './hooks/useUpdateUrlLang'
 import Styles from './GlobalStyles'
 import './styles.css'
 import GlobalMenu from './components/GlobalMenu'
+import HYLoadingSpinner from './components/ChatV2/general/HYLoadingSpinner'
 
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
@@ -123,7 +124,7 @@ const Content = () => {
 
   const onNoAccessPage = location.pathname.includes('/noaccess')
 
-  if (isLoading && !onNoAccessPage) return <CircularProgress sx={{ margin: 'auto' }} />
+  if (isLoading && !onNoAccessPage) return <HYLoadingSpinner />
 
   if (!onNoAccessPage && !hasAccess(user, courseId)) {
     return <Navigate to={getRedirect(user)} />
