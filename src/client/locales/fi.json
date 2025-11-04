@@ -44,7 +44,9 @@
     "iframeCopy": "Kopioi upotettava iframe-elementti:\n\n{{- iframeHtml}}",
     "model": "Kielimalli",
     "added": "Lisätty",
-    "fileType": "Tiedostomuoto"
+    "fileType": "Tiedostomuoto",
+    "settings": "Asetukset",
+    "about_service": "Tietoa palvelusta"
   },
   "stats": {
     "showing": "Näytetään",

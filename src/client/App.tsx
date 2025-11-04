@@ -7,9 +7,7 @@ import { SnackbarProvider } from 'notistack'
 import React, { useEffect } from 'react'
 import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom'
 import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
-import { Feedback } from './components/Feedback'
-import NavBar, { EmbeddedNavBar } from './components/NavBar'
-import { EmbeddedProvider, useIsEmbedded } from './contexts/EmbeddedContext'
+import { EmbeddedProvider } from './contexts/EmbeddedContext'
 import useCurrentUser from './hooks/useCurrentUser'
 import { AnalyticsProvider } from './stores/analytics'
 import useTheme from './theme'
@@ -17,6 +15,7 @@ import type { User } from './types'
 import { useUpdateUrlLang } from './hooks/useUpdateUrlLang'
 import Styles from './GlobalStyles'
 import './styles.css'
+import GlobalMenu from './components/GlobalMenu'
 
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
@@ -96,7 +95,6 @@ const App = () => {
 }
 
 const Layout = () => {
-  const isEmbedded = useIsEmbedded()
 
   return (
     <>
@@ -108,11 +106,10 @@ const Layout = () => {
           height: 'auto',
         }}
       >
-        {isEmbedded ? <EmbeddedNavBar /> : <NavBar />}
-        <Box>
-          <Content />
+        <Box sx={{ top: 20, right: 20, zIndex: 999, position: 'fixed' }}>
+          <GlobalMenu />
         </Box>
-        {!isEmbedded && <Feedback />}
+        <Content />
       </Box>
       <AdminLoggedInAsBanner />
     </>

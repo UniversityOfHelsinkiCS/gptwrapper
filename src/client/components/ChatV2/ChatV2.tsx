@@ -42,7 +42,6 @@ import { ResetConfirmModal } from './ResetConfirmModal'
 import TuneIcon from '@mui/icons-material/Tune'
 
 import SideBar from './SideBar'
-import ChatMenu from './ChatMenu'
 
 import { PromptEditor } from '../Prompt/PromptEditor'
 
@@ -422,12 +421,6 @@ const ChatV2Content = () => {
         display: 'flex',
       }}
     >
-
-      <Box sx={{ position: 'fixed', top: 20, right: 20, zIndex: 999 }}>
-        <ChatMenu newSideBar={newSideBar} />
-      </Box>
-
-
       {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
       {!isEmbeddedMode &&
         (isMobile ? (

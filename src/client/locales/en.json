@@ -43,7 +43,9 @@
     "iframeCopy": "Copy embeddable iframe element:\n\n{{- iframeHtml}}",
     "model": "Language model",
     "added": "Added",
-    "fileType": "File type"
+    "fileType": "File type",
+    "settings": "Settings",
+    "about_service": "About service"
   },
   "stats": {
     "timePeriodStart": "Starting",
