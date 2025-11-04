@@ -39,11 +39,11 @@ const CustomTabPanel = (props: TabPanelProps) => {
 }
 
 const CoursesModal = ({ closeModal, nextModal }: ModalInjectedProps) => {
-    const { t } = useTranslation()
-    const { courses, isLoading } = useUserCourses()
-    const { user } = useCurrentUser()
+  const { t } = useTranslation()
+  const { courses, isLoading } = useUserCourses()
+  const { user } = useCurrentUser()
 
-    const isTeacherOrAdmin = user?.isAdmin || user?.ownCourses?.length
+  const isTeacherOrAdmin = user?.isAdmin || user?.ownCourses?.length
 
   const [value, setValue] = React.useState(0)
 
@@ -53,35 +53,35 @@ const CoursesModal = ({ closeModal, nextModal }: ModalInjectedProps) => {
     setValue(newValue)
   }
 
-    const { curreEnabled, curreDisabled, ended, } = getGroupedCourses(courses)
+  const { curreEnabled, curreDisabled, ended, } = getGroupedCourses(courses)
 
 
-    if (isTeacherOrAdmin) {
-        return (
-            <Box>
-                <Tabs value={value} onChange={handleChange}>
-                    <Tab label={t('course:activeTab')} />
-                    <Tab label={t('course:notActiveTab')} />
-                    <Tab label={t('course:endedTab')} />
-                </Tabs>
-                <CustomTabPanel value={value} index={0}>
-                    <CourseList courseUnits={curreEnabled} type="enabled" closeModal={closeModal} nextModal={nextModal} />
-                </CustomTabPanel>
-                <CustomTabPanel value={value} index={1}>
-                    <CourseList courseUnits={curreDisabled} type="disabled" closeModal={closeModal} nextModal={nextModal} />
-                </CustomTabPanel>
-                <CustomTabPanel value={value} index={2}>
-                    <CourseList courseUnits={ended} type="ended" closeModal={closeModal} nextModal={nextModal} />
-                </CustomTabPanel>
-            </Box>
-        )
-    }
-
+  if (isTeacherOrAdmin) {
     return (
-        <Box>
-            <CourseList courseUnits={curreEnabled} type="enabled" closeModal={closeModal} nextModal={nextModal} />
-        </Box>
+      <Box>
+        <Tabs value={value} onChange={handleChange}>
+          <Tab label={t('course:activeTab')} />
+          <Tab label={t('course:notActiveTab')} />
+          <Tab label={t('course:endedTab')} />
+        </Tabs>
+        <CustomTabPanel value={value} index={0}>
+          <CourseList courseUnits={curreEnabled} type="enabled" closeModal={closeModal} nextModal={nextModal} />
+        </CustomTabPanel>
+        <CustomTabPanel value={value} index={1}>
+          <CourseList courseUnits={curreDisabled} type="disabled" closeModal={closeModal} nextModal={nextModal} />
+        </CustomTabPanel>
+        <CustomTabPanel value={value} index={2}>
+          <CourseList courseUnits={ended} type="ended" closeModal={closeModal} nextModal={nextModal} />
+        </CustomTabPanel>
+      </Box>
     )
+  }
+
+  return (
+    <Box>
+      <CourseList courseUnits={curreEnabled} type="enabled" closeModal={closeModal} nextModal={nextModal} />
+    </Box>
+  )
 }
 
 
@@ -133,6 +133,8 @@ const CourseList = ({ courseUnits, type, closeModal, nextModal }: { courseUnits:
     return [...courseUnits].sort(compare)
   }, [courseUnits, order, orderBy, language])
 
+
+
   return (
     <Box sx={{ py: 3, overflow: 'auto' }}>
       <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
@@ -145,7 +147,7 @@ const CourseList = ({ courseUnits, type, closeModal, nextModal }: { courseUnits:
                   direction={orderBy === 'name' ? order : 'asc'}
                   onClick={() => handleRequestSort('name')}
                 >
-                  Nimi
+                  {t('course:name')}
                 </TableSortLabel>
               </TableCell>
               <TableCell align="right" sx={{ fontWeight: 'bold' }}>
@@ -154,7 +156,7 @@ const CourseList = ({ courseUnits, type, closeModal, nextModal }: { courseUnits:
                   direction={orderBy === 'code' ? order : 'asc'}
                   onClick={() => handleRequestSort('code')}
                 >
-                  Koodi
+                  {t('course:code')}
                 </TableSortLabel>
               </TableCell>
               <TableCell align="right" sx={{ fontWeight: 'bold' }}>
@@ -163,133 +165,68 @@ const CourseList = ({ courseUnits, type, closeModal, nextModal }: { courseUnits:
                   direction={orderBy === 'activityPeriod' ? order : 'asc'}
                   onClick={() => handleRequestSort('activityPeriod')}
                 >
-                  Aika
+                  {t('course:time')}
                 </TableSortLabel>
               </TableCell>
               <TableCell />
             </TableRow>
           </TableHead>
 
-    const handleCourseSettings = (courseId: string) => {
-        nextModal("courseSettings")
-        navigate(`/${courseId}`)
-    }
+          <TableBody>
 
-    const sorted = useMemo(() => {
-        const compare = (a: CoursesViewCourse, b: CoursesViewCourse) => {
-            let av: string | number = ''
-            let bv: string | number = ''
-            if (orderBy === 'name') {
-                av = a.name[language] || ''
-                bv = b.name[language] || ''
-            } else if (orderBy === 'code') {
-                av = a.courseId || ''
-                bv = b.courseId || ''
-            } else {
-                av = new Date(a.activityPeriod.startDate).getTime()
-                bv = new Date(b.activityPeriod.startDate).getTime()
+            {
+              sorted.length
+                ?
+                sorted.map((course) => (
+                  <TableRow key={course.courseId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                      {course.name[language]}
+                    </TableCell>
+                    <TableCell align="right">{course.courseUnits[0]?.code ?? '--'}</TableCell>
+                    <TableCell align="right">{formatDate(course.activityPeriod)}</TableCell>
+                    <TableCell align="right" sx={{ width: 0 }}>
+                      <Box sx={{ display: 'inline-flex', gap: 2, pl: '3rem' }}>
+                        {type === 'ended' && (
+                          <Box component="span" sx={{ color: 'error.main', whiteSpace: 'nowrap' }}>
+                            {t('course:courseEnded')}
+                          </Box>
+                        )}
+                        {type !== 'ended' && (
+                          <>
+                            <GrayButton
+                              disabled={!course.courseId}
+                              size="small"
+                              endIcon={<ChatBubbleOutlineIcon />}
+                              onClick={() => handleChatLink(course.courseId!)}
+                            >
+                              {t('course:chat')}
+                            </GrayButton>
+                            <GrayButton size="small" endIcon={<OpenInNewIcon />}>
+                              {t('course:toCoursePage')}
+                            </GrayButton>
+                            {type === 'enabled' ? (
+                              <BlueButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>{t('course:edit')}</BlueButton>
+                            ) : (
+                              <GreenButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>{t('course:activate')}</GreenButton>
+                            )}
+                          </>
+                        )}
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))
+                :
+                <TableRow>
+                  <Box p={2}>
+                    {t('course:noResults')}
+                  </Box>
+                </TableRow>
             }
-            if (av < bv) return order === 'asc' ? -1 : 1
-            if (av > bv) return order === 'asc' ? 1 : -1
-            return 0
-        }
-        return [...courseUnits].sort(compare)
-    }, [courseUnits, order, orderBy, language])
-
-
-
-    return (
-        <Box sx={{ py: 3, overflow: 'auto' }}>
-            <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
-                <Table>
-                    <TableHead>
-                        <TableRow sx={{ backgroundColor: 'rgba(0,0,0,0.03)' }}>
-                            <TableCell sx={{ fontWeight: 'bold' }}>
-                                <TableSortLabel
-                                    active={orderBy === 'name'}
-                                    direction={orderBy === 'name' ? order : 'asc'}
-                                    onClick={() => handleRequestSort('name')}
-                                >
-                                    {t('course:name')}
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                                <TableSortLabel
-                                    active={orderBy === 'code'}
-                                    direction={orderBy === 'code' ? order : 'asc'}
-                                    onClick={() => handleRequestSort('code')}
-                                >
-                                    {t('course:code')}
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                                <TableSortLabel
-                                    active={orderBy === 'activityPeriod'}
-                                    direction={orderBy === 'activityPeriod' ? order : 'asc'}
-                                    onClick={() => handleRequestSort('activityPeriod')}
-                                >
-                                    {t('course:time')}
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell />
-                        </TableRow>
-                    </TableHead>
-
-                    <TableBody>
-
-                        {
-                            sorted.length
-                                ?
-                                sorted.map((course) => (
-                                    <TableRow key={course.courseId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                        <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                                            {course.name[language]}
-                                        </TableCell>
-                                        <TableCell align="right">{course.courseUnits[0]?.code ?? '--'}</TableCell>
-                                        <TableCell align="right">{formatDate(course.activityPeriod)}</TableCell>
-                                        <TableCell align="right" sx={{ width: 0 }}>
-                                            <Box sx={{ display: 'inline-flex', gap: 2, pl: '3rem' }}>
-                                                {type === 'ended' && (
-                                                    <Box component="span" sx={{ color: 'error.main', whiteSpace: 'nowrap' }}>
-                                                        {t('course:courseEnded')}
-                                                    </Box>
-                                                )}
-                                                {type !== 'ended' && (
-                                                    <>
-                                                        <GrayButton
-                                                            disabled={!course.courseId}
-                                                            size="small"
-                                                            endIcon={<ChatBubbleOutlineIcon />}
-                                                            onClick={() => handleChatLink(course.courseId!)}
-                                                        >
-                                                            {t('course:chat')}
-                                                        </GrayButton>
-                                                        <GrayButton size="small" endIcon={<OpenInNewIcon />}>
-                                                            {t('course:toCoursePage')}
-                                                        </GrayButton>
-                                                        {type === 'enabled' ? (
-                                                            <BlueButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>{t('course:edit')}</BlueButton>
-                                                        ) : (
-                                                            <GreenButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>{t('course:activate')}</GreenButton>
-                                                        )}
-                                                    </>
-                                                )}
-                                            </Box>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                                :
-                                <TableRow>
-                                    <Box p={2}>
-                                        {t('course:noResults')}
-                                    </Box>
-                                </TableRow>
-                        }
-                    </TableBody>
-                </Table>
-            </TableContainer>
-        </Box>
-    )
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  )
 }
 
 const CoursesSkeleton = () => (
