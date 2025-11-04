@@ -113,32 +113,6 @@ const SideBar = ({
                 </Box>
               </TextButton>
 
-              <Divider flexItem />
-
-              {
-                course &&
-                <>
-                  <TextButton>
-                    <SettingsIcon fontSize='small' />
-                  </TextButton>
-                  <TextButton>
-                    <ArticleIcon fontSize='small' />
-                  </TextButton>
-                  <TextButton>
-                    <LibraryBooksIcon fontSize='small' />
-                  </TextButton>
-                  <TextButton>
-                    <LogoutIcon sx={{ transform: 'scaleX(-1)' }} fontSize='small' />
-                  </TextButton>
-
-                  <Divider flexItem />
-                </>
-              }
-
-              <TextButton onClick={handleReset}>
-                <MapsUgcIcon fontSize='small' />
-              </TextButton>
-              <EmailButton messages={messages} disabled={!messages.length} collapsed />
             </Box>
             :
             <Box>
