@@ -16,9 +16,13 @@ import { useTranslation } from 'react-i18next'
 import { Locale } from '@shared/lang'
 import { Link as RouterLink } from 'react-router-dom'
 import useCurrentUser from '../hooks/useCurrentUser'
-import { AdminPanelSettings, AdminPanelSettingsOutlined, BarChart } from '@mui/icons-material'
+import { AdminPanelSettings, BarChart } from '@mui/icons-material'
 
-export default function GlobalMenu() {
+export default function GlobalMenu({
+  openDisclaimer,
+}: {
+  openDisclaimer: () => void
+}) {
   const { t, i18n } = useTranslation()
   const { user } = useCurrentUser()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
@@ -72,7 +76,10 @@ export default function GlobalMenu() {
             <ListItemText>{t('settings')}</ListItemText>
 
           </MenuItem>
-          <MenuItem>
+          <MenuItem onClick={() => {
+            openDisclaimer()
+            handleClose()
+          }}>
             <ListItemIcon>
               <InfoIcon fontSize="small" />
             </ListItemIcon>

@@ -38,7 +38,6 @@ const SideBar = ({
   onClose,
   setSettingsModalOpen,
   setModalContentId,
-  setDisclaimerStatus,
   messages,
   currentModel,
   setModel,
@@ -52,7 +51,6 @@ const SideBar = ({
   onClose?: () => void
   setModalContentId: React.Dispatch<React.SetStateAction<string | null>>,
   setSettingsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
-  setDisclaimerStatus: React.Dispatch<React.SetStateAction<boolean>>
   messages: ChatMessage[]
   currentModel: ValidModelName
   setModel: (model: ValidModelName) => void

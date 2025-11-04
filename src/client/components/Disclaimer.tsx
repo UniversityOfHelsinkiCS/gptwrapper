@@ -1,23 +1,22 @@
 import { Modal, Box, IconButton, Checkbox, FormControlLabel, FormGroup } from '@mui/material'
 import Close from '@mui/icons-material/Close'
 import { useTranslation } from 'react-i18next'
-import { BlueButton } from './general/Buttons'
+import { BlueButton } from './ChatV2/general/Buttons'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useState, useEffect } from 'react'
-import { useAcceptTermsMutation } from '../../hooks/useAcceptTermsMutation'
-import useCurrentUser from '../../hooks/useCurrentUser'
+import { useAcceptTermsMutation } from '../hooks/useAcceptTermsMutation'
+import useCurrentUser from '../hooks/useCurrentUser'
+import { InfoTexts } from '../locales/infoTexts'
 
 export const DisclaimerModal = ({
-  disclaimer,
   disclaimerStatus,
   setDisclaimerStatus,
 }: {
-  disclaimer: string
   disclaimerStatus: boolean
   setDisclaimerStatus: (status: boolean) => void
 }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { user } = useCurrentUser()
   const acceptTermsMutation = useAcceptTermsMutation()
   const termsAccepted = Boolean(user?.termsAcceptedAt)
@@ -86,7 +85,7 @@ export const DisclaimerModal = ({
           <Close />
         </IconButton>
 
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{disclaimer}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{InfoTexts.disclaimer[i18n.language]}</ReactMarkdown>
         <form onSubmit={handleSubmit}>
           <FormGroup sx={{ mt: 2 }}>
             <FormControlLabel

@@ -2,7 +2,7 @@ import { Box, Button, CircularProgress, CssBaseline, Snackbar } from '@mui/mater
 import { ThemeProvider } from '@mui/material/styles'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { fi } from 'date-fns/locale'
+import { fi, tr } from 'date-fns/locale'
 import { SnackbarProvider } from 'notistack'
 import React, { useEffect } from 'react'
 import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom'
@@ -17,6 +17,7 @@ import Styles from './GlobalStyles'
 import './styles.css'
 import GlobalMenu from './components/GlobalMenu'
 import HYLoadingSpinner from './components/ChatV2/general/HYLoadingSpinner'
+import { DisclaimerModal } from './components/Disclaimer'
 
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
@@ -97,6 +98,14 @@ const App = () => {
 
 const Layout = () => {
 
+  const { user } = useCurrentUser()
+  const [disclaimerStatus, setDisclaimerStatus] = React.useState(false)
+  useEffect(() => {
+    if (user && !user.termsAcceptedAt) {
+      setDisclaimerStatus(true)
+    }
+  }, [user])
+
   return (
     <>
       <Box
@@ -107,8 +116,9 @@ const Layout = () => {
           height: 'auto',
         }}
       >
+        <DisclaimerModal disclaimerStatus={disclaimerStatus} setDisclaimerStatus={setDisclaimerStatus} />
         <Box sx={{ top: 20, right: 20, zIndex: 999, position: 'fixed' }}>
-          <GlobalMenu />
+          <GlobalMenu openDisclaimer={() => setDisclaimerStatus(true)} />
         </Box>
         <Content />
       </Box>

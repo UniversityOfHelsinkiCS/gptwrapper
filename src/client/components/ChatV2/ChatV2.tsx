@@ -1,6 +1,5 @@
-import { Alert, Box, CircularProgress, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Alert, Box, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
 import ChevronLeft from '@mui/icons-material/ChevronLeft'
-import HelpIcon from '@mui/icons-material/Help'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { enqueueSnackbar } from 'notistack'
@@ -21,7 +20,6 @@ import { useAnalyticsDispatch } from '../../stores/analytics'
 import type { Course, ModalMap } from '../../types'
 import Footer from '../Footer'
 import { ChatBox } from './ChatBox'
-import { DisclaimerModal } from './Disclaimer'
 import { EmailButtonOLD } from './EmailButton'
 import { GrayButton, OutlineButtonBlack } from './general/Buttons'
 import { CourseSettingsModal } from './CourseSettingsModal'
@@ -431,7 +429,6 @@ const ChatV2Content = () => {
               }}
               course={chatInstance}
               setSettingsModalOpen={setSettingsModalOpen}
-              setDisclaimerStatus={setDisclaimerStatus}
               messages={messages}
               currentModel={activeModel}
               setModel={setActiveModel}
@@ -448,7 +445,6 @@ const ChatV2Content = () => {
               handleReset={() => setResetConfirmModalOpen(true)}
               setModalContentId={setModalContentId}
               setSettingsModalOpen={setSettingsModalOpen}
-              setDisclaimerStatus={setDisclaimerStatus}
               messages={messages}
               currentModel={activeModel}
               setModel={setActiveModel}
@@ -466,7 +462,6 @@ const ChatV2Content = () => {
               course={chatInstance}
               handleReset={() => setResetConfirmModalOpen(true)}
               setSettingsModalOpen={setSettingsModalOpen}
-              setDisclaimerStatus={setDisclaimerStatus}
               messages={messages}
               currentModel={activeModel}
               setModel={setActiveModel}
@@ -647,8 +642,6 @@ const ChatV2Content = () => {
         setModelTemperature={(updatedTemperature) => setModelTemperature(updatedTemperature)}
       />
 
-      <DisclaimerModal disclaimer={disclaimerInfo} disclaimerStatus={disclaimerStatus} setDisclaimerStatus={setDisclaimerStatus} />
-
       <ResetConfirmModal open={resetConfirmModalOpen} setOpen={setResetConfirmModalOpen} onConfirm={handleReset} />
 
     </Box >
@@ -661,7 +654,6 @@ const LeftMenu = ({
   handleReset,
   onClose,
   setSettingsModalOpen,
-  setDisclaimerStatus,
   messages,
   currentModel,
   setModel,
@@ -672,7 +664,6 @@ const LeftMenu = ({
   handleReset: () => void
   onClose?: () => void
   setSettingsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
-  setDisclaimerStatus: React.Dispatch<React.SetStateAction<boolean>>
   messages: ChatMessage[]
   currentModel: ValidModelName
   setModel: (model: ValidModelName) => void
@@ -718,9 +709,6 @@ const LeftMenu = ({
           <EmailButtonOLD messages={messages} disabled={!messages?.length} />
           <OutlineButtonBlack startIcon={<TuneIcon />} onClick={() => setSettingsModalOpen(true)} data-testid="settings-button">
             {t('chat:settings')}
-          </OutlineButtonBlack>
-          <OutlineButtonBlack startIcon={<HelpIcon />} onClick={() => setDisclaimerStatus(true)} data-testid="help-button">
-            {t('info:title')}
           </OutlineButtonBlack>
 
           {isAdmin && <OutlineButtonBlack onClick={() => setNewSidebar(prev => !prev)}>Admins: toggle old/new sidebar</OutlineButtonBlack>}
