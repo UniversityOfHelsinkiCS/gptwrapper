@@ -1,6 +1,5 @@
 /* eslint-disable */
 import { readFile, writeFile, opendir } from 'node:fs/promises'
-import { createInterface } from 'node:readline'
 import { join } from 'node:path'
 import minimist from 'minimist'
 import _ from 'lodash'
@@ -53,6 +52,11 @@ const TRANSLATION_KEY_REFERENCE_MATCHER_2 = new RegExp(/\bt\(['"`]\w+(?::\w+)*['
 const APPLICATION_NAME = 'CurreChat'
 
 const LANGUAGES = ['fi', 'sv', 'en']
+
+// OpenAI configuration constants
+const MAX_CONTEXT_EXAMPLES = 3
+const OPENAI_TEMPERATURE = 0.3
+const OPENAI_MAX_TOKENS = 200
 
 const log0 = (...msg) => {
   if (!args.quiet) {
@@ -299,7 +303,7 @@ const createMissingTranslations = async missingByLang => {
     let contextExamples = ''
     if (keyParts.length > 1) {
       const namespace = keyParts[0]
-      const existingKeys = Object.keys(locales['en'][namespace] || {}).slice(0, 3)
+      const existingKeys = Object.keys(locales['en'][namespace] || {}).slice(0, MAX_CONTEXT_EXAMPLES)
       if (existingKeys.length > 0) {
         contextExamples = '\n\nExisting translations in this namespace for context:'
         existingKeys.forEach(ek => {
@@ -341,8 +345,8 @@ Make translations brief, appropriate for UI labels, and consistent with the cont
       const response = await client.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        temperature: 0.3,
-        max_tokens: 200,
+        temperature: OPENAI_TEMPERATURE,
+        max_tokens: OPENAI_MAX_TOKENS,
       })
 
       const content = response.choices[0]?.message?.content?.trim()
