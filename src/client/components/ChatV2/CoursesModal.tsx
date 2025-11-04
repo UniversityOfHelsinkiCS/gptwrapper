@@ -60,13 +60,9 @@ const CoursesModal = ({ closeModal, nextModal }: ModalInjectedProps) => {
         return (
             <Box>
                 <Tabs value={value} onChange={handleChange}>
-                    {/* <Tab label={t('course:activeTab')} />
-                    <Tab label={t('course:curreEnabledTab')} />
-                    <Tab label={t('course:endedTab')} /> */}
                     <Tab label={t('course:activeTab')} />
-                    {/* <Tab label={t('course:curreEnabledTab')} /> */}
-                    <Tab label="Aktivoimatta" />
-                    <Tab label="Menneet kurssit" />
+                    <Tab label={t('course:notActiveTab')} />
+                    <Tab label={t('course:endedTab')} />
                 </Tabs>
                 <CustomTabPanel value={value} index={0}>
                     <CourseList courseUnits={curreEnabled} type="enabled" closeModal={closeModal} nextModal={nextModal} />
@@ -151,7 +147,7 @@ const CourseList = ({ courseUnits, type, closeModal, nextModal }: { courseUnits:
                                     direction={orderBy === 'name' ? order : 'asc'}
                                     onClick={() => handleRequestSort('name')}
                                 >
-                                    Nimi
+                                    {t('course:name')}
                                 </TableSortLabel>
                             </TableCell>
                             <TableCell align="right" sx={{ fontWeight: 'bold' }}>
@@ -160,7 +156,7 @@ const CourseList = ({ courseUnits, type, closeModal, nextModal }: { courseUnits:
                                     direction={orderBy === 'code' ? order : 'asc'}
                                     onClick={() => handleRequestSort('code')}
                                 >
-                                    Koodi
+                                    {t('course:code')}
                                 </TableSortLabel>
                             </TableCell>
                             <TableCell align="right" sx={{ fontWeight: 'bold' }}>
@@ -169,7 +165,7 @@ const CourseList = ({ courseUnits, type, closeModal, nextModal }: { courseUnits:
                                     direction={orderBy === 'activityPeriod' ? order : 'asc'}
                                     onClick={() => handleRequestSort('activityPeriod')}
                                 >
-                                    Aika
+                                    {t('course:time')}
                                 </TableSortLabel>
                             </TableCell>
                             <TableCell />
@@ -192,7 +188,7 @@ const CourseList = ({ courseUnits, type, closeModal, nextModal }: { courseUnits:
                                             <Box sx={{ display: 'inline-flex', gap: 2, pl: '3rem' }}>
                                                 {type === 'ended' && (
                                                     <Box component="span" sx={{ color: 'error.main', whiteSpace: 'nowrap' }}>
-                                                        Kurssi on päättynyt
+                                                        {t('course:courseEnded')}
                                                     </Box>
                                                 )}
                                                 {type !== 'ended' && (
@@ -203,15 +199,15 @@ const CourseList = ({ courseUnits, type, closeModal, nextModal }: { courseUnits:
                                                             endIcon={<ChatBubbleOutlineIcon />}
                                                             onClick={() => handleChatLink(course.courseId!)}
                                                         >
-                                                            Chat
+                                                            {t('course:chat')}
                                                         </GrayButton>
                                                         <GrayButton size="small" endIcon={<OpenInNewIcon />}>
-                                                            Kurssisivulle
+                                                            {t('course:toCoursePage')}
                                                         </GrayButton>
                                                         {type === 'enabled' ? (
-                                                            <BlueButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>Muokkaa</BlueButton>
+                                                            <BlueButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>{t('course:edit')}</BlueButton>
                                                         ) : (
-                                                            <GreenButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>Aktivoi</GreenButton>
+                                                            <GreenButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>{t('course:activate')}</GreenButton>
                                                         )}
                                                     </>
                                                 )}
@@ -222,7 +218,7 @@ const CourseList = ({ courseUnits, type, closeModal, nextModal }: { courseUnits:
                                 :
                                 <TableRow>
                                     <Box p={2}>
-                                        Ei tuloksia.
+                                        {t('course:noResults')}
                                     </Box>
                                 </TableRow>
                         }

@@ -302,8 +302,9 @@
     "editCourse": "Muokkaa kurssin tietoja",
     "usageResetSuccess": "Käyttö nollattu onnistuneesti",
     "activeTab": "Aktiiviset kurssit",
+    "notActiveTab": "Aktivoimatta",
+    "endedTab": "Menneet kurssit",
     "curreEnabledTab": "CurreChat käytössä",
-    "endedTab": "Päättyneet",
     "statistics": "Tilastoja",
     "averageTokenUsage": "Käytettyjen tokeneiden keskiarvo kokonaiskäytön mukaan",
     "usagePercentage": "CurreChatin käyttöön ottaneiden opiskelijoiden osuus",
@@ -327,7 +328,16 @@
     "add": "lisää",
     "sourceMaterials": "Lähdemateriaalit",
     "settings": "kurssin asetukset",
-    "confirmRemoval": "Vahvista poistaminen"
+    "confirmRemoval": "Vahvista poistaminen",
+    "name": "Nimi",
+    "code": "Koodi",
+    "time": "Aika",
+    "courseEnded": "Kurssi on päättynyt",
+    "chat": "Chat",
+    "toCoursePage": "Kurssisivulle",
+    "edit": "Muokkaa",
+    "activate": "Aktivoi",
+    "noResults": "Ei tuloksia."
   },
   "prompt": {
     "createNew": "Luo uusi alustus",
