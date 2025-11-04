@@ -50,6 +50,8 @@ const TRANSLATION_KEY_REFERENCE_MATCHER = new RegExp(/['"`]\w+(?::\w+)+['"`]/, '
 // matches t('asd'
 const TRANSLATION_KEY_REFERENCE_MATCHER_2 = new RegExp(/\bt\(['"`]\w+(?::\w+)*['"`]/, 'g')
 
+const APPLICATION_NAME = 'CurreChat'
+
 const LANGUAGES = ['fi', 'sv', 'en']
 
 const log0 = (...msg) => {
@@ -243,6 +245,16 @@ const printUnused = (translationsNotUsed, numberOfTranslations) => {
  * @param {Object} missingByLang - Object mapping languages to missing keys.
  */
 const createMissingTranslations = async missingByLang => {
+  // Validate required environment variables
+  if (!process.env.AZURE_API_KEY || !process.env.AZURE_RESOURCE) {
+    console.error(`${FgRed}Error: Missing required environment variables${Reset}`)
+    console.error('Please set AZURE_API_KEY and AZURE_RESOURCE environment variables')
+    console.error('Example:')
+    console.error('  export AZURE_API_KEY="your-api-key"')
+    console.error('  export AZURE_RESOURCE="your-resource-name"')
+    process.exit(1)
+  }
+
   // Initialize Azure OpenAI client
   const client = new AzureOpenAI({
     apiKey: process.env.AZURE_API_KEY,
@@ -307,7 +319,7 @@ const createMissingTranslations = async missingByLang => {
     }
     
     const langsToGenerate = info.map(i => i.lang)
-    const prompt = `You are a professional translator working on a web application called CurreChat.
+    const prompt = `You are a professional translator working on a web application called ${APPLICATION_NAME}.
 
 Translation key: ${k}
 Context: ${context || 'UI component'}
@@ -340,7 +352,14 @@ Make translations brief, appropriate for UI labels, and consistent with the cont
       }
 
       // Parse JSON response
-      const translations = JSON.parse(content)
+      let translations
+      try {
+        translations = JSON.parse(content)
+      } catch (parseError) {
+        console.log(`  ${FgRed}Failed to parse OpenAI response as JSON${Reset}`)
+        console.log(`  Response was: ${content.substring(0, 100)}...`)
+        continue
+      }
       
       // Assign generated translations
       for (const i of info) {
@@ -351,7 +370,7 @@ Make translations brief, appropriate for UI labels, and consistent with the cont
       }
     } catch (error) {
       console.log(`  ${FgRed}Error generating translations: ${error.message}${Reset}`)
-      // Fall back to empty strings
+      // Skip this translation and continue with the next one
     }
   }
 
