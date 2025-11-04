@@ -177,44 +177,55 @@ const CourseList = ({ courseUnits, type, closeModal, nextModal }: { courseUnits:
                     </TableHead>
 
                     <TableBody>
-                        {sorted.map((course) => (
-                            <TableRow key={course.courseId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                                    {course.name[language]}
-                                </TableCell>
-                                <TableCell align="right">{course.courseUnits[0]?.code ?? '--'}</TableCell>
-                                <TableCell align="right">{formatDate(course.activityPeriod)}</TableCell>
-                                <TableCell align="right" sx={{ width: 0 }}>
-                                    <Box sx={{ display: 'inline-flex', gap: 2, pl: '3rem' }}>
-                                        {type === 'ended' && (
-                                            <Box component="span" sx={{ color: 'error.main', whiteSpace: 'nowrap' }}>
-                                                Kurssi on päättynyt
-                                            </Box>
-                                        )}
-                                        {type !== 'ended' && (
-                                            <>
-                                                <GrayButton
-                                                    disabled={!course.courseId}
-                                                    size="small"
-                                                    endIcon={<ChatBubbleOutlineIcon />}
-                                                    onClick={() => handleChatLink(course.courseId!)}
-                                                >
-                                                    Chat
-                                                </GrayButton>
-                                                <GrayButton size="small" endIcon={<OpenInNewIcon />}>
-                                                    Kurssisivulle
-                                                </GrayButton>
-                                                {type === 'enabled' ? (
-                                                    <BlueButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>Muokkaa</BlueButton>
-                                                ) : (
-                                                    <GreenButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>Aktivoi</GreenButton>
+
+                        {
+                            sorted.length
+                                ?
+                                sorted.map((course) => (
+                                    <TableRow key={course.courseId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                        <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                                            {course.name[language]}
+                                        </TableCell>
+                                        <TableCell align="right">{course.courseUnits[0]?.code ?? '--'}</TableCell>
+                                        <TableCell align="right">{formatDate(course.activityPeriod)}</TableCell>
+                                        <TableCell align="right" sx={{ width: 0 }}>
+                                            <Box sx={{ display: 'inline-flex', gap: 2, pl: '3rem' }}>
+                                                {type === 'ended' && (
+                                                    <Box component="span" sx={{ color: 'error.main', whiteSpace: 'nowrap' }}>
+                                                        Kurssi on päättynyt
+                                                    </Box>
                                                 )}
-                                            </>
-                                        )}
+                                                {type !== 'ended' && (
+                                                    <>
+                                                        <GrayButton
+                                                            disabled={!course.courseId}
+                                                            size="small"
+                                                            endIcon={<ChatBubbleOutlineIcon />}
+                                                            onClick={() => handleChatLink(course.courseId!)}
+                                                        >
+                                                            Chat
+                                                        </GrayButton>
+                                                        <GrayButton size="small" endIcon={<OpenInNewIcon />}>
+                                                            Kurssisivulle
+                                                        </GrayButton>
+                                                        {type === 'enabled' ? (
+                                                            <BlueButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>Muokkaa</BlueButton>
+                                                        ) : (
+                                                            <GreenButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>Aktivoi</GreenButton>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </Box>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                                :
+                                <TableRow>
+                                    <Box p={2}>
+                                        Ei tuloksia.
                                     </Box>
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                                </TableRow>
+                        }
                     </TableBody>
                 </Table>
             </TableContainer>
