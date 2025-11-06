@@ -115,9 +115,10 @@ const ChatV2Content = () => {
   const [messageWarning, setMessageWarning] = useState<{ [key in WarningType]?: { message: string; ignored: boolean } }>({})
   const [leftPanelOpen, setLeftPanelOpen] = useState<boolean>(() => !isMobile)
 
+  const leftPanelFloating = isEmbeddedMode || isMobile
   useEffect(() => {
-    setLeftPanelOpen(!isMobile)
-  }, [isMobile])
+    setLeftPanelOpen(!leftPanelFloating)
+  }, [leftPanelFloating])
 
   const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
 
@@ -413,7 +414,6 @@ const ChatV2Content = () => {
     selectPrompt: { name: 'Valitse alustus', component: PromptModal, props: { chatInstanceId: chatInstance?.id } },
   }
 
-  const leftPanelFloating = isEmbeddedMode || isMobile
   const leftPanelCollapsed = !leftPanelOpen || leftPanelFloating
   const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
   const rightPanelContentWidth = rightMenuOpen ? 'var(--right-menu-width)' : '0px'
