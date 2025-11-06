@@ -3,11 +3,13 @@ import { teacherTest as test } from './fixtures'
 import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from './utils/test-helpers'
 
 test.describe('Prompts', () => {
-  test('Custom prompt text works', async ({ page }) => {
+
+  test.beforeEach(async ({ page }) => {
     await page.goto('/')
-
     await acceptDisclaimer(page)
+  })
 
+  test('Custom prompt text works', async ({ page }) => {
     // Select mock model
     await useMockModel(page)
 
@@ -65,8 +67,6 @@ test.describe('Prompts', () => {
     await page.getByText(`Link to chat with the prompt '${newPromptName}' active`).click()
 
     // Now in chat view
-    await acceptDisclaimer(page)
-
     // The prompt is active.
     await expect(page.getByTestId('prompt-selector-button').first()).toContainText(newPromptName)
 
@@ -128,8 +128,6 @@ test.describe('Prompts', () => {
     await page.getByText(`Link to chat with the prompt '${newPromptName}' active`).click()
 
     // Now in chat view
-    await acceptDisclaimer(page)
-
     // The prompt is active.
     await expect(page.getByTestId('prompt-selector-button').first()).toContainText(newPromptName)
 
@@ -148,7 +146,6 @@ test.describe('Prompts', () => {
   test('Own prompts work in course chat and normal chat', async ({ page }) => {
     // First create own prompt in course chat view
     await page.goto('/test-course-course-id')
-    await acceptDisclaimer(page)
     await page.getByTestId('settings-button').click()
     const modal = page.getByTestId('settings-modal')
 
