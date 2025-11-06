@@ -3,34 +3,14 @@ import React from 'react'
 import { TextButton } from './general/Buttons'
 import CloseIcon from '@mui/icons-material/Close'
 import { ModalMap } from 'src/client/types'
+import { Link, Outlet, useNavigate } from 'react-router-dom'
 
-export default function ModalTemplate({
-  open,
-  setOpen,
-  modalsRegister,
-  modalContentId,
-  setModalContentId,
-}: {
-  open: boolean
-  setOpen: (open: boolean) => void
-  modalsRegister: ModalMap
-  modalContentId: string | null
-  setModalContentId: React.Dispatch<React.SetStateAction<string | null>>
-}) {
-  const entry = modalContentId ? modalsRegister[modalContentId] : null
-  if (!modalContentId || !entry) return null
-
-  const { name, component: Component, props = {} } = entry
+const TemplateModal: React.FC<{ title: string, open: boolean, root: string, children: React.ReactNode }> = ({ title, open, root, children }) => {
+  const navigate = useNavigate()
 
   const handleClose = () => {
-    setOpen(false)
-    setModalContentId(null)
+    navigate(root)
   }
-
-  const handleNextModal = (modalId: string) => {
-    setModalContentId(modalId)
-  }
-
   return (
     <Modal open={open} onClose={handleClose}>
       <Box
@@ -61,16 +41,18 @@ export default function ModalTemplate({
             zIndex: 999,
           }}
         >
-          <Typography variant="h5">{name}</Typography>
-          <TextButton onClick={handleClose}>
+          <Typography variant="h5">{title}</Typography>
+          <TextButton onClick={handleClose} >
             <CloseIcon />
           </TextButton>
         </Box>
 
         <Box sx={{ p: '0 2rem 2rem 2rem' }}>
-          <Component {...props} closeModal={handleClose} nextModal={handleNextModal} />
+          {children}
         </Box>
       </Box>
     </Modal>
   )
 }
+
+export default TemplateModal

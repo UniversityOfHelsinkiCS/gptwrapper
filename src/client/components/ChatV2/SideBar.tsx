@@ -7,18 +7,18 @@ import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '@s
 import useUserStatus from '../../hooks/useUserStatus'
 import type { Course, Prompt } from '../../types'
 import { OutlineButtonBlack, TextButton } from './general/Buttons'
-import MapsUgcIcon from '@mui/icons-material/MapsUgc';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import SettingsIcon from '@mui/icons-material/Settings';
-import ArticleIcon from '@mui/icons-material/Article';
-import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
-import LogoutIcon from '@mui/icons-material/Logout';
+import MapsUgcIcon from '@mui/icons-material/MapsUgc'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import SettingsIcon from '@mui/icons-material/Settings'
+import ArticleIcon from '@mui/icons-material/Article'
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
+import LogoutIcon from '@mui/icons-material/Logout'
 import TuneIcon from '@mui/icons-material/Tune'
-import HelpCenterIcon from '@mui/icons-material/HelpCenter';
-import AppsIcon from '@mui/icons-material/Apps';
-import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined';
-import ExtensionOffIcon from '@mui/icons-material/ExtensionOff';
+import HelpCenterIcon from '@mui/icons-material/HelpCenter'
+import AppsIcon from '@mui/icons-material/Apps'
+import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined'
+import ExtensionOffIcon from '@mui/icons-material/ExtensionOff'
 
 import hyLogo from '../../assets/hy_logo.svg'
 import { formatDate } from '../Courses/util'
@@ -27,7 +27,7 @@ import useCourse from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { usePromptState } from './PromptState'
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
 
 
 const SideBar = ({
@@ -162,13 +162,13 @@ const SideBar = ({
                           {`${course.courseUnits[0].code} | ${formatDate(course.activityPeriod)}`}
                         </Typography>
                       </Box >
-                      {amongResponsibles && <TextButton startIcon={<SettingsIcon />} onClick={() => setModalContentId(prev => prev === 'courseSettings' ? null : 'courseSettings')}>{t("sidebar:courseSettings")}</TextButton>}
+                      {amongResponsibles && <TextButton startIcon={<SettingsIcon />} onClick={() => navigate(`/${courseId}/course`)}>{t("sidebar:courseSettings")}</TextButton>}
                       <TextButton startIcon={<ArticleIcon />}>{t("sidebar:coursePage")}</TextButton>
-                      <TextButton startIcon={<LibraryBooksIcon />} onClick={() => setModalContentId(prev => prev === 'course' ? null : 'course')}>{t("sidebar:courseChange")}</TextButton>
+                      <TextButton startIcon={<LibraryBooksIcon />} onClick={() => navigate(`/${courseId}/courses`)}>{t("sidebar:courseChange")}</TextButton>
                       {amongResponsibles && <TextButton onClick={() => navigate("/")} startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>{t("sidebar:courseExit")}</TextButton>}
                     </>
                     :
-                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => setModalContentId(prev => prev === 'course' ? null : 'course')}>
+                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => navigate(`/courses`)}>
                       <Typography>{t("sidebar:noCourse")}  </Typography>
                     </TextButton>
                 }
@@ -218,7 +218,7 @@ const SideBar = ({
         }
       </Box>
 
-    </Box>
+    </Box >
 
   )
 }

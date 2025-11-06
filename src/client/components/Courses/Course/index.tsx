@@ -52,12 +52,12 @@ export function Component() {
   const [addTeacherViewOpen, setAddTeacherViewOpen] = useState(false)
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
   const [responsibilities, setResponsibilities] = useState<Responsebility[]>([])
-  const { id } = useParams() as { id: string }
+  const { courseId } = useParams() as { courseId: string }
   const { t, i18n } = useTranslation()
   const { language } = i18n
 
   const { user, isLoading: userLoading } = useCurrentUser()
-  const { data: chatInstance, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(id)
+  const { data: chatInstance, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(courseId)
 
   useEffect(() => {
     if (isCourseSuccess) {
@@ -137,7 +137,7 @@ export function Component() {
   const handleAddResponsible = async (user: User) => {
 
     const username = user.username
-    const result = await apiClient.post(`/courses/${id}/responsibilities/assign`, { username: username })
+    const result = await apiClient.post(`/courses/${courseId}/responsibilities/assign`, { username: username })
     if (result.status === 200) {
       const responsibility = result.data
       setResponsibilities([...responsibilities, responsibility])
@@ -169,7 +169,7 @@ export function Component() {
     if (!confirmation) {
       return
     }
-    const result = await apiClient.post(`/courses/${id}/responsibilities/remove`, { username: responsibility.user?.username })
+    const result = await apiClient.post(`/courses/${courseId}/responsibilities/remove`, { username: responsibility.user?.username })
     if (result.status === 200) {
       const filteredResponsibilities = responsibilities.filter((r) => r.id !== responsibility.id)
       setResponsibilities(filteredResponsibilities)
@@ -308,7 +308,7 @@ export function Component() {
             overflowY: 'scroll',
           }}
         >
-          <ResponsibilityActionUserSearch courseId={id} actionText={t('course:add')} drawActionComponent={drawActionComponent} />
+          <ResponsibilityActionUserSearch courseId={courseId} actionText={t('course:add')} drawActionComponent={drawActionComponent} />
         </Box>
       </Modal>
 
@@ -318,17 +318,17 @@ export function Component() {
 
       <Box my={2}>
         <RouterTabs>
-          <Tab label={t('course:stats')} to={`/courses/${id}`} component={Link} />
-          <Tab label={t('course:discussions')} to={`/courses/${id}/discussions`} component={Link} />
-          <Tab label={t('course:prompts')} to={`/courses/${id}/prompts`} component={Link} />
-          <Tab label={t('course:sourceMaterials')} to={`/courses/${id}/rag`} component={Link} />
+          <Tab label={t('course:stats')} to={`/courses/${courseId}`} component={Link} />
+          <Tab label={t('course:discussions')} to={`/courses/${courseId}/discussions`} component={Link} />
+          <Tab label={t('course:prompts')} to={`/courses/${courseId}/prompts`} component={Link} />
+          <Tab label={t('course:sourceMaterials')} to={`/courses/${courseId}/rag`} component={Link} />
         </RouterTabs>
       </Box>
 
       <Routes>
-        <Route path="/" element={<Stats courseId={id} />} />
+        <Route path="/" element={<Stats courseId={courseId} />} />
         <Route path={`/discussions/*`} element={<Discussion />} />
-        <Route path="/prompts" element={<Prompts courseId={id} chatInstanceId={chatInstance.id} />} />
+        <Route path="/prompts" element={<Prompts courseId={courseId} chatInstanceId={chatInstance.id} />} />
         <Route path="/rag" element={<Rag />} />
       </Routes>
     </Container>

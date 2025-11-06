@@ -1,11 +1,11 @@
-import { Alert, Box, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Alert, Box, Drawer, FormControlLabel, Modal, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
 import ChevronLeft from '@mui/icons-material/ChevronLeft'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { Navigate, Outlet, Route, Router, Routes, useParams, useSearchParams } from 'react-router-dom'
 import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, type ValidModelName, ValidModelNameSchema } from '../../../config'
 import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
@@ -47,6 +47,7 @@ import TemplateModal from './TemplateModal'
 import PromptModal from './PromptModal'
 import CoursesModal from './CoursesModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
+import Rag from '../Rag/Rag'
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
@@ -394,7 +395,7 @@ const ChatV2Content = () => {
       )
     }
   }
-  //TODO: Restrict access when necessary
+
   const modalsRegister: ModalMap = {
     course: { name: 'Omat kurssini', component: CoursesModal },
     courseSettings: { name: 'Kurssin asetukset', component: CourseSettingsModal, props: { courseId: courseId } },
@@ -640,13 +641,21 @@ const ChatV2Content = () => {
         )
       )}
       {/* Modals --------------------------------------*/}
-      <TemplateModal
-        open={!!modalContentId}
-        setOpen={() => setModalContentId(null)}
-        modalsRegister={modalsRegister}
-        modalContentId={modalContentId}
-        setModalContentId={setModalContentId}
-      />
+      <Routes>
+        <Route index />
+        <Route element={
+          <TemplateModal root={`/${courseId}`} title={"koira"} open={true} >
+            <Outlet />
+          </TemplateModal>
+        }>
+          <Route path='/course' element={
+            <CourseSettingsModal />
+          } />
+          <Route path='/courses' element={
+            <CoursesModal />
+          } />
+        </Route>
+      </Routes>
       <SettingsModal
         open={settingsModalOpen}
         setOpen={setSettingsModalOpen}

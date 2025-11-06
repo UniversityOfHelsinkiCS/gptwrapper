@@ -8,16 +8,16 @@ import TableSortLabel from '@mui/material/TableSortLabel'
 import { useNavigate } from 'react-router-dom'
 
 import { formatDate, getGroupedCourses } from './util'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
 import { BlueButton, GrayButton, GreenButton, OutlineButtonBlack } from './general/Buttons'
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
 import Skeleton from '@mui/material/Skeleton'
 import { ModalInjectedProps } from 'src/client/types'
 
@@ -38,7 +38,7 @@ const CustomTabPanel = (props: TabPanelProps) => {
   )
 }
 
-const CoursesModal = ({ closeModal, nextModal }: ModalInjectedProps) => {
+const CoursesModal = () => {
   const { t } = useTranslation()
   const { courses, isLoading } = useUserCourses()
   const { user } = useCurrentUser()
@@ -65,13 +65,13 @@ const CoursesModal = ({ closeModal, nextModal }: ModalInjectedProps) => {
           <Tab label={t('course:endedTab')} />
         </Tabs>
         <CustomTabPanel value={value} index={0}>
-          <CourseList courseUnits={curreEnabled} type="enabled" closeModal={closeModal} nextModal={nextModal} />
+          <CourseList courseUnits={curreEnabled} type="enabled" />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1}>
-          <CourseList courseUnits={curreDisabled} type="disabled" closeModal={closeModal} nextModal={nextModal} />
+          <CourseList courseUnits={curreDisabled} type="disabled" />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={2}>
-          <CourseList courseUnits={ended} type="ended" closeModal={closeModal} nextModal={nextModal} />
+          <CourseList courseUnits={ended} type="ended" />
         </CustomTabPanel>
       </Box>
     )
@@ -79,7 +79,7 @@ const CoursesModal = ({ closeModal, nextModal }: ModalInjectedProps) => {
 
   return (
     <Box>
-      <CourseList courseUnits={curreEnabled} type="enabled" closeModal={closeModal} nextModal={nextModal} />
+      <CourseList courseUnits={curreEnabled} type="enabled" />
     </Box>
   )
 }
@@ -88,7 +88,7 @@ const CoursesModal = ({ closeModal, nextModal }: ModalInjectedProps) => {
 type Order = 'asc' | 'desc'
 type OrderBy = 'name' | 'code' | 'activityPeriod'
 
-const CourseList = ({ courseUnits, type, closeModal, nextModal }: { courseUnits: CoursesViewCourse[], type: "enabled" | "disabled" | "ended", closeModal: () => void, nextModal: (modalId: string) => void }) => {
+const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], type: "enabled" | "disabled" | "ended" }) => {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { language } = i18n
@@ -103,13 +103,11 @@ const CourseList = ({ courseUnits, type, closeModal, nextModal }: { courseUnits:
   }
 
   const handleChatLink = (courseId: string) => {
-    closeModal()
     navigate(`/${courseId}`)
   }
 
   const handleCourseSettings = (courseId: string) => {
-    nextModal("courseSettings")
-    navigate(`/${courseId}`)
+    navigate(`/${courseId}/course`)
   }
 
   const sorted = useMemo(() => {

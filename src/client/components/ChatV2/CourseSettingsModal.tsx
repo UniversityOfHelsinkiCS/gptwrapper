@@ -23,7 +23,7 @@ import {
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, Route, Routes } from 'react-router-dom'
+import { Link, Route, Routes, useParams } from 'react-router-dom'
 
 import { PUBLIC_URL } from '../../../config'
 import useCourse from '../../hooks/useCourse'
@@ -38,15 +38,15 @@ import { ApiErrorView } from '../common/ApiErrorView'
 import apiClient from '../../util/apiClient'
 import { ResponsibilityActionUserSearch } from '../Admin/UserSearch'
 import { OutlineButtonBlue } from '../ChatV2/general/Buttons'
+import { RouterTabs } from "../common/RouterTabs"
 
-export const CourseSettingsModal = ({ courseId }: { courseId: string }) => {
+export const CourseSettingsModal = () => {
+  const { courseId } = useParams() as { courseId: string }
   const [showTeachers, setShowTeachers] = useState(false)
   const [addTeacherViewOpen, setAddTeacherViewOpen] = useState(false)
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
   const [responsibilities, setResponsibilities] = useState<Responsebility[]>([])
-  const [tab, setTab] = useState<number>(0)
   const { t, i18n } = useTranslation()
-  const { language } = i18n
 
   const { user, isLoading: userLoading } = useCurrentUser()
   const { data: chatInstance, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(courseId)
@@ -170,122 +170,17 @@ export const CourseSettingsModal = ({ courseId }: { courseId: string }) => {
     }
   }
   return (
-    <Container sx={{}} maxWidth="xl">
+    <Container maxWidth="xl">
       <Modal open={activityPeriodFormOpen} onClose={() => setActivityPeriodFormOpen(false)}>
         <EditCourseForm course={chatInstance} setOpen={setActivityPeriodFormOpen} user={user} />
       </Modal>
-      <Tabs value={tab} onChange={(_, newValue) => setTab(newValue)}>
-        <Tab label={t('common:settings')} />
-        <Tab label={t('course:teachers')} />
-        <Tab label={t('course:students')} />
-        <Tab label={t('course:discussions')} />
-        <Tab label={t('course:sourceMaterials')} />
-      </Tabs>
-      {tab === 0 && (
-        <>
-          <Alert sx={{ mt: 1 }} severity={getInfoSeverity()}>
-            <Typography variant="h6">{getInfoMessage()}</Typography>
-          </Alert>
-          <Box display="flex">
-            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-              <div style={{ ...full, boxSizing: 'border-box', height: '50px' }}>
-                <Typography variant="h5">{chatInstance.name[language]}</Typography>
-              </div>
-
-              <div style={{ ...left, boxSizing: 'border-box', height: '50px' }}>
-                <Typography>{chatInstance.courseUnits.map((cu) => cu.code).join(', ')}</Typography>
-              </div>
-              <div style={{ ...right, boxSizing: 'border-box', height: '50px' }}>
-                <Typography style={{ fontStyle: 'italic' }}>{getCurTypeLabel(chatInstance.courseUnitRealisationTypeUrn ?? '', language)}</Typography>
-              </div>
-
-              <div style={{ ...left, boxSizing: 'border-box' }}>
-                <Typography>
-                  {t('active')} {formatDate(chatInstance.activityPeriod)}
-                </Typography>
-              </div>
-
-              <div style={{ ...right, boxSizing: 'border-box' }}>
-                <Link to={`https://studies.helsinki.fi/kurssit/toteutus/${chatInstance.courseId}`} target="_blank">
-                  {t('course:coursePage')} <OpenInNew fontSize="small" />
-                </Link>
-              </div>
-
-              {courseEnabled && (
-                <div style={{ ...left, boxSizing: 'border-box' }}>
-                  <Typography>
-                    {t('admin:usageLimit')}: {chatInstance.usageLimit}
-                  </Typography>
-                </div>
-              )}
-
-              {courseEnabled && (
-                <div style={{ ...right, boxSizing: 'border-box' }}>
-                  <Link to={studentLink}>
-                    {t('common:toStudentView')} <OpenInNew fontSize="small" />
-                  </Link>
-                </div>
-              )}
-
-              <div style={{ ...left, boxSizing: 'border-box' }}>
-                {courseEnabled && (
-                  <OutlineButtonBlue onClick={() => setActivityPeriodFormOpen(true)}>
-                    {t('course:editCourse')} <Edit />
-                  </OutlineButtonBlue>
-                )}
-                {!courseEnabled && <Typography style={{ fontStyle: 'italic' }}>{t('course:howToActive')}</Typography>}
-              </div>
-
-              <div style={{ ...right, boxSizing: 'border-box' }} />
-
-              {courseEnabled && (
-                <Tooltip title={t('copy')} placement="right">
-                  <Button sx={{ p: 0 }} color="inherit">
-                    <Typography style={{ textTransform: 'lowercase', color: 'blue' }} onClick={() => handleCopyLink(studentLink)}>
-                      {studentLink}
-                    </Typography>
-                  </Button>
-                </Tooltip>
-              )}
-            </div>
-          </Box>
-        </>
-      )}
-      {tab === 1 && (
-        <Box>
-          <OutlineButtonBlue
-            onClick={() => {
-              setAddTeacherViewOpen((prev) => !prev)
-            }}
-            sx={{ borderRadius: '1.25rem', mb: 1 }}
-          >
-            {addTeacherViewOpen ? t('common:cancel') : t('course:add')}
-          </OutlineButtonBlue>
-          {addTeacherViewOpen ? <ResponsibilityActionUserSearch courseId={courseId} actionText={t('course:add')} drawActionComponent={drawActionComponent} /> : (
-            <Stack sx={{ mb: 0, padding: 1, borderColor: 'gray', borderWidth: 1, borderStyle: 'solid', borderRadius: '0.5rem' }}>
-              {responsibilities.map((responsibility) => (
-                <Box key={responsibility.id} sx={{ display: 'flex', alignItems: 'center', padding: 1 }}>
-                  <Typography>
-                    {responsibility.user.last_name} {responsibility.user.first_names}
-                  </Typography>
-                  <AssignedResponsibilityManagement
-                    handleRemove={() => {
-                      handleRemoveResponsibility(responsibility)
-                    }}
-                    responsibility={responsibility}
-                  />
-                </Box>
-              ))}
-            </Stack>)}
-        </Box>
-      )}
-      {tab === 2 && <Stats courseId={courseId} />}
-      {tab === 3 && <Discussion />}
-      {tab === 4 && (
-        <>
-          <Rag courseId={courseId} />
-        </>
-      )}
+      <RouterTabs>
+        <Tab label={t('common:settings')} to={`/courses/${courseId}`} component={Link} />
+        <Tab label={t('course:teachers')} to={`/courses/${courseId}`} component={Link} />
+        <Tab label={t('course:students')} to={`/courses/${courseId}`} component={Link} />
+        <Tab label={t('course:discussions')} to={`/courses/${courseId}/discussions`} component={Link} />
+        <Tab label={t('course:sourceMaterials')} to={`/courses/${courseId}/rag`} component={Link} />
+      </RouterTabs>
     </Container>
   )
 }
