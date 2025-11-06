@@ -4,6 +4,10 @@ import { createInterface } from 'node:readline'
 import { join } from 'node:path'
 import minimist from 'minimist'
 import _ from 'lodash'
+import { AzureOpenAI } from 'openai'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 const args = minimist(process.argv.slice(2))
 
@@ -46,7 +50,15 @@ const TRANSLATION_KEY_REFERENCE_MATCHER = new RegExp(/['"`]\w+(?::\w+)+['"`]/, '
 // matches t('asd'
 const TRANSLATION_KEY_REFERENCE_MATCHER_2 = new RegExp(/\bt\(['"`]\w+(?::\w+)*['"`]/, 'g')
 
+const APPLICATION_NAME = 'CurreChat'
+
 const LANGUAGES = ['fi', 'sv', 'en']
+
+// OpenAI configuration constants
+const MAX_CONTEXT_EXAMPLES = 3
+const OPENAI_TEMPERATURE = 0.3
+const OPENAI_MAX_TOKENS = 200
+const ERROR_MESSAGE_PREVIEW_LENGTH = 100
 
 const log0 = (...msg) => {
   if (!args.quiet) {
@@ -235,21 +247,24 @@ const printUnused = (translationsNotUsed, numberOfTranslations) => {
 }
 
 /**
- * Prompts the user to create missing translations and writes them to files.
+ * Creates translations and writes them to files.
+ * Supports both manual input and AI-generated translations based on --ai flag.
  * @param {Object} missingByLang - Object mapping languages to missing keys.
  */
 const createMissingTranslations = async missingByLang => {
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  })
+  const useAI = args.ai
 
-  const prompt = query => new Promise(resolve => rl.question(query, resolve))
-
-  rl.on('close', () => {
-    console.log('Cancelled')
-    process.exit(1)
-  })
+  if (useAI) {
+    // Validate required environment variables for AI mode
+    if (!process.env.AZURE_API_KEY || !process.env.AZURE_RESOURCE) {
+      console.error(`${FgRed}Error: Missing required environment variables${Reset}`)
+      console.error('Please set AZURE_API_KEY and AZURE_RESOURCE environment variables')
+      console.error('Example:')
+      console.error('  export AZURE_API_KEY="your-api-key"')
+      console.error('  export AZURE_RESOURCE="your-resource-name"')
+      process.exit(1)
+    }
+  }
 
   const promptInfosByKeys = {}
 
@@ -267,13 +282,12 @@ const createMissingTranslations = async missingByLang => {
     })
   })
 
-  // Prompt user for translations
-  for (const [k, info] of Object.entries(promptInfosByKeys)) {
-    console.log(`\nAdd translations for ${FgYellow}${k}${Reset}`)
-    for (const i of info) {
-      const value = await prompt(`${FgCyan}${i.lang}${Reset}: `)
-      i.value = value
-    }
+  if (useAI) {
+    // AI-generated translations
+    await generateTranslationsWithAI(promptInfosByKeys)
+  } else {
+    // Manual user input
+    await promptUserForTranslations(promptInfosByKeys)
   }
 
   const newTranslationsByLang = {}
@@ -304,7 +318,7 @@ const createMissingTranslations = async missingByLang => {
   })
 
   // Write new translations to files
-  console.log('Writing new translations to files...')
+  console.log('\nWriting new translations to files...')
   await Promise.all(
     Object.entries(newTranslationsByLang).map(async ([lang, translations]) => {
       const filePath = join(LOCALES_PATH, `${lang}.json`)
@@ -317,6 +331,150 @@ const createMissingTranslations = async missingByLang => {
       await writeFile(filePath, JSON.stringify(merged, null, 2))
     })
   )
+  
+  if (useAI) {
+    console.log(`${FgGreen}Successfully created translations!${Reset}`)
+  }
+}
+
+/**
+ * Prompts the user to manually input translations for missing keys.
+ * @param {Object} promptInfosByKeys - Object mapping translation keys to language info.
+ */
+const promptUserForTranslations = async promptInfosByKeys => {
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+
+  const prompt = query => new Promise(resolve => rl.question(query, resolve))
+
+  rl.on('close', () => {
+    console.log('Cancelled')
+    process.exit(1)
+  })
+
+  // Prompt user for translations
+  for (const [k, info] of Object.entries(promptInfosByKeys)) {
+    console.log(`\nAdd translations for ${FgYellow}${k}${Reset}`)
+    for (const i of info) {
+      const value = await prompt(`${FgCyan}${i.lang}${Reset}: `)
+      i.value = value
+    }
+  }
+
+  rl.close()
+}
+
+/**
+ * Generates translations using Azure OpenAI for missing keys.
+ * @param {Object} promptInfosByKeys - Object mapping translation keys to language info.
+ */
+const generateTranslationsWithAI = async promptInfosByKeys => {
+  // Initialize Azure OpenAI client
+  const client = new AzureOpenAI({
+    apiKey: process.env.AZURE_API_KEY,
+    apiVersion: '2024-10-21',
+    endpoint: `https://${process.env.AZURE_RESOURCE}.openai.azure.com`,
+  })
+
+  console.log('\nGenerating translations using OpenAI...\n')
+  
+  for (const [k, info] of Object.entries(promptInfosByKeys)) {
+    console.log(`Generating translations for ${FgYellow}${k}${Reset}`)
+    
+    // Get context from the translation key
+    const keyParts = k.split(':')
+    const context = keyParts.slice(0, -1).join(' > ')
+    const keyName = keyParts[keyParts.length - 1]
+    
+    // Get existing translations for context
+    const locales = {}
+    for (const lang of LANGUAGES) {
+      locales[lang] = await readJSON(`${LOCALES_PATH}/${lang}.json`)
+    }
+    
+    // Get some existing translations from the same namespace for context
+    let contextExamples = ''
+    if (keyParts.length > 1) {
+      const namespace = keyParts[0]
+      const existingKeys = Object.keys(locales['en']?.[namespace] || {}).slice(0, MAX_CONTEXT_EXAMPLES)
+      if (existingKeys.length > 0) {
+        contextExamples = '\n\nExisting translations in this namespace for context:'
+        existingKeys.forEach(ek => {
+          contextExamples += `\n  ${namespace}:${ek}:`
+          LANGUAGES.forEach(lang => {
+            const val = locales[lang]?.[namespace]?.[ek]
+            if (val) contextExamples += `\n    ${lang}: "${val}"`
+          })
+        })
+      }
+    }
+    
+    const languageNames = {
+      fi: 'Finnish',
+      en: 'English', 
+      sv: 'Swedish'
+    }
+    
+    const langsToGenerate = info.map(i => i.lang)
+    const prompt = `You are a professional translator working on a web application called ${APPLICATION_NAME}.
+
+Translation key: ${k}
+Context: ${context || 'UI component'}
+Key name: ${keyName}${contextExamples}
+
+Generate concise, natural translations for this UI element in the following languages: ${langsToGenerate.map(l => languageNames[l]).join(', ')}.
+
+Respond with ONLY a JSON object in this exact format (no additional text):
+{
+  "fi": "finnish translation",
+  "en": "english translation",
+  "sv": "swedish translation"
+}
+
+Include only the languages: ${langsToGenerate.join(', ')}.
+Make translations brief, appropriate for UI labels, and consistent with the context.`
+
+    try {
+      const response = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: OPENAI_TEMPERATURE,
+        max_tokens: OPENAI_MAX_TOKENS,
+      })
+
+      const content = response.choices[0]?.message?.content?.trim()
+      if (!content) {
+        console.log(`  ${FgRed}Failed to generate translations${Reset}`)
+        continue
+      }
+
+      // Parse JSON response
+      let translations
+      try {
+        translations = JSON.parse(content)
+      } catch (parseError) {
+        console.log(`  ${FgRed}Failed to parse OpenAI response as JSON${Reset}`)
+        const preview = content.length > ERROR_MESSAGE_PREVIEW_LENGTH 
+          ? `${content.substring(0, ERROR_MESSAGE_PREVIEW_LENGTH)}...`
+          : content
+        console.log(`  Response was: ${preview}`)
+        continue
+      }
+      
+      // Assign generated translations
+      for (const i of info) {
+        if (translations[i.lang]) {
+          i.value = translations[i.lang]
+          console.log(`  ${FgCyan}${i.lang}${Reset}: ${i.value}`)
+        }
+      }
+    } catch (error) {
+      console.log(`  ${FgRed}Error generating translations: ${error.message}${Reset}`)
+      // Skip this translation and continue with the next one
+    }
+  }
 }
 
 /**
@@ -328,7 +486,8 @@ function printHelp() {
   console.log('--unused: print all potentially unused translation fields')
   console.log('--detailed: Show usage locations')
   console.log('--quiet: Print less stuff')
-  console.log('--create: Populate missing translations in translation files')
+  console.log('--create: Populate missing translations in translation files (prompts for manual input)')
+  console.log('--ai: Use with --create to automatically generate translations using OpenAI (requires AZURE_API_KEY and AZURE_RESOURCE environment variables)')
 }
 
 /**
