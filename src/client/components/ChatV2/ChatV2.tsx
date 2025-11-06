@@ -113,7 +113,12 @@ const ChatV2Content = () => {
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
   const [fileName, setFileName] = useState<string>('')
   const [messageWarning, setMessageWarning] = useState<{ [key in WarningType]?: { message: string; ignored: boolean } }>({})
-  const [leftPanelOpen, setLeftPanelOpen] = useState<boolean>(true)
+  const [leftPanelOpen, setLeftPanelOpen] = useState<boolean>(() => !isMobile)
+
+  useEffect(() => {
+    setLeftPanelOpen(!isMobile)
+  }, [isMobile])
+
   const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
 
   // Analytics
