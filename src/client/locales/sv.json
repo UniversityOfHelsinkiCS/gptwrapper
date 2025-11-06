@@ -40,7 +40,14 @@
     "curreTitle": "Curre",
     "tryNew": "Prova den nya chattappen",
     "close": "Stänga",
-    "loading": "Belastning"
+    "loading": "Belastning",
+    "added": "Tillagd",
+    "fileType": "Filtyp",
+    "iframeCopy": "Kopiera iframe-kod",
+    "settings": "Inställningar",
+    "model": "Modell",
+    "about_service": "Om tjänsten",
+    "logout": "Logga ut"
   },
   "chats": {
     "header": "Öppna kurschattar",
@@ -61,7 +68,10 @@
     "courseTerms": "Villkor",
     "usageCount": "Användningsräkning",
     "promptCount": "Uppmaningar",
-    "courseStats": "Kursstatistik"
+    "courseStats": "Kursstatistik",
+    "rags": "RAG:ar",
+    "sum": "Summa",
+    "courses": "Kurser"
   },
   "info": {
     "title": "Bruksanvisning",
@@ -114,7 +124,13 @@
     "errorInstructions": "Det gick inte att generera ett svar. Vi rekommenderar att du sparar den aktuella konversationen och startar en ny. Du kan också prova en annan modell. Om problemet kvarstår, kontakta supporten.",
     "email": "Konversationen kommer att skickas till {{email}}",
     "cancelResponse": "Avbryt genereringen av svaret",
-    "searchResults": "Sökresultat"
+    "searchResults": "Sökresultat",
+    "emptyConversationTooltip": "Inga meddelanden ännu.",
+    "shiftEnterSend": "Skift+Enter skickar",
+    "enterSend": "Tryck Enter för att skicka",
+    "customPrompt": "Egen instruktion",
+    "confirmResetTitle": "Bekräfta återställning",
+    "confirmResetMessage": "Återställ meddelandet?"
   },
   "settings": {
     "prompt": "Samtalsstart",
@@ -140,7 +156,11 @@
     "saveNewPrompt": "Skapa ny prompt",
     "selectedSource": "Ingen källa vald",
     "noPrompt": "Ingen prompt",
-    "sourceDescription": "Material som anges av läraren kan användas som källmaterial i kurschatten. Du kan välja källa nedan."
+    "sourceDescription": "Material som anges av läraren kan användas som källmaterial i kurschatten. Du kan välja källa nedan.",
+    "emptyPrompt": "Samtalsstart saknas",
+    "noPrompts": "Inga samtalsstarter",
+    "confirmClearCustomPrompt": "Rensa den anpassade starten?",
+    "other": "Övrigt"
   },
   "email": {
     "save": "Spara som e-post",
@@ -286,7 +306,24 @@
     "directPromptLink": "Länk för att chatta med denna prompt aktiv",
     "copyDirectPromptLinkInfo": "Kopiera en länk för att chatta med denna prompt aktiv",
     "isSavedOptOut": "Kursdiskussionerna sparas anonymt om du ger tillstånd till detta. Sparade diskussioner kan användas för forskningsändamål.",
-    "settings": "kursinställningar"
+    "settings": "kursinställningar",
+    "add": "Lägg till",
+    "confirmRemoval": "Bekräfta borttagning",
+    "sourceMaterials": "Källmaterial",
+    "customResponsibility": "Anpassat ansvar",
+    "remove": "Ta bort",
+    "notActiveTab": "Inaktiv flik",
+    "name": "Kursnamn",
+    "code": "Kurskod",
+    "time": "Tid",
+    "courseEnded": "Kursen är avslutad",
+    "chat": "Chatt",
+    "toCoursePage": "Till kurssidan",
+    "edit": "Redigera",
+    "activate": "Aktivera",
+    "noResults": "Inga resultat",
+    "teachers": "Lärare",
+    "students": "Studenter"
   },
   "prompt": {
     "createNew": "Skapa ny prompt",
@@ -319,6 +356,77 @@
     "message": "Skriv din feedback...",
     "responseWanted": "Jag vill få ett svar på min feedback",
     "cancel": "Avboka",
-    "submit": "Skicka till"
+    "submit": "Skicka till",
+    "supportInfo": "Supportinformation"
+  },
+  "embeddedLogin": {
+    "helpText": "Inloggning lyckades. Du kan stänga det här fönstret."
+  },
+  "rag": {
+    "fileSize": "Filstorlek",
+    "waitForUpload": "Väntar på uppladdning",
+    "processingFailures": "Bearbetningsfel",
+    "filesIngesting": "Läser in filer",
+    "allCompleted": "Allt slutfört",
+    "searchDescription": "Sökbeskrivning",
+    "sourceMaterials": "Källmaterial",
+    "name": "Namn",
+    "language": "Språk",
+    "numberOfFiles": "Antal filer",
+    "viewDetails": "Visa detaljer",
+    "backToCourse": "Tillbaka till kursen",
+    "collection": "Samling",
+    "uploading": "Laddar upp",
+    "uploadFiles": "Ladda upp filer",
+    "testRetrievalButton": "Testa hämtning",
+    "testRetrieval": "Testa hämtning",
+    "collectionDeleted": "Samling raderad",
+    "deleteCollection": "Ta bort samling",
+    "retryFailedFiles": "Försök igen med misslyckade filer",
+    "backToCollection": "Tillbaka till samlingen",
+    "file": "Fil",
+    "fileTextDeleted": "Filtext raderad",
+    "deleteFileText": "Ta bort fil",
+    "fileDeleted": "Fil raderad",
+    "deleteFile": "Ta bort fil",
+    "content": "Innehåll",
+    "noContent": "Inget innehåll",
+    "createNewIndex": "Skapa nytt index",
+    "creatorGuide": "Skaparguide",
+    "nameLabel": "Namn",
+    "nameHelperText": "Ange ett tydligt, beskrivande namn",
+    "finnish": "Finska",
+    "swedish": "Svenska",
+    "english": "Engelska",
+    "createIndex": "Skapa index"
+  },
+  "sendPreferenceConfigurator": {
+    "shift": "Skift",
+    "return": "Retur",
+    "toSend": "för att skicka",
+    "toNewline": "Ny rad",
+    "success": "Inställning uppdaterad.",
+    "canChangeInSettings": "Du kan ändra tangentbordsgenvägen för att skicka i chattinställningarna.",
+    "title": "Vilken tangentkombination vill du använda för att skicka ett meddelande?",
+    "ok": "OK",
+    "openConfigurator": "Ändra kortkommando"
+  },
+  "sidebar": {
+    "coursePage": "Kurssida",
+    "courseSettings": "Kursinställningar",
+    "courseChange": "Byt kurs",
+    "courseExit": "Lämna kursen",
+    "noCourse": "Ingen kurs",
+    "promptTitle": "Prompttitel",
+    "promptEdit": "Redigera prompt",
+    "promptDetails": "Promptdetaljer",
+    "promptSelect": "Välj prompt",
+    "promptNone": "Ingen",
+    "modelTitle": "Modell",
+    "chatNew": "Ny chatt",
+    "toggle": "Växla"
+  },
+  "globalSettings": {
+    "title": "Allmänna inställningar"
   }
 }

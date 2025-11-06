@@ -55,9 +55,10 @@ const APPLICATION_NAME = 'CurreChat'
 const LANGUAGES = ['fi', 'sv', 'en']
 
 // OpenAI configuration constants
+const OPENAI_MODEL_NAME = 'gpt-5'
 const MAX_CONTEXT_EXAMPLES = 3
 const OPENAI_TEMPERATURE = 0.3
-const OPENAI_MAX_TOKENS = 200
+const OPENAI_MAX_TOKENS = 1000
 const ERROR_MESSAGE_PREVIEW_LENGTH = 100
 
 const log0 = (...msg) => {
@@ -438,10 +439,11 @@ Make translations brief, appropriate for UI labels, and consistent with the cont
 
     try {
       const response = await client.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: OPENAI_MODEL_NAME,
         messages: [{ role: 'user', content: prompt }],
-        temperature: OPENAI_TEMPERATURE,
-        max_tokens: OPENAI_MAX_TOKENS,
+       //  temperature: OPENAI_TEMPERATURE,
+        max_completion_tokens: OPENAI_MAX_TOKENS,
+        reasoning_effort: 'low',
       })
 
       const content = response.choices[0]?.message?.content?.trim()

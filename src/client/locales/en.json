@@ -169,7 +169,8 @@
     "promptNone": "Ei alustusta",
     "modelTitle": "Kielimalli",
     "chatNew": "Uusi keskustelu",
-    "chatEmail": "Sähköposti"
+    "chatEmail": "Sähköposti",
+    "toggle": "Toggle"
   },
   "email": {
     "save": "Save as email",

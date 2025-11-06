@@ -170,7 +170,8 @@
     "promptNone": "Ei alustusta",
     "modelTitle": "Kielimalli",
     "chatNew": "Uusi keskustelu",
-    "chatEmail": "Sähköposti"
+    "chatEmail": "Sähköposti",
+    "toggle": "Vaihda"
   },
   "chats": {
     "header": "Auki olevat kurssichatit",
