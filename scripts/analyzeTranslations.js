@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { readFile, writeFile, opendir } from 'node:fs/promises'
+import { createInterface } from 'node:readline'
 import { join } from 'node:path'
 import minimist from 'minimist'
 import _ from 'lodash'
@@ -246,26 +247,24 @@ const printUnused = (translationsNotUsed, numberOfTranslations) => {
 }
 
 /**
- * Creates translations using Azure OpenAI and writes them to files.
+ * Creates translations and writes them to files.
+ * Supports both manual input and AI-generated translations based on --ai flag.
  * @param {Object} missingByLang - Object mapping languages to missing keys.
  */
 const createMissingTranslations = async missingByLang => {
-  // Validate required environment variables
-  if (!process.env.AZURE_API_KEY || !process.env.AZURE_RESOURCE) {
-    console.error(`${FgRed}Error: Missing required environment variables${Reset}`)
-    console.error('Please set AZURE_API_KEY and AZURE_RESOURCE environment variables')
-    console.error('Example:')
-    console.error('  export AZURE_API_KEY="your-api-key"')
-    console.error('  export AZURE_RESOURCE="your-resource-name"')
-    process.exit(1)
-  }
+  const useAI = args.ai
 
-  // Initialize Azure OpenAI client
-  const client = new AzureOpenAI({
-    apiKey: process.env.AZURE_API_KEY,
-    apiVersion: '2024-10-21',
-    endpoint: `https://${process.env.AZURE_RESOURCE}.openai.azure.com`,
-  })
+  if (useAI) {
+    // Validate required environment variables for AI mode
+    if (!process.env.AZURE_API_KEY || !process.env.AZURE_RESOURCE) {
+      console.error(`${FgRed}Error: Missing required environment variables${Reset}`)
+      console.error('Please set AZURE_API_KEY and AZURE_RESOURCE environment variables')
+      console.error('Example:')
+      console.error('  export AZURE_API_KEY="your-api-key"')
+      console.error('  export AZURE_RESOURCE="your-resource-name"')
+      process.exit(1)
+    }
+  }
 
   const promptInfosByKeys = {}
 
@@ -283,7 +282,102 @@ const createMissingTranslations = async missingByLang => {
     })
   })
 
-  // Generate translations using OpenAI
+  if (useAI) {
+    // AI-generated translations
+    await generateTranslationsWithAI(promptInfosByKeys)
+  } else {
+    // Manual user input
+    await promptUserForTranslations(promptInfosByKeys)
+  }
+
+  const newTranslationsByLang = {}
+
+  // Organize new translations into a nested structure
+  Object.entries(promptInfosByKeys).forEach(([k, info]) => {
+    info.forEach(i => {
+      if (!i.value) {
+        return
+      }
+
+      if (!newTranslationsByLang[i.lang]) {
+        newTranslationsByLang[i.lang] = {}
+      }
+
+      const parts = k.split(':')
+      let obj = newTranslationsByLang[i.lang]
+
+      for (let i = 0; i < parts.length - 1; i++) {
+        if (!obj[parts[i]]) {
+          obj[parts[i]] = {}
+        }
+        obj = obj[parts[i]]
+      }
+
+      obj[parts[parts.length - 1]] = i.value
+    })
+  })
+
+  // Write new translations to files
+  console.log('\nWriting new translations to files...')
+  await Promise.all(
+    Object.entries(newTranslationsByLang).map(async ([lang, translations]) => {
+      const filePath = join(LOCALES_PATH, `${lang}.json`)
+
+      const translationObject = await readJSON(`${LOCALES_PATH}/${lang}.json`)
+
+      // Deep merge
+      const merged = _.merge(translationObject, translations)
+
+      await writeFile(filePath, JSON.stringify(merged, null, 2))
+    })
+  )
+  
+  if (useAI) {
+    console.log(`${FgGreen}Successfully created translations!${Reset}`)
+  }
+}
+
+/**
+ * Prompts the user to manually input translations for missing keys.
+ * @param {Object} promptInfosByKeys - Object mapping translation keys to language info.
+ */
+const promptUserForTranslations = async promptInfosByKeys => {
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+
+  const prompt = query => new Promise(resolve => rl.question(query, resolve))
+
+  rl.on('close', () => {
+    console.log('Cancelled')
+    process.exit(1)
+  })
+
+  // Prompt user for translations
+  for (const [k, info] of Object.entries(promptInfosByKeys)) {
+    console.log(`\nAdd translations for ${FgYellow}${k}${Reset}`)
+    for (const i of info) {
+      const value = await prompt(`${FgCyan}${i.lang}${Reset}: `)
+      i.value = value
+    }
+  }
+
+  rl.close()
+}
+
+/**
+ * Generates translations using Azure OpenAI for missing keys.
+ * @param {Object} promptInfosByKeys - Object mapping translation keys to language info.
+ */
+const generateTranslationsWithAI = async promptInfosByKeys => {
+  // Initialize Azure OpenAI client
+  const client = new AzureOpenAI({
+    apiKey: process.env.AZURE_API_KEY,
+    apiVersion: '2024-10-21',
+    endpoint: `https://${process.env.AZURE_RESOURCE}.openai.azure.com`,
+  })
+
   console.log('\nGenerating translations using OpenAI...\n')
   
   for (const [k, info] of Object.entries(promptInfosByKeys)) {
@@ -381,50 +475,6 @@ Make translations brief, appropriate for UI labels, and consistent with the cont
       // Skip this translation and continue with the next one
     }
   }
-
-  const newTranslationsByLang = {}
-
-  // Organize new translations into a nested structure
-  Object.entries(promptInfosByKeys).forEach(([k, info]) => {
-    info.forEach(i => {
-      if (!i.value) {
-        return
-      }
-
-      if (!newTranslationsByLang[i.lang]) {
-        newTranslationsByLang[i.lang] = {}
-      }
-
-      const parts = k.split(':')
-      let obj = newTranslationsByLang[i.lang]
-
-      for (let i = 0; i < parts.length - 1; i++) {
-        if (!obj[parts[i]]) {
-          obj[parts[i]] = {}
-        }
-        obj = obj[parts[i]]
-      }
-
-      obj[parts[parts.length - 1]] = i.value
-    })
-  })
-
-  // Write new translations to files
-  console.log('\nWriting new translations to files...')
-  await Promise.all(
-    Object.entries(newTranslationsByLang).map(async ([lang, translations]) => {
-      const filePath = join(LOCALES_PATH, `${lang}.json`)
-
-      const translationObject = await readJSON(`${LOCALES_PATH}/${lang}.json`)
-
-      // Deep merge
-      const merged = _.merge(translationObject, translations)
-
-      await writeFile(filePath, JSON.stringify(merged, null, 2))
-    })
-  )
-  
-  console.log(`${FgGreen}Successfully created translations!${Reset}`)
 }
 
 /**
@@ -436,7 +486,8 @@ function printHelp() {
   console.log('--unused: print all potentially unused translation fields')
   console.log('--detailed: Show usage locations')
   console.log('--quiet: Print less stuff')
-  console.log('--create: Automatically generate and populate missing translations using OpenAI (requires AZURE_API_KEY and AZURE_RESOURCE environment variables)')
+  console.log('--create: Populate missing translations in translation files (prompts for manual input)')
+  console.log('--ai: Use with --create to automatically generate translations using OpenAI (requires AZURE_API_KEY and AZURE_RESOURCE environment variables)')
 }
 
 /**
