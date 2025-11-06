@@ -479,8 +479,8 @@ const ChatV2Content = () => {
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          // magical -10px prevents horizontal overflow when vertical scrollbar appears
-          width: `calc(100vw - 10px - ${leftPanelContentWidth} - ${rightPanelContentWidth})`,
+          // magical -11px prevents horizontal overflow when vertical scrollbar appears
+          width: `calc(100vw - 11px - ${leftPanelContentWidth} - ${rightPanelContentWidth})`,
         }}
       >
         {(isEmbeddedMode || isMobile) && (
@@ -489,7 +489,7 @@ const ChatV2Content = () => {
               position: 'fixed',
               left: 0,
               top: '50%',
-              transform: 'translate(-50%) rotate(-90deg)',
+              transform: 'translate(-40%) rotate(-90deg)',
             }}
             onClick={() => setLeftPanelOpen(true)}
             data-testid="left-panel-open"
