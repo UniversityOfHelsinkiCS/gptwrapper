@@ -35,7 +35,6 @@ import { ConversationSplash } from './general/ConversationSplash'
 import { PromptStateProvider, usePromptState } from './PromptState'
 import z from 'zod/v4'
 import useCurrentUser from '../../hooks/useCurrentUser'
-import { InfoTexts } from '../../locales/infoTexts'
 import { WarningType } from '@shared/aiApi'
 import { ResetConfirmModal } from './ResetConfirmModal'
 import TuneIcon from '@mui/icons-material/Tune'
@@ -102,7 +101,6 @@ const ChatV2Content = () => {
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
 
   const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model', ValidModelNameSchema)
-  const [disclaimerStatus, setDisclaimerStatus] = useLocalStorageState<boolean>('disclaimer-status', true)
   const [modelTemperature, setModelTemperature] = useLocalStorageStateWithURLDefault(
     `${localStoragePrefix}-chat-model-temperature`,
     String(DEFAULT_MODEL_TEMPERATURE),
@@ -146,7 +144,6 @@ const ChatV2Content = () => {
   const { promptInfo, activePrompt, createPromptMutation, editPromptMutation } = usePromptState()
   const { ragIndices } = useCourseRagIndices(chatInstance?.id)
 
-  const disclaimerInfo = InfoTexts.disclaimer[i18n.language]
 
   const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo, hasPotentialError } = useChatStream({
     onComplete: ({ message }) => {
@@ -435,7 +432,7 @@ const ChatV2Content = () => {
               setNewSidebar={setNewSidebar}
             />
           </Drawer>
-        ) : isAdmin && newSideBar ?
+        ) : newSideBar ?
           (
             <SideBar
               collapsed={sidebarCollapsed}

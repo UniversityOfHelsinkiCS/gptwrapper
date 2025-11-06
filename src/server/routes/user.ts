@@ -143,4 +143,14 @@ userRouter.put('/preferences', async (req, res) => {
   res.status(200).send(preferences)
 })
 
+userRouter.get('/logout', async (req, res) => {
+  const {
+    headers: { shib_logout_url: shibLogoutUrl },
+  } = req
+
+  res.send({
+    url: shibLogoutUrl,
+  })
+})
+
 export default userRouter

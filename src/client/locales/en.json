@@ -46,7 +46,8 @@
     "fileType": "File type",
     "settings": "Settings",
     "about_service": "About service",
-    "loading": "Loading"
+    "loading": "Loading",
+    "logout": "Sign out"
   },
   "stats": {
     "timePeriodStart": "Starting",

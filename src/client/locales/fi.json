@@ -47,7 +47,8 @@
     "fileType": "Tiedostomuoto",
     "settings": "Asetukset",
     "about_service": "Tietoa palvelusta",
-    "loading": "Ladataan"
+    "loading": "Ladataan",
+    "logout": "Kirjaudu ulos"
   },
   "stats": {
     "showing": "Näytetään",

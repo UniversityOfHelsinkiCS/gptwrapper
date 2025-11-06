@@ -16,7 +16,8 @@ import { useTranslation } from 'react-i18next'
 import { Locale } from '@shared/lang'
 import { Link as RouterLink } from 'react-router-dom'
 import useCurrentUser from '../hooks/useCurrentUser'
-import { AdminPanelSettings, BarChart } from '@mui/icons-material'
+import { AdminPanelSettings, BarChart, Logout } from '@mui/icons-material'
+import apiClient from '../util/apiClient'
 
 export default function GlobalMenu({
   openDisclaimer,
@@ -121,6 +122,16 @@ export default function GlobalMenu({
 
           </MenuItem>}
 
+          <MenuItem onClick={() => {
+            handleLogout()
+          }}>
+            <ListItemIcon>
+              <Logout fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>{t('logout')}</ListItemText>
+
+          </MenuItem>
+
           <Divider />
           <MenuItem
             disableRipple
@@ -145,4 +156,13 @@ export default function GlobalMenu({
       </Menu>
     </div>
   )
+}
+
+const handleLogout = async () => {
+  try {
+    const res = await apiClient.get('/user/logout')
+    window.location.href = res.data.url
+  } catch (error) {
+    console.error('Error logging out:', error)
+  }
 }
