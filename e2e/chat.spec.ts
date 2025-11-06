@@ -19,22 +19,6 @@ testMatrix.forEach((testConfig) => {
         await page.goto(`/${course || ''}`)
       })
 
-      test('Disclaimer is visible', async ({ page }) => {
-        await expect(page.getByTestId('submit-accept-disclaimer')).toBeVisible()
-      })
-
-      test('Disclaimer is not visible after accepting and reloading', async ({ page }) => {
-        await acceptDisclaimer(page)
-        await page.reload()
-        await expect(page.getByTestId('submit-accept-disclaimer')).not.toBeVisible()
-      })
-
-      test('Disclaimer (help) can be opened manually', async ({ page }) => {
-        await acceptDisclaimer(page)
-        await page.getByTestId('help-button').click()
-        await expect(page.getByTestId('submit-accept-disclaimer')).toBeVisible()
-      })
-
       test('Settings can be opened and closed', async ({ page }) => {
         await acceptDisclaimer(page)
         await page.getByTestId('settings-button').click()

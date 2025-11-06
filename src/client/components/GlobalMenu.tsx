@@ -47,10 +47,10 @@ export default function GlobalMenu({
     <div style={{ position: 'fixed', top: 30, right: 30 }}>
       <OutlineButtonBlack
         id="basic-button"
+        data-testid="global-menu-button"
         aria-controls={open ? 'basic-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
-
         onClick={handleClick}
       >
         <MenuIcon sx={{ color: 'text.primary' }} />
@@ -75,6 +75,7 @@ export default function GlobalMenu({
       >
         <MenuList>
           <MenuItem
+            data-testid="open-global-settings-button"
             onClick={() => {
               openSettings()
               handleClose()
@@ -86,10 +87,13 @@ export default function GlobalMenu({
             <ListItemText>{t('settings')}</ListItemText>
 
           </MenuItem>
-          <MenuItem onClick={() => {
-            openDisclaimer()
-            handleClose()
-          }}>
+          <MenuItem 
+            data-testid="open-disclaimer-button"
+            onClick={() => {
+              openDisclaimer()
+              handleClose()
+            }}
+          >
             <ListItemIcon>
               <InfoIcon fontSize="small" />
             </ListItemIcon>
