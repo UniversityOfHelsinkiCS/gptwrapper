@@ -48,7 +48,6 @@ import PromptModal from './PromptModal'
 import CoursesModal from './CoursesModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
 
-
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
  */
@@ -79,7 +78,7 @@ function useLocalStorageStateWithURLDefault<T>(key: string, defaultValue: string
     return [parsedValue.data, modifiedSetValue] as const
   }
 
-  // if the value in localStorage is invalid then revert back to default 
+  // if the value in localStorage is invalid then revert back to default
   setValue(defaultValue)
   return [defaultValue as T, modifiedSetValue] as const
 }
@@ -95,7 +94,6 @@ const ChatV2Content = () => {
   const { data: chatInstance, isLoading: instanceLoading } = useCourse(courseId)
   const { user, isLoading: userLoading } = useCurrentUser()
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
-
 
   // local storage states
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
@@ -114,8 +112,8 @@ const ChatV2Content = () => {
   // App States
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
   const [fileName, setFileName] = useState<string>('')
-  const [messageWarning, setMessageWarning] = useState<{ [key in WarningType]?: { message: string, ignored: boolean } }>({})
-  const [chatLeftSidePanelOpen, setChatLeftSidePanelOpen] = useState<boolean>(false)
+  const [messageWarning, setMessageWarning] = useState<{ [key in WarningType]?: { message: string; ignored: boolean } }>({})
+  const [leftPanelOpen, setLeftPanelOpen] = useState<boolean>(true)
   const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
 
   // Analytics
@@ -133,17 +131,14 @@ const ChatV2Content = () => {
 
   // Refs
   const chatContainerRef = useRef<HTMLDivElement | null>(null)
-  const inputFieldRef = useRef<HTMLElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
 
   const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false)
 
   const { promptInfo, activePrompt, createPromptMutation, editPromptMutation } = usePromptState()
   const { ragIndices } = useCourseRagIndices(chatInstance?.id)
-
 
   const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo, hasPotentialError } = useChatStream({
     onComplete: ({ message }) => {
@@ -190,11 +185,13 @@ const ChatV2Content = () => {
       formData.append('file', file)
     }
 
-    const newMessages = resendPrevious ? messages : messages.concat({
-      role: 'user',
-      content: message,
-      attachments: file && fileName ? fileName : undefined,
-    })
+    const newMessages = resendPrevious
+      ? messages
+      : messages.concat({
+          role: 'user',
+          content: message,
+          attachments: file && fileName ? fileName : undefined,
+        })
 
     setMessages(newMessages)
 
@@ -204,7 +201,7 @@ const ChatV2Content = () => {
     setFileName('')
     setRetryTimeout(() => {
       if (streamControllerRef.current) {
-        streamControllerRef.current.abort("timeout_error")
+        streamControllerRef.current.abort('timeout_error')
       }
     }, 5000)
 
@@ -236,7 +233,7 @@ const ChatV2Content = () => {
         streamControllerRef.current,
       )
 
-      if ("error" in res) {
+      if ('error' in res) {
         console.error('API error:', res.error)
         handleCancel()
         enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
@@ -245,8 +242,8 @@ const ChatV2Content = () => {
 
       const newWarnings = { ...messageWarning }
 
-      if ("warnings" in res) {
-        res.warnings.forEach(warning => {
+      if ('warnings' in res) {
+        res.warnings.forEach((warning) => {
           newWarnings[warning.warningType] = { message: warning.warning, ignored: false }
         })
       }
@@ -290,7 +287,7 @@ const ChatV2Content = () => {
 
     setResetConfirmModalOpen(false)
 
-    streamControllerRef.current?.abort("conversation_cleared")
+    streamControllerRef.current?.abort('conversation_cleared')
     setMessages([])
     setActiveToolResult(undefined)
     if (fileInputRef.current) {
@@ -350,7 +347,6 @@ const ChatV2Content = () => {
 
   if (statusLoading || userLoading || instanceLoading) return <HYLoadingSpinner />
 
-
   if (chatInstance && chatInstance.usageLimit === 0) {
     return (
       <Box>
@@ -394,13 +390,28 @@ const ChatV2Content = () => {
   }
   //TODO: Restrict access when necessary
   const modalsRegister: ModalMap = {
-    'course': { name: 'Omat kurssini', component: CoursesModal },
-    'courseSettings': { name: 'Kurssin asetukset', component: CourseSettingsModal, props: { courseId: courseId } },
-    'prompt': { name: 'Valitse alustus', component: PromptModal, props: { chatInstanceId: chatInstance?.id } },
-    'editPrompt': { name: 'Muokkaa alustusta', component: PromptEditor, props: { prompt: activePrompt, ragIndices, type: activePrompt?.type, chatInstanceId: activePrompt?.chatInstanceId, createPromptMutation, editPromptMutation } },
-    'selectPrompt': { name: 'Valitse alustus', component: PromptModal, props: { chatInstanceId: chatInstance?.id } },
+    course: { name: 'Omat kurssini', component: CoursesModal },
+    courseSettings: { name: 'Kurssin asetukset', component: CourseSettingsModal, props: { courseId: courseId } },
+    prompt: { name: 'Valitse alustus', component: PromptModal, props: { chatInstanceId: chatInstance?.id } },
+    editPrompt: {
+      name: 'Muokkaa alustusta',
+      component: PromptEditor,
+      props: {
+        prompt: activePrompt,
+        ragIndices,
+        type: activePrompt?.type,
+        chatInstanceId: activePrompt?.chatInstanceId,
+        createPromptMutation,
+        editPromptMutation,
+      },
+    },
+    selectPrompt: { name: 'Valitse alustus', component: PromptModal, props: { chatInstanceId: chatInstance?.id } },
   }
 
+  const leftPanelFloating = isEmbeddedMode || isMobile
+  const leftPanelCollapsed = !leftPanelOpen || leftPanelFloating
+  const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
+  const rightPanelContentWidth = rightMenuOpen ? 'var(--right-menu-width)' : '0px'
 
   return (
     <Box
@@ -411,61 +422,56 @@ const ChatV2Content = () => {
       }}
     >
       {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
-      {!isEmbeddedMode &&
-        (isMobile ? (
-          <Drawer
-            open={chatLeftSidePanelOpen}
+      {(isEmbeddedMode || isMobile) ? (
+        <Drawer
+          open={leftPanelOpen}
+          onClose={() => {
+            setLeftPanelOpen(!leftPanelOpen)
+          }}
+        >
+          <LeftMenu
+            handleReset={() => setResetConfirmModalOpen(true)}
             onClose={() => {
-              setChatLeftSidePanelOpen(!chatLeftSidePanelOpen)
+              setLeftPanelOpen(false)
             }}
-          >
-            <LeftMenu
-              handleReset={() => setResetConfirmModalOpen(true)}
-              onClose={() => {
-                setChatLeftSidePanelOpen(false)
-              }}
-              course={chatInstance}
-              setSettingsModalOpen={setSettingsModalOpen}
-              messages={messages}
-              currentModel={activeModel}
-              setModel={setActiveModel}
-              setNewSidebar={setNewSidebar}
-            />
-          </Drawer>
-        ) : newSideBar ?
-          (
-            <SideBar
-              collapsed={sidebarCollapsed}
-              setCollapsed={setSidebarCollapsed}
-              isAdmin={isAdmin}
-              course={chatInstance}
-              handleReset={() => setResetConfirmModalOpen(true)}
-              setModalContentId={setModalContentId}
-              setSettingsModalOpen={setSettingsModalOpen}
-              messages={messages}
-              currentModel={activeModel}
-              setModel={setActiveModel}
-              setNewSidebar={setNewSidebar}
-            />
-          )
-          :
-          (
-            <LeftMenu
-              sx={{
-                display: { sm: 'none', md: 'flex' },
-                position: 'sticky',
-                top: 0,
-              }}
-              course={chatInstance}
-              handleReset={() => setResetConfirmModalOpen(true)}
-              setSettingsModalOpen={setSettingsModalOpen}
-              messages={messages}
-              currentModel={activeModel}
-              setModel={setActiveModel}
-              setNewSidebar={setNewSidebar}
-            />
-          ))}
-
+            course={chatInstance}
+            setSettingsModalOpen={setSettingsModalOpen}
+            messages={messages}
+            currentModel={activeModel}
+            setModel={setActiveModel}
+            setNewSidebar={setNewSidebar}
+          />
+        </Drawer>
+      ) : newSideBar ? (
+        <SideBar
+          expanded={leftPanelOpen}
+          setExpanded={setLeftPanelOpen}
+          isAdmin={isAdmin}
+          course={chatInstance}
+          handleReset={() => setResetConfirmModalOpen(true)}
+          setModalContentId={setModalContentId}
+          setSettingsModalOpen={setSettingsModalOpen}
+          messages={messages}
+          currentModel={activeModel}
+          setModel={setActiveModel}
+          setNewSidebar={setNewSidebar}
+        />
+      ) : (
+        <LeftMenu
+          sx={{
+            display: { sm: 'none', md: 'flex' },
+            position: 'sticky',
+            top: 0,
+          }}
+          course={chatInstance}
+          handleReset={() => setResetConfirmModalOpen(true)}
+          setSettingsModalOpen={setSettingsModalOpen}
+          messages={messages}
+          currentModel={activeModel}
+          setModel={setActiveModel}
+          setNewSidebar={setNewSidebar}
+        />
+      )}
       {/* Chat view column ------------------------------------------------------------------------------------------------ */}
       <Box
         ref={chatContainerRef}
@@ -474,21 +480,23 @@ const ChatV2Content = () => {
           display: 'flex',
           flexDirection: 'column',
           // magical -10px prevents horizontal overflow when vertical scrollbar appears
-          maxWidth: isMobile ? '100%' : `calc(100vw - 10px - ${sidebarCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'} - ${rightMenuOpen ? 'var(--right-menu-width)' : '0px'})`
+          width: `calc(100vw - 10px - ${leftPanelContentWidth} - ${rightPanelContentWidth})`,
         }}
       >
-        {isMobile && (<GrayButton
-          sx={{
-            position: 'fixed',
-            left: 0,
-            top: '50%',
-            transform: 'translate(-50%) rotate(-90deg)',
-          }}
-          onClick={() => setChatLeftSidePanelOpen(true)}
-          data-testid="left-panel-open"
-        >
-          <SettingsIcon />
-        </GrayButton>)}
+        {(isEmbeddedMode || isMobile) && (
+          <GrayButton
+            sx={{
+              position: 'fixed',
+              left: 0,
+              top: '50%',
+              transform: 'translate(-50%) rotate(-90deg)',
+            }}
+            onClick={() => setLeftPanelOpen(true)}
+            data-testid="left-panel-open"
+          >
+            <SettingsIcon />
+          </GrayButton>
+        )}
         <Box
           sx={{
             height: '100%',
@@ -528,7 +536,9 @@ const ChatV2Content = () => {
           )}
 
           <Conversation
-            initial={<ConversationSplash courseName={chatInstance && getLanguageValue(chatInstance.name, i18n.language)} courseDate={chatInstance?.activityPeriod} />}
+            initial={
+              <ConversationSplash courseName={chatInstance && getLanguageValue(chatInstance.name, i18n.language)} courseDate={chatInstance?.activityPeriod} />
+            }
             messages={messages}
             completion={hasPotentialError ? `${completion} ⚠️` : completion}
             generationInfo={generationInfo}
@@ -539,7 +549,6 @@ const ChatV2Content = () => {
           />
         </Box>
         <Box
-          ref={inputFieldRef}
           sx={{
             backgroundColor: 'white',
             width: '100%',
@@ -547,11 +556,12 @@ const ChatV2Content = () => {
             bottom: 0,
           }}
         >
-          <Box sx={{
-            paddingBottom: '2rem',
-            padding: isMobile ? '0rem 1rem 1rem 1rem' : '0rem 2rem 2rem 2rem',
-          }}>
-
+          <Box
+            sx={{
+              paddingBottom: '2rem',
+              padding: isMobile ? '0rem 1rem 1rem 1rem' : '0rem 2rem 2rem 2rem',
+            }}
+          >
             <ChatBox
               disabled={isStreaming}
               fileInputRef={fileInputRef}
@@ -564,7 +574,7 @@ const ChatV2Content = () => {
                 handleSendMessage(newMessage, false, [])
               }}
               handleReset={() => setResetConfirmModalOpen(true)}
-              handleStop={() => streamControllerRef.current?.abort("user_aborted")}
+              handleStop={() => streamControllerRef.current?.abort('user_aborted')}
               isMobile={isMobile}
             />
           </Box>
@@ -578,70 +588,68 @@ const ChatV2Content = () => {
           </Box> */}
         </Box>
       </Box>
-
       {/* FileSearchResults columns ----------------------------------------------------------------------------------------------------- */}
-
-      {
-        isMobile ? (
-          <Drawer
-            anchor="right"
-            open={!!activeToolResult}
-            onClose={() => setActiveToolResult(undefined)}
+      {isMobile ? (
+        <Drawer
+          anchor="right"
+          open={!!activeToolResult}
+          onClose={() => setActiveToolResult(undefined)}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: '100%',
+              maxWidth: '100%',
+              padding: 0,
+            },
+          }}
+        >
+          <Box
             sx={{
-              '& .MuiDrawer-paper': {
-                width: '100%',
-                maxWidth: '100%',
-                padding: 0,
-              },
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              paddingTop: '1rem',
+              paddingX: '1rem',
+              paddingBottom: '1rem',
+              overflow: 'auto',
             }}
           >
-            <Box
-              sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                paddingTop: '1rem',
-                paddingX: '1rem',
-                paddingBottom: '1rem',
-                overflow: 'auto',
-              }}
-            >
-              {activeToolResult && <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />}
-            </Box>
-          </Drawer>
-        ) : (
-          !!activeToolResult && (
-            <Box
-              sx={{
-                width: rightMenuOpen ? 'var(--right-menu-width)' : '0px',
-                height: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                position: 'sticky',
-                top: 0,
-                borderLeft: '1px solid rgba(0,0,0,0.12)',
-                paddingTop: !isEmbeddedMode ? '4rem' : 0,
-              }}
-            >
-              <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />
-            </Box>
-          )
+            {activeToolResult && <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />}
+          </Box>
+        </Drawer>
+      ) : (
+        !!activeToolResult && (
+          <Box
+            sx={{
+              width: rightPanelContentWidth,
+              height: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'sticky',
+              top: 0,
+              borderLeft: '1px solid rgba(0,0,0,0.12)',
+              paddingTop: !isEmbeddedMode ? '4rem' : 0,
+            }}
+          >
+            <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />
+          </Box>
         )
-      }
-
+      )}
       {/* Modals --------------------------------------*/}
-      <TemplateModal open={!!modalContentId} setOpen={() => setModalContentId(null)} modalsRegister={modalsRegister} modalContentId={modalContentId} setModalContentId={setModalContentId} />
-
+      <TemplateModal
+        open={!!modalContentId}
+        setOpen={() => setModalContentId(null)}
+        modalsRegister={modalsRegister}
+        modalContentId={modalContentId}
+        setModalContentId={setModalContentId}
+      />
       <SettingsModal
         open={settingsModalOpen}
         setOpen={setSettingsModalOpen}
         modelTemperature={modelTemperature}
         setModelTemperature={(updatedTemperature) => setModelTemperature(updatedTemperature)}
       />
-
       <ResetConfirmModal open={resetConfirmModalOpen} setOpen={setResetConfirmModalOpen} onConfirm={handleReset} />
-
-    </Box >
+    </Box>
   )
 }
 
@@ -694,7 +702,6 @@ const LeftMenu = ({
         sx,
       ]}
     >
-
       <Box p="1rem">
         {course && <ChatInfo course={course} />}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
@@ -708,18 +715,16 @@ const LeftMenu = ({
             {t('chat:settings')}
           </OutlineButtonBlack>
 
-          {isAdmin && <OutlineButtonBlack onClick={() => setNewSidebar(prev => !prev)}>Admins: toggle old/new sidebar</OutlineButtonBlack>}
+          {isAdmin && <OutlineButtonBlack onClick={() => setNewSidebar((prev) => !prev)}>Admins: toggle old/new sidebar</OutlineButtonBlack>}
         </Box>
       </Box>
-      {
-        onClose && (
-          <OutlineButtonBlack sx={{ m: '1rem', mt: 'auto' }} onClick={onClose} startIcon={<ChevronLeft />}>
-            {t('common:close')}
-          </OutlineButtonBlack>
-        )
-      }
+      {onClose && (
+        <OutlineButtonBlack sx={{ m: '1rem', mt: 'auto' }} onClick={onClose} startIcon={<ChevronLeft />}>
+          {t('common:close')}
+        </OutlineButtonBlack>
+      )}
       <Footer />
-    </Box >
+    </Box>
   )
 }
 

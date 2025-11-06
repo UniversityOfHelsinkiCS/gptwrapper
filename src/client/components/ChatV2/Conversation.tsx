@@ -174,6 +174,7 @@ const AssistantMessageItem = ({ message, setActiveToolResult }: { message: Assis
       data-testid="assistant-message"
       id={msgId}
       sx={{
+        width: '100%',
         position: 'relative',
         pr: 4,
         wordBreak: 'break-word',
@@ -328,7 +329,7 @@ const Conversation = ({
     <>
       <Box
         style={{
-          maxWidth: '100%',
+          // maxWidth: '100%',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',

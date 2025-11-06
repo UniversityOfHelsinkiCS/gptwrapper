@@ -31,8 +31,8 @@ import { useNavigate } from 'react-router-dom';
 
 
 const SideBar = ({
-  collapsed,
-  setCollapsed,
+  expanded,
+  setExpanded,
   course,
   handleReset,
   onClose,
@@ -44,8 +44,8 @@ const SideBar = ({
   isAdmin,
   setNewSidebar,
 }: {
-  collapsed: boolean,
-  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>
+  expanded: boolean,
+  setExpanded: React.Dispatch<React.SetStateAction<boolean>>
   course: Course | undefined
   handleReset: () => void
   onClose?: () => void
@@ -88,20 +88,20 @@ const SideBar = ({
         sx={{
           pt: 3,
           height: '100%',
-          width: collapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)',
+          width: !expanded ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)',
           borderRight: '1px solid rgba(0, 0, 0, 0.15)',
           zIndex: 999
         }}
         className="scrollable-styled"
       >
         {
-          collapsed ?
+          !expanded ?
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
               <Link href="/">
                 <img src={hyLogo} alt="University of Helsinki" width="30" />
               </Link>
               <TextButton
-                onClick={() => setCollapsed(prev => !prev)}
+                onClick={() => setExpanded(prev => !prev)}
               >
                 <Box sx={{}}>
                   <ViewSidebarOutlinedIcon sx={{ transform: 'scaleX(-1)' }} />
@@ -126,7 +126,7 @@ const SideBar = ({
                 },
               }}>
                 <TextButton
-                  onClick={() => setCollapsed(prev => !prev)}
+                  onClick={() => setExpanded(prev => !prev)}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <ViewSidebarOutlinedIcon sx={{ transform: 'scaleX(-1)' }} />
