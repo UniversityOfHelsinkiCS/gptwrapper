@@ -1,8 +1,8 @@
-import { Box, Button, CircularProgress, CssBaseline, Snackbar } from '@mui/material'
+import { Box, Button, CssBaseline, Snackbar } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { fi, tr } from 'date-fns/locale'
+import { fi } from 'date-fns/locale'
 import { SnackbarProvider } from 'notistack'
 import React, { useEffect } from 'react'
 import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom'
@@ -100,7 +100,7 @@ const App = () => {
 
 const Layout = () => {
 
-  const { user } = useCurrentUser()
+  const { user, isSuccess } = useCurrentUser()
   const [feedbackOpen, setFeedbackOpen] = React.useState(false)
   const [settingsOpen, setSettingsOpen] = React.useState(false)
   const [disclaimerStatus, setDisclaimerStatus] = React.useState(false)
@@ -108,7 +108,7 @@ const Layout = () => {
     if (user && !user.termsAcceptedAt) {
       setDisclaimerStatus(true)
     }
-  }, [user])
+  }, [isSuccess])
 
   return (
     <>
