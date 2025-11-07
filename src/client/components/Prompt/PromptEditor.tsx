@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import type { PromptCreationParams, PromptEditableParams } from '@shared/prompt'
 import type { ValidModelName } from '@config'
 import {
   TextField,
@@ -18,38 +17,27 @@ import {
 } from '@mui/material'
 import { validModels } from '@config'
 import { useTranslation } from 'react-i18next'
-import type { RagIndexAttributes } from '@shared/types'
 import { enqueueSnackbar } from 'notistack'
-import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
+import { BlueButton } from '../ChatV2/general/Buttons'
 import OpenableTextfield from '../common/OpenableTextfield'
 import { Message } from '@shared/chat'
-import { CreatePromptMutation, EditPromptMutation } from '../ChatV2/PromptState'
+import { usePromptState } from '../ChatV2/PromptState'
+import { useParams } from 'react-router-dom'
+import { useCourseRagIndices } from '../../hooks/useRagIndices'
+import useCourse from '../../hooks/useCourse'
 
-interface PromptEditorProps {
-  prompt?: PromptEditableParams & { id: string }
-  ragIndices?: RagIndexAttributes[]
-  type: PromptCreationParams['type']
-  chatInstanceId?: string
-  setEditorOpen?: (open: boolean) => void
-  createPromptMutation: CreatePromptMutation
-  editPromptMutation: EditPromptMutation
-}
-
-export const PromptEditor = ({
-  prompt,
-  ragIndices,
-  type,
-  chatInstanceId,
-  setEditorOpen,
-  createPromptMutation,
-  editPromptMutation,
-}: PromptEditorProps) => {
+export const PromptEditor = () => {
   const { t } = useTranslation()
+  const { courseId } = useParams() as { courseId: string }
+  const { data: chatInstance } = useCourse(courseId)
+  const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
 
+  const { activePrompt: prompt, createPromptMutation, editPromptMutation } = usePromptState()
+  const type = prompt?.type ?? 'CHAT_INSTANCE'
   const [name, setName] = useState<string>(prompt?.name ?? '')
   const [systemMessage, setSystemMessage] = useState<string>(prompt?.systemMessage ?? '')
   const [ragSystemMessage, setRagSystemMessage] = useState<string>(() =>
-    prompt ? prompt.messages?.find((m) => m.role === 'system')?.content || '' : t('prompt:defaultRagMessage'),
+    prompt ? prompt.messages?.find((m: Message) => m.role === 'system')?.content || '' : t('prompt:defaultRagMessage'),
   )
   const [hidden, setHidden] = useState<boolean>(prompt?.hidden ?? false)
   const [ragIndexId, setRagIndexId] = useState<number | undefined | null>(prompt?.ragIndexId)
@@ -88,12 +76,11 @@ export const PromptEditor = ({
           temperature,
         })
         enqueueSnackbar(t('prompt:updatedPrompt', { name }), { variant: 'success' })
-        if (setEditorOpen) setEditorOpen(false)
       } else {
         await createPromptMutation({
           name,
           type,
-          ...(type === 'CHAT_INSTANCE' ? { chatInstanceId } : {}),
+          ...(type === 'CHAT_INSTANCE' ? { courseId } : {}),
           systemMessage,
           messages,
           hidden,
@@ -102,7 +89,6 @@ export const PromptEditor = ({
           temperature,
         })
         enqueueSnackbar(t('prompt:createdPrompt', { name }), { variant: 'success' })
-        if (setEditorOpen) setEditorOpen(false)
       }
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
@@ -136,7 +122,7 @@ export const PromptEditor = ({
             fullWidth
             margin="normal"
           />
-          {!!chatInstanceId && <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />}
+          {courseId !== 'general' && <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />}
           <FormControl fullWidth margin="normal">
             <InputLabel>{t('common:model')}</InputLabel>
             <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
@@ -178,7 +164,7 @@ export const PromptEditor = ({
           <Typography component="h3" gutterBottom>
             {t('prompt:context')}
           </Typography>
-          {!!chatInstanceId && <FormControl fullWidth margin="normal">
+          {type === 'CHAT_INSTANCE' && <FormControl fullWidth margin="normal">
             <InputLabel>{t('rag:sourceMaterials')}</InputLabel>
             <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
               <MenuItem value="" data-testid="no-source-materials">
@@ -228,9 +214,6 @@ export const PromptEditor = ({
       <DialogActions >
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
           {loading && <CircularProgress color="secondary" />}
-          {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>
-            {t('common:cancel')}
-          </OutlineButtonBlue>}
           <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
             {t('common:save')}
           </BlueButton>

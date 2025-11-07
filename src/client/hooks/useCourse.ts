@@ -8,6 +8,7 @@ const useCourse = (courseId?: string) => {
   const queryKey = ['course', courseId]
 
   const queryFn = async () => {
+
     const res = await apiClient.get<Course>(`/courses/${courseId}`)
 
     const { data } = res
@@ -18,7 +19,7 @@ const useCourse = (courseId?: string) => {
   return useQuery({
     queryKey,
     queryFn,
-    enabled: !!courseId,
+    enabled: courseId !== 'general',
     retry: false,
   })
 }

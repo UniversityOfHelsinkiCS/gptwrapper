@@ -8,9 +8,11 @@ import useCourse, { useCourseEnrolments, useCourseStatistics } from '../../../ho
 import MaxTokenUsageStudents from './MaxTokenUsageStudents'
 import HelpOutline from '@mui/icons-material/HelpOutline'
 import { BlueButton, OutlineButtonBlue } from '../../ChatV2/general/Buttons'
+import { useParams } from 'react-router-dom'
 
-const Stats = ({ courseId }: { courseId: string }) => {
+const Stats: React.FC = () => {
   const { t } = useTranslation()
+  const { courseId } = useParams()
   const { user, isLoading: isUserLoading } = useCurrentUser()
   const [studentListOpen, setStudentListOpen] = useState(false)
 

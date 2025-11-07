@@ -326,7 +326,7 @@ export function Component() {
       </Box>
 
       <Routes>
-        <Route path="/" element={<Stats courseId={courseId} />} />
+        <Route path="/" element={<Stats />} />
         <Route path={`/discussions/*`} element={<Discussion />} />
         <Route path="/prompts" element={<Prompts courseId={courseId} chatInstanceId={chatInstance.id} />} />
         <Route path="/rag" element={<Rag />} />
@@ -401,7 +401,7 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          <PromptEditor ragIndices={ragIndices} setEditorOpen={setEditorOpen} type="CHAT_INSTANCE" chatInstanceId={chatInstanceId} prompt={promptToEdit} createPromptMutation={createMutation.mutateAsync} editPromptMutation={editMutation.mutateAsync} />
+          <PromptEditor />
         </DialogContent>
       </Dialog>
     </>

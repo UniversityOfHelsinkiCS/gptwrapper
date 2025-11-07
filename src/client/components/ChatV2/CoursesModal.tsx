@@ -1,26 +1,22 @@
 import React from 'react'
-import { Box, Tab, Tabs, Typography, Container } from '@mui/material'
+import { Box, Tab, Tabs } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import useUserCourses, { CoursesViewCourse } from '../../hooks/useUserCourses'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { useMemo, useState } from 'react'
 import TableSortLabel from '@mui/material/TableSortLabel'
 import { useNavigate } from 'react-router-dom'
-
 import { formatDate, getGroupedCourses } from './util'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
-
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import { BlueButton, GrayButton, GreenButton, OutlineButtonBlack } from './general/Buttons'
+import { BlueButton, GrayButton, GreenButton } from './general/Buttons'
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
 import Skeleton from '@mui/material/Skeleton'
-import { ModalInjectedProps } from 'src/client/types'
-
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -49,7 +45,7 @@ const CoursesModal = () => {
 
   if (!courses || isLoading) return <CoursesSkeleton />
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue)
   }
 
@@ -83,7 +79,6 @@ const CoursesModal = () => {
     </Box>
   )
 }
-
 
 type Order = 'asc' | 'desc'
 type OrderBy = 'name' | 'code' | 'activityPeriod'
@@ -130,8 +125,6 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
     }
     return [...courseUnits].sort(compare)
   }, [courseUnits, order, orderBy, language])
-
-
 
   return (
     <Box sx={{ py: 3, overflow: 'auto' }}>

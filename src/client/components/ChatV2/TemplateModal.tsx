@@ -1,16 +1,16 @@
-import { Box, Modal, Typography } from '@mui/material'
+import { Box, Modal } from '@mui/material'
 import React from 'react'
 import { TextButton } from './general/Buttons'
 import CloseIcon from '@mui/icons-material/Close'
-import { ModalMap } from 'src/client/types'
-import { Link, Outlet, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
-const TemplateModal: React.FC<{ title: string, open: boolean, root: string, children: React.ReactNode }> = ({ title, open, root, children }) => {
+const TemplateModal: React.FC<{ open: boolean, root: string, children: React.ReactNode }> = ({ open, root, children }) => {
   const navigate = useNavigate()
 
   const handleClose = () => {
     navigate(root)
   }
+
   return (
     <Modal open={open} onClose={handleClose}>
       <Box
@@ -26,27 +26,25 @@ const TemplateModal: React.FC<{ title: string, open: boolean, root: string, chil
           maxHeight: '80vh',
           bgcolor: 'background.paper',
           boxShadow: 24,
-          borderRadius: '0.5rem',
+          borderRadius: '1.25rem',
           overflow: 'auto',
         }}
       >
         <Box
           sx={{
             display: 'flex',
-            justifyContent: 'space-between',
-            p: '2rem',
+            justifyContent: 'right',
+            p: '1rem',
             position: 'sticky',
             top: 0,
             backgroundColor: 'white',
             zIndex: 999,
           }}
         >
-          <Typography variant="h5">{title}</Typography>
           <TextButton onClick={handleClose} >
             <CloseIcon />
           </TextButton>
         </Box>
-
         <Box sx={{ p: '0 2rem 2rem 2rem' }}>
           {children}
         </Box>

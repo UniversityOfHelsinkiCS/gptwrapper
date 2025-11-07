@@ -1,7 +1,6 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Button, Box, Typography, styled, LinearProgress, Container, DialogTitle, DialogContent, Dialog, Link, CircularProgress } from '@mui/material'
 import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom'
-import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined'
 import Autorenew from '@mui/icons-material/Autorenew'
 import CloudUpload from '@mui/icons-material/CloudUpload'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
@@ -18,7 +17,6 @@ import queryClient from '../../util/queryClient'
 import { IngestionPipelineStageKey } from '@shared/ingestion'
 import { RagFilesStatus } from './RagFilesStatus'
 import apiClient from '../../util/apiClient'
-import { RagFile } from './RagFile'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -32,12 +30,12 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 })
 
-export const RagIndex = ({ ragIndexId, setRagIndexId }: { ragIndexId?: number, setRagIndexId?: React.Dispatch<number | undefined> }) => {
+export const RagIndex: React.FC = () => {
   const { user } = useCurrentUser()
   const { t } = useTranslation()
-  const { id: strId } = useParams() as { id: string }
+  const { id: strId, courseId } = useParams() as { id: string, courseId: string }
+  const id = parseInt(strId)
   const navigate = useNavigate()
-  const id = parseInt(strId, 10) || ragIndexId as number
   const [searchOpen, setSearchOpen] = React.useState(false)
   const deleteIndexMutation = useDeleteRagIndexMutation()
   const [refetchInterval, setRefetchInterval] = React.useState(60 * 1000)
@@ -45,7 +43,6 @@ export const RagIndex = ({ ragIndexId, setRagIndexId }: { ragIndexId?: number, s
   const { data: ragDetails, isSuccess, refetch } = useRagIndexDetails(id)
   const { data: ragFileStatuses, refetch: refetchStatuses } = useRagIndexJobs(id, refetchInterval)
   const uploadMutation = useUploadMutation({ index: ragDetails, onUploadProgress: setUploadProgress })
-  const [fileId, setFileId] = useState<number | undefined>(undefined)
 
   const isComplete = ragFileStatuses ? ragFileStatuses.every(({ pipelineStage }) => pipelineStage !== 'ingesting') && !uploadMutation.isPending : false
   const hasErrors = ragFileStatuses ? ragFileStatuses.some(({ pipelineStage }) => pipelineStage === 'error') : false
@@ -100,21 +97,13 @@ export const RagIndex = ({ ragIndexId, setRagIndexId }: { ragIndexId?: number, s
     refetchStatuses()
   }
 
-  const coursePagePath = ragDetails?.chatInstances?.[0] ? `/courses/${ragDetails.chatInstances[0].courseId}/rag` : '/rag'
-
-  if (fileId) return (
-    <RagFile ragIndexId={id} fileId={fileId} setFileId={setFileId} />
-  )
+  const coursePagePath = `/${courseId}/course/rag`
 
   return (
-    <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
-      {/* @ts-ignore */}
-      <OutlineButtonBlack onClick={() => setRagIndexId(undefined)} sx={{ mb: 2 }}>
-        <ArrowBackOutlined />
-        {!ragIndexId && <Link to={coursePagePath} component={RouterLink} sx={{ display: 'flex' }}>
-          {t('rag:backToCourse')}
-        </Link>}
-      </OutlineButtonBlack>
+    <Container sx={{ mt: '1rem' }} maxWidth="xl">
+      <Link to={coursePagePath} component={RouterLink} sx={{ display: 'flex' }}>
+        {t('rag:backToCourse')}
+      </Link>
       <Typography variant="body1">{t('rag:collection')}</Typography>
       <Typography variant="h3">{ragDetails?.metadata?.name}</Typography>
 
@@ -153,7 +142,7 @@ export const RagIndex = ({ ragIndexId, setRagIndexId }: { ragIndexId?: number, s
                 await deleteIndexMutation.mutateAsync(id)
                 const chatInstance = ragDetails.chatInstances?.[0]
                 if (chatInstance) {
-                  navigate(`/courses/${chatInstance.courseId}/rag`)
+                  navigate(`/${courseId}/course/rag`)
                 }
                 enqueueSnackbar(t('rag:collectionDeleted'), { variant: 'success' })
               }
@@ -190,9 +179,8 @@ export const RagIndex = ({ ragIndexId, setRagIndexId }: { ragIndexId?: number, s
               key={file.id}
               file={file}
               status={ragFileStatuses?.find((rfs) => rfs.ragFileId === file.id)}
-              link={!ragIndexId}
+              link
               uploadProgress={uploadMutation.isPending ? uploadProgress : undefined}
-              setFileId={setFileId}
             />
           ))}
         </Box>

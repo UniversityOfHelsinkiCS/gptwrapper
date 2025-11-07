@@ -35,9 +35,6 @@ const SideBar = ({
   setExpanded,
   course,
   handleReset,
-  onClose,
-  setSettingsModalOpen,
-  setModalContentId,
   messages,
   currentModel,
   setModel,
@@ -49,8 +46,6 @@ const SideBar = ({
   course: Course | undefined
   handleReset: () => void
   onClose?: () => void
-  setModalContentId: React.Dispatch<React.SetStateAction<string | null>>,
-  setSettingsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
   messages: ChatMessage[]
   currentModel: ValidModelName
   setModel: (model: ValidModelName) => void
@@ -168,31 +163,29 @@ const SideBar = ({
                       </Box >
                       {amongResponsibles && <TextButton startIcon={<SettingsIcon />} onClick={() => navigate(`/${courseId}/course`)}>{t("sidebar:courseSettings")}</TextButton>}
                       <TextButton startIcon={<LibraryBooksIcon />} onClick={() => navigate(`/${courseId}/courses`)}>{t("sidebar:courseChange")}</TextButton>
-                      {amongResponsibles && <TextButton onClick={() => navigate("/")} startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>{t("sidebar:courseExit")}</TextButton>}
+                      {amongResponsibles && <TextButton onClick={() => navigate("/general")} startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>{t("sidebar:courseExit")}</TextButton>}
                     </>
                     :
-                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => navigate(`/courses`)}>
+                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => navigate(`/general/courses`)}>
                       <Typography>{t("sidebar:noCourse")}  </Typography>
                     </TextButton>
                 }
               </Box>
-
               <Divider />
-
               <Box p={4}>
                 <Typography mb={0.5} color='textSecondary' >{t("sidebar:promptTitle").toUpperCase()}</Typography>
                 {
                   activePrompt ?
                     <>
                       <Typography fontWeight='bold' mb={2}>{activePrompt.name}</Typography>
-                      <TextButton startIcon={<TuneIcon />} onClick={() => setModalContentId(prev => prev === 'editPrompt' ? null : 'editPrompt')}>{t("sidebar:promptEdit")}</TextButton>
-                      {!amongResponsibles && <TextButton startIcon={<HelpCenterIcon />} onClick={() => setModalContentId(prev => prev === 'showPrompt' ? null : 'showPrompt')}>{t("sidebar:promptDetails")}</TextButton>}
-                      <TextButton startIcon={<AppsIcon />} onClick={() => setModalContentId(prev => prev === 'selectPrompt' ? null : 'selectPrompt')}>{t("sidebar:promptSelect")}</TextButton>
+                      <TextButton startIcon={<TuneIcon />} onClick={() => navigate(courseId ? `/${courseId}/prompt/${activePrompt.id}` : `/prompt/${activePrompt.id}`)}>{t("sidebar:promptEdit")}</TextButton>
+                      {!amongResponsibles && <TextButton startIcon={<HelpCenterIcon />} onClick={() => navigate(`/prompt`)}>{t("sidebar:promptDetails")}</TextButton>}
+                      <TextButton startIcon={<AppsIcon />} onClick={() => navigate(`/${courseId}/prompts`)}>{t("sidebar:promptSelect")}</TextButton>
                       <TextButton startIcon={<ExtensionOffIcon />} onClick={() => handleChangePrompt(undefined)}>{t("sidebar:promptNone")}</TextButton>
                     </>
                     :
-                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => setModalContentId(prev => prev === 'prompt' ? null : 'prompt')}>
-                      <Typography>{t("sidebar:promptSelect")}</Typography>
+                    <TextButton startIcon={<ChevronRightIcon />} onClick={() => navigate(`/${courseId}/prompts`)}>
+                      <Typography>{t("sidebar:promptNone")}</Typography>
                     </TextButton>
                 }
               </Box>
@@ -220,7 +213,6 @@ const SideBar = ({
             </Box>
         }
       </Box>
-
     </Box >
 
   )

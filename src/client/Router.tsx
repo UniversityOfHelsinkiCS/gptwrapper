@@ -13,32 +13,24 @@ import Rag from './components/Rag/Rag'
 import { RagFile } from './components/Rag/RagFile'
 import { RagIndex } from './components/Rag/RagIndex'
 import { EmbeddedLoginHelper } from './components/EmbeddedLoginHelper'
+import CoursesModal from './components/ChatV2/CoursesModal'
+import TemplateModal from './components/ChatV2/TemplateModal'
 
 const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
-
-const CourseRedirect = () => {
-  const { courseId } = useParams()
-  return <Navigate to={`/${courseId}`} replace />
-}
 
 const router = sentryCreateBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />} ErrorBoundary={ErrorPage}>
-      <Route index element={<ChatV2 />} />
-      <Route path="/v1" element={<Navigate to="/" replace />} />
-      <Route path="/v2" element={<Navigate to="/" />} />
-      <Route path="/:courseId/*" element={<ChatV2 />} />
-      <Route path="/v2/:courseId" element={<CourseRedirect />} />
-      <Route path="/v1/:courseId" element={<CourseRedirect />} />
-      <Route path="/courses" element={<Courses />} />
-      <Route path="/courses/:courseId/*" lazy={() => import('./components/Courses/Course')} />
+      <Route index element={<Navigate to="/general" />} />
       <Route path="/admin/*" lazy={() => import('./components/Admin')} />
+      <Route path="/courses/:courseId/*" lazy={() => import('./components/Courses/Course')} />
       <Route path="/noaccess" element={<NoAccess />} />
       <Route path="/chats" element={<Chats />} />
       <Route path="/statistics" lazy={() => import('./components/Statistics')} />
       <Route path="/rag" element={<Rag />} />
       <Route path="/rag/:id" element={<RagIndex />} />
       <Route path="/rag/:id/files/:fileId" element={<RagFile />} />
+      <Route path="/:courseId/*" element={<ChatV2 />} />
       <Route path="/login-helper" element={<EmbeddedLoginHelper />} />
       <Route path="*" element={<NotFound />} />
     </Route>,

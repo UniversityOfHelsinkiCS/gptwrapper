@@ -1,4 +1,3 @@
-import { Component } from "../Courses/Course"
 import Close from '@mui/icons-material/Close'
 import Edit from '@mui/icons-material/Edit'
 import OpenInNew from '@mui/icons-material/OpenInNew'
@@ -39,6 +38,8 @@ import apiClient from '../../util/apiClient'
 import { ResponsibilityActionUserSearch } from '../Admin/UserSearch'
 import { OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { RouterTabs } from "../common/RouterTabs"
+import { RagIndex } from '../Rag/RagIndex'
+import { RagFile } from '../Rag/RagFile'
 
 export const CourseSettingsModal = () => {
   const { courseId } = useParams() as { courseId: string }
@@ -47,6 +48,7 @@ export const CourseSettingsModal = () => {
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
   const [responsibilities, setResponsibilities] = useState<Responsebility[]>([])
   const { t, i18n } = useTranslation()
+  const { language } = i18n
 
   const { user, isLoading: userLoading } = useCurrentUser()
   const { data: chatInstance, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(courseId)
@@ -175,12 +177,134 @@ export const CourseSettingsModal = () => {
         <EditCourseForm course={chatInstance} setOpen={setActivityPeriodFormOpen} user={user} />
       </Modal>
       <RouterTabs>
-        <Tab label={t('common:settings')} to={`/courses/${courseId}`} component={Link} />
-        <Tab label={t('course:teachers')} to={`/courses/${courseId}`} component={Link} />
-        <Tab label={t('course:students')} to={`/courses/${courseId}`} component={Link} />
-        <Tab label={t('course:discussions')} to={`/courses/${courseId}/discussions`} component={Link} />
-        <Tab label={t('course:sourceMaterials')} to={`/courses/${courseId}/rag`} component={Link} />
+        <Tab label={t('common:settings')} to={`/${courseId}/course`} component={Link} />
+        <Tab label={t('course:teachers')} to={`/${courseId}/course/teachers`} component={Link} />
+        <Tab label={t('course:students')} to={`/${courseId}/course/students`} component={Link} />
+        <Tab label={t('course:discussions')} to={`/${courseId}/course/discussions`} component={Link} />
+        <Tab label={t('course:sourceMaterials')} to={`/${courseId}/course/rag`} component={Link} />
       </RouterTabs>
+
+      <Routes>
+        <Route index path='/' element={<><Alert severity={getInfoSeverity()}>
+          <Typography variant="h6">{getInfoMessage()}</Typography>
+        </Alert>
+
+          <Box display="flex">
+            <Paper
+              variant="outlined"
+              sx={{
+                padding: '2%',
+                mt: 2,
+                width: '100%',
+                borderRadius: '1.25rem',
+              }}
+            >
+              <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                <div style={{ ...full, boxSizing: 'border-box', height: '50px' }}>
+                  <Typography variant="h5">{chatInstance.name[language]}</Typography>
+                </div>
+
+                <div style={{ ...left, boxSizing: 'border-box', height: '50px' }}>
+                  <Typography>{chatInstance.courseUnits.map((cu) => cu.code).join(', ')}</Typography>
+                </div>
+                <div style={{ ...right, boxSizing: 'border-box', height: '50px' }}>
+                  <Typography style={{ fontStyle: 'italic' }}>{getCurTypeLabel(chatInstance.courseUnitRealisationTypeUrn ?? '', language)}</Typography>
+                </div>
+
+                <div style={{ ...left, boxSizing: 'border-box' }}>
+                  <Typography>
+                    {t('active')} {formatDate(chatInstance.activityPeriod)}
+                  </Typography>
+                </div>
+
+                <div style={{ ...right, boxSizing: 'border-box' }}>
+                  <Link to={`https://studies.helsinki.fi/kurssit/toteutus/${chatInstance.courseId}`} target="_blank">
+                    {t('course:coursePage')} <OpenInNew fontSize="small" />
+                  </Link>
+                </div>
+
+                {courseEnabled && (
+                  <div style={{ ...left, boxSizing: 'border-box' }}>
+                    <Typography>
+                      {t('admin:usageLimit')}: {chatInstance.usageLimit}
+                    </Typography>
+                  </div>
+                )}
+
+                {courseEnabled && (
+                  <div style={{ ...right, boxSizing: 'border-box' }}>
+                    <Link to={studentLink}>
+                      {t('common:toStudentView')} <OpenInNew fontSize="small" />
+                    </Link>
+                  </div>
+                )}
+
+                <div style={{ ...left, boxSizing: 'border-box' }}>
+                  {courseEnabled && (
+                    <OutlineButtonBlue onClick={() => setActivityPeriodFormOpen(true)}>
+                      {t('course:editCourse')} <Edit />
+                    </OutlineButtonBlue>
+                  )}
+                  {!courseEnabled && <Typography style={{ fontStyle: 'italic' }}>{t('course:howToActive')}</Typography>}
+                </div>
+
+                <div style={{ ...right, boxSizing: 'border-box' }} />
+
+                {courseEnabled && (
+                  <Tooltip title={t('copy')} placement="right">
+                    <Button sx={{ p: 0 }} color="inherit">
+                      <Typography style={{ textTransform: 'lowercase', color: 'blue' }} onClick={() => handleCopyLink(studentLink)}>
+                        {studentLink}
+                      </Typography>
+                    </Button>
+                  </Tooltip>
+                )}
+              </div>
+
+            </Paper>
+          </Box>
+        </>} />
+
+        <Route path={`/teachers`} element={
+          <>
+            {userIsAdminOrResponsible && (
+              <>
+                <Box>
+                  <Button
+                    onClick={() => {
+                      setAddTeacherViewOpen((prev) => !prev)
+                    }}
+                    sx={{ borderRadius: '1.25rem' }}
+                  >
+                    {t('course:add')}
+                  </Button>
+                  {!addTeacherViewOpen ? (<Stack sx={{ mb: 0, padding: 1, borderColor: 'gray', borderWidth: 1, borderStyle: 'solid', borderRadius: '0.5rem' }}>
+                    {responsibilities.map((responsibility) => (
+                      <Box key={responsibility.id} sx={{ display: 'flex', alignItems: 'center', padding: 1 }}>
+                        <Typography>
+                          {responsibility.user.last_name} {responsibility.user.first_names}
+                        </Typography>
+                        <AssignedResponsibilityManagement
+                          handleRemove={() => {
+                            handleRemoveResponsibility(responsibility)
+                          }}
+                          responsibility={responsibility}
+                        />
+                      </Box>
+                    ))}
+                  </Stack>)
+                    : <ResponsibilityActionUserSearch courseId={courseId} actionText={t('course:add')} drawActionComponent={drawActionComponent} />}
+                </Box>
+              </>
+            )}
+          </>} />
+
+        <Route path="/students" element={<Stats />} />
+        <Route path="/discussions/*" element={<Discussion />} />
+        <Route path="/rag/*" element={<Rag />} />
+        <Route path="/rag/:id" element={<RagIndex />} />
+        <Route path="/rag/:id/files/:fileId" element={<RagFile />} />
+      </Routes>
     </Container>
   )
 }

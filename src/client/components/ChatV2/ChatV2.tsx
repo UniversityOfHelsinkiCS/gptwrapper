@@ -1,11 +1,11 @@
-import { Alert, Box, Drawer, FormControlLabel, Modal, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Alert, Box, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
 import ChevronLeft from '@mui/icons-material/ChevronLeft'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Navigate, Outlet, Route, Router, Routes, useParams, useSearchParams } from 'react-router-dom'
+import { Outlet, Route, Routes, useParams, useSearchParams } from 'react-router-dom'
 import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, type ValidModelName, ValidModelNameSchema } from '../../../config'
 import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
@@ -47,7 +47,6 @@ import TemplateModal from './TemplateModal'
 import PromptModal from './PromptModal'
 import CoursesModal from './CoursesModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
-import Rag from '../Rag/Rag'
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
@@ -195,10 +194,10 @@ const ChatV2Content = () => {
     const newMessages = resendPrevious
       ? messages
       : messages.concat({
-          role: 'user',
-          content: message,
-          attachments: file && fileName ? fileName : undefined,
-        })
+        role: 'user',
+        content: message,
+        attachments: file && fileName ? fileName : undefined,
+      })
 
     setMessages(newMessages)
 
@@ -350,7 +349,6 @@ const ChatV2Content = () => {
   // For new sidebar revamp dev
   const isAdmin = user?.isAdmin
   const [newSideBar, setNewSidebar] = useState(false)
-  const [modalContentId, setModalContentId] = useState<string | null>(null)
 
   if (statusLoading || userLoading || instanceLoading) return <HYLoadingSpinner />
 
@@ -407,7 +405,6 @@ const ChatV2Content = () => {
         prompt: activePrompt,
         ragIndices,
         type: activePrompt?.type,
-        chatInstanceId: activePrompt?.chatInstanceId,
         createPromptMutation,
         editPromptMutation,
       },
@@ -455,8 +452,6 @@ const ChatV2Content = () => {
           isAdmin={isAdmin}
           course={chatInstance}
           handleReset={() => setResetConfirmModalOpen(true)}
-          setModalContentId={setModalContentId}
-          setSettingsModalOpen={setSettingsModalOpen}
           messages={messages}
           currentModel={activeModel}
           setModel={setActiveModel}
@@ -640,20 +635,16 @@ const ChatV2Content = () => {
           </Box>
         )
       )}
-      {/* Modals --------------------------------------*/}
       <Routes>
-        <Route index />
         <Route element={
-          <TemplateModal root={`/${courseId}`} title={"koira"} open={true} >
+          <TemplateModal root={`/${courseId}`} open >
             <Outlet />
           </TemplateModal>
         }>
-          <Route path='/course' element={
-            <CourseSettingsModal />
-          } />
-          <Route path='/courses' element={
-            <CoursesModal />
-          } />
+          <Route path={`course/*`} element={<CourseSettingsModal />} />
+          <Route path={`courses`} element={<CoursesModal />} />
+          <Route path={`prompts`} element={<PromptModal />} />
+          <Route path={`prompt/:promptId`} element={<PromptEditor />} />
         </Route>
       </Routes>
       <SettingsModal

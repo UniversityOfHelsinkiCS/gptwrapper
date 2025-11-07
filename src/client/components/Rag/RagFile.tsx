@@ -17,13 +17,13 @@ type RagFile = RagFileAttributes & {
   ragIndex: RagIndexAttributes
 }
 
-export const RagFile = ({ ragIndexId, fileId, setFileId }: { ragIndexId?: number, fileId?: number, setFileId?: React.Dispatch<number | undefined> }) => {
+export const RagFile: React.FC = () => {
   const { t } = useTranslation()
-  const params = useParams<{ id: string; fileId: string }>()
+  const params = useParams<{ id: string; fileId: string, courseId: string }>()
 
   // Use props if provided, otherwise fall back to URL params
-  const indexId = ragIndexId ?? (params.id ? parseInt(params.id, 10) : undefined)
-  const finalFileId = fileId ?? (params.fileId ? parseInt(params.fileId, 10) : undefined)
+  const indexId = params.id ? parseInt(params.id, 10) : undefined
+  const fileId = params.fileId ? parseInt(params.fileId, 10) : undefined
 
   const {
     data: ragFile,
@@ -33,7 +33,7 @@ export const RagFile = ({ ragIndexId, fileId, setFileId }: { ragIndexId?: number
   } = useQuery({
     queryKey: ['ragFile', indexId],
     queryFn: async () => {
-      const res = await apiClient.get<RagFile>(`/rag/indices/${indexId}/files/${finalFileId}`)
+      const res = await apiClient.get<RagFile>(`/rag/indices/${indexId}/files/${fileId}`)
       return res.data
     },
   })
@@ -51,9 +51,9 @@ export const RagFile = ({ ragIndexId, fileId, setFileId }: { ragIndexId?: number
 
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
-      {!ragIndexId ? <Link component={RouterLink} to={`/rag/${indexId}`}>
+      <Link component={RouterLink} to={`/${params.courseId}/course/rag/${indexId}`}>
         {t('rag:backToCollection')}
-      </Link> : <OutlineButtonBlack onClick={() => setFileId?.(undefined)} />}
+      </Link>
 
       <Typography variant="body1">{t('rag:file')}</Typography>
       <Typography variant="h3">
@@ -70,7 +70,7 @@ export const RagFile = ({ ragIndexId, fileId, setFileId }: { ragIndexId?: number
               })
               enqueueSnackbar(t('rag:fileTextDeleted'), { variant: 'success' })
 
-              navigate(`/rag/${ragFile.ragIndex.id}`)
+              navigate(`/${params.courseId}/courses/rag/${ragFile.ragIndex.id}`)
             }}
             sx={{ my: 2 }}
           >
@@ -88,14 +88,14 @@ export const RagFile = ({ ragIndexId, fileId, setFileId }: { ragIndexId?: number
               })
               enqueueSnackbar(t('rag:fileDeleted'), { variant: 'success' })
 
-              navigate(`/rag/${ragFile.ragIndex.id}`)
+              navigate(`/${params.courseId}/courses/rag/${ragFile.ragIndex.id}`)
             }
           }}
         >
           {t('rag:deleteFile')}
         </Button>
       </Box>
-      <RagFileInfo file={ragFile} setFileId={() => null} />
+      <RagFileInfo file={ragFile} />
       <Typography variant="h4">{t('rag:content')}</Typography>
       {ragFile.fileContent.length === 0 ? (
         <Typography variant="body1">{t('rag:noContent')}</Typography>

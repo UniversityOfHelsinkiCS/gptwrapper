@@ -1,5 +1,5 @@
-import { Box, CircularProgress, LinearProgress, Link, Paper, styled, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
-import { IngestionJobStatus, IngestionPipelineStageKey, IngestionPipelineStages } from '@shared/ingestion'
+import { Box, Link, Paper, styled, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import { IngestionJobStatus, IngestionPipelineStageKey } from '@shared/ingestion'
 import { Link as RouterLink } from 'react-router-dom'
 import type { RagFileAttributes } from '@shared/types'
 import CloudUpload from '@mui/icons-material/CloudUpload'
@@ -11,7 +11,6 @@ import { locales } from '../../locales/locales'
 import { useTranslation } from 'react-i18next'
 import { formatDistanceStrict } from 'date-fns'
 import { CircularProgressWithLabel } from '../common/CircularProgressWithLabel'
-import { TextButton } from '../ChatV2/general/Buttons'
 
 type FileStage = IngestionPipelineStageKey | 'uploading' | 'queued'
 
@@ -42,8 +41,7 @@ export const RagFileInfo: React.FC<{
   link?: boolean
   status?: IngestionJobStatus
   uploadProgress?: number
-  setFileId: React.Dispatch<number | undefined>
-}> = ({ file, link = false, status, uploadProgress, setFileId }) => {
+}> = ({ file, link = false, status, uploadProgress }) => {
   const { t, i18n } = useTranslation()
 
   const pipelineStage = status?.pipelineStage ?? file.pipelineStage
@@ -66,13 +64,9 @@ export const RagFileInfo: React.FC<{
       <Box display="flex" alignItems="center" gap={2}>
         <Box sx={{ flex: 3 }}>
           <Box display="flex" width="100%" alignItems="center">
-            {link ? (
-              <Link to={`/rag/${file.ragIndexId}/files/${file.id}`} component={RouterLink}>
-                <Typography variant="subtitle1">{file.filename}</Typography>
-              </Link>
-            ) : (
-              <TextButton onClick={() => setFileId(file.id)}>{file.filename}</TextButton>
-            )}
+            <Link to={`files/${file.id}`} component={RouterLink}>
+              <Typography variant="subtitle1">{file.filename}</Typography>
+            </Link>
             <Typography variant="body2" color="text.secondary" sx={{ marginLeft: 'auto' }}>
               {t('common:added')} {new Date(file.createdAt).toLocaleString(locales[i18n.language].code)}
             </Typography>

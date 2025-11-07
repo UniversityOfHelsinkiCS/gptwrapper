@@ -1,19 +1,17 @@
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
-import { Box, Divider, IconButton, ListSubheader, MenuItem, Tab, Tabs } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { Box, Divider, IconButton, MenuItem, Tab, Tabs } from '@mui/material'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { Course, Prompt } from '../../types'
+import type { Prompt } from '../../types'
 import { OutlineButtonBlack } from './general/Buttons'
 import { usePromptState } from './PromptState'
 import { PromptEditor } from '../Prompt/PromptEditor'
-import { useCourseRagIndices } from '../../hooks/useRagIndices'
-import usePrompts from '../../hooks/usePrompts'
 import { enqueueSnackbar } from 'notistack'
+import { useParams } from 'react-router-dom'
 
-const PromptModal = ({ chatInstanceId }: { chatInstanceId?: string }) => {
-  const { activePrompt, handleChangePrompt, coursePrompts, myPrompts, createPromptMutation, editPromptMutation, deletePromptMutation } = usePromptState()
-
-  const { ragIndices } = useCourseRagIndices(chatInstanceId)
+const PromptModal = () => {
+  const { activePrompt, handleChangePrompt, coursePrompts, myPrompts, deletePromptMutation } = usePromptState()
+  const { courseId } = useParams()
   const { t } = useTranslation()
   const [createNewOpen, setCreateNewOpen] = useState(false)
   const [tab, setTab] = useState(0)
@@ -40,7 +38,7 @@ const PromptModal = ({ chatInstanceId }: { chatInstanceId?: string }) => {
         value={tab}
         onChange={(_, newValue) => setTab(newValue)}
       >
-        {!!chatInstanceId && <Tab label="kurssi alustukset" disabled={createNewOpen} />}
+        {courseId !== 'general' && <Tab label="kurssi alustukset" disabled={createNewOpen} />}
         <Tab label="omat alustukset" disabled={createNewOpen} />
       </Tabs>
       <Box sx={{ mt: 2 }}>
@@ -55,17 +53,10 @@ const PromptModal = ({ chatInstanceId }: { chatInstanceId?: string }) => {
             <Divider sx={{ my: 1 }} />
           </>
         )}
-        {(!!chatInstanceId && tab === 0) && (
+        {(courseId !== 'general' && tab === 0) && (
           <Box>
             {createNewOpen && (
-              <PromptEditor
-                ragIndices={ragIndices}
-                chatInstanceId={chatInstanceId}
-                type="CHAT_INSTANCE"
-                setEditorOpen={setCreateNewOpen}
-                createPromptMutation={createPromptMutation}
-                editPromptMutation={editPromptMutation}
-              />
+              <PromptEditor />
             )}
             {!createNewOpen && coursePrompts.length > 0 && (
               <Box>
@@ -84,16 +75,10 @@ const PromptModal = ({ chatInstanceId }: { chatInstanceId?: string }) => {
           </Box>
         )}
 
-        {(!chatInstanceId || tab === 1) && (
+        {(courseId === 'general' || tab === 1) && (
           <Box>
             {createNewOpen && (
-              <PromptEditor
-                ragIndices={ragIndices}
-                type="PERSONAL"
-                setEditorOpen={setCreateNewOpen}
-                createPromptMutation={createPromptMutation}
-                editPromptMutation={editPromptMutation}
-              />
+              <PromptEditor />
             )}
             {!createNewOpen && myPrompts.length > 0 && (
               <Box>
