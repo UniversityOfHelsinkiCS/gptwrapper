@@ -192,7 +192,7 @@ const SideBar = ({
                     </>
                     :
                     <TextButton startIcon={<ChevronRightIcon />} onClick={() => setModalContentId(prev => prev === 'prompt' ? null : 'prompt')}>
-                      <Typography>{t("sidebar:promptNone")}</Typography>
+                      <Typography>{t("sidebar:promptSelect")}</Typography>
                     </TextButton>
                 }
               </Box>

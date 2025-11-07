@@ -412,19 +412,21 @@
     "openConfigurator": "Ändra kortkommando"
   },
   "sidebar": {
-    "coursePage": "Kurssida",
-    "courseSettings": "Kursinställningar",
-    "courseChange": "Byt kurs",
-    "courseExit": "Lämna kursen",
-    "noCourse": "Ingen kurs",
-    "promptTitle": "Prompttitel",
-    "promptEdit": "Redigera prompt",
-    "promptDetails": "Promptdetaljer",
-    "promptSelect": "Välj prompt",
-    "promptNone": "Ingen",
-    "modelTitle": "Modell",
-    "chatNew": "Ny chatt",
-    "toggle": "Växla"
+    "courseTitle": "Course",
+    "courseSettings": "Course settings",
+    "coursePage": "Course page",
+    "courseChange": "Change course",
+    "courseExit": "Exit course view",
+    "noCourse": "Select a course",
+    "promptTitle": "Prompt",
+    "promptEdit": "Edit prompt",
+    "promptDetails": "Prompt details",
+    "promptSelect": "Select a prompt",
+    "promptNone": "No prompt",
+    "modelTitle": "Language model",
+    "chatNew": "New chat",
+    "chatEmail": "Email",
+    "toggle": "Toggle"
   },
   "globalSettings": {
     "title": "Allmänna inställningar"
