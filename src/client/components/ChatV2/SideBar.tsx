@@ -19,7 +19,7 @@ import HelpCenterIcon from '@mui/icons-material/HelpCenter'
 import AppsIcon from '@mui/icons-material/Apps'
 import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined'
 import ExtensionOffIcon from '@mui/icons-material/ExtensionOff'
-
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import hyLogo from '../../assets/hy_logo.svg'
 import { formatDate } from '../Courses/util'
 import EmailButton from './EmailButton'
@@ -145,7 +145,7 @@ const SideBar = ({
               </Link>
 
               <Box p={4}>
-                <Typography mb={0.5} color='textSecondary'>{t("sidebar:coursePage").toUpperCase()}</Typography>
+                <Typography mb={0.5} color='textSecondary'>{t("sidebar:courseTitle").toUpperCase()}</Typography>
                 {
                   course ?
                     <>
@@ -158,12 +158,15 @@ const SideBar = ({
                         >
                           {course?.name[language] || 'undefined course'}
                         </Typography>
-                        <Typography variant="body2" color='textSecondary'>
-                          {`${course.courseUnits[0].code} | ${formatDate(course.activityPeriod)}`}
+                        <Typography variant="body2" color="textSecondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          {course.courseUnits[0].code} | {formatDate(course.activityPeriod)} |
+                          <Link href="https://studies.helsinki.fi/etusivu" underline="none" sx={{ display: 'inline-flex', alignItems: 'center', lineHeight: 1 }} target="_blank" rel="noopener noreferrer">
+                            <OpenInNewIcon fontSize="small" />
+                          </Link>
                         </Typography>
+
                       </Box >
                       {amongResponsibles && <TextButton startIcon={<SettingsIcon />} onClick={() => navigate(`/${courseId}/course`)}>{t("sidebar:courseSettings")}</TextButton>}
-                      <TextButton startIcon={<ArticleIcon />}>{t("sidebar:coursePage")}</TextButton>
                       <TextButton startIcon={<LibraryBooksIcon />} onClick={() => navigate(`/${courseId}/courses`)}>{t("sidebar:courseChange")}</TextButton>
                       {amongResponsibles && <TextButton onClick={() => navigate("/")} startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>{t("sidebar:courseExit")}</TextButton>}
                     </>
