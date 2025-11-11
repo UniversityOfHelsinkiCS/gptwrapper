@@ -39,7 +39,7 @@ const CoursesModal = () => {
   const { courses, isLoading } = useUserCourses()
   const { user } = useCurrentUser()
 
-  const isTeacherOrAdmin = user?.isAdmin || user?.ownCourses?.length
+  const isTeacherOrAdmin = user?.isAdmin
 
   const [value, setValue] = React.useState(0)
 
