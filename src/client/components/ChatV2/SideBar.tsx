@@ -210,7 +210,7 @@ const SideBar = ({
         }
         {
           expanded &&
-          <Box p={4}>
+          <Box px={4} py={2}>
             <Footer />
           </Box>
         }
