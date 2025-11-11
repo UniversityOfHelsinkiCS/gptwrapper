@@ -107,9 +107,6 @@ const ChatV2Content = () => {
   const [leftPanelOpen, setLeftPanelOpen] = useState<boolean>(() => !isMobile)
 
   const leftPanelFloating = isEmbeddedMode || isMobile
-  useEffect(() => {
-    setLeftPanelOpen(!leftPanelFloating)
-  }, [leftPanelFloating])
 
   const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
 
@@ -384,6 +381,8 @@ const ChatV2Content = () => {
   const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
   const rightPanelContentWidth = rightMenuOpen ? 'var(--right-menu-width)' : '0px'
 
+  console.log(leftPanelOpen)
+
   return (
     <Box
       sx={{
@@ -401,7 +400,7 @@ const ChatV2Content = () => {
           }}
         >
           <SideBar
-            expanded={leftPanelOpen}
+            expanded={true}
             setExpanded={setLeftPanelOpen}
             course={chatInstance}
             handleReset={() => setResetConfirmModalOpen(true)}

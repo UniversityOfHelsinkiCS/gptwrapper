@@ -58,7 +58,7 @@ testMatrix.forEach((testConfig) => {
         await expect(page.getByTestId('assistant-message').nth(2)).toContainText('settiä')
       })
 
-      test.only('Can empty conversation', async ({ page }) => {
+      test('Can empty conversation', async ({ page }) => {
         await acceptDisclaimer(page)
         await useMockModel(page)
 
