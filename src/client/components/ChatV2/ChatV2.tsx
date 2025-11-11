@@ -20,7 +20,6 @@ import { CourseSettingsModal } from './CourseSettingsModal'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
 import { ChatInfo } from './general/ChatInfo'
-import { SettingsModal } from './SettingsModal'
 import { StreamAbortReason, TypedAbortController, useChatStream } from './useChatStream'
 import { postCompletionStreamV3, sendConversationEmail } from './api'
 import { ConversationSplash } from './general/ConversationSplash'
@@ -101,7 +100,6 @@ const ChatV2Content = () => {
   const [saveConsent, setSaveConsent] = useLocalStorageState<boolean>('save-consent', false)
 
   // App States
-  const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false)
   const [fileName, setFileName] = useState<string>('')
   const [messageWarning, setMessageWarning] = useState<{ [key in WarningType]?: { message: string; ignored: boolean } }>({})
   const [leftPanelOpen, setLeftPanelOpen] = useState<boolean>(() => !isMobile)
@@ -585,15 +583,9 @@ const ChatV2Content = () => {
           <Route path={`course/*`} element={<CourseSettingsModal />} />
           <Route path={`courses`} element={<CoursesModal />} />
           <Route path={`prompts`} element={<PromptModal />} />
-          <Route path={`prompt/:promptId`} element={<PromptEditor />} />
+          <Route path={`prompt/:promptId`} element={<PromptEditor back={`/${courseId}`} />} />
         </Route>
       </Routes>
-      <SettingsModal
-        open={settingsModalOpen}
-        setOpen={setSettingsModalOpen}
-        modelTemperature={modelTemperature}
-        setModelTemperature={(updatedTemperature) => setModelTemperature(updatedTemperature)}
-      />
       <ResetConfirmModal open={resetConfirmModalOpen} setOpen={setResetConfirmModalOpen} onConfirm={handleReset} />
     </Box>
   )

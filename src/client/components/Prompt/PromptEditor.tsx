@@ -22,14 +22,15 @@ import { BlueButton } from '../ChatV2/general/Buttons'
 import OpenableTextfield from '../common/OpenableTextfield'
 import { Message } from '@shared/chat'
 import { usePromptState } from '../ChatV2/PromptState'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useCourse from '../../hooks/useCourse'
 
-export const PromptEditor = () => {
+export const PromptEditor = ({ back }: { back?: string }) => {
+  const navigate = useNavigate()
   const { t } = useTranslation()
   const { courseId } = useParams() as { courseId: string }
-  const { data: chatInstance } = useCourse(courseId)
+  const { data: chatInstance } = useCourse(courseId) 
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
 
   const { activePrompt: prompt, createPromptMutation, editPromptMutation } = usePromptState()
@@ -90,6 +91,7 @@ export const PromptEditor = () => {
         })
         enqueueSnackbar(t('prompt:createdPrompt', { name }), { variant: 'success' })
       }
+      if (back) navigate(back)
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     } finally {

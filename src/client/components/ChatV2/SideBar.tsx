@@ -1,11 +1,11 @@
-import { Box, Button, Divider, Link, Typography } from '@mui/material'
-import { lazy, useCallback, useEffect, useRef, useState } from 'react'
+import { Box, Divider, Link, Typography } from '@mui/material'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams, useSearchParams } from 'react-router-dom'
-import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
+import { useParams } from 'react-router-dom'
+import type { ChatMessage } from '@shared/chat'
 import useUserStatus from '../../hooks/useUserStatus'
-import type { Course, Prompt } from '../../types'
-import { OutlineButtonBlack, TextButton } from './general/Buttons'
+import type { Course } from '../../types'
+import { TextButton } from './general/Buttons'
 import MapsUgcIcon from '@mui/icons-material/MapsUgc'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
@@ -202,7 +202,6 @@ const SideBar = ({
         }
       </Box>
     </Box >
-
   )
 }
 

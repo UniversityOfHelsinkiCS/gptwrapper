@@ -6,18 +6,14 @@ import apiClient, { type ApiError } from '../../util/apiClient'
 import { type UseMutateAsyncFunction, useMutation, useQuery } from '@tanstack/react-query'
 import useCourse from '../../hooks/useCourse'
 import { useAnalyticsDispatch } from '../../stores/analytics'
-import type { MessageGenerationInfo } from '../../../shared/chat'
-import { useTranslation } from 'react-i18next'
-import { PromptCreationParams, PromptEditableParams } from '@shared/prompt'
-
+import type { PromptCreationParams, PromptEditableParams } from '@shared/prompt'
+import type { MessageGenerationInfo } from '@shared/chat'
 
 export type CreatePromptMutation = UseMutateAsyncFunction<void, ApiError, Omit<PromptCreationParams, 'userId'>, unknown>
 export type DeletePromptMutation = UseMutateAsyncFunction<void, ApiError, string, unknown>
 export type EditPromptMutation = UseMutateAsyncFunction<void, ApiError, PromptEditableParams & { id: string }, unknown>
 
 interface PromptSelectorStateType {
-  customSystemMessage: string
-  setCustomSystemMessage: (message: string) => void
   activePrompt: Prompt | undefined
   handleChangePrompt: (newPrompt: Prompt | undefined) => void
   coursePrompts: Prompt[]
@@ -47,7 +43,6 @@ const PromptStateContext = createContext<PromptSelectorStateType | undefined>(un
 export const PromptStateProvider: React.FC<{
   children: ReactNode
 }> = ({ children }) => {
-  const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
   const urlPromptId = searchParams.get('promptId')
   const { courseId } = useParams()
@@ -59,9 +54,15 @@ export const PromptStateProvider: React.FC<{
     initialData: [],
   })
 
+  const refetchPrompts = () => {
+    refetch()
+    if (courseId !== 'general') {
+      refetchCourse()
+    }
+  }
+
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
 
-  const [customSystemMessage, setCustomSystemMessage] = useLocalStorageState<string>(`${localStoragePrefix}-chat-instructions`, '')
   const [activePrompt, setActivePrompt] = useLocalStorageState<Prompt | undefined>(`${localStoragePrefix}-active-prompt`, undefined)
 
   const urlPrompt = course?.prompts.find((p) => p.id === urlPromptId)
@@ -74,10 +75,7 @@ export const PromptStateProvider: React.FC<{
    */
   const handleChangePrompt = (newPrompt: Prompt | undefined) => {
     if (!newPrompt) {
-      if (customSystemMessage.length > 0 && !window.confirm(t('settings:confirmClearCustomPrompt', { customSystemMessage }))) return
-
       setActivePrompt(undefined)
-      setCustomSystemMessage('')
       return
     }
 
@@ -126,7 +124,8 @@ export const PromptStateProvider: React.FC<{
         const res = await apiClient.post<Prompt>('/prompts', promptData)
         setActivePrompt(res.data)
       }
-      refetch()
+
+      refetchPrompts()
     },
   })
 
@@ -135,7 +134,11 @@ export const PromptStateProvider: React.FC<{
       if (prompt.type !== 'PERSONAL') return // Only do this for personal prompts
 
       await apiClient.delete(`/prompts/${prompt.id}`)
-      refetch()
+      refetchPrompts()
+
+      if (activePrompt?.id === prompt.id) {
+        setActivePrompt(undefined)
+      }
     },
   })
 
@@ -143,16 +146,14 @@ export const PromptStateProvider: React.FC<{
     mutationFn: async (data: Omit<PromptCreationParams, 'userId'>) => {
       const res = await apiClient.post(`/prompts`, data)
       setActivePrompt(res.data)
-      refetch()
-      refetchCourse()
+      refetchPrompts()
     }
   })
 
   const deletePromptMutation = useMutation({
     mutationFn: async (id: string) => {
       await apiClient.delete(`/prompts/${id}`)
-      refetch()
-      refetchCourse()
+      refetchPrompts()
     }
   })
 
@@ -160,8 +161,7 @@ export const PromptStateProvider: React.FC<{
     mutationFn: async (data: PromptEditableParams & { id: string }) => {
       const res = await apiClient.put(`prompts/${data.id}`, data)
       setActivePrompt(res.data)
-      refetch()
-      refetchCourse()
+      refetchPrompts()
     }
   })
 
@@ -175,11 +175,9 @@ export const PromptStateProvider: React.FC<{
       model: activePrompt.model,
       temperature: activePrompt.temperature,
     }
-    : { type: 'custom', systemMessage: customSystemMessage }
+    : { type: 'custom', systemMessage: '' }
 
   const value = {
-    customSystemMessage,
-    setCustomSystemMessage,
     activePrompt,
     handleChangePrompt,
     coursePrompts: course?.prompts || [],
