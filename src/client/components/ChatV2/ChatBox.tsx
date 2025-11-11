@@ -226,11 +226,11 @@ export const ChatBox = ({
                 </IconButton>
               </Tooltip>
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
-              <Box sx={{ display: 'inline-flex', justifyContent: 'space-between', alignItems: 'center', ml: 4 }}>
+              <Box sx={{ display: 'inline-flex', justifyContent: 'space-between', alignItems: 'center', ml: 2 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography
                     variant="body2"
-                    sx={{ padding: '0.5rem 0', opacity: isTokenLimitExceeded ? 1 : 0.6, color: isTokenLimitExceeded ? '#cc0000' : 'inherit' }}
+                    sx={{ whiteSpace: 'nowrap', padding: '0.5rem 0', opacity: isTokenLimitExceeded ? 1 : 0.6, color: isTokenLimitExceeded ? '#cc0000' : 'inherit' }}
                   >
                     {userStatus?.usage ?? '-'} / {userStatus?.limit ?? '-'} {!isMobile && (t('status:tokensUsed'))}
                   </Typography>
