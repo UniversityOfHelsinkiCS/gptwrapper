@@ -5,7 +5,7 @@ import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } 
 test.describe('Prompts', () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/general')
     await acceptDisclaimer(page)
   })
 
