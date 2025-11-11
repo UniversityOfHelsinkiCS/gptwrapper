@@ -163,7 +163,7 @@ const SideBar = ({
                     </>
                     :
                     <TextButton startIcon={<ChevronRightIcon />} onClick={() => navigate(`/general/courses`)}>
-                      <Typography>{t("sidebar:noCourse")}  </Typography>
+                      <Typography>{t("sidebar:noCourse")}</Typography>
                     </TextButton>
                 }
               </Box>
@@ -181,7 +181,7 @@ const SideBar = ({
                     </>
                     :
                     <TextButton startIcon={<ChevronRightIcon />} onClick={() => navigate(`/${courseId}/prompts`)}>
-                      <Typography>{t("sidebar:promptNone")}</Typography>
+                      <Typography>{t("sidebar:promptSelect")}</Typography>
                     </TextButton>
                 }
               </Box>
