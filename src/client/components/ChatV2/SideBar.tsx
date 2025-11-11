@@ -78,6 +78,9 @@ const SideBar = ({
     >
       <Box
         sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
           pt: 3,
           height: '100%',
           width: !expanded ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)',
@@ -205,7 +208,7 @@ const SideBar = ({
               </Box>
             </Box>
         }
-        <Box px={4} pt={2}>
+        <Box p={4}>
           <Footer />
         </Box>
       </Box>
