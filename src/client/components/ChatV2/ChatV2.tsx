@@ -381,8 +381,6 @@ const ChatV2Content = () => {
   const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
   const rightPanelContentWidth = rightMenuOpen ? 'var(--right-menu-width)' : '0px'
 
-  console.log(leftPanelOpen)
-
   return (
     <Box
       sx={{

@@ -11,7 +11,7 @@ import InfoIcon from '@mui/icons-material/Info'
 import ReviewsIcon from '@mui/icons-material/Reviews'
 import LanguageIcon from '@mui/icons-material/Language'
 import { OutlineButtonBlack, TextButton } from './ChatV2/general/Buttons'
-import { Box } from '@mui/material'
+import { Box, ListItem } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Locale } from '@shared/lang'
 import { Link as RouterLink } from 'react-router-dom'
@@ -137,14 +137,7 @@ export default function GlobalMenu({
           </MenuItem>
 
           <Divider />
-          <MenuItem
-            disableRipple
-            sx={{
-              '&:hover': {
-                backgroundColor: 'transparent',
-              },
-            }}
-          >
+          <ListItem>
             <ListItemIcon>
               <LanguageIcon fontSize="small" />
             </ListItemIcon>
@@ -155,7 +148,7 @@ export default function GlobalMenu({
               <Divider orientation="vertical" flexItem />
               <TextButton onClick={() => handleLanguageChange("sv")}>Sv</TextButton>
             </Box>
-          </MenuItem>
+          </ListItem>
         </MenuList>
       </Menu>
     </div>
