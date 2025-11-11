@@ -208,9 +208,12 @@ const SideBar = ({
               </Box>
             </Box>
         }
-        <Box p={4}>
-          <Footer />
-        </Box>
+        {
+          expanded &&
+          <Box p={4}>
+            <Footer />
+          </Box>
+        }
       </Box>
     </Box >
   )
