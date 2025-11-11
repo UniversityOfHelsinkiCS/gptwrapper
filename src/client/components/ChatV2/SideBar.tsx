@@ -2,7 +2,6 @@ import { Box, Button, Divider, Link, Typography } from '@mui/material'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router-dom'
-import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, type ValidModelName, ValidModelNameSchema } from '../../../config'
 import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import useUserStatus from '../../hooks/useUserStatus'
 import type { Course, Prompt } from '../../types'
@@ -11,7 +10,6 @@ import MapsUgcIcon from '@mui/icons-material/MapsUgc'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import SettingsIcon from '@mui/icons-material/Settings'
-import ArticleIcon from '@mui/icons-material/Article'
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 import LogoutIcon from '@mui/icons-material/Logout'
 import TuneIcon from '@mui/icons-material/Tune'
@@ -36,10 +34,6 @@ const SideBar = ({
   course,
   handleReset,
   messages,
-  currentModel,
-  setModel,
-  isAdmin,
-  setNewSidebar,
 }: {
   expanded: boolean,
   setExpanded: React.Dispatch<React.SetStateAction<boolean>>
@@ -47,15 +41,11 @@ const SideBar = ({
   handleReset: () => void
   onClose?: () => void
   messages: ChatMessage[]
-  currentModel: ValidModelName
-  setModel: (model: ValidModelName) => void
-  isAdmin: boolean | undefined,
-  setNewSidebar: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
+  const { user } = useCurrentUser()
   const navigate = useNavigate();
   const { courseId } = useParams()
   const { t, i18n } = useTranslation()
-  const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
   const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
   const { activePrompt, handleChangePrompt } = usePromptState()
@@ -69,7 +59,7 @@ const SideBar = ({
     setIsTokenLimitExceeded(userStatus.usage > userStatus.limit)
   }, [statusLoading, userStatus])
 
-  const amongResponsibles = isAdmin ?? chatInstance?.responsibilities.some((r) => r.user.id === user?.id)
+  const amongResponsibles = user?.isAdmin ?? chatInstance?.responsibilities.some((r) => r.user.id === user?.id)
 
   return (
     <Box
@@ -202,13 +192,11 @@ const SideBar = ({
               <Divider />
 
               <Box p={4}>
-                <TextButton startIcon={<MapsUgcIcon />} onClick={handleReset} size='large'>
+                <TextButton startIcon={<MapsUgcIcon />} onClick={handleReset} size='large' data-testid="new-conversation-button">
                   {t("sidebar:chatNew")}
                 </TextButton>
 
                 <EmailButton messages={messages} disabled={!messages.length} />
-
-                {isAdmin && <OutlineButtonBlack sx={{ mt: '2rem' }} onClick={() => setNewSidebar(prev => !prev)}>{t('sidebar:toggle')}</OutlineButtonBlack>}
               </Box>
             </Box>
         }

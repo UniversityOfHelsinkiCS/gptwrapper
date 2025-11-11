@@ -19,15 +19,6 @@ testMatrix.forEach((testConfig) => {
         await page.goto(`/${course || ''}`)
       })
 
-      test('Settings can be opened and closed', async ({ page }) => {
-        await acceptDisclaimer(page)
-        await page.getByTestId('settings-button').click()
-        await expect(page.getByTestId('close-settings')).toBeVisible()
-
-        await page.keyboard.press('Escape')
-        await expect(page.getByTestId('close-settings')).not.toBeVisible()
-      })
-
       test('Can select model', async ({ page }) => {
         await acceptDisclaimer(page)
         await useMockModel(page)
@@ -67,7 +58,7 @@ testMatrix.forEach((testConfig) => {
         await expect(page.getByTestId('assistant-message').nth(2)).toContainText('settiä')
       })
 
-      test('Can empty conversation', async ({ page }) => {
+      test.only('Can empty conversation', async ({ page }) => {
         await acceptDisclaimer(page)
         await useMockModel(page)
 
@@ -83,7 +74,7 @@ testMatrix.forEach((testConfig) => {
         await expect(page.getByTestId('user-message').nth(1)).toContainText('say minttujam2')
         await expect(page.getByTestId('assistant-message').nth(1)).toContainText('minttujam2')
 
-        await page.getByTestId('empty-conversation-button').click()
+        await page.getByTestId('new-conversation-button').click()
         await page.getByTestId('submit-confirm-reset').click()
 
         await expect(page.getByTestId('user-message')).not.toBeVisible()

@@ -1,12 +1,10 @@
 import { Alert, Box, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
-import ChevronLeft from '@mui/icons-material/ChevronLeft'
-import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, Route, Routes, useParams, useSearchParams } from 'react-router-dom'
-import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, type ValidModelName, ValidModelNameSchema } from '../../../config'
+import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, ValidModelNameSchema } from '../../../config'
 import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
@@ -15,13 +13,9 @@ import useCourse from '../../hooks/useCourse'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
-import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import { useAnalyticsDispatch } from '../../stores/analytics'
-import type { Course, ModalMap } from '../../types'
-import Footer from '../Footer'
 import { ChatBox } from './ChatBox'
-import { EmailButtonOLD } from './EmailButton'
-import { GrayButton, OutlineButtonBlack } from './general/Buttons'
+import { GrayButton } from './general/Buttons'
 import { CourseSettingsModal } from './CourseSettingsModal'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
@@ -29,15 +23,12 @@ import { ChatInfo } from './general/ChatInfo'
 import { SettingsModal } from './SettingsModal'
 import { StreamAbortReason, TypedAbortController, useChatStream } from './useChatStream'
 import { postCompletionStreamV3, sendConversationEmail } from './api'
-import PromptSelector from './PromptSelector'
-import ModelSelector from './ModelSelector'
 import { ConversationSplash } from './general/ConversationSplash'
 import { PromptStateProvider, usePromptState } from './PromptState'
 import z from 'zod/v4'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { WarningType } from '@shared/aiApi'
 import { ResetConfirmModal } from './ResetConfirmModal'
-import TuneIcon from '@mui/icons-material/Tune'
 
 import SideBar from './SideBar'
 
@@ -143,8 +134,7 @@ const ChatV2Content = () => {
 
   const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
 
-  const { promptInfo, activePrompt, createPromptMutation, editPromptMutation } = usePromptState()
-  const { ragIndices } = useCourseRagIndices(chatInstance?.id)
+  const { promptInfo } = usePromptState()
 
   const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo, hasPotentialError } = useChatStream({
     onComplete: ({ message }) => {
@@ -346,10 +336,6 @@ const ChatV2Content = () => {
     [handleLayoutShift],
   )
 
-  // For new sidebar revamp dev
-  const isAdmin = user?.isAdmin
-  const [newSideBar, setNewSidebar] = useState(false)
-
   if (statusLoading || userLoading || instanceLoading) return <HYLoadingSpinner />
 
   if (chatInstance && chatInstance.usageLimit === 0) {
@@ -394,24 +380,6 @@ const ChatV2Content = () => {
     }
   }
 
-  const modalsRegister: ModalMap = {
-    course: { name: 'Omat kurssini', component: CoursesModal },
-    courseSettings: { name: 'Kurssin asetukset', component: CourseSettingsModal, props: { courseId: courseId } },
-    prompt: { name: 'Valitse alustus', component: PromptModal, props: { chatInstanceId: chatInstance?.id } },
-    editPrompt: {
-      name: 'Muokkaa alustusta',
-      component: PromptEditor,
-      props: {
-        prompt: activePrompt,
-        ragIndices,
-        type: activePrompt?.type,
-        createPromptMutation,
-        editPromptMutation,
-      },
-    },
-    selectPrompt: { name: 'Valitse alustus', component: PromptModal, props: { chatInstanceId: chatInstance?.id } },
-  }
-
   const leftPanelCollapsed = !leftPanelOpen || leftPanelFloating
   const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
   const rightPanelContentWidth = rightMenuOpen ? 'var(--right-menu-width)' : '0px'
@@ -432,45 +400,21 @@ const ChatV2Content = () => {
             setLeftPanelOpen(!leftPanelOpen)
           }}
         >
-          <LeftMenu
-            handleReset={() => setResetConfirmModalOpen(true)}
-            onClose={() => {
-              setLeftPanelOpen(false)
-            }}
+          <SideBar
+            expanded={leftPanelOpen}
+            setExpanded={setLeftPanelOpen}
             course={chatInstance}
-            setSettingsModalOpen={setSettingsModalOpen}
+            handleReset={() => setResetConfirmModalOpen(true)}
             messages={messages}
-            currentModel={activeModel}
-            setModel={setActiveModel}
-            setNewSidebar={setNewSidebar}
           />
         </Drawer>
-      ) : newSideBar ? (
+      ) : (
         <SideBar
           expanded={leftPanelOpen}
           setExpanded={setLeftPanelOpen}
-          isAdmin={isAdmin}
           course={chatInstance}
           handleReset={() => setResetConfirmModalOpen(true)}
           messages={messages}
-          currentModel={activeModel}
-          setModel={setActiveModel}
-          setNewSidebar={setNewSidebar}
-        />
-      ) : (
-        <LeftMenu
-          sx={{
-            display: { sm: 'none', md: 'flex' },
-            position: 'sticky',
-            top: 0,
-          }}
-          course={chatInstance}
-          handleReset={() => setResetConfirmModalOpen(true)}
-          setSettingsModalOpen={setSettingsModalOpen}
-          messages={messages}
-          currentModel={activeModel}
-          setModel={setActiveModel}
-          setNewSidebar={setNewSidebar}
         />
       )}
       {/* Chat view column ------------------------------------------------------------------------------------------------ */}
@@ -654,81 +598,6 @@ const ChatV2Content = () => {
         setModelTemperature={(updatedTemperature) => setModelTemperature(updatedTemperature)}
       />
       <ResetConfirmModal open={resetConfirmModalOpen} setOpen={setResetConfirmModalOpen} onConfirm={handleReset} />
-    </Box>
-  )
-}
-
-const LeftMenu = ({
-  sx = {},
-  course,
-  handleReset,
-  onClose,
-  setSettingsModalOpen,
-  messages,
-  currentModel,
-  setModel,
-  setNewSidebar,
-}: {
-  sx?: object
-  course: Course | undefined
-  handleReset: () => void
-  onClose?: () => void
-  setSettingsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
-  messages: ChatMessage[]
-  currentModel: ValidModelName
-  setModel: (model: ValidModelName) => void
-  setNewSidebar: React.Dispatch<React.SetStateAction<boolean>>
-}) => {
-  const { user } = useCurrentUser()
-  const isAdmin = user?.isAdmin
-  const { t } = useTranslation()
-  const { courseId } = useParams()
-  const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
-  const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
-
-  useEffect(() => {
-    if (!userStatus) return
-    setIsTokenLimitExceeded(userStatus.usage > userStatus.limit)
-  }, [statusLoading, userStatus])
-
-  return (
-    <Box
-      sx={[
-        {
-          width: 'var(--sidebar-width)',
-          minWidth: 'var(--sidebar-width)',
-          position: 'relative',
-          height: '100vh',
-          borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-          paddingTop: '4rem',
-          display: 'flex',
-          flexDirection: 'column',
-        },
-        sx,
-      ]}
-    >
-      <Box p="1rem">
-        {course && <ChatInfo course={course} />}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-          <OutlineButtonBlack startIcon={<RestartAltIcon />} onClick={handleReset} data-testid="empty-conversation-button">
-            {t('chat:emptyConversation')}
-          </OutlineButtonBlack>
-          <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} />
-          <PromptSelector />
-          <EmailButtonOLD messages={messages} disabled={!messages?.length} />
-          <OutlineButtonBlack startIcon={<TuneIcon />} onClick={() => setSettingsModalOpen(true)} data-testid="settings-button">
-            {t('chat:settings')}
-          </OutlineButtonBlack>
-
-          {isAdmin && <OutlineButtonBlack onClick={() => setNewSidebar((prev) => !prev)}>Admins: toggle old/new sidebar</OutlineButtonBlack>}
-        </Box>
-      </Box>
-      {onClose && (
-        <OutlineButtonBlack sx={{ m: '1rem', mt: 'auto' }} onClick={onClose} startIcon={<ChevronLeft />}>
-          {t('common:close')}
-        </OutlineButtonBlack>
-      )}
-      <Footer />
     </Box>
   )
 }
