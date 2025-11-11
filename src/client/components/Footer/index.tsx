@@ -9,7 +9,6 @@ import { supportEmail } from '@config'
 
 const styles = {
   supportBox: {
-    p: '1rem',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -33,7 +32,7 @@ const Footer = () => {
     >
       <Box sx={styles.supportBox}>
         <Box>
-          <Typography>
+          <Typography variant='body2'>
             <Trans
               i18nKey="footer:contactSupport"
               values={{ supportEmail }}

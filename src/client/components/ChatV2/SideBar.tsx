@@ -28,6 +28,7 @@ import { usePromptState } from './PromptState'
 import { useNavigate } from 'react-router-dom'
 import ModelSelector from './ModelSelector'
 import { ValidModelName } from '../../../config'
+import Footer from '../Footer'
 
 
 const SideBar = ({
@@ -204,6 +205,9 @@ const SideBar = ({
               </Box>
             </Box>
         }
+        <Box px={4} pt={2}>
+          <Footer />
+        </Box>
       </Box>
     </Box >
   )
