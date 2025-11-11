@@ -219,7 +219,7 @@ const ChatV2Content = () => {
             saveConsent,
             ignoredWarnings,
           },
-          courseId,
+          courseId: (courseId !== 'general') ? courseId : undefined,
         },
         streamControllerRef.current,
       )
