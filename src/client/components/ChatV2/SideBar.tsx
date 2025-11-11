@@ -26,6 +26,8 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import { usePromptState } from './PromptState'
 
 import { useNavigate } from 'react-router-dom'
+import ModelSelector from './ModelSelector'
+import { ValidModelName } from '../../../config'
 
 
 const SideBar = ({
@@ -34,6 +36,8 @@ const SideBar = ({
   course,
   handleReset,
   messages,
+  currentModel,
+  setModel,
 }: {
   expanded: boolean,
   setExpanded: React.Dispatch<React.SetStateAction<boolean>>
@@ -41,6 +45,8 @@ const SideBar = ({
   handleReset: () => void
   onClose?: () => void
   messages: ChatMessage[]
+  currentModel: ValidModelName
+  setModel: (model: ValidModelName) => void
 }) => {
   const { user } = useCurrentUser()
   const navigate = useNavigate();
@@ -184,9 +190,7 @@ const SideBar = ({
 
               <Box p={4}>
                 <Typography mb={0.5} color='textSecondary'>{t("sidebar:modelTitle").toUpperCase()}</Typography>
-                <TextButton startIcon={<ChevronRightIcon />}>
-                  <Typography>GPT-5</Typography>
-                </TextButton>
+                <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} />
               </Box>
 
               <Divider />

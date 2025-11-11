@@ -401,6 +401,8 @@ const ChatV2Content = () => {
             course={chatInstance}
             handleReset={() => setResetConfirmModalOpen(true)}
             messages={messages}
+            currentModel={activeModel}
+            setModel={setActiveModel}
           />
         </Drawer>
       ) : (
@@ -410,6 +412,8 @@ const ChatV2Content = () => {
           course={chatInstance}
           handleReset={() => setResetConfirmModalOpen(true)}
           messages={messages}
+          currentModel={activeModel}
+          setModel={setActiveModel}
         />
       )}
       {/* Chat view column ------------------------------------------------------------------------------------------------ */}
@@ -518,14 +522,6 @@ const ChatV2Content = () => {
               isMobile={isMobile}
             />
           </Box>
-          {/* <Box sx={{
-            height: modalContentId ? '66vh' : 0,
-            borderTop: modalContentId ? '1px solid rgba(0,0,0,0.15)' : 'none',
-            overflow: 'hidden',
-            transition: 'height 0.3s ease',
-          }}>
-            <BottomSheet modalsRegister={modalsRegister} modalContentId={modalContentId} setModalContentId={setModalContentId} />
-          </Box> */}
         </Box>
       </Box>
       {/* FileSearchResults columns ----------------------------------------------------------------------------------------------------- */}

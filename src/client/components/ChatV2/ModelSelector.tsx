@@ -1,10 +1,10 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { MenuItem, Typography, Menu } from '@mui/material'
-import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import SmartToy from '@mui/icons-material/SmartToy'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { FREE_MODEL, inProduction, ValidModelName, validModels } from '@config'
-import { OutlineButtonBlack } from './general/Buttons'
+import { TextButton } from './general/Buttons'
 import { usePromptState } from './PromptState'
 import useCurrentUser from '../../hooks/useCurrentUser'
 
@@ -40,17 +40,18 @@ const ModelSelector = ({
     return models.filter((model) => !isTokenLimitExceeded || model === FREE_MODEL).filter((model) => user?.isAdmin || !inProduction || model !== 'mock')
   }, [isTokenLimitExceeded, user, activePrompt])
 
+
   return (
     <>
-      <OutlineButtonBlack
-        startIcon={<SmartToy />}
-        endIcon={<KeyboardArrowDown />}
+      <TextButton startIcon={<SmartToy />}
         onClick={handleClick}
         data-testid="model-selector"
         disabled={availableModels.length === 1}
       >
-        {`${t('admin:model')}: ${activePrompt?.model ?? currentModel}`}
-      </OutlineButtonBlack>
+        <Typography>
+          {activePrompt?.model ?? currentModel}
+        </Typography>
+      </TextButton>
       <Menu
         anchorEl={anchorEl}
         open={open}
