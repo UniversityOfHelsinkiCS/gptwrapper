@@ -14,7 +14,7 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import { BlueButton, GrayButton, GreenButton } from './general/Buttons'
+import { BlueButton, GrayButton, GreenButton, TextButton } from './general/Buttons'
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
 import Skeleton from '@mui/material/Skeleton'
 
@@ -171,7 +171,9 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
                 sorted.map((course) => (
                   <TableRow key={course.courseId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                     <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                      {course.name[language]}
+                      <TextButton onClick={() => handleChatLink(course.courseId!)} sx={{ fontWeight: 'bold' }} disabled={!course.courseId}>
+                        {course.name[language]}
+                      </TextButton>
                     </TableCell>
                     <TableCell align="right">{course.courseUnits[0]?.code ?? '--'}</TableCell>
                     <TableCell align="right">{formatDate(course.activityPeriod)}</TableCell>
@@ -184,14 +186,6 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
                         )}
                         {type !== 'ended' && (
                           <>
-                            <GrayButton
-                              disabled={!course.courseId}
-                              size="small"
-                              endIcon={<ChatBubbleOutlineIcon />}
-                              onClick={() => handleChatLink(course.courseId!)}
-                            >
-                              {t('course:chat')}
-                            </GrayButton>
                             <GrayButton size="small" endIcon={<OpenInNewIcon />}>
                               {t('course:toCoursePage')}
                             </GrayButton>
