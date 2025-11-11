@@ -3,15 +3,14 @@ import { useTranslation } from 'react-i18next'
 import { TableBody, TableCell, TableHead, TableRow, Table, Link, Paper, Typography, Alert } from '@mui/material'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import useCourse, { useCourseDiscussers } from '../../../hooks/useCourse'
-import OpenInNew from '@mui/icons-material/OpenInNew'
 
-const Discussion = () => {
+const Discussion: React.FC = () => {
   const { t, i18n } = useTranslation()
   const { language } = i18n
-  const { id } = useParams()
+  const { courseId } = useParams() as { courseId: string }
   const { user, isLoading: isUserLoading } = useCurrentUser()
-  const { data: course, isSuccess: isCourseSuccess } = useCourse(id)
-  const { discussers, isLoading: discussersLoading } = useCourseDiscussers(id)
+  const { data: course, isSuccess: isCourseSuccess } = useCourse(courseId)
+  const { discussers, isLoading: discussersLoading } = useCourseDiscussers(courseId)
 
   if (!course || !isCourseSuccess || isUserLoading || !user || discussersLoading) return null
 
@@ -47,7 +46,7 @@ const Discussion = () => {
           {discussers.map((d) => (
             <TableRow key={d.user_id}>
               <TableCell>
-                <Link to={`/courses/${id}/discussions/${d.user_id}`} component={RouterLink}>
+                <Link to={`/courses/${courseId}/discussions/${d.user_id}`} component={RouterLink}>
                   {d.user_id}
                 </Link>
               </TableCell>

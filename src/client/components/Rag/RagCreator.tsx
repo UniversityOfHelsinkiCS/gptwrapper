@@ -32,7 +32,7 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
                 language,
               })
               setIndexName('')
-              navigate(`/rag/${newIndex.id}`)
+              navigate(`${newIndex.id}`)
               setOpen(false)
             },
           },
