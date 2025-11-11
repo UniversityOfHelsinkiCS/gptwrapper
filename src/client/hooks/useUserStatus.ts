@@ -8,14 +8,14 @@ const useUserStatus = (courseId?: string) => {
   if (courseId) queryKey.push(courseId)
 
   const queryFn = async (): Promise<UserStatus> => {
-    const res = await apiClient.get(courseId ? `/users/status/${courseId}` : '/users/status')
+    const res = await apiClient.get(courseId !== 'general' ? `/users/status/${courseId}` : '/users/status')
 
     const { data } = res
 
     return data
   }
 
-  const { data: userStatus, ...rest } = useQuery({ queryKey, queryFn, enabled: courseId !== 'general' })
+  const { data: userStatus, ...rest } = useQuery({ queryKey, queryFn })
 
   return { userStatus, ...rest }
 }
