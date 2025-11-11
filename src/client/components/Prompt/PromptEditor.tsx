@@ -33,7 +33,7 @@ export const PromptEditor = () => {
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
 
   const { activePrompt: prompt, createPromptMutation, editPromptMutation } = usePromptState()
-  const type = prompt?.type ?? 'CHAT_INSTANCE'
+  const type = prompt?.type ?? (courseId && courseId !== 'general' ? 'CHAT_INSTANCE' : 'PERSONAL')
   const [name, setName] = useState<string>(prompt?.name ?? '')
   const [systemMessage, setSystemMessage] = useState<string>(prompt?.systemMessage ?? '')
   const [ragSystemMessage, setRagSystemMessage] = useState<string>(() =>
