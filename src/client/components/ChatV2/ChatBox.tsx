@@ -221,7 +221,7 @@ export const ChatBox = ({
                 </IconButton>
               </Tooltip>
               <Tooltip title={t('chat:emptyConversationTooltip', { hint: KeyCombinations.RESET_CHAT?.hint })} arrow placement="top">
-                <IconButton onClick={handleReset}>
+                <IconButton data-testid="clear-conversation-button" onClick={handleReset}>
                   <RestartAltIcon />
                 </IconButton>
               </Tooltip>

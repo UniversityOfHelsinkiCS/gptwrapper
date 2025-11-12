@@ -25,16 +25,21 @@ import { usePromptState } from '../ChatV2/PromptState'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useCourse from '../../hooks/useCourse'
+import { ChatInstance } from 'src/client/types'
 
-export const PromptEditor = ({ back }: { back?: string }) => {
+export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string, setEditorOpen?: React.Dispatch<boolean>, personal?: boolean }) => {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { courseId } = useParams() as { courseId: string }
-  const { data: chatInstance } = useCourse(courseId) 
+  const { data: chatInstance } = useCourse(courseId)
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
 
   const { activePrompt: prompt, createPromptMutation, editPromptMutation } = usePromptState()
-  const type = prompt?.type ?? (courseId && courseId !== 'general' ? 'CHAT_INSTANCE' : 'PERSONAL')
+  let type: 'CHAT_INSTANCE' | 'PERSONAL' = 'CHAT_INSTANCE'
+  if (prompt) type = prompt.type
+  if (courseId && courseId !== 'general') type = 'CHAT_INSTANCE'
+  if (personal) type = 'PERSONAL'
+
   const [name, setName] = useState<string>(prompt?.name ?? '')
   const [systemMessage, setSystemMessage] = useState<string>(prompt?.systemMessage ?? '')
   const [ragSystemMessage, setRagSystemMessage] = useState<string>(() =>
@@ -81,7 +86,7 @@ export const PromptEditor = ({ back }: { back?: string }) => {
         await createPromptMutation({
           name,
           type,
-          ...(type === 'CHAT_INSTANCE' ? { courseId } : {}),
+          ...(type === 'CHAT_INSTANCE' ? { chatInstanceId: chatInstance?.id } : {}),
           systemMessage,
           messages,
           hidden,
@@ -91,6 +96,7 @@ export const PromptEditor = ({ back }: { back?: string }) => {
         })
         enqueueSnackbar(t('prompt:createdPrompt', { name }), { variant: 'success' })
       }
+      if (setEditorOpen) setEditorOpen(false)
       if (back) navigate(back)
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })

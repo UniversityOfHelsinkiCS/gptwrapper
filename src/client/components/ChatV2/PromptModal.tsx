@@ -44,7 +44,7 @@ const PromptModal = () => {
       <Box sx={{ mt: 2 }}>
         {!createNewOpen && (
           <>
-            <OutlineButtonBlack sx={{ mb: 2 }} onClick={() => setCreateNewOpen((prev) => !prev)}>
+            <OutlineButtonBlack data-testid="create-prompt-button" sx={{ mb: 2 }} onClick={() => { setCreateNewOpen((prev) => !prev); handleChangePrompt(undefined) }}>
               {'Luo uusi alustus'}
             </OutlineButtonBlack>
             <MenuItem sx={{ borderRadius: '1.25rem' }} onClick={() => handleSelect(undefined)}>
@@ -56,7 +56,7 @@ const PromptModal = () => {
         {(courseId !== 'general' && tab === 0) && (
           <Box>
             {createNewOpen && (
-              <PromptEditor />
+              <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} />
             )}
             {!createNewOpen && coursePrompts.length > 0 && (
               <Box>
@@ -78,7 +78,7 @@ const PromptModal = () => {
         {(courseId === 'general' || tab === 1) && (
           <Box>
             {createNewOpen && (
-              <PromptEditor />
+              <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} personal />
             )}
             {!createNewOpen && myPrompts.length > 0 && (
               <Box>

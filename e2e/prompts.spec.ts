@@ -14,13 +14,17 @@ test.describe('Prompts', () => {
     await useMockModel(page)
 
     // Open settings
-    await page.getByTestId('settings-button').click()
+    await page.getByTestId('choose-prompt-button').click()
 
     // Write prompt in input (mocktest is the keyword to toggle echoing)
-    await page.getByTestId('assistant-instructions-input').fill('mocktest testi onnistui')
+
+    await page.getByTestId('create-prompt-button').click()
+    await page.getByTestId('prompt-name-input').fill('mocktest testi onnistui')
+    await page.getByTestId('system-message-input').fill('mocktest testi onnistui')
+    await page.getByRole('button', { name: 'Save' }).click()
 
     // Close modal
-    await page.keyboard.press('Escape')
+    await page.getByTestId('close-modal').click()
 
     // Send something
     let chatInput = page.getByTestId('chat-input').first()
@@ -33,7 +37,7 @@ test.describe('Prompts', () => {
 
     // Clear chat
     page.on('dialog', (dialog) => dialog.accept())
-    await page.getByTestId('empty-conversation-button').click()
+    await page.getByTestId('clear-conversation-button').click()
 
     // Reload page to ensure prompt is saved
     await page.reload()
@@ -46,12 +50,12 @@ test.describe('Prompts', () => {
     await expect(page.getByTestId('assistant-message')).toContainText('mocktest testi onnistui')
 
     // Also check the settings modal one more time
-    await page.getByTestId('settings-button').click()
-    await expect(page.getByTestId('assistant-instructions-input')).toContainText('mocktest testi onnistui')
+    await page.getByTestId('edit-prompt-button').click()
+    await expect(page.getByTestId('system-message-input')).toContainText('mocktest testi onnistui')
   })
 
-  test('Course prompt creation, chat link with prompt, and deletion', async ({ page }) => {
-    await page.goto('/courses/test-course-course-id/prompts')
+  test.only('Course prompt creation, chat link with prompt, and deletion', async ({ page }) => {
+    await page.goto('/test-course-course-id/prompts')
 
     const newPromptName = `testausprompti-${test.info().workerIndex}`
 

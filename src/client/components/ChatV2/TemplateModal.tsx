@@ -41,7 +41,7 @@ const TemplateModal: React.FC<{ open: boolean, root: string, children: React.Rea
             zIndex: 999,
           }}
         >
-          <TextButton onClick={handleClose} >
+          <TextButton data-testid="close-modal" onClick={handleClose} >
             <CloseIcon />
           </TextButton>
         </Box>
