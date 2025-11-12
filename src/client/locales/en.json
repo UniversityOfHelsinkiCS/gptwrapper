@@ -445,5 +445,8 @@
   },
   "globalSettings": {
     "title": "General settings"
+  },
+  "links": {
+    "studiesCur": "https://studies.helsinki.fi/courses/course-implementation/{{curId}}"
   }
 }

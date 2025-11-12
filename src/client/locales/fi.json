@@ -445,5 +445,8 @@
   },
   "globalSettings": {
     "title": "Yleisasetukset"
+  },
+  "links": {
+    "studiesCur": "https://studies.helsinki.fi/kurssit/toteutus/{{curId}}"
   }
 }

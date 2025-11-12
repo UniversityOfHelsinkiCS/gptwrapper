@@ -1,5 +1,8 @@
 import Button from '@mui/material/Button'
 import { styled } from '@mui/material'
+import { Link } from 'react-router-dom'
+import { OpenInNew } from '@mui/icons-material'
+import type { ElementType, ReactNode } from 'react'
 
 const BaseButton = styled(Button)({
   color: 'rgba(0, 0, 0, 0.86)',
@@ -91,3 +94,31 @@ export const TextButton = styled(BaseButton)({
     boxShadow: 'none',
   },
 })
+
+type LinkButtonHocProps = {
+  button: ElementType
+  to: string
+  children: ReactNode
+  endIcon?: ReactNode
+  external?: boolean
+}
+
+export const LinkButtonHoc = ({
+  button: ButtonComponent,
+  to,
+  children,
+  endIcon,
+  external,
+}: LinkButtonHocProps) => (
+  <ButtonComponent
+    component={external ? 'a' : Link}
+    // when external use href, otherwise use to for react-router Link
+    to={external ? undefined : to}
+    href={external ? to : undefined}
+    endIcon={endIcon ?? (external ? <OpenInNew /> : undefined)}
+    target={external ? '_blank' : undefined}
+    rel={external ? 'noopener noreferrer' : undefined}
+  >
+    {children}
+  </ButtonComponent>
+)

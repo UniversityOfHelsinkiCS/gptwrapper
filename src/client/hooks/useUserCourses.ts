@@ -15,9 +15,7 @@ const useUserCourses = () => {
   const queryFn = async (): Promise<CoursesViewCourse[]> => {
     const res = await apiClient.get(`/courses/user`)
 
-    const { data } = res
-
-    const courses = _.orderBy(data?.courses ?? [], ['isActive', 'isExpired'], ['desc', 'asc'])
+    const courses = _.orderBy(res.data, ['isActive', 'isExpired'], ['desc', 'asc'])
     return courses
   }
 

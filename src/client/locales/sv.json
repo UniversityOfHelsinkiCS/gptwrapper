@@ -430,5 +430,8 @@
   },
   "globalSettings": {
     "title": "Allmänna inställningar"
+  },
+  "links": {
+    "studiesCur": "https://studies.helsinki.fi/kurser/studiemoment/{{curId}}"
   }
 }

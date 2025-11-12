@@ -5,17 +5,16 @@ import useUserCourses, { CoursesViewCourse } from '../../hooks/useUserCourses'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { useMemo, useState } from 'react'
 import TableSortLabel from '@mui/material/TableSortLabel'
-import { useNavigate } from 'react-router-dom'
 import { formatDate, getGroupedCourses } from './util'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import { BlueButton, GrayButton, GreenButton, TextButton } from './general/Buttons'
+import { BlueButton, GrayButton, GreenButton, LinkButtonHoc } from './general/Buttons'
 import Skeleton from '@mui/material/Skeleton'
+import { ChatBubbleOutline, SettingsOutlined } from '@mui/icons-material'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -28,7 +27,7 @@ const CustomTabPanel = (props: TabPanelProps) => {
 
   return (
     <Box role="tabpanel" hidden={value !== index}>
-      {value === index && <Box sx={{ p: 1 }} >{children}</Box>}
+      {value === index && <Box sx={{ p: 1 }}>{children}</Box>}
     </Box>
   )
 }
@@ -36,6 +35,7 @@ const CustomTabPanel = (props: TabPanelProps) => {
 const CoursesModal = () => {
   const { t } = useTranslation()
   const { courses, isLoading } = useUserCourses()
+  console.log(courses)
   const { user } = useCurrentUser()
 
   const isTeacherOrAdmin = (courses?.length ?? 0) > 0 || user?.isAdmin
@@ -48,8 +48,7 @@ const CoursesModal = () => {
     setValue(newValue)
   }
 
-  const { curreEnabled, curreDisabled, ended, } = getGroupedCourses(courses)
-
+  const { curreEnabled, curreDisabled, ended } = getGroupedCourses(courses)
 
   if (isTeacherOrAdmin) {
     return (
@@ -82,9 +81,8 @@ const CoursesModal = () => {
 type Order = 'asc' | 'desc'
 type OrderBy = 'name' | 'code' | 'activityPeriod'
 
-const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], type: "enabled" | "disabled" | "ended" }) => {
+const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[]; type: 'enabled' | 'disabled' | 'ended' }) => {
   const { t, i18n } = useTranslation()
-  const navigate = useNavigate()
   const { language } = i18n
 
   const [order, setOrder] = useState<Order>('asc')
@@ -94,14 +92,6 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
     const isAsc = orderBy === property && order === 'asc'
     setOrder(isAsc ? 'desc' : 'asc')
     setOrderBy(property)
-  }
-
-  const handleChatLink = (courseId: string) => {
-    navigate(`/${courseId}`)
-  }
-
-  const handleCourseSettings = (courseId: string) => {
-    navigate(`/${courseId}/course`)
   }
 
   const sorted = useMemo(() => {
@@ -132,20 +122,12 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
           <TableHead>
             <TableRow sx={{ backgroundColor: 'rgba(0,0,0,0.03)' }}>
               <TableCell sx={{ fontWeight: 'bold' }}>
-                <TableSortLabel
-                  active={orderBy === 'name'}
-                  direction={orderBy === 'name' ? order : 'asc'}
-                  onClick={() => handleRequestSort('name')}
-                >
+                <TableSortLabel active={orderBy === 'name'} direction={orderBy === 'name' ? order : 'asc'} onClick={() => handleRequestSort('name')}>
                   {t('course:name')}
                 </TableSortLabel>
               </TableCell>
               <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                <TableSortLabel
-                  active={orderBy === 'code'}
-                  direction={orderBy === 'code' ? order : 'asc'}
-                  onClick={() => handleRequestSort('code')}
-                >
+                <TableSortLabel active={orderBy === 'code'} direction={orderBy === 'code' ? order : 'asc'} onClick={() => handleRequestSort('code')}>
                   {t('course:code')}
                 </TableSortLabel>
               </TableCell>
@@ -163,49 +145,49 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[], t
           </TableHead>
 
           <TableBody>
-
-            {
-              sorted.length
-                ?
-                sorted.map((course) => (
-                  <TableRow key={course.courseId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                      <TextButton onClick={() => handleChatLink(course.courseId!)} sx={{ fontWeight: 'bold' }} disabled={!course.courseId}>
-                        {course.name[language]}
-                      </TextButton>
-                    </TableCell>
-                    <TableCell align="right">{course.courseUnits[0]?.code ?? '--'}</TableCell>
-                    <TableCell align="right">{formatDate(course.activityPeriod)}</TableCell>
-                    <TableCell align="right" sx={{ width: 0 }}>
-                      <Box sx={{ display: 'inline-flex', gap: 2, pl: '3rem' }}>
-                        {type === 'ended' && (
-                          <Box component="span" sx={{ color: 'error.main', whiteSpace: 'nowrap' }}>
-                            {t('course:courseEnded')}
-                          </Box>
-                        )}
-                        {type !== 'ended' && (
-                          <>
-                            <GrayButton size="small" endIcon={<OpenInNewIcon />}>
-                              {t('course:toCoursePage')}
-                            </GrayButton>
-                            {type === 'enabled' ? (
-                              <BlueButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>{t('course:edit')}</BlueButton>
-                            ) : (
-                              <GreenButton disabled={!course.courseId} size="small" onClick={() => handleCourseSettings(course.courseId!)}>{t('course:activate')}</GreenButton>
-                            )}
-                          </>
-                        )}
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                ))
-                :
-                <TableRow>
-                  <Box p={2}>
-                    {t('course:noResults')}
-                  </Box>
+            {sorted.length ? (
+              sorted.map((course) => (
+                <TableRow key={course.courseId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                  <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                    {course.name[language]}
+                  </TableCell>
+                  <TableCell align="right">{course.courseUnits[0]?.code ?? '--'}</TableCell>
+                  <TableCell align="right">{formatDate(course.activityPeriod)}</TableCell>
+                  <TableCell align="right" sx={{ width: 0 }}>
+                    <Box sx={{ display: 'inline-flex', gap: 2, pl: '3rem' }}>
+                      {type === 'ended' && (
+                        <Box component="span" sx={{ color: 'error.main', whiteSpace: 'nowrap' }}>
+                          {t('course:courseEnded')}
+                        </Box>
+                      )}
+                      {type !== 'ended' && (
+                        <>
+                          <LinkButtonHoc button={GrayButton} to={`/${course.courseId}`} endIcon={<ChatBubbleOutline />}>
+                            {t('course:chat')}
+                          </LinkButtonHoc>
+                          <LinkButtonHoc button={GrayButton} to={t('links:studiesCur', { curId: course.courseId })} external>
+                            {t('course:toCoursePage')}
+                          </LinkButtonHoc>
+                          {type === 'enabled' ? (
+                            <LinkButtonHoc button={BlueButton} to={`/${course.courseId}/course`} endIcon={<SettingsOutlined />}>
+                              {t('course:edit')}
+                            </LinkButtonHoc>
+                          ) : (
+                            <LinkButtonHoc button={GreenButton} to={`/${course.courseId}/course`}>
+                              {t('course:activate')}
+                            </LinkButtonHoc>
+                          )}
+                        </>
+                      )}
+                    </Box>
+                  </TableCell>
                 </TableRow>
-            }
+              ))
+            ) : (
+              <TableRow>
+                <Box p={2}>{t('course:noResults')}</Box>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
@@ -233,18 +215,30 @@ const CoursesSkeleton = () => (
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: 'rgba(0,0,0,0.06)' }}>
-              <TableCell sx={{ fontWeight: 'bold' }}><Skeleton width={80} /></TableCell>
-              <TableCell align="right" sx={{ fontWeight: 'bold' }}><Skeleton width={60} /></TableCell>
-              <TableCell align="right" sx={{ fontWeight: 'bold' }}><Skeleton width={60} /></TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>
+                <Skeleton width={80} />
+              </TableCell>
+              <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                <Skeleton width={60} />
+              </TableCell>
+              <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                <Skeleton width={60} />
+              </TableCell>
               <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>
             {Array.from({ length: 5 }).map((_, i) => (
               <TableRow key={i}>
-                <TableCell><Skeleton width={240} /></TableCell>
-                <TableCell align="right"><Skeleton width={80} /></TableCell>
-                <TableCell align="right"><Skeleton width={120} /></TableCell>
+                <TableCell>
+                  <Skeleton width={240} />
+                </TableCell>
+                <TableCell align="right">
+                  <Skeleton width={80} />
+                </TableCell>
+                <TableCell align="right">
+                  <Skeleton width={120} />
+                </TableCell>
                 <TableCell align="right" sx={{ width: 0 }}>
                   <Box sx={{ display: 'inline-flex', gap: 2, pl: '2rem' }}>
                     <Skeleton variant="rounded" width={110} height={32} />
@@ -259,7 +253,5 @@ const CoursesSkeleton = () => (
     </Box>
   </Box>
 )
-
-
 
 export default CoursesModal
