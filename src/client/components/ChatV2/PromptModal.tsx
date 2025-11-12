@@ -55,7 +55,7 @@ const PromptModal = () => {
             <OutlineButtonBlack data-testid="create-prompt-button" sx={{ mb: 2 }} onClick={() => { setCreateNewOpen((prev) => !prev); handleChangePrompt(undefined) }}>
               {'Luo uusi alustus'}
             </OutlineButtonBlack>
-            <MenuItem sx={{ borderRadius: '1.25rem' }} onClick={() => handleSelect(undefined)}>
+            <MenuItem selected={activePrompt === undefined} sx={{ borderRadius: '1.25rem' }} onClick={() => handleSelect(undefined)}>
               {t('settings:noPrompt')}
             </MenuItem>
             <Divider sx={{ my: 1 }} />

@@ -18,7 +18,7 @@ import {
 import { validModels } from '@config'
 import { useTranslation } from 'react-i18next'
 import { enqueueSnackbar } from 'notistack'
-import { BlueButton } from '../ChatV2/general/Buttons'
+import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import OpenableTextfield from '../common/OpenableTextfield'
 import { Message } from '@shared/chat'
 import { usePromptState } from '../ChatV2/PromptState'
@@ -130,7 +130,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string,
             fullWidth
             margin="normal"
           />
-          {courseId !== 'general' && <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />}
+          {type !== 'PERSONAL' && <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />}
           <FormControl fullWidth margin="normal">
             <InputLabel>{t('common:model')}</InputLabel>
             <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
@@ -222,6 +222,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string,
       <DialogActions >
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
           {loading && <CircularProgress color="secondary" />}
+          {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
           <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
             {t('common:save')}
           </BlueButton>
