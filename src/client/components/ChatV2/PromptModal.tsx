@@ -46,14 +46,14 @@ const PromptModal = () => {
         value={tab}
         onChange={(_, newValue) => setTab(newValue)}
       >
-        {courseId !== 'general' && <Tab label="kurssi alustukset" disabled={createNewOpen} />}
-        <Tab label="omat alustukset" disabled={createNewOpen} />
+        {courseId !== 'general' && <Tab label={t('settings:coursePrompts')} disabled={createNewOpen} />}
+        <Tab label={t('settings:myPrompts')} disabled={createNewOpen} />
       </Tabs>
       <Box sx={{ mt: 2 }}>
         {!createNewOpen && (courseId === 'general' || tab == 1 || amongResponsibles) && (
           <>
             <OutlineButtonBlack data-testid="create-prompt-button" sx={{ mb: 2 }} onClick={() => { setCreateNewOpen((prev) => !prev); handleChangePrompt(undefined) }}>
-              {'Luo uusi alustus'}
+              {t('settings:saveNewPrompt')}
             </OutlineButtonBlack>
             <MenuItem selected={activePrompt === undefined} sx={{ borderRadius: '1.25rem' }} onClick={() => handleSelect(undefined)}>
               {t('settings:noPrompt')}
