@@ -35,7 +35,6 @@ const CustomTabPanel = (props: TabPanelProps) => {
 const CoursesModal = () => {
   const { t } = useTranslation()
   const { courses, isLoading } = useUserCourses()
-  console.log(courses)
   const { user } = useCurrentUser()
 
   const isTeacherOrAdmin = (courses?.length ?? 0) > 0 || user?.isAdmin

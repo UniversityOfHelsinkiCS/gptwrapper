@@ -448,15 +448,6 @@ courseRouter.get('/:id/responsibilities/users/:search', async (req, res) => {
     limit: 20,
   })
 
-  const results = matches.map((user: User) =>{return  {
-    id: user.id,
-    username: user.username,
-    primaryEmail: user.primaryEmail,
-    firstNames: user.firstNames,
-    lastName: user.lastName,
-  
-  }})
-
   res.send(matches)
 })
 
