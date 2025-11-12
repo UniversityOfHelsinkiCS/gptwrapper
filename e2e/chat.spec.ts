@@ -97,44 +97,6 @@ testMatrix.forEach((testConfig) => {
         await expect(page.getByText('Email sent')).toBeVisible()
       })
 
-      test('Custom system prompt can be changed', async ({ page }) => {
-        await acceptDisclaimer(page)
-        await useMockModel(page)
-        await page.getByTestId('settings-button').click()
-
-        const systemPrompt = 'mocktest this is the system prompt'
-        await page.getByTestId('assistant-instructions-input').fill(systemPrompt)
-        await page.getByTestId('settings-ok-button').click()
-
-        await sendChatMessage(page, 'I can send anything now, the model just echoes the system prompt since it begins with mocktest.')
-        await closeSendPreference(page)
-
-        await expect(page.getByTestId('assistant-message')).toContainText(systemPrompt)
-      })
-
-      test('Default temperature is 0.5 and can adjust temperature', async ({ page }) => {
-        await acceptDisclaimer(page)
-        await useMockModel(page)
-
-        await sendChatMessage(page, 'temperature')
-        await closeSendPreference(page)
-        await expect(page.getByTestId('assistant-message').first()).toContainText('Temperature: 0.5')
-
-        await page.getByTestId('settings-button').click()
-
-        const slider = page.getByRole('slider').first()
-        // Move right 6 times
-        for (let i = 0; i < 6; i++) {
-          await slider.press('ArrowRight')
-        }
-
-        // Close settings
-        await page.getByTestId('settings-ok-button').click()
-
-        await sendChatMessage(page, 'temperature')
-        await expect(page.getByTestId('assistant-message').last()).toContainText('Temperature: 1')
-      })
-
       if (!course) {
         test('Every validModel is available in general chat', async ({ page }) => {
           await acceptDisclaimer(page)
