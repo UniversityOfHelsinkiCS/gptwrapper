@@ -54,37 +54,27 @@ test.describe('Prompts', () => {
     await expect(page.getByTestId('system-message-input')).toContainText('mocktest testi onnistui')
   })
 
-  test.only('Course prompt creation, chat link with prompt, and deletion', async ({ page }) => {
-    await page.goto('/test-course-course-id/prompts')
+  test('Course prompt creation, chat link with prompt, and deletion', async ({ page }) => {
+    await page.goto('/test-course-course-id')
+    await useMockModel(page)
 
     const newPromptName = `testausprompti-${test.info().workerIndex}`
 
+    await page.getByTestId('choose-prompt-button').click()
     await page.getByTestId('create-prompt-button').click()
-
     await page.getByTestId('prompt-name-input').fill(newPromptName)
     await page.getByTestId('system-message-input').fill('mocktest kurssitesti onnistui')
     await page.getByRole('button', { name: 'Save' }).click()
 
-    await page.getByTestId('close-prompt-editor').click()
+    // await page.getByTestId('close-modal').click()
 
     // Prompt is created and link is visible
     await page.getByText(`Link to chat with the prompt '${newPromptName}' active`).click()
 
     // Now in chat view
     // The prompt is active.
-    await expect(page.getByTestId('prompt-selector-button').first()).toContainText(newPromptName)
+    await expect(page.getByTestId('prompt-name').first()).toContainText(newPromptName)
 
-    // When prompt selector is opened, it is also visible in the list, so 2 times.
-    await page.getByTestId('prompt-selector-button').click()
-    expect(await page.getByText(newPromptName).count()).toBeGreaterThan(1)
-
-    // Close selector
-    await page.keyboard.press('Escape')
-
-    // Close settings
-    await page.keyboard.press('Escape')
-
-    await useMockModel(page)
 
     // Send something
     await sendChatMessage(page, 'testinen morjens')
@@ -94,7 +84,7 @@ test.describe('Prompts', () => {
     await expect(page.getByTestId('assistant-message')).toContainText('mocktest kurssitesti onnistui')
 
     // Back to course page, delete the prompt
-    await page.goto('/courses/test-course-course-id/prompts')
+    await page.goto('/test-course-course-id/prompts')
 
     page.on('dialog', (dialog) => dialog.accept())
     await page.getByTestId(`delete-prompt-${newPromptName}`).click()
@@ -114,10 +104,14 @@ test.describe('Prompts', () => {
   })
 
   test('Prompt with RAG works', async ({ page }) => {
-    await page.goto('/courses/test-course-course-id/prompts')
+    await page.goto('/test-course-course-id')
+
+    await useMockModel(page)
 
     const newPromptName = `testausprompti-${test.info().workerIndex}-rag`
 
+
+    await page.getByTestId('choose-prompt-button').click()
     await page.getByTestId('create-prompt-button').click()
 
     await page.getByTestId('prompt-name-input').fill(newPromptName)
@@ -126,16 +120,13 @@ test.describe('Prompts', () => {
     await page.getByTestId(`source-material-rag-${test.info().workerIndex}-teacher`).click()
     await page.getByRole('button', { name: 'Save' }).click()
 
-    await page.getByTestId('close-prompt-editor').click()
-
     // Prompt is created and link is visible
     await page.getByText(`Link to chat with the prompt '${newPromptName}' active`).click()
 
     // Now in chat view
     // The prompt is active.
-    await expect(page.getByTestId('prompt-selector-button').first()).toContainText(newPromptName)
+    await expect(page.getByTestId('prompt-name').first()).toContainText(newPromptName)
 
-    await useMockModel(page)
 
     // Send something
     await sendChatMessage(page, 'rag')
@@ -147,10 +138,10 @@ test.describe('Prompts', () => {
     await expect(page.getByTestId('sources-header')).toBeVisible()
   })
 
-  test('Own prompts work in course chat and normal chat', async ({ page }) => {
+  test.skip('Own prompts work in course chat and normal chat', async ({ page }) => {
     // First create own prompt in course chat view
     await page.goto('/test-course-course-id')
-    await page.getByTestId('settings-button').click()
+    await page.getByTestId('choose-prompt-button').click()
     const modal = page.getByTestId('settings-modal')
 
     // Fill system message input

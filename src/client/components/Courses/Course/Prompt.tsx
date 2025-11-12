@@ -14,9 +14,9 @@ import { IframeCopy } from '../../common/IframeCopy'
 import { PUBLIC_URL } from '@config'
 import { OutlineButtonBlack } from '../../ChatV2/general/Buttons'
 
-const Prompt = ({ prompt, handleEdit }: { prompt: PromptType; handleEdit: () => void }) => {
+const Prompt = ({ prompt, handleEdit }: { prompt: PromptType; handleEdit?: () => void }) => {
   const { t } = useTranslation()
-  const { id: courseId } = useParams()
+  const { courseId } = useParams<{ courseId: string }>()
 
   const { id, name, hidden, ragIndexId } = prompt
 
@@ -81,9 +81,11 @@ const Prompt = ({ prompt, handleEdit }: { prompt: PromptType; handleEdit: () => 
             <IconButton onClick={() => handleDelete(prompt.id)} color="error" data-testid={`delete-prompt-${prompt.name}`} aria-label={t('course:remove')}>
               <DeleteOutline />
             </IconButton>
-            <OutlineButtonBlack onClick={handleEdit} color="primary" data-testid={`edit-prompt-${prompt.name}`} aria-label={t('common:edit')}>
-              {t('common:edit')}
-            </OutlineButtonBlack>
+            {handleEdit && (
+              <OutlineButtonBlack onClick={handleEdit} color="primary" data-testid={`edit-prompt-${prompt.name}`} aria-label={t('common:edit')}>
+                {t('common:edit')}
+              </OutlineButtonBlack>
+            )}
           </Box>
         </Box>
       </Paper>

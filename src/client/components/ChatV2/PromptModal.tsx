@@ -2,12 +2,15 @@ import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import { Box, Divider, IconButton, MenuItem, Tab, Tabs } from '@mui/material'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { Prompt } from '../../types'
+import type { Prompt as PromptType } from '../../types'
 import { OutlineButtonBlack } from './general/Buttons'
 import { usePromptState } from './PromptState'
 import { PromptEditor } from '../Prompt/PromptEditor'
 import { enqueueSnackbar } from 'notistack'
 import { useParams } from 'react-router-dom'
+import Prompt from '../Courses/Course/Prompt'
+import useCurrentUser from '../../hooks/useCurrentUser'
+import useCourse from '../../hooks/useCourse'
 
 const PromptModal = () => {
   const { activePrompt, handleChangePrompt, coursePrompts, myPrompts, deletePromptMutation } = usePromptState()
@@ -16,11 +19,14 @@ const PromptModal = () => {
   const [createNewOpen, setCreateNewOpen] = useState(false)
   const [tab, setTab] = useState(0)
 
-  const handleSelect = (prompt?: Prompt) => {
+  const { user, isLoading: userLoading } = useCurrentUser()
+  const { data: chatInstance, isSuccess: isCourseSuccess } = useCourse(courseId)
+
+  const handleSelect = (prompt?: PromptType) => {
     handleChangePrompt(prompt)
   }
 
-  const handleDelete = async (event: React.MouseEvent<HTMLButtonElement>, prompt: Prompt) => {
+  const handleDelete = async (event: React.MouseEvent<HTMLButtonElement>, prompt: PromptType) => {
     event.stopPropagation()
     try {
       if (confirm(t('settings:confirmDeletePrompt', { name: prompt.name }))) await deletePromptMutation(prompt.id)
@@ -30,6 +36,10 @@ const PromptModal = () => {
       enqueueSnackbar(`Error: ${error}`, { variant: 'error' })
     }
   }
+
+  // if (userLoading || !user || !isCourseSuccess) return null
+
+  const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
 
   return (
     <Box>
@@ -42,7 +52,7 @@ const PromptModal = () => {
         <Tab label="omat alustukset" disabled={createNewOpen} />
       </Tabs>
       <Box sx={{ mt: 2 }}>
-        {!createNewOpen && (
+        {!createNewOpen && (courseId === 'general' || tab == 1 || amongResponsibles) && (
           <>
             <OutlineButtonBlack data-testid="create-prompt-button" sx={{ mb: 2 }} onClick={() => { setCreateNewOpen((prev) => !prev); handleChangePrompt(undefined) }}>
               {'Luo uusi alustus'}
@@ -60,16 +70,19 @@ const PromptModal = () => {
             )}
             {!createNewOpen && coursePrompts.length > 0 && (
               <Box>
-                {coursePrompts.map((prompt) => (
+                {coursePrompts.map((prompt) =>
+                (amongResponsibles ?
+                  <Prompt prompt={prompt} /> :
                   <MenuItem
-                    sx={{ borderRadius: '1.25rem' }}
-                    key={prompt.id}
+                    key={
+                      prompt.id
+                    }
                     selected={prompt.id === activePrompt?.id}
                     onClick={() => handleSelect(prompt)}
+                    sx={{ borderRadius: '1.25rem' }}
                   >
                     {prompt.name}
-                  </MenuItem>
-                ))}
+                  </MenuItem>))}
               </Box>
             )}
           </Box>
