@@ -178,7 +178,7 @@ const SideBar = ({
                   activePrompt ?
                     <>
                       <Typography data-testid='prompt-name' fontWeight='bold' mb={2}>{activePrompt.name}</Typography>
-                      {amongResponsibles || courseId === 'general' && <TextButton data-testid="edit-prompt-button" startIcon={<TuneIcon />} onClick={() => navigate(courseId ? `/${courseId}/prompt/${activePrompt.id}` : `/prompt/${activePrompt.id}`)}>{t("sidebar:promptEdit")}</TextButton>}
+                      {(amongResponsibles || courseId === 'general') && <TextButton data-testid="edit-prompt-button" startIcon={<TuneIcon />} onClick={() => navigate(courseId ? `/${courseId}/prompt/${activePrompt.id}` : `/prompt/${activePrompt.id}`)}>{t("sidebar:promptEdit")}</TextButton>}
                       {(!amongResponsibles && courseId !== 'general') && <TextButton startIcon={<HelpCenterIcon />} onClick={() => navigate(`/prompt`)}>{t("sidebar:promptDetails")}</TextButton>}
                       <TextButton data-testid='choose-prompt-button' startIcon={<AppsIcon />} onClick={() => navigate(`/${courseId}/prompts`)}>{t("sidebar:promptSelect")}</TextButton>
                       <TextButton startIcon={<ExtensionOffIcon />} onClick={() => handleChangePrompt(undefined)}>{t("sidebar:promptNone")}</TextButton>

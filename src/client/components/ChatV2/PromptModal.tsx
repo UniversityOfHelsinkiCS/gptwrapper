@@ -19,8 +19,8 @@ const PromptModal = () => {
   const [createNewOpen, setCreateNewOpen] = useState(false)
   const [tab, setTab] = useState(0)
 
-  const { user, isLoading: userLoading } = useCurrentUser()
-  const { data: chatInstance, isSuccess: isCourseSuccess } = useCourse(courseId)
+  const { user } = useCurrentUser()
+  const { data: chatInstance } = useCourse(courseId)
 
   const handleSelect = (prompt?: PromptType) => {
     handleChangePrompt(prompt)
@@ -36,8 +36,6 @@ const PromptModal = () => {
       enqueueSnackbar(`Error: ${error}`, { variant: 'error' })
     }
   }
-
-  // if (userLoading || !user || !isCourseSuccess) return null
 
   const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
 
@@ -116,12 +114,12 @@ const PromptModal = () => {
               </Box>
             )}
 
-            {myPrompts.length === 0 && coursePrompts.length === 0 && (
-              <MenuItem disabled>{t('settings:noPrompts')}</MenuItem>
-            )}
           </Box>
         )}
       </Box>
+      {myPrompts.length === 0 && coursePrompts.length === 0 && (
+        <MenuItem disabled>{t('settings:noPrompts')}</MenuItem>
+      )}
     </Box >
   )
 }
