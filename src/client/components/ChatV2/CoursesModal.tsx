@@ -15,7 +15,6 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import { BlueButton, GrayButton, GreenButton, TextButton } from './general/Buttons'
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
 import Skeleton from '@mui/material/Skeleton'
 
 interface TabPanelProps {
@@ -39,7 +38,7 @@ const CoursesModal = () => {
   const { courses, isLoading } = useUserCourses()
   const { user } = useCurrentUser()
 
-  const isTeacherOrAdmin = user?.isAdmin
+  const isTeacherOrAdmin = (courses?.length ?? 0) > 0 || user?.isAdmin
 
   const [value, setValue] = React.useState(0)
 

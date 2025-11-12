@@ -25,7 +25,6 @@ import { usePromptState } from '../ChatV2/PromptState'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useCourse from '../../hooks/useCourse'
-import { ChatInstance } from 'src/client/types'
 
 export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string, setEditorOpen?: React.Dispatch<boolean>, personal?: boolean }) => {
   const navigate = useNavigate()

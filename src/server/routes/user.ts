@@ -2,7 +2,7 @@ import express from 'express'
 
 import type { ChatInstance, RequestWithUser } from '../types'
 import logger from '../util/logger'
-import { getEnrolledCourseIds, getOwnCourses, getEnrolledCourses } from '../services/chatInstances/access'
+import { getEnrolledCourseIds, getTeachedCourses, getEnrolledCourses } from '../services/chatInstances/access'
 import { User } from '../db/models'
 import { getUserStatus, getUsage } from '../services/chatInstances/usage'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
@@ -25,10 +25,12 @@ userRouter.get('/login', async (req, res) => {
 
   const [enrolledCourseIds, teacherCourses] = await Promise.all([
     getEnrolledCourseIds(user),
-    getOwnCourses(user),
+    getTeachedCourses(user),
   ])
 
-  const courses = enrolledCourseIds.concat(teacherCourses)
+  const teacherCourseIds = teacherCourses.map(c => c.courseId) as string[]
+
+  const courses = enrolledCourseIds.concat(teacherCourseIds)
   const hasCourseAccess = courses.length > 0
 
   if (!isAdmin && !hasIamAccess && !hasCourseAccess) {
@@ -36,7 +38,7 @@ userRouter.get('/login', async (req, res) => {
     throw ApplicationError.Unauthorized('Unauthorized')
   }
 
-  user.ownCourses = teacherCourses
+  user.ownCourses = teacherCourseIds
   user.activeCourseIds = courses
 
   let dbUser: User | null = null

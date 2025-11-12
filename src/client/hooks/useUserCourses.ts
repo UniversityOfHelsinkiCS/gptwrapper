@@ -12,17 +12,13 @@ export type CoursesViewCourse = {
 const useUserCourses = () => {
   const queryKey = ['chatInstances', 'user']
 
-  const queryFn = async (): Promise<{
-    courses: CoursesViewCourse[]
-    count: number
-  }> => {
+  const queryFn = async (): Promise<CoursesViewCourse[]> => {
     const res = await apiClient.get(`/courses/user`)
 
     const { data } = res
 
     const courses = _.orderBy(data?.courses ?? [], ['isActive', 'isExpired'], ['desc', 'asc'])
-    const count = data?.count || 0
-    return { courses, count }
+    return courses
   }
 
   const { data, ...rest } = useQuery({
@@ -31,7 +27,7 @@ const useUserCourses = () => {
     placeholderData: keepPreviousData,
   })
 
-  return { courses: data?.courses, count: data?.count, ...rest }
+  return { courses: data, ...rest }
 }
 
 export default useUserCourses

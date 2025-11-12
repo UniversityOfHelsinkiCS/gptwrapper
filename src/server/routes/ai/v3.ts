@@ -13,7 +13,7 @@ import logger from '../../util/logger'
 import { parseFileAndAddToLastMessage } from './fileParsing'
 import { upload } from './multer'
 import { checkIamAccess } from '../../util/iams'
-import { getOwnCourses } from '../../services/chatInstances/access'
+import { getTeachedCourses } from '../../services/chatInstances/access'
 
 const router = express.Router()
 
@@ -61,7 +61,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     res.locals.chatCompletionMeta.course = course.name?.fi
   } else {
     // If using general chat, user must be a teacher on some course, have IAM access, or be admin
-    if (!user.isAdmin && !checkIamAccess(user.iamGroups) && !(await getOwnCourses(user)).length) {
+    if (!user.isAdmin && !checkIamAccess(user.iamGroups) && !(await getTeachedCourses(user)).length) {
       throw ApplicationError.Forbidden('Not authorized for general chat')
     }
   }

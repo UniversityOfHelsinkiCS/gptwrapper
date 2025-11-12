@@ -3,9 +3,10 @@ import { Op, Sequelize, WhereOptions } from 'sequelize'
 
 import type { ActivityPeriod, RequestWithUser } from '../types'
 import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, User, Responsibility, Discussion } from '../db/models'
-import { getOwnCourses } from '../services/chatInstances/access'
+import { getTeachedCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
+import _ from 'lodash'
 
 const courseRouter = express.Router()
 
@@ -29,27 +30,15 @@ courseRouter.get('/user', async (req, res) => {
   const request = req as RequestWithUser
   const { user } = request
 
-  const courseIds = await getOwnCourses(user)
+  const chatInstances = await getTeachedCourses(user)
 
-  const { rows: chatinstances, count } = await ChatInstance.findAndCountAll({
-    where: {
-      courseId: {
-        [Op.in]: courseIds,
-      },
-    },
-    order: [
-      ['usageLimit', 'DESC'],
-      ['name', 'DESC'],
-    ], // @TODO: Fix sort order fakd
-  })
-
-  const coursesWithExtra = chatinstances.map((chatinstance) => ({
+  const coursesWithExtra = _.orderBy(chatInstances, ['usageLimit', 'name'], ['desc', 'desc']).map((chatinstance) => ({
     ...chatinstance.toJSON(),
     isActive: chatinstance.usageLimit > 0 && Date.parse(chatinstance.activityPeriod.endDate) > Date.now(),
     isExpired: Date.parse(chatinstance.activityPeriod.endDate) < Date.now(),
   }))
 
-  res.send({ courses: coursesWithExtra, count })
+  res.send(coursesWithExtra)
 })
 
 courseRouter.get('/statistics/:id', async (req, res) => {

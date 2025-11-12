@@ -57,7 +57,7 @@ export const getEnrolledCourseIds = async (user: User) => {
   return courseIds
 }
 
-export const getOwnCourses = async (user: User) => {
+export const getTeachedCourses = async (user: User) => {
   // We want to check if the user exists in the database
   // before we try to upsert the enrolments
   const teacherOfSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.teachers)
@@ -89,9 +89,9 @@ export const getOwnCourses = async (user: User) => {
     include: [Responsibility.associations.chatInstance],
   })) as (Responsibility & { chatInstance: ChatInstance })[]
 
-  const courseIds = responsibilities.map((responsibility) => responsibility.chatInstance.courseId) as string[]
+  const chatInstances = responsibilities.map((responsibility) => responsibility.chatInstance)
 
-  return courseIds
+  return chatInstances
 }
 
 /**
