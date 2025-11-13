@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Typography, Table, TableHead, TableBody, TableRow, TableCell, Paper, Link, Container } from '@mui/material'
+import { Box, Table, TableHead, TableBody, TableRow, TableCell, Link } from '@mui/material'
 import { Link as RouterLink, useParams } from 'react-router-dom'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useCourse from '../../hooks/useCourse'
@@ -14,49 +14,35 @@ const Rag: React.FC = () => {
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, true)
 
   return (
-    <Container sx={{ display: 'flex', gap: 2, mt: '4rem', mb: '10rem' }} maxWidth="xl">
-      <Box>
-        <Typography variant="h4" mb="1rem">
-          {t('rag:sourceMaterials')}
-        </Typography>
-        {chatInstance?.id && <RagCreator chatInstance={chatInstance} />}
+    <>
+      {chatInstance?.id && <RagCreator chatInstance={chatInstance} />}
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell><strong>{t('rag:name')}</strong></TableCell>
+            <TableCell><strong>{t('rag:language')}</strong></TableCell>
+            <TableCell><strong>{t('rag:numberOfFiles')}</strong></TableCell>
+            <TableCell>{}</TableCell>
+          </TableRow>
+        </TableHead>
         {ragIndices?.map((index) => (
-          <Paper
-            key={index.id}
-            sx={{
-              mt: 2,
-              p: 2,
-              borderRadius: '1.25rem'
-            }}
-          >
-            <Table sx={{ mb: 1 }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell>{t('rag:name')}</TableCell>
-                  <TableCell>{t('rag:language')}</TableCell>
-                  <TableCell>{t('rag:numberOfFiles')}</TableCell>
-                  <TableCell>{}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableCell>{index.metadata?.name}</TableCell>
-                  <TableCell>{index.metadata?.language}</TableCell>
-                  <TableCell>{index.ragFileCount}</TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                      <Link to={`${index.id}`} component={RouterLink} sx={{ ml: 'auto' }}>
-                        {t('rag:viewDetails')}
-                      </Link>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </Paper>
+          <TableBody>
+            <TableRow>
+              <TableCell>{index.metadata?.name}</TableCell>
+              <TableCell>{index.metadata?.language}</TableCell>
+              <TableCell>{index.ragFileCount}</TableCell>
+              <TableCell>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                  <Link to={`${index.id}`} component={RouterLink} sx={{ ml: 'auto' }}>
+                    {t('rag:viewDetails')}
+                  </Link>
+                </Box>
+              </TableCell>
+            </TableRow>
+          </TableBody>
         ))}
-      </Box>
-    </Container>
+      </Table>
+    </>
   )
 }
 

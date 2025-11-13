@@ -38,15 +38,7 @@ const Stats: React.FC = () => {
   }
 
   return (
-    <Paper
-      variant="outlined"
-      sx={{
-        padding: '2%',
-        mt: 2,
-        width: '100%',
-        borderRadius: '1.25rem',
-      }}
-    >
+    <>
       <Typography variant="h5" display="inline">
         {t('course:statistics')}
       </Typography>
@@ -159,7 +151,7 @@ const Stats: React.FC = () => {
       )}
 
       <MaxTokenUsageStudents course={course} />
-    </Paper>
+    </>
   )
 }
 

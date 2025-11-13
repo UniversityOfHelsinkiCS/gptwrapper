@@ -1,16 +1,19 @@
-import Edit from '@mui/icons-material/Edit'
-import OpenInNew from '@mui/icons-material/OpenInNew'
 import {
   Alert,
   Box,
   Button,
   Container,
-  Modal,
-  Paper,
+  Divider,
+  MenuItem,
   Stack,
   Tab,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
   Tooltip,
   Typography,
+  TableBody,
 } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
@@ -22,14 +25,13 @@ import useCourse from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Responsebility, User } from '../../types'
 import Rag from '../Rag/Rag'
-import { formatDate, getCurTypeLabel } from './util'
 import EditCourseForm from '../Courses/Course/EditCourseForm'
 import Stats from '../Courses/Course/Stats'
 import Discussion from '../Courses/Course/Discussions'
 import { ApiErrorView } from '../common/ApiErrorView'
 import apiClient from '../../util/apiClient'
 import { ResponsibilityActionUserSearch } from '../Admin/UserSearch'
-import { OutlineButtonBlue } from '../ChatV2/general/Buttons'
+import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import { RouterTabs } from "../common/RouterTabs"
 import { RagIndex } from '../Rag/RagIndex'
 import { RagFile } from '../Rag/RagFile'
@@ -184,30 +186,42 @@ export const CourseSettingsModal = () => {
           <>
             {userIsAdminOrResponsible && (
               <>
-                <Box>
-                  <Button
+                <Box >
+                  <OutlineButtonBlack
                     onClick={() => {
                       setAddTeacherViewOpen((prev) => !prev)
                     }}
-                    sx={{ borderRadius: '1.25rem' }}
+                    sx={{ mb: 1, mt: 1 }}
                   >
-                    {t('course:add')}
-                  </Button>
-                  {!addTeacherViewOpen ? (<Stack sx={{ mb: 0, padding: 1, borderColor: 'gray', borderWidth: 1, borderStyle: 'solid', borderRadius: '0.5rem' }}>
-                    {responsibilities.map((responsibility) => (
-                      <Box key={responsibility.id} sx={{ display: 'flex', alignItems: 'center', padding: 1 }}>
-                        <Typography>
-                          {responsibility.user.last_name} {responsibility.user.first_names}
-                        </Typography>
-                        <AssignedResponsibilityManagement
-                          handleRemove={() => {
-                            handleRemoveResponsibility(responsibility)
-                          }}
-                          responsibility={responsibility}
-                        />
-                      </Box>
-                    ))}
-                  </Stack>)
+                    {addTeacherViewOpen ? t('common:cancel') : t('course:add')}
+                  </OutlineButtonBlack>
+                  {!addTeacherViewOpen ? (<Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell><strong>{t('rag:name')}</strong></TableCell>
+                        <TableCell>{}</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {responsibilities.map((responsibility) => (
+                        <TableRow>
+                          <TableCell key={responsibility.id}>
+                            <Typography>
+                              {responsibility.user.last_name} {responsibility.user.first_names}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <AssignedResponsibilityManagement
+                              handleRemove={() => {
+                                handleRemoveResponsibility(responsibility)
+                              }}
+                              responsibility={responsibility}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>)
                     : <ResponsibilityActionUserSearch courseId={courseId} actionText={t('course:add')} drawActionComponent={drawActionComponent} />}
                 </Box>
               </>
@@ -220,7 +234,7 @@ export const CourseSettingsModal = () => {
         <Route path="/rag/:id" element={<RagIndex />} />
         <Route path="/rag/:id/files/:fileId" element={<RagFile />} />
       </Routes>
-    </Container>
+    </Container >
   )
 }
 
