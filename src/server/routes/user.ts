@@ -142,7 +142,7 @@ userRouter.put('/preferences', async (req, res) => {
 
   await User.update({ preferences: newPreferences }, { where: { id } })
 
-  res.status(200).send(preferences)
+  res.status(200).send(newPreferences)
 })
 
 userRouter.get('/logout', async (req, res) => {
