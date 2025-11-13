@@ -175,12 +175,13 @@ const SideBar = ({
 
                           <Link
                             href={t('links:studiesCur', { curId: course.courseId })}
-                            underline="none"
+                            underline="hover"
                             sx={{ display: 'inline-flex', alignItems: 'center', lineHeight: 1 }}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
                             {t('course:coursePage')}
+                            <OpenInNewIcon sx={{ fontSize: '0.9rem', ml: 0.5 }} />
                           </Link>
                         </Typography>
 
