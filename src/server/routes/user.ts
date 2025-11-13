@@ -150,6 +150,8 @@ userRouter.get('/logout', async (req, res) => {
     headers: { shib_logout_url: shibLogoutUrl },
   } = req
 
+  logger.info('Logging out user', { shibLogoutUrl })
+
   res.send({
     url: shibLogoutUrl,
   })
