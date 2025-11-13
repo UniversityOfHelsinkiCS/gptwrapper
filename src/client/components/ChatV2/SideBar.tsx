@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import type { ChatMessage } from '@shared/chat'
 import useUserStatus from '../../hooks/useUserStatus'
-import type { Course } from '../../types'
+import type { Course, Prompt } from '../../types'
 import { TextButton } from './general/Buttons'
 import MapsUgcIcon from '@mui/icons-material/MapsUgc'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -55,7 +55,7 @@ const SideBar = ({
   const { t, i18n } = useTranslation()
   const { data: chatInstance } = useCourse(courseId)
   const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
-  const { activePrompt, handleChangePrompt } = usePromptState()
+  const { activePrompt, handleChangePrompt, myPrompts } = usePromptState()
 
   const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
   const { language } = i18n
@@ -67,6 +67,12 @@ const SideBar = ({
   }, [statusLoading, userStatus])
 
   const amongResponsibles = user?.isAdmin ?? chatInstance?.responsibilities.some((r) => r.user.id === user?.id)
+
+
+  const showEditPrompt = (prompt: Prompt) => {
+
+    return (amongResponsibles || courseId === 'general' || myPrompts.some((a: Prompt) => a.id === prompt.id))
+  }
 
   return (
     <Box
@@ -178,8 +184,8 @@ const SideBar = ({
                   activePrompt ?
                     <>
                       <Typography data-testid='prompt-name' fontWeight='bold' mb={2}>{activePrompt.name}</Typography>
-                      {(amongResponsibles || courseId === 'general') && <TextButton data-testid="edit-prompt-button" startIcon={<TuneIcon />} onClick={() => navigate(courseId ? `/${courseId}/prompt/${activePrompt.id}` : `/prompt/${activePrompt.id}`)}>{t("sidebar:promptEdit")}</TextButton>}
-                      {(!amongResponsibles && courseId !== 'general') && <TextButton startIcon={<HelpCenterIcon />} onClick={() => navigate(`/prompt`)}>{t("sidebar:promptDetails")}</TextButton>}
+                      {showEditPrompt(activePrompt) ? (<TextButton data-testid="edit-prompt-button" startIcon={<TuneIcon />} onClick={() => navigate(courseId ? `/${courseId}/prompt/${activePrompt.id}` : `/prompt/${activePrompt.id}`)}>{t("sidebar:promptEdit")}</TextButton>)
+                        : (<TextButton startIcon={<HelpCenterIcon />} onClick={() => navigate(`/${courseId}/show/${activePrompt.id}`)}>{t("sidebar:promptDetails")}</TextButton>)}
                       <TextButton data-testid='choose-prompt-button' startIcon={<AppsIcon />} onClick={() => navigate(`/${courseId}/prompts`)}>{t("sidebar:promptSelect")}</TextButton>
                       <TextButton startIcon={<ExtensionOffIcon />} onClick={() => handleChangePrompt(undefined)}>{t("sidebar:promptNone")}</TextButton>
                     </>
