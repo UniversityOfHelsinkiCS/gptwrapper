@@ -52,9 +52,10 @@ const PromptModal = () => {
     enqueueSnackbar(t('common:copiedToClipboard'), { variant: 'success' })
   }
 
-  const handleEdit = (event: React.MouseEvent<HTMLButtonElement>, promptId: string, isPersonal: boolean) => {
+  const handleEdit = (event: React.MouseEvent<HTMLButtonElement>, prompt: PromptType) => {
     event.stopPropagation()
-    const route = isPersonal ? `/${courseId}/prompt/${promptId}?personal=true` : `/${courseId}/prompt/${promptId}`
+    const route = `/${courseId}/prompt/${prompt.id}`
+    handleChangePrompt(prompt)
     navigate(route)
   }
 
@@ -107,7 +108,7 @@ const PromptModal = () => {
       )}
 
       <TextButton
-        onClick={(e) => handleEdit(e, prompt.id, isPersonal)}
+        onClick={(e) => handleEdit(e, prompt)}
         color="primary"
         data-testid={`edit-prompt-${prompt.name}`}
         aria-label={t('common:edit')}
