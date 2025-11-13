@@ -163,19 +163,18 @@ const SideBar = ({
                       <Link
                         href={t('links:studiesCur', { curId: course.courseId })}
                         underline="hover"
-                        variant="caption"
                         sx={{ display: 'inline-flex', alignItems: 'center', lineHeight: 1 }}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         {t('course:coursePage')}
-                        <OpenInNewIcon sx={{ fontSize: '0.75rem', ml: 0.3 }} />
+                        <OpenInNewIcon sx={{ fontSize: '1rem', ml: 0.3 }} />
                       </Link>
                     </Typography>
 
                   </Box>
                   {amongResponsibles && (
-                    <TextButton startIcon={<SettingsIcon />} onClick={() => navigate(`/${courseId}/course`)}>
+                    <TextButton data-testid="course-settings-button" startIcon={<SettingsIcon />} onClick={() => navigate(`/${courseId}/course`)}>
                       {t('sidebar:courseSettings')}
                     </TextButton>
                   )}
@@ -183,7 +182,7 @@ const SideBar = ({
                     {t('sidebar:courseChange')}
                   </TextButton>
                   {amongResponsibles && (
-                    <TextButton onClick={() => navigate('/general')} startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>
+                    <TextButton data-testid="course-exit-button" onClick={() => navigate('/general')} startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>
                       {t('sidebar:courseExit')}
                     </TextButton>
                   )}
@@ -213,7 +212,7 @@ const SideBar = ({
                       {t('sidebar:promptEdit')}
                     </TextButton>
                   ) : (
-                    <TextButton startIcon={<HelpCenterIcon />} onClick={() => navigate(`/${courseId}/show/${activePrompt.id}`)}>
+                    <TextButton data-testid="prompt-details-button" startIcon={<HelpCenterIcon />} onClick={() => navigate(`/${courseId}/show/${activePrompt.id}`)}>
                       {t('sidebar:promptDetails')}
                     </TextButton>
                   )}

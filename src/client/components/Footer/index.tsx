@@ -23,7 +23,7 @@ const Footer = () => {
       <Link flex={1} href="https://toska.dev" target="_blank" rel="noopener" underline="hover">
         <img src={toskaColor} alt="Toska" width="100%" />
       </Link>
-      <Box flex={1} sx={{ display: 'flex', flexDirection: 'column' }}>
+      <Box flex={2} sx={{ display: 'flex', flexDirection: 'column' }}>
         <Typography variant="caption">{t('footer:server', { version: serverVersion })}</Typography>
         <Typography variant="caption">{t('footer:client', { version: clientVersion })}</Typography>
         {user?.isAdmin && <Typography variant="caption">{t('footer:uptime', { uptime })}</Typography>}
