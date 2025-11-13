@@ -131,7 +131,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string,
           />
           {type !== 'PERSONAL' && <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />}
           <FormControl fullWidth margin="normal">
-            <InputLabel>{t('common:model')}</InputLabel>
+            <InputLabel sx={{ background: 'white', px: 0.75, ml: -0.75 }}>{t('common:model')}</InputLabel> {/* sx to offset label padding so it matches inputlabel of text fields */}
             <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
               <MenuItem value="none">
                 <em>{t('prompt:modelFreeToChoose')}</em>
