@@ -129,14 +129,14 @@ const SideBar = ({
                 </Box>
               </TextButton>
             </Box>
-            <Link href="/" sx={{ px: 4, mb: 1, display: 'flex', gap: 1, textDecoration: 'none', alignItems: 'center' }}>
+            <Link href="/" sx={{ px: 3, mb: 1, display: 'flex', gap: 1, textDecoration: 'none', alignItems: 'center' }}>
               <img src={hyLogo} alt="University of Helsinki" width="36" />
               <Typography fontWeight="bold" color="textPrimary">
                 {t('appName').toUpperCase()}
               </Typography>
             </Link>
 
-            <Box p={4}>
+            <Box p={3}>
               <Typography mb={0.5} color="textSecondary">
                 {t('sidebar:courseTitle').toUpperCase()}
               </Typography>
@@ -147,27 +147,32 @@ const SideBar = ({
                       {course?.name[language] || 'undefined course'}
                     </Typography>
 
-                    <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2">{course.courseUnits[0].code}</Typography>
+                    <Typography
+                      variant="caption"
+                      component="span"
+                      sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                    >
+                      {course.courseUnits[0].code}
 
                       <Divider orientation="vertical" flexItem />
 
-                      <Typography variant="body2">{formatDate(course.activityPeriod)}</Typography>
+                      {formatDate(course.activityPeriod)}
 
                       <Divider orientation="vertical" flexItem />
 
                       <Link
                         href={t('links:studiesCur', { curId: course.courseId })}
                         underline="hover"
-                        variant='body2'
+                        variant="caption"
                         sx={{ display: 'inline-flex', alignItems: 'center', lineHeight: 1 }}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         {t('course:coursePage')}
-                        <OpenInNewIcon sx={{ fontSize: '0.9rem', ml: 0.5 }} />
+                        <OpenInNewIcon sx={{ fontSize: '0.75rem', ml: 0.3 }} />
                       </Link>
-                    </Box>
+                    </Typography>
+
                   </Box>
                   {amongResponsibles && (
                     <TextButton startIcon={<SettingsIcon />} onClick={() => navigate(`/${courseId}/course`)}>
@@ -190,7 +195,7 @@ const SideBar = ({
               )}
             </Box>
             <Divider />
-            <Box p={4}>
+            <Box p={3}>
               <Typography mb={0.5} color="textSecondary">
                 {t('sidebar:promptTitle').toUpperCase()}
               </Typography>
@@ -228,7 +233,7 @@ const SideBar = ({
 
             <Divider />
 
-            <Box p={4}>
+            <Box p={3}>
               <Typography mb={0.5} color="textSecondary">
                 {t('sidebar:modelTitle').toUpperCase()}
               </Typography>
@@ -237,7 +242,7 @@ const SideBar = ({
 
             <Divider />
 
-            <Box p={4}>
+            <Box p={3}>
               <TextButton startIcon={<MapsUgcIcon />} onClick={handleReset} size="large" data-testid="new-conversation-button">
                 {t('sidebar:chatNew')}
               </TextButton>
@@ -247,7 +252,7 @@ const SideBar = ({
           </Box>
         )}
         {expanded && (
-          <Box px={4} py={2}>
+          <Box px={3} py={2}>
             <Footer />
           </Box>
         )}
