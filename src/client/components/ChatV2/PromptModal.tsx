@@ -119,6 +119,7 @@ const PromptModal = () => {
         onClick={(event) => handleDelete(event, prompt)}
         size="small"
         aria-label={t('common:delete')}
+        data-testid={`delete-prompt-${prompt.name}`}
       >
         <DeleteOutline fontSize="small" />
       </IconButton>
