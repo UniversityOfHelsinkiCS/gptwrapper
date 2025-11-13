@@ -159,12 +159,32 @@ const SideBar = ({
                         >
                           {course?.name[language] || 'undefined course'}
                         </Typography>
-                        <Typography variant="body2" color="textSecondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          {course.courseUnits[0].code} | {formatDate(course.activityPeriod)} |
-                          <Link href="https://studies.helsinki.fi/etusivu" underline="none" sx={{ display: 'inline-flex', alignItems: 'center', lineHeight: 1 }} target="_blank" rel="noopener noreferrer">
-                            <OpenInNewIcon fontSize="small" />
+
+                        <Typography
+                          variant="body2"
+                          color="textSecondary"
+                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                        >
+                          {course.courseUnits[0].code}
+
+                          <Divider orientation="vertical" flexItem />
+
+                          {formatDate(course.activityPeriod)}
+
+                          <Divider orientation="vertical" flexItem />
+
+                          <Link
+                            href={t('links:studiesCur', { curId: course.courseId })}
+                            underline="none"
+                            sx={{ display: 'inline-flex', alignItems: 'center', lineHeight: 1 }}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {t('course:coursePage')}
                           </Link>
                         </Typography>
+
+
 
                       </Box >
                       {amongResponsibles && <TextButton startIcon={<SettingsIcon />} onClick={() => navigate(`/${courseId}/course`)}>{t("sidebar:courseSettings")}</TextButton>}
