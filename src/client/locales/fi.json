@@ -48,7 +48,8 @@
     "settings": "Asetukset",
     "about_service": "Tietoa palvelusta",
     "loading": "Ladataan",
-    "logout": "Kirjaudu ulos"
+    "logout": "Kirjaudu ulos",
+    "copiedToClipboard": "Kopioitu leikepöydälle"
   },
   "stats": {
     "showing": "Näytetään",

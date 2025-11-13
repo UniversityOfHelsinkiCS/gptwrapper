@@ -35,9 +35,9 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string,
 
   const { activePrompt: prompt, createPromptMutation, editPromptMutation } = usePromptState()
   let type: 'CHAT_INSTANCE' | 'PERSONAL' = 'CHAT_INSTANCE'
-  if (prompt) type = prompt.type
   if (courseId && courseId !== 'general') type = 'CHAT_INSTANCE'
   if (personal) type = 'PERSONAL'
+  if (prompt) type = prompt.type
 
   const [name, setName] = useState<string>(prompt?.name ?? '')
   const [systemMessage, setSystemMessage] = useState<string>(prompt?.systemMessage ?? '')

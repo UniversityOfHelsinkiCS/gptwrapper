@@ -47,7 +47,8 @@
     "settings": "Settings",
     "about_service": "About service",
     "loading": "Loading",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "copiedToClipboard": "Copied to clipboard"
   },
   "stats": {
     "timePeriodStart": "Starting",
