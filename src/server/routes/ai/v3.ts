@@ -152,7 +152,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       await new Promise((resolve) => {
         const success = res.write(`${JSON.stringify(event)}\n`, (err) => {
           if (err) {
-            logger.error('Streaming write error:', err.name)
+            logger.error('Streaming write error:', { error: err.name })
           }
         })
 

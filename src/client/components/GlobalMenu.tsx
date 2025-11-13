@@ -157,7 +157,7 @@ export default function GlobalMenu({
 
 const handleLogout = async () => {
   try {
-    const res = await apiClient.get('/user/logout')
+    const res = await apiClient.get('/users/logout')
     window.location.href = res.data.url
   } catch (error) {
     console.error('Error logging out:', error)
