@@ -1,12 +1,12 @@
-import { Box, Divider, FormControl, FormControlLabel, FormLabel, ListSubheader, Menu, MenuItem, Radio, RadioGroup, Typography } from '@mui/material'
+import { Box, FormControl, FormControlLabel, Menu, Radio, RadioGroup, Typography } from '@mui/material'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { useTranslation } from 'react-i18next'
-import { OutlineButtonBlack } from './general/Buttons'
+import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import ArrowUpward from '@mui/icons-material/ArrowUpward'
 import KeyboardReturn from '@mui/icons-material/KeyboardReturn'
 import Settings from '@mui/icons-material/Settings'
 import { usePreferencesUpdateMutation } from '../../hooks/usePreferencesUpdateMutation'
-import { UserPreferencesSchema } from '../../../shared/user'
+import { UserPreferences } from '../../../shared/user'
 import { useSnackbar } from 'notistack'
 import { useState } from 'react'
 
@@ -59,9 +59,9 @@ export const SendPreferenceConfiguratorModal = ({ open, onClose, anchorEl, conte
     const preferenceUpdates = {
       sendShortcutMode: value,
     }
-    let msg = t('sendPreferenceConfigurator:success')
+    let msg = t('preferences:success')
     if (context === 'chat') {
-      msg += ` ${t('sendPreferenceConfigurator:canChangeInSettings')}`
+      msg += ` ${t('preferences:canChangeInSettings')}`
     }
     enqueueSnackbar(msg, { variant: 'success' })
     await preferenceUpdate.mutateAsync(preferenceUpdates)
@@ -70,16 +70,16 @@ export const SendPreferenceConfiguratorModal = ({ open, onClose, anchorEl, conte
   const handleClose = async () => {
     onClose()
     if (context === 'chat') {
-      enqueueSnackbar(t('sendPreferenceConfigurator:canChangeInSettings'), { variant: 'info' })
+      enqueueSnackbar(t('preferences:canChangeInSettings'), { variant: 'info' })
     }
     await preferenceUpdate.mutateAsync({ sendShortcutMode: defaultValue })
   }
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     // Zod parsing to please ts
-    const preferenceUpdates = UserPreferencesSchema.parse({
-      sendShortcutMode: (event.target as HTMLInputElement).value,
-    })
+    const preferenceUpdates = {
+      sendShortcutMode: (event.target as HTMLInputElement).value as UserPreferences['sendShortcutMode'],
+    }
     if (preferenceUpdates.sendShortcutMode) {
       setValue(preferenceUpdates.sendShortcutMode)
     }

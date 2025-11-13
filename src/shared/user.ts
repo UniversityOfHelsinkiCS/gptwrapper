@@ -3,6 +3,7 @@ import { z } from 'zod/v4'
 export const UserPreferencesSchema = z
   .object({
     sendShortcutMode: z.enum(['shift+enter', 'enter']).default('shift+enter'),
+    skipNewConversationConfirm: z.boolean().default(false),
   })
   .partial()
 

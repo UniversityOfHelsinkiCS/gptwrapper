@@ -350,11 +350,6 @@ const promptUserForTranslations = async promptInfosByKeys => {
 
   const prompt = query => new Promise(resolve => rl.question(query, resolve))
 
-  rl.on('close', () => {
-    console.log('Cancelled')
-    process.exit(1)
-  })
-
   // Prompt user for translations
   for (const [k, info] of Object.entries(promptInfosByKeys)) {
     console.log(`\nAdd translations for ${FgYellow}${k}${Reset}`)

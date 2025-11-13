@@ -265,6 +265,14 @@ const ChatV2Content = () => {
     }
   }
 
+  const handleResetRequest = () => {
+    if (user?.preferences?.skipNewConversationConfirm) {
+      handleReset({ sendEmail: false })
+    } else {
+      setResetConfirmModalOpen(true)
+    }
+  }
+
   const handleReset = async ({ sendEmail }: { sendEmail: boolean }) => {
     if (sendEmail && user?.email) {
       try {
@@ -399,7 +407,7 @@ const ChatV2Content = () => {
             expanded={true}
             setExpanded={setLeftPanelOpen}
             course={chatInstance}
-            handleReset={() => setResetConfirmModalOpen(true)}
+            handleReset={handleResetRequest}
             messages={messages}
             currentModel={activeModel}
             setModel={setActiveModel}
@@ -410,7 +418,7 @@ const ChatV2Content = () => {
           expanded={leftPanelOpen}
           setExpanded={setLeftPanelOpen}
           course={chatInstance}
-          handleReset={() => setResetConfirmModalOpen(true)}
+          handleReset={handleResetRequest}
           messages={messages}
           currentModel={activeModel}
           setModel={setActiveModel}
@@ -517,7 +525,7 @@ const ChatV2Content = () => {
               handleSubmit={(newMessage) => {
                 handleSendMessage(newMessage, false, [])
               }}
-              handleReset={() => setResetConfirmModalOpen(true)}
+              handleReset={handleResetRequest}
               handleStop={() => streamControllerRef.current?.abort('user_aborted')}
               isMobile={isMobile}
             />

@@ -449,5 +449,11 @@
   },
   "links": {
     "studiesCur": "https://studies.helsinki.fi/courses/course-implementation/{{curId}}"
+  },
+  "preferences": {
+    "success": "Setting updated.",
+    "canChangeInSettings": "You can change the setting in global settings.",
+    "newConversationConfirmLabelChat": "Do not ask for confirmation",
+    "newConversationConfirmLabelSettings": "Skip the confirmation dialog for new conversation"
   }
 }

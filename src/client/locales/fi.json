@@ -449,5 +449,11 @@
   },
   "links": {
     "studiesCur": "https://studies.helsinki.fi/kurssit/toteutus/{{curId}}"
+  },
+  "preferences": {
+    "success": "Asetus päivitetty.",
+    "canChangeInSettings": "Voit muuttaa asetusta yleisasetuksissa.",
+    "newConversationConfirmLabelChat": "Älä kysy vahvistusta jatkossa",
+    "newConversationConfirmLabelSettings": "Ohita uuden keskustelun vahvistusdialogi"
   }
 }

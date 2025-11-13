@@ -1,7 +1,8 @@
 import { Dialog, DialogTitle, DialogContent, IconButton, Box } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import { SendPreferenceConfiguratorButton } from './ChatV2/SendPreferenceConfigurator'
+import { SendPreferenceConfiguratorButton } from './Settings/SendPreferenceConfigurator'
 import { Close } from '@mui/icons-material'
+import { NewConversationConfirmConfigurator } from './Settings/NewConversationConfirmConfigurator'
 
 export const GlobalSettings = ({
   open, setOpen
@@ -31,6 +32,8 @@ export const GlobalSettings = ({
       </DialogTitle>
       <DialogContent>
         <SendPreferenceConfiguratorButton />
+        <Box marginTop={2} />
+        <NewConversationConfirmConfigurator context='settings' />
       </DialogContent>
     </Dialog>
   )
