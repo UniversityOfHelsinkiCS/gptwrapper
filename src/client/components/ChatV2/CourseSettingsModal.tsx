@@ -1,4 +1,3 @@
-import Close from '@mui/icons-material/Close'
 import Edit from '@mui/icons-material/Edit'
 import OpenInNew from '@mui/icons-material/OpenInNew'
 import {
@@ -6,16 +5,10 @@ import {
   Box,
   Button,
   Container,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
   Modal,
   Paper,
-  Skeleton,
   Stack,
   Tab,
-  Tabs,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -43,7 +36,6 @@ import { RagFile } from '../Rag/RagFile'
 
 export const CourseSettingsModal = () => {
   const { courseId } = useParams() as { courseId: string }
-  const [showTeachers, setShowTeachers] = useState(false)
   const [addTeacherViewOpen, setAddTeacherViewOpen] = useState(false)
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
   const [responsibilities, setResponsibilities] = useState<Responsebility[]>([])
@@ -107,24 +99,6 @@ export const CourseSettingsModal = () => {
     return ''
   }
 
-  const full = {
-    flex: '0 0 100%',
-    boxSizing: 'borderBox',
-    height: '40px',
-  }
-
-  const left = {
-    flex: '0 0 74%',
-    boxSizing: 'borderBox',
-    height: '40px',
-  }
-
-  const right = {
-    flex: '0 0 26%',
-    boxSizing: 'borderBox',
-    height: '40px',
-  }
-
   const isAdminOrResponsible = () => {
     return user.isAdmin || chatInstance.responsibilities.find((r) => r.user.username === user.username)
   }
@@ -140,6 +114,18 @@ export const CourseSettingsModal = () => {
       refetchCourse()
     }
   }
+  const handleRemoveResponsibility = async (responsibility) => {
+    const confirmation = window.confirm(t('course:confirmRemoval'))
+    if (!confirmation) {
+      return
+    }
+    const result = await apiClient.post(`/courses/${courseId}/responsibilities/remove`, { username: responsibility.user?.username })
+    if (result.status === 200) {
+      const filteredResponsibilities = responsibilities.filter((r) => r.id !== responsibility.id)
+      setResponsibilities(filteredResponsibilities)
+    }
+  }
+
   const drawActionComponent = (user: User) => {
     const usersResponsibility: Responsebility | undefined = responsibilities.find((r: Responsebility) => {
       return r.user.id === user.id
@@ -160,22 +146,9 @@ export const CourseSettingsModal = () => {
       </>
     )
   }
-  const handleRemoveResponsibility = async (responsibility) => {
-    const confirmation = window.confirm(t('course:confirmRemoval'))
-    if (!confirmation) {
-      return
-    }
-    const result = await apiClient.post(`/courses/${courseId}/responsibilities/remove`, { username: responsibility.user?.username })
-    if (result.status === 200) {
-      const filteredResponsibilities = responsibilities.filter((r) => r.id !== responsibility.id)
-      setResponsibilities(filteredResponsibilities)
-    }
-  }
+
   return (
     <Container maxWidth="xl">
-      <Modal open={activityPeriodFormOpen} onClose={() => setActivityPeriodFormOpen(false)}>
-        <EditCourseForm course={chatInstance} setOpen={setActivityPeriodFormOpen} user={user} />
-      </Modal>
       <RouterTabs>
         <Tab label={t('common:settings')} to={`/${courseId}/course`} component={Link} />
         <Tab label={t('course:teachers')} to={`/${courseId}/course/teachers`} component={Link} />
@@ -183,76 +156,19 @@ export const CourseSettingsModal = () => {
         <Tab label={t('course:discussions')} to={`/${courseId}/course/discussions`} component={Link} />
         <Tab label={t('course:sourceMaterials')} to={`/${courseId}/course/rag`} component={Link} />
       </RouterTabs>
-
       <Routes>
-        <Route index path='/' element={<><Alert severity={getInfoSeverity()}>
-          <Typography variant="h6">{getInfoMessage()}</Typography>
-        </Alert>
+        <Route index path='/' element={
+          <>
+            <Alert severity={getInfoSeverity()} sx={{ mt: 1, borderRadius: '1.25', display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">{getInfoMessage()}</Typography>
+            </Alert>
 
-          <Box display="flex">
-            <Paper
-              variant="outlined"
-              sx={{
-                padding: '2%',
-                mt: 2,
-                width: '100%',
-                borderRadius: '1.25rem',
-              }}
-            >
-              <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                <div style={{ ...full, boxSizing: 'border-box', height: '50px' }}>
-                  <Typography variant="h5">{chatInstance.name[language]}</Typography>
-                </div>
-
-                <div style={{ ...left, boxSizing: 'border-box', height: '50px' }}>
-                  <Typography>{chatInstance.courseUnits.map((cu) => cu.code).join(', ')}</Typography>
-                </div>
-                <div style={{ ...right, boxSizing: 'border-box', height: '50px' }}>
-                  <Typography style={{ fontStyle: 'italic' }}>{getCurTypeLabel(chatInstance.courseUnitRealisationTypeUrn ?? '', language)}</Typography>
-                </div>
-
-                <div style={{ ...left, boxSizing: 'border-box' }}>
-                  <Typography>
-                    {t('active')} {formatDate(chatInstance.activityPeriod)}
-                  </Typography>
-                </div>
-
-                <div style={{ ...right, boxSizing: 'border-box' }}>
-                  <Link to={`https://studies.helsinki.fi/kurssit/toteutus/${chatInstance.courseId}`} target="_blank">
-                    {t('course:coursePage')} <OpenInNew fontSize="small" />
-                  </Link>
-                </div>
-
-                {courseEnabled && (
-                  <div style={{ ...left, boxSizing: 'border-box' }}>
-                    <Typography>
-                      {t('admin:usageLimit')}: {chatInstance.usageLimit}
-                    </Typography>
-                  </div>
-                )}
-
-                {courseEnabled && (
-                  <div style={{ ...right, boxSizing: 'border-box' }}>
-                    <Link to={studentLink}>
-                      {t('common:toStudentView')} <OpenInNew fontSize="small" />
-                    </Link>
-                  </div>
-                )}
-
-                <div style={{ ...left, boxSizing: 'border-box' }}>
-                  {courseEnabled && (
-                    <OutlineButtonBlue onClick={() => setActivityPeriodFormOpen(true)}>
-                      {t('course:editCourse')} <Edit />
-                    </OutlineButtonBlue>
-                  )}
-                  {!courseEnabled && <Typography style={{ fontStyle: 'italic' }}>{t('course:howToActive')}</Typography>}
-                </div>
-
-                <div style={{ ...right, boxSizing: 'border-box' }} />
-
+            <Box>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                <Typography variant="h4">{chatInstance.name[language]}</Typography>
                 {courseEnabled && (
                   <Tooltip title={t('copy')} placement="right">
-                    <Button sx={{ p: 0 }} color="inherit">
+                    <Button color="inherit">
                       <Typography style={{ textTransform: 'lowercase', color: 'blue' }} onClick={() => handleCopyLink(studentLink)}>
                         {studentLink}
                       </Typography>
@@ -260,10 +176,9 @@ export const CourseSettingsModal = () => {
                   </Tooltip>
                 )}
               </div>
-
-            </Paper>
-          </Box>
-        </>} />
+              <EditCourseForm course={chatInstance} setOpen={setActivityPeriodFormOpen} user={user} />
+            </Box>
+          </>} />
 
         <Route path={`/teachers`} element={
           <>
