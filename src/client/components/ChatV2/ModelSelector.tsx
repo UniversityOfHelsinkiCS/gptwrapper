@@ -60,6 +60,7 @@ const ModelSelector = ({
           paper: {
             style: {
               minWidth: anchorEl?.offsetWidth || 200,
+              borderRadius: '1.25rem'
             },
           },
         }}
