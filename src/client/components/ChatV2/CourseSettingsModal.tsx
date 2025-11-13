@@ -155,7 +155,7 @@ export const CourseSettingsModal = () => {
         <Tab label={t('common:settings')} to={`/${courseId}/course`} component={Link} />
         <Tab label={t('course:teachers')} to={`/${courseId}/course/teachers`} component={Link} />
         <Tab label={t('course:students')} to={`/${courseId}/course/students`} component={Link} />
-        <Tab label={t('course:discussions')} to={`/${courseId}/course/discussions`} component={Link} />
+        {chatInstance.saveDiscussions && <Tab label={t('course:discussions')} to={`/${courseId}/course/discussions`} component={Link} />}
         <Tab label={t('course:sourceMaterials')} to={`/${courseId}/course/rag`} component={Link} />
       </RouterTabs>
       <Routes>

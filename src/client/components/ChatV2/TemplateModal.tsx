@@ -26,7 +26,6 @@ const TemplateModal: React.FC<{ open: boolean, root: string, children: React.Rea
           maxHeight: '80vh',
           bgcolor: 'background.paper',
           boxShadow: 24,
-          borderRadius: '0.75rem',
           overflow: 'auto',
         }}
       >
