@@ -15,6 +15,7 @@ import TableRow from '@mui/material/TableRow'
 import { BlueButton, GrayButton, GreenButton, LinkButtonHoc } from './general/Buttons'
 import Skeleton from '@mui/material/Skeleton'
 import { ChatBubbleOutline, SettingsOutlined } from '@mui/icons-material'
+import { Course } from 'src/client/types'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -33,21 +34,22 @@ const CustomTabPanel = (props: TabPanelProps) => {
 }
 
 const CoursesModal = () => {
-  const { t } = useTranslation()
-  const { courses, isLoading } = useUserCourses()
-  const { user } = useCurrentUser()
-
-  const isTeacherOrAdmin = (courses?.length ?? 0) > 0 || user?.isAdmin
-
   const [value, setValue] = React.useState(0)
 
-  if (!courses || isLoading) return <CoursesSkeleton />
+  const { t } = useTranslation()
+
+  const { user } = useCurrentUser()
+  const { courses, isLoading } = useUserCourses()
 
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue)
   }
 
+  if (!courses || isLoading) return <CoursesSkeleton />
+
+  const isTeacherOrAdmin = (courses?.length ?? 0) > 0 || user?.isAdmin
   const { curreEnabled, curreDisabled, ended } = getGroupedCourses(courses)
+  const studentsChats = user?.enrolledCourses as Course[]
 
   if (isTeacherOrAdmin) {
     return (
@@ -72,7 +74,7 @@ const CoursesModal = () => {
 
   return (
     <Box>
-      <CourseList courseUnits={curreEnabled} type="enabled" />
+      <CourseList courseUnits={studentsChats} type="enabled" studentView />
     </Box>
   )
 }
@@ -80,7 +82,7 @@ const CoursesModal = () => {
 type Order = 'asc' | 'desc'
 type OrderBy = 'name' | 'code' | 'activityPeriod'
 
-const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[]; type: 'enabled' | 'disabled' | 'ended' }) => {
+const CourseList = ({ courseUnits, type, studentView = false }: { courseUnits: CoursesViewCourse[] | Course[]; type: 'enabled' | 'disabled' | 'ended'; studentView?: boolean }) => {
   const { t, i18n } = useTranslation()
   const { language } = i18n
 
@@ -94,7 +96,7 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[]; t
   }
 
   const sorted = useMemo(() => {
-    const compare = (a: CoursesViewCourse, b: CoursesViewCourse) => {
+    const compare = (a: CoursesViewCourse | Course, b: CoursesViewCourse | Course) => {
       let av: string | number = ''
       let bv: string | number = ''
       if (orderBy === 'name') {
@@ -167,14 +169,23 @@ const CourseList = ({ courseUnits, type }: { courseUnits: CoursesViewCourse[]; t
                           <LinkButtonHoc button={GrayButton} to={t('links:studiesCur', { curId: course.courseId })} external>
                             {t('course:toCoursePage')}
                           </LinkButtonHoc>
-                          {type === 'enabled' ? (
-                            <LinkButtonHoc button={BlueButton} to={`/${course.courseId}/course`} endIcon={<SettingsOutlined />}>
-                              {t('course:edit')}
-                            </LinkButtonHoc>
-                          ) : (
-                            <LinkButtonHoc button={GreenButton} to={`/${course.courseId}/course`}>
-                              {t('course:activate')}
-                            </LinkButtonHoc>
+                          {!studentView && (
+                            type === 'enabled' ? (
+                              <LinkButtonHoc
+                                button={BlueButton}
+                                to={`/${course.courseId}/course`}
+                                endIcon={<SettingsOutlined />}
+                              >
+                                {t('course:edit')}
+                              </LinkButtonHoc>
+                            ) : (
+                              <LinkButtonHoc
+                                button={GreenButton}
+                                to={`/${course.courseId}/course`}
+                              >
+                                {t('course:activate')}
+                              </LinkButtonHoc>
+                            )
                           )}
                         </>
                       )}
