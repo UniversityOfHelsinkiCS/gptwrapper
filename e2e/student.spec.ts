@@ -3,18 +3,18 @@ import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } 
 import { studentTest as test } from './fixtures'
 
 test.describe('Student', () => {
-  // test('Enrolled chat works', async ({ page }) => {
-  //   await page.goto('/test-course-course-id')
-  //   await acceptDisclaimer(page)
+  test('Enrolled chat works', async ({ page }) => {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
 
-  //   await useMockModel(page)
+    await useMockModel(page)
 
-  //   await sendChatMessage(page, 'testinen morjens')
-  //   await closeSendPreference(page)
+    await sendChatMessage(page, 'testinen morjens')
+    await closeSendPreference(page)
 
-  //   await expect(page.getByTestId('user-message')).toContainText('testinen morjens')
-  //   await expect(page.getByTestId('assistant-message')).toContainText('You are calling mock endpoint for streaming mock data')
-  // })
+    await expect(page.getByTestId('user-message')).toContainText('testinen morjens')
+    await expect(page.getByTestId('assistant-message')).toContainText('You are calling mock endpoint for streaming mock data')
+  })
 
   test('is sent to chats page from general chat', async ({ page }) => {
     // Tries to access general chat
