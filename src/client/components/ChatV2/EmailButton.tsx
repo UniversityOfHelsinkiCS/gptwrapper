@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Tooltip } from '@mui/material'
 import EmailIcon from '@mui/icons-material/Email'
 import ReactMarkdown from 'react-markdown'
@@ -176,14 +177,17 @@ const formatEmail = (messages: ChatMessage[], t: any): string => {
 const EmailButton = ({ messages, disabled, collapsed = false }: { messages: ChatMessage[]; disabled: boolean, collapsed?: boolean }) => {
   const { t } = useTranslation()
   const { user, isLoading } = useCurrentUser()
+  const [isCooldown, setIsCooldown] = useState(false)
 
   if (isLoading || !user?.email) return null
 
   const handleSend = async () => {
-    if (!user.email || !messages.length) {
+    if (!user.email || !messages.length || isCooldown) {
       enqueueSnackbar(t('email:failure'), { variant: 'error' })
       return
     }
+
+    setIsCooldown(true)
 
     const date = new Date()
     const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
@@ -192,11 +196,16 @@ const EmailButton = ({ messages, disabled, collapsed = false }: { messages: Chat
 
     const response = await sendEmail(user.email, text, subject)
     enqueueSnackbar(t(response.ok ? 'email:success' : 'email:failure'), { variant: response.ok ? 'success' : 'error' })
+
+    // Set cooldown for 3 seconds
+    setTimeout(() => {
+      setIsCooldown(false)
+    }, 3000)
   }
 
   return (
     <Tooltip arrow placement="right" title={t('chat:email', { email: user.email })}>
-      <TextButton startIcon={!collapsed && <EmailIcon />} onClick={handleSend} data-testid="email-button" size='large' disabled={disabled}>
+      <TextButton startIcon={!collapsed && <EmailIcon />} onClick={handleSend} data-testid="email-button" size='large' disabled={disabled || isCooldown}>
         {collapsed ?
           <EmailIcon fontSize='small' />
           :
@@ -215,14 +224,17 @@ export default EmailButton
 const EmailButtonOLD = ({ messages, disabled }: { messages: ChatMessage[]; disabled: boolean }) => {
   const { t } = useTranslation()
   const { user, isLoading } = useCurrentUser()
+  const [isCooldown, setIsCooldown] = useState(false)
 
   if (isLoading || !user?.email) return null
 
   const handleSend = async () => {
-    if (!user.email || !messages.length) {
+    if (!user.email || !messages.length || isCooldown) {
       enqueueSnackbar(t('email:failure'), { variant: 'error' })
       return
     }
+
+    setIsCooldown(true)
 
     const date = new Date()
     const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
@@ -231,11 +243,16 @@ const EmailButtonOLD = ({ messages, disabled }: { messages: ChatMessage[]; disab
 
     const response = await sendEmail(user.email, text, subject)
     enqueueSnackbar(t(response.ok ? 'email:success' : 'email:failure'), { variant: response.ok ? 'success' : 'error' })
+
+    // Set cooldown for 3 seconds
+    setTimeout(() => {
+      setIsCooldown(false)
+    }, 3000)
   }
 
   return (
     <Tooltip arrow placement="right" title={t('chat:email', { email: user.email })}>
-      <OutlineButtonBlack startIcon={<EmailIcon />} onClick={handleSend} data-testid="email-button">
+      <OutlineButtonBlack startIcon={<EmailIcon />} onClick={handleSend} data-testid="email-button" disabled={disabled || isCooldown}>
         {t('email:save')}
       </OutlineButtonBlack>
     </Tooltip>
