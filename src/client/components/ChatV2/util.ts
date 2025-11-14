@@ -63,6 +63,14 @@ export const formatDate = (activityPeriod?: ActivityPeriod) => {
   const start = new Date(startDate)
   const end = new Date(endDate)
 
+  const startYear = start.getFullYear()
+  const endYear = end.getFullYear()
+
+  // Show year in both dates if years differ
+  if (startYear !== endYear) {
+    return `${format(start, 'dd.MM.yyyy')}–${format(end, 'dd.MM.yyyy')}`
+  }
+
   return `${format(start, 'dd.MM.')}–${format(end, 'dd.MM.yyyy')}`
 }
 
