@@ -161,7 +161,7 @@
     "courseTitle": "Kurssi",
     "courseSettings": "Kurssin asetukset",
     "coursePage": "Kurssisivu",
-    "courseChange": "Vaihda kurssi chat",
+    "courseChange": "Vaihda kurssichat",
     "courseExit": "Poistu kurssinäkymästä",
     "noCourse": "Valitse kurssi",
     "promptTitle": "Alustus",
@@ -180,7 +180,7 @@
     "name": "Nimi",
     "dates": "Aika",
     "link": "Linkki chattiin",
-    "noChats": "Ei auki olevia chateja"
+    "noChats": "Ei auki olevia chatteja"
   },
   "email": {
     "save": "Tallenna sähköpostina",
