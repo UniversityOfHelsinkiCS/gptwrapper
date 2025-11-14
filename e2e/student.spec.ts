@@ -32,12 +32,23 @@ test.describe('Student', () => {
     await expect(page).toHaveURL(/chats/)
   })
 
-  test('student must not see teacher/admin specific elements', async ({ page }) => {
-    // Tries to access sandbox course
-    await page.goto('/sandbox')
-    // Student is sent to chats page
+  test('sees only student specific elements in sidebars COURSE SECTION', async ({ page }) => {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+
     await expect(page.getByTestId('course-settings-button')).toBeHidden()
     await expect(page.getByTestId('course-exit-button')).toBeHidden()
     await expect(page.getByTestId('edit-prompt-button')).toBeHidden()
+  })
+
+  test('sees only student specific elements in sidebars PROMPT SECTION', async ({ page }) => {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+
+    await page.getByTestId('choose-prompt-button').click()
+    await page.getByTestId('pick-prompt-button').first().click()
+
+    await expect(page.getByTestId('edit-prompt-button')).toBeHidden()
+    await expect(page.getByTestId('prompt-details-button')).toBeVisible()
   })
 })

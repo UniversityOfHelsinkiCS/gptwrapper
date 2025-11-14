@@ -69,6 +69,7 @@ const PromptModal = () => {
   const renderPromptItem = (prompt: PromptType, isPersonal: boolean) => (
     <MenuItem
       key={prompt.id}
+      data-testid="pick-prompt-button"
       selected={prompt.id === activePrompt?.id}
       onClick={() => handleSelect(prompt)}
       sx={{ borderRadius: '1.25rem', display: 'flex', alignItems: 'center', gap: 1 }}
