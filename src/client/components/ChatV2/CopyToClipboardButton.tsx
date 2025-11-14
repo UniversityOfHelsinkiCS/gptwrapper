@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
-import { Box, IconButton, Snackbar, Tooltip } from '@mui/material'
+import { Box, IconButton, Tooltip } from '@mui/material'
 import ContentCopy from '@mui/icons-material/ContentCopy'
-import markdownToTxt from 'markdown-to-txt'
 import { useTranslation } from 'react-i18next'
 
 interface CopyToClipboardButtonProps {
@@ -24,7 +23,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ copied, i
     const blobHtml = new Blob([element.innerHTML], {
       type: 'text/html',
     })
-    const blobText = new Blob([markdownToTxt(copied)], { type: 'text/plain' })
+    const blobText = new Blob([copied], { type: 'text/plain' })
     const data = [
       new ClipboardItem({
         'text/plain': blobText,
