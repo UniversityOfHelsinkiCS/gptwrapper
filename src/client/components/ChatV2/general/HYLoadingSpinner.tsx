@@ -18,7 +18,7 @@ export default function HYLoadingSpinner() {
                 }}
             />
             <Box sx={{ display: 'flex', alignItems: 'center', opacity: 0.5 }}>
-                <Typography variant='h5' fontStyle="italic">{t("common:loading")}...</Typography>
+                <Typography variant='h6' fontWeight='bold'>CURRECHAT</Typography>
                 <CircularProgress size="2rem" sx={{ ml: 4, color: 'black' }} />
             </Box>
         </Box>
