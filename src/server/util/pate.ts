@@ -31,6 +31,7 @@ const sendEmail = async (targets: string[], text: string, subject: string) => {
 
   if (inCI || inDevelopment) {
     logger.info('Skipping email sending in CI or development')
+    console.log(mail)
     return
   }
 
