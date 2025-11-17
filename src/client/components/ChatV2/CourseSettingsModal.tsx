@@ -32,7 +32,7 @@ import Discussion from '../Courses/Course/Discussions'
 import { ApiErrorView } from '../common/ApiErrorView'
 import apiClient from '../../util/apiClient'
 import { ResponsibilityActionUserSearch } from '../Admin/UserSearch'
-import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
+import { OutlineButtonBlack, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { RouterTabs } from "../common/RouterTabs"
 import { RagIndex } from '../Rag/RagIndex'
 import { RagFile } from '../Rag/RagFile'
@@ -250,7 +250,7 @@ export const CourseSettingsModal = () => {
 
 const AssignedResponsibilityManagement = ({ responsibility, handleRemove }) => {
   const { t } = useTranslation()
-  if (!responsibility.createdByUsercourseId) {
+  if (!responsibility.createdByUserId) {
     return (
       <Stack direction={'row'} sx={{ marginLeft: 'auto', alignItems: 'center', height: '1rem' }}>
         sisu
@@ -258,9 +258,9 @@ const AssignedResponsibilityManagement = ({ responsibility, handleRemove }) => {
     )
   }
   return (
-    <Stack direction={'row'} sx={{ marginLeft: 'auto', alignItems: 'center', height: '1rem' }}>
+    <Stack direction={'row'} sx={{ marginLeft: 'auto', alignItems: 'center', height: '1rem', gap: 1 }}>
       <Typography>{t('course:customResponsibility')}</Typography>
-      <Button onClick={handleRemove}>{t('course:remove')}</Button>
+      <OutlineButtonBlue onClick={handleRemove}>{t('course:remove')}</OutlineButtonBlue>
     </Stack>
   )
 }
