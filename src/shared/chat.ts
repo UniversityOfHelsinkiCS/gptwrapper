@@ -52,11 +52,7 @@ export type AssistantMessage = {
 
 export type Message = SystemMessage | UserMessage | AssistantMessage
 
-export type MessageRole = Message['role']
-
 export type ChatMessage = UserMessage | AssistantMessage
-
-export type ChatRole = ChatMessage['role']
 
 export const MessageGenerationInfoSchema = z.object({
   // May be overridden by prompt

@@ -1,10 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "ignoreExportsUsedInFile": {
-    "interface": true,
-    "type": true
-  },
+  "tags": ["-lintignore"],
   "entry": ["src/server/index.ts", "src/client/index.tsx"],
-  "project": ["src/**/*.{ts,tsx}"],
-  "tags": ["-lintignore"]
+  "project": ["src/**/*.{ts,tsx}"]
 }

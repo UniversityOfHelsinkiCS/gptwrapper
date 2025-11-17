@@ -122,12 +122,6 @@ export type UserStatus = {
   limit: number
 }
 
-export type InfoText = {
-  id: string
-  name: string
-  text: Locales
-}
-
 export interface Faculty {
   code: string
   name: Locales
