@@ -345,7 +345,9 @@
     "activate": "Activate",
     "noResults": "No results.",
     "teachers": "Teachers",
-    "students": "Students"
+    "students": "Students",
+    "addedFrom": "Added from",
+    "addNew": "Add new responsible"
   },
   "prompt": {
     "createNew": "Create new prompt",

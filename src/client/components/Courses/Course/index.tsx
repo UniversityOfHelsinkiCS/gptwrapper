@@ -27,7 +27,7 @@ import { PUBLIC_URL } from '../../../../config'
 import useCourse from '../../../hooks/useCourse'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import usePrompts from '../../../hooks/usePrompts'
-import type { Prompt as PromptType, Responsebility, User } from '../../../types'
+import type { Prompt as PromptType, Responsibility, User } from '../../../types'
 import Rag from '../../Rag/Rag'
 import { formatDate, getCurTypeLabel } from '../util'
 import EditCourseForm from './EditCourseForm'
@@ -51,7 +51,7 @@ export function Component() {
   const [showTeachers, setShowTeachers] = useState(false)
   const [addTeacherViewOpen, setAddTeacherViewOpen] = useState(false)
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
-  const [responsibilities, setResponsibilities] = useState<Responsebility[]>([])
+  const [responsibilities, setResponsibilities] = useState<Responsibility[]>([])
   const { courseId } = useParams() as { courseId: string }
   const { t, i18n } = useTranslation()
   const { language } = i18n
@@ -145,7 +145,7 @@ export function Component() {
     }
   }
   const drawActionComponent = (user: User) => {
-    const usersResponsibility: Responsebility | undefined = responsibilities.find((r: Responsebility) => {
+    const usersResponsibility: Responsibility | undefined = responsibilities.find((r: Responsibility) => {
       return r.user.id === user.id
     })
     const isResponsible = usersResponsibility !== undefined

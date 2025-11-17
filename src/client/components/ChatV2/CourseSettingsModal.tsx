@@ -24,7 +24,7 @@ import { Link, Route, Routes, useParams } from 'react-router-dom'
 import { PUBLIC_URL } from '../../../config'
 import useCourse from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
-import type { ChatInstanceUsage, Responsebility, User } from '../../types'
+import type { ChatInstanceUsage, Responsibility, User } from '../../types'
 import Rag from '../Rag/Rag'
 import EditCourseForm from '../Courses/Course/EditCourseForm'
 import Stats from '../Courses/Course/Stats'
@@ -43,7 +43,7 @@ export const CourseSettingsModal = () => {
   const { courseId } = useParams() as { courseId: string }
   const [addTeacherViewOpen, setAddTeacherViewOpen] = useState(false)
   const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
-  const [responsibilities, setResponsibilities] = useState<Responsebility[]>([])
+  const [responsibilities, setResponsibilities] = useState<Responsibility[]>([])
   const { t, i18n } = useTranslation()
   const { language } = i18n
 
@@ -139,7 +139,7 @@ export const CourseSettingsModal = () => {
   }
 
   const drawActionComponent = (user: User) => {
-    const usersResponsibility: Responsebility | undefined = responsibilities.find((r: Responsebility) => {
+    const usersResponsibility: Responsibility | undefined = responsibilities.find((r: Responsibility) => {
       return r.user.id === user.id
     })
     const isResponsible = usersResponsibility !== undefined
@@ -203,13 +203,13 @@ export const CourseSettingsModal = () => {
                     }}
                     sx={{ mb: 1, mt: 1 }}
                   >
-                    {addTeacherViewOpen ? t('common:cancel') : t('course:add')}
+                    {addTeacherViewOpen ? t('common:cancel') : t('course:addNew')}
                   </OutlineButtonBlack>
                   {!addTeacherViewOpen ? (<Table>
                     <TableHead>
                       <TableRow>
                         <TableCell><strong>{t('rag:name')}</strong></TableCell>
-                        <TableCell>{}</TableCell>
+                        <TableCell><strong>{t('course:addedFrom')}</strong></TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>

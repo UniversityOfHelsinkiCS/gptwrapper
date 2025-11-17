@@ -345,7 +345,9 @@
     "activate": "Aktivoi",
     "noResults": "Ei tuloksia.",
     "teachers": "Opettajat",
-    "students": "Opiskelijat"
+    "students": "Opiskelijat",
+    "addedFrom": "Lisätty lähteestä",
+    "addNew": "Lisää uusi vastuuhenkilö"
   },
   "prompt": {
     "createNew": "Luo uusi alustus",

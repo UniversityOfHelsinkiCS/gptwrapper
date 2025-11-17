@@ -83,7 +83,7 @@ export interface Enrolment {
   }
 }
 
-export interface Responsebility {
+export interface Responsibility {
   id: string
   createdByUserId: string | null
   user: {
@@ -104,7 +104,7 @@ export interface Course extends ChatInstance {
   activityPeriod: ActivityPeriod
   prompts: Prompt[]
   enrolments: Enrolment[]
-  responsibilities: Responsebility[]
+  responsibilities: Responsibility[]
   courseUnits: CourseUnit[]
   saveDiscussions: boolean
   notOptoutSaving: boolean

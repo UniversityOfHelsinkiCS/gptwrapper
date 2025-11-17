@@ -324,7 +324,9 @@
     "activate": "Aktivera",
     "noResults": "Inga resultat",
     "teachers": "Lärare",
-    "students": "Studenter"
+    "students": "Studenter",
+    "addedFrom": "Tillagd från",
+    "addNew": "Lägg till ansvarig"
   },
   "prompt": {
     "createNew": "Skapa ny prompt",
