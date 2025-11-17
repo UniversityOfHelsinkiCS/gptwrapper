@@ -1,6 +1,6 @@
 import React from 'react'
-import { Button, Box, Typography, styled, LinearProgress, Container, DialogTitle, DialogContent, Dialog, Link, CircularProgress } from '@mui/material'
-import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom'
+import { Button, Box, Typography, styled, LinearProgress, Container, DialogTitle, DialogContent, Dialog, Link, CircularProgress, Breadcrumbs } from '@mui/material'
+import { useNavigate, useParams, Link as RouterLink, useSearchParams } from 'react-router-dom'
 import Autorenew from '@mui/icons-material/Autorenew'
 import CloudUpload from '@mui/icons-material/CloudUpload'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
@@ -33,8 +33,10 @@ const VisuallyHiddenInput = styled('input')({
 export const RagIndex: React.FC = () => {
   const { user } = useCurrentUser()
   const { t } = useTranslation()
-  const { id: strId, courseId } = useParams() as { id: string, courseId: string }
-  const id = parseInt(strId)
+  const { courseId } = useParams<{ courseId: string }>()
+
+  const [searchParams, _setSearchParams] = useSearchParams()
+  const id = Number(searchParams.get('index'))
   const navigate = useNavigate()
   const [searchOpen, setSearchOpen] = React.useState(false)
   const deleteIndexMutation = useDeleteRagIndexMutation()
@@ -97,15 +99,11 @@ export const RagIndex: React.FC = () => {
     refetchStatuses()
   }
 
-  const coursePagePath = `/${courseId}/course/rag`
-
   return (
-    <Container sx={{ mt: '1rem' }} maxWidth="xl">
-      <Link to={coursePagePath} component={RouterLink} sx={{ display: 'flex' }}>
-        {t('rag:backToCourse')}
-      </Link>
-      <Typography variant="body1">{t('rag:collection')}</Typography>
-      <Typography variant="h3">{ragDetails?.metadata?.name}</Typography>
+    <Container>
+      <Breadcrumbs>
+        <Typography>{ragDetails?.metadata?.name}</Typography>
+      </Breadcrumbs>
 
       <Box py={2}>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -178,8 +176,8 @@ export const RagIndex: React.FC = () => {
             <RagFileInfo
               key={file.id}
               file={file}
+              index={id}
               status={ragFileStatuses?.find((rfs) => rfs.ragFileId === file.id)}
-              link
               uploadProgress={uploadMutation.isPending ? uploadProgress : undefined}
             />
           ))}

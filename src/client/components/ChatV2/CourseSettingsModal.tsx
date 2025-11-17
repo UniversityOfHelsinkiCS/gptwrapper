@@ -241,8 +241,6 @@ export const CourseSettingsModal = () => {
         <Route path="/students" element={<Stats />} />
         <Route path="/discussions/*" element={<Discussion />} />
         <Route path="/rag/*" element={<Rag />} />
-        <Route path="/rag/:id" element={<RagIndex />} />
-        <Route path="/rag/:id/files/:fileId" element={<RagFile />} />
       </Routes>
     </Container >
   )

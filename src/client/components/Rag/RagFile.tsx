@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
-import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom'
+import { useParams, Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom'
 import apiClient from '../../util/apiClient'
 import type { RagFileAttributes } from '../../../shared/types'
-import { Box, Button, Container, Link, Typography } from '@mui/material'
+import { Box, Breadcrumbs, Button, Container, Link, Typography } from '@mui/material'
 import { RagFileInfo } from './RagFileDetails'
 import type { RagIndexAttributes } from '../../../server/db/models/ragIndex'
 import { useDeleteRagFileMutation, useDeleteRagFileTextMutation } from './api'
@@ -19,11 +19,11 @@ type RagFile = RagFileAttributes & {
 
 export const RagFile: React.FC = () => {
   const { t } = useTranslation()
-  const params = useParams<{ id: string; fileId: string, courseId: string }>()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const fileId = Number(searchParams.get('file'))
+  const indexId = Number(searchParams.get('index'))
+  const params = useParams<{ courseId: string }>()
 
-  // Use props if provided, otherwise fall back to URL params
-  const indexId = params.id ? parseInt(params.id, 10) : undefined
-  const fileId = params.fileId ? parseInt(params.fileId, 10) : undefined
 
   const {
     data: ragFile,
@@ -50,15 +50,12 @@ export const RagFile: React.FC = () => {
   }
 
   return (
-    <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">
-      <Link component={RouterLink} to={`/${params.courseId}/course/rag/${indexId}`}>
-        {t('rag:backToCollection')}
-      </Link>
-
-      <Typography variant="body1">{t('rag:file')}</Typography>
-      <Typography variant="h3">
-        {ragFile.ragIndex.metadata?.name} / {ragFile.filename}
-      </Typography>
+    <Container>
+      <Breadcrumbs>
+        <Link href={`/${params.courseId}/course/rag?index=${ragFile.ragIndexId}`} >{ragFile.ragIndex.metadata?.name}</Link> /
+        <Typography>{ragFile.filename}
+        </Typography>
+      </Breadcrumbs>
       <Box sx={{ my: 2, display: 'flex', gap: 2 }}>
         {ragFile.fileType === 'application/pdf' && (
           <OutlineButtonBlack
@@ -95,7 +92,6 @@ export const RagFile: React.FC = () => {
           {t('rag:deleteFile')}
         </Button>
       </Box>
-      <RagFileInfo file={ragFile} />
       <Typography variant="h4">{t('rag:content')}</Typography>
       {ragFile.fileContent.length === 0 ? (
         <Typography variant="body1">{t('rag:noContent')}</Typography>

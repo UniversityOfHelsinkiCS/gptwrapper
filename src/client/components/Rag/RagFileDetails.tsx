@@ -38,10 +38,10 @@ const ProgressIcon: Record<FileStage, React.ReactNode> = {
 
 export const RagFileInfo: React.FC<{
   file: RagFileAttributes
-  link?: boolean
+  index: number
   status?: IngestionJobStatus
   uploadProgress?: number
-}> = ({ file, link = false, status, uploadProgress }) => {
+}> = ({ file, index, status, uploadProgress }) => {
   const { t, i18n } = useTranslation()
 
   const pipelineStage = status?.pipelineStage ?? file.pipelineStage
@@ -64,7 +64,7 @@ export const RagFileInfo: React.FC<{
       <Box display="flex" alignItems="center" gap={2}>
         <Box sx={{ flex: 3 }}>
           <Box display="flex" width="100%" alignItems="center">
-            <Link to={`files/${file.id}`} component={RouterLink}>
+            <Link to={`?index=${index}&file=${file.id}`} component={RouterLink}>
               <Typography variant="subtitle1">{file.filename}</Typography>
             </Link>
             <Typography variant="body2" color="text.secondary" sx={{ marginLeft: 'auto' }}>
