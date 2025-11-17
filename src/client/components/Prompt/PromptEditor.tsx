@@ -6,6 +6,7 @@ import {
   CircularProgress,
   Collapse,
   DialogActions,
+  Divider,
   FormControl,
   FormControlLabel,
   InputLabel,
@@ -22,9 +23,10 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
-import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
+import { BlueButton, LinkButtonHoc, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
 import OpenableTextfield from '../common/OpenableTextfield'
+import { ClearOutlined, LibraryBooksOutlined } from '@mui/icons-material'
 
 export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string; setEditorOpen?: React.Dispatch<boolean>; personal?: boolean }) => {
   const navigate = useNavigate()
@@ -133,7 +135,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
             <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />
           )}
           <FormControl fullWidth margin="normal">
-            <InputLabel sx={{ background: 'white', px: 0.75, ml: -0.75 }}>{t('common:model')}</InputLabel>{' '}
+            <InputLabel sx={{ background: 'white', px: 0.75, ml: -0.75 }}>{t('common:model')}</InputLabel>
             {/* sx to offset label padding so it matches inputlabel of text fields */}
             <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
               <MenuItem value="none">
@@ -179,19 +181,25 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
             {t('prompt:context')}
           </Typography>
           {type === 'CHAT_INSTANCE' && (
-            <FormControl fullWidth margin="normal">
-              <InputLabel>{t('rag:sourceMaterials')}</InputLabel>
-              <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
-                <MenuItem value="" data-testid="no-source-materials">
-                  <em>{t('prompt:noSourceMaterials')}</em>
-                </MenuItem>
-                {ragIndices?.map((index) => (
-                  <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
-                    {index.metadata.name}
+            <Box display="flex" justifyContent="space-around" alignItems="center">
+              <FormControl fullWidth margin="normal">
+                <InputLabel sx={{ background: 'white', px: 0.75, ml: -0.75 }}>{t('rag:sourceMaterials')}</InputLabel>
+                <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
+                  <MenuItem value="" data-testid="no-source-materials">
+                    <em>{t('prompt:noSourceMaterials')}</em> <ClearOutlined sx={{ ml: 1 }} />
                   </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                  {ragIndices?.map((index) => (
+                    <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
+                      {index.metadata.name}
+                    </MenuItem>
+                  ))}
+                  <Divider />
+                  <LinkButtonHoc button={MenuItem} to={`/${courseId}/course/rag`}>
+                    {t('prompt:courseSourceMaterials')} <LibraryBooksOutlined sx={{ ml: 1 }} />
+                  </LinkButtonHoc>
+                </Select>
+              </FormControl>
+            </Box>
           )}
           <Collapse in={!!ragIndexId}>
             <OpenableTextfield
