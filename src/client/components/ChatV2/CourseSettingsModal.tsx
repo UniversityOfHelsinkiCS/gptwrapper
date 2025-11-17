@@ -14,6 +14,7 @@ import {
   Tooltip,
   Typography,
   TableBody,
+  Badge,
 } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
@@ -23,7 +24,7 @@ import { Link, Route, Routes, useParams } from 'react-router-dom'
 import { PUBLIC_URL } from '../../../config'
 import useCourse from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
-import type { Responsebility, User } from '../../types'
+import type { ChatInstanceUsage, Responsebility, User } from '../../types'
 import Rag from '../Rag/Rag'
 import EditCourseForm from '../Courses/Course/EditCourseForm'
 import Stats from '../Courses/Course/Stats'
@@ -35,6 +36,8 @@ import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import { RouterTabs } from "../common/RouterTabs"
 import { RagIndex } from '../Rag/RagIndex'
 import { RagFile } from '../Rag/RagFile'
+import { useCourseUsage } from '../../hooks/useChatInstanceUsage'
+import { filterUsages } from './util'
 
 export const CourseSettingsModal = () => {
   const { courseId } = useParams() as { courseId: string }
@@ -58,7 +61,14 @@ export const CourseSettingsModal = () => {
     return <ApiErrorView error={error} />
   }
 
-  if (userLoading || !user || !isCourseSuccess) return null
+
+
+
+  const { chatInstanceUsages, isSuccess: isUsageSuccess } = useCourseUsage(chatInstance?.id)
+
+  if (userLoading || !user || !isCourseSuccess || !isUsageSuccess) return null
+
+  const filteredUsages = filterUsages(chatInstance.usageLimit, chatInstanceUsages as ChatInstanceUsage[])
 
   const studentLink = `${window.location.origin}${PUBLIC_URL}/${chatInstance.courseId}`
 
@@ -154,7 +164,7 @@ export const CourseSettingsModal = () => {
       <RouterTabs>
         <Tab label={t('common:settings')} to={`/${courseId}/course`} component={Link} />
         <Tab label={t('course:teachers')} to={`/${courseId}/course/teachers`} component={Link} />
-        <Tab label={t('course:students')} to={`/${courseId}/course/students`} component={Link} />
+        <Tab label={<Badge badgeContent={filteredUsages.length} color='secondary' >{t('course:students')}</Badge>} to={`/${courseId}/course/students`} component={Link} />
         {chatInstance.saveDiscussions && <Tab label={t('course:discussions')} to={`/${courseId}/course/discussions`} component={Link} />}
         <Tab label={t('course:sourceMaterials')} to={`/${courseId}/course/rag`} component={Link} />
       </RouterTabs>
