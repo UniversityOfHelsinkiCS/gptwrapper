@@ -1,32 +1,32 @@
-import { useEffect, useState } from 'react'
 import type { ValidModelName } from '@config'
+import { validModels } from '@config'
 import {
-  TextField,
   Box,
   Checkbox,
-  FormControlLabel,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Slider,
-  DialogActions,
-  Collapse,
-  Typography,
   CircularProgress,
+  Collapse,
+  DialogActions,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
+  Slider,
+  TextField,
+  Typography,
 } from '@mui/material'
-import { validModels } from '@config'
-import { useTranslation } from 'react-i18next'
+import type { Message } from '@shared/chat'
 import { enqueueSnackbar } from 'notistack'
-import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
-import OpenableTextfield from '../common/OpenableTextfield'
-import { Message } from '@shared/chat'
-import { usePromptState } from '../ChatV2/PromptState'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useCourse from '../../hooks/useCourse'
+import { useCourseRagIndices } from '../../hooks/useRagIndices'
+import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
+import { usePromptState } from '../ChatV2/PromptState'
+import OpenableTextfield from '../common/OpenableTextfield'
 
-export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string, setEditorOpen?: React.Dispatch<boolean>, personal?: boolean }) => {
+export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string; setEditorOpen?: React.Dispatch<boolean>; personal?: boolean }) => {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { courseId } = useParams() as { courseId: string }
@@ -129,9 +129,12 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string,
             fullWidth
             margin="normal"
           />
-          {type !== 'PERSONAL' && <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />}
+          {type !== 'PERSONAL' && (
+            <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />
+          )}
           <FormControl fullWidth margin="normal">
-            <InputLabel sx={{ background: 'white', px: 0.75, ml: -0.75 }}>{t('common:model')}</InputLabel> {/* sx to offset label padding so it matches inputlabel of text fields */}
+            <InputLabel sx={{ background: 'white', px: 0.75, ml: -0.75 }}>{t('common:model')}</InputLabel>{' '}
+            {/* sx to offset label padding so it matches inputlabel of text fields */}
             <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
               <MenuItem value="none">
                 <em>{t('prompt:modelFreeToChoose')}</em>
@@ -160,30 +163,36 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string,
               aria-labelledby="temperature-slider"
               valueLabelDisplay="auto"
               step={0.1}
-              marks
               min={0}
               max={1}
               disabled={modelHasTemperature}
+              sx={{ mb: -1 }}
             />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="body2">{t('chat:predictableTemperature')}</Typography>
+              <Typography variant="body2">{t('chat:creativeTemperature')}</Typography>
+            </Box>
           </Collapse>
         </Box>
         <Box sx={{ flex: 2 }} component="section">
           <Typography component="h3" gutterBottom>
             {t('prompt:context')}
           </Typography>
-          {type === 'CHAT_INSTANCE' && <FormControl fullWidth margin="normal">
-            <InputLabel>{t('rag:sourceMaterials')}</InputLabel>
-            <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
-              <MenuItem value="" data-testid="no-source-materials">
-                <em>{t('prompt:noSourceMaterials')}</em>
-              </MenuItem>
-              {ragIndices?.map((index) => (
-                <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
-                  {index.metadata.name}
+          {type === 'CHAT_INSTANCE' && (
+            <FormControl fullWidth margin="normal">
+              <InputLabel>{t('rag:sourceMaterials')}</InputLabel>
+              <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
+                <MenuItem value="" data-testid="no-source-materials">
+                  <em>{t('prompt:noSourceMaterials')}</em>
                 </MenuItem>
-              ))}
-            </Select>
-          </FormControl>}
+                {ragIndices?.map((index) => (
+                  <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
+                    {index.metadata.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
           <Collapse in={!!ragIndexId}>
             <OpenableTextfield
               value={ragSystemMessage}
@@ -218,7 +227,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string,
           />
         </Box>
       </Box>
-      <DialogActions >
+      <DialogActions>
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
           {loading && <CircularProgress color="secondary" />}
           {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}

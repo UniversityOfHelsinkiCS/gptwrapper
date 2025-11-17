@@ -125,7 +125,8 @@
     "warning": "Uudessa chattinäkymässä on tällä hetkellä ongelmia ja vastausten generointi on hidastunut. Vanha chattinäkymä toimii normaalisti.",
     "customPrompt": "Kustomoitu alustus",
     "confirmResetTitle": "Haluatko varmasti tyhjentää keskustelun?",
-    "confirmResetMessage": "Keskustelu poistetaan lopullisesti. Voit halutessasi saada kopion siitä sähköpostiisi."
+    "confirmResetMessage": "Keskustelu poistetaan lopullisesti. Voit halutessasi saada kopion siitä sähköpostiisi.",
+    "predictableTemperature": "Ennustettava"
   },
   "settings": {
     "prompt": "Keskustelun alustus",

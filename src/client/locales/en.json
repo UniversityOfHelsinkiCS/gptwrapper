@@ -90,9 +90,8 @@
     "conversation": "Conversation",
     "stop": "Stop",
     "temperature": "Adjust the model's temperature",
-    "preciseTemperature": "More precise",
-    "balancedTemperature": "More balanced",
-    "creativeTemperature": "More creative",
+
+    "creativeTemperature": "Creative",
     "allowSave": "The conversation may be saved",
     "denySave": "The conversation may not be saved.",
     "toBeSaved": "The discussion will be saved anonymously",
@@ -124,7 +123,8 @@
     "warning": "The new chat view is experiencing problems and the response generation is very slow. The old chat view is working normally.",
     "customPrompt": "custom prompt",
     "confirmResetTitle": "Are you sure you want to clear the conversation?",
-    "confirmResetMessage": "The conversation will be deleted. You can send a copy of it to your email using the checkbox."
+    "confirmResetMessage": "The conversation will be deleted. You can send a copy of it to your email using the checkbox.",
+    "predictableTemperature": "Predictable"
   },
   "settings": {
     "prompt": "Conversation prompt",
