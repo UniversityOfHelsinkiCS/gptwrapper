@@ -20,8 +20,6 @@ const Rag: React.FC = () => {
 
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, true)
 
-  console.log(index, file)
-
   return (
     <>
       {index && !file && <RagIndex />}
