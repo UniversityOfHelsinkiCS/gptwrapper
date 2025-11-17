@@ -182,7 +182,7 @@ const SideBar = ({
                     {t('sidebar:courseChange')}
                   </TextButton>
                   {amongResponsibles && (
-                    <TextButton data-testid="course-exit-button" onClick={() => navigate('/general')} startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>
+                    <TextButton data-testid="course-exit-button" onClick={() => { navigate('/general'); handleChangePrompt(undefined) }} startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>
                       {t('sidebar:courseExit')}
                     </TextButton>
                   )}
@@ -256,7 +256,7 @@ const SideBar = ({
           </Box>
         )}
       </Box>
-    </Box>
+    </Box >
   )
 }
 
