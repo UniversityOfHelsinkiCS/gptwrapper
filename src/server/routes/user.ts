@@ -121,7 +121,7 @@ userRouter.put('/preferences', async (req, res) => {
   const { user } = request
   const { id } = user
 
-  const preferences = UserPreferencesSchema.parse(req.body)
+  const preferenceUpdates = req.body
 
   const dbUser = await User.findByPk(user.id)
 
@@ -129,16 +129,10 @@ userRouter.put('/preferences', async (req, res) => {
     throw ApplicationError.InternalServerError('User not found')
   }
 
-  const newPreferences = {
+  const newPreferences = UserPreferencesSchema.parse({
     ...(dbUser.preferences ?? {}),
-  }
-
-  // Assign only defined values
-  for (const key in preferences) {
-    if (preferences[key] !== undefined) {
-      newPreferences[key] = preferences[key]
-    }
-  }
+    ...preferenceUpdates,
+  })
 
   await User.update({ preferences: newPreferences }, { where: { id } })
 
