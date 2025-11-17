@@ -6,14 +6,13 @@ import useCourse from '../../hooks/useCourse'
 import { RagCreator } from './RagCreator'
 import { useTranslation } from 'react-i18next'
 import { RagIndex } from './RagIndex'
-import { EnergySavingsLeafTwoTone } from '@mui/icons-material'
 import { RagFile } from './RagFile'
 
 const Rag: React.FC = () => {
   const { t } = useTranslation()
   const { courseId } = useParams<{ courseId: string }>()
   const { data: chatInstance } = useCourse(courseId)
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams, _setSearchParams] = useSearchParams()
 
   const index = Number(searchParams.get('index')) !== 0
   const file = Number(searchParams.get('file')) !== 0
@@ -35,15 +34,15 @@ const Rag: React.FC = () => {
               <TableCell>{}</TableCell>
             </TableRow>
           </TableHead>
-          {ragIndices?.map((index) => (
-            <TableBody>
-              <TableRow>
-                <TableCell>{index.metadata?.name}</TableCell>
-                <TableCell>{index.metadata?.language}</TableCell>
-                <TableCell>{index.ragFileCount}</TableCell>
+          {ragIndices?.map((ragIndex) => (
+            <TableBody key={`tbody-${ragIndex.id}`}>
+              <TableRow key={`${ragIndex.id}-index`}>
+                <TableCell>{ragIndex.metadata?.name}</TableCell>
+                <TableCell>{ragIndex.metadata?.language}</TableCell>
+                <TableCell>{ragIndex.ragFileCount}</TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                    <Link to={`?index=${index.id}`} component={RouterLink} sx={{ ml: 'auto' }}>
+                    <Link to={`?index=${ragIndex.id}`} component={RouterLink} sx={{ ml: 'auto' }}>
                       {t('rag:viewDetails')}
                     </Link>
                   </Box>
