@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "tags": ["-lintignore"],
-  "entry": ["src/server/index.ts", "src/client/index.tsx"],
+  "entry": ["src/client/index.tsx", "src/server/db/migrations/*"],
   "project": ["src/**/*.{ts,tsx}"]
 }
