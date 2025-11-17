@@ -1,4 +1,4 @@
-import { Box, Button, Input, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
+import { Box, Button, Container, Input, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -123,7 +123,7 @@ const ActionUserTable = ({
 
   return (
     <Box my={2}>
-      <TableContainer component={Paper}>
+      <TableContainer component={Container}>
         <Table>
           <TableHead>
             <TableRow>
@@ -179,7 +179,7 @@ const ActionUserTable = ({
                 </TableCell>
                 <TableCell>
                   {drawActionComponent(user)}
-               </TableCell>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -214,7 +214,7 @@ const UserSearch = () => {
 export const ActionUserSearch = ({
   actionText,
   drawActionComponent,
-  }: {
+}: {
   actionText: string
   drawActionComponent: (user: any) => any
 }) => {
@@ -224,7 +224,7 @@ export const ActionUserSearch = ({
 
   useEffect(() => {
     if (search && search.length > 4) {
-        refetch()
+      refetch()
     }
   }, [search])
 
@@ -235,7 +235,7 @@ export const ActionUserSearch = ({
       {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
 
       {isLoading && <div>Loading...</div>}
-      {users && <ActionUserTable users={users}  actionText={actionText} drawActionComponent={drawActionComponent} />}
+      {users && <ActionUserTable users={users} actionText={actionText} drawActionComponent={drawActionComponent} />}
     </Box>
   )
 }
@@ -245,18 +245,18 @@ export const ResponsibilityActionUserSearch = ({
   actionText,
   drawActionComponent,
   courseId
-  }: {
+}: {
   actionText: string
   drawActionComponent: (user: any) => any
   courseId: string
-  }) => {
+}) => {
   const [search, setSearch] = useState('')
-  const { users, isLoading, refetch} = useResponsibilityUserSearch(search, courseId)
+  const { users, isLoading, refetch } = useResponsibilityUserSearch(search, courseId)
   const { t } = useTranslation()
 
   useEffect(() => {
     if (search && search.length > 4) {
-        refetch()
+      refetch()
     }
   }, [search])
 
@@ -267,7 +267,7 @@ export const ResponsibilityActionUserSearch = ({
       {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
 
       {isLoading && <div>Loading...</div>}
-      {users && <ActionUserTable users={users}  actionText={actionText} drawActionComponent={drawActionComponent} />}
+      {users && <ActionUserTable users={users} actionText={actionText} drawActionComponent={drawActionComponent} />}
     </Box>
   )
 }
