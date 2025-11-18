@@ -7,6 +7,7 @@ import { RagCreator } from './RagCreator'
 import { useTranslation } from 'react-i18next'
 import { RagIndex } from './RagIndex'
 import { RagFile } from './RagFile'
+import { GrayButton, LinkButtonHoc } from '../ChatV2/general/Buttons'
 
 const Rag: React.FC = () => {
   const { t } = useTranslation()
@@ -20,11 +21,18 @@ const Rag: React.FC = () => {
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, true)
 
   return (
-    <>
+    <Box sx={{ mt: 2 }}>
       {index && !file && <RagIndex />}
       {index && file && <RagFile />}
       {!index && !file && (<>
-        {chatInstance?.id && <RagCreator chatInstance={chatInstance} />}
+        {chatInstance?.id && (
+          <Box display="flex" justifyContent="space-between">
+            <RagCreator chatInstance={chatInstance} />
+            <LinkButtonHoc button={GrayButton} external to="https://github.com/UniversityOfHelsinkiCS/gptwrapper/blob/main/documentation/rag.md">
+              {t('rag:readMoreAboutRag')}
+            </LinkButtonHoc>
+          </Box>
+        )}
         <Table>
           <TableHead>
             <TableRow>
@@ -52,7 +60,7 @@ const Rag: React.FC = () => {
           ))}
         </Table>
       </>)}
-    </>
+    </Box>
   )
 }
 

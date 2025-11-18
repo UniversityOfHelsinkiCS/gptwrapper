@@ -4,6 +4,8 @@ This is a technical documentation of the RAG (retrieval-augmented generation) sy
 
 The overview section is meant for all users and excludes the technical descriptions.
 
+This is a work-in-progress while CurreChat is being developed. Feedback is welcome.
+
 ## Overview
 
 The overall goal is to allow the LLM chat model to refer to relevant parts of teacher-supplied source material per student-question.

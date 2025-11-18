@@ -441,7 +441,8 @@
     "waitForUpload": "Please wait, uploading files to the server",
     "filesIngesting": "Processing files. You can leave the page.",
     "allCompleted": "Done processing.",
-    "swedish": "Swedish"
+    "swedish": "Swedish",
+    "readMoreAboutRag": "Read more about CurreChat's source material feature"
   },
   "embeddedLogin": {
     "helpText": "Successfully logged in. You may close this window."
