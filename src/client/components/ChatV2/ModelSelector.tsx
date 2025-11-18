@@ -1,7 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { MenuItem, Typography, Menu } from '@mui/material'
-import SmartToy from '@mui/icons-material/SmartToy'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { FREE_MODEL, inProduction, ValidModelName, validModels } from '@config'
 import { TextButton } from './general/Buttons'
@@ -43,7 +42,7 @@ const ModelSelector = ({
 
   return (
     <>
-      <TextButton startIcon={<SmartToy />}
+      <TextButton startIcon={<ChevronRightIcon />}
         onClick={handleClick}
         data-testid="model-selector"
         disabled={availableModels.length === 1}
