@@ -96,6 +96,7 @@ courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Re
         as: 'responsibilities',
         attributes: ['userId'],
       },
+
       {
         model: Enrolment,
         as: 'enrolments',
@@ -115,16 +116,7 @@ courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Re
     throw ApplicationError.NotFound('Chat instance not found')
   }
 
-  const hasFullAccess =
-    user.isAdmin ||
-    chatInstance.responsibilities
-      ?.map((r) => r.userId)
-      .filter(Boolean)
-      .includes(user.id)
-
-  if (!hasFullAccess) {
-    throw ApplicationError.Forbidden('Unauthorized')
-  }
+  enforceUserHasFullAccess(user, chatInstance)
 
   res.send(chatInstance.enrolments)
 })
@@ -273,7 +265,7 @@ courseRouter.put('/:id', async (req, res) => {
 
 const userAssignedAsResponsible = (userId, chatInstance: ChatInstance) => {
   const responsibilities = chatInstance.responsibilities
-  if(!responsibilities){
+  if (!responsibilities) {
     return false
   }
 
@@ -393,10 +385,8 @@ courseRouter.post('/:id/responsibilities/remove', async (req, res) => {
   }
 })
 
-
 courseRouter.get('/:id/responsibilities/users/:search', async (req, res) => {
-
-  const {id: courseId, search: search } = req.params
+  const { id: courseId, search: search } = req.params
 
   const request = req as unknown as RequestWithUser
   const { user } = request
