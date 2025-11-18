@@ -24,13 +24,15 @@ The student then uses it:
 8. The RAG search returns relevant parts of the Source Material to the LLM, which writes the answer using the results.
 9. The results and search strings are also shown to the student.
 
-> [!TIP] When to use Source Materials (RAG)?
+> [!TIP]
+> **When to use Source Materials (RAG)?**
 > If your source materials are 1-2 pages in length, you can include them directly in the prompt. 
 > This way the LLM always gets the full context of your materials reliably. 
 > For much longer materials, the token usage rises quickly and can lead to context rot and even context limit being exceeded.
 > In these cases, the RAG system (Source Materials in the UI) is more suitable.
 
-> [!IMPORTANT] How to know when CurreChat uses RAG?
+> [!IMPORTANT]
+> **How to know when CurreChat uses RAG?**
 > The LLM essentially _decides_ whether a user's question requires RAG usage based on its Prompt, so it does not always use RAG even if the Prompt has Source Materials. 
 > When RAG is used in an answer, the chat UI shows a message that RAG search is being performed using some search strings and once complete, the RAG search results are shown. 
 > If these do not appear, RAG was not used.
