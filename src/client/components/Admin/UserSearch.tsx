@@ -1,4 +1,4 @@
-import { Box, Button, Container, Input, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
+import { Box, Button, Container, Input, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -112,7 +112,7 @@ const UserTable = ({ users }: { users: User[] }) => {
 const ActionUserTable = ({
   users,
   actionText,
-  drawActionComponent
+  drawActionComponent,
 }: {
   users: User[] | any
   actionText: string
@@ -177,9 +177,7 @@ const ActionUserTable = ({
                 <TableCell align="left">
                   <Typography variant="h6">{user.primaryEmail}</Typography>
                 </TableCell>
-                <TableCell>
-                  {drawActionComponent(user)}
-                </TableCell>
+                <TableCell>{drawActionComponent(user)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -201,7 +199,7 @@ const UserSearch = () => {
 
   return (
     <Box>
-      <Input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('admin:searchUsers')} />
+      <TextField value={search} onChange={(v) => setSearch(v.currentTarget.value)} autoFocus />
 
       {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
 
@@ -211,13 +209,7 @@ const UserSearch = () => {
   )
 }
 //a component which allows users to be searched in order to perform some kind of action with the user
-export const ActionUserSearch = ({
-  actionText,
-  drawActionComponent,
-}: {
-  actionText: string
-  drawActionComponent: (user: any) => any
-}) => {
+export const ActionUserSearch = ({ actionText, drawActionComponent }: { actionText: string; drawActionComponent: (user: any) => any }) => {
   const [search, setSearch] = useState('')
   const { users, isLoading, refetch } = useUserSearch(search)
   const { t } = useTranslation()
@@ -244,7 +236,7 @@ export const ActionUserSearch = ({
 export const ResponsibilityActionUserSearch = ({
   actionText,
   drawActionComponent,
-  courseId
+  courseId,
 }: {
   actionText: string
   drawActionComponent: (user: any) => any

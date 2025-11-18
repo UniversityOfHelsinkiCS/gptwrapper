@@ -20,6 +20,8 @@ import HYLoadingSpinner from './components/ChatV2/general/HYLoadingSpinner'
 import { DisclaimerModal } from './components/Disclaimer'
 import { GlobalSettings } from './components/GlobalSettings'
 import { Feedback } from './components/Feedback'
+import { SuperSpeedLoginAs } from './components/Admin/SuperSpeedLoginAs'
+import { useLoggedInAs } from './hooks/useLoggedInAs'
 
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
@@ -99,7 +101,6 @@ const App = () => {
 }
 
 const Layout = () => {
-
   const { user, isSuccess } = useCurrentUser()
   const [feedbackOpen, setFeedbackOpen] = React.useState(false)
   const [settingsOpen, setSettingsOpen] = React.useState(false)
@@ -109,6 +110,7 @@ const Layout = () => {
       setDisclaimerStatus(true)
     }
   }, [isSuccess])
+  const { isLoggedInAs } = useLoggedInAs()
 
   return (
     <>
@@ -129,6 +131,7 @@ const Layout = () => {
         <Content />
       </Box>
       <AdminLoggedInAsBanner />
+      {(user?.isAdmin || isLoggedInAs) && <SuperSpeedLoginAs />}
     </>
   )
 }
