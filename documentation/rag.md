@@ -16,6 +16,10 @@ First, the teacher sets up the RAG:
 3. CurreChat processes and indexes the file contents into small parts.
 4. Teacher connects the Source Material Collection to one or more Prompts.
 
+> [!NOTE]
+> PDFs take a significantly longer time to process. If a text version of your source material is available, it is preferred. 
+> Markdown is highly recommended, as the indexing process can understand the markdown structure, resulting in better section splits.
+
 The student then uses it:
 
 5. Student sends a message in CurreChat with the Prompt active.
@@ -36,3 +40,16 @@ The student then uses it:
 > The LLM essentially _decides_ whether a user's question requires RAG usage based on its Prompt, so it does not always use RAG even if the Prompt has Source Materials. 
 > When RAG is used in an answer, the chat UI shows a message that RAG search is being performed using some search strings and once complete, the RAG search results are shown. 
 > If these do not appear, RAG was not used.
+
+## Implementation
+
+CurreChat RAG consists of three main parts:
+
+1. Ingestion
+   - Inputted files are processed, indexed and stored in a database
+2. Search
+   - Given a search string, a search is performed over the database and text results are returned
+3. Tool-calling
+   - The search interface is made available to the chat LLM with suitable instructions
+
+
