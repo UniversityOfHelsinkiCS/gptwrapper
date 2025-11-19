@@ -64,7 +64,7 @@ const SideBar = ({
     setIsTokenLimitExceeded(userStatus.usage > userStatus.limit)
   }, [statusLoading, userStatus])
 
-  const amongResponsibles = user?.isAdmin ?? chatInstance?.responsibilities.some((r) => r.user.id === user?.id)
+  const amongResponsibles = user?.isAdmin || chatInstance?.responsibilities.some((r) => r.user.id === user?.id)
 
   const showEditPrompt = (prompt: Prompt) => {
     return amongResponsibles || courseId === 'general' || myPrompts.some((a: Prompt) => a.id === prompt.id)

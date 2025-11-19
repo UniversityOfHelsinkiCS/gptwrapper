@@ -108,23 +108,27 @@ const PromptModal = () => {
         </>
       )}
 
-      <TextButton
-        onClick={(e) => handleEdit(e, prompt)}
-        color="primary"
-        data-testid={`edit-prompt-${prompt.name}`}
-        aria-label={t('common:edit')}
-      >
-        {t('common:edit')}
-      </TextButton>
+      {(isPersonal || amongResponsibles) && (
+        <>
+          <TextButton
+            onClick={(e) => handleEdit(e, prompt)}
+            color="primary"
+            data-testid={`edit-prompt-${prompt.name}`}
+            aria-label={t('common:edit')}
+          >
+            {t('common:edit')}
+          </TextButton>
 
-      <IconButton
-        onClick={(event) => handleDelete(event, prompt)}
-        size="small"
-        aria-label={t('common:delete')}
-        data-testid={`delete-prompt-${prompt.name}`}
-      >
-        <DeleteOutline fontSize="small" />
-      </IconButton>
+          <IconButton
+            onClick={(event) => handleDelete(event, prompt)}
+            size="small"
+            aria-label={t('common:delete')}
+            data-testid={`delete-prompt-${prompt.name}`}
+          >
+            <DeleteOutline fontSize="small" />
+          </IconButton>
+        </>
+      )}
     </MenuItem>
   )
 
