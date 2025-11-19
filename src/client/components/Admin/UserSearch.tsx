@@ -1,6 +1,6 @@
 import { Box, Button, Container, Input, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import useResetUsageMutation from '../../hooks/useResetUsageMutation'
 import useUserSearch from '../../hooks/useUserSearch'
@@ -189,6 +189,7 @@ const ActionUserTable = ({
 const UserSearch = () => {
   const [search, setSearch] = useState('')
   const { users, isLoading, refetch } = useUserSearch(search)
+  const inputRef = useRef<HTMLInputElement>(null)
   const { t } = useTranslation()
 
   useEffect(() => {
@@ -197,9 +198,15 @@ const UserSearch = () => {
     }
   }, [search])
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [])
+
   return (
     <Box>
-      <TextField value={search} onChange={(v) => setSearch(v.currentTarget.value)} autoFocus />
+      <TextField value={search} onChange={(v) => setSearch(v.currentTarget.value)} inputRef={inputRef} />
 
       {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
 
