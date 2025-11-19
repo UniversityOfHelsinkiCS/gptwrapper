@@ -4,7 +4,7 @@ import type { Request } from 'express'
 
 export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>
 
-export interface RequestWithUser extends Request {
+export interface RequestWithUser<P = Record<string, any>> extends Request<P> {
   user: User
   hijackedBy?: User
 }

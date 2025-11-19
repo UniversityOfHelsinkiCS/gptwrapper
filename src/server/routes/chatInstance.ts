@@ -1,4 +1,4 @@
-import express from 'express'
+import { Router } from 'express'
 import { Op } from 'sequelize'
 import { addMonths } from 'date-fns'
 
@@ -6,10 +6,13 @@ import { ChatInstance, User, UserChatInstanceUsage } from '../db/models'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { sequelize } from '../db/connection'
 import { ApplicationError } from '../util/ApplicationError'
+import { adminMiddleware } from '../middleware/adminMiddleware'
+import { ChatInstanceAccess, getChatInstanceAccess } from '../services/chatInstances/access'
+import { RequestWithUser } from '../types'
 
-const chatInstanceRouter = express.Router()
+const chatInstanceRouter = Router()
 
-chatInstanceRouter.get('/', async (req, res) => {
+chatInstanceRouter.get('/', [adminMiddleware], async (req, res) => {
   const { limit: limitStr, offset: offsetStr, search: searchRaw, order: orderRaw, orderBy: orderByRaw, showActiveCourses: showActiveCoursesRaw } = req.query
   const limit = limitStr ? parseInt(limitStr as string, 10) : 100
   const offset = offsetStr ? parseInt(offsetStr as string, 10) : 0
@@ -90,6 +93,12 @@ chatInstanceRouter.post('/:id/enable', async (req, res) => {
     throw ApplicationError.NotFound('ChatInstance not found')
   }
 
+  const { user } = req as RequestWithUser<{ id: string }>
+  const access = await getChatInstanceAccess(user, chatInstance)
+  if (access < ChatInstanceAccess.TEACHER) {
+    throw ApplicationError.Forbidden()
+  }
+
   const defaultActivityPeriod = chatInstance.courseActivityPeriod
     ? {
         startDate: chatInstance.courseActivityPeriod.startDate,
@@ -117,6 +126,12 @@ chatInstanceRouter.post('/:id/disable', async (req, res) => {
     throw ApplicationError.NotFound('ChatInstance not found')
   }
 
+  const { user } = req as RequestWithUser<{ id: string }>
+  const access = await getChatInstanceAccess(user, chatInstance)
+  if (access < ChatInstanceAccess.TEACHER) {
+    throw ApplicationError.Forbidden()
+  }
+
   chatInstance.usageLimit = 0
 
   await chatInstance.save()
@@ -126,6 +141,17 @@ chatInstanceRouter.post('/:id/disable', async (req, res) => {
 
 chatInstanceRouter.get('/:id/usages', async (req, res) => {
   const { id } = req.params
+
+  const chatInstance = await ChatInstance.findByPk(id)
+  if (!chatInstance) {
+    throw ApplicationError.NotFound('ChatInstance not found')
+  }
+
+  const { user } = req as RequestWithUser<{ id: string }>
+  const access = await getChatInstanceAccess(user, chatInstance)
+  if (access < ChatInstanceAccess.TEACHER) {
+    throw ApplicationError.Forbidden()
+  }
 
   const usage = (await UserChatInstanceUsage.findAll({
     where: {
@@ -152,13 +178,8 @@ chatInstanceRouter.get('/:id/usages', async (req, res) => {
     username: 'hidden',
   }
 
-  const course = await ChatInstance.findByPk(id)
-  if (!course) {
-    throw ApplicationError.NotFound('ChatInstance not found')
-  }
-
-  const usageLimit = course.usageLimit
-  const saveDiscussions = course.saveDiscussions
+  const usageLimit = chatInstance.usageLimit
+  const saveDiscussions = chatInstance.saveDiscussions
 
   const sanitizedUsage = usage.map((u) => {
     return {
@@ -179,6 +200,17 @@ chatInstanceRouter.delete('/usage/:id', async (req, res) => {
 
   if (!chatInstanceUsage) {
     throw ApplicationError.NotFound('ChatInstance not found')
+  }
+
+  const chatInstance = await ChatInstance.findByPk(chatInstanceUsage.chatInstanceId)
+  if (!chatInstance) {
+    throw ApplicationError.NotFound('ChatInstance not found')
+  }
+
+  const { user } = req as RequestWithUser<{ id: string }>
+  const access = await getChatInstanceAccess(user, chatInstance)
+  if (access < ChatInstanceAccess.TEACHER) {
+    throw ApplicationError.Forbidden()
   }
 
   chatInstanceUsage.usageCount = 0
