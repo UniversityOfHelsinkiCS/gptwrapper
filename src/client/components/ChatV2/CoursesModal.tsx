@@ -124,8 +124,6 @@ const CourseList = ({
     return [...courseUnits].sort(compare)
   }, [courseUnits, order, orderBy, language])
 
-  const inaccessible = (studentView && type === 'ended') || type === 'disabled'
-
   return (
     <Box sx={{ py: 3, overflow: 'auto' }}>
       <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
@@ -171,26 +169,22 @@ const CourseList = ({
                           {t('course:courseEnded')}
                         </Box>
                       )}
-                      {!inaccessible && (
-                        <>
-                          <LinkButtonHoc button={GrayButton} to={`/${course.courseId}`} endIcon={<ChatBubbleOutline />}>
-                            {t('course:chat')}
+                      <LinkButtonHoc button={GrayButton} to={`/${course.courseId}`} endIcon={<ChatBubbleOutline />}>
+                        {t('course:chat')}
+                      </LinkButtonHoc>
+                      <LinkButtonHoc button={GrayButton} to={t('links:studiesCur', { curId: course.courseId })} external>
+                        {t('course:toCoursePage')}
+                      </LinkButtonHoc>
+                      {!studentView &&
+                        (type === 'enabled' ? (
+                          <LinkButtonHoc button={BlueButton} to={`/${course.courseId}/course`} endIcon={<SettingsOutlined />}>
+                            {t('course:edit')}
                           </LinkButtonHoc>
-                          <LinkButtonHoc button={GrayButton} to={t('links:studiesCur', { curId: course.courseId })} external>
-                            {t('course:toCoursePage')}
+                        ) : (
+                          <LinkButtonHoc button={GreenButton} to={`/${course.courseId}/course`}>
+                            {t('course:activate')}
                           </LinkButtonHoc>
-                          {!studentView &&
-                            (type === 'enabled' ? (
-                              <LinkButtonHoc button={BlueButton} to={`/${course.courseId}/course`} endIcon={<SettingsOutlined />}>
-                                {t('course:edit')}
-                              </LinkButtonHoc>
-                            ) : (
-                              <LinkButtonHoc button={GreenButton} to={`/${course.courseId}/course`}>
-                                {t('course:activate')}
-                              </LinkButtonHoc>
-                            ))}
-                        </>
-                      )}
+                        ))}
                     </Box>
                   </TableCell>
                 </TableRow>
