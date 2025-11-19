@@ -7,7 +7,7 @@ export const queryKey = ['users']
 
 const useUsers = () => {
   const queryFn = async (): Promise<User[]> => {
-    const res = await apiClient.get(`/admin/users`)
+    const res = await apiClient.get(`/statistics/users`)
 
     const { data } = res
 

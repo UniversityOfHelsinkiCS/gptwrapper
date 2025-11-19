@@ -7,7 +7,7 @@ const useChatInstanceUsage = () => {
   const queryKey = ['chatInstanceUsage']
 
   const queryFn = async (): Promise<ChatInstanceUsage[]> => {
-    const res = await apiClient.get(`/admin/chatinstances/usage`)
+    const res = await apiClient.get(`/statistics/chatinstances/usage`)
 
     const { data } = res
 

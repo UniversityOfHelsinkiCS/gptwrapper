@@ -20,6 +20,7 @@ import feedbackRouter from './feedback'
 import testUtilsRouter from './testUtils'
 import { inProduction } from '../../config'
 import logger from '../util/logger'
+import statisticsRouter from './statistics'
 
 const router = express()
 
@@ -50,6 +51,7 @@ router.use('/courses', courseRouter)
 router.use('/prompts', promptRouter)
 router.use('/email', emailRouter)
 router.use('/admin', adminRouter)
+router.use('/statistics', statisticsRouter)
 router.use('/faculties', facultyRouter)
 router.use('/feedback', feedbackRouter)
 

@@ -7,7 +7,7 @@ const useStatistics = () => {
   const queryKey = ['statistics']
 
   const queryFn = async () => {
-    const res = await apiClient.get<StatisticResponse>(`/admin/statistics`)
+    const res = await apiClient.get<StatisticResponse>(`/statistics/statistics`)
 
     const { data } = res
 
