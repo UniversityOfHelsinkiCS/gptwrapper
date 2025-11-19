@@ -54,4 +54,41 @@ CurreChat RAG consists of three main parts:
 3. Tool-calling
    - The search interface is made available to the chat LLM with suitable instructions
 
+## Ingestion
+
+CurreChat supports any text-based files such as .txt, .html or .md and PDFs to be used as source material. 
+After a user uploads a file, the ingestion process starts. 
+
+### PDF-to-text -conversion
+
+If the file is a PDF it needs to be converted into text content. This is a non-trivial task since PDFs can contain
+complex layouts and images. 
+A simple solution can extract the textual content somewhat accurately but loses all layout, hierarchy and visual content and 
+often fails to process special characters such as those used in mathematical equations.
+
+For CurreChat RAG, we developed a more complex document intelligence solution that uses a VLM (vision-language model)
+to parse the PDF content as an image. This allows the transferring of visual information to the textual representation.
+It's downside is slow speed and the risk of hallucinations. 
+
+The VLM we use is Qwen3:8b-vl and like CurreChat, it is run on a server operated by the University's Center for Information Technology
+so no data is handled by third parties.
+
+### Chunking
+
+The textual content of the source files is split into small sections called chunks. 
+Each chunk is roughly 1000 characters long, with an overlap of 200 characters. Chunks are split on sentence breaks with best effort. 
+In the case of markdown, the splitting is done on headings and section changes.
+
+### Embedding
+
+Semantic embeddings are generated for each chunk. They are generated using an embedding language model, 
+which outputs a roughly 1000-dimensional semantic vector for the entire chunk. 
+CurreChat uses snowflake-arctic-embed2, run on the University's servers.
+
+### Database
+
+The processed chunks alongside their semantic vectors are stored in a Redis database, running on the University's servers. 
+A full-text-search index is created over the text content of the chunks, and a semantic vector index is created over the vectors of the chunks. 
+
+## Retrieval
 
