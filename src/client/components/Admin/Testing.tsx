@@ -2,7 +2,9 @@ import { Box, Typography, Divider } from '@mui/material'
 import { BlueButton, OrangeButton } from '../ChatV2/general/Buttons'
 import * as Sentry from '@sentry/react'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import useUserSearch from '../../hooks/useUserSearch'
 import apiClient from '../../util/apiClient'
+import { User } from 'src/client/types'
 
 const testResponsesApi = async () => {
   await apiClient.post('/test/responses-api-minimal')
@@ -12,8 +14,24 @@ const testCompletionsApi = async () => {
   await apiClient.post('/test/completions-api')
 }
 
+const handleLoginAs = (user: User | undefined | null) => {
+  if (!user) {
+    alert('Test login not work')
+    return
+  }
+
+  localStorage.setItem('adminLoggedInAs', user.id)
+  localStorage.setItem('adminLoggedInAsUser', JSON.stringify(user))
+  window.location.reload()
+}
+
 export default function Testing() {
   const { user } = useCurrentUser()
+
+  // ahslaaks user account for testing a teacher account
+  const { users } = useUserSearch('ahslaaks')
+  const ahslaaks: User | undefined = users?.find((u) => u.username === 'ahslaaks')
+
   if (!user) return null
 
   return (
@@ -80,12 +98,11 @@ export default function Testing() {
         </Typography>
 
         <Box sx={{ maxWidth: 360, width: '100%', display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <BlueButton onClick={() => { }}>
-            Login as a fake student
+          <BlueButton onClick={() => { }} disabled>
+            Login as&nbsp;<strong>FAKE STUDENT</strong>&nbsp;(not working yet)
           </BlueButton>
-
-          <BlueButton onClick={() => { }}>
-            Login as a fake teacher
+          <BlueButton onClick={() => handleLoginAs(ahslaaks)}>
+            Login as&nbsp;<strong>ahslaaks</strong>
           </BlueButton>
         </Box>
       </Box>
