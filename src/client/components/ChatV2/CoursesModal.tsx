@@ -1,5 +1,6 @@
 import React from 'react'
-import { Box, Tab, Tabs } from '@mui/material'
+import { useNavigate } from 'react-router-dom'
+import { Box, MenuItem, Tab, Tabs } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import useUserCourses, { CoursesViewCourse } from '../../hooks/useUserCourses'
 import useCurrentUser from '../../hooks/useCurrentUser'
@@ -12,9 +13,9 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import { BlueButton, GrayButton, GreenButton, LinkButtonHoc } from './general/Buttons'
+import { BlueButton, GreenButton } from './general/Buttons'
 import Skeleton from '@mui/material/Skeleton'
-import { ChatBubbleOutline, SettingsOutlined } from '@mui/icons-material'
+import { SettingsOutlined } from '@mui/icons-material'
 import { Course } from 'src/client/types'
 
 interface TabPanelProps {
@@ -91,6 +92,7 @@ const CourseList = ({
   type: 'enabled' | 'disabled' | 'ended'
   studentView?: boolean
 }) => {
+  const navigate = useNavigate()
   const { t, i18n } = useTranslation()
   const { language } = i18n
 
@@ -156,7 +158,16 @@ const CourseList = ({
           <TableBody>
             {sorted.length ? (
               sorted.map((course) => (
-                <TableRow key={course.courseId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableRow key={course.courseId}
+                  component={MenuItem}
+                  onClick={() => navigate(`/${course.courseId}`)}
+                  role='link'
+                  sx={{
+                    display: 'table-row',
+                    '&:last-child td, &:last-child th': { border: 0 },
+                    borderRadius: '1.25rem'
+                  }}>
+
                   <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
                     {course.name[language]}
                   </TableCell>
@@ -169,21 +180,29 @@ const CourseList = ({
                           {t('course:courseEnded')}
                         </Box>
                       )}
-                      <LinkButtonHoc button={GrayButton} to={`/${course.courseId}`} endIcon={<ChatBubbleOutline />}>
-                        {t('course:chat')}
-                      </LinkButtonHoc>
-                      <LinkButtonHoc button={GrayButton} to={t('links:studiesCur', { curId: course.courseId })} external>
-                        {t('course:toCoursePage')}
-                      </LinkButtonHoc>
                       {!studentView &&
                         (type === 'enabled' ? (
-                          <LinkButtonHoc button={BlueButton} to={`/${course.courseId}/course`} endIcon={<SettingsOutlined />}>
+                          <BlueButton
+                            role="link"
+                            endIcon={<SettingsOutlined />}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigate(`/${course.courseId}/course`)
+                            }}
+                          >
                             {t('course:edit')}
-                          </LinkButtonHoc>
+                          </BlueButton>
                         ) : (
-                          <LinkButtonHoc button={GreenButton} to={`/${course.courseId}/course`}>
+                          <GreenButton
+                            role="link"
+                            endIcon={<SettingsOutlined />}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigate(`/${course.courseId}/course`)
+                            }}
+                          >
                             {t('course:activate')}
-                          </LinkButtonHoc>
+                          </GreenButton>
                         ))}
                     </Box>
                   </TableCell>
