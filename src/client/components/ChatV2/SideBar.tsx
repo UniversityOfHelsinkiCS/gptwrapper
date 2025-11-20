@@ -8,17 +8,17 @@ import type { Course, Prompt } from '../../types'
 import { TextButton } from './general/Buttons'
 import MapsUgcIcon from '@mui/icons-material/MapsUgc'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import SettingsIcon from '@mui/icons-material/Settings'
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 import LogoutIcon from '@mui/icons-material/Logout'
 import TuneIcon from '@mui/icons-material/Tune'
 import HelpCenterIcon from '@mui/icons-material/HelpCenter'
 import AppsIcon from '@mui/icons-material/Apps'
-import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined'
 import ExtensionOffIcon from '@mui/icons-material/ExtensionOff'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import hyLogo from '../../assets/hy_logo.svg'
+import sidebarClose from '../../assets/sidebar-close.svg'
+import sidebarOpen from '../../assets/sidebar-open.svg'
 import { formatDate } from '../Courses/util'
 import EmailButton from './EmailButton'
 import useCourse from '../../hooks/useCourse'
@@ -29,6 +29,7 @@ import { useNavigate } from 'react-router-dom'
 import ModelSelector from './ModelSelector'
 import { ValidModelName } from '../../../config'
 import Footer from '../Footer'
+import { CustomIcon } from './general/CustomIcon'
 
 const SideBar = ({
   expanded,
@@ -93,16 +94,8 @@ const SideBar = ({
       >
         {!expanded ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
-            <Link href="/">
-              <img src={hyLogo} alt="University of Helsinki" width="30" />
-            </Link>
             <TextButton onClick={() => setExpanded((prev) => !prev)}>
-              <Box sx={{}}>
-                <ViewSidebarOutlinedIcon sx={{ transform: 'scaleX(-1)' }} />
-                <Box className="chevron" sx={{ display: 'flex', alignItems: 'center' }}>
-                  <ChevronRightIcon />
-                </Box>
-              </Box>
+              <CustomIcon src={sidebarOpen} />
             </TextButton>
           </Box>
         ) : (
@@ -121,20 +114,15 @@ const SideBar = ({
               }}
             >
               <TextButton onClick={() => setExpanded((prev) => !prev)}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <ViewSidebarOutlinedIcon sx={{ transform: 'scaleX(-1)' }} />
-                  <Box className="chevron" sx={{ display: 'flex', alignItems: 'center' }}>
-                    <ChevronLeftIcon />
-                  </Box>
-                </Box>
+                <CustomIcon src={sidebarClose} />
               </TextButton>
             </Box>
-            <Link href="/" sx={{ px: 3, mb: 1, display: 'flex', gap: 1, textDecoration: 'none', alignItems: 'center' }}>
+            <Box sx={{ px: 3, mb: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
               <img src={hyLogo} alt="University of Helsinki" width="36" />
               <Typography fontWeight="bold" color="textPrimary">
                 {t('appName').toUpperCase()}
               </Typography>
-            </Link>
+            </Box>
 
             <Box p={3}>
               <Typography mb={0.5} color="textSecondary">
