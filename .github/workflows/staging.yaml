@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 8
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Build staging image
         id: build-staging-image
