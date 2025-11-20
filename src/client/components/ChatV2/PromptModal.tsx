@@ -31,6 +31,7 @@ const PromptModal = () => {
 
   const handleSelect = (prompt?: PromptType) => {
     handleChangePrompt(prompt)
+    navigate(`/${courseId}`)
   }
 
   const handleDelete = async (event: React.MouseEvent<HTMLButtonElement>, prompt: PromptType) => {
