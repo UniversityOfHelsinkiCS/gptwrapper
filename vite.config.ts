@@ -26,7 +26,19 @@ if (inCI) {
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      babel: {
+        plugins: [
+          // other Babel plugins
+          [
+            '@locator/babel-jsx/dist',
+            {
+              env: 'development',
+            },
+          ],
+        ],
+      },
+    }),
     sentryVitePlugin({
       org: 'sentry',
       project: 'currechat-frontend',
