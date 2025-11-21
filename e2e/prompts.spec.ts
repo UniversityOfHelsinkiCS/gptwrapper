@@ -3,7 +3,6 @@ import { teacherTest as test } from './fixtures'
 import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from './utils/test-helpers'
 
 test.describe('Prompts', () => {
-
   test.beforeEach(async ({ page }) => {
     await page.goto('/general')
     await acceptDisclaimer(page)
@@ -37,7 +36,7 @@ test.describe('Prompts', () => {
 
     // Clear chat
     page.on('dialog', (dialog) => dialog.accept())
-    await page.getByTestId('clear-conversation-button').click()
+    await page.getByTestId('new-conversation-button').click()
 
     // Reload page to ensure prompt is saved
     await page.reload()
@@ -75,7 +74,6 @@ test.describe('Prompts', () => {
     // The prompt is active.
     await expect(page.getByTestId('prompt-name').first()).toContainText(newPromptName)
 
-
     // Send something
     await sendChatMessage(page, 'testinen morjens')
     await closeSendPreference(page)
@@ -110,7 +108,6 @@ test.describe('Prompts', () => {
 
     const newPromptName = `testausprompti-${test.info().workerIndex}-rag`
 
-
     await page.getByTestId('choose-prompt-button').click()
     await page.getByTestId('create-prompt-button').click()
 
@@ -126,7 +123,6 @@ test.describe('Prompts', () => {
     // Now in chat view
     // The prompt is active.
     await expect(page.getByTestId('prompt-name').first()).toContainText(newPromptName)
-
 
     // Send something
     await sendChatMessage(page, 'rag')
