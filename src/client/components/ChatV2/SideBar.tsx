@@ -97,6 +97,10 @@ const SideBar = ({
             <TextButton onClick={() => setExpanded((prev) => !prev)}>
               <CustomIcon src={sidebarOpen} />
             </TextButton>
+            <TextButton onClick={handleReset} data-testid="new-conversation-button">
+              <MapsUgcIcon fontSize='small' />
+            </TextButton>
+            <EmailButton messages={messages} disabled={!messages.length} collapsed />
           </Box>
         ) : (
           <Box>
@@ -130,8 +134,8 @@ const SideBar = ({
               </Typography>
               {course ? (
                 <>
-                  <Box mb={3}>
-                    <Typography variant="h6" my={0.5} fontWeight="bold" sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                  <Box mb={1} sx={{ border: '1px solid rgba(0,0,0,0.2)', borderRadius: '0.5rem', p: 2 }}>
+                    <Typography my={0.5} fontWeight="bold" sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                       {course?.name[language] || 'undefined course'}
                     </Typography>
 
@@ -188,9 +192,11 @@ const SideBar = ({
               </Typography>
               {activePrompt ? (
                 <>
-                  <Typography data-testid="prompt-name" fontWeight="bold" mb={2}>
-                    {activePrompt.name}
-                  </Typography>
+                  <Box mb={1} sx={{ border: '1px solid rgba(0,0,0,0.2)', borderRadius: '0.5rem', p: 2 }}>
+                    <Typography data-testid="prompt-name" fontWeight="bold">
+                      {activePrompt.name}
+                    </Typography>
+                  </Box>
                   {showEditPrompt(activePrompt) ? (
                     <TextButton
                       data-testid="edit-prompt-button"
