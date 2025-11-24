@@ -219,11 +219,6 @@ export const ChatBox = ({
                   />
                 </IconButton>
               </Tooltip>
-              <Tooltip title={t('chat:emptyConversationTooltip', { hint: KeyCombinations.RESET_CHAT?.hint })} arrow placement="top">
-                <IconButton data-testid="clear-conversation-button" onClick={handleReset}>
-                  <RestartAltIcon />
-                </IconButton>
-              </Tooltip>
               {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
               <Box sx={{ display: 'inline-flex', justifyContent: 'space-between', alignItems: 'center', ml: 2 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

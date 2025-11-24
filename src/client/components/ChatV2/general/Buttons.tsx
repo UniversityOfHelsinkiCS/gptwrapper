@@ -56,10 +56,18 @@ export const GreenButton = styled(BaseButton)({
 })
 
 export const RedButton = styled(BaseButton)({
-  backgroundColor: 'red',
+  backgroundColor: '#d32f2f',
   color: 'white',
   '&:hover': {
-    backgroundColor: 'darkred',
+    backgroundColor: '#b71c1c',
+  },
+})
+
+export const OrangeButton = styled(BaseButton)({
+  backgroundColor: '#ed6c02',
+  color: 'white',
+  '&:hover': {
+    backgroundColor: '#e65100',
   },
 })
 

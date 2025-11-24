@@ -8,17 +8,17 @@ import type { Course, Prompt } from '../../types'
 import { TextButton } from './general/Buttons'
 import MapsUgcIcon from '@mui/icons-material/MapsUgc'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import SettingsIcon from '@mui/icons-material/Settings'
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 import LogoutIcon from '@mui/icons-material/Logout'
 import TuneIcon from '@mui/icons-material/Tune'
 import HelpCenterIcon from '@mui/icons-material/HelpCenter'
 import AppsIcon from '@mui/icons-material/Apps'
-import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined'
 import ExtensionOffIcon from '@mui/icons-material/ExtensionOff'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import hyLogo from '../../assets/hy_logo.svg'
+import sidebarClose from '../../assets/sidebar-close.svg'
+import sidebarOpen from '../../assets/sidebar-open.svg'
 import { formatDate } from '../Courses/util'
 import EmailButton from './EmailButton'
 import useCourse from '../../hooks/useCourse'
@@ -29,6 +29,7 @@ import { useNavigate } from 'react-router-dom'
 import ModelSelector from './ModelSelector'
 import { ValidModelName } from '../../../config'
 import Footer from '../Footer'
+import { CustomIcon } from './general/CustomIcon'
 
 const SideBar = ({
   expanded,
@@ -93,17 +94,13 @@ const SideBar = ({
       >
         {!expanded ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
-            <Link href="/">
-              <img src={hyLogo} alt="University of Helsinki" width="30" />
-            </Link>
             <TextButton onClick={() => setExpanded((prev) => !prev)}>
-              <Box sx={{}}>
-                <ViewSidebarOutlinedIcon sx={{ transform: 'scaleX(-1)' }} />
-                <Box className="chevron" sx={{ display: 'flex', alignItems: 'center' }}>
-                  <ChevronRightIcon />
-                </Box>
-              </Box>
+              <CustomIcon src={sidebarOpen} />
             </TextButton>
+            <TextButton onClick={handleReset} data-testid="new-conversation-button">
+              <MapsUgcIcon fontSize='small' />
+            </TextButton>
+            <EmailButton messages={messages} disabled={!messages.length} collapsed />
           </Box>
         ) : (
           <Box>
@@ -121,20 +118,15 @@ const SideBar = ({
               }}
             >
               <TextButton onClick={() => setExpanded((prev) => !prev)}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <ViewSidebarOutlinedIcon sx={{ transform: 'scaleX(-1)' }} />
-                  <Box className="chevron" sx={{ display: 'flex', alignItems: 'center' }}>
-                    <ChevronLeftIcon />
-                  </Box>
-                </Box>
+                <CustomIcon src={sidebarClose} />
               </TextButton>
             </Box>
-            <Link href="/" sx={{ px: 3, mb: 1, display: 'flex', gap: 1, textDecoration: 'none', alignItems: 'center' }}>
+            <Box sx={{ px: 3, mb: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
               <img src={hyLogo} alt="University of Helsinki" width="36" />
               <Typography fontWeight="bold" color="textPrimary">
                 {t('appName').toUpperCase()}
               </Typography>
-            </Link>
+            </Box>
 
             <Box p={3}>
               <Typography mb={0.5} color="textSecondary">
@@ -142,8 +134,8 @@ const SideBar = ({
               </Typography>
               {course ? (
                 <>
-                  <Box mb={3}>
-                    <Typography variant="h6" my={0.5} fontWeight="bold" sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                  <Box mb={1} sx={{ border: '1px solid rgba(0,0,0,0.2)', borderRadius: '0.5rem', p: 2 }}>
+                    <Typography my={0.5} fontWeight="bold" sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                       {course?.name[language] || 'undefined course'}
                     </Typography>
 
@@ -200,9 +192,11 @@ const SideBar = ({
               </Typography>
               {activePrompt ? (
                 <>
-                  <Typography data-testid="prompt-name" fontWeight="bold" mb={2}>
-                    {activePrompt.name}
-                  </Typography>
+                  <Box mb={1} sx={{ border: '1px solid rgba(0,0,0,0.2)', borderRadius: '0.5rem', p: 2 }}>
+                    <Typography data-testid="prompt-name" fontWeight="bold">
+                      {activePrompt.name}
+                    </Typography>
+                  </Box>
                   {showEditPrompt(activePrompt) ? (
                     <TextButton
                       data-testid="edit-prompt-button"
