@@ -2,12 +2,12 @@ import { extractPageText } from 'src/server/services/jobs/pdfParsing.job'
 import type { ChatMessage, MessageContent } from '../../../shared/chat'
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
 
+export const imageFileTypes = ['image/jpeg', 'image/png']
 export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file: Express.Multer.File) => {
   let fileContent: MessageContent[] | string = ''
 
   const textFileTypes = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'text/md']
 
-  const imageFileTypes = ['image/jpeg', 'image/png']
 
   
   if (textFileTypes.includes(file.mimetype)) {

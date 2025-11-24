@@ -85,6 +85,14 @@ export const ChatBox = ({
       return
     }
 
+    if (allowedImageTypes.find(s => s === file.type) && !user?.isAdmin ) {
+      setDisallowedFileType(file.type)
+      setFileTypeAlertOpen(true)
+      setTimeout(() => {
+        setFileTypeAlertOpen(false)
+      }, 6000)
+      return
+    }
     setFileName(file.name)
   }
 

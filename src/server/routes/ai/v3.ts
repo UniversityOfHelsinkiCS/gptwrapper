@@ -10,10 +10,11 @@ import { getRagIndexSearchTool } from '../../services/rag/searchTool'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
-import { parseFileAndAddToLastMessage } from './fileParsing'
+import { imageFileTypes, parseFileAndAddToLastMessage } from './fileParsing'
 import { upload } from './multer'
 import { checkIamAccess } from '../../util/iams'
 import { getTeachedCourses } from '../../services/chatInstances/access'
+import { SupportedImageMimeTypes } from 'pdfjs-dist'
 
 const router = express.Router()
 
@@ -65,10 +66,14 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       throw ApplicationError.Forbidden('Not authorized for general chat')
     }
   }
-
+   
   // Add file to last message if exists
   try {
     if (req.file) {
+
+      if(imageFileTypes.includes(req.file.mimetype) && !user.isAdmin){
+        throw ApplicationError.Forbidden('Not authorized for images')
+      }
       options.chatMessages = (await parseFileAndAddToLastMessage(options.chatMessages, req.file)) as ChatMessage[]
     }
   } catch (error) {
