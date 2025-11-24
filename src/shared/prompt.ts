@@ -1,10 +1,14 @@
 import z from 'zod/v4'
 import { ValidModelNameSchema } from '../config'
+import { MessageContentArraySchema } from './chat'
 
 export const PromptMessagesSchema = z.array(
   z.object({
     role: z.enum(['system', 'assistant', 'user']),
-    content: z.string().min(0),
+    content: z.union([
+      z.string().min(0).max(1_200_000),
+      MessageContentArraySchema,
+    ]),
   }),
 )
 

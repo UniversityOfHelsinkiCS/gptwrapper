@@ -44,7 +44,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
   const [name, setName] = useState<string>(prompt?.name ?? '')
   const [systemMessage, setSystemMessage] = useState<string>(prompt?.systemMessage ?? '')
   const [ragSystemMessage, setRagSystemMessage] = useState<string>(() =>
-    prompt ? prompt.messages?.find((m: Message) => m.role === 'system')?.content || '' : t('prompt:defaultRagMessage'),
+    prompt ? prompt.messages?.find((m: Message) => m.role === 'system')?.content as string || '' : t('prompt:defaultRagMessage'),
   )
   const [hidden, setHidden] = useState<boolean>(prompt?.hidden ?? false)
   const [ragIndexId, setRagIndexId] = useState<number | undefined | null>(prompt?.ragIndexId)

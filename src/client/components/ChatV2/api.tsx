@@ -1,4 +1,4 @@
-import type { ChatMessage, PostStreamSchemaV3Type } from '../../../shared/chat'
+import { readMessageContent, type ChatMessage, type PostStreamSchemaV3Type } from '../../../shared/chat'
 import { postAbortableStream } from '../../util/apiClient'
 import type { ChatToolOutput } from '../../../shared/tools'
 import { useGetQuery } from '../../hooks/apiHooks'
@@ -161,7 +161,7 @@ const formatEmailContent = (content: string): string => {
 const formatEmail = (messages: ChatMessage[], t): string => {
   const emailContent = messages
     .map((msg) => {
-      const formattedContent = msg.role === 'assistant' ? formatEmailContent(msg.content) : escapeHtml(msg.content)
+      const formattedContent = msg.role === 'assistant' ? formatEmailContent(readMessageContent(msg)) : escapeHtml(readMessageContent(msg))
 
       let title = ''
       if (msg.role === 'assistant') {

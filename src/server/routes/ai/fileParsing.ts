@@ -1,14 +1,35 @@
 import { extractPageText } from 'src/server/services/jobs/pdfParsing.job'
-import type { ChatMessage } from '../../../shared/chat'
+import type { ChatMessage, MessageContent } from '../../../shared/chat'
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
 
 export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file: Express.Multer.File) => {
-  let fileContent = ''
+  let fileContent: MessageContent[] | string = ''
 
   const textFileTypes = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'text/md']
+
+  const imageFileTypes = ['image/jpeg', 'image/png']
+
+  
   if (textFileTypes.includes(file.mimetype)) {
     const fileBuffer = file.buffer
     fileContent = fileBuffer.toString('utf8')
+  }
+
+
+  if(imageFileTypes.includes(file.mimetype)){
+    //Openai supports different types of image inputs,
+    // read the image content part of langchain: https://docs.langchain.com/oss/python/langchain/messages#message-content
+    //this is the openai specific: https://platform.openai.com/docs/guides/images-vision?api-mode=responses&format=base64-encoded
+    const image = file.buffer.toString('base64')
+    const imageAsFileContent = {
+      type: "image_url",
+      image_url: {
+        url: `data:${file.mimetype};base64,${image}`
+      },
+    }
+
+    const messageToAddFileTo = messages[messages.length - 1]
+    fileContent = [imageAsFileContent]
   }
 
   if (file.mimetype === 'application/pdf') {
@@ -23,9 +44,13 @@ export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file
 
   const messageToAddFileTo = messages[messages.length - 1]
 
-  const updatedMessage = {
+  //images require content to be certain format
+  const content: MessageContent[] | string = imageFileTypes.includes(file.mimetype) ?  fileContent : `${messageToAddFileTo.content} ${fileContent as string}`
+  console.log(content)
+
+  const updatedMessage: ChatMessage = {
     ...messageToAddFileTo,
-    content: `${messageToAddFileTo.content} ${fileContent}`,
+    content: content,
   }
 
   // Remove the old message and add the new one

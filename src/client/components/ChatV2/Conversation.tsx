@@ -15,7 +15,7 @@ import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import { t } from 'i18next'
 import React, { useId, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AssistantMessage, ChatMessage, MessageGenerationInfo, ToolCallResultEvent, ToolCallStatusEvent, UserMessage } from '../../../shared/chat'
+import { readMessageContent, type AssistantMessage, type ChatMessage, type MessageGenerationInfo, type ToolCallResultEvent, type ToolCallStatusEvent, type UserMessage } from '../../../shared/chat'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import CopyToClipboardButton from './CopyToClipboardButton'
 import { BlueButton } from './general/Buttons'
@@ -35,7 +35,7 @@ const UserMessageItem = ({ message }: { message: UserMessage }) => (
       width: 'fit-content',
     }}
   >
-    {message.content}
+    {readMessageContent(message)}
 
     {message.attachments && (
       <Typography
@@ -122,7 +122,7 @@ const AssistantMessageInfo = ({ message }: { message: AssistantMessage }) => {
 }
 
 const AssistantMessageItem = ({ message, setActiveToolResult }: { message: AssistantMessage; setActiveToolResult: (data: ToolCallResultEvent) => void }) => {
-  const processedContent = React.useMemo(() => preprocessMath(message.content), [message.content])
+  const processedContent = React.useMemo(() => preprocessMath(readMessageContent(message)), [message.content])
   const katexOptions = {
     macros: {
       '\\abs': '\\left|#1\\right|',
@@ -195,7 +195,7 @@ const AssistantMessageItem = ({ message, setActiveToolResult }: { message: Assis
           borderRadius: 4,
         }}
       >
-        <CopyToClipboardButton id={msgId} copied={message.content} />
+        <CopyToClipboardButton id={msgId} copied={readMessageContent(message)} />
       </Box>
       <AssistantMessageInfo message={message} />
       <ReactMarkdown

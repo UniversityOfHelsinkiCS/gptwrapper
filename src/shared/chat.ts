@@ -31,20 +31,37 @@ export type ErrorEvent = {
 
 export type ChatEvent = WritingEvent | ToolCallStatusEvent | ToolCallResultEvent | ErrorEvent
 
+export type ImageUrl = {
+  url: string
+}
+export type MessageContent = {
+  type: string
+  image_url: ImageUrl
+}
+
 export type SystemMessage = {
   role: 'system'
-  content: string
+  content: MessageContent[] | string
 }
 
 export type UserMessage = {
   role: 'user'
-  content: string
+  content: MessageContent[] | string
   attachments?: string
+}
+
+export const readMessageContent = (msg: UserMessage | AssistantMessage): string => {
+  if(Array.isArray(msg.content)){
+    return "this is an image, image rendering not supported yet"
+  }
+  else{
+    return msg.content.toString()
+  }
 }
 
 export type AssistantMessage = {
   role: 'assistant'
-  content: string
+  content: MessageContent[] | string
   error?: string
   toolCalls?: Record<string, ToolCallResultEvent>
   generationInfo?: MessageGenerationInfo
@@ -77,9 +94,20 @@ export const MessageGenerationInfoSchema = z.object({
 
 export type MessageGenerationInfo = z.Infer<typeof MessageGenerationInfoSchema>
 
+
+const MessageContentSchema = z.object({
+  type: z.string(),
+  image_url: z.object({
+    url: z.string()
+  })
+}) 
+export const MessageContentArraySchema = z.union([z.string(), z.array(MessageContentSchema)])
 const ChatMessageSchema = z.object({
   role: z.enum(['user', 'assistant']),
-  content: z.string().min(0).max(1_200_000),
+  content: z.union([
+    z.string().min(0).max(1_200_000),
+    MessageContentArraySchema,
+  ]),
 })
 
 export const PostStreamSchemaV3 = z.object({

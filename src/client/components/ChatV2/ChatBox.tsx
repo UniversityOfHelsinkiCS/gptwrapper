@@ -75,7 +75,8 @@ export const ChatBox = ({
   }
 
   const handleFileTypeValidation = (file: File): void => {
-    if (!file.type.startsWith('text/') && file.type !== 'application/pdf') {
+    const allowedImageTypes = ['image/jpeg', 'image/png']
+    if (!file.type.startsWith('text/') && file.type !== 'application/pdf' && !allowedImageTypes.find(s => s === file.type) ) {
       setDisallowedFileType(file.type)
       setFileTypeAlertOpen(true)
       setTimeout(() => {
