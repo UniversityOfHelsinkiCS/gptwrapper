@@ -130,8 +130,8 @@
     "shiftEnterSend": "Skift+Enter skickar",
     "enterSend": "Tryck Enter för att skicka",
     "customPrompt": "Egen instruktion",
-    "confirmResetTitle": "Bekräfta återställning",
-    "confirmResetMessage": "Återställ meddelandet?"
+    "confirmResetTitle": "Ny konversation",
+    "confirmResetMessage": "Du håller på att starta en ny konversation och den pågående konversationen kommer att rensas."
   },
   "settings": {
     "prompt": "Samtalsstart",

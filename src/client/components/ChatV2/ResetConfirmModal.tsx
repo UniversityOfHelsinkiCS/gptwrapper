@@ -29,19 +29,17 @@ export const ResetConfirmModal = ({
     <Dialog open={open} onClose={() => setOpen(false)}>
       <DialogTitle>{t('chat:confirmResetTitle')}</DialogTitle>
       <DialogContent>
-        <DialogContentText>
+        <DialogContentText mb={2}>
           {t('chat:confirmResetMessage')}
         </DialogContentText>
         <FormControlLabel
           control={<Checkbox checked={sendEmail} onChange={(ev) => setSendEmail(ev.target.checked)} data-testid="send-email" />}
           label={t('email:save')}
         />
+        <NewConversationConfirmConfiguratorSwitch value={skipConfirm} setValue={setSkipConfirm} context='chat' />
       </DialogContent>
-        <form onSubmit={handleConfirm}>
+      <form onSubmit={handleConfirm}>
         <DialogActions>
-          <Box flexGrow={1} display="flex" alignItems="center" ml="1rem">
-            <NewConversationConfirmConfiguratorSwitch value={skipConfirm} setValue={setSkipConfirm} context='chat' />
-          </Box>
           <Button onClick={() => setOpen(false)} data-testid="cancel-confirm-reset" variant="text">
             {t('common:cancel')}
           </Button>
