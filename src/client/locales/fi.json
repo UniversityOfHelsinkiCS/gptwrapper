@@ -169,6 +169,7 @@
     "promptEdit": "Muokkaa alustusta",
     "promptDetails": "Alustuksen tiedot",
     "promptSelect": "Valitse alustus",
+    "promptChange": "Vaihda alustus",
     "promptNone": "Ei alustusta",
     "modelTitle": "Kielimalli",
     "chatNew": "Uusi keskustelu",

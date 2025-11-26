@@ -211,7 +211,7 @@ const SideBar = ({
                     </TextButton>
                   )}
                   <TextButton data-testid="choose-prompt-button" startIcon={<AppsIcon />} onClick={() => navigate(`/${courseId}/prompts`)}>
-                    {t('sidebar:promptSelect')}
+                    {t('sidebar:promptChange')}
                   </TextButton>
                   <TextButton startIcon={<ExtensionOffIcon />} onClick={() => handleChangePrompt(undefined)}>
                     {t('sidebar:promptNone')}
