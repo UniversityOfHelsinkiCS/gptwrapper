@@ -48,6 +48,10 @@ courseRouter.get('/statistics/:id', async (req, res) => {
     where: { courseId: id },
   })
 
+  const request = req as unknown as RequestWithUser
+  const { user } = request
+  enforceUserHasFullAccess(user, chatInstance)
+
   if (!chatInstance) throw ApplicationError.NotFound('ChatInstance not found')
 
   const usages = await UserChatInstanceUsage.findAll({
