@@ -7,6 +7,7 @@ import { getTeachedCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
 import _ from 'lodash'
+import { adminMiddleware } from '../middleware/adminMiddleware'
 
 const courseRouter = express.Router()
 
@@ -20,9 +21,8 @@ const getCourses = async () => {
   return courses
 }
 
-courseRouter.get('/', async (_, res) => {
+courseRouter.get('/',adminMiddleware, async (req, res) => {
   const courses = await getCourses()
-
   res.send(courses)
 })
 
