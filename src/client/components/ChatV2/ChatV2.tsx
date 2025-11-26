@@ -341,16 +341,6 @@ const ChatV2Content = () => {
 
   if (statusLoading || userLoading || instanceLoading) return <HYLoadingSpinner />
 
-  if (chatInstance && chatInstance.usageLimit === 0) {
-    return (
-      <Box>
-        <ChatInfo course={chatInstance} />
-        <Alert severity="warning" style={{ marginTop: 20 }}>
-          <Typography variant="h6">{t('course:curreNotOpen')}</Typography>
-        </Alert>
-      </Box>
-    )
-  }
 
   if (chatInstance?.activityPeriod) {
     const isResponsible = user?.isAdmin || chatInstance.responsibilities?.some((r) => r.user.id === user?.id)
