@@ -14,7 +14,7 @@ import { OutlineButtonBlack, TextButton } from './ChatV2/general/Buttons'
 import { Box, ListItem } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Locale } from '@shared/lang'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import useCurrentUser from '../hooks/useCurrentUser'
 import { AdminPanelSettings, BarChart, Logout } from '@mui/icons-material'
 import apiClient from '../util/apiClient'
@@ -31,6 +31,12 @@ export default function GlobalMenu({
   const { t, i18n } = useTranslation()
   const { user } = useCurrentUser()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const isAdmin = pathname.includes("admin");
+
+
   const open = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -43,8 +49,13 @@ export default function GlobalMenu({
     localStorage.setItem('lang', newLanguage)
   }
 
+
+
   return (
     <div style={{ position: 'fixed', top: 30, right: 30 }}>
+      {isAdmin && <OutlineButtonBlack onClick={() => navigate('/general')} sx={{ position: 'absolute', right: '4rem' }}>
+        Takaisin chattiin
+      </OutlineButtonBlack>}
       <OutlineButtonBlack
         id="basic-button"
         data-testid="global-menu-button"
@@ -87,7 +98,7 @@ export default function GlobalMenu({
             <ListItemText>{t('settings')}</ListItemText>
 
           </MenuItem>
-          <MenuItem 
+          <MenuItem
             data-testid="open-disclaimer-button"
             onClick={() => {
               openDisclaimer()
