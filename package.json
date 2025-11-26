@@ -107,7 +107,7 @@
     "multer": "2.0.2",
     "multer-s3": "3.0.1",
     "node-cron": "3.0.3",
-    "notistack": "3.0.1",
+    "notistack": "3.0.2",
     "openai": "4.102.0",
     "pdfjs-dist": "5.4.149",
     "pg": "8.11.3",

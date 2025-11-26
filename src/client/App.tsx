@@ -26,7 +26,9 @@ import { useLoggedInAs } from './hooks/useLoggedInAs'
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
   if (user.isAdmin) return true
-  if (courseId && !user.activeCourseIds.includes(courseId) && courseId !== 'general') return false
+  if (courseId && !user.activeCourseIds.includes(courseId) && courseId !== 'general') {
+    return false
+  }
 
   if (!courseId && window.location.pathname.endsWith('/chats')) return true
   if (!courseId && !user.hasIamAccess) return false
