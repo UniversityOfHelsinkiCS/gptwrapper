@@ -136,11 +136,13 @@ courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Re
 
 //checks if user is a admin or is responsible for the course, returns forbidden error if not
 export const enforceUserHasFullAccess = async (user, chatInstance: ChatInstance) => {
-  const isResponsibleForCourse: boolean = userAssignedAsResponsible(user.id, chatInstance)
+  const isResponsibleForCourse: boolean = await userAssignedAsResponsible(user.id, chatInstance)
   const hasFullAccess: boolean = user.isAdmin || isResponsibleForCourse
+
   if (!hasFullAccess) {
     throw ApplicationError.Forbidden('Unauthorized')
   }
+
   return hasFullAccess
 }
 
@@ -148,7 +150,11 @@ export const chatIsActive = (chatInstance: ChatInstance) => {
   const start = new Date(chatInstance.activityPeriod.startDate)
   const end = new Date(chatInstance.activityPeriod.endDate)
   const today = new Date()
-
+  console.log("start of dates")
+  console.log(today.toISOString())
+  console.log(start.toISOString())
+  console.log(end.toISOString())
+  console.log("end of dates")
   const todayIsMoreOrEqualToStart = today >= start
   const todayIsLessOrEqualToEnd = today <= end
 
@@ -164,7 +170,10 @@ export const enforceUserHasStudentOrFullAccess = async (user, chatInstance: Chat
 
   const isEnrolled = enrolments ? enrolments.find((u) => u.userId === user.id) : false
   const courseIsOpen = chatIsActive(chatInstance)
-
+  console.log("enrolled, open")
+  console.log(isEnrolled)
+  console.log(courseIsOpen)
+  console.log("---")
   //the user is a student so let the user access
   if (isEnrolled && courseIsOpen) {
     return true
@@ -312,19 +321,20 @@ courseRouter.put('/:id', async (req, res) => {
   res.send(chatInstance)
 })
 
-const userAssignedAsResponsible = (userId, chatInstance: ChatInstance) => {
-  const responsibilities = chatInstance.responsibilities
+const userAssignedAsResponsible = async (userId, chatInstance: ChatInstance) => {
+
+  const responsibilities = await Responsibility.findOne({
+    where: {
+       userId: userId,
+       chatInstanceId: chatInstance.id
+    },
+  })
+
   if (!responsibilities) {
     return false
   }
 
-  const isResponsible = responsibilities
-    .map((r: Responsibility) => {
-      return r.user?.id
-    })
-    .filter(Boolean)
-    .includes(userId)
-  return isResponsible
+  return true
 }
 
 const getUserByUsername = async (username: string): Promise<User | null> => {
@@ -359,7 +369,7 @@ courseRouter.post('/:id/responsibilities/assign', async (req, res) => {
   }
 
   const assignedUserId = userToAssign.id
-  const userAssignedAlready = userAssignedAsResponsible(assignedUserId, chatInstance)
+  const userAssignedAlready = await userAssignedAsResponsible(assignedUserId, chatInstance)
   if (userAssignedAlready) {
     res.status(400).send('User is already responsible for the course')
     return
@@ -408,7 +418,7 @@ courseRouter.post('/:id/responsibilities/remove', async (req, res) => {
   }
 
   const assignedUserId: string = userToRemove.id
-  const userAssignedAlready: boolean = userAssignedAsResponsible(assignedUserId, chatInstance)
+  const userAssignedAlready: boolean = await userAssignedAsResponsible(assignedUserId, chatInstance)
   if (!userAssignedAlready) {
     res.status(400).send('User to remove not found')
     return
