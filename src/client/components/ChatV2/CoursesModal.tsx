@@ -131,7 +131,7 @@ const CourseList = ({
       <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
         <Table>
           <TableHead>
-            <TableRow sx={{ backgroundColor: 'rgba(0,0,0,0.03)' }}>
+            <TableRow sx={{ backgroundColor: 'grey.100' }}>
               <TableCell sx={{ fontWeight: 'bold' }}>
                 <TableSortLabel active={orderBy === 'name'} direction={orderBy === 'name' ? order : 'asc'} onClick={() => handleRequestSort('name')}>
                   {t('course:name')}
@@ -165,7 +165,11 @@ const CourseList = ({
                   sx={{
                     display: 'table-row',
                     '&:last-child td, &:last-child th': { border: 0 },
-                    borderRadius: '1.25rem'
+                    borderRadius: '1.25rem',
+                    '&:hover': {
+                      backgroundColor: 'grey.100',
+                      cursor: 'pointer'
+                    },
                   }}>
 
                   <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
