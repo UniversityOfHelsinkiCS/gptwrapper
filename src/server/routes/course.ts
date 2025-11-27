@@ -50,9 +50,10 @@ courseRouter.get('/statistics/:id', async (req, res) => {
 
   const request = req as unknown as RequestWithUser
   const { user } = request
-  enforceUserHasFullAccess(user, chatInstance)
 
   if (!chatInstance) throw ApplicationError.NotFound('ChatInstance not found')
+
+  enforceUserHasFullAccess(user, chatInstance)
 
   const usages = await UserChatInstanceUsage.findAll({
     where: { chatInstanceId: chatInstance.id },
@@ -80,12 +81,15 @@ courseRouter.get('/:id', async (req, res) => {
   const { id } = req.params
 
   const chatInstance = await getChatInstance(id)
+
   if (!chatInstance) {
     throw ApplicationError.NotFound('Chat instance not found')
   }
 
+
   const request = req as unknown as RequestWithUser
   const { user } = request
+
   await enforceUserHasStudentOrFullAccess(user, chatInstance)
 
   res.send(chatInstance)
@@ -131,7 +135,7 @@ courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Re
 })
 
 //checks if user is a admin or is responsible for the course, returns forbidden error if not
-export const enforceUserHasFullAccess = async (user, chatInstance) => {
+export const enforceUserHasFullAccess = async (user, chatInstance: ChatInstance) => {
   const isResponsibleForCourse: boolean = userAssignedAsResponsible(user.id, chatInstance)
   const hasFullAccess: boolean = user.isAdmin || isResponsibleForCourse
   if (!hasFullAccess) {
@@ -153,27 +157,31 @@ export const chatIsActive = (chatInstance: ChatInstance) => {
 
 
 //allows users that are students or admins to access the course. If as user is a student then the course must be open for students
-export const enforceUserHasStudentOrFullAccess =  async (user, chatInstance: ChatInstance) => {
-  const isEnrolled = chatInstance.enrolments ? chatInstance.enrolments.find((u) => u.userId === user.id) : false
+export const enforceUserHasStudentOrFullAccess = async (user, chatInstance: ChatInstance) => {
+  const enrolments = await Enrolment.findAll({
+    where: { chatInstanceId: chatInstance.id },
+  })
+
+  const isEnrolled = enrolments ? enrolments.find((u) => u.userId === user.id) : false
   const courseIsOpen = chatIsActive(chatInstance)
 
   //the user is a student so let the user access
-  if(isEnrolled && courseIsOpen){
+  if (isEnrolled && courseIsOpen) {
     return true
   }
 
   //check if fullaccess
   const fullAccess = await enforceUserHasFullAccess(user, chatInstance)
-  if (fullAccess){
+  if (fullAccess) {
     return true
-  }   
+  }
 
   //the enforceUserHasFullAcess should throw an error but just in case we throw another one
   throw ApplicationError.Forbidden('Unauthorized')
 }
 
 // returns a chatInstance, throws an chat instance not found if not found
-const getChatInstance = async (courseId) => {
+const getChatInstance = async (courseId: string) => {
   const chatInstance = await ChatInstance.findOne({
     where: { courseId: courseId },
     include: [

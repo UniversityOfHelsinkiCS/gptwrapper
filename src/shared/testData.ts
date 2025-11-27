@@ -8,7 +8,7 @@ export const devUserHeaders = {
 
 const testRoleToIams = {
   teacher: 'hy-employees;grp-currechat-demostudents;grp-currechat-demoteachers',
-  student: 'grp-students;',
+  student: 'grp-students',
   admin: 'grp-toska;hy-employees;grp-currechat-demostudents;grp-currechat-demoteachers',
 }
 

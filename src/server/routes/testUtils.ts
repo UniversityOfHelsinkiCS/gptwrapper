@@ -84,6 +84,7 @@ router.post('/reset-test-data', async (req, res) => {
   await User.create(headersToUser(temporalTeacherHeaders))
 
   if (testUserRole === 'student') {
+    console.log("creating enrolment", testUserRole, TEST_COURSES.TEST_COURSE)
     await Enrolment.create({
       userId,
       chatInstanceId: TEST_COURSES.TEST_COURSE.id,
