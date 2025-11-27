@@ -98,14 +98,13 @@ const PromptModal = () => {
           >
             {t('course:directPromptLink', { name: prompt.name })}
           </Link>
-
-          <IconButton
-            size="small"
+          <TextButton
             onClick={(e) => handleCopyLink(e, prompt.id)}
-            aria-label={t('common:copy')}
+            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
           >
             <ContentCopyOutlined fontSize="small" />
-          </IconButton>
+            {t('copyStudentLink')}
+          </TextButton>
         </>
       )}
 
