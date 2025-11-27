@@ -40,29 +40,9 @@ export const useNewConversationConfirmMutation = (context: 'chat' | 'settings') 
   return mutation
 }
 
-export const NewConversationConfirmConfiguratorSwitch = ({ value, setValue, context }: { value: boolean, setValue: (value: boolean) => void, context?: 'chat' | 'settings' }) => {
-  const { t } = useTranslation()
-  const label = context === 'chat' ? t('preferences:newConversationConfirmLabelChat') : t('preferences:newConversationConfirmLabelSettings')
-
+export const NewConversationConfirmConfigurator = ({ label, value, setValue, context }: { label: string, value: boolean, setValue: (value: boolean) => void, context?: 'chat' | 'settings' }) => {
   const Control = context === 'chat' ? Checkbox : Switch
-
   return (
     <FormControlLabel control={<Control checked={value} onChange={(e) => setValue(e.target.checked)} />} label={label} />
-  )
-}
-
-export const NewConversationConfirmConfigurator = ({ context }: { context: 'chat' | 'settings' }) => {
-  const { user } = useCurrentUser()
-  const skipConfirm = user?.preferences?.skipNewConversationConfirm ?? false
-  const setSkipConfirmMutation = useNewConversationConfirmMutation(context)
-
-  return (
-    <NewConversationConfirmConfiguratorSwitch
-      value={skipConfirm}
-      setValue={async (newValue: boolean) => {
-        await setSkipConfirmMutation(newValue)
-      }}
-      context={context}
-    />
   )
 }

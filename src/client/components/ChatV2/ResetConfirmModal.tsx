@@ -2,7 +2,7 @@ import { Checkbox, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogA
 import { useTranslation } from 'react-i18next'
 import { BlueButton } from './general/Buttons'
 import { useState } from 'react'
-import { NewConversationConfirmConfiguratorSwitch, useNewConversationConfirmMutation } from '../Settings/NewConversationConfirmConfigurator'
+import { NewConversationConfirmConfigurator, useNewConversationConfirmMutation } from '../Settings/NewConversationConfirmConfigurator'
 import useCurrentUser from '../../hooks/useCurrentUser'
 
 export const ResetConfirmModal = ({
@@ -36,7 +36,7 @@ export const ResetConfirmModal = ({
           control={<Checkbox checked={sendEmail} onChange={(ev) => setSendEmail(ev.target.checked)} data-testid="send-email" />}
           label={t('email:save')}
         />
-        <NewConversationConfirmConfiguratorSwitch value={skipConfirm} setValue={setSkipConfirm} context='chat' />
+        <NewConversationConfirmConfigurator label={t('preferences:newConversationConfirmLabelChat')} value={skipConfirm} setValue={setSkipConfirm} context='chat' />
       </DialogContent>
       <form onSubmit={handleConfirm}>
         <DialogActions>

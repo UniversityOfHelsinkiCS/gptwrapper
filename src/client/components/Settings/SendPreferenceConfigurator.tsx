@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import ArrowUpward from '@mui/icons-material/ArrowUpward'
 import KeyboardReturn from '@mui/icons-material/KeyboardReturn'
-import Settings from '@mui/icons-material/Settings'
 import { usePreferencesUpdateMutation } from '../../hooks/usePreferencesUpdateMutation'
 import { UserPreferences } from '../../../shared/user'
 import { useSnackbar } from 'notistack'
@@ -43,6 +42,38 @@ export const EnterForNewline = ({ t }) => (
     {t('sendPreferenceConfigurator:toNewline')}
   </Box>
 )
+
+export const SendPreferenceConfigurator = ({ value, onChange }: { value: 'shift+enter' | 'enter', onChange: (event: React.ChangeEvent<HTMLInputElement>) => void; }) => {
+  const { t } = useTranslation()
+
+  return (
+    <RadioGroup value={value} onChange={onChange} name="sendPreferenceConfigurator">
+      <Typography >{t('sendPreferenceConfigurator:title')}</Typography>
+      <FormControlLabel
+        sx={{ my: 2, borderRadius: 1, backgroundColor: 'grey.100', p: 2 }}
+        value="shift+enter"
+        control={<Radio />}
+        label={
+          <Box sx={{}}>
+            <ShiftEnterToSend t={t} />
+            <EnterForNewline t={t} />
+          </Box>
+        }
+      />
+      <FormControlLabel
+        sx={{ mb: 2, borderRadius: 1, backgroundColor: 'grey.100', p: 2 }}
+        value="enter"
+        control={<Radio />}
+        label={
+          <Box>
+            <EnterToSend t={t} />
+            <ShiftEnterForNewline t={t} />
+          </Box>
+        }
+      />
+    </RadioGroup>
+  )
+}
 
 export const SendPreferenceConfiguratorModal = ({ open, onClose, anchorEl, context }) => {
   const { user } = useCurrentUser()
@@ -100,54 +131,13 @@ export const SendPreferenceConfiguratorModal = ({ open, onClose, anchorEl, conte
       }}
     >
       <form onSubmit={handleSubmit}>
-        <FormControl sx={{ p: 2 }}>
-          <Typography>{t('sendPreferenceConfigurator:title')}</Typography>
-          <RadioGroup value={value} onChange={handleChange} name="sendPreferenceConfigurator">
-            <FormControlLabel
-              sx={{ my: 2, fontSize: 'small' }}
-              value="shift+enter"
-              control={<Radio />}
-              label={
-                <div>
-                  <ShiftEnterToSend t={t} />
-                  <EnterForNewline t={t} />
-                </div>
-              }
-            />
-            <FormControlLabel
-              sx={{ mb: 2, fontSize: 'small' }}
-              value="enter"
-              control={<Radio />}
-              label={
-                <div>
-                  <EnterToSend t={t} />
-                  <ShiftEnterForNewline t={t} />
-                </div>
-              }
-            />
-          </RadioGroup>
+        <FormControl sx={{ p: 3 }}>
+          <SendPreferenceConfigurator value={value} onChange={handleChange} />
           <OutlineButtonBlack type="submit" data-testid="submit-send-preference">
             {t('sendPreferenceConfigurator:ok')}
           </OutlineButtonBlack>
         </FormControl>
       </form>
     </Menu>
-  )
-}
-
-export const SendPreferenceConfiguratorButton = () => {
-  const { t } = useTranslation()
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget)
-  const handleClose = () => setAnchorEl(null)
-  const open = Boolean(anchorEl)
-
-  return (
-    <>
-      <OutlineButtonBlack onClick={handleClick} endIcon={<Settings />}>
-        {t('sendPreferenceConfigurator:openConfigurator')}
-      </OutlineButtonBlack>
-      <SendPreferenceConfiguratorModal open={open} onClose={handleClose} anchorEl={anchorEl} context="settings" />
-    </>
   )
 }

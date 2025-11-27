@@ -32,16 +32,16 @@ import Footer from '../Footer'
 import { CustomIcon } from './general/CustomIcon'
 
 const SideBar = ({
-  expanded,
-  setExpanded,
+  open,
+  setOpen,
   course,
   handleReset,
   messages,
   currentModel,
   setModel,
 }: {
-  expanded: boolean
-  setExpanded: React.Dispatch<React.SetStateAction<boolean>>
+  open: boolean
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>
   course: Course | undefined
   handleReset: () => void
   onClose?: () => void
@@ -86,15 +86,15 @@ const SideBar = ({
           justifyContent: 'space-between',
           pt: 3,
           height: '100%',
-          width: !expanded ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)',
+          width: !open ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)',
           borderRight: '1px solid rgba(0, 0, 0, 0.15)',
           zIndex: 999,
         }}
         className="scrollable-styled"
       >
-        {!expanded ? (
+        {!open ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
-            <TextButton onClick={() => setExpanded((prev) => !prev)}>
+            <TextButton onClick={() => setOpen((prev) => !prev)}>
               <CustomIcon src={sidebarOpen} />
             </TextButton>
             <TextButton onClick={handleReset} data-testid="new-conversation-button">
@@ -117,7 +117,7 @@ const SideBar = ({
                 },
               }}
             >
-              <TextButton onClick={() => setExpanded((prev) => !prev)}>
+              <TextButton onClick={() => setOpen((prev) => !prev)}>
                 <CustomIcon src={sidebarClose} />
               </TextButton>
             </Box>
@@ -244,7 +244,7 @@ const SideBar = ({
             </Box>
           </Box>
         )}
-        {expanded && (
+        {open && (
           <Box px={3} py={2}>
             <Footer />
           </Box>

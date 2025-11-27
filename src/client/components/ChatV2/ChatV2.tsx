@@ -99,10 +99,13 @@ const ChatV2Content = () => {
   const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as ChatMessage[])
   const [saveConsent, setSaveConsent] = useLocalStorageState<boolean>('save-consent', false)
 
-  // App States
   const [fileName, setFileName] = useState<string>('')
   const [messageWarning, setMessageWarning] = useState<{ [key in WarningType]?: { message: string; ignored: boolean } }>({})
-  const [leftPanelOpen, setLeftPanelOpen] = useState<boolean>(() => !isMobile)
+
+  const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
+  const [sideBarOpen, setSideBarOpen] = useState<boolean>(() => {
+    return isMobile ? false : !defaultCollapsedSidebar
+  })
 
   const leftPanelFloating = isEmbeddedMode || isMobile
 
@@ -373,7 +376,7 @@ const ChatV2Content = () => {
     }
   }
 
-  const leftPanelCollapsed = !leftPanelOpen || leftPanelFloating
+  const leftPanelCollapsed = !sideBarOpen || leftPanelFloating
   const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
   const rightPanelContentWidth = rightMenuOpen ? 'var(--right-menu-width)' : '0px'
 
@@ -388,14 +391,14 @@ const ChatV2Content = () => {
       {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
       {(isEmbeddedMode || isMobile) ? (
         <Drawer
-          open={leftPanelOpen}
+          open={sideBarOpen}
           onClose={() => {
-            setLeftPanelOpen(!leftPanelOpen)
+            setSideBarOpen(!sideBarOpen)
           }}
         >
           <SideBar
-            expanded={true}
-            setExpanded={setLeftPanelOpen}
+            open={true} // always open in drawer
+            setOpen={setSideBarOpen}
             course={chatInstance}
             handleReset={handleResetRequest}
             messages={messages}
@@ -405,8 +408,8 @@ const ChatV2Content = () => {
         </Drawer>
       ) : (
         <SideBar
-          expanded={leftPanelOpen}
-          setExpanded={setLeftPanelOpen}
+          open={sideBarOpen}
+          setOpen={setSideBarOpen}
           course={chatInstance}
           handleReset={handleResetRequest}
           messages={messages}
@@ -433,7 +436,7 @@ const ChatV2Content = () => {
               top: '50%',
               transform: 'translate(-40%) rotate(-90deg)',
             }}
-            onClick={() => setLeftPanelOpen(true)}
+            onClick={() => setSideBarOpen(true)}
             data-testid="left-panel-open"
           >
             <SettingsIcon />
