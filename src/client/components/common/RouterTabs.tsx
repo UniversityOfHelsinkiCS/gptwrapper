@@ -11,5 +11,5 @@ export const RouterTabs = ({ children }: { children: (React.ReactElement | false
     .filter((c) => React.isValidElement(c))
     .findIndex((c) => !!matchPath(pathname, stripSearch((c.props as { to: string }).to)))
 
-  return <Tabs value={activeIndex < 0 ? 0 : activeIndex}>{children}</Tabs>
+  return <Tabs value={activeIndex < 0 ? 0 : activeIndex} slotProps={{ indicator: { style: { backgroundColor: 'black' } } }} textColor='inherit' >{children}</Tabs>
 }

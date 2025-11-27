@@ -1,6 +1,6 @@
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import { ContentCopyOutlined, Visibility, VisibilityOff } from '@mui/icons-material'
-import { Box, Divider, IconButton, MenuItem, Tab, Tabs, Link, Tooltip } from '@mui/material'
+import { Box, Divider, IconButton, MenuItem, Tab, Tabs, Link, Tooltip, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -147,10 +147,14 @@ const PromptModal = () => {
       <Tabs
         sx={{ borderBottom: 1, borderColor: 'divider' }}
         value={tab}
-        onChange={(_, newValue) => setTab(newValue)}
+        onChange={(_, newValue) => { setTab(newValue); setCreateNewOpen(false) }}
+        slotProps={{
+          indicator: { style: { backgroundColor: 'black' } }
+        }}
+        textColor='inherit'
       >
-        {courseId !== 'general' && <Tab label={t('settings:coursePrompts')} disabled={createNewOpen} />}
-        <Tab label={t('settings:myPrompts')} disabled={createNewOpen} />
+        {courseId !== 'general' && <Tab label={t('settings:coursePrompts')} />}
+        <Tab label={t('settings:myPrompts')} />
       </Tabs>
 
       <Box sx={{ mt: 2 }}>
@@ -196,7 +200,7 @@ const PromptModal = () => {
           <MenuItem disabled>{t('settings:noPrompts')}</MenuItem>
         )}
       </Box>
-    </Box>
+    </Box >
   )
 }
 
