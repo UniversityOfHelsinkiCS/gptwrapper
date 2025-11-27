@@ -150,15 +150,12 @@ export const chatIsActive = (chatInstance: ChatInstance) => {
   const start = new Date(chatInstance.activityPeriod.startDate)
   const end = new Date(chatInstance.activityPeriod.endDate)
   const today = new Date()
-  console.log("start of dates")
-  console.log(today.toISOString())
-  console.log(start.toISOString())
-  console.log(end.toISOString())
-  console.log("end of dates")
+
   const todayIsMoreOrEqualToStart = today >= start
   const todayIsLessOrEqualToEnd = today <= end
+  const usageLimitMoreThanZero = chatInstance.usageLimit > 0 
 
-  return todayIsMoreOrEqualToStart && todayIsLessOrEqualToEnd
+  return todayIsMoreOrEqualToStart && todayIsLessOrEqualToEnd && usageLimitMoreThanZero
 }
 
 
@@ -170,10 +167,7 @@ export const enforceUserHasStudentOrFullAccess = async (user, chatInstance: Chat
 
   const isEnrolled = enrolments ? enrolments.find((u) => u.userId === user.id) : false
   const courseIsOpen = chatIsActive(chatInstance)
-  console.log("enrolled, open")
-  console.log(isEnrolled)
-  console.log(courseIsOpen)
-  console.log("---")
+
   //the user is a student so let the user access
   if (isEnrolled && courseIsOpen) {
     return true
