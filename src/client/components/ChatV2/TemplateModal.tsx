@@ -27,6 +27,7 @@ const TemplateModal: React.FC<{ open: boolean, root: string, children: React.Rea
           bgcolor: 'background.paper',
           boxShadow: 24,
           overflow: 'auto',
+          borderRadius: '0.5rem'
         }}
       >
         <Box
