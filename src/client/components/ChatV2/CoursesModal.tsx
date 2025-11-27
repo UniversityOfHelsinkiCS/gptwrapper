@@ -158,8 +158,8 @@ const CourseList = ({
           <TableBody>
             {sorted.length ? (
               sorted.map((course) => (
-                <TableRow key={course.courseId}
-                  component={MenuItem}
+                <TableRow
+                  key={course.courseId}
                   onClick={() => navigate(`/${course.courseId}`)}
                   role='link'
                   sx={{
