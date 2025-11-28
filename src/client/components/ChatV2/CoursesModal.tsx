@@ -180,7 +180,7 @@ const CourseList = ({
                   <TableCell align="right" sx={{ width: 0 }}>
                     <Box sx={{ display: 'inline-flex', gap: 2, pl: '3rem' }}>
                       {type === 'ended' && (
-                        <Box component="span" sx={{ color: 'error.main', whiteSpace: 'nowrap' }}>
+                        <Box component="span" sx={{ color: 'error.main', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center' }}>
                           {t('course:courseEnded')}
                         </Box>
                       )}
