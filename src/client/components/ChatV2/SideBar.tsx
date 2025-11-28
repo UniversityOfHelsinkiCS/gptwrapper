@@ -1,4 +1,4 @@
-import { Box, Divider, Link, Typography } from '@mui/material'
+import { Box, Chip, Divider, Link, Tooltip, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
@@ -16,6 +16,7 @@ import HelpCenterIcon from '@mui/icons-material/HelpCenter'
 import AppsIcon from '@mui/icons-material/Apps'
 import ExtensionOffIcon from '@mui/icons-material/ExtensionOff'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import hyLogo from '../../assets/hy_logo.svg'
 import sidebarClose from '../../assets/sidebar-close.svg'
 import sidebarOpen from '../../assets/sidebar-open.svg'
@@ -70,6 +71,36 @@ const SideBar = ({
   const showEditPrompt = (prompt: Prompt) => {
     return amongResponsibles || courseId === 'general' || myPrompts.some((a: Prompt) => a.id === prompt.id)
   }
+
+  const CourseStatus = () => {
+    if (!chatInstance) return null;
+    const courseEnabled = chatInstance.usageLimit > 0;
+    const courseEnded = Date.parse(chatInstance.activityPeriod.endDate) < Date.now();
+
+    if (courseEnded) {
+      return (
+        <Tooltip title={t('chat:courseChatEndedInfo')}>
+          <Chip
+            label={t('chat:courseChatEnded')}
+            color="error"
+            icon={<InfoOutlinedIcon fontSize="small" />}
+          />
+        </Tooltip>
+      );
+    } else if (!courseEnabled) {
+      return (
+        <Tooltip title={t('chat:courseChatNotActivatedInfo')}>
+          <Chip
+            label={t('chat:courseChatNotActivated')}
+            color="warning"
+            icon={<InfoOutlinedIcon fontSize="small" />}
+          />
+        </Tooltip>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <Box
@@ -135,6 +166,7 @@ const SideBar = ({
               {course ? (
                 <>
                   <Box mb={1} sx={{ border: '1px solid rgba(0,0,0,0.2)', borderRadius: '0.5rem', p: 2 }}>
+                    <CourseStatus />
                     <Typography my={0.5} fontWeight="bold" sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                       {course?.name[language] || 'undefined course'}
                     </Typography>

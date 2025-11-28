@@ -126,7 +126,11 @@
     "customPrompt": "Kustomoitu alustus",
     "confirmResetTitle": "Uusi keskustelu",
     "confirmResetMessage": "Olet aloittamassa uuden keskustelun ja käynnissä oleva keskustelu tyhjennetään.",
-    "predictableTemperature": "Ennustettava"
+    "predictableTemperature": "Ennustettava",
+    "courseChatEnded": "Kurssi on päättynyt",
+    "courseChatEndedInfo": "Kurssin aukioloaika on päättynyt ja kurssi ei ole enään saatavilla.",
+    "courseChatNotActivated": "Ei aktivoitu",
+    "courseChatNotActivatedInfo": "Kurssi ei ole vielä aktivoitu. Tämä tarkoittaa, että kurssin chat ei ole auki opiskelijoille."
   },
   "settings": {
     "prompt": "Keskustelun alustus",

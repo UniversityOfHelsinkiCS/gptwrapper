@@ -10,7 +10,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import InfoIcon from '@mui/icons-material/Info'
 import ReviewsIcon from '@mui/icons-material/Reviews'
 import LanguageIcon from '@mui/icons-material/Language'
-import { OutlineButtonBlack, TextButton } from './ChatV2/general/Buttons'
+import { BlueButton, OutlineButtonBlack, TextButton } from './ChatV2/general/Buttons'
 import { Box, ListItem } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Locale } from '@shared/lang'
@@ -53,9 +53,9 @@ export default function GlobalMenu({
 
   return (
     <div style={{ position: 'fixed', top: 30, right: 30 }}>
-      {isAdmin && <OutlineButtonBlack onClick={() => navigate('/general')} sx={{ position: 'absolute', right: '4rem' }}>
+      {isAdmin && <BlueButton onClick={() => navigate('/general')} sx={{ position: 'absolute', right: '4rem' }}>
         Takaisin chattiin
-      </OutlineButtonBlack>}
+      </BlueButton>}
       <OutlineButtonBlack
         id="basic-button"
         data-testid="global-menu-button"

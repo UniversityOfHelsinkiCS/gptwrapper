@@ -131,7 +131,11 @@
     "enterSend": "Tryck Enter för att skicka",
     "customPrompt": "Egen instruktion",
     "confirmResetTitle": "Ny konversation",
-    "confirmResetMessage": "Du håller på att starta en ny konversation och den pågående konversationen kommer att rensas."
+    "confirmResetMessage": "Du håller på att starta en ny konversation och den pågående konversationen kommer att rensas.",
+    "courseChatEnded": "Kursen har avslutats",
+    "courseChatEndedInfo": "Kursens öppettid har avslutats och kursen är inte längre tillgänglig.",
+    "courseChatNotActivated": "Inte aktiverad",
+    "courseChatNotActivatedInfo": "Kursen har ännu inte aktiverats. Detta innebär att kursens chatt inte är öppen för studenter."
   },
   "settings": {
     "prompt": "Samtalsstart",

@@ -123,7 +123,11 @@
     "customPrompt": "custom prompt",
     "confirmResetTitle": "New conversation",
     "confirmResetMessage": "You are about to start a new conversation and the ongoing conversation will be cleared.",
-    "predictableTemperature": "Predictable"
+    "predictableTemperature": "Predictable",
+    "courseChatEnded": "Course has ended",
+    "courseChatEndedInfo": "The course period has ended and the course is no longer available.",
+    "courseChatNotActivated": "Not activated",
+    "courseChatNotActivatedInfo": "The course has not been activated yet. This means the course chat is not open for students."
   },
   "settings": {
     "prompt": "Conversation prompt",
