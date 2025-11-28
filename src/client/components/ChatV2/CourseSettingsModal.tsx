@@ -162,11 +162,11 @@ export const CourseSettingsModal = () => {
   return (
     <Container maxWidth="xl">
       <RouterTabs>
-        <Tab label={t('common:settings')} to={`/${courseId}/course`} component={Link} />
-        <Tab label={t('course:teachers')} to={`/${courseId}/course/teachers`} component={Link} />
-        <Tab label={<Badge badgeContent={filteredUsages.length} color='secondary' >{t('course:students')}</Badge>} to={`/${courseId}/course/students`} component={Link} />
-        {chatInstance.saveDiscussions && <Tab label={t('course:discussions')} to={`/${courseId}/course/discussions`} component={Link} />}
-        <Tab label={t('course:sourceMaterials')} to={`/${courseId}/course/rag`} component={Link} />
+        <Tab label={t('common:settings')} to={`/${courseId}/course`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
+        <Tab label={t('course:teachers')} to={`/${courseId}/course/teachers`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
+        <Tab label={<Badge badgeContent={filteredUsages.length} color='secondary' >{t('course:students')}</Badge>} to={`/${courseId}/course/students`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
+        {chatInstance.saveDiscussions && <Tab label={t('course:discussions')} to={`/${courseId}/course/discussions`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />}
+        <Tab label={t('course:sourceMaterials')} to={`/${courseId}/course/rag`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
       </RouterTabs>
       <Routes>
         <Route index path='/' element={

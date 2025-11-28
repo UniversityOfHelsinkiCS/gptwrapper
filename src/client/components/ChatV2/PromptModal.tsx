@@ -153,8 +153,8 @@ const PromptModal = () => {
         }}
         textColor='inherit'
       >
-        {courseId !== 'general' && <Tab label={t('settings:coursePrompts')} />}
-        <Tab label={t('settings:myPrompts')} />
+        {courseId !== 'general' && <Tab label={t('settings:coursePrompts')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />}
+        <Tab label={t('settings:myPrompts')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
       </Tabs>
 
       <Box sx={{ mt: 2 }}>
