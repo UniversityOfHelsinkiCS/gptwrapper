@@ -38,7 +38,7 @@ const Stats: React.FC = () => {
   }
 
   return (
-    <>
+    <Box py={3}>
       <Typography variant="h5" display="inline">
         {t('course:statistics')}
       </Typography>
@@ -151,7 +151,7 @@ const Stats: React.FC = () => {
       )}
 
       <MaxTokenUsageStudents course={course} />
-    </>
+    </Box>
   )
 }
 

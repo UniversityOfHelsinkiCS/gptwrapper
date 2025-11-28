@@ -1,12 +1,12 @@
 import { useState, forwardRef } from 'react'
-import { Box, Typography, TextField, FormControlLabel, Switch } from '@mui/material'
+import { Box, Typography, TextField, FormControlLabel, Switch, Divider } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { useTranslation } from 'react-i18next'
 import { format } from 'date-fns'
 import { enqueueSnackbar } from 'notistack'
 import { Course, SetState, User } from '../../../types'
 import { useEditCourseMutation } from '../../../hooks/useCourseMutation'
-import { BlueButton, OutlineButtonBlue } from '../../ChatV2/general/Buttons'
+import { BlueButton } from '../../ChatV2/general/Buttons'
 
 const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; setOpen: SetState<boolean>; user: User }, ref) => {
   const { t } = useTranslation()
@@ -54,7 +54,7 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
           <DatePicker label={t('closesAt')} sx={{ width: '40%' }} value={endDate} onChange={(date) => setEndDate(date || new Date())} />
         </Box>
       </Box>
-
+      <Divider />
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '40%' }}>
         <Typography variant="h5">
           {t('admin:usageLimit')}
@@ -64,29 +64,29 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
       </Box>
       {
         user.isAdmin && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Typography variant="h5">
-              {t('course:reseachCourse')}
-            </Typography>
-            <FormControlLabel
-              control={<Switch onChange={() => setSaveDiscussions(!saveDiscussions)} checked={saveDiscussions} />}
-              label={t('course:isReseachCourse')}
-            />
+          <>
+            <Divider />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Typography variant="h5">
+                {t('course:reseachCourse')}
+              </Typography>
+              <FormControlLabel
+                control={<Switch onChange={() => setSaveDiscussions(!saveDiscussions)} checked={saveDiscussions} />}
+                label={t('course:isReseachCourse')}
+              />
 
-            <FormControlLabel
-              control={<Switch onChange={() => setNotOptoutSaving(!notOptoutSaving)} checked={notOptoutSaving} disabled={!saveDiscussions} />}
-              label={t('course:canOptOut')}
-            />
-          </Box>
+              <FormControlLabel
+                control={<Switch onChange={() => setNotOptoutSaving(!notOptoutSaving)} checked={notOptoutSaving} disabled={!saveDiscussions} />}
+                label={t('course:canOptOut')}
+              />
+            </Box>
+          </>
         )
       }
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'right' }}>
         <BlueButton onClick={onUpdate} variant="contained">
           {t('save')}
         </BlueButton>
-        <OutlineButtonBlue onClick={() => setOpen(false)}>
-          {t('common:cancel')}
-        </OutlineButtonBlue>
       </Box>
     </Box >
   )

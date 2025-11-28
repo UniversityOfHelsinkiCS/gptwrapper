@@ -15,6 +15,7 @@ import {
   Typography,
   TableBody,
   Badge,
+  TableContainer,
 } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
@@ -36,6 +37,7 @@ import { OutlineButtonBlack, OutlineButtonBlue } from '../ChatV2/general/Buttons
 import { RouterTabs } from "../common/RouterTabs"
 import { useCourseUsage } from '../../hooks/useChatInstanceUsage'
 import { filterUsages } from './util'
+import { ContentCopy, CopyAll } from '@mui/icons-material'
 
 export const CourseSettingsModal = () => {
   const { courseId } = useParams() as { courseId: string }
@@ -168,68 +170,74 @@ export const CourseSettingsModal = () => {
       </RouterTabs>
       <Routes>
         <Route index path='/' element={
-          <>
-            <Alert severity={getInfoSeverity()} sx={{ mt: 1, borderRadius: '1.25', display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Box py={3}>
+            <Alert severity={getInfoSeverity()} sx={{ borderRadius: '1', display: 'flex', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">{getInfoMessage()}</Typography>
             </Alert>
 
-            <Box>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+            <Box >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: '1rem', p: 1, backgroundColor: 'grey.100', borderRadius: 1 }}>
                 <Typography variant="h4">{chatInstance.name[language]}</Typography>
                 {courseEnabled && (
                   <Tooltip title={t('copy')} placement="right">
-                    <Button color="inherit">
+                    <Button color="inherit" sx={{ gap: 1, borderRadius: '1.25rem', p: 1 }}>
                       <Typography style={{ textTransform: 'lowercase', color: 'blue' }} onClick={() => handleCopyLink(studentLink)}>
                         {studentLink}
                       </Typography>
+                      <ContentCopy />
                     </Button>
                   </Tooltip>
                 )}
-              </div>
+              </Box>
+              <Divider sx={{ mb: 2 }} />
               <EditCourseForm course={chatInstance} setOpen={setActivityPeriodFormOpen} user={user} />
             </Box>
-          </>} />
+          </Box>} />
 
         <Route path={`/teachers`} element={
           <>
             {userIsAdminOrResponsible && (
               <>
-                <Box >
+                <Box py={3}>
                   <OutlineButtonBlack
                     onClick={() => {
                       setAddTeacherViewOpen((prev) => !prev)
                     }}
-                    sx={{ mb: 1, mt: 1 }}
+                    sx={{ mb: 2 }}
                   >
                     {addTeacherViewOpen ? t('common:cancel') : t('course:addNew')}
                   </OutlineButtonBlack>
-                  {!addTeacherViewOpen ? (<Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell><strong>{t('rag:name')}</strong></TableCell>
-                        <TableCell><strong>{t('course:addedFrom')}</strong></TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {responsibilities.map((responsibility) => (
-                        <TableRow>
-                          <TableCell key={responsibility.id}>
-                            <Typography>
-                              {responsibility.user.last_name} {responsibility.user.first_names}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <AssignedResponsibilityManagement
-                              handleRemove={() => {
-                                handleRemoveResponsibility(responsibility)
-                              }}
-                              responsibility={responsibility}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>)
+                  {!addTeacherViewOpen ? (
+                    <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
+                      <Table>
+                        <TableHead>
+                          <TableRow sx={{ backgroundColor: 'grey.100' }}>
+                            <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:name')}</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>{t('course:addedFrom')}</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {responsibilities.map((responsibility) => (
+                            <TableRow>
+                              <TableCell key={responsibility.id}>
+                                <Typography>
+                                  {responsibility.user.last_name} {responsibility.user.first_names}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                <AssignedResponsibilityManagement
+                                  handleRemove={() => {
+                                    handleRemoveResponsibility(responsibility)
+                                  }}
+                                  responsibility={responsibility}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  )
                     : <ResponsibilityActionUserSearch courseId={courseId} actionText={t('course:add')} drawActionComponent={drawActionComponent} />}
                 </Box>
               </>
