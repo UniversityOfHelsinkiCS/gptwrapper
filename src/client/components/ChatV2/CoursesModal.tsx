@@ -185,7 +185,7 @@ const CourseList = ({
                         </Box>
                       )}
                       {!studentView &&
-                        (type === 'enabled' ? (
+                        (type === 'enabled' || type === 'ended' ? (
                           <BlueButton
                             role="link"
                             endIcon={<SettingsOutlined />}
