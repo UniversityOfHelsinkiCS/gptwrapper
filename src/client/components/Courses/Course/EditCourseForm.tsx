@@ -45,7 +45,7 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
 
   return (
     <Box ref={ref} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, ml: 2 }}>
         <Typography variant="h5">
           {t('editActivityPeriod')}
         </Typography>
@@ -55,7 +55,7 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
         </Box>
       </Box>
       <Divider />
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '40%' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '40%', ml: 2 }}>
         <Typography variant="h5">
           {t('admin:usageLimit')}
         </Typography>
@@ -66,7 +66,7 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
         user.isAdmin && (
           <>
             <Divider />
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, ml: 2 }}>
               <Typography variant="h5">
                 {t('course:reseachCourse')}
               </Typography>
@@ -83,12 +83,12 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
           </>
         )
       }
-      <Box sx={{ display: 'flex', justifyContent: 'right' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'right', mr: 2 }}>
         <BlueButton onClick={onUpdate} variant="contained">
           {t('save')}
         </BlueButton>
       </Box>
-    </Box >
+    </Box>
   )
 })
 
