@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Box, Typography, styled, LinearProgress, Container, DialogTitle, DialogContent, Dialog, Link, CircularProgress, Breadcrumbs } from '@mui/material'
+import { Button, Box, Typography, styled, LinearProgress, Container, DialogTitle, DialogContent, Dialog, Link, CircularProgress, Breadcrumbs, Divider } from '@mui/material'
 import { useNavigate, useParams, Link as RouterLink, useSearchParams } from 'react-router-dom'
 import Autorenew from '@mui/icons-material/Autorenew'
 import CloudUpload from '@mui/icons-material/CloudUpload'
@@ -100,13 +100,15 @@ export const RagIndex: React.FC = () => {
   }
 
   return (
-    <Container>
-      <Breadcrumbs>
-        <Typography>{ragDetails?.metadata?.name}</Typography>
-      </Breadcrumbs>
-
-      <Box py={2}>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+    <Box>
+      <Box sx={{ backgroundColor: 'grey.100', p: 2, borderRadius: 1 }}>
+        <Breadcrumbs>
+          <Typography fontWeight='bold' color='black'>{ragDetails?.metadata?.name}</Typography>
+        </Breadcrumbs>
+      </Box>
+      <Divider />
+      <Box py={2} mx={2}>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
           {/* @ts-expect-error component somehow not valid prop but it works */}
           <BlueButton component="label" variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
             {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
@@ -149,9 +151,18 @@ export const RagIndex: React.FC = () => {
           >
             {t('rag:deleteCollection')}
           </Button>
+          {user?.isAdmin && (
+            <OutlineButtonBlack
+              startIcon={<Autorenew />}
+              onClick={handleReset}
+            >
+              Reset (admin only)
+            </OutlineButtonBlack>
+          )}
           <RagFilesStatus ragFileStatuses={ragFileStatuses ?? []} ragFiles={ragDetails?.ragFiles ?? []} />
         </Box>
-        <Box mt={4}>
+        <Divider sx={{ my: 1 }} />
+        <Box>
           <Box display="flex" alignItems="center" mb={2} gap={2}>
             {isComplete && hasErrors && (
               <OutlineButtonBlack
@@ -161,14 +172,6 @@ export const RagIndex: React.FC = () => {
                 }}
               >
                 {t('rag:retryFailedFiles')}
-              </OutlineButtonBlack>
-            )}
-            {user?.isAdmin && (
-              <OutlineButtonBlack
-                startIcon={<Autorenew />}
-                onClick={handleReset}
-              >
-                Reset (admin only)
               </OutlineButtonBlack>
             )}
           </Box>
@@ -183,6 +186,6 @@ export const RagIndex: React.FC = () => {
           ))}
         </Box>
       </Box>
-    </Container >
+    </Box >
   )
 }

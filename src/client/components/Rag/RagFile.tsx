@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import apiClient from '../../util/apiClient'
 import type { RagFileAttributes } from '../../../shared/types'
-import { Box, Breadcrumbs, Button, Container, Link, Typography } from '@mui/material'
+import { Box, Breadcrumbs, Button, Container, Typography } from '@mui/material'
 import type { RagIndexAttributes } from '../../../server/db/models/ragIndex'
 import { useDeleteRagFileMutation, useDeleteRagFileTextMutation } from './api'
 import { useTranslation } from 'react-i18next'
@@ -50,7 +50,7 @@ export const RagFile: React.FC = () => {
   return (
     <Container>
       <Breadcrumbs>
-        <Link href={`/${params.courseId}/course/rag?index=${ragFile.ragIndexId}`}>{ragFile.ragIndex.metadata?.name}</Link> /
+        <Link to={`/${params.courseId}/course/rag?index=${ragFile.ragIndexId}`}>{ragFile.ragIndex.metadata?.name}</Link> /
         <Typography>{ragFile.filename}</Typography>
       </Breadcrumbs>
       <Box sx={{ my: 2, display: 'flex', gap: 2 }}>
