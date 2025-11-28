@@ -153,7 +153,12 @@
     "noPrompts": "No prompts",
     "noPrompt": "No prompt",
     "emptyPrompt": "Empty",
-    "confirmClearCustomPrompt": "Warning: This action will clear your custom prompt: \n\"{{customSystemMessage}}\""
+    "confirmClearCustomPrompt": "Warning: This action will clear your custom prompt: \n\"{{customSystemMessage}}\"",
+    "newConversation": "New conversation",
+    "newConversationToggle": "Don't ask for confirmation for new conversations in the future.",
+    "sidebar": "Sidebar",
+    "sidebarSettings": "Keep the sidebar closed by default.",
+    "sendMode": "Message sending"
   },
   "sidebar": {
     "courseTitle": "Course",

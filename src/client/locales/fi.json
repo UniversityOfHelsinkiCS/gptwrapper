@@ -156,7 +156,12 @@
     "noPrompts": "Ei alustuksia",
     "noPrompt": "Ei alustusta",
     "emptyPrompt": "Tyhjä",
-    "confirmClearCustomPrompt": "Varoitus: tämä toiminto tyhjentää luomasi alustuksen: \n\"{{customSystemMessage}}\""
+    "confirmClearCustomPrompt": "Varoitus: tämä toiminto tyhjentää luomasi alustuksen: \n\"{{customSystemMessage}}\"",
+    "newConversation": "Uusi keskustelu",
+    "newConversationToggle": "Älä kysy varmistusta jatkossa uudelle keskustelulle.",
+    "sidebar": "Sivuvalikko",
+    "sidebarSettings": "Pidä sivuvalikko oletetusti suljettuna.",
+    "sendMode": "Viestin lähetys"
   },
   "sidebar": {
     "courseTitle": "Kurssi",

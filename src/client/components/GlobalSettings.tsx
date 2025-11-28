@@ -74,9 +74,9 @@ export const GlobalSettings = ({
         <form onSubmit={handleSubmit}>
           <FormControl sx={{ display: 'flex', flexDirection: 'column', gap: 5, p: { xs: 1, md: 3 } }}>
             <Box>
-              <Typography fontWeight='bold' mb={1}>Uusi keskustelu</Typography>
+              <Typography fontWeight='bold' mb={1}>{t('settings:newConversation')}</Typography>
               <NewConversationConfirmConfigurator
-                label={'Älä kysy varmistusta jatkossa keskustelun tyhjennykselle.'}
+                label={t('settings:newConversationToggle')}
                 value={skipNewConversationConfirm!}
                 setValue={setSkipNewConversationConfirm}
                 context='settings' />
@@ -85,9 +85,9 @@ export const GlobalSettings = ({
             <Divider />
 
             <Box>
-              <Typography fontWeight='bold' mb={1}>Sivuvalikko</Typography>
+              <Typography fontWeight='bold' mb={1}>{t('settings:sidebar')}</Typography>
               <CollapsedSidebarConfigurator
-                label={'Pidä sivuvalikko oletetusti suljettuna.'}
+                label={t('settings:sidebarSettings')}
                 value={collapsedSidebarDefault!}
                 setValue={setCollapsedSidebarDefault} />
             </Box>
@@ -95,7 +95,7 @@ export const GlobalSettings = ({
             <Divider />
 
             <Box>
-              <Typography fontWeight='bold' mb={1}>Viestin lähetys</Typography>
+              <Typography fontWeight='bold' mb={1}>{t('settings:sendMode')}</Typography>
               <SendPreferenceConfigurator
                 value={sendShortcutMode!}
                 onChange={(event) => setSendShortcutMode(event.target.value as UserPreferences['sendShortcutMode'])} />

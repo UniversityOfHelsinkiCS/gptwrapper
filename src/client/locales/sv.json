@@ -161,7 +161,12 @@
     "emptyPrompt": "Samtalsstart saknas",
     "noPrompts": "Inga samtalsstarter",
     "confirmClearCustomPrompt": "Rensa den anpassade starten?",
-    "other": "Övrigt"
+    "other": "Övrigt",
+    "newConversation": "Ny konversation",
+    "newConversationToggle": "Fråga inte om bekräftelse för nya konversationer i fortsättningen.",
+    "sidebar": "Sidomeny",
+    "sidebarSettings": "Håll sidomenyn stängd som standard.",
+    "sendMode": "Meddelandehantering"
   },
   "email": {
     "save": "Spara som e-post",
