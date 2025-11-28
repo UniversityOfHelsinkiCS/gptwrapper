@@ -34,8 +34,6 @@ import apiClient from '../../util/apiClient'
 import { ResponsibilityActionUserSearch } from '../Admin/UserSearch'
 import { OutlineButtonBlack, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { RouterTabs } from "../common/RouterTabs"
-import { RagIndex } from '../Rag/RagIndex'
-import { RagFile } from '../Rag/RagFile'
 import { useCourseUsage } from '../../hooks/useChatInstanceUsage'
 import { filterUsages } from './util'
 

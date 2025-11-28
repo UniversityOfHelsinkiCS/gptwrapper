@@ -55,10 +55,10 @@ const CoursesModal = () => {
   if (isTeacherOrAdmin) {
     return (
       <Box>
-        <Tabs value={value} onChange={handleChange}>
-          <Tab label={t('course:activeTab')} />
-          <Tab label={t('course:notActiveTab')} />
-          <Tab label={t('course:endedTab')} />
+        <Tabs value={value} onChange={handleChange} slotProps={{ indicator: { style: { backgroundColor: 'black' } } }} textColor='inherit'>
+          <Tab label={t('course:activeTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
+          <Tab label={t('course:notActiveTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
+          <Tab label={t('course:endedTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
         </Tabs>
         <CustomTabPanel value={value} index={0}>
           <CourseList courseUnits={curreEnabled} type="enabled" />
