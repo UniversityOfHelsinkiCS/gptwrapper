@@ -68,68 +68,75 @@ const PromptModal = () => {
   const canCreatePrompt = courseId === 'general' || tab === 1 || amongResponsibles
 
   const renderPromptItem = (prompt: PromptType, isPersonal: boolean) => (
-    <MenuItem
-      key={prompt.id}
-      data-testid="pick-prompt-button"
-      selected={prompt.id === activePrompt?.id}
-      onClick={() => handleSelect(prompt)}
-      sx={{ borderRadius: '1.25rem', display: 'flex', alignItems: 'center', gap: 1 }}
-    >
-      <Box sx={{ flexGrow: 1 }}>{prompt.name}</Box>
+    <>
+      <MenuItem
+        key={prompt.id}
+        data-testid="pick-prompt-button"
+        selected={prompt.id === activePrompt?.id}
+        onClick={() => handleSelect(prompt)}
+        sx={{ borderRadius: '1.25rem', display: 'flex', alignItems: 'center', gap: 1 }}
+      >
+        <Box sx={{ flexGrow: 1 }}>{prompt.name}</Box>
 
-      {!isPersonal && (
-        <>
-          {prompt.hidden ? (
+        {!createNewOpen && (
+          <>
+            {!isPersonal && (
+              <>
+                {prompt.hidden ? (
 
-            <Tooltip title={t('hiddenPromptInfo')}>
-              <VisibilityOff />
-            </Tooltip>
-          ) : (
-            <Tooltip title={t('visiblePromptInfo')}>
-              <Visibility
-              />
-            </Tooltip>
-          )}
-          <Link
-            component={RouterLink}
-            to={`/${courseId}?promptId=${prompt.id}`}
-            variant="caption"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {t('course:directPromptLink', { name: prompt.name })}
-          </Link>
-          <TextButton
-            onClick={(e) => handleCopyLink(e, prompt.id)}
-            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-          >
-            <ContentCopyOutlined fontSize="small" />
-            {t('copyStudentLink')}
-          </TextButton>
-        </>
-      )}
+                  <Tooltip title={t('hiddenPromptInfo')}>
+                    <VisibilityOff />
+                  </Tooltip>
+                ) : (
+                  <Tooltip title={t('visiblePromptInfo')}>
+                    <Visibility
+                    />
+                  </Tooltip>
+                )}
+                <Link
+                  component={RouterLink}
+                  to={`/${courseId}?promptId=${prompt.id}`}
+                  variant="caption"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {t('course:directPromptLink', { name: prompt.name })}
+                </Link>
+                <TextButton
+                  onClick={(e) => handleCopyLink(e, prompt.id)}
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                >
+                  <ContentCopyOutlined fontSize="small" />
+                  {t('copyStudentLink')}
+                </TextButton>
+              </>
+            )}
 
-      {(isPersonal || amongResponsibles) && (
-        <>
-          <TextButton
-            onClick={(e) => handleEdit(e, prompt)}
-            color="primary"
-            data-testid={`edit-prompt-${prompt.name}`}
-            aria-label={t('common:edit')}
-          >
-            {t('common:edit')}
-          </TextButton>
+            {(isPersonal || amongResponsibles) && (
+              <>
+                <TextButton
+                  onClick={(e) => handleEdit(e, prompt)}
+                  color="primary"
+                  data-testid={`edit-prompt-${prompt.name}`}
+                  aria-label={t('common:edit')}
+                >
+                  {t('common:edit')}
+                </TextButton>
 
-          <IconButton
-            onClick={(event) => handleDelete(event, prompt)}
-            size="small"
-            aria-label={t('common:delete')}
-            data-testid={`delete-prompt-${prompt.name}`}
-          >
-            <DeleteOutline fontSize="small" />
-          </IconButton>
-        </>
-      )}
-    </MenuItem>
+                <IconButton
+                  onClick={(event) => handleDelete(event, prompt)}
+                  size="small"
+                  aria-label={t('common:delete')}
+                  data-testid={`delete-prompt-${prompt.name}`}
+                >
+                  <DeleteOutline fontSize="small" />
+                </IconButton>
+              </>
+            )}
+          </>
+        )}
+      </MenuItem>
+      <Divider />
+    </>
   )
 
   const renderPromptList = (prompts: PromptType[], isPersonal: boolean) => (
@@ -156,48 +163,54 @@ const PromptModal = () => {
         {courseId !== 'general' && <Tab label={t('settings:coursePrompts')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />}
         <Tab label={t('settings:myPrompts')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
       </Tabs>
+      <Box sx={{ display: 'flex', flex: 1, gap: 2, overflow: 'hidden', mt: 2 }}>
+        <Box sx={{ flex: createNewOpen ? '0 0 20%' : '1', overflowY: 'auto', paddingRight: 1 }}>
+          {!createNewOpen && canCreatePrompt && (
+            <>
+              <OutlineButtonBlack
+                data-testid="create-prompt-button"
+                sx={{ mb: 2 }}
+                onClick={handleCreateNew}
+              >
+                {t('settings:saveNewPrompt')}
+              </OutlineButtonBlack>
+              <MenuItem
+                selected={activePrompt === undefined}
+                sx={{ borderRadius: '1.25rem', py: 1.5 }}
+                onClick={() => handleSelect(undefined)}
+              >
+                {t('settings:noPrompt')}
+              </MenuItem>
+              <Divider sx={{ my: 1 }} />
+            </>
+          )}
 
-      <Box sx={{ mt: 2 }}>
-        {!createNewOpen && canCreatePrompt && (
-          <>
-            <OutlineButtonBlack
-              data-testid="create-prompt-button"
-              sx={{ mb: 2 }}
-              onClick={handleCreateNew}
-            >
-              {t('settings:saveNewPrompt')}
-            </OutlineButtonBlack>
-            <MenuItem
-              selected={activePrompt === undefined}
-              sx={{ borderRadius: '1.25rem' }}
-              onClick={() => handleSelect(undefined)}
-            >
-              {t('settings:noPrompt')}
-            </MenuItem>
-            <Divider sx={{ my: 1 }} />
-          </>
-        )}
+          {courseId !== 'general' && tab === 0 && (
+            <>
+              {renderPromptList(coursePrompts, false)}
+            </>
+          )}
 
-        {courseId !== 'general' && tab === 0 && (
-          <>
-            {createNewOpen && (
+          {(courseId === 'general' || tab === 1) && (
+            <>
+              {renderPromptList(myPrompts, true)}
+            </>
+          )}
+
+          {myPrompts.length === 0 && coursePrompts.length === 0 && (
+            <MenuItem disabled>{t('settings:noPrompts')}</MenuItem>
+          )}
+        </Box>
+        {createNewOpen && (
+          <Box sx={{ flex: '1', overflowY: 'auto', borderLeft: 1, borderColor: 'divider', paddingLeft: 2 }}>
+
+            {courseId !== 'general' && tab === 0 && (
               <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} />
             )}
-            {!createNewOpen && renderPromptList(coursePrompts, false)}
-          </>
-        )}
-
-        {(courseId === 'general' || tab === 1) && (
-          <>
-            {createNewOpen && (
+            {(courseId === 'general' || tab === 1) && (
               <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} personal />
             )}
-            {!createNewOpen && renderPromptList(myPrompts, true)}
-          </>
-        )}
-
-        {myPrompts.length === 0 && coursePrompts.length === 0 && !createNewOpen && (
-          <MenuItem disabled>{t('settings:noPrompts')}</MenuItem>
+          </Box>
         )}
       </Box>
     </Box >
