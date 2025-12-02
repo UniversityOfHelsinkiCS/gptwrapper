@@ -1,5 +1,6 @@
 import * as React from 'react'
 import Menu from '@mui/material/Menu'
+import { useTheme } from '@mui/material'
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
 import MenuList from '@mui/material/MenuList'
@@ -11,7 +12,7 @@ import InfoIcon from '@mui/icons-material/Info'
 import ReviewsIcon from '@mui/icons-material/Reviews'
 import LanguageIcon from '@mui/icons-material/Language'
 import { BlueButton, OutlineButtonBlack, TextButton } from './ChatV2/general/Buttons'
-import { Box, ListItem } from '@mui/material'
+import { Box, ListItem, useMediaQuery } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Locale } from '@shared/lang'
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
@@ -35,6 +36,8 @@ export default function GlobalMenu({
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const isAdmin = pathname.includes("admin");
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
 
   const open = Boolean(anchorEl)
@@ -52,7 +55,7 @@ export default function GlobalMenu({
 
 
   return (
-    <div style={{ position: 'fixed', top: 30, right: 30 }}>
+    <div style={{ position: 'fixed', top: isMobile ? 10 : 20, right: isMobile ? 15 : 20 }}>
       {isAdmin && <BlueButton onClick={() => navigate('/general')} sx={{ position: 'absolute', right: '4rem' }}>
         Takaisin chattiin
       </BlueButton>}
@@ -64,7 +67,7 @@ export default function GlobalMenu({
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
       >
-        <MenuIcon sx={{ color: 'text.primary' }} />
+        <MenuIcon sx={{ color: 'text.primary' }} fontSize={isMobile ? 'small' : 'medium'} />
       </OutlineButtonBlack>
       <Menu
         id="basic-menu"

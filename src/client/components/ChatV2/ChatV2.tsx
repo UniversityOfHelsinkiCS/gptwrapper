@@ -1,5 +1,5 @@
 import { Alert, Box, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
-import SettingsIcon from '@mui/icons-material/Settings'
+import { MapsUgc } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -14,8 +14,9 @@ import useLocalStorageState from '../../hooks/useLocalStorageState'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useAnalyticsDispatch } from '../../stores/analytics'
+import sidebarOpen from '../../assets/sidebar-open.svg'
 import { ChatBox } from './ChatBox'
-import { GrayButton } from './general/Buttons'
+import { OutlineButtonBlack, TextButton } from './general/Buttons'
 import { CourseSettingsModal } from './CourseSettingsModal'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
@@ -37,6 +38,7 @@ import TemplateModal from './TemplateModal'
 import PromptModal from './PromptModal'
 import CoursesModal from './CoursesModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
+import { CustomIcon } from './general/CustomIcon'
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
@@ -429,18 +431,25 @@ const ChatV2Content = () => {
         }}
       >
         {(isEmbeddedMode || isMobile) && (
-          <GrayButton
-            sx={{
-              position: 'fixed',
-              left: 0,
-              top: '50%',
-              transform: 'translate(-40%) rotate(-90deg)',
-            }}
-            onClick={() => setSideBarOpen(true)}
-            data-testid="left-panel-open"
-          >
-            <SettingsIcon />
-          </GrayButton>
+          <Box sx={{
+            position: 'fixed',
+            left: 15,
+            top: 10,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            zIndex: 999
+          }}>
+            <OutlineButtonBlack
+              onClick={() => setSideBarOpen(true)}
+              data-testid="left-panel-open"
+            >
+              <CustomIcon src={sidebarOpen} />
+            </OutlineButtonBlack>
+            <OutlineButtonBlack onClick={handleResetRequest} data-testid="new-conversation-button">
+              <MapsUgc fontSize='small' />
+            </OutlineButtonBlack>
+          </Box>
         )}
         <Box
           sx={{
