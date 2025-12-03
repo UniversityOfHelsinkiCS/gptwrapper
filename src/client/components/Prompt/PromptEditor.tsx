@@ -42,7 +42,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
   if (prompt) type = prompt.type
 
   const [name, setName] = useState<string>(prompt?.name ?? '')
-  const [studentInstructions] = useState<string>(prompt?.studentInstructions ?? '')
+  const [studentInstructions, setStudentInstructions] = useState<string>(prompt?.studentInstructions ?? '')
 
   const [systemMessage, setSystemMessage] = useState<string>(prompt?.systemMessage ?? '')
   const [ragSystemMessage, setRagSystemMessage] = useState<string>(() =>
@@ -116,138 +116,187 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
   const modelHasTemperature = selectedModel && 'temperature' in (validModels.find((m) => m.name === selectedModel) ?? {})
 
   return (
+
     <form onSubmit={handleSubmit}>
-      <Box sx={{ mt: 2, display: 'flex', gap: '1rem' }}>
-        <Box sx={{ flex: 1 }} component="section">
-          <Typography component="h3" gutterBottom>
-            {t('prompt:basicInformation')}
-          </Typography>
-          <TextField
-            slotProps={{
-              htmlInput: {
-                'data-testid': 'prompt-name-input',
-                minLength: 3,
-              },
-            }}
-            label={t('common:promptName')}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            fullWidth
-            margin="normal"
-          />
-          {type !== 'PERSONAL' && (
-            <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />
-          )}
-          <FormControl fullWidth margin="normal">
-            <InputLabel sx={{ background: 'white', px: 0.75, ml: -0.75 }}>{t('common:model')}</InputLabel>
-            {/* sx to offset label padding so it matches inputlabel of text fields */}
-            <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
-              <MenuItem value="none">
-                <em>{t('prompt:modelFreeToChoose')}</em>
-              </MenuItem>
-              {validModels.map((m) => (
-                <MenuItem key={m.name} value={m.name}>
-                  {m.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={temperatureDefined && !modelHasTemperature}
-                onChange={(e) => setTemperatureDefined(e.target.checked)}
-                disabled={modelHasTemperature}
-              />
-            }
-            label={t('chat:temperature')}
-          />
-          <Collapse in={temperatureDefined && !modelHasTemperature}>
-            <Slider
-              value={temperature}
-              onChange={(_, newValue) => setTemperature(newValue as number)}
-              aria-labelledby="temperature-slider"
-              valueLabelDisplay="auto"
-              step={0.1}
-              min={0}
-              max={1}
-              disabled={modelHasTemperature}
-              sx={{ mb: -1 }}
-            />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="body2">{t('chat:predictableTemperature')}</Typography>
-              <Typography variant="body2">{t('chat:creativeTemperature')}</Typography>
-            </Box>
-          </Collapse>
-        </Box>
-        <Box sx={{ flex: 2 }} component="section">
-          <Typography component="h3" gutterBottom>
-            {t('prompt:context')}
-          </Typography>
-          {type === 'CHAT_INSTANCE' && (
-            <Box display="flex" justifyContent="space-around" alignItems="center">
-              <FormControl fullWidth margin="normal">
-                <InputLabel sx={{ background: 'white', px: 0.75, ml: -0.75 }}>{t('rag:sourceMaterials')}</InputLabel>
-                <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
-                  <MenuItem value="" data-testid="no-source-materials">
-                    <em>{t('prompt:noSourceMaterials')}</em> <ClearOutlined sx={{ ml: 1 }} />
-                  </MenuItem>
-                  {ragIndices?.map((index) => (
-                    <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
-                      {index.metadata.name}
-                    </MenuItem>
-                  ))}
-                  <Divider />
-                  <LinkButtonHoc button={MenuItem} to={`/${courseId}/course/rag`}>
-                    {t('prompt:courseSourceMaterials')} <LibraryBooksOutlined sx={{ ml: 1 }} />
-                  </LinkButtonHoc>
-                </Select>
-              </FormControl>
-            </Box>
-          )}
-          <Collapse in={!!ragIndexId}>
-            <OpenableTextfield
-              value={ragSystemMessage}
-              onChange={(e) => setRagSystemMessage(e.target.value)}
-              onAppend={(text) => setRagSystemMessage((prev) => prev + (prev.trim().length ? ' ' : '') + text)}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+
+        {/* Basic */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography fontWeight="bold">{t('prompt:basicInformation')}</Typography>
+          <Box>
+            <TextField
               slotProps={{
-                htmlInput: { 'data-testid': 'rag-system-message-input' },
+                htmlInput: {
+                  'data-testid': 'prompt-name-input',
+                  minLength: 3,
+                },
               }}
-              label={t('prompt:ragSystemMessage')}
+              label={t('common:promptName')}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               fullWidth
-              margin="normal"
-              multiline
-              minRows={2}
-              maxRows={12}
             />
-          </Collapse>
+          </Box>
+        </Box>
+
+        <Divider />
+
+        {/* Prompt */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography fontWeight="bold">Alustuksen ohjeistus opiskelijoille</Typography>
           <TextField
             slotProps={{
               htmlInput: {
-                'data-testid': 'system-message-input',
+                // 'data-testid': 'system-message-input',
               },
             }}
-            label={t('prompt:systemMessage')}
-            value={systemMessage}
-            onChange={(e) => setSystemMessage(e.target.value)}
+            label={'Alustuksen ohjeistus'}
+            value={studentInstructions}
+            onChange={(e) => setStudentInstructions(e.target.value)}
+            fullWidth
+            multiline
+            minRows={8}
+            maxRows={48}
+          />
+        </Box>
+
+        <Divider />
+
+
+        {/* Kielimalli */}
+        <Box>
+          <Typography variant='h6' mb={2} fontWeight="bold">
+            Kielimalli
+          </Typography>
+
+          <Typography fontWeight="bold" my={1}>Kielimallin ohjeistus:</Typography>
+          <Typography fontWeight="bold" my={1}>Kielimallin ohjeistus:</Typography>
+        </Box>
+
+        <Divider />
+
+        {/* Lähdemateriaali */}
+        <Box>
+          <Typography variant='h6' mb={2} fontWeight="bold">
+            Lähdemateriaali
+          </Typography>
+
+          <Typography fontWeight="bold" my={1}>Valittu lähdemateriaali</Typography>
+          <Typography fontWeight="bold" my={1}>Kielimallin lähdemateriaali ohjeistus</Typography>
+        </Box>
+
+        <Divider />
+
+        {type !== 'PERSONAL' && (
+          <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />
+        )}
+        <FormControl fullWidth margin="normal">
+          <InputLabel sx={{ background: 'white', px: 0.75, ml: -0.75 }}>{t('common:model')}</InputLabel>
+          <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
+            <MenuItem value="none">
+              <em>{t('prompt:modelFreeToChoose')}</em>
+            </MenuItem>
+            {validModels.map((m) => (
+              <MenuItem key={m.name} value={m.name}>
+                {m.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={temperatureDefined && !modelHasTemperature}
+              onChange={(e) => setTemperatureDefined(e.target.checked)}
+              disabled={modelHasTemperature}
+            />
+          }
+          label={t('chat:temperature')}
+        />
+        <Collapse in={temperatureDefined && !modelHasTemperature}>
+          <Slider
+            value={temperature}
+            onChange={(_, newValue) => setTemperature(newValue as number)}
+            aria-labelledby="temperature-slider"
+            valueLabelDisplay="auto"
+            step={0.1}
+            min={0}
+            max={1}
+            disabled={modelHasTemperature}
+            sx={{ mb: -1 }}
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography variant="body2">{t('chat:predictableTemperature')}</Typography>
+            <Typography variant="body2">{t('chat:creativeTemperature')}</Typography>
+          </Box>
+        </Collapse>
+        <Typography component="h3" gutterBottom>
+          {t('prompt:context')}
+        </Typography>
+        {type === 'CHAT_INSTANCE' && (
+          <Box display="flex" justifyContent="space-around" alignItems="center">
+            <FormControl fullWidth margin="normal">
+              <InputLabel sx={{ background: 'white', px: 0.75, ml: -0.75 }}>{t('rag:sourceMaterials')}</InputLabel>
+              <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
+                <MenuItem value="" data-testid="no-source-materials">
+                  <em>{t('prompt:noSourceMaterials')}</em> <ClearOutlined sx={{ ml: 1 }} />
+                </MenuItem>
+                {ragIndices?.map((index) => (
+                  <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
+                    {index.metadata.name}
+                  </MenuItem>
+                ))}
+                <Divider />
+                <LinkButtonHoc button={MenuItem} to={`/${courseId}/course/rag`}>
+                  {t('prompt:courseSourceMaterials')} <LibraryBooksOutlined sx={{ ml: 1 }} />
+                </LinkButtonHoc>
+              </Select>
+            </FormControl>
+          </Box>
+        )}
+        <Collapse in={!!ragIndexId}>
+          <OpenableTextfield
+            value={ragSystemMessage}
+            onChange={(e) => setRagSystemMessage(e.target.value)}
+            onAppend={(text) => setRagSystemMessage((prev) => prev + (prev.trim().length ? ' ' : '') + text)}
+            slotProps={{
+              htmlInput: { 'data-testid': 'rag-system-message-input' },
+            }}
+            label={t('prompt:ragSystemMessage')}
             fullWidth
             margin="normal"
             multiline
-            minRows={12}
-            maxRows={48}
-            sx={{ flex: 1 }}
+            minRows={2}
+            maxRows={12}
           />
-        </Box>
+        </Collapse>
+        <TextField
+          slotProps={{
+            htmlInput: {
+              'data-testid': 'system-message-input',
+            },
+          }}
+          label={t('prompt:systemMessage')}
+          value={systemMessage}
+          onChange={(e) => setSystemMessage(e.target.value)}
+          fullWidth
+          margin="normal"
+          multiline
+          minRows={12}
+          maxRows={48}
+          sx={{ flex: 1 }}
+        />
+        <DialogActions>
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+            {loading && <CircularProgress color="secondary" />}
+            {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
+            <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
+              {t('common:save')}
+            </BlueButton>
+          </Box>
+        </DialogActions>
       </Box>
-      <DialogActions>
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-          {loading && <CircularProgress color="secondary" />}
-          {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
-          <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
-            {t('common:save')}
-          </BlueButton>
-        </Box>
-      </DialogActions>
     </form>
+
   )
 }
