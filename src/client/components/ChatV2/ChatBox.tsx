@@ -4,7 +4,6 @@ import Send from '@mui/icons-material/Send'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import { Box, Chip, IconButton, TextField, Tooltip, Typography, Alert } from '@mui/material'
-import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import { useRef } from 'react'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
@@ -13,7 +12,7 @@ import { BlueButton, GrayButton } from './general/Buttons'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { SendPreferenceConfiguratorModal, ShiftEnterForNewline, ShiftEnterToSend } from '../Settings/SendPreferenceConfigurator'
-import { KeyCombinations, useKeyboardCommands } from './useKeyboardCommands'
+import { useKeyboardCommands } from './useKeyboardCommands'
 import { WarningType } from '@shared/aiApi'
 
 export const ChatBox = ({
@@ -76,7 +75,7 @@ export const ChatBox = ({
 
   const handleFileTypeValidation = (file: File): void => {
     const allowedImageTypes = ['image/jpeg', 'image/png']
-    if (!file.type.startsWith('text/') && file.type !== 'application/pdf' && !allowedImageTypes.find(s => s === file.type) ) {
+    if (!file.type.startsWith('text/') && file.type !== 'application/pdf' && !allowedImageTypes.find(s => s === file.type)) {
       setDisallowedFileType(file.type)
       setFileTypeAlertOpen(true)
       setTimeout(() => {
@@ -85,7 +84,7 @@ export const ChatBox = ({
       return
     }
 
-    if (allowedImageTypes.find(s => s === file.type) && !user?.isAdmin ) {
+    if (allowedImageTypes.find(s => s === file.type) && !user?.isAdmin) {
       setDisallowedFileType(file.type)
       setFileTypeAlertOpen(true)
       setTimeout(() => {
@@ -252,13 +251,17 @@ export const ChatBox = ({
             </Box>
             {!isMobile && (
               <Typography
+
                 sx={{
-                  display: { sm: 'none', md: 'block' },
+                  display: !acuallyDisabled ? { sm: 'none', md: 'block' } : 'none',
                   ml: 'auto',
-                  mr: '1rem',
-                  opacity: acuallyDisabled ? 0 : 1,
+                  mr: 1,
                   transition: 'opacity 0.2s ease-in-out',
                   fontSize: '14px',
+                  background: 'white',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
                 }}
                 color="textSecondary"
               >
