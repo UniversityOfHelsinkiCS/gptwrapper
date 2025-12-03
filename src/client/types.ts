@@ -43,6 +43,7 @@ export interface User {
 export type Prompt = {
   id: string
   name: string
+  studentInstructions?: string
   chatInstanceId: string
   systemMessage: string
   messages: ChatMessage[]

@@ -42,6 +42,8 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
   if (prompt) type = prompt.type
 
   const [name, setName] = useState<string>(prompt?.name ?? '')
+  const [studentInstructions] = useState<string>(prompt?.studentInstructions ?? '')
+
   const [systemMessage, setSystemMessage] = useState<string>(prompt?.systemMessage ?? '')
   const [ragSystemMessage, setRagSystemMessage] = useState<string>(() =>
     prompt ? prompt.messages?.find((m: Message) => m.role === 'system')?.content as string || '' : t('prompt:defaultRagMessage'),
@@ -75,6 +77,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
         await editPromptMutation({
           id: prompt.id,
           name,
+          studentInstructions,
           systemMessage,
           messages,
           hidden,
@@ -87,6 +90,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
         await createPromptMutation({
           name,
           type,
+          studentInstructions,
           ...(type === 'CHAT_INSTANCE' ? { chatInstanceId: chatInstance?.id } : {}),
           systemMessage,
           messages,
