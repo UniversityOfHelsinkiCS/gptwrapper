@@ -68,7 +68,7 @@
   },
   "info": {
     "title": "Instructions",
-    "usage": "Tokens reset every month. To reduce token consumption, you can choose a free language model or clear the conversation each time you change the topic.",
+    "usage": "Tokens reset every month. To reduce token consumption, you can choose a free language model or start a new conversation each time you change the topic.",
     "acceptDisclaimer": "I have read and understood these instructions"
   },
   "footer": {

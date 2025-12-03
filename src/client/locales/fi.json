@@ -69,7 +69,7 @@
   },
   "info": {
     "title": "Käyttöohje",
-    "usage": "Tokenit nollaantuvat kuukauden välein. Vähentääksesi tokenien kulumista voit valita ilmaisen kielimallin tai tyhjentää keskustelun aina kun vaihdat keskustelun aihetta.",
+    "usage": "Tokenit nollaantuvat kuukauden välein. Vähentääksesi tokenien kulumista voit valita ilmaisen kielimallin tai aloittaa uuden keskustelun aina kun vaihdat keskustelun aihetta.",
     "acceptDisclaimer": "Olen lukenut ja ymmärtänyt käyttöohjeet"
   },
   "footer": {
