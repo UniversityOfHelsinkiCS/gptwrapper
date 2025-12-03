@@ -76,7 +76,7 @@
   },
   "info": {
     "title": "Bruksanvisning",
-    "usage": "Lösenord nollställs varje månad. Du kan minska förbrukningen av token genom att välja en gratis språkmall eller genom att rensa konversationen varje gång du byter ämne.",
+    "usage": "Lösenord nollställs varje månad. Du kan minska förbrukningen av token genom att välja en gratis språkmall eller genom att borja en ny konversation varje gång du byter ämne.",
     "acceptDisclaimer": "Jag har läst och förstått bruksanvisningen"
   },
   "footer": {
