@@ -120,197 +120,214 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
 
   return (
 
-    <form onSubmit={handleSubmit}>
-
-      {/* Basic information */}
-      <Accordion defaultExpanded sx={{ p: 1 }}>
-        <AccordionSummary
-          expandIcon={<ExpandMore />}
-          aria-controls="panel1-content"
-          id="panel1-header">
-          <Typography variant='h5' fontWeight="bold">Alustuksen perustiedot</Typography>
-          {/* {t('prompt:basicInformation')} */}
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box mb={3}>
-            <Typography mb={1} fontWeight="bold">Alustuksen nimi</Typography>
-            <TextField
-              slotProps={{
-                htmlInput: {
-                  'data-testid': 'prompt-name-input',
-                  minLength: 3,
-                },
-              }}
-              placeholder={t('common:promptName')}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              fullWidth
-            />
-          </Box>
-          <Box mb={3}>
-            <Typography mb={1} fontWeight="bold">Alustuksen ohjeistus opiskelijoille</Typography>
-            <TextField
-              slotProps={{
-                htmlInput: {
-                  'data-testid': 'student-instructions-input',
-                },
-              }}
-              value={studentInstructions}
-              onChange={(e) => setStudentInstructions(e.target.value)}
-              placeholder={'Esim:\n\n# Ohjeistus opiskelijoille.\nKäyttäkää currechattiä.'}
-              fullWidth
-              multiline
-              minRows={8}
-              maxRows={48}
-            />
-          </Box>
-        </AccordionDetails>
-      </Accordion>
+    <Box>
+      <form onSubmit={handleSubmit}>
 
 
-      {/* LLM settings */}
-      <Accordion defaultExpanded sx={{ p: 1 }}>
-        <AccordionSummary
-          expandIcon={<ExpandMore />}
-          aria-controls="panel2-content"
-          id="panel2-header">
-          <Typography variant='h5' fontWeight="bold">Alustuksen kielimallin asetukset</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box mb={3}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={temperatureDefined && !modelHasTemperature}
-                  onChange={(e) => setTemperatureDefined(e.target.checked)}
-                  disabled={modelHasTemperature}
-                />
-              }
-              label={t('chat:temperature')}
-            />
-            <Collapse in={temperatureDefined && !modelHasTemperature}>
-              <Box sx={{ mb: 3, p: 2 }}>
-                <Slider
-                  value={temperature}
-                  onChange={(_, newValue) => setTemperature(newValue as number)}
-                  aria-labelledby="temperature-slider"
-                  valueLabelDisplay="auto"
-                  step={0.1}
-                  min={0}
-                  max={1}
-                  disabled={modelHasTemperature}
-                />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body2">{t('chat:predictableTemperature')}</Typography>
-                  <Typography variant="body2">{t('chat:creativeTemperature')}</Typography>
-                </Box>
-              </Box>
-            </Collapse>
-            {type !== 'PERSONAL' && (
-              // label={t('prompt:hidePrompt')}
-              <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label="Piilota kielimallin ohjeistus opiskelijoilta" />
-            )}
-          </Box>
-          <Box mb={3}>
-            <Typography mb={1} fontWeight="bold">Alustuksen valittu kielimalli</Typography>
-            <FormControl fullWidth >
-              <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
-                <MenuItem value="none">
-                  <em>{t('prompt:modelFreeToChoose')}</em>
-                </MenuItem>
-                {validModels.map((m) => (
-                  <MenuItem key={m.name} value={m.name}>
-                    {m.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-          <Box mb={3}>
-            <Typography mb={1} fontWeight="bold">{t('prompt:systemMessage')}</Typography>
-            <TextField
-              slotProps={{
-                htmlInput: {
-                  'data-testid': 'system-message-input',
-                },
-              }}
-              placeholder="Esim. Olet avulias."
-              value={systemMessage}
-              onChange={(e) => setSystemMessage(e.target.value)}
-              fullWidth
-              multiline
-              minRows={12}
-              maxRows={48}
-            />
-          </Box>
-        </AccordionDetails>
-      </Accordion>
-
-      {/* RAG settings */}
-      <Accordion defaultExpanded sx={{ p: 1 }}>
-        <AccordionSummary
-          expandIcon={<ExpandMore />}
-          aria-controls="panel3-content"
-          id="panel3-header">
-          <Typography variant='h5' fontWeight="bold">Alustuksen lähdemateriaali aineisto</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box mb={3}>
-            <Typography fontWeight="bold" my={1}>Valittu lähdemateriaali</Typography>
-            {type === 'CHAT_INSTANCE' && (
-              <Box display="flex" justifyContent="space-around" alignItems="center">
-                <FormControl fullWidth>
-                  <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
-                    <MenuItem value="" data-testid="no-source-materials">
-                      <em>{t('prompt:noSourceMaterials')}</em> <ClearOutlined sx={{ ml: 1 }} />
-                    </MenuItem>
-                    {ragIndices?.map((index) => (
-                      <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
-                        {index.metadata.name}
-                      </MenuItem>
-                    ))}
-                    <Divider />
-                    <LinkButtonHoc button={MenuItem} to={`/${courseId}/course/rag`}>
-                      {t('prompt:courseSourceMaterials')} <LibraryBooksOutlined sx={{ ml: 1 }} />
-                    </LinkButtonHoc>
-                  </Select>
-                </FormControl>
-              </Box>
-            )}
-          </Box>
-          <Collapse in={!!ragIndexId}>
+        {/* Basic information */}
+        <Accordion defaultExpanded sx={accordionStyle}>
+          <AccordionSummary
+            expandIcon={<ExpandMore />}
+            aria-controls="panel1-content"
+            id="panel1-header">
+            <Typography variant='h5' fontWeight="bold">Alustuksen perustiedot</Typography>
+            {/* {t('prompt:basicInformation')} */}
+          </AccordionSummary>
+          <AccordionDetails>
             <Box mb={3}>
-              <Typography fontWeight="bold" my={1}>Kielimallin lähdemateriaaliohjeistus</Typography>
-
-              <OpenableTextfield
-                value={ragSystemMessage}
-                onChange={(e) => setRagSystemMessage(e.target.value)}
-                onAppend={(text) => setRagSystemMessage((prev) => prev + (prev.trim().length ? ' ' : '') + text)}
+              <Typography mb={1} fontWeight="bold">Alustuksen nimi</Typography>
+              <TextField
                 slotProps={{
-                  htmlInput: { 'data-testid': 'rag-system-message-input' },
+                  htmlInput: {
+                    'data-testid': 'prompt-name-input',
+                    minLength: 3,
+                  },
                 }}
+                placeholder={t('common:promptName')}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 fullWidth
-                multiline
-                minRows={4}
-                maxRows={16}
               />
             </Box>
-          </Collapse>
+            <Box>
+              <Typography mb={1} fontWeight="bold">Alustuksen ohjeistus opiskelijoille</Typography>
+              <TextField
+                slotProps={{
+                  htmlInput: {
+                    'data-testid': 'student-instructions-input',
+                  },
+                }}
+                value={studentInstructions}
+                onChange={(e) => setStudentInstructions(e.target.value)}
+                placeholder={'Esim:\n\n# Ohjeistus opiskelijoille.\nKäyttäkää currechattiä.'}
+                fullWidth
+                multiline
+                minRows={8}
+                maxRows={48}
+              />
+            </Box>
+          </AccordionDetails>
+        </Accordion>
 
-        </AccordionDetails>
-      </Accordion>
 
-      <DialogActions>
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-          {loading && <CircularProgress color="secondary" />}
-          {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
-          <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
-            {t('common:save')}
-          </BlueButton>
-        </Box>
-      </DialogActions>
+        {/* LLM settings */}
+        <Accordion defaultExpanded sx={accordionStyle}>
+          <AccordionSummary
+            expandIcon={<ExpandMore />}
+            aria-controls="panel2-content"
+            id="panel2-header">
+            <Typography variant='h5' fontWeight="bold">Alustuksen kielimallin asetukset</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box mb={3}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={temperatureDefined && !modelHasTemperature}
+                    onChange={(e) => setTemperatureDefined(e.target.checked)}
+                    disabled={modelHasTemperature}
+                  />
+                }
+                label={t('chat:temperature')}
+              />
+              <Collapse in={temperatureDefined && !modelHasTemperature}>
+                <Box sx={{ mb: 3, p: 2 }}>
+                  <Slider
+                    value={temperature}
+                    onChange={(_, newValue) => setTemperature(newValue as number)}
+                    aria-labelledby="temperature-slider"
+                    valueLabelDisplay="auto"
+                    step={0.1}
+                    min={0}
+                    max={1}
+                    disabled={modelHasTemperature}
+                  />
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="body2">{t('chat:predictableTemperature')}</Typography>
+                    <Typography variant="body2">{t('chat:creativeTemperature')}</Typography>
+                  </Box>
+                </Box>
+              </Collapse>
+              {type !== 'PERSONAL' && (
+                // label={t('prompt:hidePrompt')}
+                <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label="Piilota kielimallin ohjeistus opiskelijoilta" />
+              )}
+            </Box>
+            <Box mb={3}>
+              <Typography mb={1} fontWeight="bold">Alustuksen valittu kielimalli</Typography>
+              <FormControl fullWidth >
+                <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
+                  <MenuItem value="none">
+                    <em>{t('prompt:modelFreeToChoose')}</em>
+                  </MenuItem>
+                  {validModels.map((m) => (
+                    <MenuItem key={m.name} value={m.name}>
+                      {m.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+            <Box>
+              <Typography mb={1} fontWeight="bold">{t('prompt:systemMessage')}</Typography>
+              <TextField
+                slotProps={{
+                  htmlInput: {
+                    'data-testid': 'system-message-input',
+                  },
+                }}
+                placeholder="Esim. Olet avulias."
+                value={systemMessage}
+                onChange={(e) => setSystemMessage(e.target.value)}
+                fullWidth
+                multiline
+                minRows={12}
+                maxRows={48}
+              />
+            </Box>
+          </AccordionDetails>
+        </Accordion>
 
-    </form>
+        {/* RAG settings */}
+        <Accordion defaultExpanded sx={accordionStyle}>
+          <AccordionSummary
+            expandIcon={<ExpandMore />}
+            aria-controls="panel3-content"
+            id="panel3-header">
+            <Typography variant='h5' fontWeight="bold">Alustuksen lähdemateriaali aineisto</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box mb={3}>
+              <Typography fontWeight="bold" my={1}>Valittu lähdemateriaali</Typography>
+              {type === 'CHAT_INSTANCE' && (
+                <Box display="flex" justifyContent="space-around" alignItems="center">
+                  <FormControl fullWidth>
+                    <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
+                      <MenuItem value="" data-testid="no-source-materials">
+                        <em>{t('prompt:noSourceMaterials')}</em> <ClearOutlined sx={{ ml: 1 }} />
+                      </MenuItem>
+                      {ragIndices?.map((index) => (
+                        <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
+                          {index.metadata.name}
+                        </MenuItem>
+                      ))}
+                      <Divider />
+                      <LinkButtonHoc button={MenuItem} to={`/${courseId}/course/rag`}>
+                        {t('prompt:courseSourceMaterials')} <LibraryBooksOutlined sx={{ ml: 1 }} />
+                      </LinkButtonHoc>
+                    </Select>
+                  </FormControl>
+                </Box>
+              )}
+            </Box>
+            <Collapse in={!!ragIndexId}>
+              <Box>
+                <Typography fontWeight="bold" my={1}>Kielimallin lähdemateriaaliohjeistus</Typography>
+
+                <OpenableTextfield
+                  value={ragSystemMessage}
+                  onChange={(e) => setRagSystemMessage(e.target.value)}
+                  onAppend={(text) => setRagSystemMessage((prev) => prev + (prev.trim().length ? ' ' : '') + text)}
+                  slotProps={{
+                    htmlInput: { 'data-testid': 'rag-system-message-input' },
+                  }}
+                  fullWidth
+                  multiline
+                  minRows={4}
+                  maxRows={16}
+                />
+              </Box>
+            </Collapse>
+
+          </AccordionDetails>
+        </Accordion>
+
+        <DialogActions>
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+            {loading && <CircularProgress color="secondary" />}
+            {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
+            <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
+              {t('common:save')}
+            </BlueButton>
+          </Box>
+        </DialogActions>
+
+      </form>
+    </Box>
 
   )
+}
+
+const accordionStyle = {
+  mb: 3,
+  p: 2,
+  border: '1px solid rgba(0,0,0,0.2)',
+  boxShadow: 0,
+  '&:before': { display: 'none' },
+
+  borderRadius: '1rem',
+  // force full radius on the first accordion too
+  '&:first-of-type': {
+    borderRadius: '1rem',
+  },
 }
