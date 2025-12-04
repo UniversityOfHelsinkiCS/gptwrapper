@@ -150,7 +150,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
               />
             </Box>
             <Box>
-              <Typography mb={1} fontWeight="bold">Alustuksen ohjeistus opiskelijoille</Typography>
+              <Typography mb={1} fontWeight="bold">Ohjeistus opiskelijoille alustuksen käytöstä</Typography>
               <TextField
                 slotProps={{
                   htmlInput: {
@@ -262,7 +262,20 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
               {type === 'CHAT_INSTANCE' && (
                 <Box display="flex" justifyContent="space-around" alignItems="center">
                   <FormControl fullWidth>
-                    <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
+                    <Select
+                      data-testid="rag-select"
+                      value={ragIndexId ?? ''}
+                      onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}
+                      displayEmpty
+                      renderValue={(value) => {
+                        if (String(value) === '') {
+                          return <em>{t('prompt:noSourceMaterials')}</em>
+                        }
+                        const selected = ragIndices?.find((i) => i.id === Number(value))
+                        return selected ? selected.metadata.name : ''
+                      }}
+
+                    >
                       <MenuItem value="" data-testid="no-source-materials">
                         <em>{t('prompt:noSourceMaterials')}</em> <ClearOutlined sx={{ ml: 1 }} />
                       </MenuItem>
@@ -319,15 +332,15 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
 }
 
 const accordionStyle = {
-  mb: 3,
+  mb: 2,
   p: 2,
   border: '1px solid rgba(0,0,0,0.2)',
   boxShadow: 0,
   '&:before': { display: 'none' },
 
-  borderRadius: '1rem',
+  borderRadius: '0.5rem',
   // force full radius on the first accordion too
   '&:first-of-type': {
-    borderRadius: '1rem',
+    borderRadius: '0.5rem',
   },
 }
