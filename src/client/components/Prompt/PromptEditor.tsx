@@ -9,12 +9,14 @@ import {
   Divider,
   FormControl,
   FormControlLabel,
-  InputLabel,
   MenuItem,
   Select,
   Slider,
   TextField,
   Typography,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material'
 import type { Message } from '@shared/chat'
 import { enqueueSnackbar } from 'notistack'
@@ -26,7 +28,8 @@ import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import { BlueButton, LinkButtonHoc, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
 import OpenableTextfield from '../common/OpenableTextfield'
-import { ClearOutlined, LibraryBooksOutlined } from '@mui/icons-material'
+import { ClearOutlined, LibraryBooksOutlined, ExpandMore } from '@mui/icons-material'
+
 
 export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string; setEditorOpen?: React.Dispatch<boolean>; personal?: boolean }) => {
   const navigate = useNavigate()
@@ -118,14 +121,18 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
   return (
 
     <form onSubmit={handleSubmit}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
 
-        <>
-          {/* Basic information */}
+      {/* Basic information */}
+      <Accordion defaultExpanded sx={{ p: 1 }}>
+        <AccordionSummary
+          expandIcon={<ExpandMore />}
+          aria-controls="panel1-content"
+          id="panel1-header">
           <Typography variant='h5' fontWeight="bold">Alustuksen perustiedot</Typography>
           {/* {t('prompt:basicInformation')} */}
-
-          <Box>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Box mb={3}>
             <Typography mb={1} fontWeight="bold">Alustuksen nimi</Typography>
             <TextField
               slotProps={{
@@ -140,12 +147,12 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
               fullWidth
             />
           </Box>
-          <Box>
+          <Box mb={3}>
             <Typography mb={1} fontWeight="bold">Alustuksen ohjeistus opiskelijoille</Typography>
             <TextField
               slotProps={{
                 htmlInput: {
-                  // 'data-testid': 'system-message-input',
+                  'data-testid': 'student-instructions-input',
                 },
               }}
               value={studentInstructions}
@@ -157,14 +164,20 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
               maxRows={48}
             />
           </Box>
-        </>
+        </AccordionDetails>
+      </Accordion>
 
-        <Divider sx={{ my: 3 }} />
 
-        {/* LLM settings */}
-        <>
+      {/* LLM settings */}
+      <Accordion defaultExpanded sx={{ p: 1 }}>
+        <AccordionSummary
+          expandIcon={<ExpandMore />}
+          aria-controls="panel2-content"
+          id="panel2-header">
           <Typography variant='h5' fontWeight="bold">Alustuksen kielimallin asetukset</Typography>
-          <Box>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Box mb={3}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -176,7 +189,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
               label={t('chat:temperature')}
             />
             <Collapse in={temperatureDefined && !modelHasTemperature}>
-              <Box sx={{ mb: 2, p: 2 }}>
+              <Box sx={{ mb: 3, p: 2 }}>
                 <Slider
                   value={temperature}
                   onChange={(_, newValue) => setTemperature(newValue as number)}
@@ -198,7 +211,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
               <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label="Piilota kielimallin ohjeistus opiskelijoilta" />
             )}
           </Box>
-          <Box>
+          <Box mb={3}>
             <Typography mb={1} fontWeight="bold">Alustuksen valittu kielimalli</Typography>
             <FormControl fullWidth >
               <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
@@ -213,7 +226,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
               </Select>
             </FormControl>
           </Box>
-          <Box>
+          <Box mb={3}>
             <Typography mb={1} fontWeight="bold">{t('prompt:systemMessage')}</Typography>
             <TextField
               slotProps={{
@@ -230,14 +243,19 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
               maxRows={48}
             />
           </Box>
-        </>
+        </AccordionDetails>
+      </Accordion>
 
-
-        <Divider sx={{ my: 3 }} />
-
-        <>
+      {/* RAG settings */}
+      <Accordion defaultExpanded sx={{ p: 1 }}>
+        <AccordionSummary
+          expandIcon={<ExpandMore />}
+          aria-controls="panel3-content"
+          id="panel3-header">
           <Typography variant='h5' fontWeight="bold">Alustuksen lähdemateriaali aineisto</Typography>
-          <Box>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Box mb={3}>
             <Typography fontWeight="bold" my={1}>Valittu lähdemateriaali</Typography>
             {type === 'CHAT_INSTANCE' && (
               <Box display="flex" justifyContent="space-around" alignItems="center">
@@ -261,34 +279,36 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
             )}
           </Box>
           <Collapse in={!!ragIndexId}>
-            <Typography fontWeight="bold" my={1}>Kielimallin lähdemateriaali ohjeistus</Typography>
+            <Box mb={3}>
+              <Typography fontWeight="bold" my={1}>Kielimallin lähdemateriaaliohjeistus</Typography>
 
-            <OpenableTextfield
-              value={ragSystemMessage}
-              onChange={(e) => setRagSystemMessage(e.target.value)}
-              onAppend={(text) => setRagSystemMessage((prev) => prev + (prev.trim().length ? ' ' : '') + text)}
-              slotProps={{
-                htmlInput: { 'data-testid': 'rag-system-message-input' },
-              }}
-              label={t('prompt:ragSystemMessage')}
-              fullWidth
-              multiline
-              minRows={2}
-              maxRows={12}
-            />
+              <OpenableTextfield
+                value={ragSystemMessage}
+                onChange={(e) => setRagSystemMessage(e.target.value)}
+                onAppend={(text) => setRagSystemMessage((prev) => prev + (prev.trim().length ? ' ' : '') + text)}
+                slotProps={{
+                  htmlInput: { 'data-testid': 'rag-system-message-input' },
+                }}
+                fullWidth
+                multiline
+                minRows={4}
+                maxRows={16}
+              />
+            </Box>
           </Collapse>
-        </>
 
-        <DialogActions>
-          <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-            {loading && <CircularProgress color="secondary" />}
-            {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
-            <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
-              {t('common:save')}
-            </BlueButton>
-          </Box>
-        </DialogActions>
-      </Box>
+        </AccordionDetails>
+      </Accordion>
+
+      <DialogActions>
+        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+          {loading && <CircularProgress color="secondary" />}
+          {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
+          <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
+            {t('common:save')}
+          </BlueButton>
+        </Box>
+      </DialogActions>
 
     </form>
 
