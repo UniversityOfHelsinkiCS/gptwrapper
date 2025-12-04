@@ -120,10 +120,13 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
     <form onSubmit={handleSubmit}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
 
-        {/* Basic */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Typography fontWeight="bold">{t('prompt:basicInformation')}</Typography>
+        <>
+          {/* Basic information */}
+          <Typography variant='h5' fontWeight="bold">Alustuksen perustiedot</Typography>
+          {/* {t('prompt:basicInformation')} */}
+
           <Box>
+            <Typography mb={1} fontWeight="bold">Alustuksen nimi</Typography>
             <TextField
               slotProps={{
                 htmlInput: {
@@ -131,161 +134,149 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
                   minLength: 3,
                 },
               }}
-              label={t('common:promptName')}
+              placeholder={t('common:promptName')}
               value={name}
               onChange={(e) => setName(e.target.value)}
               fullWidth
             />
           </Box>
-        </Box>
-
-        <Divider />
-
-        {/* Prompt */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Typography fontWeight="bold">Alustuksen ohjeistus opiskelijoille</Typography>
-          <TextField
-            slotProps={{
-              htmlInput: {
-                // 'data-testid': 'system-message-input',
-              },
-            }}
-            label={'Alustuksen ohjeistus'}
-            value={studentInstructions}
-            onChange={(e) => setStudentInstructions(e.target.value)}
-            fullWidth
-            multiline
-            minRows={8}
-            maxRows={48}
-          />
-        </Box>
-
-        <Divider />
-
-
-        {/* Kielimalli */}
-        <Box>
-          <Typography variant='h6' mb={2} fontWeight="bold">
-            Kielimalli
-          </Typography>
-
-          <Typography fontWeight="bold" my={1}>Kielimallin ohjeistus:</Typography>
-          <Typography fontWeight="bold" my={1}>Kielimallin ohjeistus:</Typography>
-        </Box>
-
-        <Divider />
-
-        {/* Lähdemateriaali */}
-        <Box>
-          <Typography variant='h6' mb={2} fontWeight="bold">
-            Lähdemateriaali
-          </Typography>
-
-          <Typography fontWeight="bold" my={1}>Valittu lähdemateriaali</Typography>
-          <Typography fontWeight="bold" my={1}>Kielimallin lähdemateriaali ohjeistus</Typography>
-        </Box>
-
-        <Divider />
-
-        {type !== 'PERSONAL' && (
-          <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />
-        )}
-        <FormControl fullWidth margin="normal">
-          <InputLabel sx={{ background: 'white', px: 0.75, ml: -0.75 }}>{t('common:model')}</InputLabel>
-          <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
-            <MenuItem value="none">
-              <em>{t('prompt:modelFreeToChoose')}</em>
-            </MenuItem>
-            {validModels.map((m) => (
-              <MenuItem key={m.name} value={m.name}>
-                {m.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={temperatureDefined && !modelHasTemperature}
-              onChange={(e) => setTemperatureDefined(e.target.checked)}
-              disabled={modelHasTemperature}
+          <Box>
+            <Typography mb={1} fontWeight="bold">Alustuksen ohjeistus opiskelijoille</Typography>
+            <TextField
+              slotProps={{
+                htmlInput: {
+                  // 'data-testid': 'system-message-input',
+                },
+              }}
+              value={studentInstructions}
+              onChange={(e) => setStudentInstructions(e.target.value)}
+              placeholder={'Esim:\n\n# Ohjeistus opiskelijoille.\nKäyttäkää currechattiä.'}
+              fullWidth
+              multiline
+              minRows={8}
+              maxRows={48}
             />
-          }
-          label={t('chat:temperature')}
-        />
-        <Collapse in={temperatureDefined && !modelHasTemperature}>
-          <Slider
-            value={temperature}
-            onChange={(_, newValue) => setTemperature(newValue as number)}
-            aria-labelledby="temperature-slider"
-            valueLabelDisplay="auto"
-            step={0.1}
-            min={0}
-            max={1}
-            disabled={modelHasTemperature}
-            sx={{ mb: -1 }}
-          />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="body2">{t('chat:predictableTemperature')}</Typography>
-            <Typography variant="body2">{t('chat:creativeTemperature')}</Typography>
           </Box>
-        </Collapse>
-        <Typography component="h3" gutterBottom>
-          {t('prompt:context')}
-        </Typography>
-        {type === 'CHAT_INSTANCE' && (
-          <Box display="flex" justifyContent="space-around" alignItems="center">
-            <FormControl fullWidth margin="normal">
-              <InputLabel sx={{ background: 'white', px: 0.75, ml: -0.75 }}>{t('rag:sourceMaterials')}</InputLabel>
-              <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
-                <MenuItem value="" data-testid="no-source-materials">
-                  <em>{t('prompt:noSourceMaterials')}</em> <ClearOutlined sx={{ ml: 1 }} />
+        </>
+
+        <Divider sx={{ my: 3 }} />
+
+        {/* LLM settings */}
+        <>
+          <Typography variant='h5' fontWeight="bold">Alustuksen kielimallin asetukset</Typography>
+          <Box>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={temperatureDefined && !modelHasTemperature}
+                  onChange={(e) => setTemperatureDefined(e.target.checked)}
+                  disabled={modelHasTemperature}
+                />
+              }
+              label={t('chat:temperature')}
+            />
+            <Collapse in={temperatureDefined && !modelHasTemperature}>
+              <Slider
+                value={temperature}
+                onChange={(_, newValue) => setTemperature(newValue as number)}
+                aria-labelledby="temperature-slider"
+                valueLabelDisplay="auto"
+                step={0.1}
+                min={0}
+                max={1}
+                disabled={modelHasTemperature}
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography variant="body2">{t('chat:predictableTemperature')}</Typography>
+                <Typography variant="body2">{t('chat:creativeTemperature')}</Typography>
+              </Box>
+            </Collapse>
+            {type !== 'PERSONAL' && (
+              // label={t('prompt:hidePrompt')}
+              <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label="Piilota kielimallin ohjeistus opiskelijoilta" />
+            )}
+          </Box>
+          <Box>
+            <Typography mb={1} fontWeight="bold">Alustuksen valittu kielimalli</Typography>
+            <FormControl fullWidth >
+              <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
+                <MenuItem value="none">
+                  <em>{t('prompt:modelFreeToChoose')}</em>
                 </MenuItem>
-                {ragIndices?.map((index) => (
-                  <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
-                    {index.metadata.name}
+                {validModels.map((m) => (
+                  <MenuItem key={m.name} value={m.name}>
+                    {m.name}
                   </MenuItem>
                 ))}
-                <Divider />
-                <LinkButtonHoc button={MenuItem} to={`/${courseId}/course/rag`}>
-                  {t('prompt:courseSourceMaterials')} <LibraryBooksOutlined sx={{ ml: 1 }} />
-                </LinkButtonHoc>
               </Select>
             </FormControl>
           </Box>
-        )}
-        <Collapse in={!!ragIndexId}>
-          <OpenableTextfield
-            value={ragSystemMessage}
-            onChange={(e) => setRagSystemMessage(e.target.value)}
-            onAppend={(text) => setRagSystemMessage((prev) => prev + (prev.trim().length ? ' ' : '') + text)}
-            slotProps={{
-              htmlInput: { 'data-testid': 'rag-system-message-input' },
-            }}
-            label={t('prompt:ragSystemMessage')}
-            fullWidth
-            margin="normal"
-            multiline
-            minRows={2}
-            maxRows={12}
-          />
-        </Collapse>
-        <TextField
-          slotProps={{
-            htmlInput: {
-              'data-testid': 'system-message-input',
-            },
-          }}
-          label={t('prompt:systemMessage')}
-          value={systemMessage}
-          onChange={(e) => setSystemMessage(e.target.value)}
-          fullWidth
-          margin="normal"
-          multiline
-          minRows={12}
-          maxRows={48}
-          sx={{ flex: 1 }}
-        />
+          <Box>
+            <Typography mb={1} fontWeight="bold">{t('prompt:systemMessage')}</Typography>
+            <TextField
+              slotProps={{
+                htmlInput: {
+                  'data-testid': 'system-message-input',
+                },
+              }}
+              placeholder="Esim. Olet avulias."
+              value={systemMessage}
+              onChange={(e) => setSystemMessage(e.target.value)}
+              fullWidth
+              multiline
+              minRows={12}
+              maxRows={48}
+            />
+          </Box>
+        </>
+
+
+        <Divider sx={{ my: 3 }} />
+
+        <>
+          <Typography variant='h5' fontWeight="bold">Alustuksen lähdemateriaali aineisto</Typography>
+          <Box>
+            <Typography fontWeight="bold" my={1}>Valittu lähdemateriaali</Typography>
+            {type === 'CHAT_INSTANCE' && (
+              <Box display="flex" justifyContent="space-around" alignItems="center">
+                <FormControl fullWidth>
+                  <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
+                    <MenuItem value="" data-testid="no-source-materials">
+                      <em>{t('prompt:noSourceMaterials')}</em> <ClearOutlined sx={{ ml: 1 }} />
+                    </MenuItem>
+                    {ragIndices?.map((index) => (
+                      <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
+                        {index.metadata.name}
+                      </MenuItem>
+                    ))}
+                    <Divider />
+                    <LinkButtonHoc button={MenuItem} to={`/${courseId}/course/rag`}>
+                      {t('prompt:courseSourceMaterials')} <LibraryBooksOutlined sx={{ ml: 1 }} />
+                    </LinkButtonHoc>
+                  </Select>
+                </FormControl>
+              </Box>
+            )}
+          </Box>
+          <Collapse in={!!ragIndexId}>
+            <Typography fontWeight="bold" my={1}>Kielimallin lähdemateriaali ohjeistus</Typography>
+
+            <OpenableTextfield
+              value={ragSystemMessage}
+              onChange={(e) => setRagSystemMessage(e.target.value)}
+              onAppend={(text) => setRagSystemMessage((prev) => prev + (prev.trim().length ? ' ' : '') + text)}
+              slotProps={{
+                htmlInput: { 'data-testid': 'rag-system-message-input' },
+              }}
+              label={t('prompt:ragSystemMessage')}
+              fullWidth
+              multiline
+              minRows={2}
+              maxRows={12}
+            />
+          </Collapse>
+        </>
+
         <DialogActions>
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
             {loading && <CircularProgress color="secondary" />}
@@ -296,6 +287,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
           </Box>
         </DialogActions>
       </Box>
+
     </form>
 
   )
