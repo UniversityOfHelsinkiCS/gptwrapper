@@ -176,19 +176,21 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
               label={t('chat:temperature')}
             />
             <Collapse in={temperatureDefined && !modelHasTemperature}>
-              <Slider
-                value={temperature}
-                onChange={(_, newValue) => setTemperature(newValue as number)}
-                aria-labelledby="temperature-slider"
-                valueLabelDisplay="auto"
-                step={0.1}
-                min={0}
-                max={1}
-                disabled={modelHasTemperature}
-              />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2">{t('chat:predictableTemperature')}</Typography>
-                <Typography variant="body2">{t('chat:creativeTemperature')}</Typography>
+              <Box sx={{ mb: 2, p: 2 }}>
+                <Slider
+                  value={temperature}
+                  onChange={(_, newValue) => setTemperature(newValue as number)}
+                  aria-labelledby="temperature-slider"
+                  valueLabelDisplay="auto"
+                  step={0.1}
+                  min={0}
+                  max={1}
+                  disabled={modelHasTemperature}
+                />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography variant="body2">{t('chat:predictableTemperature')}</Typography>
+                  <Typography variant="body2">{t('chat:creativeTemperature')}</Typography>
+                </Box>
               </Box>
             </Collapse>
             {type !== 'PERSONAL' && (
