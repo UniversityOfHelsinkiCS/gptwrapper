@@ -22,7 +22,7 @@ const TemplateModal: React.FC<{ open: boolean, root: string, children: React.Rea
           display: 'flex',
           flexDirection: 'column',
           width: { xs: '100vw', md: '90vw', lg: '75vw' },
-          maxWidth: 1100,
+          maxWidth: 1200,
           minHeight: '85vh',
           maxHeight: '85vh',
           bgcolor: 'background.paper',
