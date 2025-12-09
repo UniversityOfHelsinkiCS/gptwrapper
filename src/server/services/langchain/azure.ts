@@ -17,4 +17,6 @@ export const getAzureChatOpenAI = ({ name, temperature, streaming = true }: Azur
     temperature: temperature,
     streaming,
     zdrEnabled: true,
+    // Note: reasoning configuration is not included to prevent summary titles from being generated
+    // (e.g., "Please Don't", "Thank You") which can disrupt conversation flow
   })
