@@ -15,11 +15,6 @@ export const getAzureChatOpenAI = ({ name, temperature, streaming = true }: Azur
     azureOpenAIApiDeploymentName: name, // In Azure, always use the acual model name as the deployment name
     azureOpenAIApiInstanceName: AZURE_RESOURCE,
     temperature: temperature,
-    reasoning: {
-      effort: 'minimal',
-      summary: null,
-      generate_summary: null,
-    },
     streaming,
     zdrEnabled: true,
   })
