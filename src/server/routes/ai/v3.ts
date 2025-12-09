@@ -66,12 +66,12 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       throw ApplicationError.Forbidden('Not authorized for general chat')
     }
   }
-   
+
   // Add file to last message if exists
   try {
     if (req.file) {
 
-      if(imageFileTypes.includes(req.file.mimetype) && !user.isAdmin){
+      if (imageFileTypes.includes(req.file.mimetype) && !user.isAdmin) {
         throw ApplicationError.Forbidden('Not authorized for images')
       }
       options.chatMessages = (await parseFileAndAddToLastMessage(options.chatMessages, req.file)) as ChatMessage[]

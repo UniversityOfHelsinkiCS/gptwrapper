@@ -3,6 +3,7 @@ import multer from 'multer'
 import crypto from 'crypto'
 import z from 'zod/v4'
 import multerS3 from 'multer-s3'
+import path from 'path'
 import { shouldRenderAsText } from '../../../shared/utils'
 import { ChatInstance, RagFile, RagIndex, Responsibility } from '../../db/models'
 import { FileStore } from '../../services/rag/fileStore'
@@ -210,6 +211,13 @@ const upload = multer({
     s3: s3Client,
     bucket: S3_BUCKET,
     acl: 'private',
+    contentType: (_req, file, cb) => {
+      const ext = path.extname(file.originalname || '');
+      if (!ext || ext === '') {
+        return cb(null, 'text/plain');
+      }
+      cb(null, file.mimetype || 'text/plain')
+    },
     metadata: (_req, file, cb) => {
       cb(null, { fieldName: file.fieldname })
     },
@@ -238,13 +246,13 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
   const { ragIndex, user, uploadedS3Keys = [] } = ragIndexRequest
 
   const ragFiles = await Promise.all(
-    req.files.map((file: Express.Multer.File, idx) =>
+    req.files.map((file: Express.MulterS3.File, idx: number) =>
       RagFile.create({
         userId: user.id,
         ragIndexId: ragIndex.id,
         pipelineStage: 'ingesting',
         filename: file.originalname,
-        fileType: file.mimetype,
+        fileType: file.contentType,
         fileSize: file.size,
         s3Key: uploadedS3Keys[idx],
         metadata: {},
@@ -270,10 +278,10 @@ ragIndexRouter.post('/reset', async (req, res) => {
   }, {
     where: { ragIndexId: ragIndex.id },
   })
-  
+
   await vectorStore.dropIndex()
   await vectorStore.createIndex()
-  
+
   // Now we need to re-ingest
   ingestRagFiles(ragIndex).catch((error) => {
     console.error('Error ingesting RAG files:', error)
