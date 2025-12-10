@@ -47,6 +47,7 @@ export const postAbortableStream = async (path: string, formData: FormData, exte
       }
     } else {
       return {
+        ...json,
         error: json.error || 'Unknown error from server',
         controller,
       }

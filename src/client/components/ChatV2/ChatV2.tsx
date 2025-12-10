@@ -230,9 +230,9 @@ const ChatV2Content = () => {
       )
 
       if ('error' in res) {
-        console.error('API error:', res.error)
+        console.error('API error:', res)
+        handleCompletionStreamError(res, fileName)
         handleCancel()
-        enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
         return
       }
 
@@ -307,6 +307,13 @@ const ChatV2Content = () => {
     setMessageWarning({})
     setIsStreaming(false)
     clearRetryTimeout()
+  }
+
+  const handleRetry = (messageIndex: number) => {
+    const newMessages = messages.slice(0, messageIndex)
+    setMessages(newMessages)
+
+    handleSendMessage('', true, [])
   }
 
   useEffect(() => {
@@ -500,6 +507,7 @@ const ChatV2Content = () => {
             toolCalls={toolCalls}
             setActiveToolResult={setActiveToolResult}
             isMobile={isMobile}
+            onRetry={handleRetry}
           />
         </Box>
         <Box
