@@ -16,7 +16,7 @@ export const DEFAULT_TOKEN_LIMIT = Number(process.env.DEFAULT_TOKEN_LIMIT) || 20
 
 export const formatInstructions = `
 Always format responses in plain Markdown.
-Use Markdown headings (#, ##, ###) for structure, even for normal text.
+Use Markdown headings (#, ##, ###) only when structuring complex content with clear sections.
 Use lists, tables, and blockquotes where useful.
 Put math in $$ ... $$ for LaTeX rendering.
 Wrap code in triple backticks with the correct language tag (js, ts, py, etc.) so syntax highlighting and rendering work.
