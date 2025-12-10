@@ -200,7 +200,7 @@ const ChatV2Content = () => {
       if (streamControllerRef.current) {
         streamControllerRef.current.abort('timeout_error')
       }
-    }, 5000)
+    }, 10_000) // 10s
 
     setIsStreaming(true)
     // Scroll immediately to show loading dots for better UX feedback

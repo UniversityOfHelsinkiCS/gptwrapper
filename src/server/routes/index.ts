@@ -28,6 +28,7 @@ initializeSentry()
 
 router.use(cors())
 router.use(express.json({ limit: '10mb' }))
+router.use(express.urlencoded({ limit: '10mb' }))
 
 router.use(shibbolethMiddleware)
 router.use(userMiddleware)
