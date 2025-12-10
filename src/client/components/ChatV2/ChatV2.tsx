@@ -310,17 +310,13 @@ const ChatV2Content = () => {
   }
 
   const handleRetry = (messageIndex: number) => {
-    // Remove the failed assistant message
+    // Remove the failed assistant message and any subsequent messages
     const newMessages = messages.slice(0, messageIndex)
     setMessages(newMessages)
     
-    // Find the last user message to resend
-    const lastUserMessage = [...newMessages].reverse().find(msg => msg.role === 'user')
-    
-    if (lastUserMessage) {
-      // Resend the last user message
-      handleSendMessage('', true, [])
-    }
+    // The messages are already set correctly (without the failed assistant message)
+    // Now resend using the existing messages
+    handleSendMessage('', true, [])
   }
 
   useEffect(() => {

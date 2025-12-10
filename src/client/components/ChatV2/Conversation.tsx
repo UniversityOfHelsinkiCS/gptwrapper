@@ -328,6 +328,22 @@ export const MessageItem = ({
   }
 }
 
+const shouldShowRetryButton = (
+  message: ChatMessage,
+  idx: number,
+  messages: ChatMessage[],
+  isStreaming: boolean,
+  onRetry?: (index: number) => void
+): boolean => {
+  return (
+    message.role === 'assistant' &&
+    !!message.error &&
+    idx === messages.length - 1 &&
+    !isStreaming &&
+    !!onRetry
+  )
+}
+
 const Conversation = ({
   messages,
   completion,
@@ -366,18 +382,13 @@ const Conversation = ({
       >
         {messages.length === 0 && initial}
         {messages.map((message, idx) => {
-          // Only show retry button for the last assistant message if it has an error
-          const showRetry = message.role === 'assistant' && 
-                           message.error && 
-                           idx === messages.length - 1 &&
-                           !isStreaming &&
-                           onRetry
+          const showRetry = shouldShowRetryButton(message, idx, messages, isStreaming, onRetry)
           return (
             <MessageItem 
               key={idx} 
               message={message} 
               setActiveToolResult={setActiveToolResult}
-              onRetry={showRetry ? () => onRetry(idx) : undefined}
+              onRetry={showRetry ? () => onRetry!(idx) : undefined}
             />
           )
         })}
