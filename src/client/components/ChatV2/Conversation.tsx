@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next'
 import { readMessageContent, type AssistantMessage, type ChatMessage, type MessageGenerationInfo, type ToolCallResultEvent, type ToolCallStatusEvent, type UserMessage } from '../../../shared/chat'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import CopyToClipboardButton from './CopyToClipboardButton'
-import { BlueButton } from './general/Buttons'
+import { BlueButton, OutlineButtonBlack } from './general/Buttons'
 
 const UserMessageItem = ({ message }: { message: UserMessage }) => (
   <Box
@@ -121,11 +121,11 @@ const AssistantMessageInfo = ({ message }: { message: AssistantMessage }) => {
   )
 }
 
-const AssistantMessageItem = ({ 
-  message, 
+const AssistantMessageItem = ({
+  message,
   setActiveToolResult,
-  onRetry 
-}: { 
+  onRetry
+}: {
   message: AssistantMessage
   setActiveToolResult: (data: ToolCallResultEvent) => void
   onRetry?: () => void
@@ -285,9 +285,9 @@ const AssistantMessageItem = ({
           <Typography variant="body1" fontStyle="italic" color="#cc0000">{`\n\n ${message.error}`}</Typography>
           {onRetry && (
             <Box sx={{ mt: 1 }}>
-              <BlueButton onClick={onRetry} size="small">
+              <OutlineButtonBlack onClick={onRetry} size="small">
                 {t('chat:retryMessage')}
-              </BlueButton>
+              </OutlineButtonBlack>
             </Box>
           )}
         </Box>
@@ -299,11 +299,11 @@ const AssistantMessageItem = ({
   )
 }
 
-export const MessageItem = ({ 
-  message, 
+export const MessageItem = ({
+  message,
   setActiveToolResult,
-  onRetry 
-}: { 
+  onRetry
+}: {
   message: ChatMessage
   setActiveToolResult: (data: ToolCallResultEvent) => void
   onRetry?: () => void
@@ -384,9 +384,9 @@ const Conversation = ({
         {messages.map((message, idx) => {
           const showRetry = shouldShowRetryButton(message, idx, messages, isStreaming, onRetry)
           return (
-            <MessageItem 
-              key={idx} 
-              message={message} 
+            <MessageItem
+              key={idx}
+              message={message}
               setActiveToolResult={setActiveToolResult}
               onRetry={showRetry ? () => onRetry!(idx) : undefined}
             />
