@@ -11,14 +11,14 @@ export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file
   const textFileTypes = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'text/md']
 
 
-  
+
   if (textFileTypes.includes(file.mimetype)) {
     const fileBuffer = file.buffer
     fileContent = fileBuffer.toString('utf8')
   }
 
 
-  if(imageFileTypes.includes(file.mimetype)){
+  if (imageFileTypes.includes(file.mimetype)) {
     //Openai supports different types of image inputs,
     // read the image content part of langchain: https://docs.langchain.com/oss/python/langchain/messages#message-content
     //this is the openai specific: https://platform.openai.com/docs/guides/images-vision?api-mode=responses&format=base64-encoded
@@ -39,7 +39,7 @@ export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file
       const data = new Uint8Array(file.buffer)
       const loadingTask = getDocument({ data })
       const pdf = await loadingTask.promise
-      
+
       if (!pdf || pdf.numPages === 0) {
         logger.error('PDF parsing failed: PDF has no pages', { filename: file.originalname })
         throw ApplicationError.BadRequest('PDF file is empty or corrupted')
@@ -51,7 +51,6 @@ export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file
         fileContent += pageText
       }
 
-      // Check if any text was extracted from the PDF
       const extractedText = fileContent as string
       if (extractedText.trim().length === 0) {
         logger.error('PDF parsing completed but extracted no text', { filename: file.originalname, numPages: pdf.numPages })
@@ -60,17 +59,16 @@ export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file
         })
       }
     } catch (error) {
-      logger.error('Error parsing PDF file', { 
+      logger.error('Error parsing PDF file', {
         error: error instanceof Error ? error.message : String(error),
         filename: file.originalname,
-        fileSize: file.size 
+        fileSize: file.size
       })
-      
+
       if (error instanceof ApplicationError) {
         throw error
       }
-      
-      // Provide more specific error messages
+
       const errorMessage = error instanceof Error ? error.message : String(error)
       if (errorMessage.includes('password') || errorMessage.includes('encrypted')) {
         throw ApplicationError.BadRequest('PDF file is password-protected or encrypted')
@@ -84,16 +82,13 @@ export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file
 
   const messageToAddFileTo = messages[messages.length - 1]
 
-  //images require content to be certain format
-  const content: MessageContent[] | string = imageFileTypes.includes(file.mimetype) ?  fileContent : `${messageToAddFileTo.content} ${fileContent as string}`
-  console.log(content)
+  const content: MessageContent[] | string = imageFileTypes.includes(file.mimetype) ? fileContent : `${messageToAddFileTo.content} ${fileContent as string}`
 
   const updatedMessage: ChatMessage = {
     ...messageToAddFileTo,
     content: content,
   }
 
-  // Remove the old message and add the new one
   messages.pop()
   messages = [...messages, updatedMessage]
 

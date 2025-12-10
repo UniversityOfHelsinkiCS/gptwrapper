@@ -310,12 +310,9 @@ const ChatV2Content = () => {
   }
 
   const handleRetry = (messageIndex: number) => {
-    // Remove the failed assistant message and any subsequent messages
     const newMessages = messages.slice(0, messageIndex)
     setMessages(newMessages)
-    
-    // Resend using the messages without the failed response
-    // setMessages is async, but handleSendMessage will use the updated state
+
     handleSendMessage('', true, [])
   }
 
