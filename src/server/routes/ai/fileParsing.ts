@@ -55,7 +55,9 @@ export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file
       const extractedText = fileContent as string
       if (extractedText.trim().length === 0) {
         logger.error('PDF parsing completed but extracted no text', { filename: file.originalname, numPages: pdf.numPages })
-        throw ApplicationError.BadRequest('PDF file contains no extractable text. The file may contain only images or be corrupted.')
+        throw ApplicationError.BadRequest('PDF file contains no extractable text. The file may contain only images or be corrupted.', {
+          extra: { filename: file.originalname, numPages: pdf.numPages }
+        })
       }
     } catch (error) {
       logger.error('Error parsing PDF file', { 

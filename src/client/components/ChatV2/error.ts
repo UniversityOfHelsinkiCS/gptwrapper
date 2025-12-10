@@ -7,22 +7,34 @@ import { enqueueSnackbar } from 'notistack'
 export const handleCompletionStreamError = (err: any, file: string) => {
   if (err?.name === 'AbortError' || !err) return
 
-  const error = err?.response?.data || err.message
+  // Extract error message and metadata from various possible structures
+  const error = err?.error || err?.response?.data?.error || err?.response?.data || err.message
+  const filename = err?.filename || err?.response?.data?.filename
+  const numPages = err?.numPages || err?.response?.data?.numPages
 
   if (error === 'Model maximum context reached' && file) {
     enqueueSnackbar(t('error:tooLargeFile'), { variant: 'error' })
   } else if (error && typeof error === 'string' && file) {
     // Check for specific PDF parsing errors
+    let errorMessage = error
+    
+    // Add file details if available
+    if (filename && numPages) {
+      errorMessage = `${error} (${filename}, ${numPages} pages)`
+    } else if (filename) {
+      errorMessage = `${error} (${filename})`
+    }
+    
     if (error.includes('password-protected') || error.includes('encrypted')) {
-      enqueueSnackbar(t('error:pdfEncrypted'), { variant: 'error' })
+      enqueueSnackbar(errorMessage, { variant: 'error' })
     } else if (error.includes('no extractable text')) {
-      enqueueSnackbar(t('error:pdfNoText'), { variant: 'error' })
+      enqueueSnackbar(errorMessage, { variant: 'error' })
     } else if (error.includes('empty') || error.includes('corrupted')) {
-      enqueueSnackbar(t('error:pdfEmpty'), { variant: 'error' })
+      enqueueSnackbar(errorMessage, { variant: 'error' })
     } else if (error.includes('invalid') || error.includes('corrupt')) {
-      enqueueSnackbar(t('error:pdfInvalid'), { variant: 'error' })
+      enqueueSnackbar(errorMessage, { variant: 'error' })
     } else if (error.includes('parsing') || error.includes('Error parsing file')) {
-      enqueueSnackbar(t('error:pdfParsingError'), { variant: 'error' })
+      enqueueSnackbar(errorMessage, { variant: 'error' })
     } else {
       enqueueSnackbar(t('error:fileParsingError'), { variant: 'error' })
     }

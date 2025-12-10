@@ -28,6 +28,7 @@ export class ApplicationError extends Error {
   toJSON() {
     return {
       error: this.message,
+      ...this.extra,
     }
   }
 

@@ -230,9 +230,9 @@ const ChatV2Content = () => {
       )
 
       if ('error' in res) {
-        console.error('API error:', res.error)
+        console.error('API error:', res)
+        handleCompletionStreamError(res, fileName)
         handleCancel()
-        enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
         return
       }
 
