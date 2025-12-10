@@ -4,6 +4,28 @@ import logger from '../util/logger'
 import { ApplicationError } from '../util/ApplicationError'
 
 const errorHandler = (error: Error, _req: Request, res: Response, next: NextFunction) => {
+  // Handle Multer-specific errors
+  if (error && 'code' in error && typeof error.code === 'string') {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      const normalizedError = ApplicationError.BadRequest('File size exceeds the maximum limit of 50MB')
+      logger.error(`${error.message} ${error.code}`)
+      res.status(normalizedError.status).json(normalizedError)
+      return
+    }
+    if (error.code === 'LIMIT_FILE_COUNT') {
+      const normalizedError = ApplicationError.BadRequest('Too many files uploaded')
+      logger.error(`${error.message} ${error.code}`)
+      res.status(normalizedError.status).json(normalizedError)
+      return
+    }
+    if (error.code === 'LIMIT_UNEXPECTED_FILE') {
+      const normalizedError = ApplicationError.BadRequest('Unexpected file in upload')
+      logger.error(`${error.message} ${error.code}`)
+      res.status(normalizedError.status).json(normalizedError)
+      return
+    }
+  }
+
   const normalizedError = error instanceof ApplicationError ? error : new ApplicationError(error.message)
 
   if (!normalizedError.silenced) {
