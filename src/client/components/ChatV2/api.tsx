@@ -20,7 +20,7 @@ export const useToolResults = (toolCallId: string) => {
 export const postCompletionStreamV3 = async (formData: FormData, input: PostStreamSchemaV3Type, abortController?: AbortController) => {
   formData.set('data', JSON.stringify(input))
 
-  return postAbortableStream('/ai/v3/stream', formData, abortController)
+  return postAbortableStream('ai/v3/stream', formData, abortController)
 }
 
 export const sendConversationEmail = async (email: string, messages: ChatMessage[], t: TFunction) => {
@@ -175,11 +175,10 @@ const formatEmail = (messages: ChatMessage[], t): string => {
       }
 
       return `
-      <div style="padding: 1rem; ${
-        msg.role === 'user'
+      <div style="padding: 1rem; ${msg.role === 'user'
           ? 'background: #efefef; margin-left: 100px; border-radius: 0.6rem; box-shadow: 0px 2px 2px rgba(0,0,0,0.2); white-space: pre-wrap; word-break: break-word; '
           : 'margin-right: 2rem;'
-      }">
+        }">
         ${title ? `<h3 style="font-style: italic; margin: 0; color: #107eab">${title}:</h3>` : ''}
         ${formattedContent}
       </div>
