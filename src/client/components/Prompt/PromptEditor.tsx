@@ -55,25 +55,25 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
   const { data: chatInstance } = useCourse(courseId)
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
   const [loading, setLoading] = useState<boolean>(false)
+  const { activePrompt, createPromptMutation, editPromptMutation } = usePromptState()
 
-  const { activePrompt: prompt, createPromptMutation, editPromptMutation } = usePromptState()
   let type: 'CHAT_INSTANCE' | 'PERSONAL' = 'CHAT_INSTANCE'
   if (courseId && courseId !== 'general') type = 'CHAT_INSTANCE'
   if (personal) type = 'PERSONAL'
-  if (prompt) type = prompt.type
+  if (activePrompt) type = activePrompt.type
 
   const [form, setForm] = useState<PromptEditorFormState>({
-    name: prompt?.name ?? '',
-    studentInstructions: prompt?.studentInstructions ?? '',
-    systemMessage: prompt?.systemMessage ?? '',
-    ragSystemMessage: prompt
-      ? (prompt.messages?.find((m: Message) => m.role === 'system')?.content as string) || ''
+    name: activePrompt?.name ?? '',
+    studentInstructions: activePrompt?.studentInstructions ?? '',
+    systemMessage: activePrompt?.systemMessage ?? '',
+    ragSystemMessage: activePrompt
+      ? (activePrompt.messages?.find((m: Message) => m.role === 'system')?.content as string) || ''
       : t('prompt:defaultRagMessage'),
-    hidden: prompt?.hidden ?? false,
-    ragIndexId: prompt?.ragIndexId ?? null,
-    selectedModel: prompt?.model ?? 'none',
-    temperatureDefined: prompt?.temperature !== undefined,
-    temperature: prompt?.temperature ?? 0.5,
+    hidden: activePrompt?.hidden ?? false,
+    ragIndexId: activePrompt?.ragIndexId ?? null,
+    selectedModel: activePrompt?.model ?? 'none',
+    temperatureDefined: activePrompt?.temperature !== undefined,
+    temperature: activePrompt?.temperature ?? 0.5,
   })
 
   const modelHasTemperature =
@@ -108,9 +108,9 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
     const messages: Message[] = ragIndexId && ragSystemMessage.length > 0 ? [{ role: 'system', content: ragSystemMessage }] : []
 
     try {
-      if (prompt) {
+      if (activePrompt) {
         await editPromptMutation({
-          id: prompt.id,
+          id: activePrompt.id,
           name,
           studentInstructions,
           systemMessage,
@@ -163,29 +163,27 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
         </Tabs>
       </Box>
 
-      <Box>
-        <form onSubmit={handleSubmit}>
-          <TabPanel value={tab} index={0}>
-            <PromptEditorForm />
-          </TabPanel>
-          <TabPanel value={tab} index={1}>
-            <PromptEditorReview />
-          </TabPanel>
-        </form>
-      </Box>
+      <form onSubmit={handleSubmit}>
+        <TabPanel value={tab} index={0}>
+          <PromptEditorForm />
+        </TabPanel>
+        <TabPanel value={tab} index={1}>
+          <PromptEditorReview />
+        </TabPanel>
 
-      <DialogActions>
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-          {loading && <CircularProgress color="secondary" />}
-          {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
-          <OutlineButtonBlue disabled={loading} variant="contained" sx={{ ml: 1 }} onClick={() => tab === 0 ? setTab(1) : setTab(0)}>
-            {tab === 1 ? 'Muokkaa' : 'Esikatsele'}
-          </OutlineButtonBlue>
-          <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
-            {t('common:save')}
-          </BlueButton>
-        </Box>
-      </DialogActions>
+        <DialogActions>
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+            {loading && <CircularProgress color="secondary" />}
+            {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
+            <OutlineButtonBlue disabled={loading} variant="contained" sx={{ ml: 1 }} onClick={() => tab === 0 ? setTab(1) : setTab(0)}>
+              {tab === 1 ? 'Muokkaa' : 'Esikatsele'}
+            </OutlineButtonBlue>
+            <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
+              {t('common:save')}
+            </BlueButton>
+          </Box>
+        </DialogActions>
+      </form>
     </PromptEditorFormContext.Provider>
   );
 }

@@ -192,7 +192,7 @@ const ModelSettingsSection = () => {
                         }
                         fullWidth
                         multiline
-                        minRows={12}
+                        minRows={8}
                         maxRows={48}
                     />
                 </Box>
