@@ -314,8 +314,8 @@ const ChatV2Content = () => {
     const newMessages = messages.slice(0, messageIndex)
     setMessages(newMessages)
     
-    // The messages are already set correctly (without the failed assistant message)
-    // Now resend using the existing messages
+    // Resend using the messages without the failed response
+    // setMessages is async, but handleSendMessage will use the updated state
     handleSendMessage('', true, [])
   }
 

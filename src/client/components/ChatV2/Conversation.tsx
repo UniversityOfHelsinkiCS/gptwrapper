@@ -340,7 +340,7 @@ const shouldShowRetryButton = (
     !!message.error &&
     idx === messages.length - 1 &&
     !isStreaming &&
-    !!onRetry
+    onRetry != null
   )
 }
 
