@@ -3,7 +3,7 @@ import { createContext, useContext } from "react"
 
 export type PromptEditorFormState = {
     name: string
-    studentInstructions: string
+    userInstructions: string
     systemMessage: string
     ragSystemMessage: string
     hidden: boolean

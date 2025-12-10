@@ -14,8 +14,7 @@ export const PromptEditorReview = () => {
             <Typography>Alustuksen nimi</Typography>
             <Typography fontWeight="bold" my={2} variant='h5'>{form.name}</Typography>
 
-            <Typography>Ohjeet opiskelijoille</Typography>
-            <Typography fontWeight="bold" my={2} variant='h5'>{form.studentInstructions}</Typography>
+            <Typography fontWeight="bold" my={2} variant='h5'>{form.userInstructions}</Typography>
         </Box>)
 }
 

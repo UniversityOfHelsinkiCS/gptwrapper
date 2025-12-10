@@ -11,7 +11,7 @@ export const PromptMessagesSchema = z.array(
 
 export const PromptUpdateableParamsSchema = z.object({
   name: z.string().min(1).max(255),
-  studentInstructions: z.string().max(20_000),
+  userInstructions: z.string().max(20_000),
   systemMessage: z.string().max(20_000),
   messages: PromptMessagesSchema.optional().default([]),
   hidden: z.boolean().default(false),

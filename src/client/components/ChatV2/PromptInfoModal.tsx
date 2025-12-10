@@ -78,7 +78,7 @@ export const PromptInfoModal = ({ back, setEditorOpen, personal }: { back?: stri
 
             <Box>
                 <Typography fontWeight='bold'>Ohjeistus opiskelijoille</Typography>
-                <Typography>{prompt?.studentInstructions ?? 'Joku Oletus ohjeistus'}</Typography>
+                <Typography>{prompt?.userInstructions ?? 'Joku Oletus ohjeistus'}</Typography>
             </Box>
 
             <Box>

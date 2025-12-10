@@ -64,7 +64,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
 
   const [form, setForm] = useState<PromptEditorFormState>({
     name: activePrompt?.name ?? '',
-    studentInstructions: activePrompt?.studentInstructions ?? '',
+    userInstructions: activePrompt?.userInstructions ?? '',
     systemMessage: activePrompt?.systemMessage ?? '',
     ragSystemMessage: activePrompt
       ? (activePrompt.messages?.find((m: Message) => m.role === 'system')?.content as string) || ''
@@ -96,7 +96,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
 
     const {
       name,
-      studentInstructions,
+      userInstructions,
       systemMessage,
       ragSystemMessage,
       hidden,
@@ -112,7 +112,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
         await editPromptMutation({
           id: activePrompt.id,
           name,
-          studentInstructions,
+          userInstructions,
           systemMessage,
           messages,
           hidden,
@@ -125,7 +125,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
         await createPromptMutation({
           name,
           type,
-          studentInstructions,
+          userInstructions,
           ...(type === 'CHAT_INSTANCE' ? { chatInstanceId: chatInstance?.id } : {}),
           systemMessage,
           messages,

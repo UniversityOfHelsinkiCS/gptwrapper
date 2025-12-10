@@ -61,8 +61,8 @@ const BasicInfoSection = () => {
                                 'data-testid': 'student-instructions-input',
                             },
                         }}
-                        value={form.studentInstructions}
-                        onChange={(e) => setForm((prev) => ({ ...prev, studentInstructions: e.target.value }))}
+                        value={form.userInstructions}
+                        onChange={(e) => setForm((prev) => ({ ...prev, userInstructions: e.target.value }))}
                         placeholder={'Esim:\n\n# Ohjeistus opiskelijoille.\nKäyttäkää currechattiä.'}
                         fullWidth
                         multiline
