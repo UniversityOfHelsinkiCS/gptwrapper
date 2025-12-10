@@ -135,7 +135,8 @@
     "courseChatEnded": "Kursen har avslutats",
     "courseChatEndedInfo": "Kursens öppettid har avslutats och kursen är inte längre tillgänglig.",
     "courseChatNotActivated": "Inte aktiverad",
-    "courseChatNotActivatedInfo": "Kursen har ännu inte aktiverats. Detta innebär att kursens chatt inte är öppen för studenter."
+    "courseChatNotActivatedInfo": "Kursen har ännu inte aktiverats. Detta innebär att kursens chatt inte är öppen för studenter.",
+    "retryMessage": "Försök igen"
   },
   "settings": {
     "prompt": "Samtalsstart",
@@ -191,7 +192,12 @@
     "noAccessInfo": "Du har för närvarande inte tillgång till CurreChat",
     "tooLargeFile": "Filen är för stor",
     "fileParsingError": "Det gick inte att läsa filen",
+    "pdfParsingError": "Det gick inte att läsa PDF-filen. Kontrollera att filen inte är skadad eller lösenordsskyddad.",
+    "pdfEmpty": "PDF-filen verkar vara tom eller skadad",
+    "pdfEncrypted": "PDF-filen är lösenordsskyddad eller krypterad och kan inte behandlas",
+    "pdfInvalid": "PDF-filen är ogiltig eller skadad",
     "invalidFileType": "Filtypen stöds inte",
+    "streamCreationTimeout": "Det tog för lång tid att skapa svaret, försöker igen",
     "notFoundTitle": "Sidan du letar efter hittades inte.",
     "goHome": "Gå till startsidan",
     "reload": "Ladda om",

@@ -77,7 +77,12 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       options.chatMessages = (await parseFileAndAddToLastMessage(options.chatMessages, req.file)) as ChatMessage[]
     }
   } catch (error) {
-    logger.error('Error parsing file', { error })
+    // If error is already an ApplicationError, rethrow it to preserve the specific message
+    if (error instanceof ApplicationError) {
+      throw error
+    }
+    // Otherwise, log and throw a generic error
+    logger.error('Error parsing file', { error, filename: req.file?.originalname })
     throw ApplicationError.BadRequest('Error parsing file')
   }
 

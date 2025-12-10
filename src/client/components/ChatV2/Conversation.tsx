@@ -121,8 +121,17 @@ const AssistantMessageInfo = ({ message }: { message: AssistantMessage }) => {
   )
 }
 
-const AssistantMessageItem = ({ message, setActiveToolResult }: { message: AssistantMessage; setActiveToolResult: (data: ToolCallResultEvent) => void }) => {
+const AssistantMessageItem = ({ 
+  message, 
+  setActiveToolResult,
+  onRetry 
+}: { 
+  message: AssistantMessage
+  setActiveToolResult: (data: ToolCallResultEvent) => void
+  onRetry?: () => void
+}) => {
   const processedContent = React.useMemo(() => preprocessMath(readMessageContent(message)), [message.content])
+  const { t } = useTranslation()
   const katexOptions = {
     macros: {
       '\\abs': '\\left|#1\\right|',
@@ -272,8 +281,15 @@ const AssistantMessageItem = ({ message, setActiveToolResult }: { message: Assis
         {processedContent}
       </ReactMarkdown>
       {message.error && (
-        <Box>
+        <Box sx={{ mt: 2 }}>
           <Typography variant="body1" fontStyle="italic" color="#cc0000">{`\n\n ${message.error}`}</Typography>
+          {onRetry && (
+            <Box sx={{ mt: 1 }}>
+              <BlueButton onClick={onRetry} size="small">
+                {t('chat:retryMessage')}
+              </BlueButton>
+            </Box>
+          )}
         </Box>
       )}
       {Object.values(message.toolCalls ?? {}).map((toolResult) => (
@@ -283,7 +299,15 @@ const AssistantMessageItem = ({ message, setActiveToolResult }: { message: Assis
   )
 }
 
-export const MessageItem = ({ message, setActiveToolResult }: { message: ChatMessage; setActiveToolResult: (data: ToolCallResultEvent) => void }) => {
+export const MessageItem = ({ 
+  message, 
+  setActiveToolResult,
+  onRetry 
+}: { 
+  message: ChatMessage
+  setActiveToolResult: (data: ToolCallResultEvent) => void
+  onRetry?: () => void
+}) => {
   if (message.role === 'assistant') {
     return (
       <Box
@@ -292,7 +316,7 @@ export const MessageItem = ({ message, setActiveToolResult }: { message: ChatMes
           height: 'auto',
         }}
       >
-        <AssistantMessageItem message={message} setActiveToolResult={setActiveToolResult} />
+        <AssistantMessageItem message={message} setActiveToolResult={setActiveToolResult} onRetry={onRetry} />
       </Box>
     )
   } else {
@@ -313,6 +337,7 @@ const Conversation = ({
   setActiveToolResult,
   initial,
   isMobile,
+  onRetry,
 }: {
   messages: ChatMessage[]
   completion: string
@@ -322,6 +347,7 @@ const Conversation = ({
   setActiveToolResult: (data: ToolCallResultEvent) => void
   initial?: React.ReactElement
   isMobile: boolean
+  onRetry?: (index: number) => void
 }) => {
   const [reminderSeen, setReminderSeen] = useLocalStorageState<boolean>('reminderSeen', false)
 
@@ -340,7 +366,20 @@ const Conversation = ({
       >
         {messages.length === 0 && initial}
         {messages.map((message, idx) => {
-          return <MessageItem key={idx} message={message} setActiveToolResult={setActiveToolResult} />
+          // Only show retry button for the last assistant message if it has an error
+          const showRetry = message.role === 'assistant' && 
+                           message.error && 
+                           idx === messages.length - 1 &&
+                           !isStreaming &&
+                           onRetry
+          return (
+            <MessageItem 
+              key={idx} 
+              message={message} 
+              setActiveToolResult={setActiveToolResult}
+              onRetry={showRetry ? () => onRetry(idx) : undefined}
+            />
+          )
         })}
 
         {isStreaming &&

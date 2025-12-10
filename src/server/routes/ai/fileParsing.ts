@@ -1,6 +1,8 @@
 import { extractPageText } from 'src/server/services/jobs/pdfParsing.job'
 import type { ChatMessage, MessageContent } from '../../../shared/chat'
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
+import logger from 'src/server/util/logger'
+import { ApplicationError } from 'src/server/util/ApplicationError'
 
 export const imageFileTypes = ['image/jpeg', 'image/png']
 export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file: Express.Multer.File) => {
@@ -33,12 +35,46 @@ export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file
   }
 
   if (file.mimetype === 'application/pdf') {
-    const data = new Uint8Array(file.buffer)
-    const loadingTask = getDocument({ data })
-    const pdf = await loadingTask.promise
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i)
-      fileContent += await extractPageText(page)
+    try {
+      const data = new Uint8Array(file.buffer)
+      const loadingTask = getDocument({ data })
+      const pdf = await loadingTask.promise
+      
+      if (!pdf || pdf.numPages === 0) {
+        logger.error('PDF parsing failed: PDF has no pages', { filename: file.originalname })
+        throw ApplicationError.BadRequest('PDF file is empty or corrupted')
+      }
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i)
+        const pageText = await extractPageText(page)
+        fileContent += pageText
+      }
+
+      if (typeof fileContent === 'string' && fileContent.trim().length === 0) {
+        logger.warn('PDF parsing completed but extracted no text', { filename: file.originalname, numPages: pdf.numPages })
+        // Don't throw error for PDFs with no text content, just warn
+      }
+    } catch (error) {
+      logger.error('Error parsing PDF file', { 
+        error: error instanceof Error ? error.message : String(error),
+        filename: file.originalname,
+        fileSize: file.size 
+      })
+      
+      if (error instanceof ApplicationError) {
+        throw error
+      }
+      
+      // Provide more specific error messages
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      if (errorMessage.includes('password') || errorMessage.includes('encrypted')) {
+        throw ApplicationError.BadRequest('PDF file is password-protected or encrypted')
+      } else if (errorMessage.includes('invalid') || errorMessage.includes('corrupt')) {
+        throw ApplicationError.BadRequest('PDF file is invalid or corrupted')
+      } else {
+        throw ApplicationError.BadRequest('Failed to parse PDF file. Please ensure the file is a valid PDF.')
+      }
     }
   }
 

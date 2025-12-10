@@ -309,6 +309,20 @@ const ChatV2Content = () => {
     clearRetryTimeout()
   }
 
+  const handleRetry = (messageIndex: number) => {
+    // Remove the failed assistant message
+    const newMessages = messages.slice(0, messageIndex)
+    setMessages(newMessages)
+    
+    // Find the last user message to resend
+    const lastUserMessage = [...newMessages].reverse().find(msg => msg.role === 'user')
+    
+    if (lastUserMessage) {
+      // Resend the last user message
+      handleSendMessage('', true, [])
+    }
+  }
+
   useEffect(() => {
     if (!userStatus) return
 
@@ -500,6 +514,7 @@ const ChatV2Content = () => {
             toolCalls={toolCalls}
             setActiveToolResult={setActiveToolResult}
             isMobile={isMobile}
+            onRetry={handleRetry}
           />
         </Box>
         <Box
