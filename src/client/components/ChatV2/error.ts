@@ -15,6 +15,8 @@ export const handleCompletionStreamError = (err: any, file: string) => {
     // Check for specific PDF parsing errors
     if (error.includes('password-protected') || error.includes('encrypted')) {
       enqueueSnackbar(t('error:pdfEncrypted'), { variant: 'error' })
+    } else if (error.includes('no extractable text')) {
+      enqueueSnackbar(t('error:pdfNoText'), { variant: 'error' })
     } else if (error.includes('empty') || error.includes('corrupted')) {
       enqueueSnackbar(t('error:pdfEmpty'), { variant: 'error' })
     } else if (error.includes('invalid') || error.includes('corrupt')) {

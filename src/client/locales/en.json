@@ -204,6 +204,7 @@
     "fileParsingError": "Parsing the file failed",
     "pdfParsingError": "Failed to parse the PDF file. Please check that the file is not corrupted or password-protected.",
     "pdfEmpty": "The PDF file appears to be empty or corrupted",
+    "pdfNoText": "The PDF file contains no extractable text. It may contain only images or be corrupted.",
     "pdfEncrypted": "The PDF file is password-protected or encrypted and cannot be processed",
     "pdfInvalid": "The PDF file is invalid or corrupted",
     "invalidFileType": "Invalid file type",

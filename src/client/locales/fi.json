@@ -215,6 +215,7 @@
     "fileParsingError": "Tiedoston lukeminen epäonnistui",
     "pdfParsingError": "PDF-tiedoston lukeminen epäonnistui. Tarkista, ettei tiedosto ole vioittunut tai salasanasuojattu.",
     "pdfEmpty": "PDF-tiedosto vaikuttaa olevan tyhjä tai vioittunut",
+    "pdfNoText": "PDF-tiedostosta ei voitu poimia tekstiä. Se saattaa sisältää vain kuvia tai olla vioittunut.",
     "pdfEncrypted": "PDF-tiedosto on salasanasuojattu tai salattu, eikä sitä voida käsitellä",
     "pdfInvalid": "PDF-tiedosto on virheellinen tai vioittunut",
     "invalidFileType": "Tiedostotyyppiä ei tueta",
