@@ -230,10 +230,24 @@ const upload = multer({
     },
   }),
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50 MB
+    fileSize: 10 * 1024 * 1024, // 10 MB
   },
 })
 const uploadMiddleware = upload.array('files')
+
+// Middleware to handle multer errors
+const handleUploadErrors = (err: Error, req: Request, res: Response, next: NextFunction) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      throw ApplicationError.BadRequest('File size exceeds the maximum limit of 10MB')
+    }
+    if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+      throw ApplicationError.BadRequest('Unexpected file field')
+    }
+    throw ApplicationError.BadRequest(`File upload error: ${err.message}`)
+  }
+  next(err)
+}
 
 const indexUploadDirMiddleware = async (req: Request, _res: Response, next: NextFunction) => {
   const { ragIndex } = req as RagIndexRequest
@@ -241,7 +255,7 @@ const indexUploadDirMiddleware = async (req: Request, _res: Response, next: Next
   next()
 }
 
-ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], async (req, res) => {
+ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware, handleUploadErrors], async (req, res) => {
   const ragIndexRequest = req as unknown as RagIndexRequest
   const { ragIndex, user, uploadedS3Keys = [] } = ragIndexRequest
 

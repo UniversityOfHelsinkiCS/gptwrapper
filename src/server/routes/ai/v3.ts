@@ -1,5 +1,6 @@
 import type { StructuredTool } from '@langchain/core/tools'
-import express from 'express'
+import express, { type Request, type Response, type NextFunction } from 'express'
+import multer from 'multer'
 import { FREE_MODEL, inProduction } from '../../../config'
 import { PostStreamSchemaV3, type ChatEvent, type ChatMessage } from '../../../shared/chat'
 import { ChatInstance, Discussion, Enrolment, Prompt, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
@@ -17,7 +18,21 @@ import { getTeachedCourses } from '../../services/chatInstances/access'
 
 const router = express.Router()
 
-router.post('/stream', upload.single('file'), async (r, res) => {
+// Middleware to handle multer errors
+const handleUploadErrors = (err: Error, req: Request, res: Response, next: NextFunction) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      throw ApplicationError.BadRequest('File size exceeds the maximum limit of 10MB')
+    }
+    if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+      throw ApplicationError.BadRequest('Unexpected file field')
+    }
+    throw ApplicationError.BadRequest(`File upload error: ${err.message}`)
+  }
+  next(err)
+}
+
+router.post('/stream', upload.single('file'), handleUploadErrors, async (r, res) => {
   const req = r as RequestWithUser
   const { options, courseId } = PostStreamSchemaV3.parse(JSON.parse(req.body.data))
   const { generationInfo } = options
