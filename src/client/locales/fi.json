@@ -130,7 +130,8 @@
     "courseChatEnded": "Kurssi on päättynyt",
     "courseChatEndedInfo": "Kurssin aukioloaika on päättynyt ja kurssi ei ole enään saatavilla.",
     "courseChatNotActivated": "Ei aktivoitu",
-    "courseChatNotActivatedInfo": "Kurssi ei ole vielä aktivoitu. Tämä tarkoittaa, että kurssin chat ei ole auki opiskelijoille."
+    "courseChatNotActivatedInfo": "Kurssi ei ole vielä aktivoitu. Tämä tarkoittaa, että kurssin chat ei ole auki opiskelijoille.",
+    "retryMessage": "Yritä uudelleen"
   },
   "settings": {
     "prompt": "Keskustelun alustus",
@@ -212,6 +213,11 @@
     "noAccessInfo": "Sinulla ei tällä hetkellä ole käyttöoikeuksia CurreChattiin",
     "tooLargeFile": "Tiedosto on liian suuri",
     "fileParsingError": "Tiedoston lukeminen epäonnistui",
+    "pdfParsingError": "PDF-tiedoston lukeminen epäonnistui. Tarkista, ettei tiedosto ole vioittunut tai salasanasuojattu.",
+    "pdfEmpty": "PDF-tiedosto vaikuttaa olevan tyhjä tai vioittunut",
+    "pdfNoText": "PDF-tiedostosta ei voitu poimia tekstiä. Se saattaa sisältää vain kuvia tai olla vioittunut.",
+    "pdfEncrypted": "PDF-tiedosto on salasanasuojattu tai salattu, eikä sitä voida käsitellä",
+    "pdfInvalid": "PDF-tiedosto on virheellinen tai vioittunut",
     "invalidFileType": "Tiedostotyyppiä ei tueta",
     "streamCreationTimeout": "Vastauksen luonti kesti liian kauan, yritetään uudelleen",
     "notFoundTitle": "Etsimääsi sivua ei löytynyt.",

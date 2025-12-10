@@ -14,7 +14,6 @@ import { imageFileTypes, parseFileAndAddToLastMessage } from './fileParsing'
 import { upload } from './multer'
 import { checkIamAccess } from '../../util/iams'
 import { getTeachedCourses } from '../../services/chatInstances/access'
-import { SupportedImageMimeTypes } from 'pdfjs-dist'
 
 const router = express.Router()
 
@@ -77,7 +76,10 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       options.chatMessages = (await parseFileAndAddToLastMessage(options.chatMessages, req.file)) as ChatMessage[]
     }
   } catch (error) {
-    logger.error('Error parsing file', { error })
+    if (error instanceof ApplicationError) {
+      throw error
+    }
+    logger.error('Error parsing file', { error, filename: req.file?.originalname })
     throw ApplicationError.BadRequest('Error parsing file')
   }
 
