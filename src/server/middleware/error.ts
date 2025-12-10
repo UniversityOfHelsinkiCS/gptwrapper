@@ -12,8 +12,14 @@ const errorHandler = (error: Error, _req: Request, res: Response, next: NextFunc
       res.status(normalizedError.status).json(normalizedError)
       return
     }
-    if (error.code === 'LIMIT_FILE_COUNT' || error.code === 'LIMIT_UNEXPECTED_FILE') {
-      const normalizedError = ApplicationError.BadRequest(error.message)
+    if (error.code === 'LIMIT_FILE_COUNT') {
+      const normalizedError = ApplicationError.BadRequest('Too many files uploaded')
+      logger.error(`${error.message} ${error.code}`)
+      res.status(normalizedError.status).json(normalizedError)
+      return
+    }
+    if (error.code === 'LIMIT_UNEXPECTED_FILE') {
+      const normalizedError = ApplicationError.BadRequest('Unexpected file in upload')
       logger.error(`${error.message} ${error.code}`)
       res.status(normalizedError.status).json(normalizedError)
       return
