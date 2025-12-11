@@ -89,8 +89,6 @@ export const useChatStream = ({
               break
 
             case 'processing':
-              // Processing event received - this keeps the connection alive during file parsing
-              // No action needed here, but the timeout should be cleared/reset in the caller
               break
 
             case 'toolCallStatus':
@@ -105,10 +103,8 @@ export const useChatStream = ({
               console.log('Streamed error:', parsedChunk)
               error += parsedChunk.error
 
-              // Call onError to show snackbar notification to user
               onError({ error: parsedChunk.error })
 
-              // Begin timeout to abort stream if error persists
               setErrorTimeoutId(setTimeout(() => {
                 console.error('Error timeout:', parsedChunk)
                 streamControllerRef.current?.abort('error')
