@@ -5,7 +5,14 @@ import logger from 'src/server/util/logger'
 import { ApplicationError } from 'src/server/util/ApplicationError'
 
 export const imageFileTypes = ['image/jpeg', 'image/png']
-export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file: Express.Multer.File) => {
+
+type ProgressCallback = (message: string) => Promise<void>
+
+export const parseFileAndAddToLastMessage = async (
+  messages: ChatMessage[], 
+  file: Express.Multer.File,
+  onProgress?: ProgressCallback
+) => {
   let fileContent: MessageContent[] | string = ''
 
   const textFileTypes = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'text/md']
@@ -45,10 +52,20 @@ export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file
         throw ApplicationError.BadRequest('PDF file is empty or corrupted')
       }
 
+      // Send initial progress update
+      if (onProgress) {
+        await onProgress(`Parsing PDF (${pdf.numPages} pages)...`)
+      }
+
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i)
         const pageText = await extractPageText(page)
         fileContent += pageText
+
+        // Send progress update every 5 pages or on last page to avoid too many events
+        if (onProgress && (i % 5 === 0 || i === pdf.numPages)) {
+          await onProgress(`Parsed ${i} of ${pdf.numPages} pages...`)
+        }
       }
 
       const extractedText = fileContent as string

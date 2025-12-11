@@ -29,7 +29,16 @@ export type ErrorEvent = {
   error: string
 }
 
-export type ChatEvent = WritingEvent | ToolCallStatusEvent | ToolCallResultEvent | ErrorEvent
+/**
+ * Event emitted when a long-running operation is in progress (e.g., file parsing)
+ * Used to keep the connection alive during processing
+ */
+export type ProcessingEvent = {
+  type: 'processing'
+  message: string
+}
+
+export type ChatEvent = WritingEvent | ToolCallStatusEvent | ToolCallResultEvent | ErrorEvent | ProcessingEvent
 
 export type ImageUrl = {
   url: string

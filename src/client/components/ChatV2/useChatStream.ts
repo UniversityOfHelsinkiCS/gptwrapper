@@ -88,6 +88,11 @@ export const useChatStream = ({
               content += parsedChunk.text
               break
 
+            case 'processing':
+              // Processing event received - this keeps the connection alive during file parsing
+              // No action needed here, but the timeout should be cleared/reset in the caller
+              break
+
             case 'toolCallStatus':
               if ('result' in parsedChunk) {
                 toolCallResultsAccum[parsedChunk.callId] = parsedChunk

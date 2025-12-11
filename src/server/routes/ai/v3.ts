@@ -66,14 +66,54 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     }
   }
 
+  // Prepare for streaming response early to enable keep-alive during file parsing
+  res.setHeader('content-type', 'text/event-stream')
+  
+  // Helper function to write events - defined once for both file parsing and chat streaming
+  const writeEvent = async (event: ChatEvent) => {
+    await new Promise<void>((resolve) => {
+      const success = res.write(`${JSON.stringify(event)}\n`, (err) => {
+        if (err) {
+          logger.error('Streaming write error:', { error: err.name })
+        }
+      })
+
+      if (!success) {
+        logger.info('res.write returned false, waiting for drain')
+        res.once('drain', resolve)
+      } else {
+        process.nextTick(resolve)
+      }
+    })
+  }
+
   // Add file to last message if exists
   try {
     if (req.file) {
+      // Flush headers immediately to start the streaming response
+      res.flushHeaders()
+
+      // Send initial processing event to keep connection alive
+      await writeEvent({
+        type: 'processing',
+        message: 'Processing file attachment...',
+      })
 
       if (imageFileTypes.includes(req.file.mimetype) && !user.isAdmin) {
         throw ApplicationError.Forbidden('Not authorized for images')
       }
-      options.chatMessages = (await parseFileAndAddToLastMessage(options.chatMessages, req.file)) as ChatMessage[]
+      
+      // Pass progress callback to file parsing for keep-alive events
+      options.chatMessages = (await parseFileAndAddToLastMessage(
+        options.chatMessages, 
+        req.file,
+        async (progressMessage: string) => {
+          await writeEvent({
+            type: 'processing',
+            message: progressMessage,
+          })
+        }
+      )) as ChatMessage[]
     }
   } catch (error) {
     if (error instanceof ApplicationError) {
@@ -143,9 +183,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   res.locals.chatCompletionMeta.tools = tools.map((t) => t.name)
 
-  // Prepare for streaming response
-  res.setHeader('content-type', 'text/event-stream')
-
   const result = await streamChat({
     user,
     chatMessages: options.chatMessages,
@@ -155,22 +192,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     temperature: temperature ?? undefined,
     ignoredWarnings: options.ignoredWarnings,
     tools,
-    writeEvent: async (event: ChatEvent) => {
-      await new Promise((resolve) => {
-        const success = res.write(`${JSON.stringify(event)}\n`, (err) => {
-          if (err) {
-            logger.error('Streaming write error:', { error: err.name })
-          }
-        })
-
-        if (!success) {
-          logger.info('res.write returned false, waiting for drain')
-          res.once('drain', resolve)
-        } else {
-          process.nextTick(resolve)
-        }
-      })
-    },
+    writeEvent,
   })
 
   res.locals.chatCompletionMeta.inputTokenCount = result.inputTokenCount
