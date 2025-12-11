@@ -189,9 +189,9 @@ const ChatV2Content = () => {
         if (imageFileTypes.includes(file.type)) {
           messageContent = fileContent as MessageContent[]
         } else {
-          // For text/PDF files, append the content to the message
+          // For text/PDF files, append the content to the message with a space separator
           const textContent = fileContent as string
-          messageContent = message ? `${message}\n\n${textContent}` : textContent
+          messageContent = message ? `${message} ${textContent}` : textContent
         }
         
         // Still send file to server for validation purposes
