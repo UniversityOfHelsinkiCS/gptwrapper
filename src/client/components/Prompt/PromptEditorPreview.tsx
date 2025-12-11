@@ -7,8 +7,8 @@ import {
 import { useTranslation } from 'react-i18next'
 import { usePromptEditorForm } from './context'
 
-export const PromptEditorReview = () => {
-    const { form, setForm } = usePromptEditorForm()
+export const PromptEditorPreview = () => {
+    const { form } = usePromptEditorForm()
     const { t } = useTranslation()
 
     return (

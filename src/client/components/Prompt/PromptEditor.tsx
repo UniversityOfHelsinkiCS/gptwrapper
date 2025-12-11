@@ -17,7 +17,7 @@ import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
 import { PromptEditorFormContext, PromptEditorFormContextValue, PromptEditorFormState, usePromptEditorForm } from './context'
 import { PromptEditorForm } from './PromptEditorForm'
-import { PromptEditorReview } from './PromptEditorReview'
+import { PromptEditorPreview } from './PromptEditorPreview'
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -168,7 +168,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
           <PromptEditorForm />
         </TabPanel>
         <TabPanel value={tab} index={1}>
-          <PromptEditorReview />
+          <PromptEditorPreview />
         </TabPanel>
 
         <DialogActions>
