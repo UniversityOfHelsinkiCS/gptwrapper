@@ -62,3 +62,7 @@ export const DEFAULT_ASSISTANT_INSTRUCTIONS = '' // 11th August 2025 we decided 
 export const DEFAULT_MODEL_TEMPERATURE = 0.5
 
 export const supportEmail = 'opetusteknologia@helsinki.fi'
+
+// File type constants for file uploads
+export const imageFileTypes = ['image/jpeg', 'image/png']
+export const textFileTypes = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'text/md']

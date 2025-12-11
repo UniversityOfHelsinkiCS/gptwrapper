@@ -1,8 +1,6 @@
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import type { MessageContent } from '../../shared/chat'
-
-export const imageFileTypes = ['image/jpeg', 'image/png']
-const textFileTypes = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'text/md']
+import { imageFileTypes, textFileTypes } from '../../config'
 
 /**
  * Parse a file and return its content in the appropriate format for chat messages

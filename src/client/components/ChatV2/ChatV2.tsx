@@ -4,7 +4,7 @@ import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, Route, Routes, useParams, useSearchParams } from 'react-router-dom'
-import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, ValidModelNameSchema } from '../../../config'
+import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, ValidModelNameSchema, imageFileTypes } from '../../../config'
 import type { ChatMessage, MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
@@ -39,7 +39,7 @@ import PromptModal from './PromptModal'
 import CoursesModal from './CoursesModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
 import { CustomIcon } from './general/CustomIcon'
-import { imageFileTypes, parseFileContent } from '../../util/fileParsing'
+import { parseFileContent } from '../../util/fileParsing'
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
