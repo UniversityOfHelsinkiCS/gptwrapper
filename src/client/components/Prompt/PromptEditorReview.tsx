@@ -1,5 +1,7 @@
 import {
     Box,
+    Divider,
+    TextField,
     Typography,
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
@@ -10,11 +12,36 @@ export const PromptEditorReview = () => {
     const { t } = useTranslation()
 
     return (
-        <Box p={2}>
-            <Typography>Alustuksen nimi</Typography>
-            <Typography fontWeight="bold" my={2} variant='h5'>{form.name}</Typography>
+        <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <Typography fontWeight="bold" variant='h4'>{form.name}</Typography>
+            <Typography>{form.userInstructions}</Typography>
 
-            <Typography fontWeight="bold" my={2} variant='h5'>{form.userInstructions}</Typography>
+            {
+                !form.hidden &&
+                <>
+                    <Divider />
+                    <Box>
+                        <Typography mb={2} fontWeight="bold">Kielimallin ohjeistus</Typography>
+                        <TextField
+                            value={form.systemMessage}
+                            placeholder='Ei kielimallin ohjeita'
+                            minRows={8}
+                            fullWidth
+                            multiline
+                            slotProps={{
+                                input: {
+                                    readOnly: true,
+                                    style: {
+                                        userSelect: 'none',
+                                        pointerEvents: 'none',
+                                        opacity: 0.8
+                                    }
+                                },
+                            }} />
+                    </Box>
+                </>
+            }
+
         </Box>)
 }
 
