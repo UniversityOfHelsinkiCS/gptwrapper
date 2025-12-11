@@ -62,3 +62,8 @@ export const DEFAULT_ASSISTANT_INSTRUCTIONS = '' // 11th August 2025 we decided 
 export const DEFAULT_MODEL_TEMPERATURE = 0.5
 
 export const supportEmail = 'opetusteknologia@helsinki.fi'
+
+// File upload limits for chat attachments
+export const MAX_CHAT_ATTACHMENT_SIZE_MB = 10 // 10MB for chat attachments (smaller than 50MB RAG limit)
+export const MAX_PDF_PAGES_FOR_CHAT = 100 // Maximum number of pages for PDF in chat
+export const LARGE_FILE_WARNING_SIZE_MB = 5 // Show warning for files larger than this

@@ -3,6 +3,7 @@ import type { ChatMessage, MessageContent } from '../../../shared/chat'
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import logger from 'src/server/util/logger'
 import { ApplicationError } from 'src/server/util/ApplicationError'
+import { MAX_PDF_PAGES_FOR_CHAT } from '../../../config'
 
 export const imageFileTypes = ['image/jpeg', 'image/png']
 export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file: Express.Multer.File) => {
@@ -43,6 +44,21 @@ export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file
       if (!pdf || pdf.numPages === 0) {
         logger.error('PDF parsing failed: PDF has no pages', { filename: file.originalname })
         throw ApplicationError.BadRequest('PDF file is empty or corrupted')
+      }
+
+      // Check page count limit before processing
+      if (pdf.numPages > MAX_PDF_PAGES_FOR_CHAT) {
+        logger.warn('PDF exceeds page limit for chat', {
+          filename: file.originalname,
+          numPages: pdf.numPages,
+          maxPages: MAX_PDF_PAGES_FOR_CHAT
+        })
+        throw ApplicationError.BadRequest(
+          `PDF file has too many pages (${pdf.numPages} pages). Chat attachments are limited to ${MAX_PDF_PAGES_FOR_CHAT} pages. Please use the RAG (Retrieval-Augmented Generation) feature for larger documents.`,
+          {
+            extra: { filename: file.originalname, numPages: pdf.numPages, maxPages: MAX_PDF_PAGES_FOR_CHAT }
+          }
+        )
       }
 
       for (let i = 1; i <= pdf.numPages; i++) {

@@ -1,6 +1,6 @@
 import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
-import { FREE_MODEL, inProduction } from '../../../config'
+import { FREE_MODEL, inProduction, MAX_CHAT_ATTACHMENT_SIZE_MB } from '../../../config'
 import { PostStreamSchemaV3, type ChatEvent, type ChatMessage } from '../../../shared/chat'
 import { ChatInstance, Discussion, Enrolment, Prompt, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
 import { checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
@@ -69,6 +69,20 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   // Add file to last message if exists
   try {
     if (req.file) {
+      // Check file size limit for chat attachments
+      const maxSizeBytes = MAX_CHAT_ATTACHMENT_SIZE_MB * 1024 * 1024
+      if (req.file.size > maxSizeBytes) {
+        throw ApplicationError.BadRequest(
+          `File size exceeds the ${MAX_CHAT_ATTACHMENT_SIZE_MB}MB limit for chat attachments. Please use a smaller file or use the RAG (Retrieval-Augmented Generation) feature for larger documents.`,
+          {
+            extra: {
+              filename: req.file.originalname,
+              fileSize: req.file.size,
+              maxSize: maxSizeBytes
+            }
+          }
+        )
+      }
 
       if (imageFileTypes.includes(req.file.mimetype) && !user.isAdmin) {
         throw ApplicationError.Forbidden('Not authorized for images')

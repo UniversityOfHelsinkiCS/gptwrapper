@@ -25,7 +25,12 @@ export const handleCompletionStreamError = (err: any, file: string) => {
       errorMessage = `${error} (${filename})`
     }
     
-    if (error.includes('password-protected') || error.includes('encrypted')) {
+    // Check for file size and page limit errors
+    if (error.includes('File size exceeds') || error.includes('exceeds the')) {
+      enqueueSnackbar(errorMessage, { variant: 'error' })
+    } else if (error.includes('too many pages') || error.includes('are limited to')) {
+      enqueueSnackbar(errorMessage, { variant: 'error' })
+    } else if (error.includes('password-protected') || error.includes('encrypted')) {
       enqueueSnackbar(errorMessage, { variant: 'error' })
     } else if (error.includes('no extractable text')) {
       enqueueSnackbar(errorMessage, { variant: 'error' })
