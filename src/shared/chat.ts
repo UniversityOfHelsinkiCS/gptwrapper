@@ -48,6 +48,7 @@ export type UserMessage = {
   role: 'user'
   content: MessageContent[] | string
   attachments?: string
+  fileContent?: string // Parsed file content (text/PDF), kept separate from displayed message
 }
 
 export const readMessageContent = (msg: UserMessage | AssistantMessage): string => {

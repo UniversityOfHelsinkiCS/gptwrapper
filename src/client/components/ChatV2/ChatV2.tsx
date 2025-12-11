@@ -179,27 +179,33 @@ const ChatV2Content = () => {
 
     const file = fileInputRef.current?.files?.[0]
     
-    // Parse file content on client side and add to message
+    // Parse file content on client side and keep it separate from the message
     let messageContent: MessageContent[] | string = message
+    let parsedFileContent: string | undefined = undefined
     if (file && !resendPrevious) {
       try {
         const fileContent = await parseFileContent(file)
         
-        // For images, replace the content with image array
+        // For images, replace the content with image array (images are shown differently)
         if (imageFileTypes.includes(file.type)) {
           messageContent = fileContent as MessageContent[]
         } else {
-          // For text/PDF files, append the content to the message with a space separator
-          const textContent = fileContent as string
-          messageContent = message ? `${message} ${textContent}` : textContent
+          // For text/PDF files, keep content separate and don't append to message
+          parsedFileContent = fileContent as string
         }
         
         // Still send file to server for validation purposes
         formData.append('file', file)
       } catch (error) {
         console.error('Error parsing file:', error)
-        enqueueSnackbar(error instanceof Error ? error.message : 'Error parsing file', { variant: 'error' })
-        handleCancel()
+        // Show file parsing errors as warnings in the chat box
+        setMessageWarning({
+          ...messageWarning,
+          fileParsingError: {
+            message: error instanceof Error ? error.message : 'Error parsing file',
+            ignored: false
+          }
+        })
         return
       }
     }
@@ -210,6 +216,7 @@ const ChatV2Content = () => {
         role: 'user',
         content: messageContent,
         attachments: file && fileName ? fileName : undefined,
+        fileContent: parsedFileContent, // Store file content separately
       })
 
     setMessages(newMessages)
