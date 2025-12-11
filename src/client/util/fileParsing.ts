@@ -69,10 +69,18 @@ const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => {
-      const base64 = (reader.result as string).split(',')[1]
-      resolve(base64)
+      if (!reader.result || typeof reader.result !== 'string') {
+        reject(new Error('Failed to read file as data URL'))
+        return
+      }
+      const parts = reader.result.split(',')
+      if (parts.length !== 2) {
+        reject(new Error('Invalid data URL format'))
+        return
+      }
+      resolve(parts[1])
     }
-    reader.onerror = reject
+    reader.onerror = () => reject(new Error('Failed to read file'))
     reader.readAsDataURL(file)
   })
 }
