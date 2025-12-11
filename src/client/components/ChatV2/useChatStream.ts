@@ -105,6 +105,9 @@ export const useChatStream = ({
               console.log('Streamed error:', parsedChunk)
               error += parsedChunk.error
 
+              // Call onError to show snackbar notification to user
+              onError({ error: parsedChunk.error })
+
               // Begin timeout to abort stream if error persists
               setErrorTimeoutId(setTimeout(() => {
                 console.error('Error timeout:', parsedChunk)
