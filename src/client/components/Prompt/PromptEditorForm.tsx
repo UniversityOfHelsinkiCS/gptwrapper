@@ -22,6 +22,14 @@ import OpenableTextfield from '../common/OpenableTextfield'
 import { ClearOutlined, LibraryBooksOutlined, ExpandMore } from '@mui/icons-material'
 import { usePromptEditorForm } from './context'
 
+
+const defaultInstructions = `You are interacting with a chat interface that has a pre-defined system prompt. This means the AI has been given a specific role, personality, or set of rules to follow.
+
+**How to start:**
+* Simply type **"Hello"** or ask a question to see how it responds.
+* The AI will adhere to its hidden instructions while chatting with you.
+`
+
 const BasicInfoSection = () => {
     const { form, setForm } = usePromptEditorForm()
     const { t } = useTranslation()
@@ -63,7 +71,7 @@ const BasicInfoSection = () => {
                         }}
                         value={form.userInstructions}
                         onChange={(e) => setForm((prev) => ({ ...prev, userInstructions: e.target.value }))}
-                        placeholder={'Esim:\n\n# Ohjeistus opiskelijoille.\nKäyttäkää currechattiä.'}
+                        placeholder={defaultInstructions}
                         fullWidth
                         multiline
                         minRows={8}
