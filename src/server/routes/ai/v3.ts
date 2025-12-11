@@ -32,7 +32,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   // @todo were not checking if the user is enrolled?
   let course: ChatInstance | null = null
 
-  // Find course
   if (courseId) {
     course = await ChatInstance.findOne({
       where: { courseId },
@@ -45,7 +44,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       throw ApplicationError.NotFound('Course not found')
     }
 
-    // Authorize course user
     if (!user.isAdmin && !course?.responsibilities?.length && !course?.enrolments?.length) {
       throw ApplicationError.Forbidden('Not authorized for this course')
     }
@@ -60,34 +58,82 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
     res.locals.chatCompletionMeta.course = course.name?.fi
   } else {
-    // If using general chat, user must be a teacher on some course, have IAM access, or be admin
     if (!user.isAdmin && !checkIamAccess(user.iamGroups) && !(await getTeachedCourses(user)).length) {
       throw ApplicationError.Forbidden('Not authorized for general chat')
     }
   }
 
-  // Add file to last message if exists
+  res.setHeader('content-type', 'text/event-stream')
+  res.setHeader('cache-control', 'no-cache')
+  res.setHeader('connection', 'keep-alive')
+
+  const writeEvent = async (event: ChatEvent) => {
+    await new Promise<void>((resolve) => {
+      const success = res.write(`${JSON.stringify(event)}\n`, (err) => {
+        if (err) {
+          logger.error('Streaming write error:', { error: err.name })
+        }
+      })
+
+      if (!success) {
+        logger.info('res.write returned false, waiting for drain')
+        res.once('drain', resolve)
+      } else {
+        process.nextTick(resolve)
+      }
+    })
+  }
+
+  let fileParsingError: string | null = null
   try {
     if (req.file) {
+      res.flushHeaders()
+
+      await writeEvent({
+        type: 'processing',
+        message: 'Processing file attachment...',
+      })
 
       if (imageFileTypes.includes(req.file.mimetype) && !user.isAdmin) {
-        throw ApplicationError.Forbidden('Not authorized for images')
+        await writeEvent({
+          type: 'error',
+          error: 'Not authorized for images',
+        })
+        res.end()
+        return
       }
-      options.chatMessages = (await parseFileAndAddToLastMessage(options.chatMessages, req.file)) as ChatMessage[]
+
+      options.chatMessages = (await parseFileAndAddToLastMessage(
+        options.chatMessages,
+        req.file,
+        async (progressMessage: string) => {
+          await writeEvent({
+            type: 'processing',
+            message: progressMessage,
+          })
+        }
+      )) as ChatMessage[]
     }
   } catch (error) {
     if (error instanceof ApplicationError) {
-      throw error
+      fileParsingError = error.message
+      logger.error('File parsing error (sent as stream event)', { error: error.message, filename: req.file?.originalname })
+    } else {
+      fileParsingError = 'Error parsing file'
+      logger.error('Error parsing file', { error, filename: req.file?.originalname })
     }
-    logger.error('Error parsing file', { error, filename: req.file?.originalname })
-    throw ApplicationError.BadRequest('Error parsing file')
+
+    await writeEvent({
+      type: 'error',
+      error: fileParsingError,
+    })
+    res.end()
+    return
   }
 
-  // Model and temperature might be overridden by prompt settings
   let model = generationInfo.model
   let temperature = generationInfo.temperature
 
-  // Find prompt if using a saved prompt
   let prompt: Prompt | null = null
 
   let systemMessage = ''
@@ -143,9 +189,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   res.locals.chatCompletionMeta.tools = tools.map((t) => t.name)
 
-  // Prepare for streaming response
-  res.setHeader('content-type', 'text/event-stream')
-
   const result = await streamChat({
     user,
     chatMessages: options.chatMessages,
@@ -155,22 +198,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     temperature: temperature ?? undefined,
     ignoredWarnings: options.ignoredWarnings,
     tools,
-    writeEvent: async (event: ChatEvent) => {
-      await new Promise((resolve) => {
-        const success = res.write(`${JSON.stringify(event)}\n`, (err) => {
-          if (err) {
-            logger.error('Streaming write error:', { error: err.name })
-          }
-        })
-
-        if (!success) {
-          logger.info('res.write returned false, waiting for drain')
-          res.once('drain', resolve)
-        } else {
-          process.nextTick(resolve)
-        }
-      })
-    },
+    writeEvent,
   })
 
   res.locals.chatCompletionMeta.inputTokenCount = result.inputTokenCount
@@ -208,7 +236,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     toolCalls: result.toolCalls,
   })
 
-  // If course has saveDiscussion turned on and user has consented to saving the discussion, save the discussion
   const consentToSave = courseId && course?.saveDiscussions && options.saveConsent
 
   if (consentToSave) {
