@@ -14,7 +14,6 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import { SendPreferenceConfiguratorModal, ShiftEnterForNewline, ShiftEnterToSend } from '../Settings/SendPreferenceConfigurator'
 import { useKeyboardCommands } from './useKeyboardCommands'
 import { WarningType } from '@shared/aiApi'
-import { MAX_CHAT_ATTACHMENT_SIZE_MB, LARGE_FILE_WARNING_SIZE_MB } from '@config'
 
 export const ChatBox = ({
   disabled,
@@ -49,8 +48,6 @@ export const ChatBox = ({
   const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
   const [disallowedFileType, setDisallowedFileType] = useState<string>('')
   const [fileTypeAlertOpen, setFileTypeAlertOpen] = useState<boolean>(false)
-  const [fileSizeAlertOpen, setFileSizeAlertOpen] = useState<boolean>(false)
-  const [largeFileWarningOpen, setLargeFileWarningOpen] = useState<boolean>(false)
   const [sendPreferenceConfiguratorOpen, setSendPreferenceConfiguratorOpen] = useState<boolean>(false)
   const sendButtonRef = useRef<HTMLButtonElement>(null)
   const textFieldRef = useRef<HTMLInputElement>(null)
@@ -94,29 +91,6 @@ export const ChatBox = ({
         setFileTypeAlertOpen(false)
       }, 6000)
       return
-    }
-
-    // Check file size limit for chat attachments
-    const maxSizeBytes = MAX_CHAT_ATTACHMENT_SIZE_MB * 1024 * 1024
-    if (file.size > maxSizeBytes) {
-      setFileSizeAlertOpen(true)
-      setTimeout(() => {
-        setFileSizeAlertOpen(false)
-      }, 8000)
-      // Clear the file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
-      return
-    }
-
-    // Show warning for large files
-    const largeSizeBytes = LARGE_FILE_WARNING_SIZE_MB * 1024 * 1024
-    if (file.size > largeSizeBytes) {
-      setLargeFileWarningOpen(true)
-      setTimeout(() => {
-        setLargeFileWarningOpen(false)
-      }, 8000)
     }
 
     setFileName(file.name)
@@ -164,17 +138,6 @@ export const ChatBox = ({
         <Alert severity="warning">
           <Typography>{`File of type "${disallowedFileType}" not supported currently`}</Typography>
           <Typography>{`Currently there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}</Typography>
-        </Alert>
-      )}
-      {fileSizeAlertOpen && (
-        <Alert severity="error">
-          <Typography>{t('error:fileSizeExceeded')}</Typography>
-          <Typography>{`Maximum file size: ${MAX_CHAT_ATTACHMENT_SIZE_MB}MB`}</Typography>
-        </Alert>
-      )}
-      {largeFileWarningOpen && (
-        <Alert severity="info">
-          <Typography>{t('error:largeFileWarning')}</Typography>
         </Alert>
       )}
       {
