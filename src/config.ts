@@ -45,6 +45,12 @@ export const validModels = [
     instructions: formatInstructions,
   },
   {
+    name: 'gpt-5.1',
+    context: 128_000,
+    temperature: 1.0,
+    instructions: formatInstructions,
+  },
+  {
     name: 'mock',
     context: 1024,
   },
