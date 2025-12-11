@@ -1,6 +1,10 @@
-import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import type { MessageContent } from '../../shared/chat'
 import { imageFileTypes, textFileTypes } from '../../config'
+
+// Configure PDF.js worker for browser environment
+// Using CDN for the worker file to match the installed pdfjs-dist version
+GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.149/pdf.worker.min.mjs`
 
 /**
  * Parse a file and return its content in the appropriate format for chat messages
