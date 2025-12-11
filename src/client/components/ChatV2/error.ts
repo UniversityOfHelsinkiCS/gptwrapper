@@ -15,29 +15,31 @@ export const handleCompletionStreamError = (err: any, file: string) => {
   if (error === 'Model maximum context reached' && file) {
     enqueueSnackbar(t('error:tooLargeFile'), { variant: 'error' })
   } else if (error && typeof error === 'string' && file) {
-    // Check for specific PDF parsing errors
-    let errorMessage = error
+    // Check for specific PDF parsing errors and use appropriate translations
+    let translatedMessage = ''
+    
+    if (error.includes('password-protected') || error.includes('encrypted')) {
+      translatedMessage = t('error:pdfEncrypted')
+    } else if (error.includes('no extractable text')) {
+      translatedMessage = t('error:pdfNoText')
+    } else if (error.includes('empty') || error.includes('corrupted')) {
+      translatedMessage = t('error:pdfEmpty')
+    } else if (error.includes('invalid') || error.includes('corrupt')) {
+      translatedMessage = t('error:pdfInvalid')
+    } else if (error.includes('parsing') || error.includes('Error parsing file')) {
+      translatedMessage = t('error:pdfParsingError')
+    } else {
+      translatedMessage = t('error:fileParsingError')
+    }
     
     // Add file details if available
     if (filename && numPages) {
-      errorMessage = `${error} (${filename}, ${numPages} pages)`
+      translatedMessage = `${translatedMessage} (${filename}, ${numPages} pages)`
     } else if (filename) {
-      errorMessage = `${error} (${filename})`
+      translatedMessage = `${translatedMessage} (${filename})`
     }
     
-    if (error.includes('password-protected') || error.includes('encrypted')) {
-      enqueueSnackbar(errorMessage, { variant: 'error' })
-    } else if (error.includes('no extractable text')) {
-      enqueueSnackbar(errorMessage, { variant: 'error' })
-    } else if (error.includes('empty') || error.includes('corrupted')) {
-      enqueueSnackbar(errorMessage, { variant: 'error' })
-    } else if (error.includes('invalid') || error.includes('corrupt')) {
-      enqueueSnackbar(errorMessage, { variant: 'error' })
-    } else if (error.includes('parsing') || error.includes('Error parsing file')) {
-      enqueueSnackbar(errorMessage, { variant: 'error' })
-    } else {
-      enqueueSnackbar(t('error:fileParsingError'), { variant: 'error' })
-    }
+    enqueueSnackbar(translatedMessage, { variant: 'error' })
   } else if (error === 'TimeoutError') {
     enqueueSnackbar(t('error:waitingForResponse'), { variant: 'error' })
   } else {
