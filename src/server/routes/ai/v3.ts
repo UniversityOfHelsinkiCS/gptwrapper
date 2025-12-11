@@ -68,6 +68,8 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   // Prepare for streaming response early to enable keep-alive during file parsing
   res.setHeader('content-type', 'text/event-stream')
+  res.setHeader('cache-control', 'no-cache')
+  res.setHeader('connection', 'keep-alive')
   
   // Helper function to write events - defined once for both file parsing and chat streaming
   const writeEvent = async (event: ChatEvent) => {

@@ -6,6 +6,9 @@ import { ApplicationError } from 'src/server/util/ApplicationError'
 
 export const imageFileTypes = ['image/jpeg', 'image/png']
 
+// Send progress updates every N pages during PDF parsing to avoid too many events
+const PDF_PROGRESS_UPDATE_INTERVAL = 5
+
 type ProgressCallback = (message: string) => Promise<void>
 
 export const parseFileAndAddToLastMessage = async (
@@ -62,8 +65,8 @@ export const parseFileAndAddToLastMessage = async (
         const pageText = await extractPageText(page)
         fileContent += pageText
 
-        // Send progress update every 5 pages or on last page to avoid too many events
-        if (onProgress && (i % 5 === 0 || i === pdf.numPages)) {
+        // Send progress update every N pages or on last page to avoid too many events
+        if (onProgress && (i % PDF_PROGRESS_UPDATE_INTERVAL === 0 || i === pdf.numPages)) {
           await onProgress(`Parsed ${i} of ${pdf.numPages} pages...`)
         }
       }
