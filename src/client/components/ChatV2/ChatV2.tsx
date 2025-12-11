@@ -5,7 +5,7 @@ import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, Route, Routes, useParams, useSearchParams } from 'react-router-dom'
 import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, ValidModelNameSchema } from '../../../config'
-import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
+import type { ChatMessage, MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { useChatScroll } from './useChatScroll'
@@ -39,6 +39,7 @@ import PromptModal from './PromptModal'
 import CoursesModal from './CoursesModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
 import { CustomIcon } from './general/CustomIcon'
+import { imageFileTypes, parseFileContent } from '../../util/fileParsing'
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
@@ -177,15 +178,37 @@ const ChatV2Content = () => {
     const formData = new FormData()
 
     const file = fileInputRef.current?.files?.[0]
-    if (file) {
-      formData.append('file', file)
+    
+    // Parse file content on client side and add to message
+    let messageContent: MessageContent[] | string = message
+    if (file && !resendPrevious) {
+      try {
+        const fileContent = await parseFileContent(file)
+        
+        // For images, replace the content with image array
+        if (imageFileTypes.includes(file.type)) {
+          messageContent = fileContent as MessageContent[]
+        } else {
+          // For text/PDF files, append the content to the message
+          const textContent = fileContent as string
+          messageContent = message ? `${message}\n\n${textContent}` : textContent
+        }
+        
+        // Still send file to server for validation purposes
+        formData.append('file', file)
+      } catch (error) {
+        console.error('Error parsing file:', error)
+        enqueueSnackbar(error instanceof Error ? error.message : 'Error parsing file', { variant: 'error' })
+        handleCancel()
+        return
+      }
     }
 
     const newMessages = resendPrevious
       ? messages
       : messages.concat({
         role: 'user',
-        content: message,
+        content: messageContent,
         attachments: file && fileName ? fileName : undefined,
       })
 

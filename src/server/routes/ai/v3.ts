@@ -66,21 +66,21 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     }
   }
 
-  // Add file to last message if exists
+  // Validate file if exists (but don't parse - client already did that)
   try {
     if (req.file) {
 
       if (imageFileTypes.includes(req.file.mimetype) && !user.isAdmin) {
         throw ApplicationError.Forbidden('Not authorized for images')
       }
-      options.chatMessages = (await parseFileAndAddToLastMessage(options.chatMessages, req.file)) as ChatMessage[]
+      // File validation only - content was already added on client side
     }
   } catch (error) {
     if (error instanceof ApplicationError) {
       throw error
     }
-    logger.error('Error parsing file', { error, filename: req.file?.originalname })
-    throw ApplicationError.BadRequest('Error parsing file')
+    logger.error('Error validating file', { error, filename: req.file?.originalname })
+    throw ApplicationError.BadRequest('Error validating file')
   }
 
   // Model and temperature might be overridden by prompt settings
