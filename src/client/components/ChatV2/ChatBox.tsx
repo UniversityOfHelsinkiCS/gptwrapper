@@ -163,7 +163,7 @@ export const ChatBox = ({
       {fileTypeAlertOpen && (
         <Alert severity="warning">
           <Typography>{`File of type "${disallowedFileType}" not supported currently`}</Typography>
-          <Typography>{`Currenlty there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}</Typography>
+          <Typography>{`Currently there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}</Typography>
         </Alert>
       )}
       {fileSizeAlertOpen && (
