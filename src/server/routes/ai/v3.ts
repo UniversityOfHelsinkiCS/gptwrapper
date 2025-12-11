@@ -84,6 +84,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     })
   }
 
+  let fileParsingError: string | null = null
   try {
     if (req.file) {
       res.flushHeaders()
@@ -94,7 +95,12 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       })
 
       if (imageFileTypes.includes(req.file.mimetype) && !user.isAdmin) {
-        throw ApplicationError.Forbidden('Not authorized for images')
+        await writeEvent({
+          type: 'error',
+          error: 'Not authorized for images',
+        })
+        res.end()
+        return
       }
 
       options.chatMessages = (await parseFileAndAddToLastMessage(
@@ -110,10 +116,19 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     }
   } catch (error) {
     if (error instanceof ApplicationError) {
-      throw error
+      fileParsingError = error.message
+      logger.error('File parsing error (sent as stream event)', { error: error.message, filename: req.file?.originalname })
+    } else {
+      fileParsingError = 'Error parsing file'
+      logger.error('Error parsing file', { error, filename: req.file?.originalname })
     }
-    logger.error('Error parsing file', { error, filename: req.file?.originalname })
-    throw ApplicationError.BadRequest('Error parsing file')
+
+    await writeEvent({
+      type: 'error',
+      error: fileParsingError,
+    })
+    res.end()
+    return
   }
 
   let model = generationInfo.model
