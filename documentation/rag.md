@@ -128,18 +128,18 @@ but they require the information about the language of the Source Material Colle
 
 The results of all retrievers are merged using weighted reciprocal rank fusion, with exact match having the highest weight.
 
-The top 15 documents are selected from the initial retrieval step. 
+The top 15 chunks are selected from the initial retrieval step. 
 
 Next, an experimental LLM-based _curation_ step is performed: 
 each result chunk with the search query is passed to a one-shot LLM prompt using OpenAI's gpt-4o-mini.
 The LLM is prompted to give a structured output containing score and a flag whether to include or exclude the chunk.
 The excluded chunks are filtered from the output and the remaining chunks are ordered based on the score.
-The _curation_ step is useful to improve _recall_, 
-although it does carry a small risk of excluding relevant chunks and therefore reducing precision. 
-In one example Source Material Collection, the number of resulting chunks are usually reduced from 15 to 2-4 and recall is greatly improved.
+The curation step is useful to improve precision, 
+although it does carry a risk of excluding relevant chunks and therefore reducing recall. 
+In one example Source Material Collection, the number of resulting chunks are usually reduced from 15 to 2-4 and precision is greatly improved.
 
 > [!NOTE]
 > The retrieval pipeline is similar to a systematic literature review, where first an initial
 > search query is created. Then inclusion and exclusion criteria are applied to the results of the initial query
-> to improve recall. Future work could focus on dynamically generating more sophisticated
+> to improve precision. Future work could focus on dynamically generating more sophisticated
 > inclusion/exclusion criteria for the curation step.
