@@ -27,6 +27,7 @@ import { BlueButton, LinkButtonHoc, OutlineButtonBlue } from '../ChatV2/general/
 import { usePromptState } from '../ChatV2/PromptState'
 import OpenableTextfield from '../common/OpenableTextfield'
 import { ClearOutlined, LibraryBooksOutlined } from '@mui/icons-material'
+import { PromptInfoContent } from '../Prompt/PromptInfoContent'
 
 export const PromptInfoModal = ({ back, setEditorOpen, personal }: { back?: string; setEditorOpen?: React.Dispatch<boolean>; personal?: boolean }) => {
     const navigate = useNavigate()
@@ -64,32 +65,16 @@ export const PromptInfoModal = ({ back, setEditorOpen, personal }: { back?: stri
         }
     }, [selectedModel])
 
-    useEffect(() => {
-        console.log("📌 prompt", prompt)
-    }, [])
+    if (!prompt) return null
 
-    // testi opsikelija 017160739
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <Box>
-                <Typography fontWeight='bold'>Alustuksen nimi</Typography>
-                <Typography variant='h5'>{prompt?.name}</Typography>
-            </Box>
-
-            <Box>
-                <Typography fontWeight='bold'>Ohjeistus opiskelijoille</Typography>
-                <Typography>{prompt?.userInstructions ?? 'Joku Oletus ohjeistus'}</Typography>
-            </Box>
-
-            <Box>
-                <Typography fontWeight='bold'>Kielimallin ohjeistus</Typography>
-                {
-                    prompt?.hidden ?
-                        <Box>lol no show</Box>
-                        :
-                        <Typography>{prompt?.systemMessage}</Typography>
-                }
-            </Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, p: 2 }}>
+            <PromptInfoContent
+                name={prompt.name}
+                userInstructions={prompt.userInstructions}
+                systemMessage={prompt.systemMessage}
+                systemMessageHidden={prompt.hidden}
+            />
         </Box>
     )
 }
