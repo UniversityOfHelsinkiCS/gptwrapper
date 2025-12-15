@@ -6,23 +6,18 @@ import {
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 
-
-const defaultInstructions = `
-You are interacting with a chat interface that has a pre-defined system prompt. This means the AI has been given a specific role, personality, or set of rules to follow.
-
-**How to start:**
-* Simply type **"Hello"** or ask a question to see how it responds.
-* The AI will adhere to its hidden instructions while chatting with you.
-`
-
 export const PromptInfoContent = ({ name, userInstructions, systemMessage, systemMessageHidden }: { name?: string, userInstructions?: string, systemMessage?: string, systemMessageHidden?: boolean }) => {
+    const { t } = useTranslation()
+
     return (
         <>
             <Box>
-                <Typography mb={4} fontWeight="bold" variant='h4'>{name}</Typography>
-                <Typography>
+                <Typography mb={2} fontWeight="bold" variant='h6'>{t('prompt:promptName')}</Typography>
+                <Typography mb={4}>{name}</Typography>
+                <Typography mb={2} fontWeight="bold" variant='h6'>{t('prompt:promptInstructions')}</Typography>
+                <Typography component="div">
                     <ReactMarkdown>
-                        {userInstructions?.length ? userInstructions : defaultInstructions}
+                        {userInstructions?.length ? userInstructions : t('prompt:defaultChatInstructions')}
                     </ReactMarkdown>
                 </Typography>
             </Box>
@@ -32,7 +27,7 @@ export const PromptInfoContent = ({ name, userInstructions, systemMessage, syste
                 <>
                     <Divider />
                     <Box>
-                        <Typography mb={2} fontWeight="bold" variant='h5'>Kielimallin ohjeistus</Typography>
+                        <Typography mb={2} fontWeight="bold" variant='h6'>{t('prompt:systemMessageLabel')}</Typography>
                         <Box
                             sx={{
                                 // Mimic MUI TextField Outline styles
@@ -42,6 +37,7 @@ export const PromptInfoContent = ({ name, userInstructions, systemMessage, syste
                                 p: '0.5rem 1rem', // Standard MUI input padding
                                 minHeight: '190px', // approx minRows={8}
                                 opacity: 0.8,
+                                backgroundColor: 'grey.100'
                             }}
                         >
                             {systemMessage ? (
@@ -50,7 +46,7 @@ export const PromptInfoContent = ({ name, userInstructions, systemMessage, syste
                                 </ReactMarkdown>
                             ) : (
                                 <Typography color="text.secondary">
-                                    Ei kielimallin ohjeita
+                                    {t('prompt:noSystemMessage')}
                                 </Typography>
                             )}
                         </Box>

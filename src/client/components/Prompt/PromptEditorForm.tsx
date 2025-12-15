@@ -23,13 +23,6 @@ import { ClearOutlined, LibraryBooksOutlined, ExpandMore } from '@mui/icons-mate
 import { usePromptEditorForm } from './context'
 
 
-const defaultInstructions = `You are interacting with a chat interface that has a pre-defined system prompt. This means the AI has been given a specific role, personality, or set of rules to follow.
-
-**How to start:**
-* Simply type **"Hello"** or ask a question to see how it responds.
-* The AI will adhere to its hidden instructions while chatting with you.
-`
-
 const BasicInfoSection = () => {
     const { form, setForm } = usePromptEditorForm()
     const { t } = useTranslation()
@@ -38,13 +31,13 @@ const BasicInfoSection = () => {
         <Accordion defaultExpanded sx={accordionStyle}>
             <AccordionSummary expandIcon={<ExpandMore />} aria-controls="panel1-content" id="panel1-header">
                 <Typography variant="h5" fontWeight="bold">
-                    Alustuksen perustiedot
+                    {t('prompt:promptBasicInfo')}
                 </Typography>
             </AccordionSummary>
             <AccordionDetails>
                 <Box mb={3}>
                     <Typography mb={1} fontWeight="bold">
-                        Alustuksen nimi
+                        {t('prompt:promptName')}
                     </Typography>
                     <TextField
                         slotProps={{
@@ -61,7 +54,7 @@ const BasicInfoSection = () => {
                 </Box>
                 <Box>
                     <Typography mb={1} fontWeight="bold">
-                        Ohjeistus opiskelijoille alustuksen käytöstä
+                        {t('prompt:studentInstructionsLabel')}
                     </Typography>
                     <TextField
                         slotProps={{
@@ -71,7 +64,7 @@ const BasicInfoSection = () => {
                         }}
                         value={form.userInstructions}
                         onChange={(e) => setForm((prev) => ({ ...prev, userInstructions: e.target.value }))}
-                        placeholder={defaultInstructions}
+                        placeholder={t('prompt:defaultChatInstructions')}
                         fullWidth
                         multiline
                         minRows={8}
@@ -95,7 +88,7 @@ const ModelSettingsSection = () => {
                 id="panel2-header"
             >
                 <Typography variant="h5" fontWeight="bold">
-                    Alustuksen kielimallin asetukset
+                    {t('prompt:promptModelSettings')}
                 </Typography>
             </AccordionSummary>
             <AccordionDetails>
@@ -152,14 +145,14 @@ const ModelSettingsSection = () => {
                                     }
                                 />
                             }
-                            label="Piilota kielimallin ohjeistus opiskelijoilta"
+                            label={t('prompt:hideSystemInstructions')}
                         />
                     )}
                 </Box>
 
                 <Box mb={3}>
                     <Typography mb={1} fontWeight="bold">
-                        Alustuksen valittu kielimalli
+                        {t('prompt:selectedModelLabel')}
                     </Typography>
                     <FormControl fullWidth>
                         <Select
@@ -193,7 +186,7 @@ const ModelSettingsSection = () => {
                                 'data-testid': 'system-message-input',
                             },
                         }}
-                        placeholder="Esim. Olet avulias avustaja."
+                        placeholder={t('prompt:systemMessagePlaceholder')}
                         value={form.systemMessage}
                         onChange={(e) =>
                             setForm((prev) => ({ ...prev, systemMessage: e.target.value }))
@@ -221,13 +214,13 @@ const RagSettingsSection = () => {
                 id="panel3-header"
             >
                 <Typography variant="h5" fontWeight="bold">
-                    Alustuksen lähdemateriaali aineisto
+                    {t('prompt:promptSourceMaterialData')}
                 </Typography>
             </AccordionSummary>
             <AccordionDetails>
                 <Box mb={3}>
                     <Typography fontWeight="bold" my={1}>
-                        Valittu lähdemateriaali
+                        {t('prompt:selectedSourceMaterial')}
                     </Typography>
                     {type === 'CHAT_INSTANCE' && (
                         <Box display="flex" justifyContent="space-around" alignItems="center">
@@ -281,7 +274,7 @@ const RagSettingsSection = () => {
                 <Collapse in={!!form.ragIndexId}>
                     <Box>
                         <Typography fontWeight="bold" my={1}>
-                            Kielimallin lähdemateriaaliohjeistus
+                            {t('prompt:modelSourceMaterialInstructions')}
                         </Typography>
 
                         <OpenableTextfield

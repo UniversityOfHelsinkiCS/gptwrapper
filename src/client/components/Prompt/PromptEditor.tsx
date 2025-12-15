@@ -15,7 +15,7 @@ import useCourse from '../../hooks/useCourse'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
-import { PromptEditorFormContext, PromptEditorFormContextValue, PromptEditorFormState, usePromptEditorForm } from './context'
+import { PromptEditorFormContext, PromptEditorFormContextValue, PromptEditorFormState } from './context'
 import { PromptEditorForm } from './PromptEditorForm'
 import { PromptEditorPreview } from './PromptEditorPreview'
 
@@ -45,7 +45,7 @@ const TabPanel = (props: TabPanelProps) => {
 export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string; setEditorOpen?: React.Dispatch<boolean>; personal?: boolean }) => {
   const [tab, setTab] = useState(0);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setTab(newValue);
   };
 
@@ -158,8 +158,8 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
     <PromptEditorFormContext.Provider value={context}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }} >
         <Tabs value={tab} onChange={handleChange} aria-label="prompt-editor-tabs" slotProps={{ indicator: { style: { backgroundColor: 'black' } } }} textColor='inherit'>
-          <Tab label="Muokkaa" />
-          <Tab label="Esikatsele" />
+          <Tab label={t('prompt:edit')} />
+          <Tab label={t('prompt:preview')} />
         </Tabs>
       </Box>
 
@@ -176,7 +176,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
             {loading && <CircularProgress color="secondary" />}
             {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
             <OutlineButtonBlue disabled={loading} variant="contained" sx={{ ml: 1 }} onClick={() => tab === 0 ? setTab(1) : setTab(0)}>
-              {tab === 1 ? 'Muokkaa' : 'Esikatsele'}
+              {tab === 1 ? t('prompt:edit') : t('prompt:preview')}
             </OutlineButtonBlue>
             <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
               {t('common:save')}

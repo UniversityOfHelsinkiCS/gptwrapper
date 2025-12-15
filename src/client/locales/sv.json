@@ -361,7 +361,24 @@
     "unknownRagLabel": "säg om inte hittas",
     "defaultRagMessage": "Om användaren hänvisar till källmaterial eller nämner 'material', använd document_search-verktyget för att hämta information från källorna. Använd resultaten i ditt svar.",
     "enforceRagMessage": "Alla svar måste baseras på källmaterialet. Använd alltid document_search-verktyget och lägg inte till information som inte finns i källorna.",
-    "unknownRagMessage": "Om svaret inte finns i källmaterialet, tala om för användaren direkt att inget svar är tillgängligt från källorna."
+    "unknownRagMessage": "Om svaret inte finns i källmaterialet, tala om för användaren direkt att inget svar är tillgängligt från källorna.",
+    "edit": "Redigera",
+    "preview": "Förhandsgranska",
+    "defaultChatInstructions": "Du interagerar med ett chattgränssnitt som har en fördefinierad systemprompt. Detta innebär att AI:n har tilldelats en specifik roll, personlighet eller uppsättning regler att följa.\n\n**Hur du börjar:**\n* Skriv helt enkelt **\"Hej\"** eller ställ en fråga för att se hur den svarar.\n* AI:n kommer att följa sina dolda instruktioner medan den chattar med dig.",
+    "studentViewInfoAlert": "Denna vy visas för studenter under avsnittet \"Promptinformation\".",
+    "promptName": "Promptnamn",
+    "promptInstructions": "Användarinstruktioner",
+    "systemMessageLabel": "Systemmeddelande",
+    "noSystemMessage": "Inget systemmeddelande",
+    "promptBasicInfo": "Grundläggande promptinformation",
+    "studentInstructionsLabel": "Instruktioner för studenter om användning av prompten",
+    "promptModelSettings": "Inställningar för promptmodell",
+    "hideSystemInstructions": "Dölj systeminstruktioner för studenter",
+    "selectedModelLabel": "Vald modell för prompten",
+    "systemMessagePlaceholder": "t.ex. Du är en hjälpsam assistent.",
+    "promptSourceMaterialData": "Promptens källmaterialdata",
+    "selectedSourceMaterial": "Valt källmaterial",
+    "modelSourceMaterialInstructions": "Källmaterialsinstruktioner för modellen"
   },
   "tooltip": {
     "copied": "Kopierad!"
