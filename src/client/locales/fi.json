@@ -401,7 +401,9 @@
     "systemMessagePlaceholder": "Esim. Olet avulias avustaja.",
     "promptSourceMaterialData": "Alustuksen lähdemateriaali aineisto",
     "selectedSourceMaterial": "Valittu lähdemateriaali",
-    "modelSourceMaterialInstructions": "Kielimallin lähdemateriaaliohjeistus"
+    "modelSourceMaterialInstructions": "Kielimallin lähdemateriaaliohjeistus",
+    "promptDescription": "Alustuksen kuvaus",
+    "myPrompt": "Oma alustukseni"
   },
   "tooltip": {
     "copied": "Kopioitu!"

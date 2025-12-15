@@ -178,7 +178,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
             <OutlineButtonBlue disabled={loading} variant="contained" sx={{ ml: 1 }} onClick={() => tab === 0 ? setTab(1) : setTab(0)}>
               {tab === 1 ? t('prompt:edit') : t('prompt:preview')}
             </OutlineButtonBlue>
-            <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
+            <BlueButton disabled={loading || !form.name} type="submit" variant="contained" sx={{ ml: 1 }}>
               {t('common:save')}
             </BlueButton>
           </Box>

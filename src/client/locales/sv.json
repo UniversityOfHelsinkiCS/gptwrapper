@@ -378,7 +378,9 @@
     "systemMessagePlaceholder": "t.ex. Du är en hjälpsam assistent.",
     "promptSourceMaterialData": "Promptens källmaterialdata",
     "selectedSourceMaterial": "Valt källmaterial",
-    "modelSourceMaterialInstructions": "Källmaterialsinstruktioner för modellen"
+    "modelSourceMaterialInstructions": "Källmaterialsinstruktioner för modellen",
+    "promptDescription": "Promptbeskrivning",
+    "myPrompt": "Min prompt"
   },
   "tooltip": {
     "copied": "Kopierad!"

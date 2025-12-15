@@ -24,7 +24,7 @@ import { usePromptEditorForm } from './context'
 
 
 const BasicInfoSection = () => {
-    const { form, setForm } = usePromptEditorForm()
+    const { form, setForm, type } = usePromptEditorForm()
     const { t } = useTranslation()
 
     return (
@@ -37,7 +37,7 @@ const BasicInfoSection = () => {
             <AccordionDetails>
                 <Box mb={3}>
                     <Typography mb={1} fontWeight="bold">
-                        {t('prompt:promptName')}
+                        {t('prompt:promptName')}*
                     </Typography>
                     <TextField
                         slotProps={{
@@ -54,7 +54,7 @@ const BasicInfoSection = () => {
                 </Box>
                 <Box>
                     <Typography mb={1} fontWeight="bold">
-                        {t('prompt:studentInstructionsLabel')}
+                        {type === 'PERSONAL' ? t('prompt:promptDescription') : t('prompt:studentInstructionsLabel')}
                     </Typography>
                     <TextField
                         slotProps={{
@@ -64,7 +64,7 @@ const BasicInfoSection = () => {
                         }}
                         value={form.userInstructions}
                         onChange={(e) => setForm((prev) => ({ ...prev, userInstructions: e.target.value }))}
-                        placeholder={t('prompt:defaultChatInstructions')}
+                        placeholder={type === 'PERSONAL' ? t('prompt:myPrompt') : t('prompt:defaultChatInstructions')}
                         fullWidth
                         multiline
                         minRows={8}
@@ -205,6 +205,8 @@ const ModelSettingsSection = () => {
 const RagSettingsSection = () => {
     const { form, setForm, type, ragIndices, courseId } = usePromptEditorForm()
     const { t } = useTranslation()
+
+    if (type === 'PERSONAL') return null // Personal prompts don't have RAGs
 
     return (
         <Accordion defaultExpanded sx={accordionStyle}>

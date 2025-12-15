@@ -399,7 +399,9 @@
     "systemMessagePlaceholder": "e.g., You are a helpful assistant.",
     "promptSourceMaterialData": "Prompt source material data",
     "selectedSourceMaterial": "Selected source material",
-    "modelSourceMaterialInstructions": "Source material instructions for the model"
+    "modelSourceMaterialInstructions": "Source material instructions for the model",
+    "promptDescription": "Prompt description",
+    "myPrompt": "My prompt"
   },
   "tooltip": {
     "copied": "Copied!"
