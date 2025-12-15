@@ -1,26 +1,5 @@
-import { ValidModelName } from "@config"
 import { createContext, useContext } from "react"
-
-export type PromptEditorFormState = {
-    name: string
-    userInstructions: string
-    systemMessage: string
-    ragSystemMessage: string
-    hidden: boolean
-    ragIndexId?: number | null
-    selectedModel: ValidModelName | 'none'
-    temperatureDefined: boolean
-    temperature: number
-}
-
-export type PromptEditorFormContextValue = {
-    form: PromptEditorFormState
-    setForm: React.Dispatch<React.SetStateAction<PromptEditorFormState>>
-    type: 'CHAT_INSTANCE' | 'PERSONAL'
-    ragIndices?: { id: number; metadata: { name: string } }[]
-    courseId: string
-    modelHasTemperature: boolean
-}
+import { PromptEditorFormContextValue } from "src/client/types"
 
 export const PromptEditorFormContext = createContext<PromptEditorFormContextValue | null>(null)
 

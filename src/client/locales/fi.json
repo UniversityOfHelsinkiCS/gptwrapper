@@ -403,7 +403,8 @@
     "selectedSourceMaterial": "Valittu lähdemateriaali",
     "modelSourceMaterialInstructions": "Kielimallin lähdemateriaaliohjeistus",
     "promptDescription": "Alustuksen kuvaus",
-    "myPrompt": "Oma alustukseni"
+    "myPrompt": "Oma alustukseni",
+    "missingPromptName": "Alustukselta puuttuu nimi"
   },
   "tooltip": {
     "copied": "Kopioitu!"

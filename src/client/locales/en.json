@@ -401,7 +401,8 @@
     "selectedSourceMaterial": "Selected source material",
     "modelSourceMaterialInstructions": "Source material instructions for the model",
     "promptDescription": "Prompt description",
-    "myPrompt": "My prompt"
+    "myPrompt": "My prompt",
+    "missingPromptName": "Prompt name is missing"
   },
   "tooltip": {
     "copied": "Copied!"

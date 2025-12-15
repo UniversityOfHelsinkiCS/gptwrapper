@@ -380,7 +380,8 @@
     "selectedSourceMaterial": "Valt källmaterial",
     "modelSourceMaterialInstructions": "Källmaterialsinstruktioner för modellen",
     "promptDescription": "Promptbeskrivning",
-    "myPrompt": "Min prompt"
+    "myPrompt": "Min prompt",
+    "missingPromptName": "Prompten saknar namn"
   },
   "tooltip": {
     "copied": "Kopierad!"

@@ -15,9 +15,10 @@ import useCourse from '../../hooks/useCourse'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
-import { PromptEditorFormContext, PromptEditorFormContextValue, PromptEditorFormState } from './context'
+import { PromptEditorFormContext } from './context'
 import { PromptEditorForm } from './PromptEditorForm'
 import { PromptEditorPreview } from './PromptEditorPreview'
+import { PromptEditorFormContextValue, PromptEditorFormState } from 'src/client/types'
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -92,6 +93,12 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+
+    if (!form.name) {
+      enqueueSnackbar(t('prompt:missingPromptName'), { variant: 'error' })
+      return
+    }
+
     setLoading(true)
 
     const {
@@ -178,7 +185,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
             <OutlineButtonBlue disabled={loading} variant="contained" sx={{ ml: 1 }} onClick={() => tab === 0 ? setTab(1) : setTab(0)}>
               {tab === 1 ? t('prompt:edit') : t('prompt:preview')}
             </OutlineButtonBlue>
-            <BlueButton disabled={loading || !form.name} type="submit" variant="contained" sx={{ ml: 1 }}>
+            <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
               {t('common:save')}
             </BlueButton>
           </Box>

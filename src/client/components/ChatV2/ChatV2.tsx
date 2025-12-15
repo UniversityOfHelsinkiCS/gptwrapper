@@ -499,7 +499,11 @@ const ChatV2Content = () => {
 
           <Conversation
             initial={
-              <ConversationSplash courseName={chatInstance && getLanguageValue(chatInstance.name, i18n.language)} courseDate={chatInstance?.activityPeriod} />
+              <ConversationSplash
+                courseName={chatInstance && getLanguageValue(chatInstance.name, i18n.language)}
+                courseDate={chatInstance?.activityPeriod}
+                promptName={promptInfo?.type === 'saved' ? promptInfo.name : undefined}
+              />
             }
             messages={messages}
             completion={hasPotentialError ? `${completion} ⚠️` : completion}

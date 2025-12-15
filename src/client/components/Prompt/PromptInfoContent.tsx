@@ -5,7 +5,7 @@ import {
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
-import { usePromptEditorForm } from './context'
+import { PromptInfo } from 'src/client/types'
 
 const muiTextfieldMimic = {
     border: '1px solid',
@@ -27,13 +27,24 @@ const multilineMimic = {
     minHeight: '190px' // mimics 8 rows
 }
 
-export const PromptInfoContent = ({ name, userInstructions, systemMessage, systemMessageHidden }: { name?: string, userInstructions?: string, systemMessage?: string, systemMessageHidden?: boolean }) => {
-    const { type } = usePromptEditorForm()
+export const PromptInfoContent = ({
+    name,
+    userInstructions,
+    systemMessage,
+    hidden,
+    type
+}: PromptInfo) => {
+
     const { t } = useTranslation()
     const defaultInstructions = type === 'PERSONAL' ? t('prompt:myPrompt') : t('prompt:defaultChatInstructions')
 
     return (
-        <>
+        <Box sx={{
+            p: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+        }}>
             <Box>
                 <Typography mb={2} fontWeight="bold">{t('prompt:promptName')}</Typography>
 
@@ -54,7 +65,7 @@ export const PromptInfoContent = ({ name, userInstructions, systemMessage, syste
             </Box>
 
             {
-                !systemMessageHidden &&
+                !hidden &&
                 <>
                     <Divider sx={{ my: 3 }} />
                     <Box>
@@ -73,6 +84,6 @@ export const PromptInfoContent = ({ name, userInstructions, systemMessage, syste
                     </Box>
                 </>
             }
-        </>
+        </Box>
     )
 }
