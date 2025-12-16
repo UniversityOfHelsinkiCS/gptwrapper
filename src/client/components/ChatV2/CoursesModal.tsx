@@ -35,16 +35,12 @@ const CustomTabPanel = (props: TabPanelProps) => {
 }
 
 const CoursesModal = () => {
-  const [value, setValue] = React.useState(0)
+  const [tab, setTab] = useState(0)
 
   const { t } = useTranslation()
 
   const { user } = useCurrentUser()
   const { courses, isLoading } = useUserCourses()
-
-  const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue)
-  }
 
   if (!courses || isLoading) return <CoursesSkeleton />
 
@@ -55,18 +51,18 @@ const CoursesModal = () => {
   if (isTeacherOrAdmin) {
     return (
       <Box>
-        <Tabs value={value} onChange={handleChange} slotProps={{ indicator: { style: { backgroundColor: 'black' } } }} textColor='inherit'>
+        <Tabs value={tab} onChange={(_: React.SyntheticEvent, newValue: number) => setTab(newValue)} slotProps={{ indicator: { style: { backgroundColor: 'black' } } }} textColor='inherit'>
           <Tab label={t('course:activeTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
           <Tab label={t('course:notActiveTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
           <Tab label={t('course:endedTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
         </Tabs>
-        <CustomTabPanel value={value} index={0}>
+        <CustomTabPanel value={tab} index={0}>
           <CourseList courseUnits={curreEnabled} type="enabled" />
         </CustomTabPanel>
-        <CustomTabPanel value={value} index={1}>
+        <CustomTabPanel value={tab} index={1}>
           <CourseList courseUnits={curreDisabled} type="disabled" />
         </CustomTabPanel>
-        <CustomTabPanel value={value} index={2}>
+        <CustomTabPanel value={tab} index={2}>
           <CourseList courseUnits={ended} type="ended" />
         </CustomTabPanel>
       </Box>

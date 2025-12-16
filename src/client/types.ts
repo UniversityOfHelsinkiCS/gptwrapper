@@ -40,18 +40,43 @@ export interface User {
   serverVersion?: string
 }
 
+export type PromptType = 'CHAT_INSTANCE' | 'PERSONAL'
+
 export type Prompt = {
   id: string
   name: string
+  userInstructions?: string
   chatInstanceId: string
   systemMessage: string
   messages: ChatMessage[]
   hidden: boolean
-  type: 'CHAT_INSTANCE' | 'PERSONAL'
+  type: PromptType
   createdAt: string
   ragIndexId?: number
   model?: ValidModelName
   temperature?: number
+}
+
+export type PromptInfo = Pick<Prompt, 'name' | 'systemMessage' | 'hidden' | 'type'> & {
+  userInstructions: string
+}
+
+export type PromptEditorFormState = Pick<Prompt, 'name' | 'systemMessage' | 'hidden'> & {
+  userInstructions: string
+  ragSystemMessage: string
+  ragIndexId?: number | null
+  selectedModel: ValidModelName | 'none'
+  temperatureDefined: boolean
+  temperature: number
+}
+
+export type PromptEditorFormContextValue = {
+  form: PromptEditorFormState
+  setForm: React.Dispatch<React.SetStateAction<PromptEditorFormState>>
+  type: PromptType
+  ragIndices?: { id: number; metadata: { name: string } }[]
+  courseId: string
+  modelHasTemperature: boolean
 }
 
 export interface ChatInstance {

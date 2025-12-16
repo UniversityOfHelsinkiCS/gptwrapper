@@ -39,6 +39,7 @@ import PromptModal from './PromptModal'
 import CoursesModal from './CoursesModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
 import { CustomIcon } from './general/CustomIcon'
+import { PromptInfoModal } from './PromptInfoModal'
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
@@ -498,7 +499,11 @@ const ChatV2Content = () => {
 
           <Conversation
             initial={
-              <ConversationSplash courseName={chatInstance && getLanguageValue(chatInstance.name, i18n.language)} courseDate={chatInstance?.activityPeriod} />
+              <ConversationSplash
+                courseName={chatInstance && getLanguageValue(chatInstance.name, i18n.language)}
+                courseDate={chatInstance?.activityPeriod}
+                promptName={promptInfo?.type === 'saved' ? promptInfo.name : undefined}
+              />
             }
             messages={messages}
             completion={hasPotentialError ? `${completion} ⚠️` : completion}
@@ -542,7 +547,7 @@ const ChatV2Content = () => {
           </Box>
         </Box>
       </Box>
-      {/* FileSearchResults columns ----------------------------------------------------------------------------------------------------- */}
+      {/* FileSearchResults columns ----------------------------------------------------------------------------------------------- */}
       {isMobile ? (
         <Drawer
           anchor="right"
@@ -588,6 +593,8 @@ const ChatV2Content = () => {
           </Box>
         )
       )}
+
+      {/* Modals routes ------------------------------------------------------------------------------------------------------------ */}
       <Routes>
         <Route element={
           <TemplateModal root={`/${courseId}`} open >
@@ -598,6 +605,7 @@ const ChatV2Content = () => {
           <Route path={`courses`} element={<CoursesModal />} />
           <Route path={`prompts`} element={<PromptModal />} />
           <Route path={`prompt/:promptId`} element={<PromptEditor back={`/${courseId}`} />} />
+          <Route path={`show/:promptId`} element={<PromptInfoModal back={`/${courseId}`} />} />
         </Route>
       </Routes>
       <ResetConfirmModal open={resetConfirmModalOpen} setOpen={setResetConfirmModalOpen} onConfirm={handleReset} />

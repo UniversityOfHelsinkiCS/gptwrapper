@@ -382,7 +382,27 @@
     "defaultRagMessage": "If the user refers to source materials or mentions 'materials', use the document_search tool to retrieve information from the sources. Incorporate the results into your answer.",
     "enforceRagMessage": "All answers must be based on the source materials. Always use the document_search tool and do not add information that is not found in the sources.",
     "unknownRagMessage": "If the answer cannot be found in the source materials, tell the user directly that no answer is available from the sources.",
-    "courseSourceMaterials": "Edit course's source materials"
+    "courseSourceMaterials": "Edit course's source materials",
+    "edit": "Edit",
+    "preview": "Preview",
+    "defaultChatInstructions": "You are interacting with a chat interface that has a pre-defined system prompt. This means the AI has been given a specific role, personality, or set of rules to follow.\n\n**How to start:**\n* Simply type **\"Hello\"** or ask a question to see how it responds.\n* The AI will adhere to its hidden instructions while chatting with you.",
+    "studentViewInfoAlert": "This view is visible to students in the \"Prompt Information\" section.",
+    "promptName": "Prompt name",
+    "promptInstructions": "User instructions",
+    "systemMessageLabel": "System message",
+    "noSystemMessage": "No system message",
+    "promptBasicInfo": "Basic prompt information",
+    "studentInstructionsLabel": "Instructions for students on prompt usage",
+    "promptModelSettings": "Prompt model settings",
+    "hideSystemInstructions": "Hide system instructions from students",
+    "selectedModelLabel": "Selected model for the prompt",
+    "systemMessagePlaceholder": "e.g., You are a helpful assistant.",
+    "promptSourceMaterialData": "Prompt source material data",
+    "selectedSourceMaterial": "Selected source material",
+    "modelSourceMaterialInstructions": "Source material instructions for the model",
+    "promptDescription": "Prompt description",
+    "myPrompt": "My prompt",
+    "missingPromptName": "Prompt name is missing"
   },
   "tooltip": {
     "copied": "Copied!"

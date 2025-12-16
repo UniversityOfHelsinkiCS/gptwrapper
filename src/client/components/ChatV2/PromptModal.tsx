@@ -1,6 +1,6 @@
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import { ContentCopyOutlined, Visibility, VisibilityOff } from '@mui/icons-material'
-import { Box, Divider, IconButton, MenuItem, Tab, Tabs, Link, Tooltip, Typography } from '@mui/material'
+import { Box, Divider, IconButton, MenuItem, Tab, Tabs, Link, Tooltip, Typography, Stack } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -68,83 +68,80 @@ const PromptModal = () => {
   const canCreatePrompt = courseId === 'general' || tab === 1 || amongResponsibles
 
   const renderPromptItem = (prompt: PromptType, isPersonal: boolean) => (
-    <>
-      <MenuItem
-        key={prompt.id}
-        data-testid="pick-prompt-button"
-        selected={prompt.id === activePrompt?.id}
-        onClick={() => handleSelect(prompt)}
-        sx={{ borderRadius: '1.25rem', display: 'flex', alignItems: 'center', gap: 1 }}
-      >
-        <Box sx={{ flexGrow: 1 }}>{prompt.name}</Box>
+    <MenuItem
+      key={prompt.id}
+      data-testid="pick-prompt-button"
+      selected={prompt.id === activePrompt?.id}
+      onClick={() => handleSelect(prompt)}
+      sx={{ borderRadius: '1.25rem', display: 'flex', alignItems: 'center', gap: 1 }}
+    >
+      <Box sx={{ flexGrow: 1 }}>{prompt.name}</Box>
 
-        {!createNewOpen && (
-          <>
-            {!isPersonal && (
-              <>
-                {prompt.hidden ? (
+      {!createNewOpen && (
+        <>
+          {!isPersonal && (
+            <>
+              {prompt.hidden ? (
 
-                  <Tooltip title={t('hiddenPromptInfo')}>
-                    <VisibilityOff />
-                  </Tooltip>
-                ) : (
-                  <Tooltip title={t('visiblePromptInfo')}>
-                    <Visibility
-                    />
-                  </Tooltip>
-                )}
-                <Link
-                  component={RouterLink}
-                  to={`/${courseId}?promptId=${prompt.id}`}
-                  variant="caption"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {t('course:directPromptLink', { name: prompt.name })}
-                </Link>
-                <TextButton
-                  onClick={(e) => handleCopyLink(e, prompt.id)}
-                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                >
-                  <ContentCopyOutlined fontSize="small" />
-                  {t('copyStudentLink')}
-                </TextButton>
-              </>
-            )}
+                <Tooltip title={t('hiddenPromptInfo')}>
+                  <VisibilityOff />
+                </Tooltip>
+              ) : (
+                <Tooltip title={t('visiblePromptInfo')}>
+                  <Visibility
+                  />
+                </Tooltip>
+              )}
+              <Link
+                component={RouterLink}
+                to={`/${courseId}?promptId=${prompt.id}`}
+                variant="caption"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {t('course:directPromptLink', { name: prompt.name })}
+              </Link>
+              <TextButton
+                onClick={(e) => handleCopyLink(e, prompt.id)}
+                sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+              >
+                <ContentCopyOutlined fontSize="small" />
+                {t('copyStudentLink')}
+              </TextButton>
+            </>
+          )}
 
-            {(isPersonal || amongResponsibles) && (
-              <>
-                <TextButton
-                  onClick={(e) => handleEdit(e, prompt)}
-                  color="primary"
-                  data-testid={`edit-prompt-${prompt.name}`}
-                  aria-label={t('common:edit')}
-                >
-                  {t('common:edit')}
-                </TextButton>
+          {(isPersonal || amongResponsibles) && (
+            <>
+              <TextButton
+                onClick={(e) => handleEdit(e, prompt)}
+                color="primary"
+                data-testid={`edit-prompt-${prompt.name}`}
+                aria-label={t('common:edit')}
+              >
+                {t('common:edit')}
+              </TextButton>
 
-                <IconButton
-                  onClick={(event) => handleDelete(event, prompt)}
-                  size="small"
-                  aria-label={t('common:delete')}
-                  data-testid={`delete-prompt-${prompt.name}`}
-                >
-                  <DeleteOutline fontSize="small" />
-                </IconButton>
-              </>
-            )}
-          </>
-        )}
-      </MenuItem>
-      <Divider />
-    </>
+              <IconButton
+                onClick={(event) => handleDelete(event, prompt)}
+                size="small"
+                aria-label={t('common:delete')}
+                data-testid={`delete-prompt-${prompt.name}`}
+              >
+                <DeleteOutline fontSize="small" />
+              </IconButton>
+            </>
+          )}
+        </>
+      )}
+    </MenuItem>
   )
 
   const renderPromptList = (prompts: PromptType[], isPersonal: boolean) => (
     <Box>
       {prompts.length > 0 && (
-        <Box>
+        <Stack divider={<Divider flexItem />}>
           {prompts.map((prompt) => renderPromptItem(prompt, isPersonal))}
-        </Box>
+        </Stack>
       )}
     </Box>
   )

@@ -384,7 +384,27 @@
     "defaultRagMessage": "Jos käyttäjä viittaa lähdemateriaaleihin tai mainitsee 'materiaalit', käytä document_search -työkalua hakeaksesi tietoa lähteistä. Hyödynnä tuloksia vastauksessa.",
     "enforceRagMessage": "Kaikkien vastausten on perustuttava lähdemateriaaleihin. Käytä aina document_search -työkalua ja älä lisää tietoa, jota ei löydy lähteistä.",
     "unknownRagMessage": "Jos vastausta ei löydy lähdemateriaaleista, kerro käyttäjälle suoraan ettei vastausta ole saatavilla lähteistä.",
-    "courseSourceMaterials": "Muokkaa kurssin materiaaleja"
+    "courseSourceMaterials": "Muokkaa kurssin materiaaleja",
+    "edit": "Muokkaa",
+    "preview": "Esikatsele",
+    "defaultChatInstructions": "Olet vuorovaikutuksessa chat-käyttöliittymän kanssa, jossa on ennalta määritetty järjestelmäkehote. Tämä tarkoittaa, että tekoälylle on annettu tietty rooli, persoonallisuus tai säännöt, joita seurata.\n\n**Kuinka aloittaa:**\n* Kirjoita yksinkertaisesti **\"Moi\"** tai kysy kysymys nähdäksesi, miten se vastaa.\n* Tekoäly noudattaa piilotettuja ohjeitaan jutellessaan kanssasi.",
+    "studentViewInfoAlert": "Tämä näkymä näkyy opiskelijoille kohdassa \"Alustuksen tiedot\".",
+    "promptName": "Alustuksen nimi",
+    "promptInstructions": "Alustuksen käyttöohjeet",
+    "systemMessageLabel": "Kielimallin ohjeistus",
+    "noSystemMessage": "Ei kielimallin ohjeita",
+    "promptBasicInfo": "Alustuksen perustiedot",
+    "studentInstructionsLabel": "Ohjeistus opiskelijoille alustuksen käytöstä",
+    "promptModelSettings": "Alustuksen kielimallin asetukset",
+    "hideSystemInstructions": "Piilota kielimallin ohjeistus opiskelijoilta",
+    "selectedModelLabel": "Alustuksen valittu kielimalli",
+    "systemMessagePlaceholder": "Esim. Olet avulias avustaja.",
+    "promptSourceMaterialData": "Alustuksen lähdemateriaali aineisto",
+    "selectedSourceMaterial": "Valittu lähdemateriaali",
+    "modelSourceMaterialInstructions": "Kielimallin lähdemateriaaliohjeistus",
+    "promptDescription": "Alustuksen kuvaus",
+    "myPrompt": "Oma alustukseni",
+    "missingPromptName": "Alustukselta puuttuu nimi"
   },
   "tooltip": {
     "copied": "Kopioitu!"

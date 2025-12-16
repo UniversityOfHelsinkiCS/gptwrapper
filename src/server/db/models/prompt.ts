@@ -32,6 +32,8 @@ class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prom
   declare temperature?: CreationOptional<number>
 
   declare ragIndex?: NonAttribute<RagIndex>
+
+  declare userInstructions?: CreationOptional<string>
 }
 
 Prompt.init(
@@ -86,6 +88,10 @@ Prompt.init(
     },
     temperature: {
       type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    userInstructions: {
+      type: DataTypes.STRING,
       allowNull: true,
     },
   },
