@@ -79,6 +79,8 @@ export type PromptEditorFormContextValue = {
   modelHasTemperature: boolean
 }
 
+export type ChatStatus = 'NOT_STARTED' | 'EXPIRED' | 'ACTIVE'
+
 export interface ChatInstance {
   promptCount?: number
   id: string

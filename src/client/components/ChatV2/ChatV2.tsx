@@ -40,7 +40,8 @@ import CoursesModal from './CoursesModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
 import { CustomIcon } from './general/CustomIcon'
 import { PromptInfoModal } from './PromptInfoModal'
-import ChatExpiredView from './ChatExpiredView'
+import { getChatActivityStatus } from './util'
+import { ChatExpiredView } from './ChatExpiredView'
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
@@ -364,7 +365,8 @@ const ChatV2Content = () => {
 
   if (statusLoading || userLoading || instanceLoading) return <HYLoadingSpinner />
 
-  if (chatInstance?.activityPeriod) return <ChatExpiredView user={user} chatInstance={chatInstance} />
+  const status = getChatActivityStatus(chatInstance, user)
+  if (status !== 'ACTIVE') return <ChatExpiredView status={status} chatInstance={chatInstance} />
 
   const leftPanelCollapsed = !sideBarOpen || leftPanelFloating
   const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
