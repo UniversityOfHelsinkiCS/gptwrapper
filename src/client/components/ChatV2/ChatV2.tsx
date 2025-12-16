@@ -40,6 +40,7 @@ import CoursesModal from './CoursesModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
 import { CustomIcon } from './general/CustomIcon'
 import { PromptInfoModal } from './PromptInfoModal'
+import ChatExpiredView from './ChatExpiredView'
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
@@ -137,7 +138,16 @@ const ChatV2Content = () => {
 
   const { promptInfo } = usePromptState()
 
-  const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo, hasPotentialError } = useChatStream({
+  const {
+    processStream,
+    completion,
+    isStreaming,
+    setIsStreaming,
+    toolCalls,
+    streamControllerRef,
+    generationInfo,
+    hasPotentialError
+  } = useChatStream({
     onComplete: ({ message }) => {
       if (message.content.length > 0) {
         setMessages((prev: ChatMessage[]) => prev.concat(message))
@@ -354,37 +364,7 @@ const ChatV2Content = () => {
 
   if (statusLoading || userLoading || instanceLoading) return <HYLoadingSpinner />
 
-
-  if (chatInstance?.activityPeriod) {
-    const isResponsible = user?.isAdmin || chatInstance.responsibilities?.some((r) => r.user.id === user?.id)
-
-    const { startDate, endDate } = chatInstance.activityPeriod
-    const start = new Date(startDate)
-    const end = new Date(endDate)
-    const now = new Date()
-
-    if (now < start && !isResponsible) {
-      return (
-        <Box>
-          <ChatInfo course={chatInstance} />
-          <Alert severity="warning" style={{ marginTop: 20 }}>
-            <Typography variant="h6">{t('course:curreNotStarted')}</Typography>
-          </Alert>
-        </Box>
-      )
-    }
-
-    if (now > end && !isResponsible) {
-      return (
-        <Box>
-          <ChatInfo course={chatInstance} />
-          <Alert severity="warning" style={{ marginTop: 20 }}>
-            <Typography variant="h6">{t('course:curreExpired')}</Typography>
-          </Alert>
-        </Box>
-      )
-    }
-  }
+  if (chatInstance?.activityPeriod) return <ChatExpiredView user={user} chatInstance={chatInstance} />
 
   const leftPanelCollapsed = !sideBarOpen || leftPanelFloating
   const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
