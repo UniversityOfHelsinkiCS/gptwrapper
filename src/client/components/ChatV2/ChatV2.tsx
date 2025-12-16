@@ -392,6 +392,7 @@ const ChatV2Content = () => {
             open={true} // always open in drawer
             setOpen={setSideBarOpen}
             course={chatInstance}
+            user={user}
             handleReset={handleResetRequest}
             messages={messages}
             currentModel={activeModel}
@@ -403,6 +404,7 @@ const ChatV2Content = () => {
           open={sideBarOpen}
           setOpen={setSideBarOpen}
           course={chatInstance}
+          user={user}
           handleReset={handleResetRequest}
           messages={messages}
           currentModel={activeModel}
