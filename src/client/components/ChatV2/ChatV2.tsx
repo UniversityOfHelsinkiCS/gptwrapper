@@ -10,7 +10,7 @@ import { getLanguageValue } from '@shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { useChatScroll } from './useChatScroll'
 import useCourse from '../../hooks/useCourse'
-import useLocalStorageState from '../../hooks/useLocalStorageState'
+import useLocalStorageState, { useLocalStorageStateWithURLDefault } from '../../hooks/useLocalStorageState'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useAnalyticsDispatch } from '../../stores/analytics'
@@ -47,36 +47,6 @@ import { ChatExpiredView } from './ChatExpiredView'
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
  */
 const Conversation = lazy(() => import('./Conversation'))
-
-function useLocalStorageStateWithURLDefault<T>(key: string, defaultValue: string, urlKey: string, schema: z.ZodType<T>) {
-  const [value, setValue] = useLocalStorageState(key, defaultValue)
-  const [searchParams, setSearchParams] = useSearchParams()
-  const urlValue = searchParams.get(urlKey)
-
-  // If urlValue is defined, it overrides the localStorage setting.
-  // However if user changes the setting, the urlValue is removed.
-  const modifiedSetValue = (newValue: T) => {
-    if (newValue !== urlValue) {
-      if (typeof newValue === 'string') {
-        setValue(newValue)
-      } else {
-        setValue(String(newValue))
-      }
-      searchParams.delete(urlKey)
-      setSearchParams(searchParams)
-    }
-  }
-
-  const parsedValue = schema.safeParse(urlValue ?? value)
-
-  if (parsedValue.success) {
-    return [parsedValue.data, modifiedSetValue] as const
-  }
-
-  // if the value in localStorage is invalid then revert back to default
-  setValue(defaultValue)
-  return [defaultValue as T, modifiedSetValue] as const
-}
 
 const ChatV2Content = () => {
   const { courseId } = useParams()

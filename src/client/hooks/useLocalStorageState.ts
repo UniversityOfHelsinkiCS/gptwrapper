@@ -1,4 +1,6 @@
 import { type Dispatch, type SetStateAction, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import z from 'zod/v4'
 
 function useLocalStorageState<T>(key: string, defaultValue: T): [T, Dispatch<SetStateAction<T>>]
 function useLocalStorageState<T>(key: string): [T | undefined, Dispatch<SetStateAction<T | undefined>>]
@@ -33,3 +35,34 @@ function useLocalStorageState<T>(key: string, defaultValue = undefined) {
 }
 
 export default useLocalStorageState
+
+export function useLocalStorageStateWithURLDefault<T>(key: string, defaultValue: string, urlKey: string, schema: z.ZodType<T>) {
+  const [value, setValue] = useLocalStorageState(key, defaultValue)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const urlValue = searchParams.get(urlKey)
+
+  // If urlValue is defined, it overrides the localStorage setting.
+  // However if user changes the setting, the urlValue is removed.
+  const modifiedSetValue = (newValue: T) => {
+    if (newValue !== urlValue) {
+      if (typeof newValue === 'string') {
+        setValue(newValue)
+      } else {
+        setValue(String(newValue))
+      }
+      searchParams.delete(urlKey)
+      setSearchParams(searchParams)
+    }
+  }
+
+  const parsedValue = schema.safeParse(urlValue ?? value)
+
+  if (parsedValue.success) {
+    return [parsedValue.data, modifiedSetValue] as const
+  }
+
+  // if the value in localStorage is invalid then revert back to default
+  // prevents faulty localStorage content from breaking the app
+  setValue(defaultValue)
+  return [defaultValue as T, modifiedSetValue] as const
+}
