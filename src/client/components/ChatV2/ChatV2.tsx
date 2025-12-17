@@ -1,9 +1,9 @@
-import { Alert, Box, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { MapsUgc } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Outlet, Route, Routes, useParams, useSearchParams } from 'react-router-dom'
+import { Outlet, Route, Routes, useParams } from 'react-router-dom'
 import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, ValidModelNameSchema } from '../../../config'
 import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
@@ -16,11 +16,10 @@ import useUserStatus from '../../hooks/useUserStatus'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import sidebarOpen from '../../assets/sidebar-open.svg'
 import { ChatBox } from './ChatBox'
-import { OutlineButtonBlack, TextButton } from './general/Buttons'
+import { OutlineButtonBlack } from './general/Buttons'
 import { CourseSettingsModal } from './CourseSettingsModal'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
-import { ChatInfo } from './general/ChatInfo'
 import { StreamAbortReason, TypedAbortController, useChatStream } from './useChatStream'
 import { postCompletionStreamV3, sendConversationEmail } from './api'
 import { ConversationSplash } from './general/ConversationSplash'
@@ -55,60 +54,8 @@ const ChatV2Content = () => {
   const chatScroll = useChatScroll()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { t, i18n } = useTranslation()
-
-  const { data: chatInstance, isLoading: instanceLoading } = useCourse(courseId)
-  const { user, isLoading: userLoading } = useCurrentUser()
-  const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
-
-  // local storage states
-  const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
-
-  const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model', ValidModelNameSchema)
-  const [modelTemperature, setModelTemperature] = useLocalStorageStateWithURLDefault(
-    `${localStoragePrefix}-chat-model-temperature`,
-    String(DEFAULT_MODEL_TEMPERATURE),
-    'temperature',
-    z.coerce.number(),
-  )
-
-  const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as ChatMessage[])
-  const [saveConsent, setSaveConsent] = useLocalStorageState<boolean>('save-consent', false)
-
-  const [fileName, setFileName] = useState<string>('')
-  const [messageWarning, setMessageWarning] = useState<{ [key in WarningType]?: { message: string; ignored: boolean } }>({})
-
-  const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
-  const [sideBarOpen, setSideBarOpen] = useState<boolean>(() => {
-    return isMobile ? false : !defaultCollapsedSidebar
-  })
-
-  const leftPanelFloating = isEmbeddedMode || isMobile
-
-  const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
-
-  // Analytics
-  const dispatchAnalytics = useAnalyticsDispatch()
-  useEffect(() => {
-    dispatchAnalytics({
-      type: 'SET_ANALYTICS_DATA',
-      payload: {
-        model: activeModel,
-        courseId,
-        nMessages: messages.length,
-      },
-    })
-  }, [messages, courseId, activeModel, dispatchAnalytics])
-
-  // Refs
-  const chatContainerRef = useRef<HTMLDivElement | null>(null)
-  const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const scrollRef = useRef<HTMLDivElement | null>(null)
-  const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
-
-  const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
-
   const { promptInfo } = usePromptState()
-
+  const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
   const {
     processStream,
     completion,
@@ -140,6 +87,47 @@ const ChatV2Content = () => {
       dispatchAnalytics({ type: 'INCREMENT_FILE_SEARCHES' })
     },
   })
+
+  // queries
+  const { data: chatInstance, isLoading: instanceLoading } = useCourse(courseId)
+  const { user, isLoading: userLoading } = useCurrentUser()
+  const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
+
+  // local storage states
+  const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
+  const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model', ValidModelNameSchema)
+  const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as ChatMessage[])
+  const [saveConsent, setSaveConsent] = useLocalStorageState<boolean>('save-consent', false)
+  const [modelTemperature, setModelTemperature] = useLocalStorageStateWithURLDefault(
+    `${localStoragePrefix}-chat-model-temperature`,
+    String(DEFAULT_MODEL_TEMPERATURE),
+    'temperature',
+    z.coerce.number(),
+  )
+
+  // app states
+  const [fileName, setFileName] = useState<string>('')
+  const [messageWarning, setMessageWarning] = useState<{ [key in WarningType]?: { message: string; ignored: boolean } }>({})
+  const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
+  const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
+
+  // Analytics
+  const dispatchAnalytics = useAnalyticsDispatch()
+  useEffect(() => {
+    dispatchAnalytics({
+      type: 'SET_ANALYTICS_DATA',
+      payload: {
+        model: activeModel,
+        courseId,
+        nMessages: messages.length,
+      },
+    })
+  }, [messages, courseId, activeModel, dispatchAnalytics])
+
+  // Refs
+  const chatContainerRef = useRef<HTMLDivElement | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const scrollRef = useRef<HTMLDivElement | null>(null)
 
   const handleSendMessage = async (message: string, resendPrevious: boolean, ignoredWarnings: WarningType[]) => {
     if (!userStatus) return
@@ -311,7 +299,6 @@ const ChatV2Content = () => {
     }
   }, [userStatus, chatInstance])
 
-  const rightMenuOpen = !!activeToolResult
 
   // Handle layout shift when right menu opens (tool result becomes visible)
   const prevScrollYProportional = useRef(0)
@@ -325,6 +312,7 @@ const ChatV2Content = () => {
       window.scrollTo(0, scrollY)
     }, 0)
   }, [])
+
   const setActiveToolResult = useCallback(
     (toolResult: ToolCallResultEvent | undefined) => {
       handleLayoutShift()
@@ -333,14 +321,21 @@ const ChatV2Content = () => {
     [handleLayoutShift],
   )
 
+  // layout
+  const rightMenuOpen = !!activeToolResult
+  const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
+  const leftPanelFloating = isEmbeddedMode || isMobile
+  const [sideBarOpen, setSideBarOpen] = useState<boolean>(() => {
+    return isMobile ? false : !defaultCollapsedSidebar
+  })
+  const leftPanelCollapsed = !sideBarOpen || leftPanelFloating
+  const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
+  const rightPanelContentWidth = rightMenuOpen ? 'var(--right-menu-width)' : '0px'
+
   if (statusLoading || userLoading || instanceLoading) return <HYLoadingSpinner />
 
   const status = getChatActivityStatus(chatInstance, user)
   if (status !== 'ACTIVE') return <ChatExpiredView status={status} chatInstance={chatInstance} />
-
-  const leftPanelCollapsed = !sideBarOpen || leftPanelFloating
-  const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
-  const rightPanelContentWidth = rightMenuOpen ? 'var(--right-menu-width)' : '0px'
 
   return (
     <Box
@@ -479,7 +474,6 @@ const ChatV2Content = () => {
         >
           <Box
             sx={{
-              paddingBottom: '2rem',
               padding: isMobile ? '0rem 1rem 1rem 1rem' : '0rem 2rem 2rem 2rem',
             }}
           >
