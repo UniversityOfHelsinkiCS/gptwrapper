@@ -80,7 +80,7 @@
     "@dqbd/tiktoken": "1.0.22",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.0",
-    "@langchain/core": "0.3.71",
+    "@langchain/core": "0.3.80",
     "@langchain/ollama": "0.2.3",
     "@langchain/openai": "0.6.7",
     "@mui/icons-material": "6.4.12",
