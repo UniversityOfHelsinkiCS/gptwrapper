@@ -101,7 +101,7 @@
     "express-async-errors": "3.1.1",
     "i18next": "25.0.0",
     "ioredis": "5.7.0",
-    "langchain": "0.3.30",
+    "langchain": "0.3.37",
     "lodash": "4.17.21",
     "morgan": "1.10.0",
     "multer": "2.0.2",
