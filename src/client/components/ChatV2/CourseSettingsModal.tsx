@@ -38,6 +38,7 @@ import { RouterTabs } from "../common/RouterTabs"
 import { useCourseUsage } from '../../hooks/useChatInstanceUsage'
 import { filterUsages } from './util'
 import { ContentCopy, CopyAll } from '@mui/icons-material'
+import CourseEmbedding from '../Courses/Course/CourseEmbedding'
 
 export const CourseSettingsModal = () => {
   const { courseId } = useParams() as { courseId: string }
@@ -167,6 +168,7 @@ export const CourseSettingsModal = () => {
         <Tab label={<Badge badgeContent={filteredUsages.length} color='secondary' >{t('course:students')}</Badge>} to={`/${courseId}/course/students`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
         {chatInstance.saveDiscussions && <Tab label={t('course:discussions')} to={`/${courseId}/course/discussions`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />}
         <Tab label={t('course:sourceMaterials')} to={`/${courseId}/course/rag`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
+        <Tab label={t('course:moodleEmbedding')} to={`/${courseId}/course/moodle`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
       </RouterTabs>
       <Routes>
         <Route index path='/' element={
@@ -174,7 +176,6 @@ export const CourseSettingsModal = () => {
             <Alert severity={getInfoSeverity()} sx={{ borderRadius: '1', display: 'flex', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">{getInfoMessage()}</Typography>
             </Alert>
-
             <Box >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: '1rem', p: 1, backgroundColor: 'grey.100', borderRadius: 1 }}>
                 <Typography variant="h4">{chatInstance.name[language]}</Typography>
@@ -247,6 +248,7 @@ export const CourseSettingsModal = () => {
         <Route path="/students" element={<Stats />} />
         <Route path="/discussions/*" element={<Discussion />} />
         <Route path="/rag/*" element={<Rag />} />
+        <Route path="/moodle/*" element={<CourseEmbedding />} />
       </Routes>
     </Container >
   )
