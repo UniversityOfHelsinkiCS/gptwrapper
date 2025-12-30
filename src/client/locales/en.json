@@ -339,6 +339,7 @@
     "isSavedForTeacherOptOut": "The course discussions will be saved anonymously, if user grants the permission to save. Saved discussions can be used for research purposes",
     "directPromptLink": "Link to chat with the prompt '{{name}}' active",
     "copyDirectPromptLinkInfo": "Copy a link to chat with the prompt '{{name}}' active",
+    "courseChatLink": "Course chat link",
     "stats": "Statistics",
     "discussions": "Discussions",
     "prompts": "Prompts",

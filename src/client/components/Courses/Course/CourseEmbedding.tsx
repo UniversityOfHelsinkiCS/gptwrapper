@@ -35,7 +35,7 @@ export default function CourseEmbedding() {
 
   return (
     <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Typography fontWeight="bold">Kurssichat linkki {selectedPrompt ? `+ (${selectedPrompt.name})` : ''}</Typography>
+      <Typography fontWeight="bold">{`${t('course:courseChatLink')} ${selectedPrompt ? `+ (${selectedPrompt.name})` : ''}`}</Typography>
       <Box sx={linkField}>
         <Typography id="moodle-link" color="textSecondary" sx={{ p: 1, pr: 3, wordBreak: 'break-all' }}>
           {link}
