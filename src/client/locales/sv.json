@@ -343,7 +343,22 @@
     "teachers": "Lärare",
     "students": "Studenter",
     "addedFrom": "Tillagd från",
-    "addNew": "Lägg till ansvarig"
+    "addNew": "Lägg till ansvarig",
+    "courseEmbeddingPrompt": "Prompt för kurschatt",
+    "moodleEmbeddingCode": "Bäddningskod för Moodle",
+    "embeddingInstructionsTitle": "Instruktioner för Moodle-inbäddning",
+    "embeddingInstructionsIntro": "Dela kurschatten antingen (A) via en länk, eller (B) genom att bädda in Currechat-appen på en Moodle-sida.",
+    "onlyLinkTitle": "Endast länk till kurschatt",
+    "appEmbeddingTitle": "Inbäddning av Currechat-appen",
+    "stepSelectPromptOnRight": "Välj prompt för kurschatt till höger",
+    "stepCopyLink": "Kopiera länk till kurschatt",
+    "stepCopyEmbeddingCode": "Kopiera bäddningskod för Moodle",
+    "stepOpenMoodleSettings": "Öppna inställningar för Moodle-sektionen (Edit settings)",
+    "stepOpenSourceCode": "Öppna källkod (View → Source code)",
+    "stepPasteAndSave": "Klistra in bäddningskoden och spara",
+    "altOpenSettings": "Moodle öppna inställningar",
+    "altSourceView": "Moodle öppna källkodsvisning",
+    "altPasteSave": "Moodle klistra in källkod och spara"
   },
   "prompt": {
     "createNew": "Skapa ny prompt",

@@ -366,7 +366,22 @@
     "teachers": "Opettajat",
     "students": "Opiskelijat",
     "addedFrom": "Lisätty lähteestä",
-    "addNew": "Lisää uusi vastuuhenkilö"
+    "addNew": "Lisää uusi vastuuhenkilö",
+    "courseEmbeddingPrompt": "Kurssichatin alustus",
+    "moodleEmbeddingCode": "Moodlen upotuskoodi",
+    "embeddingInstructionsTitle": "Moodle-upotuksen ohjeistus",
+    "embeddingInstructionsIntro": "Jaa kurssichat joko (A) linkin kautta tai (B) upottamalla Currechat-sovellus Moodle-sivulle.",
+    "onlyLinkTitle": "Pelkkä kurssichat-linkki",
+    "appEmbeddingTitle": "Currechat-sovellusupotus",
+    "stepSelectPromptOnRight": "Valitse kurssichatin alustus oikealla",
+    "stepCopyLink": "Kopioi kurssichat-linkki",
+    "stepCopyEmbeddingCode": "Kopioi Moodlen upotuskoodi",
+    "stepOpenMoodleSettings": "Avaa Moodle-osion asetukset (Edit settings)",
+    "stepOpenSourceCode": "Avaa lähdekoodi (View → Source code)",
+    "stepPasteAndSave": "Liitä upotuskoodi ja tallenna (Save)",
+    "altOpenSettings": "Moodle avaa asetukset",
+    "altSourceView": "Moodle avaa lähdekoodinäkymä",
+    "altPasteSave": "Moodle lähdekoodin upotus ja tallennus"
   },
   "prompt": {
     "createNew": "Luo uusi alustus",

@@ -364,7 +364,22 @@
     "teachers": "Teachers",
     "students": "Students",
     "addedFrom": "Added from",
-    "addNew": "Add new responsible"
+    "addNew": "Add new responsible",
+    "courseEmbeddingPrompt": "Course chat prompt",
+    "moodleEmbeddingCode": "Moodle embedding code",
+    "embeddingInstructionsTitle": "Moodle Embedding Instructions",
+    "embeddingInstructionsIntro": "Share the course chat either (A) via a link, or (B) by embedding the Currechat app into a Moodle page.",
+    "onlyLinkTitle": "Course chat link only",
+    "appEmbeddingTitle": "Currechat app embedding",
+    "stepSelectPromptOnRight": "Select course chat prompt on the right",
+    "stepCopyLink": "Copy course chat link",
+    "stepCopyEmbeddingCode": "Copy Moodle embedding code",
+    "stepOpenMoodleSettings": "Open Moodle section settings (Edit settings)",
+    "stepOpenSourceCode": "Open source code (View → Source code)",
+    "stepPasteAndSave": "Paste the embedding code and save",
+    "altOpenSettings": "Moodle open settings",
+    "altSourceView": "Moodle open source code view",
+    "altPasteSave": "Moodle source embedding and save"
   },
   "prompt": {
     "createNew": "Create new prompt",
