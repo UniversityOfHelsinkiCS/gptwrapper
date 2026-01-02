@@ -372,7 +372,7 @@
     "embeddingInstructionsTitle": "Moodle-upotuksen ohjeistus",
     "embeddingInstructionsIntro": "Jaa kurssichat joko (A) linkin kautta tai (B) upottamalla Currechat-sovellus Moodle-sivulle.",
     "onlyLinkTitle": "Pelkkä kurssichat-linkki",
-    "appEmbeddingTitle": "Currechat-sovellusupotus",
+    "appEmbeddingTitle": "Currechat sovellus upotus",
     "stepSelectPromptOnRight": "Valitse kurssichatin alustus oikealla",
     "stepCopyLink": "Kopioi kurssichat-linkki",
     "stepCopyEmbeddingCode": "Kopioi Moodlen upotuskoodi",
