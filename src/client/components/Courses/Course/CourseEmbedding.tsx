@@ -7,6 +7,10 @@ import { useParams } from "react-router-dom";
 import { usePromptState } from "../../ChatV2/PromptState";
 import { Prompt } from "src/client/types";
 import { useTranslation } from "react-i18next";
+import moodleTutorialImage1 from "../../../assets/moodle-1.jpeg";
+import moodleTutorialImage2 from "../../../assets/moodle-2.jpeg";
+import moodleTutorialImage3 from "../../../assets/moodle-3.jpeg";
+
 
 export default function CourseEmbedding() {
   const { t } = useTranslation()
@@ -62,19 +66,19 @@ export default function CourseEmbedding() {
             <GuideItem label="3." variant="secondary">
               <Box>
                 <Typography variant="body2">{t("course:stepOpenMoodleSettings")}</Typography>
-                <TutorialImage src="/moodle-1.jpeg" alt={t("course:altOpenSettings")} />
+                <TutorialImage src={moodleTutorialImage1} alt={t("course:altOpenSettings")} />
               </Box>
             </GuideItem>
             <GuideItem label="3." variant="secondary">
               <Box>
                 <Typography variant="body2">{t("course:stepOpenSourceCode")}</Typography>
-                <TutorialImage src="/moodle-2.jpeg" alt={t("course:altSourceView")} />
+                <TutorialImage src={moodleTutorialImage2} alt={t("course:altSourceView")} />
               </Box>
             </GuideItem>
             <GuideItem label="4." variant="secondary">
               <Box>
                 <Typography variant="body2">{t("course:stepPasteAndSave")}</Typography>
-                <TutorialImage src="/moodle-3.jpeg" alt={t("course:altPasteSave")} />
+                <TutorialImage src={moodleTutorialImage3} alt={t("course:altPasteSave")} />
               </Box>
             </GuideItem>
           </GuideItem>
