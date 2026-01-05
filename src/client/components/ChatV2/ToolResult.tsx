@@ -256,6 +256,7 @@ const ToolResult = ({
           {arrayResults.map((result, i) => (
             <AnnotationTruncated key={i} data={result} relevanceOrder={i + 1} setIsDrawerOpen={setIsDrawerOpen} setSelectedAnnotation={setSelectedAnnotation} />
           ))}
+          {arrayResults.length > 0 ? (
           <OutlineButtonBlack
             sx={{ margin: '1rem auto' }}
             startIcon={<SubjectIcon />}
@@ -266,6 +267,9 @@ const ToolResult = ({
           >
             {t('chat:readMore')}
           </OutlineButtonBlack>
+          ) : (
+            <Typography>{t('chat:noToolResults')}</Typography>
+          )}
         </Box>
       ) : (
         <Typography>{t('chat:failedSources')}</Typography>

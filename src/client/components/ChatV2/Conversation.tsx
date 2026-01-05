@@ -97,6 +97,7 @@ const ToolResult = ({ toolResult, handleToolResult }: { toolResult: ToolCallResu
             {`${t('chat:displaySources', { query: toolResult.input.query })}: `}
 
             <em>{sources}</em>
+            {!sources && <em>{t('chat:noToolResults')}</em>}
           </Typography>
         </Box>
       </Box>

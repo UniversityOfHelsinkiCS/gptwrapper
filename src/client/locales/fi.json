@@ -131,7 +131,8 @@
     "courseChatEndedInfo": "Kurssin aukioloaika on päättynyt ja kurssi ei ole enään saatavilla.",
     "courseChatNotActivated": "Ei aktivoitu",
     "courseChatNotActivatedInfo": "Kurssi ei ole vielä aktivoitu. Tämä tarkoittaa, että kurssin chat ei ole auki opiskelijoille.",
-    "retryMessage": "Yritä uudelleen"
+    "retryMessage": "Yritä uudelleen",
+    "noToolResults": "Ei tuloksia"
   },
   "settings": {
     "prompt": "Keskustelun alustus",
