@@ -41,6 +41,7 @@ import { CustomIcon } from './general/CustomIcon'
 import { PromptInfoModal } from './PromptInfoModal'
 import { getChatActivityStatus } from './util'
 import { ChatExpiredView } from './ChatExpiredView'
+import { ApiErrorView } from '../common/ApiErrorView'
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
@@ -89,7 +90,7 @@ const ChatV2Content = () => {
   })
 
   // queries
-  const { data: chatInstance, isLoading: instanceLoading } = useCourse(courseId)
+  const { data: chatInstance, isLoading: chatInstanceLoading, error: chatInstanceLoadError } = useCourse(courseId)
   const { user, isLoading: userLoading } = useCurrentUser()
   const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
 
@@ -332,7 +333,11 @@ const ChatV2Content = () => {
   const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
   const rightPanelContentWidth = rightMenuOpen ? 'var(--right-menu-width)' : '0px'
 
-  if (statusLoading || userLoading || instanceLoading) return <HYLoadingSpinner />
+  if (chatInstanceLoadError) {
+    return <ApiErrorView error={chatInstanceLoadError} />
+  }
+
+  if (statusLoading || userLoading || chatInstanceLoading) return <HYLoadingSpinner />
 
   const status = getChatActivityStatus(chatInstance, user)
   if (status !== 'ACTIVE') return <ChatExpiredView status={status} chatInstance={chatInstance} />
