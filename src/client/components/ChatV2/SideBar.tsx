@@ -33,7 +33,6 @@ const SideBar = ({
   course: Course | undefined
   user?: User | null
   handleReset: () => void
-  onClose?: () => void
   messages: ChatMessage[]
   currentModel: ValidModelName
   setModel: (model: ValidModelName) => void
