@@ -106,7 +106,7 @@ const worker = new Worker(
       ACTIVE_COUNT--
     }
   },
-  { connection, concurrency: 1 },
+  { connection, concurrency: 3 },
 )
 
 logger.info(`Worker started. Listening to queue "${QUEUE_NAME}"...`)
