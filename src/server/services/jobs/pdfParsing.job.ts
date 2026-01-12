@@ -26,7 +26,8 @@ type PageInfo = {
   job?: Job
 }
 
-const analyzeAndPreparePDFPages = async (pdfBytes: Uint8Array, scale = 2.0) => { //scale at 2.0 to keep closer to 200dpi which is ideal for vlms
+const analyzeAndPreparePDFPages = async (pdfBytes: Uint8Array, scale = 2.0) => {
+  //scale at 2.0 to keep closer to 200dpi which is ideal for vlms
   const loadingTask = getDocument({ data: pdfBytes })
   const pdf = await loadingTask.promise
   const pageCount = pdf.numPages
@@ -47,7 +48,7 @@ const analyzeAndPreparePDFPages = async (pdfBytes: Uint8Array, scale = 2.0) => {
     const text = await extractPageText(page)
     pageInfo.push({
       text,
-      png: new Uint8Array(pngBuffer)
+      png: new Uint8Array(pngBuffer),
     })
   }
 
@@ -94,11 +95,11 @@ type VLMJobData = {
 }
 
 /**
- * Adds a pdf parsing job to the queue. The file must be uploaded to S3 beforehand. The jobId is based on the ragFile - resubmitting with the same jobId while the previous job is running has no effect.
+ * Adds an advanced pdf parsing job to the queue. The file must be uploaded to S3 beforehand. The jobId is based on the ragFile - resubmitting with the same jobId while the previous job is running has no effect.
  * @param ragFile
- * @returns the pages which is array of PageInfo objects 
+ * @returns the pages which is array of PageInfo objects
  */
-export const submitPdfParsingJobs = async (ragFile: RagFile) => {
+export const submitAdvancedPdfParsingJobs = async (ragFile: RagFile) => {
   const pdfBytes = await FileStore.readRagFileContextToBytes(ragFile)
 
   if (!pdfBytes) {
@@ -126,6 +127,18 @@ export const submitPdfParsingJobs = async (ragFile: RagFile) => {
 
     info.job = await queue.add(jobId, jobData, { jobId, removeOnComplete: 1000, removeOnFail: 1000 })
   }
+
+  return pages
+}
+
+export const simplyParsePdf = async (ragFile: RagFile) => {
+  const pdfBytes = await FileStore.readRagFileContextToBytes(ragFile)
+
+  if (!pdfBytes) {
+    console.error(`Failed to read PDF text file ${ragFile.filename} in S3`)
+    throw ApplicationError.InternalServerError('Failed to read PDF text file')
+  }
+  const pages = await analyzeAndPreparePDFPages(pdfBytes)
 
   return pages
 }

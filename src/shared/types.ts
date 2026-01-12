@@ -11,6 +11,7 @@ export type RagIndexMetadata = {
   name: string
   toolDescription?: string
   language?: 'Finnish' | 'English' | 'Swedish'
+  advancedParsing?: boolean
 }
 
 export type RagFileMetadata = {

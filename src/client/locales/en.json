@@ -496,7 +496,9 @@
     "filesIngesting": "Processing files. You can leave the page.",
     "allCompleted": "Done processing.",
     "swedish": "Swedish",
-    "readMoreAboutRag": "Read more about CurreChat's source material feature"
+    "readMoreAboutRag": "Read more about CurreChat's source material feature",
+    "advancedParsingGuide": "Use AI-based PDF-parsing? If your PDFs contain charts, images, equations or other complex layouts, this can improve the text conversion quality of the source material, but may result in hallucinations.",
+    "advancedParsing": "AI-based parsing"
   },
   "embeddedLogin": {
     "helpText": "Successfully logged in. You may close this window."
