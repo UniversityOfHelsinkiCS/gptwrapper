@@ -499,7 +499,7 @@
     "allCompleted": "Tiedostot käsitelty.",
     "swedish": "Ruotsi",
     "readMoreAboutRag": "Lue lisää CurreChatin lähdemateriaalitoiminnosta",
-    "advancedParsingGuide": "Käytä tekoälypohjaista PDF-tiedostojen käsittelyä? Jos PDF-muotoisissa tiedostoissasi on kaavioita, kuvia, yhtälöitä tai muuta monimutkaista asettelua, tämä voi parantaa lähdemateriaalin tekstiksimuunnon laatua mutta voi myös lisätä hallusinointia.",
+    "advancedParsingGuide": "Käytä tekoälypohjaista PDF-tiedostojen käsittelyä? Jos PDF-muotoisissa tiedostoissasi on kaavioita, kuvia, yhtälöitä tai muuta monimutkaista asettelua, tämä voi parantaa lähdemateriaalin tekstiksimuunnon laatua mutta voi myös lisätä hallusinointia. Huom. tekoälypohjainen käsittely voi kestää useita minuutteja.",
     "advancedParsing": "Tekoälypohjainen käsittely"
   },
   "embeddedLogin": {

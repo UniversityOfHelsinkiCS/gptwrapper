@@ -497,7 +497,7 @@
     "allCompleted": "Done processing.",
     "swedish": "Swedish",
     "readMoreAboutRag": "Read more about CurreChat's source material feature",
-    "advancedParsingGuide": "Use AI-based PDF-parsing? If your PDFs contain charts, images, equations or other complex layouts, this can improve the text conversion quality of the source material, but may result in hallucinations.",
+    "advancedParsingGuide": "Use AI-based PDF-parsing? If your PDFs contain charts, images, equations or other complex layouts, this can improve the text conversion quality of the source material, but may result in hallucinations. Also note: AI-based parsing can take several minutes.",
     "advancedParsing": "AI-based parsing"
   },
   "embeddedLogin": {
