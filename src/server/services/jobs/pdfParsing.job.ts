@@ -1,12 +1,25 @@
-import IORedis from 'ioredis'
-import { BMQ_REDIS_CA, BMQ_REDIS_CERT, BMQ_REDIS_HOST, BMQ_REDIS_KEY, BMQ_REDIS_PORT, S3_BUCKET } from '../../util/config'
-import { Job, Queue, QueueEvents } from 'bullmq'
+import { type Job, Queue, QueueEvents } from 'bullmq'
 import crypto from 'crypto'
-import { FileStore } from '../rag/fileStore'
-import { RagFile } from '../../db/models'
-import { getDocument, PDFPageProxy } from 'pdfjs-dist/legacy/build/pdf.mjs'
-import logger from 'src/server/util/logger'
+import IORedis from 'ioredis'
+import { getDocument, type PDFPageProxy } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import { ApplicationError } from 'src/server/util/ApplicationError'
+import logger from 'src/server/util/logger'
+import type { RagFile } from '../../db/models'
+import { BMQ_REDIS_CA, BMQ_REDIS_CERT, BMQ_REDIS_HOST, BMQ_REDIS_KEY, BMQ_REDIS_PORT, S3_BUCKET } from '../../util/config'
+import { FileStore } from '../rag/fileStore'
+
+const sequenceReplacements = {
+  ä: /¨ a/g,
+  ö: /¨ o/g,
+}
+
+const fixAakkoset = (text: string) => {
+  for (const [replacement, regex] of Object.entries(sequenceReplacements)) {
+    text = text.replace(regex, replacement)
+  }
+
+  return text
+}
 
 export const extractPageText = async (page: PDFPageProxy): Promise<string> => {
   const textContent = await page.getTextContent()
@@ -17,7 +30,7 @@ export const extractPageText = async (page: PDFPageProxy): Promise<string> => {
     }
   }
   const text = parts.join(' ')
-  return text.trim()
+  return fixAakkoset(text.trim())
 }
 
 type PageInfo = {
@@ -42,7 +55,10 @@ const analyzeAndPreparePDFPages = async (pdfBytes: Uint8Array, scale = 2.0) => {
     //@ts-expect-error
     const canvasAndContext = canvasFactory.create(viewport.width, viewport.height)
 
-    await page.render({ canvasContext: canvasAndContext.context, viewport } as any).promise
+    await page.render({
+      canvasContext: canvasAndContext.context,
+      viewport,
+    } as any).promise
     const pngBuffer = canvasAndContext.canvas.toBuffer('image/png')
 
     const text = await extractPageText(page)
@@ -125,7 +141,11 @@ export const submitAdvancedPdfParsingJobs = async (ragFile: RagFile) => {
 
     logger.info(`Submitting PDF parsing job ${jobId}`)
 
-    info.job = await queue.add(jobId, jobData, { jobId, removeOnComplete: 1000, removeOnFail: 1000 })
+    info.job = await queue.add(jobId, jobData, {
+      jobId,
+      removeOnComplete: 1000,
+      removeOnFail: 1000,
+    })
   }
 
   return pages
