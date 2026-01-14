@@ -381,7 +381,7 @@
     "altOpenSettings": "Moodle open settings",
     "altSourceView": "Moodle open source code view",
     "altPasteSave": "Moodle source embedding and save",
-    "deActivate": "close course"
+    "deActivate": "close for students"
   },
   "prompt": {
     "createNew": "Create new prompt",

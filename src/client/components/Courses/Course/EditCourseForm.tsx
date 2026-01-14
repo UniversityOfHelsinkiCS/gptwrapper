@@ -32,7 +32,7 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
    onUpdate()
    are called then the onUpdate does not always see the new usage limit
   */
-  const openCourse = async () => {
+  const openCourse = async (tokens: number) => {
     console.log(usageLimit)
     const activityPeriod = {
       startDate: format(startDate, 'yyyy-MM-dd'),
@@ -41,11 +41,10 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
 
     enqueueSnackbar(t('course:courseUpdated'), { variant: 'success' })
     try {
-      const limit = DEFAULT_TOKEN_LIMIT
-      setUsageLimit(limit)
+      setUsageLimit(tokens)
       const response = mutation.mutate({
         activityPeriod,
-        usageLimit: limit,
+        usageLimit: tokens,
         saveDiscussions,
         notOptoutSaving,
       })
@@ -83,7 +82,7 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
     {
     course.usageLimit <= 0 ?
   <GreenButton
-    onClick={openCourse}
+    onClick={() => openCourse(DEFAULT_TOKEN_LIMIT)}
   >
     {t('course:activate')}
   </GreenButton>
@@ -129,7 +128,14 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
           </>
         )
       }
-      <Box sx={{ display: 'flex', justifyContent: 'right', mr: 2 }}>
+      {
+        course.usageLimit > 0 ?
+ <Box sx={{ display: 'flex', justifyContent: 'left', mr: 2 }}>
+<RedButton variant='contained' onClick={() => openCourse(0)}>{t('course:deActivate')}</RedButton>
+             </Box> :
+    <></>
+      }
+              <Box sx={{ display: 'flex', justifyContent: 'right', mr: 2 }}>
         <BlueButton onClick={onUpdate} variant="contained">
           {t('save')}
         </BlueButton>

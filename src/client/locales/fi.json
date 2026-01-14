@@ -383,7 +383,7 @@
     "altOpenSettings": "Moodle avaa asetukset",
     "altSourceView": "Moodle avaa lähdekoodinäkymä",
     "altPasteSave": "Moodle lähdekoodin upotus ja tallennus",
-    "deActivate": "sulje kurssi"
+    "deActivate": "sulje opiskelijoilta"
   },
   "prompt": {
     "createNew": "Luo uusi alustus",
