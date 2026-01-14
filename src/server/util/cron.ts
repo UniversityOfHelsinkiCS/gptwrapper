@@ -28,7 +28,7 @@ const resetUsage = async () => {
 const setupCron = async () => {
   logger.info('Starting cron jobs')
 
-  cron.schedule('0 0 1 * *', resetUsage) // Reset usage every month
+  cron.schedule('1 0 * * 1', resetUsage) // Reset usage every Monday 00:01
 
   if (inDevelopment) {
     await runUpdater()
