@@ -173,9 +173,11 @@ export const CourseSettingsModal = () => {
       <Routes>
         <Route index path='/' element={
           <Box py={3}>
+            {/*course open state message*/}
             <Alert severity={getInfoSeverity()} sx={{ borderRadius: '1', display: 'flex', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">{getInfoMessage()}</Typography>
             </Alert>
+
             <Box >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: '1rem', p: 1, backgroundColor: 'grey.100', borderRadius: 1 }}>
                 <Typography variant="h4">{chatInstance.name[language]}</Typography>

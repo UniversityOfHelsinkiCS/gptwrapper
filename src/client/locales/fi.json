@@ -382,7 +382,8 @@
     "stepPasteAndSave": "Liitä upotuskoodi ja tallenna (Save)",
     "altOpenSettings": "Moodle avaa asetukset",
     "altSourceView": "Moodle avaa lähdekoodinäkymä",
-    "altPasteSave": "Moodle lähdekoodin upotus ja tallennus"
+    "altPasteSave": "Moodle lähdekoodin upotus ja tallennus",
+    "deActivate": "sulje kurssi"
   },
   "prompt": {
     "createNew": "Luo uusi alustus",

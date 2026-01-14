@@ -380,7 +380,8 @@
     "stepPasteAndSave": "Paste the embedding code and save",
     "altOpenSettings": "Moodle open settings",
     "altSourceView": "Moodle open source code view",
-    "altPasteSave": "Moodle source embedding and save"
+    "altPasteSave": "Moodle source embedding and save",
+    "deActivate": "close course"
   },
   "prompt": {
     "createNew": "Create new prompt",
