@@ -128,7 +128,7 @@ const ChatInstanceTableChatInstanceWithTokens = React.memo(
             {rows.map((row) => (
               <TableRow role="checkbox" key={row.id}>
                 <TableCell component="th" scope="row" padding="none" width="40%" sx={{ pl: 1 }}>
-                  <Link to={`/courses/${row.courseId}`} component={RouterLink}>
+                  <Link to={`/${row.courseId}/course`} component={RouterLink}>
                     {row.name[language]}
                   </Link>
                 </TableCell>

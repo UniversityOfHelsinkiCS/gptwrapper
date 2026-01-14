@@ -1,14 +1,13 @@
-import { useState } from 'react'
-import { Box, Paper, Typography, TableBody, TableCell, TableHead, TableRow, Table, Button, Tooltip as MUITooltip } from '@mui/material'
-import { useTranslation } from 'react-i18next'
-import { BarChart, Bar, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-
-import useCurrentUser from '../../../hooks/useCurrentUser'
-import useCourse, { useCourseEnrolments, useCourseStatistics } from '../../../hooks/useCourse'
-import MaxTokenUsageStudents from './MaxTokenUsageStudents'
 import HelpOutline from '@mui/icons-material/HelpOutline'
-import { BlueButton, OutlineButtonBlue } from '../../ChatV2/general/Buttons'
+import { Box, Tooltip as MUITooltip, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
+import { Bar, BarChart, ResponsiveContainer, Tooltip, YAxis } from 'recharts'
+import useCourse, { useCourseEnrolments, useCourseStatistics } from '../../../hooks/useCourse'
+import useCurrentUser from '../../../hooks/useCurrentUser'
+import { OutlineButtonBlue } from '../../ChatV2/general/Buttons'
+import MaxTokenUsageStudents from './MaxTokenUsageStudents'
 
 const Stats: React.FC = () => {
   const { t } = useTranslation()
@@ -99,8 +98,15 @@ const Stats: React.FC = () => {
                   <TableCell>
                     <strong>{t('admin:firstNames')}</strong>
                   </TableCell>
-                  <TableCell align='right'>
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
+                  <TableCell align="right">
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        gap: 1,
+                        alignItems: 'center',
+                        justifyContent: 'flex-end',
+                      }}
+                    >
                       <strong>{t('admin:usage')}</strong>
                       <MUITooltip
                         arrow
@@ -116,8 +122,15 @@ const Stats: React.FC = () => {
                     </Box>
                   </TableCell>
 
-                  <TableCell align='right'>
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
+                  <TableCell align="right">
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        gap: 1,
+                        alignItems: 'center',
+                        justifyContent: 'flex-end',
+                      }}
+                    >
                       <strong>{t('admin:totalUsage')}</strong>
                       <MUITooltip
                         arrow
@@ -140,8 +153,8 @@ const Stats: React.FC = () => {
                     <TableCell>{enrolled.student_number}</TableCell>
                     <TableCell>{enrolled.last_name}</TableCell>
                     <TableCell>{enrolled.first_names}</TableCell>
-                    <TableCell align='right'>{usageByUser[enrolled.id] ? usageByUser[enrolled.id].usageCount : 0}</TableCell>
-                    <TableCell align='right'>{usageByUser[enrolled.id] ? usageByUser[enrolled.id].totalUsageCount : 0}</TableCell>
+                    <TableCell align="right">{usageByUser[enrolled.id] ? usageByUser[enrolled.id].usageCount : 0}</TableCell>
+                    <TableCell align="right">{usageByUser[enrolled.id] ? usageByUser[enrolled.id].totalUsageCount : 0}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
