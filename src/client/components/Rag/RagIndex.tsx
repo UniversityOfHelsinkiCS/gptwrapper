@@ -17,6 +17,7 @@ import queryClient from '../../util/queryClient'
 import { IngestionPipelineStageKey } from '@shared/ingestion'
 import { RagFilesStatus } from './RagFilesStatus'
 import apiClient from '../../util/apiClient'
+import { ArrowBack, ArrowLeftSharp } from '@mui/icons-material'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -101,6 +102,9 @@ export const RagIndex: React.FC = () => {
 
   return (
     <Box>
+      <OutlineButtonBlack sx={{ mb: 2 }} onClick={() => navigate(`/${courseId}/course/rag`)}>
+        <ArrowBack />
+      </OutlineButtonBlack>
       <Box sx={{ backgroundColor: 'grey.100', p: 2, borderRadius: 1 }}>
         <Breadcrumbs>
           <Typography fontWeight='bold' color='black'>{ragDetails?.metadata?.name}</Typography>

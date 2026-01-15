@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
-import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import apiClient from '../../util/apiClient'
 import type { RagFileAttributes } from '../../../shared/types'
-import { Box, Breadcrumbs, Button, Container, Typography } from '@mui/material'
+import { Box, Button, Container, Typography } from '@mui/material'
 import type { RagIndexAttributes } from '../../../server/db/models/ragIndex'
 import { useDeleteRagFileMutation, useDeleteRagFileTextMutation } from './api'
 import { useTranslation } from 'react-i18next'
@@ -10,6 +10,7 @@ import Markdown from 'react-markdown'
 import { enqueueSnackbar } from 'notistack'
 import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import Autorenew from '@mui/icons-material/Autorenew'
+import { ArrowBack } from '@mui/icons-material'
 
 type RagFile = RagFileAttributes & {
   fileContent: string
@@ -48,11 +49,10 @@ export const RagFile: React.FC = () => {
   }
 
   return (
-    <Container>
-      <Breadcrumbs>
-        <Link to={`/${params.courseId}/course/rag?index=${ragFile.ragIndexId}`}>{ragFile.ragIndex.metadata?.name}</Link> /
-        <Typography>{ragFile.filename}</Typography>
-      </Breadcrumbs>
+    <Box>
+      <OutlineButtonBlack onClick={() => navigate(`/${params.courseId}/course/rag?index=${ragFile.ragIndexId}`)}>
+        <ArrowBack />
+      </OutlineButtonBlack>
       <Box sx={{ my: 2, display: 'flex', gap: 2 }}>
         {ragFile.fileType === 'application/pdf' && (
           <OutlineButtonBlack
@@ -72,7 +72,7 @@ export const RagFile: React.FC = () => {
           </OutlineButtonBlack>
         )}
         <Button
-          variant="text"
+          variant="outlined"
           color="error"
           onClick={async () => {
             if (window.confirm('Are you sure you want to delete this file?')) {
@@ -85,20 +85,23 @@ export const RagFile: React.FC = () => {
               navigate(`/${params.courseId}/courses/rag?index=${ragFile.ragIndex.id}`)
             }
           }}
+          sx={{ borderRadius: '1.25rem' }}
         >
           {t('rag:deleteFile')}
         </Button>
       </Box>
       <Typography variant="h4">{t('rag:content')}</Typography>
-      {ragFile.fileContent.length === 0 ? (
-        <Typography variant="body1">{t('rag:noContent')}</Typography>
-      ) : ragFile.fileType === 'application/pdf' || ragFile.fileType === 'text/markdown' ? (
-        <Markdown>{ragFile.fileContent}</Markdown>
-      ) : (
-        <Typography variant="body1" style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
-          {ragFile.fileContent}
-        </Typography>
-      )}
-    </Container>
+      {
+        ragFile.fileContent.length === 0 ? (
+          <Typography variant="body1">{t('rag:noContent')}</Typography>
+        ) : ragFile.fileType === 'application/pdf' || ragFile.fileType === 'text/markdown' ? (
+          <Markdown>{ragFile.fileContent}</Markdown>
+        ) : (
+          <Typography variant="body1" style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
+            {ragFile.fileContent}
+          </Typography>
+        )
+      }
+    </Box >
   )
 }
