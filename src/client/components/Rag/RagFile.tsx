@@ -85,7 +85,7 @@ export const RagFile: React.FC = () => {
               navigate(`/${params.courseId}/courses/rag?index=${ragFile.ragIndex.id}`)
             }
           }}
-          sx={{ borderRadius: '1.25rem' }}
+          sx={{ my: 2, borderRadius: '1.25rem' }}
         >
           {t('rag:deleteFile')}
         </Button>
