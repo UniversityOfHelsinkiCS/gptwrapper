@@ -62,9 +62,6 @@ export const CourseSettingsModal = () => {
     return <ApiErrorView error={error} />
   }
 
-
-
-
   const { chatInstanceUsages, isSuccess: isUsageSuccess } = useCourseUsage(chatInstance?.id)
 
   if (userLoading || !user || !isCourseSuccess || !isUsageSuccess) return null
