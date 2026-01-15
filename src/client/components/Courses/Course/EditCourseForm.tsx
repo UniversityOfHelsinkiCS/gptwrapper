@@ -33,7 +33,6 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
    are called then the onUpdate does not always see the new usage limit
   */
   const openCourse = async (tokens: number) => {
-    console.log(usageLimit)
     const activityPeriod = {
       startDate: format(startDate, 'yyyy-MM-dd'),
       endDate: format(endDate, 'yyyy-MM-dd'),
@@ -48,7 +47,6 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
         saveDiscussions,
         notOptoutSaving,
       })
-      console.log(response)
       setOpen(false)
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
@@ -56,7 +54,6 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
   }
 
   const onUpdate = async () => {
-    console.log(usageLimit)
     const activityPeriod = {
       startDate: format(startDate, 'yyyy-MM-dd'),
       endDate: format(endDate, 'yyyy-MM-dd'),
@@ -70,7 +67,6 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
         saveDiscussions,
         notOptoutSaving,
       })
-      console.log(response)
       setOpen(false)
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
@@ -79,18 +75,18 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
 
   return (
     <Box ref={ref} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-    {
-    course.usageLimit <= 0 ?
-  <GreenButton
-    onClick={() => openCourse(DEFAULT_TOKEN_LIMIT)}
-  >
-    {t('course:activate')}
-  </GreenButton>
-:
-<>
-</>
-  }
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, ml: 2 }}>
+      {
+        course.usageLimit <= 0 ?
+          <GreenButton
+            onClick={() => openCourse(DEFAULT_TOKEN_LIMIT)}
+          >
+            {t('course:activate')}
+          </GreenButton>
+          :
+          <>
+          </>
+      }
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, ml: 2 }}>
         <Typography variant="h5">
           {t('editActivityPeriod')}
         </Typography>
@@ -130,12 +126,12 @@ const EditCourseForm = forwardRef(({ course, setOpen, user }: { course: Course; 
       }
       {
         course.usageLimit > 0 ?
- <Box sx={{ display: 'flex', justifyContent: 'left', mr: 2 }}>
-<RedButton variant='contained' onClick={() => openCourse(0)}>{t('course:deActivate')}</RedButton>
-             </Box> :
-    <></>
+          <Box sx={{ display: 'flex', justifyContent: 'left', mr: 2 }}>
+            <RedButton variant='contained' onClick={() => openCourse(0)}>{t('course:deActivate')}</RedButton>
+          </Box> :
+          <></>
       }
-              <Box sx={{ display: 'flex', justifyContent: 'right', mr: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'right', mr: 2 }}>
         <BlueButton onClick={onUpdate} variant="contained">
           {t('save')}
         </BlueButton>
