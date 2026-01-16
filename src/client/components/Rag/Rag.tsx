@@ -24,46 +24,47 @@ const Rag: React.FC = () => {
     <Box sx={{ py: 3 }}>
       {index && !file && <RagIndex />}
       {index && file && <RagFile />}
-      {!index && !file && (<>
-        {chatInstance?.id && (
-          <Box display="flex" justifyContent="space-between" sx={{ pb: 2 }}>
-            <RagCreator chatInstance={chatInstance} />
-            <LinkButtonHoc button={GrayButton} external to="https://github.com/UniversityOfHelsinkiCS/gptwrapper/blob/main/documentation/rag.md">
-              {t('rag:readMoreAboutRag')}
-            </LinkButtonHoc>
-          </Box>
-        )}
-        <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: 'grey.100' }}>
-                <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:name')}</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:language')}</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:numberOfFiles')}</TableCell>
-                <TableCell>{}</TableCell>
-              </TableRow>
-            </TableHead>
-            {ragIndices?.map((ragIndex) => (
-              <TableBody key={`tbody-${ragIndex.id}`}>
-                <TableRow key={`${ragIndex.id}-index`}>
-                  <TableCell>{ragIndex.metadata?.name}</TableCell>
-                  <TableCell>{ragIndex.metadata?.language}</TableCell>
-                  <TableCell>{ragIndex.ragFileCount}</TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                      <Link to={`?index=${ragIndex.id}`} component={RouterLink} sx={{ ml: 'auto' }}>
-                        {t('rag:viewDetails')}
-                      </Link>
-                    </Box>
-                  </TableCell>
+      {!index && !file && (
+        <>
+          {chatInstance?.id && (
+            <Box display="flex" justifyContent="space-between" sx={{ pb: 2 }}>
+              <RagCreator chatInstance={chatInstance} />
+              <LinkButtonHoc button={GrayButton} external to="https://github.com/UniversityOfHelsinkiCS/gptwrapper/blob/main/documentation/rag.md">
+                {t('rag:readMoreAboutRag')}
+              </LinkButtonHoc>
+            </Box>
+          )}
+          <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: 'grey.100' }}>
+                  <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:name')}</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:language')}</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:numberOfFiles')}</TableCell>
+                  <TableCell>{}</TableCell>
                 </TableRow>
-              </TableBody>
-            ))}
-          </Table>
-        </TableContainer>
-      </>)
-      }
-    </Box >
+              </TableHead>
+              {ragIndices?.map((ragIndex) => (
+                <TableBody key={`tbody-${ragIndex.id}`}>
+                  <TableRow key={`${ragIndex.id}-index`}>
+                    <TableCell>{ragIndex.metadata?.name}</TableCell>
+                    <TableCell>{ragIndex.metadata?.language}</TableCell>
+                    <TableCell>{ragIndex.ragFileCount}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                        <Link to={`?index=${ragIndex.id}`} component={RouterLink} sx={{ ml: 'auto' }} data-testid="ragIndexDetails">
+                          {t('rag:viewDetails')}
+                        </Link>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              ))}
+            </Table>
+          </TableContainer>
+        </>
+      )}
+    </Box>
   )
 }
 

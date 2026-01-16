@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import apiClient from '../../util/apiClient'
 import { RagFileAttributes, RagIndexAttributes, RagIndexMetadata } from '../../../shared/types'
 import { IngestionJobStatus } from '@shared/ingestion'
+import queryClient from '../../util/queryClient'
 
 export const useCreateRagIndexMutation = () => {
   const mutation = useMutation({
@@ -13,6 +14,9 @@ export const useCreateRagIndexMutation = () => {
         advancedParsing,
       })
       return response.data
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['ragIndices'] })
     },
   })
   return mutation
@@ -45,11 +49,17 @@ export const useRagIndexJobs = (indexId: number | null, refetchInterval: number)
   })
 }
 
-export const useDeleteRagIndexMutation = () => {
+export const useDeleteRagIndexMutation = (chatInstanceId?: string) => {
   const mutation = useMutation({
     mutationFn: async (indexId: number) => {
       const response = await apiClient.delete(`/rag/indices/${indexId}`)
       return response.data
+    },
+    onSuccess: (_data: unknown, indexId: number) => {
+      queryClient.setQueryData(['ragIndices', chatInstanceId], (indices: RagIndexAttributes[]) => {
+        if (!indices) return null
+        return indices.filter((index) => index.id !== indexId)
+      })
     },
   })
   return mutation

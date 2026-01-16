@@ -33,5 +33,5 @@ export const useCourseRagIndices = (chatInstanceId?: string, includeExtras?: boo
     },
   })
 
-  return { ragIndices, ...rest }
+  return { ragIndices: ragIndices?.toSorted((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)), ...rest }
 }

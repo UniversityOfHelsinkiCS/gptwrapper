@@ -31,7 +31,9 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
 
   return (
     <>
-      <OutlineButtonBlack onClick={() => setOpen(true)}>{t('rag:createNewIndex')}</OutlineButtonBlack>
+      <OutlineButtonBlack onClick={() => setOpen(true)} data-testid="createNewRagButton">
+        {t('rag:createNewIndex')}
+      </OutlineButtonBlack>
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
@@ -65,7 +67,7 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
             fullWidth
             required
             slotProps={{
-              htmlInput: { minLength: 5 },
+              htmlInput: { minLength: 5, 'data-testid': 'ragIndexNameInput' },
             }}
             sx={{ mt: '2rem' }}
           />
@@ -75,9 +77,12 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
               labelId="language-label"
               id="language-select"
               value={language}
+              data-testid="ragIndexLanguageInput"
               onChange={(e) => setLanguage(e.target.value as (typeof RAG_LANGUAGES)[number])}
             >
-              <MenuItem value={RAG_LANGUAGES[0]}>{t('rag:finnish')}</MenuItem>
+              <MenuItem value={RAG_LANGUAGES[0]} data-testid="ragIndexLanguageOptionFinnish">
+                {t('rag:finnish')}
+              </MenuItem>
               <MenuItem value={RAG_LANGUAGES[1]}>{t('rag:swedish')}</MenuItem>
               <MenuItem value={RAG_LANGUAGES[2]}>{t('rag:english')}</MenuItem>
             </Select>
@@ -89,7 +94,7 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
           />
         </DialogContent>
         <DialogActions>
-          <OutlineButtonBlack color="primary" type="submit">
+          <OutlineButtonBlack color="primary" type="submit" data-testid="ragIndexCreateSubmit">
             {t('rag:createIndex')}
           </OutlineButtonBlack>
         </DialogActions>
