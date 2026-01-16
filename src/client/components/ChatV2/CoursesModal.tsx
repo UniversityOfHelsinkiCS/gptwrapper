@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, MenuItem, Tab, Tabs } from '@mui/material'
+import { Box, Tab, Tabs } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import useUserCourses, { CoursesViewCourse } from '../../hooks/useUserCourses'
 import useCurrentUser from '../../hooks/useCurrentUser'
@@ -17,6 +17,10 @@ import { BlueButton, GreenButton } from './general/Buttons'
 import Skeleton from '@mui/material/Skeleton'
 import { SettingsOutlined } from '@mui/icons-material'
 import { Course } from 'src/client/types'
+import { useQueryClient } from '@tanstack/react-query'
+import { DEFAULT_TOKEN_LIMIT } from '@config'
+import { enqueueSnackbar } from 'notistack'
+import apiClient from '../../util/apiClient'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -91,6 +95,7 @@ const CourseList = ({
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
   const { language } = i18n
+  const queryClient = useQueryClient()
 
   const [order, setOrder] = useState<Order>('asc')
   const [orderBy, setOrderBy] = useState<OrderBy>('name')
@@ -122,6 +127,22 @@ const CourseList = ({
     return [...courseUnits].sort(compare)
   }, [courseUnits, order, orderBy, language])
 
+  const setCourseOpen = async (course: CoursesViewCourse | Course) => {
+    try {
+      await apiClient.put(`/courses/${course.courseId}`, {
+        usageLimit: DEFAULT_TOKEN_LIMIT,
+      })
+
+      await queryClient.invalidateQueries({ queryKey: ['chatInstances', 'user'] })
+
+      enqueueSnackbar(t('course:courseActivated'), { variant: 'success' })
+
+      navigate(`/${course.courseId}/course`)
+    } catch (error) {
+      enqueueSnackbar(t('common:fetchError'), { variant: 'error' })
+      console.error(error)
+    }
+  }
   return (
     <Box sx={{ py: 3, overflow: 'auto' }}>
       <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
@@ -196,9 +217,9 @@ const CourseList = ({
                           <GreenButton
                             role="link"
                             endIcon={<SettingsOutlined />}
-                            onClick={(e) => {
+                            onClick={async (e) => {
                               e.stopPropagation()
-                              navigate(`/${course.courseId}/course`)
+                              await setCourseOpen(course)
                             }}
                           >
                             {t('course:activate')}

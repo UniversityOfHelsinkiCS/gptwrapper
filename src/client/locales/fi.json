@@ -49,7 +49,8 @@
     "about_service": "Tietoa palvelusta",
     "loading": "Ladataan",
     "logout": "Kirjaudu ulos",
-    "copiedToClipboard": "Kopioitu leikepöydälle"
+    "copiedToClipboard": "Kopioitu leikepöydälle",
+    "fetchError": "Palvelin virhe"
   },
   "stats": {
     "showing": "Näytetään",
@@ -383,7 +384,8 @@
     "altOpenSettings": "Moodle avaa asetukset",
     "altSourceView": "Moodle avaa lähdekoodinäkymä",
     "altPasteSave": "Moodle lähdekoodin upotus ja tallennus",
-    "deActivate": "sulje opiskelijoilta"
+    "deActivate": "sulje opiskelijoilta",
+    "courseActivated": "Kurssi aktivoitu"
   },
   "prompt": {
     "createNew": "Luo uusi alustus",

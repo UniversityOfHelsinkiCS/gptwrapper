@@ -48,7 +48,8 @@
     "about_service": "About service",
     "loading": "Loading",
     "logout": "Sign out",
-    "copiedToClipboard": "Copied to clipboard"
+    "copiedToClipboard": "Copied to clipboard",
+    "fetchError": "Server error"
   },
   "stats": {
     "timePeriodStart": "Starting",
@@ -381,7 +382,8 @@
     "altOpenSettings": "Moodle open settings",
     "altSourceView": "Moodle open source code view",
     "altPasteSave": "Moodle source embedding and save",
-    "deActivate": "close for students"
+    "deActivate": "close for students",
+    "courseActivated": "Course activated"
   },
   "prompt": {
     "createNew": "Create new prompt",
