@@ -17,10 +17,7 @@ import { BlueButton, GreenButton } from './general/Buttons'
 import Skeleton from '@mui/material/Skeleton'
 import { SettingsOutlined } from '@mui/icons-material'
 import { Course } from 'src/client/types'
-import { useQueryClient } from '@tanstack/react-query'
-import { DEFAULT_TOKEN_LIMIT } from '@config'
-import { enqueueSnackbar } from 'notistack'
-import apiClient from '../../util/apiClient'
+import useOpenCourse from '../../hooks/useOpenCourse'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -95,7 +92,7 @@ const CourseList = ({
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
   const { language } = i18n
-  const queryClient = useQueryClient()
+  const { openCourse } = useOpenCourse()
 
   const [order, setOrder] = useState<Order>('asc')
   const [orderBy, setOrderBy] = useState<OrderBy>('name')
@@ -127,22 +124,6 @@ const CourseList = ({
     return [...courseUnits].sort(compare)
   }, [courseUnits, order, orderBy, language])
 
-  const setCourseOpen = async (course: CoursesViewCourse | Course) => {
-    try {
-      await apiClient.put(`/courses/${course.courseId}`, {
-        usageLimit: DEFAULT_TOKEN_LIMIT,
-      })
-
-      await queryClient.invalidateQueries({ queryKey: ['chatInstances', 'user'] })
-
-      enqueueSnackbar(t('course:courseActivated'), { variant: 'success' })
-
-      navigate(`/${course.courseId}/course`)
-    } catch (error) {
-      enqueueSnackbar(t('common:fetchError'), { variant: 'error' })
-      console.error(error)
-    }
-  }
   return (
     <Box sx={{ py: 3, overflow: 'auto' }}>
       <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
@@ -217,10 +198,14 @@ const CourseList = ({
                           <GreenButton
                             role="link"
                             endIcon={<SettingsOutlined />}
-                            onClick={async (e) => {
+                            onClick={(e) => {
                               e.stopPropagation()
-                              await setCourseOpen(course)
-                            }}
+                              if (window.confirm()){
+                                openCourse(course)
+                              }
+                            }
+
+                          }
                           >
                             {t('course:activate')}
                           </GreenButton>

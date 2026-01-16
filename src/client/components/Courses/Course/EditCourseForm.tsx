@@ -1,4 +1,4 @@
-import { useState, forwardRef } from 'react'
+import { useState, forwardRef, useEffect } from 'react'
 import {
   Box,
   Typography,
@@ -16,6 +16,7 @@ import { Course, SetState, User } from '../../../types'
 import { useEditCourseMutation } from '../../../hooks/useCourseMutation'
 import { BlueButton, GreenButton, RedButton } from '../../ChatV2/general/Buttons'
 import { DEFAULT_TOKEN_LIMIT } from '@config'
+import useCourse from '../../../hooks/useCourse'
 
 interface EditCourseFormProps {
   course: Course
@@ -26,14 +27,25 @@ interface EditCourseFormProps {
 const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(
   ({ course, setOpen, user }, ref) => {
     const { t } = useTranslation()
-    const mutation = useEditCourseMutation(course?.courseId as string)
+    /*
+    edit course form sometimes renders just before the new version of a mutated course comes back, this useCourse hook helps to make sure that the newest version of the course is rendered
+    */
+  const { data: chatInstance, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(course.courseId)
+    const mutation = useEditCourseMutation(course.courseId as string)
 
-    const [startDate, setStartDate] = useState(new Date(course?.activityPeriod?.startDate || new Date()))
-    const [endDate, setEndDate] = useState(new Date(course?.activityPeriod?.endDate || new Date()))
+    const [startDate, setStartDate] = useState(new Date(course.activityPeriod?.startDate || new Date()))
+    const [endDate, setEndDate] = useState(new Date(course.activityPeriod?.endDate || new Date()))
     const [usageLimit, setUsageLimit] = useState(course.usageLimit)
     const [saveDiscussions, setSaveDiscussions] = useState(course.saveDiscussions)
     const [notOptoutSaving, setNotOptoutSaving] = useState(course.notOptoutSaving)
 
+    useEffect(() => {
+      if(chatInstance?.usageLimit != usageLimit && chatInstance?.usageLimit != undefined){
+        setUsageLimit(chatInstance?.usageLimit)
+      }
+    }, [chatInstance])
+    console.log(course)
+    console.log(chatInstance)
     const handleSubmit = async (tokens?: number) => {
       const activityPeriod = {
         startDate: format(startDate, 'yyyy-MM-dd'),
@@ -58,7 +70,9 @@ const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(
 
     const handleActivate = () => window.confirm() && handleSubmit(DEFAULT_TOKEN_LIMIT)
     const handleDeactivate = () => window.confirm() && handleSubmit(0)
-
+    if(!chatInstance){
+      return <></>
+    }
     return (
       <Box
         ref={ref}
@@ -70,7 +84,7 @@ const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(
           margin: '0 auto',
         }}
       >
-        {course.usageLimit <= 0 && (
+        {chatInstance?.usageLimit <= 0 && (
           <Stack direction="row" justifyContent="flex-end">
             <GreenButton onClick={handleActivate}>
               {t('course:activate')}
