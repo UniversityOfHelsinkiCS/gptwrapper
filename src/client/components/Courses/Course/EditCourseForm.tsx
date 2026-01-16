@@ -40,13 +40,15 @@ const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(
         endDate: format(endDate, 'yyyy-MM-dd'),
       }
 
+      const newLimit = tokens ?? usageLimit
       try {
         await mutation.mutateAsync({
           activityPeriod,
-          usageLimit: tokens ?? usageLimit,
+          usageLimit: newLimit,
           saveDiscussions,
           notOptoutSaving,
         })
+        setUsageLimit(newLimit) //this ensures that the input field stays up do date on the form side...
         enqueueSnackbar(t('course:courseUpdated'), { variant: 'success' })
         setOpen(false)
       } catch (error: any) {
