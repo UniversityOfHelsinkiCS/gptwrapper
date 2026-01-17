@@ -29,7 +29,7 @@ See `compose.yaml` for local development. In short, in addition to the CC server
 - Redis (docker)
 - Ollama (docker)
 - Azure
-- S3
+- S3 (minio, docker)
 
 ### Azure
 
@@ -45,6 +45,8 @@ AZURE_API_KEY=<asd>
 ```
 
 ### S3
+
+(using minio by default, no need to do this locally)
 
 S3 is used for storing user-uploaded files and their processed versions.
 
