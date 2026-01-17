@@ -33,6 +33,7 @@ import { RagFilesStatus } from './RagFilesStatus'
 import apiClient from '../../util/apiClient'
 import { ArrowBack } from '@mui/icons-material'
 import useCourse from '../../hooks/useCourse'
+import { EditableTitle } from './EditableTitle'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -50,13 +51,12 @@ export const RagIndex: React.FC = () => {
   const { user } = useCurrentUser()
   const { t } = useTranslation()
   const { courseId } = useParams<{ courseId: string }>()
-  const { data: chatInstance } = useCourse(courseId)
 
   const [searchParams, _setSearchParams] = useSearchParams()
   const id = Number(searchParams.get('index'))
   const navigate = useNavigate()
   const [searchOpen, setSearchOpen] = React.useState(false)
-  const deleteIndexMutation = useDeleteRagIndexMutation(chatInstance?.id)
+  const deleteIndexMutation = useDeleteRagIndexMutation(id)
   const [refetchInterval, setRefetchInterval] = React.useState(60 * 1000)
   const [uploadProgress, setUploadProgress] = React.useState(0)
   const { data: ragDetails, isSuccess, refetch } = useRagIndexDetails(id)
@@ -123,9 +123,7 @@ export const RagIndex: React.FC = () => {
       </OutlineButtonBlack>
       <Box sx={{ backgroundColor: 'grey.100', p: 2, borderRadius: 1 }}>
         <Breadcrumbs>
-          <Typography fontWeight="bold" color="black">
-            {ragDetails?.metadata?.name}
-          </Typography>
+          <EditableTitle ragIndex={ragDetails} />
         </Breadcrumbs>
       </Box>
       <Divider />
@@ -162,7 +160,7 @@ export const RagIndex: React.FC = () => {
             data-testid="ragIndexDeleteButton"
             onClick={async () => {
               if (window.confirm(`Are you sure you want to delete index ${ragDetails.metadata?.name}?`)) {
-                await deleteIndexMutation.mutateAsync(id)
+                await deleteIndexMutation.mutateAsync()
                 const chatInstance = ragDetails.chatInstances?.[0]
                 if (chatInstance) {
                   navigate(`/${courseId}/course/rag`)

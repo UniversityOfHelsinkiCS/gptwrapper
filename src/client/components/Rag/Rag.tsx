@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { RagIndex } from './RagIndex'
 import { RagFile } from './RagFile'
 import { GrayButton, LinkButtonHoc } from '../ChatV2/general/Buttons'
+import { Settings } from '@mui/icons-material'
 
 const Rag: React.FC = () => {
   const { t } = useTranslation()
@@ -51,11 +52,11 @@ const Rag: React.FC = () => {
                     <TableCell>{ragIndex.metadata?.language}</TableCell>
                     <TableCell>{ragIndex.ragFileCount}</TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                        <Link to={`?index=${ragIndex.id}`} component={RouterLink} sx={{ ml: 'auto' }} data-testid="ragIndexDetails">
-                          {t('rag:viewDetails')}
-                        </Link>
-                      </Box>
+                      <Link to={`?index=${ragIndex.id}`} component={RouterLink} sx={{ ml: 'auto' }} data-testid="ragIndexDetails">
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                          {t('rag:viewDetails')} <Settings fontSize="small" />
+                        </Box>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 </TableBody>

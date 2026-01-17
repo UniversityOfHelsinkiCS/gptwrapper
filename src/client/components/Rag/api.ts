@@ -49,17 +49,28 @@ export const useRagIndexJobs = (indexId: number | null, refetchInterval: number)
   })
 }
 
-export const useDeleteRagIndexMutation = (chatInstanceId?: string) => {
+export const useDeleteRagIndexMutation = (indexId: number) => {
   const mutation = useMutation({
-    mutationFn: async (indexId: number) => {
+    mutationFn: async () => {
       const response = await apiClient.delete(`/rag/indices/${indexId}`)
       return response.data
     },
-    onSuccess: (_data: unknown, indexId: number) => {
-      queryClient.setQueryData(['ragIndices', chatInstanceId], (indices: RagIndexAttributes[]) => {
-        if (!indices) return null
-        return indices.filter((index) => index.id !== indexId)
-      })
+    onSuccess: (_data: unknown) => {
+      queryClient.invalidateQueries({ queryKey: ['ragIndices'] })
+    },
+  })
+  return mutation
+}
+
+export const useUpdateRagIndexMutation = (indexId: number) => {
+  const mutation = useMutation({
+    mutationFn: async (data: Partial<RagIndexAttributes>) => {
+      const response = await apiClient.put(`/rag/indices/${indexId}`, data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ragIndices'] })
+      queryClient.invalidateQueries({ queryKey: ['ragIndex', indexId] })
     },
   })
   return mutation

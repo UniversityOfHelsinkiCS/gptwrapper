@@ -212,9 +212,9 @@ const upload = multer({
     bucket: S3_BUCKET,
     acl: 'private',
     contentType: (_req, file, cb) => {
-      const ext = path.extname(file.originalname || '');
+      const ext = path.extname(file.originalname || '')
       if (!ext || ext === '') {
-        return cb(null, 'text/plain');
+        return cb(null, 'text/plain')
       }
       cb(null, file.mimetype || 'text/plain')
     },
@@ -273,11 +273,14 @@ ragIndexRouter.post('/reset', async (req, res) => {
 
   const vectorStore = RedisVectorStore.fromRagIndex(ragIndex)
 
-  await RagFile.update({
-    pipelineStage: 'ingesting',
-  }, {
-    where: { ragIndexId: ragIndex.id },
-  })
+  await RagFile.update(
+    {
+      pipelineStage: 'ingesting',
+    },
+    {
+      where: { ragIndexId: ragIndex.id },
+    },
+  )
 
   await vectorStore.dropIndex()
   await vectorStore.createIndex()
@@ -298,6 +301,35 @@ ragIndexRouter.post('/search', async (req, res) => {
   const { results, timings } = await search(ragIndex, searchParams)
 
   res.json({ results, timings })
+})
+
+const UpdateRagIndexSchema = z.object({
+  metadata: z.object({
+    name: z.string().min(1).max(255),
+  }),
+})
+
+ragIndexRouter.put('/', async (req, res) => {
+  const ragIndexRequest = req as unknown as RagIndexRequest
+  const { ragIndex } = ragIndexRequest
+  const { metadata } = UpdateRagIndexSchema.parse(req.body)
+
+  // Only name can be updated for now. Maybe others in the future.
+  const newMetadata = {
+    ...ragIndex.metadata,
+    name: metadata.name,
+  }
+
+  await RagIndex.update(
+    {
+      metadata: newMetadata,
+    },
+    {
+      where: { id: ragIndex.id },
+    },
+  )
+
+  res.json({ message: 'RAG index updated successfully' })
 })
 
 export default ragIndexRouter
