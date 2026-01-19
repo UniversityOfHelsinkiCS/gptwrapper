@@ -200,8 +200,9 @@ const CourseList = ({
                             endIcon={<SettingsOutlined />}
                             onClick={(e) => {
                               e.stopPropagation()
-                              if (window.confirm()){
+                              if (window.confirm(t('course:activate'))){
                                 openCourse(course)
+                                navigate(`/${course.courseId}/course`)
                               }
                             }
 

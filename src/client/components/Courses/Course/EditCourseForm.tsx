@@ -68,8 +68,8 @@ const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(
       }
     }
 
-    const handleActivate = () => window.confirm() && handleSubmit(DEFAULT_TOKEN_LIMIT)
-    const handleDeactivate = () => window.confirm() && handleSubmit(0)
+    const handleActivate = () => window.confirm(t('course:activate')) && handleSubmit(DEFAULT_TOKEN_LIMIT)
+    const handleDeactivate = () => window.confirm(t('course:deActivate')) && handleSubmit(0)
     if(!chatInstance){
       return <></>
     }
