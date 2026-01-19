@@ -23,6 +23,22 @@ type WriteEventFunction = (data: ChatEvent) => Promise<void>
 type ChatTool = StructuredTool<any, any, any, string>
 
 /**
+ * Prepares chat messages for the LLM by combining message content with file content
+ */
+const prepareMessagesForLLM = (messages: ChatMessage[]): ChatMessage[] => {
+  return messages.map(msg => {
+    if (msg.role === 'user' && msg.fileContent && typeof msg.content === 'string') {
+      // Combine the user's message with the file content for the LLM
+      return {
+        ...msg,
+        content: `${msg.content} ${msg.fileContent}`
+      }
+    }
+    return msg
+  })
+}
+
+/**
  * Handles the main chat streaming logic.
  * It takes the chat history, model configuration, and a set of tools,
  * and streams the response from the language model, handling tool calls
@@ -95,6 +111,9 @@ export const streamChat = async ({
     }],
   })
 
+  // Prepare messages by combining user message content with file content for the LLM
+  const preparedChatMessages = prepareMessagesForLLM(chatMessages)
+
   const { messages, warnings, inputTokenCount } = handleWarnings(
     modelConfig,
     [
@@ -104,7 +123,7 @@ export const streamChat = async ({
         role: 'system',
         content: systemMessage,
       },
-      ...chatMessages,
+      ...preparedChatMessages,
     ],
     ignoredWarnings,
   )

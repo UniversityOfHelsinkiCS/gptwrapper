@@ -1,7 +1,7 @@
 import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
 import { FREE_MODEL, inProduction } from '../../../config'
-import { PostStreamSchemaV3, type ChatEvent, type ChatMessage } from '../../../shared/chat'
+import { ChatMessage, PostStreamSchemaV3, type ChatEvent } from '../../../shared/chat'
 import { ChatInstance, Discussion, Enrolment, Prompt, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
 import { checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { streamChat } from '../../services/langchain/chat'
@@ -10,10 +10,11 @@ import { getRagIndexSearchTool } from '../../services/rag/searchTool'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
-import { imageFileTypes, parseFileAndAddToLastMessage } from './fileParsing'
+import { imageFileTypes } from '../../../config'
 import { upload } from './multer'
 import { checkIamAccess } from '../../util/iams'
 import { getTeachedCourses } from '../../services/chatInstances/access'
+import { parseFileAndAddToLastMessage } from './fileParsing'
 
 const router = express.Router()
 
@@ -63,6 +64,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     }
   }
 
+  // Validate file if exists (but don't parse - client already did that)
   res.setHeader('content-type', 'text/event-stream')
   res.setHeader('cache-control', 'no-cache')
   res.setHeader('connection', 'keep-alive')
@@ -84,7 +86,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     })
   }
 
-  let fileParsingError: string | null = null
   try {
     if (req.file) {
       res.flushHeaders()
@@ -102,6 +103,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
         res.end()
         return
       }
+      // File validation only - content was already added on client side
 
       options.chatMessages = (await parseFileAndAddToLastMessage(
         options.chatMessages,
@@ -116,19 +118,12 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     }
   } catch (error) {
     if (error instanceof ApplicationError) {
-      fileParsingError = error.message
       logger.error('File parsing error (sent as stream event)', { error: error.message, filename: req.file?.originalname })
     } else {
-      fileParsingError = 'Error parsing file'
       logger.error('Error parsing file', { error, filename: req.file?.originalname })
     }
-
-    await writeEvent({
-      type: 'error',
-      error: fileParsingError,
-    })
-    res.end()
-    return
+    logger.error('Error validating file', { error, filename: req.file?.originalname })
+    throw ApplicationError.BadRequest('Error validating file')
   }
 
   let model = generationInfo.model
