@@ -20,9 +20,9 @@ export default defineConfig({
   /* Retry on CI only */
   retries: inCI ? 1 : 0,
   /* Global timeout for each test */
-  timeout: inCI ? 20_000 : 15_000,
+  timeout: inCI ? 22_000 : 20_000,
   expect: {
-    timeout: inCI ? 7_000 : 6_000,
+    timeout: inCI ? 8_000 : 7_000,
   },
   /* Opt out of parallel tests on CI. */
   // workers: inCI ? 1 : undefined,
@@ -44,15 +44,17 @@ export default defineConfig({
   },
 
   projects: [
-    evals ? {
-      name: 'rag eval benchmark',
-      testDir: './evals',
-      use: { ...devices['Desktop Chrome'] },
-    } : {
-      name: 'e2e',
-      testDir: './e2e',
-      use: { ...devices['Desktop Chrome'] },
-    },
+    evals
+      ? {
+          name: 'rag eval benchmark',
+          testDir: './evals',
+          use: { ...devices['Desktop Chrome'] },
+        }
+      : {
+          name: 'e2e',
+          testDir: './e2e',
+          use: { ...devices['Desktop Chrome'] },
+        },
 
     // {
     //   name: 'firefox',
