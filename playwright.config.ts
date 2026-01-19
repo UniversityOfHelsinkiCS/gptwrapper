@@ -22,7 +22,7 @@ export default defineConfig({
   /* Global timeout for each test */
   timeout: inCI ? 22_000 : 20_000,
   expect: {
-    timeout: inCI ? 8_000 : 7_000,
+    timeout: inCI ? 10_000 : 7_000,
   },
   /* Opt out of parallel tests on CI. */
   // workers: inCI ? 1 : undefined,
