@@ -1,5 +1,19 @@
 import React from 'react'
-import { Button, Box, Typography, styled, LinearProgress, Container, DialogTitle, DialogContent, Dialog, Link, CircularProgress, Breadcrumbs, Divider } from '@mui/material'
+import {
+  Button,
+  Box,
+  Typography,
+  styled,
+  LinearProgress,
+  Container,
+  DialogTitle,
+  DialogContent,
+  Dialog,
+  Link,
+  CircularProgress,
+  Breadcrumbs,
+  Divider,
+} from '@mui/material'
 import { useNavigate, useParams, Link as RouterLink, useSearchParams } from 'react-router-dom'
 import Autorenew from '@mui/icons-material/Autorenew'
 import CloudUpload from '@mui/icons-material/CloudUpload'
@@ -17,6 +31,9 @@ import queryClient from '../../util/queryClient'
 import { IngestionPipelineStageKey } from '@shared/ingestion'
 import { RagFilesStatus } from './RagFilesStatus'
 import apiClient from '../../util/apiClient'
+import { ArrowBack } from '@mui/icons-material'
+import useCourse from '../../hooks/useCourse'
+import { EditableTitle } from './EditableTitle'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -39,7 +56,7 @@ export const RagIndex: React.FC = () => {
   const id = Number(searchParams.get('index'))
   const navigate = useNavigate()
   const [searchOpen, setSearchOpen] = React.useState(false)
-  const deleteIndexMutation = useDeleteRagIndexMutation()
+  const deleteIndexMutation = useDeleteRagIndexMutation(id)
   const [refetchInterval, setRefetchInterval] = React.useState(60 * 1000)
   const [uploadProgress, setUploadProgress] = React.useState(0)
   const { data: ragDetails, isSuccess, refetch } = useRagIndexDetails(id)
@@ -101,9 +118,12 @@ export const RagIndex: React.FC = () => {
 
   return (
     <Box>
+      <OutlineButtonBlack sx={{ mb: 2 }} onClick={() => navigate(`/${courseId}/course/rag`)} data-testid="ragIndexBackToList">
+        <ArrowBack />
+      </OutlineButtonBlack>
       <Box sx={{ backgroundColor: 'grey.100', p: 2, borderRadius: 1 }}>
         <Breadcrumbs>
-          <Typography fontWeight='bold' color='black'>{ragDetails?.metadata?.name}</Typography>
+          <EditableTitle ragIndex={ragDetails} />
         </Breadcrumbs>
       </Box>
       <Divider />
@@ -137,14 +157,19 @@ export const RagIndex: React.FC = () => {
             disabled={deleteIndexMutation.isPending}
             variant="text"
             color="error"
+            data-testid="ragIndexDeleteButton"
             onClick={async () => {
               if (window.confirm(`Are you sure you want to delete index ${ragDetails.metadata?.name}?`)) {
-                await deleteIndexMutation.mutateAsync(id)
+                await deleteIndexMutation.mutateAsync()
                 const chatInstance = ragDetails.chatInstances?.[0]
                 if (chatInstance) {
                   navigate(`/${courseId}/course/rag`)
                 }
-                enqueueSnackbar(t('rag:collectionDeleted'), { variant: 'success' })
+                enqueueSnackbar(t('rag:collectionDeleted'), {
+                  variant: 'success',
+                  /* @ts-expect-error why not allowed lol, even the docstring tells this is how u use SnackbarProps */
+                  SnackbarProps: { 'data-testid': 'ragIndexDeleteSuccessSnackbar' },
+                })
               }
             }}
             sx={{ mr: 'auto' }}
@@ -152,10 +177,7 @@ export const RagIndex: React.FC = () => {
             {t('rag:deleteCollection')}
           </Button>
           {user?.isAdmin && (
-            <OutlineButtonBlack
-              startIcon={<Autorenew />}
-              onClick={handleReset}
-            >
+            <OutlineButtonBlack startIcon={<Autorenew />} onClick={handleReset}>
               Reset (admin only)
             </OutlineButtonBlack>
           )}
@@ -186,6 +208,6 @@ export const RagIndex: React.FC = () => {
           ))}
         </Box>
       </Box>
-    </Box >
+    </Box>
   )
 }

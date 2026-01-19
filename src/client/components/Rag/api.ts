@@ -1,17 +1,22 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import apiClient from '../../util/apiClient'
-import { RagFileAttributes, RagIndexAttributes } from '../../../shared/types'
+import { RagFileAttributes, RagIndexAttributes, RagIndexMetadata } from '../../../shared/types'
 import { IngestionJobStatus } from '@shared/ingestion'
+import queryClient from '../../util/queryClient'
 
 export const useCreateRagIndexMutation = () => {
   const mutation = useMutation({
-    mutationFn: async ({ chatInstanceId, indexName, language }: { chatInstanceId: string; indexName: string; language: string }) => {
+    mutationFn: async ({ chatInstanceId, name, language, advancedParsing }: RagIndexMetadata & { chatInstanceId: string }) => {
       const response = await apiClient.post('/rag/indices', {
-        name: indexName,
+        name,
         chatInstanceId,
         language,
+        advancedParsing,
       })
       return response.data
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['ragIndices'] })
     },
   })
   return mutation
@@ -44,11 +49,28 @@ export const useRagIndexJobs = (indexId: number | null, refetchInterval: number)
   })
 }
 
-export const useDeleteRagIndexMutation = () => {
+export const useDeleteRagIndexMutation = (indexId: number) => {
   const mutation = useMutation({
-    mutationFn: async (indexId: number) => {
+    mutationFn: async () => {
       const response = await apiClient.delete(`/rag/indices/${indexId}`)
       return response.data
+    },
+    onSuccess: (_data: unknown) => {
+      queryClient.invalidateQueries({ queryKey: ['ragIndices'] })
+    },
+  })
+  return mutation
+}
+
+export const useUpdateRagIndexMutation = (indexId: number) => {
+  const mutation = useMutation({
+    mutationFn: async (data: Partial<RagIndexAttributes>) => {
+      const response = await apiClient.put(`/rag/indices/${indexId}`, data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ragIndices'] })
+      queryClient.invalidateQueries({ queryKey: ['ragIndex', indexId] })
     },
   })
   return mutation

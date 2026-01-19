@@ -1,4 +1,4 @@
-import { Alert, Box, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { MapsUgc } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
@@ -10,17 +10,16 @@ import { getLanguageValue } from '@shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { useChatScroll } from './useChatScroll'
 import useCourse from '../../hooks/useCourse'
-import useLocalStorageState from '../../hooks/useLocalStorageState'
+import useLocalStorageState, { useLocalStorageStateWithURLDefault } from '../../hooks/useLocalStorageState'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import sidebarOpen from '../../assets/sidebar-open.svg'
 import { ChatBox } from './ChatBox'
-import { OutlineButtonBlack, TextButton } from './general/Buttons'
+import { OutlineButtonBlack } from './general/Buttons'
 import { CourseSettingsModal } from './CourseSettingsModal'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
-import { ChatInfo } from './general/ChatInfo'
 import { StreamAbortReason, TypedAbortController, useChatStream } from './useChatStream'
 import { postCompletionStreamV3, sendConversationEmail } from './api'
 import { ConversationSplash } from './general/ConversationSplash'
@@ -40,41 +39,15 @@ import CoursesModal from './CoursesModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
 import { CustomIcon } from './general/CustomIcon'
 import { parseFileContent } from '../../util/fileParsing'
+import { PromptInfoModal } from './PromptInfoModal'
+import { getChatActivityStatus } from './util'
+import { ChatExpiredView } from './ChatExpiredView'
+import { ApiErrorView } from '../common/ApiErrorView'
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
  */
 const Conversation = lazy(() => import('./Conversation'))
-
-function useLocalStorageStateWithURLDefault<T>(key: string, defaultValue: string, urlKey: string, schema: z.ZodType<T>) {
-  const [value, setValue] = useLocalStorageState(key, defaultValue)
-  const [searchParams, setSearchParams] = useSearchParams()
-  const urlValue = searchParams.get(urlKey)
-
-  // If urlValue is defined, it overrides the localStorage setting.
-  // However if user changes the setting, the urlValue is removed.
-  const modifiedSetValue = (newValue: T) => {
-    if (newValue !== urlValue) {
-      if (typeof newValue === 'string') {
-        setValue(newValue)
-      } else {
-        setValue(String(newValue))
-      }
-      searchParams.delete(urlKey)
-      setSearchParams(searchParams)
-    }
-  }
-
-  const parsedValue = schema.safeParse(urlValue ?? value)
-
-  if (parsedValue.success) {
-    return [parsedValue.data, modifiedSetValue] as const
-  }
-
-  // if the value in localStorage is invalid then revert back to default
-  setValue(defaultValue)
-  return [defaultValue as T, modifiedSetValue] as const
-}
 
 const ChatV2Content = () => {
   const { courseId } = useParams()
@@ -83,61 +56,18 @@ const ChatV2Content = () => {
   const chatScroll = useChatScroll()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { t, i18n } = useTranslation()
-
-  const { data: chatInstance, isLoading: instanceLoading } = useCourse(courseId)
-  const { user, isLoading: userLoading } = useCurrentUser()
-  const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
-
-  // local storage states
-  const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
-
-  const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model', ValidModelNameSchema)
-  const [modelTemperature, setModelTemperature] = useLocalStorageStateWithURLDefault(
-    `${localStoragePrefix}-chat-model-temperature`,
-    String(DEFAULT_MODEL_TEMPERATURE),
-    'temperature',
-    z.coerce.number(),
-  )
-
-  const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as ChatMessage[])
-  const [saveConsent, setSaveConsent] = useLocalStorageState<boolean>('save-consent', false)
-
-  const [fileName, setFileName] = useState<string>('')
-  const [messageWarning, setMessageWarning] = useState<{ [key in WarningType]?: { message: string; ignored: boolean } }>({})
-
-  const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
-  const [sideBarOpen, setSideBarOpen] = useState<boolean>(() => {
-    return isMobile ? false : !defaultCollapsedSidebar
-  })
-
-  const leftPanelFloating = isEmbeddedMode || isMobile
-
-  const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
-
-  // Analytics
-  const dispatchAnalytics = useAnalyticsDispatch()
-  useEffect(() => {
-    dispatchAnalytics({
-      type: 'SET_ANALYTICS_DATA',
-      payload: {
-        model: activeModel,
-        courseId,
-        nMessages: messages.length,
-      },
-    })
-  }, [messages, courseId, activeModel, dispatchAnalytics])
-
-  // Refs
-  const chatContainerRef = useRef<HTMLDivElement | null>(null)
-  const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const scrollRef = useRef<HTMLDivElement | null>(null)
-  const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
-
-  const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
-
   const { promptInfo } = usePromptState()
-
-  const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo, hasPotentialError } = useChatStream({
+  const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
+  const {
+    processStream,
+    completion,
+    isStreaming,
+    setIsStreaming,
+    toolCalls,
+    streamControllerRef,
+    generationInfo,
+    hasPotentialError
+  } = useChatStream({
     onComplete: ({ message }) => {
       if (message.content.length > 0) {
         setMessages((prev: ChatMessage[]) => prev.concat(message))
@@ -159,6 +89,47 @@ const ChatV2Content = () => {
       dispatchAnalytics({ type: 'INCREMENT_FILE_SEARCHES' })
     },
   })
+
+  // queries
+  const { data: chatInstance, isLoading: chatInstanceLoading, error: chatInstanceLoadError } = useCourse(courseId)
+  const { user, isLoading: userLoading } = useCurrentUser()
+  const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
+
+  // local storage states
+  const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
+  const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model', ValidModelNameSchema)
+  const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as ChatMessage[])
+  const [saveConsent, setSaveConsent] = useLocalStorageState<boolean>('save-consent', false)
+  const [modelTemperature, setModelTemperature] = useLocalStorageStateWithURLDefault(
+    `${localStoragePrefix}-chat-model-temperature`,
+    String(DEFAULT_MODEL_TEMPERATURE),
+    'temperature',
+    z.coerce.number(),
+  )
+
+  // app states
+  const [fileName, setFileName] = useState<string>('')
+  const [messageWarning, setMessageWarning] = useState<{ [key in WarningType]?: { message: string; ignored: boolean } }>({})
+  const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
+  const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
+
+  // Analytics
+  const dispatchAnalytics = useAnalyticsDispatch()
+  useEffect(() => {
+    dispatchAnalytics({
+      type: 'SET_ANALYTICS_DATA',
+      payload: {
+        model: activeModel,
+        courseId,
+        nMessages: messages.length,
+      },
+    })
+  }, [messages, courseId, activeModel, dispatchAnalytics])
+
+  // Refs
+  const chatContainerRef = useRef<HTMLDivElement | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const scrollRef = useRef<HTMLDivElement | null>(null)
 
   const handleSendMessage = async (message: string, resendPrevious: boolean, ignoredWarnings: WarningType[]) => {
     if (!userStatus) return
@@ -359,7 +330,6 @@ const ChatV2Content = () => {
     }
   }, [userStatus, chatInstance])
 
-  const rightMenuOpen = !!activeToolResult
 
   // Handle layout shift when right menu opens (tool result becomes visible)
   const prevScrollYProportional = useRef(0)
@@ -373,6 +343,7 @@ const ChatV2Content = () => {
       window.scrollTo(0, scrollY)
     }, 0)
   }, [])
+
   const setActiveToolResult = useCallback(
     (toolResult: ToolCallResultEvent | undefined) => {
       handleLayoutShift()
@@ -381,43 +352,25 @@ const ChatV2Content = () => {
     [handleLayoutShift],
   )
 
-  if (statusLoading || userLoading || instanceLoading) return <HYLoadingSpinner />
-
-
-  if (chatInstance?.activityPeriod) {
-    const isResponsible = user?.isAdmin || chatInstance.responsibilities?.some((r) => r.user.id === user?.id)
-
-    const { startDate, endDate } = chatInstance.activityPeriod
-    const start = new Date(startDate)
-    const end = new Date(endDate)
-    const now = new Date()
-
-    if (now < start && !isResponsible) {
-      return (
-        <Box>
-          <ChatInfo course={chatInstance} />
-          <Alert severity="warning" style={{ marginTop: 20 }}>
-            <Typography variant="h6">{t('course:curreNotStarted')}</Typography>
-          </Alert>
-        </Box>
-      )
-    }
-
-    if (now > end && !isResponsible) {
-      return (
-        <Box>
-          <ChatInfo course={chatInstance} />
-          <Alert severity="warning" style={{ marginTop: 20 }}>
-            <Typography variant="h6">{t('course:curreExpired')}</Typography>
-          </Alert>
-        </Box>
-      )
-    }
-  }
-
+  // layout
+  const rightMenuOpen = !!activeToolResult
+  const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
+  const leftPanelFloating = isEmbeddedMode || isMobile
+  const [sideBarOpen, setSideBarOpen] = useState<boolean>(() => {
+    return isMobile ? false : !defaultCollapsedSidebar
+  })
   const leftPanelCollapsed = !sideBarOpen || leftPanelFloating
   const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
   const rightPanelContentWidth = rightMenuOpen ? 'var(--right-menu-width)' : '0px'
+
+  if (chatInstanceLoadError) {
+    return <ApiErrorView error={chatInstanceLoadError} />
+  }
+
+  if (statusLoading || userLoading || chatInstanceLoading) return <HYLoadingSpinner />
+
+  const status = getChatActivityStatus(chatInstance, user)
+  if (status !== 'ACTIVE') return <ChatExpiredView status={status} chatInstance={chatInstance} />
 
   return (
     <Box
@@ -439,6 +392,7 @@ const ChatV2Content = () => {
             open={true} // always open in drawer
             setOpen={setSideBarOpen}
             course={chatInstance}
+            user={user}
             handleReset={handleResetRequest}
             messages={messages}
             currentModel={activeModel}
@@ -450,6 +404,7 @@ const ChatV2Content = () => {
           open={sideBarOpen}
           setOpen={setSideBarOpen}
           course={chatInstance}
+          user={user}
           handleReset={handleResetRequest}
           messages={messages}
           currentModel={activeModel}
@@ -528,7 +483,11 @@ const ChatV2Content = () => {
 
           <Conversation
             initial={
-              <ConversationSplash courseName={chatInstance && getLanguageValue(chatInstance.name, i18n.language)} courseDate={chatInstance?.activityPeriod} />
+              <ConversationSplash
+                courseName={chatInstance && getLanguageValue(chatInstance.name, i18n.language)}
+                courseDate={chatInstance?.activityPeriod}
+                promptName={promptInfo?.type === 'saved' ? promptInfo.name : undefined}
+              />
             }
             messages={messages}
             completion={hasPotentialError ? `${completion} ⚠️` : completion}
@@ -550,7 +509,6 @@ const ChatV2Content = () => {
         >
           <Box
             sx={{
-              paddingBottom: '2rem',
               padding: isMobile ? '0rem 1rem 1rem 1rem' : '0rem 2rem 2rem 2rem',
             }}
           >
@@ -572,7 +530,7 @@ const ChatV2Content = () => {
           </Box>
         </Box>
       </Box>
-      {/* FileSearchResults columns ----------------------------------------------------------------------------------------------------- */}
+      {/* FileSearchResults columns ----------------------------------------------------------------------------------------------- */}
       {isMobile ? (
         <Drawer
           anchor="right"
@@ -618,6 +576,8 @@ const ChatV2Content = () => {
           </Box>
         )
       )}
+
+      {/* Modals routes ------------------------------------------------------------------------------------------------------------ */}
       <Routes>
         <Route element={
           <TemplateModal root={`/${courseId}`} open >
@@ -628,6 +588,7 @@ const ChatV2Content = () => {
           <Route path={`courses`} element={<CoursesModal />} />
           <Route path={`prompts`} element={<PromptModal />} />
           <Route path={`prompt/:promptId`} element={<PromptEditor back={`/${courseId}`} />} />
+          <Route path={`show/:promptId`} element={<PromptInfoModal back={`/${courseId}`} />} />
         </Route>
       </Routes>
       <ResetConfirmModal open={resetConfirmModalOpen} setOpen={setResetConfirmModalOpen} onConfirm={handleReset} />

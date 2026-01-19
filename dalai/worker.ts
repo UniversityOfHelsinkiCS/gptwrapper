@@ -54,13 +54,13 @@ const worker = new Worker(
     }
 
     try {
-
-      if (text.length < 5000) { // if page contains that much text there is no point of giving it to vlm
+      if (text.length < 5000) {
+        // if page contains that much text there is no point of giving it to vlm
         const response = await fetch(`${OLLAMA_URL}/api/generate`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'token': process.env.LAAMA_TOKEN ?? '' },
+          headers: { 'Content-Type': 'application/json', token: process.env.LAAMA_TOKEN ?? '' },
           body: JSON.stringify({
-            model: 'qwen2.5vl:7b',
+            model: 'ministral-3:3b',
             system: `Objective
                     Produce the most accurate, well-structured Markdown transcription of a PDF page by combining a rasterized image of the PDF page (such as PNG or JPEG) and the parsed text extracted from the PDF.
                     Rules and Priorities
@@ -76,7 +76,7 @@ const worker = new Worker(
             prompt: `Parsed PDF text:\n${text}\n\nImage transcription:`,
             stream: false,
             images: [bytes],
-            options: { "num_ctx": 8192 },
+            options: { num_ctx: 8192 },
           }),
         })
         if (!response.ok) {
@@ -106,7 +106,7 @@ const worker = new Worker(
       ACTIVE_COUNT--
     }
   },
-  { connection, concurrency: 1 },
+  { connection, concurrency: 3 },
 )
 
 logger.info(`Worker started. Listening to queue "${QUEUE_NAME}"...`)
@@ -123,7 +123,7 @@ async function shutdown() {
   logger.info('Shutting down worker...')
   try {
     if (ACTIVE_COUNT <= 0) await worker.close()
-  } catch { }
+  } catch {}
   process.exit(0)
 }
 process.on('SIGINT', shutdown)

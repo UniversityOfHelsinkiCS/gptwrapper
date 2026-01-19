@@ -1,8 +1,26 @@
-import { Box, Modal } from '@mui/material'
+import { Box, Modal, Typography } from '@mui/material'
 import React from 'react'
 import { TextButton } from './general/Buttons'
 import CloseIcon from '@mui/icons-material/Close'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+
+const ModalTitle = () => {
+  const { t } = useTranslation()
+  const location = useLocation()
+  const url = location.pathname
+
+  const titleMap = {
+    '/courses': t('sidebar:courseChange'),
+    '/course': t('sidebar:courseSettings'),
+    '/prompts': t('sidebar:promptSelect'),
+    '/prompt': t('sidebar:promptEdit'),
+    '/show': t('sidebar:promptDetails'),
+  }
+
+  const matchedKey = Object.keys(titleMap).find(key => url.includes(key))
+  return matchedKey ? titleMap[matchedKey] : ''
+}
 
 const TemplateModal: React.FC<{ open: boolean, root: string, children: React.ReactNode }> = ({ open, root, children }) => {
   const navigate = useNavigate()
@@ -22,8 +40,9 @@ const TemplateModal: React.FC<{ open: boolean, root: string, children: React.Rea
           display: 'flex',
           flexDirection: 'column',
           width: { xs: '100vw', md: '90vw', lg: '75vw' },
-          minHeight: '80vh',
-          maxHeight: '80vh',
+          maxWidth: 1200,
+          minHeight: '85vh',
+          maxHeight: '85vh',
           bgcolor: 'background.paper',
           boxShadow: 24,
           overflow: 'auto',
@@ -33,7 +52,7 @@ const TemplateModal: React.FC<{ open: boolean, root: string, children: React.Rea
         <Box
           sx={{
             display: 'flex',
-            justifyContent: 'right',
+            justifyContent: 'space-between',
             p: '1rem',
             position: 'sticky',
             top: 0,
@@ -41,6 +60,7 @@ const TemplateModal: React.FC<{ open: boolean, root: string, children: React.Rea
             zIndex: 999,
           }}
         >
+          <Typography variant='h6'><ModalTitle /></Typography>
           <TextButton data-testid="close-modal" onClick={handleClose} >
             <CloseIcon />
           </TextButton>

@@ -47,12 +47,14 @@ The student then uses it:
 
 CurreChat RAG consists of three main parts:
 
-1. Ingestion
+- Ingestion
    - Inputted files are processed, indexed and stored in a database
-2. Search
+- Search/retrieval
    - Given a search string, a search is performed over the database and text results are returned
-3. Tool-calling
+- Tool-calling
    - The search interface is made available to the chat LLM with suitable instructions
+
+CurreChat RAG follows an Agentic RAG paradigm: the RAG tool call in a chat context is initiated by the LLM.
 
 ## Ingestion
 
@@ -77,7 +79,7 @@ so no data is handled by third parties.
 
 The textual content of the source files is split into small sections called chunks. 
 Each chunk is roughly 1000 characters long, with an overlap of 200 characters. Chunks are split on sentence breaks with best effort. 
-In the case of markdown, the splitting is done on headings and section changes.
+In the case of markdown, the splitting is done on headings and section changes. Because of this, markdown can improve the quality of the results.
 
 ### Embedding
 
@@ -92,3 +94,67 @@ A full-text-search index is created over the text content of the chunks, and a s
 
 ## Retrieval
 
+### Tool-calling
+
+> [!NOTE] The CurreChat RAG is initiated by an LLM tool call. Most chat LLMs are trained to perform tool-calls, which allows them to initiate some action with input and optional output. To make tool-calling
+> possible, the LLM must be told the name of the tool, a description of what the tool does and what parameters to input into the tool. This is called the tool definition and it is automatically
+> included in the LLM's context when the tool is made available to it.
+
+In the chat context, instead of answering directly to the user the LLM may initiate a RAG tool call to gather extra information. The interface the LLM has to the RAG tool is roughly as follows:
+```js
+{
+   toolName: 'document_search',
+   description: `Search documents in the materials (titled '${ragIndex.metadata.name}'). 
+      Prefer ${ragIndex.metadata.language}, which is the language used in the documents. 
+      If multiple queries are needed, call this tool multiple times, once for each query.`,
+   schema: {
+      query: 'The query to search for'
+   }
+}
+```
+
+A key feature to remember here is that the LLM itself comes up with the search query or multiple search queries. 
+The Prompt in use and the name of the Source Material Collection have an effect on the query, so some care should be taken
+to make those descriptive of the materials and steer the LLM into making good queries.
+
+Once the tool call is initiated, the search system runs and returns some chunks from the Source Material Collection as results. These are added to the context of the chat.
+
+### Search
+
+To perform the search to retrieve the result, a hybrid search is used. 
+The search dataset contains the chunks of the Source Material Collection.
+
+A hybrid search over the dataset is performed over the dataset using several retrieval methods in parallel:
+
+1. Semantic similarity search using semantic vectors. An embedding vector is created from the query and cosine-similarity is used to return the most similar chunks.
+2. Keyword search using several search queries:
+    - Exact match
+    - Substring match
+    - AND of each query word occuring
+    - OR of each query word occuring
+
+For keyword search, stemming (reduction to base word form) and stop-word removal are used,
+but they require the information about the language of the Source Material Collection. 
+**Multilinguality in one collection is not supported.**
+
+The results of all retrievers are merged using weighted reciprocal rank fusion, with exact match having the highest weight.
+
+The top 15 chunks are selected from the initial retrieval step. 
+
+Next, an experimental LLM-based _curation_ step is performed: 
+each result chunk with the search query is passed to a one-shot LLM prompt using OpenAI's gpt-4o-mini.
+The LLM is prompted to give a structured output containing score and a flag whether to include or exclude the chunk.
+The excluded chunks are filtered from the output and the remaining chunks are ordered based on the score.
+The curation step is useful to improve precision, 
+although it does carry a risk of excluding relevant chunks and therefore reducing recall. 
+In one example Source Material Collection, the number of resulting chunks are usually reduced from 15 to 2-4 and precision is greatly improved.
+
+> [!NOTE]
+> The retrieval pipeline is similar to a systematic literature review, where first an initial
+> search query is created. Then inclusion and exclusion criteria are applied to the results of the initial query
+> to improve precision. Future work could focus on dynamically generating more sophisticated
+> inclusion/exclusion criteria for the curation step.
+
+## RAG performance
+
+How well does CurreChat RAG work? 

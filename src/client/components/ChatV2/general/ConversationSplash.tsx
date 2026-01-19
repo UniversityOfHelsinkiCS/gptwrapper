@@ -1,12 +1,10 @@
 import { Box, Typography } from '@mui/material'
 import hyLogo from '../../../assets/hy_logo.svg'
 import { useTranslation } from 'react-i18next'
-import { formatDate } from '../../Courses/util'
 import { ActivityPeriod } from '../../../types'
 
-export const ConversationSplash = ({ courseName, courseDate }: { courseName?: string; courseDate?: ActivityPeriod }) => {
-  const { t, i18n } = useTranslation()
-  const { language } = i18n
+export const ConversationSplash = ({ courseName, courseDate, promptName }: { courseName?: string; courseDate?: ActivityPeriod, promptName?: string }) => {
+  const { t } = useTranslation()
   return (
     <Box
       sx={{
@@ -31,25 +29,34 @@ export const ConversationSplash = ({ courseName, courseDate }: { courseName?: st
         src={hyLogo}
         alt="University of Helsinki"
         sx={{
-          width: { xs: '140px', sm: '240px', md: '300px' },
+          width: { xs: '80px', sm: '120px', md: '200px' },
           opacity: 0.2,
-          m: '2.5rem 0',
+          mb: '2.5rem',
         }}
       />
-      {courseName ? (
-        <>
-          <Typography variant="h4" fontWeight="bold" sx={{ mb: 1, opacity: 0.5 }}>
-            {courseName}
+
+      <Box sx={{ opacity: 0.5 }}>
+        {courseName ? (
+          <>
+            <Typography
+              fontWeight="bold"
+              sx={{
+                mb: 1,
+                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }
+              }}
+            >
+              {courseName}
+            </Typography>
+            <Typography fontWeight='medium' sx={{ fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' } }}>
+              {promptName}
+            </Typography>
+          </>
+        ) : (
+          <Typography variant="h6" fontStyle="italic" sx={{ mb: 1 }}>
+            {t('chat:start')}
           </Typography>
-          <Typography variant="subtitle1" color="textSecondary">
-            {formatDate(courseDate)}
-          </Typography>
-        </>
-      ) : (
-        <Typography variant="h6" fontStyle="italic" sx={{ mb: 1, opacity: 0.5 }}>
-          {t('chat:start')}
-        </Typography>
-      )}
+        )}
+      </Box>
     </Box>
   )
 }

@@ -1,9 +1,9 @@
 export const InfoTexts = {
   disclaimer: {
-      fi: `
+    fi: `
 CurreChat on Helsingin yliopistossa kehitetty generatiivisen tekoälyn työkalu. Palvelusta vastaa HY:n opetusteknlogiapalvelut (OTE). CurreChat on kehitetty erityisesti opetuksen tarpeisiin. Yleisempään käyttöön suositeltu generatiivisen tekoälyn palvelu yliopistolla on [Microsoft 365 Copilot](hhttps://helpdesk.it.helsinki.fi/help/20071).
 
-**Huom!** CurreChat on aktiivisesti kehitettävä palvelu ja sen toiminnallisuuksiin ja käyttöliittymään voi ajoittain tulla pieniä muutoksia. Hetkelliset käyttökatkot tai toimintahäiriöt ovat mahdollisia. 
+**Huom!** CurreChat on aktiivisesti kehitettävä palvelu ja sen toiminnallisuuksiin ja käyttöliittymään voi ajoittain tulla pieniä muutoksia. Hetkelliset käyttökatkot tai toimintahäiriöt ovat mahdollisia.
 
 ### Pääsy palveluun ja käyttö kursseilla
 
@@ -11,7 +11,7 @@ CurreChat on vapaasti käytettävissä Helsingin yliopiston henkilökunnalle. Yl
 
 ### Käyttörajat
 
-Kehittyneempien kielimallien käyttö on rajattu tiettyyn määrään tokeneita. Henkilökohtaisessa käytössä laskuri nollautuu kuukausittain. Kursseilla opiskelijoilla on käytössään tietty määrä tokeneita koko kurssin ajalle.
+Kehittyneempien kielimallien käyttö on rajattu tiettyyn määrään tokeneita. Henkilökohtaisessa käytössä laskuri nollautuu joka maanantai. Kursseilla opiskelijoilla on käytössään tietty määrä tokeneita koko kurssin ajalle.
 
 Tokenien kulutusta voi vähentää tyhjentämällä keskustelu aina keskustelun aiheen vaihtuessa. Kevyempien mini-päätteisten kielimallien käyttö ei kuluta token-laskuria.
 
@@ -29,8 +29,8 @@ CurreChatissa ei saa käsitellä luottamuksellisia tai salaisia tietoja ja käyt
 - [Generatiivisen tekoälyn käytön yleiset periaatteet](https://flamma.helsinki.fi/s/AHCgm) (Flamma)
 - CurreChatiin liittyvissä kysymyksissä voit olla yhteydessä osoitteeseen [opetusteknologia@helsinki.fi](mailto:opetusteknologia@helsinki.fi)
 `,
-      sv: `
-### Instruktioner för användning av CurreChatVarje användare har tillgång till 150 000 tokens för språkmodellen GPT-4o. Detta saldo återställs varje månad. **För att minska förbrukningen av tokens bör du rensa konversationen** med knappen RADERA KONVERSATION varje gång du byter ämne för konversationen. Användning av språkmodellen GPT-4o-mini förbrukar inte tokens. Du kan se förbrukningen av tokens och den språkmodell som används längst ner i konversationsfönstret.
+    sv: `
+### Instruktioner för användning av CurreChatVarje användare har tillgång till 150 000 tokens för språkmodellen GPT-4o. Detta saldo återställs varje veckas måndag. **För att minska förbrukningen av tokens bör du rensa konversationen** med knappen RADERA KONVERSATION varje gång du byter ämne för konversationen. Användning av språkmodellen GPT-4o-mini förbrukar inte tokens. Du kan se förbrukningen av tokens och den språkmodell som används längst ner i konversationsfönstret.
 
 **När du rensar konversationen raderas den gamla konversationen.**
 
@@ -48,7 +48,7 @@ Mer information om användningen av AI inom utbildning finns på: [https://teach
 
 Vid frågor som rör CurreChat-tjänsten kan du kontakta: [opetusteknologia@helsinki.fi](mailto:opetusteknologia@helsinki.fi)
 `,
-      en: `
+    en: `
 CurreChat is a generative AI tool developed at the University of Helsinki. The service is maintained by the University’s Educational Technology Services (OTE). CurreChat has been designed specifically for the needs of teaching. For more general use, the university recommends [Microsoft 365 Copilot](https://helpdesk.it.helsinki.fi/en/help/20071).
 
 **Note!** CurreChat is an actively developed service, and its functionalities and user interface may occasionally undergo small changes. Temporary outages or malfunctions are possible.
@@ -59,7 +59,7 @@ CurreChat is freely available to the staff of the University of Helsinki. Univer
 
 ### Usage limits
 
-The use of more advanced language models is limited by a set number of tokens. For personal use, the counter resets monthly. In courses, students are provided with a certain number of tokens for the entire course.
+The use of more advanced language models is limited by a set number of tokens. For personal use, the counter resets every Monday. In courses, students are provided with a certain number of tokens for the entire course.
 
 Token consumption can be reduced by clearing the conversation whenever the topic changes. The use of lighter, mini-suffixed language models does not deplenish the user's token quota.
 
@@ -77,5 +77,5 @@ Confidential or secret information must not be processed in CurreChat, and the u
 * [Policy for the use and development of artificial intelligence](https://flamma.helsinki.fi/s/4GSqe) (Flamma)
 * For questions about CurreChat, please contact [edutech@helsinki.fi](mailto:edutech@helsinki.fi)
 `,
-    },
+  },
 }

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, MenuItem, Tab, Tabs } from '@mui/material'
+import { Box, Tab, Tabs } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import useUserCourses, { CoursesViewCourse } from '../../hooks/useUserCourses'
 import useCurrentUser from '../../hooks/useCurrentUser'
@@ -17,6 +17,7 @@ import { BlueButton, GreenButton } from './general/Buttons'
 import Skeleton from '@mui/material/Skeleton'
 import { SettingsOutlined } from '@mui/icons-material'
 import { Course } from 'src/client/types'
+import useOpenCourse from '../../hooks/useOpenCourse'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -35,16 +36,12 @@ const CustomTabPanel = (props: TabPanelProps) => {
 }
 
 const CoursesModal = () => {
-  const [value, setValue] = React.useState(0)
+  const [tab, setTab] = useState(0)
 
   const { t } = useTranslation()
 
   const { user } = useCurrentUser()
   const { courses, isLoading } = useUserCourses()
-
-  const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue)
-  }
 
   if (!courses || isLoading) return <CoursesSkeleton />
 
@@ -55,18 +52,18 @@ const CoursesModal = () => {
   if (isTeacherOrAdmin) {
     return (
       <Box>
-        <Tabs value={value} onChange={handleChange} slotProps={{ indicator: { style: { backgroundColor: 'black' } } }} textColor='inherit'>
+        <Tabs value={tab} onChange={(_: React.SyntheticEvent, newValue: number) => setTab(newValue)} slotProps={{ indicator: { style: { backgroundColor: 'black' } } }} textColor='inherit'>
           <Tab label={t('course:activeTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
           <Tab label={t('course:notActiveTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
           <Tab label={t('course:endedTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
         </Tabs>
-        <CustomTabPanel value={value} index={0}>
+        <CustomTabPanel value={tab} index={0}>
           <CourseList courseUnits={curreEnabled} type="enabled" />
         </CustomTabPanel>
-        <CustomTabPanel value={value} index={1}>
+        <CustomTabPanel value={tab} index={1}>
           <CourseList courseUnits={curreDisabled} type="disabled" />
         </CustomTabPanel>
-        <CustomTabPanel value={value} index={2}>
+        <CustomTabPanel value={tab} index={2}>
           <CourseList courseUnits={ended} type="ended" />
         </CustomTabPanel>
       </Box>
@@ -95,6 +92,7 @@ const CourseList = ({
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
   const { language } = i18n
+  const { openCourse } = useOpenCourse()
 
   const [order, setOrder] = useState<Order>('asc')
   const [orderBy, setOrderBy] = useState<OrderBy>('name')
@@ -202,8 +200,12 @@ const CourseList = ({
                             endIcon={<SettingsOutlined />}
                             onClick={(e) => {
                               e.stopPropagation()
-                              navigate(`/${course.courseId}/course`)
-                            }}
+                              if (window.confirm()){
+                                openCourse(course)
+                              }
+                            }
+
+                          }
                           >
                             {t('course:activate')}
                           </GreenButton>

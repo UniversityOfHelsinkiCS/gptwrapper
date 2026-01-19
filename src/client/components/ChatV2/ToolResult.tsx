@@ -6,10 +6,12 @@ import { useTranslation } from 'react-i18next'
 import { useToolResults } from './api'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { OutlineButtonBlack } from './general/Buttons'
+import { OutlineButtonBlack, TextButton } from './general/Buttons'
 import SubjectIcon from '@mui/icons-material/Subject'
 import type { ToolCallResultEvent } from '../../../shared/chat'
 import type { RagChunk } from '../../../shared/rag'
+import { CustomIcon } from './general/CustomIcon'
+import sidebarOpen from '../../assets/sidebar-open.svg'
 
 const AnnotationTruncated = ({
   data,
@@ -217,11 +219,15 @@ const ToolResult = ({
       <Box
         sx={{
           display: 'flex',
-          justifyContent: 'space-between',
+          gap: 2,
+          ml: -2,
           alignItems: 'center',
           mb: { xs: 2, md: 3 },
         }}
       >
+        <TextButton data-testid="close-annotations" onClick={() => setActiveToolResult(undefined)}>
+          <CustomIcon src={sidebarOpen} />
+        </TextButton>
         <Typography
           variant="h5"
           fontWeight={600}
@@ -235,18 +241,6 @@ const ToolResult = ({
           <Search fontSize="large" sx={{ opacity: 0.8 }} />
           {t('chat:searchResults')}
         </Typography>
-        <IconButton
-          data-testid="close-annotations"
-          sx={{
-            color: 'grey.500',
-            background: '#FFF',
-            opacity: 0.9,
-            zIndex: 1,
-          }}
-          onClick={() => setActiveToolResult(undefined)}
-        >
-          <Close />
-        </IconButton>
       </Box>
       <Queries queries={[toolResult.input?.query ?? '']} />
       {isResultsSuccess ? (
@@ -262,6 +256,7 @@ const ToolResult = ({
           {arrayResults.map((result, i) => (
             <AnnotationTruncated key={i} data={result} relevanceOrder={i + 1} setIsDrawerOpen={setIsDrawerOpen} setSelectedAnnotation={setSelectedAnnotation} />
           ))}
+          {arrayResults.length > 0 ? (
           <OutlineButtonBlack
             sx={{ margin: '1rem auto' }}
             startIcon={<SubjectIcon />}
@@ -272,6 +267,9 @@ const ToolResult = ({
           >
             {t('chat:readMore')}
           </OutlineButtonBlack>
+          ) : (
+            <Typography>{t('chat:noToolResults')}</Typography>
+          )}
         </Box>
       ) : (
         <Typography>{t('chat:failedSources')}</Typography>

@@ -1,7 +1,7 @@
 import { Document } from '@langchain/core/documents'
 import { MarkdownTextSplitter, RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
 import { RagFile, type RagIndex } from '../../db/models'
-import { pdfQueueEvents, submitPdfParsingJobs } from '../jobs/pdfParsing.job'
+import { pdfQueueEvents, simplyParsePdf, submitAdvancedPdfParsingJobs } from '../jobs/pdfParsing.job'
 import { FileStore } from './fileStore'
 import logger from 'src/server/util/logger'
 import type { IngestionJobStatus, IngestionPipelineStageKey } from '@shared/ingestion'
@@ -64,8 +64,9 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
   await updateRagFileStatus(ragFile, { ...update, message: needToParse ? 'Preparing to parse PDF' : 'Found cached text' })
   let finalText: string | null = null
 
-  if (needToParse) {
-    const pages = await submitPdfParsingJobs(ragFile)
+  if (needToParse && (ragIndex.metadata.advancedParsing !== false)) {
+    // Advanced PDF parsing with job processing.
+    const pages = await submitAdvancedPdfParsingJobs(ragFile)
 
     try {
       const start = 5
@@ -91,7 +92,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
 
       const transcriptions: Array<string> = new Array(total)
 
-      for await (const result of jobPromises.map(p => p.then(r => r))) {
+      for await (const result of jobPromises.map((p) => p.then((r) => r))) {
         transcriptions[result.index] = result.text
         completed += 1
 
@@ -116,6 +117,13 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
       await ragFile.update({ error: 'PDF parsing failed', pipelineStage: 'error' })
       return
     }
+  } else if (needToParse) {
+    // Simple PDF parsing.
+    const pages = await simplyParsePdf(ragFile)
+
+    finalText = pages.map((p) => p.text).join('\n\n')
+
+    await FileStore.writeRagFileTextContent(ragFile, finalText)
   } else {
     progress = 50
     finalText = await FileStore.readRagFileTextContent(ragFile)
@@ -176,12 +184,14 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
     eta: 1000,
   })
 
-  await vectorStore.addDocuments(chunkDocuments.map((doc, i) => ({
-    id: doc.id!,
-    content: doc.pageContent,
-    metadata: JSON.stringify(doc.metadata),
-    content_vector: embeddings[i],
-  })))
+  await vectorStore.addDocuments(
+    chunkDocuments.map((doc, i) => ({
+      id: doc.id!,
+      content: doc.pageContent,
+      metadata: JSON.stringify(doc.metadata),
+      content_vector: embeddings[i],
+    })),
+  )
 
   await updateRagFileStatus(ragFile, {
     ...update,

@@ -48,7 +48,8 @@
     "about_service": "About service",
     "loading": "Loading",
     "logout": "Sign out",
-    "copiedToClipboard": "Copied to clipboard"
+    "copiedToClipboard": "Copied to clipboard",
+    "fetchError": "Server error"
   },
   "stats": {
     "timePeriodStart": "Starting",
@@ -128,7 +129,8 @@
     "courseChatEndedInfo": "The course period has ended and the course is no longer available.",
     "courseChatNotActivated": "Not activated",
     "courseChatNotActivatedInfo": "The course has not been activated yet. This means the course chat is not open for students.",
-    "retryMessage": "Retry"
+    "retryMessage": "Retry",
+    "noToolResults": "No results"
   },
   "settings": {
     "prompt": "Conversation prompt",
@@ -339,6 +341,7 @@
     "isSavedForTeacherOptOut": "The course discussions will be saved anonymously, if user grants the permission to save. Saved discussions can be used for research purposes",
     "directPromptLink": "Link to chat with the prompt '{{name}}' active",
     "copyDirectPromptLinkInfo": "Copy a link to chat with the prompt '{{name}}' active",
+    "courseChatLink": "Course chat link",
     "stats": "Statistics",
     "discussions": "Discussions",
     "prompts": "Prompts",
@@ -347,6 +350,7 @@
     "customResponsibility": "manually added",
     "add": "add",
     "sourceMaterials": "Source materials",
+    "moodleEmbedding": "Moodle embedding",
     "settings": "course settings",
     "confirmRemoval": "Confirm removal",
     "notActivated": "Not activated",
@@ -362,7 +366,24 @@
     "teachers": "Teachers",
     "students": "Students",
     "addedFrom": "Added from",
-    "addNew": "Add new responsible"
+    "addNew": "Add new responsible",
+    "courseEmbeddingPrompt": "Course chat prompt",
+    "moodleEmbeddingCode": "Moodle embedding code",
+    "embeddingInstructionsTitle": "Moodle Embedding Instructions",
+    "embeddingInstructionsIntro": "Share the course chat either (A) via a link, or (B) by embedding the Currechat app into a Moodle page.",
+    "onlyLinkTitle": "Course chat link only",
+    "appEmbeddingTitle": "Currechat app embedding",
+    "stepSelectPromptOnRight": "Select course chat prompt on the right",
+    "stepCopyLink": "Copy course chat link",
+    "stepCopyEmbeddingCode": "Copy Moodle embedding code",
+    "stepOpenMoodleSettings": "Open Moodle section settings (Edit settings)",
+    "stepOpenSourceCode": "Open source code (View → Source code)",
+    "stepPasteAndSave": "Paste the embedding code and save",
+    "altOpenSettings": "Moodle open settings",
+    "altSourceView": "Moodle open source code view",
+    "altPasteSave": "Moodle source embedding and save",
+    "deActivate": "close for students",
+    "courseActivated": "Course activated"
   },
   "prompt": {
     "createNew": "Create new prompt",
@@ -382,7 +403,27 @@
     "defaultRagMessage": "If the user refers to source materials or mentions 'materials', use the document_search tool to retrieve information from the sources. Incorporate the results into your answer.",
     "enforceRagMessage": "All answers must be based on the source materials. Always use the document_search tool and do not add information that is not found in the sources.",
     "unknownRagMessage": "If the answer cannot be found in the source materials, tell the user directly that no answer is available from the sources.",
-    "courseSourceMaterials": "Edit course's source materials"
+    "courseSourceMaterials": "Edit course's source materials",
+    "edit": "Edit",
+    "preview": "Preview",
+    "defaultChatInstructions": "You are interacting with a chat interface that has a pre-defined system prompt. This means the AI has been given a specific role, personality, or set of rules to follow.\n\n**How to start:**\n* Simply type **\"Hello\"** or ask a question to see how it responds.\n* The AI will adhere to its hidden instructions while chatting with you.",
+    "studentViewInfoAlert": "This view is visible to students in the \"Prompt Information\" section.",
+    "promptName": "Prompt name",
+    "promptInstructions": "User instructions",
+    "systemMessageLabel": "System message",
+    "noSystemMessage": "No system message",
+    "promptBasicInfo": "Basic prompt information",
+    "studentInstructionsLabel": "Instructions for students on prompt usage",
+    "promptModelSettings": "Prompt model settings",
+    "hideSystemInstructions": "Hide system instructions from students",
+    "selectedModelLabel": "Selected model for the prompt",
+    "systemMessagePlaceholder": "e.g., You are a helpful assistant.",
+    "promptSourceMaterialData": "Prompt source material data",
+    "selectedSourceMaterial": "Selected source material",
+    "modelSourceMaterialInstructions": "Source material instructions for the model",
+    "promptDescription": "Prompt description",
+    "myPrompt": "My prompt",
+    "missingPromptName": "Prompt name is missing"
   },
   "tooltip": {
     "copied": "Copied!"
@@ -458,7 +499,11 @@
     "filesIngesting": "Processing files. You can leave the page.",
     "allCompleted": "Done processing.",
     "swedish": "Swedish",
-    "readMoreAboutRag": "Read more about CurreChat's source material feature"
+    "readMoreAboutRag": "Read more about CurreChat's source material feature",
+    "advancedParsingGuide": "Use AI-based PDF-parsing? If your PDFs contain charts, images, equations or other complex layouts, this can improve the text conversion quality of the source material, but may result in hallucinations. Also note: AI-based parsing can take several minutes.",
+    "advancedParsing": "AI-based parsing",
+    "nameUpdateSuccess": "Name updated",
+    "nameUpdateError": "Error: name could not be updated"
   },
   "embeddedLogin": {
     "helpText": "Successfully logged in. You may close this window."

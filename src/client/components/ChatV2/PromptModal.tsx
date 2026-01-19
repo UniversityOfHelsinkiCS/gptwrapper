@@ -1,12 +1,11 @@
-import DeleteOutline from '@mui/icons-material/DeleteOutline'
+import { PUBLIC_URL } from '@config'
 import { ContentCopyOutlined, Visibility, VisibilityOff } from '@mui/icons-material'
-import { Box, Divider, IconButton, MenuItem, Tab, Tabs, Link, Tooltip, Typography } from '@mui/material'
+import DeleteOutline from '@mui/icons-material/DeleteOutline'
+import { Box, Dialog, Divider, IconButton, Link, MenuItem, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
-
-import { PUBLIC_URL } from '@config'
 import useCourse from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Prompt as PromptType } from '../../types'
@@ -25,9 +24,7 @@ const PromptModal = () => {
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
 
-  const amongResponsibles = chatInstance?.responsibilities
-    ? chatInstance.responsibilities.some((r) => r.user.id === user?.id)
-    : false
+  const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
 
   const handleSelect = (prompt?: PromptType) => {
     handleChangePrompt(prompt)
@@ -39,7 +36,9 @@ const PromptModal = () => {
     try {
       if (confirm(t('settings:confirmDeletePrompt', { name: prompt.name }))) {
         await deletePromptMutation(prompt.id)
-        enqueueSnackbar(`${t('common:delete')} ${prompt.name}`, { variant: 'success' })
+        enqueueSnackbar(`${t('common:delete')} ${prompt.name}`, {
+          variant: 'success',
+        })
       }
     } catch (error) {
       enqueueSnackbar(`Error: ${error}`, { variant: 'error' })
@@ -68,85 +67,61 @@ const PromptModal = () => {
   const canCreatePrompt = courseId === 'general' || tab === 1 || amongResponsibles
 
   const renderPromptItem = (prompt: PromptType, isPersonal: boolean) => (
-    <>
-      <MenuItem
-        key={prompt.id}
-        data-testid="pick-prompt-button"
-        selected={prompt.id === activePrompt?.id}
-        onClick={() => handleSelect(prompt)}
-        sx={{ borderRadius: '1.25rem', display: 'flex', alignItems: 'center', gap: 1 }}
-      >
-        <Box sx={{ flexGrow: 1 }}>{prompt.name}</Box>
+    <MenuItem
+      key={prompt.id}
+      data-testid="pick-prompt-button"
+      selected={prompt.id === activePrompt?.id}
+      onClick={() => handleSelect(prompt)}
+      sx={{
+        borderRadius: '1.25rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+      }}
+    >
+      <Box sx={{ flexGrow: 1 }}>{prompt.name}</Box>
+      {!isPersonal && (
+        <>
+          {prompt.hidden ? (
+            <Tooltip title={t('hiddenPromptInfo')}>
+              <VisibilityOff />
+            </Tooltip>
+          ) : (
+            <Tooltip title={t('visiblePromptInfo')}>
+              <Visibility />
+            </Tooltip>
+          )}
+          <Link component={RouterLink} to={`/${courseId}?promptId=${prompt.id}`} variant="caption" onClick={(e) => e.stopPropagation()}>
+            {t('course:directPromptLink', { name: prompt.name })}
+          </Link>
+          <TextButton onClick={(e) => handleCopyLink(e, prompt.id)} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ContentCopyOutlined fontSize="small" />
+            {t('copyStudentLink')}
+          </TextButton>
+        </>
+      )}
 
-        {!createNewOpen && (
-          <>
-            {!isPersonal && (
-              <>
-                {prompt.hidden ? (
+      {(isPersonal || amongResponsibles) && (
+        <>
+          <TextButton onClick={(e) => handleEdit(e, prompt)} color="primary" data-testid={`edit-prompt-${prompt.name}`} aria-label={t('common:edit')}>
+            {t('common:edit')}
+          </TextButton>
 
-                  <Tooltip title={t('hiddenPromptInfo')}>
-                    <VisibilityOff />
-                  </Tooltip>
-                ) : (
-                  <Tooltip title={t('visiblePromptInfo')}>
-                    <Visibility
-                    />
-                  </Tooltip>
-                )}
-                <Link
-                  component={RouterLink}
-                  to={`/${courseId}?promptId=${prompt.id}`}
-                  variant="caption"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {t('course:directPromptLink', { name: prompt.name })}
-                </Link>
-                <TextButton
-                  onClick={(e) => handleCopyLink(e, prompt.id)}
-                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                >
-                  <ContentCopyOutlined fontSize="small" />
-                  {t('copyStudentLink')}
-                </TextButton>
-              </>
-            )}
-
-            {(isPersonal || amongResponsibles) && (
-              <>
-                <TextButton
-                  onClick={(e) => handleEdit(e, prompt)}
-                  color="primary"
-                  data-testid={`edit-prompt-${prompt.name}`}
-                  aria-label={t('common:edit')}
-                >
-                  {t('common:edit')}
-                </TextButton>
-
-                <IconButton
-                  onClick={(event) => handleDelete(event, prompt)}
-                  size="small"
-                  aria-label={t('common:delete')}
-                  data-testid={`delete-prompt-${prompt.name}`}
-                >
-                  <DeleteOutline fontSize="small" />
-                </IconButton>
-              </>
-            )}
-          </>
-        )}
-      </MenuItem>
-      <Divider />
-    </>
+          <IconButton
+            onClick={(event) => handleDelete(event, prompt)}
+            size="small"
+            aria-label={t('common:delete')}
+            data-testid={`delete-prompt-${prompt.name}`}
+          >
+            <DeleteOutline fontSize="small" />
+          </IconButton>
+        </>
+      )}
+    </MenuItem>
   )
 
   const renderPromptList = (prompts: PromptType[], isPersonal: boolean) => (
-    <Box>
-      {prompts.length > 0 && (
-        <Box>
-          {prompts.map((prompt) => renderPromptItem(prompt, isPersonal))}
-        </Box>
-      )}
-    </Box>
+    <Box>{prompts.length > 0 && <Stack divider={<Divider flexItem />}>{prompts.map((prompt) => renderPromptItem(prompt, isPersonal))}</Stack>}</Box>
   )
 
   return (
@@ -154,66 +129,45 @@ const PromptModal = () => {
       <Tabs
         sx={{ borderBottom: 1, borderColor: 'divider' }}
         value={tab}
-        onChange={(_, newValue) => { setTab(newValue); setCreateNewOpen(false) }}
-        slotProps={{
-          indicator: { style: { backgroundColor: 'black' } }
+        onChange={(_, newValue) => {
+          setTab(newValue)
+          setCreateNewOpen(false)
         }}
-        textColor='inherit'
+        slotProps={{
+          indicator: { style: { backgroundColor: 'black' } },
+        }}
+        textColor="inherit"
       >
         {courseId !== 'general' && <Tab label={t('settings:coursePrompts')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />}
         <Tab label={t('settings:myPrompts')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
       </Tabs>
       <Box sx={{ display: 'flex', flex: 1, gap: 2, overflow: 'hidden', mt: 2 }}>
-        <Box sx={{ flex: createNewOpen ? '0 0 20%' : '1', overflowY: 'auto', paddingRight: 1 }}>
-          {!createNewOpen && canCreatePrompt && (
+        <Box sx={{ flex: '1', overflowY: 'auto', paddingRight: 1 }}>
+          {canCreatePrompt && (
             <>
-              <OutlineButtonBlack
-                data-testid="create-prompt-button"
-                sx={{ mb: 2 }}
-                onClick={handleCreateNew}
-              >
+              <OutlineButtonBlack data-testid="create-prompt-button" sx={{ mb: 2 }} onClick={handleCreateNew}>
                 {t('settings:saveNewPrompt')}
               </OutlineButtonBlack>
-              <MenuItem
-                selected={activePrompt === undefined}
-                sx={{ borderRadius: '1.25rem', py: 1.5 }}
-                onClick={() => handleSelect(undefined)}
-              >
+              <MenuItem selected={activePrompt === undefined} sx={{ borderRadius: '1.25rem', py: 1.5 }} onClick={() => handleSelect(undefined)}>
                 {t('settings:noPrompt')}
               </MenuItem>
               <Divider sx={{ my: 1 }} />
             </>
           )}
 
-          {courseId !== 'general' && tab === 0 && (
-            <>
-              {renderPromptList(coursePrompts, false)}
-            </>
-          )}
+          {courseId !== 'general' && tab === 0 && <>{renderPromptList(coursePrompts, false)}</>}
 
-          {(courseId === 'general' || tab === 1) && (
-            <>
-              {renderPromptList(myPrompts, true)}
-            </>
-          )}
+          {(courseId === 'general' || tab === 1) && <>{renderPromptList(myPrompts, true)}</>}
 
-          {myPrompts.length === 0 && coursePrompts.length === 0 && (
-            <MenuItem disabled>{t('settings:noPrompts')}</MenuItem>
-          )}
+          {myPrompts.length === 0 && coursePrompts.length === 0 && <MenuItem disabled>{t('settings:noPrompts')}</MenuItem>}
         </Box>
-        {createNewOpen && (
-          <Box sx={{ flex: '1', overflowY: 'auto', borderLeft: 1, borderColor: 'divider', paddingLeft: 2 }}>
 
-            {courseId !== 'general' && tab === 0 && (
-              <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} />
-            )}
-            {(courseId === 'general' || tab === 1) && (
-              <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} personal />
-            )}
-          </Box>
-        )}
+        <Dialog open={createNewOpen} onClose={() => setCreateNewOpen(false)}>
+          {courseId !== 'general' && tab === 0 && <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} />}
+          {(courseId === 'general' || tab === 1) && <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} personal />}
+        </Dialog>
       </Box>
-    </Box >
+    </Box>
   )
 }
 

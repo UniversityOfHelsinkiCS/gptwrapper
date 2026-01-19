@@ -1,20 +1,10 @@
-import type { ValidModelName } from '@config'
 import { validModels } from '@config'
 import {
   Box,
-  Checkbox,
   CircularProgress,
-  Collapse,
   DialogActions,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  InputLabel,
-  MenuItem,
-  Select,
-  Slider,
-  TextField,
-  Typography,
+  Tabs,
+  Tab
 } from '@mui/material'
 import type { Message } from '@shared/chat'
 import { enqueueSnackbar } from 'notistack'
@@ -23,58 +13,113 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
-import { BlueButton, LinkButtonHoc, OutlineButtonBlue } from '../ChatV2/general/Buttons'
+import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
-import OpenableTextfield from '../common/OpenableTextfield'
-import { ClearOutlined, LibraryBooksOutlined } from '@mui/icons-material'
+import { PromptEditorFormContext } from './context'
+import { PromptEditorForm } from './PromptEditorForm'
+import { PromptEditorPreview } from './PromptEditorPreview'
+import { PromptEditorFormContextValue, PromptEditorFormState } from 'src/client/types'
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+const TabPanel = (props: TabPanelProps) => {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`prompt-editor-tabpanel-${index}`}
+      aria-labelledby={`prompt-editor-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+    </div>
+  );
+}
+
 
 export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string; setEditorOpen?: React.Dispatch<boolean>; personal?: boolean }) => {
+  const [tab, setTab] = useState(0);
+
+  const handleChange = (_: React.SyntheticEvent, newValue: number) => {
+    setTab(newValue);
+  };
+
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { courseId } = useParams() as { courseId: string }
   const { data: chatInstance } = useCourse(courseId)
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
+  const [loading, setLoading] = useState<boolean>(false)
+  const { activePrompt, createPromptMutation, editPromptMutation } = usePromptState()
 
-  const { activePrompt: prompt, createPromptMutation, editPromptMutation } = usePromptState()
   let type: 'CHAT_INSTANCE' | 'PERSONAL' = 'CHAT_INSTANCE'
   if (courseId && courseId !== 'general') type = 'CHAT_INSTANCE'
   if (personal) type = 'PERSONAL'
-  if (prompt) type = prompt.type
+  if (activePrompt) type = activePrompt.type
 
-  const [name, setName] = useState<string>(prompt?.name ?? '')
-  const [systemMessage, setSystemMessage] = useState<string>(prompt?.systemMessage ?? '')
-  const [ragSystemMessage, setRagSystemMessage] = useState<string>(() =>
-    prompt ? prompt.messages?.find((m: Message) => m.role === 'system')?.content as string || '' : t('prompt:defaultRagMessage'),
-  )
-  const [hidden, setHidden] = useState<boolean>(prompt?.hidden ?? false)
-  const [ragIndexId, setRagIndexId] = useState<number | undefined | null>(prompt?.ragIndexId)
+  const [form, setForm] = useState<PromptEditorFormState>({
+    name: activePrompt?.name ?? '',
+    userInstructions: activePrompt?.userInstructions ?? '',
+    systemMessage: activePrompt?.systemMessage ?? '',
+    ragSystemMessage: activePrompt
+      ? (activePrompt.messages?.find((m: Message) => m.role === 'system')?.content as string) || ''
+      : t('prompt:defaultRagMessage'),
+    hidden: activePrompt?.hidden ?? false,
+    ragIndexId: activePrompt?.ragIndexId ?? null,
+    selectedModel: activePrompt?.model ?? 'none',
+    temperatureDefined: activePrompt?.temperature !== undefined,
+    temperature: activePrompt?.temperature ?? 0.5,
+  })
 
-  const [selectedModel, setModel] = useState<ValidModelName | 'none'>(prompt?.model ?? 'none')
-
-  const [temperatureDefined, setTemperatureDefined] = useState<boolean>(prompt?.temperature !== undefined)
-  const [temperature, setTemperature] = useState<number>(prompt?.temperature ?? 0.5)
-
-  const [loading, setLoading] = useState<boolean>(false)
+  const modelHasTemperature =
+    form.selectedModel && 'temperature' in (validModels.find((m) => m.name === form.selectedModel) ?? {})
 
   useEffect(() => {
-    const selectedModelConfig = validModels.find((m) => m.name === selectedModel)
+    const selectedModelConfig = validModels.find((m) => m.name === form.selectedModel)
     if (selectedModelConfig && 'temperature' in selectedModelConfig) {
-      setTemperature(selectedModelConfig.temperature)
-      setTemperatureDefined(false)
+      setForm((prev) => ({
+        ...prev,
+        temperature: selectedModelConfig.temperature,
+        temperatureDefined: false,
+      }))
     }
-  }, [selectedModel])
+  }, [form.selectedModel])
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+
+    if (!form.name) {
+      enqueueSnackbar(t('prompt:missingPromptName'), { variant: 'error' })
+      return
+    }
+
     setLoading(true)
+
+    const {
+      name,
+      userInstructions,
+      systemMessage,
+      ragSystemMessage,
+      hidden,
+      ragIndexId,
+      selectedModel,
+      temperature
+    } = form
 
     const messages: Message[] = ragIndexId && ragSystemMessage.length > 0 ? [{ role: 'system', content: ragSystemMessage }] : []
 
     try {
-      if (prompt) {
+      if (activePrompt) {
         await editPromptMutation({
-          id: prompt.id,
+          id: activePrompt.id,
           name,
+          userInstructions,
           systemMessage,
           messages,
           hidden,
@@ -87,6 +132,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
         await createPromptMutation({
           name,
           type,
+          userInstructions,
           ...(type === 'CHAT_INSTANCE' ? { chatInstanceId: chatInstance?.id } : {}),
           systemMessage,
           messages,
@@ -106,144 +152,46 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
     }
   }
 
-  /**
-   * If model has temperature, temperature is not relevant option and should not be shown to user.
-   */
-  const modelHasTemperature = selectedModel && 'temperature' in (validModels.find((m) => m.name === selectedModel) ?? {})
+  const context: PromptEditorFormContextValue = {
+    form,
+    setForm,
+    type,
+    ragIndices,
+    courseId,
+    modelHasTemperature,
+  }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Box sx={{ mt: 2, display: 'flex', gap: '1rem' }}>
-        <Box sx={{ flex: 1 }} component="section">
-          <Typography component="h3" gutterBottom>
-            {t('prompt:basicInformation')}
-          </Typography>
-          <TextField
-            slotProps={{
-              htmlInput: {
-                'data-testid': 'prompt-name-input',
-                minLength: 3,
-              },
-            }}
-            label={t('common:promptName')}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            fullWidth
-            margin="normal"
-          />
-          {type !== 'PERSONAL' && (
-            <FormControlLabel control={<Checkbox checked={hidden} onChange={(e) => setHidden(e.target.checked)} />} label={t('prompt:hidePrompt')} />
-          )}
-          <FormControl fullWidth margin="normal">
-            <InputLabel sx={{ background: 'white', px: 0.75, ml: -0.75 }}>{t('common:model')}</InputLabel>
-            {/* sx to offset label padding so it matches inputlabel of text fields */}
-            <Select value={selectedModel || ''} onChange={(e) => setModel(e.target.value as ValidModelName | 'none')}>
-              <MenuItem value="none">
-                <em>{t('prompt:modelFreeToChoose')}</em>
-              </MenuItem>
-              {validModels.map((m) => (
-                <MenuItem key={m.name} value={m.name}>
-                  {m.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={temperatureDefined && !modelHasTemperature}
-                onChange={(e) => setTemperatureDefined(e.target.checked)}
-                disabled={modelHasTemperature}
-              />
-            }
-            label={t('chat:temperature')}
-          />
-          <Collapse in={temperatureDefined && !modelHasTemperature}>
-            <Slider
-              value={temperature}
-              onChange={(_, newValue) => setTemperature(newValue as number)}
-              aria-labelledby="temperature-slider"
-              valueLabelDisplay="auto"
-              step={0.1}
-              min={0}
-              max={1}
-              disabled={modelHasTemperature}
-              sx={{ mb: -1 }}
-            />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="body2">{t('chat:predictableTemperature')}</Typography>
-              <Typography variant="body2">{t('chat:creativeTemperature')}</Typography>
-            </Box>
-          </Collapse>
-        </Box>
-        <Box sx={{ flex: 2 }} component="section">
-          <Typography component="h3" gutterBottom>
-            {t('prompt:context')}
-          </Typography>
-          {type === 'CHAT_INSTANCE' && (
-            <Box display="flex" justifyContent="space-around" alignItems="center">
-              <FormControl fullWidth margin="normal">
-                <InputLabel sx={{ background: 'white', px: 0.75, ml: -0.75 }}>{t('rag:sourceMaterials')}</InputLabel>
-                <Select data-testid="rag-select" value={ragIndexId || ''} onChange={(e) => setRagIndexId(e.target.value ? Number(e.target.value) : undefined)}>
-                  <MenuItem value="" data-testid="no-source-materials">
-                    <em>{t('prompt:noSourceMaterials')}</em> <ClearOutlined sx={{ ml: 1 }} />
-                  </MenuItem>
-                  {ragIndices?.map((index) => (
-                    <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
-                      {index.metadata.name}
-                    </MenuItem>
-                  ))}
-                  <Divider />
-                  <LinkButtonHoc button={MenuItem} to={`/${courseId}/course/rag`}>
-                    {t('prompt:courseSourceMaterials')} <LibraryBooksOutlined sx={{ ml: 1 }} />
-                  </LinkButtonHoc>
-                </Select>
-              </FormControl>
-            </Box>
-          )}
-          <Collapse in={!!ragIndexId}>
-            <OpenableTextfield
-              value={ragSystemMessage}
-              onChange={(e) => setRagSystemMessage(e.target.value)}
-              onAppend={(text) => setRagSystemMessage((prev) => prev + (prev.trim().length ? ' ' : '') + text)}
-              slotProps={{
-                htmlInput: { 'data-testid': 'rag-system-message-input' },
-              }}
-              label={t('prompt:ragSystemMessage')}
-              fullWidth
-              margin="normal"
-              multiline
-              minRows={2}
-              maxRows={12}
-            />
-          </Collapse>
-          <TextField
-            slotProps={{
-              htmlInput: {
-                'data-testid': 'system-message-input',
-              },
-            }}
-            label={t('prompt:systemMessage')}
-            value={systemMessage}
-            onChange={(e) => setSystemMessage(e.target.value)}
-            fullWidth
-            margin="normal"
-            multiline
-            minRows={12}
-            maxRows={48}
-            sx={{ flex: 1 }}
-          />
-        </Box>
+    <PromptEditorFormContext.Provider value={context}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }} >
+        <Tabs value={tab} onChange={handleChange} aria-label="prompt-editor-tabs" slotProps={{ indicator: { style: { backgroundColor: 'black' } } }} textColor='inherit'>
+          <Tab label={t('prompt:edit')} />
+          <Tab label={t('prompt:preview')} />
+        </Tabs>
       </Box>
-      <DialogActions>
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-          {loading && <CircularProgress color="secondary" />}
-          {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
-          <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
-            {t('common:save')}
-          </BlueButton>
-        </Box>
-      </DialogActions>
-    </form>
-  )
+
+      <form onSubmit={handleSubmit}>
+        <TabPanel value={tab} index={0}>
+          <PromptEditorForm />
+        </TabPanel>
+        <TabPanel value={tab} index={1}>
+          <PromptEditorPreview />
+        </TabPanel>
+
+        <DialogActions>
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+            {loading && <CircularProgress color="secondary" />}
+            {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
+            <OutlineButtonBlue disabled={loading} variant="contained" sx={{ ml: 1 }} onClick={() => tab === 0 ? setTab(1) : setTab(0)}>
+              {tab === 1 ? t('prompt:edit') : t('prompt:preview')}
+            </OutlineButtonBlue>
+            <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
+              {t('common:save')}
+            </BlueButton>
+          </Box>
+        </DialogActions>
+      </form>
+    </PromptEditorFormContext.Provider>
+  );
 }
+

@@ -1,31 +1,31 @@
-import { useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
 import {
   Box,
-  TableContainer,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Table,
-  Select,
-  MenuItem,
-  Tooltip,
-  Link,
   Container,
   IconButton,
+  Link,
+  MenuItem,
+  Paper,
+  Select,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography,
 } from '@mui/material'
+import type { Statistic } from '@shared/types'
+import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link as RouterLink } from 'react-router-dom'
-import useStatistics from '../hooks/useStatistics'
-import programme from '../locales/programme.json'
-import faculties from '../locales/faculties.json'
-import useCurrentUser from '../hooks/useCurrentUser'
 import * as xlsx from 'xlsx'
-import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
-import { Statistic } from '@shared/types'
+import useCurrentUser from '../hooks/useCurrentUser'
+import useStatistics from '../hooks/useStatistics'
+import faculties from '../locales/faculties.json'
+import programme from '../locales/programme.json'
 
 /**
  * React-router compatible lazy loaded component for Statistics page
@@ -42,16 +42,16 @@ export function Component() {
   const dataDownloadLink = useRef<HTMLAnchorElement | null>(null)
 
   useEffect(() => {
-    if(isSuccess){
+    if (isSuccess) {
       // sets the default to be the current year, the highest id is the end of the current year and the one below that is the start of current year
-      const statisticsSortedById = statistics.terms.sort((a, b,) => b.id - a.id)
-      if(statisticsSortedById.length >= 2){
+      const statisticsSortedById = statistics.terms.sort((a, b) => b.id - a.id)
+      if (statisticsSortedById.length >= 2) {
         const fromId = statisticsSortedById[1]
         const toId = statisticsSortedById[0]
         setFrom(fromId.id)
         setTo(toId.id)
       }
-     console.log(statisticsSortedById)
+      console.log(statisticsSortedById)
     }
   }, [isSuccess])
 
@@ -65,7 +65,7 @@ export function Component() {
   }
 
   const selectTerms = () => {
-    if(!to || !from){
+    if (!to || !from) {
       return []
     }
     return Array.from({ length: to - from + 1 }, (_, i) => i + from)
@@ -86,13 +86,6 @@ export function Component() {
 
   const statsToShow = statistics.data.filter(termWithin).filter(belongsToFaculty).sort(byUsage)
 
-  const exportToExcel = (jsonData: any) => {
-    const book = xlsx.utils.book_new()
-    const sheet = xlsx.utils.json_to_sheet(jsonData)
-    xlsx.utils.book_append_sheet(book, sheet, 'Tilastot')
-    xlsx.writeFile(book, 'statistics.xlsx')
-  }
-
   const exportToCSV = (jsonData: any) => {
     //const book = xlsx.utils.book_new()
     const sheet = xlsx.utils.json_to_sheet(jsonData)
@@ -103,12 +96,12 @@ export function Component() {
     if (dataDownloadLink?.current) {
       dataDownloadLink.current.href = url
       const fromTerm = statistics.terms.find((term) => term.id === from)
-      const fromTermName = fromTerm?.label[language].replace(/ /g, "_")
+      const fromTermName = fromTerm?.label[language].replace(/ /g, '_')
 
       const toTerm = statistics.terms.find((term) => term.id === to)
-      const toTermName = toTerm?.label[language].replace(/ /g, "_")
-  
-      const filename = 'currechat_from_'+fromTermName+'_to_'+toTermName+'_'+selectedFaculty
+      const toTermName = toTerm?.label[language].replace(/ /g, '_')
+
+      const filename = 'currechat_from_' + fromTermName + '_to_' + toTermName + '_' + selectedFaculty
       dataDownloadLink.current.download = filename
 
       dataDownloadLink.current.click()
@@ -125,36 +118,34 @@ export function Component() {
         Students: chat.students,
         UsedTokens: chat.usedTokens,
         PromptCount: chat.promptCount,
-        RagIndicesCount: chat.ragIndicesCount
+        RagIndicesCount: chat.ragIndicesCount,
       }
     })
     exportToCSV(mangledStatistics)
   }
-  
 
   const handleToChange = (e) => {
-   // in case of: from: 2026 and to 2024, lets change to into from
-   const newVal = parseInt(e.target.value as string, 10)   
-   if(from && from > newVal){
-     setTo(from)
-   }else{
-    setTo(newVal)
-   }
- }
-const handleFromChange = (e) => {
-   const newVal = parseInt(e.target.value as string, 10)   // in case of: from: 2026 and to 2024, lets change to into from
-   if(to && newVal > to){
-     setTo(newVal)
+    // in case of: from: 2026 and to 2024, lets change to into from
+    const newVal = parseInt(e.target.value as string, 10)
+    if (from && from > newVal) {
+      setTo(from)
+    } else {
+      setTo(newVal)
+    }
   }
-  setFrom(newVal)
- }
+  const handleFromChange = (e) => {
+    const newVal = parseInt(e.target.value as string, 10) // in case of: from: 2026 and to 2024, lets change to into from
+    if (to && newVal > to) {
+      setTo(newVal)
+    }
+    setFrom(newVal)
+  }
 
   const readTermFilter = (term) => {
-    if(term){
+    if (term) {
       return term
-    }
-    else{
-      return 0 
+    } else {
+      return 0
     }
   }
   return (
@@ -206,8 +197,8 @@ const handleFromChange = (e) => {
 
         <TableContainer component={Paper}>
           <Table>
-          <TableHead>
-           <TableRow>
+            <TableHead>
+              <TableRow>
                 <TableCell align="left">
                   <Typography variant="h6">
                     <b>{t('stats:courseCodes')}</b>
@@ -243,16 +234,15 @@ const handleFromChange = (e) => {
                     <b>{t('stats:promptCount')}</b>
                   </Typography>
                 </TableCell>
-                 <TableCell align="left">
+                <TableCell align="left">
                   <Typography variant="h6">
                     <b>{t('stats:rags')}</b>
                   </Typography>
                 </TableCell>
               </TableRow>
-           </TableHead>
+            </TableHead>
             <TableBody>
-
-              <SumRow statsToShow={statsToShow}/>
+              <SumRow statsToShow={statsToShow} />
 
               {statsToShow.map((chat) => (
                 <TableRow key={chat.id}>
@@ -261,7 +251,7 @@ const handleFromChange = (e) => {
                   </TableCell>
                   <TableCell align="left">
                     {user?.isAdmin ? (
-                      <Link to={`/courses/${chat.id}`} component={RouterLink}>
+                      <Link to={`/${chat.id}/course`} component={RouterLink}>
                         <Typography>{chat.name[language]}</Typography>
                       </Link>
                     ) : (
@@ -298,56 +288,42 @@ const handleFromChange = (e) => {
   )
 }
 
-const SumRow = ({statsToShow}) => {
+const SumRow = ({ statsToShow }) => {
   const { t, i18n } = useTranslation()
   const columnSum = (column: string) => {
-     if(!statsToShow){
-       return 0
-     }
-     const columnValues = statsToShow.map((chat) => chat[column])
-     if(columnValues.length > 0){
-       return columnValues.reduce((a, b) => a + b)
-     }else{
-       return 0
-     }
+    if (!statsToShow) {
+      return 0
+    }
+    const columnValues = statsToShow.map((chat) => chat[column])
+    if (columnValues.length > 0) {
+      return columnValues.reduce((a, b) => a + b)
+    } else {
+      return 0
+    }
   }
   const statsToShowLength = statsToShow ? statsToShow.length : 0
   const statsMessage = t('stats:sum')
-   return(
+  return (
     <TableRow>
       <TableCell align="left">
-         <Typography variant="h6">
-          {statsMessage}
-        </Typography>
+        <Typography variant="h6">{statsMessage}</Typography>
       </TableCell>
       <TableCell>
-         <Typography variant="h6">
-            {statsToShowLength + ' '+t('stats:courses')}
-        </Typography>
+        <Typography variant="h6">{statsToShowLength + ' ' + t('stats:courses')}</Typography>
+      </TableCell>
+      <TableCell align="left"></TableCell>
+      <TableCell align="left"></TableCell>
+      <TableCell align="left">
+        <Typography variant="h6">{columnSum('students')}</Typography>
       </TableCell>
       <TableCell align="left">
+        <Typography variant="h6">{columnSum('usedTokens')}</Typography>
       </TableCell>
       <TableCell align="left">
-     </TableCell>
-      <TableCell align="left">
-        <Typography variant="h6">
-          {columnSum('students')}
-        </Typography>
+        <Typography variant="h6">{columnSum('promptCount')}</Typography>
       </TableCell>
       <TableCell align="left">
-        <Typography variant="h6">
-          {columnSum('usedTokens')}
-        </Typography>
-      </TableCell>
-      <TableCell align="left">
-        <Typography variant="h6">
-          {columnSum('promptCount')}
-        </Typography>
-      </TableCell>
-      <TableCell align="left">
-        <Typography variant="h6">
-          {columnSum('ragIndicesCount')}
-        </Typography>
+        <Typography variant="h6">{columnSum('ragIndicesCount')}</Typography>
       </TableCell>
     </TableRow>
   )

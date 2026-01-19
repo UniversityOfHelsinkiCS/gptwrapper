@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react'
-import { createBrowserRouter, createRoutesFromElements, Navigate, Route, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, createRoutesFromElements, Navigate, Route, RouterProvider, useParams } from 'react-router-dom'
 
 import { PUBLIC_URL } from '../config'
 import App from './App'
@@ -15,12 +15,21 @@ import { EmbeddedLoginHelper } from './components/EmbeddedLoginHelper'
 
 const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
 
+const V2Redirect = () => {
+  const { path } = useParams()
+  
+  return <Navigate to={`/${path}`} replace />
+}
+
 const router = sentryCreateBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />} ErrorBoundary={ErrorPage}>
       <Route path="/" element={<Navigate to="/general" />} />
+      {/* Redirect from previously used v2 paths to root */}
+      <Route path="/v2/:path" element={<V2Redirect />} />
+      <Route path="/v2" element={<Navigate to="/" replace />} />
+
       <Route path="/admin/*" lazy={() => import('./components/Admin')} />
-      {/* <Route path="/courses/:courseId/*" lazy={() => import('./components/Courses/Course')} /> */}
       <Route path="/noaccess" element={<NoAccess />} />
       <Route path="/chats" element={<Chats />} />
       <Route path="/statistics" lazy={() => import('./components/Statistics')} />

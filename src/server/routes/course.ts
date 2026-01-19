@@ -303,6 +303,15 @@ courseRouter.put('/:id', async (req, res) => {
 
   if (!chatInstance) throw ApplicationError.NotFound('ChatInstance not found')
 
+
+  const request = req as unknown as RequestWithUser
+  const { user } = request
+  const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
+  if (!hasPermission) {
+    res.status(401).send('Unauthorized')
+    return
+  }
+
   chatInstance.activityPeriod = activityPeriod
   chatInstance.usageLimit = usageLimit
   if (saveDiscussions !== undefined) {

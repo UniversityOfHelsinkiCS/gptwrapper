@@ -1,5 +1,7 @@
+import { ContentCopy, CopyAll } from '@mui/icons-material'
 import {
   Alert,
+  Badge,
   Box,
   Button,
   Container,
@@ -8,36 +10,34 @@ import {
   Stack,
   Tab,
   Table,
+  TableBody,
+  TableCell,
+  TableContainer,
   TableHead,
   TableRow,
-  TableCell,
   Tooltip,
   Typography,
-  TableBody,
-  Badge,
-  TableContainer,
 } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Route, Routes, useParams } from 'react-router-dom'
-
 import { PUBLIC_URL } from '../../../config'
+import { useCourseUsage } from '../../hooks/useChatInstanceUsage'
 import useCourse from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { ChatInstanceUsage, Responsibility, User } from '../../types'
-import Rag from '../Rag/Rag'
-import EditCourseForm from '../Courses/Course/EditCourseForm'
-import Stats from '../Courses/Course/Stats'
-import Discussion from '../Courses/Course/Discussions'
-import { ApiErrorView } from '../common/ApiErrorView'
 import apiClient from '../../util/apiClient'
 import { ResponsibilityActionUserSearch } from '../Admin/UserSearch'
 import { OutlineButtonBlack, OutlineButtonBlue } from '../ChatV2/general/Buttons'
-import { RouterTabs } from "../common/RouterTabs"
-import { useCourseUsage } from '../../hooks/useChatInstanceUsage'
+import CourseEmbedding from '../Courses/Course/CourseEmbedding'
+import Discussion from '../Courses/Course/Discussions'
+import EditCourseForm from '../Courses/Course/EditCourseForm'
+import Stats from '../Courses/Course/Stats'
+import { ApiErrorView } from '../common/ApiErrorView'
+import { RouterTabs } from '../common/RouterTabs'
+import Rag from '../Rag/Rag'
 import { filterUsages } from './util'
-import { ContentCopy, CopyAll } from '@mui/icons-material'
 
 export const CourseSettingsModal = () => {
   const { courseId } = useParams() as { courseId: string }
@@ -61,9 +61,6 @@ export const CourseSettingsModal = () => {
     return <ApiErrorView error={error} />
   }
 
-
-
-
   const { chatInstanceUsages, isSuccess: isUsageSuccess } = useCourseUsage(chatInstance?.id)
 
   if (userLoading || !user || !isCourseSuccess || !isUsageSuccess) return null
@@ -75,7 +72,6 @@ export const CourseSettingsModal = () => {
   const amongResponsibles = chatInstance.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user.id) : false
 
   if (!user.isAdmin && !amongResponsibles) {
-    console.log("not admin")
     return (
       <Box>
         <Typography variant="h5">{t('noAccess')}</Typography>
@@ -117,7 +113,6 @@ export const CourseSettingsModal = () => {
   const userIsAdminOrResponsible = isAdminOrResponsible()
 
   const handleAddResponsible = async (user: User) => {
-
     const username = user.username
     const result = await apiClient.post(`/courses/${courseId}/responsibilities/assign`, { username: username })
     if (result.status === 200) {
@@ -164,91 +159,138 @@ export const CourseSettingsModal = () => {
       <RouterTabs>
         <Tab label={t('common:settings')} to={`/${courseId}/course`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
         <Tab label={t('course:teachers')} to={`/${courseId}/course/teachers`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
-        <Tab label={<Badge badgeContent={filteredUsages.length} color='secondary' >{t('course:students')}</Badge>} to={`/${courseId}/course/students`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
-        {chatInstance.saveDiscussions && <Tab label={t('course:discussions')} to={`/${courseId}/course/discussions`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />}
-        <Tab label={t('course:sourceMaterials')} to={`/${courseId}/course/rag`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
+        <Tab
+          label={
+            <Badge badgeContent={filteredUsages.length} color="secondary">
+              {t('course:students')}
+            </Badge>
+          }
+          to={`/${courseId}/course/students`}
+          component={Link}
+          sx={{ '&.Mui-selected': { fontWeight: 'bold' } }}
+        />
+        {chatInstance.saveDiscussions && (
+          <Tab label={t('course:discussions')} to={`/${courseId}/course/discussions`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
+        )}
+        <Tab
+          label={t('course:sourceMaterials')}
+          to={`/${courseId}/course/rag`}
+          component={Link}
+          sx={{ '&.Mui-selected': { fontWeight: 'bold' } }}
+          data-testid="sourceMaterialsTab"
+        />
+        <Tab label={t('course:moodleEmbedding')} to={`/${courseId}/course/moodle`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
       </RouterTabs>
       <Routes>
-        <Route index path='/' element={
-          <Box py={3}>
-            <Alert severity={getInfoSeverity()} sx={{ borderRadius: '1', display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">{getInfoMessage()}</Typography>
-            </Alert>
+        <Route
+          index
+          path="/"
+          element={
+            <Box py={3}>
+              {/*course open state message*/}
+              <Alert
+                severity={getInfoSeverity()}
+                sx={{
+                  borderRadius: '1',
+                  display: 'flex',
+                  alignItems: 'center',
+                  mb: 2,
+                }}
+              >
+                <Typography variant="h6">{getInfoMessage()}</Typography>
+              </Alert>
 
-            <Box >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: '1rem', p: 1, backgroundColor: 'grey.100', borderRadius: 1 }}>
-                <Typography variant="h4">{chatInstance.name[language]}</Typography>
-                {courseEnabled && (
-                  <Tooltip title={t('copy')} placement="right">
-                    <Button color="inherit" sx={{ gap: 1, borderRadius: '1.25rem', p: 1 }}>
-                      <Typography style={{ textTransform: 'lowercase', color: 'blue' }} onClick={() => handleCopyLink(studentLink)}>
-                        {studentLink}
-                      </Typography>
-                      <ContentCopy />
-                    </Button>
-                  </Tooltip>
-                )}
-              </Box>
-              <Divider sx={{ mb: 2 }} />
-              <EditCourseForm course={chatInstance} setOpen={setActivityPeriodFormOpen} user={user} />
-            </Box>
-          </Box>} />
-
-        <Route path={`/teachers`} element={
-          <>
-            {userIsAdminOrResponsible && (
-              <>
-                <Box py={3}>
-                  <OutlineButtonBlack
-                    onClick={() => {
-                      setAddTeacherViewOpen((prev) => !prev)
-                    }}
-                    sx={{ mb: 2 }}
-                  >
-                    {addTeacherViewOpen ? t('common:cancel') : t('course:addNew')}
-                  </OutlineButtonBlack>
-                  {!addTeacherViewOpen ? (
-                    <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
-                      <Table>
-                        <TableHead>
-                          <TableRow sx={{ backgroundColor: 'grey.100' }}>
-                            <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:name')}</TableCell>
-                            <TableCell sx={{ fontWeight: 'bold' }}>{t('course:addedFrom')}</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {responsibilities.map((responsibility) => (
-                            <TableRow>
-                              <TableCell key={responsibility.id}>
-                                <Typography>
-                                  {responsibility.user.last_name} {responsibility.user.first_names}
-                                </Typography>
-                              </TableCell>
-                              <TableCell>
-                                <AssignedResponsibilityManagement
-                                  handleRemove={() => {
-                                    handleRemoveResponsibility(responsibility)
-                                  }}
-                                  responsibility={responsibility}
-                                />
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  )
-                    : <ResponsibilityActionUserSearch courseId={courseId} actionText={t('course:add')} drawActionComponent={drawActionComponent} />}
+              <Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    p: 1,
+                    backgroundColor: 'grey.100',
+                    borderRadius: 1,
+                  }}
+                >
+                  <Typography variant="h4">{chatInstance.name[language]}</Typography>
+                  {courseEnabled && (
+                    <Tooltip title={t('copy')} placement="right">
+                      <Button color="inherit" sx={{ gap: 1, borderRadius: '1.25rem', p: 1 }}>
+                        <Typography style={{ textTransform: 'lowercase', color: 'blue' }} onClick={() => handleCopyLink(studentLink)}>
+                          {studentLink}
+                        </Typography>
+                        <ContentCopy />
+                      </Button>
+                    </Tooltip>
+                  )}
                 </Box>
-              </>
-            )}
-          </>} />
+                <Divider sx={{ mb: 2 }} />
+                <EditCourseForm course={chatInstance} setOpen={setActivityPeriodFormOpen} user={user} />
+              </Box>
+            </Box>
+          }
+        />
+
+        <Route
+          path={`/teachers`}
+          element={
+            <>
+              {userIsAdminOrResponsible && (
+                <>
+                  <Box py={3}>
+                    <OutlineButtonBlack
+                      onClick={() => {
+                        setAddTeacherViewOpen((prev) => !prev)
+                      }}
+                      sx={{ mb: 2 }}
+                    >
+                      {addTeacherViewOpen ? t('common:cancel') : t('course:addNew')}
+                    </OutlineButtonBlack>
+                    {!addTeacherViewOpen ? (
+                      <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
+                        <Table>
+                          <TableHead>
+                            <TableRow sx={{ backgroundColor: 'grey.100' }}>
+                              <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:name')}</TableCell>
+                              <TableCell sx={{ fontWeight: 'bold' }}>{t('course:addedFrom')}</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {responsibilities.map((responsibility) => (
+                              <TableRow>
+                                <TableCell key={responsibility.id}>
+                                  <Typography>
+                                    {responsibility.user.last_name} {responsibility.user.first_names}
+                                  </Typography>
+                                </TableCell>
+                                <TableCell>
+                                  <AssignedResponsibilityManagement
+                                    handleRemove={() => {
+                                      handleRemoveResponsibility(responsibility)
+                                    }}
+                                    responsibility={responsibility}
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    ) : (
+                      <ResponsibilityActionUserSearch courseId={courseId} actionText={t('course:add')} drawActionComponent={drawActionComponent} />
+                    )}
+                  </Box>
+                </>
+              )}
+            </>
+          }
+        />
 
         <Route path="/students" element={<Stats />} />
         <Route path="/discussions/*" element={<Discussion />} />
         <Route path="/rag/*" element={<Rag />} />
+        <Route path="/moodle/*" element={<CourseEmbedding />} />
       </Routes>
-    </Container >
+    </Container>
   )
 }
 

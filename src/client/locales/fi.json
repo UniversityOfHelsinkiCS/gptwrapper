@@ -49,7 +49,8 @@
     "about_service": "Tietoa palvelusta",
     "loading": "Ladataan",
     "logout": "Kirjaudu ulos",
-    "copiedToClipboard": "Kopioitu leikepöydälle"
+    "copiedToClipboard": "Kopioitu leikepöydälle",
+    "fetchError": "Palvelin virhe"
   },
   "stats": {
     "showing": "Näytetään",
@@ -131,7 +132,8 @@
     "courseChatEndedInfo": "Kurssin aukioloaika on päättynyt ja kurssi ei ole enään saatavilla.",
     "courseChatNotActivated": "Ei aktivoitu",
     "courseChatNotActivatedInfo": "Kurssi ei ole vielä aktivoitu. Tämä tarkoittaa, että kurssin chat ei ole auki opiskelijoille.",
-    "retryMessage": "Yritä uudelleen"
+    "retryMessage": "Yritä uudelleen",
+    "noToolResults": "Ei tuloksia"
   },
   "settings": {
     "prompt": "Keskustelun alustus",
@@ -342,6 +344,7 @@
     "isSavedForTeacherOptOut": "Kurssin keskustelut tallennetaan anonyymisti, jos käyttäjä antaa luvan.",
     "directPromptLink": "Linkki kurssichattiin alustuksella '{{name}}'",
     "copyDirectPromptLinkInfo": "Kopioi linkki kurssichattiin alustuksella '{{name}}'",
+    "courseChatLink": "Kurssichat linkki",
     "stats": "Statistiikka",
     "discussions": "Keskustelut",
     "prompts": "Alustukset",
@@ -350,6 +353,7 @@
     "customResponsibility": "manuaalisesti lisätty",
     "add": "lisää",
     "sourceMaterials": "Lähdemateriaalit",
+    "moodleEmbedding": "Moodle-upotus",
     "settings": "kurssin asetukset",
     "confirmRemoval": "Vahvista poistaminen",
     "name": "Nimi",
@@ -364,7 +368,24 @@
     "teachers": "Opettajat",
     "students": "Opiskelijat",
     "addedFrom": "Lisätty lähteestä",
-    "addNew": "Lisää uusi vastuuhenkilö"
+    "addNew": "Lisää uusi vastuuhenkilö",
+    "courseEmbeddingPrompt": "Kurssichatin alustus",
+    "moodleEmbeddingCode": "Moodlen upotuskoodi",
+    "embeddingInstructionsTitle": "Moodle-upotuksen ohjeistus",
+    "embeddingInstructionsIntro": "Jaa kurssichat joko (A) linkin kautta tai (B) upottamalla Currechat-sovellus Moodle-sivulle.",
+    "onlyLinkTitle": "Pelkkä kurssichat-linkki",
+    "appEmbeddingTitle": "Currechat-upotus",
+    "stepSelectPromptOnRight": "Valitse kurssichatin alustus oikealla",
+    "stepCopyLink": "Kopioi kurssichat-linkki",
+    "stepCopyEmbeddingCode": "Kopioi Moodlen upotuskoodi",
+    "stepOpenMoodleSettings": "Avaa Moodle-osion asetukset (Edit settings)",
+    "stepOpenSourceCode": "Avaa lähdekoodi (View → Source code)",
+    "stepPasteAndSave": "Liitä upotuskoodi ja tallenna (Save)",
+    "altOpenSettings": "Moodle avaa asetukset",
+    "altSourceView": "Moodle avaa lähdekoodinäkymä",
+    "altPasteSave": "Moodle lähdekoodin upotus ja tallennus",
+    "deActivate": "sulje opiskelijoilta",
+    "courseActivated": "Kurssi aktivoitu"
   },
   "prompt": {
     "createNew": "Luo uusi alustus",
@@ -384,7 +405,27 @@
     "defaultRagMessage": "Jos käyttäjä viittaa lähdemateriaaleihin tai mainitsee 'materiaalit', käytä document_search -työkalua hakeaksesi tietoa lähteistä. Hyödynnä tuloksia vastauksessa.",
     "enforceRagMessage": "Kaikkien vastausten on perustuttava lähdemateriaaleihin. Käytä aina document_search -työkalua ja älä lisää tietoa, jota ei löydy lähteistä.",
     "unknownRagMessage": "Jos vastausta ei löydy lähdemateriaaleista, kerro käyttäjälle suoraan ettei vastausta ole saatavilla lähteistä.",
-    "courseSourceMaterials": "Muokkaa kurssin materiaaleja"
+    "courseSourceMaterials": "Muokkaa kurssin materiaaleja",
+    "edit": "Muokkaa",
+    "preview": "Esikatsele",
+    "defaultChatInstructions": "Olet vuorovaikutuksessa chat-käyttöliittymän kanssa, jossa on ennalta määritetty järjestelmäkehote. Tämä tarkoittaa, että tekoälylle on annettu tietty rooli, persoonallisuus tai säännöt, joita seurata.\n\n**Kuinka aloittaa:**\n* Kirjoita yksinkertaisesti **\"Moi\"** tai kysy kysymys nähdäksesi, miten se vastaa.\n* Tekoäly noudattaa piilotettuja ohjeitaan jutellessaan kanssasi.",
+    "studentViewInfoAlert": "Tämä näkymä näkyy opiskelijoille kohdassa \"Alustuksen tiedot\".",
+    "promptName": "Alustuksen nimi",
+    "promptInstructions": "Alustuksen käyttöohjeet",
+    "systemMessageLabel": "Kielimallin ohjeistus",
+    "noSystemMessage": "Ei kielimallin ohjeita",
+    "promptBasicInfo": "Alustuksen perustiedot",
+    "studentInstructionsLabel": "Ohjeistus opiskelijoille alustuksen käytöstä",
+    "promptModelSettings": "Alustuksen kielimallin asetukset",
+    "hideSystemInstructions": "Piilota kielimallin ohjeistus opiskelijoilta",
+    "selectedModelLabel": "Alustuksen valittu kielimalli",
+    "systemMessagePlaceholder": "Esim. Olet avulias avustaja.",
+    "promptSourceMaterialData": "Alustuksen lähdemateriaali aineisto",
+    "selectedSourceMaterial": "Valittu lähdemateriaali",
+    "modelSourceMaterialInstructions": "Kielimallin lähdemateriaaliohjeistus",
+    "promptDescription": "Alustuksen kuvaus",
+    "myPrompt": "Oma alustukseni",
+    "missingPromptName": "Alustukselta puuttuu nimi"
   },
   "tooltip": {
     "copied": "Kopioitu!"
@@ -460,7 +501,11 @@
     "filesIngesting": "Tiedostoja käsitellään. Voit poistua sivulta.",
     "allCompleted": "Tiedostot käsitelty.",
     "swedish": "Ruotsi",
-    "readMoreAboutRag": "Lue lisää CurreChatin lähdemateriaalitoiminnosta"
+    "readMoreAboutRag": "Lue lisää CurreChatin lähdemateriaalitoiminnosta",
+    "advancedParsingGuide": "Käytä tekoälypohjaista PDF-tiedostojen käsittelyä? Jos PDF-muotoisissa tiedostoissasi on kaavioita, kuvia, yhtälöitä tai muuta monimutkaista asettelua, tämä voi parantaa lähdemateriaalin tekstiksimuunnon laatua mutta voi myös lisätä hallusinointia. Huom. tekoälypohjainen käsittely voi kestää useita minuutteja.",
+    "advancedParsing": "Tekoälypohjainen käsittely",
+    "nameUpdateSuccess": "Nimi päivitetty",
+    "nameUpdateError": "Virhe: nimeä ei voitu päivittää"
   },
   "embeddedLogin": {
     "helpText": "Kirjauduttu. Voit sulkea tämän ikkunan."

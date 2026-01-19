@@ -1,6 +1,19 @@
 import { useState } from 'react'
 import { useCreateRagIndexMutation } from './api'
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material'
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
+  Switch,
+  TextField,
+} from '@mui/material'
 import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import { useNavigate } from 'react-router-dom'
 import type { Course } from '../../types'
@@ -13,11 +26,14 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
   const createIndexMutation = useCreateRagIndexMutation()
   const [indexName, setIndexName] = useState('')
   const [language, setLanguage] = useState<'Finnish' | 'English' | 'Swedish'>('English')
+  const [advancedParsing, setAdvancedParsing] = useState(false)
   const [open, setOpen] = useState(false)
 
   return (
     <>
-      <OutlineButtonBlack onClick={() => setOpen(true)}>{t('rag:createNewIndex')}</OutlineButtonBlack>
+      <OutlineButtonBlack onClick={() => setOpen(true)} data-testid="createNewRagButton">
+        {t('rag:createNewIndex')}
+      </OutlineButtonBlack>
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
@@ -28,8 +44,9 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
               event.preventDefault()
               const newIndex = await createIndexMutation.mutateAsync({
                 chatInstanceId: chatInstance?.id,
-                indexName,
+                name: indexName,
                 language,
+                advancedParsing,
               })
               setIndexName('')
               navigate(`?index=${newIndex.id}`)
@@ -50,9 +67,9 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
             fullWidth
             required
             slotProps={{
-              htmlInput: { minLength: 5 },
+              htmlInput: { minLength: 5, 'data-testid': 'ragIndexNameInput' },
             }}
-            sx={{ my: '2rem' }}
+            sx={{ mt: '2rem' }}
           />
           <FormControl fullWidth sx={{ my: '2rem' }}>
             <InputLabel id="language-label">{t('rag:language')}</InputLabel>
@@ -60,16 +77,24 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
               labelId="language-label"
               id="language-select"
               value={language}
-              onChange={(e) => setLanguage(e.target.value as typeof RAG_LANGUAGES[number])}
+              data-testid="ragIndexLanguageInput"
+              onChange={(e) => setLanguage(e.target.value as (typeof RAG_LANGUAGES)[number])}
             >
-              <MenuItem value={RAG_LANGUAGES[0]}>{t('rag:finnish')}</MenuItem>
+              <MenuItem value={RAG_LANGUAGES[0]} data-testid="ragIndexLanguageOptionFinnish">
+                {t('rag:finnish')}
+              </MenuItem>
               <MenuItem value={RAG_LANGUAGES[1]}>{t('rag:swedish')}</MenuItem>
               <MenuItem value={RAG_LANGUAGES[2]}>{t('rag:english')}</MenuItem>
             </Select>
           </FormControl>
+          <DialogContentText>{t('rag:advancedParsingGuide')}</DialogContentText>
+          <FormControlLabel
+            control={<Switch checked={advancedParsing} onChange={(e) => setAdvancedParsing(e.target.checked)} />}
+            label={t('rag:advancedParsing')}
+          />
         </DialogContent>
         <DialogActions>
-          <OutlineButtonBlack color="primary" type="submit">
+          <OutlineButtonBlack color="primary" type="submit" data-testid="ragIndexCreateSubmit">
             {t('rag:createIndex')}
           </OutlineButtonBlack>
         </DialogActions>

@@ -135,7 +135,6 @@ export function Component() {
   const userIsAdminOrResponsible = isAdminOrResponsible()
 
   const handleAddResponsible = async (user: User) => {
-
     const username = user.username
     const result = await apiClient.post(`/courses/${courseId}/responsibilities/assign`, { username: username })
     if (result.status === 200) {

@@ -88,6 +88,9 @@ export const useChatStream = ({
               content += parsedChunk.text
               break
 
+            case 'processing':
+              break
+
             case 'toolCallStatus':
               if ('result' in parsedChunk) {
                 toolCallResultsAccum[parsedChunk.callId] = parsedChunk
@@ -100,7 +103,8 @@ export const useChatStream = ({
               console.log('Streamed error:', parsedChunk)
               error += parsedChunk.error
 
-              // Begin timeout to abort stream if error persists
+              onError({ error: parsedChunk.error })
+
               setErrorTimeoutId(setTimeout(() => {
                 console.error('Error timeout:', parsedChunk)
                 streamControllerRef.current?.abort('error')

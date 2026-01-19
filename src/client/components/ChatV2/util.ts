@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 
-import { ActivityPeriod, ChatInstanceUsage } from '../../types'
+import { ActivityPeriod, ChatInstanceUsage, ChatStatus } from '../../types'
 import { CoursesViewCourse } from '../../hooks/useUserCourses'
 
 import curTypes from '../../locales/curTypes.json'
@@ -94,4 +94,19 @@ export const getGroupedCourses = (courses: CoursesViewCourse[] = []) => {
     curreDisabled,
     ended,
   }
+}
+
+export const getChatActivityStatus = (chatInstance: any, user: any): ChatStatus => {
+  if (!chatInstance?.activityPeriod) return 'ACTIVE'
+
+  const isResponsible = user?.isAdmin || chatInstance.responsibilities?.some((r) => r.user.id === user?.id)
+  if (isResponsible) return 'ACTIVE'
+
+  const { startDate, endDate } = chatInstance.activityPeriod
+  const now = new Date()
+
+  if (now < new Date(startDate)) return 'NOT_STARTED'
+  if (now > new Date(endDate)) return 'EXPIRED'
+
+  return 'ACTIVE'
 }
