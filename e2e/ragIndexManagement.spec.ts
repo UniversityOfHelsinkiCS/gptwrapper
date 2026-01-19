@@ -20,7 +20,10 @@ test.describe('Rag index management', () => {
 
     await page.getByTestId('ragIndexNameInput').click()
 
-    await page.getByTestId('ragIndexCreateSubmit').click()
+    // This submit button is also cursed, lets press enter for a good measure
+    // await page.getByTestId('ragIndexCreateSubmit').click()
+    await page.getByTestId('ragIndexCreateSubmit').press('Enter')
+
     await expect(page.getByText('perkele')).toBeVisible()
 
     // Go back
@@ -43,7 +46,11 @@ test.describe('Rag index management', () => {
     await page.getByTestId('sourceMaterialsTab').click()
     await page.getByTestId('createNewRagButton').click()
     await page.getByTestId('ragIndexNameInput').fill('pahaminttu')
-    await page.getByTestId('ragIndexCreateSubmit').click()
+
+    // This submit button is cursed, lets press enter for a good measure
+    // await page.getByTestId('ragIndexCreateSubmit').click()
+    await page.getByTestId('ragIndexCreateSubmit').press('Enter')
+
     await expect(page.getByText('pahaminttu')).toBeVisible()
 
     // Go back
