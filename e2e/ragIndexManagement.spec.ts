@@ -14,7 +14,11 @@ test.describe('Rag index management', () => {
     await page.getByTestId('createNewRagButton').click()
     await page.getByTestId('ragIndexNameInput').fill('perkele')
     await page.getByTestId('ragIndexLanguageInput').click()
+    // Clicking this button in dropdown should close the dropdown, but in CI it doesnt (weird right???).
+    // Mitigate by pressing esc once
     await page.getByTestId('ragIndexLanguageOptionFinnish').click()
+    await page.getByTestId('ragIndexLanguageInput').press('Escape')
+
     await page.getByTestId('ragIndexCreateSubmit').click()
     await expect(page.getByText('perkele')).toBeVisible()
 
