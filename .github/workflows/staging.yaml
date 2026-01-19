@@ -14,7 +14,7 @@ jobs:
     secrets: inherit
 
   build-and-push-to-staging:
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     needs: test
     timeout-minutes: 8
 
@@ -30,9 +30,9 @@ jobs:
           containerfiles: |
             ./Containerfile
           build-args: |
-           # BASE_PATH=/
-            GIT_SHA=${{ github.sha }}
-            STAGING=true
+            # BASE_PATH=/
+             GIT_SHA=${{ github.sha }}
+             STAGING=true
           # Extra args are needed to increase the number of open files
           # because of build EMFILE error: https://github.com/npm/cli/issues/4783#issuecomment-1908016260
           extra-args: |
