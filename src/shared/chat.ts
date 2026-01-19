@@ -48,14 +48,14 @@ export type UserMessage = {
   role: 'user'
   content: MessageContent[] | string
   attachments?: string
-  fileContent?: string // Parsed file content (text/PDF), kept separate from displayed message
+  fileContent?: string
 }
 
 export const readMessageContent = (msg: UserMessage | AssistantMessage): string => {
-  if(Array.isArray(msg.content)){
+  if (Array.isArray(msg.content)) {
     return "this is an image, image rendering not supported yet"
   }
-  else{
+  else {
     return msg.content.toString()
   }
 }
@@ -100,15 +100,19 @@ const MessageContentSchema = z.object({
   type: z.string(),
   image_url: z.object({
     url: z.string()
-  })
-}) 
+  }),
+})
+
 export const MessageContentArraySchema = z.union([z.string(), z.array(MessageContentSchema)])
+
 const ChatMessageSchema = z.object({
   role: z.enum(['user', 'assistant']),
   content: z.union([
     z.string().min(0).max(1_200_000),
     MessageContentArraySchema,
   ]),
+  attachements: z.union([z.string(), z.array(z.string())]).optional(),
+  fileContent: z.string().optional(),
 })
 
 export const PostStreamSchemaV3 = z.object({
