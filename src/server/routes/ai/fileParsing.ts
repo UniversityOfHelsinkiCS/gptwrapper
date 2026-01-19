@@ -5,10 +5,6 @@ import logger from 'src/server/util/logger'
 import { ApplicationError } from 'src/server/util/ApplicationError'
 import { imageFileTypes, textFileTypes } from '../../../config'
 
-export { imageFileTypes }
-export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file: Express.Multer.File) => {
-export const imageFileTypes = ['image/jpeg', 'image/png']
-
 const PDF_PROGRESS_UPDATE_INTERVAL = 5
 
 type ProgressCallback = (message: string) => Promise<void>
