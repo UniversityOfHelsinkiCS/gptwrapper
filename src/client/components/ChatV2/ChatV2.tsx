@@ -3,9 +3,9 @@ import { MapsUgc } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Outlet, Route, Routes, useParams } from 'react-router-dom'
-import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, ValidModelNameSchema } from '../../../config'
-import type { ChatMessage, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
+import { Outlet, Route, Routes, useParams, useSearchParams } from 'react-router-dom'
+import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, ValidModelNameSchema, imageFileTypes } from '../../../config'
+import type { ChatMessage, MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { useChatScroll } from './useChatScroll'
@@ -38,6 +38,7 @@ import PromptModal from './PromptModal'
 import CoursesModal from './CoursesModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
 import { CustomIcon } from './general/CustomIcon'
+import { parseFileContent } from '../../util/fileParsing'
 import { PromptInfoModal } from './PromptInfoModal'
 import { getChatActivityStatus } from './util'
 import { ChatExpiredView } from './ChatExpiredView'
@@ -148,16 +149,45 @@ const ChatV2Content = () => {
     const formData = new FormData()
 
     const file = fileInputRef.current?.files?.[0]
-    if (file) {
-      formData.append('file', file)
+    
+    // Parse file content on client side and keep it separate from the message
+    let messageContent: MessageContent[] | string = message
+    let parsedFileContent: string | undefined = undefined
+    if (file && !resendPrevious) {
+      try {
+        const fileContent = await parseFileContent(file)
+        
+        // For images, replace the content with image array (images are shown differently)
+        if (imageFileTypes.includes(file.type)) {
+          messageContent = fileContent as MessageContent[]
+        } else {
+          // For text/PDF files, keep content separate and don't append to message
+          parsedFileContent = fileContent as string
+        }
+        
+        // Still send file to server for validation purposes
+        formData.append('file', file)
+      } catch (error) {
+        console.error('Error parsing file:', error)
+        // Show file parsing errors as warnings in the chat box
+        setMessageWarning({
+          ...messageWarning,
+          fileParsingError: {
+            message: error instanceof Error ? error.message : 'Error parsing file',
+            ignored: false
+          }
+        })
+        return
+      }
     }
 
     const newMessages = resendPrevious
       ? messages
       : messages.concat({
         role: 'user',
-        content: message,
+        content: messageContent,
         attachments: file && fileName ? fileName : undefined,
+        fileContent: parsedFileContent, // Store file content separately
       })
 
     setMessages(newMessages)

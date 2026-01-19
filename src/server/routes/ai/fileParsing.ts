@@ -3,7 +3,10 @@ import type { ChatMessage, MessageContent } from '../../../shared/chat'
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import logger from 'src/server/util/logger'
 import { ApplicationError } from 'src/server/util/ApplicationError'
+import { imageFileTypes, textFileTypes } from '../../../config'
 
+export { imageFileTypes }
+export const parseFileAndAddToLastMessage = async (messages: ChatMessage[], file: Express.Multer.File) => {
 export const imageFileTypes = ['image/jpeg', 'image/png']
 
 const PDF_PROGRESS_UPDATE_INTERVAL = 5
@@ -16,10 +19,6 @@ export const parseFileAndAddToLastMessage = async (
   onProgress?: ProgressCallback
 ) => {
   let fileContent: MessageContent[] | string = ''
-
-  const textFileTypes = ['text/plain', 'text/html', 'text/css', 'text/csv', 'text/markdown', 'text/md']
-
-
 
   if (textFileTypes.includes(file.mimetype)) {
     const fileBuffer = file.buffer

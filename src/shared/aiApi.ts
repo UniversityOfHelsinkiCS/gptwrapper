@@ -1,6 +1,6 @@
 import { z } from "zod/v4"
 
-export const WarningTypes = z.enum(['usage', 'contextLimit'])
+export const WarningTypes = z.enum(['usage', 'contextLimit', 'fileParsingError'])
 
 export type WarningType = z.infer<typeof WarningTypes>
 

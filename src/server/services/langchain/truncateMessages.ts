@@ -27,6 +27,10 @@ export const truncateMessages = (modelConfig: typeof validModels[number], messag
     if (typeof message.content === 'string') {
       content = message.content
     }
+    // Include fileContent in token calculation for user messages
+    if (message.role === 'user' && message.fileContent) {
+      content = `${content} ${message.fileContent}`
+    }
     const encoded = encoding.encode(content)
     const messageTokenCount = encoded.length
 

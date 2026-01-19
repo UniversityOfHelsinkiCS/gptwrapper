@@ -1,7 +1,7 @@
 import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
 import { FREE_MODEL, inProduction } from '../../../config'
-import { PostStreamSchemaV3, type ChatEvent, type ChatMessage } from '../../../shared/chat'
+import { PostStreamSchemaV3, type ChatEvent } from '../../../shared/chat'
 import { ChatInstance, Discussion, Enrolment, Prompt, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
 import { checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { streamChat } from '../../services/langchain/chat'
@@ -10,7 +10,7 @@ import { getRagIndexSearchTool } from '../../services/rag/searchTool'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
-import { imageFileTypes, parseFileAndAddToLastMessage } from './fileParsing'
+import { imageFileTypes } from './fileParsing'
 import { upload } from './multer'
 import { checkIamAccess } from '../../util/iams'
 import { getTeachedCourses } from '../../services/chatInstances/access'
@@ -63,6 +63,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     }
   }
 
+  // Validate file if exists (but don't parse - client already did that)
   res.setHeader('content-type', 'text/event-stream')
   res.setHeader('cache-control', 'no-cache')
   res.setHeader('connection', 'keep-alive')
@@ -102,6 +103,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
         res.end()
         return
       }
+      // File validation only - content was already added on client side
 
       options.chatMessages = (await parseFileAndAddToLastMessage(
         options.chatMessages,
@@ -122,6 +124,8 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       fileParsingError = 'Error parsing file'
       logger.error('Error parsing file', { error, filename: req.file?.originalname })
     }
+    logger.error('Error validating file', { error, filename: req.file?.originalname })
+    throw ApplicationError.BadRequest('Error validating file')
 
     await writeEvent({
       type: 'error',
