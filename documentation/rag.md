@@ -157,4 +157,4 @@ In one example Source Material Collection, the number of resulting chunks are us
 
 ## RAG performance
 
-How well does CurreChat RAG work? 
+How well does CurreChat RAG work? The feature is still in development and quite experimental and results vary. The only way to find out is to try it yourself on your specific use case.
