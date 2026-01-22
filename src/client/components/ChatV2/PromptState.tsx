@@ -88,12 +88,27 @@ export const PromptStateProvider: React.FC<{
     }
   }
 
-  // Url prompt?
   useEffect(() => {
     if (urlPrompt) {
       handleChangePrompt(urlPrompt)
     }
-  }, [urlPrompt?.id])
+
+    if (course && activePrompt) {
+      const isValid =
+        course.prompts.includes(activePrompt) ||
+        myPrompts.includes(activePrompt)
+
+      if (!isValid) {
+        handleChangePrompt(undefined);
+      }
+    }
+  }, [
+    urlPrompt,
+    course,
+    activePrompt,
+    myPrompts,
+    handleChangePrompt,
+  ])
 
   // Just the analytics dispatch.
   useEffect(() => {
