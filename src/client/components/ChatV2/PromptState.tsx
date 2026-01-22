@@ -95,12 +95,10 @@ export const PromptStateProvider: React.FC<{
 
     if (course && activePrompt) {
       const isValid =
-        course.prompts.includes(activePrompt) ||
-        myPrompts.includes(activePrompt)
+        course.prompts?.some(p => p.id === activePrompt.id) ||
+        myPrompts?.some(p => p.id === activePrompt.id)
 
-      if (!isValid) {
-        handleChangePrompt(undefined);
-      }
+      if (!isValid) handleChangePrompt(undefined)
     }
   }, [
     urlPrompt,
