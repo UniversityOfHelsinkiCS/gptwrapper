@@ -161,8 +161,10 @@ const PromptModal = () => {
 
           {myPrompts.length === 0 && coursePrompts.length === 0 && <MenuItem disabled>{t('settings:noPrompts')}</MenuItem>}
         </Box>
-
-        <Dialog open={createNewOpen} onClose={() => setCreateNewOpen(false)}>
+        <Dialog fullWidth open={createNewOpen} onClose={(_event, reason) => {
+          if (reason === 'backdropClick') return
+          setCreateNewOpen(false)
+        }}>
           {courseId !== 'general' && tab === 0 && <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} />}
           {(courseId === 'general' || tab === 1) && <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} personal />}
         </Dialog>
