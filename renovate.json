@@ -13,7 +13,13 @@
       "matchPackageNames": ["node"],
       "versionCompatibility": "^(?<version>[^-]+)(?<compatibility>-.*)?$",
       "versioning": "node"
-    }
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["redis", "postgres"],
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "enabled": false,
+    },
   ],
   "vulnerabilityAlerts": {
     "labels": ["security"]
