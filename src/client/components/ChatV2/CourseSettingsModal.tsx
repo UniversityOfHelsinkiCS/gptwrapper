@@ -214,8 +214,8 @@ export const CourseSettingsModal = () => {
                   <Typography variant="h4">{chatInstance.name[language]}</Typography>
                   {courseEnabled && (
                     <Tooltip title={t('copy')} placement="right">
-                      <Button color="inherit" sx={{ gap: 1, borderRadius: '1.25rem', p: 1 }}>
-                        <Typography style={{ textTransform: 'lowercase', color: 'blue' }} onClick={() => handleCopyLink(studentLink)}>
+                      <Button onClick={() => handleCopyLink(studentLink)} color="inherit" sx={{ gap: 1, borderRadius: '1.25rem', p: 1 }}>
+                        <Typography style={{ textTransform: 'lowercase', color: 'blue' }} >
                           {studentLink}
                         </Typography>
                         <ContentCopy />
