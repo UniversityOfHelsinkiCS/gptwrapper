@@ -34,7 +34,107 @@ if (CA !== undefined) {
 const connection = new Redis(creds)
 
 const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE ?? 'vlm-queue'
-const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://laama-svc:11434'
+const VLM_URL = process.env.OLLAMA_URL ?? 'http://laama-svc:11434/api/generate'
+const MODEL = process.env.MODAL ?? 'ministral-3:3b'
+const PROVIDER = process.env.PROVIDER ?? 'ollama' as 'ollama' | 'vllm'
+
+
+const systemPrompt = `Objective
+Produce the most accurate, well-structured Markdown transcription of a PDF page by combining a rasterized image of the PDF page (such as PNG or JPEG) and the parsed text extracted from the PDF.
+Rules and Priorities
+Treat the parsed PDF text as the primary source of truth for all textual content. If the page contains an image or diagram, provide a detailed description. If an image contains text, transcribe that text as precisely as possible. When discrepancies occur between image-derived transcription and the parsed PDF text, always prioritize the parsed PDF text. Always include image or diagram descriptions enclosed in image tags, for example: image This is an image of a cat with the caption “Feline.” image. Merge similar content from both sources to create the most comprehensive and accurate result. The final output must be clean, well-structured Markdown using headings, paragraphs, tables, emphasis, and math formatting as appropriate. Do not output anything other than Markdown, and do not wrap the entire output in a code block.
+Step-by-Step Instructions
+First, inspect the inputs: the rasterized image of the PDF page and the text extracted by the PDF parser. Next, detect visual content on the page. If the page contains photos, diagrams, charts, figures, or other visual elements, add a detailed description wrapped in image tags. If the image contains textual elements such as labels, captions, annotations, or scanned text, transcribe that text precisely within the description or integrate it into the main body as appropriate.
+Then resolve the textual content. Start with the parsed PDF text as the baseline transcription. Compare it against the image-derived text; if they differ, use the parsed PDF text. If the texts are similar, merge them to improve completeness, clarity, and correctness, for example by fixing broken words, missing accents, math notation, or punctuation.
+Preserve the document’s structure in Markdown. Reconstruct headings and subheadings for section titles, use tables where appropriate, and employ inline emphasis (bold or italics) and math formatting with ...... as needed. Maintain the logical reading order, including titles, authors, abstracts, body sections, figures, tables, and footnotes.
+For figures, tables, and captions, place captions and references appropriately. For figures or diagrams, include an image description enclosed in image tags, and if the figure includes textual labels or legends, transcribe them accurately. If the PDF text includes a caption that differs from the image content, prefer the PDF caption while still providing a faithful description of the image.
+Ensure quality and consistency. Remove OCR artifacts, duplicated lines, and hyphenation across line breaks. Normalize whitespace and punctuation. Render equations faithfully within ...... when present. Correct obvious transcription errors, always prioritizing the parsed PDF text.
+Output Requirements
+Produce only Markdown, with no extra commentary. Include image descriptions wrapped with image and image tags if any visual content exists. Deliver a cohesive, readable, and accurate transcription that reflects the parsed PDF as the source of truth, enhanced by precise and detailed information derived from the image`
+
+function stripMarkdownFences(txt: string) {
+  let out = (txt ?? '').trim()
+  if (out.startsWith('```markdown')) out = out.replace(/^```markdown/, '').replace(/```$/, '').trim()
+  else if (out.startsWith('```')) out = out.replace(/^```/, '').replace(/```$/, '').trim()
+  return out
+}
+
+async function transcribeWithOllama({ text, bytes }: { text?: string; bytes?: Uint8Array | Buffer }) {
+  const body: any = {
+    model: MODEL,
+    system: systemPrompt,
+    prompt: `Parsed PDF text:\n${text ?? ''}\n\nImage transcription:`,
+    stream: false,
+    options: { num_ctx: 8192 },
+  }
+
+  if (bytes && bytes.length) {
+    body.images = [Buffer.from(bytes).toString('base64')]
+  }
+
+  const response = await fetch(VLM_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  })
+
+  if (!response.ok) {
+    const errorBody = await response.text()
+    throw new Error(`Ollama API request failed with status ${response.status}: ${errorBody}`)
+  }
+
+  const data = await response.json()
+  const content = data?.response || ''
+  return stripMarkdownFences(content)
+}
+
+
+async function transcribeWithVLLM({ text, bytes }: { text?: string; bytes?: Uint8Array | Buffer }) {
+  const userText = `Parsed PDF text:\n${text ?? ''}\n\nImage transcription:`
+
+  // Build OpenAI-style messages
+  const contentParts: any[] = [{ type: 'text', text: userText }]
+
+  if (bytes && bytes.length) {
+    // Use data URL for image content if your vLLM build/model supports it.
+    // Choose MIME type based on your input (png or jpeg).
+    const base64 = Buffer.from(bytes).toString('base64')
+    contentParts.push({
+      type: 'image_url',
+      image_url: { url: `data:image/png;base64,${base64}` },
+    })
+  }
+
+  const payload = {
+    model: MODEL,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: contentParts },
+    ],
+    // You can tune temperature, max_tokens, etc.
+    // temperature: 0.2,
+    // max_tokens: 2000,
+  }
+
+  const response = await fetch(`${VLM_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    const errorBody = await response.text()
+    throw new Error(`vLLM request failed with status ${response.status}: ${errorBody}`)
+  }
+
+  const data = await response.json()
+  const txt = data?.choices?.[0]?.message?.content ?? ''
+  return stripMarkdownFences(txt)
+}
 
 // --- Worker ---
 
@@ -54,51 +154,20 @@ const worker = new Worker(
     }
 
     try {
-      if (text.length < 5000) {
-        // if page contains that much text there is no point of giving it to vlm
-        const response = await fetch(`${OLLAMA_URL}/api/generate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', token: process.env.LAAMA_TOKEN ?? '' },
-          body: JSON.stringify({
-            model: 'ministral-3:3b',
-            system: `Objective
-                    Produce the most accurate, well-structured Markdown transcription of a PDF page by combining a rasterized image of the PDF page (such as PNG or JPEG) and the parsed text extracted from the PDF.
-                    Rules and Priorities
-                    Treat the parsed PDF text as the primary source of truth for all textual content. If the page contains an image or diagram, provide a detailed description. If an image contains text, transcribe that text as precisely as possible. When discrepancies occur between image-derived transcription and the parsed PDF text, always prioritize the parsed PDF text. Always include image or diagram descriptions enclosed in image tags, for example: image This is an image of a cat with the caption “Feline.” image. Merge similar content from both sources to create the most comprehensive and accurate result. The final output must be clean, well-structured Markdown using headings, paragraphs, tables, emphasis, and math formatting as appropriate. Do not output anything other than Markdown, and do not wrap the entire output in a code block.
-                    Step-by-Step Instructions
-                    First, inspect the inputs: the rasterized image of the PDF page and the text extracted by the PDF parser. Next, detect visual content on the page. If the page contains photos, diagrams, charts, figures, or other visual elements, add a detailed description wrapped in image tags. If the image contains textual elements such as labels, captions, annotations, or scanned text, transcribe that text precisely within the description or integrate it into the main body as appropriate.
-                    Then resolve the textual content. Start with the parsed PDF text as the baseline transcription. Compare it against the image-derived text; if they differ, use the parsed PDF text. If the texts are similar, merge them to improve completeness, clarity, and correctness, for example by fixing broken words, missing accents, math notation, or punctuation.
-                    Preserve the document’s structure in Markdown. Reconstruct headings and subheadings for section titles, use tables where appropriate, and employ inline emphasis (bold or italics) and math formatting with ...... as needed. Maintain the logical reading order, including titles, authors, abstracts, body sections, figures, tables, and footnotes.
-                    For figures, tables, and captions, place captions and references appropriately. For figures or diagrams, include an image description enclosed in image tags, and if the figure includes textual labels or legends, transcribe them accurately. If the PDF text includes a caption that differs from the image content, prefer the PDF caption while still providing a faithful description of the image.
-                    Ensure quality and consistency. Remove OCR artifacts, duplicated lines, and hyphenation across line breaks. Normalize whitespace and punctuation. Render equations faithfully within ...... when present. Correct obvious transcription errors, always prioritizing the parsed PDF text.
-                    Output Requirements
-                    Produce only Markdown, with no extra commentary. Include image descriptions wrapped with image and image tags if any visual content exists. Deliver a cohesive, readable, and accurate transcription that reflects the parsed PDF as the source of truth, enhanced by precise and detailed information derived from the image`,
-            prompt: `Parsed PDF text:\n${text}\n\nImage transcription:`,
-            stream: false,
-            images: [bytes],
-            options: { num_ctx: 8192 },
-          }),
-        })
-        if (!response.ok) {
-          const errorBody = await response.text()
-          throw new Error(`Ollama API request failed with status ${response.status}: ${errorBody}`)
-        }
+      if (text && text.length >= 5000) {
+        logger.info(`Job ${job.id}: transcription complete for page ${pageNumber}`)
+        return text
+      }
 
-        const data = await response.json()
-        let txt = data?.response || ''
-        if (txt.trim().startsWith('```markdown')) {
-          txt = txt
-            .replace(/^```markdown/, '')
-            .replace(/```$/, '')
-            .trim()
-        }
-
-        return txt
+      let result: string
+      if (PROVIDER === 'ollama') {
+        result = await transcribeWithOllama({ text, bytes })
+      } else {
+        result = await transcribeWithVLLM({ text, bytes })
       }
 
       logger.info(`Job ${job.id}: transcription complete for page ${pageNumber}`)
-
-      return text
+      return result
     } catch (error) {
       logger.error(`Job ${job.id}: transcription got error: ${error}`)
       throw error
@@ -123,7 +192,7 @@ async function shutdown() {
   logger.info('Shutting down worker...')
   try {
     if (ACTIVE_COUNT <= 0) await worker.close()
-  } catch {}
+  } catch { }
   process.exit(0)
 }
 process.on('SIGINT', shutdown)
