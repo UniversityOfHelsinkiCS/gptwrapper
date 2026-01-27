@@ -89,6 +89,7 @@ async function transcribeWithOllama({ text, bytes }: { text?: string; bytes?: Ui
 
 
 async function transcribeWithVLLM({ text, bytes }: { text?: string; bytes?: Uint8Array | Buffer }) {
+  logger.info(`Sending request to vLLM for model: ${MODEL} at URL: ${VLM_URL}`)
   const userText = `Parsed PDF text:\n${text ?? ''}\n\nImage transcription:`
 
   // Build OpenAI-style messages
