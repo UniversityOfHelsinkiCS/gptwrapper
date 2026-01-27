@@ -110,7 +110,7 @@ async function transcribeWithVLLM({ text, bytes }: { text?: string; bytes?: Uint
     // max_tokens: 2000,
   }
 
-  const response = await fetch(`${VLM_URL}/chat/completions`, {
+  const response = await fetch(`${VLM_URL}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
