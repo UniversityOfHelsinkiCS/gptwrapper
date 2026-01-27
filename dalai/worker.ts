@@ -35,7 +35,7 @@ const connection = new Redis(creds)
 
 const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE ?? 'vlm-queue'
 const VLM_URL = process.env.OLLAMA_URL ?? 'http://laama-svc:11434/api/generate'
-const MODEL = process.env.MODAL ?? 'ministral-3:3b'
+const MODEL = process.env.MODEL ?? 'ministral-3:3b'
 const PROVIDER = process.env.PROVIDER ?? 'ollama' as 'ollama' | 'vllm'
 
 
