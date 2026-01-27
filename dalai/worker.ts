@@ -65,11 +65,8 @@ async function transcribeWithOllama({ text, bytes }: { text?: string; bytes?: Ui
     system: systemPrompt,
     prompt: `Parsed PDF text:\n${text ?? ''}\n\nImage transcription:`,
     stream: false,
+    images: [bytes],
     options: { num_ctx: 8192 },
-  }
-
-  if (bytes && bytes.length) {
-    body.images = [Buffer.from(bytes).toString('base64')]
   }
 
   const response = await fetch(VLM_URL, {
@@ -97,15 +94,10 @@ async function transcribeWithVLLM({ text, bytes }: { text?: string; bytes?: Uint
   // Build OpenAI-style messages
   const contentParts: any[] = [{ type: 'text', text: userText }]
 
-  if (bytes && bytes.length) {
-    // Use data URL for image content if your vLLM build/model supports it.
-    // Choose MIME type based on your input (png or jpeg).
-    const base64 = Buffer.from(bytes).toString('base64')
-    contentParts.push({
-      type: 'image_url',
-      image_url: { url: `data:image/png;base64,${base64}` },
-    })
-  }
+  contentParts.push({
+    type: 'image_url',
+    image_url: { url: `data:image/png;base64,${bytes}` },
+  })
 
   const payload = {
     model: MODEL,
@@ -144,7 +136,7 @@ const worker = new Worker(
   QUEUE_NAME,
   async (job) => {
     ACTIVE_COUNT++
-    const { bytes, pageNumber, text } = job.data || {}
+    const { bytes, pageNumber, text } = job.data || {} //bytes are already in base_64 from png buffer
 
     logger.info(`Processing job ${job.id}`)
 
