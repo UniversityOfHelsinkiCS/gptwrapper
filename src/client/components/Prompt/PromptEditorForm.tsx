@@ -9,7 +9,6 @@ import {
     FormControlLabel,
     MenuItem,
     Select,
-    Slider,
     TextField,
     Typography,
     Accordion,
@@ -93,48 +92,6 @@ const ModelSettingsSection = () => {
             </AccordionSummary>
             <AccordionDetails>
                 <Box mb={3}>
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={form.temperatureDefined && !modelHasTemperature}
-                                onChange={(e) =>
-                                    setForm((prev) => ({
-                                        ...prev,
-                                        temperatureDefined: e.target.checked,
-                                    }))
-                                }
-                                disabled={modelHasTemperature}
-                            />
-                        }
-                        label={t('chat:temperature')}
-                    />
-                    <Collapse in={form.temperatureDefined && !modelHasTemperature}>
-                        <Box sx={{ mb: 3, p: 2 }}>
-                            <Slider
-                                value={form.temperature}
-                                onChange={(_, newValue) =>
-                                    setForm((prev) => ({
-                                        ...prev,
-                                        temperature: newValue as number,
-                                    }))
-                                }
-                                aria-labelledby="temperature-slider"
-                                valueLabelDisplay="auto"
-                                step={0.1}
-                                min={0}
-                                max={1}
-                                disabled={modelHasTemperature}
-                            />
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <Typography variant="body2">
-                                    {t('chat:predictableTemperature')}
-                                </Typography>
-                                <Typography variant="body2">
-                                    {t('chat:creativeTemperature')}
-                                </Typography>
-                            </Box>
-                        </Box>
-                    </Collapse>
                     {type !== 'PERSONAL' && (
                         <FormControlLabel
                             control={
@@ -150,36 +107,7 @@ const ModelSettingsSection = () => {
                     )}
                 </Box>
 
-                <Box mb={3}>
-                    <Typography mb={1} fontWeight="bold">
-                        {t('prompt:selectedModelLabel')}
-                    </Typography>
-                    <FormControl fullWidth>
-                        <Select
-                            value={form.selectedModel || 'none'}
-                            onChange={(e) =>
-                                setForm((prev) => ({
-                                    ...prev,
-                                    selectedModel: (e.target.value || 'none') as ValidModelName | 'none',
-                                }))
-                            }
-                        >
-                            <MenuItem value="none">
-                                <em>{t('prompt:modelFreeToChoose')}</em>
-                            </MenuItem>
-                            {validModels.map((m) => (
-                                <MenuItem key={m.name} value={m.name}>
-                                    {m.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Box>
-
                 <Box>
-                    <Typography mb={1} fontWeight="bold">
-                        {t('prompt:systemMessage')}
-                    </Typography>
                     <TextField
                         slotProps={{
                             htmlInput: {

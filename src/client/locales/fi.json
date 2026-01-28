@@ -452,7 +452,7 @@
     "noSystemMessage": "Ei kielimallin ohjeita",
     "promptBasicInfo": "Alustuksen perustiedot",
     "studentInstructionsLabel": "Ohjeistus opiskelijoille alustuksen käytöstä",
-    "promptModelSettings": "Alustuksen kielimallin asetukset",
+    "promptModelSettings": "Kielimallille annettava ohjeistus",
     "hideSystemInstructions": "Piilota kielimallin ohjeistus opiskelijoilta",
     "selectedModelLabel": "Alustuksen valittu kielimalli",
     "systemMessagePlaceholder": "Esim. Olet avulias avustaja.",
