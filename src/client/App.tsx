@@ -22,6 +22,7 @@ import { GlobalSettings } from './components/GlobalSettings'
 import { Feedback } from './components/Feedback'
 import { SuperSpeedLoginAs } from './components/Admin/SuperSpeedLoginAs'
 import { useLoggedInAs } from './hooks/useLoggedInAs'
+import NotificationBanner from './components/common/NotificationBanner'
 
 const hasAccess = (user: User | null | undefined, courseId?: string) => {
   if (!user) return false
@@ -124,6 +125,7 @@ const Layout = () => {
           height: 'auto',
         }}
       >
+        <NotificationBanner />
         <Feedback open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
         <GlobalSettings open={settingsOpen} setOpen={setSettingsOpen} />
         <DisclaimerModal disclaimerStatus={disclaimerStatus} setDisclaimerStatus={setDisclaimerStatus} />

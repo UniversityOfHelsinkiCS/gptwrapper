@@ -11,6 +11,7 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import { RouterTabs } from '../common/RouterTabs'
 import Feedbacks from './Feedbacks'
 import Testing from './Testing'
+import NotificationManagement from './NotificationManagement'
 
 /**
  * React-router compatible lazy loaded component for Admin page
@@ -38,6 +39,7 @@ export function Component() {
           {user.iamGroups.includes('grp-toska') && <Tab label={t('admin:updater')} to="/admin/updater" component={Link} />}
           <Tab label={t('admin:searchUsers')} to="/admin/usersearch" component={Link} />
           <Tab label={t('admin:feedbacks')} to="/admin/feedbacks" component={Link} />
+          <Tab label={t('admin:notifications')} to="/admin/notifications" component={Link} />
           <Tab label={t('admin:testing')} to="/admin/testing" component={Link} />
         </RouterTabs>
       </Box>
@@ -48,6 +50,7 @@ export function Component() {
         {user.iamGroups.includes('grp-toska') && <Route path="/updater" element={<Updater />} />}
         <Route path="/usersearch" element={<UserSearch />} />
         <Route path="/feedbacks" element={<Feedbacks />} />
+        <Route path="/notifications" element={<NotificationManagement />} />
         <Route path="/testing" element={<Testing />} />
       </Routes>
     </Container>
