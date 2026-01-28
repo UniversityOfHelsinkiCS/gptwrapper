@@ -6,6 +6,7 @@ import { ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } 
 import logger from '../../util/logger'
 import { ApplicationError } from '../../util/ApplicationError'
 import type { Message } from '../../../shared/chat'
+import { checkIamAccess } from '../../util/iams'
 
 export const getUsage = async (userId: string) => {
   const user = await User.findByPk(userId, {
@@ -22,8 +23,13 @@ export const getUsage = async (userId: string) => {
 export const checkUsage = (user: UserType, model: ValidModelName): boolean => {
   if (model === FREE_MODEL) return true
 
-  // 10x token limit for power users
-  const tokenLimit = user.isPowerUser ? DEFAULT_TOKEN_LIMIT * 10 : DEFAULT_TOKEN_LIMIT
+  // Determine base token limit based on IAM group membership
+  // Users with IAM access get full limit, others get half
+  const hasFullAccess = user.isAdmin || checkIamAccess(user.iamGroups)
+  const baseLimit = hasFullAccess ? DEFAULT_TOKEN_LIMIT : DEFAULT_TOKEN_LIMIT / 2
+  
+  // Power users get 10x the base limit
+  const tokenLimit = user.isPowerUser ? baseLimit * 10 : baseLimit
 
   return user.isAdmin || (user.usage ?? 0) <= tokenLimit
 }

@@ -58,11 +58,8 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     course.currentUserUsage = chatInstanceUsage
 
     res.locals.chatCompletionMeta.course = course.name?.fi
-  } else {
-    if (!user.isAdmin && !checkIamAccess(user.iamGroups) && !(await getTeachedCourses(user)).length) {
-      throw ApplicationError.Forbidden('Not authorized for general chat')
-    }
   }
+  // General chat is now open to all authenticated users
 
   // Validate file if exists (but don't parse - client already did that)
   res.setHeader('content-type', 'text/event-stream')

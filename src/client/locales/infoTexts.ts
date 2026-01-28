@@ -7,11 +7,11 @@ CurreChat on Helsingin yliopistossa kehitetty generatiivisen tekoälyn työkalu.
 
 ### Pääsy palveluun ja käyttö kursseilla
 
-CurreChat on vapaasti käytettävissä Helsingin yliopiston henkilökunnalle. Yliopiston opiskelijat pääsevät käyttämään CurreChatia opettajan aktivoimilla kursseilla kurssin keston ajan.
+CurreChat on käytettävissä kaikille Helsingin yliopiston opiskelijoille ja henkilökunnalle. Opiskelijat voivat käyttää palvelua henkilökohtaisesti tai opettajan aktivoimilla kursseilla.
 
 ### Käyttörajat
 
-Kehittyneempien kielimallien käyttö on rajattu tiettyyn määrään tokeneita. Henkilökohtaisessa käytössä laskuri nollautuu joka maanantai. Kursseilla opiskelijoilla on käytössään tietty määrä tokeneita koko kurssin ajalle.
+Kehittyneempien kielimallien käyttö on rajattu tiettyyn määrään tokeneita. Henkilökohtaisessa käytössä laskuri nollautuu joka maanantai. Henkilökunnalla on käytössään 200 000 tokenia viikossa, opiskelijoilla 100 000 tokenia. Kursseilla opiskelijoilla on käytössään 200000 tokeneita viikossa.
 
 Tokenien kulutusta voi vähentää tyhjentämällä keskustelu aina keskustelun aiheen vaihtuessa. Kevyempien mini-päätteisten kielimallien käyttö ei kuluta token-laskuria.
 
@@ -55,11 +55,11 @@ CurreChat is a generative AI tool developed at the University of Helsinki. The s
 
 ### Access to the service and use in courses
 
-CurreChat is freely available to the staff of the University of Helsinki. University students can use CurreChat in courses where the teacher has enabled it for the duration of the course.
+CurreChat is available to all students and staff at the University of Helsinki. Students can use the service personally or in courses where the teacher has enabled it.
 
 ### Usage limits
 
-The use of more advanced language models is limited by a set number of tokens. For personal use, the counter resets every Monday. In courses, students are provided with a certain number of tokens for the entire course.
+The use of more advanced language models is limited by a set number of tokens. For personal use, the counter resets every Monday. Staff receives 200,000 tokens weekly, while students receive 100,000 tokens. In courses, students are provided with a certain number of tokens for the entire course.
 
 Token consumption can be reduced by clearing the conversation whenever the topic changes. The use of lighter, mini-suffixed language models does not deplenish the user's token quota.
 

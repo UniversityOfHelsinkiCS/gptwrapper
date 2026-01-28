@@ -31,12 +31,7 @@ userRouter.get('/login', async (req, res) => {
   const teacherCourseIds = teacherCourses.map(c => c.courseId) as string[]
 
   const courses = enrolledCourseIds.concat(teacherCourseIds)
-  const hasCourseAccess = courses.length > 0
-
-  if (!isAdmin && !hasIamAccess && !hasCourseAccess) {
-    logger.info('Unauthorized user', { iamGroups })
-    throw ApplicationError.Unauthorized('Unauthorized')
-  }
+  // All authenticated users now have access to general chat
 
   user.ownCourses = teacherCourseIds
   user.activeCourseIds = courses
@@ -64,11 +59,16 @@ userRouter.get('/login', async (req, res) => {
 
   const termsAccepted = await User.findByPk(id, { attributes: ['termsAcceptedAt'] })
 
+  // Calculate token limit based on tier: IAM users get full limit, others get half
+  const baseLimit = hasIamAccess || isAdmin ? DEFAULT_TOKEN_LIMIT : DEFAULT_TOKEN_LIMIT / 2
+  const tokenLimit = user.isPowerUser ? baseLimit * 10 : baseLimit
+
   res.send({
     ...dbUser.toJSON(),
     ...user,
     usage,
     hasIamAccess: isAdmin || hasIamAccess,
+    tokenLimit,
     lastRestart,
     serverVersion: process.env.VERSION,
     enrolledCourses: enrolledCourses.filter(isNowOrInFuture).map((enrollment) => enrollment.chatInstance),

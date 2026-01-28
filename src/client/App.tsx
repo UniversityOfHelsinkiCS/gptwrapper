@@ -32,17 +32,15 @@ const hasAccess = (user: User | null | undefined, courseId?: string) => {
   }
 
   if (!courseId && window.location.pathname.endsWith('/chats')) return true
-  if (!courseId && !user.hasIamAccess) return false
+  // All authenticated users now have access to general chat
 
   return true
 }
 
 const getRedirect = (user: User | null | undefined) => {
   if (!user) return '/noaccess'
-  if (user.hasIamAccess) return '/general'
-  if (user.activeCourseIds.length > 0) return '/chats'
-
-  return '/noaccess'
+  // All authenticated users now have access to general chat
+  return '/general'
 }
 
 const AdminLoggedInAsBanner = () => {
