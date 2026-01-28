@@ -56,7 +56,7 @@ const ChatV2Content = () => {
   const chatScroll = useChatScroll()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { t, i18n } = useTranslation()
-  const { promptInfo } = usePromptState()
+  const { promptInfo, shouldHideToolResults } = usePromptState()
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
   const {
     processStream,
@@ -354,6 +354,8 @@ const ChatV2Content = () => {
 
   // layout
   const rightMenuOpen = !!activeToolResult
+  const isTeacherOrAdmin = !!user?.isAdmin || (user?.ownCourses ?? []).includes(chatInstance?.courseId ?? '')
+  const hideToolResultsFromStudent = shouldHideToolResults && !isTeacherOrAdmin
   const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
   const leftPanelFloating = isEmbeddedMode || isMobile
   const [sideBarOpen, setSideBarOpen] = useState<boolean>(() => {
@@ -496,6 +498,7 @@ const ChatV2Content = () => {
             toolCalls={toolCalls}
             setActiveToolResult={setActiveToolResult}
             isMobile={isMobile}
+            hideToolResults={hideToolResultsFromStudent}
             onRetry={handleRetry}
           />
         </Box>
@@ -531,7 +534,7 @@ const ChatV2Content = () => {
         </Box>
       </Box>
       {/* FileSearchResults columns ----------------------------------------------------------------------------------------------- */}
-      {isMobile ? (
+      {!hideToolResultsFromStudent && (isMobile ? (
         <Drawer
           anchor="right"
           open={!!activeToolResult}
@@ -575,7 +578,7 @@ const ChatV2Content = () => {
             <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />
           </Box>
         )
-      )}
+      ))}
 
       {/* Modals routes ------------------------------------------------------------------------------------------------------------ */}
       <Routes>

@@ -1,6 +1,7 @@
 debug.log
 node_modules
 dist
+node_modules
 .vscode
 .env
 .env2

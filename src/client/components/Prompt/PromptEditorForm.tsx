@@ -136,17 +136,33 @@ const ModelSettingsSection = () => {
                         </Box>
                     </Collapse>
                     {type !== 'PERSONAL' && (
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={form.hidden}
-                                    onChange={(e) =>
-                                        setForm((prev) => ({ ...prev, hidden: e.target.checked }))
-                                    }
-                                />
-                            }
-                            label={t('prompt:hideSystemInstructions')}
-                        />
+                        <Box display="flex" flexDirection="column" gap={1}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={form.hidden}
+                                        onChange={(e) =>
+                                            setForm((prev) => ({ ...prev, hidden: e.target.checked }))
+                                        }
+                                    />
+                                }
+                                label={t('prompt:hideSystemInstructions')}
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={form.hideToolResults}
+                                        onChange={(e) =>
+                                            setForm((prev) => ({
+                                                ...prev,
+                                                hideToolResults: e.target.checked,
+                                            }))
+                                        }
+                                    />
+                                }
+                                label={t('prompt:hideToolResults')}
+                            />
+                        </Box>
                     )}
                 </Box>
 

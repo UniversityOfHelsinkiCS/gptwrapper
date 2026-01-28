@@ -125,10 +125,12 @@ const AssistantMessageInfo = ({ message }: { message: AssistantMessage }) => {
 const AssistantMessageItem = ({
   message,
   setActiveToolResult,
+  hideToolResults,
   onRetry
 }: {
   message: AssistantMessage
   setActiveToolResult: (data: ToolCallResultEvent) => void
+  hideToolResults?: boolean
   onRetry?: () => void
 }) => {
   const processedContent = React.useMemo(() => preprocessMath(readMessageContent(message)), [message.content])
@@ -293,9 +295,10 @@ const AssistantMessageItem = ({
           )}
         </Box>
       )}
-      {Object.values(message.toolCalls ?? {}).map((toolResult) => (
-        <ToolResult key={toolResult.callId} toolResult={toolResult} handleToolResult={handleToolResult} />
-      ))}
+      {!hideToolResults &&
+        Object.values(message.toolCalls ?? {}).map((toolResult) => (
+          <ToolResult key={toolResult.callId} toolResult={toolResult} handleToolResult={handleToolResult} />
+        ))}
     </Box>
   )
 }
@@ -303,10 +306,12 @@ const AssistantMessageItem = ({
 export const MessageItem = ({
   message,
   setActiveToolResult,
+  hideToolResults,
   onRetry
 }: {
   message: ChatMessage
   setActiveToolResult: (data: ToolCallResultEvent) => void
+  hideToolResults?: boolean
   onRetry?: () => void
 }) => {
   if (message.role === 'assistant') {
@@ -317,7 +322,7 @@ export const MessageItem = ({
           height: 'auto',
         }}
       >
-        <AssistantMessageItem message={message} setActiveToolResult={setActiveToolResult} onRetry={onRetry} />
+        <AssistantMessageItem message={message} setActiveToolResult={setActiveToolResult} hideToolResults={hideToolResults} onRetry={onRetry} />
       </Box>
     )
   } else {
@@ -354,6 +359,7 @@ const Conversation = ({
   setActiveToolResult,
   initial,
   isMobile,
+  hideToolResults,
   onRetry,
 }: {
   messages: ChatMessage[]
@@ -364,6 +370,7 @@ const Conversation = ({
   setActiveToolResult: (data: ToolCallResultEvent) => void
   initial?: React.ReactElement
   isMobile: boolean
+  hideToolResults?: boolean
   onRetry?: (index: number) => void
 }) => {
   const [reminderSeen, setReminderSeen] = useLocalStorageState<boolean>('reminderSeen', false)
@@ -389,6 +396,7 @@ const Conversation = ({
               key={idx}
               message={message}
               setActiveToolResult={setActiveToolResult}
+              hideToolResults={hideToolResults}
               onRetry={showRetry ? () => onRetry!(idx) : undefined}
             />
           )
@@ -404,9 +412,10 @@ const Conversation = ({
                 generationInfo,
               }}
               setActiveToolResult={setActiveToolResult}
+              hideToolResults={hideToolResults}
             />
           ) : (
-            <LoadingMessage toolCalls={toolCalls} />
+            <LoadingMessage toolCalls={hideToolResults ? {} : toolCalls} />
           ))}
       </Box>
       {!reminderSeen && !isStreaming && messages.length > 15 && (

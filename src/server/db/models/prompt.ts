@@ -27,6 +27,8 @@ class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prom
 
   declare hidden: CreationOptional<boolean>
 
+  declare hideToolResults: CreationOptional<boolean>
+
   declare model?: CreationOptional<ValidModelName | null>
 
   declare temperature?: CreationOptional<number>
@@ -78,6 +80,11 @@ Prompt.init(
       defaultValue: [],
     },
     hidden: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    hideToolResults: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,

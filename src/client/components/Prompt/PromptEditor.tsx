@@ -71,6 +71,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
       ? (activePrompt.messages?.find((m: Message) => m.role === 'system')?.content as string) || ''
       : t('prompt:defaultRagMessage'),
     hidden: activePrompt?.hidden ?? false,
+    hideToolResults: activePrompt?.hideToolResults ?? false,
     ragIndexId: activePrompt?.ragIndexId ?? null,
     selectedModel: activePrompt?.model ?? 'none',
     temperatureDefined: activePrompt?.temperature !== undefined,
@@ -97,8 +98,8 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
     if (!form.name) {
       enqueueSnackbar(t('prompt:missingPromptName'), { variant: 'error' })
       return
-    }
-
+}
+ 
     setLoading(true)
 
     const {
@@ -107,6 +108,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
       systemMessage,
       ragSystemMessage,
       hidden,
+      hideToolResults,
       ragIndexId,
       selectedModel,
       temperature
@@ -123,6 +125,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
           systemMessage,
           messages,
           hidden,
+          hideToolResults,
           ragIndexId,
           model: selectedModel,
           temperature,
@@ -137,6 +140,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
           systemMessage,
           messages,
           hidden,
+          hideToolResults,
           ragIndexId,
           model: selectedModel,
           temperature,
@@ -194,4 +198,3 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
     </PromptEditorFormContext.Provider>
   );
 }
-

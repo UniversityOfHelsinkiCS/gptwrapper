@@ -25,6 +25,7 @@ export const PromptInfoModal = ({ back, setEditorOpen, personal }: { back?: stri
             userInstructions={prompt.userInstructions ?? ''}
             systemMessage={prompt.systemMessage}
             hidden={prompt.hidden}
+            hideToolResults={prompt.hideToolResults}
             type={prompt.type}
         />
     )
