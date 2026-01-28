@@ -200,7 +200,7 @@
   },
   "status": {
     "modelInUse": "Language model in use:",
-    "tokensUsed": "tokens used",
+    "tokensUsed": "of tokens used",
     "limitedUsage": ", the other models are not usable when the limit is reached"
   },
   "error": {

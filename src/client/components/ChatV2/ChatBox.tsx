@@ -233,7 +233,7 @@ export const ChatBox = ({
                     variant="body2"
                     sx={{ whiteSpace: 'nowrap', padding: '0.5rem 0', opacity: isTokenLimitExceeded ? 1 : 0.6, color: isTokenLimitExceeded ? '#cc0000' : 'inherit' }}
                   >
-                    {userStatus?.usage ?? '-'} / {userStatus?.limit ?? '-'} {!isMobile && (t('status:tokensUsed'))}
+                    {userStatus?.usage != null && userStatus?.limit != null ? `${Math.round((userStatus.usage / userStatus.limit) * 100)}% ${t('status:tokensUsed')}` : '-'}
                   </Typography>
                   <Tooltip
                     arrow

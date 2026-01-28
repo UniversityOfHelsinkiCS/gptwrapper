@@ -188,7 +188,7 @@
   },
   "status": {
     "modelInUse": "Språkmodell i användning:",
-    "tokensUsed": "tokens som används",
+    "tokensUsed": "av tokens används",
     "limitedUsage": ", de andra modellerna är inte användbara när gränsen nås"
   },
   "error": {

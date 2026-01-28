@@ -211,7 +211,7 @@
   },
   "status": {
     "modelInUse": "Käytössä oleva kielimalli:",
-    "tokensUsed": "tokenia käytetty",
+    "tokensUsed": "tokeneista käytetty",
     "limitedUsage": ", muut kielimallit eivät ole käytettävissä rajan ylityttyä"
   },
   "error": {
