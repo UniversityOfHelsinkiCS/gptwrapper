@@ -30,7 +30,7 @@ const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(
     /*
     edit course form sometimes renders just before the new version of a mutated course comes back, this useCourse hook helps to make sure that the newest version of the course is rendered
     */
-  const { data: chatInstance, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(course.courseId)
+  const { data: chatInstance } = useCourse(course.courseId)
     const mutation = useEditCourseMutation(course.courseId as string)
 
     const [startDate, setStartDate] = useState(new Date(course.activityPeriod?.startDate || new Date()))
@@ -38,8 +38,12 @@ const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(
     const [saveDiscussions, setSaveDiscussions] = useState(course.saveDiscussions)
     const [notOptoutSaving, setNotOptoutSaving] = useState(course.notOptoutSaving)
 
-    console.log(course)
-    console.log(chatInstance)
+    const hasUnsavedChanges = 
+      format(startDate, 'yyyy-MM-dd') !== format(new Date(course.activityPeriod?.startDate || new Date()), 'yyyy-MM-dd') ||
+      format(endDate, 'yyyy-MM-dd') !== format(new Date(course.activityPeriod?.endDate || new Date()), 'yyyy-MM-dd') ||
+      saveDiscussions !== course.saveDiscussions ||
+      notOptoutSaving !== course.notOptoutSaving
+
     const handleSubmit = async (tokens?: number) => {
       const activityPeriod = {
         startDate: format(startDate, 'yyyy-MM-dd'),
@@ -157,7 +161,11 @@ const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(
               {t('course:deActivate')}
             </RedButton>
           )}
-          <BlueButton onClick={() => handleSubmit()} variant="contained">
+          <BlueButton 
+            onClick={() => handleSubmit()} 
+            variant="contained"
+            disabled={!hasUnsavedChanges}
+          >
             {t('save')}
           </BlueButton>
         </Stack>
