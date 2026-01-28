@@ -7,7 +7,7 @@ import { inProduction, inStaging, inCI } from './src/config'
 // eslint-disable-next-line no-nested-ternary
 const ciBase = '/'
 const developmentBase = '/'
-const stagingBase = '/'
+const stagingBase = '/gptwrapper'
 const productionBase = '/chat'
 
 let base = developmentBase
