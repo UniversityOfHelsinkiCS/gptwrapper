@@ -75,7 +75,7 @@
   },
   "info": {
     "title": "Käyttöohje",
-    "usage": "Henkilökohtainen tokenirajasi nollautuu joka maanantai. Henkilökunnalla ja opiskelijoilla, joilla on täysi käyttöoikeus, on käytössään 200 000 tokenia viikossa, kun taas muilla käyttäjillä on 100 000 tokenia. Vähentääksesi tokenien kulumista voit valita ilmaisen kielimallin tai aloittaa uuden keskustelun aina kun vaihdat aihetta.",
+    "usage": "Henkilökohtainen tokenirajasi nollautuu joka maanantai. Henkilökunnalla on käytössään 200 000 tokenia viikossa, ja opiskelijoilla 100 000 tokenia. Vähentääksesi tokenien kulumista voit valita ilmaisen kielimallin tai aloittaa uuden keskustelun aina kun vaihdat aihetta.",
     "acceptDisclaimer": "Olen lukenut ja ymmärtänyt käyttöohjeet"
   },
   "footer": {

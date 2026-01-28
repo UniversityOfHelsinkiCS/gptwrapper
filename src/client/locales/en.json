@@ -74,7 +74,7 @@
   },
   "info": {
     "title": "Instructions",
-    "usage": "Personal token limit resets every Monday. Staff and students with full access receive 200,000 tokens weekly, while other users receive 100,000 tokens. To reduce token consumption, you can choose a free language model or start a new conversation when changing topics.",
+    "usage": "Personal token limit resets every Monday. Staff receives 200,000 tokens weekly, while other students receive 100,000 tokens. To reduce token consumption, you can choose a free language model or start a new conversation when changing topics.",
     "acceptDisclaimer": "I have read and understood these instructions"
   },
   "footer": {
