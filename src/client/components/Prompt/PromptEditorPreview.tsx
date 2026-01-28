@@ -16,6 +16,7 @@ export const PromptEditorPreview = () => {
                 userInstructions={form.userInstructions}
                 systemMessage={form.systemMessage}
                 hidden={form.hidden}
+                hideToolResults={form.hideToolResults}
                 type={type}
             />
         </>

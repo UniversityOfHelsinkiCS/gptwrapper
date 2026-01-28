@@ -20,6 +20,7 @@ interface PromptSelectorStateType {
   myPrompts: Prompt[]
   urlPrompt: Prompt | undefined
   isPromptHidden: boolean
+  shouldHideToolResults: boolean
   isPromptEditable: boolean
   promptInfo: MessageGenerationInfo['promptInfo']
   saveOwnPrompt: UseMutateAsyncFunction<
@@ -67,6 +68,7 @@ export const PromptStateProvider: React.FC<{
 
   const urlPrompt = course?.prompts.find((p) => p.id === urlPromptId)
   const isPromptHidden = activePrompt?.hidden ?? false
+  const shouldHideToolResults = activePrompt?.hideToolResults ?? false
   const isPromptEditable = activePrompt === undefined || activePrompt?.type === 'PERSONAL'
   const dispatchAnalytics = useAnalyticsDispatch()
 
@@ -198,6 +200,7 @@ export const PromptStateProvider: React.FC<{
     urlPrompt,
     promptInfo,
     isPromptHidden,
+    shouldHideToolResults,
     isPromptEditable,
     saveOwnPrompt: ownPromptSaveMutation.mutateAsync,
     deleteOwnPrompt: ownPromptDeleteMutation.mutateAsync,

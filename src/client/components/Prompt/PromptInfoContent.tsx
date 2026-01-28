@@ -32,8 +32,9 @@ export const PromptInfoContent = ({
     userInstructions,
     systemMessage,
     hidden,
+    hideToolResults,
     type
-}: PromptInfo) => {
+}: PromptInfo & { hideToolResults?: boolean }) => {
 
     const { t } = useTranslation()
     const defaultInstructions = type === 'PERSONAL' ? t('prompt:myPrompt') : t('prompt:defaultChatInstructions')
@@ -80,6 +81,21 @@ export const PromptInfoContent = ({
                                     {t('prompt:noSystemMessage')}
                                 </Typography>
                             )}
+                        </Box>
+                    </Box>
+                </>
+            }
+
+            {
+                type !== 'PERSONAL' &&
+                <>
+                    <Divider sx={{ my: 3 }} />
+                    <Box>
+                        <Typography mb={2} fontWeight="bold">{t('prompt:toolResultsLabel')}</Typography>
+                        <Box sx={muiTextfieldMimic}>
+                            <Typography color="text.secondary">
+                                {hideToolResults ? t('prompt:toolResultsHidden') : t('prompt:toolResultsVisible')}
+                            </Typography>
                         </Box>
                     </Box>
                 </>

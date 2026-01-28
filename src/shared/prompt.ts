@@ -15,6 +15,7 @@ export const PromptUpdateableParamsSchema = z.object({
   systemMessage: z.string().max(20_000),
   messages: PromptMessagesSchema.optional().default([]),
   hidden: z.boolean().default(false),
+  hideToolResults: z.boolean().default(false),
   ragIndexId: z.number().min(1).optional().nullable(),
   model: ValidModelNameSchema.or(z.literal('none'))
     .optional()
