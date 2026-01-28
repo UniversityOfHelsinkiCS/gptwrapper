@@ -88,7 +88,7 @@ Playwright e2e tests are located in `e2e`. `playwright.config.ts` is also import
 Run the tests with
 
 ```bash
-npm run e2e
+npm run test:e2e
 ```
 
 To run just one test, mark it with `.only`:
