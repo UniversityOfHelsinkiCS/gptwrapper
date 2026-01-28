@@ -2,9 +2,7 @@ import { validModels } from '@config'
 import {
   Box,
   CircularProgress,
-  DialogActions,
-  Tabs,
-  Tab
+  DialogActions
 } from '@mui/material'
 import type { Message } from '@shared/chat'
 import { enqueueSnackbar } from 'notistack'
@@ -17,38 +15,10 @@ import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
 import { PromptEditorFormContext } from './context'
 import { PromptEditorForm } from './PromptEditorForm'
-import { PromptEditorPreview } from './PromptEditorPreview'
 import { PromptEditorFormContextValue, PromptEditorFormState } from 'src/client/types'
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-const TabPanel = (props: TabPanelProps) => {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`prompt-editor-tabpanel-${index}`}
-      aria-labelledby={`prompt-editor-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
-    </div>
-  );
-}
 
 
 export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string; setEditorOpen?: React.Dispatch<boolean>; personal?: boolean }) => {
-  const [tab, setTab] = useState(0);
-
-  const handleChange = (_: React.SyntheticEvent, newValue: number) => {
-    setTab(newValue);
-  };
 
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -163,28 +133,15 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
 
   return (
     <PromptEditorFormContext.Provider value={context}>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }} >
-        <Tabs value={tab} onChange={handleChange} aria-label="prompt-editor-tabs" slotProps={{ indicator: { style: { backgroundColor: 'black' } } }} textColor='inherit'>
-          <Tab label={t('prompt:edit')} />
-          <Tab label={t('prompt:preview')} />
-        </Tabs>
-      </Box>
-
       <form onSubmit={handleSubmit}>
-        <TabPanel value={tab} index={0}>
+        <Box sx={{ py: 3 }}>
           <PromptEditorForm />
-        </TabPanel>
-        <TabPanel value={tab} index={1}>
-          <PromptEditorPreview />
-        </TabPanel>
+        </Box>
 
         <DialogActions>
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
             {loading && <CircularProgress color="secondary" />}
             {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
-            <OutlineButtonBlue disabled={loading} variant="contained" sx={{ ml: 1 }} onClick={() => tab === 0 ? setTab(1) : setTab(0)}>
-              {tab === 1 ? t('prompt:edit') : t('prompt:preview')}
-            </OutlineButtonBlue>
             <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
               {t('common:save')}
             </BlueButton>

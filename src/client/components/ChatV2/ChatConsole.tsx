@@ -133,7 +133,7 @@ export default function ChatConsole({ user, course }: { user?: User | null, cour
 								{activePrompt.name}
 							</Typography>
 						</Box>
-						{showEditPrompt(activePrompt) ? (
+						{showEditPrompt(activePrompt) && (
 							<TextButton
 								data-testid="edit-prompt-button"
 								startIcon={<TuneIcon />}
@@ -141,11 +141,10 @@ export default function ChatConsole({ user, course }: { user?: User | null, cour
 							>
 								{t('sidebar:promptEdit')}
 							</TextButton>
-						) : (
-							<TextButton data-testid="prompt-details-button" startIcon={<HelpCenterIcon />} onClick={() => navigate(`/${courseId}/show/${activePrompt.id}`)}>
-								{t('sidebar:promptDetails')}
-							</TextButton>
 						)}
+						<TextButton data-testid="prompt-details-button" startIcon={<HelpCenterIcon />} onClick={() => navigate(`/${courseId}/show/${activePrompt.id}`)}>
+							{t('sidebar:promptDetails')}
+						</TextButton>
 						<TextButton data-testid="choose-prompt-button" startIcon={<AppsIcon />} onClick={() => navigate(`/${courseId}/prompts`)}>
 							{t('sidebar:promptChange')}
 						</TextButton>
