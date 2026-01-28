@@ -91,7 +91,7 @@ Prompt.init(
       allowNull: true,
     },
     userInstructions: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: true,
     },
   },
