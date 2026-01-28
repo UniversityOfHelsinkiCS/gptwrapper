@@ -1,4 +1,4 @@
-import { useState, forwardRef, useEffect } from 'react'
+import { useState, forwardRef } from 'react'
 import {
   Box,
   Typography,
@@ -35,15 +35,9 @@ const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(
 
     const [startDate, setStartDate] = useState(new Date(course.activityPeriod?.startDate || new Date()))
     const [endDate, setEndDate] = useState(new Date(course.activityPeriod?.endDate || new Date()))
-    const [usageLimit, setUsageLimit] = useState(course.usageLimit)
     const [saveDiscussions, setSaveDiscussions] = useState(course.saveDiscussions)
     const [notOptoutSaving, setNotOptoutSaving] = useState(course.notOptoutSaving)
 
-    useEffect(() => {
-      if(chatInstance?.usageLimit != usageLimit && chatInstance?.usageLimit != undefined){
-        setUsageLimit(chatInstance?.usageLimit)
-      }
-    }, [chatInstance])
     console.log(course)
     console.log(chatInstance)
     const handleSubmit = async (tokens?: number) => {
@@ -52,7 +46,7 @@ const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(
         endDate: format(endDate, 'yyyy-MM-dd'),
       }
 
-      const newLimit = tokens ?? usageLimit
+      const newLimit = tokens ?? course.usageLimit
       try {
         await mutation.mutateAsync({
           activityPeriod,
@@ -60,7 +54,6 @@ const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(
           saveDiscussions,
           notOptoutSaving,
         })
-        setUsageLimit(newLimit) //this ensures that the input field stays up do date on the form side...
         enqueueSnackbar(t('course:courseUpdated'), { variant: 'success' })
         setOpen(false)
       } catch (error: any) {
@@ -114,22 +107,20 @@ const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(
 
         <Divider />
 
-        <Box>
-          <Typography variant="h6" gutterBottom>
-            {t('admin:usageLimit')}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            {t('admin:usageLimitInfo')}
-          </Typography>
-          <TextField
-            fullWidth
-            type="number"
-            value={usageLimit}
-            onChange={(e) => setUsageLimit(Number(e.target.value))}
-          />
-        </Box>
+        {course.usageLimit > 0 && (
+          <>
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                {t('admin:usageLimit')}
+              </Typography>
+              <Typography variant="body1" sx={{ mt: 1 }}>
+                {DEFAULT_TOKEN_LIMIT.toLocaleString()}
+              </Typography>
+            </Box>
 
-        <Divider />
+            <Divider />
+          </>
+        )}
 
         {user.isAdmin && (
           <Box>
