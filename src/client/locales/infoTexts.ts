@@ -59,7 +59,7 @@ CurreChat is available to all students and staff at the University of Helsinki. 
 
 ### Usage limits
 
-The use of more advanced language models is limited by a set number of tokens. For personal use, the counter resets every Monday. Staff receives 200,000 tokens weekly, while students receive 100,000 tokens. In courses, students are provided with a certain number of tokens for the entire course.
+The use of more advanced language models is limited by a set number of tokens. For personal use, the counter resets every Monday. Staff receives 200,000 tokens weekly, while students receive 100,000 tokens. In courses, students are provided with a certain number of tokens that reset weekly every Monday.
 
 Token consumption can be reduced by clearing the conversation whenever the topic changes. The use of lighter, mini-suffixed language models does not deplenish the user's token quota.
 

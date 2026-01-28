@@ -75,7 +75,7 @@
   },
   "info": {
     "title": "Käyttöohje",
-    "usage": "Henkilökohtainen tokenirajasi nollautuu joka maanantai. Henkilökunnalla on käytössään 200 000 tokenia viikossa, ja opiskelijoilla 100 000 tokenia. Vähentääksesi tokenien kulumista voit valita ilmaisen kielimallin tai aloittaa uuden keskustelun aina kun vaihdat aihetta.",
+    "usage": "Henkilökohtainen tokenirajasi nollautuu joka maanantai. Henkilökunnalla on käytössään 200 000 tokenia viikossa, ja opiskelijoilla 100 000 tokenia. Myös kurssien tokenirajoitteet nollautuvat viikoittain joka maanantai. Vähentääksesi tokenien kulumista voit valita ilmaisen kielimallin tai aloittaa uuden keskustelun aina kun vaihdat aihetta.",
     "acceptDisclaimer": "Olen lukenut ja ymmärtänyt käyttöohjeet"
   },
   "footer": {
@@ -368,7 +368,7 @@
     "statistics": "Tilastoja",
     "averageTokenUsage": "Käytettyjen tokeneiden keskiarvo kokonaiskäytön mukaan",
     "usagePercentage": "CurreChatin käyttöön ottaneiden opiskelijoiden osuus",
-    "usageToolTip": "Käytettyjen tokenien määrä kurssin alusta lähtien tai viimeisestä nollauksesta lähtien. Nollautuu, kun laskuri palautetaan.",
+    "usageToolTip": "Käytettyjen tokenien määrä kurssin alusta lähtien tai viimeisestä nollauksesta lähtien. Nollautuu joka maanantai.",
     "totalUsageToolTip": "Tokenien kokonaismäärä koko kurssin ajalta. Tämä arvo ei koskaan nollaudu.",
     "usageChartTitle": "Opiskelijoiden käytetyt tokenit prosenttiosuutena käyttörajasta",
     "noData": "Ei dataa",

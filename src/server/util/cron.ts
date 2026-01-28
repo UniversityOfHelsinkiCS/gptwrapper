@@ -2,7 +2,7 @@ import cron from 'node-cron'
 import { Op, literal } from 'sequelize'
 
 import logger from './logger'
-import { User } from '../db/models'
+import { User, UserChatInstanceUsage } from '../db/models'
 import { run as runUpdater } from '../updater'
 import { inDevelopment } from '../../config'
 import { UPDATER_CRON_ENABLED } from './config'
@@ -23,6 +23,22 @@ const resetUsage = async () => {
       },
     },
   )
+
+  // Reset course chat token usage
+  await UserChatInstanceUsage.update(
+    {
+      usageCount: 0,
+    },
+    {
+      where: {
+        usageCount: {
+          [Op.gt]: 0,
+        },
+      },
+    },
+  )
+
+  logger.info('Usage reset complete')
 }
 
 const setupCron = async () => {

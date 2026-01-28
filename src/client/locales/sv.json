@@ -81,7 +81,7 @@
   },
   "info": {
     "title": "Bruksanvisning",
-    "usage": "Lösenord nollställs varje vecka. Du kan minska förbrukningen av token genom att välja en gratis språkmall eller genom att borja en ny konversation varje gång du byter ämne.",
+    "usage": "Lösenord nollställs varje vecka. Kurslängränser nollställs också varje måndag. Du kan minska förbrukningen av token genom att välja en gratis språkmall eller genom att borja en ny konversation varje gång du byter ämne.",
     "acceptDisclaimer": "Jag har läst och förstått bruksanvisningen"
   },
   "footer": {
@@ -326,7 +326,7 @@
     "statistics": "Statistik",
     "averageTokenUsage": "Genomsnittlig tokenanvändning enligt total användning",
     "usagePercentage": "Andel elever som har använt CurreChat",
-    "usageToolTip": "Antal använda tokens sedan kursens start eller sedan senaste återställning. Nollställs när räknaren återställs.",
+    "usageToolTip": "Antal använda tokens sedan kursens start eller sedan senaste återställning. Nollställs varje måndag.",
     "totalUsageToolTip": "Totalt antal tokens som använts under hela kursen. Detta värde nollställs aldrig.",
     "usageChartTitle": "Studenttokenanvändning i procent",
     "noData": "Inga data",

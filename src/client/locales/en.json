@@ -74,7 +74,7 @@
   },
   "info": {
     "title": "Instructions",
-    "usage": "Personal token limit resets every Monday. Staff receives 200,000 tokens weekly, while other students receive 100,000 tokens. To reduce token consumption, you can choose a free language model or start a new conversation when changing topics.",
+    "usage": "Personal token limit resets every Monday. Staff receives 200,000 tokens weekly, while other students receive 100,000 tokens. Course token limits also reset weekly every Monday. To reduce token consumption, you can choose a free language model or start a new conversation when changing topics.",
     "acceptDisclaimer": "I have read and understood these instructions"
   },
   "footer": {
@@ -365,7 +365,7 @@
     "statistics": "Statistics",
     "averageTokenUsage": "Average token usage by total usage",
     "usagePercentage": "Percentage of students who have used CurreChat",
-    "usageToolTip": "Number of tokens consumed since the start of the course or since the last reset. Resets to zero when refreshed.",
+    "usageToolTip": "Number of tokens consumed since the start of the course or since the last reset. Resets to zero every Monday.",
     "totalUsageToolTip": "Total tokens consumed over the lifetime of the course. This value never resets.",
     "usageChartTitle": "Student token usages as percentages",
     "noData": "No data",
