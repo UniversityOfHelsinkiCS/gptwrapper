@@ -449,7 +449,7 @@
     "noSystemMessage": "No system message",
     "promptBasicInfo": "Basic prompt information",
     "studentInstructionsLabel": "Instructions for students on prompt usage",
-    "promptModelSettings": "Prompt model settings",
+    "promptModelSettings": "Prompt for the model",
     "hideSystemInstructions": "Hide system instructions from students",
     "selectedModelLabel": "Selected model for the prompt",
     "systemMessagePlaceholder": "e.g., You are a helpful assistant.",
