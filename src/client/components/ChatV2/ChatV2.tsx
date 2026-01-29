@@ -56,7 +56,7 @@ const ChatV2Content = () => {
   const chatScroll = useChatScroll()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { t, i18n } = useTranslation()
-  const { promptInfo } = usePromptState()
+  const { promptInfo, isPromptHidden } = usePromptState()
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
   const {
     processStream,
@@ -107,6 +107,8 @@ const ChatV2Content = () => {
     z.coerce.number(),
   )
 
+  const amongResponsibles = user?.isAdmin || chatInstance?.responsibilities.some((r) => r.user.id === user?.id)
+
   // app states
   const [fileName, setFileName] = useState<string>('')
   const [messageWarning, setMessageWarning] = useState<{ [key in WarningType]?: { message: string; ignored: boolean } }>({})
@@ -149,14 +151,14 @@ const ChatV2Content = () => {
     const formData = new FormData()
 
     const file = fileInputRef.current?.files?.[0]
-    
+
     // Parse file content on client side and keep it separate from the message
     let messageContent: MessageContent[] | string = message
     let parsedFileContent: string | undefined = undefined
     if (file && !resendPrevious) {
       try {
         const fileContent = await parseFileContent(file)
-        
+
         // For images, replace the content with image array (images are shown differently)
         if (imageFileTypes.includes(file.type)) {
           messageContent = fileContent as MessageContent[]
@@ -164,7 +166,7 @@ const ChatV2Content = () => {
           // For text/PDF files, keep content separate and don't append to message
           parsedFileContent = fileContent as string
         }
-        
+
         // Still send file to server for validation purposes
         formData.append('file', file)
       } catch (error) {
@@ -353,7 +355,7 @@ const ChatV2Content = () => {
   )
 
   // layout
-  const rightMenuOpen = !!activeToolResult
+  const rightMenuOpen = !!activeToolResult && (amongResponsibles || !isPromptHidden)
   const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
   const leftPanelFloating = isEmbeddedMode || isMobile
   const [sideBarOpen, setSideBarOpen] = useState<boolean>(() => {
@@ -531,51 +533,53 @@ const ChatV2Content = () => {
         </Box>
       </Box>
       {/* FileSearchResults columns ----------------------------------------------------------------------------------------------- */}
-      {isMobile ? (
-        <Drawer
-          anchor="right"
-          open={!!activeToolResult}
-          onClose={() => setActiveToolResult(undefined)}
-          sx={{
-            '& .MuiDrawer-paper': {
-              width: '100%',
-              maxWidth: '100%',
-              padding: 0,
-            },
-          }}
-        >
-          <Box
+      {
+        isMobile ? (
+          <Drawer
+            anchor="right"
+            open={!!activeToolResult}
+            onClose={() => setActiveToolResult(undefined)}
             sx={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              paddingTop: '1rem',
-              paddingX: '1rem',
-              paddingBottom: '1rem',
-              overflow: 'auto',
+              '& .MuiDrawer-paper': {
+                width: '100%',
+                maxWidth: '100%',
+                padding: 0,
+              },
             }}
           >
-            {activeToolResult && <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />}
-          </Box>
-        </Drawer>
-      ) : (
-        !!activeToolResult && (
-          <Box
-            sx={{
-              width: rightPanelContentWidth,
-              height: '100vh',
-              display: 'flex',
-              flexDirection: 'column',
-              position: 'sticky',
-              top: 0,
-              borderLeft: '1px solid rgba(0,0,0,0.12)',
-              paddingTop: !isEmbeddedMode ? '4rem' : 0,
-            }}
-          >
-            <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />
-          </Box>
+            <Box
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                paddingTop: '1rem',
+                paddingX: '1rem',
+                paddingBottom: '1rem',
+                overflow: 'auto',
+              }}
+            >
+              {rightMenuOpen && <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />}
+            </Box>
+          </Drawer>
+        ) : (
+          rightMenuOpen && (
+            <Box
+              sx={{
+                width: rightPanelContentWidth,
+                height: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                position: 'sticky',
+                top: 0,
+                borderLeft: '1px solid rgba(0,0,0,0.12)',
+                paddingTop: !isEmbeddedMode ? '4rem' : 0,
+              }}
+            >
+              <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />
+            </Box>
+          )
         )
-      )}
+      }
 
       {/* Modals routes ------------------------------------------------------------------------------------------------------------ */}
       <Routes>
@@ -592,7 +596,7 @@ const ChatV2Content = () => {
         </Route>
       </Routes>
       <ResetConfirmModal open={resetConfirmModalOpen} setOpen={setResetConfirmModalOpen} onConfirm={handleReset} />
-    </Box>
+    </Box >
   )
 }
 
