@@ -60,7 +60,7 @@ const Stats: React.FC = () => {
         {t('course:usagePercentage')}: <strong>{usagePercentage ? `${Math.round(usagePercentage * 100 * 10) / 10}%` : t('course:noData')}</strong>
       </Typography>
       <MaxTokenUsageStudents course={course} />
-      {course.saveDiscussions && <UsageHistogram />}
+      <UsageHistogram />
       {usages && !course.saveDiscussions && (
         <>
           <Table sx={{ mt: 2 }}>
