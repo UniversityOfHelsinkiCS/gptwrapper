@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom'
 import useCourse, { useCourseEnrolments, useCourseStatistics } from '../../../hooks/useCourse'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import MaxTokenUsageStudents from './MaxTokenUsageStudents'
+import UsageHistogram from './UsageHistogram'
 
 type SortConfig = {
   key: 'last_name' | 'usageCount' | 'totalUsageCount'
@@ -59,6 +60,7 @@ const Stats: React.FC = () => {
         {t('course:usagePercentage')}: <strong>{usagePercentage ? `${Math.round(usagePercentage * 100 * 10) / 10}%` : t('course:noData')}</strong>
       </Typography>
       <MaxTokenUsageStudents course={course} />
+      {course.saveDiscussions && <UsageHistogram />}
       {usages && !course.saveDiscussions && (
         <>
           <Table sx={{ mt: 2 }}>

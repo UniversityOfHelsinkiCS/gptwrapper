@@ -77,6 +77,35 @@ courseRouter.get('/statistics/:id', async (req, res) => {
   res.send({ average, usagePercentage, usages: normalizedUsage })
 })
 
+courseRouter.get('/statistics/:id/daily', async (req, res) => {
+  const { id } = req.params
+
+  const chatInstance = await ChatInstance.findOne({
+    where: { courseId: id },
+  })
+
+  const request = req as unknown as RequestWithUser
+  const { user } = request
+
+  if (!chatInstance) throw ApplicationError.NotFound('ChatInstance not found')
+
+  enforceUserHasFullAccess(user, chatInstance)
+
+  // Get daily discussion counts for the course
+  const dailyUsage = (await Discussion.findAll({
+    attributes: [
+      [Sequelize.fn('DATE', Sequelize.col('created_at')), 'date'],
+      [Sequelize.fn('COUNT', Sequelize.col('id')), 'count'],
+    ],
+    where: { courseId: id },
+    group: [Sequelize.fn('DATE', Sequelize.col('created_at'))],
+    order: [[Sequelize.fn('DATE', Sequelize.col('created_at')), 'ASC']],
+    raw: true,
+  })) as unknown as { date: string; count: string }[]
+
+  res.send(dailyUsage.map((d) => ({ date: d.date, count: parseInt(d.count, 10) })))
+})
+
 courseRouter.get('/:id', async (req, res) => {
   const { id } = req.params
 

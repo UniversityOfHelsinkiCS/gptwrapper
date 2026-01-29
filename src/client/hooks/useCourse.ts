@@ -92,4 +92,29 @@ export const useCourseStatistics = (courseId?: string) => {
   return { stats, ...rest }
 }
 
+export interface DailyUsage {
+  date: string
+  count: number
+}
+
+export const useCourseDailyUsage = (courseId?: string) => {
+  const queryKey = ['dailyUsage', courseId]
+
+  const queryFn = async (): Promise<DailyUsage[]> => {
+    const res = await apiClient.get(`/courses/statistics/${courseId}/daily`)
+
+    const { data } = res
+
+    return data
+  }
+
+  const { data: dailyUsage, ...rest } = useQuery({
+    queryKey,
+    queryFn,
+    enabled: !!courseId,
+  })
+
+  return { dailyUsage, ...rest }
+}
+
 export default useCourse
