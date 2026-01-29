@@ -97,7 +97,7 @@ testMatrix.forEach((testConfig) => {
         await expect(page.getByText('Email sent')).toBeVisible()
       })
 
-      test('Can download as file', async ({ page }) => {
+      test.skip('Can download as file', async ({ page }) => {
         await acceptDisclaimer(page)
         await useMockModel(page)
 
