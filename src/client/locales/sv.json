@@ -129,6 +129,7 @@
     "toBeSaved": "Diskussionen sparas anonymt",
     "errorInstructions": "Det gick inte att generera ett svar. Vi rekommenderar att du sparar den aktuella konversationen och startar en ny. Du kan också prova en annan modell. Om problemet kvarstår, kontakta supporten.",
     "email": "Konversationen kommer att skickas till {{email}}",
+    "download": "Konversationen kommer att laddas ner som en fil",
     "cancelResponse": "Avbryt genereringen av svaret",
     "searchResults": "Sökresultat",
     "emptyConversationTooltip": "Inga meddelanden ännu.",
@@ -185,6 +186,11 @@
     "system": "System message",
     "success": "E-post skickat",
     "failure": "Det gick inte att skicka e-post"
+  },
+  "download": {
+    "save": "Spara som fil",
+    "success": "Fil nerladdad",
+    "failure": "Nedladdning misslyckades"
   },
   "status": {
     "modelInUse": "Språkmodell i användning:",

@@ -123,6 +123,7 @@
     "modelDisabled": "Model is unavailable",
     "attachFile": "Attach file",
     "email": "The conversation will be sent to {{email}}",
+    "download": "The conversation will be downloaded as a file",
     "cancelResponse": "Cancel the generation of the response",
     "searchResults": "Search results",
     "warning": "The new chat view is experiencing problems and the response generation is very slow. The old chat view is working normally.",
@@ -197,6 +198,11 @@
     "system": "System message",
     "success": "Email sent",
     "failure": "Sending email failed"
+  },
+  "download": {
+    "save": "Save as file",
+    "success": "File downloaded",
+    "failure": "Download failed"
   },
   "status": {
     "modelInUse": "Language model in use:",

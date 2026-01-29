@@ -10,6 +10,7 @@ import MapsUgcIcon from '@mui/icons-material/MapsUgc'
 import sidebarClose from '../../assets/sidebar-close.svg'
 import sidebarOpen from '../../assets/sidebar-open.svg'
 import EmailButton from './EmailButton'
+import DownloadButton from './DownloadButton'
 import hyLogo from '../../assets/hy_logo.svg'
 
 import ModelSelector from './ModelSelector'
@@ -78,6 +79,7 @@ const SideBar = ({
               <MapsUgcIcon fontSize='small' />
             </TextButton>
             <EmailButton messages={messages} disabled={!messages.length} collapsed />
+            {user?.isAdmin && <DownloadButton messages={messages} disabled={!messages.length} collapsed />}
           </Box>
         ) : (
           <Box>
@@ -125,6 +127,7 @@ const SideBar = ({
               </TextButton>
 
               <EmailButton messages={messages} disabled={!messages.length} />
+              {user?.isAdmin && <DownloadButton messages={messages} disabled={!messages.length} />}
             </Box>
           </Box>
         )}

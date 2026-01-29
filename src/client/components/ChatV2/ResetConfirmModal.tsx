@@ -10,17 +10,18 @@ export const ResetConfirmModal = ({
 }: {
   open: boolean
   setOpen: (open: boolean) => void
-  onConfirm: (data: { sendEmail: boolean }) => void
+  onConfirm: (data: { sendEmail: boolean; downloadFile: boolean }) => void
 }) => {
   const { t } = useTranslation()
   const { user } = useCurrentUser()
   const setSkipConfirmMutation = useNewConversationConfirmMutation('chat')
   const [skipConfirm, setSkipConfirm] = useState(user?.preferences?.skipNewConversationConfirm ?? false)
   const [sendEmail, setSendEmail] = useState(false)
+  const [downloadFile, setDownloadFile] = useState(false)
 
   const handleConfirm = (ev: React.FormEvent<HTMLFormElement>) => {
     ev.preventDefault()
-    onConfirm({ sendEmail })
+    onConfirm({ sendEmail, downloadFile })
     setSkipConfirmMutation(skipConfirm)
     setOpen(false)
   }
@@ -32,10 +33,16 @@ export const ResetConfirmModal = ({
         <DialogContentText mb={2}>
           {t('chat:confirmResetMessage')}
         </DialogContentText>
-        <FormControlLabel
-          control={<Checkbox checked={sendEmail} onChange={(ev) => setSendEmail(ev.target.checked)} data-testid="send-email" />}
-          label={t('email:save')}
-        />
+        <Box display="flex" flexDirection="column" gap={1}>
+          <FormControlLabel
+            control={<Checkbox checked={sendEmail} onChange={(ev) => setSendEmail(ev.target.checked)} data-testid="send-email" />}
+            label={t('email:save')}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={downloadFile} onChange={(ev) => setDownloadFile(ev.target.checked)} data-testid="download-file" />}
+            label={t('download:save')}
+          />
+        </Box>
         <NewConversationConfirmConfigurator label={t('preferences:newConversationConfirmLabelChat')} value={skipConfirm} setValue={setSkipConfirm} context='chat' />
       </DialogContent>
       <form onSubmit={handleConfirm}>

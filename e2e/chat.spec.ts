@@ -97,6 +97,28 @@ testMatrix.forEach((testConfig) => {
         await expect(page.getByText('Email sent')).toBeVisible()
       })
 
+      test('Can download as file', async ({ page }) => {
+        await acceptDisclaimer(page)
+        await useMockModel(page)
+
+        await sendChatMessage(page, 'test download')
+
+        await closeSendPreference(page)
+
+        await expect(page.getByTestId('user-message')).toContainText('test download')
+        await expect(page.getByTestId('assistant-message')).toContainText('OVER', { timeout: 6000 })
+
+        // Set up download handler
+        const downloadPromise = page.waitForEvent('download')
+        await page.getByTestId('download-button').click()
+
+        // Verify download was triggered
+        const download = await downloadPromise
+        expect(download.suggestedFilename()).toMatch(/currechat-discussion-\d{4}-\d{2}-\d{2}-\d{6}\.md/)
+
+        await expect(page.getByText('File downloaded')).toBeVisible()
+      })
+
       if (!course) {
         test('Every validModel is available in general chat', async ({ page }) => {
           await acceptDisclaimer(page)

@@ -33,6 +33,93 @@ export const sendConversationEmail = async (email: string, messages: ChatMessage
   return response
 }
 
+export const downloadDiscussionAsFile = (messages: ChatMessage[], t: TFunction) => {
+  const textContent = formatMessagesAsText(messages, t)
+  const blob = new Blob([textContent], { type: 'text/markdown;charset=utf-8' })
+  
+  const date = new Date()
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  const filename = `currechat-discussion-${year}-${month}-${day}-${hours}${minutes}${seconds}.md`
+  
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+const formatMessagesAsText = (messages: ChatMessage[], t: TFunction): string => {
+  const textContent = messages
+    .map((msg) => {
+      const content = readMessageContent(msg)
+      let header = ''
+      
+      if (msg.role === 'user') {
+        header = '[USER]'
+        const parts = [header, content]
+        
+        if (msg.attachments) {
+          parts.push(`[Attachment: ${msg.attachments}]`)
+        }
+        
+        return parts.join('\n')
+      } else {
+        // Assistant message
+        let modelInfo = t('email:assistant')
+        if (msg.generationInfo) {
+          modelInfo = msg.generationInfo.model
+          if (msg.generationInfo.promptInfo.type === 'saved') {
+            modelInfo = `${msg.generationInfo.promptInfo.name} (${msg.generationInfo.model})`
+          }
+        }
+        header = `[ASSISTANT - ${modelInfo}]`
+        
+        const parts = [header, content]
+        
+        if (msg.error) {
+          parts.push(`[Error: ${msg.error}]`)
+        }
+        
+        if (msg.toolCalls) {
+          const toolCallEntries = Object.entries(msg.toolCalls)
+          if (toolCallEntries.length > 0) {
+            const sources = toolCallEntries
+              .map(([, toolCall]) => {
+                if (toolCall.result && toolCall.input) {
+                  const filenames = toolCall.result.files.map(f => f.fileName).join(', ')
+                  return `[Sources: ${filenames} - Query: "${toolCall.input.query}"]`
+                }
+                return null
+              })
+              .filter(Boolean)
+              .join('\n')
+            
+            if (sources) {
+              parts.push(sources)
+            }
+          }
+        }
+        
+        return parts.join('\n')
+      }
+    })
+    .join('\n\n---\n\n')
+  
+  const date = new Date()
+  const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
+  const title = `# ${t('chat:conversation')} ${formattedDate}\n\n`
+  
+  return title + textContent
+}
+
 const escapeHtml = (str: string): string =>
   str.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;')
 

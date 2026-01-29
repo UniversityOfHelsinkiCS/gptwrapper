@@ -21,7 +21,7 @@ import { CourseSettingsModal } from './CourseSettingsModal'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
 import { StreamAbortReason, TypedAbortController, useChatStream } from './useChatStream'
-import { postCompletionStreamV3, sendConversationEmail } from './api'
+import { postCompletionStreamV3, sendConversationEmail, downloadDiscussionAsFile } from './api'
 import { ConversationSplash } from './general/ConversationSplash'
 import { PromptStateProvider, usePromptState } from './PromptState'
 import z from 'zod/v4'
@@ -275,13 +275,13 @@ const ChatV2Content = () => {
 
   const handleResetRequest = () => {
     if (user?.preferences?.skipNewConversationConfirm) {
-      handleReset({ sendEmail: false })
+      handleReset({ sendEmail: false, downloadFile: false })
     } else {
       setResetConfirmModalOpen(true)
     }
   }
 
-  const handleReset = async ({ sendEmail }: { sendEmail: boolean }) => {
+  const handleReset = async ({ sendEmail, downloadFile }: { sendEmail: boolean; downloadFile: boolean }) => {
     if (sendEmail && user?.email) {
       try {
         await sendConversationEmail(user.email, messages, t)
@@ -289,6 +289,16 @@ const ChatV2Content = () => {
       } catch (error) {
         console.error('Failed to send conversation email:', error)
         enqueueSnackbar(t('email:failure'), { variant: 'error' })
+      }
+    }
+
+    if (downloadFile) {
+      try {
+        downloadDiscussionAsFile(messages, t)
+        enqueueSnackbar(t('download:success'), { variant: 'success' })
+      } catch (error) {
+        console.error('Failed to download conversation:', error)
+        enqueueSnackbar(t('download:failure'), { variant: 'error' })
       }
     }
 
