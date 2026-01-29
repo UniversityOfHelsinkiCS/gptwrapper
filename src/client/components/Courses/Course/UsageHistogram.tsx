@@ -3,10 +3,21 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useCourseDailyUsage } from '../../../hooks/useCourse'
-import { format, parseISO } from 'date-fns'
+
+const formatDate = (dateStr: string): string => {
+  try {
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) {
+      return dateStr
+    }
+    return date.toLocaleDateString()
+  } catch {
+    return dateStr
+  }
+}
 
 const UsageHistogram: React.FC = () => {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { courseId } = useParams()
   const { dailyUsage, isLoading } = useCourseDailyUsage(courseId)
 
@@ -24,7 +35,7 @@ const UsageHistogram: React.FC = () => {
   const chartData = dailyUsage.map((d) => ({
     date: d.date,
     count: d.count,
-    formattedDate: format(parseISO(d.date), 'dd.MM.yyyy'),
+    formattedDate: formatDate(d.date),
   }))
 
   return (

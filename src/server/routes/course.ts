@@ -89,7 +89,7 @@ courseRouter.get('/statistics/:id/daily', async (req, res) => {
 
   if (!chatInstance) throw ApplicationError.NotFound('ChatInstance not found')
 
-  enforceUserHasFullAccess(user, chatInstance)
+  await enforceUserHasFullAccess(user, chatInstance)
 
   // Get daily discussion counts for the course
   const dailyUsage = (await Discussion.findAll({
