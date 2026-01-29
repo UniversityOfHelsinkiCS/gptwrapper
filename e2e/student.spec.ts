@@ -16,20 +16,20 @@ test.describe('Student', () => {
     await expect(page.getByTestId('assistant-message')).toContainText('You are calling mock endpoint for streaming mock data')
   })
 
-  test('is sent to chats page from general chat', async ({ page }) => {
+  test('is sent to general page from general chat', async ({ page }) => {
     // Tries to access general chat
     await page.goto('/')
     // Student is sent to chats page
     await expect(page).not.toHaveURL(/sandbox/)
-    await expect(page).toHaveURL(/chats/)
+    await expect(page).toHaveURL(/general/)
   })
 
-  test('is sent to chats page from non-enrolled course', async ({ page }) => {
+  test('is sent to general page from non-enrolled course', async ({ page }) => {
     // Tries to access sandbox course
     await page.goto('/sandbox')
     // Student is sent to chats page
     await expect(page).not.toHaveURL(/sandbox/)
-    await expect(page).toHaveURL(/chats/)
+    await expect(page).toHaveURL(/general/)
   })
 
   test('sees only student specific elements in sidebars COURSE SECTION', async ({ page }) => {
