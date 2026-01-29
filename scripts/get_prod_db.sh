@@ -12,11 +12,10 @@ DOCKER_COMPOSE=$PROJECT_ROOT/compose.yaml
 
 S3_CONF=~/.s3cfg
 
-retry () {
-    for i in {1..60}
-    do
-        $@ && break || echo "Retry attempt $i failed, waiting..." && sleep 3;
-    done
+retry() {
+  for i in {1..60}; do
+    $@ && break || echo "Retry attempt $i failed, waiting..." && sleep 3
+  done
 }
 
 if [ ! -f "$S3_CONF" ]; then
@@ -58,12 +57,12 @@ if [ ! -f "${BACKUPS}${FILE_NAME}" ]; then
 fi
 
 echo "Removing database and related volume"
-docker-compose -f $DOCKER_COMPOSE down -v
+docker compose -f $DOCKER_COMPOSE down -v
 
 echo "Starting postgres in the background"
-docker-compose -f $DOCKER_COMPOSE up -d $SERVICE_NAME
+docker compose -f $DOCKER_COMPOSE up -d $SERVICE_NAME
 
-retry docker-compose -f $DOCKER_COMPOSE exec $SERVICE_NAME pg_isready --dbname=$DB_NAME
+retry docker compose -f $DOCKER_COMPOSE exec $SERVICE_NAME pg_isready --dbname=$DB_NAME
 
 echo "Populating ${FOLDER_NAME}"
-docker exec -i $CONTAINER /bin/bash -c "gunzip | psql -U postgres" < ${BACKUPS}${FILE_NAME}
+docker exec -i $CONTAINER /bin/bash -c "gunzip | psql -U postgres" <${BACKUPS}${FILE_NAME}
