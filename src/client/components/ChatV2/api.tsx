@@ -25,6 +25,91 @@ export const postCompletionStreamV3 = async (formData: FormData, input: PostStre
   return postAbortableStream('ai/v3/stream', formData, abortController)
 }
 
+// Helper function to parse markdown and create TextRun objects
+const parseMarkdownToTextRuns = (text: string): TextRun[] => {
+  const runs: TextRun[] = []
+  let currentPos = 0
+  
+  // Match patterns: ***text***, **text**, *text*, `text`, and links [text](url)
+  const patterns = [
+    { regex: /\*\*\*(.+?)\*\*\*/g, format: { bold: true, italics: true } },
+    { regex: /\*\*(.+?)\*\*/g, format: { bold: true } },
+    { regex: /\*(.+?)\*/g, format: { italics: true } },
+    { regex: /`(.+?)`/g, format: { font: 'Courier New' } },
+  ]
+  
+  const matches: Array<{ start: number; end: number; text: string; format: any }> = []
+  
+  // Find all matches
+  patterns.forEach(({ regex, format }) => {
+    const re = new RegExp(regex)
+    let match
+    while ((match = re.exec(text)) !== null) {
+      matches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        text: match[1],
+        format
+      })
+    }
+  })
+  
+  // Sort matches by position
+  matches.sort((a, b) => a.start - b.start)
+  
+  // Remove overlapping matches (keep longer/earlier ones)
+  const filteredMatches: typeof matches = []
+  let lastEnd = 0
+  matches.forEach(match => {
+    if (match.start >= lastEnd) {
+      filteredMatches.push(match)
+      lastEnd = match.end
+    }
+  })
+  
+  // Build TextRuns
+  filteredMatches.forEach(match => {
+    // Add plain text before this match
+    if (match.start > currentPos) {
+      const plainText = text.substring(currentPos, match.start)
+      if (plainText) {
+        runs.push(new TextRun({ text: plainText }))
+      }
+    }
+    // Add formatted text
+    runs.push(new TextRun({ text: match.text, ...match.format }))
+    currentPos = match.end
+  })
+  
+  // Add remaining plain text
+  if (currentPos < text.length) {
+    const remainingText = text.substring(currentPos)
+    if (remainingText) {
+      runs.push(new TextRun({ text: remainingText }))
+    }
+  }
+  
+  // If no matches, return plain text
+  if (runs.length === 0 && text) {
+    runs.push(new TextRun({ text }))
+  }
+  
+  return runs.length > 0 ? runs : [new TextRun({ text: ' ' })]
+}
+
+// Helper function to detect heading level and extract text
+const parseHeading = (line: string): { isHeading: boolean; level: number; text: string } => {
+  const headingMatch = line.match(/^(#{1,6})\s+(.+)$/)
+  if (headingMatch) {
+    return {
+      isHeading: true,
+      level: headingMatch[1].length,
+      text: headingMatch[2]
+    }
+  }
+  return { isHeading: false, level: 0, text: line }
+}
+
 // Helper function to save file with proper "Save As" dialog
 const saveFileWithDialog = async (blob: Blob, filename: string, accept: Record<string, string[]>) => {
   // Check if File System Access API is supported
@@ -111,9 +196,18 @@ const downloadDiscussionAsText = async (messages: ChatMessage[], t: TFunction) =
   messages.forEach((msg) => {
     const content = readMessageContent(msg)
     
+    // Strip all markdown formatting for plain text
+    const cleanContent = content
+      .replace(/^#{1,6}\s+(.+)$/gm, '$1')   // Strip headings
+      .replace(/\*\*\*(.+?)\*\*\*/g, '$1')  // ***bold+italic***
+      .replace(/\*\*(.+?)\*\*/g, '$1')      // **bold**
+      .replace(/\*(.+?)\*/g, '$1')          // *italic*
+      .replace(/`(.+?)`/g, '$1')            // `code`
+      .replace(/\[(.+?)\]\(.+?\)/g, '$1')  // [text](url)
+    
     if (msg.role === 'user') {
       textLines.push('[USER]')
-      textLines.push(content)
+      textLines.push(cleanContent)
       
       if (msg.attachments) {
         textLines.push(`[Attachment: ${msg.attachments}]`)
@@ -128,7 +222,7 @@ const downloadDiscussionAsText = async (messages: ChatMessage[], t: TFunction) =
       }
       
       textLines.push(`[ASSISTANT - ${modelInfo}]`)
-      textLines.push(content)
+      textLines.push(cleanContent)
       
       if (msg.error) {
         textLines.push(`[Error: ${msg.error}]`)
@@ -199,12 +293,39 @@ const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) =
         })
       )
       
-      children.push(
-        new Paragraph({
-          text: content,
-          spacing: { after: 100 },
-        })
-      )
+      // Split content by newlines and create separate paragraphs
+      const contentLines = content.split('\n')
+      contentLines.forEach((line, index) => {
+        const heading = parseHeading(line)
+        if (heading.isHeading) {
+          // Create heading paragraph
+          const headingLevels = [
+            HeadingLevel.HEADING_1,
+            HeadingLevel.HEADING_2,
+            HeadingLevel.HEADING_3,
+            HeadingLevel.HEADING_4,
+            HeadingLevel.HEADING_5,
+            HeadingLevel.HEADING_6
+          ]
+          children.push(
+            new Paragraph({
+              text: heading.text,
+              heading: headingLevels[heading.level - 1],
+              spacing: { before: 200, after: 100 },
+            })
+          )
+        } else {
+          const textRuns = parseMarkdownToTextRuns(line || ' ')
+          children.push(
+            new Paragraph({
+              children: textRuns,
+              spacing: { 
+                after: index === contentLines.length - 1 ? 100 : 0 
+              },
+            })
+          )
+        }
+      })
       
       if (msg.attachments) {
         children.push(
@@ -244,12 +365,39 @@ const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) =
         })
       )
       
-      children.push(
-        new Paragraph({
-          text: content,
-          spacing: { after: 100 },
-        })
-      )
+      // Split content by newlines and create separate paragraphs
+      const contentLines = content.split('\n')
+      contentLines.forEach((line, index) => {
+        const heading = parseHeading(line)
+        if (heading.isHeading) {
+          // Create heading paragraph
+          const headingLevels = [
+            HeadingLevel.HEADING_1,
+            HeadingLevel.HEADING_2,
+            HeadingLevel.HEADING_3,
+            HeadingLevel.HEADING_4,
+            HeadingLevel.HEADING_5,
+            HeadingLevel.HEADING_6
+          ]
+          children.push(
+            new Paragraph({
+              text: heading.text,
+              heading: headingLevels[heading.level - 1],
+              spacing: { before: 200, after: 100 },
+            })
+          )
+        } else {
+          const textRuns = parseMarkdownToTextRuns(line || ' ')
+          children.push(
+            new Paragraph({
+              children: textRuns,
+              spacing: { 
+                after: index === contentLines.length - 1 ? 100 : 0 
+              },
+            })
+          )
+        }
+      })
       
       if (msg.error) {
         children.push(
@@ -348,14 +496,41 @@ const downloadDiscussionAsPdf = async (messages: ChatMessage[], t: TFunction) =>
       // Message content
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(10)
-      const lines = doc.splitTextToSize(content, maxWidth)
-      lines.forEach((line: string) => {
-        if (yPosition > 270) {
-          doc.addPage()
-          yPosition = 20
+      // Strip markdown formatting for cleaner PDF output
+      const cleanContent = content
+        .replace(/\*\*\*(.+?)\*\*\*/g, '$1')  // ***bold+italic***
+        .replace(/\*\*(.+?)\*\*/g, '$1')      // **bold**
+        .replace(/\*(.+?)\*/g, '$1')          // *italic*
+        .replace(/`(.+?)`/g, '$1')            // `code`
+        .replace(/\[(.+?)\]\(.+?\)/g, '$1')  // [text](url)
+      
+      const contentLines = cleanContent.split('\n')
+      contentLines.forEach((line: string) => {
+        const heading = parseHeading(line)
+        if (heading.isHeading) {
+          // Render heading with appropriate size
+          const headingSizes = [16, 14, 13, 12, 11, 10]
+          doc.setFont('helvetica', 'bold')
+          doc.setFontSize(headingSizes[heading.level - 1])
+          if (yPosition > 270) {
+            doc.addPage()
+            yPosition = 20
+          }
+          doc.text(heading.text, margin, yPosition)
+          yPosition += headingSizes[heading.level - 1] / 2 + 4
+          doc.setFont('helvetica', 'normal')
+          doc.setFontSize(10)
+        } else {
+          const lines = doc.splitTextToSize(line, maxWidth)
+          lines.forEach((textLine: string) => {
+            if (yPosition > 270) {
+              doc.addPage()
+              yPosition = 20
+            }
+            doc.text(textLine, margin, yPosition)
+            yPosition += 6
+          })
         }
-        doc.text(line, margin, yPosition)
-        yPosition += 6
       })
       
       // Attachments
@@ -385,14 +560,41 @@ const downloadDiscussionAsPdf = async (messages: ChatMessage[], t: TFunction) =>
       // Message content
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(10)
-      const lines = doc.splitTextToSize(content, maxWidth)
-      lines.forEach((line: string) => {
-        if (yPosition > 270) {
-          doc.addPage()
-          yPosition = 20
+      // Strip markdown formatting for cleaner PDF output
+      const cleanContent = content
+        .replace(/\*\*\*(.+?)\*\*\*/g, '$1')  // ***bold+italic***
+        .replace(/\*\*(.+?)\*\*/g, '$1')      // **bold**
+        .replace(/\*(.+?)\*/g, '$1')          // *italic*
+        .replace(/`(.+?)`/g, '$1')            // `code`
+        .replace(/\[(.+?)\]\(.+?\)/g, '$1')  // [text](url)
+      
+      const contentLines = cleanContent.split('\n')
+      contentLines.forEach((line: string) => {
+        const heading = parseHeading(line)
+        if (heading.isHeading) {
+          // Render heading with appropriate size
+          const headingSizes = [16, 14, 13, 12, 11, 10]
+          doc.setFont('helvetica', 'bold')
+          doc.setFontSize(headingSizes[heading.level - 1])
+          if (yPosition > 270) {
+            doc.addPage()
+            yPosition = 20
+          }
+          doc.text(heading.text, margin, yPosition)
+          yPosition += headingSizes[heading.level - 1] / 2 + 4
+          doc.setFont('helvetica', 'normal')
+          doc.setFontSize(10)
+        } else {
+          const lines = doc.splitTextToSize(line, maxWidth)
+          lines.forEach((textLine: string) => {
+            if (yPosition > 270) {
+              doc.addPage()
+              yPosition = 20
+            }
+            doc.text(textLine, margin, yPosition)
+            yPosition += 6
+          })
         }
-        doc.text(line, margin, yPosition)
-        yPosition += 6
       })
       
       // Error
@@ -632,7 +834,7 @@ const formatEmailContent = (content: string): string => {
     )
 
     return renderToStaticMarkup(markdownElement)
-  } catch (_error) {
+  } catch {
     return escapeHtml(content)
   }
 }
