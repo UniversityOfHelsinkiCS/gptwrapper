@@ -7,6 +7,8 @@ import { sendEmail } from '../../util/email'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { Document, Paragraph, TextRun, HeadingLevel, AlignmentType, Packer } from 'docx'
+import { jsPDF } from 'jspdf'
 
 export const useToolResults = (toolCallId: string) => {
   return useGetQuery<ChatToolOutput | { expired: true }>({
@@ -33,7 +35,17 @@ export const sendConversationEmail = async (email: string, messages: ChatMessage
   return response
 }
 
-export const downloadDiscussionAsFile = (messages: ChatMessage[], t: TFunction) => {
+export const downloadDiscussionAsFile = (messages: ChatMessage[], t: TFunction, format: 'md' | 'docx' | 'pdf' = 'md') => {
+  if (format === 'docx') {
+    downloadDiscussionAsDocx(messages, t)
+  } else if (format === 'pdf') {
+    downloadDiscussionAsPdf(messages, t)
+  } else {
+    downloadDiscussionAsMarkdown(messages, t)
+  }
+}
+
+const downloadDiscussionAsMarkdown = (messages: ChatMessage[], t: TFunction) => {
   const textContent = formatMessagesAsText(messages, t)
   const blob = new Blob([textContent], { type: 'text/markdown;charset=utf-8' })
   
@@ -54,6 +66,294 @@ export const downloadDiscussionAsFile = (messages: ChatMessage[], t: TFunction) 
   link.click()
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
+}
+
+const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) => {
+  const date = new Date()
+  const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
+  
+  const children: Paragraph[] = [
+    new Paragraph({
+      text: `${t('chat:conversation')} ${formattedDate}`,
+      heading: HeadingLevel.HEADING_1,
+      spacing: { after: 400 },
+    }),
+  ]
+
+  messages.forEach((msg) => {
+    const content = readMessageContent(msg)
+    let header = ''
+    let modelInfo = ''
+    
+    if (msg.role === 'user') {
+      header = '[USER]'
+      
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: header,
+              bold: true,
+              color: '000000',
+            }),
+          ],
+          spacing: { before: 300, after: 100 },
+        })
+      )
+      
+      children.push(
+        new Paragraph({
+          text: content,
+          spacing: { after: 100 },
+        })
+      )
+      
+      if (msg.attachments) {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `[Attachment: ${msg.attachments}]`,
+                italics: true,
+                color: '666666',
+              }),
+            ],
+            spacing: { after: 200 },
+          })
+        )
+      }
+    } else {
+      // Assistant message
+      modelInfo = t('email:assistant')
+      if (msg.generationInfo) {
+        modelInfo = msg.generationInfo.model
+        if (msg.generationInfo.promptInfo.type === 'saved') {
+          modelInfo = `${msg.generationInfo.promptInfo.name} (${msg.generationInfo.model})`
+        }
+      }
+      header = `[ASSISTANT - ${modelInfo}]`
+      
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: header,
+              bold: true,
+              color: '107eab',
+            }),
+          ],
+          spacing: { before: 300, after: 100 },
+        })
+      )
+      
+      children.push(
+        new Paragraph({
+          text: content,
+          spacing: { after: 100 },
+        })
+      )
+      
+      if (msg.error) {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `[Error: ${msg.error}]`,
+                color: 'FF0000',
+              }),
+            ],
+            spacing: { after: 100 },
+          })
+        )
+      }
+      
+      if (msg.toolCalls) {
+        const toolCallEntries = Object.entries(msg.toolCalls)
+        if (toolCallEntries.length > 0) {
+          toolCallEntries.forEach(([, toolCall]) => {
+            if (toolCall.result && toolCall.input) {
+              const filenames = toolCall.result.files.map((f) => f.fileName).join(', ')
+              children.push(
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: `[Sources: ${filenames} - Query: "${toolCall.input.query}"]`,
+                      italics: true,
+                      color: '666666',
+                    }),
+                  ],
+                  spacing: { after: 100 },
+                })
+              )
+            }
+          })
+        }
+      }
+    }
+  })
+
+  const doc = new Document({
+    sections: [
+      {
+        children,
+      },
+    ],
+  })
+
+  const blob = await Packer.toBlob(doc)
+  
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  const filename = `currechat-discussion-${year}-${month}-${day}-${hours}${minutes}${seconds}.docx`
+  
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+const downloadDiscussionAsPdf = (messages: ChatMessage[], t: TFunction) => {
+  const date = new Date()
+  const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
+  
+  const doc = new jsPDF()
+  const pageWidth = doc.internal.pageSize.getWidth()
+  const margin = 15
+  const maxWidth = pageWidth - 2 * margin
+  let yPosition = 20
+
+  // Title
+  doc.setFontSize(18)
+  doc.setFont('helvetica', 'bold')
+  doc.text(`${t('chat:conversation')} ${formattedDate}`, margin, yPosition)
+  yPosition += 15
+
+  messages.forEach((msg, index) => {
+    const content = readMessageContent(msg)
+    
+    // Check if we need a new page
+    if (yPosition > 260) {
+      doc.addPage()
+      yPosition = 20
+    }
+
+    // Message header
+    doc.setFontSize(12)
+    doc.setFont('helvetica', 'bold')
+    
+    if (msg.role === 'user') {
+      doc.setTextColor(0, 0, 0)
+      doc.text('[USER]', margin, yPosition)
+      yPosition += 8
+      
+      // Message content
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      const lines = doc.splitTextToSize(content, maxWidth)
+      lines.forEach((line: string) => {
+        if (yPosition > 270) {
+          doc.addPage()
+          yPosition = 20
+        }
+        doc.text(line, margin, yPosition)
+        yPosition += 6
+      })
+      
+      // Attachments
+      if (msg.attachments) {
+        doc.setFont('helvetica', 'italic')
+        doc.setTextColor(102, 102, 102)
+        doc.setFontSize(9)
+        doc.text(`[Attachment: ${msg.attachments}]`, margin, yPosition)
+        yPosition += 6
+        doc.setTextColor(0, 0, 0)
+      }
+    } else {
+      // Assistant message
+      let modelInfo = t('email:assistant')
+      if (msg.generationInfo) {
+        modelInfo = msg.generationInfo.model
+        if (msg.generationInfo.promptInfo.type === 'saved') {
+          modelInfo = `${msg.generationInfo.promptInfo.name} (${msg.generationInfo.model})`
+        }
+      }
+      
+      doc.setTextColor(16, 126, 171)
+      doc.text(`[ASSISTANT - ${modelInfo}]`, margin, yPosition)
+      doc.setTextColor(0, 0, 0)
+      yPosition += 8
+      
+      // Message content
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      const lines = doc.splitTextToSize(content, maxWidth)
+      lines.forEach((line: string) => {
+        if (yPosition > 270) {
+          doc.addPage()
+          yPosition = 20
+        }
+        doc.text(line, margin, yPosition)
+        yPosition += 6
+      })
+      
+      // Error
+      if (msg.error) {
+        doc.setTextColor(255, 0, 0)
+        doc.setFontSize(9)
+        doc.text(`[Error: ${msg.error}]`, margin, yPosition)
+        doc.setTextColor(0, 0, 0)
+        yPosition += 6
+      }
+      
+      // Tool calls
+      if (msg.toolCalls) {
+        const toolCallEntries = Object.entries(msg.toolCalls)
+        if (toolCallEntries.length > 0) {
+          doc.setFont('helvetica', 'italic')
+          doc.setTextColor(102, 102, 102)
+          doc.setFontSize(9)
+          
+          toolCallEntries.forEach(([, toolCall]) => {
+            if (toolCall.result && toolCall.input) {
+              const filenames = toolCall.result.files.map((f) => f.fileName).join(', ')
+              const sourceLine = `[Sources: ${filenames} - Query: "${toolCall.input.query}"]`
+              const sourceLines = doc.splitTextToSize(sourceLine, maxWidth)
+              sourceLines.forEach((line: string) => {
+                if (yPosition > 270) {
+                  doc.addPage()
+                  yPosition = 20
+                }
+                doc.text(line, margin, yPosition)
+                yPosition += 5
+              })
+            }
+          })
+          
+          doc.setTextColor(0, 0, 0)
+        }
+      }
+    }
+    
+    yPosition += 10 // Space between messages
+  })
+
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  const filename = `currechat-discussion-${year}-${month}-${day}-${hours}${minutes}${seconds}.pdf`
+  
+  doc.save(filename)
 }
 
 const formatMessagesAsText = (messages: ChatMessage[], t: TFunction): string => {

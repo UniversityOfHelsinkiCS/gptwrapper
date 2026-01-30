@@ -202,7 +202,10 @@
   "download": {
     "save": "Save as file",
     "success": "File downloaded",
-    "failure": "Download failed"
+    "failure": "Download failed",
+    "formatMarkdown": "Markdown (.md)",
+    "formatDocx": "Word document (.docx)",
+    "formatPdf": "PDF document (.pdf)"
   },
   "status": {
     "modelInUse": "Language model in use:",

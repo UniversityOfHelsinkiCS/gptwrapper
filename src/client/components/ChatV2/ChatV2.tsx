@@ -275,13 +275,13 @@ const ChatV2Content = () => {
 
   const handleResetRequest = () => {
     if (user?.preferences?.skipNewConversationConfirm) {
-      handleReset({ sendEmail: false, downloadFile: false })
+      handleReset({ sendEmail: false, downloadFile: false, downloadFormat: 'md' })
     } else {
       setResetConfirmModalOpen(true)
     }
   }
 
-  const handleReset = async ({ sendEmail, downloadFile }: { sendEmail: boolean; downloadFile: boolean }) => {
+  const handleReset = async ({ sendEmail, downloadFile, downloadFormat }: { sendEmail: boolean; downloadFile: boolean; downloadFormat: 'md' | 'docx' | 'pdf' }) => {
     if (sendEmail && user?.email) {
       try {
         await sendConversationEmail(user.email, messages, t)
@@ -294,7 +294,7 @@ const ChatV2Content = () => {
 
     if (downloadFile) {
       try {
-        downloadDiscussionAsFile(messages, t)
+        downloadDiscussionAsFile(messages, t, downloadFormat)
         enqueueSnackbar(t('download:success'), { variant: 'success' })
       } catch (error) {
         console.error('Failed to download conversation:', error)

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Tooltip } from '@mui/material'
+import { Tooltip, Menu, MenuItem } from '@mui/material'
 import DownloadIcon from '@mui/icons-material/Download'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
@@ -10,16 +10,27 @@ import { downloadDiscussionAsFile } from './api'
 const DownloadButton = ({ messages, disabled, collapsed = false }: { messages: ChatMessage[]; disabled: boolean; collapsed?: boolean }) => {
   const { t } = useTranslation()
   const [isCooldown, setIsCooldown] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
 
-  const handleDownload = async () => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (!messages.length || isCooldown) {
       enqueueSnackbar(t('download:failure'), { variant: 'error' })
       return
     }
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
+
+  const handleDownload = async (format: 'md' | 'docx' | 'pdf') => {
+    handleClose()
 
     try {
       setIsCooldown(true)
-      downloadDiscussionAsFile(messages, t)
+      downloadDiscussionAsFile(messages, t, format)
       enqueueSnackbar(t('download:success'), { variant: 'success' })
 
       // Set cooldown for 3 seconds
@@ -33,11 +44,34 @@ const DownloadButton = ({ messages, disabled, collapsed = false }: { messages: C
   }
 
   return (
-    <Tooltip arrow placement="right" title={t('chat:download')}>
-      <TextButton startIcon={!collapsed && <DownloadIcon />} onClick={handleDownload} data-testid="download-button" size="large" disabled={disabled || isCooldown}>
-        {collapsed ? <DownloadIcon fontSize="small" /> : t('download:save')}
-      </TextButton>
-    </Tooltip>
+    <>
+      <Tooltip arrow placement="right" title={t('chat:download')}>
+        <TextButton 
+          startIcon={!collapsed && <DownloadIcon />} 
+          onClick={handleClick} 
+          data-testid="download-button" 
+          size="large" 
+          disabled={disabled || isCooldown}
+        >
+          {collapsed ? <DownloadIcon fontSize="small" /> : t('download:save')}
+        </TextButton>
+      </Tooltip>
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+      >
+        <MenuItem onClick={() => handleDownload('md')} data-testid="download-md">
+          {t('download:formatMarkdown')}
+        </MenuItem>
+        <MenuItem onClick={() => handleDownload('docx')} data-testid="download-docx">
+          {t('download:formatDocx')}
+        </MenuItem>
+        <MenuItem onClick={() => handleDownload('pdf')} data-testid="download-pdf">
+          {t('download:formatPdf')}
+        </MenuItem>
+      </Menu>
+    </>
   )
 }
 

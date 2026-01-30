@@ -127,7 +127,7 @@ const SideBar = ({
               </TextButton>
 
               <EmailButton messages={messages} disabled={!messages.length} />
-              {user?.isAdmin && <DownloadButton messages={messages} disabled={!messages.length} />}
+              <DownloadButton messages={messages} disabled={!messages.length} />
             </Box>
           </Box>
         )}

@@ -190,7 +190,10 @@
   "download": {
     "save": "Spara som fil",
     "success": "Fil nerladdad",
-    "failure": "Nedladdning misslyckades"
+    "failure": "Nedladdning misslyckades",
+    "formatMarkdown": "Markdown (.md)",
+    "formatDocx": "Word-dokument (.docx)",
+    "formatPdf": "PDF-dokument (.pdf)"
   },
   "status": {
     "modelInUse": "Språkmodell i användning:",

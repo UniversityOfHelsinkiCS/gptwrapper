@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogActions, Button, DialogContentText, Box } from '@mui/material'
+import { Checkbox, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogActions, Button, DialogContentText, Box, RadioGroup, Radio } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { BlueButton } from './general/Buttons'
 import { useState } from 'react'
@@ -10,7 +10,7 @@ export const ResetConfirmModal = ({
 }: {
   open: boolean
   setOpen: (open: boolean) => void
-  onConfirm: (data: { sendEmail: boolean; downloadFile: boolean }) => void
+  onConfirm: (data: { sendEmail: boolean; downloadFile: boolean; downloadFormat: 'md' | 'docx' | 'pdf' }) => void
 }) => {
   const { t } = useTranslation()
   const { user } = useCurrentUser()
@@ -18,10 +18,11 @@ export const ResetConfirmModal = ({
   const [skipConfirm, setSkipConfirm] = useState(user?.preferences?.skipNewConversationConfirm ?? false)
   const [sendEmail, setSendEmail] = useState(false)
   const [downloadFile, setDownloadFile] = useState(false)
+  const [downloadFormat, setDownloadFormat] = useState<'md' | 'docx' | 'pdf'>('md')
 
   const handleConfirm = (ev: React.FormEvent<HTMLFormElement>) => {
     ev.preventDefault()
-    onConfirm({ sendEmail, downloadFile })
+    onConfirm({ sendEmail, downloadFile, downloadFormat })
     setSkipConfirmMutation(skipConfirm)
     setOpen(false)
   }
@@ -42,6 +43,15 @@ export const ResetConfirmModal = ({
             control={<Checkbox checked={downloadFile} onChange={(ev) => setDownloadFile(ev.target.checked)} data-testid="download-file" />}
             label={t('download:save')}
           />
+          {downloadFile && (
+            <Box ml={4}>
+              <RadioGroup value={downloadFormat} onChange={(ev) => setDownloadFormat(ev.target.value as 'md' | 'docx' | 'pdf')}>
+                <FormControlLabel value="md" control={<Radio size="small" />} label={t('download:formatMarkdown')} />
+                <FormControlLabel value="docx" control={<Radio size="small" />} label={t('download:formatDocx')} />
+                <FormControlLabel value="pdf" control={<Radio size="small" />} label={t('download:formatPdf')} />
+              </RadioGroup>
+            </Box>
+          )}
         </Box>
         <NewConversationConfirmConfigurator label={t('preferences:newConversationConfirmLabelChat')} value={skipConfirm} setValue={setSkipConfirm} context='chat' />
       </DialogContent>

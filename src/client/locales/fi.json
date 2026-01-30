@@ -213,7 +213,10 @@
   "download": {
     "save": "Tallenna tiedostona",
     "success": "Tiedosto ladattu",
-    "failure": "Lataus epäonnistui"
+    "failure": "Lataus epäonnistui",
+    "formatMarkdown": "Markdown (.md)",
+    "formatDocx": "Word-dokumentti (.docx)",
+    "formatPdf": "PDF-dokumentti (.pdf)"
   },
   "status": {
     "modelInUse": "Käytössä oleva kielimalli:",
