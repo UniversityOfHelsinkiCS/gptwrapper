@@ -25,7 +25,7 @@ const DownloadButton = ({ messages, disabled, collapsed = false }: { messages: C
     setAnchorEl(null)
   }
 
-  const handleDownload = async (format: 'md' | 'docx' | 'pdf') => {
+  const handleDownload = async (format: 'md' | 'docx' | 'pdf' | 'txt') => {
     handleClose()
 
     try {
@@ -69,6 +69,9 @@ const DownloadButton = ({ messages, disabled, collapsed = false }: { messages: C
         </MenuItem>
         <MenuItem onClick={() => handleDownload('pdf')} data-testid="download-pdf">
           {t('download:formatPdf')}
+        </MenuItem>
+        <MenuItem onClick={() => handleDownload('txt')} data-testid="download-txt">
+          {t('download:formatText')}
         </MenuItem>
       </Menu>
     </>

@@ -216,7 +216,8 @@
     "failure": "Lataus epäonnistui",
     "formatMarkdown": "Markdown (.md)",
     "formatDocx": "Word-dokumentti (.docx)",
-    "formatPdf": "PDF-dokumentti (.pdf)"
+    "formatPdf": "PDF-dokumentti (.pdf)",
+    "formatText": "Pelkkä teksti (.txt)"
   },
   "status": {
     "modelInUse": "Käytössä oleva kielimalli:",

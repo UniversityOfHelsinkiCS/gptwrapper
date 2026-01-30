@@ -281,7 +281,7 @@ const ChatV2Content = () => {
     }
   }
 
-  const handleReset = async ({ sendEmail, downloadFile, downloadFormat }: { sendEmail: boolean; downloadFile: boolean; downloadFormat: 'md' | 'docx' | 'pdf' }) => {
+  const handleReset = async ({ sendEmail, downloadFile, downloadFormat }: { sendEmail: boolean; downloadFile: boolean; downloadFormat: 'md' | 'docx' | 'pdf' | 'txt' }) => {
     if (sendEmail && user?.email) {
       try {
         await sendConversationEmail(user.email, messages, t)

@@ -7,7 +7,7 @@ import { sendEmail } from '../../util/email'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { Document, Paragraph, TextRun, HeadingLevel, AlignmentType, Packer } from 'docx'
+import { Document, Paragraph, TextRun, HeadingLevel, Packer } from 'docx'
 import { jsPDF } from 'jspdf'
 
 export const useToolResults = (toolCallId: string) => {
@@ -25,6 +25,41 @@ export const postCompletionStreamV3 = async (formData: FormData, input: PostStre
   return postAbortableStream('ai/v3/stream', formData, abortController)
 }
 
+// Helper function to save file with proper "Save As" dialog
+const saveFileWithDialog = async (blob: Blob, filename: string, accept: Record<string, string[]>) => {
+  // Check if File System Access API is supported
+  if ('showSaveFilePicker' in window) {
+    try {
+      const handle = await (window as any).showSaveFilePicker({
+        suggestedName: filename,
+        types: [{
+          description: 'File',
+          accept: accept,
+        }],
+      })
+      const writable = await handle.createWritable()
+      await writable.write(blob)
+      await writable.close()
+      return
+    } catch (err: any) {
+      // User cancelled or error occurred, fall back to regular download
+      if (err.name !== 'AbortError') {
+        console.error('Error saving file:', err)
+      }
+    }
+  }
+  
+  // Fallback for browsers that don't support File System Access API
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
 export const sendConversationEmail = async (email: string, messages: ChatMessage[], t: TFunction) => {
   const date = new Date()
   const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
@@ -35,17 +70,19 @@ export const sendConversationEmail = async (email: string, messages: ChatMessage
   return response
 }
 
-export const downloadDiscussionAsFile = (messages: ChatMessage[], t: TFunction, format: 'md' | 'docx' | 'pdf' = 'md') => {
+export const downloadDiscussionAsFile = (messages: ChatMessage[], t: TFunction, format: 'md' | 'docx' | 'pdf' | 'txt' = 'md') => {
   if (format === 'docx') {
     downloadDiscussionAsDocx(messages, t)
   } else if (format === 'pdf') {
     downloadDiscussionAsPdf(messages, t)
+  } else if (format === 'txt') {
+    downloadDiscussionAsText(messages, t)
   } else {
     downloadDiscussionAsMarkdown(messages, t)
   }
 }
 
-const downloadDiscussionAsMarkdown = (messages: ChatMessage[], t: TFunction) => {
+const downloadDiscussionAsMarkdown = async (messages: ChatMessage[], t: TFunction) => {
   const textContent = formatMessagesAsText(messages, t)
   const blob = new Blob([textContent], { type: 'text/markdown;charset=utf-8' })
   
@@ -58,14 +95,75 @@ const downloadDiscussionAsMarkdown = (messages: ChatMessage[], t: TFunction) => 
   const seconds = String(date.getSeconds()).padStart(2, '0')
   const filename = `currechat-discussion-${year}-${month}-${day}-${hours}${minutes}${seconds}.md`
   
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  await saveFileWithDialog(blob, filename, { 'text/markdown': ['.md'] })
+}
+
+const downloadDiscussionAsText = async (messages: ChatMessage[], t: TFunction) => {
+  const date = new Date()
+  const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
+  
+  const textLines: string[] = []
+  textLines.push(`${t('chat:conversation')} ${formattedDate}`)
+  textLines.push('')
+  textLines.push('========================================')
+  textLines.push('')
+
+  messages.forEach((msg) => {
+    const content = readMessageContent(msg)
+    
+    if (msg.role === 'user') {
+      textLines.push('[USER]')
+      textLines.push(content)
+      
+      if (msg.attachments) {
+        textLines.push(`[Attachment: ${msg.attachments}]`)
+      }
+    } else {
+      let modelInfo = t('email:assistant')
+      if (msg.generationInfo) {
+        modelInfo = msg.generationInfo.model
+        if (msg.generationInfo.promptInfo.type === 'saved') {
+          modelInfo = `${msg.generationInfo.promptInfo.name} (${msg.generationInfo.model})`
+        }
+      }
+      
+      textLines.push(`[ASSISTANT - ${modelInfo}]`)
+      textLines.push(content)
+      
+      if (msg.error) {
+        textLines.push(`[Error: ${msg.error}]`)
+      }
+      
+      if (msg.toolCalls) {
+        const toolCallEntries = Object.entries(msg.toolCalls)
+        if (toolCallEntries.length > 0) {
+          toolCallEntries.forEach(([, toolCall]) => {
+            if (toolCall.result && toolCall.input) {
+              const filenames = toolCall.result.files.map((f) => f.fileName).join(', ')
+              textLines.push(`[Sources: ${filenames} - Query: "${toolCall.input.query}"]`)
+            }
+          })
+        }
+      }
+    }
+    
+    textLines.push('')
+    textLines.push('----------------------------------------')
+    textLines.push('')
+  })
+  
+  const textContent = textLines.join('\n')
+  const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' })
+  
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  const filename = `currechat-discussion-${year}-${month}-${day}-${hours}${minutes}${seconds}.txt`
+  
+  await saveFileWithDialog(blob, filename, { 'text/plain': ['.txt'] })
 }
 
 const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) => {
@@ -210,17 +308,10 @@ const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) =
   const seconds = String(date.getSeconds()).padStart(2, '0')
   const filename = `currechat-discussion-${year}-${month}-${day}-${hours}${minutes}${seconds}.docx`
   
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  await saveFileWithDialog(blob, filename, { 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] })
 }
 
-const downloadDiscussionAsPdf = (messages: ChatMessage[], t: TFunction) => {
+const downloadDiscussionAsPdf = async (messages: ChatMessage[], t: TFunction) => {
   const date = new Date()
   const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
   
@@ -236,7 +327,7 @@ const downloadDiscussionAsPdf = (messages: ChatMessage[], t: TFunction) => {
   doc.text(`${t('chat:conversation')} ${formattedDate}`, margin, yPosition)
   yPosition += 15
 
-  messages.forEach((msg, index) => {
+  messages.forEach((msg) => {
     const content = readMessageContent(msg)
     
     // Check if we need a new page
@@ -353,7 +444,8 @@ const downloadDiscussionAsPdf = (messages: ChatMessage[], t: TFunction) => {
   const seconds = String(date.getSeconds()).padStart(2, '0')
   const filename = `currechat-discussion-${year}-${month}-${day}-${hours}${minutes}${seconds}.pdf`
   
-  doc.save(filename)
+  const pdfBlob = doc.output('blob')
+  await saveFileWithDialog(pdfBlob, filename, { 'application/pdf': ['.pdf'] })
 }
 
 const formatMessagesAsText = (messages: ChatMessage[], t: TFunction): string => {
@@ -540,7 +632,7 @@ const formatEmailContent = (content: string): string => {
     )
 
     return renderToStaticMarkup(markdownElement)
-  } catch (error) {
+  } catch (_error) {
     return escapeHtml(content)
   }
 }

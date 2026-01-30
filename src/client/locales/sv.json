@@ -193,7 +193,8 @@
     "failure": "Nedladdning misslyckades",
     "formatMarkdown": "Markdown (.md)",
     "formatDocx": "Word-dokument (.docx)",
-    "formatPdf": "PDF-dokument (.pdf)"
+    "formatPdf": "PDF-dokument (.pdf)",
+    "formatText": "Ren text (.txt)"
   },
   "status": {
     "modelInUse": "Språkmodell i användning:",

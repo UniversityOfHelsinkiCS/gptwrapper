@@ -10,7 +10,7 @@ export const ResetConfirmModal = ({
 }: {
   open: boolean
   setOpen: (open: boolean) => void
-  onConfirm: (data: { sendEmail: boolean; downloadFile: boolean; downloadFormat: 'md' | 'docx' | 'pdf' }) => void
+  onConfirm: (data: { sendEmail: boolean; downloadFile: boolean; downloadFormat: 'md' | 'docx' | 'pdf' | 'txt' }) => void
 }) => {
   const { t } = useTranslation()
   const { user } = useCurrentUser()
@@ -18,7 +18,7 @@ export const ResetConfirmModal = ({
   const [skipConfirm, setSkipConfirm] = useState(user?.preferences?.skipNewConversationConfirm ?? false)
   const [sendEmail, setSendEmail] = useState(false)
   const [downloadFile, setDownloadFile] = useState(false)
-  const [downloadFormat, setDownloadFormat] = useState<'md' | 'docx' | 'pdf'>('md')
+  const [downloadFormat, setDownloadFormat] = useState<'md' | 'docx' | 'pdf' | 'txt'>('md')
 
   const handleConfirm = (ev: React.FormEvent<HTMLFormElement>) => {
     ev.preventDefault()
@@ -45,10 +45,11 @@ export const ResetConfirmModal = ({
           />
           {downloadFile && (
             <Box ml={4}>
-              <RadioGroup value={downloadFormat} onChange={(ev) => setDownloadFormat(ev.target.value as 'md' | 'docx' | 'pdf')}>
+              <RadioGroup value={downloadFormat} onChange={(ev) => setDownloadFormat(ev.target.value as 'md' | 'docx' | 'pdf' | 'txt')}>
                 <FormControlLabel value="md" control={<Radio size="small" />} label={t('download:formatMarkdown')} />
                 <FormControlLabel value="docx" control={<Radio size="small" />} label={t('download:formatDocx')} />
                 <FormControlLabel value="pdf" control={<Radio size="small" />} label={t('download:formatPdf')} />
+                <FormControlLabel value="txt" control={<Radio size="small" />} label={t('download:formatText')} />
               </RadioGroup>
             </Box>
           )}

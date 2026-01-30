@@ -205,7 +205,8 @@
     "failure": "Download failed",
     "formatMarkdown": "Markdown (.md)",
     "formatDocx": "Word document (.docx)",
-    "formatPdf": "PDF document (.pdf)"
+    "formatPdf": "PDF document (.pdf)",
+    "formatText": "Plain text (.txt)"
   },
   "status": {
     "modelInUse": "Language model in use:",
