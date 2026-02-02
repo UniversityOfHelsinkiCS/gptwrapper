@@ -49,13 +49,11 @@ const courseUnitsOf = ({ courseUnits }: any) => {
 
 const createChatInstance = async (courseRealisations: SisuCourseWithRealization[]) => {
   const chatInstances = courseRealisations.map((course) => {
-    const courseUnit = getCourseUnit(course.courseUnits, course.activityPeriod)
-
     return {
       name: {
-        fi: courseUnit.name.fi,
-        en: courseUnit.name.en || courseUnit.name.fi,
-        sv: courseUnit.name.sv || courseUnit.name.fi,
+        fi: course.name.fi,
+        en: course.name.en || course.name.fi,
+        sv: course.name.sv || course.name.fi,
       },
       courseId: course.id,
       activityPeriod: course.activityPeriod,
