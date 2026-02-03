@@ -31,6 +31,15 @@ services:
     volumes:
       - pg_data:/data
     container_name: gptwrapper_db
+  adminer: # http://localhost:8080/?pgsql=db&username=postgres&db=postgres&ns=public
+    image: adminer
+    restart: always
+    environment:
+      - ADMINER_DEFAULT_SERVER=db
+      - ADMINER_DESIGN=dracula
+    ports:
+      - 8080:8080
+    container_name: gptwrapper_admirer
 
   redis:
     image: redis/redis-stack-server
