@@ -55,6 +55,10 @@ const courseNameWithCourseType = (name: Locales | string | null, type: Locales |
   if (!typeTranslated) {
     return nameTranslated
   }
+
+  if (typeTranslated.startsWith(nameTranslated)) {
+    return typeTranslated
+  }
   return `${nameTranslated} | ${typeTranslated}`
 }
 
