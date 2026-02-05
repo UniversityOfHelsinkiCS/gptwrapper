@@ -82,7 +82,7 @@ export const RagFile: React.FC = () => {
               })
               enqueueSnackbar(t('rag:fileDeleted'), { variant: 'success' })
 
-              navigate(`/${params.courseId}/courses/rag?index=${ragFile.ragIndex.id}`)
+              navigate(`/${params.courseId}/course/rag?index=${ragFile.ragIndex.id}`)
             }
           }}
           sx={{ my: 2, borderRadius: '1.25rem' }}
