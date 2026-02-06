@@ -49,7 +49,7 @@ const setupCron = async () => {
   if (inDevelopment) {
     await runUpdater()
   } else if (UPDATER_CRON_ENABLED) {
-    cron.schedule('15 3,15 * * *', runUpdater) // Run updater every 12 hours
+    cron.schedule('0 3 * * *', runUpdater) // Run updater at 3 am every day
   }
 }
 
