@@ -1,8 +1,11 @@
 import {
     Box,
     Divider,
+    Tab,
+    Tabs,
     Typography,
 } from '@mui/material'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import { PromptInfo } from 'src/client/types'
@@ -37,53 +40,97 @@ export const PromptInfoContent = ({
 
     const { t } = useTranslation()
     const defaultInstructions = type === 'PERSONAL' ? t('prompt:myPrompt') : t('prompt:defaultChatInstructions')
+    const [tab, setTab] = useState(0)
+
+    // If system message is hidden, render content without tabs
+    if (hidden) {
+        return (
+            <Box sx={{
+                p: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+            }}>
+                <Box>
+                    <Typography variant="h5" fontWeight="bold">{name || '-'}</Typography>
+
+                    <Box sx={{ 
+                        mt: 2,
+                        overflowWrap: 'break-word',
+                        wordBreak: 'break-word',
+                        whiteSpace: 'pre-wrap'
+                    }}>
+                        <Typography>
+                            {userInstructions?.length ? userInstructions : defaultInstructions}
+                        </Typography>
+                    </Box>
+                </Box>
+            </Box>
+        )
+    }
 
     return (
         <Box sx={{
-            p: 2,
             display: 'flex',
             flexDirection: 'column',
-            gap: 2,
         }}>
-            <Box>
-                <Typography mb={2} fontWeight="bold">{t('prompt:promptName')}</Typography>
+            <Tabs 
+                sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }} 
+                value={tab} 
+                onChange={(_, newValue) => setTab(newValue)}
+            >
+                <Tab label={t('prompt:description')} />
+                <Tab label={t('prompt:languageModel')} />
+            </Tabs>
 
-                {/* No <p> wrapper needed anymore */}
-                <Box sx={muiTextfieldMimic}>
-                    <Typography>{name || '-'}</Typography>
-                </Box>
-
-                <Typography mt={3} mb={2} fontWeight="bold">
-                    {type === 'PERSONAL' ? t('prompt:promptDescription') : t('prompt:promptInstructions')}
-                </Typography>
-
-                <Box sx={{ ...muiTextfieldMimic, ...multilineMimic }}>
-                    <ReactMarkdown>
-                        {userInstructions?.length ? userInstructions : defaultInstructions}
-                    </ReactMarkdown>
-                </Box>
-            </Box>
-
-            {
-                !hidden &&
-                <>
-                    <Divider sx={{ my: 3 }} />
+            {tab === 0 && (
+                <Box sx={{
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
+                }}>
                     <Box>
-                        <Typography mb={2} fontWeight="bold">{t('prompt:systemMessageLabel')}</Typography>
-                        <Box sx={{ ...muiTextfieldMimic, ...multilineMimic }}>
-                            {systemMessage ? (
-                                <ReactMarkdown>
-                                    {systemMessage}
-                                </ReactMarkdown>
-                            ) : (
-                                <Typography color="text.secondary">
-                                    {t('prompt:noSystemMessage')}
-                                </Typography>
-                            )}
+                        <Typography variant="h5" fontWeight="bold">{name || '-'}</Typography>
+
+                        <Box sx={{ 
+                            mt: 2,
+                            overflowWrap: 'break-word',
+                            wordBreak: 'break-word',
+                            whiteSpace: 'pre-wrap'
+                        }}>
+                            <Typography>
+                                {userInstructions?.length ? userInstructions : defaultInstructions}
+                            </Typography>
                         </Box>
                     </Box>
-                </>
-            }
+                </Box>
+            )}
+
+            {tab === 1 && (
+                <Box sx={{
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
+                }}>
+                    <Box sx={{ 
+                        overflowWrap: 'break-word',
+                        wordBreak: 'break-word',
+                        whiteSpace: 'pre-wrap'
+                    }}>
+                        {systemMessage ? (
+                            <Typography>
+                                {systemMessage}
+                            </Typography>
+                        ) : (
+                            <Typography color="text.secondary">
+                                {t('prompt:noSystemMessage')}
+                            </Typography>
+                        )}
+                    </Box>
+                </Box>
+            )}
         </Box>
     )
 }

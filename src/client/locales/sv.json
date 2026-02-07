@@ -424,7 +424,7 @@
     "unknownRagMessage": "Om svaret inte finns i källmaterialet, tala om för användaren direkt att inget svar är tillgängligt från källorna.",
     "edit": "Redigera",
     "preview": "Förhandsgranska",
-    "defaultChatInstructions": "Du interagerar med ett chattgränssnitt som har en fördefinierad systemprompt. Detta innebär att AI:n har tilldelats en specifik roll, personlighet eller uppsättning regler att följa.\n\n**Hur du börjar:**\n* Skriv helt enkelt **\"Hej\"** eller ställ en fråga för att se hur den svarar.\n* AI:n kommer att följa sina dolda instruktioner medan den chattar med dig.",
+    "defaultChatInstructions": "Du interagerar med ett chattgränssnitt som har en fördefinierad systemprompt. Detta innebär att AI:n har tilldelats en specifik roll, personlighet eller uppsättning regler att följa.\n\nHur du börjar:\n- Skriv helt enkelt \"Hej\" eller ställ en fråga för att se hur den svarar.\n- AI:n kommer att följa sina dolda instruktioner medan den chattar med dig.",
     "studentViewInfoAlert": "Denna vy visas för studenter under avsnittet \"Promptinformation\".",
     "promptName": "Promptnamn",
     "promptInstructions": "Användarinstruktioner",
@@ -441,7 +441,9 @@
     "modelSourceMaterialInstructions": "Källmaterialsinstruktioner för modellen",
     "promptDescription": "Promptbeskrivning",
     "myPrompt": "Min prompt",
-    "missingPromptName": "Prompten saknar namn"
+    "missingPromptName": "Prompten saknar namn",
+    "description": "Beskrivning",
+    "languageModel": "AI-instruktioner"
   },
   "tooltip": {
     "copied": "Kopierad!"

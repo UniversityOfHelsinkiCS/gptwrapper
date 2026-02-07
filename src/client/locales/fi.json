@@ -453,7 +453,7 @@
     "courseSourceMaterials": "Muokkaa kurssin materiaaleja",
     "edit": "Muokkaa",
     "preview": "Esikatsele",
-    "defaultChatInstructions": "Olet vuorovaikutuksessa chat-käyttöliittymän kanssa, jossa on ennalta määritetty järjestelmäkehote. Tämä tarkoittaa, että tekoälylle on annettu tietty rooli, persoonallisuus tai säännöt, joita seurata.\n\n**Kuinka aloittaa:**\n* Kirjoita yksinkertaisesti **\"Moi\"** tai kysy kysymys nähdäksesi, miten se vastaa.\n* Tekoäly noudattaa piilotettuja ohjeitaan jutellessaan kanssasi.",
+    "defaultChatInstructions": "Olet vuorovaikutuksessa chat-käyttöliittymän kanssa, jossa on ennalta määritetty järjestelmäkehote. Tämä tarkoittaa, että tekoälylle on annettu tietty rooli, persoonallisuus tai säännöt, joita seurata.\n\nKuinka aloittaa:\n- Kirjoita yksinkertaisesti \"Moi\" tai kysy kysymys nähdäksesi, miten se vastaa.\n- Tekoäly noudattaa piilotettuja ohjeitaan jutellessaan kanssasi.",
     "studentViewInfoAlert": "Tämä näkymä näkyy opiskelijoille kohdassa \"Alustuksen tiedot\".",
     "promptName": "Alustuksen nimi",
     "promptInstructions": "Alustuksen käyttöohjeet",
@@ -470,7 +470,9 @@
     "modelSourceMaterialInstructions": "Kielimallin lähdemateriaaliohjeistus",
     "promptDescription": "Alustuksen kuvaus",
     "myPrompt": "Oma alustukseni",
-    "missingPromptName": "Alustukselta puuttuu nimi"
+    "missingPromptName": "Alustukselta puuttuu nimi",
+    "description": "Kuvaus",
+    "languageModel": "Tekoälyn ohjeistus"
   },
   "tooltip": {
     "copied": "Kopioitu!"
