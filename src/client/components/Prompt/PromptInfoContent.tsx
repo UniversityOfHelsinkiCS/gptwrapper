@@ -1,34 +1,12 @@
 import {
     Box,
-    Divider,
     Tab,
     Tabs,
     Typography,
 } from '@mui/material'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import ReactMarkdown from 'react-markdown'
 import { PromptInfo } from 'src/client/types'
-
-const muiTextfieldMimic = {
-    border: '1px solid',
-    borderColor: 'rgba(0, 0, 0, 0.16)',
-    borderRadius: 1,
-    p: '16.5px 14px', // Exact MUI OutlinedInput padding
-    backgroundColor: 'grey.50',
-    '& p': {
-        m: 0, // Removes margin from Markdown paragraphs
-        lineHeight: 1.5 // Ensures readable text height
-    },
-    // Add space between paragraphs if there are multiple
-    '& p + p': {
-        mt: 1
-    }
-}
-
-const multilineMimic = {
-    minHeight: '190px' // mimics 8 rows
-}
 
 export const PromptInfoContent = ({
     name,
@@ -42,7 +20,6 @@ export const PromptInfoContent = ({
     const defaultInstructions = type === 'PERSONAL' ? t('prompt:myPrompt') : t('prompt:defaultChatInstructions')
     const [tab, setTab] = useState(0)
 
-    // If system message is hidden, render content without tabs
     if (hidden) {
         return (
             <Box sx={{
@@ -85,7 +62,9 @@ export const PromptInfoContent = ({
 
             {tab === 0 && (
                 <Box sx={{
-                    p: 2,
+                    pt: 3,
+                    pb: 2,
+                    px: 2,
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 2,
@@ -109,7 +88,9 @@ export const PromptInfoContent = ({
 
             {tab === 1 && (
                 <Box sx={{
-                    p: 2,
+                    pt: 3,
+                    pb: 2,
+                    px: 2,
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 2,
