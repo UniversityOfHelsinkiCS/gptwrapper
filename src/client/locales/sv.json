@@ -425,6 +425,7 @@
     "edit": "Redigera",
     "preview": "Förhandsgranska",
     "defaultChatInstructions": "Du interagerar med ett chattgränssnitt som har en fördefinierad systemprompt. Detta innebär att AI:n har tilldelats en specifik roll, personlighet eller uppsättning regler att följa.\n\nHur du börjar:\n- Skriv helt enkelt \"Hej\" eller ställ en fråga för att se hur den svarar.\n- AI:n kommer att följa sina dolda instruktioner medan den chattar med dig.",
+    "defaultChatInstructionsVisible": "Du interagerar med ett chattgränssnitt som har en fördefinierad systemprompt. Detta innebär att AI:n har tilldelats en specifik roll, personlighet eller uppsättning regler att följa.\n\nHur du börjar:\n- Skriv helt enkelt \"Hej\" eller ställ en fråga för att se hur den svarar.\n- AI:n kommer att följa sina instruktioner medan den chattar med dig. Du kan granska dessa instruktioner på fliken 'AI-instruktioner'.",
     "studentViewInfoAlert": "Denna vy visas för studenter under avsnittet \"Promptinformation\".",
     "promptName": "Promptnamn",
     "promptInstructions": "Användarinstruktioner",

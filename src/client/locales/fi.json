@@ -454,6 +454,7 @@
     "edit": "Muokkaa",
     "preview": "Esikatsele",
     "defaultChatInstructions": "Olet vuorovaikutuksessa chat-käyttöliittymän kanssa, jossa on ennalta määritetty järjestelmäkehote. Tämä tarkoittaa, että tekoälylle on annettu tietty rooli, persoonallisuus tai säännöt, joita seurata.\n\nKuinka aloittaa:\n- Kirjoita yksinkertaisesti \"Moi\" tai kysy kysymys nähdäksesi, miten se vastaa.\n- Tekoäly noudattaa piilotettuja ohjeitaan jutellessaan kanssasi.",
+    "defaultChatInstructionsVisible": "Olet vuorovaikutuksessa chat-käyttöliittymän kanssa, jossa on ennalta määritetty järjestelmäkehote. Tämä tarkoittaa, että tekoälylle on annettu tietty rooli, persoonallisuus tai säännöt, joita seurata.\n\nKuinka aloittaa:\n- Kirjoita yksinkertaisesti \"Moi\" tai kysy kysymys nähdäksesi, miten se vastaa.\n- Tekoäly noudattaa ohjeitaan jutellessaan kanssasi. Voit tutustua näihin ohjeisiin 'Tekoälyn ohjeistus' -välilehdellä.",
     "studentViewInfoAlert": "Tämä näkymä näkyy opiskelijoille kohdassa \"Alustuksen tiedot\".",
     "promptName": "Alustuksen nimi",
     "promptInstructions": "Alustuksen käyttöohjeet",

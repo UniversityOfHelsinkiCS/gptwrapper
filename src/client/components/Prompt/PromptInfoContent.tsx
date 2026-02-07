@@ -15,10 +15,29 @@ export const PromptInfoContent = ({
     hidden,
     type
 }: PromptInfo) => {
-
     const { t } = useTranslation()
-    const defaultInstructions = type === 'PERSONAL' ? t('prompt:myPrompt') : t('prompt:defaultChatInstructions')
+    const getDefaultInstructions = () => {
+        if (type === 'PERSONAL') return t('prompt:myPrompt')
+        return hidden ? t('prompt:defaultChatInstructions') : t('prompt:defaultChatInstructionsVisible')
+    }
     const [tab, setTab] = useState(0)
+
+    const DescriptionContent = () => (
+        <Box>
+            <Typography variant="h5" fontWeight="bold">{name || '-'}</Typography>
+
+            <Box sx={{ 
+                mt: 2,
+                overflowWrap: 'break-word',
+                wordBreak: 'break-word',
+                whiteSpace: 'pre-wrap'
+            }}>
+                <Typography>
+                    {userInstructions?.length ? userInstructions : getDefaultInstructions()}
+                </Typography>
+            </Box>
+        </Box>
+    )
 
     if (hidden) {
         return (
@@ -28,20 +47,7 @@ export const PromptInfoContent = ({
                 flexDirection: 'column',
                 gap: 2,
             }}>
-                <Box>
-                    <Typography variant="h5" fontWeight="bold">{name || '-'}</Typography>
-
-                    <Box sx={{ 
-                        mt: 2,
-                        overflowWrap: 'break-word',
-                        wordBreak: 'break-word',
-                        whiteSpace: 'pre-wrap'
-                    }}>
-                        <Typography>
-                            {userInstructions?.length ? userInstructions : defaultInstructions}
-                        </Typography>
-                    </Box>
-                </Box>
+                <DescriptionContent />
             </Box>
         )
     }
@@ -69,20 +75,7 @@ export const PromptInfoContent = ({
                     flexDirection: 'column',
                     gap: 2,
                 }}>
-                    <Box>
-                        <Typography variant="h5" fontWeight="bold">{name || '-'}</Typography>
-
-                        <Box sx={{ 
-                            mt: 2,
-                            overflowWrap: 'break-word',
-                            wordBreak: 'break-word',
-                            whiteSpace: 'pre-wrap'
-                        }}>
-                            <Typography>
-                                {userInstructions?.length ? userInstructions : defaultInstructions}
-                            </Typography>
-                        </Box>
-                    </Box>
+                    <DescriptionContent />
                 </Box>
             )}
 
