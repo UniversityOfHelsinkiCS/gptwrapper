@@ -60,11 +60,12 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
 
   await updateRagFileStatus(ragFile, update)
   const needToParse = (await FileStore.readRagFileTextContent(ragFile)) === null
+  const needToParseWithVlm = needToParse && ragFile.metadata?.advancedParsing
   progress = 5
   await updateRagFileStatus(ragFile, { ...update, message: needToParse ? 'Preparing to parse PDF' : 'Found cached text' })
   let finalText: string | null = null
 
-  if (needToParse && (ragIndex.metadata.advancedParsing !== false)) {
+  if (needToParseWithVlm) {
     // Advanced PDF parsing with job processing.
     const pages = await submitAdvancedPdfParsingJobs(ragFile)
 

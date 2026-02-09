@@ -6,12 +6,11 @@ import queryClient from '../../util/queryClient'
 
 export const useCreateRagIndexMutation = () => {
   const mutation = useMutation({
-    mutationFn: async ({ chatInstanceId, name, language, advancedParsing }: RagIndexMetadata & { chatInstanceId: string }) => {
+    mutationFn: async ({ chatInstanceId, name, language }: RagIndexMetadata & { chatInstanceId: string }) => {
       const response = await apiClient.post('/rag/indices', {
         name,
         chatInstanceId,
         language,
-        advancedParsing,
       })
       return response.data
     },

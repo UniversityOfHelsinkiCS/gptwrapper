@@ -235,13 +235,16 @@ const upload = multer({
 })
 const uploadMiddleware = upload.array('files')
 
-const indexUploadDirMiddleware = async (req: Request, _res: Response, next: NextFunction) => {
-  const { ragIndex } = req as RagIndexRequest
-  await FileStore.createRagIndexDir(ragIndex)
+const attachFileMetadata = (req: Request, _res: Response, next: NextFunction) => {
+  const settings: boolean[] = JSON.parse(req.body.advancedParsing || '[]')
+  const files = req.files as Express.MulterS3.File[]
+  files?.forEach((file, idx) => {
+    file.advancedParsing = settings[idx] ?? false
+  })
   next()
 }
 
-ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], async (req, res) => {
+ragIndexRouter.post('/upload', [uploadMiddleware, attachFileMetadata], async (req, res) => {
   const ragIndexRequest = req as unknown as RagIndexRequest
   const { ragIndex, user, uploadedS3Keys = [] } = ragIndexRequest
 
@@ -255,7 +258,9 @@ ragIndexRouter.post('/upload', [indexUploadDirMiddleware, uploadMiddleware], asy
         fileType: file.contentType,
         fileSize: file.size,
         s3Key: uploadedS3Keys[idx],
-        metadata: {},
+        metadata: {
+          advancedParsing: file.advancedParsing,
+        },
       }),
     ),
   )

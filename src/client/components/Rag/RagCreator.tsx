@@ -46,7 +46,6 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
                 chatInstanceId: chatInstance?.id,
                 name: indexName,
                 language,
-                advancedParsing,
               })
               setIndexName('')
               navigate(`?index=${newIndex.id}`)

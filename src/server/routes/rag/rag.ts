@@ -14,12 +14,11 @@ const IndexCreationSchema = z.object({
   name: z.string().min(1).max(100),
   language: z.enum(['Finnish', 'English', 'Swedish']).optional(),
   chatInstanceId: z.string().min(1).max(100),
-  advancedParsing: z.boolean()
 })
 
 router.post('/indices', async (req, res) => {
   const { user } = req as RequestWithUser
-  const { name, chatInstanceId, language, advancedParsing } = IndexCreationSchema.parse(req.body)
+  const { name, chatInstanceId, language } = IndexCreationSchema.parse(req.body)
 
   const chatInstance = await ChatInstance.findByPk(chatInstanceId, {
     include: [
@@ -50,7 +49,6 @@ router.post('/indices', async (req, res) => {
     metadata: {
       name,
       language,
-      advancedParsing,
     },
   })
 
@@ -105,16 +103,16 @@ router.get('/indices', async (req, res) => {
   }
 
   const indices = chatInstance
-    ? (chatInstance.ragIndices ?? [])
+    ? chatInstance.ragIndices ?? []
     : await RagIndex.findAll({
-      include: [
-        {
-          model: RagFile,
-          as: 'ragFiles',
-          attributes: ['id', 'filename'],
-        },
-      ],
-    })
+        include: [
+          {
+            model: RagFile,
+            as: 'ragFiles',
+            attributes: ['id', 'filename'],
+          },
+        ],
+      })
 
   if (includeExtras) {
     const indicesWithCount = await Promise.all(

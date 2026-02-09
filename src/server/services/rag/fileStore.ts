@@ -51,8 +51,7 @@ export const FileStore = {
 
       const ragIndexId = ragIndex.id
       const ragFiles = await RagFile.findAll({ where: { ragIndexId } })
-      const deletions = ragFiles.filter((rf) => rf.s3Key && rf.s3Key.length > 0)
-        .map((rf) => FileStore.deleteRagFileDocument(rf))
+      const deletions = ragFiles.filter((rf) => rf.s3Key && rf.s3Key.length > 0).map((rf) => FileStore.deleteRagFileDocument(rf))
       await Promise.allSettled(deletions)
     } catch (error) {
       console.warn(`Failed to delete S3 objects with prefix ${prefix}:`, error)
@@ -123,12 +122,6 @@ export const FileStore = {
     }
   },
 
-  // S3 does not require creating directories
-  async createRagIndexDir(_ragIndex: RagIndex) {
-    // No-op for S3
-    return
-  },
-
   async readRagFileContextToBytes(ragFile: RagFile) {
     const s3Key = FileStore.getRagFileKey(ragFile)
     try {
@@ -162,7 +155,6 @@ const streamToString = (stream: any): Promise<string> => {
     stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')))
   })
 }
-
 
 const streamToBuffer = async (stream: NodeJS.ReadableStream): Promise<Buffer> => {
   const chunks: Buffer[] = []
