@@ -85,6 +85,7 @@ export const useUploadMutation = ({ index, onUploadProgress = () => {} }: { inde
       // Append each file individually
       files.forEach((file) => {
         formData.append('files', file)
+        formData.append('advancedParsing', 'true')
       })
 
       const res = await apiClient.post(`/rag/indices/${index.id}/upload`, formData, {

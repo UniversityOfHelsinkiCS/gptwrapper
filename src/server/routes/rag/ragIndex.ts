@@ -236,7 +236,10 @@ const upload = multer({
 const uploadMiddleware = upload.array('files')
 
 const attachFileMetadata = (req: Request, _res: Response, next: NextFunction) => {
-  const settings: boolean[] = JSON.parse(req.body.advancedParsing || '[]')
+  const advancedParsing = req.body.advancedParsing ?? []
+  const values = Array.isArray(advancedParsing) ? advancedParsing : [advancedParsing]
+  const settings: boolean[] = values.map((value: string) => String(value).toLowerCase() === 'true')
+
   const files = req.files as Express.MulterS3.File[]
   files?.forEach((file, idx) => {
     file.advancedParsing = settings[idx] ?? false
