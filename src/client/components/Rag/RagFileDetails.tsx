@@ -1,4 +1,4 @@
-import { Box, Divider, Link, styled, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import { Box, Link, styled, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 import { IngestionJobStatus, IngestionPipelineStageKey } from '@shared/ingestion'
 import { Link as RouterLink } from 'react-router-dom'
 import type { RagFileAttributes } from '@shared/types'
@@ -7,7 +7,6 @@ import DownloadDone from '@mui/icons-material/DownloadDone'
 import ErrorOutline from '@mui/icons-material/ErrorOutline'
 import PendingOutlined from '@mui/icons-material/PendingOutlined'
 import SettingsOutlined from '@mui/icons-material/SettingsOutlined'
-import AutoFixHigh from '@mui/icons-material/AutoFixHigh'
 import { locales } from '../../locales/locales'
 import { useTranslation } from 'react-i18next'
 import { formatDistanceStrict } from 'date-fns'
@@ -103,8 +102,7 @@ export const RagFileInfo: React.FC<{
       <TableCell>
         {isPdf && (
           <Box display="flex" alignItems="center" gap={0.5}>
-            {usedAdvancedParsing && <AutoFixHigh sx={{ fontSize: 16, color: 'primary.main' }} />}
-            <Typography variant="body2" color={usedAdvancedParsing ? 'primary.main' : 'text.secondary'}>
+            <Typography variant="body2">
               {usedAdvancedParsing ? t('rag:advancedParsing') : t('rag:standardParsing')}
             </Typography>
           </Box>

@@ -270,6 +270,7 @@ export const RagIndex: React.FC = () => {
             variant="contained"
             onClick={async () => {
               await handleUpload(stagedFiles, advancedParsing)
+              setStagedFiles([])
             }}
             disabled={uploadMutation.isPending}
           >
