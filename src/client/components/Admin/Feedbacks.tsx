@@ -1,4 +1,4 @@
-import { Box, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import { Box, Paper, Table, TableBody, TableCell, TableRow, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import type { FeedbackPost } from '../../../shared/feedback'
 import { locales } from '../../locales/locales'

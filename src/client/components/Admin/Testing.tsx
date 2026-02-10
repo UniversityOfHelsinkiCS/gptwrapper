@@ -1,4 +1,4 @@
-import { Box, Typography, Divider } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import { BlueButton, OrangeButton } from '../ChatV2/general/Buttons'
 import * as Sentry from '@sentry/react'
 import useCurrentUser from '../../hooks/useCurrentUser'

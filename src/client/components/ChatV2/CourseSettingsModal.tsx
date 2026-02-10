@@ -1,4 +1,4 @@
-import { ContentCopy, CopyAll } from '@mui/icons-material'
+import { ContentCopy } from '@mui/icons-material'
 import {
   Alert,
   Badge,
@@ -6,7 +6,6 @@ import {
   Button,
   Container,
   Divider,
-  MenuItem,
   Stack,
   Tab,
   Table,
@@ -42,7 +41,7 @@ import { filterUsages } from './util'
 export const CourseSettingsModal = () => {
   const { courseId } = useParams() as { courseId: string }
   const [addTeacherViewOpen, setAddTeacherViewOpen] = useState(false)
-  const [activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
+  const [_activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
   const [responsibilities, setResponsibilities] = useState<Responsibility[]>([])
   const { t, i18n } = useTranslation()
   const { language } = i18n

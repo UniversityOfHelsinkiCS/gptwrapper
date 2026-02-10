@@ -3,7 +3,7 @@ import { MapsUgc } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Outlet, Route, Routes, useParams, useSearchParams } from 'react-router-dom'
+import { Outlet, Route, Routes, useParams } from 'react-router-dom'
 import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, ValidModelNameSchema, imageFileTypes } from '../../../config'
 import type { ChatMessage, MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
@@ -100,7 +100,7 @@ const ChatV2Content = () => {
   const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model', ValidModelNameSchema)
   const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as ChatMessage[])
   const [saveConsent, setSaveConsent] = useLocalStorageState<boolean>('save-consent', false)
-  const [modelTemperature, setModelTemperature] = useLocalStorageStateWithURLDefault(
+  const [modelTemperature, _setModelTemperature] = useLocalStorageStateWithURLDefault(
     `${localStoragePrefix}-chat-model-temperature`,
     String(DEFAULT_MODEL_TEMPERATURE),
     'temperature',
