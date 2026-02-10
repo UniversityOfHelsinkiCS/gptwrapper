@@ -8,11 +8,17 @@ import {
   Container,
   DialogTitle,
   DialogContent,
+  DialogActions,
   Dialog,
   Link,
   CircularProgress,
   Breadcrumbs,
   Divider,
+  FormControlLabel,
+  Switch,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material'
 import { useNavigate, useParams, Link as RouterLink, useSearchParams } from 'react-router-dom'
 import Autorenew from '@mui/icons-material/Autorenew'
@@ -59,6 +65,8 @@ export const RagIndex: React.FC = () => {
   const deleteIndexMutation = useDeleteRagIndexMutation(id)
   const [refetchInterval, setRefetchInterval] = React.useState(60 * 1000)
   const [uploadProgress, setUploadProgress] = React.useState(0)
+  const [stagedFiles, setStagedFiles] = React.useState<File[]>([])
+  const [advancedParsing, setAdvancedParsing] = React.useState<boolean[]>([])
   const { data: ragDetails, isSuccess, refetch } = useRagIndexDetails(id)
   const { data: ragFileStatuses, refetch: refetchStatuses } = useRagIndexJobs(id, refetchInterval)
   const uploadMutation = useUploadMutation({ index: ragDetails, onUploadProgress: setUploadProgress })
@@ -78,7 +86,12 @@ export const RagIndex: React.FC = () => {
     return <LinearProgress />
   }
 
-  const handleUpload = async (files: File[]) => {
+  const handleStageFiles = (files: File[]) => {
+    setStagedFiles(files)
+    setAdvancedParsing(files.map(() => false))
+  }
+
+  const handleUpload = async (files: File[], perFileAdvancedParsing: boolean[]) => {
     setUploadProgress(0)
     queryClient.setQueryData<RagIndexDetails>(['ragIndex', id], (old) => {
       if (!old) return old
@@ -105,7 +118,9 @@ export const RagIndex: React.FC = () => {
         ],
       }
     })
-    await uploadMutation.mutateAsync(Array.from(files))
+    await uploadMutation.mutateAsync({ files: Array.from(files), advancedParsing: perFileAdvancedParsing })
+    setStagedFiles([])
+    setAdvancedParsing([])
     refetch()
     refetchStatuses()
   }
@@ -137,8 +152,9 @@ export const RagIndex: React.FC = () => {
               onChange={async (e) => {
                 const files = e.target.files
                 if (files && files.length > 0) {
-                  await handleUpload(Array.from(files))
+                  handleStageFiles(Array.from(files))
                 }
+                e.target.value = ''
               }}
               multiple
             />
@@ -190,7 +206,7 @@ export const RagIndex: React.FC = () => {
               <OutlineButtonBlack
                 startIcon={<Autorenew />}
                 onClick={async () => {
-                  await handleUpload([])
+                  await handleUpload([], [])
                 }}
               >
                 {t('rag:retryFailedFiles')}
@@ -208,6 +224,49 @@ export const RagIndex: React.FC = () => {
           ))}
         </Box>
       </Box>
+      <Dialog open={stagedFiles.length > 0} onClose={() => setStagedFiles([])} fullWidth maxWidth="sm">
+        <DialogTitle>{t('rag:uploadFiles')}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" mb={1}>
+            {t('rag:advancedParsingGuide')}
+          </Typography>
+          <List dense>
+            {stagedFiles.map((file, idx) => (
+              <ListItem key={file.name} disableGutters>
+                <ListItemText primary={file.name} secondary={`${(file.size / 1024).toFixed(0)} KB`} />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={advancedParsing[idx] ?? false}
+                      onChange={(e) => {
+                        setAdvancedParsing((prev) => {
+                          const next = [...prev]
+                          next[idx] = e.target.checked
+                          return next
+                        })
+                      }}
+                    />
+                  }
+                  label={t('rag:advancedParsing')}
+                  labelPlacement="start"
+                />
+              </ListItem>
+            ))}
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <OutlineButtonBlack onClick={() => setStagedFiles([])}>{t('common:cancel')}</OutlineButtonBlack>
+          <BlueButton
+            variant="contained"
+            onClick={async () => {
+              await handleUpload(stagedFiles, advancedParsing)
+            }}
+            disabled={uploadMutation.isPending}
+          >
+            {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
+          </BlueButton>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

@@ -77,15 +77,14 @@ export const useUpdateRagIndexMutation = (indexId: number) => {
 
 export const useUploadMutation = ({ index, onUploadProgress = () => {} }: { index?: RagIndexAttributes; onUploadProgress?: (progress: number) => void }) => {
   const mutation = useMutation({
-    mutationFn: async (files: File[]) => {
+    mutationFn: async ({ files, advancedParsing }: { files: File[]; advancedParsing: boolean[] }) => {
       if (!index) {
         throw new Error('Index is required')
       }
       const formData = new FormData()
-      // Append each file individually
-      files.forEach((file) => {
+      files.forEach((file, idx) => {
         formData.append('files', file)
-        formData.append('advancedParsing', 'true')
+        formData.append('advancedParsing', String(advancedParsing[idx] ?? false))
       })
 
       const res = await apiClient.post(`/rag/indices/${index.id}/upload`, formData, {

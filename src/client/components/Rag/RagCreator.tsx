@@ -7,11 +7,9 @@ import {
   DialogContentText,
   DialogTitle,
   FormControl,
-  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
-  Switch,
   TextField,
 } from '@mui/material'
 import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
@@ -26,7 +24,6 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
   const createIndexMutation = useCreateRagIndexMutation()
   const [indexName, setIndexName] = useState('')
   const [language, setLanguage] = useState<'Finnish' | 'English' | 'Swedish'>('English')
-  const [advancedParsing, setAdvancedParsing] = useState(false)
   const [open, setOpen] = useState(false)
 
   return (
@@ -86,11 +83,6 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
               <MenuItem value={RAG_LANGUAGES[2]}>{t('rag:english')}</MenuItem>
             </Select>
           </FormControl>
-          <DialogContentText>{t('rag:advancedParsingGuide')}</DialogContentText>
-          <FormControlLabel
-            control={<Switch checked={advancedParsing} onChange={(e) => setAdvancedParsing(e.target.checked)} />}
-            label={t('rag:advancedParsing')}
-          />
         </DialogContent>
         <DialogActions>
           <OutlineButtonBlack color="primary" type="submit" data-testid="ragIndexCreateSubmit">
