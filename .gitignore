@@ -20,4 +20,4 @@ minio-data/*
 *.s3cfg
 # Sentry Config File
 .env.sentry-build-plugin
-.github/copilot-instructions.md
+*/copilot-instructions.md
