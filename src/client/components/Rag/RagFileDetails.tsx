@@ -54,12 +54,12 @@ export const RagFileTableHead: React.FC = () => {
   return (
     <TableHead>
       <TableRow>
-        <TableCell>{t('rag:fileName')}</TableCell>
-        <HideOnSmallHead>{t('common:fileType')}</HideOnSmallHead>
-        <TableCell>{t('rag:fileSizeKb')}</TableCell>
-        <TableCell>{t('rag:parsing')}</TableCell>
-        <HideOnSmallHead>{t('common:added')}</HideOnSmallHead>
-        <TableCell>{t('rag:fileStatus')}</TableCell>
+        <TableCell><strong>{t('rag:fileName')}</strong></TableCell>
+        <HideOnSmallHead><strong>{t('common:fileType')}</strong></HideOnSmallHead>
+        <TableCell><strong>{t('rag:fileSizeKb')}</strong></TableCell>
+        <TableCell><strong>{t('rag:parsing')}</strong></TableCell>
+        <HideOnSmallHead><strong>{t('common:added')}</strong></HideOnSmallHead>
+        <TableCell><strong>{t('rag:fileStatus')}</strong></TableCell>
         <TableCell />
       </TableRow>
     </TableHead>
