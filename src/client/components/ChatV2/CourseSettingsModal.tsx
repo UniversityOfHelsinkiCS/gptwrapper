@@ -224,13 +224,15 @@ export const CourseSettingsModal = () => {
                         <Table>
                           <TableHead>
                             <TableRow sx={{ backgroundColor: 'grey.100' }}>
+                              <TableCell />
                               <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:name')}</TableCell>
                               <TableCell sx={{ fontWeight: 'bold' }}>{t('course:addedFrom')}</TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {responsibilities.map((responsibility) => (
+                            {responsibilities.map((responsibility, idx) => (
                               <TableRow>
+                                <TableCell>{idx + 1}</TableCell>
                                 <TableCell key={responsibility.id}>
                                   <Typography>
                                     {responsibility.user.last_name} {responsibility.user.first_names}

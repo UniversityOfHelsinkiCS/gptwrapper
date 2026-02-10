@@ -64,6 +64,7 @@ const Stats: React.FC = () => {
           <Table sx={{ mt: 2 }}>
             <TableHead sx={{ borderRadius: 1, backgroundColor: 'grey.100' }}>
               <TableRow>
+                <TableCell />
                 <TableCell>
                   <strong>{t('admin:studentNumber')}</strong>
                 </TableCell>
@@ -141,8 +142,9 @@ const Stats: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {sortedUsers.map((enrolled) => (
+              {sortedUsers.map((enrolled, idx) => (
                 <TableRow key={enrolled.id}>
+                  <TableCell>{idx + 1}</TableCell>
                   <TableCell>{enrolled.student_number}</TableCell>
                   <TableCell>{enrolled.last_name}</TableCell>
                   <TableCell>{enrolled.first_names}</TableCell>
