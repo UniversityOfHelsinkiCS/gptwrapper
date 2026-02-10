@@ -46,7 +46,7 @@ test.describe('Student', () => {
     await acceptDisclaimer(page)
 
     await page.getByTestId('choose-prompt-button').click()
-    await page.getByTestId('pick-prompt-button').first().click()
+    await page.getByTestId('prompt-row-Test Prompt').click()
 
     await expect(page.getByTestId('edit-prompt-button')).toBeHidden()
     await expect(page.getByTestId('prompt-details-button')).toBeVisible()

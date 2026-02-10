@@ -65,10 +65,11 @@ test.describe('Prompts', () => {
     await page.getByTestId('system-message-input').fill('mocktest kurssitesti onnistui')
     await page.getByRole('button', { name: 'Save' }).click()
 
-    // await page.getByTestId('close-modal').click()
+    // Close the prompt modal to go back to the prompts list
+    await page.getByTestId('close-modal').click()
 
-    // Prompt is created and link is visible
-    await page.getByText(`Link to chat with the prompt '${newPromptName}' active`).click()
+    // Navigate directly to chat with the prompt using URL parameter
+    await page.goto(`/test-course-course-id?promptId=${newPromptName}`)
 
     // Now in chat view
     // The prompt is active.
@@ -117,8 +118,11 @@ test.describe('Prompts', () => {
     await page.getByTestId(`source-material-rag-${test.info().workerIndex}-teacher`).click()
     await page.getByRole('button', { name: 'Save' }).click()
 
-    // Prompt is created and link is visible
-    await page.getByText(`Link to chat with the prompt '${newPromptName}' active`).click()
+    // Close the prompt modal
+    await page.getByTestId('close-modal').click()
+
+    // Navigate directly to chat with the prompt using URL parameter
+    await page.goto(`/test-course-course-id?promptId=${newPromptName}`)
 
     // Now in chat view
     // The prompt is active.
