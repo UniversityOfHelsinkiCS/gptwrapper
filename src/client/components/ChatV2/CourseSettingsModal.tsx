@@ -1,6 +1,5 @@
 import { ContentCopy } from '@mui/icons-material'
 import {
-  Alert,
   Badge,
   Box,
   Button,
@@ -85,27 +84,6 @@ export const CourseSettingsModal = () => {
 
   const courseEnabled = chatInstance.usageLimit > 0
 
-  const isCourseActive =
-    courseEnabled && Date.parse(chatInstance.activityPeriod.endDate) > Date.now() && Date.parse(chatInstance.activityPeriod.startDate) <= Date.now()
-
-  const willBeEnabled = courseEnabled && Date.parse(chatInstance.activityPeriod.startDate) > Date.now()
-
-  const wasEnabled = courseEnabled && Date.parse(chatInstance.activityPeriod.endDate) < Date.now()
-
-  const getInfoSeverity = () => {
-    if (!courseEnabled) return 'warning'
-    if (isCourseActive) return 'success'
-    return 'info'
-  }
-
-  const getInfoMessage = () => {
-    if (!courseEnabled) return t('course:curreNotOpen')
-    if (isCourseActive) return t('course:curreOpen')
-    if (willBeEnabled) return `${t('course:curreWillBeOpen')} ${chatInstance.activityPeriod.startDate}`
-    if (wasEnabled) return `${t('course:curreWasOpen')} ${chatInstance.activityPeriod.endDate}`
-    return ''
-  }
-
   const isAdminOrResponsible = () => {
     return user.isAdmin || chatInstance.responsibilities.find((r) => r.user.username === user.username)
   }
@@ -185,46 +163,43 @@ export const CourseSettingsModal = () => {
           index
           path="/"
           element={
-            <Box py={3}>
-              {/*course open state message*/}
-              <Alert
-                severity={getInfoSeverity()}
-                sx={{
-                  borderRadius: '1',
-                  display: 'flex',
-                  alignItems: 'center',
-                  mb: 2,
-                }}
-              >
-                <Typography variant="h6">{getInfoMessage()}</Typography>
-              </Alert>
-
+            <Box py={3} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <Box>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    p: 1,
-                    backgroundColor: 'grey.100',
-                    borderRadius: 1,
-                  }}
-                >
-                  <Typography variant="h4">{chatInstance.name[language]}</Typography>
-                  {courseEnabled && (
+                <Typography variant="h5" fontWeight="bold">
+                  {chatInstance.name[language]}
+                </Typography>
+              </Box>
+
+              {courseEnabled && (
+                <>
+                  <Divider />
+                  <Box>
+                    <Typography fontWeight="bold" mb={1}>
+                      {t('course:studentLink')}
+                    </Typography>
                     <Tooltip title={t('copy')} placement="right">
-                      <Button onClick={() => handleCopyLink(studentLink)} color="inherit" sx={{ gap: 1, borderRadius: '1.25rem', p: 1 }}>
-                        <Typography style={{ textTransform: 'lowercase', color: 'blue' }} >
+                      <Button
+                        onClick={() => handleCopyLink(studentLink)}
+                        color="inherit"
+                        sx={{
+                          gap: 1,
+                          borderRadius: '1.25rem',
+                          p: 1,
+                          textTransform: 'none',
+                        }}
+                        endIcon={<ContentCopy />}
+                      >
+                        <Typography variant="body2" color="primary">
                           {studentLink}
                         </Typography>
-                        <ContentCopy />
                       </Button>
                     </Tooltip>
-                  )}
-                </Box>
-                <Divider sx={{ mb: 2 }} />
-                <EditCourseForm course={chatInstance} setOpen={setActivityPeriodFormOpen} user={user} />
-              </Box>
+                  </Box>
+                </>
+              )}
+
+              <Divider />
+              <EditCourseForm course={chatInstance} setOpen={setActivityPeriodFormOpen} user={user} />
             </Box>
           }
         />

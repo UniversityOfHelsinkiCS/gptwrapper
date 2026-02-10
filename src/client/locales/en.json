@@ -351,6 +351,7 @@
     "howToActive": "Go to Courses I teach to activate the chat",
     "coursePage": "Course page",
     "curreEnabled": "CurreChat is enabled for the course",
+    "studentLink": "Link for students",
     "curreNotEnabled": "CurreChat is not enabled for the course",
     "curreExpired": "The course is over",
     "curreNotOpen": "Students cannot access the chat of this course",

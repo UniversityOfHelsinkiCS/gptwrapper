@@ -345,6 +345,7 @@
     "howToActive": "Välj de kurser jag undervisar om du vill aktivera kurschatten",
     "coursePage": "Kurssidan",
     "curreEnabled": "CurreChat används i kursen",
+    "studentLink": "Länk för studenter",
     "curreNotEnabled": "CurreChat används inte i kursen",
     "curreExpired": "Kursen har avslutats",
     "curreOpen": "Kurschatten är öppen för studenter",

@@ -354,6 +354,7 @@
     "howToActive": "Valitse opettamani kurssit jos haluat ottaa käyttöön kurssichatin",
     "coursePage": "Kurssisivu",
     "curreEnabled": "CurreChat on käytössä kurssilla",
+    "studentLink": "Linkki opiskelijoille",
     "curreNotEnabled": "CurreChat ei ole käytössä kurssilla",
     "curreExpired": "Kurssi on päättynyt",
     "curreNotOpen": "Kurssin chat ei ole auki opiskelijoille",

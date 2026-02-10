@@ -78,7 +78,6 @@ const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(
           flexDirection: 'column',
           gap: 3,
           p: 2,
-          margin: '0 auto',
         }}
       >
         {chatInstance?.usageLimit <= 0 && (
