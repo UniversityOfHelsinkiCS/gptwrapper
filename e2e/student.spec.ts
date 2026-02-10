@@ -45,10 +45,10 @@ test.describe('Student', () => {
     await page.goto('/test-course-course-id')
     await acceptDisclaimer(page)
 
-    // Students shouldn't see the edit prompt button in the sidebar
-    await expect(page.getByTestId('edit-prompt-button')).toBeHidden()
+    // Students shouldn't see the edit prompt button in the sidebar (when no prompt is selected)
+    await expect(page.getByTestId('edit-prompt-button')).not.toBeVisible()
     
-    // But they should see the prompt details button when a prompt is selected
-    await expect(page.getByTestId('prompt-details-button')).toBeVisible()
+    // They should see the button to choose a prompt
+    await expect(page.getByTestId('choose-prompt-button')).toBeVisible()
   })
 })
