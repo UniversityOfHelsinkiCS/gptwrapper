@@ -19,6 +19,9 @@ import {
   List,
   ListItem,
   ListItemText,
+  Table,
+  TableBody,
+  TableContainer,
 } from '@mui/material'
 import { useNavigate, useParams, Link as RouterLink, useSearchParams } from 'react-router-dom'
 import Autorenew from '@mui/icons-material/Autorenew'
@@ -26,7 +29,7 @@ import CloudUpload from '@mui/icons-material/CloudUpload'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import FindInPage from '@mui/icons-material/FindInPage'
 import { orderBy } from 'lodash'
-import { RagFileInfo } from './RagFileDetails'
+import { RagFileInfo, RagFileTableHead } from './RagFileDetails'
 import { RagIndexDetails, useDeleteRagIndexMutation, useRagIndexDetails, useRagIndexJobs, useUploadMutation } from './api'
 import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
@@ -213,15 +216,22 @@ export const RagIndex: React.FC = () => {
               </OutlineButtonBlack>
             )}
           </Box>
-          {orderBy(ragDetails.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (
-            <RagFileInfo
-              key={file.id}
-              file={file}
-              index={id}
-              status={ragFileStatuses?.find((rfs) => rfs.ragFileId === file.id)}
-              uploadProgress={uploadMutation.isPending ? uploadProgress : undefined}
-            />
-          ))}
+          <TableContainer sx={{ overflowX: 'hidden' }}>
+            <Table size="small">
+              <RagFileTableHead />
+              <TableBody>
+                {orderBy(ragDetails.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (
+                  <RagFileInfo
+                    key={file.id}
+                    file={file}
+                    index={id}
+                    status={ragFileStatuses?.find((rfs) => rfs.ragFileId === file.id)}
+                    uploadProgress={uploadMutation.isPending ? uploadProgress : undefined}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Box>
       </Box>
       <Dialog open={stagedFiles.length > 0} onClose={() => setStagedFiles([])} fullWidth maxWidth="sm">
