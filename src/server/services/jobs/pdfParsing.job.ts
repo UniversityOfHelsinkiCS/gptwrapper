@@ -110,19 +110,24 @@ type VLMJobData = {
   text: string
 }
 
+const isImage = (ragFile: RagFile) => ragFile.fileType === 'image/png'
+
 /**
  * Adds an advanced pdf parsing job to the queue. The file must be uploaded to S3 beforehand. The jobId is based on the ragFile - resubmitting with the same jobId while the previous job is running has no effect.
  * @param ragFile
  * @returns the pages which is array of PageInfo objects
  */
-export const submitAdvancedPdfParsingJobs = async (ragFile: RagFile) => {
-  const pdfBytes = await FileStore.readRagFileContextToBytes(ragFile)
+export const submitAdvancedParsingJobs = async (ragFile: RagFile) => {
+  const fileBytes = await FileStore.readRagFileContextToBytes(ragFile)
 
-  if (!pdfBytes) {
-    console.error(`Failed to read PDF text file ${ragFile.filename} in S3`)
-    throw ApplicationError.InternalServerError('Failed to read PDF text file')
+  if (!fileBytes) {
+    console.error(`Failed to read file ${ragFile.filename} in S3`)
+    throw ApplicationError.InternalServerError('Failed to read file')
   }
-  const pages = await analyzeAndPreparePDFPages(pdfBytes)
+
+  const pages = isImage(ragFile)
+    ? [{ text: '', png: fileBytes } as PageInfo]
+    : await analyzeAndPreparePDFPages(fileBytes)
 
   const baseJobId = crypto.randomBytes(20).toString('hex')
 

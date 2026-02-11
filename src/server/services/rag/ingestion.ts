@@ -1,7 +1,7 @@
 import { Document } from '@langchain/core/documents'
 import { MarkdownTextSplitter, RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
 import { RagFile, type RagIndex } from '../../db/models'
-import { pdfQueueEvents, simplyParsePdf, submitAdvancedPdfParsingJobs } from '../jobs/pdfParsing.job'
+import { pdfQueueEvents, simplyParsePdf, submitAdvancedParsingJobs } from '../jobs/pdfParsing.job'
 import { FileStore } from './fileStore'
 import logger from 'src/server/util/logger'
 import type { IngestionJobStatus, IngestionPipelineStageKey } from '@shared/ingestion'
@@ -67,7 +67,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
 
   if (needToParseWithVlm) {
     // Advanced PDF parsing with job processing.
-    const pages = await submitAdvancedPdfParsingJobs(ragFile)
+    const pages = await submitAdvancedParsingJobs(ragFile)
 
     try {
       const start = 5

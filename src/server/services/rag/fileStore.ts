@@ -13,6 +13,8 @@ import { S3_BUCKET } from '../../util/config'
 import { s3Client } from '../../util/s3client'
 
 const isPdf = (ragFile: RagFile) => ragFile.fileType === 'application/pdf'
+const isImage = (ragFile: RagFile) => ragFile.fileType === 'image/png'
+const isBinaryFile = (ragFile: RagFile) => isPdf(ragFile) || isImage(ragFile)
 const getPdfTextKey = (s3Key: string) => `${s3Key}.md`
 
 export const FileStore = {
@@ -62,7 +64,7 @@ export const FileStore = {
     const s3Key = FileStore.getRagFileKey(ragFile)
 
     try {
-      if (isPdf(ragFile)) {
+      if (isBinaryFile(ragFile)) {
         const pdfTextKey = getPdfTextKey(s3Key)
         await s3Client.send(new DeleteObjectCommand({ Bucket: S3_BUCKET, Key: pdfTextKey }))
         return true
@@ -90,7 +92,7 @@ export const FileStore = {
   async readRagFileTextContent(ragFile: RagFile) {
     const s3Key = FileStore.getRagFileKey(ragFile)
 
-    if (isPdf(ragFile)) {
+    if (isBinaryFile(ragFile)) {
       const pdfTextKey = getPdfTextKey(s3Key)
       try {
         const textObj = await s3Client.send(new GetObjectCommand({ Bucket: S3_BUCKET, Key: pdfTextKey }))

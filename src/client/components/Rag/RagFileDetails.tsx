@@ -74,6 +74,7 @@ export const RagFileInfo: React.FC<{
   const { t, i18n } = useTranslation()
   const usedAdvancedParsing = !!(file.metadata as Record<string, unknown> | null)?.advancedParsing
   const isPdf = file.fileType === 'application/pdf'
+  const isImage = file.fileType === 'image/png'
 
   const pipelineStage = status?.pipelineStage ?? file.pipelineStage
 
@@ -100,7 +101,7 @@ export const RagFileInfo: React.FC<{
       <HideOnSmall>{file.fileType}</HideOnSmall>
       <TableCell>{(file.fileSize / 1024).toFixed()} kB</TableCell>
       <TableCell>
-        {isPdf && (
+        {(isPdf || isImage) && (
           <Box display="flex" alignItems="center" gap={0.5}>
             <Typography variant="body2">
               {usedAdvancedParsing ? t('rag:advancedParsing') : t('rag:standardParsing')}
