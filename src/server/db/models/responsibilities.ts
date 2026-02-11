@@ -12,7 +12,7 @@ class Responsibility extends Model<InferAttributes<Responsibility>, InferCreatio
 
   declare chatInstanceId: string
 
-  declare createdByUserId: CreationOptional<string>
+  declare createdByUserId: CreationOptional<string | null>
 }
 
 Responsibility.init(

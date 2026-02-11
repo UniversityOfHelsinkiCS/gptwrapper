@@ -13,6 +13,7 @@ const removeOldResponsibilities = async (responsibilitiesToInsert: Responsibilit
       chatInstanceId: {
         [Op.in]: chatInstanceIds,
       },
+      createdByUserId: null,
     },
   })
 }
