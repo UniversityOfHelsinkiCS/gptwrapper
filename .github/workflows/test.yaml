@@ -45,7 +45,7 @@ jobs:
         run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package-lock.json').packages[''].devDependencies['@playwright/test'])")" >> $GITHUB_ENV
 
       - name: Cache playwright binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: playwright-cache
         with:
           path: |
