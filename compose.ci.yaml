@@ -14,7 +14,7 @@ services:
     container_name: gptwrapper
 
   db:
-    image: docker.io/postgres:15.8-alpine
+    image: docker.io/postgres:15.16-alpine
     environment:
       - PGDATA=/data
       - POSTGRES_PASSWORD=postgres
