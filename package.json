@@ -63,7 +63,7 @@
     "eslint-plugin-i18next": "6.1.2",
     "eslint-plugin-prettier": "5.2.1",
     "eslint-plugin-react": "7.37.2",
-    "globals": "16.4.0",
+    "globals": "17.3.0",
     "husky": "9.0.10",
     "knip": "5.69.1",
     "lint-staged": "16.0.0",
