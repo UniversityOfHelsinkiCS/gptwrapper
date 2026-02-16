@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import useCourse, { useCourseEnrolments, useCoursePromptUsages, useCourseStatistics } from '../../../hooks/useCourse'
 import useCurrentUser from '../../../hooks/useCurrentUser'
-import MaxTokenUsageStudents from './MaxTokenUsageStudents'
 import PromptUsageHistogram from './PromptUsageHistogram'
 
 type SortConfig = {
@@ -61,7 +60,6 @@ const Stats: React.FC = () => {
       <Typography>
         {t('course:usagePercentage')}: <strong>{usagePercentage ? `${Math.round(usagePercentage * 100 * 10) / 10}%` : t('course:noData')}</strong>
       </Typography>
-      <MaxTokenUsageStudents course={course} />
       <PromptUsageHistogram promptUsages={promptUsages ?? []} activityPeriod={course.activityPeriod} />
       {usages && !course.saveDiscussions && (
         <>
