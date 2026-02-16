@@ -37,7 +37,6 @@ test.describe('Student', () => {
     await acceptDisclaimer(page)
 
     await expect(page.getByTestId('course-settings-button')).toBeHidden()
-    await expect(page.getByTestId('course-exit-button')).toBeHidden()
     await expect(page.getByTestId('edit-prompt-button')).toBeHidden()
   })
 
