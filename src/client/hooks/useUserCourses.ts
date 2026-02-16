@@ -5,8 +5,8 @@ import { Course } from '../types'
 import apiClient from '../util/apiClient'
 
 export type CoursesViewCourse = {
-  isActive: boolean
-  isExpired: boolean
+  activated: boolean
+  expired: boolean
 } & Course
 
 const useUserCourses = () => {
@@ -15,7 +15,7 @@ const useUserCourses = () => {
   const queryFn = async (): Promise<CoursesViewCourse[]> => {
     const res = await apiClient.get(`/courses/user`)
 
-    const courses = _.orderBy(res.data, ['isActive', 'isExpired'], ['desc', 'asc'])
+    const courses = _.orderBy(res.data, ['activated', 'expired'], ['desc', 'asc'])
     return courses
   }
 

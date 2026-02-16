@@ -7,7 +7,6 @@ import { getTeachedCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
 import _ from 'lodash'
-import { adminMiddleware } from '../middleware/adminMiddleware'
 
 const courseRouter = express.Router()
 
@@ -34,8 +33,8 @@ courseRouter.get('/user', async (req, res) => {
 
   const coursesWithExtra = _.orderBy(chatInstances, ['usageLimit', 'name'], ['desc', 'desc']).map((chatinstance) => ({
     ...chatinstance.toJSON(),
-    isActive: chatinstance.usageLimit > 0 && Date.parse(chatinstance.activityPeriod.endDate) > Date.now(),
-    isExpired: Date.parse(chatinstance.activityPeriod.endDate) < Date.now(),
+    activated: chatinstance.usageLimit > 0,
+    expired: Date.parse(chatinstance.activityPeriod.endDate) < Date.now(),
   }))
 
   res.send(coursesWithExtra)
