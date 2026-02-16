@@ -480,7 +480,8 @@
     "myPrompt": "My prompt",
     "missingPromptName": "Prompt name is missing",
     "description": "Description",
-    "languageModel": "AI Instructions"
+    "languageModel": "AI Instructions",
+    "hiddenFromStudents": "This tab is hidden from students."
   },
   "tooltip": {
     "copied": "Copied!"

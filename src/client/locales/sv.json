@@ -453,7 +453,8 @@
     "myPrompt": "Min prompt",
     "missingPromptName": "Prompten saknar namn",
     "description": "Beskrivning",
-    "languageModel": "AI-instruktioner"
+    "languageModel": "AI-instruktioner",
+    "hiddenFromStudents": "Denna flik är dold för studenter."
   },
   "tooltip": {
     "copied": "Kopierad!"

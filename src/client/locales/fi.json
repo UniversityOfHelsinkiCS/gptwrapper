@@ -482,7 +482,8 @@
     "myPrompt": "Oma alustukseni",
     "missingPromptName": "Alustukselta puuttuu nimi",
     "description": "Kuvaus",
-    "languageModel": "Tekoälyn ohjeistus"
+    "languageModel": "Tekoälyn ohjeistus",
+    "hiddenFromStudents": "Tämä välilehti on piilotettu opiskelijoilta."
   },
   "tooltip": {
     "copied": "Kopioitu!"
