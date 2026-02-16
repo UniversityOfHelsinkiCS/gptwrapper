@@ -2,7 +2,7 @@ import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
 import { FREE_MODEL, inProduction } from '../../../config'
 import { ChatMessage, PostStreamSchemaV3, type ChatEvent } from '../../../shared/chat'
-import { ChatInstance, Discussion, Enrolment, Prompt, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
+import { ChatInstance, Discussion, Enrolment, Prompt, PromptUsage, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
 import { checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { streamChat } from '../../services/langchain/chat'
 import { getMockRagIndexSearchTool } from '../../services/rag/mockSearchTool'
@@ -102,16 +102,12 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       }
       // File validation only - content was already added on client side
 
-      options.chatMessages = (await parseFileAndAddToLastMessage(
-        options.chatMessages,
-        req.file,
-        async (progressMessage: string) => {
-          await writeEvent({
-            type: 'processing',
-            message: progressMessage,
-          })
-        }
-      )) as ChatMessage[]
+      options.chatMessages = (await parseFileAndAddToLastMessage(options.chatMessages, req.file, async (progressMessage: string) => {
+        await writeEvent({
+          type: 'processing',
+          message: progressMessage,
+        })
+      })) as ChatMessage[]
     }
   } catch (error) {
     if (error instanceof ApplicationError) {
@@ -215,6 +211,12 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
     if (course) {
       await incrementCourseUsage(course, result.tokenCount) // course.currentUserUsage.usage is incremented by tokenCount
+      await PromptUsage.create({
+        chatInstanceId: course.id,
+        promptId: prompt?.id ?? null,
+        userId: userToCharge.id,
+        tokenCount: result.tokenCount,
+      })
     } else {
       await incrementUsage(userToCharge, result.tokenCount)
     }

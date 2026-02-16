@@ -3,9 +3,10 @@ import HelpOutline from '@mui/icons-material/HelpOutline'
 import { Box, Tooltip as MUITooltip, Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
-import useCourse, { useCourseEnrolments, useCourseStatistics } from '../../../hooks/useCourse'
+import useCourse, { useCourseEnrolments, useCoursePromptUsages, useCourseStatistics } from '../../../hooks/useCourse'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import MaxTokenUsageStudents from './MaxTokenUsageStudents'
+import PromptUsageHistogram from './PromptUsageHistogram'
 
 type SortConfig = {
   key: 'last_name' | 'usageCount' | 'totalUsageCount'
@@ -20,6 +21,7 @@ const Stats: React.FC = () => {
   const { stats, isLoading } = useCourseStatistics(courseId)
   const { data: course, isSuccess: isCourseSuccess } = useCourse(courseId)
   const { data: enrolments } = useCourseEnrolments(courseId)
+  const { data: promptUsages } = useCoursePromptUsages(courseId)
 
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'last_name', direction: 'asc' })
 
@@ -29,11 +31,12 @@ const Stats: React.FC = () => {
 
   const usageByUser = usages.map((usage) => usage.dataValues).reduce((acc, u) => ({ ...acc, [u.userId]: u }), {}) ?? []
 
-  const enrolledUsers = enrolments?.map((enrolment) => ({
-    ...enrolment.user,
-    usageCount: usageByUser[enrolment.user.id]?.usageCount || 0,
-    totalUsageCount: usageByUser[enrolment.user.id]?.totalUsageCount || 0,
-  })) ?? []
+  const enrolledUsers =
+    enrolments?.map((enrolment) => ({
+      ...enrolment.user,
+      usageCount: usageByUser[enrolment.user.id]?.usageCount || 0,
+      totalUsageCount: usageByUser[enrolment.user.id]?.totalUsageCount || 0,
+    })) ?? []
 
   const requestSort = (key: 'last_name' | 'usageCount' | 'totalUsageCount') => {
     let direction: 'asc' | 'desc' = 'asc'
@@ -59,6 +62,7 @@ const Stats: React.FC = () => {
         {t('course:usagePercentage')}: <strong>{usagePercentage ? `${Math.round(usagePercentage * 100 * 10) / 10}%` : t('course:noData')}</strong>
       </Typography>
       <MaxTokenUsageStudents course={course} />
+      <PromptUsageHistogram promptUsages={promptUsages ?? []} activityPeriod={course.activityPeriod} />
       {usages && !course.saveDiscussions && (
         <>
           <Table sx={{ mt: 2 }}>
@@ -69,11 +73,7 @@ const Stats: React.FC = () => {
                   <strong>{t('admin:studentNumber')}</strong>
                 </TableCell>
                 <TableCell>
-                  <TableSortLabel
-                    active={sortConfig.key === 'last_name'}
-                    direction={sortConfig.direction}
-                    onClick={() => requestSort('last_name')}
-                  >
+                  <TableSortLabel active={sortConfig.key === 'last_name'} direction={sortConfig.direction} onClick={() => requestSort('last_name')}>
                     <strong>{t('admin:lastName')}</strong>
                   </TableSortLabel>
                 </TableCell>
@@ -89,11 +89,7 @@ const Stats: React.FC = () => {
                       justifyContent: 'flex-end',
                     }}
                   >
-                    <TableSortLabel
-                      active={sortConfig.key === 'usageCount'}
-                      direction={sortConfig.direction}
-                      onClick={() => requestSort('usageCount')}
-                    >
+                    <TableSortLabel active={sortConfig.key === 'usageCount'} direction={sortConfig.direction} onClick={() => requestSort('usageCount')}>
                       <strong>{t('admin:usage')}</strong>
                     </TableSortLabel>
                     <MUITooltip

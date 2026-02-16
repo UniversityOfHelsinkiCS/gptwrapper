@@ -10,6 +10,7 @@ import RagFile from './ragFile'
 import ChatInstanceRagIndex from './chatInstanceRagIndex'
 import Feedback from './feedback'
 import Notification from './Notification'
+import PromptUsage from './promptUsage'
 
 User.belongsToMany(ChatInstance, {
   through: UserChatInstanceUsage,
@@ -79,4 +80,24 @@ ChatInstanceRagIndex.belongsTo(User, { as: 'user' })
 Feedback.belongsTo(User, { as: 'user' })
 User.hasMany(Feedback, { as: 'feedbacks' })
 
-export { User, ChatInstance, UserChatInstanceUsage, Prompt, Enrolment, Responsibility, Discussion, RagIndex, RagFile, ChatInstanceRagIndex, Feedback, Notification }
+PromptUsage.belongsTo(Prompt, { as: 'prompt' })
+Prompt.hasMany(PromptUsage, { as: 'promptUsages' })
+PromptUsage.belongsTo(ChatInstance, { as: 'chatInstance' })
+ChatInstance.hasMany(PromptUsage, { as: 'promptUsages' })
+PromptUsage.belongsTo(User, { as: 'user' })
+
+export {
+  User,
+  ChatInstance,
+  UserChatInstanceUsage,
+  Prompt,
+  Enrolment,
+  Responsibility,
+  Discussion,
+  RagIndex,
+  RagFile,
+  ChatInstanceRagIndex,
+  Feedback,
+  Notification,
+  PromptUsage,
+}

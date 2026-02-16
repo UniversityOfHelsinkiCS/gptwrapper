@@ -2,7 +2,7 @@ import express from 'express'
 import { Op, Sequelize, WhereOptions } from 'sequelize'
 
 import type { ActivityPeriod, RequestWithUser } from '../types'
-import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, User, Responsibility, Discussion } from '../db/models'
+import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, PromptUsage, User, Responsibility, Discussion } from '../db/models'
 import { getTeachedCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
@@ -77,6 +77,61 @@ courseRouter.get('/statistics/:id', async (req, res) => {
   res.send({ average, usagePercentage, usages: normalizedUsage })
 })
 
+courseRouter.get('/statistics/:id/prompt-usages', async (req, res) => {
+  const { id } = req.params
+
+  const chatInstance = await ChatInstance.findOne({
+    where: { courseId: id },
+  })
+
+  const request = req as unknown as RequestWithUser
+  const { user } = request
+
+  if (!chatInstance) throw ApplicationError.NotFound('ChatInstance not found')
+
+  enforceUserHasFullAccess(user, chatInstance)
+
+  const { startDate, endDate } = chatInstance.activityPeriod
+
+  const promptUsages = await PromptUsage.findAll({
+    where: {
+      chatInstanceId: chatInstance.id,
+      createdAt: {
+        [Op.gte]: new Date(startDate),
+        [Op.lte]: new Date(endDate),
+      },
+    },
+    attributes: [
+      'promptId',
+      [Sequelize.fn('DATE', Sequelize.col('PromptUsage.created_at')), 'date'],
+      [Sequelize.fn('SUM', Sequelize.col('token_count')), 'totalTokens'],
+      [Sequelize.fn('COUNT', Sequelize.col('PromptUsage.id')), 'messageCount'],
+    ],
+    include: [
+      {
+        model: Prompt,
+        as: 'prompt',
+        attributes: ['name'],
+        required: false,
+      },
+    ],
+    group: ['promptId', 'prompt.id', Sequelize.fn('DATE', Sequelize.col('PromptUsage.created_at'))],
+    order: [[Sequelize.fn('DATE', Sequelize.col('PromptUsage.created_at')), 'ASC']],
+    raw: true,
+    nest: true,
+  })
+
+  const result = promptUsages.map((pu) => ({
+    promptId: pu.promptId,
+    promptName: pu.prompt?.name ?? null,
+    date: (pu as any).date as string,
+    totalTokens: Number((pu as any).totalTokens),
+    messageCount: Number((pu as any).messageCount),
+  }))
+
+  res.send(result)
+})
+
 courseRouter.get('/:id', async (req, res) => {
   const { id } = req.params
 
@@ -86,7 +141,6 @@ courseRouter.get('/:id', async (req, res) => {
     throw ApplicationError.NotFound('Chat instance not found')
   }
 
-
   const request = req as unknown as RequestWithUser
   const { user } = request
 
@@ -94,7 +148,6 @@ courseRouter.get('/:id', async (req, res) => {
 
   res.send(chatInstance)
 })
-
 
 courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Response) => {
   const request = req as unknown as RequestWithUser
@@ -153,11 +206,10 @@ export const chatIsActive = (chatInstance: ChatInstance) => {
 
   const todayIsMoreOrEqualToStart = today >= start
   const todayIsLessOrEqualToEnd = today <= end
-  const usageLimitMoreThanZero = chatInstance.usageLimit > 0 
+  const usageLimitMoreThanZero = chatInstance.usageLimit > 0
 
   return todayIsMoreOrEqualToStart && todayIsLessOrEqualToEnd && usageLimitMoreThanZero
 }
-
 
 //allows users that are students or admins to access the course. If as user is a student then the course must be open for students
 export const enforceUserHasStudentOrFullAccess = async (user, chatInstance: ChatInstance) => {
@@ -303,7 +355,6 @@ courseRouter.put('/:id', async (req, res) => {
 
   if (!chatInstance) throw ApplicationError.NotFound('ChatInstance not found')
 
-
   const request = req as unknown as RequestWithUser
   const { user } = request
   const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
@@ -325,11 +376,10 @@ courseRouter.put('/:id', async (req, res) => {
 })
 
 const userAssignedAsResponsible = async (userId, chatInstance: ChatInstance) => {
-
   const responsibilities = await Responsibility.findOne({
     where: {
-       userId: userId,
-       chatInstanceId: chatInstance.id
+      userId: userId,
+      chatInstanceId: chatInstance.id,
     },
   })
 

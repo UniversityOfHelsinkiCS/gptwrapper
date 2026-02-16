@@ -8,7 +8,6 @@ const useCourse = (courseId?: string) => {
   const queryKey = ['course', courseId]
 
   const queryFn = async () => {
-
     const res = await apiClient.get<Course>(`/courses/${courseId}`)
 
     const { data } = res
@@ -90,6 +89,32 @@ export const useCourseStatistics = (courseId?: string) => {
   })
 
   return { stats, ...rest }
+}
+
+export type PromptUsageData = {
+  promptId: string | null
+  promptName: string | null
+  date: string
+  totalTokens: number
+  messageCount: number
+}
+
+export const useCoursePromptUsages = (courseId?: string) => {
+  const queryKey = ['promptUsages', courseId]
+
+  const queryFn = async (): Promise<PromptUsageData[]> => {
+    const res = await apiClient.get(`/courses/statistics/${courseId}/prompt-usages`)
+
+    const { data } = res
+
+    return data
+  }
+
+  return useQuery({
+    queryKey,
+    queryFn,
+    enabled: !!courseId,
+  })
 }
 
 export default useCourse
