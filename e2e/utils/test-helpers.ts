@@ -1,8 +1,14 @@
-import { Page } from '@playwright/test'
+import { expect, Page } from '@playwright/test'
 
 export const acceptDisclaimer = async (page: Page) => {
-  await page.getByTestId('accept-disclaimer').click()
-  await page.getByTestId('submit-accept-disclaimer').click()
+  const checkbox = page.getByTestId('accept-disclaimer')
+  await checkbox.waitFor({ state: 'visible' })
+  await checkbox.scrollIntoViewIfNeeded()
+  await checkbox.click()
+
+  const submitButton = page.getByTestId('submit-accept-disclaimer')
+  await expect(submitButton).toBeEnabled({ timeout: 10000 })
+  await submitButton.click()
 }
 
 export const closeSendPreference = async (page: Page) => {

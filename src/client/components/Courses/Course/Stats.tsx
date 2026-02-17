@@ -50,20 +50,20 @@ const Stats: React.FC = () => {
   })
 
   return (
-    <Box py={3}>
-      <Typography variant="h5" display="inline">
+    <Box py={3} data-testid="students-stats-container">
+      <Typography variant="h5" display="inline" data-testid="statistics-heading">
         {t('course:statistics')}
       </Typography>
-      <Typography sx={{ my: 1 }}>
+      <Typography sx={{ my: 1 }} data-testid="average-token-usage">
         {t('course:averageTokenUsage')}: <strong>{Math.round(average) ?? t('course:noData')}</strong>
       </Typography>
-      <Typography>
+      <Typography data-testid="usage-percentage">
         {t('course:usagePercentage')}: <strong>{usagePercentage ? `${Math.round(usagePercentage * 100 * 10) / 10}%` : t('course:noData')}</strong>
       </Typography>
       <PromptUsageHistogram promptUsages={promptUsages ?? []} activityPeriod={course.activityPeriod} />
       {usages && !course.saveDiscussions && (
         <>
-          <Table sx={{ mt: 2 }}>
+          <Table sx={{ mt: 2 }} data-testid="students-table">
             <TableHead sx={{ borderRadius: 1, backgroundColor: 'grey.100' }}>
               <TableRow>
                 <TableCell />
@@ -71,7 +71,12 @@ const Stats: React.FC = () => {
                   <strong>{t('admin:studentNumber')}</strong>
                 </TableCell>
                 <TableCell>
-                  <TableSortLabel active={sortConfig.key === 'last_name'} direction={sortConfig.direction} onClick={() => requestSort('last_name')}>
+                  <TableSortLabel
+                    active={sortConfig.key === 'last_name'}
+                    direction={sortConfig.direction}
+                    onClick={() => requestSort('last_name')}
+                    data-testid="sort-by-last-name"
+                  >
                     <strong>{t('admin:lastName')}</strong>
                   </TableSortLabel>
                 </TableCell>
@@ -87,7 +92,12 @@ const Stats: React.FC = () => {
                       justifyContent: 'flex-end',
                     }}
                   >
-                    <TableSortLabel active={sortConfig.key === 'usageCount'} direction={sortConfig.direction} onClick={() => requestSort('usageCount')}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'usageCount'}
+                      direction={sortConfig.direction}
+                      onClick={() => requestSort('usageCount')}
+                      data-testid="sort-by-usage"
+                    >
                       <strong>{t('admin:usage')}</strong>
                     </TableSortLabel>
                     <MUITooltip
@@ -117,6 +127,7 @@ const Stats: React.FC = () => {
                       active={sortConfig.key === 'totalUsageCount'}
                       direction={sortConfig.direction}
                       onClick={() => requestSort('totalUsageCount')}
+                      data-testid="sort-by-total-usage"
                     >
                       <strong>{t('admin:totalUsage')}</strong>
                     </TableSortLabel>
@@ -135,15 +146,19 @@ const Stats: React.FC = () => {
                 </TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>
+            <TableBody data-testid="students-table-body">
               {sortedUsers.map((enrolled, idx) => (
-                <TableRow key={enrolled.id}>
+                <TableRow key={enrolled.id} data-testid={`student-row-${enrolled.id}`}>
                   <TableCell>{idx + 1}</TableCell>
-                  <TableCell>{enrolled.student_number}</TableCell>
-                  <TableCell>{enrolled.last_name}</TableCell>
-                  <TableCell>{enrolled.first_names}</TableCell>
-                  <TableCell align="right">{usageByUser[enrolled.id] ? usageByUser[enrolled.id].usageCount : 0}</TableCell>
-                  <TableCell align="right">{usageByUser[enrolled.id] ? usageByUser[enrolled.id].totalUsageCount : 0}</TableCell>
+                  <TableCell data-testid="student-number">{enrolled.student_number}</TableCell>
+                  <TableCell data-testid="student-last-name">{enrolled.last_name}</TableCell>
+                  <TableCell data-testid="student-first-names">{enrolled.first_names}</TableCell>
+                  <TableCell align="right" data-testid="student-usage">
+                    {usageByUser[enrolled.id] ? usageByUser[enrolled.id].usageCount : 0}
+                  </TableCell>
+                  <TableCell align="right" data-testid="student-total-usage">
+                    {usageByUser[enrolled.id] ? usageByUser[enrolled.id].totalUsageCount : 0}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
