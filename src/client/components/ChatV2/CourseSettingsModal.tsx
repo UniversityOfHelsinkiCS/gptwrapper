@@ -145,6 +145,7 @@ export const CourseSettingsModal = () => {
           to={`/${courseId}/course/students`}
           component={Link}
           sx={{ '&.Mui-selected': { fontWeight: 'bold' } }}
+          data-testid="studentsTab"
         />
         {chatInstance.saveDiscussions && (
           <Tab label={t('course:discussions')} to={`/${courseId}/course/discussions`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
