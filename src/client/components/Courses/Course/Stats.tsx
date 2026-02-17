@@ -3,9 +3,9 @@ import HelpOutline from '@mui/icons-material/HelpOutline'
 import { Box, Tooltip as MUITooltip, Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
-import useCourse, { useCourseEnrolments, useCourseStatistics } from '../../../hooks/useCourse'
+import useCourse, { useCourseEnrolments, useCoursePromptUsages, useCourseStatistics } from '../../../hooks/useCourse'
 import useCurrentUser from '../../../hooks/useCurrentUser'
-import MaxTokenUsageStudents from './MaxTokenUsageStudents'
+import PromptUsageHistogram from './PromptUsageHistogram'
 
 type SortConfig = {
   key: 'last_name' | 'usageCount' | 'totalUsageCount'
@@ -20,6 +20,7 @@ const Stats: React.FC = () => {
   const { stats, isLoading } = useCourseStatistics(courseId)
   const { data: course, isSuccess: isCourseSuccess } = useCourse(courseId)
   const { data: enrolments } = useCourseEnrolments(courseId)
+  const { data: promptUsages } = useCoursePromptUsages(courseId)
 
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'last_name', direction: 'asc' })
 
@@ -59,7 +60,7 @@ const Stats: React.FC = () => {
       <Typography data-testid="usage-percentage">
         {t('course:usagePercentage')}: <strong>{usagePercentage ? `${Math.round(usagePercentage * 100 * 10) / 10}%` : t('course:noData')}</strong>
       </Typography>
-      <MaxTokenUsageStudents course={course} />
+      <PromptUsageHistogram promptUsages={promptUsages ?? []} activityPeriod={course.activityPeriod} />
       {usages && !course.saveDiscussions && (
         <>
           <Table sx={{ mt: 2 }} data-testid="students-table">

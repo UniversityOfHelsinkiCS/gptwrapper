@@ -215,6 +215,7 @@ const PromptModal = () => {
                 systemMessage={infoModalPrompt.systemMessage}
                 hidden={infoModalPrompt.hidden}
                 type={infoModalPrompt.type}
+                isTeacher={amongResponsibles}
               />
             )}
           </Box>

@@ -343,6 +343,10 @@
     "totalUsageToolTip": "Totalt antal tokens som använts under hela kursen. Detta värde nollställs aldrig.",
     "usageChartTitle": "Studenttokenanvändning i procent",
     "noData": "Inga data",
+    "promptUsageTitle": "Tokenanvändning per prompt",
+    "customPrompt": "Egen prompt",
+    "tokens": "Tokens",
+    "messages": "Meddelanden",
     "noCourses": "Inga kurser att visa",
     "percentageUsed": "Andel använda polletter",
     "howToActive": "Välj de kurser jag undervisar om du vill aktivera kurschatten",
@@ -449,7 +453,8 @@
     "myPrompt": "Min prompt",
     "missingPromptName": "Prompten saknar namn",
     "description": "Beskrivning",
-    "languageModel": "AI-instruktioner"
+    "languageModel": "AI-instruktioner",
+    "hiddenFromStudents": "Denna flik är dold för studenter."
   },
   "tooltip": {
     "copied": "Kopierad!"

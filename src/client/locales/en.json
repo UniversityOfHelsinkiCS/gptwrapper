@@ -383,6 +383,10 @@
     "totalUsageToolTip": "Total tokens consumed over the lifetime of the course. This value never resets.",
     "usageChartTitle": "Student token usages as percentages",
     "noData": "No data",
+    "promptUsageTitle": "Token usage per prompt",
+    "customPrompt": "Custom prompt",
+    "tokens": "Tokens",
+    "messages": "Messages",
     "noCourses": "No courses",
     "showActiveCourses": "Show active courses",
     "isSavedOptOut": "The course discussions will be saved anonymously, if you grant permission to save. Saved discussions can be used for research purposes.",
@@ -476,7 +480,8 @@
     "myPrompt": "My prompt",
     "missingPromptName": "Prompt name is missing",
     "description": "Description",
-    "languageModel": "AI Instructions"
+    "languageModel": "AI Instructions",
+    "hiddenFromStudents": "This tab is hidden from students."
   },
   "tooltip": {
     "copied": "Copied!"

@@ -52,6 +52,10 @@ export default function GlobalMenu({
     localStorage.setItem('lang', newLanguage)
   }
 
+  const languageButtonSx = (lang: string) => ({
+    fontWeight: i18n.language === lang ? 'bold' : 'normal',
+    textDecoration: i18n.language === lang ? 'underline' : 'none',
+  })
 
 
   return (
@@ -156,11 +160,11 @@ export default function GlobalMenu({
               <LanguageIcon fontSize="small" />
             </ListItemIcon>
             <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
-              <TextButton onClick={() => handleLanguageChange("fi")}>Fi</TextButton>
+              <TextButton onClick={() => handleLanguageChange("fi")} sx={languageButtonSx("fi")}>Fi</TextButton>
               <Divider orientation="vertical" flexItem />
-              <TextButton onClick={() => handleLanguageChange("en")}>En</TextButton>
+              <TextButton onClick={() => handleLanguageChange("en")} sx={languageButtonSx("en")}>En</TextButton>
               <Divider orientation="vertical" flexItem />
-              <TextButton onClick={() => handleLanguageChange("sv")}>Sv</TextButton>
+              <TextButton onClick={() => handleLanguageChange("sv")} sx={languageButtonSx("sv")}>Sv</TextButton>
             </Box>
           </ListItem>
         </MenuList>

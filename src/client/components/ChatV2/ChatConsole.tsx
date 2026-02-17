@@ -109,11 +109,9 @@ export default function ChatConsole({ user, course }: { user?: User | null, cour
 						<TextButton startIcon={<LibraryBooksIcon />} onClick={() => navigate(`/${courseId}/courses`)}>
 							{t('sidebar:courseChange')}
 						</TextButton>
-						{amongResponsibles && (
-							<TextButton data-testid="course-exit-button" onClick={() => { navigate('/general'); handleChangePrompt(undefined) }} startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>
-								{t('sidebar:courseExit')}
-							</TextButton>
-						)}
+						<TextButton data-testid="course-exit-button" onClick={() => { navigate('/general'); handleChangePrompt(undefined) }} startIcon={<LogoutIcon sx={{ transform: 'scaleX(-1)' }} />}>
+							{t('sidebar:courseExit')}
+						</TextButton>
 					</>
 				) : (
 					<TextButton startIcon={<ChevronRightIcon />} onClick={() => navigate(`/general/courses`)}>

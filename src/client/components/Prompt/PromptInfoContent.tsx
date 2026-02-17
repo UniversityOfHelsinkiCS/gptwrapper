@@ -1,4 +1,5 @@
 import {
+    Alert,
     Box,
     Tab,
     Tabs,
@@ -13,8 +14,9 @@ export const PromptInfoContent = ({
     userInstructions,
     systemMessage,
     hidden,
-    type
-}: PromptInfo) => {
+    type,
+    isTeacher = false,
+}: PromptInfo & { isTeacher?: boolean }) => {
     const { t } = useTranslation()
     const getDefaultInstructions = () => {
         if (type === 'PERSONAL') return t('prompt:myPrompt')
@@ -39,7 +41,7 @@ export const PromptInfoContent = ({
         </Box>
     )
 
-    if (hidden) {
+    if (hidden && !isTeacher) {
         return (
             <Box sx={{
                 p: 2,
@@ -88,6 +90,11 @@ export const PromptInfoContent = ({
                     flexDirection: 'column',
                     gap: 2,
                 }}>
+                    {hidden && (
+                        <Alert severity="info">
+                            {t('prompt:hiddenFromStudents')}
+                        </Alert>
+                    )}
                     <Box sx={{ 
                         overflowWrap: 'break-word',
                         wordBreak: 'break-word',
