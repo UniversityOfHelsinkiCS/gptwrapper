@@ -81,7 +81,7 @@
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.0",
     "@langchain/core": "0.3.80",
-    "@langchain/ollama": "0.2.4",
+    "@langchain/ollama": "1.2.4",
     "@langchain/openai": "0.6.17",
     "@mui/icons-material": "6.4.12",
     "@mui/material": "6.4.12",
