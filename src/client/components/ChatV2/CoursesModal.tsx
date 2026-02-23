@@ -30,7 +30,7 @@ const CustomTabPanel = (props: TabPanelProps) => {
 
   return (
     <Box role="tabpanel" hidden={value !== index}>
-      {value === index && <Box sx={{ p: 1 }}>{children}</Box>}
+      <Box sx={{ p: 1 }}>{children}</Box>
     </Box>
   )
 }
