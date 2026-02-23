@@ -52,19 +52,24 @@ const CoursesModal = () => {
   if (isTeacherOrAdmin) {
     return (
       <Box>
-        <Tabs value={tab} onChange={(_: React.SyntheticEvent, newValue: number) => setTab(newValue)} slotProps={{ indicator: { style: { backgroundColor: 'black' } } }} textColor='inherit'>
+        <Tabs
+          value={tab}
+          onChange={(_: React.SyntheticEvent, newValue: number) => setTab(newValue)}
+          slotProps={{ indicator: { style: { backgroundColor: 'black' } } }}
+          textColor="inherit"
+        >
           <Tab label={t('course:activeTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
           <Tab label={t('course:notActiveTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
           <Tab label={t('course:endedTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
         </Tabs>
         <CustomTabPanel value={tab} index={0}>
-          <CourseList courseUnits={curreEnabled} type="enabled" />
+          <CourseList courseUnits={curreEnabled} type={'enabled'} />
         </CustomTabPanel>
         <CustomTabPanel value={tab} index={1}>
-          <CourseList courseUnits={curreDisabled} type="disabled" />
+          <CourseList courseUnits={curreDisabled} type={'disabled'} />
         </CustomTabPanel>
         <CustomTabPanel value={tab} index={2}>
-          <CourseList courseUnits={ended} type="ended" />
+          <CourseList courseUnits={ended} type={'ended'} initialOrderBy={'activityPeriod'} initialOrder={'desc'} />
         </CustomTabPanel>
       </Box>
     )
@@ -80,22 +85,23 @@ const CoursesModal = () => {
 type Order = 'asc' | 'desc'
 type OrderBy = 'name' | 'code' | 'activityPeriod'
 
-const CourseList = ({
-  courseUnits,
-  type,
-  studentView = false,
-}: {
+interface CourseListProps {
   courseUnits: CoursesViewCourse[] | Course[]
   type: 'enabled' | 'disabled' | 'ended'
   studentView?: boolean
-}) => {
+  initialOrderBy?: OrderBy
+  initialOrder?: Order
+}
+
+const CourseList = (props: CourseListProps) => {
+  const { courseUnits, type, studentView = false, initialOrderBy = 'name', initialOrder = 'asc' } = props
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
   const { language } = i18n
   const { openCourse } = useOpenCourse()
 
-  const [order, setOrder] = useState<Order>('asc')
-  const [orderBy, setOrderBy] = useState<OrderBy>('name')
+  const [order, setOrder] = useState<Order>(initialOrder)
+  const [orderBy, setOrderBy] = useState<OrderBy>(initialOrderBy)
 
   const handleRequestSort = (property: OrderBy) => {
     const isAsc = orderBy === property && order === 'asc'
@@ -159,17 +165,17 @@ const CourseList = ({
                 <TableRow
                   key={course.courseId}
                   onClick={() => navigate(`/${course.courseId}`)}
-                  role='link'
+                  role="link"
                   sx={{
                     display: 'table-row',
                     '&:last-child td, &:last-child th': { border: 0 },
                     borderRadius: '1.25rem',
                     '&:hover': {
                       backgroundColor: 'grey.100',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
                     },
-                  }}>
-
+                  }}
+                >
                   <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
                     {course.name[language]}
                   </TableCell>
@@ -200,13 +206,11 @@ const CourseList = ({
                             endIcon={<SettingsOutlined />}
                             onClick={(e) => {
                               e.stopPropagation()
-                              if (window.confirm(t('course:activate'))){
+                              if (window.confirm(t('course:activate'))) {
                                 openCourse(course)
                                 navigate(`/${course.courseId}/course`)
                               }
-                            }
-
-                          }
+                            }}
                           >
                             {t('course:activate')}
                           </GreenButton>
