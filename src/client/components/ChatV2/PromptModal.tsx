@@ -1,7 +1,7 @@
 import { PUBLIC_URL } from '@config'
 import { ContentCopyOutlined, InfoOutlined, EditOutlined, Close } from '@mui/icons-material'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
-import { Box, Dialog, Typography } from '@mui/material'
+import { Box, Dialog, Divider, List, ListItemButton, ListItemText, Typography, Paper } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -14,6 +14,7 @@ import { OutlineButtonBlack, TextButton } from './general/Buttons'
 import { usePromptState } from './PromptState'
 import { PromptInfoContent } from '../Prompt/PromptInfoContent'
 import { Tab, Tabs, IconButton } from '@mui/material'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 
 const PromptModal = () => {
   const { activePrompt, handleChangePrompt, coursePrompts, myPrompts, deletePromptMutation } = usePromptState()
@@ -24,6 +25,7 @@ const PromptModal = () => {
   const [tab, setTab] = useState(0)
   const [infoModalOpen, setInfoModalOpen] = useState(false)
   const [infoModalPrompt, setInfoModalPrompt] = useState<PromptType | undefined>()
+  const [previewPrompt, setPreviewPrompt] = useState<PromptType | undefined>()
 
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
@@ -43,6 +45,7 @@ const PromptModal = () => {
         enqueueSnackbar(`${t('common:delete')} ${prompt.name}`, {
           variant: 'success',
         })
+        if (previewPrompt?.id === prompt.id) setPreviewPrompt(undefined)
       }
     } catch (error) {
       enqueueSnackbar(`Error: ${error}`, { variant: 'error' })
@@ -76,73 +79,29 @@ const PromptModal = () => {
 
   const canCreatePrompt = courseId === 'general' || tab === 1 || amongResponsibles
 
-  const renderPromptItem = (prompt: PromptType, isPersonal: boolean) => (
-    <Box
+  const currentPrompts = courseId !== 'general' && tab === 0 ? coursePrompts : myPrompts
+  const isPersonalTab = courseId === 'general' || tab === 1
+
+  const renderPromptListItem = (prompt: PromptType) => (
+    <ListItemButton
       key={prompt.id}
-      onClick={() => handleSelect(prompt)}
+      selected={previewPrompt?.id === prompt.id}
+      onClick={() => setPreviewPrompt(prompt)}
       sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        p: 2,
-        cursor: 'pointer',
-        backgroundColor: prompt.id === activePrompt?.id ? 'action.selected' : 'transparent',
-        '&:hover': {
-          backgroundColor: 'action.hover',
+        borderRadius: '8px',
+        mb: 0.5,
+        py: 1.5,
+        '&.Mui-selected': {
+          backgroundColor: 'action.selected',
+          borderLeft: '3px solid',
+          borderLeftColor: 'primary.main',
         },
-        borderBottom: '1px solid',
-        borderColor: 'divider',
       }}
       data-testid={`prompt-row-${prompt.name}`}
     >
-      <Typography>{prompt.name}</Typography>
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-        <TextButton
-          startIcon={<InfoOutlined fontSize="small" />}
-          onClick={(e) => handleShowInfo(e, prompt)}
-          sx={{ minWidth: 'auto' }}
-        >
-          {t('common:info')}
-        </TextButton>
-        {(isPersonal || amongResponsibles) && (
-          <TextButton
-            startIcon={<EditOutlined fontSize="small" />}
-            onClick={(e) => handleEdit(e, prompt)}
-            color="primary"
-            data-testid={`edit-prompt-${prompt.name}`}
-            sx={{ minWidth: 'auto' }}
-          >
-            {t('common:edit')}
-          </TextButton>
-        )}
-        {!isPersonal && (
-          <TextButton
-            startIcon={<ContentCopyOutlined fontSize="small" />}
-            onClick={(e) => handleCopyLink(e, prompt.id)}
-            sx={{ minWidth: 'auto' }}
-          >
-            {t('common:link')}
-          </TextButton>
-        )}
-        {(isPersonal || amongResponsibles) && (
-          <TextButton
-            startIcon={<DeleteOutline fontSize="small" />}
-            onClick={(event) => handleDelete(event, prompt)}
-            color="error"
-            data-testid={`delete-prompt-${prompt.name}`}
-            sx={{ minWidth: 'auto' }}
-          >
-            {t('common:delete')}
-          </TextButton>
-        )}
-      </Box>
-    </Box>
-  )
-
-  const renderPromptList = (prompts: PromptType[], isPersonal: boolean) => (
-    <Box>
-      {prompts.map((prompt) => renderPromptItem(prompt, isPersonal))}
-    </Box>
+      <ListItemText primary={prompt.name} primaryTypographyProps={{ fontWeight: previewPrompt?.id === prompt.id ? 'bold' : 'normal', noWrap: true }} />
+      {prompt.id === activePrompt?.id && <CheckCircleOutlineIcon color="success" fontSize="small" sx={{ ml: 1 }} />}
+    </ListItemButton>
   )
 
   return (
@@ -153,6 +112,7 @@ const PromptModal = () => {
         onChange={(_, newValue) => {
           setTab(newValue)
           setCreateNewOpen(false)
+          setPreviewPrompt(undefined)
         }}
         slotProps={{
           indicator: { style: { backgroundColor: 'black' } },
@@ -162,12 +122,14 @@ const PromptModal = () => {
         {courseId !== 'general' && <Tab label={t('settings:coursePrompts')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />}
         <Tab label={t('settings:myPrompts')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
       </Tabs>
-      <Box sx={{ display: 'flex', flex: 1, gap: 2, overflow: 'hidden', mt: 2 }}>
-        <Box sx={{ flex: '1', overflowY: 'auto' }}>
+
+      <Box sx={{ display: 'flex', gap: 2, mt: 2, minHeight: '50vh' }}>
+        {/* Left panel - prompt list */}
+        <Box sx={{ width: 280, minWidth: 280, display: 'flex', flexDirection: 'column' }}>
           {canCreatePrompt && (
-            <TextButton 
-              data-testid="create-prompt-button" 
-              sx={{ mb: 2 }} 
+            <TextButton
+              data-testid="create-prompt-button"
+              sx={{ mb: 1 }}
               onClick={handleCreateNew}
               startIcon={<Typography sx={{ fontSize: '1.5rem', lineHeight: 1 }}>+</Typography>}
             >
@@ -175,52 +137,113 @@ const PromptModal = () => {
             </TextButton>
           )}
 
-          {courseId !== 'general' && tab === 0 && coursePrompts.length > 0 && renderPromptList(coursePrompts, false)}
+          <List sx={{ flex: 1, overflowY: 'auto' }}>{currentPrompts.map((prompt) => renderPromptListItem(prompt))}</List>
 
-          {(courseId === 'general' || tab === 1) && myPrompts.length > 0 && renderPromptList(myPrompts, true)}
-
-          {myPrompts.length === 0 && coursePrompts.length === 0 && (
+          {currentPrompts.length === 0 && (
             <Box sx={{ p: 3, textAlign: 'center', color: 'text.secondary' }}>
-              <Typography>{t('settings:noPrompts')}</Typography>
+              <Typography variant="body2">{t('settings:noPrompts')}</Typography>
             </Box>
           )}
         </Box>
 
-        <Dialog fullWidth open={createNewOpen} onClose={(_event, reason) => {
+        <Divider orientation="vertical" flexItem />
+
+        {/* Right panel - preview */}
+        <Box sx={{ flex: 1, overflow: 'auto' }}>
+          {previewPrompt ? (
+            <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', height: '100%' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                <Typography variant="h6" fontWeight="bold">
+                  {previewPrompt.name}
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                  <IconButton size="small" onClick={(e) => handleShowInfo(e, previewPrompt)}>
+                    <InfoOutlined fontSize="small" />
+                  </IconButton>
+                  {(isPersonalTab || amongResponsibles) && (
+                    <IconButton size="small" onClick={(e) => handleEdit(e, previewPrompt)} color="primary" data-testid={`edit-prompt-${previewPrompt.name}`}>
+                      <EditOutlined fontSize="small" />
+                    </IconButton>
+                  )}
+                  {!isPersonalTab && (
+                    <IconButton size="small" onClick={(e) => handleCopyLink(e, previewPrompt.id)}>
+                      <ContentCopyOutlined fontSize="small" />
+                    </IconButton>
+                  )}
+                  {(isPersonalTab || amongResponsibles) && (
+                    <IconButton
+                      size="small"
+                      onClick={(event) => handleDelete(event, previewPrompt)}
+                      color="error"
+                      data-testid={`delete-prompt-${previewPrompt.name}`}
+                    >
+                      <DeleteOutline fontSize="small" />
+                    </IconButton>
+                  )}
+                </Box>
+              </Box>
+
+              {previewPrompt.userInstructions && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                    Instructions
+                  </Typography>
+                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                    {previewPrompt.userInstructions}
+                  </Typography>
+                </Box>
+              )}
+
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                  {t('chat:systemMessage')}
+                </Typography>
+                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: previewPrompt.hidden ? 'text.disabled' : 'text.primary' }}>
+                  {previewPrompt.hidden ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
+                </Typography>
+              </Box>
+
+              <Box sx={{ mt: 'auto', pt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                <OutlineButtonBlack onClick={() => handleSelect(previewPrompt)}>{t('settings:choosePrompt')}</OutlineButtonBlack>
+              </Box>
+            </Paper>
+          ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
+              <Typography>{t('settings:noPrompt')}</Typography>
+            </Box>
+          )}
+        </Box>
+      </Box>
+
+      <Dialog
+        fullWidth
+        open={createNewOpen}
+        onClose={(_event, reason) => {
           if (reason === 'backdropClick') return
           setCreateNewOpen(false)
-        }}>
-          {courseId !== 'general' && tab === 0 && <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} />}
-          {(courseId === 'general' || tab === 1) && <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} personal />}
-        </Dialog>
+        }}
+      >
+        {courseId !== 'general' && tab === 0 && <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} />}
+        {(courseId === 'general' || tab === 1) && <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} personal />}
+      </Dialog>
 
-        <Dialog 
-          fullWidth 
-          maxWidth="md"
-          open={infoModalOpen} 
-          onClose={() => setInfoModalOpen(false)}
-        >
-          <Box sx={{ position: 'relative', p: 3 }}>
-            <IconButton
-              onClick={() => setInfoModalOpen(false)}
-              sx={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }}
-              data-testid="close-info-modal"
-            >
-              <Close />
-            </IconButton>
-            {infoModalPrompt && (
-              <PromptInfoContent
-                name={infoModalPrompt.name}
-                userInstructions={infoModalPrompt.userInstructions ?? ''}
-                systemMessage={infoModalPrompt.systemMessage}
-                hidden={infoModalPrompt.hidden}
-                type={infoModalPrompt.type}
-                isTeacher={amongResponsibles}
-              />
-            )}
-          </Box>
-        </Dialog>
-      </Box>
+      <Dialog fullWidth maxWidth="md" open={infoModalOpen} onClose={() => setInfoModalOpen(false)}>
+        <Box sx={{ position: 'relative', p: 3 }}>
+          <IconButton onClick={() => setInfoModalOpen(false)} sx={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }} data-testid="close-info-modal">
+            <Close />
+          </IconButton>
+          {infoModalPrompt && (
+            <PromptInfoContent
+              name={infoModalPrompt.name}
+              userInstructions={infoModalPrompt.userInstructions ?? ''}
+              systemMessage={infoModalPrompt.systemMessage}
+              hidden={infoModalPrompt.hidden}
+              type={infoModalPrompt.type}
+              isTeacher={amongResponsibles}
+            />
+          )}
+        </Box>
+      </Dialog>
     </Box>
   )
 }
