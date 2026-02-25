@@ -312,7 +312,7 @@ const handleWarnings = (
   if (!isFreeModel && tokenUsagePercentage > 10 && !ignoredWarnings?.includes('usage')) {
     warnings.push({
       warningType: 'usage',
-      warning: `You are about to use ${tokenUsagePercentage}% of your monthly CurreChat usage`,
+      warning: `You are about to use ${tokenUsagePercentage}% of your weekly CurreChat usage`,
       canIgnore: true,
     })
   }
