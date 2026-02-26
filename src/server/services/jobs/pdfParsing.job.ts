@@ -48,8 +48,8 @@ const analyzeAndPreparePDFPages = async (pdfBytes: Uint8Array, scale = 2.0) => {
     const pageCount = pdf.numPages
 
     if (pageCount > 100) {
-      logger.error('PDF parsing failed: PDF has too many pages')
-      throw ApplicationError.BadRequest('PDF file is has too many pages')
+      logger.error('PDF parsing failed: PDF has too many pages.')
+      throw ApplicationError.BadRequest('PDF file has too many pages. Max page count is 100.')
     }
 
     const pageInfo: PageInfo[] = []
