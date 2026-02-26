@@ -27,6 +27,7 @@ export const extractPageText = async (page: PDFPageProxy): Promise<string> => {
   for (const item of textContent.items as any[]) {
     if (typeof item.str === 'string' && item.str.length > 0) {
       parts.push(item.str)
+      console.log(item.str)
     }
   }
   const text = parts.join(' ')
@@ -41,34 +42,44 @@ type PageInfo = {
 
 const analyzeAndPreparePDFPages = async (pdfBytes: Uint8Array, scale = 2.0) => {
   //scale at 2.0 to keep closer to 200dpi which is ideal for vlms
-  const loadingTask = getDocument({ data: pdfBytes })
-  const pdf = await loadingTask.promise
-  const pageCount = pdf.numPages
+  try {
+    const loadingTask = getDocument({ data: pdfBytes })
+    const pdf = await loadingTask.promise
+    const pageCount = pdf.numPages
 
-  const pageInfo: PageInfo[] = []
+    if (pageCount > 100) {
+      logger.error('PDF parsing failed: PDF has too many pages')
+      throw ApplicationError.BadRequest('PDF file is has too many pages')
+    }
 
-  for (let i = 1; i <= pageCount; i++) {
-    const page = await pdf.getPage(i)
+    const pageInfo: PageInfo[] = []
 
-    const viewport = page.getViewport({ scale })
-    const canvasFactory = pdf.canvasFactory
-    //@ts-expect-error
-    const canvasAndContext = canvasFactory.create(viewport.width, viewport.height)
+    for (let i = 1; i <= pageCount; i++) {
+      const page = await pdf.getPage(i)
 
-    await page.render({
-      canvasContext: canvasAndContext.context,
-      viewport,
-    } as any).promise
-    const pngBuffer = canvasAndContext.canvas.toBuffer('image/png')
+      const viewport = page.getViewport({ scale })
+      const canvasFactory = pdf.canvasFactory
+      //@ts-expect-error
+      const canvasAndContext = canvasFactory.create(viewport.width, viewport.height)
 
-    const text = await extractPageText(page)
-    pageInfo.push({
-      text,
-      png: new Uint8Array(pngBuffer),
-    })
+      await page.render({
+        canvasContext: canvasAndContext.context,
+        viewport,
+      } as any).promise
+      const pngBuffer = canvasAndContext.canvas.toBuffer('image/png')
+
+      const text = await extractPageText(page)
+      pageInfo.push({
+        text,
+        png: new Uint8Array(pngBuffer),
+      })
+    }
+
+    return pageInfo
+  } catch (error) {
+    logger.error(error)
+    throw error
   }
-
-  return pageInfo
 }
 
 let creds: Record<string, any> = {
