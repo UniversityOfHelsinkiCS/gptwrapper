@@ -1,7 +1,7 @@
 import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
 import { FREE_MODEL, inProduction } from '../../../config'
-import { ChatMessage, PostStreamSchemaV3, type ChatEvent } from '../../../shared/chat'
+import { PostStreamSchemaV3, type ChatEvent } from '../../../shared/chat'
 import { ChatInstance, Discussion, Enrolment, Prompt, PromptUsage, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
 import { checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { streamChat } from '../../services/langchain/chat'
@@ -10,11 +10,7 @@ import { getRagIndexSearchTool } from '../../services/rag/searchTool'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
-import { imageFileTypes } from '../../../config'
 import { upload } from './multer'
-import { checkIamAccess } from '../../util/iams'
-import { getTeachedCourses } from '../../services/chatInstances/access'
-import { parseFileAndAddToLastMessage } from './fileParsing'
 
 const router = express.Router()
 
@@ -81,42 +77,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
         process.nextTick(resolve)
       }
     })
-  }
-
-  try {
-    if (req.file) {
-      res.flushHeaders()
-
-      await writeEvent({
-        type: 'processing',
-        message: 'Processing file attachment...',
-      })
-
-      if (imageFileTypes.includes(req.file.mimetype) && !user.isAdmin) {
-        await writeEvent({
-          type: 'error',
-          error: 'Not authorized for images',
-        })
-        res.end()
-        return
-      }
-      // File validation only - content was already added on client side
-
-      options.chatMessages = (await parseFileAndAddToLastMessage(options.chatMessages, req.file, async (progressMessage: string) => {
-        await writeEvent({
-          type: 'processing',
-          message: progressMessage,
-        })
-      })) as ChatMessage[]
-    }
-  } catch (error) {
-    if (error instanceof ApplicationError) {
-      logger.error('File parsing error (sent as stream event)', { error: error.message, filename: req.file?.originalname })
-    } else {
-      logger.error('Error parsing file', { error, filename: req.file?.originalname })
-    }
-    logger.error('Error validating file', { error, filename: req.file?.originalname })
-    throw ApplicationError.BadRequest('Error validating file')
   }
 
   let model = generationInfo.model
