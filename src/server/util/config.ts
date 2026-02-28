@@ -56,6 +56,8 @@ export const statsViewerIams = ['hy-one', 'hy-ypa-opa-opintoasiainpaallikot']
 
 export const adminIams = ['grp-toska', 'hy-ypa-opa-ote']
 
+export const courseCreatorIam = 'grp-currechat-course-creators'
+
 export const basicUserIam = 'grp-currechat'
 
 export const powerUserIam = 'grp-currechat-powerusers'
