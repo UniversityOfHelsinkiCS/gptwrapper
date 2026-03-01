@@ -13,5 +13,10 @@ export function shouldRenderAsText(mimetype: string): boolean {
 
 export const getLanguageValue = (locale: Locale, language: keyof Locale | string) => {
   const translation = locale[language]
-  return translation || locale['en'] || locale['fi']
+  const str = translation || locale['en'] || locale['fi']
+  if (typeof str !== 'string') {
+    console.error('Invalid locale: ', locale)
+    return '(invalid locale)'
+  }
+  return str
 }

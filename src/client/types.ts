@@ -31,6 +31,7 @@ export interface User {
   usage: number
   activeCourseIds: string[]
   ownCourses: string[]
+  isCourseCreator: boolean
   hasIamAccess?: boolean
   lastRestart: string
   enrolledCourses: ChatInstance[]

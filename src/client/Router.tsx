@@ -16,6 +16,7 @@ const router = sentryCreateBrowserRouter(
     <Route path="/" element={<App />} ErrorBoundary={ErrorPage}>
       <Route path="/" element={<Navigate to="/general" />} />
       <Route path="/admin/*" lazy={() => import('./components/Admin')} />
+      <Route path="/course-creator/*" lazy={() => import('./components/CourseCreator')} />
       <Route path="/noaccess" element={<NoAccess />} />
       <Route path="/statistics" lazy={() => import('./components/Statistics')} />
       <Route path="/login-helper" element={<EmbeddedLoginHelper />} />

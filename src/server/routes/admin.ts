@@ -40,34 +40,6 @@ adminRouter.post('/chatinstances', async (req, res) => {
   res.status(201).send(newChatInstance)
 })
 
-interface UpdatedChatInstanceData {
-  name: string
-  description: string
-  usageLimit: number
-  courseId: string
-}
-
-adminRouter.put('/chatinstances/:id', async (req, res) => {
-  const { id } = req.params
-  const data = req.body as UpdatedChatInstanceData
-  const { description, usageLimit, courseId, name } = data
-
-  const chatInstance = await ChatInstance.findByPk(id)
-
-  if (!chatInstance) {
-    throw ApplicationError.NotFound('Invalid chat instance id')
-  }
-
-  chatInstance.name = { en: name, fi: name, sv: name }
-  chatInstance.description = description
-  chatInstance.usageLimit = usageLimit
-  chatInstance.courseId = courseId
-
-  await chatInstance.save()
-
-  res.send(chatInstance)
-})
-
 adminRouter.delete('/chatinstances/:id', async (req, res) => {
   const { id } = req.params
 

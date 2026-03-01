@@ -35,7 +35,7 @@ export default function GlobalMenu({
 
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const isAdmin = pathname.includes("admin");
+  const inManagementView = pathname.includes('admin') || pathname.includes('course-creator')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -60,7 +60,7 @@ export default function GlobalMenu({
 
   return (
     <div style={{ position: 'fixed', top: isMobile ? 10 : 20, right: isMobile ? 15 : 20 }}>
-      {isAdmin && <BlueButton onClick={() => navigate('/general')} sx={{ position: 'absolute', right: '4rem' }}>
+      {inManagementView && <BlueButton onClick={() => navigate('/general')} sx={{ position: 'absolute', right: '4rem' }}>
         Takaisin chattiin
       </BlueButton>}
       <OutlineButtonBlack
@@ -141,6 +141,14 @@ export default function GlobalMenu({
               <AdminPanelSettings fontSize="small" />
             </ListItemIcon>
             <ListItemText>{t('admin')}</ListItemText>
+
+          </MenuItem>}
+
+          {user?.isCourseCreator && <MenuItem component={RouterLink} to="/course-creator">
+            <ListItemIcon>
+              <AdminPanelSettings fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>{t('courseCreator:title')}</ListItemText>
 
           </MenuItem>}
 

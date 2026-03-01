@@ -324,6 +324,27 @@
     "preview": "Förhandsgranska",
     "noContent": "Inget innehåll"
   },
+  "courseCreator": {
+    "title": "Anpassade chattar",
+    "subtitle": "Skapa och hantera dina anpassade chattinstanser.",
+    "create": "Skapa ny anpassad chatt",
+    "manage": "Hantera anpassade chattar",
+    "name": "Namn",
+    "description": "Beskrivning",
+    "createButton": "Skapa",
+    "save": "Spara",
+    "delete": "Ta bort",
+    "loadError": "Det gick inte att ladda anpassade chattar",
+    "noCustomChats": "Inga anpassade chattar ännu",
+    "createSuccess": "Anpassad chatt skapad",
+    "createError": "Det gick inte att skapa anpassad chatt",
+    "saveSuccess": "Anpassad chatt sparad",
+    "saveError": "Det gick inte att spara anpassad chatt",
+    "deleteSuccess": "Anpassad chatt borttagen",
+    "deleteError": "Det gick inte att ta bort anpassad chatt",
+    "confirmDeleteTitle": "Ta bort anpassad chatt?",
+    "confirmDeleteMessage": "Är du säker på att du vill ta bort '{{name}}'?"
+  },
   "course": {
     "courseUpdated": "Kursen uppdaterad",
     "disableCurre": "Inaktivera CurreChat",
