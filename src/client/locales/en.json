@@ -352,6 +352,7 @@
     "manage": "Manage custom chats",
     "name": "Name",
     "description": "Description",
+    "courseId": "Course ID",
     "createButton": "Create",
     "save": "Save",
     "delete": "Delete",

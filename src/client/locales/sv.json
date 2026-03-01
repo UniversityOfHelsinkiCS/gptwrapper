@@ -331,6 +331,7 @@
     "manage": "Hantera anpassade chattar",
     "name": "Namn",
     "description": "Beskrivning",
+    "courseId": "Kurs-ID",
     "createButton": "Skapa",
     "save": "Spara",
     "delete": "Ta bort",

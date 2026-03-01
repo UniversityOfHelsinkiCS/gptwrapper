@@ -17,6 +17,7 @@ const chatInstanceRouter = Router()
 const NewCustomChatInstanceSchema = z.object({
   name: LocaleSchema,
   description: z.string().optional(),
+  courseId: z.string().trim().min(1),
 })
 
 const CustomChatInstanceParamsSchema = z.object({
@@ -34,7 +35,7 @@ const getAuthorizedCustomChatInstance = async (req: RequestWithUser<{ id: string
 
   const chatInstance = await ChatInstance.findByPk(id)
 
-  if (!chatInstance || chatInstance.courseId) {
+  if (!chatInstance) {
     throw ApplicationError.NotFound('ChatInstance not found')
   }
 
@@ -42,6 +43,7 @@ const getAuthorizedCustomChatInstance = async (req: RequestWithUser<{ id: string
     where: {
       userId: user.id,
       chatInstanceId: chatInstance.id,
+      createdByUserId: user.id,
     },
   })
 
@@ -59,7 +61,7 @@ chatInstanceRouter.post('/custom', async (req, res) => {
     throw ApplicationError.Forbidden()
   }
 
-  const { name, description } = NewCustomChatInstanceSchema.parse(req.body)
+  const { name, description, courseId } = NewCustomChatInstanceSchema.parse(req.body)
 
   const now = new Date()
 
@@ -67,7 +69,7 @@ chatInstanceRouter.post('/custom', async (req, res) => {
     name,
     description: description?.trim() || '',
     usageLimit: DEFAULT_TOKEN_LIMIT,
-    courseId: null,
+    courseId,
     activityPeriod: {
       startDate: now.toISOString(),
       endDate: addMonths(now, 12).toISOString(),
@@ -93,9 +95,6 @@ chatInstanceRouter.get('/custom', async (req, res) => {
   }
 
   const chatInstances = await ChatInstance.findAll({
-    where: {
-      courseId: null,
-    },
     include: [
       {
         model: Responsibility,
@@ -104,6 +103,7 @@ chatInstanceRouter.get('/custom', async (req, res) => {
         required: true,
         where: {
           userId: user.id,
+          createdByUserId: user.id,
         },
       },
     ],
@@ -115,10 +115,11 @@ chatInstanceRouter.get('/custom', async (req, res) => {
 
 chatInstanceRouter.put('/custom/:id', async (req, res) => {
   const chatInstance = await getAuthorizedCustomChatInstance(req as RequestWithUser<{ id: string }>)
-  const { name, description } = NewCustomChatInstanceSchema.parse(req.body)
+  const { name, description, courseId } = NewCustomChatInstanceSchema.parse(req.body)
 
   chatInstance.name = name
   chatInstance.description = description?.trim() || ''
+  chatInstance.courseId = courseId
 
   await chatInstance.save()
 

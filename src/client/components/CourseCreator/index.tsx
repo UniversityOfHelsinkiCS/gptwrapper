@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Link,
   Paper,
   Stack,
   TextField,
@@ -19,6 +20,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate } from 'react-router-dom'
 import { useSnackbar } from 'notistack'
+import { Link as RouterLink } from 'react-router-dom'
 
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { ChatInstance } from '../../types'
@@ -26,12 +28,14 @@ import apiClient from '../../util/apiClient'
 import queryClient from '../../util/queryClient'
 import { getLanguageValue } from '@shared/utils'
 import { LocalizedTextField } from '../common/LocalizedTextField'
-import { OutlineButtonBlue } from '../ChatV2/general/Buttons'
+import { BlueButton } from '../ChatV2/general/Buttons'
 import { Locale } from '@shared/lang'
+import { SettingsOutlined } from '@mui/icons-material'
 
 type EditableValues = {
   name: Locale
   description: string
+  courseId: string
 }
 
 const queryKey = ['courseCreatorChatInstances']
@@ -45,8 +49,10 @@ export function Component() {
   const { user, isLoading: isUserLoading } = useCurrentUser()
   const [name, setName] = useState<Locale>({ fi: '', sv: '', en: '' })
   const [description, setDescription] = useState('')
+  const [courseId, setCourseId] = useState('')
   const [editingId, setEditingId] = useState<string|null>(null)
   const [chatInstanceToDelete, setChatInstanceToDelete] = useState<{ id: string; name: Locale } | null>(null)
+  const isCreateCourseIdMissing = !courseId.trim()
 
   const {
     data: chatInstances = [],
@@ -66,11 +72,13 @@ export function Component() {
       await apiClient.post('/chatinstances/custom', {
         name,
         description: description.trim(),
+        courseId: courseId.trim(),
       })
     },
     onSuccess: () => {
       setName({ fi: '', en: '', sv: '' })
       setDescription('')
+      setCourseId('')
       enqueueSnackbar(t('courseCreator:createSuccess'), { variant: 'success' })
       queryClient.invalidateQueries({ queryKey })
     },
@@ -139,11 +147,23 @@ export function Component() {
                 },
               }}
             />
+            <TextField
+              label={t('courseCreator:courseId')}
+              value={courseId}
+              onChange={(event) => setCourseId(event.target.value)}
+              size="small"
+              required
+              slotProps={{
+                htmlInput: {
+                  'data-testid': 'course-creator-create-course-id-input',
+                },
+              }}
+            />
             <Box>
               <Button
                 variant="contained"
                 onClick={() => createMutation.mutate()}
-                disabled={createMutation.isPending}
+                disabled={createMutation.isPending || isCreateCourseIdMissing}
                 data-testid="course-creator-create-button"
               >
                 {t('courseCreator:createButton')}
@@ -175,11 +195,16 @@ export function Component() {
                   onSave={async (v) => { await saveMutation.mutateAsync(v); setEditingId(null) }}
                   isSaving={saveMutation.isPending}
                 /> : (
-                  <Stack>
-                    <Typography>{chatInstance.name ? getLanguageValue(chatInstance.name, i18n.language) : ''}</Typography>
-                    <OutlineButtonBlue onClick={() => setEditingId(chatInstance.id)} data-testid="course-creator-edit-toggle">
-                      {t('edit')}
-                    </OutlineButtonBlue>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Link to={`/${chatInstance.courseId}`} component={RouterLink}>{chatInstance.name ? getLanguageValue(chatInstance.name, i18n.language) : ''}</Link>
+                    <Box>
+                      <BlueButton onClick={() => setEditingId(chatInstance.id)} 
+                        data-testid="course-creator-edit-toggle"
+                        endIcon={<SettingsOutlined />}
+                      >
+                        {t('edit')}
+                      </BlueButton>
+                    </Box>
                   </Stack>
                 )}
               </Paper>
@@ -218,7 +243,9 @@ export function Component() {
 const ChatInstanceEditor = ({ chatInstance, onDelete, isDeleting, onSave, isSaving }) => {
   const [name, setName] = useState(chatInstance.name)
   const [description, setDescription] = useState(chatInstance.description)
+  const [courseId, setCourseId] = useState(chatInstance.courseId || '')
   const { t } = useTranslation()
+  const isCourseIdMissing = !courseId.trim()
 
   return (
     <Stack spacing={1.5}>
@@ -241,6 +268,18 @@ const ChatInstanceEditor = ({ chatInstance, onDelete, isDeleting, onSave, isSavi
           },
         }}
       />
+      <TextField
+        label={t('courseCreator:courseId')}
+        value={courseId}
+        size="small"
+        onChange={(event) => setCourseId(event.target.value)}
+        required
+        slotProps={{
+          htmlInput: {
+            'data-testid': 'course-creator-edit-course-id-input',
+          },
+        }}
+      />
       <Stack direction="row" spacing={1}>
         <Button
           variant="outlined"
@@ -250,10 +289,11 @@ const ChatInstanceEditor = ({ chatInstance, onDelete, isDeleting, onSave, isSavi
               payload: {
                 name: name,
                 description: description.trim(),
+                courseId: courseId.trim(),
               },
             })
           }
-          disabled={isSaving}
+          disabled={isSaving || isCourseIdMissing}
           data-testid="course-creator-save-button"
         >
           {t('courseCreator:save')}

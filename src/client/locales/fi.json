@@ -355,6 +355,7 @@
     "manage": "Hallitse mukautettuja chatteja",
     "name": "Nimi",
     "description": "Kuvaus",
+    "courseId": "Kurssitunnus",
     "createButton": "Luo",
     "save": "Tallenna",
     "delete": "Poista",
