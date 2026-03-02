@@ -13,6 +13,7 @@ import { PORT } from './util/config'
 import { inProduction, inStaging } from '../config'
 import router from './routes'
 import logger from './util/logger'
+import { setupMetrics } from './services/metrics/setup'
 import { connectToDatabase } from './db/connection'
 import seed from './db/seeders'
 import setupCron from './util/cron'
@@ -21,6 +22,8 @@ import { updateLastRestart } from './util/lastRestart'
 const app = express()
 
 app.use(cors())
+
+setupMetrics(app)
 
 app.use('/api', (req, res, next) => router(req, res, next))
 app.use('/api', (_, res) => {

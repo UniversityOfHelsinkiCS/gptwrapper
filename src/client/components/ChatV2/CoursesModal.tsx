@@ -58,9 +58,9 @@ const CoursesModal = () => {
           slotProps={{ indicator: { style: { backgroundColor: 'black' } } }}
           textColor="inherit"
         >
-          <Tab label={t('course:activeTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
-          <Tab label={t('course:notActiveTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
-          <Tab label={t('course:endedTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
+          <Tab data-testid="view-active-courses" label={t('course:activeTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
+          <Tab data-testid="view-not-active-courses" label={t('course:notActiveTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
+          <Tab data-testid="view-ended-courses" label={t('course:endedTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
         </Tabs>
         <CustomTabPanel value={tab} index={0}>
           <CourseList courseUnits={curreEnabled} type={'enabled'} />
@@ -137,7 +137,12 @@ const CourseList = (props: CourseListProps) => {
           <TableHead>
             <TableRow sx={{ backgroundColor: 'grey.100' }}>
               <TableCell sx={{ fontWeight: 'bold' }}>
-                <TableSortLabel active={orderBy === 'name'} direction={orderBy === 'name' ? order : 'asc'} onClick={() => handleRequestSort('name')}>
+                <TableSortLabel
+                  data-testid="sort-by-name"
+                  active={orderBy === 'name'}
+                  direction={orderBy === 'name' ? order : 'asc'}
+                  onClick={() => handleRequestSort('name')}
+                >
                   {t('course:name')}
                 </TableSortLabel>
               </TableCell>
@@ -176,7 +181,7 @@ const CourseList = (props: CourseListProps) => {
                     },
                   }}
                 >
-                  <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                  <TableCell data-testid="course-name-table-cell" component="th" scope="row" sx={{ fontWeight: 'bold' }}>
                     {course.name[language]}
                   </TableCell>
                   <TableCell align="right">{course.courseUnits[0]?.code ?? '--'}</TableCell>

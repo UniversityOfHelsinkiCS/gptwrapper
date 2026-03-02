@@ -1,7 +1,10 @@
-import { Worker } from 'bullmq'
+import { Worker, Queue } from 'bullmq'
 import dotenv from 'dotenv'
 import Redis, { type RedisOptions } from 'ioredis'
 import logger from './logger.ts'
+import { vlmQueueWait, vlmProcessing, vlmJobsTotal, vlmRetriesTotal, vlmStallsTotal, queueDepth, oldestJobAge } from './metrics.ts'
+import express from 'express'
+import client from 'prom-client'
 
 dotenv.config({ path: '../.env' })
 
@@ -35,8 +38,37 @@ const connection = new Redis(creds)
 
 const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE ?? 'vlm-queue'
 const VLM_URL = process.env.VLM_URL ?? 'http://laama-svc:11434/api/generate'
-const MODEL = process.env.MODEL ?? 'ministral-3:3b'
+const MODEL = process.env.MODEL ?? 'qwen3-vl:4b'
 const PROVIDER = process.env.PROVIDER ?? 'ollama' as 'ollama' | 'vllm'
+
+// --- Express Metrics Server ---
+
+const app = express()
+const register = new client.Registry()
+
+// Register all metrics
+register.registerMetric(vlmQueueWait)
+register.registerMetric(vlmProcessing)
+register.registerMetric(vlmJobsTotal)
+register.registerMetric(vlmRetriesTotal)
+register.registerMetric(vlmStallsTotal)
+register.registerMetric(queueDepth)
+register.registerMetric(oldestJobAge)
+
+// Collect default metrics
+client.collectDefaultMetrics({ register })
+
+// Metrics endpoint
+app.get('/metrics', async (_req, res) => {
+  res.setHeader('Content-Type', register.contentType)
+  res.status(200).send(await register.metrics())
+})
+
+const METRICS_PORT = process.env.METRICS_PORT ?? 9090
+app.listen(METRICS_PORT, () => {
+  logger.info(`Metrics server listening on port ${METRICS_PORT}`)
+})
+
 
 
 const systemPrompt = `Objective
@@ -171,13 +203,50 @@ const worker = new Worker(
   { connection, concurrency: 3 },
 )
 
+const queue = new Queue(QUEUE_NAME, { connection })
+
+setInterval(async () => {
+  const counts = await queue.getJobCounts('waiting', 'active', 'delayed', 'failed')
+  const q = queue.name
+  queueDepth.set({ queue: q, state: 'waiting' }, counts.waiting ?? 0)
+  queueDepth.set({ queue: q, state: 'active' }, counts.active ?? 0)
+  queueDepth.set({ queue: q, state: 'delayed' }, counts.delayed ?? 0)
+  queueDepth.set({ queue: q, state: 'failed' }, counts.failed ?? 0)
+
+  const [oldest] = await queue.getWaiting(0, 0)
+  const ageSec = oldest ? (Date.now() - oldest.timestamp) / 1000 : 0
+  oldestJobAge.set({ queue: q }, ageSec)
+}, 15000)
+
 logger.info(`Worker started. Listening to queue "${QUEUE_NAME}"...`)
 
-worker.on('completed', (job, result) => {
+worker.on('completed', (job) => {
+  const queue = job.queueName
+  const provider = (job.data?.provider || 'ollama') as 'ollama' | 'vllm'
+  if (job.processedOn != null) {
+    const waitSec = (job.processedOn - job.timestamp) / 1000
+    vlmQueueWait.observe({ queue, provider }, waitSec)
+  }
+  if (job.processedOn != null && job.finishedOn != null) {
+    const procSec = (job.finishedOn - job.processedOn) / 1000
+    vlmProcessing.observe({ queue, provider, status: 'success' }, procSec)
+    if (procSec > 300) vlmStallsTotal.inc({ queue, provider })
+  }
+  vlmJobsTotal.inc({ queue, provider, status: 'completed' })
   logger.info(`Job ${job.id} completed.`)
 })
 
 worker.on('failed', (job, err) => {
+  if (!job) return
+  const queue = job.queueName
+  const provider = (job.data?.provider || 'ollama') as 'ollama' | 'vllm'
+  vlmJobsTotal.inc({ queue, provider, status: 'failed' })
+  if (job.processedOn != null && job.finishedOn != null) {
+    const procSec = (job.finishedOn - job.processedOn) / 1000
+    vlmProcessing.observe({ queue, provider, status: 'failed' }, procSec)
+    if (procSec > 300) vlmStallsTotal.inc({ queue, provider })
+  }
+  if (job.attemptsMade > 0) vlmRetriesTotal.inc({ queue, provider })
   logger.error(`Job ${job?.id} failed:`, err)
 })
 
