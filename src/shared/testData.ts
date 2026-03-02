@@ -36,6 +36,7 @@ export const TEST_COURSES = {
       endDate: '2026-08-31',
     },
     code: 'OTE-1234',
+    usageLimit: 200_000,
   },
   TEST_COURSE: {
     id: 'test-course',
@@ -66,6 +67,7 @@ export const TEST_COURSES = {
       endDate: '2024-09-02',
     },
     code: 'ESI-1234',
+    usageLimit: 200_000,
   },
   TOSKA: {
     id: 'toska',
