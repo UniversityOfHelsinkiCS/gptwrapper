@@ -41,7 +41,7 @@ test.describe('Select course modal', () => {
     await expect(page.getByRole('rowheader', { name: TEST_COURSES.TEST_COURSE.name.en })).toBeHidden()
   })
 
-  test.only('sorting persists through changing tabs', async ({ page }) => {
+  test('sorting persists through changing tabs', async ({ page }) => {
     await page.getByTestId('sort-by-name').first().click()
     await page.getByTestId('view-not-active-courses').click()
     await page.getByTestId('view-active-courses').click()
