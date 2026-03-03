@@ -1,16 +1,144 @@
 import { Router } from 'express'
 import { Op } from 'sequelize'
 import { addMonths } from 'date-fns'
+import { z } from 'zod/v4'
 
-import { ChatInstance, User, UserChatInstanceUsage } from '../db/models'
+import { ChatInstance, Responsibility, User, UserChatInstanceUsage } from '../db/models'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { sequelize } from '../db/connection'
 import { ApplicationError } from '../util/ApplicationError'
 import { adminMiddleware } from '../middleware/adminMiddleware'
 import { ChatInstanceAccess, getChatInstanceAccess } from '../services/chatInstances/access'
 import { RequestWithUser } from '../types'
+import { LocaleSchema } from '@shared/lang'
 
 const chatInstanceRouter = Router()
+
+const NewCustomChatInstanceSchema = z.object({
+  name: LocaleSchema,
+  description: z.string().optional(),
+  courseId: z.string().trim().min(1),
+})
+
+const CustomChatInstanceParamsSchema = z.object({
+  id: z.string().min(1),
+})
+
+const getAuthorizedCustomChatInstance = async (req: RequestWithUser<{ id: string }>) => {
+  const { user } = req
+  const { id } = CustomChatInstanceParamsSchema.parse(req.params)
+  console.log(id)
+
+  if (!user.isCourseCreator) {
+    throw ApplicationError.Forbidden()
+  }
+
+  const chatInstance = await ChatInstance.findByPk(id)
+
+  if (!chatInstance) {
+    throw ApplicationError.NotFound('ChatInstance not found')
+  }
+
+  const responsibility = await Responsibility.findOne({
+    where: {
+      userId: user.id,
+      chatInstanceId: chatInstance.id,
+      createdByUserId: user.id,
+    },
+  })
+
+  if (!responsibility) {
+    throw ApplicationError.Forbidden()
+  }
+
+  return chatInstance
+}
+
+chatInstanceRouter.post('/custom', async (req, res) => {
+  const { user } = req as RequestWithUser
+
+  if (!user.isCourseCreator) {
+    throw ApplicationError.Forbidden()
+  }
+
+  const { name, description, courseId } = NewCustomChatInstanceSchema.parse(req.body)
+
+  const now = new Date()
+
+  const chatInstance = await ChatInstance.create({
+    name,
+    description: description?.trim() || '',
+    usageLimit: DEFAULT_TOKEN_LIMIT,
+    courseId,
+    activityPeriod: {
+      startDate: now.toISOString(),
+      endDate: addMonths(now, 12).toISOString(),
+    },
+    saveDiscussions: false,
+    notOptoutSaving: false,
+  })
+
+  await Responsibility.create({
+    userId: user.id,
+    chatInstanceId: chatInstance.id,
+    createdByUserId: user.id,
+  })
+
+  res.status(201).send(chatInstance)
+})
+
+chatInstanceRouter.get('/custom', async (req, res) => {
+  const { user } = req as RequestWithUser
+
+  if (!user.isCourseCreator) {
+    throw ApplicationError.Forbidden()
+  }
+
+  const chatInstances = await ChatInstance.findAll({
+    include: [
+      {
+        model: Responsibility,
+        as: 'responsibilities',
+        attributes: [],
+        required: true,
+        where: {
+          userId: user.id,
+          createdByUserId: user.id,
+        },
+      },
+    ],
+    order: [['createdAt', 'DESC']],
+  })
+
+  res.send(chatInstances)
+})
+
+chatInstanceRouter.put('/custom/:id', async (req, res) => {
+  const chatInstance = await getAuthorizedCustomChatInstance(req as RequestWithUser<{ id: string }>)
+  const { name, description, courseId } = NewCustomChatInstanceSchema.parse(req.body)
+
+  chatInstance.name = name
+  chatInstance.description = description?.trim() || ''
+  chatInstance.courseId = courseId
+
+  await chatInstance.save()
+
+  res.send(chatInstance)
+})
+
+chatInstanceRouter.delete('/custom/:id', async (req, res) => {
+  const chatInstance = await getAuthorizedCustomChatInstance(req as RequestWithUser<{ id: string }>)
+
+  await UserChatInstanceUsage.destroy({
+    where: {
+      chatInstanceId: chatInstance.id,
+    },
+  })
+
+  await chatInstance.destroy()
+
+  res.status(204).send()
+})
 
 chatInstanceRouter.get('/', [adminMiddleware], async (req, res) => {
   const { limit: limitStr, offset: offsetStr, search: searchRaw, order: orderRaw, orderBy: orderByRaw, showActiveCourses: showActiveCoursesRaw } = req.query

@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src", "e2e", "evals", "playwright.config.ts", "vite.config.ts"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

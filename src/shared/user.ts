@@ -22,6 +22,7 @@ export interface User {
   ownCourses?: string[]
   usage?: number
   isStatsViewer: boolean
+  isCourseCreator: boolean
   preferences?: UserPreferences
   lastLoggedInAt?: Date
   serverVersion?: string

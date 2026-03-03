@@ -33,7 +33,7 @@ export default [
     languageOptions: {
       parserOptions: {
         parser: '@babel/eslint-parser',
-        project: './tsconfig.json',
+        project: './tsconfig.eslint.json',
       },
     },
     settings: {

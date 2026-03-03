@@ -345,6 +345,28 @@
     "preview": "Preview",
     "noContent": "No content"
   },
+  "courseCreator": {
+    "title": "Custom chats",
+    "subtitle": "Create and manage your custom chat instances.",
+    "create": "Create new custom chat",
+    "manage": "Manage custom chats",
+    "name": "Name",
+    "description": "Description",
+    "courseId": "Course ID",
+    "createButton": "Create",
+    "save": "Save",
+    "delete": "Delete",
+    "loadError": "Could not load custom chats",
+    "noCustomChats": "No custom chats yet",
+    "createSuccess": "Custom chat created",
+    "createError": "Failed to create custom chat",
+    "saveSuccess": "Custom chat saved",
+    "saveError": "Failed to save custom chat",
+    "deleteSuccess": "Custom chat deleted",
+    "deleteError": "Failed to delete custom chat",
+    "confirmDeleteTitle": "Delete custom chat?",
+    "confirmDeleteMessage": "Are you sure you want to delete '{{name}}'?"
+  },
   "course": {
     "showDiscussions": "Show the saved discussions",
     "reseachCourse": "Research course",

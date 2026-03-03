@@ -68,9 +68,11 @@ export default function ChatConsole({ user, course }: { user?: User | null; cour
               </Typography>
 
               <Typography variant="caption" component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                {course.courseUnits[0].code}
-
-                <Divider orientation="vertical" flexItem />
+                {course.courseUnits?.length > 0 ? (
+                <>
+                  {course.courseUnits[0].code}
+                  <Divider orientation="vertical" flexItem />
+                </>) : ''}
 
                 {formatDate(course.activityPeriod)}
 
