@@ -36,6 +36,8 @@ export const BMQ_REDIS_CERT = getEnv('BMQ_REDIS_CERT', 'placeholder')
 
 export const BMQ_REDIS_KEY = getEnv('BMQ_REDIS_KEY', 'placeholder')
 
+export const BMQ_REDIS_PASS = process.env.BMQ_REDIS_PASS
+
 export const UPDATER_CRON_ENABLED = process.env.UPDATER_CRON_ENABLED === 'true'
 
 export const OLLAMA_URL = process.env.OLLAMA_URL
