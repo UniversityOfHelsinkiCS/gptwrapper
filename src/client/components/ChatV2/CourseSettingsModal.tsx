@@ -22,11 +22,11 @@ import { useTranslation } from 'react-i18next'
 import { Link, Route, Routes, useParams } from 'react-router-dom'
 import { PUBLIC_URL } from '../../../config'
 import { useCourseUsage } from '../../hooks/useChatInstanceUsage'
-import useCourse from '../../hooks/useCourse'
+import useCourse, { useCourseEnrolments } from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
-import type { ChatInstanceUsage, Responsibility, User } from '../../types'
+import type { ChatInstanceUsage, Enrolment, Responsibility, User } from '../../types'
 import apiClient from '../../util/apiClient'
-import { ResponsibilityActionUserSearch } from '../Admin/UserSearch'
+import { EnrolmentActionUserSearch, ResponsibilityActionUserSearch } from '../Admin/UserSearch'
 import { OutlineButtonBlack, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import CourseEmbedding from '../Courses/Course/CourseEmbedding'
 import Discussion from '../Courses/Course/Discussions'
@@ -40,19 +40,28 @@ import { filterUsages } from './util'
 export const CourseSettingsModal = () => {
   const { courseId } = useParams() as { courseId: string }
   const [addTeacherViewOpen, setAddTeacherViewOpen] = useState(false)
+  const [addStudentViewOpen, setAddStudentViewOpen] = useState(false)
   const [_activityPeriodFormOpen, setActivityPeriodFormOpen] = useState(false)
   const [responsibilities, setResponsibilities] = useState<Responsibility[]>([])
+  const [enrolments, setEnrolments] = useState<Enrolment[]>([])
   const { t, i18n } = useTranslation()
   const { language } = i18n
 
   const { user, isLoading: userLoading } = useCurrentUser()
   const { data: chatInstance, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(courseId)
+  const { data: initialEnrolments } = useCourseEnrolments(courseId)
 
   useEffect(() => {
     if (isCourseSuccess) {
       setResponsibilities(chatInstance?.responsibilities)
     }
   }, [isCourseSuccess])
+
+  useEffect(() => {
+    if (initialEnrolments) {
+      setEnrolments(initialEnrolments)
+    }
+  }, [initialEnrolments])
 
   if (error) {
     console.log(error, courseId)
@@ -110,6 +119,29 @@ export const CourseSettingsModal = () => {
     }
   }
 
+  const handleAddEnrolment = async (user: User) => {
+    const username = user.username
+    const result = await apiClient.post(`/courses/${courseId}/enrolments/assign`, { username })
+
+    if (result.status === 200) {
+      const enrolment = result.data
+      setEnrolments((prev) => [...prev, enrolment])
+    }
+  }
+
+  const handleRemoveEnrolment = async (enrolment: Enrolment) => {
+    const confirmation = window.confirm(t('course:confirmRemoval'))
+    if (!confirmation) {
+      return
+    }
+
+    const result = await apiClient.post(`/courses/${courseId}/enrolments/remove`, { username: enrolment.user.username })
+
+    if (result.status === 200) {
+      setEnrolments((prev) => prev.filter((e) => e.id !== enrolment.id))
+    }
+  }
+
   const drawActionComponent = (user: User) => {
     const usersResponsibility: Responsibility | undefined = responsibilities.find((r: Responsibility) => {
       return r.user.id === user.id
@@ -129,6 +161,16 @@ export const CourseSettingsModal = () => {
         )}
       </>
     )
+  }
+
+  const drawStudentActionComponent = (user: User) => {
+    const usersEnrolment = enrolments.find((e) => e.user.id === user.id)
+
+    if (!usersEnrolment) {
+      return <Button onClick={() => handleAddEnrolment(user)}>{t('course:add')}</Button>
+    }
+
+    return <OutlineButtonBlue onClick={() => handleRemoveEnrolment(usersEnrolment)}>{t('course:remove')}</OutlineButtonBlue>
   }
 
   return (
@@ -208,61 +250,32 @@ export const CourseSettingsModal = () => {
         <Route
           path={`/teachers`}
           element={
-            <>
-              {userIsAdminOrResponsible && (
-                <>
-                  <Box py={3}>
-                    <OutlineButtonBlack
-                      onClick={() => {
-                        setAddTeacherViewOpen((prev) => !prev)
-                      }}
-                      sx={{ mb: 2 }}
-                    >
-                      {addTeacherViewOpen ? t('common:cancel') : t('course:addNew')}
-                    </OutlineButtonBlack>
-                    {!addTeacherViewOpen ? (
-                      <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
-                        <Table>
-                          <TableHead>
-                            <TableRow sx={{ backgroundColor: 'grey.100' }}>
-                              <TableCell />
-                              <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:name')}</TableCell>
-                              <TableCell sx={{ fontWeight: 'bold' }}>{t('course:addedFrom')}</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {responsibilities.map((responsibility, idx) => (
-                              <TableRow>
-                                <TableCell>{idx + 1}</TableCell>
-                                <TableCell key={responsibility.id}>
-                                  <Typography>
-                                    {responsibility.user.last_name} {responsibility.user.first_names}
-                                  </Typography>
-                                </TableCell>
-                                <TableCell>
-                                  <AssignedResponsibilityManagement
-                                    handleRemove={() => {
-                                      handleRemoveResponsibility(responsibility)
-                                    }}
-                                    responsibility={responsibility}
-                                  />
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    ) : (
-                      <ResponsibilityActionUserSearch courseId={courseId} actionText={t('course:add')} drawActionComponent={drawActionComponent} />
-                    )}
-                  </Box>
-                </>
-              )}
-            </>
+            <TeachersSettingsView
+              userIsAdminOrResponsible={Boolean(userIsAdminOrResponsible)}
+              addTeacherViewOpen={addTeacherViewOpen}
+              setAddTeacherViewOpen={setAddTeacherViewOpen}
+              responsibilities={responsibilities}
+              courseId={courseId}
+              drawActionComponent={drawActionComponent}
+              handleRemoveResponsibility={handleRemoveResponsibility}
+            />
           }
         />
 
-        <Route path="/students" element={<Stats />} />
+        <Route
+          path="/students"
+          element={
+            <StudentsSettingsView
+              userIsAdminOrResponsible={Boolean(userIsAdminOrResponsible)}
+              addStudentViewOpen={addStudentViewOpen}
+              setAddStudentViewOpen={setAddStudentViewOpen}
+              enrolments={enrolments}
+              courseId={courseId}
+              drawStudentActionComponent={drawStudentActionComponent}
+              handleRemoveEnrolment={handleRemoveEnrolment}
+            />
+          }
+        />
         <Route path="/discussions/*" element={<Discussion />} />
         <Route path="/rag/*" element={<Rag />} />
         <Route path="/moodle/*" element={<CourseEmbedding />} />
@@ -271,12 +284,160 @@ export const CourseSettingsModal = () => {
   )
 }
 
+const TeachersSettingsView = ({
+  userIsAdminOrResponsible,
+  addTeacherViewOpen,
+  setAddTeacherViewOpen,
+  responsibilities,
+  courseId,
+  drawActionComponent,
+  handleRemoveResponsibility,
+}: {
+  userIsAdminOrResponsible: boolean
+  addTeacherViewOpen: boolean
+  setAddTeacherViewOpen: React.Dispatch<React.SetStateAction<boolean>>
+  responsibilities: Responsibility[]
+  courseId: string
+  drawActionComponent: (user: User) => any
+  handleRemoveResponsibility: (responsibility: Responsibility) => void
+}) => {
+  const { t } = useTranslation()
+
+  if (!userIsAdminOrResponsible) {
+    return null
+  }
+
+  return (
+    <Box py={3}>
+      <OutlineButtonBlack
+        onClick={() => {
+          setAddTeacherViewOpen((prev) => !prev)
+        }}
+        sx={{ mb: 2 }}
+      >
+        {addTeacherViewOpen ? t('common:cancel') : t('course:addNew')}
+      </OutlineButtonBlack>
+      {!addTeacherViewOpen ? (
+        <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: 'grey.100' }}>
+                <TableCell />
+                <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:name')}</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>{t('course:addedFrom')}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {responsibilities.map((responsibility, idx) => (
+                <TableRow key={responsibility.id}>
+                  <TableCell>{idx + 1}</TableCell>
+                  <TableCell>
+                    <Typography>
+                      {responsibility.user.last_name} {responsibility.user.first_names}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <AssignedResponsibilityManagement
+                      handleRemove={() => {
+                        handleRemoveResponsibility(responsibility)
+                      }}
+                      responsibility={responsibility}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      ) : (
+        <ResponsibilityActionUserSearch courseId={courseId} actionText={t('course:add')} drawActionComponent={drawActionComponent} />
+      )}
+    </Box>
+  )
+}
+
+const StudentsSettingsView = ({
+  userIsAdminOrResponsible,
+  addStudentViewOpen,
+  setAddStudentViewOpen,
+  enrolments,
+  courseId,
+  drawStudentActionComponent,
+  handleRemoveEnrolment,
+}: {
+  userIsAdminOrResponsible: boolean
+  addStudentViewOpen: boolean
+  setAddStudentViewOpen: React.Dispatch<React.SetStateAction<boolean>>
+  enrolments: Enrolment[]
+  courseId: string
+  drawStudentActionComponent: (user: User) => any
+  handleRemoveEnrolment: (enrolment: Enrolment) => void
+}) => {
+  const { t } = useTranslation()
+
+  return (
+    <Box py={3} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {userIsAdminOrResponsible && (
+        <>
+          <OutlineButtonBlack
+            onClick={() => {
+              setAddStudentViewOpen((prev) => !prev)
+            }}
+            sx={{ alignSelf: 'flex-start' }}
+          >
+            {addStudentViewOpen ? t('common:cancel') : t('course:addNew')}
+          </OutlineButtonBlack>
+
+          {!addStudentViewOpen ? (
+            <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: 'grey.100' }}>
+                    <TableCell />
+                    <TableCell sx={{ fontWeight: 'bold' }}>{t('admin:studentNumber')}</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:name')}</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>{t('course:addedFrom')}</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {enrolments.map((enrolment, idx) => (
+                    <TableRow key={enrolment.id}>
+                      <TableCell>{idx + 1}</TableCell>
+                      <TableCell>{enrolment.user.student_number}</TableCell>
+                      <TableCell>
+                        <Typography>
+                          {enrolment.user.last_name} {enrolment.user.first_names}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <OutlineButtonBlue onClick={() => handleRemoveEnrolment(enrolment)}>{t('course:remove')}</OutlineButtonBlue>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <EnrolmentActionUserSearch
+              courseId={courseId}
+              actionText={t('course:add')}
+              drawActionComponent={drawStudentActionComponent}
+            />
+          )}
+        </>
+      )}
+
+      <Stats />
+    </Box>
+  )
+}
+
 const AssignedResponsibilityManagement = ({ responsibility, handleRemove }) => {
   const { t } = useTranslation()
   if (!responsibility.createdByUserId) {
     return (
       <Stack direction={'row'} sx={{ marginLeft: 'auto', alignItems: 'center', height: '1rem' }}>
-        sisu
+        {"Sisu"}
       </Stack>
     )
   }

@@ -7,6 +7,7 @@ import useUserSearch from '../../hooks/useUserSearch'
 
 import type { User } from '../../types'
 import useResponsibilityUserSearch from '../../hooks/useResponsibilityUserSearch'
+import useEnrolmentUserSearch from '../../hooks/useEnrolmentUserSearch'
 
 const handleLoginAs = (user: User) => () => {
   localStorage.setItem('adminLoggedInAs', user.id)
@@ -251,6 +252,37 @@ export const ResponsibilityActionUserSearch = ({
 }) => {
   const [search, setSearch] = useState('')
   const { users, isLoading, refetch } = useResponsibilityUserSearch(search, courseId)
+  const { t } = useTranslation()
+
+  useEffect(() => {
+    if (search && search.length > 4) {
+      refetch()
+    }
+  }, [search])
+
+  return (
+    <Box>
+      <Input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('admin:searchUsers')} />
+
+      {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
+
+      {isLoading && <div>Loading...</div>}
+      {users && <ActionUserTable users={users} actionText={actionText} drawActionComponent={drawActionComponent} />}
+    </Box>
+  )
+}
+
+export const EnrolmentActionUserSearch = ({
+  actionText,
+  drawActionComponent,
+  courseId,
+}: {
+  actionText: string
+  drawActionComponent: (user: any) => any
+  courseId: string
+}) => {
+  const [search, setSearch] = useState('')
+  const { users, isLoading, refetch } = useEnrolmentUserSearch(search, courseId)
   const { t } = useTranslation()
 
   useEffect(() => {
