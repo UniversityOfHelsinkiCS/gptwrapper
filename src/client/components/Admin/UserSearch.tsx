@@ -230,7 +230,13 @@ export const ActionUserSearch = ({ actionText, drawActionComponent }: { actionTe
 
   return (
     <Box>
-      <Input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('admin:searchUsers')} />
+      <Input
+        type="text"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder={t('admin:searchUsers')}
+        inputProps={{ 'data-testid': 'enrolment-user-search-input' }}
+      />
 
       {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
 

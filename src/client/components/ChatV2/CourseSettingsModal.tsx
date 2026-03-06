@@ -167,10 +167,18 @@ export const CourseSettingsModal = () => {
     const usersEnrolment = enrolments.find((e) => e.user.id === user.id)
 
     if (!usersEnrolment) {
-      return <Button onClick={() => handleAddEnrolment(user)}>{t('course:add')}</Button>
+      return (
+        <Button data-testid={`add-student-${user.username}`} onClick={() => handleAddEnrolment(user)}>
+          {t('course:add')}
+        </Button>
+      )
     }
 
-    return <OutlineButtonBlue onClick={() => handleRemoveEnrolment(usersEnrolment)}>{t('course:remove')}</OutlineButtonBlue>
+    return (
+      <OutlineButtonBlue data-testid={`remove-student-${user.username}`} onClick={() => handleRemoveEnrolment(usersEnrolment)}>
+        {t('course:remove')}
+      </OutlineButtonBlue>
+    )
   }
 
   return (
@@ -384,12 +392,13 @@ const StudentsSettingsView = ({
               setAddStudentViewOpen((prev) => !prev)
             }}
             sx={{ alignSelf: 'flex-start' }}
+            data-testid="toggle-add-student-view"
           >
             {addStudentViewOpen ? t('common:cancel') : t('course:addNew')}
           </OutlineButtonBlack>
 
           {!addStudentViewOpen ? (
-            <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
+            <TableContainer sx={{ borderRadius: 1, minWidth: 800 }} data-testid="students-management-table">
               <Table>
                 <TableHead>
                   <TableRow sx={{ backgroundColor: 'grey.100' }}>
@@ -401,7 +410,7 @@ const StudentsSettingsView = ({
                 </TableHead>
                 <TableBody>
                   {enrolments.map((enrolment, idx) => (
-                    <TableRow key={enrolment.id}>
+                    <TableRow key={enrolment.id} data-testid={`enrolment-row-${enrolment.user.username}`}>
                       <TableCell>{idx + 1}</TableCell>
                       <TableCell>{enrolment.user.student_number}</TableCell>
                       <TableCell>
