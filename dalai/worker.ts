@@ -12,6 +12,7 @@ dotenv.config({ path: '../.env' })
 
 const REDIS_HOST = process.env.REDIS_HOST ?? ''
 const REDIS_PORT = process.env.REDIS_PORT ?? ''
+const REDIS_PASS = process.env.REDIS_PASS ?? undefined
 const CA = process.env.CA || undefined
 const CERT = process.env.CERT ?? ''
 const KEY = process.env.KEY ?? ''
@@ -22,13 +23,27 @@ let creds: RedisOptions = {
   maxRetriesPerRequest: null,
 }
 
-if (CA !== undefined) {
+
+//used for certificate based auth
+if (CA !== undefined && REDIS_PASS == undefined) {
   creds = {
     ...creds,
     tls: {
       ca: CA,
       cert: CERT,
       key: KEY,
+      servername: REDIS_HOST,
+    },
+  }
+}
+
+//used for tls + password, in this case dalai wont need its own certs just needs to trust the redis cert
+if (CA !== undefined && REDIS_PASS !== undefined) {
+  creds = {
+    ...creds,
+    password: REDIS_PASS,
+    tls: {
+      ca: CA, 
       servername: REDIS_HOST,
     },
   }

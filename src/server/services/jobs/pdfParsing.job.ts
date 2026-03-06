@@ -1,11 +1,11 @@
 import { type Job, Queue, QueueEvents } from 'bullmq'
 import crypto from 'crypto'
-import IORedis from 'ioredis'
+import IORedis, { type RedisOptions } from 'ioredis'
 import { getDocument, type PDFPageProxy } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import { ApplicationError } from 'src/server/util/ApplicationError'
 import logger from 'src/server/util/logger'
 import type { RagFile } from '../../db/models'
-import { BMQ_REDIS_CA, BMQ_REDIS_CERT, BMQ_REDIS_HOST, BMQ_REDIS_KEY, BMQ_REDIS_PORT, S3_BUCKET } from '../../util/config'
+import { BMQ_REDIS_CA, BMQ_REDIS_CERT, BMQ_REDIS_HOST, BMQ_REDIS_KEY, BMQ_REDIS_PASS, BMQ_REDIS_PORT, S3_BUCKET } from '../../util/config'
 import { FileStore } from '../rag/fileStore'
 
 const sequenceReplacements = {
@@ -82,15 +82,33 @@ const analyzeAndPreparePDFPages = async (pdfBytes: Uint8Array, scale = 2.0) => {
   }
 }
 
-let creds: Record<string, any> = {
+let creds: RedisOptions = {
   host: BMQ_REDIS_HOST,
-  port: BMQ_REDIS_PORT,
+  port: Number(BMQ_REDIS_PORT) || 6379,
+  maxRetriesPerRequest: null,
 }
 
-if (BMQ_REDIS_CA !== 'none') {
+if (BMQ_REDIS_PASS) {
   creds = {
     ...creds,
-    maxRetriesPerRequest: null,
+    password: BMQ_REDIS_PASS,
+  }
+}
+
+
+if (BMQ_REDIS_CA !== 'none' && BMQ_REDIS_PASS) {
+  creds = {
+    ...creds,
+    tls: {
+      ca: BMQ_REDIS_CA,
+      servername: BMQ_REDIS_HOST,
+    },
+  }
+}
+
+if (BMQ_REDIS_CA !== 'none' && !BMQ_REDIS_PASS) {
+  creds = {
+    ...creds,
     tls: {
       ca: BMQ_REDIS_CA,
       cert: BMQ_REDIS_CERT,
@@ -99,6 +117,7 @@ if (BMQ_REDIS_CA !== 'none') {
     },
   }
 }
+
 
 const connection = new IORedis(creds)
 
