@@ -1,7 +1,7 @@
 import { PUBLIC_URL } from '@config'
 import { ContentCopyOutlined, InfoOutlined, EditOutlined, Close } from '@mui/icons-material'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
-import { Box, Dialog, Divider, List, ListItemButton, ListItemText, Typography, Paper } from '@mui/material'
+import { Box, Dialog, Divider, List, ListItemButton, ListItemText, Typography, Paper, Button } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -127,14 +127,15 @@ const PromptModal = () => {
         {/* Left panel - prompt list */}
         <Box sx={{ width: 280, minWidth: 280, display: 'flex', flexDirection: 'column' }}>
           {canCreatePrompt && (
-            <TextButton
+            <Button
+              variant="outlined"
               data-testid="create-prompt-button"
               sx={{ mb: 1 }}
               onClick={handleCreateNew}
               startIcon={<Typography sx={{ fontSize: '1.5rem', lineHeight: 1 }}>+</Typography>}
             >
               {t('settings:saveNewPrompt')}
-            </TextButton>
+            </Button>
           )}
 
           <List sx={{ flex: 1, overflowY: 'auto' }}>{currentPrompts.map((prompt) => renderPromptListItem(prompt))}</List>
