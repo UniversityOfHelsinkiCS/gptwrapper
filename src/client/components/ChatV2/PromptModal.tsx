@@ -152,62 +152,65 @@ const PromptModal = () => {
         {/* Right panel - preview */}
         <Box sx={{ flex: 1, overflow: 'auto' }}>
           {previewPrompt ? (
-            <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', height: '100%' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                <Typography variant="h6" fontWeight="bold">
-                  {previewPrompt.name}
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 0.5 }}>
-                  <IconButton size="small" onClick={(e) => handleShowInfo(e, previewPrompt)}>
-                    <InfoOutlined fontSize="small" />
-                  </IconButton>
-                  {(isPersonalTab || amongResponsibles) && (
-                    <IconButton size="small" onClick={(e) => handleEdit(e, previewPrompt)} color="primary" data-testid={`edit-prompt-${previewPrompt.name}`}>
-                      <EditOutlined fontSize="small" />
+            <div>
+              <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', height: '100%' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                  <Typography variant="h6" fontWeight="bold">
+                    {previewPrompt.name}
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    <IconButton size="small" onClick={(e) => handleShowInfo(e, previewPrompt)}>
+                      <InfoOutlined fontSize="small" />
                     </IconButton>
-                  )}
-                  {!isPersonalTab && (
-                    <IconButton size="small" onClick={(e) => handleCopyLink(e, previewPrompt.id)}>
-                      <ContentCopyOutlined fontSize="small" />
-                    </IconButton>
-                  )}
-                  {(isPersonalTab || amongResponsibles) && (
-                    <IconButton
-                      size="small"
-                      onClick={(event) => handleDelete(event, previewPrompt)}
-                      color="error"
-                      data-testid={`delete-prompt-${previewPrompt.name}`}
-                    >
-                      <DeleteOutline fontSize="small" />
-                    </IconButton>
-                  )}
+                    {(isPersonalTab || amongResponsibles) && (
+                      <IconButton size="small" onClick={(e) => handleEdit(e, previewPrompt)} color="primary" data-testid={`edit-prompt-${previewPrompt.name}`}>
+                        <EditOutlined fontSize="small" />
+                      </IconButton>
+                    )}
+                    {!isPersonalTab && (
+                      <IconButton size="small" onClick={(e) => handleCopyLink(e, previewPrompt.id)}>
+                        <ContentCopyOutlined fontSize="small" />
+                      </IconButton>
+                    )}
+                    {(isPersonalTab || amongResponsibles) && (
+                      <IconButton
+                        size="small"
+                        onClick={(event) => handleDelete(event, previewPrompt)}
+                        color="error"
+                        data-testid={`delete-prompt-${previewPrompt.name}`}
+                      >
+                        <DeleteOutline fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Box>
                 </Box>
-              </Box>
 
-              {previewPrompt.userInstructions && (
+                {previewPrompt.userInstructions && (
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                      Instructions
+                    </Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                      {previewPrompt.userInstructions}
+                    </Typography>
+                  </Box>
+                )}
+
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Instructions
+                    {t('chat:systemMessage')}
                   </Typography>
-                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                    {previewPrompt.userInstructions}
+                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: previewPrompt.hidden ? 'text.disabled' : 'text.primary' }}>
+                    {previewPrompt.hidden ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
                   </Typography>
                 </Box>
-              )}
-
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  {t('chat:systemMessage')}
-                </Typography>
-                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: previewPrompt.hidden ? 'text.disabled' : 'text.primary' }}>
-                  {previewPrompt.hidden ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
-                </Typography>
-              </Box>
-
+              </Paper>
               <Box sx={{ mt: 'auto', pt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                <OutlineButtonBlack onClick={() => handleSelect(previewPrompt)}>{t('settings:choosePrompt')}</OutlineButtonBlack>
+                <Button variant="contained" onClick={() => handleSelect(previewPrompt)}>
+                  {t('settings:choosePrompt')}
+                </Button>
               </Box>
-            </Paper>
+            </div>
           ) : (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
               <Typography>{t('settings:noPrompt')}</Typography>
