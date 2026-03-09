@@ -25,7 +25,7 @@ const PromptModal = () => {
   const [tab, setTab] = useState(0)
   const [infoModalOpen, setInfoModalOpen] = useState(false)
   const [infoModalPrompt, setInfoModalPrompt] = useState<PromptType | undefined>()
-  const [previewPrompt, setPreviewPrompt] = useState<PromptType | undefined>()
+  const [previewPrompt, setPreviewPrompt] = useState<PromptType | undefined>(activePrompt)
 
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
