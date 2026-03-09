@@ -100,7 +100,7 @@ const PromptModal = () => {
       data-testid={`prompt-row-${prompt.name}`}
     >
       <ListItemText primary={prompt.name} primaryTypographyProps={{ fontWeight: previewPrompt?.id === prompt.id ? 'bold' : 'normal', noWrap: true }} />
-      {prompt.id === activePrompt?.id && <CheckCircleOutlineIcon color="success" fontSize="small" sx={{ ml: 1 }} />}
+      {prompt.id === activePrompt?.id && <CheckCircleOutlineIcon fontSize="small" sx={{ ml: 1, color: 'black' }} />}
     </ListItemButton>
   )
 
