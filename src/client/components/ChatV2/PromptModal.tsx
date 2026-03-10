@@ -159,9 +159,6 @@ const PromptModal = () => {
                     {previewPrompt.name}
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 0.5 }}>
-                    <IconButton size="small" onClick={(e) => handleShowInfo(e, previewPrompt)}>
-                      <InfoOutlined fontSize="small" />
-                    </IconButton>
                     {(isPersonalTab || amongResponsibles) && (
                       <IconButton size="small" onClick={(e) => handleEdit(e, previewPrompt)} color="primary" data-testid={`edit-prompt-${previewPrompt.name}`}>
                         <EditOutlined fontSize="small" />
@@ -187,8 +184,8 @@ const PromptModal = () => {
 
                 {previewPrompt.userInstructions && (
                   <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                      Instructions
+                    <Typography variant="h6" color="text.primary" gutterBottom>
+                      {t('prompt:promptInstructions')}
                     </Typography>
                     <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
                       {previewPrompt.userInstructions}
@@ -197,8 +194,8 @@ const PromptModal = () => {
                 )}
 
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    {t('chat:systemMessage')}
+                  <Typography variant="h6" color="text.primary" gutterBottom>
+                    {t('prompt:systemMessage')}
                   </Typography>
                   <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: previewPrompt.hidden ? 'text.disabled' : 'text.primary' }}>
                     {previewPrompt.hidden ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
