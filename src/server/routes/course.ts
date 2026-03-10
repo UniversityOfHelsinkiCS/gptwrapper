@@ -389,6 +389,17 @@ const userAssignedAsResponsible = async (userId, chatInstance: ChatInstance) => 
   return true
 }
 
+const userEnrolledToCourse = async (userId, chatInstance: ChatInstance) => {
+  const enrolment = await Enrolment.findOne({
+    where: {
+      userId,
+      chatInstanceId: chatInstance.id,
+    },
+  })
+
+  return Boolean(enrolment)
+}
+
 const getUserByUsername = async (username: string): Promise<User | null> => {
   const user = await User.findOne({
     where: {
@@ -447,6 +458,93 @@ courseRouter.post('/:id/responsibilities/assign', async (req, res) => {
   res.json(responsibilityToReturn)
 })
 
+courseRouter.post('/:id/enrolments/assign', async (req, res) => {
+  const courseId = req.params.id
+  const body = req.body as {
+    username: string
+  }
+  const assignedUserUsername: string = body.username
+
+  const request = req as unknown as RequestWithUser
+  const { user } = request
+  const chatInstance = await getChatInstance(courseId)
+  const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
+  if (!hasPermission) {
+    res.status(401).send('Unauthorized')
+    return
+  }
+
+  const userToAssign = await getUserByUsername(assignedUserUsername)
+  if (!userToAssign) {
+    res.status(400).send('User not found with username')
+    return
+  }
+
+  const userAlreadyEnrolled = await userEnrolledToCourse(userToAssign.id, chatInstance)
+  if (userAlreadyEnrolled) {
+    res.status(400).send('User is already enrolled to the course')
+    return
+  }
+
+  const createdEnrolment = await Enrolment.create({
+    userId: userToAssign.id,
+    chatInstanceId: chatInstance.id,
+  })
+
+  res.json({
+    id: createdEnrolment.id,
+    user: {
+      id: userToAssign.id,
+      username: userToAssign.username,
+      first_names: userToAssign.firstNames,
+      last_name: userToAssign.lastName,
+      student_number: userToAssign.studentNumber,
+    },
+  })
+})
+
+courseRouter.post('/:id/enrolments/remove', async (req, res) => {
+  const courseId = req.params.id
+  const body = req.body as {
+    username: string
+  }
+  const assignedUserUsername: string = body.username
+
+  const request = req as unknown as RequestWithUser
+  const { user } = request
+  const chatInstance = await getChatInstance(courseId)
+  const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
+  if (!hasPermission) {
+    res.status(401).send('Unauthorized')
+    return
+  }
+
+  const userToRemove = await getUserByUsername(assignedUserUsername)
+  if (!userToRemove) {
+    res.status(400).send('User not found with username')
+    return
+  }
+
+  const enrolment = await Enrolment.findOne({
+    where: {
+      userId: userToRemove.id,
+      chatInstanceId: chatInstance.id,
+    },
+  })
+
+  if (!enrolment) {
+    res.status(400).send('User enrolment not found')
+    return
+  }
+
+  try {
+    await enrolment.destroy()
+    res.json({ result: 'success' })
+  } catch {
+    res.status(500).send('Unknown error occurred')
+  }
+})
+
 courseRouter.post('/:id/responsibilities/remove', async (req, res) => {
   const courseId = req.params.id
   const body = req.body as {
@@ -498,6 +596,62 @@ courseRouter.post('/:id/responsibilities/remove', async (req, res) => {
 
 courseRouter.get('/:id/responsibilities/users/:search', async (req, res) => {
   const { id: courseId, search: search } = req.params
+
+  const request = req as unknown as RequestWithUser
+  const { user } = request
+  const chatInstance = await getChatInstance(courseId)
+  const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
+  if (!hasPermission) {
+    res.status(401).send('Unauthorized')
+    return
+  }
+
+  let where = {} as WhereOptions<User>
+
+  if (search.split(' ').length > 1) {
+    const firstNames = search.split(' ')[0]
+    const lastName = search.split(' ')[1]
+
+    where = {
+      firstNames: {
+        [Op.iLike]: `%${firstNames}%`,
+      },
+      lastName: {
+        [Op.iLike]: `%${lastName}%`,
+      },
+    }
+  } else {
+    where = {
+      [Op.or]: [
+        {
+          username: {
+            [Op.iLike]: `%${search}%`,
+          },
+        },
+        {
+          studentNumber: {
+            [Op.iLike]: `%${search}%`,
+          },
+        },
+        {
+          primaryEmail: {
+            [Op.iLike]: `%${search}%`,
+          },
+        },
+      ],
+    }
+  }
+
+  const matches = await User.findAll({
+    where,
+    limit: 20,
+  })
+
+  res.send(matches)
+})
+
+courseRouter.get('/:id/enrolments/users/:search', async (req, res) => {
+  const { id: courseId, search } = req.params
 
   const request = req as unknown as RequestWithUser
   const { user } = request

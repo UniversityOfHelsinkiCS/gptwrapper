@@ -83,4 +83,22 @@ test.describe('Course Settings - Students Tab', () => {
       expect(await cells.count()).toBeGreaterThanOrEqual(6)
     }
   })
+
+  test('Can add an enrolment from students tab', async ({ page }, testInfo) => {
+    const workerIdx = testInfo.workerIndex
+    const usernameToAdd = `temporal_teacher_testTestUser-teacher-${workerIdx}`
+    const searchInput = page.getByPlaceholder('Search users')
+
+    await page.getByTestId('toggle-add-student-view').click()
+    await expect(searchInput).toBeVisible()
+
+    await searchInput.fill(usernameToAdd)
+    await expect(page.getByText(usernameToAdd)).toBeVisible()
+
+    await page.getByTestId(`add-student-${usernameToAdd}`).click()
+    await expect(page.getByTestId(`remove-student-${usernameToAdd}`)).toBeVisible()
+
+    await page.getByTestId('toggle-add-student-view').click()
+    await expect(page.getByTestId(`enrolment-row-${usernameToAdd}`)).toBeVisible()
+  })
 })
