@@ -22,7 +22,7 @@ test.describe('Course Settings - Students Tab', () => {
     const table = page.getByTestId('students-table')
     await expect(table).toBeVisible()
 
-    await expect(page.getByText('Student number')).toBeVisible()
+    await expect(table.getByText('Student number')).toBeVisible()
     await expect(page.getByText('Last name')).toBeVisible()
     await expect(page.getByText('First names')).toBeVisible()
     await expect(page.getByTestId('sort-by-usage')).toBeVisible()
