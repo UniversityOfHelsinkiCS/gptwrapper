@@ -65,13 +65,14 @@ test.describe('Prompts', () => {
     await page.getByTestId('system-message-input').fill('mocktest kurssitesti onnistui')
     await page.getByRole('button', { name: 'Save' }).click()
 
-    // Dialog closes automatically, now back at prompts list
-    // Select the prompt by clicking on its row
+    // Select the prompt by clicking its row
     await page.getByTestId(`prompt-row-${newPromptName}`).click()
+
+    await expect(page.getByTestId(`prompt-preview-title-for-${newPromptName}`)).toContainText(newPromptName)
+    await page.getByTestId('change-to-prompt-button').click()
 
     // Now in chat view
     // The prompt is active.
-    await expect(page.getByTestId('prompt-name').first()).toContainText(newPromptName)
 
     // Send something
     await sendChatMessage(page, 'testinen morjens')
@@ -83,8 +84,9 @@ test.describe('Prompts', () => {
     // Back to course page, delete the prompt
     await page.goto('/test-course-course-id/prompts')
 
-    page.on('dialog', (dialog) => dialog.accept())
+    await page.getByTestId(`prompt-row-${newPromptName}`).click()
     await page.getByTestId(`delete-prompt-${newPromptName}`).click()
+    page.on('dialog', (dialog) => dialog.accept())
 
     // Prompt is not visible anymore
     await page.reload() // <- 100% less flaky
@@ -119,6 +121,11 @@ test.describe('Prompts', () => {
     // Dialog closes automatically, now back at prompts list
     // Select the prompt by clicking on its row
     await page.getByTestId(`prompt-row-${newPromptName}`).click()
+
+    // Select the prompt by clicking its row
+    await page.getByTestId(`prompt-row-${newPromptName}`).click()
+    await expect(page.getByTestId(`prompt-preview-title-for-${newPromptName}`)).toContainText(newPromptName)
+    await page.getByTestId('change-to-prompt-button').click()
 
     // Now in chat view
     // The prompt is active.

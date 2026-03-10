@@ -155,7 +155,7 @@ const PromptModal = () => {
             <div>
               <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', height: '100%' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                  <Typography variant="h6" fontWeight="bold">
+                  <Typography variant="h6" fontWeight="bold" data-testid={`prompt-preview-title-for-${previewPrompt.name}`}>
                     {previewPrompt.name}
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 0.5 }}>
@@ -206,7 +206,7 @@ const PromptModal = () => {
                 </Box>
               </Paper>
               <Box sx={{ mt: 'auto', pt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                <Button variant="contained" onClick={() => handleSelect(previewPrompt)}>
+                <Button data-testid="change-to-prompt-button" variant="contained" onClick={() => handleSelect(previewPrompt)}>
                   {t('settings:choosePrompt')}
                 </Button>
               </Box>
