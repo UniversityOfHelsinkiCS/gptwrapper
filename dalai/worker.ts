@@ -23,7 +23,6 @@ let creds: RedisOptions = {
   maxRetriesPerRequest: null,
 }
 
-
 //used for certificate based auth
 if (CA !== undefined && REDIS_PASS == undefined) {
   creds = {
@@ -43,7 +42,7 @@ if (CA !== undefined && REDIS_PASS !== undefined) {
     ...creds,
     password: REDIS_PASS,
     tls: {
-      ca: CA, 
+      ca: CA,
       servername: REDIS_HOST,
     },
   }
@@ -54,7 +53,7 @@ const connection = new Redis(creds)
 const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE ?? 'vlm-queue'
 const VLM_URL = process.env.VLM_URL ?? 'http://laama-svc:11434/api/generate'
 const MODEL = process.env.MODEL ?? 'qwen3-vl:4b'
-const PROVIDER = process.env.PROVIDER ?? 'ollama' as 'ollama' | 'vllm'
+const PROVIDER = process.env.PROVIDER ?? ('ollama' as 'ollama' | 'vllm')
 
 // --- Express Metrics Server ---
 
@@ -84,8 +83,6 @@ app.listen(METRICS_PORT, () => {
   logger.info(`Metrics server listening on port ${METRICS_PORT}`)
 })
 
-
-
 const systemPrompt = `Objective
 Produce the most accurate, well-structured Markdown transcription of a PDF page by combining a rasterized image of the PDF page (such as PNG or JPEG) and the parsed text extracted from the PDF.
 Rules and Priorities
@@ -101,7 +98,11 @@ Produce only Markdown, with no extra commentary. Include image descriptions wrap
 
 function stripMarkdownFences(txt: string) {
   let out = (txt ?? '').trim()
-  if (out.startsWith('```markdown')) out = out.replace(/^```markdown/, '').replace(/```$/, '').trim()
+  if (out.startsWith('```markdown'))
+    out = out
+      .replace(/^```markdown/, '')
+      .replace(/```$/, '')
+      .trim()
   else if (out.startsWith('```')) out = out.replace(/^```/, '').replace(/```$/, '').trim()
   return out
 }
@@ -133,7 +134,6 @@ async function transcribeWithOllama({ text, bytes }: { text?: string; bytes?: Ui
   const content = data?.response || ''
   return stripMarkdownFences(content)
 }
-
 
 async function transcribeWithVLLM({ text, bytes }: { text?: string; bytes?: Uint8Array | Buffer }) {
   logger.info(`Sending request to vLLM for model: ${MODEL} at URL: ${VLM_URL}`)
@@ -237,7 +237,7 @@ logger.info(`Worker started. Listening to queue "${QUEUE_NAME}"...`)
 
 worker.on('completed', (job) => {
   const queue = job.queueName
-  const provider = (job.data?.provider || 'ollama') as 'ollama' | 'vllm'
+  const provider = PROVIDER
   if (job.processedOn != null) {
     const waitSec = (job.processedOn - job.timestamp) / 1000
     vlmQueueWait.observe({ queue, provider }, waitSec)
@@ -254,7 +254,7 @@ worker.on('completed', (job) => {
 worker.on('failed', (job, err) => {
   if (!job) return
   const queue = job.queueName
-  const provider = (job.data?.provider || 'ollama') as 'ollama' | 'vllm'
+  const provider = PROVIDER
   vlmJobsTotal.inc({ queue, provider, status: 'failed' })
   if (job.processedOn != null && job.finishedOn != null) {
     const procSec = (job.finishedOn - job.processedOn) / 1000
@@ -269,7 +269,7 @@ async function shutdown() {
   logger.info('Shutting down worker...')
   try {
     if (ACTIVE_COUNT <= 0) await worker.close()
-  } catch { }
+  } catch {}
   process.exit(0)
 }
 process.on('SIGINT', shutdown)

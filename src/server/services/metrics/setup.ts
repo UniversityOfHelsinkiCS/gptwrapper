@@ -1,14 +1,7 @@
 import express from 'express'
 import client from 'prom-client'
-import {
-  vlmQueueWait,
-  vlmProcessing,
-  vlmJobsTotal,
-  vlmRetriesTotal,
-  vlmStallsTotal,
-  queueDepth,
-  oldestJobAge,
-} from './index'
+import { vlmQueueWait, vlmProcessing, vlmJobsTotal, vlmRetriesTotal, vlmStallsTotal, queueDepth, oldestJobAge } from './index'
+import { startVlmQueueMetrics } from './vlmQueueMetrics'
 
 export function setupMetrics(app: express.Express) {
   const register = new client.Registry()
@@ -25,6 +18,8 @@ export function setupMetrics(app: express.Express) {
     res.setHeader('Content-Type', register.contentType)
     res.status(200).send(await register.metrics())
   })
+
+  void startVlmQueueMetrics()
 
   return { register }
 }

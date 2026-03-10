@@ -1,12 +1,12 @@
-import { type Job, Queue, QueueEvents } from 'bullmq'
+import { type Job } from 'bullmq'
 import crypto from 'crypto'
-import IORedis, { type RedisOptions } from 'ioredis'
 import { getDocument, type PDFPageProxy } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import { ApplicationError } from 'src/server/util/ApplicationError'
 import logger from 'src/server/util/logger'
 import type { RagFile } from '../../db/models'
-import { BMQ_REDIS_CA, BMQ_REDIS_CERT, BMQ_REDIS_HOST, BMQ_REDIS_KEY, BMQ_REDIS_PASS, BMQ_REDIS_PORT, S3_BUCKET } from '../../util/config'
+import { S3_BUCKET } from '../../util/config'
 import { FileStore } from '../rag/fileStore'
+import { vlmQueue, vlmQueueEvents } from './vlmQueue'
 
 const sequenceReplacements = {
   ä: /¨ a/g,
@@ -82,55 +82,14 @@ const analyzeAndPreparePDFPages = async (pdfBytes: Uint8Array, scale = 2.0) => {
   }
 }
 
-let creds: RedisOptions = {
-  host: BMQ_REDIS_HOST,
-  port: Number(BMQ_REDIS_PORT) || 6379,
-  maxRetriesPerRequest: null,
-}
-
-if (BMQ_REDIS_PASS) {
-  creds = {
-    ...creds,
-    password: BMQ_REDIS_PASS,
-  }
-}
-
-
-if (BMQ_REDIS_CA !== 'none' && BMQ_REDIS_PASS) {
-  creds = {
-    ...creds,
-    tls: {
-      ca: BMQ_REDIS_CA,
-      servername: BMQ_REDIS_HOST,
-    },
-  }
-}
-
-if (BMQ_REDIS_CA !== 'none' && !BMQ_REDIS_PASS) {
-  creds = {
-    ...creds,
-    tls: {
-      ca: BMQ_REDIS_CA,
-      cert: BMQ_REDIS_CERT,
-      key: BMQ_REDIS_KEY,
-      servername: BMQ_REDIS_HOST,
-    },
-  }
-}
-
-
-const connection = new IORedis(creds)
-
-export const queue = new Queue('vlm-queue', {
-  connection,
-})
+export const queue = vlmQueue
 
 export const getPdfParsingJobId = (ragFile: RagFile) => {
   const s3Key = FileStore.getRagFileKey(ragFile)
   return `scan:${S3_BUCKET}/${s3Key}`
 }
 
-export const pdfQueueEvents = new QueueEvents('vlm-queue', { connection })
+export const pdfQueueEvents = vlmQueueEvents
 
 type VLMJobData = {
   type: 'vlm-job'
@@ -155,9 +114,7 @@ export const submitAdvancedParsingJobs = async (ragFile: RagFile) => {
     throw ApplicationError.InternalServerError('Failed to read file')
   }
 
-  const pages = isImage(ragFile)
-    ? [{ text: '', png: fileBytes } as PageInfo]
-    : await analyzeAndPreparePDFPages(fileBytes)
+  const pages = isImage(ragFile) ? [{ text: '', png: fileBytes } as PageInfo] : await analyzeAndPreparePDFPages(fileBytes)
 
   const baseJobId = crypto.randomBytes(20).toString('hex')
 

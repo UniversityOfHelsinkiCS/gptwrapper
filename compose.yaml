@@ -82,6 +82,8 @@ services:
     volumes:
       - ./dalai/:/opt/app-root/src
       - dalai_data:/app
+    ports:
+      - 9090:9090
     container_name: gptwrapper_dalai
     depends_on:
       - redis

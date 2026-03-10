@@ -8,7 +8,6 @@ import express from 'express'
 import cors from 'cors'
 import 'express-async-errors'
 
-
 import { PORT } from './util/config'
 import { inProduction, inStaging } from '../config'
 import router from './routes'
