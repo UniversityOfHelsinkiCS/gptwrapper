@@ -58,16 +58,7 @@ const ChatV2Content = () => {
   const { t, i18n } = useTranslation()
   const { promptInfo, isPromptHidden } = usePromptState()
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
-  const {
-    processStream,
-    completion,
-    isStreaming,
-    setIsStreaming,
-    toolCalls,
-    streamControllerRef,
-    generationInfo,
-    hasPotentialError
-  } = useChatStream({
+  const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo, hasPotentialError } = useChatStream({
     onComplete: ({ message }) => {
       if (message.content.length > 0) {
         setMessages((prev: ChatMessage[]) => prev.concat(message))
@@ -176,8 +167,8 @@ const ChatV2Content = () => {
           ...messageWarning,
           fileParsingError: {
             message: error instanceof Error ? error.message : 'Error parsing file',
-            ignored: false
-          }
+            ignored: false,
+          },
         })
         return
       }
@@ -186,11 +177,11 @@ const ChatV2Content = () => {
     const newMessages = resendPrevious
       ? messages
       : messages.concat({
-        role: 'user',
-        content: messageContent,
-        attachments: file && fileName ? fileName : undefined,
-        fileContent: parsedFileContent, // Store file content separately
-      })
+          role: 'user',
+          content: messageContent,
+          attachments: file && fileName ? fileName : undefined,
+          fileContent: parsedFileContent, // Store file content separately
+        })
 
     setMessages(newMessages)
 
@@ -227,7 +218,7 @@ const ChatV2Content = () => {
             saveConsent,
             ignoredWarnings,
           },
-          courseId: (courseId !== 'general') ? courseId : undefined,
+          courseId: courseId !== 'general' ? courseId : undefined,
         },
         streamControllerRef.current,
       )
@@ -281,7 +272,15 @@ const ChatV2Content = () => {
     }
   }
 
-  const handleReset = async ({ sendEmail, downloadFile, downloadFormat }: { sendEmail: boolean; downloadFile: boolean; downloadFormat: 'md' | 'docx' | 'pdf' | 'txt' }) => {
+  const handleReset = async ({
+    sendEmail,
+    downloadFile,
+    downloadFormat,
+  }: {
+    sendEmail: boolean
+    downloadFile: boolean
+    downloadFormat: 'md' | 'docx' | 'pdf' | 'txt'
+  }) => {
     if (sendEmail && user?.email) {
       try {
         await sendConversationEmail(user.email, messages, t)
@@ -342,7 +341,6 @@ const ChatV2Content = () => {
     }
   }, [userStatus, chatInstance])
 
-
   // Handle layout shift when right menu opens (tool result becomes visible)
   const prevScrollYProportional = useRef(0)
   const handleLayoutShift = useCallback(() => {
@@ -393,7 +391,7 @@ const ChatV2Content = () => {
       }}
     >
       {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
-      {(isEmbeddedMode || isMobile) ? (
+      {isEmbeddedMode || isMobile ? (
         <Drawer
           open={sideBarOpen}
           onClose={() => {
@@ -432,26 +430,28 @@ const ChatV2Content = () => {
           flexDirection: 'column',
           // magical -11px prevents horizontal overflow when vertical scrollbar appears
           width: `calc(100vw - 11px - ${leftPanelContentWidth} - ${rightPanelContentWidth})`,
+          maxWidth: '1080px',
+          marginLeft: 'auto',
+          marginRight: 'auto',
         }}
       >
         {(isEmbeddedMode || isMobile) && (
-          <Box sx={{
-            position: 'fixed',
-            left: 15,
-            top: 10,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            zIndex: 999
-          }}>
-            <OutlineButtonBlack
-              onClick={() => setSideBarOpen(true)}
-              data-testid="left-panel-open"
-            >
+          <Box
+            sx={{
+              position: 'fixed',
+              left: 15,
+              top: 10,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              zIndex: 999,
+            }}
+          >
+            <OutlineButtonBlack onClick={() => setSideBarOpen(true)} data-testid="left-panel-open">
               <CustomIcon src={sidebarOpen} />
             </OutlineButtonBlack>
             <OutlineButtonBlack onClick={handleResetRequest} data-testid="new-conversation-button">
-              <MapsUgc fontSize='small' />
+              <MapsUgc fontSize="small" />
             </OutlineButtonBlack>
           </Box>
         )}
@@ -543,61 +543,61 @@ const ChatV2Content = () => {
         </Box>
       </Box>
       {/* FileSearchResults columns ----------------------------------------------------------------------------------------------- */}
-      {
-        isMobile ? (
-          <Drawer
-            anchor="right"
-            open={!!activeToolResult}
-            onClose={() => setActiveToolResult(undefined)}
+      {isMobile ? (
+        <Drawer
+          anchor="right"
+          open={!!activeToolResult}
+          onClose={() => setActiveToolResult(undefined)}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: '100%',
+              maxWidth: '100%',
+              padding: 0,
+            },
+          }}
+        >
+          <Box
             sx={{
-              '& .MuiDrawer-paper': {
-                width: '100%',
-                maxWidth: '100%',
-                padding: 0,
-              },
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              paddingTop: '1rem',
+              paddingX: '1rem',
+              paddingBottom: '1rem',
+              overflow: 'auto',
             }}
           >
-            <Box
-              sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                paddingTop: '1rem',
-                paddingX: '1rem',
-                paddingBottom: '1rem',
-                overflow: 'auto',
-              }}
-            >
-              {rightMenuOpen && <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />}
-            </Box>
-          </Drawer>
-        ) : (
-          rightMenuOpen && (
-            <Box
-              sx={{
-                width: rightPanelContentWidth,
-                height: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                position: 'sticky',
-                top: 0,
-                borderLeft: '1px solid rgba(0,0,0,0.12)',
-                paddingTop: !isEmbeddedMode ? '4rem' : 0,
-              }}
-            >
-              <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />
-            </Box>
-          )
+            {rightMenuOpen && <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />}
+          </Box>
+        </Drawer>
+      ) : (
+        rightMenuOpen && (
+          <Box
+            sx={{
+              width: rightPanelContentWidth,
+              height: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'sticky',
+              top: 0,
+              borderLeft: '1px solid rgba(0,0,0,0.12)',
+              paddingTop: !isEmbeddedMode ? '4rem' : 0,
+            }}
+          >
+            <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />
+          </Box>
         )
-      }
+      )}
 
       {/* Modals routes ------------------------------------------------------------------------------------------------------------ */}
       <Routes>
-        <Route element={
-          <TemplateModal root={`/${courseId}`} open >
-            <Outlet />
-          </TemplateModal>
-        }>
+        <Route
+          element={
+            <TemplateModal root={`/${courseId}`} open>
+              <Outlet />
+            </TemplateModal>
+          }
+        >
           <Route path={`course/*`} element={<CourseSettingsModal />} />
           <Route path={`courses`} element={<CoursesModal />} />
           <Route path={`prompts`} element={<PromptModal />} />
@@ -606,7 +606,7 @@ const ChatV2Content = () => {
         </Route>
       </Routes>
       <ResetConfirmModal open={resetConfirmModalOpen} setOpen={setResetConfirmModalOpen} onConfirm={handleReset} />
-    </Box >
+    </Box>
   )
 }
 
