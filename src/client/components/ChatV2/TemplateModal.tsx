@@ -18,11 +18,11 @@ const ModalTitle = () => {
     '/show': t('sidebar:promptDetails'),
   }
 
-  const matchedKey = Object.keys(titleMap).find(key => url.includes(key))
+  const matchedKey = Object.keys(titleMap).find((key) => url.includes(key))
   return matchedKey ? titleMap[matchedKey] : ''
 }
 
-const TemplateModal: React.FC<{ open: boolean, root: string, children: React.ReactNode }> = ({ open, root, children }) => {
+const TemplateModal: React.FC<{ open: boolean; root: string; children: React.ReactNode }> = ({ open, root, children }) => {
   const navigate = useNavigate()
 
   const handleClose = () => {
@@ -46,7 +46,7 @@ const TemplateModal: React.FC<{ open: boolean, root: string, children: React.Rea
           bgcolor: 'background.paper',
           boxShadow: 24,
           overflow: 'auto',
-          borderRadius: '0.5rem'
+          borderRadius: '0.5rem',
         }}
       >
         <Box
@@ -56,18 +56,18 @@ const TemplateModal: React.FC<{ open: boolean, root: string, children: React.Rea
             p: '1rem',
             position: 'sticky',
             top: 0,
-            backgroundColor: 'white',
             zIndex: 999,
+            bgcolor: 'background.paper',
           }}
         >
-          <Typography variant='h6'><ModalTitle /></Typography>
-          <TextButton data-testid="close-modal" onClick={handleClose} >
+          <Typography variant="h6">
+            <ModalTitle />
+          </Typography>
+          <TextButton data-testid="close-modal" onClick={handleClose}>
             <CloseIcon />
           </TextButton>
         </Box>
-        <Box sx={{ p: '0 2rem 2rem 2rem' }}>
-          {children}
-        </Box>
+        <Box sx={{ p: '0 2rem 2rem 2rem' }}>{children}</Box>
       </Box>
     </Modal>
   )

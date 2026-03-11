@@ -55,6 +55,7 @@ const SideBar = ({
         position: 'sticky',
         top: 0,
         height: '100vh',
+        bgcolor: 'background.paper',
       }}
     >
       <Box
@@ -76,7 +77,7 @@ const SideBar = ({
               <CustomIcon src={sidebarOpen} />
             </TextButton>
             <TextButton onClick={handleReset} data-testid="new-conversation-button">
-              <MapsUgcIcon fontSize='small' />
+              <MapsUgcIcon fontSize="small" />
             </TextButton>
             <EmailButton messages={messages} disabled={!messages.length} collapsed />
             {user?.isAdmin && <DownloadButton messages={messages} disabled={!messages.length} collapsed />}
@@ -137,7 +138,7 @@ const SideBar = ({
           </Box>
         )}
       </Box>
-    </Box >
+    </Box>
   )
 }
 

@@ -41,6 +41,7 @@ export default function Styles() {
           '--sb-thumb-color': '#000000',
           '--sb-thumb-hover-color': '#333333',
           '--sb-size': '6px',
+          backgroundColor: '#f5f5f5',
         },
         '*::-webkit-scrollbar': {
           width: 'var(--sb-size)',

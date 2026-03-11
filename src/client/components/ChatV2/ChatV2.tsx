@@ -464,6 +464,7 @@ const ChatV2Content = () => {
             paddingLeft: '1rem',
             paddingRight: '1rem',
             paddingTop: '1rem',
+            maxWidth: '1000px',
           }}
           ref={scrollRef}
         >
@@ -513,7 +514,6 @@ const ChatV2Content = () => {
         </Box>
         <Box
           sx={{
-            backgroundColor: 'white',
             width: '100%',
             position: 'sticky',
             bottom: 0,
@@ -582,6 +582,7 @@ const ChatV2Content = () => {
               top: 0,
               borderLeft: '1px solid rgba(0,0,0,0.12)',
               paddingTop: !isEmbeddedMode ? '4rem' : 0,
+              bgcolor: 'background.paper',
             }}
           >
             <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />

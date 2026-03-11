@@ -75,7 +75,7 @@ export const ChatBox = ({
 
   const handleFileTypeValidation = (file: File): void => {
     const allowedImageTypes = ['image/jpeg', 'image/png']
-    if (!file.type.startsWith('text/') && file.type !== 'application/pdf' && !allowedImageTypes.find(s => s === file.type)) {
+    if (!file.type.startsWith('text/') && file.type !== 'application/pdf' && !allowedImageTypes.find((s) => s === file.type)) {
       setDisallowedFileType(file.type)
       setFileTypeAlertOpen(true)
       setTimeout(() => {
@@ -84,7 +84,7 @@ export const ChatBox = ({
       return
     }
 
-    if (allowedImageTypes.find(s => s === file.type) && !user?.isAdmin) {
+    if (allowedImageTypes.find((s) => s === file.type) && !user?.isAdmin) {
       setDisallowedFileType(file.type)
       setFileTypeAlertOpen(true)
       setTimeout(() => {
@@ -125,12 +125,13 @@ export const ChatBox = ({
   return (
     <Box
       sx={{
-        background: 'white',
+        background: '#f8f8f8',
         mb: 1,
         border: '1px solid rgba(0,0,0,0.3)',
         borderRadius: '1.25rem',
         padding: isMobile ? '0.2rem 0.2rem' : '0.5rem 1rem',
         backdropFilter: 'blur(5px)',
+        boxShadow: 3,
       }}
     >
       {fileTypeAlertOpen && (
@@ -139,32 +140,30 @@ export const ChatBox = ({
           <Typography>{`Currenlty there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}</Typography>
         </Alert>
       )}
-      {
-        activeMessageWarnings.length > 0 && (
-          <Alert
-            severity="warning"
-            sx={{ my: '0.2rem' }}
-            action={
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <GrayButton onClick={handleCancel} type="button">
-                  {t('common:cancel')}
-                </GrayButton>
-                <BlueButton onClick={() => handleContinue('', Object.keys(messageWarning) as WarningType[])} color="primary" type="button">
-                  {t('common:continue')}
-                </BlueButton>
+      {activeMessageWarnings.length > 0 && (
+        <Alert
+          severity="warning"
+          sx={{ my: '0.2rem' }}
+          action={
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <GrayButton onClick={handleCancel} type="button">
+                {t('common:cancel')}
+              </GrayButton>
+              <BlueButton onClick={() => handleContinue('', Object.keys(messageWarning) as WarningType[])} color="primary" type="button">
+                {t('common:continue')}
+              </BlueButton>
+            </Box>
+          }
+        >
+          {Object.entries(messageWarning)
+            .filter(([, warning]) => !warning.ignored)
+            .map(([type, warning]) => (
+              <Box key={type} sx={{ mb: 0.5 }}>
+                {warning.message}
               </Box>
-            }
-          >
-            {Object.entries(messageWarning)
-              .filter(([, warning]) => !warning.ignored)
-              .map(([type, warning]) => (
-                <Box key={type} sx={{ mb: 0.5 }}>
-                  {warning.message}
-                </Box>
-              ))}
-          </Alert>
-        )
-      }
+            ))}
+        </Alert>
+      )}
 
       <Box
         component="form"
@@ -231,9 +230,16 @@ export const ChatBox = ({
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography
                     variant="body2"
-                    sx={{ whiteSpace: 'nowrap', padding: '0.5rem 0', opacity: isTokenLimitExceeded ? 1 : 0.6, color: isTokenLimitExceeded ? '#cc0000' : 'inherit' }}
+                    sx={{
+                      whiteSpace: 'nowrap',
+                      padding: '0.5rem 0',
+                      opacity: isTokenLimitExceeded ? 1 : 0.6,
+                      color: isTokenLimitExceeded ? '#cc0000' : 'inherit',
+                    }}
                   >
-                    {userStatus?.usage != null && userStatus?.limit != null ? `${Math.round((userStatus.usage / userStatus.limit) * 100)}% ${t('status:tokensUsed')}` : '-'}
+                    {userStatus?.usage != null && userStatus?.limit != null
+                      ? `${Math.round((userStatus.usage / userStatus.limit) * 100)}% ${t('status:tokensUsed')}`
+                      : '-'}
                   </Typography>
                   <Tooltip
                     arrow
@@ -251,17 +257,15 @@ export const ChatBox = ({
             </Box>
             {!isMobile && (
               <Typography
-
                 sx={{
                   display: !acuallyDisabled ? { sm: 'none', md: 'block' } : 'none',
                   ml: 'auto',
                   mr: 1,
                   transition: 'opacity 0.2s ease-in-out',
                   fontSize: '14px',
-                  background: 'white',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
-                  textOverflow: 'ellipsis'
+                  textOverflow: 'ellipsis',
                 }}
                 color="textSecondary"
               >
@@ -275,7 +279,7 @@ export const ChatBox = ({
                   <StopIcon />
                 </IconButton>
               ) : (
-                <IconButton type='submit' ref={sendButtonRef} data-testid="send-chat-message">
+                <IconButton type="submit" ref={sendButtonRef} data-testid="send-chat-message">
                   <Send />
                 </IconButton>
               )}
@@ -289,6 +293,6 @@ export const ChatBox = ({
           </Box>
         </Box>
       </Box>
-    </Box >
+    </Box>
   )
 }

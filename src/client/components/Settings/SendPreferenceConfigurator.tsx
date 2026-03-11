@@ -43,12 +43,18 @@ export const EnterForNewline = ({ t }) => (
   </Box>
 )
 
-export const SendPreferenceConfigurator = ({ value, onChange }: { value: 'shift+enter' | 'enter', onChange: (event: React.ChangeEvent<HTMLInputElement>) => void; }) => {
+export const SendPreferenceConfigurator = ({
+  value,
+  onChange,
+}: {
+  value: 'shift+enter' | 'enter'
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+}) => {
   const { t } = useTranslation()
 
   return (
     <RadioGroup value={value} onChange={onChange} name="sendPreferenceConfigurator">
-      <Typography >{t('sendPreferenceConfigurator:title')}</Typography>
+      <Typography>{t('sendPreferenceConfigurator:title')}</Typography>
       <FormControlLabel
         sx={{ my: 2, borderRadius: 1, backgroundColor: 'grey.100', p: 2 }}
         value="shift+enter"

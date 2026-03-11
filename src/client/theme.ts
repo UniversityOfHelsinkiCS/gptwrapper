@@ -35,6 +35,10 @@ const themeOptions: ThemeOptions = {
       main: '#e99939',
       contrastText: '#1a202c',
     },
+    background: {
+      default: '#fafaf8',
+      paper: '#fafaf8',
+    },
   },
 
   shape: {
