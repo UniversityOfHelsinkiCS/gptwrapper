@@ -1,13 +1,14 @@
 import { Document } from '@langchain/core/documents'
 import { MarkdownTextSplitter, RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
 import { RagFile, type RagIndex } from '../../db/models'
-import { pdfQueueEvents, simplyParsePdf, submitAdvancedParsingJobs } from '../jobs/pdfParsing.job'
+import { preparePagesForAdvancedParsing, simplyParsePdf } from '../jobs/pdfParsing.job'
 import { FileStore } from './fileStore'
 import logger from 'src/server/util/logger'
 import type { IngestionJobStatus, IngestionPipelineStageKey } from '@shared/ingestion'
 import type { RagFileMetadata } from '@shared/types'
 import { RedisVectorStore } from './vectorStore'
 import { getEmbedder } from './embedder'
+import { parsePageWithDirectOllama } from './directOllamaPageParser'
 
 const defaultTextSplitter = new RecursiveCharacterTextSplitter({
   chunkSize: 1000,
@@ -66,8 +67,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
   let finalText: string | null = null
 
   if (needToParseWithVlm) {
-    // Advanced PDF parsing with job processing.
-    const pages = await submitAdvancedParsingJobs(ragFile)
+    const pages = await preparePagesForAdvancedParsing(ragFile)
 
     try {
       const start = 5
@@ -81,20 +81,17 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
         eta: total * 10000,
       })
 
-      const jobPromises = pages.map(async (p, index) => {
-        try {
-          const text = await p.job!.waitUntilFinished(pdfQueueEvents)
-          return { index, text, success: true }
-        } catch (error) {
-          logger.error('Page job failed: ', p.job!.id, error)
-          return { index, text: p.text, success: false }
-        }
-      })
-
       const transcriptions: Array<string> = new Array(total)
 
-      for await (const result of jobPromises.map((p) => p.then((r) => r))) {
-        transcriptions[result.index] = result.text
+      for (const [index, page] of pages.entries()) {
+        const pageNumber = index + 1
+
+        transcriptions[index] = await parsePageWithDirectOllama({
+          pageNumber,
+          pngBase64: Buffer.from(page.png).toString('base64'),
+          extractedText: page.text || undefined,
+        })
+
         completed += 1
 
         const fraction = completed / total

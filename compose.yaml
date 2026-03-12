@@ -1,5 +1,7 @@
 services:
   app:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     build:
       context: ./
       dockerfile: dev.Containerfile
@@ -10,8 +12,7 @@ services:
       - S3_ACCESS_KEY=minioadmin
       - S3_SECRET_ACCESS_KEY=minioadmin
       - S3_BUCKET=mybucket
-      - BMQ_REDIS_HOST=redis
-      - BMQ_REDIS_PORT=6379
+      - OLLAMA_URL=http://host.docker.internal:11434
     volumes:
       - ./:/opt/app-root/src
     ports:
@@ -49,7 +50,6 @@ services:
     volumes:
       - redis_data:/data
 
-  # Comment out if you use local ollama. Set OLLAMA_URL=host.docker.internal:11434 if using recent Docker Desktop.
   # ollama:
   #   image: ollama/ollama
   #   ports:
@@ -66,27 +66,6 @@ services:
   #     interval: 10s
   #     timeout: 5s
   #     retries: 5
-
-  dalai:
-    build:
-      context: ./dalai
-      dockerfile: dev.Dockerfile
-    environment:
-      - OLLAMA_URL=http://host.docker.internal:11434
-      #- OLLAMA_URL=http://ollama:11434
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - S3_HOST=http://minio:9000
-      - S3_ACCESS_KEY=minioadmin
-      - S3_SECRET_ACCESS_KEY=minioadmin
-    volumes:
-      - ./dalai/:/opt/app-root/src
-      - dalai_data:/app
-    ports:
-      - 9090:9090
-    container_name: gptwrapper_dalai
-    depends_on:
-      - redis
 
   minio:
     image: minio/minio:latest
@@ -127,5 +106,4 @@ volumes:
   pg_data:
   redis_data:
   ollama_data:
-  dalai_data:
   minio-data:

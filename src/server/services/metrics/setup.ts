@@ -1,7 +1,6 @@
 import express from 'express'
 import client from 'prom-client'
 import { vlmQueueWait, vlmProcessing, vlmJobsTotal, vlmRetriesTotal, vlmStallsTotal, queueDepth, oldestJobAge } from './index'
-import { startVlmQueueMetrics } from './vlmQueueMetrics'
 
 export function setupMetrics(app: express.Express) {
   const register = new client.Registry()
@@ -19,7 +18,9 @@ export function setupMetrics(app: express.Express) {
     res.status(200).send(await register.metrics())
   })
 
-  void startVlmQueueMetrics()
+  if (process.env.ENABLE_VLM_QUEUE_METRICS === 'true') {
+    void import('./vlmQueueMetrics').then(({ startVlmQueueMetrics }) => startVlmQueueMetrics())
+  }
 
   return { register }
 }

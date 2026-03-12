@@ -1,12 +1,9 @@
-import { type Job } from 'bullmq'
-import crypto from 'crypto'
 import { getDocument, type PDFPageProxy } from 'pdfjs-dist/legacy/build/pdf.mjs'
+import type { TextItem } from 'pdfjs-dist/types/src/display/api'
 import { ApplicationError } from 'src/server/util/ApplicationError'
 import logger from 'src/server/util/logger'
 import type { RagFile } from '../../db/models'
-import { S3_BUCKET } from '../../util/config'
 import { FileStore } from '../rag/fileStore'
-import { vlmQueue, vlmQueueEvents } from './vlmQueue'
 
 const sequenceReplacements = {
   ä: /¨ a/g,
@@ -24,23 +21,28 @@ const fixAakkoset = (text: string) => {
 export const extractPageText = async (page: PDFPageProxy): Promise<string> => {
   const textContent = await page.getTextContent()
   const parts: string[] = []
-  for (const item of textContent.items as any[]) {
-    if (typeof item.str === 'string' && item.str.length > 0) {
+  for (const item of textContent.items) {
+    if ('str' in item && typeof (item as TextItem).str === 'string' && item.str.length > 0) {
       parts.push(item.str)
-      console.log(item.str)
     }
   }
   const text = parts.join(' ')
   return fixAakkoset(text.trim())
 }
 
-type PageInfo = {
+export type PageInfo = {
   text: string
   png: Uint8Array
-  job?: Job
 }
 
-const analyzeAndPreparePDFPages = async (pdfBytes: Uint8Array, scale = 2.0) => {
+type RenderCanvasAndContext = {
+  canvas: {
+    toBuffer: (mimeType: 'image/png') => Buffer
+  }
+  context: CanvasRenderingContext2D
+}
+
+export const analyzeAndPreparePDFPages = async (pdfBytes: Uint8Array, scale = 2.0) => {
   //scale at 2.0 to keep closer to 200dpi which is ideal for vlms
   try {
     const loadingTask = getDocument({ data: pdfBytes })
@@ -58,14 +60,14 @@ const analyzeAndPreparePDFPages = async (pdfBytes: Uint8Array, scale = 2.0) => {
       const page = await pdf.getPage(i)
 
       const viewport = page.getViewport({ scale })
-      const canvasFactory = pdf.canvasFactory
-      //@ts-expect-error
+      const canvasFactory = pdf.canvasFactory as { create: (width: number, height: number) => RenderCanvasAndContext }
       const canvasAndContext = canvasFactory.create(viewport.width, viewport.height)
 
       await page.render({
+        canvas: null,
         canvasContext: canvasAndContext.context,
         viewport,
-      } as any).promise
+      }).promise
       const pngBuffer = canvasAndContext.canvas.toBuffer('image/png')
 
       const text = await extractPageText(page)
@@ -82,66 +84,7 @@ const analyzeAndPreparePDFPages = async (pdfBytes: Uint8Array, scale = 2.0) => {
   }
 }
 
-export const queue = vlmQueue
-
-export const getPdfParsingJobId = (ragFile: RagFile) => {
-  const s3Key = FileStore.getRagFileKey(ragFile)
-  return `scan:${S3_BUCKET}/${s3Key}`
-}
-
-export const pdfQueueEvents = vlmQueueEvents
-
-type VLMJobData = {
-  type: 'vlm-job'
-  ragFileId: number
-  pageNumber: number
-  bytes: string
-  text: string
-}
-
 const isImage = (ragFile: RagFile) => ragFile.fileType === 'image/png'
-
-/**
- * Adds an advanced pdf parsing job to the queue. The file must be uploaded to S3 beforehand. The jobId is based on the ragFile - resubmitting with the same jobId while the previous job is running has no effect.
- * @param ragFile
- * @returns the pages which is array of PageInfo objects
- */
-export const submitAdvancedParsingJobs = async (ragFile: RagFile) => {
-  const fileBytes = await FileStore.readRagFileContextToBytes(ragFile)
-
-  if (!fileBytes) {
-    console.error(`Failed to read file ${ragFile.filename} in S3`)
-    throw ApplicationError.InternalServerError('Failed to read file')
-  }
-
-  const pages = isImage(ragFile) ? [{ text: '', png: fileBytes } as PageInfo] : await analyzeAndPreparePDFPages(fileBytes)
-
-  const baseJobId = crypto.randomBytes(20).toString('hex')
-
-  for (let i = 0; i < pages.length; i++) {
-    const pageNumber = i + 1
-    const info = pages[i]
-    const jobId = `${baseJobId}:page:${pageNumber}`
-
-    const jobData: VLMJobData = {
-      type: 'vlm-job',
-      ragFileId: ragFile.id,
-      pageNumber,
-      bytes: Buffer.from(info.png).toString('base64'),
-      text: info.text,
-    }
-
-    logger.info(`Submitting PDF parsing job ${jobId}`)
-
-    info.job = await queue.add(jobId, jobData, {
-      jobId,
-      removeOnComplete: 1000,
-      removeOnFail: 1000,
-    })
-  }
-
-  return pages
-}
 
 export const simplyParsePdf = async (ragFile: RagFile) => {
   const pdfBytes = await FileStore.readRagFileContextToBytes(ragFile)
@@ -153,4 +96,15 @@ export const simplyParsePdf = async (ragFile: RagFile) => {
   const pages = await analyzeAndPreparePDFPages(pdfBytes)
 
   return pages
+}
+
+export const preparePagesForAdvancedParsing = async (ragFile: RagFile) => {
+  const fileBytes = await FileStore.readRagFileContextToBytes(ragFile)
+
+  if (!fileBytes) {
+    console.error(`Failed to read file ${ragFile.filename} in S3`)
+    throw ApplicationError.InternalServerError('Failed to read file')
+  }
+
+  return isImage(ragFile) ? [{ text: '', png: fileBytes } satisfies PageInfo] : analyzeAndPreparePDFPages(fileBytes)
 }

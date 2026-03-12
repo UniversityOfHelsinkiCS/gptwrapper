@@ -42,6 +42,7 @@ export const UPDATER_CRON_ENABLED = process.env.UPDATER_CRON_ENABLED === 'true'
 
 export const OLLAMA_URL = process.env.OLLAMA_URL
 export const OLLAMA_EMBEDDER_MODEL = getEnv('OLLAMA_EMBEDDER_MODEL', 'placeholder')
+export const OLLAMA_VISION_MODEL = getEnv('OLLAMA_VISION_MODEL', 'qwen3-vl:4b')
 
 export const LAAMA_API_URL = getEnv('LAAMA_API_URL', 'placeholder')
 export const LAAMA_API_TOKEN = getEnv('LAAMA_API_TOKEN', 'placeholder')
