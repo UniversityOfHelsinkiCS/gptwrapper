@@ -126,7 +126,7 @@
     "rehype-katex": "7.0.1",
     "remark-gfm": "4.0.0",
     "remark-math": "6.0.0",
-    "sequelize": "6.37.7",
+    "sequelize": "6.37.8",
     "umzug": "3.8.2",
     "unfuck-spa-shibboleth-session": "4.1.0",
     "unfuck-utf8-headers-middleware": "1.0.1",
