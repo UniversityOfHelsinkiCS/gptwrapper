@@ -107,7 +107,7 @@
     "langchain": "0.3.37",
     "lodash": "4.17.23",
     "morgan": "1.10.0",
-    "multer": "2.0.2",
+    "multer": "2.1.0",
     "multer-s3": "3.0.1",
     "node-cron": "3.0.3",
     "notistack": "3.0.2",
