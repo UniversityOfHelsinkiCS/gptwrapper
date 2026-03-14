@@ -52,7 +52,7 @@ const connection = new Redis(creds)
 
 const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE ?? 'vlm-queue'
 const VLM_URL = process.env.VLM_URL ?? 'http://laama-svc:11434/api/generate'
-const MODEL = process.env.MODEL ?? 'qwen3-vl:4b'
+const MODEL = process.env.MODEL ?? 'qwen3-vl:4b-instruct-bf16'
 const PROVIDER = process.env.PROVIDER ?? ('ollama' as 'ollama' | 'vllm')
 
 // --- Express Metrics Server ---
@@ -269,7 +269,7 @@ async function shutdown() {
   logger.info('Shutting down worker...')
   try {
     if (ACTIVE_COUNT <= 0) await worker.close()
-  } catch {}
+  } catch { }
   process.exit(0)
 }
 process.on('SIGINT', shutdown)
