@@ -1,5 +1,5 @@
 import { PUBLIC_URL } from '@config'
-import { ContentCopyOutlined, InfoOutlined, EditOutlined, Close } from '@mui/icons-material'
+import { ContentCopyOutlined, EditOutlined, Close, ClearOutlined } from '@mui/icons-material'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import { Box, Dialog, Divider, List, ListItemButton, ListItemText, Typography, Paper, Button } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
@@ -10,7 +10,6 @@ import useCourse from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Prompt as PromptType } from '../../types'
 import { PromptEditor } from '../Prompt/PromptEditor'
-import { OutlineButtonBlack, TextButton } from './general/Buttons'
 import { usePromptState } from './PromptState'
 import { PromptInfoContent } from '../Prompt/PromptInfoContent'
 import { Tab, Tabs, IconButton } from '@mui/material'
@@ -72,12 +71,6 @@ const PromptModal = () => {
   const handleCreateNew = () => {
     setCreateNewOpen((prev) => !prev)
     handleChangePrompt(undefined)
-  }
-
-  const handleShowInfo = (event: React.MouseEvent<HTMLButtonElement>, prompt: PromptType) => {
-    event.stopPropagation()
-    setInfoModalPrompt(prompt)
-    setInfoModalOpen(true)
   }
 
   const handleMobileBackToPromptList = () => {
@@ -145,7 +138,27 @@ const PromptModal = () => {
             </Button>
           )}
 
-          <List sx={{ flex: 1, overflowY: 'auto' }}>{currentPrompts.map((prompt) => renderPromptListItem(prompt))}</List>
+          <List sx={{ flex: 1, overflowY: 'auto' }}>
+            <ListItemButton
+              key={'noPrompt'}
+              onClick={() => handleSelect()}
+              sx={{
+                borderRadius: '8px',
+                mb: 0.5,
+                py: 1.5,
+                '&.Mui-selected': {
+                  backgroundColor: 'action.selected',
+                  borderLeft: '3px solid',
+                  borderLeftColor: 'primary.main',
+                },
+              }}
+            >
+              <ClearOutlined />
+              {t('sidebar:promptNone')}
+            </ListItemButton>
+            <Divider />
+            {currentPrompts.map((prompt) => renderPromptListItem(prompt))}
+          </List>
 
           {currentPrompts.length === 0 && (
             <Box sx={{ p: 3, color: 'text.secondary' }}>
