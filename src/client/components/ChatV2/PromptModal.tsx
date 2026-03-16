@@ -148,7 +148,7 @@ const PromptModal = () => {
           <List sx={{ flex: 1, overflowY: 'auto' }}>{currentPrompts.map((prompt) => renderPromptListItem(prompt))}</List>
 
           {currentPrompts.length === 0 && (
-            <Box sx={{ p: 3, textAlign: 'center', color: 'text.secondary' }}>
+            <Box sx={{ p: 3, color: 'text.secondary' }}>
               <Typography variant="body2">{t('settings:noPrompts')}</Typography>
             </Box>
           )}
@@ -221,7 +221,7 @@ const PromptModal = () => {
               </Box>
             </Box>
           ) : (
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
               <Typography>{t('settings:noPrompt')}</Typography>
             </Box>
           )}

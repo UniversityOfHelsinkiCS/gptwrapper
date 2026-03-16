@@ -170,7 +170,7 @@
     "sourceDescription": "Kurssichatissa voidaan käyttää lähteenä opettajan määrittämiä materiaaleja. Voit valita lähteen alta.",
     "other": "Muut asetukset",
     "noPrompts": "Ei alustuksia",
-    "noPrompt": "Ei alustusta",
+    "noPrompt": "Ei alustusta valittuna",
     "emptyPrompt": "Tyhjä",
     "confirmClearCustomPrompt": "Varoitus: tämä toiminto tyhjentää luomasi alustuksen: \n\"{{customSystemMessage}}\"",
     "newConversation": "Uusi keskustelu",
