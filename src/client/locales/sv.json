@@ -476,7 +476,8 @@
     "missingPromptName": "Prompten saknar namn",
     "description": "Beskrivning",
     "languageModel": "AI-instruktioner",
-    "hiddenFromStudents": "Denna flik är dold för studenter."
+    "hiddenFromStudents": "Denna flik är dold för studenter.",
+    "backToPromptList": "Tillbaka"
   },
   "tooltip": {
     "copied": "Kopierad!"

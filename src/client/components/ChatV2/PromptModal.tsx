@@ -15,6 +15,7 @@ import { usePromptState } from './PromptState'
 import { PromptInfoContent } from '../Prompt/PromptInfoContent'
 import { Tab, Tabs, IconButton } from '@mui/material'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+import { useMediaQuery, useTheme } from '@mui/material'
 
 const PromptModal = () => {
   const { activePrompt, handleChangePrompt, coursePrompts, myPrompts, deletePromptMutation } = usePromptState()
@@ -29,6 +30,8 @@ const PromptModal = () => {
 
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
 
@@ -77,6 +80,10 @@ const PromptModal = () => {
     setInfoModalOpen(true)
   }
 
+  const handleMobileBackToPromptList = () => {
+    setPreviewPrompt(undefined)
+  }
+
   const canCreatePrompt = courseId === 'general' || tab === 1 || amongResponsibles
 
   const currentPrompts = courseId !== 'general' && tab === 0 ? coursePrompts : myPrompts
@@ -123,9 +130,9 @@ const PromptModal = () => {
         <Tab label={t('settings:myPrompts')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
       </Tabs>
 
-      <Box sx={{ display: 'flex', gap: 2, mt: 2, minHeight: '50vh' }}>
+      <Box sx={{ display: 'flex', gap: 2, mt: 2, height: '60vh' }}>
         {/* Left panel - prompt list */}
-        <Box sx={{ width: 280, minWidth: 280, display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ display: !isMobile || !previewPrompt ? 'flex' : 'none', width: 280, minWidth: 280, flexDirection: 'column' }}>
           {canCreatePrompt && (
             <Button
               variant="outlined"
@@ -147,13 +154,13 @@ const PromptModal = () => {
           )}
         </Box>
 
-        <Divider orientation="vertical" flexItem />
+        <Divider sx={{ display: isMobile ? 'none' : 'flex' }} orientation="vertical" flexItem />
 
         {/* Right panel - preview */}
-        <Box sx={{ flex: 1, overflow: 'auto' }}>
+        <Box sx={{ display: !isMobile || previewPrompt ? 'flex' : 'none', flex: 1, overflow: 'hidden' }}>
           {previewPrompt ? (
-            <div>
-              <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', height: '100%' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
+              <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', height: '100%', overflow: 'auto' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Typography variant="h6" fontWeight="bold" data-testid={`prompt-preview-title-for-${previewPrompt.name}`}>
                     {previewPrompt.name}
@@ -187,7 +194,7 @@ const PromptModal = () => {
                     <Typography variant="h6" color="text.primary" gutterBottom>
                       {t('prompt:promptInstructions')}
                     </Typography>
-                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                       {previewPrompt.userInstructions}
                     </Typography>
                   </Box>
@@ -202,12 +209,17 @@ const PromptModal = () => {
                   </Typography>
                 </Box>
               </Paper>
-              <Box sx={{ mt: 'auto', pt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+              <Box sx={{ mt: 'auto', pt: 2, display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
+                {isMobile && (
+                  <Button variant="outlined" onClick={() => handleMobileBackToPromptList()}>
+                    {t('prompt:backToPromptList')}
+                  </Button>
+                )}
                 <Button data-testid="change-to-prompt-button" variant="contained" onClick={() => handleSelect(previewPrompt)}>
                   {t('settings:choosePrompt')}
                 </Button>
               </Box>
-            </div>
+            </Box>
           ) : (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
               <Typography>{t('settings:noPrompt')}</Typography>

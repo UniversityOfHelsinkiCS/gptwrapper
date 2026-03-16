@@ -503,7 +503,8 @@
     "missingPromptName": "Prompt name is missing",
     "description": "Description",
     "languageModel": "AI Instructions",
-    "hiddenFromStudents": "This tab is hidden from students."
+    "hiddenFromStudents": "This tab is hidden from students.",
+    "backToPromptList": "Back"
   },
   "tooltip": {
     "copied": "Copied!"

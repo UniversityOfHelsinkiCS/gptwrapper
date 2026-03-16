@@ -505,7 +505,8 @@
     "missingPromptName": "Alustukselta puuttuu nimi",
     "description": "Kuvaus",
     "languageModel": "Tekoälyn ohjeistus",
-    "hiddenFromStudents": "Tämä välilehti on piilotettu opiskelijoilta."
+    "hiddenFromStudents": "Tämä välilehti on piilotettu opiskelijoilta.",
+    "backToPromptList": "Takaisin"
   },
   "tooltip": {
     "copied": "Kopioitu!"
