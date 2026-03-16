@@ -90,7 +90,7 @@ const PromptModal = () => {
       sx={{
         borderRadius: '8px',
         mb: 0.5,
-        py: 1.5,
+        py: 1,
         '&.Mui-selected': {
           backgroundColor: 'action.selected',
           borderLeft: '3px solid',
