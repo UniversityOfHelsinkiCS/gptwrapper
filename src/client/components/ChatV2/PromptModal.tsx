@@ -139,27 +139,24 @@ const PromptModal = () => {
             </Button>
           )}
 
-          <List sx={{ flex: 1, overflowY: 'auto' }}>
-            <ListItemButton
-              key={'noPrompt'}
-              onClick={() => handleSelect()}
-              sx={{
-                borderRadius: '8px',
-                mb: 0.5,
-                py: 1.5,
-                '&.Mui-selected': {
-                  backgroundColor: 'action.selected',
-                  borderLeft: '3px solid',
-                  borderLeftColor: 'primary.main',
-                },
-              }}
-            >
-              <ClearOutlined />
-              {t('sidebar:promptNone')}
-            </ListItemButton>
-            <Divider />
-            {currentPrompts.map((prompt) => renderPromptListItem(prompt))}
-          </List>
+          <Button
+            variant="outlined"
+            onClick={() => handleSelect()}
+            sx={{
+              color: 'black',
+              border: '2px solid #a5a5a5',
+              '&:hover': {
+                backgroundColor: 'rgba(0, 0, 0, 0.04)',
+              },
+            }}
+            startIcon={<ClearOutlined sx={{ fontSize: '1.5rem', lineHeight: 1 }} />}
+          >
+            {t('sidebar:promptNone')}
+          </Button>
+
+          <Divider sx={{ p: 1 }} />
+
+          <List sx={{ flex: 1, overflowY: 'auto' }}>{currentPrompts.map((prompt) => renderPromptListItem(prompt))}</List>
 
           {currentPrompts.length === 0 && (
             <Box sx={{ p: 3, color: 'text.secondary' }}>
