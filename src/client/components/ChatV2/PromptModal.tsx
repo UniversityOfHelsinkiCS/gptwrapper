@@ -216,7 +216,7 @@ const PromptModal = () => {
                     {t('prompt:systemMessage')}
                   </Typography>
                   <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: previewPrompt.hidden ? 'text.disabled' : 'text.primary' }}>
-                    {previewPrompt.hidden ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
+                    {previewPrompt.hidden && !amongResponsibles ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
                   </Typography>
                 </Box>
               </Paper>
