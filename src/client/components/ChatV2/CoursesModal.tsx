@@ -76,7 +76,7 @@ const CoursesModal = () => {
   }
 
   return (
-    <Box>
+    <Box sx={{ flex: 1, overflow: 'auto' }}>
       <CourseList courseUnits={studentsChats} type="enabled" studentView />
     </Box>
   )
@@ -131,7 +131,7 @@ const CourseList = (props: CourseListProps) => {
   }, [courseUnits, order, orderBy, language])
 
   return (
-    <Box sx={{ py: 3, overflow: 'auto' }}>
+    <Box sx={{ py: 3, overflow: 'auto', flex: 1 }}>
       <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
         <Table>
           <TableHead>
