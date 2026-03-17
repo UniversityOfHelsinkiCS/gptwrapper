@@ -15,6 +15,7 @@ import { PromptInfoContent } from '../Prompt/PromptInfoContent'
 import { Tab, Tabs, IconButton } from '@mui/material'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import { useMediaQuery, useTheme } from '@mui/material'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 const PromptModal = () => {
   const { activePrompt, handleChangePrompt, coursePrompts, myPrompts, deletePromptMutation } = usePromptState()
@@ -225,6 +226,7 @@ const PromptModal = () => {
               <Box sx={{ mt: 'auto', pt: 2, display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
                 {isMobile && (
                   <Button variant="outlined" onClick={() => handleMobileBackToPromptList()}>
+                    <ArrowBackIcon />
                     {t('prompt:backToPromptList')}
                   </Button>
                 )}
