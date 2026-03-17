@@ -136,7 +136,7 @@ ragIndexRouter.get('/files/:fileId', async (req, res) => {
 
   let fileContent: string
 
-  if (shouldRenderAsText(ragFile.fileType) || ragFile.fileType === 'application/pdf') {
+  if (shouldRenderAsText(ragFile.fileType) || ragFile.fileType === 'application/pdf' || ragFile.fileType === 'image/png') {
     const fileContentText = await FileStore.readRagFileTextContent(ragFile)
     if (fileContentText === null) {
       fileContent = 'File content is not available'
