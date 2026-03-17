@@ -182,7 +182,7 @@ export const CourseSettingsModal = () => {
   }
 
   return (
-    <Container maxWidth="xl">
+    <Box sx={{ flex: 1, overflow: 'auto' }}>
       <RouterTabs>
         <Tab label={t('common:settings')} to={`/${courseId}/course`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
         <Tab label={t('course:teachers')} to={`/${courseId}/course/teachers`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
@@ -288,7 +288,7 @@ export const CourseSettingsModal = () => {
         <Route path="/rag/*" element={<Rag />} />
         <Route path="/moodle/*" element={<CourseEmbedding />} />
       </Routes>
-    </Container>
+    </Box>
   )
 }
 
@@ -427,11 +427,7 @@ const StudentsSettingsView = ({
               </Table>
             </TableContainer>
           ) : (
-            <EnrolmentActionUserSearch
-              courseId={courseId}
-              actionText={t('course:add')}
-              drawActionComponent={drawStudentActionComponent}
-            />
+            <EnrolmentActionUserSearch courseId={courseId} actionText={t('course:add')} drawActionComponent={drawStudentActionComponent} />
           )}
         </>
       )}
@@ -446,7 +442,7 @@ const AssignedResponsibilityManagement = ({ responsibility, handleRemove }) => {
   if (!responsibility.createdByUserId) {
     return (
       <Stack direction={'row'} sx={{ marginLeft: 'auto', alignItems: 'center', height: '1rem' }}>
-        {"Sisu"}
+        {'Sisu'}
       </Stack>
     )
   }

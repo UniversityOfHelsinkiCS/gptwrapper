@@ -67,7 +67,7 @@ const TemplateModal: React.FC<{ open: boolean; root: string; children: React.Rea
             <CloseIcon />
           </TextButton>
         </Box>
-        <Box sx={{ p: '0 2rem 2rem 2rem' }}>{children}</Box>
+        <Box sx={{ display: 'flex', p: '0 2rem 2rem 2rem', flex: '1', overflow: 'hidden' }}>{children}</Box>
       </Box>
     </Modal>
   )

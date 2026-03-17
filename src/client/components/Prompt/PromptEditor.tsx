@@ -1,9 +1,5 @@
 import { validModels } from '@config'
-import {
-  Box,
-  CircularProgress,
-  DialogActions
-} from '@mui/material'
+import { Box, CircularProgress, DialogActions } from '@mui/material'
 import type { Message } from '@shared/chat'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
@@ -17,9 +13,7 @@ import { PromptEditorFormContext } from './context'
 import { PromptEditorForm } from './PromptEditorForm'
 import { PromptEditorFormContextValue, PromptEditorFormState } from 'src/client/types'
 
-
 export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string; setEditorOpen?: React.Dispatch<boolean>; personal?: boolean }) => {
-
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { courseId } = useParams() as { courseId: string }
@@ -47,8 +41,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
     temperature: activePrompt?.temperature ?? 0.5,
   })
 
-  const modelHasTemperature =
-    form.selectedModel && 'temperature' in (validModels.find((m) => m.name === form.selectedModel) ?? {})
+  const modelHasTemperature = form.selectedModel && 'temperature' in (validModels.find((m) => m.name === form.selectedModel) ?? {})
 
   useEffect(() => {
     const selectedModelConfig = validModels.find((m) => m.name === form.selectedModel)
@@ -71,16 +64,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
 
     setLoading(true)
 
-    const {
-      name,
-      userInstructions,
-      systemMessage,
-      ragSystemMessage,
-      hidden,
-      ragIndexId,
-      selectedModel,
-      temperature
-    } = form
+    const { name, userInstructions, systemMessage, ragSystemMessage, hidden, ragIndexId, selectedModel, temperature } = form
 
     const messages: Message[] = ragIndexId && ragSystemMessage.length > 0 ? [{ role: 'system', content: ragSystemMessage }] : []
 
@@ -133,22 +117,23 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
 
   return (
     <PromptEditorFormContext.Provider value={context}>
-      <form onSubmit={handleSubmit}>
-        <Box sx={{ py: 3 }}>
-          <PromptEditorForm />
-        </Box>
-
-        <DialogActions>
-          <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-            {loading && <CircularProgress color="secondary" />}
-            {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
-            <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
-              {t('common:save')}
-            </BlueButton>
+      <Box sx={{ flex: 1, overflow: 'auto' }}>
+        <form onSubmit={handleSubmit}>
+          <Box sx={{ py: 3 }}>
+            <PromptEditorForm />
           </Box>
-        </DialogActions>
-      </form>
-    </PromptEditorFormContext.Provider>
-  );
-}
 
+          <DialogActions>
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+              {loading && <CircularProgress color="secondary" />}
+              {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
+              <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
+                {t('common:save')}
+              </BlueButton>
+            </Box>
+          </DialogActions>
+        </form>
+      </Box>
+    </PromptEditorFormContext.Provider>
+  )
+}

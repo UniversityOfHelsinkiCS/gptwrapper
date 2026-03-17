@@ -6,35 +6,40 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import useCourse from '../../hooks/useCourse'
 
 export const PromptInfoModal = ({ back, setEditorOpen, personal }: { back?: string; setEditorOpen?: React.Dispatch<boolean>; personal?: boolean }) => {
-    const { activePrompt: prompt } = usePromptState()
-    const { courseId } = useParams()
-    const { user } = useCurrentUser()
-    const { data: course } = useCourse(courseId)
+  const { activePrompt: prompt } = usePromptState()
+  const { courseId } = useParams()
+  const { user } = useCurrentUser()
+  const { data: course } = useCourse(courseId)
 
-    const isTeacher = user?.isAdmin || course?.responsibilities?.some((r) => r.user.id === user?.id) || false
+  const isTeacher = user?.isAdmin || course?.responsibilities?.some((r) => r.user.id === user?.id) || false
 
-    if (!prompt) {
-        return (
-            <Box sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '300px', // Ensures the modal doesn't collapse
-                width: '100%'
-            }}>
-                <CircularProgress />
-            </Box>
-        )
-    }
-
+  if (!prompt) {
     return (
-        <PromptInfoContent
-            name={prompt.name}
-            userInstructions={prompt.userInstructions ?? ''}
-            systemMessage={prompt.systemMessage}
-            hidden={prompt.hidden}
-            type={prompt.type}
-            isTeacher={isTeacher}
-        />
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '300px', // Ensures the modal doesn't collapse
+          width: '100%',
+          flex: 1,
+          overflow: 'auto',
+        }}
+      >
+        <CircularProgress />
+      </Box>
     )
+  }
+
+  return (
+    <PromptInfoContent
+      name={prompt.name}
+      userInstructions={prompt.userInstructions ?? ''}
+      systemMessage={prompt.systemMessage}
+      hidden={prompt.hidden}
+      type={prompt.type}
+      isTeacher={isTeacher}
+    />
+  )
 }
+

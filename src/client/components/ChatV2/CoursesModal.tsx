@@ -51,7 +51,7 @@ const CoursesModal = () => {
 
   if (isTeacherOrAdmin) {
     return (
-      <Box>
+      <Box sx={{ flex: 1, overflow: 'auto' }}>
         <Tabs
           value={tab}
           onChange={(_: React.SyntheticEvent, newValue: number) => setTab(newValue)}
@@ -237,7 +237,7 @@ const CourseList = (props: CourseListProps) => {
 }
 
 const CoursesSkeleton = () => (
-  <Box>
+  <Box sx={{ flex: 1 }}>
     <Tabs
       value={0}
       slotProps={{

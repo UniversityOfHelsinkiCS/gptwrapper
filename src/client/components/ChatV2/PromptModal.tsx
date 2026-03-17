@@ -105,7 +105,7 @@ const PromptModal = () => {
   )
 
   return (
-    <Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       <Tabs
         sx={{ borderBottom: 1, borderColor: 'divider' }}
         value={tab}
@@ -123,7 +123,7 @@ const PromptModal = () => {
         <Tab label={t('settings:myPrompts')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
       </Tabs>
 
-      <Box sx={{ display: 'flex', gap: 2, mt: 2, height: '60vh' }}>
+      <Box sx={{ display: 'flex', gap: 2, mt: 2, flex: 1, minHeight: 0 }}>
         {/* Left panel - prompt list */}
         <Box sx={{ display: !isMobile || !previewPrompt ? 'flex' : 'none', width: 280, minWidth: 280, flexDirection: 'column' }}>
           {canCreatePrompt && (
@@ -172,8 +172,8 @@ const PromptModal = () => {
         {/* Right panel - preview */}
         <Box sx={{ display: !isMobile || previewPrompt ? 'flex' : 'none', flex: 1, overflow: 'hidden' }}>
           {previewPrompt ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
-              <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', height: '100%', overflow: 'auto' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
+              <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', flex: 1, minHeight: 0 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Typography variant="h6" fontWeight="bold" data-testid={`prompt-preview-title-for-${previewPrompt.name}`}>
                     {previewPrompt.name}
