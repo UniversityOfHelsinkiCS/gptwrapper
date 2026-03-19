@@ -1,8 +1,21 @@
-import { Worker, Queue } from 'bullmq'
+import { Worker, Queue, type JobType } from 'bullmq'
 import dotenv from 'dotenv'
 import Redis, { type RedisOptions } from 'ioredis'
 import logger from './logger.ts'
-import { vlmQueueWait, vlmProcessing, vlmJobsTotal, vlmRetriesTotal, vlmStallsTotal, queueDepth, oldestJobAge } from './metrics.ts'
+import {
+  vlmQueueWait,
+  vlmProcessing,
+  vlmJobsTotal,
+  vlmRetriesTotal,
+  vlmStallsTotal,
+  queueDepth,
+  oldestJobAge,
+  vlmQueueWaitPercentiles,
+  vlmProcessingPercentiles,
+  vlmFailureModesTotal,
+  vlmDocumentCompletion,
+  vlmDocumentCompletionPercentiles,
+} from './metrics.ts'
 import express from 'express'
 import client from 'prom-client'
 
@@ -63,11 +76,16 @@ const register = new client.Registry()
 // Register all metrics
 register.registerMetric(vlmQueueWait)
 register.registerMetric(vlmProcessing)
+register.registerMetric(vlmQueueWaitPercentiles)
+register.registerMetric(vlmProcessingPercentiles)
 register.registerMetric(vlmJobsTotal)
 register.registerMetric(vlmRetriesTotal)
 register.registerMetric(vlmStallsTotal)
+register.registerMetric(vlmFailureModesTotal)
 register.registerMetric(queueDepth)
 register.registerMetric(oldestJobAge)
+register.registerMetric(vlmDocumentCompletion)
+register.registerMetric(vlmDocumentCompletionPercentiles)
 
 // Collect default metrics
 client.collectDefaultMetrics({ register })
@@ -180,6 +198,121 @@ async function transcribeWithVLLM({ text, bytes }: { text?: string; bytes?: Uint
 
 let ACTIVE_COUNT = 0
 
+type FailureMode = 'none' | 'timeout' | 'transport' | 'worker_exception' | 'unknown'
+
+type DocumentTrackingState = {
+  queue: string
+  provider: string
+  firstQueuedAtMs: number
+  latestFinishedAtMs: number
+  terminalEvents: number
+  failedEvents: number
+  worstFailureMode: Exclude<FailureMode, 'none'> | 'unknown'
+}
+
+const documentTracking = new Map<number, DocumentTrackingState>()
+
+const classifyFailureMode = (reason?: string): Exclude<FailureMode, 'none'> => {
+  const text = reason?.toLowerCase() ?? ''
+
+  if (text.includes('timeout') || text.includes('timed out') || text.includes('etimedout') || text.includes('abort')) {
+    return 'timeout'
+  }
+
+  if (
+    text.includes('fetch') ||
+    text.includes('network') ||
+    text.includes('socket') ||
+    text.includes('econn') ||
+    text.includes('connection') ||
+    text.includes('5')
+  ) {
+    return 'transport'
+  }
+
+  if (text.length > 0) {
+    return 'worker_exception'
+  }
+
+  return 'unknown'
+}
+
+const getRagFileId = (job: { data: unknown }) => {
+  if (job.data && typeof job.data === 'object' && 'ragFileId' in job.data) {
+    const ragFileId = (job.data as Record<string, unknown>).ragFileId
+    if (typeof ragFileId === 'number' && Number.isFinite(ragFileId)) return ragFileId
+  }
+  return null
+}
+
+const hasRemainingDocumentJobs = async (ragFileId: number) => {
+  const terminalPendingStates: JobType[] = ['waiting', 'active', 'delayed', 'prioritized', 'waiting-children']
+  const jobs = await queue.getJobs(terminalPendingStates, 0, 5000, false)
+  return jobs.some((job) => {
+    if (!job.data || typeof job.data !== 'object' || !('ragFileId' in job.data)) return false
+    return (job.data as Record<string, unknown>).ragFileId === ragFileId
+  })
+}
+
+const trackDocumentTerminalEvent = async (job: { queueName: string; data: unknown; timestamp: number; finishedOn?: number }, failureMode: FailureMode) => {
+  const ragFileId = getRagFileId(job)
+  if (ragFileId == null) return
+
+  const current =
+    documentTracking.get(ragFileId) ??
+    ({
+      queue: job.queueName,
+      provider: PROVIDER,
+      firstQueuedAtMs: job.timestamp,
+      latestFinishedAtMs: job.finishedOn ?? Date.now(),
+      terminalEvents: 0,
+      failedEvents: 0,
+      worstFailureMode: 'unknown',
+    } satisfies DocumentTrackingState)
+
+  current.firstQueuedAtMs = Math.min(current.firstQueuedAtMs, job.timestamp)
+  current.latestFinishedAtMs = Math.max(current.latestFinishedAtMs, job.finishedOn ?? Date.now())
+  current.terminalEvents += 1
+
+  if (failureMode !== 'none') {
+    current.failedEvents += 1
+    current.worstFailureMode = failureMode
+  }
+
+  documentTracking.set(ragFileId, current)
+
+  if (await hasRemainingDocumentJobs(ragFileId)) return
+
+  const status = current.failedEvents > 0 ? 'failed' : 'completed'
+  const finalFailureMode: FailureMode = current.failedEvents > 0 ? current.worstFailureMode : 'none'
+  const durationSec = Math.max((current.latestFinishedAtMs - current.firstQueuedAtMs) / 1000, 0)
+  const matchedCondition = 'provider_matched'
+
+  vlmDocumentCompletion.observe(
+    {
+      queue: current.queue,
+      provider: current.provider,
+      status,
+      failure_mode: finalFailureMode,
+      matched_condition: matchedCondition,
+    },
+    durationSec,
+  )
+
+  vlmDocumentCompletionPercentiles.observe(
+    {
+      queue: current.queue,
+      provider: current.provider,
+      status,
+      failure_mode: finalFailureMode,
+      matched_condition: matchedCondition,
+    },
+    durationSec,
+  )
+
+  documentTracking.delete(ragFileId)
+}
+
 const worker = new Worker(
   QUEUE_NAME,
   async (job) => {
@@ -221,12 +354,13 @@ const worker = new Worker(
 const queue = new Queue(QUEUE_NAME, { connection })
 
 setInterval(async () => {
-  const counts = await queue.getJobCounts('waiting', 'active', 'delayed', 'failed')
+  const counts = await queue.getJobCounts('waiting', 'active', 'delayed', 'failed', 'completed')
   const q = queue.name
   queueDepth.set({ queue: q, state: 'waiting' }, counts.waiting ?? 0)
   queueDepth.set({ queue: q, state: 'active' }, counts.active ?? 0)
   queueDepth.set({ queue: q, state: 'delayed' }, counts.delayed ?? 0)
   queueDepth.set({ queue: q, state: 'failed' }, counts.failed ?? 0)
+  queueDepth.set({ queue: q, state: 'completed' }, counts.completed ?? 0)
 
   const [oldest] = await queue.getWaiting(0, 0)
   const ageSec = oldest ? (Date.now() - oldest.timestamp) / 1000 : 0
@@ -235,33 +369,44 @@ setInterval(async () => {
 
 logger.info(`Worker started. Listening to queue "${QUEUE_NAME}"...`)
 
-worker.on('completed', (job) => {
+worker.on('completed', async (job) => {
   const queue = job.queueName
   const provider = PROVIDER
   if (job.processedOn != null) {
     const waitSec = (job.processedOn - job.timestamp) / 1000
     vlmQueueWait.observe({ queue, provider }, waitSec)
+    vlmQueueWaitPercentiles.observe({ queue, provider, status: 'success' }, waitSec)
   }
   if (job.processedOn != null && job.finishedOn != null) {
     const procSec = (job.finishedOn - job.processedOn) / 1000
     vlmProcessing.observe({ queue, provider, status: 'success' }, procSec)
+    vlmProcessingPercentiles.observe({ queue, provider, status: 'success' }, procSec)
     if (procSec > 300) vlmStallsTotal.inc({ queue, provider })
   }
   vlmJobsTotal.inc({ queue, provider, status: 'completed' })
+  await trackDocumentTerminalEvent(job, 'none')
   logger.info(`Job ${job.id} completed.`)
 })
 
-worker.on('failed', (job, err) => {
+worker.on('failed', async (job, err) => {
   if (!job) return
   const queue = job.queueName
   const provider = PROVIDER
+  const failureMode = classifyFailureMode(err?.message)
   vlmJobsTotal.inc({ queue, provider, status: 'failed' })
+  vlmFailureModesTotal.inc({ queue, provider, failure_mode: failureMode })
+  if (job.processedOn != null) {
+    const waitSec = (job.processedOn - job.timestamp) / 1000
+    vlmQueueWaitPercentiles.observe({ queue, provider, status: 'failed' }, waitSec)
+  }
   if (job.processedOn != null && job.finishedOn != null) {
     const procSec = (job.finishedOn - job.processedOn) / 1000
     vlmProcessing.observe({ queue, provider, status: 'failed' }, procSec)
+    vlmProcessingPercentiles.observe({ queue, provider, status: 'failed' }, procSec)
     if (procSec > 300) vlmStallsTotal.inc({ queue, provider })
   }
   if (job.attemptsMade > 0) vlmRetriesTotal.inc({ queue, provider })
+  await trackDocumentTerminalEvent(job, failureMode)
   logger.error(`Job ${job?.id} failed:`, err)
 })
 
@@ -269,7 +414,9 @@ async function shutdown() {
   logger.info('Shutting down worker...')
   try {
     if (ACTIVE_COUNT <= 0) await worker.close()
-  } catch { }
+  } catch {
+    logger.error('Worker shutdown failed')
+  }
   process.exit(0)
 }
 process.on('SIGINT', shutdown)
