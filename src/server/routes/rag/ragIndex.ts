@@ -16,6 +16,7 @@ import { s3Client } from '../../util/s3client'
 import { ingestRagFiles } from '../../services/rag/ingestion'
 import { IngestionJobStatus } from '@shared/ingestion'
 import { RedisVectorStore } from '../../services/rag/vectorStore'
+import logger from '../../util/logger'
 
 const ragIndexRouter = Router()
 
@@ -176,7 +177,7 @@ ragIndexRouter.delete('/files/:fileId', async (req, res) => {
 
   // Now we need to re-ingest
   ingestRagFiles(ragIndex).catch((error) => {
-    console.error('Error ingesting RAG files:', error)
+    logger.error('Error ingesting RAG files', { error })
   })
 
   res.json({ message: 'File deleted successfully, re-ingesting' })
@@ -200,7 +201,7 @@ ragIndexRouter.delete('/files/:fileId/text', async (req, res) => {
 
   // Now we need to re-ingest
   ingestRagFiles(ragIndex).catch((error) => {
-    console.error('Error ingesting RAG files:', error)
+    logger.error('Error ingesting RAG files', { error })
   })
 
   res.json({ message: 'File text version deleted successfully, re-ingesting' })
@@ -269,7 +270,7 @@ ragIndexRouter.post('/upload', [uploadMiddleware, attachFileMetadata], async (re
   )
 
   ingestRagFiles(ragIndex, ragFiles).catch((error) => {
-    console.error('Error ingesting RAG files:', error)
+    logger.error('Error ingesting RAG files', { error })
   })
 
   res.json({ message: 'Files uploaded successfully' })
@@ -295,7 +296,7 @@ ragIndexRouter.post('/reset', async (req, res) => {
 
   // Now we need to re-ingest
   ingestRagFiles(ragIndex).catch((error) => {
-    console.error('Error ingesting RAG files:', error)
+    logger.error('Error ingesting RAG files', { error })
   })
 
   res.json({ message: 'RAG index reset successfully' })

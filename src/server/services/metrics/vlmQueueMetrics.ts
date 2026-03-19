@@ -4,6 +4,7 @@ import { type Job, type JobType } from 'bullmq'
 import {
   oldestJobAge,
   queueDepth,
+  vlmActiveJobsOverdue,
   vlmDocumentCompletion,
   vlmDocumentCompletionPercentiles,
   vlmFailureModesTotal,
@@ -169,6 +170,14 @@ export async function startVlmQueueMetrics() {
       const [oldest] = await vlmQueue.getWaiting(0, 0)
       const ageSec = oldest ? (Date.now() - oldest.timestamp) / 1000 : 0
       oldestJobAge.set({ queue: q }, ageSec)
+
+      const activeJobs = await vlmQueue.getActive(0, 5000)
+      const overdue = activeJobs.reduce((count, job) => {
+        if (job.processedOn == null) return count
+        const runtimeSec = (Date.now() - job.processedOn) / 1000
+        return runtimeSec > 300 ? count + 1 : count
+      }, 0)
+      vlmActiveJobsOverdue.set({ queue: q }, overdue)
     } catch (error) {
       logger.error('Failed to update VLM queue gauges', error)
     }

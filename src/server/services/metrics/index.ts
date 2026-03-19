@@ -2,6 +2,27 @@ import client from 'prom-client'
 
 const quantiles = [0.5, 0.9, 0.95, 0.99]
 
+export const httpRequestsTotal = new client.Counter({
+  name: 'currechat_http_requests_total',
+  help: 'Total HTTP requests completed.',
+  labelNames: ['method', 'route', 'status'] as const,
+  registers: [],
+})
+
+export const httpRequestDuration = new client.Histogram({
+  name: 'currechat_http_request_duration_seconds',
+  help: 'HTTP request duration in seconds.',
+  labelNames: ['method', 'route', 'status'] as const,
+  buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30],
+  registers: [],
+})
+
+export const httpInFlightRequests = new client.Gauge({
+  name: 'currechat_http_in_flight_requests',
+  help: 'Number of HTTP requests currently in flight.',
+  registers: [],
+})
+
 export const vlmQueueWait = new client.Histogram({
   name: 'currechat_vlm_queue_wait_seconds',
   help: 'BullMQ job wait time: processedOn - timestamp (seconds).',
@@ -69,6 +90,13 @@ export const queueDepth = new client.Gauge({
 export const oldestJobAge = new client.Gauge({
   name: 'currechat_vlm_oldest_job_age_seconds',
   help: 'Age of oldest waiting job (seconds).',
+  labelNames: ['queue'] as const,
+  registers: [],
+})
+
+export const vlmActiveJobsOverdue = new client.Gauge({
+  name: 'currechat_vlm_active_jobs_overdue',
+  help: 'Number of active jobs with runtime exceeding stall threshold (300s).',
   labelNames: ['queue'] as const,
   registers: [],
 })

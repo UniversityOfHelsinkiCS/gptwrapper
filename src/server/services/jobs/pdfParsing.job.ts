@@ -27,7 +27,6 @@ export const extractPageText = async (page: PDFPageProxy): Promise<string> => {
   for (const item of textContent.items as any[]) {
     if (typeof item.str === 'string' && item.str.length > 0) {
       parts.push(item.str)
-      console.log(item.str)
     }
   }
   const text = parts.join(' ')
@@ -110,7 +109,7 @@ export const submitAdvancedParsingJobs = async (ragFile: RagFile) => {
   const fileBytes = await FileStore.readRagFileContextToBytes(ragFile)
 
   if (!fileBytes) {
-    console.error(`Failed to read file ${ragFile.filename} in S3`)
+    logger.error(`Failed to read file ${ragFile.filename} in S3`)
     throw ApplicationError.InternalServerError('Failed to read file')
   }
 
@@ -147,7 +146,7 @@ export const simplyParsePdf = async (ragFile: RagFile) => {
   const pdfBytes = await FileStore.readRagFileContextToBytes(ragFile)
 
   if (!pdfBytes) {
-    console.error(`Failed to read PDF text file ${ragFile.filename} in S3`)
+    logger.error(`Failed to read PDF text file ${ragFile.filename} in S3`)
     throw ApplicationError.InternalServerError('Failed to read PDF text file')
   }
   const pages = await analyzeAndPreparePDFPages(pdfBytes)

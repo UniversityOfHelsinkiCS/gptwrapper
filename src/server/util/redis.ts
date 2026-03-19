@@ -1,6 +1,7 @@
 import { createClient } from 'redis'
 
 import { REDIS_HOST } from './config'
+import logger from './logger'
 
 const redisUrl = `redis://${REDIS_HOST}:6379`
 
@@ -9,10 +10,10 @@ export const redisClient = createClient({
 })
 
 await redisClient.connect().catch((err) => {
-  console.error('Redis connection error:', err)
+  logger.error('Redis connection error', { err })
 })
 
-redisClient.on('error', (err) => console.error('Redis Client Error', err))
+redisClient.on('error', (err) => logger.error('Redis Client Error', { err }))
 
 export const set = async (key: string, value: any) => {
   const ttl = 60 * 60

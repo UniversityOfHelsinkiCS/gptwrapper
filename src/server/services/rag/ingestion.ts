@@ -42,7 +42,7 @@ export const ingestRagFiles = async (ragIndex: RagIndex, ragFiles?: RagFile[]) =
 }
 
 export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
-  console.time(`Ingestion ${ragFile.filename}`)
+  const ingestionStartMs = Date.now()
 
   await ragFile.update({ error: null, pipelineStage: 'ingesting' })
 
@@ -202,7 +202,8 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
     eta: undefined,
   })
 
-  console.timeEnd(`Ingestion ${ragFile.filename}`)
+  const ingestionDurationMs = Date.now() - ingestionStartMs
+  logger.info('RAG ingestion completed', { ragFileId: ragFile.id, durationMs: ingestionDurationMs })
 }
 
 export const updateRagFileStatus = async (ragFile: RagFile, update: IngestionJobStatus) => {

@@ -61,6 +61,22 @@ S3_SECRET_KEY=<secret-key>
 
 ## Developers: things to know
 
+## Metrics (Prometheus)
+
+The server exposes Prometheus metrics at `GET /metrics` on the same port as the server (default `8000`).
+
+- Local dev: `http://localhost:8000/metrics`
+- Includes HTTP request metrics and BullMQ VLM queue metrics.
+
+Dalai (the VLM worker) also exposes Prometheus metrics at `GET /metrics` on `METRICS_PORT` (default `9090`).
+
+- Local dev: `http://localhost:9090/metrics`
+- Includes BullMQ VLM queue metrics and (when available) NVML-based GPU metrics.
+
+### Label cardinality
+
+Metrics labels are intentionally bounded; request IDs, user IDs, and other high-cardinality values should only appear in logs, not metric labels.
+
 ### Debugging in production
 
 In browser console, run
@@ -120,7 +136,6 @@ Before each test, the test data of a test user is reset by calling the `/test/re
 When running the tests, the headers `x-test-user-idx` and `x-test-user-role` are set, defining the test user's id and iam-based role. They are read at `src/server/middleware/user.ts`.
 
 The tests are isolated so that each (should at least) modifies their own data discriminated by the user's id. This allows parallel execution.
-
 
 ## Trivia
 
