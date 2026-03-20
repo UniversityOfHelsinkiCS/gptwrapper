@@ -126,7 +126,13 @@ const PromptModal = () => {
 
       <Box sx={{ display: 'flex', gap: 2, mt: 2, flex: 1, minHeight: 0 }}>
         {/* Left panel - prompt list */}
-        <Box sx={{ display: !isMobile || !previewPrompt ? 'flex' : 'none', width: 280, minWidth: 280, flexDirection: 'column' }}>
+        <Box
+          sx={{
+            display: !isMobile || !previewPrompt ? 'flex' : 'none',
+            width: !isMobile ? 280 : '90vw',
+            flexDirection: 'column',
+          }}
+        >
           {canCreatePrompt && (
             <Button
               variant="outlined"
@@ -168,7 +174,7 @@ const PromptModal = () => {
         <Divider sx={{ display: isMobile ? 'none' : 'flex' }} orientation="vertical" flexItem />
 
         {/* Right panel - preview */}
-        <Box sx={{ display: !isMobile || previewPrompt ? 'flex' : 'none', flex: 1, overflow: 'hidden' }}>
+        <Box sx={{ display: !isMobile || previewPrompt ? 'flex' : 'none', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
           {previewPrompt ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
               <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', flex: 1, minHeight: 0 }}>

@@ -39,7 +39,7 @@ const TemplateModal: React.FC<{ open: boolean; root: string; children: React.Rea
           transform: 'translate(-50%, -50%)',
           display: 'flex',
           flexDirection: 'column',
-          width: { xs: '100vw', md: '90vw', lg: '75vw' },
+          width: { xs: '99vw', md: '90vw', lg: '75vw' },
           maxWidth: 1200,
           minHeight: '85vh',
           maxHeight: '85vh',
@@ -67,7 +67,7 @@ const TemplateModal: React.FC<{ open: boolean; root: string; children: React.Rea
             <CloseIcon />
           </TextButton>
         </Box>
-        <Box sx={{ display: 'flex', p: '0 2rem 2rem 2rem', flex: '1', overflow: 'hidden' }}>{children}</Box>
+        <Box sx={{ display: 'flex', p: '0 1rem 1rem 1rem', flex: '1', overflow: 'hidden' }}>{children}</Box>
       </Box>
     </Modal>
   )
