@@ -19,6 +19,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { BlueButton, OutlineButtonBlue } from './general/Buttons.tsx'
 
 const PromptModal = () => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const { activePrompt, handleChangePrompt, coursePrompts, myPrompts, deletePromptMutation } = usePromptState()
   const { courseId } = useParams()
   const navigate = useNavigate()
@@ -27,14 +29,12 @@ const PromptModal = () => {
   const [tab, setTab] = useState(0)
   const [infoModalOpen, setInfoModalOpen] = useState(false)
   const [infoModalPrompt, setInfoModalPrompt] = useState<PromptType | undefined>()
-  const [previewPrompts, setPreviewPrompts] = useState<Record<number, PromptType | undefined>>({ [tab]: activePrompt })
+  const [previewPrompts, setPreviewPrompts] = useState<Record<number, PromptType | undefined>>(isMobile ? {} : { [tab]: activePrompt })
   const previewPrompt = previewPrompts[tab]
   const setPreviewPrompt = (prompt: PromptType | undefined) => setPreviewPrompts((prev) => ({ ...prev, [tab]: prompt }))
 
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
 
