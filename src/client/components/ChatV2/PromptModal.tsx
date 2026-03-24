@@ -16,6 +16,7 @@ import { Tab, Tabs, IconButton } from '@mui/material'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import { useMediaQuery, useTheme } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import { BlueButton, OutlineButtonBlue } from './general/Buttons.tsx'
 
 const PromptModal = () => {
   const { activePrompt, handleChangePrompt, coursePrompts, myPrompts, deletePromptMutation } = usePromptState()
@@ -235,14 +236,21 @@ const PromptModal = () => {
               </Paper>
               <Box sx={{ mt: 'auto', pt: 2, display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
                 {isMobile && (
-                  <Button variant="outlined" onClick={() => handleMobileBackToPromptList()}>
+                  <OutlineButtonBlue onClick={() => handleMobileBackToPromptList()}>
                     <ArrowBackIcon />
                     {t('prompt:backToPromptList')}
-                  </Button>
+                  </OutlineButtonBlue>
                 )}
-                <Button data-testid="change-to-prompt-button" variant="contained" onClick={() => handleSelect(previewPrompt)}>
-                  {t('settings:choosePrompt')}
-                </Button>
+                <Box sx={{ display: 'flex' }}>
+                  {(isPersonalTab || amongResponsibles) && (
+                    <OutlineButtonBlue sx={{ mx: 1 }} onClick={(e) => handleEdit(e, previewPrompt)}>
+                      {t('prompt:edit')}
+                    </OutlineButtonBlue>
+                  )}
+                  <BlueButton data-testid="change-to-prompt-button" variant="contained" onClick={() => handleSelect(previewPrompt)}>
+                    {t('settings:choosePrompt')}
+                  </BlueButton>
+                </Box>
               </Box>
             </Box>
           ) : (
