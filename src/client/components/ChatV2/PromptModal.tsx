@@ -103,6 +103,17 @@ const PromptModal = () => {
     >
       <ListItemText primary={prompt.name} primaryTypographyProps={{ fontWeight: previewPrompt?.id === prompt.id ? 'bold' : 'normal', noWrap: true }} />
       {prompt.id === activePrompt?.id && <CheckCircleOutlineIcon fontSize="small" sx={{ ml: 1, color: 'black' }} />}
+      {previewPrompt?.id === prompt.id && (
+        <BlueButton
+          size="small"
+          variant="contained"
+          data-testid="change-to-prompt-button"
+          onClick={(e) => { e.stopPropagation(); handleSelect(prompt) }}
+          sx={{ ml: 1, whiteSpace: 'nowrap' }}
+        >
+          {t('settings:choosePrompt')}
+        </BlueButton>
+      )}
     </ListItemButton>
   )
 
@@ -183,7 +194,7 @@ const PromptModal = () => {
                   <Typography variant="h6" fontWeight="bold" data-testid={`prompt-preview-title-for-${previewPrompt.name}`}>
                     {previewPrompt.name}
                   </Typography>
-                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                  <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
                     {(isPersonalTab || amongResponsibles) && (
                       <IconButton size="small" onClick={(e) => handleEdit(e, previewPrompt)} color="primary" data-testid={`edit-prompt-${previewPrompt.name}`}>
                         <EditOutlined fontSize="small" />
@@ -234,24 +245,17 @@ const PromptModal = () => {
                   </Typography>
                 </Box>
               </Paper>
-              <Box sx={{ mt: 'auto', pt: 2, display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
-                {isMobile && (
+              {isMobile && (
+                <Box sx={{ mt: 'auto', pt: 2, display: 'flex', justifyContent: 'space-between' }}>
                   <OutlineButtonBlue onClick={() => handleMobileBackToPromptList()}>
                     <ArrowBackIcon />
                     {t('prompt:backToPromptList')}
                   </OutlineButtonBlue>
-                )}
-                <Box sx={{ display: 'flex' }}>
-                  {(isPersonalTab || amongResponsibles) && (
-                    <OutlineButtonBlue sx={{ mx: 1 }} onClick={(e) => handleEdit(e, previewPrompt)}>
-                      {t('prompt:edit')}
-                    </OutlineButtonBlue>
-                  )}
                   <BlueButton data-testid="change-to-prompt-button" variant="contained" onClick={() => handleSelect(previewPrompt)}>
                     {t('settings:choosePrompt')}
                   </BlueButton>
                 </Box>
-              </Box>
+              )}
             </Box>
           ) : (
             <Box sx={{ display: 'flex', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
