@@ -522,7 +522,7 @@
     "submit": "Lähetä",
     "description": "Huomasitko jotain parannettavaa? Onko sinulle kehitysehdotus? Kerro siitä tässä. Huom. palaute ei ole anonyymiä. Voit myös halutessasi pyytää vastausta kehittäjiltä.",
     "responseWanted": "Haluan vastauksen palautteeseen",
-    "supportInfo": "Jos tarvitset apua, ota yhteyttä tukeen: <mailto:{{supportEmail}}>"
+    "supportInfo": "Jos tarvitset apua, ota yhteyttä tukeen: <mailTo>{{supportEmail}}</mailTo>"
   },
   "testUse": {
     "titleV2": "Uusi chattinäkymä on vielä kehityksessä. Voit halutessasi valita sen oletukseksi.",

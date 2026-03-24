@@ -493,7 +493,7 @@
     "responseWanted": "Jag vill få ett svar på min feedback",
     "cancel": "Avboka",
     "submit": "Skicka till",
-    "supportInfo": "Supportinformation"
+    "supportInfo": "Om du behöver hjälp, kontakta supporten: <mailTo>{{supportEmail}}</mailTo>"
   },
   "embeddedLogin": {
     "helpText": "Inloggning lyckades. Du kan stänga det här fönstret."
