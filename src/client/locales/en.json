@@ -160,7 +160,7 @@
     "saveMyPromptAs": "Save prompt as",
     "saveNewPrompt": "Create a new prompt",
     "updatePrompt": "Update prompt",
-    "choosePrompt": "Choose prompt",
+    "choosePrompt": "Select",
     "default": "Default",
     "confirmDeletePrompt": "Are you sure you want to delete the prompt '{{name}}'?",
     "selectedSource": "No selected source",

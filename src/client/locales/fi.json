@@ -163,7 +163,7 @@
     "saveMyPromptAs": "Tallenna alustus nimellä",
     "saveNewPrompt": "Lisää uusi alustus",
     "updatePrompt": "Päivitä alustus",
-    "choosePrompt": "Valitse alustus",
+    "choosePrompt": "Valitse",
     "selectedSource": "Ei valittua lähdettä",
     "default": "Oletus",
     "confirmDeletePrompt": "Haluatko varmasti poistaa alustuksen '{{name}}'?",
