@@ -27,7 +27,9 @@ const PromptModal = () => {
   const [tab, setTab] = useState(0)
   const [infoModalOpen, setInfoModalOpen] = useState(false)
   const [infoModalPrompt, setInfoModalPrompt] = useState<PromptType | undefined>()
-  const [previewPrompt, setPreviewPrompt] = useState<PromptType | undefined>(activePrompt)
+  const [previewPrompts, setPreviewPrompts] = useState<Record<number, PromptType | undefined>>({ [tab]: activePrompt })
+  const previewPrompt = previewPrompts[tab]
+  const setPreviewPrompt = (prompt: PromptType | undefined) => setPreviewPrompts((prev) => ({ ...prev, [tab]: prompt }))
 
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
@@ -128,7 +130,6 @@ const PromptModal = () => {
         onChange={(_, newValue) => {
           setTab(newValue)
           setCreateNewOpen(false)
-          setPreviewPrompt(undefined)
         }}
         slotProps={{
           indicator: { style: { backgroundColor: 'black' } },
