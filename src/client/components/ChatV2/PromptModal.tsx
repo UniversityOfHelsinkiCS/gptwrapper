@@ -200,7 +200,7 @@ const PromptModal = () => {
         <Box sx={{ display: !isMobile || previewPrompt ? 'flex' : 'none', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
           {previewPrompt ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
-              <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', flex: 1, minHeight: 0 }}>
+              <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Typography variant="h6" fontWeight="bold" data-testid={`prompt-preview-title-for-${previewPrompt.name}`}>
                     {previewPrompt.name}
