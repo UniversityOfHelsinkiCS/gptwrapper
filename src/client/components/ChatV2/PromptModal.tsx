@@ -103,12 +103,15 @@ const PromptModal = () => {
     >
       <ListItemText primary={prompt.name} primaryTypographyProps={{ fontWeight: previewPrompt?.id === prompt.id ? 'bold' : 'normal', noWrap: true }} />
       {prompt.id === activePrompt?.id && <CheckCircleOutlineIcon fontSize="small" sx={{ ml: 1, color: 'black' }} />}
-      {previewPrompt?.id === prompt.id && (
+      {previewPrompt?.id === prompt.id && prompt.id !== activePrompt?.id && (
         <BlueButton
           size="small"
           variant="contained"
           data-testid="change-to-prompt-button"
-          onClick={(e) => { e.stopPropagation(); handleSelect(prompt) }}
+          onClick={(e) => {
+            e.stopPropagation()
+            handleSelect(prompt)
+          }}
           sx={{ ml: 1, whiteSpace: 'nowrap' }}
         >
           {t('settings:choosePrompt')}
