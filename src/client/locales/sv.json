@@ -161,6 +161,7 @@
     "resetConfirm": "Är du säker på att du vill återställa till standardinställningarna?",
     "saveMyPrompt": "Lägg till en ny prompt",
     "confirmDeletePrompt": "Är du säker på att du vill ta bort frågan '{{name}}'?",
+    "confirmDeletePromptTitle": "Ta bort prompt",
     "choosePrompt": "Välj",
     "default": "Default",
     "coursePrompts": "Kursprompter",

@@ -17,6 +17,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import { useMediaQuery, useTheme } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { BlueButton, OutlineButtonBlue } from './general/Buttons.tsx'
+import ConfirmDialog from './general/ConfirmDialog'
 
 const PromptModal = () => {
   const theme = useTheme()
@@ -26,6 +27,7 @@ const PromptModal = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [createNewOpen, setCreateNewOpen] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<PromptType | null>(null)
   const [tab, setTab] = useState(0)
   const [infoModalOpen, setInfoModalOpen] = useState(false)
   const [infoModalPrompt, setInfoModalPrompt] = useState<PromptType | undefined>()
@@ -43,16 +45,19 @@ const PromptModal = () => {
     navigate(`/${courseId}`)
   }
 
-  const handleDelete = async (event: React.MouseEvent<HTMLButtonElement>, prompt: PromptType) => {
+  const handleDelete = (event: React.MouseEvent<HTMLButtonElement>, prompt: PromptType) => {
     event.stopPropagation()
+    setDeleteConfirm(prompt)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirm) return
+    const prompt = deleteConfirm
+    setDeleteConfirm(null)
     try {
-      if (confirm(t('settings:confirmDeletePrompt', { name: prompt.name }))) {
-        await deletePromptMutation(prompt.id)
-        enqueueSnackbar(`${t('common:delete')} ${prompt.name}`, {
-          variant: 'success',
-        })
-        if (previewPrompt?.id === prompt.id) setPreviewPrompt(undefined)
-      }
+      await deletePromptMutation(prompt.id)
+      enqueueSnackbar(`${t('common:delete')} ${prompt.name}`, { variant: 'success' })
+      if (previewPrompt?.id === prompt.id) setPreviewPrompt(undefined)
     } catch (error) {
       enqueueSnackbar(`Error: ${error}`, { variant: 'error' })
     }
@@ -282,6 +287,14 @@ const PromptModal = () => {
         {courseId !== 'general' && tab === 0 && <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} />}
         {(courseId === 'general' || tab === 1) && <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} personal />}
       </Dialog>
+
+      <ConfirmDialog
+        open={!!deleteConfirm}
+        title={t('settings:confirmDeletePromptTitle')}
+        message={t('settings:confirmDeletePrompt', { name: deleteConfirm?.name })}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteConfirm(null)}
+      />
 
       <Dialog fullWidth maxWidth="md" open={infoModalOpen} onClose={() => setInfoModalOpen(false)}>
         <Box sx={{ position: 'relative', p: 3 }}>

@@ -167,6 +167,7 @@
     "selectedSource": "Ei valittua lähdettä",
     "default": "Oletus",
     "confirmDeletePrompt": "Haluatko varmasti poistaa alustuksen '{{name}}'?",
+    "confirmDeletePromptTitle": "Poista alustus",
     "sourceDescription": "Kurssichatissa voidaan käyttää lähteenä opettajan määrittämiä materiaaleja. Voit valita lähteen alta.",
     "other": "Muut asetukset",
     "noPrompts": "Ei alustuksia",
