@@ -33,7 +33,7 @@ const EmailButton = ({ messages, disabled, collapsed = false }: { messages: Chat
   }
 
   return (
-    <Tooltip arrow placement="right" title={disabled || isCooldown ? '' : t('chat:email', { email: user.email })}>
+    <Tooltip arrow placement="right" title={collapsed && !disabled && !isCooldown ? t('chat:email', { email: user.email }) : ''}>
       <span>
         <TextButton startIcon={!collapsed && <EmailIcon />} onClick={handleSend} data-testid="email-button" size="large" disabled={disabled || isCooldown}>
           {collapsed ? <EmailIcon fontSize="small" /> : t('email:save')}
