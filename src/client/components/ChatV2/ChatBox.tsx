@@ -125,9 +125,10 @@ export const ChatBox = ({
   return (
     <Box
       sx={{
-        background: '#f8f8f8',
+        bgcolor: 'background.paper',
         mb: 1,
-        border: '1px solid rgba(0,0,0,0.3)',
+        border: '1px solid',
+        borderColor: 'divider',
         borderRadius: '1.25rem',
         padding: isMobile ? '0.2rem 0.2rem' : '0.5rem 1rem',
         backdropFilter: 'blur(5px)',
@@ -234,7 +235,7 @@ export const ChatBox = ({
                       whiteSpace: 'nowrap',
                       padding: '0.5rem 0',
                       opacity: isTokenLimitExceeded ? 1 : 0.6,
-                      color: isTokenLimitExceeded ? '#cc0000' : 'inherit',
+                      color: isTokenLimitExceeded ? 'error.main' : 'inherit',
                     }}
                   >
                     {userStatus?.usage != null && userStatus?.limit != null

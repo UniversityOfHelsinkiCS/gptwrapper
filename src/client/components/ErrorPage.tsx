@@ -50,8 +50,8 @@ export const ErrorPage = () => {
           sx={{
             mt: 2,
             p: 4,
-            backgroundColor: 'black',
-            color: 'white',
+            backgroundColor: 'grey.900',
+            color: 'common.white',
             fontFamily: 'monospace',
             fontSize: 14,
             width: '40%',

@@ -162,8 +162,8 @@ const GuideItem = ({ label, variant = 'primary', children }: { label: string | n
           display: 'flex',
           justifyContent: 'center',
           ...(isPrimary ? {
-            backgroundColor: 'black',
-            color: 'white',
+            backgroundColor: 'text.primary',
+            color: 'background.paper',
             width: '2rem',
             height: '2rem',
             borderRadius: '100%',

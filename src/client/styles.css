@@ -11,7 +11,7 @@
 .loader {
   width: 45px;
   aspect-ratio: 2;
-  --_g: no-repeat radial-gradient(circle closest-side, #000 90%, #0000);
+  --_g: no-repeat radial-gradient(circle closest-side, var(--loader-color, #000) 90%, #0000);
   background:
     var(--_g) 0% 50%,
     var(--_g) 50% 50%,
@@ -48,11 +48,11 @@
 
 .scrollable-styled {
   overflow-y: auto;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  scrollbar-color: var(--sb-thumb-color) var(--sb-track-color);
 }
 
 .scrollable-styled:hover {
-  scrollbar-color: rgba(0, 0, 0, 0.4) transparent;
+  scrollbar-color: var(--sb-thumb-hover-color) var(--sb-track-color);
 }
 
 .scrollable-code-highlight {

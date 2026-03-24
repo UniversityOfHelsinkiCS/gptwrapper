@@ -1,7 +1,6 @@
 import { createTheme, responsiveFontSizes, type ThemeOptions } from '@mui/material/styles'
 import { useMemo } from 'react'
-
-// import { useMediaQuery } from '@mui/material'
+import { useMediaQuery } from '@mui/material'
 
 /**
  * Module augmentation to extend default theme with new colours: https://mui.com/material-ui/customization/palette/#customization
@@ -18,27 +17,9 @@ declare module '@mui/material/styles' {
   }
 }
 
-const themeOptions: ThemeOptions = {
+const baseOptions: Omit<ThemeOptions, 'palette'> = {
   typography: {
     fontFamily: ['"Open Sans"', '"Helvetica"', '"Arial"', '"sans-serif"', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'].join(','),
-  },
-
-  palette: {
-    // primary: {
-    //   main: '#107eab',
-    // },
-    toskaDark: {
-      main: '#1a202c',
-      contrastText: '#fff',
-    },
-    toskaPrimary: {
-      main: '#e99939',
-      contrastText: '#1a202c',
-    },
-    background: {
-      default: '#fafaf8',
-      paper: '#fafaf8',
-    },
   },
 
   shape: {
@@ -81,15 +62,34 @@ const themeOptions: ThemeOptions = {
   },
 }
 
-// const ColorModeContext = React.createContext({ toggleColorMode: () => {} });
+// Feature flag: set to true to enable dark mode, false to force light mode
+const DARK_MODE_ENABLED = false
 
 const useTheme = () => {
-  const prefersDarkMode = false // useMediaQuery('(prefers-color-scheme: dark)');
-  if (themeOptions.palette) {
-    themeOptions.palette.mode = prefersDarkMode ? 'dark' : 'light'
-  }
+  const systemPrefersDark = useMediaQuery('(prefers-color-scheme: dark)')
+  const prefersDarkMode = DARK_MODE_ENABLED && systemPrefersDark
 
-  const theme = useMemo(() => responsiveFontSizes(createTheme(themeOptions)), [])
+  const theme = useMemo(
+    () =>
+      responsiveFontSizes(
+        createTheme({
+          ...baseOptions,
+          palette: {
+            mode: prefersDarkMode ? 'dark' : 'light',
+            toskaDark: {
+              main: '#1a202c',
+              contrastText: '#fff',
+            },
+            toskaPrimary: {
+              main: '#e99939',
+              contrastText: '#1a202c',
+            },
+            background: prefersDarkMode ? { default: '#121212', paper: '#1e1e1e' } : { default: '#fafaf8', paper: '#fafaf8' },
+          },
+        }),
+      ),
+    [prefersDarkMode],
+  )
 
   return theme
 }

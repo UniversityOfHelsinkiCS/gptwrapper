@@ -580,7 +580,8 @@ const ChatV2Content = () => {
               flexDirection: 'column',
               position: 'sticky',
               top: 0,
-              borderLeft: '1px solid rgba(0,0,0,0.12)',
+              borderLeft: '1px solid',
+              borderLeftColor: 'divider',
               paddingTop: !isEmbeddedMode ? '4rem' : 0,
               bgcolor: 'background.paper',
             }}

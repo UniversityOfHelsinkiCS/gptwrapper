@@ -1,47 +1,19 @@
-import { GlobalStyles } from '@mui/material'
-
-/* Quick scrollbar design using https://scrollbar.app/
-
-body {
-  --sb-track-color: #e0e0e0;
-  --sb-thumb-color: #000000;
-  --sb-size: 6px;
-}
-
-body::-webkit-scrollbar {
-  width: var(--sb-size)
-}
-
-body::-webkit-scrollbar-track {
-  background: var(--sb-track-color);
-  border-radius: 3px;
-}
-
-body::-webkit-scrollbar-thumb {
-  background: var(--sb-thumb-color);
-  border-radius: 3px;
-
-}
-
-@supports not selector(::-webkit-scrollbar) {
-  body {
-    scrollbar-color: var(--sb-thumb-color)
-                     var(--sb-track-color);
-  }
-}
-
-*/
+import { GlobalStyles, useTheme } from '@mui/material'
 
 export default function Styles() {
+  const theme = useTheme()
+  const isDark = theme.palette.mode === 'dark'
+
   return (
     <GlobalStyles
       styles={{
         body: {
           '--sb-track-color': 'transparent',
-          '--sb-thumb-color': '#000000',
-          '--sb-thumb-hover-color': '#333333',
+          '--sb-thumb-color': isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+          '--sb-thumb-hover-color': isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
           '--sb-size': '6px',
-          backgroundColor: '#f5f5f5',
+          '--loader-color': theme.palette.text.primary,
+          backgroundColor: theme.palette.background.default,
         },
         '*::-webkit-scrollbar': {
           width: 'var(--sb-size)',

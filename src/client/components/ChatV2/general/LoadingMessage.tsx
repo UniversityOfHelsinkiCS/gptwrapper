@@ -1,26 +1,21 @@
-import { Typography } from '@mui/material'
+import { Typography, useTheme } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import type { ToolCallStatusEvent } from '../../../../shared/chat'
 
-const loadingDotStyle = (delay: number) => ({
+const loadingDotStyle = (delay: number, color: string) => ({
   width: 5,
   height: 5,
   borderRadius: '100%',
   margin: 3,
-  backgroundColor: 'rgba(0,0,0,0.4)',
+  backgroundColor: color,
   animation: 'bounceWave 1.2s infinite',
   animationDelay: `${delay}s`,
 })
 
-const sourcesTextStyle = {
-  fontStyle: 'italic',
-  ml: '1rem',
-  color: 'rgba(0,0,0,0.8)',
-  animation: 'slideIn 0.3s ease-out',
-}
-
 export const LoadingMessage = ({ toolCalls }: { toolCalls: Record<string, ToolCallStatusEvent> }) => {
   const { t } = useTranslation()
+  const theme = useTheme()
+  const dotColor = theme.palette.text.secondary
 
   const toolCallMessages = Object.values(toolCalls)
 
@@ -50,11 +45,15 @@ export const LoadingMessage = ({ toolCalls }: { toolCalls: Record<string, ToolCa
         `}
       </style>
       <div style={{ alignItems: 'center', display: 'flex', height: '4rem' }}>
-        <div style={loadingDotStyle(0)} />
-        <div style={loadingDotStyle(0.15)} />
-        <div style={loadingDotStyle(0.3)} />
+        <div style={loadingDotStyle(0, dotColor)} />
+        <div style={loadingDotStyle(0.15, dotColor)} />
+        <div style={loadingDotStyle(0.3, dotColor)} />
         {toolCallMessages.map((tc) => (
-          <Typography key={tc.callId} sx={sourcesTextStyle} data-testid="tool-call-message">
+          <Typography
+            key={tc.callId}
+            sx={{ fontStyle: 'italic', ml: '1rem', color: 'text.secondary', animation: 'slideIn 0.3s ease-out' }}
+            data-testid="tool-call-message"
+          >
             {tc.text}
           </Typography>
         ))}

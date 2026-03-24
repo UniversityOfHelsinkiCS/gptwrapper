@@ -302,7 +302,7 @@ export function Component() {
           sx={{
             width: '90vw',
             height: '90vh',
-            background: 'white',
+            bgcolor: 'background.paper',
             padding: '2rem',
             overflowY: 'scroll',
           }}
@@ -393,7 +393,7 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
           {promptToEdit ? t('prompt:editPrompt', { name: promptToEdit.name }) : t('prompt:createNew')}
           <IconButton
             onClick={() => setEditorOpen(false)}
-            sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500', background: '#FFF', opacity: 0.9, zIndex: 1 }}
+            sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500', bgcolor: 'background.paper', opacity: 0.9, zIndex: 1 }}
             data-testid="close-prompt-editor"
           >
             <Close />

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Box, Typography, Chip, IconButton, Drawer } from '@mui/material'
+import { Box, Typography, Chip, IconButton, Drawer, useTheme } from '@mui/material'
 import Close from '@mui/icons-material/Close'
 import Search from '@mui/icons-material/Search'
 import { useTranslation } from 'react-i18next'
@@ -46,7 +46,7 @@ const AnnotationTruncated = ({
       sx={{
         display: 'flex',
         gap: 2,
-        backgroundColor: isHovering ? '#efefef' : 'transparent',
+        backgroundColor: isHovering ? 'action.hover' : 'transparent',
         transition: 'background-color 0.1s ease-in-out',
         padding: '0.8rem 0.6rem',
         borderRadius: '0.6rem',
@@ -61,8 +61,8 @@ const AnnotationTruncated = ({
     >
       <Box
         sx={{
-          color: 'black',
-          backgroundColor: 'rgba(0,0,0,0.12)',
+          color: 'text.primary',
+          backgroundColor: 'action.selected',
           width: 24,
           height: 24,
           minWidth: 24,
@@ -83,6 +83,9 @@ const AnnotationTruncated = ({
 const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: RagChunk; relevanceOrder: number; isSelected: boolean }) => {
   const annotationRef = useRef<HTMLDivElement>(null)
   const [shouldFlash, setShouldFlash] = useState(false)
+  const theme = useTheme()
+  const bgColor = theme.palette.action.hover
+  const flashColor = theme.palette.action.selected
 
   useEffect(() => {
     if (isSelected && annotationRef.current) {
@@ -100,8 +103,8 @@ const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: RagChu
     <Box ref={annotationRef} sx={{ display: 'flex', gap: 2 }}>
       <Box
         sx={{
-          color: 'black',
-          backgroundColor: 'rgba(0,0,0,0.12)',
+          color: 'text.primary',
+          backgroundColor: 'action.selected',
           minWidth: '1.8rem',
           height: '1.8rem',
           display: 'flex',
@@ -138,15 +141,15 @@ const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: RagChu
           sx={{
             p: '0.5rem 1.5rem',
             borderRadius: '0.5rem',
-            backgroundColor: '#f5f5f5',
+            backgroundColor: bgColor,
             animation: shouldFlash ? 'flashIn 0.5s ease-out 0.4s 1' : undefined,
           }}
         >
           <style>{`
             @keyframes flashIn {
-              0% { background-color: #f5f5f5; }
-              50% { background-color:#cccccc; }
-              100% { background-color: #f5f5f5; }
+              0% { background-color: ${bgColor}; }
+              50% { background-color: ${flashColor}; }
+              100% { background-color: ${bgColor}; }
             }
           `}</style>
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.content}</ReactMarkdown>
@@ -299,7 +302,7 @@ const ToolResult = ({
                 top: 10,
                 right: 10,
                 color: 'grey.500',
-                background: '#FFF',
+                bgcolor: 'background.paper',
                 opacity: 0.9,
               }}
             >

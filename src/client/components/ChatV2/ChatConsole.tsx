@@ -61,7 +61,7 @@ export default function ChatConsole({ user, course }: { user?: User | null; cour
         </Typography>
         {course ? (
           <>
-            <Box mb={1} sx={{ border: '1px solid rgba(0,0,0,0.2)', borderRadius: '0.5rem', p: 2 }}>
+            <Box mb={1} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '0.5rem', p: 2 }}>
               <CourseStatus course={course} />
               <Typography my={0.5} fontWeight="bold" sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                 {course?.name[language] || 'undefined course'}
@@ -122,7 +122,7 @@ export default function ChatConsole({ user, course }: { user?: User | null; cour
         </Typography>
         {activePrompt ? (
           <>
-            <Box mb={1} sx={{ border: '1px solid rgba(0,0,0,0.2)', borderRadius: '0.5rem', p: 2 }}>
+            <Box mb={1} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '0.5rem', p: 2 }}>
               <Typography data-testid="prompt-name" fontWeight="bold">
                 {activePrompt.name}
               </Typography>

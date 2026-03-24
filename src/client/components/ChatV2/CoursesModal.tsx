@@ -55,7 +55,7 @@ const CoursesModal = () => {
         <Tabs
           value={tab}
           onChange={(_: React.SyntheticEvent, newValue: number) => setTab(newValue)}
-          slotProps={{ indicator: { style: { backgroundColor: 'black' } } }}
+          slotProps={{ indicator: { sx: { backgroundColor: 'text.primary' } } }}
           textColor="inherit"
         >
           <Tab data-testid="view-active-courses" label={t('course:activeTab')} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
@@ -242,7 +242,7 @@ const CoursesSkeleton = () => (
       value={0}
       slotProps={{
         indicator: {
-          sx: { backgroundColor: 'rgba(0,0,0,0.1)', height: 3, borderRadius: 1 },
+          sx: { backgroundColor: 'action.selected', height: 3, borderRadius: 1 },
         },
       }}
     >
@@ -255,7 +255,7 @@ const CoursesSkeleton = () => (
       <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
         <Table>
           <TableHead>
-            <TableRow sx={{ backgroundColor: 'rgba(0,0,0,0.06)' }}>
+            <TableRow sx={{ backgroundColor: 'action.hover' }}>
               <TableCell sx={{ fontWeight: 'bold' }}>
                 <Skeleton width={80} />
               </TableCell>

@@ -15,6 +15,7 @@ import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import { t } from 'i18next'
 import React, { useId, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useTheme } from '@mui/material'
 import { readMessageContent, type AssistantMessage, type ChatMessage, type MessageGenerationInfo, type ToolCallResultEvent, type ToolCallStatusEvent, type UserMessage } from '../../../shared/chat'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import CopyToClipboardButton from './CopyToClipboardButton'
@@ -23,7 +24,7 @@ import { BlueButton, OutlineButtonBlack } from './general/Buttons'
 const UserMessageItem = ({ message }: { message: UserMessage }) => (
   <Box
     sx={{
-      backgroundColor: '#efefef',
+      backgroundColor: 'action.hover',
       padding: '1rem 1.5rem',
       marginLeft: 10, //applies only in mobile
       borderRadius: '1rem 0.0rem 1rem 1rem',
@@ -133,6 +134,7 @@ const AssistantMessageItem = ({
 }) => {
   const processedContent = React.useMemo(() => preprocessMath(readMessageContent(message)), [message.content])
   const { t } = useTranslation()
+  const theme = useTheme()
   const katexOptions = {
     macros: {
       '\\abs': '\\left|#1\\right|',
@@ -167,7 +169,7 @@ const AssistantMessageItem = ({
     },
     extensions: ['mhchem.js'],
     output: 'htmlAndMathml',
-    errorColor: '#cc0000',
+    errorColor: theme.palette.error.main,
     throwOnError: true,
     strict: "error", // disables logging katex warnings/errors – if debugging, turn these two on
   }
@@ -201,7 +203,7 @@ const AssistantMessageItem = ({
           bottom: -15,
           opacity: { xs: 0.7, md: 0 },
           transition: 'opacity 0.2s ease-in-out',
-          background: '#fcfcfcff',
+          bgcolor: 'background.paper',
           borderRadius: 4,
         }}
       >
@@ -232,7 +234,7 @@ const AssistantMessageItem = ({
                       opacity: 1,
                       fontSize: '0.8rem',
                       padding: '0.4rem 0.8rem',
-                      backgroundColor: '#efefef',
+                      backgroundColor: 'action.hover',
                     }}
                   >
                     {language}
@@ -283,7 +285,7 @@ const AssistantMessageItem = ({
       </ReactMarkdown>
       {message.error && (
         <Box sx={{ mt: 2 }}>
-          <Typography variant="body1" fontStyle="italic" color="#cc0000">{`\n\n ${message.error}`}</Typography>
+          <Typography variant="body1" fontStyle="italic" color="error.main">{`\n\n ${message.error}`}</Typography>
           {onRetry && (
             <Box sx={{ mt: 1 }}>
               <OutlineButtonBlack onClick={onRetry} size="small">

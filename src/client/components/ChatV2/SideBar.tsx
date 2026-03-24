@@ -66,7 +66,8 @@ const SideBar = ({
           pt: 3,
           height: '100%',
           width: !open ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)',
-          borderRight: '1px solid rgba(0, 0, 0, 0.15)',
+          borderRight: '1px solid',
+          borderRightColor: 'divider',
           zIndex: 999,
         }}
         className="scrollable-styled"

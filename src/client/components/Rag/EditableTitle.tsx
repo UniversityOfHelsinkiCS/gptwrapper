@@ -59,7 +59,7 @@ export const EditableTitle = ({ ragIndex }: { ragIndex: RagIndexAttributes }) =>
         </>
       ) : (
         <>
-          <Typography fontWeight="bold" color="black">
+          <Typography fontWeight="bold" color="text.primary">
             {ragIndex?.metadata?.name}
           </Typography>
           <Tooltip title={t('common:edit')}>

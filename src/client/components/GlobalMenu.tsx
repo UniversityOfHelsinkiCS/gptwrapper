@@ -85,7 +85,8 @@ export default function GlobalMenu({
           paper: {
             sx: {
               boxShadow: '2px 2px 12px rgba(0,0,0,0.1)',
-              border: '1px solid rgba(0,0,0,0.2)',
+              border: '1px solid',
+              borderColor: 'divider',
               borderRadius: '1.25rem',
             }, elevation: 1
           },

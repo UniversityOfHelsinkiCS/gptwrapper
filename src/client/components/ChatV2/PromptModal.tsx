@@ -104,7 +104,7 @@ const PromptModal = () => {
       data-testid={`prompt-row-${prompt.name}`}
     >
       <ListItemText primary={prompt.name} primaryTypographyProps={{ fontWeight: previewPrompt?.id === prompt.id ? 'bold' : 'normal', noWrap: true }} />
-      {prompt.id === activePrompt?.id && <CheckCircleOutlineIcon fontSize="small" sx={{ ml: 1, color: 'black' }} />}
+      {prompt.id === activePrompt?.id && <CheckCircleOutlineIcon fontSize="small" sx={{ ml: 1, color: 'text.primary' }} />}
       {previewPrompt?.id === prompt.id && prompt.id !== activePrompt?.id && (
         <BlueButton
           size="small"
@@ -132,7 +132,7 @@ const PromptModal = () => {
           setCreateNewOpen(false)
         }}
         slotProps={{
-          indicator: { style: { backgroundColor: 'black' } },
+          indicator: { sx: { backgroundColor: 'text.primary' } },
         }}
         textColor="inherit"
       >
@@ -165,10 +165,12 @@ const PromptModal = () => {
             variant="outlined"
             onClick={() => handleSelect()}
             sx={{
-              color: 'black',
-              border: '2px solid #a5a5a5',
+              color: 'text.primary',
+              border: '2px solid',
+              borderColor: 'divider',
               '&:hover': {
-                backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                backgroundColor: 'action.hover',
+                borderColor: 'divider',
               },
             }}
             startIcon={<ClearOutlined sx={{ fontSize: '1.5rem', lineHeight: 1 }} />}
