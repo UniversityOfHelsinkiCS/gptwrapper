@@ -26,7 +26,7 @@ const ConfirmDialog = ({
         <Button onClick={onCancel} variant="text">
           {t('common:cancel')}
         </Button>
-        <Button onClick={onConfirm} variant="contained" color="error">
+        <Button onClick={onConfirm} variant="contained" color="error" data-testid="confirm-dialog-confirm">
           {t('common:delete')}
         </Button>
       </DialogActions>

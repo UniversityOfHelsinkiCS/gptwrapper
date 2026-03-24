@@ -86,7 +86,7 @@ test.describe('Prompts', () => {
 
     await page.getByTestId(`prompt-row-${newPromptName}`).click()
     await page.getByTestId(`delete-prompt-${newPromptName}`).click()
-    page.on('dialog', (dialog) => dialog.accept())
+    await page.getByTestId('confirm-dialog-confirm').click()
 
     // Prompt is not visible anymore
     await page.reload() // <- 100% less flaky
