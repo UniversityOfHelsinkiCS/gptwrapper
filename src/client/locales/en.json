@@ -468,6 +468,7 @@
     "modelFreeToChoose": "Model free to choose",
     "systemMessage": "Instructions for the language model",
     "hidePrompt": "Hide prompt text from students",
+    "promptHidden": "hidden from students",
     "noSourceMaterials": "No source materials",
     "ragSystemMessage": "Source material instructions",
     "basicInformation": "Basic information",

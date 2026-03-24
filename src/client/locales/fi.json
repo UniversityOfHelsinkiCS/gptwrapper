@@ -470,6 +470,7 @@
     "modelFreeToChoose": "Malli vapaasti valittavissa",
     "systemMessage": "Kielimallille annettava ohjeistus",
     "hidePrompt": "Piilota alustuksen sisältö opiskelijoilta",
+    "promptHidden": "piilotettu opiskelijoilta",
     "noSourceMaterials": "Ei lähdemateriaaleja",
     "ragSystemMessage": "Lähdemateriaaliohjeistus",
     "basicInformation": "Perustiedot",

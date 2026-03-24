@@ -218,9 +218,16 @@ const PromptModal = () => {
                 )}
 
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" color="text.primary" gutterBottom>
-                    {t('prompt:systemMessage')}
-                  </Typography>
+                  <Box gap={1} sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="h6" color="text.primary" gutterBottom>
+                      {t('prompt:systemMessage')}
+                    </Typography>
+                    {previewPrompt.hidden && (
+                      <Typography variant="h6" color="textDisabled" gutterBottom>
+                        {`(${t('prompt:promptHidden')})`}
+                      </Typography>
+                    )}
+                  </Box>
                   <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: previewPrompt.hidden ? 'text.disabled' : 'text.primary' }}>
                     {previewPrompt.hidden && !amongResponsibles ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
                   </Typography>

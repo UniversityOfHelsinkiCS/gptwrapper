@@ -442,6 +442,7 @@
     "modelFreeToChoose": "Modell fri att välja",
     "systemMessage": "Instruktioner för språkmodellen",
     "hidePrompt": "Dölj prompttext för studenter",
+    "promptHidden": "dold för studenter",
     "noSourceMaterials": "Inga källmaterial",
     "ragSystemMessage": "Instruktioner för källmaterial",
     "basicInformation": "Grundläggande information",
