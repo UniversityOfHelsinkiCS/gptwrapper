@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Tooltip, Menu, MenuItem } from '@mui/material'
+import { Menu, MenuItem } from '@mui/material'
 import DownloadIcon from '@mui/icons-material/Download'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
@@ -45,17 +45,15 @@ const DownloadButton = ({ messages, disabled, collapsed = false }: { messages: C
 
   return (
     <>
-      <Tooltip arrow placement="right" title={t('chat:download')}>
-        <TextButton 
-          startIcon={!collapsed && <DownloadIcon />} 
-          onClick={handleClick} 
-          data-testid="download-button" 
-          size="large" 
-          disabled={disabled || isCooldown}
-        >
-          {collapsed ? <DownloadIcon fontSize="small" /> : t('download:save')}
-        </TextButton>
-      </Tooltip>
+      <TextButton
+        startIcon={!collapsed && <DownloadIcon />}
+        onClick={handleClick}
+        data-testid="download-button"
+        size="large"
+        disabled={disabled || isCooldown}
+      >
+        {collapsed ? <DownloadIcon fontSize="small" /> : t('download:save')}
+      </TextButton>
       <Menu
         anchorEl={anchorEl}
         open={open}
