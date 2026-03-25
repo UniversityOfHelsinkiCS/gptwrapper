@@ -422,6 +422,7 @@
     "students": "Studenter",
     "addedFrom": "Tillagd från",
     "addNew": "Lägg till ansvarig",
+    "addNewStudent": "Lägg till ny student",
     "courseEmbeddingPrompt": "Prompt för kurschatt",
     "moodleEmbeddingCode": "Bäddningskod för Moodle",
     "embeddingInstructionsTitle": "Instruktioner för Moodle-inbäddning",

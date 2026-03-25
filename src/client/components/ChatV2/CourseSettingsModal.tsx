@@ -281,6 +281,7 @@ export const CourseSettingsModal = () => {
               courseId={courseId}
               drawStudentActionComponent={drawStudentActionComponent}
               handleRemoveEnrolment={handleRemoveEnrolment}
+              isCustomCourse={chatInstance.courseUnits.length === 0}
             />
           }
         />
@@ -372,6 +373,7 @@ const StudentsSettingsView = ({
   courseId,
   drawStudentActionComponent,
   handleRemoveEnrolment,
+  isCustomCourse
 }: {
   userIsAdminOrResponsible: boolean
   addStudentViewOpen: boolean
@@ -380,12 +382,13 @@ const StudentsSettingsView = ({
   courseId: string
   drawStudentActionComponent: (user: User) => any
   handleRemoveEnrolment: (enrolment: Enrolment) => void
+  isCustomCourse: boolean
 }) => {
   const { t } = useTranslation()
 
   return (
     <Box py={3} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {userIsAdminOrResponsible && (
+      {userIsAdminOrResponsible && isCustomCourse && (
         <>
           <OutlineButtonBlack
             onClick={() => {
@@ -394,7 +397,7 @@ const StudentsSettingsView = ({
             sx={{ alignSelf: 'flex-start' }}
             data-testid="toggle-add-student-view"
           >
-            {addStudentViewOpen ? t('common:cancel') : t('course:addNew')}
+            {addStudentViewOpen ? t('common:cancel') : t('course:addNewStudent')}
           </OutlineButtonBlack>
 
           {!addStudentViewOpen ? (

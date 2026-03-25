@@ -448,6 +448,7 @@
     "students": "Opiskelijat",
     "addedFrom": "Lisätty lähteestä",
     "addNew": "Lisää uusi vastuuhenkilö",
+    "addNewStudent": "Lisää uusi opiskelija",
     "courseEmbeddingPrompt": "Kurssichatin alustus",
     "moodleEmbeddingCode": "Moodlen upotuskoodi",
     "embeddingInstructionsTitle": "Moodle-upotuksen ohjeistus",

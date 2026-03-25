@@ -446,6 +446,7 @@
     "students": "Students",
     "addedFrom": "Added from",
     "addNew": "Add new responsible",
+    "addNewStudent": "Add new student",
     "courseEmbeddingPrompt": "Course chat prompt",
     "moodleEmbeddingCode": "Moodle embedding code",
     "embeddingInstructionsTitle": "Moodle Embedding Instructions",
