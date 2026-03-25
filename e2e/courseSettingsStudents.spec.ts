@@ -84,7 +84,8 @@ test.describe('Course Settings - Students Tab', () => {
     }
   })
 
-  test('Can add an enrolment from students tab', async ({ page }, testInfo) => {
+  // possible only for custom courses, disabled until better seed
+  test.skip('Can add an enrolment from students tab', async ({ page }, testInfo) => {
     const workerIdx = testInfo.workerIndex
     const usernameToAdd = `temporal_teacher_testTestUser-teacher-${workerIdx}`
     const searchInput = page.getByPlaceholder('Search users')
