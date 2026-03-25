@@ -314,6 +314,7 @@ courseRouter.get('/:id/discussions/:user_id', checkDiscussionAccess, async (req,
       courseId: id,
       userId,
     },
+    order: [['createdAt', 'ASC']],
   })
 
   res.send(discussions.map((d) => d))

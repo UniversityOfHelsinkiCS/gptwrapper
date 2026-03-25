@@ -56,10 +56,10 @@ export type Discussion = {
   courseId: string
   response: string
   metadata: {
-    model: ValidModelName
-    messages: {
+    generationInfo: { model: ValidModelName }
+    chatMessages: {
       role: string
-      content: string
+      content: string | { type: string; image_url?: unknown }[]
     }[]
   }
   createdAt: string
