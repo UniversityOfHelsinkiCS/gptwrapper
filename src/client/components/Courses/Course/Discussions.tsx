@@ -8,6 +8,10 @@ import useCourse, { useCourseDiscussers, useCourseDiscussion } from '../../../ho
 import { BlueButton } from '../../ChatV2/general/Buttons'
 import type { Discussion } from '../../../../shared/types'
 
+const getChatMessages = (discussion: Discussion) => {
+  return discussion.metadata?.chatMessages ?? (discussion.metadata as any)?.messages ?? []
+}
+
 const DiscussionView: React.FC = () => {
   return (
     <Routes>
@@ -99,11 +103,13 @@ const DiscussionDetail: React.FC = () => {
       sessions.push(curr)
       continue
     }
-    const currLen = curr.metadata.chatMessages.length
-    const nextLen = next.metadata.chatMessages.length
+    const currMessages = getChatMessages(curr)
+    const nextMessages = getChatMessages(next)
+    const currLen = currMessages.length
+    const nextLen = nextMessages.length
     const nextExtendsThis =
       nextLen > currLen &&
-      curr.metadata.chatMessages.every((msg, j) => next.metadata.chatMessages[j]?.role === msg.role && next.metadata.chatMessages[j]?.content === msg.content)
+      currMessages.every((msg, j) => nextMessages[j]?.role === msg.role && nextMessages[j]?.content === msg.content)
     if (!nextExtendsThis) sessions.push(curr)
   }
 
@@ -115,7 +121,7 @@ const DiscussionDetail: React.FC = () => {
 
       <Stack spacing={4} mt={2} sx={{ maxWidth: '900px', mx: 'auto' }}>
         {sessions.map((discussion) => {
-          const messages = [...discussion.metadata.chatMessages, { role: 'assistant', content: discussion.response }]
+          const messages = [...getChatMessages(discussion), { role: 'assistant', content: discussion.response }]
           return (
             <Paper key={discussion.id} elevation={3} sx={{ p: 3, borderRadius: 2 }}>
               <Typography variant="caption" color="text.secondary">
