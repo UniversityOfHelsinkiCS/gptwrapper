@@ -46,7 +46,7 @@ const Discussion: React.FC = () => {
           {discussers.map((d) => (
             <TableRow key={d.user_id}>
               <TableCell>
-                <Link to={`/courses/${courseId}/discussions/${d.user_id}`} component={RouterLink}>
+                <Link to={`${d.user_id}`} component={RouterLink}>
                   {d.user_id}
                 </Link>
               </TableCell>
