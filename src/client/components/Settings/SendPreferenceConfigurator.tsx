@@ -56,7 +56,7 @@ export const SendPreferenceConfigurator = ({
     <RadioGroup value={value} onChange={onChange} name="sendPreferenceConfigurator">
       <Typography>{t('sendPreferenceConfigurator:title')}</Typography>
       <FormControlLabel
-        sx={{ my: 2, borderRadius: 1, backgroundColor: 'grey.100', p: 2 }}
+        sx={{ my: 1, borderRadius: 1, p: 1 }}
         value="shift+enter"
         control={<Radio />}
         label={
@@ -67,7 +67,7 @@ export const SendPreferenceConfigurator = ({
         }
       />
       <FormControlLabel
-        sx={{ mb: 2, borderRadius: 1, backgroundColor: 'grey.100', p: 2 }}
+        sx={{ mb: 1, borderRadius: 1, p: 1 }}
         value="enter"
         control={<Radio />}
         label={
