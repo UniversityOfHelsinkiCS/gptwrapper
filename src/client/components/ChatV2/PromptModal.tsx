@@ -156,7 +156,7 @@ const PromptModal = () => {
         >
           {canCreatePrompt && (
             <Button
-              variant="outlined"
+              variant="contained"
               data-testid="create-prompt-button"
               sx={{ mb: 1 }}
               onClick={handleCreateNew}
