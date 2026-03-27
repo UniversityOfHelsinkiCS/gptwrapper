@@ -470,6 +470,9 @@
   "prompt": {
     "createNew": "Create new prompt",
     "editPrompt": "Edit prompt '{{name}}'",
+    "editPromptTooltip": "Edit",
+    "deletePromptTooltip": "Delete",
+    "copyPromptUrlTooltip": "Copy link",
     "createdPrompt": "Prompt \"{{name}}\" created",
     "updatedPrompt": "Prompt \"{{name}}\" updated",
     "modelFreeToChoose": "Model free to choose",

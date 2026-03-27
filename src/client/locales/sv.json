@@ -442,6 +442,9 @@
   "prompt": {
     "createNew": "Skapa ny prompt",
     "editPrompt": "Redigera prompt '{{name}}'",
+    "editPromptTooltip": "Redigera",
+    "deletePromptTooltip": "Ta bort",
+    "copyPromptUrlTooltip": "Kopiera länk",
     "createdPrompt": "Prompt \"{{name}}\" skapad",
     "updatedPrompt": "Prompt \"{{name}}\" uppdaterad",
     "modelFreeToChoose": "Modell fri att välja",

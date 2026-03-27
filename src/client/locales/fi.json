@@ -472,6 +472,9 @@
   "prompt": {
     "createNew": "Luo uusi alustus",
     "editPrompt": "Muokkaa alustusta \"{{name}}\"",
+    "editPromptTooltip": "Muokkaa",
+    "deletePromptTooltip": "Poista",
+    "copyPromptUrlTooltip": "Kopioi linkki",
     "createdPrompt": "Alustus \"{{name}}\" luotu",
     "updatedPrompt": "Alustus \"{{name}}\" muokattu",
     "modelFreeToChoose": "Malli vapaasti valittavissa",

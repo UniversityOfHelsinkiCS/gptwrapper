@@ -1,7 +1,7 @@
 import { PUBLIC_URL } from '@config'
 import { ContentCopyOutlined, EditOutlined, Close, ClearOutlined } from '@mui/icons-material'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
-import { Box, Dialog, Divider, List, ListItemButton, ListItemText, Typography, Paper, Button } from '@mui/material'
+import { Box, Dialog, Divider, List, ListItemButton, ListItemText, Typography, Paper, Button, Tooltip } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -207,24 +207,35 @@ const PromptModal = () => {
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
                     {(isPersonalTab || amongResponsibles) && (
-                      <IconButton size="small" onClick={(e) => handleEdit(e, previewPrompt)} color="primary" data-testid={`edit-prompt-${previewPrompt.name}`}>
-                        <EditOutlined fontSize="small" />
-                      </IconButton>
+                      <Tooltip arrow placement="bottom" title={t('prompt:editPromptTooltip')}>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleEdit(e, previewPrompt)}
+                          color="primary"
+                          data-testid={`edit-prompt-${previewPrompt.name}`}
+                        >
+                          <EditOutlined fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     )}
                     {!isPersonalTab && (
-                      <IconButton size="small" onClick={(e) => handleCopyLink(e, previewPrompt.id)}>
-                        <ContentCopyOutlined fontSize="small" />
-                      </IconButton>
+                      <Tooltip arrow placement="bottom" title={t('prompt:copyPromptUrlTooltip')}>
+                        <IconButton size="small" onClick={(e) => handleCopyLink(e, previewPrompt.id)}>
+                          <ContentCopyOutlined fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     )}
                     {(isPersonalTab || amongResponsibles) && (
-                      <IconButton
-                        size="small"
-                        onClick={(event) => handleDelete(event, previewPrompt)}
-                        color="error"
-                        data-testid={`delete-prompt-${previewPrompt.name}`}
-                      >
-                        <DeleteOutline fontSize="small" />
-                      </IconButton>
+                      <Tooltip arrow placement="bottom" title={t('prompt:deletePromptTooltip')}>
+                        <IconButton
+                          size="small"
+                          onClick={(event) => handleDelete(event, previewPrompt)}
+                          color="error"
+                          data-testid={`delete-prompt-${previewPrompt.name}`}
+                        >
+                          <DeleteOutline fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     )}
                   </Box>
                 </Box>
