@@ -1,4 +1,4 @@
-import { Box, Divider, Typography } from '@mui/material'
+import { Box, Divider, Tooltip, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
@@ -74,12 +74,16 @@ const SideBar = ({
       >
         {!open ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
-            <TextButton onClick={() => setOpen((prev) => !prev)}>
-              <CustomIcon src={sidebarOpen} />
-            </TextButton>
-            <TextButton onClick={handleReset} data-testid="new-conversation-button">
-              <MapsUgcIcon fontSize="small" />
-            </TextButton>
+            <Tooltip arrow placement="right" title={t('sidebar:open')}>
+              <TextButton onClick={() => setOpen((prev) => !prev)}>
+                <CustomIcon src={sidebarOpen} />
+              </TextButton>
+            </Tooltip>
+            <Tooltip arrow placement="right" title={t('sidebar:chatNew')}>
+              <TextButton onClick={handleReset} data-testid="new-conversation-button">
+                <MapsUgcIcon fontSize="small" />
+              </TextButton>
+            </Tooltip>
             <EmailButton messages={messages} disabled={!messages.length} collapsed />
             {user?.isAdmin && <DownloadButton messages={messages} disabled={!messages.length} collapsed />}
           </Box>
@@ -98,9 +102,11 @@ const SideBar = ({
                 },
               }}
             >
-              <TextButton onClick={() => setOpen((prev) => !prev)}>
-                <CustomIcon src={sidebarClose} />
-              </TextButton>
+              <Tooltip arrow placement="right" title={t('sidebar:close')}>
+                <TextButton onClick={() => setOpen((prev) => !prev)}>
+                  <CustomIcon src={sidebarClose} />
+                </TextButton>
+              </Tooltip>
             </Box>
 
             <Box sx={{ px: 3, mb: 1, display: 'flex', gap: 1, alignItems: 'center' }}>

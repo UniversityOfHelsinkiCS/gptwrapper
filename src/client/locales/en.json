@@ -194,7 +194,9 @@
     "modelTitle": "Language model",
     "chatNew": "New chat",
     "chatEmail": "Email",
-    "toggle": "Toggle"
+    "toggle": "Toggle",
+    "open": "Open sidebar",
+    "close": "Close sidebar"
   },
   "email": {
     "save": "Save as email",

@@ -197,7 +197,9 @@
     "modelTitle": "Kielimalli",
     "chatNew": "Uusi keskustelu",
     "chatEmail": "Sähköposti",
-    "toggle": "Vaihda"
+    "toggle": "Vaihda",
+    "open": "Avaa sivuvalikko",
+    "close": "Sulje sivuvalikko"
   },
   "chats": {
     "header": "Auki olevat kurssichatit",

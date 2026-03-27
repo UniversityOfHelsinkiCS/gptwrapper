@@ -569,7 +569,9 @@
     "modelTitle": "Språkmodell",
     "chatNew": "Ny chatt",
     "chatEmail": "E-post",
-    "toggle": "Växla"
+    "toggle": "Växla",
+    "open": "Öppna sidomenyn",
+    "close": "Stäng sidomenyn"
   },
   "globalSettings": {
     "title": "Allmänna inställningar"
