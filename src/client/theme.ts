@@ -84,7 +84,7 @@ const useTheme = () => {
               main: '#e99939',
               contrastText: '#1a202c',
             },
-            background: prefersDarkMode ? { default: '#121212', paper: '#1e1e1e' } : { default: '#fafaf8', paper: '#fafaf8' },
+            background: prefersDarkMode ? { default: '#121212', paper: '#1e1e1e' } : { default: '#f4f4f4', paper: '#f8f8f8' },
           },
         }),
       ),
