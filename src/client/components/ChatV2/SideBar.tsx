@@ -12,6 +12,7 @@ import sidebarOpen from '../../assets/sidebar-open.svg'
 import EmailButton from './EmailButton'
 import DownloadButton from './DownloadButton'
 import hyLogo from '../../assets/hy_logo.svg'
+import { useTheme } from '@mui/material/styles'
 
 import ModelSelector from './ModelSelector'
 import { ValidModelName } from '../../../config'
@@ -40,6 +41,7 @@ const SideBar = ({
 }) => {
   const { courseId } = useParams()
   const { t } = useTranslation()
+  const theme = useTheme()
   const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
 
   const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
@@ -110,7 +112,14 @@ const SideBar = ({
             </Box>
 
             <Box sx={{ px: 3, mb: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-              <img src={hyLogo} alt="University of Helsinki" width="36" />
+              <img
+                src={hyLogo}
+                alt="University of Helsinki"
+                width="36"
+                style={{
+                  filter: theme.palette.mode === 'dark' ? 'invert(1)' : undefined,
+                }}
+              />
               <Typography fontWeight="bold" color="textPrimary">
                 {t('appName').toUpperCase()}
               </Typography>
