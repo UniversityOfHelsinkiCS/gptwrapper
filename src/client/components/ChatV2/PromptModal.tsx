@@ -11,7 +11,6 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Prompt as PromptType } from '../../types'
 import { PromptEditor } from '../Prompt/PromptEditor'
 import { usePromptState } from './PromptState'
-import { PromptInfoContent } from '../Prompt/PromptInfoContent'
 import { Tab, Tabs, IconButton } from '@mui/material'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import { useMediaQuery, useTheme } from '@mui/material'
@@ -29,8 +28,6 @@ const PromptModal = () => {
   const [createNewOpen, setCreateNewOpen] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<PromptType | null>(null)
   const [tab, setTab] = useState(0)
-  const [infoModalOpen, setInfoModalOpen] = useState(false)
-  const [infoModalPrompt, setInfoModalPrompt] = useState<PromptType | undefined>()
   const [previewPrompts, setPreviewPrompts] = useState<Record<number, PromptType | undefined>>(isMobile ? {} : { [tab]: activePrompt })
   const previewPrompt = previewPrompts[tab]
   const setPreviewPrompt = (prompt: PromptType | undefined) => setPreviewPrompts((prev) => ({ ...prev, [tab]: prompt }))
@@ -287,18 +284,6 @@ const PromptModal = () => {
         </Box>
       </Box>
 
-      <Dialog
-        fullWidth
-        open={createNewOpen}
-        onClose={(_event, reason) => {
-          if (reason === 'backdropClick') return
-          setCreateNewOpen(false)
-        }}
-      >
-        {courseId !== 'general' && tab === 0 && <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} />}
-        {(courseId === 'general' || tab === 1) && <PromptEditor back={`/${courseId}/prompts`} setEditorOpen={setCreateNewOpen} personal />}
-      </Dialog>
-
       <ConfirmDialog
         open={!!deleteConfirm}
         title={t('settings:confirmDeletePromptTitle')}
@@ -306,24 +291,6 @@ const PromptModal = () => {
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteConfirm(null)}
       />
-
-      <Dialog fullWidth maxWidth="md" open={infoModalOpen} onClose={() => setInfoModalOpen(false)}>
-        <Box sx={{ position: 'relative', p: 3 }}>
-          <IconButton onClick={() => setInfoModalOpen(false)} sx={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }} data-testid="close-info-modal">
-            <Close />
-          </IconButton>
-          {infoModalPrompt && (
-            <PromptInfoContent
-              name={infoModalPrompt.name}
-              userInstructions={infoModalPrompt.userInstructions ?? ''}
-              systemMessage={infoModalPrompt.systemMessage}
-              hidden={infoModalPrompt.hidden}
-              type={infoModalPrompt.type}
-              isTeacher={amongResponsibles}
-            />
-          )}
-        </Box>
-      </Dialog>
     </Box>
   )
 }
