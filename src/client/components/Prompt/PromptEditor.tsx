@@ -10,7 +10,7 @@ import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
 import { PromptEditorFormContext } from './context'
-import { PromptEditorForm } from './PromptEditorForm'
+import { PromptEditorForm2 } from './PromptEditorForm2'
 import { PromptEditorFormContextValue, PromptEditorFormState } from 'src/client/types'
 
 export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string; setEditorOpen?: React.Dispatch<boolean>; personal?: boolean }) => {
@@ -120,7 +120,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         <form onSubmit={handleSubmit}>
           <Box sx={{ py: 3 }}>
-            <PromptEditorForm />
+            <PromptEditorForm2 />
           </Box>
 
           <DialogActions>
