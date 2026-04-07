@@ -9,7 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Prompt as PromptType } from '../../types'
-import { PromptEditor } from '../Prompt/PromptEditor'
+import { PromptEditor2 } from '../Prompt/PromptEditor2'
 import { usePromptState } from './PromptState'
 import { Tab, Tabs, IconButton } from '@mui/material'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
@@ -31,6 +31,7 @@ const PromptModal = () => {
   const [previewPrompts, setPreviewPrompts] = useState<Record<number, PromptType | undefined>>(isMobile ? {} : { [tab]: activePrompt })
   const previewPrompt = previewPrompts[tab]
   const setPreviewPrompt = (prompt: PromptType | undefined) => setPreviewPrompts((prev) => ({ ...prev, [tab]: prompt }))
+  const [isEditing, setIsEditing] = useState(false)
 
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
@@ -65,6 +66,10 @@ const PromptModal = () => {
     const link = `${window.location.origin}${PUBLIC_URL}/${courseId}?promptId=${promptId}`
     navigator.clipboard.writeText(link)
     enqueueSnackbar(t('common:copiedToClipboard'), { variant: 'success' })
+  }
+
+  const handleEdit2 = () => {
+    setIsEditing(!isEditing)
   }
 
   const handleEdit = (event: React.MouseEvent<HTMLButtonElement>, prompt: PromptType) => {
@@ -190,98 +195,103 @@ const PromptModal = () => {
             </Box>
           )}
         </Box>
-
         <Divider sx={{ display: isMobile ? 'none' : 'flex' }} orientation="vertical" flexItem />
-
         {/* Right panel - preview */}
-        <Box sx={{ display: !isMobile || previewPrompt ? 'flex' : 'none', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
-          {previewPrompt ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
-              <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                  <Typography variant="h6" fontWeight="bold" data-testid={`prompt-preview-title-for-${previewPrompt.name}`}>
-                    {previewPrompt.name}
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-                    {(isPersonalTab || amongResponsibles) && (
-                      <Tooltip arrow placement="bottom" title={t('prompt:editPromptTooltip')}>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => handleEdit(e, previewPrompt)}
-                          color="primary"
-                          data-testid={`edit-prompt-${previewPrompt.name}`}
-                        >
-                          <EditOutlined fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {!isPersonalTab && (
-                      <Tooltip arrow placement="bottom" title={t('prompt:copyPromptUrlTooltip')}>
-                        <IconButton size="small" onClick={(e) => handleCopyLink(e, previewPrompt.id)}>
-                          <ContentCopyOutlined fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {(isPersonalTab || amongResponsibles) && (
-                      <Tooltip arrow placement="bottom" title={t('prompt:deletePromptTooltip')}>
-                        <IconButton
-                          size="small"
-                          onClick={(event) => handleDelete(event, previewPrompt)}
-                          color="error"
-                          data-testid={`delete-prompt-${previewPrompt.name}`}
-                        >
-                          <DeleteOutline fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
+        {!isEditing && (
+          <Box sx={{ display: !isMobile || previewPrompt ? 'flex' : 'none', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
+            {previewPrompt ? (
+              <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
+                <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                    <Typography variant="h6" fontWeight="bold" data-testid={`prompt-preview-title-for-${previewPrompt.name}`}>
+                      {previewPrompt.name}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                      {(isPersonalTab || amongResponsibles) && (
+                        <Tooltip arrow placement="bottom" title={t('prompt:editPromptTooltip')}>
+                          <IconButton size="small" onClick={(e) => handleEdit2()} color="primary" data-testid={`edit-prompt-${previewPrompt.name}`}>
+                            <EditOutlined fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {!isPersonalTab && (
+                        <Tooltip arrow placement="bottom" title={t('prompt:copyPromptUrlTooltip')}>
+                          <IconButton size="small" onClick={(e) => handleCopyLink(e, previewPrompt.id)}>
+                            <ContentCopyOutlined fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {(isPersonalTab || amongResponsibles) && (
+                        <Tooltip arrow placement="bottom" title={t('prompt:deletePromptTooltip')}>
+                          <IconButton
+                            size="small"
+                            onClick={(event) => handleDelete(event, previewPrompt)}
+                            color="error"
+                            data-testid={`delete-prompt-${previewPrompt.name}`}
+                          >
+                            <DeleteOutline fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </Box>
                   </Box>
-                </Box>
 
-                {previewPrompt.userInstructions && (
+                  {previewPrompt.userInstructions && (
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="h6" color="text.primary" gutterBottom>
+                        {t('prompt:promptInstructions')}
+                      </Typography>
+                      <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                        {previewPrompt.userInstructions}
+                      </Typography>
+                    </Box>
+                  )}
+
                   <Box sx={{ mb: 3 }}>
-                    <Typography variant="h6" color="text.primary" gutterBottom>
-                      {t('prompt:promptInstructions')}
+                    <Box gap={1} sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Typography variant="h6" color="text.primary" gutterBottom>
+                        {t('prompt:systemMessage')}
+                      </Typography>
+                      {previewPrompt.hidden && (
+                        <Typography variant="h6" color="textDisabled" gutterBottom>
+                          {`(${t('prompt:promptHidden')})`}
+                        </Typography>
+                      )}
+                    </Box>
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: previewPrompt.hidden ? 'text.disabled' : 'text.primary' }}>
+                      {previewPrompt.hidden && !amongResponsibles ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
                     </Typography>
-                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                      {previewPrompt.userInstructions}
-                    </Typography>
+                  </Box>
+                </Paper>
+                {isMobile && (
+                  <Box sx={{ mt: 'auto', pt: 2, display: 'flex', justifyContent: 'space-between' }}>
+                    <OutlineButtonBlue onClick={() => handleMobileBackToPromptList()}>
+                      <ArrowBackIcon />
+                      {t('prompt:backToPromptList')}
+                    </OutlineButtonBlue>
+                    <BlueButton data-testid="change-to-prompt-button" variant="contained" onClick={() => handleSelect(previewPrompt)}>
+                      {t('settings:choosePrompt')}
+                    </BlueButton>
                   </Box>
                 )}
-
-                <Box sx={{ mb: 3 }}>
-                  <Box gap={1} sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="h6" color="text.primary" gutterBottom>
-                      {t('prompt:systemMessage')}
-                    </Typography>
-                    {previewPrompt.hidden && (
-                      <Typography variant="h6" color="textDisabled" gutterBottom>
-                        {`(${t('prompt:promptHidden')})`}
-                      </Typography>
-                    )}
-                  </Box>
-                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: previewPrompt.hidden ? 'text.disabled' : 'text.primary' }}>
-                    {previewPrompt.hidden && !amongResponsibles ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
-                  </Typography>
-                </Box>
+              </Box>
+            ) : (
+              <Box sx={{ display: 'flex', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
+                <Typography>{t('settings:noPrompt')}</Typography>
+              </Box>
+            )}
+          </Box>
+        )}
+        {isEditing && (
+          <Box sx={{ display: !isMobile || previewPrompt ? 'flex' : 'none', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
+              <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
+                <PromptEditor2 />
+                <BlueButton onClick={() => handleEdit2()}> BÄKKIIN </BlueButton>
               </Paper>
-              {isMobile && (
-                <Box sx={{ mt: 'auto', pt: 2, display: 'flex', justifyContent: 'space-between' }}>
-                  <OutlineButtonBlue onClick={() => handleMobileBackToPromptList()}>
-                    <ArrowBackIcon />
-                    {t('prompt:backToPromptList')}
-                  </OutlineButtonBlue>
-                  <BlueButton data-testid="change-to-prompt-button" variant="contained" onClick={() => handleSelect(previewPrompt)}>
-                    {t('settings:choosePrompt')}
-                  </BlueButton>
-                </Box>
-              )}
             </Box>
-          ) : (
-            <Box sx={{ display: 'flex', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
-              <Typography>{t('settings:noPrompt')}</Typography>
-            </Box>
-          )}
-        </Box>
+          </Box>
+        )}
       </Box>
 
       <ConfirmDialog
