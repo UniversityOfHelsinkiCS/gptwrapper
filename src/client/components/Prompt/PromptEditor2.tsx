@@ -10,35 +10,45 @@ import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
 import { PromptEditorFormContext } from './context'
-import { PromptEditorForm } from './PromptEditorForm'
+import { PromptEditorForm2 } from './PromptEditorForm2'
 import { PromptEditorFormContextValue, PromptEditorFormState } from 'src/client/types'
 
-export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string; setEditorOpen?: React.Dispatch<boolean>; personal?: boolean }) => {
+export const PromptEditor2 = ({
+  back,
+  setEditorOpen,
+  personal,
+  previewPrompt,
+}: {
+  back?: string
+  setEditorOpen?: React.Dispatch<boolean>
+  personal?: boolean
+  previewPrompt?: any
+}) => {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { courseId } = useParams() as { courseId: string }
   const { data: chatInstance } = useCourse(courseId)
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
   const [loading, setLoading] = useState<boolean>(false)
-  const { activePrompt, createPromptMutation, editPromptMutation } = usePromptState()
+  const { createPromptMutation, editPromptMutation } = usePromptState()
 
   let type: 'CHAT_INSTANCE' | 'PERSONAL' = 'CHAT_INSTANCE'
   if (courseId && courseId !== 'general') type = 'CHAT_INSTANCE'
   if (personal) type = 'PERSONAL'
-  if (activePrompt) type = activePrompt.type
+  if (previewPrompt) type = previewPrompt.type
 
   const [form, setForm] = useState<PromptEditorFormState>({
-    name: activePrompt?.name ?? '',
-    userInstructions: activePrompt?.userInstructions ?? '',
-    systemMessage: activePrompt?.systemMessage ?? '',
-    ragSystemMessage: activePrompt
-      ? (activePrompt.messages?.find((m: Message) => m.role === 'system')?.content as string) || ''
+    name: previewPrompt?.name ?? '',
+    userInstructions: previewPrompt?.userInstructions ?? '',
+    systemMessage: previewPrompt?.systemMessage ?? '',
+    ragSystemMessage: previewPrompt
+      ? (previewPrompt.messages?.find((m: Message) => m.role === 'system')?.content as string) || ''
       : t('prompt:defaultRagMessage'),
-    hidden: activePrompt?.hidden ?? false,
-    ragIndexId: activePrompt?.ragIndexId ?? null,
-    selectedModel: activePrompt?.model ?? 'none',
-    temperatureDefined: activePrompt?.temperature !== undefined,
-    temperature: activePrompt?.temperature ?? 0.5,
+    hidden: previewPrompt?.hidden ?? false,
+    ragIndexId: previewPrompt?.ragIndexId ?? null,
+    selectedModel: previewPrompt?.model ?? 'none',
+    temperatureDefined: previewPrompt?.temperature !== undefined,
+    temperature: previewPrompt?.temperature ?? 0.5,
   })
 
   const modelHasTemperature = form.selectedModel && 'temperature' in (validModels.find((m) => m.name === form.selectedModel) ?? {})
@@ -69,9 +79,9 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
     const messages: Message[] = ragIndexId && ragSystemMessage.length > 0 ? [{ role: 'system', content: ragSystemMessage }] : []
 
     try {
-      if (activePrompt) {
+      if (previewPrompt) {
         await editPromptMutation({
-          id: activePrompt.id,
+          id: previewPrompt.id,
           name,
           userInstructions,
           systemMessage,
@@ -120,7 +130,7 @@ export const PromptEditor = ({ back, setEditorOpen, personal }: { back?: string;
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         <form onSubmit={handleSubmit}>
           <Box sx={{ py: 3 }}>
-            <PromptEditorForm />
+            <PromptEditorForm2 />
           </Box>
 
           <DialogActions>
