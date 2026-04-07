@@ -111,7 +111,7 @@ export const PromptEditor2 = ({
       }
       if (setEditorOpen) setEditorOpen(false)
       if (back) navigate(back)
-      onDone()
+      onDone(previewPrompt.id)
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     } finally {

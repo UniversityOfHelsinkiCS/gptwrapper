@@ -3,7 +3,7 @@ import { ContentCopyOutlined, EditOutlined, Close, ClearOutlined } from '@mui/ic
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import { Box, Dialog, Divider, List, ListItemButton, ListItemText, Typography, Paper, Button, Tooltip } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
@@ -38,7 +38,7 @@ const PromptModal = () => {
 
   const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
 
-  const onDone = () => {
+  const onDone = (promptId) => {
     setIsEditing(false)
   }
 
@@ -89,6 +89,13 @@ const PromptModal = () => {
 
   const currentPrompts = courseId !== 'general' && tab === 0 ? coursePrompts : myPrompts
   const isPersonalTab = courseId === 'general' || tab === 1
+
+  useEffect(() => {
+    if (previewPrompt) {
+      const currentPrompt = currentPrompts.find((prompt) => previewPrompt.id === prompt.id)
+      setPreviewPrompt(currentPrompt)
+    }
+  }, [currentPrompts])
 
   const renderPromptListItem = (prompt: PromptType) => (
     <ListItemButton
