@@ -97,7 +97,10 @@ const PromptModal = () => {
     <ListItemButton
       key={prompt.id}
       selected={previewPrompt?.id === prompt.id}
-      onClick={() => setPreviewPrompt(prompt)}
+      onClick={() => {
+        setPreviewPrompt(prompt)
+        setIsEditing(false)
+      }}
       sx={{
         borderRadius: '8px',
         mb: 0.5,
