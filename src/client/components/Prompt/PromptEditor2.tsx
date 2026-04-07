@@ -18,11 +18,13 @@ export const PromptEditor2 = ({
   setEditorOpen,
   personal,
   previewPrompt,
+  onDone,
 }: {
   back?: string
   setEditorOpen?: React.Dispatch<boolean>
   personal?: boolean
   previewPrompt?: any
+  onDone?: any
 }) => {
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -109,6 +111,7 @@ export const PromptEditor2 = ({
       }
       if (setEditorOpen) setEditorOpen(false)
       if (back) navigate(back)
+      onDone()
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     } finally {

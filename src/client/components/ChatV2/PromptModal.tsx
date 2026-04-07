@@ -38,6 +38,10 @@ const PromptModal = () => {
 
   const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
 
+  const onDone = () => {
+    setIsEditing(false)
+  }
+
   const handleSelect = (prompt?: PromptType) => {
     handleChangePrompt(prompt)
     navigate(`/${courseId}`)
@@ -68,15 +72,8 @@ const PromptModal = () => {
     enqueueSnackbar(t('common:copiedToClipboard'), { variant: 'success' })
   }
 
-  const handleEdit2 = () => {
+  const handleEdit = () => {
     setIsEditing(!isEditing)
-  }
-
-  const handleEdit = (event: React.MouseEvent<HTMLButtonElement>, prompt: PromptType) => {
-    event.stopPropagation()
-    const route = `/${courseId}/prompt/${prompt.id}`
-    handleChangePrompt(prompt)
-    navigate(route)
   }
 
   const handleCreateNew = () => {
@@ -212,7 +209,7 @@ const PromptModal = () => {
                     <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
                       {(isPersonalTab || amongResponsibles) && (
                         <Tooltip arrow placement="bottom" title={t('prompt:editPromptTooltip')}>
-                          <IconButton size="small" onClick={(e) => handleEdit2()} color="primary" data-testid={`edit-prompt-${previewPrompt.name}`}>
+                          <IconButton size="small" onClick={(e) => handleEdit()} color="primary" data-testid={`edit-prompt-${previewPrompt.name}`}>
                             <EditOutlined fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -289,8 +286,8 @@ const PromptModal = () => {
           <Box sx={{ display: !isMobile || previewPrompt ? 'flex' : 'none', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
               <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
-                <PromptEditor2 previewPrompt={previewPrompt} />
-                <BlueButton onClick={() => handleEdit2()}> BÄKKIIN </BlueButton>
+                <PromptEditor2 previewPrompt={previewPrompt} onDone={onDone} />
+                <BlueButton onClick={() => handleEdit()}> BÄKKIIN </BlueButton>
               </Paper>
             </Box>
           </Box>
