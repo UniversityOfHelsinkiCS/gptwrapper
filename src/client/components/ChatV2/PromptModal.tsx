@@ -38,7 +38,7 @@ const PromptModal = () => {
 
   const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
 
-  const onDone = (promptId) => {
+  const onDone = () => {
     setIsEditing(false)
   }
 
@@ -77,8 +77,8 @@ const PromptModal = () => {
   }
 
   const handleCreateNew = () => {
-    setCreateNewOpen((prev) => !prev)
-    handleChangePrompt(undefined)
+    setPreviewPrompt(undefined)
+    setIsEditing(true)
   }
 
   const handleMobileBackToPromptList = () => {
@@ -174,7 +174,6 @@ const PromptModal = () => {
               {t('settings:saveNewPrompt')}
             </Button>
           )}
-
           <Button
             variant="outlined"
             onClick={() => handleSelect()}
@@ -191,11 +190,8 @@ const PromptModal = () => {
           >
             {t('sidebar:promptNone')}
           </Button>
-
           <Divider sx={{ p: 1 }} />
-
           <List sx={{ flex: 1, overflowY: 'auto' }}>{currentPrompts.map((prompt) => renderPromptListItem(prompt))}</List>
-
           {currentPrompts.length === 0 && (
             <Box sx={{ p: 3, color: 'text.secondary' }}>
               <Typography variant="body2">{t('settings:noPrompts')}</Typography>
