@@ -11,6 +11,7 @@ import { RagFile, RagIndex } from '../../db/models'
 import { ApplicationError } from '../../util/ApplicationError'
 import { S3_BUCKET } from '../../util/config'
 import { s3Client } from '../../util/s3client'
+import logger from 'src/server/util/logger'
 
 const isPdf = (ragFile: RagFile) => ragFile.fileType === 'application/pdf'
 const isImage = (ragFile: RagFile) => ragFile.fileType === 'image/png'
@@ -56,7 +57,7 @@ export const FileStore = {
       const deletions = ragFiles.filter((rf) => rf.s3Key && rf.s3Key.length > 0).map((rf) => FileStore.deleteRagFileDocument(rf))
       await Promise.allSettled(deletions)
     } catch (error) {
-      console.warn(`Failed to delete S3 objects with prefix ${prefix}:`, error)
+      logger.warn(`Failed to delete S3 objects with prefix ${prefix}:`, error)
     }
   },
 
@@ -70,7 +71,7 @@ export const FileStore = {
         return true
       }
     } catch (error) {
-      console.error(`Failed to delete file ${getPdfTextKey(s3Key)} from S3:`, error)
+      logger.error(`Failed to delete file ${getPdfTextKey(s3Key)} from S3:`, error)
     }
 
     return false
@@ -84,7 +85,7 @@ export const FileStore = {
     try {
       await s3Client.send(new DeleteObjectCommand({ Bucket: S3_BUCKET, Key: s3Key }))
     } catch (error) {
-      console.error(`Failed to delete file ${s3Key} from S3:`, error)
+      logger.error(`Failed to delete file ${s3Key} from S3:`, error)
       throw ApplicationError.InternalServerError('Failed to delete file')
     }
   },
@@ -104,7 +105,7 @@ export const FileStore = {
           return null
         }
 
-        console.error(`Failed to read PDF text file ${pdfTextKey} in S3:`, error)
+        logger.error(`Failed to read PDF text file ${pdfTextKey} in S3:`, error)
         throw ApplicationError.InternalServerError('Failed to read PDF text file')
       }
     }
@@ -119,7 +120,7 @@ export const FileStore = {
         return null
       }
 
-      console.error(`Failed to read file ${s3Key} from S3:`, error)
+      logger.error(`Failed to read file ${s3Key} from S3:`, error)
       throw ApplicationError.InternalServerError('Failed to read file content')
     }
   },
@@ -131,10 +132,11 @@ export const FileStore = {
       const buffer = await streamToBuffer(obj.Body as NodeJS.ReadableStream)
       return new Uint8Array(buffer)
     } catch (error) {
-      // Check if key does not exist
       if (error instanceof NoSuchKey) {
         return null
       }
+      logger.error(`Failed to read file ${s3Key} from S3:`, error)
+      throw ApplicationError.InternalServerError('Failed to read file content')
     }
   },
 
@@ -144,7 +146,7 @@ export const FileStore = {
     try {
       await s3Client.send(new PutObjectCommand({ Bucket: S3_BUCKET, Key: pdfTextKey, Body: textContent, ContentType: 'text/markdown charset=utf-8' }))
     } catch (error) {
-      console.error(`Error while uploading file to s3: ${error}`)
+      logger.error(`Error while uploading file to s3: ${error}`)
     }
   },
 }
