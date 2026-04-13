@@ -44,10 +44,13 @@ export const ingestRagFiles = async (ragIndex: RagIndex, ragFiles?: RagFile[]) =
 export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
   const ingestionStartMs = Date.now()
 
+  console.log("1")
   await ragFile.update({ error: null, pipelineStage: 'ingesting' })
 
+  console.log("2")
   const vectorStore = RedisVectorStore.fromRagIndex(ragIndex)
 
+  console.log("3")
   let progress = 2.5
   const update = {
     ragFileId: ragFile.id,
@@ -58,6 +61,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
     eta: undefined,
   }
 
+  console.log("4")
   await updateRagFileStatus(ragFile, update)
   const needToParse = (await FileStore.readRagFileTextContent(ragFile)) === null
   const needToParseWithVlm = needToParse && ragFile.metadata?.advancedParsing
@@ -65,10 +69,12 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
   await updateRagFileStatus(ragFile, { ...update, message: needToParse ? 'Preparing to parse PDF' : 'Found cached text' })
   let finalText: string | null = null
 
+  console.log("5")
   if (needToParseWithVlm) {
     // Advanced PDF parsing with job processing.
     const pages = await submitAdvancedParsingJobs(ragFile)
 
+    console.log("6")
     try {
       const start = 5
       const end = 60
@@ -81,22 +87,28 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
         eta: total * 10000,
       })
 
+      console.log("7")
       const jobPromises = pages.map(async (p, index) => {
         try {
           const text = await p.job!.waitUntilFinished(pdfQueueEvents)
+          console.log("8")
           return { index, text, success: true }
+
         } catch (error) {
           logger.error('Page job failed: ', p.job!.id, error)
+          console.log("9")
           return { index, text: p.text, success: false }
         }
       })
 
       const transcriptions: Array<string> = new Array(total)
 
+          console.log("10")
       for await (const result of jobPromises.map((p) => p.then((r) => r))) {
         transcriptions[result.index] = result.text
         completed += 1
 
+          console.log("11")
         const fraction = completed / total
 
         const pct = Math.round(start + (end - start) * fraction)
@@ -113,22 +125,27 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
       finalText = transcriptions.join('\n\n')
 
       await FileStore.writeRagFileTextContent(ragFile, finalText)
+          console.log("11")
     } catch (error: any) {
       logger.error('Error waiting for PDF parsing jobs to finish:', error)
       await ragFile.update({ error: 'PDF parsing failed', pipelineStage: 'error' })
+          console.log("12")
       return
     }
   } else if (needToParse) {
     // Simple PDF parsing.
+          console.log("13")
     const pages = await simplyParsePdf(ragFile)
 
     finalText = pages.map((p) => p.text).join('\n\n')
 
     await FileStore.writeRagFileTextContent(ragFile, finalText)
+          console.log("14")
   } else {
     progress = 50
     finalText = await FileStore.readRagFileTextContent(ragFile)
 
+    console.log("15")
     await updateRagFileStatus(ragFile, {
       ...update,
       progress,
@@ -137,9 +154,11 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
     })
   }
 
+  console.log("16")
   if (finalText === null) {
     logger.error('Error reading rag file text: file does not exist')
     await ragFile.update({ error: 'Error reading rag file text: file does not exist' })
+    console.log("17")
     return
   }
 
@@ -150,6 +169,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
     eta: 6000,
   })
 
+  console.log("18")
   const document = new Document({
     pageContent: finalText,
   })
@@ -158,6 +178,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
 
   const chunkDocuments = await splitter.splitDocuments([document])
 
+  console.log("19")
   let idx = 0
   for (const chunkDocument of chunkDocuments) {
     chunkDocument.id = `${ragFile.filename}:${idx}`
@@ -165,9 +186,11 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
       ...chunkDocument.metadata,
       ragFileName: ragFile.filename,
     }
+    console.log("20")
     idx++
   }
 
+          console.log("21")
   await updateRagFileStatus(ragFile, {
     ...update,
     message: `Embedding chunks`,
@@ -175,9 +198,11 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
     eta: 5000,
   })
 
+          console.log("22")
   const embedder = getEmbedder()
   const embeddings = await embedder.embedDocuments(chunkDocuments.map((d) => d.pageContent))
 
+          console.log("23")
   await updateRagFileStatus(ragFile, {
     ...update,
     message: 'Saving vectors',
@@ -185,6 +210,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
     eta: 1000,
   })
 
+          console.log("24")
   await vectorStore.addDocuments(
     chunkDocuments.map((doc, i) => ({
       id: doc.id!,
@@ -194,6 +220,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
     })),
   )
 
+          console.log("25")
   await updateRagFileStatus(ragFile, {
     ...update,
     pipelineStage: 'completed',
@@ -202,8 +229,10 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
     eta: undefined,
   })
 
+          console.log("26")
   const ingestionDurationMs = Date.now() - ingestionStartMs
   logger.info('RAG ingestion completed', { ragFileId: ragFile.id, durationMs: ingestionDurationMs })
+  console.log("finale 27")
 }
 
 export const updateRagFileStatus = async (ragFile: RagFile, update: IngestionJobStatus) => {
