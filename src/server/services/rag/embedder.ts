@@ -15,7 +15,6 @@ const _ollamaEmbedder = new OllamaEmbeddings({
       headers: {
         ...init?.headers,
         token: LAAMA_API_TOKEN,
-        Connection: 'close',
       },
     })
   },
