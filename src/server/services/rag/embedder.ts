@@ -12,6 +12,7 @@ const _ollamaEmbedder = new OllamaEmbeddings({
   fetch: (input: RequestInfo | URL, init?: RequestInit) => {
     return fetch(input, {
       ...init,
+      signal: undefined,
       headers: {
         ...init?.headers,
         token: LAAMA_API_TOKEN,
