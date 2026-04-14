@@ -70,14 +70,6 @@ const ModelSettingsSection = () => {
       <Typography variant="h5" fontWeight="bold">
         {t('prompt:promptModelSettings')}
       </Typography>
-      <Box mb={3}>
-        {type !== 'PERSONAL' && (
-          <FormControlLabel
-            control={<Checkbox checked={form.hidden} onChange={(e) => setForm((prev) => ({ ...prev, hidden: e.target.checked }))} />}
-            label={t('prompt:hideSystemInstructions')}
-          />
-        )}
-      </Box>
 
       <Box>
         <TextField
@@ -96,6 +88,15 @@ const ModelSettingsSection = () => {
           minRows={8}
           maxRows={48}
         />
+      </Box>
+
+      <Box mb={3}>
+        {type !== 'PERSONAL' && (
+          <FormControlLabel
+            control={<Checkbox checked={form.hidden} onChange={(e) => setForm((prev) => ({ ...prev, hidden: e.target.checked }))} />}
+            label={t('prompt:hideSystemInstructions')}
+          />
+        )}
       </Box>
     </Box>
   )
