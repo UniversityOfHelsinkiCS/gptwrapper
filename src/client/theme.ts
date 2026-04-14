@@ -17,6 +17,8 @@ declare module '@mui/material/styles' {
   }
 }
 
+export const monospaceFonts = "'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace"
+
 const baseOptions: Omit<ThemeOptions, 'palette'> = {
   typography: {
     fontFamily: ['"Open Sans"', '"Helvetica"', '"Arial"', '"sans-serif"', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'].join(','),

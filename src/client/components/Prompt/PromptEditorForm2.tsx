@@ -4,6 +4,7 @@ import { LinkButtonHoc } from '../ChatV2/general/Buttons'
 import OpenableTextfield from '../common/OpenableTextfield'
 import { ClearOutlined, LibraryBooksOutlined, ExpandMore } from '@mui/icons-material'
 import { usePromptEditorForm } from './context'
+import { monospaceFonts } from '../../theme'
 
 const BasicInfoSection = () => {
   const { form, setForm, type } = usePromptEditorForm()
@@ -81,7 +82,7 @@ const ModelSettingsSection = () => {
       <Box>
         <TextField
           variant="filled"
-          sx={{ '& textarea': { fontFamily: 'monospace' } }}
+          sx={{ '& textarea': { fontFamily: monospaceFonts } }}
           slotProps={{
             htmlInput: {
               'data-testid': 'system-message-input',
