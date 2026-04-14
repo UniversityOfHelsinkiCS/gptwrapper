@@ -11,8 +11,8 @@ import sidebarClose from '../../assets/sidebar-close.svg'
 import sidebarOpen from '../../assets/sidebar-open.svg'
 import EmailButton from './EmailButton'
 import DownloadButton from './DownloadButton'
-import hyLogo from '../../assets/hy_logo.svg'
 import { useTheme } from '@mui/material/styles'
+import { HYLogo } from './general/HYLogo'
 
 import ModelSelector from './ModelSelector'
 import { ValidModelName } from '../../../config'
@@ -112,14 +112,7 @@ const SideBar = ({
             </Box>
 
             <Box sx={{ px: 3, mb: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-              <img
-                src={hyLogo}
-                alt="University of Helsinki"
-                width="36"
-                style={{
-                  filter: theme.palette.mode === 'dark' ? 'invert(1)' : undefined,
-                }}
-              />
+              <HYLogo sx={{ width: 36, height: 36, color: '#e99939', flexShrink: 0 }} />
               <Typography fontWeight="bold" color="textPrimary">
                 {t('appName').toUpperCase()}
               </Typography>

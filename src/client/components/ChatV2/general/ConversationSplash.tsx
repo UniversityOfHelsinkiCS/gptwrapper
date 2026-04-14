@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material'
-import hyLogo from '../../../assets/hy_logo.svg'
+import { HYLogo } from './HYLogo'
 import { useTranslation } from 'react-i18next'
 import { ActivityPeriod } from '../../../types'
 
@@ -24,12 +24,10 @@ export const ConversationSplash = ({ courseName, courseDate, promptName }: { cou
         },
       }}
     >
-      <Box
-        component="img"
-        src={hyLogo}
-        alt="University of Helsinki"
+      <HYLogo
         sx={{
           width: { xs: '80px', sm: '120px', md: '200px' },
+          color: '#e99939',
           opacity: 0.2,
           mb: '2.5rem',
         }}
