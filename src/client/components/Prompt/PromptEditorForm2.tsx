@@ -12,7 +12,7 @@ const BasicInfoSection = () => {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight="bold">
+      <Typography variant="h6" fontWeight="bold" color="text.primary" gutterBottom>
         {t('prompt:promptBasicInfo')}
       </Typography>
       <Box mb={3}>
@@ -67,7 +67,7 @@ const ModelSettingsSection = () => {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight="bold">
+      <Typography variant="h6" fontWeight="bold" color="text.primary" gutterBottom>
         {t('prompt:promptModelSettings')}
       </Typography>
 
@@ -110,7 +110,7 @@ const RagSettingsSection = () => {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight="bold">
+      <Typography variant="h6" fontWeight="bold" color="text.primary" gutterBottom>
         {t('prompt:promptSourceMaterialData')}
       </Typography>
       <Box mb={3}>
