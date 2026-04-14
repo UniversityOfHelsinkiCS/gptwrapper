@@ -244,7 +244,7 @@ export function Component() {
             {courseEnabled && (
               <Tooltip title={t('copy')} placement="right">
                 <Button sx={{ p: 0 }} color="inherit">
-                  <Typography style={{ textTransform: 'lowercase', color: 'blue' }} onClick={() => handleCopyLink(studentLink)}>
+                  <Typography style={{ textTransform: 'lowercase', color: 'inherit' }} onClick={() => handleCopyLink(studentLink)}>
                     {studentLink}
                   </Typography>
                 </Button>
@@ -267,7 +267,7 @@ export function Component() {
                   >
                     {t('course:add')}
                   </Button>
-                  <Stack sx={{ mb: 0, padding: 1, borderColor: 'gray', borderWidth: 1, borderStyle: 'solid', borderRadius: '0.5rem' }}>
+                  <Stack sx={{ mb: 0, padding: 1, borderColor: 'divider', borderWidth: 1, borderStyle: 'solid', borderRadius: '0.5rem' }}>
                     {responsibilities.map((responsibility) => (
                       <Box key={responsibility.id} sx={{ display: 'flex', alignItems: 'center', padding: 1 }}>
                         <Typography>
@@ -357,7 +357,6 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
   const editMutation = useEditPromptMutation()
   const createMutation = useCreatePromptMutation()
 
-
   const { prompts, isLoading: promptsLoading } = usePrompts(courseId)
 
   const [editorOpen, setEditorOpen] = useState(false)
@@ -393,7 +392,7 @@ const Prompts = ({ courseId, chatInstanceId }: { courseId: string; chatInstanceI
           {promptToEdit ? t('prompt:editPrompt', { name: promptToEdit.name }) : t('prompt:createNew')}
           <IconButton
             onClick={() => setEditorOpen(false)}
-            sx={{ position: 'absolute', top: 10, right: 20, color: 'grey.500', bgcolor: 'background.paper', opacity: 0.9, zIndex: 1 }}
+            sx={{ position: 'absolute', top: 10, right: 20, color: 'text.secondary', bgcolor: 'background.elevated', opacity: 0.9, zIndex: 1 }}
             data-testid="close-prompt-editor"
           >
             <Close />

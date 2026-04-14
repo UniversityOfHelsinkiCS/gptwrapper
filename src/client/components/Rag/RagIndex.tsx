@@ -139,7 +139,7 @@ export const RagIndex: React.FC = () => {
       <OutlineButtonBlack sx={{ mb: 2 }} onClick={() => navigate(`/${courseId}/course/rag`)} data-testid="ragIndexBackToList">
         <ArrowBack />
       </OutlineButtonBlack>
-      <Box sx={{ backgroundColor: 'grey.100', p: 2, borderRadius: 1 }}>
+      <Box sx={{ backgroundColor: 'background.subtle', p: 2, borderRadius: 1 }}>
         <Breadcrumbs>
           <EditableTitle ragIndex={ragDetails} />
         </Breadcrumbs>

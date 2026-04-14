@@ -135,7 +135,7 @@ const CourseList = (props: CourseListProps) => {
       <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
         <Table>
           <TableHead>
-            <TableRow sx={{ backgroundColor: 'grey.100' }}>
+            <TableRow sx={{ backgroundColor: 'background.subtle' }}>
               <TableCell sx={{ fontWeight: 'bold' }}>
                 <TableSortLabel
                   data-testid="sort-by-name"
@@ -176,7 +176,7 @@ const CourseList = (props: CourseListProps) => {
                     '&:last-child td, &:last-child th': { border: 0 },
                     borderRadius: '1.25rem',
                     '&:hover': {
-                      backgroundColor: 'grey.100',
+                      backgroundColor: 'background.subtle',
                       cursor: 'pointer',
                     },
                   }}

@@ -38,7 +38,7 @@ const Rag: React.FC = () => {
           <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
             <Table>
               <TableHead>
-                <TableRow sx={{ backgroundColor: 'grey.100' }}>
+                <TableRow sx={{ backgroundColor: 'background.subtle' }}>
                   <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:name')}</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:language')}</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:numberOfFiles')}</TableCell>

@@ -260,16 +260,16 @@ const ToolResult = ({
             <AnnotationTruncated key={i} data={result} relevanceOrder={i + 1} setIsDrawerOpen={setIsDrawerOpen} setSelectedAnnotation={setSelectedAnnotation} />
           ))}
           {arrayResults.length > 0 ? (
-          <OutlineButtonBlack
-            sx={{ margin: '1rem auto' }}
-            startIcon={<SubjectIcon />}
-            onClick={() => {
-              setIsDrawerOpen(true)
-              setSelectedAnnotation(null)
-            }}
-          >
-            {t('chat:readMore')}
-          </OutlineButtonBlack>
+            <OutlineButtonBlack
+              sx={{ margin: '1rem auto' }}
+              startIcon={<SubjectIcon />}
+              onClick={() => {
+                setIsDrawerOpen(true)
+                setSelectedAnnotation(null)
+              }}
+            >
+              {t('chat:readMore')}
+            </OutlineButtonBlack>
           ) : (
             <Typography>{t('chat:noToolResults')}</Typography>
           )}
@@ -301,8 +301,8 @@ const ToolResult = ({
                 position: 'fixed',
                 top: 10,
                 right: 10,
-                color: 'grey.500',
-                bgcolor: 'background.paper',
+                color: 'text.secondary',
+                bgcolor: 'background.elevated',
                 opacity: 0.9,
               }}
             >

@@ -1,110 +1,119 @@
-import { Box, Typography, FormControl, Select, MenuItem, SelectChangeEvent, Divider } from "@mui/material";
-import CopyToClipboardButton from "../../ChatV2/CopyToClipboardButton";
-import { ReactNode, useEffect, useState } from "react";
-import { PUBLIC_URL } from "@config";
-import useCourse from "../../../hooks/useCourse";
-import { useParams } from "react-router-dom";
-import { usePromptState } from "../../ChatV2/PromptState";
-import { Prompt } from "src/client/types";
-import { useTranslation } from "react-i18next";
-import moodleTutorialImage1 from "../../../assets/moodle-1.jpeg";
-import moodleTutorialImage2 from "../../../assets/moodle-2.jpeg";
-import moodleTutorialImage3 from "../../../assets/moodle-3.jpeg";
-
+import { Box, Typography, FormControl, Select, MenuItem, SelectChangeEvent, Divider } from '@mui/material'
+import CopyToClipboardButton from '../../ChatV2/CopyToClipboardButton'
+import { ReactNode, useEffect, useState } from 'react'
+import { PUBLIC_URL } from '@config'
+import useCourse from '../../../hooks/useCourse'
+import { useParams } from 'react-router-dom'
+import { usePromptState } from '../../ChatV2/PromptState'
+import { Prompt } from 'src/client/types'
+import { useTranslation } from 'react-i18next'
+import moodleTutorialImage1 from '../../../assets/moodle-1.jpeg'
+import moodleTutorialImage2 from '../../../assets/moodle-2.jpeg'
+import moodleTutorialImage3 from '../../../assets/moodle-3.jpeg'
 
 export default function CourseEmbedding() {
   const { t } = useTranslation()
-  const { courseId } = useParams() as { courseId: string };
-  const { data: chatInstance } = useCourse(courseId);
-  const { coursePrompts, activePrompt } = usePromptState();
-  const [link, setLink] = useState<string>("");
-  const [embeddingCode, setEmbeddingCode] = useState<string>("")
-  const [selectedPrompt, setSelectedPrompt] = useState<Prompt | undefined>(activePrompt);
+  const { courseId } = useParams() as { courseId: string }
+  const { data: chatInstance } = useCourse(courseId)
+  const { coursePrompts, activePrompt } = usePromptState()
+  const [link, setLink] = useState<string>('')
+  const [embeddingCode, setEmbeddingCode] = useState<string>('')
+  const [selectedPrompt, setSelectedPrompt] = useState<Prompt | undefined>(activePrompt)
 
   useEffect(() => {
-    if (!chatInstance) return;
-    const baseUrl = `${window.location.origin}${PUBLIC_URL}/${chatInstance.courseId}`;
-    const studentLink = selectedPrompt ? createLinkWithPrompt(baseUrl, selectedPrompt.id) : baseUrl;
-    const moodleEmbedding = selectedPrompt ? createEmbeddingWithPrompt(baseUrl, selectedPrompt.id) : createEmbedding(baseUrl);
-    setLink(studentLink);
-    setEmbeddingCode(moodleEmbedding);
-  }, [chatInstance, selectedPrompt]);
+    if (!chatInstance) return
+    const baseUrl = `${window.location.origin}${PUBLIC_URL}/${chatInstance.courseId}`
+    const studentLink = selectedPrompt ? createLinkWithPrompt(baseUrl, selectedPrompt.id) : baseUrl
+    const moodleEmbedding = selectedPrompt ? createEmbeddingWithPrompt(baseUrl, selectedPrompt.id) : createEmbedding(baseUrl)
+    setLink(studentLink)
+    setEmbeddingCode(moodleEmbedding)
+  }, [chatInstance, selectedPrompt])
 
   const handleChange = (event: SelectChangeEvent) => {
-    const value = event.target.value;
-    if (value === "") {
-      setSelectedPrompt(undefined);
+    const value = event.target.value
+    if (value === '') {
+      setSelectedPrompt(undefined)
     } else {
-      const prompt = coursePrompts.find((p) => String(p.id) === String(value));
-      setSelectedPrompt(prompt);
+      const prompt = coursePrompts.find((p) => String(p.id) === String(value))
+      setSelectedPrompt(prompt)
     }
-  };
+  }
 
   return (
     <Box sx={{ p: 1, position: 'relative' }}>
-      <Typography variant="h5" my={2} fontWeight="semibold">{t("course:embeddingInstructionsTitle")}</Typography>
-      <Typography mb={8}>{t("course:embeddingInstructionsIntro")}</Typography>
+      <Typography variant="h5" my={2} fontWeight="semibold">
+        {t('course:embeddingInstructionsTitle')}
+      </Typography>
+      <Typography mb={8}>{t('course:embeddingInstructionsIntro')}</Typography>
       <Box sx={{ display: 'flex', gap: 8 }}>
         <Box flex={2} mb={2}>
           <GuideItem label={'A'}>
-            <Typography fontWeight="bold" mb={3}>{t("course:onlyLinkTitle")}</Typography>
+            <Typography fontWeight="bold" mb={3}>
+              {t('course:onlyLinkTitle')}
+            </Typography>
             <GuideItem label="1." variant="secondary">
               <Typography variant="body2">{t('course:stepSelectPromptOnRight')}</Typography>
             </GuideItem>
             <GuideItem label="2." variant="secondary">
-              <Typography variant="body2">{t("course:stepCopyLink")}</Typography>
+              <Typography variant="body2">{t('course:stepCopyLink')}</Typography>
             </GuideItem>
           </GuideItem>
           <GuideItem label={'B'}>
-            <Typography fontWeight="bold" mb={3}>{t("course:appEmbeddingTitle")}</Typography>
+            <Typography fontWeight="bold" mb={3}>
+              {t('course:appEmbeddingTitle')}
+            </Typography>
             <GuideItem label="1." variant="secondary">
               <Typography variant="body2">{t('course:stepSelectPromptOnRight')}</Typography>
             </GuideItem>
             <GuideItem label="2." variant="secondary">
-              <Typography variant="body2">{t("course:stepCopyEmbeddingCode")}</Typography>
+              <Typography variant="body2">{t('course:stepCopyEmbeddingCode')}</Typography>
             </GuideItem>
             <GuideItem label="3." variant="secondary">
               <Box>
-                <Typography variant="body2">{t("course:stepOpenMoodleSettings")}</Typography>
-                <TutorialImage src={moodleTutorialImage1} alt={t("course:altOpenSettings")} />
+                <Typography variant="body2">{t('course:stepOpenMoodleSettings')}</Typography>
+                <TutorialImage src={moodleTutorialImage1} alt={t('course:altOpenSettings')} />
               </Box>
             </GuideItem>
             <GuideItem label="3." variant="secondary">
               <Box>
-                <Typography variant="body2">{t("course:stepOpenSourceCode")}</Typography>
-                <TutorialImage src={moodleTutorialImage2} alt={t("course:altSourceView")} />
+                <Typography variant="body2">{t('course:stepOpenSourceCode')}</Typography>
+                <TutorialImage src={moodleTutorialImage2} alt={t('course:altSourceView')} />
               </Box>
             </GuideItem>
             <GuideItem label="4." variant="secondary">
               <Box>
-                <Typography variant="body2">{t("course:stepPasteAndSave")}</Typography>
-                <TutorialImage src={moodleTutorialImage3} alt={t("course:altPasteSave")} />
+                <Typography variant="body2">{t('course:stepPasteAndSave')}</Typography>
+                <TutorialImage src={moodleTutorialImage3} alt={t('course:altPasteSave')} />
               </Box>
             </GuideItem>
           </GuideItem>
         </Box>
         <Divider orientation="vertical" flexItem />
-        <Box flex={1}
+        <Box
+          flex={1}
           sx={{
             position: 'sticky',
-            top: 100,           // Defines where the sticking starts
+            top: 100, // Defines where the sticking starts
             alignSelf: 'flex-start', // prevents the box from stretching to the full height of the left side
-            height: 'fit-content'    // Ensures the sticky container isn't taller than its content
-          }}>
+            height: 'fit-content', // Ensures the sticky container isn't taller than its content
+          }}
+        >
           <Box>
-            <Typography fontWeight="bold" mb={2}>{t('course:courseEmbeddingPrompt')}</Typography>
+            <Typography fontWeight="bold" mb={2}>
+              {t('course:courseEmbeddingPrompt')}
+            </Typography>
             <FormControl fullWidth size="small">
               <Select
                 labelId="prompt-select-label"
                 id="prompt-select"
-                value={selectedPrompt?.id || ""}
+                value={selectedPrompt?.id || ''}
                 onChange={handleChange}
                 displayEmpty
                 renderValue={(selected) => {
                   if (!selected) {
-                    return <em style={{ color: 'gray', fontStyle: 'normal' }}>{t('sidebar:promptSelect')}</em>;
+                    return <em style={{ color: 'gray', fontStyle: 'normal' }}>{t('sidebar:promptSelect')}</em>
                   }
-                  return coursePrompts.find(p => p.id === selected)?.name;
+                  return coursePrompts.find((p) => p.id === selected)?.name
                 }}
                 sx={{ p: 0.8 }}
               >
@@ -127,7 +136,9 @@ export default function CourseEmbedding() {
             </Typography>
           </CopyField>
 
-          <Typography fontWeight="bold" mb={2}>{t('course:moodleEmbeddingCode')}</Typography>
+          <Typography fontWeight="bold" mb={2}>
+            {t('course:moodleEmbeddingCode')}
+          </Typography>
           <CopyField copied={embeddingCode}>
             <Box
               id="moodle-embedding"
@@ -147,13 +158,11 @@ export default function CourseEmbedding() {
         </Box>
       </Box>
     </Box>
-
-  );
+  )
 }
 
-
-const GuideItem = ({ label, variant = 'primary', children }: { label: string | number, variant?: 'primary' | 'secondary', children: ReactNode }) => {
-  const isPrimary = variant === 'primary';
+const GuideItem = ({ label, variant = 'primary', children }: { label: string | number; variant?: 'primary' | 'secondary'; children: ReactNode }) => {
+  const isPrimary = variant === 'primary'
 
   return (
     <Box display="flex" gap={isPrimary ? 3 : 2} mb={3}>
@@ -161,18 +170,20 @@ const GuideItem = ({ label, variant = 'primary', children }: { label: string | n
         sx={{
           display: 'flex',
           justifyContent: 'center',
-          ...(isPrimary ? {
-            backgroundColor: 'text.primary',
-            color: 'background.paper',
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '100%',
-            flexShrink: 0,
-            alignItems: 'center'
-          } : {
-            width: 'auto',
-            height: 'auto',
-          })
+          ...(isPrimary
+            ? {
+                backgroundColor: 'text.primary',
+                color: 'background.paper',
+                width: '2rem',
+                height: '2rem',
+                borderRadius: '100%',
+                flexShrink: 0,
+                alignItems: 'center',
+              }
+            : {
+                width: 'auto',
+                height: 'auto',
+              }),
         }}
       >
         <Typography variant={isPrimary ? 'body1' : 'body2'} sx={{ fontWeight: isPrimary ? 'normal' : 'bold' }}>
@@ -186,27 +197,31 @@ const GuideItem = ({ label, variant = 'primary', children }: { label: string | n
   )
 }
 
-const CopyField = ({ children, copied }: { children: ReactNode, copied: string }) => {
-  return (<Box sx={{
-    border: '1px solid',
-    borderColor: 'rgba(0, 0, 0, 0.2)',
-    borderRadius: 1,
-    backgroundColor: 'grey.50',
-    p: 1,
-    mb: 2,
-    minHeight: 100,
-    maxHeight: 200,
-    overflowY: 'auto',
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'space-between',
-  }}>
-    {children}
-    <CopyToClipboardButton id="moodle-embedding" copied={copied} />
-  </Box>)
+const CopyField = ({ children, copied }: { children: ReactNode; copied: string }) => {
+  return (
+    <Box
+      sx={{
+        border: '1px solid',
+        borderColor: 'rgba(0, 0, 0, 0.2)',
+        borderRadius: 1,
+        backgroundColor: 'background.subtle',
+        p: 1,
+        mb: 2,
+        minHeight: 100,
+        maxHeight: 200,
+        overflowY: 'auto',
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'space-between',
+      }}
+    >
+      {children}
+      <CopyToClipboardButton id="moodle-embedding" copied={copied} />
+    </Box>
+  )
 }
 
-const TutorialImage = ({ src, alt }: { src: string, alt: string }) => {
+const TutorialImage = ({ src, alt }: { src: string; alt: string }) => {
   return (
     <Box
       component="img"
@@ -221,13 +236,13 @@ const TutorialImage = ({ src, alt }: { src: string, alt: string }) => {
         mt: 2,
       }}
     />
-  );
-};
+  )
+}
 
-const createLinkWithPrompt = (baseUrl: string, promptId: string) => (`${baseUrl}?promptId=${promptId}`)
+const createLinkWithPrompt = (baseUrl: string, promptId: string) => `${baseUrl}?promptId=${promptId}`
 const createEmbeddingWithPrompt = (baseUrl: string, promptId: string) => embeddingMake(baseUrl, promptId)
 const createEmbedding = (baseUrl: string) => embeddingMake(baseUrl)
-const embeddingMake = (baseUrl: string, promptId?: string) => (
+const embeddingMake = (baseUrl: string, promptId?: string) =>
   `<div lang="fi" style="position: relative;" translate="yes"><iframe
     id="cc-iframe"
     style="border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 0.3rem;"
@@ -350,4 +365,3 @@ const embeddingMake = (baseUrl: string, promptId?: string) => (
     }
   </script>
 </div>`
-) 

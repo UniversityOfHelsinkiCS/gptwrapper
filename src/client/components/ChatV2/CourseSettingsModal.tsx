@@ -330,7 +330,7 @@ const TeachersSettingsView = ({
         <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
           <Table>
             <TableHead>
-              <TableRow sx={{ backgroundColor: 'grey.100' }}>
+              <TableRow sx={{ backgroundColor: 'background.subtle' }}>
                 <TableCell />
                 <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:name')}</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>{t('course:addedFrom')}</TableCell>
@@ -373,7 +373,7 @@ const StudentsSettingsView = ({
   courseId,
   drawStudentActionComponent,
   handleRemoveEnrolment,
-  isCustomCourse
+  isCustomCourse,
 }: {
   userIsAdminOrResponsible: boolean
   addStudentViewOpen: boolean
@@ -404,7 +404,7 @@ const StudentsSettingsView = ({
             <TableContainer sx={{ borderRadius: 1, minWidth: 800 }} data-testid="students-management-table">
               <Table>
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: 'grey.100' }}>
+                  <TableRow sx={{ backgroundColor: 'background.subtle' }}>
                     <TableCell />
                     <TableCell sx={{ fontWeight: 'bold' }}>{t('admin:studentNumber')}</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>{t('rag:name')}</TableCell>

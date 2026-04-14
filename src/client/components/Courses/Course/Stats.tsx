@@ -64,7 +64,7 @@ const Stats: React.FC = () => {
       {usages && !course.saveDiscussions && (
         <>
           <Table sx={{ mt: 2 }} data-testid="students-table">
-            <TableHead sx={{ borderRadius: 1, backgroundColor: 'grey.100' }}>
+            <TableHead sx={{ borderRadius: 1, backgroundColor: 'background.subtle' }}>
               <TableRow>
                 <TableCell />
                 <TableCell>
