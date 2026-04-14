@@ -78,6 +78,18 @@ const ModelSettingsSection = () => {
         <Typography variant="h6" fontWeight="bold" color="text.primary">
           {t('prompt:promptModelSettings')}
         </Typography>
+        {type !== 'PERSONAL' && (
+          <FormControlLabel
+            sx={{ ml: 'auto' }}
+            control={<Checkbox checked={form.hidden} onChange={(e) => setForm((prev) => ({ ...prev, hidden: e.target.checked }))} />}
+            label={
+              <Box display="flex" alignItems="center" gap={1}>
+                {t('prompt:hideSystemInstructions')}
+                {form.hidden ? <VisibilityOffOutlined fontSize="small" color="action" /> : <VisibilityOutlined fontSize="small" color="action" />}
+              </Box>
+            }
+          />
+        )}
       </Box>
 
       <Box>
@@ -99,19 +111,6 @@ const ModelSettingsSection = () => {
         />
       </Box>
 
-      <Box mb={3}>
-        {type !== 'PERSONAL' && (
-          <FormControlLabel
-            control={<Checkbox checked={form.hidden} onChange={(e) => setForm((prev) => ({ ...prev, hidden: e.target.checked }))} />}
-            label={
-              <Box display="flex" alignItems="center" gap={1}>
-                {t('prompt:hideSystemInstructions')}
-                {form.hidden ? <VisibilityOffOutlined fontSize="small" color="action" /> : <VisibilityOutlined fontSize="small" color="action" />}
-              </Box>
-            }
-          />
-        )}
-      </Box>
     </Box>
   )
 }
