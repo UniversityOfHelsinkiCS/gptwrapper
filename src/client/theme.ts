@@ -15,6 +15,11 @@ declare module '@mui/material/styles' {
     toskaDark: PaletteOptions['primary']
     toskaPrimary: PaletteOptions['primary']
   }
+
+  interface TypeBackground {
+    subtle: string
+    elevated: string
+  }
 }
 
 export const monospaceFonts = "'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace"
@@ -86,7 +91,9 @@ const useTheme = () => {
               main: '#e99939',
               contrastText: '#1a202c',
             },
-            background: prefersDarkMode ? { default: '#121212', paper: '#1e1e1e' } : { default: '#f4f4f4', paper: '#f8f8f8' },
+            background: prefersDarkMode
+              ? { default: '#121212', subtle: '#181818', paper: '#1e1e1e', elevated: '#252525' }
+              : { default: '#f4f4f4', subtle: '#efefef', paper: '#f8f8f8', elevated: '#ffffff' },
           },
         }),
       ),
