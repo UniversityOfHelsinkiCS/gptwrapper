@@ -30,6 +30,11 @@ export const ConversationSplash = ({ courseName, courseDate, promptName }: { cou
           color: '#e99939',
           opacity: 0.2,
           mb: '2.5rem',
+          animation: 'spinOnce 0.8s ease-out',
+          '@keyframes spinOnce': {
+            from: { transform: 'rotate(0deg)' },
+            to: { transform: 'rotate(360deg)' },
+          },
         }}
       />
 
