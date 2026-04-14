@@ -4,7 +4,7 @@ import type { Message } from '@shared/chat'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
@@ -13,20 +13,7 @@ import { PromptEditorFormContext } from './context'
 import { PromptEditorForm2 } from './PromptEditorForm2'
 import { PromptEditorFormContextValue, PromptEditorFormState } from 'src/client/types'
 
-export const PromptEditor2 = ({
-  back,
-  setEditorOpen,
-  personal,
-  previewPrompt,
-  onDone,
-}: {
-  back?: string
-  setEditorOpen?: React.Dispatch<boolean>
-  personal?: boolean
-  previewPrompt?: any
-  onDone?: any
-}) => {
-  const navigate = useNavigate()
+export const PromptEditor2 = ({ personal, previewPrompt, onDone }: { personal?: boolean; previewPrompt?: any; onDone: () => void }) => {
   const { t } = useTranslation()
   const { courseId } = useParams() as { courseId: string }
   const { data: chatInstance } = useCourse(courseId)
@@ -109,8 +96,6 @@ export const PromptEditor2 = ({
         })
         enqueueSnackbar(t('prompt:createdPrompt', { name }), { variant: 'success' })
       }
-      if (setEditorOpen) setEditorOpen(false)
-      if (back) navigate(back)
       onDone()
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
@@ -139,7 +124,9 @@ export const PromptEditor2 = ({
           <DialogActions>
             <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
               {loading && <CircularProgress color="secondary" />}
-              {setEditorOpen && <OutlineButtonBlue onClick={() => setEditorOpen(false)}>{t('common:cancel')}</OutlineButtonBlue>}
+              <OutlineButtonBlue type="button" onClick={onDone}>
+                {t('common:cancel')}
+              </OutlineButtonBlue>
               <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
                 {t('common:save')}
               </BlueButton>
