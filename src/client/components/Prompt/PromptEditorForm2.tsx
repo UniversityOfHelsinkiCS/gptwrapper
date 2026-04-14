@@ -16,7 +16,7 @@ const BasicInfoSection = () => {
       </Typography>
       <Box mb={3}>
         <Typography mb={1} fontWeight="bold">
-          {t('prompt:promptName')}*
+          {t('prompt:name')}*
         </Typography>
         <TextField
           slotProps={{
@@ -31,25 +31,27 @@ const BasicInfoSection = () => {
           fullWidth
         />
       </Box>
-      <Box>
-        <Typography mb={1} fontWeight="bold">
-          {type === 'PERSONAL' ? t('prompt:promptDescription') : t('prompt:studentInstructionsLabel')}
-        </Typography>
-        <TextField
-          slotProps={{
-            htmlInput: {
-              'data-testid': 'student-instructions-input',
-            },
-          }}
-          value={form.userInstructions}
-          onChange={(e) => setForm((prev) => ({ ...prev, userInstructions: e.target.value }))}
-          placeholder={type === 'PERSONAL' ? t('prompt:myPrompt') : t('prompt:defaultChatInstructions')}
-          fullWidth
-          multiline
-          minRows={8}
-          maxRows={48}
-        />
-      </Box>
+      {type !== 'PERSONAL' && (
+        <Box>
+          <Typography mb={1} fontWeight="bold">
+            {t('prompt:studentInstructionsLabel')}
+          </Typography>
+          <TextField
+            slotProps={{
+              htmlInput: {
+                'data-testid': 'student-instructions-input',
+              },
+            }}
+            value={form.userInstructions}
+            onChange={(e) => setForm((prev) => ({ ...prev, userInstructions: e.target.value }))}
+            placeholder={t('prompt:defaultChatInstructions')}
+            fullWidth
+            multiline
+            minRows={8}
+            maxRows={48}
+          />
+        </Box>
+      )}
     </Box>
   )
 }
@@ -104,9 +106,6 @@ const RagSettingsSection = () => {
         {t('prompt:promptSourceMaterialData')}
       </Typography>
       <Box mb={3}>
-        <Typography fontWeight="bold" my={1}>
-          {t('prompt:selectedSourceMaterial')}
-        </Typography>
         {type === 'CHAT_INSTANCE' && (
           <Box display="flex" justifyContent="space-around" alignItems="center">
             <FormControl fullWidth>
