@@ -2,7 +2,10 @@ import { Box, Checkbox, Collapse, Divider, FormControl, FormControlLabel, MenuIt
 import { useTranslation } from 'react-i18next'
 import { LinkButtonHoc } from '../ChatV2/general/Buttons'
 import OpenableTextfield from '../common/OpenableTextfield'
-import { ClearOutlined, LibraryBooksOutlined, ExpandMore } from '@mui/icons-material'
+import { ClearOutlined, LibraryBooksOutlined, ExpandMore, VisibilityOutlined, VisibilityOffOutlined } from '@mui/icons-material'
+import PsychologyIcon from '@mui/icons-material/Psychology'
+import EditNoteIcon from '@mui/icons-material/EditNote'
+import BookmarksIcon from '@mui/icons-material/Bookmarks'
 import { usePromptEditorForm } from './context'
 import { monospaceFonts } from '../../theme'
 
@@ -12,9 +15,12 @@ const BasicInfoSection = () => {
 
   return (
     <Box>
-      <Typography variant="h6" fontWeight="bold" color="text.primary" gutterBottom>
-        {t('prompt:promptBasicInfo')}
-      </Typography>
+      <Box display="flex" alignItems="center" gap={1} mb={1}>
+        <EditNoteIcon color="action" />
+        <Typography variant="h6" fontWeight="bold" color="text.primary">
+          {t('prompt:promptBasicInfo')}
+        </Typography>
+      </Box>
       <Box mb={3}>
         <Typography mb={1} fontWeight="bold">
           {t('prompt:name')}
@@ -67,9 +73,12 @@ const ModelSettingsSection = () => {
 
   return (
     <Box>
-      <Typography variant="h6" fontWeight="bold" color="text.primary" gutterBottom>
-        {t('prompt:promptModelSettings')}
-      </Typography>
+      <Box display="flex" alignItems="center" gap={1} mb={1}>
+        <PsychologyIcon color="action" />
+        <Typography variant="h6" fontWeight="bold" color="text.primary">
+          {t('prompt:promptModelSettings')}
+        </Typography>
+      </Box>
 
       <Box>
         <TextField
@@ -94,7 +103,12 @@ const ModelSettingsSection = () => {
         {type !== 'PERSONAL' && (
           <FormControlLabel
             control={<Checkbox checked={form.hidden} onChange={(e) => setForm((prev) => ({ ...prev, hidden: e.target.checked }))} />}
-            label={t('prompt:hideSystemInstructions')}
+            label={
+              <Box display="flex" alignItems="center" gap={1}>
+                {t('prompt:hideSystemInstructions')}
+                {form.hidden ? <VisibilityOffOutlined fontSize="small" color="action" /> : <VisibilityOutlined fontSize="small" color="action" />}
+              </Box>
+            }
           />
         )}
       </Box>
@@ -110,9 +124,12 @@ const RagSettingsSection = () => {
 
   return (
     <Box>
-      <Typography variant="h6" fontWeight="bold" color="text.primary" gutterBottom>
-        {t('prompt:promptSourceMaterialData')}
-      </Typography>
+      <Box display="flex" alignItems="center" gap={1} mb={1}>
+        <BookmarksIcon color="action" />
+        <Typography variant="h6" fontWeight="bold" color="text.primary">
+          {t('prompt:promptSourceMaterialData')}
+        </Typography>
+      </Box>
       <Box mb={3}>
         {type === 'CHAT_INSTANCE' && (
           <Box display="flex" justifyContent="space-around" alignItems="center">
@@ -194,9 +211,9 @@ const RagSettingsSection = () => {
 export const PromptEditorForm2 = () => (
   <Box>
     <BasicInfoSection />
-    <Divider />
+    <Divider sx={{ my: 3 }} />
     <ModelSettingsSection />
-    <Divider />
+    <Divider sx={{ my: 3 }} />
     <RagSettingsSection />
   </Box>
 )
