@@ -144,6 +144,7 @@ const PromptModal = () => {
         onChange={(_, newValue) => {
           setTab(newValue)
           setCreateNewOpen(false)
+          setIsEditing(false)
         }}
         slotProps={{
           indicator: { sx: { backgroundColor: 'text.primary' } },
