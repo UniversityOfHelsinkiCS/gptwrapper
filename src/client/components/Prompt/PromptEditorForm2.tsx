@@ -16,9 +16,12 @@ const BasicInfoSection = () => {
       </Typography>
       <Box mb={3}>
         <Typography mb={1} fontWeight="bold">
-          {t('prompt:name')}*
+          {t('prompt:name')}
         </Typography>
         <TextField
+          required
+          label="required"
+          variant="filled"
           slotProps={{
             htmlInput: {
               'data-testid': 'prompt-name-input',
@@ -37,6 +40,7 @@ const BasicInfoSection = () => {
             {t('prompt:studentInstructionsLabel')}
           </Typography>
           <TextField
+            variant="filled"
             slotProps={{
               htmlInput: {
                 'data-testid': 'student-instructions-input',
@@ -47,7 +51,7 @@ const BasicInfoSection = () => {
             placeholder={t('prompt:defaultChatInstructions')}
             fullWidth
             multiline
-            minRows={8}
+            minRows={4}
             maxRows={48}
           />
         </Box>
@@ -76,6 +80,8 @@ const ModelSettingsSection = () => {
 
       <Box>
         <TextField
+          variant="filled"
+          sx={{ '& textarea': { fontFamily: 'monospace' } }}
           slotProps={{
             htmlInput: {
               'data-testid': 'system-message-input',
