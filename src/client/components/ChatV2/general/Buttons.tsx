@@ -41,13 +41,13 @@ export const GrayButton = styled(BaseButton)(({ theme }) => ({
   },
 }))
 
-export const BlueButton = styled(BaseButton)({
-  backgroundColor: '#1976D2',
-  color: 'white',
+export const BlueButton = styled(BaseButton)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.primary.contrastText,
   '&:hover': {
-    backgroundColor: '#1565C0',
+    backgroundColor: theme.palette.primary.dark,
   },
-})
+}))
 
 export const GreenButton = styled(BaseButton)({
   backgroundColor: '#43A047',
@@ -80,14 +80,14 @@ export const OutlineButtonBlack = styled(BaseButton)(({ theme }) => ({
   },
 }))
 
-export const OutlineButtonBlue = styled(BaseButton)({
+export const OutlineButtonBlue = styled(BaseButton)(({ theme }) => ({
   backgroundColor: 'transparent',
-  border: '1px solid #1976D2',
-  color: '#1976D2',
+  border: `1px solid ${theme.palette.primary.main}`,
+  color: theme.palette.primary.main,
   '&:hover': {
-    backgroundColor: 'rgba(25, 118, 210, 0.05)',
+    backgroundColor: theme.palette.primary.light + '14',
   },
-})
+}))
 
 export const TextButton = styled(BaseButton)(({ theme }) => ({
   backgroundColor: 'transparent',

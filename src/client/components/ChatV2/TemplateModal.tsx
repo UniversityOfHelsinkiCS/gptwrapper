@@ -57,7 +57,7 @@ const TemplateModal: React.FC<{ open: boolean; root: string; children: React.Rea
             position: 'sticky',
             top: 0,
             zIndex: 999,
-            bgcolor: 'background.paper',
+            bgcolor: 'background.subtle',
           }}
         >
           <Typography variant="h6">

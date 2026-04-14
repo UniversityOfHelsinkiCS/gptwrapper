@@ -83,6 +83,9 @@ const useTheme = () => {
           ...baseOptions,
           palette: {
             mode: prefersDarkMode ? 'dark' : 'light',
+            primary: {
+              main: '#5779A2',
+            },
             toskaDark: {
               main: '#1a202c',
               contrastText: '#fff',
