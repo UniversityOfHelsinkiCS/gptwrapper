@@ -21,7 +21,7 @@ const BasicInfoSection = () => {
         </Typography>
         <TextField
           required
-          label="required"
+          label={t('common:required')}
           variant="filled"
           slotProps={{
             htmlInput: {
@@ -161,6 +161,8 @@ const RagSettingsSection = () => {
           </Typography>
 
           <OpenableTextfield
+            variant="filled"
+            sx={{ '& textarea': { fontFamily: monospaceFonts } }}
             value={form.ragSystemMessage}
             onChange={(e) =>
               setForm((prev) => ({

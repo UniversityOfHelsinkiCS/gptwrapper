@@ -58,7 +58,8 @@
     "english": "English",
     "swedish": "Swedish",
     "copiedToClipboard": "Copied to clipboard",
-    "fetchError": "Server error"
+    "fetchError": "Server error",
+    "required": "required"
   },
   "stats": {
     "timePeriodStart": "Starting",

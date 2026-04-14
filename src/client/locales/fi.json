@@ -59,7 +59,8 @@
     "english": "englanti",
     "swedish": "ruotsi",
     "copiedToClipboard": "Kopioitu leikepöydälle",
-    "fetchError": "Palvelin virhe"
+    "fetchError": "Palvelin virhe",
+    "required": "pakollinen"
   },
   "stats": {
     "showing": "Näytetään",

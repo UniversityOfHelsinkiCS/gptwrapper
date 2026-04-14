@@ -57,7 +57,8 @@
     "finnish": "Finska",
     "english": "Engelska",
     "swedish": "Svenska",
-    "copiedToClipboard": "Kopierat till urklipp"
+    "copiedToClipboard": "Kopierat till urklipp",
+    "required": "obligatorisk"
   },
   "chats": {
     "header": "Öppna kurschattar",
