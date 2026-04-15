@@ -2,14 +2,12 @@ import { Box, Chip, Divider, Link, Tooltip, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import type { Course, Prompt, User } from '../../types'
-import { TextButton } from './general/Buttons'
+import { GrayButton, TextButton } from './general/Buttons'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import SettingsIcon from '@mui/icons-material/Settings'
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 import LogoutIcon from '@mui/icons-material/Logout'
 import TuneIcon from '@mui/icons-material/Tune'
-import HelpCenterIcon from '@mui/icons-material/HelpCenter'
-import AppsIcon from '@mui/icons-material/Apps'
 import ExtensionOffIcon from '@mui/icons-material/ExtensionOff'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
@@ -125,14 +123,15 @@ export default function ChatConsole({ user, course }: { user?: User | null; cour
         </Typography>
         {activePrompt ? (
           <>
-            <Box mb={1} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '0.5rem', p: 2 }}>
-              <Typography data-testid="prompt-name" fontWeight="bold">
-                {activePrompt.name}
-              </Typography>
-            </Box>
-            <TextButton data-testid="choose-prompt-button" startIcon={<AppsIcon />} onClick={() => navigate(`/${courseId}/prompts`)}>
-              {t('sidebar:promptChange')}
-            </TextButton>
+            <GrayButton
+              data-testid="choose-prompt-button"
+              startIcon={<TuneIcon />}
+              endIcon={<ChevronRightIcon />}
+              onClick={() => navigate(`/${courseId}/prompts`)}
+              sx={{ width: '100%', mb: 0.5 }}
+            >
+              {activePrompt.name}
+            </GrayButton>
             <TextButton startIcon={<ExtensionOffIcon />} onClick={() => handleChangePrompt(undefined)}>
               {t('sidebar:promptNone')}
             </TextButton>
