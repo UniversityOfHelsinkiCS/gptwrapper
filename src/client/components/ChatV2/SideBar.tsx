@@ -112,7 +112,7 @@ const SideBar = ({
             </Box>
 
             <Box sx={{ px: 3, mb: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-              <HYLogo sx={{ width: 36, height: 36, color: '#e99939', flexShrink: 0 }} />
+              <HYLogo sx={{ width: 36, height: 36, color: 'text.primary', flexShrink: 0 }} />
               <Typography fontWeight="bold" color="textPrimary">
                 {t('appName').toUpperCase()}
               </Typography>

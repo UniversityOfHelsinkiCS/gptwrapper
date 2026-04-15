@@ -27,7 +27,7 @@ export const ConversationSplash = ({ courseName, courseDate, promptName }: { cou
       <HYLogo
         sx={{
           width: { xs: '80px', sm: '120px', md: '200px' },
-          color: '#e99939',
+          color: 'text.primary',
           opacity: 0.2,
           mb: '2.5rem',
           animation: 'spinOnce 0.8s ease-out',
