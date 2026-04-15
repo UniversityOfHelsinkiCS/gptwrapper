@@ -16,7 +16,7 @@ const BasicInfoSection = () => {
   return (
     <Box>
       <Box display="flex" alignItems="center" gap={1} mb={5}>
-        <EditNoteIcon color="action" />
+        <EditNoteIcon color="secondary" />
         <Typography variant="h6" fontWeight="bold" color="text.primary">
           {t('prompt:promptBasicInfo')}
         </Typography>
@@ -74,7 +74,7 @@ const ModelSettingsSection = () => {
   return (
     <Box>
       <Box display="flex" alignItems="center" gap={1} mb={5}>
-        <PsychologyIcon color="action" />
+        <PsychologyIcon color="secondary" />
         <Typography variant="h6" fontWeight="bold" color="text.primary">
           {t('prompt:promptModelSettings')}
         </Typography>
@@ -123,7 +123,7 @@ const RagSettingsSection = () => {
   return (
     <Box>
       <Box display="flex" alignItems="center" gap={1} mb={5}>
-        <BookmarksIcon color="action" />
+        <BookmarksIcon color="secondary" />
         <Typography variant="h6" fontWeight="bold" color="text.primary">
           {t('prompt:promptSourceMaterialData')}
         </Typography>
