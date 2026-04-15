@@ -117,7 +117,7 @@ export const PromptEditor2 = ({ personal, previewPrompt, onDone }: { personal?: 
     <PromptEditorFormContext.Provider value={context}>
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         <form onSubmit={handleSubmit}>
-          <Box sx={{ py: 3 }}>
+          <Box sx={{ py: 0 }}>
             <PromptEditorForm2 />
           </Box>
 
