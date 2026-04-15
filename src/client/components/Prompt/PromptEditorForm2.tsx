@@ -7,7 +7,7 @@ import PsychologyIcon from '@mui/icons-material/Psychology'
 import EditNoteIcon from '@mui/icons-material/EditNote'
 import BookmarksIcon from '@mui/icons-material/Bookmarks'
 import { usePromptEditorForm } from './context'
-import { monospaceFonts } from '../../theme'
+import { monospaceStyle } from '../../theme'
 
 const BasicInfoSection = () => {
   const { form, setForm, type } = usePromptEditorForm()
@@ -95,7 +95,7 @@ const ModelSettingsSection = () => {
       <Box>
         <TextField
           variant="filled"
-          sx={{ '& textarea': { fontFamily: monospaceFonts } }}
+          sx={{ '& textarea': monospaceStyle }}
           slotProps={{
             htmlInput: {
               'data-testid': 'system-message-input',
@@ -110,7 +110,6 @@ const ModelSettingsSection = () => {
           maxRows={48}
         />
       </Box>
-
     </Box>
   )
 }
@@ -179,7 +178,7 @@ const RagSettingsSection = () => {
 
           <OpenableTextfield
             variant="filled"
-            sx={{ '& textarea': { fontFamily: monospaceFonts } }}
+            sx={{ '& textarea': monospaceStyle }}
             value={form.ragSystemMessage}
             onChange={(e) =>
               setForm((prev) => ({

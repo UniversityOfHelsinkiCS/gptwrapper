@@ -23,6 +23,7 @@ declare module '@mui/material/styles' {
 }
 
 export const monospaceFonts = "'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace"
+export const monospaceStyle = { fontFamily: monospaceFonts, fontSize: 'inherit' } as const
 
 const baseOptions: Omit<ThemeOptions, 'palette'> = {
   typography: {
