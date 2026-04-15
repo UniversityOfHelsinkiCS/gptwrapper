@@ -56,6 +56,20 @@ const baseOptions: Omit<ThemeOptions, 'palette'> = {
       },
     },
 
+    MuiFilledInput: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(87, 121, 162, 0.08)',
+          ':hover': {
+            backgroundColor: 'rgba(87, 121, 162, 0.13)',
+          },
+          '&.Mui-focused': {
+            backgroundColor: 'rgba(87, 121, 162, 0.13)',
+          },
+        },
+      },
+    },
+
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
