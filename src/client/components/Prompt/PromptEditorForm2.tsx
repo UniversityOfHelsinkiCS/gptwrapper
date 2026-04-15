@@ -85,7 +85,7 @@ const ModelSettingsSection = () => {
             label={
               <Box display="flex" alignItems="center" gap={1}>
                 {t('prompt:hideSystemInstructions')}
-                {form.hidden ? <VisibilityOffOutlined fontSize="small" color="action" /> : <VisibilityOutlined fontSize="small" color="action" />}
+                {form.hidden ? <VisibilityOffOutlined fontSize="small" color="error" /> : <VisibilityOutlined fontSize="small" color="success" />}
               </Box>
             }
           />
