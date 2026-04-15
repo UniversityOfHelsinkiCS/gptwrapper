@@ -101,6 +101,9 @@ const useTheme = () => {
             primary: {
               main: '#5779A2',
             },
+            secondary: {
+              main: '#79719D',
+            },
             toskaDark: {
               main: '#1a202c',
               contrastText: '#fff',
