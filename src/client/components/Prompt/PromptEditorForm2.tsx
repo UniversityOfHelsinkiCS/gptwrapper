@@ -73,7 +73,7 @@ const ModelSettingsSection = () => {
 
   return (
     <Box>
-      <Box display="flex" alignItems="center" gap={1} mb={5}>
+      <Box display="flex" alignItems="center" gap={1} mb={1}>
         <PsychologyIcon color="secondary" />
         <Typography variant="h6" fontWeight="bold" color="text.primary">
           {t('prompt:promptModelSettings')}
