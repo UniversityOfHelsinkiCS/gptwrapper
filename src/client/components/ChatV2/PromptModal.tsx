@@ -242,10 +242,7 @@ const PromptModal = () => {
 
                   {previewPrompt.userInstructions && (
                     <Box sx={{ mb: 3 }}>
-                      <Typography variant="h6" color="text.primary" gutterBottom>
-                        {t('prompt:promptInstructions')}
-                      </Typography>
-                      <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                      <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                         {previewPrompt.userInstructions}
                       </Typography>
                     </Box>
