@@ -512,7 +512,7 @@
     "promptSourceMaterialData": "Lähdemateriaali",
     "selectedSourceMaterial": "Valittu lähdemateriaali",
     "modelSourceMaterialInstructions": "Kielimallin lähdemateriaaliohjeistus",
-    "promptDescription": "Alustuksen kuvaus",
+    "promptDescription": "Kuvaus",
     "myPrompt": "Oma alustukseni",
     "missingPromptName": "Alustukselta puuttuu nimi",
     "description": "Kuvaus",
