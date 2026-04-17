@@ -41,28 +41,27 @@ const BasicInfoSection = () => {
           fullWidth
         />
       </Box>
-      {type !== 'PERSONAL' && (
-        <Box>
-          <Typography mb={1} fontWeight="bold">
-            {t('prompt:studentInstructionsLabel')}
-          </Typography>
-          <TextField
-            variant="filled"
-            slotProps={{
-              htmlInput: {
-                'data-testid': 'student-instructions-input',
-              },
-            }}
-            value={form.userInstructions}
-            onChange={(e) => setForm((prev) => ({ ...prev, userInstructions: e.target.value }))}
-            placeholder={t('prompt:defaultChatInstructions')}
-            fullWidth
-            multiline
-            minRows={4}
-            maxRows={48}
-          />
-        </Box>
-      )}
+      <Box>
+        <Typography mb={1} fontWeight="bold">
+          {type === 'PERSONAL' ? t('prompt:promptDescription') : t('prompt:studentInstructionsLabel')}
+        </Typography>
+
+        <TextField
+          variant="filled"
+          slotProps={{
+            htmlInput: {
+              'data-testid': 'student-instructions-input',
+            },
+          }}
+          value={form.userInstructions}
+          onChange={(e) => setForm((prev) => ({ ...prev, userInstructions: e.target.value }))}
+          placeholder={t('prompt:defaultChatInstructions')}
+          fullWidth
+          multiline
+          minRows={type === 'PERSONAL' ? 1 : 4}
+          maxRows={48}
+        />
+      </Box>
     </Box>
   )
 }
