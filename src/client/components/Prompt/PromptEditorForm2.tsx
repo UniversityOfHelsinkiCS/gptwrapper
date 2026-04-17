@@ -15,14 +15,14 @@ const BasicInfoSection = () => {
 
   return (
     <Box>
-      <Box display="flex" alignItems="center" gap={1} mb={5}>
+      <Box display="flex" alignItems="center" gap={1} mb={3}>
         <EditNoteIcon color="secondary" />
-        <Typography variant="h6" fontWeight="bold" color="text.primary">
+        <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
           {t('prompt:promptBasicInfo')}
         </Typography>
       </Box>
       <Box mb={3}>
-        <Typography mb={1} fontWeight="bold">
+        <Typography variant="overline" mb={1} fontWeight="bold">
           {t('prompt:name')}
         </Typography>
         <TextField
@@ -42,7 +42,7 @@ const BasicInfoSection = () => {
         />
       </Box>
       <Box>
-        <Typography mb={1} fontWeight="bold">
+        <Typography variant="overline" mb={1} fontWeight="bold">
           {type === 'PERSONAL' ? t('prompt:promptDescription') : t('prompt:studentInstructionsLabel')}
         </Typography>
 
@@ -74,7 +74,7 @@ const ModelSettingsSection = () => {
     <Box>
       <Box display="flex" alignItems="center" gap={1} mb={1}>
         <PsychologyIcon color="secondary" />
-        <Typography variant="h6" fontWeight="bold" color="text.primary">
+        <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
           {t('prompt:promptModelSettings')}
         </Typography>
         {type !== 'PERSONAL' && (
@@ -121,9 +121,9 @@ const RagSettingsSection = () => {
 
   return (
     <Box>
-      <Box display="flex" alignItems="center" gap={1} mb={5}>
+      <Box display="flex" alignItems="center" gap={1} mb={3}>
         <BookmarksIcon color="secondary" />
-        <Typography variant="h6" fontWeight="bold" color="text.primary">
+        <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
           {t('prompt:promptSourceMaterialData')}
         </Typography>
       </Box>
@@ -171,7 +171,7 @@ const RagSettingsSection = () => {
 
       <Collapse in={!!form.ragIndexId}>
         <Box>
-          <Typography fontWeight="bold" my={1}>
+          <Typography variant="overline" fontWeight="bold" my={1}>
             {t('prompt:modelSourceMaterialInstructions')}
           </Typography>
 
