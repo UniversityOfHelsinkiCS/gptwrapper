@@ -35,6 +35,7 @@ const BasicInfoSection = () => {
               minLength: 3,
             },
           }}
+          autoFocus
           placeholder={t('common:promptName')}
           value={form.name}
           onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
