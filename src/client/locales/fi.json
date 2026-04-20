@@ -482,6 +482,7 @@
     "systemMessage": "Kielimallille annettava ohjeistus",
     "hidePrompt": "Piilota alustuksen sisältö opiskelijoilta",
     "promptHidden": "piilotettu opiskelijoilta",
+    "promptNotHidden": "näkyy opiskelijoille",
     "noSourceMaterials": "Ei lähdemateriaaleja",
     "ragSystemMessage": "Lähdemateriaaliohjeistus",
     "basicInformation": "Perustiedot",

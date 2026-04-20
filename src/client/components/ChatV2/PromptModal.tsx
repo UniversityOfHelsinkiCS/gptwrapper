@@ -1,7 +1,7 @@
 import { PUBLIC_URL } from '@config'
-import { ContentCopyOutlined, EditOutlined, Close, ClearOutlined } from '@mui/icons-material'
+import { ContentCopyOutlined, EditOutlined, Close, ClearOutlined, VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
-import { Box, Dialog, Divider, List, ListItemButton, ListItemText, Typography, Paper, Button, Tooltip } from '@mui/material'
+import { Box, Dialog, Divider, List, ListItemButton, ListItemText, Typography, Paper, Button, Tooltip, Alert } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -17,6 +17,7 @@ import { useMediaQuery, useTheme } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { BlueButton, OutlineButtonBlue } from './general/Buttons.tsx'
 import ConfirmDialog from './general/ConfirmDialog'
+import { monospaceStyle } from '../../theme'
 
 const PromptModal = () => {
   const theme = useTheme()
@@ -250,16 +251,23 @@ const PromptModal = () => {
 
                   <Box sx={{ mb: 3 }}>
                     <Box gap={1} sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Typography variant="h6" color="text.primary" gutterBottom>
-                        {t('prompt:systemMessage')}
+                      <Typography variant="subtitle1" fontWeight="bold" color="text.primary" gutterBottom>
+                        {t('prompt:promptModelSettings')}
                       </Typography>
-                      {previewPrompt.hidden && (
-                        <Typography variant="h6" color="textDisabled" gutterBottom>
-                          {`(${t('prompt:promptHidden')})`}
-                        </Typography>
-                      )}
                     </Box>
-                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: previewPrompt.hidden ? 'text.disabled' : 'text.primary' }}>
+                    {!isPersonalTab && (
+                      <Alert
+                        icon={
+                          previewPrompt.hidden ? (
+                            <VisibilityOffOutlined color="error" fontSize="inherit" />
+                          ) : (
+                            <VisibilityOutlined color="success" fontSize="inherit" />
+                          )
+                        }
+                        severity="info"
+                      >{`${t(previewPrompt.hidden ? 'prompt:promptHidden' : 'prompt:promptNotHidden')}`}</Alert>
+                    )}
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary', ...monospaceStyle }}>
                       {previewPrompt.hidden && !amongResponsibles ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
                     </Typography>
                   </Box>
