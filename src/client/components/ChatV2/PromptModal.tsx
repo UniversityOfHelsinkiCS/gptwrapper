@@ -12,6 +12,7 @@ import type { Prompt as PromptType } from '../../types'
 import { PromptEditor2 } from '../Prompt/PromptEditor2'
 import { usePromptState } from './PromptState'
 import { Tab, Tabs, IconButton } from '@mui/material'
+import PsychologyIcon from '@mui/icons-material/Psychology'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import { useMediaQuery, useTheme } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -251,7 +252,8 @@ const PromptModal = () => {
 
                   <Box sx={{ mb: 3 }}>
                     <Box gap={1} sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Typography variant="subtitle1" fontWeight="bold" color="text.primary" gutterBottom>
+                      <PsychologyIcon color="secondary" />
+                      <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
                         {t('prompt:promptModelSettings')}
                       </Typography>
                     </Box>
