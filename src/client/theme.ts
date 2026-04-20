@@ -104,6 +104,18 @@ const useTheme = () => {
             secondary: {
               main: '#79719D',
             },
+            success: {
+              main: '#4a7c59',
+            },
+            info: {
+              main: '#5779A2',
+            },
+            warning: {
+              main: '#b07d3a',
+            },
+            error: {
+              main: '#9b4545',
+            },
             toskaDark: {
               main: '#1a202c',
               contrastText: '#fff',
