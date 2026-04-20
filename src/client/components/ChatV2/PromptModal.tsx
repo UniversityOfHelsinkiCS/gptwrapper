@@ -80,6 +80,10 @@ const PromptModal = () => {
   }
 
   const handleCreateNew = () => {
+    if (isEditing) {
+      setIsEditing(false)
+      return
+    }
     setPreviewPrompt(undefined)
     setIsEditing(true)
   }
