@@ -28,6 +28,9 @@ export const monospaceStyle = { fontFamily: monospaceFonts, fontSize: 'inherit' 
 const baseOptions: Omit<ThemeOptions, 'palette'> = {
   typography: {
     fontFamily: ['"Open Sans"', '"Helvetica"', '"Arial"', '"sans-serif"', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'].join(','),
+    overline: {
+      fontSize: '0.75rem',
+    },
   },
 
   shape: {
