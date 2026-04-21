@@ -129,7 +129,7 @@ const useTheme = () => {
             },
             background: prefersDarkMode
               ? { default: '#121212', subtle: '#181818', paper: '#1e1e1e', elevated: '#252525' }
-              : { default: '#f4f4f4', subtle: '#efefef', paper: '#f8f8f8', elevated: '#ffffff' },
+              : { default: '#f4f4f4', subtle: 'rgba(87, 121, 162, 0.08)', paper: '#f8f8f8', elevated: '#ffffff' },
           },
         }),
       ),
