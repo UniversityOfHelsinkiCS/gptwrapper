@@ -36,20 +36,12 @@ const ModelSelector = ({
       return [activePrompt.model]
     }
     const models = validModels.map((model) => model.name)
-    return models.filter((model) => !isTokenLimitExceeded || model === FREE_MODEL).filter((model) => user?.isAdmin || !inProduction || model !== 'mock')
-  }, [isTokenLimitExceeded, user, activePrompt])
-
-
+    return models.filter((model) => !isTokenLimitExceeded || model === FREE_MODEL).filter((model) => user?.isAdmin || (model !== 'mock' && model !== 'gpt-5.1')) //FLAG gpt only for admins
+  }, [isTokenLimitExceeded, user, activePrompt]).filter((model) => user?.isAdmin || !inProduction || (model !== 'mock' && model !== 'gpt-5.1')) //FLAG gpt only for admins
   return (
     <>
-      <TextButton startIcon={<ChevronRightIcon />}
-        onClick={handleClick}
-        data-testid="model-selector"
-        disabled={availableModels.length === 1}
-      >
-        <Typography>
-          {activePrompt?.model ?? currentModel}
-        </Typography>
+      <TextButton startIcon={<ChevronRightIcon />} onClick={handleClick} data-testid="model-selector" disabled={availableModels.length === 1}>
+        <Typography>{activePrompt?.model ?? currentModel}</Typography>
       </TextButton>
       <Menu
         anchorEl={anchorEl}
@@ -59,7 +51,7 @@ const ModelSelector = ({
           paper: {
             style: {
               minWidth: anchorEl?.offsetWidth || 200,
-              borderRadius: '1.25rem'
+              borderRadius: '1.25rem',
             },
           },
         }}
