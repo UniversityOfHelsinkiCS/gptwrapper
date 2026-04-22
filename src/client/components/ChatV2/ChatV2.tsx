@@ -405,8 +405,6 @@ const ChatV2Content = () => {
             user={user}
             handleReset={handleResetRequest}
             messages={messages}
-            currentModel={activeModel}
-            setModel={setActiveModel}
           />
         </Drawer>
       ) : (
@@ -417,8 +415,6 @@ const ChatV2Content = () => {
           user={user}
           handleReset={handleResetRequest}
           messages={messages}
-          currentModel={activeModel}
-          setModel={setActiveModel}
         />
       )}
       {/* Chat view column ------------------------------------------------------------------------------------------------ */}
@@ -538,6 +534,8 @@ const ChatV2Content = () => {
               handleReset={handleResetRequest}
               handleStop={() => streamControllerRef.current?.abort('user_aborted')}
               isMobile={isMobile}
+              currentModel={activeModel}
+              setModel={setActiveModel}
             />
           </Box>
         </Box>

@@ -14,6 +14,9 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import { SendPreferenceConfiguratorModal, ShiftEnterForNewline, ShiftEnterToSend } from '../Settings/SendPreferenceConfigurator'
 import { useKeyboardCommands } from './useKeyboardCommands'
 import { WarningType } from '@shared/aiApi'
+import ModelSelector from './ModelSelector'
+import { ValidModelName } from '../../../config'
+import { amber } from '@mui/material/colors'
 
 export const ChatBox = ({
   disabled,
@@ -27,6 +30,8 @@ export const ChatBox = ({
   handleReset,
   handleStop,
   isMobile,
+  currentModel,
+  setModel,
 }: {
   disabled: boolean
   fileInputRef: React.RefObject<HTMLInputElement | null>
@@ -39,6 +44,8 @@ export const ChatBox = ({
   handleReset: () => void
   handleStop: () => void
   isMobile: boolean
+  currentModel: ValidModelName
+  setModel: (model: ValidModelName) => void
 }) => {
   const { courseId } = useParams()
   const isEmbedded = useIsEmbedded()
@@ -123,174 +130,210 @@ export const ChatBox = ({
   const activeMessageWarnings = Object.values(messageWarning).filter((warning) => !warning.ignored)
 
   return (
-    <Box
-      sx={{
-        bgcolor: 'background.paper',
-        mb: 1,
-        border: '1px solid',
-        borderColor: 'divider',
-        borderRadius: '1.25rem',
-        padding: isMobile ? '0.2rem 0.2rem' : '0.5rem 1rem',
-        backdropFilter: 'blur(5px)',
-        boxShadow: 3,
-      }}
-    >
-      {fileTypeAlertOpen && (
-        <Alert severity="warning">
-          <Typography>{`File of type "${disallowedFileType}" not supported currently`}</Typography>
-          <Typography>{`Currenlty there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}</Typography>
-        </Alert>
-      )}
-      {activeMessageWarnings.length > 0 && (
-        <Alert
-          severity="warning"
-          sx={{ my: '0.2rem' }}
-          action={
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <GrayButton onClick={handleCancel} type="button">
-                {t('common:cancel')}
-              </GrayButton>
-              <BlueButton onClick={() => handleContinue('', Object.keys(messageWarning) as WarningType[])} color="primary" type="button">
-                {t('common:continue')}
-              </BlueButton>
-            </Box>
-          }
+    <Box sx={{ mb: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75, pl: 0.5 }}>
+        <Typography
+          sx={{
+            fontSize: '0.6875rem',
+            fontWeight: 600,
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            color: 'text.disabled',
+            userSelect: 'none',
+          }}
         >
-          {Object.entries(messageWarning)
-            .filter(([, warning]) => !warning.ignored)
-            .map(([type, warning]) => (
-              <Box key={type} sx={{ mb: 0.5 }}>
-                {warning.message}
-              </Box>
-            ))}
-        </Alert>
-      )}
-
+          {t('sidebar:modelTitle')}
+        </Typography>
+        <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} />
+      </Box>
       <Box
-        component="form"
-        onSubmit={onSubmit}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            if (!isShiftEnterSend) {
-              if (e.shiftKey) {
-                // Do nothing with this event, it will result in a newline being inserted
-              } else {
-                onSubmit(e)
-              }
-            } else if (e.shiftKey) {
-              onSubmit(e)
-            }
-          }
+        sx={{
+          bgcolor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: '1.25rem',
+          padding: isMobile ? '0.2rem 0.2rem' : '0.5rem 1rem',
+          backdropFilter: 'blur(5px)',
+          boxShadow: 3,
         }}
       >
-        <Box>
-          <TextField
-            autoFocus={!isEmbedded}
-            inputRef={textFieldRef}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder={t('chat:writeHere')}
-            fullWidth
-            multiline
-            data-sentry-mask
-            maxRows={25}
-            sx={{ padding: '0.5rem' }}
-            variant="standard"
-            slotProps={{
-              htmlInput: {
-                'data-testid': 'chat-input',
-              },
-              input: {
-                disableUnderline: true,
-              },
-            }}
-          />
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              mt: '0.5rem',
-            }}
+        {fileTypeAlertOpen && (
+          <Alert severity="warning">
+            <Typography>{`File of type "${disallowedFileType}" not supported currently`}</Typography>
+            <Typography>{`Currenlty there is support for formats ".pdf" and plain text such as ".txt", ".csv", and ".md"`}</Typography>
+          </Alert>
+        )}
+        {activeMessageWarnings.length > 0 && (
+          <Alert
+            severity="warning"
+            sx={{ my: '0.2rem' }}
+            action={
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <GrayButton onClick={handleCancel} type="button">
+                  {t('common:cancel')}
+                </GrayButton>
+                <BlueButton onClick={() => handleContinue('', Object.keys(messageWarning) as WarningType[])} color="primary" type="button">
+                  {t('common:continue')}
+                </BlueButton>
+              </Box>
+            }
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Tooltip title={t('chat:attachFile')} arrow placement="top">
-                <IconButton component="label">
-                  <AttachFileIcon />
-                  <input
-                    type="file"
-                    accept="*"
-                    hidden
-                    ref={fileInputRef}
-                    onChange={(e) => e.target.files?.[0] && handleFileTypeValidation(e.target.files[0])}
-                  />
-                </IconButton>
-              </Tooltip>
-              {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
-              <Box sx={{ display: 'inline-flex', justifyContent: 'space-between', alignItems: 'center', ml: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      whiteSpace: 'nowrap',
-                      padding: '0.5rem 0',
-                      opacity: isTokenLimitExceeded ? 1 : 0.6,
-                      color: isTokenLimitExceeded ? 'error.main' : 'inherit',
-                    }}
-                  >
-                    {userStatus?.usage != null && userStatus?.limit != null
-                      ? `${Math.round((userStatus.usage / userStatus.limit) * 100)}% ${t('status:tokensUsed')}`
-                      : '-'}
-                  </Typography>
-                  <Tooltip
-                    arrow
-                    placement="top"
-                    title={
-                      <Typography variant="body2" sx={{ p: 1 }}>
-                        {t('info:usage')}
-                      </Typography>
-                    }
-                  >
-                    <HelpOutline fontSize="small" sx={{ color: 'inherit', opacity: 0.7, mt: 0.5, flex: 2, display: { xs: 'none', sm: 'block' } }} />
-                  </Tooltip>
+            {Object.entries(messageWarning)
+              .filter(([, warning]) => !warning.ignored)
+              .map(([type, warning]) => (
+                <Box key={type} sx={{ mb: 0.5 }}>
+                  {warning.message}
+                </Box>
+              ))}
+          </Alert>
+        )}
+
+        <Box
+          component="form"
+          onSubmit={onSubmit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              if (!isShiftEnterSend) {
+                if (e.shiftKey) {
+                  // Do nothing with this event, it will result in a newline being inserted
+                } else {
+                  onSubmit(e)
+                }
+              } else if (e.shiftKey) {
+                onSubmit(e)
+              }
+            }
+          }}
+        >
+          <Box>
+            <TextField
+              autoFocus={!isEmbedded}
+              inputRef={textFieldRef}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder={t('chat:writeHere')}
+              fullWidth
+              multiline
+              data-sentry-mask
+              maxRows={25}
+              sx={{ padding: '0.5rem' }}
+              variant="standard"
+              slotProps={{
+                htmlInput: {
+                  'data-testid': 'chat-input',
+                },
+                input: {
+                  disableUnderline: true,
+                },
+              }}
+            />
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mt: '0.5rem',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Tooltip title={t('chat:attachFile')} arrow placement="top">
+                  <IconButton component="label">
+                    <AttachFileIcon />
+                    <input
+                      type="file"
+                      accept="*"
+                      hidden
+                      ref={fileInputRef}
+                      onChange={(e) => e.target.files?.[0] && handleFileTypeValidation(e.target.files[0])}
+                    />
+                  </IconButton>
+                </Tooltip>
+                {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
+                <Box sx={{ display: 'inline-flex', justifyContent: 'space-between', alignItems: 'center', ml: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        whiteSpace: 'nowrap',
+                        padding: '0.5rem 0',
+                        opacity: isTokenLimitExceeded ? 1 : 0.6,
+                        color: isTokenLimitExceeded ? 'error.main' : 'inherit',
+                      }}
+                    >
+                      {userStatus?.usage != null && userStatus?.limit != null
+                        ? `${Math.round((userStatus.usage / userStatus.limit) * 100)}% ${t('status:tokensUsed')}`
+                        : '-'}
+                    </Typography>
+                    <Tooltip
+                      arrow
+                      placement="top"
+                      title={
+                        <Typography variant="body2" sx={{ p: 1 }}>
+                          {t('info:usage')}
+                        </Typography>
+                      }
+                    >
+                      <HelpOutline fontSize="small" sx={{ color: 'inherit', opacity: 0.7, mt: 0.5, flex: 2, display: { xs: 'none', sm: 'block' } }} />
+                    </Tooltip>
+                  </Box>
                 </Box>
               </Box>
-            </Box>
-            {!isMobile && (
-              <Typography
-                sx={{
-                  display: !acuallyDisabled ? { sm: 'none', md: 'block' } : 'none',
-                  ml: 'auto',
-                  mr: 1,
-                  transition: 'opacity 0.2s ease-in-out',
-                  fontSize: '14px',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-                color="textSecondary"
-              >
-                {isShiftEnterSend ? <ShiftEnterToSend t={t} /> : <ShiftEnterForNewline t={t} />}
-              </Typography>
-            )}
-
-            <Tooltip title={disabled ? t('chat:cancelResponse') : isShiftEnterSend ? t('chat:shiftEnterSend') : t('chat:enterSend')} arrow placement="top">
-              {disabled ? (
-                <IconButton onClick={handleStop}>
-                  <StopIcon />
-                </IconButton>
-              ) : (
-                <IconButton type="submit" ref={sendButtonRef} data-testid="send-chat-message">
-                  <Send />
-                </IconButton>
+              {!isMobile && (
+                <Typography
+                  sx={{
+                    display: !acuallyDisabled ? { sm: 'none', md: 'block' } : 'none',
+                    ml: 'auto',
+                    mr: 1,
+                    transition: 'opacity 0.2s ease-in-out',
+                    fontSize: '14px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                  color="textSecondary"
+                >
+                  {isShiftEnterSend ? <ShiftEnterToSend t={t} /> : <ShiftEnterForNewline t={t} />}
+                </Typography>
               )}
-            </Tooltip>
-            <SendPreferenceConfiguratorModal
-              open={sendPreferenceConfiguratorOpen}
-              onClose={() => setSendPreferenceConfiguratorOpen(false)}
-              anchorEl={sendButtonRef.current}
-              context="chat"
-            />
+
+              <Tooltip title={disabled ? t('chat:cancelResponse') : isShiftEnterSend ? t('chat:shiftEnterSend') : t('chat:enterSend')} arrow placement="top">
+                {disabled ? (
+                  <IconButton onClick={handleStop}>
+                    <StopIcon />
+                  </IconButton>
+                ) : (
+                  <IconButton
+                    type="submit"
+                    ref={sendButtonRef}
+                    data-testid="send-chat-message"
+                    disabled={acuallyDisabled}
+                    sx={{
+                      backgroundColor: acuallyDisabled ? 'action.disabledBackground' : amber[700],
+                      color: acuallyDisabled ? 'action.disabled' : '#fff',
+                      borderRadius: '0.5rem',
+                      width: 36,
+                      height: 36,
+                      transition: 'background-color 0.18s, transform 0.1s, filter 0.1s',
+                      '&:hover': {
+                        backgroundColor: acuallyDisabled ? 'action.disabledBackground' : amber[800],
+                        transform: acuallyDisabled ? 'none' : 'scale(1.06)',
+                      },
+                      '&.Mui-disabled': {
+                        color: 'action.disabled',
+                      },
+                    }}
+                  >
+                    <Send sx={{ fontSize: 18 }} />
+                  </IconButton>
+                )}
+              </Tooltip>
+              <SendPreferenceConfiguratorModal
+                open={sendPreferenceConfiguratorOpen}
+                onClose={() => setSendPreferenceConfiguratorOpen(false)}
+                anchorEl={sendButtonRef.current}
+                context="chat"
+              />
+            </Box>
           </Box>
         </Box>
       </Box>

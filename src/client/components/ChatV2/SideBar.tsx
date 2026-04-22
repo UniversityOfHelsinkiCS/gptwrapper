@@ -1,9 +1,6 @@
 import { Box, Button, Divider, Tooltip, Typography } from '@mui/material'
-import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router-dom'
 import type { ChatMessage } from '@shared/chat'
-import useUserStatus from '../../hooks/useUserStatus'
 import type { Course, User } from '../../types'
 import { TextButton } from './general/Buttons'
 import MapsUgcIcon from '@mui/icons-material/MapsUgc'
@@ -11,11 +8,8 @@ import sidebarClose from '../../assets/sidebar-close.svg'
 import sidebarOpen from '../../assets/sidebar-open.svg'
 import EmailButton from './EmailButton'
 import DownloadButton from './DownloadButton'
-import { useTheme } from '@mui/material/styles'
 import { HYLogo } from './general/HYLogo'
 
-import ModelSelector from './ModelSelector'
-import { ValidModelName } from '../../../config'
 import Footer from '../Footer'
 import { CustomIcon } from './general/CustomIcon'
 import ChatConsole from './ChatConsole'
@@ -27,8 +21,6 @@ const SideBar = ({
   user,
   handleReset,
   messages,
-  currentModel,
-  setModel,
 }: {
   open: boolean
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
@@ -36,20 +28,8 @@ const SideBar = ({
   user?: User | null
   handleReset: () => void
   messages: ChatMessage[]
-  currentModel: ValidModelName
-  setModel: (model: ValidModelName) => void
 }) => {
-  const { courseId } = useParams()
   const { t } = useTranslation()
-  const theme = useTheme()
-  const { userStatus, isLoading: statusLoading } = useUserStatus(courseId)
-
-  const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
-
-  useEffect(() => {
-    if (!userStatus) return
-    setIsTokenLimitExceeded(userStatus.usage > userStatus.limit)
-  }, [statusLoading, userStatus])
 
   return (
     <Box
@@ -127,15 +107,6 @@ const SideBar = ({
             <Divider />
 
             <ChatConsole user={user} course={course} />
-
-            <Divider />
-
-            <Box p={3}>
-              <Typography mb={0.5} color="textSecondary">
-                {t('sidebar:modelTitle').toUpperCase()}
-              </Typography>
-              <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} />
-            </Box>
           </Box>
         )}
         {open && (
