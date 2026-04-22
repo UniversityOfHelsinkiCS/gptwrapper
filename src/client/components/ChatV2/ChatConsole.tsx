@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import type { Course, User } from '../../types'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import SchoolIcon from '@mui/icons-material/School'
-import TuneIcon from '@mui/icons-material/Tune'
+import ChatIcon from '@mui/icons-material/Chat'
 import CloseIcon from '@mui/icons-material/Close'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { usePromptState } from './PromptState'
@@ -15,7 +15,7 @@ const SectionLabel = ({ children }: { children: ReactNode }) => (
     variant="overline"
     sx={{
       display: 'block',
-      fontSize: '0.65rem',
+      fontSize: '0.75rem',
       fontWeight: 700,
       letterSpacing: '0.1em',
       color: 'text.secondary',
@@ -71,22 +71,13 @@ const SelectorRow = ({ icon, label, placeholder, onClick, onClear, clearTooltip,
           '&:hover': { backgroundColor: disabled ? 'transparent' : 'action.selected' },
         }}
       >
-        <Box sx={{ display: 'flex', flexShrink: 0, color: hasValue ? 'primary.main' : 'text.disabled', '& svg': { fontSize: 18 } }}>
-          {icon}
-        </Box>
-        <Box sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {label || placeholder}
-        </Box>
+        <Box sx={{ display: 'flex', flexShrink: 0, color: hasValue ? 'primary.main' : 'text.disabled', '& svg': { fontSize: 18 } }}>{icon}</Box>
+        <Box sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label || placeholder}</Box>
         <ChevronRightIcon sx={{ fontSize: 16, color: 'text.disabled', flexShrink: 0 }} />
       </Box>
       {hasValue && onClear && (
         <Tooltip title={clearTooltip ?? ''} placement="right">
-          <IconButton
-            size="small"
-            onClick={onClear}
-            data-testid={clearTestId}
-            sx={{ color: 'text.disabled', '&:hover': { color: 'text.secondary' } }}
-          >
+          <IconButton size="small" onClick={onClear} data-testid={clearTestId} sx={{ color: 'text.disabled', '&:hover': { color: 'text.secondary' } }}>
             <CloseIcon sx={{ fontSize: 16 }} />
           </IconButton>
         </Tooltip>
@@ -159,7 +150,7 @@ export default function ChatConsole({ user: _user, course }: { user?: User | nul
       <Box>
         <SectionLabel>{t('sidebar:promptTitle')}</SectionLabel>
         <SelectorRow
-          icon={<TuneIcon />}
+          icon={<ChatIcon />}
           label={activePrompt?.name}
           placeholder={t('sidebar:promptSelect')}
           onClick={() => navigate(promptsPath)}
