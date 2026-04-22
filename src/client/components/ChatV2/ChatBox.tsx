@@ -56,9 +56,25 @@ export const ChatBox = ({
   const [disallowedFileType, setDisallowedFileType] = useState<string>('')
   const [fileTypeAlertOpen, setFileTypeAlertOpen] = useState<boolean>(false)
   const [sendPreferenceConfiguratorOpen, setSendPreferenceConfiguratorOpen] = useState<boolean>(false)
+  const [isNearBottom, setIsNearBottom] = useState<boolean>(true)
   const sendButtonRef = useRef<HTMLButtonElement>(null)
   const textFieldRef = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState<string>('')
+
+  useEffect(() => {
+    const check = () => {
+      const el = document.documentElement
+      const dist = el.scrollHeight - el.clientHeight - el.scrollTop
+      setIsNearBottom(dist <= 24)
+    }
+    check()
+    window.addEventListener('scroll', check, { passive: true })
+    window.addEventListener('resize', check)
+    return () => {
+      window.removeEventListener('scroll', check)
+      window.removeEventListener('resize', check)
+    }
+  }, [])
 
   const acuallyDisabled = disabled || message.length === 0
 
@@ -131,7 +147,18 @@ export const ChatBox = ({
 
   return (
     <Box sx={{ mb: 1 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75, pl: 0.5 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          mb: 0.75,
+          pl: 0.5,
+          opacity: isNearBottom ? 1 : 0,
+          pointerEvents: isNearBottom ? 'auto' : 'none',
+          transition: 'opacity 0.2s ease',
+        }}
+      >
         <Typography
           sx={{
             fontSize: '0.6875rem',
