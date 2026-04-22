@@ -1,4 +1,4 @@
-import { Box, Divider, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Divider, Tooltip, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
@@ -118,6 +118,14 @@ const SideBar = ({
               </Typography>
             </Box>
 
+            <Box sx={{ px: 3, pb: 2 }}>
+              <Button fullWidth variant="contained" disableElevation startIcon={<MapsUgcIcon />} onClick={handleReset} data-testid="new-conversation-button">
+                {t('sidebar:chatNew')}
+              </Button>
+            </Box>
+
+            <Divider />
+
             <ChatConsole user={user} course={course} />
 
             <Divider />
@@ -128,22 +136,19 @@ const SideBar = ({
               </Typography>
               <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} />
             </Box>
-
-            <Divider />
-
-            <Box p={3}>
-              <TextButton startIcon={<MapsUgcIcon />} onClick={handleReset} size="large" data-testid="new-conversation-button">
-                {t('sidebar:chatNew')}
-              </TextButton>
-
-              <EmailButton messages={messages} disabled={!messages.length} />
-              <DownloadButton messages={messages} disabled={!messages.length} />
-            </Box>
           </Box>
         )}
         {open && (
-          <Box px={3} py={2}>
-            <Footer />
+          <Box>
+            <Divider />
+            <Box sx={{ px: 3, py: 1 }}>
+              <EmailButton messages={messages} disabled={!messages.length} />
+              <DownloadButton messages={messages} disabled={!messages.length} />
+            </Box>
+            <Divider />
+            <Box px={3} py={2}>
+              <Footer />
+            </Box>
           </Box>
         )}
       </Box>
