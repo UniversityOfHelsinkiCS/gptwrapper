@@ -19,7 +19,7 @@ const SectionLabel = ({ children }: { children: ReactNode }) => (
       fontWeight: 700,
       letterSpacing: '0.1em',
       color: 'text.secondary',
-      px: 2,
+      px: 3,
       pt: 1.5,
       pb: 0.5,
       lineHeight: 1.6,
@@ -44,7 +44,7 @@ type SelectorRowProps = {
 const SelectorRow = ({ icon, label, placeholder, onClick, onClear, clearTooltip, disabled, selectorTestId, clearTestId }: SelectorRowProps) => {
   const hasValue = Boolean(label)
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, px: 1 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, px: 3 }}>
       <Box
         component="button"
         onClick={onClick}
@@ -150,7 +150,7 @@ export default function ChatConsole({ user: _user, course }: { user?: User | nul
           clearTestId="course-exit-button"
         />
         {course && (
-          <Box sx={{ px: 2, pt: 1 }}>
+          <Box sx={{ px: 3, pt: 1 }}>
             <CourseStatus course={course} />
           </Box>
         )}
