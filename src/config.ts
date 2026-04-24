@@ -56,7 +56,6 @@ export const validModels = [
     context: 128_000,
     temperature: 1.0,
     instructions: formatInstructions,
-    forAdminsField: true,
   },
   {
     name: 'mock',
