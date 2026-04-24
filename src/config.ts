@@ -52,7 +52,7 @@ export const validModels = [
     forAdminsField: true,
   },
   {
-    name: 'Mistral-Large-3',
+    name: 'Mistral-Large-3-1',
     context: 128_000,
     temperature: 1.0,
     instructions: formatInstructions,
