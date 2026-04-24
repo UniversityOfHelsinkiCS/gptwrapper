@@ -98,7 +98,7 @@ const SideBar = ({
               </Typography>
             </Box>
 
-            <Box sx={{ px: 3, pb: 2 }}>
+            <Box sx={{ px: 3, py: 2 }}>
               <Button fullWidth variant="contained" disableElevation startIcon={<MapsUgcIcon />} onClick={handleReset} data-testid="new-conversation-button">
                 {t('sidebar:chatNew')}
               </Button>
