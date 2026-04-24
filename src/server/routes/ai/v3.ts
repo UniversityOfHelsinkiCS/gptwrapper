@@ -1,6 +1,6 @@
 import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
-import { FREE_MODEL, inProduction } from '../../../config'
+import { FREE_MODEL, inProduction, isAdminOnlyModel, type ValidModelName } from '../../../config'
 import { PostStreamSchemaV3, type ChatEvent } from '../../../shared/chat'
 import { ChatInstance, Discussion, Enrolment, Prompt, PromptUsage, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
 import { checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
@@ -14,11 +14,19 @@ import { upload } from './multer'
 
 const router = express.Router()
 
+const ensureModelAllowedForUser = (model: ValidModelName, isAdmin: boolean) => {
+  if (isAdminOnlyModel(model) && !isAdmin) {
+    throw ApplicationError.Forbidden('Selected model is restricted to admins')
+  }
+}
+
 router.post('/stream', upload.single('file'), async (r, res) => {
   const req = r as RequestWithUser
   const { options, courseId } = PostStreamSchemaV3.parse(JSON.parse(req.body.data))
   const { generationInfo } = options
   const { user } = req
+
+  ensureModelAllowedForUser(generationInfo.model, user.isAdmin)
 
   res.locals.chatCompletionMeta = {
     courseId,
@@ -126,6 +134,9 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   } else {
     systemMessage = generationInfo.promptInfo.systemMessage
   }
+
+  // double check after prompt overrides because prompt.model can change the effective model.
+  ensureModelAllowedForUser(model, user.isAdmin)
 
   const isFreeModel = model === FREE_MODEL
 

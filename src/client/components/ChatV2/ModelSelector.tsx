@@ -2,10 +2,21 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { MenuItem, Typography, Menu } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import { FREE_MODEL, inProduction, ValidModelName, validModels } from '@config'
+import { FREE_MODEL, inProduction, isAdminOnlyModel, ValidModelName, validModels } from '@config'
 import { TextButton } from './general/Buttons'
 import { usePromptState } from './PromptState'
 import useCurrentUser from '../../hooks/useCurrentUser'
+
+const filterAvailableModels = (
+  models: ValidModelName[],
+  isTokenLimitExceeded: boolean,
+  isAdmin: boolean | undefined,
+): ValidModelName[] => {
+  return models
+    .filter((model) => !isTokenLimitExceeded || model === FREE_MODEL)
+    .filter((model) => isAdmin || !inProduction || !isAdminOnlyModel(model))
+}
+ 
 
 const ModelSelector = ({
   currentModel,
@@ -36,8 +47,9 @@ const ModelSelector = ({
       return [activePrompt.model]
     }
     const models = validModels.map((model) => model.name)
-    return models.filter((model) => !isTokenLimitExceeded || model === FREE_MODEL).filter((model) => user?.isAdmin || (model !== 'mock' && model !== 'gpt-5.1')) //FLAG gpt only for admins
-  }, [isTokenLimitExceeded, user, activePrompt]).filter((model) => user?.isAdmin || !inProduction || (model !== 'mock' && model !== 'gpt-5.1')) //FLAG gpt only for admins
+    return filterAvailableModels(models, isTokenLimitExceeded, user?.isAdmin)
+  }, [isTokenLimitExceeded, user, activePrompt])
+  
   return (
     <>
       <TextButton startIcon={<ChevronRightIcon />} onClick={handleClick} data-testid="model-selector" disabled={availableModels.length === 1}>
