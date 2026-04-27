@@ -1,6 +1,6 @@
 import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
-import { FREE_MODEL, inProduction, isAdminOnlyModel, type ValidModelName } from '../../../config'
+import { FREE_MODEL, inProduction, isMockModel, type ValidModelName } from '../../../config'
 import { PostStreamSchemaV3, type ChatEvent } from '../../../shared/chat'
 import { ChatInstance, Discussion, Enrolment, Prompt, PromptUsage, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
 import { checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
@@ -15,8 +15,8 @@ import { upload } from './multer'
 const router = express.Router()
 
 const ensureModelAllowedForUser = (model: ValidModelName, isAdmin: boolean) => {
-  if (isAdminOnlyModel(model) && !isAdmin) {
-    throw ApplicationError.Forbidden('Selected model is restricted to admins')
+  if (inProduction && isMockModel(model) && !isAdmin) {
+    throw ApplicationError.Forbidden('Mock model is restricted to admins in production')
   }
 }
 

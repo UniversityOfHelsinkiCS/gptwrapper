@@ -49,7 +49,6 @@ export const validModels = [
     context: 128_000,
     temperature: 1.0,
     instructions: formatInstructions,
-    forAdminsField: true,
   },
   {
     name: 'Mistral-Large-3-1',
@@ -60,7 +59,6 @@ export const validModels = [
   {
     name: 'mock',
     context: 1024,
-    forAdminsField: true,
   },
 ] as const
 
@@ -68,8 +66,7 @@ export const ValidModelNameSchema = z.union(validModels.map((model) => z.literal
 
 export type ValidModelName = z.infer<typeof ValidModelNameSchema>
 
-export const isAdminOnlyModel = (modelName: ValidModelName): boolean =>
-  validModels.some((model) => model.name === modelName && 'forAdminsField' in model && model.forAdminsField)
+export const isMockModel = (modelName: ValidModelName): boolean => modelName === 'mock'
 
 export const DEFAULT_MODEL = ValidModelNameSchema.parse(process.env.DEFAULT_MODEL || 'gpt-4o-mini')
 

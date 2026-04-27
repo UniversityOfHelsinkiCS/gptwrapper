@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { FREE_MODEL, inProduction, isAdminOnlyModel, ValidModelName, validModels } from '@config'
+import { FREE_MODEL, inProduction, isMockModel, ValidModelName, validModels } from '@config'
 import { Box, Chip, MenuItem, Typography, Menu, alpha } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
@@ -10,7 +10,7 @@ import { usePromptState } from './PromptState'
 import useCurrentUser from '../../hooks/useCurrentUser'
 
 const filterAvailableModels = (models: ValidModelName[], isTokenLimitExceeded: boolean, isAdmin: boolean | undefined): ValidModelName[] => {
-  return models.filter((model) => !isTokenLimitExceeded || model === FREE_MODEL).filter((model) => isAdmin || !inProduction || !isAdminOnlyModel(model))
+  return models.filter((model) => !isTokenLimitExceeded || model === FREE_MODEL).filter((model) => !isMockModel(model) || !inProduction || isAdmin)
 }
 
 const ModelSelector = ({
