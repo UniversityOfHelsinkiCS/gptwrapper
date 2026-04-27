@@ -43,7 +43,7 @@ test.describe('Prompts', () => {
 
     chatInput = page.getByTestId('chat-input').first()
     await chatInput.fill('testinen morjens')
-    await page.keyboard.press('Shift+Enter')
+    await chatInput.press('Shift+Enter')
 
     // The result should be echo of prompt, again
     await expect(page.getByTestId('assistant-message')).toContainText('mocktest testi onnistui')
