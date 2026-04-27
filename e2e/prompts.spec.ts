@@ -43,13 +43,15 @@ test.describe('Prompts', () => {
 
     chatInput = page.getByTestId('chat-input').first()
     await chatInput.fill('testinen morjens')
-    await chatInput.press('Shift+Enter')
+    await page.keyboard.press('Shift+Enter')
 
     // The result should be echo of prompt, again
     await expect(page.getByTestId('assistant-message')).toContainText('mocktest testi onnistui')
 
     // Also check the settings modal one more time
-    await page.getByTestId('edit-prompt-button').click()
+    await page.getByTestId('choose-prompt-button').click()
+    await page.getByTestId('prompt-row-mocktest testi onnistui').click()
+    await page.getByTestId('edit-prompt-mocktest testi onnistui').click()
     await expect(page.getByTestId('system-message-input')).toContainText('mocktest testi onnistui')
   })
 
@@ -69,7 +71,7 @@ test.describe('Prompts', () => {
     await page.getByTestId(`prompt-row-${newPromptName}`).click()
 
     await expect(page.getByTestId(`prompt-preview-title-for-${newPromptName}`)).toContainText(newPromptName)
-    await page.getByTestId('change-to-prompt-button').click()
+    await page.getByTestId(`prompt-row-${newPromptName}`).locator('button').click()
 
     // Now in chat view
     // The prompt is active.
@@ -125,7 +127,7 @@ test.describe('Prompts', () => {
     // Select the prompt by clicking its row
     await page.getByTestId(`prompt-row-${newPromptName}`).click()
     await expect(page.getByTestId(`prompt-preview-title-for-${newPromptName}`)).toContainText(newPromptName)
-    await page.getByTestId('change-to-prompt-button').click()
+    await page.getByTestId(`prompt-row-${newPromptName}`).locator('button').click()
 
     // Now in chat view
     // The prompt is active.

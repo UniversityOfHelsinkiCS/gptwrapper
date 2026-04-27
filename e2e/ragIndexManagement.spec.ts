@@ -9,7 +9,8 @@ test.describe('Rag index management', () => {
   })
 
   test('Can create a new rag and delete it', async ({ page }) => {
-    await page.getByTestId('course-settings-button').click()
+    await page.getByTestId('select-course-button').click()
+    await page.getByTestId('course-settings-button').first().click()
     await page.getByTestId('sourceMaterialsTab').click()
     await page.getByTestId('createNewRagButton').click()
     await page.getByTestId('ragIndexNameInput').fill('perkele')
@@ -42,7 +43,8 @@ test.describe('Rag index management', () => {
   })
 
   test('Can change the name of a RAG index', async ({ page }) => {
-    await page.getByTestId('course-settings-button').click()
+    await page.getByTestId('select-course-button').click()
+    await page.getByTestId('course-settings-button').first().click()
     await page.getByTestId('sourceMaterialsTab').click()
     await page.getByTestId('createNewRagButton').click()
     await page.getByTestId('ragIndexNameInput').fill('pahaminttu')
@@ -69,7 +71,7 @@ test.describe('Rag index management', () => {
     // Go back
     await page.getByTestId('ragIndexBackToList').click()
 
-    await expect(page.getByText('minttu')).toBeVisible()
+    await expect(page.getByText('minttu').first()).toBeVisible()
     await expect(page.getByText('pahaminttu')).not.toBeVisible()
   })
 })

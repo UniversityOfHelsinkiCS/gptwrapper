@@ -6,7 +6,7 @@ test.describe('Course Settings - Students Tab', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/test-course-course-id')
     await acceptDisclaimer(page)
-    await page.getByTestId('course-settings-button').click()
+    await page.goto('/test-course-course-id/course')
     await page.getByTestId('studentsTab').click()
   })
 

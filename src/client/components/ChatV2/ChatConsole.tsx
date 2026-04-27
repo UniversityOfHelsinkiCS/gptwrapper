@@ -137,7 +137,7 @@ export default function ChatConsole({ user: _user, course }: { user?: User | nul
           onClick={() => navigate(coursesPath)}
           onClear={course ? handleClearCourse : undefined}
           clearTooltip={t('sidebar:courseExit')}
-          selectorTestId={course ? undefined : 'select-course-button'}
+          selectorTestId="select-course-button"
           clearTestId="course-exit-button"
         />
         {course && (
@@ -147,7 +147,7 @@ export default function ChatConsole({ user: _user, course }: { user?: User | nul
         )}
       </Box>
 
-      <Box>
+      <Box data-testid={activePrompt ? 'prompt-name' : undefined}>
         <SectionLabel>{t('sidebar:promptTitle')}</SectionLabel>
         <SelectorRow
           icon={<ChatIcon />}

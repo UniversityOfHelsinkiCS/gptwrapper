@@ -198,6 +198,7 @@ const CourseList = (props: CourseListProps) => {
                           <BlueButton
                             role="link"
                             endIcon={<SettingsOutlined />}
+                            data-testid="course-settings-button"
                             onClick={(e) => {
                               e.stopPropagation()
                               navigate(`/${course.courseId}/course`)
