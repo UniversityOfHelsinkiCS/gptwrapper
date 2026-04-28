@@ -12,6 +12,11 @@ import { setupWindowMessageListeners } from './util/windowMessages'
 
 setupWindowMessageListeners()
 
+const vitePreloadErrorEvent = ['vite', 'preloadError'].join(':') // split to avoid translation key regex false positive
+window.addEventListener(vitePreloadErrorEvent, () => {
+  window.location.reload()
+})
+
 const ReactQueryDevtoolsProduction = inDevelopment
   ? ReactQueryDevtools
   : React.lazy(() =>

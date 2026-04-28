@@ -141,8 +141,6 @@ export const ChatBox = ({
     setIsTokenLimitExceeded(userStatus.usage > userStatus.limit)
   }, [statusLoading, userStatus])
 
-  if (statusLoading) return null
-
   const activeMessageWarnings = Object.values(messageWarning).filter((warning) => !warning.ignored)
 
   return (
