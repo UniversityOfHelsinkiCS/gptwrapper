@@ -16,7 +16,6 @@ import { useKeyboardCommands } from './useKeyboardCommands'
 import { WarningType } from '@shared/aiApi'
 import ModelSelector from './ModelSelector'
 import { ValidModelName } from '../../../config'
-import { amber } from '@mui/material/colors'
 
 export const ChatBox = ({
   disabled,
@@ -328,29 +327,29 @@ export const ChatBox = ({
                   </IconButton>
                 ) : (
                   <span>
-                  <IconButton
-                    type="submit"
-                    ref={sendButtonRef}
-                    data-testid="send-chat-message"
-                    disabled={acuallyDisabled}
-                    sx={{
-                      backgroundColor: acuallyDisabled ? 'action.disabledBackground' : 'primary.main',
-                      color: acuallyDisabled ? 'action.disabled' : '#fff',
-                      borderRadius: '0.5rem',
-                      width: 36,
-                      height: 36,
-                      transition: 'background-color 0.18s, transform 0.1s, filter 0.1s',
-                      '&:hover': {
+                    <IconButton
+                      type="submit"
+                      ref={sendButtonRef}
+                      data-testid="send-chat-message"
+                      disabled={acuallyDisabled}
+                      sx={{
                         backgroundColor: acuallyDisabled ? 'action.disabledBackground' : 'primary.main',
-                        transform: acuallyDisabled ? 'none' : 'scale(1.06)',
-                      },
-                      '&.Mui-disabled': {
-                        color: 'action.disabled',
-                      },
-                    }}
-                  >
-                    <Send sx={{ fontSize: 18 }} />
-                  </IconButton>
+                        color: acuallyDisabled ? 'action.disabled' : '#fff',
+                        borderRadius: '0.5rem',
+                        width: 36,
+                        height: 36,
+                        transition: 'background-color 0.18s, transform 0.1s, filter 0.1s',
+                        '&:hover': {
+                          backgroundColor: acuallyDisabled ? 'action.disabledBackground' : 'primary.main',
+                          transform: acuallyDisabled ? 'none' : 'scale(1.06)',
+                        },
+                        '&.Mui-disabled': {
+                          color: 'action.disabled',
+                        },
+                      }}
+                    >
+                      <Send sx={{ fontSize: 18 }} />
+                    </IconButton>
                   </span>
                 )}
               </Tooltip>
