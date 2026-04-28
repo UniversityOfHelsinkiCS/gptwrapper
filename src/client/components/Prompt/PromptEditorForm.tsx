@@ -68,7 +68,7 @@ const BasicInfoSection = () => {
 }
 
 const ModelSettingsSection = () => {
-  const { form, setForm, type, modelHasTemperature } = usePromptEditorForm()
+  const { form, setForm, type } = usePromptEditorForm()
   const { t } = useTranslation()
 
   return (

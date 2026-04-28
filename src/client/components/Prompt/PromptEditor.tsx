@@ -1,8 +1,7 @@
-import { validModels } from '@config'
 import { Box, CircularProgress, DialogActions } from '@mui/material'
 import type { Message } from '@shared/chat'
 import { enqueueSnackbar } from 'notistack'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
@@ -35,23 +34,7 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
       : t('prompt:defaultRagMessage'),
     hidden: previewPrompt?.hidden ?? false,
     ragIndexId: previewPrompt?.ragIndexId ?? null,
-    selectedModel: previewPrompt?.model ?? 'none',
-    temperatureDefined: previewPrompt?.temperature !== undefined,
-    temperature: previewPrompt?.temperature ?? 0.5,
   })
-
-  const modelHasTemperature = form.selectedModel && 'temperature' in (validModels.find((m) => m.name === form.selectedModel) ?? {})
-
-  useEffect(() => {
-    const selectedModelConfig = validModels.find((m) => m.name === form.selectedModel)
-    if (selectedModelConfig && 'temperature' in selectedModelConfig) {
-      setForm((prev) => ({
-        ...prev,
-        temperature: selectedModelConfig.temperature,
-        temperatureDefined: false,
-      }))
-    }
-  }, [form.selectedModel])
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -63,7 +46,7 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
 
     setLoading(true)
 
-    const { name, userInstructions, systemMessage, ragSystemMessage, hidden, ragIndexId, selectedModel, temperature } = form
+    const { name, userInstructions, systemMessage, ragSystemMessage, hidden, ragIndexId } = form
 
     const messages: Message[] = ragIndexId && ragSystemMessage.length > 0 ? [{ role: 'system', content: ragSystemMessage }] : []
 
@@ -77,8 +60,6 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
           messages,
           hidden,
           ragIndexId,
-          model: selectedModel,
-          temperature,
         })
         enqueueSnackbar(t('prompt:updatedPrompt', { name }), { variant: 'success' })
       } else {
@@ -91,8 +72,6 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
           messages,
           hidden,
           ragIndexId,
-          model: selectedModel,
-          temperature,
         })
         enqueueSnackbar(t('prompt:createdPrompt', { name }), { variant: 'success' })
       }
@@ -110,7 +89,6 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
     type,
     ragIndices,
     courseId,
-    modelHasTemperature,
   }
 
   return (

@@ -66,9 +66,6 @@ export type PromptEditorFormState = Pick<Prompt, 'name' | 'systemMessage' | 'hid
   userInstructions: string
   ragSystemMessage: string
   ragIndexId?: number | null
-  selectedModel: ValidModelName | 'none'
-  temperatureDefined: boolean
-  temperature: number
 }
 
 export type PromptEditorFormContextValue = {
@@ -77,7 +74,6 @@ export type PromptEditorFormContextValue = {
   type: PromptType
   ragIndices?: { id: number; metadata: { name: string } }[]
   courseId: string
-  modelHasTemperature: boolean
 }
 
 export type ChatStatus = 'NOT_STARTED' | 'EXPIRED' | 'ACTIVE'

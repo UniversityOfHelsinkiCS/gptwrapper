@@ -38,9 +38,6 @@ const ModelSelector = ({
   }
 
   const availableModels = React.useMemo(() => {
-    if (activePrompt?.model) {
-      return [activePrompt.model]
-    }
     const models = validModels.map((model) => model.name)
     return filterAvailableModels(models, isTokenLimitExceeded, user?.isAdmin)
   }, [isTokenLimitExceeded, user, activePrompt])
