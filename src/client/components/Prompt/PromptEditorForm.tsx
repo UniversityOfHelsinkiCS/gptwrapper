@@ -159,11 +159,6 @@ const RagSettingsSection = () => {
                     {index.metadata.name}
                   </MenuItem>
                 ))}
-                <Divider />
-                <LinkButtonHoc button={MenuItem} to={`/${courseId}/course/rag`}>
-                  {t('prompt:courseSourceMaterials')}
-                  <LibraryBooksOutlined sx={{ ml: 1 }} />
-                </LinkButtonHoc>
               </Select>
             </FormControl>
           </Box>
