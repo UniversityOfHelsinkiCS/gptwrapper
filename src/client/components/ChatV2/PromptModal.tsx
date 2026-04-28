@@ -9,7 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Prompt as PromptType } from '../../types'
-import { PromptEditor2 } from '../Prompt/PromptEditor2'
+import { PromptEditor } from '../Prompt/PromptEditor'
 import { usePromptState } from './PromptState'
 import { Tab, Tabs, IconButton } from '@mui/material'
 import PsychologyIcon from '@mui/icons-material/Psychology'
@@ -304,7 +304,7 @@ const PromptModal = () => {
           <Box sx={{ display: !isMobile || previewPrompt ? 'flex' : 'none', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
               <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
-                <PromptEditor2 previewPrompt={previewPrompt} onDone={onDone} personal={isPersonalTab} />
+                <PromptEditor previewPrompt={previewPrompt} onDone={onDone} personal={isPersonalTab} />
               </Paper>
             </Box>
           </Box>

@@ -206,7 +206,7 @@ const RagSettingsSection = () => {
   )
 }
 
-export const PromptEditorForm2 = () => (
+export const PromptEditorForm = () => (
   <Box>
     <BasicInfoSection />
     <Divider sx={{ my: 3 }} />
