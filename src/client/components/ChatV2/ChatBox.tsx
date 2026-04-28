@@ -327,6 +327,7 @@ export const ChatBox = ({
                     <StopIcon />
                   </IconButton>
                 ) : (
+                  <span>
                   <IconButton
                     type="submit"
                     ref={sendButtonRef}
@@ -350,6 +351,7 @@ export const ChatBox = ({
                   >
                     <Send sx={{ fontSize: 18 }} />
                   </IconButton>
+                  </span>
                 )}
               </Tooltip>
               <SendPreferenceConfiguratorModal
