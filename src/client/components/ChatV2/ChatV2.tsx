@@ -31,15 +31,12 @@ import { ResetConfirmModal } from './ResetConfirmModal'
 
 import SideBar from './SideBar'
 
-import { PromptEditor } from '../Prompt/PromptEditor'
-
 import TemplateModal from './TemplateModal'
 import PromptModal from './PromptModal'
 import CoursesModal from './CoursesModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
 import { CustomIcon } from './general/CustomIcon'
 import { parseFileContent } from '../../util/fileParsing'
-import { PromptInfoModal } from './PromptInfoModal'
 import { getChatActivityStatus } from './util'
 import { ChatExpiredView } from './ChatExpiredView'
 import { ApiErrorView } from '../common/ApiErrorView'
