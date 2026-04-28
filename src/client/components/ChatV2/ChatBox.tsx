@@ -335,14 +335,14 @@ export const ChatBox = ({
                     data-testid="send-chat-message"
                     disabled={acuallyDisabled}
                     sx={{
-                      backgroundColor: acuallyDisabled ? 'action.disabledBackground' : amber[700],
+                      backgroundColor: acuallyDisabled ? 'action.disabledBackground' : 'primary.main',
                       color: acuallyDisabled ? 'action.disabled' : '#fff',
                       borderRadius: '0.5rem',
                       width: 36,
                       height: 36,
                       transition: 'background-color 0.18s, transform 0.1s, filter 0.1s',
                       '&:hover': {
-                        backgroundColor: acuallyDisabled ? 'action.disabledBackground' : amber[800],
+                        backgroundColor: acuallyDisabled ? 'action.disabledBackground' : 'primary.main',
                         transform: acuallyDisabled ? 'none' : 'scale(1.06)',
                       },
                       '&.Mui-disabled': {
