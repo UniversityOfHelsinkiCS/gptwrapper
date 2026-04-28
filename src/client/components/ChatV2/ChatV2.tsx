@@ -408,14 +408,7 @@ const ChatV2Content = () => {
           />
         </Drawer>
       ) : (
-        <SideBar
-          open={sideBarOpen}
-          setOpen={setSideBarOpen}
-          course={chatInstance}
-          user={user}
-          handleReset={handleResetRequest}
-          messages={messages}
-        />
+        <SideBar open={sideBarOpen} setOpen={setSideBarOpen} course={chatInstance} user={user} handleReset={handleResetRequest} messages={messages} />
       )}
       {/* Chat view column ------------------------------------------------------------------------------------------------ */}
       <Box
@@ -601,8 +594,6 @@ const ChatV2Content = () => {
           <Route path={`course/*`} element={<CourseSettingsModal />} />
           <Route path={`courses`} element={<CoursesModal />} />
           <Route path={`prompts`} element={<PromptModal />} />
-          <Route path={`prompt/:promptId`} element={<PromptEditor back={`/${courseId}`} />} />
-          <Route path={`show/:promptId`} element={<PromptInfoModal back={`/${courseId}`} />} />
         </Route>
       </Routes>
       <ResetConfirmModal open={resetConfirmModalOpen} setOpen={setResetConfirmModalOpen} onConfirm={handleReset} />
