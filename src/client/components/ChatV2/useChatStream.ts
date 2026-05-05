@@ -53,28 +53,14 @@ export const useChatStream = ({
 
         const data = decoder.decode(value)
 
-        let accumulatedChunk = ''
+        let accumulated = ''
         for (const chunk of data.split('\n')) {
           if (!chunk || chunk.trim().length === 0) continue
+          const result = parseStreamChunk(chunk, accumulated)
+          accumulated = result.accumulated
+          if (!result.parsed) continue
 
-          let parsedChunk: ChatEvent | undefined
-          try {
-            parsedChunk = JSON.parse(chunk)
-          } catch (e: any) {
-            console.error('Error', e)
-            console.error('Could not parse the chunk:', chunk)
-            accumulatedChunk += chunk
-
-            try {
-              parsedChunk = JSON.parse(accumulatedChunk)
-              accumulatedChunk = ''
-            } catch (e: any) {
-              console.error('Error', e)
-              console.error('Could not parse the accumulated chunk:', accumulatedChunk)
-            }
-          }
-
-          if (!parsedChunk) continue
+          const parsedChunk = result.parsed
 
           onText()
 
@@ -105,10 +91,12 @@ export const useChatStream = ({
 
               onError({ error: parsedChunk.error })
 
-              setErrorTimeoutId(setTimeout(() => {
-                console.error('Error timeout:', parsedChunk)
-                streamControllerRef.current?.abort('error')
-              }, 3000))
+              setErrorTimeoutId(
+                setTimeout(() => {
+                  console.error('Error timeout:', parsedChunk)
+                  streamControllerRef.current?.abort('error')
+                }, 3000),
+              )
 
               break
 
@@ -186,5 +174,18 @@ export const useChatStream = ({
     toolCalls,
     streamControllerRef,
     hasPotentialError: errorTimeoutId !== null,
+  }
+}
+
+function parseStreamChunk(chunk: string, accumulated: string): { parsed: ChatEvent | undefined; accumulated: string } {
+  try {
+    return { parsed: JSON.parse(chunk), accumulated: '' }
+  } catch {
+    const next = accumulated + chunk
+    try {
+      return { parsed: JSON.parse(next), accumulated: '' }
+    } catch {
+      return { parsed: undefined, accumulated: next }
+    }
   }
 }
