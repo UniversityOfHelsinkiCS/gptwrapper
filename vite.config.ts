@@ -1,5 +1,5 @@
 import { sentryVitePlugin } from '@sentry/vite-plugin'
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
 import { inProduction, inStaging, inCI } from './src/config'
@@ -25,6 +25,9 @@ if (inCI) {
 }
 
 export default defineConfig({
+  test: {
+    environment: 'node',
+  },
   plugins: [
     react({
       babel: {
