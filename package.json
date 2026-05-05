@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "docker compose up",
+    "test": "vitest",
+    "autotest": "vitest watch",
     "prod": "NODE_ENV=production tsx src/server/index.ts",
     "dev": "concurrently \"npm run dev:server\" \"vite\"",
     "dev:server": "NODE_ENV=development tsx watch --clear-screen=false src/server/index.ts",
