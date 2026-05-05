@@ -1,5 +1,5 @@
 import express from 'express'
-import { Op } from 'sequelize'
+import { Op, type Identifier } from 'sequelize'
 import { Notification } from '../db/models'
 import { ApplicationError } from '../util/ApplicationError'
 import { adminMiddleware } from '../middleware/adminMiddleware'
@@ -14,28 +14,16 @@ notificationRouter.get('/', async (req, res) => {
       active: true,
       [Op.or]: [
         {
-          [Op.and]: [
-            { startDate: { [Op.lte]: now } },
-            { endDate: { [Op.gte]: now } },
-          ],
+          [Op.and]: [{ startDate: { [Op.lte]: now } }, { endDate: { [Op.gte]: now } }],
         },
         {
-          [Op.and]: [
-            { startDate: null },
-            { endDate: null },
-          ],
+          [Op.and]: [{ startDate: null }, { endDate: null }],
         },
         {
-          [Op.and]: [
-            { startDate: null },
-            { endDate: { [Op.gte]: now } },
-          ],
+          [Op.and]: [{ startDate: null }, { endDate: { [Op.gte]: now } }],
         },
         {
-          [Op.and]: [
-            { startDate: { [Op.lte]: now } },
-            { endDate: null },
-          ],
+          [Op.and]: [{ startDate: { [Op.lte]: now } }, { endDate: null }],
         },
       ],
     },
@@ -50,9 +38,7 @@ notificationRouter.get('/', async (req, res) => {
 
 notificationRouter.get('/admin', adminMiddleware, async (req, res) => {
   const notifications = await Notification.findAll({
-    order: [
-      ['createdAt', 'DESC'],
-    ],
+    order: [['createdAt', 'DESC']],
   })
 
   res.json(notifications)
@@ -77,7 +63,7 @@ notificationRouter.post('/admin', adminMiddleware, async (req, res) => {
 })
 
 notificationRouter.put('/admin/:id', adminMiddleware, async (req, res) => {
-  const { id } = req.params
+  const id = req.params.id as Identifier | undefined
   const { message, startDate, endDate, priority, active } = req.body
 
   const notification = await Notification.findByPk(id)
@@ -102,7 +88,7 @@ notificationRouter.put('/admin/:id', adminMiddleware, async (req, res) => {
 })
 
 notificationRouter.delete('/admin/:id', adminMiddleware, async (req, res) => {
-  const { id } = req.params
+  const id = req.params.id as Identifier | undefined
 
   const notification = await Notification.findByPk(id)
 
