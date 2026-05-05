@@ -177,7 +177,7 @@ export const useChatStream = ({
   }
 }
 
-function parseStreamChunk(chunk: string, accumulated: string): { parsed: ChatEvent | undefined; accumulated: string } {
+export function parseStreamChunk(chunk: string, accumulated: string): { parsed: ChatEvent | undefined; accumulated: string } {
   try {
     return { parsed: JSON.parse(chunk), accumulated: '' }
   } catch {
