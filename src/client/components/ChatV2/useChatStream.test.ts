@@ -1,6 +1,24 @@
-import { describe, test, expect } from 'vitest'
+import { renderHook, act } from '@testing-library/react'
+import { useChatStream } from './useChatStream'
+import { describe, test, expect, vi } from 'vitest'
 import { parseStreamChunk } from './useChatStream'
-import type { ChatEvent } from '../../../shared/chat'
+
+const generationInfo = {
+  model: 'gpt-4o' as const,
+  promptInfo: { type: 'custom' as const, systemMessage: 'test' },
+}
+
+const makeStream = (lines: string[]): ReadableStream => {
+  const encoder = new TextEncoder()
+  return new ReadableStream({
+    start(controller) {
+      for (const line of lines) {
+        controller.enqueue(encoder.encode(line + '\n'))
+      }
+      controller.close()
+    },
+  })
+}
 
 describe('Stream chunk parsing parses', () => {
   test('WritingEvent', () => {
@@ -47,5 +65,25 @@ describe('Stream chunk parsing parses', () => {
       },
       accumulated: '',
     })
+  })
+})
+
+describe('ChatStream', () => {
+  test('writing event accumulates completion', async () => {
+    const onComplete = vi.fn()
+    const { result } = renderHook(() =>
+      useChatStream({
+        onComplete,
+        onError: vi.fn(),
+        onText: vi.fn(),
+        onToolCallComplete: vi.fn(),
+      }),
+    )
+
+    const stream = makeStream(['{"type":"writing", "text":"hello"}'])
+
+    await act(() => result.current.processStream(stream, generationInfo))
+
+    expect(onComplete).toHaveBeenCalledWith({ message: expect.objectContaining({ content: 'hello' }) })
   })
 })
