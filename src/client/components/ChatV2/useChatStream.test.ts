@@ -86,4 +86,18 @@ describe('ChatStream', () => {
 
     expect(onComplete).toHaveBeenCalledWith({ message: expect.objectContaining({ content: 'hello' }) })
   })
+  test('cut stream', async () => {
+    const onComplete = vi.fn()
+    const { result } = renderHook(() =>
+      useChatStream({
+        onComplete,
+        onError: vi.fn(),
+        onText: vi.fn(),
+        onToolCallComplete: vi.fn(),
+      }),
+    )
+    const stream = makeStream(['{"type":"writ'])
+    await act(() => result.current.processStream(stream, generationInfo))
+    expect(onComplete).toHaveBeenCalled()
+  })
 })
