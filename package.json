@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "docker compose up",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "autotest": "vitest watch",
     "prod": "NODE_ENV=production tsx src/server/index.ts",
     "dev": "concurrently \"npm run dev:server\" \"vite\"",
@@ -62,6 +63,7 @@
     "@typescript-eslint/eslint-plugin": "8.33.1",
     "@typescript-eslint/parser": "8.33.1",
     "@vitejs/plugin-react": "5.1.1",
+    "@vitest/coverage-v8": "^4.1.5",
     "concurrently": "9.0.0",
     "eslint": "9.13.0",
     "eslint-config-prettier": "9.1.0",
