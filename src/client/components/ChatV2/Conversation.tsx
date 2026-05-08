@@ -285,7 +285,9 @@ const AssistantMessageItem = ({
       </ReactMarkdown>
       {message.error && (
         <Box sx={{ mt: 2 }}>
-          <Typography variant="body1" fontStyle="italic" color="error.main">{`\n\n ${message.error}`}</Typography>
+          <Typography variant="body1" fontStyle="italic" color="error.main">
+            {message.error === 'timeout_error' ? t('chat:timeoutError') : `\n\n ${message.error}`}
+          </Typography>
           {onRetry && (
             <Box sx={{ mt: 1 }}>
               <OutlineButtonBlack onClick={onRetry} size="small">

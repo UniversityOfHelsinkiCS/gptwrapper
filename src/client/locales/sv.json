@@ -147,7 +147,8 @@
     "courseChatEndedInfo": "Kursens öppettid har avslutats och kursen är inte längre tillgänglig.",
     "courseChatNotActivated": "Inte aktiverad",
     "courseChatNotActivatedInfo": "Kursen har ännu inte aktiverats. Detta innebär att kursens chatt inte är öppen för studenter.",
-    "retryMessage": "Försök igen"
+    "retryMessage": "Försök igen",
+    "timeoutError": "Servern svarade inte i tid. Försök igen."
   },
   "settings": {
     "prompt": "Samtalsstart",

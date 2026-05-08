@@ -221,7 +221,7 @@ describe('ChatStream', () => {
     expect(onError).not.toHaveBeenCalled()
   })
 
-  test('AbortError with timeout_error calls onError', async () => {
+  test('AbortError with timeout_error calls onComplete with error', async () => {
     const onComplete = vi.fn()
     const onError = vi.fn()
     const { result } = renderHook(() => useChatStream({ onComplete, onError, onText: vi.fn(), onToolCallComplete: vi.fn() }))
@@ -229,8 +229,8 @@ describe('ChatStream', () => {
     controller.abort('timeout_error')
     result.current.streamControllerRef.current = controller
     await act(() => result.current.processStream(makeErrorStream(makeAbortError()), generationInfo))
-    expect(onError).toHaveBeenCalled()
-    expect(onComplete).not.toHaveBeenCalled()
+    expect(onComplete).toHaveBeenCalledWith({ message: expect.objectContaining({ error: 'timeout_error' }) })
+    expect(onError).not.toHaveBeenCalled()
   })
 
   test('default case', async () => {

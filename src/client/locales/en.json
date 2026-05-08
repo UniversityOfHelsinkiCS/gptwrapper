@@ -141,6 +141,7 @@
     "courseChatNotActivated": "Not activated",
     "courseChatNotActivatedInfo": "The course has not been activated yet. This means the course chat is not open for students.",
     "retryMessage": "Retry",
+    "timeoutError": "The server didn't respond in time. Please try again.",
     "noToolResults": "No results"
   },
   "settings": {

@@ -121,8 +121,16 @@ export const useChatStream = ({
 
         switch (reason) {
           case 'timeout_error':
-            error += '\nTimeout error'
-            break
+            onComplete({
+              message: {
+                role: 'assistant',
+                content,
+                error: 'timeout_error',
+                toolCalls: toolCallResultsAccum,
+                generationInfo: baseGenerationInfo,
+              },
+            })
+            return
 
           case 'user_aborted':
             onComplete({

@@ -57,7 +57,7 @@ const ChatV2Content = () => {
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
   const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo, hasPotentialError } = useChatStream({
     onComplete: ({ message }) => {
-      if (message.content.length > 0) {
+      if (message.content.length > 0 || message.error) {
         setMessages((prev: ChatMessage[]) => prev.concat(message))
         refetchStatus()
       }
@@ -256,7 +256,14 @@ const ChatV2Content = () => {
         enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
       }
     } catch (err: any) {
-      console.error(err)
+      const wasTimeout = streamControllerRef.current?.signal.reason === 'timeout_error'
+      if (wasTimeout) {
+        setMessages((prev: ChatMessage[]) =>
+          prev.concat({ role: 'assistant', content: '', error: 'timeout_error', toolCalls: {}, generationInfo }),
+        )
+      } else {
+        console.error(err)
+      }
       handleCancel()
     }
   }

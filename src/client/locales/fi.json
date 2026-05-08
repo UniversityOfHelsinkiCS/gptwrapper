@@ -144,6 +144,7 @@
     "courseChatNotActivated": "Ei aktivoitu",
     "courseChatNotActivatedInfo": "Kurssi ei ole vielä aktivoitu. Tämä tarkoittaa, että kurssin chat ei ole auki opiskelijoille.",
     "retryMessage": "Yritä uudelleen",
+    "timeoutError": "Palvelin ei vastannut ajoissa. Yritä uudelleen.",
     "noToolResults": "Ei tuloksia"
   },
   "settings": {
