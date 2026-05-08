@@ -3,8 +3,6 @@ import { type CreationOptional, DataTypes, type InferAttributes, type InferCreat
 import type { Message } from '@shared/chat'
 import { sequelize } from '../connection'
 import RagIndex from './ragIndex'
-import type { ValidModelName } from '@config'
-
 export const PromptTypeValues = ['CHAT_INSTANCE', 'PERSONAL'] as const
 export type PromptType = (typeof PromptTypeValues)[number]
 
@@ -26,10 +24,6 @@ class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prom
   declare messages: CreationOptional<Message[]>
 
   declare hidden: CreationOptional<boolean>
-
-  declare model?: CreationOptional<ValidModelName | null>
-
-  declare temperature?: CreationOptional<number>
 
   declare ragIndex?: NonAttribute<RagIndex>
 
@@ -81,14 +75,6 @@ Prompt.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
-    },
-    model: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    temperature: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
     },
     userInstructions: {
       type: DataTypes.TEXT,

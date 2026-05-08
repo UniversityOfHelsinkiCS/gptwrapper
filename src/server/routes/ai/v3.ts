@@ -87,8 +87,8 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     })
   }
 
-  let model = generationInfo.model
-  let temperature = generationInfo.temperature
+  const model = generationInfo.model
+  const temperature = generationInfo.temperature
 
   let prompt: Prompt | null = null
 
@@ -113,14 +113,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
     systemMessage = prompt.systemMessage
 
-    if (prompt.model) {
-      model = prompt.model
-    }
-
-    if (prompt.temperature) {
-      temperature = prompt.temperature
-    }
-
     if (prompt.ragIndex) {
       const searchTool = generationInfo.model === 'mock' ? getMockRagIndexSearchTool(prompt.ragIndex) : getRagIndexSearchTool(prompt.ragIndex)
       tools.push(searchTool)
@@ -135,7 +127,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     systemMessage = generationInfo.promptInfo.systemMessage
   }
 
-  // double check after prompt overrides because prompt.model can change the effective model.
   ensureModelAllowedForUser(model, user.isAdmin)
 
   const isFreeModel = model === FREE_MODEL

@@ -185,8 +185,6 @@ export const PromptStateProvider: React.FC<{
       name: activePrompt.name,
       type: 'saved',
       systemMessage: activePrompt.systemMessage,
-      model: activePrompt.model,
-      temperature: activePrompt.temperature,
     }
     : { type: 'custom', systemMessage: '' }
 

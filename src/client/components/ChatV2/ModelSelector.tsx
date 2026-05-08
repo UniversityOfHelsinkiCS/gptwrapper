@@ -42,7 +42,7 @@ const ModelSelector = ({
     return filterAvailableModels(models, isTokenLimitExceeded, user?.isAdmin)
   }, [isTokenLimitExceeded, user, activePrompt])
 
-  const displayModel = activePrompt?.model ?? currentModel
+  const displayModel = currentModel
   const disabled = availableModels.length === 1
 
   const isFree = (model: string) => model === FREE_MODEL

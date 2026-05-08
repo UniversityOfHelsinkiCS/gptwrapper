@@ -1,4 +1,3 @@
-import { ValidModelName } from '../config'
 import type { ChatMessage } from '@shared/chat'
 import { Locale } from '@shared/lang'
 import { Locales, Statistic, Term } from '@shared/types'
@@ -54,8 +53,6 @@ export type Prompt = {
   type: PromptType
   createdAt: string
   ragIndexId?: number
-  model?: ValidModelName
-  temperature?: number
 }
 
 export type PromptInfo = Pick<Prompt, 'name' | 'systemMessage' | 'hidden' | 'type'> & {

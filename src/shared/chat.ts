@@ -82,9 +82,7 @@ export type Message = SystemMessage | UserMessage | AssistantMessage
 export type ChatMessage = UserMessage | AssistantMessage
 
 export const MessageGenerationInfoSchema = z.object({
-  // May be overridden by prompt
   model: ValidModelNameSchema,
-  // May be overridden by prompt
   temperature: z.number().min(0).max(1).optional().nullable(),
   promptInfo: z.discriminatedUnion('type', [
     z.object({
@@ -92,8 +90,6 @@ export const MessageGenerationInfoSchema = z.object({
       id: z.string(),
       name: z.string(),
       systemMessage: z.string().optional(),
-      model: ValidModelNameSchema.optional().nullable(),
-      temperature: z.number().min(0).max(1).optional().nullable(),
     }),
     z.object({
       type: z.literal('custom'),

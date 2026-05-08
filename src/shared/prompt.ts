@@ -1,5 +1,4 @@
 import z from 'zod/v4'
-import { ValidModelNameSchema } from '../config'
 import { MessageContentArraySchema } from './chat'
 
 export const PromptMessagesSchema = z.array(
@@ -16,10 +15,6 @@ export const PromptUpdateableParamsSchema = z.object({
   messages: PromptMessagesSchema.optional().default([]),
   hidden: z.boolean().default(false),
   ragIndexId: z.number().min(1).optional().nullable(),
-  model: ValidModelNameSchema.or(z.literal('none'))
-    .optional()
-    .transform((val) => (val === 'none' ? null : val)),
-  temperature: z.number().min(0).max(1).optional(),
 })
 
 export const PromptCreationParamsSchema = z.intersection(

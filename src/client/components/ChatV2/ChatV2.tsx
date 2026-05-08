@@ -126,7 +126,7 @@ const ChatV2Content = () => {
     const { usage, limit } = userStatus
     const tokenUsageExceeded = usage >= limit
 
-    const acualModel = (promptInfo.type === 'saved' ? promptInfo.model : null) ?? activeModel
+    const acualModel = activeModel
 
     if (tokenUsageExceeded && acualModel !== FREE_MODEL) {
       enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
