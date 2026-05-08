@@ -66,6 +66,7 @@ export const streamChat = async ({
   writeEvent,
   user,
   ignoredWarnings,
+  tokenLimit,
 }: {
   model: ValidModelName
   temperature?: number
@@ -76,6 +77,7 @@ export const streamChat = async ({
   writeEvent: WriteEventFunction
   user: User
   ignoredWarnings?: WarningType[]
+  tokenLimit: number
 }): Promise<
   | {
       warnings: AiApiWarning[]
@@ -126,6 +128,7 @@ export const streamChat = async ({
       ...preparedChatMessages,
     ],
     ignoredWarnings,
+    tokenLimit,
   )
 
   if (warnings.length > 0) {
@@ -296,6 +299,7 @@ const handleWarnings = (
   modelConfig: (typeof validModels)[number],
   messages: Message[],
   ignoredWarnings?: WarningType[],
+  tokenLimit: number = DEFAULT_TOKEN_LIMIT,
 ): { warnings: AiApiWarning[]; messages: Message[]; inputTokenCount: number } => {
   const encoding = getEncoding(modelConfig.name)
   const tokenCount = calculateUsage(messages, encoding)
@@ -305,7 +309,7 @@ const handleWarnings = (
   const warnings: AiApiWarning[] = []
 
   // Warn about usage if over 10% of limit
-  const tokenUsagePercentage = Math.round((tokenCount / DEFAULT_TOKEN_LIMIT) * 100)
+  const tokenUsagePercentage = Math.round((tokenCount / tokenLimit) * 100)
 
   const isFreeModel = modelConfig.name === FREE_MODEL
 

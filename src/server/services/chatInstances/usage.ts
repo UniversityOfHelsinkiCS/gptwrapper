@@ -20,18 +20,15 @@ export const getUsage = async (userId: string) => {
   return user.usage
 }
 
-export const checkUsage = (user: UserType, model: ValidModelName): boolean => {
-  if (model === FREE_MODEL) return true
-
-  // Determine base token limit based on IAM group membership
-  // Users with IAM access get full limit, others get half
+export const getUserTokenLimit = (user: UserType): number => {
   const hasFullAccess = user.isAdmin || checkIamAccess(user.iamGroups)
   const baseLimit = hasFullAccess ? DEFAULT_TOKEN_LIMIT : DEFAULT_TOKEN_LIMIT / 2
-  
-  // Power users get 10x the base limit
-  const tokenLimit = user.isPowerUser ? baseLimit * 10 : baseLimit
+  return user.isPowerUser ? baseLimit * 10 : baseLimit
+}
 
-  return user.isAdmin || (user.usage ?? 0) <= tokenLimit
+export const checkUsage = (user: UserType, model: ValidModelName): boolean => {
+  if (model === FREE_MODEL) return true
+  return user.isAdmin || (user.usage ?? 0) <= getUserTokenLimit(user)
 }
 
 export const checkCourseUsage = (user: UserType, chatInstance: ChatInstance): boolean => {

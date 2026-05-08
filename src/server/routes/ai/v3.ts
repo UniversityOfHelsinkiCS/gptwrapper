@@ -3,7 +3,7 @@ import express from 'express'
 import { FREE_MODEL, inProduction, isMockModel, type ValidModelName } from '../../../config'
 import { PostStreamSchemaV3, type ChatEvent } from '../../../shared/chat'
 import { ChatInstance, Discussion, Enrolment, Prompt, PromptUsage, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
-import { checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
+import { checkCourseUsage, checkUsage, getUserTokenLimit, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { streamChat } from '../../services/langchain/chat'
 import { getMockRagIndexSearchTool } from '../../services/rag/mockSearchTool'
 import { getRagIndexSearchTool } from '../../services/rag/searchTool'
@@ -149,6 +149,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     ignoredWarnings: options.ignoredWarnings,
     tools,
     writeEvent,
+    tokenLimit: getUserTokenLimit(user),
   })
 
   res.locals.chatCompletionMeta.inputTokenCount = result.inputTokenCount
@@ -171,21 +172,22 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       userToCharge = req.hijackedBy
     }
 
+    const totalTokenCount = result.tokenCount + result.inputTokenCount
     if (course) {
-      await incrementCourseUsage(course, result.tokenCount) // course.currentUserUsage.usage is incremented by tokenCount
+      await incrementCourseUsage(course, totalTokenCount)
       await PromptUsage.create({
         chatInstanceId: course.id,
         promptId: prompt?.id ?? null,
         userId: userToCharge.id,
-        tokenCount: result.tokenCount,
+        tokenCount: totalTokenCount,
       })
     } else {
-      await incrementUsage(userToCharge, result.tokenCount)
+      await incrementUsage(userToCharge, totalTokenCount)
     }
   }
 
   Object.assign(res.locals.chatCompletionMeta, {
-    tokenCount: result.tokenCount,
+    tokenCount: result.tokenCount + result.inputTokenCount,
     outputTokenCount: result.tokenCount,
     timeToFirstToken: result.timeToFirstToken,
     tokensPerSecond: result.tokensPerSecond,
