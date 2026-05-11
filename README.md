@@ -35,7 +35,7 @@ See `compose.yaml` for local development. In short, in addition to the CC server
 
 Azure is used for OpenAI LLMs.
 
-Create an AI foundry resource (or something) and create deployment for the models you want to use (gpt-5 for example). Always set the deployment name to the acual model name. So for model gpt-5, the deployment name should be gpt-5.
+Create an AI foundry resource (or something) and create deployment for the models you want to use (gpt-5.1 for example). Always set the deployment name to the acual model name. So for model gpt-5.1, the deployment name should be gpt-5.1.
 
 Then populate .env with the following:
 

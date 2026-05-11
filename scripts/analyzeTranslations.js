@@ -55,7 +55,7 @@ const APPLICATION_NAME = 'CurreChat'
 const LANGUAGES = ['fi', 'sv', 'en']
 
 // OpenAI configuration constants
-const OPENAI_MODEL_NAME = 'gpt-5'
+const OPENAI_MODEL_NAME = 'gpt-5.1'
 const MAX_CONTEXT_EXAMPLES = 3
 const OPENAI_TEMPERATURE = 0.3
 const OPENAI_MAX_TOKENS = 1000

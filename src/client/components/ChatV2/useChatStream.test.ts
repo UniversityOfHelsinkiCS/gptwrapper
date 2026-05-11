@@ -5,7 +5,7 @@ import { describe, test, expect, vi } from 'vitest'
 import { parseStreamChunk } from './useChatStream'
 
 const generationInfo = {
-  model: 'gpt-4o' as const,
+  model: 'gpt-4o-mini' as const,
   promptInfo: { type: 'custom' as const, systemMessage: 'test' },
 }
 

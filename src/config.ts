@@ -27,22 +27,8 @@ Wrap code in triple backticks with the correct language tag (js, ts, py, etc.) s
  */
 export const validModels = [
   {
-    name: 'gpt-4o',
-    context: 128_000,
-  },
-  {
     name: 'gpt-4o-mini',
     context: 128_000,
-  },
-  {
-    name: 'gpt-4.1',
-    context: 128_000,
-  },
-  {
-    name: 'gpt-5',
-    context: 128_000,
-    temperature: 1.0,
-    instructions: formatInstructions,
   },
   {
     name: 'gpt-5.1',
