@@ -69,9 +69,12 @@ export const ChatBox = ({
     check()
     window.addEventListener('scroll', check, { passive: true })
     window.addEventListener('resize', check)
+    const ro = new ResizeObserver(check)
+    ro.observe(document.documentElement)
     return () => {
       window.removeEventListener('scroll', check)
       window.removeEventListener('resize', check)
+      ro.disconnect()
     }
   }, [])
 
