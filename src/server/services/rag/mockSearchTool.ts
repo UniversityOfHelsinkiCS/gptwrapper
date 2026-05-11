@@ -25,7 +25,8 @@ const mockSearch: typeof search = async (_index: RagIndex, _params: { query: str
   }
 }
 
-export const getMockRagIndexSearchTool: typeof getRagIndexSearchTool = (ragIndex: RagIndex) =>
+//Todo fix the typing here 
+export const getMockRagIndexSearchTool: any = (ragIndex: RagIndex) =>
   tool(
     async ({ query }: { query: string }) => {
       console.log('Mock search tool invoked with query:', query)
