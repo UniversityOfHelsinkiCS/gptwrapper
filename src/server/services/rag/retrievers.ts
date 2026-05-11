@@ -6,7 +6,7 @@ import { redisClient } from '../../util/redis'
 import { Embeddings } from '@langchain/core/embeddings'
 import { getEmbedder } from './embedder'
 import { transformQuery, TransformQueryOptions } from './queryTransformer'
-import { EnsembleRetriever } from 'langchain/retrievers/ensemble'
+import { EnsembleRetriever } from '@langchain/classic/retrievers/ensemble'
 
 const normalizeWhitespace = (str: string) => {
   return str.replace(/\s+/g, ' ').trim();

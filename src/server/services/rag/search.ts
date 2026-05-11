@@ -1,8 +1,8 @@
 import { RagChunk, SearchParams } from '../../../shared/rag'
 import type { RagIndex } from '../../db/models'
 import { getAndFTSearchRetriever, getOrFTSearchRetriever, getExactFTSearchRetriever, getSubstringFTSearchRetriever, getVectorSearchRetriever, getMultiQueryEnsembleRetriever } from './retrievers'
-import { EnsembleRetriever } from 'langchain/retrievers/ensemble'
-import { BaseRetriever } from '@langchain/core/retrievers'
+import { BaseRetriever } from '@langchain/classic'
+import { EnsembleRetriever } from '@langchain/classic/retrievers/ensemble'
 import { curateDocuments } from './curator'
 
 export const search = async (ragIndex: RagIndex, searchParams: SearchParams): Promise<{ results: RagChunk[]; timings: Record<string, number> }> => {
