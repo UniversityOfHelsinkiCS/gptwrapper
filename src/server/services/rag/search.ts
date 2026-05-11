@@ -1,7 +1,7 @@
 import { RagChunk, SearchParams } from '../../../shared/rag'
 import type { RagIndex } from '../../db/models'
 import { getAndFTSearchRetriever, getOrFTSearchRetriever, getExactFTSearchRetriever, getSubstringFTSearchRetriever, getVectorSearchRetriever, getMultiQueryEnsembleRetriever } from './retrievers'
-import { BaseRetriever } from '@langchain/classic'
+import { BaseRetriever } from '@langchain/core/retrievers'
 import { EnsembleRetriever } from '@langchain/classic/retrievers/ensemble'
 import { curateDocuments } from './curator'
 
