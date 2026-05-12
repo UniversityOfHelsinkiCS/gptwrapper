@@ -102,6 +102,10 @@ export const streamChat = async ({
     throw new Error(`Invalid model: ${model}`)
   }
 
+  const instructionMessage = modelConfigHasInstructions(modelConfig)
+    ? [{ role: 'system' as const, content: modelConfig.instructions }]
+    : []
+
   const chatModel = getChatModel(modelConfig, tools, temperature).withConfig({
     callbacks: [{
       handleLLMError(err) {
@@ -120,7 +124,7 @@ export const streamChat = async ({
   const { messages, warnings, inputTokenCount } = handleWarnings(
     modelConfig,
     [
-      ...('instructions' in modelConfig ? [{ role: 'system' as const, content: modelConfig.instructions }] : []),
+      ...instructionMessage,
       ...promptMessages,
       {
         role: 'system',
@@ -284,8 +288,7 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
  * @returns A chat model instance.
  */
 const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[], temperature?: number): ChatModel => {
-  
-  switch (modelConfig.provider){
+  switch (modelConfig.provider) {
     case ModelProvider.Azure:
       return getAzureChatOpenAI({
           name: modelConfig.name,
@@ -295,12 +298,12 @@ const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[], tempera
     case ModelProvider.Vertex:
       return getVertexModelProvider(modelConfig.name)
     default:
-      console.error("unknown model provider" + modelConfig.provider)
+      throw new Error(`Unknown model provider: ${modelConfig.provider}`)
   }
-  
- 
- 
 }
+
+const modelConfigHasInstructions = (modelConfig: ModelConfig): modelConfig is ModelConfig & { instructions: string } =>
+  'instructions' in modelConfig && typeof modelConfig.instructions === 'string'
 
 const handleWarnings = (
   modelConfig: (typeof validModels)[number],
