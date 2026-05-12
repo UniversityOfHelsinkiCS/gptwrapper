@@ -62,13 +62,13 @@ const ModelSelector = ({
           padding: '4px 8px 4px 10px',
           borderRadius: 999,
           border: '1px solid',
-          borderColor: open ? 'divider' : 'transparent',
-          backgroundColor: (theme) => (open ? alpha(theme.palette.text.primary, 0.09) : alpha(theme.palette.text.primary, 0.055)),
+          borderColor: 'divider',
+          backgroundColor: 'background.paper',
           cursor: disabled ? 'default' : 'pointer',
           fontFamily: 'inherit',
           transition: 'background-color 0.12s, border-color 0.12s',
           '&:hover': {
-            backgroundColor: (theme) => (disabled ? alpha(theme.palette.text.primary, 0.055) : alpha(theme.palette.text.primary, 0.08)),
+            backgroundColor: 'background.default',
           },
           '&:disabled': {
             opacity: 0.7,
