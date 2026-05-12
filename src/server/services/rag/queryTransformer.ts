@@ -1,5 +1,5 @@
 import { ChatPromptTemplate } from "@langchain/core/prompts"
-import { getAzureChatOpenAI } from "../langchain/azure"
+import { getAzureChatOpenAI } from "../langchain/modelGenerators"
 import { z } from "zod/v4"
 import logger from "../../util/logger"
 

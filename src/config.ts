@@ -22,31 +22,55 @@ Put math in $$ ... $$ for LaTeX rendering.
 Wrap code in triple backticks with the correct language tag (js, ts, py, etc.) so syntax highlighting and rendering work.
 `
 
+export enum ModelProvider {
+  Azure = "azure",
+  Vertex = "vertex",
+  Mock = "mock"
+}
+
+export type ModelConfig = {
+  name: string,
+  context: number,
+  provider: ModelProvider,
+  instructions?: string,
+  temperature?: number
+}
+
 /**
  * name: the acual model name, which is shown to users, configures the model to be used and is also the azure deployment name.
  */
-export const validModels = [
+export const validModels: ModelConfig[] = [
   {
     name: 'gpt-4o-mini',
     context: 128_000,
+    provider: ModelProvider.Azure
   },
   {
     name: 'gpt-5.1',
     context: 128_000,
-    temperature: 1.0,
     instructions: formatInstructions,
+    provider: ModelProvider.Azure
   },
   {
     name: 'Mistral-Large-3-1',
     context: 128_000,
-    temperature: 1.0,
     instructions: formatInstructions,
+    provider: ModelProvider.Azure
+  },
+  {
+    name: 'ClaudeHaiku4.6',
+    context: 128_000,
+    instructions: formatInstructions,
+    provider: ModelProvider.Vertex
   },
   {
     name: 'mock',
     context: 1024,
+    provider: ModelProvider.Mock
   },
 ] as const
+
+
 
 export const ValidModelNameSchema = z.union(validModels.map((model) => z.literal(model.name)))
 
@@ -59,7 +83,10 @@ export const DEFAULT_MODEL = ValidModelNameSchema.parse(process.env.DEFAULT_MODE
 export const FREE_MODEL = ValidModelNameSchema.parse(process.env.FREE_MODEL || 'gpt-4o-mini') // as it was decided in 23th Sept 2024 meeting
 
 export const DEFAULT_ASSISTANT_INSTRUCTIONS = '' // 11th August 2025 we decided it should be empty
-export const DEFAULT_MODEL_TEMPERATURE = 0.5
+
+export const DEFAULT_MODEL_TEMPERATURE = 1.0
+
+export const DEFAULT_VERTEX_LOCATION = "europe-north1" // Hamina, Finland
 
 export const supportEmail = 'opetusteknologia@helsinki.fi'
 

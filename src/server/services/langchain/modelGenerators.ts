@@ -1,5 +1,8 @@
+import { DEFAULT_MODEL_TEMPERATURE, DEFAULT_VERTEX_LOCATION } from "@config";
+import { ChatVertexAI } from "@langchain/google-vertexai";
 import { AzureChatOpenAI, ChatOpenAICallOptions } from "@langchain/openai";
 import { AZURE_API_KEY, AZURE_RESOURCE } from "src/server/util/config";
+import { ChatModel } from "./chat";
 
 interface AzureModelConfig {
   name: string;
@@ -23,3 +26,12 @@ export const getAzureChatOpenAI = ({ name, temperature, streaming = true }: Azur
     streaming,
     zdrEnabled: true,
   })
+
+
+  export const getVertexModelProvider = (modelName: string): ChatModel => {
+    return new ChatVertexAI({
+      model: modelName,
+      location: DEFAULT_VERTEX_LOCATION,
+      temperature: DEFAULT_MODEL_TEMPERATURE
+    })
+  }

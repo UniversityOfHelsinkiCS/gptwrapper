@@ -4,7 +4,7 @@ import { AIMessageChunk, BaseMessageLike } from '@langchain/core/messages'
 import type { Runnable } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
-import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, type ValidModelName, validModels } from '@config'
+import { DEFAULT_MODEL_TEMPERATURE, DEFAULT_TOKEN_LIMIT, FREE_MODEL, ModelConfig, ModelProvider, type ValidModelName, validModels } from '@config'
 import type { ChatEvent, ChatMessage, Message } from '@shared/chat'
 import type { ChatToolDef, ChatToolOutput } from '@shared/tools'
 import type { User } from '@shared/user'
@@ -14,7 +14,8 @@ import { AiApiWarning, WarningType } from '@shared/aiApi'
 import getEncoding from 'src/server/util/tiktoken'
 import { calculateUsage } from '../chatInstances/usage'
 import { truncateMessages } from './truncateMessages'
-import { getAzureChatOpenAI } from './azure'
+import { getAzureChatOpenAI, getVertexModelProvider } from './modelGenerators'
+import { VertexAI } from '@langchain/google-vertexai'
 
 export type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
 
@@ -282,17 +283,23 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
  * @param temperature The temperature for the model's responses.
  * @returns A chat model instance.
  */
-const getChatModel = (modelConfig: (typeof validModels)[number], tools: StructuredTool[], temperature?: number): ChatModel => {
-  const chatModel =
-    modelConfig.name === 'mock'
-      ? new MockModel({ tools, temperature })
-      : getAzureChatOpenAI({
+const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[], temperature?: number): ChatModel => {
+  
+  switch (modelConfig.provider){
+    case ModelProvider.Azure:
+      return getAzureChatOpenAI({
           name: modelConfig.name,
-          temperature: 'temperature' in modelConfig ? modelConfig.temperature : temperature ?? 0.7,
+          temperature: DEFAULT_MODEL_TEMPERATURE,
           streaming: true,
         }).bindTools(tools) // Make tools available to the model.
-
-  return chatModel
+    case ModelProvider.Vertex:
+      return getVertexModelProvider(modelConfig.name)
+    default:
+      console.error("unknown model provider" + modelConfig.provider)
+  }
+  
+ 
+ 
 }
 
 const handleWarnings = (

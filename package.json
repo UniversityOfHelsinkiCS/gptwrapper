@@ -91,6 +91,7 @@
     "@emotion/styled": "11.14.0",
     "@langchain/classic": "^1.0.32",
     "@langchain/core": "^1.1.45",
+    "@langchain/google-vertexai": "^2.1.30",
     "@langchain/ollama": "^1.2.7",
     "@langchain/openai": "^1.4.5",
     "@mui/icons-material": "6.4.12",
