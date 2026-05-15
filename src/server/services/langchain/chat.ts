@@ -16,6 +16,7 @@ import { calculateUsage } from '../chatInstances/usage'
 import { truncateMessages } from './truncateMessages'
 import { getAzureChatOpenAI, getVertexModelProvider } from './modelGenerators'
 import { VertexAI } from '@langchain/google-vertexai'
+import logger from 'src/server/util/logger'
 
 export type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
 
@@ -140,13 +141,23 @@ export const streamChat = async ({
     return { warnings, inputTokenCount }
   }
 
-  let iterations = 2
+  const MAX_TOOL_ITERATIONS = 5
+  let iterations = MAX_TOOL_ITERATIONS
   let result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
 
   // If the model decided to call tools, execute them and send the results back to the model in subsequent turns.
   while (result.toolCalls.length > 0 && iterations > 0) {
     result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
     iterations--
+  }
+
+  // Escape hatch: if the cap was hit while the model was still calling tools,
+  // force a final turn with tools disabled so the model produces a text answer
+  // from whatever results it already has instead of returning an empty response.
+  if (result.toolCalls.length > 0) {
+    logger.info('Tool iteration cap reached, forcing final no-tools turn', { maxIterations: MAX_TOOL_ITERATIONS })
+    const noToolsModel = (chatModel as any).bind({ tool_choice: 'none' }) as ChatModel
+    result = await chatTurn(noToolsModel, messages, toolsByName, writeEvent, user)
   }
 
   return {
