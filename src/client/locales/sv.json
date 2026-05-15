@@ -126,6 +126,11 @@
     "readSources": "Läser källor",
     "failedSources": "Misslyckades att visa källor",
     "freeModel": "gratis",
+    "modelDescriptions": {
+      "premium": "Kraftfullast — bäst för krävande uppgifter",
+      "balanced": "Stark allroundmodell",
+      "fastAndCheap": "Snabb och ekonomisk"
+    },
     "emptyReminder": "Observera att långa konversationer förbrukar fler tokens. Vi rekommenderar att du rensar konversationen när du byter samtalsämne.",
     "modelDisabled": "Språkmodellen är inte tillgänglig",
     "attachFile": "Bifoga fil",
