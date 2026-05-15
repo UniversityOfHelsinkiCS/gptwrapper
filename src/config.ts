@@ -28,12 +28,18 @@ export enum ModelProvider {
   Mock = "mock"
 }
 
+export type ModelDescriptionKey =
+  | 'chat:modelDescriptions.premium'
+  | 'chat:modelDescriptions.balanced'
+  | 'chat:modelDescriptions.fastAndCheap'
+
 export type ModelConfig = {
   name: string,
   context: number,
   provider: ModelProvider,
   instructions?: string,
-  temperature?: number
+  temperature?: number,
+  descriptionKey?: ModelDescriptionKey,
 }
 
 /**
@@ -49,19 +55,22 @@ export const validModels: ModelConfig[] = [
     name: 'gpt-5.1',
     context: 128_000,
     instructions: formatInstructions,
-    provider: ModelProvider.Azure
+    provider: ModelProvider.Azure,
+    descriptionKey: 'chat:modelDescriptions.premium',
   },
   {
     name: 'Mistral-Large-3-1',
     context: 128_000,
     instructions: formatInstructions,
-    provider: ModelProvider.Azure
+    provider: ModelProvider.Azure,
+    descriptionKey: 'chat:modelDescriptions.balanced',
   },
   {
     name: 'ClaudeHaiku4.6',
     context: 128_000,
     instructions: formatInstructions,
-    provider: ModelProvider.Vertex
+    provider: ModelProvider.Vertex,
+    descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   },
   {
     name: 'mock',
