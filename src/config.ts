@@ -58,7 +58,7 @@ export const validModels: ModelConfig[] = [
     provider: ModelProvider.Azure
   },
   {
-    name: 'ClaudeHaiku4.6',
+    name: 'claude-haiku-4-5@20251001',
     context: 128_000,
     instructions: formatInstructions,
     provider: ModelProvider.Vertex

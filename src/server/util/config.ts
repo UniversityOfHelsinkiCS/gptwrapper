@@ -9,6 +9,8 @@ export const AZURE_API_KEY = getEnv('AZURE_API_KEY', 'placeholder')
 
 export const AZURE_RESOURCE = getEnv('AZURE_RESOURCE', 'placeholder')
 
+export const GOOGLE_CLOUD_PROJECT_ID = getEnv('GOOGLE_CLOUD_PROJECT_ID', '') 
+
 export const DATABASE_URL = getEnv('DATABASE_URL', 'placeholder-this-needs-to-be-set')
 
 export const JAMI_URL =
