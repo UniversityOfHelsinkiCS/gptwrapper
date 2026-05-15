@@ -10,6 +10,7 @@ jobs:
     secrets: inherit
 
   build-and-push-to-production:
+    needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 8
 
