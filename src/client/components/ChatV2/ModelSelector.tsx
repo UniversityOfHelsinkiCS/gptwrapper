@@ -10,7 +10,10 @@ import { usePromptState } from './PromptState'
 import useCurrentUser from '../../hooks/useCurrentUser'
 
 const filterAvailableModels = (models: ValidModelName[], isTokenLimitExceeded: boolean, isAdmin: boolean | undefined): ValidModelName[] => {
-  return models.filter((model) => !isTokenLimitExceeded || model === FREE_MODEL).filter((model) => !isMockModel(model) || !inProduction || isAdmin)
+  return models
+    .filter((model) => !isTokenLimitExceeded || model === FREE_MODEL)
+    .filter((model) => !isMockModel(model) || !inProduction || isAdmin)
+    .filter((model) => model !== 'ClaudeHaiku4.6' || !inProduction || isAdmin)
 }
 
 const ModelSelector = ({
