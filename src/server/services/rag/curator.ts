@@ -6,7 +6,7 @@ import logger from "src/server/util/logger";
 
 const CurationOutputSchema = z.object({
   // reason: z.string().min(1).max(500).describe("A brief explanation of the relevance score assigned to the document."),
-  relevanceScore: z.number().min(0).max(1).describe("A score from 0 to 1 indicating the relevance of the document to the user query."),
+  relevanceScore: z.number().describe("A score from 0 to 1 (inclusive) indicating the relevance of the document to the user query. Must be between 0 and 1."),
   shouldBeIncluded: z.boolean().describe("Indicates whether the document should be included in the final curated list."),
 })
 
@@ -21,7 +21,7 @@ export const curateDocuments = async (documents: Document[], query: string) => {
   let outputTokens = 0;
 
   const model = getAzureChatOpenAI({ name: "gpt-4o-mini", temperature: 0, streaming: false })
-    .withStructuredOutput(CurationOutputSchema, { name: 'Curator', method: 'jsonMode' })
+    .withStructuredOutput(CurationOutputSchema, { name: 'Curator', method: 'jsonSchema' })
     .withConfig({ 
       callbacks: [{ handleLLMEnd(output,) {
         const tokenUsage = output.llmOutput?.tokenUsage as { promptTokens: number; completionTokens: number; totalTokens: number; } | undefined;
@@ -51,7 +51,7 @@ export const curateDocuments = async (documents: Document[], query: string) => {
 
     return {
       document: doc,
-      relevanceScore: response.relevanceScore,
+      relevanceScore: Math.max(0, Math.min(1, response.relevanceScore)),
       // reason: response.reason,
       shouldBeIncluded: response.shouldBeIncluded,
     };
