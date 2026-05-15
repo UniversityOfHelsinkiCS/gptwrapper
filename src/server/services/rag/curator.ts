@@ -21,7 +21,7 @@ export const curateDocuments = async (documents: Document[], query: string) => {
   let outputTokens = 0;
 
   const model = getAzureChatOpenAI({ name: "gpt-4o-mini", temperature: 0, streaming: false })
-    .withStructuredOutput(CurationOutputSchema, { name: 'Curator', method: 'json_mode' })
+    .withStructuredOutput(CurationOutputSchema, { name: 'Curator', method: 'jsonMode' })
     .withConfig({ 
       callbacks: [{ handleLLMEnd(output,) {
         const tokenUsage = output.llmOutput?.tokenUsage as { promptTokens: number; completionTokens: number; totalTokens: number; } | undefined;
