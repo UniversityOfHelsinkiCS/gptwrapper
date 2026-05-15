@@ -297,6 +297,8 @@ const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[], tempera
         }).bindTools(tools) // Make tools available to the model.
     case ModelProvider.Vertex:
       return getVertexModelProvider(modelConfig.name)
+    case ModelProvider.Mock:
+      return new MockModel({ tools, temperature })
     default:
       throw new Error(`Unknown model provider: ${modelConfig.provider}`)
   }
