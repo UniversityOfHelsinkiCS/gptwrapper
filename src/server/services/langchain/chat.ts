@@ -15,7 +15,6 @@ import getEncoding from 'src/server/util/tiktoken'
 import { calculateUsage } from '../chatInstances/usage'
 import { truncateMessages } from './truncateMessages'
 import { getAzureChatOpenAI, getVertexModelProvider } from './modelGenerators'
-import { VertexAI } from '@langchain/google-vertexai'
 
 export type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
 
@@ -292,11 +291,11 @@ const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[], tempera
     case ModelProvider.Azure:
       return getAzureChatOpenAI({
           name: modelConfig.name,
-          temperature: DEFAULT_MODEL_TEMPERATURE,
+          temperature,
           streaming: true,
         }).bindTools(tools) // Make tools available to the model.
     case ModelProvider.Vertex:
-      return getVertexModelProvider(modelConfig.name)
+      return getVertexModelProvider(modelConfig.name, temperature)
     default:
       throw new Error(`Unknown model provider: ${modelConfig.provider}`)
   }
