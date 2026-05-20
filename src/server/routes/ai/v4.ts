@@ -14,6 +14,16 @@ import { upload } from './multer'
 
 const router = express.Router()
 
+const v4DebugEnabled = process.env.V4_DEBUG === 'true'
+
+const debugV4 = (message: string, data?: Record<string, unknown>) => {
+  if (!v4DebugEnabled) {
+    return
+  }
+
+  logger.debug(`[v4-route] ${message}`, data ?? {})
+}
+
 type StreamRequest = {
   req: RequestWithUser
   options: ReturnType<typeof PostStreamSchemaV3.parse>['options']
@@ -111,6 +121,13 @@ const configureStreamResponse = (res: express.Response) => {
 }
 
 const createWriteEvent = (res: express.Response) => async (event: ChatEvent) => {
+  debugV4('writing event to response', {
+    type: event.type,
+    textLength: event.type === 'writing' ? event.text.length : undefined,
+    error: event.type === 'error' ? event.error : undefined,
+    callId: event.type === 'toolCallStatus' ? event.callId : undefined,
+  })
+
   await new Promise<void>((resolve) => {
     const success = res.write(`${JSON.stringify(event)}\n`, (err) => {
       if (err) {
@@ -289,6 +306,15 @@ const handleStreamRequest = async (request: express.Request, res: express.Respon
   const { req, options, courseId } = parseStreamRequest(request)
   const { generationInfo } = options
 
+  debugV4('received stream request', {
+    model: generationInfo.model,
+    temperature: generationInfo.temperature,
+    courseId,
+    chatMessageCount: options.chatMessages.length,
+    promptInfoType: generationInfo.promptInfo.type,
+    fileSize: req.file?.size,
+  })
+
   ensureModelAllowedForUser(generationInfo.model, req.user.isAdmin)
   initializeResponseMeta({ res, courseId, model: generationInfo.model, fileSize: req.file?.size })
 
@@ -307,6 +333,14 @@ const handleStreamRequest = async (request: express.Request, res: express.Respon
     temperature: generationInfo.temperature ?? undefined,
     tools,
     writeEvent,
+  })
+
+  debugV4('agent stream finished', {
+    model: generationInfo.model,
+    responseLength: result.response.length,
+    tokenCount: result.tokenCount,
+    inputTokenCount: result.inputTokenCount,
+    toolCalls: result.toolCalls,
   })
 
   await chargeUsage({ req, course, prompt, isFreeModel, result })

@@ -6,6 +6,7 @@ import type { ChatToolDef, ChatToolOutput } from '@shared/tools'
 import type { User } from '@shared/user'
 import { getAzureChatOpenAI, getVertexModelProvider } from './modelGenerators'
 import { ToolResultStore } from './fileSearchResultsStore'
+import logger from 'src/server/util/logger'
 
 type WriteEventFunction = (data: ChatEvent) => Promise<void>
 type AgentUsage = {
@@ -34,12 +35,25 @@ type StreamRunState = {
   toolCallNames: Set<string>
 }
 
-const serializeUnknownRecord = (value: unknown): Record<string, unknown> | undefined => {
+const v4DebugEnabled = true
+
+const previewText = (value: string, maxLength = 200): string =>
+  value.length <= maxLength ? value : `${value.slice(0, maxLength)}...`
+
+const debugV4 = (message: string, data?: Record<string, unknown>) => {
+  if (!v4DebugEnabled) {
+    return
+  }
+
+  console.log(`[v4] ${message}`, data ?? {})
+}
+
+const readUnknownRecord = (value: unknown): Record<string, unknown> | undefined => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return undefined
   }
 
-  return JSON.parse(JSON.stringify(value)) as Record<string, unknown>
+  return value as Record<string, unknown>
 }
 
 const normalizeUsage = (usage: unknown): AgentUsage | undefined => {
@@ -62,13 +76,13 @@ const normalizeUsage = (usage: unknown): AgentUsage | undefined => {
 }
 
 const extractMessagesFromAgentUpdate = (update: unknown): Record<string, unknown>[] => {
-  const typedUpdate = serializeUnknownRecord(update)
+  const typedUpdate = readUnknownRecord(update)
   if (!typedUpdate || !Array.isArray(typedUpdate.messages)) {
     return []
   }
 
   return typedUpdate.messages.flatMap((message) => {
-    const typedMessage = serializeUnknownRecord(message)
+    const typedMessage = readUnknownRecord(message)
     return typedMessage ? [typedMessage] : []
   })
 }
@@ -77,7 +91,7 @@ const readMessageBlocks = (message: Record<string, unknown>): unknown =>
   message.contentBlocks ?? message.content_blocks ?? message.content
 
 const readMessageType = (message: Record<string, unknown>): string | undefined => {
-  const lcKwargs = serializeUnknownRecord(message.lc_kwargs)
+  const lcKwargs = readUnknownRecord(message.lc_kwargs)
   const typed = message.type ?? lcKwargs?.type
   return typeof typed === 'string' ? typed : undefined
 }
@@ -86,12 +100,12 @@ const readToolCallId = (message: Record<string, unknown>): string | undefined =>
   const direct = message.tool_call_id ?? message.toolCallId
   if (typeof direct === 'string') return direct
 
-  const kwargs = serializeUnknownRecord(message.kwargs)
+  const kwargs = readUnknownRecord(message.kwargs)
   return typeof kwargs?.tool_call_id === 'string' ? kwargs.tool_call_id : undefined
 }
 
 const readToolArtifact = (message: Record<string, unknown>): ChatToolOutput | undefined => {
-  const artifact = message.artifact ?? serializeUnknownRecord(message.kwargs)?.artifact
+  const artifact = message.artifact ?? readUnknownRecord(message.kwargs)?.artifact
   return Array.isArray(artifact) ? artifact as ChatToolOutput : undefined
 }
 
@@ -103,27 +117,28 @@ const extractAgentText = (content: unknown): string => {
     return content
   }
 
-  if (!Array.isArray(content)) {
+  if (Array.isArray(content)) {
+    return content.reduce((acc, block) => acc + extractAgentText(block), '')
+  }
+
+  const typedContent = readUnknownRecord(content)
+  if (!typedContent) {
     return ''
   }
 
-  return content.reduce(
-    (acc, block) => {
-      if (!block || typeof block !== 'object' || !('type' in block)) {
-        return acc
-      }
+  if (typeof typedContent.text === 'string') {
+    return typedContent.text
+  }
 
-      const typedBlock = block as Record<string, unknown>
+  if ('content' in typedContent) {
+    return extractAgentText(typedContent.content)
+  }
 
-      switch (typedBlock.type) {
-        case 'text':
-          return acc + (typeof typedBlock.text === 'string' ? typedBlock.text : '')
-        default:
-          return acc
-      }
-    },
-    '',
-  )
+  if ('contentBlocks' in typedContent || 'content_blocks' in typedContent) {
+    return extractAgentText(typedContent.contentBlocks ?? typedContent.content_blocks)
+  }
+
+  return ''
 }
 
 const getAgentModel = (model: ValidModelName, temperature?: number) => {
@@ -208,7 +223,13 @@ const appendStreamedText = async ({
     state.firstTokenTS = Date.now()
   }
 
+  
   state.finalContent += text
+  debugV4('streamed text appended', {
+    textLength: text.length,
+    textPreview: previewText(text),
+    accumulatedLength: state.finalContent.length,
+  })
   await writeEvent({
     type: 'writing',
     text,
@@ -225,8 +246,14 @@ const handleMessageChunk = async ({
   writeEvent: WriteEventFunction
 }) => {
   const [token] = Array.isArray(chunk) ? chunk as [unknown, unknown] : [undefined, undefined]
-  const typedToken = serializeUnknownRecord(token)
-  const chunkText = extractAgentText(typedToken?.contentBlocks ?? typedToken?.content_blocks ?? typedToken?.content)
+  const typedToken = readUnknownRecord(token)
+  const chunkText = extractAgentText(readMessageBlocks(typedToken ?? {}))
+
+  debugV4('message chunk received', {
+    hasToken: Boolean(typedToken),
+    chunkTextLength: chunkText.length,
+    chunkTextPreview: previewText(chunkText),
+  })
 
   await appendStreamedText({ text: chunkText, state, writeEvent })
   state.latestUsage = normalizeUsage(readMessageUsage(typedToken ?? {})) ?? state.latestUsage
@@ -283,6 +310,10 @@ const updateStateFromStepMessages = ({
 
     if (state.finalContent.length === 0 && outputText.length > 0) {
       state.finalContent = outputText
+      debugV4('final content hydrated from step messages', {
+        outputTextLength: outputText.length,
+        outputTextPreview: previewText(outputText),
+      })
     }
 
     state.latestUsage = normalizeUsage(readMessageUsage(message)) ?? state.latestUsage
@@ -300,13 +331,19 @@ const handleUpdateChunk = async ({
   user: User
   writeEvent: WriteEventFunction
 }) => {
-  const typedUpdate = serializeUnknownRecord(chunk)
+  const typedUpdate = readUnknownRecord(chunk)
   if (!typedUpdate) {
+    debugV4('skipping non-object update chunk')
     return
   }
 
   for (const [stepName, stepUpdate] of Object.entries(typedUpdate)) {
     const stepMessages = extractMessagesFromAgentUpdate(stepUpdate)
+
+    debugV4('update chunk received', {
+      stepName,
+      messageCount: stepMessages.length,
+    })
 
     if (stepName === 'model') {
       await handleModelStep({ stepMessages, state, writeEvent })
@@ -333,10 +370,18 @@ const processAgentStream = async ({
 }) => {
   for await (const event of stream) {
     if (!Array.isArray(event) || event.length !== 2) {
+      debugV4('skipping malformed stream event', {
+        eventType: typeof event,
+      })
       continue
     }
 
     const [streamMode, chunk] = event as [string, unknown]
+
+    debugV4('stream event received', {
+      streamMode,
+      chunkType: Array.isArray(chunk) ? 'array' : typeof chunk,
+    })
 
     if (streamMode === 'messages') {
       await handleMessageChunk({ chunk, state, writeEvent })
@@ -368,6 +413,14 @@ const finalizeStreamResult = async ({
   const outputTokenCount = state.latestUsage?.outputTokens
   const tokenStreamingDuration = state.firstTokenTS ? Math.max(Date.now() - state.firstTokenTS, 1) : undefined
 
+  debugV4('finalizing stream result', {
+    responseLength: state.finalContent.length,
+    responsePreview: previewText(state.finalContent),
+    inputTokens: state.latestUsage?.inputTokens,
+    outputTokens: outputTokenCount,
+    toolCallCount: state.toolCallNames.size,
+  })
+
   return {
     tokenCount: outputTokenCount ?? 0,
     inputTokenCount: state.latestUsage?.inputTokens ?? 0,
@@ -393,16 +446,21 @@ const emitToolCallRequestEvents = async ({
   for (const message of messages) {
     const toolCalls = Array.isArray(message.tool_calls) ? message.tool_calls : Array.isArray(message.toolCalls) ? message.toolCalls : []
     for (const rawToolCall of toolCalls) {
-      const toolCall = serializeUnknownRecord(rawToolCall)
+      const toolCall = readUnknownRecord(rawToolCall)
       if (!toolCall) continue
 
       const callId = typeof toolCall.id === 'string' ? toolCall.id : undefined
       const toolName = typeof toolCall.name === 'string' ? toolCall.name as ChatToolDef['name'] : undefined
-      const input = serializeUnknownRecord(toolCall.args ?? toolCall.input) as ChatToolDef['input'] | undefined
+      const input = readUnknownRecord(toolCall.args ?? toolCall.input) as ChatToolDef['input'] | undefined
 
       if (!callId || !toolName || !input || pendingToolCalls.has(callId)) continue
 
       pendingToolCalls.set(callId, { name: toolName, input })
+      debugV4('tool call requested', {
+        callId,
+        toolName,
+        query: input.query,
+      })
 
       await writeEvent({
         type: 'toolCallStatus',
@@ -438,6 +496,12 @@ const emitToolResultEvents = async ({
     if (!pending || !artifact) continue
 
     await ToolResultStore.saveResults(callId, artifact, user)
+    debugV4('tool call completed', {
+      callId,
+      toolName: pending.name,
+      query: pending.input.query,
+      resultCount: artifact.length,
+    })
 
     await writeEvent({
       type: 'toolCallStatus',
@@ -480,6 +544,14 @@ export const streamAgentChat = async ({
   const systemPrompt = buildSystemPrompt(modelConfig.instructions, systemMessage)
   const messages = buildAgentMessages(promptMessages, chatMessages)
   const state = createStreamState()
+
+  debugV4('starting agent stream', {
+    model,
+    temperature,
+    systemPromptLength: systemPrompt.length,
+    messageCount: messages.length,
+    toolCount: tools.length,
+  })
 
   const agent = createAgent({
     name: 'chat_completion_1_0',
