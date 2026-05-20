@@ -1,4 +1,4 @@
-import { createAgent } from 'langchain'
+import { createAgent, type AgentRunStream } from 'langchain'
 import type { StructuredTool } from '@langchain/core/tools'
 import { getModelConfig, type ValidModelName } from '@config'
 import type { ChatEvent, ChatMessage } from '@shared/chat'
@@ -30,6 +30,8 @@ type StreamRunState = {
   finalContent: string
   toolCallNames: Set<string>
 }
+
+type AgentEventRun = AgentRunStream<Record<string, unknown>>
 
 const v4DebugEnabled = true
 
@@ -245,7 +247,7 @@ const streamAgentMessages = async ({
   state,
   writeEvent,
 }: {
-  run: Awaited<ReturnType<ReturnType<typeof createAgent>['streamEvents']>>
+  run: AgentEventRun
   state: StreamRunState
   writeEvent: WriteEventFunction
 }) => {
@@ -271,7 +273,7 @@ const streamAgentToolCalls = async ({
   user,
   writeEvent,
 }: {
-  run: Awaited<ReturnType<ReturnType<typeof createAgent>['streamEvents']>>
+  run: AgentEventRun
   state: StreamRunState
   user: User
   writeEvent: WriteEventFunction
@@ -420,7 +422,7 @@ export const streamAgentChat = async ({
     {
       version: 'v3',
     },
-  )
+  ) as AgentEventRun
 
   const [output] = await Promise.all([
     run.output,
