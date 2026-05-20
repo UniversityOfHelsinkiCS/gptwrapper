@@ -12,8 +12,10 @@ services:
       - S3_BUCKET=mybucket
       - BMQ_REDIS_HOST=redis
       - BMQ_REDIS_PORT=6379
+      - GOOGLE_APPLICATION_CREDENTIALS=/auth/gcloud/application_default_credentials.json
     volumes:
       - ./:/opt/app-root/src
+      - ${HOME}/.config/gcloud/application_default_credentials.json:/auth/gcloud/application_default_credentials.json:ro
     ports:
       - 3000:3000
       - 8000:8000

@@ -37,10 +37,14 @@ export type ModelConfig = {
   name: string,
   context: number,
   provider: ModelProvider,
+  streamVersion: string,
   instructions?: string,
   temperature?: number,
   descriptionKey?: ModelDescriptionKey,
 }
+
+export const normalizeVertexModelName = (modelName: string): string =>
+  modelName
 
 /**
  * name: the acual model name, which is shown to users, configures the model to be used and is also the azure deployment name.
@@ -49,11 +53,13 @@ export const validModels: ModelConfig[] = [
   {
     name: 'gpt-4o-mini',
     context: 128_000,
+    streamVersion: 'v3',
     provider: ModelProvider.Azure
   },
   {
     name: 'gpt-5.1',
     context: 128_000,
+    streamVersion: 'v3',
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',
@@ -61,13 +67,15 @@ export const validModels: ModelConfig[] = [
   {
     name: 'Mistral-Large-3-1',
     context: 128_000,
+    streamVersion: 'v3',
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.balanced',
   },
   {
-    name: 'ClaudeHaiku4.6',
+    name: 'gemini-2.5-flash',
     context: 128_000,
+    streamVersion: 'v4',
     instructions: formatInstructions,
     provider: ModelProvider.Vertex,
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
@@ -75,17 +83,29 @@ export const validModels: ModelConfig[] = [
   {
     name: 'mock',
     context: 1024,
+    streamVersion: 'v3',
     provider: ModelProvider.Mock
   },
 ] as const
 
+
+export const vertexModels = validModels.filter((model) => model.provider === ModelProvider.Vertex)
 
 
 export const ValidModelNameSchema = z.union(validModels.map((model) => z.literal(model.name)))
 
 export type ValidModelName = z.infer<typeof ValidModelNameSchema>
 
+export const getModelConfig = (modelName: ValidModelName): ModelConfig | undefined =>
+  validModels.find((model) => model.name === modelName)
+
+export const usesStreamVersion = (modelName: ValidModelName, version: string): boolean =>
+  getModelConfig(modelName)?.streamVersion === version
+
 export const isMockModel = (modelName: ValidModelName): boolean => modelName === 'mock'
+
+export const isVertexModel = (modelName: ValidModelName): boolean =>
+  vertexModels.some((model) => model.name === normalizeVertexModelName(modelName))
 
 export const DEFAULT_MODEL = ValidModelNameSchema.parse(process.env.DEFAULT_MODEL || 'gpt-4o-mini')
 

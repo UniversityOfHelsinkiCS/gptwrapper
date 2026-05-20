@@ -41,6 +41,7 @@ export const useChatStream = ({
   const processStream = async (stream: ReadableStream, baseGenerationInfo: MessageGenerationInfo) => {
     let content = ''
     let error = ''
+    let accumulated = ''
     const toolCallResultsAccum: Record<string, ToolCallResultEvent> = {}
     setGenerationInfo(baseGenerationInfo)
 
@@ -53,7 +54,6 @@ export const useChatStream = ({
 
         const data = decoder.decode(value)
 
-        let accumulated = ''
         for (const chunk of data.split('\n')) {
           if (!chunk || chunk.trim().length === 0) continue
           const result = parseStreamChunk(chunk, accumulated)

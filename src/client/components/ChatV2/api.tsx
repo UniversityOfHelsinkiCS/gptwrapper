@@ -1,3 +1,4 @@
+import { usesStreamVersion } from '../../../config'
 import { readMessageContent, type ChatMessage, type PostStreamSchemaV3Type } from '../../../shared/chat'
 import { postAbortableStream } from '../../util/apiClient'
 import type { ChatToolOutput } from '../../../shared/tools'
@@ -22,7 +23,9 @@ export const useToolResults = (toolCallId: string) => {
 export const postCompletionStreamV3 = async (formData: FormData, input: PostStreamSchemaV3Type, abortController?: AbortController) => {
   formData.set('data', JSON.stringify(input))
 
-  return postAbortableStream('ai/v3/stream', formData, abortController)
+  const path = usesStreamVersion(input.options.generationInfo.model, 'v4') ? 'ai/v4/stream' : 'ai/v3/stream'
+
+  return postAbortableStream(path, formData, abortController)
 }
 
 // Helper function to parse markdown and create TextRun objects

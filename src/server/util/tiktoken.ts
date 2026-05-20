@@ -7,7 +7,7 @@ const getEncoding = (model: ValidModelName) => {
   
   //24.4.2026, many sources state that the token counts wont differ that much, 
   //so there is no need to use a different estimator for different models.
-  if (model === 'mock' || model === 'gpt-5.1' || model === 'Mistral-Large-3-1') {
+  if (model === 'mock' || model === 'claude-haiku-4-5@20251001' || model === 'gpt-5.1' || model === 'Mistral-Large-3-1') {
     model = 'gpt-4o-mini'
   }
 

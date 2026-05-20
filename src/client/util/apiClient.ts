@@ -20,6 +20,13 @@ const getCustomHeaders = () => {
   return headers
 }
 
+const getFetchHeaders = (): Record<string, string> =>
+  Object.fromEntries(
+    Object.entries(getCustomHeaders())
+      .filter(([, value]) => value !== undefined)
+      .map(([key, value]) => [key, String(value)]),
+  )
+
 apiClient.interceptors.request.use((config) => {
   const newConfig = { ...config, headers: getCustomHeaders() }
 
@@ -31,7 +38,7 @@ export const postAbortableStream = async (path: string, formData: FormData, exte
 
   const response = await fetch(`${PUBLIC_URL}/api/${path}`, {
     method: 'POST',
-    headers: getCustomHeaders(),
+    headers: getFetchHeaders(),
     body: formData,
     signal: controller.signal,
   })
