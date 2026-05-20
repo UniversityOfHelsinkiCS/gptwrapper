@@ -6,7 +6,6 @@ import type { ChatToolDef, ChatToolOutput } from '@shared/tools'
 import type { User } from '@shared/user'
 import { getAzureChatOpenAI, getVertexModelProvider } from './modelGenerators'
 import { ToolResultStore } from './fileSearchResultsStore'
-import logger from 'src/server/util/logger'
 
 type WriteEventFunction = (data: ChatEvent) => Promise<void>
 type AgentUsage = {
@@ -24,14 +23,11 @@ type AgentChatResult = {
   toolCalls?: string
 }
 
-type PendingToolCalls = Map<string, { name: ChatToolDef['name']; input: ChatToolDef['input'] }>
-
 type StreamRunState = {
   startTS: number
   firstTokenTS?: number
   latestUsage?: AgentUsage
   finalContent: string
-  pendingToolCalls: PendingToolCalls
   toolCallNames: Set<string>
 }
 
@@ -89,25 +85,6 @@ const extractMessagesFromAgentUpdate = (update: unknown): Record<string, unknown
 
 const readMessageBlocks = (message: Record<string, unknown>): unknown =>
   message.contentBlocks ?? message.content_blocks ?? message.content
-
-const readMessageType = (message: Record<string, unknown>): string | undefined => {
-  const lcKwargs = readUnknownRecord(message.lc_kwargs)
-  const typed = message.type ?? lcKwargs?.type
-  return typeof typed === 'string' ? typed : undefined
-}
-
-const readToolCallId = (message: Record<string, unknown>): string | undefined => {
-  const direct = message.tool_call_id ?? message.toolCallId
-  if (typeof direct === 'string') return direct
-
-  const kwargs = readUnknownRecord(message.kwargs)
-  return typeof kwargs?.tool_call_id === 'string' ? kwargs.tool_call_id : undefined
-}
-
-const readToolArtifact = (message: Record<string, unknown>): ChatToolOutput | undefined => {
-  const artifact = message.artifact ?? readUnknownRecord(message.kwargs)?.artifact
-  return Array.isArray(artifact) ? artifact as ChatToolOutput : undefined
-}
 
 const readMessageUsage = (message: Record<string, unknown>): unknown =>
   message.usage_metadata ?? message.usageMetadata ?? message.usage
@@ -202,7 +179,6 @@ const buildAgentMessages = (
 const createStreamState = (): StreamRunState => ({
   startTS: Date.now(),
   finalContent: '',
-  pendingToolCalls: new Map<string, { name: ChatToolDef['name']; input: ChatToolDef['input'] }>(),
   toolCallNames: new Set<string>(),
 })
 
@@ -236,161 +212,125 @@ const appendStreamedText = async ({
   })
 }
 
-const handleMessageChunk = async ({
-  chunk,
-  state,
-  writeEvent,
-}: {
-  chunk: unknown
-  state: StreamRunState
-  writeEvent: WriteEventFunction
-}) => {
-  const [token] = Array.isArray(chunk) ? chunk as [unknown, unknown] : [undefined, undefined]
-  const typedToken = readUnknownRecord(token)
-  const chunkText = extractAgentText(readMessageBlocks(typedToken ?? {}))
-
-  debugV4('message chunk received', {
-    hasToken: Boolean(typedToken),
-    chunkTextLength: chunkText.length,
-    chunkTextPreview: previewText(chunkText),
-  })
-
-  await appendStreamedText({ text: chunkText, state, writeEvent })
-  state.latestUsage = normalizeUsage(readMessageUsage(typedToken ?? {})) ?? state.latestUsage
-}
-
-const handleModelStep = async ({
-  stepMessages,
-  state,
-  writeEvent,
-}: {
-  stepMessages: Record<string, unknown>[]
-  state: StreamRunState
-  writeEvent: WriteEventFunction
-}) => {
-  await emitToolCallRequestEvents({
-    messages: stepMessages,
-    pendingToolCalls: state.pendingToolCalls,
-    writeEvent,
-  })
-
-  for (const pending of state.pendingToolCalls.values()) {
-    state.toolCallNames.add(pending.name)
-  }
-}
-
-const handleToolStep = async ({
-  stepMessages,
-  state,
-  user,
-  writeEvent,
-}: {
-  stepMessages: Record<string, unknown>[]
-  state: StreamRunState
-  user: User
-  writeEvent: WriteEventFunction
-}) => {
-  await emitToolResultEvents({
-    messages: stepMessages,
-    pendingToolCalls: state.pendingToolCalls,
-    user,
-    writeEvent,
-  })
-}
-
-const updateStateFromStepMessages = ({
-  stepMessages,
+const hydrateStateFromOutput = ({
+  output,
   state,
 }: {
-  stepMessages: Record<string, unknown>[]
+  output: unknown
   state: StreamRunState
 }) => {
-  for (const message of stepMessages) {
+  const typedOutput = readUnknownRecord(output)
+  const outputMessages = typedOutput ? extractMessagesFromAgentUpdate(typedOutput) : []
+
+  for (const message of outputMessages) {
     const outputText = extractAgentText(readMessageBlocks(message))
 
-    if (state.finalContent.length === 0 && outputText.length > 0) {
+    if (outputText.length > 0) {
       state.finalContent = outputText
-      debugV4('final content hydrated from step messages', {
-        outputTextLength: outputText.length,
-        outputTextPreview: previewText(outputText),
-      })
     }
 
     state.latestUsage = normalizeUsage(readMessageUsage(message)) ?? state.latestUsage
   }
+
+  if (state.finalContent.length > 0) {
+    debugV4('final content hydrated from run output', {
+      outputTextLength: state.finalContent.length,
+      outputTextPreview: previewText(state.finalContent),
+    })
+  }
 }
 
-const handleUpdateChunk = async ({
-  chunk,
+const streamAgentMessages = async ({
+  run,
   state,
-  user,
   writeEvent,
 }: {
-  chunk: unknown
+  run: Awaited<ReturnType<ReturnType<typeof createAgent>['streamEvents']>>
   state: StreamRunState
-  user: User
   writeEvent: WriteEventFunction
 }) => {
-  const typedUpdate = readUnknownRecord(chunk)
-  if (!typedUpdate) {
-    debugV4('skipping non-object update chunk')
-    return
-  }
-
-  for (const [stepName, stepUpdate] of Object.entries(typedUpdate)) {
-    const stepMessages = extractMessagesFromAgentUpdate(stepUpdate)
-
-    debugV4('update chunk received', {
-      stepName,
-      messageCount: stepMessages.length,
+  for await (const message of run.messages) {
+    debugV4('agent message stream opened', {
+      node: message.node,
+      namespaceDepth: message.namespace.length,
     })
 
-    if (stepName === 'model') {
-      await handleModelStep({ stepMessages, state, writeEvent })
+    for await (const token of message.text) {
+      await appendStreamedText({ text: token, state, writeEvent })
     }
 
-    if (stepName === 'tools') {
-      await handleToolStep({ stepMessages, state, user, writeEvent })
-    }
-
-    updateStateFromStepMessages({ stepMessages, state })
+    state.latestUsage = normalizeUsage(await message.usage) ?? state.latestUsage
   }
 }
 
-const processAgentStream = async ({
-  stream,
+
+// this is when rag toolcalls happen, to track the progress
+const streamAgentToolCalls = async ({
+  run,
   state,
   user,
   writeEvent,
 }: {
-  stream: AsyncIterable<unknown>
+  run: Awaited<ReturnType<ReturnType<typeof createAgent>['streamEvents']>>
   state: StreamRunState
   user: User
   writeEvent: WriteEventFunction
 }) => {
-  for await (const event of stream) {
-    if (!Array.isArray(event) || event.length !== 2) {
-      debugV4('skipping malformed stream event', {
-        eventType: typeof event,
+  for await (const call of run.toolCalls) {
+    const input = readUnknownRecord(call.input) as ChatToolDef['input'] | undefined
+    const toolName = call.name as ChatToolDef['name']
+
+    state.toolCallNames.add(toolName)
+
+    debugV4('tool call streamed', {
+      callId: call.callId,
+      toolName,
+      query: input?.query,
+    })
+
+    if (input) {
+      await writeEvent({
+        type: 'toolCallStatus',
+        callId: call.callId,
+        toolName,
+        text: `Searching for '${input.query}'`,
+        input,
       })
+    }
+
+    const status = await call.status
+    if (status !== 'finished') {
       continue
     }
 
-    const [streamMode, chunk] = event as [string, unknown]
+    const output = await call.output
+    if (!input || !Array.isArray(output)) {
+      continue
+    }
 
-    debugV4('stream event received', {
-      streamMode,
-      chunkType: Array.isArray(chunk) ? 'array' : typeof chunk,
+    const artifact = output as ChatToolOutput
+    await ToolResultStore.saveResults(call.callId, artifact, user)
+
+    debugV4('tool call completed', {
+      callId: call.callId,
+      toolName,
+      query: input.query,
+      resultCount: artifact.length,
     })
 
-    if (streamMode === 'messages') {
-      await handleMessageChunk({ chunk, state, writeEvent })
-      continue
-    }
-
-    if (streamMode === 'updates') {
-      await handleUpdateChunk({ chunk, state, user, writeEvent })
-    }
+    await writeEvent({
+      type: 'toolCallStatus',
+      toolName,
+      callId: call.callId,
+      text: `Completed search for '${input.query}'`,
+      input,
+      result: {
+        files: artifact.map((chunk) => ({
+          fileName: chunk.metadata.ragFileName,
+          score: chunk.score,
+        })),
+      },
+    })
   }
 }
 
@@ -434,93 +374,6 @@ const finalizeStreamResult = async ({
   }
 }
 
-const emitToolCallRequestEvents = async ({
-  messages,
-  pendingToolCalls,
-  writeEvent,
-}: {
-  messages: Record<string, unknown>[]
-  pendingToolCalls: Map<string, { name: ChatToolDef['name']; input: ChatToolDef['input'] }>
-  writeEvent: WriteEventFunction
-}) => {
-  for (const message of messages) {
-    const toolCalls = Array.isArray(message.tool_calls) ? message.tool_calls : Array.isArray(message.toolCalls) ? message.toolCalls : []
-    for (const rawToolCall of toolCalls) {
-      const toolCall = readUnknownRecord(rawToolCall)
-      if (!toolCall) continue
-
-      const callId = typeof toolCall.id === 'string' ? toolCall.id : undefined
-      const toolName = typeof toolCall.name === 'string' ? toolCall.name as ChatToolDef['name'] : undefined
-      const input = readUnknownRecord(toolCall.args ?? toolCall.input) as ChatToolDef['input'] | undefined
-
-      if (!callId || !toolName || !input || pendingToolCalls.has(callId)) continue
-
-      pendingToolCalls.set(callId, { name: toolName, input })
-      debugV4('tool call requested', {
-        callId,
-        toolName,
-        query: input.query,
-      })
-
-      await writeEvent({
-        type: 'toolCallStatus',
-        callId,
-        toolName,
-        text: `Searching for '${input.query}'`,
-        input,
-      })
-    }
-  }
-}
-
-const emitToolResultEvents = async ({
-  messages,
-  pendingToolCalls,
-  user,
-  writeEvent,
-}: {
-  messages: Record<string, unknown>[]
-  pendingToolCalls: Map<string, { name: ChatToolDef['name']; input: ChatToolDef['input'] }>
-  user: User
-  writeEvent: WriteEventFunction
-}) => {
-  for (const message of messages) {
-    if (readMessageType(message) !== 'tool') continue
-
-    const callId = readToolCallId(message)
-    if (!callId) continue
-
-    const pending = pendingToolCalls.get(callId)
-    const artifact = readToolArtifact(message)
-
-    if (!pending || !artifact) continue
-
-    await ToolResultStore.saveResults(callId, artifact, user)
-    debugV4('tool call completed', {
-      callId,
-      toolName: pending.name,
-      query: pending.input.query,
-      resultCount: artifact.length,
-    })
-
-    await writeEvent({
-      type: 'toolCallStatus',
-      toolName: pending.name,
-      callId,
-      text: `Completed search for '${pending.input.query}'`,
-      input: pending.input,
-      result: {
-        files: artifact.map((chunk) => ({
-          fileName: chunk.metadata.ragFileName,
-          score: chunk.score,
-        })),
-      },
-    })
-
-    pendingToolCalls.delete(callId)
-  }
-}
-
 export const streamAgentChat = async ({
   model,
   temperature,
@@ -560,15 +413,21 @@ export const streamAgentChat = async ({
     ...(systemPrompt.length > 0 ? { systemPrompt } : {}),
   })
 
-  const stream = await agent.stream(
+  const run = await agent.streamEvents(
     {
       messages,
     },
     {
-      streamMode: ['messages', 'updates'],
+      version: 'v3',
     },
   )
 
-  await processAgentStream({ stream, state, user, writeEvent })
+  const [output] = await Promise.all([
+    run.output,
+    streamAgentMessages({ run, state, writeEvent }),
+    streamAgentToolCalls({ run, state, user, writeEvent }),
+  ])
+
+  hydrateStateFromOutput({ output, state })
   return finalizeStreamResult({ state, writeEvent })
 }
