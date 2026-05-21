@@ -35,7 +35,7 @@ export default function GlobalMenu({
 
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const inManagementView = pathname.includes('admin') || pathname.includes('course-creator')
+  const inCourseCreatorView = pathname.includes('course-creator')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -60,7 +60,7 @@ export default function GlobalMenu({
 
   return (
     <div style={{ position: 'fixed', top: isMobile ? 10 : 20, right: isMobile ? 15 : 20 }}>
-      {inManagementView && <BlueButton onClick={() => navigate('/general')} sx={{ position: 'absolute', right: '4rem' }}>
+      {inCourseCreatorView && <BlueButton onClick={() => navigate('/general')} sx={{ position: 'absolute', right: '4rem' }}>
         Takaisin chattiin
       </BlueButton>}
       <OutlineButtonBlack

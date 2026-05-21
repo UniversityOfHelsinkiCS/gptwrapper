@@ -24,8 +24,6 @@ import {
   Tabs,
   Tooltip,
   Typography,
-  useMediaQuery,
-  useTheme,
 } from '@mui/material'
 import type { Statistic } from '@shared/types'
 import { useEffect, useRef, useState } from 'react'
@@ -69,8 +67,6 @@ export function Component() {
   const isCoursesRoute = Boolean(useMatch('/statistics/courses'))
   const isTrendsRoute = Boolean(useMatch('/statistics/trends'))
   const activeTab: 'courses' | 'trends' = isTrendsRoute ? 'trends' : 'courses'
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const dataDownloadLink = useRef<HTMLAnchorElement | null>(null)
 
   useEffect(() => {
@@ -307,20 +303,12 @@ export function Component() {
     }
   }
   return (
-    <Container sx={{ mt: '6rem', mb: '10rem' }} maxWidth="xl">
-      <BlueButton
-        onClick={() => navigate('/general')}
-        sx={{
-          position: 'fixed',
-          top: isMobile ? 10 : 20,
-          right: isMobile ? '4.5rem' : '5.5rem',
-          zIndex: 1100,
-        }}
-      >
-        Takaisin chattiin
-      </BlueButton>
+    <Container sx={{ mt: '6rem', mb: '10rem', position: 'relative' }} maxWidth="xl">
+      <Box sx={{ position: 'absolute', top: '-5rem', left: 10 }}>
+        <BlueButton onClick={() => navigate('/general')}>Takaisin chattiin</BlueButton>
+      </Box>
 
-      <Box my={2}>
+      <Box sx={{ mb: 2 }}>
         <Tabs
           value={activeTab}
           onChange={(_, value) => navigate(`/statistics/${value}`)}
