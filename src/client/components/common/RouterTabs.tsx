@@ -1,10 +1,17 @@
 import { Tabs } from '@mui/material'
+import type { SxProps, Theme } from '@mui/material/styles'
 import React from 'react'
 import { useLocation } from 'react-router-dom'
 
 const stripSearch = (path: string) => path.split('?')[0]
 
-export const RouterTabs = ({ children }: { children: React.ReactNode }) => {
+type RouterTabsProps = {
+  children: React.ReactNode
+  sx?: SxProps<Theme>
+  tabSx?: SxProps<Theme>
+}
+
+export const RouterTabs = ({ children, sx, tabSx }: RouterTabsProps) => {
   const { pathname } = useLocation()
 
   const tabs = React.Children.toArray(children).filter((c) => React.isValidElement(c))
@@ -18,8 +25,14 @@ export const RouterTabs = ({ children }: { children: React.ReactNode }) => {
   }, -1)
 
   return (
-    <Tabs value={activeIndex < 0 ? false : activeIndex} slotProps={{ indicator: { style: { backgroundColor: 'black' } } }} textColor="inherit">
-      {children}
+    <Tabs value={activeIndex < 0 ? false : activeIndex} slotProps={{ indicator: { style: { backgroundColor: 'black' } } }} textColor="inherit" sx={sx}>
+      {tabs.map((tab) =>
+        React.isValidElement(tab)
+          ? React.cloneElement(tab as React.ReactElement<{ sx?: SxProps<Theme> }>, {
+              sx: [tab.props.sx, tabSx],
+            })
+          : tab,
+      )}
     </Tabs>
   )
 }

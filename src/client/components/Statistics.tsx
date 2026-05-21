@@ -1,59 +1,111 @@
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
 import {
   Box,
+  Checkbox,
   Container,
+  FormControlLabel,
+  FormGroup,
   IconButton,
   Link,
   MenuItem,
   Paper,
   Select,
   Stack,
+  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  TableSortLabel,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tabs,
   Tooltip,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import type { Statistic } from '@shared/types'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useMatch, useNavigate } from 'react-router-dom'
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip as ChartTooltip, XAxis, YAxis } from 'recharts'
 import * as xlsx from 'xlsx'
 import useCurrentUser from '../hooks/useCurrentUser'
 import useStatistics from '../hooks/useStatistics'
 import faculties from '../locales/faculties.json'
 import programme from '../locales/programme.json'
+import { BlueButton } from './ChatV2/general/Buttons'
 
 /**
  * React-router compatible lazy loaded component for Statistics page
  */
 
 export function Component() {
+  const trendSeriesKeys = ['courses', 'students', 'percentage', 'prompts', 'rags'] as const
+  type TrendSeriesKey = (typeof trendSeriesKeys)[number]
+
   const [from, setFrom] = useState<number | null>(null)
   const [to, setTo] = useState<number | null>(null)
   const [selectedFaculty, setFaculties] = useState('H00')
+  const [trendSelectionMode, setTrendSelectionMode] = useState<'single' | 'multi'>('multi')
+  const [trendSeries, setTrendSeries] = useState({
+    courses: true,
+    students: true,
+    percentage: true,
+    prompts: true,
+    rags: true,
+  })
+  const [sortBy, setSortBy] = useState<'usedTokens' | 'usagePercentage' | 'promptCount' | 'ragIndicesCount'>('usedTokens')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const { data: statistics, isSuccess } = useStatistics()
   const { t, i18n } = useTranslation()
   const { language } = i18n
   const { user, isLoading: isUserLoading } = useCurrentUser()
+  const navigate = useNavigate()
+  const isStatisticsRoot = Boolean(useMatch('/statistics'))
+  const isCoursesRoute = Boolean(useMatch('/statistics/courses'))
+  const isTrendsRoute = Boolean(useMatch('/statistics/trends'))
+  const activeTab: 'courses' | 'trends' = isTrendsRoute ? 'trends' : 'courses'
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const dataDownloadLink = useRef<HTMLAnchorElement | null>(null)
 
   useEffect(() => {
+    if (isStatisticsRoot && !isCoursesRoute && !isTrendsRoute) {
+      navigate('/statistics/courses', { replace: true })
+    }
+  }, [isStatisticsRoot, isCoursesRoute, isTrendsRoute, navigate])
+
+  useEffect(() => {
     if (isSuccess) {
-      // sets the default to be the current year, the highest id is the end of the current year and the one below that is the start of current year
-      const statisticsSortedById = statistics.terms.sort((a, b) => b.id - a.id)
-      if (statisticsSortedById.length >= 2) {
-        const fromId = statisticsSortedById[1]
-        const toId = statisticsSortedById[0]
+      const statisticsSortedById = [...statistics.terms].sort((a, b) => a.id - b.id)
+      if (statisticsSortedById.length > 0) {
+        const fromId = statisticsSortedById[0]
+        const toId = statisticsSortedById[statisticsSortedById.length - 1]
         setFrom(fromId.id)
         setTo(toId.id)
       }
       console.log(statisticsSortedById)
     }
   }, [isSuccess])
+
+  useEffect(() => {
+    if (trendSelectionMode !== 'single') return
+
+    setTrendSeries((prev) => {
+      const firstEnabled = trendSeriesKeys.find((k) => prev[k]) ?? 'courses'
+      return trendSeriesKeys.reduce(
+        (acc, key) => ({
+          ...acc,
+          [key]: key === firstEnabled,
+        }),
+        {} as Record<TrendSeriesKey, boolean>,
+      )
+    })
+  }, [trendSelectionMode])
 
   if (!isSuccess || isUserLoading) return null
 
@@ -72,7 +124,76 @@ export function Component() {
   }
   const selectedTerms = selectTerms()
 
-  const byUsage = (a, b) => b.usedTokens - a.usedTokens
+  const usagePercentageNumber = (students: number, enrolled: number) => {
+    if (!enrolled) return 0
+    return (students / enrolled) * 100
+  }
+
+  const sortedStats = (stats: Statistic[]) => {
+    const sorted = [...stats]
+
+    sorted.sort((a, b) => {
+      const aValue =
+        sortBy === 'usedTokens'
+          ? a.usedTokens
+          : sortBy === 'usagePercentage'
+            ? usagePercentageNumber(a.students, a.enrollmentCount)
+            : sortBy === 'promptCount'
+              ? a.promptCount
+              : a.ragIndicesCount
+      const bValue =
+        sortBy === 'usedTokens'
+          ? b.usedTokens
+          : sortBy === 'usagePercentage'
+            ? usagePercentageNumber(b.students, b.enrollmentCount)
+            : sortBy === 'promptCount'
+              ? b.promptCount
+              : b.ragIndicesCount
+
+      if (aValue === bValue) return 0
+      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue
+    })
+
+    return sorted
+  }
+
+  const requestSort = (column: 'usedTokens' | 'usagePercentage' | 'promptCount' | 'ragIndicesCount') => {
+    if (sortBy === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+      return
+    }
+
+    setSortBy(column)
+    setSortDirection('desc')
+  }
+
+  const usagePercentage = (students: number, enrolled: number) => {
+    return `${usagePercentageNumber(students, enrolled).toFixed(1)}%`
+  }
+
+  const toggleTrendSeries = (key: TrendSeriesKey) => {
+    setTrendSeries((prev) => {
+      if (trendSelectionMode === 'single') {
+        return trendSeriesKeys.reduce(
+          (acc, currentKey) => ({
+            ...acc,
+            [currentKey]: currentKey === key,
+          }),
+          {} as Record<TrendSeriesKey, boolean>,
+        )
+      }
+
+      const currentlyEnabled = trendSeriesKeys.filter((k) => prev[k]).length
+      if (prev[key] && currentlyEnabled === 1) {
+        return prev
+      }
+
+      return {
+        ...prev,
+        [key]: !prev[key],
+      }
+    })
+  }
 
   const termWithin = (stat: Statistic) => {
     const terms = stat.terms.map((tr) => tr.id)
@@ -84,7 +205,29 @@ export function Component() {
     return stat.programmes.some((p) => p.startsWith(selectedFaculty.substring(1)))
   }
 
-  const statsToShow = statistics.data.filter(termWithin).filter(belongsToFaculty).sort(byUsage)
+  const filteredByFaculty = statistics.data.filter(belongsToFaculty)
+  const statsToShow = sortedStats(filteredByFaculty.filter(termWithin))
+  const allTermIds = [...statistics.terms].sort((a, b) => a.id - b.id).map((term) => term.id)
+  const trendRows = allTermIds.map((termId) => {
+    const termStats = filteredByFaculty.filter((stat) => stat.terms.some((term) => term.id === termId))
+    const courses = termStats.length
+    const students = termStats.reduce((sum, stat) => sum + stat.students, 0)
+    const enrolled = termStats.reduce((sum, stat) => sum + stat.enrollmentCount, 0)
+    const prompts = termStats.reduce((sum, stat) => sum + stat.promptCount, 0)
+    const rags = termStats.reduce((sum, stat) => sum + stat.ragIndicesCount, 0)
+    const termLabel = statistics.terms.find((term) => term.id === termId)?.label[language] ?? String(termId)
+
+    return {
+      termId,
+      termLabel,
+      courses,
+      students,
+      percentage: usagePercentageNumber(students, enrolled),
+      prompts,
+      rags,
+    }
+  })
+  const trendRowsNewestFirst = [...trendRows].sort((a, b) => b.termId - a.termId)
 
   const exportToCSV = (jsonData: any) => {
     //const book = xlsx.utils.book_new()
@@ -109,6 +252,19 @@ export function Component() {
   }
 
   const handleXLSX = () => {
+    if (activeTab === 'trends') {
+      const trendData = trendRows.map((row) => ({
+        Term: row.termLabel,
+        Courses: row.courses,
+        Students: row.students,
+        Percentage: `${row.percentage.toFixed(1)}%`,
+        PromptCount: row.prompts,
+        RagCount: row.rags,
+      }))
+      exportToCSV(trendData)
+      return
+    }
+
     const mangledStatistics = statsToShow.map((chat) => {
       return {
         Codes: chat.codes.join(', '),
@@ -116,6 +272,8 @@ export function Component() {
         Terms: chat.terms.map((trm) => trm.label[language]).join(', '),
         Programmes: namesOf(chat.programmes),
         Students: chat.students,
+        Enrolled: chat.enrollmentCount,
+        StudentUsagePercentage: usagePercentage(chat.students, chat.enrollmentCount),
         UsedTokens: chat.usedTokens,
         PromptCount: chat.promptCount,
         RagIndicesCount: chat.ragIndicesCount,
@@ -149,30 +307,88 @@ export function Component() {
     }
   }
   return (
-    <Container sx={{ mt: '8rem', mb: '10rem' }} maxWidth="xl">
+    <Container sx={{ mt: '6rem', mb: '10rem' }} maxWidth="xl">
+      <BlueButton
+        onClick={() => navigate('/general')}
+        sx={{
+          position: 'fixed',
+          top: isMobile ? 10 : 20,
+          right: isMobile ? '4.5rem' : '5.5rem',
+          zIndex: 1100,
+        }}
+      >
+        Takaisin chattiin
+      </BlueButton>
+
       <Box my={2}>
+        <Tabs
+          value={activeTab}
+          onChange={(_, value) => navigate(`/statistics/${value}`)}
+          sx={{
+            px: 1,
+            py: 1,
+            mb: 2,
+            border: 1,
+            borderColor: 'divider',
+            borderRadius: 2,
+            backgroundColor: 'background.paper',
+            '& .MuiTabs-indicator': {
+              display: 'none',
+            },
+          }}
+        >
+          <Tab
+            value="courses"
+            label={t('stats:courseStatsTab')}
+            sx={{
+              borderRadius: 1.5,
+              minHeight: 40,
+              '&.Mui-selected': {
+                backgroundColor: 'action.selected',
+                fontWeight: 700,
+              },
+            }}
+          />
+          <Tab
+            value="trends"
+            label={t('stats:trendsTab')}
+            sx={{
+              borderRadius: 1.5,
+              minHeight: 40,
+              '&.Mui-selected': {
+                backgroundColor: 'action.selected',
+                fontWeight: 700,
+              },
+            }}
+          />
+        </Tabs>
+
         <Stack direction="row">
           <div>
-            <span style={{ marginRight: 10 }}>{t('stats:timePeriodStart')}</span>
+            {activeTab === 'courses' && (
+              <>
+                <span style={{ marginRight: 10 }}>{t('stats:timePeriodStart')}</span>
 
-            <Select value={from} onChange={handleFromChange}>
-              {statistics.terms.map((term) => (
-                <MenuItem key={term.id} value={term.id}>
-                  {term.label[language]}
-                </MenuItem>
-              ))}
-            </Select>
+                <Select value={from} onChange={handleFromChange}>
+                  {statistics.terms.map((term) => (
+                    <MenuItem key={term.id} value={term.id}>
+                      {term.label[language]}
+                    </MenuItem>
+                  ))}
+                </Select>
 
-            <span style={{ margin: 10 }}>{t('stats:timePeriodStop')}</span>
-            <Select value={to} onChange={handleToChange}>
-              {statistics.terms
-                .filter((trm) => trm.id >= readTermFilter(from))
-                .map((term) => (
-                  <MenuItem key={term.id} value={term.id}>
-                    {term.label[language]}
-                  </MenuItem>
-                ))}
-            </Select>
+                <span style={{ margin: 10 }}>{t('stats:timePeriodStop')}</span>
+                <Select value={to} onChange={handleToChange}>
+                  {statistics.terms
+                    .filter((trm) => trm.id >= readTermFilter(from))
+                    .map((term) => (
+                      <MenuItem key={term.id} value={term.id}>
+                        {term.label[language]}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </>
+            )}
 
             <span style={{ margin: 10 }}>{t('stats:showing')}</span>
 
@@ -184,18 +400,20 @@ export function Component() {
               ))}
             </Select>
           </div>
-          <a ref={dataDownloadLink} style={{ display: 'none' }} />
-          <IconButton
-            onClick={() => {
-              handleXLSX()
-            }}
-            sx={{ marginLeft: 'auto' }}
-          >
-            <CloudDownloadIcon fontSize="large" />
-          </IconButton>
+          <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
+            <a ref={dataDownloadLink} style={{ display: 'none' }} />
+            <IconButton
+              onClick={() => {
+                handleXLSX()
+              }}
+            >
+              <CloudDownloadIcon fontSize="large" />
+            </IconButton>
+          </Stack>
         </Stack>
 
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} sx={{ mt: 2 }}>
+          {activeTab === 'courses' ? (
           <Table>
             <TableHead>
               <TableRow>
@@ -226,17 +444,51 @@ export function Component() {
                 </TableCell>
                 <TableCell align="left">
                   <Typography variant="h6">
-                    <b>{t('stats:usageCount')}</b>
+                    <b>{t('stats:enrollmentCount')}</b>
                   </Typography>
                 </TableCell>
                 <TableCell align="left">
                   <Typography variant="h6">
-                    <b>{t('stats:promptCount')}</b>
+                    <TableSortLabel
+                      active={sortBy === 'usagePercentage'}
+                      direction={sortBy === 'usagePercentage' ? sortDirection : 'desc'}
+                      onClick={() => requestSort('usagePercentage')}
+                    >
+                      <b>{t('stats:studentEnrollmentPercentage')}</b>
+                    </TableSortLabel>
                   </Typography>
                 </TableCell>
                 <TableCell align="left">
                   <Typography variant="h6">
-                    <b>{t('stats:rags')}</b>
+                    <TableSortLabel
+                      active={sortBy === 'usedTokens'}
+                      direction={sortBy === 'usedTokens' ? sortDirection : 'desc'}
+                      onClick={() => requestSort('usedTokens')}
+                    >
+                      <b>{t('stats:usageCount')}</b>
+                    </TableSortLabel>
+                  </Typography>
+                </TableCell>
+                <TableCell align="left">
+                  <Typography variant="h6">
+                    <TableSortLabel
+                      active={sortBy === 'promptCount'}
+                      direction={sortBy === 'promptCount' ? sortDirection : 'desc'}
+                      onClick={() => requestSort('promptCount')}
+                    >
+                      <b>{t('stats:promptCount')}</b>
+                    </TableSortLabel>
+                  </Typography>
+                </TableCell>
+                <TableCell align="left">
+                  <Typography variant="h6">
+                    <TableSortLabel
+                      active={sortBy === 'ragIndicesCount'}
+                      direction={sortBy === 'ragIndicesCount' ? sortDirection : 'desc'}
+                      onClick={() => requestSort('ragIndicesCount')}
+                    >
+                      <b>{t('stats:rags')}</b>
+                    </TableSortLabel>
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -270,6 +522,12 @@ export function Component() {
                     <Typography>{chat.students}</Typography>
                   </TableCell>
                   <TableCell align="left">
+                    <Typography>{chat.enrollmentCount}</Typography>
+                  </TableCell>
+                  <TableCell align="left">
+                    <Typography>{usagePercentage(chat.students, chat.enrollmentCount)}</Typography>
+                  </TableCell>
+                  <TableCell align="left">
                     <Typography>{chat.usedTokens}</Typography>
                   </TableCell>
                   <TableCell align="left">
@@ -282,6 +540,157 @@ export function Component() {
               ))}
             </TableBody>
           </Table>
+          ) : (
+            <>
+              <Box sx={{ px: 2, pt: 2 }}>
+                <Stack direction={{ xs: 'column', lg: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', lg: 'center' }} sx={{ mb: 1 }}>
+                  <FormGroup row>
+                    <FormControlLabel
+                      control={<Checkbox checked={trendSeries.courses} onChange={() => toggleTrendSeries('courses')} />}
+                      label={t('stats:trendCourses')}
+                    />
+                    <FormControlLabel
+                      control={<Checkbox checked={trendSeries.students} onChange={() => toggleTrendSeries('students')} />}
+                      label={t('stats:trendStudentsCheckbox')}
+                    />
+                    <FormControlLabel
+                      control={<Checkbox checked={trendSeries.percentage} onChange={() => toggleTrendSeries('percentage')} />}
+                      label={t('stats:trendPercentageCheckbox')}
+                    />
+                    <FormControlLabel
+                      control={<Checkbox checked={trendSeries.prompts} onChange={() => toggleTrendSeries('prompts')} />}
+                      label={t('stats:promptCount')}
+                    />
+                    <FormControlLabel
+                      control={<Checkbox checked={trendSeries.rags} onChange={() => toggleTrendSeries('rags')} />}
+                      label={t('stats:rags')}
+                    />
+                  </FormGroup>
+
+                  <Stack direction="row" spacing={2} alignItems="center" sx={{ ml: { lg: 2 } }}>
+                    <Typography variant="body2" color="text.secondary">
+                      {t('stats:trendSelectionMode')}
+                    </Typography>
+                    <ToggleButtonGroup
+                      size="small"
+                      exclusive
+                      value={trendSelectionMode}
+                      onChange={(_, value) => {
+                        if (value) setTrendSelectionMode(value)
+                      }}
+                    >
+                      <ToggleButton value="single">{t('stats:trendSelectionSingle')}</ToggleButton>
+                      <ToggleButton value="multi">{t('stats:trendSelectionMulti')}</ToggleButton>
+                    </ToggleButtonGroup>
+                  </Stack>
+                </Stack>
+
+                <Box sx={{ width: '100%', height: 280 }}>
+                  <ResponsiveContainer>
+                    <LineChart data={trendRows} margin={{ top: 8, right: 24, left: 0, bottom: 8 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="termLabel" />
+                      <YAxis yAxisId="count" />
+                      <YAxis yAxisId="percentage" orientation="right" tickFormatter={(value) => `${value}%`} />
+                      <ChartTooltip
+                        formatter={(value, _name, item) => {
+                          if (item?.dataKey === 'percentage') return `${Number(value).toFixed(1)}%`
+                          return value
+                        }}
+                      />
+                      <Legend />
+                      {trendSeries.courses && (
+                        <Line yAxisId="count" type="monotone" dataKey="courses" name={t('stats:trendCourses')} stroke="#1565c0" strokeWidth={2} dot={false} />
+                      )}
+                      {trendSeries.students && (
+                        <Line yAxisId="count" type="monotone" dataKey="students" name={t('stats:studentCount')} stroke="#2e7d32" strokeWidth={2} dot={false} />
+                      )}
+                      {trendSeries.percentage && (
+                        <Line
+                          yAxisId="percentage"
+                          type="monotone"
+                          dataKey="percentage"
+                          name={t('stats:studentEnrollmentPercentage')}
+                          stroke="#ef6c00"
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                      )}
+                      {trendSeries.prompts && (
+                        <Line yAxisId="count" type="monotone" dataKey="prompts" name={t('stats:promptCount')} stroke="#6a1b9a" strokeWidth={2} dot={false} />
+                      )}
+                      {trendSeries.rags && (
+                        <Line yAxisId="count" type="monotone" dataKey="rags" name={t('stats:rags')} stroke="#455a64" strokeWidth={2} dot={false} />
+                      )}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </Box>
+              </Box>
+
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="left">
+                      <Typography variant="h6">
+                        <b>{t('stats:trendTerm')}</b>
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="left">
+                      <Typography variant="h6">
+                        <b>{t('stats:trendCourses')}</b>
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="left">
+                      <Typography variant="h6">
+                        <b>{t('stats:studentCount')}</b>
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="left">
+                      <Typography variant="h6">
+                        <Tooltip title={t('stats:studentEnrollmentPercentageTooltip')}>
+                          <b>{t('stats:studentEnrollmentPercentage')}</b>
+                        </Tooltip>
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="left">
+                      <Typography variant="h6">
+                        <b>{t('stats:promptCount')}</b>
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="left">
+                      <Typography variant="h6">
+                        <b>{t('stats:rags')}</b>
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {trendRowsNewestFirst.map((row) => (
+                    <TableRow key={row.termId}>
+                      <TableCell align="left">
+                        <Typography>{row.termLabel}</Typography>
+                      </TableCell>
+                      <TableCell align="left">
+                        <Typography>{row.courses}</Typography>
+                      </TableCell>
+                      <TableCell align="left">
+                        <Typography>{row.students}</Typography>
+                      </TableCell>
+                      <TableCell align="left">
+                        <Typography>{`${row.percentage.toFixed(1)}%`}</Typography>
+                      </TableCell>
+                      <TableCell align="left">
+                        <Typography>{row.prompts}</Typography>
+                      </TableCell>
+                      <TableCell align="left">
+                        <Typography>{row.rags}</Typography>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </>
+          )}
         </TableContainer>
       </Box>
     </Container>
@@ -289,7 +698,7 @@ export function Component() {
 }
 
 const SumRow = ({ statsToShow }) => {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const columnSum = (column: string) => {
     if (!statsToShow) {
       return 0
@@ -301,6 +710,11 @@ const SumRow = ({ statsToShow }) => {
       return 0
     }
   }
+
+  const totalStudents = columnSum('students')
+  const totalEnrolled = columnSum('enrollmentCount')
+  const totalUsagePercentage = totalEnrolled ? `${((totalStudents / totalEnrolled) * 100).toFixed(1)}%` : '0%'
+
   const statsToShowLength = statsToShow ? statsToShow.length : 0
   const statsMessage = t('stats:sum')
   return (
@@ -314,7 +728,13 @@ const SumRow = ({ statsToShow }) => {
       <TableCell align="left"></TableCell>
       <TableCell align="left"></TableCell>
       <TableCell align="left">
-        <Typography variant="h6">{columnSum('students')}</Typography>
+        <Typography variant="h6">{totalStudents}</Typography>
+      </TableCell>
+      <TableCell align="left">
+        <Typography variant="h6">{totalEnrolled}</Typography>
+      </TableCell>
+      <TableCell align="left">
+        <Typography variant="h6">{totalUsagePercentage}</Typography>
       </TableCell>
       <TableCell align="left">
         <Typography variant="h6">{columnSum('usedTokens')}</Typography>

@@ -33,18 +33,36 @@ export function Component() {
         </Typography>
       </Box>
       <Box mb={3}>
-        <RouterTabs>
-          <Tab label={t('admin:courses')} to="/admin/chatinstances" component={Link} />
-          <Tab label={t('admin:usage')} to="/admin/usage" component={Link} />
-          {user.iamGroups.includes('grp-toska') && <Tab label={t('admin:updater')} to="/admin/updater" component={Link} />}
+        <RouterTabs
+          sx={{
+            px: 1,
+            py: 1,
+            border: 1,
+            borderColor: 'divider',
+            borderRadius: 2,
+            backgroundColor: 'background.paper',
+            '& .MuiTabs-indicator': {
+              display: 'none',
+            },
+          }}
+          tabSx={{
+            borderRadius: 1.5,
+            minHeight: 40,
+            '&.Mui-selected': {
+              backgroundColor: 'action.selected',
+              fontWeight: 700,
+            },
+          }}
+        >
           <Tab label={t('admin:searchUsers')} to="/admin/usersearch" component={Link} />
-          <Tab label={t('admin:feedbacks')} to="/admin/feedbacks" component={Link} />
           <Tab label={t('admin:notifications')} to="/admin/notifications" component={Link} />
+          <Tab label={t('admin:feedbacks')} to="/admin/feedbacks" component={Link} />
+          {user.iamGroups.includes('grp-toska') && <Tab label={t('admin:updater')} to="/admin/updater" component={Link} />}
           <Tab label={t('admin:testing')} to="/admin/testing" component={Link} />
         </RouterTabs>
       </Box>
       <Routes>
-        <Route path="/" element={<Navigate to="/admin/chatinstances" />} />
+        <Route path="/" element={<Navigate to="/admin/usersearch" />} />
         <Route path="/chatinstances" element={<ChatInstances />} />
         <Route path="/usage" element={<Usage />} />
         {user.iamGroups.includes('grp-toska') && <Route path="/updater" element={<Updater />} />}

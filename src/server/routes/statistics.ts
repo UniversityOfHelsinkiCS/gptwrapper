@@ -3,7 +3,7 @@ import express from 'express'
 import { sequelize } from '../db/connection'
 
 import { RequestWithUser } from '../types'
-import { ChatInstance, UserChatInstanceUsage, User, Prompt, RagIndex } from '../db/models'
+import { ChatInstance, UserChatInstanceUsage, User, Prompt, RagIndex, Enrolment } from '../db/models'
 import { statsViewerIams } from '../util/config'
 import { generateTerms } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
@@ -42,12 +42,25 @@ const getUsages = async () => {
   }))
 }
 
+const getEnrollmentCounts = async () => {
+  const enrolments = (await Enrolment.findAll({
+    attributes: ['chatInstanceId', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+    group: ['chatInstanceId'],
+    raw: true,
+  })) as unknown as { chatInstanceId: string; count: string }[]
+
+  return enrolments.reduce<Record<string, number>>((acc, enrolment) => {
+    acc[enrolment.chatInstanceId] = Number(enrolment.count)
+    return acc
+  }, {})
+}
+
 // this function is mostly garbage
 statisticsRouter.get('/statistics', [adminMiddleware], async (req, res) => {
   const terms = generateTerms()
 
   const mangelStats = async () => {
-    const usages = await getUsages()
+    const [usages, enrollmentCounts] = await Promise.all([getUsages(), getEnrollmentCounts()])
 
     const courses = {}
 
@@ -80,7 +93,7 @@ statisticsRouter.get('/statistics', [adminMiddleware], async (req, res) => {
       }, [])
     }
 
-    const extractFields = async (chatInstance: ChatInstance & { prompts: any[] }): Promise<Statistic> => {
+    const extractFields = async (chatInstance: ChatInstance & { prompts: any[] }): Promise<Statistic & { enrollmentCount: number }> => {
       const ragIndicesLength = chatInstance.ragIndices?.length
       const ragIndicesCount = ragIndicesLength ? ragIndicesLength : 0
 
@@ -98,6 +111,7 @@ statisticsRouter.get('/statistics', [adminMiddleware], async (req, res) => {
         codes: getUniqueValues(codes),
         programmes: getUniqueValues(programmes),
         students: courses[chatInstance.id].students,
+        enrollmentCount: enrollmentCounts[chatInstance.id] ?? 0,
         usedTokens: courses[chatInstance.id].usedTokens,
         promptCount: chatInstance.prompts.length,
         ragIndicesCount: ragIndicesCount,
@@ -121,6 +135,7 @@ statisticsRouter.get('/statistics', [adminMiddleware], async (req, res) => {
           },
         ],
       })) as ChatInstance & { prompts: any[] }
+
       const data: any = await extractFields(chatInstance)
       datas.push(data)
     }

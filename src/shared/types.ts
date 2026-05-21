@@ -86,6 +86,7 @@ export interface Statistic {
   codes: string[]
   programmes: string[]
   students: number
+  enrollmentCount: number
   usedTokens: number
   promptCount: number
   ragIndicesCount: number
