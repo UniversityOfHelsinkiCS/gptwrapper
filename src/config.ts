@@ -80,6 +80,14 @@ export const validModels: ModelConfig[] = [
     provider: ModelProvider.Vertex,
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   },
+   {
+    name: 'gemini-2.5-pro',
+    context: 128_000,
+    streamVersion: 'v4',
+    instructions: formatInstructions,
+    provider: ModelProvider.Vertex,
+    descriptionKey: 'chat:modelDescriptions.premium',
+  },
   {
     name: 'mock',
     context: 1024,
