@@ -32,3 +32,4 @@ CLAUDE*.md
 coverage
 docs/agents
 CONTEXT.md
+docs/adr
