@@ -4,7 +4,7 @@ import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, Route, Routes, useParams } from 'react-router-dom'
-import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, ValidModelNameSchema, imageFileTypes } from '../../../config'
+import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, FREE_MODEL, ValidModelNameSchema, getModelConfig, imageFileTypes } from '../../../config'
 import type { ChatMessage, MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
@@ -186,11 +186,12 @@ const ChatV2Content = () => {
       fileInputRef.current.value = ''
     }
     setFileName('')
+    const streamCreationTimeout = getModelConfig(acualModel)?.timeoutOverride ?? 10_000
     setRetryTimeout(() => {
       if (streamControllerRef.current) {
         streamControllerRef.current.abort('timeout_error')
       }
-    }, 10_000) // 10s
+    }, streamCreationTimeout)
 
     setIsStreaming(true)
     // Scroll immediately to show loading dots for better UX feedback

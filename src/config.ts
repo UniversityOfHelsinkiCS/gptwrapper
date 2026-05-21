@@ -38,6 +38,7 @@ export type ModelConfig = {
   context: number,
   provider: ModelProvider,
   streamVersion: string,
+  timeoutOverride?: number,
   instructions?: string,
   temperature?: number,
   descriptionKey?: ModelDescriptionKey,
