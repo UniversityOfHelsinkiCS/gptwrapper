@@ -33,7 +33,7 @@ type StreamRunState = {
 
 type AgentEventRun = AgentRunStream<Record<string, unknown>>
 
-const v4DebugEnabled = true
+const v4DebugEnabled = process.env.V4_DEBUG === 'true'
 
 const previewText = (value: string, maxLength = 200): string =>
   value.length <= maxLength ? value : `${value.slice(0, maxLength)}...`
