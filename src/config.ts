@@ -80,6 +80,7 @@ export const validModels: ModelConfig[] = [
     instructions: formatInstructions,
     provider: ModelProvider.Vertex,
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+    timeoutOverride: 60000,
   },
    {
     name: 'gemini-2.5-pro',
@@ -88,6 +89,7 @@ export const validModels: ModelConfig[] = [
     instructions: formatInstructions,
     provider: ModelProvider.Vertex,
     descriptionKey: 'chat:modelDescriptions.premium',
+    timeoutOverride: 60000,
   },
   {
     name: 'mock',
