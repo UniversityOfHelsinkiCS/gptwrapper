@@ -4,7 +4,6 @@ import type { RagIndex } from '../../db/models'
 import { SearchSchema } from '../../../shared/rag'
 import { Document } from '@langchain/core/documents'
 import type { search } from './search'
-import type { getRagIndexSearchTool } from './searchTool'
 
 const mockDocuments = [
   new Document({ pageContent: 'This is the first mock document.', metadata: { ragFileName: 'mock_document1.pdf' } }),
@@ -25,7 +24,7 @@ const mockSearch: typeof search = async (_index: RagIndex, _params: { query: str
   }
 }
 
-//Todo fix the typing here 
+//Todo fix the typing here
 export const getMockRagIndexSearchTool: any = (ragIndex: RagIndex) =>
   tool(
     async ({ query }: { query: string }) => {

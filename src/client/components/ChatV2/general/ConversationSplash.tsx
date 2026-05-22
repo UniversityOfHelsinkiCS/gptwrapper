@@ -3,7 +3,15 @@ import { HYLogo } from './HYLogo'
 import { useTranslation } from 'react-i18next'
 import { ActivityPeriod } from '../../../types'
 
-export const ConversationSplash = ({ courseName, courseDate, promptName }: { courseName?: string; courseDate?: ActivityPeriod, promptName?: string }) => {
+export const ConversationSplash = ({
+  courseName,
+  courseDate: _courseDate,
+  promptName,
+}: {
+  courseName?: string
+  courseDate?: ActivityPeriod
+  promptName?: string
+}) => {
   const { t } = useTranslation()
   return (
     <Box
@@ -45,12 +53,12 @@ export const ConversationSplash = ({ courseName, courseDate, promptName }: { cou
               fontWeight="bold"
               sx={{
                 mb: 1,
-                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }
+                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
               }}
             >
               {courseName}
             </Typography>
-            <Typography fontWeight='medium' sx={{ fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' } }}>
+            <Typography fontWeight="medium" sx={{ fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' } }}>
               {promptName}
             </Typography>
           </>

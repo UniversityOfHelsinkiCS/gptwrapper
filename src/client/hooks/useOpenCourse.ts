@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 
@@ -10,7 +9,6 @@ import { DEFAULT_TOKEN_LIMIT } from '../../config'
 
 const useOpenCourse = () => {
   const queryClient = useQueryClient()
-  const navigate = useNavigate()
   const { t } = useTranslation()
 
   const mutationFn = async (course: CoursesViewCourse | Course) => {

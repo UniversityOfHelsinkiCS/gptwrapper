@@ -53,17 +53,7 @@ const parseStreamRequest = (request: express.Request): StreamRequest => {
   }
 }
 
-const initializeResponseMeta = ({
-  res,
-  courseId,
-  model,
-  fileSize,
-}: {
-  res: express.Response
-  courseId?: string
-  model: ValidModelName
-  fileSize?: number
-}) => {
+const initializeResponseMeta = ({ res, courseId, model, fileSize }: { res: express.Response; courseId?: string; model: ValidModelName; fileSize?: number }) => {
   res.locals.chatCompletionMeta = {
     courseId,
     model,
@@ -146,12 +136,10 @@ const createWriteEvent = (res: express.Response) => async (event: ChatEvent) => 
 }
 
 const resolvePromptContext = async ({
-  req,
   res,
   course,
   generationInfo,
 }: {
-  req: RequestWithUser
   res: express.Response
   course: ChatInstance | null
   generationInfo: StreamRequest['options']['generationInfo']
@@ -179,9 +167,7 @@ const resolvePromptContext = async ({
     throw ApplicationError.NotFound('Prompt not found')
   }
 
-  const tools = prompt.ragIndex
-    ? [generationInfo.model === 'mock' ? getMockRagIndexSearchTool(prompt.ragIndex) : getRagIndexSearchTool(prompt.ragIndex)]
-    : []
+  const tools = prompt.ragIndex ? [generationInfo.model === 'mock' ? getMockRagIndexSearchTool(prompt.ragIndex) : getRagIndexSearchTool(prompt.ragIndex)] : []
 
   if (prompt.ragIndex) {
     res.locals.chatCompletionMeta.ragIndexId = prompt.ragIndex.id
@@ -198,15 +184,7 @@ const resolvePromptContext = async ({
   }
 }
 
-const ensureUsageAllowed = ({
-  user,
-  course,
-  model,
-}: {
-  user: RequestWithUser['user']
-  course: ChatInstance | null
-  model: ValidModelName
-}) => {
+const ensureUsageAllowed = ({ user, course, model }: { user: RequestWithUser['user']; course: ChatInstance | null; model: ValidModelName }) => {
   const isFreeModel = model === FREE_MODEL
   const usageAllowed = (course ? checkCourseUsage(user, course) : isFreeModel) || checkUsage(user, model)
 
@@ -255,15 +233,7 @@ const chargeUsage = async ({
   await incrementUsage(userToCharge, totalTokenCount)
 }
 
-const storeResultMeta = ({
-  res,
-  tools,
-  result,
-}: {
-  res: express.Response
-  tools: StructuredTool[]
-  result: Awaited<ReturnType<typeof streamAgentChat>>
-}) => {
+const storeResultMeta = ({ res, tools, result }: { res: express.Response; tools: StructuredTool[]; result: Awaited<ReturnType<typeof streamAgentChat>> }) => {
   Object.assign(res.locals.chatCompletionMeta, {
     tools: tools.map((tool) => tool.name),
     tokenCount: result.tokenCount + result.inputTokenCount,

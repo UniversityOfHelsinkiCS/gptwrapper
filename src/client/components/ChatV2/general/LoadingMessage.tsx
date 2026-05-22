@@ -1,5 +1,4 @@
 import { Typography, useTheme } from '@mui/material'
-import { useTranslation } from 'react-i18next'
 import type { ToolCallStatusEvent } from '../../../../shared/chat'
 
 const loadingDotStyle = (delay: number, color: string) => ({
@@ -13,7 +12,6 @@ const loadingDotStyle = (delay: number, color: string) => ({
 })
 
 export const LoadingMessage = ({ toolCalls }: { toolCalls: Record<string, ToolCallStatusEvent> }) => {
-  const { t } = useTranslation()
   const theme = useTheme()
   const dotColor = theme.palette.text.secondary
 

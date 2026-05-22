@@ -1,7 +1,7 @@
 import { PUBLIC_URL } from '@config'
-import { ContentCopyOutlined, EditOutlined, Close, ClearOutlined, VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material'
+import { ContentCopyOutlined, EditOutlined, ClearOutlined, VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
-import { Box, Dialog, Divider, List, ListItemButton, ListItemText, Typography, Paper, Button, Tooltip, Alert } from '@mui/material'
+import { Box, Divider, List, ListItemButton, ListItemText, Typography, Paper, Button, Tooltip, Alert } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -28,7 +28,6 @@ const PromptModal = () => {
   const { courseId } = useParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const [createNewOpen, setCreateNewOpen] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<PromptType | null>(null)
   const [tab, setTab] = useState(0)
   const [previewPrompts, setPreviewPrompts] = useState<Record<number, PromptType | undefined>>(isMobile ? {} : { [tab]: activePrompt })
@@ -150,7 +149,6 @@ const PromptModal = () => {
         value={tab}
         onChange={(_, newValue) => {
           setTab(newValue)
-          setCreateNewOpen(false)
           setIsEditing(false)
         }}
         slotProps={{
@@ -220,7 +218,7 @@ const PromptModal = () => {
                     <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
                       {(isPersonalTab || amongResponsibles) && (
                         <Tooltip arrow placement="bottom" title={t('prompt:editPromptTooltip')}>
-                          <IconButton size="small" onClick={(e) => handleEdit()} color="primary" data-testid={`edit-prompt-${previewPrompt.name}`}>
+                          <IconButton size="small" onClick={handleEdit} color="primary" data-testid={`edit-prompt-${previewPrompt.name}`}>
                             <EditOutlined fontSize="small" />
                           </IconButton>
                         </Tooltip>

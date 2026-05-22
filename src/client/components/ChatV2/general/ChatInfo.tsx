@@ -2,13 +2,11 @@ import { Box, Typography, Link } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Course } from '../../../types'
 import { formatDate } from '../../Courses/util'
-import Settings from '@mui/icons-material/Settings'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import useCourse from '../../../hooks/useCourse'
 import { PUBLIC_URL } from '../../../../config'
 
 export const ChatInfo = ({ course }: { course: Course }) => {
-
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(course.courseId)
   const { t, i18n } = useTranslation()
@@ -27,11 +25,11 @@ export const ChatInfo = ({ course }: { course: Course }) => {
         {course?.name[language] || 'undefined course'}
       </Typography>
       <Typography variant="body1">{formatDate(course.activityPeriod)}</Typography>
-      {(user.isAdmin && amongResponsibles) &&
-        (<Link href={`${PUBLIC_URL}/courses/${course.courseId}`}>
-          <Typography >{t('course:settings')}</Typography>
-        </Link>)
-      }
-    </Box >
+      {user.isAdmin && amongResponsibles && (
+        <Link href={`${PUBLIC_URL}/courses/${course.courseId}`}>
+          <Typography>{t('course:settings')}</Typography>
+        </Link>
+      )}
+    </Box>
   )
 }

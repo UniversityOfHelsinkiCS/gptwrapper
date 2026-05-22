@@ -5,12 +5,10 @@ import {
   Typography,
   styled,
   LinearProgress,
-  Container,
   DialogTitle,
   DialogContent,
   DialogActions,
   Dialog,
-  Link,
   CircularProgress,
   Breadcrumbs,
   Divider,
@@ -23,7 +21,7 @@ import {
   TableBody,
   TableContainer,
 } from '@mui/material'
-import { useNavigate, useParams, Link as RouterLink, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import Autorenew from '@mui/icons-material/Autorenew'
 import CloudUpload from '@mui/icons-material/CloudUpload'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
@@ -41,7 +39,6 @@ import { IngestionPipelineStageKey } from '@shared/ingestion'
 import { RagFilesStatus } from './RagFilesStatus'
 import apiClient from '../../util/apiClient'
 import { ArrowBack } from '@mui/icons-material'
-import useCourse from '../../hooks/useCourse'
 import { EditableTitle } from './EditableTitle'
 
 const VisuallyHiddenInput = styled('input')({

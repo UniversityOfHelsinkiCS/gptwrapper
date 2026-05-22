@@ -37,7 +37,7 @@ const DownloadButton = ({ messages, disabled, collapsed = false }: { messages: C
       setTimeout(() => {
         setIsCooldown(false)
       }, 3000)
-    } catch (error) {
+    } catch {
       enqueueSnackbar(t('download:failure'), { variant: 'error' })
       setIsCooldown(false)
     }
@@ -58,11 +58,7 @@ const DownloadButton = ({ messages, disabled, collapsed = false }: { messages: C
           </TextButton>
         </span>
       </Tooltip>
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-      >
+      <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
         <MenuItem onClick={() => handleDownload('md')} data-testid="download-md">
           {t('download:formatMarkdown')}
         </MenuItem>

@@ -15,7 +15,6 @@ import getEncoding from 'src/server/util/tiktoken'
 import { calculateUsage } from '../chatInstances/usage'
 import { truncateMessages } from './truncateMessages'
 import { getAzureChatOpenAI, getVertexModelProvider } from './modelGenerators'
-import { VertexAI } from '@langchain/google-vertexai'
 import logger from 'src/server/util/logger'
 
 export type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
@@ -28,12 +27,12 @@ type ChatTool = StructuredTool<any, any, any, string>
  * Prepares chat messages for the LLM by combining message content with file content
  */
 const prepareMessagesForLLM = (messages: ChatMessage[]): ChatMessage[] => {
-  return messages.map(msg => {
+  return messages.map((msg) => {
     if (msg.role === 'user' && msg.fileContent && typeof msg.content === 'string') {
       // Combine the user's message with the file content for the LLM
       return {
         ...msg,
-        content: `${msg.content} ${msg.fileContent}`
+        content: `${msg.content} ${msg.fileContent}`,
       }
     }
     return msg
@@ -103,20 +102,20 @@ export const streamChat = async ({
     throw new Error(`Invalid model: ${model}`)
   }
 
-  const instructionMessage = modelConfigHasInstructions(modelConfig)
-    ? [{ role: 'system' as const, content: modelConfig.instructions }]
-    : []
+  const instructionMessage = modelConfigHasInstructions(modelConfig) ? [{ role: 'system' as const, content: modelConfig.instructions }] : []
 
   const chatModel = getChatModel(modelConfig, tools, temperature).withConfig({
-    callbacks: [{
-      handleLLMError(err) {
-        console.error('Chat model error:', err)
-        writeEvent({
-          type: 'error',
-          error: 'Error while generating response',
-        })
+    callbacks: [
+      {
+        handleLLMError(err) {
+          console.error('Chat model error:', err)
+          writeEvent({
+            type: 'error',
+            error: 'Error while generating response',
+          })
+        },
       },
-    }],
+    ],
   })
 
   // Prepare messages by combining user message content with file content for the LLM
@@ -231,14 +230,12 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
   const toolCalls = fullOutput?.tool_calls ?? []
 
   for (const toolCall of toolCalls) {
-
     const tool = toolsByName[toolCall.name]
     const id = toolCall.id
     const name = toolCall.name as ChatToolDef['name']
     const input = toolCall.args as ChatToolDef['input']
 
     if (id && tool) {
-
       await writeEvent({
         type: 'toolCallStatus',
         toolName: name,
@@ -302,10 +299,10 @@ const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[], tempera
   switch (modelConfig.provider) {
     case ModelProvider.Azure:
       return getAzureChatOpenAI({
-          name: modelConfig.name,
-          temperature: DEFAULT_MODEL_TEMPERATURE,
-          streaming: true,
-        }).bindTools(tools) // Make tools available to the model.
+        name: modelConfig.name,
+        temperature: DEFAULT_MODEL_TEMPERATURE,
+        streaming: true,
+      }).bindTools(tools) // Make tools available to the model.
     case ModelProvider.Vertex:
       return getVertexModelProvider(modelConfig.name)
     case ModelProvider.Mock:

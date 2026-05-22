@@ -114,7 +114,7 @@ const ModelSettingsSection = () => {
 }
 
 const RagSettingsSection = () => {
-  const { form, setForm, type, ragIndices, courseId } = usePromptEditorForm()
+  const { form, setForm, type, ragIndices } = usePromptEditorForm()
   const { t } = useTranslation()
 
   if (type === 'PERSONAL') return null // Personal prompts don't have RAGs

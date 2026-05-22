@@ -1,11 +1,10 @@
-import { Checkbox, FormControlLabel, Switch } from "@mui/material"
-import { User } from "@shared/user"
-import { useSnackbar } from "notistack"
-import { useTranslation } from "react-i18next"
-import useCurrentUser from "../../hooks/useCurrentUser"
-import { usePreferencesUpdateMutation } from "../../hooks/usePreferencesUpdateMutation"
-import queryClient from "../../util/queryClient"
-import { useCallback } from "react"
+import { Checkbox, FormControlLabel, Switch } from '@mui/material'
+import { User } from '@shared/user'
+import { useSnackbar } from 'notistack'
+import { useTranslation } from 'react-i18next'
+import { usePreferencesUpdateMutation } from '../../hooks/usePreferencesUpdateMutation'
+import queryClient from '../../util/queryClient'
+import { useCallback } from 'react'
 
 export const useNewConversationConfirmMutation = (context: 'chat' | 'settings') => {
   const preferenceUpdate = usePreferencesUpdateMutation()
@@ -27,7 +26,7 @@ export const useNewConversationConfirmMutation = (context: 'chat' | 'settings') 
               skipNewConversationConfirm: preferenceUpdates.skipNewConversationConfirm,
             },
           }))
-        }
+        },
       })
       let msg = t('preferences:success')
       if (context === 'chat') {
@@ -40,9 +39,17 @@ export const useNewConversationConfirmMutation = (context: 'chat' | 'settings') 
   return mutation
 }
 
-export const NewConversationConfirmConfigurator = ({ label, value, setValue, context }: { label: string, value: boolean, setValue: (value: boolean) => void, context?: 'chat' | 'settings' }) => {
+export const NewConversationConfirmConfigurator = ({
+  label,
+  value,
+  setValue,
+  context,
+}: {
+  label: string
+  value: boolean
+  setValue: (value: boolean) => void
+  context?: 'chat' | 'settings'
+}) => {
   const Control = context === 'chat' ? Checkbox : Switch
-  return (
-    <FormControlLabel control={<Control checked={value} onChange={(e) => setValue(e.target.checked)} />} label={label} />
-  )
+  return <FormControlLabel control={<Control checked={value} onChange={(e) => setValue(e.target.checked)} />} label={label} />
 }

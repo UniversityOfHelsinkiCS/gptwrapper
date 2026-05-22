@@ -1,7 +1,7 @@
 import { Locales } from '@shared/types'
 
 import { ChatInstance } from '../db/models'
-import { ActivityPeriod, SisuCourseUnit, SisuCourseWithRealization } from '../types'
+import { SisuCourseWithRealization } from '../types'
 import { mangleData } from './mangleData'
 import { upsertResponsibilities } from './responsibilities'
 import { safeBulkCreate } from './util'

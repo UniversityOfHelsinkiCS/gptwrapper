@@ -2,8 +2,8 @@ import globals from 'globals'
 import pluginJs from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import pluginReact from 'eslint-plugin-react'
-import i18next from 'eslint-plugin-i18next';
-import eslintConfigPrettier from "eslint-config-prettier"
+import i18next from 'eslint-plugin-i18next'
+import eslintConfigPrettier from 'eslint-config-prettier'
 // import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 
 export default [
@@ -22,7 +22,7 @@ export default [
       '@typescript-eslint/ban-ts-comment': 'off',
       'i18next/no-literal-string': 'warn',
       '@typescript-eslint/no-unused-vars': [
-        'warn',
+        'error',
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',

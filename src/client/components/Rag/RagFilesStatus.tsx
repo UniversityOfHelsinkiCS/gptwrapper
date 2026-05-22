@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import { IngestionJobStatus } from '@shared/ingestion'
 import { RagFileAttributes } from '@shared/types'
 import { CircularProgressWithLabel } from '../common/CircularProgressWithLabel'

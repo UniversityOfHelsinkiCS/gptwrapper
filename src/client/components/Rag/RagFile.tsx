@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import apiClient from '../../util/apiClient'
 import type { RagFileAttributes } from '../../../shared/types'
-import { Box, Button, Container, Typography } from '@mui/material'
+import { Box, Button, Typography } from '@mui/material'
 import type { RagIndexAttributes } from '../../../server/db/models/ragIndex'
 import { useDeleteRagFileMutation, useDeleteRagFileTextMutation } from './api'
 import { useTranslation } from 'react-i18next'
@@ -19,7 +19,7 @@ type RagFile = RagFileAttributes & {
 
 export const RagFile: React.FC = () => {
   const { t } = useTranslation()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const fileId = Number(searchParams.get('file'))
   const indexId = Number(searchParams.get('index'))
   const params = useParams<{ courseId: string }>()
@@ -91,17 +91,15 @@ export const RagFile: React.FC = () => {
         </Button>
       </Box>
       <Typography variant="h4">{t('rag:content')}</Typography>
-      {
-        ragFile.fileContent.length === 0 ? (
-          <Typography variant="body1">{t('rag:noContent')}</Typography>
-        ) : ragFile.fileType === 'application/pdf' || ragFile.fileType === 'text/markdown' ? (
-          <Markdown>{ragFile.fileContent}</Markdown>
-        ) : (
-          <Typography variant="body1" style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
-            {ragFile.fileContent}
-          </Typography>
-        )
-      }
-    </Box >
+      {ragFile.fileContent.length === 0 ? (
+        <Typography variant="body1">{t('rag:noContent')}</Typography>
+      ) : ragFile.fileType === 'application/pdf' || ragFile.fileType === 'text/markdown' ? (
+        <Markdown>{ragFile.fileContent}</Markdown>
+      ) : (
+        <Typography variant="body1" style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
+          {ragFile.fileContent}
+        </Typography>
+      )}
+    </Box>
   )
 }

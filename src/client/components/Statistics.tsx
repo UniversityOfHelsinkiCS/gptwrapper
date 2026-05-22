@@ -402,132 +402,132 @@ export function Component() {
 
         <TableContainer component={Paper} sx={{ mt: 2 }}>
           {activeTab === 'courses' ? (
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell align="left">
-                  <Typography variant="h6">
-                    <b>{t('stats:courseCodes')}</b>
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="h6">
-                    <b>{t('stats:courseNameInfo')}</b>
-                  </Typography>
-                </TableCell>
-                <TableCell align="left">
-                  <Typography variant="h6">
-                    <b>{t('stats:courseTerms')}</b>
-                  </Typography>
-                </TableCell>
-                <TableCell align="left">
-                  <Typography variant="h6">
-                    <b>{t('stats:programCodes')}</b>
-                  </Typography>
-                </TableCell>
-                <TableCell align="left">
-                  <Typography variant="h6">
-                    <b>{t('stats:studentCount')}</b>
-                  </Typography>
-                </TableCell>
-                <TableCell align="left">
-                  <Typography variant="h6">
-                    <b>{t('stats:enrollmentCount')}</b>
-                  </Typography>
-                </TableCell>
-                <TableCell align="left">
-                  <Typography variant="h6">
-                    <TableSortLabel
-                      active={sortBy === 'usagePercentage'}
-                      direction={sortBy === 'usagePercentage' ? sortDirection : 'desc'}
-                      onClick={() => requestSort('usagePercentage')}
-                    >
-                      <b>{t('stats:studentEnrollmentPercentage')}</b>
-                    </TableSortLabel>
-                  </Typography>
-                </TableCell>
-                <TableCell align="left">
-                  <Typography variant="h6">
-                    <TableSortLabel
-                      active={sortBy === 'usedTokens'}
-                      direction={sortBy === 'usedTokens' ? sortDirection : 'desc'}
-                      onClick={() => requestSort('usedTokens')}
-                    >
-                      <b>{t('stats:usageCount')}</b>
-                    </TableSortLabel>
-                  </Typography>
-                </TableCell>
-                <TableCell align="left">
-                  <Typography variant="h6">
-                    <TableSortLabel
-                      active={sortBy === 'promptCount'}
-                      direction={sortBy === 'promptCount' ? sortDirection : 'desc'}
-                      onClick={() => requestSort('promptCount')}
-                    >
-                      <b>{t('stats:promptCount')}</b>
-                    </TableSortLabel>
-                  </Typography>
-                </TableCell>
-                <TableCell align="left">
-                  <Typography variant="h6">
-                    <TableSortLabel
-                      active={sortBy === 'ragIndicesCount'}
-                      direction={sortBy === 'ragIndicesCount' ? sortDirection : 'desc'}
-                      onClick={() => requestSort('ragIndicesCount')}
-                    >
-                      <b>{t('stats:rags')}</b>
-                    </TableSortLabel>
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              <SumRow statsToShow={statsToShow} />
-
-              {statsToShow.map((chat) => (
-                <TableRow key={chat.id}>
+            <Table>
+              <TableHead>
+                <TableRow>
                   <TableCell align="left">
-                    <Typography>{chat.codes.join(', ')}</Typography>
+                    <Typography variant="h6">
+                      <b>{t('stats:courseCodes')}</b>
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="h6">
+                      <b>{t('stats:courseNameInfo')}</b>
+                    </Typography>
                   </TableCell>
                   <TableCell align="left">
-                    {user?.isAdmin ? (
-                      <Link to={`/${chat.id}/course`} component={RouterLink}>
-                        <Typography>{chat.name[language]}</Typography>
-                      </Link>
-                    ) : (
-                      <Typography>{chat.name[language]}</Typography>
-                    )}
+                    <Typography variant="h6">
+                      <b>{t('stats:courseTerms')}</b>
+                    </Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <Typography>{chat.terms.map((trm) => trm.label[language]).join(', ')}</Typography>
+                    <Typography variant="h6">
+                      <b>{t('stats:programCodes')}</b>
+                    </Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <Tooltip title={namesOf(chat.programmes)}>
-                      <Typography>{chat.programmes}</Typography>
-                    </Tooltip>
+                    <Typography variant="h6">
+                      <b>{t('stats:studentCount')}</b>
+                    </Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <Typography>{chat.students}</Typography>
+                    <Typography variant="h6">
+                      <b>{t('stats:enrollmentCount')}</b>
+                    </Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <Typography>{chat.enrollmentCount}</Typography>
+                    <Typography variant="h6">
+                      <TableSortLabel
+                        active={sortBy === 'usagePercentage'}
+                        direction={sortBy === 'usagePercentage' ? sortDirection : 'desc'}
+                        onClick={() => requestSort('usagePercentage')}
+                      >
+                        <b>{t('stats:studentEnrollmentPercentage')}</b>
+                      </TableSortLabel>
+                    </Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <Typography>{usagePercentage(chat.students, chat.enrollmentCount)}</Typography>
+                    <Typography variant="h6">
+                      <TableSortLabel
+                        active={sortBy === 'usedTokens'}
+                        direction={sortBy === 'usedTokens' ? sortDirection : 'desc'}
+                        onClick={() => requestSort('usedTokens')}
+                      >
+                        <b>{t('stats:usageCount')}</b>
+                      </TableSortLabel>
+                    </Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <Typography>{chat.usedTokens}</Typography>
+                    <Typography variant="h6">
+                      <TableSortLabel
+                        active={sortBy === 'promptCount'}
+                        direction={sortBy === 'promptCount' ? sortDirection : 'desc'}
+                        onClick={() => requestSort('promptCount')}
+                      >
+                        <b>{t('stats:promptCount')}</b>
+                      </TableSortLabel>
+                    </Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <Typography>{chat.promptCount}</Typography>
-                  </TableCell>
-                  <TableCell align="left">
-                    <Typography>{chat.ragIndicesCount}</Typography>
+                    <Typography variant="h6">
+                      <TableSortLabel
+                        active={sortBy === 'ragIndicesCount'}
+                        direction={sortBy === 'ragIndicesCount' ? sortDirection : 'desc'}
+                        onClick={() => requestSort('ragIndicesCount')}
+                      >
+                        <b>{t('stats:rags')}</b>
+                      </TableSortLabel>
+                    </Typography>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                <SumRow statsToShow={statsToShow} />
+
+                {statsToShow.map((chat) => (
+                  <TableRow key={chat.id}>
+                    <TableCell align="left">
+                      <Typography>{chat.codes.join(', ')}</Typography>
+                    </TableCell>
+                    <TableCell align="left">
+                      {user?.isAdmin ? (
+                        <Link to={`/${chat.id}/course`} component={RouterLink}>
+                          <Typography>{chat.name[language]}</Typography>
+                        </Link>
+                      ) : (
+                        <Typography>{chat.name[language]}</Typography>
+                      )}
+                    </TableCell>
+                    <TableCell align="left">
+                      <Typography>{chat.terms.map((trm) => trm.label[language]).join(', ')}</Typography>
+                    </TableCell>
+                    <TableCell align="left">
+                      <Tooltip title={namesOf(chat.programmes)}>
+                        <Typography>{chat.programmes}</Typography>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell align="left">
+                      <Typography>{chat.students}</Typography>
+                    </TableCell>
+                    <TableCell align="left">
+                      <Typography>{chat.enrollmentCount}</Typography>
+                    </TableCell>
+                    <TableCell align="left">
+                      <Typography>{usagePercentage(chat.students, chat.enrollmentCount)}</Typography>
+                    </TableCell>
+                    <TableCell align="left">
+                      <Typography>{chat.usedTokens}</Typography>
+                    </TableCell>
+                    <TableCell align="left">
+                      <Typography>{chat.promptCount}</Typography>
+                    </TableCell>
+                    <TableCell align="left">
+                      <Typography>{chat.ragIndicesCount}</Typography>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           ) : (
             <>
               <Box sx={{ px: 2, pt: 2 }}>
@@ -549,10 +549,7 @@ export function Component() {
                       control={<Checkbox checked={trendSeries.prompts} onChange={() => toggleTrendSeries('prompts')} />}
                       label={t('stats:promptCount')}
                     />
-                    <FormControlLabel
-                      control={<Checkbox checked={trendSeries.rags} onChange={() => toggleTrendSeries('rags')} />}
-                      label={t('stats:rags')}
-                    />
+                    <FormControlLabel control={<Checkbox checked={trendSeries.rags} onChange={() => toggleTrendSeries('rags')} />} label={t('stats:rags')} />
                   </FormGroup>
 
                   <Stack direction="row" spacing={2} alignItems="center" sx={{ ml: { lg: 2 } }}>

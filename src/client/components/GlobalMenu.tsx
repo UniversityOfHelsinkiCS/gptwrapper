@@ -26,23 +26,22 @@ export default function GlobalMenu({
   openFeedback,
 }: {
   openDisclaimer: () => void
-  openSettings: () => void,
+  openSettings: () => void
   openFeedback: () => void
 }) {
   const { t, i18n } = useTranslation()
   const { user } = useCurrentUser()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
 
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
   const inCourseCreatorView = pathname.includes('course-creator')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
-
   const open = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
+    setAnchorEl(event.currentTarget)
   }
   const handleClose = () => {
     setAnchorEl(null)
@@ -57,12 +56,13 @@ export default function GlobalMenu({
     textDecoration: i18n.language === lang ? 'underline' : 'none',
   })
 
-
   return (
     <div style={{ position: 'fixed', top: isMobile ? 10 : 20, right: isMobile ? 15 : 20 }}>
-      {inCourseCreatorView && <BlueButton onClick={() => navigate('/general')} sx={{ position: 'absolute', right: '4rem' }}>
-        Takaisin chattiin
-      </BlueButton>}
+      {inCourseCreatorView && (
+        <BlueButton onClick={() => navigate('/general')} sx={{ position: 'absolute', right: '4rem' }}>
+          Takaisin chattiin
+        </BlueButton>
+      )}
       <OutlineButtonBlack
         id="basic-button"
         data-testid="global-menu-button"
@@ -88,7 +88,8 @@ export default function GlobalMenu({
               border: '1px solid',
               borderColor: 'divider',
               borderRadius: '1.25rem',
-            }, elevation: 1
+            },
+            elevation: 1,
           },
         }}
       >
@@ -104,7 +105,6 @@ export default function GlobalMenu({
               <SettingsIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText>{t('settings')}</ListItemText>
-
           </MenuItem>
           <MenuItem
             data-testid="open-disclaimer-button"
@@ -117,50 +117,54 @@ export default function GlobalMenu({
               <InfoIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText>{t('about_service')}</ListItemText>
-
           </MenuItem>
-          <MenuItem onClick={() => {
-            openFeedback()
-            handleClose()
-          }}>
+          <MenuItem
+            onClick={() => {
+              openFeedback()
+              handleClose()
+            }}
+          >
             <ListItemIcon>
               <ReviewsIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText>{t('feedback:giveFeedback')}</ListItemText>
-
           </MenuItem>
-          {user?.isStatsViewer && <MenuItem component={RouterLink} to="/statistics">
-            <ListItemIcon>
-              <BarChart fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>{t('courseStats')}</ListItemText>
+          {user?.isStatsViewer && (
+            <MenuItem component={RouterLink} to="/statistics">
+              <ListItemIcon>
+                <BarChart fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>{t('courseStats')}</ListItemText>
+            </MenuItem>
+          )}
 
-          </MenuItem>}
+          {user?.isAdmin && (
+            <MenuItem component={RouterLink} to="/admin">
+              <ListItemIcon>
+                <AdminPanelSettings fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>{t('admin')}</ListItemText>
+            </MenuItem>
+          )}
 
-          {user?.isAdmin && <MenuItem component={RouterLink} to="/admin">
-            <ListItemIcon>
-              <AdminPanelSettings fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>{t('admin')}</ListItemText>
+          {user?.isCourseCreator && (
+            <MenuItem component={RouterLink} to="/course-creator">
+              <ListItemIcon>
+                <AdminPanelSettings fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>{t('courseCreator:title')}</ListItemText>
+            </MenuItem>
+          )}
 
-          </MenuItem>}
-
-          {user?.isCourseCreator && <MenuItem component={RouterLink} to="/course-creator">
-            <ListItemIcon>
-              <AdminPanelSettings fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>{t('courseCreator:title')}</ListItemText>
-
-          </MenuItem>}
-
-          <MenuItem onClick={() => {
-            handleLogout()
-          }}>
+          <MenuItem
+            onClick={() => {
+              handleLogout()
+            }}
+          >
             <ListItemIcon>
               <Logout fontSize="small" />
             </ListItemIcon>
             <ListItemText>{t('logout')}</ListItemText>
-
           </MenuItem>
 
           <Divider />
@@ -169,11 +173,17 @@ export default function GlobalMenu({
               <LanguageIcon fontSize="small" />
             </ListItemIcon>
             <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
-              <TextButton onClick={() => handleLanguageChange("fi")} sx={languageButtonSx("fi")}>Fi</TextButton>
+              <TextButton onClick={() => handleLanguageChange('fi')} sx={languageButtonSx('fi')}>
+                Fi
+              </TextButton>
               <Divider orientation="vertical" flexItem />
-              <TextButton onClick={() => handleLanguageChange("en")} sx={languageButtonSx("en")}>En</TextButton>
+              <TextButton onClick={() => handleLanguageChange('en')} sx={languageButtonSx('en')}>
+                En
+              </TextButton>
               <Divider orientation="vertical" flexItem />
-              <TextButton onClick={() => handleLanguageChange("sv")} sx={languageButtonSx("sv")}>Sv</TextButton>
+              <TextButton onClick={() => handleLanguageChange('sv')} sx={languageButtonSx('sv')}>
+                Sv
+              </TextButton>
             </Box>
           </ListItem>
         </MenuList>

@@ -21,7 +21,7 @@ if (!inProduction) {
     let restString = ''
     try {
       restString = JSON.stringify(rest)
-    } catch (e) {
+    } catch {
       restString = 'Error stringifying rest'
     }
 

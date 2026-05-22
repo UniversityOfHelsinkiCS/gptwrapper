@@ -1,7 +1,6 @@
 import { format } from 'date-fns'
 
-import { ActivityPeriod, ChatInstanceUsage, Course } from '../../types'
-import { CoursesViewCourse } from '../../hooks/useUserCourses'
+import { ActivityPeriod, ChatInstanceUsage } from '../../types'
 
 import curTypes from '../../locales/curTypes.json'
 
