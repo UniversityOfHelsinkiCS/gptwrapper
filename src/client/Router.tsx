@@ -11,6 +11,8 @@ import { EmbeddedLoginHelper } from './components/EmbeddedLoginHelper'
 
 const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
 
+let x
+
 const router = sentryCreateBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />} ErrorBoundary={ErrorPage}>
