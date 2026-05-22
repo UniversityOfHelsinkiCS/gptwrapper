@@ -1,3 +1,5 @@
+/* eslint-disable i18next/no-literal-string */
+
 import { Box, Typography } from '@mui/material'
 import { BlueButton, OrangeButton } from '../ChatV2/general/Buttons'
 import * as Sentry from '@sentry/react'
@@ -48,9 +50,7 @@ export default function Testing() {
         <Box sx={{ maxWidth: 360, width: '100%', display: 'flex', flexDirection: 'column', gap: 1 }}>
           <OrangeButton
             onClick={() => {
-              throw new Error(
-                `Testing client-side error. Caused by ${user.username} pressing the Error testing button.`
-              )
+              throw new Error(`Testing client-side error. Caused by ${user.username} pressing the Error testing button.`)
             }}
           >
             Error testing button. Pressing should cause a sentry error being emitted and an alert fired in toska slack.
@@ -58,9 +58,7 @@ export default function Testing() {
 
           <OrangeButton
             onClick={() => {
-              Sentry.captureMessage(
-                `Greetings from ${user.username}, they just pressed the Sentry message testing button.`
-              )
+              Sentry.captureMessage(`Greetings from ${user.username}, they just pressed the Sentry message testing button.`)
             }}
           >
             Sentry message testing button. Pressing should cause a sentry message being emitted and a message sent to toska slack.
@@ -78,13 +76,9 @@ export default function Testing() {
         </Typography>
 
         <Box sx={{ maxWidth: 360, width: '100%', display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <OrangeButton onClick={testResponsesApi}>
-            Responses API test, see logs. Do not press for fun.
-          </OrangeButton>
+          <OrangeButton onClick={testResponsesApi}>Responses API test, see logs. Do not press for fun.</OrangeButton>
 
-          <OrangeButton onClick={testCompletionsApi}>
-            Completions API test, Do not press for fun.
-          </OrangeButton>
+          <OrangeButton onClick={testCompletionsApi}>Completions API test, Do not press for fun.</OrangeButton>
         </Box>
       </Box>
 
@@ -98,7 +92,7 @@ export default function Testing() {
         </Typography>
 
         <Box sx={{ maxWidth: 360, width: '100%', display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <BlueButton onClick={() => { }} disabled>
+          <BlueButton onClick={() => {}} disabled>
             Login as&nbsp;<strong>FAKE STUDENT</strong>&nbsp;(not working yet)
           </BlueButton>
           <BlueButton onClick={() => handleLoginAs(ahslaaks)}>
