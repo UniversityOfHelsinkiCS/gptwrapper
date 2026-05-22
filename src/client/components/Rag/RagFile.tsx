@@ -41,7 +41,7 @@ export const RagFile: React.FC = () => {
   const navigate = useNavigate()
 
   if (isError) {
-    return <div>Error: {error.message}</div>
+    return <div>{t('rag:errorWithMessage', { message: error.message })}</div>
   }
 
   if (!isSuccess) {

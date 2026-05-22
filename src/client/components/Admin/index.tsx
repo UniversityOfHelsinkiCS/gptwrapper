@@ -29,7 +29,7 @@ export function Component() {
   return (
     <Container sx={{ mt: '8rem', mb: '10rem', position: 'relative' }} maxWidth="xl">
       <Box sx={{ position: 'absolute', top: '-7rem', left: 10 }}>
-        <BlueButton onClick={() => navigate('/general')}>Takaisin chattiin</BlueButton>
+        <BlueButton onClick={() => navigate('/general')}>{t('common:backToChat')}</BlueButton>
       </Box>
 
       <Box m={2}>
