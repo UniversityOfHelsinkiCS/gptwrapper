@@ -2,10 +2,12 @@ import { Box, DialogContent, Typography } from '@mui/material'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import UserSearch from './UserSearch'
 
 export const SuperSpeedLoginAs = () => {
   const [open, setOpen] = useState(false)
+  const { t } = useTranslation()
 
   // Register hotkey event listener
   useEffect(() => {
@@ -35,9 +37,9 @@ export const SuperSpeedLoginAs = () => {
     >
       <DialogTitle id="super-speed-login-dialog-title">
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          🚀 Super Speed Login As 🚀
+          {t('admin:loginAsButton')}
           <Typography variant="body2" color="text.secondary" sx={{ ml: 'auto' }}>
-            Press <strong>ESC</strong> to close
+            {t('close')}
           </Typography>
         </Box>
       </DialogTitle>

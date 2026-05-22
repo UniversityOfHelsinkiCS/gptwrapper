@@ -51,7 +51,7 @@ export const GlobalSettings = ({
   if (isLoading) {
     return (
       <Dialog fullWidth open={open} onClose={() => setOpen(false)}>
-        loading
+        {t('loading')}
       </Dialog>
     )
   }

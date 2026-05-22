@@ -60,7 +60,7 @@ export default function GlobalMenu({
     <div style={{ position: 'fixed', top: isMobile ? 10 : 20, right: isMobile ? 15 : 20 }}>
       {inCourseCreatorView && (
         <BlueButton onClick={() => navigate('/general')} sx={{ position: 'absolute', right: '4rem' }}>
-          Takaisin chattiin
+          {t('backToChat')}
         </BlueButton>
       )}
       <OutlineButtonBlack
@@ -174,15 +174,15 @@ export default function GlobalMenu({
             </ListItemIcon>
             <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
               <TextButton onClick={() => handleLanguageChange('fi')} sx={languageButtonSx('fi')}>
-                Fi
+                {t('finnish')}
               </TextButton>
               <Divider orientation="vertical" flexItem />
               <TextButton onClick={() => handleLanguageChange('en')} sx={languageButtonSx('en')}>
-                En
+                {t('english')}
               </TextButton>
               <Divider orientation="vertical" flexItem />
               <TextButton onClick={() => handleLanguageChange('sv')} sx={languageButtonSx('sv')}>
-                Sv
+                {t('swedish')}
               </TextButton>
             </Box>
           </ListItem>

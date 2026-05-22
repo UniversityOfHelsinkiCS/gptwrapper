@@ -194,7 +194,7 @@ export const RagIndex: React.FC = () => {
           </Button>
           {user?.isAdmin && (
             <OutlineButtonBlack startIcon={<Autorenew />} onClick={handleReset}>
-              Reset (admin only)
+              {t('reset')}
             </OutlineButtonBlack>
           )}
           <RagFilesStatus ragFileStatuses={ragFileStatuses ?? []} ragFiles={ragDetails?.ragFiles ?? []} />

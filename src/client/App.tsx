@@ -5,6 +5,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { fi } from 'date-fns/locale'
 import { SnackbarProvider } from 'notistack'
 import React, { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom'
 import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
 import { EmbeddedProvider } from './contexts/EmbeddedContext'
@@ -46,6 +47,7 @@ const getRedirect = (user: User | null | undefined) => {
 const AdminLoggedInAsBanner = () => {
   const [open, setOpen] = React.useState(false)
   const [user, setUser] = React.useState<User | null>(null)
+  const { t } = useTranslation()
 
   useEffect(() => {
     const adminLoggedInAs = localStorage.getItem('adminLoggedInAs')
@@ -69,7 +71,7 @@ const AdminLoggedInAsBanner = () => {
       message={`You are currently logged in as ${user?.studentNumber} ${user?.lastName} ${user?.firstNames}`}
       action={
         <Button color="secondary" onClick={handleClick}>
-          Return to yourself
+          {t('back')}
         </Button>
       }
     />
