@@ -291,7 +291,7 @@ const handleStreamRequest = async (request: express.Request, res: express.Respon
   const course = await resolveCourseContext({ req, res, courseId })
   configureStreamResponse(res)
   const writeEvent = createWriteEvent(res)
-  const { prompt, systemMessage, tools } = await resolvePromptContext({ req, res, course, generationInfo })
+  const { prompt, systemMessage, tools } = await resolvePromptContext({ res, course, generationInfo })
   const { isFreeModel } = ensureUsageAllowed({ user: req.user, course, model: generationInfo.model })
 
   const result = await streamAgentChat({
