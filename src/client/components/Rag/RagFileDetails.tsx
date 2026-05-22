@@ -53,12 +53,24 @@ export const RagFileTableHead: React.FC = () => {
   return (
     <TableHead>
       <TableRow>
-        <TableCell><strong>{t('rag:fileName')}</strong></TableCell>
-        <HideOnSmallHead><strong>{t('common:fileType')}</strong></HideOnSmallHead>
-        <TableCell><strong>{t('rag:fileSizeKb')}</strong></TableCell>
-        <TableCell><strong>{t('rag:parsing')}</strong></TableCell>
-        <HideOnSmallHead><strong>{t('common:added')}</strong></HideOnSmallHead>
-        <TableCell><strong>{t('rag:fileStatus')}</strong></TableCell>
+        <TableCell>
+          <strong>{t('rag:fileName')}</strong>
+        </TableCell>
+        <HideOnSmallHead>
+          <strong>{t('common:fileType')}</strong>
+        </HideOnSmallHead>
+        <TableCell>
+          <strong>{t('rag:fileSizeKb')}</strong>
+        </TableCell>
+        <TableCell>
+          <strong>{t('rag:parsing')}</strong>
+        </TableCell>
+        <HideOnSmallHead>
+          <strong>{t('common:added')}</strong>
+        </HideOnSmallHead>
+        <TableCell>
+          <strong>{t('rag:fileStatus')}</strong>
+        </TableCell>
         <TableCell />
       </TableRow>
     </TableHead>
@@ -86,8 +98,8 @@ export const RagFileInfo: React.FC<{
 
   const accentColor = isSuccess ? 'success' : isError ? 'error' : 'info'
   const error = status?.error ?? file.error
-  const message = isSuccess ? 'Completed' : isError ? 'Error' : isUploading ? 'Uploading' : (status?.message ?? 'Queued')
-  const progress = isSuccess ? 100 : isUploading ? uploadProgress : (status?.progress ?? 0)
+  const message = isSuccess ? 'Completed' : isError ? 'Error' : isUploading ? 'Uploading' : status?.message ?? 'Queued'
+  const progress = isSuccess ? 100 : isUploading ? uploadProgress : status?.progress ?? 0
 
   const progressIcon = ProgressIcon[fileStage]
 
@@ -99,13 +111,13 @@ export const RagFileInfo: React.FC<{
         </Link>
       </TableCell>
       <HideOnSmall>{file.fileType}</HideOnSmall>
-      <TableCell>{(file.fileSize / 1024).toFixed()} kB</TableCell>
+      <TableCell>
+        {(file.fileSize / 1024).toFixed()} {t('rag:fileSizeUnit')}
+      </TableCell>
       <TableCell>
         {(isPdf || isImage) && (
           <Box display="flex" alignItems="center" gap={0.5}>
-            <Typography variant="body2">
-              {usedAdvancedParsing ? t('rag:advancedParsing') : t('rag:standardParsing')}
-            </Typography>
+            <Typography variant="body2">{usedAdvancedParsing ? t('rag:advancedParsing') : t('rag:standardParsing')}</Typography>
           </Box>
         )}
       </TableCell>
@@ -123,7 +135,7 @@ export const RagFileInfo: React.FC<{
             </Typography>
             {status?.eta && (
               <Typography variant="body2" component="div" sx={{ color: 'text.secondary' }}>
-                {formatDistanceStrict(0, status?.eta)} left
+                {t('rag:etaLeft', { value: formatDistanceStrict(0, status?.eta) })}
               </Typography>
             )}
             {error?.length && (

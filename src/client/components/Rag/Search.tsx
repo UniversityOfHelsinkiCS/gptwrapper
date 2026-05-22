@@ -49,13 +49,13 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
     <Box my="2rem" display="flex" gap="1rem">
       <form onSubmit={handleSubmit} style={{ flex: 1 }}>
         <FormControl>
-          <TextField type="text" value={query} onChange={handleInputChange} label="Search Query" />
-          <FormControlLabel control={<Checkbox checked={vector} onChange={(e) => setVector(e.target.checked)} />} label="Use semantic search" />
-          <FormControlLabel control={<Checkbox checked={ft} onChange={(e) => setFt(e.target.checked)} />} label="Use keyword search" />
-          <FormControlLabel control={<Checkbox checked={rerank} onChange={(e) => setRerank(e.target.checked)} />} label="Use reranking" />
-          <FormControlLabel control={<Checkbox checked={curate} onChange={(e) => setCurate(e.target.checked)} />} label="Use curation" />
+          <TextField type="text" value={query} onChange={handleInputChange} label={t('rag:searchQueryLabel')} />
+          <FormControlLabel control={<Checkbox checked={vector} onChange={(e) => setVector(e.target.checked)} />} label={t('rag:useSemanticSearch')} />
+          <FormControlLabel control={<Checkbox checked={ft} onChange={(e) => setFt(e.target.checked)} />} label={t('rag:useKeywordSearch')} />
+          <FormControlLabel control={<Checkbox checked={rerank} onChange={(e) => setRerank(e.target.checked)} />} label={t('rag:useReranking')} />
+          <FormControlLabel control={<Checkbox checked={curate} onChange={(e) => setCurate(e.target.checked)} />} label={t('rag:useCuration')} />
         </FormControl>
-        <OutlineButtonBlue type="submit">Search</OutlineButtonBlue>
+        <OutlineButtonBlue type="submit">{t('rag:searchButton')}</OutlineButtonBlue>
         <Typography variant="body2" mt="2rem">
           {t('rag:searchDescription')}
         </Typography>
@@ -65,7 +65,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
         <Fade in={!!results?.timings}>
           {results?.timings ? (
             <Box mb="2rem" width="80%">
-              <Typography variant="h6">Timings</Typography>
+              <Typography variant="h6">{t('rag:timingsTitle')}</Typography>
               <Box display="flex">
                 {Object.entries(results?.timings ?? {}).map(([key, value], idx) => (
                   <Zoom
@@ -75,7 +75,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
                     timeout={{ enter: 1000 + idx * 1000 }}
                   >
                     <div>
-                      {key}: {value} ms
+                      {t('rag:timingEntry', { key, value })}
                       <Box width="100%" height="1rem" bgcolor={TimeLineColors[idx % TimeLineColors.length]} border="1px solid black" borderRadius="1rem" />
                     </div>
                   </Zoom>
@@ -90,13 +90,13 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
           {results?.results ? (
             <Box my="1rem">
               <Typography variant="h6" mb="1rem">
-                Results
+                {t('rag:resultsTitle')}
               </Typography>
               <Box data-testid="rag-search-results">
                 {results?.results?.map((chunk) => (
                   <Box key={chunk.id} my="1rem">
                     <Typography variant="subtitle2" color="text.secondary">
-                      Source: {chunk.metadata?.ragFileName ?? 'unknown'}
+                      {t('rag:sourceLabel', { source: chunk.metadata?.ragFileName ?? t('rag:unknownSource') })}
                     </Typography>
                     <Typography whiteSpace="pre-line" variant="body2">
                       {chunk.content}
