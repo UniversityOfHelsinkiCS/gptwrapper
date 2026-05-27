@@ -272,7 +272,7 @@ const PromptModal = () => {
                         severity="info"
                       >{`${t(previewPrompt.hidden ? 'prompt:promptHidden' : 'prompt:promptNotHidden')}`}</Alert>
                     )}
-                    <Paper variant="outlined" sx={{ p: 3, mt: 1, backgroundColor: alpha(theme.palette.primary.main, 0.08) }}>
+                    <Paper variant="outlined" sx={{ p: 3, mt: 1, backgroundColor: alpha(theme.palette.primary.main, 0.08), ...!isMobile && { maxHeight: '300px', overflow: 'auto' } }}>
                       <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary', ...monospaceStyle }}>
                         {previewPrompt.hidden && !amongResponsibles ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
                       </Typography>
