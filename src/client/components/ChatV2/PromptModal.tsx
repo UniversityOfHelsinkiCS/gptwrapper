@@ -107,6 +107,9 @@ const PromptModal = () => {
     <ListItemButton
       key={prompt.id}
       selected={previewPrompt?.id === prompt.id}
+      onMouseOver={() => {
+        if (!isMobile && !isEditing) setPreviewPrompt(prompt)
+      }}
       onClick={() => {
         setPreviewPrompt(prompt)
         setIsEditing(false)
@@ -279,17 +282,17 @@ const PromptModal = () => {
                     </Paper>
                   </Box>
                 </Paper>
-                {isMobile && (
-                  <Box sx={{ mt: 'auto', pt: 2, display: 'flex', justifyContent: 'space-between' }}>
+                <Box sx={{ pt: 2, display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
+                  {isMobile && (
                     <OutlineButtonBlue onClick={() => handleMobileBackToPromptList()}>
                       <ArrowBackIcon />
                       {t('prompt:backToPromptList')}
                     </OutlineButtonBlue>
-                    <BlueButton data-testid="change-to-prompt-button" variant="contained" onClick={() => handleSelect(previewPrompt)}>
-                      {t('settings:choosePrompt')}
-                    </BlueButton>
-                  </Box>
-                )}
+                  )}
+                  <BlueButton data-testid="change-to-prompt-button" variant="contained" onClick={() => handleSelect(previewPrompt)}>
+                    {t('settings:choosePrompt')}
+                  </BlueButton>
+                </Box>
               </Box>
             ) : (
               <Box sx={{ display: 'flex', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
