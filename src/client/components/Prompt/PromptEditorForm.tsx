@@ -55,7 +55,6 @@ const BasicInfoSection = () => {
           }}
           value={form.userInstructions}
           onChange={(e) => setForm((prev) => ({ ...prev, userInstructions: e.target.value }))}
-          placeholder={t('prompt:defaultChatInstructions')}
           fullWidth
           multiline
           minRows={type === 'PERSONAL' ? 1 : 4}
