@@ -126,7 +126,23 @@ const PromptModal = () => {
       }}
       data-testid={`prompt-row-${prompt.name}`}
     >
-      <ListItemText primary={prompt.name} primaryTypographyProps={{ fontWeight: previewPrompt?.id === prompt.id ? 'bold' : 'normal', noWrap: true }} />
+      <ListItemText
+        primary={prompt.name}
+        slotProps={{
+          primary: {
+            sx: {
+              display: '-webkit-box',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: 2,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
+              overflowWrap: 'anywhere',
+            },
+          },
+        }}
+      />
       {prompt.id === activePrompt?.id && <CheckCircleOutlineIcon fontSize="small" sx={{ ml: 1, color: 'text.primary' }} />}
       {previewPrompt?.id === prompt.id && prompt.id !== activePrompt?.id && (
         <BlueButton
