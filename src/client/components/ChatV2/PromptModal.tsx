@@ -144,20 +144,7 @@ const PromptModal = () => {
         }}
       />
       {prompt.id === activePrompt?.id && <CheckCircleOutlineIcon fontSize="small" sx={{ ml: 1, color: 'text.primary' }} />}
-      {previewPrompt?.id === prompt.id && prompt.id !== activePrompt?.id && (
-        <BlueButton
-          size="small"
-          variant="contained"
-          data-testid="change-to-prompt-button"
-          onClick={(e) => {
-            e.stopPropagation()
-            handleSelect(prompt)
-          }}
-          sx={{ ml: 1, whiteSpace: 'nowrap' }}
-        >
-          {t('settings:choosePrompt')}
-        </BlueButton>
-      )}
+    
     </ListItemButton>
   )
 
