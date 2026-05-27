@@ -35,7 +35,7 @@ export default function GlobalMenu({
 
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const inCourseCreatorView = pathname.includes('course-creator')
+  const showBackButton = pathname.includes('course-creator') || pathname.includes('admin') || pathname.includes('statistics')  
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -58,8 +58,16 @@ export default function GlobalMenu({
 
   return (
     <div style={{ position: 'fixed', top: isMobile ? 10 : 20, right: isMobile ? 15 : 20 }}>
-      {inCourseCreatorView && (
-        <BlueButton onClick={() => navigate('/general')} sx={{ position: 'absolute', right: '4rem' }}>
+      {showBackButton && (
+        <BlueButton
+          onClick={() => navigate('/general')}
+          sx={{
+            position: 'fixed',
+            top: isMobile ? 10 : 20,
+            left: isMobile ? 15 : 20,
+
+          }}
+        >
           {t('backToChat')}
         </BlueButton>
       )}
