@@ -480,6 +480,7 @@
     "edit": "Edit",
     "activate": "Open chat for students",
     "noResults": "You do not have courses where CurreChat is enabled",
+    "noCourseResults": "No ongoing courses",
     "teachers": "Teachers",
     "students": "Students",
     "addedFrom": "Added from",
