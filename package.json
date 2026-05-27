@@ -90,7 +90,7 @@
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.0",
     "@langchain/classic": "^1.0.32",
-    "@langchain/core": "^1.1.45",
+    "@langchain/core": "^1.1.48",
     "@langchain/google": "^0.1.12",
     "@langchain/google-vertexai": "^2.1.30",
     "@langchain/ollama": "^1.2.7",
