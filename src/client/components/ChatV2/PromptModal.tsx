@@ -168,7 +168,7 @@ const PromptModal = () => {
         <Box
           sx={{
             display: !isMobile || !previewPrompt ? 'flex' : 'none',
-            width: !isMobile ? 280 : '90vw',
+            width: !isMobile ? 310 : '90vw',
             flexDirection: 'column',
           }}
         >

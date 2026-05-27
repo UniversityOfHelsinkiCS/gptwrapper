@@ -40,7 +40,7 @@ const TemplateModal: React.FC<{ open: boolean; root: string; children: React.Rea
           display: 'flex',
           flexDirection: 'column',
           width: { xs: '99vw', md: '90vw', lg: '75vw' },
-          maxWidth: 1200,
+          maxWidth: 1400,
           minHeight: '85vh',
           maxHeight: '85vh',
           bgcolor: 'background.paper',
