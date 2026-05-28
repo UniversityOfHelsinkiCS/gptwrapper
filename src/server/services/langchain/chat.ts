@@ -4,7 +4,7 @@ import { AIMessageChunk, BaseMessageLike } from '@langchain/core/messages'
 import type { Runnable } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
-import { DEFAULT_MODEL_TEMPERATURE, DEFAULT_TOKEN_LIMIT, FREE_MODEL, ModelConfig, ModelProvider, type ValidModelName, validModels } from '@config'
+import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, ModelConfig, ModelProvider, type ValidModelName, validModels } from '@config'
 import type { ChatEvent, ChatMessage, Message } from '@shared/chat'
 import type { ChatToolDef, ChatToolOutput } from '@shared/tools'
 import type { User } from '@shared/user'
@@ -298,11 +298,7 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
 const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[], temperature?: number): ChatModel => {
   switch (modelConfig.provider) {
     case ModelProvider.Azure:
-      return getAzureChatOpenAI({
-        name: modelConfig.name,
-        temperature: DEFAULT_MODEL_TEMPERATURE,
-        streaming: true,
-      }).bindTools(tools) // Make tools available to the model.
+      return getAzureChatOpenAI(modelConfig.name)
     case ModelProvider.Vertex:
       return getVertexModelProvider(modelConfig.name)
     case ModelProvider.Mock:

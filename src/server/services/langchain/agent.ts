@@ -439,7 +439,7 @@ export const streamAgentChat = async ({
     toolCount: tools.length,
   })
 
-  const baseModel = getAgentModel(model, temperature)
+  const baseModel = getAgentModel(model)
   const firstTurnModel = tools.length > 0 ? ((baseModel as any).bindTools(tools) as ChatModel) : baseModel
   const firstTurnMessages = systemPrompt.length > 0 ? [new SystemMessage(systemPrompt), ...messages] : messages
 
