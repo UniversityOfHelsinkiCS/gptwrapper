@@ -4,7 +4,7 @@ import { AIMessage, AIMessageChunk, HumanMessage, SystemMessage, ToolMessage, ty
 import type { Runnable } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
-import { getModelConfig, type ValidModelName } from '@config'
+import { getModelConfig, ModelProvider, type ValidModelName } from '@config'
 import type { ChatEvent, ChatMessage } from '@shared/chat'
 import type { RagChunk } from '@shared/rag'
 import { getAzureChatOpenAI, getVertexModelProvider } from './modelGenerators'
@@ -51,8 +51,7 @@ type NormalizedToolResult = {
 
 const v4DebugEnabled = process.env.V4_DEBUG === 'true'
 
-const previewText = (value: string, maxLength = 200): string =>
-  value.length <= maxLength ? value : `${value.slice(0, maxLength)}...`
+const previewText = (value: string, maxLength = 200): string => (value.length <= maxLength ? value : `${value.slice(0, maxLength)}...`)
 
 const debugV4 = (message: string, data?: Record<string, unknown>) => {
   if (!v4DebugEnabled) {
@@ -132,21 +131,17 @@ const safelyStreamMessages = async (model: ChatModel, messages: BaseMessageLike[
   }
 }
 
-const getAgentModel = (model: ValidModelName, temperature?: number) => {
+const getAgentModel = (model: ValidModelName) => {
   const modelConfig = getModelConfig(model)
   if (!modelConfig) {
     throw new Error(`Invalid model: ${model}`)
   }
 
   switch (modelConfig.provider) {
-    case 'azure':
-      return getAzureChatOpenAI({
-        name: modelConfig.name,
-        temperature,
-        streaming: true,
-      })
-    case 'vertex':
-      return getVertexModelProvider(modelConfig.name, temperature)
+    case ModelProvider.Azure:
+      return getAzureChatOpenAI(modelConfig.name)
+    case ModelProvider.Vertex:
+      return getVertexModelProvider(modelConfig.name)
     default:
       throw new Error(`Model ${model} is not supported by the agent route`)
   }
@@ -166,27 +161,21 @@ const getAgentConfig = (model: ValidModelName) => {
 }
 
 const buildSystemPrompt = (instructions: string | undefined, systemMessage: string): string =>
-  [instructions ?? '', systemMessage]
-    .filter((part) => part.trim().length > 0)
-    .join('\n\n')
+  [instructions ?? '', systemMessage].filter((part) => part.trim().length > 0).join('\n\n')
 
 const prepareMessagesForAgent = (messages: ChatMessage[]): BaseMessageLike[] =>
   messages.map((message) => {
-    const content = typeof message.content === 'string'
-      ? message.role === 'user' && message.fileContent
-        ? `${message.content} ${message.fileContent}`
-        : message.content
-      : 'this is an image, image rendering not supported yet'
+    const content =
+      typeof message.content === 'string'
+        ? message.role === 'user' && message.fileContent
+          ? `${message.content} ${message.fileContent}`
+          : message.content
+        : 'this is an image, image rendering not supported yet'
 
-    return message.role === 'user'
-      ? new HumanMessage(content)
-      : new AIMessage(content)
+    return message.role === 'user' ? new HumanMessage(content) : new AIMessage(content)
   })
 
-const buildAgentMessages = (
-  promptMessages: { role: string; content: unknown }[],
-  chatMessages: ChatMessage[],
-) : BaseMessageLike[] => [
+const buildAgentMessages = (promptMessages: { role: string; content: unknown }[], chatMessages: ChatMessage[]): BaseMessageLike[] => [
   ...promptMessages
     .filter((message) => typeof message.content === 'string' && (message.role === 'system' || message.role === 'user' || message.role === 'assistant'))
     .map((message) => {
@@ -211,15 +200,7 @@ const createStreamState = (): StreamRunState => ({
   toolCallNames: new Set<string>(),
 })
 
-const appendStreamedText = async ({
-  text,
-  state,
-  writeEvent,
-}: {
-  text: string
-  state: StreamRunState
-  writeEvent: WriteEventFunction
-}) => {
+const appendStreamedText = async ({ text, state, writeEvent }: { text: string; state: StreamRunState; writeEvent: WriteEventFunction }) => {
   if (text.length === 0) {
     return
   }
@@ -228,7 +209,6 @@ const appendStreamedText = async ({
     state.firstTokenTS = Date.now()
   }
 
-  
   state.finalContent += text
   debugV4('streamed text appended', {
     textLength: text.length,
@@ -285,7 +265,8 @@ const buildToolCallMessage = (output: AIMessageChunk) =>
   })
 
 const isRagChunkArray = (value: unknown): value is RagChunk[] =>
-  Array.isArray(value) && value.every((chunk) => {
+  Array.isArray(value) &&
+  value.every((chunk) => {
     const typedChunk = readUnknownRecord(chunk)
     const metadata = readUnknownRecord(typedChunk?.metadata)
 
@@ -316,20 +297,14 @@ const normalizeToolResult = (result: unknown): NormalizedToolResult => {
 
 const getToolStatusText = ({ toolName, input, status }: { toolName: string; input: V4ToolInput; status: 'started' | 'completed' }) => {
   if (toolName === 'document_search') {
-    return status === 'started'
-      ? `Searching source materials for '${input.query}'`
-      : `Completed source material search for '${input.query}'`
+    return status === 'started' ? `Searching source materials for '${input.query}'` : `Completed source material search for '${input.query}'`
   }
 
   if (toolName === 'weather') {
-    return status === 'started'
-      ? `Checking weather for '${input.query}'`
-      : `Completed weather lookup for '${input.query}'`
+    return status === 'started' ? `Checking weather for '${input.query}'` : `Completed weather lookup for '${input.query}'`
   }
 
-  return status === 'started'
-    ? `Calling ${toolName}`
-    : `Completed ${toolName}`
+  return status === 'started' ? `Calling ${toolName}` : `Completed ${toolName}`
 }
 
 const executeToolCalls = async ({
@@ -371,7 +346,7 @@ const executeToolCalls = async ({
       input: toolCall.args,
     })
 
-    //Invokes the tool and adds the result back as a regular message. 
+    //Invokes the tool and adds the result back as a regular message.
     //Result is later seen by the agent as part of the conversation
     const result = await tool.invoke(toolCall)
     const { content, artifact } = normalizeToolResult(result)
@@ -403,13 +378,7 @@ const executeToolCalls = async ({
   }
 }
 
-const finalizeStreamResult = async ({
-  state,
-  writeEvent,
-}: {
-  state: StreamRunState
-  writeEvent: WriteEventFunction
-}): Promise<AgentChatResult> => {
+const finalizeStreamResult = async ({ state, writeEvent }: { state: StreamRunState; writeEvent: WriteEventFunction }): Promise<AgentChatResult> => {
   if (!state.firstTokenTS && state.finalContent.length > 0) {
     state.firstTokenTS = Date.now()
     await writeEvent({
@@ -434,10 +403,7 @@ const finalizeStreamResult = async ({
     tokenCount: outputTokenCount ?? 0,
     inputTokenCount: state.latestUsage?.inputTokens ?? 0,
     timeToFirstToken,
-    tokensPerSecond:
-      outputTokenCount !== undefined && tokenStreamingDuration
-        ? (outputTokenCount / tokenStreamingDuration) * 1000
-        : undefined,
+    tokensPerSecond: outputTokenCount !== undefined && tokenStreamingDuration ? (outputTokenCount / tokenStreamingDuration) * 1000 : undefined,
     response: state.finalContent,
     toolCalls: state.toolCallNames.size > 0 ? JSON.stringify(Array.from(state.toolCallNames)) : undefined,
   }
@@ -474,7 +440,7 @@ export const streamAgentChat = async ({
   })
 
   const baseModel = getAgentModel(model, temperature)
-  const firstTurnModel = tools.length > 0 ? (baseModel as any).bindTools(tools) as ChatModel : baseModel
+  const firstTurnModel = tools.length > 0 ? ((baseModel as any).bindTools(tools) as ChatModel) : baseModel
   const firstTurnMessages = systemPrompt.length > 0 ? [new SystemMessage(systemPrompt), ...messages] : messages
 
   const firstTurn = await streamModelTurn({
@@ -497,10 +463,7 @@ export const streamAgentChat = async ({
     return finalizeStreamResult({ state, writeEvent })
   }
 
-  const secondTurnMessages: BaseMessageLike[] = [
-    ...firstTurnMessages,
-    buildToolCallMessage(firstTurn.fullOutput),
-  ]
+  const secondTurnMessages: BaseMessageLike[] = [...firstTurnMessages, buildToolCallMessage(firstTurn.fullOutput)]
 
   await executeToolCalls({
     messages: secondTurnMessages,

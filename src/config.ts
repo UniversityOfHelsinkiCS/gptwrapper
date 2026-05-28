@@ -48,13 +48,13 @@ export const validModels: ModelConfig[] = [
   {
     name: 'gpt-4o-mini',
     context: 128_000,
-    streamVersion: 'v3',
+    streamVersion: 'v4',
     provider: ModelProvider.Azure,
   },
   {
     name: 'gpt-5.1',
     context: 128_000,
-    streamVersion: 'v3',
+    streamVersion: 'v4',
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',
@@ -70,7 +70,7 @@ export const validModels: ModelConfig[] = [
   {
     name: 'gemini-2.5-flash',
     context: 128_000,
-    streamVersion: 'v3',
+    streamVersion: 'v4',
     instructions: formatInstructions,
     provider: ModelProvider.Vertex,
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
@@ -79,7 +79,7 @@ export const validModels: ModelConfig[] = [
   {
     name: 'gemini-2.5-pro',
     context: 128_000,
-    streamVersion: 'v3',
+    streamVersion: 'v4',
     instructions: formatInstructions,
     provider: ModelProvider.Vertex,
     descriptionKey: 'chat:modelDescriptions.premium',
@@ -105,7 +105,7 @@ export const usesStreamVersion = (modelName: ValidModelName, version: string): b
 
 export const isMockModel = (modelName: ValidModelName): boolean => modelName === 'mock'
 
-export const isVertexModel = (modelName: ValidModelName): boolean => vertexModels.some((model) => model.name === normalizeVertexModelName(modelName))
+export const isVertexModel = (modelName: ValidModelName): boolean => vertexModels.some((model) => model.name === modelName)
 
 export const DEFAULT_MODEL = ValidModelNameSchema.parse(process.env.DEFAULT_MODEL || 'gpt-4o-mini')
 
