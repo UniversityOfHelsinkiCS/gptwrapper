@@ -1,13 +1,15 @@
-import { createAgent, type AgentRunStream } from 'langchain'
+import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
+import type { BaseChatModelCallOptions } from '@langchain/core/language_models/chat_models'
+import { AIMessage, AIMessageChunk, ToolMessage, type BaseMessageLike } from '@langchain/core/messages'
+import type { Runnable } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
+import { concat } from '@langchain/core/utils/stream'
 import { getModelConfig, type ValidModelName } from '@config'
 import type { ChatEvent, ChatMessage } from '@shared/chat'
-import type { ChatToolDef, ChatToolOutput } from '@shared/tools'
-import type { User } from '@shared/user'
 import { getAzureChatOpenAI, getVertexModelProvider } from './modelGenerators'
-import { ToolResultStore } from './fileSearchResultsStore'
 
 type WriteEventFunction = (data: ChatEvent) => Promise<void>
+type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
 type AgentUsage = {
   inputTokens?: number
   outputTokens?: number
@@ -31,7 +33,15 @@ type StreamRunState = {
   toolCallNames: Set<string>
 }
 
-type AgentEventRun = AgentRunStream<Record<string, unknown>>
+type V4ToolInput = {
+  query: string
+}
+
+type V4ToolCall = {
+  id?: string
+  name: string
+  args: V4ToolInput
+}
 
 const v4DebugEnabled = process.env.V4_DEBUG === 'true'
 
@@ -73,24 +83,6 @@ const normalizeUsage = (usage: unknown): AgentUsage | undefined => {
   }
 }
 
-const extractMessagesFromAgentUpdate = (update: unknown): Record<string, unknown>[] => {
-  const typedUpdate = readUnknownRecord(update)
-  if (!typedUpdate || !Array.isArray(typedUpdate.messages)) {
-    return []
-  }
-
-  return typedUpdate.messages.flatMap((message) => {
-    const typedMessage = readUnknownRecord(message)
-    return typedMessage ? [typedMessage] : []
-  })
-}
-
-const readMessageBlocks = (message: Record<string, unknown>): unknown =>
-  message.contentBlocks ?? message.content_blocks ?? message.content
-
-const readMessageUsage = (message: Record<string, unknown>): unknown =>
-  message.usage_metadata ?? message.usageMetadata ?? message.usage
-
 const extractAgentText = (content: unknown): string => {
   if (typeof content === 'string') {
     return content
@@ -118,6 +110,20 @@ const extractAgentText = (content: unknown): string => {
   }
 
   return ''
+}
+
+const safelyStreamMessages = async (model: ChatModel, messages: BaseMessageLike[]) => {
+  try {
+    return await model.stream(messages)
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'content_filter') {
+      const innerError = 'error' in error ? (error.error as { message?: string }) : null
+
+      return [new AIMessageChunk({ content: innerError?.message ?? 'The response was blocked by content filtering.' })]
+    }
+
+    throw error
+  }
 }
 
 const getAgentModel = (model: ValidModelName, temperature?: number) => {
@@ -214,124 +220,104 @@ const appendStreamedText = async ({
   })
 }
 
-const hydrateStateFromOutput = ({
-  output,
+const streamModelTurn = async ({
+  model,
+  messages,
   state,
+  writeEvent,
+  emitText,
 }: {
-  output: unknown
+  model: ChatModel
+  messages: BaseMessageLike[]
   state: StreamRunState
+  writeEvent: WriteEventFunction
+  emitText: boolean
 }) => {
-  const typedOutput = readUnknownRecord(output)
-  const outputMessages = typedOutput ? extractMessagesFromAgentUpdate(typedOutput) : []
+  const stream = await safelyStreamMessages(model, messages)
+  let fullOutput: AIMessageChunk | undefined
+  let bufferedText = ''
 
-  for (const message of outputMessages) {
-    const outputText = extractAgentText(readMessageBlocks(message))
+  for await (const chunk of stream) {
+    const chunkText = extractAgentText(chunk.content)
+    bufferedText += chunkText
 
-    if (outputText.length > 0) {
-      state.finalContent = outputText
+    if (emitText && chunkText.length > 0) {
+      await appendStreamedText({ text: chunkText, state, writeEvent })
     }
 
-    state.latestUsage = normalizeUsage(readMessageUsage(message)) ?? state.latestUsage
+    fullOutput = fullOutput ? concat(fullOutput, chunk) : chunk
   }
 
-  if (state.finalContent.length > 0) {
-    debugV4('final content hydrated from run output', {
-      outputTextLength: state.finalContent.length,
-      outputTextPreview: previewText(state.finalContent),
-    })
+  state.latestUsage = normalizeUsage(fullOutput?.usage_metadata) ?? state.latestUsage
+
+  return {
+    bufferedText,
+    fullOutput,
+    toolCalls: (fullOutput?.tool_calls ?? []) as V4ToolCall[],
   }
 }
 
-const streamAgentMessages = async ({
-  run,
+const buildToolCallMessage = (output: AIMessageChunk) =>
+  new AIMessage({
+    content: extractAgentText(output.content),
+    tool_calls: output.tool_calls ?? [],
+  })
+
+const executeToolCalls = async ({
+  messages,
   state,
+  toolCalls,
+  tools,
   writeEvent,
 }: {
-  run: AgentEventRun
+  messages: BaseMessageLike[]
   state: StreamRunState
+  toolCalls: V4ToolCall[]
+  tools: StructuredTool[]
   writeEvent: WriteEventFunction
 }) => {
-  for await (const message of run.messages) {
-    debugV4('agent message stream opened', {
-      node: message.node,
-      namespaceDepth: message.namespace.length,
-    })
+  const toolsByName = Object.fromEntries(tools.map((tool) => [tool.name, tool]))
 
-    for await (const token of message.text) {
-      await appendStreamedText({ text: token, state, writeEvent })
+  for (const toolCall of toolCalls) {
+    const tool = toolsByName[toolCall.name]
+    const callId = toolCall.id ?? toolCall.name
+
+    if (!tool) {
+      continue
     }
 
-    state.latestUsage = normalizeUsage(await message.usage) ?? state.latestUsage
-  }
-}
-
-
-// this is when rag toolcalls happen, to track the progress
-const streamAgentToolCalls = async ({
-  run,
-  state,
-  user,
-  writeEvent,
-}: {
-  run: AgentEventRun
-  state: StreamRunState
-  user: User
-  writeEvent: WriteEventFunction
-}) => {
-  for await (const call of run.toolCalls) {
-    const input = readUnknownRecord(call.input) as ChatToolDef['input'] | undefined
-    const toolName = call.name as ChatToolDef['name']
-
-    state.toolCallNames.add(toolName)
+    state.toolCallNames.add(toolCall.name)
 
     debugV4('tool call streamed', {
-      callId: call.callId,
-      toolName,
-      query: input?.query,
-    })
-
-    if (input) {
-      await writeEvent({
-        type: 'toolCallStatus',
-        callId: call.callId,
-        toolName,
-        text: `Searching for '${input.query}'`,
-        input,
-      })
-    }
-
-    const status = await call.status
-    if (status !== 'finished') {
-      continue
-    }
-
-    const output = await call.output
-    if (!input || !Array.isArray(output)) {
-      continue
-    }
-
-    const artifact = output as ChatToolOutput
-    await ToolResultStore.saveResults(call.callId, artifact, user)
-
-    debugV4('tool call completed', {
-      callId: call.callId,
-      toolName,
-      query: input.query,
-      resultCount: artifact.length,
+      callId,
+      toolName: toolCall.name,
+      query: toolCall.args?.query,
     })
 
     await writeEvent({
       type: 'toolCallStatus',
-      toolName,
-      callId: call.callId,
-      text: `Completed search for '${input.query}'`,
-      input,
-      result: {
-        files: artifact.map((chunk) => ({
-          fileName: chunk.metadata.ragFileName,
-          score: chunk.score,
-        })),
-      },
+      callId,
+      toolName: toolCall.name,
+      text: `Checking weather for '${toolCall.args.query}'`,
+      input: toolCall.args,
+    })
+
+    const result = await tool.invoke(toolCall)
+    const content = typeof result === 'string' ? result : JSON.stringify(result)
+    messages.push(new ToolMessage(content, callId, toolCall.name))
+
+    debugV4('tool call completed', {
+      callId,
+      toolName: toolCall.name,
+      query: toolCall.args.query,
+    })
+
+    await writeEvent({
+      type: 'toolCallStatus',
+      toolName: toolCall.name,
+      callId,
+      text: `Completed weather lookup for '${toolCall.args.query}'`,
+      input: toolCall.args,
     })
   }
 }
@@ -383,7 +369,6 @@ export const streamAgentChat = async ({
   chatMessages,
   promptMessages = [],
   tools = [],
-  user,
   writeEvent,
 }: {
   model: ValidModelName
@@ -392,12 +377,11 @@ export const streamAgentChat = async ({
   chatMessages: ChatMessage[]
   promptMessages?: { role: string; content: unknown }[]
   tools?: StructuredTool[]
-  user: User
   writeEvent: WriteEventFunction
 }): Promise<AgentChatResult> => {
   const modelConfig = getAgentConfig(model)
   const systemPrompt = buildSystemPrompt(modelConfig.instructions, systemMessage)
-  const messages = buildAgentMessages(promptMessages, chatMessages)
+  const messages: BaseMessageLike[] = buildAgentMessages(promptMessages, chatMessages)
   const state = createStreamState()
 
   debugV4('starting agent stream', {
@@ -408,28 +392,50 @@ export const streamAgentChat = async ({
     toolCount: tools.length,
   })
 
-  const agent = createAgent({
-    name: 'chat_completion_1_0',
-    model: getAgentModel(model, temperature) as any,
-    tools,
-    ...(systemPrompt.length > 0 ? { systemPrompt } : {}),
+  const baseModel = getAgentModel(model, temperature)
+  const firstTurnModel = tools.length > 0 ? (baseModel as any).bindTools(tools) as ChatModel : baseModel
+  const firstTurnMessages = systemPrompt.length > 0 ? [{ role: 'system', content: systemPrompt }, ...messages] : messages
+
+  const firstTurn = await streamModelTurn({
+    model: firstTurnModel,
+    messages: firstTurnMessages,
+    state,
+    writeEvent,
+    emitText: false,
   })
 
-  const run = await agent.streamEvents(
-    {
-      messages,
-    },
-    {
-      version: 'v3',
-    },
-  ) as AgentEventRun
+  if (!firstTurn.fullOutput) {
+    return finalizeStreamResult({ state, writeEvent })
+  }
 
-  const [output] = await Promise.all([
-    run.output,
-    streamAgentMessages({ run, state, writeEvent }),
-    streamAgentToolCalls({ run, state, user, writeEvent }),
-  ])
+  if (firstTurn.toolCalls.length === 0) {
+    if (firstTurn.bufferedText.length > 0) {
+      await appendStreamedText({ text: firstTurn.bufferedText, state, writeEvent })
+    }
 
-  hydrateStateFromOutput({ output, state })
+    return finalizeStreamResult({ state, writeEvent })
+  }
+
+  const secondTurnMessages: BaseMessageLike[] = [
+    ...firstTurnMessages,
+    buildToolCallMessage(firstTurn.fullOutput),
+  ]
+
+  await executeToolCalls({
+    messages: secondTurnMessages,
+    state,
+    toolCalls: firstTurn.toolCalls,
+    tools,
+    writeEvent,
+  })
+
+  await streamModelTurn({
+    model: baseModel,
+    messages: secondTurnMessages,
+    state,
+    writeEvent,
+    emitText: true,
+  })
+
   return finalizeStreamResult({ state, writeEvent })
 }

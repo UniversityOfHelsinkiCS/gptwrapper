@@ -2,11 +2,10 @@ import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
 import { FREE_MODEL, inProduction, isMockModel, type ValidModelName } from '../../../config'
 import { PostStreamSchemaV3, type ChatEvent } from '../../../shared/chat'
-import { ChatInstance, Discussion, Enrolment, Prompt, PromptUsage, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
+import { ChatInstance, Discussion, Enrolment, Prompt, PromptUsage, Responsibility, UserChatInstanceUsage } from '../../db/models'
 import { checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { streamAgentChat } from '../../services/langchain/agent'
-import { getMockRagIndexSearchTool } from '../../services/rag/mockSearchTool'
-import { getRagIndexSearchTool } from '../../services/rag/searchTool'
+import { getWeatherTool } from '../../services/weather/weatherTool'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
@@ -148,30 +147,19 @@ const resolvePromptContext = async ({
     return {
       prompt: null,
       systemMessage: generationInfo.promptInfo.systemMessage,
-      tools: [],
+      tools: [getWeatherTool()],
     }
   }
 
-  const prompt = await Prompt.findByPk(generationInfo.promptInfo.id, {
-    ...(course ? { where: { chatInstanceId: course.id } } : {}),
-    include: [
-      {
-        model: RagIndex,
-        as: 'ragIndex',
-        required: false,
-      },
-    ],
+  const prompt = await Prompt.findOne({
+    where: {
+      id: generationInfo.promptInfo.id,
+      ...(course ? { chatInstanceId: course.id } : {}),
+    },
   })
 
   if (!prompt) {
     throw ApplicationError.NotFound('Prompt not found')
-  }
-
-  const tools = prompt.ragIndex ? [generationInfo.model === 'mock' ? getMockRagIndexSearchTool(prompt.ragIndex) : getRagIndexSearchTool(prompt.ragIndex)] : []
-
-  if (prompt.ragIndex) {
-    res.locals.chatCompletionMeta.ragIndexId = prompt.ragIndex.id
-    res.locals.chatCompletionMeta.ragIndex = prompt.ragIndex.metadata.name
   }
 
   res.locals.chatCompletionMeta.promptId = prompt.id
@@ -180,7 +168,7 @@ const resolvePromptContext = async ({
   return {
     prompt,
     systemMessage: prompt.systemMessage,
-    tools,
+    tools: [getWeatherTool()],
   }
 }
 
@@ -295,7 +283,6 @@ const handleStreamRequest = async (request: express.Request, res: express.Respon
   const { isFreeModel } = ensureUsageAllowed({ user: req.user, course, model: generationInfo.model })
 
   const result = await streamAgentChat({
-    user: req.user,
     chatMessages: options.chatMessages,
     systemMessage,
     promptMessages: prompt?.messages,

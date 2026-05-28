@@ -1,5 +1,4 @@
 import z from 'zod/v4'
-import type { ChatToolDef } from './tools'
 import { ValidModelNameSchema } from '../config'
 import { WarningTypes } from './aiApi'
 
@@ -11,17 +10,26 @@ export type WritingEvent = {
   text: string
 }
 
+export type ToolCallInput = {
+  query?: string
+  [key: string]: unknown
+}
+
+export type ToolCallResult = {
+  files: { fileName: string; score?: number }[]
+}
+
 export type ToolCallStatusEvent = {
   type: 'toolCallStatus'
   callId: string
-  toolName: ChatToolDef['name']
+  toolName: string
   text: string
-  input?: ChatToolDef['input']
+  input?: ToolCallInput
 }
 
 export type ToolCallResultEvent = ToolCallStatusEvent & {
-  input: ChatToolDef['input']
-  result: ChatToolDef['result']
+  input: ToolCallInput
+  result: ToolCallResult
 }
 
 export type ErrorEvent = {
