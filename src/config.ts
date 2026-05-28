@@ -23,29 +23,23 @@ Wrap code in triple backticks with the correct language tag (js, ts, py, etc.) s
 `
 
 export enum ModelProvider {
-  Azure = "azure",
-  Vertex = "vertex",
-  Mock = "mock"
+  Azure = 'azure',
+  Vertex = 'vertex',
+  Mock = 'mock',
 }
 
-export type ModelDescriptionKey =
-  | 'chat:modelDescriptions.premium'
-  | 'chat:modelDescriptions.balanced'
-  | 'chat:modelDescriptions.fastAndCheap'
+export type ModelDescriptionKey = 'chat:modelDescriptions.premium' | 'chat:modelDescriptions.balanced' | 'chat:modelDescriptions.fastAndCheap'
 
 export type ModelConfig = {
-  name: string,
-  context: number,
-  provider: ModelProvider,
-  streamVersion: string,
-  timeoutOverride?: number,
-  instructions?: string,
-  temperature?: number,
-  descriptionKey?: ModelDescriptionKey,
+  name: string
+  context: number
+  provider: ModelProvider
+  streamVersion: string
+  timeoutOverride?: number
+  instructions?: string
+  temperature?: number
+  descriptionKey?: ModelDescriptionKey
 }
-
-export const normalizeVertexModelName = (modelName: string): string =>
-  modelName
 
 /**
  * name: the acual model name, which is shown to users, configures the model to be used and is also the azure deployment name.
@@ -55,7 +49,7 @@ export const validModels: ModelConfig[] = [
     name: 'gpt-4o-mini',
     context: 128_000,
     streamVersion: 'v3',
-    provider: ModelProvider.Azure
+    provider: ModelProvider.Azure,
   },
   {
     name: 'gpt-5.1',
@@ -76,16 +70,16 @@ export const validModels: ModelConfig[] = [
   {
     name: 'gemini-2.5-flash',
     context: 128_000,
-    streamVersion: 'v4',
+    streamVersion: 'v3',
     instructions: formatInstructions,
     provider: ModelProvider.Vertex,
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     timeoutOverride: 60000,
   },
-   {
+  {
     name: 'gemini-2.5-pro',
     context: 128_000,
-    streamVersion: 'v4',
+    streamVersion: 'v3',
     instructions: formatInstructions,
     provider: ModelProvider.Vertex,
     descriptionKey: 'chat:modelDescriptions.premium',
@@ -95,28 +89,23 @@ export const validModels: ModelConfig[] = [
     name: 'mock',
     context: 1024,
     streamVersion: 'v3',
-    provider: ModelProvider.Mock
+    provider: ModelProvider.Mock,
   },
 ] as const
 
-
 export const vertexModels = validModels.filter((model) => model.provider === ModelProvider.Vertex)
-
 
 export const ValidModelNameSchema = z.union(validModels.map((model) => z.literal(model.name)))
 
 export type ValidModelName = z.infer<typeof ValidModelNameSchema>
 
-export const getModelConfig = (modelName: ValidModelName): ModelConfig | undefined =>
-  validModels.find((model) => model.name === modelName)
+export const getModelConfig = (modelName: ValidModelName): ModelConfig | undefined => validModels.find((model) => model.name === modelName)
 
-export const usesStreamVersion = (modelName: ValidModelName, version: string): boolean =>
-  getModelConfig(modelName)?.streamVersion === version
+export const usesStreamVersion = (modelName: ValidModelName, version: string): boolean => getModelConfig(modelName)?.streamVersion === version
 
 export const isMockModel = (modelName: ValidModelName): boolean => modelName === 'mock'
 
-export const isVertexModel = (modelName: ValidModelName): boolean =>
-  vertexModels.some((model) => model.name === normalizeVertexModelName(modelName))
+export const isVertexModel = (modelName: ValidModelName): boolean => vertexModels.some((model) => model.name === normalizeVertexModelName(modelName))
 
 export const DEFAULT_MODEL = ValidModelNameSchema.parse(process.env.DEFAULT_MODEL || 'gpt-4o-mini')
 
@@ -126,7 +115,7 @@ export const DEFAULT_ASSISTANT_INSTRUCTIONS = '' // 11th August 2025 we decided 
 
 export const DEFAULT_MODEL_TEMPERATURE = 1.0
 
-export const DEFAULT_VERTEX_LOCATION = "europe-north1" // Hamina, Finland
+export const DEFAULT_VERTEX_LOCATION = 'europe-north1' // Hamina, Finland
 
 export const supportEmail = 'opetusteknologia@helsinki.fi'
 
