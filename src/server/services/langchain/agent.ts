@@ -6,6 +6,7 @@ import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
 import { getModelConfig, type ValidModelName } from '@config'
 import type { ChatEvent, ChatMessage } from '@shared/chat'
+import type { RagChunk } from '@shared/rag'
 import { getAzureChatOpenAI, getVertexModelProvider } from './modelGenerators'
 
 type WriteEventFunction = (data: ChatEvent) => Promise<void>
@@ -41,6 +42,11 @@ type V4ToolCall = {
   id?: string
   name: string
   args: V4ToolInput
+}
+
+type NormalizedToolResult = {
+  content: string
+  artifact?: unknown
 }
 
 const v4DebugEnabled = process.env.V4_DEBUG === 'true'
@@ -278,6 +284,54 @@ const buildToolCallMessage = (output: AIMessageChunk) =>
     tool_calls: output.tool_calls ?? [],
   })
 
+const isRagChunkArray = (value: unknown): value is RagChunk[] =>
+  Array.isArray(value) && value.every((chunk) => {
+    const typedChunk = readUnknownRecord(chunk)
+    const metadata = readUnknownRecord(typedChunk?.metadata)
+
+    return typeof typedChunk?.content === 'string' && typeof metadata?.ragFileName === 'string'
+  })
+
+const normalizeToolResult = (result: unknown): NormalizedToolResult => {
+  const typedResult = readUnknownRecord(result)
+
+  if (typedResult && typeof typedResult.content === 'string') {
+    return {
+      content: typedResult.content,
+      artifact: typedResult.artifact,
+    }
+  }
+
+  if (Array.isArray(result) && result.length === 2 && typeof result[0] === 'string') {
+    return {
+      content: result[0],
+      artifact: result[1],
+    }
+  }
+
+  return {
+    content: typeof result === 'string' ? result : JSON.stringify(result),
+  }
+}
+
+const getToolStatusText = ({ toolName, input, status }: { toolName: string; input: V4ToolInput; status: 'started' | 'completed' }) => {
+  if (toolName === 'document_search') {
+    return status === 'started'
+      ? `Searching source materials for '${input.query}'`
+      : `Completed source material search for '${input.query}'`
+  }
+
+  if (toolName === 'weather') {
+    return status === 'started'
+      ? `Checking weather for '${input.query}'`
+      : `Completed weather lookup for '${input.query}'`
+  }
+
+  return status === 'started'
+    ? `Calling ${toolName}`
+    : `Completed ${toolName}`
+}
+
 const executeToolCalls = async ({
   messages,
   state,
@@ -313,12 +367,14 @@ const executeToolCalls = async ({
       type: 'toolCallStatus',
       callId,
       toolName: toolCall.name,
-      text: `Checking weather for '${toolCall.args.query}'`,
+      text: getToolStatusText({ toolName: toolCall.name, input: toolCall.args, status: 'started' }),
       input: toolCall.args,
     })
 
+    //Invokes the tool and adds the result back as a regular message. 
+    //Result is later seen by the agent as part of the conversation
     const result = await tool.invoke(toolCall)
-    const content = typeof result === 'string' ? result : JSON.stringify(result)
+    const { content, artifact } = normalizeToolResult(result)
     messages.push(new ToolMessage(content, callId, toolCall.name))
 
     debugV4('tool call completed', {
@@ -331,8 +387,18 @@ const executeToolCalls = async ({
       type: 'toolCallStatus',
       toolName: toolCall.name,
       callId,
-      text: `Completed weather lookup for '${toolCall.args.query}'`,
+      text: getToolStatusText({ toolName: toolCall.name, input: toolCall.args, status: 'completed' }),
       input: toolCall.args,
+      ...(isRagChunkArray(artifact)
+        ? {
+            result: {
+              files: artifact.map((chunk) => ({
+                fileName: chunk.metadata.ragFileName,
+                score: chunk.score,
+              })),
+            },
+          }
+        : {}),
     })
   }
 }

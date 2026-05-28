@@ -2,9 +2,10 @@ import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
 import { FREE_MODEL, inProduction, isMockModel, type ValidModelName } from '../../../config'
 import { PostStreamSchemaV3, type ChatEvent } from '../../../shared/chat'
-import { ChatInstance, Discussion, Enrolment, Prompt, PromptUsage, Responsibility, UserChatInstanceUsage } from '../../db/models'
+import { ChatInstance, Discussion, Enrolment, Prompt, PromptUsage, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
 import { checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { streamAgentChat } from '../../services/langchain/agent'
+import { getV4RagIndexSearchTool } from '../../services/langchain/v4RagTool'
 import { getWeatherTool } from '../../services/weather/weatherTool'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
@@ -34,6 +35,11 @@ type PromptContext = {
   systemMessage: string
   tools: StructuredTool[]
 }
+
+const buildToolsV4 = (ragIndex?: RagIndex | null): StructuredTool[] => [
+  getWeatherTool(),
+  ...(ragIndex ? [getV4RagIndexSearchTool(ragIndex)] : []),
+]
 
 const ensureModelAllowedForUser = (model: ValidModelName, isAdmin: boolean) => {
   if (inProduction && isMockModel(model) && !isAdmin) {
@@ -147,7 +153,7 @@ const resolvePromptContext = async ({
     return {
       prompt: null,
       systemMessage: generationInfo.promptInfo.systemMessage,
-      tools: [getWeatherTool()],
+      tools: buildToolsV4(),
     }
   }
 
@@ -156,6 +162,13 @@ const resolvePromptContext = async ({
       id: generationInfo.promptInfo.id,
       ...(course ? { chatInstanceId: course.id } : {}),
     },
+    include: [
+      {
+        model: RagIndex,
+        as: 'ragIndex',
+        required: false,
+      },
+    ],
   })
 
   if (!prompt) {
@@ -165,10 +178,15 @@ const resolvePromptContext = async ({
   res.locals.chatCompletionMeta.promptId = prompt.id
   res.locals.chatCompletionMeta.promptName = prompt.name
 
+  if (prompt.ragIndex) {
+    res.locals.chatCompletionMeta.ragIndexId = prompt.ragIndex.id
+    res.locals.chatCompletionMeta.ragIndex = prompt.ragIndex.metadata.name
+  }
+
   return {
     prompt,
     systemMessage: prompt.systemMessage,
-    tools: [getWeatherTool()],
+    tools: buildToolsV4(prompt.ragIndex),
   }
 }
 
