@@ -60,7 +60,7 @@ export const validModels: ModelConfig[] = [
   {
     name: 'gpt-5.1',
     context: 128_000,
-    streamVersion: 'v3',
+    streamVersion: 'v4',
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',

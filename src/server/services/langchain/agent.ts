@@ -1,6 +1,6 @@
 import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
 import type { BaseChatModelCallOptions } from '@langchain/core/language_models/chat_models'
-import { AIMessage, AIMessageChunk, ToolMessage, type BaseMessageLike } from '@langchain/core/messages'
+import { AIMessage, AIMessageChunk, HumanMessage, SystemMessage, ToolMessage, type BaseMessageLike } from '@langchain/core/messages'
 import type { Runnable } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
@@ -164,23 +164,38 @@ const buildSystemPrompt = (instructions: string | undefined, systemMessage: stri
     .filter((part) => part.trim().length > 0)
     .join('\n\n')
 
-const prepareMessagesForAgent = (messages: ChatMessage[]): Array<{ role: 'user' | 'assistant'; content: string }> =>
-  messages.map((message) => ({
-    role: message.role,
-    content: typeof message.content === 'string'
+const prepareMessagesForAgent = (messages: ChatMessage[]): BaseMessageLike[] =>
+  messages.map((message) => {
+    const content = typeof message.content === 'string'
       ? message.role === 'user' && message.fileContent
         ? `${message.content} ${message.fileContent}`
         : message.content
-      : 'this is an image, image rendering not supported yet',
-  }))
+      : 'this is an image, image rendering not supported yet'
+
+    return message.role === 'user'
+      ? new HumanMessage(content)
+      : new AIMessage(content)
+  })
 
 const buildAgentMessages = (
   promptMessages: { role: string; content: unknown }[],
   chatMessages: ChatMessage[],
-) => [
+) : BaseMessageLike[] => [
   ...promptMessages
     .filter((message) => typeof message.content === 'string' && (message.role === 'system' || message.role === 'user' || message.role === 'assistant'))
-    .map((message) => ({ role: message.role as 'system' | 'user' | 'assistant', content: message.content as string })),
+    .map((message) => {
+      const content = message.content as string
+
+      if (message.role === 'system') {
+        return new SystemMessage(content)
+      }
+
+      if (message.role === 'user') {
+        return new HumanMessage(content)
+      }
+
+      return new AIMessage(content)
+    }),
   ...prepareMessagesForAgent(chatMessages),
 ]
 
@@ -394,7 +409,7 @@ export const streamAgentChat = async ({
 
   const baseModel = getAgentModel(model, temperature)
   const firstTurnModel = tools.length > 0 ? (baseModel as any).bindTools(tools) as ChatModel : baseModel
-  const firstTurnMessages = systemPrompt.length > 0 ? [{ role: 'system', content: systemPrompt }, ...messages] : messages
+  const firstTurnMessages = systemPrompt.length > 0 ? [new SystemMessage(systemPrompt), ...messages] : messages
 
   const firstTurn = await streamModelTurn({
     model: firstTurnModel,
