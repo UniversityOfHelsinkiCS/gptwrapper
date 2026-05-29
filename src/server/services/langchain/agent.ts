@@ -300,10 +300,6 @@ const getToolStatusText = ({ toolName, input, status }: { toolName: string; inpu
     return status === 'started' ? `Searching source materials for '${input.query}'` : `Completed source material search for '${input.query}'`
   }
 
-  if (toolName === 'weather') {
-    return status === 'started' ? `Checking weather for '${input.query}'` : `Completed weather lookup for '${input.query}'`
-  }
-
   return status === 'started' ? `Calling ${toolName}` : `Completed ${toolName}`
 }
 

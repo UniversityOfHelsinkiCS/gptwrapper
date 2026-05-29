@@ -6,7 +6,6 @@ import { ChatInstance, Discussion, Enrolment, Prompt, PromptUsage, RagIndex, Res
 import { checkCourseUsage, checkUsage, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { streamAgentChat } from '../../services/langchain/agent'
 import { getV4RagIndexSearchTool } from '../../services/langchain/v4RagTool'
-import { getWeatherTool } from '../../services/weather/weatherTool'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
@@ -37,7 +36,6 @@ type PromptContext = {
 }
 
 const buildToolsV4 = (ragIndex?: RagIndex | null): StructuredTool[] => [
-  getWeatherTool(),
   ...(ragIndex ? [getV4RagIndexSearchTool(ragIndex)] : []),
 ]
 
