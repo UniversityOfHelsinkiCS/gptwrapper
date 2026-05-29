@@ -32,6 +32,7 @@ const BasicInfoSection = () => {
             htmlInput: {
               'data-testid': 'prompt-name-input',
               minLength: 3,
+              maxLength: 100,
             },
           }}
           autoFocus
