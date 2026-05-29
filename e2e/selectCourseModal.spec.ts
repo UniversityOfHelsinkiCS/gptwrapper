@@ -26,7 +26,7 @@ test.describe('Select course modal', () => {
   test('empty tab shows message to user', async ({ page }) => {
     await page.getByTestId('view-not-active-courses').click()
     // message source: en.json course.noResults
-    await expect(page.getByText('You do not have courses where CurreChat is enabled')).toBeVisible()
+    await expect(page.getByText('You do not have any ongoing courses')).toBeVisible()
     await expect(page.getByRole('rowheader', { name: TEST_COURSES.OTE_SANDBOX.name.en })).toBeHidden()
     await expect(page.getByRole('rowheader', { name: TEST_COURSES.TOSKA.name.en })).toBeHidden()
     await expect(page.getByRole('rowheader', { name: TEST_COURSES.TEST_COURSE.name.en })).toBeHidden()
