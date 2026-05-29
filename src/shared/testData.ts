@@ -22,6 +22,218 @@ export const getTestUserHeaders = (idx: string, role: 'teacher' | 'student' | 'a
   }
 }
 
+export const SANDBOXES = {
+  teologinen: {
+    id: 'teologinen-sandbox',
+    courseId: 'teologinen-sandbox',
+    name: {
+      en: 'Faculty of Theology',
+      sv: 'Teologiska fakulteten',
+      fi: 'Teologinen tiedekunta',
+    },
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2126-08-31',
+    },
+    code: 'H10',
+    usageLimit: 200_000,
+  },
+  oikeustieteellinen: {
+    id: 'oikeustieteellinen-sandbox',
+    courseId: 'oikeustieteellinen-sandbox',
+    name: {
+      en: 'Faculty of Law',
+      sv: 'Juridiska fakulteten',
+      fi: 'Oikeustieteellinen tiedekunta',
+    },
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2126-08-31',
+    },
+    code: 'H20',
+    usageLimit: 200_000,
+  },
+  laaketieteellinen: {
+    id: 'laaketieteellinen-sandbox',
+    courseId: 'laaketieteellinen-sandbox',
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2126-08-31',
+    },
+    code: 'H30',
+    name: {
+      fi: 'Lääketieteellinen tiedekunta',
+      en: 'Faculty of Medicine',
+      sv: 'Medicinska fakulteten',
+    },
+    usageLimit: 200_000,
+  },
+  humanistinen: {
+    id: 'humanistinen-sandbox',
+    courseId: 'humanistinen-sandbox',
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2126-08-31',
+    },
+    code: 'H40',
+    name: {
+      fi: 'Humanistinen tiedekunta',
+      en: 'Faculty of Arts',
+      sv: 'Humanistiska fakulteten',
+    },
+    usageLimit: 200_000,
+  },
+  matemaattisluonnontieteellinen: {
+    id: 'matemaattisluonnontieteellinen-sandbox',
+    courseId: 'matemaattisluonnontieteellinen-sandbox',
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2126-08-31',
+    },
+    code: 'H50',
+    name: {
+      fi: 'Matemaattis-luonnontieteellinen tiedekunta',
+      en: 'Faculty of Science',
+      sv: 'Matematisk-naturvetenskapliga fakulteten',
+    },
+    usageLimit: 200_000,
+  },
+  farmasia: {
+    id: 'farmasia-sandbox',
+    courseId: 'farmasia-sandbox',
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2126-08-31',
+    },
+    code: 'H55',
+    name: {
+      fi: 'Farmasian tiedekunta',
+      en: 'Faculty of Pharmacy',
+      sv: 'Farmaceutiska fakulteten',
+    },
+    usageLimit: 200_000,
+  },
+  bioYmparistotieteellinen: {
+    id: 'farmasia-sandbox',
+    courseId: 'farmasia-sandbox',
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2126-08-31',
+    },
+    code: 'H57',
+    name: {
+      fi: 'Bio- ja ympäristötieteellinen tiedekunta',
+      en: 'Faculty of Biological and Environmental Sciences',
+      sv: 'Bio- och miljövetenskapliga fakulteten',
+    },
+    usageLimit: 200_000,
+  },
+  kasvatustieteellinen: {
+    id: 'kasvatustieteellinen-sandbox',
+    courseId: 'kasvatustieteellinen-sandbox',
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2126-08-31',
+    },
+    code: 'H60',
+    name: {
+      fi: 'Kasvatustieteellinen tiedekunta',
+      en: 'Faculty of Educational Sciences',
+      sv: 'Pedagogiska fakulteten',
+    },
+    usageLimit: 200_000,
+  },
+  valtiotieteellinen: {
+    id: 'valtiotieteellinen-sandbox',
+    courseId: 'valtiotieteellinen-sandbox',
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2126-08-31',
+    },
+    code: 'H70',
+    name: {
+      fi: 'Valtiotieteellinen tiedekunta',
+      en: 'Faculty of Social Sciences',
+      sv: 'Statsvetenskapliga fakulteten',
+    },
+    usageLimit: 200_000,
+  },
+  sockom: {
+    id: 'sockom-sandbox',
+    courseId: 'sockom-sandbox',
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2126-08-31',
+    },
+    code: 'H74',
+    name: {
+      fi: 'Svenska social- och kommunalhögskolan',
+      en: 'Swedish School of Social Science',
+      sv: 'Svenska social- och kommunalhögskolan',
+    },
+    usageLimit: 200_000,
+  },
+  maatalousMetsatieteellinen: {
+    id: 'maatalousMetsatieteellinen-sandbox',
+    courseId: 'maatalousMetsatieteellinen-sandbox',
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2126-08-31',
+    },
+    code: 'H80',
+    name: {
+      fi: 'Maatalous-metsätieteellinen tiedekunta',
+      en: 'Faculty of Agriculture and Forestry',
+      sv: 'Agrikultur-forstvetenskapliga fakulteten',
+    },
+    usageLimit: 200_000,
+  },
+  elainlaaketieteellinen: {
+    id: 'elainlaaketieteellinen-sandbox',
+    courseId: 'elainlaaketieteellinen-sandbox',
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2126-08-31',
+    },
+    code: 'H90',
+    name: {
+      fi: 'Eläinlääketieteellinen tiedekunta',
+      en: 'Faculty of Veterinary Medicine',
+      sv: 'Veterinärmedicinska fakulteten',
+    },
+    usageLimit: 200_000,
+  },
+  kielikeskus: {
+    id: 'kielikeskus-sandbox',
+    courseId: 'kielikeskus-sandbox',
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2126-08-31',
+    },
+    code: 'H906',
+    name: {
+      fi: 'Kielikeskus',
+      en: 'Language Centre',
+      sv: 'Språkcentrum',
+    },
+    usageLimit: 200_000,
+  },
+  misc: {
+    id: 'misc-sandbox',
+    courseId: 'misc-sandbox',
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2126-08-31',
+    },
+    code: 'H906',
+    name: {
+      fi: 'CurreChat hiekkalaatikko',
+      en: 'CurreChat sandbox',
+      sv: 'CurreChat sandbox',
+    },
+    usageLimit: 200_000,
+  },
+}
 export const TEST_COURSES = {
   OTE_SANDBOX: {
     id: 'sandbox',
