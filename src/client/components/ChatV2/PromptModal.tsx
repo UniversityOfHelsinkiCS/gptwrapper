@@ -34,6 +34,7 @@ const PromptModal = () => {
   const previewPrompt = previewPrompts[tab]
   const setPreviewPrompt = (prompt: PromptType | undefined) => setPreviewPrompts((prev) => ({ ...prev, [tab]: prompt }))
   const [isEditing, setIsEditing] = useState(false)
+  const [hoveredPromptId, setHoveredPromptId] = useState<string | null>(null)
 
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
@@ -107,8 +108,11 @@ const PromptModal = () => {
     <ListItemButton
       key={prompt.id}
       selected={previewPrompt?.id === prompt.id}
-      onMouseOver={() => {
-        if (!isMobile && !isEditing) setPreviewPrompt(prompt)
+      onMouseEnter={() => {
+        if (!isMobile) setHoveredPromptId(prompt.id)
+      }}
+      onMouseLeave={() => {
+        if (!isMobile) setHoveredPromptId((current) => (current === prompt.id ? null : current))
       }}
       onClick={() => {
         setPreviewPrompt(prompt)
@@ -118,6 +122,8 @@ const PromptModal = () => {
         borderRadius: '8px',
         mb: 0.5,
         py: 1,
+        height: '50px',
+        minHeight: '50px',
         '&.Mui-selected': {
           backgroundColor: 'action.selected',
           borderLeft: '3px solid',
@@ -126,25 +132,22 @@ const PromptModal = () => {
       }}
       data-testid={`prompt-row-${prompt.name}`}
     >
-      <ListItemText
-        primary={prompt.name}
-        slotProps={{
-          primary: {
-            sx: {
-              display: '-webkit-box',
-              WebkitBoxOrient: 'vertical',
-              WebkitLineClamp: 2,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'normal',
-              wordBreak: 'break-word',
-              overflowWrap: 'anywhere',
-            },
-          },
-        }}
-      />
+      <ListItemText primary={prompt.name} slotProps={{ primary: { fontWeight: previewPrompt?.id === prompt.id ? 'bold' : 'normal', noWrap: true } } } />
       {prompt.id === activePrompt?.id && <CheckCircleOutlineIcon fontSize="small" sx={{ ml: 1, color: 'text.primary' }} />}
-    
+      {hoveredPromptId === prompt.id && prompt.id !== activePrompt?.id && (
+        <BlueButton
+          size="small"
+          variant="contained"
+          data-testid="change-to-prompt-button"
+          onClick={(e) => {
+            e.stopPropagation()
+            handleSelect(prompt)
+          }}
+          sx={{ ml: 1, whiteSpace: 'nowrap' }}
+        >
+          {t('settings:choosePrompt')}
+        </BlueButton>
+      )}
     </ListItemButton>
   )
 
@@ -292,9 +295,6 @@ const PromptModal = () => {
                       {t('prompt:backToPromptList')}
                     </OutlineButtonBlue>
                   )}
-                  <BlueButton data-testid="change-to-prompt-button" variant="contained" onClick={() => handleSelect(previewPrompt)}>
-                    {t('settings:choosePrompt')}
-                  </BlueButton>
                 </Box>
               </Box>
             ) : (
