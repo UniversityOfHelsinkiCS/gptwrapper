@@ -38,7 +38,7 @@ services:
     restart: always
     environment:
       - ADMINER_DEFAULT_SERVER=db
-      - ADMINER_DESIGN=dracula
+      - ADMINER_DESIGN=win98
     ports:
       - 8080:8080
     container_name: gptwrapper_admirer
