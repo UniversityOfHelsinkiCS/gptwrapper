@@ -1,9 +1,9 @@
 import type { InferCreationAttributes } from 'sequelize'
 import type { CourseUnit } from '../../types'
-import { TEST_COURSES } from '../../../shared/testData'
+import { TEST_COURSES, SANDBOXES } from '../../../shared/testData'
 import { ChatInstance } from '../models'
 
-const chatInstances = Object.values(TEST_COURSES).map((course) => ({
+const chatInstances = Object.values({ ...TEST_COURSES, ...SANDBOXES }).map((course) => ({
   id: course.id,
   name: course.name,
   description: '',

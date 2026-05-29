@@ -22,6 +22,8 @@ export const getTestUserHeaders = (idx: string, role: 'teacher' | 'student' | 'a
   }
 }
 
+//TODO: iamGroups for misc sandbox
+
 export const SANDBOXES = {
   teologinen: {
     id: 'teologinen-sandbox',
@@ -37,6 +39,7 @@ export const SANDBOXES = {
     },
     code: 'H10',
     usageLimit: 200_000,
+    iamGroups: ['hy-ttdk-allstaff', 'hy-ttdk-employees'],
   },
   oikeustieteellinen: {
     id: 'oikeustieteellinen-sandbox',
@@ -52,6 +55,7 @@ export const SANDBOXES = {
     },
     code: 'H20',
     usageLimit: 200_000,
+    iamGroups: ['hy-oiktdk-allstaff', 'hy-oiktdk-employees'],
   },
   laaketieteellinen: {
     id: 'laaketieteellinen-sandbox',
@@ -67,6 +71,7 @@ export const SANDBOXES = {
       sv: 'Medicinska fakulteten',
     },
     usageLimit: 200_000,
+    iamGroups: ['hy-ltdk-allstaff', 'hy-ltdk-employees'],
   },
   humanistinen: {
     id: 'humanistinen-sandbox',
@@ -82,6 +87,7 @@ export const SANDBOXES = {
       sv: 'Humanistiska fakulteten',
     },
     usageLimit: 200_000,
+    iamGroups: ['hy-humtdk-allstaff', 'hy-humtdk-employees'],
   },
   matemaattisluonnontieteellinen: {
     id: 'matemaattisluonnontieteellinen-sandbox',
@@ -97,6 +103,7 @@ export const SANDBOXES = {
       sv: 'Matematisk-naturvetenskapliga fakulteten',
     },
     usageLimit: 200_000,
+    iamGroups: ['hy-mltdk-allstaff', 'hy-mltdk-employees'],
   },
   farmasia: {
     id: 'farmasia-sandbox',
@@ -112,10 +119,11 @@ export const SANDBOXES = {
       sv: 'Farmaceutiska fakulteten',
     },
     usageLimit: 200_000,
+    iamGroups: ['hy-ftdk-allstaff', 'hy-ftdk-employees'],
   },
   bioYmparistotieteellinen: {
-    id: 'farmasia-sandbox',
-    courseId: 'farmasia-sandbox',
+    id: 'bioYmparistotieteellinen-sandbox',
+    courseId: 'bioYmparistotieteellinen-sandbox',
     activityPeriod: {
       startDate: '2024-09-01',
       endDate: '2126-08-31',
@@ -127,6 +135,7 @@ export const SANDBOXES = {
       sv: 'Bio- och miljövetenskapliga fakulteten',
     },
     usageLimit: 200_000,
+    iamGroups: ['hy-bytdk-allstaff', 'hy-bytdk-employees'],
   },
   kasvatustieteellinen: {
     id: 'kasvatustieteellinen-sandbox',
@@ -142,6 +151,7 @@ export const SANDBOXES = {
       sv: 'Pedagogiska fakulteten',
     },
     usageLimit: 200_000,
+    iamGroups: ['hy-ktdk-allstaff', 'hy-ktdk-employees'],
   },
   valtiotieteellinen: {
     id: 'valtiotieteellinen-sandbox',
@@ -157,6 +167,7 @@ export const SANDBOXES = {
       sv: 'Statsvetenskapliga fakulteten',
     },
     usageLimit: 200_000,
+    iamGroups: ['hy-valttdk-allstaff', 'hy-valttdk-employees'],
   },
   sockom: {
     id: 'sockom-sandbox',
@@ -172,6 +183,7 @@ export const SANDBOXES = {
       sv: 'Svenska social- och kommunalhögskolan',
     },
     usageLimit: 200_000,
+    iamGroups: ['hy-sskh-allstaff', 'hy-sskh-employees'],
   },
   maatalousMetsatieteellinen: {
     id: 'maatalousMetsatieteellinen-sandbox',
@@ -187,6 +199,7 @@ export const SANDBOXES = {
       sv: 'Agrikultur-forstvetenskapliga fakulteten',
     },
     usageLimit: 200_000,
+    iamGroups: ['hy-mmtdk-allstaff', 'hy-mmtdk-employees'],
   },
   elainlaaketieteellinen: {
     id: 'elainlaaketieteellinen-sandbox',
@@ -202,6 +215,7 @@ export const SANDBOXES = {
       sv: 'Veterinärmedicinska fakulteten',
     },
     usageLimit: 200_000,
+    iamGroups: ['hy-eltdk-allstaff', 'hy-eltdk-employees'],
   },
   kielikeskus: {
     id: 'kielikeskus-sandbox',
@@ -217,6 +231,7 @@ export const SANDBOXES = {
       sv: 'Språkcentrum',
     },
     usageLimit: 200_000,
+    iamGroups: ['hy-kielikeskus-employees'],
   },
   misc: {
     id: 'misc-sandbox',
@@ -234,6 +249,7 @@ export const SANDBOXES = {
     usageLimit: 200_000,
   },
 }
+
 export const TEST_COURSES = {
   OTE_SANDBOX: {
     id: 'sandbox',
