@@ -34,7 +34,6 @@ const PromptModal = () => {
   const previewPrompt = previewPrompts[tab]
   const setPreviewPrompt = (prompt: PromptType | undefined) => setPreviewPrompts((prev) => ({ ...prev, [tab]: prompt }))
   const [isEditing, setIsEditing] = useState(false)
-  const [hoveredPromptId, setHoveredPromptId] = useState<string | null>(null)
 
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
@@ -108,12 +107,6 @@ const PromptModal = () => {
     <ListItemButton
       key={prompt.id}
       selected={previewPrompt?.id === prompt.id}
-      onMouseEnter={() => {
-        if (!isMobile) setHoveredPromptId(prompt.id)
-      }}
-      onMouseLeave={() => {
-        if (!isMobile) setHoveredPromptId((current) => (current === prompt.id ? null : current))
-      }}
       onClick={() => {
         setPreviewPrompt(prompt)
         setIsEditing(false)
@@ -129,25 +122,38 @@ const PromptModal = () => {
           borderLeft: '3px solid',
           borderLeftColor: 'primary.main',
         },
+        '& .change-prompt-button': {
+          opacity: 0,
+          transform: 'translateX(4px)',
+          visibility: 'hidden',
+          pointerEvents: 'none',
+          transition: 'opacity 180ms ease, transform 180ms ease, visibility 0s linear 180ms',
+        },
+        '&:hover .change-prompt-button:not(.change-prompt-button--active)': {
+          opacity: 1,
+          transform: 'translateX(0)',
+          visibility: 'visible',
+          pointerEvents: 'auto',
+          transitionDelay: '300ms',
+        },
       }}
       data-testid={`prompt-row-${prompt.name}`}
     >
       <ListItemText primary={prompt.name} slotProps={{ primary: { fontWeight: previewPrompt?.id === prompt.id ? 'bold' : 'normal', noWrap: true } } } />
       {prompt.id === activePrompt?.id && <CheckCircleOutlineIcon fontSize="small" sx={{ ml: 1, color: 'text.primary' }} />}
-      {hoveredPromptId === prompt.id && prompt.id !== activePrompt?.id && (
-        <BlueButton
-          size="small"
-          variant="contained"
-          data-testid="change-to-prompt-button"
-          onClick={(e) => {
-            e.stopPropagation()
-            handleSelect(prompt)
-          }}
-          sx={{ ml: 1, whiteSpace: 'nowrap' }}
-        >
-          {t('settings:choosePrompt')}
-        </BlueButton>
-      )}
+      <BlueButton
+        size="small"
+        variant="contained"
+        data-testid="change-to-prompt-button"
+        className={prompt.id === activePrompt?.id ? 'change-prompt-button change-prompt-button--active' : 'change-prompt-button'}
+        onClick={(e) => {
+          e.stopPropagation()
+          handleSelect(prompt)
+        }}
+        sx={{ ml: 1, whiteSpace: 'nowrap' }}
+      >
+        {t('settings:choosePrompt')}
+      </BlueButton>
     </ListItemButton>
   )
 
