@@ -295,6 +295,9 @@ const PromptModal = () => {
                       {t('prompt:backToPromptList')}
                     </OutlineButtonBlue>
                   )}
+                  <BlueButton data-testid="change-to-prompt-button" variant="contained" onClick={() => handleSelect(previewPrompt)}>
+                    {t('settings:choosePrompt')}
+                  </BlueButton>
                 </Box>
               </Box>
             ) : (
