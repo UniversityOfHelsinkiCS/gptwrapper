@@ -39,7 +39,7 @@ Prompt.init(
       defaultValue: DataTypes.UUIDV4,
     },
     name: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
     },
     type: {

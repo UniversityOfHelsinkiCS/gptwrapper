@@ -34,6 +34,7 @@ const PromptModal = () => {
   const previewPrompt = previewPrompts[tab]
   const setPreviewPrompt = (prompt: PromptType | undefined) => setPreviewPrompts((prev) => ({ ...prev, [tab]: prompt }))
   const [isEditing, setIsEditing] = useState(false)
+  const [hoveredPromptId, setHoveredPromptId] = useState<string | null>(null)
 
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
@@ -107,6 +108,12 @@ const PromptModal = () => {
     <ListItemButton
       key={prompt.id}
       selected={previewPrompt?.id === prompt.id}
+      onMouseEnter={() => {
+        if (!isMobile) setHoveredPromptId(prompt.id)
+      }}
+      onMouseLeave={() => {
+        if (!isMobile) setHoveredPromptId((current) => (current === prompt.id ? null : current))
+      }}
       onClick={() => {
         setPreviewPrompt(prompt)
         setIsEditing(false)
@@ -115,6 +122,8 @@ const PromptModal = () => {
         borderRadius: '8px',
         mb: 0.5,
         py: 1,
+        height: '50px',
+        minHeight: '50px',
         '&.Mui-selected': {
           backgroundColor: 'action.selected',
           borderLeft: '3px solid',
@@ -123,9 +132,9 @@ const PromptModal = () => {
       }}
       data-testid={`prompt-row-${prompt.name}`}
     >
-      <ListItemText primary={prompt.name} primaryTypographyProps={{ fontWeight: previewPrompt?.id === prompt.id ? 'bold' : 'normal', noWrap: true }} />
+      <ListItemText primary={prompt.name} slotProps={{ primary: { fontWeight: previewPrompt?.id === prompt.id ? 'bold' : 'normal', noWrap: true } } } />
       {prompt.id === activePrompt?.id && <CheckCircleOutlineIcon fontSize="small" sx={{ ml: 1, color: 'text.primary' }} />}
-      {previewPrompt?.id === prompt.id && prompt.id !== activePrompt?.id && (
+      {hoveredPromptId === prompt.id && prompt.id !== activePrompt?.id && (
         <BlueButton
           size="small"
           variant="contained"
@@ -165,7 +174,7 @@ const PromptModal = () => {
         <Box
           sx={{
             display: !isMobile || !previewPrompt ? 'flex' : 'none',
-            width: !isMobile ? 280 : '90vw',
+            width: !isMobile ? 310 : '90vw',
             flexDirection: 'column',
           }}
         >
@@ -212,7 +221,7 @@ const PromptModal = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
                 <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                    <Typography variant="h4" fontWeight="bold" data-testid={`prompt-preview-title-for-${previewPrompt.name}`}>
+                    <Typography variant="h4" fontWeight="bold" data-testid={`prompt-preview-title-for-${previewPrompt.name}`} sx={{ wordBreak: 'break-word' }}>
                       {previewPrompt.name}
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
@@ -272,24 +281,24 @@ const PromptModal = () => {
                         severity="info"
                       >{`${t(previewPrompt.hidden ? 'prompt:promptHidden' : 'prompt:promptNotHidden')}`}</Alert>
                     )}
-                    <Paper variant="outlined" sx={{ p: 3, mt: 1, backgroundColor: alpha(theme.palette.primary.main, 0.08) }}>
+                    <Paper variant="outlined" sx={{ p: 3, mt: 1, backgroundColor: alpha(theme.palette.primary.main, 0.08), ...!isMobile && { maxHeight: '300px', overflow: 'auto' } }}>
                       <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary', ...monospaceStyle }}>
                         {previewPrompt.hidden && !amongResponsibles ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
                       </Typography>
                     </Paper>
                   </Box>
                 </Paper>
-                {isMobile && (
-                  <Box sx={{ mt: 'auto', pt: 2, display: 'flex', justifyContent: 'space-between' }}>
+                <Box sx={{ pt: 2, display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
+                  {isMobile && (
                     <OutlineButtonBlue onClick={() => handleMobileBackToPromptList()}>
                       <ArrowBackIcon />
                       {t('prompt:backToPromptList')}
                     </OutlineButtonBlue>
-                    <BlueButton data-testid="change-to-prompt-button" variant="contained" onClick={() => handleSelect(previewPrompt)}>
-                      {t('settings:choosePrompt')}
-                    </BlueButton>
-                  </Box>
-                )}
+                  )}
+                  <BlueButton data-testid="change-to-prompt-button" variant="contained" onClick={() => handleSelect(previewPrompt)}>
+                    {t('settings:choosePrompt')}
+                  </BlueButton>
+                </Box>
               </Box>
             ) : (
               <Box sx={{ display: 'flex', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>

@@ -28,10 +28,16 @@ export const SuperSpeedLoginAs = () => {
 
   return (
     <Dialog
-      fullWidth
-      maxWidth="md"
       open={open}
       onClose={() => setOpen(false)}
+      slotProps={{
+        paper: {
+            sx: {
+            minWidth: '50vw',
+            maxWidth: '70vw',
+          },
+        },
+      }}
       aria-labelledby="super-speed-login-dialog-title"
       aria-describedby="super-speed-login-dialog-description"
     >
@@ -43,8 +49,24 @@ export const SuperSpeedLoginAs = () => {
           </Typography>
         </Box>
       </DialogTitle>
-      <DialogContent>
-        <UserSearch />
+      <DialogContent
+        sx={{
+          maxHeight: '70vh',
+          overflowY: 'auto',
+        }}
+      >
+        <Box
+          sx={{
+            width: '100%',
+            overflowX: 'auto',
+            '& .MuiTableContainer-root': {
+              maxHeight: '52vh',
+              overflow: 'auto',
+            },
+          }}
+        >
+          <UserSearch />
+        </Box>
       </DialogContent>
     </Dialog>
   )

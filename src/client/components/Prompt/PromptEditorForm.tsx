@@ -32,6 +32,7 @@ const BasicInfoSection = () => {
             htmlInput: {
               'data-testid': 'prompt-name-input',
               minLength: 3,
+              maxLength: 100,
             },
           }}
           autoFocus
@@ -55,7 +56,6 @@ const BasicInfoSection = () => {
           }}
           value={form.userInstructions}
           onChange={(e) => setForm((prev) => ({ ...prev, userInstructions: e.target.value }))}
-          placeholder={t('prompt:defaultChatInstructions')}
           fullWidth
           multiline
           minRows={type === 'PERSONAL' ? 1 : 4}

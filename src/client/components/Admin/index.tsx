@@ -1,6 +1,6 @@
 import { Container, Box, Tab, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import { Route, Routes, Link, Navigate, useNavigate } from 'react-router-dom'
+import { Route, Routes, Link, Navigate } from 'react-router-dom'
 
 import { format } from 'date-fns'
 import ChatInstances from './ChatInstances'
@@ -12,7 +12,6 @@ import { RouterTabs } from '../common/RouterTabs'
 import Feedbacks from './Feedbacks'
 import Testing from './Testing'
 import NotificationManagement from './NotificationManagement'
-import { BlueButton } from '../ChatV2/general/Buttons'
 
 /**
  * React-router compatible lazy loaded component for Admin page
@@ -21,17 +20,12 @@ import { BlueButton } from '../ChatV2/general/Buttons'
 export function Component() {
   const { t } = useTranslation()
   const { user } = useCurrentUser()
-  const navigate = useNavigate()
   if (!user) return null
 
   const lastRestart = format(new Date(user?.lastRestart), 'dd/MM/yyyy HH.mm.ss')
 
   return (
     <Container sx={{ mt: '8rem', mb: '10rem', position: 'relative' }} maxWidth="xl">
-      <Box sx={{ position: 'absolute', top: '-7rem', left: 10 }}>
-        <BlueButton onClick={() => navigate('/general')}>{t('common:backToChat')}</BlueButton>
-      </Box>
-
       <Box m={2}>
         <Typography variant="body1">
           {t('admin:lastUpdate')}

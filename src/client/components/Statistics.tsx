@@ -35,7 +35,6 @@ import useCurrentUser from '../hooks/useCurrentUser'
 import useStatistics from '../hooks/useStatistics'
 import faculties from '../locales/faculties.json'
 import programme from '../locales/programme.json'
-import { BlueButton } from './ChatV2/general/Buttons'
 
 /**
  * React-router compatible lazy loaded component for Statistics page
@@ -304,10 +303,6 @@ export function Component() {
   }
   return (
     <Container sx={{ mt: '6rem', mb: '10rem', position: 'relative' }} maxWidth="xl">
-      <Box sx={{ position: 'absolute', top: '-5rem', left: 10 }}>
-        <BlueButton onClick={() => navigate('/general')}>{t('common:backToChat')}</BlueButton>
-      </Box>
-
       <Box sx={{ mb: 2 }}>
         <Tabs
           value={activeTab}
