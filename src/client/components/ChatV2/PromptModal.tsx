@@ -20,6 +20,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { BlueButton, OutlineButtonBlue } from './general/Buttons.tsx'
 import ConfirmDialog from './general/ConfirmDialog'
 import { monospaceStyle } from '../../theme'
+import BookmarksIcon from '@mui/icons-material/Bookmarks'
+import { useCourseRagIndices } from '../../hooks/useRagIndices'
 
 const PromptModal = () => {
   const theme = useTheme()
@@ -39,6 +41,9 @@ const PromptModal = () => {
   const { data: chatInstance } = useCourse(courseId)
 
   const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
+
+  const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
+  const rag = ragIndices?.find((r) => r.id === previewPrompt?.ragIndexId)
 
   const onDone = () => {
     setIsEditing(false)
@@ -112,11 +117,13 @@ const PromptModal = () => {
         setIsEditing(false)
       }}
       sx={{
+        position: 'relative',
         borderRadius: '8px',
         mb: 0.5,
         py: 1,
         height: '50px',
         minHeight: '50px',
+        pr: prompt.id === activePrompt?.id ? 10 : 0.5,
         '&.Mui-selected': {
           backgroundColor: 'action.selected',
           borderLeft: '3px solid',
@@ -129,31 +136,47 @@ const PromptModal = () => {
           pointerEvents: 'none',
           transition: 'opacity 180ms ease, transform 180ms ease, visibility 0s linear 180ms',
         },
+        '& .prompt-list-item__text': {
+          transition: 'padding-right 180ms ease',
+          transitionDelay: '200ms',
+        },
         '&:hover .change-prompt-button:not(.change-prompt-button--active)': {
           opacity: 1,
           transform: 'translateX(0)',
           visibility: 'visible',
           pointerEvents: 'auto',
-          transitionDelay: '300ms',
+          transitionDelay: '200ms',
+        },
+        '&:hover .prompt-list-item__text': {
+          pr: prompt.id === activePrompt?.id ? 3 : 10,
         },
       }}
       data-testid={`prompt-row-${prompt.name}`}
     >
-      <ListItemText primary={prompt.name} slotProps={{ primary: { fontWeight: previewPrompt?.id === prompt.id ? 'bold' : 'normal', noWrap: true } } } />
-      {prompt.id === activePrompt?.id && <CheckCircleOutlineIcon fontSize="small" sx={{ ml: 1, color: 'text.primary' }} />}
-      <BlueButton
-        size="small"
-        variant="contained"
-        data-testid="change-to-prompt-button"
-        className={prompt.id === activePrompt?.id ? 'change-prompt-button change-prompt-button--active' : 'change-prompt-button'}
-        onClick={(e) => {
-          e.stopPropagation()
-          handleSelect(prompt)
-        }}
-        sx={{ ml: 1, whiteSpace: 'nowrap' }}
-      >
-        {t('settings:choosePrompt')}
-      </BlueButton>
+      <ListItemText
+        className="prompt-list-item__text"
+        primary={prompt.name}
+        slotProps={{ primary: { noWrap: true } }}
+        sx={{ minWidth: 0 }}
+      />
+      {prompt.id === activePrompt?.id && (
+        <CheckCircleOutlineIcon fontSize="small" sx={{ position: 'absolute', right: 16, color: 'text.primary' }} />
+      )}
+      {prompt.id !== activePrompt?.id && (
+        <BlueButton
+          size="small"
+          variant="contained"
+          data-testid="change-to-prompt-button"
+          className={prompt.id === activePrompt?.id ? 'change-prompt-button change-prompt-button--active' : 'change-prompt-button'}
+          onClick={(e) => {
+            e.stopPropagation()
+            handleSelect(prompt)
+          }}
+          sx={{ position: 'absolute', right: 8, whiteSpace: 'nowrap' }}
+        >
+          {t('settings:choosePrompt')}
+        </BlueButton>
+      )}
     </ListItemButton>
   )
 
@@ -259,7 +282,6 @@ const PromptModal = () => {
                       )}
                     </Box>
                   </Box>
-
                   {previewPrompt.userInstructions && (
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
@@ -267,15 +289,15 @@ const PromptModal = () => {
                       </Typography>
                     </Box>
                   )}
-
+                  <Divider sx={{ my: 3 }} />
                   <Box sx={{ mb: 3 }}>
-                    <Box gap={1} sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb:3 }}>
                       <PsychologyIcon color="secondary" />
                       <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
                         {t('prompt:promptModelSettings')}
                       </Typography>
                     </Box>
-                    {!isPersonalTab && (
+                    {!isPersonalTab && (amongResponsibles || user?.isAdmin) && (
                       <Alert
                         icon={
                           previewPrompt.hidden ? (
@@ -287,12 +309,42 @@ const PromptModal = () => {
                         severity="info"
                       >{`${t(previewPrompt.hidden ? 'prompt:promptHidden' : 'prompt:promptNotHidden')}`}</Alert>
                     )}
-                    <Paper variant="outlined" sx={{ p: 3, mt: 1, backgroundColor: alpha(theme.palette.primary.main, 0.08), ...!isMobile && { maxHeight: '300px', overflow: 'auto' } }}>
+                    <Paper variant="outlined" sx={{ p: 3, mt: 3, backgroundColor: alpha(theme.palette.primary.main, 0.08), ...!isMobile && { maxHeight: '300px', overflow: 'auto' } }}>
                       <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary', ...monospaceStyle }}>
                         {previewPrompt.hidden && !amongResponsibles ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
                       </Typography>
                     </Paper>
                   </Box>
+                  <Divider sx={{ my: 3 }} />
+                    <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb:3 }}>
+                      <BookmarksIcon color="secondary" />
+                      <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
+                          {t('prompt:promptSourceMaterialData')}
+                      </Typography>
+                    </Box>
+                    {!isPersonalTab && (amongResponsibles || user?.isAdmin) && (
+                      <Alert
+                        icon={
+                          previewPrompt.ragHidden ? (
+                            <VisibilityOffOutlined color="error" fontSize="inherit" />
+                          ) : (
+                            <VisibilityOutlined color="success" fontSize="inherit" />
+                          )
+                        }
+                        severity="info"
+                      >{`${t(previewPrompt.ragHidden ? 'prompt:promptHidden' : 'prompt:promptNotHidden')}`}</Alert>
+                    )}
+                  {rag ? (
+                    <Box sx={{ mb: 5, flexDirection: 'column', display: 'flex', gap: 1, mt: 5, border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2, backgroundColor: alpha(theme.palette.primary.main, 0.08) }}>
+                      <Typography variant="body2">
+                        {previewPrompt.ragHidden && !(amongResponsibles || user?.isAdmin) ? t('common:hiddenRag') : rag.metadata.name}
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Box sx={{ mb: 3, ml: 2, mt: 5 }}>
+                      <Typography variant="body2">{t('prompt:noRag')}</Typography> 
+                    </Box>
+                  )}
                 </Paper>
                 <Box sx={{ pt: 2, display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
                   {isMobile && (

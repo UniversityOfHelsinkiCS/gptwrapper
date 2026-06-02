@@ -50,6 +50,7 @@ export type Prompt = {
   systemMessage: string
   messages: ChatMessage[]
   hidden: boolean
+  ragHidden: boolean
   type: PromptType
   createdAt: string
   ragIndexId?: number
@@ -59,7 +60,7 @@ export type PromptInfo = Pick<Prompt, 'name' | 'systemMessage' | 'hidden' | 'typ
   userInstructions: string
 }
 
-export type PromptEditorFormState = Pick<Prompt, 'name' | 'systemMessage' | 'hidden'> & {
+export type PromptEditorFormState = Pick<Prompt, 'name' | 'systemMessage' | 'hidden' | 'ragHidden'> & {
   userInstructions: string
   ragSystemMessage: string
   ragIndexId?: number | null

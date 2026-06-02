@@ -25,6 +25,8 @@ class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prom
 
   declare hidden: CreationOptional<boolean>
 
+  declare ragHidden: CreationOptional<boolean>
+
   declare ragIndex?: NonAttribute<RagIndex>
 
   declare userInstructions?: CreationOptional<string>
@@ -74,7 +76,12 @@ Prompt.init(
     hidden: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: false,
+      defaultValue: true,
+    },
+    ragHidden: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
     },
     userInstructions: {
       type: DataTypes.TEXT,
