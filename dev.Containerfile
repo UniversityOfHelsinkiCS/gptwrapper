@@ -8,7 +8,7 @@ ENV VERSION=development
 ENV VITE_VERSION=development
 
 COPY package* ./
-RUN curl -fsSL https://github.com/AikidoSec/safe-chain/releases/latest/download/install-safe-chain.sh | sh -s -- --ci
+COPY ./.npmrc ./
 RUN npm ci
 
 EXPOSE 3000

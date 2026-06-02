@@ -21,7 +21,7 @@ ARG CI
 ENV CI=$CI
 
 COPY package* ./
-RUN curl -fsSL https://github.com/AikidoSec/safe-chain/releases/latest/download/install-safe-chain.sh | sh -s -- --ci
+COPY ./.npmrc ./
 RUN npm ci --omit-dev --ignore-scripts --no-audit --no-fund
 COPY . .
 
