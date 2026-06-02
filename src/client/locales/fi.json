@@ -32,6 +32,7 @@
     "hidePrompt": "Piilota alustuksen teksti opiskelijoilta",
     "hiddenPromptInfo": "Alustuksen teksti ei näy opiskelijoille",
     "visiblePromptInfo": "Alustuksen teksti näkyy opiskelijoille",
+    "hiddenRag": "Lähdemateliaali ei näy opiskelijoille",
     "promptName": "Alustuksen nimi",
     "copyStudentLink": "Kopioi",
     "linkCopied": "Linkki kopioitu",
@@ -555,7 +556,8 @@
     "description": "Kuvaus",
     "languageModel": "Tekoälyn ohjeistus",
     "hiddenFromStudents": "Tämä välilehti on piilotettu opiskelijoilta.",
-    "backToPromptList": "Takaisin"
+    "backToPromptList": "Takaisin",
+    "noRag": "Ei käytössä olevaa lähdemateriaalikokoelmaa"
   },
   "tooltip": {
     "copied": "Kopioitu!"

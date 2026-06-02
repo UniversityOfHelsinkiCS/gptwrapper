@@ -31,6 +31,7 @@
     "prompt": "Prompt",
     "hiddenPromptInfo": "Prompt text is not visible to students",
     "visiblePromptInfo": "Prompt text is visible to students",
+    "hiddenRag": "Source material is not visible to students",
     "promptName": "Prompt name",
     "copyStudentLink": "Copy",
     "linkCopied": "Link copied",
@@ -553,7 +554,8 @@
     "description": "Description",
     "languageModel": "AI Instructions",
     "hiddenFromStudents": "This tab is hidden from students.",
-    "backToPromptList": "Back"
+    "backToPromptList": "Back",
+    "noRag": "No source material in use"
   },
   "tooltip": {
     "copied": "Copied!"

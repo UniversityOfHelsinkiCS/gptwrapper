@@ -30,6 +30,7 @@
     "hidePrompt": "Dölj uppmaningstext från elever",
     "hiddenPromptInfo": "Uppmaningstexten är inte synlig för eleverna",
     "visiblePromptInfo": "Snabbtext är synlig för eleverna",
+    "hiddenRag": "Källmaterial är inte synligt för eleverna",
     "promptName": "Snabbnamn",
     "copyStudentLink": "Kopiera elevlänk",
     "linkCopied": "Länken kopierad",
@@ -525,7 +526,8 @@
     "languageModel": "AI-instruktioner",
     "hiddenFromStudents": "Denna flik är dold för studenter.",
     "backToPromptList": "Tillbaka",
-    "courseSourceMaterials": "Redigera kursens källmaterial"
+    "courseSourceMaterials": "Redigera kursens källmaterial",
+    "noRag": "Inget källmaterial används"
   },
   "tooltip": {
     "copied": "Kopierad!"
