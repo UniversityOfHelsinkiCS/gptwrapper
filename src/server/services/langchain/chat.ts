@@ -297,8 +297,12 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
  */
 const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[], temperature?: number): ChatModel => {
   switch (modelConfig.provider) {
-    case ModelProvider.Azure:
-      return getAzureChatOpenAI(modelConfig.name)
+    case ModelProvider.Azure: {
+      const azureModel = getAzureChatOpenAI(modelConfig.name)
+      // Make tools available to the model. Without this, Azure models never see
+      // the tools and can't emit tool_calls. Removed accidentally in 4fc8d9f9.
+      return tools.length > 0 ? (azureModel.bindTools(tools) as ChatModel) : azureModel
+    }
     case ModelProvider.Vertex:
       return getVertexModelProvider(modelConfig.name)
     case ModelProvider.Mock:
