@@ -544,7 +544,7 @@
     "promptBasicInfo": "Alustuksen tiedot",
     "studentInstructionsLabel": "Ohjeistus opiskelijoille",
     "promptModelSettings": "Kielimallin ohjeistus",
-    "hideSystemInstructions": "Piilota opiskelijoilta",
+    "showForStudents": "Näytä opiskelijoille",
     "selectedModelLabel": "Alustuksen valittu kielimalli",
     "systemMessagePlaceholder": "Esim. Olet avulias avustaja.",
     "promptSourceMaterialData": "Lähdemateriaali",

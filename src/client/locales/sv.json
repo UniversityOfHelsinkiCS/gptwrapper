@@ -513,6 +513,7 @@
     "promptBasicInfo": "Promptdetaljer",
     "studentInstructionsLabel": "Instruktioner för studenter",
     "promptModelSettings": "Modellinstruktioner",
+    "showForStudents": "Visa för studenter",
     "hideSystemInstructions": "Dölj för studenter",
     "selectedModelLabel": "Vald modell för prompten",
     "systemMessagePlaceholder": "t.ex. Du är en hjälpsam assistent.",

@@ -542,6 +542,7 @@
     "promptBasicInfo": "Prompt details",
     "studentInstructionsLabel": "Student instructions",
     "promptModelSettings": "Model instructions",
+    "showForStudents": "Show for students",
     "hideSystemInstructions": "Hide from students",
     "selectedModelLabel": "Selected model for the prompt",
     "systemMessagePlaceholder": "e.g., You are a helpful assistant.",
