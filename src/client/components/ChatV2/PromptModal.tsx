@@ -291,7 +291,7 @@ const PromptModal = () => {
                   )}
                   <Divider sx={{ my: 3 }} />
                   <Box sx={{ mb: 3 }}>
-                    <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb:3 }}>
+                    <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb:1.5 }}>
                       <PsychologyIcon color="secondary" />
                       <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
                         {t('prompt:promptModelSettings')}
@@ -309,14 +309,14 @@ const PromptModal = () => {
                         severity="info"
                       >{`${t(previewPrompt.hidden ? 'prompt:promptHidden' : 'prompt:promptNotHidden')}`}</Alert>
                     )}
-                    <Paper variant="outlined" sx={{ p: 3, mt: 3, backgroundColor: alpha(theme.palette.primary.main, 0.08), ...!isMobile && { maxHeight: '300px', overflow: 'auto' } }}>
+                    <Paper variant="outlined" sx={{ p: 3, mt: 1.5, backgroundColor: alpha(theme.palette.primary.main, 0.08), ...!isMobile && { maxHeight: '300px', overflow: 'auto' } }}>
                       <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary', ...monospaceStyle }}>
                         {previewPrompt.hidden && !amongResponsibles ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
                       </Typography>
                     </Paper>
                   </Box>
                   <Divider sx={{ my: 3 }} />
-                    <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb:3 }}>
+                    <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb:1.5 }}>
                       <BookmarksIcon color="secondary" />
                       <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
                           {t('prompt:promptSourceMaterialData')}
@@ -335,7 +335,7 @@ const PromptModal = () => {
                       >{`${t(previewPrompt.ragHidden ? 'prompt:promptHidden' : 'prompt:promptNotHidden')}`}</Alert>
                     )}
                   {rag ? (
-                    <Box sx={{ mb: 5, flexDirection: 'column', display: 'flex', gap: 1, mt: 5, border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2, backgroundColor: alpha(theme.palette.primary.main, 0.08) }}>
+                    <Box sx={{ mb: 5, flexDirection: 'column', display: 'flex', gap: 1, mt: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2, backgroundColor: alpha(theme.palette.primary.main, 0.08) }}>
                       <Typography variant="body2">
                         {previewPrompt.ragHidden && !(amongResponsibles || user?.isAdmin) ? t('common:hiddenRag') : rag.metadata.name}
                       </Typography>
