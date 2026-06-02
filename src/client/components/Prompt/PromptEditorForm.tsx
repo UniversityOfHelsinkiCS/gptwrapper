@@ -80,10 +80,10 @@ const ModelSettingsSection = () => {
         {type !== 'PERSONAL' && (
           <FormControlLabel
             sx={{ ml: 'auto' }}
-            control={<Checkbox checked={form.hidden} onChange={(e) => setForm((prev) => ({ ...prev, hidden: e.target.checked }))} />}
+            control={<Checkbox checked={!form.hidden} onChange={(e) => setForm((prev) => ({ ...prev, hidden: !e.target.checked }))} />}
             label={
               <Box display="flex" alignItems="center" gap={1}>
-                {t('prompt:hideSystemInstructions')}
+                {t('prompt:showForStudents')}
                 {form.hidden ? <VisibilityOffOutlined fontSize="small" color="error" /> : <VisibilityOutlined fontSize="small" color="success" />}
               </Box>
             }
@@ -126,6 +126,16 @@ const RagSettingsSection = () => {
         <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
           {t('prompt:promptSourceMaterialData')}
         </Typography>
+        <FormControlLabel
+          sx={{ ml: 'auto' }}
+          control={<Checkbox checked={!form.ragHidden} onChange={(e) => setForm((prev) => ({ ...prev, ragHidden: !e.target.checked }))} />}
+          label={
+            <Box display="flex" alignItems="center" gap={1}>
+              {t('prompt:showForStudents')}
+              {form.ragHidden ? <VisibilityOffOutlined fontSize="small" color="error" /> : <VisibilityOutlined fontSize="small" color="success" />}
+            </Box>
+          }
+        />
       </Box>
       <Box mb={3}>
         {type === 'CHAT_INSTANCE' && (
