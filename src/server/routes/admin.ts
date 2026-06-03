@@ -34,7 +34,6 @@ adminRouter.post('/chatinstances', async (req, res) => {
     courseId,
     activityPeriod: course.activityPeriod,
     saveDiscussions: false,
-    notOptoutSaving: false,
   })
 
   res.status(201).send(newChatInstance)
@@ -169,7 +168,7 @@ adminRouter.get('/user-search', async (req, res) => {
   })
 })
 
-adminRouter.post('/run-updater', async (req, res) => {
+adminRouter.post('/run-updater', async (_req, res) => {
   runUpdater()
   res.send('Updater started')
 })

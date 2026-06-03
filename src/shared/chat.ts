@@ -70,9 +70,8 @@ export type UserMessage = {
 
 export const readMessageContent = (msg: UserMessage | AssistantMessage): string => {
   if (Array.isArray(msg.content)) {
-    return "this is an image, image rendering not supported yet"
-  }
-  else {
+    return 'this is an image, image rendering not supported yet'
+  } else {
     return msg.content.toString()
   }
 }
@@ -108,11 +107,10 @@ export const MessageGenerationInfoSchema = z.object({
 
 export type MessageGenerationInfo = z.Infer<typeof MessageGenerationInfoSchema>
 
-
 const MessageContentSchema = z.object({
   type: z.string(),
   image_url: z.object({
-    url: z.string()
+    url: z.string(),
   }),
 })
 
@@ -120,10 +118,7 @@ export const MessageContentArraySchema = z.union([z.string(), z.array(MessageCon
 
 const ChatMessageSchema = z.object({
   role: z.enum(['user', 'assistant']),
-  content: z.union([
-    z.string().min(0).max(1_200_000),
-    MessageContentArraySchema,
-  ]),
+  content: z.union([z.string().min(0).max(1_200_000), MessageContentArraySchema]),
   attachements: z.union([z.string(), z.array(z.string())]).optional(),
   fileContent: z.string().optional(),
 })
@@ -133,7 +128,6 @@ export const PostStreamSchemaV3 = z.object({
     chatMessages: z.array(ChatMessageSchema),
     generationInfo: MessageGenerationInfoSchema,
     ignoredWarnings: WarningTypes.array().optional(),
-    saveConsent: z.boolean().optional(),
     courseId: z.string().optional(),
   }),
   courseId: z.string().optional(),

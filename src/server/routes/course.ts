@@ -20,7 +20,7 @@ const getCourses = async () => {
   return courses
 }
 
-courseRouter.get('/', async (req, res) => {
+courseRouter.get('/', async (_req, res) => {
   const courses = await getCourses()
   res.send(courses)
 })
@@ -342,11 +342,10 @@ courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {
 
 courseRouter.put('/:id', async (req, res) => {
   const { id } = req.params
-  const { activityPeriod, usageLimit, saveDiscussions, notOptoutSaving } = req.body as {
+  const { activityPeriod, usageLimit, saveDiscussions } = req.body as {
     activityPeriod: ActivityPeriod
     usageLimit: number
     saveDiscussions: boolean
-    notOptoutSaving: boolean
   }
 
   const chatInstance = await ChatInstance.findOne({
@@ -367,7 +366,6 @@ courseRouter.put('/:id', async (req, res) => {
   chatInstance.usageLimit = usageLimit
   if (saveDiscussions !== undefined) {
     chatInstance.saveDiscussions = saveDiscussions
-    chatInstance.notOptoutSaving = notOptoutSaving
   }
 
   await chatInstance.save()

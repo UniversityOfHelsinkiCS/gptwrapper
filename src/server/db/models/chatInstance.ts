@@ -35,8 +35,6 @@ class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAtt
 
   declare saveDiscussions: boolean
 
-  declare notOptoutSaving: boolean
-
   declare responsibilities?: NonAttribute<Responsibility[]>
 
   declare ragIndices?: NonAttribute<RagIndex[]>
@@ -99,9 +97,6 @@ ChatInstance.init(
       defaultValue: [],
     },
     saveDiscussions: {
-      type: DataTypes.BOOLEAN,
-    },
-    notOptoutSaving: {
       type: DataTypes.BOOLEAN,
     },
   },

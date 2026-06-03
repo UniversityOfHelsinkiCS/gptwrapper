@@ -194,10 +194,8 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     toolCalls: result.toolCalls,
   })
 
-  const consentToSave = courseId && course?.saveDiscussions && options.saveConsent
-
-  if (consentToSave) {
-    // @todo: should file search results also be saved?
+  // @todo: should file search results also be saved?
+  if (courseId && course?.saveDiscussions) {
     const discussion = {
       userId: user.id,
       courseId,

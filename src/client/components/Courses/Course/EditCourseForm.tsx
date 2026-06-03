@@ -27,13 +27,11 @@ const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(({ course, s
   const [startDate, setStartDate] = useState(new Date(course.activityPeriod?.startDate || new Date()))
   const [endDate, setEndDate] = useState(new Date(course.activityPeriod?.endDate || new Date()))
   const [saveDiscussions, setSaveDiscussions] = useState(course.saveDiscussions)
-  const [notOptoutSaving, setNotOptoutSaving] = useState(course.notOptoutSaving)
 
   const hasUnsavedChanges =
     format(startDate, 'yyyy-MM-dd') !== format(new Date(course.activityPeriod?.startDate || new Date()), 'yyyy-MM-dd') ||
     format(endDate, 'yyyy-MM-dd') !== format(new Date(course.activityPeriod?.endDate || new Date()), 'yyyy-MM-dd') ||
-    saveDiscussions !== course.saveDiscussions ||
-    notOptoutSaving !== course.notOptoutSaving
+    saveDiscussions !== course.saveDiscussions
 
   const handleSubmit = async (tokens?: number) => {
     const activityPeriod = {
@@ -47,7 +45,6 @@ const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(({ course, s
         activityPeriod,
         usageLimit: newLimit,
         saveDiscussions,
-        notOptoutSaving,
       })
       enqueueSnackbar(t('course:courseUpdated'), { variant: 'success' })
       setOpen(false)
@@ -122,10 +119,6 @@ const EditCourseForm = forwardRef<HTMLElement, EditCourseFormProps>(({ course, s
           <FormControlLabel
             control={<Switch checked={saveDiscussions} onChange={() => setSaveDiscussions(!saveDiscussions)} />}
             label={t('course:isReseachCourse')}
-          />
-          <FormControlLabel
-            control={<Switch checked={notOptoutSaving} onChange={() => setNotOptoutSaving(!notOptoutSaving)} disabled={!saveDiscussions} />}
-            label={t('course:canOptOut')}
           />
         </Box>
       )}

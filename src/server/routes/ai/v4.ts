@@ -35,9 +35,7 @@ type PromptContext = {
   tools: StructuredTool[]
 }
 
-const buildToolsV4 = (ragIndex?: RagIndex | null): StructuredTool[] => [
-  ...(ragIndex ? [getV4RagIndexSearchTool(ragIndex)] : []),
-]
+const buildToolsV4 = (ragIndex?: RagIndex | null): StructuredTool[] => [...(ragIndex ? [getV4RagIndexSearchTool(ragIndex)] : [])]
 
 const ensureModelAllowedForUser = (model: ValidModelName, isAdmin: boolean) => {
   if (inProduction && isMockModel(model) && !isAdmin) {
@@ -262,7 +260,7 @@ const saveDiscussionIfNeeded = async ({
   courseId?: string
   response: string
 }) => {
-  const consentToSave = courseId && course?.saveDiscussions && options.saveConsent
+  const consentToSave = courseId && course?.saveDiscussions
 
   if (!consentToSave) {
     return

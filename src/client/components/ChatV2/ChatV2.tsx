@@ -1,4 +1,4 @@
-import { Box, Drawer, FormControlLabel, Paper, Switch, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Drawer, Paper, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { MapsUgc } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
@@ -87,7 +87,6 @@ const ChatV2Content = () => {
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
   const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model', ValidModelNameSchema)
   const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as ChatMessage[])
-  const [saveConsent, setSaveConsent] = useLocalStorageState<boolean>('save-consent', false)
   const [modelTemperature, _setModelTemperature] = useLocalStorageStateWithURLDefault(
     `${localStoragePrefix}-chat-model-temperature`,
     String(DEFAULT_MODEL_TEMPERATURE),
@@ -213,7 +212,6 @@ const ChatV2Content = () => {
           options: {
             generationInfo,
             chatMessages: newMessages,
-            saveConsent,
             ignoredWarnings,
           },
           courseId: courseId !== 'general' ? courseId : undefined,
@@ -259,9 +257,7 @@ const ChatV2Content = () => {
     } catch (err: any) {
       const wasTimeout = streamControllerRef.current?.signal.reason === 'timeout_error'
       if (wasTimeout) {
-        setMessages((prev: ChatMessage[]) =>
-          prev.concat({ role: 'assistant', content: '', error: 'timeout_error', toolCalls: {}, generationInfo }),
-        )
+        setMessages((prev: ChatMessage[]) => prev.concat({ role: 'assistant', content: '', error: 'timeout_error', toolCalls: {}, generationInfo }))
       } else {
         console.error(err)
       }
@@ -475,16 +471,9 @@ const ChatV2Content = () => {
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Typography variant="body1" fontWeight={600}>
-                  {chatInstance?.notOptoutSaving ? t('course:isSavedNotOptOut') : t('course:isSavedOptOut')}
+                  {t('course:isSavedNotOptOut')}
                 </Typography>
               </Box>
-
-              {!chatInstance.notOptoutSaving && chatInstance.saveDiscussions && (
-                <FormControlLabel
-                  control={<Switch onChange={() => setSaveConsent(!saveConsent)} checked={saveConsent} />}
-                  label={saveConsent ? t('chat:allowSave') : t('chat:denySave')}
-                />
-              )}
             </Paper>
           )}
 

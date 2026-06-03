@@ -45,7 +45,7 @@ const DiscussionList: React.FC = () => {
         >
           <Typography variant="h6">{t('course:reseachCourse')}</Typography>
           <Alert severity="warning" style={{ marginTop: 20, marginBottom: 20 }}>
-            <Typography>{course.notOptoutSaving ? t('course:isSavedNotOptOut') : t('course:isSavedForTeacherOptOut')}</Typography>
+            <Typography>{t('course:isSavedNotOptOut')}</Typography>
           </Alert>
         </Paper>
       )}
@@ -107,9 +107,7 @@ const DiscussionDetail: React.FC = () => {
     const nextMessages = getChatMessages(next)
     const currLen = currMessages.length
     const nextLen = nextMessages.length
-    const nextExtendsThis =
-      nextLen > currLen &&
-      currMessages.every((msg, j) => nextMessages[j]?.role === msg.role && nextMessages[j]?.content === msg.content)
+    const nextExtendsThis = nextLen > currLen && currMessages.every((msg, j) => nextMessages[j]?.role === msg.role && nextMessages[j]?.content === msg.content)
     if (!nextExtendsThis) sessions.push(curr)
   }
 

@@ -75,7 +75,6 @@ chatInstanceRouter.post('/custom', async (req, res) => {
       endDate: addMonths(now, 12).toISOString(),
     },
     saveDiscussions: false,
-    notOptoutSaving: false,
   })
 
   await Responsibility.create({
