@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { inProduction } from '../../config'
 import { getTestUserHeaders, TEST_COURSES } from '../../shared/testData'
-import { ChatInstanceRagIndex, Enrolment, Prompt, RagIndex, Responsibility, User, UserChatInstanceUsage } from '../db/models'
+import { ChatInstanceRagIndex, Discussion, Enrolment, Prompt, RagIndex, Responsibility, User, UserChatInstanceUsage } from '../db/models'
 import { headersToUser } from '../middleware/user'
 import { ApplicationError } from '../util/ApplicationError'
 import logger from '../util/logger'
@@ -72,6 +72,13 @@ router.post('/reset-test-data', async (req, res) => {
       },
     },
   })
+  await Discussion.destroy({
+    where: {
+      userId: {
+        [Op.in]: testUserIds,
+      },
+    },
+  })
   await User.destroy({
     where: {
       id: {
@@ -88,6 +95,10 @@ router.post('/reset-test-data', async (req, res) => {
     await Enrolment.create({
       userId,
       chatInstanceId: TEST_COURSES.TEST_COURSE.id,
+    })
+    await Enrolment.create({
+      userId,
+      chatInstanceId: TEST_COURSES.DISCUSSION_TEST_COURSE.id,
     })
   }
 
@@ -107,6 +118,22 @@ router.post('/reset-test-data', async (req, res) => {
   logger.info('Test data reset successfully')
 
   res.status(200).json({ message: 'Test data reset successfully' })
+})
+
+/**
+ * Deletes every discussion for a given course. Used by the saved-discussions e2e test,
+ * which is the sole writer of its dedicated course, to guarantee a clean slate regardless
+ * of which worker index (or retry) previously ran it.
+ */
+router.post('/reset-course-discussions', async (req, res) => {
+  if (inProduction) {
+    throw ApplicationError.InternalServerError('Cannot call this in production')
+  }
+
+  const { courseId } = req.body as { courseId: string }
+  await Discussion.destroy({ where: { courseId } })
+
+  res.status(200).json({ message: 'Course discussions reset successfully' })
 })
 
 export default router

@@ -279,7 +279,6 @@ export const TEST_COURSES = {
       endDate: '2030-08-31',
     },
     code: 'TEST-1234',
-    model: 'mock',
     usageLimit: 200_000,
   },
   EXAMPLE_COURSE: {
@@ -311,6 +310,22 @@ export const TEST_COURSES = {
     },
     code: 'TOSKA-1234',
     usageLimit: 2_000_000,
+  },
+  DISCUSSION_TEST_COURSE: {
+    id: 'discussion-test-course',
+    courseId: 'discussion-test-course-id',
+    name: {
+      en: 'Discussion test course',
+      sv: 'Diskussionstestkurs',
+      fi: 'Keskustelutestikurssi',
+    },
+    activityPeriod: {
+      startDate: '2024-09-01',
+      endDate: '2030-08-31',
+    },
+    code: 'DISC-1234',
+    saveDiscussions: true,
+    usageLimit: 200_000,
   },
 }
 
