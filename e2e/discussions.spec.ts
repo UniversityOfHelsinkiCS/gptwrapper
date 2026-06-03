@@ -2,19 +2,24 @@ import { expect } from '@playwright/test'
 import { studentTest as test } from './fixtures'
 import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from './utils/test-helpers'
 
+const COURSE_PATH = '/discussion-test-course-id'
+
 test.describe('Saved discussions', () => {
   test('student chat in a saving course is visible to the teacher', async ({ page, request }, testInfo) => {
     const workerIdx = testInfo.workerIndex
-    const coursePath = `/discussion-test-course-${workerIdx}`
 
-    // Per-worker course (+ enrolment, teacher responsibility, clean slate) so parallel
-    // workers and retries never share discussion rows.
-    await request.post('/api/test/setup-discussion-test', { data: { testUserIdx: workerIdx } })
+    // The student fixture already provisioned the student + enrolments.
+    // Provision the teacher user too so getTeachedCourses can grant the responsibility.
+    await request.post('/api/test/reset-test-data', { data: { testUserIdx: workerIdx, testUserRole: 'teacher' } })
+
+    // This is the only test that writes to the discussion course. Wipe it so the
+    // discussers assertion is deterministic regardless of prior worker indices / retries.
+    await request.post('/api/test/reset-course-discussions', { data: { courseId: 'discussion-test-course-id' } })
 
     const message = `saved-discussion-${workerIdx}-${Date.now()}`
 
     // --- Act as the student: chat in the saving course ---
-    await page.goto(coursePath)
+    await page.goto(COURSE_PATH)
     await acceptDisclaimer(page)
     await useMockModel(page)
 
@@ -34,9 +39,12 @@ test.describe('Saved discussions', () => {
       'x-test-user-role': 'teacher',
     })
 
+    // Navigating to the course triggers getTeachedCourses, which upserts the teacher's responsibility.
+    await page.goto(COURSE_PATH)
+    await acceptDisclaimer(page)
+
     // --- Verify the saved discussion in the teacher's Discussions view ---
-    // The teacher's terms are pre-accepted in setup, so no disclaimer modal appears.
-    await page.goto(`${coursePath}/course/discussions`)
+    await page.goto(`${COURSE_PATH}/course/discussions`)
 
     const discusserRow = page.getByTestId('discusser-row')
     await expect(discusserRow).toHaveCount(1)

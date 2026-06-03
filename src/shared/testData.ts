@@ -311,31 +311,22 @@ export const TEST_COURSES = {
     code: 'TOSKA-1234',
     usageLimit: 2_000_000,
   },
-}
-
-/**
- * A per-worker course used only by the saved-discussions e2e test. Each Playwright
- * worker (and retry) gets its own course id so parallel runs never share discussion
- * rows. Created on demand via the /api/test/setup-discussion-test endpoint rather than
- * seeded, so it doesn't leak into the other tests' course lists.
- */
-export const getDiscussionTestCourse = (idx: string | number) => {
-  const id = `discussion-test-course-${idx}`
-  return {
-    id,
-    courseId: id,
+  DISCUSSION_TEST_COURSE: {
+    id: 'discussion-test-course',
+    courseId: 'discussion-test-course-id',
     name: {
-      en: 'Saved discussions e2e',
-      sv: 'Sparade diskussioner e2e',
-      fi: 'Tallennetut keskustelut e2e',
+      en: 'Discussion test course',
+      sv: 'Diskussionstestkurs',
+      fi: 'Keskustelutestikurssi',
     },
     activityPeriod: {
       startDate: '2024-09-01',
       endDate: '2030-08-31',
     },
+    code: 'DISC-1234',
     saveDiscussions: true,
     usageLimit: 200_000,
-  }
+  },
 }
 
 export const TEST_USERS = {
