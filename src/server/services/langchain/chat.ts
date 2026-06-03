@@ -303,8 +303,10 @@ const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[], tempera
       // the tools and can't emit tool_calls. Removed accidentally in 4fc8d9f9.
       return tools.length > 0 ? (azureModel.bindTools(tools) as ChatModel) : azureModel
     }
-    case ModelProvider.Vertex:
-      return getVertexModelProvider(modelConfig.name)
+    case ModelProvider.Vertex: {
+      const vertexModel = getVertexModelProvider(modelConfig.name)
+      return tools.length > 0 ? vertexModel.bindTools(tools) : vertexModel
+    }
     case ModelProvider.Mock:
       return new MockModel({ tools, temperature })
     default:
