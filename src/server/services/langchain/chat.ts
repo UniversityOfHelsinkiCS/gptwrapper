@@ -24,6 +24,36 @@ type WriteEventFunction = (data: ChatEvent) => Promise<void>
 type ChatTool = StructuredTool<any, any, any, string>
 
 /**
+ * Normalizes the `content` of a streamed message chunk into plain text.
+ *
+ * Azure/OpenAI streams content as a plain string, but Vertex/Gemini streams it
+ * as an array of content-block objects (e.g. `[{ type: 'text', text: '...' }]`).
+ * Casting that array straight to a string (or passing it through to the client)
+ * produces `[object Object]`, so we recursively pull the text out instead.
+ */
+const extractText = (content: unknown): string => {
+  if (typeof content === 'string') {
+    return content
+  }
+
+  if (Array.isArray(content)) {
+    return content.reduce<string>((acc, block) => acc + extractText(block), '')
+  }
+
+  if (content && typeof content === 'object') {
+    const record = content as Record<string, unknown>
+    if (typeof record.text === 'string') {
+      return record.text
+    }
+    if ('content' in record) {
+      return extractText(record.content)
+    }
+  }
+
+  return ''
+}
+
+/**
  * Prepares chat messages for the LLM by combining message content with file content
  */
 const prepareMessagesForLLM = (messages: ChatMessage[]): ChatMessage[] => {
@@ -166,7 +196,7 @@ export const streamChat = async ({
     tokenStreamingDuration: result.tokenStreamingDuration,
     timeToFirstToken: result.timeToFirstToken,
     tokensPerSecond: result.tokensPerSecond,
-    response: (result.fullOutput?.content ?? '') as string,
+    response: extractText(result.fullOutput?.content),
     toolCalls: result.toolCalls.length > 0 ? JSON.stringify(result.toolCalls.map((t) => t.name)) : undefined,
   }
 }
@@ -212,7 +242,7 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
       }
     }
 
-    const text = chunk.content as string
+    const text = extractText(chunk.content)
     if (text.length > 0) {
       await writeEvent({
         type: 'writing',
