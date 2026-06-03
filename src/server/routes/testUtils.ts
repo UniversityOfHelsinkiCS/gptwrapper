@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { inProduction } from '../../config'
-import { getTestUserHeaders, TEST_COURSES } from '../../shared/testData'
-import { ChatInstanceRagIndex, Discussion, Enrolment, Prompt, RagIndex, Responsibility, User, UserChatInstanceUsage } from '../db/models'
+import { getDiscussionTestCourse, getTestUserHeaders, TEST_COURSES } from '../../shared/testData'
+import { ChatInstance, ChatInstanceRagIndex, Discussion, Enrolment, Prompt, RagIndex, Responsibility, User, UserChatInstanceUsage } from '../db/models'
 import { headersToUser } from '../middleware/user'
 import { ApplicationError } from '../util/ApplicationError'
 import logger from '../util/logger'
@@ -72,13 +72,6 @@ router.post('/reset-test-data', async (req, res) => {
       },
     },
   })
-  await Discussion.destroy({
-    where: {
-      userId: {
-        [Op.in]: testUserIds,
-      },
-    },
-  })
   await User.destroy({
     where: {
       id: {
@@ -95,10 +88,6 @@ router.post('/reset-test-data', async (req, res) => {
     await Enrolment.create({
       userId,
       chatInstanceId: TEST_COURSES.TEST_COURSE.id,
-    })
-    await Enrolment.create({
-      userId,
-      chatInstanceId: TEST_COURSES.DISCUSSION_TEST_COURSE.id,
     })
   }
 
@@ -121,19 +110,49 @@ router.post('/reset-test-data', async (req, res) => {
 })
 
 /**
- * Deletes every discussion for a given course. Used by the saved-discussions e2e test,
- * which is the sole writer of its dedicated course, to guarantee a clean slate regardless
- * of which worker index (or retry) previously ran it.
+ * Sets up an isolated, per-worker course for the saved-discussions e2e test: its own
+ * ChatInstance (with saveDiscussions on), the worker's student enrolled, the worker's
+ * teacher responsible, and any previous discussions cleared. Per-worker so parallel
+ * workers and retries never share discussion rows.
  */
-router.post('/reset-course-discussions', async (req, res) => {
+router.post('/setup-discussion-test', async (req, res) => {
   if (inProduction) {
     throw ApplicationError.InternalServerError('Cannot call this in production')
   }
 
-  const { courseId } = req.body as { courseId: string }
-  await Discussion.destroy({ where: { courseId } })
+  const testUserIdx = req.body.testUserIdx as string
+  const course = getDiscussionTestCourse(testUserIdx)
 
-  res.status(200).json({ message: 'Course discussions reset successfully' })
+  const studentId = getTestUserHeaders(testUserIdx, 'student').hypersonsisuid
+  const teacherHeaders = getTestUserHeaders(testUserIdx, 'teacher')
+  const teacherId = teacherHeaders.hypersonsisuid
+
+  await ChatInstance.upsert({
+    id: course.id,
+    courseId: course.courseId,
+    name: course.name,
+    description: '',
+    activityPeriod: course.activityPeriod,
+    usageLimit: course.usageLimit,
+    saveDiscussions: course.saveDiscussions,
+    courseUnits: [],
+  })
+
+  // Ensure the teacher exists and pre-accept terms so no disclaimer modal can race the
+  // discussers view. (The student is recreated fresh by the studentTest fixture and
+  // accepts the disclaimer through the UI.)
+  await User.upsert(headersToUser(teacherHeaders))
+  await User.update({ termsAcceptedAt: new Date() }, { where: { id: teacherId } })
+
+  // Clean slate, then wire up access for this worker's student + teacher.
+  await Discussion.destroy({ where: { courseId: course.courseId } })
+  await Enrolment.findOrCreate({ where: { userId: studentId, chatInstanceId: course.id } })
+  await Responsibility.findOrCreate({
+    where: { userId: teacherId, chatInstanceId: course.id },
+    defaults: { userId: teacherId, chatInstanceId: course.id, createdByUserId: teacherId },
+  })
+
+  res.status(200).json({ message: 'Discussion test set up successfully' })
 })
 
 export default router
