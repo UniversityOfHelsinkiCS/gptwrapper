@@ -11,7 +11,6 @@ const chatInstances = Object.values({ ...TEST_COURSES, ...SANDBOXES }).map((cour
   activityPeriod: course.activityPeriod,
   code: course.code,
   usageLimit: 'usageLimit' in course ? course.usageLimit : undefined,
-  saveDiscussions: 'saveDiscussions' in course ? course.saveDiscussions : undefined,
   courseUnits: [
     {
       code: course.code,

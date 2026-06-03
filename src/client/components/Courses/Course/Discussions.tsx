@@ -61,9 +61,9 @@ const DiscussionList: React.FC = () => {
         </TableHead>
         <TableBody>
           {discussers.map((d, idx) => (
-            <TableRow key={d.user_id} data-testid="discusser-row">
+            <TableRow key={d.user_id}>
               <TableCell>
-                <Link to={`${d.user_id}`} component={RouterLink} data-testid="discusser-link">
+                <Link to={`${d.user_id}`} component={RouterLink}>
                   {t('course:student')} {idx + 1}
                 </Link>
               </TableCell>
@@ -130,7 +130,6 @@ const DiscussionDetail: React.FC = () => {
                   msg.role === 'user' ? (
                     <Box
                       key={msgIdx}
-                      data-testid="discussion-user-message"
                       sx={{
                         alignSelf: 'flex-end',
                         backgroundColor: 'action.hover',
