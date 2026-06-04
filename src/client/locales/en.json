@@ -516,8 +516,8 @@
     "modelFreeToChoose": "Model free to choose",
     "systemMessage": "Instructions for the language model",
     "hidePrompt": "Hide prompt text from students",
-    "promptHidden": "hidden from students",
-    "promptNotHidden": "visible to students",
+    "promptHidden": "Hidden from students",
+    "promptNotHidden": "Visible to students",
     "noSourceMaterials": "No source materials",
     "ragSystemMessage": "Source material instructions",
     "basicInformation": "Basic information",
@@ -556,7 +556,13 @@
     "languageModel": "AI Instructions",
     "hiddenFromStudents": "This tab is hidden from students.",
     "backToPromptList": "Back",
-    "noRag": "No source material in use"
+    "ragInUse": "Source material in use",
+    "noRag": "No source material in use",
+    "editCustomRagMessage": "Edit custom instruction",
+    "addCustomRagMessage": "Add custom instruction",
+    "customRagMessage": "Custom instruction",
+    "showRagMessages": "Show instructions",
+    "noRagMessagesToShow": "No instructions"
   },
   "tooltip": {
     "copied": "Copied!"

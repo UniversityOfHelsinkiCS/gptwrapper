@@ -488,8 +488,8 @@
     "modelFreeToChoose": "Modell fri att välja",
     "systemMessage": "Instruktioner för språkmodellen",
     "hidePrompt": "Dölj prompttext för studenter",
-    "promptHidden": "dold för studenter",
-    "promptNotHidden": "synlig för studenter",
+    "promptHidden": "Dold för studenter",
+    "promptNotHidden": "Synlig för studenter",
     "noSourceMaterials": "Inget källmaterial",
     "ragSystemMessage": "Instruktioner för källmaterial",
     "basicInformation": "Grundläggande information",
@@ -528,7 +528,13 @@
     "hiddenFromStudents": "Denna flik är dold för studenter.",
     "backToPromptList": "Tillbaka",
     "courseSourceMaterials": "Redigera kursens källmaterial",
-    "noRag": "Inget källmaterial används"
+    "ragInUse": "Använt källmaterial",
+    "noRag": "Inget källmaterial används",
+    "editCustomRagMessage": "Redigera anpassad instruktion",
+    "addCustomRagMessage": "Lägg till anpassad instruktion",
+    "customRagMessage": "Anpassad instruktion",
+    "showRagMessages": "Visa instruktioner",
+    "noRagMessagesToShow": "Inga instruktioner"
   },
   "tooltip": {
     "copied": "Kopierad!"

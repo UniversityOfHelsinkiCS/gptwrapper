@@ -1,12 +1,14 @@
-import { Box, Checkbox, Collapse, Divider, FormControl, FormControlLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
+import { Box, Switch, Collapse, Divider, FormControl, FormControlLabel, MenuItem, Select, TextField, Tooltip, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import OpenableTextfield from '../common/OpenableTextfield'
+import RagMessageEditor from './RagMessageEditor'
 import { ClearOutlined, VisibilityOutlined, VisibilityOffOutlined } from '@mui/icons-material'
 import PsychologyIcon from '@mui/icons-material/Psychology'
 import EditNoteIcon from '@mui/icons-material/EditNote'
 import BookmarksIcon from '@mui/icons-material/Bookmarks'
 import { usePromptEditorForm } from './context'
 import { monospaceStyle } from '../../theme'
+import { useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material'
 
 const BasicInfoSection = () => {
   const { form, setForm, type } = usePromptEditorForm()
@@ -69,6 +71,9 @@ const BasicInfoSection = () => {
 const ModelSettingsSection = () => {
   const { form, setForm, type } = usePromptEditorForm()
   const { t } = useTranslation()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  
 
   return (
     <Box>
@@ -80,7 +85,7 @@ const ModelSettingsSection = () => {
         {type !== 'PERSONAL' && (
           <FormControlLabel
             sx={{ ml: 'auto' }}
-            control={<Checkbox checked={!form.hidden} onChange={(e) => setForm((prev) => ({ ...prev, hidden: !e.target.checked }))} />}
+            control={<Switch checked={!form.hidden} onChange={(e) => setForm((prev) => ({ ...prev, hidden: !e.target.checked }))} />}
             label={
               <Box display="flex" alignItems="center" gap={1}>
                 {t('prompt:showForStudents')}
@@ -94,7 +99,7 @@ const ModelSettingsSection = () => {
       <Box>
         <TextField
           variant="filled"
-          sx={{ '& textarea': monospaceStyle }}
+          sx={{ '& textarea': monospaceStyle, ...!isMobile && { maxHeight: '300px', overflow: 'auto' } }}
           slotProps={{
             htmlInput: {
               'data-testid': 'system-message-input',
@@ -126,18 +131,23 @@ const RagSettingsSection = () => {
         <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
           {t('prompt:promptSourceMaterialData')}
         </Typography>
-        <FormControlLabel
-          sx={{ ml: 'auto' }}
-          control={<Checkbox checked={!form.ragHidden} onChange={(e) => setForm((prev) => ({ ...prev, ragHidden: !e.target.checked }))} />}
-          label={
-            <Box display="flex" alignItems="center" gap={1}>
-              {t('prompt:showForStudents')}
-              {form.ragHidden ? <VisibilityOffOutlined fontSize="small" color="error" /> : <VisibilityOutlined fontSize="small" color="success" />}
-            </Box>
-          }
-        />
       </Box>
       <Box mb={3}>
+        <Box display="flex" alignItems="center">
+          <Typography variant="overline" fontWeight="bold" my={1}>
+            {t('prompt:ragInUse')}
+          </Typography>
+          <FormControlLabel
+            sx={{ ml: 'auto' }}
+            control={<Switch checked={!form.ragHidden} onChange={(e) => setForm((prev) => ({ ...prev, ragHidden: !e.target.checked }))} />}
+            label={
+              <Box display="flex" alignItems="center" gap={1}>
+                {t('prompt:showForStudents')}
+                {form.ragHidden ? <VisibilityOffOutlined fontSize="small" color="error" /> : <VisibilityOutlined fontSize="small" color="success" />}
+              </Box>
+            }
+          />
+        </Box>
         {type === 'CHAT_INSTANCE' && (
           <Box display="flex" justifyContent="space-around" alignItems="center">
             <FormControl fullWidth>
@@ -176,33 +186,35 @@ const RagSettingsSection = () => {
 
       <Collapse in={!!form.ragIndexId}>
         <Box>
-          <Typography variant="overline" fontWeight="bold" my={1}>
-            {t('prompt:modelSourceMaterialInstructions')}
-          </Typography>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Typography variant="overline" fontWeight="bold" my={1}>
+              {t('prompt:modelSourceMaterialInstructions')}
+            </Typography>
+            <Tooltip placement="right" title={t('prompt:promptHidden')} describeChild>
+              <Box component="span" tabIndex={0} aria-label={t('prompt:promptHidden')}>
+                <VisibilityOffOutlined fontSize="small" color="error" />
+              </Box>
+            </Tooltip>
+          </Box>
 
-          <OpenableTextfield
-            variant="filled"
-            sx={{ '& textarea': monospaceStyle }}
-            value={form.ragSystemMessage}
-            onChange={(e) =>
+          <RagMessageEditor
+            selectedMessages={form.ragSystemMessages}
+            onAddMessage={(text) =>
+              setForm((prev) => {
+                if (prev.ragSystemMessages.includes(text)) return prev
+
+                return {
+                  ...prev,
+                  ragSystemMessages: [...prev.ragSystemMessages, text],
+                }
+              })
+            }
+            onRemoveMessage={(text) =>
               setForm((prev) => ({
                 ...prev,
-                ragSystemMessage: e.target.value,
+                ragSystemMessages: prev.ragSystemMessages.filter((message) => message !== text),
               }))
             }
-            onAppend={(text) =>
-              setForm((prev) => ({
-                ...prev,
-                ragSystemMessage: prev.ragSystemMessage + (prev.ragSystemMessage.trim().length ? ' ' : '') + text,
-              }))
-            }
-            slotProps={{
-              htmlInput: { 'data-testid': 'rag-system-message-input' },
-            }}
-            fullWidth
-            multiline
-            minRows={4}
-            maxRows={16}
           />
         </Box>
       </Collapse>
@@ -217,5 +229,6 @@ export const PromptEditorForm = () => (
     <ModelSettingsSection />
     <Divider sx={{ my: 3 }} />
     <RagSettingsSection />
+    <Divider sx={{ my: 3 }} />
   </Box>
 )

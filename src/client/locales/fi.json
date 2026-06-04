@@ -518,8 +518,8 @@
     "modelFreeToChoose": "Malli vapaasti valittavissa",
     "systemMessage": "Kielimallille annettava ohjeistus",
     "hidePrompt": "Piilota alustuksen sisältö opiskelijoilta",
-    "promptHidden": "piilotettu opiskelijoilta",
-    "promptNotHidden": "näkyy opiskelijoille",
+    "promptHidden": "Piilotettu opiskelijoilta",
+    "promptNotHidden": "Näkyy opiskelijoille",
     "noSourceMaterials": "Ei lähdemateriaaleja",
     "ragSystemMessage": "Lähdemateriaaliohjeistus",
     "basicInformation": "Perustiedot",
@@ -557,7 +557,13 @@
     "languageModel": "Tekoälyn ohjeistus",
     "hiddenFromStudents": "Tämä välilehti on piilotettu opiskelijoilta.",
     "backToPromptList": "Takaisin",
-    "noRag": "Ei käytössä olevaa lähdemateriaalikokoelmaa"
+    "ragInUse": "Käytössä oleva lähdemateriaalikokoelma",
+    "noRag": "Ei käytössä olevaa lähdemateriaalikokoelmaa",
+    "editCustomRagMessage": "Muokkaa omaa ohjeistusta",
+    "addCustomRagMessage": "Lisää oma ohjeistus",
+    "customRagMessage": "Oma ohjeistus",
+    "showRagMessages": "Näytä ohjeistukset",
+    "noRagMessagesToShow": "Ei ohjeistuksia"
   },
   "tooltip": {
     "copied": "Kopioitu!"

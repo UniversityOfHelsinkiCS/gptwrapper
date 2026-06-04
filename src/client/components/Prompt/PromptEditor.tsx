@@ -20,6 +20,23 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
   const [loading, setLoading] = useState<boolean>(false)
   const { createPromptMutation, editPromptMutation } = usePromptState()
 
+  const ragMessages = [t('prompt:defaultRagMessage'), t('prompt:enforceRagMessage'), t('prompt:unknownRagMessage')]
+
+  const getInitialRagSystemMessages = (rawMessage?: string) => {
+    const message = rawMessage?.trim()
+
+    if (!message) return [t('prompt:defaultRagMessage')]
+
+    const presetMessages = ragMessages.filter((presetMessage) => message.includes(presetMessage))
+
+    if (presetMessages.length > 0) {
+      const remaining = ragMessages.reduce((currentMessage, presetMessage) => currentMessage.replaceAll(presetMessage, ''), message).trim()
+      return remaining ? [...presetMessages, remaining] : presetMessages
+    }
+
+    return [message]
+  }
+
   let type: 'CHAT_INSTANCE' | 'PERSONAL' = 'CHAT_INSTANCE'
   if (courseId && courseId !== 'general') type = 'CHAT_INSTANCE'
   if (personal) type = 'PERSONAL'
@@ -29,9 +46,9 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
     name: previewPrompt?.name ?? '',
     userInstructions: previewPrompt?.userInstructions ?? '',
     systemMessage: previewPrompt?.systemMessage ?? '',
-    ragSystemMessage: previewPrompt
-      ? (previewPrompt.messages?.find((m: Message) => m.role === 'system')?.content as string) || ''
-      : t('prompt:defaultRagMessage'),
+    ragSystemMessages: previewPrompt
+      ? getInitialRagSystemMessages((previewPrompt.messages?.find((m: Message) => m.role === 'system')?.content as string) || '')
+      : [t('prompt:defaultRagMessage')],
     hidden: previewPrompt?.hidden ?? true,
     ragHidden: previewPrompt?.ragHidden ?? true,
     ragIndexId: previewPrompt?.ragIndexId ?? null,
@@ -47,7 +64,8 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
 
     setLoading(true)
 
-    const { name, userInstructions, systemMessage, ragSystemMessage, hidden, ragHidden, ragIndexId } = form
+    const { name, userInstructions, systemMessage, ragSystemMessages, hidden, ragHidden, ragIndexId } = form
+    const ragSystemMessage = ragSystemMessages.join(' ')
 
     const messages: Message[] = ragIndexId && ragSystemMessage.length > 0 ? [{ role: 'system', content: ragSystemMessage }] : []
 

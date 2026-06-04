@@ -1,29 +1,58 @@
-import { Box, TextField, type TextFieldProps } from '@mui/material'
-import { GrayButton } from '../ChatV2/general/Buttons'
-import AddIcon from '@mui/icons-material/Add'
+import { Box, IconButton, TextField, Tooltip } from '@mui/material'
 import { t } from 'i18next'
+import { monospaceStyle } from '../../theme'
+import CancelIcon from '@mui/icons-material/Cancel'
+import DoneIcon from '@mui/icons-material/Done'
 
-type OpenableTextfieldProps = TextFieldProps & {
-  onAppend: (text: string) => void
+type OpenableTextfieldProps = {
+  value: string
+  onChange: (value: string) => void
+  onCancel: () => void
+  onSave: () => void
+  placeholder?: string
+  testId?: string
 }
 
-const OpenableTextfield = ({ onAppend, ...props }: OpenableTextfieldProps) => {
+const OpenableTextfield = ({
+  value,
+  onChange,
+  onCancel,
+  onSave,
+  placeholder = '',
+  testId = '',
+}: OpenableTextfieldProps) => {
   return (
-    <Box sx={{ mb: 2 }}>
-      <TextField sx={{ mb: 0 }} {...props} fullWidth />
-      <Box sx={{ display: 'flex', gap: 1, mt: 1, width: '100%' }}>
-        <GrayButton size="small" endIcon={<AddIcon />} onClick={() => onAppend(t('prompt:defaultRagMessage'))}>
-          {t('prompt:defaultRagLabel')}
-        </GrayButton>
-        <GrayButton size="small" endIcon={<AddIcon />} onClick={() => onAppend(t('prompt:enforceRagMessage'))}>
-          {t('prompt:enforceRagLabel')}
-        </GrayButton>
-        <GrayButton size="small" endIcon={<AddIcon />} onClick={() => onAppend(t('prompt:unknownRagMessage'))}>
-          {t('prompt:unknownRagLabel')}
-        </GrayButton>
+    <Box>
+      <TextField
+        variant="filled"
+        sx={{ '& textarea': monospaceStyle }}
+        slotProps={{
+          htmlInput: {
+            'data-testid': testId,
+          },
+        }}
+        fullWidth
+        multiline
+        minRows={3}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>
+        <Tooltip arrow placement='top' title={t('common:cancel')}>
+          <IconButton size="small" onClick={onCancel}>
+            <CancelIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip arrow placement='top' title={t('common:save')}>
+          <IconButton size="small" onClick={onSave}>
+          <DoneIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>  
       </Box>
     </Box>
   )
 }
+
 
 export default OpenableTextfield
