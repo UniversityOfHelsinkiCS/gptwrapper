@@ -162,7 +162,7 @@ const RagMessageEditor = ({ selectedMessages, onAddMessage, onRemoveMessage }: R
                     </IconButton>
                   </Tooltip>
                   <Tooltip arrow placement="bottom" title={t('prompt:deletePromptTooltip')}>
-                    <IconButton aria-label={t('common:remove')} size="small" onClick={() => onRemoveMessage(message)}>
+                    <IconButton aria-label={t('common:delete')} size="small" onClick={() => onRemoveMessage(message)}>
                       <ClearOutlinedIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
