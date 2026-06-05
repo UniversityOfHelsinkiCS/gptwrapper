@@ -7,6 +7,7 @@ import logger from '../../util/logger'
 import { ApplicationError } from '../../util/ApplicationError'
 import type { Message } from '../../../shared/chat'
 import { checkIamAccess } from '../../util/iams'
+import { Op } from 'sequelize'
 
 export const getUsage = async (userId: string) => {
   const user = await User.findByPk(userId, {
@@ -127,4 +128,27 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
     usage: chatInstanceUsage?.usageCount ?? 0,
     limit: chatInstance?.usageLimit ?? 0,
   }
+}
+
+export const getCourseUsages = async (user: UserType) => {
+  const chatInstanceUsages = await UserChatInstanceUsage.findAll({
+    where: {
+      userId: user.id,
+      usageCount: {
+        [Op.gt]: 0,
+      },
+    },
+    include: [
+      {
+        model: ChatInstance,
+        as: 'chatInstance',
+        attributes: ['name'],
+      },
+    ],
+  })
+
+  return chatInstanceUsages.map((ci) => ({
+    name: ci.chatInstance?.name,
+    usage: ci.usageCount,
+  }))
 }

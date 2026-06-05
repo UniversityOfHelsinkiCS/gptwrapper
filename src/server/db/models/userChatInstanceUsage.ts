@@ -1,6 +1,7 @@
-import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
+import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, NonAttribute } from 'sequelize'
 
 import { sequelize } from '../connection'
+import ChatInstance from './chatInstance'
 
 class UserChatInstanceUsage extends Model<InferAttributes<UserChatInstanceUsage>, InferCreationAttributes<UserChatInstanceUsage>> {
   declare id: CreationOptional<string>
@@ -12,6 +13,8 @@ class UserChatInstanceUsage extends Model<InferAttributes<UserChatInstanceUsage>
   declare usageCount: CreationOptional<number>
 
   declare totalUsageCount: CreationOptional<number>
+
+  declare chatInstance?: NonAttribute<ChatInstance>
 }
 
 UserChatInstanceUsage.init(
