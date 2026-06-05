@@ -229,6 +229,8 @@
   },
   "error": {
     "unexpected": "Ett oväntat fel inträffade",
+    "sessionExpired": "Sessionen har gått ut",
+    "pleaseReload": "Vänligen ladda om sidan",
     "noAccess": "Ingen tillgång",
     "noAccessInfo": "Du har för närvarande inte tillgång till CurreChat",
     "tooLargeFile": "Filen är för stor",

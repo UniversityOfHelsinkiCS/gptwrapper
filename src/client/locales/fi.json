@@ -254,6 +254,8 @@
   },
   "error": {
     "unexpected": "Odottomaton virhe tapahtui",
+    "sessionExpired": "Istunto on vanhentunut",
+    "pleaseReload": "Ole hyvä ja lataa sivu uudelleen",
     "noAccess": "Ei oikeuksia",
     "noAccessInfo": "Sinulla ei tällä hetkellä ole käyttöoikeuksia CurreChattiin",
     "tooLargeFile": "Tiedosto on liian suuri",

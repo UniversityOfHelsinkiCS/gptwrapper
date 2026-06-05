@@ -243,6 +243,8 @@
   },
   "error": {
     "unexpected": "An unexpected error occurred",
+    "sessionExpired": "Session expired",
+    "pleaseReload": "Please reload the page",
     "noAccess": "No access",
     "noAccessInfo": "You do not currently have access to CurreChat",
     "tooLargeFile": "The file is too large",
