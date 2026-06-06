@@ -381,7 +381,6 @@
     "created": "Notification created successfully",
     "updated": "Notification updated successfully",
     "deleted": "Notification deleted successfully",
-    "error": "Problem",
     "allLanguagesRequired": "Message is required in all languages (fi, en, sv)",
     "markdownSupported": "Markdown formatting is supported",
     "optionalDate": "Optional - leave empty for no date restriction",

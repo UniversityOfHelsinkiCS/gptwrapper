@@ -384,7 +384,6 @@
     "created": "Ilmoitus luotu onnistuneesti",
     "updated": "Ilmoitus päivitetty onnistuneesti",
     "deleted": "Ilmoitus poistettu onnistuneesti",
-    "error": "Ongelma",
     "allLanguagesRequired": "Viesti vaaditaan kaikilla kielillä (fi, en, sv)",
     "markdownSupported": "Markdown-muotoilu tuettu",
     "optionalDate": "Valinnainen - jätä tyhjäksi jos ei aikarajoitusta",
