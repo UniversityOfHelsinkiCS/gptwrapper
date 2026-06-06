@@ -4,7 +4,7 @@ import type { ChatInstance, RequestWithUser } from '../types'
 import logger from '../util/logger'
 import { getEnrolledCourseIds, getTeachedCourses, getEnrolledCourses } from '../services/chatInstances/access'
 import { User } from '../db/models'
-import { getUserStatus, getUsage } from '../services/chatInstances/usage'
+import { getUserStatus, getUsage, getCourseUsages, CourseUsage } from '../services/chatInstances/usage'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { getLastRestart } from '../util/lastRestart'
 import { ApplicationError } from '../util/ApplicationError'
@@ -23,12 +23,9 @@ userRouter.get('/login', async (req, res) => {
 
   const hasIamAccess = checkIamAccess(iamGroups)
 
-  const [enrolledCourseIds, teacherCourses] = await Promise.all([
-    getEnrolledCourseIds(user),
-    getTeachedCourses(user),
-  ])
+  const [enrolledCourseIds, teacherCourses] = await Promise.all([getEnrolledCourseIds(user), getTeachedCourses(user)])
 
-  const teacherCourseIds = teacherCourses.map(c => c.courseId) as string[]
+  const teacherCourseIds = teacherCourses.map((c) => c.courseId) as string[]
 
   const courses = enrolledCourseIds.concat(teacherCourseIds)
   // All authenticated users now have access to general chat
@@ -89,6 +86,25 @@ userRouter.get('/status', async (req, res) => {
     usage,
     limit,
   })
+  return
+})
+
+userRouter.get('/status/all', async (req, res) => {
+  const request = req as RequestWithUser
+  const { user } = request
+  const { id } = user
+
+  const generalUsage = await getUsage(id)
+  const limit = user.isPowerUser ? 10 * DEFAULT_TOKEN_LIMIT : DEFAULT_TOKEN_LIMIT
+
+  const courseUsages = await getCourseUsages(user)
+
+  const generalChat: CourseUsage = {
+    usage: generalUsage,
+    name: { en: 'General chat', sv: 'General chat', fi: 'Yleinen chat' },
+  }
+
+  res.send({ limit, courses: { generalChat, ...courseUsages } })
   return
 })
 
