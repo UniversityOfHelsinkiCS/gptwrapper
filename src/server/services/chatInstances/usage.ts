@@ -8,6 +8,7 @@ import { ApplicationError } from '../../util/ApplicationError'
 import type { Message } from '../../../shared/chat'
 import { checkIamAccess } from '../../util/iams'
 import { Op } from 'sequelize'
+import { Locales } from '@shared/types'
 
 export const getUsage = async (userId: string) => {
   const user = await User.findByPk(userId, {
@@ -130,7 +131,12 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
   }
 }
 
-export const getCourseUsages = async (user: UserType) => {
+export type CourseUsage = {
+  name: Locales
+  usage: number
+}
+
+export const getCourseUsages = async (user: UserType): Promise<CourseUsage[]> => {
   const chatInstanceUsages = await UserChatInstanceUsage.findAll({
     where: {
       userId: user.id,
@@ -148,7 +154,7 @@ export const getCourseUsages = async (user: UserType) => {
   })
 
   return chatInstanceUsages.map((ci) => ({
-    name: ci.chatInstance?.name,
-    usage: ci.usageCount,
+    name: ci.chatInstance!.name,
+    usage: ci.usageCount!,
   }))
 }
