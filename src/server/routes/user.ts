@@ -4,12 +4,13 @@ import type { ChatInstance, RequestWithUser } from '../types'
 import logger from '../util/logger'
 import { getEnrolledCourseIds, getTeachedCourses, getEnrolledCourses } from '../services/chatInstances/access'
 import { User } from '../db/models'
-import { getUserStatus, getUsage, getCourseUsages, CourseUsage } from '../services/chatInstances/usage'
+import { getUserStatus, getUsage, getCourseUsages } from '../services/chatInstances/usage'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { getLastRestart } from '../util/lastRestart'
 import { ApplicationError } from '../util/ApplicationError'
 import { UserPreferencesSchema } from '../../shared/user'
 import { checkIamAccess } from '../util/iams'
+import { CourseUsage } from '@shared/types'
 
 const isNowOrInFuture = ({ chatInstance }: { chatInstance: ChatInstance }) =>
   chatInstance.usageLimit > 0 && new Date() <= new Date(chatInstance.activityPeriod.endDate)
@@ -104,7 +105,7 @@ userRouter.get('/status/all', async (req, res) => {
     name: { en: 'General chat', sv: 'General chat', fi: 'Yleinen chat' },
   }
 
-  res.send({ limit, courses: { generalChat, ...courseUsages } })
+  res.send({ limit, courses: [generalChat, ...courseUsages] })
   return
 })
 
