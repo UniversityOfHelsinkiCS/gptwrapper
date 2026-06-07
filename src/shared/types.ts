@@ -91,3 +91,8 @@ export interface Statistic {
   promptCount: number
   ragIndicesCount: number
 }
+
+export type CourseUsage = {
+  name: Locales
+  usage: number
+}

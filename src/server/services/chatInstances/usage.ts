@@ -8,7 +8,7 @@ import { ApplicationError } from '../../util/ApplicationError'
 import type { Message } from '../../../shared/chat'
 import { checkIamAccess } from '../../util/iams'
 import { Op } from 'sequelize'
-import { Locales } from '@shared/types'
+import { CourseUsage } from '@shared/types'
 
 export const getUsage = async (userId: string) => {
   const user = await User.findByPk(userId, {
@@ -129,11 +129,6 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
     usage: chatInstanceUsage?.usageCount ?? 0,
     limit: chatInstance?.usageLimit ?? 0,
   }
-}
-
-export type CourseUsage = {
-  name: Locales
-  usage: number
 }
 
 export const getCourseUsages = async (user: UserType): Promise<CourseUsage[]> => {
