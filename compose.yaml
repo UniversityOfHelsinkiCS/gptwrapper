@@ -15,6 +15,7 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/auth/gcloud/application_default_credentials.json
     volumes:
       - ./:/opt/app-root/src
+      - /opt/app-root/src/node_modules
       - ${HOME}/.config/gcloud/application_default_credentials.json:/auth/gcloud/application_default_credentials.json:ro
     ports:
       - 3000:3000
@@ -83,6 +84,7 @@ services:
       - S3_SECRET_ACCESS_KEY=minioadmin
     volumes:
       - ./dalai/:/opt/app-root/src
+      - /opt/app-root/src/node_modules
       - dalai_data:/app
     ports:
       - 9090:9090
