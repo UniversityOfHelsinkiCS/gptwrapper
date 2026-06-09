@@ -182,6 +182,7 @@ const RagMessageEditor = ({ selectedMessages, onAddMessage, onRemoveMessage }: R
 
             return (
               <OpenableTextfield
+                key={message}
                 value={form.customMessage}
                 onChange={(value) => setForm((prev) => ({ ...prev, customMessage: value }))}
                 placeholder={t('prompt:addCustomRagMessage')}
