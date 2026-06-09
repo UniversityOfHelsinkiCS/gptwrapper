@@ -1,102 +1,87 @@
 import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager'
-import { AIMessage, AIMessageChunk, type BaseMessage, isHumanMessage, isSystemMessage, isToolMessage } from '@langchain/core/messages'
-import type { ChatGenerationChunk, ChatResult } from '@langchain/core/outputs'
-import { FakeStreamingChatModel } from '@langchain/core/utils/testing'
-import { basicTestContent, mathTestContent } from './mockContent'
-import { StructuredTool } from '@langchain/core/tools'
+import { BaseChatModel, type BaseChatModelParams } from '@langchain/core/language_models/chat_models'
+import { AIMessage, type BaseMessage, isHumanMessage, isSystemMessage, isToolMessage } from '@langchain/core/messages'
+import { ChatGenerationChunk, type ChatResult } from '@langchain/core/outputs'
+import type { StructuredTool } from '@langchain/core/tools'
+import { fakeModel } from 'langchain'
+import { basicTestContent, codeTestContent, mathTestContent } from './mockContent'
 
-/**
- * See https://github.com/langchain-ai/langchainjs/blob/fe79533d36ddf92b830ea231297b522fce1c538f/langchain-core/src/utils/testing/index.ts#L219
- *
- * FakeStreamingChatModel echoes the first input message out of the box.
- */
-export class MockModel extends FakeStreamingChatModel {
-  temperature?: number | null
-  midwayErrorInjected: boolean = false
+export class MockModel extends BaseChatModel {
+  tools: StructuredTool[]
 
-  constructor({ tools, temperature }: { tools: StructuredTool[]; temperature?: number | null }) {
-    super({
-      sleep: 5,
-    })
-    this.bindTools(tools)
-    this.temperature = temperature
+  constructor({ tools, ...rest }: { tools: StructuredTool[] } & BaseChatModelParams) {
+    super(rest)
+    this.tools = tools
   }
 
-  setupTestResponse(messages: BaseMessage[]) {
-    const firstSystemMessage = messages.find(isSystemMessage)
-    const lastHumanMessage = (messages.findLast(isHumanMessage)?.content ?? '') as string
-    const toolMessage = isToolMessage(messages[messages.length - 1]) ? messages[messages.length - 1] : null
-    // console.log(messages)
-    if (toolMessage) {
-      this.chunks = [new AIMessageChunk(`Ok! Got some great results from that mock tool call!: "${toolMessage.content}"`)]
-    } else if (firstSystemMessage && (firstSystemMessage.content as string).startsWith('mocktest')) {
-      // testing a system message
-      // Do nothing. FakeStreamingChatModel echoes the first message.
-    } else if (lastHumanMessage.startsWith('say ')) {
-      const msg = lastHumanMessage.replace('say ', '')
-      this.chunks = [new AIMessageChunk(msg)]
-    } else if (lastHumanMessage.startsWith('rag')) {
-      // Do a tool call
-      this.chunks = toolCallChunks
-    } else if (lastHumanMessage.startsWith('math')) {
-      // Do a tool call
-      this.chunks = mathChunks
-    } else if (lastHumanMessage.startsWith('temperature')) {
-      // Echo the temperature
-      this.chunks = [new AIMessageChunk(`Temperature: ${this.temperature}`)]
-    } else if (lastHumanMessage.startsWith('midway fail')) {
-      // Simulate an error midway through streaming
-      this.midwayErrorInjected = true
-      this.chunks = [
-        new AIMessageChunk('After four hundred years of computations, '),
-        // Error will be thrown after this chunk
-        new AIMessageChunk('I\'ve determined that the answer to the ultimate question of life, the universe, and everything is '),
-        new AIMessageChunk('42'),
-      ]
-    } else {
-      this.responses = defaultResponse
+  _llmType() {
+    return 'mock'
+  }
+
+  private buildFake(messages: BaseMessage[]) {
+    const lastHuman = (messages.findLast(isHumanMessage)?.content ?? '') as string
+    const firstSystem = messages.find(isSystemMessage)
+    const last = messages[messages.length - 1]
+
+    if (last && isToolMessage(last)) {
+      return fakeModel().respond(new AIMessage(`Ok! Got some great results from that mock tool call!: "${last.content}"`))
     }
+    if (firstSystem && (firstSystem.content as string).startsWith('mocktest')) {
+      return fakeModel().respond(new AIMessage(firstSystem.content as string))
+    }
+    if (lastHuman.startsWith('say ')) {
+      return fakeModel().respond(new AIMessage(lastHuman.replace('say ', '')))
+    }
+    if (lastHuman.startsWith('rag')) {
+      return fakeModel().respond(
+        new AIMessage({
+          content: '',
+          tool_calls: [{ name: 'mock_document_search', args: { query: 'mock test query' }, id: 'mock_document_search_id', type: 'tool_call' }],
+        }),
+      )
+    }
+    if (lastHuman.startsWith('math')) {
+      return fakeModel().respond(new AIMessage(mathTestContent))
+    }
+    if (lastHuman.startsWith('code')) {
+      return fakeModel().respond(new AIMessage(codeTestContent))
+    }
+    if (lastHuman.startsWith('midway fail') || lastHuman.startsWith('incomplete fail') || lastHuman.startsWith('fail')) {
+      // The new fakeModel can only throw at call start, not mid-stream.
+      return fakeModel().respond(new Error('Mock error injected'))
+    }
+    return fakeModel().respond(new AIMessage(basicTestContent))
   }
 
-  async _generate(messages: BaseMessage[], _options: this['ParsedCallOptions'], _runManager?: CallbackManagerForLLMRun): Promise<ChatResult> {
-    this.setupTestResponse(messages)
-    return super._generate(messages, _options, _runManager)
+  async _generate(messages: BaseMessage[], options: this['ParsedCallOptions'], _runManager?: CallbackManagerForLLMRun): Promise<ChatResult> {
+    const message = await this.buildFake(messages).invoke(messages, options)
+    return {
+      generations: [{ text: extractText(message.content), message }],
+    }
   }
 
   async *_streamResponseChunks(
     messages: BaseMessage[],
-    _options: this['ParsedCallOptions'],
+    options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun,
   ): AsyncGenerator<ChatGenerationChunk> {
-    this.setupTestResponse(messages)
-    let i = 0
-    for await (const chunk of super._streamResponseChunks(messages, _options, runManager)) {
-      if (this.midwayErrorInjected && i === 2) {
-        throw new Error('Midway error injected')
-      }
-      yield chunk
-      i++
+    for await (const chunk of await this.buildFake(messages).stream(messages, options)) {
+      const text = extractText(chunk.content)
+      await runManager?.handleLLMNewToken(text)
+      yield new ChatGenerationChunk({ message: chunk, text })
     }
   }
 }
 
-const defaultResponse = [new AIMessage(basicTestContent)]
-
-const toolCallChunks = [
-  new AIMessageChunk({
-    content: '',
-    tool_call_chunks: [
-      {
-        name: 'mock_document_search',
-        args: JSON.stringify({ query: 'mock test query' }),
-        id: 'mock_document_search_id',
-      },
-    ],
-  }),
-]
-
-const mathChunks = [
-  new AIMessageChunk({
-    content: mathTestContent,
-  }),
-]
+const extractText = (content: unknown): string => {
+  if (typeof content === 'string') {
+    return content
+  }
+  if (Array.isArray(content)) {
+    return content.reduce<string>((acc, block) => acc + extractText(block), '')
+  }
+  if (content && typeof content === 'object' && 'text' in content && typeof (content as { text: unknown }).text === 'string') {
+    return (content as { text: string }).text
+  }
+  return ''
+}

@@ -78,7 +78,6 @@ const prepareMessagesForLLM = (messages: ChatMessage[]): ChatMessage[] => {
  * This function can perform two chat turns if the first one results in tool calls.
  *
  * @param model The name of the model to use.
- * @param temperature The temperature for the model's responses.
  * @param systemMessage The system message to prepend to the chat history.
  * @param chatMessages The history of chat messages.
  * @param promptMessages The messages defined in the prompt, will be prepended to the chat history.
@@ -89,7 +88,6 @@ const prepareMessagesForLLM = (messages: ChatMessage[]): ChatMessage[] => {
  */
 export const streamChat = async ({
   model,
-  temperature,
   systemMessage,
   chatMessages,
   promptMessages = [],
@@ -100,7 +98,6 @@ export const streamChat = async ({
   tokenLimit,
 }: {
   model: ValidModelName
-  temperature?: number
   systemMessage: string
   chatMessages: ChatMessage[]
   promptMessages?: Message[]
@@ -134,7 +131,7 @@ export const streamChat = async ({
 
   const instructionMessage = modelConfigHasInstructions(modelConfig) ? [{ role: 'system' as const, content: modelConfig.instructions }] : []
 
-  const chatModel = getChatModel(modelConfig, tools, temperature).withConfig({
+  const chatModel = getChatModel(modelConfig, tools).withConfig({
     callbacks: [
       {
         handleLLMError(err) {
@@ -322,10 +319,9 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
  * Can be a MockModel for testing or an AzureChatOpenAI model.
  * @param modelConfig The configuration for the model.
  * @param tools The structured tools the model can use.
- * @param temperature The temperature for the model's responses.
  * @returns A chat model instance.
  */
-const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[], temperature?: number): ChatModel => {
+const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[]): ChatModel => {
   switch (modelConfig.provider) {
     case ModelProvider.Azure: {
       const azureModel = getAzureChatOpenAI(modelConfig.name)
@@ -338,7 +334,7 @@ const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[], tempera
       return tools.length > 0 ? vertexModel.bindTools(tools) : vertexModel
     }
     case ModelProvider.Mock:
-      return new MockModel({ tools, temperature })
+      return new MockModel({ tools })
     default:
       throw new Error(`Unknown model provider: ${modelConfig.provider}`)
   }
