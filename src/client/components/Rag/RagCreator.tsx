@@ -63,7 +63,7 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
             fullWidth
             required
             slotProps={{
-              htmlInput: { minLength: 5, 'data-testid': 'ragIndexNameInput' },
+              htmlInput: { minLength: 5, maxLength: 100, 'data-testid': 'ragIndexNameInput' },
             }}
             sx={{ mt: '2rem' }}
           />
