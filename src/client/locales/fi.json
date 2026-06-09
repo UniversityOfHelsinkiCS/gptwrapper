@@ -550,6 +550,7 @@
     "selectedModelLabel": "Alustuksen valittu kielimalli",
     "systemMessagePlaceholder": "Esim. Olet avulias avustaja.",
     "promptSourceMaterialData": "Lähdemateriaali",
+    "sourceMaterialFileCount": "{{count}} tiedostoa",
     "selectedSourceMaterial": "Valittu lähdemateriaali",
     "modelSourceMaterialInstructions": "Kielimallin lähdemateriaaliohjeistus",
     "promptDescription": "Kuvaus",

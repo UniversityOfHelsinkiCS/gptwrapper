@@ -3,7 +3,12 @@ import { ContentCopyOutlined, EditOutlined, ClearOutlined, VisibilityOffOutlined
 import ExpandLess from '@mui/icons-material/ExpandLess'
 import ExpandMore from '@mui/icons-material/ExpandMore'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
-import { Box, Divider, List, ListItemButton, ListItem, ListItemText, Typography, Paper, Button, Tooltip, Alert, Collapse } from '@mui/material'
+import { Box, Divider, List, ListItemButton, ListItem, ListItemText, ListItemIcon, Typography, Paper, Button, Tooltip, Alert, Collapse } from '@mui/material'
+import FolderOutlined from '@mui/icons-material/FolderOutlined'
+import PictureAsPdfOutlined from '@mui/icons-material/PictureAsPdfOutlined'
+import ImageOutlined from '@mui/icons-material/ImageOutlined'
+import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined'
+import InsertDriveFileOutlined from '@mui/icons-material/InsertDriveFileOutlined'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -27,6 +32,34 @@ import { useRagIndexDetails } from '../Rag/api.ts'
 import { orderBy } from 'lodash'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 
+const formatFileSize = (bytes: number) => {
+  if (!bytes) return ''
+  if (bytes < 1024) return `${bytes} B`
+  const kb = bytes / 1024
+  if (kb < 1024) return `${kb.toFixed(0)} kB`
+  return `${(kb / 1024).toFixed(1)} MB`
+}
+
+const getFileTypeLabel = (fileType: string) => {
+  if (!fileType) return ''
+  if (fileType === 'application/pdf') return 'PDF'
+  if (fileType.startsWith('image/')) return fileType.replace('image/', '').toUpperCase()
+  if (fileType.includes('wordprocessingml') || fileType.includes('msword')) return 'Word'
+  if (fileType.includes('spreadsheet') || fileType.includes('excel')) return 'Excel'
+  if (fileType.includes('presentation') || fileType.includes('powerpoint')) return 'PowerPoint'
+  if (fileType === 'text/plain') return 'TXT'
+  if (fileType === 'text/markdown') return 'Markdown'
+  if (fileType === 'text/csv') return 'CSV'
+  return (fileType.split('/').pop() ?? fileType).toUpperCase()
+}
+
+const getFileIcon = (fileType: string) => {
+  if (fileType === 'application/pdf') return <PictureAsPdfOutlined fontSize="small" color="error" />
+  if (fileType?.startsWith('image/')) return <ImageOutlined fontSize="small" color="primary" />
+  if (fileType?.includes('word') || fileType?.includes('document') || fileType?.startsWith('text/')) return <DescriptionOutlined fontSize="small" color="info" />
+  return <InsertDriveFileOutlined fontSize="small" color="action" />
+}
+
 const PromptModal = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -48,6 +81,12 @@ const PromptModal = () => {
 
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
   const rag = ragIndices?.find((r) => r.id === previewPrompt?.ragIndexId)
+
+  const completedRagFiles = orderBy(
+    (ragDetails?.ragFiles ?? []).filter((file) => file.pipelineStage === 'completed'),
+    [(file) => Date.parse(file.createdAt)],
+    ['desc'],
+  )
 
   const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
 
@@ -345,39 +384,51 @@ const PromptModal = () => {
                       >{`${t(previewPrompt.ragHidden ? 'prompt:promptHidden' : 'prompt:promptNotHidden')}`}</Alert>
                     )}
                   {rag ? (
-                    <Box sx={{ mb: 5, flexDirection: 'column', display: 'flex', gap: 1, mt: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2, backgroundColor: alpha(theme.palette.primary.main, 0.08) }}>
-                      {(ragDetails && ragDetails.ragFiles.some((file) => file.pipelineStage === 'completed') && (amongResponsibles || user?.isAdmin)) ? (
-                      <List disablePadding>                      
-                        <ListItemButton onClick={() => setShowRagFiles((open) => !open)} sx={{ px: 1, borderRadius: 1 }}>
-                          <ListItemText
-                            primary={rag.metadata.name}
-                            slotProps={{ primary: { variant: 'body2' } }}
-                          />
-                          {showRagFiles ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
-                        </ListItemButton>
-                        <Collapse in={showRagFiles} timeout="auto" unmountOnExit>
-                          <List component="div" disablePadding>
-                            {orderBy(ragDetails?.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (file.pipelineStage === 'completed' ? (
-                              <ListItem key={file.id} sx={{ pl: 4, py: 0.25, borderRadius: 1 }}>
-                                <ListItemText
-                                  primary={file.filename}
-                                  slotProps={{ primary: { variant: 'body2' } }}
-                                />
-                              </ListItem>
-                            ) : null))}
-                          </List>
-                        </Collapse>
-                      </List>
+                    <Box sx={{ mb: 5, mt: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden', backgroundColor: alpha(theme.palette.primary.main, 0.08) }}>
+                      {(completedRagFiles.length > 0 && (amongResponsibles || user?.isAdmin)) ? (
+                        <List disablePadding>
+                          <ListItemButton onClick={() => setShowRagFiles((open) => !open)} sx={{ px: 2, py: 1.5 }}>
+                            <ListItemIcon sx={{ minWidth: 40 }}>
+                              <FolderOutlined color="secondary" />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={rag.metadata.name}
+                              secondary={t('prompt:sourceMaterialFileCount', { count: completedRagFiles.length })}
+                              slotProps={{ primary: { variant: 'body1', fontWeight: 'bold', sx: { wordBreak: 'break-word' } } }}
+                            />
+                            {showRagFiles ? <ExpandLess /> : <ExpandMore />}
+                          </ListItemButton>
+                          <Collapse in={showRagFiles} timeout="auto" unmountOnExit>
+                            <Divider />
+                            <List component="div" disablePadding>
+                              {completedRagFiles.map((file) => (
+                                <ListItem key={file.id} sx={{ px: 2, py: 1 }}>
+                                  <ListItemIcon sx={{ minWidth: 40 }}>{getFileIcon(file.fileType)}</ListItemIcon>
+                                  <ListItemText
+                                    primary={file.filename}
+                                    secondary={[getFileTypeLabel(file.fileType), formatFileSize(file.fileSize)].filter(Boolean).join(' · ')}
+                                    slotProps={{
+                                      primary: { variant: 'body2', sx: { wordBreak: 'break-word' } },
+                                      secondary: { variant: 'caption' },
+                                    }}
+                                  />
+                                </ListItem>
+                              ))}
+                            </List>
+                          </Collapse>
+                        </List>
                       ) : (
-                        <Typography variant="body2">
-                        {previewPrompt.ragHidden && !(amongResponsibles || user?.isAdmin) ? t('common:hiddenRag') : rag.metadata.name}
-                      </Typography>
-
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 2 }}>
+                          <FolderOutlined color="secondary" />
+                          <Typography variant="body2">
+                            {previewPrompt.ragHidden && !(amongResponsibles || user?.isAdmin) ? t('common:hiddenRag') : rag.metadata.name}
+                          </Typography>
+                        </Box>
                       )}
                     </Box>
                   ) : (
                     <Box sx={{ mb: 3, ml: 2, mt: 5 }}>
-                      <Typography variant="body2">{t('prompt:noRag')}</Typography> 
+                      <Typography variant="body2">{t('prompt:noRag')}</Typography>
                     </Box>
                   )}
                 </Paper>

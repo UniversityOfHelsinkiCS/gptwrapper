@@ -549,6 +549,7 @@
     "selectedModelLabel": "Selected model for the prompt",
     "systemMessagePlaceholder": "e.g., You are a helpful assistant.",
     "promptSourceMaterialData": "Source material",
+    "sourceMaterialFileCount": "{{count}} files",
     "selectedSourceMaterial": "Selected source material",
     "modelSourceMaterialInstructions": "Source material instructions for the model",
     "promptDescription": "Description",

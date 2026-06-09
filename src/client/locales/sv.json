@@ -520,6 +520,7 @@
     "selectedModelLabel": "Vald modell för prompten",
     "systemMessagePlaceholder": "t.ex. Du är en hjälpsam assistent.",
     "promptSourceMaterialData": "Källmaterial",
+    "sourceMaterialFileCount": "{{count}} filer",
     "selectedSourceMaterial": "Valt källmaterial",
     "modelSourceMaterialInstructions": "Källmaterialsinstruktioner för modellen",
     "promptDescription": "Beskrivning",
