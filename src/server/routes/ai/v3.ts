@@ -88,7 +88,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   }
 
   const model = generationInfo.model
-  const temperature = generationInfo.temperature
 
   let prompt: Prompt | null = null
 
@@ -145,7 +144,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     systemMessage,
     promptMessages: prompt?.messages,
     model,
-    temperature: temperature ?? undefined,
     ignoredWarnings: options.ignoredWarnings,
     tools,
     writeEvent,
