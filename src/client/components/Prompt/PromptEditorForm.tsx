@@ -157,7 +157,7 @@ const RagSettingsSection = () => {
                 onChange={(e) =>
                   setForm((prev) => ({
                     ...prev,
-                    ragIndexId: e.target.value ? Number(e.target.value) : undefined,
+                    ragIndexId: e.target.value ? Number(e.target.value) : null,
                   }))
                 }
                 displayEmpty

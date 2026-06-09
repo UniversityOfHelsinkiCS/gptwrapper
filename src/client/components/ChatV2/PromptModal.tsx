@@ -1,7 +1,9 @@
 import { PUBLIC_URL } from '@config'
 import { ContentCopyOutlined, EditOutlined, ClearOutlined, VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material'
+import ExpandLess from '@mui/icons-material/ExpandLess'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
-import { Box, Divider, List, ListItemButton, ListItemText, Typography, Paper, Button, Tooltip, Alert } from '@mui/material'
+import { Box, Divider, List, ListItemButton, ListItem, ListItemText, Typography, Paper, Button, Tooltip, Alert, Collapse } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -21,7 +23,8 @@ import { BlueButton, OutlineButtonBlue } from './general/Buttons.tsx'
 import ConfirmDialog from './general/ConfirmDialog'
 import { monospaceStyle } from '../../theme'
 import BookmarksIcon from '@mui/icons-material/Bookmarks'
-import { useCourseRagIndices } from '../../hooks/useRagIndices'
+import { useRagIndexDetails } from '../Rag/api.ts'
+import { orderBy } from 'lodash'
 
 const PromptModal = () => {
   const theme = useTheme()
@@ -36,14 +39,13 @@ const PromptModal = () => {
   const previewPrompt = previewPrompts[tab]
   const setPreviewPrompt = (prompt: PromptType | undefined) => setPreviewPrompts((prev) => ({ ...prev, [tab]: prompt }))
   const [isEditing, setIsEditing] = useState(false)
+  const [showRagFiles, setShowRagFiles] = useState(false)
+  const { data: rag} = useRagIndexDetails(previewPrompt?.ragIndexId ?? null)
 
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
 
   const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
-
-  const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
-  const rag = ragIndices?.find((r) => r.id === previewPrompt?.ragIndexId)
 
   const onDone = () => {
     setIsEditing(false)
@@ -107,6 +109,10 @@ const PromptModal = () => {
       setPreviewPrompt(currentPrompt)
     }
   }, [currentPrompts])
+
+  useEffect(() => {
+    setShowRagFiles(false)
+  }, [previewPrompt?.id])
 
   const renderPromptListItem = (prompt: PromptType) => (
     <ListItemButton
@@ -336,9 +342,27 @@ const PromptModal = () => {
                     )}
                   {rag ? (
                     <Box sx={{ mb: 5, flexDirection: 'column', display: 'flex', gap: 1, mt: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2, backgroundColor: alpha(theme.palette.primary.main, 0.08) }}>
-                      <Typography variant="body2">
-                        {previewPrompt.ragHidden && !(amongResponsibles || user?.isAdmin) ? t('common:hiddenRag') : rag.metadata.name}
-                      </Typography>
+                      <List disablePadding>
+                        <ListItemButton onClick={() => setShowRagFiles((open) => !open)} sx={{ px: 1, borderRadius: 1 }}>
+                          <ListItemText
+                            primary={previewPrompt.ragHidden && !(amongResponsibles || user?.isAdmin) ? t('common:hiddenRag') : rag.metadata.name}
+                            slotProps={{ primary: { variant: 'body2' } }}
+                          />
+                          {showRagFiles ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
+                        </ListItemButton>
+                        <Collapse in={showRagFiles} timeout="auto" unmountOnExit>
+                          <List component="div" disablePadding>
+                            {orderBy(rag.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (file.pipelineStage === 'completed' ? (
+                              <ListItem key={file.id} sx={{ pl: 4, py: 0.25, borderRadius: 1 }}>
+                                <ListItemText
+                                  primary={file.filename}
+                                  slotProps={{ primary: { variant: 'body2' } }}
+                                />
+                              </ListItem>
+                            ) : null))}
+                          </List>
+                        </Collapse>
+                      </List>
                     </Box>
                   ) : (
                     <Box sx={{ mb: 3, ml: 2, mt: 5 }}>
