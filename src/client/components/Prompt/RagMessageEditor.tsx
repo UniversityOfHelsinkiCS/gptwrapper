@@ -1,5 +1,5 @@
 import { Box, IconButton, Paper, Stack, Typography, Tooltip, FormControlLabel, Switch } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { GrayButton } from '../ChatV2/general/Buttons'
 import AddIcon from '@mui/icons-material/Add'
 import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined'
@@ -9,6 +9,7 @@ import { useTheme } from '@mui/material'
 import { monospaceStyle } from '../../theme'
 import { Done, EditOutlined } from '@mui/icons-material'
 import OpenableTextfield from '../common/OpenableTextfield'
+import { usePromptEditorForm } from './context'
 
 type RagMessageEditorProps = {
   selectedMessages: string[]
@@ -19,7 +20,7 @@ type RagMessageEditorProps = {
 const RagMessageEditor = ({ selectedMessages, onAddMessage, onRemoveMessage }: RagMessageEditorProps) => {
   const theme = useTheme()
   const [showCustomEditor, setShowCustomEditor] = useState(false)
-  const [customText, setCustomText] = useState('')
+  const { form, setForm } = usePromptEditorForm()
   const [showMessages, setShowMessages] = useState(false)
 
   const options = [
@@ -39,11 +40,6 @@ const RagMessageEditor = ({ selectedMessages, onAddMessage, onRemoveMessage }: R
 
     return indexA - indexB
   })
-
-  useEffect(() => {
-    setCustomText(existingCustom ?? '')
-  }, [existingCustom])
-
 
   return (
     <Box sx={{ mb: 2 }}>
@@ -157,12 +153,26 @@ const RagMessageEditor = ({ selectedMessages, onAddMessage, onRemoveMessage }: R
                     </Typography>
                   </Box>
                   <Tooltip arrow placement="bottom" title={t('prompt:editPromptTooltip')}>
-                    <IconButton size="small" onClick={() => setShowCustomEditor(true)} color="primary" data-testid="edit-custom-rag">
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setForm((prev) => (prev.customMessage ? prev : { ...prev, customMessage: message }))
+                        setShowCustomEditor(true)
+                      }}
+                      color="primary"
+                      data-testid="edit-custom-rag"
+                    >
                       <EditOutlined fontSize="small" />
                     </IconButton>
                   </Tooltip>
                   <Tooltip arrow placement="bottom" title={t('prompt:deletePromptTooltip')}>
-                    <IconButton aria-label={t('common:delete')} size="small" onClick={() => onRemoveMessage(message)}>
+                    <IconButton 
+                      aria-label={t('common:delete')} 
+                      size="small" 
+                      onClick={() => {
+                        onRemoveMessage(message)
+                        setForm((prev) => ({ ...prev, customMessage: '' }))
+                      }}>
                       <ClearOutlinedIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
@@ -172,16 +182,16 @@ const RagMessageEditor = ({ selectedMessages, onAddMessage, onRemoveMessage }: R
 
             return (
               <OpenableTextfield
-                value={customText}
-                onChange={setCustomText}
+                value={form.customMessage}
+                onChange={(value) => setForm((prev) => ({ ...prev, customMessage: value }))}
                 placeholder={t('prompt:addCustomRagMessage')}
                 onCancel={() => {
                   setShowCustomEditor(false)
-                  setCustomText(existingCustom ?? '')
+                  setForm((prev) => ({ ...prev, customMessage: existingCustom ?? '' }))
                 }}
                 onSave={() => {
-                  const trimmed = customText.trim()
-                  if (!trimmed) {
+                  const trimmed = form.customMessage.trim()
+                  if (trimmed.length === 0) {
                     if (existingCustom) onRemoveMessage(existingCustom)
                     setShowCustomEditor(false)
                     return
@@ -228,19 +238,19 @@ const RagMessageEditor = ({ selectedMessages, onAddMessage, onRemoveMessage }: R
       {!existingCustom && showCustomEditor && (
         <Box sx={{ mt: 2 }}>
           <OpenableTextfield
-            value={customText}
-            onChange={setCustomText}
+            value={form.customMessage}
+            onChange={(value) => setForm((prev) => ({ ...prev, customMessage: value }))}
             placeholder={t('prompt:addCustomRagMessage')}
             onCancel={() => {
               setShowCustomEditor(false)
-              setCustomText('')
+              setForm((prev) => ({ ...prev, customMessage: '' }))
             }}
             onSave={() => {
-              const trimmed = customText.trim()
-              if (!trimmed) {
+              const trimmed = form.customMessage.trim()
+              if (trimmed.length === 0) {
                 if (existingCustom) onRemoveMessage(existingCustom)
                 setShowCustomEditor(false)
-                setCustomText('')
+                setForm((prev) => ({ ...prev, customMessage: '' }))
                 return
               }
 
@@ -254,7 +264,6 @@ const RagMessageEditor = ({ selectedMessages, onAddMessage, onRemoveMessage }: R
               }
 
               setShowCustomEditor(false)
-              setCustomText('')
             }}
             testId="add-custom-rag-input"
           />

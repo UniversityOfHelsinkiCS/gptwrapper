@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
+import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
@@ -42,17 +43,29 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
   if (personal) type = 'PERSONAL'
   if (previewPrompt) type = previewPrompt.type
 
-  const [form, setForm] = useState<PromptEditorFormState>({
+  const initialRagSystemMessages = previewPrompt
+    ? getInitialRagSystemMessages((previewPrompt.messages?.find((m: Message) => m.role === 'system')?.content as string) || '')
+    : [t('prompt:defaultRagMessage')]
+  const initialCustomMessage = initialRagSystemMessages.find((message) => !ragMessages.includes(message)) ?? ''
+
+  const initialForm: PromptEditorFormState = {
     name: previewPrompt?.name ?? '',
     userInstructions: previewPrompt?.userInstructions ?? '',
     systemMessage: previewPrompt?.systemMessage ?? '',
-    ragSystemMessages: previewPrompt
-      ? getInitialRagSystemMessages((previewPrompt.messages?.find((m: Message) => m.role === 'system')?.content as string) || '')
-      : [t('prompt:defaultRagMessage')],
+    ragSystemMessages: initialRagSystemMessages,
+    customMessage: initialCustomMessage,
     hidden: previewPrompt?.hidden ?? true,
     ragHidden: previewPrompt?.ragHidden ?? true,
     ragIndexId: previewPrompt?.ragIndexId ?? null,
-  })
+  }
+
+  const cacheKey = `promptEditorForm:${previewPrompt ? `edit:${previewPrompt.id}` : `new:${type}:${courseId}`}`
+  const [form, setForm] = useLocalStorageState<PromptEditorFormState>(cacheKey, initialForm)
+
+  const clearCachedForm = () => {
+    localStorage.removeItem(cacheKey)
+    setForm(initialForm)
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -96,6 +109,7 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
         })
         enqueueSnackbar(t('prompt:createdPrompt', { name }), { variant: 'success' })
       }
+      clearCachedForm()
       onDone()
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
@@ -123,7 +137,13 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
           <DialogActions>
             <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
               {loading && <CircularProgress color="secondary" />}
-              <OutlineButtonBlue type="button" onClick={onDone}>
+              <OutlineButtonBlue
+                type="button"
+                onClick={() => {
+                  clearCachedForm()
+                  onDone()
+                }}
+              >
                 {t('common:cancel')}
               </OutlineButtonBlue>
               <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>

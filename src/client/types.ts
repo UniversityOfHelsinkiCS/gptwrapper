@@ -63,6 +63,7 @@ export type PromptInfo = Pick<Prompt, 'name' | 'systemMessage' | 'hidden' | 'typ
 export type PromptEditorFormState = Pick<Prompt, 'name' | 'systemMessage' | 'hidden' | 'ragHidden'> & {
   userInstructions: string
   ragSystemMessages: string[]
+  customMessage: string
   ragIndexId?: number | null
 }
 
