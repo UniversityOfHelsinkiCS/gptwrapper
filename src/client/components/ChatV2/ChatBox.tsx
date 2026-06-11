@@ -15,6 +15,7 @@ import { SendPreferenceConfiguratorModal, ShiftEnterForNewline, ShiftEnterToSend
 import { useKeyboardCommands } from './useKeyboardCommands'
 import { WarningType } from '@shared/aiApi'
 import ModelSelector from './ModelSelector'
+import UsageSelector from './UsageSelector'
 import { ValidModelName } from '../../../config'
 
 export const ChatBox = ({
@@ -128,8 +129,9 @@ export const ChatBox = ({
 
   return (
     <Box sx={{ mb: 1 }}>
-      <Box sx={{ mb: 0.75, pl: 0.5 }}>
+      <Box sx={{ mb: 0.75, px: 0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
         <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} />
+        <UsageSelector />
       </Box>
       <Box
         sx={{

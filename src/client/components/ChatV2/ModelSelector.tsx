@@ -45,10 +45,7 @@ const ModelSelector = ({
     return filterAvailableModels(models, isTokenLimitExceeded, user?.isAdmin)
   }, [isTokenLimitExceeded, user, activePrompt])
 
-  const descriptionKeyByModel = React.useMemo(
-    () => Object.fromEntries(validModels.map((m) => [m.name, m.descriptionKey])),
-    [],
-  )
+  const descriptionKeyByModel = React.useMemo(() => Object.fromEntries(validModels.map((m) => [m.name, m.descriptionKey])), [])
 
   const displayModel = currentModel
   const disabled = availableModels.length === 1
@@ -133,14 +130,16 @@ const ModelSelector = ({
           const active = model === displayModel
           const descriptionKey = descriptionKeyByModel[model]
           return (
-            <MenuItem key={model} value={model} onClick={() => handleSelect(model)} data-testid={`${model}-option`} sx={{ gap: 1, py: 1, px: 1.75, alignItems: 'flex-start' }}>
+            <MenuItem
+              key={model}
+              value={model}
+              onClick={() => handleSelect(model)}
+              data-testid={`${model}-option`}
+              sx={{ gap: 1, py: 1, px: 1.75, alignItems: 'flex-start' }}
+            >
               <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
                 <Typography sx={{ fontSize: '0.875rem', fontWeight: active ? 600 : 400 }}>{model}</Typography>
-                {descriptionKey && (
-                  <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.3 }}>
-                    {t(descriptionKey)}
-                  </Typography>
-                )}
+                {descriptionKey && <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.3 }}>{t(descriptionKey)}</Typography>}
               </Box>
               {isFree(model) && (
                 <Chip
