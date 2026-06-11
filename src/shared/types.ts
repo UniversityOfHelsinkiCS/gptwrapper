@@ -93,6 +93,8 @@ export interface Statistic {
 }
 
 export type CourseUsage = {
+  courseId: string | null
   name: Locales
   usage: number
+  limit: number
 }
