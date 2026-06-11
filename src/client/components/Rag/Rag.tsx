@@ -1,23 +1,27 @@
 import React from 'react'
 import { Box, Table, TableHead, TableBody, TableRow, TableCell, Link, TableContainer } from '@mui/material'
-import { Link as RouterLink, useParams, useSearchParams } from 'react-router-dom'
+import { Link as RouterLink, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import useCourse from '../../hooks/useCourse'
 import { RagCreator } from './RagCreator'
 import { useTranslation } from 'react-i18next'
 import { RagIndex } from './RagIndex'
 import { RagFile } from './RagFile'
-import { GrayButton, LinkButtonHoc } from '../ChatV2/general/Buttons'
+import { GrayButton, LinkButtonHoc, OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import { Settings } from '@mui/icons-material'
+import { ArrowBack } from '@mui/icons-material'
+import { createRagSearchParams, getRagNavigationState } from './ragNavigation'
 
 const Rag: React.FC = () => {
   const { t } = useTranslation()
   const { courseId } = useParams<{ courseId: string }>()
+  const navigate = useNavigate()
   const { data: chatInstance } = useCourse(courseId)
   const [searchParams, _setSearchParams] = useSearchParams()
+  const { indexId, fileId, returnToEditor, returnPromptId, promptTab } = getRagNavigationState(searchParams)
 
-  const index = Number(searchParams.get('index')) !== 0
-  const file = Number(searchParams.get('file')) !== 0
+  const index = indexId !== undefined
+  const file = fileId !== undefined
 
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, true)
 
@@ -27,6 +31,24 @@ const Rag: React.FC = () => {
       {index && file && <RagFile />}
       {!index && !file && (
         <>
+          {returnToEditor && (
+            <Box sx={{ pb: 2 }}>
+              <OutlineButtonBlack
+                onClick={() =>
+                  navigate(
+                    `/${courseId}/prompts?${createRagSearchParams({
+                      returnToEditor,
+                      returnPromptId,
+                      promptTab,
+                    })}`,
+                  )
+                }
+                data-testid="back-to-prompt-editor"
+              >
+                <ArrowBack />
+              </OutlineButtonBlack>
+            </Box>
+          )}
           {chatInstance?.id && (
             <Box display="flex" justifyContent="space-between" sx={{ pb: 2 }}>
               <RagCreator chatInstance={chatInstance} />
@@ -52,7 +74,17 @@ const Rag: React.FC = () => {
                     <TableCell>{ragIndex.metadata?.language}</TableCell>
                     <TableCell>{ragIndex.ragFileCount}</TableCell>
                     <TableCell>
-                      <Link to={`?index=${ragIndex.id}`} component={RouterLink} sx={{ ml: 'auto' }} data-testid="ragIndexDetails">
+                      <Link
+                        to={`?${createRagSearchParams({
+                          indexId: ragIndex.id,
+                          returnToEditor,
+                          returnPromptId,
+                          promptTab,
+                        })}`}
+                        component={RouterLink}
+                        sx={{ ml: 'auto' }}
+                        data-testid="ragIndexDetails"
+                      >
                         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                           {t('rag:viewDetails')} <Settings fontSize="small" />
                         </Box>

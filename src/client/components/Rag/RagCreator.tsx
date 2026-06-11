@@ -13,14 +13,17 @@ import {
   TextField,
 } from '@mui/material'
 import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import type { Course } from '../../types'
 import { useTranslation } from 'react-i18next'
 import { RAG_LANGUAGES } from '@shared/lang'
+import { createRagSearchParams, getRagNavigationState } from './ragNavigation'
 
 export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const { returnToEditor, returnPromptId, promptTab } = getRagNavigationState(searchParams)
   const createIndexMutation = useCreateRagIndexMutation()
   const [indexName, setIndexName] = useState('')
   const [language, setLanguage] = useState<'Finnish' | 'English' | 'Swedish'>('English')
@@ -45,7 +48,14 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
                 language,
               })
               setIndexName('')
-              navigate(`?index=${newIndex.id}`)
+              navigate(
+                `?${createRagSearchParams({
+                  indexId: newIndex.id,
+                  returnToEditor,
+                  returnPromptId,
+                  promptTab,
+                })}`,
+              )
               setOpen(false)
             },
           },

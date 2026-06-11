@@ -1,6 +1,6 @@
 import { Box, Link, styled, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 import { IngestionJobStatus, IngestionPipelineStageKey } from '@shared/ingestion'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useSearchParams } from 'react-router-dom'
 import type { RagFileAttributes } from '@shared/types'
 import CloudUpload from '@mui/icons-material/CloudUpload'
 import DownloadDone from '@mui/icons-material/DownloadDone'
@@ -11,6 +11,7 @@ import { locales } from '../../locales/locales'
 import { useTranslation } from 'react-i18next'
 import { formatDistanceStrict } from 'date-fns'
 import { CircularProgressWithLabel } from '../common/CircularProgressWithLabel'
+import { createRagSearchParams, getRagNavigationState } from './ragNavigation'
 
 type FileStage = IngestionPipelineStageKey | 'uploading' | 'queued'
 
@@ -84,6 +85,8 @@ export const RagFileInfo: React.FC<{
   uploadProgress?: number
 }> = ({ file, index, status, uploadProgress }) => {
   const { t, i18n } = useTranslation()
+  const [searchParams] = useSearchParams()
+  const { returnToEditor, returnPromptId, promptTab } = getRagNavigationState(searchParams)
   const usedAdvancedParsing = !!(file.metadata as Record<string, unknown> | null)?.advancedParsing
   const isPdf = file.fileType === 'application/pdf'
   const isImage = file.fileType === 'image/png'
@@ -103,10 +106,22 @@ export const RagFileInfo: React.FC<{
 
   const progressIcon = ProgressIcon[fileStage]
 
+
+
   return (
     <TableRow>
       <TableCell sx={{ maxWidth: 200, wordBreak: 'break-word' }}>
-        <Link to={`?index=${index}&file=${file.id}`} component={RouterLink}>
+
+        <Link
+          to={`?${createRagSearchParams({
+            indexId: index,
+            fileId: file.id,
+            returnToEditor,
+            returnPromptId,
+            promptTab,
+          })}`}
+          component={RouterLink}
+        >
           {file.filename}
         </Link>
       </TableCell>

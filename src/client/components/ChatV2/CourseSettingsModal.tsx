@@ -3,7 +3,7 @@ import { Badge, Box, Button, Divider, Stack, Tab, Table, TableBody, TableCell, T
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, Route, Routes, useParams } from 'react-router-dom'
+import { Link, Route, Routes, useParams, useSearchParams } from 'react-router-dom'
 import { PUBLIC_URL } from '../../../config'
 import { useCourseUsage } from '../../hooks/useChatInstanceUsage'
 import useCourse, { useCourseEnrolments } from '../../hooks/useCourse'
@@ -34,6 +34,9 @@ export const CourseSettingsModal = () => {
   const { user, isLoading: userLoading } = useCurrentUser()
   const { data: chatInstance, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(courseId)
   const { data: initialEnrolments } = useCourseEnrolments(courseId)
+
+  const [searchParams, _setSearchParams] = useSearchParams()
+  const returnToEditor = searchParams.get('editPrompt') === '1'
 
   useEffect(() => {
     if (isCourseSuccess) {
@@ -167,32 +170,40 @@ export const CourseSettingsModal = () => {
 
   return (
     <Box sx={{ flex: 1, overflow: 'auto' }}>
-      <RouterTabs>
-        <Tab label={t('common:settings')} to={`/${courseId}/course`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
-        <Tab label={t('course:teachers')} to={`/${courseId}/course/teachers`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
-        <Tab
-          label={
-            <Badge badgeContent={filteredUsages.length} color="secondary">
-              {t('course:students')}
-            </Badge>
-          }
-          to={`/${courseId}/course/students`}
-          component={Link}
-          sx={{ '&.Mui-selected': { fontWeight: 'bold' } }}
-          data-testid="studentsTab"
-        />
-        {chatInstance.saveDiscussions && (
-          <Tab label={t('course:discussions')} to={`/${courseId}/course/discussions`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
-        )}
-        <Tab
-          label={t('course:sourceMaterials')}
-          to={`/${courseId}/course/rag`}
-          component={Link}
-          sx={{ '&.Mui-selected': { fontWeight: 'bold' } }}
-          data-testid="sourceMaterialsTab"
-        />
-        <Tab label={t('course:moodleEmbedding')} to={`/${courseId}/course/moodle`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
-      </RouterTabs>
+      {!returnToEditor && (
+        <RouterTabs>
+          <Tab label={t('common:settings')} to={`/${courseId}/course`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} /><Tab label={t('course:teachers')} to={`/${courseId}/course/teachers`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} /><Tab
+              label={<Badge badgeContent={filteredUsages.length} color="secondary">
+                {t('course:students')}
+              </Badge>}
+              to={`/${courseId}/course/students`}
+              component={Link}
+              sx={{ '&.Mui-selected': { fontWeight: 'bold' } }}
+              data-testid="studentsTab" />
+          {chatInstance.saveDiscussions && (
+            <Tab label={t('course:discussions')} to={`/${courseId}/course/discussions`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
+          )}
+          <Tab
+            label={t('course:sourceMaterials')}
+            to={`/${courseId}/course/rag`}
+            component={Link}
+            sx={{ '&.Mui-selected': { fontWeight: 'bold' } }}
+            data-testid="sourceMaterialsTab"
+          />
+          <Tab label={t('course:moodleEmbedding')} to={`/${courseId}/course/moodle`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
+        </RouterTabs>
+      )}
+      {returnToEditor && (
+        <RouterTabs>
+          <Tab
+            label={t('course:sourceMaterials')}
+            to={`/${courseId}/course/rag`}
+            component={Link}
+            sx={{ '&.Mui-selected': { fontWeight: 'bold' } }}
+            data-testid="sourceMaterialsTab"
+          />
+        </RouterTabs>
+      )}
       <Routes>
         <Route
           index

@@ -11,6 +11,7 @@ import { enqueueSnackbar } from 'notistack'
 import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import Autorenew from '@mui/icons-material/Autorenew'
 import { ArrowBack } from '@mui/icons-material'
+import { createRagPath, getRagNavigationState } from './ragNavigation'
 
 type RagFile = RagFileAttributes & {
   fileContent: string
@@ -20,8 +21,7 @@ type RagFile = RagFileAttributes & {
 export const RagFile: React.FC = () => {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
-  const fileId = Number(searchParams.get('file'))
-  const indexId = Number(searchParams.get('index'))
+  const { fileId, indexId, returnToEditor, returnPromptId, promptTab } = getRagNavigationState(searchParams)
   const params = useParams<{ courseId: string }>()
 
   const {
@@ -40,6 +40,15 @@ export const RagFile: React.FC = () => {
   const deleteTextMutation = useDeleteRagFileTextMutation()
   const navigate = useNavigate()
 
+  const getRagIndexPath = (targetIndexId: number) => {
+    return createRagPath(params.courseId ?? '', {
+      indexId: targetIndexId,
+      returnToEditor,
+      returnPromptId,
+      promptTab,
+    })
+  }
+
   if (isError) {
     return <div>{t('rag:errorWithMessage', { message: error.message })}</div>
   }
@@ -50,7 +59,7 @@ export const RagFile: React.FC = () => {
 
   return (
     <Box>
-      <OutlineButtonBlack onClick={() => navigate(`/${params.courseId}/course/rag?index=${ragFile.ragIndexId}`)}>
+      <OutlineButtonBlack onClick={() => navigate(getRagIndexPath(ragFile.ragIndexId))}>
         <ArrowBack />
       </OutlineButtonBlack>
       <Box sx={{ my: 2, display: 'flex', gap: 2 }}>
@@ -64,7 +73,7 @@ export const RagFile: React.FC = () => {
               })
               enqueueSnackbar(t('rag:fileTextDeleted'), { variant: 'success' })
 
-              navigate(`/${params.courseId}/course/rag/${ragFile.ragIndex.id}`)
+              navigate(getRagIndexPath(ragFile.ragIndex.id))
             }}
             sx={{ my: 2 }}
           >
@@ -82,7 +91,7 @@ export const RagFile: React.FC = () => {
               })
               enqueueSnackbar(t('rag:fileDeleted'), { variant: 'success' })
 
-              navigate(`/${params.courseId}/course/rag?index=${ragFile.ragIndex.id}`)
+              navigate(getRagIndexPath(ragFile.ragIndex.id))
             }
           }}
           sx={{ my: 2, borderRadius: '1.25rem' }}

@@ -7,7 +7,7 @@ import { Box, Divider, List, ListItemButton, ListItem, ListItemText, Typography,
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Prompt as PromptType } from '../../types'
@@ -33,6 +33,7 @@ const PromptModal = () => {
   const { activePrompt, handleChangePrompt, coursePrompts, myPrompts, deletePromptMutation } = usePromptState()
   const { courseId } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { t } = useTranslation()
   const [deleteConfirm, setDeleteConfirm] = useState<PromptType | null>(null)
   const [tab, setTab] = useState(0)
@@ -106,6 +107,9 @@ const PromptModal = () => {
 
   const currentPrompts = courseId !== 'general' && tab === 0 ? coursePrompts : myPrompts
   const isPersonalTab = courseId === 'general' || tab === 1
+  const shouldOpenEditorFromQuery = searchParams.get('editPrompt') === '1'
+  const promptId = searchParams.get('promptId')
+  const promptTab = Number(searchParams.get('promptTab'))
 
   useEffect(() => {
     if (previewPrompt) {
@@ -117,6 +121,30 @@ const PromptModal = () => {
   useEffect(() => {
     setShowRagFiles(false)
   }, [previewPrompt?.id])
+
+  useEffect(() => {
+    if (!shouldOpenEditorFromQuery) return
+
+    const targetTab = Number.isFinite(promptTab) ? promptTab : courseId === 'general' ? 1 : 0
+    const promptSource = targetTab === 0 ? coursePrompts : myPrompts
+    const requestedPrompt = promptSource.find((prompt) => prompt.id === promptId)
+    const hasLoadedPrompts = promptSource.length > 0
+
+    if (previewPrompt && promptId && !requestedPrompt && !hasLoadedPrompts) return
+
+    if (tab !== targetTab) {
+      setTab(targetTab)
+    }
+
+    if (!promptId) {
+      setPreviewPrompt(undefined)
+    }
+
+    setPreviewPrompts((prev) => ({ ...prev, [targetTab]: requestedPrompt }))
+
+    setIsEditing(true)
+    navigate(`/${courseId}/prompts`, { replace: true })
+  }, [shouldOpenEditorFromQuery, promptId, promptTab, coursePrompts, myPrompts, courseId, tab, navigate])
 
   const renderPromptListItem = (prompt: PromptType) => (
     <ListItemButton

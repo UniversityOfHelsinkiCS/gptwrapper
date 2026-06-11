@@ -40,6 +40,7 @@ import { RagFilesStatus } from './RagFilesStatus'
 import apiClient from '../../util/apiClient'
 import { ArrowBack } from '@mui/icons-material'
 import { EditableTitle } from './EditableTitle'
+import { createRagPath, getRagNavigationState } from './ragNavigation'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -59,7 +60,8 @@ export const RagIndex: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>()
 
   const [searchParams, _setSearchParams] = useSearchParams()
-  const id = Number(searchParams.get('index'))
+  const { indexId, returnToEditor, returnPromptId, promptTab } = getRagNavigationState(searchParams)
+  const id = indexId ?? 0
   const navigate = useNavigate()
   const [searchOpen, setSearchOpen] = React.useState(false)
   const deleteIndexMutation = useDeleteRagIndexMutation(id)
@@ -131,9 +133,17 @@ export const RagIndex: React.FC = () => {
     refetchStatuses()
   }
 
+  const getRagListPath = () => {
+    return createRagPath(courseId ?? '', {
+      returnToEditor,
+      returnPromptId,
+      promptTab,
+    })
+  }
+
   return (
     <Box>
-      <OutlineButtonBlack sx={{ mb: 2 }} onClick={() => navigate(`/${courseId}/course/rag`)} data-testid="ragIndexBackToList">
+      <OutlineButtonBlack sx={{ mb: 2 }} onClick={() => navigate(getRagListPath())} data-testid="ragIndexBackToList">
         <ArrowBack />
       </OutlineButtonBlack>
       <Box sx={{ backgroundColor: 'background.subtle', p: 2, borderRadius: 1 }}>
@@ -179,7 +189,7 @@ export const RagIndex: React.FC = () => {
                 await deleteIndexMutation.mutateAsync()
                 const chatInstance = ragDetails.chatInstances?.[0]
                 if (chatInstance) {
-                  navigate(`/${courseId}/course/rag`)
+                  navigate(getRagListPath())
                 }
                 enqueueSnackbar(t('rag:collectionDeleted'), {
                   variant: 'success',
