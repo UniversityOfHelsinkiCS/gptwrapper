@@ -611,7 +611,8 @@
     "finnish": "Finska",
     "swedish": "Svenska",
     "english": "Engelska",
-    "createIndex": "Skapa index"
+    "createIndex": "Skapa index",
+    "editSourceMaterial": "Redigera källmaterial"
   },
   "sendPreferenceConfigurator": {
     "shift": "Skift",

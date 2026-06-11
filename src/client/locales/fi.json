@@ -666,7 +666,8 @@
     "parsing": "Käsittely",
     "etaLeft": "{{value}} jäljellä",
     "nameUpdateSuccess": "Nimi päivitetty",
-    "nameUpdateError": "Virhe: nimeä ei voitu päivittää"
+    "nameUpdateError": "Virhe: nimeä ei voitu päivittää",
+    "editSourceMaterial": "Muokkaa lähdemateriaaleja"
   },
   "embeddedLogin": {
     "helpText": "Kirjauduttu. Voit sulkea tämän ikkunan."

@@ -9,6 +9,9 @@ import { usePromptEditorForm } from './context'
 import { monospaceStyle } from '../../theme'
 import { useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material'
+import { TextButton } from '../ChatV2/general/Buttons'
+import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
+import { useNavigate } from 'react-router-dom'
 
 const BasicInfoSection = () => {
   const { form, setForm, type } = usePromptEditorForm()
@@ -119,8 +122,10 @@ const ModelSettingsSection = () => {
 }
 
 const RagSettingsSection = () => {
-  const { form, setForm, type, ragIndices } = usePromptEditorForm()
+  const { form, setForm, type, ragIndices, courseId, editingPromptId, editingPromptTab } = usePromptEditorForm()
   const { t } = useTranslation()
+  const theme = useTheme()
+  const navigate = useNavigate()
 
   if (type === 'PERSONAL') return null // Personal prompts don't have RAGs
 
@@ -149,7 +154,7 @@ const RagSettingsSection = () => {
           />
         </Box>
         {type === 'CHAT_INSTANCE' && (
-          <Box display="flex" justifyContent="space-around" alignItems="center">
+          <Box display="flex" justifyContent="space-around" alignItems="center" flexDirection="column" gap={2}>
             <FormControl fullWidth>
               <Select
                 data-testid="rag-select"
@@ -180,6 +185,23 @@ const RagSettingsSection = () => {
                 ))}
               </Select>
             </FormControl>
+              <TextButton
+                onClick={() => {
+                  const params = new URLSearchParams({ editPrompt: '1', promptTab: String(editingPromptTab) })
+                  if (editingPromptId) {
+                    params.set('promptId', editingPromptId)
+                  }
+
+                  navigate(`/${courseId}/course/rag?${params.toString()}`)
+                }}
+                data-testid="edit-source-material-link"
+                endIcon={<ArrowRightAltIcon color="primary" />}
+                sx={{ alignSelf: 'flex-end' }}
+              >
+                <span data-testid="edit-source-material-button" style={{ color: theme.palette.primary.main }}>
+                  {t('rag:editSourceMaterial')}
+                </span>
+              </TextButton>
           </Box>
         )}
       </Box>

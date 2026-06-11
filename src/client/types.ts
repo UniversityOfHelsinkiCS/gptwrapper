@@ -73,6 +73,8 @@ export type PromptEditorFormContextValue = {
   type: PromptType
   ragIndices?: { id: number; metadata: { name: string } }[]
   courseId: string
+  editingPromptId?: string
+  editingPromptTab: number
 }
 
 export type ChatStatus = 'NOT_STARTED' | 'EXPIRED' | 'ACTIVE'

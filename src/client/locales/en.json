@@ -665,7 +665,8 @@
     "parsing": "Parsing",
     "etaLeft": "{{value}} left",
     "nameUpdateSuccess": "Name updated",
-    "nameUpdateError": "Error: name could not be updated"
+    "nameUpdateError": "Error: name could not be updated",
+    "editSourceMaterial": "Edit source materials"
   },
   "embeddedLogin": {
     "helpText": "Successfully logged in. You may close this window."
