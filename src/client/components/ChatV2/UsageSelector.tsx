@@ -1,8 +1,10 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Menu, MenuItem, Typography } from '@mui/material'
+import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Menu, MenuItem, Typography } from '@mui/material'
 import HelpOutline from '@mui/icons-material/HelpOutline'
+import EventRepeatIcon from '@mui/icons-material/EventRepeat'
+import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
 import { Gauge, gaugeClasses } from '@mui/x-charts/Gauge'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -176,8 +178,13 @@ const UsageSelector = () => {
       </Menu>
       <Dialog open={infoOpen} onClose={() => setInfoOpen(false)} maxWidth="xs">
         <DialogTitle>{t('status:usageTitle')}</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2">{t('info:usage')}</Typography>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Alert severity="info" icon={<EventRepeatIcon fontSize="small" />}>
+            {t('info:usageReset')}
+          </Alert>
+          <Alert severity="success" icon={<LightbulbOutlinedIcon fontSize="small" />}>
+            {t('info:usageTips')}
+          </Alert>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setInfoOpen(false)}>{t('common:close')}</Button>

@@ -100,7 +100,8 @@
   },
   "info": {
     "title": "Bruksanvisning",
-    "usage": "Lösenord nollställs varje vecka. Kurslängränser nollställs också varje måndag. Du kan minska förbrukningen av token genom att välja en gratis språkmall eller genom att borja en ny konversation varje gång du byter ämne.",
+    "usageReset": "Din tokenförbrukning för kurser och den allmänna chatten nollställs varje måndag.",
+    "usageTips": "Du kan spara tokens genom att välja en gratis språkmodell och börja en ny konversation när du byter ämne.",
     "acceptDisclaimer": "Jag har läst och förstått bruksanvisningen"
   },
   "footer": {

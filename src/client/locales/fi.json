@@ -94,7 +94,8 @@
   },
   "info": {
     "title": "Käyttöohje",
-    "usage": "Henkilökohtainen tokenirajasi nollautuu joka maanantai. Henkilökunnalla on käytössään 200 000 tokenia viikossa, ja opiskelijoilla 100 000 tokenia. Myös kurssien tokenirajoitteet nollautuvat viikoittain joka maanantai. Vähentääksesi tokenien kulumista voit valita ilmaisen kielimallin tai aloittaa uuden keskustelun aina kun vaihdat aihetta.",
+    "usageReset": "Tokenien käyttösi kursseilla ja yleisessä chatissa nollautuu joka maanantai.",
+    "usageTips": "Voit säästää tokeneita valitsemalla ilmaisen kielimallin ja aloittamalla uuden keskustelun, kun vaihdat aihetta.",
     "acceptDisclaimer": "Olen lukenut ja ymmärtänyt käyttöohjeet"
   },
   "footer": {
