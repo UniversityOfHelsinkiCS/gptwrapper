@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import HelpOutline from '@mui/icons-material/HelpOutline'
 import Send from '@mui/icons-material/Send'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
@@ -236,34 +235,6 @@ export const ChatBox = ({
                   </IconButton>
                 </Tooltip>
                 {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
-                <Box sx={{ display: 'inline-flex', justifyContent: 'space-between', alignItems: 'center', ml: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        whiteSpace: 'nowrap',
-                        padding: '0.5rem 0',
-                        opacity: isTokenLimitExceeded ? 1 : 0.6,
-                        color: isTokenLimitExceeded ? 'error.main' : 'inherit',
-                      }}
-                    >
-                      {userStatus?.usage != null && userStatus?.limit != null
-                        ? `${Math.round((userStatus.usage / userStatus.limit) * 100)}% ${t('status:tokensUsed')}`
-                        : '-'}
-                    </Typography>
-                    <Tooltip
-                      arrow
-                      placement="top"
-                      title={
-                        <Typography variant="body2" sx={{ p: 1 }}>
-                          {t('info:usage')}
-                        </Typography>
-                      }
-                    >
-                      <HelpOutline fontSize="small" sx={{ color: 'inherit', opacity: 0.7, mt: 0.5, flex: 2, display: { xs: 'none', sm: 'block' } }} />
-                    </Tooltip>
-                  </Box>
-                </Box>
               </Box>
               {!isMobile && (
                 <Typography
