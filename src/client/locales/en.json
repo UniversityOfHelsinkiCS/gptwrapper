@@ -239,7 +239,10 @@
   "status": {
     "modelInUse": "Language model in use:",
     "tokensUsed": "of tokens used",
-    "limitedUsage": ", the other models are not usable when the limit is reached"
+    "limitedUsage": ", the other models are not usable when the limit is reached",
+    "usage": "Usage",
+    "usageTitle": "Token usage",
+    "tokens": "tokens"
   },
   "error": {
     "unexpected": "An unexpected error occurred",

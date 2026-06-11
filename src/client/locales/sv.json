@@ -225,7 +225,10 @@
   "status": {
     "modelInUse": "Språkmodell i användning:",
     "tokensUsed": "av tokens används",
-    "limitedUsage": ", de andra modellerna är inte användbara när gränsen nås"
+    "limitedUsage": ", de andra modellerna är inte användbara när gränsen nås",
+    "usage": "Användning",
+    "usageTitle": "Tokenanvändning",
+    "tokens": "tokens"
   },
   "error": {
     "unexpected": "Ett oväntat fel inträffade",

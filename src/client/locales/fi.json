@@ -250,7 +250,10 @@
   "status": {
     "modelInUse": "Käytössä oleva kielimalli:",
     "tokensUsed": "tokeneista käytetty",
-    "limitedUsage": ", muut kielimallit eivät ole käytettävissä rajan ylityttyä"
+    "limitedUsage": ", muut kielimallit eivät ole käytettävissä rajan ylityttyä",
+    "usage": "Käyttö",
+    "usageTitle": "Tokenien käyttö",
+    "tokens": "tokenia"
   },
   "error": {
     "unexpected": "Odottomaton virhe tapahtui",
