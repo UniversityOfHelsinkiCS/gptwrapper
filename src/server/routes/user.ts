@@ -4,8 +4,7 @@ import type { ChatInstance, RequestWithUser } from '../types'
 import logger from '../util/logger'
 import { getEnrolledCourseIds, getTeachedCourses, getEnrolledCourses } from '../services/chatInstances/access'
 import { User } from '../db/models'
-import { getUserStatus, getUsage, getCourseUsages } from '../services/chatInstances/usage'
-import { DEFAULT_TOKEN_LIMIT } from '../../config'
+import { getUserStatus, getUsage, getCourseUsages, getUserTokenLimit } from '../services/chatInstances/usage'
 import { getLastRestart } from '../util/lastRestart'
 import { ApplicationError } from '../util/ApplicationError'
 import { UserPreferencesSchema } from '../../shared/user'
@@ -57,9 +56,7 @@ userRouter.get('/login', async (req, res) => {
 
   const termsAccepted = await User.findByPk(id, { attributes: ['termsAcceptedAt'] })
 
-  // Calculate token limit based on tier: IAM users get full limit, others get half
-  const baseLimit = hasIamAccess || isAdmin ? DEFAULT_TOKEN_LIMIT : DEFAULT_TOKEN_LIMIT / 2
-  const tokenLimit = user.isPowerUser ? baseLimit * 10 : baseLimit
+  const tokenLimit = getUserTokenLimit(user)
 
   res.send({
     ...dbUser.toJSON(),
@@ -81,7 +78,7 @@ userRouter.get('/status', async (req, res) => {
   const { id } = user
 
   const usage = await getUsage(id)
-  const limit = user.isPowerUser ? 10 * DEFAULT_TOKEN_LIMIT : DEFAULT_TOKEN_LIMIT
+  const limit = getUserTokenLimit(user)
 
   res.send({
     usage,
@@ -96,7 +93,7 @@ userRouter.get('/status/all', async (req, res) => {
   const { id } = user
 
   const generalUsage = await getUsage(id)
-  const limit = user.isPowerUser ? 10 * DEFAULT_TOKEN_LIMIT : DEFAULT_TOKEN_LIMIT
+  const limit = getUserTokenLimit(user)
 
   const courseUsages = await getCourseUsages(user)
 
