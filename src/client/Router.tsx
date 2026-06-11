@@ -8,7 +8,6 @@ import { NotFound } from './components/common/NotFound'
 import { ErrorPage } from './components/ErrorPage'
 import NoAccess from './components/NoAccess'
 import { EmbeddedLoginHelper } from './components/EmbeddedLoginHelper'
-import UsageModal from './components/ChatV2/UsageModal'
 
 const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
 
@@ -22,7 +21,6 @@ const router = sentryCreateBrowserRouter(
       <Route path="/statistics" lazy={() => import('./components/Statistics')} />
       <Route path="/login-helper" element={<EmbeddedLoginHelper />} />
       <Route path="/:courseId/*" element={<ChatV2 />} />
-      <Route path="/dev/usage-modal" element={<UsageModal />} />
       <Route path="*" element={<NotFound />} />
     </Route>,
   ),
