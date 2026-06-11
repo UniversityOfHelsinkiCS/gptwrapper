@@ -1,6 +1,6 @@
 import { createTheme, responsiveFontSizes, type ThemeOptions } from '@mui/material/styles'
 import { useMemo } from 'react'
-import { useMediaQuery } from '@mui/material'
+import { useDarkMode } from './contexts/DarkModeContext'
 
 /**
  * Module augmentation to extend default theme with new colours: https://mui.com/material-ui/customization/palette/#customization
@@ -87,12 +87,8 @@ const baseOptions: Omit<ThemeOptions, 'palette'> = {
   },
 }
 
-// Feature flag: set to true to enable dark mode, false to force light mode
-const DARK_MODE_ENABLED = false
-
 const useTheme = () => {
-  const systemPrefersDark = useMediaQuery('(prefers-color-scheme: dark)')
-  const prefersDarkMode = DARK_MODE_ENABLED && systemPrefersDark
+  const { darkMode: prefersDarkMode } = useDarkMode()
 
   const theme = useMemo(
     () =>

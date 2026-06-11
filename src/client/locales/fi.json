@@ -201,7 +201,9 @@
     "newConversationToggle": "Älä kysy varmistusta jatkossa uudelle keskustelulle.",
     "sidebar": "Sivuvalikko",
     "sidebarSettings": "Pidä sivuvalikko oletetusti suljettuna.",
-    "sendMode": "Viestin lähetys"
+    "sendMode": "Viestin lähetys",
+    "appearance": "Ulkoasu",
+    "darkModeToggle": "Käytä tummaa teemaa."
   },
   "sidebar": {
     "courseTitle": "Kurssi",

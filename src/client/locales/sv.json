@@ -204,7 +204,9 @@
     "newConversationToggle": "Fråga inte om bekräftelse för nya konversationer i fortsättningen.",
     "sidebar": "Sidomeny",
     "sidebarSettings": "Håll sidomenyn stängd som standard.",
-    "sendMode": "Meddelandehantering"
+    "sendMode": "Meddelandehantering",
+    "appearance": "Utseende",
+    "darkModeToggle": "Använd mörkt tema."
   },
   "email": {
     "save": "Spara som e-post",

@@ -198,7 +198,9 @@
     "newConversationToggle": "Don't ask for confirmation for new conversations in the future.",
     "sidebar": "Sidebar",
     "sidebarSettings": "Keep the sidebar closed by default.",
-    "sendMode": "Message sending"
+    "sendMode": "Message sending",
+    "appearance": "Appearance",
+    "darkModeToggle": "Use dark mode."
   },
   "sidebar": {
     "courseTitle": "Course",

@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 import { SendPreferenceConfigurator } from './Settings/SendPreferenceConfigurator'
 import { NewConversationConfirmConfigurator } from './Settings/NewConversationConfirmConfigurator'
 import { CollapsedSidebarConfigurator } from './Settings/CollapsedSidebarConfigurator'
+import { DarkModeConfigurator } from './Settings/DarkModeConfigurator'
 
 export const GlobalSettings = ({
   open, setOpen
@@ -90,6 +91,13 @@ export const GlobalSettings = ({
                 label={t('settings:sidebarSettings')}
                 value={collapsedSidebarDefault!}
                 setValue={setCollapsedSidebarDefault} />
+            </Box>
+
+            <Divider />
+
+            <Box>
+              <Typography fontWeight='bold' mb={1}>{t('settings:appearance')}</Typography>
+              <DarkModeConfigurator label={t('settings:darkModeToggle')} />
             </Box>
 
             <Divider />

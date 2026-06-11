@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom'
 import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
 import { EmbeddedProvider } from './contexts/EmbeddedContext'
+import { DarkModeProvider } from './contexts/DarkModeContext'
 import useCurrentUser from './hooks/useCurrentUser'
 import { AnalyticsProvider } from './stores/analytics'
 import useTheme from './theme'
@@ -78,7 +79,13 @@ const AdminLoggedInAsBanner = () => {
   )
 }
 
-const App = () => {
+const App = () => (
+  <DarkModeProvider>
+    <ThemedApp />
+  </DarkModeProvider>
+)
+
+const ThemedApp = () => {
   useUpdateUrlLang()
   const theme = useTheme()
 
