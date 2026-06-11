@@ -98,6 +98,7 @@
     "@mui/icons-material": "7.3.11",
     "@mui/material": "7.3.11",
     "@mui/utils": "7.3.11",
+    "@mui/x-charts": "9.4.0",
     "@mui/x-date-pickers": "8.11.2",
     "@sentry/node": "8.0.0",
     "@sentry/react": "9.40.0",
