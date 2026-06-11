@@ -1,7 +1,8 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Box, Menu, MenuItem, Typography } from '@mui/material'
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Menu, MenuItem, Typography } from '@mui/material'
+import HelpOutline from '@mui/icons-material/HelpOutline'
 import { Gauge, gaugeClasses } from '@mui/x-charts/Gauge'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -42,6 +43,7 @@ const UsageSelector = () => {
   const { usageInfo, isLoading, refetch } = useUserUsages()
   const { handleChangePrompt } = usePromptState()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [infoOpen, setInfoOpen] = React.useState(false)
   const open = Boolean(anchorEl)
 
   if (isLoading || !usageInfo) return null
@@ -129,12 +131,17 @@ const UsageSelector = () => {
           },
         }}
       >
-        <Typography
-          variant="overline"
-          sx={{ display: 'block', px: 1.75, pt: 0.5, pb: 1, fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled' }}
-        >
-          {t('status:usageTitle')}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
+          <Typography
+            variant="overline"
+            sx={{ display: 'block', px: 1.75, pt: 0.5, pb: 1, fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled' }}
+          >
+            {t('status:usageTitle')}
+          </Typography>
+          <IconButton size="small" onClick={() => setInfoOpen(true)} aria-label={t('common:showInfo')}>
+            <HelpOutline sx={{ fontSize: 16, color: 'text.secondary' }} />
+          </IconButton>
+        </Box>
         {usageInfo.courses
           .filter((course) => course.usage > 0 || course.courseId === currentCourseId || course.courseId === 'general')
           .map((course) => {
@@ -167,6 +174,15 @@ const UsageSelector = () => {
             )
           })}
       </Menu>
+      <Dialog open={infoOpen} onClose={() => setInfoOpen(false)} maxWidth="xs">
+        <DialogTitle>{t('status:usageTitle')}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">{t('info:usage')}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setInfoOpen(false)}>{t('common:close')}</Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }
