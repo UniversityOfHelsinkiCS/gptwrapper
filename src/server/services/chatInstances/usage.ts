@@ -7,7 +7,6 @@ import logger from '../../util/logger'
 import { ApplicationError } from '../../util/ApplicationError'
 import type { Message } from '../../../shared/chat'
 import { checkIamAccess } from '../../util/iams'
-import { Op } from 'sequelize'
 import { CourseUsage } from '@shared/types'
 
 export const getUsage = async (userId: string) => {
@@ -135,21 +134,20 @@ export const getCourseUsages = async (user: UserType): Promise<CourseUsage[]> =>
   const chatInstanceUsages = await UserChatInstanceUsage.findAll({
     where: {
       userId: user.id,
-      usageCount: {
-        [Op.gt]: 0,
-      },
     },
     include: [
       {
         model: ChatInstance,
         as: 'chatInstance',
-        attributes: ['name'],
+        attributes: ['name', 'courseId', 'usageLimit'],
       },
     ],
   })
 
   return chatInstanceUsages.map((ci) => ({
+    courseId: ci.chatInstance!.courseId,
     name: ci.chatInstance!.name,
-    usage: ci.usageCount!,
+    usage: ci.usageCount ?? 0,
+    limit: ci.chatInstance!.usageLimit ?? 0,
   }))
 }

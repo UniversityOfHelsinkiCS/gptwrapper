@@ -101,7 +101,9 @@ userRouter.get('/status/all', async (req, res) => {
   const courseUsages = await getCourseUsages(user)
 
   const generalChat: CourseUsage = {
+    courseId: 'general',
     usage: generalUsage,
+    limit,
     name: { en: 'General chat', sv: 'General chat', fi: 'Yleinen chat' },
   }
 
