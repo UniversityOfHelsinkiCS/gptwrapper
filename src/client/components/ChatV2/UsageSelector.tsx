@@ -135,35 +135,37 @@ const UsageSelector = () => {
         >
           {t('status:usageTitle')}
         </Typography>
-        {usageInfo.courses.map((course) => {
-          const active = course.courseId === currentCourseId
-          const percent = usagePercent(course.usage, course.limit)
-          return (
-            <MenuItem
-              key={course.courseId ?? getLanguageValue(course.name, i18n.language)}
-              onClick={() => handleSelect(course)}
-              sx={{ gap: 1.25, py: 0.75, px: 1.75, alignItems: 'center' }}
-            >
-              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25, minWidth: 0 }}>
-                <Typography
-                  sx={{
-                    fontSize: '0.875rem',
-                    fontWeight: active ? 600 : 400,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  {getLanguageValue(course.name, i18n.language)}
-                </Typography>
-                <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.3 }}>
-                  {formatTokens(course.usage)} / {formatTokens(course.limit)} {t('status:tokens')}
-                </Typography>
-              </Box>
-              <UsageGauge percent={percent} />
-            </MenuItem>
-          )
-        })}
+        {usageInfo.courses
+          .filter((course) => course.usage > 0 || course.courseId === currentCourseId || course.courseId === 'general')
+          .map((course) => {
+            const active = course.courseId === currentCourseId
+            const percent = usagePercent(course.usage, course.limit)
+            return (
+              <MenuItem
+                key={course.courseId ?? getLanguageValue(course.name, i18n.language)}
+                onClick={() => handleSelect(course)}
+                sx={{ gap: 1.25, py: 0.75, px: 1.75, alignItems: 'center' }}
+              >
+                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25, minWidth: 0 }}>
+                  <Typography
+                    sx={{
+                      fontSize: '0.875rem',
+                      fontWeight: active ? 600 : 400,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {getLanguageValue(course.name, i18n.language)}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.3 }}>
+                    {formatTokens(course.usage)} / {formatTokens(course.limit)} {t('status:tokens')}
+                  </Typography>
+                </Box>
+                <UsageGauge percent={percent} />
+              </MenuItem>
+            )
+          })}
       </Menu>
     </>
   )
