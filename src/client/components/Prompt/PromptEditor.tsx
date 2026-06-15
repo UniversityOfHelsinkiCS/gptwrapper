@@ -1,7 +1,7 @@
 import { Box, CircularProgress, DialogActions } from '@mui/material'
 import type { Message } from '@shared/chat'
 import { enqueueSnackbar } from 'notistack'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
@@ -9,7 +9,7 @@ import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
-import { PromptEditorFormContext } from './context'
+import { PromptEditorFormContext, usePromptEditorState } from './context'
 import { PromptEditorForm } from './PromptEditorForm'
 import { PromptEditorFormContextValue, PromptEditorFormState } from 'src/client/types'
 
@@ -66,6 +66,25 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
     localStorage.removeItem(cacheKey)
     setForm(initialForm)
   }
+
+  const { setHasChanges, setCacheKey } = usePromptEditorState()
+
+
+  const hasChanges =
+    JSON.stringify({ ...form, ragSystemMessages: [...form.ragSystemMessages].sort() }) !==
+    JSON.stringify({ ...initialForm, ragSystemMessages: [...initialForm.ragSystemMessages].sort() })
+
+  useEffect(() => {
+    setCacheKey(cacheKey)
+  }, [cacheKey, setCacheKey])  
+
+  useEffect(() => {
+    setHasChanges(hasChanges)
+
+    return () => {
+      setHasChanges(false)
+    }
+  }, [hasChanges, setHasChanges])
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()

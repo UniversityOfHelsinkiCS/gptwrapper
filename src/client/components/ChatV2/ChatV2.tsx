@@ -40,6 +40,7 @@ import { parseFileContent } from '../../util/fileParsing'
 import { getChatActivityStatus } from './util'
 import { ChatExpiredView } from './ChatExpiredView'
 import { ApiErrorView } from '../common/ApiErrorView'
+import { PromptEditorState } from '../Prompt/context'
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
@@ -101,6 +102,8 @@ const ChatV2Content = () => {
   const [messageWarning, setMessageWarning] = useState<{ [key in WarningType]?: { message: string; ignored: boolean } }>({})
   const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
   const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
+  const [hasChanges, setHasChanges] = useState(false)
+  const [cacheKey, setCacheKey] = useState('')
 
   // Analytics
   const dispatchAnalytics = useAnalyticsDispatch()
@@ -577,19 +580,29 @@ const ChatV2Content = () => {
       )}
 
       {/* Modals routes ------------------------------------------------------------------------------------------------------------ */}
-      <Routes>
-        <Route
-          element={
-            <TemplateModal root={`/${courseId}`} open>
-              <Outlet />
-            </TemplateModal>
-          }
-        >
-          <Route path={`course/*`} element={<CourseSettingsModal />} />
-          <Route path={`courses`} element={<CoursesModal />} />
-          <Route path={`prompts`} element={<PromptModal />} />
-        </Route>
-      </Routes>
+      <PromptEditorState.Provider
+        value={{
+          hasChanges,
+          setHasChanges,
+          cacheKey,
+          setCacheKey,
+        }}
+      >
+        <Routes>
+          <Route
+            element={
+              <TemplateModal root={`/${courseId}`} open>
+                <Outlet />
+              </TemplateModal>
+            }
+          >
+            <Route path={`course/*`} element={<CourseSettingsModal />} />
+            <Route path={`courses`} element={<CoursesModal />} />
+            <Route path={`prompts`} element={<PromptModal />} />
+          </Route>
+        </Routes>
+       
+      </PromptEditorState.Provider>
       <ResetConfirmModal open={resetConfirmModalOpen} setOpen={setResetConfirmModalOpen} onConfirm={handleReset} />
     </Box>
   )

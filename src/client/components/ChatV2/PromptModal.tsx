@@ -26,6 +26,7 @@ import BookmarksIcon from '@mui/icons-material/Bookmarks'
 import { useRagIndexDetails } from '../Rag/api.ts'
 import { orderBy } from 'lodash'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
+import { usePromptEditorState } from '../Prompt/context.tsx'
 
 const PromptModal = () => {
   const theme = useTheme()
@@ -44,6 +45,8 @@ const PromptModal = () => {
   const [showRagFiles, setShowRagFiles] = useState(false)
   const { data: ragDetails} = useRagIndexDetails(previewPrompt?.ragIndexId ?? null)
 
+  const { hasChanges, setHasChanges, cacheKey, setCacheKey } = usePromptEditorState()
+
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
 
@@ -57,6 +60,7 @@ const PromptModal = () => {
   }
 
   const handleSelect = (prompt?: PromptType) => {
+    if (!confirmClose()) return
     handleChangePrompt(prompt)
     navigate(`/${courseId}`)
   }
@@ -91,6 +95,7 @@ const PromptModal = () => {
   }
 
   const handleCreateNew = () => {
+    if (!confirmClose()) return
     if (isEditing) {
       setIsEditing(false)
       return
@@ -146,11 +151,28 @@ const PromptModal = () => {
     navigate(`/${courseId}/prompts`, { replace: true })
   }, [shouldOpenEditorFromQuery, promptId, promptTab, coursePrompts, myPrompts, courseId, tab, navigate])
 
+  const confirmClose = () => {
+    if (!hasChanges || !isEditing) return true
+
+    const shouldClose = window.confirm(
+      t('prompt:unSavedChanges'),
+    )
+
+    if (!shouldClose) return false
+
+    setHasChanges(false)
+    localStorage.removeItem(cacheKey)
+    setCacheKey('')
+    return true
+  }
+
+
   const renderPromptListItem = (prompt: PromptType) => (
     <ListItemButton
       key={prompt.id}
       selected={previewPrompt?.id === prompt.id}
       onClick={() => {
+        if (!confirmClose()) return
         setPreviewPrompt(prompt)
         setIsEditing(false)
       }}
@@ -208,6 +230,7 @@ const PromptModal = () => {
           className={prompt.id === activePrompt?.id ? 'change-prompt-button change-prompt-button--active' : 'change-prompt-button'}
           onClick={(e) => {
             e.stopPropagation()
+            if (!confirmClose()) return        
             handleSelect(prompt)
           }}
           sx={{ position: 'absolute', right: 8, whiteSpace: 'nowrap' }}
@@ -224,6 +247,7 @@ const PromptModal = () => {
         sx={{ borderBottom: 1, borderColor: 'divider' }}
         value={tab}
         onChange={(_, newValue) => {
+          if (!confirmClose()) return
           setTab(newValue)
           setIsEditing(false)
         }}

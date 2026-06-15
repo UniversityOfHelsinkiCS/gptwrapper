@@ -4,6 +4,7 @@ import { TextButton } from './general/Buttons'
 import CloseIcon from '@mui/icons-material/Close'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { usePromptEditorState } from '../Prompt/context'
 
 const ModalTitle = () => {
   const { t } = useTranslation()
@@ -24,8 +25,23 @@ const ModalTitle = () => {
 
 const TemplateModal: React.FC<{ open: boolean; root: string; children: React.ReactNode }> = ({ open, root, children }) => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
+
+  const { hasChanges, setHasChanges, cacheKey, setCacheKey } = usePromptEditorState()
 
   const handleClose = () => {
+    if (hasChanges) {
+      const shouldClose = window.confirm(
+        t('prompt:unSavedChanges'),
+      )
+
+      if (!shouldClose) return
+
+      setHasChanges(false)
+      localStorage.removeItem(cacheKey)
+      setCacheKey('')
+    }
+
     navigate(root)
   }
 
