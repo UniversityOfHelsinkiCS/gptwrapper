@@ -77,6 +77,13 @@ export type PromptEditorFormContextValue = {
   editingPromptTab: number
 }
 
+export type PromptEditorContextValue = {
+  hasChanges: boolean
+  setHasChanges: React.Dispatch<React.SetStateAction<boolean>>
+  cacheKey: string
+  setCacheKey: React.Dispatch<React.SetStateAction<string>>
+}
+
 export type ChatStatus = 'NOT_STARTED' | 'EXPIRED' | 'ACTIVE'
 
 export interface ChatInstance {
