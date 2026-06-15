@@ -569,7 +569,8 @@
     "addCustomRagMessage": "Add custom instruction",
     "customRagMessage": "Custom instruction",
     "showRagMessages": "Show instructions",
-    "noRagMessagesToShow": "No instructions"
+    "noRagMessagesToShow": "No instructions",
+    "unSavedChanges": "You have unsaved changes. If you close this view now, you will lose the changes you have made. Do you want to continue?"
   },
   "tooltip": {
     "copied": "Copied!"

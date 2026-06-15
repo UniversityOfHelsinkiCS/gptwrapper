@@ -570,7 +570,8 @@
     "addCustomRagMessage": "Lisää oma ohjeistus",
     "customRagMessage": "Oma ohjeistus",
     "showRagMessages": "Näytä ohjeistukset",
-    "noRagMessagesToShow": "Ei ohjeistuksia"
+    "noRagMessagesToShow": "Ei ohjeistuksia",
+    "unSavedChanges": "Sinulla on tallentamattomia muutoksia. Sulkemalla näkymän nyt, menetät tekemäsi muutokset. Haluatko jatkaa?"
   },
   "tooltip": {
     "copied": "Kopioitu!"
