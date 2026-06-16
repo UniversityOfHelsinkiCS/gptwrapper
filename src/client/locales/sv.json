@@ -543,7 +543,10 @@
     "customRagMessage": "Anpassad instruktion",
     "showRagMessages": "Visa instruktioner",
     "noRagMessagesToShow": "Inga instruktioner",
-    "unSavedChanges": "Du har osparade ändringar. Om du stänger vyn nu, förlorar du de ändringar du har gjort. Vill du fortsätta?"
+    "unSavedChanges": "Du har osparade ändringar. Om du stänger vyn nu, förlorar du de ändringar du har gjort. Vill du fortsätta?",
+    "creatorName": "Skapare: {{firstNames}} {{lastName}}",
+    "creatorHidden": "Dold för andra användare",
+    "showCreator": "Visa promptskapare för andra användare"
   },
   "tooltip": {
     "copied": "Kopierad!"

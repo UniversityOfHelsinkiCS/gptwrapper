@@ -571,7 +571,10 @@
     "customRagMessage": "Oma ohjeistus",
     "showRagMessages": "Näytä ohjeistukset",
     "noRagMessagesToShow": "Ei ohjeistuksia",
-    "unSavedChanges": "Sinulla on tallentamattomia muutoksia. Sulkemalla näkymän nyt, menetät tekemäsi muutokset. Haluatko jatkaa?"
+    "unSavedChanges": "Sinulla on tallentamattomia muutoksia. Sulkemalla näkymän nyt, menetät tekemäsi muutokset. Haluatko jatkaa?",
+    "creatorName": "Alustuksen luoja: {{firstNames}} {{lastName}}",
+    "creatorHidden": "Piilotettu muilta käyttäjiltä",
+    "showCreator": "Näytä alustuksen tekijä muille käyttäjille"
   },
   "tooltip": {
     "copied": "Kopioitu!"
