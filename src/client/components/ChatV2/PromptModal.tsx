@@ -50,6 +50,8 @@ const PromptModal = () => {
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
 
+  const courseResponsibilities = chatInstance?.responsibilities || []
+ 
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
   const rag = ragIndices?.find((r) => r.id === previewPrompt?.ragIndexId)
 
@@ -309,13 +311,42 @@ const PromptModal = () => {
         {/* Right panel - preview */}
         {!isEditing && (
           <Box sx={{ display: !isMobile || previewPrompt ? 'flex' : 'none', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
-            {previewPrompt ? (
+            {previewPrompt ? (            
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
                 <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                  {!isPersonalTab && (amongResponsibles || user.isAdmin) && (
+                      <Box>
+                        {(() => {
+                          const promptCreator = courseResponsibilities.find((u) => u.user.id === previewPrompt.userId)
+                          const hasCreatorInfo = promptCreator && promptCreator.user.first_names && promptCreator.user.last_name
+                          return (
+                            <>
+                              {hasCreatorInfo && (previewPrompt.showCreator || previewPrompt.userId === user.id) ? (
+                                <Box display="flex" alignItems="center" gap={1}>
+                                <Typography variant="body2" fontWeight="light" data-testid={`prompt-preview-creator-for-${previewPrompt.name}`}>
+                                  {t('prompt:creatorName', { firstNames: promptCreator.user.first_names.split(' ')[0], lastName: promptCreator.user.last_name })}
+                                </Typography>
+                                {previewPrompt.userId === promptCreator.user.id && !previewPrompt.showCreator && (
+                                  <Tooltip placement="right" title={t('prompt:creatorHidden')} describeChild>
+                                    <Box component="span" tabIndex={0} aria-label={t('prompt:creatorHidden')}>
+                                      <VisibilityOffOutlined fontSize="small" color="error" />
+                                    </Box>
+                                  </Tooltip>
+                                )}
+                                </Box>
+                              ) : ( null )}
+                            </>
+                          )
+                        })()}
+                      </Box>
+                    
+                    )}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2, mt: 2 }}>
+                    <Box sx={{ flexDirection: 'column', display: 'flex', gap: 1, maxWidth: '80%' }}>  
                     <Typography variant="h4" fontWeight="bold" data-testid={`prompt-preview-title-for-${previewPrompt.name}`} sx={{ wordBreak: 'break-word' }}>
                       {previewPrompt.name}
                     </Typography>
+                    </Box>
                     <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
                       {(previewPrompt.userId === user.id || user.isAdmin)  && (
                         <Tooltip arrow placement="bottom" title={t('prompt:editPromptTooltip')}>
@@ -360,7 +391,7 @@ const PromptModal = () => {
                         {t('prompt:promptModelSettings')}
                       </Typography>
                     </Box>
-                    {!isPersonalTab && (amongResponsibles || user?.isAdmin) && (
+                    {!isPersonalTab && (amongResponsibles || user.isAdmin) && (
                       <Alert
                         icon={
                           previewPrompt.hidden ? (
@@ -385,7 +416,7 @@ const PromptModal = () => {
                           {t('prompt:promptSourceMaterialData')}
                       </Typography>
                     </Box>
-                    {!isPersonalTab && (amongResponsibles || user?.isAdmin) && (
+                    {!isPersonalTab && (amongResponsibles || user.isAdmin) && (
                       <Alert
                         icon={
                           previewPrompt.ragHidden ? (

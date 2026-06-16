@@ -11,24 +11,48 @@ import { useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material'
 import { TextButton } from '../ChatV2/general/Buttons'
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import useCurrentUser from '../../hooks/useCurrentUser'
+import useCourse from '../../hooks/useCourse'
 
 const BasicInfoSection = () => {
   const { form, setForm, type } = usePromptEditorForm()
   const { t } = useTranslation()
+  const { user} = useCurrentUser()
+  const { courseId } = useParams()
+  const { data: chatInstance } = useCourse(courseId)
+  const courseResponsibilities = chatInstance?.responsibilities || []
+
+  const promptCreator = courseResponsibilities.find((u) => u.user.id === form.userId)
 
   return (
     <Box>
-      <Box display="flex" alignItems="center" gap={1} mb={3}>
+      <Box display="flex" alignItems="center" gap={1}>
         <EditNoteIcon color="secondary" />
         <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
           {t('prompt:promptBasicInfo')}
         </Typography>
       </Box>
+      {promptCreator?.user.first_names && promptCreator?.user.last_name && (form.userId === user?.id || user?.isAdmin) && (
+        <Box display="flex" gap={1} mt={3} flexDirection="row" alignItems="center" justifyContent="space-between">
+          <Typography variant="body1">
+            {t('prompt:creatorName', { firstNames: promptCreator?.user.first_names.split(' ')[0], lastName: promptCreator?.user.last_name })}
+          </Typography>
+          <FormControlLabel
+            control={<Switch checked={form.showCreator} onChange={(e) => setForm((prev) => ({ ...prev, showCreator: e.target.checked }))} />}
+            label={
+              <Box display="flex" alignItems="flex-end" gap={1}>
+                  {t('prompt:showCreator')}
+                  {!form.showCreator ? <VisibilityOffOutlined fontSize="small" color="error" /> : <VisibilityOutlined fontSize="small" color="success" />}
+              </Box>
+            }
+          />
+        </Box>
+      )} 
       <Box mb={3}>
         <Typography variant="overline" mb={1} fontWeight="bold">
           {t('prompt:name')}
-        </Typography>
+        </Typography> 
         <TextField
           required
           label={t('common:required')}
