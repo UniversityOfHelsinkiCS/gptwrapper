@@ -166,6 +166,7 @@ const PromptModal = () => {
     return true
   }
 
+  if (!user) return null
 
   const renderPromptListItem = (prompt: PromptType) => (
     <ListItemButton
@@ -316,7 +317,7 @@ const PromptModal = () => {
                       {previewPrompt.name}
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-                      {(isPersonalTab || amongResponsibles) && (
+                      {(previewPrompt.userId === user.id || user.isAdmin)  && (
                         <Tooltip arrow placement="bottom" title={t('prompt:editPromptTooltip')}>
                           <IconButton size="small" onClick={handleEdit} color="primary" data-testid={`edit-prompt-${previewPrompt.name}`}>
                             <EditOutlined fontSize="small" />
@@ -330,7 +331,7 @@ const PromptModal = () => {
                           </IconButton>
                         </Tooltip>
                       )}
-                      {(isPersonalTab || amongResponsibles) && (
+                      {(previewPrompt.userId === user.id || user.isAdmin) && (
                         <Tooltip arrow placement="bottom" title={t('prompt:deletePromptTooltip')}>
                           <IconButton
                             size="small"

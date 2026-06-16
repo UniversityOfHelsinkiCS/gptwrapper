@@ -54,6 +54,7 @@ export type Prompt = {
   type: PromptType
   createdAt: string
   ragIndexId?: number
+  userId: string | null
 }
 
 export type PromptInfo = Pick<Prompt, 'name' | 'systemMessage' | 'hidden' | 'type'> & {

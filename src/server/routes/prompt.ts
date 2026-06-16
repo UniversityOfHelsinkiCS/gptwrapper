@@ -94,6 +94,20 @@ const authorizeChatInstancePromptResponsible = async (user: User, prompt: ChatIn
   }
 }
 
+const authorizeChatInstancePromptCreator = async (user: User, prompt: Prompt) => {
+  const chatInstance = await ChatInstance.findByPk(prompt.chatInstanceId)
+
+  if (!chatInstance) {
+    throw ApplicationError.NotFound('Chat instance not found')
+  }
+
+  const isCreator = user.id === prompt.userId
+
+  if (!isCreator && !user.isAdmin) {
+    throw ApplicationError.Forbidden('Not allowed')
+  }
+}
+
 const authorizePromptCreation = async (user: User, promptParams: z.output<typeof PromptCreationParamsSchema>) => {
   switch (promptParams.type) {
     case 'CHAT_INSTANCE': {
@@ -135,7 +149,7 @@ promptRouter.post('/', async (req, res) => {
 const authorizePromptUpdate = async (user: User, prompt: Prompt) => {
   switch (prompt.type) {
     case 'CHAT_INSTANCE': {
-      await authorizeChatInstancePromptResponsible(user, prompt as ChatInstancePrompt)
+      await authorizeChatInstancePromptCreator(user, prompt)
       break
     }
     case 'PERSONAL': {
