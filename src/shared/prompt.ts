@@ -16,6 +16,7 @@ export const PromptUpdateableParamsSchema = z.object({
   hidden: z.boolean().default(false),
   ragHidden: z.boolean().default(false),
   ragIndexId: z.number().min(1).optional().nullable(),
+  showCreator: z.boolean().default(false),
 })
 
 export const PromptCreationParamsSchema = z.intersection(
