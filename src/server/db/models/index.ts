@@ -11,6 +11,7 @@ import ChatInstanceRagIndex from './chatInstanceRagIndex'
 import Feedback from './feedback'
 import Notification from './Notification'
 import PromptUsage from './promptUsage'
+import PromptChatInstance from './promptChatInstance'
 
 User.belongsToMany(ChatInstance, {
   through: UserChatInstanceUsage,
@@ -22,13 +23,21 @@ ChatInstance.belongsToMany(User, {
   as: 'users',
 })
 
+Prompt.belongsToMany(ChatInstance, {
+  through: PromptChatInstance,
+  as: 'chatInstances',
+});
+
+ChatInstance.belongsToMany(Prompt, {
+  through: PromptChatInstance,
+  as: 'prompts',
+});
+
 UserChatInstanceUsage.belongsTo(User, { as: 'user' })
 
 ChatInstance.hasMany(UserChatInstanceUsage, { as: 'usage' })
 
 UserChatInstanceUsage.belongsTo(ChatInstance, { as: 'chatInstance' })
-
-ChatInstance.hasMany(Prompt, { as: 'prompts' })
 
 User.hasMany(Prompt, { as: 'prompts' })
 
@@ -100,4 +109,5 @@ export {
   Feedback,
   Notification,
   PromptUsage,
+  PromptChatInstance,
 }

@@ -2,7 +2,7 @@ import express from 'express'
 import type { InferAttributes } from 'sequelize'
 import { PromptCreationParamsSchema, PromptUpdateableParamsSchema } from '../../shared/prompt'
 import type { User } from '@shared/user'
-import { ChatInstance, Prompt, RagIndex, Responsibility } from '../db/models'
+import { ChatInstance, Prompt, RagIndex, Responsibility, PromptChatInstance } from '../db/models'
 import type { RequestWithUser } from '../types'
 import { ApplicationError } from '../util/ApplicationError'
 import { z } from 'zod/v4'
@@ -143,6 +143,16 @@ promptRouter.post('/', async (req, res) => {
 
   const newPrompt = await Prompt.create(promptParams)
 
+  const chatInstanceID = input.chatInstanceId
+
+  if (chatInstanceID) {
+    await PromptChatInstance.create({
+      promptId: newPrompt.id,
+      chatInstanceId: chatInstanceID,
+    })
+  }
+ 
+
   res.status(201).send(newPrompt)
 })
 
@@ -177,6 +187,8 @@ promptRouter.delete('/:id', async (req, res) => {
   await authorizePromptUpdate(user, prompt)
 
   await prompt.destroy()
+
+  await PromptChatInstance.destroy({ where: { promptId: prompt.id } })
 
   res.status(204).send()
 })
