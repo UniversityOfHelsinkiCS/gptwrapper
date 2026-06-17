@@ -9,9 +9,9 @@ import { useAnalyticsDispatch } from '../../stores/analytics'
 import type { PromptCreationParams, PromptEditableParams } from '@shared/prompt'
 import type { MessageGenerationInfo } from '@shared/chat'
 
-export type CreatePromptMutation = UseMutateAsyncFunction<void, ApiError, Omit<PromptCreationParams, 'userId'>, unknown>
+export type CreatePromptMutation = UseMutateAsyncFunction<Prompt, ApiError, Omit<PromptCreationParams, 'userId'>, unknown>
 export type DeletePromptMutation = UseMutateAsyncFunction<void, ApiError, string, unknown>
-export type EditPromptMutation = UseMutateAsyncFunction<void, ApiError, PromptEditableParams & { id: string }, unknown>
+export type EditPromptMutation = UseMutateAsyncFunction<Prompt, ApiError, PromptEditableParams & { id: string }, unknown>
 
 interface PromptSelectorStateType {
   activePrompt: Prompt | undefined
@@ -160,6 +160,7 @@ export const PromptStateProvider: React.FC<{
       const res = await apiClient.post(`/prompts`, data)
       setActivePrompt(res.data)
       refetchPrompts()
+      return res.data
     }
   })
 
@@ -175,6 +176,7 @@ export const PromptStateProvider: React.FC<{
       const res = await apiClient.put(`prompts/${data.id}`, data)
       setActivePrompt(res.data)
       refetchPrompts()
+      return res.data
     }
   })
 

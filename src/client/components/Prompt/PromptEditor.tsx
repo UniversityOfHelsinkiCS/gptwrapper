@@ -11,9 +11,9 @@ import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
 import { PromptEditorFormContext, usePromptEditorState } from './context'
 import { PromptEditorForm } from './PromptEditorForm'
-import { PromptEditorFormContextValue, PromptEditorFormState } from 'src/client/types'
+import { Prompt, PromptEditorFormContextValue, PromptEditorFormState } from 'src/client/types'
 
-export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: boolean; previewPrompt?: any; onDone: () => void }) => {
+export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: boolean; previewPrompt?: any; onDone: (prompt?: Prompt) => void }) => {
   const { t } = useTranslation()
   const { courseId } = useParams() as { courseId: string }
   const { data: chatInstance } = useCourse(courseId)
@@ -105,7 +105,7 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
 
     try {
       if (previewPrompt) {
-        await editPromptMutation({
+        const editedPrompt = await editPromptMutation({
           id: previewPrompt.id,
           name,
           userInstructions,
@@ -117,8 +117,9 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
           showCreator,
         })
         enqueueSnackbar(t('prompt:updatedPrompt', { name }), { variant: 'success' })
+        onDone(editedPrompt ?? undefined)
       } else {
-        await createPromptMutation({
+        const newPrompt = await createPromptMutation({
           name,
           type,
           userInstructions,
@@ -131,9 +132,10 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
           showCreator,
         })
         enqueueSnackbar(t('prompt:createdPrompt', { name }), { variant: 'success' })
+        onDone(newPrompt ?? undefined)
       }
       clearCachedForm()
-      onDone()
+      
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     } finally {

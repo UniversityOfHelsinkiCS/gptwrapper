@@ -57,8 +57,9 @@ const PromptModal = () => {
 
   const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
 
-  const onDone = () => {
+  const onDone = (prompt?: PromptType) => {
     setIsEditing(false)
+    setPreviewPrompt(prompt)
   }
 
   const handleSelect = (prompt?: PromptType) => {
@@ -167,6 +168,10 @@ const PromptModal = () => {
     setCacheKey('')
     return true
   }
+
+  const sortedPrompts = currentPrompts.sort((a, b) =>
+    a.name.localeCompare(b.name, 'fi', { sensitivity: 'base' })
+  )
 
   if (!user) return null
 
@@ -300,7 +305,7 @@ const PromptModal = () => {
             {t('sidebar:promptNone')}
           </Button>
           <Divider sx={{ p: 1 }} />
-          <List sx={{ flex: 1, overflowY: 'auto' }}>{currentPrompts.map((prompt) => renderPromptListItem(prompt))}</List>
+          <List sx={{ flex: 1, overflowY: 'auto' }}>{sortedPrompts.map((prompt) => renderPromptListItem(prompt))}</List>
           {currentPrompts.length === 0 && (
             <Box sx={{ p: 3, color: 'text.secondary' }}>
               <Typography variant="body2">{t('settings:noPrompts')}</Typography>
