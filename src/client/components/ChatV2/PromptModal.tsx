@@ -267,7 +267,7 @@ const PromptModal = () => {
         {/* Left panel - prompt list */}
         <Box
           sx={{
-            display: !isMobile || !previewPrompt ? 'flex' : 'none',
+            display: !isMobile || (!previewPrompt && !isEditing) ? 'flex' : 'none',
             width: !isMobile ? 310 : '90vw',
             flexDirection: 'column',
           }}
@@ -485,7 +485,7 @@ const PromptModal = () => {
           </Box>
         )}
         {isEditing && (
-          <Box sx={{ display: !isMobile || previewPrompt ? 'flex' : 'none', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
+          <Box sx={{ display:'flex', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
               <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
                 <PromptEditor previewPrompt={previewPrompt} onDone={onDone} personal={isPersonalTab} />
