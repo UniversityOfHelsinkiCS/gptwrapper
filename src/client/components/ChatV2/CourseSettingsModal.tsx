@@ -94,7 +94,7 @@ export const CourseSettingsModal = () => {
       refetchCourse()
     }
   }
-  const handleRemoveResponsibility = async (responsibility) => {
+  const handleRemoveResponsibility = async (responsibility: Responsibility) => {
     const confirmation = window.confirm(t('course:confirmRemoval'))
     if (!confirmation) {
       return
@@ -172,14 +172,19 @@ export const CourseSettingsModal = () => {
     <Box sx={{ flex: 1, overflow: 'auto' }}>
       {!returnToEditor && (
         <RouterTabs>
-          <Tab label={t('common:settings')} to={`/${courseId}/course`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} /><Tab label={t('course:teachers')} to={`/${courseId}/course/teachers`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} /><Tab
-              label={<Badge badgeContent={filteredUsages.length} color="secondary">
+          <Tab label={t('common:settings')} to={`/${courseId}/course`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
+          <Tab label={t('course:teachers')} to={`/${courseId}/course/teachers`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
+          <Tab
+            label={
+              <Badge badgeContent={filteredUsages.length} color="secondary">
                 {t('course:students')}
-              </Badge>}
-              to={`/${courseId}/course/students`}
-              component={Link}
-              sx={{ '&.Mui-selected': { fontWeight: 'bold' } }}
-              data-testid="studentsTab" />
+              </Badge>
+            }
+            to={`/${courseId}/course/students`}
+            component={Link}
+            sx={{ '&.Mui-selected': { fontWeight: 'bold' } }}
+            data-testid="studentsTab"
+          />
           {chatInstance.saveDiscussions && (
             <Tab label={t('course:discussions')} to={`/${courseId}/course/discussions`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
           )}
