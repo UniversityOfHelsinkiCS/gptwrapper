@@ -129,6 +129,16 @@ router.get('/indices', async (req, res) => {
   res.json(indices)
 })
 
+router.get('/indicesV2', async (req, res) => {
+  const { user } = req as RequestWithUser
+  const ragIndices = await RagIndex.findAll({
+    where: {
+      userId: user.id,
+    },
+  })
+  res.json(ragIndices)
+})
+
 router.use('/indices/:ragIndexId', [ragIndexMiddleware], ragIndexRouter)
 
 export default router
