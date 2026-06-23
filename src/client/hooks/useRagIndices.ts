@@ -2,19 +2,14 @@ import { useQuery } from '@tanstack/react-query'
 import type { RagIndexAttributes } from '../../shared/types'
 import apiClient from '../util/apiClient'
 
-export const useRagIndices = (includeExtras?: boolean) => {
+export const useRagIndices = () => {
   const { data: ragIndices, ...rest } = useQuery<RagIndexAttributes[]>({
     queryKey: ['ragIndices'],
     queryFn: async () => {
-      const response = await apiClient.get(`/rag/indices`, {
-        params: {
-          includeExtras: includeExtras ? includeExtras : false,
-        },
-      })
+      const response = await apiClient.get(`/rag/indicesV2`)
       return response.data
     },
   })
-
   return { ragIndices, ...rest }
 }
 
