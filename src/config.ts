@@ -52,6 +52,13 @@ export const validModels: ModelConfig[] = [
     provider: ModelProvider.Azure,
   },
   {
+    name: 'gpt-5-mini',
+    context: 128_000,
+    streamVersion: 'v3',
+    descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+    provider: ModelProvider.Azure,
+  },
+  {
     name: 'gpt-5.5',
     context: 128_000,
     streamVersion: 'v3',
