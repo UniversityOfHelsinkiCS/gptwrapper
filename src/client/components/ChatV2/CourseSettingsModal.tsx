@@ -196,13 +196,15 @@ export const CourseSettingsModal = () => {
             sx={{ '&.Mui-selected': { fontWeight: 'bold' } }}
             data-testid="sourceMaterialsTab"
           />
-          <Tab
-            label={t('course:userSourceMaterials')}
-            to={`/${courseId}/course/userrags`}
-            component={Link}
-            sx={{ '&.Mui-selected': { fontWeight: 'bold' } }}
-            data-testid="sourceMaterialsTab"
-          />
+          {user.isAdmin && (
+            <Tab
+              label={t('course:userSourceMaterials')}
+              to={`/${courseId}/course/userrags`}
+              component={Link}
+              sx={{ '&.Mui-selected': { fontWeight: 'bold' } }}
+              data-testid="sourceMaterialsTab"
+            />
+          )}
           <Tab label={t('course:moodleEmbedding')} to={`/${courseId}/course/moodle`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
         </RouterTabs>
       )}
