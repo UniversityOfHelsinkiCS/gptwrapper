@@ -52,7 +52,7 @@ export const validModels: ModelConfig[] = [
     provider: ModelProvider.Azure,
   },
   {
-    name: 'gpt-5.1',
+    name: 'gpt-5.5',
     context: 128_000,
     streamVersion: 'v3',
     instructions: formatInstructions,
