@@ -54,7 +54,11 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 })
 
-export const RagIndex: React.FC = ({ ragTab }) => {
+interface RagIndexProps {
+  ragTab?: 'course' | 'user'
+}
+
+export const RagIndex: React.FC<RagIndexProps> = ({ ragTab }) => {
   const { user } = useCurrentUser()
   const { t } = useTranslation()
   const { courseId } = useParams<{ courseId: string }>()
