@@ -4,6 +4,7 @@ type RagNavigationOptions = {
   returnToEditor?: boolean
   returnPromptId?: string | null
   promptTab?: string | null
+  ragTab?: string | null
 }
 
 const getNumberParam = (value: string | null) => {
@@ -17,9 +18,10 @@ export const getRagNavigationState = (searchParams: URLSearchParams) => ({
   returnToEditor: searchParams.get('editPrompt') === '1',
   returnPromptId: searchParams.get('promptId'),
   promptTab: searchParams.get('promptTab'),
+  ragTab: searchParams.get('ragTab'),
 })
 
-export const createRagSearchParams = ({ indexId, fileId, returnToEditor, returnPromptId, promptTab }: RagNavigationOptions = {}) => {
+export const createRagSearchParams = ({ indexId, fileId, returnToEditor, returnPromptId, promptTab, ragTab }: RagNavigationOptions = {}) => {
   const params = new URLSearchParams()
 
   if (indexId) {
@@ -40,6 +42,8 @@ export const createRagSearchParams = ({ indexId, fileId, returnToEditor, returnP
 
   if (promptTab) {
     params.set('promptTab', promptTab)
+  } else if (ragTab) {
+    params.set('ragTab', ragTab)
   }
 
   return params.toString()
@@ -47,5 +51,6 @@ export const createRagSearchParams = ({ indexId, fileId, returnToEditor, returnP
 
 export const createRagPath = (courseId: string, options: RagNavigationOptions = {}) => {
   const search = createRagSearchParams(options)
-  return `/${courseId}/course/rag${search ? `?${search}` : ''}`
+  const basePath = options.ragTab === 'user' ? 'userrags' : 'rag'
+  return `/${courseId}/course/${basePath}${search ? `?${search}` : ''}`
 }

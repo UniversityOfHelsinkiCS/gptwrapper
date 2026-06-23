@@ -27,7 +27,7 @@ const UserRags: React.FC = () => {
 
   return (
     <Box sx={{ py: 3 }}>
-      {index && !file && <RagIndex />}
+      {index && !file && <RagIndex ragTab="user" />}
       {index && file && <RagFile />}
       {!index && !file && (
         <>
@@ -80,6 +80,7 @@ const UserRags: React.FC = () => {
                           returnToEditor,
                           returnPromptId,
                           promptTab,
+                          ragTab: 'user',
                         })}`}
                         component={RouterLink}
                         sx={{ ml: 'auto' }}
