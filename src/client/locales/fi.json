@@ -223,7 +223,8 @@
     "chatEmail": "Sähköposti",
     "toggle": "Vaihda",
     "open": "Avaa sivuvalikko",
-    "close": "Sulje sivuvalikko"
+    "close": "Sulje sivuvalikko",
+    "sourceMaterials": "Lähdemateriaalit"
   },
   "chats": {
     "header": "Auki olevat kurssichatit",

@@ -653,7 +653,8 @@
     "chatEmail": "E-post",
     "toggle": "Växla",
     "open": "Öppna sidomenyn",
-    "close": "Stäng sidomenyn"
+    "close": "Stäng sidomenyn",
+    "sourceMaterials": "Källmaterial"
   },
   "globalSettings": {
     "title": "Allmänna inställningar"

@@ -148,7 +148,7 @@ export default function ChatConsole({ user, course }: { user?: User | null; cour
         )}
       </Box>
 
-      <Box data-testid={activePrompt ? 'prompt-name' : undefined}>
+      <Box sx={{ mb: 1 }} data-testid={activePrompt ? 'prompt-name' : undefined}>
         <SectionLabel>{t('sidebar:promptTitle')}</SectionLabel>
         <SelectorRow
           icon={<ChatIcon />}
@@ -163,7 +163,7 @@ export default function ChatConsole({ user, course }: { user?: User | null; cour
 
       {user?.isAdmin && (
         <Box>
-          <SectionLabel>{t('course:userSourceMaterials')}</SectionLabel>
+          <SectionLabel>{t('sidebar:sourceMaterials')}</SectionLabel>
           <SelectorRow
             icon={<LibraryBooksIcon />}
             placeholder={t('course:userSourceMaterials')}

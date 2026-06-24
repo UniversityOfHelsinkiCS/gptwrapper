@@ -220,7 +220,8 @@
     "chatEmail": "Email",
     "toggle": "Toggle",
     "open": "Open sidebar",
-    "close": "Close sidebar"
+    "close": "Close sidebar",
+    "sourceMaterials": "Source materials"
   },
   "email": {
     "save": "Save as email",
