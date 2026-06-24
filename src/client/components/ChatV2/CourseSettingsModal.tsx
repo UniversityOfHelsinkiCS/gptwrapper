@@ -19,7 +19,6 @@ import Stats from '../Courses/Course/Stats'
 import { ApiErrorView } from '../common/ApiErrorView'
 import { RouterTabs } from '../common/RouterTabs'
 import Rag from '../Rag/Rag'
-import UserRags from '../Rag/UserRags'
 import { filterUsages } from './util'
 
 export const CourseSettingsModal = () => {
@@ -196,15 +195,6 @@ export const CourseSettingsModal = () => {
             sx={{ '&.Mui-selected': { fontWeight: 'bold' } }}
             data-testid="sourceMaterialsTab"
           />
-          {user.isAdmin && (
-            <Tab
-              label={t('course:userSourceMaterials')}
-              to={`/${courseId}/course/userrags`}
-              component={Link}
-              sx={{ '&.Mui-selected': { fontWeight: 'bold' } }}
-              data-testid="sourceMaterialsTab"
-            />
-          )}
           <Tab label={t('course:moodleEmbedding')} to={`/${courseId}/course/moodle`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />
         </RouterTabs>
       )}
@@ -297,7 +287,6 @@ export const CourseSettingsModal = () => {
         />
         <Route path="/discussions/*" element={<Discussion />} />
         <Route path="/rag/*" element={<Rag />} />
-        <Route path="/userrags/*" element={<UserRags />} />
         <Route path="/moodle/*" element={<CourseEmbedding />} />
       </Routes>
     </Box>

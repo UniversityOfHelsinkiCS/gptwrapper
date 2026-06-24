@@ -17,6 +17,7 @@ const ModalTitle = () => {
     '/prompts': t('sidebar:promptSelect'),
     '/prompt': t('sidebar:promptEdit'),
     '/show': t('sidebar:promptDetails'),
+    '/userrags': t('course:userSourceMaterials'),
   }
 
   const matchedKey = Object.keys(titleMap).find((key) => url.includes(key))

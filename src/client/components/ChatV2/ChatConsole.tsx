@@ -8,6 +8,7 @@ import SchoolIcon from '@mui/icons-material/School'
 import ChatIcon from '@mui/icons-material/Chat'
 import CloseIcon from '@mui/icons-material/Close'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 import { usePromptState } from './PromptState'
 
 const SectionLabel = ({ children }: { children: ReactNode }) => (
@@ -110,7 +111,7 @@ const CourseStatus = ({ course }: { course?: Course }) => {
   return null
 }
 
-export default function ChatConsole({ user: _user, course }: { user?: User | null; course?: Course }) {
+export default function ChatConsole({ user, course }: { user?: User | null; course?: Course }) {
   const navigate = useNavigate()
   const { courseId } = useParams()
   const { t, i18n } = useTranslation()
@@ -159,6 +160,17 @@ export default function ChatConsole({ user: _user, course }: { user?: User | nul
           selectorTestId="choose-prompt-button"
         />
       </Box>
+
+      {user?.isAdmin && (
+        <Box>
+          <SectionLabel>{t('course:userSourceMaterials')}</SectionLabel>
+          <SelectorRow
+            icon={<LibraryBooksIcon />}
+            placeholder={t('course:userSourceMaterials')}
+            onClick={() => navigate(`/${courseId ?? 'general'}/userrags`)}
+          />
+        </Box>
+      )}
     </Box>
   )
 }
