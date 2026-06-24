@@ -54,11 +54,13 @@ const userMiddleware = async (req: any, _res: any, next: any) => {
       return next(new Error('User not found'))
     }
     const isStatsViewer = hijackedUser.isAdmin || statsViewerIams.some((iam) => hijackedUser.iamGroups.includes(iam))
+    const isEmployee = hijackedUser.isAdmin || hijackedUser.iamGroups.includes(employeeIam)
 
     req.user = {
       email: acualUser.email,
       ...hijackedUser.toJSON(),
       isStatsViewer,
+      isEmployee,
     }
 
     req.hijackedBy = acualUser
