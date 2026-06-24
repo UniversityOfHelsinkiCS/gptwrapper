@@ -2,7 +2,6 @@ import React from 'react'
 import { Box, Table, TableHead, TableBody, TableRow, TableCell, Link, TableContainer } from '@mui/material'
 import { Link as RouterLink, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useRagIndices } from '../../hooks/useRagIndices'
-import useCourse from '../../hooks/useCourse'
 import { RagCreator } from './RagCreator'
 import { useTranslation } from 'react-i18next'
 import { RagIndex } from './RagIndex'
@@ -16,7 +15,6 @@ const UserRags: React.FC = () => {
   const { t } = useTranslation()
   const { courseId } = useParams<{ courseId: string }>()
   const navigate = useNavigate()
-  const { data: chatInstance } = useCourse(courseId)
   const [searchParams, _setSearchParams] = useSearchParams()
   const { indexId, fileId, returnToEditor, returnPromptId, promptTab } = getRagNavigationState(searchParams)
 
@@ -49,14 +47,12 @@ const UserRags: React.FC = () => {
               </OutlineButtonBlack>
             </Box>
           )}
-          {chatInstance?.id && (
-            <Box display="flex" justifyContent="space-between" sx={{ pb: 2 }}>
-              <RagCreator chatInstance={chatInstance} />
-              <LinkButtonHoc button={GrayButton} external to="https://github.com/UniversityOfHelsinkiCS/gptwrapper/blob/main/documentation/rag.md">
-                {t('rag:readMoreAboutRag')}
-              </LinkButtonHoc>
-            </Box>
-          )}
+          <Box display="flex" justifyContent="space-between" sx={{ pb: 2 }}>
+            <RagCreator />
+            <LinkButtonHoc button={GrayButton} external to="https://github.com/UniversityOfHelsinkiCS/gptwrapper/blob/main/documentation/rag.md">
+              {t('rag:readMoreAboutRag')}
+            </LinkButtonHoc>
+          </Box>
           <TableContainer sx={{ borderRadius: 1, minWidth: 800 }}>
             <Table>
               <TableHead>

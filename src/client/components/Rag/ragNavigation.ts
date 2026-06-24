@@ -51,6 +51,6 @@ export const createRagSearchParams = ({ indexId, fileId, returnToEditor, returnP
 
 export const createRagPath = (courseId: string, options: RagNavigationOptions = {}) => {
   const search = createRagSearchParams(options)
-  const basePath = options.ragTab === 'user' ? 'userrags' : 'rag'
-  return `/${courseId}/course/${basePath}${search ? `?${search}` : ''}`
+  const path = options.ragTab === 'user' ? `/${courseId}/userrags` : `/${courseId}/course/rag`
+  return `${path}${search ? `?${search}` : ''}`
 }

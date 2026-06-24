@@ -129,6 +129,20 @@ router.get('/indices', async (req, res) => {
   res.json(indices)
 })
 
+router.post('/indicesV2', async (req, res) => {
+  const { user } = req as RequestWithUser
+  const { name, language } = z
+    .object({
+      name: z.string().min(1).max(100),
+      language: z.enum(['Finnish', 'English', 'Swedish']).optional(),
+    })
+    .parse(req.body)
+
+  const ragIndex = await RagIndex.create({ userId: user.id, metadata: { name, language } })
+  await RedisVectorStore.fromRagIndex(ragIndex).createIndex()
+  res.json(ragIndex)
+})
+
 router.get('/indicesV2', async (req, res) => {
   const { user } = req as RequestWithUser
   const ragIndices = await RagIndex.findAll({

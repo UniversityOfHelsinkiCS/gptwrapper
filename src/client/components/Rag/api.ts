@@ -21,6 +21,18 @@ export const useCreateRagIndexMutation = () => {
   return mutation
 }
 
+export const useCreateUserRagIndexMutation = () => {
+  return useMutation({
+    mutationFn: async ({ name, language }: RagIndexMetadata) => {
+      const response = await apiClient.post('/rag/indicesV2', { name, language })
+      return response.data
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['ragIndices'] })
+    },
+  })
+}
+
 export type RagIndexDetails = Omit<RagIndexAttributes, 'ragFileCount'> & {
   ragFiles: RagFileAttributes[]
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useCreateRagIndexMutation } from './api'
+import { useCreateRagIndexMutation, useCreateUserRagIndexMutation } from './api'
 import {
   Dialog,
   DialogActions,
@@ -19,12 +19,13 @@ import { useTranslation } from 'react-i18next'
 import { RAG_LANGUAGES } from '@shared/lang'
 import { createRagSearchParams, getRagNavigationState } from './ragNavigation'
 
-export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
+export const RagCreator = ({ chatInstance }: { chatInstance?: Course }) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { returnToEditor, returnPromptId, promptTab } = getRagNavigationState(searchParams)
   const createIndexMutation = useCreateRagIndexMutation()
+  const createUserIndexMutation = useCreateUserRagIndexMutation()
   const [indexName, setIndexName] = useState('')
   const [language, setLanguage] = useState<'Finnish' | 'English' | 'Swedish'>('English')
   const [open, setOpen] = useState(false)
@@ -42,11 +43,9 @@ export const RagCreator = ({ chatInstance }: { chatInstance: Course }) => {
             component: 'form',
             onSubmit: async (event: React.FormEvent<HTMLFormElement>) => {
               event.preventDefault()
-              const newIndex = await createIndexMutation.mutateAsync({
-                chatInstanceId: chatInstance?.id,
-                name: indexName,
-                language,
-              })
+              const newIndex = chatInstance
+                ? await createIndexMutation.mutateAsync({ chatInstanceId: chatInstance.id, name: indexName, language })
+                : await createUserIndexMutation.mutateAsync({ name: indexName, language })
               setIndexName('')
               navigate(
                 `?${createRagSearchParams({
