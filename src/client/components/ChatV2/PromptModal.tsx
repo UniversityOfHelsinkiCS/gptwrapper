@@ -483,7 +483,7 @@ const PromptModal = () => {
                 </Box>
               </Box>
             ) : (
-              <Box sx={{ display: 'flex', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
+              <Box sx={{ display: 'flex', flex: 1, justifyContent: 'center', height: '100%', color: 'text.secondary', pt: 4 }}>
                 <Typography>{t('settings:noPrompt')}</Typography>
               </Box>
             )}
