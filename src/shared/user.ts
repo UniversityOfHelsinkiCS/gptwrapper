@@ -18,6 +18,7 @@ export interface User {
   email?: string
   isAdmin: boolean
   isPowerUser: boolean
+  isEmployee: boolean
   activeCourseIds?: string[]
   ownCourses?: string[]
   usage?: number

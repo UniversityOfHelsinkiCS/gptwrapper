@@ -27,6 +27,7 @@ export interface User {
   studentNumber: string
   isAdmin: boolean
   isPowerUser: boolean
+  isEmployee: boolean
   usage: number
   activeCourseIds: string[]
   ownCourses: string[]

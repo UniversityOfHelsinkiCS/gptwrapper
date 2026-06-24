@@ -2,7 +2,7 @@ import { inCI, inDevelopment } from '../../config'
 import { devUserHeaders, getTestUserHeaders } from '../../shared/testData'
 import { User as UserModel } from '../db/models'
 import type { User } from '../../shared/user'
-import { adminIams, courseCreatorIam, powerUserIam, statsViewerIams } from '../util/config'
+import { adminIams, courseCreatorIam, powerUserIam, statsViewerIams, employeeIam } from '../util/config'
 
 const parseIamGroups = (iamGroups: string) => iamGroups?.split(';').filter(Boolean) ?? []
 
@@ -29,6 +29,7 @@ export const headersToUser = (headers: any): User => {
     isPowerUser: isPowerUser(iamGroups),
     isStatsViewer: isAdmin || statsViewerIams.some((iam) => iamGroups.includes(iam)),
     isCourseCreator: isAdmin || iamGroups.includes(courseCreatorIam),
+    isEmployee: isAdmin || iamGroups.includes(employeeIam),
   }
 
   return user

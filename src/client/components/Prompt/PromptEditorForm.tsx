@@ -145,12 +145,13 @@ const ModelSettingsSection = () => {
 }
 
 const RagSettingsSection = () => {
-  const { form, setForm, type, ragIndices, userRagIndices, courseId, editingPromptId, editingPromptTab } = usePromptEditorForm()
+  const { form, setForm, ragIndices, userRagIndices, courseId, editingPromptId, editingPromptTab } = usePromptEditorForm()
   const { t } = useTranslation()
   const theme = useTheme()
+  const { user } = useCurrentUser()
   const navigate = useNavigate()
 
-  if (type === 'PERSONAL') return null // Personal prompts don't have RAGs
+  if (!user?.isEmployee && !user?.isAdmin) return null
 
   return (
     <Box>
@@ -176,65 +177,63 @@ const RagSettingsSection = () => {
             }
           />
         </Box>
-        {type === 'CHAT_INSTANCE' && (
-          <Box display="flex" justifyContent="space-around" alignItems="center" flexDirection="column" gap={2}>
-            <FormControl fullWidth>
-              <Select
-                data-testid="rag-select"
-                value={form.ragIndexId ?? ''}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    ragIndexId: e.target.value ? Number(e.target.value) : null,
-                  }))
+        <Box display="flex" justifyContent="space-around" alignItems="center" flexDirection="column" gap={2}>
+          <FormControl fullWidth>
+            <Select
+              data-testid="rag-select"
+              value={form.ragIndexId ?? ''}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  ragIndexId: e.target.value ? Number(e.target.value) : null,
+                }))
+              }
+              displayEmpty
+              renderValue={(value) => {
+                if (String(value) === '') {
+                  return <em>{t('prompt:noSourceMaterials')}</em>
                 }
-                displayEmpty
-                renderValue={(value) => {
-                  if (String(value) === '') {
-                    return <em>{t('prompt:noSourceMaterials')}</em>
-                  }
-                  const numValue = Number(value)
-                  const selected = ragIndices?.find((i) => i.id === numValue) ?? userRagIndices?.find((i) => i.id === numValue)
-                  return selected ? selected.metadata.name : ''
-                }}
-              >
-                <MenuItem value="" data-testid="no-source-materials">
-                  <em>{t('prompt:noSourceMaterials')}</em>
-                  <ClearOutlined sx={{ ml: 1 }} />
-                </MenuItem>
-                {!!ragIndices?.length && <ListSubheader>{t('course:sourceMaterials')}</ListSubheader>}
-                {ragIndices?.map((index) => (
-                  <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
-                    {index.metadata.name}
-                  </MenuItem>
-                ))}
-                {!!userRagIndices?.length && <ListSubheader>{t('course:userSourceMaterials')}</ListSubheader>}
-                {userRagIndices?.map((index) => (
-                  <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
-                    {index.metadata.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextButton
-              onClick={() => {
-                const params = new URLSearchParams({ editPrompt: '1', promptTab: String(editingPromptTab) })
-                if (editingPromptId) {
-                  params.set('promptId', editingPromptId)
-                }
-
-                navigate(`/${courseId}/course/rag?${params.toString()}`)
+                const numValue = Number(value)
+                const selected = ragIndices?.find((i) => i.id === numValue) ?? userRagIndices?.find((i) => i.id === numValue)
+                return selected ? selected.metadata.name : ''
               }}
-              data-testid="edit-source-material-link"
-              endIcon={<ArrowRightAltIcon color="primary" />}
-              sx={{ alignSelf: 'flex-end' }}
             >
-              <span data-testid="edit-source-material-button" style={{ color: theme.palette.primary.main }}>
-                {t('rag:editSourceMaterial')}
-              </span>
-            </TextButton>
-          </Box>
-        )}
+              <MenuItem value="" data-testid="no-source-materials">
+                <em>{t('prompt:noSourceMaterials')}</em>
+                <ClearOutlined sx={{ ml: 1 }} />
+              </MenuItem>
+              {!!ragIndices?.length && <ListSubheader>{t('course:sourceMaterials')}</ListSubheader>}
+              {ragIndices?.map((index) => (
+                <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
+                  {index.metadata.name}
+                </MenuItem>
+              ))}
+              {!!userRagIndices?.length && <ListSubheader>{t('course:userSourceMaterials')}</ListSubheader>}
+              {userRagIndices?.map((index) => (
+                <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
+                  {index.metadata.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextButton
+            onClick={() => {
+              const params = new URLSearchParams({ editPrompt: '1', promptTab: String(editingPromptTab) })
+              if (editingPromptId) {
+                params.set('promptId', editingPromptId)
+              }
+
+              navigate(`/${courseId}/course/rag?${params.toString()}`)
+            }}
+            data-testid="edit-source-material-link"
+            endIcon={<ArrowRightAltIcon color="primary" />}
+            sx={{ alignSelf: 'flex-end' }}
+          >
+            <span data-testid="edit-source-material-button" style={{ color: theme.palette.primary.main }}>
+              {t('rag:editSourceMaterial')}
+            </span>
+          </TextButton>
+        </Box>
       </Box>
 
       <Collapse in={!!form.ragIndexId}>
