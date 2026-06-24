@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useCreateRagIndexMutation, useCreateUserRagIndexMutation } from './api'
 import {
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
@@ -11,6 +12,7 @@ import {
   MenuItem,
   Select,
   TextField,
+  Typography,
 } from '@mui/material'
 import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -19,7 +21,7 @@ import { useTranslation } from 'react-i18next'
 import { RAG_LANGUAGES } from '@shared/lang'
 import { createRagSearchParams, getRagNavigationState } from './ragNavigation'
 
-export const RagCreator = ({ chatInstance }: { chatInstance?: Course }) => {
+export const RagCreator = ({ chatInstance, onCreated }: { chatInstance?: Course; onCreated?: (indexId: number) => void }) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -32,9 +34,15 @@ export const RagCreator = ({ chatInstance }: { chatInstance?: Course }) => {
 
   return (
     <>
-      <OutlineButtonBlack onClick={() => setOpen(true)} data-testid="createNewRagButton">
+      <Button
+        variant="contained"
+        onClick={() => setOpen(true)}
+        data-testid="createNewRagButton"
+        startIcon={<Typography sx={{ fontSize: '1.5rem', lineHeight: 1 }}>+</Typography>}
+        sx={{ mb: 1 }}
+      >
         {t('rag:createNewIndex')}
-      </OutlineButtonBlack>
+      </Button>
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
@@ -47,14 +55,18 @@ export const RagCreator = ({ chatInstance }: { chatInstance?: Course }) => {
                 ? await createIndexMutation.mutateAsync({ chatInstanceId: chatInstance.id, name: indexName, language })
                 : await createUserIndexMutation.mutateAsync({ name: indexName, language })
               setIndexName('')
-              navigate(
-                `?${createRagSearchParams({
-                  indexId: newIndex.id,
-                  returnToEditor,
-                  returnPromptId,
-                  promptTab,
-                })}`,
-              )
+              if (onCreated) {
+                onCreated(newIndex.id)
+              } else {
+                navigate(
+                  `?${createRagSearchParams({
+                    indexId: newIndex.id,
+                    returnToEditor,
+                    returnPromptId,
+                    promptTab,
+                  })}`,
+                )
+              }
               setOpen(false)
             },
           },

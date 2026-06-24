@@ -83,7 +83,8 @@ export const RagFileInfo: React.FC<{
   index: number
   status?: IngestionJobStatus
   uploadProgress?: number
-}> = ({ file, index, status, uploadProgress }) => {
+  onSelectFile?: (fileId: number) => void
+}> = ({ file, index, status, uploadProgress, onSelectFile }) => {
   const { t, i18n } = useTranslation()
   const [searchParams] = useSearchParams()
   const { returnToEditor, returnPromptId, promptTab, ragTab } = getRagNavigationState(searchParams)
@@ -111,20 +112,25 @@ export const RagFileInfo: React.FC<{
   return (
     <TableRow>
       <TableCell sx={{ maxWidth: 200, wordBreak: 'break-word' }}>
-
-        <Link
-          to={`?${createRagSearchParams({
-            indexId: index,
-            fileId: file.id,
-            returnToEditor,
-            returnPromptId,
-            promptTab,
-            ragTab,
-          })}`}
-          component={RouterLink}
-        >
-          {file.filename}
-        </Link>
+        {onSelectFile ? (
+          <Link component="button" onClick={() => onSelectFile(file.id)} sx={{ cursor: 'pointer' }}>
+            {file.filename}
+          </Link>
+        ) : (
+          <Link
+            to={`?${createRagSearchParams({
+              indexId: index,
+              fileId: file.id,
+              returnToEditor,
+              returnPromptId,
+              promptTab,
+              ragTab,
+            })}`}
+            component={RouterLink}
+          >
+            {file.filename}
+          </Link>
+        )}
       </TableCell>
       <HideOnSmall>{file.fileType}</HideOnSmall>
       <TableCell>

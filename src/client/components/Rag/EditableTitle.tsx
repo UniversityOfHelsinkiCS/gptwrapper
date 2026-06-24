@@ -1,7 +1,7 @@
 import { CancelOutlined, Check, Edit } from '@mui/icons-material'
 import { Box, CircularProgress, IconButton, TextField, Tooltip, Typography } from '@mui/material'
 import type { RagIndexAttributes } from '@shared/types'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useUpdateRagIndexMutation } from './api'
 import { useSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
@@ -10,6 +10,11 @@ export const EditableTitle = ({ ragIndex }: { ragIndex: RagIndexAttributes }) =>
   const [title, setTitle] = useState(ragIndex?.metadata?.name || '')
   const [isEditing, setIsEditing] = useState(false)
   const updateMutation = useUpdateRagIndexMutation(ragIndex.id)
+
+  useEffect(() => {
+    setTitle(ragIndex?.metadata?.name || '')
+    setIsEditing(false)
+  }, [ragIndex.id])
   const { enqueueSnackbar } = useSnackbar()
   const { t } = useTranslation()
 
