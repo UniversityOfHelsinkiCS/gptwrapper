@@ -74,6 +74,7 @@ export type PromptEditorFormContextValue = {
   setForm: React.Dispatch<React.SetStateAction<PromptEditorFormState>>
   type: PromptType
   ragIndices?: { id: number; metadata: { name: string } }[]
+  userRagIndices?: { id: number; metadata: { name: string } }[]
   courseId: string
   editingPromptId?: string
   editingPromptTab: number

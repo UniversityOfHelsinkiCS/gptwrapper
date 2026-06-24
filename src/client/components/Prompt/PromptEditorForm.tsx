@@ -1,4 +1,4 @@
-import { Box, Switch, Collapse, Divider, FormControl, FormControlLabel, MenuItem, Select, TextField, Tooltip, Typography } from '@mui/material'
+import { Box, Switch, Collapse, Divider, FormControl, FormControlLabel, ListSubheader, MenuItem, Select, TextField, Tooltip, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import RagMessageEditor from './RagMessageEditor'
 import { ClearOutlined, VisibilityOutlined, VisibilityOffOutlined } from '@mui/icons-material'
@@ -10,7 +10,7 @@ import { monospaceStyle } from '../../theme'
 import { useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material'
 import { TextButton } from '../ChatV2/general/Buttons'
-import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
+import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt'
 import { useNavigate, useParams } from 'react-router-dom'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import useCourse from '../../hooks/useCourse'
@@ -18,7 +18,7 @@ import useCourse from '../../hooks/useCourse'
 const BasicInfoSection = () => {
   const { form, setForm, type } = usePromptEditorForm()
   const { t } = useTranslation()
-  const { user} = useCurrentUser()
+  const { user } = useCurrentUser()
   const { courseId } = useParams()
   const { data: chatInstance } = useCourse(courseId)
   const courseResponsibilities = chatInstance?.responsibilities || []
@@ -42,17 +42,17 @@ const BasicInfoSection = () => {
             control={<Switch checked={form.showCreator} onChange={(e) => setForm((prev) => ({ ...prev, showCreator: e.target.checked }))} />}
             label={
               <Box display="flex" alignItems="flex-end" gap={1}>
-                  {t('prompt:showCreator')}
-                  {!form.showCreator ? <VisibilityOffOutlined fontSize="small" color="error" /> : <VisibilityOutlined fontSize="small" color="success" />}
+                {t('prompt:showCreator')}
+                {!form.showCreator ? <VisibilityOffOutlined fontSize="small" color="error" /> : <VisibilityOutlined fontSize="small" color="success" />}
               </Box>
             }
           />
         </Box>
-      )} 
+      )}
       <Box mb={3}>
         <Typography variant="overline" mb={1} fontWeight="bold">
           {t('prompt:name')}
-        </Typography> 
+        </Typography>
         <TextField
           required
           label={t('common:required')}
@@ -100,7 +100,6 @@ const ModelSettingsSection = () => {
   const { t } = useTranslation()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-  
 
   return (
     <Box>
@@ -126,7 +125,7 @@ const ModelSettingsSection = () => {
       <Box>
         <TextField
           variant="filled"
-          sx={{ '& textarea': monospaceStyle, ...!isMobile && { maxHeight: '300px', overflow: 'auto' } }}
+          sx={{ '& textarea': monospaceStyle, ...(!isMobile && { maxHeight: '300px', overflow: 'auto' }) }}
           slotProps={{
             htmlInput: {
               'data-testid': 'system-message-input',
@@ -146,7 +145,7 @@ const ModelSettingsSection = () => {
 }
 
 const RagSettingsSection = () => {
-  const { form, setForm, type, ragIndices, courseId, editingPromptId, editingPromptTab } = usePromptEditorForm()
+  const { form, setForm, type, ragIndices, userRagIndices, courseId, editingPromptId, editingPromptTab } = usePromptEditorForm()
   const { t } = useTranslation()
   const theme = useTheme()
   const navigate = useNavigate()
@@ -194,7 +193,8 @@ const RagSettingsSection = () => {
                   if (String(value) === '') {
                     return <em>{t('prompt:noSourceMaterials')}</em>
                   }
-                  const selected = ragIndices?.find((i) => i.id === Number(value))
+                  const numValue = Number(value)
+                  const selected = ragIndices?.find((i) => i.id === numValue) ?? userRagIndices?.find((i) => i.id === numValue)
                   return selected ? selected.metadata.name : ''
                 }}
               >
@@ -202,30 +202,37 @@ const RagSettingsSection = () => {
                   <em>{t('prompt:noSourceMaterials')}</em>
                   <ClearOutlined sx={{ ml: 1 }} />
                 </MenuItem>
+                {!!ragIndices?.length && <ListSubheader>{t('course:sourceMaterials')}</ListSubheader>}
                 {ragIndices?.map((index) => (
+                  <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
+                    {index.metadata.name}
+                  </MenuItem>
+                ))}
+                {!!userRagIndices?.length && <ListSubheader>{t('course:userSourceMaterials')}</ListSubheader>}
+                {userRagIndices?.map((index) => (
                   <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
                     {index.metadata.name}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
-              <TextButton
-                onClick={() => {
-                  const params = new URLSearchParams({ editPrompt: '1', promptTab: String(editingPromptTab) })
-                  if (editingPromptId) {
-                    params.set('promptId', editingPromptId)
-                  }
+            <TextButton
+              onClick={() => {
+                const params = new URLSearchParams({ editPrompt: '1', promptTab: String(editingPromptTab) })
+                if (editingPromptId) {
+                  params.set('promptId', editingPromptId)
+                }
 
-                  navigate(`/${courseId}/course/rag?${params.toString()}`)
-                }}
-                data-testid="edit-source-material-link"
-                endIcon={<ArrowRightAltIcon color="primary" />}
-                sx={{ alignSelf: 'flex-end' }}
-              >
-                <span data-testid="edit-source-material-button" style={{ color: theme.palette.primary.main }}>
-                  {t('rag:editSourceMaterial')}
-                </span>
-              </TextButton>
+                navigate(`/${courseId}/course/rag?${params.toString()}`)
+              }}
+              data-testid="edit-source-material-link"
+              endIcon={<ArrowRightAltIcon color="primary" />}
+              sx={{ alignSelf: 'flex-end' }}
+            >
+              <span data-testid="edit-source-material-button" style={{ color: theme.palette.primary.main }}>
+                {t('rag:editSourceMaterial')}
+              </span>
+            </TextButton>
           </Box>
         )}
       </Box>

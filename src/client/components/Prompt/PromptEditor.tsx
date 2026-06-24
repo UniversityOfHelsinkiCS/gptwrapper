@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
-import { useCourseRagIndices } from '../../hooks/useRagIndices'
+import { useCourseRagIndices, useRagIndices } from '../../hooks/useRagIndices'
 import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
 import { PromptEditorFormContext, usePromptEditorState } from './context'
@@ -18,6 +18,7 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
   const { courseId } = useParams() as { courseId: string }
   const { data: chatInstance } = useCourse(courseId)
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
+  const { ragIndices: userRagIndices } = useRagIndices()
   const [loading, setLoading] = useState<boolean>(false)
   const { createPromptMutation, editPromptMutation } = usePromptState()
 
@@ -71,14 +72,13 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
 
   const { setHasChanges, setCacheKey } = usePromptEditorState()
 
-
   const hasChanges =
     JSON.stringify({ ...form, ragSystemMessages: [...form.ragSystemMessages].sort() }) !==
     JSON.stringify({ ...initialForm, ragSystemMessages: [...initialForm.ragSystemMessages].sort() })
 
   useEffect(() => {
     setCacheKey(cacheKey)
-  }, [cacheKey, setCacheKey])  
+  }, [cacheKey, setCacheKey])
 
   useEffect(() => {
     setHasChanges(hasChanges)
@@ -135,7 +135,6 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
         onDone(newPrompt ?? undefined)
       }
       clearCachedForm()
-      
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     } finally {
@@ -148,6 +147,7 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
     setForm,
     type,
     ragIndices,
+    userRagIndices,
     courseId,
     editingPromptId: previewPrompt?.id,
     editingPromptTab: type === 'CHAT_INSTANCE' ? 0 : 1,
