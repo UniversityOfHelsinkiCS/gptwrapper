@@ -619,7 +619,10 @@
     "swedish": "Svenska",
     "english": "Engelska",
     "createIndex": "Skapa index",
-    "editSourceMaterial": "Redigera källmaterial"
+    "editSourceMaterial": "Redigera källmaterial",
+    "noCollections": "Inga samlingar ännu",
+    "selectCollection": "Välj en samling",
+    "backToCollections": "Tillbaka till samlingar"
   },
   "sendPreferenceConfigurator": {
     "shift": "Skift",

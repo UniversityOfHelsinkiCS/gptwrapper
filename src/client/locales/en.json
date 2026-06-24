@@ -673,7 +673,10 @@
     "etaLeft": "{{value}} left",
     "nameUpdateSuccess": "Name updated",
     "nameUpdateError": "Error: name could not be updated",
-    "editSourceMaterial": "Edit source materials"
+    "editSourceMaterial": "Edit source materials",
+    "noCollections": "No collections yet",
+    "selectCollection": "Select a collection",
+    "backToCollections": "Back to collections"
   },
   "embeddedLogin": {
     "helpText": "Successfully logged in. You may close this window."

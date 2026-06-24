@@ -674,7 +674,10 @@
     "etaLeft": "{{value}} jäljellä",
     "nameUpdateSuccess": "Nimi päivitetty",
     "nameUpdateError": "Virhe: nimeä ei voitu päivittää",
-    "editSourceMaterial": "Muokkaa lähdemateriaaleja"
+    "editSourceMaterial": "Muokkaa lähdemateriaaleja",
+    "noCollections": "Ei kokoelmia vielä",
+    "selectCollection": "Valitse kokoelma",
+    "backToCollections": "Takaisin kokoelmiin"
   },
   "embeddedLogin": {
     "helpText": "Kirjauduttu. Voit sulkea tämän ikkunan."
