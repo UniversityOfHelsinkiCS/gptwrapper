@@ -677,7 +677,14 @@
     "editSourceMaterial": "Edit source materials",
     "noCollections": "No collections yet",
     "selectCollection": "Select a collection",
-    "backToCollections": "Back to collections"
+    "backToCollections": "Back to collections",
+    "fileCountLabel_one": "{{count}} file",
+    "fileCountLabel_other": "{{count}} files",
+    "processedProgress": "{{done}} / {{total}} processed",
+    "statusReady": "Ready",
+    "statusProcessing": "Processing",
+    "statusFailed": "Ingestion failed",
+    "confirmDeleteFile": "Are you sure you want to delete this file?"
   },
   "embeddedLogin": {
     "helpText": "Successfully logged in. You may close this window."

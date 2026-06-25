@@ -10,34 +10,31 @@ import {
   DialogActions,
   Dialog,
   CircularProgress,
-  Breadcrumbs,
   Divider,
   FormControlLabel,
   Switch,
   List,
   ListItem,
   ListItemText,
-  Table,
-  TableBody,
-  TableContainer,
 } from '@mui/material'
 import Autorenew from '@mui/icons-material/Autorenew'
 import CloudUpload from '@mui/icons-material/CloudUpload'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import FindInPage from '@mui/icons-material/FindInPage'
+import FolderOpen from '@mui/icons-material/FolderOpen'
 import { orderBy } from 'lodash'
-import { RagFileInfo, RagFileTableHead } from './RagFileDetails'
-import { RagIndexDetails, useDeleteRagIndexMutation, useRagIndexDetails, useRagIndexJobs, useUploadMutation } from './api'
+import { RagIndexDetails, useDeleteRagFileMutation, useDeleteRagIndexMutation, useRagIndexDetails, useRagIndexJobs, useUploadMutation } from './api'
 import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
-import { BlueButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
+import { BlueButton, OutlineButtonBlack, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { enqueueSnackbar } from 'notistack'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import queryClient from '../../util/queryClient'
 import { IngestionPipelineStageKey } from '@shared/ingestion'
-import { RagFilesStatus } from './RagFilesStatus'
 import apiClient from '../../util/apiClient'
 import { EditableTitle } from './EditableTitle'
+import { RagFileRowV2 } from './RagFileRowV2'
+import { RagProgressSummaryV2 } from './RagProgressSummaryV2'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -63,6 +60,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
 
   const [searchOpen, setSearchOpen] = React.useState(false)
   const deleteIndexMutation = useDeleteRagIndexMutation(indexId)
+  const deleteFileMutation = useDeleteRagFileMutation()
   const [refetchInterval, setRefetchInterval] = React.useState(60 * 1000)
   const [uploadProgress, setUploadProgress] = React.useState(0)
   const [stagedFiles, setStagedFiles] = React.useState<File[]>([])
@@ -72,7 +70,6 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
   const uploadMutation = useUploadMutation({ index: ragDetails, onUploadProgress: setUploadProgress })
 
   const isComplete = ragFileStatuses ? ragFileStatuses.every(({ pipelineStage }) => pipelineStage !== 'ingesting') && !uploadMutation.isPending : false
-  const hasErrors = ragFileStatuses ? ragFileStatuses.some(({ pipelineStage }) => pipelineStage === 'error') : false
 
   React.useEffect(() => {
     if (isComplete) {
@@ -131,14 +128,25 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
     refetchStatuses()
   }
 
+  const handleDeleteFile = async (fileId: number) => {
+    if (!window.confirm(t('rag:confirmDeleteFile'))) return
+    await deleteFileMutation.mutateAsync({ indexId, fileId })
+    enqueueSnackbar(t('rag:fileDeleted'), { variant: 'success' })
+    refetch()
+    refetchStatuses()
+  }
+
   return (
     <Box sx={{ flex: 1, overflow: 'auto' }}>
-      <Box sx={{ backgroundColor: 'background.subtle', p: 2, borderRadius: 1 }}>
-        <Breadcrumbs>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, px: 2, pt: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+          <FolderOpen sx={{ color: 'secondary.main' }} />
           <EditableTitle ragIndex={ragDetails} />
-        </Breadcrumbs>
+        </Box>
+        <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+          {t('rag:fileCountLabel', { count: ragDetails.ragFiles.length })}
+        </Typography>
       </Box>
-      <Divider />
       <Box py={2} mx={2}>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
           {/* @ts-expect-error component somehow not valid prop but it works */}
@@ -156,15 +164,20 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
               multiple
             />
           </BlueButton>
-          <OutlineButtonBlack startIcon={<FindInPage />} onClick={() => setSearchOpen(true)} disabled={ragDetails.ragFiles.length === 0}>
+          <OutlineButtonBlue startIcon={<FindInPage />} onClick={() => setSearchOpen(true)} disabled={ragDetails.ragFiles.length === 0}>
             {t('rag:testRetrievalButton')}
-          </OutlineButtonBlack>
+          </OutlineButtonBlue>
           <Dialog open={searchOpen} onClose={() => setSearchOpen(false)} fullWidth maxWidth="lg">
             <DialogTitle>{t('rag:testRetrieval', { name: ragDetails.metadata.name })}</DialogTitle>
             <DialogContent>
               <Search ragIndex={ragDetails} />
             </DialogContent>
           </Dialog>
+          {user?.isAdmin && (
+            <OutlineButtonBlack startIcon={<Autorenew />} onClick={handleReset}>
+              {t('reset')}
+            </OutlineButtonBlack>
+          )}
           <Button
             startIcon={deleteIndexMutation.isPending ? <CircularProgress /> : <DeleteOutline />}
             disabled={deleteIndexMutation.isPending}
@@ -182,48 +195,27 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
                 })
               }
             }}
-            sx={{ mr: 'auto' }}
+            sx={{ ml: 'auto' }}
           >
             {t('rag:deleteCollection')}
           </Button>
-          {user?.isAdmin && (
-            <OutlineButtonBlack startIcon={<Autorenew />} onClick={handleReset}>
-              {t('reset')}
-            </OutlineButtonBlack>
-          )}
-          <RagFilesStatus ragFileStatuses={ragFileStatuses ?? []} ragFiles={ragDetails?.ragFiles ?? []} />
         </Box>
+        <RagProgressSummaryV2 ragFileStatuses={ragFileStatuses ?? []} ragFiles={ragDetails?.ragFiles ?? []} />
         <Divider sx={{ my: 1 }} />
-        <Box>
-          <Box display="flex" alignItems="center" mb={2} gap={2}>
-            {isComplete && hasErrors && (
-              <OutlineButtonBlack
-                startIcon={<Autorenew />}
-                onClick={async () => {
-                  await handleUpload([], [])
-                }}
-              >
-                {t('rag:retryFailedFiles')}
-              </OutlineButtonBlack>
-            )}
-          </Box>
-          <TableContainer sx={{ overflowX: 'hidden' }}>
-            <Table size="small">
-              <RagFileTableHead />
-              <TableBody>
-                {orderBy(ragDetails.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (
-                  <RagFileInfo
-                    key={file.id}
-                    file={file}
-                    index={indexId}
-                    status={ragFileStatuses?.find((rfs) => rfs.ragFileId === file.id)}
-                    uploadProgress={uploadMutation.isPending ? uploadProgress : undefined}
-                    onSelectFile={onSelectFile}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          {orderBy(ragDetails.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (
+            <RagFileRowV2
+              key={file.id}
+              file={file}
+              status={ragFileStatuses?.find((rfs) => rfs.ragFileId === file.id)}
+              uploadProgress={uploadMutation.isPending ? uploadProgress : undefined}
+              onSelectFile={onSelectFile}
+              onDelete={handleDeleteFile}
+              onRetry={async () => {
+                await handleUpload([], [])
+              }}
+            />
+          ))}
         </Box>
       </Box>
       <Dialog open={stagedFiles.length > 0} onClose={() => setStagedFiles([])} fullWidth maxWidth="sm">

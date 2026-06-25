@@ -622,7 +622,14 @@
     "editSourceMaterial": "Redigera källmaterial",
     "noCollections": "Inga samlingar ännu",
     "selectCollection": "Välj en samling",
-    "backToCollections": "Tillbaka till samlingar"
+    "backToCollections": "Tillbaka till samlingar",
+    "fileCountLabel_one": "{{count}} fil",
+    "fileCountLabel_other": "{{count}} filer",
+    "processedProgress": "{{done}} / {{total}} bearbetade",
+    "statusReady": "Klar",
+    "statusProcessing": "Bearbetar",
+    "statusFailed": "Inläsning misslyckades",
+    "confirmDeleteFile": "Är du säker på att du vill radera den här filen?"
   },
   "sendPreferenceConfigurator": {
     "shift": "Skift",

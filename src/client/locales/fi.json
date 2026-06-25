@@ -678,7 +678,14 @@
     "editSourceMaterial": "Muokkaa lähdemateriaaleja",
     "noCollections": "Ei kokoelmia vielä",
     "selectCollection": "Valitse kokoelma",
-    "backToCollections": "Takaisin kokoelmiin"
+    "backToCollections": "Takaisin kokoelmiin",
+    "fileCountLabel_one": "{{count}} tiedosto",
+    "fileCountLabel_other": "{{count}} tiedostoa",
+    "processedProgress": "{{done}} / {{total}} käsitelty",
+    "statusReady": "Valmis",
+    "statusProcessing": "Käsitellään",
+    "statusFailed": "Ingestointi epäonnistui",
+    "confirmDeleteFile": "Haluatko varmasti poistaa tämän tiedoston?"
   },
   "embeddedLogin": {
     "helpText": "Kirjauduttu. Voit sulkea tämän ikkunan."
