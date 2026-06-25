@@ -281,6 +281,7 @@
     "noChats": "No open course chats"
   },
   "admin": {
+    "tryAgain": "Reset All (Admin only)",
     "showing": "Showing",
     "timePeriodStart": "Starting",
     "timePeriodStop": "ending",

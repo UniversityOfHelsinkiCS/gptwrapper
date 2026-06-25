@@ -31,7 +31,7 @@ import { RagFileInfo, RagFileTableHead } from './RagFileDetails'
 import { RagIndexDetails, useDeleteRagIndexMutation, useRagIndexDetails, useRagIndexJobs, useUploadMutation } from './api'
 import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
-import { BlueButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
+import { BlueButton, OrangeButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import { enqueueSnackbar } from 'notistack'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import queryClient from '../../util/queryClient'
@@ -208,9 +208,9 @@ export const RagIndex: React.FC<RagIndexProps> = ({ ragTab }) => {
             {t('rag:deleteCollection')}
           </Button>
           {user?.isAdmin && (
-            <OutlineButtonBlack startIcon={<Autorenew />} onClick={handleReset}>
-              {t('reset')}
-            </OutlineButtonBlack>
+            <OrangeButton startIcon={<Autorenew />} onClick={handleReset}>
+              {t('admin:tryAgain')}
+            </OrangeButton>
           )}
           <RagFilesStatus ragFileStatuses={ragFileStatuses ?? []} ragFiles={ragDetails?.ragFiles ?? []} />
         </Box>

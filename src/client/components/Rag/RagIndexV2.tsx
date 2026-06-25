@@ -26,7 +26,7 @@ import { orderBy } from 'lodash'
 import { RagIndexDetails, useDeleteRagFileMutation, useDeleteRagIndexMutation, useRagIndexDetails, useRagIndexJobs, useUploadMutation } from './api'
 import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
-import { BlueButton, OutlineButtonBlack, OutlineButtonBlue } from '../ChatV2/general/Buttons'
+import { BlueButton, OrangeButton, OutlineButtonBlack, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { enqueueSnackbar } from 'notistack'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import queryClient from '../../util/queryClient'
@@ -174,9 +174,9 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
             </DialogContent>
           </Dialog>
           {user?.isAdmin && (
-            <OutlineButtonBlack startIcon={<Autorenew />} onClick={handleReset}>
-              {t('reset')}
-            </OutlineButtonBlack>
+            <OrangeButton startIcon={<Autorenew />} onClick={handleReset}>
+              {t('admin:tryAgain')}
+            </OrangeButton>
           )}
           <Button
             startIcon={deleteIndexMutation.isPending ? <CircularProgress /> : <DeleteOutline />}

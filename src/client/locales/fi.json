@@ -284,6 +284,7 @@
     "waitingForResponse": "Waiting for response"
   },
   "admin": {
+    "tryAgain": "Reset All (Admin only)",
     "showing": "Näytetään",
     "timePeriodStart": "Alkaen",
     "timePeriodStop": "päättyen",
