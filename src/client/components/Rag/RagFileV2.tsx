@@ -3,12 +3,11 @@ import apiClient from '../../util/apiClient'
 import type { RagFileAttributes } from '../../../shared/types'
 import type { RagIndexAttributes } from '../../../server/db/models/ragIndex'
 import { Box, Button, Typography } from '@mui/material'
-import { useDeleteRagFileMutation, useDeleteRagFileTextMutation } from './api'
+import { useDeleteRagFileMutation } from './api'
 import { useTranslation } from 'react-i18next'
 import Markdown from 'react-markdown'
 import { enqueueSnackbar } from 'notistack'
 import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
-import Autorenew from '@mui/icons-material/Autorenew'
 import { ArrowBack } from '@mui/icons-material'
 
 type RagFile = RagFileAttributes & {
@@ -33,7 +32,6 @@ export const RagFileV2: React.FC<RagFileV2Props> = ({ indexId, fileId, onBack })
     },
   })
   const deleteMutation = useDeleteRagFileMutation()
-  const deleteTextMutation = useDeleteRagFileTextMutation()
 
   if (isError) {
     return <div>{t('rag:errorWithMessage', { message: (error as Error).message })}</div>
@@ -49,19 +47,6 @@ export const RagFileV2: React.FC<RagFileV2Props> = ({ indexId, fileId, onBack })
         <ArrowBack />
       </OutlineButtonBlack>
       <Box sx={{ my: 2, display: 'flex', gap: 2 }}>
-        {ragFile.fileType === 'application/pdf' && (
-          <OutlineButtonBlack
-            startIcon={<Autorenew />}
-            onClick={async () => {
-              await deleteTextMutation.mutateAsync({ indexId, fileId })
-              enqueueSnackbar(t('rag:fileTextDeleted'), { variant: 'success' })
-              onBack()
-            }}
-            sx={{ my: 2 }}
-          >
-            {t('rag:deleteFileText')}
-          </OutlineButtonBlack>
-        )}
         <Button
           variant="outlined"
           color="error"
