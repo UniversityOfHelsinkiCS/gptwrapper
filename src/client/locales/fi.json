@@ -224,7 +224,7 @@
     "toggle": "Vaihda",
     "open": "Avaa sivuvalikko",
     "close": "Sulje sivuvalikko",
-    "sourceMaterials": "Lähdemateriaalit"
+    "sourceMaterials": "Lähdemateriaali"
   },
   "chats": {
     "header": "Auki olevat kurssichatit",
@@ -480,7 +480,7 @@
     "customResponsibility": "manuaalisesti lisätty",
     "add": "lisää",
     "sourceMaterials": "Kurssin lähdemateriaalit",
-    "userSourceMaterials": "Omat lähdemateriaalit",
+    "userSourceMaterials": "Kokoelmat",
     "moodleEmbedding": "Moodle-upotus",
     "settings": "kurssin asetukset",
     "confirmRemoval": "Vahvista poistaminen",

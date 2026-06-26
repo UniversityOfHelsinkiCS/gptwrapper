@@ -221,7 +221,7 @@
     "toggle": "Toggle",
     "open": "Open sidebar",
     "close": "Close sidebar",
-    "sourceMaterials": "Source materials"
+    "sourceMaterials": "Source material"
   },
   "email": {
     "save": "Save as email",
@@ -477,7 +477,7 @@
     "customResponsibility": "manually added",
     "add": "add",
     "sourceMaterials": "Course source materials",
-    "userSourceMaterials": "Your source materials",
+    "userSourceMaterials": "Collections",
     "moodleEmbedding": "Moodle embedding",
     "settings": "course settings",
     "confirmRemoval": "Confirm removal",
