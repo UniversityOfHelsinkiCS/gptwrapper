@@ -1,20 +1,22 @@
 import { useState } from 'react'
 import { useCreateRagIndexMutation, useCreateUserRagIndexMutation } from './api'
 import {
+  Alert,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   FormControl,
   InputLabel,
+  Link,
   MenuItem,
   Select,
   TextField,
   Typography,
 } from '@mui/material'
-import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
+import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
+import { BlueButton } from '../ChatV2/general/Buttons'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import type { Course } from '../../types'
 import { useTranslation } from 'react-i18next'
@@ -73,11 +75,22 @@ export const RagCreator = ({ chatInstance, onCreated }: { chatInstance?: Course;
         }}
       >
         <DialogTitle>{t('rag:createNewIndex')}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>{t('rag:creatorGuide')}</DialogContentText>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Alert severity="info">
+            {t('rag:creatorInfo')}{' '}
+            <Link
+              href="https://github.com/UniversityOfHelsinkiCS/gptwrapper/blob/main/documentation/rag.md"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t('rag:readMoreAboutRag')}
+            </Link>
+          </Alert>
+          <Alert severity="success" icon={<LightbulbOutlinedIcon fontSize="small" />}>
+            {t('rag:creatorLanguageTip')}
+          </Alert>
           <TextField
             label={t('rag:nameLabel')}
-            helperText={t('rag:nameHelperText')}
             variant="outlined"
             value={indexName}
             onChange={(e) => setIndexName(e.target.value)}
@@ -86,14 +99,15 @@ export const RagCreator = ({ chatInstance, onCreated }: { chatInstance?: Course;
             slotProps={{
               htmlInput: { minLength: 5, maxLength: 100, 'data-testid': 'ragIndexNameInput' },
             }}
-            sx={{ mt: '2rem' }}
+            sx={{ mt: '1rem' }}
           />
-          <FormControl fullWidth sx={{ my: '2rem' }}>
+          <FormControl fullWidth>
             <InputLabel id="language-label">{t('rag:language')}</InputLabel>
             <Select
               labelId="language-label"
               id="language-select"
               value={language}
+              label={t('rag:language')}
               data-testid="ragIndexLanguageInput"
               onChange={(e) => setLanguage(e.target.value as (typeof RAG_LANGUAGES)[number])}
             >
@@ -106,9 +120,9 @@ export const RagCreator = ({ chatInstance, onCreated }: { chatInstance?: Course;
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <OutlineButtonBlack color="primary" type="submit" data-testid="ragIndexCreateSubmit">
+          <BlueButton color="primary" type="submit" data-testid="ragIndexCreateSubmit">
             {t('rag:createIndex')}
-          </OutlineButtonBlack>
+          </BlueButton>
         </DialogActions>
       </Dialog>
     </>
