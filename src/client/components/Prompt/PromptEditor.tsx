@@ -168,7 +168,7 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
                 type="button"
                 onClick={() => {
                   clearCachedForm()
-                  onDone()
+                  onDone(previewPrompt)
                 }}
               >
                 {t('common:cancel')}
