@@ -26,7 +26,7 @@ import { orderBy } from 'lodash'
 import { RagIndexDetails, useDeleteRagFileMutation, useDeleteRagIndexMutation, useRagIndexDetails, useRagIndexJobs, useUploadMutation } from './api'
 import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
-import { BlueButton, OrangeButton, OutlineButtonBlack, OutlineButtonBlue } from '../ChatV2/general/Buttons'
+import { BlueButton, OrangeButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import { enqueueSnackbar } from 'notistack'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import queryClient from '../../util/queryClient'
@@ -162,7 +162,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
       <Box py={2} mx={2}>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
           {/* @ts-expect-error component somehow not valid prop but it works */}
-          <BlueButton component="label" variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
+          <Button variant="contained" component="label" variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
             {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
             <VisuallyHiddenInput
               type="file"
@@ -176,10 +176,10 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
               }}
               multiple
             />
-          </BlueButton>
-          <OutlineButtonBlue startIcon={<FindInPage />} onClick={() => setSearchOpen(true)} disabled={ragDetails.ragFiles.length === 0}>
+          </Button>
+          <Button variant="outlined" startIcon={<FindInPage />} onClick={() => setSearchOpen(true)} disabled={ragDetails.ragFiles.length === 0}>
             {t('rag:testRetrievalButton')}
-          </OutlineButtonBlue>
+          </Button>
           <Dialog open={searchOpen} onClose={() => setSearchOpen(false)} fullWidth maxWidth="lg">
             <DialogTitle>{t('rag:testRetrieval', { name: ragDetails.metadata.name })}</DialogTitle>
             <DialogContent>
@@ -244,7 +244,9 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
                 <ListItem key={file.name} disableGutters>
                   <ListItemText
                     primary={file.name}
-                    secondary={isImage ? `${(file.size / 1024).toFixed(0)} KB · ${t('rag:imageRequiresAdvancedParsing')}` : `${(file.size / 1024).toFixed(0)} KB`}
+                    secondary={
+                      isImage ? `${(file.size / 1024).toFixed(0)} KB · ${t('rag:imageRequiresAdvancedParsing')}` : `${(file.size / 1024).toFixed(0)} KB`
+                    }
                   />
                   <FormControlLabel
                     control={
