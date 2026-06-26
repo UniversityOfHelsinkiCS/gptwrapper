@@ -1,5 +1,6 @@
 import React from 'react'
 import {
+  Alert,
   Button,
   Box,
   Typography,
@@ -11,17 +12,16 @@ import {
   Dialog,
   CircularProgress,
   Divider,
-  FormControlLabel,
-  Switch,
-  List,
-  ListItem,
-  ListItemText,
+  Collapse,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material'
 import Autorenew from '@mui/icons-material/Autorenew'
 import CloudUpload from '@mui/icons-material/CloudUpload'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import FindInPage from '@mui/icons-material/FindInPage'
 import Bookmarks from '@mui/icons-material/Bookmarks'
+import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { orderBy } from 'lodash'
 import { RagIndexDetails, useDeleteRagFileMutation, useDeleteRagIndexMutation, useRagIndexDetails, useRagIndexJobs, useUploadMutation } from './api'
 import { Search } from './Search'
@@ -38,6 +38,29 @@ import { RagProgressSummaryV2 } from './RagProgressSummaryV2'
 import { isSupportedRagFile, RAG_FILE_ACCEPT } from '@shared/utils'
 
 const isImageFile = (fileType: string) => fileType === 'image/png'
+
+// Only PDFs benefit from a choice between standard and AI-based parsing. Images always require AI
+// parsing and text files never need it, so the toggle is shown for PDFs only.
+const isPdfFile = (file: File) => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+
+const fileExtension = (name: string) => {
+  const dot = name.lastIndexOf('.')
+  return (dot > -1 ? name.slice(dot + 1) : 'file').toUpperCase().slice(0, 4)
+}
+
+// Truncate in the middle so the file extension stays visible.
+const truncateMiddle = (name: string, max: number) => {
+  if (name.length <= max) return name
+  const dot = name.lastIndexOf('.')
+  const ext = dot > -1 ? name.slice(dot) : ''
+  const base = dot > -1 ? name.slice(0, dot) : name
+  const keep = Math.max(8, max - ext.length - 1)
+  const head = Math.ceil(keep * 0.6)
+  const tail = Math.floor(keep * 0.4)
+  return `${base.slice(0, head)}…${base.slice(base.length - tail)}${ext}`
+}
+
+const fileSizeLabel = (bytes: number) => `${(bytes / 1024).toFixed(0)} KB`
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -234,41 +257,120 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
       <Dialog open={stagedFiles.length > 0} onClose={() => setStagedFiles([])} fullWidth maxWidth="sm">
         <DialogTitle>{t('rag:uploadFiles')}</DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="text.secondary" mb={1}>
-            {t('rag:advancedParsingGuide')}
-          </Typography>
-          <List dense>
+          <Collapse in={advancedParsing.some(Boolean)} timeout={220} unmountOnExit>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 2 }}>
+              <Alert severity="info">{t('rag:advancedParsingInfo')}</Alert>
+              <Alert severity="warning" icon={<HourglassEmpty fontSize="small" />}>
+                {t('rag:advancedParsingTimeWarning')}
+              </Alert>
+              <Alert severity="warning">{t('rag:advancedParsingAccuracyWarning')}</Alert>
+            </Box>
+          </Collapse>
+          <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                px: 2,
+                py: 1,
+                backgroundColor: 'background.subtle',
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+              }}
+            >
+              <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: '0.05em', color: 'text.secondary' }}>
+                {t('rag:fileName')}
+              </Typography>
+              <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: '0.05em', color: 'text.secondary' }}>
+                {t('rag:parsing')}
+              </Typography>
+            </Box>
             {stagedFiles.map((file, idx) => {
               const isImage = isImageFile(file.type)
+              const isPdf = isPdfFile(file)
+              const mode = isImage || (advancedParsing[idx] ?? false) ? 'advanced' : 'standard'
               return (
-                <ListItem key={file.name} disableGutters>
-                  <ListItemText
-                    primary={file.name}
-                    secondary={
-                      isImage ? `${(file.size / 1024).toFixed(0)} KB · ${t('rag:imageRequiresAdvancedParsing')}` : `${(file.size / 1024).toFixed(0)} KB`
-                    }
-                  />
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={isImage || (advancedParsing[idx] ?? false)}
-                        disabled={isImage}
-                        onChange={(e) => {
-                          setAdvancedParsing((prev) => {
-                            const next = [...prev]
-                            next[idx] = e.target.checked
-                            return next
-                          })
-                        }}
-                      />
-                    }
-                    label={t('rag:advancedParsing')}
-                    labelPlacement="start"
-                  />
-                </ListItem>
+                <Box
+                  key={file.name}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 2,
+                    px: 2,
+                    py: 1.5,
+                    ...(idx > 0 && { borderTop: '1px solid', borderColor: 'divider' }),
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+                    <Box
+                      sx={{
+                        flexShrink: 0,
+                        width: 38,
+                        height: 38,
+                        borderRadius: 2,
+                        backgroundColor: 'action.hover',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: 'primary.main',
+                      }}
+                    >
+                      {fileExtension(file.name)}
+                    </Box>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography title={file.name} sx={{ fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {truncateMiddle(file.name, 34)}
+                      </Typography>
+                      <Typography sx={{ fontSize: 12, color: 'text.secondary', mt: '2px' }}>
+                        {fileSizeLabel(file.size)}
+                        {isImage ? ` · ${t('rag:imageRequiresAdvancedParsing')}` : ''}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  {isPdf ? (
+                    <ToggleButtonGroup
+                      size="small"
+                      exclusive
+                      value={mode}
+                      onChange={(_e, value) => {
+                        if (!value) return
+                        setAdvancedParsing((prev) => {
+                          const next = [...prev]
+                          next[idx] = value === 'advanced'
+                          return next
+                        })
+                      }}
+                      sx={{
+                        flexShrink: 0,
+                        '& .MuiToggleButton-root': {
+                          textTransform: 'none',
+                          px: 1.75,
+                          py: 0.75,
+                          '&:hover': { backgroundColor: 'transparent' },
+                        },
+                        '& .MuiToggleButton-root.Mui-selected': {
+                          backgroundColor: 'primary.main',
+                          color: 'primary.contrastText',
+                          '&:hover': { backgroundColor: 'primary.main' },
+                        },
+                      }}
+                    >
+                      <ToggleButton value="standard">{t('rag:standardParsing')}</ToggleButton>
+                      <ToggleButton value="advanced">{t('rag:advancedParsing')}</ToggleButton>
+                    </ToggleButtonGroup>
+                  ) : (
+                    <Typography variant="body2" sx={{ flexShrink: 0, color: 'text.secondary' }}>
+                      {isImage ? t('rag:advancedParsing') : t('rag:standardParsing')}
+                    </Typography>
+                  )}
+                </Box>
               )
             })}
-          </List>
+          </Box>
         </DialogContent>
         <DialogActions>
           <OutlineButtonBlack onClick={() => setStagedFiles([])}>{t('common:cancel')}</OutlineButtonBlack>
