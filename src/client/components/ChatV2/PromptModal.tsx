@@ -13,6 +13,7 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Prompt as PromptType } from '../../types'
 import { PromptEditor } from '../Prompt/PromptEditor'
 import { usePromptState } from './PromptState'
+import StudentModal from './StudentModal'
 import { Tab, Tabs, IconButton } from '@mui/material'
 import PsychologyIcon from '@mui/icons-material/Psychology'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
@@ -27,6 +28,96 @@ import { useRagIndexDetails } from '../Rag/api.ts'
 import { orderBy } from 'lodash'
 import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import { usePromptEditorState } from '../Prompt/context.tsx'
+
+type PromptListItemProps = {
+  prompt: PromptType
+  previewPromptId?: string
+  activePromptId?: string
+  onPreview: (prompt: PromptType) => void
+  onSelect: (prompt: PromptType) => void
+  confirmClose: () => boolean
+  choosePromptLabel: string
+}
+
+export const PromptListItem = ({
+  prompt,
+  previewPromptId,
+  activePromptId,
+  onPreview,
+  onSelect,
+  confirmClose,
+  choosePromptLabel,
+}: PromptListItemProps) => (
+  <ListItemButton
+    selected={previewPromptId === prompt.id}
+    onClick={() => {
+      if (!confirmClose()) return
+      onPreview(prompt)
+    }}
+    sx={{
+      position: 'relative',
+      borderRadius: '8px',
+      mb: 0.5,
+      py: 1,
+      height: '50px',
+      minHeight: '50px',
+      pr: prompt.id === activePromptId ? 10 : 0.5,
+      '&.Mui-selected': {
+        backgroundColor: 'background.subtle',
+        borderLeft: '1px solid',
+        borderLeftColor: 'primary.main',
+      },
+      '& .change-prompt-button': {
+        opacity: 0,
+        transform: 'translateX(4px)',
+        visibility: 'hidden',
+        pointerEvents: 'none',
+        transition: 'opacity 180ms ease, transform 180ms ease, visibility 0s linear 180ms',
+      },
+      '& .prompt-list-item__text': {
+        transition: 'padding-right 180ms ease',
+        transitionDelay: '200ms',
+      },
+      '&:hover .change-prompt-button:not(.change-prompt-button--active)': {
+        opacity: 1,
+        transform: 'translateX(0)',
+        visibility: 'visible',
+        pointerEvents: 'auto',
+        transitionDelay: '200ms',
+      },
+      '&:hover .prompt-list-item__text': {
+        pr: prompt.id === activePromptId ? 3 : 10,
+      },
+    }}
+    data-testid={`prompt-row-${prompt.name}`}
+  >
+    <ListItemText
+      className="prompt-list-item__text"
+      primary={prompt.name}
+      slotProps={{ primary: { noWrap: true } }}
+      sx={{ minWidth: 0 }}
+    />
+    {prompt.id === activePromptId && (
+      <CheckCircleOutlineIcon fontSize="small" sx={{ position: 'absolute', right: 16, color: 'text.primary' }} />
+    )}
+    {prompt.id !== activePromptId && (
+      <BlueButton
+        size="small"
+        variant="contained"
+        data-testid="change-to-prompt-button"
+        className="change-prompt-button"
+        onClick={(e) => {
+          e.stopPropagation()
+          if (!confirmClose()) return
+          onSelect(prompt)
+        }}
+        sx={{ position: 'absolute', right: 8, whiteSpace: 'nowrap' }}
+      >
+        {choosePromptLabel}
+      </BlueButton>
+    )}
+  </ListItemButton>
+)
 
 const PromptModal = () => {
   const theme = useTheme()
@@ -175,79 +266,7 @@ const PromptModal = () => {
 
   if (!user) return null
 
-  const renderPromptListItem = (prompt: PromptType) => (
-    <ListItemButton
-      key={prompt.id}
-      selected={previewPrompt?.id === prompt.id}
-      onClick={() => {
-        if (!confirmClose()) return
-        setPreviewPrompt(prompt)
-        setIsEditing(false)
-      }}
-      sx={{
-        position: 'relative',
-        borderRadius: '8px',
-        mb: 0.5,
-        py: 1,
-        height: '50px',
-        minHeight: '50px',
-        pr: prompt.id === activePrompt?.id ? 10 : 0.5,
-        '&.Mui-selected': {
-          backgroundColor: 'action.selected',
-          borderLeft: '3px solid',
-          borderLeftColor: 'primary.main',
-        },
-        '& .change-prompt-button': {
-          opacity: 0,
-          transform: 'translateX(4px)',
-          visibility: 'hidden',
-          pointerEvents: 'none',
-          transition: 'opacity 180ms ease, transform 180ms ease, visibility 0s linear 180ms',
-        },
-        '& .prompt-list-item__text': {
-          transition: 'padding-right 180ms ease',
-          transitionDelay: '200ms',
-        },
-        '&:hover .change-prompt-button:not(.change-prompt-button--active)': {
-          opacity: 1,
-          transform: 'translateX(0)',
-          visibility: 'visible',
-          pointerEvents: 'auto',
-          transitionDelay: '200ms',
-        },
-        '&:hover .prompt-list-item__text': {
-          pr: prompt.id === activePrompt?.id ? 3 : 10,
-        },
-      }}
-      data-testid={`prompt-row-${prompt.name}`}
-    >
-      <ListItemText
-        className="prompt-list-item__text"
-        primary={prompt.name}
-        slotProps={{ primary: { noWrap: true } }}
-        sx={{ minWidth: 0 }}
-      />
-      {prompt.id === activePrompt?.id && (
-        <CheckCircleOutlineIcon fontSize="small" sx={{ position: 'absolute', right: 16, color: 'text.primary' }} />
-      )}
-      {prompt.id !== activePrompt?.id && (
-        <BlueButton
-          size="small"
-          variant="contained"
-          data-testid="change-to-prompt-button"
-          className={prompt.id === activePrompt?.id ? 'change-prompt-button change-prompt-button--active' : 'change-prompt-button'}
-          onClick={(e) => {
-            e.stopPropagation()
-            if (!confirmClose()) return        
-            handleSelect(prompt)
-          }}
-          sx={{ position: 'absolute', right: 8, whiteSpace: 'nowrap' }}
-        >
-          {t('settings:choosePrompt')}
-        </BlueButton>
-      )}
-    </ListItemButton>
-  )
+  if (!user.isEmployee && !user.isAdmin) return <StudentModal />
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
@@ -305,7 +324,23 @@ const PromptModal = () => {
             {t('sidebar:promptNone')}
           </Button>
           <Divider sx={{ p: 1 }} />
-          <List sx={{ flex: 1, overflowY: 'auto' }}>{sortedPrompts.map((prompt) => renderPromptListItem(prompt))}</List>
+          <List sx={{ flex: 1, overflowY: 'auto' }}>
+            {sortedPrompts.map((prompt) => (
+              <PromptListItem
+                key={prompt.id}
+                prompt={prompt}
+                previewPromptId={previewPrompt?.id}
+                activePromptId={activePrompt?.id}
+                confirmClose={confirmClose}
+                choosePromptLabel={t('settings:choosePrompt')}
+                onPreview={(selectedPrompt) => {
+                  setPreviewPrompt(selectedPrompt)
+                  setIsEditing(false)
+                }}
+                onSelect={handleSelect}
+              />
+            ))}
+          </List>
           {currentPrompts.length === 0 && (
             <Box sx={{ p: 3, color: 'text.secondary' }}>
               <Typography variant="body2">{t('settings:noPrompts')}</Typography>
@@ -326,7 +361,7 @@ const PromptModal = () => {
                           const hasCreatorInfo = promptCreator && promptCreator.user.first_names && promptCreator.user.last_name
                           return (
                             <>
-                              {hasCreatorInfo && (previewPrompt.showCreator || previewPrompt.userId === user.id) ? (
+                              {hasCreatorInfo ? (
                                 <Box display="flex" alignItems="center" gap={1}>
                                 <Typography variant="body2" fontWeight="light" data-testid={`prompt-preview-creator-for-${previewPrompt.name}`}>
                                   {t('prompt:creatorName', { firstNames: promptCreator.user.first_names.split(' ')[0], lastName: promptCreator.user.last_name })}
