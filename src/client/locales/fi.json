@@ -628,7 +628,7 @@
     "errorWithMessage": "Virhe: {{message}}",
     "noContent": "Ei sisältöä",
     "creatorInfo": "Lähdemateriaalikokoelma on joukko tiedostoja, jotka voit liittää alustukseen. Kielimalli voi hakea liitetyistä tiedostoista vastauksiinsa olennaiset kohdat.",
-    "creatorLanguageTip": "Pidä kaikki kokoelman tiedostot samalla kielellä. Kielten sekoittaminen heikentää hakutuloksia.",
+    "creatorLanguageTip": "Kokoelman tiedostojen on hyvä olla samalla kielellä. Kielten sekoittaminen heikentää hakutuloksia.",
     "uploading": "Ladataan",
     "uploadFiles": "Lisää tiedostoja",
     "createNewIndex": "Luo uusi kokoelma",
