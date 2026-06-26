@@ -669,6 +669,7 @@
     "allCompleted": "Tiedostot käsitelty.",
     "swedish": "Ruotsi",
     "readMoreAboutRag": "Lue lisää",
+    "advancedParsingGuide": "Käytä tekoälypohjaista PDF-tiedostojen käsittelyä? Jos PDF-muotoisissa tiedostoissasi on kaavioita, kuvia, yhtälöitä tai muuta monimutkaista asettelua, tämä voi parantaa lähdemateriaalin tekstiksimuunnon laatua mutta voi myös lisätä hallusinointia. Huom. tekoälypohjainen käsittely voi kestää useita minuutteja.",
     "advancedParsingInfo": "Tekoälypohjainen käsittely lukee kaavioita, kuvia, yhtälöitä tai monimutkaista asettelua sisältävät tiedostot tarkemmin kuin peruskäsittely.",
     "advancedParsingTimeWarning": "Käsittely voi kestää useita minuutteja tiedostoa kohden.",
     "advancedParsingAccuracyWarning": "Tekoälypohjainen käsittely saattaa joskus lisätä tekstiä, jota alkuperäisessä tiedostossa ei ole.",

@@ -572,6 +572,7 @@
     "fileSize": "Filstorlek",
     "fileSizeUnit": "kB",
     "etaLeft": "{{value}} kvar",
+    "advancedParsingGuide": "Använd AI-baserad PDF-tolkning? Om dina PDF-filer innehåller diagram, bilder, ekvationer eller annan komplex layout kan detta förbättra textkonverteringens kvalitet, men kan också leda till hallucinationer. Observera: AI-baserad tolkning kan ta flera minuter.",
     "advancedParsingInfo": "AI-baserad bearbetning läser filer med diagram, bilder, ekvationer eller komplex layout mer exakt än standardbearbetning.",
     "advancedParsingTimeWarning": "Det kan ta flera minuter per fil.",
     "advancedParsingAccuracyWarning": "AI-baserad bearbetning kan ibland lägga till text som inte finns i originalfilen.",
