@@ -57,7 +57,6 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
     customMessage: initialCustomMessage,
     hidden: previewPrompt?.hidden ?? true,
     ragHidden: previewPrompt?.ragHidden ?? true,
-    showCreator: previewPrompt?.showCreator ?? false,
     ragIndexId: previewPrompt?.ragIndexId ?? null,
     userId: previewPrompt?.userId ?? null,
   }
@@ -98,7 +97,7 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
 
     setLoading(true)
 
-    const { name, userInstructions, systemMessage, ragSystemMessages, hidden, ragHidden, ragIndexId, showCreator } = form
+    const { name, userInstructions, systemMessage, ragSystemMessages, hidden, ragHidden, ragIndexId } = form
     const ragSystemMessage = ragSystemMessages.join(' ')
 
     const messages: Message[] = ragIndexId && ragSystemMessage.length > 0 ? [{ role: 'system', content: ragSystemMessage }] : []
@@ -114,7 +113,6 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
           hidden,
           ragHidden,
           ragIndexId,
-          showCreator,
         })
         enqueueSnackbar(t('prompt:updatedPrompt', { name }), { variant: 'success' })
         onDone(editedPrompt ?? undefined)
@@ -129,7 +127,6 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
           hidden,
           ragHidden,
           ragIndexId,
-          showCreator,
         })
         enqueueSnackbar(t('prompt:createdPrompt', { name }), { variant: 'success' })
         onDone(newPrompt ?? undefined)

@@ -364,15 +364,8 @@ const PromptModal = () => {
                               {hasCreatorInfo ? (
                                 <Box display="flex" alignItems="center" gap={1}>
                                 <Typography variant="body2" fontWeight="light" data-testid={`prompt-preview-creator-for-${previewPrompt.name}`}>
-                                  {t('prompt:creatorName', { firstNames: promptCreator.user.first_names.split(' ')[0], lastName: promptCreator.user.last_name })}
+                                  {`${promptCreator.user.first_names.split(' ')[0]} ${promptCreator.user.last_name}`}
                                 </Typography>
-                                {previewPrompt.userId === promptCreator.user.id && !previewPrompt.showCreator && (
-                                  <Tooltip placement="right" title={t('prompt:creatorHidden')} describeChild>
-                                    <Box component="span" tabIndex={0} aria-label={t('prompt:creatorHidden')}>
-                                      <VisibilityOffOutlined fontSize="small" color="error" />
-                                    </Box>
-                                  </Tooltip>
-                                )}
                                 </Box>
                               ) : ( null )}
                             </>

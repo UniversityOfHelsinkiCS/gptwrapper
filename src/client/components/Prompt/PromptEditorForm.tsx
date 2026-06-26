@@ -38,15 +38,6 @@ const BasicInfoSection = () => {
           <Typography variant="body1">
             {t('prompt:creatorName', { firstNames: promptCreator?.user.first_names.split(' ')[0], lastName: promptCreator?.user.last_name })}
           </Typography>
-          <FormControlLabel
-            control={<Switch checked={form.showCreator} onChange={(e) => setForm((prev) => ({ ...prev, showCreator: e.target.checked }))} />}
-            label={
-              <Box display="flex" alignItems="flex-end" gap={1}>
-                {t('prompt:showCreator')}
-                {!form.showCreator ? <VisibilityOffOutlined fontSize="small" color="error" /> : <VisibilityOutlined fontSize="small" color="success" />}
-              </Box>
-            }
-          />
         </Box>
       )}
       <Box mb={3}>

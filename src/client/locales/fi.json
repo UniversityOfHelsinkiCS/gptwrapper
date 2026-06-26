@@ -577,7 +577,6 @@
     "unSavedChanges": "Sinulla on tallentamattomia muutoksia. Sulkemalla näkymän nyt, menetät tekemäsi muutokset. Haluatko jatkaa?",
     "creatorName": "Alustuksen luoja: {{firstNames}} {{lastName}}",
     "creatorHidden": "Piilotettu muilta käyttäjiltä",
-    "showCreator": "Näytä alustuksen tekijä muille käyttäjille",
     "coursePrompts": "Kurssien alustukset"
   },
   "tooltip": {
