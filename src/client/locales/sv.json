@@ -629,7 +629,8 @@
     "statusReady": "Klar",
     "statusProcessing": "Bearbetar",
     "statusFailed": "Inläsning misslyckades",
-    "confirmDeleteFile": "Är du säker på att du vill radera den här filen?"
+    "confirmDeleteFile": "Är du säker på att du vill radera den här filen?",
+    "imageRequiresAdvancedParsing": "AI-baserad tolkning krävs för bilder"
   },
   "sendPreferenceConfigurator": {
     "shift": "Skift",

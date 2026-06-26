@@ -685,7 +685,8 @@
     "statusReady": "Valmis",
     "statusProcessing": "Käsitellään",
     "statusFailed": "Ingestointi epäonnistui",
-    "confirmDeleteFile": "Haluatko varmasti poistaa tämän tiedoston?"
+    "confirmDeleteFile": "Haluatko varmasti poistaa tämän tiedoston?",
+    "imageRequiresAdvancedParsing": "Kuville käytetään aina tekoälypohjaista käsittelyä"
   },
   "embeddedLogin": {
     "helpText": "Kirjauduttu. Voit sulkea tämän ikkunan."

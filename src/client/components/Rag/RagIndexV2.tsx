@@ -36,6 +36,8 @@ import { EditableTitle } from './EditableTitle'
 import { RagFileRowV2 } from './RagFileRowV2'
 import { RagProgressSummaryV2 } from './RagProgressSummaryV2'
 
+const isImageFile = (fileType: string) => fileType === 'image/png'
+
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
   clipPath: 'inset(50%)',
@@ -85,7 +87,8 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
 
   const handleStageFiles = (files: File[]) => {
     setStagedFiles(files)
-    setAdvancedParsing(files.map(() => false))
+    // Images can only be read via AI-based (VLM) parsing, so force it on for them.
+    setAdvancedParsing(files.map((f) => isImageFile(f.type)))
   }
 
   const handleUpload = async (files: File[], perFileAdvancedParsing: boolean[]) => {
@@ -225,27 +228,34 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
             {t('rag:advancedParsingGuide')}
           </Typography>
           <List dense>
-            {stagedFiles.map((file, idx) => (
-              <ListItem key={file.name} disableGutters>
-                <ListItemText primary={file.name} secondary={`${(file.size / 1024).toFixed(0)} KB`} />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={advancedParsing[idx] ?? false}
-                      onChange={(e) => {
-                        setAdvancedParsing((prev) => {
-                          const next = [...prev]
-                          next[idx] = e.target.checked
-                          return next
-                        })
-                      }}
-                    />
-                  }
-                  label={t('rag:advancedParsing')}
-                  labelPlacement="start"
-                />
-              </ListItem>
-            ))}
+            {stagedFiles.map((file, idx) => {
+              const isImage = isImageFile(file.type)
+              return (
+                <ListItem key={file.name} disableGutters>
+                  <ListItemText
+                    primary={file.name}
+                    secondary={isImage ? `${(file.size / 1024).toFixed(0)} KB · ${t('rag:imageRequiresAdvancedParsing')}` : `${(file.size / 1024).toFixed(0)} KB`}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={isImage || (advancedParsing[idx] ?? false)}
+                        disabled={isImage}
+                        onChange={(e) => {
+                          setAdvancedParsing((prev) => {
+                            const next = [...prev]
+                            next[idx] = e.target.checked
+                            return next
+                          })
+                        }}
+                      />
+                    }
+                    label={t('rag:advancedParsing')}
+                    labelPlacement="start"
+                  />
+                </ListItem>
+              )
+            })}
           </List>
         </DialogContent>
         <DialogActions>
