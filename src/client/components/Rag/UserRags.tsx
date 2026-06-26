@@ -36,7 +36,7 @@ const UserRags: React.FC = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, minHeight: 0 }}>
       {returnToEditor && (
         <Box sx={{ pb: 2 }}>
           <OutlineButtonBlack
@@ -90,7 +90,7 @@ const UserRags: React.FC = () => {
         <Divider sx={{ display: isMobile ? 'none' : 'flex' }} orientation="vertical" flexItem />
 
         {/* Right panel */}
-        <Box sx={{ display: !isMobile || selectedIndexId ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0, overflow: 'hidden', maxWidth: !isMobile ? '100%' : '90vw' }}>
+        <Box sx={{ display: !isMobile || selectedIndexId ? 'flex' : 'none', flex: 1, flexDirection: 'column', minWidth: 0, minHeight: 0, overflow: 'hidden', maxWidth: !isMobile ? '100%' : '90vw' }}>
           {isMobile && selectedIndexId && (
             <Box sx={{ pb: 1 }}>
               <OutlineButtonBlue onClick={handleBack}>
