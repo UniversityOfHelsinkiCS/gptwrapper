@@ -117,6 +117,7 @@ export default function ChatConsole({ user, course }: { user?: User | null; cour
   const { t, i18n } = useTranslation()
   const { activePrompt, handleChangePrompt } = usePromptState()
   const { language } = i18n
+  const isEmployeeOrAdmin = user?.isEmployee || user?.isAdmin
 
   const courseName = course ? course.name[language] || 'undefined course' : undefined
   const coursesPath = `/${courseId ?? 'general'}/courses`
@@ -129,6 +130,7 @@ export default function ChatConsole({ user, course }: { user?: User | null; cour
 
   return (
     <Box sx={{ pb: 1 }}>
+      {isEmployeeOrAdmin && (
       <Box sx={{ mb: 1 }}>
         <SectionLabel>{t('sidebar:courseTitle')}</SectionLabel>
         <SelectorRow
@@ -147,6 +149,7 @@ export default function ChatConsole({ user, course }: { user?: User | null; cour
           </Box>
         )}
       </Box>
+      )}
 
       <Box sx={{ mb: 1 }} data-testid={activePrompt ? 'prompt-name' : undefined}>
         <SectionLabel>{t('sidebar:promptTitle')}</SectionLabel>
