@@ -4,7 +4,7 @@ import crypto from 'crypto'
 import z from 'zod/v4'
 import multerS3 from 'multer-s3'
 import path from 'path'
-import { shouldRenderAsText } from '../../../shared/utils'
+import { isSupportedRagFile, shouldRenderAsText } from '../../../shared/utils'
 import { ChatInstance, RagFile, RagIndex, Responsibility } from '../../db/models'
 import { FileStore } from '../../services/rag/fileStore'
 import type { RequestWithUser } from '../../types'
@@ -232,6 +232,13 @@ const upload = multer({
   }),
   limits: {
     fileSize: 50 * 1024 * 1024, // 50 MB
+  },
+  fileFilter: (_req, file, cb) => {
+    if (isSupportedRagFile(file.originalname, file.mimetype)) {
+      cb(null, true)
+    } else {
+      cb(ApplicationError.BadRequest(`Unsupported file type: ${file.originalname}`))
+    }
   },
 })
 const uploadMiddleware = upload.array('files')
