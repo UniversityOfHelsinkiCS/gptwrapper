@@ -21,7 +21,7 @@ import Autorenew from '@mui/icons-material/Autorenew'
 import CloudUpload from '@mui/icons-material/CloudUpload'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import FindInPage from '@mui/icons-material/FindInPage'
-import FolderOpen from '@mui/icons-material/FolderOpen'
+import Bookmarks from '@mui/icons-material/Bookmarks'
 import { orderBy } from 'lodash'
 import { RagIndexDetails, useDeleteRagFileMutation, useDeleteRagIndexMutation, useRagIndexDetails, useRagIndexJobs, useUploadMutation } from './api'
 import { Search } from './Search'
@@ -152,7 +152,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
     <Box sx={{ flex: 1, overflow: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, px: 2, pt: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-          <FolderOpen sx={{ color: 'secondary.main' }} />
+          <Bookmarks sx={{ color: 'secondary.main' }} />
           <EditableTitle ragIndex={ragDetails} />
         </Box>
         <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
