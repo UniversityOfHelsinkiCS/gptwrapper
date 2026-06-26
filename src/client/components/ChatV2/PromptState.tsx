@@ -3,7 +3,7 @@ import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { useParams, useSearchParams } from 'react-router-dom'
 import type { Prompt } from '../../types'
 import apiClient, { type ApiError } from '../../util/apiClient'
-import { type UseMutateAsyncFunction, useMutation, useQuery } from '@tanstack/react-query'
+import { type UseMutateAsyncFunction, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import useCourse from '../../hooks/useCourse'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import type { PromptCreationParams, PromptEditableParams } from '@shared/prompt'
@@ -46,6 +46,8 @@ export const PromptStateProvider: React.FC<{
   const [searchParams, setSearchParams] = useSearchParams()
   const urlPromptId = searchParams.get('promptId')
   const { courseId } = useParams()
+  const queryClient = useQueryClient()
+  
 
   const { data: course, refetch: refetchCourse } = useCourse(courseId)
 
@@ -56,6 +58,8 @@ export const PromptStateProvider: React.FC<{
 
   const refetchPrompts = () => {
     refetch()
+    queryClient.invalidateQueries({ queryKey: ['/prompts/my-prompts'] })
+    queryClient.invalidateQueries({ queryKey: ['course'] })
     if (courseId !== 'general') {
       refetchCourse()
     }
