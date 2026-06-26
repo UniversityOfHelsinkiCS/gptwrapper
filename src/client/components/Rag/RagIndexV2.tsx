@@ -35,6 +35,7 @@ import apiClient from '../../util/apiClient'
 import { EditableTitle } from './EditableTitle'
 import { RagFileRowV2 } from './RagFileRowV2'
 import { RagProgressSummaryV2 } from './RagProgressSummaryV2'
+import { isSupportedRagFile, RAG_FILE_ACCEPT } from '@shared/utils'
 
 const isImageFile = (fileType: string) => fileType === 'image/png'
 
@@ -86,9 +87,17 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
   }
 
   const handleStageFiles = (files: File[]) => {
-    setStagedFiles(files)
+    const supported = files.filter((f) => isSupportedRagFile(f.name, f.type))
+    const unsupported = files.filter((f) => !isSupportedRagFile(f.name, f.type))
+
+    if (unsupported.length > 0) {
+      enqueueSnackbar(t('rag:unsupportedFileType', { files: unsupported.map((f) => f.name).join(', ') }), { variant: 'error' })
+    }
+    if (supported.length === 0) return
+
+    setStagedFiles(supported)
     // Images can only be read via AI-based (VLM) parsing, so force it on for them.
-    setAdvancedParsing(files.map((f) => isImageFile(f.type)))
+    setAdvancedParsing(supported.map((f) => isImageFile(f.type)))
   }
 
   const handleUpload = async (files: File[], perFileAdvancedParsing: boolean[]) => {
@@ -157,6 +166,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
             {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
             <VisuallyHiddenInput
               type="file"
+              accept={RAG_FILE_ACCEPT}
               onChange={async (e) => {
                 const files = e.target.files
                 if (files && files.length > 0) {

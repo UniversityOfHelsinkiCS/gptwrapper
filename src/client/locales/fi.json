@@ -686,7 +686,8 @@
     "statusProcessing": "Käsitellään",
     "statusFailed": "Ingestointi epäonnistui",
     "confirmDeleteFile": "Haluatko varmasti poistaa tämän tiedoston?",
-    "imageRequiresAdvancedParsing": "Kuville käytetään aina tekoälypohjaista käsittelyä"
+    "imageRequiresAdvancedParsing": "Kuville käytetään aina tekoälypohjaista käsittelyä",
+    "unsupportedFileType": "Tiedostotyyppiä ei tueta: {{files}}"
   },
   "embeddedLogin": {
     "helpText": "Kirjauduttu. Voit sulkea tämän ikkunan."

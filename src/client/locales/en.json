@@ -685,7 +685,8 @@
     "statusProcessing": "Processing",
     "statusFailed": "Ingestion failed",
     "confirmDeleteFile": "Are you sure you want to delete this file?",
-    "imageRequiresAdvancedParsing": "AI-based parsing required for images"
+    "imageRequiresAdvancedParsing": "AI-based parsing required for images",
+    "unsupportedFileType": "Unsupported file type: {{files}}"
   },
   "embeddedLogin": {
     "helpText": "Successfully logged in. You may close this window."
