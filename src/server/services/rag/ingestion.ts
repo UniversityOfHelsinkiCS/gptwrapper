@@ -2,7 +2,7 @@ import { Document } from '@langchain/core/documents'
 import { MarkdownTextSplitter, RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
 import { RagFile, type RagIndex } from '../../db/models'
 import { pdfQueueEvents, simplyParsePdf, submitAdvancedParsingJobs } from '../jobs/pdfParsing.job'
-import { FileStore } from './fileStore'
+import { FileStore, isBinaryFile, isImage } from './fileStore'
 import logger from 'src/server/util/logger'
 import type { IngestionJobStatus, IngestionPipelineStageKey } from '@shared/ingestion'
 import type { RagFileMetadata } from '@shared/types'
@@ -59,11 +59,23 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
   }
 
   await updateRagFileStatus(ragFile, update)
-  const needToParse = (await FileStore.readRagFileTextContent(ragFile)) === null
-  const needToParseWithVlm = needToParse && ragFile.metadata?.advancedParsing
+  const existingText = await FileStore.readRagFileTextContent(ragFile)
+  const needToParse = existingText === null
+
+  // Only binary files (PDF/image) require a text-extraction step; their extracted text is cached
+  // separately. For plain text files the uploaded content IS the text, so missing content here is a
+  // genuine read failure rather than a reason to run PDF parsing.
+  if (needToParse && !isBinaryFile(ragFile)) {
+    logger.error(`File content missing or unreadable for ${ragFile.filename} in S3`)
+    await ragFile.update({ error: 'File content is missing or could not be read', pipelineStage: 'error' })
+    return
+  }
+
+  // Images can only be read with VLM parsing, so always use it for them regardless of the upload flag.
+  const needToParseWithVlm = needToParse && isBinaryFile(ragFile) && (isImage(ragFile) || ragFile.metadata?.advancedParsing)
   progress = 5
-  await updateRagFileStatus(ragFile, { ...update, message: needToParse ? 'Preparing to parse PDF' : 'Found cached text' })
-  let finalText: string | null = null
+  await updateRagFileStatus(ragFile, { ...update, message: needToParse ? 'Extracting text' : 'Found cached text' })
+  let finalText: string | null = existingText
 
   if (needToParseWithVlm) {
     // Advanced PDF parsing with job processing.
@@ -119,15 +131,15 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
       return
     }
   } else if (needToParse) {
-    // Simple PDF parsing.
+    // Standard (non-VLM) PDF text extraction. Only reached by binary files thanks to the guard above.
     const pages = await simplyParsePdf(ragFile)
 
     finalText = pages.map((p) => p.text).join('\n\n')
 
     await FileStore.writeRagFileTextContent(ragFile, finalText)
   } else {
+    // Text file content read directly, or previously-extracted text served from cache.
     progress = 50
-    finalText = await FileStore.readRagFileTextContent(ragFile)
 
     await updateRagFileStatus(ragFile, {
       ...update,

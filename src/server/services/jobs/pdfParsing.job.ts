@@ -146,8 +146,8 @@ export const simplyParsePdf = async (ragFile: RagFile) => {
   const pdfBytes = await FileStore.readRagFileContextToBytes(ragFile)
 
   if (!pdfBytes) {
-    logger.error(`Failed to read PDF text file ${ragFile.filename} in S3`)
-    throw ApplicationError.InternalServerError('Failed to read PDF text file')
+    logger.error(`Failed to read file ${ragFile.filename} in S3`)
+    throw ApplicationError.InternalServerError('Failed to read file content')
   }
   const pages = await analyzeAndPreparePDFPages(pdfBytes)
 

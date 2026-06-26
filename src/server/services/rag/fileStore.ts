@@ -13,9 +13,9 @@ import { S3_BUCKET } from '../../util/config'
 import { s3Client } from '../../util/s3client'
 import logger from 'src/server/util/logger'
 
-const isPdf = (ragFile: RagFile) => ragFile.fileType === 'application/pdf'
-const isImage = (ragFile: RagFile) => ragFile.fileType === 'image/png'
-const isBinaryFile = (ragFile: RagFile) => isPdf(ragFile) || isImage(ragFile)
+export const isPdf = (ragFile: RagFile) => ragFile.fileType === 'application/pdf'
+export const isImage = (ragFile: RagFile) => ragFile.fileType === 'image/png'
+export const isBinaryFile = (ragFile: RagFile) => isPdf(ragFile) || isImage(ragFile)
 const getPdfTextKey = (s3Key: string) => `${s3Key}.md`
 
 export const FileStore = {
@@ -105,8 +105,8 @@ export const FileStore = {
           return null
         }
 
-        logger.error(`Failed to read PDF text file ${pdfTextKey} in S3:`, error)
-        throw ApplicationError.InternalServerError('Failed to read PDF text file')
+        logger.error(`Failed to read extracted text ${pdfTextKey} in S3:`, error)
+        throw ApplicationError.InternalServerError('Failed to read extracted text content')
       }
     }
 
