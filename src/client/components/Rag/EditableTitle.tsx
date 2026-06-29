@@ -52,13 +52,13 @@ export const EditableTitle = ({ ragIndex }: { ragIndex: RagIndexAttributes }) =>
             slotProps={{ htmlInput: { 'data-testid': 'ragIndexNameEditInput' } }}
           />
           <Tooltip title={t('common:cancel')}>
-            <IconButton onClick={handleCancel} size="small" data-testid="ragIndexNameEditCancel">
-              <CancelOutlined />
+            <IconButton color="error" onClick={handleCancel} size="small" data-testid="ragIndexNameEditCancel">
+              <CancelOutlined fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title={t('common:save')}>
-            <IconButton onClick={handleSave} size="small" data-testid="ragIndexNameEditSave">
-              {updateMutation.isPending ? <CircularProgress size={20} /> : <Check />}
+            <IconButton color="success" onClick={handleSave} size="small" data-testid="ragIndexNameEditSave">
+              {updateMutation.isPending ? <CircularProgress size={20} /> : <Check fontSize="small" />}
             </IconButton>
           </Tooltip>
         </>
@@ -68,8 +68,8 @@ export const EditableTitle = ({ ragIndex }: { ragIndex: RagIndexAttributes }) =>
             {ragIndex?.metadata?.name}
           </Typography>
           <Tooltip title={t('common:edit')}>
-            <IconButton onClick={() => setIsEditing(true)} size="small" data-testid="ragIndexNameEditToggle">
-              <Edit />
+            <IconButton color="primary" onClick={() => setIsEditing(true)} size="small" data-testid="ragIndexNameEditToggle">
+              <Edit fontSize="small" />
             </IconButton>
           </Tooltip>
         </>
