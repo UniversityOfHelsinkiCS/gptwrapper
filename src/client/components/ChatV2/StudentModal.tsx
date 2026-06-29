@@ -100,7 +100,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
           {showPrompts ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
           
         </ListItemButton>
-        {showPrompts ? (
+        {showPrompts && sortedPrompts.length > 0 ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2, mb: 1 }}>
             <List sx={{ py: 0 }}>
               {sortedPrompts.map((prompt) => (
@@ -120,11 +120,16 @@ const CoursePrompts = (props: CoursePromptsProps) => {
               ))}
             </List>
           </Box>
+        ) : showPrompts && !sortedPrompts.length ? (
+          <Box sx={{ ml: 3, mt: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              {t('settings:noPrompts')}
+            </Typography>
+          </Box>
         ) : null}
       </Box>
     </Box>
   )
-        
 }
 
 
@@ -140,7 +145,6 @@ const StudentModal = () => {
   const [showMyPrompts, setShowMyPrompts] = useState(myPrompts.some((p) => p.id === previewPrompt?.id) || false)
   const [showCoursePrompts, setShowCoursePrompts] = useState((previewPrompt && !myPrompts.some((p) => p.id === previewPrompt.id)) || false)
   
-  
   const { hasChanges, setHasChanges, cacheKey, setCacheKey } = usePromptEditorState()
 
   const { user } = useCurrentUser()
@@ -148,13 +152,7 @@ const StudentModal = () => {
   const studentsCourses = user?.enrolledCourses as Course[]
 
   const courseId = studentsCourses.find((course) => course.id === previewPrompt?.chatInstanceId)?.courseId ?? 'general' 
-  
-  
-
   const { data: chatInstance } = useCourse(courseId)
-
-
-  
  
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
   type RagIndex = NonNullable<typeof ragIndices>[number]
@@ -165,14 +163,10 @@ const StudentModal = () => {
   }, [previewPrompt?.ragIndexId, ragIndices])
 
 
-  
-
-
   const onDone = (prompt?: PromptType) => {
     setIsEditing(false)
     setPreviewPrompt(prompt)
   }
-
 
 
   const handleDelete = (event: React.MouseEvent<HTMLButtonElement>, prompt: PromptType) => {
@@ -238,12 +232,7 @@ const StudentModal = () => {
     a.name.localeCompare(b.name, 'fi', { sensitivity: 'base' })
   )
 
-  
-
   if (!user) return null
-
-
-  
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       <Box sx={{ display: 'flex', gap: 2, mt: 2, flex: 1, minHeight: 0 }}>
@@ -293,7 +282,8 @@ const StudentModal = () => {
                 />
               </IconButton>
             )}           
-            {showMyPrompts && sortedMyPrompts.map((course) => 
+            {showMyPrompts && sortedMyPrompts.length > 0 ?
+            sortedMyPrompts.map((course) => 
             <Box key={course.id} sx={{ ml: 3 }}>
               <PromptListItem
                 key={course.id} 
@@ -313,46 +303,52 @@ const StudentModal = () => {
                 }}
               />
               </Box>
-            )}
-            <Divider sx={{ p: 1 }} />
+            ) : showMyPrompts && !sortedMyPrompts.length ? (
+              <Box sx={{ ml: 3, mt: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  {t('settings:noPrompts')}
+                </Typography>
+              </Box>
+            ) : null}
             
-            <ListItemButton
-              onClick={() => setShowCoursePrompts((open) => !open)}
-              sx={{ 
-                px: 1, 
-                borderRadius: 1, 
-                backgroundColor: !showCoursePrompts ? 'background.subtle' : 'action.selected',
-                ...(showCoursePrompts && {
-                  borderLeft: '2px solid',
-                  borderLeftColor: 'primary.main',
-                }),
-              }}
-              data-testid={`course-prompts-toggle`}
-            >
-              <ListItemIcon>
-              <SchoolIcon />
-            </ListItemIcon>
-            
-            <ListItemText
-              primary={t('prompt:coursePrompts')}
-              slotProps={{ primary: { variant: 'subtitle1' } }}
-            />
-            {showCoursePrompts ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
-            </ListItemButton>
-            <Box sx={{ height: 6 }} />
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml:2 }}>
-            {showCoursePrompts && studentsCourses.map((course) => 
-              <CoursePrompts 
-                key={course.id} 
-                course={course} 
-                previewPrompt={previewPrompt} 
-                confirmClose={confirmClose} 
-                setPreviewPrompt={setPreviewPrompt} 
-                setIsEditing={setIsEditing}
-              />
-            )}
+            {studentsCourses.length > 0 && (   
+              <Box>
+                <Divider sx={{ p: 1 }} />
+                <ListItemButton
+                    onClick={() => setShowCoursePrompts((open) => !open)}
+                    sx={{
+                      px: 1,
+                      borderRadius: 1,
+                      backgroundColor: !showCoursePrompts ? 'background.subtle' : 'action.selected',
+                      ...(showCoursePrompts && {
+                        borderLeft: '2px solid',
+                        borderLeftColor: 'primary.main',
+                      }),
+                    }}
+                    data-testid={`course-prompts-toggle`}
+                  >
+                    <ListItemIcon>
+                      <SchoolIcon />
+                    </ListItemIcon>
+
+                    <ListItemText
+                      primary={t('prompt:coursePrompts')}
+                      slotProps={{ primary: { variant: 'subtitle1' } }} />
+                    {showCoursePrompts ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
+                  </ListItemButton>
+                    <Box sx={{ height: 6 }} /><Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2 }}>
+                      {showCoursePrompts && studentsCourses.map((course) => <CoursePrompts
+                        key={course.id}
+                        course={course}
+                        previewPrompt={previewPrompt}
+                        confirmClose={confirmClose}
+                        setPreviewPrompt={setPreviewPrompt}
+                        setIsEditing={setIsEditing} />
+                      )}
+                    </Box>
+                </Box>
+              )}
             </Box>
-          </Box>
         </Box>
         <Divider sx={{ display: isMobile ? 'none' : 'flex' }} orientation="vertical" flexItem />
         {/* Right panel - preview */}
