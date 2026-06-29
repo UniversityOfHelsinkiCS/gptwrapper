@@ -135,10 +135,7 @@ const StudentModal = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [deleteConfirm, setDeleteConfirm] = useState<PromptType | null>(null)
-  const tab = 0
-  const [previewPrompts, setPreviewPrompts] = useState<Record<number, PromptType | undefined>>(isMobile ? {} : { [tab]: activePrompt })
-  const previewPrompt = previewPrompts[tab]
-  const setPreviewPrompt = (prompt: PromptType | undefined) => setPreviewPrompts((prev) => ({ ...prev, [tab]: prompt }))
+  const [previewPrompt, setPreviewPrompt] = useState<PromptType | undefined>(isMobile ? undefined : activePrompt)
   const [isEditing, setIsEditing] = useState(false)
   const [showMyPrompts, setShowMyPrompts] = useState(myPrompts.some((p) => p.id === previewPrompt?.id) || false)
   const [showCoursePrompts, setShowCoursePrompts] = useState((previewPrompt && !myPrompts.some((p) => p.id === previewPrompt.id)) || false)
