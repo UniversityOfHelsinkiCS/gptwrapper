@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { RagIndexAttributes } from '../../../shared/types'
 import { RagChunk, SearchInputParams } from '../../../shared/rag'
 import apiClient from '../../util/apiClient'
-import { Box, Checkbox, Fade, FormControl, FormControlLabel, LinearProgress, TextField, Typography, Zoom } from '@mui/material'
+import { Alert, Box, Checkbox, Fade, FormControl, FormControlLabel, LinearProgress, TextField, Typography, Zoom } from '@mui/material'
 import { OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { amber, green, blue } from '@mui/material/colors'
 import { useTranslation } from 'react-i18next'
@@ -46,7 +46,9 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
   const totalTime = Object.values(results?.timings ?? {}).reduce((acc, curr) => acc + curr, 0)
 
   return (
-    <Box my="2rem" display="flex" gap="1rem">
+    <Box my="2rem" display="flex" gap="1rem" sx={{ flexDirection: 'column' }}>
+      <Alert severity="info">{t('rag:searchDescription')}</Alert>
+
       <form onSubmit={handleSubmit} style={{ flex: 1 }}>
         <FormControl>
           <TextField type="text" value={query} onChange={handleInputChange} label={t('rag:searchQueryLabel')} />
@@ -56,9 +58,6 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
           <FormControlLabel control={<Checkbox checked={curate} onChange={(e) => setCurate(e.target.checked)} />} label={t('rag:useCuration')} />
         </FormControl>
         <OutlineButtonBlue type="submit">{t('rag:searchButton')}</OutlineButtonBlue>
-        <Typography variant="body2" mt="2rem">
-          {t('rag:searchDescription')}
-        </Typography>
       </form>
       <Box flex={2}>
         {isLoading && <LinearProgress />}
