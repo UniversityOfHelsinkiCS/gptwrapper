@@ -251,6 +251,9 @@ const attachFileMetadata = (req: Request, _res: Response, next: NextFunction) =>
   const files = req.files as Express.MulterS3.File[]
   files?.forEach((file, idx) => {
     file.advancedParsing = settings[idx] ?? false
+    // Multer/busboy decodes the multipart filename as latin1, mangling UTF-8 names
+    // (e.g. "ä" -> "Ã¤"). Re-interpret the bytes as UTF-8 to recover the original.
+    file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8')
   })
   next()
 }
