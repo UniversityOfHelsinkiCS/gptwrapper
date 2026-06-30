@@ -10,7 +10,7 @@ import { OutlineButtonBlack, OutlineButtonBlue } from '../ChatV2/general/Buttons
 import { ArrowBack } from '@mui/icons-material'
 import { createRagSearchParams, getRagNavigationState } from './ragNavigation'
 
-const UserRags: React.FC = () => {
+const RagModal: React.FC = () => {
   const { t } = useTranslation()
   const { courseId } = useParams<{ courseId: string }>()
   const navigate = useNavigate()
@@ -124,4 +124,4 @@ const UserRags: React.FC = () => {
   )
 }
 
-export default UserRags
+export default RagModal

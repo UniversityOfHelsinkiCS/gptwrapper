@@ -34,7 +34,7 @@ import SideBar from './SideBar'
 import TemplateModal from './TemplateModal'
 import PromptModal from './PromptModal'
 import CoursesModal from './CoursesModal'
-import UserRags from '../Rag/UserRags'
+import RagModal from '../Rag/RagModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
 import { CustomIcon } from './general/CustomIcon'
 import { parseFileContent } from '../../util/fileParsing'
@@ -600,7 +600,7 @@ const ChatV2Content = () => {
             <Route path={`course/*`} element={<CourseSettingsModal />} />
             <Route path={`courses`} element={<CoursesModal />} />
             <Route path={`prompts`} element={<PromptModal />} />
-            <Route path={`userrags`} element={<UserRags />} />
+            <Route path={`userrags`} element={<RagModal />} />
           </Route>
         </Routes>
        
