@@ -13,11 +13,11 @@ import { CourseUsage } from '@shared/types'
 import useUserUsages from '../../hooks/useUserUsage'
 import { usePromptState } from './PromptState'
 
-const usagePercent = (usage: number, limit: number) => (limit > 0 ? Math.round((usage / limit) * 100) : 0)
+export const usagePercent = (usage: number, limit: number) => (limit > 0 ? Math.round((usage / limit) * 100) : 0)
 
-const formatTokens = (n: number) => (n >= 1000 ? `${Math.round(n / 1000)}k` : `${n}`)
+export const formatTokens = (n: number) => (n >= 1000 ? `${Math.round(n / 1000)}k` : `${n}`)
 
-const gaugeColorKey = (percent: number): 'error' | 'warning' | 'success' => (percent >= 75 ? 'error' : percent >= 50 ? 'warning' : 'success')
+export const gaugeColorKey = (percent: number): 'error' | 'warning' | 'success' => (percent >= 75 ? 'error' : percent >= 50 ? 'warning' : 'success')
 
 const UsageGauge = ({ percent, size = 56 }: { percent: number; size?: number }) => (
   <Gauge
