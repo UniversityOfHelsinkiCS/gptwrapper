@@ -131,24 +131,24 @@ export default function ChatConsole({ user, course }: { user?: User | null; cour
   return (
     <Box sx={{ pb: 1 }}>
       {isEmployeeOrAdmin && (
-      <Box sx={{ mb: 1 }}>
-        <SectionLabel>{t('sidebar:courseTitle')}</SectionLabel>
-        <SelectorRow
-          icon={<SchoolIcon />}
-          label={courseName}
-          placeholder={t('sidebar:noCourse')}
-          onClick={() => navigate(coursesPath)}
-          onClear={course ? handleClearCourse : undefined}
-          clearTooltip={t('sidebar:courseExit')}
-          selectorTestId="select-course-button"
-          clearTestId="course-exit-button"
-        />
-        {course && (
-          <Box sx={{ px: 3, pt: 1 }}>
-            <CourseStatus course={course} />
-          </Box>
-        )}
-      </Box>
+        <Box sx={{ mb: 1 }}>
+          <SectionLabel>{t('sidebar:courseTitle')}</SectionLabel>
+          <SelectorRow
+            icon={<SchoolIcon />}
+            label={courseName}
+            placeholder={t('sidebar:noCourse')}
+            onClick={() => navigate(coursesPath)}
+            onClear={course ? handleClearCourse : undefined}
+            clearTooltip={t('sidebar:courseExit')}
+            selectorTestId="select-course-button"
+            clearTestId="course-exit-button"
+          />
+          {course && (
+            <Box sx={{ px: 3, pt: 1 }}>
+              <CourseStatus course={course} />
+            </Box>
+          )}
+        </Box>
       )}
 
       <Box sx={{ mb: 1 }} data-testid={activePrompt ? 'prompt-name' : undefined}>
@@ -164,7 +164,7 @@ export default function ChatConsole({ user, course }: { user?: User | null; cour
         />
       </Box>
 
-      {user?.isAdmin && (
+      {isEmployeeOrAdmin && (
         <Box>
           <SectionLabel>{t('sidebar:sourceMaterials')}</SectionLabel>
           <SelectorRow
