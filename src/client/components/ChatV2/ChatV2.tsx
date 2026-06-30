@@ -123,8 +123,9 @@ const ChatV2Content = () => {
   const chatContainerRef = useRef<HTMLDivElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
+  const sendSeq = useRef(0) // increments per send attempt, for admin timing logs
 
-  const handleSendMessage = async (message: string, resendPrevious: boolean, ignoredWarnings: WarningType[]) => {
+  const handleSendMessage = async (message: string, resendPrevious: boolean, ignoredWarnings: WarningType[], messagesToResend?: ChatMessage[]) => {
     if (!userStatus) return
     const { usage, limit } = userStatus
     const tokenUsageExceeded = usage >= limit
@@ -174,9 +175,12 @@ const ChatV2Content = () => {
       }
     }
 
+    // On retry, `messages` in this closure is stale (the slice from handleRetry
+    // hasn't been applied yet), so the caller passes the intended history explicitly.
+    const baseMessages = messagesToResend ?? messages
     const newMessages = resendPrevious
-      ? messages
-      : messages.concat({
+      ? baseMessages
+      : baseMessages.concat({
           role: 'user',
           content: messageContent,
           attachments: file && fileName ? fileName : undefined,
@@ -190,7 +194,22 @@ const ChatV2Content = () => {
     }
     setFileName('')
     const streamCreationTimeout = getModelConfig(acualModel)?.timeoutOverride ?? DEFAULT_STREAM_TIMEOUT
+
+    // Admin-only timing instrumentation: confirms whether timeouts really fire
+    // before the configured budget and which clock ran out. Safe in production
+    // since devs are admins. See investigation of fast "timeout_error" reports.
+    const attemptId = ++sendSeq.current
+    const armedAt = performance.now()
+    const logAdminTiming = (msg: string) => {
+      if (user?.isAdmin) {
+        console.log(`[chat-timing] #${attemptId} ${msg}`)
+      }
+    }
+
     setRetryTimeout(() => {
+      logAdminTiming(
+        `timeout fired after ${Math.round(performance.now() - armedAt)}ms (configured ${streamCreationTimeout}ms, model=${acualModel}, resend=${resendPrevious}, file=${Boolean(file)})`,
+      )
       if (streamControllerRef.current) {
         streamControllerRef.current.abort('timeout_error')
       }
@@ -223,6 +242,12 @@ const ChatV2Content = () => {
         streamControllerRef.current,
       )
 
+      // Headers have arrived, so the stream-creation budget no longer applies.
+      // Clear here (not just on the success path below) so an early return for
+      // warnings or errors can never leak the timer into a later attempt.
+      logAdminTiming(`headers received after ${Math.round(performance.now() - armedAt)}ms`)
+      clearRetryTimeout()
+
       if ('error' in res) {
         console.error('API error:', res)
         handleCompletionStreamError(res, fileName)
@@ -248,8 +273,6 @@ const ChatV2Content = () => {
       if (Object.keys(newWarnings).length > 0) {
         return
       }
-
-      clearRetryTimeout()
 
       if ('stream' in res) {
         await processStream(res.stream, generationInfo)
@@ -330,7 +353,9 @@ const ChatV2Content = () => {
     const newMessages = messages.slice(0, messageIndex)
     setMessages(newMessages)
 
-    handleSendMessage('', true, [])
+    // Pass the sliced history explicitly: setMessages is async, so the closure
+    // inside handleSendMessage would otherwise still see the errored message.
+    handleSendMessage('', true, [], newMessages)
   }
 
   useEffect(() => {
