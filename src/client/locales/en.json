@@ -513,7 +513,8 @@
     "altSourceView": "Moodle open source code view",
     "altPasteSave": "Moodle source embedding and save",
     "deActivate": "close for students",
-    "courseActivated": "Course activated"
+    "courseActivated": "Course activated",
+    "courseActivePeriod": "Course chat open:"
   },
   "prompt": {
     "createNew": "Create new prompt",

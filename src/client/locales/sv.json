@@ -485,7 +485,8 @@
     "stepPasteAndSave": "Klistra in bäddningskoden och spara",
     "altOpenSettings": "Moodle öppna inställningar",
     "altSourceView": "Moodle öppna källkodsvisning",
-    "altPasteSave": "Moodle klistra in källkod och spara"
+    "altPasteSave": "Moodle klistra in källkod och spara",
+    "courseActivePeriod": "Kurschatten öppen:"
   },
   "prompt": {
     "createNew": "Skapa ny prompt",
