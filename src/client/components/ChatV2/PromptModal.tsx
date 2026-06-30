@@ -26,7 +26,6 @@ import { monospaceStyle } from '../../theme'
 import BookmarksIcon from '@mui/icons-material/Bookmarks'
 import { useRagIndexDetails } from '../Rag/api.ts'
 import { orderBy } from 'lodash'
-import { useCourseRagIndices } from '../../hooks/useRagIndices'
 import { usePromptEditorState } from '../Prompt/context.tsx'
 
 type PromptListItemProps = {
@@ -134,8 +133,7 @@ const PromptModal = () => {
   const setPreviewPrompt = (prompt: PromptType | undefined) => setPreviewPrompts((prev) => ({ ...prev, [tab]: prompt }))
   const [isEditing, setIsEditing] = useState(false)
   const [showRagFiles, setShowRagFiles] = useState(false)
-  const { data: ragDetails} = useRagIndexDetails(previewPrompt?.ragIndexId ?? null)
-
+  
   const { hasChanges, setHasChanges, cacheKey, setCacheKey } = usePromptEditorState()
 
   const { user } = useCurrentUser()
@@ -143,10 +141,11 @@ const PromptModal = () => {
 
   const courseResponsibilities = chatInstance?.responsibilities || []
  
-  const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
-  const rag = ragIndices?.find((r) => r.id === previewPrompt?.ragIndexId)
+  const rag = chatInstance?.prompts.find((p) => p.id === previewPrompt?.id)?.ragIndex
 
   const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
+
+  const { data: ragDetails} = amongResponsibles || user?.isAdmin ? useRagIndexDetails(previewPrompt?.ragIndexId ?? null) : { data: null }
 
   const onDone = (prompt?: PromptType) => {
     setIsEditing(false)

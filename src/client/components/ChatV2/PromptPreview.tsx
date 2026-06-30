@@ -3,7 +3,6 @@ import { ContentCopyOutlined, EditOutlined } from '@mui/icons-material'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import { Box, Divider, Typography, Paper, Tooltip, IconButton } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
-import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import useCourse from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
@@ -14,7 +13,6 @@ import { useMediaQuery, useTheme } from '@mui/material'
 import { alpha } from '@mui/material/styles'
 import { monospaceStyle } from '../../theme'
 import BookmarksIcon from '@mui/icons-material/Bookmarks'
-import { useCourseRagIndices } from '../../hooks/useRagIndices'
 
 const PromptPreview = ({
   prompt,
@@ -35,13 +33,8 @@ const PromptPreview = ({
   const courseId = studentsCourses.find((course) => course.id === prompt?.chatInstanceId)?.courseId ?? 'general'
   const { data: chatInstance } = useCourse(courseId)
 
-  const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
-  type RagIndex = NonNullable<typeof ragIndices>[number]
-  const [rag, setRag] = useState<RagIndex | undefined>(undefined)
+  const rag = chatInstance?.prompts.find((p) => p.id === prompt.id)?.ragIndex
 
-  useEffect(() => {
-    setRag(ragIndices?.find((r) => r.id === prompt?.ragIndexId))
-  }, [prompt?.ragIndexId, ragIndices])
 
   const handleCopyLink = (event: React.MouseEvent<HTMLButtonElement>, prompt: Prompt) => {
     event.stopPropagation()
