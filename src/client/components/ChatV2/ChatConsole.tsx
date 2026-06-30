@@ -171,6 +171,7 @@ export default function ChatConsole({ user, course }: { user?: User | null; cour
             icon={<LibraryBooksIcon />}
             placeholder={t('course:userSourceMaterials')}
             onClick={() => navigate(`/${courseId ?? 'general'}/userrags`)}
+            selectorTestId="openSourceMaterialsButton"
           />
         </Box>
       )}

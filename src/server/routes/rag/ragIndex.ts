@@ -52,8 +52,11 @@ export async function ragIndexMiddleware(req: Request, res: Response, next: Next
 
   const isResponsible = responsibilities.some((r) => ragIndex.chatInstances?.some((ci) => ci.id === r.chatInstanceId))
 
-  // Check that user is admin or responsible for this chatInstance
-  if (!isResponsible && !user.isAdmin) {
+  // V2 user indices are personal (no chatInstance), so the owner always has access.
+  const isOwner = ragIndex.userId === user.id
+
+  // Check that user is admin, the owner, or responsible for this chatInstance
+  if (!isResponsible && !isOwner && !user.isAdmin) {
     res.status(403).json({ error: 'Forbidden' })
     return
   }

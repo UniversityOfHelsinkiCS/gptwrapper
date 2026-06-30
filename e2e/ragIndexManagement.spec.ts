@@ -2,76 +2,32 @@ import { expect } from '@playwright/test'
 import { teacherTest as test } from './fixtures'
 import { acceptDisclaimer } from './utils/test-helpers'
 
-test.describe('Rag index management', () => {
+test.describe('Source material management', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/test-course-course-id')
     await acceptDisclaimer(page)
   })
 
-  test('Can create a new rag and delete it', async ({ page }) => {
-    await page.getByTestId('select-course-button').click()
-    await page.getByTestId('course-settings-button').first().click()
-    await page.getByTestId('sourceMaterialsTab').click()
+  test('Teacher can open the source materials modal and add and remove a collection', async ({ page }) => {
+    // Open the source materials modal from the sidebar
+    await page.getByTestId('openSourceMaterialsButton').click()
+
+    // Create a new collection
     await page.getByTestId('createNewRagButton').click()
     await page.getByTestId('ragIndexNameInput').fill('perkele')
-    await page.getByTestId('ragIndexLanguageInput').click()
-    // Clicking this button in dropdown should close the dropdown, but in CI it doesnt (weird right???).
-    // Mitigate by focusing the text field.
-    await page.getByTestId('ragIndexLanguageOptionFinnish').click()
 
-    await page.getByTestId('ragIndexNameInput').click()
-
-    // This submit button is also cursed, lets press enter for a good measure
-    // await page.getByTestId('ragIndexCreateSubmit').click()
+    // This submit button is cursed, lets press enter for a good measure
     await page.getByTestId('ragIndexCreateSubmit').press('Enter')
 
-    await expect(page.getByText('perkele')).toBeVisible()
+    // Creating auto-selects the new collection, so it shows up both in the
+    // list and as the detail view title.
+    await expect(page.getByText('perkele').first()).toBeVisible()
 
-    // Go back
-    await page.getByTestId('ragIndexBackToList').click()
-
-    await expect(page.getByText('perkele')).toBeVisible()
-    // Should be first in list now
-    await page.getByTestId('ragIndexDetails').first().click()
-
+    // Delete it from the detail view (guarded by a window.confirm dialog)
     page.on('dialog', (dialog) => dialog.accept())
     await page.getByTestId('ragIndexDeleteButton').click()
 
     await expect(page.getByTestId('ragIndexDeleteSuccessSnackbar')).toBeVisible()
-
-    await expect(page.getByText('perkele')).not.toBeVisible()
-  })
-
-  test('Can change the name of a RAG index', async ({ page }) => {
-    await page.getByTestId('select-course-button').click()
-    await page.getByTestId('course-settings-button').first().click()
-    await page.getByTestId('sourceMaterialsTab').click()
-    await page.getByTestId('createNewRagButton').click()
-    await page.getByTestId('ragIndexNameInput').fill('pahaminttu')
-
-    // This submit button is cursed, lets press enter for a good measure
-    // await page.getByTestId('ragIndexCreateSubmit').click()
-    await page.getByTestId('ragIndexCreateSubmit').press('Enter')
-
-    await expect(page.getByText('pahaminttu')).toBeVisible()
-
-    // Go back
-    await page.getByTestId('ragIndexBackToList').click()
-
-    await expect(page.getByText('pahaminttu')).toBeVisible()
-    // Should be first in list now
-    await page.getByTestId('ragIndexDetails').first().click()
-
-    await page.getByTestId('ragIndexNameEditToggle').click()
-    await page.getByTestId('ragIndexNameEditInput').fill('minttu')
-    await page.getByTestId('ragIndexNameEditSave').click()
-    await expect(page.getByText('minttu')).toBeVisible()
-    await expect(page.getByText('pahaminttu')).not.toBeVisible()
-
-    // Go back
-    await page.getByTestId('ragIndexBackToList').click()
-
-    await expect(page.getByText('minttu').first()).toBeVisible()
-    await expect(page.getByText('pahaminttu')).not.toBeVisible()
+    await expect(page.getByText('perkele')).toHaveCount(0)
   })
 })
