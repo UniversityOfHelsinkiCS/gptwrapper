@@ -35,6 +35,10 @@ const RagModal: React.FC = () => {
     setSelectedFileId(null)
   }
 
+  const sortedRagIndices = ragIndices?.sort((a, b) =>
+    a.metadata?.name.localeCompare(b.metadata?.name, 'fi', { sensitivity: 'base' })
+  )
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, minHeight: 0 }}>
       {returnToEditor && (
@@ -61,7 +65,7 @@ const RagModal: React.FC = () => {
           <RagCreator onCreated={handleSelectIndex} />
           <Divider sx={{ my: 1 }} />
           <List sx={{ flex: 1, overflowY: 'auto' }}>
-            {ragIndices?.map((ragIndex) => (
+            {sortedRagIndices?.map((ragIndex) => (
               <ListItemButton
                 key={ragIndex.id}
                 selected={selectedIndexId === ragIndex.id}
