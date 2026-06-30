@@ -10,6 +10,7 @@ import ExpandLess from '@mui/icons-material/ExpandLess'
 import ExpandMore from '@mui/icons-material/ExpandMore'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import { usagePercent, gaugeColorKey, formatTokens } from './UsageSelector'
+import SchoolIcon from '@mui/icons-material/School'
 
 
 const CoursePreview = ({ course }: { course: Course }) => {
@@ -30,9 +31,14 @@ const CoursePreview = ({ course }: { course: Course }) => {
 
   return (
     <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2, mt: 2 }}>
-        <Box sx={{ flexDirection: 'column', display: 'flex', gap: 1, maxWidth: '80%' }}>  
-          <Typography variant="h4" fontWeight="bold" data-testid={`course-preview-title-for-${course.name[language]}`} sx={{ wordBreak: 'break-word' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 6, mt: 2 }}>
+        <Box sx={{ flexDirection: 'row', display: 'flex', gap: 1, maxWidth: '80%' }}>
+          <SchoolIcon color="primary" fontSize='large'/>  
+          <Typography 
+            variant="h4" 
+            fontWeight="bold" 
+            data-testid={`course-preview-title-for-${course.name[language]}`} 
+            sx={{ wordBreak: 'break-word', hyphens: 'auto', }}>
             {course.name[language]}
           </Typography>
         </Box>
@@ -50,7 +56,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: '220px' }}>
             <Box gap={1} sx={{ display: 'flex', alignItems: 'center' }}>
-              <DateRangeIcon color="secondary" />
+              <DateRangeIcon color="primary" />
               <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
                 {t('course:courseActivePeriod')}
               </Typography>
@@ -68,7 +74,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
               return (
                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                   <Box gap={1} sx={{ display: 'flex', alignItems: 'center' }}>
-                    <BarChartIcon color="secondary" />
+                    <BarChartIcon color="primary" />
                     <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
                       {t('status:usageTitle')}
                     </Typography>
@@ -99,7 +105,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
         
         <Box sx={{ display: 'flex', flexDirection: 'column', width: '30%' }}>
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <PeopleIcon color="secondary"/>          
+            <PeopleIcon color="primary"/>          
           <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
              {t('course:teachers')}
           </Typography> 

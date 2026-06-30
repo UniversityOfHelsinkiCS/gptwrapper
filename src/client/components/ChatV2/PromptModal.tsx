@@ -63,7 +63,7 @@ export const PromptListItem = ({
       pr: prompt.id === activePromptId ? 10 : 0.5,
       '&.Mui-selected': {
         backgroundColor: 'background.subtle',
-        borderLeft: '1px solid',
+        borderLeft: '3px solid',
         borderLeftColor: 'primary.main',
       },
       '& .change-prompt-button': {

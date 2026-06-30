@@ -1,6 +1,6 @@
 import ExpandLess from '@mui/icons-material/ExpandLess'
 import ExpandMore from '@mui/icons-material/ExpandMore'
-import { Box, List, ListItemButton, ListItemText, Typography, IconButton } from '@mui/material'
+import { Box, List, ListItemButton, ListItemText, Typography, ListItemIcon } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -8,6 +8,7 @@ import useCourse from '../../hooks/useCourse'
 import type { Course, Prompt as PromptType } from '../../types'
 import { usePromptState } from './PromptState'
 import { PromptListItem } from './PromptModal.tsx'
+import SchoolIcon from '@mui/icons-material/School'
 
 
 
@@ -18,11 +19,11 @@ interface CoursePromptsProps {
   setPreviewPrompt: (prompt: PromptType | undefined) => void
   setIsEditing: (isEditing: boolean) => void
   setPreviewCourse: (course: Course | undefined) => void
-
+  previewCourse?: Course
 }
 
 const CoursePrompts = (props: CoursePromptsProps) => {
-  const { course, previewPrompt, confirmClose, setPreviewPrompt, setIsEditing, setPreviewCourse } = props
+  const { course, previewPrompt, confirmClose, setPreviewPrompt, setIsEditing, setPreviewCourse, previewCourse } = props
   const { t, i18n } = useTranslation()
   const { language } = i18n
   const { activePrompt, handleChangePrompt } = usePromptState()
@@ -58,41 +59,40 @@ const CoursePrompts = (props: CoursePromptsProps) => {
     if (!course.courseId) return
     handleChangePrompt(prompt)
     if (course.courseId) navigate(`/${course.courseId}`)
-  }
-  
+  } 
   return (
     <Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <IconButton
-            onClick={() => setShowPrompts((open) => !open)}
-            data-testid={`show-course-info-${course.id}-button`}
-            sx={{ color: 'primary.main', borderRadius: 1 }}
-          >
-            {showPrompts ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}       
-          </IconButton>
           <ListItemButton
-            onClick={() => {
-              setPreviewCourse(course)
+            onClick={() => { 
+              if (!showPrompts) {
+               setPreviewCourse(course)
               setPreviewPrompt(undefined)
-            }}
-            sx={{ 
-              px: 1, 
-              borderRadius: 1,
-              flex: 1,
-              gap: 2,
-              '&:hover': {
-                backgroundColor: 'transparent',
               }
+              setShowPrompts((open) => !open)
             }}
-            data-testid={`course-prompts-toggle-${course.id}`}
+            sx={{
+              px: 1,
+              borderRadius: 1,
+              ...((previewCourse?.id === course.id) ? {
+                backgroundColor: 'background.subtle',
+                borderLeft: '2px solid',
+                borderLeftColor: 'primary.main',
+              } : {
+                backgroundColor: 'action.selected',
+              }),
+            }}
+            data-testid={`show-course-info-${course.id}-button`}
           >
+            <ListItemIcon>
+              <SchoolIcon color='primary'/>
+            </ListItemIcon>
             <ListItemText
               primary={course.name[language]}
-              slotProps={{ primary: { variant: 'subtitle1'} }}
-            />
+              slotProps={{ primary: { variant: 'subtitle1' } }} />
+            {showPrompts ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
           </ListItemButton>
-          
         </Box>
         {showPrompts && sortedPrompts.length > 0 ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2, mb: 1 }}>

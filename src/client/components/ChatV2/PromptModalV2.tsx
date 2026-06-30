@@ -14,7 +14,6 @@ import ConfirmDialog from './general/ConfirmDialog'
 import { usePromptEditorState } from '../Prompt/context.tsx'
 import { PromptListItem } from './PromptModal.tsx'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
-import SchoolIcon from '@mui/icons-material/School'
 import PersonIcon from '@mui/icons-material/Person'
 import PromptPreview from './PromptPreview.tsx'
 import CoursePrompts from './CoursePrompts.tsx'
@@ -35,7 +34,6 @@ const PromptModalV2 = () => {
   const [previewCourse, setPreviewCourse] = useState<Course | undefined>(undefined)
   const [isEditing, setIsEditing] = useState(false)
   const [showMyPrompts, setShowMyPrompts] = useState(myPrompts.some((p) => p.id === previewPrompt?.id) || false)
-  const [showCoursePrompts, setShowCoursePrompts] = useState((previewPrompt && !myPrompts.some((p) => p.id === previewPrompt.id)) || false)
   
   const { hasChanges, setHasChanges, cacheKey, setCacheKey } = usePromptEditorState()
 
@@ -122,19 +120,15 @@ const PromptModalV2 = () => {
         <Box sx={{ overflowY: 'auto', mt: 1 }}>
           <ListItemButton
             onClick={() => setShowMyPrompts((open) => !open)}
-            sx={{ 
-              px: 1, 
-              borderRadius: 1, 
-              backgroundColor: !showMyPrompts ? 'background.subtle' : 'action.selected',
-              ...(showMyPrompts && {
-                borderLeft: '2px solid',
-                borderLeftColor: 'primary.main',
-              }),
+            sx={{
+              px: 1,
+              borderRadius: 1,
+              backgroundColor: 'action.selected',
             }}
             data-testid={`my-prompts-toggle`}
           >
             <ListItemIcon>
-              <PersonIcon />
+              <PersonIcon color='primary'/>
             </ListItemIcon>
             <ListItemText
               primary={t('settings:myPrompts')} 
@@ -143,11 +137,12 @@ const PromptModalV2 = () => {
             {showMyPrompts ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
           </ListItemButton>
             {showMyPrompts && (
+              <Box sx={{ ml: 3 }}>
               <IconButton
                 aria-label={t('settings:saveMyPrompt')}
                 onClick={handleCreateNew}
                 data-testid="create-myprompt-button"
-                sx={{ color: 'primary.main', borderRadius: 1 }}
+                sx={{ color: 'primary.main', borderRadius: 1, '&:hover': { backgroundColor: 'transparent' } }}
               >
                 <AddCircleIcon/>
                 <ListItemText
@@ -156,6 +151,7 @@ const PromptModalV2 = () => {
                   sx={{ minWidth: 0, ml: 1 }}
                 />
               </IconButton>
+              </Box>
             )}           
             {showMyPrompts && sortedMyPrompts.length > 0 ?
             sortedMyPrompts.map((course) => 
@@ -189,43 +185,22 @@ const PromptModalV2 = () => {
             
             {studentsCourses.length > 0 && (   
               <Box>
-                <Divider sx={{ p: 1 }} />
-                <ListItemButton
-                    onClick={() => setShowCoursePrompts((open) => !open)}
-                    sx={{
-                      px: 1,
-                      borderRadius: 1,
-                      backgroundColor: !showCoursePrompts ? 'background.subtle' : 'action.selected',
-                      ...(showCoursePrompts && {
-                        borderLeft: '2px solid',
-                        borderLeftColor: 'primary.main',
-                      }),
-                    }}
-                    data-testid={`course-prompts-toggle`}
-                  >
-                    <ListItemIcon>
-                      <SchoolIcon />
-                    </ListItemIcon>
-
-                    <ListItemText
-                      primary={t('prompt:coursePrompts')}
-                      slotProps={{ primary: { variant: 'subtitle1' } }} />
-                    {showCoursePrompts ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
-                  </ListItemButton>
-                    <Box sx={{ height: 6 }} /><Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2 }}>
-                      {showCoursePrompts && studentsCourses.map((course) => 
-                      <CoursePrompts
-                        key={course.id}
-                        course={course}
-                        previewPrompt={previewPrompt}
-                        confirmClose={confirmClose}
-                        setPreviewPrompt={setPreviewPrompt}
-                        setIsEditing={setIsEditing} 
-                        setPreviewCourse={setPreviewCourse}
-                      />
-                      )}
-                    </Box>
+                <Box sx={{ height: 6 }} />
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1}}>
+                  {studentsCourses.map((course) => 
+                  <CoursePrompts
+                    key={course.id}
+                    course={course}
+                    previewPrompt={previewPrompt}
+                    confirmClose={confirmClose}
+                    setPreviewPrompt={setPreviewPrompt}
+                    setIsEditing={setIsEditing} 
+                    setPreviewCourse={setPreviewCourse}
+                    previewCourse={previewCourse}
+                  />
+                  )}
                 </Box>
+              </Box>
               )}
             </Box>
         </Box>
