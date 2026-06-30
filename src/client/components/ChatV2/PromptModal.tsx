@@ -13,7 +13,7 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Prompt as PromptType } from '../../types'
 import { PromptEditor } from '../Prompt/PromptEditor'
 import { usePromptState } from './PromptState'
-import StudentModal from './StudentModal'
+import PromptModalV2 from './PromptModalV2'
 import { Tab, Tabs, IconButton } from '@mui/material'
 import PsychologyIcon from '@mui/icons-material/Psychology'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
@@ -266,7 +266,7 @@ const PromptModal = () => {
 
   if (!user) return null
 
-  if (!user.isEmployee && !user.isAdmin) return <StudentModal />
+  if (!user.isEmployee && !user.isAdmin) return <PromptModalV2 />
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>

@@ -24,7 +24,7 @@ import ExpandMore from '@mui/icons-material/ExpandMore'
 
 
 
-const StudentModal = () => {
+const PromptModalV2 = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const { activePrompt, handleChangePrompt, myPrompts, deletePromptMutation } = usePromptState()
@@ -303,4 +303,4 @@ const StudentModal = () => {
   )
 }
 
-export default StudentModal
+export default PromptModalV2
