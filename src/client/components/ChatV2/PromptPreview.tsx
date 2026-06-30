@@ -1,0 +1,142 @@
+import { PUBLIC_URL } from '@config'
+import { ContentCopyOutlined, EditOutlined } from '@mui/icons-material'
+import DeleteOutline from '@mui/icons-material/DeleteOutline'
+import { Box, Divider, Typography, Paper, Tooltip, IconButton } from '@mui/material'
+import { enqueueSnackbar } from 'notistack'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import useCourse from '../../hooks/useCourse'
+import useCurrentUser from '../../hooks/useCurrentUser'
+import type { Prompt, Course } from '../../types'
+import { usePromptState } from './PromptState'
+import PsychologyIcon from '@mui/icons-material/Psychology'
+import { useMediaQuery, useTheme } from '@mui/material'
+import { alpha } from '@mui/material/styles'
+import { monospaceStyle } from '../../theme'
+import BookmarksIcon from '@mui/icons-material/Bookmarks'
+import { useCourseRagIndices } from '../../hooks/useRagIndices'
+
+const PromptPreview = ({
+  prompt,
+  handleEdit,
+  handleDelete,
+}: {
+  prompt: Prompt,
+  handleEdit: () => void,
+  handleDelete: (event: React.MouseEvent<HTMLButtonElement>, prompt: Prompt) => void,
+}) => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const { myPrompts } = usePromptState()
+  const { t } = useTranslation()
+  const { user } = useCurrentUser()
+  const studentsCourses = user?.enrolledCourses as Course[]
+
+  const courseId = studentsCourses.find((course) => course.id === prompt?.chatInstanceId)?.courseId ?? 'general'
+  const { data: chatInstance } = useCourse(courseId)
+
+  const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
+  type RagIndex = NonNullable<typeof ragIndices>[number]
+  const [rag, setRag] = useState<RagIndex | undefined>(undefined)
+
+  useEffect(() => {
+    setRag(ragIndices?.find((r) => r.id === prompt?.ragIndexId))
+  }, [prompt?.ragIndexId, ragIndices])
+
+  const handleCopyLink = (event: React.MouseEvent<HTMLButtonElement>, prompt: Prompt) => {
+    event.stopPropagation()
+    const course = studentsCourses?.find((c) => c.id === prompt.chatInstanceId)
+    const link = `${window.location.origin}${PUBLIC_URL}/${course?.courseId}?promptId=${prompt.id}`
+    navigator.clipboard.writeText(link)
+    enqueueSnackbar(t('common:copiedToClipboard'), { variant: 'success' })
+  }
+
+  return (
+    <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2, mt: 2 }}>
+        <Box sx={{ flexDirection: 'column', display: 'flex', gap: 1, maxWidth: '80%' }}>
+          <Typography variant="h4" fontWeight="bold" data-testid={`prompt-preview-title-for-${prompt.name}`} sx={{ wordBreak: 'break-word' }}>
+            {prompt.name}
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+          {myPrompts.some((p) => p.id === prompt.id) && (
+            <Tooltip arrow placement="bottom" title={t('prompt:editPromptTooltip')}>
+              <IconButton size="small" onClick={handleEdit} color="primary" data-testid={`edit-prompt-${prompt.name}`}>
+                <EditOutlined fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+          <Tooltip arrow placement="bottom" title={t('prompt:copyPromptUrlTooltip')}>
+            <IconButton size="small" onClick={(e) => handleCopyLink(e, prompt)}>
+              <ContentCopyOutlined fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          {myPrompts.some((p) => p.id === prompt.id) && (
+            <Tooltip arrow placement="bottom" title={t('prompt:deletePromptTooltip')}>
+              <IconButton
+                size="small"
+                onClick={(event) => handleDelete(event, prompt)}
+                color="error"
+                data-testid={`delete-prompt-${prompt.name}`}
+              >
+                <DeleteOutline fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
+      </Box>
+      {prompt.userInstructions && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+            {prompt.userInstructions}
+          </Typography>
+        </Box>
+      )}
+      <Divider sx={{ my: 3 }} />
+      <Box sx={{ mb: 3 }}>
+        <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+          <PsychologyIcon color="secondary" />
+          <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
+            {t('prompt:promptModelSettings')}
+          </Typography>
+        </Box>
+        <Paper variant="outlined" sx={{ p: 3, mt: 1.5, backgroundColor: alpha(theme.palette.primary.main, 0.08), ...!isMobile && { maxHeight: '300px', overflow: 'auto' } }}>
+          {myPrompts.some((p) => p.id === prompt.id) ? (
+            <Typography variant="body2">
+              {prompt.systemMessage || '—'}
+            </Typography>
+          ) : (
+            <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary', ...monospaceStyle }}>
+              {prompt.hidden && !user?.isAdmin ? t('common:hiddenPromptInfo') : prompt.systemMessage || '—'}
+            </Typography>
+          )}
+        </Paper>
+      </Box>
+      {!myPrompts.some((p) => p.id === prompt.id) && (
+        <>
+          <Divider sx={{ my: 3 }} />
+          <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+            <BookmarksIcon color="secondary" />
+            <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
+              {t('prompt:promptSourceMaterialData')}
+            </Typography>
+          </Box>
+          {rag ? (
+            <Box sx={{ mb: 5, flexDirection: 'column', display: 'flex', gap: 1, mt: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2, backgroundColor: alpha(theme.palette.primary.main, 0.08) }}>
+              <Typography variant="body2">
+                {prompt.ragHidden && !user?.isAdmin ? t('common:hiddenRag') : rag.metadata.name}
+              </Typography>
+            </Box>
+          ) : (
+            <Box sx={{ mb: 3, ml: 2, mt: 5 }}>
+              <Typography variant="body2">{t('prompt:noRag')}</Typography>
+            </Box>
+          )}
+        </>
+      )}
+    </Paper>
+  )
+}
+
+export default PromptPreview
