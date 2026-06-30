@@ -56,6 +56,11 @@ export type Prompt = {
   createdAt: string
   ragIndexId?: number
   userId: string | null
+  ragIndex?: ragInfo
+}
+
+export type ragInfo = {
+  metadata: { name: string, language: string}
 }
 
 export type PromptInfo = Pick<Prompt, 'name' | 'systemMessage' | 'hidden' | 'type'> & {
