@@ -2,7 +2,7 @@ import express from 'express'
 import { Op, Sequelize, WhereOptions } from 'sequelize'
 
 import type { ActivityPeriod, RequestWithUser } from '../types'
-import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, PromptUsage, User, Responsibility, Discussion } from '../db/models'
+import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, PromptUsage, User, Responsibility, Discussion, RagIndex } from '../db/models'
 import { getTeachedCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
@@ -254,6 +254,14 @@ const getChatInstance = async (courseId: string) => {
       {
         model: Prompt,
         as: 'prompts',
+        include: [
+          {
+            model: RagIndex,
+            as: 'ragIndex',
+            attributes: ['metadata'],
+          },
+        ],
+        
       },
     ],
   })
