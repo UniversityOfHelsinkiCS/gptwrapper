@@ -227,13 +227,15 @@ const CourseList = (props: CourseListProps) => {
               ))
             ) : (
               <TableRow>
-                {props.type === 'ended' ? (
-                  <Box p={2}>{t('course:noCourses')}</Box>
-                ) : props.studentView ? (
-                  <Box p={2}>{t('course:noResults')}</Box>
-                ) : (
-                  <Box p={2}>{t('course:noCourseResults')}</Box>
-                )}
+                <TableCell colSpan={4}>
+                  {props.type === 'ended' ? (
+                    <Box p={2}>{t('course:noCourses')}</Box>
+                  ) : props.studentView ? (
+                    <Box p={2}>{t('course:noResults')}</Box>
+                  ) : (
+                    <Box p={2}>{t('course:noCourseResults')}</Box>
+                  )}
+                </TableCell>
               </TableRow>
             )}
           </TableBody>
