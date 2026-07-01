@@ -437,7 +437,7 @@ const PromptModal = () => {
                     )}
                     <Paper variant="outlined" sx={{ p: 3, mt: 1.5, backgroundColor: alpha(theme.palette.primary.main, 0.08), ...!isMobile && { maxHeight: '300px', overflow: 'auto' } }}>
                       <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary', ...monospaceStyle }}>
-                        {previewPrompt.hidden && !amongResponsibles ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
+                        {previewPrompt.hidden && !amongResponsibles && !user.isAdmin && !isPersonalTab ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
                       </Typography>
                     </Paper>
                   </Box>
