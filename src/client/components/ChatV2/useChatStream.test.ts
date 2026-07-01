@@ -123,34 +123,28 @@ describe('ChatStream', () => {
     expect(onComplete).toHaveBeenCalledWith({ message: expect.objectContaining({ content: '' }) })
   })
 
-  test('a toolCallStatus event without result', async () => {
+  // A status update without a result is in-flight only: it must NOT trigger the
+  // completion callback, and nothing should end up in the message's toolCalls.
+  test('a toolCallStatus event without result does not complete the tool call', async () => {
     const onComplete = vi.fn()
-    const { result } = renderHook(() =>
-      useChatStream({
-        onComplete,
-        onError: vi.fn(),
-        onText: vi.fn(),
-        onToolCallComplete: vi.fn(),
-      }),
-    )
+    const onToolCallComplete = vi.fn()
+    const { result } = renderHook(() => useChatStream({ onComplete, onToolCallComplete, onError: vi.fn(), onText: vi.fn() }))
     const stream = makeStream(['{"type":"toolCallStatus", "callId": "c1", "toolName": "document_search", "text": "hello"} '])
     await act(() => result.current.processStream(stream, generationInfo))
-    expect(onComplete).toHaveBeenCalled()
+    expect(onToolCallComplete).not.toHaveBeenCalled()
+    expect(onComplete).toHaveBeenCalledWith({ message: expect.objectContaining({ toolCalls: {} }) })
   })
 
-  test('a toolCallStatus event with result', async () => {
+  // A status update carrying a result completes the tool call: the callback fires
+  // with that chunk and the result is accumulated into the final message.
+  test('a toolCallStatus event with result completes the tool call', async () => {
     const onComplete = vi.fn()
-    const { result } = renderHook(() =>
-      useChatStream({
-        onComplete,
-        onError: vi.fn(),
-        onText: vi.fn(),
-        onToolCallComplete: vi.fn(),
-      }),
-    )
+    const onToolCallComplete = vi.fn()
+    const { result } = renderHook(() => useChatStream({ onComplete, onToolCallComplete, onError: vi.fn(), onText: vi.fn() }))
     const stream = makeStream(['{"type":"toolCallStatus", "callId": "c1", "toolName": "document_search", "text": "hello", "result":{"files":[]}}'])
     await act(() => result.current.processStream(stream, generationInfo))
-    expect(onComplete).toHaveBeenCalled()
+    expect(onToolCallComplete).toHaveBeenCalledWith(expect.objectContaining({ callId: 'c1' }))
+    expect(onComplete).toHaveBeenCalledWith({ message: expect.objectContaining({ toolCalls: expect.objectContaining({ c1: expect.anything() }) }) })
   })
 
   test('ErrorEvent sets error timeout', async () => {
@@ -243,7 +237,8 @@ describe('ChatStream', () => {
     expect(onError).not.toHaveBeenCalled()
   })
 
-  test('default case', async () => {
+  // An unknown event type is ignored: it must not crash and must add no content.
+  test('unknown event type is ignored and adds no content', async () => {
     const onComplete = vi.fn()
     const { result } = renderHook(() =>
       useChatStream({
@@ -255,7 +250,7 @@ describe('ChatStream', () => {
     )
     const stream = makeStream(['{"type":"Some other case", "message": "hello"} '])
     await act(() => result.current.processStream(stream, generationInfo))
-    expect(onComplete).toHaveBeenCalled()
+    expect(onComplete).toHaveBeenCalledWith({ message: expect.objectContaining({ content: '' }) })
   })
 })
 
