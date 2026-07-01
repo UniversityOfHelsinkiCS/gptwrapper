@@ -23,7 +23,7 @@ const useCourse = (courseId?: string) => {
   })
 }
 
-export const useCourseEnrolments = (courseId?: string) => {
+export const useCourseEnrolments = (courseId?: string, enabled = true) => {
   const queryKey = ['enrolments', courseId]
 
   const queryFn = async () => {
@@ -37,7 +37,7 @@ export const useCourseEnrolments = (courseId?: string) => {
   return useQuery({
     queryKey,
     queryFn,
-    enabled: !!courseId,
+    enabled: !!courseId && enabled,
   })
 }
 
