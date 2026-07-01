@@ -486,7 +486,8 @@
     "altOpenSettings": "Moodle öppna inställningar",
     "altSourceView": "Moodle öppna källkodsvisning",
     "altPasteSave": "Moodle klistra in källkod och spara",
-    "courseActivePeriod": "Kurschatten öppen:"
+    "courseActivePeriod": "Kurschatten öppen:",
+    "goToCoursePage": "Gå till kurssidan"
   },
   "prompt": {
     "createNew": "Skapa ny prompt",
@@ -548,8 +549,7 @@
     "noRagMessagesToShow": "Inga instruktioner",
     "unSavedChanges": "Du har osparade ändringar. Om du stänger vyn nu, förlorar du de ändringar du har gjort. Vill du fortsätta?",
     "creatorName": "Skapare: {{firstNames}} {{lastName}}",
-    "creatorHidden": "Dold för andra användare",
-    "coursePrompts": "Kursens prompts"
+    "creatorHidden": "Dold för andra användare"
   },
   "tooltip": {
     "copied": "Kopierad!"

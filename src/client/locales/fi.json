@@ -516,7 +516,8 @@
     "altPasteSave": "Moodle lähdekoodin upotus ja tallennus",
     "deActivate": "sulje opiskelijoilta",
     "courseActivated": "Kurssi aktivoitu",
-    "courseActivePeriod": "Kurssin chat avoinna:"
+    "courseActivePeriod": "Kurssin chat avoinna:",
+    "goToCoursePage": "Siirry kurssisivulle"
   },
   "prompt": {
     "createNew": "Luo uusi alustus",
@@ -577,8 +578,7 @@
     "noRagMessagesToShow": "Ei ohjeistuksia",
     "unSavedChanges": "Sinulla on tallentamattomia muutoksia. Sulkemalla näkymän nyt, menetät tekemäsi muutokset. Haluatko jatkaa?",
     "creatorName": "Alustuksen luoja: {{firstNames}} {{lastName}}",
-    "creatorHidden": "Piilotettu muilta käyttäjiltä",
-    "coursePrompts": "Kurssien alustukset"
+    "creatorHidden": "Piilotettu muilta käyttäjiltä"
   },
   "tooltip": {
     "copied": "Kopioitu!"

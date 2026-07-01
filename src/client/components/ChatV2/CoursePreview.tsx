@@ -1,5 +1,5 @@
 import useUserUsages from '../../hooks/useUserUsage'
-import { Box, Typography, Paper, IconButton, LinearProgress } from '@mui/material'
+import { Box, Typography, Paper, IconButton, LinearProgress, Button } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import type { Course } from '../../types'
 import DateRangeIcon from '@mui/icons-material/DateRange'
@@ -11,6 +11,7 @@ import ExpandMore from '@mui/icons-material/ExpandMore'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import { usagePercent, gaugeColorKey, formatTokens } from './UsageSelector'
 import SchoolIcon from '@mui/icons-material/School'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 
 
 const CoursePreview = ({ course }: { course: Course }) => {
@@ -28,6 +29,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
   const { usageInfo } = useUserUsages()
 
   const currentCourseUsage = usageInfo?.courses.find((c) => c.courseId === course.courseId)
+
 
   return (
     <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
@@ -128,6 +130,15 @@ const CoursePreview = ({ course }: { course: Course }) => {
             </Box>
           )}
         </Box>
+        <Button variant="contained"
+          onClick={() => {
+            window.open(`https://studies.helsinki.fi/kurssit/toteutus/${course.courseId}`, '_blank')
+          }}
+          sx={{ mt: 3, width: 'fit-content' }}
+          endIcon={<OpenInNewIcon />}
+        >
+          {t('course:goToCoursePage')}
+        </Button>
         
       </Box>
 

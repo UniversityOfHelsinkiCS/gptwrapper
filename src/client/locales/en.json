@@ -514,7 +514,8 @@
     "altPasteSave": "Moodle source embedding and save",
     "deActivate": "close for students",
     "courseActivated": "Course activated",
-    "courseActivePeriod": "Course chat open:"
+    "courseActivePeriod": "Course chat open:",
+    "goToCoursePage": "Go to course page"
   },
   "prompt": {
     "createNew": "Create new prompt",
@@ -576,8 +577,7 @@
     "noRagMessagesToShow": "No instructions",
     "unSavedChanges": "You have unsaved changes. If you close this view now, you will lose the changes you have made. Do you want to continue?",
     "creatorName": "Creator: {{firstNames}} {{lastName}}",
-    "creatorHidden": "Hidden from other users",
-    "coursePrompts": "Course prompts"
+    "creatorHidden": "Hidden from other users"
   },
   "tooltip": {
     "copied": "Copied!"
