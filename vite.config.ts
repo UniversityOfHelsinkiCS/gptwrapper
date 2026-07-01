@@ -80,6 +80,7 @@ export default defineConfig({
     alias: {
       '@shared': '/src/shared',
       '@config': '/src/config.ts',
+      src: '/src',
     },
   },
 })

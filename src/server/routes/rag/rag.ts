@@ -4,9 +4,10 @@ import { ChatInstance, ChatInstanceRagIndex, RagFile, RagIndex } from '../../db/
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import { TEST_COURSES } from '../../../shared/testData'
-import ragIndexRouter, { ragIndexMiddleware } from './ragIndex'
+import ragIndexRouter from './ragIndex'
 import { ChatInstanceAccess, getChatInstanceAccess } from '../../services/chatInstances/access'
 import { RedisVectorStore } from 'src/server/services/rag/vectorStore'
+import { ragIndexMiddleware } from './ragIndexMiddleware'
 
 const router = Router()
 
