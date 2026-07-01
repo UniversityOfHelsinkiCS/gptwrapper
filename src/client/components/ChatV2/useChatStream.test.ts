@@ -97,20 +97,15 @@ describe('ChatStream', () => {
 
     expect(onComplete).toHaveBeenCalledWith({ message: expect.objectContaining({ content: 'hello' }) })
   })
-  //TODO: This should probably cause an error, cut stream now silently fails:
-  test('cut stream', async () => {
+
+  test('stream interrupted mid-chunk calls onError without onComplete', async () => {
     const onComplete = vi.fn()
-    const { result } = renderHook(() =>
-      useChatStream({
-        onComplete,
-        onError: vi.fn(),
-        onText: vi.fn(),
-        onToolCallComplete: vi.fn(),
-      }),
-    )
-    const stream = makeStream(['{"type":"writ'])
+    const onError = vi.fn()
+    const { result } = renderHook(() => useChatStream({ onComplete, onError, onText: vi.fn(), onToolCallComplete: vi.fn() }))
+    const stream = makeErrorStream(new Error('network error'), ['{"type":"writ'])
     await act(() => result.current.processStream(stream, generationInfo))
-    expect(onComplete).toHaveBeenCalled()
+    expect(onError).toHaveBeenCalled()
+    expect(onComplete).not.toHaveBeenCalled()
   })
 
   test('a processing event', async () => {
@@ -205,6 +200,21 @@ describe('ChatStream', () => {
     controller.abort('user_aborted')
     result.current.streamControllerRef.current = controller
     await act(() => result.current.processStream(makeErrorStream(makeAbortError()), generationInfo))
+    expect(onComplete).toHaveBeenCalled()
+    expect(onError).not.toHaveBeenCalled()
+  })
+
+  // Regression: Firefox rejects an aborted stream read with a TypeError rather than an
+  // AbortError. A user-initiated stop must still be graceful (onComplete, not onError)
+  // regardless of what error type the browser throws, because we own the abort signal.
+  test('user_aborted is graceful even when the read rejects with a non-AbortError (Firefox)', async () => {
+    const onComplete = vi.fn()
+    const onError = vi.fn()
+    const { result } = renderHook(() => useChatStream({ onComplete, onError, onText: vi.fn(), onToolCallComplete: vi.fn() }))
+    const controller = new TypedAbortController<StreamAbortReason>()
+    controller.abort('user_aborted')
+    result.current.streamControllerRef.current = controller
+    await act(() => result.current.processStream(makeErrorStream(new TypeError('NetworkError when attempting to fetch resource.')), generationInfo))
     expect(onComplete).toHaveBeenCalled()
     expect(onError).not.toHaveBeenCalled()
   })

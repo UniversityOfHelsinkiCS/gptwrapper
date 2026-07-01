@@ -116,7 +116,7 @@ export const useChatStream = ({
         },
       })
     } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') {
+      if (streamControllerRef.current?.signal.aborted) {
         const reason = streamControllerRef.current?.signal.reason as StreamAbortReason | undefined
 
         switch (reason) {
