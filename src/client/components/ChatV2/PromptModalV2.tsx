@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Course, Prompt as PromptType } from '../../types'
-import { PromptEditor } from '../Prompt/PromptEditor'
+import { PromptEditorV2 } from '../Prompt/PromptEditorV2'
 import { usePromptState } from './PromptState'
 import { useMediaQuery, useTheme } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -20,6 +20,8 @@ import CoursePrompts from './CoursePrompts.tsx'
 import CoursePreview from './CoursePreview.tsx'
 import ExpandLess from '@mui/icons-material/ExpandLess'
 import ExpandMore from '@mui/icons-material/ExpandMore'
+import useUserCourses from '../../hooks/useUserCourses'
+import { getGroupedCourses } from './util'
 
 
 
@@ -40,6 +42,14 @@ const PromptModalV2 = () => {
   const { user } = useCurrentUser()
 
   const studentsCourses = user?.enrolledCourses as Course[]
+  const { courses } = useUserCourses()
+  const { curreEnabled, curreDisabled } = getGroupedCourses(courses)
+  const mergedCourses = courses ? [...curreEnabled, ...curreDisabled, ...studentsCourses] : studentsCourses ? studentsCourses : []
+  const userCourses = Array.from(new Map(mergedCourses.map((course) => [course.id, course])).values())
+
+  const [isPersonal, setIsPersonal] = useState<boolean>(false)
+  const [courseId, setCourseId] = useState<string>('general')
+
 
   const onDone = (prompt?: PromptType) => {
     setIsEditing(false)
@@ -66,11 +76,12 @@ const PromptModalV2 = () => {
   }
 
 
-  const handleEdit = () => {
+  const handleEdit = (courseId?: string) => {
     setIsEditing(!isEditing)
+    setCourseId(courseId ?? 'general')
   }
 
-  const handleCreateNew = () => {
+  const handleCreateNew = (courseId?: string) => {
     if (!confirmClose()) return
     if (isEditing) {
       setIsEditing(false)
@@ -78,6 +89,12 @@ const PromptModalV2 = () => {
     }
     setPreviewPrompt(undefined)
     setIsEditing(true)
+    setCourseId(courseId ?? 'general')
+    if (!courseId) {
+      setIsPersonal(true)
+    } else {
+      setIsPersonal(false)
+    }
   }
 
   const handleMobileBackToPromptList = () => {
@@ -105,6 +122,7 @@ const PromptModalV2 = () => {
   )
 
   if (!user) return null
+
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
@@ -140,7 +158,7 @@ const PromptModalV2 = () => {
               <Box sx={{ ml: 3 }}>
               <IconButton
                 aria-label={t('settings:saveMyPrompt')}
-                onClick={handleCreateNew}
+                onClick={() => handleCreateNew()}
                 data-testid="create-myprompt-button"
                 sx={{ color: 'primary.main', borderRadius: 1, '&:hover': { backgroundColor: 'transparent' } }}
               >
@@ -183,11 +201,11 @@ const PromptModalV2 = () => {
               </Box>
             ) : null}
             
-            {studentsCourses.length > 0 && (   
+            {userCourses.length > 0 && (   
               <Box>
                 <Box sx={{ height: 6 }} />
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1}}>
-                  {studentsCourses.map((course) => 
+                  {userCourses.map((course) => 
                   <CoursePrompts
                     key={course.id}
                     course={course}
@@ -197,6 +215,7 @@ const PromptModalV2 = () => {
                     setIsEditing={setIsEditing} 
                     setPreviewCourse={setPreviewCourse}
                     previewCourse={previewCourse}
+                    handleCreateNew={handleCreateNew}
                   />
                   )}
                 </Box>
@@ -208,59 +227,53 @@ const PromptModalV2 = () => {
         {/* Right panel - preview */}
         {!isEditing && (
           <Box sx={{ display: !isMobile || previewPrompt || previewCourse ? 'flex' : 'none', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
-            {previewPrompt ? (            
+                        
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
+                {previewPrompt ? (
                 <PromptPreview
                   prompt={previewPrompt}
                   handleEdit={handleEdit}
                   handleDelete={handleDelete}
+                  courses={userCourses}
                 />
+                ) : previewCourse ? (
+                  <CoursePreview course={previewCourse}/>
+                ) : (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
+                    <Typography>{t('settings:noPrompt')}</Typography>
+                  </Box>
+                )}
                 <Box sx={{ pt: 2, display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
-                  {isMobile && (
+                  {isMobile && (previewPrompt || previewCourse) && (
                     <OutlineButtonBlue onClick={() => handleMobileBackToPromptList()}>
                       <ArrowBackIcon />
                       {t('prompt:backToPromptList')}
                     </OutlineButtonBlue>
                   )}
+                  {previewPrompt && (
+
                   <BlueButton 
                     data-testid="change-to-prompt-button" 
                     variant="contained" 
                     onClick={() => {
                       if (!confirmClose()) return
                       handleChangePrompt(previewPrompt)
-                      const course = studentsCourses?.find((c) => c.id === previewPrompt.chatInstanceId)
+                      const course = userCourses?.find((c) => c.id === previewPrompt.chatInstanceId)
                       if (course && course.courseId) navigate(`/${course.courseId}`)
                       if (!course) navigate(`/general`)
                     }}>
                     {t('settings:choosePrompt')}
                   </BlueButton>
-                </Box>
-              </Box>
-            ) : previewCourse ? (
-              <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
-                <CoursePreview course={previewCourse}/>
-                <Box sx={{ pt: 2, display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
-                  {isMobile && (
-                    <OutlineButtonBlue onClick={() => handleMobileBackToPromptList()}>
-                      <ArrowBackIcon />
-                      {t('prompt:backToPromptList')}
-                    </OutlineButtonBlue>
                   )}
                 </Box>
               </Box>
-              
-            ) : (
-              <Box sx={{ display: 'flex', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
-                <Typography>{t('settings:noPrompt')}</Typography>
-              </Box>
-            )}
           </Box>
         )}
         {isEditing && (
           <Box sx={{ display:'flex', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
               <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
-                <PromptEditor previewPrompt={previewPrompt} onDone={onDone} personal={true} />
+                <PromptEditorV2 previewPrompt={previewPrompt} onDone={onDone} personal={isPersonal} courseId={courseId} />
               </Paper>
             </Box>
           </Box>
@@ -279,3 +292,4 @@ const PromptModalV2 = () => {
 }
 
 export default PromptModalV2
+               
