@@ -145,7 +145,8 @@ const PromptModal = () => {
 
   const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
 
-  const { data: ragDetails} = amongResponsibles || user?.isAdmin ? useRagIndexDetails(previewPrompt?.ragIndexId ?? null) : { data: null }
+  const shouldFetchRagDetails = amongResponsibles || user?.isAdmin
+  const { data: ragDetails } = useRagIndexDetails(previewPrompt?.ragIndexId ?? null, shouldFetchRagDetails)
 
   const onDone = (prompt?: PromptType) => {
     setIsEditing(false)

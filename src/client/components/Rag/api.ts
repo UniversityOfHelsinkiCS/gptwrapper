@@ -37,14 +37,14 @@ export type RagIndexDetails = Omit<RagIndexAttributes, 'ragFileCount'> & {
   ragFiles: RagFileAttributes[]
 }
 
-export const useRagIndexDetails = (indexId: number | null) => {
+export const useRagIndexDetails = (indexId: number | null, enabled = true) => {
   return useQuery<RagIndexDetails>({
     queryKey: ['ragIndex', indexId],
     queryFn: async () => {
       const response = await apiClient.get(`/rag/indices/${indexId}`)
       return response.data
     },
-    enabled: !!indexId,
+    enabled: !!indexId && enabled,
   })
 }
 
