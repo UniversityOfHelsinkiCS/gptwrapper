@@ -13,9 +13,10 @@ services:
       - BMQ_REDIS_HOST=redis
       - BMQ_REDIS_PORT=6379
       - GOOGLE_APPLICATION_CREDENTIALS=/auth/gcloud/application_default_credentials.json
+    env_file:
+      - .env
     volumes:
-      - ./:/opt/app-root/src
-      - /opt/app-root/src/node_modules
+      - ./src:/opt/app-root/src
       - ${HOME}/.config/gcloud/application_default_credentials.json:/auth/gcloud/application_default_credentials.json:ro
     ports:
       - 3000:3000
