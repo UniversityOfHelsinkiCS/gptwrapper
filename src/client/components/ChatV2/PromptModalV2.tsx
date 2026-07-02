@@ -116,7 +116,7 @@ const PromptModalV2 = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-      <Box sx={{ display: 'flex', gap: 2, mt: 2, flex: 1, minHeight: 0 }}>
+      <Box sx={{ display: 'flex', gap: 2, flex: 1, minHeight: 0 }}>
         {/* Left panel - prompt list */}
         <Box
           sx={{
@@ -125,7 +125,7 @@ const PromptModalV2 = () => {
             flexDirection: 'column',
           }}
         >
-          <Box sx={{ overflowY: 'auto', mt: 1 }}>
+          <Box sx={{ overflowY: 'auto', mt: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 1, '&:hover': { backgroundColor: 'action.hover' } }}>
               <ListItemButton
                 onClick={() => setShowMyPrompts(true)}
@@ -223,7 +223,7 @@ const PromptModalV2 = () => {
           <Box
             sx={{ display: !isMobile || previewPrompt || previewCourse ? 'flex' : 'none', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0, mt: 2 }}>
               {previewPrompt ? (
                 <PromptPreview prompt={previewPrompt} handleEdit={handleEdit} handleDelete={handleDelete} courses={userCourses} />
               ) : previewCourse ? (

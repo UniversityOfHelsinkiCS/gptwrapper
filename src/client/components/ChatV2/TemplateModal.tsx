@@ -1,4 +1,4 @@
-import { Box, Modal, Typography } from '@mui/material'
+import { Box, Divider, Modal, Typography } from '@mui/material'
 import React from 'react'
 import { TextButton } from './general/Buttons'
 import CloseIcon from '@mui/icons-material/Close'
@@ -32,9 +32,7 @@ const TemplateModal: React.FC<{ open: boolean; root: string; children: React.Rea
 
   const handleClose = () => {
     if (hasChanges) {
-      const shouldClose = window.confirm(
-        t('prompt:unSavedChanges'),
-      )
+      const shouldClose = window.confirm(t('prompt:unSavedChanges'))
 
       if (!shouldClose) return
 
@@ -84,6 +82,7 @@ const TemplateModal: React.FC<{ open: boolean; root: string; children: React.Rea
             <CloseIcon />
           </TextButton>
         </Box>
+        <Divider />
         <Box sx={{ display: 'flex', p: '0 1rem 1rem 1rem', flex: '1', overflow: 'hidden' }}>{children}</Box>
       </Box>
     </Modal>
