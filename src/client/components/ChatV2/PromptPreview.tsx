@@ -150,13 +150,13 @@ const PromptPreview = ({
           >{`${t(prompt.hidden ? 'prompt:promptHidden' : 'prompt:promptNotHidden')}`}</Alert>
         )}
         <Paper variant="outlined" sx={{ p: 3, mt: 1.5, backgroundColor: alpha(theme.palette.primary.main, 0.08), ...!isMobile && { maxHeight: '300px', overflow: 'auto' } }}>
-          {isPersonalPrompt ? (
+          {!isPersonalPrompt && prompt.hidden && !user?.isAdmin && !amongResponsibles ? (
             <Typography variant="body2">
-              {prompt.systemMessage || '—'}
+              {t('common:hiddenPromptInfo')}
             </Typography>
           ) : (
             <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary', ...monospaceStyle }}>
-              {prompt.hidden && !user?.isAdmin && !amongResponsibles ? t('common:hiddenPromptInfo') : prompt.systemMessage || '—'}
+              {prompt.systemMessage || '—'}
             </Typography>
           )}
         </Paper>
