@@ -14,8 +14,6 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import { useMediaQuery, useTheme } from '@mui/material'
 import PreviewIcon from '@mui/icons-material/Preview'
 
-
-
 interface CoursePromptsProps {
   course: Course
   previewPrompt?: PromptType
@@ -37,12 +35,11 @@ const CoursePrompts = (props: CoursePromptsProps) => {
   const navigate = useNavigate()
   const { user } = useCurrentUser()
 
-  const { data: courseData, isLoading } = useCourse(course.courseId) 
+  const { data: courseData, isLoading } = useCourse(course.courseId)
   const [showPrompts, setShowPrompts] = useState(previewPrompt?.chatInstanceId === course.id || false)
 
   const amongResponsibles = courseData?.responsibilities ? courseData.responsibilities.some((r) => r.user.id === user?.id) : false
 
-  
   const currentPrompts = courseData?.prompts || []
 
   useEffect(() => {
@@ -59,10 +56,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
 
   if (isLoading) return null
 
-
-  const sortedPrompts = currentPrompts.sort((a, b) =>
-    a.name.localeCompare(b.name, 'fi', { sensitivity: 'base' })
-  )
+  const sortedPrompts = currentPrompts.sort((a, b) => a.name.localeCompare(b.name, 'fi', { sensitivity: 'base' }))
 
   const handleSelect = (prompt?: PromptType) => {
     if (!confirmClose()) return
@@ -76,7 +70,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <ListItemButton
-            onClick={() => { 
+            onClick={() => {
               if (!showPrompts && !isMobile) {
                 setPreviewCourse(course)
                 setPreviewPrompt(undefined)
@@ -93,15 +87,13 @@ const CoursePrompts = (props: CoursePromptsProps) => {
                       backgroundColor: 'action.selected',
                     },
                   }
-                : (previewCourse?.id === course.id)
+                : previewCourse?.id === course.id
                   ? {
                       backgroundColor: 'background.subtle',
                       borderLeft: '2px solid',
                       borderLeftColor: 'primary.main',
                     }
-                  : {
-                      backgroundColor: 'action.selected',
-                    }),
+                  : {}),
             }}
             data-testid={`show-course-info-${course.id}-button`}
           >
@@ -110,10 +102,10 @@ const CoursePrompts = (props: CoursePromptsProps) => {
             </ListItemIcon>
             <ListItemText
               primary={course.name[language]}
-              slotProps={{ primary: { variant: 'subtitle1', color: course.activated || !amongResponsibles || user?.isAdmin ? 'default' : 'text.secondary' } }} />
+              slotProps={{ primary: { variant: 'subtitle1', color: course.activated || !amongResponsibles || user?.isAdmin ? 'default' : 'text.secondary' } }}
+            />
             {showPrompts ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
           </ListItemButton>
-              
         </Box>
         {showPrompts && (
           <>
@@ -125,12 +117,8 @@ const CoursePrompts = (props: CoursePromptsProps) => {
                   data-testid={`show-course-info-${course.id}-mobile-button`}
                   sx={{ color: 'primary.main', borderRadius: 1, '&:hover': { backgroundColor: 'transparent' } }}
                 >
-                  <PreviewIcon/>
-                  <ListItemText
-                    primary={t('course:showCourse')}
-                    slotProps={{ primary: { noWrap: true } }}
-                    sx={{ minWidth: 0, ml: 1 }}
-                  />
+                  <PreviewIcon />
+                  <ListItemText primary={t('course:showCourse')} slotProps={{ primary: { noWrap: true } }} sx={{ minWidth: 0, ml: 1 }} />
                 </IconButton>
               </Box>
             )}
@@ -143,12 +131,8 @@ const CoursePrompts = (props: CoursePromptsProps) => {
                   data-testid="create-myprompt-button"
                   sx={{ color: 'primary.main', borderRadius: 1, '&:hover': { backgroundColor: 'transparent' } }}
                 >
-                  <AddCircleIcon/>
-                  <ListItemText
-                    primary={t('settings:saveNewPrompt')}
-                    slotProps={{ primary: { noWrap: true } }}
-                    sx={{ minWidth: 0, ml: 1 }}
-                  />
+                  <AddCircleIcon />
+                  <ListItemText primary={t('settings:saveNewPrompt')} slotProps={{ primary: { noWrap: true } }} sx={{ minWidth: 0, ml: 1 }} />
                 </IconButton>
               </Box>
             )}
@@ -189,3 +173,4 @@ const CoursePrompts = (props: CoursePromptsProps) => {
 }
 
 export default CoursePrompts
+
