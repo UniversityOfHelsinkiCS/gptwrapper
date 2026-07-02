@@ -195,20 +195,22 @@ const PromptModalV2 = () => {
 
             {userCourses.length > 0 && (
               <Box>
-                <Box sx={{ height: 6 }} />
+                <Divider sx={{ my: 1 }} />
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {userCourses.map((course) => (
-                    <CoursePrompts
-                      key={course.id}
-                      course={course}
-                      previewPrompt={previewPrompt}
-                      confirmClose={confirmClose}
-                      setPreviewPrompt={setPreviewPrompt}
-                      setIsEditing={setIsEditing}
-                      setPreviewCourse={setPreviewCourse}
-                      previewCourse={previewCourse}
-                      handleCreateNew={handleCreateNew}
-                    />
+                  {userCourses.map((course, index) => (
+                    <Box key={course.id}>
+                      {index > 0 && <Divider sx={{ mb: 1 }} />}
+                      <CoursePrompts
+                        course={course}
+                        previewPrompt={previewPrompt}
+                        confirmClose={confirmClose}
+                        setPreviewPrompt={setPreviewPrompt}
+                        setIsEditing={setIsEditing}
+                        setPreviewCourse={setPreviewCourse}
+                        previewCourse={previewCourse}
+                        handleCreateNew={handleCreateNew}
+                      />
+                    </Box>
                   ))}
                 </Box>
               </Box>
