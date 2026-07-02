@@ -1,4 +1,4 @@
-import { Box, Divider, ListItemButton, ListItemText, Typography, Paper, IconButton, ListItemIcon } from '@mui/material'
+import { Box, Divider, ListItemButton, ListItemText, Typography, Paper, IconButton, ListItemIcon, Tooltip } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -13,7 +13,7 @@ import { BlueButton, OutlineButtonBlue } from './general/Buttons.tsx'
 import ConfirmDialog from './general/ConfirmDialog'
 import { usePromptEditorState } from '../Prompt/context.tsx'
 import { PromptListItem } from './PromptModal.tsx'
-import AddCircleIcon from '@mui/icons-material/AddCircle'
+import AddIcon from '@mui/icons-material/Add'
 import PersonIcon from '@mui/icons-material/Person'
 import PromptPreview from './PromptPreview.tsx'
 import CoursePrompts from './CoursePrompts.tsx'
@@ -138,20 +138,22 @@ const PromptModalV2 = () => {
                 }}
                 data-testid="my-prompts-open"
               >
-                <ListItemIcon>
+                <ListItemIcon sx={{ minWidth: 40 }}>
                   <PersonIcon color="primary" />
                 </ListItemIcon>
-                <ListItemText primary={t('settings:myPrompts')} slotProps={{ primary: { variant: 'subtitle1' } }} />
+                <ListItemText primary={t('settings:myPrompts')} slotProps={{ primary: { variant: 'subtitle1', fontWeight: 600 } }} />
               </ListItemButton>
 
-              <IconButton
-                aria-label={t('settings:saveMyPrompt')}
-                onClick={() => handleCreateNew()}
-                data-testid="create-myprompt-button"
-                sx={{ color: 'primary.main' }}
-              >
-                <AddCircleIcon />
-              </IconButton>
+              <Tooltip title={t('settings:saveNewPrompt')}>
+                <IconButton
+                  aria-label={t('settings:saveNewPrompt')}
+                  onClick={() => handleCreateNew()}
+                  data-testid="create-myprompt-button"
+                  sx={{ color: 'primary.main' }}
+                >
+                  <AddIcon />
+                </IconButton>
+              </Tooltip>
 
               <IconButton
                 aria-label={t('course:togglePrompts')}
@@ -164,7 +166,7 @@ const PromptModalV2 = () => {
             </Box>
             {showMyPrompts && sortedMyPrompts.length > 0 ? (
               sortedMyPrompts.map((course) => (
-                <Box key={course.id} sx={{ ml: 3 }}>
+                <Box key={course.id} sx={{ ml: 4 }}>
                   <PromptListItem
                     key={course.id}
                     prompt={course}
@@ -186,7 +188,7 @@ const PromptModalV2 = () => {
                 </Box>
               ))
             ) : showMyPrompts && !sortedMyPrompts.length ? (
-              <Box sx={{ ml: 3, mt: 1 }}>
+              <Box sx={{ ml: 6, mt: 1 }}>
                 <Typography variant="body2" color="text.secondary">
                   {t('settings:noPrompts')}
                 </Typography>
