@@ -33,4 +33,4 @@ coverage
 docs/agents
 CONTEXT.md
 docs/adr
-.scratch/langchain-v1-consolidation
+.scratch/
