@@ -35,9 +35,7 @@ const RagModal: React.FC = () => {
     setSelectedFileId(null)
   }
 
-  const sortedRagIndices = ragIndices?.sort((a, b) =>
-    a.metadata?.name.localeCompare(b.metadata?.name, 'fi', { sensitivity: 'base' })
-  )
+  const sortedRagIndices = ragIndices?.sort((a, b) => a.metadata?.name.localeCompare(b.metadata?.name, 'fi', { sensitivity: 'base' }))
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, minHeight: 0 }}>
@@ -59,9 +57,9 @@ const RagModal: React.FC = () => {
           </OutlineButtonBlack>
         </Box>
       )}
-      <Box sx={{ display: 'flex', gap: 2, mt: 2, flex: 1, minHeight: 0 }}>
+      <Box sx={{ display: 'flex', gap: 2, flex: 1, minHeight: 0 }}>
         {/* Left panel — collection list */}
-        <Box sx={{ display: !isMobile || !selectedIndexId ? 'flex' : 'none', width: !isMobile ? 310 : '90vw', flexDirection: 'column' }}>
+        <Box sx={{ display: !isMobile || !selectedIndexId ? 'flex' : 'none', width: !isMobile ? 310 : '90vw', flexDirection: 'column', mt: 2 }}>
           <RagCreator onCreated={handleSelectIndex} />
           <Divider sx={{ my: 1 }} />
           <List sx={{ flex: 1, overflowY: 'auto' }}>
@@ -94,7 +92,18 @@ const RagModal: React.FC = () => {
         <Divider sx={{ display: isMobile ? 'none' : 'flex' }} orientation="vertical" flexItem />
 
         {/* Right panel */}
-        <Box sx={{ display: !isMobile || selectedIndexId ? 'flex' : 'none', flex: 1, flexDirection: 'column', minWidth: 0, minHeight: 0, overflow: 'hidden', maxWidth: !isMobile ? '100%' : '90vw' }}>
+        <Box
+          sx={{
+            display: !isMobile || selectedIndexId ? 'flex' : 'none',
+            flex: 1,
+            flexDirection: 'column',
+            minWidth: 0,
+            minHeight: 0,
+            overflow: 'hidden',
+            maxWidth: !isMobile ? '100%' : '90vw',
+            mt: 2,
+          }}
+        >
           {isMobile && selectedIndexId && (
             <Box sx={{ pb: 1 }}>
               <OutlineButtonBlue onClick={handleBack}>
@@ -108,20 +117,8 @@ const RagModal: React.FC = () => {
               <Typography>{t('rag:selectCollection')}</Typography>
             </Box>
           )}
-          {selectedIndexId && !selectedFileId && (
-            <RagIndexV2
-              indexId={selectedIndexId}
-              onBack={handleBack}
-              onSelectFile={setSelectedFileId}
-            />
-          )}
-          {selectedIndexId && selectedFileId && (
-            <RagFileV2
-              indexId={selectedIndexId}
-              fileId={selectedFileId}
-              onBack={() => setSelectedFileId(null)}
-            />
-          )}
+          {selectedIndexId && !selectedFileId && <RagIndexV2 indexId={selectedIndexId} onBack={handleBack} onSelectFile={setSelectedFileId} />}
+          {selectedIndexId && selectedFileId && <RagFileV2 indexId={selectedIndexId} fileId={selectedFileId} onBack={() => setSelectedFileId(null)} />}
         </Box>
       </Box>
     </Box>
