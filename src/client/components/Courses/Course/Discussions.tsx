@@ -146,7 +146,19 @@ const DiscussionDetail: React.FC = () => {
                       <Typography variant="body2">{typeof msg.content === 'string' ? msg.content : '[image]'}</Typography>
                     </Box>
                   ) : (
-                    <Box key={msgIdx} sx={{ width: '100%', wordBreak: 'break-word' }}>
+                    <Box
+                      key={msgIdx}
+                      sx={{
+                        width: '100%',
+                        minWidth: 0,
+                        overflowWrap: 'anywhere',
+                        wordBreak: 'break-word',
+                        '& pre': { overflowX: 'auto', maxWidth: '100%' },
+                        '& code': { overflowWrap: 'anywhere' },
+                        '& img': { maxWidth: '100%', height: 'auto' },
+                        '& table': { display: 'block', width: '100%', overflowX: 'auto' },
+                      }}
+                    >
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{typeof msg.content === 'string' ? msg.content : ''}</ReactMarkdown>
                     </Box>
                   ),
