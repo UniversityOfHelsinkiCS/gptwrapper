@@ -18,7 +18,7 @@ import PersonIcon from '@mui/icons-material/Person'
 import PromptPreview from './PromptPreview.tsx'
 import CoursePrompts from './CoursePrompts.tsx'
 import CoursePreview from './CoursePreview.tsx'
-import ExpandLess from '@mui/icons-material/ExpandLess'
+import ChevronRight from '@mui/icons-material/ChevronRight'
 import ExpandMore from '@mui/icons-material/ExpandMore'
 import useUserCourses from '../../hooks/useUserCourses'
 import { getGroupedCourses } from './util'
@@ -126,33 +126,42 @@ const PromptModalV2 = () => {
           }}
         >
           <Box sx={{ overflowY: 'auto', mt: 1 }}>
-            <ListItemButton
-              onClick={() => setShowMyPrompts((open) => !open)}
-              sx={{
-                px: 1,
-                borderRadius: 1,
-              }}
-              data-testid={`my-prompts-toggle`}
-            >
-              <ListItemIcon>
-                <PersonIcon color="primary" />
-              </ListItemIcon>
-              <ListItemText primary={t('settings:myPrompts')} slotProps={{ primary: { variant: 'subtitle1' } }} />
-              {showMyPrompts ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
-            </ListItemButton>
-            {showMyPrompts && (
-              <Box sx={{ ml: 3 }}>
-                <IconButton
-                  aria-label={t('settings:saveMyPrompt')}
-                  onClick={() => handleCreateNew()}
-                  data-testid="create-myprompt-button"
-                  sx={{ color: 'primary.main', borderRadius: 1, '&:hover': { backgroundColor: 'transparent' } }}
-                >
-                  <AddCircleIcon />
-                  <ListItemText primary={t('settings:saveNewPrompt')} slotProps={{ primary: { noWrap: true } }} sx={{ minWidth: 0, ml: 1 }} />
-                </IconButton>
-              </Box>
-            )}
+            <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 1, '&:hover': { backgroundColor: 'action.hover' } }}>
+              <ListItemButton
+                onClick={() => setShowMyPrompts(true)}
+                sx={{
+                  px: 1,
+                  borderRadius: 1,
+                  flex: 1,
+                  minWidth: 0,
+                  '&:hover': { backgroundColor: 'transparent' },
+                }}
+                data-testid="my-prompts-open"
+              >
+                <ListItemIcon>
+                  <PersonIcon color="primary" />
+                </ListItemIcon>
+                <ListItemText primary={t('settings:myPrompts')} slotProps={{ primary: { variant: 'subtitle1' } }} />
+              </ListItemButton>
+
+              <IconButton
+                aria-label={t('settings:saveMyPrompt')}
+                onClick={() => handleCreateNew()}
+                data-testid="create-myprompt-button"
+                sx={{ color: 'primary.main' }}
+              >
+                <AddCircleIcon />
+              </IconButton>
+
+              <IconButton
+                aria-label={t('course:togglePrompts')}
+                onClick={() => setShowMyPrompts((open) => !open)}
+                data-testid="my-prompts-toggle"
+                sx={{ color: 'text.secondary' }}
+              >
+                {showMyPrompts ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
+              </IconButton>
+            </Box>
             {showMyPrompts && sortedMyPrompts.length > 0 ? (
               sortedMyPrompts.map((course) => (
                 <Box key={course.id} sx={{ ml: 3 }}>

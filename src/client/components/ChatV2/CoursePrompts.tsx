@@ -1,4 +1,4 @@
-import ExpandLess from '@mui/icons-material/ExpandLess'
+import ChevronRight from '@mui/icons-material/ChevronRight'
 import ExpandMore from '@mui/icons-material/ExpandMore'
 import { Box, List, ListItemButton, ListItemText, Typography, ListItemIcon, IconButton } from '@mui/material'
 import { useEffect, useState } from 'react'
@@ -11,8 +11,6 @@ import { PromptListItem } from './PromptModal.tsx'
 import SchoolIcon from '@mui/icons-material/School'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import useCurrentUser from '../../hooks/useCurrentUser'
-import { useMediaQuery, useTheme } from '@mui/material'
-import PreviewIcon from '@mui/icons-material/Preview'
 
 interface CoursePromptsProps {
   course: Course
@@ -28,8 +26,6 @@ interface CoursePromptsProps {
 const CoursePrompts = (props: CoursePromptsProps) => {
   const { course, previewPrompt, confirmClose, setPreviewPrompt, setIsEditing, setPreviewCourse, previewCourse, handleCreateNew } = props
   const { t, i18n } = useTranslation()
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const { language } = i18n
   const { activePrompt, handleChangePrompt } = usePromptState()
   const navigate = useNavigate()
@@ -68,32 +64,33 @@ const CoursePrompts = (props: CoursePromptsProps) => {
   return (
     <Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            borderRadius: 1,
+            '&:hover': { backgroundColor: 'action.hover' },
+            ...(previewCourse?.id === course.id
+              ? {
+                  backgroundColor: 'background.subtle',
+                  borderLeft: '2px solid',
+                  borderLeftColor: 'primary.main',
+                }
+              : {}),
+          }}
+        >
           <ListItemButton
             onClick={() => {
-              if (!showPrompts && !isMobile) {
-                setPreviewCourse(course)
-                setPreviewPrompt(undefined)
-              }
-              setShowPrompts((open) => !open)
+              setPreviewCourse(course)
+              setPreviewPrompt(undefined)
+              setShowPrompts(true)
             }}
             sx={{
               px: 1,
               borderRadius: 1,
-              ...(isMobile
-                ? {
-                    backgroundColor: 'action.selected',
-                    '&:hover': {
-                      backgroundColor: 'action.selected',
-                    },
-                  }
-                : previewCourse?.id === course.id
-                  ? {
-                      backgroundColor: 'background.subtle',
-                      borderLeft: '2px solid',
-                      borderLeftColor: 'primary.main',
-                    }
-                  : {}),
+              flex: 1,
+              minWidth: 0,
+              '&:hover': { backgroundColor: 'transparent' },
             }}
             data-testid={`show-course-info-${course.id}-button`}
           >
@@ -104,39 +101,30 @@ const CoursePrompts = (props: CoursePromptsProps) => {
               primary={course.name[language]}
               slotProps={{ primary: { variant: 'subtitle1', color: course.activated || !amongResponsibles || user?.isAdmin ? 'default' : 'text.secondary' } }}
             />
-            {showPrompts ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
           </ListItemButton>
+
+          {(amongResponsibles || user?.isAdmin) && (
+            <IconButton
+              aria-label={t('settings:saveMyPrompt')}
+              onClick={() => handleCreateNew(course.courseId)}
+              data-testid="create-myprompt-button"
+              sx={{ color: 'primary.main' }}
+            >
+              <AddCircleIcon />
+            </IconButton>
+          )}
+
+          <IconButton
+            aria-label={t('course:togglePrompts')}
+            onClick={() => setShowPrompts((open) => !open)}
+            data-testid={`toggle-course-prompts-${course.id}-button`}
+            sx={{ color: 'text.secondary' }}
+          >
+            {showPrompts ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
+          </IconButton>
         </Box>
         {showPrompts && (
           <>
-            {isMobile && (
-              <Box sx={{ ml: 3 }}>
-                <IconButton
-                  aria-label={t('course:showCourse')}
-                  onClick={() => setPreviewCourse(course)}
-                  data-testid={`show-course-info-${course.id}-mobile-button`}
-                  sx={{ color: 'primary.main', borderRadius: 1, '&:hover': { backgroundColor: 'transparent' } }}
-                >
-                  <PreviewIcon />
-                  <ListItemText primary={t('course:showCourse')} slotProps={{ primary: { noWrap: true } }} sx={{ minWidth: 0, ml: 1 }} />
-                </IconButton>
-              </Box>
-            )}
-
-            {(amongResponsibles || user?.isAdmin) && (
-              <Box sx={{ ml: 3 }}>
-                <IconButton
-                  aria-label={t('settings:saveMyPrompt')}
-                  onClick={() => handleCreateNew(course.courseId)}
-                  data-testid="create-myprompt-button"
-                  sx={{ color: 'primary.main', borderRadius: 1, '&:hover': { backgroundColor: 'transparent' } }}
-                >
-                  <AddCircleIcon />
-                  <ListItemText primary={t('settings:saveNewPrompt')} slotProps={{ primary: { noWrap: true } }} sx={{ minWidth: 0, ml: 1 }} />
-                </IconButton>
-              </Box>
-            )}
-
             {sortedPrompts.length > 0 ? (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2, mb: 1 }}>
                 <List sx={{ py: 0 }}>
@@ -173,4 +161,3 @@ const CoursePrompts = (props: CoursePromptsProps) => {
 }
 
 export default CoursePrompts
-

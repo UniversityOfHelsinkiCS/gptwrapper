@@ -446,6 +446,7 @@
     "noStudentsCloseToMaxTokenLimit": "No students",
     "editCourse": "Edit course",
     "showCourse": "Show course information",
+    "togglePrompts": "Show or hide prompts",
     "usageResetSuccess": "Usage reset successfully",
     "activeTab": "Active courses",
     "notActiveTab": "Not active",

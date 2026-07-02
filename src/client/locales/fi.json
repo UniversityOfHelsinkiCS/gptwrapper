@@ -449,6 +449,7 @@
     "noStudentsCloseToMaxTokenLimit": "Ei näytettäviä opiskelijoita",
     "editCourse": "Muokkaa kurssin tietoja",
     "showCourse": "Näytä kurssin tiedot",
+    "togglePrompts": "Näytä tai piilota alustukset",
     "usageResetSuccess": "Käyttö nollattu onnistuneesti",
     "activeTab": "Aktiiviset kurssit",
     "notActiveTab": "Aktivoimatta",

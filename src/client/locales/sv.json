@@ -402,6 +402,7 @@
     "disableCurreModalTitle": "Inaktivera CurreChat på kursen {{name}}?",
     "editCourse": "Redigera kurs",
     "showCourse": "Visa kursinformation",
+    "togglePrompts": "Visa eller dölj prompter",
     "usageResetSuccess": "Användningsåterställning lyckades",
     "curreNotOpen": "Studenter kan inte komma åt denna kurs",
     "activeTab": "Activa courses",
