@@ -4,6 +4,6 @@ WORKDIR /opt/app-root/src
 
 COPY . .
 
-RUN npm i
+RUN npm ci
 
 CMD ["npm", "run", "dev"]
