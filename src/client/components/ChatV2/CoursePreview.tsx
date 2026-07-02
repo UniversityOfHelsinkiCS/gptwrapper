@@ -24,37 +24,33 @@ const CoursePreview = ({ course }: { course: Course }) => {
   const { language } = i18n
   const { data: chatInstance } = useCourse(course.courseId)
   const { user } = useCurrentUser()
-  
+
   const courseResponsibilities = chatInstance?.responsibilities || []
   const amongResponsibles = courseResponsibilities.some((r) => r.user.id === user?.id)
   const { data: enrolments } = useCourseEnrolments(course.courseId, Boolean(user?.isAdmin || amongResponsibles))
-  
-  const teacherNames = courseResponsibilities.filter(
-    (responsibility) => responsibility.user.first_names && responsibility.user.last_name,
-  )
 
-  const studentNames = enrolments?.filter(
-    (enrolment) => enrolment.user.first_names && enrolment.user.last_name,
-  )
+  const teacherNames = courseResponsibilities.filter((responsibility) => responsibility.user.first_names && responsibility.user.last_name)
+
+  const studentNames = enrolments?.filter((enrolment) => enrolment.user.first_names && enrolment.user.last_name)
   const toggleTeachers = teacherNames.length > 5
   const [showTeachers, setShowTeachers] = useState(false)
   const [showStudents, setShowStudents] = useState(false)
-  
+
   const { usageInfo } = useUserUsages()
 
   const currentCourseUsage = usageInfo?.courses.find((c) => c.courseId === course.courseId)
 
-
   return (
-    <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%', mb:2 }}>
+    <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%', mb: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4, mt: 2 }}>
-        <Box sx={{ flexDirection: 'row', display: 'flex', gap: 1, maxWidth: '80%' }}>
-          <SchoolIcon color="primary" fontSize='large'/>  
-          <Typography 
-            variant="h4" 
-            fontWeight="bold" 
-            data-testid={`course-preview-title-for-${course.name[language]}`} 
-            sx={{ wordBreak: 'break-word', hyphens: 'auto', }}>
+        <Box sx={{ flexDirection: 'row', display: 'flex', gap: 1, maxWidth: '100%' }}>
+          <SchoolIcon color="primary" fontSize="large" />
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            data-testid={`course-preview-title-for-${course.name[language]}`}
+            sx={{ wordBreak: 'break-word', hyphens: 'auto' }}
+          >
             {course.name[language]}
           </Typography>
           {course.courseUnitRealisationTypeUrn && (
@@ -73,53 +69,52 @@ const CoursePreview = ({ course }: { course: Course }) => {
           )}
         </Box>
       </Box>
-      <Box sx={{mt: 3, display: 'flex', gap: 3, flexDirection: 'column', alignItems: 'flex-start' }}>
+      <Box sx={{ mt: 3, display: 'flex', gap: 3, flexDirection: 'column', alignItems: 'flex-start' }}>
         {course.courseUnitRealisationTypeUrn && (
-      <Box
-          sx={{
-            width: '70%',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            gap: 3,
-            flexWrap: 'wrap',
-          }}
-        >
-          <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: '220px' }}>
-            <Box gap={1} sx={{ display: 'flex', alignItems: 'center' }}>
-              <TagIcon color="primary" />
-              <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
-                {t('course:code')}:{' '}
-                <Box component="span" sx={{ color: 'text.secondary', variant: 'body2', fontWeight: 'normal' }}>
-                  {course.courseUnits[0]?.code ?? '--'}
-                </Box>
-              </Typography>
-            </Box>
-          </Box>
-
-          {amongResponsibles && (
-           <Box
-            gap={1}
+          <Box
             sx={{
+              width: '70%',
               display: 'flex',
-              alignItems: 'center',
-              width: '250px',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              gap: 3,
+              flexWrap: 'wrap',
             }}
           >
-            {course.activated ? (
-              <ToggleOnIcon fontSize="large" sx={{ color: 'success.main' }} />
-            ) : (
-              <ToggleOffIcon fontSize="large" sx={{ color: 'error.main' }} />
+            <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: '220px' }}>
+              <Box gap={1} sx={{ display: 'flex', alignItems: 'center' }}>
+                <TagIcon color="primary" />
+                <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
+                  {t('course:code')}:{' '}
+                  <Box component="span" sx={{ color: 'text.secondary', variant: 'body2', fontWeight: 'normal' }}>
+                    {course.courseUnits[0]?.code ?? '--'}
+                  </Box>
+                </Typography>
+              </Box>
+            </Box>
+
+            {amongResponsibles && (
+              <Box
+                gap={1}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  width: '250px',
+                }}
+              >
+                {course.activated ? (
+                  <ToggleOnIcon fontSize="large" sx={{ color: 'success.main' }} />
+                ) : (
+                  <ToggleOffIcon fontSize="large" sx={{ color: 'error.main' }} />
+                )}
+                <Typography variant="body2" sx={{ textAlign: 'right' }}>
+                  {course.activated ? t('course:activatedForStudents') : t('course:closedForStudents')}
+                </Typography>
+              </Box>
             )}
-            <Typography variant="body2" sx={{textAlign: 'right' }}>
-              {course.activated ? t('course:activatedForStudents') : t('course:closedForStudents')}
-            </Typography>
           </Box>
-              )
-            }
-        </Box>
         )}
-      
+
         <Box
           sx={{
             width: '70%',
@@ -176,7 +171,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
                 </Box>
               )
             })()}
-        </Box>    
+        </Box>
         <Box
           sx={{
             width: '70%',
@@ -204,13 +199,13 @@ const CoursePreview = ({ course }: { course: Course }) => {
             </Box>
             {teacherNames.length > 0 && (!toggleTeachers || showTeachers) && (
               <Box sx={{ display: 'flex', flexDirection: 'column', ml: 4, mt: 1, gap: 0.75 }}>
-                {teacherNames.sort((a, b) =>
-                    a.user.last_name.localeCompare(b.user.last_name, 'fi', { sensitivity: 'base' })
-                  ).map((responsibility) => (
-                  <Typography key={responsibility.user.id} variant="body2" color="text.primary">
-                    {`${responsibility.user.last_name} ${responsibility.user.first_names.split(' ')[0]} `}
-                  </Typography>
-                ))}
+                {teacherNames
+                  .sort((a, b) => a.user.last_name.localeCompare(b.user.last_name, 'fi', { sensitivity: 'base' }))
+                  .map((responsibility) => (
+                    <Typography key={responsibility.user.id} variant="body2" color="text.primary">
+                      {`${responsibility.user.last_name} ${responsibility.user.first_names.split(' ')[0]} `}
+                    </Typography>
+                  ))}
               </Box>
             )}
           </Box>
@@ -233,22 +228,21 @@ const CoursePreview = ({ course }: { course: Course }) => {
               </Box>
               {studentNames.length > 0 && (studentNames.length <= 5 || showStudents) && (
                 <Box sx={{ display: 'flex', flexDirection: 'column', ml: 4, mt: 1, gap: 0.75 }}>
-                  {studentNames.sort((a, b) =>
-                    a.user.last_name.localeCompare(b.user.last_name, 'fi', { sensitivity: 'base' })
-                  ).map((enrolment) => (
-                    <Typography key={enrolment.user.id} variant="body2" color="text.primary">
-                      {`${enrolment.user.last_name} ${enrolment.user.first_names}`}
-                    </Typography>
-                  ))}
+                  {studentNames
+                    .sort((a, b) => a.user.last_name.localeCompare(b.user.last_name, 'fi', { sensitivity: 'base' }))
+                    .map((enrolment) => (
+                      <Typography key={enrolment.user.id} variant="body2" color="text.primary">
+                        {`${enrolment.user.last_name} ${enrolment.user.first_names}`}
+                      </Typography>
+                    ))}
                 </Box>
               )}
             </Box>
           ) : null}
         </Box>
       </Box>
-
-      </Paper>
-     
+    </Paper>
   )
 }
 export default CoursePreview
+
