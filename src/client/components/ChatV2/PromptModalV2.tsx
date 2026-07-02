@@ -174,6 +174,7 @@ const PromptModalV2 = () => {
                     activePromptId={activePrompt?.id}
                     confirmClose={confirmClose}
                     choosePromptLabel={t('settings:choosePrompt')}
+                    activeLabel={t('settings:promptInUse')}
                     onPreview={(selectedPrompt) => {
                       setPreviewPrompt(selectedPrompt)
                       setIsEditing(false)

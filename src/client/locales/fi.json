@@ -187,6 +187,7 @@
     "saveNewPrompt": "Lisää uusi alustus",
     "updatePrompt": "Päivitä alustus",
     "choosePrompt": "Valitse",
+    "promptInUse": "Käytössä oleva alustus",
     "selectedSource": "Ei valittua lähdettä",
     "default": "Oletus",
     "confirmDeletePrompt": "Haluatko varmasti poistaa alustuksen '{{name}}'?",

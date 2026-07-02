@@ -36,6 +36,7 @@ type PromptListItemProps = {
   onSelect: (prompt: PromptType) => void
   confirmClose: () => boolean
   choosePromptLabel: string
+  activeLabel?: string
 }
 
 export const PromptListItem = ({
@@ -46,6 +47,7 @@ export const PromptListItem = ({
   onSelect,
   confirmClose,
   choosePromptLabel,
+  activeLabel,
 }: PromptListItemProps) => (
   <ListItemButton
     selected={previewPromptId === prompt.id}
@@ -97,7 +99,12 @@ export const PromptListItem = ({
       sx={{ minWidth: 0 }}
     />
     {prompt.id === activePromptId && (
-      <CheckCircleOutlineIcon fontSize="small" sx={{ position: 'absolute', right: 16, color: 'text.primary' }} />
+      <Tooltip title={activeLabel ?? ''}>
+        <CheckCircleOutlineIcon
+          fontSize="small"
+          sx={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'primary.main' }}
+        />
+      </Tooltip>
     )}
     {prompt.id !== activePromptId && (
       <BlueButton
@@ -333,6 +340,7 @@ const PromptModal = () => {
                 activePromptId={activePrompt?.id}
                 confirmClose={confirmClose}
                 choosePromptLabel={t('settings:choosePrompt')}
+              activeLabel={t('settings:promptInUse')}
                 onPreview={(selectedPrompt) => {
                   setPreviewPrompt(selectedPrompt)
                   setIsEditing(false)

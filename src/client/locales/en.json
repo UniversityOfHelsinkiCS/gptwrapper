@@ -184,6 +184,7 @@
     "saveNewPrompt": "Create a new prompt",
     "updatePrompt": "Update prompt",
     "choosePrompt": "Select",
+    "promptInUse": "Currently active prompt",
     "default": "Default",
     "confirmDeletePrompt": "Are you sure you want to delete the prompt '{{name}}'?",
     "confirmDeletePromptTitle": "Delete prompt",

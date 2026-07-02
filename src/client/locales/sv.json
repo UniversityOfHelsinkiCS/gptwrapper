@@ -186,6 +186,7 @@
     "confirmDeletePrompt": "Är du säker på att du vill ta bort frågan '{{name}}'?",
     "confirmDeletePromptTitle": "Ta bort prompt",
     "choosePrompt": "Välj",
+    "promptInUse": "Aktiv prompt just nu",
     "default": "Default",
     "coursePrompts": "Kursprompter",
     "myPrompts": "Mina prompter",
