@@ -28,17 +28,17 @@ A more complex one: \\[\\sum_{k=1}^N k = \\frac{N(N+1)}{2}\\]
 ### Aligned Equations
 
 Consider the following steps:
-\\begin{align*}
-  y &= (x+1)^2 \\
-    &= x^2 + 2x + 1 \\
+\\[\\begin{align*}
+  y &= (x+1)^2 \\\\
+    &= x^2 + 2x + 1 \\\\
     &= x(x+2) + 1
-\\end{align*}
+\\end{align*}\\]
 
 And for some general variables:
-\\begin{aligned}
-  A &= B + C \\
+\\[\\begin{aligned}
+  A &= B + C \\\\
     &= D - E + F
-\\end{aligned}
+\\end{aligned}\\]
 
 ---
 
@@ -96,10 +96,10 @@ Then we have this:
 \\[\\frac{d}{dx} e^x = e^x\\]
 
 Now for an alignment:
-\\begin{align*}
+\\[\\begin{align*}
   P(A|B) &= \\frac{P(B|A)P(A)}{P(B)} \\\\
          &= \\frac{P(B|A)P(A)}{\\sum P(B|A_i)P(A_i)}
-\\end{align*}
+\\end{align*}\\]
 
 And finally, a small matrix:
 \\[\\begin{pmatrix}
