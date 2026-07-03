@@ -261,7 +261,7 @@ const PromptModal = () => {
 
   if (!user) return null
 
-  return <PromptModalV2 />
+  if (!user.isEmployee && !user.isAdmin) return <PromptModalV2 />
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
