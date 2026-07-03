@@ -18,7 +18,7 @@ const Rag: React.FC = () => {
   const navigate = useNavigate()
   const { data: chatInstance } = useCourse(courseId)
   const [searchParams, _setSearchParams] = useSearchParams()
-  const { indexId, fileId, returnToEditor, returnPromptId, promptTab } = getRagNavigationState(searchParams)
+  const { indexId, fileId, returnToEditor, returnPromptId, promptType } = getRagNavigationState(searchParams)
 
   const index = indexId !== undefined
   const file = fileId !== undefined
@@ -39,7 +39,7 @@ const Rag: React.FC = () => {
                     `/${courseId}/prompts?${createRagSearchParams({
                       returnToEditor,
                       returnPromptId,
-                      promptTab,
+                      promptType,
                     })}`,
                   )
                 }
@@ -79,7 +79,7 @@ const Rag: React.FC = () => {
                           indexId: ragIndex.id,
                           returnToEditor,
                           returnPromptId,
-                          promptTab,
+                          promptType,
                           ragTab: 'course',
                         })}`}
                         component={RouterLink}

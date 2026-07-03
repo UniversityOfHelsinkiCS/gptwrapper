@@ -21,7 +21,7 @@ type RagFile = RagFileAttributes & {
 export const RagFile: React.FC = () => {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
-  const { fileId, indexId, returnToEditor, returnPromptId, promptTab, ragTab } = getRagNavigationState(searchParams)
+  const { fileId, indexId, returnToEditor, returnPromptId, promptType, ragTab } = getRagNavigationState(searchParams)
   const params = useParams<{ courseId: string }>()
 
   const {
@@ -45,7 +45,7 @@ export const RagFile: React.FC = () => {
       indexId: targetIndexId,
       returnToEditor,
       returnPromptId,
-      promptTab,
+      promptType,
       ragTab,
     })
   }

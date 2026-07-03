@@ -82,7 +82,7 @@ export type PromptEditorFormContextValue = {
   userRagIndices?: { id: number; metadata: { name: string } }[]
   courseId: string
   editingPromptId?: string
-  editingPromptTab: number
+  editingPromptType: number
 }
 
 export type PromptEditorContextValue = {

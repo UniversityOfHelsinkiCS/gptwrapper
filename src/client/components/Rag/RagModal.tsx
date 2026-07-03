@@ -15,7 +15,7 @@ const RagModal: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { returnToEditor, returnPromptId, promptTab } = getRagNavigationState(searchParams)
+  const { returnToEditor, returnPromptId, promptType } = getRagNavigationState(searchParams)
 
   const [selectedIndexId, setSelectedIndexId] = useState<number | null>(null)
   const [selectedFileId, setSelectedFileId] = useState<number | null>(null)
@@ -47,7 +47,7 @@ const RagModal: React.FC = () => {
                 `/${courseId}/prompts?${createRagSearchParams({
                   returnToEditor,
                   returnPromptId,
-                  promptTab,
+                  promptType,
                 })}`,
               )
             }

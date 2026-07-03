@@ -27,7 +27,7 @@ export const RagCreator = ({ chatInstance, onCreated }: { chatInstance?: Course;
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { returnToEditor, returnPromptId, promptTab } = getRagNavigationState(searchParams)
+  const { returnToEditor, returnPromptId, promptType } = getRagNavigationState(searchParams)
   const createIndexMutation = useCreateRagIndexMutation()
   const createUserIndexMutation = useCreateUserRagIndexMutation()
   const [indexName, setIndexName] = useState('')
@@ -65,7 +65,7 @@ export const RagCreator = ({ chatInstance, onCreated }: { chatInstance?: Course;
                     indexId: newIndex.id,
                     returnToEditor,
                     returnPromptId,
-                    promptTab,
+                    promptType,
                   })}`,
                 )
               }

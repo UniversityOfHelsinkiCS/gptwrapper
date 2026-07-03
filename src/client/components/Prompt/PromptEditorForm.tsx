@@ -136,7 +136,7 @@ const ModelSettingsSection = () => {
 }
 
 const RagSettingsSection = () => {
-  const { form, setForm, ragIndices, userRagIndices, courseId, editingPromptId, editingPromptTab } = usePromptEditorForm()
+  const { form, setForm, ragIndices, userRagIndices, courseId, editingPromptId, editingPromptType } = usePromptEditorForm()
   const { t } = useTranslation()
   const theme = useTheme()
   const { user } = useCurrentUser()
@@ -209,7 +209,7 @@ const RagSettingsSection = () => {
           </FormControl>
           <TextButton
             onClick={() => {
-              const params = new URLSearchParams({ editPrompt: '1', promptTab: String(editingPromptTab) })
+              const params = new URLSearchParams({ editPrompt: '1', promptType: String(editingPromptType) })
               if (editingPromptId) {
                 params.set('promptId', editingPromptId)
               }

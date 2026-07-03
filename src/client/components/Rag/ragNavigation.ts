@@ -3,7 +3,7 @@ type RagNavigationOptions = {
   fileId?: number
   returnToEditor?: boolean
   returnPromptId?: string | null
-  promptTab?: string | null
+  promptType?: string | null
   ragTab?: string | null
 }
 
@@ -17,11 +17,11 @@ export const getRagNavigationState = (searchParams: URLSearchParams) => ({
   fileId: getNumberParam(searchParams.get('file')),
   returnToEditor: searchParams.get('editPrompt') === '1',
   returnPromptId: searchParams.get('promptId'),
-  promptTab: searchParams.get('promptTab'),
+  promptType: searchParams.get('promptType'),
   ragTab: searchParams.get('ragTab'),
 })
 
-export const createRagSearchParams = ({ indexId, fileId, returnToEditor, returnPromptId, promptTab, ragTab }: RagNavigationOptions = {}) => {
+export const createRagSearchParams = ({ indexId, fileId, returnToEditor, returnPromptId, promptType, ragTab }: RagNavigationOptions = {}) => {
   const params = new URLSearchParams()
 
   if (indexId) {
@@ -40,8 +40,8 @@ export const createRagSearchParams = ({ indexId, fileId, returnToEditor, returnP
     params.set('promptId', returnPromptId)
   }
 
-  if (promptTab) {
-    params.set('promptTab', promptTab)
+  if (promptType) {
+    params.set('promptType', promptType)
   } else if (ragTab) {
     params.set('ragTab', ragTab)
   }

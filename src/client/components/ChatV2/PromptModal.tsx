@@ -92,18 +92,10 @@ export const PromptListItem = ({
     }}
     data-testid={`prompt-row-${prompt.name}`}
   >
-    <ListItemText
-      className="prompt-list-item__text"
-      primary={prompt.name}
-      slotProps={{ primary: { noWrap: true } }}
-      sx={{ minWidth: 0 }}
-    />
+    <ListItemText className="prompt-list-item__text" primary={prompt.name} slotProps={{ primary: { noWrap: true } }} sx={{ minWidth: 0 }} />
     {prompt.id === activePromptId && (
       <Tooltip title={activeLabel ?? ''}>
-        <CheckCircleOutlineIcon
-          fontSize="small"
-          sx={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'primary.main' }}
-        />
+        <CheckCircleOutlineIcon fontSize="small" sx={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'primary.main' }} />
       </Tooltip>
     )}
     {prompt.id !== activePromptId && (
@@ -140,14 +132,14 @@ const PromptModal = () => {
   const setPreviewPrompt = (prompt: PromptType | undefined) => setPreviewPrompts((prev) => ({ ...prev, [tab]: prompt }))
   const [isEditing, setIsEditing] = useState(false)
   const [showRagFiles, setShowRagFiles] = useState(false)
-  
+
   const { hasChanges, setHasChanges, cacheKey, setCacheKey } = usePromptEditorState()
 
   const { user } = useCurrentUser()
   const { data: chatInstance } = useCourse(courseId)
 
   const courseResponsibilities = chatInstance?.responsibilities || []
- 
+
   const rag = chatInstance?.prompts.find((p) => p.id === previewPrompt?.id)?.ragIndex
 
   const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
@@ -215,7 +207,7 @@ const PromptModal = () => {
   const isPersonalTab = courseId === 'general' || tab === 1
   const shouldOpenEditorFromQuery = searchParams.get('editPrompt') === '1'
   const promptId = searchParams.get('promptId')
-  const promptTab = Number(searchParams.get('promptTab'))
+  const promptType = Number(searchParams.get('promptType'))
 
   useEffect(() => {
     if (previewPrompt) {
@@ -231,7 +223,7 @@ const PromptModal = () => {
   useEffect(() => {
     if (!shouldOpenEditorFromQuery) return
 
-    const targetTab = Number.isFinite(promptTab) ? promptTab : courseId === 'general' ? 1 : 0
+    const targetTab = Number.isFinite(promptType) ? promptType : courseId === 'general' ? 1 : 0
     const promptSource = targetTab === 0 ? coursePrompts : myPrompts
     const requestedPrompt = promptSource.find((prompt) => prompt.id === promptId)
     const hasLoadedPrompts = promptSource.length > 0
@@ -250,14 +242,12 @@ const PromptModal = () => {
 
     setIsEditing(true)
     navigate(`/${courseId}/prompts`, { replace: true })
-  }, [shouldOpenEditorFromQuery, promptId, promptTab, coursePrompts, myPrompts, courseId, tab, navigate])
+  }, [shouldOpenEditorFromQuery, promptId, promptType, coursePrompts, myPrompts, courseId, tab, navigate])
 
   const confirmClose = () => {
     if (!hasChanges || !isEditing) return true
 
-    const shouldClose = window.confirm(
-      t('prompt:unSavedChanges'),
-    )
+    const shouldClose = window.confirm(t('prompt:unSavedChanges'))
 
     if (!shouldClose) return false
 
@@ -267,9 +257,7 @@ const PromptModal = () => {
     return true
   }
 
-  const sortedPrompts = currentPrompts.sort((a, b) =>
-    a.name.localeCompare(b.name, 'fi', { sensitivity: 'base' })
-  )
+  const sortedPrompts = currentPrompts.sort((a, b) => a.name.localeCompare(b.name, 'fi', { sensitivity: 'base' }))
 
   if (!user) return null
 
@@ -340,7 +328,7 @@ const PromptModal = () => {
                 activePromptId={activePrompt?.id}
                 confirmClose={confirmClose}
                 choosePromptLabel={t('settings:choosePrompt')}
-              activeLabel={t('settings:promptInUse')}
+                activeLabel={t('settings:promptInUse')}
                 onPreview={(selectedPrompt) => {
                   setPreviewPrompt(selectedPrompt)
                   setIsEditing(false)
@@ -359,37 +347,41 @@ const PromptModal = () => {
         {/* Right panel - preview */}
         {!isEditing && (
           <Box sx={{ display: !isMobile || previewPrompt ? 'flex' : 'none', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
-            {previewPrompt ? (            
+            {previewPrompt ? (
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
                 <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
                   {!isPersonalTab && (amongResponsibles || user.isAdmin) && (
-                      <Box>
-                        {(() => {
-                          const promptCreator = courseResponsibilities.find((u) => u.user.id === previewPrompt.userId)
-                          const hasCreatorInfo = promptCreator && promptCreator.user.first_names && promptCreator.user.last_name
-                          return (
-                            <>
-                              {hasCreatorInfo ? (
-                                <Box display="flex" alignItems="center" gap={1}>
+                    <Box>
+                      {(() => {
+                        const promptCreator = courseResponsibilities.find((u) => u.user.id === previewPrompt.userId)
+                        const hasCreatorInfo = promptCreator && promptCreator.user.first_names && promptCreator.user.last_name
+                        return (
+                          <>
+                            {hasCreatorInfo ? (
+                              <Box display="flex" alignItems="center" gap={1}>
                                 <Typography variant="body2" fontWeight="light" data-testid={`prompt-preview-creator-for-${previewPrompt.name}`}>
                                   {`${promptCreator.user.first_names.split(' ')[0]} ${promptCreator.user.last_name}`}
                                 </Typography>
-                                </Box>
-                              ) : ( null )}
-                            </>
-                          )
-                        })()}
-                      </Box>
-                    
-                    )}
+                              </Box>
+                            ) : null}
+                          </>
+                        )
+                      })()}
+                    </Box>
+                  )}
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2, mt: 2 }}>
-                    <Box sx={{ flexDirection: 'column', display: 'flex', gap: 1, maxWidth: '80%' }}>  
-                    <Typography variant="h4" fontWeight="bold" data-testid={`prompt-preview-title-for-${previewPrompt.name}`} sx={{ wordBreak: 'break-word' }}>
-                      {previewPrompt.name}
-                    </Typography>
+                    <Box sx={{ flexDirection: 'column', display: 'flex', gap: 1, maxWidth: '80%' }}>
+                      <Typography
+                        variant="h4"
+                        fontWeight="bold"
+                        data-testid={`prompt-preview-title-for-${previewPrompt.name}`}
+                        sx={{ wordBreak: 'break-word' }}
+                      >
+                        {previewPrompt.name}
+                      </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-                      {(previewPrompt.userId === user.id || user.isAdmin)  && (
+                      {(previewPrompt.userId === user.id || user.isAdmin) && (
                         <Tooltip arrow placement="bottom" title={t('prompt:editPromptTooltip')}>
                           <IconButton size="small" onClick={handleEdit} color="primary" data-testid={`edit-prompt-${previewPrompt.name}`}>
                             <EditOutlined fontSize="small" />
@@ -426,7 +418,7 @@ const PromptModal = () => {
                   )}
                   <Divider sx={{ my: 3 }} />
                   <Box sx={{ mb: 3 }}>
-                    <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb:1.5 }}>
+                    <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                       <PsychologyIcon color="secondary" />
                       <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
                         {t('prompt:promptModelSettings')}
@@ -444,65 +436,83 @@ const PromptModal = () => {
                         severity="info"
                       >{`${t(previewPrompt.hidden ? 'prompt:promptHidden' : 'prompt:promptNotHidden')}`}</Alert>
                     )}
-                    <Paper variant="outlined" sx={{ p: 3, mt: 1.5, backgroundColor: alpha(theme.palette.primary.main, 0.08), ...!isMobile && { maxHeight: '300px', overflow: 'auto' } }}>
+                    <Paper
+                      variant="outlined"
+                      sx={{
+                        p: 3,
+                        mt: 1.5,
+                        backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                        ...(!isMobile && { maxHeight: '300px', overflow: 'auto' }),
+                      }}
+                    >
                       <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary', ...monospaceStyle }}>
-                        {previewPrompt.hidden && !amongResponsibles && !user.isAdmin && !isPersonalTab ? t('common:hiddenPromptInfo') : previewPrompt.systemMessage || '—'}
+                        {previewPrompt.hidden && !amongResponsibles && !user.isAdmin && !isPersonalTab
+                          ? t('common:hiddenPromptInfo')
+                          : previewPrompt.systemMessage || '—'}
                       </Typography>
                     </Paper>
                   </Box>
                   <Divider sx={{ my: 3 }} />
-                    <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb:1.5 }}>
-                      <BookmarksIcon color="secondary" />
-                      <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
-                          {t('prompt:promptSourceMaterialData')}
-                      </Typography>
-                    </Box>
-                    {!isPersonalTab && (amongResponsibles || user.isAdmin) && (
-                      <Alert
-                        icon={
-                          previewPrompt.ragHidden ? (
-                            <VisibilityOffOutlined color="error" fontSize="inherit" />
-                          ) : (
-                            <VisibilityOutlined color="success" fontSize="inherit" />
-                          )
-                        }
-                        severity="info"
-                      >{`${t(previewPrompt.ragHidden ? 'prompt:promptHidden' : 'prompt:promptNotHidden')}`}</Alert>
-                    )}
+                  <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                    <BookmarksIcon color="secondary" />
+                    <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
+                      {t('prompt:promptSourceMaterialData')}
+                    </Typography>
+                  </Box>
+                  {!isPersonalTab && (amongResponsibles || user.isAdmin) && (
+                    <Alert
+                      icon={
+                        previewPrompt.ragHidden ? (
+                          <VisibilityOffOutlined color="error" fontSize="inherit" />
+                        ) : (
+                          <VisibilityOutlined color="success" fontSize="inherit" />
+                        )
+                      }
+                      severity="info"
+                    >{`${t(previewPrompt.ragHidden ? 'prompt:promptHidden' : 'prompt:promptNotHidden')}`}</Alert>
+                  )}
                   {rag ? (
-                    <Box sx={{ mb: 5, flexDirection: 'column', display: 'flex', gap: 1, mt: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2, backgroundColor: alpha(theme.palette.primary.main, 0.08) }}>
-                      {(ragDetails && ragDetails.ragFiles.some((file) => file.pipelineStage === 'completed') && (amongResponsibles || user?.isAdmin)) ? (
-                      <List disablePadding>                      
-                        <ListItemButton onClick={() => setShowRagFiles((open) => !open)} sx={{ px: 1, borderRadius: 1 }}>
-                          <ListItemText
-                            primary={rag.metadata.name}
-                            slotProps={{ primary: { variant: 'body2' } }}
-                          />
-                          {showRagFiles ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
-                        </ListItemButton>
-                        <Collapse in={showRagFiles} timeout="auto" unmountOnExit>
-                          <List component="div" disablePadding>
-                            {orderBy(ragDetails?.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (file.pipelineStage === 'completed' ? (
-                              <ListItem key={file.id} sx={{ pl: 4, py: 0.25, borderRadius: 1 }}>
-                                <ListItemText
-                                  primary={file.filename}
-                                  slotProps={{ primary: { variant: 'body2' } }}
-                                />
-                              </ListItem>
-                            ) : null))}
-                          </List>
-                        </Collapse>
-                      </List>
+                    <Box
+                      sx={{
+                        mb: 5,
+                        flexDirection: 'column',
+                        display: 'flex',
+                        gap: 1,
+                        mt: 1.5,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        borderRadius: 1,
+                        p: 2,
+                        backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                      }}
+                    >
+                      {ragDetails && ragDetails.ragFiles.some((file) => file.pipelineStage === 'completed') && (amongResponsibles || user?.isAdmin) ? (
+                        <List disablePadding>
+                          <ListItemButton onClick={() => setShowRagFiles((open) => !open)} sx={{ px: 1, borderRadius: 1 }}>
+                            <ListItemText primary={rag.metadata.name} slotProps={{ primary: { variant: 'body2' } }} />
+                            {showRagFiles ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
+                          </ListItemButton>
+                          <Collapse in={showRagFiles} timeout="auto" unmountOnExit>
+                            <List component="div" disablePadding>
+                              {orderBy(ragDetails?.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) =>
+                                file.pipelineStage === 'completed' ? (
+                                  <ListItem key={file.id} sx={{ pl: 4, py: 0.25, borderRadius: 1 }}>
+                                    <ListItemText primary={file.filename} slotProps={{ primary: { variant: 'body2' } }} />
+                                  </ListItem>
+                                ) : null,
+                              )}
+                            </List>
+                          </Collapse>
+                        </List>
                       ) : (
                         <Typography variant="body2">
-                        {previewPrompt.ragHidden && !(amongResponsibles || user?.isAdmin) ? t('common:hiddenRag') : rag.metadata.name}
-                      </Typography>
-
+                          {previewPrompt.ragHidden && !(amongResponsibles || user?.isAdmin) ? t('common:hiddenRag') : rag.metadata.name}
+                        </Typography>
                       )}
                     </Box>
                   ) : (
                     <Box sx={{ mb: 3, ml: 2, mt: 5 }}>
-                      <Typography variant="body2">{t('prompt:noRag')}</Typography> 
+                      <Typography variant="body2">{t('prompt:noRag')}</Typography>
                     </Box>
                   )}
                 </Paper>
@@ -526,7 +536,7 @@ const PromptModal = () => {
           </Box>
         )}
         {isEditing && (
-          <Box sx={{ display:'flex', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
+          <Box sx={{ display: 'flex', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
               <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
                 <PromptEditor previewPrompt={previewPrompt} onDone={onDone} personal={isPersonalTab} />

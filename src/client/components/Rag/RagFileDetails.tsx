@@ -87,7 +87,7 @@ export const RagFileInfo: React.FC<{
 }> = ({ file, index, status, uploadProgress, onSelectFile }) => {
   const { t, i18n } = useTranslation()
   const [searchParams] = useSearchParams()
-  const { returnToEditor, returnPromptId, promptTab, ragTab } = getRagNavigationState(searchParams)
+  const { returnToEditor, returnPromptId, promptType, ragTab } = getRagNavigationState(searchParams)
   const usedAdvancedParsing = !!(file.metadata as Record<string, unknown> | null)?.advancedParsing
   const isPdf = file.fileType === 'application/pdf'
   const isImage = file.fileType === 'image/png'
@@ -123,7 +123,7 @@ export const RagFileInfo: React.FC<{
               fileId: file.id,
               returnToEditor,
               returnPromptId,
-              promptTab,
+              promptType,
               ragTab,
             })}`}
             component={RouterLink}

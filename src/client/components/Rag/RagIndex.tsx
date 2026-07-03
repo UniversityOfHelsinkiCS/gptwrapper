@@ -64,7 +64,7 @@ export const RagIndex: React.FC<RagIndexProps> = ({ ragTab }) => {
   const { courseId } = useParams<{ courseId: string }>()
 
   const [searchParams, _setSearchParams] = useSearchParams()
-  const { indexId, returnToEditor, returnPromptId, promptTab } = getRagNavigationState(searchParams)
+  const { indexId, returnToEditor, returnPromptId, promptType } = getRagNavigationState(searchParams)
   const id = indexId ?? 0
   const navigate = useNavigate()
   const [searchOpen, setSearchOpen] = React.useState(false)
@@ -141,7 +141,7 @@ export const RagIndex: React.FC<RagIndexProps> = ({ ragTab }) => {
     return createRagPath(courseId ?? '', {
       returnToEditor,
       returnPromptId,
-      promptTab,
+      promptType,
       ragTab,
     })
   }

@@ -147,7 +147,7 @@ export const PromptEditor = ({ personal, previewPrompt, onDone }: { personal?: b
     userRagIndices,
     courseId,
     editingPromptId: previewPrompt?.id,
-    editingPromptTab: type === 'CHAT_INSTANCE' ? 0 : 1,
+    editingPromptType: type === 'CHAT_INSTANCE' ? 0 : 1,
   }
 
   return (
