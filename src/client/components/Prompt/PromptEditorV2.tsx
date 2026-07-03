@@ -9,10 +9,20 @@ import { useCourseRagIndices, useRagIndices } from '../../hooks/useRagIndices'
 import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
 import { PromptEditorFormContext, usePromptEditorState } from './context'
-import { PromptEditorForm } from './PromptEditorForm'
+import { PromptEditorFormV2 } from './PromptEditorFormV2'
 import { Prompt, PromptEditorFormContextValue, PromptEditorFormState } from 'src/client/types'
 
-export const PromptEditorV2 = ({ personal, previewPrompt, onDone, courseId }: { personal?: boolean; previewPrompt?: any; onDone: (prompt?: Prompt) => void; courseId: string }) => {
+export const PromptEditorV2 = ({
+  personal,
+  previewPrompt,
+  onDone,
+  courseId,
+}: {
+  personal?: boolean
+  previewPrompt?: any
+  onDone: (prompt?: Prompt) => void
+  courseId: string
+}) => {
   const { t } = useTranslation()
   const { data: chatInstance } = useCourse(courseId)
 
@@ -154,7 +164,7 @@ export const PromptEditorV2 = ({ personal, previewPrompt, onDone, courseId }: { 
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         <form onSubmit={handleSubmit}>
           <Box sx={{ py: 0 }}>
-            <PromptEditorForm />
+            <PromptEditorFormV2 />
           </Box>
 
           <DialogActions>

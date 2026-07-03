@@ -4,7 +4,15 @@ import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, Route, Routes, useParams } from 'react-router-dom'
-import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, DEFAULT_STREAM_TIMEOUT, FREE_MODEL, ValidModelNameSchema, getModelConfig, imageFileTypes } from '../../../config'
+import {
+  DEFAULT_MODEL,
+  DEFAULT_MODEL_TEMPERATURE,
+  DEFAULT_STREAM_TIMEOUT,
+  FREE_MODEL,
+  ValidModelNameSchema,
+  getModelConfig,
+  imageFileTypes,
+} from '../../../config'
 import type { ChatMessage, MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
@@ -105,6 +113,7 @@ const ChatV2Content = () => {
   const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
   const [hasChanges, setHasChanges] = useState(false)
   const [cacheKey, setCacheKey] = useState('')
+  const [isEditing, setIsEditing] = useState(false)
 
   // Analytics
   const dispatchAnalytics = useAnalyticsDispatch()
@@ -612,6 +621,8 @@ const ChatV2Content = () => {
           setHasChanges,
           cacheKey,
           setCacheKey,
+          isEditing,
+          setIsEditing,
         }}
       >
         <Routes>
@@ -628,7 +639,6 @@ const ChatV2Content = () => {
             <Route path={`userrags`} element={<RagModal />} />
           </Route>
         </Routes>
-       
       </PromptEditorState.Provider>
       <ResetConfirmModal open={resetConfirmModalOpen} setOpen={setResetConfirmModalOpen} onConfirm={handleReset} />
     </Box>

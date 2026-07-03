@@ -60,7 +60,7 @@ export type Prompt = {
 }
 
 export type ragInfo = {
-  metadata: { name: string, language: string}
+  metadata: { name: string; language: string }
 }
 
 export type PromptInfo = Pick<Prompt, 'name' | 'systemMessage' | 'hidden' | 'type'> & {
@@ -90,6 +90,8 @@ export type PromptEditorContextValue = {
   setHasChanges: React.Dispatch<React.SetStateAction<boolean>>
   cacheKey: string
   setCacheKey: React.Dispatch<React.SetStateAction<string>>
+  isEditing: boolean
+  setIsEditing: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 export type ChatStatus = 'NOT_STARTED' | 'EXPIRED' | 'ACTIVE'

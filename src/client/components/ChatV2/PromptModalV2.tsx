@@ -1,8 +1,8 @@
 import { Box, Divider, ListItemButton, ListItemText, Typography, Paper, IconButton, ListItemIcon, Tooltip } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Course, Prompt as PromptType } from '../../types'
 import { PromptEditorV2 } from '../Prompt/PromptEditorV2'
@@ -26,15 +26,15 @@ import { getGroupedCourses } from './util'
 const PromptModalV2 = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-  const { activePrompt, handleChangePrompt, coursePrompts, myPrompts, deletePromptMutation } = usePromptState()
+  const { activePrompt, handleChangePrompt, myPrompts, deletePromptMutation } = usePromptState()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [deleteConfirm, setDeleteConfirm] = useState<PromptType | null>(null)
   const [previewPrompt, setPreviewPrompt] = useState<PromptType | undefined>(isMobile ? undefined : activePrompt)
   const [previewCourse, setPreviewCourse] = useState<Course | undefined>(undefined)
-  const [isEditing, setIsEditing] = useState(false)
+  //const [isEditing, setIsEditing] = useState(false)
+  const { isEditing, setIsEditing } = usePromptEditorState()
   const [showMyPrompts, setShowMyPrompts] = useState(myPrompts.some((p) => p.id === previewPrompt?.id) || false)
-  const [searchParams] = useSearchParams()
 
   const { hasChanges, setHasChanges, cacheKey, setCacheKey } = usePromptEditorState()
 
@@ -48,31 +48,6 @@ const PromptModalV2 = () => {
 
   const [isPersonal, setIsPersonal] = useState<boolean>(false)
   const [courseId, setCourseId] = useState<string>('general')
-  const { courseId: paramCourseId } = useParams()
-  const shouldOpenEditorFromQuery = searchParams.get('editPrompt') === '1'
-  const promptId = searchParams.get('promptId')
-  const promptType = Number(searchParams.get('promptType'))
-
-  useEffect(() => {
-    if (!shouldOpenEditorFromQuery) return
-
-    const targetType = Number.isFinite(promptType) ? promptType : paramCourseId === 'general' ? 1 : 0
-
-    const promptSource = targetType === 0 ? coursePrompts : myPrompts
-    const requestedPrompt = promptSource?.find((prompt) => prompt.id === promptId)
-    const hasLoadedPrompts = promptSource && promptSource.length > 0
-
-    if (previewPrompt && promptId && !requestedPrompt && !hasLoadedPrompts) return
-
-    if (!promptId) {
-      setPreviewPrompt(undefined)
-    }
-
-    setPreviewPrompt(requestedPrompt)
-
-    setIsEditing(true)
-    navigate(`/${courseId}/prompts`, { replace: true })
-  }, [shouldOpenEditorFromQuery, promptId, promptType, userCourses, myPrompts, courseId, navigate])
 
   const onDone = (prompt?: PromptType) => {
     setIsEditing(false)
