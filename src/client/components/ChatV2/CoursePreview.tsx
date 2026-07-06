@@ -18,6 +18,7 @@ import ToggleOnIcon from '@mui/icons-material/ToggleOn'
 import ToggleOffIcon from '@mui/icons-material/ToggleOff'
 import TagIcon from '@mui/icons-material/Tag'
 import { useCourseEnrolments } from '../../hooks/useCourse'
+import { CourseActivityPeriodEditor } from '../Courses/Course/CourseActivityPeriodEditor'
 
 const CoursePreview = ({ course }: { course: Course }) => {
   const { i18n, t } = useTranslation()
@@ -70,6 +71,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
         </Box>
       </Box>
       <Box sx={{ mt: 3, display: 'flex', gap: 3, flexDirection: 'column', alignItems: 'flex-start' }}>
+        <CourseActivityPeriodEditor course={course} />
         {course.courseUnitRealisationTypeUrn && (
           <Box
             sx={{
@@ -245,4 +247,3 @@ const CoursePreview = ({ course }: { course: Course }) => {
   )
 }
 export default CoursePreview
-
