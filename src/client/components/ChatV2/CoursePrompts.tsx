@@ -1,6 +1,6 @@
 import ChevronRight from '@mui/icons-material/ChevronRight'
 import ExpandMore from '@mui/icons-material/ExpandMore'
-import { Box, List, ListItemButton, ListItemText, Typography, ListItemIcon, IconButton, Tooltip } from '@mui/material'
+import { Box, List, ListItemButton, ListItemText, Typography, IconButton, Tooltip } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -8,7 +8,6 @@ import useCourse from '../../hooks/useCourse'
 import type { Course, Prompt as PromptType } from '../../types'
 import { usePromptState } from './PromptState'
 import { PromptListItem } from './PromptModal.tsx'
-import SchoolIcon from '@mui/icons-material/School'
 import AddIcon from '@mui/icons-material/Add'
 import useCurrentUser from '../../hooks/useCurrentUser'
 
@@ -94,12 +93,15 @@ const CoursePrompts = (props: CoursePromptsProps) => {
             }}
             data-testid={`show-course-info-${course.id}-button`}
           >
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <SchoolIcon color={course.activated || !amongResponsibles || user?.isAdmin ? 'primary' : 'disabled'} />
-            </ListItemIcon>
             <ListItemText
               primary={course.name[language]}
-              slotProps={{ primary: { variant: 'subtitle1', fontWeight: 600, color: course.activated || !amongResponsibles || user?.isAdmin ? 'default' : 'text.secondary' } }}
+              slotProps={{
+                primary: {
+                  variant: 'subtitle1',
+                  fontWeight: 600,
+                  color: course.activated || !amongResponsibles || user?.isAdmin ? 'default' : 'text.secondary',
+                },
+              }}
             />
           </ListItemButton>
 
@@ -128,7 +130,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
         {showPrompts && (
           <>
             {sortedPrompts.length > 0 ? (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 4, mb: 1 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 0, mb: 1 }}>
                 <List sx={{ py: 0 }}>
                   {sortedPrompts.map((prompt) => (
                     <PromptListItem
@@ -150,7 +152,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
                 </List>
               </Box>
             ) : (
-              <Box sx={{ ml: 6, mt: 1 }}>
+              <Box sx={{ ml: 2, mt: 1 }}>
                 <Typography variant="body1" color="text.secondary">
                   {t('settings:noPrompts')}
                 </Typography>
