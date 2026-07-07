@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import useCourse from '../../hooks/useCourse'
 import type { Course, Prompt as PromptType } from '../../types'
 import { usePromptState } from './PromptState'
-import { PromptListItem } from './PromptModal.tsx'
+import { PromptListItem } from './PromptModalV2.tsx'
 import AddIcon from '@mui/icons-material/Add'
 import useCurrentUser from '../../hooks/useCurrentUser'
 

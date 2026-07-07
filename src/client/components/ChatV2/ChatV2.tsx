@@ -32,7 +32,7 @@ import { ResetConfirmModal } from './ResetConfirmModal'
 import SideBar from './SideBar'
 
 import TemplateModal from './TemplateModal'
-import PromptModal from './PromptModal'
+import PromptModalV2 from './PromptModalV2'
 import CoursesModal from './CoursesModal'
 import RagModal from '../Rag/RagModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
@@ -624,7 +624,7 @@ const ChatV2Content = () => {
           >
             <Route path={`course/*`} element={<CourseSettingsModal />} />
             <Route path={`courses`} element={<CoursesModal />} />
-            <Route path={`prompts`} element={<PromptModal />} />
+            <Route path={`prompts`} element={<PromptModalV2 />} />
             <Route path={`userrags`} element={<RagModal />} />
           </Route>
         </Routes>
