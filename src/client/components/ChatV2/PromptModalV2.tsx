@@ -12,9 +12,9 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { BlueButton, OutlineButtonBlue } from './general/Buttons.tsx'
 import ConfirmDialog from './general/ConfirmDialog'
 import { usePromptEditorState } from '../Prompt/context.tsx'
-import { PromptListItem } from './PromptModal.tsx'
 import AddIcon from '@mui/icons-material/Add'
 import PersonIcon from '@mui/icons-material/Person'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import PromptPreview from './PromptPreview.tsx'
 import CoursePrompts from './CoursePrompts.tsx'
 import CoursePreview from './CoursePreview.tsx'
@@ -22,6 +22,95 @@ import ChevronRight from '@mui/icons-material/ChevronRight'
 import ExpandMore from '@mui/icons-material/ExpandMore'
 import useUserCourses from '../../hooks/useUserCourses'
 import { getGroupedCourses } from './util'
+
+type PromptListItemProps = {
+  prompt: PromptType
+  previewPromptId?: string
+  activePromptId?: string
+  onPreview: (prompt: PromptType) => void
+  onSelect: (prompt: PromptType) => void
+  confirmClose: () => boolean
+  choosePromptLabel: string
+  activeLabel?: string
+}
+
+export const PromptListItem = ({
+  prompt,
+  previewPromptId,
+  activePromptId,
+  onPreview,
+  onSelect,
+  confirmClose,
+  choosePromptLabel,
+  activeLabel,
+}: PromptListItemProps) => (
+  <ListItemButton
+    selected={previewPromptId === prompt.id}
+    onClick={() => {
+      if (!confirmClose()) return
+      onPreview(prompt)
+    }}
+    sx={{
+      position: 'relative',
+      borderRadius: '8px',
+      mb: 0.5,
+      py: 1,
+      height: '50px',
+      minHeight: '50px',
+      pr: prompt.id === activePromptId ? 10 : 0.5,
+      '&.Mui-selected': {
+        backgroundColor: 'background.subtle',
+        borderLeft: '3px solid',
+        borderLeftColor: 'primary.main',
+      },
+      '& .change-prompt-button': {
+        opacity: 0,
+        transform: 'translateX(4px)',
+        visibility: 'hidden',
+        pointerEvents: 'none',
+        transition: 'opacity 180ms ease, transform 180ms ease, visibility 0s linear 180ms',
+      },
+      '& .prompt-list-item__text': {
+        transition: 'padding-right 180ms ease',
+        transitionDelay: '200ms',
+      },
+      '&:hover .change-prompt-button:not(.change-prompt-button--active)': {
+        opacity: 1,
+        transform: 'translateX(0)',
+        visibility: 'visible',
+        pointerEvents: 'auto',
+        transitionDelay: '200ms',
+      },
+      '&:hover .prompt-list-item__text': {
+        pr: prompt.id === activePromptId ? 3 : 10,
+      },
+    }}
+    data-testid={`prompt-row-${prompt.name}`}
+  >
+    <ListItemText className="prompt-list-item__text" primary={prompt.name} slotProps={{ primary: { noWrap: true } }} sx={{ minWidth: 0 }} />
+    {prompt.id === activePromptId && (
+      <Tooltip title={activeLabel ?? ''}>
+        <CheckCircleOutlineIcon fontSize="small" sx={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'primary.main' }} />
+      </Tooltip>
+    )}
+    {prompt.id !== activePromptId && (
+      <BlueButton
+        size="small"
+        variant="contained"
+        data-testid="change-to-prompt-button"
+        className="change-prompt-button"
+        onClick={(e) => {
+          e.stopPropagation()
+          if (!confirmClose()) return
+          onSelect(prompt)
+        }}
+        sx={{ position: 'absolute', right: 8, whiteSpace: 'nowrap' }}
+      >
+        {choosePromptLabel}
+      </BlueButton>
+    )}
+  </ListItemButton>
+)
 
 const PromptModalV2 = () => {
   const theme = useTheme()
