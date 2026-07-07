@@ -56,12 +56,6 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
         p: 2,
       }}
     >
-      {!course.activated && (
-        <Stack direction="row" justifyContent="flex-end">
-          <GreenButton onClick={handleActivate}>{t('course:activate')}</GreenButton>
-        </Stack>
-      )}
-
       <Box>
         <Typography variant="h6" gutterBottom>
           {t('editActivityPeriod')}
@@ -85,7 +79,11 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
       <Divider />
 
       <Stack direction="row" justifyContent="space-between">
-        {course.activated && <RedButton onClick={handleDeactivate}>{t('course:deActivate')}</RedButton>}
+        {course.activated ? (
+          <RedButton onClick={handleDeactivate}>{t('course:deActivate')}</RedButton>
+        ) : (
+          <GreenButton onClick={handleActivate}>{t('course:activate')}</GreenButton>
+        )}
         <BlueButton onClick={() => handleSubmit()} variant="contained" disabled={!hasUnsavedChanges}>
           {t('save')}
         </BlueButton>

@@ -177,7 +177,10 @@ export interface CourseStatistics {
     userId: string
     chatInstanceId: string
     dataValues: {
+      id: string
       userId: string
+      usageCount: number
+      totalUsageCount: number
     }
   }[]
 }
