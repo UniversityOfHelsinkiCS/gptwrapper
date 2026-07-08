@@ -22,7 +22,6 @@ import SchoolIcon from '@mui/icons-material/School'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import TagIcon from '@mui/icons-material/Tag'
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'
-import ContentCopy from '@mui/icons-material/ContentCopy'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import PeopleIcon from '@mui/icons-material/People'
 import GroupsIcon from '@mui/icons-material/Groups'
@@ -127,13 +126,6 @@ const CoursePreview = ({ course }: { course: Course }) => {
   }, [students, search, sortConfig])
 
   if (!user) return null
-
-  const studentLink = `${window.location.origin}/${course.courseId}`
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(studentLink)
-    enqueueSnackbar(t('linkCopied'), { variant: 'info' })
-  }
 
   const requestSort = (key: SortKey) => {
     setSortConfig((prev) => ({ key, direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc' }))
@@ -250,37 +242,6 @@ const CoursePreview = ({ course }: { course: Course }) => {
           <Typography variant="body2">{formatDate(course.activityPeriod)}</Typography>
         </Box>
       </Box>
-
-      {/* Student link (managers, when activated) */}
-      {canManage && activated && (
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" fontWeight="bold" color="text.primary" gutterBottom>
-            {t('course:studentLink')}
-          </Typography>
-          <Tooltip title={t('copy')} placement="right">
-            <Box
-              component="button"
-              onClick={handleCopyLink}
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 1,
-                cursor: 'pointer',
-                border: 'none',
-                background: 'none',
-                p: 0,
-                color: 'primary.main',
-                font: 'inherit',
-              }}
-            >
-              <Typography variant="body2" color="primary">
-                {studentLink}
-              </Typography>
-              <ContentCopy fontSize="small" />
-            </Box>
-          </Tooltip>
-        </Box>
-      )}
 
       {/* Activity period editor (managers) */}
       {canManage && (
@@ -399,7 +360,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('course:searchStudents')}
-              InputProps={{ startAdornment: <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} /> }}
+              slotProps={{ input: { startAdornment: <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} /> } }}
               sx={{ minWidth: 220 }}
             />
             {isAdmin && isCustomCourse && (
