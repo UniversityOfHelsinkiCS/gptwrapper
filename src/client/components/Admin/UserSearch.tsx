@@ -123,7 +123,7 @@ const ActionUserTable = ({
   if (!users || users.length === 0) return null
 
   return (
-    <Box my={2}>
+    <Box my={2} sx={{ maxWidth: '100%', minWidth: 0, overflow: 'auto' }}>
       <TableContainer component={Container}>
         <Table>
           <TableHead>
@@ -164,19 +164,19 @@ const ActionUserTable = ({
             {users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell component="th" scope="row">
-                  <Typography variant="h6">{user.username}</Typography>
+                  <Typography>{user.username}</Typography>
                 </TableCell>
                 <TableCell align="left">
-                  <Typography variant="h6">{user.lastName}</Typography>
+                  <Typography>{user.lastName}</Typography>
                 </TableCell>
                 <TableCell align="left">
-                  <Typography variant="h6">{user.firstNames}</Typography>
+                  <Typography>{user.firstNames}</Typography>
                 </TableCell>
                 <TableCell align="left">
-                  <Typography variant="h6">{user.studentNumber}</Typography>
+                  <Typography>{user.studentNumber}</Typography>
                 </TableCell>
                 <TableCell align="left">
-                  <Typography variant="h6">{user.primaryEmail}</Typography>
+                  <Typography>{user.primaryEmail}</Typography>
                 </TableCell>
                 <TableCell>{drawActionComponent(user)}</TableCell>
               </TableRow>

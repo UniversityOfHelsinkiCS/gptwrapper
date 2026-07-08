@@ -373,7 +373,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
           {addStudentOpen && isAdmin && isCustomCourse ? (
             <EnrolmentActionUserSearch courseId={course.courseId as string} actionText={t('course:add')} drawActionComponent={drawStudentAction} />
           ) : (
-            <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '8px', overflow: 'hidden' }}>
+            <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '8px', overflow: 'auto' }}>
               <Table size="small" data-testid="students-table">
                 <TableHead>
                   <TableRow sx={{ backgroundColor: 'background.subtle' }}>

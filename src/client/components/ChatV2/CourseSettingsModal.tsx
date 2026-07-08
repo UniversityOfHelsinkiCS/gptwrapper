@@ -169,7 +169,7 @@ export const CourseSettingsModal = () => {
   }
 
   return (
-    <Box sx={{ flex: 1, overflow: 'auto' }}>
+    <Box sx={{ flex: 1, minWidth: 0, overflow: 'auto' }}>
       {!returnToEditor && (
         <RouterTabs>
           <Tab label={t('common:settings')} to={`/${courseId}/course`} component={Link} sx={{ '&.Mui-selected': { fontWeight: 'bold' } }} />

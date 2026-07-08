@@ -204,7 +204,7 @@ const PromptModalV2 = () => {
   if (!user) return null
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, minHeight: 0 }}>
       <Box sx={{ display: 'flex', gap: 2, flex: 1, minHeight: 0 }}>
         {/* Left panel - course and prompt list */}
         <Box
@@ -313,9 +313,15 @@ const PromptModalV2 = () => {
         {/* Right panel - preview */}
         {!isEditing && (
           <Box
-            sx={{ display: !isMobile || previewPrompt || previewCourse ? 'flex' : 'none', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}
+            sx={{
+              display: !isMobile || previewPrompt || previewCourse ? 'flex' : 'none',
+              maxWidth: !isMobile ? '100%' : '90vw',
+              flex: 1,
+              minWidth: 0,
+              overflow: 'hidden',
+            }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0, mt: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minWidth: 0, minHeight: 0, mt: 2 }}>
               {previewPrompt ? (
                 <PromptPreview prompt={previewPrompt} handleEdit={handleEdit} handleDelete={handleDelete} courses={userCourses} />
               ) : previewCourse ? (
