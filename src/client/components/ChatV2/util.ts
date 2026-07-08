@@ -68,10 +68,10 @@ export const formatDate = (activityPeriod?: ActivityPeriod) => {
 
   // Show year in both dates if years differ
   if (startYear !== endYear) {
-    return `${format(start, 'dd.MM.yyyy')}–${format(end, 'dd.MM.yyyy')}`
+    return `${format(start, 'dd.MM.yyyy')} – ${format(end, 'dd.MM.yyyy')}`
   }
 
-  return `${format(start, 'dd.MM.')}–${format(end, 'dd.MM.yyyy')}`
+  return `${format(start, 'dd.MM.')} – ${format(end, 'dd.MM.yyyy')}`
 }
 
 export const formatDateTime = (date: string) => `${format(new Date(date), 'dd.MM.yyyy hh:mm:ss')}`

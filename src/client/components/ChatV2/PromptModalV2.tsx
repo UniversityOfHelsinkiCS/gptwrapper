@@ -206,7 +206,7 @@ const PromptModalV2 = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       <Box sx={{ display: 'flex', gap: 2, flex: 1, minHeight: 0 }}>
-        {/* Left panel - prompt list */}
+        {/* Left panel - course and prompt list */}
         <Box
           sx={{
             display: !isMobile || (!previewPrompt && !previewCourse && !isEditing) ? 'flex' : 'none',

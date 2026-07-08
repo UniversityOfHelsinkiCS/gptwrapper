@@ -38,6 +38,7 @@ import useUserUsages from '../../hooks/useUserUsage'
 import { useResetChatInstanceUsageMutation } from '../../hooks/useChatInstanceUsageMutation'
 import apiClient from '../../util/apiClient'
 import { usagePercent, gaugeColorKey, formatTokens } from './UsageSelector'
+import { formatDate } from './util'
 import { OutlineButtonBlue, BlueButton } from './general/Buttons'
 import { CourseActivityPeriodEditor } from '../Courses/Course/CourseActivityPeriodEditor'
 import PromptUsageHistogram from '../Courses/Course/PromptUsageHistogram'
@@ -246,9 +247,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
         )}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <EventAvailableIcon fontSize="small" />
-          <Typography variant="body2">
-            {t('course:courseActivePeriod')} {course.activityPeriod.startDate} – {course.activityPeriod.endDate}
-          </Typography>
+          <Typography variant="body2">{formatDate(course.activityPeriod)}</Typography>
         </Box>
       </Box>
 
