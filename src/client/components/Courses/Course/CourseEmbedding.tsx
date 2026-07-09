@@ -22,8 +22,8 @@ export default function CourseEmbedding({ courseId: courseIdProp, coursePrompts:
   const { courseId: routeCourseId } = useParams() as { courseId: string }
   const { coursePrompts: contextCoursePrompts, activePrompt: contextActivePrompt } = usePromptState()
   const courseId = courseIdProp ?? routeCourseId
-  const coursePrompts = coursePromptsProp ?? contextCoursePrompts
   const { data: chatInstance } = useCourse(courseId)
+  const coursePrompts = coursePromptsProp?.length ? coursePromptsProp : contextCoursePrompts?.length ? contextCoursePrompts : (chatInstance?.prompts ?? [])
   const [link, setLink] = useState<string>('')
   const [embeddingCode, setEmbeddingCode] = useState<string>('')
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | undefined>(activePromptProp ?? contextActivePrompt)
