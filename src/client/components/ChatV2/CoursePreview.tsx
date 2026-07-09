@@ -3,6 +3,9 @@ import {
   Avatar,
   Box,
   Chip,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   IconButton,
   LinearProgress,
   Paper,
@@ -20,6 +23,7 @@ import { useTranslation } from 'react-i18next'
 import { enqueueSnackbar } from 'notistack'
 import SchoolIcon from '@mui/icons-material/School'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import CodeIcon from '@mui/icons-material/Code'
 import TagIcon from '@mui/icons-material/Tag'
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'
 import BarChartIcon from '@mui/icons-material/BarChart'
@@ -40,6 +44,7 @@ import { usagePercent, gaugeColorKey, formatTokens } from './UsageSelector'
 import { formatDate } from './util'
 import { OutlineButtonBlue, BlueButton } from './general/Buttons'
 import { CourseActivityPeriodEditor } from '../Courses/Course/CourseActivityPeriodEditor'
+import CourseEmbedding from '../Courses/Course/CourseEmbedding'
 import PromptUsageHistogram from '../Courses/Course/PromptUsageHistogram'
 import { EnrolmentActionUserSearch, ResponsibilityActionUserSearch } from '../Admin/UserSearch'
 
@@ -76,6 +81,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
   const [addTeacherOpen, setAddTeacherOpen] = useState(false)
   const [showAllTeachers, setShowAllTeachers] = useState(false)
   const [addStudentOpen, setAddStudentOpen] = useState(false)
+  const [embeddingModalOpen, setEmbeddingModalOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'last_name', direction: 'asc' })
 
@@ -195,6 +201,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
   const activated = activeCourse.activated
 
   return (
+    <>
     <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%', mb: 2 }}>
       {/* Title */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mt: 1 }}>
@@ -226,6 +233,17 @@ const CoursePreview = ({ course }: { course: Course }) => {
             variant="outlined"
             sx={{ fontWeight: 600 }}
           />
+        )}
+        {canManage && (
+          <Tooltip title={t('course:moodleEmbedding')}>
+            <IconButton
+              aria-label={t('course:moodleEmbedding')}
+              onClick={() => setEmbeddingModalOpen(true)}
+              data-testid="open-course-embedding-button"
+            >
+              <CodeIcon color="primary" />
+            </IconButton>
+          </Tooltip>
         )}
       </Box>
 
@@ -454,6 +472,18 @@ const CoursePreview = ({ course }: { course: Course }) => {
         </Box>
       )}
     </Paper>
+    <Dialog open={embeddingModalOpen} onClose={() => setEmbeddingModalOpen(false)} fullWidth maxWidth="lg">
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {t('course:moodleEmbedding')}
+        <IconButton onClick={() => setEmbeddingModalOpen(false)} aria-label={t('common:close')}>
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent dividers>
+        <CourseEmbedding courseId={course.courseId} coursePrompts={course.prompts} />
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }
 

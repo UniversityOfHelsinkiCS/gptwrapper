@@ -11,14 +11,22 @@ import moodleTutorialImage1 from '../../../assets/moodle-1.jpeg'
 import moodleTutorialImage2 from '../../../assets/moodle-2.jpeg'
 import moodleTutorialImage3 from '../../../assets/moodle-3.jpeg'
 
-export default function CourseEmbedding() {
+interface CourseEmbeddingProps {
+  courseId?: string
+  coursePrompts?: Prompt[]
+  activePrompt?: Prompt
+}
+
+export default function CourseEmbedding({ courseId: courseIdProp, coursePrompts: coursePromptsProp, activePrompt: activePromptProp }: CourseEmbeddingProps = {}) {
   const { t } = useTranslation()
-  const { courseId } = useParams() as { courseId: string }
+  const { courseId: routeCourseId } = useParams() as { courseId: string }
+  const { coursePrompts: contextCoursePrompts, activePrompt: contextActivePrompt } = usePromptState()
+  const courseId = courseIdProp ?? routeCourseId
+  const coursePrompts = coursePromptsProp ?? contextCoursePrompts
   const { data: chatInstance } = useCourse(courseId)
-  const { coursePrompts, activePrompt } = usePromptState()
   const [link, setLink] = useState<string>('')
   const [embeddingCode, setEmbeddingCode] = useState<string>('')
-  const [selectedPrompt, setSelectedPrompt] = useState<Prompt | undefined>(activePrompt)
+  const [selectedPrompt, setSelectedPrompt] = useState<Prompt | undefined>(activePromptProp ?? contextActivePrompt)
 
   useEffect(() => {
     if (!chatInstance) return
