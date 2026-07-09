@@ -69,6 +69,13 @@ const CoursePrompts = (props: CoursePromptsProps) => {
             alignItems: 'center',
             borderRadius: 1,
             '&:hover': { backgroundColor: 'action.hover' },
+            '& .add-prompt-button': {
+              opacity: showPrompts ? 1 : 0,
+              transition: 'opacity 180ms ease',
+            },
+            '&:hover .add-prompt-button, & .add-prompt-button:focus-visible': {
+              opacity: 1,
+            },
             ...(previewCourse?.id === course.id
               ? {
                   backgroundColor: 'background.subtle',
@@ -111,6 +118,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
                 aria-label={t('settings:saveNewPrompt')}
                 onClick={() => handleCreateNew(course.courseId)}
                 data-testid="create-myprompt-button"
+                className="add-prompt-button"
                 sx={{ color: 'primary.main' }}
               >
                 <AddIcon />
