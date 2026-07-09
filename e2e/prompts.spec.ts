@@ -17,7 +17,7 @@ test.describe('Prompts', () => {
 
     // Write prompt in input (mocktest is the keyword to toggle echoing)
 
-    await page.getByTestId('create-prompt-button').click()
+    await page.getByTestId('create-personal-prompt-button').click()
     await page.getByTestId('prompt-name-input').fill('mocktest testi onnistui')
     await page.getByTestId('system-message-input').fill('mocktest testi onnistui')
     await page.getByRole('button', { name: 'Save' }).click()
@@ -62,7 +62,7 @@ test.describe('Prompts', () => {
     const newPromptName = `testausprompti-${test.info().workerIndex}`
 
     await page.getByTestId('choose-prompt-button').click()
-    await page.getByTestId('create-prompt-button').click()
+    await page.getByTestId('create-course-prompt-test-course-course-id-button').click()
     await page.getByTestId('prompt-name-input').fill(newPromptName)
     await page.getByTestId('system-message-input').fill('mocktest kurssitesti onnistui')
     await page.getByRole('button', { name: 'Save' }).click()
@@ -112,7 +112,7 @@ test.describe('Prompts', () => {
     const newPromptName = `testausprompti-${test.info().workerIndex}-rag`
 
     await page.getByTestId('choose-prompt-button').click()
-    await page.getByTestId('create-prompt-button').click()
+    await page.getByTestId('create-course-prompt-test-course-course-id-button').click()
 
     await page.getByTestId('prompt-name-input').fill(newPromptName)
     await page.getByTestId('system-message-input').fill('what ever')

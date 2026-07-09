@@ -39,6 +39,13 @@ const CoursePrompts = (props: CoursePromptsProps) => {
 
   useEffect(() => {
     if (!previewPrompt) return
+    if (previewPrompt.chatInstanceId !== course.id) return
+
+    setShowPrompts(true)
+  }, [previewPrompt?.id, course.id])
+
+  useEffect(() => {
+    if (!previewPrompt) return
 
     const thisCourseId = course.courseId ?? course.id
     const previewPromptCourseId = previewPrompt.chatInstanceId
@@ -117,7 +124,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
               <IconButton
                 aria-label={t('settings:saveNewPrompt')}
                 onClick={() => handleCreateNew(course.courseId)}
-                data-testid="create-myprompt-button"
+                data-testid={`create-course-prompt-${course.courseId ?? course.id}-button`}
                 className="add-prompt-button"
                 sx={{ color: 'primary.main' }}
               >

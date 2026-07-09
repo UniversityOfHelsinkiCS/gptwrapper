@@ -237,7 +237,7 @@ const PromptModalV2 = () => {
                 <IconButton
                   aria-label={t('settings:saveNewPrompt')}
                   onClick={() => handleCreateNew()}
-                  data-testid="create-myprompt-button"
+                  data-testid="create-personal-prompt-button"
                   sx={{ color: 'primary.main' }}
                 >
                   <AddIcon />

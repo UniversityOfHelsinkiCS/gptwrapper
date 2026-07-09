@@ -114,6 +114,8 @@ export const PromptEditorV2 = ({ personal, previewPrompt, onDone, courseId }: { 
           ragIndexId,
         })
         enqueueSnackbar(t('prompt:updatedPrompt', { name }), { variant: 'success' })
+        clearCachedForm()
+        setHasChanges(false)
         onDone(editedPrompt ?? undefined)
       } else {
         const newPrompt = await createPromptMutation({
@@ -128,9 +130,10 @@ export const PromptEditorV2 = ({ personal, previewPrompt, onDone, courseId }: { 
           ragIndexId,
         })
         enqueueSnackbar(t('prompt:createdPrompt', { name }), { variant: 'success' })
+        clearCachedForm()
+        setHasChanges(false)
         onDone(newPrompt ?? undefined)
       }
-      clearCachedForm()
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     } finally {

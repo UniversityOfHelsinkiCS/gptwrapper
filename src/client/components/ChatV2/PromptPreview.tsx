@@ -80,9 +80,9 @@ const PromptPreview = ({
         </Box>
       ) : (
       <>
-        {user.id === prompt.userId ? (
+        {user.id === prompt.userId && user.firstNames ? (
           <Typography variant="body2" fontWeight="light" data-testid={`prompt-preview-creator-for-${prompt.name}`}>
-            {`${user.firstNames.split(' ')[0]} ${user.lastName}`}
+            {`${user.firstNames.split(' ')[0]} ${user.lastName ?? ''}`}
           </Typography>
         ) : null}
       </>
