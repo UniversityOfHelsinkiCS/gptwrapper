@@ -149,17 +149,17 @@ const PromptPreview = ({
             severity="info"
           >{`${t(prompt.hidden ? 'prompt:promptHidden' : 'prompt:promptNotHidden')}`}</Alert>
         )}
-        <Paper variant="outlined" sx={{ p: 3, mt: 1.5, backgroundColor: alpha(theme.palette.primary.main, 0.08), ...!isMobile && { maxHeight: '300px', overflow: 'auto' } }}>
-          {!isPersonalPrompt && prompt.hidden && !user?.isAdmin && !amongResponsibles ? (
-            <Typography variant="body2">
-              {t('common:hiddenPromptInfo')}
-            </Typography>
-          ) : (
+        {!isPersonalPrompt && prompt.hidden && !user?.isAdmin && !amongResponsibles ? (
+          <Alert icon={<VisibilityOffOutlined fontSize="inherit" />} severity="info" sx={{ mt: 1.5 }}>
+            {t('common:hiddenPromptInfo')}
+          </Alert>
+        ) : (
+          <Paper variant="outlined" sx={{ p: 3, mt: 1.5, backgroundColor: alpha(theme.palette.primary.main, 0.08), ...!isMobile && { maxHeight: '300px', overflow: 'auto' } }}>
             <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary', ...monospaceStyle }}>
               {prompt.systemMessage || '—'}
             </Typography>
-          )}
-        </Paper>
+          </Paper>
+        )}
       </Box>
       {(!isPersonalPrompt || (isPersonalPrompt && ragDetails)) && (
         <>
@@ -213,11 +213,17 @@ const PromptPreview = ({
               )}
             </Box>
           ) : rag ? (
-            <Box sx={{ mb: 5, flexDirection: 'column', display: 'flex', gap: 1, mt: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2, backgroundColor: alpha(theme.palette.primary.main, 0.08) }}>
-              <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary', ...monospaceStyle }}>
-                {prompt.ragHidden && !(amongResponsibles || user.isAdmin) ? t('common:hiddenRag') : rag.metadata.name}
-              </Typography>
-            </Box>
+            prompt.ragHidden && !(amongResponsibles || user.isAdmin) ? (
+              <Alert icon={<VisibilityOffOutlined fontSize="inherit" />} severity="info" sx={{ mt: 1.5 }}>
+                {t('common:hiddenRag')}
+              </Alert>
+            ) : (
+              <Box sx={{ mb: 5, flexDirection: 'column', display: 'flex', gap: 1, mt: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2, backgroundColor: alpha(theme.palette.primary.main, 0.08) }}>
+                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary', ...monospaceStyle }}>
+                  {rag.metadata.name}
+                </Typography>
+              </Box>
+            )
           ) : (
             <Box sx={{ mb: 3, ml: 2, mt: 5 }}>
               <Typography variant="body2">{t('prompt:noRag')}</Typography>
