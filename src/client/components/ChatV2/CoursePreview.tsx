@@ -24,6 +24,7 @@ import { enqueueSnackbar } from 'notistack'
 import SchoolIcon from '@mui/icons-material/School'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import CodeIcon from '@mui/icons-material/Code'
+import ForumIcon from '@mui/icons-material/Forum'
 import TagIcon from '@mui/icons-material/Tag'
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'
 import BarChartIcon from '@mui/icons-material/BarChart'
@@ -45,6 +46,7 @@ import { formatDate } from './util'
 import { OutlineButtonBlue, BlueButton } from './general/Buttons'
 import { CourseActivityPeriodEditor } from '../Courses/Course/CourseActivityPeriodEditor'
 import CourseEmbedding from '../Courses/Course/CourseEmbedding'
+import DiscussionView from '../Courses/Course/Discussions'
 import PromptUsageHistogram from '../Courses/Course/PromptUsageHistogram'
 import { EnrolmentActionUserSearch, ResponsibilityActionUserSearch } from '../Admin/UserSearch'
 
@@ -82,6 +84,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
   const [showAllTeachers, setShowAllTeachers] = useState(false)
   const [addStudentOpen, setAddStudentOpen] = useState(false)
   const [embeddingModalOpen, setEmbeddingModalOpen] = useState(false)
+  const [discussionsModalOpen, setDiscussionsModalOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'last_name', direction: 'asc' })
 
@@ -242,6 +245,17 @@ const CoursePreview = ({ course }: { course: Course }) => {
               data-testid="open-course-embedding-button"
             >
               <CodeIcon color="primary" />
+            </IconButton>
+          </Tooltip>
+        )}
+        {canManage && course.saveDiscussions && (
+          <Tooltip title={t('course:discussions')}>
+            <IconButton
+              aria-label={t('course:discussions')}
+              onClick={() => setDiscussionsModalOpen(true)}
+              data-testid="open-course-discussions-button"
+            >
+              <ForumIcon color="primary" />
             </IconButton>
           </Tooltip>
         )}
@@ -481,6 +495,17 @@ const CoursePreview = ({ course }: { course: Course }) => {
       </DialogTitle>
       <DialogContent dividers>
         <CourseEmbedding courseId={course.courseId} coursePrompts={course.prompts} />
+      </DialogContent>
+    </Dialog>
+    <Dialog open={discussionsModalOpen} onClose={() => setDiscussionsModalOpen(false)} fullWidth maxWidth="lg">
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {t('course:discussions')}
+        <IconButton onClick={() => setDiscussionsModalOpen(false)} aria-label={t('common:close')}>
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent dividers>
+        <DiscussionView courseId={course.courseId} />
       </DialogContent>
     </Dialog>
     </>

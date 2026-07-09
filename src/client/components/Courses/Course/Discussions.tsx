@@ -1,4 +1,5 @@
-import { useParams, Link as RouterLink, Route, Routes, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TableBody, TableCell, TableHead, TableRow, Table, Link, Paper, Typography, Alert, Box, Stack } from '@mui/material'
 import ReactMarkdown from 'react-markdown'
@@ -12,19 +13,21 @@ const getChatMessages = (discussion: Discussion) => {
   return discussion.metadata?.chatMessages ?? (discussion.metadata as any)?.messages ?? []
 }
 
-const DiscussionView: React.FC = () => {
-  return (
-    <Routes>
-      <Route index element={<DiscussionList />} />
-      <Route path=":userId" element={<DiscussionDetail />} />
-    </Routes>
-  )
+const DiscussionView: React.FC<{ courseId?: string }> = ({ courseId: courseIdProp }) => {
+  const { courseId: routeCourseId } = useParams<{ courseId: string }>()
+  const courseId = courseIdProp ?? routeCourseId
+  const [selectedUserId, setSelectedUserId] = useState<string | undefined>(undefined)
+
+  if (selectedUserId) {
+    return <DiscussionDetail courseId={courseId} userId={selectedUserId} onBack={() => setSelectedUserId(undefined)} />
+  }
+
+  return <DiscussionList courseId={courseId} onSelectUser={setSelectedUserId} />
 }
 
-const DiscussionList: React.FC = () => {
+const DiscussionList: React.FC<{ courseId?: string; onSelectUser: (userId: string) => void }> = ({ courseId, onSelectUser }) => {
   const { t, i18n } = useTranslation()
   const { language } = i18n
-  const { courseId } = useParams<{ courseId: string }>()
   const { user, isLoading: isUserLoading } = useCurrentUser()
   const { data: course, isSuccess: isCourseSuccess } = useCourse(courseId ?? '')
   const { discussers, isLoading: discussersLoading } = useCourseDiscussers(courseId ?? '')
@@ -63,7 +66,7 @@ const DiscussionList: React.FC = () => {
           {discussers.map((d, idx) => (
             <TableRow key={d.user_id}>
               <TableCell>
-                <Link to={`${d.user_id}`} component={RouterLink}>
+                <Link component="button" onClick={() => onSelectUser(d.user_id)}>
                   {t('course:student')} {idx + 1}
                 </Link>
               </TableCell>
@@ -76,10 +79,8 @@ const DiscussionList: React.FC = () => {
   )
 }
 
-const DiscussionDetail: React.FC = () => {
+const DiscussionDetail: React.FC<{ courseId?: string; userId: string; onBack: () => void }> = ({ courseId, userId, onBack }) => {
   const { t } = useTranslation()
-  const navigate = useNavigate()
-  const { courseId, userId } = useParams<{ courseId: string; userId: string }>()
   const { data: discussions, isLoading } = useCourseDiscussion(courseId ?? '', userId ?? '')
 
   if (!courseId || !userId || isLoading) return null
@@ -88,7 +89,7 @@ const DiscussionDetail: React.FC = () => {
     return (
       <Box py={3}>
         <Box sx={{ position: 'sticky', top: 0, zIndex: 1, py: 1 }}>
-          <BlueButton onClick={() => navigate('..', { relative: 'path' })}>← {t('common:back')}</BlueButton>
+          <BlueButton onClick={onBack}>← {t('common:back')}</BlueButton>
         </Box>
         <Typography mt={2}>{t('course:noDiscussions')}</Typography>
       </Box>
@@ -114,7 +115,7 @@ const DiscussionDetail: React.FC = () => {
   return (
     <Box py={3}>
       <Box sx={{ position: 'sticky', top: 0, zIndex: 1, py: 1 }}>
-        <BlueButton onClick={() => navigate('..', { relative: 'path' })}>← {t('common:back')}</BlueButton>
+        <BlueButton onClick={onBack}>← {t('common:back')}</BlueButton>
       </Box>
 
       <Stack spacing={4} mt={2} sx={{ maxWidth: '900px', mx: 'auto' }}>
