@@ -73,8 +73,18 @@ export default defineConfig({
     strictPort: true,
     port: 3000,
   },
+  // Only expose the env vars the client bundle actually reads (via src/config.ts).
+  // Passing the whole `process.env` bakes every build-time secret (tokens, PATH, …)
+  // into the client-side JS, which is a security leak.
   define: {
-    'process.env': process.env,
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+    'process.env.STAGING': JSON.stringify(process.env.STAGING),
+    'process.env.CI': JSON.stringify(process.env.CI),
+    'process.env.REACT_APP_GIT_SHA': JSON.stringify(process.env.REACT_APP_GIT_SHA),
+    'process.env.PUBLIC_URL': JSON.stringify(process.env.PUBLIC_URL),
+    'process.env.DEFAULT_TOKEN_LIMIT': JSON.stringify(process.env.DEFAULT_TOKEN_LIMIT),
+    'process.env.DEFAULT_MODEL': JSON.stringify(process.env.DEFAULT_MODEL),
+    'process.env.FREE_MODEL': JSON.stringify(process.env.FREE_MODEL),
   },
   resolve: {
     alias: {
