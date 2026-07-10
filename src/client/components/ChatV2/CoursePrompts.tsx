@@ -37,6 +37,9 @@ const CoursePrompts = (props: CoursePromptsProps) => {
 
   const currentPrompts = courseData?.prompts || []
 
+  const courseEnded = Date.parse(course.activityPeriod.endDate) < Date.now()
+  const dotColor = courseEnded ? 'error.main' : course.usageLimit > 0 ? 'success.main' : 'grey.400'
+
   useEffect(() => {
     if (!previewPrompt) return
     if (previewPrompt.chatInstanceId !== course.id) return
@@ -115,7 +118,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
                 borderRadius: '50%',
                 mr: 1.5,
                 flexShrink: 0,
-                backgroundColor: course.activated ? 'success.main' : 'grey.400',
+                backgroundColor: dotColor,
               }}
             />
             <ListItemText

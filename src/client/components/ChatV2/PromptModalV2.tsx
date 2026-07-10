@@ -1,4 +1,4 @@
-import { Box, Divider, ListItemButton, ListItemText, Typography, Paper, IconButton, ListItemIcon, Tooltip } from '@mui/material'
+import { Box, Divider, ListItemButton, ListItemText, Typography, Paper, IconButton, ListItemIcon, Tooltip, Switch, Popover, FormControlLabel } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -14,6 +14,7 @@ import ConfirmDialog from './general/ConfirmDialog'
 import { usePromptEditorState } from '../Prompt/context.tsx'
 import AddIcon from '@mui/icons-material/Add'
 import PersonIcon from '@mui/icons-material/Person'
+import FilterListIcon from '@mui/icons-material/FilterList'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import PromptPreview from './PromptPreview.tsx'
 import CoursePrompts from './CoursePrompts.tsx'
@@ -130,9 +131,16 @@ const PromptModalV2 = () => {
 
   const studentsCourses = user?.enrolledCourses as Course[]
   const { courses } = useUserCourses()
-  const { curreEnabled, curreDisabled } = getGroupedCourses(courses)
-  const mergedCourses = courses ? [...curreEnabled, ...curreDisabled, ...studentsCourses] : studentsCourses ? studentsCourses : []
-  const userCourses = Array.from(new Map(mergedCourses.map((course) => [course.id, course])).values())
+  const { curreEnabled, curreDisabled, ended } = getGroupedCourses(courses)
+  const students = studentsCourses ?? []
+
+  const [showInactive, setShowInactive] = useState(true)
+  const [showEnded, setShowEnded] = useState(false)
+  const [filterAnchor, setFilterAnchor] = useState<HTMLButtonElement | null>(null)
+
+  const dedupe = (list: Course[]) => Array.from(new Map(list.map((course) => [course.id, course])).values())
+  const allCourses = dedupe([...curreEnabled, ...curreDisabled, ...ended, ...students])
+  const visibleCourses = dedupe([...curreEnabled, ...(showInactive ? curreDisabled : []), ...(showEnded ? ended : []), ...students])
 
   const [isPersonal, setIsPersonal] = useState<boolean>(false)
   const [courseId, setCourseId] = useState<string>('general')
@@ -285,27 +293,57 @@ const PromptModalV2 = () => {
               </Box>
             ) : null}
 
-            {userCourses.length > 0 && (
+            {allCourses.length > 0 && (
               <Box>
                 <Divider sx={{ my: 1 }} />
-                <Typography
-                  variant="overline"
-                  sx={{
-                    display: 'block',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    letterSpacing: '0.1em',
-                    color: 'text.secondary',
-                    px: 1,
-                    pt: 1.5,
-                    pb: 0.5,
-                    lineHeight: 1.6,
-                  }}
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, pt: 1.5, pb: 0.5 }}>
+                  <Typography
+                    variant="overline"
+                    sx={{
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.1em',
+                      color: 'text.secondary',
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {t('settings:courses')}
+                  </Typography>
+                  <Tooltip title={t('settings:filterCourses')}>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => setFilterAnchor(e.currentTarget)}
+                      data-testid="course-filter-button"
+                      sx={{ color: filterAnchor ? 'primary.main' : 'text.secondary' }}
+                    >
+                      <FilterListIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+                <Popover
+                  open={Boolean(filterAnchor)}
+                  anchorEl={filterAnchor}
+                  onClose={() => setFilterAnchor(null)}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                 >
-                  {t('settings:courses')}
-                </Typography>
+                  <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', minWidth: 260 }}>
+                    <FormControlLabel
+                      control={<Switch checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} data-testid="filter-show-inactive" />}
+                      label={t('settings:showInactiveCourses')}
+                      labelPlacement="start"
+                      sx={{ justifyContent: 'space-between', ml: 0, mr: 0 }}
+                    />
+                    <FormControlLabel
+                      control={<Switch checked={showEnded} onChange={(e) => setShowEnded(e.target.checked)} data-testid="filter-show-ended" />}
+                      label={t('settings:showEndedCourses')}
+                      labelPlacement="start"
+                      sx={{ justifyContent: 'space-between', ml: 0, mr: 0 }}
+                    />
+                  </Box>
+                </Popover>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {userCourses.map((course) => (
+                  {visibleCourses.map((course) => (
                     <Box key={course.id}>
                       <CoursePrompts
                         course={course}
@@ -338,7 +376,7 @@ const PromptModalV2 = () => {
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minWidth: 0, minHeight: 0, mt: 2 }}>
               {previewPrompt ? (
-                <PromptPreview prompt={previewPrompt} handleEdit={handleEdit} handleDelete={handleDelete} courses={userCourses} />
+                <PromptPreview prompt={previewPrompt} handleEdit={handleEdit} handleDelete={handleDelete} courses={allCourses} />
               ) : previewCourse ? (
                 <CoursePreview course={previewCourse} />
               ) : (
@@ -360,7 +398,7 @@ const PromptModalV2 = () => {
                     onClick={() => {
                       if (!confirmClose()) return
                       handleChangePrompt(previewPrompt)
-                      const course = userCourses?.find((c) => c.id === previewPrompt.chatInstanceId)
+                      const course = allCourses?.find((c) => c.id === previewPrompt.chatInstanceId)
                       if (course && course.courseId) navigate(`/${course.courseId}`)
                       if (!course) navigate(`/general`)
                     }}

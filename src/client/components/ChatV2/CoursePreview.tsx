@@ -35,6 +35,7 @@ import GroupAddIcon from '@mui/icons-material/GroupAdd'
 import SearchIcon from '@mui/icons-material/Search'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import CloseIcon from '@mui/icons-material/Close'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import type { Course, Enrolment, Responsibility, User } from '../../types'
 import useCourse, { useCourseEnrolments, useCoursePromptUsages, useCourseStatistics } from '../../hooks/useCourse'
 import useCurrentUser from '../../hooks/useCurrentUser'
@@ -202,6 +203,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
 
   const activeCourse: Course = chatInstance ? { ...chatInstance, activated: chatInstance.usageLimit > 0 } : course
   const activated = activeCourse.activated
+  const courseEnded = Date.parse(course.activityPeriod.endDate) < Date.now()
 
   return (
     <>
@@ -217,7 +219,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
           >
             {course.name[language]}
           </Typography>
-          {canManage && (
+          {canManage && !courseEnded && (
             <Chip
               size="small"
               label={activated ? t('course:statusActive') : t('course:statusClosed')}
@@ -225,6 +227,11 @@ const CoursePreview = ({ course }: { course: Course }) => {
               variant="filled"
               sx={{ fontWeight: 600 }}
             />
+          )}
+          {courseEnded && (
+            <Tooltip title={t('chat:courseChatEndedInfo')}>
+              <Chip label={t('chat:courseChatEnded')} color="error" size="small" icon={<InfoOutlinedIcon fontSize="small" />} sx={{ fontWeight: 600 }} />
+            </Tooltip>
           )}
           {course.courseUnitRealisationTypeUrn && (
             <Tooltip title={t('course:goToCoursePage')}>

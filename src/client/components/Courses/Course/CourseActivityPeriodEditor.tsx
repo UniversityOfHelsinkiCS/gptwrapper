@@ -47,6 +47,8 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
   const handleActivate = () => window.confirm(t('course:activate')) && handleSubmit(DEFAULT_TOKEN_LIMIT)
   const handleDeactivate = () => window.confirm(t('course:deActivate')) && handleSubmit(0)
 
+  const courseEnded = Date.parse(course.activityPeriod?.endDate) < Date.now()
+
   return (
     <Box
       sx={{
@@ -79,7 +81,9 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
       <Divider />
 
       <Stack direction="row" justifyContent="space-between">
-        {course.activated ? (
+        {courseEnded ? (
+          <Box />
+        ) : course.activated ? (
           <RedButton onClick={handleDeactivate}>{t('course:deActivate')}</RedButton>
         ) : (
           <GreenButton onClick={handleActivate}>{t('course:activate')}</GreenButton>
