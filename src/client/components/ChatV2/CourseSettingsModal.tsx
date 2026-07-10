@@ -34,6 +34,7 @@ export const CourseSettingsModal = () => {
   const { user, isLoading: userLoading } = useCurrentUser()
   const { data: chatInstance, isSuccess: isCourseSuccess, error, refetch: refetchCourse } = useCourse(courseId)
   const { data: initialEnrolments } = useCourseEnrolments(courseId)
+  const { chatInstanceUsages, isSuccess: isUsageSuccess } = useCourseUsage(chatInstance?.id)
 
   const [searchParams, _setSearchParams] = useSearchParams()
   const returnToEditor = searchParams.get('editPrompt') === '1'
@@ -54,8 +55,6 @@ export const CourseSettingsModal = () => {
     console.log(error, courseId)
     return <ApiErrorView error={error} />
   }
-
-  const { chatInstanceUsages, isSuccess: isUsageSuccess } = useCourseUsage(chatInstance?.id)
 
   if (userLoading || !user || !isCourseSuccess || !isUsageSuccess) return null
 
