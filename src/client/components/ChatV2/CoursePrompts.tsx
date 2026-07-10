@@ -107,6 +107,17 @@ const CoursePrompts = (props: CoursePromptsProps) => {
             }}
             data-testid={`show-course-info-${course.id}-button`}
           >
+            <Box
+              component="span"
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                mr: 1.5,
+                flexShrink: 0,
+                backgroundColor: course.activated ? 'success.main' : 'grey.400',
+              }}
+            />
             <ListItemText
               primary={course.name[language]}
               slotProps={{
@@ -145,7 +156,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
         {showPrompts && (
           <>
             {sortedPrompts.length > 0 ? (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 0, mb: 1 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2.5, mb: 1 }}>
                 <List sx={{ py: 0 }}>
                   {sortedPrompts.map((prompt) => (
                     <PromptListItem

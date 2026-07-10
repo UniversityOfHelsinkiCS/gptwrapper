@@ -288,10 +288,25 @@ const PromptModalV2 = () => {
             {userCourses.length > 0 && (
               <Box>
                 <Divider sx={{ my: 1 }} />
+                <Typography
+                  variant="overline"
+                  sx={{
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.1em',
+                    color: 'text.secondary',
+                    px: 1,
+                    pt: 1.5,
+                    pb: 0.5,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {t('settings:courses')}
+                </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {userCourses.map((course, index) => (
+                  {userCourses.map((course) => (
                     <Box key={course.id}>
-                      {index > 0 && <Divider sx={{ mb: 1 }} />}
                       <CoursePrompts
                         course={course}
                         previewPrompt={previewPrompt}

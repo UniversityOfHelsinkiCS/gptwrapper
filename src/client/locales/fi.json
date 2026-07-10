@@ -180,6 +180,7 @@
     "resetDefault": "Palauta oletusasetukset",
     "resetConfirm": "Oletko varma että haluat palauttaa oletusasetukset?",
     "myPrompts": "Omat alustukset",
+    "courses": "Kurssit",
     "coursePrompts": "Kurssin alustukset",
     "saveMyPrompt": "Lisää oma alustus",
     "saveMyPromptModalTitle": "Luo tai päivitä oma alustus",

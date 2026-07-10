@@ -190,6 +190,7 @@
     "default": "Default",
     "coursePrompts": "Kursprompter",
     "myPrompts": "Mina prompter",
+    "courses": "Kurser",
     "saveMyPromptModalTitle": "Skapa eller uppdatera en prompt",
     "saveMyPromptAs": "Spara prompt som",
     "updatePrompt": "Uppdatera prompt",
