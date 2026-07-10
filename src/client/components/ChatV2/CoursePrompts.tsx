@@ -47,6 +47,14 @@ const CoursePrompts = (props: CoursePromptsProps) => {
     setShowPrompts(true)
   }, [previewPrompt?.id, course.id])
 
+  // Collapse an empty course once it is no longer the previewed course
+  useEffect(() => {
+    if (previewCourse?.id === course.id) return
+    if (currentPrompts.length > 0) return
+
+    setShowPrompts(false)
+  }, [previewCourse?.id, course.id, currentPrompts.length])
+
   useEffect(() => {
     if (!previewPrompt) return
 
@@ -156,38 +164,36 @@ const CoursePrompts = (props: CoursePromptsProps) => {
             {showPrompts ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
           </IconButton>
         </Box>
-        {showPrompts && (
-          <>
-            {sortedPrompts.length > 0 ? (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2.5, mb: 1 }}>
-                <List sx={{ py: 0 }}>
-                  {sortedPrompts.map((prompt) => (
-                    <PromptListItem
-                      key={prompt.id}
-                      prompt={prompt}
-                      previewPromptId={previewPrompt?.id}
-                      activePromptId={activePrompt?.id}
-                      confirmClose={confirmClose}
-                      choosePromptLabel={t('settings:choosePrompt')}
-                      activeLabel={t('settings:promptInUse')}
-                      onPreview={(selectedPrompt) => {
-                        setPreviewPrompt(selectedPrompt)
-                        setIsEditing(false)
-                        setPreviewCourse(undefined)
-                      }}
-                      onSelect={handleSelect}
-                    />
-                  ))}
-                </List>
-              </Box>
-            ) : (
-              <Box sx={{ ml: 2, mt: 1 }}>
-                <Typography variant="body1" color="text.secondary">
-                  {t('settings:noPrompts')}
-                </Typography>
-              </Box>
-            )}
-          </>
+        {showPrompts && sortedPrompts.length > 0 && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2.5, mb: 1 }}>
+            <List sx={{ py: 0 }}>
+              {sortedPrompts.map((prompt) => (
+                <PromptListItem
+                  key={prompt.id}
+                  prompt={prompt}
+                  previewPromptId={previewPrompt?.id}
+                  activePromptId={activePrompt?.id}
+                  confirmClose={confirmClose}
+                  choosePromptLabel={t('settings:choosePrompt')}
+                  activeLabel={t('settings:promptInUse')}
+                  onPreview={(selectedPrompt) => {
+                    setPreviewPrompt(selectedPrompt)
+                    setIsEditing(false)
+                    setPreviewCourse(undefined)
+                  }}
+                  onSelect={handleSelect}
+                />
+              ))}
+            </List>
+          </Box>
+        )}
+        {/* Empty course: show the no-prompts hint only while this course is previewed */}
+        {showPrompts && sortedPrompts.length === 0 && previewCourse?.id === course.id && (
+          <Box sx={{ ml: 2, mt: 1 }}>
+            <Typography variant="body1" color="text.secondary">
+              {t('settings:noPrompts')}
+            </Typography>
+          </Box>
         )}
       </Box>
     </Box>
