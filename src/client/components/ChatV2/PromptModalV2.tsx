@@ -35,6 +35,7 @@ import CoursePreview from './CoursePreview.tsx'
 import ChevronRight from '@mui/icons-material/ChevronRight'
 import ExpandMore from '@mui/icons-material/ExpandMore'
 import useUserCourses from '../../hooks/useUserCourses'
+import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { getGroupedCourses } from './util'
 
 type PromptListItemProps = {
@@ -147,8 +148,8 @@ const PromptModalV2 = () => {
   const { curreEnabled, curreDisabled, ended } = getGroupedCourses(courses)
   const students = studentsCourses ?? []
 
-  const [showInactive, setShowInactive] = useState(true)
-  const [showEnded, setShowEnded] = useState(false)
+  const [showInactive, setShowInactive] = useLocalStorageState('promptFilter.showInactive', true)
+  const [showEnded, setShowEnded] = useLocalStorageState('promptFilter.showEnded', false)
   const [filterAnchor, setFilterAnchor] = useState<HTMLButtonElement | null>(null)
 
   const dedupe = (list: Course[]) => Array.from(new Map(list.map((course) => [course.id, course])).values())
