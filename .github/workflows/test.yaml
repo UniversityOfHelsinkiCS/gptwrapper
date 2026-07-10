@@ -38,6 +38,7 @@ jobs:
       - run: npm run translations -- --lang fi,en
       - run: npm run lint
       - run: npm run tsc
+      - run: npm run test
 
       # https://playwrightsolutions.com/playwright-github-action-to-cache-the-browser-binaries/
       - name: Get installed Playwright version
