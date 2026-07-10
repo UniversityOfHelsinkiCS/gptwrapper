@@ -19,6 +19,33 @@ export const formatTokens = (n: number) => (n >= 1000 ? `${Math.round(n / 1000)}
 
 export const gaugeColorKey = (percent: number): 'error' | 'warning' | 'success' => (percent >= 75 ? 'error' : percent >= 50 ? 'warning' : 'success')
 
+export const UsageInfoButton = () => {
+  const { t } = useTranslation()
+  const [infoOpen, setInfoOpen] = React.useState(false)
+
+  return (
+    <>
+      <IconButton size="small" onClick={() => setInfoOpen(true)} aria-label={t('common:showInfo')}>
+        <HelpOutline sx={{ fontSize: 16, color: 'text.secondary' }} />
+      </IconButton>
+      <Dialog open={infoOpen} onClose={() => setInfoOpen(false)} maxWidth="xs">
+        <DialogTitle>{t('status:usageTitle')}</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Alert severity="info" icon={<EventRepeatIcon fontSize="small" />}>
+            {t('info:usageReset')}
+          </Alert>
+          <Alert severity="success" icon={<LightbulbOutlinedIcon fontSize="small" />}>
+            {t('info:usageTips')}
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setInfoOpen(false)}>{t('common:close')}</Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  )
+}
+
 const UsageGauge = ({ percent, size = 56 }: { percent: number; size?: number }) => (
   <Gauge
     width={size}
@@ -45,7 +72,6 @@ const UsageSelector = () => {
   const { usageInfo, isLoading, refetch } = useUserUsages()
   const { handleChangePrompt } = usePromptState()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const [infoOpen, setInfoOpen] = React.useState(false)
   const open = Boolean(anchorEl)
 
   if (isLoading || !usageInfo) return null
@@ -140,9 +166,7 @@ const UsageSelector = () => {
           >
             {t('status:usageTitle')}
           </Typography>
-          <IconButton size="small" onClick={() => setInfoOpen(true)} aria-label={t('common:showInfo')}>
-            <HelpOutline sx={{ fontSize: 16, color: 'text.secondary' }} />
-          </IconButton>
+          <UsageInfoButton />
         </Box>
         {usageInfo.courses
           .filter((course) => course.usage > 0 || course.courseId === currentCourseId || course.courseId === 'general')
@@ -176,20 +200,6 @@ const UsageSelector = () => {
             )
           })}
       </Menu>
-      <Dialog open={infoOpen} onClose={() => setInfoOpen(false)} maxWidth="xs">
-        <DialogTitle>{t('status:usageTitle')}</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <Alert severity="info" icon={<EventRepeatIcon fontSize="small" />}>
-            {t('info:usageReset')}
-          </Alert>
-          <Alert severity="success" icon={<LightbulbOutlinedIcon fontSize="small" />}>
-            {t('info:usageTips')}
-          </Alert>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setInfoOpen(false)}>{t('common:close')}</Button>
-        </DialogActions>
-      </Dialog>
     </>
   )
 }

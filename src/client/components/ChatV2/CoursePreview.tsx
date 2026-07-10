@@ -42,7 +42,7 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import useUserUsages from '../../hooks/useUserUsage'
 import { useResetChatInstanceUsageMutation } from '../../hooks/useChatInstanceUsageMutation'
 import apiClient from '../../util/apiClient'
-import { usagePercent, gaugeColorKey, formatTokens } from './UsageSelector'
+import { usagePercent, gaugeColorKey, formatTokens, UsageInfoButton } from './UsageSelector'
 import { formatDate } from './util'
 import { OutlineButtonBlue, BlueButton } from './general/Buttons'
 import { CourseActivityPeriodEditor } from '../Courses/Course/CourseActivityPeriodEditor'
@@ -293,6 +293,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
                     <Typography variant="subtitle1" fontWeight="bold">
                       {t('status:usageTitle')}
                     </Typography>
+                    <UsageInfoButton />
                   </Box>
                   <Typography variant="body2" color="text.secondary">
                     {formatTokens(currentCourseUsage.usage)} / {formatTokens(currentCourseUsage.limit)} {t('status:tokens')}

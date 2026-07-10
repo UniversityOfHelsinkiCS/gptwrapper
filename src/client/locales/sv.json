@@ -235,7 +235,7 @@
     "tokensUsed": "av tokens används",
     "limitedUsage": ", de andra modellerna är inte användbara när gränsen nås",
     "usage": "Användning",
-    "usageTitle": "Tokenanvändning",
+    "usageTitle": "Din tokenanvändning",
     "tokens": "tokens"
   },
   "error": {
