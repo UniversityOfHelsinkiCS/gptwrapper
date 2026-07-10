@@ -84,9 +84,13 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
         {courseEnded ? (
           <Box />
         ) : course.activated ? (
-          <RedButton onClick={handleDeactivate}>{t('course:deActivate')}</RedButton>
+          <RedButton data-testid="course-deactivate-button" onClick={handleDeactivate}>
+            {t('course:deActivate')}
+          </RedButton>
         ) : (
-          <GreenButton onClick={handleActivate}>{t('course:activate')}</GreenButton>
+          <GreenButton data-testid="course-activate-button" onClick={handleActivate}>
+            {t('course:activate')}
+          </GreenButton>
         )}
         <BlueButton onClick={() => handleSubmit()} variant="contained" disabled={!hasUnsavedChanges}>
           {t('save')}

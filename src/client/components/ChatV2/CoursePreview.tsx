@@ -222,6 +222,8 @@ const CoursePreview = ({ course }: { course: Course }) => {
           {canManage && !courseEnded && (
             <Chip
               size="small"
+              data-testid="course-status-chip"
+              data-active={activated ? 'true' : 'false'}
               label={activated ? t('course:statusActive') : t('course:statusClosed')}
               color={activated ? 'success' : 'error'}
               variant="filled"
