@@ -1,4 +1,17 @@
-import { Box, Divider, ListItemButton, ListItemText, Typography, Paper, IconButton, ListItemIcon, Tooltip, Switch, Popover, FormControlLabel } from '@mui/material'
+import {
+  Box,
+  Divider,
+  ListItemButton,
+  ListItemText,
+  Typography,
+  Paper,
+  IconButton,
+  ListItemIcon,
+  Tooltip,
+  Switch,
+  Popover,
+  FormControlLabel,
+} from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -223,6 +236,7 @@ const PromptModalV2 = () => {
           }}
         >
           <Box sx={{ overflowY: 'auto', mt: 2 }}>
+            {/* My prompts header row */}
             <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 1, '&:hover': { backgroundColor: 'action.hover' } }}>
               <ListItemButton
                 onClick={() => setShowMyPrompts(true)}
@@ -241,6 +255,7 @@ const PromptModalV2 = () => {
                 <ListItemText primary={t('settings:myPrompts')} slotProps={{ primary: { variant: 'subtitle1', fontWeight: 600 } }} />
               </ListItemButton>
 
+              {/* Add new personal prompt */}
               <Tooltip title={t('settings:saveNewPrompt')}>
                 <IconButton
                   aria-label={t('settings:saveNewPrompt')}
@@ -252,6 +267,7 @@ const PromptModalV2 = () => {
                 </IconButton>
               </Tooltip>
 
+              {/* Expand/collapse my prompts list */}
               <IconButton
                 aria-label={t('course:togglePrompts')}
                 onClick={() => setShowMyPrompts((open) => !open)}
@@ -261,6 +277,7 @@ const PromptModalV2 = () => {
                 {showMyPrompts ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
               </IconButton>
             </Box>
+            {/* My prompts list */}
             {showMyPrompts && sortedMyPrompts.length > 0 ? (
               sortedMyPrompts.map((course) => (
                 <Box key={course.id} sx={{ ml: 4 }}>
@@ -293,9 +310,11 @@ const PromptModalV2 = () => {
               </Box>
             ) : null}
 
+            {/* Courses section */}
             {allCourses.length > 0 && (
               <Box>
                 <Divider sx={{ my: 1 }} />
+                {/* Courses header with filter */}
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, pt: 1.5, pb: 0.5 }}>
                   <Typography
                     variant="overline"
@@ -320,6 +339,7 @@ const PromptModalV2 = () => {
                     </IconButton>
                   </Tooltip>
                 </Box>
+                {/* Course filter popover */}
                 <Popover
                   open={Boolean(filterAnchor)}
                   anchorEl={filterAnchor}
@@ -342,6 +362,7 @@ const PromptModalV2 = () => {
                     />
                   </Box>
                 </Popover>
+                {/* Course prompts list */}
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   {visibleCourses.map((course) => (
                     <Box key={course.id}>
@@ -384,6 +405,7 @@ const PromptModalV2 = () => {
                   <Typography>{t('settings:noPrompt')}</Typography>
                 </Box>
               )}
+              {/* Preview action buttons */}
               <Box sx={{ pt: 2, display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
                 {isMobile && (previewPrompt || previewCourse) && (
                   <OutlineButtonBlue onClick={() => handleMobileBackToPromptList()}>
@@ -410,6 +432,7 @@ const PromptModalV2 = () => {
             </Box>
           </Box>
         )}
+        {/* Right panel - prompt editor */}
         {isEditing && (
           <Box sx={{ display: 'flex', maxWidth: !isMobile ? '100%' : '90vw', flex: 1, overflow: 'hidden' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
@@ -421,6 +444,7 @@ const PromptModalV2 = () => {
         )}
       </Box>
 
+      {/* Delete prompt confirmation */}
       <ConfirmDialog
         open={!!deleteConfirm}
         title={t('settings:confirmDeletePromptTitle')}
