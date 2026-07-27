@@ -93,6 +93,7 @@ export const streamChat = async ({
   promptMessages = [],
   tools = [],
   writeEvent,
+  startStream,
   user,
   ignoredWarnings,
   tokenLimit,
@@ -103,6 +104,7 @@ export const streamChat = async ({
   promptMessages?: Message[]
   tools?: ChatTool[]
   writeEvent: WriteEventFunction
+  startStream: () => void
   user: User
   ignoredWarnings?: WarningType[]
   tokenLimit: number
@@ -166,6 +168,8 @@ export const streamChat = async ({
   if (warnings.length > 0) {
     return { warnings, inputTokenCount }
   }
+
+  startStream()
 
   const MAX_TOOL_ITERATIONS = 5
   let iterations = MAX_TOOL_ITERATIONS

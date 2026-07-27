@@ -66,9 +66,12 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   // General chat is now open to all authenticated users
 
   // Validate file if exists (but don't parse - client already did that)
-  res.setHeader('content-type', 'text/event-stream')
-  res.setHeader('cache-control', 'no-cache')
-  res.setHeader('connection', 'keep-alive')
+  const startStream = () => {
+    res.setHeader('content-type', 'text/event-stream')
+    res.setHeader('cache-control', 'no-cache')
+    res.setHeader('connection', 'keep-alive')
+    res.flushHeaders()
+  }
 
   const writeEvent = async (event: ChatEvent) => {
     await new Promise<void>((resolve) => {
@@ -147,6 +150,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     ignoredWarnings: options.ignoredWarnings,
     tools,
     writeEvent,
+    startStream,
     tokenLimit: getUserTokenLimit(user),
   })
 
