@@ -171,34 +171,42 @@ export const streamChat = async ({
 
   startStream()
 
-  const MAX_TOOL_ITERATIONS = 5
-  let iterations = MAX_TOOL_ITERATIONS
-  let result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
+  const keepAlive = setInterval(() => {
+    writeEvent({ type: 'processing', message: 'processing' }).catch((error) => logger.error(error))
+  }, 5000)
 
-  // If the model decided to call tools, execute them and send the results back to the model in subsequent turns.
-  while (result.toolCalls.length > 0 && iterations > 0) {
-    result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
-    iterations--
-  }
+  try {
+    const MAX_TOOL_ITERATIONS = 5
+    let iterations = MAX_TOOL_ITERATIONS
+    let result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
 
-  // Escape hatch: if the cap was hit while the model was still calling tools,
-  // force a final turn with tools disabled so the model produces a text answer
-  // from whatever results it already has instead of returning an empty response.
-  if (result.toolCalls.length > 0) {
-    logger.info('Tool iteration cap reached, forcing final no-tools turn', { maxIterations: MAX_TOOL_ITERATIONS })
-    const noToolsModel = (chatModel as any).bind({ tool_choice: 'none' }) as ChatModel
-    result = await chatTurn(noToolsModel, messages, toolsByName, writeEvent, user)
-  }
+    // If the model decided to call tools, execute them and send the results back to the model in subsequent turns.
+    while (result.toolCalls.length > 0 && iterations > 0) {
+      result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
+      iterations--
+    }
 
-  return {
-    tokenCount: result.tokenCount,
-    firstTokenTS: result.firstTokenTS,
-    inputTokenCount: result.inputTokenCount,
-    tokenStreamingDuration: result.tokenStreamingDuration,
-    timeToFirstToken: result.timeToFirstToken,
-    tokensPerSecond: result.tokensPerSecond,
-    response: extractText(result.fullOutput?.content),
-    toolCalls: result.toolCalls.length > 0 ? JSON.stringify(result.toolCalls.map((t) => t.name)) : undefined,
+    // Escape hatch: if the cap was hit while the model was still calling tools,
+    // force a final turn with tools disabled so the model produces a text answer
+    // from whatever results it already has instead of returning an empty response.
+    if (result.toolCalls.length > 0) {
+      logger.info('Tool iteration cap reached, forcing final no-tools turn', { maxIterations: MAX_TOOL_ITERATIONS })
+      const noToolsModel = (chatModel as any).bind({ tool_choice: 'none' }) as ChatModel
+      result = await chatTurn(noToolsModel, messages, toolsByName, writeEvent, user)
+    }
+
+    return {
+      tokenCount: result.tokenCount,
+      firstTokenTS: result.firstTokenTS,
+      inputTokenCount: result.inputTokenCount,
+      tokenStreamingDuration: result.tokenStreamingDuration,
+      timeToFirstToken: result.timeToFirstToken,
+      tokensPerSecond: result.tokensPerSecond,
+      response: extractText(result.fullOutput?.content),
+      toolCalls: result.toolCalls.length > 0 ? JSON.stringify(result.toolCalls.map((t) => t.name)) : undefined,
+    }
+  } finally {
+    clearInterval(keepAlive)
   }
 }
 
