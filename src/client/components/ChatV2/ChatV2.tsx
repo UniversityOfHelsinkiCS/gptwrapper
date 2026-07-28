@@ -4,7 +4,15 @@ import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, Route, Routes, useParams } from 'react-router-dom'
-import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, DEFAULT_STREAM_TIMEOUT, FREE_MODEL, ValidModelNameSchema, getModelConfig, imageFileTypes } from '../../../config'
+import {
+  DEFAULT_MODEL,
+  DEFAULT_MODEL_TEMPERATURE,
+  DEFAULT_STREAM_TIMEOUT,
+  FREE_MODEL,
+  ValidModelNameSchema,
+  getModelConfig,
+  imageFileTypes,
+} from '../../../config'
 import type { ChatMessage, MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
@@ -66,6 +74,9 @@ const ChatV2Content = () => {
       chatScroll.autoScroll()
     },
     onText: () => {
+      if (performance.now() - lastRearmRef.current > 1000) {
+        armStreamTimeoutRef.current?.()
+      }
       chatScroll.autoScroll()
     },
     onError: (error) => {
@@ -124,6 +135,8 @@ const ChatV2Content = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const sendSeq = useRef(0) // increments per send attempt, for admin timing logs
+  const armStreamTimeoutRef = useRef<(() => void) | null>(null)
+  const lastRearmRef = useRef(0)
 
   const handleSendMessage = async (message: string, resendPrevious: boolean, ignoredWarnings: WarningType[], messagesToResend?: ChatMessage[]) => {
     if (!userStatus) return
@@ -206,14 +219,18 @@ const ChatV2Content = () => {
       }
     }
 
-    setRetryTimeout(() => {
-      logAdminTiming(
-        `timeout fired after ${Math.round(performance.now() - armedAt)}ms (configured ${streamCreationTimeout}ms, model=${acualModel}, resend=${resendPrevious}, file=${Boolean(file)})`,
-      )
-      if (streamControllerRef.current) {
-        streamControllerRef.current.abort('timeout_error')
-      }
-    }, streamCreationTimeout)
+    const armStreamTimeout = () => {
+      setRetryTimeout(() => {
+        logAdminTiming(
+          `timeout after ${Math.round(performance.now() - lastRearmRef.current)}ms of silence (budget ${streamCreationTimeout}ms, model=${acualModel})`,
+        )
+        streamControllerRef.current?.abort('timeout_error')
+      }, streamCreationTimeout)
+      lastRearmRef.current = performance.now()
+    }
+
+    armStreamTimeoutRef.current = armStreamTimeout
+    armStreamTimeout()
 
     setIsStreaming(true)
     // Scroll immediately to show loading dots for better UX feedback
@@ -242,11 +259,7 @@ const ChatV2Content = () => {
         streamControllerRef.current,
       )
 
-      // Headers have arrived, so the stream-creation budget no longer applies.
-      // Clear here (not just on the success path below) so an early return for
-      // warnings or errors can never leak the timer into a later attempt.
       logAdminTiming(`headers received after ${Math.round(performance.now() - armedAt)}ms`)
-      clearRetryTimeout()
 
       if ('error' in res) {
         console.error('API error:', res)
@@ -261,6 +274,7 @@ const ChatV2Content = () => {
         res.warnings.forEach((warning) => {
           newWarnings[warning.warningType] = { message: warning.warning, ignored: false }
         })
+        clearRetryTimeout()
       }
 
       ignoredWarnings.forEach((type) => {
@@ -276,6 +290,7 @@ const ChatV2Content = () => {
 
       if ('stream' in res) {
         await processStream(res.stream, generationInfo)
+        clearRetryTimeout()
       } else {
         console.error('API error: No stream in response')
         handleCancel()
@@ -628,7 +643,6 @@ const ChatV2Content = () => {
             <Route path={`userrags`} element={<RagModal />} />
           </Route>
         </Routes>
-       
       </PromptEditorState.Provider>
       <ResetConfirmModal open={resetConfirmModalOpen} setOpen={setResetConfirmModalOpen} onConfirm={handleReset} />
     </Box>

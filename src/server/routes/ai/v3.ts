@@ -74,19 +74,28 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   }
 
   const writeEvent = async (event: ChatEvent) => {
+    if (res.destroyed || res.writableEnded) return
     await new Promise<void>((resolve) => {
       const success = res.write(`${JSON.stringify(event)}\n`, (err) => {
         if (err) {
           logger.error('Streaming write error:', { error: err.name })
+          resolve()
         }
       })
 
-      if (!success) {
-        logger.info('res.write returned false, waiting for drain')
-        res.once('drain', resolve)
-      } else {
+      if (success) {
         process.nextTick(resolve)
       }
+
+      const done = () => {
+        res.off('drain', done)
+        res.off('close', done)
+        res.off('error', done)
+        resolve()
+      }
+      res.once('drain', done)
+      res.once('close', done)
+      res.once('error', done)
     })
   }
 

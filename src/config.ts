@@ -125,7 +125,7 @@ export const DEFAULT_MODEL_TEMPERATURE = 1.0
 // How long the client waits for the first streamed token before aborting with a
 // timeout_error.
 // For models that need longer set `timeoutOverride`.
-export const DEFAULT_STREAM_TIMEOUT = 30_000
+export const DEFAULT_STREAM_TIMEOUT = 20_000
 
 export const DEFAULT_VERTEX_LOCATION = 'europe-north1' // Hamina, Finland
 
