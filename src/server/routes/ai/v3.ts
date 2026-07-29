@@ -93,6 +93,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
       if (success) {
         process.nextTick(resolve)
+        return
       }
 
       const done = () => {
