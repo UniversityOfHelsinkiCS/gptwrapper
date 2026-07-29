@@ -66,6 +66,14 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   // General chat is now open to all authenticated users
 
   // Validate file if exists (but don't parse - client already did that)
+
+  const abortController = new AbortController()
+  res.on('close', () => {
+    if (!res.writableFinished) {
+      logger.info('Client disconnected, aborting upstream generation', { model })
+      abortController.abort()
+    }
+  })
   const startStream = () => {
     res.setHeader('content-type', 'text/event-stream')
     res.setHeader('cache-control', 'no-cache')
@@ -150,18 +158,28 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   res.locals.chatCompletionMeta.tools = tools.map((t) => t.name)
 
-  const result = await streamChat({
-    user,
-    chatMessages: options.chatMessages,
-    systemMessage,
-    promptMessages: prompt?.messages,
-    model,
-    ignoredWarnings: options.ignoredWarnings,
-    tools,
-    writeEvent,
-    startStream,
-    tokenLimit: getUserTokenLimit(user),
-  })
+  let result: Awaited<ReturnType<typeof streamChat>>
+
+  try {
+    result = await streamChat({
+      user,
+      chatMessages: options.chatMessages,
+      systemMessage,
+      promptMessages: prompt?.messages,
+      model,
+      ignoredWarnings: options.ignoredWarnings,
+      tools,
+      writeEvent,
+      startStream,
+      tokenLimit: getUserTokenLimit(user),
+      signal: abortController.signal,
+    })
+  } catch (error) {
+    if (abortController.signal.aborted) {
+      return
+    }
+    throw error
+  }
 
   res.locals.chatCompletionMeta.inputTokenCount = result.inputTokenCount
 

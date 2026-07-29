@@ -97,6 +97,7 @@ export const streamChat = async ({
   user,
   ignoredWarnings,
   tokenLimit,
+  signal,
 }: {
   model: ValidModelName
   systemMessage: string
@@ -108,6 +109,7 @@ export const streamChat = async ({
   user: User
   ignoredWarnings?: WarningType[]
   tokenLimit: number
+  signal: AbortSignal
 }): Promise<
   | {
       warnings: AiApiWarning[]
@@ -178,11 +180,11 @@ export const streamChat = async ({
   try {
     const MAX_TOOL_ITERATIONS = 5
     let iterations = MAX_TOOL_ITERATIONS
-    let result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
+    let result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user, signal)
 
     // If the model decided to call tools, execute them and send the results back to the model in subsequent turns.
     while (result.toolCalls.length > 0 && iterations > 0) {
-      result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user)
+      result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user, signal)
       iterations--
     }
 
@@ -192,7 +194,7 @@ export const streamChat = async ({
     if (result.toolCalls.length > 0) {
       logger.info('Tool iteration cap reached, forcing final no-tools turn', { maxIterations: MAX_TOOL_ITERATIONS })
       const noToolsModel = (chatModel as any).bind({ tool_choice: 'none' }) as ChatModel
-      result = await chatTurn(noToolsModel, messages, toolsByName, writeEvent, user)
+      result = await chatTurn(noToolsModel, messages, toolsByName, writeEvent, user, signal)
     }
 
     return {
@@ -221,8 +223,15 @@ export const streamChat = async ({
  * @param user The user for whom the tool results are stored.
  * @returns An object with statistics about the chat turn and any tool calls made.
  */
-const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByName: Record<string, ChatTool>, writeEvent: WriteEventFunction, user: User) => {
-  const stream = await safelyStreamMessages(model, messages)
+const chatTurn = async (
+  model: ChatModel,
+  messages: BaseMessageLike[],
+  toolsByName: Record<string, ChatTool>,
+  writeEvent: WriteEventFunction,
+  user: User,
+  signal: AbortSignal,
+) => {
+  const stream = await safelyStreamMessages(model, messages, signal)
 
   const startTS = Date.now()
   let firstTokenTS = 0
@@ -283,7 +292,7 @@ const chatTurn = async (model: ChatModel, messages: BaseMessageLike[], toolsByNa
         input,
       })
 
-      const result = await tool.invoke(toolCall)
+      const result = await tool.invoke(toolCall, { signal })
       const artifact = result.artifact as ChatToolOutput
       await ToolResultStore.saveResults(id, artifact, user)
 
@@ -401,9 +410,9 @@ const handleWarnings = (
   return { warnings, messages: messagesToReturn, inputTokenCount: tokenCount }
 }
 
-const safelyStreamMessages = async (model: ChatModel, messages: BaseMessageLike[]) => {
+const safelyStreamMessages = async (model: ChatModel, messages: BaseMessageLike[], signal: AbortSignal) => {
   try {
-    return await model.stream(messages)
+    return await model.stream(messages, { signal })
   } catch (error) {
     if (error instanceof Error) {
       // Handle API errors specifically.
