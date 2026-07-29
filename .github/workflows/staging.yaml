@@ -40,7 +40,7 @@ jobs:
           extra-args: |
             --ulimit nofile=4096:4096
 
-      - name: Push staging image to quay.io
+      - name: Push staging image to version helsinki
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build-staging-image.outputs.image }}
