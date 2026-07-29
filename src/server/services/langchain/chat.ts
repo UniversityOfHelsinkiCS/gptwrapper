@@ -376,7 +376,6 @@ const handleWarnings = (
 ): { warnings: AiApiWarning[]; messages: Message[]; inputTokenCount: number } => {
   const encoding = getEncoding(modelConfig.name)
   const tokenCount = calculateUsage(messages, encoding)
-  encoding.free()
 
   let messagesToReturn = messages
   const warnings: AiApiWarning[] = []

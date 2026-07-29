@@ -42,7 +42,5 @@ export const truncateMessages = (modelConfig: typeof validModels[number], messag
     }
   }
 
-  encoding.free()
-
   return truncatedMessages
 }
