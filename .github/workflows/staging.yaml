@@ -45,9 +45,10 @@ jobs:
         with:
           image: ${{ steps.build-staging-image.outputs.image }}
           tags: ${{ steps.build-staging-image.outputs.tags }}
-          registry: quay.io/toska
-          username: toska+github
-          password: ${{ secrets.QUAY_IO_TOKEN }}
+          registry: registry.version.helsinki.fi/toska/openshift/kontit/
+          username: kontit
+          password: ${{ secrets.VERSION_PUSH_SECRET }}
+
 
       - name: Print logs on failure
         shell: bash
