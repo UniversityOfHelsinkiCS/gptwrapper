@@ -139,11 +139,15 @@ export const streamChat = async ({
     callbacks: [
       {
         handleLLMError(err) {
-          console.error('Chat model error:', err)
+          if (signal.aborted) {
+            logger.info('Chat model call aborted', { reason: signal.reason })
+          } else {
+            logger.error('Chat model error:', err)
+          }
           writeEvent({
             type: 'error',
             error: 'Error while generating response',
-          })
+          }).catch((error) => logger.error('Failed to write error event', { error }))
         },
       },
     ],

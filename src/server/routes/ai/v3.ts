@@ -71,7 +71,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   res.on('close', () => {
     if (!res.writableFinished) {
       logger.info('Client disconnected, aborting upstream generation', { model })
-      abortController.abort()
+      abortController.abort('client_disconnected')
     }
   })
   const startStream = () => {
