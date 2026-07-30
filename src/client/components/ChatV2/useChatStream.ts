@@ -32,13 +32,14 @@ export const useChatStream = ({
   const [generationInfo, setGenerationInfo] = useState<MessageGenerationInfo | undefined>()
   const [isStreaming, setIsStreaming] = useState(false)
   const [toolCalls, setToolCalls] = useState<Record<string, ToolCallState>>({})
-  const [errorTimeoutId, setErrorTimeoutId] = useState<NodeJS.Timeout | null>(null)
+  const [hasPotentialError, setHasPotentialError] = useState(false)
+
+  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const streamControllerRef = useRef<TypedAbortController<StreamAbortReason>>(null)
 
-  const decoder = new TextDecoder()
-
   const processStream = async (stream: ReadableStream, baseGenerationInfo: MessageGenerationInfo) => {
+    const decoder = new TextDecoder()
     let content = ''
     let error = ''
     let accumulated = ''
@@ -52,59 +53,11 @@ export const useChatStream = ({
         const { value, done } = await reader.read()
         if (done) break
 
-        const data = decoder.decode(value)
-
-        for (const chunk of data.split('\n')) {
-          if (!chunk || chunk.trim().length === 0) continue
-          const result = parseStreamChunk(chunk, accumulated)
-          accumulated = result.accumulated
-          if (!result.parsed) continue
-
-          const parsedChunk = result.parsed
-
-          onText()
-
-          // Successfully received something, so clear any existing error timeout
-          if (errorTimeoutId) clearTimeout(errorTimeoutId)
-          setErrorTimeoutId(null)
-
-          switch (parsedChunk.type) {
-            case 'writing':
-              setCompletion((prev) => prev + parsedChunk.text)
-              content += parsedChunk.text
-              break
-
-            case 'processing':
-              break
-
-            case 'toolCallStatus':
-              if ('result' in parsedChunk) {
-                toolCallResultsAccum[parsedChunk.callId] = parsedChunk
-                onToolCallComplete(parsedChunk)
-              }
-              setToolCalls((prev) => ({ ...prev, [parsedChunk.callId]: parsedChunk }))
-              break
-
-            case 'error':
-              console.log('Streamed error:', parsedChunk)
-              error += parsedChunk.error
-
-              onError({ error: parsedChunk.error })
-
-              setErrorTimeoutId(
-                setTimeout(() => {
-                  console.error('Error timeout:', parsedChunk)
-                  streamControllerRef.current?.abort('error')
-                }, 3000),
-              )
-
-              break
-
-            default:
-              break
-          }
-        }
+        processChunks(decoder.decode(value, { stream: true }))
       }
+
+      const flushed = decoder.decode()
+      if (flushed) processChunks(flushed)
 
       onComplete({
         message: {
@@ -171,6 +124,60 @@ export const useChatStream = ({
       setIsStreaming(false)
       setGenerationInfo(undefined)
     }
+
+    function processChunks(data: string) {
+      for (const chunk of data.split('\n')) {
+        if (!chunk || chunk.trim().length === 0) continue
+        const result = parseStreamChunk(chunk, accumulated)
+        accumulated = result.accumulated
+        if (!result.parsed) continue
+
+        const parsedChunk = result.parsed
+
+        onText()
+
+        // Successfully received something, so clear any existing error timeout
+        if (errorTimeoutRef.current) {
+          clearTimeout(errorTimeoutRef.current)
+          errorTimeoutRef.current = null
+          setHasPotentialError(false)
+        }
+
+        switch (parsedChunk.type) {
+          case 'writing':
+            setCompletion((prev) => prev + parsedChunk.text)
+            content += parsedChunk.text
+            break
+
+          case 'processing':
+            break
+
+          case 'toolCallStatus':
+            if ('result' in parsedChunk) {
+              toolCallResultsAccum[parsedChunk.callId] = parsedChunk
+              onToolCallComplete(parsedChunk)
+            }
+            setToolCalls((prev) => ({ ...prev, [parsedChunk.callId]: parsedChunk }))
+            break
+
+          case 'error':
+            error += parsedChunk.error
+
+            onError({ error: parsedChunk.error })
+
+            errorTimeoutRef.current = setTimeout(() => {
+              console.error('Error timeout:', parsedChunk)
+              streamControllerRef.current?.abort('error')
+            }, 3000)
+            setHasPotentialError(true)
+
+            break
+
+          default:
+            break
+        }
+      }
+    }
   }
 
   return {
@@ -181,7 +188,7 @@ export const useChatStream = ({
     setIsStreaming,
     toolCalls,
     streamControllerRef,
-    hasPotentialError: errorTimeoutId !== null,
+    hasPotentialError,
   }
 }
 
