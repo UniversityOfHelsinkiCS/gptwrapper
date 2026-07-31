@@ -184,8 +184,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
       </Box>
       <Box py={2} mx={2}>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-          {/* @ts-expect-error component somehow not valid prop but it works */}
-          <Button variant="contained" component="label" variant="contained" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
+          <Button variant="contained" component="label" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
             {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
             <VisuallyHiddenInput
               type="file"
