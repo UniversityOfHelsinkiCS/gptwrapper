@@ -21,6 +21,7 @@ const ensureModelAllowedForUser = (model: ValidModelName, isAdmin: boolean) => {
 }
 
 router.post('/stream', upload.single('file'), async (r, res) => {
+  const requestStartTime = Date.now()
   const req = r as RequestWithUser
   const { options, courseId } = PostStreamSchemaV3.parse(JSON.parse(req.body.data))
   const { generationInfo } = options
@@ -75,6 +76,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     }
   })
   const startStream = () => {
+    res.locals.chatCompletionMeta.timeToStreamStart = Date.now() - requestStartTime
     res.setHeader('content-type', 'text/event-stream')
     res.setHeader('cache-control', 'no-cache')
     res.setHeader('connection', 'keep-alive')
