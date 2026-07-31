@@ -35,8 +35,9 @@ test.describe('Prompts', () => {
     await expect(page.getByTestId('assistant-message')).toContainText('mocktest testi onnistui')
 
     // Clear chat
-    page.on('dialog', (dialog) => dialog.accept())
     await page.getByTestId('new-conversation-button').click()
+    await page.getByTestId('submit-confirm-reset').click()
+    await expect(page.getByTestId('assistant-message')).not.toBeVisible()
 
     // Reload page to ensure prompt is saved
     await page.reload()
