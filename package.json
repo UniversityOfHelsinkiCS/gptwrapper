@@ -63,7 +63,7 @@
     "@types/morgan": "1.9.9",
     "@types/multer": "2.0.0",
     "@types/multer-s3": "3.0.3",
-    "@types/node": "22.19.1",
+    "@types/node": "24.13.3",
     "@types/react": "19.1.12",
     "@types/react-dom": "19.1.9",
     "@types/react-router-dom": "5.3.3",
