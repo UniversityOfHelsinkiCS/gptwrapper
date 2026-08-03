@@ -540,7 +540,9 @@
     "deActivate": "sulje opiskelijoilta",
     "courseActivated": "Kurssi aktivoitu",
     "courseActivePeriod": "Kurssin chat avoinna:",
-    "goToCoursePage": "Siirry kurssisivulle"
+    "goToCoursePage": "Siirry kurssisivulle",
+    "saveDiscussions": "Aseta kurssi \"{{course}}\" tutkimuskurssiksi. Keskustelut tallennetaan.",
+    "unsaveDiscussions": "Poista kurssi \"{{course}}\" tutkimuskurssien joukosta. Keskusteluja ei tallenneta."
   },
   "prompt": {
     "createNew": "Luo uusi alustus",

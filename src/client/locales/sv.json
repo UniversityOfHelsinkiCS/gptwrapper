@@ -510,7 +510,9 @@
     "altSourceView": "Moodle öppna källkodsvisning",
     "altPasteSave": "Moodle klistra in källkod och spara",
     "courseActivePeriod": "Kurschatten öppen:",
-    "goToCoursePage": "Gå till kurssidan"
+    "goToCoursePage": "Gå till kurssidan",
+    "saveDiscussions": "Sätt kursen \"{{course}}\" som en forskningskurs. Diskussioner kommer att sparas.",
+    "unsaveDiscussions": "Ta bort kursen \"{{course}}\" från forskningskurser. Diskussioner kommer inte att sparas."
   },
   "prompt": {
     "createNew": "Skapa ny prompt",

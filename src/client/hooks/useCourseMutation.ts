@@ -10,6 +10,11 @@ interface UpdatedCourseData {
   saveDiscussions: boolean
 }
 
+interface SaveDiscussionsVariables {
+  chatId: string
+  saveDiscussions: boolean
+}
+
 export const useEditCourseMutation = (id: string) => {
   const mutationFn = async (data: UpdatedCourseData) => {
     const res = await apiClient.put(`/courses/${id}`, data)
@@ -28,4 +33,28 @@ export const useEditCourseMutation = (id: string) => {
   })
 
   return mutation
+}
+
+export const useSaveDiscussionsMutation = () => {
+  const mutationFn = async ({ chatId, saveDiscussions }: SaveDiscussionsVariables) => {
+    const res = await apiClient.put(`/courses/${chatId}`, {
+      saveDiscussions,
+    })
+
+    return res.data
+  }
+
+  return useMutation({
+    mutationFn,
+    onSuccess: async (_data, { chatId }) => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ['statistics'],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ['course', chatId],
+        }),
+      ])
+    },
+  })
 }

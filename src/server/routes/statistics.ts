@@ -115,6 +115,7 @@ statisticsRouter.get('/statistics', [adminMiddleware], async (req, res) => {
         usedTokens: courses[chatInstance.id].usedTokens,
         promptCount: chatInstance.prompts.length,
         ragIndicesCount: ragIndicesCount,
+        saveDiscussions: chatInstance.saveDiscussions ?? false,
       }
     }
 

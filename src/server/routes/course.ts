@@ -351,9 +351,9 @@ courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {
 courseRouter.put('/:id', async (req, res) => {
   const { id } = req.params
   const { activityPeriod, usageLimit, saveDiscussions } = req.body as {
-    activityPeriod: ActivityPeriod
-    usageLimit: number
-    saveDiscussions: boolean
+    activityPeriod?: ActivityPeriod
+    usageLimit?: number
+    saveDiscussions?: boolean
   }
 
   const chatInstance = await ChatInstance.findOne({
@@ -370,8 +370,12 @@ courseRouter.put('/:id', async (req, res) => {
     return
   }
 
-  chatInstance.activityPeriod = activityPeriod
-  chatInstance.usageLimit = usageLimit
+  if (activityPeriod !== undefined) {
+    chatInstance.activityPeriod = activityPeriod
+  }
+  if (usageLimit !== undefined) {
+    chatInstance.usageLimit = usageLimit
+  }
   if (saveDiscussions !== undefined) {
     chatInstance.saveDiscussions = saveDiscussions
   }

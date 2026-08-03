@@ -538,7 +538,9 @@
     "deActivate": "close for students",
     "courseActivated": "Course activated",
     "courseActivePeriod": "Course chat open:",
-    "goToCoursePage": "Go to course page"
+    "goToCoursePage": "Go to course page",
+    "saveDiscussions": "Set course \"{{course}}\" as a research course. Discussions will be saved.",
+    "unsaveDiscussions": "Remove course \"{{course}}\" from research courses. Discussions will not be saved."
   },
   "prompt": {
     "createNew": "Create new prompt",

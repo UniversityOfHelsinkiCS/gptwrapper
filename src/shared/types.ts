@@ -90,6 +90,7 @@ export interface Statistic {
   usedTokens: number
   promptCount: number
   ragIndicesCount: number
+  saveDiscussions?: boolean
 }
 
 export type CourseUsage = {

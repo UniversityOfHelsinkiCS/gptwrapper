@@ -24,6 +24,7 @@ import {
   Tabs,
   Tooltip,
   Typography,
+  Switch,
 } from '@mui/material'
 import type { Statistic } from '@shared/types'
 import { useEffect, useRef, useState } from 'react'
@@ -35,6 +36,8 @@ import useCurrentUser from '../hooks/useCurrentUser'
 import useStatistics from '../hooks/useStatistics'
 import faculties from '../locales/faculties.json'
 import programme from '../locales/programme.json'
+import { enqueueSnackbar } from 'notistack'
+import { useSaveDiscussionsMutation } from '../hooks/useCourseMutation'
 
 /**
  * React-router compatible lazy loaded component for Statistics page
@@ -44,8 +47,8 @@ export function Component() {
   const trendSeriesKeys = ['courses', 'students', 'percentage', 'prompts', 'rags'] as const
   type TrendSeriesKey = (typeof trendSeriesKeys)[number]
 
-  const [from, setFrom] = useState<number | null>(null)
-  const [to, setTo] = useState<number | null>(null)
+  const [from, setFrom] = useState<number | ''>('')
+  const [to, setTo] = useState<number | ''>('')
   const [selectedFaculty, setFaculties] = useState('H00')
   const [trendSelectionMode, setTrendSelectionMode] = useState<'single' | 'multi'>('multi')
   const [trendSeries, setTrendSeries] = useState({
@@ -55,7 +58,7 @@ export function Component() {
     prompts: true,
     rags: true,
   })
-  const [sortBy, setSortBy] = useState<'usedTokens' | 'usagePercentage' | 'promptCount' | 'ragIndicesCount'>('usedTokens')
+  const [sortBy, setSortBy] = useState<'usedTokens' | 'usagePercentage' | 'promptCount' | 'ragIndicesCount' | 'saveDiscussions'>('usedTokens')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const { data: statistics, isSuccess } = useStatistics()
   const { t, i18n } = useTranslation()
@@ -67,6 +70,15 @@ export function Component() {
   const isTrendsRoute = Boolean(useMatch('/statistics/trends'))
   const activeTab: 'courses' | 'trends' = isTrendsRoute ? 'trends' : 'courses'
   const dataDownloadLink = useRef<HTMLAnchorElement | null>(null)
+  const saveDiscussionsMutation = useSaveDiscussionsMutation()
+
+  const handleSaveDiscussionsChange = async (saveDiscussions: boolean, chatId: string) => {
+    try {
+      await saveDiscussionsMutation.mutateAsync({ chatId, saveDiscussions })
+    } catch (error: any) {
+      enqueueSnackbar(error.message, { variant: 'error' })
+    }
+  }
 
   useEffect(() => {
     if (isStatisticsRoot && !isCoursesRoute && !isTrendsRoute) {
@@ -82,8 +94,10 @@ export function Component() {
         const toId = statisticsSortedById[statisticsSortedById.length - 1]
         setFrom(fromId.id)
         setTo(toId.id)
+      } else {
+        setFrom('')
+        setTo('')
       }
-      console.log(statisticsSortedById)
     }
   }, [isSuccess])
 
@@ -112,7 +126,7 @@ export function Component() {
   }
 
   const selectTerms = () => {
-    if (!to || !from) {
+    if (to === '' || from === '') {
       return []
     }
     return Array.from({ length: to - from + 1 }, (_, i) => i + from)
@@ -135,7 +149,9 @@ export function Component() {
             ? usagePercentageNumber(a.students, a.enrollmentCount)
             : sortBy === 'promptCount'
               ? a.promptCount
-              : a.ragIndicesCount
+              : sortBy === 'saveDiscussions'
+                ? Number(a.saveDiscussions ?? false)
+                : a.ragIndicesCount
       const bValue =
         sortBy === 'usedTokens'
           ? b.usedTokens
@@ -143,7 +159,9 @@ export function Component() {
             ? usagePercentageNumber(b.students, b.enrollmentCount)
             : sortBy === 'promptCount'
               ? b.promptCount
-              : b.ragIndicesCount
+              : sortBy === 'saveDiscussions'
+                ? Number(b.saveDiscussions ?? false)
+                : b.ragIndicesCount
 
       if (aValue === bValue) return 0
       return sortDirection === 'asc' ? aValue - bValue : bValue - aValue
@@ -152,7 +170,7 @@ export function Component() {
     return sorted
   }
 
-  const requestSort = (column: 'usedTokens' | 'usagePercentage' | 'promptCount' | 'ragIndicesCount') => {
+  const requestSort = (column: 'usedTokens' | 'usagePercentage' | 'promptCount' | 'ragIndicesCount' | 'saveDiscussions') => {
     if (sortBy === column) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
       return
@@ -280,7 +298,9 @@ export function Component() {
   const handleToChange = (e) => {
     // in case of: from: 2026 and to 2024, lets change to into from
     const newVal = parseInt(e.target.value as string, 10)
-    if (from && from > newVal) {
+    if (Number.isNaN(newVal)) return
+
+    if (from !== '' && from > newVal) {
       setTo(from)
     } else {
       setTo(newVal)
@@ -288,21 +308,23 @@ export function Component() {
   }
   const handleFromChange = (e) => {
     const newVal = parseInt(e.target.value as string, 10) // in case of: from: 2026 and to 2024, lets change to into from
-    if (to && newVal > to) {
+    if (Number.isNaN(newVal)) return
+
+    if (to !== '' && newVal > to) {
       setTo(newVal)
     }
     setFrom(newVal)
   }
 
   const readTermFilter = (term) => {
-    if (term) {
+    if (term !== '') {
       return term
     } else {
       return 0
     }
   }
   return (
-    <Container sx={{ mt: '6rem', mb: '10rem', position: 'relative' }} maxWidth="xl">
+    <Container sx={{ mt: '6rem', mb: '10rem', position: 'relative', width: '100%' }} maxWidth={false}>
       <Box sx={{ mb: 2 }}>
         <Tabs
           value={activeTab}
@@ -474,6 +496,19 @@ export function Component() {
                       </TableSortLabel>
                     </Typography>
                   </TableCell>
+                  {user?.isAdmin && (
+                    <TableCell align="center">
+                      <Typography variant="h6">
+                        <TableSortLabel
+                          active={sortBy === 'saveDiscussions'}
+                          direction={sortBy === 'saveDiscussions' ? sortDirection : 'desc'}
+                          onClick={() => requestSort('saveDiscussions')}
+                        >
+                          <b>{t('course:isReseachCourse')}</b>
+                        </TableSortLabel>
+                      </Typography>
+                    </TableCell>
+                  )}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -519,6 +554,18 @@ export function Component() {
                     <TableCell align="left">
                       <Typography>{chat.ragIndicesCount}</Typography>
                     </TableCell>
+                    {user?.isAdmin && (
+                      <TableCell align="center">
+                        <Switch
+                          checked={Boolean(chat.saveDiscussions)}
+                          disabled={saveDiscussionsMutation.isPending && saveDiscussionsMutation.variables?.chatId === chat.id}
+                          onChange={(_, checked) =>
+                            window.confirm(t(checked ? 'course:saveDiscussions' : 'course:unsaveDiscussions', { course: chat.name[language] })) &&
+                            handleSaveDiscussionsChange(checked, chat.id)
+                          }
+                        />
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
@@ -679,6 +726,7 @@ export function Component() {
 
 const SumRow = ({ statsToShow }) => {
   const { t } = useTranslation()
+  const { user } = useCurrentUser()
   const columnSum = (column: string) => {
     if (!statsToShow) {
       return 0
@@ -725,6 +773,11 @@ const SumRow = ({ statsToShow }) => {
       <TableCell align="left">
         <Typography variant="h6">{columnSum('ragIndicesCount')}</Typography>
       </TableCell>
+      {user?.isAdmin && (
+        <TableCell align="center">
+          <Typography variant="h6">{columnSum('saveDiscussions')}</Typography>
+        </TableCell>
+      )}
     </TableRow>
   )
 }
