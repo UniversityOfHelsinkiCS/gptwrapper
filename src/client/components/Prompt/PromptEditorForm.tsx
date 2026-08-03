@@ -9,9 +9,7 @@ import { usePromptEditorForm } from './context'
 import { monospaceStyle } from '../../theme'
 import { useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material'
-import { TextButton } from '../ChatV2/general/Buttons'
-import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import useCourse from '../../hooks/useCourse'
 
@@ -136,11 +134,9 @@ const ModelSettingsSection = () => {
 }
 
 const RagSettingsSection = () => {
-  const { form, setForm, ragIndices, userRagIndices, courseId, editingPromptId, editingPromptTab } = usePromptEditorForm()
+  const { form, setForm, ragIndices, userRagIndices } = usePromptEditorForm()
   const { t } = useTranslation()
-  const theme = useTheme()
   const { user } = useCurrentUser()
-  const navigate = useNavigate()
 
   if (!user?.isEmployee && !user?.isAdmin) return null
 
@@ -207,23 +203,6 @@ const RagSettingsSection = () => {
               ))}
             </Select>
           </FormControl>
-          <TextButton
-            onClick={() => {
-              const params = new URLSearchParams({ editPrompt: '1', promptTab: String(editingPromptTab) })
-              if (editingPromptId) {
-                params.set('promptId', editingPromptId)
-              }
-
-              navigate(`/${courseId}/course/rag?${params.toString()}`)
-            }}
-            data-testid="edit-source-material-link"
-            endIcon={<ArrowRightAltIcon color="primary" />}
-            sx={{ alignSelf: 'flex-end' }}
-          >
-            <span data-testid="edit-source-material-button" style={{ color: theme.palette.primary.main }}>
-              {t('rag:editSourceMaterial')}
-            </span>
-          </TextButton>
         </Box>
       </Box>
 
