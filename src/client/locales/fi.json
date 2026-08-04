@@ -211,13 +211,12 @@
     "darkModeToggle": "Käytä tummaa teemaa."
   },
   "sidebar": {
-    "courseTitle": "Kurssi",
+    "coursesAndPrompts": "Kurssit ja alustukset",
     "courseSettings": "Kurssin asetukset",
     "coursePage": "Kurssisivu",
     "courseChange": "Vaihda kurssichat",
     "courseExit": "Poistu kurssinäkymästä",
     "noCourse": "Valitse kurssi",
-    "promptTitle": "Alustus",
     "promptEdit": "Muokkaa alustusta",
     "promptDetails": "Alustuksen tiedot",
     "promptSelect": "Valitse alustus",

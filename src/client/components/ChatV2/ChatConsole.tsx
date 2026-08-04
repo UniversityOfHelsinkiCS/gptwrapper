@@ -1,13 +1,11 @@
-import { Box, Chip, IconButton, Tooltip, Typography } from '@mui/material'
+import { Box, IconButton, Tooltip, Typography } from '@mui/material'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
-import type { Course, User } from '../../types'
+import type { User } from '../../types'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import SchoolIcon from '@mui/icons-material/School'
 import ChatIcon from '@mui/icons-material/Chat'
 import CloseIcon from '@mui/icons-material/Close'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 import { usePromptState } from './PromptState'
 
@@ -87,72 +85,19 @@ const SelectorRow = ({ icon, label, placeholder, onClick, onClear, clearTooltip,
   )
 }
 
-const CourseStatus = ({ course }: { course?: Course }) => {
-  const { t } = useTranslation()
-  if (!course) return null
-
-  const courseEnded = Date.parse(course.activityPeriod.endDate) < Date.now()
-  const courseEnabled = course.usageLimit > 0
-
-  if (courseEnded) {
-    return (
-      <Tooltip title={t('chat:courseChatEndedInfo')}>
-        <Chip label={t('chat:courseChatEnded')} color="error" size="small" icon={<InfoOutlinedIcon fontSize="small" />} />
-      </Tooltip>
-    )
-  }
-  if (!courseEnabled) {
-    return (
-      <Tooltip title={t('chat:courseChatNotActivatedInfo')}>
-        <Chip label={t('chat:courseChatNotActivated')} color="warning" size="small" icon={<InfoOutlinedIcon fontSize="small" />} />
-      </Tooltip>
-    )
-  }
-  return null
-}
-
-export default function ChatConsole({ user, course }: { user?: User | null; course?: Course }) {
+export default function ChatConsole({ user }: { user?: User | null }) {
   const navigate = useNavigate()
   const { courseId } = useParams()
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { activePrompt, handleChangePrompt } = usePromptState()
-  const { language } = i18n
   const isEmployeeOrAdmin = user?.isEmployee || user?.isAdmin
 
-  const courseName = course ? course.name[language] || 'undefined course' : undefined
-  const coursesPath = `/${courseId ?? 'general'}/courses`
   const promptsPath = `/${courseId ?? 'general'}/prompts`
-
-  const handleClearCourse = () => {
-    navigate('/general')
-    handleChangePrompt(undefined)
-  }
 
   return (
     <Box sx={{ pb: 1 }}>
-      {isEmployeeOrAdmin && (
-        <Box sx={{ mb: 1 }}>
-          <SectionLabel>{t('sidebar:courseTitle')}</SectionLabel>
-          <SelectorRow
-            icon={<SchoolIcon />}
-            label={courseName}
-            placeholder={t('sidebar:noCourse')}
-            onClick={() => navigate(coursesPath)}
-            onClear={course ? handleClearCourse : undefined}
-            clearTooltip={t('sidebar:courseExit')}
-            selectorTestId="select-course-button"
-            clearTestId="course-exit-button"
-          />
-          {course && (
-            <Box sx={{ px: 3, pt: 1 }}>
-              <CourseStatus course={course} />
-            </Box>
-          )}
-        </Box>
-      )}
-
       <Box sx={{ mb: 1 }} data-testid={activePrompt ? 'prompt-name' : undefined}>
-        <SectionLabel>{t('sidebar:promptTitle')}</SectionLabel>
+        <SectionLabel>{t('sidebar:coursesAndPrompts')}</SectionLabel>
         <SelectorRow
           icon={<ChatIcon />}
           label={activePrompt?.name}

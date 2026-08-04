@@ -208,13 +208,12 @@
     "darkModeToggle": "Use dark mode."
   },
   "sidebar": {
-    "courseTitle": "Course",
+    "coursesAndPrompts": "Courses and prompts",
     "courseSettings": "Course settings",
     "coursePage": "Course page",
     "courseChange": "Change course chat",
     "courseExit": "Exit course view",
     "noCourse": "Select course",
-    "promptTitle": "Prompt",
     "promptEdit": "Edit prompt",
     "promptDetails": "Prompt details",
     "promptSelect": "Select prompt",

@@ -25,7 +25,6 @@ import { useAnalyticsDispatch } from '../../stores/analytics'
 import sidebarOpen from '../../assets/sidebar-open.svg'
 import { ChatBox } from './ChatBox'
 import { OutlineButtonBlack } from './general/Buttons'
-import { CourseSettingsModal } from './CourseSettingsModal'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
 import { StreamAbortReason, TypedAbortController, useChatStream } from './useChatStream'
@@ -41,7 +40,6 @@ import SideBar from './SideBar'
 
 import TemplateModal from './TemplateModal'
 import PromptModalV2 from './PromptModalV2'
-import CoursesModal from './CoursesModal'
 import RagModal from '../Rag/RagModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
 import { CustomIcon } from './general/CustomIcon'
@@ -637,8 +635,6 @@ const ChatV2Content = () => {
               </TemplateModal>
             }
           >
-            <Route path={`course/*`} element={<CourseSettingsModal />} />
-            <Route path={`courses`} element={<CoursesModal />} />
             <Route path={`prompts`} element={<PromptModalV2 />} />
             <Route path={`userrags`} element={<RagModal />} />
           </Route>

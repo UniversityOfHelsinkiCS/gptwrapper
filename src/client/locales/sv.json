@@ -689,13 +689,12 @@
     "openConfigurator": "Ändra kortkommando"
   },
   "sidebar": {
-    "courseTitle": "Kurs",
+    "coursesAndPrompts": "Kurser och prompts",
     "courseSettings": "Kursinställningar",
     "coursePage": "Kurssida",
     "courseChange": "Byt kurschatt",
     "courseExit": "Lämna kursvy",
     "noCourse": "Välj en kurs",
-    "promptTitle": "Prompt",
     "promptEdit": "Redigera prompt",
     "promptDetails": "Promptdetaljer",
     "promptChange": "Byt uppmaning",
