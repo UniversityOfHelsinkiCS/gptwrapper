@@ -103,7 +103,14 @@ export default function ChatConsole({ user }: { user?: User | null }) {
           label={activePrompt?.name}
           placeholder={t('sidebar:promptSelect')}
           onClick={() => navigate(promptsPath)}
-          onClear={activePrompt ? () => handleChangePrompt(undefined) : undefined}
+          onClear={
+            activePrompt
+              ? () => {
+                  handleChangePrompt(undefined)
+                  navigate('/general')
+                }
+              : undefined
+          }
           clearTooltip={t('sidebar:promptNone')}
           selectorTestId="choose-prompt-button"
         />
