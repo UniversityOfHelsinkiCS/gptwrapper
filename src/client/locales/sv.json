@@ -60,7 +60,8 @@
     "english": "Engelska",
     "swedish": "Svenska",
     "copiedToClipboard": "Kopierat till urklipp",
-    "required": "obligatorisk"
+    "required": "obligatorisk",
+    "retryMessage": "Försök igen"
   },
   "chats": {
     "header": "Öppna kurschattar",

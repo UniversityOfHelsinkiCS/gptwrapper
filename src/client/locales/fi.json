@@ -62,7 +62,8 @@
     "swedish": "ruotsi",
     "copiedToClipboard": "Kopioitu leikepöydälle",
     "fetchError": "Palvelin virhe",
-    "required": "pakollinen"
+    "required": "pakollinen",
+    "retryMessage": "Yritä uudelleen"
   },
   "stats": {
     "showing": "Näytetään",
