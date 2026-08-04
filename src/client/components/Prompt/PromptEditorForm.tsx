@@ -25,7 +25,7 @@ const BasicInfoSection = () => {
 
   return (
     <Box>
-      <Box display="flex" alignItems="center" gap={1}>
+      <Box display="flex" alignItems="center" gap={1} mb={1}>
         <EditNoteIcon color="secondary" />
         <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
           {t('prompt:promptBasicInfo')}
@@ -39,7 +39,7 @@ const BasicInfoSection = () => {
         </Box>
       )}
       <Box mb={3}>
-        <Typography variant="overline" mb={1} fontWeight="bold">
+        <Typography variant="subtitle1" mb={1} fontWeight="bold">
           {t('prompt:name')}
         </Typography>
         <TextField
@@ -61,8 +61,8 @@ const BasicInfoSection = () => {
         />
       </Box>
       <Box>
-        <Typography variant="overline" mb={1} fontWeight="bold">
-          {type === 'PERSONAL' ? t('prompt:promptDescription') : t('prompt:studentInstructionsLabel')}
+        <Typography variant="subtitle1" mb={1} fontWeight="bold">
+          {t('prompt:promptDescription')}
         </Typography>
 
         <TextField
