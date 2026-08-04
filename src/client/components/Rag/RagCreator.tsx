@@ -17,17 +17,12 @@ import {
 } from '@mui/material'
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
 import { BlueButton } from '../ChatV2/general/Buttons'
-import { useNavigate, useSearchParams } from 'react-router-dom'
 import type { Course } from '../../types'
 import { useTranslation } from 'react-i18next'
 import { RAG_LANGUAGES } from '@shared/lang'
-import { createRagSearchParams, getRagNavigationState } from './ragNavigation'
 
 export const RagCreator = ({ chatInstance, onCreated }: { chatInstance?: Course; onCreated?: (indexId: number) => void }) => {
   const { t } = useTranslation()
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const { returnToEditor, returnPromptId, promptTab } = getRagNavigationState(searchParams)
   const createIndexMutation = useCreateRagIndexMutation()
   const createUserIndexMutation = useCreateUserRagIndexMutation()
   const [indexName, setIndexName] = useState('')
@@ -59,15 +54,6 @@ export const RagCreator = ({ chatInstance, onCreated }: { chatInstance?: Course;
               setIndexName('')
               if (onCreated) {
                 onCreated(newIndex.id)
-              } else {
-                navigate(
-                  `?${createRagSearchParams({
-                    indexId: newIndex.id,
-                    returnToEditor,
-                    returnPromptId,
-                    promptTab,
-                  })}`,
-                )
               }
               setOpen(false)
             },
@@ -78,11 +64,7 @@ export const RagCreator = ({ chatInstance, onCreated }: { chatInstance?: Course;
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <Alert severity="info">
             {t('rag:creatorInfo')}{' '}
-            <Link
-              href="https://github.com/UniversityOfHelsinkiCS/gptwrapper/blob/main/documentation/rag.md"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <Link href="https://github.com/UniversityOfHelsinkiCS/gptwrapper/blob/main/documentation/rag.md" target="_blank" rel="noopener noreferrer">
               {t('rag:readMoreAboutRag')}
             </Link>
           </Alert>

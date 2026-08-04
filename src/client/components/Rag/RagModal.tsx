@@ -1,21 +1,15 @@
 import React, { useState } from 'react'
 import { Box, Divider, List, ListItemButton, ListItemText, Typography, useMediaQuery, useTheme } from '@mui/material'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useRagIndices } from '../../hooks/useRagIndices'
 import { RagCreator } from './RagCreator'
 import { useTranslation } from 'react-i18next'
 import { RagIndexV2 } from './RagIndexV2'
 import { RagFileV2 } from './RagFileV2'
-import { OutlineButtonBlack, OutlineButtonBlue } from '../ChatV2/general/Buttons'
+import { OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { ArrowBack } from '@mui/icons-material'
-import { createRagSearchParams, getRagNavigationState } from './ragNavigation'
 
 const RagModal: React.FC = () => {
   const { t } = useTranslation()
-  const { courseId } = useParams<{ courseId: string }>()
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const { returnToEditor, returnPromptId, promptTab } = getRagNavigationState(searchParams)
 
   const [selectedIndexId, setSelectedIndexId] = useState<number | null>(null)
   const [selectedFileId, setSelectedFileId] = useState<number | null>(null)
@@ -39,24 +33,6 @@ const RagModal: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, minHeight: 0 }}>
-      {returnToEditor && (
-        <Box sx={{ pb: 2 }}>
-          <OutlineButtonBlack
-            onClick={() =>
-              navigate(
-                `/${courseId}/prompts?${createRagSearchParams({
-                  returnToEditor,
-                  returnPromptId,
-                  promptTab,
-                })}`,
-              )
-            }
-            data-testid="back-to-prompt-editor"
-          >
-            <ArrowBack />
-          </OutlineButtonBlack>
-        </Box>
-      )}
       <Box sx={{ display: 'flex', gap: 2, flex: 1, minHeight: 0 }}>
         {/* Left panel — collection list */}
         <Box sx={{ display: !isMobile || !selectedIndexId ? 'flex' : 'none', width: !isMobile ? 310 : '90vw', flexDirection: 'column', mt: 2 }}>

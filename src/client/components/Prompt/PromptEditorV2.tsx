@@ -12,7 +12,17 @@ import { PromptEditorFormContext, usePromptEditorState } from './context'
 import { PromptEditorForm } from './PromptEditorForm'
 import { Prompt, PromptEditorFormContextValue, PromptEditorFormState } from 'src/client/types'
 
-export const PromptEditorV2 = ({ personal, previewPrompt, onDone, courseId }: { personal?: boolean; previewPrompt?: any; onDone: (prompt?: Prompt) => void; courseId: string }) => {
+export const PromptEditorV2 = ({
+  personal,
+  previewPrompt,
+  onDone,
+  courseId,
+}: {
+  personal?: boolean
+  previewPrompt?: any
+  onDone: (prompt?: Prompt) => void
+  courseId: string
+}) => {
   const { t } = useTranslation()
   const { data: chatInstance } = useCourse(courseId)
 
@@ -148,8 +158,6 @@ export const PromptEditorV2 = ({ personal, previewPrompt, onDone, courseId }: { 
     ragIndices,
     userRagIndices,
     courseId,
-    editingPromptId: previewPrompt?.id,
-    editingPromptTab: type === 'CHAT_INSTANCE' ? 0 : 1,
   }
 
   return (

@@ -60,7 +60,7 @@ export type Prompt = {
 }
 
 export type ragInfo = {
-  metadata: { name: string, language: string}
+  metadata: { name: string; language: string }
 }
 
 export type PromptInfo = Pick<Prompt, 'name' | 'systemMessage' | 'hidden' | 'type'> & {
@@ -81,8 +81,6 @@ export type PromptEditorFormContextValue = {
   ragIndices?: { id: number; metadata: { name: string } }[]
   userRagIndices?: { id: number; metadata: { name: string } }[]
   courseId: string
-  editingPromptId?: string
-  editingPromptTab: number
 }
 
 export type PromptEditorContextValue = {
