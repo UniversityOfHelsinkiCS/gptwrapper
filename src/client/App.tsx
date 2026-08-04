@@ -1,4 +1,4 @@
-import { Box, Button, CssBaseline, Snackbar } from '@mui/material'
+import { Box, Button, CircularProgress, Container, CssBaseline, Snackbar, Typography } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
@@ -25,25 +25,7 @@ import { Feedback } from './components/Feedback'
 import { SuperSpeedLoginAs } from './components/Admin/SuperSpeedLoginAs'
 import { useLoggedInAs } from './hooks/useLoggedInAs'
 import NotificationBanner from './components/common/NotificationBanner'
-
-const hasAccess = (user: User | null | undefined, courseId?: string) => {
-  if (!user) return false
-  if (user.isAdmin) return true
-  if (courseId && !user.activeCourseIds.includes(courseId) && courseId !== 'general') {
-    return false
-  }
-
-  if (!courseId && window.location.pathname.endsWith('/chats')) return true
-  // All authenticated users now have access to general chat
-
-  return true
-}
-
-const getRedirect = (user: User | null | undefined) => {
-  if (!user) return '/noaccess'
-  // All authenticated users now have access to general chat
-  return '/general'
-}
+import { resolveContentView, getRedirect } from './util/contentView'
 
 const AdminLoggedInAsBanner = () => {
   const [open, setOpen] = React.useState(false)
@@ -147,20 +129,38 @@ const Layout = () => {
   )
 }
 
+const LoginError = ({ onRetry, isRetrying }: { onRetry: () => void; isRetrying: boolean }) => {
+  const { t } = useTranslation()
+
+  return (
+    <Container sx={{ mt: '4rem' }} maxWidth="sm">
+      <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
+        <Typography variant="h5">{t('common:fetchError')}</Typography>
+        <Button variant="contained" onClick={onRetry} disabled={isRetrying}>
+          {isRetrying ? <CircularProgress size={20} /> : t('common:retryMessage')}
+        </Button>
+      </Box>
+    </Container>
+  )
+}
+
 const Content = () => {
   const { courseId } = useParams()
   const location = useLocation()
-  const { user, isLoading } = useCurrentUser()
+  const { user, isLoading, isError, refetch, isFetching } = useCurrentUser()
 
-  const onNoAccessPage = location.pathname.includes('/noaccess')
+  const view = resolveContentView({
+    isLoading,
+    isError,
+    user,
+    courseId,
+    onNoAccessPage: location.pathname.includes('/noaccess'),
+  })
 
-  if (isLoading && !onNoAccessPage) return <HYLoadingSpinner />
-
-  if (!onNoAccessPage && !hasAccess(user, courseId)) {
-    return <Navigate to={getRedirect(user)} />
-  }
-
-  if (!user && !onNoAccessPage) return null
+  if (view === 'loading') return <HYLoadingSpinner />
+  if (view === 'error') return <LoginError onRetry={() => refetch()} isRetrying={isFetching} />
+  if (view === 'redirect') return <Navigate to={getRedirect(user)} />
+  if (view === 'nothing') return null
 
   return (
     <Box sx={{ flex: 1 }}>
