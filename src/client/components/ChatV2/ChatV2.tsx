@@ -35,9 +35,7 @@ import z from 'zod/v4'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { WarningType } from '@shared/aiApi'
 import { ResetConfirmModal } from './ResetConfirmModal'
-
 import SideBar from './SideBar'
-
 import TemplateModal from './TemplateModal'
 import PromptModalV2 from './PromptModalV2'
 import RagModal from '../Rag/RagModal'
@@ -444,14 +442,13 @@ const ChatV2Content = () => {
           <SideBar
             open={true} // always open in drawer
             setOpen={setSideBarOpen}
-            course={chatInstance}
             user={user}
             handleReset={handleResetRequest}
             messages={messages}
           />
         </Drawer>
       ) : (
-        <SideBar open={sideBarOpen} setOpen={setSideBarOpen} course={chatInstance} user={user} handleReset={handleResetRequest} messages={messages} />
+        <SideBar open={sideBarOpen} setOpen={setSideBarOpen} user={user} handleReset={handleResetRequest} messages={messages} />
       )}
       {/* Chat view column ------------------------------------------------------------------------------------------------ */}
       <Box
