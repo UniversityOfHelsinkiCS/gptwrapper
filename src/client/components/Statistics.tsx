@@ -6,7 +6,6 @@ import {
   FormControlLabel,
   FormGroup,
   IconButton,
-  Link,
   MenuItem,
   Paper,
   Select,
@@ -29,7 +28,7 @@ import {
 import type { Statistic } from '@shared/types'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link as RouterLink, useMatch, useNavigate } from 'react-router-dom'
+import { useMatch, useNavigate } from 'react-router-dom'
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip as ChartTooltip, XAxis, YAxis } from 'recharts'
 import * as xlsx from 'xlsx'
 import useCurrentUser from '../hooks/useCurrentUser'
@@ -520,13 +519,7 @@ export function Component() {
                       <Typography>{chat.codes.join(', ')}</Typography>
                     </TableCell>
                     <TableCell align="left">
-                      {user?.isAdmin ? (
-                        <Link to={`/${chat.id}/course`} component={RouterLink}>
-                          <Typography>{chat.name[language]}</Typography>
-                        </Link>
-                      ) : (
-                        <Typography>{chat.name[language]}</Typography>
-                      )}
+                      <Typography>{chat.name[language]}</Typography>
                     </TableCell>
                     <TableCell align="left">
                       <Typography>{chat.terms.map((trm) => trm.label[language]).join(', ')}</Typography>
