@@ -34,7 +34,7 @@ const useCurrentUser = () => {
     // unnecessarily within a short period of time.
     staleTime: 5000,
     retry: (failureCount, error) => {
-      const status = (error as ApiError).response?.status
+      const status = (error as ApiError)?.response?.status
       if (status && status >= 400 && status < 500) return false
       return failureCount < 2
     },

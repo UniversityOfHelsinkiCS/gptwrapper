@@ -14,7 +14,7 @@ const mockedGet = vi.mocked(apiClient.get)
 const response = (status: number, data?: unknown) => ({ status, data }) as any
 
 const axiosError = (status: number) =>
-  Object.assign(new Error(`Request failed with status code $(status)`), {
+  Object.assign(new Error(`Request failed with status code ${status}`), {
     isAxiosError: true,
     response: { status },
   })
