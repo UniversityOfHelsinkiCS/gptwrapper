@@ -2,7 +2,7 @@ import express from 'express'
 
 import type { ChatInstance, RequestWithUser } from '../types'
 import logger from '../util/logger'
-import { getEnrolledCourseIds, getTeachedCourses, getEnrolledCourses } from '../services/chatInstances/access'
+import { getTeachedCourses, getEnrolledCourses } from '../services/chatInstances/access'
 import { User } from '../db/models'
 import { getUserStatus, getUsage, getCourseUsages, getUserTokenLimit } from '../services/chatInstances/usage'
 import { getLastRestart } from '../util/lastRestart'
@@ -23,9 +23,11 @@ userRouter.get('/login', async (req, res) => {
 
   const hasIamAccess = checkIamAccess(iamGroups)
 
-  const [enrolledCourseIds, teacherCourses] = await Promise.all([getEnrolledCourseIds(user), getTeachedCourses(user)])
+  const [enrolments, teacherCourses] = await Promise.all([getEnrolledCourses(user), getTeachedCourses(user)])
 
   const teacherCourseIds = teacherCourses.map((c) => c.courseId) as string[]
+
+  const enrolledCourseIds = enrolments.map((enrolment) => enrolment.chatInstance.courseId) as string[]
 
   const courses = enrolledCourseIds.concat(teacherCourseIds)
   // All authenticated users now have access to general chat
@@ -52,8 +54,6 @@ userRouter.get('/login', async (req, res) => {
 
   const lastRestart = await getLastRestart()
 
-  const enrolledCourses = await getEnrolledCourses(user)
-
   const termsAccepted = await User.findByPk(id, { attributes: ['termsAcceptedAt'] })
 
   const tokenLimit = getUserTokenLimit(user)
@@ -66,7 +66,7 @@ userRouter.get('/login', async (req, res) => {
     tokenLimit,
     lastRestart,
     serverVersion: process.env.VERSION,
-    enrolledCourses: enrolledCourses.filter(isNowOrInFuture).map((enrollment) => enrollment.chatInstance),
+    enrolledCourses: enrolments.filter(isNowOrInFuture).map((enrolment) => enrolment.chatInstance),
     termsAcceptedAt: termsAccepted?.termsAcceptedAt,
   })
   return

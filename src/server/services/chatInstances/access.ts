@@ -47,16 +47,6 @@ export const getEnrolledCourses = async (user: User) => {
   return enrollments
 }
 
-/**
- * Gets the chat instance ids of the courses the user is enrolled in
- */
-export const getEnrolledCourseIds = async (user: User) => {
-  const enrollments = await getEnrolledCourses(user)
-  const courseIds = enrollments.map((enrolment) => enrolment.chatInstance.courseId) as string[]
-
-  return courseIds
-}
-
 export const getTeachedCourses = async (user: User) => {
   // We want to check if the user exists in the database
   // before we try to upsert the enrolments
