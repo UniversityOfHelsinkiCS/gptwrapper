@@ -714,7 +714,7 @@
     "etaLeft": "{{value}} jäljellä",
     "nameUpdateSuccess": "Nimi päivitetty",
     "nameUpdateError": "Virhe: nimeä ei voitu päivittää",
-    "editSourceMaterial": "Muokkaa lähdemateriaalikokoelmaa",
+    "editSourceMaterial": "Muokkaa lähdemateriaalikokoelmia",
     "noCollections": "Ei kokoelmia vielä",
     "selectCollection": "Valitse kokoelma",
     "backToCollections": "Takaisin kokoelmiin",

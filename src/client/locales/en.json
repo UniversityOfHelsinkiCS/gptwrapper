@@ -713,7 +713,7 @@
     "etaLeft": "{{value}} left",
     "nameUpdateSuccess": "Name updated",
     "nameUpdateError": "Error: name could not be updated",
-    "editSourceMaterial": "Edit source material collection",
+    "editSourceMaterial": "Edit source material collections",
     "noCollections": "No collections yet",
     "selectCollection": "Select a collection",
     "backToCollections": "Back to collections",
