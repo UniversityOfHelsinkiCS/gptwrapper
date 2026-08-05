@@ -221,7 +221,7 @@ const PromptModalV2 = () => {
     return true
   }
 
-  const sortedMyPrompts = myPrompts.sort((a, b) => a.name.localeCompare(b.name, 'fi', { sensitivity: 'base' }))
+  const sortedMyPrompts = myPrompts.sort((a, b) => a.name.localeCompare(b.name, 'fi', { sensitivity: 'base', numeric: true }))
 
   if (!user) return null
 

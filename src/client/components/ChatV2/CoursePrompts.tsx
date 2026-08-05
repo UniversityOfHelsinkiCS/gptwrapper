@@ -69,7 +69,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
 
   if (isLoading) return null
 
-  const sortedPrompts = currentPrompts.sort((a, b) => a.name.localeCompare(b.name, 'fi', { sensitivity: 'base' }))
+  const sortedPrompts = currentPrompts.sort((a, b) => a.name.localeCompare(b.name, 'fi', { sensitivity: 'base', numeric: true }))
 
   const handleSelect = (prompt?: PromptType) => {
     if (!confirmClose()) return
