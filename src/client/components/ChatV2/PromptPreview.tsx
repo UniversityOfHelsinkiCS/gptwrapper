@@ -55,7 +55,7 @@ const PromptPreview = ({
   const isPersonalPrompt = prompt.type === 'PERSONAL' || myPrompts.some((p) => p.id === prompt.id)
 
   const shouldFetchRagDetails = amongResponsibles || user?.isAdmin || isPersonalPrompt
-  const { data: ragDetails } = useRagIndexDetails(prompt.ragIndexId ?? null, shouldFetchRagDetails)
+  const { data: ragDetails } = useRagIndexDetails(prompt.ragIndexId && prompt.ragIndex ? prompt.ragIndexId : null, shouldFetchRagDetails)
 
   const ragFiles = ragDetails?.ragFiles.filter((file) => file.pipelineStage === 'completed' && !file.error) ?? []
 
