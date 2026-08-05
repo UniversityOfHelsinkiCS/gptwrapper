@@ -60,6 +60,7 @@
     "english": "Engelska",
     "swedish": "Svenska",
     "copiedToClipboard": "Kopierat till urklipp",
+    "fetchError": "Error",
     "required": "obligatorisk",
     "retryMessage": "Försök igen"
   },

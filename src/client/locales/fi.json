@@ -61,7 +61,7 @@
     "english": "englanti",
     "swedish": "ruotsi",
     "copiedToClipboard": "Kopioitu leikepöydälle",
-    "fetchError": "Palvelin virhe",
+    "fetchError": "Virhe palvelimella",
     "required": "pakollinen",
     "retryMessage": "Yritä uudelleen"
   },
