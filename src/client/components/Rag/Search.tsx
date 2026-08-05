@@ -24,6 +24,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    event.stopPropagation()
     if (!query.trim()) return
     const searchParams: SearchInputParams = {
       query,
@@ -92,7 +93,13 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
         }}
       >
         <SearchIcon sx={{ color: 'action.active', flex: '0 0 auto' }} />
-        <InputBase autoFocus value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('rag:searchQueryLabel')} sx={{ flex: 1, fontSize: '16px' }} />
+        <InputBase
+          autoFocus
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t('rag:searchQueryLabel')}
+          sx={{ flex: 1, fontSize: '16px' }}
+        />
         <IconButton
           type="submit"
           disabled={!query.trim()}
@@ -140,7 +147,19 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
           </Box>
 
           <Collapse in={adminOpen}>
-            <Box mt="12px" sx={{ bgcolor: 'grey.50', border: '1px solid', borderColor: 'divider', borderRadius: '8px', p: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <Box
+              mt="12px"
+              sx={{
+                bgcolor: 'grey.50',
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: '8px',
+                p: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+              }}
+            >
               <Box display="flex" flexWrap="wrap" sx={{ columnGap: '28px' }}>
                 <FormControlLabel control={<Checkbox checked={vector} onChange={(e) => setVector(e.target.checked)} />} label={t('rag:useSemanticSearch')} />
                 <FormControlLabel control={<Checkbox checked={ft} onChange={(e) => setFt(e.target.checked)} />} label={t('rag:useKeywordSearch')} />
@@ -160,11 +179,17 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
                     </Box>
                     {Object.entries(results.timings).map(([key, value]) => (
                       <Typography key={key} variant="caption" color="text.secondary">
-                        {key} <Box component="span" sx={{ fontFamily: 'monospace', color: 'text.primary' }}>{t('rag:msValue', { value })}</Box>
+                        {key}{' '}
+                        <Box component="span" sx={{ fontFamily: 'monospace', color: 'text.primary' }}>
+                          {t('rag:msValue', { value })}
+                        </Box>
                       </Typography>
                     ))}
                     <Typography variant="caption" fontWeight={600}>
-                      {t('rag:timingsTotalShort')} <Box component="span" sx={{ fontFamily: 'monospace' }}>{t('rag:msValue', { value: totalTime })}</Box>
+                      {t('rag:timingsTotalShort')}{' '}
+                      <Box component="span" sx={{ fontFamily: 'monospace' }}>
+                        {t('rag:msValue', { value: totalTime })}
+                      </Box>
                     </Typography>
                   </Box>
                 </>
@@ -178,7 +203,13 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
 
       {results && allResults.length > 0 && (
         <Box data-testid="rag-search-results">
-          <Box display="flex" alignItems="baseline" justifyContent="space-between" gap="12px" sx={{ pb: '6px', borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Box
+            display="flex"
+            alignItems="baseline"
+            justifyContent="space-between"
+            gap="12px"
+            sx={{ pb: '6px', borderBottom: '1px solid', borderColor: 'divider' }}
+          >
             <Typography variant="subtitle1" fontWeight={500}>
               {t('rag:resultsTitle')}
             </Typography>
@@ -190,10 +221,12 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
           <Box display="flex" flexDirection="column">
             {visibleResults.map((chunk, idx) => (
               <Box
-                key={chunk.id}
+                key={chunk.id ?? `${chunk.metadata?.ragFileName ?? 'unknown'}-${idx}`}
                 sx={{ display: 'flex', gap: '14px', py: '16px', borderBottom: idx < visibleResults.length - 1 ? '1px solid' : 'none', borderColor: 'divider' }}
               >
-                <Typography sx={{ fontFamily: 'monospace', fontSize: '13px', fontWeight: 500, color: 'primary.main', flex: '0 0 auto', pt: '1px' }}>#{idx + 1}</Typography>
+                <Typography sx={{ fontFamily: 'monospace', fontSize: '13px', fontWeight: 500, color: 'primary.main', flex: '0 0 auto', pt: '1px' }}>
+                  #{idx + 1}
+                </Typography>
                 <Box minWidth={0} display="flex" flexDirection="column" gap="6px">
                   <Box display="flex" alignItems="center" gap="6px" sx={{ color: 'text.disabled', minWidth: 0 }}>
                     <InsertDriveFileOutlined sx={{ fontSize: 14, flex: '0 0 auto' }} />

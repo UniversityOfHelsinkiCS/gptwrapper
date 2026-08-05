@@ -1,4 +1,19 @@
-import { Box, Switch, Collapse, Divider, FormControl, FormControlLabel, ListSubheader, MenuItem, Select, TextField, Tooltip, Typography } from '@mui/material'
+import {
+  Box,
+  Switch,
+  Collapse,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  ListSubheader,
+  MenuItem,
+  Select,
+  TextField,
+  Tooltip,
+  Typography,
+  IconButton,
+  Paper,
+} from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import RagMessageEditor from './RagMessageEditor'
 import { ClearOutlined, VisibilityOutlined, VisibilityOffOutlined } from '@mui/icons-material'
@@ -7,11 +22,16 @@ import EditNoteIcon from '@mui/icons-material/EditNote'
 import BookmarksIcon from '@mui/icons-material/Bookmarks'
 import { usePromptEditorForm } from './context'
 import { monospaceStyle } from '../../theme'
+import { useState } from 'react'
 import { useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import useCourse from '../../hooks/useCourse'
+import CloseIcon from '@mui/icons-material/Close'
+import { RagDetails } from '../Rag/RagModal'
+import { RagCreator } from '../Rag//RagCreator'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 
 const BasicInfoSection = () => {
   const { form, setForm, type } = usePromptEditorForm()
@@ -137,6 +157,17 @@ const RagSettingsSection = () => {
   const { form, setForm, ragIndices, userRagIndices } = usePromptEditorForm()
   const { t } = useTranslation()
   const { user } = useCurrentUser()
+  const [open, setOpen] = useState(false)
+  const [selectedIndexId, setSelectedIndexId] = useState<number | null>(null)
+  const [selectedFileId, setSelectedFileId] = useState<number | null>(null)
+  const [newRags, setNewRags] = useState<number[]>([])
+  const hasSelectedRagIndex =
+    form.ragIndexId != null && !!(ragIndices?.some((index) => index.id === form.ragIndexId) || userRagIndices?.some((index) => index.id === form.ragIndexId))
+
+  const handleBack = () => {
+    setSelectedIndexId(null)
+    setSelectedFileId(null)
+  }
 
   if (!user?.isEmployee && !user?.isAdmin) return null
 
@@ -168,13 +199,18 @@ const RagSettingsSection = () => {
           <FormControl fullWidth>
             <Select
               data-testid="rag-select"
-              value={form.ragIndexId ?? ''}
-              onChange={(e) =>
+              value={hasSelectedRagIndex ? form.ragIndexId : ''}
+              onChange={(e) => {
                 setForm((prev) => ({
                   ...prev,
                   ragIndexId: e.target.value ? Number(e.target.value) : null,
                 }))
-              }
+                setSelectedIndexId(null)
+                setOpen(false)
+                if (newRags.includes(Number(e.target.value))) {
+                  setSelectedIndexId(Number(e.target.value))
+                }
+              }}
               displayEmpty
               renderValue={(value) => {
                 if (String(value) === '') {
@@ -203,8 +239,67 @@ const RagSettingsSection = () => {
               ))}
             </Select>
           </FormControl>
+          <Box display="flex" justifyContent="flex-start" width="100%">
+            <RagCreator
+              onCreated={(indexId) => {
+                setSelectedIndexId(indexId)
+                setForm((prev) => ({ ...prev, ragIndexId: indexId }))
+                setNewRags((prev) => [...prev, indexId])
+                setOpen(true)
+              }}
+            />
+          </Box>
         </Box>
       </Box>
+      {selectedIndexId && (
+        <Paper
+          variant="outlined"
+          sx={{
+            p: 2,
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            position: 'relative',
+          }}
+          onClick={() => setOpen(true)}
+        >
+          <Box flex={1}>
+            {!open ? (
+              <>
+                <Typography fontWeight="bold">
+                  {(() => {
+                    const selected = ragIndices?.find((i) => i.id === selectedIndexId) ?? userRagIndices?.find((i) => i.id === selectedIndexId)
+                    return selected?.metadata.name
+                  })()}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {t('rag:continueEditing')}
+                </Typography>
+              </>
+            ) : (
+              <RagDetails
+                selectedIndexId={selectedIndexId}
+                onBack={handleBack}
+                onSelectFile={setSelectedFileId}
+                selectedFileId={selectedFileId}
+                ragModal={false}
+              />
+            )}
+          </Box>
+          <IconButton
+            data-testid={!open ? 'edit-new-rag-button' : 'close-new-rag-details-button'}
+            onClick={(e) => {
+              e.stopPropagation()
+              setOpen(!open)
+            }}
+            aria-label={!open ? undefined : t('common:close')}
+            sx={{ ml: 1 }}
+          >
+            {!open ? <ExpandMore /> : <CloseIcon />}
+          </IconButton>
+        </Paper>
+      )}
 
       <Collapse in={!!form.ragIndexId}>
         <Box>

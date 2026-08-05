@@ -714,7 +714,7 @@
     "etaLeft": "{{value}} jäljellä",
     "nameUpdateSuccess": "Nimi päivitetty",
     "nameUpdateError": "Virhe: nimeä ei voitu päivittää",
-    "editSourceMaterial": "Muokkaa kurssin lähdemateriaaleja",
+    "editSourceMaterial": "Muokkaa lähdemateriaalikokoelmaa",
     "noCollections": "Ei kokoelmia vielä",
     "selectCollection": "Valitse kokoelma",
     "backToCollections": "Takaisin kokoelmiin",
@@ -725,7 +725,8 @@
     "statusFailed": "Ingestointi epäonnistui",
     "confirmDeleteFile": "Haluatko varmasti poistaa tämän tiedoston?",
     "imageRequiresAdvancedParsing": "Kuville käytetään aina tekoälypohjaista käsittelyä",
-    "unsupportedFileType": "Tiedostotyyppiä ei tueta: {{files}}"
+    "unsupportedFileType": "Tiedostotyyppiä ei tueta: {{files}}",
+    "continueEditing": "Jatka muokkausta"
   },
   "embeddedLogin": {
     "helpText": "Kirjauduttu. Voit sulkea tämän ikkunan."

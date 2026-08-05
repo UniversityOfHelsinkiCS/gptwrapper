@@ -3,10 +3,55 @@ import { Box, Divider, List, ListItemButton, ListItemText, Typography, useMediaQ
 import { useRagIndices } from '../../hooks/useRagIndices'
 import { RagCreator } from './RagCreator'
 import { useTranslation } from 'react-i18next'
-import { RagIndexV2 } from './RagIndexV2'
-import { RagFileV2 } from './RagFileV2'
-import { OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { ArrowBack } from '@mui/icons-material'
+import { RagFileV2 } from './RagFileV2'
+import { RagIndexV2 } from './RagIndexV2'
+import { OutlineButtonBlue } from '../ChatV2/general/Buttons'
+
+interface RagDetailsProps {
+  selectedIndexId: number | null
+  onBack: () => void
+  onSelectFile: React.Dispatch<React.SetStateAction<number | null>>
+  selectedFileId: number | null
+  ragModal: boolean
+}
+
+export const RagDetails: React.FC<RagDetailsProps> = ({ selectedIndexId, onBack, onSelectFile, selectedFileId, ragModal }) => {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
+  return (
+    <Box
+      sx={{
+        display: !isMobile || selectedIndexId ? 'flex' : 'none',
+        flex: 1,
+        flexDirection: 'column',
+        minWidth: 0,
+        minHeight: 0,
+        overflow: 'hidden',
+        maxWidth: !isMobile ? '100%' : '90vw',
+        mt: 2,
+      }}
+    >
+      {isMobile && selectedIndexId && ragModal && (
+        <Box sx={{ pb: 1 }}>
+          <OutlineButtonBlue onClick={onBack}>
+            <ArrowBack />
+            {t('rag:backToCollections')}
+          </OutlineButtonBlue>
+        </Box>
+      )}
+      {!selectedIndexId && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', height: '100%', color: 'text.secondary', pt: 4 }}>
+          <Typography>{t('rag:selectCollection')}</Typography>
+        </Box>
+      )}
+      {selectedIndexId && !selectedFileId && <RagIndexV2 indexId={selectedIndexId} onBack={onBack} onSelectFile={onSelectFile} />}
+      {selectedIndexId && selectedFileId && <RagFileV2 indexId={selectedIndexId} fileId={selectedFileId} onBack={() => onSelectFile(null)} />}
+    </Box>
+  )
+}
 
 const RagModal: React.FC = () => {
   const { t } = useTranslation()
@@ -68,34 +113,7 @@ const RagModal: React.FC = () => {
         <Divider sx={{ display: isMobile ? 'none' : 'flex' }} orientation="vertical" flexItem />
 
         {/* Right panel */}
-        <Box
-          sx={{
-            display: !isMobile || selectedIndexId ? 'flex' : 'none',
-            flex: 1,
-            flexDirection: 'column',
-            minWidth: 0,
-            minHeight: 0,
-            overflow: 'hidden',
-            maxWidth: !isMobile ? '100%' : '90vw',
-            mt: 2,
-          }}
-        >
-          {isMobile && selectedIndexId && (
-            <Box sx={{ pb: 1 }}>
-              <OutlineButtonBlue onClick={handleBack}>
-                <ArrowBack />
-                {t('rag:backToCollections')}
-              </OutlineButtonBlue>
-            </Box>
-          )}
-          {!selectedIndexId && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', height: '100%', color: 'text.secondary', pt: 4 }}>
-              <Typography>{t('rag:selectCollection')}</Typography>
-            </Box>
-          )}
-          {selectedIndexId && !selectedFileId && <RagIndexV2 indexId={selectedIndexId} onBack={handleBack} onSelectFile={setSelectedFileId} />}
-          {selectedIndexId && selectedFileId && <RagFileV2 indexId={selectedIndexId} fileId={selectedFileId} onBack={() => setSelectedFileId(null)} />}
-        </Box>
+        <RagDetails selectedIndexId={selectedIndexId} onBack={handleBack} onSelectFile={setSelectedFileId} selectedFileId={selectedFileId} ragModal={true} />
       </Box>
     </Box>
   )

@@ -665,7 +665,7 @@
     "swedish": "Svenska",
     "english": "Engelska",
     "createIndex": "Skapa index",
-    "editSourceMaterial": "Redigera kursens källmaterial",
+    "editSourceMaterial": "Redigera källmaterialsamling",
     "noCollections": "Inga samlingar ännu",
     "selectCollection": "Välj en samling",
     "backToCollections": "Tillbaka till samlingar",
@@ -676,7 +676,8 @@
     "statusFailed": "Inläsning misslyckades",
     "confirmDeleteFile": "Är du säker på att du vill radera den här filen?",
     "imageRequiresAdvancedParsing": "AI-baserad tolkning krävs för bilder",
-    "unsupportedFileType": "Filtypen stöds inte: {{files}}"
+    "unsupportedFileType": "Filtypen stöds inte: {{files}}",
+    "continueEditing": "Fortsätt redigera"
   },
   "sendPreferenceConfigurator": {
     "shift": "Skift",

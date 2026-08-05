@@ -48,6 +48,7 @@ export const RagCreator = ({ chatInstance, onCreated }: { chatInstance?: Course;
             component: 'form',
             onSubmit: async (event: React.FormEvent<HTMLFormElement>) => {
               event.preventDefault()
+              event.stopPropagation()
               const newIndex = chatInstance
                 ? await createIndexMutation.mutateAsync({ chatInstanceId: chatInstance.id, name: indexName, language })
                 : await createUserIndexMutation.mutateAsync({ name: indexName, language })
