@@ -1,7 +1,7 @@
 import { PUBLIC_URL } from '@config'
 import { ContentCopyOutlined, EditOutlined, VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
-import { Box, Divider, Typography, Paper, Tooltip, IconButton, Alert, List, ListItem, ListItemText } from '@mui/material'
+import { Box, Divider, Typography, Paper, Tooltip, IconButton, Alert, List, ListItem, ListItemText, Modal } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 import useCourse from '../../hooks/useCourse'
@@ -17,6 +17,9 @@ import { useRagIndexDetails } from '../Rag/api.ts'
 import { orderBy } from 'lodash'
 import { TextButton } from './general/Buttons.tsx'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import CloseIcon from '@mui/icons-material/Close'
+import RagModal from '../Rag/RagModal.tsx'
+import { useState } from 'react'
 
 const ragFileBadge = (filename: string, fileType?: string) => {
   const ext = filename.includes('.') ? filename.split('.').pop()?.toUpperCase() : fileType?.split('/').pop()?.toUpperCase()
@@ -26,6 +29,52 @@ const ragFileBadge = (filename: string, fileType?: string) => {
   if (label === 'PPTX' || label === 'PPT') return { label, palette: 'warning' as const }
   if (label === 'PNG' || label === 'JPG' || label === 'JPEG') return { label, palette: 'secondary' as const }
   return { label, palette: 'primary' as const }
+}
+
+const RagDetailsModal: React.FC<{ open: boolean; onClose: () => void; rag?: number }> = ({ open, onClose, rag }) => {
+  const { t } = useTranslation()
+
+  return (
+    <Modal open={open} onClose={onClose} hideBackdrop>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          width: { xs: '99vw', md: '90vw', lg: '75vw' },
+          maxWidth: 1400,
+          minHeight: '85vh',
+          maxHeight: '85vh',
+          bgcolor: 'background.paper',
+          boxShadow: 24,
+          overflow: 'auto',
+          borderRadius: '0.5rem',
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            p: '1rem',
+            position: 'sticky',
+            top: 0,
+            zIndex: 999,
+            bgcolor: 'background.subtle',
+          }}
+        >
+          <Typography variant="h6">{t('course:userSourceMaterials')}</Typography>
+          <TextButton data-testid="close-modal" onClick={onClose}>
+            <CloseIcon />
+          </TextButton>
+        </Box>
+        <Divider />
+        <Box sx={{ display: 'flex', p: '0 1rem 1rem 1rem', flex: '1', overflow: 'hidden' }}>{<RagModal rag={rag} />}</Box>
+      </Box>
+    </Modal>
+  )
 }
 
 const PromptPreview = ({
@@ -44,7 +93,7 @@ const PromptPreview = ({
   const { myPrompts } = usePromptState()
   const { t } = useTranslation()
   const { user } = useCurrentUser()
-
+  const [openModal, setOpenModal] = useState(false)
   const courseId = courses.find((course) => course.id === prompt?.chatInstanceId)?.courseId ?? 'general'
   const { data: chatInstance } = useCourse(courseId)
 
@@ -300,23 +349,23 @@ const PromptPreview = ({
           {(prompt.userId === user.id || user.isAdmin) && (
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
               <TextButton
-                onClick={() => {
-                  const params = new URLSearchParams()
-                  if (ragDetails) {
-                    params.set('ragId', ragDetails.id.toString())
-                  }
-                  window.open(`/general/userrags?${params.toString()}`, '_blank')
-                }}
-                data-testid="edit-source-material-link"
+                onClick={() => setOpenModal(true)}
+                data-testid="edit-source-material-button"
                 endIcon={<OpenInNewIcon color="primary" />}
+                sx={{ color: theme.palette.primary.main }}
               >
-                <span data-testid="edit-source-material-button" style={{ color: theme.palette.primary.main }}>
-                  {t('rag:editSourceMaterial')}
-                </span>
+                {t('rag:editSourceMaterial')}
               </TextButton>
             </Box>
           )}
         </>
+      )}
+      {openModal && (
+        <RagDetailsModal
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+          rag={ragDetails && (ragDetails.UserId === user.id || user.isAdmin) ? ragDetails.id : undefined}
+        />
       )}
     </Paper>
   )

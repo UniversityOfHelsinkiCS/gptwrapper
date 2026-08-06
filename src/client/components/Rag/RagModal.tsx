@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState } from 'react'
 import { Box, Divider, List, ListItemButton, ListItemText, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { useRagIndices } from '../../hooks/useRagIndices'
 import { RagCreator } from './RagCreator'
@@ -8,7 +7,6 @@ import { ArrowBack } from '@mui/icons-material'
 import { RagFileV2 } from './RagFileV2'
 import { RagIndexV2 } from './RagIndexV2'
 import { OutlineButtonBlue } from '../ChatV2/general/Buttons'
-import { useSearchParams } from 'react-router-dom'
 
 interface RagDetailsProps {
   selectedIndexId: number | null
@@ -55,29 +53,16 @@ export const RagDetails: React.FC<RagDetailsProps> = ({ selectedIndexId, onBack,
   )
 }
 
-const RagModal: React.FC = () => {
+const RagModal: React.FC<{ rag?: number }> = ({ rag }) => {
   const { t } = useTranslation()
-
-  const [searchParams] = useSearchParams()
-  const ragId = searchParams.get('ragId')
-  const navigate = useNavigate()
 
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const { ragIndices } = useRagIndices()
 
-  const [selectedIndexId, setSelectedIndexId] = useState<number | null>(null)
+  const [selectedIndexId, setSelectedIndexId] = useState<number | null>(rag ?? null)
   const [selectedFileId, setSelectedFileId] = useState<number | null>(null)
-
-  useEffect(() => {
-    if (!ragId || !ragIndices) return
-
-    if (ragIndices.some((r) => r.id === Number(ragId))) {
-      setSelectedIndexId(Number(ragId))
-      navigate(`/general/userrags`, { replace: true })
-    }
-  }, [ragId, ragIndices])
 
   const handleSelectIndex = (indexId: number) => {
     setSelectedIndexId(indexId)
