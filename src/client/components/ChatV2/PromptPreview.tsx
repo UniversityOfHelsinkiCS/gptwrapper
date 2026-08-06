@@ -103,10 +103,19 @@ const PromptPreview = ({
 
   const isPersonalPrompt = prompt.type === 'PERSONAL' || myPrompts.some((p) => p.id === prompt.id)
 
-  const shouldFetchRagDetails = amongResponsibles || user?.isAdmin || isPersonalPrompt
-  const { data: ragDetails } = useRagIndexDetails(prompt.ragIndexId && prompt.ragIndex ? prompt.ragIndexId : null, shouldFetchRagDetails)
+  const canEditPrompt = !!user && (prompt.userId === user.id || user.isAdmin)
+  const shouldFetchRagDetails = amongResponsibles || user?.isAdmin || isPersonalPrompt || (!!user && prompt.userId === user.id)
+  const { data: ragDetails, refetch: refetchRagDetails } = useRagIndexDetails(
+    prompt.ragIndexId && prompt.ragIndex ? prompt.ragIndexId : null,
+    shouldFetchRagDetails,
+  )
 
-  const ragFiles = ragDetails?.ragFiles.filter((file) => file.pipelineStage === 'completed' && !file.error) ?? []
+  const ragFiles = ragDetails?.ragFiles.filter((file) => !file.error) ?? []
+
+  const handleCloseRagDetailsModal = () => {
+    setOpenModal(false)
+    void refetchRagDetails()
+  }
 
   const handleCopyLink = (event: React.MouseEvent<HTMLButtonElement>, prompt: Prompt) => {
     event.stopPropagation()
@@ -152,7 +161,7 @@ const PromptPreview = ({
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-          {(prompt.userId === user.id || user.isAdmin) && (
+          {canEditPrompt && (
             <Tooltip arrow placement="bottom" title={t('prompt:editPromptTooltip')}>
               <IconButton size="small" onClick={() => handleEdit(courseId)} color="primary" data-testid={`edit-prompt-${prompt.name}`}>
                 <EditOutlined fontSize="small" />
@@ -166,7 +175,7 @@ const PromptPreview = ({
               </IconButton>
             </Tooltip>
           )}
-          {(prompt.userId === user.id || user.isAdmin) && (
+          {canEditPrompt && (
             <Tooltip arrow placement="bottom" title={t('prompt:deletePromptTooltip')}>
               <IconButton size="small" onClick={(event) => handleDelete(event, prompt)} color="error" data-testid={`delete-prompt-${prompt.name}`}>
                 <DeleteOutline fontSize="small" />
@@ -219,6 +228,18 @@ const PromptPreview = ({
               <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
                 {t('prompt:promptSourceMaterialData')}
               </Typography>
+              {canEditPrompt && (
+                <Tooltip placement="right" title={t('rag:editSourceMaterial')} describeChild>
+                  <IconButton
+                    onClick={() => setOpenModal(true)}
+                    data-testid="edit-source-material-button"
+                    sx={{ color: theme.palette.primary.main }}
+                    aria-label={t('rag:editSourceMaterial')}
+                  >
+                    <OpenInNewIcon color="primary" />
+                  </IconButton>
+                </Tooltip>
+              )}
             </Box>
             {!isPersonalPrompt && (amongResponsibles || user.isAdmin) && (
               <Box display="flex" alignItems="center" gap={1}>
@@ -346,24 +367,12 @@ const PromptPreview = ({
               </Box>
             </Paper>
           )}
-          {(prompt.userId === user.id || user.isAdmin) && (
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <TextButton
-                onClick={() => setOpenModal(true)}
-                data-testid="edit-source-material-button"
-                endIcon={<OpenInNewIcon color="primary" />}
-                sx={{ color: theme.palette.primary.main }}
-              >
-                {t('rag:editSourceMaterial')}
-              </TextButton>
-            </Box>
-          )}
         </>
       )}
       {openModal && (
         <RagDetailsModal
           open={openModal}
-          onClose={() => setOpenModal(false)}
+          onClose={handleCloseRagDetailsModal}
           rag={ragDetails && (ragDetails.UserId === user.id || user.isAdmin) ? ragDetails.id : undefined}
         />
       )}
