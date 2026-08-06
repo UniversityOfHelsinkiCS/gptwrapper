@@ -1,6 +1,6 @@
 import { type ChatInstance, Enrolment, Responsibility, User as UserModel } from '../../db/models'
 import type { User } from '../../../shared/user'
-import { TEST_COURSES, TEST_USERS, SANDBOXES } from '../../../shared/testData'
+import { TEST_COURSES, TEST_USERS } from '../../../shared/testData'
 import logger from '../../util/logger'
 
 const getUserById = async (id: string) => UserModel.findByPk(id)
@@ -47,46 +47,37 @@ export const getEnrolledCourses = async (user: User) => {
   return enrollments
 }
 
+/**
+ * Gets the chat instance ids of the courses the user is enrolled in
+ */
+export const getEnrolledCourseIds = async (user: User) => {
+  const enrollments = await getEnrolledCourses(user)
+  const courseIds = enrollments.map((enrolment) => enrolment.chatInstance.courseId) as string[]
+
+  return courseIds
+}
+
 export const getTeachedCourses = async (user: User) => {
   // We want to check if the user exists in the database
   // before we try to upsert the enrolments
-  const userExists = await getUserById(user.id)
+  const teacherOfSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.teachers)
 
-  if (userExists) {
-    // TEST_COURSES block: dev/test courses for admins and demo teachers
-    const teacherOfSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.teachers)
-    if (teacherOfSandbox) {
-      for (const chatInstanceId of Object.values(TEST_COURSES).map((course) => course.id)) {
-        try {
-          await Responsibility.upsert(
-            { userId: user.id, chatInstanceId },
-            // TS is wrong here. It expects fields in camelCase
-            // while the actual fields need to be in snake_case
-            // @ts-expect-error
-            { conflictFields: ['user_id', 'chat_instance_id'] },
-          )
-        } catch (err: unknown) {
-          logger.info(`Failed to upsert test course responsibility for user ${user.id} on ${chatInstanceId}: ${(err as Error).message}`)
-        }
-      }
-    }
-
-    // SANDBOXES block: faculty sandboxes assigned by IAM group
-    const applicableSandboxes = user.isAdmin
-      ? Object.values(SANDBOXES)
-      : Object.values(SANDBOXES).filter((sandbox) => 'iamGroups' in sandbox && sandbox.iamGroups.some((group) => user.iamGroups.includes(group)))
-
-    for (const sandbox of applicableSandboxes) {
+  if (teacherOfSandbox && (await getUserById(user.id))) {
+    const sandboxChatInstanceIds = Object.values(TEST_COURSES).map((course) => course.id)
+    for (const chatInstanceId of sandboxChatInstanceIds) {
       try {
         await Responsibility.upsert(
-          { userId: user.id, chatInstanceId: sandbox.id },
+          {
+            userId: user.id,
+            chatInstanceId,
+          },
           // TS is wrong here. It expects fields in camelCase
           // while the actual fields need to be in snake_case
           // @ts-expect-error
           { conflictFields: ['user_id', 'chat_instance_id'] },
         )
       } catch (err: unknown) {
-        logger.info(`Failed to upsert sandbox responsibility for user ${user.id} on ${sandbox.id}: ${(err as Error).message}`)
+        logger.info(`Failed to upsert sandbox course responsibility for user ${user.id} on ${chatInstanceId}: ${(err as Error).message}`)
       }
     }
   }
