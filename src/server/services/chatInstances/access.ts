@@ -5,46 +5,55 @@ import logger from '../../util/logger'
 
 const getUserById = async (id: string) => UserModel.findByPk(id)
 
-export const getEnrolledCourses = async (user: User) => {
-  // Only do the example/test course upserts if the user is an admin or member of the special course
-  // We also want to check if the user exists in the database
-  // before we try to upsert the enrolments.
-
-  const enrolledToSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.enrolled)
-  if (enrolledToSandbox && (await getUserById(user.id))) {
-    await Enrolment.upsert(
-      {
-        userId: user.id,
-        chatInstanceId: TEST_COURSES.OTE_SANDBOX.id,
-      },
-      // TS is wrong here. It expects fields in camelCase
-      // while the actual fields need to be in snake_case
-      // @ts-expect-error
-      { conflictFields: ['user_id', 'chat_instance_id'] },
-    )
-
-    if (user.iamGroups.includes('grp-toska')) {
-      await Enrolment.upsert(
-        {
-          userId: user.id,
-          chatInstanceId: TEST_COURSES.TOSKA.id,
-        },
-        // TS is wrong here. It expects fields in camelCase
-        // while the actual fields need to be in snake_case
-        // @ts-expect-error
-        { conflictFields: ['user_id', 'chat_instance_id'] },
-      )
-    }
-  }
-
-  const enrollments = (await Enrolment.findAll({
+const findEnrolments = async (userId: string) =>
+  (await Enrolment.findAll({
     where: {
-      userId: user.id,
+      userId,
     },
     include: [Enrolment.associations.chatInstance],
   })) as (Enrolment & { chatInstance: ChatInstance })[]
 
-  return enrollments
+export const getEnrolledCourses = async (user: User) => {
+  const enrolledToSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.enrolled)
+
+  const enrolments = await findEnrolments(user.id)
+
+  if (!enrolledToSandbox) return enrolments
+
+  const sandboxChatInstanceIds = [TEST_COURSES.OTE_SANDBOX.id, ...(user.iamGroups.includes('grp-toska') ? [TEST_COURSES.TOSKA.id] : [])]
+
+  const existingChatInstanceIds = new Set(enrolments.map((enrolment) => enrolment.chatInstanceId))
+  const missingChatInstanceIds = sandboxChatInstanceIds.filter((id) => !existingChatInstanceIds.has(id))
+
+  if (missingChatInstanceIds.length === 0) return enrolments
+
+  // Having any enrolment already proves the user row exists (FK). Otherwise we
+  // have to check, since the user may not be persisted yet on their first login.
+  if (enrolments.length === 0 && !(await getUserById(user.id))) {
+    logger.info(`[access] getEnrolledCourses user=${user.id} not yet in db, skipping sandbox upserts`)
+    return enrolments
+  }
+
+  await Promise.all(
+    missingChatInstanceIds.map(async (chatInstanceId) => {
+      try {
+        await Enrolment.upsert(
+          {
+            userId: user.id,
+            chatInstanceId,
+          },
+          // TS is wrong here. It expects fields in camelCase
+          // while the actual fields need to be in snake_case
+          // @ts-expect-error
+          { conflictFields: ['user_id', 'chat_instance_id'] },
+        )
+      } catch (err: unknown) {
+        logger.info(`Failed to upsert sandbox course enrolment for user ${user.id} on ${chatInstanceId}: ${(err as Error).message}`)
+      }
+    }),
+  )
+
+  return findEnrolments(user.id)
 }
 
 /**
@@ -57,14 +66,37 @@ export const getEnrolledCourseIds = async (user: User) => {
   return courseIds
 }
 
+const findResponsibilities = async (userId: string) =>
+  (await Responsibility.findAll({
+    where: {
+      userId,
+    },
+    include: [Responsibility.associations.chatInstance],
+  })) as (Responsibility & { chatInstance: ChatInstance })[]
+
 export const getTeachedCourses = async (user: User) => {
-  // We want to check if the user exists in the database
-  // before we try to upsert the enrolments
   const teacherOfSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.teachers)
 
-  if (teacherOfSandbox && (await getUserById(user.id))) {
-    const sandboxChatInstanceIds = Object.values(TEST_COURSES).map((course) => course.id)
-    for (const chatInstanceId of sandboxChatInstanceIds) {
+  const responsibilities = await findResponsibilities(user.id)
+
+  if (!teacherOfSandbox) return responsibilities.map((responsibility) => responsibility.chatInstance)
+
+  const sandboxChatInstanceIds = Object.values(TEST_COURSES).map((course) => course.id)
+
+  const existingChatInstanceIds = new Set(responsibilities.map((responsibility) => responsibility.chatInstanceId))
+  const missingChatInstanceIds = sandboxChatInstanceIds.filter((id) => !existingChatInstanceIds.has(id))
+
+  if (missingChatInstanceIds.length === 0) return responsibilities.map((responsibility) => responsibility.chatInstance)
+
+  // Having any responsibility already proves the user row exists (FK). Otherwise we
+  // have to check, since the user may not be persisted yet on their first login.
+  if (responsibilities.length === 0 && !(await getUserById(user.id))) {
+    logger.info(`[access] getTeachedCourses user=${user.id} not yet in db, skipping sandbox upserts`)
+    return responsibilities.map((responsibility) => responsibility.chatInstance)
+  }
+
+  await Promise.all(
+    missingChatInstanceIds.map(async (chatInstanceId) => {
       try {
         await Responsibility.upsert(
           {
@@ -79,19 +111,12 @@ export const getTeachedCourses = async (user: User) => {
       } catch (err: unknown) {
         logger.info(`Failed to upsert sandbox course responsibility for user ${user.id} on ${chatInstanceId}: ${(err as Error).message}`)
       }
-    }
-  }
+    }),
+  )
 
-  const responsibilities = (await Responsibility.findAll({
-    where: {
-      userId: user.id,
-    },
-    include: [Responsibility.associations.chatInstance],
-  })) as (Responsibility & { chatInstance: ChatInstance })[]
+  const refetched = await findResponsibilities(user.id)
 
-  const chatInstances = responsibilities.map((responsibility) => responsibility.chatInstance)
-
-  return chatInstances
+  return refetched.map((responsibility) => responsibility.chatInstance)
 }
 
 /**
