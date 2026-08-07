@@ -50,24 +50,20 @@ userRouter.get('/login', async (req, res) => {
     }
   }
 
-  const usage = await getUsage(id)
-
   const lastRestart = await getLastRestart()
-
-  const termsAccepted = await User.findByPk(id, { attributes: ['termsAcceptedAt'] })
 
   const tokenLimit = getUserTokenLimit(user)
 
   res.send({
     ...dbUser.toJSON(),
     ...user,
-    usage,
+    usage: dbUser.usage,
     hasIamAccess: isAdmin || hasIamAccess,
     tokenLimit,
     lastRestart,
     serverVersion: process.env.VERSION,
     enrolledCourses: enrolments.filter(isNowOrInFuture).map((enrolment) => enrolment.chatInstance),
-    termsAcceptedAt: termsAccepted?.termsAcceptedAt,
+    termsAcceptedAt: dbUser.termsAcceptedAt,
   })
   return
 })
