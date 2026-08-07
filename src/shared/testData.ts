@@ -33,7 +33,7 @@ export const TEST_COURSES = {
     },
     activityPeriod: {
       startDate: '2024-09-01',
-      endDate: '2026-08-31',
+      endDate: '2126-08-31',
     },
     code: 'OTE-1234',
     usageLimit: 200_000,
