@@ -105,6 +105,43 @@ test.describe('Prompts', () => {
      */
   })
 
+  test('Copying a prompt to a course and to own prompts', async ({ page }) => {
+    const newPromptName = `kopiointiprompti-${test.info().workerIndex}`
+
+    await page.goto('/test-course-course-id/prompts')
+
+    await page.getByTestId('create-course-prompt-test-course-course-id-button').click()
+    await page.getByTestId('prompt-name-input').fill(newPromptName)
+    await page.getByTestId('system-message-input').fill('mocktest kopiointi onnistui')
+    await page.getByRole('button', { name: 'Save' }).click()
+
+    await page.getByTestId(`prompt-row-${newPromptName}`).click()
+
+    // Copying into the source course duplicates it, so the name gets a number
+    await page.getByTestId('copy-prompt-button').click()
+    await page.getByTestId('copy-target-test-course-course-id').click()
+    await expect(page.getByTestId(`prompt-row-${newPromptName} (2)`)).toBeVisible()
+
+    // The same name is free in own prompts, so the copy keeps it
+    await page.getByTestId(`prompt-row-${newPromptName}`).click()
+    await page.getByTestId('copy-prompt-button').click()
+    await page.getByTestId('copy-target-personal').click()
+
+    await page.getByTestId('my-prompts-open').click()
+    await expect(page.getByTestId(`prompt-row-${newPromptName}`)).toHaveCount(2)
+
+    // The copy is independent: editing it leaves the original alone.
+    // My prompts renders above the courses, so the personal copy is the first row.
+    await page.getByTestId(`prompt-row-${newPromptName}`).first().click()
+    await page.getByTestId(`edit-prompt-${newPromptName}`).click()
+    await page.getByTestId('system-message-input').fill('mocktest kopio muokattu')
+    await page.getByRole('button', { name: 'Save' }).click()
+
+    await page.getByTestId(`prompt-row-${newPromptName}`).last().click()
+    await expect(page.getByTestId(`prompt-preview-title-for-${newPromptName}`)).toBeVisible()
+    await expect(page.getByText('mocktest kopiointi onnistui')).toBeVisible()
+  })
+
   test('Prompt with RAG works', async ({ page }) => {
     await page.goto('/test-course-course-id')
 
