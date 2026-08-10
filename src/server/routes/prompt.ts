@@ -1,6 +1,7 @@
 import express from 'express'
 import type { InferAttributes } from 'sequelize'
 import { PromptCopyParamsSchema, PromptCreationParamsSchema, PromptUpdateableParamsSchema } from '../../shared/prompt'
+import { canCopyPrompt } from '../../shared/promptPermissions'
 import { resolveCopyName, shouldKeepRagIndex } from '../util/promptCopy'
 import type { User } from '@shared/user'
 import { ChatInstance, Prompt, RagIndex, Responsibility, PromptChatInstance } from '../db/models'
@@ -74,8 +75,8 @@ interface ChatInstancePrompt {
   chatInstanceId: string
 }
 
-const authorizeChatInstancePromptResponsible = async (user: User, prompt: ChatInstancePrompt) => {
-  const chatInstance = await ChatInstance.findByPk(prompt.chatInstanceId, {
+const isResponsibleForChatInstance = async (user: User, chatInstanceId: string) => {
+  const chatInstance = await ChatInstance.findByPk(chatInstanceId, {
     include: [
       {
         model: Responsibility,
@@ -89,7 +90,11 @@ const authorizeChatInstancePromptResponsible = async (user: User, prompt: ChatIn
     throw ApplicationError.NotFound('Chat instance not found')
   }
 
-  const isResponsible = chatInstance.responsibilities?.some((r) => r.userId === user.id)
+  return chatInstance.responsibilities?.some((r) => r.userId === user.id) ?? false
+}
+
+const authorizeChatInstancePromptResponsible = async (user: User, prompt: ChatInstancePrompt) => {
+  const isResponsible = await isResponsibleForChatInstance(user, prompt.chatInstanceId)
 
   if (!isResponsible && !user.isAdmin) {
     throw ApplicationError.Forbidden('Not allowed')
@@ -174,6 +179,13 @@ promptRouter.post('/:id/copy', async (req, res) => {
 
   if (!source) {
     throw ApplicationError.NotFound('Prompt not found')
+  }
+
+  const isResponsibleForSource =
+    source.type === 'CHAT_INSTANCE' && source.chatInstanceId ? await isResponsibleForChatInstance(user, source.chatInstanceId) : false
+
+  if (!canCopyPrompt({ isAdmin: user.isAdmin, isOwner: source.userId === user.id, isResponsible: isResponsibleForSource })) {
+    throw ApplicationError.Forbidden('Not allowed')
   }
 
   const keepRagIndex = shouldKeepRagIndex(source.ragIndex?.userId, user.id)

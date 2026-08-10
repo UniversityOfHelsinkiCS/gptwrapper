@@ -22,6 +22,7 @@ import RagModal from '../Rag/RagModal.tsx'
 import { useState } from 'react'
 import CopyPromptMenu from './CopyPromptMenu.tsx'
 import type { CoursesViewCourse } from '../../hooks/useUserCourses'
+import { canCopyPrompt } from '@shared/promptPermissions'
 
 const ragFileBadge = (filename: string, fileType?: string) => {
   const ext = filename.includes('.') ? filename.split('.').pop()?.toUpperCase() : fileType?.split('/').pop()?.toUpperCase()
@@ -112,7 +113,7 @@ const PromptPreview = ({
   const isPersonalPrompt = prompt.type === 'PERSONAL' || myPrompts.some((p) => p.id === prompt.id)
 
   const canEditPrompt = !!user && (prompt.userId === user.id || user.isAdmin)
-  const canCopyPrompt = !!user
+  const showCopyPrompt = !!user && canCopyPrompt({ isAdmin: user.isAdmin, isOwner: prompt.userId === user.id, isResponsible: amongResponsibles })
   const shouldFetchRagDetails = amongResponsibles || user?.isAdmin || isPersonalPrompt || (!!user && prompt.userId === user.id)
   const { data: ragDetails, refetch: refetchRagDetails } = useRagIndexDetails(
     prompt.ragIndexId && prompt.ragIndex ? prompt.ragIndexId : null,
@@ -177,7 +178,7 @@ const PromptPreview = ({
               </IconButton>
             </Tooltip>
           )}
-          {canCopyPrompt && (
+          {showCopyPrompt && (
             <Tooltip arrow placement="bottom" title={t('prompt:copyPromptTooltip')}>
               <IconButton size="small" onClick={(e) => setCopyAnchor(e.currentTarget)} color="primary" data-testid="copy-prompt-button">
                 <ContentCopyOutlined fontSize="small" />
@@ -385,7 +386,7 @@ const PromptPreview = ({
           )}
         </>
       )}
-      {canCopyPrompt && <CopyPromptMenu prompt={prompt} targets={copyTargets} anchorEl={copyAnchor} onClose={() => setCopyAnchor(null)} onCopied={onCopied} />}
+      {showCopyPrompt && <CopyPromptMenu prompt={prompt} targets={copyTargets} anchorEl={copyAnchor} onClose={() => setCopyAnchor(null)} onCopied={onCopied} />}
       {openModal && (
         <RagDetailsModal
           open={openModal}
