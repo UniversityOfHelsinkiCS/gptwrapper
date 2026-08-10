@@ -1,6 +1,7 @@
 import express from 'express'
 import type { InferAttributes } from 'sequelize'
-import { PromptCreationParamsSchema, PromptUpdateableParamsSchema } from '../../shared/prompt'
+import { PromptCopyParamsSchema, PromptCreationParamsSchema, PromptUpdateableParamsSchema } from '../../shared/prompt'
+import { resolveCopyName, shouldKeepRagIndex } from '../util/promptCopy'
 import type { User } from '@shared/user'
 import { ChatInstance, Prompt, RagIndex, Responsibility, PromptChatInstance } from '../db/models'
 import type { RequestWithUser } from '../types'
@@ -62,6 +63,7 @@ const getPotentialNameConflicts = async (prompt: InferAttributes<Prompt, { omit:
         attributes: ['id', 'name'],
         where: {
           userId: prompt.userId,
+          type: 'PERSONAL',
         },
       })
     }
@@ -116,7 +118,7 @@ const authorizePromptCreation = async (user: User, promptParams: z.output<typeof
     }
     case 'PERSONAL': {
       // This is fine. Anyone can create a personal prompt. Lets just limit the number of prompts per user to 200
-      const count = await Prompt.count({ where: { userId: user.id } })
+      const count = await Prompt.count({ where: { userId: user.id, type: 'PERSONAL' } })
       if (count >= 200) {
         throw ApplicationError.Forbidden('Maximum number of prompts reached')
       }
@@ -151,7 +153,66 @@ promptRouter.post('/', async (req, res) => {
       chatInstanceId: chatInstanceID,
     })
   }
- 
+
+  res.status(201).send(newPrompt)
+})
+
+promptRouter.post('/:id/copy', async (req, res) => {
+  const { user } = req as unknown as RequestWithUser
+  const { id } = req.params
+  const { target, name } = PromptCopyParamsSchema.parse(req.body)
+
+  const source = await Prompt.findByPk(id, {
+    include: [
+      {
+        model: RagIndex,
+        as: 'ragIndex',
+        required: false,
+      },
+    ],
+  })
+
+  if (!source) {
+    throw ApplicationError.NotFound('Prompt not found')
+  }
+
+  const keepRagIndex = shouldKeepRagIndex(source.ragIndex?.userId, user.id)
+
+  const base = {
+    userId: user.id,
+    name: name ?? source.name,
+    userInstructions: source.userInstructions ?? '',
+    systemMessage: source.systemMessage,
+    // The rag system messages are meaningless without the index they instruct.
+    messages: keepRagIndex ? source.messages : [],
+    hidden: source.hidden,
+    ragHidden: source.ragHidden,
+    ragIndexId: keepRagIndex ? source.ragIndexId ?? null : null,
+  }
+
+  const copyParams =
+    target.type === 'CHAT_INSTANCE'
+      ? { ...base, type: 'CHAT_INSTANCE' as const, chatInstanceId: target.chatInstanceId }
+      : { ...base, type: 'PERSONAL' as const }
+
+  await authorizePromptCreation(user, copyParams)
+
+  const potentialConflicts = await getPotentialNameConflicts(copyParams)
+
+  const newPrompt = await Prompt.create({
+    ...copyParams,
+    name: resolveCopyName(
+      potentialConflicts.map((p) => p.name),
+      copyParams.name,
+    ),
+  })
+
+  if (target.type === 'CHAT_INSTANCE') {
+    await PromptChatInstance.create({
+      promptId: newPrompt.id,
+      chatInstanceId: target.chatInstanceId,
+    })
+  }
 
   res.status(201).send(newPrompt)
 })

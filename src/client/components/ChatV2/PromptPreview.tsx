@@ -1,5 +1,5 @@
 import { PUBLIC_URL } from '@config'
-import { ContentCopyOutlined, EditOutlined, VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material'
+import { ContentCopyOutlined, EditOutlined, LinkOutlined, VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import { Box, Divider, Typography, Paper, Tooltip, IconButton, Alert, List, ListItem, ListItemText, Modal } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
@@ -20,6 +20,8 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import CloseIcon from '@mui/icons-material/Close'
 import RagModal from '../Rag/RagModal.tsx'
 import { useState } from 'react'
+import CopyPromptMenu from './CopyPromptMenu.tsx'
+import type { CoursesViewCourse } from '../../hooks/useUserCourses'
 
 const ragFileBadge = (filename: string, fileType?: string) => {
   const ext = filename.includes('.') ? filename.split('.').pop()?.toUpperCase() : fileType?.split('/').pop()?.toUpperCase()
@@ -82,11 +84,16 @@ const PromptPreview = ({
   handleEdit,
   handleDelete,
   courses,
+  copyTargets,
+  onCopied,
 }: {
   prompt: Prompt
   handleEdit: (courseId?: string) => void
   handleDelete: (event: React.MouseEvent<HTMLButtonElement>, prompt: Prompt) => void
   courses: Course[]
+  /** Courses the user may copy into — narrower than `courses`, which includes enrolments. */
+  copyTargets: CoursesViewCourse[]
+  onCopied: (course?: CoursesViewCourse) => void
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -94,6 +101,7 @@ const PromptPreview = ({
   const { t } = useTranslation()
   const { user } = useCurrentUser()
   const [openModal, setOpenModal] = useState(false)
+  const [copyAnchor, setCopyAnchor] = useState<HTMLElement | null>(null)
   const courseId = courses.find((course) => course.id === prompt?.chatInstanceId)?.courseId ?? 'general'
   const { data: chatInstance } = useCourse(courseId)
 
@@ -104,6 +112,7 @@ const PromptPreview = ({
   const isPersonalPrompt = prompt.type === 'PERSONAL' || myPrompts.some((p) => p.id === prompt.id)
 
   const canEditPrompt = !!user && (prompt.userId === user.id || user.isAdmin)
+  const canCopyPrompt = !!user
   const shouldFetchRagDetails = amongResponsibles || user?.isAdmin || isPersonalPrompt || (!!user && prompt.userId === user.id)
   const { data: ragDetails, refetch: refetchRagDetails } = useRagIndexDetails(
     prompt.ragIndexId && prompt.ragIndex ? prompt.ragIndexId : null,
@@ -168,10 +177,17 @@ const PromptPreview = ({
               </IconButton>
             </Tooltip>
           )}
+          {canCopyPrompt && (
+            <Tooltip arrow placement="bottom" title={t('prompt:copyPromptTooltip')}>
+              <IconButton size="small" onClick={(e) => setCopyAnchor(e.currentTarget)} color="primary" data-testid="copy-prompt-button">
+                <ContentCopyOutlined fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
           {!isPersonalPrompt && (
             <Tooltip arrow placement="bottom" title={t('prompt:copyPromptUrlTooltip')}>
               <IconButton size="small" onClick={(e) => handleCopyLink(e, prompt)}>
-                <ContentCopyOutlined fontSize="small" />
+                <LinkOutlined fontSize="small" />
               </IconButton>
             </Tooltip>
           )}
@@ -369,6 +385,7 @@ const PromptPreview = ({
           )}
         </>
       )}
+      {canCopyPrompt && <CopyPromptMenu prompt={prompt} targets={copyTargets} anchorEl={copyAnchor} onClose={() => setCopyAnchor(null)} onCopied={onCopied} />}
       {openModal && (
         <RagDetailsModal
           open={openModal}

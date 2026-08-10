@@ -34,5 +34,19 @@ export const PromptCreationParamsSchema = z.intersection(
   ]),
 )
 
+export const PromptCopyParamsSchema = z.object({
+  name: z.string().min(1).max(255).optional(),
+  target: z.discriminatedUnion('type', [
+    z.object({
+      type: z.literal('PERSONAL'),
+    }),
+    z.object({
+      type: z.literal('CHAT_INSTANCE'),
+      chatInstanceId: z.string().min(1),
+    }),
+  ]),
+})
+
 export type PromptCreationParams = z.input<typeof PromptCreationParamsSchema>
 export type PromptEditableParams = z.input<typeof PromptUpdateableParamsSchema>
+export type PromptCopyParams = z.input<typeof PromptCopyParamsSchema>

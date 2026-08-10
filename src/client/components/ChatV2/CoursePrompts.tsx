@@ -20,10 +20,12 @@ interface CoursePromptsProps {
   setPreviewCourse: (course: Course | undefined) => void
   previewCourse?: Course
   handleCreateNew: (courseId?: string) => void
+  /** Set after a prompt is copied, so the destination course opens to reveal the copy. */
+  expandTarget?: { courseId: string; nonce: number } | null
 }
 
 const CoursePrompts = (props: CoursePromptsProps) => {
-  const { course, previewPrompt, confirmClose, setPreviewPrompt, setIsEditing, setPreviewCourse, previewCourse, handleCreateNew } = props
+  const { course, previewPrompt, confirmClose, setPreviewPrompt, setIsEditing, setPreviewCourse, previewCourse, handleCreateNew, expandTarget } = props
   const { t, i18n } = useTranslation()
   const { language } = i18n
   const { activePrompt, handleChangePrompt } = usePromptState()
@@ -46,6 +48,13 @@ const CoursePrompts = (props: CoursePromptsProps) => {
 
     setShowPrompts(true)
   }, [previewPrompt?.id, course.id])
+
+  useEffect(() => {
+    if (!expandTarget) return
+    if (expandTarget.courseId !== (course.courseId ?? course.id)) return
+
+    setShowPrompts(true)
+  }, [expandTarget?.nonce])
 
   // Collapse an empty course once it is no longer the previewed course
   useEffect(() => {

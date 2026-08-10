@@ -34,7 +34,7 @@ import CoursePrompts from './CoursePrompts.tsx'
 import CoursePreview from './CoursePreview.tsx'
 import ChevronRight from '@mui/icons-material/ChevronRight'
 import ExpandMore from '@mui/icons-material/ExpandMore'
-import useUserCourses from '../../hooks/useUserCourses'
+import useUserCourses, { type CoursesViewCourse } from '../../hooks/useUserCourses'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { getGroupedCourses } from './util'
 
@@ -155,6 +155,17 @@ const PromptModalV2 = () => {
   const dedupe = (list: Course[]) => Array.from(new Map(list.map((course) => [course.id, course])).values())
   const allCourses = dedupe([...curreEnabled, ...curreDisabled, ...ended, ...students])
   const visibleCourses = dedupe([...curreEnabled, ...(showInactive ? curreDisabled : []), ...(showEnded ? ended : []), ...students])
+
+  const copyTargets = Array.from(new Map([...curreEnabled, ...curreDisabled].map((course) => [course.id, course])).values())
+
+  const [expandTarget, setExpandTarget] = useState<{ courseId: string; nonce: number } | null>(null)
+
+  const handleCopied = (course?: CoursesViewCourse) => {
+    const destinationId = course?.courseId ?? course?.id
+    if (!destinationId) return
+
+    setExpandTarget((previous) => ({ courseId: destinationId, nonce: (previous?.nonce ?? 0) + 1 }))
+  }
 
   const [isPersonal, setIsPersonal] = useState<boolean>(false)
   const [courseId, setCourseId] = useState<string>('general')
@@ -376,6 +387,7 @@ const PromptModalV2 = () => {
                         setPreviewCourse={setPreviewCourse}
                         previewCourse={previewCourse}
                         handleCreateNew={handleCreateNew}
+                        expandTarget={expandTarget}
                       />
                     </Box>
                   ))}
@@ -398,7 +410,14 @@ const PromptModalV2 = () => {
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minWidth: 0, minHeight: 0, mt: 2 }}>
               {previewPrompt ? (
-                <PromptPreview prompt={previewPrompt} handleEdit={handleEdit} handleDelete={handleDelete} courses={allCourses} />
+                <PromptPreview
+                  prompt={previewPrompt}
+                  handleEdit={handleEdit}
+                  handleDelete={handleDelete}
+                  courses={allCourses}
+                  copyTargets={copyTargets}
+                  onCopied={handleCopied}
+                />
               ) : previewCourse ? (
                 <CoursePreview course={previewCourse} />
               ) : (
