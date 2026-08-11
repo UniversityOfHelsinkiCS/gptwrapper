@@ -12,6 +12,7 @@ import Feedback from './feedback'
 import Notification from './Notification'
 import PromptUsage from './promptUsage'
 import PromptChatInstance from './promptChatInstance'
+import UniversityPrompt from './universityPrompt'
 
 User.belongsToMany(ChatInstance, {
   through: UserChatInstanceUsage,
@@ -26,12 +27,12 @@ ChatInstance.belongsToMany(User, {
 Prompt.belongsToMany(ChatInstance, {
   through: PromptChatInstance,
   as: 'chatInstances',
-});
+})
 
 ChatInstance.belongsToMany(Prompt, {
   through: PromptChatInstance,
   as: 'prompts',
-});
+})
 
 UserChatInstanceUsage.belongsTo(User, { as: 'user' })
 
@@ -95,6 +96,10 @@ PromptUsage.belongsTo(ChatInstance, { as: 'chatInstance' })
 ChatInstance.hasMany(PromptUsage, { as: 'promptUsages' })
 PromptUsage.belongsTo(User, { as: 'user' })
 
+UniversityPrompt.belongsTo(Prompt, { as: 'fiPrompt', foreignKey: 'fi' })
+UniversityPrompt.belongsTo(Prompt, { as: 'enPrompt', foreignKey: 'en' })
+UniversityPrompt.belongsTo(Prompt, { as: 'svPrompt', foreignKey: 'sv' })
+
 export {
   User,
   ChatInstance,
@@ -110,4 +115,5 @@ export {
   Notification,
   PromptUsage,
   PromptChatInstance,
+  UniversityPrompt,
 }

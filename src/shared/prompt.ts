@@ -47,6 +47,23 @@ export const PromptCopyParamsSchema = z.object({
   ]),
 })
 
+export const UniversityPromptCreationParamsSchema = z.object({
+  name: z.string().min(1).max(255),
+  userInstructions: z.string().max(20_000),
+  userId: z.string().min(1),
+  systemMessage: z.string().max(20_000),
+  messages: PromptMessagesSchema.optional().default([]),
+  ragIndexId: z.number().min(1).optional().nullable(),
+  type: z.enum(['UNIVERSITY', 'TEMPLATE']),
+})
+
+export const UniversityPromptBodySchema = z.object({
+  fi: UniversityPromptCreationParamsSchema,
+  en: UniversityPromptCreationParamsSchema,
+  sv: UniversityPromptCreationParamsSchema,
+})
+
 export type PromptCreationParams = z.input<typeof PromptCreationParamsSchema>
 export type PromptEditableParams = z.input<typeof PromptUpdateableParamsSchema>
 export type PromptCopyParams = z.input<typeof PromptCopyParamsSchema>
+export type UniversityPromptCreationParams = z.input<typeof UniversityPromptCreationParamsSchema>

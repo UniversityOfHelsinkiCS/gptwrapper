@@ -3,7 +3,7 @@ import { type CreationOptional, DataTypes, type InferAttributes, type InferCreat
 import type { Message } from '@shared/chat'
 import { sequelize } from '../connection'
 import RagIndex from './ragIndex'
-export const PromptTypeValues = ['CHAT_INSTANCE', 'PERSONAL'] as const
+export const PromptTypeValues = ['CHAT_INSTANCE', 'PERSONAL', 'UNIVERSITY', 'TEMPLATE'] as const
 export type PromptType = (typeof PromptTypeValues)[number]
 
 class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prompt>> {
@@ -30,7 +30,6 @@ class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prom
   declare ragIndex?: NonAttribute<RagIndex>
 
   declare userInstructions?: CreationOptional<string>
-
 }
 
 Prompt.init(

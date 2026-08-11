@@ -18,6 +18,7 @@ import adminRouter from './admin'
 import facultyRouter from './faculty'
 import feedbackRouter from './feedback'
 import notificationRouter from './notifications'
+import uniPromptRouter from './uniPrompt'
 import testUtilsRouter from './testUtils'
 import { inProduction } from '../../config'
 import logger from '../util/logger'
@@ -57,6 +58,7 @@ router.use('/statistics', statisticsRouter)
 router.use('/faculties', facultyRouter)
 router.use('/feedback', feedbackRouter)
 router.use('/notifications', notificationRouter)
+router.use('/uniprompts', uniPromptRouter)
 
 Sentry.setupExpressErrorHandler(router)
 router.use(errorHandler)

@@ -41,7 +41,7 @@ export interface User {
   serverVersion?: string
 }
 
-export type PromptType = 'CHAT_INSTANCE' | 'PERSONAL'
+export type PromptType = 'CHAT_INSTANCE' | 'PERSONAL' | 'UNIVERSITY' | 'TEMPLATE'
 
 export type Prompt = {
   id: string
