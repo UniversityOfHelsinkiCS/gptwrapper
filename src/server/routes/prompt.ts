@@ -68,6 +68,9 @@ const getPotentialNameConflicts = async (prompt: InferAttributes<Prompt, { omit:
         },
       })
     }
+    default: {
+      return []
+    }
   }
 }
 
