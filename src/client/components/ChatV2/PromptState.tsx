@@ -47,7 +47,6 @@ export const PromptStateProvider: React.FC<{
   const urlPromptId = searchParams.get('promptId')
   const { courseId } = useParams()
   const queryClient = useQueryClient()
-  
 
   const { data: course, refetch: refetchCourse } = useCourse(courseId)
 
@@ -59,6 +58,7 @@ export const PromptStateProvider: React.FC<{
   const refetchPrompts = () => {
     refetch()
     queryClient.invalidateQueries({ queryKey: ['/prompts/my-prompts'] })
+    queryClient.invalidateQueries({ queryKey: ['chatInstances', 'user'] })
     queryClient.invalidateQueries({ queryKey: ['course'] })
     if (courseId !== 'general') {
       refetchCourse()
@@ -98,19 +98,11 @@ export const PromptStateProvider: React.FC<{
     }
 
     if (course && activePrompt) {
-      const isValid =
-        course.prompts?.some(p => p.id === activePrompt.id) ||
-        myPrompts?.some(p => p.id === activePrompt.id)
+      const isValid = course.prompts?.some((p) => p.id === activePrompt.id) || myPrompts?.some((p) => p.id === activePrompt.id)
 
       if (!isValid) handleChangePrompt(undefined)
     }
-  }, [
-    urlPrompt,
-    course,
-    activePrompt,
-    myPrompts,
-    handleChangePrompt,
-  ])
+  }, [urlPrompt, course, activePrompt, myPrompts, handleChangePrompt])
 
   // Just the analytics dispatch.
   useEffect(() => {
@@ -131,7 +123,6 @@ export const PromptStateProvider: React.FC<{
         name,
         systemMessage,
         type: 'PERSONAL',
-
       }
 
       if (promptToSave) {
@@ -165,14 +156,14 @@ export const PromptStateProvider: React.FC<{
       setActivePrompt(res.data)
       refetchPrompts()
       return res.data
-    }
+    },
   })
 
   const deletePromptMutation = useMutation({
     mutationFn: async (id: string) => {
       await apiClient.delete(`/prompts/${id}`)
       refetchPrompts()
-    }
+    },
   })
 
   const editPromptMutation = useMutation({
@@ -181,17 +172,16 @@ export const PromptStateProvider: React.FC<{
       setActivePrompt(res.data)
       refetchPrompts()
       return res.data
-    }
+    },
   })
-
 
   const promptInfo: MessageGenerationInfo['promptInfo'] = activePrompt
     ? {
-      id: activePrompt.id,
-      name: activePrompt.name,
-      type: 'saved',
-      systemMessage: activePrompt.systemMessage,
-    }
+        id: activePrompt.id,
+        name: activePrompt.name,
+        type: 'saved',
+        systemMessage: activePrompt.systemMessage,
+      }
     : { type: 'custom', systemMessage: '' }
 
   const value = {

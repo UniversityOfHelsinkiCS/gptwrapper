@@ -18,10 +18,12 @@ export const useCreatePromptMutation = () => {
 
   const mutation = useMutation({
     mutationFn,
-    onSuccess: () =>
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey,
-      }),
+      })
+      invalidateAllPromptLists()
+    },
   })
 
   return mutation
@@ -36,10 +38,12 @@ export const useDeletePromptMutation = () => {
 
   const mutation = useMutation({
     mutationFn,
-    onSuccess: () =>
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey,
-      }),
+      })
+      invalidateAllPromptLists()
+    },
   })
 
   return mutation
@@ -53,11 +57,13 @@ export type CopyPromptVariables = PromptCopyParams & {
 
 const invalidatePromptLists = (destinationCourseId?: string) => {
   queryClient.invalidateQueries({ queryKey: ['/prompts/my-prompts'] })
+  queryClient.invalidateQueries({ queryKey: ['chatInstances', 'user'] })
   if (destinationCourseId) queryClient.invalidateQueries({ queryKey: ['course', destinationCourseId] })
 }
 
 const invalidateAllPromptLists = () => {
   queryClient.invalidateQueries({ queryKey: ['/prompts/my-prompts'] })
+  queryClient.invalidateQueries({ queryKey: ['chatInstances', 'user'] })
   queryClient.invalidateQueries({ queryKey: ['course'] })
 }
 
@@ -70,7 +76,10 @@ export const useCopyPromptMutation = () => {
 
   const mutation = useMutation({
     mutationFn,
-    onSuccess: (_prompt, variables) => invalidatePromptLists(variables.destinationCourseId),
+    onSuccess: (_prompt, variables) => {
+      queryClient.invalidateQueries({ queryKey })
+      invalidatePromptLists(variables.destinationCourseId)
+    },
     onError: (error: ApiError) => {
       if (error.response?.status === 404) invalidateAllPromptLists()
     },
@@ -88,10 +97,12 @@ export const useEditPromptMutation = () => {
 
   const mutation = useMutation({
     mutationFn,
-    onSuccess: () =>
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey,
-      }),
+      })
+      invalidateAllPromptLists()
+    },
   })
 
   return mutation

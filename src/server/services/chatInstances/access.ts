@@ -1,4 +1,4 @@
-import { type ChatInstance, Enrolment, Responsibility, User as UserModel } from '../../db/models'
+import { type ChatInstance, Enrolment, Prompt, RagIndex, Responsibility, User as UserModel } from '../../db/models'
 import type { User } from '../../../shared/user'
 import { TEST_COURSES, TEST_USERS } from '../../../shared/testData'
 import logger from '../../util/logger'
@@ -8,14 +8,42 @@ const getUserById = async (id: string) => UserModel.findByPk(id)
 const findEnrolments = async (userId: string) =>
   (await Enrolment.findAll({
     where: {
-      userId,
+      userId: userId,
     },
-    include: [Enrolment.associations.chatInstance],
+    include: [
+      {
+        association: Responsibility.associations.chatInstance,
+        include: [
+          {
+            model: Responsibility,
+            as: 'responsibilities',
+            attributes: ['id', 'createdByUserId'],
+            include: [
+              {
+                model: UserModel,
+                as: 'user',
+                attributes: ['id', 'username', 'last_name', 'first_names'],
+              },
+            ],
+          },
+          {
+            model: Prompt,
+            as: 'prompts',
+            include: [
+              {
+                model: RagIndex,
+                as: 'ragIndex',
+                attributes: ['metadata'],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   })) as (Enrolment & { chatInstance: ChatInstance })[]
 
 export const getEnrolledCourses = async (user: User) => {
   const enrolledToSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.enrolled)
-
   const enrolments = await findEnrolments(user.id)
 
   if (!enrolledToSandbox) return enrolments
@@ -71,7 +99,36 @@ const findResponsibilities = async (userId: string) =>
     where: {
       userId,
     },
-    include: [Responsibility.associations.chatInstance],
+    include: [
+      {
+        association: Responsibility.associations.chatInstance,
+        include: [
+          {
+            model: Responsibility,
+            as: 'responsibilities',
+            attributes: ['id', 'createdByUserId'],
+            include: [
+              {
+                model: UserModel,
+                as: 'user',
+                attributes: ['id', 'username', 'last_name', 'first_names'],
+              },
+            ],
+          },
+          {
+            model: Prompt,
+            as: 'prompts',
+            include: [
+              {
+                model: RagIndex,
+                as: 'ragIndex',
+                attributes: ['metadata'],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   })) as (Responsibility & { chatInstance: ChatInstance })[]
 
 export const getTeachedCourses = async (user: User) => {

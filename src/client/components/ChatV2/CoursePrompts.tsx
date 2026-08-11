@@ -4,7 +4,6 @@ import { Box, List, ListItemButton, ListItemText, Typography, IconButton, Toolti
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import useCourse from '../../hooks/useCourse'
 import type { Course, Prompt as PromptType } from '../../types'
 import { usePromptState } from './PromptState'
 import { PromptListItem } from './PromptModalV2.tsx'
@@ -32,12 +31,11 @@ const CoursePrompts = (props: CoursePromptsProps) => {
   const navigate = useNavigate()
   const { user } = useCurrentUser()
 
-  const { data: courseData, isLoading } = useCourse(course.courseId)
   const [showPrompts, setShowPrompts] = useState(previewPrompt?.chatInstanceId === course.id || false)
 
-  const amongResponsibles = courseData?.responsibilities ? courseData.responsibilities.some((r) => r.user.id === user?.id) : false
+  const amongResponsibles = course.responsibilities ? course.responsibilities.some((r) => r.user.id === user?.id) : false
 
-  const currentPrompts = courseData?.prompts || []
+  const currentPrompts = course.prompts ?? []
 
   const courseEnded = Date.parse(course.activityPeriod.endDate) < Date.now()
   const dotColor = courseEnded ? 'error.main' : course.usageLimit > 0 ? 'success.main' : 'grey.400'
@@ -76,9 +74,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
     setPreviewPrompt(currentPrompt)
   }, [currentPrompts])
 
-  if (isLoading) return null
-
-  const sortedPrompts = currentPrompts.sort((a, b) => a.name.localeCompare(b.name, 'fi', { sensitivity: 'base', numeric: true }))
+  const sortedPrompts = [...currentPrompts].sort((a, b) => a.name.localeCompare(b.name, 'fi', { sensitivity: 'base', numeric: true }))
 
   const handleSelect = (prompt?: PromptType) => {
     if (!confirmClose()) return

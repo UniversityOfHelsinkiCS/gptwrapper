@@ -144,7 +144,7 @@ const PromptModalV2 = () => {
   const { user } = useCurrentUser()
 
   const studentsCourses = user?.enrolledCourses as Course[]
-  const { courses } = useUserCourses()
+  const { courses, isLoading } = useUserCourses()
   const { curreEnabled, curreDisabled, ended } = getGroupedCourses(courses)
   const students = studentsCourses ?? []
 
@@ -234,7 +234,7 @@ const PromptModalV2 = () => {
 
   const sortedMyPrompts = myPrompts.sort((a, b) => a.name.localeCompare(b.name, 'fi', { sensitivity: 'base', numeric: true }))
 
-  if (!user) return null
+  if (!user || isLoading) return null
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, minHeight: 0 }}>
