@@ -37,6 +37,8 @@ import ExpandMore from '@mui/icons-material/ExpandMore'
 import useUserCourses, { type CoursesViewCourse } from '../../hooks/useUserCourses'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { getGroupedCourses } from './util'
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
+import UniversityPromptGallery from './UniversityPromptGallery.tsx'
 
 type PromptListItemProps = {
   prompt: PromptType
@@ -170,6 +172,29 @@ const PromptModalV2 = () => {
   const [isPersonal, setIsPersonal] = useState<boolean>(false)
   const [courseId, setCourseId] = useState<string>('general')
 
+  /**
+   * The third right-panel mode. Opening either preview closes it.
+   */
+  const [showUniversityPrompts, setShowUniversityPrompts] = useState(false)
+
+  const showPromptPreview = (prompt: PromptType | undefined) => {
+    setShowUniversityPrompts(false)
+    setPreviewPrompt(prompt)
+  }
+
+  const showCoursePreview = (course: Course | undefined) => {
+    setShowUniversityPrompts(false)
+    setPreviewCourse(course)
+  }
+
+  const openUniversityPrompts = () => {
+    if (!confirmClose()) return
+    setShowUniversityPrompts(true)
+    setPreviewPrompt(undefined)
+    setPreviewCourse(undefined)
+    setIsEditing(false)
+  }
+
   const onDone = (prompt?: PromptType) => {
     setIsEditing(false)
     setPreviewPrompt(prompt)
@@ -217,6 +242,13 @@ const PromptModalV2 = () => {
   const handleMobileBackToPromptList = () => {
     setPreviewPrompt(undefined)
     setPreviewCourse(undefined)
+    setShowUniversityPrompts(false)
+  }
+
+  const handleSelectUniversityPrompt = (prompt: PromptType) => {
+    if (!confirmClose()) return
+    handleChangePrompt(prompt)
+    navigate(`/general`)
   }
 
   const confirmClose = () => {
@@ -242,12 +274,25 @@ const PromptModalV2 = () => {
         {/* Left panel - course and prompt list */}
         <Box
           sx={{
-            display: !isMobile || (!previewPrompt && !previewCourse && !isEditing) ? 'flex' : 'none',
+            display: !isMobile || (!previewPrompt && !previewCourse && !isEditing && !showUniversityPrompts) ? 'flex' : 'none',
             width: !isMobile ? 350 : '90vw',
             flexDirection: 'column',
           }}
         >
           <Box sx={{ overflowY: 'auto', mt: 2 }}>
+            {/* University prompts — opens the gallery in the right panel */}
+            <ListItemButton
+              selected={showUniversityPrompts}
+              onClick={openUniversityPrompts}
+              sx={{ px: 1, borderRadius: 1, mb: 0.5 }}
+              data-testid="university-prompts-open"
+            >
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <AccountBalanceIcon color="primary" />
+              </ListItemIcon>
+              <ListItemText primary={t('uniPrompts:galleryNav')} slotProps={{ primary: { variant: 'subtitle1', fontWeight: 600 } }} />
+            </ListItemButton>
+
             {/* My prompts header row */}
             <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 1, '&:hover': { backgroundColor: 'action.hover' } }}>
               <ListItemButton
@@ -302,7 +347,7 @@ const PromptModalV2 = () => {
                     choosePromptLabel={t('settings:choosePrompt')}
                     activeLabel={t('settings:promptInUse')}
                     onPreview={(selectedPrompt) => {
-                      setPreviewPrompt(selectedPrompt)
+                      showPromptPreview(selectedPrompt)
                       setIsEditing(false)
                       setPreviewCourse(undefined)
                     }}
@@ -382,9 +427,9 @@ const PromptModalV2 = () => {
                         course={course}
                         previewPrompt={previewPrompt}
                         confirmClose={confirmClose}
-                        setPreviewPrompt={setPreviewPrompt}
+                        setPreviewPrompt={showPromptPreview}
                         setIsEditing={setIsEditing}
-                        setPreviewCourse={setPreviewCourse}
+                        setPreviewCourse={showCoursePreview}
                         previewCourse={previewCourse}
                         handleCreateNew={handleCreateNew}
                         expandTarget={expandTarget}
@@ -401,7 +446,7 @@ const PromptModalV2 = () => {
         {!isEditing && (
           <Box
             sx={{
-              display: !isMobile || previewPrompt || previewCourse ? 'flex' : 'none',
+              display: !isMobile || previewPrompt || previewCourse || showUniversityPrompts ? 'flex' : 'none',
               maxWidth: !isMobile ? '100%' : '90vw',
               flex: 1,
               minWidth: 0,
@@ -409,7 +454,9 @@ const PromptModalV2 = () => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minWidth: 0, minHeight: 0, mt: 2 }}>
-              {previewPrompt ? (
+              {showUniversityPrompts ? (
+                <UniversityPromptGallery onSelect={handleSelectUniversityPrompt} copyTargets={copyTargets} onCopied={handleCopied} />
+              ) : previewPrompt ? (
                 <PromptPreview
                   prompt={previewPrompt}
                   handleEdit={handleEdit}
@@ -427,7 +474,7 @@ const PromptModalV2 = () => {
               )}
               {/* Preview action buttons */}
               <Box sx={{ pt: 2, display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
-                {isMobile && (previewPrompt || previewCourse) && (
+                {isMobile && (previewPrompt || previewCourse || showUniversityPrompts) && (
                   <OutlineButtonBlue onClick={() => handleMobileBackToPromptList()}>
                     <ArrowBackIcon />
                     {t('prompt:backToPromptList')}

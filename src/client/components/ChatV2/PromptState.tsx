@@ -5,6 +5,7 @@ import type { Prompt } from '../../types'
 import apiClient, { type ApiError } from '../../util/apiClient'
 import { type UseMutateAsyncFunction, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import useCourse from '../../hooks/useCourse'
+import useUniversityPrompts from '../../hooks/useUniversityPrompts'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import type { PromptCreationParams, PromptEditableParams } from '@shared/prompt'
 import type { MessageGenerationInfo } from '@shared/chat'
@@ -65,6 +66,11 @@ export const PromptStateProvider: React.FC<{
     }
   }
 
+  // Used to validate a selected university prompt: it lives in neither course.prompts
+  // nor myPrompts, so without this list an admin's deletion would not clear it.
+  const { groups: universityPromptGroups, isPending: universityPromptsPending, isError: universityPromptsFailed } = useUniversityPrompts()
+  const universityPrompts = universityPromptGroups.flatMap((group) => group.prompts)
+
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
 
   const [activePrompt, setActivePrompt] = useLocalStorageState<Prompt | undefined>(`${localStoragePrefix}-active-prompt`, undefined)
@@ -74,9 +80,6 @@ export const PromptStateProvider: React.FC<{
   const isPromptEditable = activePrompt === undefined || activePrompt?.type === 'PERSONAL'
   const dispatchAnalytics = useAnalyticsDispatch()
 
-  /**
-   * This handles every prompt change and updates related data as needed.
-   */
   const handleChangePrompt = (newPrompt: Prompt | undefined) => {
     if (!newPrompt) {
       setActivePrompt(undefined)
@@ -97,12 +100,15 @@ export const PromptStateProvider: React.FC<{
       handleChangePrompt(urlPrompt)
     }
 
-    if (course && activePrompt) {
-      const isValid = course.prompts?.some((p) => p.id === activePrompt.id) || myPrompts?.some((p) => p.id === activePrompt.id)
+    if (course && activePrompt && !universityPromptsPending && !universityPromptsFailed) {
+      const isValid =
+        universityPrompts.some((p) => p.id === activePrompt.id) ||
+        course.prompts?.some((p) => p.id === activePrompt.id) ||
+        myPrompts?.some((p) => p.id === activePrompt.id)
 
       if (!isValid) handleChangePrompt(undefined)
     }
-  }, [urlPrompt, course, activePrompt, myPrompts, handleChangePrompt])
+  }, [urlPrompt, course, activePrompt, myPrompts, universityPrompts, universityPromptsPending, universityPromptsFailed, handleChangePrompt])
 
   // Just the analytics dispatch.
   useEffect(() => {
