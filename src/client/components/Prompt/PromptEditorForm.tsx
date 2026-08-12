@@ -104,7 +104,7 @@ const BasicInfoSection = () => {
   )
 }
 
-const ModelSettingsSection = () => {
+const ModelSettingsSection = ({ hideVisibilityToggle = false }: { hideVisibilityToggle?: boolean }) => {
   const { form, setForm, type } = usePromptEditorForm()
   const { t } = useTranslation()
   const theme = useTheme()
@@ -117,7 +117,7 @@ const ModelSettingsSection = () => {
         <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
           {t('prompt:promptModelSettings')}
         </Typography>
-        {type !== 'PERSONAL' && (
+        {type !== 'PERSONAL' && !hideVisibilityToggle && (
           <FormControlLabel
             sx={{ ml: 'auto' }}
             control={<Switch checked={!form.hidden} onChange={(e) => setForm((prev) => ({ ...prev, hidden: !e.target.checked }))} />}
@@ -339,13 +339,17 @@ const RagSettingsSection = () => {
   )
 }
 
-export const PromptEditorForm = () => (
+export const PromptEditorForm = ({ hideRagSettings = false, hideVisibilityToggle = false }: { hideRagSettings?: boolean; hideVisibilityToggle?: boolean } = {}) => (
   <Box>
     <BasicInfoSection />
     <Divider sx={{ my: 3 }} />
-    <ModelSettingsSection />
+    <ModelSettingsSection hideVisibilityToggle={hideVisibilityToggle} />
     <Divider sx={{ my: 3 }} />
-    <RagSettingsSection />
-    <Divider sx={{ my: 3 }} />
+    {!hideRagSettings && (
+      <>
+        <RagSettingsSection />
+        <Divider sx={{ my: 3 }} />
+      </>
+    )}
   </Box>
 )

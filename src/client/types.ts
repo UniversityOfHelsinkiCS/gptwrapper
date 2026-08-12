@@ -43,6 +43,8 @@ export interface User {
 
 export type PromptType = 'CHAT_INSTANCE' | 'PERSONAL' | 'UNIVERSITY' | 'TEMPLATE'
 
+export type PromptLanguage = 'fi' | 'en' | 'sv'
+
 export type Prompt = {
   id: string
   name: string
@@ -57,6 +59,8 @@ export type Prompt = {
   ragIndexId?: number
   userId: string | null
   ragIndex?: ragInfo
+  language?: PromptLanguage | null
+  universityPromptId?: string | null
 }
 
 export type ragInfo = {

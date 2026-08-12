@@ -12,6 +12,7 @@ import { RouterTabs } from '../common/RouterTabs'
 import Feedbacks from './Feedbacks'
 import Testing from './Testing'
 import NotificationManagement from './NotificationManagement'
+import UniversityPromptManagement from './UniversityPromptManagement'
 
 /**
  * React-router compatible lazy loaded component for Admin page
@@ -56,6 +57,7 @@ export function Component() {
         >
           <Tab label={t('admin:searchUsers')} to="/admin/usersearch" component={Link} />
           <Tab label={t('admin:notifications')} to="/admin/notifications" component={Link} />
+          <Tab label={t('admin:uniPrompts')} to="/admin/uniprompts" component={Link} />
           <Tab label={t('admin:feedbacks')} to="/admin/feedbacks" component={Link} />
           {user.iamGroups.includes('grp-toska') && <Tab label={t('admin:updater')} to="/admin/updater" component={Link} />}
           <Tab label={t('admin:testing')} to="/admin/testing" component={Link} />
@@ -69,6 +71,7 @@ export function Component() {
         <Route path="/usersearch" element={<UserSearch />} />
         <Route path="/feedbacks" element={<Feedbacks />} />
         <Route path="/notifications" element={<NotificationManagement />} />
+        <Route path="/uniprompts" element={<UniversityPromptManagement />} />
         <Route path="/testing" element={<Testing />} />
       </Routes>
     </Container>
