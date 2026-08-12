@@ -136,15 +136,16 @@ const PromptModalV2 = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [deleteConfirm, setDeleteConfirm] = useState<PromptType | null>(null)
-  const opensOnGallery = !activePrompt || activePrompt.type === 'UNIVERSITY' || activePrompt.type === 'TEMPLATE'
+  const { user } = useCurrentUser()
+  // The university prompt gallery is admin-only for now
+  const canSeeUniversityPrompts = Boolean(user?.isAdmin)
+  const opensOnGallery = canSeeUniversityPrompts && (!activePrompt || activePrompt.type === 'UNIVERSITY' || activePrompt.type === 'TEMPLATE')
   const [previewPrompt, setPreviewPrompt] = useState<PromptType | undefined>(isMobile || opensOnGallery ? undefined : activePrompt)
   const [previewCourse, setPreviewCourse] = useState<Course | undefined>(undefined)
   const [isEditing, setIsEditing] = useState(false)
   const [showMyPrompts, setShowMyPrompts] = useState(myPrompts.some((p) => p.id === previewPrompt?.id) || false)
 
   const { hasChanges, setHasChanges, cacheKey, setCacheKey } = usePromptEditorState()
-
-  const { user } = useCurrentUser()
 
   const studentsCourses = user?.enrolledCourses as Course[]
   const { courses, isLoading } = useUserCourses()
@@ -186,6 +187,7 @@ const PromptModalV2 = () => {
   }
 
   const openUniversityPrompts = () => {
+    if (!canSeeUniversityPrompts) return
     if (!confirmClose()) return
     setShowUniversityPrompts(true)
     setPreviewPrompt(undefined)
@@ -278,18 +280,20 @@ const PromptModalV2 = () => {
           }}
         >
           <Box sx={{ overflowY: 'auto', mt: 2 }}>
-            {/* University prompts — opens the gallery in the right panel */}
-            <ListItemButton
-              selected={showUniversityPrompts}
-              onClick={openUniversityPrompts}
-              sx={{ px: 1, borderRadius: 1, mb: 0.5 }}
-              data-testid="university-prompts-open"
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                <AccountBalanceIcon color="primary" />
-              </ListItemIcon>
-              <ListItemText primary={t('uniPrompts:galleryNav')} slotProps={{ primary: { variant: 'subtitle1', fontWeight: 600 } }} />
-            </ListItemButton>
+            {/* University prompts — opens the gallery in the right panel. Admin only for now. */}
+            {canSeeUniversityPrompts && (
+              <ListItemButton
+                selected={showUniversityPrompts}
+                onClick={openUniversityPrompts}
+                sx={{ px: 1, borderRadius: 1, mb: 0.5 }}
+                data-testid="university-prompts-open"
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <AccountBalanceIcon color="primary" />
+                </ListItemIcon>
+                <ListItemText primary={t('uniPrompts:galleryNav')} slotProps={{ primary: { variant: 'subtitle1', fontWeight: 600 } }} />
+              </ListItemButton>
+            )}
 
             {/* My prompts header row */}
             <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 1, '&:hover': { backgroundColor: 'action.hover' } }}>
@@ -452,7 +456,7 @@ const PromptModalV2 = () => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minWidth: 0, minHeight: 0, mt: 2 }}>
-              {showUniversityPrompts ? (
+              {showUniversityPrompts && canSeeUniversityPrompts ? (
                 <UniversityPromptGallery onSelect={handleSelectUniversityPrompt} copyTargets={copyTargets} onCopied={handleCopied} />
               ) : previewPrompt ? (
                 <PromptPreview
