@@ -1,15 +1,14 @@
-import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
+import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, NonAttribute } from 'sequelize'
 
 import { sequelize } from '../connection'
+import type Prompt from './prompt'
 
 class UniversityPrompt extends Model<InferAttributes<UniversityPrompt>, InferCreationAttributes<UniversityPrompt>> {
   declare id: CreationOptional<string>
 
-  declare fi: string | null
+  declare published: CreationOptional<boolean>
 
-  declare en: string | null
-
-  declare sv: string | null
+  declare prompts?: NonAttribute<Prompt[]>
 
   declare createdAt: CreationOptional<Date>
 
@@ -24,17 +23,10 @@ UniversityPrompt.init(
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
     },
-    fi: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    en: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    sv: {
-      type: DataTypes.STRING,
-      allowNull: true,
+    published: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
 
     createdAt: {

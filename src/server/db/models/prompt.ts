@@ -3,8 +3,12 @@ import { type CreationOptional, DataTypes, type InferAttributes, type InferCreat
 import type { Message } from '@shared/chat'
 import { sequelize } from '../connection'
 import RagIndex from './ragIndex'
+import type UniversityPrompt from './universityPrompt'
 export const PromptTypeValues = ['CHAT_INSTANCE', 'PERSONAL', 'UNIVERSITY', 'TEMPLATE'] as const
 export type PromptType = (typeof PromptTypeValues)[number]
+
+export const PromptLanguageValues = ['fi', 'en', 'sv'] as const
+export type PromptLanguage = (typeof PromptLanguageValues)[number]
 
 class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prompt>> {
   declare id: CreationOptional<string>
@@ -30,6 +34,12 @@ class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prom
   declare ragIndex?: NonAttribute<RagIndex>
 
   declare userInstructions?: CreationOptional<string>
+
+  declare universityPromptId?: CreationOptional<string | null>
+
+  declare language?: CreationOptional<PromptLanguage | null>
+
+  declare universityPrompt?: NonAttribute<UniversityPrompt>
 }
 
 Prompt.init(
@@ -85,6 +95,14 @@ Prompt.init(
     },
     userInstructions: {
       type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    universityPromptId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
+    language: {
+      type: DataTypes.STRING,
       allowNull: true,
     },
   },

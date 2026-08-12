@@ -96,9 +96,8 @@ PromptUsage.belongsTo(ChatInstance, { as: 'chatInstance' })
 ChatInstance.hasMany(PromptUsage, { as: 'promptUsages' })
 PromptUsage.belongsTo(User, { as: 'user' })
 
-UniversityPrompt.belongsTo(Prompt, { as: 'fiPrompt', foreignKey: 'fi' })
-UniversityPrompt.belongsTo(Prompt, { as: 'enPrompt', foreignKey: 'en' })
-UniversityPrompt.belongsTo(Prompt, { as: 'svPrompt', foreignKey: 'sv' })
+UniversityPrompt.hasMany(Prompt, { as: 'prompts' })
+Prompt.belongsTo(UniversityPrompt, { as: 'universityPrompt' })
 
 export {
   User,
