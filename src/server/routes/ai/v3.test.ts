@@ -5,23 +5,6 @@ import type { AddressInfo } from 'node:net'
 import type { Server } from 'node:http'
 import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 
-// See the note in ../prompt.test.ts: src/config.ts parses DEFAULT_MODEL / FREE_MODEL at import time and those are
-// unset under `npm run test`, so the module is stubbed rather than evaluated.
-vi.mock('../../../config', async () => {
-  const { z } = await import('zod/v4')
-  return {
-    ValidModelNameSchema: z.string(),
-    FREE_MODEL: 'mock',
-    DEFAULT_MODEL: 'mock',
-    DEFAULT_TOKEN_LIMIT: 200_000,
-    inProduction: false,
-    inStaging: false,
-    inDevelopment: false,
-    inCI: false,
-    isMockModel: () => false,
-  }
-})
-
 vi.mock('../../db/models', () => ({
   ChatInstance: { findOne: vi.fn() },
   Discussion: { create: vi.fn() },

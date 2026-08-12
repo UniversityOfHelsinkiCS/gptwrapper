@@ -5,21 +5,6 @@ import type { AddressInfo } from 'node:net'
 import type { Server } from 'node:http'
 import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 
-// `src/config.ts` parses DEFAULT_MODEL / FREE_MODEL at import time, and vite.config's `define` bakes those in as
-// the literal string "undefined" when the variables are unset (as they are under `npm run test`). The router only
-// reaches config transitively, through the zod schemas in `shared/chat`, so stubbing it keeps the test hermetic.
-vi.mock('../../config', async () => {
-  const { z } = await import('zod/v4')
-  return {
-    ValidModelNameSchema: z.string(),
-    DEFAULT_TOKEN_LIMIT: 200_000,
-    inProduction: false,
-    inStaging: false,
-    inDevelopment: false,
-    inCI: false,
-  }
-})
-
 vi.mock('../db/models', () => ({
   Prompt: { findByPk: vi.fn(), findAll: vi.fn(), count: vi.fn(), create: vi.fn() },
   ChatInstance: { findByPk: vi.fn() },

@@ -24,6 +24,12 @@ if (inCI) {
   base = ciBase
 }
 
+// with this undefined is not string 'undefined' when testing.
+const defineEnv = (name: string): string => {
+  const value = process.env[name]
+  return value === undefined ? 'undefined' : JSON.stringify(value)
+}
+
 export default defineConfig({
   test: {
     environment: 'happy-dom',
@@ -77,14 +83,14 @@ export default defineConfig({
   // Passing the whole `process.env` bakes every build-time secret (tokens, PATH, …)
   // into the client-side JS, which is a security leak.
   define: {
-    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-    'process.env.STAGING': JSON.stringify(process.env.STAGING),
-    'process.env.CI': JSON.stringify(process.env.CI),
-    'process.env.REACT_APP_GIT_SHA': JSON.stringify(process.env.REACT_APP_GIT_SHA),
-    'process.env.PUBLIC_URL': JSON.stringify(process.env.PUBLIC_URL),
-    'process.env.DEFAULT_TOKEN_LIMIT': JSON.stringify(process.env.DEFAULT_TOKEN_LIMIT),
-    'process.env.DEFAULT_MODEL': JSON.stringify(process.env.DEFAULT_MODEL),
-    'process.env.FREE_MODEL': JSON.stringify(process.env.FREE_MODEL),
+    'process.env.NODE_ENV': defineEnv('NODE_ENV'),
+    'process.env.STAGING': defineEnv('STAGING'),
+    'process.env.CI': defineEnv('CI'),
+    'process.env.REACT_APP_GIT_SHA': defineEnv('REACT_APP_GIT_SHA'),
+    'process.env.PUBLIC_URL': defineEnv('PUBLIC_URL'),
+    'process.env.DEFAULT_TOKEN_LIMIT': defineEnv('DEFAULT_TOKEN_LIMIT'),
+    'process.env.DEFAULT_MODEL': defineEnv('DEFAULT_MODEL'),
+    'process.env.FREE_MODEL': defineEnv('FREE_MODEL'),
   },
   resolve: {
     alias: {
