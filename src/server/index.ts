@@ -38,13 +38,13 @@ if (inProduction || inStaging) {
   app.get('*', (_, res) => res.sendFile(INDEX_PATH))
 }
 
-app.listen(PORT, async () => {
-  await connectToDatabase()
-  await seed()
-  await updateLastRestart()
-  if (inProduction || inStaging) {
-    await setupCron()
-  }
+await connectToDatabase()
+await seed()
+await updateLastRestart()
+if (inProduction || inStaging) {
+  await setupCron()
+}
 
+app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`)
 })

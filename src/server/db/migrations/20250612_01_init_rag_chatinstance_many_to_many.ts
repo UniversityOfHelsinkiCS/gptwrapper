@@ -1,7 +1,6 @@
-import { DataTypes, QueryTypes } from 'sequelize'
+import { DataTypes } from 'sequelize'
 
 import type { Migration } from '../connection'
-import { ChatInstance, ChatInstanceRagIndex } from '../models'
 
 export const up: Migration = async ({ context: queryInterface }) => {
   const transaction = await queryInterface.sequelize.transaction()
@@ -34,27 +33,21 @@ export const up: Migration = async ({ context: queryInterface }) => {
     },
   })
 
-  // Create ChatInstanceRagIndices from old relations
-  const ragIndices = (await queryInterface.sequelize.query(
+  // Create ChatInstanceRagIndices from old relations.
+  // Raw SQL on purpose: models describe the *current* schema, so using them here
+  // would break as soon as a later migration changes the columns they map to.
+  await queryInterface.sequelize.query(
     `
-    select * from rag_indices
+    insert into chat_instances_rag_indices (chat_instance_id, rag_index_id, created_at, updated_at)
+    select r.chat_instance_id, r.id, now(), now()
+    from rag_indices r
+    join chat_instances ci on ci.id = r.chat_instance_id
+    where r.chat_instance_id is not null
     `,
-    { type: QueryTypes.SELECT },
-  )) as any[]
+    { transaction },
+  )
 
-  for await (const ragIndex of ragIndices) {
-    if (!ragIndex.chat_instance_id) continue
-
-    const chatInstance = await ChatInstance.findByPk(ragIndex.chat_instance_id)
-    if (!chatInstance) continue
-
-    await ChatInstanceRagIndex.create({
-      ragIndexId: ragIndex.id,
-      chatInstanceId: chatInstance.id,
-    })
-  }
-
-  await queryInterface.removeColumn('rag_indices', 'chat_instance_id')
+  await queryInterface.removeColumn('rag_indices', 'chat_instance_id', { transaction })
 
   await transaction.commit()
 }
