@@ -136,7 +136,8 @@ const PromptModalV2 = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [deleteConfirm, setDeleteConfirm] = useState<PromptType | null>(null)
-  const [previewPrompt, setPreviewPrompt] = useState<PromptType | undefined>(isMobile ? undefined : activePrompt)
+  const opensOnGallery = !activePrompt || activePrompt.type === 'UNIVERSITY' || activePrompt.type === 'TEMPLATE'
+  const [previewPrompt, setPreviewPrompt] = useState<PromptType | undefined>(isMobile || opensOnGallery ? undefined : activePrompt)
   const [previewCourse, setPreviewCourse] = useState<Course | undefined>(undefined)
   const [isEditing, setIsEditing] = useState(false)
   const [showMyPrompts, setShowMyPrompts] = useState(myPrompts.some((p) => p.id === previewPrompt?.id) || false)
@@ -172,10 +173,7 @@ const PromptModalV2 = () => {
   const [isPersonal, setIsPersonal] = useState<boolean>(false)
   const [courseId, setCourseId] = useState<string>('general')
 
-  /**
-   * The third right-panel mode. Opening either preview closes it.
-   */
-  const [showUniversityPrompts, setShowUniversityPrompts] = useState(false)
+  const [showUniversityPrompts, setShowUniversityPrompts] = useState(!isMobile && opensOnGallery)
 
   const showPromptPreview = (prompt: PromptType | undefined) => {
     setShowUniversityPrompts(false)
