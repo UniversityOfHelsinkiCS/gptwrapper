@@ -18,4 +18,12 @@ describe('canCopyPrompt', () => {
   test('stops a student copying a course prompt', () => {
     expect(canCopyPrompt({ isAdmin: false, isOwner: false, isResponsible: false })).toBe(false)
   })
+
+  test('lets a student copy a university template they neither own nor are responsible for', () => {
+    expect(canCopyPrompt({ isAdmin: false, isOwner: false, isResponsible: false, isUniversityTemplate: true })).toBe(true)
+  })
+
+  test('treats a missing isUniversityTemplate as not a template', () => {
+    expect(canCopyPrompt({ isAdmin: false, isOwner: false, isResponsible: false, isUniversityTemplate: false })).toBe(false)
+  })
 })

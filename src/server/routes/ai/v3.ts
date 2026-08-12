@@ -133,6 +133,10 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       throw ApplicationError.NotFound('Prompt not found')
     }
 
+    if (prompt.type === 'TEMPLATE') {
+      throw ApplicationError.Forbidden('Template prompts must be copied before use')
+    }
+
     systemMessage = prompt.systemMessage
 
     if (prompt.ragIndex) {
@@ -145,6 +149,8 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
     res.locals.chatCompletionMeta.promptId = prompt.id
     res.locals.chatCompletionMeta.promptName = prompt.name
+    res.locals.chatCompletionMeta.promptType = prompt.type
+    res.locals.chatCompletionMeta.promptLanguage = prompt.language ?? null
   } else {
     systemMessage = generationInfo.promptInfo.systemMessage
   }

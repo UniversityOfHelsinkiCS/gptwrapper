@@ -7,6 +7,7 @@ import type { User } from '@shared/user'
 import { ChatInstance, Prompt, RagIndex, Responsibility, PromptChatInstance } from '../db/models'
 import type { RequestWithUser } from '../types'
 import { ApplicationError } from '../util/ApplicationError'
+import logger from '../util/logger'
 import { z } from 'zod/v4'
 
 const promptRouter = express.Router()
@@ -133,7 +134,7 @@ const authorizePromptCreation = async (user: User, promptParams: z.output<typeof
       break
     }
     default: {
-      throw ApplicationError.InternalServerError('Unknown prompt type')
+      throw ApplicationError.Forbidden('Not allowed')
     }
   }
 }
@@ -184,10 +185,21 @@ promptRouter.post('/:id/copy', async (req, res) => {
     throw ApplicationError.NotFound('Prompt not found')
   }
 
+  if (source.type === 'UNIVERSITY') {
+    throw ApplicationError.Forbidden('University prompts cannot be copied')
+  }
+
   const isResponsibleForSource =
     source.type === 'CHAT_INSTANCE' && source.chatInstanceId ? await isResponsibleForChatInstance(user, source.chatInstanceId) : false
 
-  if (!canCopyPrompt({ isAdmin: user.isAdmin, isOwner: source.userId === user.id, isResponsible: isResponsibleForSource })) {
+  if (
+    !canCopyPrompt({
+      isAdmin: user.isAdmin,
+      isOwner: source.userId === user.id,
+      isResponsible: isResponsibleForSource,
+      isUniversityTemplate: source.type === 'TEMPLATE',
+    })
+  ) {
     throw ApplicationError.Forbidden('Not allowed')
   }
 
@@ -229,6 +241,14 @@ promptRouter.post('/:id/copy', async (req, res) => {
     })
   }
 
+  logger.info('PromptCopy', {
+    sourcePromptId: source.id,
+    sourceType: source.type,
+    targetType: copyParams.type,
+    language: source.language ?? null,
+    userId: user.id,
+  })
+
   res.status(201).send(newPrompt)
 })
 
@@ -245,7 +265,7 @@ const authorizePromptUpdate = async (user: User, prompt: Prompt) => {
       break
     }
     default: {
-      throw ApplicationError.InternalServerError('Unknown prompt type')
+      throw ApplicationError.Forbidden('Not allowed')
     }
   }
 }
