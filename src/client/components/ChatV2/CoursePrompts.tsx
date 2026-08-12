@@ -192,8 +192,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
             </List>
           </Box>
         )}
-        {/* Empty course: show the no-prompts hint only while this course is previewed */}
-        {showPrompts && sortedPrompts.length === 0 && previewCourse?.id === course.id && (
+        {showPrompts && sortedPrompts.length === 0 && (
           <Box sx={{ ml: 2, mt: 1 }}>
             <Typography variant="body1" color="text.secondary">
               {t('settings:noPrompts')}
