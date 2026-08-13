@@ -203,6 +203,7 @@ const PromptModalV2 = () => {
   const handleDelete = (event: React.MouseEvent<HTMLButtonElement>, prompt: PromptType) => {
     event.stopPropagation()
     setDeleteConfirm(prompt)
+    handleChangePrompt(undefined)
   }
 
   const handleDeleteConfirm = async () => {
