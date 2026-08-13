@@ -200,7 +200,7 @@ const ChatInstanceTable = () => {
       <Paper sx={{ width: '100%', mb: 2 }}>
         <Box>
           <InputLabel>
-            <Checkbox checked={showActiveCourses} onChange={() => setShowActiveCourses(!showActiveCourses)} inputProps={{ 'aria-label': 'controlled' }} />
+            <Checkbox checked={showActiveCourses} onChange={() => setShowActiveCourses(!showActiveCourses)} slotProps={{ input: { 'aria-label': 'controlled' } }} />
 
             {t(`course:showActiveCourses`)}
           </InputLabel>

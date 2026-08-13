@@ -1,6 +1,6 @@
 import { Box, Button, Container, Input, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type InputHTMLAttributes } from 'react'
 import { useTranslation } from 'react-i18next'
 import useResetUsageMutation from '../../hooks/useResetUsageMutation'
 import useUserSearch from '../../hooks/useUserSearch'
@@ -235,7 +235,7 @@ export const ActionUserSearch = ({ actionText, drawActionComponent }: { actionTe
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder={t('admin:searchUsers')}
-        inputProps={{ 'data-testid': 'enrolment-user-search-input' }}
+        slotProps={{ input: { 'data-testid': 'enrolment-user-search-input' } as InputHTMLAttributes<HTMLInputElement> }}
       />
 
       {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}

@@ -404,7 +404,7 @@ export default function UniversityPromptManagement() {
                           checked={group.published}
                           onChange={() => handleTogglePublished(group)}
                           disabled={updateMutation.isPending}
-                          inputProps={{ 'aria-label': t('uniPrompts:published') }}
+                          slotProps={{ input: { 'aria-label': t('uniPrompts:published') } }}
                         />
                       }
                       label={group.published ? t('uniPrompts:published') : t('uniPrompts:draft')}
