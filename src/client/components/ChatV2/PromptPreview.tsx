@@ -115,10 +115,7 @@ const PromptPreview = ({
   const canEditPrompt = !!user && (prompt.userId === user.id || user.isAdmin)
   const showCopyPrompt = !!user && canCopyPrompt({ isAdmin: user.isAdmin, isOwner: prompt.userId === user.id, isResponsible: amongResponsibles })
   const shouldFetchRagDetails = amongResponsibles || user?.isAdmin || isPersonalPrompt || (!!user && prompt.userId === user.id)
-  const { data: ragDetails, refetch: refetchRagDetails } = useRagIndexDetails(
-    prompt.ragIndexId && prompt.ragIndex ? prompt.ragIndexId : null,
-    shouldFetchRagDetails,
-  )
+  const { data: ragDetails, refetch: refetchRagDetails } = useRagIndexDetails(prompt.ragIndexId ? prompt.ragIndexId : null, shouldFetchRagDetails)
 
   const ragFiles = ragDetails?.ragFiles.filter((file) => !file.error) ?? []
 
@@ -135,6 +132,8 @@ const PromptPreview = ({
   }
 
   if (!user) return null
+
+  console.log('ragDetails', ragDetails, 'isPersonalPrompt', isPersonalPrompt, prompt)
   return (
     <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
       {amongResponsibles || user.isAdmin ? (
