@@ -35,7 +35,7 @@ export const useCreateUserRagIndexMutation = () => {
 
 export type RagIndexDetails = Omit<RagIndexAttributes, 'ragFileCount'> & {
   ragFiles: RagFileAttributes[]
-  UserId?: string
+  userId?: string
 }
 
 export const useRagIndexDetails = (indexId: number | null, enabled = true) => {

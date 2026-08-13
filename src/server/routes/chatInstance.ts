@@ -313,7 +313,6 @@ chatInstanceRouter.get('/:id/usages', async (req, res) => {
       ...u.toJSON(),
       user: saveDiscussions ? anon_user : u.user,
       userId: !saveDiscussions || u.usageCount > 0.8 * usageLimit ? u.userId : 'hidden',
-      UserId: !saveDiscussions || u.usageCount > 0.8 * usageLimit ? u.userId : 'hidden',
     }
   })
 

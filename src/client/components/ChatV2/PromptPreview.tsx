@@ -391,7 +391,7 @@ const PromptPreview = ({
         <RagDetailsModal
           open={openModal}
           onClose={handleCloseRagDetailsModal}
-          rag={ragDetails && (ragDetails.UserId === user.id || user.isAdmin) ? ragDetails.id : undefined}
+          rag={ragDetails && (ragDetails.userId === user.id || user.isAdmin) ? ragDetails.id : undefined}
         />
       )}
     </Paper>
