@@ -18,7 +18,9 @@ const useCourse = (courseId?: string) => {
   return useQuery({
     queryKey,
     queryFn,
-    enabled: courseId !== 'general',
+    // The prompt editor is also rendered outside a course route (admin university
+    // prompts), where useParams gives no courseId — don't fetch /courses/undefined.
+    enabled: Boolean(courseId) && courseId !== 'general',
     retry: false,
   })
 }
