@@ -68,6 +68,8 @@ export const useDeleteRagIndexMutation = (indexId: number) => {
       return response.data
     },
     onSuccess: (_data: unknown) => {
+      queryClient.removeQueries({ queryKey: ['ragIndex', indexId] })
+      queryClient.removeQueries({ queryKey: ['ragIndex', indexId, 'jobs'] })
       queryClient.invalidateQueries({ queryKey: ['ragIndices'] })
     },
   })

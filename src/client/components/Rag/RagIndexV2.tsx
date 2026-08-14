@@ -78,9 +78,10 @@ interface RagIndexV2Props {
   indexId: number
   onBack: () => void
   onSelectFile: (fileId: number) => void
+  onDeleted?: () => void
 }
 
-export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelectFile }) => {
+export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelectFile, onDeleted }) => {
   const { user } = useCurrentUser()
   const { t } = useTranslation()
 
@@ -222,6 +223,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
             onClick={async () => {
               if (window.confirm(`Are you sure you want to delete index ${ragDetails.metadata?.name}?`)) {
                 await deleteIndexMutation.mutateAsync()
+                onDeleted?.()
                 onBack()
                 enqueueSnackbar(t('rag:collectionDeleted'), {
                   variant: 'success',

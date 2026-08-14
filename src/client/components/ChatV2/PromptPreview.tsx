@@ -34,7 +34,7 @@ const ragFileBadge = (filename: string, fileType?: string) => {
   return { label, palette: 'primary' as const }
 }
 
-const RagDetailsModal: React.FC<{ open: boolean; onClose: () => void; rag?: number }> = ({ open, onClose, rag }) => {
+const RagDetailsModal: React.FC<{ open: boolean; onClose: () => void; onRagDeleted: () => void; rag?: number }> = ({ open, onClose, onRagDeleted, rag }) => {
   const { t } = useTranslation()
 
   return (
@@ -74,7 +74,7 @@ const RagDetailsModal: React.FC<{ open: boolean; onClose: () => void; rag?: numb
           </TextButton>
         </Box>
         <Divider />
-        <Box sx={{ display: 'flex', p: '0 1rem 1rem 1rem', flex: '1', overflow: 'hidden' }}>{<RagModal rag={rag} />}</Box>
+        <Box sx={{ display: 'flex', p: '0 1rem 1rem 1rem', flex: '1', overflow: 'hidden' }}>{<RagModal rag={rag} onDeleted={onRagDeleted} />}</Box>
       </Box>
     </Modal>
   )
@@ -103,8 +103,9 @@ const PromptPreview = ({
   const { user } = useCurrentUser()
   const [openModal, setOpenModal] = useState(false)
   const [copyAnchor, setCopyAnchor] = useState<HTMLElement | null>(null)
+  const [deletedRagIndexId, setDeletedRagIndexId] = useState<number | null>(null)
   const courseId = courses.find((course) => course.id === prompt?.chatInstanceId)?.courseId ?? 'general'
-  const { data: chatInstance } = useCourse(courseId)
+  const { data: chatInstance, refetch: refetchChatInstance } = useCourse(courseId)
 
   const rag = chatInstance?.prompts.find((p) => p.id === prompt.id)?.ragIndex
 
@@ -116,16 +117,25 @@ const PromptPreview = ({
   const showCopyPrompt = !!user && canCopyPrompt({ isAdmin: user.isAdmin, isOwner: prompt.userId === user.id, isResponsible: amongResponsibles })
   const shouldFetchRagDetails = amongResponsibles || user?.isAdmin || isPersonalPrompt || (!!user && prompt.userId === user.id)
   const ragIndexId = prompt.ragIndex === null ? null : prompt.ragIndexId ? prompt.ragIndexId : null
+  const ragWasDeleted = deletedRagIndexId === ragIndexId
+  const displayedRag = ragWasDeleted ? undefined : rag
 
-  const { data: ragDetails, refetch: refetchRagDetails } = useRagIndexDetails(ragIndexId, shouldFetchRagDetails)
+  const { data: ragDetails, refetch: refetchRagDetails } = useRagIndexDetails(ragWasDeleted ? null : ragIndexId, shouldFetchRagDetails)
 
   const ragFiles = ragDetails?.ragFiles.filter((file) => !file.error) ?? []
 
   const handleCloseRagDetailsModal = () => {
     setOpenModal(false)
-    if (ragIndexId) {
+    if (ragIndexId && !ragWasDeleted) {
       void refetchRagDetails()
     }
+  }
+
+  const handleRagDeleted = () => {
+    if (ragIndexId) {
+      setDeletedRagIndexId(ragIndexId)
+    }
+    void refetchChatInstance()
   }
 
   const handleCopyLink = (event: React.MouseEvent<HTMLButtonElement>, prompt: Prompt) => {
@@ -338,7 +348,7 @@ const PromptPreview = ({
                 ) : null}
               </Box>
             </Paper>
-          ) : rag ? (
+          ) : displayedRag ? (
             prompt.ragHidden && !(amongResponsibles || user.isAdmin) ? (
               <Alert icon={<VisibilityOffOutlined fontSize="inherit" />} severity="info" sx={{ mt: 1.5 }}>
                 {t('common:hiddenRag')}
@@ -359,7 +369,7 @@ const PromptPreview = ({
                 }}
               >
                 <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary', ...monospaceStyle }}>
-                  {rag.metadata.name}
+                  {displayedRag.metadata.name}
                 </Typography>
               </Box>
             )
@@ -393,6 +403,7 @@ const PromptPreview = ({
         <RagDetailsModal
           open={openModal}
           onClose={handleCloseRagDetailsModal}
+          onRagDeleted={handleRagDeleted}
           rag={ragDetails && (ragDetails.userId === user.id || user.isAdmin) ? ragDetails.id : undefined}
         />
       )}

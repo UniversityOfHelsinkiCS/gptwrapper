@@ -14,9 +14,10 @@ interface RagDetailsProps {
   onSelectFile: React.Dispatch<React.SetStateAction<number | null>>
   selectedFileId: number | null
   ragModal: boolean
+  onDeleted?: () => void
 }
 
-export const RagDetails: React.FC<RagDetailsProps> = ({ selectedIndexId, onBack, onSelectFile, selectedFileId, ragModal }) => {
+export const RagDetails: React.FC<RagDetailsProps> = ({ selectedIndexId, onBack, onSelectFile, selectedFileId, ragModal, onDeleted }) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -47,13 +48,13 @@ export const RagDetails: React.FC<RagDetailsProps> = ({ selectedIndexId, onBack,
           <Typography>{t('rag:selectCollection')}</Typography>
         </Box>
       )}
-      {selectedIndexId && !selectedFileId && <RagIndexV2 indexId={selectedIndexId} onBack={onBack} onSelectFile={onSelectFile} />}
+      {selectedIndexId && !selectedFileId && <RagIndexV2 indexId={selectedIndexId} onBack={onBack} onSelectFile={onSelectFile} onDeleted={onDeleted} />}
       {selectedIndexId && selectedFileId && <RagFileV2 indexId={selectedIndexId} fileId={selectedFileId} onBack={() => onSelectFile(null)} />}
     </Box>
   )
 }
 
-const RagModal: React.FC<{ rag?: number }> = ({ rag }) => {
+const RagModal: React.FC<{ rag?: number; onDeleted?: () => void }> = ({ rag, onDeleted }) => {
   const { t } = useTranslation()
 
   const theme = useTheme()
@@ -113,7 +114,14 @@ const RagModal: React.FC<{ rag?: number }> = ({ rag }) => {
         <Divider sx={{ display: isMobile ? 'none' : 'flex' }} orientation="vertical" flexItem />
 
         {/* Right panel */}
-        <RagDetails selectedIndexId={selectedIndexId} onBack={handleBack} onSelectFile={setSelectedFileId} selectedFileId={selectedFileId} ragModal={true} />
+        <RagDetails
+          selectedIndexId={selectedIndexId}
+          onBack={handleBack}
+          onSelectFile={setSelectedFileId}
+          selectedFileId={selectedFileId}
+          ragModal={true}
+          onDeleted={onDeleted}
+        />
       </Box>
     </Box>
   )
