@@ -238,7 +238,7 @@ const PromptPreview = ({
           </Paper>
         )}
       </Box>
-      {(!isPersonalPrompt || (isPersonalPrompt && ragDetails)) && (
+      {(!isPersonalPrompt || user.isEmployee || user.isAdmin) && (
         <>
           <Divider sx={{ my: 3 }} />
           <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb: 1.5, justifyContent: 'space-between' }}>
