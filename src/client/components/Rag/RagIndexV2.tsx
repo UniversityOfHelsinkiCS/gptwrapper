@@ -36,6 +36,7 @@ import { EditableTitle } from './EditableTitle'
 import { RagFileRowV2 } from './RagFileRowV2'
 import { RagProgressSummaryV2 } from './RagProgressSummaryV2'
 import { isSupportedRagFile, RAG_FILE_ACCEPT } from '@shared/utils'
+import { usePromptState } from '../ChatV2/PromptState'
 
 const isImageFile = (fileType: string) => fileType === 'image/png'
 
@@ -95,6 +96,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
   const { data: ragDetails, isSuccess, refetch } = useRagIndexDetails(indexId)
   const { data: ragFileStatuses, refetch: refetchStatuses } = useRagIndexJobs(indexId, refetchInterval)
   const uploadMutation = useUploadMutation({ index: ragDetails, onUploadProgress: setUploadProgress })
+  const { activePrompt, handleChangePrompt } = usePromptState()
 
   const isComplete = ragFileStatuses ? ragFileStatuses.every(({ pipelineStage }) => pipelineStage !== 'ingesting') && !uploadMutation.isPending : false
 
@@ -230,6 +232,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
                   /* @ts-expect-error why not allowed lol, even the docstring tells this is how u use SnackbarProps */
                   SnackbarProps: { 'data-testid': 'ragIndexDeleteSuccessSnackbar' },
                 })
+                handleChangePrompt(activePrompt ? { ...activePrompt, ragIndexId: null } : undefined)
               }
             }}
             sx={{ ml: 'auto' }}

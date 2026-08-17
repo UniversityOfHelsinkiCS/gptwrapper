@@ -101,12 +101,16 @@ export const PromptStateProvider: React.FC<{
     }
 
     if (course && activePrompt && !universityPromptsPending && !universityPromptsFailed) {
-      const isValid =
-        universityPrompts.some((p) => p.id === activePrompt.id) ||
-        course.prompts?.some((p) => p.id === activePrompt.id) ||
-        myPrompts?.some((p) => p.id === activePrompt.id)
+      const freshPrompt =
+        universityPrompts.find((p) => p.id === activePrompt.id) ||
+        course.prompts?.find((p) => p.id === activePrompt.id) ||
+        myPrompts?.find((p) => p.id === activePrompt.id)
 
-      if (!isValid) handleChangePrompt(undefined)
+      if (!freshPrompt) {
+        handleChangePrompt(undefined)
+      } else if (JSON.stringify(freshPrompt) !== JSON.stringify(activePrompt)) {
+        setActivePrompt(freshPrompt)
+      }
     }
   }, [urlPrompt, course, activePrompt, myPrompts, universityPrompts, universityPromptsPending, universityPromptsFailed, handleChangePrompt])
 

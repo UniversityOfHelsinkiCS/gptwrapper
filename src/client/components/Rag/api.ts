@@ -71,6 +71,9 @@ export const useDeleteRagIndexMutation = (indexId: number) => {
       queryClient.removeQueries({ queryKey: ['ragIndex', indexId] })
       queryClient.removeQueries({ queryKey: ['ragIndex', indexId, 'jobs'] })
       queryClient.invalidateQueries({ queryKey: ['ragIndices'] })
+      queryClient.invalidateQueries({ queryKey: ['/prompts/my-prompts'] })
+      queryClient.invalidateQueries({ queryKey: ['course'] })
+      queryClient.invalidateQueries({ queryKey: ['chatInstances', 'user'] })
     },
   })
   return mutation
