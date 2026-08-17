@@ -7,6 +7,7 @@ import { getTeachedCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
 import _ from 'lodash'
+import { User } from '@shared/user'
 
 const courseRouter = express.Router()
 
@@ -211,12 +212,10 @@ export const chatIsActive = (chatInstance: ChatInstance) => {
 }
 
 //allows users that are students or admins to access the course. If as user is a student then the course must be open for students
-export const enforceUserHasStudentOrFullAccess = async (user, chatInstance: ChatInstance) => {
-  const enrolments = await Enrolment.findAll({
-    where: { chatInstanceId: chatInstance.id },
+export const enforceUserHasStudentOrFullAccess = async (user: User, chatInstance: ChatInstance) => {
+  const isEnrolled = await Enrolment.findOne({
+    where: { chatInstanceId: chatInstance.id, userId: user.id },
   })
-
-  const isEnrolled = enrolments ? enrolments.find((u) => u.userId === user.id) : false
   const courseIsOpen = chatIsActive(chatInstance)
 
   //the user is a student so let the user access
@@ -261,7 +260,6 @@ const getChatInstance = async (courseId: string) => {
             attributes: ['metadata'],
           },
         ],
-        
       },
     ],
   })
