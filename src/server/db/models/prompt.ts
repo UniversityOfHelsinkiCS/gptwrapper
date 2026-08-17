@@ -110,6 +110,14 @@ Prompt.init(
   {
     underscored: true,
     sequelize,
+    modelName: 'Prompt',
+    tableName: 'prompts',
+    indexes: [
+      {
+        fields: ['chat_instance_id'],
+        name: 'prompts_chat_instance_id_idx',
+      },
+    ],
   },
 )
 

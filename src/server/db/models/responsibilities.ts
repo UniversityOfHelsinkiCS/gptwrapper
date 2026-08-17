@@ -45,6 +45,10 @@ Responsibility.init(
         unique: true,
         fields: ['user_id', 'chat_instance_id'],
       },
+      {
+        fields: ['chat_instance_id'],
+        name: 'responsibilities_chat_instance_id_idx',
+      },
     ],
   },
 )
