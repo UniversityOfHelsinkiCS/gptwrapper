@@ -11,5 +11,5 @@ export const up: Migration = async ({ context: queryInterface }) => {
 
 export const down: Migration = async ({ context: queryInterface }) => {
   await queryInterface.removeIndex('prompts', 'prompts_chat_instance_id_idx')
-  await queryInterface.removeIndex('prompts', 'responsibilities_chat_instance_id_idx')
+  await queryInterface.removeIndex('responsibilities', 'responsibilities_chat_instance_id_idx')
 }
