@@ -173,12 +173,10 @@ const UsageSelector = () => {
           .map((course) => {
             const active = course.courseId === currentCourseId
             const percent = usagePercent(course.usage, course.limit)
-            return (
-              <MenuItem
-                key={course.courseId ?? getLanguageValue(course.name, i18n.language)}
-                onClick={() => handleSelect(course)}
-                sx={{ gap: 1.25, py: 0.75, px: 1.75, alignItems: 'center' }}
-              >
+            const key = course.courseId ?? getLanguageValue(course.name, i18n.language)
+            const itemSx = { display: 'flex', gap: 1.25, py: 0.75, px: 1.75, alignItems: 'center' }
+            const content = (
+              <>
                 <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25, minWidth: 0 }}>
                   <Typography
                     sx={{
@@ -196,7 +194,17 @@ const UsageSelector = () => {
                   </Typography>
                 </Box>
                 <UsageGauge percent={percent} />
+              </>
+            )
+
+            return course.courseId === 'general' ? (
+              <MenuItem key={key} onClick={() => handleSelect(course)} sx={itemSx}>
+                {content}
               </MenuItem>
+            ) : (
+              <Box key={key} sx={itemSx}>
+                {content}
+              </Box>
             )
           })}
       </Menu>
