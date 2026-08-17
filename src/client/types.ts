@@ -56,9 +56,9 @@ export type Prompt = {
   ragHidden: boolean
   type: PromptType
   createdAt: string
-  ragIndexId?: number
+  ragIndexId?: number | null
   userId: string | null
-  ragIndex?: ragInfo
+  ragIndex?: ragInfo | null
   language?: PromptLanguage | null
   universityPromptId?: string | null
 }

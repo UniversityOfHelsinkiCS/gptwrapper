@@ -73,6 +73,7 @@ Prompt.init(
         model: RagIndex,
         key: 'id',
       },
+      onDelete: 'SET NULL',
     },
     systemMessage: {
       type: DataTypes.TEXT,
