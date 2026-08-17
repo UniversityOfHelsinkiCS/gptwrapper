@@ -53,7 +53,7 @@ courseRouter.get('/statistics/:id', async (req, res) => {
 
   if (!chatInstance) throw ApplicationError.NotFound('ChatInstance not found')
 
-  enforceUserHasFullAccess(user, chatInstance)
+  await enforceUserHasFullAccess(user, chatInstance)
 
   const usages = await UserChatInstanceUsage.findAll({
     where: { chatInstanceId: chatInstance.id },
@@ -89,7 +89,7 @@ courseRouter.get('/statistics/:id/prompt-usages', async (req, res) => {
 
   if (!chatInstance) throw ApplicationError.NotFound('ChatInstance not found')
 
-  enforceUserHasFullAccess(user, chatInstance)
+  await enforceUserHasFullAccess(user, chatInstance)
 
   const { startDate, endDate } = chatInstance.activityPeriod
 
