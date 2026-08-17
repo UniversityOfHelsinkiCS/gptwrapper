@@ -7,7 +7,7 @@ import { getTeachedCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
 import _ from 'lodash'
-import { User } from '@shared/user'
+import type { User as SharedUser } from '@shared/user'
 
 const courseRouter = express.Router()
 
@@ -188,7 +188,7 @@ courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Re
 })
 
 //checks if user is a admin or is responsible for the course, returns forbidden error if not
-export const enforceUserHasFullAccess = async (user, chatInstance: ChatInstance) => {
+export const enforceUserHasFullAccess = async (user: SharedUser, chatInstance: ChatInstance) => {
   const isResponsibleForCourse: boolean = await userAssignedAsResponsible(user.id, chatInstance)
   const hasFullAccess: boolean = user.isAdmin || isResponsibleForCourse
 
@@ -212,7 +212,7 @@ export const chatIsActive = (chatInstance: ChatInstance) => {
 }
 
 //allows users that are students or admins to access the course. If as user is a student then the course must be open for students
-export const enforceUserHasStudentOrFullAccess = async (user: User, chatInstance: ChatInstance) => {
+export const enforceUserHasStudentOrFullAccess = async (user: SharedUser, chatInstance: ChatInstance) => {
   const isEnrolled = await Enrolment.findOne({
     where: { chatInstanceId: chatInstance.id, userId: user.id },
   })
