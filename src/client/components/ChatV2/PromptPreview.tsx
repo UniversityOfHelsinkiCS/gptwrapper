@@ -1,7 +1,7 @@
 import { PUBLIC_URL } from '@config'
 import { ContentCopyOutlined, EditOutlined, LinkOutlined, VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
-import { Box, Divider, Typography, Paper, Tooltip, IconButton, Alert, List, ListItem, ListItemText, Modal } from '@mui/material'
+import { Box, Divider, Typography, Paper, Tooltip, IconButton, Alert, List, ListItem, ListItemText } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 import useCourse from '../../hooks/useCourse'
@@ -15,10 +15,6 @@ import { monospaceStyle } from '../../theme'
 import BookmarksIcon from '@mui/icons-material/Bookmarks'
 import { useRagIndexDetails } from '../Rag/api.ts'
 import { orderBy } from 'lodash'
-import { TextButton } from './general/Buttons.tsx'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew'
-import CloseIcon from '@mui/icons-material/Close'
-import RagModal from '../Rag/RagModal.tsx'
 import { useState } from 'react'
 import CopyPromptMenu from './CopyPromptMenu.tsx'
 import type { CoursesViewCourse } from '../../hooks/useUserCourses'
@@ -32,52 +28,6 @@ const ragFileBadge = (filename: string, fileType?: string) => {
   if (label === 'PPTX' || label === 'PPT') return { label, palette: 'warning' as const }
   if (label === 'PNG' || label === 'JPG' || label === 'JPEG') return { label, palette: 'secondary' as const }
   return { label, palette: 'primary' as const }
-}
-
-const RagDetailsModal: React.FC<{ open: boolean; onClose: () => void; onRagDeleted: () => void; rag?: number }> = ({ open, onClose, onRagDeleted, rag }) => {
-  const { t } = useTranslation()
-
-  return (
-    <Modal open={open} onClose={onClose} hideBackdrop>
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          display: 'flex',
-          flexDirection: 'column',
-          width: { xs: '99vw', md: '90vw', lg: '75vw' },
-          maxWidth: 1400,
-          minHeight: '85vh',
-          maxHeight: '85vh',
-          bgcolor: 'background.paper',
-          boxShadow: 24,
-          overflow: 'auto',
-          borderRadius: '0.5rem',
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            p: '1rem',
-            position: 'sticky',
-            top: 0,
-            zIndex: 999,
-            bgcolor: 'background.subtle',
-          }}
-        >
-          <Typography variant="h6">{t('course:userSourceMaterials')}</Typography>
-          <TextButton data-testid="close-modal" onClick={onClose}>
-            <CloseIcon />
-          </TextButton>
-        </Box>
-        <Divider />
-        <Box sx={{ display: 'flex', p: '0 1rem 1rem 1rem', flex: '1', overflow: 'hidden' }}>{<RagModal rag={rag} onDeleted={onRagDeleted} />}</Box>
-      </Box>
-    </Modal>
-  )
 }
 
 const PromptPreview = ({
@@ -101,13 +51,11 @@ const PromptPreview = ({
   const { myPrompts } = usePromptState()
   const { t } = useTranslation()
   const { user } = useCurrentUser()
-  const [openModal, setOpenModal] = useState(false)
   const [copyAnchor, setCopyAnchor] = useState<HTMLElement | null>(null)
-  const [deletedRagIndexId, setDeletedRagIndexId] = useState<number | null>(null)
   const courseId = courses.find((course) => course.id === prompt?.chatInstanceId)?.courseId ?? 'general'
-  const { data: chatInstance, refetch: refetchChatInstance } = useCourse(courseId)
+  const { data: chatInstance } = useCourse(courseId)
 
-  const rag = chatInstance?.prompts.find((p) => p.id === prompt.id)?.ragIndex
+  const rag = prompt.ragIndex
 
   const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
 
@@ -117,26 +65,10 @@ const PromptPreview = ({
   const showCopyPrompt = !!user && canCopyPrompt({ isAdmin: user.isAdmin, isOwner: prompt.userId === user.id, isResponsible: amongResponsibles })
   const shouldFetchRagDetails = amongResponsibles || user?.isAdmin || isPersonalPrompt || (!!user && prompt.userId === user.id)
   const ragIndexId = prompt.ragIndex === null ? null : prompt.ragIndexId ? prompt.ragIndexId : null
-  const ragWasDeleted = deletedRagIndexId === ragIndexId
-  const displayedRag = ragWasDeleted ? undefined : rag
 
-  const { data: ragDetails, refetch: refetchRagDetails } = useRagIndexDetails(ragWasDeleted ? null : ragIndexId, shouldFetchRagDetails)
+  const { data: ragDetails } = useRagIndexDetails(ragIndexId, shouldFetchRagDetails)
 
   const ragFiles = ragDetails?.ragFiles.filter((file) => !file.error) ?? []
-
-  const handleCloseRagDetailsModal = () => {
-    setOpenModal(false)
-    if (ragIndexId && !ragWasDeleted) {
-      void refetchRagDetails()
-    }
-  }
-
-  const handleRagDeleted = () => {
-    if (ragIndexId) {
-      setDeletedRagIndexId(ragIndexId)
-    }
-    void refetchChatInstance()
-  }
 
   const handleCopyLink = (event: React.MouseEvent<HTMLButtonElement>, prompt: Prompt) => {
     event.stopPropagation()
@@ -257,18 +189,6 @@ const PromptPreview = ({
               <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
                 {t('prompt:promptSourceMaterialData')}
               </Typography>
-              {canEditPrompt && (
-                <Tooltip placement="right" title={t('rag:editSourceMaterial')} describeChild>
-                  <IconButton
-                    onClick={() => setOpenModal(true)}
-                    data-testid="edit-source-material-button"
-                    sx={{ color: theme.palette.primary.main }}
-                    aria-label={t('rag:editSourceMaterial')}
-                  >
-                    <OpenInNewIcon color="primary" />
-                  </IconButton>
-                </Tooltip>
-              )}
             </Box>
             {!isPersonalPrompt && (amongResponsibles || user.isAdmin) && (
               <Box display="flex" alignItems="center" gap={1}>
@@ -348,7 +268,7 @@ const PromptPreview = ({
                 ) : null}
               </Box>
             </Paper>
-          ) : displayedRag ? (
+          ) : rag ? (
             prompt.ragHidden && !(amongResponsibles || user.isAdmin) ? (
               <Alert icon={<VisibilityOffOutlined fontSize="inherit" />} severity="info" sx={{ mt: 1.5 }}>
                 {t('common:hiddenRag')}
@@ -369,7 +289,7 @@ const PromptPreview = ({
                 }}
               >
                 <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary', ...monospaceStyle }}>
-                  {displayedRag.metadata.name}
+                  {rag.metadata.name}
                 </Typography>
               </Box>
             )
@@ -399,14 +319,6 @@ const PromptPreview = ({
         </>
       )}
       {showCopyPrompt && <CopyPromptMenu prompt={prompt} targets={copyTargets} anchorEl={copyAnchor} onClose={() => setCopyAnchor(null)} onCopied={onCopied} />}
-      {openModal && (
-        <RagDetailsModal
-          open={openModal}
-          onClose={handleCloseRagDetailsModal}
-          onRagDeleted={handleRagDeleted}
-          rag={ragDetails && (ragDetails.userId === user.id || user.isAdmin) ? ragDetails.id : undefined}
-        />
-      )}
     </Paper>
   )
 }
