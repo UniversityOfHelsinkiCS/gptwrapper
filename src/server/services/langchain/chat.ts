@@ -355,7 +355,7 @@ const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[]): ChatMo
       return tools.length > 0 ? (azureModel.bindTools(tools) as ChatModel) : azureModel
     }
     case ModelProvider.Vertex: {
-      const vertexModel = getVertexModelProvider(modelConfig.name)
+      const vertexModel = getVertexModelProvider(modelConfig)
       return tools.length > 0 ? vertexModel.bindTools(tools) : vertexModel
     }
     case ModelProvider.Mock:

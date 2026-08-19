@@ -39,6 +39,8 @@ export type ModelConfig = {
   instructions?: string
   temperature?: number
   descriptionKey?: ModelDescriptionKey
+  /** Vertex-only: overrides DEFAULT_VERTEX_LOCATION for models not available in that region. */
+  modelRegion?: string
 }
 
 /**
@@ -74,23 +76,26 @@ export const validModels: ModelConfig[] = [
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.balanced',
   },
+  // gemini 3.5 flash lite is not available in EU for now. It is the direct replacement 2.5 flash
+  // {
+  //   name: 'gemini-3.5-flash-lite',
+  //   context: 128_000,
+  //   streamVersion: 'v3',
+  //   instructions: formatInstructions,
+  //   provider: ModelProvider.Vertex,
+  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+  //   timeoutOverride: 60000,
+  // },
   {
-    name: 'gemini-2.5-flash',
+    name: 'gemini-3.5-flash',
     context: 128_000,
     streamVersion: 'v3',
     instructions: formatInstructions,
     provider: ModelProvider.Vertex,
-    descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+    descriptionKey: 'chat:modelDescriptions.balanced',
     timeoutOverride: 60000,
-  },
-  {
-    name: 'gemini-2.5-pro',
-    context: 128_000,
-    streamVersion: 'v3',
-    instructions: formatInstructions,
-    provider: ModelProvider.Vertex,
-    descriptionKey: 'chat:modelDescriptions.premium',
-    timeoutOverride: 60000,
+    // Not available in europe-north1(helsinki) yet, so we use europe-west3(frankfurt) for now.
+    modelRegion: 'europe-west3',
   },
   {
     name: 'mock',
