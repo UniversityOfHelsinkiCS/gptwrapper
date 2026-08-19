@@ -23,7 +23,6 @@ import { useTranslation } from 'react-i18next'
 import { enqueueSnackbar } from 'notistack'
 import SchoolIcon from '@mui/icons-material/School'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
-import CodeIcon from '@mui/icons-material/Code'
 import ForumIcon from '@mui/icons-material/Forum'
 import TagIcon from '@mui/icons-material/Tag'
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'
@@ -46,7 +45,6 @@ import { usagePercent, gaugeColorKey, formatTokens, UsageInfoButton } from './Us
 import { formatDate } from './util'
 import { OutlineButtonBlue, BlueButton } from './general/Buttons'
 import { CourseActivityPeriodEditor } from '../Courses/Course/CourseActivityPeriodEditor'
-import CourseEmbedding from '../Courses/Course/CourseEmbedding'
 import DiscussionView from '../Courses/Course/Discussions'
 import PromptUsageHistogram from '../Courses/Course/PromptUsageHistogram'
 import { EnrolmentActionUserSearch, ResponsibilityActionUserSearch } from '../Admin/UserSearch'
@@ -84,7 +82,6 @@ const CoursePreview = ({ course }: { course: Course }) => {
   const [addTeacherOpen, setAddTeacherOpen] = useState(false)
   const [showAllTeachers, setShowAllTeachers] = useState(false)
   const [addStudentOpen, setAddStudentOpen] = useState(false)
-  const [embeddingModalOpen, setEmbeddingModalOpen] = useState(false)
   const [discussionsModalOpen, setDiscussionsModalOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'last_name', direction: 'asc' })
@@ -243,13 +240,6 @@ const CoursePreview = ({ course }: { course: Course }) => {
                 data-testid="go-to-course-page-link"
               >
                 <OpenInNewIcon color="primary" />
-              </IconButton>
-            </Tooltip>
-          )}
-          {canManage && (
-            <Tooltip title={t('course:moodleEmbedding')}>
-              <IconButton aria-label={t('course:moodleEmbedding')} onClick={() => setEmbeddingModalOpen(true)} data-testid="open-course-embedding-button">
-                <CodeIcon color="primary" />
               </IconButton>
             </Tooltip>
           )}
@@ -488,17 +478,6 @@ const CoursePreview = ({ course }: { course: Course }) => {
           </Box>
         )}
       </Paper>
-      <Dialog open={embeddingModalOpen} onClose={() => setEmbeddingModalOpen(false)} fullWidth maxWidth="lg">
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {t('course:moodleEmbedding')}
-          <IconButton onClick={() => setEmbeddingModalOpen(false)} aria-label={t('common:close')}>
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          <CourseEmbedding courseId={course.courseId} coursePrompts={course.prompts} />
-        </DialogContent>
-      </Dialog>
       <Dialog open={discussionsModalOpen} onClose={() => setDiscussionsModalOpen(false)} fullWidth maxWidth="lg">
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {t('course:discussions')}

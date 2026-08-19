@@ -1,10 +1,8 @@
-import { Box, Typography, FormControl, Select, MenuItem, SelectChangeEvent, Divider } from '@mui/material'
+import { Box, Typography, Divider } from '@mui/material'
 import CopyToClipboardButton from '../../ChatV2/CopyToClipboardButton'
 import { ReactNode, useEffect, useState } from 'react'
 import { PUBLIC_URL } from '@config'
 import useCourse from '../../../hooks/useCourse'
-import { useParams } from 'react-router-dom'
-import { usePromptState } from '../../ChatV2/PromptState'
 import { Prompt } from 'src/client/types'
 import { useTranslation } from 'react-i18next'
 import moodleTutorialImage1 from '../../../assets/moodle-1.jpeg'
@@ -12,40 +10,24 @@ import moodleTutorialImage2 from '../../../assets/moodle-2.jpeg'
 import moodleTutorialImage3 from '../../../assets/moodle-3.jpeg'
 
 interface CourseEmbeddingProps {
-  courseId?: string
-  coursePrompts?: Prompt[]
-  activePrompt?: Prompt
+  courseId: string
+  prompt: Prompt
 }
 
-export default function CourseEmbedding({ courseId: courseIdProp, coursePrompts: coursePromptsProp, activePrompt: activePromptProp }: CourseEmbeddingProps = {}) {
+export default function CourseEmbedding({ courseId, prompt }: CourseEmbeddingProps) {
   const { t } = useTranslation()
-  const { courseId: routeCourseId } = useParams() as { courseId: string }
-  const { coursePrompts: contextCoursePrompts, activePrompt: contextActivePrompt } = usePromptState()
-  const courseId = courseIdProp ?? routeCourseId
   const { data: chatInstance } = useCourse(courseId)
-  const coursePrompts = coursePromptsProp?.length ? coursePromptsProp : contextCoursePrompts?.length ? contextCoursePrompts : (chatInstance?.prompts ?? [])
   const [link, setLink] = useState<string>('')
   const [embeddingCode, setEmbeddingCode] = useState<string>('')
-  const [selectedPrompt, setSelectedPrompt] = useState<Prompt | undefined>(activePromptProp ?? contextActivePrompt)
 
   useEffect(() => {
     if (!chatInstance) return
     const baseUrl = `${window.location.origin}${PUBLIC_URL}/${chatInstance.courseId}`
-    const studentLink = selectedPrompt ? createLinkWithPrompt(baseUrl, selectedPrompt.id) : baseUrl
-    const moodleEmbedding = selectedPrompt ? createEmbeddingWithPrompt(baseUrl, selectedPrompt.id) : createEmbedding(baseUrl)
+    const studentLink = createLinkWithPrompt(baseUrl, prompt.id)
+    const moodleEmbedding = createEmbeddingWithPrompt(baseUrl, prompt.id)
     setLink(studentLink)
     setEmbeddingCode(moodleEmbedding)
-  }, [chatInstance, selectedPrompt])
-
-  const handleChange = (event: SelectChangeEvent) => {
-    const value = event.target.value
-    if (value === '') {
-      setSelectedPrompt(undefined)
-    } else {
-      const prompt = coursePrompts.find((p) => String(p.id) === String(value))
-      setSelectedPrompt(prompt)
-    }
-  }
+  }, [chatInstance, prompt])
 
   return (
     <Box sx={{ p: 1, position: 'relative' }}>
@@ -106,38 +88,14 @@ export default function CourseEmbedding({ courseId: courseIdProp, coursePrompts:
             height: 'fit-content', // Ensures the sticky container isn't taller than its content
           }}
         >
-          <Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
             <Typography fontWeight="bold" mb={2}>
               {t('course:courseEmbeddingPrompt')}
             </Typography>
-            <FormControl fullWidth size="small">
-              <Select
-                labelId="prompt-select-label"
-                id="prompt-select"
-                value={selectedPrompt?.id || ''}
-                onChange={handleChange}
-                displayEmpty
-                renderValue={(selected) => {
-                  if (!selected) {
-                    return <em style={{ color: 'gray', fontStyle: 'normal' }}>{t('sidebar:promptSelect')}</em>
-                  }
-                  return coursePrompts.find((p) => p.id === selected)?.name
-                }}
-                sx={{ p: 0.8 }}
-              >
-                <MenuItem value="">
-                  <em>{t('sidebar:promptNone')}</em>
-                </MenuItem>
-                {coursePrompts.map((prompt) => (
-                  <MenuItem key={prompt.id} value={prompt.id} sx={{ p: 2 }}>
-                    {prompt.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Typography>{prompt.name}</Typography>
           </Box>
 
-          <Typography fontWeight="bold" mt={3} mb={2}>{`${t('course:courseChatLink')} ${selectedPrompt ? `+ (${selectedPrompt.name})` : ''}`}</Typography>
+          <Typography fontWeight="bold" mt={3} mb={2}>{`${t('course:courseChatLink')} ${prompt ? `+ (${prompt.name})` : ''}`}</Typography>
           <CopyField copied={link}>
             <Typography color="textSecondary" sx={{ p: 1, pr: 3, wordBreak: 'break-all' }}>
               {link}
@@ -249,7 +207,6 @@ const TutorialImage = ({ src, alt }: { src: string; alt: string }) => {
 
 const createLinkWithPrompt = (baseUrl: string, promptId: string) => `${baseUrl}?promptId=${promptId}`
 const createEmbeddingWithPrompt = (baseUrl: string, promptId: string) => embeddingMake(baseUrl, promptId)
-const createEmbedding = (baseUrl: string) => embeddingMake(baseUrl)
 const embeddingMake = (baseUrl: string, promptId?: string) =>
   `<div lang="fi" style="position: relative;" translate="yes"><iframe
     id="cc-iframe"
