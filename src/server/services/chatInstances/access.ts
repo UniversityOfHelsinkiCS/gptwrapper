@@ -5,6 +5,35 @@ import logger from '../../util/logger'
 
 const getUserById = async (id: string) => UserModel.findByPk(id)
 
+const chatInstanceWithPrompts = {
+  include: [
+    {
+      model: Responsibility,
+      as: 'responsibilities',
+      separate: true,
+      attributes: ['id', 'createdByUserId'],
+      include: [
+        {
+          model: UserModel,
+          as: 'user',
+          attributes: ['id', 'username', 'last_name', 'first_names'],
+        },
+      ],
+    },
+    {
+      model: Prompt,
+      as: 'prompts',
+      include: [
+        {
+          model: RagIndex,
+          as: 'ragIndex',
+          attributes: ['metadata'],
+        },
+      ],
+    },
+  ],
+}
+
 const findEnrolments = async (userId: string) =>
   (await Enrolment.findAll({
     where: {
@@ -12,32 +41,8 @@ const findEnrolments = async (userId: string) =>
     },
     include: [
       {
-        association: Responsibility.associations.chatInstance,
-        include: [
-          {
-            model: Responsibility,
-            as: 'responsibilities',
-            attributes: ['id', 'createdByUserId'],
-            include: [
-              {
-                model: UserModel,
-                as: 'user',
-                attributes: ['id', 'username', 'last_name', 'first_names'],
-              },
-            ],
-          },
-          {
-            model: Prompt,
-            as: 'prompts',
-            include: [
-              {
-                model: RagIndex,
-                as: 'ragIndex',
-                attributes: ['metadata'],
-              },
-            ],
-          },
-        ],
+        association: Enrolment.associations.chatInstance,
+        ...chatInstanceWithPrompts,
       },
     ],
   })) as (Enrolment & { chatInstance: ChatInstance })[]
@@ -102,31 +107,7 @@ const findResponsibilities = async (userId: string) =>
     include: [
       {
         association: Responsibility.associations.chatInstance,
-        include: [
-          {
-            model: Responsibility,
-            as: 'responsibilities',
-            attributes: ['id', 'createdByUserId'],
-            include: [
-              {
-                model: UserModel,
-                as: 'user',
-                attributes: ['id', 'username', 'last_name', 'first_names'],
-              },
-            ],
-          },
-          {
-            model: Prompt,
-            as: 'prompts',
-            include: [
-              {
-                model: RagIndex,
-                as: 'ragIndex',
-                attributes: ['metadata'],
-              },
-            ],
-          },
-        ],
+        ...chatInstanceWithPrompts,
       },
     ],
   })) as (Responsibility & { chatInstance: ChatInstance })[]
