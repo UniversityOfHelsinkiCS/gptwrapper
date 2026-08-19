@@ -59,7 +59,7 @@ courseRouter.get('/user', async (req, res) => {
     else byId.set(chatInstance.id, { ...decorate(chatInstance), role: 'student' })
   }
 
-  res.send(byId.values())
+  res.send([...byId.values()])
 })
 
 courseRouter.get('/statistics/:id', async (req, res) => {

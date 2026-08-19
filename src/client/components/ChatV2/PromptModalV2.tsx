@@ -147,21 +147,17 @@ const PromptModalV2 = () => {
 
   const { hasChanges, setHasChanges, cacheKey, setCacheKey } = usePromptEditorState()
 
-  const studentsCourses = user?.enrolledCourses as Course[]
   const { courses, isLoading } = useUserCourses()
   const { curreEnabled, curreDisabled, ended } = getGroupedCourses(courses)
-  const students = studentsCourses ?? []
 
   const [showInactive, setShowInactive] = useLocalStorageState('promptFilter.showInactive', true)
   const [showEnded, setShowEnded] = useLocalStorageState('promptFilter.showEnded', false)
   const [filterAnchor, setFilterAnchor] = useState<HTMLButtonElement | null>(null)
 
-  const dedupe = (list: Course[]) => Array.from(new Map(list.map((course) => [course.id, course])).values())
-  const allCourses = dedupe([...curreEnabled, ...curreDisabled, ...ended, ...students])
-  const visibleCourses = dedupe([...curreEnabled, ...(showInactive ? curreDisabled : []), ...(showEnded ? ended : []), ...students])
+  const allCourses = [...curreEnabled, ...curreDisabled, ...ended]
+  const visibleCourses = [...curreEnabled, ...(showInactive ? curreDisabled : []), ...(showEnded ? ended : [])]
 
-  const copyTargets = Array.from(new Map([...curreEnabled, ...curreDisabled].map((course) => [course.id, course])).values())
-
+  const copyTargets = allCourses.filter((course) => course.role === 'teacher')
   const [expandTarget, setExpandTarget] = useState<{ courseId: string; nonce: number } | null>(null)
 
   const handleCopied = (course?: CoursesViewCourse) => {

@@ -1,5 +1,4 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import _ from 'lodash'
 
 import { Course } from '../types'
 import apiClient from '../util/apiClient'
@@ -7,6 +6,7 @@ import apiClient from '../util/apiClient'
 export type CoursesViewCourse = {
   activated: boolean
   expired: boolean
+  role: 'student' | 'teacher'
 } & Course
 
 const useUserCourses = () => {
@@ -15,7 +15,7 @@ const useUserCourses = () => {
   const queryFn = async (): Promise<CoursesViewCourse[]> => {
     const res = await apiClient.get(`/courses/user`)
 
-    const courses = _.orderBy(res.data, ['activated', 'expired'], ['desc', 'asc'])
+    const courses = res.data
     return courses
   }
 
