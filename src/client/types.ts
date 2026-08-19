@@ -34,7 +34,6 @@ export interface User {
   isCourseCreator: boolean
   hasIamAccess?: boolean
   lastRestart: string
-  enrolledCourses: ChatInstance[]
   isStatsViewer: boolean
   termsAcceptedAt?: string | null
   preferences?: UserPreferences

@@ -1,6 +1,6 @@
 import express from 'express'
 
-import type { ChatInstance, RequestWithUser } from '../types'
+import type { RequestWithUser } from '../types'
 import logger from '../util/logger'
 import { getTeachedCourses, getEnrolledCourses } from '../services/chatInstances/access'
 import { User } from '../db/models'
@@ -10,9 +10,6 @@ import { ApplicationError } from '../util/ApplicationError'
 import { UserPreferencesSchema } from '../../shared/user'
 import { checkIamAccess } from '../util/iams'
 import { CourseUsage } from '@shared/types'
-
-const isNowOrInFuture = ({ chatInstance }: { chatInstance: ChatInstance }) =>
-  chatInstance.usageLimit > 0 && new Date() <= new Date(chatInstance.activityPeriod.endDate)
 
 const userRouter = express.Router()
 
@@ -62,7 +59,6 @@ userRouter.get('/login', async (req, res) => {
     tokenLimit,
     lastRestart,
     serverVersion: process.env.VERSION,
-    enrolledCourses: enrolments.filter(isNowOrInFuture).map((enrolment) => enrolment.chatInstance),
     termsAcceptedAt: dbUser.termsAcceptedAt,
   })
   return
