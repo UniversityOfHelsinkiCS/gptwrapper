@@ -3,7 +3,7 @@ import { Op, Sequelize, WhereOptions } from 'sequelize'
 
 import type { ActivityPeriod, RequestWithUser } from '../types'
 import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, PromptUsage, User, Responsibility, Discussion, RagIndex } from '../db/models'
-import { getTeachedCourses } from '../services/chatInstances/access'
+import { getEnrolledCourses, getTeachedCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
 import _ from 'lodash'
@@ -21,6 +21,18 @@ const getCourses = async () => {
   return courses
 }
 
+export const chatIsActive = (chatInstance: ChatInstance) => {
+  const start = new Date(chatInstance.activityPeriod.startDate)
+  const end = new Date(chatInstance.activityPeriod.endDate)
+  const today = new Date()
+
+  const todayIsMoreOrEqualToStart = today >= start
+  const todayIsLessOrEqualToEnd = today <= end
+  const usageLimitMoreThanZero = chatInstance.usageLimit > 0
+
+  return todayIsMoreOrEqualToStart && todayIsLessOrEqualToEnd && usageLimitMoreThanZero
+}
+
 courseRouter.get('/', async (_req, res) => {
   const courses = await getCourses()
   res.send(courses)
@@ -30,15 +42,24 @@ courseRouter.get('/user', async (req, res) => {
   const request = req as RequestWithUser
   const { user } = request
 
-  const chatInstances = await getTeachedCourses(user)
+  const [teached, enrolled] = await Promise.all([getTeachedCourses(user), getEnrolledCourses(user)])
+  const decorate = (ci: ChatInstance) => ({
+    ...ci.toJSON(),
+    activated: ci.usageLimit > 0,
+    expired: Date.parse(ci.activityPeriod.endDate) < Date.now(),
+  })
 
-  const coursesWithExtra = _.orderBy(chatInstances, ['usageLimit', 'name'], ['desc', 'desc']).map((chatinstance) => ({
-    ...chatinstance.toJSON(),
-    activated: chatinstance.activated,
-    expired: Date.parse(chatinstance.activityPeriod.endDate) < Date.now(),
-  }))
+  const byId = new Map<string, ReturnType<typeof decorate> & { role: 'teacher' | 'student' }>()
 
-  res.send(coursesWithExtra)
+  for (const ci of teached) byId.set(ci.id, { ...decorate(ci), role: 'teacher' })
+
+  for (const { chatInstance } of enrolled.filter(({ chatInstance }) => chatIsActive(chatInstance))) {
+    const existing = byId.get(chatInstance.id)
+    if (existing) continue
+    else byId.set(chatInstance.id, { ...decorate(chatInstance), role: 'student' })
+  }
+
+  res.send(byId.values())
 })
 
 courseRouter.get('/statistics/:id', async (req, res) => {
@@ -197,18 +218,6 @@ export const enforceUserHasFullAccess = async (user: SharedUser, chatInstance: C
   }
 
   return hasFullAccess
-}
-
-export const chatIsActive = (chatInstance: ChatInstance) => {
-  const start = new Date(chatInstance.activityPeriod.startDate)
-  const end = new Date(chatInstance.activityPeriod.endDate)
-  const today = new Date()
-
-  const todayIsMoreOrEqualToStart = today >= start
-  const todayIsLessOrEqualToEnd = today <= end
-  const usageLimitMoreThanZero = chatInstance.usageLimit > 0
-
-  return todayIsMoreOrEqualToStart && todayIsLessOrEqualToEnd && usageLimitMoreThanZero
 }
 
 //allows users that are students or admins to access the course. If as user is a student then the course must be open for students
