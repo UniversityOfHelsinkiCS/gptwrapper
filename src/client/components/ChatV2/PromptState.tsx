@@ -9,7 +9,7 @@ import useUniversityPrompts from '../../hooks/useUniversityPrompts'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import type { PromptCreationParams, PromptEditableParams } from '@shared/prompt'
 import type { MessageGenerationInfo } from '@shared/chat'
-import { invalidateAllPromptLists } from 'src/client/util/promptQueries'
+import { invalidateAllPromptLists } from '../../util/promptQueries'
 
 export type CreatePromptMutation = UseMutateAsyncFunction<Prompt, ApiError, Omit<PromptCreationParams, 'userId'>, unknown>
 export type DeletePromptMutation = UseMutateAsyncFunction<void, ApiError, string, unknown>
@@ -24,17 +24,6 @@ interface PromptSelectorStateType {
   isPromptHidden: boolean
   isPromptEditable: boolean
   promptInfo: MessageGenerationInfo['promptInfo']
-  saveOwnPrompt: UseMutateAsyncFunction<
-    void,
-    ApiError,
-    {
-      name: string
-      promptToSave?: Prompt
-      systemMessage: string
-    },
-    unknown
-  >
-  deleteOwnPrompt: UseMutateAsyncFunction<void, ApiError, Prompt, unknown>
   createPromptMutation: CreatePromptMutation
   deletePromptMutation: DeletePromptMutation
   editPromptMutation: EditPromptMutation
