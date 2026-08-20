@@ -26,6 +26,8 @@ export const handleCompletionStreamError = (err: any, file: string) => {
       translatedMessage = t('error:pdfInvalid')
     } else if (error.includes('parsing') || error.includes('Error parsing file')) {
       translatedMessage = t('error:pdfParsingError')
+    } else if (error.includes('too large')) {
+      translatedMessage = t('error:tooLargeFile')
     } else {
       translatedMessage = t('error:fileParsingError')
     }
