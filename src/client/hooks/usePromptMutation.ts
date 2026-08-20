@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 
 import queryClient from '../util/queryClient'
-import { queryKey } from './usePrompts'
 import apiClient from '../util/apiClient'
 import type { PromptEditableParams, PromptCreationParams, PromptCopyParams } from '@shared/prompt'
 import type { Prompt } from '../types'
@@ -19,9 +18,6 @@ export const useCreatePromptMutation = () => {
   const mutation = useMutation({
     mutationFn,
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey,
-      })
       invalidateAllPromptLists()
     },
   })
@@ -39,9 +35,6 @@ export const useDeletePromptMutation = () => {
   const mutation = useMutation({
     mutationFn,
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey,
-      })
       invalidateAllPromptLists()
     },
   })
@@ -77,7 +70,6 @@ export const useCopyPromptMutation = () => {
   const mutation = useMutation({
     mutationFn,
     onSuccess: (_prompt, variables) => {
-      queryClient.invalidateQueries({ queryKey })
       invalidatePromptLists(variables.destinationCourseId)
     },
     onError: (error: ApiError) => {
@@ -98,9 +90,6 @@ export const useEditPromptMutation = () => {
   const mutation = useMutation({
     mutationFn,
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey,
-      })
       invalidateAllPromptLists()
     },
   })
