@@ -123,41 +123,6 @@ export const PromptStateProvider: React.FC<{
     })
   }, [activePrompt?.id])
 
-  const ownPromptSaveMutation = useMutation({
-    mutationFn: async ({ name, promptToSave, systemMessage }: { name: string; promptToSave?: Prompt; systemMessage: string }) => {
-      if (promptToSave && promptToSave.type !== 'PERSONAL') return // Only do this for personal prompts
-
-      const promptData = {
-        name,
-        systemMessage,
-        type: 'PERSONAL',
-      }
-
-      if (promptToSave) {
-        const res = await apiClient.put<Prompt>(`/prompts/${promptToSave.id}`, promptData)
-        setActivePrompt(res.data)
-      } else {
-        const res = await apiClient.post<Prompt>('/prompts', promptData)
-        setActivePrompt(res.data)
-      }
-
-      refetchPrompts()
-    },
-  })
-
-  const ownPromptDeleteMutation = useMutation({
-    mutationFn: async (prompt: Prompt) => {
-      if (prompt.type !== 'PERSONAL') return // Only do this for personal prompts
-
-      await apiClient.delete(`/prompts/${prompt.id}`)
-      refetchPrompts()
-
-      if (activePrompt?.id === prompt.id) {
-        setActivePrompt(undefined)
-      }
-    },
-  })
-
   const createPromptMutation = useMutation({
     mutationFn: async (data: Omit<PromptCreationParams, 'userId'>) => {
       const res = await apiClient.post(`/prompts`, data)
@@ -201,8 +166,6 @@ export const PromptStateProvider: React.FC<{
     promptInfo,
     isPromptHidden,
     isPromptEditable,
-    saveOwnPrompt: ownPromptSaveMutation.mutateAsync,
-    deleteOwnPrompt: ownPromptDeleteMutation.mutateAsync,
     createPromptMutation: createPromptMutation.mutateAsync,
     deletePromptMutation: deletePromptMutation.mutateAsync,
     editPromptMutation: editPromptMutation.mutateAsync,
