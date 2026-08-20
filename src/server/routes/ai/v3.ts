@@ -136,6 +136,9 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     if (prompt.type === 'TEMPLATE') {
       throw ApplicationError.Forbidden('Template prompts must be copied before use')
     }
+    if (prompt.type === 'PERSONAL' && prompt.userId !== user.id) {
+      throw ApplicationError.NotFound('Prompt not found')
+    }
 
     systemMessage = prompt.systemMessage
 
