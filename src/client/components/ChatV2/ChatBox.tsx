@@ -194,6 +194,7 @@ export const ChatBox = ({
           <Box>
             <TextField
               autoFocus={!isEmbedded}
+              id="chat-input"
               inputRef={textFieldRef}
               value={message}
               onChange={(e) => setMessage(e.target.value)}

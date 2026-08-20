@@ -1,12 +1,14 @@
 import { Checkbox, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogActions, Button, DialogContentText, Box, RadioGroup, Radio } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { BlueButton } from './general/Buttons'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { NewConversationConfirmConfigurator, useNewConversationConfirmMutation } from '../Settings/NewConversationConfirmConfigurator'
 import useCurrentUser from '../../hooks/useCurrentUser'
 
 export const ResetConfirmModal = ({
-  open, setOpen, onConfirm
+  open,
+  setOpen,
+  onConfirm,
 }: {
   open: boolean
   setOpen: (open: boolean) => void
@@ -19,21 +21,47 @@ export const ResetConfirmModal = ({
   const [sendEmail, setSendEmail] = useState(false)
   const [downloadFile, setDownloadFile] = useState(false)
   const [downloadFormat, setDownloadFormat] = useState<'md' | 'docx' | 'pdf' | 'txt'>('md')
+  const wasConfirmedRef = useRef(false)
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null)
+  const wasOpenRef = useRef(open)
+  if (open && !wasOpenRef.current) {
+    previouslyFocusedElementRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+  }
+  wasOpenRef.current = open
 
   const handleConfirm = (ev: React.FormEvent<HTMLFormElement>) => {
     ev.preventDefault()
     onConfirm({ sendEmail, downloadFile, downloadFormat })
     setSkipConfirmMutation(skipConfirm)
+    wasConfirmedRef.current = true
+    setOpen(false)
+  }
+
+  const handleClose = () => {
+    wasConfirmedRef.current = false
     setOpen(false)
   }
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)}>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      disableRestoreFocus
+      slotProps={{
+        transition: {
+          onExited: () => {
+            if (wasConfirmedRef.current) {
+              document.getElementById('chat-input')?.focus()
+            } else {
+              previouslyFocusedElementRef.current?.focus()
+            }
+          },
+        },
+      }}
+    >
       <DialogTitle>{t('chat:confirmResetTitle')}</DialogTitle>
       <DialogContent>
-        <DialogContentText mb={2}>
-          {t('chat:confirmResetMessage')}
-        </DialogContentText>
+        <DialogContentText mb={2}>{t('chat:confirmResetMessage')}</DialogContentText>
         <Box display="flex" flexDirection="column" gap={1}>
           <FormControlLabel
             control={<Checkbox checked={sendEmail} onChange={(ev) => setSendEmail(ev.target.checked)} data-testid="send-email" />}
@@ -54,11 +82,16 @@ export const ResetConfirmModal = ({
             </Box>
           )}
         </Box>
-        <NewConversationConfirmConfigurator label={t('preferences:newConversationConfirmLabelChat')} value={skipConfirm} setValue={setSkipConfirm} context='chat' />
+        <NewConversationConfirmConfigurator
+          label={t('preferences:newConversationConfirmLabelChat')}
+          value={skipConfirm}
+          setValue={setSkipConfirm}
+          context="chat"
+        />
       </DialogContent>
       <form onSubmit={handleConfirm}>
         <DialogActions>
-          <Button onClick={() => setOpen(false)} data-testid="cancel-confirm-reset" variant="text">
+          <Button onClick={handleClose} data-testid="cancel-confirm-reset" variant="text">
             {t('common:cancel')}
           </Button>
           <BlueButton type="submit" data-testid="submit-confirm-reset">
