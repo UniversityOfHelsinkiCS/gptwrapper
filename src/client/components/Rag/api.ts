@@ -3,6 +3,7 @@ import apiClient from '../../util/apiClient'
 import { RagFileAttributes, RagIndexAttributes, RagIndexMetadata } from '../../../shared/types'
 import { IngestionJobStatus } from '@shared/ingestion'
 import queryClient from '../../util/queryClient'
+import { invalidateAllPromptLists } from 'src/client/util/promptQueries'
 
 export const useCreateRagIndexMutation = () => {
   const mutation = useMutation({
@@ -71,9 +72,7 @@ export const useDeleteRagIndexMutation = (indexId: number) => {
       queryClient.removeQueries({ queryKey: ['ragIndex', indexId] })
       queryClient.removeQueries({ queryKey: ['ragIndex', indexId, 'jobs'] })
       queryClient.invalidateQueries({ queryKey: ['ragIndices'] })
-      queryClient.invalidateQueries({ queryKey: ['/prompts/my-prompts'] })
-      queryClient.invalidateQueries({ queryKey: ['course'] })
-      queryClient.invalidateQueries({ queryKey: ['chatInstances', 'user'] })
+      invalidateAllPromptLists()
     },
   })
   return mutation

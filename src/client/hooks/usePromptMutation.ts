@@ -1,10 +1,9 @@
 import { useMutation } from '@tanstack/react-query'
-
-import queryClient from '../util/queryClient'
 import apiClient from '../util/apiClient'
 import type { PromptEditableParams, PromptCreationParams, PromptCopyParams } from '@shared/prompt'
 import type { Prompt } from '../types'
 import type { ApiError } from '../util/apiClient'
+import { invalidateAllPromptLists, invalidatePromptLists } from '../util/promptQueries'
 
 export const useCreatePromptMutation = () => {
   const mutationFn = async (data: Omit<PromptCreationParams, 'userId'>) => {
@@ -46,18 +45,6 @@ export type CopyPromptVariables = PromptCopyParams & {
   promptId: string
   /** SIS course id of the destination, needed to invalidate the right ['course', id] query. */
   destinationCourseId?: string
-}
-
-const invalidatePromptLists = (destinationCourseId?: string) => {
-  queryClient.invalidateQueries({ queryKey: ['/prompts/my-prompts'] })
-  queryClient.invalidateQueries({ queryKey: ['chatInstances', 'user'] })
-  if (destinationCourseId) queryClient.invalidateQueries({ queryKey: ['course', destinationCourseId] })
-}
-
-const invalidateAllPromptLists = () => {
-  queryClient.invalidateQueries({ queryKey: ['/prompts/my-prompts'] })
-  queryClient.invalidateQueries({ queryKey: ['chatInstances', 'user'] })
-  queryClient.invalidateQueries({ queryKey: ['course'] })
 }
 
 export const useCopyPromptMutation = () => {
