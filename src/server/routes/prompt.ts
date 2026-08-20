@@ -27,29 +27,6 @@ promptRouter.get('/my-prompts', async (req, res) => {
   return
 })
 
-promptRouter.get('/for-course/:courseId', async (req, res) => {
-  const { courseId } = req.params
-
-  // Note: we dont have any authorization checks here. Consider?
-  const chatInstance = await ChatInstance.findOne({
-    where: {
-      courseId,
-    },
-    attributes: ['id'],
-    include: {
-      model: Prompt,
-      as: 'prompts',
-      separate: true,
-      order: [['createdAt', 'ASC']],
-    },
-  })
-
-  const prompts = chatInstance?.prompts || []
-
-  res.send(prompts)
-  return
-})
-
 const getPotentialNameConflicts = async (prompt: InferAttributes<Prompt, { omit: 'id' }>) => {
   switch (prompt.type) {
     case 'CHAT_INSTANCE': {
