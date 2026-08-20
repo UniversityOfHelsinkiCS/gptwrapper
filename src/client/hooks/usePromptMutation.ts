@@ -1,45 +1,9 @@
 import { useMutation } from '@tanstack/react-query'
 import apiClient from '../util/apiClient'
-import type { PromptEditableParams, PromptCreationParams, PromptCopyParams } from '@shared/prompt'
+import type { PromptCopyParams } from '@shared/prompt'
 import type { Prompt } from '../types'
 import type { ApiError } from '../util/apiClient'
 import { invalidateAllPromptLists, invalidatePromptLists } from '../util/promptQueries'
-
-export const useCreatePromptMutation = () => {
-  const mutationFn = async (data: Omit<PromptCreationParams, 'userId'>) => {
-    const res = await apiClient.post(`/prompts`, data)
-
-    const prompt = res.data
-
-    return prompt
-  }
-
-  const mutation = useMutation({
-    mutationFn,
-    onSuccess: () => {
-      invalidateAllPromptLists()
-    },
-  })
-
-  return mutation
-}
-
-export const useDeletePromptMutation = () => {
-  const mutationFn = async (id: string) => {
-    const res = await apiClient.delete(`/prompts/${id}`)
-
-    return res
-  }
-
-  const mutation = useMutation({
-    mutationFn,
-    onSuccess: () => {
-      invalidateAllPromptLists()
-    },
-  })
-
-  return mutation
-}
 
 export type CopyPromptVariables = PromptCopyParams & {
   promptId: string
@@ -61,23 +25,6 @@ export const useCopyPromptMutation = () => {
     },
     onError: (error: ApiError) => {
       if (error.response?.status === 404) invalidateAllPromptLists()
-    },
-  })
-
-  return mutation
-}
-
-export const useEditPromptMutation = () => {
-  const mutationFn = async (data: PromptEditableParams & { id: string }) => {
-    const res = await apiClient.put(`/prompts/${data.id}`, data)
-    const prompt = res.data
-    return prompt
-  }
-
-  const mutation = useMutation({
-    mutationFn,
-    onSuccess: () => {
-      invalidateAllPromptLists()
     },
   })
 
