@@ -8,6 +8,7 @@ import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
 import _ from 'lodash'
 import type { User as SharedUser } from '@shared/user'
+import { chatIsActive } from '../services/chatInstances/activity'
 
 const courseRouter = express.Router()
 
@@ -19,18 +20,6 @@ const getCourses = async () => {
   })
 
   return courses
-}
-
-export const chatIsActive = (chatInstance: ChatInstance) => {
-  const start = new Date(chatInstance.activityPeriod.startDate)
-  const end = new Date(chatInstance.activityPeriod.endDate)
-  const today = new Date()
-
-  const todayIsMoreOrEqualToStart = today >= start
-  const todayIsLessOrEqualToEnd = today <= end
-  const usageLimitMoreThanZero = chatInstance.usageLimit > 0
-
-  return todayIsMoreOrEqualToStart && todayIsLessOrEqualToEnd && usageLimitMoreThanZero
 }
 
 courseRouter.get('/', async (_req, res) => {
