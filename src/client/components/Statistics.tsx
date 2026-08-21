@@ -1,8 +1,12 @@
+import CloseIcon from '@mui/icons-material/Close'
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
 import {
   Box,
   Checkbox,
   Container,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   FormControlLabel,
   FormGroup,
   IconButton,
@@ -31,6 +35,8 @@ import { useTranslation } from 'react-i18next'
 import { useMatch, useNavigate } from 'react-router-dom'
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip as ChartTooltip, XAxis, YAxis } from 'recharts'
 import * as xlsx from 'xlsx'
+import CoursePreview from './ChatV2/CoursePreview.tsx'
+import useCourse from '../hooks/useCourse'
 import useCurrentUser from '../hooks/useCurrentUser'
 import useStatistics from '../hooks/useStatistics'
 import faculties from '../locales/faculties.json'
@@ -59,6 +65,8 @@ export function Component() {
   })
   const [sortBy, setSortBy] = useState<'usedTokens' | 'usagePercentage' | 'promptCount' | 'ragIndicesCount' | 'saveDiscussions'>('usedTokens')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [previewCourseId, setPreviewCourseId] = useState<string | undefined>(undefined)
+  const { data: previewCourse } = useCourse(previewCourseId)
   const { data: statistics, isSuccess } = useStatistics()
   const { t, i18n } = useTranslation()
   const { language } = i18n
@@ -514,7 +522,7 @@ export function Component() {
                 <SumRow statsToShow={statsToShow} />
 
                 {statsToShow.map((chat) => (
-                  <TableRow key={chat.id}>
+                  <TableRow key={chat.id} onClick={() => setPreviewCourseId(chat.id)} sx={{ cursor: 'pointer' }} hover>
                     <TableCell align="left">
                       <Typography>{chat.codes.join(', ')}</Typography>
                     </TableCell>
@@ -548,7 +556,7 @@ export function Component() {
                       <Typography>{chat.ragIndicesCount}</Typography>
                     </TableCell>
                     {user?.isAdmin && (
-                      <TableCell align="center">
+                      <TableCell align="center" onClick={(e) => e.stopPropagation()}>
                         <Switch
                           checked={Boolean(chat.saveDiscussions)}
                           disabled={saveDiscussionsMutation.isPending && saveDiscussionsMutation.variables?.chatId === chat.id}
@@ -713,6 +721,14 @@ export function Component() {
           )}
         </TableContainer>
       </Box>
+      <Dialog open={Boolean(previewCourseId)} onClose={() => setPreviewCourseId(undefined)} fullWidth maxWidth="lg">
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+          <IconButton onClick={() => setPreviewCourseId(undefined)} aria-label={t('common:close')}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 0 }}>{previewCourse && <CoursePreview course={previewCourse} />}</DialogContent>
+      </Dialog>
     </Container>
   )
 }
