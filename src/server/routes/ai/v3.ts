@@ -55,8 +55,9 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     }
 
     const isExempt = user.isAdmin || Boolean(course.responsibilities?.length)
-    if (!chatIsActive(course) && !isExempt) {
-      throw ApplicationError.Forbidden('Course is not active')
+    if (!isExempt) {
+      if (!course.activated) throw ApplicationError.Forbidden('Course chat is not activated')
+      if (!chatIsActive(course)) throw ApplicationError.Forbidden('Course is not active')
     }
 
     const [chatInstanceUsage] = await UserChatInstanceUsage.findOrCreate({
