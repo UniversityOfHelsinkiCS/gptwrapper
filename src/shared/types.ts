@@ -98,4 +98,5 @@ export type CourseUsage = {
   name: Locales
   usage: number
   limit: number
+  activated?: boolean
 }

@@ -44,6 +44,8 @@ class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAtt
   declare enrolments?: NonAttribute<Enrolment[]>
 
   declare currentUserUsage?: NonAttribute<UserChatInstanceUsage>
+
+  declare activated: boolean
 }
 
 ChatInstance.init(
@@ -98,6 +100,11 @@ ChatInstance.init(
     },
     saveDiscussions: {
       type: DataTypes.BOOLEAN,
+    },
+    activated: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
   },
   {

@@ -34,7 +34,7 @@ courseRouter.get('/user', async (req, res) => {
 
   const coursesWithExtra = _.orderBy(chatInstances, ['usageLimit', 'name'], ['desc', 'desc']).map((chatinstance) => ({
     ...chatinstance.toJSON(),
-    activated: chatinstance.usageLimit > 0,
+    activated: chatinstance.activated,
     expired: Date.parse(chatinstance.activityPeriod.endDate) < Date.now(),
   }))
 
@@ -348,10 +348,11 @@ courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {
 
 courseRouter.put('/:id', async (req, res) => {
   const { id } = req.params
-  const { activityPeriod, usageLimit, saveDiscussions } = req.body as {
+  const { activityPeriod, usageLimit, saveDiscussions, activated } = req.body as {
     activityPeriod?: ActivityPeriod
     usageLimit?: number
     saveDiscussions?: boolean
+    activated?: boolean
   }
 
   const chatInstance = await ChatInstance.findOne({
@@ -376,6 +377,9 @@ courseRouter.put('/:id', async (req, res) => {
   }
   if (saveDiscussions !== undefined) {
     chatInstance.saveDiscussions = saveDiscussions
+  }
+  if (activated !== undefined) {
+    chatInstance.activated = activated
   }
 
   await chatInstance.save()
