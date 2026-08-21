@@ -99,9 +99,11 @@ const stream = (promptId: string, courseId?: string) => {
   return fetch(`${baseUrl}/ai/v3/stream`, { method: 'POST', body: form })
 }
 
-const savedPrompt = (type: string) =>
+/** PERSONAL prompts are refused with a 404 unless `userId` matches the requesting user. */
+const savedPrompt = (type: string, userId = 'user-1') =>
   ({
     id: 'prompt-1',
+    userId,
     name: 'Essay helper',
     type,
     systemMessage: 'You help with essays',
@@ -141,23 +143,76 @@ describe('POST /ai/v3/stream with a saved prompt', () => {
   })
 })
 
-const expiredCourse = (overrides = {}) =>
+/**
+ * Defaults describe a course a student may chat in: activated, inside its activity period, with a
+ * usage limit left. Each test switches off exactly one of those, so it fails for one reason.
+ */
+const courseFixture = (overrides = {}) =>
   ({
     id: 'ci-1',
     name: { fi: 'Kurssi' },
-    activityPeriod: { startDate: '2020-01-01', endDate: '2020-06-01' },
+    activated: true,
+    activityPeriod: { startDate: '2020-01-01', endDate: '2099-01-01' },
     usageLimit: 10,
-    enrolments: [{ userId: 'student-1' }],
+    enrolments: [{ userId: 'user-1' }],
     responsibilities: [],
     ...overrides,
   }) as any
 
-describe('POST /ai/v3/stream as a student', () => {
-  test('returns 403 for an enrolled student but expired course', async () => {
-    vi.mocked(ChatInstance.findOne).mockResolvedValue(expiredCourse())
-    vi.mocked(UserChatInstanceUsage.findOrCreate).mockResolvedValue([{}, false] as any)
+const givenCourse = (overrides = {}) => {
+  vi.mocked(ChatInstance.findOne).mockResolvedValue(courseFixture(overrides))
+  vi.mocked(UserChatInstanceUsage.findOrCreate).mockResolvedValue([{}, false] as any)
+  vi.mocked(Prompt.findByPk).mockResolvedValue(savedPrompt('CHAT_INSTANCE'))
+}
 
-    vi.mocked(Prompt.findByPk).mockResolvedValue(savedPrompt('CHAT_INSTANCE'))
+const expired = { activityPeriod: { startDate: '2020-01-01', endDate: '2020-06-01' } }
+const notStarted = { activityPeriod: { startDate: '2099-01-01', endDate: '2099-06-01' } }
+/** The real query filters both includes on the current user, so a teacher has no enrolment row. */
+const teaching = { enrolments: [], responsibilities: [{ userId: 'teacher-1' }] }
+
+describe('POST /ai/v3/stream as an enrolled student', () => {
+  test('chats in an active course', async () => {
+    givenCourse()
+
+    const response = await stream('prompt-1', 'course-1')
+    await response.text()
+
+    expect(response.status).toBe(200)
+    expect(streamChat).toHaveBeenCalled()
+  })
+
+  test('is refused when the course has ended', async () => {
+    givenCourse(expired)
+
+    const response = await stream('prompt-1', 'course-1')
+    await response.text()
+
+    expect(response.status).toBe(403)
+    expect(streamChat).not.toHaveBeenCalled()
+  })
+
+  test('is refused when the course has not started', async () => {
+    givenCourse(notStarted)
+
+    const response = await stream('prompt-1', 'course-1')
+    await response.text()
+
+    expect(response.status).toBe(403)
+    expect(streamChat).not.toHaveBeenCalled()
+  })
+
+  test('is refused when the course chat is not activated', async () => {
+    givenCourse({ activated: false })
+
+    const response = await stream('prompt-1', 'course-1')
+    await response.text()
+
+    expect(response.status).toBe(403)
+    expect(streamChat).not.toHaveBeenCalled()
+  })
+
+  test('is refused when the course has no usage limit left', async () => {
+    givenCourse({ usageLimit: 0 })
 
     const response = await stream('prompt-1', 'course-1')
     await response.text()
@@ -167,18 +222,36 @@ describe('POST /ai/v3/stream as a student', () => {
   })
 })
 
-describe('POST /ai/v3/stream as a teacher', () => {
-  test('works for a non-active course', async () => {
-    vi.mocked(ChatInstance.findOne).mockResolvedValue(
-      expiredCourse({
-        enrolments: [],
-        responsibilities: [{ userId: 'teacher-1' }],
-      }),
-    )
-    vi.mocked(UserChatInstanceUsage.findOrCreate).mockResolvedValue([{}, false] as any)
-
-    vi.mocked(Prompt.findByPk).mockResolvedValue(savedPrompt('CHAT_INSTANCE'))
+describe('POST /ai/v3/stream as a responsible teacher', () => {
+  beforeEach(() => {
     currentUser = { id: 'teacher-1', isAdmin: false }
+  })
+
+  test('chats in a course that has ended', async () => {
+    givenCourse({ ...teaching, ...expired })
+
+    const response = await stream('prompt-1', 'course-1')
+    await response.text()
+
+    expect(response.status).toBe(200)
+    expect(streamChat).toHaveBeenCalled()
+  })
+
+  test('chats in a course that is not activated', async () => {
+    givenCourse({ ...teaching, activated: false })
+
+    const response = await stream('prompt-1', 'course-1')
+    await response.text()
+
+    expect(response.status).toBe(200)
+    expect(streamChat).toHaveBeenCalled()
+  })
+})
+
+describe('POST /ai/v3/stream as an admin', () => {
+  test('chats in a course that is neither activated nor running', async () => {
+    currentUser = { id: 'admin-1', isAdmin: true }
+    givenCourse({ ...expired, activated: false, enrolments: [], responsibilities: [] })
 
     const response = await stream('prompt-1', 'course-1')
     await response.text()
