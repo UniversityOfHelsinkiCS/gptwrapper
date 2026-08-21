@@ -34,6 +34,7 @@ adminRouter.post('/chatinstances', async (req, res) => {
     courseId,
     activityPeriod: course.activityPeriod,
     saveDiscussions: false,
+    activated: usageLimit > 0,
   })
 
   res.status(201).send(newChatInstance)

@@ -8,6 +8,7 @@ interface UpdatedCourseData {
   activityPeriod: ActivityPeriod
   usageLimit: number
   saveDiscussions: boolean
+  activated: boolean
 }
 
 interface SaveDiscussionsVariables {

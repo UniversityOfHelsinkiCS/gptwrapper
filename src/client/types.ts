@@ -107,6 +107,7 @@ export interface ChatInstance {
   prompts: Prompt[]
   courseUnitRealisationTypeUrn?: string
   activityPeriod: ActivityPeriod
+  activated: boolean
 }
 
 export type ActivityPeriod = {
@@ -149,7 +150,6 @@ export interface Course extends ChatInstance {
   responsibilities: Responsibility[]
   courseUnits: CourseUnit[]
   saveDiscussions: boolean
-  activated?: boolean
 }
 
 export type ChatInstanceUsage = {

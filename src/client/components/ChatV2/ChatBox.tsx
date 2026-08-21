@@ -15,10 +15,12 @@ import { useKeyboardCommands } from './useKeyboardCommands'
 import { WarningType } from '@shared/aiApi'
 import ModelSelector from './ModelSelector'
 import UsageSelector from './UsageSelector'
-import { ValidModelName } from '../../../config'
+import { DEFAULT_TOKEN_LIMIT, ValidModelName } from '../../../config'
+import { Course } from 'src/client/types'
 
 export const ChatBox = ({
   disabled,
+  chatInstance,
   fileInputRef,
   fileName,
   messageWarning,
@@ -33,6 +35,7 @@ export const ChatBox = ({
   setModel,
 }: {
   disabled: boolean
+  chatInstance?: Course
   fileInputRef: React.RefObject<HTMLInputElement | null>
   fileName: string
   messageWarning: { [key in WarningType]?: { message: string; ignored: boolean } }
@@ -58,6 +61,7 @@ export const ChatBox = ({
   const sendButtonRef = useRef<HTMLButtonElement>(null)
   const textFieldRef = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState<string>('')
+  const amongResponsibles = user?.isAdmin || chatInstance?.responsibilities.some((r) => r.user.id === user?.id)
 
   const acuallyDisabled = disabled || message.length === 0
 
@@ -121,7 +125,8 @@ export const ChatBox = ({
 
   useEffect(() => {
     if (!userStatus) return
-    setIsTokenLimitExceeded(userStatus.usage > userStatus.limit)
+    const limit = !chatInstance?.activated && amongResponsibles ? DEFAULT_TOKEN_LIMIT : userStatus.limit
+    setIsTokenLimitExceeded(userStatus.usage > limit)
   }, [statusLoading, userStatus])
 
   const activeMessageWarnings = Object.values(messageWarning).filter((warning) => !warning.ignored)

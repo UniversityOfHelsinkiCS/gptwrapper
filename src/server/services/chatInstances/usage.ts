@@ -37,7 +37,11 @@ export const checkCourseUsage = (user: UserType, chatInstance: ChatInstance): bo
     throw ApplicationError.InternalServerError('chatInstance.currentUserUsage undefined. This shouldnt happen!')
   }
 
-  if (!user.isAdmin && chatInstance.currentUserUsage.usageCount >= chatInstance.usageLimit) {
+  const tokenUsageExceeded = !chatInstance.activated
+    ? chatInstance.currentUserUsage.usageCount >= DEFAULT_TOKEN_LIMIT
+    : chatInstance.currentUserUsage.usageCount >= chatInstance.usageLimit
+
+  if (!user.isAdmin && tokenUsageExceeded) {
     logger.info('Usage limit reached')
 
     return false
@@ -139,7 +143,7 @@ export const getCourseUsages = async (user: UserType): Promise<CourseUsage[]> =>
       {
         model: ChatInstance,
         as: 'chatInstance',
-        attributes: ['name', 'courseId', 'usageLimit'],
+        attributes: ['name', 'courseId', 'usageLimit', 'activated'],
       },
     ],
   })
@@ -149,5 +153,6 @@ export const getCourseUsages = async (user: UserType): Promise<CourseUsage[]> =>
     name: ci.chatInstance!.name,
     usage: ci.usageCount ?? 0,
     limit: ci.chatInstance!.usageLimit ?? 0,
+    activated: ci.chatInstance!.activated,
   }))
 }

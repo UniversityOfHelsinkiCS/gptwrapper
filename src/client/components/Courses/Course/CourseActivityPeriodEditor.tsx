@@ -37,6 +37,7 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
         activityPeriod,
         usageLimit: newLimit,
         saveDiscussions: false,
+        activated: newLimit > 0,
       })
       enqueueSnackbar(t('course:courseUpdated'), { variant: 'success' })
     } catch (error: any) {

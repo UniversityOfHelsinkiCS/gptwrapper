@@ -48,6 +48,7 @@ import { CourseActivityPeriodEditor } from '../Courses/Course/CourseActivityPeri
 import DiscussionView from '../Courses/Course/Discussions'
 import PromptUsageHistogram from '../Courses/Course/PromptUsageHistogram'
 import { EnrolmentActionUserSearch, ResponsibilityActionUserSearch } from '../Admin/UserSearch'
+import { DEFAULT_TOKEN_LIMIT } from '@config'
 
 const initialsOf = (lastName?: string, firstNames?: string) => {
   const a = firstNames?.trim()?.[0] ?? ''
@@ -198,7 +199,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
     )
   }
 
-  const activeCourse: Course = chatInstance ? { ...chatInstance, activated: chatInstance.usageLimit > 0 } : course
+  const activeCourse: Course = chatInstance ? chatInstance : course
   const activated = activeCourse.activated
   const courseEnded = Date.parse(course.activityPeriod.endDate) < Date.now()
 
@@ -276,7 +277,8 @@ const CoursePreview = ({ course }: { course: Course }) => {
         {/* Personal usage card */}
         {currentCourseUsage &&
           (() => {
-            const percent = usagePercent(currentCourseUsage.usage, currentCourseUsage.limit)
+            const limit = !course.activated && amongResponsibles ? DEFAULT_TOKEN_LIMIT : currentCourseUsage.limit
+            const percent = usagePercent(currentCourseUsage.usage, limit)
             return (
               <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '8px', p: 2, mb: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
@@ -288,7 +290,7 @@ const CoursePreview = ({ course }: { course: Course }) => {
                     <UsageInfoButton />
                   </Box>
                   <Typography variant="body2" color="text.secondary">
-                    {formatTokens(currentCourseUsage.usage)} / {formatTokens(currentCourseUsage.limit)} {t('status:tokens')}
+                    {formatTokens(currentCourseUsage.usage)} / {formatTokens(limit)} {t('status:tokens')}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>

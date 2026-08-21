@@ -8,6 +8,7 @@ import {
   DEFAULT_MODEL,
   DEFAULT_MODEL_TEMPERATURE,
   DEFAULT_STREAM_TIMEOUT,
+  DEFAULT_TOKEN_LIMIT,
   FREE_MODEL,
   ValidModelNameSchema,
   getModelConfig,
@@ -105,6 +106,11 @@ const ChatV2Content = () => {
 
   const amongResponsibles = user?.isAdmin || chatInstance?.responsibilities.some((r) => r.user.id === user?.id)
 
+  const isTokenUsageExceeded = (status: NonNullable<typeof userStatus>) => {
+    const { usage, limit } = status
+    return amongResponsibles && !chatInstance?.activated ? usage >= DEFAULT_TOKEN_LIMIT : usage >= limit
+  }
+
   // app states
   const [fileName, setFileName] = useState<string>('')
   const [messageWarning, setMessageWarning] = useState<{ [key in WarningType]?: { message: string; ignored: boolean } }>({})
@@ -136,11 +142,9 @@ const ChatV2Content = () => {
 
   const handleSendMessage = async (message: string, resendPrevious: boolean, ignoredWarnings: WarningType[], messagesToResend?: ChatMessage[]) => {
     if (!userStatus) return
-    const { usage, limit } = userStatus
-    const tokenUsageExceeded = usage >= limit
+    const tokenUsageExceeded = isTokenUsageExceeded(userStatus)
 
     const acualModel = activeModel
-
     if (tokenUsageExceeded && acualModel !== FREE_MODEL) {
       enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
       handleCancel()
@@ -372,11 +376,9 @@ const ChatV2Content = () => {
   useEffect(() => {
     if (!userStatus) return
 
-    const { usage, limit } = userStatus
+    const tokenUsageExceeded = isTokenUsageExceeded(userStatus)
 
-    const tokenUseExceeded = usage >= limit
-
-    if (tokenUseExceeded) {
+    if (tokenUsageExceeded) {
       setActiveModel(FREE_MODEL)
       return
     }
@@ -548,6 +550,7 @@ const ChatV2Content = () => {
           >
             <ChatBox
               disabled={isStreaming}
+              chatInstance={chatInstance}
               fileInputRef={fileInputRef}
               fileName={fileName}
               setFileName={setFileName}

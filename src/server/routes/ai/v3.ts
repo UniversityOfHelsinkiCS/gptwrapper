@@ -54,6 +54,10 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       throw ApplicationError.Forbidden('Not authorized for this course')
     }
 
+    if (!user.isAdmin && !course?.responsibilities?.length && !course.activated) {
+      throw ApplicationError.Forbidden('Course chat is not activated')
+    }
+
     const [chatInstanceUsage] = await UserChatInstanceUsage.findOrCreate({
       where: {
         userId: user.id,
@@ -162,9 +166,9 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   const isFreeModel = model === FREE_MODEL
 
-  const usageAllowed = (course ? checkCourseUsage(user, course) : isFreeModel) || checkUsage(user, generationInfo.model)
+  const usageAllowed = course ? checkCourseUsage(user, course) : checkUsage(user, generationInfo.model)
 
-  if (!usageAllowed) {
+  if (!usageAllowed && !isFreeModel) {
     throw ApplicationError.Forbidden('Usage limit reached')
   }
 

@@ -12,6 +12,7 @@ import { getLanguageValue } from '@shared/utils'
 import { CourseUsage } from '@shared/types'
 import useUserUsages from '../../hooks/useUserUsage'
 import { usePromptState } from './PromptState'
+import { DEFAULT_TOKEN_LIMIT } from '@config'
 
 export const usagePercent = (usage: number, limit: number) => (limit > 0 ? Math.round((usage / limit) * 100) : 0)
 
@@ -175,6 +176,7 @@ const UsageSelector = () => {
             const percent = usagePercent(course.usage, course.limit)
             const key = course.courseId ?? getLanguageValue(course.name, i18n.language)
             const itemSx = { display: 'flex', gap: 1.25, py: 0.75, px: 1.75, alignItems: 'center' }
+            const limit = course.activated ? course.limit : DEFAULT_TOKEN_LIMIT
             const content = (
               <>
                 <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25, minWidth: 0 }}>
@@ -190,7 +192,7 @@ const UsageSelector = () => {
                     {getLanguageValue(course.name, i18n.language)}
                   </Typography>
                   <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.3 }}>
-                    {formatTokens(course.usage)} / {formatTokens(course.limit)} {t('status:tokens')}
+                    {formatTokens(course.usage)} / {formatTokens(limit)} {t('status:tokens')}
                   </Typography>
                 </Box>
                 <UsageGauge percent={percent} />
