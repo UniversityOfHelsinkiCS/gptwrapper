@@ -34,7 +34,6 @@ courseRouter.get('/user', async (req, res) => {
   const [teached, enrolled] = await Promise.all([getTeachedCourses(user), getEnrolledCourses(user)])
   const decorate = (ci: ChatInstance) => ({
     ...ci.toJSON(),
-    activated: ci.usageLimit > 0,
     expired: Date.parse(ci.activityPeriod.endDate) < Date.now(),
   })
 
