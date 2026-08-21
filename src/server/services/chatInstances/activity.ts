@@ -1,4 +1,4 @@
-import { ChatInstance } from 'src/server/db/models'
+import { ChatInstance } from '../../db/models'
 
 export const chatIsActive = (chatInstance: ChatInstance) => {
   const start = new Date(chatInstance.activityPeriod.startDate)
