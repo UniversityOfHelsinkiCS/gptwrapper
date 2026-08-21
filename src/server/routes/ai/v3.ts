@@ -11,6 +11,7 @@ import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
 import { upload } from './multer'
+import { chatIsActive } from '../../services/chatInstances/activity'
 
 const router = express.Router()
 
@@ -35,7 +36,6 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     fileSize: req.file?.size,
   }
 
-  // @todo were not checking if the user is enrolled?
   let course: ChatInstance | null = null
 
   if (courseId) {
@@ -54,8 +54,9 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       throw ApplicationError.Forbidden('Not authorized for this course')
     }
 
-    if (!user.isAdmin && !course?.responsibilities?.length && !course.activated) {
-      throw ApplicationError.Forbidden('Course chat is not activated')
+    const isExempt = user.isAdmin || Boolean(course.responsibilities?.length)
+    if (!chatIsActive(course) && !isExempt) {
+      throw ApplicationError.Forbidden('Course is not active')
     }
 
     const [chatInstanceUsage] = await UserChatInstanceUsage.findOrCreate({

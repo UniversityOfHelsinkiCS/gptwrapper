@@ -39,16 +39,17 @@ vi.mock('@sentry/node', () => ({ captureException: vi.fn() }))
 
 import v3Router from './v3'
 import errorHandler from '../../middleware/error'
-import { Prompt } from '../../db/models'
+import { Prompt, ChatInstance, UserChatInstanceUsage } from '../../db/models'
 import { streamChat } from '../../services/langchain/chat'
 
 let server: Server
 let baseUrl: string
+let currentUser = { id: 'user-1', isAdmin: false }
 
 beforeAll(async () => {
   const app = express()
   app.use((req, res, next) => {
-    ;(req as any).user = { id: 'student-1', isAdmin: false }
+    ;(req as any).user = currentUser
     res.locals = res.locals ?? {}
     next()
   })
@@ -67,6 +68,7 @@ afterAll(async () => {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  currentUser = { id: 'user-1', isAdmin: false }
   vi.mocked(streamChat).mockResolvedValue({
     inputTokenCount: 1,
     tokenCount: 2,
@@ -78,7 +80,7 @@ beforeEach(() => {
 })
 
 /** The /stream route reads its JSON payload out of a multipart `data` field, alongside the optional file upload. */
-const stream = (promptId: string) => {
+const stream = (promptId: string, courseId?: string) => {
   const form = new FormData()
   form.append(
     'data',
@@ -90,6 +92,7 @@ const stream = (promptId: string) => {
           promptInfo: { type: 'saved', id: promptId, name: 'Essay helper' },
         },
       },
+      ...(courseId ? { courseId } : {}),
     }),
   )
 
@@ -131,6 +134,53 @@ describe('POST /ai/v3/stream with a saved prompt', () => {
     vi.mocked(Prompt.findByPk).mockResolvedValue(savedPrompt('PERSONAL'))
 
     const response = await stream('prompt-1')
+    await response.text()
+
+    expect(response.status).toBe(200)
+    expect(streamChat).toHaveBeenCalled()
+  })
+})
+
+const expiredCourse = (overrides = {}) =>
+  ({
+    id: 'ci-1',
+    name: { fi: 'Kurssi' },
+    activityPeriod: { startDate: '2020-01-01', endDate: '2020-06-01' },
+    usageLimit: 10,
+    enrolments: [{ userId: 'student-1' }],
+    responsibilities: [],
+    ...overrides,
+  }) as any
+
+describe('POST /ai/v3/stream as a student', () => {
+  test('returns 403 for an enrolled student but expired course', async () => {
+    vi.mocked(ChatInstance.findOne).mockResolvedValue(expiredCourse())
+    vi.mocked(UserChatInstanceUsage.findOrCreate).mockResolvedValue([{}, false] as any)
+
+    vi.mocked(Prompt.findByPk).mockResolvedValue(savedPrompt('CHAT_INSTANCE'))
+
+    const response = await stream('prompt-1', 'course-1')
+    await response.text()
+
+    expect(response.status).toBe(403)
+    expect(streamChat).not.toHaveBeenCalled()
+  })
+})
+
+describe('POST /ai/v3/stream as a teacher', () => {
+  test('works for a non-active course', async () => {
+    vi.mocked(ChatInstance.findOne).mockResolvedValue(
+      expiredCourse({
+        enrolments: [],
+        responsibilities: [{ userId: 'teacher-1' }],
+      }),
+    )
+    vi.mocked(UserChatInstanceUsage.findOrCreate).mockResolvedValue([{}, false] as any)
+
+    vi.mocked(Prompt.findByPk).mockResolvedValue(savedPrompt('CHAT_INSTANCE'))
+    currentUser = { id: 'teacher-1', isAdmin: false }
+
+    const response = await stream('prompt-1', 'course-1')
     await response.text()
 
     expect(response.status).toBe(200)
