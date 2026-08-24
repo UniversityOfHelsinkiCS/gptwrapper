@@ -91,7 +91,9 @@
     "courseCodes": "Kurssikoodit",
     "sum": "YHTEENSÄ:",
     "rags": "RAG:it",
-    "courses": "kurssia"
+    "courses": "kurssia",
+    "searchCourses": "Hae kurssikoodilla tai nimellä",
+    "clearSearch": "Tyhjennä haku"
   },
   "info": {
     "title": "Käyttöohje",

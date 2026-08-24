@@ -1,5 +1,6 @@
 import CloseIcon from '@mui/icons-material/Close'
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
+import SearchIcon from '@mui/icons-material/Search'
 import {
   Box,
   Checkbox,
@@ -22,6 +23,7 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
+  TextField,
   ToggleButton,
   ToggleButtonGroup,
   Tabs,
@@ -30,7 +32,7 @@ import {
   Switch,
 } from '@mui/material'
 import type { Statistic } from '@shared/types'
-import { useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMatch, useNavigate } from 'react-router-dom'
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip as ChartTooltip, XAxis, YAxis } from 'recharts'
@@ -48,6 +50,67 @@ import { useSaveDiscussionsMutation } from '../hooks/useCourseMutation'
  * React-router compatible lazy loaded component for Statistics page
  */
 
+type SortColumn = 'usedTokens' | 'usagePercentage' | 'promptCount' | 'ragIndicesCount' | 'saveDiscussions'
+
+const usagePercentageNumber = (students: number, enrolled: number) => {
+  if (!enrolled) return 0
+  return (students / enrolled) * 100
+}
+
+const usagePercentage = (students: number, enrolled: number) => `${usagePercentageNumber(students, enrolled).toFixed(1)}%`
+
+const namesOf = (codes: string[], language: string) => {
+  if (!codes || codes.length === 0) return ''
+  const code = codes[0]
+  if (!programme[code]) return code
+  return codes.map((c) => (programme[c] ? programme[c][language] : c)).join(', ')
+}
+
+const belongsToFaculty = (stat: Statistic, selectedFaculty: string) => {
+  if (selectedFaculty === 'H00') return true
+  return stat.programmes.some((p) => p.startsWith(selectedFaculty.substring(1)))
+}
+
+const termWithin = (stat: Statistic, selectedTerms: number[]) => {
+  const terms = stat.terms.map((tr) => tr.id)
+  return selectedTerms.some((term) => terms.includes(term))
+}
+
+const matchesSearch = (stat: Statistic, query: string, language: string) =>
+  stat.codes.some((code) => code.toLowerCase().includes(query)) || (stat.name[language] ?? '').toLowerCase().includes(query)
+
+const sortedStats = (stats: Statistic[], sortBy: SortColumn, sortDirection: 'asc' | 'desc') => {
+  const sorted = [...stats]
+
+  sorted.sort((a, b) => {
+    const aValue =
+      sortBy === 'usedTokens'
+        ? a.usedTokens
+        : sortBy === 'usagePercentage'
+          ? usagePercentageNumber(a.students, a.enrollmentCount)
+          : sortBy === 'promptCount'
+            ? a.promptCount
+            : sortBy === 'saveDiscussions'
+              ? Number(a.saveDiscussions ?? false)
+              : a.ragIndicesCount
+    const bValue =
+      sortBy === 'usedTokens'
+        ? b.usedTokens
+        : sortBy === 'usagePercentage'
+          ? usagePercentageNumber(b.students, b.enrollmentCount)
+          : sortBy === 'promptCount'
+            ? b.promptCount
+            : sortBy === 'saveDiscussions'
+              ? Number(b.saveDiscussions ?? false)
+              : b.ragIndicesCount
+
+    if (aValue === bValue) return 0
+    return sortDirection === 'asc' ? aValue - bValue : bValue - aValue
+  })
+
+  return sorted
+}
+
 export function Component() {
   const trendSeriesKeys = ['courses', 'students', 'percentage', 'prompts', 'rags'] as const
   type TrendSeriesKey = (typeof trendSeriesKeys)[number]
@@ -55,6 +118,8 @@ export function Component() {
   const [from, setFrom] = useState<number | ''>('')
   const [to, setTo] = useState<number | ''>('')
   const [selectedFaculty, setFaculties] = useState('H00')
+  const [search, setSearch] = useState('')
+  const deferredSearch = useDeferredValue(search)
   const [trendSelectionMode, setTrendSelectionMode] = useState<'single' | 'multi'>('multi')
   const [trendSeries, setTrendSeries] = useState({
     courses: true,
@@ -63,7 +128,7 @@ export function Component() {
     prompts: true,
     rags: true,
   })
-  const [sortBy, setSortBy] = useState<'usedTokens' | 'usagePercentage' | 'promptCount' | 'ragIndicesCount' | 'saveDiscussions'>('usedTokens')
+  const [sortBy, setSortBy] = useState<SortColumn>('usedTokens')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [previewCourseId, setPreviewCourseId] = useState<string | undefined>(undefined)
   const { data: previewCourse } = useCourse(previewCourseId)
@@ -78,14 +143,18 @@ export function Component() {
   const activeTab: 'courses' | 'trends' = isTrendsRoute ? 'trends' : 'courses'
   const dataDownloadLink = useRef<HTMLAnchorElement | null>(null)
   const saveDiscussionsMutation = useSaveDiscussionsMutation()
+  const { mutateAsync: saveDiscussionsMutateAsync } = saveDiscussionsMutation
 
-  const handleSaveDiscussionsChange = async (saveDiscussions: boolean, chatId: string) => {
-    try {
-      await saveDiscussionsMutation.mutateAsync({ chatId, saveDiscussions })
-    } catch (error: any) {
-      enqueueSnackbar(error.message, { variant: 'error' })
-    }
-  }
+  const handleSaveDiscussionsChange = useCallback(
+    async (saveDiscussions: boolean, chatId: string) => {
+      try {
+        await saveDiscussionsMutateAsync({ chatId, saveDiscussions })
+      } catch (error: any) {
+        enqueueSnackbar(error.message, { variant: 'error' })
+      }
+    },
+    [saveDiscussionsMutateAsync],
+  )
 
   useEffect(() => {
     if (isStatisticsRoot && !isCoursesRoute && !isTrendsRoute) {
@@ -123,73 +192,65 @@ export function Component() {
     })
   }, [trendSelectionMode])
 
-  if (!isSuccess || isUserLoading) return null
+  const allStats = isSuccess ? statistics.data : []
+  const allTerms = isSuccess ? statistics.terms : []
 
-  const namesOf = (codes: string[]) => {
-    if (!codes || codes.length === 0) return ''
-    const code = codes[0]
-    if (!programme[code]) return code
-    return codes.map((c) => (programme[c] ? programme[c][language] : c)).join(', ')
-  }
-
-  const selectTerms = () => {
-    if (to === '' || from === '') {
-      return []
-    }
+  const selectedTerms = useMemo(() => {
+    if (to === '' || from === '') return []
     return Array.from({ length: to - from + 1 }, (_, i) => i + from)
-  }
-  const selectedTerms = selectTerms()
+  }, [from, to])
 
-  const usagePercentageNumber = (students: number, enrolled: number) => {
-    if (!enrolled) return 0
-    return (students / enrolled) * 100
-  }
+  const filteredByFaculty = useMemo(() => allStats.filter((stat) => belongsToFaculty(stat, selectedFaculty)), [allStats, selectedFaculty])
 
-  const sortedStats = (stats: Statistic[]) => {
-    const sorted = [...stats]
+  const statsToShow = useMemo(() => {
+    const query = deferredSearch.trim().toLowerCase()
+    const termFiltered = filteredByFaculty.filter((stat) => termWithin(stat, selectedTerms))
+    const searched = query ? termFiltered.filter((stat) => matchesSearch(stat, query, language)) : termFiltered
+    return sortedStats(searched, sortBy, sortDirection)
+  }, [filteredByFaculty, selectedTerms, deferredSearch, language, sortBy, sortDirection])
 
-    sorted.sort((a, b) => {
-      const aValue =
-        sortBy === 'usedTokens'
-          ? a.usedTokens
-          : sortBy === 'usagePercentage'
-            ? usagePercentageNumber(a.students, a.enrollmentCount)
-            : sortBy === 'promptCount'
-              ? a.promptCount
-              : sortBy === 'saveDiscussions'
-                ? Number(a.saveDiscussions ?? false)
-                : a.ragIndicesCount
-      const bValue =
-        sortBy === 'usedTokens'
-          ? b.usedTokens
-          : sortBy === 'usagePercentage'
-            ? usagePercentageNumber(b.students, b.enrollmentCount)
-            : sortBy === 'promptCount'
-              ? b.promptCount
-              : sortBy === 'saveDiscussions'
-                ? Number(b.saveDiscussions ?? false)
-                : b.ragIndicesCount
+  const allTermIds = useMemo(() => [...allTerms].sort((a, b) => a.id - b.id).map((term) => term.id), [allTerms])
 
-      if (aValue === bValue) return 0
-      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue
-    })
+  const trendRows = useMemo(
+    () =>
+      allTermIds.map((termId) => {
+        const termStats = filteredByFaculty.filter((stat) => stat.terms.some((term) => term.id === termId))
+        const courses = termStats.length
+        const students = termStats.reduce((sum, stat) => sum + stat.students, 0)
+        const enrolled = termStats.reduce((sum, stat) => sum + stat.enrollmentCount, 0)
+        const prompts = termStats.reduce((sum, stat) => sum + stat.promptCount, 0)
+        const rags = termStats.reduce((sum, stat) => sum + stat.ragIndicesCount, 0)
+        const termLabel = allTerms.find((term) => term.id === termId)?.label[language] ?? String(termId)
 
-    return sorted
-  }
+        return {
+          termId,
+          termLabel,
+          courses,
+          students,
+          percentage: usagePercentageNumber(students, enrolled),
+          prompts,
+          rags,
+        }
+      }),
+    [allTermIds, filteredByFaculty, allTerms, language],
+  )
 
-  const requestSort = (column: 'usedTokens' | 'usagePercentage' | 'promptCount' | 'ragIndicesCount' | 'saveDiscussions') => {
-    if (sortBy === column) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
-      return
-    }
+  const trendRowsNewestFirst = useMemo(() => [...trendRows].sort((a, b) => b.termId - a.termId), [trendRows])
 
-    setSortBy(column)
-    setSortDirection('desc')
-  }
+  const requestSort = useCallback(
+    (column: SortColumn) => {
+      if (sortBy === column) {
+        setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+        return
+      }
 
-  const usagePercentage = (students: number, enrolled: number) => {
-    return `${usagePercentageNumber(students, enrolled).toFixed(1)}%`
-  }
+      setSortBy(column)
+      setSortDirection('desc')
+    },
+    [sortBy, sortDirection],
+  )
+
+  if (!isSuccess || isUserLoading || !user) return null
 
   const toggleTrendSeries = (key: TrendSeriesKey) => {
     setTrendSeries((prev) => {
@@ -214,40 +275,6 @@ export function Component() {
       }
     })
   }
-
-  const termWithin = (stat: Statistic) => {
-    const terms = stat.terms.map((tr) => tr.id)
-    return selectedTerms.some((term) => terms.includes(term))
-  }
-
-  const belongsToFaculty = (stat: Statistic) => {
-    if (selectedFaculty === 'H00') return true
-    return stat.programmes.some((p) => p.startsWith(selectedFaculty.substring(1)))
-  }
-
-  const filteredByFaculty = statistics.data.filter(belongsToFaculty)
-  const statsToShow = sortedStats(filteredByFaculty.filter(termWithin))
-  const allTermIds = [...statistics.terms].sort((a, b) => a.id - b.id).map((term) => term.id)
-  const trendRows = allTermIds.map((termId) => {
-    const termStats = filteredByFaculty.filter((stat) => stat.terms.some((term) => term.id === termId))
-    const courses = termStats.length
-    const students = termStats.reduce((sum, stat) => sum + stat.students, 0)
-    const enrolled = termStats.reduce((sum, stat) => sum + stat.enrollmentCount, 0)
-    const prompts = termStats.reduce((sum, stat) => sum + stat.promptCount, 0)
-    const rags = termStats.reduce((sum, stat) => sum + stat.ragIndicesCount, 0)
-    const termLabel = statistics.terms.find((term) => term.id === termId)?.label[language] ?? String(termId)
-
-    return {
-      termId,
-      termLabel,
-      courses,
-      students,
-      percentage: usagePercentageNumber(students, enrolled),
-      prompts,
-      rags,
-    }
-  })
-  const trendRowsNewestFirst = [...trendRows].sort((a, b) => b.termId - a.termId)
 
   const exportToCSV = (jsonData: any) => {
     //const book = xlsx.utils.book_new()
@@ -290,7 +317,7 @@ export function Component() {
         Codes: chat.codes.join(', '),
         Course: chat.name[language],
         Terms: chat.terms.map((trm) => trm.label[language]).join(', '),
-        Programmes: namesOf(chat.programmes),
+        Programmes: namesOf(chat.programmes, language),
         Students: chat.students,
         Enrolled: chat.enrollmentCount,
         StudentUsagePercentage: usagePercentage(chat.students, chat.enrollmentCount),
@@ -375,7 +402,7 @@ export function Component() {
           />
         </Tabs>
 
-        <Stack direction="row">
+        <Stack direction="row" alignItems="center">
           <div>
             {activeTab === 'courses' && (
               <>
@@ -412,8 +439,32 @@ export function Component() {
               ))}
             </Select>
           </div>
-          <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ marginLeft: 'auto' }}>
             <a ref={dataDownloadLink} style={{ display: 'none' }} />
+            {activeTab === 'courses' && (
+              <TextField
+                size="small"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={t('stats:searchCourses')}
+                slotProps={{
+                  input: {
+                    startAdornment: <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} />,
+                    endAdornment: (
+                      <IconButton
+                        size="small"
+                        aria-label={t('stats:clearSearch')}
+                        onClick={() => setSearch('')}
+                        sx={{ visibility: search ? 'visible' : 'hidden', mr: -0.5 }}
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    ),
+                  },
+                }}
+                sx={{ minWidth: 260 }}
+              />
+            )}
             <IconButton
               onClick={() => {
                 handleXLSX()
@@ -426,151 +477,16 @@ export function Component() {
 
         <TableContainer component={Paper} sx={{ mt: 2 }}>
           {activeTab === 'courses' ? (
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell align="left">
-                    <Typography variant="h6">
-                      <b>{t('stats:courseCodes')}</b>
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="h6">
-                      <b>{t('stats:courseNameInfo')}</b>
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="left">
-                    <Typography variant="h6">
-                      <b>{t('stats:courseTerms')}</b>
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="left">
-                    <Typography variant="h6">
-                      <b>{t('stats:programCodes')}</b>
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="left">
-                    <Typography variant="h6">
-                      <b>{t('stats:studentCount')}</b>
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="left">
-                    <Typography variant="h6">
-                      <b>{t('stats:enrollmentCount')}</b>
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="left">
-                    <Typography variant="h6">
-                      <TableSortLabel
-                        active={sortBy === 'usagePercentage'}
-                        direction={sortBy === 'usagePercentage' ? sortDirection : 'desc'}
-                        onClick={() => requestSort('usagePercentage')}
-                      >
-                        <b>{t('stats:studentEnrollmentPercentage')}</b>
-                      </TableSortLabel>
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="left">
-                    <Typography variant="h6">
-                      <TableSortLabel
-                        active={sortBy === 'usedTokens'}
-                        direction={sortBy === 'usedTokens' ? sortDirection : 'desc'}
-                        onClick={() => requestSort('usedTokens')}
-                      >
-                        <b>{t('stats:usageCount')}</b>
-                      </TableSortLabel>
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="left">
-                    <Typography variant="h6">
-                      <TableSortLabel
-                        active={sortBy === 'promptCount'}
-                        direction={sortBy === 'promptCount' ? sortDirection : 'desc'}
-                        onClick={() => requestSort('promptCount')}
-                      >
-                        <b>{t('stats:promptCount')}</b>
-                      </TableSortLabel>
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="left">
-                    <Typography variant="h6">
-                      <TableSortLabel
-                        active={sortBy === 'ragIndicesCount'}
-                        direction={sortBy === 'ragIndicesCount' ? sortDirection : 'desc'}
-                        onClick={() => requestSort('ragIndicesCount')}
-                      >
-                        <b>{t('stats:rags')}</b>
-                      </TableSortLabel>
-                    </Typography>
-                  </TableCell>
-                  {user?.isAdmin && (
-                    <TableCell align="center">
-                      <Typography variant="h6">
-                        <TableSortLabel
-                          active={sortBy === 'saveDiscussions'}
-                          direction={sortBy === 'saveDiscussions' ? sortDirection : 'desc'}
-                          onClick={() => requestSort('saveDiscussions')}
-                        >
-                          <b>{t('course:isReseachCourse')}</b>
-                        </TableSortLabel>
-                      </Typography>
-                    </TableCell>
-                  )}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <SumRow statsToShow={statsToShow} />
-
-                {statsToShow.map((chat) => (
-                  <TableRow key={chat.id} onClick={() => setPreviewCourseId(chat.id)} sx={{ cursor: 'pointer' }} hover>
-                    <TableCell align="left">
-                      <Typography>{chat.codes.join(', ')}</Typography>
-                    </TableCell>
-                    <TableCell align="left">
-                      <Typography>{chat.name[language]}</Typography>
-                    </TableCell>
-                    <TableCell align="left">
-                      <Typography>{chat.terms.map((trm) => trm.label[language]).join(', ')}</Typography>
-                    </TableCell>
-                    <TableCell align="left">
-                      <Tooltip title={namesOf(chat.programmes)}>
-                        <Typography>{chat.programmes}</Typography>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell align="left">
-                      <Typography>{chat.students}</Typography>
-                    </TableCell>
-                    <TableCell align="left">
-                      <Typography>{chat.enrollmentCount}</Typography>
-                    </TableCell>
-                    <TableCell align="left">
-                      <Typography>{usagePercentage(chat.students, chat.enrollmentCount)}</Typography>
-                    </TableCell>
-                    <TableCell align="left">
-                      <Typography>{chat.usedTokens}</Typography>
-                    </TableCell>
-                    <TableCell align="left">
-                      <Typography>{chat.promptCount}</Typography>
-                    </TableCell>
-                    <TableCell align="left">
-                      <Typography>{chat.ragIndicesCount}</Typography>
-                    </TableCell>
-                    {user?.isAdmin && (
-                      <TableCell align="center" onClick={(e) => e.stopPropagation()}>
-                        <Switch
-                          checked={Boolean(chat.saveDiscussions)}
-                          disabled={saveDiscussionsMutation.isPending && saveDiscussionsMutation.variables?.chatId === chat.id}
-                          onChange={(_, checked) =>
-                            window.confirm(t(checked ? 'course:saveDiscussions' : 'course:unsaveDiscussions', { course: chat.name[language] })) &&
-                            handleSaveDiscussionsChange(checked, chat.id)
-                          }
-                        />
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <CoursesTable
+              rows={statsToShow}
+              sortBy={sortBy}
+              sortDirection={sortDirection}
+              onRequestSort={requestSort}
+              onRowClick={setPreviewCourseId}
+              isAdmin={user.isAdmin}
+              pendingChatId={saveDiscussionsMutation.isPending ? saveDiscussionsMutation.variables?.chatId : undefined}
+              onSaveDiscussionsChange={handleSaveDiscussionsChange}
+            />
           ) : (
             <>
               <Box sx={{ px: 2, pt: 2 }}>
@@ -732,6 +648,179 @@ export function Component() {
     </Container>
   )
 }
+
+interface CoursesTableProps {
+  rows: Statistic[]
+  sortBy: SortColumn
+  sortDirection: 'asc' | 'desc'
+  onRequestSort: (column: SortColumn) => void
+  onRowClick: (chatId: string) => void
+  isAdmin: boolean
+  pendingChatId: string | undefined
+  onSaveDiscussionsChange: (saveDiscussions: boolean, chatId: string) => void
+}
+
+const CoursesTable = memo(function CoursesTable({
+  rows,
+  sortBy,
+  sortDirection,
+  onRequestSort,
+  onRowClick,
+  isAdmin,
+  pendingChatId,
+  onSaveDiscussionsChange,
+}: CoursesTableProps) {
+  const { t, i18n } = useTranslation()
+  const { language } = i18n
+
+  return (
+    <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell align="left">
+            <Typography variant="h6">
+              <b>{t('stats:courseCodes')}</b>
+            </Typography>
+          </TableCell>
+          <TableCell>
+            <Typography variant="h6">
+              <b>{t('stats:courseNameInfo')}</b>
+            </Typography>
+          </TableCell>
+          <TableCell align="left">
+            <Typography variant="h6">
+              <b>{t('stats:courseTerms')}</b>
+            </Typography>
+          </TableCell>
+          <TableCell align="left">
+            <Typography variant="h6">
+              <b>{t('stats:programCodes')}</b>
+            </Typography>
+          </TableCell>
+          <TableCell align="left">
+            <Typography variant="h6">
+              <b>{t('stats:studentCount')}</b>
+            </Typography>
+          </TableCell>
+          <TableCell align="left">
+            <Typography variant="h6">
+              <b>{t('stats:enrollmentCount')}</b>
+            </Typography>
+          </TableCell>
+          <TableCell align="left">
+            <Typography variant="h6">
+              <TableSortLabel
+                active={sortBy === 'usagePercentage'}
+                direction={sortBy === 'usagePercentage' ? sortDirection : 'desc'}
+                onClick={() => onRequestSort('usagePercentage')}
+              >
+                <b>{t('stats:studentEnrollmentPercentage')}</b>
+              </TableSortLabel>
+            </Typography>
+          </TableCell>
+          <TableCell align="left">
+            <Typography variant="h6">
+              <TableSortLabel
+                active={sortBy === 'usedTokens'}
+                direction={sortBy === 'usedTokens' ? sortDirection : 'desc'}
+                onClick={() => onRequestSort('usedTokens')}
+              >
+                <b>{t('stats:usageCount')}</b>
+              </TableSortLabel>
+            </Typography>
+          </TableCell>
+          <TableCell align="left">
+            <Typography variant="h6">
+              <TableSortLabel
+                active={sortBy === 'promptCount'}
+                direction={sortBy === 'promptCount' ? sortDirection : 'desc'}
+                onClick={() => onRequestSort('promptCount')}
+              >
+                <b>{t('stats:promptCount')}</b>
+              </TableSortLabel>
+            </Typography>
+          </TableCell>
+          <TableCell align="left">
+            <Typography variant="h6">
+              <TableSortLabel
+                active={sortBy === 'ragIndicesCount'}
+                direction={sortBy === 'ragIndicesCount' ? sortDirection : 'desc'}
+                onClick={() => onRequestSort('ragIndicesCount')}
+              >
+                <b>{t('stats:rags')}</b>
+              </TableSortLabel>
+            </Typography>
+          </TableCell>
+          {isAdmin && (
+            <TableCell align="center">
+              <Typography variant="h6">
+                <TableSortLabel
+                  active={sortBy === 'saveDiscussions'}
+                  direction={sortBy === 'saveDiscussions' ? sortDirection : 'desc'}
+                  onClick={() => onRequestSort('saveDiscussions')}
+                >
+                  <b>{t('course:isReseachCourse')}</b>
+                </TableSortLabel>
+              </Typography>
+            </TableCell>
+          )}
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        <SumRow statsToShow={rows} />
+
+        {rows.map((chat) => (
+          <TableRow key={chat.id} onClick={() => onRowClick(chat.id)} sx={{ cursor: 'pointer' }} hover>
+            <TableCell align="left">
+              <Typography>{chat.codes.join(', ')}</Typography>
+            </TableCell>
+            <TableCell align="left">
+              <Typography>{chat.name[language]}</Typography>
+            </TableCell>
+            <TableCell align="left">
+              <Typography>{chat.terms.map((trm) => trm.label[language]).join(', ')}</Typography>
+            </TableCell>
+            <TableCell align="left">
+              <Tooltip title={namesOf(chat.programmes, language)}>
+                <Typography>{chat.programmes}</Typography>
+              </Tooltip>
+            </TableCell>
+            <TableCell align="left">
+              <Typography>{chat.students}</Typography>
+            </TableCell>
+            <TableCell align="left">
+              <Typography>{chat.enrollmentCount}</Typography>
+            </TableCell>
+            <TableCell align="left">
+              <Typography>{usagePercentage(chat.students, chat.enrollmentCount)}</Typography>
+            </TableCell>
+            <TableCell align="left">
+              <Typography>{chat.usedTokens}</Typography>
+            </TableCell>
+            <TableCell align="left">
+              <Typography>{chat.promptCount}</Typography>
+            </TableCell>
+            <TableCell align="left">
+              <Typography>{chat.ragIndicesCount}</Typography>
+            </TableCell>
+            {isAdmin && (
+              <TableCell align="center" onClick={(e) => e.stopPropagation()}>
+                <Switch
+                  checked={Boolean(chat.saveDiscussions)}
+                  disabled={pendingChatId === chat.id}
+                  onChange={(_, checked) =>
+                    window.confirm(t(checked ? 'course:saveDiscussions' : 'course:unsaveDiscussions', { course: chat.name[language] })) &&
+                    onSaveDiscussionsChange(checked, chat.id)
+                  }
+                />
+              </TableCell>
+            )}
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  )
+})
 
 const SumRow = ({ statsToShow }) => {
   const { t } = useTranslation()

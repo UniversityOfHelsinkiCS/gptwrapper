@@ -90,7 +90,9 @@
     "trendSelectionMulti": "Multi",
     "sum": "SUM:",
     "rags": "Source materials",
-    "courses": "courses"
+    "courses": "courses",
+    "searchCourses": "Search course code or name",
+    "clearSearch": "Clear search"
   },
   "info": {
     "title": "Instructions",

@@ -98,7 +98,9 @@
     "trendSelectionMulti": "Flera",
     "rags": "RAG:ar",
     "sum": "Summa",
-    "courses": "Kurser"
+    "courses": "Kurser",
+    "searchCourses": "Sök kurskod eller namn",
+    "clearSearch": "Rensa sökning"
   },
   "info": {
     "title": "Bruksanvisning",
