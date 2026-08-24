@@ -152,6 +152,7 @@ const PromptModalV2 = () => {
 
   const [showInactive, setShowInactive] = useLocalStorageState('promptFilter.showInactive', true)
   const [showEnded, setShowEnded] = useLocalStorageState('promptFilter.showEnded', false)
+  const [showActivityPeriod, setShowActivityPeriod] = useLocalStorageState('promptFilter.showCourseActivityPeriod', false)
   const [filterAnchor, setFilterAnchor] = useState<HTMLButtonElement | null>(null)
 
   const allCourses = [...curreEnabled, ...curreDisabled, ...ended]
@@ -416,6 +417,18 @@ const PromptModalV2 = () => {
                       labelPlacement="start"
                       sx={{ justifyContent: 'space-between', ml: 0, mr: 0 }}
                     />
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={showActivityPeriod}
+                          onChange={(e) => setShowActivityPeriod(e.target.checked)}
+                          data-testid="filter-show-activity-period"
+                        />
+                      }
+                      label={t('settings:showActivityPeriod')}
+                      labelPlacement="start"
+                      sx={{ justifyContent: 'space-between', ml: 0, mr: 0 }}
+                    />
                   </Box>
                 </Popover>
                 {/* Course prompts list */}
@@ -432,6 +445,7 @@ const PromptModalV2 = () => {
                         previewCourse={previewCourse}
                         handleCreateNew={handleCreateNew}
                         expandTarget={expandTarget}
+                        showActivityPeriod={showActivityPeriod}
                       />
                     </Box>
                   ))}

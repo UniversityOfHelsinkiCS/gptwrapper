@@ -188,6 +188,7 @@
     "filterCourses": "Suodata kursseja",
     "showInactiveCourses": "Näytä ei-aktiiviset kurssit",
     "showEndedCourses": "Näytä päättyneet kurssit",
+    "showActivityPeriod": "Näytä kurssien käynnissäoloajat",
     "coursePrompts": "Kurssin alustukset",
     "saveMyPrompt": "Lisää oma alustus",
     "saveMyPromptModalTitle": "Luo tai päivitä oma alustus",

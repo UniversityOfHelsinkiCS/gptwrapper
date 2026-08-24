@@ -9,8 +9,10 @@ import { usePromptState } from './PromptState'
 import { PromptListItem } from './PromptModalV2.tsx'
 import AddIcon from '@mui/icons-material/Add'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import { formatDate } from './util'
 
 interface CoursePromptsProps {
+  showActivityPeriod: boolean
   course: Course
   previewPrompt?: PromptType
   confirmClose: () => boolean
@@ -24,7 +26,18 @@ interface CoursePromptsProps {
 }
 
 const CoursePrompts = (props: CoursePromptsProps) => {
-  const { course, previewPrompt, confirmClose, setPreviewPrompt, setIsEditing, setPreviewCourse, previewCourse, handleCreateNew, expandTarget } = props
+  const {
+    course,
+    previewPrompt,
+    confirmClose,
+    setPreviewPrompt,
+    setIsEditing,
+    setPreviewCourse,
+    previewCourse,
+    handleCreateNew,
+    expandTarget,
+    showActivityPeriod,
+  } = props
   const { t, i18n } = useTranslation()
   const { language } = i18n
   const { activePrompt, handleChangePrompt } = usePromptState()
@@ -136,6 +149,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
             />
             <ListItemText
               primary={course.name[language]}
+              secondary={showActivityPeriod ? formatDate(course.activityPeriod) : undefined}
               slotProps={{
                 primary: {
                   variant: 'subtitle1',

@@ -199,6 +199,7 @@
     "filterCourses": "Filtrera kurser",
     "showInactiveCourses": "Visa inaktiva kurser",
     "showEndedCourses": "Visa avslutade kurser",
+    "showActivityPeriod": "Visa kursers aktivitetstid",
     "saveMyPromptModalTitle": "Skapa eller uppdatera en prompt",
     "saveMyPromptAs": "Spara prompt som",
     "updatePrompt": "Uppdatera prompt",
