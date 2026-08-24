@@ -7,7 +7,7 @@ export const chatIsActive = (chatInstance: ChatInstance) => {
 
   const todayIsMoreOrEqualToStart = today >= start
   const todayIsLessOrEqualToEnd = today <= end
-  const usageLimitMoreThanZero = chatInstance.usageLimit > 0
+  const chatIsActivated = chatInstance.activated
 
-  return todayIsMoreOrEqualToStart && todayIsLessOrEqualToEnd && usageLimitMoreThanZero
+  return todayIsMoreOrEqualToStart && todayIsLessOrEqualToEnd && chatIsActivated
 }
