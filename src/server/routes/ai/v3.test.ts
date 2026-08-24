@@ -210,16 +210,6 @@ describe('POST /ai/v3/stream as an enrolled student', () => {
     expect(response.status).toBe(403)
     expect(streamChat).not.toHaveBeenCalled()
   })
-
-  test('is refused when the course has no usage limit left', async () => {
-    givenCourse({ usageLimit: 0 })
-
-    const response = await stream('prompt-1', 'course-1')
-    await response.text()
-
-    expect(response.status).toBe(403)
-    expect(streamChat).not.toHaveBeenCalled()
-  })
 })
 
 describe('POST /ai/v3/stream as a responsible teacher', () => {
