@@ -215,7 +215,12 @@
     "sidebarSettings": "Håll sidomenyn stängd som standard.",
     "sendMode": "Meddelandehantering",
     "appearance": "Utseende",
-    "darkModeToggle": "Använd mörkt tema."
+    "darkModeToggle": "Använd mörkt tema.",
+    "languageMenu": {
+      "fi": "Valitse kieli: suomi",
+      "sv": "Välj språk: svenska",
+      "en": "Select language: English"
+    }
   },
   "email": {
     "save": "Spara som e-post",

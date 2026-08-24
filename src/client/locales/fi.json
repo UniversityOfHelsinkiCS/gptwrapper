@@ -211,7 +211,12 @@
     "sidebarSettings": "Pidä sivuvalikko oletetusti suljettuna.",
     "sendMode": "Viestin lähetys",
     "appearance": "Ulkoasu",
-    "darkModeToggle": "Käytä tummaa teemaa."
+    "darkModeToggle": "Käytä tummaa teemaa.",
+    "languageMenu": {
+      "fi": "Valitse kieli: suomi",
+      "sv": "Välj språk: svenska",
+      "en": "Select language: English"
+    }
   },
   "sidebar": {
     "coursesAndPrompts": "Kurssit ja alustukset",

@@ -3,7 +3,6 @@ import Menu from '@mui/material/Menu'
 import { useTheme } from '@mui/material'
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
-import MenuList from '@mui/material/MenuList'
 import ListItemText from '@mui/material/ListItemText'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import SettingsIcon from '@mui/icons-material/Settings'
@@ -12,10 +11,10 @@ import InfoIcon from '@mui/icons-material/Info'
 import ReviewsIcon from '@mui/icons-material/Reviews'
 import LanguageIcon from '@mui/icons-material/Language'
 import { BlueButton, OutlineButtonBlack, TextButton } from './ChatV2/general/Buttons'
-import { Box, ListItem, useMediaQuery } from '@mui/material'
+import { useMediaQuery } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Locale } from '@shared/lang'
-import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import useCurrentUser from '../hooks/useCurrentUser'
 import { AdminPanelSettings, BarChart, Logout } from '@mui/icons-material'
 import apiClient from '../util/apiClient'
@@ -35,7 +34,7 @@ export default function GlobalMenu({
 
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const showBackButton = pathname.includes('course-creator') || pathname.includes('admin') || pathname.includes('statistics')  
+  const showBackButton = pathname.includes('course-creator') || pathname.includes('admin') || pathname.includes('statistics')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -65,7 +64,6 @@ export default function GlobalMenu({
             position: 'fixed',
             top: isMobile ? 10 : 20,
             left: isMobile ? 15 : 20,
-
           }}
         >
           {t('backToChat')}
@@ -101,100 +99,121 @@ export default function GlobalMenu({
           },
         }}
       >
-        <MenuList>
+        <MenuItem
+          data-testid="open-global-settings-button"
+          onClick={() => {
+            openSettings()
+            handleClose()
+          }}
+        >
+          <ListItemIcon>
+            <SettingsIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>{t('settings')}</ListItemText>
+        </MenuItem>
+        <MenuItem
+          data-testid="open-disclaimer-button"
+          onClick={() => {
+            openDisclaimer()
+            handleClose()
+          }}
+        >
+          <ListItemIcon>
+            <InfoIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>{t('about_service')}</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            openFeedback()
+            handleClose()
+          }}
+        >
+          <ListItemIcon>
+            <ReviewsIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>{t('feedback:giveFeedback')}</ListItemText>
+        </MenuItem>
+        {user?.isStatsViewer && (
           <MenuItem
-            data-testid="open-global-settings-button"
             onClick={() => {
-              openSettings()
+              navigate('/statistics')
               handleClose()
             }}
           >
             <ListItemIcon>
-              <SettingsIcon fontSize="small" />
+              <BarChart fontSize="small" />
             </ListItemIcon>
-            <ListItemText>{t('settings')}</ListItemText>
+            <ListItemText>{t('courseStats')}</ListItemText>
           </MenuItem>
+        )}
+
+        {user?.isAdmin && (
           <MenuItem
-            data-testid="open-disclaimer-button"
             onClick={() => {
-              openDisclaimer()
+              navigate('/admin')
               handleClose()
             }}
           >
             <ListItemIcon>
-              <InfoIcon fontSize="small" />
+              <AdminPanelSettings fontSize="small" />
             </ListItemIcon>
-            <ListItemText>{t('about_service')}</ListItemText>
+            <ListItemText>{t('admin')}</ListItemText>
           </MenuItem>
+        )}
+
+        {user?.isCourseCreator && (
           <MenuItem
             onClick={() => {
-              openFeedback()
+              navigate('/course-creator')
               handleClose()
             }}
           >
             <ListItemIcon>
-              <ReviewsIcon fontSize="small" />
+              <AdminPanelSettings fontSize="small" />
             </ListItemIcon>
-            <ListItemText>{t('feedback:giveFeedback')}</ListItemText>
+            <ListItemText>{t('courseCreator:title')}</ListItemText>
           </MenuItem>
-          {user?.isStatsViewer && (
-            <MenuItem component={RouterLink} to="/statistics">
-              <ListItemIcon>
-                <BarChart fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>{t('courseStats')}</ListItemText>
-            </MenuItem>
-          )}
+        )}
 
-          {user?.isAdmin && (
-            <MenuItem component={RouterLink} to="/admin">
-              <ListItemIcon>
-                <AdminPanelSettings fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>{t('admin')}</ListItemText>
-            </MenuItem>
-          )}
+        <MenuItem
+          onClick={() => {
+            handleLogout()
+          }}
+        >
+          <ListItemIcon>
+            <Logout fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>{t('logout')}</ListItemText>
+        </MenuItem>
 
-          {user?.isCourseCreator && (
-            <MenuItem component={RouterLink} to="/course-creator">
-              <ListItemIcon>
-                <AdminPanelSettings fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>{t('courseCreator:title')}</ListItemText>
-            </MenuItem>
-          )}
-
-          <MenuItem
-            onClick={() => {
-              handleLogout()
-            }}
-          >
-            <ListItemIcon>
-              <Logout fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>{t('logout')}</ListItemText>
-          </MenuItem>
-
-          <Divider />
-          <ListItem>
-            <ListItemIcon>
-              <LanguageIcon fontSize="small" />
-            </ListItemIcon>
-            <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
-              <TextButton onClick={() => handleLanguageChange('fi')} sx={languageButtonSx('fi')}>
-                {t('finnish')}
-              </TextButton>
-              <Divider orientation="vertical" flexItem />
-              <TextButton onClick={() => handleLanguageChange('en')} sx={languageButtonSx('en')}>
-                {t('english')}
-              </TextButton>
-              <Divider orientation="vertical" flexItem />
-              <TextButton onClick={() => handleLanguageChange('sv')} sx={languageButtonSx('sv')}>
-                {t('swedish')}
-              </TextButton>
-            </Box>
-          </ListItem>
-        </MenuList>
+        <Divider />
+        <ListItemIcon sx={{ display: 'inline-flex', verticalAlign: 'middle', minWidth: 'auto', marginLeft: 1.5, marginRight: 0.5 }}>
+          <LanguageIcon fontSize="small" />
+        </ListItemIcon>
+        <TextButton
+          aria-label={t(`settings:languageMenu:${'fi'}`)}
+          onClick={() => handleLanguageChange('fi')}
+          sx={{ ...languageButtonSx('fi'), display: 'inline-flex', verticalAlign: 'middle' }}
+        >
+          {t('finnish')}
+        </TextButton>
+        <Divider orientation="vertical" flexItem sx={{ display: 'inline-flex', verticalAlign: 'middle' }} />
+        <TextButton
+          aria-label={t(`settings:languageMenu:${'en'}`)}
+          onClick={() => handleLanguageChange('en')}
+          sx={{ ...languageButtonSx('en'), display: 'inline-flex', verticalAlign: 'middle' }}
+        >
+          {t('english')}
+        </TextButton>
+        <Divider orientation="vertical" flexItem sx={{ display: 'inline-flex', verticalAlign: 'middle' }} />
+        <TextButton
+          aria-label={t(`settings:languageMenu:${'sv'}`)}
+          onClick={() => handleLanguageChange('sv')}
+          sx={{ ...languageButtonSx('sv'), display: 'inline-flex', verticalAlign: 'middle' }}
+        >
+          {t('swedish')}
+        </TextButton>
       </Menu>
     </div>
   )

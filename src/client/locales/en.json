@@ -208,7 +208,12 @@
     "sidebarSettings": "Keep the sidebar closed by default.",
     "sendMode": "Message sending",
     "appearance": "Appearance",
-    "darkModeToggle": "Use dark mode."
+    "darkModeToggle": "Use dark mode.",
+    "languageMenu": {
+      "fi": "Valitse kieli: suomi",
+      "sv": "Välj språk: svenska",
+      "en": "Select language: English"
+    }
   },
   "sidebar": {
     "coursesAndPrompts": "Courses and prompts",
