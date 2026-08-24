@@ -405,18 +405,22 @@ const PromptModalV2 = () => {
                   transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                 >
                   <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', minWidth: 260 }}>
-                    <FormControlLabel
-                      control={<Switch checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} data-testid="filter-show-inactive" />}
-                      label={t('settings:showInactiveCourses')}
-                      labelPlacement="start"
-                      sx={{ justifyContent: 'space-between', ml: 0, mr: 0 }}
-                    />
-                    <FormControlLabel
-                      control={<Switch checked={showEnded} onChange={(e) => setShowEnded(e.target.checked)} data-testid="filter-show-ended" />}
-                      label={t('settings:showEndedCourses')}
-                      labelPlacement="start"
-                      sx={{ justifyContent: 'space-between', ml: 0, mr: 0 }}
-                    />
+                    {(user?.isAdmin || user?.isEmployee) && (
+                      <>
+                        <FormControlLabel
+                          control={<Switch checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} data-testid="filter-show-inactive" />}
+                          label={t('settings:showInactiveCourses')}
+                          labelPlacement="start"
+                          sx={{ justifyContent: 'space-between', ml: 0, mr: 0 }}
+                        />
+                        <FormControlLabel
+                          control={<Switch checked={showEnded} onChange={(e) => setShowEnded(e.target.checked)} data-testid="filter-show-ended" />}
+                          label={t('settings:showEndedCourses')}
+                          labelPlacement="start"
+                          sx={{ justifyContent: 'space-between', ml: 0, mr: 0 }}
+                        />
+                      </>
+                    )}
                     <FormControlLabel
                       control={
                         <Switch
