@@ -106,7 +106,8 @@
     "server": "Palvelinversio {{version}}",
     "client": "Selainversio {{version}}",
     "uptime": "Uptime: {{uptime}}",
-    "mismatch": "Lataa sivu uudelleen"
+    "mismatch": "Lataa sivu uudelleen",
+    "toska": "Lue CurreChatin kehittäjistä."
   },
   "chat": {
     "start": "Aloita keskustelu lähettämällä viesti...",

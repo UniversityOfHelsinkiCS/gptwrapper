@@ -105,7 +105,8 @@
     "server": "Server version {{version}}",
     "client": "Client version {{version}}",
     "uptime": "Uptime: {{uptime}}",
-    "mismatch": "Reload for latest changes"
+    "mismatch": "Reload for latest changes",
+    "toska": "Read about the developers of CurreChat."
   },
   "chat": {
     "start": "Start the conversation by sending a message...",

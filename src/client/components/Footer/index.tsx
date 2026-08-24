@@ -23,7 +23,7 @@ const Footer = () => {
       }}
     >
       <Link flex={1} href="https://toska.dev" target="_blank" rel="noopener" underline="hover">
-        <img src={toskaColor} alt="Toska" width="100%" />
+        <img src={toskaColor} width="100%" alt={t('footer:toska')} />
       </Link>
       <Box flex={2} sx={{ display: 'flex', flexDirection: 'column' }}>
         <Typography variant="caption">{t('footer:server', { version: serverVersion })}</Typography>

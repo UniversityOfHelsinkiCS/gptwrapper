@@ -113,7 +113,8 @@
     "server": "Server version {{version}}",
     "client": "Klient version {{version}}",
     "uptime": "Uptime: {{uptime}}",
-    "mismatch": "Ladda sida om"
+    "mismatch": "Ladda sida om",
+    "toska": "Läs om CurreChats utvecklare."
   },
   "chat": {
     "start": "Starta konversationen genom att skicka ett meddelande...",
