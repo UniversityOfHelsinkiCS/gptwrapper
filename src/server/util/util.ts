@@ -5,7 +5,6 @@ export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve
 export const generateTerms = () => {
   const dateNow = new Date()
   const yearNow = dateNow.getFullYear()
-  const monthNow = dateNow.getMonth()
 
   type Term = {
     label: {
@@ -20,8 +19,7 @@ export const generateTerms = () => {
   const terms: Term[] = []
   let id = 1
 
-  // this is ugly
-  for (let y = 2023; y <= yearNow + (monthNow > 7 ? 1 : 0); y += 1) {
+  for (let y = 2023; y <= yearNow; y += 1) {
     terms.push({
       label: {
         en: `spring ${y}`,
@@ -47,7 +45,7 @@ export const generateTerms = () => {
     id += 2
   }
 
-  return terms.splice(0, terms.length - 1).reverse()
+  return terms.filter((term) => new Date(term.startDate) <= dateNow).reverse()
 }
 
 const ENCRYPTION_IV = process.env.ENCRYPTION_IV || 'default'
