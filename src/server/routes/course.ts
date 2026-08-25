@@ -154,12 +154,8 @@ courseRouter.get('/:id', async (req, res) => {
   const { user } = request
 
   const accessLevel = await requireCourseAccess(user, chatInstance)
-  if (accessLevel === 'STUDENT_CLOSED') {
-    res.send({ ...chatInstance.toJSON(), prompts: [] })
-    return
-  }
-  await enforceUserHasStudentOrFullAccess(user, chatInstance)
-  res.send(chatInstance)
+
+  res.send(serializeCourse(chatInstance, accessLevel))
 })
 
 courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Response) => {
@@ -212,28 +208,6 @@ export const enforceUserHasFullAccess = async (user: SharedUser, chatInstance: C
   return hasFullAccess
 }
 
-//allows users that are students or admins to access the course. If as user is a student then the course must be open for students
-export const enforceUserHasStudentOrFullAccess = async (user: SharedUser, chatInstance: ChatInstance) => {
-  const isEnrolled = await Enrolment.findOne({
-    where: { chatInstanceId: chatInstance.id, userId: user.id },
-  })
-  const courseIsOpen = chatIsActive(chatInstance)
-
-  //the user is a student so let the user access
-  if (isEnrolled && courseIsOpen) {
-    return true
-  }
-
-  //check if fullaccess
-  const fullAccess = await enforceUserHasFullAccess(user, chatInstance)
-  if (fullAccess) {
-    return true
-  }
-
-  //the enforceUserHasFullAcess should throw an error but just in case we throw another one
-  throw ApplicationError.Forbidden('Unauthorized')
-}
-
 type AccessLevel = 'FULL' | 'STUDENT' | 'STUDENT_CLOSED'
 const requireCourseAccess = async (user: SharedUser, chatInstance: ChatInstance): Promise<AccessLevel> => {
   if (user.isAdmin) {
@@ -257,6 +231,17 @@ const requireCourseAccess = async (user: SharedUser, chatInstance: ChatInstance)
   }
 
   throw ApplicationError.Forbidden('Unauthorized')
+}
+
+export const serializeCourse = (chatInstance: ChatInstance, accessLevel: AccessLevel) => {
+  switch (accessLevel) {
+    case 'FULL':
+    case 'STUDENT':
+      return chatInstance
+    case 'STUDENT_CLOSED':
+      // a closed course should not leak the prompts of the teacher
+      return { ...chatInstance.toJSON(), prompts: [] }
+  }
 }
 
 // returns a chatInstance, throws an chat instance not found if not found
