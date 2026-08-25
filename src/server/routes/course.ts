@@ -153,8 +153,12 @@ courseRouter.get('/:id', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
 
+  const accessLevel = await requireCourseAccess(user, chatInstance)
+  if (accessLevel === 'STUDENT_CLOSED') {
+    res.send({ ...chatInstance.toJSON(), prompts: [] })
+    return
+  }
   await enforceUserHasStudentOrFullAccess(user, chatInstance)
-
   res.send(chatInstance)
 })
 
@@ -227,6 +231,31 @@ export const enforceUserHasStudentOrFullAccess = async (user: SharedUser, chatIn
   }
 
   //the enforceUserHasFullAcess should throw an error but just in case we throw another one
+  throw ApplicationError.Forbidden('Unauthorized')
+}
+
+type AccessLevel = 'FULL' | 'STUDENT' | 'STUDENT_CLOSED'
+const requireCourseAccess = async (user: SharedUser, chatInstance: ChatInstance): Promise<AccessLevel> => {
+  if (user.isAdmin) {
+    return 'FULL'
+  }
+  const isResponsible = await userAssignedAsResponsible(user.id, chatInstance)
+  if (isResponsible) {
+    return 'FULL'
+  }
+  const isEnrolled = await Enrolment.findOne({
+    where: { chatInstanceId: chatInstance.id, userId: user.id },
+  })
+
+  const courseIsOpen = chatIsActive(chatInstance)
+  if (isEnrolled && courseIsOpen) {
+    return 'STUDENT'
+  }
+
+  if (isEnrolled && !courseIsOpen) {
+    return 'STUDENT_CLOSED'
+  }
+
   throw ApplicationError.Forbidden('Unauthorized')
 }
 
