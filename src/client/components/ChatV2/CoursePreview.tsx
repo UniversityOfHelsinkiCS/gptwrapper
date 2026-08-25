@@ -59,7 +59,7 @@ const initialsOf = (lastName?: string, firstNames?: string) => {
 type SortKey = 'last_name' | 'weekly' | 'total'
 type SortConfig = { key: SortKey; direction: 'asc' | 'desc' }
 
-const CoursePreview = ({ course }: { course: Course }) => {
+const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCourses?: () => void }) => {
   const { i18n, t } = useTranslation()
   const { language } = i18n
   const { data: chatInstance, refetch: refetchCourse } = useCourse(course.courseId)
@@ -88,8 +88,12 @@ const CoursePreview = ({ course }: { course: Course }) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'last_name', direction: 'asc' })
 
   useEffect(() => {
+    if (chatInstance && refetchCourses) refetchCourses()
+  }, [chatInstance, refetchCourses])
+
+  useEffect(() => {
     if (chatInstance?.responsibilities) setResponsibilities(chatInstance.responsibilities)
-  }, [chatInstance])
+  }, [chatInstance?.responsibilities])
 
   useEffect(() => {
     if (enrolmentsData) setEnrolments(enrolmentsData)

@@ -147,7 +147,7 @@ const PromptModalV2 = () => {
 
   const { hasChanges, setHasChanges, cacheKey, setCacheKey } = usePromptEditorState()
 
-  const { courses, isLoading } = useUserCourses()
+  const { courses, isLoading, refetch } = useUserCourses()
   const { curreEnabled, curreDisabled, ended } = getGroupedCourses(courses)
 
   const [showInactive, setShowInactive] = useLocalStorageState('promptFilter.showInactive', true)
@@ -483,7 +483,7 @@ const PromptModalV2 = () => {
                   onCopied={handleCopied}
                 />
               ) : previewCourse ? (
-                <CoursePreview course={previewCourse} />
+                <CoursePreview course={previewCourse} refetchCourses={refetch} />
               ) : (
                 <Box sx={{ display: 'flex', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
                   <Typography>{t('settings:noPrompt')}</Typography>

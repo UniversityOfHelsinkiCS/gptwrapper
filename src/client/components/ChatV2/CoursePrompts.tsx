@@ -51,7 +51,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
   const currentPrompts = course.prompts ?? []
 
   const courseEnded = Date.parse(course.activityPeriod.endDate) < Date.now()
-  const dotColor = courseEnded ? 'error.main' : course.usageLimit > 0 ? 'success.main' : 'grey.400'
+  const dotColor = courseEnded ? 'error.main' : course.activated ? 'success.main' : 'grey.400'
 
   useEffect(() => {
     if (!previewPrompt) return
