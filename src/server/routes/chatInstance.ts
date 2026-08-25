@@ -212,63 +212,6 @@ chatInstanceRouter.get('/:id', async (req, res) => {
   res.send(chatInstance)
 })
 
-chatInstanceRouter.post('/:id/enable', async (req, res) => {
-  const { id } = req.params
-
-  const chatInstance = await ChatInstance.findByPk(id)
-
-  if (!chatInstance) {
-    throw ApplicationError.NotFound('ChatInstance not found')
-  }
-
-  const { user } = req as RequestWithUser<{ id: string }>
-  const access = await getChatInstanceAccess(user, chatInstance)
-  if (access < ChatInstanceAccess.TEACHER) {
-    throw ApplicationError.Forbidden()
-  }
-
-  const defaultActivityPeriod = chatInstance.courseActivityPeriod
-    ? {
-        startDate: chatInstance.courseActivityPeriod.startDate,
-        endDate: addMonths(chatInstance.courseActivityPeriod?.endDate, 1).toDateString(),
-      }
-    : {
-        startDate: new Date().toDateString(),
-        endDate: addMonths(new Date(), 1).toDateString(),
-      }
-
-  chatInstance.usageLimit = DEFAULT_TOKEN_LIMIT
-  chatInstance.activityPeriod = defaultActivityPeriod
-  chatInstance.activated = true
-
-  await chatInstance.save()
-
-  res.send(chatInstance)
-})
-
-chatInstanceRouter.post('/:id/disable', async (req, res) => {
-  const { id } = req.params
-
-  const chatInstance = await ChatInstance.findByPk(id)
-
-  if (!chatInstance) {
-    throw ApplicationError.NotFound('ChatInstance not found')
-  }
-
-  const { user } = req as RequestWithUser<{ id: string }>
-  const access = await getChatInstanceAccess(user, chatInstance)
-  if (access < ChatInstanceAccess.TEACHER) {
-    throw ApplicationError.Forbidden()
-  }
-
-  chatInstance.usageLimit = 0
-  chatInstance.activated = false
-
-  await chatInstance.save()
-
-  res.send(chatInstance)
-})
-
 chatInstanceRouter.get('/:id/usages', async (req, res) => {
   const { id } = req.params
 
