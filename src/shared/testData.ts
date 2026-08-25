@@ -37,6 +37,7 @@ export const TEST_COURSES = {
     },
     code: 'OTE-1234',
     usageLimit: 200_000,
+    activated: true,
   },
   TEST_COURSE: {
     id: 'test-course',
@@ -53,6 +54,7 @@ export const TEST_COURSES = {
     code: 'TEST-1234',
     model: 'mock',
     usageLimit: 200_000,
+    activated: true,
   },
   EXAMPLE_COURSE: {
     id: 'esimerkit',
@@ -68,6 +70,7 @@ export const TEST_COURSES = {
     },
     code: 'ESI-1234',
     usageLimit: 200_000,
+    activated: true,
   },
   TOSKA: {
     id: 'toska',
@@ -83,6 +86,7 @@ export const TEST_COURSES = {
     },
     code: 'TOSKA-1234',
     usageLimit: 2_000_000,
+    activated: true,
   },
 }
 
