@@ -25,7 +25,7 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
     setEndDate(new Date(course.activityPeriod?.endDate || new Date()))
   }, [course.courseId])
 
-  const handleSubmit = async (tokens?: number) => {
+  const handleSubmit = async (tokens?: number, activated?: boolean) => {
     const activityPeriod = {
       startDate: format(startDate, 'yyyy-MM-dd'),
       endDate: format(endDate, 'yyyy-MM-dd'),
@@ -37,7 +37,7 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
         activityPeriod,
         usageLimit: newLimit,
         saveDiscussions: false,
-        activated: newLimit > 0,
+        activated: activated ?? course.activated,
       })
       enqueueSnackbar(t('course:courseUpdated'), { variant: 'success' })
     } catch (error: any) {
@@ -45,8 +45,8 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
     }
   }
 
-  const handleActivate = () => window.confirm(t('course:activate')) && handleSubmit(DEFAULT_TOKEN_LIMIT)
-  const handleDeactivate = () => window.confirm(t('course:deActivate')) && handleSubmit(0)
+  const handleActivate = () => window.confirm(t('course:activate')) && handleSubmit(DEFAULT_TOKEN_LIMIT, true)
+  const handleDeactivate = () => window.confirm(t('course:deActivate')) && handleSubmit(0, false)
 
   const courseEnded = Date.parse(course.activityPeriod?.endDate) < Date.now()
 

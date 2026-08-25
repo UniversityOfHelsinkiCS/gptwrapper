@@ -131,6 +131,7 @@ router.post('/reset-test-data', async (req, res) => {
       description: '',
       usageLimit: 0, // Closed: teacher must activate it in the test
       courseId: activationCourseId,
+      activated: false,
       activityPeriod: {
         startDate: '2024-09-01',
         endDate: '2100-08-31',

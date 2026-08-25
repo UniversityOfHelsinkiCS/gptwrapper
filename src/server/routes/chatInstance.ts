@@ -239,6 +239,7 @@ chatInstanceRouter.post('/:id/enable', async (req, res) => {
 
   chatInstance.usageLimit = DEFAULT_TOKEN_LIMIT
   chatInstance.activityPeriod = defaultActivityPeriod
+  chatInstance.activated = true
 
   await chatInstance.save()
 
@@ -261,6 +262,7 @@ chatInstanceRouter.post('/:id/disable', async (req, res) => {
   }
 
   chatInstance.usageLimit = 0
+  chatInstance.activated = false
 
   await chatInstance.save()
 
