@@ -4,7 +4,7 @@ import CancelIcon from '@mui/icons-material/Cancel'
 import DoneIcon from '@mui/icons-material/Done'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { useTranslation } from 'react-i18next'
-import { format } from 'date-fns'
+import { format, isValid } from 'date-fns'
 import { enqueueSnackbar } from 'notistack'
 import { Course } from '../../../types'
 import { useEditCourseMutation } from '../../../hooks/useCourseMutation'
@@ -75,13 +75,13 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
           <DatePicker
             label={t('opensAt')}
             value={startDate}
-            onChange={(date) => setStartDate(date || new Date())}
+            onChange={(date) => date && isValid(date) && setStartDate(date)}
             slotProps={{ textField: { fullWidth: true, size: 'small' } }}
           />
           <DatePicker
             label={t('closesAt')}
             value={endDate}
-            onChange={(date) => setEndDate(date || new Date())}
+            onChange={(date) => date && isValid(date) && setEndDate(date)}
             slotProps={{ textField: { fullWidth: true, size: 'small' } }}
           />
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>
