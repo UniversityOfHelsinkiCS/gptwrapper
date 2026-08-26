@@ -1,21 +1,14 @@
 import crypto from 'crypto'
 
+import type { Term } from '../../shared/types'
+import type { ActivityPeriod } from '../types'
+
 export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export const generateTerms = () => {
   const dateNow = new Date()
   const yearNow = dateNow.getFullYear()
 
-  type Term = {
-    label: {
-      en: string
-      fi: string
-      sv: string
-    }
-    id: number
-    startDate: string
-    endDate: string
-  }
   const terms: Term[] = []
   let id = 1
 
@@ -46,6 +39,15 @@ export const generateTerms = () => {
   }
 
   return terms.filter((term) => new Date(term.startDate) <= dateNow).reverse()
+}
+
+export const getTermsOf = (courseActivityPeriod: ActivityPeriod | null | undefined, terms: Term[]): Term[] => {
+  if (!courseActivityPeriod) return []
+
+  const courseStart = Date.parse(courseActivityPeriod.startDate)
+  const courseEnd = Date.parse(courseActivityPeriod.endDate || '2112-12-21')
+
+  return terms.filter((term) => Date.parse(term.startDate) <= courseEnd && Date.parse(term.endDate) >= courseStart)
 }
 
 const ENCRYPTION_IV = process.env.ENCRYPTION_IV || 'default'

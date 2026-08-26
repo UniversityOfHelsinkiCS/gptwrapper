@@ -75,6 +75,8 @@ export type Release = {
 export interface Term {
   label: Locales
   id: number
+  startDate: string
+  endDate: string
 }
 
 export interface Statistic {
