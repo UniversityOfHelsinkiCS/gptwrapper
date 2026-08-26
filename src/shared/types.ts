@@ -102,3 +102,12 @@ export type CourseUsage = {
   limit: number
   activated?: boolean
 }
+
+export interface ChatInstanceSearchResult {
+  /** chatInstance.courseId (the Course Unit Realisation id), which /courses/:id expects */
+  id: string
+  name: Locales
+  /** human interpretable course codes, e.g. ['TKT-01001'] */
+  codes: string[]
+  terms: Term[]
+}

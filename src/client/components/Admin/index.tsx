@@ -4,6 +4,7 @@ import { Route, Routes, Link, Navigate } from 'react-router-dom'
 
 import { format } from 'date-fns'
 import ChatInstances from './ChatInstances'
+import ChatInstanceSearch from './ChatInstanceSearch'
 import Usage from './Usage'
 import Updater from './Updater'
 import UserSearch from './UserSearch'
@@ -56,6 +57,7 @@ export function Component() {
           }}
         >
           <Tab label={t('admin:searchUsers')} to="/admin/usersearch" component={Link} />
+          <Tab label={t('admin:chatInstance')} to="/admin/chatinstancesearch" component={Link} />
           <Tab label={t('admin:notifications')} to="/admin/notifications" component={Link} />
           <Tab label={t('admin:uniPrompts')} to="/admin/uniprompts" component={Link} />
           <Tab label={t('admin:feedbacks')} to="/admin/feedbacks" component={Link} />
@@ -69,6 +71,7 @@ export function Component() {
         <Route path="/usage" element={<Usage />} />
         {user.iamGroups.includes('grp-toska') && <Route path="/updater" element={<Updater />} />}
         <Route path="/usersearch" element={<UserSearch />} />
+        <Route path="/chatinstancesearch" element={<ChatInstanceSearch />} />
         <Route path="/feedbacks" element={<Feedbacks />} />
         <Route path="/notifications" element={<NotificationManagement />} />
         <Route path="/uniprompts" element={<UniversityPromptManagement />} />

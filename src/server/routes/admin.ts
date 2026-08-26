@@ -2,10 +2,14 @@ import express from 'express'
 import { Op, WhereOptions } from 'sequelize'
 
 import { ChatInstance, UserChatInstanceUsage, User } from '../db/models'
+import { sequelize } from '../db/connection'
 import { getCourse } from '../util/importer'
 import { run as runUpdater } from '../updater'
 import { ApplicationError } from '../util/ApplicationError'
 import { adminMiddleware } from '../middleware/adminMiddleware'
+import { generateTerms, getTermsOf } from '../util/util'
+import { LANGUAGES } from '../../shared/lang'
+import type { ChatInstanceSearchResult } from '../../shared/types'
 
 const adminRouter = express.Router()
 
@@ -167,6 +171,45 @@ adminRouter.get('/user-search', async (req, res) => {
     })),
     count,
   })
+})
+
+adminRouter.get('/chatinstance-search', async (req, res) => {
+  const CHAT_INSTANCE_SEARCH_MIN_LENGTH = 3
+
+  const search = String(req.query.search ?? '').trim()
+  const languageParam = String(req.query.language ?? '')
+  const language = (LANGUAGES as readonly string[]).includes(languageParam) ? languageParam : 'en'
+
+  if (search.length < CHAT_INSTANCE_SEARCH_MIN_LENGTH) {
+    res.send([])
+    return
+  }
+
+  const like = sequelize.escape(`%${search}%`)
+
+  const chatInstances = await ChatInstance.findAll({
+    attributes: ['courseId', 'name', 'courseUnits', 'courseActivityPeriod'],
+    where: {
+      courseId: { [Op.ne]: null },
+      [Op.or]: [
+        sequelize.literal(`EXISTS (SELECT 1 FROM unnest("ChatInstance"."course_units") AS course_unit WHERE course_unit->>'code' ILIKE ${like})`),
+        { [`name.${language}`]: { [Op.iLike]: `%${search}%` } },
+      ],
+    },
+    order: [[sequelize.literal(`"ChatInstance"."activity_period"->>'startDate'`), 'DESC NULLS LAST']],
+    limit: 500,
+  })
+
+  const terms = generateTerms()
+
+  const results: ChatInstanceSearchResult[] = chatInstances.map((chatInstance) => ({
+    id: chatInstance.courseId as string,
+    name: chatInstance.name,
+    codes: [...new Set((chatInstance.courseUnits ?? []).map((unit) => unit.code))],
+    terms: getTermsOf(chatInstance.courseActivityPeriod, terms),
+  }))
+
+  res.send(results)
 })
 
 adminRouter.post('/run-updater', async (_req, res) => {

@@ -5,7 +5,7 @@ import { sequelize } from '../db/connection'
 import { RequestWithUser } from '../types'
 import { ChatInstance, UserChatInstanceUsage, User, Prompt, RagIndex, Enrolment } from '../db/models'
 import { statsViewerIams } from '../util/config'
-import { generateTerms } from '../util/util'
+import { generateTerms, getTermsOf } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
 import { Statistic, Term } from 'src/shared/types'
 import { adminMiddleware } from '../middleware/adminMiddleware'
@@ -57,7 +57,7 @@ const getEnrollmentCounts = async () => {
 
 // this function is mostly garbage
 statisticsRouter.get('/statistics', [adminMiddleware], async (req, res) => {
-  const terms = generateTerms()
+  const allTerms = generateTerms()
 
   const mangelStats = async () => {
     const [usages, enrollmentCounts] = await Promise.all([getUsages(), getEnrollmentCounts()])
@@ -73,15 +73,6 @@ statisticsRouter.get('/statistics', [adminMiddleware], async (req, res) => {
       }
       courses[usage.chatInstanceId].students += 1
       courses[usage.chatInstanceId].usedTokens += usage.totalUsageCount //we are interested in how many tokens totally are used in a course
-    }
-
-    const getTermsOf = ({ courseActivityPeriod }): Term[] => {
-      const checkDateOverlap = (term, course) =>
-        new Date(term.startDate) <= new Date(course.endDate || '2112-12-21') && new Date(term.endDate) >= new Date(course.startDate)
-
-      if (!courseActivityPeriod) return []
-
-      return terms.filter((term) => checkDateOverlap(term, courseActivityPeriod))
     }
 
     function getUniqueValues(array) {
@@ -101,7 +92,7 @@ statisticsRouter.get('/statistics', [adminMiddleware], async (req, res) => {
 
       const codes = units.map((u) => u.code)
       const programmes = units.flatMap((item) => item.organisations.map((org) => org.code))
-      const terms: Term[] = getTermsOf(chatInstance)
+      const terms: Term[] = getTermsOf(chatInstance.courseActivityPeriod, allTerms)
       return {
         startDate: chatInstance.activityPeriod?.startDate,
         endDate: chatInstance.activityPeriod?.endDate,
@@ -146,7 +137,7 @@ statisticsRouter.get('/statistics', [adminMiddleware], async (req, res) => {
 
   res.send({
     data: await mangelStats(),
-    terms,
+    terms: allTerms,
   })
 })
 
