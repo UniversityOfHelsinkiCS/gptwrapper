@@ -100,7 +100,7 @@ export type CourseUsage = {
   name: Locales
   usage: number
   limit: number
-  activated?: boolean
+  activated: boolean
 }
 
 export interface ChatInstanceSearchResult {
