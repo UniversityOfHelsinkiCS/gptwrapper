@@ -205,7 +205,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
 
   const activeCourse: Course = chatInstance ? chatInstance : course
   const activated = activeCourse.activated
-  const courseEnded = Date.parse(course.activityPeriod.endDate) < Date.now()
+  const courseEnded = Date.parse(activeCourse.activityPeriod.endDate) < Date.now()
 
   return (
     <>
@@ -267,7 +267,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
           )}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <EventAvailableIcon fontSize="small" />
-            <Typography variant="body2">{formatDate(course.activityPeriod)}</Typography>
+            <Typography variant="body2">{formatDate(activeCourse.activityPeriod)}</Typography>
           </Box>
         </Box>
 
@@ -330,14 +330,14 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
             <Typography variant="body2" color="text.secondary">
               ({responsibilities.length})
             </Typography>
-            {isAdmin && (
+            {canManage && (
               <OutlineButtonBlue
                 sx={{ ml: 'auto' }}
                 startIcon={<PersonAddIcon />}
                 onClick={() => setAddTeacherOpen((open) => !open)}
                 data-testid="toggle-add-teacher-view"
               >
-                {addTeacherOpen ? t('common:cancel') : t('course:addTeacher')}
+                {addTeacherOpen ? t('common:close') : t('course:addTeacher')}
               </OutlineButtonBlue>
             )}
           </Box>
@@ -355,7 +355,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
                     sx={{ '& .MuiChip-avatar': { bgcolor: 'primary.main', color: 'primary.contrastText' } }}
                     avatar={<Avatar>{initialsOf(responsibility.user.last_name, responsibility.user.first_names)}</Avatar>}
                     label={`${responsibility.user.last_name ?? ''} ${responsibility.user.first_names?.split(' ')[0] ?? ''}`.trim()}
-                    onDelete={isAdmin && responsibility.createdByUserId ? () => handleRemoveResponsibility(responsibility) : undefined}
+                    onDelete={canManage && responsibility.createdByUserId ? () => handleRemoveResponsibility(responsibility) : undefined}
                     deleteIcon={<CloseIcon />}
                     variant="outlined"
                   />

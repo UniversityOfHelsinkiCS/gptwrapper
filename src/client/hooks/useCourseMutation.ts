@@ -17,7 +17,7 @@ interface SaveDiscussionsVariables {
 }
 
 export const useEditCourseMutation = (id: string) => {
-  const mutationFn = async (data: UpdatedCourseData) => {
+  const mutationFn = async (data: Partial<UpdatedCourseData>) => {
     const res = await apiClient.put(`/courses/${id}`, data)
 
     const course = res.data

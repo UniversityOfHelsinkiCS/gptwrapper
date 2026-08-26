@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Box, Typography, Divider, Stack } from '@mui/material'
+import { Box, Typography, Divider, Stack, Tooltip, IconButton } from '@mui/material'
+import CancelIcon from '@mui/icons-material/Cancel'
+import DoneIcon from '@mui/icons-material/Done'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { useTranslation } from 'react-i18next'
 import { format } from 'date-fns'
 import { enqueueSnackbar } from 'notistack'
 import { Course } from '../../../types'
 import { useEditCourseMutation } from '../../../hooks/useCourseMutation'
-import { BlueButton, GreenButton, RedButton } from '../../ChatV2/general/Buttons'
+import { GreenButton, RedButton } from '../../ChatV2/general/Buttons'
 import { DEFAULT_TOKEN_LIMIT } from '@config'
 
 export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
@@ -26,23 +28,29 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
   }, [course.courseId])
 
   const handleSubmit = async (tokens?: number, activated?: boolean) => {
-    const activityPeriod = {
-      startDate: format(startDate, 'yyyy-MM-dd'),
-      endDate: format(endDate, 'yyyy-MM-dd'),
-    }
-
-    const newLimit = tokens ?? course.usageLimit
     try {
-      await mutation.mutateAsync({
-        activityPeriod,
-        usageLimit: newLimit,
-        saveDiscussions: false,
-        activated: activated ?? course.activated,
-      })
+      if (activated === undefined) {
+        await mutation.mutateAsync({
+          activityPeriod: {
+            startDate: format(startDate, 'yyyy-MM-dd'),
+            endDate: format(endDate, 'yyyy-MM-dd'),
+          },
+        })
+      } else {
+        await mutation.mutateAsync({
+          usageLimit: tokens ?? course.usageLimit,
+          activated,
+        })
+      }
       enqueueSnackbar(t('course:courseUpdated'), { variant: 'success' })
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     }
+  }
+
+  const handleCancel = () => {
+    setStartDate(new Date(course.activityPeriod?.startDate || new Date()))
+    setEndDate(new Date(course.activityPeriod?.endDate || new Date()))
   }
 
   const handleActivate = () => window.confirm(t('course:activate')) && handleSubmit(DEFAULT_TOKEN_LIMIT, true)
@@ -55,27 +63,53 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 3,
+        gap: 2,
         p: 2,
       }}
     >
       <Box>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
           {t('editActivityPeriod')}
         </Typography>
-        <Stack direction="row" spacing={2}>
+        <Stack direction="row" spacing={2} alignItems="flex-start">
           <DatePicker
             label={t('opensAt')}
             value={startDate}
             onChange={(date) => setStartDate(date || new Date())}
-            slotProps={{ textField: { fullWidth: true } }}
+            slotProps={{ textField: { fullWidth: true, size: 'small' } }}
           />
           <DatePicker
             label={t('closesAt')}
             value={endDate}
             onChange={(date) => setEndDate(date || new Date())}
-            slotProps={{ textField: { fullWidth: true } }}
+            slotProps={{ textField: { fullWidth: true, size: 'small' } }}
           />
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>
+            <Tooltip arrow placement="top" title={t('common:cancel')}>
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={() => handleCancel()}
+                  disabled={!hasUnsavedChanges}
+                  sx={{ '&.Mui-disabled .MuiSvgIcon-root': { color: 'action.disabled', opacity: 0.55 } }}
+                >
+                  <CancelIcon fontSize="small" color="primary" />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip arrow placement="top" title={t('common:save')}>
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={() => handleSubmit()}
+                  disabled={!hasUnsavedChanges}
+                  sx={{ '&.Mui-disabled .MuiSvgIcon-root': { color: 'action.disabled', opacity: 0.55 } }}
+                >
+                  <DoneIcon fontSize="small" color="primary" />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
         </Stack>
       </Box>
 
@@ -93,9 +127,6 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
             {t('course:activate')}
           </GreenButton>
         )}
-        <BlueButton onClick={() => handleSubmit()} variant="contained" disabled={!hasUnsavedChanges}>
-          {t('save')}
-        </BlueButton>
       </Stack>
     </Box>
   )
