@@ -3,7 +3,11 @@ import type { ChatInstance } from '../../db/models'
 import { ApplicationError } from 'src/server/util/ApplicationError'
 
 export const chatIsActive = (chatInstance: ChatInstance) => {
-  return getChatStatus(chatInstance) === 'ACTIVATED'
+  try {
+    return getChatStatus(chatInstance) === 'ACTIVATED'
+  } catch {
+    return false
+  }
 }
 
 export const getChatStatus = (chatInstance: ChatInstance): ChatStatus => {
