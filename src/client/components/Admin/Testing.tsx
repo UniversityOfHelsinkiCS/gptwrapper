@@ -94,10 +94,10 @@ export default function Testing() {
 
         <Box sx={{ maxWidth: 360, width: '100%', display: 'flex', flexDirection: 'column', gap: 1 }}>
           <BlueButton onClick={() => {}} disabled>
-            {t('admin:testingLoginAs')}&nbsp;<strong>{t('admin:testingFakeStudent')}</strong>&nbsp;({t('admin:testingNotWorkingYet')})
+            {t('admin:testingLoginAs')}{'\u00a0'}<strong>{t('admin:testingFakeStudent')}</strong>{'\u00a0'}{`(${t('admin:testingNotWorkingYet')})`}
           </BlueButton>
           <BlueButton onClick={() => handleLoginAs(ahslaaks, t('admin:testingLoginUnavailable'))}>
-            {t('admin:testingLoginAs')}&nbsp;<strong>{testTeacherUsername}</strong>
+            {t('admin:testingLoginAs')}{'\u00a0'}<strong>{testTeacherUsername}</strong>
           </BlueButton>
         </Box>
       </Box>
