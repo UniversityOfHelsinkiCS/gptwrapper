@@ -111,3 +111,8 @@ export interface ChatInstanceSearchResult {
   codes: string[]
   terms: Term[]
 }
+
+export interface ChatInstanceSearchResponse {
+  results: ChatInstanceSearchResult[]
+  count: number
+}

@@ -14,6 +14,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   TextField,
   Typography,
@@ -25,7 +26,7 @@ import { useTranslation } from 'react-i18next'
 import { getLanguageValue } from '@shared/utils'
 import useCourse from '../../../hooks/useCourse'
 import CoursePreview from '../../ChatV2/CoursePreview'
-import useChatInstanceSearch, { CHAT_INSTANCE_SEARCH_MIN_LENGTH } from './useChatInstanceSearch'
+import useChatInstanceSearch, { CHAT_INSTANCE_SEARCH_DEFAULT_LIMIT, CHAT_INSTANCE_SEARCH_MIN_LENGTH } from './useChatInstanceSearch'
 
 const ChatInstanceSearch = () => {
   const { t, i18n } = useTranslation()
@@ -34,6 +35,8 @@ const ChatInstanceSearch = () => {
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [previewCourseId, setPreviewCourseId] = useState<string | undefined>(undefined)
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(CHAT_INSTANCE_SEARCH_DEFAULT_LIMIT)
 
   const setDebounced = useMemo(() => debounce((value: string) => setDebouncedSearch(value.trim()), 300), [])
 
@@ -41,6 +44,7 @@ const ChatInstanceSearch = () => {
 
   const handleSearchChange = (value: string) => {
     setSearch(value)
+    setPage(0)
     setDebounced(value)
   }
 
@@ -48,49 +52,52 @@ const ChatInstanceSearch = () => {
     setDebounced.cancel()
     setSearch('')
     setDebouncedSearch('')
+    setPage(0)
   }
 
-  const { data: chatInstances, isFetching } = useChatInstanceSearch(debouncedSearch, language)
+  const {
+    results: chatInstances,
+    count,
+    isFetching,
+  } = useChatInstanceSearch({ search: debouncedSearch, language, limit: rowsPerPage, offset: page * rowsPerPage })
   const { data: previewCourse } = useCourse(previewCourseId)
 
   const hasQuery = debouncedSearch.length >= CHAT_INSTANCE_SEARCH_MIN_LENGTH
 
   return (
     <Box>
-      <TextField
-        value={search}
-        onChange={(event) => handleSearchChange(event.target.value)}
-        placeholder={t('admin:chatInstanceSearchPlaceholder')}
-        size="small"
-        sx={{ minWidth: 360 }}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" />
-              </InputAdornment>
-            ),
-            endAdornment: search ? (
-              <InputAdornment position="end">
-                <IconButton size="small" onClick={clearSearch} aria-label={t('common:close')}>
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </InputAdornment>
-            ) : null,
-          },
-        }}
-      />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <TextField
+          value={search}
+          onChange={(event) => handleSearchChange(event.target.value)}
+          placeholder={t('admin:chatInstanceSearchPlaceholder')}
+          size="small"
+          sx={{ minWidth: 360 }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+              endAdornment: search ? (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={clearSearch} aria-label={t('common:close')}>
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ) : null,
+            },
+          }}
+        />
+
+        {hasQuery && isFetching && <CircularProgress size={24} />}
+      </Box>
 
       {!hasQuery && (
         <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
           {t('admin:chatInstanceSearchHint')}
         </Typography>
-      )}
-
-      {hasQuery && isFetching && (
-        <Box sx={{ mt: 2 }}>
-          <CircularProgress size={24} />
-        </Box>
       )}
 
       {hasQuery && !isFetching && chatInstances?.length === 0 && (
@@ -125,6 +132,19 @@ const ChatInstanceSearch = () => {
               ))}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            rowsPerPageOptions={[25, 50, 100]}
+            count={count ?? -1}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={(_event, newPage) => setPage(newPage)}
+            onRowsPerPageChange={(event) => {
+              setRowsPerPage(parseInt(event.target.value, 10))
+              setPage(0)
+            }}
+            labelRowsPerPage={t('admin:rowsPerPage')}
+          />
         </TableContainer>
       )}
 

@@ -20,43 +20,43 @@ const createWrapper = () => {
 describe('useChatInstanceSearch', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockedGet.mockResolvedValue({ data: results } as any)
+    mockedGet.mockResolvedValue({ data: { results, count: results.length } } as any)
   })
 
   test('does not query for a search shorter than the minimum length', () => {
     const short = 'a'.repeat(CHAT_INSTANCE_SEARCH_MIN_LENGTH - 1)
 
-    const { result } = renderHook(() => useChatInstanceSearch(short, 'en'), { wrapper: createWrapper() })
+    const { result } = renderHook(() => useChatInstanceSearch({ search: short, language: 'en' }), { wrapper: createWrapper() })
 
     expect(mockedGet).not.toHaveBeenCalled()
-    expect(result.current.data).toBeUndefined()
+    expect(result.current.results).toBeUndefined()
   })
 
   test('queries once the search reaches the minimum length', async () => {
-    const { result } = renderHook(() => useChatInstanceSearch('testing', 'en'), { wrapper: createWrapper() })
+    const { result } = renderHook(() => useChatInstanceSearch({ search: 'testing', language: 'en' }), { wrapper: createWrapper() })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toEqual(results)
-    expect(mockedGet).toHaveBeenCalledWith('/admin/chatinstance-search?search=testing&language=en')
+    expect(result.current.results).toEqual(results)
+    expect(mockedGet).toHaveBeenCalledWith('/admin/chatinstance-search?search=testing&language=en&limit=25&offset=0')
   })
 
   test('passes the language through', async () => {
-    const { result } = renderHook(() => useChatInstanceSearch('testing', 'fi'), { wrapper: createWrapper() })
+    const { result } = renderHook(() => useChatInstanceSearch({ search: 'testing', language: 'fi' }), { wrapper: createWrapper() })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(mockedGet).toHaveBeenCalledWith('/admin/chatinstance-search?search=testing&language=fi')
+    expect(mockedGet).toHaveBeenCalledWith('/admin/chatinstance-search?search=testing&language=fi&limit=25&offset=0')
   })
 
   test('url-encodes the search term', async () => {
-    const { result } = renderHook(() => useChatInstanceSearch('a&b c', 'en'), { wrapper: createWrapper() })
+    const { result } = renderHook(() => useChatInstanceSearch({ search: 'a&b c', language: 'en' }), { wrapper: createWrapper() })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(mockedGet).toHaveBeenCalledWith('/admin/chatinstance-search?search=a%26b%20c&language=en')
+    expect(mockedGet).toHaveBeenCalledWith('/admin/chatinstance-search?search=a%26b%20c&language=en&limit=25&offset=0')
   })
 
   test('keeps the previous results visible while the next search loads', async () => {
     const wrapper = createWrapper()
-    const { result, rerender } = renderHook(({ search }) => useChatInstanceSearch(search, 'en'), {
+    const { result, rerender } = renderHook(({ search }) => useChatInstanceSearch({ search, language: 'en' }), {
       wrapper,
       initialProps: { search: 'testing' },
     })
@@ -68,16 +68,23 @@ describe('useChatInstanceSearch', () => {
 
     rerender({ search: 'testing more' })
 
-    expect(result.current.data).toEqual(results)
+    expect(result.current.results).toEqual(results)
     expect(result.current.isFetching).toBe(true)
 
-    resolveNext({ data: [] })
-    await waitFor(() => expect(result.current.data).toEqual([]))
+    resolveNext({ data: { results: [], count: 0 } })
+    await waitFor(() => expect(result.current.results).toEqual([]))
+  })
+
+  test('requests the next page with an offset', async () => {
+    const { result } = renderHook(() => useChatInstanceSearch({ search: 'testing', language: 'en', limit: 25, offset: 25 }), { wrapper: createWrapper() })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(mockedGet).toHaveBeenCalledWith('/admin/chatinstance-search?search=testing&language=en&limit=25&offset=25')
   })
 
   test('refetches when only the language changes', async () => {
     const wrapper = createWrapper()
-    const { result, rerender } = renderHook(({ language }) => useChatInstanceSearch('testing', language), {
+    const { result, rerender } = renderHook(({ language }) => useChatInstanceSearch({ search: 'testing', language }), {
       wrapper,
       initialProps: { language: 'en' },
     })
@@ -86,6 +93,6 @@ describe('useChatInstanceSearch', () => {
 
     rerender({ language: 'fi' })
 
-    await waitFor(() => expect(mockedGet).toHaveBeenLastCalledWith('/admin/chatinstance-search?search=testing&language=fi'))
+    await waitFor(() => expect(mockedGet).toHaveBeenLastCalledWith('/admin/chatinstance-search?search=testing&language=fi&limit=25&offset=0'))
   })
 })
