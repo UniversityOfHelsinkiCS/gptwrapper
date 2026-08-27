@@ -8,7 +8,7 @@ import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
 import _ from 'lodash'
 import type { User as SharedUser } from '@shared/user'
-import { chatIsActive } from '../services/chatInstances/activity'
+import { chatIsActive, getChatStatus } from '../services/chatInstances/activity'
 
 const courseRouter = express.Router()
 
@@ -240,7 +240,7 @@ export const serializeCourse = (chatInstance: ChatInstance, accessLevel: AccessL
       return chatInstance
     case 'STUDENT_CLOSED':
       // a closed course should not leak the prompts of the teacher
-      return { ...chatInstance.toJSON(), prompts: [] }
+      return { ...chatInstance.toJSON(), prompts: [], status: getChatStatus(chatInstance) }
   }
 }
 

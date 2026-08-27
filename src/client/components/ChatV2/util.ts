@@ -1,9 +1,10 @@
 import { format } from 'date-fns'
 
-import { ActivityPeriod, ChatInstanceUsage, ChatStatus, Course } from '../../types'
+import { ActivityPeriod, ChatInstanceUsage } from '../../types'
 import { CoursesViewCourse } from '../../hooks/useUserCourses'
 
 import curTypes from '../../locales/curTypes.json'
+import { ChatStatus } from '@shared/types'
 
 export const preprocessMath = (content: string): string => {
   // console.time('preprocessMath')

@@ -93,8 +93,6 @@ export type PromptEditorContextValue = {
   setCacheKey: React.Dispatch<React.SetStateAction<string>>
 }
 
-export type ChatStatus = 'NOT_STARTED' | 'EXPIRED' | 'ACTIVE'
-
 export interface ChatInstance {
   promptCount?: number
   id: string
