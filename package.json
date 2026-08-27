@@ -17,7 +17,7 @@
     "lint:fix": "oxlint src --fix",
     "format": "prettier --write 'src/**/*.{ts,tsx}'",
     "build": "vite build",
-    "prepare": "husky install",
+    "prepare": "husky",
     "test:e2e": "playwright test",
     "test:e2e:logging": "playwright test --reporter=line --workers=1",
     "test:evals": "node evals/rag-eval.spec.ts",
