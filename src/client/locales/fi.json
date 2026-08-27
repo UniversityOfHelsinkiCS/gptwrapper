@@ -476,6 +476,7 @@
     "curreWillBeOpen": "Kurssin chat avautuu opiskelijoille",
     "curreWasOpen": "Kurssin chat on sulkeutunut",
     "curreNotStarted": "Kurssi ei ole alkanut",
+    "curreNotActivated": "Kurssin chattia ei ole vielä avattu",
     "disableCurre": "Poista CurreChat käytöstä",
     "enableCurre": "Ota CurreChat käyttöön",
     "enableCurreModalTitle": "Ota CurreChat käyttöön kurssille {{name}}?",

@@ -468,6 +468,7 @@
     "curreExpired": "The course is over",
     "curreNotOpen": "Students cannot access the chat of this course",
     "curreNotStarted": "The course has not started",
+    "curreNotActivated": "The course chat has not been opened yet",
     "curreOpen": "The course chat is open for students",
     "activatedForStudents": "Activated for students",
     "closedForStudents": "Closed for students",

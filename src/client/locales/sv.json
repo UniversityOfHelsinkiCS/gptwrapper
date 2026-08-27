@@ -485,6 +485,7 @@
     "curreWillBeOpen": "Kurschatten öppnar för studenter",
     "curreWasOpen": "Kurschatten har stängts",
     "curreNotStarted": "Kursen har inte startat",
+    "curreNotActivated": "Kurschatten har inte öppnats än",
     "enableCurre": "Aktivera CurreChat",
     "enableCurreModalTitle": "Aktivera CurreChat för kursen {{name}}?",
     "enableCurreModalText": "Språkmodellen {{defaultModel}} och {{defaultTokenLimit}} tokenanvändningsgränsen per elev är inställda som standardinställningar för kursen. CurreChat används under kursen {{activityPeriod}} (kursens längd + 1 månad). Du kan redigera dessa inställningar senare.",
