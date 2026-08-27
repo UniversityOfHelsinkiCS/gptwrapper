@@ -148,13 +148,13 @@ const saveFileWithDialog = async (blob: Blob, filename: string, accept: Record<s
   URL.revokeObjectURL(url)
 }
 
-export const sendConversationEmail = async (email: string, messages: ChatMessage[], t: TFunction) => {
+export const sendConversationEmail = async (messages: ChatMessage[], t: TFunction) => {
   const date = new Date()
   const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
   const subject = `${t('chat:conversation')} ${formattedDate}`
   const text = formatEmail(messages, t)
 
-  const response = await sendEmail(email, text, subject)
+  const response = await sendEmail(text, subject)
   return response
 }
 

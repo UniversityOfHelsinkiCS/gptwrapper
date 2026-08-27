@@ -23,13 +23,18 @@ const EmailButton = ({ messages, disabled, collapsed = false }: { messages: Chat
 
     setIsCooldown(true)
 
-    await sendConversationEmail(user.email, messages, t)
-    enqueueSnackbar(t('email:success'), { variant: 'success' })
-
-    // Set cooldown for 3 seconds
-    setTimeout(() => {
-      setIsCooldown(false)
-    }, 3000)
+    try {
+      await sendConversationEmail(messages, t)
+      enqueueSnackbar(t('email:success'), { variant: 'success' })
+    } catch (error) {
+      console.error('Failed to send conversation email:', error)
+      enqueueSnackbar(t('email:failure'), { variant: 'error' })
+    } finally {
+      // Set cooldown for 3 seconds
+      setTimeout(() => {
+        setIsCooldown(false)
+      }, 3000)
+    }
   }
 
   return (

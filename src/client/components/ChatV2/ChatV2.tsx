@@ -326,7 +326,7 @@ const ChatV2Content = () => {
   }) => {
     if (sendEmail && user?.email) {
       try {
-        await sendConversationEmail(user.email, messages, t)
+        await sendConversationEmail(messages, t)
         enqueueSnackbar(t('email:success'), { variant: 'success' })
       } catch (error) {
         console.error('Failed to send conversation email:', error)
