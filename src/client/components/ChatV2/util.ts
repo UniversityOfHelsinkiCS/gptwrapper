@@ -97,19 +97,12 @@ export const getGroupedCourses = (courses: CoursesViewCourse[] = []) => {
   }
 }
 
-export const getChatActivityStatus = (chatInstance: any, user: any): ChatStatus => {
-  if (!chatInstance?.activityPeriod) return 'ACTIVE'
+export const getChatActivityStatus = (chatInstance: any): ChatStatus => {
+  if (!chatInstance.status) {
+    return 'ACTIVATED'
+  }
 
-  const isResponsible = user?.isAdmin || chatInstance.responsibilities?.some((r) => r.user.id === user?.id)
-  if (isResponsible) return 'ACTIVE'
-
-  const { startDate, endDate } = chatInstance.activityPeriod
-  const now = new Date()
-
-  if (now < new Date(startDate)) return 'NOT_STARTED'
-  if (now > new Date(endDate)) return 'EXPIRED'
-
-  return 'ACTIVE'
+  return chatInstance.status
 }
 
 /**

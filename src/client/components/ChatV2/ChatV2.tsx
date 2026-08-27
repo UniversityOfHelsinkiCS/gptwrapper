@@ -455,8 +455,8 @@ const ChatV2Content = () => {
 
   if (statusLoading || userLoading || chatInstanceLoading) return <HYLoadingSpinner />
 
-  const status = getChatActivityStatus(chatInstance, user)
-  if (status !== 'ACTIVE') return <ChatExpiredView status={status} chatInstance={chatInstance} />
+  const status = getChatActivityStatus(chatInstance)
+  if (status !== 'ACTIVATED') return <ChatExpiredView status={status} chatInstance={chatInstance} />
 
   return (
     <Box

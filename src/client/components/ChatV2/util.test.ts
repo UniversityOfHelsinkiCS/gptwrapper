@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, test, expect, afterEach, vi } from 'vitest'
+import { describe, test, expect } from 'vitest'
 
 import { getGroupedCourses, filterUsages, getChatActivityStatus, formatDate } from './util'
 import type { CoursesViewCourse } from '../../hooks/useUserCourses'
@@ -61,43 +61,15 @@ describe('filterUsages', () => {
 })
 
 describe('getChatActivityStatus', () => {
-  const period = { startDate: '2024-01-01', endDate: '2024-12-31' }
+  const courseWithStatus = { status: 'EXPIRED' }
 
-  // getChatActivityStatus reads new Date() internally, so freeze the clock per test.
-  const at = (date: string) => vi.setSystemTime(new Date(date))
-
-  afterEach(() => {
-    vi.useRealTimers()
+  // admin and responsible case:
+  test('is ACTIVATED if no status set', () => {
+    expect(getChatActivityStatus({})).toBe('ACTIVATED')
   })
 
-  test('returns ACTIVE within the activity period', () => {
-    at('2024-06-01')
-    const chatInstance = { activityPeriod: period, responsibilities: [] }
-    expect(getChatActivityStatus(chatInstance, { id: 'u', isAdmin: false })).toBe('ACTIVE')
-  })
-
-  test('returns NOT_STARTED before the start date', () => {
-    at('2023-12-01')
-    const chatInstance = { activityPeriod: period, responsibilities: [] }
-    expect(getChatActivityStatus(chatInstance, { id: 'u', isAdmin: false })).toBe('NOT_STARTED')
-  })
-
-  test('returns EXPIRED after the end date', () => {
-    at('2025-01-01')
-    const chatInstance = { activityPeriod: period, responsibilities: [] }
-    expect(getChatActivityStatus(chatInstance, { id: 'u', isAdmin: false })).toBe('EXPIRED')
-  })
-
-  test('a responsible teacher always sees ACTIVE even after expiry', () => {
-    at('2025-01-01')
-    const chatInstance = { activityPeriod: period, responsibilities: [{ user: { id: 'teacher' } }] }
-    expect(getChatActivityStatus(chatInstance, { id: 'teacher', isAdmin: false })).toBe('ACTIVE')
-  })
-
-  test('an admin always sees ACTIVE even after expiry', () => {
-    at('2025-01-01')
-    const chatInstance = { activityPeriod: period, responsibilities: [] }
-    expect(getChatActivityStatus(chatInstance, { id: 'admin', isAdmin: true })).toBe('ACTIVE')
+  test('is EXPIRED if status is set', () => {
+    expect(getChatActivityStatus(courseWithStatus)).toBe('EXPIRED')
   })
 })
 
