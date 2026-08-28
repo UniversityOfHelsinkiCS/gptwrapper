@@ -122,6 +122,7 @@ const UsageSelector = () => {
         }}
       >
         <Typography
+          aria-label={t('status:usageTitle') + pillLabel}
           sx={{
             fontSize: '0.8125rem',
             fontWeight: 600,

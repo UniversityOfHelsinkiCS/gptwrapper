@@ -81,7 +81,9 @@ const ModelSelector = ({
         }}
       >
         <PsychologyIcon sx={{ fontSize: 14, color: 'primary.main' }} />
-        <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: 'text.primary', lineHeight: 1 }}>{displayModel}</Typography>
+        <Typography aria-label={t('sidebar:modelTitle') + displayModel} sx={{ fontSize: '0.8125rem', fontWeight: 600, color: 'text.primary', lineHeight: 1 }}>
+          {displayModel}
+        </Typography>
         {isFree(displayModel) && (
           <Chip
             label={t('chat:freeModel')}
