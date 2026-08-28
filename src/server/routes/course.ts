@@ -9,6 +9,7 @@ import { ApplicationError } from '../util/ApplicationError'
 import _ from 'lodash'
 import type { User as SharedUser } from '@shared/user'
 import { chatIsActive, getChatStatus } from '../services/chatInstances/activity'
+import { AccessLevel } from '@shared/types'
 
 const courseRouter = express.Router()
 
@@ -208,7 +209,6 @@ export const enforceUserHasFullAccess = async (user: SharedUser, chatInstance: C
   return hasFullAccess
 }
 
-type AccessLevel = 'FULL' | 'STUDENT' | 'STUDENT_CLOSED'
 const requireCourseAccess = async (user: SharedUser, chatInstance: ChatInstance): Promise<AccessLevel> => {
   if (user.isAdmin) {
     return 'FULL'

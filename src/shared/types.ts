@@ -117,3 +117,5 @@ export interface ChatInstanceSearchResponse {
   count: number
 }
 export type ChatStatus = 'NOT_STARTED' | 'EXPIRED' | 'ACTIVATED' | 'NOT_ACTIVATED'
+
+export type AccessLevel = 'FULL' | 'STUDENT' | 'STUDENT_CLOSED'
