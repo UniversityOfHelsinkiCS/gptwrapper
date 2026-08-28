@@ -439,41 +439,37 @@ export function Component() {
               ))}
             </Select>
           </div>
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ marginLeft: 'auto' }}>
-            <a ref={dataDownloadLink} style={{ display: 'none' }} />
-            {activeTab === 'courses' && (
-              <TextField
-                size="small"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t('stats:searchCourses')}
-                slotProps={{
-                  input: {
-                    startAdornment: <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} />,
-                    endAdornment: (
-                      <IconButton
-                        size="small"
-                        aria-label={t('stats:clearSearch')}
-                        onClick={() => setSearch('')}
-                        sx={{ visibility: search ? 'visible' : 'hidden', mr: -0.5 }}
-                      >
-                        <CloseIcon fontSize="small" />
-                      </IconButton>
-                    ),
-                  },
-                }}
-                sx={{ minWidth: 260 }}
-              />
-            )}
-            <IconButton
-              onClick={() => {
-                handleXLSX()
-              }}
-            >
-              <CloudDownloadIcon fontSize="large" />
-            </IconButton>
-          </Stack>
+          <IconButton onClick={handleXLSX} sx={{ marginLeft: 'auto' }}>
+            <CloudDownloadIcon fontSize="large" />
+          </IconButton>
         </Stack>
+
+        <a ref={dataDownloadLink} style={{ display: 'none' }} />
+
+        {activeTab === 'courses' && (
+          <TextField
+            size="small"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('stats:searchCourses')}
+            slotProps={{
+              input: {
+                startAdornment: <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} />,
+                endAdornment: (
+                  <IconButton
+                    size="small"
+                    aria-label={t('stats:clearSearch')}
+                    onClick={() => setSearch('')}
+                    sx={{ visibility: search ? 'visible' : 'hidden', mr: -0.5 }}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                ),
+              },
+            }}
+            sx={{ mt: 1, minWidth: 260 }}
+          />
+        )}
 
         <TableContainer component={Paper} sx={{ mt: 2 }}>
           {activeTab === 'courses' ? (
