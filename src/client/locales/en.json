@@ -348,6 +348,7 @@
     "chatInstance": "Search courses",
     "chatInstanceSearchPlaceholder": "Course code or course name",
     "chatInstanceSearchHint": "Type at least 3 characters",
+    "chatInstanceSearchLanguageHint": "The search matches course names in the language you have selected",
     "chatInstanceSearchNoResults": "No courses found",
     "typeMore": "Type at least 5 characters",
     "editTexts": "Edit texts",

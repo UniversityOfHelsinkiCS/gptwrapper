@@ -351,6 +351,7 @@
     "chatInstance": "Hae kursseja",
     "chatInstanceSearchPlaceholder": "Kurssikoodi tai kurssin nimi",
     "chatInstanceSearchHint": "Kirjoita vähintään 3 merkkiä",
+    "chatInstanceSearchLanguageHint": "Haku kohdistuu kurssien nimiin valitsemallasi kielellä",
     "chatInstanceSearchNoResults": "Kursseja ei löytynyt",
     "editTexts": "Muokkaa tekstejä",
     "userSearchFieldLabel": "Käyttäjätunnus tai Sisu id",

@@ -94,6 +94,10 @@ const ChatInstanceSearch = () => {
         {hasQuery && isFetching && <CircularProgress size={24} />}
       </Box>
 
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        {t('admin:chatInstanceSearchLanguageHint')}
+      </Typography>
+
       {!hasQuery && (
         <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
           {t('admin:chatInstanceSearchHint')}

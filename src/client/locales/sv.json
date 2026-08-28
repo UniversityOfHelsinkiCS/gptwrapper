@@ -317,6 +317,7 @@
     "chatInstance": "Sök kurser",
     "chatInstanceSearchPlaceholder": "Kurskod eller kursnamn",
     "chatInstanceSearchHint": "Skriv minst 3 tecken",
+    "chatInstanceSearchLanguageHint": "Sökningen matchar kursnamn på det språk du har valt",
     "chatInstanceSearchNoResults": "Inga kurser hittades",
     "editTexts": "Redigera texter",
     "userSearchFieldLabel": "Användarnamn eller Sisu-id",
