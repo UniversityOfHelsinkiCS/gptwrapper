@@ -27,6 +27,7 @@
     "confirmDeletePrompt": "Är du säker på att du vill ta bort denna prompt?",
     "active": "Öppna: ",
     "prompt": "Prompt",
+    "promptAndModel": "Prompt och modell:",
     "hidePrompt": "Dölj uppmaningstext från elever",
     "hiddenPromptInfo": "Uppmaningstexten är inte synlig för eleverna",
     "visiblePromptInfo": "Snabbtext är synlig för eleverna",
@@ -173,7 +174,14 @@
     "courseChatNotActivated": "Inte aktiverad",
     "courseChatNotActivatedInfo": "Kursen har ännu inte aktiverats. Detta innebär att kursens chatt inte är öppen för studenter.",
     "retryMessage": "Försök igen",
-    "timeoutError": "Servern svarade inte i tid. Försök igen."
+    "timeoutError": "Servern svarade inte i tid. Försök igen.",
+    "writingResponse": "Ett svar skrivs.",
+    "processingRequest": "Din förfrågan behandlas.",
+    "responseReady": "Svaret är klart.",
+    "responseCanceled": "Genereringen av svaret avbröts.",
+    "responseFailed": "Det gick inte att generera svaret.",
+    "goToLatestResponse": "Gå till senaste svaret",
+    "latestResponseLabel": "Senaste svaret"
   },
   "settings": {
     "prompt": "Samtalsstart",

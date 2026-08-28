@@ -16,9 +16,18 @@ import { t } from 'i18next'
 import React, { useId, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@mui/material'
-import { readMessageContent, type AssistantMessage, type ChatMessage, type MessageGenerationInfo, type ToolCallResultEvent, type ToolCallStatusEvent, type UserMessage } from '../../../shared/chat'
+import {
+  readMessageContent,
+  type AssistantMessage,
+  type ChatMessage,
+  type MessageGenerationInfo,
+  type ToolCallResultEvent,
+  type ToolCallStatusEvent,
+  type UserMessage,
+} from '../../../shared/chat'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import CopyToClipboardButton from './CopyToClipboardButton'
+import { StreamStatusAnnouncer } from './StreamStatusAnnouncer'
 import { BlueButton, OutlineButtonBlack } from './general/Buttons'
 
 const UserMessageItem = ({ message }: { message: UserMessage }) => (
@@ -118,7 +127,9 @@ const AssistantMessageInfo = ({ message }: { message: AssistantMessage }) => {
   return (
     <Box sx={{ display: 'flex', opacity: 0.7, alignItems: 'center' }}>
       <ArrowRight fontSize="small" />
-      <Typography fontSize="small">{title}</Typography>
+      <Typography aria-label={message.generationInfo.promptInfo.type === 'saved' ? t('common:promptAndModel') : t('status:modelInUse')} fontSize="small">
+        {title}
+      </Typography>
     </Box>
   )
 }
@@ -126,11 +137,17 @@ const AssistantMessageInfo = ({ message }: { message: AssistantMessage }) => {
 const AssistantMessageItem = ({
   message,
   setActiveToolResult,
-  onRetry
+  onRetry,
+  isStreaming = false,
+  isLatestResponse = false,
+  latestResponseRef,
 }: {
   message: AssistantMessage
   setActiveToolResult: (data: ToolCallResultEvent) => void
   onRetry?: () => void
+  isStreaming?: boolean
+  isLatestResponse?: boolean
+  latestResponseRef?: React.Ref<HTMLDivElement>
 }) => {
   const processedContent = React.useMemo(() => preprocessMath(readMessageContent(message)), [message.content])
   const { t } = useTranslation()
@@ -171,7 +188,7 @@ const AssistantMessageItem = ({
     output: 'htmlAndMathml',
     errorColor: theme.palette.error.main,
     throwOnError: true,
-    strict: "error", // disables logging katex warnings/errors – if debugging, turn these two on
+    strict: 'error', // disables logging katex warnings/errors – if debugging, turn these two on
   }
   let codeCount = 0
 
@@ -185,6 +202,10 @@ const AssistantMessageItem = ({
     <Box
       data-testid="assistant-message"
       id={msgId}
+      aria-busy={isStreaming}
+      ref={isLatestResponse ? latestResponseRef : undefined}
+      tabIndex={isLatestResponse ? -1 : undefined}
+      aria-label={isLatestResponse ? t('chat:latestResponseLabel') : undefined}
       sx={{
         width: '100%',
         position: 'relative',
@@ -195,20 +216,6 @@ const AssistantMessageItem = ({
         },
       }}
     >
-      <Box
-        className="copy-message-button"
-        sx={{
-          position: 'absolute',
-          right: 10,
-          bottom: -15,
-          opacity: { xs: 0.7, md: 0 },
-          transition: 'opacity 0.2s ease-in-out',
-          bgcolor: 'background.paper',
-          borderRadius: 4,
-        }}
-      >
-        <CopyToClipboardButton id={msgId} copied={readMessageContent(message)} />
-      </Box>
       <AssistantMessageInfo message={message} />
       <ReactMarkdown
         remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
@@ -226,7 +233,7 @@ const AssistantMessageItem = ({
                 <Box
                   sx={{
                     borderRadius: '0.5rem',
-                    overflowX: 'auto'
+                    overflowX: 'auto',
                   }}
                 >
                   <Typography
@@ -283,6 +290,20 @@ const AssistantMessageItem = ({
       >
         {processedContent}
       </ReactMarkdown>
+      <Box
+        className="copy-message-button"
+        sx={{
+          position: 'absolute',
+          right: 10,
+          bottom: -15,
+          opacity: { xs: 0.7, md: 0 },
+          transition: 'opacity 0.2s ease-in-out',
+          bgcolor: 'background.paper',
+          borderRadius: 4,
+        }}
+      >
+        <CopyToClipboardButton id={msgId} copied={readMessageContent(message)} />
+      </Box>
       {message.error && (
         <Box sx={{ mt: 2 }}>
           <Typography variant="body1" fontStyle="italic" color="error.main">
@@ -307,11 +328,17 @@ const AssistantMessageItem = ({
 export const MessageItem = ({
   message,
   setActiveToolResult,
-  onRetry
+  onRetry,
+  isStreaming = false,
+  isLatestResponse = false,
+  latestResponseRef,
 }: {
   message: ChatMessage
   setActiveToolResult: (data: ToolCallResultEvent) => void
   onRetry?: () => void
+  isStreaming?: boolean
+  isLatestResponse?: boolean
+  latestResponseRef?: React.Ref<HTMLDivElement>
 }) => {
   if (message.role === 'assistant') {
     return (
@@ -321,7 +348,14 @@ export const MessageItem = ({
           height: 'auto',
         }}
       >
-        <AssistantMessageItem message={message} setActiveToolResult={setActiveToolResult} onRetry={onRetry} />
+        <AssistantMessageItem
+          message={message}
+          setActiveToolResult={setActiveToolResult}
+          onRetry={onRetry}
+          isStreaming={isStreaming}
+          isLatestResponse={isLatestResponse}
+          latestResponseRef={latestResponseRef}
+        />
       </Box>
     )
   } else {
@@ -338,15 +372,9 @@ const shouldShowRetryButton = (
   idx: number,
   messages: ChatMessage[],
   isStreaming: boolean,
-  onRetry?: (index: number) => void
+  onRetry?: (index: number) => void,
 ): boolean => {
-  return (
-    message.role === 'assistant' &&
-    !!message.error &&
-    idx === messages.length - 1 &&
-    !isStreaming &&
-    onRetry != null
-  )
+  return message.role === 'assistant' && !!message.error && idx === messages.length - 1 && !isStreaming && onRetry != null
 }
 
 const Conversation = ({
@@ -355,20 +383,26 @@ const Conversation = ({
   generationInfo,
   toolCalls,
   isStreaming,
+  endState,
   setActiveToolResult,
   initial,
   isMobile,
   onRetry,
+  latestResponseIndex,
+  latestResponseRef,
 }: {
   messages: ChatMessage[]
   completion: string
   generationInfo?: MessageGenerationInfo
   toolCalls: { [callId: string]: ToolCallStatusEvent }
   isStreaming: boolean
+  endState: 'none' | 'canceled' | 'error'
   setActiveToolResult: (data: ToolCallResultEvent) => void
   initial?: React.ReactElement
   isMobile: boolean
   onRetry?: (index: number) => void
+  latestResponseIndex: number | null
+  latestResponseRef: React.RefObject<HTMLDivElement | null>
 }) => {
   const [reminderSeen, setReminderSeen] = useLocalStorageState<boolean>('reminderSeen', false)
 
@@ -385,15 +419,20 @@ const Conversation = ({
           justifyContent: messages.length === 0 ? 'center' : 'flex-start',
         }}
       >
+        <StreamStatusAnnouncer isStreaming={isStreaming} hasCompletion={completion.length > 0} endState={endState} />
+
         {messages.length === 0 && initial}
         {messages.map((message, idx) => {
           const showRetry = shouldShowRetryButton(message, idx, messages, isStreaming, onRetry)
+          const isLatestResponse = idx === latestResponseIndex
           return (
             <MessageItem
               key={idx}
               message={message}
               setActiveToolResult={setActiveToolResult}
               onRetry={showRetry ? () => onRetry!(idx) : undefined}
+              isLatestResponse={isLatestResponse}
+              latestResponseRef={isLatestResponse ? latestResponseRef : undefined}
             />
           )
         })}
@@ -408,6 +447,7 @@ const Conversation = ({
                 generationInfo,
               }}
               setActiveToolResult={setActiveToolResult}
+              isStreaming
             />
           ) : (
             <LoadingMessage toolCalls={toolCalls} />

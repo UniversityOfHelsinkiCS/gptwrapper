@@ -79,6 +79,7 @@ const ChatV2Content = () => {
     onError: (error) => {
       handleCompletionStreamError(error, fileName)
       enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
+      handleCancel('error')
     },
     onToolCallComplete: (toolResult) => {
       if (!isMobile) {
@@ -118,6 +119,7 @@ const ChatV2Content = () => {
   const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
   const [hasChanges, setHasChanges] = useState(false)
   const [cacheKey, setCacheKey] = useState('')
+  const [endState, setEndState] = useState<'none' | 'canceled' | 'error'>('none')
 
   // Analytics
   const dispatchAnalytics = useAnalyticsDispatch()
@@ -138,6 +140,18 @@ const ChatV2Content = () => {
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const sendSeq = useRef(0) // increments per send attempt, for admin timing logs
   const armStreamTimeoutRef = useRef<(() => void) | null>(null)
+
+  // The index of the most recent finished assistant turn, or null while none has arrived yet or while the response is still streaming.
+  const latestResponseRef = useRef<HTMLDivElement | null>(null)
+  const latestResponseIndex = !isStreaming && messages.length > 0 && messages[messages.length - 1].role === 'assistant' ? messages.length - 1 : null
+  const [visitedResponseIndex, setVisitedResponseIndex] = useState<number | null>(null)
+  const isNewResponseAvailable = latestResponseIndex !== null && latestResponseIndex !== visitedResponseIndex
+
+  const handleGoToLatestResponse = () => {
+    // focus the latest response so screen readers can read it out loud
+    latestResponseRef.current?.focus()
+    setVisitedResponseIndex(latestResponseIndex)
+  }
   const lastRearmRef = useRef(0)
 
   const handleSendMessage = async (message: string, resendPrevious: boolean, ignoredWarnings: WarningType[], messagesToResend?: ChatMessage[]) => {
@@ -147,7 +161,7 @@ const ChatV2Content = () => {
     const acualModel = activeModel
     if (tokenUsageExceeded && acualModel !== FREE_MODEL) {
       enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
-      handleCancel()
+      handleCancel('error')
       return
     }
 
@@ -233,6 +247,7 @@ const ChatV2Content = () => {
     armStreamTimeout()
 
     setIsStreaming(true)
+    setEndState('none')
     // Scroll immediately to show loading dots for better UX feedback
     // Small delay ensures React has rendered the loading message
     setTimeout(() => {
@@ -264,7 +279,7 @@ const ChatV2Content = () => {
       if ('error' in res) {
         console.error('API error:', res)
         handleCompletionStreamError(res, fileName)
-        handleCancel()
+        handleCancel('error')
         return
       }
 
@@ -293,17 +308,18 @@ const ChatV2Content = () => {
         clearRetryTimeout()
       } else {
         console.error('API error: No stream in response')
-        handleCancel()
+        handleCancel('error')
         enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
       }
     } catch (err: any) {
-      const wasTimeout = streamControllerRef.current?.signal.reason === 'timeout_error'
+      const abortReason = streamControllerRef.current?.signal.reason
+      const wasTimeout = abortReason === 'timeout_error'
       if (wasTimeout) {
         setMessages((prev: ChatMessage[]) => prev.concat({ role: 'assistant', content: '', error: 'timeout_error', toolCalls: {}, generationInfo }))
       } else {
         console.error(err)
       }
-      handleCancel()
+      handleCancel(abortReason === 'user_aborted' ? 'canceled' : 'error')
     }
   }
 
@@ -354,14 +370,16 @@ const ChatV2Content = () => {
     }
     setFileName('')
     setMessageWarning({})
+    setEndState('none')
     clearRetryTimeout()
     dispatchAnalytics({ type: 'RESET_CHAT' })
   }
 
-  const handleCancel = () => {
+  const handleCancel = (reason: 'canceled' | 'error' = 'canceled') => {
     setMessageWarning({})
     setIsStreaming(false)
     clearRetryTimeout()
+    setEndState(reason)
   }
 
   const handleRetry = (messageIndex: number) => {
@@ -530,10 +548,13 @@ const ChatV2Content = () => {
             completion={hasPotentialError ? `${completion} ⚠️` : completion}
             generationInfo={generationInfo}
             isStreaming={isStreaming}
+            endState={endState}
             toolCalls={toolCalls}
             setActiveToolResult={setActiveToolResult}
             isMobile={isMobile}
             onRetry={handleRetry}
+            latestResponseIndex={latestResponseIndex}
+            latestResponseRef={latestResponseRef}
           />
         </Box>
         <Box
@@ -561,10 +582,15 @@ const ChatV2Content = () => {
                 handleSendMessage(newMessage, false, [])
               }}
               handleReset={handleResetRequest}
-              handleStop={() => streamControllerRef.current?.abort('user_aborted')}
+              handleStop={() => {
+                streamControllerRef.current?.abort('user_aborted')
+                setEndState('canceled')
+              }}
               isMobile={isMobile}
               currentModel={activeModel}
               setModel={setActiveModel}
+              isNewResponseAvailable={isNewResponseAvailable}
+              onGoToLatestResponse={handleGoToLatestResponse}
             />
           </Box>
         </Box>

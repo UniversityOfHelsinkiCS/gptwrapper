@@ -29,6 +29,7 @@
     "confirmDeletePrompt": "Haluatko varmasti poistaa tämän alustuksen?",
     "active": "Käynnissä: ",
     "prompt": "Alustus",
+    "promptAndModel": "Alustus ja kielimalli:",
     "hidePrompt": "Piilota alustuksen teksti opiskelijoilta",
     "hiddenPromptInfo": "Alustuksen teksti ei näy opiskelijoille",
     "visiblePromptInfo": "Alustuksen teksti näkyy opiskelijoille",
@@ -169,7 +170,14 @@
     "courseChatNotActivatedInfo": "Kurssi ei ole vielä aktivoitu. Tämä tarkoittaa, että kurssin chat ei ole auki opiskelijoille.",
     "retryMessage": "Yritä uudelleen",
     "timeoutError": "Palvelin ei vastannut ajoissa. Yritä uudelleen.",
-    "noToolResults": "Ei tuloksia"
+    "noToolResults": "Ei tuloksia",
+    "writingResponse": "Muodostetaan vastausta.",
+    "processingRequest": "Käsitellään pyyntöä.",
+    "responseReady": "Vastaus on valmis.",
+    "responseCanceled": "Vastauksen generointi peruutettiin.",
+    "responseFailed": "Vastauksen generointi epäonnistui.",
+    "goToLatestResponse": "Siirry uusimpaan vastaukseen",
+    "latestResponseLabel": "Uusin vastaus"
   },
   "settings": {
     "prompt": "Keskustelun alustus",

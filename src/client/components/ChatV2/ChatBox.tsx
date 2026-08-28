@@ -3,6 +3,7 @@ import Send from '@mui/icons-material/Send'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import { Box, Chip, IconButton, TextField, Tooltip, Typography, Alert } from '@mui/material'
+import { visuallyHidden } from '@mui/utils'
 import { useRef } from 'react'
 import useUserStatus from '../../hooks/useUserStatus'
 import { useParams } from 'react-router-dom'
@@ -17,6 +18,33 @@ import ModelSelector from './ModelSelector'
 import UsageSelector from './UsageSelector'
 import { DEFAULT_TOKEN_LIMIT, ValidModelName } from '../../../config'
 import { Course } from 'src/client/types'
+import TrendingFlatIcon from '@mui/icons-material/TrendingFlat'
+
+const skipLinkSx = {
+  ...visuallyHidden,
+  zIndex: 1300,
+  '&:focus-visible': {
+    position: 'fixed',
+    top: '1rem',
+    right: '1rem',
+    width: 'auto',
+    height: 'auto',
+    bgcolor: 'primary.main',
+    borderRadius: '0.5rem',
+    p: 1,
+    color: 'white',
+    margin: 0,
+    overflow: 'visible',
+    clip: 'auto',
+    clipPath: 'none',
+    whiteSpace: 'normal',
+    transform: 'translateY(-100%)',
+    '&:focus': {
+      transform: 'translateY(0)',
+      outline: '2px solid #fff',
+    },
+  },
+}
 
 export const ChatBox = ({
   disabled,
@@ -33,6 +61,8 @@ export const ChatBox = ({
   isMobile,
   currentModel,
   setModel,
+  isNewResponseAvailable,
+  onGoToLatestResponse,
 }: {
   disabled: boolean
   chatInstance?: Course
@@ -40,7 +70,7 @@ export const ChatBox = ({
   fileName: string
   messageWarning: { [key in WarningType]?: { message: string; ignored: boolean } }
   setFileName: (name: string) => void
-  handleCancel: () => void
+  handleCancel: (reason: 'canceled' | 'error') => void
   handleContinue: (message: string, ignoredWarnings: WarningType[]) => void
   handleSubmit: (message: string) => void
   handleReset: () => void
@@ -48,6 +78,8 @@ export const ChatBox = ({
   isMobile: boolean
   currentModel: ValidModelName
   setModel: (model: ValidModelName) => void
+  isNewResponseAvailable: boolean
+  onGoToLatestResponse: () => void
 }) => {
   const { courseId } = useParams()
   const isEmbedded = useIsEmbedded()
@@ -160,7 +192,7 @@ export const ChatBox = ({
             sx={{ my: '0.2rem' }}
             action={
               <Box sx={{ display: 'flex', gap: 1 }}>
-                <GrayButton onClick={handleCancel} type="button">
+                <GrayButton onClick={() => handleCancel('canceled')} type="button">
                   {t('common:cancel')}
                 </GrayButton>
                 <BlueButton onClick={() => handleContinue('', Object.keys(messageWarning) as WarningType[])} color="primary" type="button">
@@ -219,6 +251,14 @@ export const ChatBox = ({
                 },
               }}
             />
+            {isNewResponseAvailable && acuallyDisabled && (
+              <Tooltip title={t('chat:goToLatestResponse')} arrow placement="right">
+                <IconButton component="button" type="button" onClick={onGoToLatestResponse} sx={skipLinkSx}>
+                  <TrendingFlatIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+
             <Box
               sx={{
                 display: 'flex',
@@ -269,6 +309,7 @@ export const ChatBox = ({
                   <span>
                     <IconButton
                       type="submit"
+                      aria-label={t('common:send')}
                       ref={sendButtonRef}
                       data-testid="send-chat-message"
                       disabled={acuallyDisabled}
