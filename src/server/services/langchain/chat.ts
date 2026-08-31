@@ -390,6 +390,7 @@ const handleWarnings = (
       warningType: 'usage',
       warning: `You are about to use ${tokenUsagePercentage}% of your weekly CurreChat usage`,
       canIgnore: true,
+      tokenUsagePercentage,
     })
   }
 

@@ -114,7 +114,9 @@ const ChatV2Content = () => {
 
   // app states
   const [fileName, setFileName] = useState<string>('')
-  const [messageWarning, setMessageWarning] = useState<{ [key in WarningType]?: { message: string; ignored: boolean } }>({})
+  const [messageWarning, setMessageWarning] = useState<{
+    [key in WarningType]?: { message: string; ignored: boolean; tokenCount?: number; contextLimit?: number; tokenUsagePercentage?: number }
+  }>({})
   const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
   const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
   const [hasChanges, setHasChanges] = useState(false)
@@ -287,7 +289,13 @@ const ChatV2Content = () => {
 
       if ('warnings' in res) {
         res.warnings.forEach((warning) => {
-          newWarnings[warning.warningType] = { message: warning.warning, ignored: false }
+          newWarnings[warning.warningType] = {
+            message: warning.warning,
+            ignored: false,
+            tokenCount: 'tokenCount' in warning ? warning.tokenCount : undefined,
+            contextLimit: 'contextLimit' in warning ? warning.contextLimit : undefined,
+            tokenUsagePercentage: 'tokenUsagePercentage' in warning ? warning.tokenUsagePercentage : undefined,
+          }
         })
         clearRetryTimeout()
       }

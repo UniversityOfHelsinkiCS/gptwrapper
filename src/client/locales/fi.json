@@ -177,7 +177,9 @@
     "responseCanceled": "Vastauksen generointi peruutettiin.",
     "responseFailed": "Vastauksen generointi epäonnistui.",
     "goToLatestResponse": "Siirry uusimpaan vastaukseen",
-    "latestResponseLabel": "Uusin vastaus"
+    "latestResponseLabel": "Uusin vastaus",
+    "usageWarning": "Olet käyttämässä {{tokenUsagePercentage}}% viikoittaisesta CurreChat-käytöstäsi.",
+    "contextLimitWarning": "Keskustelu ylittää valitun mallin kontekstirajan, joka on {{contextLimit}} tokenia. Keskustelussasi on {{tokenCount}} tokenia. Jatkaminen katkaisee vanhimmat viestit. Suositeltavaa on aloittaa uusi keskustelu."
   },
   "settings": {
     "prompt": "Keskustelun alustus",

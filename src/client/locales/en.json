@@ -174,7 +174,9 @@
     "responseCanceled": "Response generation was canceled.",
     "responseFailed": "Generating a response failed.",
     "goToLatestResponse": "Go to latest response",
-    "latestResponseLabel": "Latest response"
+    "latestResponseLabel": "Latest response",
+    "usageWarning": "You are about to use {{tokenUsagePercentage}}% of your weekly CurreChat usage",
+    "contextLimitWarning": "The conversation exceeds the context limit of {{contextLimit}} tokens for the selected model. Your conversation has {{tokenCount}} tokens. Clicking continue will truncate the oldest messages. It is recommended to start a new conversation."
   },
   "settings": {
     "prompt": "Conversation prompt",

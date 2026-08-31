@@ -68,7 +68,7 @@ export const ChatBox = ({
   chatInstance?: Course
   fileInputRef: React.RefObject<HTMLInputElement | null>
   fileName: string
-  messageWarning: { [key in WarningType]?: { message: string; ignored: boolean } }
+  messageWarning: { [key in WarningType]?: { message: string; ignored: boolean; tokenCount?: number; contextLimit?: number; tokenUsagePercentage?: number } }
   setFileName: (name: string) => void
   handleCancel: (reason: 'canceled' | 'error') => void
   handleContinue: (message: string, ignoredWarnings: WarningType[]) => void
@@ -204,8 +204,27 @@ export const ChatBox = ({
             {Object.entries(messageWarning)
               .filter(([, warning]) => !warning.ignored)
               .map(([type, warning]) => (
-                <Box key={type} sx={{ mb: 0.5 }}>
-                  {warning.message}
+                <Box key={type} sx={{ mb: 0.5, flexDirection: 'row', display: 'flex', gap: 1 }}>
+                  {type === 'usage' && 'tokenUsagePercentage' in warning ? (
+                    <Typography variant="body2" color="textSecondary">
+                      {t('chat:usageWarning', { tokenUsagePercentage: warning.tokenUsagePercentage })}
+                    </Typography>
+                  ) : type === 'contextLimit' && 'tokenCount' in warning && 'contextLimit' in warning ? (
+                    <Typography variant="body2" color="textSecondary">
+                      {t('chat:contextLimitWarning', { tokenCount: warning.tokenCount, contextLimit: warning.contextLimit })}
+                    </Typography>
+                  ) : (
+                    <>
+                      {type === 'fileParsingError' && (
+                        <Typography variant="body2" color="textSecondary">
+                          {t('error:fileParsingError')}:
+                        </Typography>
+                      )}
+                      <Typography variant="body2" color="textSecondary">
+                        {warning.message}
+                      </Typography>
+                    </>
+                  )}
                 </Box>
               ))}
           </Alert>
