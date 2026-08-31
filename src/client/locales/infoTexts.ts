@@ -1,7 +1,7 @@
 export const InfoTexts = {
   disclaimer: {
     fi: `
-CurreChat on Helsingin yliopistossa kehitetty generatiivisen tekoälyn työkalu. Palvelusta vastaa HY:n opetusteknlogiapalvelut (OTE). CurreChat on kehitetty erityisesti opetuksen tarpeisiin. Yleisempään käyttöön suositeltu generatiivisen tekoälyn palvelu yliopistolla on [Microsoft 365 Copilot](hhttps://helpdesk.it.helsinki.fi/help/20071).
+CurreChat on Helsingin yliopistossa kehitetty generatiivisen tekoälyn työkalu. Palvelusta vastaa HY:n opetusteknlogiapalvelut (OTE). CurreChat on kehitetty erityisesti opetuksen tarpeisiin. Yleisempään käyttöön suositeltu generatiivisen tekoälyn palvelu yliopistolla on [Microsoft 365 Copilot](https://helpdesk.it.helsinki.fi/help/20071).
 
 **Huom!** CurreChat on aktiivisesti kehitettävä palvelu ja sen toiminnallisuuksiin ja käyttöliittymään voi ajoittain tulla pieniä muutoksia. Hetkelliset käyttökatkot tai toimintahäiriöt ovat mahdollisia.
 
