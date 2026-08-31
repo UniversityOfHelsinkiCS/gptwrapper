@@ -42,7 +42,7 @@ import useUserUsages from '../../hooks/useUserUsage'
 import { useResetChatInstanceUsageMutation } from '../../hooks/useChatInstanceUsageMutation'
 import apiClient from '../../util/apiClient'
 import { usagePercent, gaugeColorKey, formatTokens, UsageInfoButton } from './UsageSelector'
-import { formatDate } from './util'
+import { formatDate, isCustomChatInstance } from './util'
 import { OutlineButtonBlue, BlueButton } from './general/Buttons'
 import { CourseActivityPeriodEditor } from '../Courses/Course/CourseActivityPeriodEditor'
 import DiscussionView from '../Courses/Course/Discussions'
@@ -69,7 +69,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
   const amongResponsibles = courseResponsibilities.some((r) => r.user.id === user?.id)
   const canManage = Boolean(user?.isAdmin || amongResponsibles)
   const isAdmin = Boolean(user?.isAdmin)
-  const isCustomCourse = (course.courseUnits?.length ?? 0) === 0
+  const isCustomCourse = isCustomChatInstance(course)
 
   const { data: enrolmentsData } = useCourseEnrolments(course.courseId, canManage)
   const { stats, refetch: refetchStats } = useCourseStatistics(canManage ? course.courseId : undefined)

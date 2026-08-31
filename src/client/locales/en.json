@@ -190,6 +190,7 @@
     "resetConfirm": "Are you sure you want to reset to default settings?",
     "myPrompts": "My prompts",
     "courses": "Courses",
+    "workspace": "Workspaces",
     "filterCourses": "Filter courses",
     "showInactiveCourses": "Show inactive courses",
     "showEndedCourses": "Show ended courses",

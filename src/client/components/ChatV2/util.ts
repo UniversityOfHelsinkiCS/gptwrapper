@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 
-import { ActivityPeriod, ChatInstanceUsage, ChatStatus } from '../../types'
+import { ActivityPeriod, ChatInstanceUsage, ChatStatus, Course } from '../../types'
 import { CoursesViewCourse } from '../../hooks/useUserCourses'
 
 import curTypes from '../../locales/curTypes.json'
@@ -110,3 +110,9 @@ export const getChatActivityStatus = (chatInstance: any, user: any): ChatStatus 
 
   return 'ACTIVE'
 }
+
+/**
+ * Chat instances imported from Sisu always have course units (and thus a course code);
+ * the ones created by hand (course creator / admin) never do.
+ */
+export const isCustomChatInstance = (chatInstance: Partial<Pick<Course, 'courseUnits'>>) => (chatInstance.courseUnits?.length ?? 0) === 0

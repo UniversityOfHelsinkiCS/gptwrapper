@@ -36,9 +36,17 @@ import ChevronRight from '@mui/icons-material/ChevronRight'
 import ExpandMore from '@mui/icons-material/ExpandMore'
 import useUserCourses, { type CoursesViewCourse } from '../../hooks/useUserCourses'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
-import { getGroupedCourses } from './util'
+import { getGroupedCourses, isCustomChatInstance } from './util'
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import UniversityPromptGallery from './UniversityPromptGallery.tsx'
+
+const SECTION_LABEL_SX = {
+  fontSize: '0.75rem',
+  fontWeight: 700,
+  letterSpacing: '0.1em',
+  color: 'text.secondary',
+  lineHeight: 1.6,
+} as const
 
 type PromptListItemProps = {
   prompt: PromptType
@@ -158,6 +166,9 @@ const PromptModalV2 = () => {
   const allCourses = [...curreEnabled, ...curreDisabled, ...ended]
   const visibleCourses = [...curreEnabled, ...(showInactive ? curreDisabled : []), ...(showEnded ? ended : [])]
 
+  const sisuCourses = visibleCourses.filter((course) => !isCustomChatInstance(course))
+  const customCourses = visibleCourses.filter((course) => isCustomChatInstance(course))
+
   const copyTargets = allCourses.filter((course) => course.role === 'teacher')
   const [expandTarget, setExpandTarget] = useState<{ courseId: string; nonce: number } | null>(null)
 
@@ -266,6 +277,27 @@ const PromptModalV2 = () => {
 
   if (!user || isLoading) return null
 
+  const renderCourseList = (courses: CoursesViewCourse[]) => (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+      {courses.map((course) => (
+        <Box key={course.id}>
+          <CoursePrompts
+            course={course}
+            previewPrompt={previewPrompt}
+            confirmClose={confirmClose}
+            setPreviewPrompt={showPromptPreview}
+            setIsEditing={setIsEditing}
+            setPreviewCourse={showCoursePreview}
+            previewCourse={previewCourse}
+            handleCreateNew={handleCreateNew}
+            expandTarget={expandTarget}
+            showActivityPeriod={showActivityPeriod}
+          />
+        </Box>
+      ))}
+    </Box>
+  )
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, minHeight: 0 }}>
       <Box sx={{ display: 'flex', gap: 2, flex: 1, minHeight: 0 }}>
@@ -373,16 +405,7 @@ const PromptModalV2 = () => {
                 <Divider sx={{ my: 1 }} />
                 {/* Courses header with filter */}
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, pt: 1.5, pb: 0.5 }}>
-                  <Typography
-                    variant="overline"
-                    sx={{
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      letterSpacing: '0.1em',
-                      color: 'text.secondary',
-                      lineHeight: 1.6,
-                    }}
-                  >
+                  <Typography variant="overline" sx={SECTION_LABEL_SX}>
                     {t('settings:courses')}
                   </Typography>
                   <Tooltip title={t('settings:filterCourses')}>
@@ -436,24 +459,19 @@ const PromptModalV2 = () => {
                   </Box>
                 </Popover>
                 {/* Course prompts list */}
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {visibleCourses.map((course) => (
-                    <Box key={course.id}>
-                      <CoursePrompts
-                        course={course}
-                        previewPrompt={previewPrompt}
-                        confirmClose={confirmClose}
-                        setPreviewPrompt={showPromptPreview}
-                        setIsEditing={setIsEditing}
-                        setPreviewCourse={showCoursePreview}
-                        previewCourse={previewCourse}
-                        handleCreateNew={handleCreateNew}
-                        expandTarget={expandTarget}
-                        showActivityPeriod={showActivityPeriod}
-                      />
+                {renderCourseList(sisuCourses)}
+
+                {customCourses.length > 0 && (
+                  <Box>
+                    <Divider sx={{ my: 1 }} />
+                    <Box sx={{ px: 1, pt: 1.5, pb: 0.5 }}>
+                      <Typography variant="overline" sx={SECTION_LABEL_SX}>
+                        {t('settings:workspace')}
+                      </Typography>
                     </Box>
-                  ))}
-                </Box>
+                    {renderCourseList(customCourses)}
+                  </Box>
+                )}
               </Box>
             )}
           </Box>
