@@ -191,6 +191,8 @@ const ChatV2Content = () => {
         // Still send file to server for validation purposes
         formData.append('file', file)
       } catch (error) {
+        setEndState('none')
+        setIsStreaming(true)
         console.error('Error parsing file:', error)
         // Show file parsing errors as warnings in the chat box
         setMessageWarning({
