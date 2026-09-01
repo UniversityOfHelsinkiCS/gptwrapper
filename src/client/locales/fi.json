@@ -613,6 +613,8 @@
     "studentInstructionsLabel": "Ohjeistus opiskelijoille",
     "promptModelSettings": "Kielimallin ohjeistus",
     "showForStudents": "Näytä opiskelijoille",
+    "showModelInstructionsForStudents": "Näytä kielimallin ohjeistus opiskelijoille",
+    "showRagForStudents": "Näytä lähdemateriaalikokoelma opiskelijoille",
     "selectedModelLabel": "Alustuksen valittu kielimalli",
     "systemMessagePlaceholder": "Esim. Olet avulias avustaja.",
     "promptSourceMaterialData": "Lähdemateriaali",
@@ -634,7 +636,8 @@
     "noRagMessagesToShow": "Ei ohjeistuksia",
     "unSavedChanges": "Sinulla on tallentamattomia muutoksia. Sulkemalla näkymän nyt, menetät tekemäsi muutokset. Haluatko jatkaa?",
     "creatorName": "Alustuksen luoja: {{firstNames}} {{lastName}}",
-    "creatorHidden": "Piilotettu muilta käyttäjiltä"
+    "creatorHidden": "Piilotettu muilta käyttäjiltä",
+    "tooShort": "Nimen on oltava vähintään 3 merkkiä pitkä"
   },
   "tooltip": {
     "copied": "Kopioitu!"

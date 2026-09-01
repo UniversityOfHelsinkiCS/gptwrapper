@@ -14,6 +14,7 @@ import {
   IconButton,
   Paper,
 } from '@mui/material'
+import { visuallyHidden } from '@mui/utils'
 import { useTranslation } from 'react-i18next'
 import RagMessageEditor from './RagMessageEditor'
 import { ClearOutlined, VisibilityOutlined, VisibilityOffOutlined } from '@mui/icons-material'
@@ -64,7 +65,7 @@ const BasicInfoSection = () => {
         </Typography>
         <TextField
           required
-          label={t('common:required')}
+          label={t('common:promptName')}
           variant="filled"
           slotProps={{
             htmlInput: {
@@ -72,26 +73,33 @@ const BasicInfoSection = () => {
               minLength: 3,
               maxLength: 100,
             },
+            inputLabel: {
+              sx: visuallyHidden,
+            },
           }}
           autoFocus
-          placeholder={t('common:promptName')}
           value={form.name}
           onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
           fullWidth
+          error={form.name.length < 3}
+          helperText={form.name.length < 3 ? t('prompt:tooShort') : ''}
         />
       </Box>
       <Box>
         <Typography variant="subtitle1" mb={1} fontWeight="bold">
           {t('prompt:promptDescription')}
         </Typography>
-
         <TextField
           variant="filled"
           slotProps={{
             htmlInput: {
               'data-testid': 'student-instructions-input',
             },
+            inputLabel: {
+              sx: visuallyHidden,
+            },
           }}
+          label={t('prompt:promptDescription')}
           value={form.userInstructions}
           onChange={(e) => setForm((prev) => ({ ...prev, userInstructions: e.target.value }))}
           fullWidth
@@ -122,7 +130,7 @@ const ModelSettingsSection = ({ hideVisibilityToggle = false }: { hideVisibility
             sx={{ ml: 'auto' }}
             control={<Switch checked={!form.hidden} onChange={(e) => setForm((prev) => ({ ...prev, hidden: !e.target.checked }))} />}
             label={
-              <Box display="flex" alignItems="center" gap={1}>
+              <Box display="flex" alignItems="center" gap={1} aria-label={t('prompt:showModelInstructionsForStudents')}>
                 {t('prompt:showForStudents')}
                 {form.hidden ? <VisibilityOffOutlined fontSize="small" color="error" /> : <VisibilityOutlined fontSize="small" color="success" />}
               </Box>
@@ -134,10 +142,14 @@ const ModelSettingsSection = ({ hideVisibilityToggle = false }: { hideVisibility
       <Box>
         <TextField
           variant="filled"
+          label={t('prompt:promptModelSettings')}
           sx={{ '& textarea': monospaceStyle, ...(!isMobile && { maxHeight: '300px', overflow: 'auto' }) }}
           slotProps={{
             htmlInput: {
               'data-testid': 'system-message-input',
+            },
+            inputLabel: {
+              sx: visuallyHidden,
             },
           }}
           placeholder={t('prompt:systemMessagePlaceholder')}
@@ -154,7 +166,7 @@ const ModelSettingsSection = ({ hideVisibilityToggle = false }: { hideVisibility
 }
 
 const RagSettingsSection = () => {
-  const { form, setForm, ragIndices, userRagIndices } = usePromptEditorForm()
+  const { form, setForm, ragIndices, userRagIndices, type } = usePromptEditorForm()
   const { t } = useTranslation()
   const { user } = useCurrentUser()
   const [open, setOpen] = useState(false)
@@ -181,24 +193,27 @@ const RagSettingsSection = () => {
       </Box>
       <Box mb={3}>
         <Box display="flex" alignItems="center">
-          <Typography variant="overline" fontWeight="bold" my={1}>
+          <Typography id="rag-in-use-label" variant="overline" fontWeight="bold" my={1}>
             {t('prompt:ragInUse')}
           </Typography>
-          <FormControlLabel
-            sx={{ ml: 'auto' }}
-            control={<Switch checked={!form.ragHidden} onChange={(e) => setForm((prev) => ({ ...prev, ragHidden: !e.target.checked }))} />}
-            label={
-              <Box display="flex" alignItems="center" gap={1}>
-                {t('prompt:showForStudents')}
-                {form.ragHidden ? <VisibilityOffOutlined fontSize="small" color="error" /> : <VisibilityOutlined fontSize="small" color="success" />}
-              </Box>
-            }
-          />
+          {type !== 'PERSONAL' && (
+            <FormControlLabel
+              sx={{ ml: 'auto' }}
+              control={<Switch checked={!form.ragHidden} onChange={(e) => setForm((prev) => ({ ...prev, ragHidden: !e.target.checked }))} />}
+              label={
+                <Box display="flex" alignItems="center" gap={1} aria-label={t('prompt:showRagForStudents')}>
+                  {t('prompt:showForStudents')}
+                  {form.ragHidden ? <VisibilityOffOutlined fontSize="small" color="error" /> : <VisibilityOutlined fontSize="small" color="success" />}
+                </Box>
+              }
+            />
+          )}
         </Box>
         <Box display="flex" justifyContent="space-around" alignItems="center" flexDirection="column" gap={2}>
           <FormControl fullWidth>
             <Select
               data-testid="rag-select"
+              aria-describedby="rag-in-use-label"
               value={hasSelectedRagIndex ? form.ragIndexId : ''}
               onChange={(e) => {
                 setForm((prev) => ({
@@ -339,7 +354,10 @@ const RagSettingsSection = () => {
   )
 }
 
-export const PromptEditorForm = ({ hideRagSettings = false, hideVisibilityToggle = false }: { hideRagSettings?: boolean; hideVisibilityToggle?: boolean } = {}) => (
+export const PromptEditorForm = ({
+  hideRagSettings = false,
+  hideVisibilityToggle = false,
+}: { hideRagSettings?: boolean; hideVisibilityToggle?: boolean } = {}) => (
   <Box>
     <BasicInfoSection />
     <Divider sx={{ my: 3 }} />
