@@ -390,6 +390,7 @@ const ChatV2Content = () => {
     setIsStreaming(false)
     clearRetryTimeout()
     setEndState(reason)
+    document.getElementById('chat-input')?.focus()
   }
 
   const handleRetry = (messageIndex: number) => {
@@ -587,7 +588,10 @@ const ChatV2Content = () => {
               setFileName={setFileName}
               messageWarning={messageWarning}
               handleCancel={handleCancel}
-              handleContinue={(_, ignoredWarnings) => handleSendMessage('', true, ignoredWarnings)}
+              handleContinue={(_, ignoredWarnings) => {
+                handleSendMessage('', true, ignoredWarnings)
+                document.getElementById('chat-input')?.focus()
+              }}
               handleSubmit={(newMessage) => {
                 handleSendMessage(newMessage, false, [])
               }}

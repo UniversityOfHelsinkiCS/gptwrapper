@@ -192,7 +192,7 @@ export const ChatBox = ({
             sx={{ my: '0.2rem' }}
             action={
               <Box sx={{ display: 'flex', gap: 1 }}>
-                <GrayButton onClick={() => handleCancel('canceled')} type="button">
+                <GrayButton autoFocus={activeMessageWarnings.length > 0} onClick={() => handleCancel('canceled')} type="button">
                   {t('common:cancel')}
                 </GrayButton>
                 <BlueButton onClick={() => handleContinue('', Object.keys(messageWarning) as WarningType[])} color="primary" type="button">
