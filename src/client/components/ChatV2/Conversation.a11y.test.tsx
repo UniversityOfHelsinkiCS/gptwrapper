@@ -22,17 +22,11 @@ beforeAll(async () => {
     defaultNS: 'common',
   })
 })
-
 afterEach(cleanup)
 
 const RESPONSE_TEXT = 'The capital of Finland is Helsinki.'
 
-const renderConversation = (props: {
-  messages: ChatMessage[]
-  completion: string
-  isStreaming: boolean
-  endState?: 'none' | 'canceled' | 'error'
-}) =>
+const renderConversation = (props: { messages: ChatMessage[]; completion: string; isStreaming: boolean; endState?: 'none' | 'canceled' | 'error' }) =>
   render(
     <StrictMode>
       <I18nextProvider i18n={i18n}>
@@ -49,12 +43,7 @@ const renderConversation = (props: {
     </StrictMode>,
   )
 
-const conversationProps = (props: {
-  messages: ChatMessage[]
-  completion: string
-  isStreaming: boolean
-  endState?: 'none' | 'canceled' | 'error'
-}) => (
+const conversationProps = (props: { messages: ChatMessage[]; completion: string; isStreaming: boolean; endState?: 'none' | 'canceled' | 'error' }) => (
   <StrictMode>
     <I18nextProvider i18n={i18n}>
       <Conversation
