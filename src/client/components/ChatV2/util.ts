@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 
-import { ActivityPeriod, ChatInstanceUsage } from '../../types'
+import { ActivityPeriod, ChatInstanceUsage, Course } from '../../types'
 import { CoursesViewCourse } from '../../hooks/useUserCourses'
 
 import curTypes from '../../locales/curTypes.json'
@@ -97,8 +97,8 @@ export const getGroupedCourses = (courses: CoursesViewCourse[] = []) => {
   }
 }
 
-export const getChatActivityStatus = (chatInstance: any): ChatStatus => {
-  if (!chatInstance.status) {
+export const getChatActivityStatus = (chatInstance: Course | undefined): ChatStatus => {
+  if (!chatInstance?.status) {
     return 'ACTIVATED'
   }
 
