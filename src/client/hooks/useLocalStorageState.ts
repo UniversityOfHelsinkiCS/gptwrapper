@@ -58,12 +58,14 @@ export function useLocalStorageStateWithURLDefault<T>(key: string, defaultValue:
 
   const parsedValue = schema.safeParse(urlValue ?? value)
 
+  useEffect(() => {
+    if (!parsedValue.success) {
+      setValue(defaultValue)
+    }
+  }, [parsedValue.success, defaultValue, setValue])
+
   if (parsedValue.success) {
     return [parsedValue.data, modifiedSetValue] as const
   }
-
-  // if the value in localStorage is invalid then revert back to default
-  // prevents faulty localStorage content from breaking the app
-  setValue(defaultValue)
   return [defaultValue as T, modifiedSetValue] as const
 }
