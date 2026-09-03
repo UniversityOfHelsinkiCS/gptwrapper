@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { type SetStateAction, useMemo, useState } from 'react'
 import {
   Alert,
   Box,
@@ -36,6 +36,7 @@ import type { UniversityPromptBody, UniversityPromptType } from '@shared/prompt'
 import { PromptEditorFormContext } from '../Prompt/context'
 import { PromptEditorForm } from '../Prompt/PromptEditorForm'
 import type { PromptEditorFormContextValue, PromptEditorFormState } from '../../types'
+import useLocalStorageState from '../../hooks/useLocalStorageState'
 import {
   groupToBody,
   universityPromptLanguages,
@@ -67,6 +68,12 @@ type EditorState = {
   type: UniversityPromptType
   published: boolean
   languages: Record<UniversityPromptLanguage, LanguageState>
+}
+
+type CachedEditorState = {
+  type: UniversityPromptType
+  published: boolean
+  languages: Record<UniversityPromptLanguage, { enabled: boolean; form: PromptEditorFormState }>
 }
 
 const emptyForm = (): PromptEditorFormState => ({
@@ -116,6 +123,30 @@ const buildEditorState = (group?: UniversityPromptGroup): EditorState => {
   }
 }
 
+const toCached = (state: EditorState): CachedEditorState => ({
+  type: state.type,
+  published: state.published,
+  languages: Object.fromEntries(
+    universityPromptLanguages.map((language) => [language, { enabled: state.languages[language].enabled, form: state.languages[language].form }]),
+  ) as CachedEditorState['languages'],
+})
+
+const mergeDraft = (base: EditorState, draft?: CachedEditorState): EditorState => ({
+  type: draft?.type ?? base.type,
+  published: draft?.published ?? base.published,
+  languages: Object.fromEntries(
+    universityPromptLanguages.map((language) => [
+      language,
+      {
+        enabled: draft?.languages?.[language]?.enabled ?? base.languages[language].enabled,
+        existed: base.languages[language].existed,
+        messages: base.languages[language].messages,
+        form: { ...base.languages[language].form, ...draft?.languages?.[language]?.form },
+      } satisfies LanguageState,
+    ]),
+  ) as Record<UniversityPromptLanguage, LanguageState>,
+})
+
 const groupLanguages = (group: UniversityPromptGroup) =>
   universityPromptLanguages.filter((language) => (group.prompts ?? []).some((prompt) => prompt.language === language))
 
@@ -131,13 +162,17 @@ const UniversityPromptDialog = ({ open, onClose, group }: { open: boolean; onClo
   const updateMutation = useUpdateUniversityPromptMutation()
   const isEdit = Boolean(group)
 
-  const [state, setState] = useState<EditorState>(() => buildEditorState(group))
-  const [currentTab, setCurrentTab] = useState<UniversityPromptLanguage>('fi')
+  const base = useMemo(() => buildEditorState(group), [group])
 
-  useEffect(() => {
-    setState(buildEditorState(group))
-    setCurrentTab('fi')
-  }, [group, open])
+  const cacheKey = `universityPromptEditorForm:${group ? `edit:${group.id}` : 'new'}`
+  const [draft, setDraft] = useLocalStorageState<CachedEditorState>(cacheKey, toCached(base))
+
+  const state = useMemo(() => mergeDraft(base, draft), [base, draft])
+
+  const setState = (update: SetStateAction<EditorState>) =>
+    setDraft((prevDraft) => toCached(typeof update === 'function' ? update(mergeDraft(base, prevDraft)) : update))
+
+  const [currentTab, setCurrentTab] = useState<UniversityPromptLanguage>('fi')
 
   const active = state.languages[currentTab]
 
@@ -165,6 +200,17 @@ const UniversityPromptDialog = ({ open, onClose, group }: { open: boolean; onClo
 
   const setLanguageEnabled = (language: UniversityPromptLanguage, enabled: boolean) =>
     setState((prev) => ({ ...prev, languages: { ...prev.languages, [language]: { ...prev.languages[language], enabled } } }))
+
+  const hasChanges = JSON.stringify(toCached(base)) !== JSON.stringify(draft)
+
+  const clearDraft = () => localStorage.removeItem(cacheKey)
+
+  const handleClose = () => {
+    if (hasChanges && !window.confirm(t('prompt:unSavedChanges'))) return
+
+    clearDraft()
+    onClose()
+  }
 
   const handleSubmit = async () => {
     if (enabledLanguages.length === 0) {
@@ -215,6 +261,7 @@ const UniversityPromptDialog = ({ open, onClose, group }: { open: boolean; onClo
         await createMutation.mutateAsync(body)
         enqueueSnackbar(t('uniPrompts:created'), { variant: 'success' })
       }
+      clearDraft()
       onClose()
     } catch (error: any) {
       enqueueSnackbar(error?.response?.data?.message || error?.message || t('uniPrompts:error'), { variant: 'error' })
@@ -222,7 +269,7 @@ const UniversityPromptDialog = ({ open, onClose, group }: { open: boolean; onClo
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
       <DialogTitle>{isEdit ? t('uniPrompts:editTitle') : t('uniPrompts:createTitle')}</DialogTitle>
       <DialogContent>
         <Stack spacing={3} sx={{ mt: 1 }}>
@@ -302,7 +349,7 @@ const UniversityPromptDialog = ({ open, onClose, group }: { open: boolean; onClo
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t('common:cancel')}</Button>
+        <Button onClick={handleClose}>{t('common:cancel')}</Button>
         <Button onClick={handleSubmit} variant="contained" data-testid="uniprompt-save" disabled={createMutation.isPending || updateMutation.isPending}>
           {isEdit ? t('common:save') : t('common:create')}
         </Button>
