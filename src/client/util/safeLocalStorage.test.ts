@@ -1,5 +1,5 @@
 import { describe, test, expect, afterEach } from 'vitest'
-import safeStorage from './safeStorage'
+import safeStorage from './safeLocalStorage'
 
 const realStorage = globalThis.localStorage
 const setGlobalStorage = (value: unknown) => {
