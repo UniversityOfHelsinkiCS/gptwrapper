@@ -30,6 +30,6 @@ class SafeStorage {
   }
 }
 
-const safeStorage = new SafeStorage()
+const safeLocalStorage = new SafeStorage()
 
-export default safeStorage
+export default safeLocalStorage

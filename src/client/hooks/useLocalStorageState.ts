@@ -1,13 +1,13 @@
 import { type Dispatch, type SetStateAction, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import z from 'zod/v4'
-import safeStorage from '../util/safeStorage'
+import safeLocalStorage from '../util/safeLocalStorage'
 
 function useLocalStorageState<T>(key: string, defaultValue: T): [T, Dispatch<SetStateAction<T>>]
 function useLocalStorageState<T>(key: string): [T | undefined, Dispatch<SetStateAction<T | undefined>>]
 function useLocalStorageState<T>(key: string, defaultValue = undefined) {
   const [state, setState] = useState(() => {
-    const storedValue = safeStorage.getItem(key)
+    const storedValue = safeLocalStorage.getItem(key)
     if (!storedValue) return defaultValue
 
     let parsedValue: T | undefined
@@ -26,9 +26,9 @@ function useLocalStorageState<T>(key: string, defaultValue = undefined) {
 
   useEffect(() => {
     if (state !== undefined) {
-      safeStorage.setItem(key, JSON.stringify({ value: state }))
+      safeLocalStorage.setItem(key, JSON.stringify({ value: state }))
     } else {
-      safeStorage.removeItem(key)
+      safeLocalStorage.removeItem(key)
     }
   }, [key, state])
 

@@ -9,6 +9,7 @@ import initializeI18n from './util/i18n'
 import queryClient from './util/queryClient'
 import { inCI, inDevelopment, inStaging } from '../config'
 import { setupWindowMessageListeners } from './util/windowMessages'
+import safeLocalStorage from './util/safeLocalStorage'
 
 setupWindowMessageListeners()
 
@@ -44,7 +45,7 @@ const Main = () => {
       setShowDevtools(true)
     }
 
-    const adminLoggedInAs = localStorage.getItem('adminLoggedInAs')
+    const adminLoggedInAs = safeLocalStorage.getItem('adminLoggedInAs')
     if (adminLoggedInAs) {
       console.log(`%cLogged in as ${adminLoggedInAs}`, 'color: orange')
     }
@@ -55,7 +56,7 @@ const Main = () => {
       <Router />
       {showDevtools && (
         <React.Suspense fallback={null}>
-          <ReactQueryDevtoolsProduction buttonPosition='bottom-left' />
+          <ReactQueryDevtoolsProduction buttonPosition="bottom-left" />
         </React.Suspense>
       )}
     </QueryClientProvider>

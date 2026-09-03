@@ -26,6 +26,7 @@ import { SuperSpeedLoginAs } from './components/Admin/SuperSpeedLoginAs'
 import { useLoggedInAs } from './hooks/useLoggedInAs'
 import NotificationBanner from './components/common/NotificationBanner'
 import { resolveContentView, getRedirect } from './util/contentView'
+import safeLocalStorage from './util/safeLocalStorage'
 
 const AdminLoggedInAsBanner = () => {
   const [open, setOpen] = React.useState(false)
@@ -33,17 +34,17 @@ const AdminLoggedInAsBanner = () => {
   const { t } = useTranslation()
 
   useEffect(() => {
-    const adminLoggedInAs = localStorage.getItem('adminLoggedInAs')
+    const adminLoggedInAs = safeLocalStorage.getItem('adminLoggedInAs')
     if (adminLoggedInAs) {
       setOpen(true)
-      setUser(JSON.parse(localStorage.getItem('adminLoggedInAsUser') || 'null'))
+      setUser(JSON.parse(safeLocalStorage.getItem('adminLoggedInAsUser') || 'null'))
     }
   }, [])
 
   const handleClick = () => {
     setOpen(false)
-    localStorage.removeItem('adminLoggedInAs')
-    localStorage.removeItem('adminLoggedInAsUser')
+    safeLocalStorage.removeItem('adminLoggedInAs')
+    safeLocalStorage.removeItem('adminLoggedInAsUser')
     window.location.reload()
   }
 

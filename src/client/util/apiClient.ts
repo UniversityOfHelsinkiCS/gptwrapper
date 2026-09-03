@@ -1,6 +1,7 @@
 import axios, { AxiosRequestHeaders, type AxiosError } from 'axios'
 import { PUBLIC_URL } from '../../config'
 import { AiApiResponse } from '@shared/aiApi'
+import safeLocalStorage from './safeLocalStorage'
 
 export type ApiError = AxiosError<{ message: string }>
 
@@ -13,7 +14,7 @@ export const updaterApiClient = axios.create({
 const getCustomHeaders = () => {
   const headers = {} as AxiosRequestHeaders
 
-  const adminLoggedInAs = localStorage.getItem('adminLoggedInAs') // id
+  const adminLoggedInAs = safeLocalStorage.getItem('adminLoggedInAs') // id
   if (adminLoggedInAs) {
     headers['x-admin-logged-in-as'] = adminLoggedInAs
   }
@@ -33,7 +34,11 @@ apiClient.interceptors.request.use((config) => {
   return newConfig
 })
 
-export const postAbortableStream = async (path: string, formData: FormData, externalController?: AbortController): Promise<AiApiResponse & { controller: AbortController }> => {
+export const postAbortableStream = async (
+  path: string,
+  formData: FormData,
+  externalController?: AbortController,
+): Promise<AiApiResponse & { controller: AbortController }> => {
   const controller = externalController ?? new AbortController()
 
   const response = await fetch(`${PUBLIC_URL}/api/${path}`, {
@@ -47,7 +52,7 @@ export const postAbortableStream = async (path: string, formData: FormData, exte
 
   if (contentType?.includes('application/json')) {
     const json = await response.json()
-    if ("warnings" in json) {
+    if ('warnings' in json) {
       return {
         ...json,
         controller,
