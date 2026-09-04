@@ -83,7 +83,7 @@ const CopyPromptMenu = ({
       onClose={handleClose}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      slotProps={{ list: { sx: { pt: 0, minWidth: 300 } }, paper: { sx: { maxHeight: 400 } } }}
+      slotProps={{ list: { 'aria-label': t('prompt:copyPromptTo'), sx: { pt: 0, minWidth: 300 } }, paper: { sx: { maxHeight: 400 } } }}
       data-testid="copy-prompt-menu"
     >
       <ListSubheader sx={{ lineHeight: 2.5 }}>{t('prompt:copyPromptTo')}</ListSubheader>
