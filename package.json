@@ -49,7 +49,7 @@
     }
   },
   "devDependencies": {
-    "@babel/preset-typescript": "7.23.3",
+    "@babel/preset-typescript": "8.0.1",
     "@locator/babel-jsx": "0.5.1",
     "@playwright/test": "1.57.0",
     "@testing-library/dom": "^10.4.1",
