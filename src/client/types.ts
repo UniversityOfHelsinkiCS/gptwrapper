@@ -1,6 +1,6 @@
 import type { ChatMessage } from '@shared/chat'
 import { Locale } from '@shared/lang'
-import { ChatStatus, Locales, Statistic, Term } from '@shared/types'
+import { AccessLevel, ChatStatus, Locales, Statistic, Term } from '@shared/types'
 import type { UserPreferences } from '@shared/user'
 
 /*
@@ -105,7 +105,7 @@ export interface ChatInstance {
   courseUnitRealisationTypeUrn?: string
   activityPeriod: ActivityPeriod
   activated: boolean
-  status?: ChatStatus
+  status: ChatStatus
 }
 
 export type ActivityPeriod = {
@@ -148,6 +148,7 @@ export interface Course extends ChatInstance {
   responsibilities: Responsibility[]
   courseUnits: CourseUnit[]
   saveDiscussions: boolean
+  accessLevel: AccessLevel
 }
 
 export type ChatInstanceUsage = {
