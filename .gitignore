@@ -148,3 +148,4 @@ cypress.env.json
 !.env.template
 !.env.sample
 !.env.example
+env.enc
