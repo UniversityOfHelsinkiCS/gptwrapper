@@ -234,14 +234,8 @@ const requireCourseAccess = async (user: SharedUser, chatInstance: ChatInstance)
 }
 
 export const serializeCourse = (chatInstance: ChatInstance, accessLevel: AccessLevel) => {
-  switch (accessLevel) {
-    case 'FULL':
-    case 'STUDENT':
-      return chatInstance
-    case 'STUDENT_CLOSED':
-      // a closed course should not leak the prompts of the teacher
-      return { ...chatInstance.toJSON(), prompts: [], status: getChatStatus(chatInstance) }
-  }
+  const base = { ...chatInstance.toJSON(), status: getChatStatus(chatInstance), accessLevel }
+  return accessLevel === 'STUDENT_CLOSED' ? { ...base, prompts: [] } : base
 }
 
 // returns a chatInstance, throws an chat instance not found if not found
