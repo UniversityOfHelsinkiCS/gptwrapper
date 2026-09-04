@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { FREE_MODEL, inProduction, isMockModel, ValidModelName, validModels } from '@config'
-import { Box, Chip, MenuItem, Typography, Menu, alpha } from '@mui/material'
+import { Box, Chip, MenuItem, Typography, Menu, alpha, ListSubheader } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -113,6 +113,7 @@ const ModelSelector = ({
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         slotProps={{
+          list: { 'aria-label': t('sidebar:modelTitle') },
           paper: {
             style: {
               minWidth: 260,
@@ -122,12 +123,10 @@ const ModelSelector = ({
           },
         }}
       >
-        <Typography
-          variant="overline"
-          sx={{ display: 'block', px: 1.75, pt: 0.5, pb: 1, fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled' }}
-        >
+        <ListSubheader sx={{ display: 'block', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled' }}>
           {t('sidebar:modelTitle')}
-        </Typography>
+        </ListSubheader>
+
         {availableModels.map((model) => {
           const active = model === displayModel
           const descriptionKey = descriptionKeyByModel[model]
@@ -137,7 +136,10 @@ const ModelSelector = ({
               value={model}
               onClick={() => handleSelect(model)}
               data-testid={`${model}-option`}
-              sx={{ gap: 1, py: 1, px: 1.75, alignItems: 'flex-start' }}
+              selected={active}
+              aria-selected={active}
+              aria-label={[model, descriptionKey && t(descriptionKey), isFree(model) && t('chat:freeModel'), active && t('common:selected')].filter(Boolean).join(', ')}
+              sx={{ gap: 1, py: 1, px: 1.75, alignItems: 'flex-start', mt: 1 }}
             >
               <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
                 <Typography sx={{ fontSize: '0.875rem', fontWeight: active ? 600 : 400 }}>{model}</Typography>

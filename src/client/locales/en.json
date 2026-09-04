@@ -1,5 +1,6 @@
 {
   "common": {
+    "selected": "Selected",
     "noAccess": "No access",
     "courseStats": "Course stats",
     "appName": "CurreChat",

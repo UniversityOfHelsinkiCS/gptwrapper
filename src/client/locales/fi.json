@@ -1,5 +1,6 @@
 {
   "common": {
+    "selected": "Valittu",
     "noAccess": "Ei oikeuksia",
     "courseStats": "Kurssitilastot",
     "appName": "CurreChat",
