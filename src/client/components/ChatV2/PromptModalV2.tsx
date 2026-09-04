@@ -108,6 +108,8 @@ export const PromptListItem = ({
       <ListItemButton
         className={prompt.id !== activePromptId ? 'prompt-list-item__button' : undefined}
         selected={previewPromptId === prompt.id}
+        aria-selected={prompt.id === activePromptId}
+        aria-label={[prompt.name, prompt.id === activePromptId && t('common:selected'), t('prompt:preview')].filter(Boolean).join(', ')}
         onClick={() => {
           if (!confirmClose()) return
           onPreview(prompt)
@@ -133,7 +135,7 @@ export const PromptListItem = ({
       {prompt.id !== activePromptId && (
         <BlueButton
           size="small"
-          aria-label={`${t('sidebar:promptSelect')} ${prompt.name}`}
+          aria-label={t('sidebar:promptSelect')}
           variant="contained"
           data-testid="change-to-prompt-button"
           className="change-prompt-button"
