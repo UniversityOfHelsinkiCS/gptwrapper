@@ -39,6 +39,7 @@ import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { getGroupedCourses, isCustomChatInstance } from './util'
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import UniversityPromptGallery from './UniversityPromptGallery.tsx'
+import { focusIndicatorStyle, switchFocusIndicatorStyle } from '../../util/accessibility'
 
 const SECTION_LABEL_SX = {
   fontSize: '0.75rem',
@@ -68,74 +69,96 @@ export const PromptListItem = ({
   confirmClose,
   choosePromptLabel,
   activeLabel,
-}: PromptListItemProps) => (
-  <ListItemButton
-    selected={previewPromptId === prompt.id}
-    onClick={() => {
-      if (!confirmClose()) return
-      onPreview(prompt)
-    }}
-    sx={{
-      position: 'relative',
-      borderRadius: '8px',
-      mb: 0.5,
-      py: 1,
-      height: '50px',
-      minHeight: '50px',
-      pr: prompt.id === activePromptId ? 10 : 0.5,
-      '&.Mui-selected': {
-        backgroundColor: 'background.subtle',
-        borderLeft: '3px solid',
-        borderLeftColor: 'primary.main',
-      },
-      '& .change-prompt-button': {
-        opacity: 0,
-        transform: 'translateX(4px)',
-        visibility: 'hidden',
-        pointerEvents: 'none',
-        transition: 'opacity 180ms ease, transform 180ms ease, visibility 0s linear 180ms',
-      },
-      '& .prompt-list-item__text': {
-        transition: 'padding-right 180ms ease',
-        transitionDelay: '200ms',
-      },
-      '&:hover .change-prompt-button:not(.change-prompt-button--active)': {
-        opacity: 1,
-        transform: 'translateX(0)',
-        visibility: 'visible',
-        pointerEvents: 'auto',
-        transitionDelay: '200ms',
-      },
-      '&:hover .prompt-list-item__text': {
-        pr: prompt.id === activePromptId ? 3 : 10,
-      },
-    }}
-    data-testid={`prompt-row-${prompt.name}`}
-  >
-    <ListItemText className="prompt-list-item__text" primary={prompt.name} slotProps={{ primary: { noWrap: true } }} sx={{ minWidth: 0 }} />
-    {prompt.id === activePromptId && (
-      <Tooltip title={activeLabel ?? ''}>
-        <CheckCircleOutlineIcon fontSize="small" sx={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'primary.main' }} />
-      </Tooltip>
-    )}
-    {prompt.id !== activePromptId && (
-      <BlueButton
-        size="small"
-        variant="contained"
-        data-testid="change-to-prompt-button"
-        className="change-prompt-button"
-        onClick={(e) => {
-          e.stopPropagation()
+}: PromptListItemProps) => {
+  const { t } = useTranslation()
+  return (
+    <Box
+      sx={{
+        position: 'relative',
+        borderRadius: '8px',
+        mb: 0.5,
+        height: '50px',
+        minHeight: '50px',
+
+        '& .change-prompt-button': {
+          opacity: 0,
+          transform: 'translateY(-50%) translateX(4px)',
+          pointerEvents: 'none',
+          transition: 'opacity 180ms ease, transform 180ms ease',
+        },
+
+        '&:hover .change-prompt-button': {
+          opacity: prompt.id !== activePromptId ? 1 : 0,
+          transform: 'translateY(-50%) translateX(0)',
+          pointerEvents: 'auto',
+        },
+
+        '& .change-prompt-button:focus-visible': {
+          opacity: prompt.id !== activePromptId ? 1 : 0,
+          transform: 'translateY(-50%) translateX(0)',
+          pointerEvents: 'auto',
+        },
+
+        '&:hover .prompt-list-item__button, &:focus-within .prompt-list-item__button': {
+          paddingRight: '6rem',
+        },
+      }}
+      data-testid={`prompt-row-${prompt.name}`}
+    >
+      <ListItemButton
+        className={prompt.id !== activePromptId ? 'prompt-list-item__button' : undefined}
+        selected={previewPromptId === prompt.id}
+        onClick={() => {
           if (!confirmClose()) return
-          onSelect(prompt)
+          onPreview(prompt)
         }}
-        sx={{ position: 'absolute', right: 8, whiteSpace: 'nowrap' }}
+        sx={{
+          height: '100%',
+          borderRadius: '8px',
+          pr: prompt.id === activePromptId ? '2.5rem' : undefined,
+          ...focusIndicatorStyle(),
+        }}
       >
-        {choosePromptLabel}
-      </BlueButton>
-    )}
-  </ListItemButton>
-)
+        <ListItemText className="prompt-list-item__text" primary={prompt.name} slotProps={{ primary: { noWrap: true } }} sx={{ minWidth: 0 }} />
+        {prompt.id === activePromptId && (
+          <Tooltip title={activeLabel ?? ''}>
+            <CheckCircleOutlineIcon
+              fontSize="small"
+              sx={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'primary.main' }}
+            />
+          </Tooltip>
+        )}
+      </ListItemButton>
+
+      {prompt.id !== activePromptId && (
+        <BlueButton
+          size="small"
+          aria-label={`${t('sidebar:promptSelect')} ${prompt.name}`}
+          variant="contained"
+          data-testid="change-to-prompt-button"
+          className="change-prompt-button"
+          onClick={(e) => {
+            e.stopPropagation()
+            if (!confirmClose()) return
+            onSelect(prompt)
+          }}
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: '50%',
+            whiteSpace: 'nowrap',
+
+            '&:focus-visible': {
+              opacity: 1,
+            },
+          }}
+        >
+          {choosePromptLabel}
+        </BlueButton>
+      )}
+    </Box>
+  )
+}
 
 const PromptModalV2 = () => {
   const theme = useTheme()
@@ -315,7 +338,7 @@ const PromptModalV2 = () => {
               <ListItemButton
                 selected={showUniversityPrompts}
                 onClick={openUniversityPrompts}
-                sx={{ px: 1, borderRadius: 1, mb: 0.5 }}
+                sx={{ px: 1, borderRadius: 1, mb: 0.5, ...focusIndicatorStyle() }}
                 data-testid="university-prompts-open"
               >
                 <ListItemIcon sx={{ minWidth: 40 }}>
@@ -335,6 +358,7 @@ const PromptModalV2 = () => {
                   flex: 1,
                   minWidth: 0,
                   '&:hover': { backgroundColor: 'transparent' },
+                  ...focusIndicatorStyle(),
                 }}
                 data-testid="my-prompts-open"
               >
@@ -350,7 +374,10 @@ const PromptModalV2 = () => {
                   aria-label={t('settings:saveNewPrompt')}
                   onClick={() => handleCreateNew()}
                   data-testid="create-personal-prompt-button"
-                  sx={{ color: 'primary.main' }}
+                  sx={{
+                    color: 'primary.main',
+                    ...focusIndicatorStyle(),
+                  }}
                 >
                   <AddIcon />
                 </IconButton>
@@ -361,7 +388,10 @@ const PromptModalV2 = () => {
                 aria-label={t('course:togglePrompts')}
                 onClick={() => setShowMyPrompts((open) => !open)}
                 data-testid="my-prompts-toggle"
-                sx={{ color: 'text.secondary' }}
+                sx={{
+                  color: 'text.secondary',
+                  ...focusIndicatorStyle(),
+                }}
               >
                 {showMyPrompts ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
               </IconButton>
@@ -434,13 +464,13 @@ const PromptModalV2 = () => {
                           control={<Switch checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} data-testid="filter-show-inactive" />}
                           label={t('settings:showInactiveCourses')}
                           labelPlacement="start"
-                          sx={{ justifyContent: 'space-between', ml: 0, mr: 0 }}
+                          sx={{ justifyContent: 'space-between', ml: 0, mr: 0, ...switchFocusIndicatorStyle }}
                         />
                         <FormControlLabel
                           control={<Switch checked={showEnded} onChange={(e) => setShowEnded(e.target.checked)} data-testid="filter-show-ended" />}
                           label={t('settings:showEndedCourses')}
                           labelPlacement="start"
-                          sx={{ justifyContent: 'space-between', ml: 0, mr: 0 }}
+                          sx={{ justifyContent: 'space-between', ml: 0, mr: 0, ...switchFocusIndicatorStyle }}
                         />
                       </>
                     )}
@@ -454,7 +484,7 @@ const PromptModalV2 = () => {
                       }
                       label={t('settings:showActivityPeriod')}
                       labelPlacement="start"
-                      sx={{ justifyContent: 'space-between', ml: 0, mr: 0 }}
+                      sx={{ justifyContent: 'space-between', ml: 0, mr: 0, ...switchFocusIndicatorStyle }}
                     />
                   </Box>
                 </Popover>
@@ -517,6 +547,7 @@ const PromptModalV2 = () => {
                 )}
                 {previewPrompt && (
                   <BlueButton
+                    sx={{ mr: 1 }}
                     data-testid="change-to-prompt-button"
                     variant="contained"
                     onClick={() => {
