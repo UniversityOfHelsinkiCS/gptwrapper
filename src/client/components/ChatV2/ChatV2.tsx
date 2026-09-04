@@ -68,6 +68,9 @@ const ChatV2Content = () => {
         setMessages((prev: ChatMessage[]) => prev.concat(message))
         refetchStatus()
       }
+      if (message.error) {
+        setEndState('error')
+      }
       chatScroll.autoScroll()
     },
     onText: () => {
