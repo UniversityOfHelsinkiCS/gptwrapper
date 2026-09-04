@@ -10,6 +10,7 @@ import { PromptListItem } from './PromptModalV2.tsx'
 import AddIcon from '@mui/icons-material/Add'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { formatDate } from './util'
+import { focusIndicatorStyle } from '../../util/accessibility'
 
 interface CoursePromptsProps {
   showActivityPeriod: boolean
@@ -133,6 +134,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
               flex: 1,
               minWidth: 0,
               '&:hover': { backgroundColor: 'transparent' },
+              ...focusIndicatorStyle(),
             }}
             data-testid={`show-course-info-${course.id}-button`}
           >
@@ -167,7 +169,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
                 onClick={() => handleCreateNew(course.courseId)}
                 data-testid={`create-course-prompt-${course.courseId ?? course.id}-button`}
                 className="add-prompt-button"
-                sx={{ color: 'primary.main' }}
+                sx={{ color: 'primary.main', ...focusIndicatorStyle() }}
               >
                 <AddIcon />
               </IconButton>
@@ -178,7 +180,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
             aria-label={t('course:togglePrompts')}
             onClick={() => setShowPrompts((open) => !open)}
             data-testid={`toggle-course-prompts-${course.id}-button`}
-            sx={{ color: 'text.secondary' }}
+            sx={{ color: 'text.secondary', ...focusIndicatorStyle() }}
           >
             {showPrompts ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
           </IconButton>

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { usePreferencesUpdateMutation } from '../../hooks/usePreferencesUpdateMutation'
 import queryClient from '../../util/queryClient'
 import { useCallback } from 'react'
+import { switchFocusIndicatorStyle } from 'src/client/util/accessibility'
 
 export const useNewConversationConfirmMutation = (context: 'chat' | 'settings') => {
   const preferenceUpdate = usePreferencesUpdateMutation()
@@ -51,5 +52,7 @@ export const NewConversationConfirmConfigurator = ({
   context?: 'chat' | 'settings'
 }) => {
   const Control = context === 'chat' ? Checkbox : Switch
-  return <FormControlLabel control={<Control checked={value} onChange={(e) => setValue(e.target.checked)} />} label={label} />
+  return (
+    <FormControlLabel control={<Control checked={value} onChange={(e) => setValue(e.target.checked)} />} label={label} sx={{ ...switchFocusIndicatorStyle }} />
+  )
 }

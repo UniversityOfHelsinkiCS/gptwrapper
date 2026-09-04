@@ -1,14 +1,4 @@
-import {
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  FormControlLabel,
-  Link,
-  TextField,
-} from '@mui/material'
+import { Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, Link, TextField } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
@@ -18,6 +8,7 @@ import type { FeedbackPost } from '../../shared/feedback'
 import { useSnackbar } from 'notistack'
 import { BlueButton, OutlineButtonBlack } from './ChatV2/general/Buttons'
 import { supportEmail } from '@config'
+import { focusIndicatorStyle } from '../util/accessibility'
 
 const useSubmitFeedbackMutation = () => {
   const analyticsMetadata = useAnalytics()
@@ -39,9 +30,7 @@ const useSubmitFeedbackMutation = () => {
 export const Feedback: React.FC<{
   open: boolean
   onClose: () => void
-}> = ({
-  open, onClose
-}) => {
+}> = ({ open, onClose }) => {
   const { t } = useTranslation()
   const { enqueueSnackbar } = useSnackbar()
   const [feedback, setFeedback] = useState('')
@@ -67,7 +56,16 @@ export const Feedback: React.FC<{
         <DialogContentText sx={{ mb: 2 }}>{t('feedback:description')}</DialogContentText>
         <TextField label={t('feedback:message')} multiline rows={4} fullWidth value={feedback} onChange={(e) => setFeedback(e.target.value)} />
         <FormControlLabel
-          control={<Checkbox checked={responseWanted} onChange={(ev) => setResponseWanted(ev.target.checked)} />}
+          control={
+            <Checkbox
+              checked={responseWanted}
+              disableRipple
+              onChange={(ev) => setResponseWanted(ev.target.checked)}
+              sx={{
+                ...focusIndicatorStyle(),
+              }}
+            />
+          }
           label={t('feedback:responseWanted')}
         />
         <DialogContentText>

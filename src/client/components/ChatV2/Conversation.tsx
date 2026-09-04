@@ -29,6 +29,7 @@ import useLocalStorageState from '../../hooks/useLocalStorageState'
 import CopyToClipboardButton from './CopyToClipboardButton'
 import { StreamStatusAnnouncer } from './StreamStatusAnnouncer'
 import { BlueButton, OutlineButtonBlack } from './general/Buttons'
+import { focusIndicatorStyle } from 'src/client/util/accessibility'
 
 const UserMessageItem = ({ message }: { message: UserMessage }) => (
   <Box
@@ -214,6 +215,9 @@ const AssistantMessageItem = ({
         '&:hover .copy-message-button': {
           opacity: 0.7,
         },
+        '&:focus-within .copy-message-button': {
+          opacity: 0.7,
+        },
       }}
     >
       <AssistantMessageInfo message={message} />
@@ -300,6 +304,7 @@ const AssistantMessageItem = ({
           transition: 'opacity 0.2s ease-in-out',
           bgcolor: 'background.paper',
           borderRadius: 4,
+          ...focusIndicatorStyle(),
         }}
       >
         <CopyToClipboardButton id={msgId} copied={readMessageContent(message)} />

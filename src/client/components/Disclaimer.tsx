@@ -9,13 +9,7 @@ import { useAcceptTermsMutation } from '../hooks/useAcceptTermsMutation'
 import useCurrentUser from '../hooks/useCurrentUser'
 import { InfoTexts } from '../locales/infoTexts'
 
-export const DisclaimerModal = ({
-  disclaimerStatus,
-  setDisclaimerStatus,
-}: {
-  disclaimerStatus: boolean
-  setDisclaimerStatus: (status: boolean) => void
-}) => {
+export const DisclaimerModal = ({ disclaimerStatus, setDisclaimerStatus }: { disclaimerStatus: boolean; setDisclaimerStatus: (status: boolean) => void }) => {
   const { t, i18n } = useTranslation()
   const { user } = useCurrentUser()
   const acceptTermsMutation = useAcceptTermsMutation()
@@ -85,7 +79,9 @@ export const DisclaimerModal = ({
           <Close />
         </IconButton>
 
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{InfoTexts.disclaimer[i18n.language]}</ReactMarkdown>
+        <Box sx={{ mt: 2 }}>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{InfoTexts.disclaimer[i18n.language]}</ReactMarkdown>
+        </Box>
         <form onSubmit={handleSubmit}>
           <FormGroup sx={{ mt: 2 }}>
             <FormControlLabel

@@ -8,12 +8,13 @@ import { usePreferencesUpdateMutation } from '../../hooks/usePreferencesUpdateMu
 import { UserPreferences } from '../../../shared/user'
 import { useSnackbar } from 'notistack'
 import { useState } from 'react'
+import { optionFocusIndicatorStyle } from 'src/client/util/accessibility'
 
 export const ShiftEnterToSend = ({ t }) => (
   <Box display="flex" alignItems="center" gap={0.5} component="span">
     <strong>{t('sendPreferenceConfigurator:shift')}</strong>
     <ArrowUpward fontSize="small" />+ <strong>{t('sendPreferenceConfigurator:return')}</strong>
-    <KeyboardReturn fontSize="small" />
+    <KeyboardReturn fontSize="small" sx={{ ...optionFocusIndicatorStyle() }} />
     {t('sendPreferenceConfigurator:toSend')}
   </Box>
 )
@@ -56,7 +57,7 @@ export const SendPreferenceConfigurator = ({
     <RadioGroup value={value} onChange={onChange} name="sendPreferenceConfigurator">
       <Typography>{t('sendPreferenceConfigurator:title')}</Typography>
       <FormControlLabel
-        sx={{ my: 1, borderRadius: 1, p: 1 }}
+        sx={{ my: 1, borderRadius: 1, p: 1, ...optionFocusIndicatorStyle() }}
         value="shift+enter"
         control={<Radio />}
         label={
@@ -67,7 +68,7 @@ export const SendPreferenceConfigurator = ({
         }
       />
       <FormControlLabel
-        sx={{ mb: 1, borderRadius: 1, p: 1 }}
+        sx={{ mb: 1, borderRadius: 1, p: 1, ...optionFocusIndicatorStyle() }}
         value="enter"
         control={<Radio />}
         label={

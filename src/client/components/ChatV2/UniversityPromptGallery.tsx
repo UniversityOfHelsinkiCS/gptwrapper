@@ -68,6 +68,7 @@ const UniversityPromptCard = ({
           activate(event.currentTarget)
         }}
         sx={{
+          ml: 0.5,
           p: 2,
           borderRadius: '8px',
           cursor: 'pointer',

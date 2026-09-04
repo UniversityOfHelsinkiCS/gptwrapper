@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { focusVisibleOutline } from '../../theme'
 import Send from '@mui/icons-material/Send'
 import StopIcon from '@mui/icons-material/Stop'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
@@ -39,9 +40,10 @@ const skipLinkSx = {
     clipPath: 'none',
     whiteSpace: 'normal',
     transform: 'translateY(-100%)',
+    transition: 'transform 0.3s ease-out',
     '&:focus': {
       transform: 'translateY(0)',
-      outline: '2px solid #fff',
+      ...focusVisibleOutline,
     },
   },
 }

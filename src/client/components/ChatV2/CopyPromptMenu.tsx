@@ -88,11 +88,11 @@ const CopyPromptMenu = ({
     >
       <ListSubheader sx={{ lineHeight: 2.5 }}>{t('prompt:copyPromptTo')}</ListSubheader>
 
-      <MenuItem onClick={() => handleCopy()} disabled={isPending} data-testid="copy-target-personal">
+      <MenuItem onClick={() => handleCopy()} disabled={isPending} data-testid="copy-target-personal" sx={{ mt: 1 }}>
         <ListItemIcon sx={{ minWidth: 36 }}>
           <PersonIcon color="primary" fontSize="small" />
         </ListItemIcon>
-        <ListItemText primary={t('settings:myPrompts')} />
+        <ListItemText primary={t('settings:myPrompts')} sx={{ minWidth: 0, my: 0 }} />
       </MenuItem>
 
       {targets.length > 0 && <Divider />}

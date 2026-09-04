@@ -24,6 +24,17 @@ declare module '@mui/material/styles' {
 
 export const monospaceFonts = "'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace"
 export const monospaceStyle = { fontFamily: monospaceFonts, fontSize: 'inherit' } as const
+export const focusIndicator = '#005fcc'
+export const focusVisibleOutline = {
+  outline: `3px solid ${focusIndicator}`,
+  outlineOffset: '2px',
+} as const
+
+const resetFocusVisibleBackground = {
+  '&.Mui-focusVisible': {
+    backgroundColor: 'transparent',
+  },
+} as const
 
 const baseOptions: Omit<ThemeOptions, 'palette'> = {
   typography: {
@@ -38,6 +49,24 @@ const baseOptions: Omit<ThemeOptions, 'palette'> = {
   },
 
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        ':focus-visible': focusVisibleOutline,
+      },
+    },
+
+    MuiButtonBase: {
+      defaultProps: {
+        disableRipple: true,
+      },
+
+      styleOverrides: {
+        root: {
+          '&:focus-visible': focusVisibleOutline,
+        },
+      },
+    },
+
     MuiButton: {
       styleOverrides: {
         root: {
@@ -57,6 +86,18 @@ const baseOptions: Omit<ThemeOptions, 'palette'> = {
         root: {
           borderRadius: 5,
         },
+      },
+    },
+
+    MuiMenuItem: {
+      styleOverrides: {
+        root: resetFocusVisibleBackground,
+      },
+    },
+
+    MuiListItemButton: {
+      styleOverrides: {
+        root: resetFocusVisibleBackground,
       },
     },
 
