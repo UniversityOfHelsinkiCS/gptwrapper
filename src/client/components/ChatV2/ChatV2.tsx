@@ -454,7 +454,7 @@ const ChatV2Content = () => {
 
   if (statusLoading || userLoading || chatInstanceLoading) return <HYLoadingSpinner />
 
-  if (chatInstance?.accessLevel === 'STUDENT_CLOSED') {
+  if (chatInstance?.accessLevel === 'STUDENT_CLOSED' && chatInstance.status !== 'ACTIVATED') {
     return <ChatExpiredView status={chatInstance.status} chatInstance={chatInstance} />
   }
 
