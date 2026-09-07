@@ -60,6 +60,7 @@ const ModelSelector = ({
         onClick={disabled ? undefined : handleClick}
         disabled={disabled}
         data-testid="model-selector"
+        aria-label={`${t('sidebar:modelTitle')} ${displayModel} `}
         sx={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -81,9 +82,7 @@ const ModelSelector = ({
         }}
       >
         <PsychologyIcon sx={{ fontSize: 14, color: 'primary.main' }} />
-        <Typography aria-label={t('sidebar:modelTitle') + displayModel} sx={{ fontSize: '0.8125rem', fontWeight: 600, color: 'text.primary', lineHeight: 1 }}>
-          {displayModel}
-        </Typography>
+        <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: 'text.primary', lineHeight: 1 }}>{displayModel}</Typography>
         {isFree(displayModel) && (
           <Chip
             label={t('chat:freeModel')}
@@ -123,7 +122,7 @@ const ModelSelector = ({
           },
         }}
       >
-        <ListSubheader sx={{ display: 'block', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled' }}>
+        <ListSubheader sx={{ display: 'block', fontSize: '0.725rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled' }}>
           {t('sidebar:modelTitle')}
         </ListSubheader>
 
@@ -138,7 +137,9 @@ const ModelSelector = ({
               data-testid={`${model}-option`}
               selected={active}
               aria-selected={active}
-              aria-label={[model, descriptionKey && t(descriptionKey), isFree(model) && t('chat:freeModel'), active && t('common:selected')].filter(Boolean).join(', ')}
+              aria-label={[model, descriptionKey && t(descriptionKey), isFree(model) && t('chat:freeModel'), active && t('common:selected')]
+                .filter(Boolean)
+                .join(', ')}
               sx={{ gap: 1, py: 1, px: 1.75, alignItems: 'flex-start', mt: 1 }}
             >
               <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
