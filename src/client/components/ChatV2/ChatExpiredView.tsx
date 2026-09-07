@@ -1,20 +1,40 @@
-import { Alert, Box, Typography } from '@mui/material';
-import { ChatInfo } from './general/ChatInfo';
-import { useTranslation } from 'react-i18next';
+import { Alert, Box, Typography } from '@mui/material'
+import { ChatInfo } from './general/ChatInfo'
+import { useTranslation } from 'react-i18next'
+import { ChatStatus } from '@shared/types'
+import { Course } from 'src/client/types'
 
-export const ChatExpiredView = ({ status, chatInstance }) => {
-    const { t } = useTranslation()
+type Props = {
+  status: ChatStatus
+  chatInstance: Course
+}
 
-    const message = status === 'NOT_STARTED'
-        ? t('course:curreNotStarted')
-        : t('course:curreExpired');
+export const ChatExpiredView = ({ status, chatInstance }: Props) => {
+  const { t } = useTranslation()
 
-    return (
-        <Box>
-            <ChatInfo course={chatInstance} />
-            <Alert severity="warning" style={{ marginTop: 20 }}>
-                <Typography variant="h6">{message}</Typography>
-            </Alert>
-        </Box>
-    );
-};
+  let message
+
+  switch (status) {
+    case 'NOT_STARTED': {
+      message = t('course.curreNotStarted')
+      break
+    }
+    case 'EXPIRED': {
+      message = t('course:curreExpired')
+      break
+    }
+    case 'NOT_ACTIVATED': {
+      message = t('course.curreNotActivated')
+    }
+  }
+
+  return (
+    <Box>
+      <ChatInfo course={chatInstance} />
+      <Alert severity="warning" style={{ marginTop: 20 }}>
+        <Typography variant="h6">{message}</Typography>
+      </Alert>
+    </Box>
+  )
+}
+
