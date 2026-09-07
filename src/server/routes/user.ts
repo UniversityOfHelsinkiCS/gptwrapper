@@ -94,6 +94,7 @@ userRouter.get('/status/all', async (req, res) => {
     usage: generalUsage,
     limit,
     name: { en: 'General Chat', sv: 'General Chat', fi: 'Yleinen chat' },
+    activated: true,
   }
 
   res.send({ limit, courses: [generalChat, ...courseUsages] })
