@@ -46,7 +46,7 @@
     "tryNew": "Kokeile uutta chattiä",
     "close": "Sulje",
     "info": "Info",
-    "showInfo": "Näytä tiedot",
+    "showInfo": "Lisätietoja",
     "link": "Linkki",
     "useOld": "Vanha chattinäkymä",
     "iframeCopy": "Kopioi upotettava iframe-elementti:\n\n{{- iframeHtml}}",

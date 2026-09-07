@@ -45,7 +45,7 @@
     "tryNew": "Try the new chat",
     "close": "Close",
     "info": "Info",
-    "showInfo": "Show info",
+    "showInfo": "More information",
     "link": "Link",
     "useOld": "Old chat view",
     "iframeCopy": "Copy embeddable iframe element:\n\n{{- iframeHtml}}",
