@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, test, expect } from 'vitest'
 
-import { getGroupedCourses, filterUsages, getChatActivityStatus, formatDate } from './util'
+import { getGroupedCourses, filterUsages, formatDate } from './util'
 import type { CoursesViewCourse } from '../../hooks/useUserCourses'
 import type { ChatInstanceUsage } from '../../types'
 
@@ -57,19 +57,6 @@ describe('filterUsages', () => {
 
   test('returns empty when nobody is close to the limit', () => {
     expect(filterUsages(1000, [usage(0), usage(100)])).toEqual([])
-  })
-})
-
-describe('getChatActivityStatus', () => {
-  const courseWithStatus = { status: 'EXPIRED' }
-
-  // admin and responsible case:
-  test('is ACTIVATED if no status set', () => {
-    expect(getChatActivityStatus({})).toBe('ACTIVATED')
-  })
-
-  test('is EXPIRED if status is set', () => {
-    expect(getChatActivityStatus(courseWithStatus)).toBe('EXPIRED')
   })
 })
 

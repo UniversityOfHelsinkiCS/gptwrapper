@@ -4,7 +4,6 @@ import { ActivityPeriod, ChatInstanceUsage, Course } from '../../types'
 import { CoursesViewCourse } from '../../hooks/useUserCourses'
 
 import curTypes from '../../locales/curTypes.json'
-import { ChatStatus } from '@shared/types'
 
 export const preprocessMath = (content: string): string => {
   // console.time('preprocessMath')
@@ -95,14 +94,6 @@ export const getGroupedCourses = (courses: CoursesViewCourse[] = []) => {
     curreDisabled,
     ended,
   }
-}
-
-export const getChatActivityStatus = (chatInstance: Course | undefined): ChatStatus => {
-  if (!chatInstance?.status) {
-    return 'ACTIVATED'
-  }
-
-  return chatInstance.status
 }
 
 /**

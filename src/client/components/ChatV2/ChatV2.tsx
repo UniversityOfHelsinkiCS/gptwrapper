@@ -43,7 +43,6 @@ import RagModal from '../Rag/RagModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
 import { CustomIcon } from './general/CustomIcon'
 import { parseFileContent } from '../../util/fileParsing'
-import { getChatActivityStatus } from './util'
 import { ChatExpiredView } from './ChatExpiredView'
 import { ApiErrorView } from '../common/ApiErrorView'
 import { PromptEditorState } from '../Prompt/context'
@@ -455,8 +454,9 @@ const ChatV2Content = () => {
 
   if (statusLoading || userLoading || chatInstanceLoading) return <HYLoadingSpinner />
 
-  const status = getChatActivityStatus(chatInstance)
-  if (status !== 'ACTIVATED') return <ChatExpiredView status={status} chatInstance={chatInstance} />
+  if (chatInstance?.accessLevel === 'STUDENT_CLOSED') {
+    return <ChatExpiredView status={chatInstance.status} chatInstance={chatInstance} />
+  }
 
   return (
     <Box
