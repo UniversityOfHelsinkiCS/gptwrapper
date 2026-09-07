@@ -16,7 +16,7 @@ export const ChatExpiredView = ({ status, chatInstance }: Props) => {
 
   switch (status) {
     case 'NOT_STARTED': {
-      message = t('course.curreNotStarted')
+      message = t('course:curreNotStarted')
       break
     }
     case 'EXPIRED': {
@@ -24,7 +24,8 @@ export const ChatExpiredView = ({ status, chatInstance }: Props) => {
       break
     }
     case 'NOT_ACTIVATED': {
-      message = t('course.curreNotActivated')
+      message = t('course:curreNotActivated')
+      break
     }
   }
 
@@ -37,4 +38,3 @@ export const ChatExpiredView = ({ status, chatInstance }: Props) => {
     </Box>
   )
 }
-
