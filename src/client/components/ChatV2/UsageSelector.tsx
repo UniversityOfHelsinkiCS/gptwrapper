@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Menu, MenuItem, Typography } from '@mui/material'
+import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Menu, MenuItem, Typography, ListSubheader } from '@mui/material'
 import HelpOutline from '@mui/icons-material/HelpOutline'
 import EventRepeatIcon from '@mui/icons-material/EventRepeat'
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
@@ -148,10 +148,12 @@ const UsageSelector = () => {
       <Menu
         anchorEl={anchorEl}
         open={open}
+        disableAutoFocusItem
         onClose={() => setAnchorEl(null)}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         slotProps={{
+          list: { 'aria-labelledby': 'usage-selector-title' },
           paper: {
             style: {
               minWidth: 320,
@@ -162,21 +164,29 @@ const UsageSelector = () => {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
-          <Typography
-            variant="overline"
-            sx={{ display: 'block', px: 1.75, pt: 0.5, pb: 1, fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled' }}
+          <ListSubheader
+            id="usage-selector-title"
+            sx={{ display: 'block', fontSize: '0.725rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled' }}
           >
             {t('status:usageTitle')}
-          </Typography>
+          </ListSubheader>
+
           <UsageInfoButton />
         </Box>
+
         {usageInfo.courses
           .filter((course) => course.usage > 0 || course.courseId === currentCourseId || course.courseId === 'general')
           .map((course) => {
             const active = course.courseId === currentCourseId
             const percent = usagePercent(course.usage, course.limit)
             const key = course.courseId ?? getLanguageValue(course.name, i18n.language)
-            const itemSx = { display: 'flex', gap: 1.25, py: 0.75, px: 1.75, alignItems: 'center' }
+            const itemSx = { display: 'flex', gap: 1.25, py: 0.75, px: 1.75, alignItems: 'center', mt: 1 }
+            const staticItemSx = {
+              ...itemSx,
+              cursor: 'text',
+              '&:hover': { backgroundColor: 'transparent' },
+              '&.Mui-focusVisible': { backgroundColor: 'transparent' },
+            }
             const limit = course.activated ? course.limit : DEFAULT_TOKEN_LIMIT
             const content = (
               <>
@@ -205,9 +215,9 @@ const UsageSelector = () => {
                 {content}
               </MenuItem>
             ) : (
-              <Box key={key} sx={itemSx}>
+              <MenuItem key={key} sx={staticItemSx}>
                 {content}
-              </Box>
+              </MenuItem>
             )
           })}
       </Menu>
