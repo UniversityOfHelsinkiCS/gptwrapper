@@ -3,6 +3,7 @@ import {
   Alert,
   Button,
   Box,
+  Chip,
   Typography,
   styled,
   LinearProgress,
@@ -13,6 +14,7 @@ import {
   CircularProgress,
   Divider,
   Collapse,
+  Paper,
   ToggleButton,
   ToggleButtonGroup,
 } from '@mui/material'
@@ -37,6 +39,16 @@ import { RagFileRowV2 } from './RagFileRowV2'
 import { RagProgressSummaryV2 } from './RagProgressSummaryV2'
 import { isSupportedRagFile, RAG_FILE_ACCEPT } from '@shared/utils'
 import { usePromptState } from '../ChatV2/PromptState'
+import { PromptType } from '../../types'
+
+const promptTypeOrder: PromptType[] = ['CHAT_INSTANCE', 'PERSONAL', 'UNIVERSITY', 'TEMPLATE']
+
+const promptTypeLabelKeys: Record<PromptType, string> = {
+  CHAT_INSTANCE: 'rag:promptTypeChatInstance',
+  PERSONAL: 'rag:promptTypePersonal',
+  UNIVERSITY: 'rag:promptTypeUniversity',
+  TEMPLATE: 'rag:promptTypeTemplate',
+}
 
 const isImageFile = (fileType: string) => fileType === 'image/png'
 
@@ -174,6 +186,11 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
     refetchStatuses()
   }
 
+  const prompts = ragDetails.prompts ?? []
+  const promptGroups = promptTypeOrder
+    .map((type) => ({ type, prompts: prompts.filter((prompt) => prompt.type === type) }))
+    .filter((group) => group.prompts.length > 0)
+
   return (
     <Box sx={{ flex: 1, overflow: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, px: 2, pt: 2 }}>
@@ -241,21 +258,101 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
           </Button>
         </Box>
         <RagProgressSummaryV2 ragFileStatuses={ragFileStatuses ?? []} ragFiles={ragDetails?.ragFiles ?? []} />
+        {ragDetails.ragFiles.length > 0 && (
+          <>
+            <Divider sx={{ my: 1 }} />
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              {orderBy(ragDetails.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (
+                <RagFileRowV2
+                  key={file.id}
+                  file={file}
+                  status={ragFileStatuses?.find((rfs) => rfs.ragFileId === file.id)}
+                  uploadProgress={uploadMutation.isPending ? uploadProgress : undefined}
+                  onSelectFile={onSelectFile}
+                  onDelete={handleDeleteFile}
+                  onRetry={async () => {
+                    await handleUpload([], [])
+                  }}
+                />
+              ))}
+            </Box>
+          </>
+        )}
         <Divider sx={{ my: 1 }} />
-        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-          {orderBy(ragDetails.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (
-            <RagFileRowV2
-              key={file.id}
-              file={file}
-              status={ragFileStatuses?.find((rfs) => rfs.ragFileId === file.id)}
-              uploadProgress={uploadMutation.isPending ? uploadProgress : undefined}
-              onSelectFile={onSelectFile}
-              onDelete={handleDeleteFile}
-              onRetry={async () => {
-                await handleUpload([], [])
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 2 }}>
+            <Typography component="h3" variant="body2" sx={{ fontWeight: 600 }}>
+              {t('rag:promptUsageTitle')}
+            </Typography>
+            {prompts.length > 0 && (
+              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                {t('rag:promptUsageCount', { count: prompts.length })}
+              </Typography>
+            )}
+          </Box>
+          {promptGroups.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              {t('rag:promptUsageEmpty')}
+            </Typography>
+          ) : (
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                gap: 1.5,
+                width: promptGroups.length === 1 ? 'min(100%, max(260px, calc(50% - 6px)))' : '100%',
               }}
-            />
-          ))}
+            >
+              {promptGroups.map(({ type, prompts: typePrompts }) => (
+                <Paper key={type} variant="outlined" sx={{ overflow: 'hidden' }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 1,
+                      px: 1.5,
+                      py: 1,
+                      bgcolor: 'action.hover',
+                      borderBottom: 1,
+                      borderColor: 'divider',
+                    }}
+                  >
+                    <Typography
+                      id={`ragPromptUsage-${type}`}
+                      variant="caption"
+                      sx={{ fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'text.secondary' }}
+                    >
+                      {t(promptTypeLabelKeys[type])}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {typePrompts.length}
+                    </Typography>
+                  </Box>
+                  <Box
+                    component="ul"
+                    aria-labelledby={`ragPromptUsage-${type}`}
+                    sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, listStyle: 'none', p: 1.5, m: 0 }}
+                  >
+                    {typePrompts.map((prompt) => (
+                      <Chip
+                        key={prompt.id}
+                        component="li"
+                        size="small"
+                        variant="outlined"
+                        label={prompt.name}
+                        sx={{
+                          maxWidth: '100%',
+                          height: 'auto',
+                          '& .MuiChip-label': { whiteSpace: 'normal', overflowWrap: 'anywhere', py: 0.25 },
+                        }}
+                      />
+                    ))}
+                  </Box>
+                </Paper>
+              ))}
+            </Box>
+          )}
         </Box>
       </Box>
       <Dialog open={stagedFiles.length > 0} onClose={() => setStagedFiles([])} fullWidth maxWidth="sm">

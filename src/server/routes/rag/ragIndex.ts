@@ -5,7 +5,7 @@ import z from 'zod/v4'
 import multerS3 from 'multer-s3'
 import path from 'path'
 import { isSupportedRagFile, shouldRenderAsText } from '../../../shared/utils'
-import { RagFile, RagIndex } from '../../db/models'
+import { Prompt, RagFile, RagIndex } from '../../db/models'
 import { FileStore } from '../../services/rag/fileStore'
 import { ApplicationError } from '../../util/ApplicationError'
 import { search } from '../../services/rag/search'
@@ -37,13 +37,21 @@ ragIndexRouter.get('/', async (req, res) => {
   const ragIndexRequest = req as RagIndexRequest
   const ragIndex = ragIndexRequest.ragIndex
 
-  const ragFiles = await RagFile.findAll({
-    where: { ragIndexId: ragIndex.id },
-  })
+  const [ragFiles, prompts] = await Promise.all([
+    RagFile.findAll({
+      where: { ragIndexId: ragIndex.id },
+    }),
+    Prompt.findAll({
+      where: { ragIndexId: ragIndex.id },
+      attributes: ['id', 'name', 'type'],
+      order: [['name', 'ASC']],
+    }),
+  ])
 
   res.json({
     ...ragIndex.toJSON(),
     ragFiles: ragFiles.map((file) => file.toJSON()),
+    prompts: prompts.map((prompt) => prompt.toJSON()),
   })
 })
 

@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import apiClient from '../../util/apiClient'
 import { RagFileAttributes, RagIndexAttributes, RagIndexMetadata } from '../../../shared/types'
+import { PromptType } from '../../types'
 import { IngestionJobStatus } from '@shared/ingestion'
 import queryClient from '../../util/queryClient'
 import { invalidateAllPromptLists } from 'src/client/util/promptQueries'
@@ -34,9 +35,16 @@ export const useCreateUserRagIndexMutation = () => {
   })
 }
 
+export type RagIndexPromptUsage = {
+  id: string
+  name: string
+  type: PromptType
+}
+
 export type RagIndexDetails = Omit<RagIndexAttributes, 'ragFileCount'> & {
   ragFiles: RagFileAttributes[]
   userId?: string
+  prompts: RagIndexPromptUsage[]
 }
 
 export const useRagIndexDetails = (indexId: number | null, enabled = true) => {
