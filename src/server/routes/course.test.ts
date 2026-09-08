@@ -82,20 +82,25 @@ const courseFixture = (overrides = {}) => ({
   },
 })
 
+const expired = { activityPeriod: { startDate: '2020-01-01', endDate: '2020-06-01' } }
+const notStarted = { activityPeriod: { startDate: '2099-01-01', endDate: '2099-06-01' } }
+
 describe('courses/:id', () => {
   describe('Admin', () => {
-    test('gets 200 with prompts on a closed course', async () => {
+    test('gets 200 with prompts on a not activated course', async () => {
       currentUser = { id: 'admin-1', isAdmin: true }
       vi.mocked(ChatInstance.findOne).mockResolvedValue(courseFixture({ activated: false }) as any)
       const response = await getCourse('course-1')
       const body = await response.json()
       expect(response.status).toBe(200)
       expect(body.prompts).toHaveLength(1)
+      expect(body.status).toBe('NOT_ACTIVATED')
+      expect(body.accessLevel).toBe('FULL')
     })
   })
 
   describe('Responsible teacher', () => {
-    test('gets 200 with prompts on a closed course', async () => {
+    test('gets 200 with prompts on a not activated course', async () => {
       currentUser = { id: 'teacher-1', isAdmin: false }
       vi.mocked(ChatInstance.findOne).mockResolvedValue(courseFixture({ activated: false }) as any)
       vi.mocked(Responsibility.findOne).mockResolvedValue({ id: 'responsibility-1' } as any)
@@ -103,29 +108,72 @@ describe('courses/:id', () => {
       const body = await response.json()
       expect(response.status).toBe(200)
       expect(body.prompts).toHaveLength(1)
+      expect(body.status).toBe('NOT_ACTIVATED')
+      expect(body.accessLevel).toBe('FULL')
     })
-  })
 
-  describe('Students', () => {
-    test('gets 200 with prompts on an open course', async () => {
-      currentUser = { id: 'student-1', isAdmin: false }
-      vi.mocked(ChatInstance.findOne).mockResolvedValue(courseFixture({ activated: true }) as any)
-      vi.mocked(Enrolment.findOne).mockResolvedValue(courseFixture([{ id: 'student-1' }]) as any)
+    test('gets 200 with prompts on an expired course', async () => {
+      currentUser = { id: 'teacher-1', isAdmin: false }
+      vi.mocked(ChatInstance.findOne).mockResolvedValue(courseFixture(expired) as any)
+      vi.mocked(Responsibility.findOne).mockResolvedValue({ id: 'responsibility-1' } as any)
       const response = await getCourse('course-1')
       const body = await response.json()
       expect(response.status).toBe(200)
       expect(body.prompts).toHaveLength(1)
+      expect(body.status).toBe('EXPIRED')
+      expect(body.accessLevel).toBe('FULL')
+    })
+  })
+
+  describe('Enrolled student', () => {
+    test('gets 200 with prompts on an open course', async () => {
+      currentUser = { id: 'student-1', isAdmin: false }
+      vi.mocked(ChatInstance.findOne).mockResolvedValue(courseFixture({ activated: true }) as any)
+      vi.mocked(Enrolment.findOne).mockResolvedValue(courseFixture({ id: 'student-1' }) as any)
+      const response = await getCourse('course-1')
+      const body = await response.json()
+      expect(response.status).toBe(200)
+      expect(body.prompts).toHaveLength(1)
+      expect(body.status).toBe('ACTIVATED')
+      expect(body.accessLevel).toBe('STUDENT')
     })
 
-    test('gets 200 with no prompts on a closed course', async () => {
+    test('gets 200 with no prompts on a not activated course', async () => {
       currentUser = { id: 'student-1', isAdmin: false }
       vi.mocked(ChatInstance.findOne).mockResolvedValue(courseFixture({ activated: false }) as any)
-      vi.mocked(Enrolment.findOne).mockResolvedValue({ id: 'enrolment-1' } as any)
+      vi.mocked(Enrolment.findOne).mockResolvedValue(courseFixture({ id: 'enrolment-1' }) as any)
       const response = await getCourse('course-1')
       const body = await response.json()
       expect(response.status).toBe(200)
       expect(body.prompts).toEqual([])
       expect(JSON.stringify(body)).not.toContain('very secret draft')
+      expect(body.status).toBe('NOT_ACTIVATED')
+      expect(body.accessLevel).toBe('STUDENT_CLOSED')
+    })
+
+    test('gets 200 with no prompts on an expired course', async () => {
+      currentUser = { id: 'student-1', isAdmin: false }
+      vi.mocked(ChatInstance.findOne).mockResolvedValue(courseFixture(expired) as any)
+      vi.mocked(Enrolment.findOne).mockResolvedValue(courseFixture({ id: 'enrolment-1' }) as any)
+      const response = await getCourse('course-1')
+      const body = await response.json()
+      expect(response.status).toBe(200)
+      expect(body.prompts).toEqual([])
+      expect(JSON.stringify(body)).not.toContain('very secret draft')
+      expect(body.status).toBe('EXPIRED')
+      expect(body.accessLevel).toBe('STUDENT_CLOSED')
+    })
+    test('gets 200 with no prompts on an course that has not yet started', async () => {
+      currentUser = { id: 'student-1', isAdmin: false }
+      vi.mocked(ChatInstance.findOne).mockResolvedValue(courseFixture(notStarted) as any)
+      vi.mocked(Enrolment.findOne).mockResolvedValue(courseFixture({ id: 'enrolment-1' }) as any)
+      const response = await getCourse('course-1')
+      const body = await response.json()
+      expect(response.status).toBe(200)
+      expect(body.prompts).toEqual([])
+      expect(JSON.stringify(body)).not.toContain('very secret draft')
+      expect(body.status).toBe('NOT_STARTED')
+      expect(body.accessLevel).toBe('STUDENT_CLOSED')
     })
   })
 
