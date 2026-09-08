@@ -244,14 +244,17 @@
     "promptDetails": "Alustuksen tiedot",
     "promptSelect": "Valitse alustus",
     "promptChange": "Vaihda alustus",
-    "promptNone": "Ei alustusta",
+    "promptNone": "Lopeta alustuksen käyttäminen",
     "modelTitle": "Kielimalli",
     "chatNew": "Uusi keskustelu",
     "chatEmail": "Sähköposti",
     "toggle": "Vaihda",
     "open": "Avaa sivuvalikko",
     "close": "Sulje sivuvalikko",
-    "sourceMaterials": "Lähdemateriaalien hallinta"
+    "sourceMaterials": "Lähdemateriaalien hallinta",
+    "myPrompt": "Oma alustus",
+    "universityPrompt": "Yliopiston alustus",
+    "manageCourseAndPrompts": "Hallinnoi kursseja ja alustuksia"
   },
   "chats": {
     "header": "Auki olevat kurssichatit",

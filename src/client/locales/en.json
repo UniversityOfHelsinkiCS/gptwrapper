@@ -241,14 +241,17 @@
     "promptDetails": "Prompt details",
     "promptSelect": "Select prompt",
     "promptChange": "Change prompt",
-    "promptNone": "No prompt",
+    "promptNone": "Stop using the prompt",
     "modelTitle": "Language model",
     "chatNew": "New chat",
     "chatEmail": "Email",
     "toggle": "Toggle",
     "open": "Open sidebar",
     "close": "Close sidebar",
-    "sourceMaterials": "Source material management"
+    "sourceMaterials": "Source material management",
+    "myPrompt": "My prompt",
+    "universityPrompt": "University prompt",
+    "manageCourseAndPrompts": "Manage courses and prompts"
   },
   "email": {
     "save": "Save as email",

@@ -745,14 +745,17 @@
     "promptDetails": "Promptdetaljer",
     "promptChange": "Byt uppmaning",
     "promptSelect": "Välj en prompt",
-    "promptNone": "Ingen prompt",
+    "promptNone": "Sluta använda prompten",
     "modelTitle": "Språkmodell",
     "chatNew": "Ny chatt",
     "chatEmail": "E-post",
     "toggle": "Växla",
     "open": "Öppna sidomenyn",
     "close": "Stäng sidomenyn",
-    "sourceMaterials": "Hantering av källmaterial"
+    "sourceMaterials": "Hantering av källmaterial",
+    "myPrompt": "Mitt prompt",
+    "universityPrompt": "Universitetsprompt",
+    "manageCourseAndPrompts": "Hantera kurs och prompter"
   },
   "globalSettings": {
     "title": "Allmänna inställningar"
