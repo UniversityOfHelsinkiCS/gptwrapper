@@ -236,7 +236,7 @@ export const ChatBox = ({
           component="form"
           onSubmit={onSubmit}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && e.target === textFieldRef.current) {
               if (!isShiftEnterSend) {
                 if (e.shiftKey) {
                   // Do nothing with this event, it will result in a newline being inserted
