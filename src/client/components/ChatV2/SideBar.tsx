@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Box, Button, Divider, Tooltip, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import type { ChatMessage } from '@shared/chat'
@@ -28,6 +29,19 @@ const SideBar = ({
   messages: ChatMessage[]
 }) => {
   const { t } = useTranslation()
+  const openButtonRef = useRef<HTMLButtonElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const prevOpenRef = useRef(open)
+
+  useEffect(() => {
+    if (prevOpenRef.current === open) return
+    prevOpenRef.current = open
+    if (open) {
+      closeButtonRef.current?.focus()
+    } else {
+      openButtonRef.current?.focus()
+    }
+  }, [open])
 
   return (
     <Box
@@ -55,7 +69,7 @@ const SideBar = ({
         {!open ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
             <Tooltip arrow placement="right" title={t('sidebar:open')}>
-              <TextButton onClick={() => setOpen((prev) => !prev)}>
+              <TextButton ref={openButtonRef} onClick={() => setOpen((prev) => !prev)}>
                 <CustomIcon src={sidebarOpen} />
               </TextButton>
             </Tooltip>
@@ -83,7 +97,7 @@ const SideBar = ({
               }}
             >
               <Tooltip arrow placement="right" title={t('sidebar:close')}>
-                <TextButton onClick={() => setOpen((prev) => !prev)}>
+                <TextButton ref={closeButtonRef} onClick={() => setOpen((prev) => !prev)}>
                   <CustomIcon src={sidebarClose} />
                 </TextButton>
               </Tooltip>
