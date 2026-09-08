@@ -5,7 +5,7 @@ import { ChatStatus } from '@shared/types'
 import { Course } from 'src/client/types'
 
 type Props = {
-  status: ChatStatus
+  status: Exclude<ChatStatus, 'ACTIVATED'>
   chatInstance: Course
 }
 
