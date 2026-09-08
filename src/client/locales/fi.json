@@ -230,7 +230,8 @@
       "fi": "Valitse kieli: suomi",
       "sv": "Välj språk: svenska",
       "en": "Select language: English"
-    }
+    },
+    "chooseChat": "Valitse käyttöön"
   },
   "sidebar": {
     "coursesAndPrompts": "Kurssit ja alustukset",

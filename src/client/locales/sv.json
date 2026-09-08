@@ -234,7 +234,8 @@
       "fi": "Valitse kieli: suomi",
       "sv": "Välj språk: svenska",
       "en": "Select language: English"
-    }
+    },
+    "chooseChat": "Välj för användning"
   },
   "email": {
     "save": "Spara som e-post",

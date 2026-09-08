@@ -227,7 +227,8 @@
       "fi": "Valitse kieli: suomi",
       "sv": "Välj språk: svenska",
       "en": "Select language: English"
-    }
+    },
+    "chooseChat": "Select for use"
   },
   "sidebar": {
     "coursesAndPrompts": "Courses and prompts",

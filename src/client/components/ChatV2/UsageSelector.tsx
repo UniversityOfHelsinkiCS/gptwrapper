@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Alert, Box, Button, ButtonBase, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Popover, Typography } from '@mui/material'
+import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Menu, MenuItem, Typography } from '@mui/material'
 import HelpOutline from '@mui/icons-material/HelpOutline'
 import EventRepeatIcon from '@mui/icons-material/EventRepeat'
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
@@ -83,7 +83,6 @@ const UsageSelector = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [infoOpen, setInfoOpen] = React.useState(false)
   const open = Boolean(anchorEl)
-  const autoFocusRef = React.useRef<HTMLButtonElement>(null)
 
   if (isLoading || !usageInfo) return null
 
@@ -132,7 +131,7 @@ const UsageSelector = () => {
         }}
       >
         <Typography
-          aria-label={`${t('status:usageTitle')}: ${pillLabel}`}
+          aria-label={t('status:usageTitle') + pillLabel}
           sx={{
             fontSize: '0.8125rem',
             fontWeight: 600,
@@ -155,113 +154,86 @@ const UsageSelector = () => {
           <ExpandMoreIcon sx={{ fontSize: 16, color: 'text.secondary', ml: -0.25 }} />
         )}
       </Box>
-      <Popover
+      <Menu
         anchorEl={anchorEl}
         open={open}
+        disableAutoFocusItem
         onClose={() => setAnchorEl(null)}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         slotProps={{
-          transition: { onEntered: () => autoFocusRef.current?.focus() },
+          list: { 'aria-labelledby': 'usage-selector-title' },
           paper: {
-            role: 'menu',
-            'aria-labelledby': 'usage-selector-title',
             style: {
               minWidth: 320,
               borderRadius: '0.75rem',
               marginTop: '-8px',
-              outline: 'none',
             },
           },
         }}
       >
-        <Box sx={{ py: 1 }}>
-          <ButtonBase
-            ref={autoFocusRef}
-            role="menuitem"
-            onClick={() => setInfoOpen(true)}
-            aria-label={t('common:showInfo')}
-            sx={{
-              display: 'flex',
-              width: '100%',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              py: 1,
-              px: 1.75,
-              textAlign: 'left',
-              '&:hover': { backgroundColor: 'action.hover', '@media (hover: none)': { backgroundColor: 'transparent' } },
-              '&.Mui-focusVisible': { backgroundColor: 'transparent' },
-            }}
+        <MenuItem aria-label={t('common:showInfo')} onClick={() => setInfoOpen(true)}>
+          <Typography
+            id="usage-selector-title"
+            component="span"
+            sx={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled', py: 1 }}
           >
-            <Typography
-              id="usage-selector-title"
-              component="span"
-              sx={{ display: 'block', fontSize: '0.725rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled' }}
-            >
-              {t('status:usageTitle')}
-            </Typography>
+            {t('status:usageTitle')}
+          </Typography>
 
-            <HelpOutline sx={{ fontSize: 16, color: 'text.secondary' }} />
-          </ButtonBase>
+          <HelpOutline sx={{ fontSize: 16, color: 'text.secondary', ml: 'auto' }} />
+        </MenuItem>
 
-          {usageInfo.courses
-            .filter((course) => course.usage > 0 || course.courseId === currentCourseId || course.courseId === 'general')
-            .map((course) => {
-              const active = course.courseId === currentCourseId
-              const percent = usagePercent(course.usage, course.limit)
-              const key = course.courseId ?? getLanguageValue(course.name, i18n.language)
-              const itemSx = { display: 'flex', gap: 1.25, py: 0.75, px: 1.75, alignItems: 'center', mt: 1 }
-              const limit = course.activated ? course.limit : DEFAULT_TOKEN_LIMIT
-              const content = (
-                <>
-                  <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25, minWidth: 0 }}>
-                    <Typography
-                      sx={{
-                        fontSize: '0.875rem',
-                        fontWeight: active ? 600 : 400,
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {getLanguageValue(course.name, i18n.language)}
-                    </Typography>
-                    <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.3 }}>
-                      {formatTokens(course.usage)} / {formatTokens(limit)} {t('status:tokens')}
-                    </Typography>
-                  </Box>
-                  <UsageGauge percent={percent} />
-                </>
-              )
-
-              const isSelectable = course.courseId === 'general'
-              const usageLabel = `${getLanguageValue(course.name, i18n.language)}, ${formatTokens(course.usage)} / ${formatTokens(limit)} ${t('status:tokens')}, ${percent}% ${t('status:tokensUsed')}`
-              const ariaLabel = isSelectable ? `${usageLabel}, ${t('settings:choosePrompt')}` : usageLabel
-
-              return isSelectable ? (
-                <ButtonBase
-                  role="menuitem"
-                  aria-label={ariaLabel}
-                  key={key}
-                  onClick={() => handleSelect(course)}
-                  sx={{
-                    ...itemSx,
-                    width: '100%',
-                    textAlign: 'left',
-                    '&:hover': { backgroundColor: 'action.hover', '@media (hover: none)': { backgroundColor: 'transparent' } },
-                    '&.Mui-focusVisible': { backgroundColor: 'transparent' },
-                  }}
-                >
-                  {content}
-                </ButtonBase>
-              ) : (
-                <Box role="group" tabIndex={0} aria-label={ariaLabel} key={key} sx={{ ...itemSx, cursor: 'text' }}>
-                  {content}
+        {usageInfo.courses
+          .filter((course) => course.usage > 0 || course.courseId === currentCourseId || course.courseId === 'general')
+          .map((course) => {
+            const active = course.courseId === currentCourseId
+            const percent = usagePercent(course.usage, course.limit)
+            const key = course.courseId ?? getLanguageValue(course.name, i18n.language)
+            const itemSx = { display: 'flex', gap: 1.25, py: 0.75, px: 1.75, alignItems: 'center', mt: 1 }
+            const staticItemSx = {
+              ...itemSx,
+              cursor: 'text',
+              '&:hover': { backgroundColor: 'transparent' },
+              '&.Mui-focusVisible': { backgroundColor: 'transparent' },
+            }
+            const limit = course.activated ? course.limit : DEFAULT_TOKEN_LIMIT
+            const content = (
+              <>
+                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25, minWidth: 0 }}>
+                  <Typography
+                    sx={{
+                      fontSize: '0.875rem',
+                      fontWeight: active ? 600 : 400,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {getLanguageValue(course.name, i18n.language)}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.3 }}>
+                    {formatTokens(course.usage)} / {formatTokens(limit)} {t('status:tokens')}
+                  </Typography>
                 </Box>
-              )
-            })}
-        </Box>
-      </Popover>
+                <UsageGauge percent={percent} />
+              </>
+            )
+            const isSelectable = course.courseId === 'general'
+            const usageLabel = `${getLanguageValue(course.name, i18n.language)}, ${formatTokens(course.usage)} / ${formatTokens(limit)} ${t('status:tokens')}, ${percent}% ${t('status:tokensUsed')}`
+            const ariaLabel = isSelectable ? `${usageLabel}, ${t('settings:chooseChat')}` : usageLabel
+
+            return isSelectable ? (
+              <MenuItem aria-label={ariaLabel} key={key} onClick={() => handleSelect(course)} sx={itemSx}>
+                {content}
+              </MenuItem>
+            ) : (
+              <Box aria-label={ariaLabel} role="group" tabIndex={0} key={key} sx={staticItemSx}>
+                {content}
+              </Box>
+            )
+          })}
+      </Menu>
       <UsageInfoDialog open={infoOpen} onClose={() => setInfoOpen(false)} />
     </>
   )
