@@ -18,6 +18,11 @@ import {
 } from './metrics.ts'
 import express from 'express'
 import client from 'prom-client'
+import { execFile } from 'node:child_process'
+import path from 'node:path'
+import { promisify } from 'node:util'
+import { mkdir, rm, stat, readFile, writeFile } from 'node:fs/promises';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
 dotenv.config({ path: '../.env' })
 
@@ -67,6 +72,24 @@ const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE ?? 'vlm-queue'
 const VLM_URL = process.env.VLM_URL ?? 'http://laama-svc:11434/api/generate'
 const MODEL = process.env.MODEL ?? 'qwen3-vl:4b-instruct-bf16'
 const PROVIDER = process.env.PROVIDER ?? ('ollama' as 'ollama' | 'vllm')
+
+const S3_HOST: string = process.env.S3_HOST ?? ''
+const S3_ACCESS_KEY: string = process.env.S3_ACCESS_KEY ?? ''
+const S3_SECRET_ACCESS_KEY: string = process.env.S3_SECRET_ACCESS_KEY ?? ''
+const S3_BUCKET: string = process.env.S3_BUCKET ?? 'gptwrapper-data-prod'
+
+// Used for pdf parsing
+const TEMPDATA_PATH = process.env.TEMPDATA_PATH ?? '/tempdata'
+
+export const s3Client = new S3Client({
+  region: 'us-east-1',
+  endpoint: S3_HOST,
+  forcePathStyle: true,
+  credentials: {
+    accessKeyId: S3_ACCESS_KEY,
+    secretAccessKey: S3_SECRET_ACCESS_KEY,
+  },
+})
 
 // --- Express Metrics Server ---
 
@@ -194,6 +217,163 @@ async function transcribeWithVLLM({ text, bytes }: { text?: string; bytes?: Uint
   return stripMarkdownFences(txt)
 }
 
+// --- PDF parsing ---
+
+async function parsePDFWithGS(id: string, s3key: string) {
+  const base_path = path.join(TEMPDATA_PATH, id, '/')
+  const images_path = path.join(base_path, 'raster/')
+  const text_path = path.join(base_path, 'text/')
+  const file_path = path.join(base_path, 'input_'+id+'.pdf')
+
+  let pages
+
+  const pExecFile = promisify(execFile)
+
+  // Create temp dir for processing
+  await mkdir(base_path)
+  await mkdir(images_path)
+  await mkdir(text_path)
+
+  let runStatus = 0
+
+  // Dump pdf into directory from s3
+  try{
+    const s3file = await s3Client.send(new GetObjectCommand({
+      Bucket: S3_BUCKET,
+      Key: s3key
+    }))
+
+    const s3bytes = await s3file.Body?.transformToByteArray()
+  
+    if (s3bytes === undefined) {
+      throw new Error('s3 object is undefined')
+    }
+  
+    await writeFile(file_path, s3bytes)
+  }
+  catch (error) {
+    logger.error('Something failed during s3 download', error)  
+    runStatus = -1
+  }
+
+  const pagesRegex = /\nPages:\s*\d+\n/
+
+  const metadata_options: string[] = [
+    `${file_path}`
+  ]
+
+  if(runStatus === 0){
+    try{
+      const {stdout} = await pExecFile('pdfinfo', metadata_options)
+      const pagesMatch = stdout.match(pagesRegex)
+      if (pagesMatch?.length != 1) throw new Error('Could not get page count')
+      const pagesStr = pagesMatch[0].match(/\d+/)
+      if (pagesStr?.length != 1) throw new Error('Could not extract page count')
+      pages = parseInt(pagesStr[0])
+    }
+    catch(error){
+      logger.error('Error in metadata parsing', error)
+      runStatus = -1
+    }
+  }
+
+  const rasterize_options: string[] = [
+    '-sDEVICE=png16m', 
+    '-dNOPAUSE', 
+    '-dBATCH', 
+    '-dDownScaleFactor=1 ', 
+    '-dTextAlphaBits=4', 
+    `-sOutputFile=${images_path}%04d.png`, 
+    '-r110x110', 
+    `-f ${file_path}`
+  ]
+
+  const text_options: string[] = [
+    '-sDEVICE=txtwrite', 
+    '-dTextFormat=3',
+    '-dNOPAUSE', 
+    '-dBATCH',
+    `-sOutputFile=${text_path}%04d.txt`, 
+    `-f ${file_path}`
+  ]
+
+  if (runStatus === 0){
+    try{
+      // Rasterize the pdf to images on disk
+      await new Promise<void>((resolve, reject) => {
+        const child = execFile('gs', rasterize_options)
+        
+        child.on('exit', (code) => {
+          if (code === 0){
+            resolve()
+          }
+          else{
+            reject()
+          }
+        })
+        
+        child.on('error', reject)
+      })
+
+      // Extract text to files on disk
+      await new Promise<void>((resolve, reject) => {
+        const child = execFile('gs', text_options)
+        
+        child.on('exit', (code) => {
+          if (code === 0){
+            resolve()
+          }
+          else{
+            reject()
+          }
+        })
+        
+        child.on('error', reject)
+      })
+    }
+    catch (error){
+      logger.error('Something failed in pdf parsing pipeline', error)  
+      runStatus = -1
+    }
+  }
+
+  const transcriptions = [];
+
+  // Now we have text-image pairs we can process with vllm
+  if (runStatus === 0){
+    try {
+      //@ts-expect-error pages is always defined when runStatus === 0
+      for (let pageNumber = 0; pageNumber < pages; pageNumber++) {
+        const text_file_path = path.join(text_path, `${String(pageNumber).padStart(4, '0')}.txt`)
+        const image_file_path = path.join(images_path, `${String(pageNumber).padStart(4, '0')}.png`)
+
+        // Check they acually exist
+        await stat(text_file_path)
+        await stat(image_file_path)
+
+        transcriptions.push(await transcribeWithVLLM({
+          text: await readFile(text_file_path, {encoding: 'utf-8'}),
+          bytes: await readFile(image_file_path, {encoding: null}),
+        }))
+      }
+    }
+    catch (error){
+      logger.error('Something failed in vllm pipeline', error)
+      runStatus = -1
+    }
+  }
+
+  // Clean up fs regardless of errors
+  await rm(base_path, {recursive: true})
+
+  if(runStatus === -1){
+    throw new Error('PDF parsing failed')
+  }
+
+  return transcriptions
+}
+
+
 // --- Worker ---
 
 let ACTIVE_COUNT = 0
@@ -317,7 +497,7 @@ const worker = new Worker(
   QUEUE_NAME,
   async (job) => {
     ACTIVE_COUNT++
-    const { bytes, pageNumber, text } = job.data || {} //bytes are already in base_64 from png buffer
+    const { bytes, pageNumber, text, jobtype, s3key } = job.data || {} //bytes are already in base_64 from png buffer
 
     logger.info(`Processing job ${job.id}`)
 
@@ -326,26 +506,51 @@ const worker = new Worker(
       throw new Error('Job ID is missing')
     }
 
-    try {
-      if (text && text.length >= 5000) {
+    // Handle new jobs with jobtype attribute
+    if (jobtype) {
+        if (jobtype === 'pdf-process') {
+          let result
+          try {
+            result = await parsePDFWithGS(jobId, s3key)
+            return result
+          }
+          catch (error) {
+            logger.error(`Job ${jobId}: pdf parsing got error: ${error}`)
+            throw error
+          }
+          finally {
+            ACTIVE_COUNT--
+          }
+        }
+        // Fail on unhandled jobtypes
+        else {
+          ACTIVE_COUNT--
+          throw new Error(`Unhandled job type: ${jobtype}`)
+        }
+    }
+    // If not defined presume legacy transcription job
+    else {
+      try {
+        if (text && text.length >= 5000) {
+          logger.info(`Job ${job.id}: transcription complete for page ${pageNumber}`)
+          return text
+        }
+
+        let result: string
+        if (PROVIDER === 'ollama') {
+          result = await transcribeWithOllama({ text, bytes })
+        } else {
+          result = await transcribeWithVLLM({ text, bytes })
+        }
+
         logger.info(`Job ${job.id}: transcription complete for page ${pageNumber}`)
-        return text
+        return result
+      } catch (error) {
+        logger.error(`Job ${job.id}: transcription got error: ${error}`)
+        throw error
+      } finally {
+        ACTIVE_COUNT--
       }
-
-      let result: string
-      if (PROVIDER === 'ollama') {
-        result = await transcribeWithOllama({ text, bytes })
-      } else {
-        result = await transcribeWithVLLM({ text, bytes })
-      }
-
-      logger.info(`Job ${job.id}: transcription complete for page ${pageNumber}`)
-      return result
-    } catch (error) {
-      logger.error(`Job ${job.id}: transcription got error: ${error}`)
-      throw error
-    } finally {
-      ACTIVE_COUNT--
     }
   },
   { connection, concurrency: 3 },
