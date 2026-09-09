@@ -75,7 +75,7 @@ const PROVIDER = process.env.PROVIDER ?? ('ollama' as 'ollama' | 'vllm')
 
 const S3_HOST: string = process.env.S3_HOST ?? ''
 const S3_ACCESS_KEY: string = process.env.S3_ACCESS_KEY ?? ''
-const S3_SECRET_ACCESS_KEY: string = process.env.S3_SECRET_ACCESS_KEY ?? ''
+const S3_SECRET_KEY: string = process.env.S3_SECRET_KEY ?? ''
 const S3_BUCKET: string = process.env.S3_BUCKET ?? 'gptwrapper-data-prod'
 
 // Used for pdf parsing
@@ -87,7 +87,7 @@ export const s3Client = new S3Client({
   forcePathStyle: true,
   credentials: {
     accessKeyId: S3_ACCESS_KEY,
-    secretAccessKey: S3_SECRET_ACCESS_KEY,
+    secretAccessKey: S3_SECRET_KEY,
   },
 })
 
