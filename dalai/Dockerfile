@@ -6,6 +6,10 @@ COPY . .
 
 RUN npm i
 
+# for pdf parsing
+RUN apk add ghostscript
+RUN apk add poppler-utils
+
 RUN mkdir -p ./uploads && chmod 777 ./uploads
 
 RUN chmod 777 -R .
