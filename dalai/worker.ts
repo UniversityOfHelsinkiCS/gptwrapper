@@ -201,12 +201,22 @@ async function transcribeWithVLLM({ text, bytes }: { text?: string; bytes?: Uint
 
   logger.info(`vLLM payload OK`)
 
+  let jsonPayload
+
+  try {
+    jsonPayload = JSON.stringify(payload)
+  }
+  catch (e) {
+    logger.error(`JSON stringify error ${e}`)
+    throw new Error(`JSON stringify failed: ${e}`)
+  }
+
   const response = await fetch(`${VLM_URL}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(payload),
+    body: jsonPayload,
   })
 
   logger.info(`vLLM responded`)
