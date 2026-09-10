@@ -14,7 +14,7 @@ const ModalTitle = () => {
   const titleMap = {
     '/courses': t('sidebar:courseChange'),
     '/course': t('sidebar:courseSettings'),
-    '/prompts': t('sidebar:promptSelect'),
+    '/prompts': t('sidebar:coursesAndPrompts'),
     '/prompt': t('sidebar:promptEdit'),
     '/show': t('sidebar:promptDetails'),
     '/userrags': t('course:userSourceMaterials'),
@@ -47,6 +47,9 @@ const TemplateModal: React.FC<{ open: boolean; root: string; children: React.Rea
   return (
     <Modal open={open} onClose={handleClose}>
       <Box
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="template-modal-title"
         sx={{
           position: 'absolute',
           top: '50%',
@@ -75,10 +78,10 @@ const TemplateModal: React.FC<{ open: boolean; root: string; children: React.Rea
             bgcolor: 'background.subtle',
           }}
         >
-          <Typography variant="h6">
+          <Typography variant="h6" id="template-modal-title">
             <ModalTitle />
           </Typography>
-          <TextButton data-testid="close-modal" onClick={handleClose}>
+          <TextButton aria-label={t('common:close')} data-testid="close-modal" onClick={handleClose}>
             <CloseIcon />
           </TextButton>
         </Box>
