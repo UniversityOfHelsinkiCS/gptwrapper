@@ -199,6 +199,8 @@ async function transcribeWithVLLM({ text, bytes }: { text?: string; bytes?: Uint
     // max_tokens: 2000,
   }
 
+  logger.info(`vLLM payload OK`)
+
   const response = await fetch(`${VLM_URL}`, {
     method: 'POST',
     headers: {
@@ -206,6 +208,8 @@ async function transcribeWithVLLM({ text, bytes }: { text?: string; bytes?: Uint
     },
     body: JSON.stringify(payload),
   })
+
+  logger.info(`vLLM responded`)
 
   if (!response.ok) {
     const errorBody = await response.text()
@@ -343,9 +347,12 @@ async function parsePDFWithGS(id: string, s3key: string) {
         await stat(text_file_path)
         await stat(image_file_path)
 
+        const b64_image = Buffer.from(await readFile(image_file_path, {encoding: null})).toString('base64');
+
         transcriptions.push(await transcribeWithVLLM({
           text: await readFile(text_file_path, {encoding: 'utf-8'}),
-          bytes: await readFile(image_file_path, {encoding: null}),
+          //@ts-expect-error no idea why it is typed as a buffer, when it just concats it to a string
+          bytes: b64_image,
         }))
       }
     }
