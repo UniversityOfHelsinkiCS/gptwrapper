@@ -211,13 +211,20 @@ async function transcribeWithVLLM({ text, bytes }: { text?: string; bytes?: Uint
     throw new Error(`JSON stringify failed: ${e}`)
   }
 
-  const response = await fetch(`${VLM_URL}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: jsonPayload,
-  })
+  let response 
+  try {
+    response = await fetch(`${VLM_URL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonPayload,
+    })
+  }
+  catch (e) {
+    logger.error(`Fetch error ${e}`)
+    throw new Error(`Fetch failed: ${e}`)
+  }
 
   logger.info(`vLLM responded`)
 
