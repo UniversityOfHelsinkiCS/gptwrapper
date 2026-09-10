@@ -333,7 +333,7 @@ async function parsePDFWithGS(id: string, s3key: string) {
   if (runStatus === 0){
     try {
       //@ts-expect-error pages is always defined when runStatus === 0
-      for (let pageNumber = 0; pageNumber < pages; pageNumber++) {
+      for (let pageNumber = 1; pageNumber < pages; pageNumber++) {
         const text_file_path = path.join(text_path, `${String(pageNumber).padStart(4, '0')}.txt`)
         const image_file_path = path.join(images_path, `${String(pageNumber).padStart(4, '0')}.png`)
 
