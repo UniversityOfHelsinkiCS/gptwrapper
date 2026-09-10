@@ -297,7 +297,7 @@ async function parsePDFWithGS(id: string, s3key: string) {
     '-dTextAlphaBits=4', 
     `-sOutputFile=${images_path}%04d.png`, 
     '-r110x110', 
-    `-f ${file_path}`
+    `-f${file_path}`
   ]
 
   const text_options: string[] = [
@@ -306,44 +306,20 @@ async function parsePDFWithGS(id: string, s3key: string) {
     '-dNOPAUSE', 
     '-dBATCH',
     `-sOutputFile=${text_path}%04d.txt`, 
-    `-f ${file_path}`
+    `-f${file_path}`
   ]
 
   if (runStatus === 0){
     try{
       logger.info(`Job: ${id}, rasterizing`)
+      
       // Rasterize the pdf to images on disk
-      await new Promise<void>((resolve, reject) => {
-        const child = execFile('gs', rasterize_options)
-        
-        child.on('exit', (code) => {
-          if (code === 0){
-            resolve()
-          }
-          else{
-            reject()
-          }
-        })
-        
-        child.on('error', reject)
-      })
-
+      await pExecFile('gs', rasterize_options)
+      
       logger.info(`Job: ${id}, text extraction`)
+      
       // Extract text to files on disk
-      await new Promise<void>((resolve, reject) => {
-        const child = execFile('gs', text_options)
-        
-        child.on('exit', (code) => {
-          if (code === 0){
-            resolve()
-          }
-          else{
-            reject()
-          }
-        })
-        
-        child.on('error', reject)
-      })
+      await pExecFile('gs', text_options)
     }
     catch (error){
       safeError('Something failed in pdf parsing pipeline', error)  
