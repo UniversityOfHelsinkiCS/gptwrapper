@@ -180,7 +180,8 @@
     "goToLatestResponse": "Siirry uusimpaan vastaukseen",
     "latestResponseLabel": "Uusin vastaus",
     "usageWarning": "Olet käyttämässä {{tokenUsagePercentage}}% viikoittaisesta CurreChat-käytöstäsi.",
-    "contextLimitWarning": "Keskustelu ylittää valitun mallin kontekstirajan, joka on {{contextLimit}} tokenia. Keskustelussasi on {{tokenCount}} tokenia. Jatkaminen katkaisee vanhimmat viestit. Suositeltavaa on aloittaa uusi keskustelu."
+    "contextLimitWarning": "Keskustelu ylittää valitun mallin kontekstirajan, joka on {{contextLimit}} tokenia. Keskustelussasi on {{tokenCount}} tokenia. Jatkaminen katkaisee vanhimmat viestit. Suositeltavaa on aloittaa uusi keskustelu.",
+    "noPrompt": "Ei alustusta"
   },
   "settings": {
     "prompt": "Keskustelun alustus",

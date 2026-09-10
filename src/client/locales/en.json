@@ -177,7 +177,8 @@
     "goToLatestResponse": "Go to latest response",
     "latestResponseLabel": "Latest response",
     "usageWarning": "You are about to use {{tokenUsagePercentage}}% of your weekly CurreChat usage",
-    "contextLimitWarning": "The conversation exceeds the context limit of {{contextLimit}} tokens for the selected model. Your conversation has {{tokenCount}} tokens. Clicking continue will truncate the oldest messages. It is recommended to start a new conversation."
+    "contextLimitWarning": "The conversation exceeds the context limit of {{contextLimit}} tokens for the selected model. Your conversation has {{tokenCount}} tokens. Clicking continue will truncate the oldest messages. It is recommended to start a new conversation.",
+    "noPrompt": "No prompt"
   },
   "settings": {
     "prompt": "Conversation prompt",

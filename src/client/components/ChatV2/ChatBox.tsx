@@ -18,7 +18,7 @@ import { WarningType } from '@shared/aiApi'
 import ModelSelector from './ModelSelector'
 import UsageSelector from './UsageSelector'
 import { DEFAULT_TOKEN_LIMIT, ValidModelName } from '../../../config'
-import { Course } from 'src/client/types'
+import { Course, Prompt } from 'src/client/types'
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat'
 
 const skipLinkSx = {
@@ -65,6 +65,8 @@ export const ChatBox = ({
   setModel,
   isNewResponseAvailable,
   onGoToLatestResponse,
+  prompt,
+  courseName,
 }: {
   disabled: boolean
   chatInstance?: Course
@@ -82,6 +84,8 @@ export const ChatBox = ({
   setModel: (model: ValidModelName) => void
   isNewResponseAvailable: boolean
   onGoToLatestResponse: () => void
+  prompt?: Prompt | null
+  courseName?: string
 }) => {
   const { courseId } = useParams()
   const isEmbedded = useIsEmbedded()
@@ -100,6 +104,11 @@ export const ChatBox = ({
   const acuallyDisabled = disabled || message.length === 0
 
   const { t } = useTranslation()
+
+  const promptName = prompt?.name
+  const promptType = prompt?.type
+  const hasType = promptType === 'CHAT_INSTANCE' || promptType === 'PERSONAL' || promptType === 'UNIVERSITY'
+  const typeLabel = hasType ? (promptType === 'CHAT_INSTANCE' ? courseName : t(`sidebar:${promptType === 'PERSONAL' ? 'myPrompt' : 'universityPrompt'}`)) : null
 
   useKeyboardCommands({
     resetChat: handleReset,
@@ -250,6 +259,9 @@ export const ChatBox = ({
           }}
         >
           <Box>
+            <Typography sx={visuallyHidden} id="hidden-prompt-description">
+              {t('common:prompt')}: {typeLabel ? `${typeLabel} -` : ''} {promptName ? ` ${promptName}` : t('chat:noPrompt')}
+            </Typography>
             <TextField
               autoFocus={!isEmbedded}
               id="chat-input"

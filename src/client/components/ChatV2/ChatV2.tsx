@@ -60,7 +60,7 @@ const ChatV2Content = () => {
   const chatScroll = useChatScroll()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { t, i18n } = useTranslation()
-  const { promptInfo, isPromptHidden } = usePromptState()
+  const { activePrompt, promptInfo, isPromptHidden } = usePromptState()
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
   const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo, hasPotentialError } = useChatStream({
     onComplete: ({ message }) => {
@@ -151,6 +151,7 @@ const ChatV2Content = () => {
   const latestResponseIndex = !isStreaming && messages.length > 0 && messages[messages.length - 1].role === 'assistant' ? messages.length - 1 : null
   const [visitedResponseIndex, setVisitedResponseIndex] = useState<number | null>(null)
   const isNewResponseAvailable = latestResponseIndex !== null && latestResponseIndex !== visitedResponseIndex
+  const courseName = chatInstance && getLanguageValue(chatInstance.name, i18n.language)
 
   const handleGoToLatestResponse = () => {
     // focus the latest response so screen readers can read it out loud
@@ -553,7 +554,7 @@ const ChatV2Content = () => {
           <Conversation
             initial={
               <ConversationSplash
-                courseName={chatInstance && getLanguageValue(chatInstance.name, i18n.language)}
+                courseName={courseName}
                 courseDate={chatInstance?.activityPeriod}
                 promptName={promptInfo?.type === 'saved' ? promptInfo.name : undefined}
               />
@@ -586,6 +587,8 @@ const ChatV2Content = () => {
             <ChatBox
               disabled={isStreaming}
               chatInstance={chatInstance}
+              courseName={courseName}
+              prompt={activePrompt}
               fileInputRef={fileInputRef}
               fileName={fileName}
               setFileName={setFileName}
