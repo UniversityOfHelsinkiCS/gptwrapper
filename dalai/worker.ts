@@ -225,6 +225,17 @@ async function parsePDFWithGS(id: string, s3key: string) {
   const text_path = path.join(base_path, 'text/')
   const file_path = path.join(base_path, 'input_'+id+'.pdf')
 
+  const safeError = (msg: string, error: unknown) => {
+    try {
+      logger.error(JSON.stringify({
+        msg, error
+      }))
+    }
+    catch (e){
+      console.error("safe error logging failed", msg, e)
+    }
+  }
+
   let pages
 
   const pExecFile = promisify(execFile)
@@ -252,7 +263,7 @@ async function parsePDFWithGS(id: string, s3key: string) {
     await writeFile(file_path, s3bytes)
   }
   catch (error) {
-    logger.error('Something failed during s3 download', error)  
+    safeError('Something failed during s3 download', error)  
     runStatus = -1
   }
 
@@ -270,9 +281,10 @@ async function parsePDFWithGS(id: string, s3key: string) {
       const pagesStr = pagesMatch[0].match(/\d+/)
       if (pagesStr?.length != 1) throw new Error('Could not extract page count')
       pages = parseInt(pagesStr[0])
+      logger.info(`Job: ${id} metadata parsed, pages: ${pages}`)
     }
     catch(error){
-      logger.error('Error in metadata parsing', error)
+      safeError('Error in metadata parsing', error)
       runStatus = -1
     }
   }
@@ -299,6 +311,7 @@ async function parsePDFWithGS(id: string, s3key: string) {
 
   if (runStatus === 0){
     try{
+      logger.info(`Job: ${id}, rasterizing`)
       // Rasterize the pdf to images on disk
       await new Promise<void>((resolve, reject) => {
         const child = execFile('gs', rasterize_options)
@@ -315,6 +328,7 @@ async function parsePDFWithGS(id: string, s3key: string) {
         child.on('error', reject)
       })
 
+      logger.info(`Job: ${id}, text extraction`)
       // Extract text to files on disk
       await new Promise<void>((resolve, reject) => {
         const child = execFile('gs', text_options)
@@ -332,7 +346,7 @@ async function parsePDFWithGS(id: string, s3key: string) {
       })
     }
     catch (error){
-      logger.error('Something failed in pdf parsing pipeline', error)  
+      safeError('Something failed in pdf parsing pipeline', error)  
       runStatus = -1
     }
   }
@@ -347,6 +361,8 @@ async function parsePDFWithGS(id: string, s3key: string) {
         const text_file_path = path.join(text_path, `${String(pageNumber).padStart(4, '0')}.txt`)
         const image_file_path = path.join(images_path, `${String(pageNumber).padStart(4, '0')}.png`)
 
+        logger.info(`Job: ${id}, transcription page: ${pageNumber}/${pages}`)
+
         // Check they acually exist
         await stat(text_file_path)
         await stat(image_file_path)
@@ -358,17 +374,20 @@ async function parsePDFWithGS(id: string, s3key: string) {
       }
     }
     catch (error){
-      logger.error('Something failed in vllm pipeline', error)
+      safeError('Something failed in vllm pipeline', error)
       runStatus = -1
     }
   }
 
+  logger.info(`Job: ${id}, cleanup`)
   // Clean up fs regardless of errors
   await rm(base_path, {recursive: true})
 
   if(runStatus === -1){
     throw new Error('PDF parsing failed')
   }
+
+  logger.info(`Job: ${id}, finished`)
 
   return transcriptions
 }
