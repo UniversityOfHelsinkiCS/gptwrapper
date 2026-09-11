@@ -32,6 +32,7 @@ vi.mock('../services/chatInstances/access', () => ({
 import errorHandler from '../middleware/error'
 import { ChatInstance, Enrolment, Responsibility } from '../db/models'
 import courseRouter from './course'
+import { getEnrolledCourses, getTeachedCourses } from '../services/chatInstances/access'
 
 let currentUser: { id: string; isAdmin: boolean }
 let server: Server
@@ -184,5 +185,22 @@ describe('courses/:id', () => {
       const response = await getCourse('course-1')
       expect(response.status).toBe(403)
     })
+  })
+})
+
+const getUserCourses = () => fetch(`${baseUrl}/courses/user`)
+
+describe('courses/user', () => {
+  test('returns one course if user is teacher AND enrolled', async () => {
+    currentUser = { id: 'teacher-1', isAdmin: false }
+    const course = courseFixture()
+    vi.mocked(getTeachedCourses).mockResolvedValue([course] as any)
+    vi.mocked(getEnrolledCourses).mockResolvedValue([{ chatInstance: course }] as any)
+
+    const response = await getUserCourses()
+    const body = await response.json()
+
+    expect(body.length).toBe(1)
+    expect(body[0].role).toBe('teacher')
   })
 })
