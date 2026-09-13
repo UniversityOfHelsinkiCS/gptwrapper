@@ -62,6 +62,6 @@ studentTest.describe('Login sandbox access', () => {
     // A student is in neither demo IAM group, so both functions early-return the
     // plain query result. Only the enrolment reset-test-data created should be there.
     expect(user.ownCourses).toEqual([])
-    expect(user.activeCourseIds).toEqual([TEST_COURSES.TEST_COURSE.courseId])
+    expect(user.activeCourseIds).toEqual([TEST_COURSES.TEST_COURSE.courseId, TEST_COURSES.EXAMPLE_COURSE.courseId])
   })
 })

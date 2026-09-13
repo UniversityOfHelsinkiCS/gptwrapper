@@ -102,6 +102,11 @@ router.post('/reset-test-data', async (req, res) => {
       userId,
       chatInstanceId: TEST_COURSES.TEST_COURSE.id,
     })
+    console.log('creating enrolment', testUserRole, TEST_COURSES.EXAMPLE_COURSE)
+    await Enrolment.create({
+      userId,
+      chatInstanceId: TEST_COURSES.EXAMPLE_COURSE.id,
+    })
   }
 
   const ragIndex = await RagIndex.create({
