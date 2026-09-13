@@ -116,6 +116,7 @@ export interface ChatInstanceSearchResponse {
   results: ChatInstanceSearchResult[]
   count: number
 }
+// State of the course, not about a user.
 export type ChatStatus = 'NOT_STARTED' | 'EXPIRED' | 'ACTIVATED' | 'NOT_ACTIVATED'
-
+// What this user can do. A fact about a pair.
 export type AccessLevel = 'FULL' | 'STUDENT' | 'STUDENT_CLOSED'
