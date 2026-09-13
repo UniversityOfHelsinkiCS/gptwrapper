@@ -203,4 +203,18 @@ describe('courses/user', () => {
     expect(body.length).toBe(1)
     expect(body[0].role).toBe('teacher')
   })
+
+  test('handles broken activityPeriod', async () => {
+    vi.mocked(getTeachedCourses).mockResolvedValue([] as any)
+    vi.mocked(getEnrolledCourses).mockResolvedValue([
+      { chatInstance: courseFixture({ id: 'ci-bad', activityPeriod: null }) },
+      { chatInstance: courseFixture({ id: 'ci-good' }) },
+    ] as any)
+    const response = await getUserCourses()
+    const body = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(body.length).toBe(1)
+    expect(body[0].id).toBe('ci-good')
+  })
 })
