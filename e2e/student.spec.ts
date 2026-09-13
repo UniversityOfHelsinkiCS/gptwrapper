@@ -69,6 +69,12 @@ test.describe('Student', () => {
     await expect(page).toHaveURL(/general/)
   })
 
+  test('sees the expired view on an ended course', async ({ page }) => {
+    await page.goto('/example-course-id')
+    await expect(page).toHaveURL(/example-course-id/)
+    await expect(page.getByTestId('chat-expired-view')).toBeVisible()
+  })
+
   test('sees only student specific elements in sidebars COURSE SECTION', async ({ page }) => {
     await page.goto('/test-course-course-id')
     await acceptDisclaimer(page)
@@ -83,7 +89,7 @@ test.describe('Student', () => {
 
     // Students shouldn't see the edit prompt button in the sidebar (when no prompt is selected)
     await expect(page.getByTestId('edit-prompt-button')).not.toBeVisible()
-    
+
     // They should see the button to choose a prompt
     await expect(page.getByTestId('choose-prompt-button')).toBeVisible()
   })
