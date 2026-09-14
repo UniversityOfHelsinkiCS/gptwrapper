@@ -148,6 +148,7 @@ const ContextRow = ({
           onClick={onClick}
           data-testid={selectorTestId}
           aria-description={ariaDescription}
+          id={selectorTestId}
           sx={{
             position: 'relative',
             width: '100%',
@@ -177,7 +178,7 @@ const ContextRow = ({
                   fontSize: '0.6875rem',
                   fontWeight: 700,
                   letterSpacing: '0.05em',
-                  textTransform: 'uppercase',
+
                   color: 'text.secondary',
                   display: '-webkit-box',
                   WebkitLineClamp: 2,
@@ -195,7 +196,21 @@ const ContextRow = ({
             <Box sx={{ display: 'flex', flexShrink: 0, color: 'primary.main', '& svg': { fontSize: 18 } }}>
               <ChatIcon />
             </Box>
-            <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: '0.9375rem', fontWeight: 700, color: 'text.primary' }}>
+            <Typography
+              noWrap
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                fontSize: '0.9375rem',
+                fontWeight: 700,
+                color: 'text.primary',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'normal',
+              }}
+            >
               {promptLabel}
             </Typography>
           </Box>
