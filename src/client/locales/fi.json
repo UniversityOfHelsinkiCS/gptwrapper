@@ -840,6 +840,7 @@
     "goToLatestResponse": "Siirry uusimpaan vastaukseen",
     "previewAndManage": "Esikatsele ja hallinnoi",
     "choosePrompt": "Valitse käyttöön: {{name}}",
+    "chooseUniPrompt": "Valitse käyttöön",
     "formOpened": "Lomake avattu: {{form}}",
     "promptListOpened": "Alustuslista laajennettu: {{name}}",
     "editCancelled": "Muokkaus peruutettiin",

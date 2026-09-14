@@ -814,6 +814,7 @@
     "goToLatestResponse": "Gå till senaste svaret",
     "previewAndManage": "Förhandsgranska och hantera",
     "choosePrompt": "Välj för användning: {{name}}",
+    "chooseUniPrompt": "Välj för användning",
     "formOpened": "Formulär öppnat: {{form}}",
     "promptListOpened": "Promptlista expanderad: {{name}}",
     "editCancelled": "Redigeringen avbröts",

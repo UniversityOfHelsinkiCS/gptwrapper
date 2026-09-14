@@ -839,6 +839,7 @@
     "goToLatestResponse": "Go to latest response",
     "previewAndManage": "Preview and manage",
     "choosePrompt": "Select for use: {{name}}",
+    "chooseUniPrompt": "Select for use",
     "formOpened": "Form opened: {form}",
     "promptListOpened": "Prompt list expanded: {{name}}",
     "editCancelled": "Editing canceled",

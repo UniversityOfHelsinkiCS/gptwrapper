@@ -60,7 +60,11 @@ const UniversityPromptCard = ({
         variant="outlined"
         role="button"
         tabIndex={0}
-        aria-label={`${prompt.name} — ${isTemplate ? t('uniPrompts:copyTo') : t('settings:choosePrompt')}`}
+        aria-label={
+          isTemplate
+            ? `${t('uniPrompts:categoryTemplate')} — ${prompt.name} ${t('uniPrompts:copyTo')}`
+            : `${t('uniPrompts:categoryUniversity')} — ${prompt.name} ${t('accessibility:chooseUniPrompt')}`
+        }
         onClick={(event) => activate(event.currentTarget)}
         onKeyDown={(event) => {
           if (event.key !== 'Enter' && event.key !== ' ') return
