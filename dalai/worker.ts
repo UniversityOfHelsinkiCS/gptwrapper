@@ -197,6 +197,9 @@ async function transcribeWithVLLM({ text, bytes }: { text?: string; bytes?: Uint
     // You can tune temperature, max_tokens, etc.
     // temperature: 0.2,
     // max_tokens: 2000,
+    chat_template_kwargs: {
+      enable_thinking: false
+    }
   }
 
   logger.info(`vLLM payload OK`)
