@@ -9,7 +9,6 @@ const base = {
   isLoading: false,
   isError: false,
   user: undefined,
-  courseId: undefined,
   onNoAccessPage: false,
 }
 
@@ -38,6 +37,6 @@ describe('resolveContentView', () => {
     expect(resolveContentView({ ...base, user: null, onNoAccessPage: true })).toBe('content')
   })
   test('lets a logged-in user reach any course route (the server decides access', () => {
-    expect(resolveContentView({ ...base, user: student, courseId: 'other-course' })).toBe('content')
+    expect(resolveContentView({ ...base, user: student })).toBe('content')
   })
 })

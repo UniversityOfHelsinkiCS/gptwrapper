@@ -6,7 +6,7 @@ import { fi } from 'date-fns/locale'
 import { SnackbarProvider } from 'notistack'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
 import { EmbeddedProvider } from './contexts/EmbeddedContext'
 import { DarkModeProvider } from './contexts/DarkModeContext'
@@ -146,7 +146,6 @@ const LoginError = ({ onRetry, isRetrying }: { onRetry: () => void; isRetrying: 
 }
 
 const Content = () => {
-  const { courseId } = useParams()
   const location = useLocation()
   const { user, isLoading, isError, refetch, isFetching } = useCurrentUser()
 
@@ -154,14 +153,12 @@ const Content = () => {
     isLoading,
     isError,
     user,
-    courseId,
     onNoAccessPage: location.pathname.includes('/noaccess'),
   })
 
   if (view === 'loading') return <HYLoadingSpinner />
   if (view === 'error') return <LoginError onRetry={() => refetch()} isRetrying={isFetching} />
   if (view === 'redirect') return <Navigate to={getRedirect(user)} />
-  if (view === 'nothing') return null
 
   return (
     <Box sx={{ flex: 1 }}>
