@@ -40,6 +40,7 @@ import { getGroupedCourses, isCustomChatInstance } from './util'
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import UniversityPromptGallery from './UniversityPromptGallery.tsx'
 import { focusIndicatorStyle, switchFocusIndicatorStyle } from '../../util/accessibility'
+import { StatusAnnouncer } from '../common/StatusAnnouncer.tsx'
 
 const SECTION_LABEL_SX = {
   fontSize: '0.75rem',
@@ -109,7 +110,8 @@ export const PromptListItem = ({
         className={prompt.id !== activePromptId ? 'prompt-list-item__button' : undefined}
         selected={previewPromptId === prompt.id}
         aria-selected={prompt.id === activePromptId}
-        aria-label={[prompt.name, prompt.id === activePromptId && t('common:selected'), t('prompt:preview')].filter(Boolean).join(', ')}
+        aria-pressed={previewPromptId === prompt.id}
+        aria-label={[t('common:prompt'), prompt.name, prompt.id === activePromptId && t('common:selected'), t('common:preview')].filter(Boolean).join(', ')}
         onClick={() => {
           if (!confirmClose()) return
           onPreview(prompt)
@@ -131,11 +133,12 @@ export const PromptListItem = ({
           </Tooltip>
         )}
       </ListItemButton>
+      <StatusAnnouncer message={previewPromptId === prompt.id ? t('accessibility:previewOpened', { name: prompt.name }) : ''} />
 
       {prompt.id !== activePromptId && (
         <BlueButton
           size="small"
-          aria-label={t('sidebar:promptSelect')}
+          aria-label={t('accessibility:choosePrompt', { name: prompt.name })}
           variant="contained"
           data-testid="change-to-prompt-button"
           className="change-prompt-button"
@@ -325,6 +328,7 @@ const PromptModalV2 = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, minHeight: 0 }}>
+      <StatusAnnouncer message={isEditing ? t('accessibility:formOpened', { form: t('settings:saveNewPrompt') }) : ''} />
       <Box sx={{ display: 'flex', gap: 2, flex: 1, minHeight: 0 }}>
         {/* Left panel - course and prompt list */}
         <Box
@@ -334,26 +338,30 @@ const PromptModalV2 = () => {
             flexDirection: 'column',
           }}
         >
-          <Box sx={{ overflowY: 'auto', mt: 2 }}>
+          <Box sx={{ overflowY: 'auto', mt: 2 }} role="region" aria-label={t('common:promptList')}>
             {/* University prompts — opens the gallery in the right panel. Admin only for now. */}
             {canSeeUniversityPrompts && (
-              <ListItemButton
-                selected={showUniversityPrompts}
-                onClick={openUniversityPrompts}
-                sx={{ px: 1, borderRadius: 1, mb: 0.5, ...focusIndicatorStyle() }}
-                data-testid="university-prompts-open"
-              >
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  <AccountBalanceIcon color="primary" />
-                </ListItemIcon>
-                <ListItemText primary={t('uniPrompts:galleryNav')} slotProps={{ primary: { variant: 'subtitle1', fontWeight: 600 } }} />
-              </ListItemButton>
+              <Box>
+                <ListItemButton
+                  selected={showUniversityPrompts}
+                  onClick={openUniversityPrompts}
+                  sx={{ px: 1, borderRadius: 1, mb: 0.5, ...focusIndicatorStyle() }}
+                  data-testid="university-prompts-open"
+                  aria-pressed={showUniversityPrompts}
+                >
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    <AccountBalanceIcon color="primary" />
+                  </ListItemIcon>
+                  <ListItemText primary={t('uniPrompts:galleryNav')} slotProps={{ primary: { variant: 'subtitle1', fontWeight: 600 } }} />
+                </ListItemButton>
+                <StatusAnnouncer message={showUniversityPrompts ? t('accessibility:previewOpened', { name: t('uniPrompts:title') }) : ''} />
+              </Box>
             )}
 
             {/* My prompts header row */}
             <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 1, '&:hover': { backgroundColor: 'action.hover' } }}>
               <ListItemButton
-                onClick={() => setShowMyPrompts(true)}
+                onClick={() => setShowMyPrompts((open) => !open)}
                 sx={{
                   px: 1,
                   borderRadius: 1,
@@ -369,11 +377,12 @@ const PromptModalV2 = () => {
                 </ListItemIcon>
                 <ListItemText primary={t('settings:myPrompts')} slotProps={{ primary: { variant: 'subtitle1', fontWeight: 600 } }} />
               </ListItemButton>
+              <StatusAnnouncer message={showMyPrompts ? t('accessibility:promptListOpened', { name: t('settings:myPrompts') }) : ''} />
 
               {/* Add new personal prompt */}
               <Tooltip title={t('settings:saveNewPrompt')}>
                 <IconButton
-                  aria-label={t('settings:saveNewPrompt')}
+                  aria-label={t('accessibility:saveMyPrompt')}
                   onClick={() => handleCreateNew()}
                   data-testid="create-personal-prompt-button"
                   sx={{
@@ -387,9 +396,10 @@ const PromptModalV2 = () => {
 
               {/* Expand/collapse my prompts list */}
               <IconButton
-                aria-label={t('course:togglePrompts')}
+                aria-label={t('accessibility:toggleMyPrompts')}
                 onClick={() => setShowMyPrompts((open) => !open)}
                 data-testid="my-prompts-toggle"
+                aria-expanded={showMyPrompts}
                 sx={{
                   color: 'text.secondary',
                   ...focusIndicatorStyle(),
@@ -400,11 +410,11 @@ const PromptModalV2 = () => {
             </Box>
             {/* My prompts list */}
             {showMyPrompts && sortedMyPrompts.length > 0 ? (
-              sortedMyPrompts.map((course) => (
-                <Box key={course.id} sx={{ ml: 4 }}>
+              sortedMyPrompts.map((p) => (
+                <Box key={p.id} sx={{ ml: 4 }}>
                   <PromptListItem
-                    key={course.id}
-                    prompt={course}
+                    key={p.id}
+                    prompt={p}
                     previewPromptId={previewPrompt?.id}
                     activePromptId={activePrompt?.id}
                     confirmClose={confirmClose}
@@ -458,8 +468,21 @@ const PromptModalV2 = () => {
                   onClose={() => setFilterAnchor(null)}
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                   transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  slotProps={{
+                    paper: {
+                      role: 'menu',
+                      'aria-labelledby': 'course-filter-title',
+                    },
+                  }}
                 >
-                  <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', minWidth: 260 }}>
+                  <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', minWidth: 260, mb: 1 }}>
+                    <Typography
+                      id="course-filter-title"
+                      component="span"
+                      sx={{ display: 'block', fontSize: '0.725rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled' }}
+                    >
+                      {t('settings:filterCourses')}
+                    </Typography>
                     {(user?.isAdmin || user?.isEmployee) && (
                       <>
                         <FormControlLabel
@@ -520,7 +543,11 @@ const PromptModalV2 = () => {
               overflow: 'hidden',
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minWidth: 0, minHeight: 0, mt: 2 }}>
+            <Box
+              sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minWidth: 0, minHeight: 0, mt: 2 }}
+              role="region"
+              aria-label={t('accessibility:previewAndManage')}
+            >
               {showUniversityPrompts && canSeeUniversityPrompts ? (
                 <UniversityPromptGallery onSelect={handleSelectUniversityPrompt} copyTargets={copyTargets} onCopied={handleCopied} />
               ) : previewPrompt ? (

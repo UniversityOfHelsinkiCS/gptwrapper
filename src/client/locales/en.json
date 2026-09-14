@@ -64,7 +64,10 @@
     "copiedToClipboard": "Copied to clipboard",
     "fetchError": "Server error",
     "required": "required",
-    "retryMessage": "Retry"
+    "retryMessage": "Retry",
+    "preview": "Preview",
+    "promptList": "Courses and prompts",
+    "course": "Course"
   },
   "stats": {
     "timePeriodStart": "Starting",
@@ -174,7 +177,6 @@
     "responseReady": "The response is ready.",
     "responseCanceled": "Response generation was canceled.",
     "responseFailed": "Generating a response failed.",
-    "goToLatestResponse": "Go to latest response",
     "latestResponseLabel": "Latest response",
     "usageWarning": "You are about to use {{tokenUsagePercentage}}% of your weekly CurreChat usage",
     "contextLimitWarning": "The conversation exceeds the context limit of {{contextLimit}} tokens for the selected model. Your conversation has {{tokenCount}} tokens. Clicking continue will truncate the oldest messages. It is recommended to start a new conversation.",
@@ -831,5 +833,17 @@
     "copyTo": "Copy to…",
     "selectLanguage": "Choose language",
     "galleryEmpty": "No university prompts have been published yet"
+  },
+  "accessibility": {
+    "previewOpened": "Preview opened: {{name}}",
+    "goToLatestResponse": "Go to latest response",
+    "previewAndManage": "Preview and manage",
+    "choosePrompt": "Select for use: {{name}}",
+    "formOpened": "Form opened: {form}",
+    "promptListOpened": "Prompt list expanded: {{name}}",
+    "editCancelled": "Editing canceled",
+    "saveMyPrompt": "Add a new personal prompt",
+    "newCoursePrompt": "Add a new prompt for course {{name}}",
+    "toggleMyPrompts": "Show or hide personal prompts"
   }
 }

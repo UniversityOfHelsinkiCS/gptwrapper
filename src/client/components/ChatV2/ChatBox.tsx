@@ -285,7 +285,7 @@ export const ChatBox = ({
               }}
             />
             {isNewResponseAvailable && acuallyDisabled && (
-              <Tooltip title={t('chat:goToLatestResponse')} arrow placement="right">
+              <Tooltip title={t('accessibility:goToLatestResponse')} arrow placement="right">
                 <IconButton component="button" type="button" onClick={onGoToLatestResponse} sx={skipLinkSx}>
                   <TrendingFlatIcon />
                 </IconButton>

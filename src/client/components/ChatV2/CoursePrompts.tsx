@@ -11,6 +11,7 @@ import AddIcon from '@mui/icons-material/Add'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { formatDate } from './util'
 import { focusIndicatorStyle } from '../../util/accessibility'
+import { StatusAnnouncer } from '../common/StatusAnnouncer.tsx'
 
 interface CoursePromptsProps {
   showActivityPeriod: boolean
@@ -137,6 +138,10 @@ const CoursePrompts = (props: CoursePromptsProps) => {
               ...focusIndicatorStyle(),
             }}
             data-testid={`show-course-info-${course.id}-button`}
+            aria-label={[t('common:course'), course.name[language], showActivityPeriod && formatDate(course.activityPeriod), t('common:preview')]
+              .filter(Boolean)
+              .join(', ')}
+            aria-pressed={previewCourse?.id === course.id}
           >
             <Box
               component="span"
@@ -161,11 +166,12 @@ const CoursePrompts = (props: CoursePromptsProps) => {
               }}
             />
           </ListItemButton>
+          <StatusAnnouncer message={previewCourse?.id === course.id ? t('accessibility:previewOpened', { name: course.name[language] }) : ''} />
 
           {(amongResponsibles || user?.isAdmin) && (
             <Tooltip title={t('settings:saveNewPrompt')}>
               <IconButton
-                aria-label={t('settings:saveNewPrompt')}
+                aria-label={t('accessibility:newCoursePrompt', { name: course.name[language] })}
                 onClick={() => handleCreateNew(course.courseId)}
                 data-testid={`create-course-prompt-${course.courseId ?? course.id}-button`}
                 className="add-prompt-button"
@@ -177,7 +183,8 @@ const CoursePrompts = (props: CoursePromptsProps) => {
           )}
 
           <IconButton
-            aria-label={t('course:togglePrompts')}
+            aria-label={t('course:togglePrompts') + ` ${course.name[language]}`}
+            aria-expanded={showPrompts}
             onClick={() => setShowPrompts((open) => !open)}
             data-testid={`toggle-course-prompts-${course.id}-button`}
             sx={{ color: 'text.secondary', ...focusIndicatorStyle() }}

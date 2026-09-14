@@ -64,7 +64,10 @@
     "copiedToClipboard": "Kopierat till urklipp",
     "fetchError": "Error",
     "required": "obligatorisk",
-    "retryMessage": "Försök igen"
+    "retryMessage": "Försök igen",
+    "preview": "Förhandsgranska",
+    "promptList": "Kurser och prompts",
+    "course": "Kurs"
   },
   "chats": {
     "header": "Öppna kurschattar",
@@ -181,7 +184,6 @@
     "responseReady": "Svaret är klart.",
     "responseCanceled": "Genereringen av svaret avbröts.",
     "responseFailed": "Det gick inte att generera svaret.",
-    "goToLatestResponse": "Gå till senaste svaret",
     "latestResponseLabel": "Senaste svaret",
     "usageWarning": "Du håller på att använda {{tokenUsagePercentage}}% av din veckovisa CurreChat-användning",
     "contextLimitWarning": "Samtalet överskrider kontextgränsen på {{contextLimit}} token för den valda modellen. Ditt samtal har {{tokenCount}} token. Att klicka på fortsätt kommer att trunkera de äldsta meddelandena. Det rekommenderas att starta ett nytt samtal.",
@@ -806,5 +808,17 @@
     "copyTo": "Kopiera till…",
     "selectLanguage": "Välj språk",
     "galleryEmpty": "Inga universitetsprompter har publicerats ännu"
+  },
+  "accessibility": {
+    "previewOpened": "Förhandsgranskning öppnad: {{name}}",
+    "goToLatestResponse": "Gå till senaste svaret",
+    "previewAndManage": "Förhandsgranska och hantera",
+    "choosePrompt": "Välj för användning: {{name}}",
+    "formOpened": "Formulär öppnat: {{form}}",
+    "promptListOpened": "Promptlista expanderad: {{name}}",
+    "editCancelled": "Redigeringen avbröts",
+    "saveMyPrompt": "Lägg till en ny personlig prompt",
+    "newCoursePrompt": "Lägg till en ny prompt för kurs {{name}}",
+    "toggleMyPrompts": "Visa eller dölj personliga prompter"
   }
 }

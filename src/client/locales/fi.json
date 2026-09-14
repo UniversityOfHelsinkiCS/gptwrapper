@@ -65,7 +65,10 @@
     "copiedToClipboard": "Kopioitu leikepöydälle",
     "fetchError": "Virhe palvelimella",
     "required": "pakollinen",
-    "retryMessage": "Yritä uudelleen"
+    "retryMessage": "Yritä uudelleen",
+    "preview": "Esikatsele",
+    "promptList": "Kurssit ja alustukset",
+    "course": "Kurssi"
   },
   "stats": {
     "showing": "Näytetään",
@@ -177,7 +180,6 @@
     "responseReady": "Vastaus on valmis.",
     "responseCanceled": "Vastauksen generointi peruutettiin.",
     "responseFailed": "Vastauksen generointi epäonnistui.",
-    "goToLatestResponse": "Siirry uusimpaan vastaukseen",
     "latestResponseLabel": "Uusin vastaus",
     "usageWarning": "Olet käyttämässä {{tokenUsagePercentage}}% viikoittaisesta CurreChat-käytöstäsi.",
     "contextLimitWarning": "Keskustelu ylittää valitun mallin kontekstirajan, joka on {{contextLimit}} tokenia. Keskustelussasi on {{tokenCount}} tokenia. Jatkaminen katkaisee vanhimmat viestit. Suositeltavaa on aloittaa uusi keskustelu.",
@@ -832,5 +834,17 @@
     "copyTo": "Kopioi kohteeseen…",
     "selectLanguage": "Valitse kieli",
     "galleryEmpty": "Yliopiston alustuksia ei ole vielä julkaistu"
+  },
+  "accessibility": {
+    "previewOpened": "Esikatselu avattu: {{name}}",
+    "goToLatestResponse": "Siirry uusimpaan vastaukseen",
+    "previewAndManage": "Esikatsele ja hallinnoi",
+    "choosePrompt": "Valitse käyttöön: {{name}}",
+    "formOpened": "Lomake avattu: {{form}}",
+    "promptListOpened": "Alustuslista laajennettu: {{name}}",
+    "editCancelled": "Muokkaus peruutettiin",
+    "saveMyPrompt": "Lisää oma alustus",
+    "newCoursePrompt": "Lisää uusi alustus kurssille {{name}}",
+    "toggleMyPrompts": "Näytä tai piilota omat alustukset"
   }
 }

@@ -4,7 +4,7 @@ import { StrictMode } from 'react'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
 import { afterEach, beforeAll, describe, expect, test } from 'vitest'
 import en from '../../locales/en.json'
-import { StreamStatusAnnouncer, resolveAnnouncementState } from './StreamStatusAnnouncer'
+import { StreamStatusAnnouncer, resolveAnnouncementState } from './StatusAnnouncer'
 
 const i18n = i18next.createInstance()
 

@@ -36,15 +36,7 @@ export const resolveAnnouncementState = ({
   return hasStreamed ? 'ready' : 'idle'
 }
 
-export const StreamStatusAnnouncer = ({
-  isStreaming,
-  hasCompletion,
-  endState,
-}: {
-  isStreaming: boolean
-  hasCompletion: boolean
-  endState: StreamEndState
-}) => {
+export const StreamStatusAnnouncer = ({ isStreaming, hasCompletion, endState }: { isStreaming: boolean; hasCompletion: boolean; endState: StreamEndState }) => {
   const { t } = useTranslation()
   const [state, setState] = useState<StreamAnnouncementState>('idle')
   const hasStreamedRef = useRef(false)
@@ -69,6 +61,14 @@ export const StreamStatusAnnouncer = ({
   return (
     <Box component="p" role="status" aria-live="polite" aria-atomic="true" data-testid="stream-status-announcer" sx={visuallyHidden}>
       {messages[state]}
+    </Box>
+  )
+}
+
+export const StatusAnnouncer = ({ message }: { message: string }) => {
+  return (
+    <Box component="p" role="status" aria-live="polite" aria-atomic="true" data-testid="status-announcer" sx={visuallyHidden}>
+      {message}
     </Box>
   )
 }
