@@ -53,6 +53,7 @@ const SelectorRow = ({ icon, label, placeholder, onClick, onClear, clearTooltip,
         onClick={onClick}
         disabled={disabled}
         data-testid={selectorTestId}
+        id={selectorTestId}
         sx={{
           flex: 1,
           minWidth: 0,
