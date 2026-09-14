@@ -137,6 +137,9 @@ Ensure quality and consistency. Remove OCR artifacts, duplicated lines, and hyph
 Output Requirements
 Produce only Markdown, with no extra commentary. Include image descriptions wrapped with image and image tags if any visual content exists. Deliver a cohesive, readable, and accurate transcription that reflects the parsed PDF as the source of truth, enhanced by precise and detailed information derived from the image`
 
+const imagePrompt = `Produce concise descriptions of images and charts in the page. Use markdown in your response, but do not use level 1 headings.`
+
+
 function stripMarkdownFences(txt: string) {
   let out = (txt ?? '').trim()
   if (out.startsWith('```markdown'))
@@ -176,7 +179,7 @@ async function transcribeWithOllama({ text, bytes }: { text?: string; bytes?: Ui
   return stripMarkdownFences(content)
 }
 
-async function transcribeWithVLLM({ text, bytes }: { text?: string; bytes?: Uint8Array | Buffer }) {
+async function transcribeWithVLLM({ text, bytes, prompt }: { text?: string; bytes?: Uint8Array | Buffer; prompt?: string }) {
   logger.info(`Sending request to vLLM for model: ${MODEL} at URL: ${VLM_URL}`)
   const userText = `Parsed PDF text:\n${text ?? ''}\n\nImage transcription:`
 
@@ -191,7 +194,7 @@ async function transcribeWithVLLM({ text, bytes }: { text?: string; bytes?: Uint
   const payload = {
     model: MODEL,
     messages: [
-      { role: 'system', content: systemPrompt },
+      { role: 'system', content: prompt ? prompt : systemPrompt },
       { role: 'user', content: contentParts },
     ],
     // You can tune temperature, max_tokens, etc.
@@ -244,11 +247,13 @@ async function transcribeWithVLLM({ text, bytes }: { text?: string; bytes?: Uint
 
 // --- PDF parsing ---
 
-async function parsePDFWithGS(id: string, s3key: string) {
+async function parsePDFWithGS(id: string, s3key: string, jobOptions: any) {
   const base_path = path.join(TEMPDATA_PATH, id, '/')
   const images_path = path.join(base_path, 'raster/')
   const text_path = path.join(base_path, 'text/')
   const file_path = path.join(base_path, 'input_'+id+'.pdf')
+
+  const transcribeImages = jobOptions?.transcribeImages != undefined ? jobOptions?.transcribeImages : false 
 
   const safeError = (msg: string, error: unknown) => {
     try {
@@ -368,19 +373,34 @@ async function parsePDFWithGS(id: string, s3key: string) {
         await stat(text_file_path)
         await stat(image_file_path)
 
-        const b64_image = Buffer.from(await readFile(image_file_path, {encoding: null})).toString('base64');
+        const parsedText = await readFile(text_file_path, {encoding: 'utf-8'})
+        let result = parsedText
 
-        const vllm_response = await transcribeWithVLLM({
-          text: await readFile(text_file_path, {encoding: 'utf-8'}),
-          //@ts-expect-error no idea why it is typed as a buffer, when it just concats it to a string
-          bytes: b64_image,
-        })
+        try{
+            if (transcribeImages) {
+              const b64_image = Buffer.from(await readFile(image_file_path, {encoding: null})).toString('base64');
+              
+              const vllm_response = await transcribeWithVLLM({
+                text: parsedText,
+                //@ts-expect-error no idea why it is typed as a buffer, when it just concats it to a string
+                bytes: b64_image,
+                prompt: imagePrompt
+              })
+                   
+              result += "\n\n# Transcriptions of possible images on the page\n\n"
+              result += vllm_response
+          }
+        }
+        catch (error) {
+          safeError('Something failed in vllm pipeline', error)
+        }
 
-        transcriptions.push(vllm_response)
+
+        transcriptions.push(result)
       }
     }
     catch (error){
-      safeError('Something failed in vllm pipeline', error)
+      safeError('Something failed in transcription pipeline', error)
       runStatus = -1
     }
   }
@@ -522,7 +542,7 @@ const worker = new Worker(
   QUEUE_NAME,
   async (job) => {
     ACTIVE_COUNT++
-    const { bytes, pageNumber, text, jobtype, s3key } = job.data || {} //bytes are already in base_64 from png buffer
+    const { bytes, pageNumber, text, jobtype, s3key, jobOptions } = job.data || {} //bytes are already in base_64 from png buffer
 
     logger.info(`Processing job ${job.id}`)
 
@@ -536,7 +556,7 @@ const worker = new Worker(
         if (jobtype === 'pdf-process') {
           let result
           try {
-            result = await parsePDFWithGS(jobId, s3key)
+            result = await parsePDFWithGS(jobId, s3key, jobOptions)
             return result
           }
           catch (error) {
