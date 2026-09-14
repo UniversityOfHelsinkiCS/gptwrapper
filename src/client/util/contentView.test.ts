@@ -2,8 +2,8 @@ import { describe, test, expect } from 'vitest'
 import { resolveContentView } from './contentView'
 import type { User } from '../types'
 
-const admin = { isAdmin: true, acviteCouseIds: [] } as unknown as User
-const student = { isAdmin: false, activeCourseIds: ['course-1'] } as unknown as User
+const admin = { isAdmin: true } as unknown as User
+const student = { isAdmin: false } as unknown as User
 
 const base = {
   isLoading: false,
@@ -36,7 +36,7 @@ describe('resolveContentView', () => {
   test('renders the noaccess page without looping', () => {
     expect(resolveContentView({ ...base, user: null, onNoAccessPage: true })).toBe('content')
   })
-  test('lets a logged-in user reach any course route (the server decides access', () => {
+  test('renders content for a logged-in user', () => {
     expect(resolveContentView({ ...base, user: student })).toBe('content')
   })
 })
