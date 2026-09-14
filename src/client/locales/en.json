@@ -287,6 +287,7 @@
     "pleaseReload": "Please reload the page",
     "noAccess": "No access",
     "noAccessInfo": "You do not currently have access to CurreChat",
+    "noCourseAccess": "You don't have access to the course chat",
     "tooLargeFile": "The file is too large",
     "fileParsingError": "Parsing the file failed",
     "pdfParsingError": "Failed to parse the PDF file. Please check that the file is not corrupted or password-protected.",

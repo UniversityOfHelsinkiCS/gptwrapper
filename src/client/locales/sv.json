@@ -271,6 +271,7 @@
     "pleaseReload": "Vänligen ladda om sidan",
     "noAccess": "Ingen tillgång",
     "noAccessInfo": "Du har för närvarande inte tillgång till CurreChat",
+    "noCourseAccess": "Du har inte tillgång till kurschatten",
     "tooLargeFile": "Filen är för stor",
     "fileParsingError": "Det gick inte att läsa filen",
     "pdfParsingError": "Det gick inte att läsa PDF-filen. Kontrollera att filen inte är skadad eller lösenordsskyddad.",

@@ -3,7 +3,7 @@ import { MapsUgc } from '@mui/icons-material'
 import { enqueueSnackbar } from 'notistack'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Outlet, Route, Routes, useParams } from 'react-router-dom'
+import { Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom'
 import {
   DEFAULT_MODEL,
   DEFAULT_MODEL_TEMPERATURE,
@@ -450,6 +450,16 @@ const ChatV2Content = () => {
   const leftPanelCollapsed = !sideBarOpen || leftPanelFloating
   const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
   const rightPanelContentWidth = rightMenuOpen ? 'var(--right-menu-width)' : '0px'
+
+  useEffect(() => {
+    if (chatInstanceLoadError?.response?.status === 403) {
+      enqueueSnackbar(t('error:noCourseAccess'), { variant: 'error' })
+    }
+  }, [chatInstanceLoadError])
+
+  if (chatInstanceLoadError?.response?.status === 403) {
+    return <Navigate to="/general" replace />
+  }
 
   if (chatInstanceLoadError) {
     return <ApiErrorView error={chatInstanceLoadError} />
