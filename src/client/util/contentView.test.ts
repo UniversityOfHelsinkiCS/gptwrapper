@@ -2,8 +2,7 @@ import { describe, test, expect } from 'vitest'
 import { resolveContentView } from './contentView'
 import type { User } from '../types'
 
-const admin = { isAdmin: true } as unknown as User
-const student = { isAdmin: false } as unknown as User
+const user = {} as User
 
 const base = {
   isLoading: false,
@@ -22,7 +21,7 @@ describe('resolveContentView', () => {
   })
 
   test('keeps rendering when a background refetch fails but a user is cached', () => {
-    expect(resolveContentView({ ...base, isError: true, user: admin })).toBe('content')
+    expect(resolveContentView({ ...base, isError: true, user })).toBe('content')
   })
 
   test('redirects when there is genuinely no user', () => {
@@ -36,7 +35,8 @@ describe('resolveContentView', () => {
   test('renders the noaccess page without looping', () => {
     expect(resolveContentView({ ...base, user: null, onNoAccessPage: true })).toBe('content')
   })
+
   test('renders content for a logged-in user', () => {
-    expect(resolveContentView({ ...base, user: student })).toBe('content')
+    expect(resolveContentView({ ...base, user })).toBe('content')
   })
 })
