@@ -22,6 +22,7 @@ import useCourse from '../../hooks/useCourse'
 import useLocalStorageState, { useLocalStorageStateWithURLDefault } from '../../hooks/useLocalStorageState'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
+import { invalidateUserUsage } from '../../hooks/useUserUsage'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import sidebarOpen from '../../assets/sidebar-open.svg'
 import { ChatBox } from './ChatBox'
@@ -319,6 +320,7 @@ const ChatV2Content = () => {
       if ('stream' in res) {
         await processStream(res.stream, generationInfo)
         clearRetryTimeout()
+        invalidateUserUsage()
       } else {
         console.error('API error: No stream in response')
         handleCancel('error')
@@ -333,6 +335,7 @@ const ChatV2Content = () => {
         console.error(err)
       }
       handleCancel(abortReason === 'user_aborted' ? 'canceled' : 'error')
+      invalidateUserUsage()
     }
   }
 
