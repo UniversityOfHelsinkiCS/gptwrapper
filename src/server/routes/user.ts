@@ -20,19 +20,10 @@ userRouter.get('/login', async (req, res) => {
 
   const hasIamAccess = checkIamAccess(iamGroups)
 
-  const [enrolments, teacherCourses] = await Promise.all([getEnrolledCourses(user), getTeachedCourses(user)])
-
-  const teacherCourseIds = teacherCourses.map((c) => c.courseId) as string[]
-
-  const enrolledCourseIds = enrolments.map((enrolment) => enrolment.chatInstance.courseId) as string[]
-
-  const courses = enrolledCourseIds.concat(teacherCourseIds)
-  // All authenticated users now have access to general chat
-
-  user.ownCourses = teacherCourseIds
-  user.activeCourseIds = courses
-
   let dbUser: User | null = null
+
+  // this is here temporarily to retain upsert functionality and not break e2e tests.
+  await Promise.all([getEnrolledCourses(user), getTeachedCourses(user)])
 
   // When acual user logs in, update the users info.
   if (!request.hijackedBy) {
