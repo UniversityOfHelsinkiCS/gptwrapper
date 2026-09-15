@@ -4,6 +4,7 @@ import { BlueButton } from './general/Buttons'
 import { useRef, useState } from 'react'
 import { NewConversationConfirmConfigurator, useNewConversationConfirmMutation } from '../Settings/NewConversationConfirmConfigurator'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import { focusIndicatorStyle } from 'src/client/util/accessibility'
 
 export const ResetConfirmModal = ({
   open,
@@ -64,11 +65,31 @@ export const ResetConfirmModal = ({
         <DialogContentText mb={2}>{t('chat:confirmResetMessage')}</DialogContentText>
         <Box display="flex" flexDirection="column" gap={1}>
           <FormControlLabel
-            control={<Checkbox checked={sendEmail} onChange={(ev) => setSendEmail(ev.target.checked)} data-testid="send-email" />}
+            control={
+              <Checkbox
+                checked={sendEmail}
+                disableRipple
+                onChange={(ev) => setSendEmail(ev.target.checked)}
+                data-testid="send-email"
+                sx={{
+                  ...focusIndicatorStyle(),
+                }}
+              />
+            }
             label={t('email:save')}
           />
           <FormControlLabel
-            control={<Checkbox checked={downloadFile} onChange={(ev) => setDownloadFile(ev.target.checked)} data-testid="download-file" />}
+            control={
+              <Checkbox
+                checked={downloadFile}
+                disableRipple
+                onChange={(ev) => setDownloadFile(ev.target.checked)}
+                data-testid="download-file"
+                sx={{
+                  ...focusIndicatorStyle(),
+                }}
+              />
+            }
             label={t('download:save')}
           />
           {downloadFile && (
