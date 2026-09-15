@@ -96,9 +96,6 @@ const CoursePrompts = (props: CoursePromptsProps) => {
     if (!course.courseId) return
     handleChangePrompt(prompt)
     navigate(`/${course.courseId}`)
-    requestAnimationFrame(() => {
-      window.document.getElementById('choose-prompt-button')?.focus()
-    })
   }
 
   return (

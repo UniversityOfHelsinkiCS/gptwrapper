@@ -846,6 +846,7 @@
     "editCancelled": "Muokkaus peruutettiin",
     "saveMyPrompt": "Lisää oma alustus",
     "newCoursePrompt": "Lisää uusi alustus kurssille {{name}}",
-    "toggleMyPrompts": "Näytä tai piilota omat alustukset"
+    "toggleMyPrompts": "Näytä tai piilota omat alustukset",
+    "promptInUse": "Käytössä oleva alustus: {{prompt}}"
   }
 }

@@ -1,10 +1,11 @@
 import { Box, Divider, Modal, Typography } from '@mui/material'
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { TextButton } from './general/Buttons'
 import CloseIcon from '@mui/icons-material/Close'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { usePromptEditorState } from '../Prompt/context'
+import { requestFocusAfterNavigate } from '../../util/accessibility'
 
 const ModalTitle = () => {
   const { t } = useTranslation()
@@ -30,6 +31,16 @@ const TemplateModal: React.FC<{ open: boolean; root: string; children: React.Rea
 
   const { hasChanges, setHasChanges, cacheKey, setCacheKey } = usePromptEditorState()
 
+  // Captured synchronously during the initial render, before MUI's own focus trap can move
+  // focus into the dialog — this is who opened the modal, and the default place focus should
+  // return to when it closes (a more specific action can override this).
+  const openerRef = useRef(document.activeElement as HTMLElement | null)
+
+  useEffect(() => {
+    const openerId = openerRef.current?.id
+    if (openerId) requestFocusAfterNavigate(openerId)
+  }, [])
+
   const handleClose = () => {
     if (hasChanges) {
       const shouldClose = window.confirm(t('prompt:unSavedChanges'))
@@ -45,7 +56,7 @@ const TemplateModal: React.FC<{ open: boolean; root: string; children: React.Rea
   }
 
   return (
-    <Modal open={open} onClose={handleClose}>
+    <Modal open={open} onClose={handleClose} disableRestoreFocus>
       <Box
         role="dialog"
         aria-modal="true"

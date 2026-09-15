@@ -820,6 +820,7 @@
     "editCancelled": "Redigeringen avbröts",
     "saveMyPrompt": "Lägg till en ny personlig prompt",
     "newCoursePrompt": "Lägg till en ny prompt för kurs {{name}}",
-    "toggleMyPrompts": "Visa eller dölj personliga prompter"
+    "toggleMyPrompts": "Visa eller dölj personliga prompter",
+    "promptInUse": "Aktiv prompt: {{prompt}}"
   }
 }

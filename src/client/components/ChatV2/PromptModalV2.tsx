@@ -286,9 +286,6 @@ const PromptModalV2 = () => {
     if (!confirmClose()) return
     handleChangePrompt(prompt)
     navigate(`/general`)
-    requestAnimationFrame(() => {
-      window.document.getElementById('choose-prompt-button')?.focus()
-    })
   }
 
   const confirmClose = () => {
@@ -432,9 +429,6 @@ const PromptModalV2 = () => {
                       if (!confirmClose()) return
                       handleChangePrompt(prompt)
                       navigate(`/general`)
-                      requestAnimationFrame(() => {
-                        window.document.getElementById('choose-prompt-button')?.focus()
-                      })
                     }}
                   />
                 </Box>
@@ -591,9 +585,6 @@ const PromptModalV2 = () => {
                       const course = allCourses?.find((c) => c.id === previewPrompt.chatInstanceId)
                       if (course && course.courseId) navigate(`/${course.courseId}`)
                       if (!course) navigate(`/general`)
-                      requestAnimationFrame(() => {
-                        window.document.getElementById('choose-prompt-button')?.focus()
-                      })
                     }}
                   >
                     {t('settings:choosePrompt')}

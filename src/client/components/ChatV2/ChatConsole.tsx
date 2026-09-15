@@ -1,7 +1,8 @@
 import { Box, IconButton, Tooltip, Typography } from '@mui/material'
 import type { ReactNode } from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import type { User } from '../../types'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ChatIcon from '@mui/icons-material/Chat'
@@ -10,6 +11,7 @@ import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 import { getLanguageValue } from '@shared/utils'
 import { usePromptState } from './PromptState'
 import useCourse from '../../hooks/useCourse'
+import { consumePendingFocusTarget } from '../../util/accessibility'
 
 const SectionLabel = ({ children }: { children: ReactNode }) => (
   <Typography
@@ -148,7 +150,10 @@ const ContextRow = ({
           component="button"
           onClick={onClick}
           data-testid={selectorTestId}
-          aria-description={ariaDescription}
+          aria-label={ariaDescription}
+          aria-description={t('accessibility:promptInUse', {
+            prompt: [hasType ? typeLabel : null, promptLabel].filter(Boolean).join(' '),
+          })}
           id={selectorTestId}
           sx={{
             position: 'relative',
@@ -238,6 +243,7 @@ const ContextRow = ({
 
 export default function ChatConsole({ user }: { user?: User | null }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { courseId } = useParams()
   const { t, i18n } = useTranslation()
   const { activePrompt, handleChangePrompt } = usePromptState()
@@ -247,6 +253,10 @@ export default function ChatConsole({ user }: { user?: User | null }) {
 
   const promptsPath = `/${courseId ?? 'general'}/prompts`
   const courseLabel = isCourseChat ? (course ? getLanguageValue(course.name, i18n.language) : '') : undefined
+
+  useEffect(() => {
+    consumePendingFocusTarget()
+  }, [location.pathname])
 
   return (
     <Box sx={{ pb: 1 }}>

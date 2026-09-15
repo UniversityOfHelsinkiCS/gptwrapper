@@ -845,6 +845,7 @@
     "editCancelled": "Editing canceled",
     "saveMyPrompt": "Add a new personal prompt",
     "newCoursePrompt": "Add a new prompt for course {{name}}",
-    "toggleMyPrompts": "Show or hide personal prompts"
+    "toggleMyPrompts": "Show or hide personal prompts",
+    "promptInUse": "Currently active prompt: {{prompt}}"
   }
 }
