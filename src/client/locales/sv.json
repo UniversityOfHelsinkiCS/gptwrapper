@@ -821,6 +821,8 @@
     "saveMyPrompt": "Lägg till en ny personlig prompt",
     "newCoursePrompt": "Lägg till en ny prompt för kurs {{name}}",
     "toggleMyPrompts": "Visa eller dölj personliga prompter",
-    "promptInUse": "Aktiv prompt: {{prompt}}"
+    "promptInUse": "Aktiv prompt: {{prompt}}",
+    "promptCleared": "Prompten har rensats",
+    "promptSelect": "Välj en prompt"
   }
 }

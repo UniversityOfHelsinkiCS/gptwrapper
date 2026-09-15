@@ -847,6 +847,8 @@
     "saveMyPrompt": "Lisää oma alustus",
     "newCoursePrompt": "Lisää uusi alustus kurssille {{name}}",
     "toggleMyPrompts": "Näytä tai piilota omat alustukset",
-    "promptInUse": "Käytössä oleva alustus: {{prompt}}"
+    "promptInUse": "Käytössä oleva alustus: {{prompt}}",
+    "promptCleared": "Alustus poistettu käytöstä",
+    "promptSelect": "Valitse alustus"
   }
 }

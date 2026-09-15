@@ -20,6 +20,7 @@ import UsageSelector from './UsageSelector'
 import { DEFAULT_TOKEN_LIMIT, ValidModelName } from '../../../config'
 import { Course, Prompt } from 'src/client/types'
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat'
+import { StatusAnnouncer } from '../common/StatusAnnouncer'
 
 const skipLinkSx = {
   ...visuallyHidden,
@@ -259,6 +260,7 @@ export const ChatBox = ({
           }}
         >
           <Box>
+            <StatusAnnouncer message={!promptName ? t('accessibility:promptCleared') : ''} />
             <Typography sx={visuallyHidden} id="hidden-prompt-description">
               {t('common:prompt')}: {typeLabel ? `${typeLabel} -` : ''} {promptName ? ` ${promptName}` : t('chat:noPrompt')}
             </Typography>

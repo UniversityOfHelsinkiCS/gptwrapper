@@ -11,7 +11,7 @@ import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 import { getLanguageValue } from '@shared/utils'
 import { usePromptState } from './PromptState'
 import useCourse from '../../hooks/useCourse'
-import { consumePendingFocusTarget } from '../../util/accessibility'
+import { consumePendingFocusTarget, requestFocusAfterNavigate } from '../../util/accessibility'
 
 const SectionLabel = ({ children }: { children: ReactNode }) => (
   <Typography
@@ -43,15 +43,29 @@ type SelectorRowProps = {
   selectorTestId?: string
   clearTestId?: string
   ariaLabel?: string
+  ariaDescription?: string
 }
 
-const SelectorRow = ({ icon, label, placeholder, onClick, onClear, clearTooltip, disabled, selectorTestId, clearTestId, ariaLabel }: SelectorRowProps) => {
+const SelectorRow = ({
+  icon,
+  label,
+  placeholder,
+  onClick,
+  onClear,
+  clearTooltip,
+  disabled,
+  selectorTestId,
+  clearTestId,
+  ariaLabel,
+  ariaDescription,
+}: SelectorRowProps) => {
   const hasValue = Boolean(label)
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, px: 3, mt: 1 }}>
       <Box
         component="button"
         aria-label={ariaLabel}
+        aria-description={ariaDescription}
         onClick={onClick}
         disabled={disabled}
         data-testid={selectorTestId}
@@ -124,6 +138,7 @@ const ContextRow = ({
     return (
       <SelectorRow
         ariaLabel={t('sidebar:manageCourseAndPrompts')}
+        ariaDescription={t('accessibility:promptSelect')}
         icon={<ChatIcon />}
         placeholder={placeholder}
         onClick={onClick}
@@ -278,6 +293,7 @@ export default function ChatConsole({ user }: { user?: User | null }) {
           onClear={
             activePrompt
               ? () => {
+                  requestFocusAfterNavigate('chat-input')
                   handleChangePrompt(undefined)
                   navigate('/general')
                 }
