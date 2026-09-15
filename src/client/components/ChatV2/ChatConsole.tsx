@@ -102,7 +102,7 @@ type ContextRowProps = {
   clearTooltip?: string
   selectorTestId?: string
   clearTestId?: string
-  ariaDescription?: string
+  ariaLabel?: string
 }
 
 const ContextRow = ({
@@ -115,14 +115,20 @@ const ContextRow = ({
   clearTooltip,
   selectorTestId,
   clearTestId,
-  ariaDescription,
+  ariaLabel,
 }: ContextRowProps) => {
   const hasPrompt = Boolean(promptLabel)
   const { t } = useTranslation()
 
   if (!hasPrompt) {
     return (
-      <SelectorRow ariaLabel={t('sidebar:coursesAndPrompts')} icon={<ChatIcon />} placeholder={placeholder} onClick={onClick} selectorTestId={selectorTestId} />
+      <SelectorRow
+        ariaLabel={t('sidebar:manageCourseAndPrompts')}
+        icon={<ChatIcon />}
+        placeholder={placeholder}
+        onClick={onClick}
+        selectorTestId={selectorTestId}
+      />
     )
   }
 
@@ -150,7 +156,7 @@ const ContextRow = ({
           component="button"
           onClick={onClick}
           data-testid={selectorTestId}
-          aria-label={ariaDescription}
+          aria-label={ariaLabel}
           aria-description={t('accessibility:promptInUse', {
             prompt: [hasType ? typeLabel : null, promptLabel].filter(Boolean).join(' '),
           })}
@@ -256,14 +262,14 @@ export default function ChatConsole({ user }: { user?: User | null }) {
 
   useEffect(() => {
     consumePendingFocusTarget()
-  }, [location.pathname])
+  }, [location.pathname, activePrompt])
 
   return (
     <Box sx={{ pb: 1 }}>
       <Box sx={{ mb: 1 }} data-testid={activePrompt ? 'prompt-name' : undefined}>
         <SectionLabel>{t('sidebar:coursesAndPrompts')}</SectionLabel>
         <ContextRow
-          ariaDescription={t('sidebar:manageCourseAndPrompts')}
+          ariaLabel={t('sidebar:manageCourseAndPrompts')}
           courseLabel={courseLabel}
           promptLabel={activePrompt?.name}
           promptType={activePrompt?.type}
