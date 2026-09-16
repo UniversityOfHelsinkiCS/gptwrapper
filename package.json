@@ -22,6 +22,7 @@
     "test:e2e:logging": "playwright test --reporter=line --workers=1",
     "test:evals": "node evals/rag-eval.spec.ts",
     "test:record": "playwright codegen -o e2e/recorded.spec.ts localhost:3000",
+    "axe:scan": "playwright test --project=axe --workers=1 --reporter=list",
     "translations": "node scripts/analyzeTranslations.js",
     "migrations": "node scripts/analyzeMigrationNames.js",
     "knip": "knip"
@@ -49,6 +50,7 @@
     }
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@babel/preset-typescript": "7.23.3",
     "@locator/babel-jsx": "0.5.1",
     "@playwright/test": "1.57.0",
@@ -67,6 +69,7 @@
     "@types/react-syntax-highlighter": "15.5.13",
     "@vitejs/plugin-react": "5.1.1",
     "@vitest/coverage-v8": "^4.1.5",
+    "axe-core": "4.13.0",
     "concurrently": "9.0.0",
     "eslint-plugin-i18next": "6.1.2",
     "globals": "16.4.0",

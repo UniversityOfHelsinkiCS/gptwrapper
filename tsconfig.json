@@ -22,6 +22,6 @@
       "@config": ["src/config.ts"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "e2e/axe"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -55,6 +55,12 @@ export default defineConfig({
           testDir: './e2e',
           use: { ...devices['Desktop Chrome'] },
         },
+    {
+      name: 'axe',
+      testDir: './e2e/checks',
+      testMatch: '**/axe-scan.spec.ts',
+      use: { ...devices['Desktop Chrome'] },
+    },
 
     // {
     //   name: 'firefox',
