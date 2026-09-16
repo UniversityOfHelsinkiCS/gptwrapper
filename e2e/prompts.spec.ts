@@ -72,7 +72,7 @@ test.describe('Prompts', () => {
     await page.getByTestId(`prompt-row-${newPromptName}`).click()
 
     await expect(page.getByTestId(`prompt-preview-title-for-${newPromptName}`)).toContainText(newPromptName)
-    await page.getByTestId(`prompt-row-${newPromptName}`).locator('button').click()
+    await page.getByTestId(`change-to-prompt-${newPromptName}`).click()
 
     // Now in chat view
     // The prompt is active.
@@ -165,7 +165,7 @@ test.describe('Prompts', () => {
     // Select the prompt by clicking its row
     await page.getByTestId(`prompt-row-${newPromptName}`).click()
     await expect(page.getByTestId(`prompt-preview-title-for-${newPromptName}`)).toContainText(newPromptName)
-    await page.getByTestId(`prompt-row-${newPromptName}`).locator('button').click()
+    await page.getByTestId(`change-to-prompt-${newPromptName}`).click()
 
     // Now in chat view
     // The prompt is active.

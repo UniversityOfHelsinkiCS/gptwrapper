@@ -104,7 +104,6 @@ export const PromptListItem = ({
           paddingRight: '6rem',
         },
       }}
-      data-testid={`prompt-row-${prompt.name}`}
     >
       <ListItemButton
         className={prompt.id !== activePromptId ? 'prompt-list-item__button' : undefined}
@@ -122,6 +121,7 @@ export const PromptListItem = ({
           pr: prompt.id === activePromptId ? '2.5rem' : undefined,
           ...focusIndicatorStyle(),
         }}
+        data-testid={`prompt-row-${prompt.name}`}
       >
         <ListItemText className="prompt-list-item__text" primary={prompt.name} slotProps={{ primary: { noWrap: true } }} sx={{ minWidth: 0 }} />
         {prompt.id === activePromptId && (
@@ -140,7 +140,7 @@ export const PromptListItem = ({
           size="small"
           aria-label={t('accessibility:choosePrompt', { name: prompt.name })}
           variant="contained"
-          data-testid="change-to-prompt-button"
+          data-testid={`change-to-prompt-${prompt.name}`}
           className="change-prompt-button"
           onClick={(e) => {
             e.stopPropagation()
