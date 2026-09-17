@@ -19,8 +19,6 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
 
   declare totalUsage: CreationOptional<bigint>
 
-  declare activeCourseIds: CreationOptional<string[]>
-
   declare lastName: CreationOptional<string>
 
   declare firstNames: CreationOptional<string>
@@ -69,11 +67,6 @@ User.init(
     totalUsage: {
       type: DataTypes.BIGINT,
       defaultValue: 0,
-    },
-    activeCourseIds: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: false,
-      defaultValue: [],
     },
     lastName: {
       type: DataTypes.STRING,

@@ -15,7 +15,6 @@ const users: InferCreationAttributes<User>[] = [
     usage: 0,
     primaryEmail: 'test@example.com',
     studentNumber: '123456',
-    activeCourseIds: [],
     termsAcceptedAt: null,
     preferences: {},
     lastLoggedInAt: new Date(),

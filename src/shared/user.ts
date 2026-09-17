@@ -19,8 +19,6 @@ export interface User {
   isAdmin: boolean
   isPowerUser: boolean
   isEmployee: boolean
-  activeCourseIds?: string[]
-  ownCourses?: string[]
   usage?: number
   isStatsViewer: boolean
   isCourseCreator: boolean
