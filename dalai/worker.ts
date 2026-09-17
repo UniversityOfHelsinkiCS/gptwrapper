@@ -137,7 +137,7 @@ Ensure quality and consistency. Remove OCR artifacts, duplicated lines, and hyph
 Output Requirements
 Produce only Markdown, with no extra commentary. Include image descriptions wrapped with image and image tags if any visual content exists. Deliver a cohesive, readable, and accurate transcription that reflects the parsed PDF as the source of truth, enhanced by precise and detailed information derived from the image`
 
-const imagePrompt = `Produce concise descriptions of images and charts in the page. Use markdown in your response, but do not use level 1 headings. If there are no images return empty output.`
+const imagePrompt = `Produce concise descriptions of visual elements in the given page. Only transcribe elements that would not be detected by classical OCR solutions (like images, equations and charts), along with their context.`
 
 
 function stripMarkdownFences(txt: string) {
