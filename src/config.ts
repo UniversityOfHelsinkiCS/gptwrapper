@@ -48,12 +48,6 @@ export type ModelConfig = {
  */
 export const validModels: ModelConfig[] = [
   {
-    name: 'gpt-4o-mini',
-    context: 128_000,
-    streamVersion: 'v3',
-    provider: ModelProvider.Azure,
-  },
-  {
     name: 'gpt-5-mini',
     context: 128_000,
     streamVersion: 'v3',
@@ -119,9 +113,9 @@ export const isMockModel = (modelName: ValidModelName): boolean => modelName ===
 
 export const isVertexModel = (modelName: ValidModelName): boolean => vertexModels.some((model) => model.name === modelName)
 
-export const DEFAULT_MODEL = ValidModelNameSchema.parse(process.env.DEFAULT_MODEL || 'gpt-4o-mini')
+export const DEFAULT_MODEL = ValidModelNameSchema.parse(process.env.DEFAULT_MODEL || 'gpt-5-mini')
 
-export const FREE_MODEL = ValidModelNameSchema.parse(process.env.FREE_MODEL || 'gpt-4o-mini') // as it was decided in 23th Sept 2024 meeting
+export const FREE_MODEL = ValidModelNameSchema.parse(process.env.FREE_MODEL || 'gpt-5-mini')
 
 export const DEFAULT_ASSISTANT_INSTRUCTIONS = '' // 11th August 2025 we decided it should be empty
 

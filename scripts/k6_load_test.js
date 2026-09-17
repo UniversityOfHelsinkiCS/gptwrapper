@@ -33,7 +33,7 @@ const data = {
   options: {
     messages: [],
     assistantInstructions: 'Olet avulias avustaja',
-    model: 'gpt-4o-mini',
+    model: 'gpt-5-mini',
     modelTemperature: 0.5,
     saveConsent: false,
     prevResponseId: '',
