@@ -27,7 +27,6 @@ const usersHandler = async (users: SisuUser[]) => {
       id: user.id,
       language: parsePreferredLanguageUrnToLanguage(user.preferredLanguageUrn),
       username: user.eduPersonPrincipalName ? user.eduPersonPrincipalName.split('@')[0] : user.id,
-      active_course_ids: [],
       lastName: user.lastName,
       firstNames: user.firstNames,
       studentNumber: user.studentNumber,
