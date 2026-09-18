@@ -69,7 +69,7 @@ if (CA !== undefined && REDIS_PASS !== undefined) {
 const connection = new Redis(creds)
 
 const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE ?? 'vlm-queue'
-const VLM_URL = process.env.VLM_URL ?? 'http://laama-svc:11434/api/generate'
+const VLM_URL = process.env.VLM_URL ?? 'http://laama-svc:11434/v1/chat/completions'
 const MODEL = process.env.MODEL ?? 'qwen3-vl:4b-instruct-bf16'
 const PROVIDER = process.env.PROVIDER ?? ('ollama' as 'ollama' | 'vllm')
 
@@ -137,7 +137,7 @@ Ensure quality and consistency. Remove OCR artifacts, duplicated lines, and hyph
 Output Requirements
 Produce only Markdown, with no extra commentary. Include image descriptions wrapped with image and image tags if any visual content exists. Deliver a cohesive, readable, and accurate transcription that reflects the parsed PDF as the source of truth, enhanced by precise and detailed information derived from the image`
 
-const imagePrompt = `Produce concise descriptions of visual elements in the given page. Only transcribe elements that would not be detected by classical OCR solutions (like images, equations and charts), along with their context.`
+const imagePrompt = `Produce concise descriptions of visual elements in the given page. Only transcribe elements that would not be detected by classical OCR solutions (like images, equations and charts), along with their context. Only return the results, without additional text.`
 
 
 function stripMarkdownFences(txt: string) {
@@ -192,7 +192,7 @@ async function transcribeWithVLLM({ text, bytes, prompt }: { text?: string; byte
   })
 
   const payload = {
-    model: MODEL,
+    // model: MODEL,
     messages: [
       { role: 'system', content: prompt ? prompt : systemPrompt },
       { role: 'user', content: contentParts },
@@ -374,7 +374,8 @@ async function parsePDFWithGS(id: string, s3key: string, jobOptions: any) {
         await stat(image_file_path)
 
         const parsedText = await readFile(text_file_path, {encoding: 'utf-8'})
-        let result = parsedText
+        let result = `# Text extracted from the page\n\n`
+        result += parsedText
 
         try{
             if (transcribeImages) {
