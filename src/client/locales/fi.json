@@ -861,6 +861,8 @@
     "promptCleared": "Alustus poistettu käytöstä",
     "promptSelect": "Valitse alustus",
     "globalMenu": "Tietoa ja asetuksia",
-    "loading": "Ladataan"
+    "loading": "Ladataan",
+    "chooseLanguageVersion": "Valitse kieliversio alustukselle {{name}}",
+    "languageSelected": "Kieliversio vaihdettu alustukselle {{name}}"
   }
 }

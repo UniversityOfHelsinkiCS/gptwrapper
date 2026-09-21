@@ -8,6 +8,7 @@ import type { CoursesViewCourse } from '../../hooks/useUserCourses'
 import useUniversityPrompts, { groupLanguages, type UniversityPromptGroup } from '../../hooks/useUniversityPrompts'
 import type { Prompt, PromptLanguage } from '../../types'
 import CopyPromptMenu from './CopyPromptMenu.tsx'
+import { StatusAnnouncer } from '../common/StatusAnnouncer.tsx'
 
 const isPromptLanguage = (language: string): language is PromptLanguage => language === 'fi' || language === 'en' || language === 'sv'
 
@@ -58,42 +59,60 @@ const UniversityPromptCard = ({
     <>
       <Paper
         variant="outlined"
-        role="button"
-        tabIndex={0}
-        aria-label={
-          isTemplate
-            ? `${t('uniPrompts:categoryTemplate')} — ${prompt.name} ${t('uniPrompts:copyTo')}`
-            : `${t('uniPrompts:categoryUniversity')} — ${prompt.name} ${t('accessibility:chooseUniPrompt')}`
-        }
-        onClick={(event) => activate(event.currentTarget)}
-        onKeyDown={(event) => {
-          if (event.key !== 'Enter' && event.key !== ' ') return
-          event.preventDefault()
-          activate(event.currentTarget)
-        }}
         sx={{
+          position: 'relative',
           ml: 0.5,
           p: 2,
           borderRadius: '8px',
-          cursor: 'pointer',
           display: 'flex',
           flexDirection: 'column',
           backgroundColor: 'background.elevated',
           transition: 'border-color 120ms ease, background-color 120ms ease',
-          '&:hover, &:focus-visible': {
+          '&:hover, &:focus-within': {
             borderColor: 'primary.main',
             backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.04),
           },
         }}
-        data-testid={`uni-prompt-card-${prompt.name}`}
       >
-        <Box sx={{ mb: 1.5 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, wordBreak: 'break-word' }}>
+        <Box
+          component="button"
+          type="button"
+          aria-label={
+            isTemplate
+              ? `${t('uniPrompts:categoryTemplate')} ${prompt.name} ${t('uniPrompts:copyTo')}`
+              : `${t('uniPrompts:categoryUniversity')} ${prompt.name} ${t('accessibility:chooseUniPrompt')}`
+          }
+          aria-describedby={prompt.userInstructions ? `uni-prompt-user-instructions-${group.id}` : undefined}
+          onClick={(event) => activate(event.currentTarget)}
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            m: 0,
+            p: 0,
+            border: 0,
+            borderRadius: 'inherit',
+            background: 'none',
+            cursor: 'pointer',
+            font: 'inherit',
+          }}
+          data-testid={`uni-prompt-card-${prompt.name}`}
+        />
+
+        <Box sx={{ mb: 1.5, pointerEvents: 'none' }}>
+          <Typography variant="subtitle2" component="h3" sx={{ fontWeight: 600, wordBreak: 'break-word' }}>
             {prompt.name}
           </Typography>
 
           {prompt.userInstructions && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+            <Typography
+              id={`uni-prompt-user-instructions-${group.id}`}
+              variant="body2"
+              color="text.secondary"
+              aria-hidden
+              sx={{ mt: 0.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+            >
               {prompt.userInstructions}
             </Typography>
           )}
@@ -102,8 +121,8 @@ const UniversityPromptCard = ({
         {languages.length > 0 && (
           <Box
             role="group"
-            aria-label={t('uniPrompts:selectLanguage')}
-            sx={{ display: 'flex', gap: 0.75, mt: 'auto', pt: 1.25, borderTop: '1px solid', borderColor: 'divider' }}
+            aria-label={t('accessibility:chooseLanguageVersion', { name: prompt.name })}
+            sx={{ position: 'relative', zIndex: 1, display: 'flex', gap: 0.75, mt: 'auto', pt: 1.25, borderTop: '1px solid', borderColor: 'divider' }}
             data-testid={`uni-prompt-languages-${group.id}`}
           >
             {languages.map((option) => (
@@ -119,14 +138,16 @@ const UniversityPromptCard = ({
                 sx={{
                   px: 1.1,
                   py: 0.4,
+                  minWidth: 24,
+                  minHeight: 24,
                   lineHeight: 1,
                   fontSize: '0.6875rem',
                   letterSpacing: '0.06em',
                   borderRadius: '4px',
                   textTransform: 'uppercase',
-                  color: 'text.disabled',
+                  color: 'text.primary',
                   '&.Mui-selected, &.Mui-selected:hover': {
-                    color: 'primary.main',
+                    color: 'primary',
                     borderColor: (theme) => alpha(theme.palette.primary.main, 0.5),
                     backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.12),
                   },
@@ -139,6 +160,7 @@ const UniversityPromptCard = ({
           </Box>
         )}
       </Paper>
+      {languages.length > 0 && <StatusAnnouncer message={language ? t('accessibility:languageSelected', { name: prompt.name }) : ''} />}
 
       {isTemplate && <CopyPromptMenu prompt={prompt} targets={copyTargets} anchorEl={copyAnchor} onClose={() => setCopyAnchor(null)} onCopied={onCopied} />}
     </>
@@ -165,7 +187,11 @@ const CardGrid = ({
 
 const SectionLabel = ({ children }: { children: string }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, mt: 3, mb: 1.5 }}>
-    <Typography variant="overline" sx={{ fontWeight: 500, letterSpacing: '0.09em', lineHeight: 1, color: 'text.secondary', whiteSpace: 'nowrap' }}>
+    <Typography
+      variant="overline"
+      component="h2"
+      sx={{ fontWeight: 500, letterSpacing: '0.09em', lineHeight: 1, color: 'text.secondary', whiteSpace: 'nowrap' }}
+    >
       {children}
     </Typography>
     <Box sx={{ flex: 1, height: '1px', backgroundColor: 'divider' }} />
@@ -202,7 +228,7 @@ const UniversityPromptGallery = ({
     <Box sx={{ overflowY: 'auto', pr: 1 }} data-testid="uni-prompt-gallery">
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mt: 1 }}>
         <AccountBalanceIcon color="primary" fontSize="large" />
-        <Typography variant="h4" fontWeight="bold" sx={{ wordBreak: 'break-word', hyphens: 'auto' }}>
+        <Typography variant="h4" component="h1" fontWeight="bold" sx={{ wordBreak: 'break-word', hyphens: 'auto' }}>
           {t('uniPrompts:galleryNav')}
         </Typography>
       </Box>
@@ -220,7 +246,7 @@ const UniversityPromptGallery = ({
       {templateGroups.length > 0 && (
         <Box sx={{ mt: 3, p: 2.5, borderRadius: '10px', border: '1px solid', borderColor: 'divider', backgroundColor: 'background.subtle' }}>
           <Box sx={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', columnGap: 1.5, mb: 1.75 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 600 }}>
               {t('uniPrompts:sectionTemplates')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
