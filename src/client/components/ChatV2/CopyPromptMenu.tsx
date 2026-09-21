@@ -83,10 +83,12 @@ const CopyPromptMenu = ({
       onClose={handleClose}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      slotProps={{ list: { 'aria-label': t('prompt:copyPromptTo'), sx: { pt: 0, minWidth: 300 } }, paper: { sx: { maxHeight: 400 } } }}
+      slotProps={{ list: { 'aria-labelledby': 'copy-prompt-to-header', sx: { pt: 0, minWidth: 300 } }, paper: { sx: { maxHeight: 400 } } }}
       data-testid="copy-prompt-menu"
     >
-      <ListSubheader sx={{ lineHeight: 2.5 }}>{t('prompt:copyPromptTo')}</ListSubheader>
+      <ListSubheader id="copy-prompt-to-header" sx={{ lineHeight: 2.5 }}>
+        {t('prompt:copyPromptTo')}
+      </ListSubheader>
 
       <MenuItem onClick={() => handleCopy()} disabled={isPending} data-testid="copy-target-personal" sx={{ mt: 1 }}>
         <ListItemIcon sx={{ minWidth: 36 }}>
