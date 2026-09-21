@@ -85,7 +85,7 @@ const SelectorRow = ({
           fontFamily: 'inherit',
           fontSize: '0.875rem',
           fontWeight: hasValue ? 500 : 400,
-          color: hasValue ? 'text.primary' : 'text.disabled',
+          color: hasValue ? 'text.primary' : 'text.secondary',
           backgroundColor: hasValue ? 'action.hover' : 'transparent',
           transition: 'background-color .15s ease',
           '&:hover': { backgroundColor: disabled ? 'transparent' : 'action.selected' },

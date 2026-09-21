@@ -46,7 +46,7 @@ export const ConversationSplash = ({
         }}
       />
 
-      <Box sx={{ opacity: 0.5 }}>
+      <Box sx={{ opacity: 0.75 }}>
         {courseName ? (
           <>
             <Typography

@@ -280,6 +280,7 @@ export const ChatBox = ({
               slotProps={{
                 htmlInput: {
                   'data-testid': 'chat-input',
+                  'aria-label': t('chat:writeHere'),
                 },
                 input: {
                   disableUnderline: true,
