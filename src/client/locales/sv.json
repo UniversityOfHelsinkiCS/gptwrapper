@@ -837,6 +837,7 @@
     "globalMenu": "Information och inställningar",
     "loading": "Laddar",
     "chooseLanguageVersion": "Välj språkversion för prompten {{name}}",
-    "languageSelected": "Språkversionen har ändrats för prompten {{name}}"
+    "languageSelected": "Språkversionen har ändrats för prompten {{name}}",
+    "selectModel": "Välj språkmodell"
   }
 }

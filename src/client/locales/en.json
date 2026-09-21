@@ -862,6 +862,7 @@
     "globalMenu": "Information and settings",
     "loading": "Loading",
     "chooseLanguageVersion": "Choose language version for prompt {{name}}",
-    "languageSelected": "Language version changed for prompt {{name}}"
+    "languageSelected": "Language version changed for prompt {{name}}",
+    "selectModel": "Select language model"
   }
 }

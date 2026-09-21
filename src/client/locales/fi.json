@@ -863,6 +863,7 @@
     "globalMenu": "Tietoa ja asetuksia",
     "loading": "Ladataan",
     "chooseLanguageVersion": "Valitse kieliversio alustukselle {{name}}",
-    "languageSelected": "Kieliversio vaihdettu alustukselle {{name}}"
+    "languageSelected": "Kieliversio vaihdettu alustukselle {{name}}",
+    "selectModel": "Valitse kielimalli"
   }
 }

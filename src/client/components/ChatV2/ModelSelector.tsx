@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { FREE_MODEL, inProduction, isMockModel, ValidModelName, validModels } from '@config'
-import { Box, Chip, MenuItem, Typography, Menu, alpha, ListSubheader } from '@mui/material'
+import { Box, Chip, MenuItem, Typography, Menu, ListSubheader } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -60,7 +60,8 @@ const ModelSelector = ({
         onClick={disabled ? undefined : handleClick}
         disabled={disabled}
         data-testid="model-selector"
-        aria-label={`${t('sidebar:modelTitle')} ${displayModel} `}
+        aria-label={t('accessibility:selectModel')}
+        aria-describedby="current-model"
         sx={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -82,18 +83,19 @@ const ModelSelector = ({
         }}
       >
         <PsychologyIcon sx={{ fontSize: 14, color: 'primary.main' }} />
-        <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: 'text.primary', lineHeight: 1 }}>{displayModel}</Typography>
+        <Typography id="current-model" sx={{ fontSize: '0.8125rem', fontWeight: 600, color: 'text.primary', lineHeight: 1 }}>
+          {displayModel}
+        </Typography>
         {isFree(displayModel) && (
           <Chip
             label={t('chat:freeModel')}
             size="small"
+            color="success"
             sx={{
               height: 18,
               fontSize: '0.65rem',
               fontWeight: 600,
               letterSpacing: '0.03em',
-              color: 'success.main',
-              backgroundColor: (theme) => alpha(theme.palette.success.main, 0.12),
               '& .MuiChip-label': { px: 0.75 },
             }}
           />
@@ -150,13 +152,12 @@ const ModelSelector = ({
                 <Chip
                   label={t('chat:freeModel')}
                   size="small"
+                  color="success"
                   sx={{
                     height: 18,
                     fontSize: '0.65rem',
                     fontWeight: 600,
                     letterSpacing: '0.03em',
-                    color: 'success.main',
-                    backgroundColor: (theme) => alpha(theme.palette.success.main, 0.12),
                     '& .MuiChip-label': { px: 0.75 },
                   }}
                 />
