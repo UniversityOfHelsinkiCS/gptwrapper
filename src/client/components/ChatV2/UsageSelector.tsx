@@ -113,6 +113,8 @@ const UsageSelector = () => {
         type="button"
         onClick={handleClick}
         data-testid="usage-selector"
+        aria-label={t('status:usageTitle')}
+        aria-describedby="current-chat-usage"
         sx={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -130,24 +132,25 @@ const UsageSelector = () => {
           },
         }}
       >
-        <Typography
-          aria-label={t('status:usageTitle') + pillLabel}
-          sx={{
-            fontSize: '0.8125rem',
-            fontWeight: 600,
-            color: 'text.primary',
-            lineHeight: 1,
-            maxWidth: 160,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {pillLabel}
-        </Typography>
-        {pillPercent != null && (
-          <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: `${gaugeColorKey(pillPercent)}.main`, lineHeight: 1 }}>{pillPercent}%</Typography>
-        )}
+        <Box id="current-chat-usage" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Typography
+            sx={{
+              fontSize: '0.8125rem',
+              fontWeight: 600,
+              color: 'text.primary',
+              lineHeight: 1,
+              maxWidth: 160,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {pillLabel}
+          </Typography>
+          {pillPercent != null && (
+            <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: `${gaugeColorKey(pillPercent)}.main`, lineHeight: 1 }}>{pillPercent}%</Typography>
+          )}
+        </Box>
         {open ? (
           <ExpandLessIcon sx={{ fontSize: 16, color: 'text.secondary', ml: -0.25 }} />
         ) : (
