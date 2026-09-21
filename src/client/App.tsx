@@ -1,4 +1,5 @@
 import { Box, Button, CircularProgress, Container, CssBaseline, Snackbar, Typography } from '@mui/material'
+import { visuallyHidden } from '@mui/utils'
 import { ThemeProvider } from '@mui/material/styles'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
@@ -94,6 +95,7 @@ const ThemedApp = () => {
 }
 
 const Layout = () => {
+  const { t } = useTranslation()
   const { user, isSuccess } = useCurrentUser()
   const [feedbackOpen, setFeedbackOpen] = React.useState(false)
   const [settingsOpen, setSettingsOpen] = React.useState(false)
@@ -115,6 +117,11 @@ const Layout = () => {
           height: 'auto',
         }}
       >
+        <Box component="header">
+          <Typography component="h1" sx={visuallyHidden}>
+            {t('common:appName')}
+          </Typography>
+        </Box>
         <NotificationBanner />
         <Feedback open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
         <GlobalSettings open={settingsOpen} setOpen={setSettingsOpen} />
@@ -156,13 +163,13 @@ const Content = () => {
     onNoAccessPage: location.pathname.includes('/noaccess'),
   })
 
-  if (view === 'loading') return <HYLoadingSpinner />
-  if (view === 'error') return <LoginError onRetry={() => refetch()} isRetrying={isFetching} />
   if (view === 'redirect') return <Navigate to={getRedirect(user)} />
 
   return (
-    <Box sx={{ flex: 1 }}>
-      <Outlet />
+    <Box component="main" sx={{ flex: 1 }}>
+      {view === 'loading' && <HYLoadingSpinner />}
+      {view === 'error' && <LoginError onRetry={() => refetch()} isRetrying={isFetching} />}
+      {view !== 'loading' && view !== 'error' && <Outlet />}
     </Box>
   )
 }

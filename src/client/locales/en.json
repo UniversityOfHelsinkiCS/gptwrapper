@@ -858,6 +858,8 @@
     "toggleMyPrompts": "Show or hide personal prompts",
     "promptInUse": "Currently active prompt: {{prompt}}",
     "promptCleared": "Prompt cleared",
-    "promptSelect": "Select prompt"
+    "promptSelect": "Select prompt",
+    "globalMenu": "Information and settings",
+    "loading": "Loading"
   }
 }

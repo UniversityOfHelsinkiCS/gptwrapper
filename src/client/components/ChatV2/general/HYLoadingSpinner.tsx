@@ -1,7 +1,9 @@
 import { Box, CircularProgress, Typography } from '@mui/material'
 import hyLogo from '../../../assets/hy_logo.svg'
+import { useTranslation } from 'react-i18next'
 
 export default function HYLoadingSpinner() {
+  const { t } = useTranslation()
   return (
     <Box sx={{ width: '100vw', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
       <Box
@@ -15,10 +17,10 @@ export default function HYLoadingSpinner() {
         }}
       />
       <Box sx={{ display: 'flex', alignItems: 'center', opacity: 0.5 }}>
-        <Typography variant="h6" fontWeight="bold">
+        <Typography variant="h6" component="h2" fontWeight="bold">
           CURRECHAT
         </Typography>
-        <CircularProgress size="2rem" sx={{ ml: 4, color: 'text.primary' }} />
+        <CircularProgress size="2rem" sx={{ ml: 4, color: 'text.primary' }} aria-label={t('accessibility:loading')} />
       </Box>
     </Box>
   )

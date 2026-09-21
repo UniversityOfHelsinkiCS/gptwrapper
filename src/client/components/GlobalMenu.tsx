@@ -71,6 +71,7 @@ export default function GlobalMenu({
       )}
       <OutlineButtonBlack
         id="basic-button"
+        aria-label={t('accessibility:globalMenu')}
         data-testid="global-menu-button"
         aria-controls={open ? 'basic-menu' : undefined}
         aria-haspopup="true"

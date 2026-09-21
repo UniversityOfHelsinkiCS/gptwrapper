@@ -859,6 +859,8 @@
     "toggleMyPrompts": "Näytä tai piilota omat alustukset",
     "promptInUse": "Käytössä oleva alustus: {{prompt}}",
     "promptCleared": "Alustus poistettu käytöstä",
-    "promptSelect": "Valitse alustus"
+    "promptSelect": "Valitse alustus",
+    "globalMenu": "Tietoa ja asetuksia",
+    "loading": "Ladataan"
   }
 }

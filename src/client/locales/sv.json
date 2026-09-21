@@ -833,6 +833,8 @@
     "toggleMyPrompts": "Visa eller dölj personliga prompter",
     "promptInUse": "Aktiv prompt: {{prompt}}",
     "promptCleared": "Prompten har rensats",
-    "promptSelect": "Välj en prompt"
+    "promptSelect": "Välj en prompt",
+    "globalMenu": "Information och inställningar",
+    "loading": "Laddar"
   }
 }
