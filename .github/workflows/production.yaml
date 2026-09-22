@@ -32,7 +32,7 @@ jobs:
             VERSION=${{ github.ref_name }}
           extra-args: --ulimit nofile=4096:4096
 
-      - name: Push to quay.io
+      - name: Push to registry.version.helsinki.fi
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build-image.outputs.image }}
@@ -50,8 +50,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Login to registry.version.helsinki.fi
+        uses: docker/login-action@v4
+        with:
+          registry: registry.version.helsinki.fi
+          username: kontit
+          password: ${{ secrets.VERSION_PUSH_SECRET }}
+
       - name: Pull image and create a container
-        run: docker create --name gptwrapper quay.io/toska/gptwrapper:production
+        run: docker create --name gptwrapper registry.version.helsinki.fi/toska/openshift/kontit/gptwrapper:production
 
       - name: Copy assets from the container
         run: docker cp gptwrapper:/opt/app-root/src/dist ./dist
