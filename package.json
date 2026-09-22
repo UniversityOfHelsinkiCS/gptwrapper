@@ -22,6 +22,7 @@
     "test:e2e:logging": "playwright test --reporter=line --workers=1",
     "test:evals": "node evals/rag-eval.spec.ts",
     "test:record": "playwright codegen -o e2e/recorded.spec.ts localhost:3000",
+    "manual:record": "tsx user_manua_poc/lib/runner.ts",
     "translations": "node scripts/analyzeTranslations.js",
     "migrations": "node scripts/analyzeMigrationNames.js",
     "knip": "knip"

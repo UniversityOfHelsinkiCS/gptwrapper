@@ -37,7 +37,12 @@ userRouter.get('/login', async (req, res) => {
   // When acual user logs in, update the users info.
   if (!request.hijackedBy) {
     user.lastLoggedInAt = new Date()
-    ;[dbUser] = await User.upsert(user)
+    // Restrict to the fields actually derived from the login headers: an
+    // unrestricted upsert would reset every other column (e.g. termsAcceptedAt)
+    // to its default on each login, silently un-accepting the terms.
+    ;[dbUser] = await User.upsert(user, {
+      fields: ['id', 'username', 'language', 'isAdmin', 'isPowerUser', 'iamGroups', 'activeCourseIds', 'lastLoggedInAt'],
+    })
   } else {
     dbUser = await User.findByPk(id)
 
