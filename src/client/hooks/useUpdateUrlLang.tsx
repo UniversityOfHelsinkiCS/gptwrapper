@@ -20,9 +20,11 @@ export const useUpdateUrlLang = () => {
       i18n.changeLanguage(newLang)
 
       //we dont want ?lang=?? to stick around since it makes it annoying to navigate so clear the param
+      // replace, because pushing here would leave a duplicate history entry on every page,
+      // which the user then has to press back through twice
 
       params.delete('lang')
-      setParams(params)
+      setParams(params, { replace: true })
     },
     [i18n, params, setParams],
   )
