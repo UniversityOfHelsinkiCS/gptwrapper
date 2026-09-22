@@ -19,7 +19,8 @@ vi.mock('../../db/models', () => ({
 vi.mock('../../services/chatInstances/usage', () => ({
   checkCourseUsage: vi.fn(() => true),
   checkUsage: vi.fn(() => true),
-  getUserTokenLimit: vi.fn(() => 100_000),
+  getCourseTokenLimit: vi.fn(() => 50_000),
+  getUserTokenLimit: vi.fn(async () => 100_000),
   incrementCourseUsage: vi.fn(),
   incrementUsage: vi.fn(),
 }))
@@ -41,6 +42,8 @@ import v3Router from './v3'
 import errorHandler from '../../middleware/error'
 import { Prompt, ChatInstance, UserChatInstanceUsage } from '../../db/models'
 import { streamChat } from '../../services/langchain/chat'
+import { getUserTokenLimit } from '../../services/chatInstances/usage'
+import { FREE_MODEL } from '../../../config'
 
 let server: Server
 let baseUrl: string
@@ -80,7 +83,7 @@ beforeEach(() => {
 })
 
 /** The /stream route reads its JSON payload out of a multipart `data` field, alongside the optional file upload. */
-const stream = (promptId: string, courseId?: string) => {
+const stream = (promptId: string, courseId?: string, model = 'mock') => {
   const form = new FormData()
   form.append(
     'data',
@@ -88,7 +91,7 @@ const stream = (promptId: string, courseId?: string) => {
       options: {
         chatMessages: [{ role: 'user', content: 'hello' }],
         generationInfo: {
-          model: 'mock',
+          model,
           promptInfo: { type: 'saved', id: promptId, name: 'Essay helper' },
         },
       },
@@ -141,6 +144,27 @@ describe('POST /ai/v3/stream with a saved prompt', () => {
     expect(response.status).toBe(200)
     expect(streamChat).toHaveBeenCalled()
   })
+
+  test('has its usage measured against the personal budget when there is no course', async () => {
+    vi.mocked(Prompt.findByPk).mockResolvedValue(savedPrompt('PERSONAL'))
+
+    const response = await stream('prompt-1')
+    await response.text()
+
+    expect(streamChat).toHaveBeenCalledWith(expect.objectContaining({ tokenLimit: 100_000 }))
+  })
+
+  /** The personal limit costs two DB queries, and nothing consumes it for a free model. */
+  test('skips the personal budget lookup entirely for a free model', async () => {
+    vi.mocked(Prompt.findByPk).mockResolvedValue(savedPrompt('PERSONAL'))
+
+    const response = await stream('prompt-1', undefined, FREE_MODEL)
+    await response.text()
+
+    expect(response.status).toBe(200)
+    expect(streamChat).toHaveBeenCalled()
+    expect(getUserTokenLimit).not.toHaveBeenCalled()
+  })
 })
 
 /**
@@ -179,6 +203,15 @@ describe('POST /ai/v3/stream as an enrolled student', () => {
 
     expect(response.status).toBe(200)
     expect(streamChat).toHaveBeenCalled()
+  })
+
+  test('has its usage measured against the course budget, not the personal one', async () => {
+    givenCourse()
+
+    const response = await stream('prompt-1', 'course-1')
+    await response.text()
+
+    expect(streamChat).toHaveBeenCalledWith(expect.objectContaining({ tokenLimit: 50_000 }))
   })
 
   test('is refused when the course has ended', async () => {

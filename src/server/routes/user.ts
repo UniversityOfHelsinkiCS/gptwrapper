@@ -40,7 +40,7 @@ userRouter.get('/login', async (req, res) => {
 
   const lastRestart = await getLastRestart()
 
-  const tokenLimit = getUserTokenLimit(user)
+  const tokenLimit = await getUserTokenLimit(user)
 
   res.send({
     ...dbUser.toJSON(),
@@ -61,7 +61,7 @@ userRouter.get('/status', async (req, res) => {
   const { id } = user
 
   const usage = await getUsage(id)
-  const limit = getUserTokenLimit(user)
+  const limit = await getUserTokenLimit(user)
 
   res.send({
     usage,
@@ -76,7 +76,7 @@ userRouter.get('/status/all', async (req, res) => {
   const { id } = user
 
   const generalUsage = await getUsage(id)
-  const limit = getUserTokenLimit(user)
+  const limit = await getUserTokenLimit(user)
 
   const courseUsages = await getCourseUsages(user)
 

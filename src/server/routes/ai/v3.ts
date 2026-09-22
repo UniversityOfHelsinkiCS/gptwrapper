@@ -1,9 +1,9 @@
 import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
-import { FREE_MODEL, inProduction, isMockModel, type ValidModelName } from '../../../config'
+import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction, isMockModel, type ValidModelName } from '../../../config'
 import { PostStreamSchemaV3, type ChatEvent } from '../../../shared/chat'
 import { ChatInstance, Discussion, Enrolment, Prompt, PromptUsage, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
-import { checkCourseUsage, checkUsage, getUserTokenLimit, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
+import { checkCourseUsage, checkUsage, getCourseTokenLimit, getUserTokenLimit, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { streamChat } from '../../services/langchain/chat'
 import { getMockRagIndexSearchTool } from '../../services/rag/mockSearchTool'
 import { getRagIndexSearchTool } from '../../services/rag/searchTool'
@@ -167,7 +167,9 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   const isFreeModel = model === FREE_MODEL
 
-  const usageAllowed = course ? checkCourseUsage(user, course) : checkUsage(user, generationInfo.model)
+  const tokenLimit = course ? getCourseTokenLimit(course) : isFreeModel ? DEFAULT_TOKEN_LIMIT : await getUserTokenLimit(user)
+
+  const usageAllowed = course ? checkCourseUsage(user, course, tokenLimit) : checkUsage(user, generationInfo.model, tokenLimit)
 
   if (!usageAllowed && !isFreeModel) {
     throw ApplicationError.Forbidden('Usage limit reached')
@@ -188,7 +190,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       tools,
       writeEvent,
       startStream,
-      tokenLimit: getUserTokenLimit(user),
+      tokenLimit,
       signal: abortController.signal,
     })
   } catch (error) {

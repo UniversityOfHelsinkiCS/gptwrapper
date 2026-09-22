@@ -7,6 +7,7 @@ import logger from '../../util/logger'
 import { ApplicationError } from '../../util/ApplicationError'
 import type { Message } from '../../../shared/chat'
 import { checkIamAccess } from '../../util/iams'
+import { chatIsActive } from './activity'
 import { CourseUsage } from '@shared/types'
 
 export const getUsage = async (userId: string) => {
@@ -21,25 +22,55 @@ export const getUsage = async (userId: string) => {
   return user.usage
 }
 
-export const getUserTokenLimit = (user: UserType): number => {
+export const COURSE_TOKEN_BONUS = 100_000
+const countActiveCourseMemberships = async (user: UserType): Promise<number> => {
+  const membershipQuery = {
+    attributes: ['chatInstanceId'],
+    where: { userId: user.id },
+    include: [
+      {
+        model: ChatInstance,
+        as: 'chatInstance',
+        attributes: ['id', 'activityPeriod', 'activated'],
+        where: { activated: true },
+        required: true,
+      },
+    ],
+  }
+
+  const [enrolments, responsibilities] = await Promise.all([
+    Enrolment.findAll(membershipQuery) as Promise<(Enrolment & { chatInstance: ChatInstance })[]>,
+    Responsibility.findAll(membershipQuery) as Promise<(Responsibility & { chatInstance: ChatInstance })[]>,
+  ])
+
+  const activeChatInstances = [...enrolments, ...responsibilities].map((membership) => membership.chatInstance).filter(chatIsActive)
+
+  return new Set(activeChatInstances.map((chatInstance) => chatInstance.id)).size
+}
+
+export const getUserTokenLimit = async (user: UserType): Promise<number> => {
   const hasFullAccess = user.isAdmin || checkIamAccess(user.iamGroups)
   const baseLimit = hasFullAccess ? DEFAULT_TOKEN_LIMIT : DEFAULT_TOKEN_LIMIT / 2
-  return user.isPowerUser ? baseLimit * 10 : baseLimit
+  const tierLimit = user.isPowerUser ? baseLimit * 10 : baseLimit
+
+  const activeCourseCount = await countActiveCourseMemberships(user)
+
+  return tierLimit + COURSE_TOKEN_BONUS * activeCourseCount
 }
 
-export const checkUsage = (user: UserType, model: ValidModelName): boolean => {
+export const checkUsage = (user: UserType, model: ValidModelName, tokenLimit: number): boolean => {
   if (model === FREE_MODEL) return true
-  return user.isAdmin || (user.usage ?? 0) <= getUserTokenLimit(user)
+  return user.isAdmin || (user.usage ?? 0) <= tokenLimit
 }
 
-export const checkCourseUsage = (user: UserType, chatInstance: ChatInstance): boolean => {
+export const getCourseTokenLimit = (chatInstance: ChatInstance): number => (chatInstance.activated ? chatInstance.usageLimit : DEFAULT_TOKEN_LIMIT)
+
+export const checkCourseUsage = (user: UserType, chatInstance: ChatInstance, tokenLimit: number): boolean => {
   if (!chatInstance.currentUserUsage) {
     throw ApplicationError.InternalServerError('chatInstance.currentUserUsage undefined. This shouldnt happen!')
   }
 
-  const tokenUsageExceeded = !chatInstance.activated
-    ? chatInstance.currentUserUsage.usageCount >= DEFAULT_TOKEN_LIMIT
-    : chatInstance.currentUserUsage.usageCount >= chatInstance.usageLimit
+  const tokenUsageExceeded = chatInstance.currentUserUsage.usageCount >= tokenLimit
 
   if (!user.isAdmin && tokenUsageExceeded) {
     logger.info('Usage limit reached')
