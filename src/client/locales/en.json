@@ -67,7 +67,10 @@
     "retryMessage": "Retry",
     "preview": "Preview",
     "promptList": "Courses and prompts",
-    "course": "Course"
+    "course": "Course",
+    "fi": "SUOMI",
+    "en": "ENGLISH",
+    "sv": "SVENSKA"
   },
   "stats": {
     "timePeriodStart": "Starting",
@@ -235,11 +238,6 @@
     "sendMode": "Message sending",
     "appearance": "Appearance",
     "darkModeToggle": "Use dark mode.",
-    "languageMenu": {
-      "fi": "Valitse kieli: suomi",
-      "sv": "Välj språk: svenska",
-      "en": "Select language: English"
-    },
     "chooseChat": "Select for use"
   },
   "sidebar": {
@@ -863,6 +861,11 @@
     "loading": "Loading",
     "chooseLanguageVersion": "Choose language version for prompt {{name}}",
     "languageSelected": "Language version changed for prompt {{name}}",
-    "selectModel": "Select language model"
+    "selectModel": "Select language model",
+    "languageMenu": {
+      "fi": "Valitse kieli: suomi",
+      "sv": "Välj språk: svenska",
+      "en": "Select language: English"
+    }
   }
 }

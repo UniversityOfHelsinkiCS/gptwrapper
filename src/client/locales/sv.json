@@ -67,7 +67,10 @@
     "retryMessage": "Försök igen",
     "preview": "Förhandsgranska",
     "promptList": "Kurser och prompts",
-    "course": "Kurs"
+    "course": "Kurs",
+    "fi": "SUOMI",
+    "en": "ENGLISH",
+    "sv": "SVENSKA"
   },
   "chats": {
     "header": "Öppna kurschattar",
@@ -242,11 +245,6 @@
     "sendMode": "Meddelandehantering",
     "appearance": "Utseende",
     "darkModeToggle": "Använd mörkt tema.",
-    "languageMenu": {
-      "fi": "Valitse kieli: suomi",
-      "sv": "Välj språk: svenska",
-      "en": "Select language: English"
-    },
     "chooseChat": "Välj för användning"
   },
   "email": {
@@ -838,6 +836,11 @@
     "loading": "Laddar",
     "chooseLanguageVersion": "Välj språkversion för prompten {{name}}",
     "languageSelected": "Språkversionen har ändrats för prompten {{name}}",
-    "selectModel": "Välj språkmodell"
+    "selectModel": "Välj språkmodell",
+    "languageMenu": {
+      "fi": "Valitse kieli: suomi",
+      "sv": "Välj språk: svenska",
+      "en": "Select language: English"
+    }
   }
 }

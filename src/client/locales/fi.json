@@ -68,7 +68,10 @@
     "retryMessage": "Yritä uudelleen",
     "preview": "Esikatsele",
     "promptList": "Kurssit ja alustukset",
-    "course": "Kurssi"
+    "course": "Kurssi",
+    "fi": "SUOMI",
+    "en": "ENGLISH",
+    "sv": "SVENSKA"
   },
   "stats": {
     "showing": "Näytetään",
@@ -238,11 +241,6 @@
     "sendMode": "Viestin lähetys",
     "appearance": "Ulkoasu",
     "darkModeToggle": "Käytä tummaa teemaa.",
-    "languageMenu": {
-      "fi": "Valitse kieli: suomi",
-      "sv": "Välj språk: svenska",
-      "en": "Select language: English"
-    },
     "chooseChat": "Valitse käyttöön"
   },
   "sidebar": {
@@ -864,6 +862,11 @@
     "loading": "Ladataan",
     "chooseLanguageVersion": "Valitse kieliversio alustukselle {{name}}",
     "languageSelected": "Kieliversio vaihdettu alustukselle {{name}}",
-    "selectModel": "Valitse kielimalli"
+    "selectModel": "Valitse kielimalli",
+    "languageMenu": {
+      "fi": "Valitse kieli: suomi",
+      "sv": "Välj språk: svenska",
+      "en": "Select language: English"
+    }
   }
 }

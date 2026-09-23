@@ -10,7 +10,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import InfoIcon from '@mui/icons-material/Info'
 import ReviewsIcon from '@mui/icons-material/Reviews'
 import LanguageIcon from '@mui/icons-material/Language'
-import { BlueButton, OutlineButtonBlack, TextButton } from './ChatV2/general/Buttons'
+import { BlueButton, OutlineButtonBlack } from './ChatV2/general/Buttons'
 import { useMediaQuery } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Locale } from '@shared/lang'
@@ -23,10 +23,12 @@ export default function GlobalMenu({
   openDisclaimer,
   openSettings,
   openFeedback,
+  container,
 }: {
   openDisclaimer: () => void
   openSettings: () => void
   openFeedback: () => void
+  container?: React.RefObject<HTMLElement | null> | (() => HTMLElement | null)
 }) {
   const { t, i18n } = useTranslation()
   const { user } = useCurrentUser()
@@ -85,6 +87,7 @@ export default function GlobalMenu({
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
+        container={typeof container === 'function' ? container : () => container?.current ?? null}
         slotProps={{
           list: {
             'aria-labelledby': 'basic-button',
@@ -192,29 +195,29 @@ export default function GlobalMenu({
         <ListItemIcon sx={{ display: 'inline-flex', verticalAlign: 'middle', minWidth: 'auto', marginLeft: 1.5, marginRight: 0.5 }}>
           <LanguageIcon fontSize="small" />
         </ListItemIcon>
-        <TextButton
-          aria-label={t(`settings:languageMenu:${'fi'}`)}
+        <MenuItem
+          aria-label={t(`accessibility:languageMenu:${'fi'}`)}
           onClick={() => handleLanguageChange('fi')}
-          sx={{ ...languageButtonSx('fi'), display: 'inline-flex', verticalAlign: 'middle' }}
+          sx={{ ...languageButtonSx('fi'), ml: 1, display: 'inline-flex', verticalAlign: 'middle', fontSize: 'small' }}
         >
-          {t('finnish')}
-        </TextButton>
+          {t('fi')}
+        </MenuItem>
         <Divider orientation="vertical" flexItem sx={{ display: 'inline-flex', verticalAlign: 'middle' }} />
-        <TextButton
-          aria-label={t(`settings:languageMenu:${'en'}`)}
+        <MenuItem
+          aria-label={t(`accessibility:languageMenu:${'en'}`)}
           onClick={() => handleLanguageChange('en')}
-          sx={{ ...languageButtonSx('en'), display: 'inline-flex', verticalAlign: 'middle' }}
+          sx={{ ...languageButtonSx('en'), display: 'inline-flex', verticalAlign: 'middle', fontSize: 'small' }}
         >
-          {t('english')}
-        </TextButton>
+          {t('en')}
+        </MenuItem>
         <Divider orientation="vertical" flexItem sx={{ display: 'inline-flex', verticalAlign: 'middle' }} />
-        <TextButton
-          aria-label={t(`settings:languageMenu:${'sv'}`)}
+        <MenuItem
+          aria-label={t(`accessibility:languageMenu:${'sv'}`)}
           onClick={() => handleLanguageChange('sv')}
-          sx={{ ...languageButtonSx('sv'), display: 'inline-flex', verticalAlign: 'middle' }}
+          sx={{ ...languageButtonSx('sv'), mr: 1.5, display: 'inline-flex', verticalAlign: 'middle', fontSize: 'small' }}
         >
-          {t('swedish')}
-        </TextButton>
+          {t('sv')}
+        </MenuItem>
       </Menu>
     </div>
   )

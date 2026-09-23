@@ -15,7 +15,18 @@ test.describe('axe wcag scan', () => {
     await page.goto('/general')
 
     await page.getByTestId('choose-prompt-button').click()
+    const modal = page.getByRole('dialog')
+    await expect(modal).toBeVisible()
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+    await scan(page, testInfo.title)
+  })
+
+  test('scan global menu', async ({ page }, testInfo) => {
+    await page.goto('/general')
+
+    await page.getByTestId('global-menu-button').click()
+    const modal = page.getByRole('menu')
+    await expect(modal).toBeVisible()
     await scan(page, testInfo.title)
   })
 })

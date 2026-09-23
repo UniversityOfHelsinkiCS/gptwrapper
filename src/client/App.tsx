@@ -100,6 +100,7 @@ const Layout = () => {
   const [feedbackOpen, setFeedbackOpen] = React.useState(false)
   const [settingsOpen, setSettingsOpen] = React.useState(false)
   const [disclaimerStatus, setDisclaimerStatus] = React.useState(false)
+  const headerRef = React.useRef<HTMLElement>(null)
   useEffect(() => {
     if (user && !user.termsAcceptedAt) {
       setDisclaimerStatus(true)
@@ -117,18 +118,23 @@ const Layout = () => {
           height: 'auto',
         }}
       >
-        <Box component="header">
+        <Box component="header" ref={headerRef}>
           <Typography component="h1" sx={visuallyHidden}>
             {t('common:appName')}
           </Typography>
+          <Box sx={{ top: 20, right: 20, zIndex: 999, position: 'fixed' }}>
+            <GlobalMenu
+              openDisclaimer={() => setDisclaimerStatus(true)}
+              openSettings={() => setSettingsOpen(true)}
+              openFeedback={() => setFeedbackOpen(true)}
+              container={headerRef}
+            />
+          </Box>
         </Box>
         <NotificationBanner />
         <Feedback open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
         <GlobalSettings open={settingsOpen} setOpen={setSettingsOpen} />
         <DisclaimerModal disclaimerStatus={disclaimerStatus} setDisclaimerStatus={setDisclaimerStatus} />
-        <Box sx={{ top: 20, right: 20, zIndex: 999, position: 'fixed' }}>
-          <GlobalMenu openDisclaimer={() => setDisclaimerStatus(true)} openSettings={() => setSettingsOpen(true)} openFeedback={() => setFeedbackOpen(true)} />
-        </Box>
         <Content />
       </Box>
       <AdminLoggedInAsBanner />
