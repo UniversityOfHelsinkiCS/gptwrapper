@@ -15,15 +15,16 @@ export const useChangelog = () => {
   return { releases: releases || [], ...rest }
 }
 
-export const useHasUnseenReleases = () => {
+export const useUnseenReleasesCount = () => {
   const { releases } = useChangelog()
   const { user } = useCurrentUser()
 
-  const latestRelease = releases[0]
-  if (!latestRelease) return false
-
   const lastSeenChangelogAt = user?.preferences?.lastSeenChangelogAt
-  if (!lastSeenChangelogAt) return true
+  // if user has never seen changelog display 1 unseen release.
+  if (!lastSeenChangelogAt) return 1
 
-  return new Date(latestRelease.time) > new Date(lastSeenChangelogAt)
+  const lastSeen = new Date(lastSeenChangelogAt)
+  return releases.filter((release) => new Date(release.time) > lastSeen).length
 }
+
+export const useHasUnseenReleases = () => useUnseenReleasesCount() > 0
