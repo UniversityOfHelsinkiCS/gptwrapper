@@ -63,7 +63,7 @@ export const ConversationSplash = ({
             </Typography>
           </>
         ) : (
-          <Typography variant="h6" fontStyle="italic" color="text.primary" sx={{ mb: 1 }}>
+          <Typography variant="h6" component="h2" fontStyle="italic" color="text.primary" sx={{ mb: 1 }}>
             {t('chat:start')}
           </Typography>
         )}
