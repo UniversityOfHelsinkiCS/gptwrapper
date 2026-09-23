@@ -70,7 +70,7 @@ const SideBar = ({
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
             <Tooltip arrow placement="right" title={t('sidebar:open')}>
               <TextButton ref={openButtonRef} onClick={() => setOpen((prev) => !prev)}>
-                <CustomIcon src={sidebarOpen} />
+                <CustomIcon src={sidebarOpen} alt={t('sidebar:open')} />
               </TextButton>
             </Tooltip>
             <Tooltip arrow placement="right" title={t('sidebar:chatNew')}>
@@ -98,7 +98,7 @@ const SideBar = ({
             >
               <Tooltip arrow placement="right" title={t('sidebar:close')}>
                 <TextButton ref={closeButtonRef} onClick={() => setOpen((prev) => !prev)}>
-                  <CustomIcon src={sidebarClose} />
+                  <CustomIcon src={sidebarClose} alt={t('sidebar:close')} />
                 </TextButton>
               </Tooltip>
             </Box>
