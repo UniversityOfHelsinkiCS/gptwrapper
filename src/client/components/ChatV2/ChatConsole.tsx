@@ -12,6 +12,7 @@ import { getLanguageValue } from '@shared/utils'
 import { usePromptState } from './PromptState'
 import useCourse from '../../hooks/useCourse'
 import { consumePendingFocusTarget, requestFocusAfterNavigate } from '../../util/accessibility'
+import { visuallyHidden } from '@mui/utils'
 
 const SectionLabel = ({ children }: { children: ReactNode }) => (
   <Typography
@@ -43,29 +44,15 @@ type SelectorRowProps = {
   selectorTestId?: string
   clearTestId?: string
   ariaLabel?: string
-  ariaDescription?: string
 }
 
-const SelectorRow = ({
-  icon,
-  label,
-  placeholder,
-  onClick,
-  onClear,
-  clearTooltip,
-  disabled,
-  selectorTestId,
-  clearTestId,
-  ariaLabel,
-  ariaDescription,
-}: SelectorRowProps) => {
+const SelectorRow = ({ icon, label, placeholder, onClick, onClear, clearTooltip, disabled, selectorTestId, clearTestId, ariaLabel }: SelectorRowProps) => {
   const hasValue = Boolean(label)
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, px: 3, mt: 1 }}>
       <Box
         component="button"
-        aria-label={ariaLabel}
-        aria-description={ariaDescription}
+        aria-label={[ariaLabel, label || placeholder].filter(Boolean).join(', ')}
         onClick={onClick}
         disabled={disabled}
         data-testid={selectorTestId}
@@ -116,21 +103,9 @@ type ContextRowProps = {
   clearTooltip?: string
   selectorTestId?: string
   clearTestId?: string
-  ariaLabel?: string
 }
 
-const ContextRow = ({
-  courseLabel,
-  promptLabel,
-  promptType,
-  placeholder,
-  onClick,
-  onClear,
-  clearTooltip,
-  selectorTestId,
-  clearTestId,
-  ariaLabel,
-}: ContextRowProps) => {
+const ContextRow = ({ courseLabel, promptLabel, promptType, placeholder, onClick, onClear, clearTooltip, selectorTestId, clearTestId }: ContextRowProps) => {
   const hasPrompt = Boolean(promptLabel)
   const { t } = useTranslation()
 
@@ -138,7 +113,6 @@ const ContextRow = ({
     return (
       <SelectorRow
         ariaLabel={t('sidebar:manageCourseAndPrompts')}
-        ariaDescription={t('accessibility:promptSelect')}
         icon={<ChatIcon />}
         placeholder={placeholder}
         onClick={onClick}
@@ -171,10 +145,6 @@ const ContextRow = ({
           component="button"
           onClick={onClick}
           data-testid={selectorTestId}
-          aria-label={ariaLabel}
-          aria-description={t('accessibility:promptInUse', {
-            prompt: [hasType ? typeLabel : null, promptLabel].filter(Boolean).join(' '),
-          })}
           id={selectorTestId}
           sx={{
             position: 'relative',
@@ -197,6 +167,7 @@ const ContextRow = ({
             color: 'text.primary',
           }}
         >
+          <Typography sx={visuallyHidden}>{t('sidebar:manageCourseAndPrompts')}</Typography>
           {hasType && (
             <Box sx={{ display: 'flex', gap: 0.75, minWidth: 0, mb: 1 }}>
               <Typography
@@ -284,7 +255,6 @@ export default function ChatConsole({ user }: { user?: User | null }) {
       <Box sx={{ mb: 1 }} data-testid={activePrompt ? 'prompt-name' : undefined}>
         <SectionLabel>{t('sidebar:coursesAndPrompts')}</SectionLabel>
         <ContextRow
-          ariaLabel={t('sidebar:manageCourseAndPrompts')}
           courseLabel={courseLabel}
           promptLabel={activePrompt?.name}
           promptType={activePrompt?.type}

@@ -8,6 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PsychologyIcon from '@mui/icons-material/Psychology'
 import { usePromptState } from './PromptState'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import { visuallyHidden } from '@mui/utils'
 
 const filterAvailableModels = (models: ValidModelName[], isTokenLimitExceeded: boolean, isAdmin: boolean | undefined): ValidModelName[] => {
   return models
@@ -60,8 +61,6 @@ const ModelSelector = ({
         onClick={disabled ? undefined : handleClick}
         disabled={disabled}
         data-testid="model-selector"
-        aria-label={t('accessibility:selectModel')}
-        aria-describedby="current-model"
         sx={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -83,9 +82,8 @@ const ModelSelector = ({
         }}
       >
         <PsychologyIcon sx={{ fontSize: 14, color: 'primary.main' }} />
-        <Typography id="current-model" sx={{ fontSize: '0.8125rem', fontWeight: 600, color: 'text.primary', lineHeight: 1 }}>
-          {displayModel}
-        </Typography>
+        <Typography sx={visuallyHidden}>{t('accessibility:selectModel')}</Typography>
+        <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: 'text.primary', lineHeight: 1 }}>{displayModel}</Typography>
         {isFree(displayModel) && (
           <Chip
             label={t('chat:freeModel')}
