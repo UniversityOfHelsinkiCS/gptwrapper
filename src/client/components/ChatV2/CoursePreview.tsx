@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  Divider,
   IconButton,
   LinearProgress,
   Paper,
@@ -49,6 +50,7 @@ import DiscussionView from '../Courses/Course/Discussions'
 import PromptUsageHistogram from '../Courses/Course/PromptUsageHistogram'
 import { EnrolmentActionUserSearch, ResponsibilityActionUserSearch } from '../Admin/UserSearch'
 import { DEFAULT_TOKEN_LIMIT } from '@config'
+import CancelIcon from '@mui/icons-material/Cancel'
 
 const initialsOf = (lastName?: string, firstNames?: string) => {
   const a = firstNames?.trim()?.[0] ?? ''
@@ -321,6 +323,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
         )}
 
         {/* Teachers */}
+        <Divider sx={{ mb: 2 }} />
         <Box sx={{ mb: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
             <PeopleIcon sx={{ color: 'text.secondary' }} />
@@ -374,6 +377,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
         </Box>
 
         {/* Students (managers) */}
+        <Divider sx={{ mb: 2 }} />
         {canManage && (
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, flexWrap: 'wrap' }}>
@@ -385,17 +389,20 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
                 ({students.length})
               </Typography>
               <Box sx={{ flex: 1 }} />
-              <TextField
-                size="small"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t('course:searchStudents')}
-                slotProps={{ input: { startAdornment: <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} /> } }}
-                sx={{ minWidth: 220 }}
-              />
+              {!addStudentOpen && (
+                <TextField
+                  size="small"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={t('course:searchStudents')}
+                  slotProps={{ input: { startAdornment: <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} /> } }}
+                  sx={{ minWidth: 220 }}
+                />
+              )}
+
               {isAdmin && isCustomCourse && (
                 <BlueButton startIcon={<GroupAddIcon />} onClick={() => setAddStudentOpen((open) => !open)} data-testid="toggle-add-student-view">
-                  {addStudentOpen ? t('common:cancel') : t('course:addNewStudent')}
+                  {addStudentOpen ? t('common:close') : t('course:addNewStudent')}
                 </BlueButton>
               )}
             </Box>
@@ -419,7 +426,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
                           {t('admin:name')}
                         </TableSortLabel>
                       </TableCell>
-                      <TableCell align="right">
+                      <TableCell align="center">
                         <TableSortLabel
                           active={sortConfig.key === 'weekly'}
                           direction={sortConfig.direction}
@@ -429,7 +436,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
                           {t('course:weeklyUsage')}
                         </TableSortLabel>
                       </TableCell>
-                      <TableCell align="right">
+                      <TableCell align="center">
                         <TableSortLabel
                           active={sortConfig.key === 'total'}
                           direction={sortConfig.direction}
@@ -439,7 +446,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
                           {t('admin:totalUsage')}
                         </TableSortLabel>
                       </TableCell>
-                      <TableCell align="right" sx={{ width: 48 }} />
+                      {isAdmin && isCustomCourse && <TableCell align="center">{t('course:remove')}</TableCell>}
                     </TableRow>
                   </TableHead>
                   <TableBody data-testid="students-table-body">
@@ -455,21 +462,45 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
                             {`${s.user.last_name ?? ''} ${s.user.first_names ?? ''}`.trim()}
                           </Box>
                         </TableCell>
-                        <TableCell align="right" data-testid="student-usage">
+                        <TableCell align="center" data-testid="student-usage">
                           {s.weekly}
                         </TableCell>
                         <TableCell align="right" data-testid="student-total-usage">
-                          {s.total}
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'flex-end',
+                            }}
+                          >
+                            <Box sx={{ minWidth: 40, textAlign: 'center' }}>{s.total}</Box>
+
+                            <Box sx={{ width: 40, ml: 1 }}>
+                              {isAdmin && s.usageId && s.weekly > 0 && (
+                                <Tooltip title={t('course:resetWeeklyUsage')}>
+                                  <IconButton size="small" onClick={() => handleResetUsage(s.usageId as string)} data-testid={`reset-usage-${s.user.id}`}>
+                                    <RestartAltIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                            </Box>
+                          </Box>
                         </TableCell>
-                        <TableCell align="right">
-                          {isAdmin && s.usageId && s.weekly > 0 && (
-                            <Tooltip title={t('course:resetWeeklyUsage')}>
-                              <IconButton size="small" onClick={() => handleResetUsage(s.usageId as string)} data-testid={`reset-usage-${s.user.id}`}>
-                                <RestartAltIcon fontSize="small" />
+                        {isAdmin && isCustomCourse && (
+                          <TableCell align="right">
+                            <Tooltip arrow placement="top" title={t('course:remove')}>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  const existing = enrolments.find((e) => e.user.id === s.user.id)
+                                  if (existing) handleRemoveEnrolment(existing)
+                                }}
+                              >
+                                <CancelIcon fontSize="small" color="primary" />
                               </IconButton>
                             </Tooltip>
-                          )}
-                        </TableCell>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
