@@ -119,7 +119,16 @@
     "client": "Klient version {{version}}",
     "uptime": "Uptime: {{uptime}}",
     "mismatch": "Ladda sida om",
-    "toska": "Läs om CurreChats utvecklare."
+    "toska": "Läs om CurreChats utvecklare.",
+    "changelog": "Ändringslogg"
+  },
+  "changelog": {
+    "title": "Ändringslogg",
+    "subtitle": "Nyheter i CurreChat. Release notes publiceras på engelska.",
+    "releasedOn": "Version {{version}} • Publicerad {{date}}",
+    "loading": "Laddar releaser...",
+    "error": "Ändringsloggen kunde inte laddas just nu. Försök igen senare.",
+    "empty": "Inga releaser att visa."
   },
   "chat": {
     "start": "Starta konversationen genom att skicka ett meddelande...",

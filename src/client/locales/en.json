@@ -111,7 +111,16 @@
     "client": "Client version {{version}}",
     "uptime": "Uptime: {{uptime}}",
     "mismatch": "Reload for latest changes",
-    "toska": "Read about the developers of CurreChat."
+    "toska": "Read about the developers of CurreChat.",
+    "changelog": "Changelog"
+  },
+  "changelog": {
+    "title": "Changelog",
+    "subtitle": "What's new in CurreChat. Release notes are published in English.",
+    "releasedOn": "Version {{version}} • Released on {{date}}",
+    "loading": "Loading releases...",
+    "error": "Could not load the changelog right now. Please try again later.",
+    "empty": "No releases to show."
   },
   "chat": {
     "start": "Start the conversation by sending a message...",

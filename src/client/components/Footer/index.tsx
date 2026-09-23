@@ -1,13 +1,16 @@
-import { Box, Typography, Link } from '@mui/material'
+import { Badge, Box, Typography, Link } from '@mui/material'
 import { useTranslation } from 'react-i18next'
+import { Link as RouterLink } from 'react-router-dom'
 import toskaColor from '../../assets/toscalogo_color.svg'
 import { formatDistanceToNow } from 'date-fns'
 import { locales } from '../../locales/locales'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import { useHasUnseenReleases } from '../../hooks/useChangelog'
 
 const Footer = () => {
   const { t, i18n } = useTranslation()
   const { user } = useCurrentUser()
+  const hasUnseenReleases = useHasUnseenReleases()
 
   const uptime = formatDistanceToNow(user?.lastRestart ?? Date.now(), { locale: locales[i18n.language] })
   const serverVersion = user?.serverVersion
@@ -29,6 +32,11 @@ const Footer = () => {
         <Typography variant="caption">{t('footer:server', { version: serverVersion })}</Typography>
         <Typography variant="caption">{t('footer:client', { version: clientVersion })}</Typography>
         <Typography variant="caption">{t('footer:uptime', { uptime })}</Typography>
+        <Badge variant="dot" color="primary" invisible={!hasUnseenReleases} sx={{ alignSelf: 'flex-start', '& .MuiBadge-badge': { right: -6 } }}>
+          <Link component={RouterLink} to="/changelog" variant="caption" underline="hover">
+            {t('footer:changelog')}
+          </Link>
+        </Badge>
         {serverVersion !== clientVersion && <Typography variant="caption">{t('footer:mismatch')}</Typography>}
       </Box>
     </Box>

@@ -5,6 +5,7 @@ export const UserPreferencesSchema = z
     sendShortcutMode: z.enum(['shift+enter', 'enter']).optional().default('shift+enter'),
     skipNewConversationConfirm: z.boolean().optional().default(false),
     collapsedSidebarDefault: z.boolean().optional().default(false),
+    lastSeenChangelogAt: z.iso.datetime({ offset: true }).optional(),
   })
   .partial()
 

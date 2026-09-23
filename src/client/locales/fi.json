@@ -112,7 +112,16 @@
     "client": "Selainversio {{version}}",
     "uptime": "Uptime: {{uptime}}",
     "mismatch": "Lataa sivu uudelleen",
-    "toska": "Lue CurreChatin kehittäjistä."
+    "toska": "Lue CurreChatin kehittäjistä.",
+    "changelog": "Muutosloki"
+  },
+  "changelog": {
+    "title": "Muutosloki",
+    "subtitle": "Mitä uutta on CurreChatissa. Julkaisutiedot ovat englanniksi.",
+    "releasedOn": "Versio {{version}} • Julkaistu {{date}}",
+    "loading": "Ladataan julkaisuja...",
+    "error": "Muutoslokia ei voitu ladata juuri nyt. Yritä myöhemmin uudelleen.",
+    "empty": "Ei näytettäviä julkaisuja."
   },
   "chat": {
     "start": "Aloita keskustelu lähettämällä viesti...",

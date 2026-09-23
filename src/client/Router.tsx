@@ -20,6 +20,7 @@ const router = sentryCreateBrowserRouter(
       <Route path="/noaccess" element={<NoAccess />} />
       <Route path="/statistics/*" lazy={() => import('./components/Statistics')} />
       <Route path="/login-helper" element={<EmbeddedLoginHelper />} />
+      <Route path="/changelog" lazy={() => import('./components/Changelog')} />
       <Route path="/:courseId/*" element={<ChatV2 />} />
       <Route path="*" element={<NotFound />} />
     </Route>,
