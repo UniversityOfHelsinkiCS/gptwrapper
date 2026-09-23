@@ -22,13 +22,12 @@ export const ConversationSplash = ({
         justifyContent: 'center',
         textAlign: 'center',
         alignItems: 'center',
-        transition: 'opacity 0.6s, transform 0.6s',
-        opacity: 1,
+        transition: 'transform 0.6s',
         transform: 'scale(1)',
         animation: 'fadeInScale 0.6s ease',
         '@keyframes fadeInScale': {
-          from: { opacity: 0, transform: 'scale(0.8)' },
-          to: { opacity: 1, transform: 'scale(1)' },
+          from: { transform: 'scale(0.8)' },
+          to: { transform: 'scale(1)' },
         },
       }}
     >
@@ -46,11 +45,12 @@ export const ConversationSplash = ({
         }}
       />
 
-      <Box sx={{ opacity: 0.75 }}>
+      <Box>
         {courseName ? (
           <>
             <Typography
               fontWeight="bold"
+              color="text.secondary"
               sx={{
                 mb: 1,
                 fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
@@ -58,12 +58,12 @@ export const ConversationSplash = ({
             >
               {courseName}
             </Typography>
-            <Typography fontWeight="medium" sx={{ fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' } }}>
+            <Typography fontWeight="medium" color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' } }}>
               {promptName}
             </Typography>
           </>
         ) : (
-          <Typography variant="h6" fontStyle="italic" sx={{ mb: 1 }}>
+          <Typography variant="h6" fontStyle="italic" color="text.primary" sx={{ mb: 1 }}>
             {t('chat:start')}
           </Typography>
         )}
