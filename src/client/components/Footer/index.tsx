@@ -37,7 +37,13 @@ const Footer = () => {
           to="/changelog"
           variant="caption"
           underline="hover"
-          sx={{ alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 0.75 }}
+          sx={{
+            alignSelf: 'flex-start',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 0.75,
+            color: 'text.primary',
+          }}
         >
           {t('footer:changelog')}
           {unseenReleasesCount > 0 && (
