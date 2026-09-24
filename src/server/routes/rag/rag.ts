@@ -1,68 +1,14 @@
 import { Router } from 'express'
 import z from 'zod/v4'
-import { ChatInstance, ChatInstanceRagIndex, RagFile, RagIndex } from '../../db/models'
+import { ChatInstance, RagFile, RagIndex } from '../../db/models'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
-import { TEST_COURSES } from '../../../shared/testData'
 import ragIndexRouter from './ragIndex'
 import { ChatInstanceAccess, getChatInstanceAccess } from '../../services/chatInstances/access'
 import { RedisVectorStore } from 'src/server/services/rag/vectorStore'
 import { ragIndexMiddleware } from './ragIndexMiddleware'
 
 const router = Router()
-
-const IndexCreationSchema = z.object({
-  name: z.string().min(1).max(100),
-  language: z.enum(['Finnish', 'English', 'Swedish']).optional(),
-  chatInstanceId: z.string().min(1).max(100),
-})
-
-router.post('/indices', async (req, res) => {
-  const { user } = req as RequestWithUser
-  const { name, chatInstanceId, language } = IndexCreationSchema.parse(req.body)
-
-  const chatInstance = await ChatInstance.findByPk(chatInstanceId, {
-    include: [
-      {
-        model: RagIndex,
-        as: 'ragIndices',
-      },
-    ],
-  })
-
-  if (!chatInstance) {
-    throw ApplicationError.NotFound('Invalid chat instance id')
-  }
-
-  if ((await getChatInstanceAccess(user, chatInstance)) < ChatInstanceAccess.TEACHER) {
-    throw ApplicationError.Forbidden('Cannot create index, user is not responsible for the course')
-  }
-
-  // Only TEST_COURSES allow > 10 rag indices
-  const isTestCourse = Object.values(TEST_COURSES).some((course) => course.id === chatInstance.id)
-  const hasMaxRagIndices = (chatInstance.ragIndices?.length ?? 0) > 10
-  if (!isTestCourse && hasMaxRagIndices) {
-    throw ApplicationError.Forbidden(`Cannot create index, 10 already exists on the course ${chatInstance.id}`)
-  }
-
-  const ragIndex = await RagIndex.create({
-    userId: user.id,
-    metadata: {
-      name,
-      language,
-    },
-  })
-
-  await ChatInstanceRagIndex.create({
-    chatInstanceId,
-    ragIndexId: ragIndex.id,
-    userId: user.id,
-  })
-
-  await RedisVectorStore.fromRagIndex(ragIndex).createIndex()
-
-  res.json(ragIndex)
-})
 
 const GetIndicesQuerySchema = z.object({
   chatInstanceId: z.string().optional(),

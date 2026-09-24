@@ -6,23 +6,6 @@ import { IngestionJobStatus } from '@shared/ingestion'
 import queryClient from '../../util/queryClient'
 import { invalidateAllPromptLists } from 'src/client/util/promptQueries'
 
-export const useCreateRagIndexMutation = () => {
-  const mutation = useMutation({
-    mutationFn: async ({ chatInstanceId, name, language }: RagIndexMetadata & { chatInstanceId: string }) => {
-      const response = await apiClient.post('/rag/indices', {
-        name,
-        chatInstanceId,
-        language,
-      })
-      return response.data
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['ragIndices'] })
-    },
-  })
-  return mutation
-}
-
 export const useCreateUserRagIndexMutation = () => {
   return useMutation({
     mutationFn: async ({ name, language }: RagIndexMetadata) => {

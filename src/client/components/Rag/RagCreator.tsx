@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useCreateRagIndexMutation, useCreateUserRagIndexMutation } from './api'
+import { useCreateUserRagIndexMutation } from './api'
 import {
   Button,
   Dialog,
@@ -21,9 +21,8 @@ import type { Course } from '../../types'
 import { useTranslation } from 'react-i18next'
 import { RAG_LANGUAGES } from '@shared/lang'
 
-export const RagCreator = ({ chatInstance, onCreated }: { chatInstance?: Course; onCreated?: (indexId: number) => void }) => {
+export const RagCreator = ({ onCreated }: { onCreated?: (indexId: number) => void }) => {
   const { t } = useTranslation()
-  const createIndexMutation = useCreateRagIndexMutation()
   const createUserIndexMutation = useCreateUserRagIndexMutation()
   const [indexName, setIndexName] = useState('')
   const [language, setLanguage] = useState<'Finnish' | 'English' | 'Swedish'>('English')
@@ -49,9 +48,7 @@ export const RagCreator = ({ chatInstance, onCreated }: { chatInstance?: Course;
             onSubmit: async (event: React.FormEvent<HTMLFormElement>) => {
               event.preventDefault()
               event.stopPropagation()
-              const newIndex = chatInstance
-                ? await createIndexMutation.mutateAsync({ chatInstanceId: chatInstance.id, name: indexName, language })
-                : await createUserIndexMutation.mutateAsync({ name: indexName, language })
+              const newIndex = await createUserIndexMutation.mutateAsync({ name: indexName, language })
               setIndexName('')
               if (onCreated) {
                 onCreated(newIndex.id)
