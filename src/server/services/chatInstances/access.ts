@@ -1,6 +1,6 @@
 import { type ChatInstance, Enrolment, Prompt, RagIndex, Responsibility, User as UserModel } from '../../db/models'
 import type { User } from '../../../shared/user'
-import { TEST_COURSES, TEST_USERS } from '../../../shared/testData'
+import { STAFF_COURSES, TEST_USERS } from '../../../shared/testData'
 import logger from '../../util/logger'
 
 const getUserById = async (id: string) => UserModel.findByPk(id)
@@ -53,7 +53,7 @@ export const getEnrolledCourses = async (user: User) => {
 
   if (!enrolledToSandbox) return enrolments
 
-  const sandboxChatInstanceIds = [TEST_COURSES.OTE_SANDBOX.id, ...(user.iamGroups.includes('grp-toska') ? [TEST_COURSES.TOSKA.id] : [])]
+  const sandboxChatInstanceIds = [STAFF_COURSES.OTE_SANDBOX.id, ...(user.iamGroups.includes('grp-toska') ? [STAFF_COURSES.TOSKA.id] : [])]
 
   const existingChatInstanceIds = new Set(enrolments.map((enrolment) => enrolment.chatInstanceId))
   const missingChatInstanceIds = sandboxChatInstanceIds.filter((id) => !existingChatInstanceIds.has(id))
@@ -127,7 +127,7 @@ export const getTeachedCourses = async (user: User) => {
 
   if (!teacherOfSandbox) return responsibilities.map((responsibility) => responsibility.chatInstance)
 
-  const sandboxChatInstanceIds = Object.values(TEST_COURSES).map((course) => course.id)
+  const sandboxChatInstanceIds = Object.values(STAFF_COURSES).map((course) => course.id)
 
   const existingChatInstanceIds = new Set(responsibilities.map((responsibility) => responsibility.chatInstanceId))
   const missingChatInstanceIds = sandboxChatInstanceIds.filter((id) => !existingChatInstanceIds.has(id))

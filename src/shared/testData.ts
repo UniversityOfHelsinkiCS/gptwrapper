@@ -22,7 +22,7 @@ export const getTestUserHeaders = (idx: string, role: 'teacher' | 'student' | 'a
   }
 }
 
-export const TEST_COURSES = {
+export const STAFF_COURSES = {
   OTE_SANDBOX: {
     id: 'sandbox',
     courseId: 'sandbox',
@@ -39,6 +39,24 @@ export const TEST_COURSES = {
     usageLimit: 200_000,
     activated: true,
   },
+  TOSKA: {
+    id: 'toska',
+    courseId: 'toska-course-id',
+    name: {
+      en: 'Toska',
+      sv: 'Toska',
+      fi: 'Toska',
+    },
+    activityPeriod: {
+      startDate: '2025-08-26',
+      endDate: '2100-08-26',
+    },
+    code: 'TOSKA-1234',
+    usageLimit: 2_000_000,
+    activated: true,
+  },
+}
+export const TEST_COURSES = {
   TEST_COURSE: {
     id: 'test-course',
     courseId: 'test-course-course-id',
@@ -70,22 +88,6 @@ export const TEST_COURSES = {
     },
     code: 'ESI-1234',
     usageLimit: 200_000,
-    activated: true,
-  },
-  TOSKA: {
-    id: 'toska',
-    courseId: 'toska-course-id',
-    name: {
-      en: 'Toska',
-      sv: 'Toska',
-      fi: 'Toska',
-    },
-    activityPeriod: {
-      startDate: '2025-08-26',
-      endDate: '2100-08-26',
-    },
-    code: 'TOSKA-1234',
-    usageLimit: 2_000_000,
     activated: true,
   },
 }
