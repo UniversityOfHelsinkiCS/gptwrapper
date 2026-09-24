@@ -10,13 +10,13 @@ import { RedisVectorStore } from './vectorStore'
 import { getEmbedder } from './embedder'
 
 const defaultTextSplitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 1000,
-  chunkOverlap: 200,
+  chunkSize: 1000 / 2,
+  chunkOverlap: 200 / 2,
 })
 
 const markdownTextSplitter = new MarkdownTextSplitter({
-  chunkSize: 1000,
-  chunkOverlap: 200,
+  chunkSize: 1000 / 2,
+  chunkOverlap: 200 / 2,
 })
 
 const isMarkdown = (mimetype: string) => mimetype === 'text/markdown'
