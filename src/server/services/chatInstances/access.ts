@@ -112,6 +112,14 @@ const findResponsibilities = async (userId: string) =>
     ],
   })) as (Responsibility & { chatInstance: ChatInstance })[]
 
+export const ensureSandBoxAccess = async (user: User): Promise<void> => {
+  const teacherOfSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.teachers)
+  const enrolledToSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.enrolled)
+
+  if (!enrolledToSandbox && !teacherOfSandbox) {
+    return
+  }
+}
 export const getTeachedCourses = async (user: User) => {
   const teacherOfSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.teachers)
 
