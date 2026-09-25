@@ -96,7 +96,8 @@ interface RagIndexV2Props {
 
 export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelectFile, onDeleted }) => {
   const { user } = useCurrentUser()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const { language } = i18n
 
   const [searchOpen, setSearchOpen] = React.useState(false)
   const deleteIndexMutation = useDeleteRagIndexMutation(indexId)
@@ -340,7 +341,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
                         component="li"
                         size="small"
                         variant="outlined"
-                        label={prompt.name}
+                        label={[prompt.chatInstance?.name[language], prompt.name].filter(Boolean).join(' / ')}
                         sx={{
                           maxWidth: '100%',
                           height: 'auto',

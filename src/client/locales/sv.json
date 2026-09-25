@@ -722,7 +722,7 @@
     "promptUsageTitle": "Prompter som använder denna samling",
     "promptUsageEmpty": "Ingen prompt använder denna samling ännu",
     "promptUsageCount": "{{count}} prompter",
-    "promptTypeChatInstance": "Samtalsspecifik",
+    "promptTypeChatInstance": "Kursprompt",
     "promptTypePersonal": "Personlig",
     "promptTypeUniversity": "Universitetsprompt",
     "promptTypeTemplate": "Mall",

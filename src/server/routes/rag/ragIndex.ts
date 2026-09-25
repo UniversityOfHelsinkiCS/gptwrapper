@@ -5,7 +5,7 @@ import z from 'zod/v4'
 import multerS3 from 'multer-s3'
 import path from 'path'
 import { isSupportedRagFile, shouldRenderAsText } from '../../../shared/utils'
-import { Prompt, RagFile, RagIndex } from '../../db/models'
+import { ChatInstance, Prompt, RagFile, RagIndex } from '../../db/models'
 import { FileStore } from '../../services/rag/fileStore'
 import { ApplicationError } from '../../util/ApplicationError'
 import { search } from '../../services/rag/search'
@@ -44,6 +44,7 @@ ragIndexRouter.get('/', async (req, res) => {
     Prompt.findAll({
       where: { ragIndexId: ragIndex.id },
       attributes: ['id', 'name', 'type'],
+      include: { model: ChatInstance, as: 'chatInstance', attributes: ['id', 'name'], required: false },
       order: [['name', 'ASC']],
     }),
   ])

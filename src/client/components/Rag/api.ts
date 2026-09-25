@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import apiClient from '../../util/apiClient'
-import { RagFileAttributes, RagIndexAttributes, RagIndexMetadata } from '../../../shared/types'
+import { Locales, RagFileAttributes, RagIndexAttributes, RagIndexMetadata } from '../../../shared/types'
 import { PromptType } from '../../types'
 import { IngestionJobStatus } from '@shared/ingestion'
 import queryClient from '../../util/queryClient'
@@ -39,6 +39,7 @@ export type RagIndexPromptUsage = {
   id: string
   name: string
   type: PromptType
+  chatInstance: { id: string; name: Locales } | null
 }
 
 export type RagIndexDetails = Omit<RagIndexAttributes, 'ragFileCount'> & {

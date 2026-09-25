@@ -772,7 +772,7 @@
     "promptUsageTitle": "Prompts using this collection",
     "promptUsageEmpty": "No prompts use this collection yet",
     "promptUsageCount": "{{count}} prompts",
-    "promptTypeChatInstance": "Conversation-specific",
+    "promptTypeChatInstance": "Course prompt",
     "promptTypePersonal": "Personal",
     "promptTypeUniversity": "University prompt",
     "promptTypeTemplate": "Template",
