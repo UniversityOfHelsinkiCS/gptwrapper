@@ -40,6 +40,7 @@ import { RagProgressSummaryV2 } from './RagProgressSummaryV2'
 import { isSupportedRagFile, RAG_FILE_ACCEPT } from '@shared/utils'
 import { usePromptState } from '../ChatV2/PromptState'
 import { PromptType } from '../../types'
+import { useNavigate, useParams } from 'react-router-dom'
 
 const promptTypeOrder: PromptType[] = ['CHAT_INSTANCE', 'PERSONAL', 'UNIVERSITY', 'TEMPLATE']
 
@@ -98,7 +99,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
   const { user } = useCurrentUser()
   const { t, i18n } = useTranslation()
   const { language } = i18n
-
+  const { courseId } = useParams()
   const [searchOpen, setSearchOpen] = React.useState(false)
   const deleteIndexMutation = useDeleteRagIndexMutation(indexId)
   const deleteFileMutation = useDeleteRagFileMutation()
@@ -110,6 +111,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
   const { data: ragFileStatuses, refetch: refetchStatuses } = useRagIndexJobs(indexId, refetchInterval)
   const uploadMutation = useUploadMutation({ index: ragDetails, onUploadProgress: setUploadProgress })
   const { activePrompt, handleChangePrompt } = usePromptState()
+  const navigate = useNavigate()
 
   const isComplete = ragFileStatuses ? ragFileStatuses.every(({ pipelineStage }) => pipelineStage !== 'ingesting') && !uploadMutation.isPending : false
 
@@ -185,6 +187,10 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
     enqueueSnackbar(t('rag:fileDeleted'), { variant: 'success' })
     refetch()
     refetchStatuses()
+  }
+
+  const handleOpenPromptClick = (promptId: string) => {
+    navigate(`/${courseId ?? 'general'}/prompts`, { state: { previewPromptId: promptId } })
   }
 
   const prompts = ragDetails.prompts ?? []
@@ -338,6 +344,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
                     {typePrompts.map((prompt) => (
                       <Chip
                         key={prompt.id}
+                        onClick={() => handleOpenPromptClick(prompt.id)}
                         component="li"
                         size="small"
                         variant="outlined"

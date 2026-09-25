@@ -13,9 +13,10 @@ import {
   FormControlLabel,
 } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Course, Prompt as PromptType } from '../../types'
 import { PromptEditorV2 } from '../Prompt/PromptEditorV2'
@@ -170,13 +171,24 @@ const PromptModalV2 = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const { activePrompt, handleChangePrompt, myPrompts, deletePromptMutation } = usePromptState()
   const navigate = useNavigate()
+  const location = useLocation()
   const { t } = useTranslation()
   const [deleteConfirm, setDeleteConfirm] = useState<PromptType | null>(null)
   const { user } = useCurrentUser()
+  // When opened from elsewhere (e.g. RAG index view), preview the given prompt instead of the active one
+  const initialPreviewPromptId = (location.state as { previewPromptId?: string } | null)?.previewPromptId
+  const { data: initialPreviewPrompt } = useQuery<PromptType>({
+    queryKey: [`/prompts/${initialPreviewPromptId}`],
+    enabled: Boolean(initialPreviewPromptId),
+  })
   // The university prompt gallery is admin-only for now
   const canSeeUniversityPrompts = Boolean(user?.isAdmin)
-  const opensOnGallery = canSeeUniversityPrompts && (!activePrompt || activePrompt.type === 'UNIVERSITY' || activePrompt.type === 'TEMPLATE')
-  const [previewPrompt, setPreviewPrompt] = useState<PromptType | undefined>(isMobile || opensOnGallery ? undefined : activePrompt)
+  const opensOnGallery =
+    canSeeUniversityPrompts &&
+    (initialPreviewPromptId
+      ? initialPreviewPrompt?.type === 'UNIVERSITY'
+      : !activePrompt || activePrompt.type === 'UNIVERSITY' || activePrompt.type === 'TEMPLATE')
+  const [previewPrompt, setPreviewPrompt] = useState<PromptType | undefined>(isMobile || opensOnGallery || initialPreviewPromptId ? undefined : activePrompt)
   const [previewCourse, setPreviewCourse] = useState<Course | undefined>(undefined)
   const [isEditing, setIsEditing] = useState(false)
   const [showMyPrompts, setShowMyPrompts] = useState(myPrompts.some((p) => p.id === previewPrompt?.id) || false)
@@ -211,6 +223,18 @@ const PromptModalV2 = () => {
   const [courseId, setCourseId] = useState<string>('general')
 
   const [showUniversityPrompts, setShowUniversityPrompts] = useState(!isMobile && opensOnGallery)
+
+  useEffect(() => {
+    if (!initialPreviewPrompt) return
+    if (opensOnGallery) {
+      setShowUniversityPrompts(!isMobile)
+      setPreviewPrompt(undefined)
+      return
+    }
+    setShowUniversityPrompts(false)
+    setPreviewPrompt(initialPreviewPrompt)
+    if (myPrompts.some((p) => p.id === initialPreviewPrompt.id)) setShowMyPrompts(true)
+  }, [initialPreviewPrompt])
 
   const showPromptPreview = (prompt: PromptType | undefined) => {
     setShowUniversityPrompts(false)
