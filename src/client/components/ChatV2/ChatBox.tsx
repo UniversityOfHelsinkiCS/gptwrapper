@@ -96,6 +96,7 @@ export const ChatBox = ({
   const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
   const [disallowedFileType, setDisallowedFileType] = useState<string>('')
   const [fileTypeAlertOpen, setFileTypeAlertOpen] = useState<boolean>(false)
+  const [fileAnnouncement, setFileAnnouncement] = useState<string>('')
   const [sendPreferenceConfiguratorOpen, setSendPreferenceConfiguratorOpen] = useState<boolean>(false)
   const sendButtonRef = useRef<HTMLButtonElement>(null)
   const textFieldRef = useRef<HTMLInputElement>(null)
@@ -125,6 +126,9 @@ export const ChatBox = ({
       fileInputRef.current.value = ''
     }
     setFileName('')
+    setFileAnnouncement(t('accessibility:fileRemoved'))
+    const target = document.getElementById('chat-input')
+    if (target) target.focus()
   }
 
   const handleFileTypeValidation = (file: File): void => {
@@ -147,6 +151,7 @@ export const ChatBox = ({
       return
     }
     setFileName(file.name)
+    setFileAnnouncement(t('accessibility:fileAttached', { file: file.name }))
   }
 
   const onSubmit = (e: React.FormEvent) => {
@@ -261,6 +266,7 @@ export const ChatBox = ({
         >
           <Box>
             <StatusAnnouncer message={!promptName ? t('accessibility:promptCleared') : ''} />
+            <StatusAnnouncer message={fileAnnouncement} />
             <Typography sx={visuallyHidden} id="hidden-prompt-description">
               {t('common:prompt')}: {typeLabel ? `${typeLabel} -` : ''} {promptName ? ` ${promptName}` : t('chat:noPrompt')}
             </Typography>
@@ -305,7 +311,7 @@ export const ChatBox = ({
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Tooltip title={t('chat:attachFile')} arrow placement="top">
-                  <IconButton onClick={() => fileInputRef.current?.click()}>
+                  <IconButton id="attach-file-button" onClick={() => fileInputRef.current?.click()}>
                     <AttachFileIcon />
                     <input
                       type="file"
@@ -317,7 +323,15 @@ export const ChatBox = ({
                     />
                   </IconButton>
                 </Tooltip>
-                {fileName && <Chip sx={{ borderRadius: 100 }} label={fileName} onDelete={handleDeleteFile} />}
+
+                {fileName && (
+                  <Chip
+                    sx={{ borderRadius: 100 }}
+                    label={fileName}
+                    onDelete={handleDeleteFile}
+                    aria-label={[t('accessibility:attachment', { file: fileName }), t('accessibility:removeAttachment')].join(', ')}
+                  />
+                )}
               </Box>
               {!isMobile && (
                 <Typography

@@ -841,6 +841,10 @@
       "fi": "Valitse kieli: suomi",
       "sv": "Välj språk: svenska",
       "en": "Select language: English"
-    }
+    },
+    "attachment": "Bilaga: {{file}}",
+    "removeAttachment": "Ta bort filen genom att trycka på Delete eller Backspace",
+    "fileAttached": "Fil bifogad: {{file}}",
+    "fileRemoved": "Filen har tagits bort"
   }
 }

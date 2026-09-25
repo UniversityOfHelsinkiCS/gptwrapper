@@ -867,6 +867,10 @@
       "fi": "Valitse kieli: suomi",
       "sv": "Välj språk: svenska",
       "en": "Select language: English"
-    }
+    },
+    "attachment": "Liitetty tiedosto: {{file}}",
+    "removeAttachment": "Poista tiedosto painamalla Delete tai Backspace",
+    "fileAttached": "Tiedosto liitetty: {{file}}",
+    "fileRemoved": "Tiedosto poistettu"
   }
 }
