@@ -7,6 +7,7 @@ import { alpha } from '@mui/material/styles'
 import { AccessTime, ExpandLess, ExpandMore, InsertDriveFileOutlined, Search as SearchIcon, Tune } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import { InfoBox } from '../common/InfoBox'
 
 export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
   const { t } = useTranslation()
@@ -74,7 +75,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
 
   return (
     <Box my="0.5rem" display="flex" flexDirection="column" gap="18px">
-      <Alert severity="info">{t('rag:searchDescription')}</Alert>
+      <InfoBox severity="info">{t('rag:searchDescription')}</InfoBox>
 
       <Box
         component="form"

@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-  Alert,
   Button,
   Box,
   Chip,
@@ -29,6 +28,7 @@ import { RagIndexDetails, useDeleteRagFileMutation, useDeleteRagIndexMutation, u
 import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
 import { BlueButton, OrangeButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
+import { InfoBox } from '../common/InfoBox'
 import { enqueueSnackbar } from 'notistack'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import queryClient from '../../util/queryClient'
@@ -360,11 +360,11 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
         <DialogContent>
           <Collapse in={advancedParsing.some(Boolean)} timeout={220} unmountOnExit>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 2 }}>
-              <Alert severity="info">{t('rag:advancedParsingInfo')}</Alert>
-              <Alert severity="warning" icon={<HourglassEmpty fontSize="small" />}>
+              <InfoBox severity="info">{t('rag:advancedParsingInfo')}</InfoBox>
+              <InfoBox severity="warning" icon={<HourglassEmpty fontSize="small" />}>
                 {t('rag:advancedParsingTimeWarning')}
-              </Alert>
-              <Alert severity="warning">{t('rag:advancedParsingAccuracyWarning')}</Alert>
+              </InfoBox>
+              <InfoBox severity="warning">{t('rag:advancedParsingAccuracyWarning')}</InfoBox>
             </Box>
           </Collapse>
           <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>

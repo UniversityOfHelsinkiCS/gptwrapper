@@ -1,10 +1,11 @@
 import { PUBLIC_URL } from '@config'
 import { ContentCopyOutlined, EditOutlined, LinkOutlined, VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
-import { Box, Divider, Typography, Paper, Tooltip, IconButton, Alert, List, ListItem, ListItemText, Dialog, DialogContent, DialogTitle } from '@mui/material'
+import { Box, Divider, Typography, Paper, Tooltip, IconButton, List, ListItem, ListItemText, Dialog, DialogContent, DialogTitle } from '@mui/material'
 import { enqueueSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 import useCourse from '../../hooks/useCourse'
+import { InfoBox } from '../common/InfoBox'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Prompt, Course } from '../../types'
 import { usePromptState } from './PromptState'
@@ -183,9 +184,9 @@ const PromptPreview = ({
             )}
           </Box>
           {!isPersonalPrompt && prompt.hidden && !user?.isAdmin && !amongResponsibles ? (
-            <Alert icon={<VisibilityOffOutlined fontSize="inherit" />} severity="info" sx={{ mt: 1.5 }}>
+            <InfoBox icon={<VisibilityOffOutlined fontSize="inherit" />} severity="info" sx={{ mt: 1.5 }}>
               {t('common:hiddenPromptInfo')}
-            </Alert>
+            </InfoBox>
           ) : (
             <Paper sx={{ p: 3, mt: 1.5, backgroundColor: alpha(theme.palette.primary.main, 0.08), ...(!isMobile && { maxHeight: '300px', overflow: 'auto' }) }}>
               <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary', ...monospaceStyle }}>
@@ -286,9 +287,9 @@ const PromptPreview = ({
               </Paper>
             ) : rag ? (
               prompt.ragHidden && !canManage ? (
-                <Alert icon={<VisibilityOffOutlined fontSize="inherit" />} severity="info" sx={{ mt: 1.5 }}>
+                <InfoBox icon={<VisibilityOffOutlined fontSize="inherit" />} severity="info" sx={{ mt: 1.5 }}>
                   {t('common:hiddenRag')}
-                </Alert>
+                </InfoBox>
               ) : (
                 <Box
                   sx={{

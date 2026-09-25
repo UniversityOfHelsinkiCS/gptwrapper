@@ -1,9 +1,10 @@
 import { useParams } from 'react-router-dom'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TableBody, TableCell, TableHead, TableRow, Table, Link, Paper, Typography, Alert, Box, Stack } from '@mui/material'
+import { TableBody, TableCell, TableHead, TableRow, Table, Link, Paper, Typography, Box, Stack } from '@mui/material'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { InfoBox } from '../../common/InfoBox'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import useCourse, { useCourseDiscussers, useCourseDiscussion } from '../../../hooks/useCourse'
 import { BlueButton } from '../../ChatV2/general/Buttons'
@@ -47,9 +48,9 @@ const DiscussionList: React.FC<{ courseId?: string; onSelectUser: (userId: strin
           }}
         >
           <Typography variant="h6">{t('course:reseachCourse')}</Typography>
-          <Alert severity="warning" style={{ marginTop: 20, marginBottom: 20 }}>
+          <InfoBox severity="warning" sx={{ my: 2.5 }}>
             <Typography>{t('course:isSavedNotOptOut')}</Typography>
-          </Alert>
+          </InfoBox>
         </Paper>
       )}
 

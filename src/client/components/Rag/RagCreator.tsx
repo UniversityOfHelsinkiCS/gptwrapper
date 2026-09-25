@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useCreateRagIndexMutation, useCreateUserRagIndexMutation } from './api'
 import {
-  Alert,
   Button,
   Dialog,
   DialogActions,
@@ -17,6 +16,7 @@ import {
 } from '@mui/material'
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
 import { BlueButton } from '../ChatV2/general/Buttons'
+import { InfoBox } from '../common/InfoBox'
 import type { Course } from '../../types'
 import { useTranslation } from 'react-i18next'
 import { RAG_LANGUAGES } from '@shared/lang'
@@ -63,15 +63,15 @@ export const RagCreator = ({ chatInstance, onCreated }: { chatInstance?: Course;
       >
         <DialogTitle>{t('rag:createNewIndex')}</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <Alert severity="info">
+          <InfoBox severity="info">
             {t('rag:creatorInfo')}{' '}
             <Link href="https://github.com/UniversityOfHelsinkiCS/gptwrapper/blob/main/documentation/rag.md" target="_blank" rel="noopener noreferrer">
               {t('rag:readMoreAboutRag')}
             </Link>
-          </Alert>
-          <Alert severity="success" icon={<LightbulbOutlinedIcon fontSize="small" />}>
+          </InfoBox>
+          <InfoBox severity="success" icon={<LightbulbOutlinedIcon fontSize="small" />}>
             {t('rag:creatorLanguageTip')}
-          </Alert>
+          </InfoBox>
           <TextField
             label={t('rag:nameLabel')}
             variant="outlined"

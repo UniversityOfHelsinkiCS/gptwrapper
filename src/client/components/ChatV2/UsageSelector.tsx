@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Menu, MenuItem, Typography } from '@mui/material'
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Menu, MenuItem, Typography } from '@mui/material'
 import HelpOutline from '@mui/icons-material/HelpOutline'
 import EventRepeatIcon from '@mui/icons-material/EventRepeat'
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
@@ -11,6 +11,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { getLanguageValue } from '@shared/utils'
 import { CourseUsage } from '@shared/types'
 import useUserUsages from '../../hooks/useUserUsage'
+import { InfoBox } from '../common/InfoBox'
 import { usePromptState } from './PromptState'
 import { DEFAULT_TOKEN_LIMIT } from '@config'
 import { visuallyHidden } from '@mui/utils'
@@ -28,12 +29,12 @@ const UsageInfoDialog = ({ open, onClose }: { open: boolean; onClose: () => void
     <Dialog open={open} onClose={onClose} maxWidth="xs">
       <DialogTitle>{t('status:usageTitle')}</DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-        <Alert severity="info" icon={<EventRepeatIcon fontSize="small" />}>
+        <InfoBox severity="info" icon={<EventRepeatIcon fontSize="small" />}>
           {t('info:usageReset')}
-        </Alert>
-        <Alert severity="success" icon={<LightbulbOutlinedIcon fontSize="small" />}>
+        </InfoBox>
+        <InfoBox severity="success" icon={<LightbulbOutlinedIcon fontSize="small" />}>
           {t('info:usageTips')}
-        </Alert>
+        </InfoBox>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t('common:close')}</Button>

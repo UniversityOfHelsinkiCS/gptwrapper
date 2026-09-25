@@ -61,6 +61,8 @@ S3_SECRET_KEY=<secret-key>
 
 ## Developers: things to know
 
+- [Accessibility](documentation/accessibility.md) — when to use `Alert` vs `InfoBox`, and how to announce state changes.
+
 ## Metrics (Prometheus)
 
 The server exposes Prometheus metrics at `GET /metrics` on the same port as the server (default `8000`).
