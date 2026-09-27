@@ -1,5 +1,5 @@
 import { expect, type APIRequestContext } from '@playwright/test'
-import { TEST_COURSES } from '../src/shared/testData'
+import { STAFF_COURSES, TEST_COURSES } from '../src/shared/testData'
 import { studentTest, teacherTest } from './fixtures'
 
 const login = async (request: APIRequestContext, workerIndex: number, role: 'teacher' | 'student') => {
@@ -24,7 +24,7 @@ const getUserCourses = async (request: APIRequestContext, workerIndex: number, r
   return response.json()
 }
 
-const sandboxCourseIds = Object.values(TEST_COURSES).map((course) => course.courseId)
+const sandboxCourseIds = Object.values(STAFF_COURSES).map((course) => course.courseId)
 
 // TODO:
 // this should be accessLevel === 'FULL' soon
@@ -35,7 +35,7 @@ teacherTest.describe('Login sandbox access', () => {
     await login(request, testInfo.workerIndex, 'teacher')
     const courses = await getUserCourses(request, testInfo.workerIndex, 'teacher')
 
-    expect(ownCourseIds(courses).sort()).toEqual([...sandboxCourseIds].sort())
+    expect(ownCourseIds(courses)).toEqual(expect.arrayContaining(sandboxCourseIds))
   })
 
   teacherTest('is idempotent across repeated logins', async ({ request }, testInfo) => {

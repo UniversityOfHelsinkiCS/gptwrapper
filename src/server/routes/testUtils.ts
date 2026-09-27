@@ -109,6 +109,14 @@ router.post('/reset-test-data', async (req, res) => {
     })
   }
 
+  if (testUserRole === 'teacher') {
+    console.log('creating responsibility', testUserRole, TEST_COURSES.TEST_COURSE)
+    await Responsibility.create({
+      userId,
+      chatInstanceId: TEST_COURSES.TEST_COURSE.id,
+    })
+  }
+
   const ragIndex = await RagIndex.create({
     userId: temporalTeacherId,
     metadata: {
