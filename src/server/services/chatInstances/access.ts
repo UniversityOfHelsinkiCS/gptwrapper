@@ -48,45 +48,8 @@ const findEnrolments = async (userId: string) =>
   })) as (Enrolment & { chatInstance: ChatInstance })[]
 
 export const getEnrolledCourses = async (user: User) => {
-  const enrolledToSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.enrolled)
   const enrolments = await findEnrolments(user.id)
-
-  if (!enrolledToSandbox) return enrolments
-
-  const sandboxChatInstanceIds = [STAFF_COURSES.OTE_SANDBOX.id, ...(user.iamGroups.includes('grp-toska') ? [STAFF_COURSES.TOSKA.id] : [])]
-
-  const existingChatInstanceIds = new Set(enrolments.map((enrolment) => enrolment.chatInstanceId))
-  const missingChatInstanceIds = sandboxChatInstanceIds.filter((id) => !existingChatInstanceIds.has(id))
-
-  if (missingChatInstanceIds.length === 0) return enrolments
-
-  // Having any enrolment already proves the user row exists (FK). Otherwise we
-  // have to check, since the user may not be persisted yet on their first login.
-  if (enrolments.length === 0 && !(await getUserById(user.id))) {
-    logger.info(`[access] getEnrolledCourses user=${user.id} not yet in db, skipping sandbox upserts`)
-    return enrolments
-  }
-
-  await Promise.all(
-    missingChatInstanceIds.map(async (chatInstanceId) => {
-      try {
-        await Enrolment.upsert(
-          {
-            userId: user.id,
-            chatInstanceId,
-          },
-          // TS is wrong here. It expects fields in camelCase
-          // while the actual fields need to be in snake_case
-          // @ts-expect-error
-          { conflictFields: ['user_id', 'chat_instance_id'] },
-        )
-      } catch (err: unknown) {
-        logger.info(`Failed to upsert sandbox course enrolment for user ${user.id} on ${chatInstanceId}: ${(err as Error).message}`)
-      }
-    }),
-  )
-
-  return findEnrolments(user.id)
+  return enrolments
 }
 
 /**
@@ -112,14 +75,6 @@ const findResponsibilities = async (userId: string) =>
     ],
   })) as (Responsibility & { chatInstance: ChatInstance })[]
 
-export const ensureSandBoxAccess = async (user: User): Promise<void> => {
-  const teacherOfSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.teachers)
-  const enrolledToSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.enrolled)
-
-  if (!enrolledToSandbox && !teacherOfSandbox) {
-    return
-  }
-}
 export const getTeachedCourses = async (user: User) => {
   const teacherOfSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.teachers)
 
@@ -127,7 +82,7 @@ export const getTeachedCourses = async (user: User) => {
 
   if (!teacherOfSandbox) return responsibilities.map((responsibility) => responsibility.chatInstance)
 
-  const sandboxChatInstanceIds = Object.values(STAFF_COURSES).map((course) => course.id)
+  const sandboxChatInstanceIds = [STAFF_COURSES.OTE_SANDBOX.id, ...(user.iamGroups.includes(TEST_USERS.teachers) ? STAFF_COURSES.TOSKA.id : [])]
 
   const existingChatInstanceIds = new Set(responsibilities.map((responsibility) => responsibility.chatInstanceId))
   const missingChatInstanceIds = sandboxChatInstanceIds.filter((id) => !existingChatInstanceIds.has(id))
