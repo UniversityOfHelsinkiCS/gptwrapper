@@ -3,13 +3,13 @@ export const devUserHeaders = {
   mail: 'veikko@toska.test.dev',
   preferredlanguage: 'fi',
   hypersonsisuid: 'dev-hlo-123',
-  hygroupcn: 'grp-toska;hy-employees;grp-currechat-demostudents;grp-currechat-demoteachers',
+  hygroupcn: 'grp-toska;hy-employees',
 }
 
 const testRoleToIams = {
-  teacher: 'hy-employees;grp-currechat-demostudents;grp-currechat-demoteachers',
+  teacher: 'hy-employees',
   student: 'grp-students',
-  admin: 'grp-toska;hy-employees;grp-currechat-demostudents;grp-currechat-demoteachers',
+  admin: 'grp-toska;hy-employees',
 }
 
 export const getTestUserHeaders = (idx: string, role: 'teacher' | 'student' | 'admin') => {
@@ -90,9 +90,4 @@ export const TEST_COURSES = {
     usageLimit: 200_000,
     activated: true,
   },
-}
-
-export const TEST_USERS = {
-  enrolled: 'grp-currechat-demostudents',
-  teachers: 'grp-currechat-demoteachers',
 }
