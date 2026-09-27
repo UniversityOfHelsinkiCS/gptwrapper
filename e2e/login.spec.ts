@@ -1,8 +1,8 @@
 import { expect, type APIRequestContext } from '@playwright/test'
 import { STAFF_COURSES, TEST_COURSES } from '../src/shared/testData'
-import { studentTest, teacherTest } from './fixtures'
+import { adminTest, studentTest } from './fixtures'
 
-const login = async (request: APIRequestContext, workerIndex: number, role: 'teacher' | 'student') => {
+const login = async (request: APIRequestContext, workerIndex: number, role: 'teacher' | 'student' | 'admin') => {
   const response = await request.get('/api/users/login', {
     headers: {
       'x-test-user-index': String(workerIndex),
@@ -13,7 +13,7 @@ const login = async (request: APIRequestContext, workerIndex: number, role: 'tea
   return response.json()
 }
 
-const getUserCourses = async (request: APIRequestContext, workerIndex: number, role: 'teacher' | 'student') => {
+const getUserCourses = async (request: APIRequestContext, workerIndex: number, role: 'teacher' | 'student' | 'admin') => {
   const response = await request.get('/api/courses/user', {
     headers: {
       'x-test-user-index': String(workerIndex),
@@ -30,18 +30,18 @@ const sandboxCourseIds = Object.values(STAFF_COURSES).map((course) => course.cou
 // this should be accessLevel === 'FULL' soon
 const ownCourseIds = (courses) => courses.filter((course) => course.role === 'teacher').map((course) => course.courseId)
 
-teacherTest.describe('Login sandbox access', () => {
-  teacherTest('grants every sandbox course on first login', async ({ request }, testInfo) => {
-    await login(request, testInfo.workerIndex, 'teacher')
-    const courses = await getUserCourses(request, testInfo.workerIndex, 'teacher')
+adminTest.describe('Login sandbox access', () => {
+  adminTest('grants every sandbox course on first login', async ({ request }, testInfo) => {
+    await login(request, testInfo.workerIndex, 'admin')
+    const courses = await getUserCourses(request, testInfo.workerIndex, 'admin')
 
     expect(ownCourseIds(courses)).toEqual(expect.arrayContaining(sandboxCourseIds))
   })
 
-  teacherTest('is idempotent across repeated logins', async ({ request }, testInfo) => {
-    const first = await getUserCourses(request, testInfo.workerIndex, 'teacher')
-    const second = await getUserCourses(request, testInfo.workerIndex, 'teacher')
-    const third = await getUserCourses(request, testInfo.workerIndex, 'teacher')
+  adminTest('is idempotent across repeated logins', async ({ request }, testInfo) => {
+    const first = await getUserCourses(request, testInfo.workerIndex, 'admin')
+    const second = await getUserCourses(request, testInfo.workerIndex, 'admin')
+    const third = await getUserCourses(request, testInfo.workerIndex, 'admin')
 
     const firstOwnCourses = ownCourseIds(first)
     const secondOwnCourses = ownCourseIds(second)
@@ -54,7 +54,7 @@ teacherTest.describe('Login sandbox access', () => {
 
 studentTest.describe('Login sandbox access', () => {
   studentTest('does not grant sandbox courses to a plain student', async ({ request }, testInfo) => {
-    await login(request, testInfo.workerIndex, 'teacher')
+    await login(request, testInfo.workerIndex, 'student')
     const courses = await getUserCourses(request, testInfo.workerIndex, 'student')
 
     // A student is in neither demo IAM group, so both functions early-return the
