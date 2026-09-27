@@ -15,9 +15,7 @@ export const headersToUser = (headers: any): User => {
 
   const iamGroups = parseIamGroups(hygroupcn)
 
-  const excludeFromAdmin = ['mluukkai2']
-
-  const isAdmin = !excludeFromAdmin.includes(username) && checkAdmin(iamGroups)
+  const isAdmin = checkAdmin(iamGroups)
 
   const user: User = {
     id: id || username,
