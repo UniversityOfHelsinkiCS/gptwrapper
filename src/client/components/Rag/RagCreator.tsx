@@ -17,7 +17,6 @@ import {
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
 import { BlueButton } from '../ChatV2/general/Buttons'
 import { InfoBox } from '../common/InfoBox'
-import type { Course } from '../../types'
 import { useTranslation } from 'react-i18next'
 import { RAG_LANGUAGES } from '@shared/lang'
 
