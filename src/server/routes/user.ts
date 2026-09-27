@@ -2,7 +2,7 @@ import express from 'express'
 
 import type { RequestWithUser } from '../types'
 import logger from '../util/logger'
-import { getTeachedCourses, getEnrolledCourses } from '../services/chatInstances/access'
+import { ensureSandboxAccess } from '../services/chatInstances/access'
 import { User } from '../db/models'
 import { getUserStatus, getUsage, getCourseUsages, getUserTokenLimit } from '../services/chatInstances/usage'
 import { getLastRestart } from '../util/lastRestart'
@@ -22,13 +22,11 @@ userRouter.get('/login', async (req, res) => {
 
   let dbUser: User | null = null
 
-  // this is here temporarily to retain upsert functionality and not break e2e tests.
-  await Promise.all([getEnrolledCourses(user), getTeachedCourses(user)])
-
   // When acual user logs in, update the users info.
   if (!request.hijackedBy) {
     user.lastLoggedInAt = new Date()
     ;[dbUser] = await User.upsert(user)
+    await ensureSandboxAccess(user)
   } else {
     dbUser = await User.findByPk(id)
 
