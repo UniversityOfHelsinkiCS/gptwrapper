@@ -1,9 +1,7 @@
 import { type ChatInstance, Enrolment, Prompt, RagIndex, Responsibility, User as UserModel } from '../../db/models'
 import type { User } from '../../../shared/user'
-import { STAFF_COURSES, TEST_USERS } from '../../../shared/testData'
+import { STAFF_COURSES } from '../../../shared/testData'
 import logger from '../../util/logger'
-
-const getUserById = async (id: string) => UserModel.findByPk(id)
 
 const chatInstanceWithPrompts = {
   include: [
@@ -75,26 +73,26 @@ const findResponsibilities = async (userId: string) =>
     ],
   })) as (Responsibility & { chatInstance: ChatInstance })[]
 
-export const getTeachedCourses = async (user: User) => {
-  const teacherOfSandbox = user.isAdmin || user.iamGroups.includes(TEST_USERS.teachers)
+export const ensureSandboxAccess = async (user: User) => {
+  const isAdmin = user.isAdmin
+  const isToska = user.iamGroups.includes('grp-toska')
+
+  if (!isAdmin && !isToska) return
 
   const responsibilities = await findResponsibilities(user.id)
 
-  if (!teacherOfSandbox) return responsibilities.map((responsibility) => responsibility.chatInstance)
-
-  const sandboxChatInstanceIds = [STAFF_COURSES.OTE_SANDBOX.id, ...(user.iamGroups.includes(TEST_USERS.teachers) ? STAFF_COURSES.TOSKA.id : [])]
+  const sandboxChatInstanceIds: Array<string> = []
+  if (isAdmin) {
+    sandboxChatInstanceIds.push(STAFF_COURSES.OTE_SANDBOX.id)
+  }
+  if (isToska) {
+    sandboxChatInstanceIds.push(STAFF_COURSES.TOSKA.id)
+  }
 
   const existingChatInstanceIds = new Set(responsibilities.map((responsibility) => responsibility.chatInstanceId))
   const missingChatInstanceIds = sandboxChatInstanceIds.filter((id) => !existingChatInstanceIds.has(id))
 
-  if (missingChatInstanceIds.length === 0) return responsibilities.map((responsibility) => responsibility.chatInstance)
-
-  // Having any responsibility already proves the user row exists (FK). Otherwise we
-  // have to check, since the user may not be persisted yet on their first login.
-  if (responsibilities.length === 0 && !(await getUserById(user.id))) {
-    logger.info(`[access] getTeachedCourses user=${user.id} not yet in db, skipping sandbox upserts`)
-    return responsibilities.map((responsibility) => responsibility.chatInstance)
-  }
+  if (missingChatInstanceIds.length === 0) return
 
   await Promise.all(
     missingChatInstanceIds.map(async (chatInstanceId) => {
@@ -114,10 +112,11 @@ export const getTeachedCourses = async (user: User) => {
       }
     }),
   )
+}
+export const getTeachedCourses = async (user: User) => {
+  const responsibilities = await findResponsibilities(user.id)
 
-  const refetched = await findResponsibilities(user.id)
-
-  return refetched.map((responsibility) => responsibility.chatInstance)
+  return responsibilities.map((responsibility) => responsibility.chatInstance)
 }
 
 /**
