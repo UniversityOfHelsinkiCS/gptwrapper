@@ -129,6 +129,8 @@
   },
   "chat": {
     "start": "Aloita keskustelu lähettämällä viesti...",
+    "fileTypeNotSupported": "Tiedostotyyppiä \"{{- type}}\" ei tueta tällä hetkellä",
+    "supportedFileFormats": "Tällä hetkellä tuetut tiedostomuodot ovat \".pdf\" sekä tekstitiedostot, kuten \".txt\", \".csv\" ja \".md\"",
     "writeHere": "Kirjoita viestisi tähän...",
     "systemMessage": "Ohjeistus",
     "systemMessageCreation": "Alustus",

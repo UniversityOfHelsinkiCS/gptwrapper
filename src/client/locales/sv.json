@@ -136,6 +136,8 @@
   },
   "chat": {
     "start": "Starta konversationen genom att skicka ett meddelande...",
+    "fileTypeNotSupported": "Filtypen \"{{- type}}\" stöds inte för närvarande",
+    "supportedFileFormats": "För närvarande stöds formaten \".pdf\" samt vanlig text, såsom \".txt\", \".csv\" och \".md\"",
     "writeHere": "Skriv ditt meddelande här...",
     "systemMessage": "Vägledning",
     "systemMessageCreation": "Initiering",
