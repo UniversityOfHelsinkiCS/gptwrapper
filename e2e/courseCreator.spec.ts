@@ -20,7 +20,7 @@ const createCustomChat = async (page: Page, name: string, description: string, c
   await page.getByTestId('course-creator-create-course-id-input').fill(courseId)
   await page.getByTestId('course-creator-create-button').click()
 
-  await expect(page.getByText('Custom chat created')).toBeVisible()
+  await expect(page.getByText('Workspace created')).toBeVisible()
 
   const row = page.getByTestId('course-creator-chat-row').filter({ hasText: name }).first()
   await expect(row).toBeVisible()
@@ -50,7 +50,7 @@ test.describe('Course creator custom chats', () => {
     await page.getByTestId('course-creator-edit-course-id-input').fill(updatedCourseId)
     await page.getByTestId('course-creator-save-button').click()
 
-    await expect(page.getByText('Custom chat saved')).toBeVisible()
+    await expect(page.getByText('Workspace saved')).toBeVisible()
 
     const updatedRow = page.getByTestId('course-creator-chat-row').filter({ hasText: updatedName }).first()
     await expect(updatedRow).toBeVisible()
@@ -80,7 +80,7 @@ test.describe('Course creator custom chats', () => {
     await page.getByTestId('course-creator-delete-button').click()
     await page.getByTestId('course-creator-delete-confirm-button').click()
 
-    await expect(page.getByText('Custom chat deleted')).toBeVisible()
+    await expect(page.getByText('Workspace deleted')).toBeVisible()
     await expect(page.getByTestId('course-creator-chat-row').filter({ hasText: name })).toHaveCount(0)
   })
 })
