@@ -362,7 +362,7 @@ const PromptModalV2 = () => {
             flexDirection: 'column',
           }}
         >
-          <Box sx={{ overflowY: 'auto', mt: 2 }} role="region" aria-label={t('common:promptList')}>
+          <Box sx={{ overflowY: 'auto', mt: 2 }} role="region" aria-label={t('common:prompts')}>
             {/* University prompts — opens the gallery in the right panel. Admin only for now. */}
             {canSeeUniversityPrompts && (
               <Box>
@@ -376,7 +376,7 @@ const PromptModalV2 = () => {
                   <ListItemIcon sx={{ minWidth: 40 }}>
                     <AccountBalanceIcon color="primary" />
                   </ListItemIcon>
-                  <ListItemText primary={t('uniPrompts:galleryNav')} slotProps={{ primary: { variant: 'subtitle1', fontWeight: 600 } }} />
+                  <ListItemText primary={t('uniPrompts:galleryNav')} slotProps={{ primary: { variant: 'subtitle1', component: 'h3', fontWeight: 600 } }} />
                 </ListItemButton>
                 <StatusAnnouncer message={showUniversityPrompts ? t('accessibility:previewOpened', { name: t('uniPrompts:title') }) : ''} />
               </Box>
@@ -399,7 +399,7 @@ const PromptModalV2 = () => {
                 <ListItemIcon sx={{ minWidth: 40 }}>
                   <PersonIcon color="primary" />
                 </ListItemIcon>
-                <ListItemText primary={t('settings:myPrompts')} slotProps={{ primary: { variant: 'subtitle1', fontWeight: 600 } }} />
+                <ListItemText primary={t('settings:myPrompts')} slotProps={{ primary: { variant: 'subtitle1', component: 'h3', fontWeight: 600 } }} />
               </ListItemButton>
               <StatusAnnouncer message={showMyPrompts ? t('accessibility:promptListOpened', { name: t('settings:myPrompts') }) : ''} />
 
@@ -471,7 +471,7 @@ const PromptModalV2 = () => {
                 <Divider sx={{ my: 1 }} />
                 {/* Courses header with filter */}
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, pt: 1.5, pb: 0.5 }}>
-                  <Typography variant="overline" sx={SECTION_LABEL_SX}>
+                  <Typography variant="overline" component="h3" sx={SECTION_LABEL_SX}>
                     {t('settings:courses')}
                   </Typography>
                   <Tooltip title={t('settings:filterCourses')}>
@@ -544,7 +544,7 @@ const PromptModalV2 = () => {
                   <Box>
                     <Divider sx={{ my: 1 }} />
                     <Box sx={{ px: 1, pt: 1.5, pb: 0.5 }}>
-                      <Typography variant="overline" sx={SECTION_LABEL_SX}>
+                      <Typography variant="overline" component="h3" sx={SECTION_LABEL_SX}>
                         {t('settings:workspace')}
                       </Typography>
                     </Box>
@@ -570,7 +570,7 @@ const PromptModalV2 = () => {
             <Box
               sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minWidth: 0, minHeight: 0, mt: 2 }}
               role="region"
-              aria-label={t('accessibility:previewAndManage')}
+              aria-label={t('accessibility:preview')}
             >
               {showUniversityPrompts && canSeeUniversityPrompts ? (
                 <UniversityPromptGallery onSelect={handleSelectUniversityPrompt} copyTargets={copyTargets} onCopied={handleCopied} />

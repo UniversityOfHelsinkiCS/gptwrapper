@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Paper, Typography } from '@mui/material'
+import { Paper, Typography, Box } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { PromptUsageData } from '../../../hooks/useCourse'
@@ -61,7 +61,11 @@ const PromptUsageHistogram = ({ promptUsages, activityPeriod }: Props) => {
   if (!promptUsages || promptUsages.length === 0) {
     return (
       <Paper variant="outlined" sx={{ padding: '2%', mt: 2 }}>
-        <Typography variant="h6">{t('course:promptUsageTitle')}</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <Typography variant="subtitle1" component="h4" fontWeight="bold">
+            {t('course:promptUsageTitle')}
+          </Typography>
+        </Box>
         <Typography color="text.secondary" sx={{ mt: 1 }}>
           {t('course:noData')}
         </Typography>
@@ -71,9 +75,12 @@ const PromptUsageHistogram = ({ promptUsages, activityPeriod }: Props) => {
 
   return (
     <Paper variant="outlined" sx={{ padding: '2%', mt: 2 }}>
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        {t('course:promptUsageTitle')}
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <Typography variant="subtitle1" component="h4" fontWeight="bold">
+          {t('course:promptUsageTitle')}
+        </Typography>
+      </Box>
+
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />

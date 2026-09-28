@@ -101,7 +101,7 @@ const UniversityPromptCard = ({
         />
 
         <Box sx={{ mb: 1.5, pointerEvents: 'none' }}>
-          <Typography variant="subtitle2" component="h3" sx={{ fontWeight: 600, wordBreak: 'break-word' }}>
+          <Typography variant="subtitle2" component="h5" sx={{ fontWeight: 600, wordBreak: 'break-word' }}>
             {prompt.name}
           </Typography>
 
@@ -189,7 +189,7 @@ const SectionLabel = ({ children }: { children: string }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, mt: 3, mb: 1.5 }}>
     <Typography
       variant="overline"
-      component="h2"
+      component="h4"
       sx={{ fontWeight: 500, letterSpacing: '0.09em', lineHeight: 1, color: 'text.secondary', whiteSpace: 'nowrap' }}
     >
       {children}
@@ -228,7 +228,7 @@ const UniversityPromptGallery = ({
     <Box sx={{ overflowY: 'auto', pr: 1 }} data-testid="uni-prompt-gallery">
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mt: 1 }}>
         <AccountBalanceIcon color="primary" fontSize="large" />
-        <Typography variant="h4" component="h1" fontWeight="bold" sx={{ wordBreak: 'break-word', hyphens: 'auto' }}>
+        <Typography variant="h3" fontWeight="bold" sx={{ wordBreak: 'break-word', hyphens: 'auto' }}>
           {t('uniPrompts:galleryNav')}
         </Typography>
       </Box>
@@ -244,17 +244,17 @@ const UniversityPromptGallery = ({
       )}
 
       {templateGroups.length > 0 && (
-        <Box sx={{ mt: 3, p: 2.5, borderRadius: '10px', border: '1px solid', borderColor: 'divider', backgroundColor: 'background.subtle' }}>
-          <Box sx={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', columnGap: 1.5, mb: 1.75 }}>
-            <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 600 }}>
-              {t('uniPrompts:sectionTemplates')}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {t('uniPrompts:sectionTemplatesHelp')}
-            </Typography>
+        <>
+          <SectionLabel>{t('uniPrompts:sectionTemplates')}</SectionLabel>
+          <Box sx={{ mt: 3, p: 2.5, borderRadius: '10px', border: '1px solid', borderColor: 'divider', backgroundColor: 'background.subtle' }}>
+            <Box sx={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', columnGap: 1.5, mb: 1.75 }}>
+              <Typography variant="body2" color="text.secondary">
+                {t('uniPrompts:sectionTemplatesHelp')}
+              </Typography>
+            </Box>
+            <CardGrid groups={templateGroups} onSelect={onSelect} copyTargets={copyTargets} onCopied={onCopied} />
           </Box>
-          <CardGrid groups={templateGroups} onSelect={onSelect} copyTargets={copyTargets} onCopied={onCopied} />
-        </Box>
+        </>
       )}
     </Box>
   )

@@ -10,6 +10,7 @@ import { Course } from '../../../types'
 import { useEditCourseMutation } from '../../../hooks/useCourseMutation'
 import { GreenButton, RedButton } from '../../ChatV2/general/Buttons'
 import { DEFAULT_TOKEN_LIMIT } from '@config'
+import DateRangeIcon from '@mui/icons-material/DateRange'
 
 export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
   const { t } = useTranslation()
@@ -68,9 +69,12 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
       }}
     >
       <Box>
-        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-          {t('editActivityPeriod')}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <DateRangeIcon color="primary" />
+          <Typography variant="subtitle1" component="h4" fontWeight="bold">
+            {t('editActivityPeriod')}
+          </Typography>
+        </Box>
         <Stack direction="row" spacing={2} alignItems="flex-start">
           <DatePicker
             label={t('opensAt')}

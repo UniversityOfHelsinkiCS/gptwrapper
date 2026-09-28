@@ -51,6 +51,7 @@ import PromptUsageHistogram from '../Courses/Course/PromptUsageHistogram'
 import { EnrolmentActionUserSearch, ResponsibilityActionUserSearch } from '../Admin/UserSearch'
 import { DEFAULT_TOKEN_LIMIT } from '@config'
 import CancelIcon from '@mui/icons-material/Cancel'
+import { visuallyHidden } from '@mui/utils'
 
 const initialsOf = (lastName?: string, firstNames?: string) => {
   const a = firstNames?.trim()?.[0] ?? ''
@@ -217,6 +218,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
           <SchoolIcon color="primary" fontSize="large" />
           <Typography
             variant="h4"
+            component="h3"
             fontWeight="bold"
             data-testid={`course-preview-title-for-${course.name[language]}`}
             sx={{ wordBreak: 'break-word', hyphens: 'auto' }}
@@ -290,7 +292,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <BarChartIcon color="primary" />
-                    <Typography variant="subtitle1" fontWeight="bold">
+                    <Typography variant="subtitle1" component="h4" fontWeight="bold">
                       {t('status:usageTitle')}
                     </Typography>
                     <UsageInfoButton />
@@ -312,6 +314,9 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
         {/* Stats (managers) */}
         {canManage && stats && (
           <Box sx={{ mb: 3 }} data-testid="students-stats-container">
+            <Typography component="h4" sx={visuallyHidden}>
+              {t('course:statistics')}
+            </Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 1.5, mb: 3 }}>
               <StatTile value={enrolments.length} label={t('course:enrolledStudents')} />
               <StatTile value={stats.usagePercentage ? `${Math.round(stats.usagePercentage * 100 * 10) / 10} %` : '0 %'} label={t('course:haveUsedCurre')} />
@@ -327,7 +332,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
         <Box sx={{ mb: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
             <PeopleIcon sx={{ color: 'text.secondary' }} />
-            <Typography variant="subtitle1" fontWeight="bold">
+            <Typography variant="subtitle1" component="h4" fontWeight="bold">
               {t('course:teachers')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -382,7 +387,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, flexWrap: 'wrap' }}>
               <GroupsIcon sx={{ color: 'text.secondary' }} />
-              <Typography variant="subtitle1" fontWeight="bold">
+              <Typography variant="subtitle1" component="h4" fontWeight="bold">
                 {t('course:students')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -532,7 +537,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
 
 const StatTile = ({ value, label, accent = 'primary' }: { value: string | number; label: string; accent?: 'primary' | 'secondary' }) => (
   <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '8px', p: 2 }}>
-    <Typography variant="h5" fontWeight="bold" color={`${accent}.main`} lineHeight={1.1}>
+    <Typography variant="h5" component="p" fontWeight="bold" color={`${accent}.main`} lineHeight={1.1}>
       {value}
     </Typography>
     <Typography variant="caption" color="text.secondary">

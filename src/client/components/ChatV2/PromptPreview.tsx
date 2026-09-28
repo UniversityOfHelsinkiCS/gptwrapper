@@ -118,7 +118,7 @@ const PromptPreview = ({
         )}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2, mt: 2 }}>
           <Box sx={{ flexDirection: 'column', display: 'flex', gap: 1, maxWidth: '80%' }}>
-            <Typography variant="h4" fontWeight="bold" data-testid={`prompt-preview-title-for-${prompt.name}`} sx={{ wordBreak: 'break-word' }}>
+            <Typography variant="h4" component="h3" fontWeight="bold" data-testid={`prompt-preview-title-for-${prompt.name}`} sx={{ wordBreak: 'break-word' }}>
               {prompt.name}
             </Typography>
           </Box>
@@ -172,7 +172,7 @@ const PromptPreview = ({
           <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb: 1.5, justifyContent: 'space-between' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <PsychologyIcon color="secondary" />
-              <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
+              <Typography variant="subtitle1" component="h4" fontWeight="bold" color="text.primary">
                 {t('prompt:promptModelSettings')}
               </Typography>
             </Box>
@@ -201,7 +201,7 @@ const PromptPreview = ({
             <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb: 1.5, justifyContent: 'space-between' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <BookmarksIcon color="secondary" />
-                <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
+                <Typography variant="subtitle1" component="h4" fontWeight="bold" color="text.primary">
                   {t('prompt:promptSourceMaterialData')}
                 </Typography>
               </Box>
@@ -229,7 +229,7 @@ const PromptPreview = ({
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, px: 2, pt: 2 }}>
-                    <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
+                    <Typography variant="subtitle1" component="h5" fontWeight="bold" color="text.primary">
                       {ragDetails.metadata.name}
                     </Typography>
                     <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>

@@ -160,6 +160,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
               slotProps={{
                 primary: {
                   variant: 'subtitle1',
+                  component: 'h4',
                   fontWeight: 600,
                   color: course.activated || !amongResponsibles || user?.isAdmin ? 'default' : 'text.secondary',
                 },
