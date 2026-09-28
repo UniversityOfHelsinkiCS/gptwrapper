@@ -1,4 +1,4 @@
-import { Box, IconButton, Tooltip, Typography } from '@mui/material'
+import { Box, IconButton, Tooltip, Typography, Divider } from '@mui/material'
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -12,11 +12,11 @@ import { getLanguageValue } from '@shared/utils'
 import { usePromptState } from './PromptState'
 import useCourse from '../../hooks/useCourse'
 import { consumePendingFocusTarget, requestFocusAfterNavigate } from '../../util/accessibility'
-import { visuallyHidden } from '@mui/utils'
 
 const SectionLabel = ({ children }: { children: ReactNode }) => (
   <Typography
     variant="overline"
+    component="h2"
     sx={{
       display: 'block',
       fontSize: '0.75rem',
@@ -43,16 +43,14 @@ type SelectorRowProps = {
   disabled?: boolean
   selectorTestId?: string
   clearTestId?: string
-  ariaLabel?: string
 }
 
-const SelectorRow = ({ icon, label, placeholder, onClick, disabled, selectorTestId, ariaLabel }: SelectorRowProps) => {
+const SelectorRow = ({ icon, label, placeholder, onClick, disabled, selectorTestId }: SelectorRowProps) => {
   const hasValue = Boolean(label)
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, px: 3, mt: 1 }}>
       <Box
         component="button"
-        aria-label={[ariaLabel, label || placeholder].filter(Boolean).join(', ')}
         onClick={onClick}
         disabled={disabled}
         data-testid={selectorTestId}
@@ -71,8 +69,8 @@ const SelectorRow = ({ icon, label, placeholder, onClick, disabled, selectorTest
           cursor: disabled ? 'default' : 'pointer',
           fontFamily: 'inherit',
           fontSize: '0.875rem',
-          fontWeight: hasValue ? 500 : 400,
-          color: hasValue ? 'text.primary' : 'text.secondary',
+          fontWeight: 400,
+          color: 'text.secondary',
           backgroundColor: hasValue ? 'action.hover' : 'transparent',
           transition: 'background-color .15s ease',
           '&:hover': { backgroundColor: disabled ? 'transparent' : 'action.selected' },
@@ -86,49 +84,33 @@ const SelectorRow = ({ icon, label, placeholder, onClick, disabled, selectorTest
   )
 }
 
-type ContextRowProps = {
+type ContextCardProps = {
   courseLabel?: string | null
   promptLabel?: string | null
   promptType?: string | null
   ragLabel?: string | null
   ragHidden?: boolean | null
   isEmployeeOrAdmin?: boolean
-  placeholder: string
-  onClick?: () => void
   onClear?: () => void
   clearTooltip?: string
-  selectorTestId?: string
+  contextCardId?: string
   clearTestId?: string
 }
 
-const ContextRow = ({
+const ContextCard = ({
   courseLabel,
   promptLabel,
   promptType,
   ragLabel,
   ragHidden,
   isEmployeeOrAdmin,
-  placeholder,
-  onClick,
   onClear,
   clearTooltip,
-  selectorTestId,
+  contextCardId,
   clearTestId,
-}: ContextRowProps) => {
+}: ContextCardProps) => {
   const hasPrompt = Boolean(promptLabel)
   const { t } = useTranslation()
-
-  if (!hasPrompt) {
-    return (
-      <SelectorRow
-        ariaLabel={t('sidebar:manageCourseAndPrompts')}
-        icon={<ChatIcon />}
-        placeholder={placeholder}
-        onClick={onClick}
-        selectorTestId={selectorTestId}
-      />
-    )
-  }
 
   const hasType = promptType === 'CHAT_INSTANCE' || promptType === 'PERSONAL' || promptType === 'UNIVERSITY'
   const typeLabel = hasType
@@ -149,14 +131,11 @@ const ContextRow = ({
           borderColor: 'transparent',
           borderRadius: 2,
           backgroundColor: 'action.hover',
-          transition: 'background-color .15s ease, border-color .15s ease',
         }}
       >
         <Box
-          component="button"
-          onClick={onClick}
-          data-testid={selectorTestId}
-          id={selectorTestId}
+          data-testid={contextCardId}
+          id={contextCardId}
           sx={{
             position: 'relative',
             width: '100%',
@@ -171,98 +150,114 @@ const ContextRow = ({
             py: 1.25,
             pr: 4,
             textAlign: 'left',
-            cursor: 'pointer',
             fontFamily: 'inherit',
-            '&:hover': { backgroundColor: 'action.selected' },
             fontWeight: 500,
             color: 'text.primary',
           }}
         >
-          <Typography sx={visuallyHidden}>{t('sidebar:manageCourseAndPrompts')}</Typography>
-          {hasType && (
-            <Box sx={{ display: 'flex', gap: 0.75, minWidth: 0, mb: 1 }}>
-              <Typography
-                sx={{
-                  minWidth: 0,
-                  fontSize: '0.6875rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.05em',
-
-                  color: 'text.secondary',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'normal',
-                }}
-              >
-                {typeLabel}
-              </Typography>
-            </Box>
-          )}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-            <Box sx={{ display: 'flex', flexShrink: 0, color: 'primary.main', '& svg': { fontSize: 18 } }}>
-              <ChatIcon />
-            </Box>
+          {!hasPrompt ? (
             <Typography
               noWrap
               sx={{
                 flex: 1,
                 minWidth: 0,
-                fontSize: '0.9375rem',
-                fontWeight: 700,
-                color: 'text.primary',
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: 'vertical',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'normal',
+                fontSize: '0.875rem',
+                fontWeight: 400,
+                color: 'text.secondary',
               }}
             >
-              {promptLabel}
+              {t('chat:noPrompt')}
             </Typography>
-          </Box>
-          {showRagLabel && (
-            <Box sx={{ display: 'flex', gap: 0.75, minWidth: 0, mt: 1 }}>
-              <Typography
-                sx={{
-                  minWidth: 0,
-                  fontSize: '0.6875rem',
+          ) : (
+            <>
+              {hasType && (
+                <Box sx={{ display: 'flex', gap: 0.75, minWidth: 0, mb: 1 }}>
+                  <Typography
+                    sx={{
+                      minWidth: 0,
+                      fontSize: '0.6875rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.05em',
 
-                  letterSpacing: '0.05em',
+                      color: 'text.secondary',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'normal',
+                    }}
+                  >
+                    {typeLabel}
+                  </Typography>
+                </Box>
+              )}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+                <Box sx={{ display: 'flex', flexShrink: 0, color: 'primary.main', '& svg': { fontSize: 18 } }}>
+                  <ChatIcon />
+                </Box>
+                <Typography
+                  noWrap
+                  sx={{
+                    flex: 1,
+                    minWidth: 0,
+                    fontSize: '0.9375rem',
+                    fontWeight: 700,
+                    color: 'text.primary',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'normal',
+                  }}
+                >
+                  {promptLabel}
+                </Typography>
+              </Box>
+              {showRagLabel && (
+                <Box sx={{ display: 'flex', gap: 0.75, minWidth: 0, mt: 1 }}>
+                  <Typography
+                    sx={{
+                      minWidth: 0,
+                      fontSize: '0.6875rem',
 
-                  color: 'text.secondary',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'normal',
-                }}
-              >
-                {t('sidebar:sourceMaterialInUse')}
-                {ragLabel}
-              </Typography>
-            </Box>
+                      letterSpacing: '0.05em',
+
+                      color: 'text.secondary',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'normal',
+                    }}
+                  >
+                    {t('sidebar:sourceMaterialInUse')}
+                    {ragLabel}
+                  </Typography>
+                </Box>
+              )}
+            </>
           )}
-          <ChevronRightIcon
-            sx={{ position: 'absolute', top: '50%', right: 8, transform: 'translateY(-50%)', fontSize: 16, color: 'text.disabled', flexShrink: 0 }}
-          />
+          {onClear && (
+            <Tooltip title={clearTooltip ?? ''} placement="right">
+              <IconButton
+                size="small"
+                onClick={onClear}
+                data-testid={clearTestId}
+                sx={{ position: 'absolute', top: 4, right: 4, color: 'text.disabled', '&:hover': { color: 'text.secondary' } }}
+              >
+                <CloseIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
       </Box>
-      {onClear && (
-        <Tooltip title={clearTooltip ?? ''} placement="right">
-          <IconButton
-            size="small"
-            onClick={onClear}
-            data-testid={clearTestId}
-            sx={{ mt: 0.25, color: 'text.disabled', '&:hover': { color: 'text.secondary' } }}
-          >
-            <CloseIcon sx={{ fontSize: 16 }} />
-          </IconButton>
-        </Tooltip>
-      )}
     </Box>
   )
 }
@@ -286,17 +281,35 @@ export default function ChatConsole({ user }: { user?: User | null }) {
 
   return (
     <Box sx={{ pb: 1 }}>
-      <Box sx={{ mb: 1 }} data-testid={activePrompt ? 'prompt-name' : undefined}>
-        <SectionLabel>{t('sidebar:coursesAndPrompts')}</SectionLabel>
-        <ContextRow
+      <Box sx={{ mb: 1 }}>
+        <SelectorRow
+          icon={<ChatIcon />}
+          placeholder={t('sidebar:coursesAndPrompts')}
+          onClick={() => navigate(promptsPath)}
+          selectorTestId="choose-prompt-button"
+        />
+      </Box>
+
+      {isEmployeeOrAdmin && (
+        <Box sx={{ mb: 1 }}>
+          <SelectorRow
+            icon={<LibraryBooksIcon />}
+            placeholder={t('sidebar:sourceMaterials')}
+            onClick={() => navigate(`/${courseId ?? 'general'}/userrags`)}
+            selectorTestId="openSourceMaterialsButton"
+          />
+        </Box>
+      )}
+      <Divider />
+      <Box sx={{ mt: 1 }} data-testid={activePrompt ? 'prompt-name' : undefined}>
+        <SectionLabel>{t('common:prompt')}</SectionLabel>
+        <ContextCard
           courseLabel={courseLabel}
           promptLabel={activePrompt?.name}
           promptType={activePrompt?.type}
           ragLabel={activePrompt?.ragIndex?.metadata.name}
           ragHidden={activePrompt?.ragHidden}
           isEmployeeOrAdmin={Boolean(isEmployeeOrAdmin)}
-          placeholder={t('sidebar:promptSelect')}
-          onClick={() => navigate(promptsPath)}
           onClear={
             activePrompt
               ? () => {
@@ -307,22 +320,9 @@ export default function ChatConsole({ user }: { user?: User | null }) {
               : undefined
           }
           clearTooltip={t('sidebar:promptNone')}
-          selectorTestId="choose-prompt-button"
+          contextCardId="prompt-context"
         />
       </Box>
-
-      {isEmployeeOrAdmin && (
-        <Box>
-          <SectionLabel>{t('sidebar:sourceMaterials')}</SectionLabel>
-          <SelectorRow
-            icon={<LibraryBooksIcon />}
-            placeholder={t('course:userSourceMaterials')}
-            onClick={() => navigate(`/${courseId ?? 'general'}/userrags`)}
-            selectorTestId="openSourceMaterialsButton"
-            ariaLabel={t('sidebar:sourceMaterials')}
-          />
-        </Box>
-      )}
     </Box>
   )
 }
