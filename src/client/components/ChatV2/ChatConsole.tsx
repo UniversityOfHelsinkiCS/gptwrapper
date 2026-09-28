@@ -46,7 +46,7 @@ type SelectorRowProps = {
   ariaLabel?: string
 }
 
-const SelectorRow = ({ icon, label, placeholder, onClick, onClear, clearTooltip, disabled, selectorTestId, clearTestId, ariaLabel }: SelectorRowProps) => {
+const SelectorRow = ({ icon, label, placeholder, onClick, disabled, selectorTestId, ariaLabel }: SelectorRowProps) => {
   const hasValue = Boolean(label)
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, px: 3, mt: 1 }}>
@@ -82,13 +82,6 @@ const SelectorRow = ({ icon, label, placeholder, onClick, onClear, clearTooltip,
         <Box sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label || placeholder}</Box>
         <ChevronRightIcon sx={{ fontSize: 16, color: 'text.disabled', flexShrink: 0 }} />
       </Box>
-      {hasValue && onClear && (
-        <Tooltip title={clearTooltip ?? ''} placement="right">
-          <IconButton size="small" onClick={onClear} data-testid={clearTestId} sx={{ color: 'text.disabled', '&:hover': { color: 'text.secondary' } }}>
-            <CloseIcon sx={{ fontSize: 16 }} />
-          </IconButton>
-        </Tooltip>
-      )}
     </Box>
   )
 }
@@ -97,6 +90,9 @@ type ContextRowProps = {
   courseLabel?: string | null
   promptLabel?: string | null
   promptType?: string | null
+  ragLabel?: string | null
+  ragHidden?: boolean | null
+  isEmployeeOrAdmin?: boolean
   placeholder: string
   onClick?: () => void
   onClear?: () => void
@@ -105,7 +101,20 @@ type ContextRowProps = {
   clearTestId?: string
 }
 
-const ContextRow = ({ courseLabel, promptLabel, promptType, placeholder, onClick, onClear, clearTooltip, selectorTestId, clearTestId }: ContextRowProps) => {
+const ContextRow = ({
+  courseLabel,
+  promptLabel,
+  promptType,
+  ragLabel,
+  ragHidden,
+  isEmployeeOrAdmin,
+  placeholder,
+  onClick,
+  onClear,
+  clearTooltip,
+  selectorTestId,
+  clearTestId,
+}: ContextRowProps) => {
   const hasPrompt = Boolean(promptLabel)
   const { t } = useTranslation()
 
@@ -127,6 +136,8 @@ const ContextRow = ({ courseLabel, promptLabel, promptType, placeholder, onClick
       ? courseLabel
       : t(`sidebar:${promptType === 'PERSONAL' ? 'myPrompt' : 'universityPrompt'}`)
     : null
+
+  const showRagLabel = Boolean(ragLabel) && (promptType === 'PERSONAL' || !ragHidden || isEmployeeOrAdmin)
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, px: 3, mt: 1 }}>
@@ -212,6 +223,29 @@ const ContextRow = ({ courseLabel, promptLabel, promptType, placeholder, onClick
               {promptLabel}
             </Typography>
           </Box>
+          {showRagLabel && (
+            <Box sx={{ display: 'flex', gap: 0.75, minWidth: 0, mt: 1 }}>
+              <Typography
+                sx={{
+                  minWidth: 0,
+                  fontSize: '0.6875rem',
+
+                  letterSpacing: '0.05em',
+
+                  color: 'text.secondary',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'normal',
+                }}
+              >
+                {t('sidebar:sourceMaterialInUse')}
+                {ragLabel}
+              </Typography>
+            </Box>
+          )}
           <ChevronRightIcon
             sx={{ position: 'absolute', top: '50%', right: 8, transform: 'translateY(-50%)', fontSize: 16, color: 'text.disabled', flexShrink: 0 }}
           />
@@ -258,6 +292,9 @@ export default function ChatConsole({ user }: { user?: User | null }) {
           courseLabel={courseLabel}
           promptLabel={activePrompt?.name}
           promptType={activePrompt?.type}
+          ragLabel={activePrompt?.ragIndex?.metadata.name}
+          ragHidden={activePrompt?.ragHidden}
+          isEmployeeOrAdmin={Boolean(isEmployeeOrAdmin)}
           placeholder={t('sidebar:promptSelect')}
           onClick={() => navigate(promptsPath)}
           onClear={

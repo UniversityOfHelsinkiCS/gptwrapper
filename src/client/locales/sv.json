@@ -765,6 +765,7 @@
     "open": "Öppna sidomenyn",
     "close": "Stäng sidomenyn",
     "sourceMaterials": "Hantering av källmaterial",
+    "sourceMaterialInUse": "Källmaterial: ",
     "myPrompt": "Mitt prompt",
     "universityPrompt": "Universitetsprompt",
     "manageCourseAndPrompts": "Hantera kurs och prompter"

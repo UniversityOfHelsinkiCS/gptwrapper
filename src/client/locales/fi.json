@@ -262,6 +262,7 @@
     "open": "Avaa sivuvalikko",
     "close": "Sulje sivuvalikko",
     "sourceMaterials": "Lähdemateriaalien hallinta",
+    "sourceMaterialInUse": "Lähdemateriaali: ",
     "myPrompt": "Oma alustus",
     "universityPrompt": "Yliopiston alustus",
     "manageCourseAndPrompts": "Hallinnoi kursseja ja alustuksia"
