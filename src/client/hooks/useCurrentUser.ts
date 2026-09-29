@@ -29,10 +29,11 @@ const useCurrentUser = () => {
   const { data: user, ...rest } = useQuery({
     queryKey,
     queryFn,
-    // multiple components mount this hook.
-    // staleTime ensures that the data is not refetched
-    // unnecessarily within a short period of time.
-    staleTime: 5000,
+    // The login data does not change during a session, so we fetch it once.
+    // Session liveness is handled by initShibboletPinger in App.tsx.
+    // Mutations that change the user (preferences, terms) update the cache with setQueryData.
+    staleTime: 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
     retry: (failureCount, error) => {
       const status = (error as ApiError)?.response?.status
       if (status && status >= 400 && status < 500) return false
