@@ -57,9 +57,7 @@ studentTest.describe('Login sandbox access', () => {
     await login(request, testInfo.workerIndex, 'student')
     const courses = await getUserCourses(request, testInfo.workerIndex, 'student')
 
-    // A student is in neither demo IAM group, so both functions early-return the
-    // plain query result. Only the enrolment reset-test-data created should be there.
-    // EXAMPLE_COURSE ended in 2024 so it shouldnt be here either.
+    // A student is not an admin or in grp-toska
     expect(ownCourseIds(courses)).toEqual([])
     expect(courses.map((course) => course.courseId)).toEqual([TEST_COURSES.TEST_COURSE.courseId])
   })
