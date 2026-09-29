@@ -39,16 +39,15 @@ adminTest.describe('Login sandbox access', () => {
   })
 
   adminTest('is idempotent across repeated logins', async ({ request }, testInfo) => {
-    const first = await getUserCourses(request, testInfo.workerIndex, 'admin')
-    const second = await getUserCourses(request, testInfo.workerIndex, 'admin')
-    const third = await getUserCourses(request, testInfo.workerIndex, 'admin')
+    const idx = testInfo.workerIndex
 
-    const firstOwnCourses = ownCourseIds(first)
-    const secondOwnCourses = ownCourseIds(second)
-    const thirdOwnCourses = ownCourseIds(third)
+    await login(request, idx, 'admin')
+    const first = ownCourseIds(await getUserCourses(request, testInfo.workerIndex, 'admin')).sort()
+    await login(request, idx, 'admin')
+    await login(request, idx, 'admin')
+    const second = ownCourseIds(await getUserCourses(request, testInfo.workerIndex, 'admin')).sort()
 
-    expect(secondOwnCourses.sort()).toEqual(firstOwnCourses.sort())
-    expect(thirdOwnCourses.sort()).toEqual(firstOwnCourses.sort())
+    expect(second).toEqual(first)
   })
 })
 
