@@ -8,7 +8,6 @@ import { getUserStatus, getUsage, getCourseUsages, getUserTokenLimit } from '../
 import { getLastRestart } from '../util/lastRestart'
 import { ApplicationError } from '../util/ApplicationError'
 import { UserPreferencesSchema } from '../../shared/user'
-import { checkIamAccess } from '../util/iams'
 import { CourseUsage } from '@shared/types'
 
 const userRouter = express.Router()
@@ -16,9 +15,7 @@ const userRouter = express.Router()
 userRouter.get('/login', async (req, res) => {
   const request = req as RequestWithUser
   const { user } = request
-  const { id, isAdmin, iamGroups } = user
-
-  const hasIamAccess = checkIamAccess(iamGroups)
+  const { id } = user
 
   let dbUser: User | null = null
 
@@ -44,7 +41,6 @@ userRouter.get('/login', async (req, res) => {
     ...dbUser.toJSON(),
     ...user,
     usage: dbUser.usage,
-    hasIamAccess: isAdmin || hasIamAccess,
     tokenLimit,
     lastRestart,
     serverVersion: process.env.VERSION,

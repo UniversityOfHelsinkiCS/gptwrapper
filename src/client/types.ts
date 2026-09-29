@@ -30,7 +30,6 @@ export interface User {
   isEmployee: boolean
   usage: number
   isCourseCreator: boolean
-  hasIamAccess?: boolean
   lastRestart: string
   isStatsViewer: boolean
   termsAcceptedAt?: string | null

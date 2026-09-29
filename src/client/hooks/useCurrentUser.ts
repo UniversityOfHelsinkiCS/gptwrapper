@@ -30,7 +30,7 @@ const useCurrentUser = () => {
     queryKey,
     queryFn,
     // The login data does not change during a session, so we fetch it once.
-    // Session liveness is handled by initShibboletPinger in App.tsx.
+    // Session liveness is handled by initShibbolethPinger in App.tsx.
     // Mutations that change the user (preferences, terms) update the cache with setQueryData.
     staleTime: 60 * 60 * 1000,
     refetchOnWindowFocus: false,
