@@ -110,6 +110,7 @@ export interface ChatInstanceSearchResult {
   /** human interpretable course codes, e.g. ['TKT-01001'] */
   codes: string[]
   terms: Term[]
+  saveDiscussions: boolean
 }
 
 export interface ChatInstanceSearchResponse {

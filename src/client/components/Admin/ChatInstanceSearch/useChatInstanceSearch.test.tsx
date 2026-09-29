@@ -10,7 +10,7 @@ import useChatInstanceSearch, { CHAT_INSTANCE_SEARCH_MIN_LENGTH } from './useCha
 
 const mockedGet = vi.mocked(apiClient.get)
 
-const results = [{ id: 'cur-1', name: { en: 'Intro', fi: 'Intro', sv: 'Intro' }, codes: ['TKT10003'], terms: [] }]
+const results = [{ id: 'cur-1', name: { en: 'Intro', fi: 'Intro', sv: 'Intro' }, codes: ['TKT10003'], terms: [], saveDiscussions: false }]
 
 const createWrapper = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { gcTime: 0, retry: false } } })

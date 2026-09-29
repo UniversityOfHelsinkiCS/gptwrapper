@@ -195,7 +195,7 @@ adminRouter.get('/chatinstance-search', async (req, res) => {
   const like = sequelize.escape(`%${search}%`)
 
   const { rows: chatInstances, count } = await ChatInstance.findAndCountAll({
-    attributes: ['courseId', 'name', 'courseUnits', 'courseActivityPeriod'],
+    attributes: ['courseId', 'name', 'courseUnits', 'courseActivityPeriod', 'saveDiscussions'],
     where: {
       courseId: { [Op.ne]: null },
       [Op.or]: [
@@ -218,6 +218,7 @@ adminRouter.get('/chatinstance-search', async (req, res) => {
     name: chatInstance.name,
     codes: [...new Set((chatInstance.courseUnits ?? []).map((unit) => unit.code))],
     terms: getTermsOf(chatInstance.courseActivityPeriod, terms),
+    saveDiscussions: chatInstance.saveDiscussions ?? false,
   }))
 
   const response: ChatInstanceSearchResponse = { results, count }

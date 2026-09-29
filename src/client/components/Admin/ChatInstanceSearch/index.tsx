@@ -16,6 +16,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Switch,
   TextField,
   Typography,
 } from '@mui/material'
@@ -25,6 +26,7 @@ import { useTranslation } from 'react-i18next'
 
 import { getLanguageValue } from '@shared/utils'
 import useCourse from '../../../hooks/useCourse'
+import { useSaveDiscussionsMutation } from '../../../hooks/useCourseMutation'
 import CoursePreview from '../../ChatV2/CoursePreview'
 import useChatInstanceSearch, { CHAT_INSTANCE_SEARCH_DEFAULT_LIMIT, CHAT_INSTANCE_SEARCH_MIN_LENGTH } from './useChatInstanceSearch'
 
@@ -61,6 +63,7 @@ const ChatInstanceSearch = () => {
     isFetching,
   } = useChatInstanceSearch({ search: debouncedSearch, language, limit: rowsPerPage, offset: page * rowsPerPage })
   const { data: previewCourse } = useCourse(previewCourseId)
+  const saveDiscussionsMutation = useSaveDiscussionsMutation()
 
   const hasQuery = debouncedSearch.length >= CHAT_INSTANCE_SEARCH_MIN_LENGTH
 
@@ -118,6 +121,9 @@ const ChatInstanceSearch = () => {
                 <TableCell sx={{ fontWeight: 'bold' }}>{t('stats:courseCodes')}</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>{t('stats:courseNameInfo')}</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>{t('stats:courseTerms')}</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+                  {t('course:isReseachCourse')}
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -131,6 +137,18 @@ const ChatInstanceSearch = () => {
                   </TableCell>
                   <TableCell align="left">
                     <Typography>{chatInstance.terms.map((term) => getLanguageValue(term.label, language)).join(', ')}</Typography>
+                  </TableCell>
+                  <TableCell align="center" onClick={(e) => e.stopPropagation()}>
+                    <Switch
+                      checked={chatInstance.saveDiscussions}
+                      disabled={saveDiscussionsMutation.isPending && saveDiscussionsMutation.variables?.chatId === chatInstance.id}
+                      slotProps={{ input: { 'aria-label': `${t('course:isReseachCourse')}: ${getLanguageValue(chatInstance.name, language)}` } }}
+                      onChange={(_, checked) =>
+                        window.confirm(
+                          t(checked ? 'course:saveDiscussions' : 'course:unsaveDiscussions', { course: getLanguageValue(chatInstance.name, language) }),
+                        ) && saveDiscussionsMutation.mutate({ chatId: chatInstance.id, saveDiscussions: checked })
+                      }
+                    />
                   </TableCell>
                 </TableRow>
               ))}

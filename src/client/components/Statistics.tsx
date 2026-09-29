@@ -43,7 +43,6 @@ import useCurrentUser from '../hooks/useCurrentUser'
 import useStatistics from '../hooks/useStatistics'
 import faculties from '../locales/faculties.json'
 import programme from '../locales/programme.json'
-import { enqueueSnackbar } from 'notistack'
 import { useSaveDiscussionsMutation } from '../hooks/useCourseMutation'
 
 /**
@@ -143,17 +142,11 @@ export function Component() {
   const activeTab: 'courses' | 'trends' = isTrendsRoute ? 'trends' : 'courses'
   const dataDownloadLink = useRef<HTMLAnchorElement | null>(null)
   const saveDiscussionsMutation = useSaveDiscussionsMutation()
-  const { mutateAsync: saveDiscussionsMutateAsync } = saveDiscussionsMutation
+  const { mutate: saveDiscussionsMutate } = saveDiscussionsMutation
 
   const handleSaveDiscussionsChange = useCallback(
-    async (saveDiscussions: boolean, chatId: string) => {
-      try {
-        await saveDiscussionsMutateAsync({ chatId, saveDiscussions })
-      } catch (error: any) {
-        enqueueSnackbar(error.message, { variant: 'error' })
-      }
-    },
-    [saveDiscussionsMutateAsync],
+    (saveDiscussions: boolean, chatId: string) => saveDiscussionsMutate({ chatId, saveDiscussions }),
+    [saveDiscussionsMutate],
   )
 
   useEffect(() => {
@@ -803,6 +796,7 @@ const CoursesTable = memo(function CoursesTable({
               <TableCell align="center" onClick={(e) => e.stopPropagation()}>
                 <Switch
                   checked={Boolean(chat.saveDiscussions)}
+                  slotProps={{ input: { 'aria-label': `${t('course:isReseachCourse')}: ${chat.name[language]}` } }}
                   disabled={pendingChatId === chat.id}
                   onChange={(_, checked) =>
                     window.confirm(t(checked ? 'course:saveDiscussions' : 'course:unsaveDiscussions', { course: chat.name[language] })) &&

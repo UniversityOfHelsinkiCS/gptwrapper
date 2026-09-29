@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
+import { enqueueSnackbar } from 'notistack'
 
 import type { ActivityPeriod } from '../types'
 import queryClient from '../util/queryClient'
@@ -55,7 +56,13 @@ export const useSaveDiscussionsMutation = () => {
         queryClient.invalidateQueries({
           queryKey: ['course', chatId],
         }),
+        queryClient.invalidateQueries({
+          queryKey: ['chatInstanceSearch'],
+        }),
       ])
+    },
+    onError: (error: Error) => {
+      enqueueSnackbar(error.message, { variant: 'error' })
     },
   })
 }
