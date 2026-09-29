@@ -1,6 +1,10 @@
 import z from 'zod/v4'
 import { MessageContentArraySchema } from './chat'
 
+export const PROMPT_TEXT_MAX_LENGTH = 20_000
+
+export const isPromptTextTooLong = (text: string) => text.length > PROMPT_TEXT_MAX_LENGTH
+
 export const PromptMessagesSchema = z.array(
   z.object({
     role: z.enum(['system', 'assistant', 'user']),
@@ -10,8 +14,8 @@ export const PromptMessagesSchema = z.array(
 
 export const PromptUpdateableParamsSchema = z.object({
   name: z.string().min(1).max(255),
-  userInstructions: z.string().max(20_000),
-  systemMessage: z.string().max(20_000),
+  userInstructions: z.string().max(PROMPT_TEXT_MAX_LENGTH),
+  systemMessage: z.string().max(PROMPT_TEXT_MAX_LENGTH),
   messages: PromptMessagesSchema.optional().default([]),
   hidden: z.boolean().default(false),
   ragHidden: z.boolean().default(false),
@@ -53,8 +57,8 @@ export const PromptCopyParamsSchema = z.object({
  */
 export const UniversityPromptCreationParamsSchema = z.object({
   name: z.string().min(1).max(255),
-  userInstructions: z.string().max(20_000).optional().default(''),
-  systemMessage: z.string().max(20_000),
+  userInstructions: z.string().max(PROMPT_TEXT_MAX_LENGTH).optional().default(''),
+  systemMessage: z.string().max(PROMPT_TEXT_MAX_LENGTH),
   messages: PromptMessagesSchema.optional().default([]),
 })
 

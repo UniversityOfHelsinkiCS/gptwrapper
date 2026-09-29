@@ -1,10 +1,12 @@
 import { Box, CircularProgress, DialogActions } from '@mui/material'
 import type { Message } from '@shared/chat'
+import { isPromptTextTooLong, PROMPT_TEXT_MAX_LENGTH } from '@shared/prompt'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import useCourse from '../../hooks/useCourse'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
+import { getApiErrorMessage } from '../../util/apiClient'
 import { useCourseRagIndices, useRagIndices } from '../../hooks/useRagIndices'
 import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
@@ -104,6 +106,11 @@ export const PromptEditorV2 = ({
       return
     }
 
+    if (isPromptTextTooLong(form.systemMessage) || isPromptTextTooLong(form.userInstructions)) {
+      enqueueSnackbar(t('prompt:textTooLong', { max: PROMPT_TEXT_MAX_LENGTH }), { variant: 'error' })
+      return
+    }
+
     setLoading(true)
 
     const { name, userInstructions, systemMessage, ragSystemMessages, hidden, ragHidden, ragIndexId } = form
@@ -145,7 +152,7 @@ export const PromptEditorV2 = ({
         onDone(newPrompt ?? undefined)
       }
     } catch (error: any) {
-      enqueueSnackbar(error.message, { variant: 'error' })
+      enqueueSnackbar(getApiErrorMessage(error), { variant: 'error' })
     } finally {
       setLoading(false)
     }

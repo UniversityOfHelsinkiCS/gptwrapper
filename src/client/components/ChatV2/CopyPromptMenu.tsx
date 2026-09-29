@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import type { CoursesViewCourse } from '../../hooks/useUserCourses'
 import { useCopyPromptMutation } from '../../hooks/usePromptMutation'
 import type { Prompt } from '../../types'
+import { getApiErrorMessage } from '../../util/apiClient'
 import { formatDate } from './util'
 
 /** Above this many courses the list is long enough that scanning it beats scrolling. */
@@ -70,9 +71,7 @@ const CopyPromptMenu = ({
 
       onCopied(course)
     } catch (error) {
-      const apiError = error as { response?: { data?: { error?: string } }; message?: string }
-
-      enqueueSnackbar(apiError.response?.data?.error ?? apiError.message ?? t('prompt:copyPromptFailed'), { variant: 'error' })
+      enqueueSnackbar(getApiErrorMessage(error, t('prompt:copyPromptFailed')), { variant: 'error' })
     }
   }
 

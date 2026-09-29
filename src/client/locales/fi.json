@@ -658,7 +658,8 @@
     "unSavedChanges": "Sinulla on tallentamattomia muutoksia. Sulkemalla näkymän nyt, menetät tekemäsi muutokset. Haluatko jatkaa?",
     "creatorName": "Alustuksen luoja: {{firstNames}} {{lastName}}",
     "creatorHidden": "Piilotettu muilta käyttäjiltä",
-    "tooShort": "Nimen on oltava vähintään 3 merkkiä pitkä"
+    "tooShort": "Nimen on oltava vähintään 3 merkkiä pitkä",
+    "textTooLong": "Teksti on liian pitkä. Enimmäispituus on {{max}} merkkiä"
   },
   "tooltip": {
     "copied": "Kopioitu!"

@@ -28,11 +28,30 @@ import { useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import useCurrentUser from '../../hooks/useCurrentUser'
+import { isPromptTextTooLong, PROMPT_TEXT_MAX_LENGTH } from '@shared/prompt'
 import useCourse from '../../hooks/useCourse'
 import CloseIcon from '@mui/icons-material/Close'
 import { RagDetails } from '../Rag/RagModal'
 import { RagCreator } from '../Rag//RagCreator'
 import ExpandMore from '@mui/icons-material/ExpandMore'
+
+const PromptTextHelper = ({ text }: { text: string }) => {
+  const { t } = useTranslation()
+
+  return (
+    <Box component="span" display="flex" justifyContent="space-between" gap={2}>
+      <span>{isPromptTextTooLong(text) ? t('prompt:textTooLong', { max: PROMPT_TEXT_MAX_LENGTH }) : ''}</span>
+      <Box component="span" aria-live="polite" sx={{ whiteSpace: 'nowrap' }}>
+        {text.length} / {PROMPT_TEXT_MAX_LENGTH}
+      </Box>
+    </Box>
+  )
+}
+
+const promptTextLimitProps = (text: string) => ({
+  error: isPromptTextTooLong(text),
+  helperText: <PromptTextHelper text={text} />,
+})
 
 const BasicInfoSection = () => {
   const { form, setForm, type } = usePromptEditorForm()
@@ -143,7 +162,7 @@ const ModelSettingsSection = ({ hideVisibilityToggle = false }: { hideVisibility
         <TextField
           variant="filled"
           label={t('prompt:promptModelSettings')}
-          sx={{ '& textarea': monospaceStyle, ...(!isMobile && { maxHeight: '300px', overflow: 'auto' }) }}
+          sx={{ '& textarea': monospaceStyle }}
           slotProps={{
             htmlInput: {
               'data-testid': 'system-message-input',
@@ -155,10 +174,11 @@ const ModelSettingsSection = ({ hideVisibilityToggle = false }: { hideVisibility
           placeholder={t('prompt:systemMessagePlaceholder')}
           value={form.systemMessage}
           onChange={(e) => setForm((prev) => ({ ...prev, systemMessage: e.target.value }))}
+          {...promptTextLimitProps(form.systemMessage)}
           fullWidth
           multiline
           minRows={8}
-          maxRows={48}
+          maxRows={isMobile ? 48 : 12}
         />
       </Box>
     </Box>

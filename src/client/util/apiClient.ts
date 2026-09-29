@@ -5,6 +5,11 @@ import safeLocalStorage from './safeLocalStorage'
 
 export type ApiError = AxiosError<{ message: string }>
 
+export const getApiErrorMessage = (error: unknown, fallback?: string): string | undefined => {
+  const apiError = error as { response?: { data?: { error?: string } }; message?: string }
+  return apiError?.response?.data?.error ?? apiError?.message ?? fallback
+}
+
 const apiClient = axios.create({ baseURL: `${PUBLIC_URL}/api` })
 
 export const updaterApiClient = axios.create({
