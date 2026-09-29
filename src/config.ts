@@ -81,15 +81,14 @@ export const validModels: ModelConfig[] = [
   //   timeoutOverride: 60000,
   // },
   {
-    name: 'gemini-3.5-flash',
+    name: 'gemini-3.8-flash',
     context: 128_000,
     streamVersion: 'v3',
     instructions: formatInstructions,
     provider: ModelProvider.Vertex,
     descriptionKey: 'chat:modelDescriptions.balanced',
     timeoutOverride: 60000,
-    // Not available in europe-north1(helsinki) yet, so we use europe-west3(frankfurt) for now.
-    modelRegion: 'europe-west3',
+    modelRegion: 'eu',
   },
   {
     name: 'mock',
