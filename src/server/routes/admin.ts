@@ -3,7 +3,6 @@ import { Op, WhereOptions } from 'sequelize'
 
 import { ChatInstance, UserChatInstanceUsage, User } from '../db/models'
 import { sequelize } from '../db/connection'
-import { getCourse } from '../util/importer'
 import { run as runUpdater } from '../updater'
 import { ApplicationError } from '../util/ApplicationError'
 import { adminMiddleware } from '../middleware/adminMiddleware'
@@ -14,53 +13,6 @@ import type { ChatInstanceSearchResponse, ChatInstanceSearchResult } from '../..
 const adminRouter = express.Router()
 
 adminRouter.use(adminMiddleware)
-
-interface NewChatInstanceData {
-  name: string
-  description: string
-  usageLimit: number
-  courseId: string
-}
-
-adminRouter.post('/chatinstances', async (req, res) => {
-  const data = req.body as NewChatInstanceData
-  const { name, description, usageLimit, courseId } = data
-
-  const course = await getCourse(courseId)
-  if (!course) {
-    throw ApplicationError.NotFound('Invalid course id')
-  }
-
-  const newChatInstance = await ChatInstance.create({
-    name: { en: name, fi: name, sv: name },
-    description,
-    usageLimit,
-    courseId,
-    activityPeriod: course.activityPeriod,
-    saveDiscussions: false,
-    activated: usageLimit > 0,
-  })
-
-  res.status(201).send(newChatInstance)
-})
-
-adminRouter.delete('/chatinstances/:id', async (req, res) => {
-  const { id } = req.params
-
-  const chatInstance = await ChatInstance.findByPk(id)
-
-  if (!chatInstance) {
-    throw ApplicationError.NotFound('Invalid chat instance id')
-  }
-
-  await UserChatInstanceUsage.destroy({
-    where: { chatInstanceId: id },
-  })
-
-  await chatInstance.destroy()
-
-  res.status(204).send()
-})
 
 adminRouter.delete('/chatinstances/usage/:id', async (req, res) => {
   const { id } = req.params
