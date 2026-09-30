@@ -261,13 +261,14 @@ async function parsePDFWithGS(id: string, s3key: string, jobOptions: any) {
   }
 
   const transcribeImages = jobOptions?.transcribeImages != undefined ? jobOptions?.transcribeImages : false 
-  const disableRasterization = jobOptions?.disableRasterization != undefined ? jobOptions?.transcribeImages : false 
+  const disableRasterization = jobOptions?.disableRasterization != undefined ? jobOptions?.disableRasterization : false 
 
   const safeError = (msg: string, error: unknown) => {
     try {
       logger.error(JSON.stringify({
         msg, error
       }))
+      console.log('Options', transcribeImages, disableRasterization)
     }
     catch (e){
       console.error("safe error logging failed", msg, e)
