@@ -254,6 +254,7 @@ async function parsePDFWithGS(id: string, s3key: string, jobOptions: any) {
   const file_path = path.join(base_path, 'input_'+id+'.pdf')
 
   const transcribeImages = jobOptions?.transcribeImages != undefined ? jobOptions?.transcribeImages : false 
+  const disableRasterization = jobOptions?.disableRasterization != undefined ? jobOptions?.transcribeImages : false 
 
   const safeError = (msg: string, error: unknown) => {
     try {
@@ -341,10 +342,12 @@ async function parsePDFWithGS(id: string, s3key: string, jobOptions: any) {
 
   if (runStatus === 0){
     try{
-      logger.info(`Job: ${id}, rasterizing`)
-      
-      // Rasterize the pdf to images on disk
-      await pExecFile('gs', rasterize_options)
+      if(!disableRasterization){
+        logger.info(`Job: ${id}, rasterizing`)
+        
+        // Rasterize the pdf to images on disk
+        await pExecFile('gs', rasterize_options)
+      }
       
       logger.info(`Job: ${id}, text extraction`)
       
@@ -371,14 +374,17 @@ async function parsePDFWithGS(id: string, s3key: string, jobOptions: any) {
 
         // Check they acually exist
         await stat(text_file_path)
-        await stat(image_file_path)
+
+        if (!disableRasterization){
+          await stat(image_file_path)
+        }
 
         const parsedText = await readFile(text_file_path, {encoding: 'utf-8'})
         let result = `# Text extracted from the page\n\n`
         result += parsedText
 
         try{
-            if (transcribeImages) {
+            if (transcribeImages && !disableRasterization) {
               const b64_image = Buffer.from(await readFile(image_file_path, {encoding: null})).toString('base64');
               
               const vllm_response = await transcribeWithVLLM({
