@@ -182,7 +182,7 @@ export const streamChat = async ({
   }, 5000)
 
   try {
-    const MAX_TOOL_ITERATIONS = 5
+    const MAX_TOOL_ITERATIONS = 2
     let iterations = MAX_TOOL_ITERATIONS
     let result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user, signal)
 
@@ -192,14 +192,15 @@ export const streamChat = async ({
       iterations--
     }
 
+    // Temp disable: langchain does not support this anymore, and we are migrating to agents anyway
     // Escape hatch: if the cap was hit while the model was still calling tools,
     // force a final turn with tools disabled so the model produces a text answer
     // from whatever results it already has instead of returning an empty response.
-    if (result.toolCalls.length > 0) {
-      logger.info('Tool iteration cap reached, forcing final no-tools turn', { maxIterations: MAX_TOOL_ITERATIONS })
-      const noToolsModel = (chatModel as any).bind({ tool_choice: 'none' }) as ChatModel
-      result = await chatTurn(noToolsModel, messages, toolsByName, writeEvent, user, signal)
-    }
+    // if (result.toolCalls.length > 0) {
+    //   logger.info('Tool iteration cap reached, forcing final no-tools turn', { maxIterations: MAX_TOOL_ITERATIONS })
+    //   const noToolsModel = (chatModel as any).bind({ tool_choice: 'none' }) as ChatModel
+    //   result = await chatTurn(noToolsModel, messages, toolsByName, writeEvent, user, signal)
+    // }
 
     return {
       tokenCount: result.tokenCount,
