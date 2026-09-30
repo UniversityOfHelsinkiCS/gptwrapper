@@ -253,6 +253,13 @@ async function parsePDFWithGS(id: string, s3key: string, jobOptions: any) {
   const text_path = path.join(base_path, 'text/')
   const file_path = path.join(base_path, 'input_'+id+'.pdf')
 
+  try{
+    logger.info(`Got options: ${jobOptions ? JSON.stringify(jobOptions) : "none"}`)
+  }
+  catch{
+    logger.error(`Logging options failed`)
+  }
+
   const transcribeImages = jobOptions?.transcribeImages != undefined ? jobOptions?.transcribeImages : false 
   const disableRasterization = jobOptions?.disableRasterization != undefined ? jobOptions?.transcribeImages : false 
 
