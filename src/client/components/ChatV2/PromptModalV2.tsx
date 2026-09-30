@@ -362,7 +362,7 @@ const PromptModalV2 = () => {
             flexDirection: 'column',
           }}
         >
-          <Box sx={{ overflowY: 'auto', mt: 2 }} role="region" aria-label={t('common:prompts')}>
+          <Box sx={{ overflowY: 'auto', mt: 2, position: 'relative' }} role="region" aria-label={t('common:prompts')}>
             {/* University prompts — opens the gallery in the right panel. Admin only for now. */}
             {canSeeUniversityPrompts && (
               <Box>

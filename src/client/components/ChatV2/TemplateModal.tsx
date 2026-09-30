@@ -97,7 +97,7 @@ const TemplateModal: React.FC<{ open: boolean; root: string; children: React.Rea
           </TextButton>
         </Box>
         <Divider />
-        <Box sx={{ display: 'flex', p: '0 1rem 1rem 1rem', flex: '1', overflow: 'hidden' }}>{children}</Box>
+        <Box sx={{ display: 'flex', p: '0 1rem 1rem 1rem', flex: '1', overflow: 'hidden', position: 'relative' }}>{children}</Box>
       </Box>
     </Modal>
   )
