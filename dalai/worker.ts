@@ -380,7 +380,7 @@ async function parsePDFWithGS(id: string, s3key: string, jobOptions: any) {
         }
 
         const parsedText = await readFile(text_file_path, {encoding: 'utf-8'})
-        let result = `# Text extracted from the page\n\n`
+        let result = `# Text extracted from page ${pageNumber}\n\n`
         result += parsedText
 
         try{
