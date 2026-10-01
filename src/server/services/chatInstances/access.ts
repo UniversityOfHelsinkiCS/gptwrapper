@@ -79,7 +79,12 @@ export const ensureSandboxAccess = async (user: User) => {
 
   if (!isAdmin && !isToska) return
 
-  const responsibilities = await findResponsibilities(user.id)
+  const responsibilities = await Responsibility.findAll({
+    attributes: ['chatInstanceId'],
+    where: {
+      userId: user.id,
+    },
+  })
 
   const sandboxChatInstanceIds: Array<string> = []
   if (isAdmin) {
