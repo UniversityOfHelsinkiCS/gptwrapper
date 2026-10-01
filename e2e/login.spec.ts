@@ -42,10 +42,10 @@ adminTest.describe('Login sandbox access', () => {
     const idx = testInfo.workerIndex
 
     await login(request, idx, 'admin')
-    const first = ownCourseIds(await getUserCourses(request, testInfo.workerIndex, 'admin')).sort()
+    const first = ownCourseIds(await getUserCourses(request, idx, 'admin')).sort()
     await login(request, idx, 'admin')
     await login(request, idx, 'admin')
-    const second = ownCourseIds(await getUserCourses(request, testInfo.workerIndex, 'admin')).sort()
+    const second = ownCourseIds(await getUserCourses(request, idx, 'admin')).sort()
 
     expect(second).toEqual(first)
   })
