@@ -106,7 +106,7 @@
     "@sentry/vite-plugin": "4.3.0",
     "@tanstack/react-query": "5.81.2",
     "@tanstack/react-query-devtools": "5.81.2",
-    "axios": "1.18.1",
+    "axios": "1.20.0",
     "bullmq": "5.79.2",
     "cors": "2.8.5",
     "date-fns": "^3.6.0",
