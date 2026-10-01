@@ -45,6 +45,8 @@
     "curreTitle": "Curre",
     "tryNew": "Kokeile uutta chattiä",
     "close": "Sulje",
+    "closeNotification": "Sulje ilmoitus",
+    "notificationsRegion": "Ilmoitukset",
     "info": "Info",
     "showInfo": "Lisätietoja",
     "link": "Linkki",
@@ -877,6 +879,9 @@
     "attachment": "Liitetty tiedosto: {{file}}",
     "removeAttachment": "Poista tiedosto painamalla Delete tai Backspace",
     "fileAttached": "Tiedosto liitetty: {{file}}",
-    "fileRemoved": "Tiedosto poistettu"
+    "fileRemoved": "Tiedosto poistettu",
+    "closeNotification": "Sulje ilmoitus",
+    "unseenReleasesOne": "{{count}} uusi muutos",
+    "unseenReleases": "{{count}} uutta muutosta"
   }
 }

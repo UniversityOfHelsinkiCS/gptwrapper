@@ -44,6 +44,8 @@
     "copy": "Copy",
     "tryNew": "Try the new chat",
     "close": "Close",
+    "closeNotification": "Close notification",
+    "notificationsRegion": "Notifications",
     "info": "Info",
     "showInfo": "More information",
     "link": "Link",
@@ -876,6 +878,9 @@
     "attachment": "Attachment: {{file}}",
     "removeAttachment": "Remove the file by pressing Delete or Backspace",
     "fileAttached": "File attached: {{file}}",
-    "fileRemoved": "File removed"
+    "fileRemoved": "File removed",
+    "closeNotification": "Close notification",
+    "unseenReleasesOne": "{{count}} new change",
+    "unseenReleases": "{{count}} new changes"
   }
 }

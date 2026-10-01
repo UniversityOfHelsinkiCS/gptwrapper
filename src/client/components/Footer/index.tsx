@@ -50,6 +50,11 @@ const Footer = () => {
             <Chip
               component="span"
               label={unseenReleasesCount}
+              aria-label={
+                unseenReleasesCount === 1
+                  ? t('accessibility:unseenReleasesOne', { count: unseenReleasesCount })
+                  : t('accessibility:unseenReleases', { count: unseenReleasesCount })
+              }
               size="small"
               color="primary"
               sx={{ height: 16, fontSize: 10, fontWeight: 600, cursor: 'inherit', '& .MuiChip-label': { px: 0.75 } }}

@@ -45,6 +45,8 @@
     "curreTitle": "Curre",
     "tryNew": "Prova den nya chattappen",
     "close": "Stänga",
+    "closeNotification": "Stäng meddelande",
+    "notificationsRegion": "Meddelanden",
     "info": "Info",
     "showInfo": "Mer information",
     "link": "Länk",
@@ -851,6 +853,9 @@
     "attachment": "Bilaga: {{file}}",
     "removeAttachment": "Ta bort filen genom att trycka på Delete eller Backspace",
     "fileAttached": "Fil bifogad: {{file}}",
-    "fileRemoved": "Filen har tagits bort"
+    "fileRemoved": "Filen har tagits bort",
+    "closeNotification": "Stäng avisering",
+    "unseenReleasesOne": "{{count}} ny ändring",
+    "unseenReleases": "{{count}} nya ändringar"
   }
 }
