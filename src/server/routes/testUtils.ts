@@ -97,12 +97,12 @@ router.post('/reset-test-data', async (req, res) => {
   await User.create(headersToUser(temporalTeacherHeaders))
 
   if (testUserRole === 'student') {
-    console.log('creating enrolment', testUserRole, TEST_COURSES.TEST_COURSE)
+    logger.info('creating enrolment', testUserRole, TEST_COURSES.TEST_COURSE)
     await Enrolment.create({
       userId,
       chatInstanceId: TEST_COURSES.TEST_COURSE.id,
     })
-    console.log('creating enrolment', testUserRole, TEST_COURSES.EXAMPLE_COURSE)
+    logger.info('creating enrolment', testUserRole, TEST_COURSES.EXAMPLE_COURSE)
     await Enrolment.create({
       userId,
       chatInstanceId: TEST_COURSES.EXAMPLE_COURSE.id,
@@ -110,7 +110,7 @@ router.post('/reset-test-data', async (req, res) => {
   }
 
   if (testUserRole === 'teacher') {
-    console.log('creating responsibility', testUserRole, TEST_COURSES.TEST_COURSE)
+    logger.info('creating responsibility', testUserRole, TEST_COURSES.TEST_COURSE)
     await Responsibility.create({
       userId,
       chatInstanceId: TEST_COURSES.TEST_COURSE.id,
