@@ -850,6 +850,7 @@
     "galleryEmpty": "No university prompts have been published yet"
   },
   "accessibility": {
+    "notificationCount": "{{count}} notifications",
     "previewOpened": "Preview opened: {{name}}",
     "goToLatestResponse": "Go to latest response",
     "previewAndManage": "Preview and manage",

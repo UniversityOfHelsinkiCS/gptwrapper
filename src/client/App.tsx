@@ -26,6 +26,7 @@ import { Feedback } from './components/Feedback'
 import { SuperSpeedLoginAs } from './components/Admin/SuperSpeedLoginAs'
 import { useLoggedInAs } from './hooks/useLoggedInAs'
 import NotificationBanner from './components/common/NotificationBanner'
+import { SnackbarAnnouncer, announceSnackbar, forgetSnackbar, SnackbarCloseButton } from './components/common/SnackbarAnnouncer'
 import { resolveContentView, getRedirect } from './util/contentView'
 import safeLocalStorage from './util/safeLocalStorage'
 
@@ -82,7 +83,14 @@ const ThemedApp = () => {
       <CssBaseline />
       <Styles />
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
-        <SnackbarProvider preventDuplicate autoHideDuration={15_000}>
+        <SnackbarAnnouncer />
+        <SnackbarProvider
+          preventDuplicate
+          autoHideDuration={30_000}
+          onEnter={announceSnackbar}
+          onExited={forgetSnackbar}
+          action={(snackbarId) => <SnackbarCloseButton snackbarId={snackbarId} />}
+        >
           <EmbeddedProvider>
             <AnalyticsProvider>
               <Layout />

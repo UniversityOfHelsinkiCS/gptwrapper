@@ -825,6 +825,7 @@
     "galleryEmpty": "Inga universitetsprompter har publicerats ännu"
   },
   "accessibility": {
+    "notificationCount": "{{count}} aviseringar",
     "previewOpened": "Förhandsgranskning öppnad: {{name}}",
     "goToLatestResponse": "Gå till senaste svaret",
     "previewAndManage": "Förhandsgranska och hantera",
