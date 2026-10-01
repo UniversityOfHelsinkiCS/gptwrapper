@@ -67,7 +67,6 @@ export const ChatBox = ({
   isNewResponseAvailable,
   onGoToLatestResponse,
   prompt,
-  courseName,
 }: {
   disabled: boolean
   chatInstance?: Course
@@ -86,7 +85,6 @@ export const ChatBox = ({
   isNewResponseAvailable: boolean
   onGoToLatestResponse: () => void
   prompt?: Prompt | null
-  courseName?: string
 }) => {
   const { courseId } = useParams()
   const isEmbedded = useIsEmbedded()
@@ -108,9 +106,6 @@ export const ChatBox = ({
   const { t } = useTranslation()
 
   const promptName = prompt?.name
-  const promptType = prompt?.type
-  const hasType = promptType === 'CHAT_INSTANCE' || promptType === 'PERSONAL' || promptType === 'UNIVERSITY'
-  const typeLabel = hasType ? (promptType === 'CHAT_INSTANCE' ? courseName : t(`sidebar:${promptType === 'PERSONAL' ? 'myPrompt' : 'universityPrompt'}`)) : null
 
   useKeyboardCommands({
     resetChat: handleReset,
@@ -267,9 +262,6 @@ export const ChatBox = ({
           <Box>
             <StatusAnnouncer message={!promptName ? t('accessibility:promptCleared') : ''} />
             <StatusAnnouncer message={fileAnnouncement} />
-            <Typography sx={visuallyHidden} id="hidden-prompt-description">
-              {t('common:prompt')}: {typeLabel ? `${typeLabel} -` : ''} {promptName ? ` ${promptName}` : t('chat:noPrompt')}
-            </Typography>
             <TextField
               autoFocus={!isEmbedded}
               id="chat-input"

@@ -599,7 +599,6 @@ const ChatV2Content = () => {
             <ChatBox
               disabled={isStreaming}
               chatInstance={chatInstance}
-              courseName={courseName}
               prompt={activePrompt}
               fileInputRef={fileInputRef}
               fileName={fileName}
