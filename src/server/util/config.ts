@@ -24,6 +24,14 @@ export const IMPORTER_URL =
     ? 'https://api-toska.apps.ocp-prod-0.k8s.it.helsinki.fi/importer'
     : 'https://api-toska.apps.ocp-test-0.k8s.it.helsinki.fi/importer'
 
+export const VECTORDB_HOST = getEnv('VECTORDB_HOST', 'vectordb')
+export const VECTORDB_USER = getEnv('VECTORDB_USER', 'postgres')
+export const VECTORDB_PASSWORD = getEnv('VECTORDB_PASSWORD', 'postgres')
+export const VECTORDB_DATABASE = getEnv('VECTORDB_DATABASE', 'postgres')
+export const VECTORDB_PORT = 5432
+export const USE_DALAI_PROCESSING = getEnv('USE_DALAI_PROCESSING', 'false') === 'true'
+
+
 export const REDIS_HOST = getEnv('REDIS_HOST', 'redis')
 
 export const REDIS_PORT = 6379

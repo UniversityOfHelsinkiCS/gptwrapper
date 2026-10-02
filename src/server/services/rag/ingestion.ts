@@ -7,7 +7,9 @@ import logger from 'src/server/util/logger'
 import type { IngestionJobStatus, IngestionPipelineStageKey } from '@shared/ingestion'
 import type { RagFileMetadata } from '@shared/types'
 import { RedisVectorStore } from './vectorStore'
-import { getEmbedder } from './embedder'
+import crypto from 'crypto'
+import { vlmQueue } from '../jobs/vlmQueue'
+import { USE_DALAI_PROCESSING } from 'src/server/util/config'
 
 const defaultTextSplitter = new RecursiveCharacterTextSplitter({
   chunkSize: 1000 / 2,
@@ -77,66 +79,149 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
   await updateRagFileStatus(ragFile, { ...update, message: needToParse ? 'Extracting text' : 'Found cached text' })
   let finalText: string | null = existingText
 
+
+  const useDalaiParsing = USE_DALAI_PROCESSING
+
   if (needToParseWithVlm) {
-    // Advanced PDF parsing with job processing.
-    const pages = await submitAdvancedParsingJobs(ragFile)
+    if (useDalaiParsing) {
+      try {
+        const s3key = ragFile.s3Key
 
-    try {
-      const start = 5
-      const end = 60
-      const total = pages.length || 1
-      let completed = 0
+        const baseJobId = crypto.randomBytes(20).toString('hex')
 
-      await updateRagFileStatus(ragFile, {
-        ...update,
-        message: total > 1 ? `Parsing ${total} pages` : 'Parsing',
-        eta: total * 10000,
-      })
-
-      const jobPromises = pages.map(async (p, index) => {
-        try {
-          const text = await p.job!.waitUntilFinished(pdfQueueEvents)
-          return { index, text, success: true }
-        } catch (error) {
-          logger.error('Page job failed: ', p.job!.id, error)
-          return { index, text: p.text, success: false }
+        const jobId = `${baseJobId}-full`
+        const jobData = {
+          jobtype: 'pdf-process',
+          s3key: s3key,
+          jobOptions: {
+            transcribeImages: true,
+            disableRasterization: false
+          }
         }
-      })
 
-      const transcriptions: Array<string> = new Array(total)
+        const job = await vlmQueue.add(jobId, jobData, {
+          jobId,
+          removeOnComplete: 1000,
+          removeOnFail: 1000,
+        })
 
-      for await (const result of jobPromises.map((p) => p.then((r) => r))) {
-        transcriptions[result.index] = result.text
-        completed += 1
+        const transcription_results = await job.waitUntilFinished(pdfQueueEvents)
 
-        const fraction = completed / total
+        if (!transcription_results) {
+          throw new Error('Dalai returned null response')
+        }
 
-        const pct = Math.round(start + (end - start) * fraction)
-        progress = pct
+        finalText = transcription_results.join("\n\n") as unknown as string
+
+        await FileStore.writeRagFileTextContent(ragFile, finalText)
+      }
+      catch (error: any) {
+        logger.error('Error waiting for PDF parsing job to finish:', error)
+        await ragFile.update({ error: 'PDF parsing failed', pipelineStage: 'error' })
+        return
+      }
+    }
+    else {
+      // Advanced PDF parsing with job processing.
+      const pages = await submitAdvancedParsingJobs(ragFile)
+
+      try {
+        const start = 5
+        const end = 60
+        const total = pages.length || 1
+        let completed = 0
 
         await updateRagFileStatus(ragFile, {
           ...update,
-          progress,
-          message: `Parsing (${completed}/${total})`,
-          eta: Math.round((total - completed) * 6000),
+          message: total > 1 ? `Parsing ${total} pages` : 'Parsing',
+          eta: total * 10000,
         })
+
+        const jobPromises = pages.map(async (p, index) => {
+          try {
+            const text = await p.job!.waitUntilFinished(pdfQueueEvents)
+            return { index, text, success: true }
+          } catch (error) {
+            logger.error('Page job failed: ', p.job!.id, error)
+            return { index, text: p.text, success: false }
+          }
+        })
+
+        const transcriptions: Array<string> = new Array(total)
+
+        for await (const result of jobPromises.map((p) => p.then((r) => r))) {
+          transcriptions[result.index] = result.text
+          completed += 1
+
+          const fraction = completed / total
+
+          const pct = Math.round(start + (end - start) * fraction)
+          progress = pct
+
+          await updateRagFileStatus(ragFile, {
+            ...update,
+            progress,
+            message: `Parsing (${completed}/${total})`,
+            eta: Math.round((total - completed) * 6000),
+          })
+        }
+
+        finalText = transcriptions.join('\n\n')
+
+        await FileStore.writeRagFileTextContent(ragFile, finalText)
+      } catch (error: any) {
+        logger.error('Error waiting for PDF parsing jobs to finish:', error)
+        await ragFile.update({ error: 'PDF parsing failed', pipelineStage: 'error' })
+        return
       }
-
-      finalText = transcriptions.join('\n\n')
-
-      await FileStore.writeRagFileTextContent(ragFile, finalText)
-    } catch (error: any) {
-      logger.error('Error waiting for PDF parsing jobs to finish:', error)
-      await ragFile.update({ error: 'PDF parsing failed', pipelineStage: 'error' })
-      return
     }
   } else if (needToParse) {
     // Standard (non-VLM) PDF text extraction. Only reached by binary files thanks to the guard above.
-    const pages = await simplyParsePdf(ragFile)
+    if (useDalaiParsing) {
+      try {
+        const s3key = ragFile.s3Key
 
-    finalText = pages.map((p) => p.text).join('\n\n')
+        const baseJobId = crypto.randomBytes(20).toString('hex')
 
-    await FileStore.writeRagFileTextContent(ragFile, finalText)
+        const jobId = `${baseJobId}-full`
+        const jobData = {
+          jobtype: 'pdf-process',
+          s3key: s3key,
+          jobOptions: {
+            transcribeImages: false,
+            disableRasterization: true
+          }
+        }
+
+        const job = await vlmQueue.add(jobId, jobData, {
+          jobId,
+          removeOnComplete: 1000,
+          removeOnFail: 1000,
+        })
+
+        const transcription_results = await job.waitUntilFinished(pdfQueueEvents)
+
+        if (!transcription_results) {
+          throw new Error('Dalai returned null response [only text extraction]')
+        }
+
+        finalText = transcription_results.join("\n\n") as unknown as string
+
+        await FileStore.writeRagFileTextContent(ragFile, finalText)
+      }
+      catch (error: any) {
+        logger.error('[only text extraction] Error waiting for PDF parsing job to finish:', error)
+        await ragFile.update({ error: 'PDF parsing failed', pipelineStage: 'error' })
+        return
+      }
+    }
+    else {
+      const pages = await simplyParsePdf(ragFile)
+
+      finalText = pages.map((p) => p.text).join('\n\n')
+
+      await FileStore.writeRagFileTextContent(ragFile, finalText)
+    }
   } else {
     // Text file content read directly, or previously-extracted text served from cache.
     progress = 50
@@ -163,7 +248,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
   })
 
   const document = new Document({
-    pageContent: finalText,
+    pageContent: finalText.replace(/^\s+|\s+$|\s+(?=\s)/g, ""),
   })
 
   const splitter = isMarkdown(ragFile.fileType) ? markdownTextSplitter : defaultTextSplitter
@@ -176,6 +261,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
     chunkDocument.metadata = {
       ...chunkDocument.metadata,
       ragFileName: ragFile.filename,
+      ragIndex: `ragIndex-${ragIndex.id}`
     }
     idx++
   }
@@ -187,9 +273,6 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
     eta: 5000,
   })
 
-  const embedder = getEmbedder()
-  const embeddings = await embedder.embedDocuments(chunkDocuments.map((d) => d.pageContent))
-
   await updateRagFileStatus(ragFile, {
     ...update,
     message: 'Saving vectors',
@@ -198,11 +281,10 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
   })
 
   await vectorStore.addDocuments(
-    chunkDocuments.map((doc, i) => ({
+    chunkDocuments.map((doc, _i) => ({
       id: doc.id!,
-      content: doc.pageContent,
-      metadata: JSON.stringify(doc.metadata),
-      content_vector: embeddings[i],
+      pageContent: doc.pageContent,
+      metadata: doc.metadata,
     })),
   )
 
