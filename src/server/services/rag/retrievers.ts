@@ -2,11 +2,11 @@ import { CallbackManagerForRetrieverRun } from '@langchain/core/callbacks/manage
 import { Document, DocumentInterface } from '@langchain/core/documents'
 import { BaseRetriever } from '@langchain/core/retrievers'
 import { RediSearchLanguage, SearchReply } from 'redis'
-import { redisClient } from '../../util/redis'
 import { Embeddings } from '@langchain/core/embeddings'
 import { getEmbedder } from './embedder'
 import { transformQuery, TransformQueryOptions } from './queryTransformer'
 import { EnsembleRetriever } from '@langchain/classic/retrievers/ensemble'
+import { retriever, vectorPool } from './vectorStore'
 
 const normalizeWhitespace = (str: string) => {
   return str.replace(/\s+/g, ' ').trim();
@@ -20,8 +20,8 @@ const removeIllegalCharacters = (str: string) => {
   return str.replace(TOKEN_RE, '');
 }
 
-export const getExactFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `@content_exact:"${q}"`, language, 'exact', highlight)
-export const getSubstringFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `*${removeIllegalCharacters(q)}*`, language, 'substring', highlight)
+export const getExactFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `"${q}"`, language, 'exact', highlight)
+export const getSubstringFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `${removeIllegalCharacters(q)}`, language, 'substring', highlight)
 export const getAndFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => removeIllegalCharacters(q), language, 'and', highlight)
 export const getOrFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => q.split(' ').map(word => word.trim()).filter(word => word.length > 0).join(' | '), language, 'or', highlight)
 
@@ -57,31 +57,26 @@ class FTSearchRetriever extends BaseRetriever {
 
   async redisQuery(query: string): Promise<SearchReply['documents']> {
     try {
-      const results = await redisClient.ft.search(this.indexName, query, {
-        RETURN: ['content', 'metadata'],
-        ...(this.highlight ? { HIGHLIGHT: {
-          TAGS: {
-            open: '**',
-            close: '**',
-          },
-        }} : {}),
-        DIALECT: 2,
-        LIMIT: {
-          from: 0,
-          size: 16,
-        },
-        ...(this.language ? { LANGUAGE: this.language } : {}),
-      })
+      const results = await vectorPool.query(`SELECT id, content, metadata FROM documents WHERE fts_index @@ websearch_to_tsquery('simple', $1::text);`, [query])
 
-      // Type narrowing
-      if (!results || typeof results !== 'object' || !('documents' in results) || !Array.isArray(results.documents)) {
+      if (!results || !results.rows) {
         console.warn('ft.search did not return documents for query:', query, 'index:', this.indexName)
         return []
       }
 
-      console.log(`${query} ${this.name ? `(${this.name}) ` : ''}results:`, results.documents.length)
+      const formatted =  results.rows.map((row) => {
+        return {
+          id: row.id,
+          value: {
+            content: row.content,
+            metadata: row.metadata
+          }
+        }
+      })
 
-      return (results as SearchReply).documents
+
+
+      return formatted
     } catch (error) {
       console.error(`Error during FT search (${this.name}, '${query}'):`, error)
       return []
@@ -104,39 +99,13 @@ class VectorSearchRetriever extends BaseRetriever {
   }
 
   async _getRelevantDocuments(query: string, _callbacks?: CallbackManagerForRetrieverRun): Promise<DocumentInterface<Record<string, any>>[]> {
-    const queryEmbedding = await this.embedder.embedQuery(query)
-
-    const redisQuery = `* => [KNN ${this.k} @content_vector $vector AS vector_score]`
-
     try {
-      const results = await redisClient.ft.search(this.indexName, redisQuery, {
-        RETURN: ['content', 'metadata', 'vector_score'],
-        SORTBY: `vector_score`,
-        DIALECT: 2,
-        PARAMS: {
-          vector: Buffer.from(new Float32Array(queryEmbedding).buffer),
-        },
-        LIMIT: {
-          from: 0,
-          size: this.k,
-        },
-      })
-
-      // Type narrowing
-      if (!results || typeof results !== 'object' || !('documents' in results) || !Array.isArray(results.documents)) {
-        console.warn('ft.search did not return documents for vector query:', query, 'index:', this.indexName)
-        return []
-      }
-
-      // Make sure sorted correctly
-      // console.log((results as SearchReply).documents.map((doc) => doc.value.vector_score))
-      console.log('VectorSearchRetriever results:', results.documents.length)
-
-      return (results as SearchReply).documents.map(
+      const docs = await retriever.invoke(query)
+      return docs.map(
         (doc) =>
           new Document({
-            pageContent: doc.value.content as string,
-            metadata: doc.value.metadata as Record<string, any>,
+            pageContent: doc.pageContent as string,
+            metadata: doc.metadata as Record<string, any>,
           }),
       )
     } catch (error) {

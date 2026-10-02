@@ -1,118 +1,84 @@
-import { createClient, RediSearchSchema } from 'redis'
-import { redisClient } from '../../util/redis'
 import { RAG_LANGUAGES } from '@shared/lang'
 import type { RagIndex } from '../../db/models'
 
-const SCHEMA: RediSearchSchema = {
-  content: {
-    type: 'TEXT',
-  },
-  content_exact: {
-    type: 'TEXT',
-    WEIGHT: 2.0,
-    NOSTEM: true,
-    WITHSUFFIXTRIE: true,
-  },
-  metadata: {
-    type: 'TEXT',
-  },
-  content_vector: {
-    type: 'VECTOR',
-    ALGORITHM: 'HNSW',
-    TYPE: 'FLOAT32',
-    DIM: 1024, // Check that this matches the embedder output dimension. For example if the model is changed, may need to change this.
-    DISTANCE_METRIC: 'COSINE',
-  },
-} as const
+import { PGVectorStore, DistanceStrategy } from "@langchain/pgvector";
+import { PoolConfig } from "pg";
+import { getEmbedder } from './embedder';
+import { VECTORDB_DATABASE, VECTORDB_HOST, VECTORDB_PASSWORD, VECTORDB_PORT, VECTORDB_USER } from 'src/server/util/config';
+import { Document } from "@langchain/core/documents";
+import { randomUUID } from 'node:crypto';
 
-export type RedisDocument = {
-  id?: string
-  content: string
-  metadata: string
-  content_vector: number[]
-}
 
-export class RedisVectorStore {
-  client: ReturnType<typeof createClient>
+const config = {
+  postgresConnectionOptions: {
+    host: VECTORDB_HOST,
+    port: VECTORDB_PORT,
+    user: VECTORDB_USER,
+    password: VECTORDB_PASSWORD,
+    database: VECTORDB_DATABASE,
+  } as PoolConfig,
+  tableName: "documents",
+  columns: {
+    idColumnName: "id",
+    vectorColumnName: "vector",
+    contentColumnName: "content",
+    metadataColumnName: "metadata",
+  },
+  distanceStrategy: "cosine" as DistanceStrategy,
+};
+
+const ollamaEmbedder = getEmbedder()
+
+// This also initializes the table, if it does not exist yet
+const vectorStore = await PGVectorStore.initialize(ollamaEmbedder, config);
+
+export const vectorPool = vectorStore.pool
+
+// Make sure FTS exists
+await vectorPool.query(`ALTER TABLE documents ADD COLUMN IF NOT EXISTS fts_index tsvector
+    GENERATED ALWAYS AS (to_tsvector('simple', coalesce(content, ''))) STORED;`)
+
+export const retriever = vectorStore.asRetriever({
+  searchType: "mmr",
+  k: 6,
+});
+
+export class CustomPGVectorStore {
   indexName: string
+  store: PGVectorStore
   language: typeof RAG_LANGUAGES[number]
 
   constructor(indexName: string, language: typeof RAG_LANGUAGES[number]) {
-    this.client = redisClient
     this.indexName = indexName
     this.language = language
+    this.store = vectorStore
   }
 
   static fromRagIndex(ragIndex: RagIndex) {
-    return new RedisVectorStore(`ragIndex-${ragIndex.id}`, ragIndex.metadata.language ?? 'English')
+    console.log("Asked for", ragIndex)
+    return new CustomPGVectorStore(`ragIndex-${ragIndex.id}`, ragIndex.metadata.language ?? 'English')
   }
 
   async createIndex() {
-    try {
-      await this.client.ft.create(this.indexName, SCHEMA, {
-        ON: 'HASH',
-        PREFIX: `doc:${this.indexName}:`,
-        LANGUAGE: this.language,
-      })
-    } catch (e) {
-      const err = e instanceof Error ? e : new Error(String(e));
-      if (err.message === 'Index already exists') {
-        console.log('Index exists already, skipping creation.')
-      } else {
-        throw err
-      }
-    }
+    console.log("Called stubbed function createIndex")
   }
 
-  async addDocuments(documents: RedisDocument[]) {
-    if (!this.client.isOpen) {
-      await this.client.connect()
-    }
-    const pipeline = this.client.multi()
+  async addDocuments(documents: Document[]) {
+    console.log("Asked to add documents", this.indexName, documents)
 
-    for (const doc of documents) {
-      if (!doc.id) {
-        throw new Error('Document must have an id')
-      }
-      const docId = `doc:${this.indexName}:${doc.id}`
-      pipeline.hSet(docId, {
-        content: doc.content,
-        content_exact: doc.content,
-        metadata: doc.metadata,
-        content_vector: Buffer.from(new Float32Array(doc.content_vector).buffer),
-      })
-    }
-    await pipeline.exec()
+    await this.store.addDocuments(documents, { ids: documents.map(_doc => randomUUID())})
   }
 
-  async deleteAllDocuments() {
-    if (!this.client.isOpen) {
-      await this.client.connect()
-    }
-    let cursor = '0'
-    do {
-      const reply = await this.client.scan(cursor, {
-        MATCH: `doc:${this.indexName}:*`,
-        COUNT: 100,
-      })
-      cursor = reply.cursor
-      if (reply.keys.length > 0) {
-        await this.client.del(reply.keys)
-      }
-    } while (cursor !== '0')
+
+    async deleteAllDocuments() {
+      console.log("Deleted all under", this.indexName)
+      await this.store.delete({ filter: { ragIndex: this.indexName } });
   }
 
   async dropIndex() {
     await this.deleteAllDocuments()
-    try {
-      await this.client.ft.dropIndex(this.indexName)
-    } catch (e) {
-      const err = e instanceof Error ? e : new Error(String(e));
-      if (err.message === 'Unknown Index name') {
-        console.log('Index does not exist, skipping drop.')
-      } else {
-        throw err
-      }
-    }
+    console.log("Dropped stub", this.indexName)
   }
 }
+
+export const RedisVectorStore = CustomPGVectorStore

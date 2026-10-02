@@ -8,6 +8,7 @@ import {
 
 const _ollamaEmbedder = new OllamaEmbeddings({
   model: OLLAMA_EMBEDDER_MODEL,
+  dimensions: 1024,
   baseUrl: LAAMA_API_URL,
   fetch: (input: RequestInfo | URL, init?: RequestInit) => {
     return fetch(input, {
