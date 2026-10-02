@@ -32,6 +32,13 @@ const ollamaEmbedder = getEmbedder()
 // This also initializes the table, if it does not exist yet
 const vectorStore = await PGVectorStore.initialize(ollamaEmbedder, config);
 
+// Improve nn-search with HNSW index
+await vectorStore.createHnswIndex({
+  dimensions: 1024,
+  m: 16,
+  efConstruction: 64,
+});
+
 export const vectorPool = vectorStore.pool
 
 // Make sure FTS exists
@@ -64,13 +71,10 @@ export class CustomPGVectorStore {
   }
 
   async addDocuments(documents: Document[]) {
-    console.log("Asked to add documents", this.indexName, documents)
-
     await this.store.addDocuments(documents, { ids: documents.map(_doc => randomUUID())})
   }
 
-
-    async deleteAllDocuments() {
+  async deleteAllDocuments() {
       console.log("Deleted all under", this.indexName)
       await this.store.delete({ filter: { ragIndex: this.indexName } });
   }
