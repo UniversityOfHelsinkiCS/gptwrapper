@@ -96,6 +96,7 @@
     "@langchain/google": "0.2.7",
     "@langchain/ollama": "^1.2.7",
     "@langchain/openai": "^1.4.5",
+    "@langchain/pgvector": "0.1.0",
     "@mui/icons-material": "7.3.11",
     "@mui/material": "7.3.11",
     "@mui/utils": "7.3.11",
