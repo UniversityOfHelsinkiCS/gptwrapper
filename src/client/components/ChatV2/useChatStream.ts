@@ -42,6 +42,8 @@ export const useChatStream = ({
     const decoder = new TextDecoder()
     let content = ''
     let error = ''
+    // The stream usually breaks right after an error event, which must not report the same failure again
+    let errorReported = false
     let accumulated = ''
     const toolCallResultsAccum: Record<string, ToolCallResultEvent> = {}
     setGenerationInfo(baseGenerationInfo)
@@ -104,8 +106,7 @@ export const useChatStream = ({
       } else {
         error += '\nResponse stream was interrupted'
       }
-
-      onError(err)
+      if (!errorReported) onError(err)
       if (content.length > 0) {
         onComplete({
           message: {
@@ -118,6 +119,11 @@ export const useChatStream = ({
         })
       }
     } finally {
+      // A pending error timeout would otherwise abort the next stream's controller
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current)
+        errorTimeoutRef.current = null
+      }
       streamControllerRef.current = null
       setCompletion('')
       setToolCalls({})
@@ -163,6 +169,7 @@ export const useChatStream = ({
           case 'error':
             error += parsedChunk.error
 
+            errorReported = true
             onError({ error: parsedChunk.error })
 
             errorTimeoutRef.current = setTimeout(() => {
