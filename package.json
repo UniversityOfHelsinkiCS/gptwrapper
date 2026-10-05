@@ -11,7 +11,7 @@
     "prod": "NODE_ENV=production tsx src/server/index.ts",
     "dev": "concurrently \"npm run dev:server\" \"vite\"",
     "dev:server": "NODE_ENV=development tsx watch --clear-screen=false src/server/index.ts",
-    "tsc": "tsc",
+    "tsc": "docker compose exec app npx tsc || tsc || (echo 'make sure containers are running' && exit 1)",
     "tsc:on": "tsc --watch",
     "lint": "oxlint src",
     "lint:fix": "oxlint src --fix",
