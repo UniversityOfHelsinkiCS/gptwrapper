@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { useAcceptTermsMutation } from '../hooks/useAcceptTermsMutation'
 import useCurrentUser from '../hooks/useCurrentUser'
 import { InfoTexts } from '../locales/infoTexts'
+import { focusIndicatorStyle } from 'src/client/util/accessibility'
 
 export const DisclaimerModal = ({ disclaimerStatus, setDisclaimerStatus }: { disclaimerStatus: boolean; setDisclaimerStatus: (status: boolean) => void }) => {
   const { t, i18n } = useTranslation()
@@ -87,7 +88,18 @@ export const DisclaimerModal = ({ disclaimerStatus, setDisclaimerStatus }: { dis
             <FormControlLabel
               disabled={termsAccepted}
               sx={{ display: termsAccepted ? 'none' : '' }}
-              control={<Checkbox required checked={hasRead} onChange={handleToggle} data-testid="accept-disclaimer" />}
+              control={
+                <Checkbox
+                  required
+                  disableRipple
+                  checked={hasRead}
+                  onChange={handleToggle}
+                  data-testid="accept-disclaimer"
+                  sx={{
+                    ...focusIndicatorStyle(),
+                  }}
+                />
+              }
               label={t('info:acceptDisclaimer')}
             />
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
