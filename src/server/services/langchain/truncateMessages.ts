@@ -1,6 +1,6 @@
 import getEncoding from "src/server/util/tiktoken";
 import { validModels } from "@config";
-import { Message } from "@shared/chat";
+import { Message, readMessageContent } from "@shared/chat";
 
 export const truncateMessages = (modelConfig: typeof validModels[number], messages: Message[]): Message[] => {
   let tokenCount = 0
@@ -11,11 +11,7 @@ export const truncateMessages = (modelConfig: typeof validModels[number], messag
   messages.forEach((message) => {
     if (message.role === 'system') {
       truncatedMessages.push(message)
-      let content: string = ''
-      if (typeof message.content === 'string') {
-        content = message.content
-      }
-      const encoded = encoding.encode(content)
+      const encoded = encoding.encode(readMessageContent(message))
       tokenCount += encoded.length
     }
   })
@@ -23,14 +19,9 @@ export const truncateMessages = (modelConfig: typeof validModels[number], messag
   // Start from the end and work backwards to keep the most recent messages
   for (let i = messages.length - 1; i >= 0; i--) {
     const message = messages[i]
-    let content: string = ''
-    if (typeof message.content === 'string') {
-      content = message.content
-    }
+    const text = readMessageContent(message)
     // Include fileContent in token calculation for user messages
-    if (message.role === 'user' && message.fileContent) {
-      content = `${content} ${message.fileContent}`
-    }
+    const content = message.role === 'user' && message.fileContent ? `${text} ${message.fileContent}` : text
     const encoded = encoding.encode(content)
     const messageTokenCount = encoded.length
 

@@ -48,13 +48,19 @@ export type ProcessingEvent = {
 
 export type ChatEvent = WritingEvent | ToolCallStatusEvent | ToolCallResultEvent | ErrorEvent | ProcessingEvent
 
-export type ImageUrl = {
-  url: string
-}
-export type MessageContent = {
-  type: string
-  image_url: ImageUrl
-}
+const TextContentPartSchema = z.object({
+  type: z.literal('text'),
+  text: z.string(),
+})
+const ImageContentPartSchema = z.object({
+  type: z.literal('image_url'),
+  image_url: z.object({
+    url: z.string(),
+  }),
+})
+const MessageContentSchema = z.discriminatedUnion('type', [TextContentPartSchema, ImageContentPartSchema])
+
+export type MessageContent = z.Infer<typeof MessageContentSchema>
 
 export type SystemMessage = {
   role: 'system'
@@ -68,12 +74,20 @@ export type UserMessage = {
   fileContent?: string
 }
 
-export const readMessageContent = (msg: UserMessage | AssistantMessage): string => {
-  if (Array.isArray(msg.content)) {
-    return 'this is an image, image rendering not supported yet'
-  } else {
-    return msg.content.toString()
-  }
+export const readMessageContent = (msg: Pick<Message, 'content'>): string => {
+  if (!Array.isArray(msg.content)) return msg.content
+  return msg.content
+    .filter((part) => part.type === 'text')
+    .map((part) => part.text)
+    .join('\n')
+}
+
+/**
+ * Returns the image urls (data urls base64) of a message
+ */
+export const readMessageImages = (msg: Pick<Message, 'content'>): string[] => {
+  if (!Array.isArray(msg.content)) return []
+  return msg.content.filter((part) => part.type === 'image_url').map((part) => part.image_url.url)
 }
 
 export type AssistantMessage = {
@@ -106,13 +120,6 @@ export const MessageGenerationInfoSchema = z.object({
 })
 
 export type MessageGenerationInfo = z.Infer<typeof MessageGenerationInfoSchema>
-
-const MessageContentSchema = z.object({
-  type: z.string(),
-  image_url: z.object({
-    url: z.string(),
-  }),
-})
 
 export const MessageContentArraySchema = z.union([z.string(), z.array(MessageContentSchema)])
 

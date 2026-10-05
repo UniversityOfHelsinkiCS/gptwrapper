@@ -12,7 +12,6 @@ import {
   FREE_MODEL,
   ValidModelNameSchema,
   getModelConfig,
-  imageFileTypes,
 } from '../../../config'
 import type { ChatMessage, MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
@@ -184,12 +183,12 @@ const ChatV2Content = () => {
       try {
         const fileContent = await parseFileContent(file)
 
-        // For images, replace the content with image array (images are shown differently)
-        if (imageFileTypes.includes(file.type)) {
-          messageContent = fileContent as MessageContent[]
-        } else {
+        if (typeof fileContent === 'string') {
           // For text/PDF files, keep content separate and don't append to message
-          parsedFileContent = fileContent as string
+          parsedFileContent = fileContent
+        } else {
+          // For images, send the prompt text and the image together as multimodal content
+          messageContent = message.trim() ? [{ type: 'text', text: message }, ...fileContent] : fileContent
         }
 
         // Still send file to server for validation purposes

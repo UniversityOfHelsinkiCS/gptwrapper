@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next'
 import { useTheme } from '@mui/material'
 import {
   readMessageContent,
+  readMessageImages,
   type AssistantMessage,
   type ChatMessage,
   type MessageGenerationInfo,
@@ -47,6 +48,16 @@ const UserMessageItem = ({ message }: { message: UserMessage }) => (
     }}
   >
     {readMessageContent(message)}
+
+    {readMessageImages(message).map((url, idx) => (
+      <Box
+        key={idx}
+        component="img"
+        src={url}
+        alt={message.attachments ?? ''}
+        sx={{ display: 'block', maxWidth: '12rem', maxHeight: '12rem', borderRadius: '0.5rem', marginTop: '1rem', objectFit: 'contain' }}
+      />
+    ))}
 
     {message.attachments && (
       <Typography

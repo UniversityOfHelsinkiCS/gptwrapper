@@ -5,7 +5,7 @@ import type { User as UserType } from '../../../shared/user'
 import { ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../../db/models'
 import logger from '../../util/logger'
 import { ApplicationError } from '../../util/ApplicationError'
-import type { Message } from '../../../shared/chat'
+import { readMessageContent, type Message } from '../../../shared/chat'
 import { checkIamAccess } from '../../util/iams'
 import { chatIsActive } from './activity'
 import { CourseUsage } from '@shared/types'
@@ -84,11 +84,7 @@ export const checkCourseUsage = (user: UserType, chatInstance: ChatInstance, tok
 export const calculateUsage = (messages: Message[], encoding: Tiktoken): number => {
   let tokenCount = 0
   messages.forEach((message) => {
-    let content: string = ''
-    if (typeof message.content === 'string') {
-      content = message.content
-    }
-    const encoded = encoding.encode(content)
+    const encoded = encoding.encode(readMessageContent(message))
     tokenCount += encoded.length
   })
 

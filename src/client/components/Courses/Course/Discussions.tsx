@@ -9,6 +9,7 @@ import useCurrentUser from '../../../hooks/useCurrentUser'
 import useCourse, { useCourseDiscussers, useCourseDiscussion } from '../../../hooks/useCourse'
 import { BlueButton } from '../../ChatV2/general/Buttons'
 import type { Discussion } from '../../../../shared/types'
+import { readMessageContent, readMessageImages } from '../../../../shared/chat'
 
 const getChatMessages = (discussion: Discussion) => {
   return discussion.metadata?.chatMessages ?? (discussion.metadata as any)?.messages ?? []
@@ -145,7 +146,16 @@ const DiscussionDetail: React.FC<{ courseId?: string; userId: string; onBack: ()
                         whiteSpace: 'pre-wrap',
                       }}
                     >
-                      <Typography variant="body2">{typeof msg.content === 'string' ? msg.content : '[image]'}</Typography>
+                      <Typography variant="body2">{readMessageContent(msg)}</Typography>
+                      {readMessageImages(msg).map((url, imgIdx) => (
+                        <Box
+                          key={imgIdx}
+                          component="img"
+                          src={url}
+                          alt="[image]"
+                          sx={{ display: 'block', maxWidth: '12rem', maxHeight: '12rem', borderRadius: '0.5rem', marginTop: '1rem', objectFit: 'contain' }}
+                        />
+                      ))}
                     </Box>
                   ) : (
                     <Box
@@ -161,7 +171,7 @@ const DiscussionDetail: React.FC<{ courseId?: string; userId: string; onBack: ()
                         '& table': { display: 'block', width: '100%', overflowX: 'auto' },
                       }}
                     >
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{typeof msg.content === 'string' ? msg.content : ''}</ReactMarkdown>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{readMessageContent(msg)}</ReactMarkdown>
                     </Box>
                   ),
                 )}
