@@ -128,9 +128,21 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
 
+  vectordb:
+    image: docker.io/pgvector/pgvector:pg18-trixie
+    environment:
+      - POSTGRES_DB=rag
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5434:5432'
+    volumes:
+      - pgvector_data:/data
+    container_name: gptwrapper_vectordb
+
 volumes:
   pg_data:
   redis_data:
   ollama_data:
   dalai_data:
   minio-data:
+  pgvector_data:
