@@ -78,7 +78,7 @@ const UserMessageItem = ({ message }: { message: UserMessage }) => (
 )
 
 const ToolResult = ({ toolResult, handleToolResult }: { toolResult: ToolCallResultEvent; handleToolResult: (toolResult: ToolCallResultEvent) => void }) => {
-  const sources = useMemo(() => Array.from(new Set<string>(toolResult.result.files.map((file) => file.fileName)).values()).join(', '), [])
+  const sources = useMemo(() => Array.from(new Set<string>((toolResult.result?.files ?? []).map((file) => file.fileName)).values()).join(', '), [])
   return (
     <Box
       data-testid="file-search-sources"

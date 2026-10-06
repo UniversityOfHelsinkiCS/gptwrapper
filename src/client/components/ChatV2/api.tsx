@@ -236,7 +236,7 @@ const downloadDiscussionAsText = async (messages: ChatMessage[], t: TFunction) =
         if (toolCallEntries.length > 0) {
           toolCallEntries.forEach(([, toolCall]) => {
             if (toolCall.result && toolCall.input) {
-              const filenames = toolCall.result.files.map((f) => f.fileName).join(', ')
+              const filenames = (toolCall.result.files ?? []).map((f) => f.fileName).join(', ')
               textLines.push(`[Sources: ${filenames} - Query: "${toolCall.input.query}"]`)
             }
           })
@@ -421,7 +421,7 @@ const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) =
         if (toolCallEntries.length > 0) {
           toolCallEntries.forEach(([, toolCall]) => {
             if (toolCall.result && toolCall.input) {
-              const filenames = toolCall.result.files.map((f) => f.fileName).join(', ')
+              const filenames = (toolCall.result.files ?? []).map((f) => f.fileName).join(', ')
               children.push(
                 new Paragraph({
                   children: [
@@ -619,7 +619,7 @@ const downloadDiscussionAsPdf = async (messages: ChatMessage[], t: TFunction) =>
           
           toolCallEntries.forEach(([, toolCall]) => {
             if (toolCall.result && toolCall.input) {
-              const filenames = toolCall.result.files.map((f) => f.fileName).join(', ')
+              const filenames = (toolCall.result.files ?? []).map((f) => f.fileName).join(', ')
               const sourceLine = `[Sources: ${filenames} - Query: "${toolCall.input.query}"]`
               const sourceLines = doc.splitTextToSize(sourceLine, maxWidth)
               sourceLines.forEach((line: string) => {
@@ -691,7 +691,7 @@ const formatMessagesAsText = (messages: ChatMessage[], t: TFunction): string => 
             const sources = toolCallEntries
               .map(([, toolCall]) => {
                 if (toolCall.result && toolCall.input) {
-                  const filenames = toolCall.result.files.map(f => f.fileName).join(', ')
+                  const filenames = (toolCall.result.files ?? []).map(f => f.fileName).join(', ')
                   return `[Sources: ${filenames} - Query: "${toolCall.input.query}"]`
                 }
                 return null
