@@ -48,6 +48,7 @@ export default function GlobalMenu({
     setAnchorEl(null)
   }
   const handleLanguageChange = (newLanguage: keyof Locale) => {
+    if (i18n.language === newLanguage) return
     i18n.changeLanguage(newLanguage)
     localStorage.setItem('lang', newLanguage)
   }
@@ -56,6 +57,11 @@ export default function GlobalMenu({
     fontWeight: i18n.language === lang ? 'bold' : 'normal',
     textDecoration: i18n.language === lang ? 'underline' : 'none',
   })
+
+  const languageAriaLabel = (lang: string) => {
+    const label = t(`accessibility:languageMenu:${lang}`)
+    return i18n.language === lang ? `${label}, ${t('common:selected')}` : label
+  }
 
   return (
     <div style={{ position: 'fixed', top: isMobile ? 10 : 20, right: isMobile ? 15 : 20 }}>
@@ -196,7 +202,7 @@ export default function GlobalMenu({
           <LanguageIcon fontSize="small" />
         </ListItemIcon>
         <MenuItem
-          aria-label={t(`accessibility:languageMenu:${'fi'}`)}
+          aria-label={languageAriaLabel('fi')}
           onClick={() => handleLanguageChange('fi')}
           sx={{ ...languageButtonSx('fi'), ml: 1, display: 'inline-flex', verticalAlign: 'middle', fontSize: 'small' }}
         >
@@ -204,7 +210,7 @@ export default function GlobalMenu({
         </MenuItem>
         <Divider orientation="vertical" flexItem sx={{ display: 'inline-flex', verticalAlign: 'middle' }} />
         <MenuItem
-          aria-label={t(`accessibility:languageMenu:${'en'}`)}
+          aria-label={languageAriaLabel('en')}
           onClick={() => handleLanguageChange('en')}
           sx={{ ...languageButtonSx('en'), display: 'inline-flex', verticalAlign: 'middle', fontSize: 'small' }}
         >
@@ -212,7 +218,7 @@ export default function GlobalMenu({
         </MenuItem>
         <Divider orientation="vertical" flexItem sx={{ display: 'inline-flex', verticalAlign: 'middle' }} />
         <MenuItem
-          aria-label={t(`accessibility:languageMenu:${'sv'}`)}
+          aria-label={languageAriaLabel('sv')}
           onClick={() => handleLanguageChange('sv')}
           sx={{ ...languageButtonSx('sv'), mr: 1.5, display: 'inline-flex', verticalAlign: 'middle', fontSize: 'small' }}
         >
