@@ -1,6 +1,6 @@
 import { Box, IconButton, Tooltip, Typography, Divider } from '@mui/material'
 import type { ReactNode } from 'react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import type { User } from '../../types'
@@ -12,6 +12,7 @@ import { getLanguageValue } from '@shared/utils'
 import { usePromptState } from './PromptState'
 import useCourse from '../../hooks/useCourse'
 import { consumePendingFocusTarget, requestFocusAfterNavigate } from '../../util/accessibility'
+import { StatusAnnouncer } from '../common/StatusAnnouncer'
 
 const SectionLabel = ({ children }: { children: ReactNode }) => (
   <Typography
@@ -275,9 +276,15 @@ export default function ChatConsole({ user }: { user?: User | null }) {
   const promptsPath = `/${courseId ?? 'general'}/prompts`
   const courseLabel = isCourseChat ? (course ? getLanguageValue(course.name, i18n.language) : '') : undefined
 
+  const [promptClearedAnnouncement, setPromptClearedAnnouncement] = useState('')
+
   useEffect(() => {
     consumePendingFocusTarget()
   }, [location.pathname, activePrompt])
+
+  useEffect(() => {
+    if (activePrompt) setPromptClearedAnnouncement('')
+  }, [activePrompt])
 
   return (
     <Box sx={{ pb: 1 }}>
@@ -315,6 +322,7 @@ export default function ChatConsole({ user }: { user?: User | null }) {
               ? () => {
                   requestFocusAfterNavigate('chat-input')
                   handleChangePrompt(undefined)
+                  setPromptClearedAnnouncement(t('accessibility:promptCleared'))
                   navigate('/general')
                 }
               : undefined
@@ -322,6 +330,7 @@ export default function ChatConsole({ user }: { user?: User | null }) {
           clearTooltip={t('sidebar:promptNone')}
           contextCardId="prompt-context"
         />
+        <StatusAnnouncer message={promptClearedAnnouncement} />
       </Box>
     </Box>
   )

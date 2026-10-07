@@ -59,7 +59,7 @@ const ChatV2Content = () => {
   const chatScroll = useChatScroll()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { t, i18n } = useTranslation()
-  const { activePrompt, promptInfo, isPromptHidden } = usePromptState()
+  const { promptInfo, isPromptHidden } = usePromptState()
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
   const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo, hasPotentialError } = useChatStream({
     onComplete: ({ message }) => {
@@ -599,7 +599,6 @@ const ChatV2Content = () => {
             <ChatBox
               disabled={isStreaming}
               chatInstance={chatInstance}
-              prompt={activePrompt}
               fileInputRef={fileInputRef}
               fileName={fileName}
               setFileName={setFileName}

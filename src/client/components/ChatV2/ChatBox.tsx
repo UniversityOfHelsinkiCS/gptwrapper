@@ -18,7 +18,7 @@ import { WarningType } from '@shared/aiApi'
 import ModelSelector from './ModelSelector'
 import UsageSelector from './UsageSelector'
 import { DEFAULT_TOKEN_LIMIT, ValidModelName } from '../../../config'
-import { Course, Prompt } from 'src/client/types'
+import { Course } from 'src/client/types'
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat'
 import { StatusAnnouncer } from '../common/StatusAnnouncer'
 
@@ -66,7 +66,6 @@ export const ChatBox = ({
   setModel,
   isNewResponseAvailable,
   onGoToLatestResponse,
-  prompt,
 }: {
   disabled: boolean
   chatInstance?: Course
@@ -84,7 +83,6 @@ export const ChatBox = ({
   setModel: (model: ValidModelName) => void
   isNewResponseAvailable: boolean
   onGoToLatestResponse: () => void
-  prompt?: Prompt | null
 }) => {
   const { courseId } = useParams()
   const isEmbedded = useIsEmbedded()
@@ -104,8 +102,6 @@ export const ChatBox = ({
   const acuallyDisabled = disabled || message.length === 0
 
   const { t } = useTranslation()
-
-  const promptName = prompt?.name
 
   useKeyboardCommands({
     resetChat: handleReset,
@@ -260,7 +256,6 @@ export const ChatBox = ({
           }}
         >
           <Box>
-            <StatusAnnouncer message={!promptName ? t('accessibility:promptCleared') : ''} />
             <StatusAnnouncer message={fileAnnouncement} />
             <TextField
               autoFocus={!isEmbedded}
