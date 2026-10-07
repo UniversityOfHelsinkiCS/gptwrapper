@@ -65,6 +65,7 @@ export const DisclaimerModal = ({ disclaimerStatus, setDisclaimerStatus }: { dis
       >
         <IconButton
           id="close-disclaimer"
+          aria-label={t('common:close')}
           onClick={() => closeAccepted()}
           sx={{
             position: 'absolute',

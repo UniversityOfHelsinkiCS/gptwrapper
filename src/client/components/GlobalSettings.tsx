@@ -13,12 +13,7 @@ import { NewConversationConfirmConfigurator } from './Settings/NewConversationCo
 import { CollapsedSidebarConfigurator } from './Settings/CollapsedSidebarConfigurator'
 import { DarkModeConfigurator } from './Settings/DarkModeConfigurator'
 
-export const GlobalSettings = ({
-  open, setOpen
-}: {
-  open: boolean
-  setOpen: (open: boolean) => void
-}) => {
+export const GlobalSettings = ({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) => {
   const { user, isLoading } = useCurrentUser()
   const preferenceUpdate = usePreferencesUpdateMutation()
 
@@ -59,54 +54,59 @@ export const GlobalSettings = ({
 
   return (
     <Dialog fullWidth open={open} onClose={() => setOpen(false)}>
-      <DialogTitle>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {t('globalSettings:title')}
-          <IconButton
-            data-testid="close-global-settings"
-            onClick={() => setOpen(false)}
-          >
-            <Close />
-          </IconButton>
-        </Box>
-      </DialogTitle>
+      <DialogTitle sx={{ py: 2.5, pr: 10 }}>{t('globalSettings:title')}</DialogTitle>
+      <IconButton
+        data-testid="close-global-settings"
+        onClick={() => setOpen(false)}
+        aria-label={t('common:close')}
+        sx={{ position: 'absolute', top: 16, right: 24 }}
+      >
+        <Close />
+      </IconButton>
       <Divider />
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <FormControl sx={{ display: 'flex', flexDirection: 'column', gap: 5, p: { xs: 1, md: 3 } }}>
             <Box>
-              <Typography fontWeight='bold' mb={1}>{t('settings:newConversation')}</Typography>
+              <Typography fontWeight="bold" mb={1}>
+                {t('settings:newConversation')}
+              </Typography>
               <NewConversationConfirmConfigurator
                 label={t('settings:newConversationToggle')}
                 value={skipNewConversationConfirm!}
                 setValue={setSkipNewConversationConfirm}
-                context='settings' />
+                context="settings"
+              />
             </Box>
 
             <Divider />
 
             <Box>
-              <Typography fontWeight='bold' mb={1}>{t('settings:sidebar')}</Typography>
-              <CollapsedSidebarConfigurator
-                label={t('settings:sidebarSettings')}
-                value={collapsedSidebarDefault!}
-                setValue={setCollapsedSidebarDefault} />
+              <Typography fontWeight="bold" mb={1}>
+                {t('settings:sidebar')}
+              </Typography>
+              <CollapsedSidebarConfigurator label={t('settings:sidebarSettings')} value={collapsedSidebarDefault!} setValue={setCollapsedSidebarDefault} />
             </Box>
 
             <Divider />
 
             <Box>
-              <Typography fontWeight='bold' mb={1}>{t('settings:appearance')}</Typography>
+              <Typography fontWeight="bold" mb={1}>
+                {t('settings:appearance')}
+              </Typography>
               <DarkModeConfigurator label={t('settings:darkModeToggle')} />
             </Box>
 
             <Divider />
 
             <Box>
-              <Typography fontWeight='bold' mb={1}>{t('settings:sendMode')}</Typography>
+              <Typography fontWeight="bold" mb={1}>
+                {t('settings:sendMode')}
+              </Typography>
               <SendPreferenceConfigurator
                 value={sendShortcutMode!}
-                onChange={(event) => setSendShortcutMode(event.target.value as UserPreferences['sendShortcutMode'])} />
+                onChange={(event) => setSendShortcutMode(event.target.value as UserPreferences['sendShortcutMode'])}
+              />
             </Box>
           </FormControl>
 
