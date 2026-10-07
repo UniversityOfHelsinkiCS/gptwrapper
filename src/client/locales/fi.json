@@ -882,6 +882,9 @@
     "fileRemoved": "Tiedosto poistettu",
     "closeNotification": "Sulje ilmoitus",
     "unseenReleasesOne": "{{count}} uusi muutos",
-    "unseenReleases": "{{count}} uutta muutosta"
+    "unseenReleases": "{{count}} uutta muutosta",
+    "userMessageHeading": "Sinun viestisi",
+    "responseHeading": "Vastaus",
+    "sourceResults": "Hakutulokset lähdemateriaaleista"
   }
 }

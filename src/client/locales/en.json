@@ -881,6 +881,9 @@
     "fileRemoved": "File removed",
     "closeNotification": "Close notification",
     "unseenReleasesOne": "{{count}} new change",
-    "unseenReleases": "{{count}} new changes"
+    "unseenReleases": "{{count}} new changes",
+    "userMessageHeading": "Your message",
+    "responseHeading": "Response",
+    "sourceResults": "Search results from source materials"
   }
 }

@@ -856,6 +856,9 @@
     "fileRemoved": "Filen har tagits bort",
     "closeNotification": "Stäng avisering",
     "unseenReleasesOne": "{{count}} ny ändring",
-    "unseenReleases": "{{count}} nya ändringar"
+    "unseenReleases": "{{count}} nya ändringar",
+    "userMessageHeading": "Ditt meddelande",
+    "responseHeading": "Svar",
+    "sourceResults": "Sökresultat från källmaterialen"
   }
 }

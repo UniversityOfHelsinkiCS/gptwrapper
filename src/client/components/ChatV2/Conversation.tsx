@@ -31,6 +31,7 @@ import CopyToClipboardButton from './CopyToClipboardButton'
 import { StreamStatusAnnouncer } from '../common/StatusAnnouncer'
 import { BlueButton, OutlineButtonBlack } from './general/Buttons'
 import { focusIndicatorStyle } from 'src/client/util/accessibility'
+import { visuallyHidden } from '@mui/utils'
 
 const UserMessageItem = ({ message }: { message: UserMessage }) => (
   <Box
@@ -106,6 +107,9 @@ const ToolResult = ({ toolResult, handleToolResult }: { toolResult: ToolCallResu
             flexDirection: 'column',
           }}
         >
+          <Typography component="h3" sx={visuallyHidden}>
+            {t('accessibility:sourceResults')}
+          </Typography>
           <Typography
             variant="body2"
             sx={{
@@ -129,7 +133,13 @@ const ToolResult = ({ toolResult, handleToolResult }: { toolResult: ToolCallResu
 
 const AssistantMessageInfo = ({ message }: { message: AssistantMessage }) => {
   const { t } = useTranslation()
-  if (!message.generationInfo) return null
+  if (!message.generationInfo) {
+    return (
+      <Typography component="h2" sx={visuallyHidden}>
+        {t('accessibility:responseHeading')}
+      </Typography>
+    )
+  }
 
   const title =
     message.generationInfo.promptInfo.type === 'saved'
@@ -138,6 +148,9 @@ const AssistantMessageInfo = ({ message }: { message: AssistantMessage }) => {
 
   return (
     <Box sx={{ display: 'flex', opacity: 0.7, alignItems: 'center' }}>
+      <Typography component="h2" sx={visuallyHidden}>
+        {t('accessibility:responseHeading')}
+      </Typography>
       <ArrowRight fontSize="small" />
       <Typography aria-label={message.generationInfo.promptInfo.type === 'saved' ? t('common:promptAndModel') : t('status:modelInUse')} fontSize="small">
         {title}
@@ -356,6 +369,7 @@ export const MessageItem = ({
   isLatestResponse?: boolean
   latestResponseRef?: React.Ref<HTMLDivElement>
 }) => {
+  const { t } = useTranslation()
   if (message.role === 'assistant') {
     return (
       <Box
@@ -377,6 +391,9 @@ export const MessageItem = ({
   } else {
     return (
       <Box data-sentry-mask data-testid="user-message" sx={{ alignSelf: 'flex-end' }}>
+        <Typography component="h2" sx={visuallyHidden}>
+          {t('accessibility:userMessageHeading')}
+        </Typography>
         <UserMessageItem message={message} />
       </Box>
     )
