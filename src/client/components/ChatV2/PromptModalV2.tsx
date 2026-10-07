@@ -1,6 +1,7 @@
 import {
   Box,
   Divider,
+  List,
   ListItemButton,
   ListItemText,
   Typography,
@@ -75,8 +76,10 @@ export const PromptListItem = ({
   const { t } = useTranslation()
   return (
     <Box
+      component="li"
       sx={{
         position: 'relative',
+        listStyle: 'none',
         borderRadius: '8px',
         mb: 0.5,
         height: '50px',
@@ -109,7 +112,6 @@ export const PromptListItem = ({
       <ListItemButton
         className={prompt.id !== activePromptId ? 'prompt-list-item__button' : undefined}
         selected={previewPromptId === prompt.id}
-        aria-selected={prompt.id === activePromptId}
         aria-pressed={previewPromptId === prompt.id}
         aria-label={[t('common:prompt'), prompt.name, prompt.id === activePromptId && t('common:selected'), t('common:preview')].filter(Boolean).join(', ')}
         onClick={() => {
@@ -399,7 +401,10 @@ const PromptModalV2 = () => {
                 <ListItemIcon sx={{ minWidth: 40 }}>
                   <PersonIcon color="primary" />
                 </ListItemIcon>
-                <ListItemText primary={t('settings:myPrompts')} slotProps={{ primary: { variant: 'subtitle1', component: 'h3', fontWeight: 600 } }} />
+                <ListItemText
+                  primary={t('settings:myPrompts')}
+                  slotProps={{ primary: { id: 'my-prompts-heading', variant: 'subtitle1', component: 'h3', fontWeight: 600 } }}
+                />
               </ListItemButton>
               <StatusAnnouncer message={showMyPrompts ? t('accessibility:promptListOpened', { name: t('settings:myPrompts') }) : ''} />
 
@@ -434,8 +439,8 @@ const PromptModalV2 = () => {
             </Box>
             {/* My prompts list */}
             {showMyPrompts && sortedMyPrompts.length > 0 ? (
-              sortedMyPrompts.map((p) => (
-                <Box key={p.id} sx={{ ml: 4 }}>
+              <List sx={{ py: 0, ml: 4 }} aria-labelledby="my-prompts-heading">
+                {sortedMyPrompts.map((p) => (
                   <PromptListItem
                     key={p.id}
                     prompt={p}
@@ -455,8 +460,8 @@ const PromptModalV2 = () => {
                       navigate(`/general`)
                     }}
                   />
-                </Box>
-              ))
+                ))}
+              </List>
             ) : showMyPrompts && !sortedMyPrompts.length ? (
               <Box sx={{ ml: 6, mt: 1 }}>
                 <Typography variant="body2" color="text.secondary">

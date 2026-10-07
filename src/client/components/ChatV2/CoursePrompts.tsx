@@ -159,6 +159,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
               secondary={showActivityPeriod ? formatDate(course.activityPeriod) : undefined}
               slotProps={{
                 primary: {
+                  id: `course-heading-${course.id}`,
                   variant: 'subtitle1',
                   component: 'h4',
                   fontWeight: 600,
@@ -195,7 +196,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
         </Box>
         {showPrompts && sortedPrompts.length > 0 && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2.5, mb: 1 }}>
-            <List sx={{ py: 0 }}>
+            <List sx={{ py: 0 }} aria-labelledby={`course-heading-${course.id}`}>
               {sortedPrompts.map((prompt) => (
                 <PromptListItem
                   key={prompt.id}
