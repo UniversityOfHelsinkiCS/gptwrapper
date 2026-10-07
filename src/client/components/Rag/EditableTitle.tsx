@@ -3,7 +3,7 @@ import { Box, CircularProgress, IconButton, TextField, Tooltip, Typography } fro
 import type { RagIndexAttributes } from '@shared/types'
 import { useState, useEffect } from 'react'
 import { useUpdateRagIndexMutation } from './api'
-import { useSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../common/Snackbar'
 import { useTranslation } from 'react-i18next'
 
 export const EditableTitle = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
@@ -15,7 +15,6 @@ export const EditableTitle = ({ ragIndex }: { ragIndex: RagIndexAttributes }) =>
     setTitle(ragIndex?.metadata?.name || '')
     setIsEditing(false)
   }, [ragIndex.id])
-  const { enqueueSnackbar } = useSnackbar()
   const { t } = useTranslation()
 
   const handleSave = async () => {

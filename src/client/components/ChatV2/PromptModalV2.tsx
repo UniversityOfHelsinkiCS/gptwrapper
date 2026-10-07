@@ -13,7 +13,7 @@ import {
   Popover,
   FormControlLabel,
 } from '@mui/material'
-import { enqueueSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../common/Snackbar'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'

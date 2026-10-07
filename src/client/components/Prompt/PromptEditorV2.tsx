@@ -1,7 +1,7 @@
 import { Box, CircularProgress, DialogActions } from '@mui/material'
 import type { Message } from '@shared/chat'
 import { isPromptTextTooLong, PROMPT_TEXT_MAX_LENGTH } from '@shared/prompt'
-import { enqueueSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../common/Snackbar'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import useCourse from '../../hooks/useCourse'
@@ -152,7 +152,7 @@ export const PromptEditorV2 = ({
         onDone(newPrompt ?? undefined)
       }
     } catch (error: any) {
-      enqueueSnackbar(getApiErrorMessage(error), { variant: 'error' })
+      enqueueSnackbar(getApiErrorMessage(error) ?? t('error:unexpected'), { variant: 'error' })
     } finally {
       setLoading(false)
     }

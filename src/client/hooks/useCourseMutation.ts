@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
-import { enqueueSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../components/common/Snackbar'
 
 import type { ActivityPeriod } from '../types'
 import queryClient from '../util/queryClient'

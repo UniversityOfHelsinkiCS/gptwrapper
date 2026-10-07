@@ -1,5 +1,5 @@
 import { Box, Button } from '@mui/material'
-import { enqueueSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../common/Snackbar'
 import { useTranslation } from 'react-i18next'
 import { updaterApiClient } from '../../util/apiClient'
 

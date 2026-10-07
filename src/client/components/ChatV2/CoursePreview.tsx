@@ -21,7 +21,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import { enqueueSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../common/Snackbar'
 import SchoolIcon from '@mui/icons-material/School'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import ForumIcon from '@mui/icons-material/Forum'

@@ -1,6 +1,6 @@
 import { Box, Drawer, Paper, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { MapsUgc } from '@mui/icons-material'
-import { enqueueSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../common/Snackbar'
 import { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom'

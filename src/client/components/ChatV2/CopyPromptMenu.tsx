@@ -1,7 +1,7 @@
 import PersonIcon from '@mui/icons-material/Person'
 import { Box, Divider, InputAdornment, ListItemIcon, ListItemText, ListSubheader, Menu, MenuItem, TextField, Typography } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
-import { enqueueSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../common/Snackbar'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -71,7 +71,7 @@ const CopyPromptMenu = ({
 
       onCopied(course)
     } catch (error) {
-      enqueueSnackbar(getApiErrorMessage(error, t('prompt:copyPromptFailed')), { variant: 'error' })
+      enqueueSnackbar(getApiErrorMessage(error) ?? t('prompt:copyPromptFailed'), { variant: 'error' })
     }
   }
 

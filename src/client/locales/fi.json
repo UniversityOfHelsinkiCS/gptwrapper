@@ -851,6 +851,10 @@
     "galleryEmpty": "Yliopiston alustuksia ei ole vielä julkaistu"
   },
   "accessibility": {
+    "errorNotification": "Virhe",
+    "warningNotification": "Varoitus",
+    "notificationRegion_one": "Ilmoitukset, {{count}} ilmoitus",
+    "notificationRegion_other": "Ilmoitukset, {{count}} ilmoitusta",
     "notificationCount": "{{count}} ilmoitusta",
     "previewOpened": "Esikatselu avattu: {{name}}",
     "goToLatestResponse": "Siirry uusimpaan vastaukseen",

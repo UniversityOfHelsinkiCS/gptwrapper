@@ -6,7 +6,7 @@ import ArrowUpward from '@mui/icons-material/ArrowUpward'
 import KeyboardReturn from '@mui/icons-material/KeyboardReturn'
 import { usePreferencesUpdateMutation } from '../../hooks/usePreferencesUpdateMutation'
 import { UserPreferences } from '../../../shared/user'
-import { useSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../common/Snackbar'
 import { useState } from 'react'
 import { optionFocusIndicatorStyle } from 'src/client/util/accessibility'
 
@@ -85,7 +85,6 @@ export const SendPreferenceConfigurator = ({
 export const SendPreferenceConfiguratorModal = ({ open, onClose, anchorEl, context }) => {
   const { user } = useCurrentUser()
   const preferenceUpdate = usePreferencesUpdateMutation()
-  const { enqueueSnackbar } = useSnackbar()
   const { t } = useTranslation()
 
   const defaultValue = user?.preferences?.sendShortcutMode || 'shift+enter'

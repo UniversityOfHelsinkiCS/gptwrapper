@@ -1,6 +1,6 @@
 import { Checkbox, FormControlLabel, Switch } from '@mui/material'
 import { User } from '@shared/user'
-import { useSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../common/Snackbar'
 import { useTranslation } from 'react-i18next'
 import { usePreferencesUpdateMutation } from '../../hooks/usePreferencesUpdateMutation'
 import queryClient from '../../util/queryClient'
@@ -9,7 +9,6 @@ import { focusIndicatorStyle, switchFocusIndicatorStyle } from 'src/client/util/
 
 export const useNewConversationConfirmMutation = (context: 'chat' | 'settings') => {
   const preferenceUpdate = usePreferencesUpdateMutation()
-  const { enqueueSnackbar } = useSnackbar()
   const { t } = useTranslation()
 
   const mutation = useCallback(async (value: boolean) => {

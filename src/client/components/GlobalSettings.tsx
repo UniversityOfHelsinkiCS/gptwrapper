@@ -5,7 +5,7 @@ import { BlueButton } from './ChatV2/general/Buttons'
 import { usePreferencesUpdateMutation } from '../hooks/usePreferencesUpdateMutation'
 import useCurrentUser from '../hooks/useCurrentUser'
 import { UserPreferences } from '../../shared/user'
-import { useSnackbar } from 'notistack'
+import { enqueueSnackbar } from './common/Snackbar'
 import { useEffect, useState } from 'react'
 
 import { SendPreferenceConfigurator } from './Settings/SendPreferenceConfigurator'
@@ -17,7 +17,6 @@ export const GlobalSettings = ({ open, setOpen }: { open: boolean; setOpen: (ope
   const { user, isLoading } = useCurrentUser()
   const preferenceUpdate = usePreferencesUpdateMutation()
 
-  const { enqueueSnackbar } = useSnackbar()
   const { t } = useTranslation()
 
   const [sendShortcutMode, setSendShortcutMode] = useState<UserPreferences['sendShortcutMode']>('shift+enter')

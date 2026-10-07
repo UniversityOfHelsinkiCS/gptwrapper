@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Menu, MenuItem, Tooltip } from '@mui/material'
 import DownloadIcon from '@mui/icons-material/Download'
-import { enqueueSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../common/Snackbar'
 import { useTranslation } from 'react-i18next'
 import type { ChatMessage } from '../../../shared/chat'
 import { TextButton } from './general/Buttons'

@@ -6,7 +6,7 @@ import { Box, Button, Typography } from '@mui/material'
 import { useDeleteRagFileMutation } from './api'
 import { useTranslation } from 'react-i18next'
 import Markdown from 'react-markdown'
-import { enqueueSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../common/Snackbar'
 import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import { ArrowBack } from '@mui/icons-material'
 

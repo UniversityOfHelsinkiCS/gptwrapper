@@ -5,7 +5,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import apiClient from '../util/apiClient'
 import { addJustInTimeFields, useAnalytics } from '../stores/analytics'
 import type { FeedbackPost } from '../../shared/feedback'
-import { useSnackbar } from 'notistack'
+import { enqueueSnackbar } from './common/Snackbar'
 import { BlueButton, OutlineButtonBlack } from './ChatV2/general/Buttons'
 import { supportEmail } from '@config'
 import { focusIndicatorStyle } from '../util/accessibility'
@@ -32,7 +32,6 @@ export const Feedback: React.FC<{
   onClose: () => void
 }> = ({ open, onClose }) => {
   const { t } = useTranslation()
-  const { enqueueSnackbar } = useSnackbar()
   const [feedback, setFeedback] = useState('')
   const [responseWanted, setResponseWanted] = useState(false)
 

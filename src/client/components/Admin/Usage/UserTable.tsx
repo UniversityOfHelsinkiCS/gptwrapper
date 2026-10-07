@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Table, TableContainer, TableBody, TableCell, TableHead, TableRow, Paper, Typography, Box, Button, TextField } from '@mui/material'
-import { enqueueSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../../common/Snackbar'
 import { useTranslation } from 'react-i18next'
 
 import { debounce } from 'lodash'

@@ -1,5 +1,5 @@
 import { t } from 'i18next'
-import { enqueueSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../common/Snackbar'
 
 /**
  * Handle error messages related to completion stream creation

@@ -850,6 +850,10 @@
     "galleryEmpty": "No university prompts have been published yet"
   },
   "accessibility": {
+    "errorNotification": "Error",
+    "warningNotification": "Warning",
+    "notificationRegion_one": "Notifications, {{count}} notification",
+    "notificationRegion_other": "Notifications, {{count}} notifications",
     "notificationCount": "{{count}} notifications",
     "previewOpened": "Preview opened: {{name}}",
     "goToLatestResponse": "Go to latest response",

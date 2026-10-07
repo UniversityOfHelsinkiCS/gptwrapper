@@ -160,6 +160,18 @@
     "valid-typeof": "error",
     "no-array-constructor": "error",
     "no-unused-expressions": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "notistack",
+            "importNames": ["enqueueSnackbar", "useSnackbar"],
+            "message": "Use enqueueSnackbar from components/common/Snackbar instead."
+          }
+        ]
+      }
+    ],
     "i18next/no-literal-string": "error",
     "typescript/no-duplicate-enum-values": "error",
     "typescript/no-empty-object-type": "error",
@@ -206,6 +218,14 @@
         "prefer-const": "error",
         "prefer-rest-params": "error",
         "prefer-spread": "error"
+      }
+    },
+    {
+      "files": [
+        "src/client/components/common/Snackbar.tsx"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
       }
     }
   ]

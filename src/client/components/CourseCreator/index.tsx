@@ -19,7 +19,7 @@ import {
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate } from 'react-router-dom'
-import { useSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../common/Snackbar'
 import { Link as RouterLink } from 'react-router-dom'
 
 import useCurrentUser from '../../hooks/useCurrentUser'
@@ -45,7 +45,6 @@ const queryKey = ['courseCreatorChatInstances']
  */
 export function Component() {
   const { t, i18n } = useTranslation()
-  const { enqueueSnackbar } = useSnackbar()
   const { user, isLoading: isUserLoading } = useCurrentUser()
   const [name, setName] = useState<Locale>({ fi: '', sv: '', en: '' })
   const [description, setDescription] = useState('')

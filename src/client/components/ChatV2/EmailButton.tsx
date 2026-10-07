@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Tooltip } from '@mui/material'
 import EmailIcon from '@mui/icons-material/Email'
-import { enqueueSnackbar } from 'notistack'
+import { enqueueSnackbar } from '../common/Snackbar'
 import { useTranslation } from 'react-i18next'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { ChatMessage } from '../../../shared/chat'
