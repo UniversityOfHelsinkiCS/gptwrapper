@@ -122,7 +122,7 @@ const ModelSelector = ({
           },
         }}
       >
-        <ListSubheader sx={{ display: 'block', fontSize: '0.725rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled' }}>
+        <ListSubheader sx={{ display: 'block', fontSize: '0.725rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.secondary' }}>
           {t('sidebar:modelTitle')}
         </ListSubheader>
 

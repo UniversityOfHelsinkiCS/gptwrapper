@@ -180,7 +180,7 @@ const UsageSelector = () => {
           <Typography
             id="usage-selector-title"
             component="span"
-            sx={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled', py: 1 }}
+            sx={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.secondary', py: 1 }}
           >
             {t('status:usageTitle')}
           </Typography>
