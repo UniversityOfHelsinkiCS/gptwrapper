@@ -85,7 +85,7 @@ const CopyPromptMenu = ({
       slotProps={{ list: { 'aria-labelledby': 'copy-prompt-to-header', sx: { pt: 0, minWidth: 300 } }, paper: { sx: { maxHeight: 400 } } }}
       data-testid="copy-prompt-menu"
     >
-      <ListSubheader id="copy-prompt-to-header" sx={{ lineHeight: 2.5 }}>
+      <ListSubheader id="copy-prompt-to-header" sx={{ lineHeight: 2.5, color: 'text.secondary' }}>
         {t('prompt:copyPromptTo')}
       </ListSubheader>
 
