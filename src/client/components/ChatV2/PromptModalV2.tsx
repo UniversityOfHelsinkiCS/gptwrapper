@@ -42,7 +42,7 @@ import { getGroupedCourses, isCustomChatInstance } from './util'
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import UniversityPromptGallery from './UniversityPromptGallery.tsx'
 import { focusIndicatorStyle, switchFocusIndicatorStyle } from '../../util/accessibility'
-import { StatusAnnouncer } from '../common/StatusAnnouncer.tsx'
+import { StatusAnnouncer } from '../common/Accessibility/StatusAnnouncer.tsx'
 
 const SECTION_LABEL_SX = {
   fontSize: '0.75rem',

@@ -20,7 +20,7 @@ import UsageSelector from './UsageSelector'
 import { DEFAULT_TOKEN_LIMIT, ValidModelName } from '../../../config'
 import { Course } from 'src/client/types'
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat'
-import { StatusAnnouncer } from '../common/StatusAnnouncer'
+import { StatusAnnouncer } from '../common/Accessibility/StatusAnnouncer'
 
 const skipLinkSx = {
   ...visuallyHidden,

@@ -8,7 +8,7 @@ import type { CoursesViewCourse } from '../../hooks/useUserCourses'
 import useUniversityPrompts, { groupLanguages, type UniversityPromptGroup } from '../../hooks/useUniversityPrompts'
 import type { Prompt, PromptLanguage } from '../../types'
 import CopyPromptMenu from './CopyPromptMenu.tsx'
-import { StatusAnnouncer } from '../common/StatusAnnouncer.tsx'
+import { StatusAnnouncer } from '../common/Accessibility/StatusAnnouncer.tsx'
 
 const isPromptLanguage = (language: string): language is PromptLanguage => language === 'fi' || language === 'en' || language === 'sv'
 
