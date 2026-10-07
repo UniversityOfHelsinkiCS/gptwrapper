@@ -57,7 +57,7 @@ const Footer = () => {
               }
               size="small"
               color="primary"
-              sx={{ height: 16, fontSize: 10, fontWeight: 600, cursor: 'inherit', '& .MuiChip-label': { px: 0.75 } }}
+              sx={{ height: 16, fontSize: 14, fontWeight: 500, cursor: 'inherit', '& .MuiChip-label': { px: 0.75 } }}
             />
           )}
         </Link>
