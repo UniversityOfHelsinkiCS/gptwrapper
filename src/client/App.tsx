@@ -87,6 +87,7 @@ const ThemedApp = () => {
         <SnackbarAnnouncer />
         <SnackbarProvider
           maxSnack={MAX_SNACKBARS}
+          autoHideDuration={null}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           Components={snackbarComponents}
           onEnter={announceSnackbar}
