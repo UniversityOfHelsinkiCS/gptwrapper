@@ -89,7 +89,6 @@ const ThemedApp = () => {
           maxSnack={MAX_SNACKBARS}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           Components={snackbarComponents}
-          autoHideDuration={30_000}
           onEnter={announceSnackbar}
           onClose={forgetClosedSnackbar}
         >
