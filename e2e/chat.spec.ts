@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from './utils/test-helpers'
+import { acceptDisclaimer, closeSendPreference, closeSnackbars, sendChatMessage, useMockModel } from './utils/test-helpers'
 import { TestByRole } from './fixtures'
 import { FREE_MODEL, validModels } from '../src/config'
 
@@ -17,32 +17,32 @@ testMatrix.forEach((testConfig) => {
     test.describe(`${course ? `Course` : 'General'} chat test for ${testConfig.role}`, () => {
       test.beforeEach(async ({ page }) => {
         await page.goto(`/${course || ''}`)
+        await acceptDisclaimer(page)
       })
 
       test('Can select model', async ({ page }) => {
-        await acceptDisclaimer(page)
         await useMockModel(page)
       })
 
       test('One message works', async ({ page }) => {
-        await acceptDisclaimer(page)
         await useMockModel(page)
 
         await sendChatMessage(page, 'testinen morjens')
 
         await closeSendPreference(page)
+        await closeSnackbars(page)
 
         await expect(page.getByTestId('user-message')).toContainText('testinen morjens')
         await expect(page.getByTestId('assistant-message')).toContainText('You are calling mock endpoint for streaming mock data')
       })
 
       test('Multiple messages work', async ({ page }) => {
-        await acceptDisclaimer(page)
         await useMockModel(page)
 
         await sendChatMessage(page, 'say perkele')
 
         await closeSendPreference(page)
+        await closeSnackbars(page)
 
         await expect(page.getByTestId('user-message').first()).toContainText('say perkele')
         await expect(page.getByTestId('assistant-message').first()).toContainText('perkele')
@@ -59,17 +59,19 @@ testMatrix.forEach((testConfig) => {
       })
 
       test('Can empty conversation', async ({ page }) => {
-        await acceptDisclaimer(page)
         await useMockModel(page)
 
         await sendChatMessage(page, 'say minttujam')
 
         await closeSendPreference(page)
+        await closeSnackbars(page)
 
         await expect(page.getByTestId('user-message')).toContainText('say minttujam')
         await expect(page.getByTestId('assistant-message')).toContainText('minttujam')
 
         await sendChatMessage(page, 'say minttujam2')
+
+        await closeSnackbars(page)
 
         await expect(page.getByTestId('user-message').nth(1)).toContainText('say minttujam2')
         await expect(page.getByTestId('assistant-message').nth(1)).toContainText('minttujam2')
@@ -82,12 +84,12 @@ testMatrix.forEach((testConfig) => {
       })
 
       test('Can save as email', async ({ page }) => {
-        await acceptDisclaimer(page)
         await useMockModel(page)
 
         await sendChatMessage(page, 'tää tyhjennetään')
 
         await closeSendPreference(page)
+        await closeSnackbars(page)
 
         await expect(page.getByTestId('user-message')).toContainText('tää tyhjennetään')
         await expect(page.getByTestId('assistant-message')).toContainText('OVER', { timeout: 6000 })
@@ -98,12 +100,12 @@ testMatrix.forEach((testConfig) => {
       })
 
       test.skip('Can download as file', async ({ page }) => {
-        await acceptDisclaimer(page)
         await useMockModel(page)
 
         await sendChatMessage(page, 'test download')
 
         await closeSendPreference(page)
+        await closeSnackbars(page)
 
         await expect(page.getByTestId('user-message')).toContainText('test download')
         await expect(page.getByTestId('assistant-message')).toContainText('OVER', { timeout: 6000 })
@@ -121,7 +123,6 @@ testMatrix.forEach((testConfig) => {
 
       if (!course) {
         test('Every validModel is available in general chat', async ({ page }) => {
-          await acceptDisclaimer(page)
           await page.getByTestId('model-selector').first().click()
 
           const modelNames = validModels.map((modelConfig) => (modelConfig.name + FREE_MODEL === modelConfig.name ? ' (free)' : ''))

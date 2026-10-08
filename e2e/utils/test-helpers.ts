@@ -26,3 +26,14 @@ export const useMockModel = async (page: Page) => {
   await page.getByTestId('model-selector').first().click()
   await page.getByTestId('mock-option').first().click()
 }
+
+export const closeSnackbars = async (page: Page) => {
+  const closeNotification = page.locator('[data-snackbar-close]')
+
+  if ((await closeNotification.count()) === 0) {
+    return
+  }
+
+  for (const button of await closeNotification.all()) await button.click()
+  await expect(closeNotification).toHaveCount(0)
+}

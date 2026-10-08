@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test'
 import { teacherTest as test } from './fixtures'
-import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from './utils/test-helpers'
+import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel, closeSnackbars } from './utils/test-helpers'
 
 test.describe('Prompts', () => {
   test.beforeEach(async ({ page }) => {
@@ -75,6 +75,7 @@ test.describe('Prompts', () => {
     await page.getByTestId('change-to-prompt-button').click()
     // Now in chat view
     // The prompt is active.
+    await closeSnackbars(page)
 
     // Send something
     await sendChatMessage(page, 'testinen morjens')
@@ -129,6 +130,8 @@ test.describe('Prompts', () => {
     await page.getByTestId('my-prompts-open').click()
     await expect(page.getByTestId(`prompt-row-${newPromptName}`)).toHaveCount(2)
 
+    await closeSnackbars(page)
+
     // The copy is independent: editing it leaves the original alone.
     // My prompts renders above the courses, so the personal copy is the first row.
     await page.getByTestId(`prompt-row-${newPromptName}`).first().click()
@@ -167,6 +170,8 @@ test.describe('Prompts', () => {
     // Now in chat view
     // The prompt is active.
     await expect(page.getByTestId('prompt-name').first()).toContainText(newPromptName)
+
+    await closeSnackbars(page)
 
     // Send something
     await sendChatMessage(page, 'rag')
