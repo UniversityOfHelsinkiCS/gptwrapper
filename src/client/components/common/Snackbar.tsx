@@ -21,7 +21,6 @@ const openSnackbars = new Map<string, SnackbarKey>()
 
 /*
  Use this instead of enqueueSnackbar from notistack.
- Errors and warnings stay until the user closes them with the close button so that they are not missed.
  A message that is already open is not shown twice, but it is announced again so that a screen reader user
  knows the action caused it again. Duplicates are handled here instead of notistack's preventDuplicate,
  which silently drops them, also while the previous one is still animating out.
@@ -33,8 +32,7 @@ export const enqueueSnackbar = (message: string, options: OptionsObject = {}) =>
     return openKey
   }
 
-  const persist = options.variant === 'error' || options.variant === 'warning'
-  const key = enqueueNotistackSnackbar(message, { persist, ...options })
+  const key = enqueueNotistackSnackbar(message, options)
   openSnackbars.set(message, key)
   return key
 }

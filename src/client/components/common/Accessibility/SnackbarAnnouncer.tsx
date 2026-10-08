@@ -23,7 +23,7 @@ const FOCUS_INTERRUPTS_WITHIN = 1_000
 /*
  A new live region update interrupts the one being read, so of messages arriving close together only the last
  would be heard. Instead every announcement also repeats the snackbars announced within MESSAGE_LIFETIME, newest first.
- Older ones are left out, errors and warnings stay visible until closed and would otherwise be repeated over and over.
+ Older ones are left out, snackbars stay visible longer than that and would otherwise be repeated over and over.
 */
 let visibleSnackbars: VisibleSnackbar[] = []
 let listener: (() => void) | null = null
