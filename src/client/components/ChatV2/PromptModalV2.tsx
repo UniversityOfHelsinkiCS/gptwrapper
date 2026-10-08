@@ -43,6 +43,7 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import UniversityPromptGallery from './UniversityPromptGallery.tsx'
 import { focusIndicatorStyle, switchFocusIndicatorStyle } from '../../util/accessibility'
 import { StatusAnnouncer } from '../common/Accessibility/StatusAnnouncer.tsx'
+import { getApiErrorMessage } from '../../util/apiClient'
 
 const SECTION_LABEL_SX = {
   fontSize: '0.75rem',
@@ -277,7 +278,7 @@ const PromptModalV2 = () => {
       enqueueSnackbar(`${t('common:delete')} ${prompt.name}`, { variant: 'success' })
       if (previewPrompt?.id === prompt.id) setPreviewPrompt(undefined)
     } catch (error) {
-      enqueueSnackbar(`Error: ${error}`, { variant: 'error' })
+      enqueueSnackbar(getApiErrorMessage(error) ?? t('error:unexpected'), { variant: 'error' })
     }
   }
 
