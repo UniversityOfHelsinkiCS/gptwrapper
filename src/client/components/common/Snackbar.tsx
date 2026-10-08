@@ -13,8 +13,8 @@ import {
 } from 'notistack'
 import { forwardRef, useEffect, useId, useRef, useSyncExternalStore, type MouseEvent, type SyntheticEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { forgetSnackbar, reannounceSnackbar } from './Accessibility/SnackbarAnnouncer'
-import { SNACKBAR_CONTAINER, findFocusAfterClose, rememberFocusOutsideSnackbars } from './Accessibility/SnackbarFocus'
+import { forgetSnackbar, reannounceSnackbar } from './accessibility/SnackbarAnnouncer'
+import { SNACKBAR_CONTAINER, findFocusAfterClose, rememberFocusOutsideSnackbars } from './accessibility/SnackbarFocus'
 
 export const MAX_SNACKBARS = 4
 

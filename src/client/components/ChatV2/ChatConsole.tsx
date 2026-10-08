@@ -12,7 +12,7 @@ import { getLanguageValue } from '@shared/utils'
 import { usePromptState } from './PromptState'
 import useCourse from '../../hooks/useCourse'
 import { consumePendingFocusTarget, requestFocusAfterNavigate } from '../../util/accessibility'
-import { StatusAnnouncer } from '../common/Accessibility/StatusAnnouncer'
+import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
 import type { Prompt } from '../../types'
 
 const PROMPT_ANNOUNCEMENT_DELAY_MS = 500

@@ -11,7 +11,7 @@ import AddIcon from '@mui/icons-material/Add'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { formatDate } from './util'
 import { focusIndicatorStyle } from '../../util/accessibility'
-import { StatusAnnouncer } from '../common/Accessibility/StatusAnnouncer.tsx'
+import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer.tsx'
 
 interface CoursePromptsProps {
   showActivityPeriod: boolean

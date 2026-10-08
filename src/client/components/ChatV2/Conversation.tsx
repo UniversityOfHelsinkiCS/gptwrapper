@@ -28,7 +28,7 @@ import {
 } from '../../../shared/chat'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import CopyToClipboardButton from './CopyToClipboardButton'
-import { StreamStatusAnnouncer } from '../common/Accessibility/StatusAnnouncer'
+import { StreamStatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
 import { BlueButton, OutlineButtonBlack } from './general/Buttons'
 import { focusIndicatorStyle } from 'src/client/util/accessibility'
 import { visuallyHidden } from '@mui/utils'
