@@ -9,18 +9,17 @@ import {
   type CustomContentProps,
   type OptionsObject,
   type SnackbarKey,
+  type VariantType,
 } from 'notistack'
-import { forwardRef, useEffect, useId, useRef, useSyncExternalStore, type SyntheticEvent } from 'react'
+import { forwardRef, useEffect, useId, useRef, useSyncExternalStore, type MouseEvent, type SyntheticEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { forgetSnackbar, reannounceSnackbar } from './Accessibility/SnackbarAnnouncer'
+import { SNACKBAR_CONTAINER, findFocusAfterClose, rememberFocusOutsideSnackbars } from './Accessibility/SnackbarFocus'
 
 export const MAX_SNACKBARS = 4
 
 const AUTO_HIDE_DURATION = 30_000
 
-const SNACKBAR_CONTAINER = '.notistack-SnackbarContainer'
-
-// Keyed by message, from enqueueing until the snackbar starts closing
 const openSnackbars = new Map<string, SnackbarKey>()
 
 /*
@@ -31,22 +30,24 @@ const openSnackbars = new Map<string, SnackbarKey>()
  which silently drops them, also while the previous one is still animating out.
 */
 export const enqueueSnackbar = (message: string, options: OptionsObject = {}) => {
-  const openKey = openSnackbars.get(message)
+  const duplicateKey = `${options.variant ?? 'default'}:${message}`
+  const openKey = openSnackbars.get(duplicateKey)
   if (openKey !== undefined) {
     reannounceSnackbar(openKey)
     return openKey
   }
 
-  const key = enqueueNotistackSnackbar(message, { autoHideDuration: null, ...options })
-  openSnackbars.set(message, key)
+  const key = enqueueNotistackSnackbar(message, { ...options, autoHideDuration: null })
+  openSnackbars.set(duplicateKey, key)
   return key
 }
 
+// Without a key notistack is closing all snackbars
 export const forgetClosedSnackbar = (_event: SyntheticEvent | null, _reason: CloseReason, key?: SnackbarKey) => {
-  for (const [message, openKey] of openSnackbars) {
-    if (openKey === key) openSnackbars.delete(message)
+  for (const [duplicateKey, openKey] of openSnackbars) {
+    if (key === undefined || openKey === key) openSnackbars.delete(duplicateKey)
   }
-  if (key !== undefined) forgetSnackbar(key)
+  forgetSnackbar(key)
 }
 
 /*
@@ -55,13 +56,12 @@ export const forgetClosedSnackbar = (_event: SyntheticEvent | null, _reason: Clo
  the mouse is in the notification region, so that the region does not change under the user, nor while the window
  is not focused. The container has pointer-events none, so only the snackbars themselves are hovered.
 */
-let windowBlurred = false
 const pauseListeners = new Set<() => void>()
 
 const notifyPauseListeners = () => pauseListeners.forEach((listener) => listener())
 
-const handleWindowFocusChange = (event: FocusEvent) => {
-  windowBlurred = event.type === 'blur'
+const handleDocumentEvent = (event: Event) => {
+  if (event.type === 'focusin') rememberFocusOutsideSnackbars(event.target)
   notifyPauseListeners()
 }
 
@@ -70,21 +70,22 @@ const windowEvents = ['focus', 'blur'] as const
 
 const subscribeToAutoHidePause = (listener: () => void) => {
   if (pauseListeners.size === 0) {
-    documentEvents.forEach((type) => document.addEventListener(type, notifyPauseListeners))
-    windowEvents.forEach((type) => window.addEventListener(type, handleWindowFocusChange))
+    rememberFocusOutsideSnackbars(document.activeElement)
+    documentEvents.forEach((type) => document.addEventListener(type, handleDocumentEvent))
+    windowEvents.forEach((type) => window.addEventListener(type, notifyPauseListeners))
   }
   pauseListeners.add(listener)
 
   return () => {
     pauseListeners.delete(listener)
     if (pauseListeners.size > 0) return
-    documentEvents.forEach((type) => document.removeEventListener(type, notifyPauseListeners))
-    windowEvents.forEach((type) => window.removeEventListener(type, handleWindowFocusChange))
+    documentEvents.forEach((type) => document.removeEventListener(type, handleDocumentEvent))
+    windowEvents.forEach((type) => window.removeEventListener(type, notifyPauseListeners))
   }
 }
 
 const isAutoHidePaused = () =>
-  windowBlurred || !!document.activeElement?.closest(SNACKBAR_CONTAINER) || !!document.querySelector(`${SNACKBAR_CONTAINER} :hover`)
+  !document.hasFocus() || !!document.activeElement?.closest(SNACKBAR_CONTAINER) || !!document.querySelector(`${SNACKBAR_CONTAINER} :hover`)
 
 const useAutoHide = (id: SnackbarKey, persist: boolean) => {
   const paused = useSyncExternalStore(subscribeToAutoHidePause, isAutoHidePaused)
@@ -105,45 +106,56 @@ const useAutoHide = (id: SnackbarKey, persist: boolean) => {
   useEffect(() => () => notifyPauseListeners(), [])
 }
 
+const isOpen = (key: string | undefined) => [...openSnackbars.values()].some((openKey) => String(openKey) === key)
+
 const SnackbarCloseButton = ({ snackbarId, messageId }: { snackbarId: SnackbarKey; messageId: string }) => {
   const { t } = useTranslation()
+
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    const closeButton = event.currentTarget
+    const focusAfterClose = document.activeElement === closeButton ? findFocusAfterClose(closeButton, isOpen) : null
+    closeSnackbar(snackbarId)
+    focusAfterClose?.focus()
+  }
 
   return (
     <IconButton
       aria-label={t('accessibility:closeNotification')}
       aria-describedby={messageId}
+      data-snackbar-close={String(snackbarId)}
       color="inherit"
       size="small"
-      onClick={() => closeSnackbar(snackbarId)}
+      onClick={handleClick}
     >
       <Close fontSize="small" />
     </IconButton>
   )
 }
 
-const FixedWidthContent = styled(MaterialDesignContent)<{ variant?: string }>(({ theme, variant }) => ({
-  '&.notistack-MuiContent': {
-    width: 400,
-    maxWidth: '100%',
-    flexWrap: 'nowrap',
-    color: 'white',
-    backgroundColor:
-      String(variant) === 'error'
-        ? theme.palette.error.main
-        : String(variant) === 'success'
-          ? theme.palette.success.main
-          : String(variant) === 'warning'
-            ? '#C5A207'
-            : String(variant) === 'info'
-              ? theme.palette.primary.main
-              : theme.palette.secondary.main,
-  },
-  '& #notistack-snackbar': {
-    flex: 1,
-    minWidth: 0,
-    overflowWrap: 'anywhere',
-  },
-}))
+const FixedWidthContent = styled(MaterialDesignContent)(({ theme, variant }) => {
+  const backgroundColors: Record<VariantType, string> = {
+    default: theme.palette.secondary.main,
+    success: theme.palette.success.main,
+    error: theme.palette.error.main,
+    warning: '#cb510ae4',
+    info: theme.palette.primary.main,
+  }
+
+  return {
+    '&.notistack-MuiContent': {
+      width: 400,
+      maxWidth: '100%',
+      flexWrap: 'nowrap',
+      color: 'white',
+      backgroundColor: backgroundColors[variant] ?? theme.palette.secondary.main,
+    },
+    '& #notistack-snackbar': {
+      flex: 1,
+      minWidth: 0,
+      overflowWrap: 'anywhere',
+    },
+  }
+})
 
 /*
  The type of an error or warning is otherwise shown only with color and icon, so it is written out for screen readers.

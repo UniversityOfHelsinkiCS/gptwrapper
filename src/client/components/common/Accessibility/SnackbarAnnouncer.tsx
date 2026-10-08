@@ -32,9 +32,12 @@ let listener: (() => void) | null = null
 let snackbarRegion: HTMLElement | null = null
 let countListener: ((count: number) => void) | null = null
 
+// onEnter gets the snackbar's root element, which itself has role="alert" and the variant class
+const selfOrDescendant = (node: HTMLElement, selector: string) => (node.matches(selector) ? node : node.querySelector<HTMLElement>(selector))
+
 const getSeverity = (node: HTMLElement): Severity => {
-  if (node.querySelector('.notistack-MuiContent-error')) return 'error'
-  if (node.querySelector('.notistack-MuiContent-warning')) return 'warning'
+  if (selfOrDescendant(node, '.notistack-MuiContent-error')) return 'error'
+  if (selfOrDescendant(node, '.notistack-MuiContent-warning')) return 'warning'
   return null
 }
 
@@ -43,7 +46,7 @@ export const announceSnackbar = (node: HTMLElement, _isAppearing: boolean, key: 
   if (!message) return
 
   // The persistent regions do the announcing, prevent the snackbar itself from being read a second time
-  node.querySelector('[role="alert"]')?.removeAttribute('role')
+  selfOrDescendant(node, '[role="alert"]')?.removeAttribute('role')
   snackbarRegion = node.closest<HTMLElement>('.notistack-SnackbarContainer')
 
   const snackbar = { key, message, severity: getSeverity(node), announcedAt: Date.now() }
@@ -62,8 +65,8 @@ export const reannounceSnackbar = (key: SnackbarKey) => {
 }
 
 // Called when the snackbar starts closing, so that the count does not include snackbars animating out
-export const forgetSnackbar = (key: SnackbarKey) => {
-  visibleSnackbars = visibleSnackbars.filter((snackbar) => snackbar.key !== key)
+export const forgetSnackbar = (key?: SnackbarKey) => {
+  visibleSnackbars = key === undefined ? [] : visibleSnackbars.filter((snackbar) => snackbar.key !== key)
   countListener?.(visibleSnackbars.length)
 }
 
