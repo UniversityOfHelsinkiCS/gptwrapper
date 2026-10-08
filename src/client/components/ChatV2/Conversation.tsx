@@ -451,6 +451,8 @@ const Conversation = ({
           padding: isMobile ? '4rem 0rem' : '4rem 1rem',
           justifyContent: messages.length === 0 ? 'center' : 'flex-start',
         }}
+        role="region"
+        aria-label={t('chat:conversation')}
       >
         <StreamStatusAnnouncer isStreaming={isStreaming} hasCompletion={completion.length > 0} endState={endState} />
 
