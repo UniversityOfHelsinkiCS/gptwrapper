@@ -338,7 +338,12 @@ export const ChatBox = ({
                 </Typography>
               )}
 
-              <Tooltip title={disabled ? t('chat:cancelResponse') : isShiftEnterSend ? t('chat:shiftEnterSend') : t('chat:enterSend')} arrow placement="top">
+              <Tooltip
+                id="send-tooltip"
+                title={disabled ? t('chat:cancelResponse') : isShiftEnterSend ? t('chat:shiftEnterSend') : t('chat:enterSend')}
+                arrow
+                placement="top"
+              >
                 {disabled ? (
                   <IconButton onClick={handleStop}>
                     <StopIcon />
@@ -347,7 +352,7 @@ export const ChatBox = ({
                   <span>
                     <IconButton
                       type="submit"
-                      aria-label={t('common:send')}
+                      aria-labelledby="send-tooltip"
                       ref={sendButtonRef}
                       data-testid="send-chat-message"
                       disabled={acuallyDisabled}
