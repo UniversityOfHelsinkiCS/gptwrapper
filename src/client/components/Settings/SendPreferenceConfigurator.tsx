@@ -1,4 +1,4 @@
-import { Box, FormControl, FormControlLabel, Menu, Radio, RadioGroup, Typography } from '@mui/material'
+import { Box, FormControl, FormControlLabel, Popover, Radio, RadioGroup, Typography } from '@mui/material'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { useTranslation } from 'react-i18next'
 import { OutlineButtonBlack } from '../ChatV2/general/Buttons'
@@ -7,7 +7,7 @@ import KeyboardReturn from '@mui/icons-material/KeyboardReturn'
 import { usePreferencesUpdateMutation } from '../../hooks/usePreferencesUpdateMutation'
 import { UserPreferences } from '../../../shared/user'
 import { enqueueSnackbar } from '../common/Snackbar'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { optionFocusIndicatorStyle } from 'src/client/util/accessibility'
 
 export const ShiftEnterToSend = ({ t }) => (
@@ -47,15 +47,19 @@ export const EnterForNewline = ({ t }) => (
 export const SendPreferenceConfigurator = ({
   value,
   onChange,
+  titleId,
 }: {
   value: 'shift+enter' | 'enter'
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  titleId?: string
 }) => {
   const { t } = useTranslation()
+  const generatedTitleId = useId()
+  const labelId = titleId ?? generatedTitleId
 
   return (
-    <RadioGroup value={value} onChange={onChange} name="sendPreferenceConfigurator">
-      <Typography>{t('sendPreferenceConfigurator:title')}</Typography>
+    <RadioGroup value={value} onChange={onChange} name="sendPreferenceConfigurator" aria-labelledby={labelId}>
+      <Typography id={labelId}>{t('sendPreferenceConfigurator:title')}</Typography>
       <FormControlLabel
         sx={{ my: 1, borderRadius: 1, p: 1, ...optionFocusIndicatorStyle() }}
         value="shift+enter"
@@ -86,6 +90,7 @@ export const SendPreferenceConfiguratorModal = ({ open, onClose, anchorEl, conte
   const { user } = useCurrentUser()
   const preferenceUpdate = usePreferencesUpdateMutation()
   const { t } = useTranslation()
+  const titleId = useId()
 
   const defaultValue = user?.preferences?.sendShortcutMode || 'shift+enter'
   const [value, setValue] = useState(defaultValue)
@@ -123,7 +128,7 @@ export const SendPreferenceConfiguratorModal = ({ open, onClose, anchorEl, conte
   }
 
   return (
-    <Menu
+    <Popover
       open={open}
       onClose={handleClose}
       anchorEl={anchorEl}
@@ -135,15 +140,22 @@ export const SendPreferenceConfiguratorModal = ({ open, onClose, anchorEl, conte
         vertical: 'bottom',
         horizontal: 'right',
       }}
+      slotProps={{
+        paper: {
+          role: 'dialog',
+          'aria-modal': true,
+          'aria-labelledby': titleId,
+        },
+      }}
     >
       <form onSubmit={handleSubmit}>
         <FormControl sx={{ p: 3 }}>
-          <SendPreferenceConfigurator value={value} onChange={handleChange} />
+          <SendPreferenceConfigurator value={value} onChange={handleChange} titleId={titleId} />
           <OutlineButtonBlack type="submit" data-testid="submit-send-preference">
             {t('sendPreferenceConfigurator:ok')}
           </OutlineButtonBlack>
         </FormControl>
       </form>
-    </Menu>
+    </Popover>
   )
 }
