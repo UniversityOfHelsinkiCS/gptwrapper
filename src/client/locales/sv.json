@@ -202,7 +202,9 @@
     "latestResponseLabel": "Senaste svaret",
     "usageWarning": "Du håller på att använda {{tokenUsagePercentage}}% av din veckovisa CurreChat-användning",
     "contextLimitWarning": "Samtalet överskrider kontextgränsen på {{contextLimit}} token för den valda modellen. Ditt samtal har {{tokenCount}} token. Att klicka på fortsätt kommer att trunkera de äldsta meddelandena. Det rekommenderas att starta ett nytt samtal.",
-    "noPrompt": "Ingen prompt"
+    "noPrompt": "Ingen prompt",
+    "showFullDescription": "Visa hela beskrivningen",
+    "showLessDescription": "Visa mindre"
   },
   "settings": {
     "prompt": "Samtalsstart",

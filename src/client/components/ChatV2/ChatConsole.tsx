@@ -1,4 +1,4 @@
-import { Box, IconButton, Tooltip, Typography, Divider } from '@mui/material'
+import { Box, Button, IconButton, Tooltip, Typography, Divider } from '@mui/material'
 import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -12,11 +12,12 @@ import { getLanguageValue } from '@shared/utils'
 import { usePromptState } from './PromptState'
 import useCourse from '../../hooks/useCourse'
 import { consumePendingFocusTarget, requestFocusAfterNavigate } from '../../util/accessibility'
-import { StatusAnnouncer } from '../common/StatusAnnouncer'
+import { StatusAnnouncer } from '../common/Accessibility/StatusAnnouncer'
+import type { Prompt } from '../../types'
 
 const PROMPT_ANNOUNCEMENT_DELAY_MS = 500
 
-const SectionLabel =({ children }: { children: ReactNode }) => (
+const SectionLabel = ({ children }: { children: ReactNode }) => (
   <Typography
     variant="overline"
     component="h2"
@@ -89,8 +90,7 @@ const SelectorRow = ({ icon, label, placeholder, onClick, disabled, selectorTest
 
 type ContextCardProps = {
   courseLabel?: string | null
-  promptLabel?: string | null
-  promptType?: string | null
+  prompt?: Prompt | undefined
   ragLabel?: string | null
   ragHidden?: boolean | null
   isEmployeeOrAdmin?: boolean
@@ -100,22 +100,15 @@ type ContextCardProps = {
   clearTestId?: string
 }
 
-const ContextCard = ({
-  courseLabel,
-  promptLabel,
-  promptType,
-  ragLabel,
-  ragHidden,
-  isEmployeeOrAdmin,
-  onClear,
-  clearTooltip,
-  contextCardId,
-  clearTestId,
-}: ContextCardProps) => {
-  const hasPrompt = Boolean(promptLabel)
+const ContextCard = ({ courseLabel, prompt, ragLabel, ragHidden, isEmployeeOrAdmin, onClear, clearTooltip, contextCardId, clearTestId }: ContextCardProps) => {
   const { t } = useTranslation()
+  const promptLabel = prompt?.name
+  const promptDescription = prompt?.userInstructions
+  const promptType = prompt?.type
 
+  const hasPrompt = Boolean(promptLabel)
   const hasType = promptType === 'CHAT_INSTANCE' || promptType === 'PERSONAL' || promptType === 'UNIVERSITY'
+  const hasDescription = Boolean(promptDescription)
   const typeLabel = hasType
     ? promptType === 'CHAT_INSTANCE'
       ? courseLabel
@@ -123,6 +116,24 @@ const ContextCard = ({
     : null
 
   const showRagLabel = Boolean(ragLabel) && (promptType === 'PERSONAL' || !ragHidden || isEmployeeOrAdmin)
+
+  const [descExpanded, setDescExpanded] = useState(false)
+  const [descOverflows, setDescOverflows] = useState(false)
+  const descRef = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    setDescExpanded(false)
+  }, [prompt?.id])
+
+  useEffect(() => {
+    const el = descRef.current
+    if (!el || descExpanded) return
+    const measure = () => setDescOverflows(el.scrollHeight > el.clientHeight + 1)
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [promptDescription, descExpanded])
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, px: 3, mt: 1 }}>
@@ -222,15 +233,55 @@ const ContextCard = ({
                   {promptLabel}
                 </Typography>
               </Box>
+              {hasDescription && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.25, minWidth: 0, mt: 1 }}>
+                  <Typography
+                    ref={descRef}
+                    sx={{
+                      minWidth: 0,
+                      fontSize: '0.6875rem',
+                      fontWeight: 500,
+                      letterSpacing: '0.05em',
+
+                      color: 'text.secondary',
+                      display: '-webkit-box',
+                      WebkitLineClamp: descExpanded ? 'unset' : 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'normal',
+                    }}
+                  >
+                    {promptDescription}
+                  </Typography>
+                  {(descOverflows || descExpanded) && (
+                    <Button
+                      variant="text"
+                      size="small"
+                      aria-expanded={descExpanded}
+                      onClick={() => setDescExpanded((expanded) => !expanded)}
+                      sx={{
+                        p: 0,
+                        mt: 0.3,
+                        minWidth: 0,
+                        fontSize: '0.6875rem',
+                        fontWeight: 600,
+                        textTransform: 'none',
+                      }}
+                    >
+                      {descExpanded ? t('chat:showLessDescription') : t('chat:showFullDescription')}
+                    </Button>
+                  )}
+                </Box>
+              )}
               {showRagLabel && (
                 <Box sx={{ display: 'flex', gap: 0.75, minWidth: 0, mt: 1 }}>
                   <Typography
                     sx={{
                       minWidth: 0,
                       fontSize: '0.6875rem',
-
+                      fontWeight: 600,
                       letterSpacing: '0.05em',
-
                       color: 'text.secondary',
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
@@ -330,8 +381,7 @@ export default function ChatConsole({ user }: { user?: User | null }) {
         <SectionLabel>{t('common:prompt')}</SectionLabel>
         <ContextCard
           courseLabel={courseLabel}
-          promptLabel={activePrompt?.name}
-          promptType={activePrompt?.type}
+          prompt={activePrompt}
           ragLabel={activePrompt?.ragIndex?.metadata.name}
           ragHidden={activePrompt?.ragHidden}
           isEmployeeOrAdmin={Boolean(isEmployeeOrAdmin)}
