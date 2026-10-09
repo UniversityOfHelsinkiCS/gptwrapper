@@ -12,13 +12,13 @@ import { vlmQueue } from '../jobs/vlmQueue'
 import { USE_DALAI_PROCESSING } from 'src/server/util/config'
 
 const defaultTextSplitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 1000 / 2,
-  chunkOverlap: 200 / 2,
+  chunkSize: 1000,
+  chunkOverlap: 200,
 })
 
 const markdownTextSplitter = new MarkdownTextSplitter({
-  chunkSize: 1000 / 2,
-  chunkOverlap: 200 / 2,
+  chunkSize: 1000,
+  chunkOverlap: 200,
 })
 
 const isMarkdown = (mimetype: string) => mimetype === 'text/markdown'
