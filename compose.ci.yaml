@@ -27,6 +27,18 @@ services:
   redis:
     image: redis/redis-stack-server
     container_name: gptwrapper_redis
+  
+  vectordb:
+    image: docker.io/pgvector/pgvector:pg18-trixie
+    environment:
+      - POSTGRES_DB=rag
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5434:5432'
+    volumes:
+      - pgvector_data:/data
+    container_name: gptwrapper_vectordb
 
 volumes:
   pg_data:
+  pgvector_data:
