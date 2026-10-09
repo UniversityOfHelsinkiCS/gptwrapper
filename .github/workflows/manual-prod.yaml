@@ -1,0 +1,74 @@
+name: Manual deploy to production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    secrets: inherit
+
+  build-and-push-to-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: gptwrapper
+          tags: production ${{ github.sha }}
+          containerfiles: |
+            ./Containerfile
+          build-args: |
+            BASE_PATH=/chat
+            GIT_SHA=${{ github.sha }}
+            STAGING=false
+            VERSION=${{ github.ref_name }}
+          extra-args: --ulimit nofile=4096:4096
+
+      - name: Push to registry.version.helsinki.fi
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: registry.version.helsinki.fi/toska/openshift/kontit/
+          username: kontit
+          password: ${{ secrets.VERSION_PUSH_SECRET }}
+
+
+  sentry-release:
+    runs-on: ubuntu-latest
+    needs: build-and-push-to-production
+    timeout-minutes: 2
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Login to registry.version.helsinki.fi
+        uses: docker/login-action@v4
+        with:
+          registry: registry.version.helsinki.fi
+          username: kontit
+          password: ${{ secrets.VERSION_PUSH_SECRET }}
+
+      - name: Pull image and create a container
+        run: docker create --name gptwrapper registry.version.helsinki.fi/toska/openshift/kontit/gptwrapper:production
+
+      - name: Copy assets from the container
+        run: docker cp gptwrapper:/opt/app-root/src/dist ./dist
+
+      - name: Create Sentry release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_URL: ${{ secrets.SENTRY_URL }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_TOKEN }}
+          SENTRY_ORG: sentry
+          SENTRY_PROJECT: currechat-frontend
+        with:
+          environment: production
+          set_commits: 'skip'
+          sourcemaps: ./dist/assets
+          url_prefix: '~/assets'
