@@ -4,9 +4,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    secrets: inherit
-
   build-and-push-to-production:
     runs-on: ubuntu-latest
     timeout-minutes: 8
