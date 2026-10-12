@@ -890,6 +890,7 @@
     "unseenReleases": "{{count}} uutta muutosta",
     "userMessageHeading": "Sinun viestisi",
     "responseHeading": "Vastaus",
-    "sourceResults": "Hakutulokset lähdemateriaaleista"
+    "sourceResults": "Hakutulokset lähdemateriaaleista",
+    "courseSelected": "{{name}} valittu käyttöön"
   }
 }

@@ -864,6 +864,7 @@
     "unseenReleases": "{{count}} nya ändringar",
     "userMessageHeading": "Ditt meddelande",
     "responseHeading": "Svar",
-    "sourceResults": "Sökresultat från källmaterialen"
+    "sourceResults": "Sökresultat från källmaterialen",
+    "courseSelected": "{{name}} vald för användning"
   }
 }

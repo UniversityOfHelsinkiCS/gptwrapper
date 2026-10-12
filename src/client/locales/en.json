@@ -889,6 +889,7 @@
     "unseenReleases": "{{count}} new changes",
     "userMessageHeading": "Your message",
     "responseHeading": "Response",
-    "sourceResults": "Search results from source materials"
+    "sourceResults": "Search results from source materials",
+    "courseSelected": "{{name}} selected for use"
   }
 }

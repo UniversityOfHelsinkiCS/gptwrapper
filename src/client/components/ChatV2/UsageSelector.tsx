@@ -12,6 +12,7 @@ import { getLanguageValue } from '@shared/utils'
 import { CourseUsage } from '@shared/types'
 import useUserUsages from '../../hooks/useUserUsage'
 import { InfoBox } from '../common/InfoBox'
+import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
 import { usePromptState } from './PromptState'
 import { DEFAULT_TOKEN_LIMIT } from '@config'
 import { visuallyHidden } from '@mui/utils'
@@ -101,6 +102,7 @@ const UsageSelector = () => {
 
   const handleSelect = (course: CourseUsage) => {
     setAnchorEl(null)
+    announceToScreenReader(t('accessibility:courseSelected', { name: getLanguageValue(course.name, i18n.language) }))
     if (course.courseId && course.courseId !== currentCourseId) {
       // Prompts are course-specific, so they must not carry over to the next course
       handleChangePrompt(undefined)
