@@ -92,12 +92,7 @@ const RagModal: React.FC<{ rag?: number; onDeleted?: () => void }> = ({ rag, onD
                 onClick={() => handleSelectIndex(ragIndex.id)}
                 sx={{
                   borderRadius: '8px',
-                  mb: 0.5,
-                  '&.Mui-selected': {
-                    backgroundColor: 'action.selected',
-                    borderLeft: '3px solid',
-                    borderLeftColor: 'primary.main',
-                  },
+                  m: 0.6,
                 }}
               >
                 <ListItemText primary={ragIndex.metadata?.name} slotProps={{ primary: { noWrap: true } }} />

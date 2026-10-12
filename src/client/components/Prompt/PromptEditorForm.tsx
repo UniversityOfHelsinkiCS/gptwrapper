@@ -34,6 +34,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import { RagDetails } from '../Rag/RagModal'
 import { RagCreator } from '../Rag//RagCreator'
 import ExpandMore from '@mui/icons-material/ExpandMore'
+import { switchFocusIndicatorStyle } from 'src/client/util/accessibility'
 
 const PromptTextHelper = ({ text }: { text: string }) => {
   const { t } = useTranslation()
@@ -147,7 +148,13 @@ const ModelSettingsSection = ({ hideVisibilityToggle = false }: { hideVisibility
         {type !== 'PERSONAL' && !hideVisibilityToggle && (
           <FormControlLabel
             sx={{ ml: 'auto' }}
-            control={<Switch checked={!form.hidden} onChange={(e) => setForm((prev) => ({ ...prev, hidden: !e.target.checked }))} />}
+            control={
+              <Switch
+                checked={!form.hidden}
+                onChange={(e) => setForm((prev) => ({ ...prev, hidden: !e.target.checked }))}
+                sx={{ ...switchFocusIndicatorStyle }}
+              />
+            }
             label={
               <Box display="flex" alignItems="center" gap={1} aria-label={t('prompt:showModelInstructionsForStudents')}>
                 {t('prompt:showForStudents')}
@@ -219,7 +226,13 @@ const RagSettingsSection = () => {
           {type !== 'PERSONAL' && (
             <FormControlLabel
               sx={{ ml: 'auto' }}
-              control={<Switch checked={!form.ragHidden} onChange={(e) => setForm((prev) => ({ ...prev, ragHidden: !e.target.checked }))} />}
+              control={
+                <Switch
+                  checked={!form.ragHidden}
+                  onChange={(e) => setForm((prev) => ({ ...prev, ragHidden: !e.target.checked }))}
+                  sx={{ ...switchFocusIndicatorStyle }}
+                />
+              }
               label={
                 <Box display="flex" alignItems="center" gap={1} aria-label={t('prompt:showRagForStudents')}>
                   {t('prompt:showForStudents')}
@@ -260,13 +273,13 @@ const RagSettingsSection = () => {
                 <em>{t('prompt:noSourceMaterials')}</em>
                 <ClearOutlined sx={{ ml: 1 }} />
               </MenuItem>
-              {!!ragIndices?.length && <ListSubheader>{t('course:sourceMaterials')}</ListSubheader>}
+              {!!ragIndices?.length && <ListSubheader sx={{ mt: 1, mb: 1 }}>{t('course:sourceMaterials')}</ListSubheader>}
               {ragIndices?.map((index) => (
                 <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
                   {index.metadata.name}
                 </MenuItem>
               ))}
-              {!!userRagIndices?.length && <ListSubheader>{t('course:userSourceMaterials')}</ListSubheader>}
+              {!!userRagIndices?.length && <ListSubheader sx={{ mt: 1, mb: 1 }}>{t('course:userSourceMaterials')}</ListSubheader>}
               {userRagIndices?.map((index) => (
                 <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
                   {index.metadata.name}
@@ -274,7 +287,7 @@ const RagSettingsSection = () => {
               ))}
             </Select>
           </FormControl>
-          <Box display="flex" justifyContent="flex-start" width="100%">
+          <Box display="flex" justifyContent="flex-start" width="100%" sx={{ ml: 1.5 }}>
             <RagCreator
               onCreated={(indexId) => {
                 setSelectedIndexId(indexId)
