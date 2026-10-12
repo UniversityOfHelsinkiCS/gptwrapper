@@ -22,18 +22,35 @@ const AUTO_HIDE_DURATION = 30_000
 
 const openSnackbars = new Map<string, SnackbarKey>()
 
+// How many times each open snackbar has been shown again, a change starts its auto hide timer from the beginning
+const autoHideRestarts = new Map<SnackbarKey, number>()
+const restartListeners = new Set<() => void>()
+
+const subscribeToAutoHideRestarts = (listener: () => void) => {
+  restartListeners.add(listener)
+  return () => {
+    restartListeners.delete(listener)
+  }
+}
+
+const restartAutoHide = (key: SnackbarKey) => {
+  autoHideRestarts.set(key, (autoHideRestarts.get(key) ?? 0) + 1)
+  restartListeners.forEach((listener) => listener())
+}
+
 /*
  Use this instead of enqueueSnackbar from notistack.
  Snackbars close after AUTO_HIDE_DURATION, see useAutoHide. Notistack's own timer is turned off with autoHideDuration null.
  A message that is already open is not shown twice, but it is announced again so that a screen reader user
- knows the action caused it again. Duplicates are handled here instead of notistack's preventDuplicate,
- which silently drops them, also while the previous one is still animating out.
+ knows the action caused it again, and its timer starts from the beginning. Duplicates are handled here instead of
+ notistack's preventDuplicate, which silently drops them, also while the previous one is still animating out.
 */
 export const enqueueSnackbar = (message: string, options: OptionsObject = {}) => {
   const duplicateKey = `${options.variant ?? 'default'}:${message}`
   const openKey = openSnackbars.get(duplicateKey)
   if (openKey !== undefined) {
     reannounceSnackbar(openKey)
+    restartAutoHide(openKey)
     return openKey
   }
 
@@ -47,6 +64,8 @@ export const forgetClosedSnackbar = (_event: SyntheticEvent | null, _reason: Clo
   for (const [duplicateKey, openKey] of openSnackbars) {
     if (key === undefined || openKey === key) openSnackbars.delete(duplicateKey)
   }
+  if (key === undefined) autoHideRestarts.clear()
+  else autoHideRestarts.delete(key)
   forgetSnackbar(key)
 }
 
@@ -89,7 +108,13 @@ const isAutoHidePaused = () =>
 
 const useAutoHide = (id: SnackbarKey, persist: boolean) => {
   const paused = useSyncExternalStore(subscribeToAutoHidePause, isAutoHidePaused)
+  const restarts = useSyncExternalStore(subscribeToAutoHideRestarts, () => autoHideRestarts.get(id) ?? 0)
   const wasPausedRef = useRef(false)
+
+  // Shown again, so it gets the full time. Runs before the timer effect below.
+  useEffect(() => {
+    wasPausedRef.current = false
+  }, [restarts])
 
   useEffect(() => {
     if (persist) return
@@ -100,7 +125,7 @@ const useAutoHide = (id: SnackbarKey, persist: boolean) => {
     // Like notistack, a paused snackbar gets half of the time when the user leaves
     const timeout = setTimeout(() => closeSnackbar(id), wasPausedRef.current ? AUTO_HIDE_DURATION / 2 : AUTO_HIDE_DURATION)
     return () => clearTimeout(timeout)
-  }, [id, persist, paused])
+  }, [id, persist, paused, restarts])
 
   // A focused close button removed from the DOM does not fire focusout in every browser, the others would stay paused
   useEffect(() => () => notifyPauseListeners(), [])
