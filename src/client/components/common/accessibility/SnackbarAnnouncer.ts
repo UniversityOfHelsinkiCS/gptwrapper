@@ -25,6 +25,9 @@ type VisibleSnackbar = { message: string; assertive: boolean; announcedAt: numbe
 
 const visibleSnackbars = new Map<SnackbarKey, VisibleSnackbar>()
 
+// Messages heard only by screen readers
+let screenReaderMessages: VisibleSnackbar[] = []
+
 // The container notistack renders the snackbars in, labelled as a region with the number of snackbars open
 let snackbarRegion: HTMLElement | null = null
 
@@ -95,7 +98,11 @@ const announce = () => {
   modalWaitStartedAt = null
 
   const now = Date.now()
-  const newestFirst = [...visibleSnackbars.values()].filter((snackbar) => now - snackbar.announcedAt < MESSAGE_LIFETIME).reverse()
+  screenReaderMessages = screenReaderMessages.filter((message) => now - message.announcedAt < MESSAGE_LIFETIME)
+  const newestFirst = [...visibleSnackbars.values(), ...screenReaderMessages]
+    .filter((snackbar) => now - snackbar.announcedAt < MESSAGE_LIFETIME)
+    .sort((a, b) => a.announcedAt - b.announcedAt)
+    .reverse()
   if (newestFirst.length === 0) return
 
   const messages = newestFirst.map((snackbar) => snackbar.message)
@@ -191,6 +198,14 @@ export const reannounceSnackbar = (key: SnackbarKey) => {
   // Moved last, so that it is the newest
   visibleSnackbars.delete(key)
   visibleSnackbars.set(key, { ...snackbar, announcedAt: Date.now() })
+  scheduleAnnouncement()
+}
+
+/*
+ Announces a message without showing a snackbar, e.g. to confirm a choice whose result is visible but not focused.
+*/
+export const announceToScreenReader = (message: string, { assertive = false } = {}) => {
+  screenReaderMessages.push({ message, assertive, announcedAt: Date.now() })
   scheduleAnnouncement()
 }
 
