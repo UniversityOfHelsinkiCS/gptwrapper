@@ -46,16 +46,17 @@ const NotificationBanner = () => {
                 },
               }}
             >
-              <Box sx={{ flex: 1 }}>
+              <Box id="notification" sx={{ flex: 1 }}>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {notification.message[i18n.language as keyof typeof notification.message] || notification.message.en}
                 </ReactMarkdown>
               </Box>
               <IconButton
-                aria-label={t('common:close')}
+                aria-label={t('accessibility:closeNotification')}
+                aria-describedby="notification"
                 size="small"
                 onClick={() => handleDismiss(notification.id)}
-                sx={{ ml: 1 }}
+                sx={{ ml: 1, mr: 1 }}
               >
                 <CloseIcon fontSize="small" />
               </IconButton>
