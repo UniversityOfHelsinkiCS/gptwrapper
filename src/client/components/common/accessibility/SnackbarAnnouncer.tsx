@@ -17,8 +17,9 @@ type Announcement = { messages: string[]; assertive: boolean }
 // Long enough to be read, short enough that stale messages are not found later with the virtual cursor
 const MESSAGE_LIFETIME = 7_000
 
-// Covers a modal's closing transition: focus moved this soon after an announcement cut it off, see SnackbarAnnouncer
-const FOCUS_INTERRUPTS_WITHIN = 1_000
+// Covers a modal's closing transition: focus moving or the region's modal closing this soon after an announcement
+// cut it off, see SnackbarAnnouncer
+const INTERRUPTS_WITHIN = 1_000
 
 /*
  A new live region update interrupts the one being read, so of messages arriving close together only the last
@@ -177,25 +178,31 @@ export const SnackbarAnnouncer = () => {
 
   useEffect(() => {
     const handleFocusIn = () => {
-      if (Date.now() - shownAtRef.current < FOCUS_INTERRUPTS_WITHIN) interruptedRef.current = true
+      if (Date.now() - shownAtRef.current < INTERRUPTS_WITHIN) interruptedRef.current = true
     }
     document.addEventListener('focusin', handleFocusIn)
     return () => document.removeEventListener('focusin', handleFocusIn)
   }, [])
 
   /*
-   The regions move when a modal opens or closes, and moving the portal mounts them anew. An announcement already
-   rendered in the old container has normally been heard there, e.g. in a closing menu or confirm dialog on top of
-   another modal, and repeating it would read it twice. It is announced again in the new container only when it was lost:
-   - it was rendered in the same commit as the move, so its text was inserted together with its live region
-   - focus moved right after it was rendered, e.g. a dialog that sets focus itself when its closing transition ends
-  */
+
+    Moving the portal remounts live regions. Repeat an announcement only if it may have been lost:
+    - it was rendered in the same commit as the move
+    - focus moved right after rendering
+    - the old container closed before it could be announced
+    Otherwise, it was likely already heard, and repeating it would cause duplication.
+
+*/
+
   const previousRef = useRef({ container, announcement })
   useEffect(() => {
     const previous = previousRef.current
     previousRef.current = { container, announcement }
     if (container === previous.container || !announcement) return
-    if (announcement !== previous.announcement || interruptedRef.current) listener?.()
+
+    const previousClosed = !previous.container.isConnected || !!previous.container.closest('[aria-hidden="true"]')
+    const lostWithContainer = previousClosed && Date.now() - shownAtRef.current < INTERRUPTS_WITHIN
+    if (announcement !== previous.announcement || interruptedRef.current || lostWithContainer) listener?.()
   }, [container, announcement])
 
   const content = announcement && (
