@@ -125,7 +125,13 @@ const PromptPreview = ({
           <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
             {canEditPrompt && (
               <Tooltip arrow placement="bottom" title={t('prompt:editPromptTooltip')}>
-                <IconButton size="small" onClick={() => handleEdit(courseId)} color="primary" data-testid={`edit-prompt-${prompt.name}`}>
+                <IconButton
+                  id="edit-prompt-button"
+                  size="small"
+                  onClick={() => handleEdit(courseId)}
+                  color="primary"
+                  data-testid={`edit-prompt-${prompt.name}`}
+                >
                   <EditOutlined fontSize="small" />
                 </IconButton>
               </Tooltip>

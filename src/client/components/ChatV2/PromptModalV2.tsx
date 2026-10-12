@@ -14,7 +14,7 @@ import {
   FormControlLabel,
 } from '@mui/material'
 import { enqueueSnackbar } from '../common/Snackbar'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
@@ -195,6 +195,7 @@ const PromptModalV2 = () => {
   const [previewPrompt, setPreviewPrompt] = useState<PromptType | undefined>(isMobile || opensOnGallery || initialPreviewPromptId ? undefined : activePrompt)
   const [previewCourse, setPreviewCourse] = useState<Course | undefined>(undefined)
   const [isEditing, setIsEditing] = useState(false)
+  const focusEditButtonOnDone = useRef(false)
   const [showMyPrompts, setShowMyPrompts] = useState(myPrompts.some((p) => p.id === previewPrompt?.id) || false)
 
   const { hasChanges, setHasChanges, cacheKey, setCacheKey } = usePromptEditorState()
@@ -260,9 +261,16 @@ const PromptModalV2 = () => {
   }
 
   const onDone = (prompt?: PromptType) => {
+    focusEditButtonOnDone.current = true
     setIsEditing(false)
     setPreviewPrompt(prompt)
   }
+
+  useEffect(() => {
+    if (isEditing || !focusEditButtonOnDone.current) return
+    focusEditButtonOnDone.current = false
+    document.getElementById('edit-prompt-button')?.focus()
+  }, [isEditing])
 
   const handleDelete = (event: React.MouseEvent<HTMLButtonElement>, prompt: PromptType) => {
     event.stopPropagation()
