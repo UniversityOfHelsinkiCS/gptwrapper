@@ -284,8 +284,10 @@ const PromptModalV2 = () => {
     setDeleteConfirm(null)
     try {
       await deletePromptMutation(prompt.id)
-      enqueueSnackbar(`${t('common:delete')} ${prompt.name}`, { variant: 'success' })
+      enqueueSnackbar(`${t('common:deleted', { name: prompt.name })}`, { variant: 'success' })
       if (previewPrompt?.id === prompt.id) setPreviewPrompt(undefined)
+      const target = document.getElementById('close-template-modal')
+      if (target) target.focus()
     } catch (error) {
       enqueueSnackbar(getApiErrorMessage(error) ?? t('error:unexpected'), { variant: 'error' })
     }

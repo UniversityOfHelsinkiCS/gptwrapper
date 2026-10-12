@@ -71,7 +71,8 @@
     "course": "Kurs",
     "fi": "SUOMI",
     "en": "ENGLISH",
-    "sv": "SVENSKA"
+    "sv": "SVENSKA",
+    "deleted": "Prompt \"{{name}}\" raderad"
   },
   "chats": {
     "header": "Öppna kurschattar",

@@ -92,7 +92,7 @@ const TemplateModal: React.FC<{ open: boolean; root: string; children: React.Rea
           <Typography variant="h6" component="h2" id="template-modal-title">
             <ModalTitle />
           </Typography>
-          <TextButton aria-label={t('common:close')} data-testid="close-modal" onClick={handleClose}>
+          <TextButton id="close-template-modal" aria-label={t('common:close')} data-testid="close-modal" onClick={handleClose}>
             <CloseIcon />
           </TextButton>
         </Box>

@@ -71,7 +71,8 @@
     "course": "Course",
     "fi": "SUOMI",
     "en": "ENGLISH",
-    "sv": "SVENSKA"
+    "sv": "SVENSKA",
+    "deleted": "Prompt \"{{name}}\" deleted"
   },
   "stats": {
     "timePeriodStart": "Starting",

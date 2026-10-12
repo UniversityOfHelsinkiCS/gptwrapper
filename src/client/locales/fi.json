@@ -72,7 +72,8 @@
     "course": "Kurssi",
     "fi": "SUOMI",
     "en": "ENGLISH",
-    "sv": "SVENSKA"
+    "sv": "SVENSKA",
+    "deleted": "Alustus \"{{name}}\" poistettu"
   },
   "stats": {
     "showing": "Näytetään",
