@@ -32,6 +32,7 @@ export type ModelDescriptionKey = 'chat:modelDescriptions.premium' | 'chat:model
 
 export type ModelConfig = {
   name: string
+  displayName: string
   context: number
   provider: ModelProvider
   streamVersion: string
@@ -44,11 +45,13 @@ export type ModelConfig = {
 }
 
 /**
- * name: the acual model name, which is shown to users, configures the model to be used and is also the azure deployment name.
+ * name: the acual model name, which configures the model to be used and is also the azure deployment name.
+ * displayName: the human-readable name shown to users.
  */
 export const validModels: ModelConfig[] = [
   {
     name: 'gpt-5-mini',
+    displayName: 'GPT-5 mini',
     context: 128_000,
     streamVersion: 'v3',
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
@@ -56,6 +59,7 @@ export const validModels: ModelConfig[] = [
   },
   {
     name: 'gpt-5.5',
+    displayName: 'GPT-5.5',
     context: 128_000,
     streamVersion: 'v3',
     instructions: formatInstructions,
@@ -64,6 +68,7 @@ export const validModels: ModelConfig[] = [
   },
   {
     name: 'Mistral-Large-3-1',
+    displayName: 'Mistral Large 3',
     context: 128_000,
     streamVersion: 'v3',
     instructions: formatInstructions,
@@ -73,6 +78,7 @@ export const validModels: ModelConfig[] = [
   // gemini 3.5 flash lite is not available in EU for now. It is the direct replacement 2.5 flash
   // {
   //   name: 'gemini-3.5-flash-lite',
+  //   displayName: 'Gemini 3.5 Flash-Lite',
   //   context: 128_000,
   //   streamVersion: 'v3',
   //   instructions: formatInstructions,
@@ -82,6 +88,7 @@ export const validModels: ModelConfig[] = [
   // },
   {
     name: 'gemini-3.8-flash',
+    displayName: 'Gemini 3.8 Flash',
     context: 128_000,
     streamVersion: 'v3',
     instructions: formatInstructions,
@@ -92,6 +99,7 @@ export const validModels: ModelConfig[] = [
   },
   {
     name: 'mock',
+    displayName: 'Mock',
     context: 1024,
     streamVersion: 'v3',
     provider: ModelProvider.Mock,
@@ -105,6 +113,8 @@ export const ValidModelNameSchema = z.union(validModels.map((model) => z.literal
 export type ValidModelName = z.infer<typeof ValidModelNameSchema>
 
 export const getModelConfig = (modelName: ValidModelName): ModelConfig | undefined => validModels.find((model) => model.name === modelName)
+
+export const getModelDisplayName = (modelName: ValidModelName): string => getModelConfig(modelName)?.displayName ?? modelName
 
 export const usesStreamVersion = (modelName: ValidModelName, version: string): boolean => getModelConfig(modelName)?.streamVersion === version
 

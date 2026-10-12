@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { FREE_MODEL, inProduction, isMockModel, ValidModelName, validModels } from '@config'
+import { FREE_MODEL, getModelDisplayName, inProduction, isMockModel, ModelConfig, ValidModelName, validModels } from '@config'
 import { Box, Chip, MenuItem, Typography, Menu, ListSubheader } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
@@ -10,11 +10,10 @@ import { usePromptState } from './PromptState'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { visuallyHidden } from '@mui/utils'
 
-const filterAvailableModels = (models: ValidModelName[], isTokenLimitExceeded: boolean, isAdmin: boolean | undefined): ValidModelName[] => {
+const filterAvailableModels = (models: ModelConfig[], isTokenLimitExceeded: boolean, isAdmin: boolean | undefined): ModelConfig[] => {
   return models
-    .filter((model) => !isTokenLimitExceeded || model === FREE_MODEL)
-    .filter((model) => !isMockModel(model) || !inProduction || isAdmin)
-    .filter((model) => model !== 'ClaudeHaiku4.6' || !inProduction || isAdmin)
+    .filter((model) => !isTokenLimitExceeded || model.name === FREE_MODEL)
+    .filter((model) => !isMockModel(model.name) || !inProduction || isAdmin)
 }
 
 const ModelSelector = ({
@@ -41,14 +40,11 @@ const ModelSelector = ({
     setAnchorEl(null)
   }
 
-  const availableModels = React.useMemo(() => {
-    const models = validModels.map((model) => model.name)
-    return filterAvailableModels(models, isTokenLimitExceeded, user?.isAdmin)
-  }, [isTokenLimitExceeded, user, activePrompt])
+  const availableModels = React.useMemo(
+    () => filterAvailableModels(validModels, isTokenLimitExceeded, user?.isAdmin),
+    [isTokenLimitExceeded, user, activePrompt],
+  )
 
-  const descriptionKeyByModel = React.useMemo(() => Object.fromEntries(validModels.map((m) => [m.name, m.descriptionKey])), [])
-
-  const displayModel = currentModel
   const disabled = availableModels.length === 1
 
   const isFree = (model: string) => model === FREE_MODEL
@@ -60,6 +56,9 @@ const ModelSelector = ({
         type="button"
         onClick={disabled ? undefined : handleClick}
         disabled={disabled}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={open ? 'model-selector-menu' : undefined}
         data-testid="model-selector"
         sx={{
           display: 'inline-flex',
@@ -83,8 +82,8 @@ const ModelSelector = ({
       >
         <PsychologyIcon sx={{ fontSize: 14, color: 'primary.main' }} />
         <Typography sx={visuallyHidden}>{t('accessibility:selectModel')}</Typography>
-        <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: 'text.primary', lineHeight: 1 }}>{displayModel}</Typography>
-        {isFree(displayModel) && (
+        <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: 'text.primary', lineHeight: 1 }}>{getModelDisplayName(currentModel)}</Typography>
+        {isFree(currentModel) && (
           <Chip
             label={t('chat:freeModel')}
             size="small"
@@ -106,6 +105,7 @@ const ModelSelector = ({
           ))}
       </Box>
       <Menu
+        id="model-selector-menu"
         anchorEl={anchorEl}
         open={open}
         onClose={() => setAnchorEl(null)}
@@ -126,27 +126,25 @@ const ModelSelector = ({
           {t('sidebar:modelTitle')}
         </ListSubheader>
 
-        {availableModels.map((model) => {
-          const active = model === displayModel
-          const descriptionKey = descriptionKeyByModel[model]
+        {availableModels.map(({ name, displayName, descriptionKey }) => {
+          const active = name === currentModel
           return (
             <MenuItem
-              key={model}
-              value={model}
-              onClick={() => handleSelect(model)}
-              data-testid={`${model}-option`}
+              key={name}
+              value={name}
+              onClick={() => handleSelect(name)}
+              data-testid={`${name}-option`}
               selected={active}
-              aria-selected={active}
-              aria-label={[model, descriptionKey && t(descriptionKey), isFree(model) && t('chat:freeModel'), active && t('common:selected')]
-                .filter(Boolean)
-                .join(', ')}
+              role="menuitemradio"
+              aria-checked={active}
+              aria-label={[displayName, descriptionKey && t(descriptionKey), isFree(name) && t('chat:freeModel')].filter(Boolean).join(', ')}
               sx={{ gap: 1, py: 1, px: 1.75, alignItems: 'flex-start', mt: 1 }}
             >
               <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
-                <Typography sx={{ fontSize: '0.875rem', fontWeight: active ? 600 : 400 }}>{model}</Typography>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: active ? 600 : 400 }}>{displayName}</Typography>
                 {descriptionKey && <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.3 }}>{t(descriptionKey)}</Typography>}
               </Box>
-              {isFree(model) && (
+              {isFree(name) && (
                 <Chip
                   label={t('chat:freeModel')}
                   size="small"
