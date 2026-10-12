@@ -44,6 +44,7 @@ import UniversityPromptGallery from './UniversityPromptGallery.tsx'
 import { focusIndicatorStyle, switchFocusIndicatorStyle } from '../../util/accessibility'
 import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer.tsx'
 import { getApiErrorMessage } from '../../util/apiClient'
+import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer.ts'
 
 const SECTION_LABEL_SX = {
   fontSize: '0.75rem',
@@ -312,6 +313,7 @@ const PromptModalV2 = () => {
   const handleSelectUniversityPrompt = (prompt: PromptType) => {
     if (!confirmClose()) return
     handleChangePrompt(prompt)
+    announceToScreenReader(t('accessibility:promptInUse', { prompt: prompt.name }))
     navigate(`/general`)
   }
 
@@ -458,6 +460,7 @@ const PromptModalV2 = () => {
                     onSelect={(prompt) => {
                       if (!confirmClose()) return
                       handleChangePrompt(prompt)
+                      announceToScreenReader(t('accessibility:promptInUse', { prompt: prompt.name }))
                       navigate(`/general`)
                     }}
                   />
@@ -613,6 +616,7 @@ const PromptModalV2 = () => {
                       if (!confirmClose()) return
                       handleChangePrompt(previewPrompt)
                       const course = allCourses?.find((c) => c.id === previewPrompt.chatInstanceId)
+                      announceToScreenReader(t('accessibility:promptInUse', { prompt: previewPrompt.name }))
                       if (course && course.courseId) navigate(`/${course.courseId}`)
                       if (!course) navigate(`/general`)
                     }}

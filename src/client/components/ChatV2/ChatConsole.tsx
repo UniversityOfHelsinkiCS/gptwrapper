@@ -12,10 +12,8 @@ import { getLanguageValue } from '@shared/utils'
 import { usePromptState } from './PromptState'
 import useCourse from '../../hooks/useCourse'
 import { consumePendingFocusTarget, requestFocusAfterNavigate } from '../../util/accessibility'
-import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
+import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
 import type { Prompt } from '../../types'
-
-const PROMPT_ANNOUNCEMENT_DELAY_MS = 500
 
 const SectionLabel = ({ children }: { children: ReactNode }) => (
   <Typography
@@ -329,31 +327,9 @@ export default function ChatConsole({ user }: { user?: User | null }) {
   const promptsPath = `/${courseId ?? 'general'}/prompts`
   const courseLabel = isCourseChat ? (course ? getLanguageValue(course.name, i18n.language) : '') : undefined
 
-  const [promptAnnouncement, setPromptAnnouncement] = useState('')
-  // Initialized on mount so a prompt restored from localStorage on page load is not announced.
-  const previousPromptIdRef = useRef(activePrompt?.id)
-
   useEffect(() => {
     consumePendingFocusTarget()
   }, [location.pathname, activePrompt])
-
-  useEffect(() => {
-    const previousPromptId = previousPromptIdRef.current
-    previousPromptIdRef.current = activePrompt?.id
-    if (!activePrompt || activePrompt.id === previousPromptId) return
-
-    // A prompt is usually chosen inside TemplateModal, which hides the rest of the page from
-    // assistive tech (aria-hidden) while open. The modal closes in the same commit as this
-    // change, so a message set right away would land in a live region the screen reader has
-    // only just regained — and is not announced. Clear first, then announce once the modal
-    // has closed and focus has returned to the opener.
-    setPromptAnnouncement('')
-    const timeout = setTimeout(() => {
-      setPromptAnnouncement(t('accessibility:promptInUse', { prompt: activePrompt.name }))
-    }, PROMPT_ANNOUNCEMENT_DELAY_MS)
-
-    return () => clearTimeout(timeout)
-  }, [activePrompt?.id])
 
   return (
     <Box sx={{ pb: 1 }}>
@@ -390,7 +366,7 @@ export default function ChatConsole({ user }: { user?: User | null }) {
               ? () => {
                   requestFocusAfterNavigate('chat-input')
                   handleChangePrompt(undefined)
-                  setPromptAnnouncement(t('accessibility:promptCleared'))
+                  announceToScreenReader(t('accessibility:promptCleared'))
                   navigate('/general')
                 }
               : undefined
@@ -398,7 +374,6 @@ export default function ChatConsole({ user }: { user?: User | null }) {
           clearTooltip={t('sidebar:promptNone')}
           contextCardId="prompt-context"
         />
-        <StatusAnnouncer message={promptAnnouncement} />
       </Box>
     </Box>
   )

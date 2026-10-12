@@ -12,6 +12,7 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import { formatDate } from './util'
 import { focusIndicatorStyle } from '../../util/accessibility'
 import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer.tsx'
+import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer.ts'
 
 interface CoursePromptsProps {
   showActivityPeriod: boolean
@@ -95,6 +96,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
     if (!confirmClose()) return
     if (!course.courseId) return
     handleChangePrompt(prompt)
+    announceToScreenReader(t('accessibility:promptInUse', { prompt: prompt?.name }))
     navigate(`/${course.courseId}`)
   }
 
