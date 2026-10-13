@@ -24,8 +24,9 @@ vi.mock('@sentry/node', () => ({
   captureException: vi.fn(),
 }))
 
-vi.mock('../services/chatInstances/access', () => ({
-  getEnrolledCourses: vi.fn(),
+vi.mock('../services/chatInstances/access', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../services/chatInstances/access')>()), // keep functions real
+  getEnrolledCourses: vi.fn(), // except these two
   getTeachedCourses: vi.fn(),
 }))
 
