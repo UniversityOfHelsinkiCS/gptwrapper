@@ -15,6 +15,7 @@ vi.mock('../../../hooks/useCourseMutation', () => ({
   useSaveDiscussionsMutation: () => ({ mutate, isPending: false, variables: undefined }),
 }))
 vi.mock('../../ChatV2/CoursePreview', () => ({ default: () => null }))
+vi.mock('lodash/debounce', () => ({ default: (fn: any) => Object.assign(fn, { cancel: () => {} }) }))
 
 import en from '../../../locales/en.json'
 import ChatInstanceSearch from './index'
