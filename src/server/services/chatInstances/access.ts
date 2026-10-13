@@ -2,6 +2,9 @@ import { type ChatInstance, Enrolment, Prompt, RagIndex, Responsibility, User as
 import type { User } from '../../../shared/user'
 import { STAFF_COURSES } from '../../../shared/testData'
 import logger from '../../util/logger'
+import { AccessLevel } from '@shared/types'
+import { chatIsActive } from './activity'
+import type { User as SharedUser } from '@shared/user'
 
 const chatInstanceWithPrompts = {
   include: [
@@ -158,4 +161,40 @@ export const getChatInstanceAccess = async (user: User, chatInstance: ChatInstan
   if (enrolments.length > 0) return ChatInstanceAccess.STUDENT
 
   return ChatInstanceAccess.NONE
+}
+
+export const getAccessLevel = async (user: SharedUser, chatInstance: ChatInstance): Promise<AccessLevel | null> => {
+  if (user.isAdmin) {
+    return 'FULL'
+  }
+
+  const isResponsible = await Responsibility.findOne({
+    where: {
+      userId: user.id,
+      chatInstanceId: chatInstance.id,
+    },
+  })
+
+  if (isResponsible) {
+    return 'FULL'
+  }
+
+  const isEnrolled = await Enrolment.findOne({
+    where: {
+      userId: user.id,
+      chatInstanceId: chatInstance.id,
+    },
+  })
+
+  const courseIsOpen = chatIsActive(chatInstance)
+
+  if (isEnrolled && courseIsOpen) {
+    return 'STUDENT'
+  }
+
+  if (isEnrolled && !courseIsOpen) {
+    return 'STUDENT_CLOSED'
+  }
+
+  return null
 }

@@ -3,7 +3,7 @@ import { Op, Sequelize, WhereOptions } from 'sequelize'
 
 import type { ActivityPeriod, RequestWithUser } from '../types'
 import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, PromptUsage, User, Responsibility, Discussion, RagIndex } from '../db/models'
-import { getEnrolledCourses, getTeachedCourses } from '../services/chatInstances/access'
+import { getAccessLevel, getEnrolledCourses, getTeachedCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
 import _ from 'lodash'
@@ -210,27 +210,12 @@ export const enforceUserHasFullAccess = async (user: SharedUser, chatInstance: C
 }
 
 const requireCourseAccess = async (user: SharedUser, chatInstance: ChatInstance): Promise<AccessLevel> => {
-  if (user.isAdmin) {
-    return 'FULL'
-  }
-  const isResponsible = await userAssignedAsResponsible(user.id, chatInstance)
-  if (isResponsible) {
-    return 'FULL'
-  }
-  const isEnrolled = await Enrolment.findOne({
-    where: { chatInstanceId: chatInstance.id, userId: user.id },
-  })
+  const accessLevel = await getAccessLevel(user, chatInstance)
 
-  const courseIsOpen = chatIsActive(chatInstance)
-  if (isEnrolled && courseIsOpen) {
-    return 'STUDENT'
+  if (!accessLevel) {
+    throw ApplicationError.Forbidden('Unauthorized')
   }
-
-  if (isEnrolled && !courseIsOpen) {
-    return 'STUDENT_CLOSED'
-  }
-
-  throw ApplicationError.Forbidden('Unauthorized')
+  return accessLevel
 }
 
 export const serializeCourse = (chatInstance: ChatInstance, accessLevel: AccessLevel) => {
