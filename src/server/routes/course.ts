@@ -199,14 +199,13 @@ courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Re
 
 //checks if user is a admin or is responsible for the course, returns forbidden error if not
 export const enforceUserHasFullAccess = async (user: SharedUser, chatInstance: ChatInstance) => {
-  const isResponsibleForCourse: boolean = await userAssignedAsResponsible(user.id, chatInstance)
-  const hasFullAccess: boolean = user.isAdmin || isResponsibleForCourse
+  const accessLevel = await getAccessLevel(user, chatInstance)
 
-  if (!hasFullAccess) {
+  if (accessLevel !== 'FULL') {
     throw ApplicationError.Forbidden('Unauthorized')
   }
 
-  return hasFullAccess
+  return true
 }
 
 const requireCourseAccess = async (user: SharedUser, chatInstance: ChatInstance): Promise<AccessLevel> => {
@@ -364,6 +363,7 @@ courseRouter.put('/:id', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
   const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
+  //TODO: I'm pretty sure this never runs, check:
   if (!hasPermission) {
     res.status(401).send('Unauthorized')
     return
