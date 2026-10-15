@@ -57,7 +57,7 @@ class FTSearchRetriever extends BaseRetriever {
 
   async redisQuery(query: string): Promise<SearchReply['documents']> {
     try {
-      const results = await vectorPool.query(`SELECT id, content, metadata FROM documents WHERE fts_index @@ websearch_to_tsquery('simple', $1::text);`, [query])
+      const results = await vectorPool.query(`SELECT id, content, metadata FROM documents WHERE fts_index @@ websearch_to_tsquery('simple', $1::text) AND metadata->>'ragIndex' = $2;`, [query, this.indexName])
 
       if (!results || !results.rows) {
         console.warn('ft.search did not return documents for query:', query, 'index:', this.indexName)
@@ -100,7 +100,9 @@ class VectorSearchRetriever extends BaseRetriever {
 
   async _getRelevantDocuments(query: string, _callbacks?: CallbackManagerForRetrieverRun): Promise<DocumentInterface<Record<string, any>>[]> {
     try {
-      const docs = await retriever.invoke(query)
+      const docs = await retriever.invoke(query, {
+        metadata: { ragIndex: this.indexName }
+      })
       return docs.map(
         (doc) =>
           new Document({
