@@ -586,7 +586,7 @@ const PromptModalV2 = () => {
             }}
           >
             <Box
-              sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minWidth: 0, minHeight: 0, mt: 2 }}
+              sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minWidth: 0, minHeight: 0, mt: 2, ml: 1, mr: 1 }}
               role="region"
               aria-label={t('accessibility:preview')}
             >

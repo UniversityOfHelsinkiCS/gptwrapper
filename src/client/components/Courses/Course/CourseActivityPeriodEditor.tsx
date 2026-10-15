@@ -78,21 +78,24 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
         <Stack direction="row" spacing={2} alignItems="flex-start">
           <DatePicker
             label={t('opensAt')}
+            enableAccessibleFieldDOMStructure={false}
             value={startDate}
             onChange={(date) => date && isValid(date) && setStartDate(date)}
             slotProps={{ textField: { fullWidth: true, size: 'small' } }}
           />
           <DatePicker
             label={t('closesAt')}
+            enableAccessibleFieldDOMStructure={false}
             value={endDate}
             onChange={(date) => date && isValid(date) && setEndDate(date)}
             slotProps={{ textField: { fullWidth: true, size: 'small' } }}
           />
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>
-            <Tooltip arrow placement="top" title={t('common:cancel')}>
+            <Tooltip arrow placement="top" title={t('common:cancel')} describeChild>
               <span>
                 <IconButton
                   size="small"
+                  aria-label={t('common:cancel')}
                   onClick={() => handleCancel()}
                   disabled={!hasUnsavedChanges}
                   sx={{ '&.Mui-disabled .MuiSvgIcon-root': { color: 'action.disabled', opacity: 0.55 } }}
@@ -101,10 +104,11 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
                 </IconButton>
               </span>
             </Tooltip>
-            <Tooltip arrow placement="top" title={t('common:save')}>
+            <Tooltip arrow placement="top" title={t('common:save')} describeChild>
               <span>
                 <IconButton
                   size="small"
+                  aria-label={t('common:save')}
                   onClick={() => handleSubmit()}
                   disabled={!hasUnsavedChanges}
                   sx={{ '&.Mui-disabled .MuiSvgIcon-root': { color: 'action.disabled', opacity: 0.55 } }}

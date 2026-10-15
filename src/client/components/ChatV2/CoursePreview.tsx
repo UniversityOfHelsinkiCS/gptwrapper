@@ -302,7 +302,13 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <LinearProgress variant="determinate" color={gaugeColorKey(percent)} value={percent} sx={{ height: 12, borderRadius: 6, flex: 1 }} />
+                  <LinearProgress
+                    variant="determinate"
+                    aria-label={t('status:usageTitle')}
+                    color={gaugeColorKey(percent)}
+                    value={percent}
+                    sx={{ height: 12, borderRadius: 6, flex: 1 }}
+                  />
                   <Typography variant="body2" fontWeight={600} sx={{ minWidth: 45, textAlign: 'right' }}>
                     {percent} %
                   </Typography>
@@ -400,7 +406,10 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={t('course:searchStudents')}
-                  slotProps={{ input: { startAdornment: <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} /> } }}
+                  slotProps={{
+                    input: { startAdornment: <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} /> },
+                    htmlInput: { 'aria-label': t('course:searchStudents') },
+                  }}
                   sx={{ minWidth: 220 }}
                 />
               )}
