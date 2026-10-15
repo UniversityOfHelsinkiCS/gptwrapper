@@ -8,7 +8,7 @@ import useCourse from '../../hooks/useCourse'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import { getApiErrorMessage } from '../../util/apiClient'
 import { useCourseRagIndices, useRagIndices } from '../../hooks/useRagIndices'
-import { BlueButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
+import { BlueButton, OutlineButtonBlue } from '../ChatV2/general/Buttons'
 import { usePromptState } from '../ChatV2/PromptState'
 import { PromptEditorFormContext, usePromptEditorState } from './context'
 import { PromptEditorForm } from './PromptEditorForm'
@@ -178,7 +178,7 @@ export const PromptEditorV2 = ({
           <DialogActions>
             <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
               {loading && <CircularProgress color="secondary" />}
-              <OutlineButtonBlack
+              <OutlineButtonBlue
                 type="button"
                 onClick={() => {
                   clearCachedForm()
@@ -186,7 +186,7 @@ export const PromptEditorV2 = ({
                 }}
               >
                 {t('common:cancel')}
-              </OutlineButtonBlack>
+              </OutlineButtonBlue>
               <BlueButton disabled={loading} type="submit" variant="contained" sx={{ ml: 1 }}>
                 {t('common:save')}
               </BlueButton>

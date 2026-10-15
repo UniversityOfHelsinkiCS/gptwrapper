@@ -139,7 +139,7 @@ const useTheme = () => {
           palette: {
             mode: prefersDarkMode ? 'dark' : 'light',
             primary: {
-              main: '#5779A2',
+              main: '#54749C',
             },
             secondary: {
               main: '#79719D',
