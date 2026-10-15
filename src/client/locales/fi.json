@@ -855,8 +855,8 @@
   "accessibility": {
     "errorNotification": "Virhe",
     "warningNotification": "Varoitus",
-    "notificationRegion_one": "Ilmoitukset, {{count}} ilmoitus",
-    "notificationRegion_other": "Ilmoitukset, {{count}} ilmoitusta",
+    "notificationRegionOne": "Ilmoitukset, {{count}} ilmoitus",
+    "notificationRegionOther": "Ilmoitukset, {{count}} ilmoitusta",
     "notificationCount": "{{count}} ilmoitusta",
     "previewOpened": "Esikatselu avattu: {{name}}",
     "goToLatestResponse": "Siirry uusimpaan vastaukseen",

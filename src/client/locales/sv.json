@@ -829,8 +829,8 @@
   "accessibility": {
     "errorNotification": "Fel",
     "warningNotification": "Varning",
-    "notificationRegion_one": "Aviseringar, {{count}} avisering",
-    "notificationRegion_other": "Aviseringar, {{count}} aviseringar",
+    "notificationRegionOne": "Aviseringar, {{count}} avisering",
+    "notificationRegionOther": "Aviseringar, {{count}} aviseringar",
     "notificationCount": "{{count}} aviseringar",
     "previewOpened": "Förhandsgranskning öppnad: {{name}}",
     "goToLatestResponse": "Gå till senaste svaret",

@@ -164,7 +164,12 @@ const labelSnackbarRegion = () => {
     return
   }
   snackbarRegion.setAttribute('role', 'region')
-  snackbarRegion.setAttribute('aria-label', t('accessibility:notificationRegion', { count: visibleSnackbars.size }))
+  snackbarRegion.setAttribute(
+    'aria-label',
+    visibleSnackbars.size === 1
+      ? t('accessibility:notificationRegionOne', { count: visibleSnackbars.size })
+      : t('accessibility:notificationRegionOther', { count: visibleSnackbars.size }),
+  )
 }
 
 i18next.on('languageChanged', labelSnackbarRegion)
