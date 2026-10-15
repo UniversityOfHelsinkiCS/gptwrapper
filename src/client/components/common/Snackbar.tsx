@@ -162,7 +162,7 @@ const FixedWidthContent = styled(MaterialDesignContent)(({ theme, variant }) => 
     default: theme.palette.secondary.main,
     success: theme.palette.success.main,
     error: theme.palette.error.main,
-    warning: '#cb510ae4',
+    warning: theme.palette.warning.main,
     info: theme.palette.primary.main,
   }
 
@@ -182,12 +182,6 @@ const FixedWidthContent = styled(MaterialDesignContent)(({ theme, variant }) => 
   }
 })
 
-/*
- The type of an error or warning is otherwise shown only with color and icon, so it is written out for screen readers.
- It is part of the message text, so it is also heard in the live announcement and with the virtual cursor.
- The close button is described by the message: focusing it tells which notification it closes.
- Notistack gives every message the same id, so a unique one is needed for that.
-*/
 const SnackbarContent = forwardRef<HTMLDivElement, CustomContentProps>(({ id, message, variant, ...props }, ref) => {
   const { t } = useTranslation()
   const messageId = useId()

@@ -151,7 +151,7 @@ const useTheme = () => {
               main: '#5779A2',
             },
             warning: {
-              main: '#b07d3a',
+              main: '#cb510ae4',
             },
             error: {
               main: '#9b4545',
