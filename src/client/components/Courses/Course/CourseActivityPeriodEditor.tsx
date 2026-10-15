@@ -44,6 +44,10 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
         })
       }
       enqueueSnackbar(t('course:courseUpdated'), { variant: 'success' })
+      const target = document.getElementsByName('course-activity-period-editor')[0] as HTMLElement | null
+      if (target) {
+        target.focus()
+      }
     } catch (error: any) {
       enqueueSnackbar(error.message, { variant: 'error' })
     }
@@ -52,6 +56,10 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
   const handleCancel = () => {
     setStartDate(new Date(course.activityPeriod?.startDate || new Date()))
     setEndDate(new Date(course.activityPeriod?.endDate || new Date()))
+    const target = document.getElementsByName('course-activity-period-editor')[0] as HTMLElement | null
+    if (target) {
+      target.focus()
+    }
   }
 
   const handleActivate = () => window.confirm(t('course:activate')) && handleSubmit(DEFAULT_TOKEN_LIMIT, true)
@@ -77,6 +85,7 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
         </Box>
         <Stack direction="row" spacing={2} alignItems="flex-start">
           <DatePicker
+            name="course-activity-period-editor"
             label={t('opensAt')}
             enableAccessibleFieldDOMStructure={false}
             value={startDate}
