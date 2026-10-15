@@ -12,7 +12,10 @@ export const acceptDisclaimer = async (page: Page) => {
 }
 
 export const closeSendPreference = async (page: Page) => {
-  await page.getByTestId('submit-send-preference').click()
+  const submitButton = page.getByTestId('submit-send-preference')
+  await submitButton.click()
+  // Wait for the popover's exit transition to finish, otherwise half-faded content lingers in the DOM
+  await expect(submitButton).toHaveCount(0)
 }
 
 export const sendChatMessage = async (page: Page, message: string) => {
