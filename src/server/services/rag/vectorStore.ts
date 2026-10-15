@@ -45,9 +45,13 @@ export const vectorPool = vectorStore.pool
 await vectorPool.query(`ALTER TABLE documents ADD COLUMN IF NOT EXISTS fts_index tsvector
     GENERATED ALWAYS AS (to_tsvector('simple', coalesce(content, ''))) STORED;`)
 
-export const retriever = vectorStore.asRetriever({
+
+export const getRetriever = (ragid) => vectorStore.asRetriever({
   searchType: "mmr",
   k: 6,
+  filter: {
+    ragIndex: ragid
+  }
 });
 
 export class CustomPGVectorStore {

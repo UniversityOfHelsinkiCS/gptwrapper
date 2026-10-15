@@ -6,7 +6,7 @@ import { Embeddings } from '@langchain/core/embeddings'
 import { getEmbedder } from './embedder'
 import { transformQuery, TransformQueryOptions } from './queryTransformer'
 import { EnsembleRetriever } from '@langchain/classic/retrievers/ensemble'
-import { retriever, vectorPool } from './vectorStore'
+import { getRetriever, vectorPool } from './vectorStore'
 
 const normalizeWhitespace = (str: string) => {
   return str.replace(/\s+/g, ' ').trim();
@@ -100,9 +100,8 @@ class VectorSearchRetriever extends BaseRetriever {
 
   async _getRelevantDocuments(query: string, _callbacks?: CallbackManagerForRetrieverRun): Promise<DocumentInterface<Record<string, any>>[]> {
     try {
-      const docs = await retriever.invoke(query, {
-        metadata: { ragIndex: this.indexName }
-      })
+      const retriever = getRetriever(this.indexName)
+      const docs = await retriever.invoke(query)
       return docs.map(
         (doc) =>
           new Document({
