@@ -103,6 +103,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
         />
         <IconButton
           type="submit"
+          aria-label={t('rag:searchButton')}
           disabled={!query.trim()}
           sx={{
             flex: '0 0 auto',

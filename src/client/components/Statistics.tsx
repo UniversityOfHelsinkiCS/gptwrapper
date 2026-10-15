@@ -432,7 +432,7 @@ export function Component() {
               ))}
             </Select>
           </div>
-          <IconButton onClick={handleXLSX} sx={{ marginLeft: 'auto' }}>
+          <IconButton onClick={handleXLSX} aria-label={t('accessibility:downloadStatistics')} sx={{ marginLeft: 'auto' }}>
             <CloudDownloadIcon fontSize="large" />
           </IconButton>
         </Stack>
@@ -580,8 +580,8 @@ export function Component() {
                     </TableCell>
                     <TableCell align="left">
                       <Typography variant="h6">
-                        <Tooltip title={t('stats:studentEnrollmentPercentageTooltip')}>
-                          <b>{t('stats:studentEnrollmentPercentage')}</b>
+                        <Tooltip title={t('stats:studentEnrollmentPercentageTooltip')} describeChild>
+                          <b tabIndex={0}>{t('stats:studentEnrollmentPercentage')}</b>
                         </Tooltip>
                       </Typography>
                     </TableCell>
@@ -770,8 +770,8 @@ const CoursesTable = memo(function CoursesTable({
               <Typography>{chat.terms.map((trm) => trm.label[language]).join(', ')}</Typography>
             </TableCell>
             <TableCell align="left">
-              <Tooltip title={namesOf(chat.programmes, language)}>
-                <Typography>{chat.programmes}</Typography>
+              <Tooltip title={namesOf(chat.programmes, language)} describeChild>
+                <Typography tabIndex={chat.programmes.length ? 0 : undefined}>{chat.programmes}</Typography>
               </Tooltip>
             </TableCell>
             <TableCell align="left">

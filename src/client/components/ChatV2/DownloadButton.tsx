@@ -45,11 +45,14 @@ const DownloadButton = ({ messages, disabled, collapsed = false }: { messages: C
 
   return (
     <>
-      <Tooltip arrow placement="right" title={collapsed ? t('chat:download') : ''}>
+      <Tooltip arrow placement="right" title={collapsed ? t('chat:download') : ''} describeChild>
         <span>
           <TextButton
             startIcon={!collapsed && <DownloadIcon />}
             onClick={handleClick}
+            aria-label={collapsed ? t('download:save') : undefined}
+            aria-haspopup="menu"
+            aria-expanded={open}
             data-testid="download-button"
             size="large"
             disabled={disabled || isCooldown}

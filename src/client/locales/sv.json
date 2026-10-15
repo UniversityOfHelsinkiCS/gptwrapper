@@ -868,6 +868,9 @@
     "responseHeading": "Svar",
     "sourceResults": "Sökresultat från källmaterialen",
     "courseSelected": "{{name}} vald för användning",
-    "copyToClipboard": "Kopiera {{item}} till urklipp"
+    "copyToClipboard": "Kopiera {{item}} till urklipp",
+    "itemAction": "{{action}}: {{- item}}",
+    "downloadStatistics": "Ladda ner statistiken som en Excel-fil",
+    "copyIframe": "Kopiera iframe-kod"
   }
 }

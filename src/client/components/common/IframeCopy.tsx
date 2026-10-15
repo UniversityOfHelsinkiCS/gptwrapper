@@ -1,6 +1,7 @@
 import { IconButton, Tooltip } from '@mui/material'
 import HtmlIcon from '@mui/icons-material/Html'
 import { useTranslation } from 'react-i18next'
+import { enqueueSnackbar } from './Snackbar'
 
 export const IframeCopy = ({ courseId, promptId, model }: { courseId: string; promptId?: string; model?: string }) => {
   const { t } = useTranslation()
@@ -18,7 +19,13 @@ export const IframeCopy = ({ courseId, promptId, model }: { courseId: string; pr
         },
       }}
     >
-      <IconButton onClick={() => navigator.clipboard.writeText(iframeSrcCode(courseId, promptId, model))}>
+      <IconButton
+        aria-label={t('accessibility:copyIframe')}
+        onClick={async () => {
+          await navigator.clipboard.writeText(iframeSrcCode(courseId, promptId, model))
+          enqueueSnackbar(t('common:copiedToClipboard'), { variant: 'success' })
+        }}
+      >
         <HtmlIcon />
       </IconButton>
     </Tooltip>

@@ -341,7 +341,8 @@ const RagSettingsSection = () => {
               e.stopPropagation()
               setOpen(!open)
             }}
-            aria-label={!open ? undefined : t('common:close')}
+            aria-label={!open ? t('rag:continueEditing') : t('common:close')}
+            aria-expanded={open}
             sx={{ ml: 1 }}
           >
             {!open ? <ExpandMore /> : <CloseIcon />}
@@ -356,7 +357,7 @@ const RagSettingsSection = () => {
               {t('prompt:modelSourceMaterialInstructions')}
             </Typography>
             <Tooltip placement="right" title={t('prompt:promptHidden')} describeChild>
-              <Box component="span" tabIndex={0} aria-label={t('prompt:promptHidden')}>
+              <Box component="span" role="img" tabIndex={0} aria-label={t('prompt:promptHidden')}>
                 <VisibilityOffOutlined fontSize="small" color="error" />
               </Box>
             </Tooltip>

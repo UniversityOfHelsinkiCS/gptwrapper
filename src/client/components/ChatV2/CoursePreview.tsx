@@ -237,8 +237,15 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
             />
           )}
           {courseEnded && (
-            <Tooltip title={t('chat:courseChatEndedInfo')}>
-              <Chip label={t('chat:courseChatEnded')} color="error" size="small" icon={<InfoOutlinedIcon fontSize="small" />} sx={{ fontWeight: 600 }} />
+            <Tooltip title={t('chat:courseChatEndedInfo')} describeChild>
+              <Chip
+                tabIndex={0}
+                label={t('chat:courseChatEnded')}
+                color="error"
+                size="small"
+                icon={<InfoOutlinedIcon fontSize="small" />}
+                sx={{ fontWeight: 600 }}
+              />
             </Tooltip>
           )}
           {course.courseUnitRealisationTypeUrn && (
@@ -492,7 +499,15 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
                             <Box sx={{ width: 40, ml: 1 }}>
                               {isAdmin && s.usageId && s.weekly > 0 && (
                                 <Tooltip title={t('course:resetWeeklyUsage')}>
-                                  <IconButton size="small" onClick={() => handleResetUsage(s.usageId as string)} data-testid={`reset-usage-${s.user.id}`}>
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleResetUsage(s.usageId as string)}
+                                    aria-label={t('accessibility:itemAction', {
+                                      action: t('course:resetWeeklyUsage'),
+                                      item: `${s.user.last_name ?? ''} ${s.user.first_names ?? ''}`.trim(),
+                                    })}
+                                    data-testid={`reset-usage-${s.user.id}`}
+                                  >
                                     <RestartAltIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
@@ -509,6 +524,10 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
                                   const existing = enrolments.find((e) => e.user.id === s.user.id)
                                   if (existing) handleRemoveEnrolment(existing)
                                 }}
+                                aria-label={t('accessibility:itemAction', {
+                                  action: t('course:remove'),
+                                  item: `${s.user.last_name ?? ''} ${s.user.first_names ?? ''}`.trim(),
+                                })}
                               >
                                 <CancelIcon fontSize="small" color="primary" />
                               </IconButton>

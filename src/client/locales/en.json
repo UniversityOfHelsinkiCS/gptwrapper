@@ -893,6 +893,9 @@
     "responseHeading": "Response",
     "sourceResults": "Search results from source materials",
     "courseSelected": "{{name}} selected for use",
-    "copyToClipboard": "Copy {{item}} to clipboard"
+    "copyToClipboard": "Copy {{item}} to clipboard",
+    "itemAction": "{{action}}: {{- item}}",
+    "downloadStatistics": "Download statistics as an Excel file",
+    "copyIframe": "Copy embeddable iframe element"
   }
 }

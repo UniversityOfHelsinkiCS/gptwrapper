@@ -131,6 +131,7 @@ const PromptPreview = ({
                   id="edit-prompt-button"
                   size="small"
                   onClick={() => handleEdit(courseId)}
+                  aria-label={t('prompt:editPrompt', { name: prompt.name })}
                   color="primary"
                   data-testid={`edit-prompt-${prompt.name}`}
                 >
@@ -140,14 +141,26 @@ const PromptPreview = ({
             )}
             {showCopyPrompt && (
               <Tooltip arrow placement="bottom" title={t('prompt:copyPromptTooltip')}>
-                <IconButton size="small" onClick={(e) => setCopyAnchor(e.currentTarget)} color="primary" data-testid="copy-prompt-button">
+                <IconButton
+                  size="small"
+                  onClick={(e) => setCopyAnchor(e.currentTarget)}
+                  aria-label={t('accessibility:itemAction', { action: t('prompt:copyPromptTooltip'), item: prompt.name })}
+                  aria-haspopup="menu"
+                  aria-expanded={Boolean(copyAnchor)}
+                  color="primary"
+                  data-testid="copy-prompt-button"
+                >
                   <ContentCopyOutlined fontSize="small" />
                 </IconButton>
               </Tooltip>
             )}
             {!isPersonalPrompt && (
               <Tooltip arrow placement="bottom" title={t('prompt:copyPromptUrlTooltip')}>
-                <IconButton size="small" onClick={(e) => handleCopyLink(e, prompt)}>
+                <IconButton
+                  size="small"
+                  onClick={(e) => handleCopyLink(e, prompt)}
+                  aria-label={t('accessibility:itemAction', { action: t('prompt:copyPromptUrlTooltip'), item: prompt.name })}
+                >
                   <LinkOutlined fontSize="small" />
                 </IconButton>
               </Tooltip>
@@ -161,7 +174,13 @@ const PromptPreview = ({
             )}
             {canEditPrompt && (
               <Tooltip arrow placement="bottom" title={t('prompt:deletePromptTooltip')}>
-                <IconButton size="small" onClick={(event) => handleDelete(event, prompt)} color="error" data-testid={`delete-prompt-${prompt.name}`}>
+                <IconButton
+                  size="small"
+                  onClick={(event) => handleDelete(event, prompt)}
+                  aria-label={t('accessibility:itemAction', { action: t('prompt:deletePromptTooltip'), item: prompt.name })}
+                  color="error"
+                  data-testid={`delete-prompt-${prompt.name}`}
+                >
                   <DeleteOutline fontSize="small" />
                 </IconButton>
               </Tooltip>

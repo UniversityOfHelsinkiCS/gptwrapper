@@ -894,6 +894,9 @@
     "responseHeading": "Vastaus",
     "sourceResults": "Hakutulokset lähdemateriaaleista",
     "courseSelected": "{{name}} valittu käyttöön",
-    "copyToClipboard": "Kopioi {{item}} leikepöydälle"
+    "copyToClipboard": "Kopioi {{item}} leikepöydälle",
+    "itemAction": "{{action}}: {{- item}}",
+    "downloadStatistics": "Lataa tilastot Excel-tiedostona",
+    "copyIframe": "Kopioi upotettava iframe-elementti"
   }
 }

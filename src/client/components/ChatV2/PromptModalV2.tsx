@@ -496,6 +496,8 @@ const PromptModalV2 = () => {
                     <IconButton
                       size="small"
                       onClick={(e) => setFilterAnchor(e.currentTarget)}
+                      aria-haspopup="true"
+                      aria-expanded={Boolean(filterAnchor)}
                       data-testid="course-filter-button"
                       sx={{ color: filterAnchor ? 'primary.main' : 'text.secondary' }}
                     >

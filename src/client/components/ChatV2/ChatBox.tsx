@@ -300,16 +300,16 @@ export const ChatBox = ({
                 <Tooltip title={t('chat:attachFile')} arrow placement="top">
                   <IconButton id="attach-file-button" onClick={() => fileInputRef.current?.click()}>
                     <AttachFileIcon />
-                    <input
-                      type="file"
-                      accept="*"
-                      hidden
-                      aria-label={t('chat:attachFile')}
-                      ref={fileInputRef}
-                      onChange={(e) => e.target.files?.[0] && handleFileTypeValidation(e.target.files[0])}
-                    />
                   </IconButton>
                 </Tooltip>
+                <input
+                  type="file"
+                  accept="*"
+                  hidden
+                  aria-label={t('chat:attachFile')}
+                  ref={fileInputRef}
+                  onChange={(e) => e.target.files?.[0] && handleFileTypeValidation(e.target.files[0])}
+                />
 
                 {fileName && (
                   <Chip

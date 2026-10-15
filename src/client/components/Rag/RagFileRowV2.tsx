@@ -124,6 +124,7 @@ export const RagFileRowV2: React.FC<RagFileRowV2Props> = ({ file, status, upload
       <Tooltip title={t('rag:deleteFile')}>
         <IconButton
           onClick={() => onDelete(file.id)}
+          aria-label={t('accessibility:itemAction', { action: t('rag:deleteFile'), item: file.filename })}
           sx={{ flexShrink: 0, color: 'text.disabled', '&:hover': { color: 'error.main', backgroundColor: (theme) => alpha(theme.palette.error.main, 0.1) } }}
         >
           <DeleteOutline />
