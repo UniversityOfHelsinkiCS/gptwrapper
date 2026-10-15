@@ -201,7 +201,8 @@
     "contextLimitWarning": "Keskustelu ylittää valitun mallin kontekstirajan, joka on {{contextLimit}} tokenia. Keskustelussasi on {{tokenCount}} tokenia. Jatkaminen katkaisee vanhimmat viestit. Suositeltavaa on aloittaa uusi keskustelu.",
     "noPrompt": "Ei alustusta",
     "showFullDescription": "Näytä koko kuvaus",
-    "showLessDescription": "Näytä vähemmän"
+    "showLessDescription": "Näytä vähemmän",
+    "codeBlock": "Koodikenttä"
   },
   "settings": {
     "prompt": "Keskustelun alustus",
@@ -892,6 +893,7 @@
     "userMessageHeading": "Sinun viestisi",
     "responseHeading": "Vastaus",
     "sourceResults": "Hakutulokset lähdemateriaaleista",
-    "courseSelected": "{{name}} valittu käyttöön"
+    "courseSelected": "{{name}} valittu käyttöön",
+    "copyToClipboard": "Kopioi {{item}} leikepöydälle"
   }
 }

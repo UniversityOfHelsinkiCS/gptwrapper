@@ -205,7 +205,8 @@
     "contextLimitWarning": "Samtalet överskrider kontextgränsen på {{contextLimit}} token för den valda modellen. Ditt samtal har {{tokenCount}} token. Att klicka på fortsätt kommer att trunkera de äldsta meddelandena. Det rekommenderas att starta ett nytt samtal.",
     "noPrompt": "Ingen prompt",
     "showFullDescription": "Visa hela beskrivningen",
-    "showLessDescription": "Visa mindre"
+    "showLessDescription": "Visa mindre",
+    "codeBlock": "Kodblock"
   },
   "settings": {
     "prompt": "Samtalsstart",
@@ -866,6 +867,7 @@
     "userMessageHeading": "Ditt meddelande",
     "responseHeading": "Svar",
     "sourceResults": "Sökresultat från källmaterialen",
-    "courseSelected": "{{name}} vald för användning"
+    "courseSelected": "{{name}} vald för användning",
+    "copyToClipboard": "Kopiera {{item}} till urklipp"
   }
 }

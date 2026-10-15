@@ -8,11 +8,13 @@ interface CopyToClipboardButtonProps {
   id: string
   iconColor?: string
   buttonStyle?: React.CSSProperties
+  label?: string
 }
 
-const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ copied, id, iconColor = 'primary', buttonStyle }) => {
+const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ copied, id, iconColor = 'primary', buttonStyle, label }) => {
   const { t } = useTranslation()
   const [tooltipMessage, setTooltipMessage] = useState(t('chat:copyToClipboard'))
+  const ariaLabel = label ? t('accessibility:copyToClipboard', { item: label }) : t('chat:copyToClipboard')
 
   const handleClick = () => {
     const element = document.getElementById(id)
@@ -41,6 +43,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ copied, i
     <Box>
       <Tooltip title={tooltipMessage} arrow leaveDelay={0} enterTouchDelay={300}>
         <IconButton
+          aria-label={ariaLabel}
           onClick={handleClick}
           style={{
             ...buttonStyle,

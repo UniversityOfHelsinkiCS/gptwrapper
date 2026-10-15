@@ -296,6 +296,7 @@ const AssistantMessageItem = ({
                     <CopyToClipboardButton
                       id={codeBlockId}
                       copied={String(children)}
+                      label={t('chat:codeBlock')}
                       iconColor="#FFF"
                       buttonStyle={{
                         position: 'absolute',
@@ -331,7 +332,7 @@ const AssistantMessageItem = ({
           ...focusIndicatorStyle(),
         }}
       >
-        <CopyToClipboardButton id={msgId} copied={readMessageContent(message)} />
+        <CopyToClipboardButton id={msgId} copied={readMessageContent(message)} label={t('accessibility:responseHeading')} />
       </Box>
       {message.error && (
         <Box sx={{ mt: 2 }}>

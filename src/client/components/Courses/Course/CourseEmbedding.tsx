@@ -96,7 +96,7 @@ export default function CourseEmbedding({ courseId, prompt }: CourseEmbeddingPro
           </Box>
 
           <Typography fontWeight="bold" mt={3} mb={2}>{`${t('course:courseChatLink')} ${prompt ? `+ (${prompt.name})` : ''}`}</Typography>
-          <CopyField copied={link}>
+          <CopyField copied={link} label={t('course:courseChatLink') + (prompt ? `+ ${t('common:prompt')}` : '')}>
             <Typography color="textSecondary" sx={{ p: 1, pr: 3, wordBreak: 'break-all' }}>
               {link}
             </Typography>
@@ -105,7 +105,7 @@ export default function CourseEmbedding({ courseId, prompt }: CourseEmbeddingPro
           <Typography fontWeight="bold" mb={2}>
             {t('course:moodleEmbeddingCode')}
           </Typography>
-          <CopyField copied={embeddingCode}>
+          <CopyField copied={embeddingCode} label={t('course:moodleEmbeddingCode')}>
             <Box
               id="moodle-embedding"
               component="pre"
@@ -163,7 +163,7 @@ const GuideItem = ({ label, variant = 'primary', children }: { label: string | n
   )
 }
 
-const CopyField = ({ children, copied }: { children: ReactNode; copied: string }) => {
+const CopyField = ({ children, copied, label }: { children: ReactNode; copied: string; label: string }) => {
   return (
     <Box
       sx={{
@@ -182,7 +182,7 @@ const CopyField = ({ children, copied }: { children: ReactNode; copied: string }
       }}
     >
       {children}
-      <CopyToClipboardButton id="moodle-embedding" copied={copied} />
+      <CopyToClipboardButton id="moodle-embedding" copied={copied} label={label} />
     </Box>
   )
 }

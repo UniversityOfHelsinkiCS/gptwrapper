@@ -198,7 +198,8 @@
     "contextLimitWarning": "The conversation exceeds the context limit of {{contextLimit}} tokens for the selected model. Your conversation has {{tokenCount}} tokens. Clicking continue will truncate the oldest messages. It is recommended to start a new conversation.",
     "noPrompt": "No prompt",
     "showFullDescription": "Show full description",
-    "showLessDescription": "Show less"
+    "showLessDescription": "Show less",
+    "codeBlock": "Code block"
   },
   "settings": {
     "prompt": "Conversation prompt",
@@ -891,6 +892,7 @@
     "userMessageHeading": "Your message",
     "responseHeading": "Response",
     "sourceResults": "Search results from source materials",
-    "courseSelected": "{{name}} selected for use"
+    "courseSelected": "{{name}} selected for use",
+    "copyToClipboard": "Copy {{item}} to clipboard"
   }
 }
