@@ -68,7 +68,7 @@ const BasicInfoSection = () => {
     <Box>
       <Box display="flex" alignItems="center" gap={1} mb={1}>
         <EditNoteIcon color="secondary" />
-        <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
+        <Typography variant="subtitle1" component="h3" fontWeight="bold" color="text.primary">
           {t('prompt:promptBasicInfo')}
         </Typography>
       </Box>
@@ -80,7 +80,7 @@ const BasicInfoSection = () => {
         </Box>
       )}
       <Box mb={3}>
-        <Typography variant="subtitle1" mb={1} fontWeight="bold">
+        <Typography variant="subtitle1" component="h4" mb={1} fontWeight="bold">
           {t('prompt:name')}
         </Typography>
         <TextField
@@ -106,7 +106,7 @@ const BasicInfoSection = () => {
         />
       </Box>
       <Box>
-        <Typography variant="subtitle1" mb={1} fontWeight="bold">
+        <Typography variant="subtitle1" component="h4" mb={1} fontWeight="bold">
           {t('prompt:promptDescription')}
         </Typography>
         <TextField
@@ -142,7 +142,7 @@ const ModelSettingsSection = ({ hideVisibilityToggle = false }: { hideVisibility
     <Box>
       <Box display="flex" alignItems="center" gap={1} mb={1}>
         <PsychologyIcon color="secondary" />
-        <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
+        <Typography variant="subtitle1" component="h4" fontWeight="bold" color="text.primary">
           {t('prompt:promptModelSettings')}
         </Typography>
         {type !== 'PERSONAL' && !hideVisibilityToggle && (
@@ -214,7 +214,7 @@ const RagSettingsSection = () => {
     <Box>
       <Box display="flex" alignItems="center" gap={1} mb={3}>
         <BookmarksIcon color="secondary" />
-        <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
+        <Typography variant="subtitle1" component="h4" fontWeight="bold" color="text.primary">
           {t('prompt:promptSourceMaterialData')}
         </Typography>
       </Box>
