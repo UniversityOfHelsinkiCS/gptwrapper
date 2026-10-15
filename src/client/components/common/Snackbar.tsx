@@ -18,7 +18,7 @@ import { SNACKBAR_CONTAINER, findFocusAfterClose, rememberFocusOutsideSnackbars 
 
 export const MAX_SNACKBARS = 4
 
-const AUTO_HIDE_DURATION = 30_000
+const AUTO_HIDE_DURATION = 20_000
 
 const openSnackbars = new Map<string, SnackbarKey>()
 
