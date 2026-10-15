@@ -23,6 +23,7 @@ import { canCopyPrompt } from '@shared/promptPermissions'
 import CodeIcon from '@mui/icons-material/Code'
 import CloseIcon from '@mui/icons-material/Close'
 import CourseEmbedding from '../Courses/Course/CourseEmbedding'
+import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer.tsx'
 
 const ragFileBadge = (filename: string, fileType?: string) => {
   const ext = filename.includes('.') ? filename.split('.').pop()?.toUpperCase() : fileType?.split('/').pop()?.toUpperCase()
@@ -88,6 +89,7 @@ const PromptPreview = ({
 
   return (
     <>
+      <StatusAnnouncer message={t('accessibility:previewOpened', { name: prompt.name })} />
       <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
         {canManage ? (
           <Box>

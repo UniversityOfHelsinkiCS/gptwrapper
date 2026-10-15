@@ -163,7 +163,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
                 primary: {
                   id: `course-heading-${course.id}`,
                   variant: 'subtitle1',
-                  component: 'h4',
+                  component: 'span',
                   fontWeight: 600,
                   color: course.activated || !amongResponsibles || user?.isAdmin ? 'default' : 'text.secondary',
                 },

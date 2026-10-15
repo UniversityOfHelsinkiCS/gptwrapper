@@ -101,7 +101,7 @@ const UniversityPromptCard = ({
         />
 
         <Box sx={{ mb: 1.5, pointerEvents: 'none' }}>
-          <Typography variant="subtitle2" component="h5" sx={{ fontWeight: 600, wordBreak: 'break-word' }}>
+          <Typography variant="subtitle2" component="span" sx={{ fontWeight: 600, wordBreak: 'break-word' }}>
             {prompt.name}
           </Typography>
 

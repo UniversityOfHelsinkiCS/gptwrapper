@@ -138,7 +138,6 @@ export const PromptListItem = ({
           </Tooltip>
         )}
       </ListItemButton>
-      <StatusAnnouncer message={previewPromptId === prompt.id ? t('accessibility:previewOpened', { name: prompt.name }) : ''} />
 
       {prompt.id !== activePromptId && (
         <BlueButton
@@ -391,7 +390,7 @@ const PromptModalV2 = () => {
                   <ListItemIcon sx={{ minWidth: 40 }}>
                     <AccountBalanceIcon color="primary" />
                   </ListItemIcon>
-                  <ListItemText primary={t('uniPrompts:galleryNav')} slotProps={{ primary: { variant: 'subtitle1', component: 'h3', fontWeight: 600 } }} />
+                  <ListItemText primary={t('uniPrompts:galleryNav')} slotProps={{ primary: { variant: 'subtitle1', component: 'span', fontWeight: 600 } }} />
                 </ListItemButton>
                 <StatusAnnouncer message={showUniversityPrompts ? t('accessibility:previewOpened', { name: t('uniPrompts:title') }) : ''} />
               </Box>
@@ -416,7 +415,7 @@ const PromptModalV2 = () => {
                 </ListItemIcon>
                 <ListItemText
                   primary={t('settings:myPrompts')}
-                  slotProps={{ primary: { id: 'my-prompts-heading', variant: 'subtitle1', component: 'h3', fontWeight: 600 } }}
+                  slotProps={{ primary: { id: 'my-prompts-heading', variant: 'subtitle1', component: 'span', fontWeight: 600 } }}
                 />
               </ListItemButton>
               <StatusAnnouncer message={showMyPrompts ? t('accessibility:promptListOpened', { name: t('settings:myPrompts') }) : ''} />
@@ -490,7 +489,7 @@ const PromptModalV2 = () => {
                 <Divider sx={{ my: 1 }} />
                 {/* Courses header with filter */}
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, pt: 1.5, pb: 0.5 }}>
-                  <Typography variant="overline" component="h3" sx={SECTION_LABEL_SX}>
+                  <Typography variant="overline" sx={SECTION_LABEL_SX}>
                     {t('settings:courses')}
                   </Typography>
                   <Tooltip title={t('settings:filterCourses')}>
@@ -563,7 +562,7 @@ const PromptModalV2 = () => {
                   <Box>
                     <Divider sx={{ my: 1 }} />
                     <Box sx={{ px: 1, pt: 1.5, pb: 0.5 }}>
-                      <Typography variant="overline" component="h3" sx={SECTION_LABEL_SX}>
+                      <Typography variant="overline" sx={SECTION_LABEL_SX}>
                         {t('settings:workspace')}
                       </Typography>
                     </Box>
