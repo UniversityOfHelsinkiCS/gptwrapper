@@ -72,7 +72,7 @@ export const Feedback: React.FC<{
             i18nKey="feedback:supportInfo"
             values={{ supportEmail }}
             components={{
-              mailTo: <Link href={`mailto:${supportEmail}`} underline="hover" color="toskaPrimary.main" />,
+              mailTo: <Link href={`mailto:${supportEmail}`} underline="always" color="warning.main" />,
             }}
           />
         </DialogContentText>
