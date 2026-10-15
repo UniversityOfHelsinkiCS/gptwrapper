@@ -1,4 +1,4 @@
-import { Modal, Box, IconButton, Checkbox, FormControlLabel, FormGroup } from '@mui/material'
+import { Modal, Box, IconButton, Checkbox, FormControlLabel, FormGroup, Typography } from '@mui/material'
 import Close from '@mui/icons-material/Close'
 import { useTranslation } from 'react-i18next'
 import { BlueButton } from './ChatV2/general/Buttons'
@@ -45,6 +45,9 @@ export const DisclaimerModal = ({ disclaimerStatus, setDisclaimerStatus }: { dis
   return (
     <Modal open={disclaimerStatus} onClose={() => closeAccepted()}>
       <Box
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('common:about_service')}
         sx={{
           position: 'absolute',
           top: '50%',
@@ -63,6 +66,9 @@ export const DisclaimerModal = ({ disclaimerStatus, setDisclaimerStatus }: { dis
           padding: '2rem',
         }}
       >
+        <Typography variant="h5" component="h2" my={2} fontWeight="semibold">
+          {t('about_service')}
+        </Typography>
         <IconButton
           id="close-disclaimer"
           aria-label={t('common:close')}

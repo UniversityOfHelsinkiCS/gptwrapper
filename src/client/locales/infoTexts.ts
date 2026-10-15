@@ -21,7 +21,7 @@ CurreChat noudattaa EU:n yleistä tietosuoja-asetusta (GDPR). Käydyt keskustelu
 
 CurreChatissa ei saa käsitellä luottamuksellisia tai salaisia tietoja ja käyttäjän tulee varmistaa, että hänellä on riittävät oikeudet syöttämiensä materiaalien käsittelyyn palvelussa.
 
-**Ohjeita ja lisätietoa**
+### Ohjeita ja lisätietoa
 
 - [Tekoäly opetuksessa](https://teaching.helsinki.fi/ohjeet/node/3923) (Opetustyön ohjeet)
 - [Tekoälyn käyttö oppimisen tukena](https://studies.helsinki.fi/ohjeet/node/3968) (Opiskelu-palvelu)
@@ -30,7 +30,9 @@ CurreChatissa ei saa käsitellä luottamuksellisia tai salaisia tietoja ja käyt
 - CurreChatiin liittyvissä kysymyksissä voit olla yhteydessä osoitteeseen [opetusteknologia@helsinki.fi](mailto:opetusteknologia@helsinki.fi)
 `,
     sv: `
-### Instruktioner för användning av CurreChatAnvändningen av de mer avancerade språkmodellerna är begränsad till ett visst antal tokens per vecka. Personalen har tillgång till 200 000 tokens och studerande till 100 000 tokens. Varje aktiv kurs ger ytterligare 100 000 tokens per vecka för personligt bruk. På kurser har studerande som standard 200 000 tokens per vecka. Detta saldo återställs varje veckas måndag. **För att minska förbrukningen av tokens bör du rensa konversationen** med knappen RADERA KONVERSATION varje gång du byter ämne för konversationen. Användning av språkmodellen GPT-4o-mini förbrukar inte tokens. Du kan se förbrukningen av tokens och den språkmodell som används längst ner i konversationsfönstret.
+### Instruktioner för användning av CurreChat
+
+Användningen av de mer avancerade språkmodellerna är begränsad till ett visst antal tokens per vecka. Personalen har tillgång till 200 000 tokens och studerande till 100 000 tokens. Varje aktiv kurs ger ytterligare 100 000 tokens per vecka för personligt bruk. På kurser har studerande som standard 200 000 tokens per vecka. Detta saldo återställs varje veckas måndag. **För att minska förbrukningen av tokens bör du rensa konversationen** med knappen RADERA KONVERSATION varje gång du byter ämne för konversationen. Användning av språkmodellen GPT-4o-mini förbrukar inte tokens. Du kan se förbrukningen av tokens och den språkmodell som används längst ner i konversationsfönstret.
 
 **När du rensar konversationen raderas den gamla konversationen.**
 
@@ -69,7 +71,7 @@ CurreChat complies with the EU General Data Protection Regulation(GDPR).Conversa
 
 Confidential or secret information must not be processed in CurreChat, and the user must ensure that they have sufficient rights to handle the materials they input into the service.
 
-**Instructions and further information**
+### Instructions and further information
 
 * [Artificial intelligence in teaching](https://teaching.helsinki.fi/instructions/article/artificial-intelligence-teaching) (Instructions for teachers)
 * [Using AI to Support Learning](https://studies.helsinki.fi/instructions/article/using-ai-support-learning) (Studies service)
