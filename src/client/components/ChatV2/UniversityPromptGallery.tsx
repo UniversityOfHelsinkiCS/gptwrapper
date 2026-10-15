@@ -8,7 +8,7 @@ import type { CoursesViewCourse } from '../../hooks/useUserCourses'
 import useUniversityPrompts, { groupLanguages, type UniversityPromptGroup } from '../../hooks/useUniversityPrompts'
 import type { Prompt, PromptLanguage } from '../../types'
 import CopyPromptMenu from './CopyPromptMenu.tsx'
-import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer.tsx'
+import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer.ts'
 
 const isPromptLanguage = (language: string): language is PromptLanguage => language === 'fi' || language === 'en' || language === 'sv'
 
@@ -134,6 +134,7 @@ const UniversityPromptCard = ({
                 onClick={(event) => {
                   event.stopPropagation()
                   setLanguage(option)
+                  announceToScreenReader(`${t('accessibility:languageSelected', { name: prompt.name })}`)
                 }}
                 sx={{
                   px: 1.1,
@@ -160,7 +161,6 @@ const UniversityPromptCard = ({
           </Box>
         )}
       </Paper>
-      {languages.length > 0 && <StatusAnnouncer message={language ? t('accessibility:languageSelected', { name: prompt.name }) : ''} />}
 
       {isTemplate && <CopyPromptMenu prompt={prompt} targets={copyTargets} anchorEl={copyAnchor} onClose={() => setCopyAnchor(null)} onCopied={onCopied} />}
     </>
