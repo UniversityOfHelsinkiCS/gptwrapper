@@ -40,6 +40,10 @@ export const requestFocusAfterNavigate = (elementId: string) => {
   sessionStorage.setItem(PENDING_FOCUS_STORAGE_KEY, elementId)
 }
 
+const FOCUS_SETTLE_TIME = 100
+
+const isHiddenFromScreenReaders = (element: HTMLElement) => !!element.closest('[aria-hidden="true"], [inert]')
+
 export const consumePendingFocusTarget = (): boolean => {
   const pendingId = sessionStorage.getItem(PENDING_FOCUS_STORAGE_KEY)
   if (!pendingId) return false
@@ -47,7 +51,15 @@ export const consumePendingFocusTarget = (): boolean => {
   const target = document.getElementById(pendingId)
   if (!target) return false
 
-  target.focus()
+  // Behind an open modal (MUI marks the rest of the page aria-hidden): keep the request pending
+  // until it closes, otherwise the modal's focus trap swallows it.
+  if (isHiddenFromScreenReaders(target)) return false
+
   sessionStorage.removeItem(PENDING_FOCUS_STORAGE_KEY)
+  const focusedBefore = document.activeElement
+  setTimeout(() => {
+    if (document.activeElement !== focusedBefore && document.activeElement !== document.body) return
+    if (target.isConnected && !isHiddenFromScreenReaders(target)) target.focus()
+  }, FOCUS_SETTLE_TIME)
   return true
 }
