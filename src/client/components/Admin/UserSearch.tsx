@@ -268,7 +268,13 @@ export const ResponsibilityActionUserSearch = ({
 
   return (
     <Box>
-      <Input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('admin:searchUsers')} />
+      <Input
+        type="text"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder={t('admin:searchUsers')}
+        slotProps={{ input: { 'aria-label': t('admin:searchUsers'), 'aria-describedby': 'teachers-header' } }}
+      />
 
       {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
 
@@ -299,7 +305,13 @@ export const EnrolmentActionUserSearch = ({
 
   return (
     <Box>
-      <Input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('admin:searchUsers')} />
+      <Input
+        type="text"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder={t('admin:searchUsers')}
+        slotProps={{ input: { 'aria-label': t('admin:searchUsers'), 'aria-describedby': 'students-header' } }}
+      />
 
       {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
 

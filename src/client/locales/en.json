@@ -519,8 +519,12 @@
     "activeThisWeek": "Active this week",
     "weeklyUsage": "Weekly usage",
     "resetWeeklyUsage": "Reset weekly usage",
-    "searchStudents": "Search name or number",
+    "searchStudents": "Search by name or student number",
     "addTeacher": "Add teacher",
+    "addTeacherFailed": "Adding the teacher failed",
+    "addStudentFailed": "Adding the student failed",
+    "removeTeacherFailed": "Removing the teacher failed",
+    "removeStudentFailed": "Removing the student failed",
     "showMore": "Show {{count}} more",
     "showLess": "Show less",
     "activityPeriod": "Activity period",
@@ -899,6 +903,11 @@
     "itemAction": "{{action}}: {{- item}}",
     "downloadStatistics": "Download statistics as an Excel file",
     "copyIframe": "Copy embeddable iframe element",
-    "closeInfo": "Close additional information"
+    "closeInfo": "Close additional information",
+    "teacherAdded": "Teacher added: {{- name}}",
+    "studentAdded": "Student added: {{- name}}",
+    "teacherRemoved": "Teacher removed: {{- name}}",
+    "studentRemoved": "Student removed: {{- name}}",
+    "removeChip": "Remove by pressing Delete or Backspace"
   }
 }

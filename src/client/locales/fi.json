@@ -522,8 +522,12 @@
     "activeThisWeek": "Aktiivisia tällä viikolla",
     "weeklyUsage": "Viikoittainen käyttö",
     "resetWeeklyUsage": "Nollaa viikon käyttö",
-    "searchStudents": "Hae nimellä tai numerolla",
+    "searchStudents": "Hae nimellä tai opiskelijanumerolla",
     "addTeacher": "Lisää opettaja",
+    "addTeacherFailed": "Opettajan lisääminen epäonnistui",
+    "addStudentFailed": "Opiskelijan lisääminen epäonnistui",
+    "removeTeacherFailed": "Opettajan poistaminen epäonnistui",
+    "removeStudentFailed": "Opiskelijan poistaminen epäonnistui",
     "showMore": "Näytä {{count}} lisää",
     "showLess": "Näytä vähemmän",
     "activityPeriod": "Aktiivinen jakso",
@@ -900,6 +904,11 @@
     "itemAction": "{{action}}: {{- item}}",
     "downloadStatistics": "Lataa tilastot Excel-tiedostona",
     "copyIframe": "Kopioi upotettava iframe-elementti",
-    "closeInfo": "Sulje lisätiedot"
+    "closeInfo": "Sulje lisätiedot",
+    "teacherAdded": "Opettaja lisätty: {{- name}}",
+    "studentAdded": "Opiskelija lisätty: {{- name}}",
+    "teacherRemoved": "Opettaja poistettu: {{- name}}",
+    "studentRemoved": "Opiskelija poistettu: {{- name}}",
+    "removeChip": "Poista painamalla Delete tai Backspace"
   }
 }

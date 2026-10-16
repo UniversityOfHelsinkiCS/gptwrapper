@@ -470,8 +470,12 @@
     "activeThisWeek": "Aktiva denna vecka",
     "weeklyUsage": "Veckoanvändning",
     "resetWeeklyUsage": "Nollställ veckoanvändning",
-    "searchStudents": "Sök namn eller nummer",
+    "searchStudents": "Sök namn eller studentnummer",
     "addTeacher": "Lägg till lärare",
+    "addTeacherFailed": "Det gick inte att lägga till läraren",
+    "addStudentFailed": "Det gick inte att lägga till studenten",
+    "removeTeacherFailed": "Det gick inte att ta bort läraren",
+    "removeStudentFailed": "Det gick inte att ta bort studenten",
     "showMore": "Visa {{count}} till",
     "showLess": "Visa mindre",
     "activityPeriod": "Aktiv period",
@@ -874,6 +878,11 @@
     "itemAction": "{{action}}: {{- item}}",
     "downloadStatistics": "Ladda ner statistiken som en Excel-fil",
     "copyIframe": "Kopiera iframe-kod",
-    "closeInfo": "Stäng tilläggsinformation"
+    "closeInfo": "Stäng tilläggsinformation",
+    "teacherAdded": "Lärare tillagd: {{- name}}",
+    "studentAdded": "Student tillagd: {{- name}}",
+    "teacherRemoved": "Lärare borttagen: {{- name}}",
+    "studentRemoved": "Student borttagen: {{- name}}",
+    "removeChip": "Ta bort genom att trycka på Delete eller Backspace"
   }
 }

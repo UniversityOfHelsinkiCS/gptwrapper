@@ -52,11 +52,18 @@ import { EnrolmentActionUserSearch, ResponsibilityActionUserSearch } from '../Ad
 import { DEFAULT_TOKEN_LIMIT } from '@config'
 import CancelIcon from '@mui/icons-material/Cancel'
 import { visuallyHidden } from '@mui/utils'
+import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
 
 const initialsOf = (lastName?: string, firstNames?: string) => {
   const a = firstNames?.trim()?.[0] ?? ''
   const b = lastName?.trim()?.[0] ?? ''
   return `${a}${b}`.toUpperCase()
+}
+
+const addButtonSx = {
+  backgroundColor: 'primary.main',
+  color: 'primary.contrastText',
+  '&:hover': { backgroundColor: 'primary.dark' },
 }
 
 type SortKey = 'last_name' | 'weekly' | 'total'
@@ -89,6 +96,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
   const [discussionsModalOpen, setDiscussionsModalOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'last_name', direction: 'asc' })
+  const [statusMessage, setStatusMessage] = useState('')
 
   useEffect(() => {
     if (chatInstance && refetchCourses) refetchCourses()
@@ -147,31 +155,53 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
   }
 
   const handleAddResponsible = async (target: User) => {
-    const result = await apiClient.post(`/courses/${course.courseId}/responsibilities/assign`, { username: target.username })
-    if (result.status === 200) {
+    try {
+      const result = await apiClient.post(`/courses/${course.courseId}/responsibilities/assign`, { username: target.username })
+      if (result.status !== 200) throw new Error()
       setResponsibilities((prev) => [...prev, result.data])
+      setStatusMessage(t('accessibility:teacherAdded', { name: `${target.firstNames ?? ''} ${target.lastName ?? ''}`.trim() }))
       refetchCourse()
+    } catch {
+      enqueueSnackbar(t('course:addTeacherFailed'), { variant: 'error' })
     }
   }
 
-  const handleRemoveResponsibility = async (responsibility: Responsibility) => {
-    if (!window.confirm(t('course:confirmRemoval'))) return
-    const result = await apiClient.post(`/courses/${course.courseId}/responsibilities/remove`, { username: responsibility.user?.username })
-    if (result.status === 200) {
+  const handleRemoveResponsibility = async (responsibility: Responsibility): Promise<boolean> => {
+    if (!window.confirm(t('course:confirmRemoval'))) return false
+    try {
+      const result = await apiClient.post(`/courses/${course.courseId}/responsibilities/remove`, { username: responsibility.user?.username })
+      if (result.status !== 200) throw new Error()
       setResponsibilities((prev) => prev.filter((r) => r.id !== responsibility.id))
+      setStatusMessage(t('accessibility:teacherRemoved', { name: `${responsibility.user.first_names ?? ''} ${responsibility.user.last_name ?? ''}`.trim() }))
       refetchCourse()
+      return true
+    } catch {
+      enqueueSnackbar(t('course:removeTeacherFailed'), { variant: 'error' })
+      return false
     }
   }
 
   const handleAddEnrolment = async (target: User) => {
-    const result = await apiClient.post(`/courses/${course.courseId}/enrolments/assign`, { username: target.username })
-    if (result.status === 200) setEnrolments((prev) => [...prev, result.data])
+    try {
+      const result = await apiClient.post(`/courses/${course.courseId}/enrolments/assign`, { username: target.username })
+      if (result.status !== 200) throw new Error()
+      setEnrolments((prev) => [...prev, result.data])
+      setStatusMessage(t('accessibility:studentAdded', { name: `${target.firstNames ?? ''} ${target.lastName ?? ''}`.trim() }))
+    } catch {
+      enqueueSnackbar(t('course:addStudentFailed'), { variant: 'error' })
+    }
   }
 
   const handleRemoveEnrolment = async (enrolment: Enrolment) => {
     if (!window.confirm(t('course:confirmRemoval'))) return
-    const result = await apiClient.post(`/courses/${course.courseId}/enrolments/remove`, { username: enrolment.user.username })
-    if (result.status === 200) setEnrolments((prev) => prev.filter((e) => e.id !== enrolment.id))
+    try {
+      const result = await apiClient.post(`/courses/${course.courseId}/enrolments/remove`, { username: enrolment.user.username })
+      if (result.status !== 200) throw new Error()
+      setEnrolments((prev) => prev.filter((e) => e.id !== enrolment.id))
+      setStatusMessage(t('accessibility:studentRemoved', { name: `${enrolment.user.first_names ?? ''} ${enrolment.user.last_name ?? ''}`.trim() }))
+    } catch {
+      enqueueSnackbar(t('course:removeStudentFailed'), { variant: 'error' })
+    }
   }
 
   const handleResetUsage = async (usageId: string) => {
@@ -186,23 +216,26 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
 
   const drawTeacherAction = (target: User) => {
     const existing = responsibilities.find((r) => r.user.id === target.id)
-    return existing ? (
-      <OutlineButtonBlue onClick={() => handleRemoveResponsibility(existing)}>{t('course:remove')}</OutlineButtonBlue>
-    ) : (
-      <BlueButton onClick={() => handleAddResponsible(target)}>{t('course:add')}</BlueButton>
+    return (
+      <OutlineButtonBlue
+        onClick={() => (existing ? handleRemoveResponsibility(existing) : handleAddResponsible(target))}
+        sx={existing ? undefined : addButtonSx}
+      >
+        {existing ? t('course:remove') : t('course:add')}
+      </OutlineButtonBlue>
     )
   }
 
   const drawStudentAction = (target: User) => {
     const existing = enrolments.find((e) => e.user.id === target.id)
-    return existing ? (
-      <OutlineButtonBlue data-testid={`remove-student-${target.username}`} onClick={() => handleRemoveEnrolment(existing)}>
-        {t('course:remove')}
+    return (
+      <OutlineButtonBlue
+        data-testid={existing ? `remove-student-${target.username}` : `add-student-${target.username}`}
+        onClick={() => (existing ? handleRemoveEnrolment(existing) : handleAddEnrolment(target))}
+        sx={existing ? undefined : addButtonSx}
+      >
+        {existing ? t('course:remove') : t('course:add')}
       </OutlineButtonBlue>
-    ) : (
-      <BlueButton data-testid={`add-student-${target.username}`} onClick={() => handleAddEnrolment(target)}>
-        {t('course:add')}
-      </BlueButton>
     )
   }
 
@@ -212,6 +245,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
 
   return (
     <>
+      <StatusAnnouncer message={statusMessage} />
       <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%', mb: 2 }}>
         {/* Title */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mt: 1 }}>
@@ -345,7 +379,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
         <Box sx={{ mb: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
             <PeopleIcon sx={{ color: 'text.secondary' }} />
-            <Typography variant="subtitle1" component="h4" fontWeight="bold">
+            <Typography id="teachers-header" variant="subtitle1" component="h4" fontWeight="bold">
               {t('course:teachers')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -353,6 +387,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
             </Typography>
             {canManage && (
               <OutlineButtonBlue
+                id="toggle-add-teacher-view"
                 sx={{ ml: 'auto' }}
                 startIcon={<PersonAddIcon />}
                 onClick={() => setAddTeacherOpen((open) => !open)}
@@ -376,9 +411,20 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
                     sx={{ '& .MuiChip-avatar': { bgcolor: 'primary.main', color: 'primary.contrastText' } }}
                     avatar={<Avatar>{initialsOf(responsibility.user.last_name, responsibility.user.first_names)}</Avatar>}
                     label={`${responsibility.user.last_name ?? ''} ${responsibility.user.first_names?.split(' ')[0] ?? ''}`.trim()}
-                    onDelete={canManage && responsibility.createdByUserId ? () => handleRemoveResponsibility(responsibility) : undefined}
+                    onDelete={
+                      canManage && responsibility.createdByUserId
+                        ? async () => {
+                            const removed = await handleRemoveResponsibility(responsibility)
+                            if (removed) document.getElementById('toggle-add-teacher-view')?.focus()
+                          }
+                        : undefined
+                    }
                     deleteIcon={<CloseIcon />}
                     variant="outlined"
+                    aria-label={[
+                      `${responsibility.user.last_name ?? ''} ${responsibility.user.first_names?.split(' ')[0] ?? ''}`.trim(),
+                      t('accessibility:removeChip'),
+                    ].join(', ')}
                   />
                 ))}
               {responsibilities.length > 5 && (
@@ -400,7 +446,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, flexWrap: 'wrap' }}>
               <GroupsIcon sx={{ color: 'text.secondary' }} />
-              <Typography variant="subtitle1" component="h4" fontWeight="bold">
+              <Typography id="students-header" variant="subtitle1" component="h4" fontWeight="bold">
                 {t('course:students')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -414,10 +460,12 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={t('course:searchStudents')}
                   slotProps={{
-                    input: { startAdornment: <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} /> },
+                    input: {
+                      startAdornment: <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} />,
+                    },
                     htmlInput: { 'aria-label': t('course:searchStudents') },
                   }}
-                  sx={{ minWidth: 220 }}
+                  sx={{ minWidth: 320 }}
                 />
               )}
 
