@@ -269,7 +269,9 @@
     "sourceMaterialInUse": "Source material: ",
     "myPrompt": "My prompt",
     "universityPrompt": "University prompt",
-    "manageCourseAndPrompts": "Manage courses and prompts"
+    "manageCourseAndPrompts": "Manage courses and prompts",
+    "openSources": "Open search results",
+    "closeSources": "Close search results"
   },
   "email": {
     "save": "Save as email",
@@ -896,6 +898,7 @@
     "copyToClipboard": "Copy {{item}} to clipboard",
     "itemAction": "{{action}}: {{- item}}",
     "downloadStatistics": "Download statistics as an Excel file",
-    "copyIframe": "Copy embeddable iframe element"
+    "copyIframe": "Copy embeddable iframe element",
+    "closeInfo": "Close additional information"
   }
 }

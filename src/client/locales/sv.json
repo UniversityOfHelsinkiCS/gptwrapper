@@ -776,7 +776,9 @@
     "sourceMaterialInUse": "Källmaterial: ",
     "myPrompt": "Mitt prompt",
     "universityPrompt": "Universitetsprompt",
-    "manageCourseAndPrompts": "Hantera kurs och prompter"
+    "manageCourseAndPrompts": "Hantera kurs och prompter",
+    "openSources": "Öppna sökresultat",
+    "closeSources": "Stäng sökresultat"
   },
   "globalSettings": {
     "title": "Allmänna inställningar"
@@ -871,6 +873,7 @@
     "copyToClipboard": "Kopiera {{item}} till urklipp",
     "itemAction": "{{action}}: {{- item}}",
     "downloadStatistics": "Ladda ner statistiken som en Excel-fil",
-    "copyIframe": "Kopiera iframe-kod"
+    "copyIframe": "Kopiera iframe-kod",
+    "closeInfo": "Stäng tilläggsinformation"
   }
 }

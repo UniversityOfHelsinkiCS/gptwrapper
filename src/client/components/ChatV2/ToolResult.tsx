@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Box, Typography, Chip, IconButton, Drawer, useTheme } from '@mui/material'
+import { Box, Typography, Chip, IconButton, Drawer, Tooltip, useTheme } from '@mui/material'
 import Close from '@mui/icons-material/Close'
 import Search from '@mui/icons-material/Search'
 import { useTranslation } from 'react-i18next'
@@ -12,6 +12,7 @@ import type { ToolCallResultEvent } from '../../../shared/chat'
 import type { RagChunk } from '../../../shared/rag'
 import { CustomIcon } from './general/CustomIcon'
 import sidebarOpen from '../../assets/sidebar-open.svg'
+import sidebarClose from '../../assets/sidebar-close.svg'
 
 const AnnotationTruncated = ({
   data,
@@ -195,133 +196,151 @@ const Queries = ({ queries }: { queries: string[] }) => {
   )
 }
 
-const ToolResult = ({
-  toolResult,
-  setActiveToolResult,
-}: {
-  toolResult: ToolCallResultEvent
-  setActiveToolResult: (result: ToolCallResultEvent | undefined) => void
-}) => {
+const ToolResult = ({ toolResult, open, onToggle }: { toolResult: ToolCallResultEvent; open: boolean; onToggle: () => void }) => {
   const { data: results, isSuccess: isResultsSuccess } = useToolResults(toolResult.callId)
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
   const [selectedAnnotation, setSelectedAnnotation] = useState<number | null>(null)
   const arrayResults = Array.isArray(results) ? results : []
   const { t } = useTranslation()
+  const toggleLabel = open ? t('sidebar:closeSources') : t('sidebar:openSources')
 
+  // The toggle button stays mounted in both states so it keeps its position and the focus, and screen readers announce the aria-expanded change
   return (
     <Box
-      p="1rem"
       sx={{
+        pt: 3,
+        pb: '1rem',
+        px: open ? '1rem' : 0,
         width: '100%',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        overflowY: 'scroll',
+        overflowY: open ? 'scroll' : 'hidden',
       }}
     >
       <Box
         sx={{
           display: 'flex',
-          gap: 2,
-          ml: -2,
-          alignItems: 'center',
-          mb: { xs: 2, md: 3 },
+          ml: open ? -1 : 0,
+          mb: open ? 2 : 0,
+          justifyContent: open ? 'flex-start' : 'center',
         }}
       >
-        <TextButton data-testid="close-annotations" onClick={() => setActiveToolResult(undefined)}>
-          <CustomIcon src={sidebarOpen} />
-        </TextButton>
-        <Typography
-          variant="h5"
-          fontWeight={600}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-          }}
-          data-testid="sources-header"
-        >
-          <Search fontSize="large" sx={{ opacity: 0.8 }} />
-          {t('chat:searchResults')}
-        </Typography>
+        <Tooltip arrow placement="left" title={toggleLabel}>
+          <TextButton
+            data-testid={open ? 'close-annotations' : 'open-annotations'}
+            aria-expanded={open}
+            aria-controls={open ? 'tool-result-content' : undefined}
+            onClick={onToggle}
+          >
+            <CustomIcon src={open ? sidebarOpen : sidebarClose} alt={toggleLabel} />
+          </TextButton>
+        </Tooltip>
       </Box>
-      <Queries queries={[toolResult.input?.query ?? '']} />
-      {isResultsSuccess ? (
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            minHeight: { xs: 'auto', md: 400 },
-            flex: 1,
-          }}
-        >
-          {arrayResults.map((result, i) => (
-            <AnnotationTruncated key={i} data={result} relevanceOrder={i + 1} setIsDrawerOpen={setIsDrawerOpen} setSelectedAnnotation={setSelectedAnnotation} />
-          ))}
-          {arrayResults.length > 0 ? (
-            <OutlineButtonBlack
-              sx={{ margin: '1rem auto' }}
-              startIcon={<SubjectIcon />}
-              onClick={() => {
-                setIsDrawerOpen(true)
-                setSelectedAnnotation(null)
-              }}
-            >
-              {t('chat:readMore')}
-            </OutlineButtonBlack>
-          ) : (
-            <Typography>{t('chat:noToolResults')}</Typography>
-          )}
-        </Box>
-      ) : (
-        <Typography>{t('chat:failedSources')}</Typography>
-      )}
-      <Drawer anchor="right" open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
-        <Box
-          sx={{
-            maxWidth: { xs: '100vw', md: '60vw' },
-            padding: '2rem',
-          }}
-        >
-          <Box
+      {open && (
+        <Box id="tool-result-content" sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+          <Typography
+            variant="h5"
+            component="h3"
+            fontWeight={600}
             sx={{
               display: 'flex',
-              justifyContent: 'flex-end',
-              mb: 2,
+              alignItems: 'center',
+              gap: 1.5,
+              mb: { xs: 2, md: 3 },
             }}
+            data-testid="sources-header"
           >
-            <IconButton
-              data-testid="close-expanded-annotations"
-              onClick={() => {
-                setIsDrawerOpen(false)
-                setSelectedAnnotation(null)
-              }}
+            <Search fontSize="large" sx={{ opacity: 0.8 }} />
+            {t('chat:searchResults')}
+          </Typography>
+          <Queries queries={[toolResult.input?.query ?? '']} />
+          {isResultsSuccess ? (
+            <Box
               sx={{
-                position: 'fixed',
-                top: 10,
-                right: 10,
-                color: 'text.secondary',
-                bgcolor: 'background.elevated',
-                opacity: 0.9,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                minHeight: { xs: 'auto', md: 400 },
+                flex: 1,
               }}
             >
-              <Close />
-            </IconButton>
-          </Box>
-          <Box
-            sx={{
-              display: 'flex',
-              gap: '4rem',
-              flexDirection: 'column',
-            }}
-          >
-            {arrayResults.map((result, i) => (
-              <AnnotationExpanded key={i} data={result} relevanceOrder={i + 1} isSelected={selectedAnnotation === i + 1} />
-            ))}
-          </Box>
+              {arrayResults.map((result, i) => (
+                <AnnotationTruncated
+                  key={i}
+                  data={result}
+                  relevanceOrder={i + 1}
+                  setIsDrawerOpen={setIsDrawerOpen}
+                  setSelectedAnnotation={setSelectedAnnotation}
+                />
+              ))}
+              {arrayResults.length > 0 ? (
+                <OutlineButtonBlack
+                  sx={{ margin: '1rem auto' }}
+                  startIcon={<SubjectIcon />}
+                  onClick={() => {
+                    setIsDrawerOpen(true)
+                    setSelectedAnnotation(null)
+                  }}
+                >
+                  {t('chat:readMore')}
+                </OutlineButtonBlack>
+              ) : (
+                <Typography>{t('chat:noToolResults')}</Typography>
+              )}
+            </Box>
+          ) : (
+            <Typography>{t('chat:failedSources')}</Typography>
+          )}
+          <Drawer anchor="right" open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
+            <Box
+              sx={{
+                maxWidth: { xs: '100vw', md: '60vw' },
+                padding: '2rem',
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  mb: 2,
+                }}
+              >
+                <IconButton
+                  data-testid="close-expanded-annotations"
+                  aria-label={t('accessibility:closeInfo')}
+                  onClick={() => {
+                    setIsDrawerOpen(false)
+                    setSelectedAnnotation(null)
+                  }}
+                  sx={{
+                    position: 'fixed',
+                    top: 10,
+                    right: 10,
+                    color: 'text.secondary',
+                    bgcolor: 'background.elevated',
+                    opacity: 0.9,
+                  }}
+                >
+                  <Close />
+                </IconButton>
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: '4rem',
+                  flexDirection: 'column',
+                  mt: 4,
+                }}
+              >
+                {arrayResults.map((result, i) => (
+                  <AnnotationExpanded key={i} data={result} relevanceOrder={i + 1} isSelected={selectedAnnotation === i + 1} />
+                ))}
+              </Box>
+            </Box>
+          </Drawer>
         </Box>
-      </Drawer>
+      )}
     </Box>
   )
 }

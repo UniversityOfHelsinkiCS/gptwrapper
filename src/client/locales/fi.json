@@ -272,7 +272,9 @@
     "sourceMaterialInUse": "Lähdemateriaali: ",
     "myPrompt": "Oma alustus",
     "universityPrompt": "Yliopiston alustus",
-    "manageCourseAndPrompts": "Hallinnoi kursseja ja alustuksia"
+    "manageCourseAndPrompts": "Hallinnoi kursseja ja alustuksia",
+    "openSources": "Avaa hakutulokset",
+    "closeSources": "Sulje hakutulokset"
   },
   "chats": {
     "header": "Auki olevat kurssichatit",
@@ -897,6 +899,7 @@
     "copyToClipboard": "Kopioi {{item}} leikepöydälle",
     "itemAction": "{{action}}: {{- item}}",
     "downloadStatistics": "Lataa tilastot Excel-tiedostona",
-    "copyIframe": "Kopioi upotettava iframe-elementti"
+    "copyIframe": "Kopioi upotettava iframe-elementti",
+    "closeInfo": "Sulje lisätiedot"
   }
 }

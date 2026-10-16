@@ -64,7 +64,7 @@ export default function GlobalMenu({
   }
 
   return (
-    <div style={{ position: 'fixed', top: isMobile ? 10 : 20, right: isMobile ? 15 : 20 }}>
+    <div style={{ position: 'fixed', top: isMobile ? 10 : 20, right: isMobile ? 15 : 'calc(20px + var(--global-menu-right-offset, 0px))' }}>
       {showBackButton && (
         <BlueButton
           onClick={() => navigate('/general')}

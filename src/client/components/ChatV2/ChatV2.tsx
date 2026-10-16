@@ -1,7 +1,7 @@
 import { Box, Drawer, Paper, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { MapsUgc } from '@mui/icons-material'
 import { enqueueSnackbar } from '../common/Snackbar'
-import { lazy, useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom'
 import {
@@ -120,6 +120,7 @@ const ChatV2Content = () => {
     [key in WarningType]?: { message: string; ignored: boolean; tokenCount?: number; contextLimit?: number; tokenUsagePercentage?: number }
   }>({})
   const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
+  const [rightMenuExpanded, setRightMenuExpanded0] = useState<boolean>(true)
   const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
   const [hasChanges, setHasChanges] = useState(false)
   const [cacheKey, setCacheKey] = useState('')
@@ -435,12 +436,35 @@ const ChatV2Content = () => {
     (toolResult: ToolCallResultEvent | undefined) => {
       handleLayoutShift()
       setActiveToolResult0(toolResult)
+      if (toolResult) {
+        setRightMenuExpanded0(true)
+      }
     },
     [handleLayoutShift],
   )
 
+  const setRightMenuExpanded = useCallback(
+    (expanded: boolean) => {
+      handleLayoutShift()
+      setRightMenuExpanded0(expanded)
+    },
+    [handleLayoutShift],
+  )
+
+  // Fall back to the latest tool result of the conversation so the right menu can be reopened after it has been cleared (e.g. on page reload)
+  const latestToolResult = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const message = messages[i]
+      if (message.role !== 'assistant') continue
+      const toolResults = Object.values(message.toolCalls ?? {})
+      if (toolResults.length > 0) return toolResults[toolResults.length - 1]
+    }
+    return undefined
+  }, [messages])
+  const shownToolResult = activeToolResult ?? latestToolResult
+
   // layout
-  const rightMenuOpen = !!activeToolResult && (amongResponsibles || !isPromptHidden)
+  const hasToolResults = !!shownToolResult && (amongResponsibles || !isPromptHidden)
   const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
   const leftPanelFloating = isEmbeddedMode || isMobile
   const [sideBarOpen, setSideBarOpen] = useState<boolean>(() => {
@@ -448,7 +472,16 @@ const ChatV2Content = () => {
   })
   const leftPanelCollapsed = !sideBarOpen || leftPanelFloating
   const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
-  const rightPanelContentWidth = rightMenuOpen ? 'var(--right-menu-width)' : '0px'
+  const rightPanelContentWidth = !hasToolResults ? '0px' : rightMenuExpanded ? 'var(--right-menu-width)' : 'var(--sidebar-width-collapsed)'
+  const rightPanelCollapsed = !isMobile && hasToolResults && !rightMenuExpanded
+
+  useEffect(() => {
+    if (!rightPanelCollapsed) return
+    document.documentElement.style.setProperty('--global-menu-right-offset', 'var(--sidebar-width-collapsed)')
+    return () => {
+      document.documentElement.style.removeProperty('--global-menu-right-offset')
+    }
+  }, [rightPanelCollapsed])
 
   useEffect(() => {
     if (chatInstanceLoadError?.response?.status === 403) {
@@ -650,11 +683,12 @@ const ChatV2Content = () => {
               overflow: 'auto',
             }}
           >
-            {rightMenuOpen && <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />}
+            {!!activeToolResult && hasToolResults && <ToolResult toolResult={activeToolResult} open onToggle={() => setActiveToolResult(undefined)} />}
           </Box>
         </Drawer>
       ) : (
-        rightMenuOpen && (
+        hasToolResults &&
+        shownToolResult && (
           <Box
             sx={{
               width: rightPanelContentWidth,
@@ -665,11 +699,10 @@ const ChatV2Content = () => {
               top: 0,
               borderLeft: '1px solid',
               borderLeftColor: 'divider',
-              paddingTop: !isEmbeddedMode ? '4rem' : 0,
               bgcolor: 'background.paper',
             }}
           >
-            <ToolResult toolResult={activeToolResult} setActiveToolResult={setActiveToolResult} />
+            <ToolResult toolResult={shownToolResult} open={rightMenuExpanded} onToggle={() => setRightMenuExpanded(!rightMenuExpanded)} />
           </Box>
         )
       )}
