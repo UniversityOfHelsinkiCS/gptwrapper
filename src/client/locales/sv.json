@@ -883,6 +883,16 @@
     "studentAdded": "Student tillagd: {{- name}}",
     "teacherRemoved": "Lärare borttagen: {{- name}}",
     "studentRemoved": "Student borttagen: {{- name}}",
-    "removeChip": "Ta bort genom att trycka på Delete eller Backspace"
+    "removeChip": "Ta bort genom att trycka på Delete eller Backspace",
+    "optionSelected": "Vald: {{- name}}",
+    "optionDeselected": "Val borttaget: {{- name}}",
+    "selectOption": "{{- name}}: välj för användning",
+    "deselectOption": "{{- name}}: ta bort val",
+    "editSourceMaterial": "Redigera källmaterialet {{name}}",
+    "closeSourceMaterialEditing": "Stäng redigeringen av källmaterialet {{name}}",
+    "textFieldOpened": "Textfält öppnat: {{- name}}",
+    "textFieldClosed": "Textfält stängt: {{- name}}",
+    "itemDeleted": "Raderad: {{- name}}",
+    "editPromptForm": "Redigera prompt"
   }
 }

@@ -908,6 +908,16 @@
     "studentAdded": "Student added: {{- name}}",
     "teacherRemoved": "Teacher removed: {{- name}}",
     "studentRemoved": "Student removed: {{- name}}",
-    "removeChip": "Remove by pressing Delete or Backspace"
+    "removeChip": "Remove by pressing Delete or Backspace",
+    "optionSelected": "Selected: {{- name}}",
+    "optionDeselected": "Selection removed: {{- name}}",
+    "selectOption": "{{- name}}: select for use",
+    "deselectOption": "{{- name}}: remove selection",
+    "editSourceMaterial": "Edit source material {{name}}",
+    "closeSourceMaterialEditing": "Close editing of source material {{name}}",
+    "textFieldOpened": "Text field opened: {{- name}}",
+    "textFieldClosed": "Text field closed: {{- name}}",
+    "itemDeleted": "Deleted: {{- name}}",
+    "editPromptForm": "Edit prompt"
   }
 }

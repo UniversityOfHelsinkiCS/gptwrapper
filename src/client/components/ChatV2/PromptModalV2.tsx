@@ -260,9 +260,13 @@ const PromptModalV2 = () => {
   }
 
   const onDone = (prompt?: PromptType) => {
-    focusEditButtonOnDone.current = true
+    if (prompt) focusEditButtonOnDone.current = true
     setIsEditing(false)
     setPreviewPrompt(prompt)
+    if (!prompt) {
+      const target = document.getElementById('close-template-modal')
+      if (target) target.focus()
+    }
   }
 
   useEffect(() => {
@@ -366,7 +370,9 @@ const PromptModalV2 = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, minHeight: 0 }}>
-      <StatusAnnouncer message={isEditing ? t('accessibility:formOpened', { form: t('settings:saveNewPrompt') }) : ''} />
+      <StatusAnnouncer
+        message={isEditing ? t('accessibility:formOpened', { form: previewPrompt ? t('accessibility:editPromptForm') : t('settings:saveNewPrompt') }) : ''}
+      />
       <Box sx={{ display: 'flex', gap: 2, flex: 1, minHeight: 0 }}>
         {/* Left panel - course and prompt list */}
         <Box

@@ -909,6 +909,16 @@
     "studentAdded": "Opiskelija lisätty: {{- name}}",
     "teacherRemoved": "Opettaja poistettu: {{- name}}",
     "studentRemoved": "Opiskelija poistettu: {{- name}}",
-    "removeChip": "Poista painamalla Delete tai Backspace"
+    "removeChip": "Poista painamalla Delete tai Backspace",
+    "optionSelected": "Valittu: {{- name}}",
+    "optionDeselected": "Valinta poistettu: {{- name}}",
+    "selectOption": "{{- name}}: valitse käyttöön",
+    "deselectOption": "{{- name}}: poista valinta",
+    "editSourceMaterial": "Muokkaa lähdemateriaalia {{name}}",
+    "closeSourceMaterialEditing": "Sulje lähdemateriaalin {{name}} muokkaus",
+    "textFieldOpened": "Tekstikenttä avattu: {{- name}}",
+    "textFieldClosed": "Tekstikenttä suljettu: {{- name}}",
+    "itemDeleted": "Poistettu: {{- name}}",
+    "editPromptForm": "Alustuksen muokkaus"
   }
 }

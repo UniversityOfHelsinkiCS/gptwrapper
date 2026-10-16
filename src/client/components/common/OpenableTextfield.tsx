@@ -13,22 +13,17 @@ type OpenableTextfieldProps = {
   testId?: string
 }
 
-const OpenableTextfield = ({
-  value,
-  onChange,
-  onCancel,
-  onSave,
-  placeholder = '',
-  testId = '',
-}: OpenableTextfieldProps) => {
+const OpenableTextfield = ({ value, onChange, onCancel, onSave, placeholder = '', testId = '' }: OpenableTextfieldProps) => {
   return (
     <Box>
       <TextField
+        id={testId}
         variant="filled"
         sx={{ '& textarea': monospaceStyle }}
         slotProps={{
           htmlInput: {
             'data-testid': testId,
+            'aria-label': placeholder || undefined,
           },
         }}
         fullWidth
@@ -38,21 +33,28 @@ const OpenableTextfield = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>
-        <Tooltip arrow placement='top' title={t('common:cancel')}>
-          <IconButton size="small" onClick={onCancel}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1, mr: 1 }}>
+        <Tooltip arrow placement="top" title={t('common:cancel')}>
+          <IconButton
+            size="small"
+            onClick={onCancel}
+            aria-label={placeholder ? t('accessibility:itemAction', { action: t('common:cancel'), item: placeholder }) : t('common:cancel')}
+          >
             <CancelIcon fontSize="small" color="primary" />
           </IconButton>
         </Tooltip>
-        <Tooltip arrow placement='top' title={t('common:save')}>
-          <IconButton size="small" onClick={onSave}>
-          <DoneIcon fontSize="small" color="primary" />
+        <Tooltip arrow placement="top" title={t('common:save')}>
+          <IconButton
+            size="small"
+            onClick={onSave}
+            aria-label={placeholder ? t('accessibility:itemAction', { action: t('common:save'), item: placeholder }) : t('common:save')}
+          >
+            <DoneIcon fontSize="small" color="primary" />
           </IconButton>
-        </Tooltip>  
+        </Tooltip>
       </Box>
     </Box>
   )
 }
-
 
 export default OpenableTextfield

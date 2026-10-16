@@ -202,6 +202,7 @@ const RagSettingsSection = () => {
   const [newRags, setNewRags] = useState<number[]>([])
   const hasSelectedRagIndex =
     form.ragIndexId != null && !!(ragIndices?.some((index) => index.id === form.ragIndexId) || userRagIndices?.some((index) => index.id === form.ragIndexId))
+  const selectedIndexName = (ragIndices?.find((i) => i.id === selectedIndexId) ?? userRagIndices?.find((i) => i.id === selectedIndexId))?.metadata.name
 
   const handleBack = () => {
     setSelectedIndexId(null)
@@ -220,7 +221,7 @@ const RagSettingsSection = () => {
       </Box>
       <Box mb={3}>
         <Box display="flex" alignItems="center">
-          <Typography id="rag-in-use-label" variant="overline" fontWeight="bold" my={1}>
+          <Typography id="rag-in-use-label" variant="overline" component="h5" fontWeight="bold" my={1}>
             {t('prompt:ragInUse')}
           </Typography>
           {type !== 'PERSONAL' && (
@@ -273,15 +274,33 @@ const RagSettingsSection = () => {
                 <em>{t('prompt:noSourceMaterials')}</em>
                 <ClearOutlined sx={{ ml: 1 }} />
               </MenuItem>
-              {!!ragIndices?.length && <ListSubheader sx={{ mt: 1, mb: 1 }}>{t('course:sourceMaterials')}</ListSubheader>}
+              {!!ragIndices?.length && (
+                <ListSubheader id="course-source-materials-heading" sx={{ mt: 1, mb: 1 }}>
+                  {t('course:sourceMaterials')}
+                </ListSubheader>
+              )}
               {ragIndices?.map((index) => (
-                <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
+                <MenuItem
+                  key={index.id}
+                  value={index.id}
+                  data-testid={`source-material-${index.metadata.name}`}
+                  aria-describedby="course-source-materials-heading"
+                >
                   {index.metadata.name}
                 </MenuItem>
               ))}
-              {!!userRagIndices?.length && <ListSubheader sx={{ mt: 1, mb: 1 }}>{t('course:userSourceMaterials')}</ListSubheader>}
+              {!!userRagIndices?.length && (
+                <ListSubheader id="user-source-materials-heading" sx={{ mt: 1, mb: 1 }}>
+                  {t('course:userSourceMaterials')}
+                </ListSubheader>
+              )}
               {userRagIndices?.map((index) => (
-                <MenuItem key={index.id} value={index.id} data-testid={`source-material-${index.metadata.name}`}>
+                <MenuItem
+                  key={index.id}
+                  value={index.id}
+                  data-testid={`source-material-${index.metadata.name}`}
+                  aria-describedby="user-source-materials-heading"
+                >
                   {index.metadata.name}
                 </MenuItem>
               ))}
@@ -309,18 +328,30 @@ const RagSettingsSection = () => {
             justifyContent: 'space-between',
             cursor: 'pointer',
             position: 'relative',
+            pr: 7,
           }}
           onClick={() => setOpen(true)}
         >
+          <IconButton
+            data-testid={!open ? 'edit-new-rag-button' : 'close-new-rag-details-button'}
+            onClick={(e) => {
+              e.stopPropagation()
+              setOpen(!open)
+            }}
+            aria-label={
+              !open
+                ? t('accessibility:editSourceMaterial', { name: selectedIndexName })
+                : t('accessibility:closeSourceMaterialEditing', { name: selectedIndexName })
+            }
+            aria-expanded={open}
+            sx={{ position: 'absolute', top: 8, right: 8 }}
+          >
+            {!open ? <ExpandMore /> : <CloseIcon />}
+          </IconButton>
           <Box flex={1}>
             {!open ? (
               <>
-                <Typography fontWeight="bold">
-                  {(() => {
-                    const selected = ragIndices?.find((i) => i.id === selectedIndexId) ?? userRagIndices?.find((i) => i.id === selectedIndexId)
-                    return selected?.metadata.name
-                  })()}
-                </Typography>
+                <Typography fontWeight="bold">{selectedIndexName}</Typography>
                 <Typography variant="body2" color="text.secondary">
                   {t('rag:continueEditing')}
                 </Typography>
@@ -335,25 +366,13 @@ const RagSettingsSection = () => {
               />
             )}
           </Box>
-          <IconButton
-            data-testid={!open ? 'edit-new-rag-button' : 'close-new-rag-details-button'}
-            onClick={(e) => {
-              e.stopPropagation()
-              setOpen(!open)
-            }}
-            aria-label={!open ? t('rag:continueEditing') : t('common:close')}
-            aria-expanded={open}
-            sx={{ ml: 1 }}
-          >
-            {!open ? <ExpandMore /> : <CloseIcon />}
-          </IconButton>
         </Paper>
       )}
 
       <Collapse in={!!form.ragIndexId}>
         <Box>
           <Box display="flex" alignItems="center" gap={1}>
-            <Typography variant="overline" fontWeight="bold" my={1}>
+            <Typography variant="overline" component="h5" fontWeight="bold" my={1}>
               {t('prompt:modelSourceMaterialInstructions')}
             </Typography>
             <Tooltip placement="right" title={t('prompt:promptHidden')} describeChild>
