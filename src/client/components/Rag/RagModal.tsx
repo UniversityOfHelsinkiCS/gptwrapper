@@ -7,6 +7,7 @@ import { ArrowBack } from '@mui/icons-material'
 import { RagFileV2 } from './RagFileV2'
 import { RagIndexV2 } from './RagIndexV2'
 import { OutlineButtonBlue } from '../ChatV2/general/Buttons'
+import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
 
 interface RagDetailsProps {
   selectedIndexId: number | null
@@ -86,17 +87,20 @@ const RagModal: React.FC<{ rag?: number; onDeleted?: () => void }> = ({ rag, onD
           <Divider sx={{ my: 1 }} />
           <List sx={{ flex: 1, overflowY: 'auto' }}>
             {sortedRagIndices?.map((ragIndex) => (
-              <ListItemButton
-                key={ragIndex.id}
-                selected={selectedIndexId === ragIndex.id}
-                onClick={() => handleSelectIndex(ragIndex.id)}
-                sx={{
-                  borderRadius: '8px',
-                  m: 0.6,
-                }}
-              >
-                <ListItemText primary={ragIndex.metadata?.name} slotProps={{ primary: { noWrap: true } }} />
-              </ListItemButton>
+              <>
+                <ListItemButton
+                  key={ragIndex.id}
+                  selected={selectedIndexId === ragIndex.id}
+                  onClick={() => handleSelectIndex(ragIndex.id)}
+                  sx={{
+                    borderRadius: '8px',
+                    m: 0.6,
+                  }}
+                >
+                  <ListItemText primary={ragIndex.metadata?.name} slotProps={{ primary: { noWrap: true } }} />
+                </ListItemButton>
+                <StatusAnnouncer message={selectedIndexId === ragIndex.id ? t('accessibility:previewOpened', { name: ragIndex.metadata?.name }) : ''} />
+              </>
             ))}
           </List>
           {ragIndices?.length === 0 && (

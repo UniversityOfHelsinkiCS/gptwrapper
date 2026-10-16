@@ -2,8 +2,9 @@ import type { Theme } from '@mui/material'
 import type { SystemStyleObject } from '@mui/system'
 import { focusIndicator } from '../theme'
 
-export const focusIndicatorStyle = ({ color }: { color?: string } = {}): SystemStyleObject<Theme> => ({
-  '&.Mui-focusVisible': {
+// Pass selector '&:has(:focus-visible)' when focus lands on a child, e.g. a hidden file input inside a label button.
+export const focusIndicatorStyle = ({ color, selector = '&.Mui-focusVisible' }: { color?: string; selector?: string } = {}): SystemStyleObject<Theme> => ({
+  [selector]: {
     outline: '3px solid',
     outlineColor: color ?? focusIndicator,
     outlineOffset: '-3px',

@@ -919,6 +919,7 @@
     "textFieldOpened": "Tekstikenttä avattu: {{- name}}",
     "textFieldClosed": "Tekstikenttä suljettu: {{- name}}",
     "itemDeleted": "Poistettu: {{- name}}",
-    "editPromptForm": "Alustuksen muokkaus"
+    "editPromptForm": "Alustuksen muokkaus",
+    "editName": "Muokkaa nimeä"
   }
 }

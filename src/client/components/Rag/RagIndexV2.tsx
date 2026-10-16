@@ -41,6 +41,7 @@ import { isSupportedRagFile, RAG_FILE_ACCEPT } from '@shared/utils'
 import { usePromptState } from '../ChatV2/PromptState'
 import { PromptType } from '../../types'
 import { useNavigate, useParams } from 'react-router-dom'
+import { focusIndicatorStyle } from 'src/client/util/accessibility'
 
 const promptTypeOrder: PromptType[] = ['CHAT_INSTANCE', 'PERSONAL', 'UNIVERSITY', 'TEMPLATE']
 
@@ -211,21 +212,23 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
       </Box>
       <Box py={2} mx={2}>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Button variant="contained" component="label" tabIndex={-1} startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
-            {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
-            <VisuallyHiddenInput
-              type="file"
-              accept={RAG_FILE_ACCEPT}
-              onChange={async (e) => {
-                const files = e.target.files
-                if (files && files.length > 0) {
-                  handleStageFiles(Array.from(files))
-                }
-                e.target.value = ''
-              }}
-              multiple
-            />
-          </Button>
+          <Box sx={{ ...focusIndicatorStyle }}>
+            <Button variant="contained" tabIndex={-1} component="label" startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
+              {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
+              <VisuallyHiddenInput
+                type="file"
+                accept={RAG_FILE_ACCEPT}
+                onChange={async (e) => {
+                  const files = e.target.files
+                  if (files && files.length > 0) {
+                    handleStageFiles(Array.from(files))
+                  }
+                  e.target.value = ''
+                }}
+                multiple
+              />
+            </Button>
+          </Box>
           <Button variant="outlined" startIcon={<FindInPage />} onClick={() => setSearchOpen(true)} disabled={ragDetails.ragFiles.length === 0}>
             {t('rag:testRetrievalButton')}
           </Button>
@@ -257,6 +260,8 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
                   SnackbarProps: { 'data-testid': 'ragIndexDeleteSuccessSnackbar' },
                 })
                 handleChangePrompt(activePrompt ? { ...activePrompt, ragIndexId: null } : undefined)
+                const target = document.getElementById('close-template-modal')
+                if (target) target.focus()
               }
             }}
             sx={{ ml: 'auto' }}
@@ -288,7 +293,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
         <Divider sx={{ my: 1 }} />
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 2 }}>
-            <Typography component="h3" variant="body2" sx={{ fontWeight: 600 }}>
+            <Typography component="h4" variant="body2" sx={{ fontWeight: 600 }}>
               {t('rag:promptUsageTitle')}
             </Typography>
             {prompts.length > 0 && (
@@ -490,6 +495,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
               setStagedFiles([])
             }}
             disabled={uploadMutation.isPending}
+            sx={{ ...focusIndicatorStyle }}
           >
             {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
           </BlueButton>

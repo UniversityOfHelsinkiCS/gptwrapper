@@ -918,6 +918,7 @@
     "textFieldOpened": "Text field opened: {{- name}}",
     "textFieldClosed": "Text field closed: {{- name}}",
     "itemDeleted": "Deleted: {{- name}}",
-    "editPromptForm": "Edit prompt"
+    "editPromptForm": "Edit prompt",
+    "editName": "Edit name"
   }
 }

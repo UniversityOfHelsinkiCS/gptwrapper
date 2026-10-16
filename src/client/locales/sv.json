@@ -893,6 +893,7 @@
     "textFieldOpened": "Textfält öppnat: {{- name}}",
     "textFieldClosed": "Textfält stängt: {{- name}}",
     "itemDeleted": "Raderad: {{- name}}",
-    "editPromptForm": "Redigera prompt"
+    "editPromptForm": "Redigera prompt",
+    "editName": "Redigera namn"
   }
 }
