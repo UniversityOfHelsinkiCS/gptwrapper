@@ -405,28 +405,30 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
                 .slice()
                 .sort((a, b) => (a.user.last_name ?? '').localeCompare(b.user.last_name ?? '', 'fi', { sensitivity: 'base' }))
                 .slice(0, showAllTeachers ? undefined : 5)
-                .map((responsibility) => (
-                  <Chip
-                    key={responsibility.id}
-                    sx={{ '& .MuiChip-avatar': { bgcolor: 'primary.main', color: 'primary.contrastText' } }}
-                    avatar={<Avatar>{initialsOf(responsibility.user.last_name, responsibility.user.first_names)}</Avatar>}
-                    label={`${responsibility.user.last_name ?? ''} ${responsibility.user.first_names?.split(' ')[0] ?? ''}`.trim()}
-                    onDelete={
-                      canManage && responsibility.createdByUserId
-                        ? async () => {
-                            const removed = await handleRemoveResponsibility(responsibility)
-                            if (removed) document.getElementById('toggle-add-teacher-view')?.focus()
-                          }
-                        : undefined
-                    }
-                    deleteIcon={<CloseIcon />}
-                    variant="outlined"
-                    aria-label={[
-                      `${responsibility.user.last_name ?? ''} ${responsibility.user.first_names?.split(' ')[0] ?? ''}`.trim(),
-                      t('accessibility:removeChip'),
-                    ].join(', ')}
-                  />
-                ))}
+                .map((responsibility) => {
+                  const name = `${responsibility.user.last_name ?? ''} ${responsibility.user.first_names?.split(' ')[0] ?? ''}`.trim()
+                  // Only deletable chips get role="button"; aria-label is prohibited on the plain div otherwise
+                  const deletable = canManage && Boolean(responsibility.createdByUserId)
+                  return (
+                    <Chip
+                      key={responsibility.id}
+                      sx={{ '& .MuiChip-avatar': { bgcolor: 'primary.main', color: 'primary.contrastText' } }}
+                      avatar={<Avatar>{initialsOf(responsibility.user.last_name, responsibility.user.first_names)}</Avatar>}
+                      label={name}
+                      onDelete={
+                        deletable
+                          ? async () => {
+                              const removed = await handleRemoveResponsibility(responsibility)
+                              if (removed) document.getElementById('toggle-add-teacher-view')?.focus()
+                            }
+                          : undefined
+                      }
+                      deleteIcon={<CloseIcon />}
+                      variant="outlined"
+                      aria-label={deletable ? [name, t('accessibility:removeChip')].filter(Boolean).join(', ') : undefined}
+                    />
+                  )
+                })}
               {responsibilities.length > 5 && (
                 <Chip
                   variant="outlined"
