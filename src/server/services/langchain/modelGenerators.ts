@@ -1,17 +1,17 @@
-import { AzureChatOpenAI } from '@langchain/openai'
+import { ChatOpenAI } from '@langchain/openai'
 import { ChatGoogle } from '@langchain/google/node'
 import { AZURE_API_KEY, AZURE_RESOURCE, GOOGLE_CLOUD_PROJECT_ID } from 'src/server/util/config'
 import { DEFAULT_MODEL_TEMPERATURE, DEFAULT_VERTEX_LOCATION, type ModelConfig } from '@config'
 
 export const getAzureChatOpenAI = (modelName: string, streaming = true) =>
-  new AzureChatOpenAI({
+  new ChatOpenAI({
     model: modelName,
-    azureOpenAIApiKey: AZURE_API_KEY,
-    azureOpenAIApiVersion: '2024-10-21',
-    azureOpenAIApiDeploymentName: modelName, // In Azure, always use the acual model name as the deployment name
-    azureOpenAIApiInstanceName: AZURE_RESOURCE,
-    useResponsesApi: false,
-    streaming: streaming,
+    configuration: {
+      baseURL: `https://${AZURE_RESOURCE}.services.ai.azure.com/openai/v1`
+    },
+    useResponsesApi: true,
+    apiKey: AZURE_API_KEY,
+    streaming: streaming
   })
 
 export const getVertexModelProvider = (modelConfig: Pick<ModelConfig, 'name' | 'modelRegion'>) => {
