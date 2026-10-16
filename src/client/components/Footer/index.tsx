@@ -41,6 +41,7 @@ const Footer = () => {
             alignSelf: 'flex-start',
             display: 'inline-flex',
             alignItems: 'center',
+            minHeight: 24,
             gap: 0.75,
             color: 'text.primary',
           }}
@@ -60,6 +61,16 @@ const Footer = () => {
               sx={{ height: 16, fontSize: 14, fontWeight: 500, cursor: 'inherit', '& .MuiChip-label': { px: 0.75 } }}
             />
           )}
+        </Link>
+        <Link
+          href="https://github.com/UniversityOfHelsinkiCS/gptwrapper/blob/main/documentation/accessibility-statement.md"
+          target="_blank"
+          rel="noopener"
+          variant="caption"
+          underline="hover"
+          sx={{ alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', minHeight: 24, color: 'text.primary' }}
+        >
+          {t('footer:accessibilityStatement')}
         </Link>
         {serverVersion !== clientVersion && <Typography variant="caption">{t('footer:mismatch')}</Typography>}
       </Box>

@@ -117,7 +117,8 @@
     "uptime": "Uptime: {{uptime}}",
     "mismatch": "Reload for latest changes",
     "toska": "Read about the developers of CurreChat.",
-    "changelog": "Changelog"
+    "changelog": "Changelog",
+    "accessibilityStatement": "Accessibility statement"
   },
   "changelog": {
     "title": "Changelog",

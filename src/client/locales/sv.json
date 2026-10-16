@@ -125,7 +125,8 @@
     "uptime": "Uptime: {{uptime}}",
     "mismatch": "Ladda sida om",
     "toska": "Läs om CurreChats utvecklare.",
-    "changelog": "Ändringslogg"
+    "changelog": "Ändringslogg",
+    "accessibilityStatement": "Tillgänglighetsutlåtande"
   },
   "changelog": {
     "title": "Ändringslogg",

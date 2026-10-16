@@ -118,7 +118,8 @@
     "uptime": "Uptime: {{uptime}}",
     "mismatch": "Lataa sivu uudelleen",
     "toska": "Lue CurreChatin kehittäjistä.",
-    "changelog": "Muutosloki"
+    "changelog": "Muutosloki",
+    "accessibilityStatement": "Saavutettavuusseloste"
   },
   "changelog": {
     "title": "Muutosloki",
