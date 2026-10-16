@@ -64,6 +64,17 @@ test.describe('axe wcag scan for prompt modal', () => {
     await scan(page, testInfo.title)
   })
 
+  teacherTest('scan course preview', async ({ page }, testInfo) => {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await page.getByTestId('choose-prompt-button').click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+
+    await page.getByTestId('show-course-info-test-course-button').click()
+    await expect(page.getByTestId('course-status-chip')).toBeVisible()
+    await scan(page, testInfo.title)
+  })
+
   test('scan my prompt creator', async ({ page }, testInfo) => {
     await page.goto('/general')
     await acceptDisclaimer(page)
@@ -165,17 +176,6 @@ adminTest.describe('axe wcag scan for university prompt gallery', () => {
 
 teacherTest.describe('axe wcag scan for prompt modal previews', () => {
   teacherTest.afterAll(writeAxeReport)
-
-  teacherTest('scan course preview', async ({ page }, testInfo) => {
-    await page.goto('/test-course-course-id')
-    await acceptDisclaimer(page)
-    await page.getByTestId('choose-prompt-button').click()
-    await expect(page.getByRole('dialog')).toBeVisible()
-
-    await page.getByTestId('show-course-info-test-course-button').click()
-    await expect(page.getByTestId('course-status-chip')).toBeVisible()
-    await scan(page, testInfo.title)
-  })
 
   teacherTest('scan prompt preview', async ({ page }, testInfo) => {
     const promptName = `axe-prompt-${testInfo.workerIndex}`
