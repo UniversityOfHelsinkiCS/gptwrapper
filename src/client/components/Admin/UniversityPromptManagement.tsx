@@ -20,6 +20,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   Tabs,
@@ -403,7 +404,7 @@ export default function UniversityPromptManagement() {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" useFlexGap flexWrap="wrap" spacing={2} sx={{ mb: 3 }}>
         <Typography variant="h5" component="h3">{t('uniPrompts:title')}</Typography>
         <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreate} data-testid="uniprompt-create">
           {t('uniPrompts:create')}
@@ -413,64 +414,66 @@ export default function UniversityPromptManagement() {
       {groups.length === 0 ? (
         <Typography color="textSecondary">{t('uniPrompts:noPrompts')}</Typography>
       ) : (
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>{t('uniPrompts:name')}</TableCell>
-              <TableCell>{t('uniPrompts:languages')}</TableCell>
-              <TableCell>{t('uniPrompts:published')}</TableCell>
-              <TableCell>{t('uniPrompts:category')}</TableCell>
-              <TableCell>{t('uniPrompts:actions')}</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {groups.map((group) => {
-              const languages = groupLanguages(group)
-              const category = (group.prompts ?? [])[0]?.type ?? 'UNIVERSITY'
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>{t('uniPrompts:name')}</TableCell>
+                <TableCell>{t('uniPrompts:languages')}</TableCell>
+                <TableCell>{t('uniPrompts:published')}</TableCell>
+                <TableCell>{t('uniPrompts:category')}</TableCell>
+                <TableCell>{t('uniPrompts:actions')}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {groups.map((group) => {
+                const languages = groupLanguages(group)
+                const category = (group.prompts ?? [])[0]?.type ?? 'UNIVERSITY'
 
-              return (
-                <TableRow key={group.id}>
-                  <TableCell>{groupTitle(group, i18n.language) ?? t('uniPrompts:untitled')}</TableCell>
-                  <TableCell>
-                    <Stack direction="row" spacing={0.5}>
-                      {universityPromptLanguages.map((language) => (
-                        <Chip
-                          key={language}
-                          size="small"
-                          label={language.toUpperCase()}
-                          variant={languages.includes(language) ? 'filled' : 'outlined'}
-                          color={languages.includes(language) ? 'primary' : 'default'}
-                        />
-                      ))}
-                    </Stack>
-                  </TableCell>
-                  <TableCell>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={group.published}
-                          onChange={() => handleTogglePublished(group)}
-                          disabled={updateMutation.isPending}
-                          slotProps={{ input: { 'aria-label': t('uniPrompts:published') } }}
-                        />
-                      }
-                      label={group.published ? t('uniPrompts:published') : t('uniPrompts:draft')}
-                    />
-                  </TableCell>
-                  <TableCell>{category === 'TEMPLATE' ? t('uniPrompts:categoryTemplate') : t('uniPrompts:categoryUniversity')}</TableCell>
-                  <TableCell>
-                    <IconButton size="small" onClick={() => handleEdit(group)} aria-label={t('common:edit')}>
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton size="small" color="error" onClick={() => handleDelete(group)} aria-label={t('common:delete')}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
+                return (
+                  <TableRow key={group.id}>
+                    <TableCell>{groupTitle(group, i18n.language) ?? t('uniPrompts:untitled')}</TableCell>
+                    <TableCell>
+                      <Stack direction="row" spacing={0.5}>
+                        {universityPromptLanguages.map((language) => (
+                          <Chip
+                            key={language}
+                            size="small"
+                            label={language.toUpperCase()}
+                            variant={languages.includes(language) ? 'filled' : 'outlined'}
+                            color={languages.includes(language) ? 'primary' : 'default'}
+                          />
+                        ))}
+                      </Stack>
+                    </TableCell>
+                    <TableCell>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={group.published}
+                            onChange={() => handleTogglePublished(group)}
+                            disabled={updateMutation.isPending}
+                            slotProps={{ input: { 'aria-label': t('uniPrompts:published') } }}
+                          />
+                        }
+                        label={group.published ? t('uniPrompts:published') : t('uniPrompts:draft')}
+                      />
+                    </TableCell>
+                    <TableCell>{category === 'TEMPLATE' ? t('uniPrompts:categoryTemplate') : t('uniPrompts:categoryUniversity')}</TableCell>
+                    <TableCell>
+                      <IconButton size="small" onClick={() => handleEdit(group)} aria-label={t('common:edit')}>
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton size="small" color="error" onClick={() => handleDelete(group)} aria-label={t('common:delete')}>
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
 
       {dialogOpen && (
