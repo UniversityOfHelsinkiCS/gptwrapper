@@ -83,7 +83,7 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
             {t('editActivityPeriod')}
           </Typography>
         </Box>
-        <Stack direction="row" spacing={2} alignItems="flex-start">
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'flex-start' }}>
           <DatePicker
             name="course-activity-period-editor"
             label={t('opensAt')}

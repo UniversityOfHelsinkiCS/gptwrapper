@@ -19,6 +19,8 @@ import {
   TextField,
   Tooltip,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { enqueueSnackbar } from '../common/Snackbar'
@@ -74,6 +76,8 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
   const { language } = i18n
   const { data: chatInstance, refetch: refetchCourse } = useCourse(course.courseId)
   const { user } = useCurrentUser()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const courseResponsibilities = chatInstance?.responsibilities ?? course.responsibilities ?? []
   const amongResponsibles = courseResponsibilities.some((r) => r.user.id === user?.id)
@@ -246,7 +250,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
   return (
     <>
       <StatusAnnouncer message={statusMessage} />
-      <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%', mb: 2 }}>
+      <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: '12px', overflow: 'auto', maxHeight: '100%', mb: 2 }}>
         {/* Title */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mt: 1 }}>
           <SchoolIcon color="primary" fontSize="large" />
@@ -330,7 +334,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
             const percent = usagePercent(currentCourseUsage.usage, limit)
             return (
               <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '8px', p: 2, mb: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', columnGap: 2, mb: 1.5 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <BarChartIcon color="primary" />
                     <Typography variant="subtitle1" component="h4" fontWeight="bold">
@@ -364,7 +368,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
             <Typography component="h4" sx={visuallyHidden}>
               {t('course:statistics')}
             </Typography>
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 1.5, mb: 3 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(160px, 100%), 1fr))', gap: 1.5, mb: 3 }}>
               <StatTile value={enrolments.length} label={t('course:enrolledStudents')} />
               <StatTile value={stats.usagePercentage ? `${Math.round(stats.usagePercentage * 100 * 10) / 10} %` : '0 %'} label={t('course:haveUsedCurre')} />
               <StatTile value={Math.round(stats.average || 0)} label={t('course:avgTokensPerStudent')} />
@@ -377,7 +381,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
         {/* Teachers */}
         <Divider sx={{ mb: 2 }} />
         <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, flexWrap: 'wrap' }}>
             <PeopleIcon sx={{ color: 'text.secondary' }} />
             <Typography id="teachers-header" variant="subtitle1" component="h4" fontWeight="bold">
               {t('course:teachers')}
@@ -467,7 +471,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
                     },
                     htmlInput: { 'aria-label': t('course:searchStudents') },
                   }}
-                  sx={{ minWidth: 320 }}
+                  sx={{ width: 320, maxWidth: '100%' }}
                 />
               )}
 
@@ -598,7 +602,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
           </Box>
         )}
       </Paper>
-      <Dialog open={discussionsModalOpen} onClose={() => setDiscussionsModalOpen(false)} fullWidth maxWidth="lg">
+      <Dialog open={discussionsModalOpen} onClose={() => setDiscussionsModalOpen(false)} fullWidth maxWidth="lg" fullScreen={isMobile}>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {t('course:discussions')}
           <IconButton onClick={() => setDiscussionsModalOpen(false)} aria-label={t('common:close')}>

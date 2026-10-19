@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Paper, Typography, Box } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { PromptUsageData } from '../../../hooks/useCourse'
 import type { ActivityPeriod } from '../../../types'
 
@@ -81,18 +81,30 @@ const PromptUsageHistogram = ({ promptUsages, activityPeriod }: Props) => {
         </Typography>
       </Box>
 
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-          <YAxis />
-          <Tooltip formatter={(value: number) => value.toLocaleString()} />
-          <Legend />
-          {promptNames.map(({ key, name }, idx) => (
-            <Bar key={key} dataKey={key} name={name} stackId="tokens" fill={COLORS[idx % COLORS.length]} />
-          ))}
-        </BarChart>
-      </ResponsiveContainer>
+      <Box sx={{ minWidth: 0 }}>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+            <YAxis />
+            <Tooltip formatter={(value: number) => value.toLocaleString()} />
+            {promptNames.map(({ key, name }, idx) => (
+              <Bar key={key} dataKey={key} name={name} stackId="tokens" fill={COLORS[idx % COLORS.length]} />
+            ))}
+          </BarChart>
+        </ResponsiveContainer>
+      </Box>
+
+      <Box component="ul" sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 1, columnGap: 2, listStyle: 'none', p: 0, m: 0, mt: 1 }}>
+        {promptNames.map(({ key, name }, idx) => (
+          <Box component="li" key={key} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>
+            <Box sx={{ width: 12, height: 12, flexShrink: 0, bgcolor: COLORS[idx % COLORS.length] }} />
+            <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+              {name}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
     </Paper>
   )
 }
