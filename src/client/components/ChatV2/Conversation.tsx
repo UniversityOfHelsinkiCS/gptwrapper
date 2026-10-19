@@ -82,38 +82,42 @@ const UserMessageItem = ({ message }: { message: UserMessage }) => (
 const ToolResult = ({ toolResult, handleToolResult }: { toolResult: ToolCallResultEvent; handleToolResult: (toolResult: ToolCallResultEvent) => void }) => {
   const sources = useMemo(() => Array.from(new Set<string>((toolResult.result?.files ?? []).map((file) => file.fileName)).values()).join(', '), [])
   return (
-    <Box
-      data-testid="file-search-sources"
-      sx={{
-        display: 'flex',
-        alignItems: { xs: 'flex-start', sm: 'center' },
-        gap: 2,
-        fontStyle: 'italic',
-        maxWidth: 'fit-content',
-        opacity: '0.85',
-        mt: 3,
-        cursor: 'pointer',
-        padding: '0.6rem',
-        borderRadius: '0.6rem',
-      }}
-      onClick={() => {
-        handleToolResult(toolResult)
-      }}
-    >
-      <FormatQuoteIcon sx={{ fontSize: '2rem' }} />
-      <Box sx={{ minWidth: 0, mt: { xs: 0.5, md: 0 } }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <Typography component="h3" sx={visuallyHidden}>
-            {t('accessibility:sourceResults')}
-          </Typography>
+    <>
+      <Typography component="h3" sx={visuallyHidden}>
+        {t('accessibility:sourceResults')}
+      </Typography>
+      <Box
+        component="button"
+        type="button"
+        data-testid="file-search-sources"
+        sx={{
+          display: 'flex',
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          gap: 2,
+          font: 'inherit',
+          color: 'inherit',
+          textAlign: 'left',
+          border: 'none',
+          background: 'none',
+          fontStyle: 'italic',
+          maxWidth: 'fit-content',
+          opacity: '0.85',
+          mt: 3,
+          cursor: 'pointer',
+          padding: '0.6rem',
+          borderRadius: '0.6rem',
+        }}
+        onClick={() => {
+          handleToolResult(toolResult)
+        }}
+      >
+        <FormatQuoteIcon sx={{ fontSize: '2rem' }} />
+        <Box component="span" sx={{ display: 'block', minWidth: 0, mt: { xs: 0.5, md: 0 } }}>
           <Typography
+            component="span"
             variant="body2"
             sx={{
+              display: 'block',
               mr: 2,
               wordBreak: 'break-all',
               textOverflow: 'ellipsis',
@@ -128,7 +132,7 @@ const ToolResult = ({ toolResult, handleToolResult }: { toolResult: ToolCallResu
           </Typography>
         </Box>
       </Box>
-    </Box>
+    </>
   )
 }
 

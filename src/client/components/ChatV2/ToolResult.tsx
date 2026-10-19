@@ -43,10 +43,17 @@ const AnnotationTruncated = ({
 
   return (
     <Box
+      component="button"
+      type="button"
       data-testid="sources-truncated-item"
       sx={{
         display: 'flex',
+        width: '100%',
         gap: 2,
+        font: 'inherit',
+        color: 'inherit',
+        textAlign: 'left',
+        border: 'none',
         backgroundColor: isHovering ? 'action.hover' : 'transparent',
         transition: 'background-color 0.1s ease-in-out',
         padding: '0.8rem 0.6rem',
@@ -61,6 +68,7 @@ const AnnotationTruncated = ({
       onMouseLeave={() => setIsHovering(false)}
     >
       <Box
+        component="span"
         sx={{
           color: 'text.primary',
           backgroundColor: 'action.selected',
@@ -76,7 +84,9 @@ const AnnotationTruncated = ({
       >
         {relevanceOrder}
       </Box>
-      <Typography sx={multilineEllipsisTruncate}>{data.content}</Typography>
+      <Typography component="span" sx={multilineEllipsisTruncate}>
+        {data.content}
+      </Typography>
     </Box>
   )
 }
