@@ -23,7 +23,7 @@ import EditNoteIcon from '@mui/icons-material/EditNote'
 import BookmarksIcon from '@mui/icons-material/Bookmarks'
 import { usePromptEditorForm } from './context'
 import { monospaceStyle } from '../../theme'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material'
 import { useParams } from 'react-router-dom'
@@ -137,12 +137,14 @@ const ModelSettingsSection = ({ hideVisibilityToggle = false }: { hideVisibility
   const { t } = useTranslation()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const headingId = useId()
+  const visibilityLabelId = useId()
 
   return (
     <Box>
       <Box display="flex" alignItems="center" gap={1} mb={1}>
         <PsychologyIcon color="secondary" />
-        <Typography variant="subtitle1" component="h4" fontWeight="bold" color="text.primary">
+        <Typography id={headingId} variant="subtitle1" component="h4" fontWeight="bold" color="text.primary">
           {t('prompt:promptModelSettings')}
         </Typography>
         {type !== 'PERSONAL' && !hideVisibilityToggle && (
@@ -152,12 +154,13 @@ const ModelSettingsSection = ({ hideVisibilityToggle = false }: { hideVisibility
               <Switch
                 checked={!form.hidden}
                 onChange={(e) => setForm((prev) => ({ ...prev, hidden: !e.target.checked }))}
+                slotProps={{ input: { 'aria-labelledby': `${headingId} ${visibilityLabelId}` } }}
                 sx={{ ...switchFocusIndicatorStyle }}
               />
             }
             label={
-              <Box display="flex" alignItems="center" gap={1} aria-label={t('prompt:showModelInstructionsForStudents')}>
-                {t('prompt:showForStudents')}
+              <Box display="flex" alignItems="center" gap={1}>
+                <span id={visibilityLabelId}>{t('prompt:showForStudents')}</span>
                 {form.hidden ? <VisibilityOffOutlined fontSize="small" color="error" /> : <VisibilityOutlined fontSize="small" color="success" />}
               </Box>
             }
@@ -202,6 +205,7 @@ const RagSettingsSection = () => {
   const [newRags, setNewRags] = useState<number[]>([])
   const hasSelectedRagIndex =
     form.ragIndexId != null && !!(ragIndices?.some((index) => index.id === form.ragIndexId) || userRagIndices?.some((index) => index.id === form.ragIndexId))
+  const visibilityLabelId = useId()
   const selectedIndexName = (ragIndices?.find((i) => i.id === selectedIndexId) ?? userRagIndices?.find((i) => i.id === selectedIndexId))?.metadata.name
 
   const handleBack = () => {
@@ -231,12 +235,13 @@ const RagSettingsSection = () => {
                 <Switch
                   checked={!form.ragHidden}
                   onChange={(e) => setForm((prev) => ({ ...prev, ragHidden: !e.target.checked }))}
+                  slotProps={{ input: { 'aria-labelledby': `rag-in-use-label ${visibilityLabelId}` } }}
                   sx={{ ...switchFocusIndicatorStyle }}
                 />
               }
               label={
-                <Box display="flex" alignItems="center" gap={1} aria-label={t('prompt:showRagForStudents')}>
-                  {t('prompt:showForStudents')}
+                <Box display="flex" alignItems="center" gap={1}>
+                  <span id={visibilityLabelId}>{t('prompt:showForStudents')}</span>
                   {form.ragHidden ? <VisibilityOffOutlined fontSize="small" color="error" /> : <VisibilityOutlined fontSize="small" color="success" />}
                 </Box>
               }
