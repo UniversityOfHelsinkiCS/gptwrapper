@@ -1,4 +1,5 @@
 import { Container, Box, Tab, Typography } from '@mui/material'
+import { visuallyHidden } from '@mui/utils'
 import { useTranslation } from 'react-i18next'
 import { Route, Routes, Link, Navigate } from 'react-router-dom'
 
@@ -28,6 +29,9 @@ export function Component() {
 
   return (
     <Container sx={{ mt: '8rem', mb: '10rem', position: 'relative' }} maxWidth="xl">
+      <Typography component="h2" sx={visuallyHidden}>
+        {t('common:admin')}
+      </Typography>
       <Box m={2}>
         <Typography variant="body1">
           {t('admin:lastUpdate')}

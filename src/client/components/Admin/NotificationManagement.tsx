@@ -316,7 +316,7 @@ export default function NotificationManagement() {
   return (
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Typography variant="h5">{t('notifications:title')}</Typography>
+        <Typography variant="h5" component="h3">{t('notifications:title')}</Typography>
         <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreate}>
           {t('notifications:create')}
         </Button>

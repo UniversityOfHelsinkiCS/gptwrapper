@@ -7,7 +7,7 @@ export const EmbeddedLoginHelper = () => {
   return (
     <Container maxWidth="sm">
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <Typography variant="h6">{t('embeddedLogin:helpText')}</Typography>
+        <Typography variant="h6" component="h2">{t('embeddedLogin:helpText')}</Typography>
       </Box>
     </Container>
   )

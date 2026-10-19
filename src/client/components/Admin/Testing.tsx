@@ -41,7 +41,7 @@ export default function Testing() {
     <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Error & Sentry section */}
       <Box sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-        <Typography variant="h6" sx={{ mb: 0.5 }}>
+        <Typography variant="h6" component="h3" sx={{ mb: 0.5 }}>
           {t('admin:testingErrorSentryTitle')}
         </Typography>
         <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
@@ -69,7 +69,7 @@ export default function Testing() {
 
       {/* API section */}
       <Box sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-        <Typography variant="h6" sx={{ mb: 0.5 }}>
+        <Typography variant="h6" component="h3" sx={{ mb: 0.5 }}>
           {t('admin:testingApiTitle')}
         </Typography>
         <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
@@ -85,7 +85,7 @@ export default function Testing() {
 
       {/* Impersonation section */}
       <Box sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-        <Typography variant="h6" sx={{ mb: 0.5 }}>
+        <Typography variant="h6" component="h3" sx={{ mb: 0.5 }}>
           {t('admin:testingImpersonationTitle')}
         </Typography>
         <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>

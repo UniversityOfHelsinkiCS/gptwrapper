@@ -23,8 +23,12 @@ export const NotFound = () => {
         gap: 6,
       }}
     >
-      <Typography variant="h1">{404}</Typography>
-      <Typography variant="h4">{t('error:notFoundTitle')}</Typography>
+      <Typography variant="h1" component="p">
+        {404}
+      </Typography>
+      <Typography variant="h4" component="h2">
+        {t('error:notFoundTitle')}
+      </Typography>
       <OutlineButtonBlack onClick={handleGoHome}>{t('error:goHome')}</OutlineButtonBlack>
     </Box>
   )

@@ -120,13 +120,13 @@ export function Component() {
     <Container sx={{ mt: '8rem', mb: '10rem' }} maxWidth="md" data-testid="course-creator-page">
       <Stack spacing={3}>
         <Box>
-          <Typography variant="h4">{t('courseCreator:title')}</Typography>
+          <Typography variant="h4" component="h2">{t('courseCreator:title')}</Typography>
           <Typography color="text.secondary">{t('courseCreator:subtitle')}</Typography>
         </Box>
 
         <Paper sx={{ p: 2 }}>
           <Stack spacing={2}>
-            <Typography variant="h6">{t('courseCreator:create')}</Typography>
+            <Typography variant="h6" component="h3">{t('courseCreator:create')}</Typography>
             <LocalizedTextField
               label={t('courseCreator:name')}
               value={name}
@@ -173,7 +173,7 @@ export function Component() {
 
         <Paper sx={{ p: 2 }}>
           <Stack spacing={2}>
-            <Typography variant="h6">{t('courseCreator:manage')}</Typography>
+            <Typography variant="h6" component="h3">{t('courseCreator:manage')}</Typography>
 
             {isError && <Alert severity="error">{t('courseCreator:loadError')}</Alert>}
 

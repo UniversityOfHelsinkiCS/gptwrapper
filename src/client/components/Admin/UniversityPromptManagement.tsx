@@ -404,7 +404,7 @@ export default function UniversityPromptManagement() {
   return (
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Typography variant="h5">{t('uniPrompts:title')}</Typography>
+        <Typography variant="h5" component="h3">{t('uniPrompts:title')}</Typography>
         <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreate} data-testid="uniprompt-create">
           {t('uniPrompts:create')}
         </Button>

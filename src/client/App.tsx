@@ -162,7 +162,7 @@ const LoginError = ({ onRetry, isRetrying }: { onRetry: () => void; isRetrying: 
   return (
     <Container sx={{ mt: '4rem' }} maxWidth="sm">
       <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-        <Typography variant="h5">{t('common:fetchError')}</Typography>
+        <Typography variant="h5" component="h2">{t('common:fetchError')}</Typography>
         <Button variant="contained" onClick={onRetry} disabled={isRetrying}>
           {isRetrying ? <CircularProgress size={20} /> : t('common:retryMessage')}
         </Button>

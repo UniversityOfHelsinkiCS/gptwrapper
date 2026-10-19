@@ -9,7 +9,7 @@ export const ChatInfo = ({ course }: { course: Course }) => {
 
   return (
     <Box mt={2} mb={4}>
-      <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 'bold', mb: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {course.name[language] || 'undefined course'}
       </Typography>
       <Typography variant="body1">{formatDate(course.activityPeriod)}</Typography>
