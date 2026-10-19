@@ -522,7 +522,7 @@ export function Component() {
                   </Stack>
                 </Stack>
 
-                <Box sx={{ width: '100%', height: 280 }}>
+                <Box role="img" aria-label={t('stats:trendChartLabel')} sx={{ width: '100%', height: 280 }}>
                   <ResponsiveContainer>
                     <LineChart data={trendRows} margin={{ top: 8, right: 24, left: 0, bottom: 8 }}>
                       <CartesianGrid strokeDasharray="3 3" />

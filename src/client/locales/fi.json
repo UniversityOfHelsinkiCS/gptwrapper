@@ -89,6 +89,7 @@
     "trendSelectionMode": "Valintatapa",
     "trendSelectionSingle": "Yksi",
     "trendSelectionMulti": "Moni",
+    "trendChartLabel": "Käytön trendit lukukausittain. Tiedot on esitetty kaavion alla olevassa taulukossa.",
     "courseTerms": "Lukukaudet",
     "courseNameInfo": "Kurssi",
     "usageCount": "Käyttömäärä",

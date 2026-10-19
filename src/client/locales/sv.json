@@ -106,6 +106,7 @@
     "trendSelectionMode": "Valtyp",
     "trendSelectionSingle": "En",
     "trendSelectionMulti": "Flera",
+    "trendChartLabel": "Användningstrender per termin. Uppgifterna visas i tabellen under diagrammet.",
     "rags": "RAG:ar",
     "sum": "Summa",
     "courses": "Kurser",

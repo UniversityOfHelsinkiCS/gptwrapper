@@ -98,6 +98,7 @@
     "trendSelectionMode": "Selection mode",
     "trendSelectionSingle": "Single",
     "trendSelectionMulti": "Multi",
+    "trendChartLabel": "Usage trends by term. The data is shown in the table below the chart.",
     "sum": "SUM:",
     "rags": "Source materials",
     "courses": "courses",
