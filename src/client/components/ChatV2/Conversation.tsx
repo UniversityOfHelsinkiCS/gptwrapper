@@ -29,6 +29,7 @@ import {
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import CopyToClipboardButton from './CopyToClipboardButton'
 import { StreamStatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
+import { ScrollableRegion } from '../common/accessibility/ScrollableRegion'
 import { BlueButton, OutlineButtonBlack } from './general/Buttons'
 import { focusIndicatorStyle } from 'src/client/util/accessibility'
 import { visuallyHidden } from '@mui/utils'
@@ -256,6 +257,25 @@ const AssistantMessageItem = ({
               return <>{children}</>
             }
             return <pre {...rest}>{children}</pre>
+          },
+          table(props) {
+            const { node, ...rest } = props
+            return (
+              <ScrollableRegion label={t('accessibility:scrollableTable')} sx={{ '& th, & td': { wordBreak: 'normal', overflowWrap: 'normal' } }}>
+                <table {...rest} />
+              </ScrollableRegion>
+            )
+          },
+          span(props) {
+            const { node, ...rest } = props
+            if (!rest.className?.includes('katex-display')) {
+              return <span {...rest} />
+            }
+            return (
+              <ScrollableRegion label={t('accessibility:scrollableFormula')}>
+                <span {...rest} />
+              </ScrollableRegion>
+            )
           },
           code(props) {
             const { children, className, node, ...rest } = props
