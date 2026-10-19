@@ -951,6 +951,8 @@
     "textFieldClosed": "Tekstikenttä suljettu: {{- name}}",
     "itemDeleted": "Poistettu: {{- name}}",
     "editPromptForm": "Alustuksen muokkaus",
-    "editName": "Muokkaa nimeä"
+    "editName": "Muokkaa nimeä",
+    "scrollableTable": "Taulukko",
+    "scrollableFormula": "Kaava"
   }
 }

@@ -950,6 +950,8 @@
     "textFieldClosed": "Text field closed: {{- name}}",
     "itemDeleted": "Deleted: {{- name}}",
     "editPromptForm": "Edit prompt",
-    "editName": "Edit name"
+    "editName": "Edit name",
+    "scrollableTable": "Table",
+    "scrollableFormula": "Formula"
   }
 }
