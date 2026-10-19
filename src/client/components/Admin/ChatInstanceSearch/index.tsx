@@ -5,9 +5,9 @@ import {
   CircularProgress,
   Dialog,
   DialogContent,
-  DialogTitle,
   IconButton,
   InputAdornment,
+  Link,
   Paper,
   Table,
   TableBody,
@@ -23,7 +23,7 @@ import {
   useTheme,
 } from '@mui/material'
 import debounce from 'lodash/debounce'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { getLanguageValue } from '@shared/utils'
@@ -67,6 +67,7 @@ const ChatInstanceSearch = () => {
     isFetching,
   } = useChatInstanceSearch({ search: debouncedSearch, language, limit: rowsPerPage, offset: page * rowsPerPage })
   const { data: previewCourse } = useCourse(previewCourseId)
+  const previewTitleId = useId()
   const saveDiscussionsMutation = useSaveDiscussionsMutation()
 
   const hasQuery = debouncedSearch.length >= CHAT_INSTANCE_SEARCH_MIN_LENGTH
@@ -137,7 +138,17 @@ const ChatInstanceSearch = () => {
                     <Typography>{chatInstance.codes.join(', ')}</Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <Typography>{getLanguageValue(chatInstance.name, language)}</Typography>
+                    <Link
+                      component="button"
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        setPreviewCourseId(chatInstance.id)
+                      }}
+                      sx={{ textAlign: 'left' }}
+                    >
+                      <Typography component="span">{getLanguageValue(chatInstance.name, language)}</Typography>
+                    </Link>
                   </TableCell>
                   <TableCell align="left">
                     <Typography>{chatInstance.terms.map((term) => getLanguageValue(term.label, language)).join(', ')}</Typography>
@@ -174,13 +185,20 @@ const ChatInstanceSearch = () => {
         </TableContainer>
       )}
 
-      <Dialog open={Boolean(previewCourseId)} onClose={() => setPreviewCourseId(undefined)} fullWidth maxWidth="lg" fullScreen={isMobile}>
-        <DialogTitle component="div" sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+      <Dialog
+        open={Boolean(previewCourseId)}
+        onClose={() => setPreviewCourseId(undefined)}
+        aria-labelledby={previewTitleId}
+        fullWidth
+        maxWidth="lg"
+        fullScreen={isMobile}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
           <IconButton onClick={() => setPreviewCourseId(undefined)} aria-label={t('common:close')}>
             <CloseIcon />
           </IconButton>
-        </DialogTitle>
-        <DialogContent sx={{ pt: 0 }}>{previewCourse && <CoursePreview course={previewCourse} />}</DialogContent>
+        </Box>
+        <DialogContent sx={{ pt: 0 }}>{previewCourse && <CoursePreview course={previewCourse} titleId={previewTitleId} />}</DialogContent>
       </Dialog>
     </Box>
   )

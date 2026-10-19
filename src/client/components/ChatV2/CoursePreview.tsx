@@ -71,7 +71,7 @@ const addButtonSx = {
 type SortKey = 'last_name' | 'weekly' | 'total'
 type SortConfig = { key: SortKey; direction: 'asc' | 'desc' }
 
-const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCourses?: () => void }) => {
+const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; refetchCourses?: () => void; titleId?: string }) => {
   const { i18n, t } = useTranslation()
   const { language } = i18n
   const { data: chatInstance, refetch: refetchCourse } = useCourse(course.courseId)
@@ -255,6 +255,7 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mt: 1 }}>
           <SchoolIcon color="primary" fontSize="large" />
           <Typography
+            id={titleId}
             variant="h4"
             component="h3"
             fontWeight="bold"
@@ -603,12 +604,12 @@ const CoursePreview = ({ course, refetchCourses }: { course: Course; refetchCour
         )}
       </Paper>
       <Dialog open={discussionsModalOpen} onClose={() => setDiscussionsModalOpen(false)} fullWidth maxWidth="lg" fullScreen={isMobile}>
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {t('course:discussions')}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pr: 2 }}>
+          <DialogTitle>{t('course:discussions')}</DialogTitle>
           <IconButton onClick={() => setDiscussionsModalOpen(false)} aria-label={t('common:close')}>
             <CloseIcon />
           </IconButton>
-        </DialogTitle>
+        </Box>
         <DialogContent dividers>
           <DiscussionView courseId={course.courseId} />
         </DialogContent>

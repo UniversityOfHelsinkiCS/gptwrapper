@@ -41,14 +41,12 @@ export const SuperSpeedLoginAs = () => {
       aria-labelledby="super-speed-login-dialog-title"
       aria-describedby="super-speed-login-dialog-description"
     >
-      <DialogTitle id="super-speed-login-dialog-title">
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {t('admin:loginAsButton')}
-          <Typography variant="body2" color="text.secondary" sx={{ ml: 'auto' }}>
-            {t('close')}
-          </Typography>
-        </Box>
-      </DialogTitle>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, pr: 3 }}>
+        <DialogTitle id="super-speed-login-dialog-title">{t('admin:loginAsButton')}</DialogTitle>
+        <Typography variant="body2" color="text.secondary" sx={{ ml: 'auto' }}>
+          {t('close')}
+        </Typography>
+      </Box>
       <DialogContent
         sx={{
           maxHeight: '70vh',

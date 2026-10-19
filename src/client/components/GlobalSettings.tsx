@@ -46,7 +46,8 @@ export const GlobalSettings = ({ open, setOpen }: { open: boolean; setOpen: (ope
   if (isLoading) {
     return (
       <Dialog fullWidth open={open} onClose={() => setOpen(false)}>
-        {t('loading')}
+        <DialogTitle sx={{ py: 2.5 }}>{t('globalSettings:title')}</DialogTitle>
+        <DialogContent>{t('loading')}</DialogContent>
       </Dialog>
     )
   }
