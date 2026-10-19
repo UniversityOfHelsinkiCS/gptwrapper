@@ -130,6 +130,7 @@
     "empty": "No releases to show."
   },
   "chat": {
+    "generalChat": "General chat",
     "start": "Start the conversation by sending a message...",
     "fileTypeNotSupported": "File of type \"{{- type}}\" not supported currently",
     "supportedFileFormats": "Currently there is support for formats \".pdf\" and plain text such as \".txt\", \".csv\", and \".md\"",
@@ -250,6 +251,7 @@
     "chooseChat": "Select for use"
   },
   "sidebar": {
+    "landmark": "Sidebar",
     "coursesAndPrompts": "Courses and prompts",
     "courseSettings": "Course settings",
     "coursePage": "Course page",
@@ -646,8 +648,6 @@
     "studentInstructionsLabel": "Student instructions",
     "promptModelSettings": "Model instructions",
     "showForStudents": "Show for students",
-    "showModelInstructionsForStudents": "Show model instructions for students",
-    "showRagForStudents": "Show source material collection for students",
     "hideSystemInstructions": "Hide from students",
     "selectedModelLabel": "Selected model for the prompt",
     "systemMessagePlaceholder": "e.g., You are a helpful assistant.",
@@ -890,6 +890,7 @@
     "loadError": "Failed to load API keys"
   },
   "accessibility": {
+    "skipToContent": "Skip to content",
     "errorNotification": "Error",
     "warningNotification": "Warning",
     "notificationRegionOne": "Notifications, {{count}} notification",

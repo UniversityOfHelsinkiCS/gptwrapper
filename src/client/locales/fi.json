@@ -131,6 +131,7 @@
     "empty": "Ei näytettäviä julkaisuja."
   },
   "chat": {
+    "generalChat": "Yleinen chat",
     "start": "Aloita keskustelu lähettämällä viesti...",
     "fileTypeNotSupported": "Tiedostotyyppiä \"{{- type}}\" ei tueta tällä hetkellä",
     "supportedFileFormats": "Tällä hetkellä tuetut tiedostomuodot ovat \".pdf\" sekä tekstitiedostot, kuten \".txt\", \".csv\" ja \".md\"",
@@ -253,6 +254,7 @@
     "chooseChat": "Valitse käyttöön"
   },
   "sidebar": {
+    "landmark": "Sivupalkki",
     "coursesAndPrompts": "Kurssit ja alustukset",
     "courseSettings": "Kurssin asetukset",
     "coursePage": "Kurssisivu",
@@ -648,8 +650,6 @@
     "studentInstructionsLabel": "Ohjeistus opiskelijoille",
     "promptModelSettings": "Kielimallin ohjeistus",
     "showForStudents": "Näytä opiskelijoille",
-    "showModelInstructionsForStudents": "Näytä kielimallin ohjeistus opiskelijoille",
-    "showRagForStudents": "Näytä lähdemateriaalikokoelma opiskelijoille",
     "selectedModelLabel": "Alustuksen valittu kielimalli",
     "systemMessagePlaceholder": "Esim. Olet avulias avustaja.",
     "promptSourceMaterialData": "Lähdemateriaali",
@@ -891,6 +891,7 @@
     "loadError": "API-avainten lataaminen epäonnistui"
   },
   "accessibility": {
+    "skipToContent": "Siirry sisältöön",
     "errorNotification": "Virhe",
     "warningNotification": "Varoitus",
     "notificationRegionOne": "Ilmoitukset, {{count}} ilmoitus",

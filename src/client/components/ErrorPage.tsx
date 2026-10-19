@@ -7,6 +7,7 @@ import Replay from '@mui/icons-material/Replay'
 import { useRouteError } from 'react-router-dom'
 import * as Sentry from '@sentry/react'
 import axios from 'axios'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export const SessionExpiredError = () => {
   const { t } = useTranslation()
@@ -47,6 +48,7 @@ export const ErrorPage = () => {
   const { t } = useTranslation()
 
   const isAxiosError = axios.isAxiosError(error)
+  usePageTitle(isAxiosError && !error.response ? t('error:sessionExpired') : t('error:unexpected'))
 
   React.useEffect(() => {
     if (!isAxiosError || error.response) {

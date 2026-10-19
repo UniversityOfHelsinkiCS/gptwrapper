@@ -1,8 +1,10 @@
 import { Box, Container, Typography } from "@mui/material"
 import { useTranslation } from "react-i18next"
+import { usePageTitle } from "../hooks/usePageTitle"
 
 export const EmbeddedLoginHelper = () => {
   const { t } = useTranslation()
+  usePageTitle(t('embeddedLogin:helpText'))
 
   return (
     <Container maxWidth="sm">

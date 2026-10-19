@@ -22,7 +22,7 @@ const ModalTitle = () => {
   }
 
   const matchedKey = Object.keys(titleMap).find((key) => url.includes(key))
-  return matchedKey ? titleMap[matchedKey] : ''
+  return matchedKey ? titleMap[matchedKey] : t('common:appName')
 }
 
 const TemplateModal: React.FC<{ open: boolean; root: string; children: React.ReactNode }> = ({ open, root, children }) => {

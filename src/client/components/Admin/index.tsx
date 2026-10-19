@@ -1,7 +1,7 @@
 import { Container, Box, Tab, Typography } from '@mui/material'
 import { visuallyHidden } from '@mui/utils'
 import { useTranslation } from 'react-i18next'
-import { Route, Routes, Link, Navigate } from 'react-router-dom'
+import { Route, Routes, Link, Navigate, useMatch } from 'react-router-dom'
 
 import { format } from 'date-fns'
 import ChatInstances from './ChatInstances'
@@ -16,6 +16,7 @@ import Feedbacks from './Feedbacks'
 import Testing from './Testing'
 import NotificationManagement from './NotificationManagement'
 import UniversityPromptManagement from './UniversityPromptManagement'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 /**
  * React-router compatible lazy loaded component for Admin page
@@ -24,6 +25,17 @@ import UniversityPromptManagement from './UniversityPromptManagement'
 export function Component() {
   const { t } = useTranslation()
   const { user } = useCurrentUser()
+  const tabPath = useMatch('/admin/:tab/*')?.params.tab
+  const tabs = [
+    { path: 'usersearch', label: t('admin:searchUsers') },
+    { path: 'chatinstancesearch', label: t('admin:chatInstance') },
+    { path: 'notifications', label: t('admin:notifications') },
+    { path: 'uniprompts', label: t('admin:uniPrompts') },
+    { path: 'feedbacks', label: t('admin:feedbacks') },
+    ...(user?.iamGroups.includes('grp-toska') ? [{ path: 'updater', label: t('admin:updater') }] : []),
+    { path: 'testing', label: t('admin:testing') },
+  ]
+  usePageTitle(tabs.find((tab) => tab.path === tabPath)?.label, t('common:admin'))
   if (!user) return null
 
   const lastRestart = format(new Date(user?.lastRestart), 'dd/MM/yyyy HH.mm.ss')
@@ -58,13 +70,9 @@ export function Component() {
             '&.Mui-selected': selectedTabStyle,
           }}
         >
-          <Tab label={t('admin:searchUsers')} to="/admin/usersearch" component={Link} />
-          <Tab label={t('admin:chatInstance')} to="/admin/chatinstancesearch" component={Link} />
-          <Tab label={t('admin:notifications')} to="/admin/notifications" component={Link} />
-          <Tab label={t('admin:uniPrompts')} to="/admin/uniprompts" component={Link} />
-          <Tab label={t('admin:feedbacks')} to="/admin/feedbacks" component={Link} />
-          {user.iamGroups.includes('grp-toska') && <Tab label={t('admin:updater')} to="/admin/updater" component={Link} />}
-          <Tab label={t('admin:testing')} to="/admin/testing" component={Link} />
+          {tabs.map((tab) => (
+            <Tab key={tab.path} label={tab.label} to={`/admin/${tab.path}`} component={Link} />
+          ))}
         </RouterTabs>
       </Box>
       <Routes>

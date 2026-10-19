@@ -46,6 +46,7 @@ import { parseFileContent } from '../../util/fileParsing'
 import { ChatExpiredView } from './ChatExpiredView'
 import { ApiErrorView } from '../common/ApiErrorView'
 import { PromptEditorState } from '../Prompt/context'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
@@ -152,6 +153,7 @@ const ChatV2Content = () => {
   const [visitedResponseIndex, setVisitedResponseIndex] = useState<number | null>(null)
   const isNewResponseAvailable = latestResponseIndex !== null && latestResponseIndex !== visitedResponseIndex
   const courseName = chatInstance && getLanguageValue(chatInstance.name, i18n.language)
+  usePageTitle(courseId === 'general' ? t('chat:generalChat') : courseName)
 
   const handleGoToLatestResponse = () => {
     // focus the latest response so screen readers can read it out loud
@@ -533,7 +535,10 @@ const ChatV2Content = () => {
       {/* Chat view column ------------------------------------------------------------------------------------------------ */}
       <Box
         ref={chatContainerRef}
+        data-skip-target
+        tabIndex={-1}
         sx={{
+          '&:focus-visible': { outline: 'none' },
           flex: 1,
           display: 'flex',
           flexDirection: 'column',

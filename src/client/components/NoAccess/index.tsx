@@ -1,8 +1,10 @@
 import { Box, Container, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 const NoAccess = () => {
   const { t } = useTranslation()
+  usePageTitle(t('error:noAccess'))
 
   return (
     <Container sx={{ mt: '4rem', mb: '10rem' }} maxWidth="xl">

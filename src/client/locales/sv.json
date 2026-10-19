@@ -138,6 +138,7 @@
     "empty": "Inga releaser att visa."
   },
   "chat": {
+    "generalChat": "Allmän chatt",
     "start": "Starta konversationen genom att skicka ett meddelande...",
     "fileTypeNotSupported": "Filtypen \"{{- type}}\" stöds inte för närvarande",
     "supportedFileFormats": "För närvarande stöds formaten \".pdf\" samt vanlig text, såsom \".txt\", \".csv\" och \".md\"",
@@ -613,8 +614,6 @@
     "studentInstructionsLabel": "Instruktioner för studenter",
     "promptModelSettings": "Modellinstruktioner",
     "showForStudents": "Visa för studenter",
-    "showModelInstructionsForStudents": "Visa modellinstruktioner för studenter",
-    "showRagForStudents": "Visa källmaterialsamling för studenter",
     "hideSystemInstructions": "Dölj för studenter",
     "selectedModelLabel": "Vald modell för prompten",
     "systemMessagePlaceholder": "t.ex. Du är en hjälpsam assistent.",
@@ -763,6 +762,7 @@
     "openConfigurator": "Ändra kortkommando"
   },
   "sidebar": {
+    "landmark": "Sidofält",
     "coursesAndPrompts": "Kurser och prompts",
     "courseSettings": "Kursinställningar",
     "coursePage": "Kurssida",
@@ -865,6 +865,7 @@
     "loadError": "Det gick inte att läsa in API-nycklarna"
   },
   "accessibility": {
+    "skipToContent": "Hoppa till innehållet",
     "errorNotification": "Fel",
     "warningNotification": "Varning",
     "notificationRegionOne": "Aviseringar, {{count}} avisering",

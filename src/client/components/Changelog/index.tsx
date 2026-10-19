@@ -11,6 +11,7 @@ import type { Release } from '@shared/changelog'
 import { useChangelog, useHasUnseenReleases } from '../../hooks/useChangelog'
 import { usePreferencesUpdateMutation } from '../../hooks/usePreferencesUpdateMutation'
 import { locales } from '../../locales/locales'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 const ReleaseCard = ({ release }: { release: Release }) => {
   const { t, i18n } = useTranslation()
@@ -32,6 +33,7 @@ const ReleaseCard = ({ release }: { release: Release }) => {
 
 export const Component = () => {
   const { t } = useTranslation()
+  usePageTitle(t('changelog:title'))
   const { releases, isLoading, isError } = useChangelog()
   const hasUnseenReleases = useHasUnseenReleases()
   const { mutate: updatePreferences } = usePreferencesUpdateMutation()

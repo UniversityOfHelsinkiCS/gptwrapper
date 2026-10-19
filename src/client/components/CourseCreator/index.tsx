@@ -31,6 +31,7 @@ import { LocalizedTextField } from '../common/LocalizedTextField'
 import { BlueButton } from '../ChatV2/general/Buttons'
 import { Locale } from '@shared/lang'
 import { SettingsOutlined } from '@mui/icons-material'
+import { usePageTitle } from '../../hooks/usePageTitle'
 
 type EditableValues = {
   name: Locale
@@ -45,6 +46,7 @@ const queryKey = ['courseCreatorChatInstances']
  */
 export function Component() {
   const { t, i18n } = useTranslation()
+  usePageTitle(t('courseCreator:title'))
   const { user, isLoading: isUserLoading } = useCurrentUser()
   const [name, setName] = useState<Locale>({ fi: '', sv: '', en: '' })
   const [description, setDescription] = useState('')
