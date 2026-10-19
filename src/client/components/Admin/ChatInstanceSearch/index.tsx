@@ -171,7 +171,7 @@ const ChatInstanceSearch = () => {
       )}
 
       <Dialog open={Boolean(previewCourseId)} onClose={() => setPreviewCourseId(undefined)} fullWidth maxWidth="lg">
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+        <DialogTitle component="div" sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
           <IconButton onClick={() => setPreviewCourseId(undefined)} aria-label={t('common:close')}>
             <CloseIcon />
           </IconButton>
