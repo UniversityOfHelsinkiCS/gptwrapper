@@ -33,7 +33,7 @@ export const ChatExpiredView = ({ status, chatInstance }: Props) => {
     <Box data-testid="chat-expired-view">
       <ChatInfo course={chatInstance} />
       <Alert severity="warning" style={{ marginTop: 20 }}>
-        <Typography variant="h6">{message}</Typography>
+        <Typography variant="h6" component="p">{message}</Typography>
       </Alert>
     </Box>
   )
