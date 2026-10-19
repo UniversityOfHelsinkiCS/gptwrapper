@@ -45,6 +45,8 @@ const SideBar = ({
 
   return (
     <Box
+      component="aside"
+      aria-label={t('sidebar:landmark')}
       sx={{
         position: 'sticky',
         top: 0,
