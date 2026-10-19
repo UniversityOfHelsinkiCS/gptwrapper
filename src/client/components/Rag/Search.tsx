@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import { RagIndexAttributes } from '../../../shared/types'
 import { RagChunk, SearchInputParams } from '../../../shared/rag'
 import apiClient from '../../util/apiClient'
@@ -21,6 +21,8 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [showAll, setShowAll] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
+  const adminOptionsId = useId()
+  const resultsListId = useId()
   const [results, setResults] = useState<{ results: RagChunk[]; timings: Record<string, number> }>()
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -122,12 +124,18 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
       {user?.isAdmin && (
         <Box>
           <Box
-            role="button"
+            component="button"
+            type="button"
+            aria-expanded={adminOpen}
+            aria-controls={adminOptionsId}
             onClick={() => setAdminOpen((open) => !open)}
             sx={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
+              font: 'inherit',
+              color: 'inherit',
+              bgcolor: 'transparent',
               border: '1px solid',
               borderColor: 'divider',
               borderRadius: '20px',
@@ -139,16 +147,16 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
             }}
           >
             <Tune sx={{ fontSize: 18, color: 'action.active' }} />
-            <Typography variant="body2" fontWeight={500}>
+            <Typography component="span" variant="body2" fontWeight={500}>
               {t('rag:advancedOptionsLabel')}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography component="span" variant="caption" color="text.secondary">
               · {t('rag:adminOnly')}
             </Typography>
             {adminOpen ? <ExpandLess sx={{ color: 'action.active' }} /> : <ExpandMore sx={{ color: 'action.active' }} />}
           </Box>
 
-          <Collapse in={adminOpen}>
+          <Collapse in={adminOpen} id={adminOptionsId}>
             <Box
               mt="12px"
               sx={{
@@ -220,7 +228,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
             </Typography>
           </Box>
 
-          <Box display="flex" flexDirection="column">
+          <Box id={resultsListId} display="flex" flexDirection="column">
             {visibleResults.map((chunk, idx) => (
               <Box
                 key={chunk.id ?? `${chunk.metadata?.ragFileName ?? 'unknown'}-${idx}`}
@@ -246,18 +254,25 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
 
           {allResults.length > 3 && (
             <Box
-              role="button"
+              component="button"
+              type="button"
+              aria-expanded={showAll}
+              aria-controls={resultsListId}
               onClick={() => setShowAll((prev) => !prev)}
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '6px',
+                width: '100%',
                 p: '12px',
                 cursor: 'pointer',
+                font: 'inherit',
                 color: 'primary.main',
+                bgcolor: 'transparent',
                 fontSize: '14px',
                 fontWeight: 500,
+                border: 'none',
                 borderTop: '1px solid',
                 borderColor: 'divider',
                 '&:hover': { bgcolor: (theme) => alpha(theme.palette.primary.main, 0.04) },
