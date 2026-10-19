@@ -2,7 +2,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile'
 import { Box, Paper, Typography } from '@mui/material'
 import ReactMarkdown from 'react-markdown'
 import { PrismAsync as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { accessibleOneDark } from './codeTheme'
 import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -249,6 +249,14 @@ const AssistantMessageItem = ({
         remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
         rehypePlugins={[[rehypeKatex, katexOptions]]}
         components={{
+          pre(props) {
+            const { children, node, ...rest } = props
+            const codeNode = node?.children[0]
+            if (codeNode?.type === 'element' && /language-(\w+)/.test(String(codeNode.properties.className ?? ''))) {
+              return <>{children}</>
+            }
+            return <pre {...rest}>{children}</pre>
+          },
           code(props) {
             const { children, className, node, ...rest } = props
             const match = /language-(\w+)/.exec(className || '')
@@ -278,7 +286,7 @@ const AssistantMessageItem = ({
                     {/* @ts-ignore */}
                     <SyntaxHighlighter
                       {...rest}
-                      PreTag="div"
+                      PreTag="pre"
                       children={String(children)}
                       language={language}
                       customStyle={{
@@ -289,7 +297,7 @@ const AssistantMessageItem = ({
                         overflowWrap: 'break-word',
                         whiteSpace: 'pre-wrap',
                       }}
-                      style={oneDark}
+                      style={accessibleOneDark}
                       className="scrollable-code-highlight"
                       id={codeBlockId}
                     />
