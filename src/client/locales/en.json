@@ -333,6 +333,7 @@
     "noChats": "No open course chats"
   },
   "admin": {
+    "actions": "Actions",
     "tryAgain": "Reset All (Admin only)",
     "showing": "Showing",
     "timePeriodStart": "Starting",

@@ -38,58 +38,62 @@ const UserTable = ({ users }: { users: User[] }) => {
           <TableHead>
             <TableRow>
               <TableCell>
-                <Typography variant="h6">
+                <Typography variant="h6" component="span">
                   <b>{t('admin:username')}</b>
                 </Typography>
               </TableCell>
               <TableCell align="left">
-                <Typography variant="h6">
+                <Typography variant="h6" component="span">
                   <b>{t('admin:lastName')}</b>
                 </Typography>
               </TableCell>
               <TableCell align="left">
-                <Typography variant="h6">
+                <Typography variant="h6" component="span">
                   <b>{t('admin:firstNames')}</b>
                 </Typography>
               </TableCell>
               <TableCell align="left">
-                <Typography variant="h6">
+                <Typography variant="h6" component="span">
                   <b>{t('admin:studentNumber')}</b>
                 </Typography>
               </TableCell>
               <TableCell align="left">
-                <Typography variant="h6">
+                <Typography variant="h6" component="span">
                   <b>{t('admin:email')}</b>
                 </Typography>
               </TableCell>
               <TableCell align="left">
-                <Typography variant="h6">
+                <Typography variant="h6" component="span">
                   <b>{t('admin:usage')}</b>
                 </Typography>
               </TableCell>
-              <TableCell />
+              <TableCell>
+                <Typography variant="h6" component="span">
+                  <b>{t('admin:actions')}</b>
+                </Typography>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell component="th" scope="row">
-                  <Typography variant="h6">{user.username}</Typography>
+                  <Typography variant="h6" component="span">{user.username}</Typography>
                 </TableCell>
                 <TableCell align="left">
-                  <Typography variant="h6">{user.lastName}</Typography>
+                  <Typography variant="h6" component="span">{user.lastName}</Typography>
                 </TableCell>
                 <TableCell align="left">
-                  <Typography variant="h6">{user.firstNames}</Typography>
+                  <Typography variant="h6" component="span">{user.firstNames}</Typography>
                 </TableCell>
                 <TableCell align="left">
-                  <Typography variant="h6">{user.studentNumber}</Typography>
+                  <Typography variant="h6" component="span">{user.studentNumber}</Typography>
                 </TableCell>
                 <TableCell align="left">
-                  <Typography variant="h6">{user.primaryEmail}</Typography>
+                  <Typography variant="h6" component="span">{user.primaryEmail}</Typography>
                 </TableCell>
                 <TableCell align="left">
-                  <Typography variant="h6">{user.usage}</Typography>
+                  <Typography variant="h6" component="span">{user.usage}</Typography>
                 </TableCell>
                 <TableCell>
                   <Button variant="outlined" onClick={handleLoginAs(user)}>
@@ -129,32 +133,32 @@ const ActionUserTable = ({
           <TableHead>
             <TableRow>
               <TableCell>
-                <Typography variant="h6">
+                <Typography variant="h6" component="span">
                   <b>{t('admin:username')}</b>
                 </Typography>
               </TableCell>
               <TableCell align="left">
-                <Typography variant="h6">
+                <Typography variant="h6" component="span">
                   <b>{t('admin:lastName')}</b>
                 </Typography>
               </TableCell>
               <TableCell align="left">
-                <Typography variant="h6">
+                <Typography variant="h6" component="span">
                   <b>{t('admin:firstNames')}</b>
                 </Typography>
               </TableCell>
               <TableCell align="left">
-                <Typography variant="h6">
+                <Typography variant="h6" component="span">
                   <b>{t('admin:studentNumber')}</b>
                 </Typography>
               </TableCell>
               <TableCell align="left">
-                <Typography variant="h6">
+                <Typography variant="h6" component="span">
                   <b>{t('admin:email')}</b>
                 </Typography>
               </TableCell>
               <TableCell align="left">
-                <Typography variant="h6">
+                <Typography variant="h6" component="span">
                   <b>{actionText}</b>
                 </Typography>
               </TableCell>

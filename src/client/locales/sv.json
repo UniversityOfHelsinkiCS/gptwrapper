@@ -306,6 +306,7 @@
     "waitingForResponse": "Väntar på respons"
   },
   "admin": {
+    "actions": "Åtgärder",
     "tryAgain": "Reset All (Admin only)",
     "showing": "Visande",
     "timePeriodStart": "Startande",

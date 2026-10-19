@@ -336,6 +336,7 @@
     "waitingForResponse": "Waiting for response"
   },
   "admin": {
+    "actions": "Toiminnot",
     "tryAgain": "Reset All (Admin only)",
     "showing": "Näytetään",
     "timePeriodStart": "Alkaen",

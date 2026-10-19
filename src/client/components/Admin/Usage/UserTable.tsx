@@ -98,18 +98,23 @@ const UserTable = () => {
           <TableHead>
             <TableRow>
               <TableCell>
-                <Typography variant="h5">
+                <Typography variant="h5" component="span">
                   <b>{t('admin:username')}</b>
                 </Typography>
               </TableCell>
               <TableCell>
-                <Typography variant="h5">
+                <Typography variant="h5" component="span">
                   <b>{t('admin:usageCount')}</b>
                 </Typography>
               </TableCell>
               <TableCell align="right">
-                <Typography variant="h5">
+                <Typography variant="h5" component="span">
                   <b>{t('admin:courseNameInfo')}</b>
+                </Typography>
+              </TableCell>
+              <TableCell colSpan={2}>
+                <Typography variant="h5" component="span">
+                  <b>{t('admin:actions')}</b>
                 </Typography>
               </TableCell>
             </TableRow>
@@ -119,10 +124,10 @@ const UserTable = () => {
             {(searchedUsages.length !== 0 ? searchedUsages : sortedUsage).map(({ id, usageCount, user, chatInstance }) => (
               <TableRow key={id}>
                 <TableCell component="th" scope="row">
-                  <Typography variant="h6">{user.username}</Typography>
+                  <Typography variant="h6" component="span">{user.username}</Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography variant="h6">{usageCount}</Typography>
+                  <Typography variant="h6" component="span">{usageCount}</Typography>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="overline">
