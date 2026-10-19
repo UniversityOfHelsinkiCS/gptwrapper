@@ -66,7 +66,7 @@ const Stats: React.FC = () => {
           <Table sx={{ mt: 2 }} data-testid="students-table">
             <TableHead sx={{ borderRadius: 1, backgroundColor: 'background.subtle' }}>
               <TableRow>
-                <TableCell />
+                <TableCell>#</TableCell>
                 <TableCell>
                   <strong>{t('admin:studentNumber')}</strong>
                 </TableCell>
