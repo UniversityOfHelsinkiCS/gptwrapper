@@ -13,7 +13,7 @@ import { EmbeddedProvider } from './contexts/EmbeddedContext'
 import { DarkModeProvider } from './contexts/DarkModeContext'
 import useCurrentUser from './hooks/useCurrentUser'
 import { AnalyticsProvider } from './stores/analytics'
-import useTheme from './theme'
+import useTheme, { focusVisibleOutline } from './theme'
 import type { User } from './types'
 import { useUpdateUrlLang } from './hooks/useUpdateUrlLang'
 import Styles from './GlobalStyles'
@@ -63,6 +63,44 @@ const AdminLoggedInAsBanner = () => {
         </Button>
       }
     />
+  )
+}
+
+const skipLinkSx = {
+  ...visuallyHidden,
+  '&:focus-visible': {
+    position: 'fixed',
+    top: '1rem',
+    left: '1rem',
+    zIndex: 1300,
+    width: 'auto',
+    height: 'auto',
+    bgcolor: 'primary.main',
+    borderRadius: '0.5rem',
+    p: 1.8,
+    color: 'white',
+    margin: 1,
+    overflow: 'visible',
+    clip: 'auto',
+    clipPath: 'none',
+    whiteSpace: 'normal',
+    ...focusVisibleOutline,
+  },
+}
+
+const SkipToContent = () => {
+  const { t } = useTranslation()
+
+  const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault()
+    const target = document.querySelector<HTMLElement>('[data-skip-target]') ?? document.getElementById('main-content')
+    target?.focus()
+  }
+
+  return (
+    <Box component="a" href="#main-content" onClick={handleClick} sx={skipLinkSx}>
+      {t('accessibility:skipToContent')}
+    </Box>
   )
 }
 
@@ -129,6 +167,7 @@ const Layout = () => {
           height: 'auto',
         }}
       >
+        <SkipToContent />
         <Box component="header" ref={headerRef}>
           <Typography component="h1" sx={visuallyHidden}>
             {t('common:appName')}
@@ -162,7 +201,9 @@ const LoginError = ({ onRetry, isRetrying }: { onRetry: () => void; isRetrying: 
   return (
     <Container sx={{ mt: '4rem' }} maxWidth="sm">
       <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-        <Typography variant="h5" component="h2">{t('common:fetchError')}</Typography>
+        <Typography variant="h5" component="h2">
+          {t('common:fetchError')}
+        </Typography>
         <Button variant="contained" onClick={onRetry} disabled={isRetrying}>
           {isRetrying ? <CircularProgress size={20} /> : t('common:retryMessage')}
         </Button>
@@ -185,7 +226,7 @@ const Content = () => {
   if (view === 'redirect') return <Navigate to={getRedirect(user)} />
 
   return (
-    <Box component="main" sx={{ flex: 1 }}>
+    <Box component="main" id="main-content" tabIndex={-1} sx={{ flex: 1, '&:focus-visible': { outline: 'none' } }}>
       {view === 'loading' && <HYLoadingSpinner />}
       {view === 'error' && <LoginError onRetry={() => refetch()} isRetrying={isFetching} />}
       {view !== 'loading' && view !== 'error' && <Outlet />}
