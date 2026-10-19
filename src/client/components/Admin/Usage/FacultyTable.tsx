@@ -44,12 +44,12 @@ const FacultyTable = () => {
           <TableHead>
             <TableRow>
               <TableCell>
-                <Typography variant="h5">
+                <Typography variant="h5" component="span">
                   <b>{t('admin:name')}</b>
                 </Typography>
               </TableCell>
               <TableCell>
-                <Typography variant="h5" align="right">
+                <Typography variant="h5" component="span" align="right">
                   <b>{t('admin:usageCount')}</b>
                 </Typography>
               </TableCell>
@@ -60,10 +60,10 @@ const FacultyTable = () => {
             {sortedUsage.map(({ faculty, usageCount }) => (
               <TableRow key={faculty.code}>
                 <TableCell component="th" scope="row">
-                  <Typography variant="h6">{faculty.name[i18n.language as keyof Locales] ?? faculty.name.fi}</Typography>
+                  <Typography variant="h6" component="span">{faculty.name[i18n.language as keyof Locales] ?? faculty.name.fi}</Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography variant="h6">{usageCount}</Typography>
+                  <Typography variant="h6" component="span">{usageCount}</Typography>
                 </TableCell>
               </TableRow>
             ))}
