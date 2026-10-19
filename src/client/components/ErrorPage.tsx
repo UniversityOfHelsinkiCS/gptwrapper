@@ -22,8 +22,10 @@ export const SessionExpiredError = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '80vh',
+        minHeight: '80vh',
         gap: 4,
+        px: 2,
+        textAlign: 'center',
       }}
     >
       <Typography variant="h4" component="h1">
@@ -32,7 +34,7 @@ export const SessionExpiredError = () => {
       <Typography variant="body1" color="textSecondary" sx={{ maxWidth: '600px' }}>
         {t('error:pleaseReload')}
       </Typography>
-      <Box sx={{ display: 'flex', gap: 2 }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 2 }}>
         <OutlineButtonBlack startIcon={<Replay />} onClick={handleReload}>
           {t('error:reload')}
         </OutlineButtonBlack>
@@ -76,8 +78,10 @@ export const ErrorPage = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '80vh',
+        minHeight: '80vh',
         gap: 4,
+        px: 2,
+        textAlign: 'center',
       }}
     >
       <Typography variant="h4" component="h1">
@@ -90,14 +94,17 @@ export const ErrorPage = () => {
         <Box
           sx={{
             mt: 2,
-            p: 4,
+            p: { xs: 2, sm: 4 },
             backgroundColor: 'grey.900',
             color: 'common.white',
             fontFamily: 'monospace',
             fontSize: 14,
-            width: '40%',
+            width: '100%',
+            maxWidth: '800px',
             borderRadius: 1,
-            textAlign: 'center',
+            textAlign: 'left',
+            whiteSpace: 'pre-wrap',
+            overflowWrap: 'anywhere',
           }}
         >
           <b>{t('error:errorMessage')}:</b> {error.message} <br />
@@ -110,7 +117,7 @@ export const ErrorPage = () => {
           ) : null}
         </Box>
       )}
-      <Box sx={{ display: 'flex', gap: 2 }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 2 }}>
         <OutlineButtonBlack startIcon={<ArrowBack />} onClick={handleGoHome}>
           {t('error:goHome')}
         </OutlineButtonBlack>

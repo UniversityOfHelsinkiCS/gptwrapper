@@ -38,7 +38,15 @@ export const RouterTabs = ({ children, sx, tabSx }: RouterTabsProps) => {
   }, -1)
 
   return (
-    <Tabs value={activeIndex < 0 ? false : activeIndex} slotProps={{ indicator: { style: { backgroundColor: 'black' } } }} textColor="inherit" sx={sx}>
+    <Tabs
+      value={activeIndex < 0 ? false : activeIndex}
+      variant="scrollable"
+      scrollButtons="auto"
+      allowScrollButtonsMobile
+      slotProps={{ indicator: { style: { backgroundColor: 'black' } } }}
+      textColor="inherit"
+      sx={sx}
+    >
       {tabs.map((tab) =>
         React.cloneElement(tab, {
           sx: mergeSx(tab.props.sx, tabSx),

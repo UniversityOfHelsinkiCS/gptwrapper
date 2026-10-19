@@ -19,6 +19,8 @@ import {
   Switch,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import debounce from 'lodash/debounce'
 import { useEffect, useMemo, useState } from 'react'
@@ -33,6 +35,8 @@ import useChatInstanceSearch, { CHAT_INSTANCE_SEARCH_DEFAULT_LIMIT, CHAT_INSTANC
 const ChatInstanceSearch = () => {
   const { t, i18n } = useTranslation()
   const { language } = i18n
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -75,7 +79,7 @@ const ChatInstanceSearch = () => {
           onChange={(event) => handleSearchChange(event.target.value)}
           placeholder={t('admin:chatInstanceSearchPlaceholder')}
           size="small"
-          sx={{ minWidth: 360 }}
+          sx={{ width: 360, maxWidth: '100%' }}
           slotProps={{
             input: {
               startAdornment: (
@@ -170,7 +174,7 @@ const ChatInstanceSearch = () => {
         </TableContainer>
       )}
 
-      <Dialog open={Boolean(previewCourseId)} onClose={() => setPreviewCourseId(undefined)} fullWidth maxWidth="lg">
+      <Dialog open={Boolean(previewCourseId)} onClose={() => setPreviewCourseId(undefined)} fullWidth maxWidth="lg" fullScreen={isMobile}>
         <DialogTitle component="div" sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
           <IconButton onClick={() => setPreviewCourseId(undefined)} aria-label={t('common:close')}>
             <CloseIcon />

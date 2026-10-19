@@ -205,8 +205,8 @@ const ChatInstanceTable = () => {
             {t(`course:showActiveCourses`)}
           </InputLabel>
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <TextField label={t('admin:searchCourse')} variant="outlined" sx={{ flex: 1, m: 1 }} onChange={handleChangeSearch} />
+        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+          <TextField label={t('admin:searchCourse')} variant="outlined" sx={{ flex: '1 1 240px', m: 1 }} onChange={handleChangeSearch} />
           <TablePagination
             rowsPerPageOptions={[10, 50, 100]}
             component="div"

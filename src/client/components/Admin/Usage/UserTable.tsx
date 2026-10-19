@@ -92,7 +92,7 @@ const UserTable = () => {
 
   return (
     <Box my={2}>
-      <TextField sx={{ width: '30em', my: 2 }} label="Search users" variant="outlined" onChange={handleSearchChange} />
+      <TextField sx={{ width: '30em', maxWidth: '100%', my: 2 }} label="Search users" variant="outlined" onChange={handleSearchChange} />
       <TableContainer component={Paper}>
         <Table>
           <TableHead>

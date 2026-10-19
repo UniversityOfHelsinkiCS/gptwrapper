@@ -11,7 +11,7 @@ import { useId, useState } from 'react'
 import { optionFocusIndicatorStyle } from 'src/client/util/accessibility'
 
 export const ShiftEnterToSend = ({ t }) => (
-  <Box display="flex" alignItems="center" gap={0.5} component="span">
+  <Box display="flex" flexWrap="wrap" alignItems="center" gap={0.5} component="span">
     <strong>{t('sendPreferenceConfigurator:shift')}</strong>
     <ArrowUpward fontSize="small" />+ <strong>{t('sendPreferenceConfigurator:return')}</strong>
     <KeyboardReturn fontSize="small" sx={{ ...optionFocusIndicatorStyle() }} />
@@ -20,7 +20,7 @@ export const ShiftEnterToSend = ({ t }) => (
 )
 
 export const EnterToSend = ({ t }) => (
-  <Box display="flex" alignItems="center" gap={0.5} component="span">
+  <Box display="flex" flexWrap="wrap" alignItems="center" gap={0.5} component="span">
     <strong>{t('sendPreferenceConfigurator:return')}</strong>
     <KeyboardReturn fontSize="small" />
     {t('sendPreferenceConfigurator:toSend')}
@@ -28,7 +28,7 @@ export const EnterToSend = ({ t }) => (
 )
 
 export const ShiftEnterForNewline = ({ t }) => (
-  <Box display="flex" alignItems="center" gap={0.5} component="span">
+  <Box display="flex" flexWrap="wrap" alignItems="center" gap={0.5} component="span">
     <strong>{t('sendPreferenceConfigurator:shift')}</strong>
     <ArrowUpward fontSize="small" />+ <strong>{t('sendPreferenceConfigurator:return')}</strong>
     <KeyboardReturn fontSize="small" />
@@ -37,7 +37,7 @@ export const ShiftEnterForNewline = ({ t }) => (
 )
 
 export const EnterForNewline = ({ t }) => (
-  <Box display="flex" alignItems="center" gap={0.5} component="span">
+  <Box display="flex" flexWrap="wrap" alignItems="center" gap={0.5} component="span">
     <strong>{t('sendPreferenceConfigurator:return')}</strong>
     <KeyboardReturn fontSize="small" />
     {t('sendPreferenceConfigurator:toNewline')}
@@ -149,7 +149,7 @@ export const SendPreferenceConfiguratorModal = ({ open, onClose, anchorEl, conte
       }}
     >
       <form onSubmit={handleSubmit}>
-        <FormControl sx={{ p: 3 }}>
+        <FormControl sx={{ p: { xs: 2, sm: 3 } }}>
           <SendPreferenceConfigurator value={value} onChange={handleChange} titleId={titleId} />
           <OutlineButtonBlack type="submit" data-testid="submit-send-preference">
             {t('sendPreferenceConfigurator:ok')}

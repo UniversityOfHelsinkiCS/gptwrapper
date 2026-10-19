@@ -13,8 +13,8 @@ export default function Feedbacks() {
   return (
     <Box>
       {feedbacks?.map((f) => (
-        <Paper key={f.id} sx={{ p: 1, my: 4, display: 'flex', gap: 2 }}>
-          <Box sx={{ flex: 1 }}>
+        <Paper key={f.id} sx={{ p: 1, my: 4, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
+          <Box sx={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
             <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
               {new Date(f.createdAt).toLocaleString(locales.fi.code)}
             </Typography>
@@ -23,7 +23,7 @@ export default function Feedbacks() {
             </Typography>
             <Typography variant="body1">{f.feedback}</Typography>
           </Box>
-          <Table size="small" sx={{ flex: 1 }}>
+          <Table size="small" sx={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
             <TableBody>
               {Object.entries(f.metadata).map(([key, value]) => (
                 <TableRow key={key}>

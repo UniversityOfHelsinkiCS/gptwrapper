@@ -18,6 +18,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   Tabs,
@@ -315,7 +316,7 @@ export default function NotificationManagement() {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" useFlexGap flexWrap="wrap" spacing={2} sx={{ mb: 3 }}>
         <Typography variant="h5" component="h3">{t('notifications:title')}</Typography>
         <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreate}>
           {t('notifications:create')}
@@ -325,41 +326,43 @@ export default function NotificationManagement() {
       {notifications.length === 0 ? (
         <Typography color="textSecondary">{t('notifications:noNotifications')}</Typography>
       ) : (
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>{t('notifications:message')}</TableCell>
-              <TableCell>{t('notifications:startDate')}</TableCell>
-              <TableCell>{t('notifications:endDate')}</TableCell>
-              <TableCell>{t('notifications:severity')}</TableCell>
-              <TableCell>{t('notifications:active')}</TableCell>
-              <TableCell>{t('notifications:actions')}</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {notifications.map((notification) => (
-              <TableRow key={notification.id}>
-                <TableCell>
-                  <Typography variant="body2" sx={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {notification.message[i18n.language as keyof Locales] || notification.message.en}
-                  </Typography>
-                </TableCell>
-                <TableCell>{notification.startDate ? new Date(notification.startDate).toLocaleDateString() : '-'}</TableCell>
-                <TableCell>{notification.endDate ? new Date(notification.endDate).toLocaleDateString() : '-'}</TableCell>
-                <TableCell>{t(`notifications:${getSeverityFromPriority(notification.priority)}`)}</TableCell>
-                <TableCell>{notification.active ? t('common:yes') : t('common:no')}</TableCell>
-                <TableCell>
-                  <IconButton size="small" onClick={() => handleEdit(notification)}>
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton size="small" onClick={() => handleDelete(notification.id)} color="error">
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>{t('notifications:message')}</TableCell>
+                <TableCell>{t('notifications:startDate')}</TableCell>
+                <TableCell>{t('notifications:endDate')}</TableCell>
+                <TableCell>{t('notifications:severity')}</TableCell>
+                <TableCell>{t('notifications:active')}</TableCell>
+                <TableCell>{t('notifications:actions')}</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {notifications.map((notification) => (
+                <TableRow key={notification.id}>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {notification.message[i18n.language as keyof Locales] || notification.message.en}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>{notification.startDate ? new Date(notification.startDate).toLocaleDateString() : '-'}</TableCell>
+                  <TableCell>{notification.endDate ? new Date(notification.endDate).toLocaleDateString() : '-'}</TableCell>
+                  <TableCell>{t(`notifications:${getSeverityFromPriority(notification.priority)}`)}</TableCell>
+                  <TableCell>{notification.active ? t('common:yes') : t('common:no')}</TableCell>
+                  <TableCell>
+                    <IconButton size="small" onClick={() => handleEdit(notification)}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton size="small" onClick={() => handleDelete(notification.id)} color="error">
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
 
       <NotificationDialog open={dialogOpen} onClose={handleCloseDialog} notification={editingNotification} />
