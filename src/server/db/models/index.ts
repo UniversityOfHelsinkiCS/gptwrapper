@@ -13,6 +13,7 @@ import Notification from './Notification'
 import PromptUsage from './promptUsage'
 import PromptChatInstance from './promptChatInstance'
 import UniversityPrompt from './universityPrompt'
+import ApiKey from './apiKey'
 
 /**
  * Foreign keys are always named explicitly. Without `foreignKey`, `hasMany` and
@@ -92,6 +93,9 @@ RagIndex.hasMany(Prompt, { as: 'prompts', foreignKey: 'ragIndexId' })
 
 RagFile.belongsTo(User, { as: 'user' })
 
+ApiKey.belongsTo(User, { as: 'user' })
+User.hasMany(ApiKey, { as: 'apikeys', foreignKey: 'userId' })
+
 /**
  * Everyone's favourite super-many-to-many relationship
  */
@@ -131,4 +135,5 @@ export {
   PromptUsage,
   PromptChatInstance,
   UniversityPrompt,
+  ApiKey,
 }
