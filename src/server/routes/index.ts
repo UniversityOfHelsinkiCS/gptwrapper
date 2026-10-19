@@ -21,6 +21,7 @@ import notificationRouter from './notifications'
 import changelogRouter from './changelog'
 import uniPromptRouter from './uniPrompt'
 import testUtilsRouter from './testUtils'
+import apiKeyRouter from './apiKey'
 import { inProduction } from '../../config'
 import logger from '../util/logger'
 import statisticsRouter from './statistics'
@@ -61,6 +62,7 @@ router.use('/feedback', feedbackRouter)
 router.use('/notifications', notificationRouter)
 router.use('/changelog', changelogRouter)
 router.use('/uniprompts', uniPromptRouter)
+router.use('/apikeys', apiKeyRouter)
 
 Sentry.setupExpressErrorHandler(router)
 router.use(errorHandler)
