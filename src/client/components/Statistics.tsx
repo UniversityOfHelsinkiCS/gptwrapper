@@ -7,10 +7,10 @@ import {
   Container,
   Dialog,
   DialogContent,
-  DialogTitle,
   FormControlLabel,
   FormGroup,
   IconButton,
+  Link,
   MenuItem,
   Paper,
   Select,
@@ -35,7 +35,7 @@ import {
 } from '@mui/material'
 import type { Statistic } from '@shared/types'
 import { visuallyHidden } from '@mui/utils'
-import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useDeferredValue, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMatch, useNavigate } from 'react-router-dom'
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip as ChartTooltip, XAxis, YAxis } from 'recharts'
@@ -136,6 +136,7 @@ export function Component() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [previewCourseId, setPreviewCourseId] = useState<string | undefined>(undefined)
   const { data: previewCourse } = useCourse(previewCourseId)
+  const previewTitleId = useId()
   const { data: statistics, isSuccess } = useStatistics()
   const { t, i18n } = useTranslation()
   const theme = useTheme()
@@ -538,10 +539,26 @@ export function Component() {
                       />
                       <Legend />
                       {trendSeries.courses && (
-                        <Line yAxisId="count" type="monotone" dataKey="courses" name={t('stats:trendCourses')} stroke={chartSeriesColor(theme, 0)} strokeWidth={2} dot={false} />
+                        <Line
+                          yAxisId="count"
+                          type="monotone"
+                          dataKey="courses"
+                          name={t('stats:trendCourses')}
+                          stroke={chartSeriesColor(theme, 0)}
+                          strokeWidth={2}
+                          dot={false}
+                        />
                       )}
                       {trendSeries.students && (
-                        <Line yAxisId="count" type="monotone" dataKey="students" name={t('stats:studentCount')} stroke={chartSeriesColor(theme, 2)} strokeWidth={2} dot={false} />
+                        <Line
+                          yAxisId="count"
+                          type="monotone"
+                          dataKey="students"
+                          name={t('stats:studentCount')}
+                          stroke={chartSeriesColor(theme, 2)}
+                          strokeWidth={2}
+                          dot={false}
+                        />
                       )}
                       {trendSeries.percentage && (
                         <Line
@@ -555,10 +572,26 @@ export function Component() {
                         />
                       )}
                       {trendSeries.prompts && (
-                        <Line yAxisId="count" type="monotone" dataKey="prompts" name={t('stats:promptCount')} stroke={chartSeriesColor(theme, 4)} strokeWidth={2} dot={false} />
+                        <Line
+                          yAxisId="count"
+                          type="monotone"
+                          dataKey="prompts"
+                          name={t('stats:promptCount')}
+                          stroke={chartSeriesColor(theme, 4)}
+                          strokeWidth={2}
+                          dot={false}
+                        />
                       )}
                       {trendSeries.rags && (
-                        <Line yAxisId="count" type="monotone" dataKey="rags" name={t('stats:rags')} stroke={chartSeriesColor(theme, 7)} strokeWidth={2} dot={false} />
+                        <Line
+                          yAxisId="count"
+                          type="monotone"
+                          dataKey="rags"
+                          name={t('stats:rags')}
+                          stroke={chartSeriesColor(theme, 7)}
+                          strokeWidth={2}
+                          dot={false}
+                        />
                       )}
                     </LineChart>
                   </ResponsiveContainer>
@@ -631,13 +664,20 @@ export function Component() {
           )}
         </TableContainer>
       </Box>
-      <Dialog open={Boolean(previewCourseId)} onClose={() => setPreviewCourseId(undefined)} fullWidth maxWidth="lg" fullScreen={isMobile}>
-        <DialogTitle component="div" sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+      <Dialog
+        open={Boolean(previewCourseId)}
+        onClose={() => setPreviewCourseId(undefined)}
+        aria-labelledby={previewTitleId}
+        fullWidth
+        maxWidth="lg"
+        fullScreen={isMobile}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
           <IconButton onClick={() => setPreviewCourseId(undefined)} aria-label={t('common:close')}>
             <CloseIcon />
           </IconButton>
-        </DialogTitle>
-        <DialogContent sx={{ pt: 0 }}>{previewCourse && <CoursePreview course={previewCourse} />}</DialogContent>
+        </Box>
+        <DialogContent sx={{ pt: 0 }}>{previewCourse && <CoursePreview course={previewCourse} titleId={previewTitleId} />}</DialogContent>
       </Dialog>
     </Container>
   )
@@ -769,7 +809,17 @@ const CoursesTable = memo(function CoursesTable({
               <Typography>{chat.codes.join(', ')}</Typography>
             </TableCell>
             <TableCell align="left">
-              <Typography>{chat.name[language]}</Typography>
+              <Link
+                component="button"
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onRowClick(chat.id)
+                }}
+                sx={{ textAlign: 'left' }}
+              >
+                <Typography component="span">{chat.name[language]}</Typography>
+              </Link>
             </TableCell>
             <TableCell align="left">
               <Typography>{chat.terms.map((trm) => trm.label[language]).join(', ')}</Typography>
@@ -841,34 +891,52 @@ const SumRow = ({ statsToShow }) => {
   return (
     <TableRow>
       <TableCell component="th" scope="row" align="left">
-        <Typography variant="h6" component="span">{statsMessage}</Typography>
+        <Typography variant="h6" component="span">
+          {statsMessage}
+        </Typography>
       </TableCell>
       <TableCell>
-        <Typography variant="h6" component="span">{statsToShowLength + ' ' + t('stats:courses')}</Typography>
+        <Typography variant="h6" component="span">
+          {statsToShowLength + ' ' + t('stats:courses')}
+        </Typography>
       </TableCell>
       <TableCell align="left"></TableCell>
       <TableCell align="left"></TableCell>
       <TableCell align="left">
-        <Typography variant="h6" component="span">{totalStudents}</Typography>
+        <Typography variant="h6" component="span">
+          {totalStudents}
+        </Typography>
       </TableCell>
       <TableCell align="left">
-        <Typography variant="h6" component="span">{totalEnrolled}</Typography>
+        <Typography variant="h6" component="span">
+          {totalEnrolled}
+        </Typography>
       </TableCell>
       <TableCell align="left">
-        <Typography variant="h6" component="span">{totalUsagePercentage}</Typography>
+        <Typography variant="h6" component="span">
+          {totalUsagePercentage}
+        </Typography>
       </TableCell>
       <TableCell align="left">
-        <Typography variant="h6" component="span">{columnSum('usedTokens')}</Typography>
+        <Typography variant="h6" component="span">
+          {columnSum('usedTokens')}
+        </Typography>
       </TableCell>
       <TableCell align="left">
-        <Typography variant="h6" component="span">{columnSum('promptCount')}</Typography>
+        <Typography variant="h6" component="span">
+          {columnSum('promptCount')}
+        </Typography>
       </TableCell>
       <TableCell align="left">
-        <Typography variant="h6" component="span">{columnSum('ragIndicesCount')}</Typography>
+        <Typography variant="h6" component="span">
+          {columnSum('ragIndicesCount')}
+        </Typography>
       </TableCell>
       {user?.isAdmin && (
         <TableCell align="center">
-          <Typography variant="h6" component="span">{columnSum('saveDiscussions')}</Typography>
+          <Typography variant="h6" component="span">
+            {columnSum('saveDiscussions')}
+          </Typography>
         </TableCell>
       )}
     </TableRow>
