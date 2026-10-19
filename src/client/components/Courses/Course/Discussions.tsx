@@ -7,12 +7,58 @@ import remarkGfm from 'remark-gfm'
 import { InfoBox } from '../../common/InfoBox'
 import useCurrentUser from '../../../hooks/useCurrentUser'
 import useCourse, { useCourseDiscussers, useCourseDiscussion } from '../../../hooks/useCourse'
+import DownloadIcon from '@mui/icons-material/Download'
+import { enqueueSnackbar } from '../../common/Snackbar'
 import { BlueButton } from '../../ChatV2/general/Buttons'
+import { groupBy } from 'lodash'
+import { saveFileWithDialog } from '../../../util/saveFile'
+import apiClient from '../../../util/apiClient'
 import type { Discussion } from '../../../../shared/types'
+import type { Course } from '../../../types'
 import { readMessageContent, readMessageImages } from '../../../../shared/chat'
 
 const getChatMessages = (discussion: Discussion) => {
   return discussion.metadata?.chatMessages ?? (discussion.metadata as any)?.messages ?? []
+}
+
+const extendsHistory = (next: Discussion, curr: Discussion) => {
+  const currMessages = getChatMessages(curr)
+  const nextMessages = getChatMessages(next)
+  return (
+    nextMessages.length > currMessages.length &&
+    currMessages.every((msg, j) => nextMessages[j]?.role === msg.role && readMessageContent(nextMessages[j]) === readMessageContent(msg))
+  )
+}
+
+const getSessions = (discussions: Discussion[]): Discussion[] =>
+  discussions.filter((curr, i) => {
+    const next = discussions[i + 1]
+    return !next || !extendsHistory(next, curr)
+  })
+
+const exportDiscussions = (course: Course, discussers: { user_id: string }[], discussions: Discussion[]) => {
+  const byUser = groupBy(discussions, 'userId')
+
+  return {
+    course: { courseId: course.courseId, name: course.name },
+    exportedAt: new Date().toISOString(),
+    students: discussers.map((discusser, idx) => ({
+      student: `Student ${idx + 1}`,
+      studentId: discusser.user_id,
+      conversations: getSessions(byUser[discusser.user_id] ?? []).map((s) => ({
+        id: s.id,
+        createdAt: s.createdAt,
+        model: s.metadata?.generationInfo?.model,
+        temperature: s.metadata?.generationInfo?.temperature,
+        promptInfo: s.metadata?.generationInfo?.promptInfo,
+        messages: [...getChatMessages(s), { role: 'assistant', content: s.response }].map((m) => ({
+          role: m.role,
+          content: readMessageContent(m),
+          imageCount: readMessageImages(m).length,
+        })),
+      })),
+    })),
+  }
 }
 
 const DiscussionView: React.FC<{ courseId?: string }> = ({ courseId: courseIdProp }) => {
@@ -33,8 +79,26 @@ const DiscussionList: React.FC<{ courseId?: string; onSelectUser: (userId: strin
   const { user, isLoading: isUserLoading } = useCurrentUser()
   const { data: course, isSuccess: isCourseSuccess } = useCourse(courseId ?? '')
   const { discussers, isLoading: discussersLoading } = useCourseDiscussers(courseId ?? '')
+  const [isExporting, setIsExporting] = useState(false)
 
   if (!courseId || !course || !isCourseSuccess || isUserLoading || !user || discussersLoading) return null
+
+  const handleDownloadAll = async () => {
+    setIsExporting(true)
+    try {
+      const { data: discussions } = await apiClient.get<Discussion[]>(`/courses/${courseId}/discussions`)
+      const data = exportDiscussions(course, discussers, discussions)
+      const date = new Date().toISOString().slice(0, 10)
+      const saved = await saveFileWithDialog(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), `${courseId}-conversations-${date}.json`, {
+        'application/json': ['.json'],
+      })
+      if (saved) enqueueSnackbar(t('download:success'), { variant: 'success' })
+    } catch {
+      enqueueSnackbar(t('download:failure'), { variant: 'error' })
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   return (
     <div>
@@ -55,7 +119,14 @@ const DiscussionList: React.FC<{ courseId?: string; onSelectUser: (userId: strin
         </Paper>
       )}
 
-      <h2>{course.name[language]}</h2>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+        <h2>{course.name[language]}</h2>
+        {discussers.length > 0 && (
+          <BlueButton startIcon={<DownloadIcon />} onClick={handleDownloadAll} disabled={isExporting}>
+            {t('course:downloadAllDiscussions')}
+          </BlueButton>
+        )}
+      </Box>
 
       <Table>
         <TableHead>
@@ -98,21 +169,7 @@ const DiscussionDetail: React.FC<{ courseId?: string; userId: string; onBack: ()
     )
   }
 
-  const sessions: Discussion[] = []
-  for (let i = 0; i < discussions.length; i++) {
-    const curr = discussions[i]
-    const next = discussions[i + 1]
-    if (!next) {
-      sessions.push(curr)
-      continue
-    }
-    const currMessages = getChatMessages(curr)
-    const nextMessages = getChatMessages(next)
-    const currLen = currMessages.length
-    const nextLen = nextMessages.length
-    const nextExtendsThis = nextLen > currLen && currMessages.every((msg, j) => nextMessages[j]?.role === msg.role && nextMessages[j]?.content === msg.content)
-    if (!nextExtendsThis) sessions.push(curr)
-  }
+  const sessions = getSessions(discussions)
 
   return (
     <Box py={3}>

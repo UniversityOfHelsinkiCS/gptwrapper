@@ -478,6 +478,7 @@
   "course": {
     "showDiscussions": "Show the saved discussions",
     "reseachCourse": "Research course",
+    "downloadAllDiscussions": "Download all conversations",
     "isReseachCourse": "The course is a research course",
     "canOptOut": "It is not possible to opt out from saving the discussions",
     "percentageUsed": "Percentage of tokens used",

@@ -1,6 +1,5 @@
-import { ValidModelName } from '../config'
 import type { IngestionPipelineStageKey } from './ingestion'
-import type { MessageContent } from './chat'
+import type { MessageContent, MessageGenerationInfo } from './chat'
 
 export type Locales = {
   fi: string
@@ -57,7 +56,7 @@ export type Discussion = {
   courseId: string
   response: string
   metadata: {
-    generationInfo: { model: ValidModelName }
+    generationInfo: MessageGenerationInfo
     chatMessages: {
       role: string
       content: string | MessageContent[]

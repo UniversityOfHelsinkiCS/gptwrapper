@@ -481,6 +481,7 @@
   "course": {
     "showDiscussions": "Näytä talletetut keskustelut",
     "reseachCourse": "Tutkimuskurssi",
+    "downloadAllDiscussions": "Lataa kaikki keskustelut",
     "isReseachCourse": "Kurssi on tutkimuskurssi",
     "canOptOut": "Tallennusta ei ole mahdollista kieltää",
     "percentageUsed": "Prosenttia tokeneista käytetty",

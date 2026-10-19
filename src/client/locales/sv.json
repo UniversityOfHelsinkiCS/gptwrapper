@@ -517,6 +517,7 @@
     "prompts": "Prompter",
     "rag": "RAG",
     "reseachCourse": "Forskningskurs",
+    "downloadAllDiscussions": "Ladda ner alla diskussioner",
     "isSavedNotOptOut": "Kursdiskussionerna sparas anonymt.\\n\\nSparade diskussioner kan användas för forskningsändamål.",
     "isSavedForTeacherOptOut": "Kursdiskussionerna sparas anonymt om användaren ger tillstånd till detta. Sparade diskussioner kan användas för forskningsändamål.",
     "isReseachCourse": "Kursen är en forskningskurs",

@@ -317,6 +317,16 @@ const checkDiscussionAccess = async (req: express.Request, res: express.Response
   }
 }
 
+courseRouter.get('/:id/discussions', checkDiscussionAccess, async (req, res) => {
+  const { id } = req.params
+  const discussions = await Discussion.findAll({
+    where: { courseId: id },
+    order: [['createdAt', 'ASC']],
+  })
+
+  res.send(discussions.map((d) => ({ ...d.toJSON(), userId: encrypt(d.userId).encryptedData })))
+})
+
 courseRouter.get('/:id/discussions/:user_id', checkDiscussionAccess, async (req, res) => {
   const userId = decrypt(req.params.user_id)
   const { id } = req.params
@@ -328,7 +338,7 @@ courseRouter.get('/:id/discussions/:user_id', checkDiscussionAccess, async (req,
     order: [['createdAt', 'ASC']],
   })
 
-  res.send(discussions.map((d) => d))
+  res.send(discussions.map((d) => ({ ...d.toJSON(), userId: req.params.user_id })))
 })
 
 courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {

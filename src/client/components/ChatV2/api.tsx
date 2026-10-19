@@ -5,6 +5,7 @@ import type { ChatToolOutput } from '../../../shared/tools'
 import { useGetQuery } from '../../hooks/apiHooks'
 import { TFunction } from 'i18next'
 import { sendEmail } from '../../util/email'
+import { saveFileWithDialog } from '../../util/saveFile'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -111,41 +112,6 @@ const parseHeading = (line: string): { isHeading: boolean; level: number; text: 
     }
   }
   return { isHeading: false, level: 0, text: line }
-}
-
-// Helper function to save file with proper "Save As" dialog
-const saveFileWithDialog = async (blob: Blob, filename: string, accept: Record<string, string[]>) => {
-  // Check if File System Access API is supported
-  if ('showSaveFilePicker' in window) {
-    try {
-      const handle = await (window as any).showSaveFilePicker({
-        suggestedName: filename,
-        types: [{
-          description: 'File',
-          accept: accept,
-        }],
-      })
-      const writable = await handle.createWritable()
-      await writable.write(blob)
-      await writable.close()
-      return
-    } catch (err: any) {
-      // User cancelled or error occurred, fall back to regular download
-      if (err.name !== 'AbortError') {
-        console.error('Error saving file:', err)
-      }
-    }
-  }
-  
-  // Fallback for browsers that don't support File System Access API
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
 }
 
 export const sendConversationEmail = async (messages: ChatMessage[], t: TFunction) => {
