@@ -24,7 +24,15 @@ import FindInPage from '@mui/icons-material/FindInPage'
 import Bookmarks from '@mui/icons-material/Bookmarks'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { groupBy, orderBy } from 'lodash'
-import { RagIndexDetails, RagIndexPromptUsage, useDeleteRagFileMutation, useDeleteRagIndexMutation, useRagIndexDetails, useRagIndexJobs, useUploadMutation } from './api'
+import {
+  RagIndexDetails,
+  RagIndexPromptUsage,
+  useDeleteRagFileMutation,
+  useDeleteRagIndexMutation,
+  useRagIndexDetails,
+  useRagIndexJobs,
+  useUploadMutation,
+} from './api'
 import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
 import { BlueButton, OrangeButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
@@ -41,7 +49,7 @@ import { isSupportedRagFile, RAG_FILE_ACCEPT } from '@shared/utils'
 import { usePromptState } from '../ChatV2/PromptState'
 import { PromptType } from '../../types'
 import { useNavigate, useParams } from 'react-router-dom'
-import { focusIndicatorStyle } from 'src/client/util/accessibility'
+import { focusVisibleOutline } from 'src/client/theme'
 import { formatDate } from '../ChatV2/util'
 
 const promptTypeOrder: PromptType[] = ['CHAT_INSTANCE', 'PERSONAL', 'UNIVERSITY', 'TEMPLATE']
@@ -55,7 +63,7 @@ const promptTypeLabelKeys: Record<PromptType, string> = {
 
 const promptChipListSx = { display: 'flex', flexWrap: 'wrap', gap: 0.75, listStyle: 'none', p: 0, m: 0 }
 
-const isImageFile =(fileType: string) => fileType === 'image/png'
+const isImageFile = (fileType: string) => fileType === 'image/png'
 
 // Only PDFs benefit from a choice between standard and AI-based parsing. Images always require AI
 // parsing and text files never need it, so the toggle is shown for PDFs only.
@@ -231,23 +239,28 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
       </Box>
       <Box py={2} mx={2}>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Box sx={{ ...focusIndicatorStyle }}>
-            <Button variant="contained" tabIndex={-1} component="label" startIcon={<CloudUpload />} disabled={uploadMutation.isPending}>
-              {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
-              <VisuallyHiddenInput
-                type="file"
-                accept={RAG_FILE_ACCEPT}
-                onChange={async (e) => {
-                  const files = e.target.files
-                  if (files && files.length > 0) {
-                    handleStageFiles(Array.from(files))
-                  }
-                  e.target.value = ''
-                }}
-                multiple
-              />
-            </Button>
-          </Box>
+          <Button
+            variant="contained"
+            tabIndex={-1}
+            component="label"
+            startIcon={<CloudUpload />}
+            disabled={uploadMutation.isPending}
+            sx={{ '&:has(:focus-visible)': focusVisibleOutline }}
+          >
+            {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
+            <VisuallyHiddenInput
+              type="file"
+              accept={RAG_FILE_ACCEPT}
+              onChange={async (e) => {
+                const files = e.target.files
+                if (files && files.length > 0) {
+                  handleStageFiles(Array.from(files))
+                }
+                e.target.value = ''
+              }}
+              multiple
+            />
+          </Button>
           <Button variant="outlined" startIcon={<FindInPage />} onClick={() => setSearchOpen(true)} disabled={ragDetails.ragFiles.length === 0}>
             {t('rag:testRetrievalButton')}
           </Button>
@@ -365,11 +378,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
                       {Object.entries(groupBy(typePrompts, (prompt) => prompt.chatInstance?.id)).map(([courseKey, coursePrompts]) => {
                         const course = coursePrompts[0].chatInstance
                         return (
-                          <Box
-                            component="li"
-                            key={courseKey}
-                            sx={{ px: 1.5, py: 1.25, '&:not(:first-of-type)': { borderTop: 1, borderColor: 'divider' } }}
-                          >
+                          <Box component="li" key={courseKey} sx={{ px: 1.5, py: 1.25, '&:not(:first-of-type)': { borderTop: 1, borderColor: 'divider' } }}>
                             {course && (
                               <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap', mb: 0.75 }}>
                                 <Typography variant="body2" sx={{ fontWeight: 500, overflowWrap: 'anywhere' }}>
@@ -525,7 +534,6 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
               setStagedFiles([])
             }}
             disabled={uploadMutation.isPending}
-            sx={{ ...focusIndicatorStyle }}
           >
             {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
           </BlueButton>
