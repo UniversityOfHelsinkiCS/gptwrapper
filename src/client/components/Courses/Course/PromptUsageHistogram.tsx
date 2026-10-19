@@ -1,11 +1,10 @@
 import { useMemo } from 'react'
-import { Paper, Typography, Box } from '@mui/material'
+import { Paper, Typography, Box, useTheme } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { PromptUsageData } from '../../../hooks/useCourse'
 import type { ActivityPeriod } from '../../../types'
-
-const COLORS = ['#1976d2', '#d32f2f', '#388e3c', '#f57c00', '#7b1fa2', '#0097a7', '#c2185b', '#455a64', '#fbc02d', '#512da8']
+import { chartAxisColor, chartSeriesColor, chartTooltipStyle } from '../../../util/charts'
 
 const formatDateLabel = (dateStr: string): string => {
   const date = new Date(dateStr)
@@ -19,6 +18,7 @@ type Props = {
 
 const PromptUsageHistogram = ({ promptUsages, activityPeriod }: Props) => {
   const { t } = useTranslation()
+  const theme = useTheme()
 
   const { chartData, promptNames } = useMemo(() => {
     const promptTotals = new Map<string, number>()
@@ -85,11 +85,11 @@ const PromptUsageHistogram = ({ promptUsages, activityPeriod }: Props) => {
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-            <YAxis />
-            <Tooltip formatter={(value: number) => value.toLocaleString()} />
+            <XAxis dataKey="date" stroke={chartAxisColor(theme)} tick={{ fontSize: 12 }} />
+            <YAxis stroke={chartAxisColor(theme)} />
+            <Tooltip {...chartTooltipStyle(theme)} cursor={{ fill: theme.palette.action.hover }} formatter={(value: number) => value.toLocaleString()} />
             {promptNames.map(({ key, name }, idx) => (
-              <Bar key={key} dataKey={key} name={name} stackId="tokens" fill={COLORS[idx % COLORS.length]} />
+              <Bar key={key} dataKey={key} name={name} stackId="tokens" fill={chartSeriesColor(theme, idx)} stroke={theme.palette.background.paper} />
             ))}
           </BarChart>
         </ResponsiveContainer>
@@ -98,7 +98,7 @@ const PromptUsageHistogram = ({ promptUsages, activityPeriod }: Props) => {
       <Box component="ul" sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 1, columnGap: 2, listStyle: 'none', p: 0, m: 0, mt: 1 }}>
         {promptNames.map(({ key, name }, idx) => (
           <Box component="li" key={key} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>
-            <Box sx={{ width: 12, height: 12, flexShrink: 0, bgcolor: COLORS[idx % COLORS.length] }} />
+            <Box sx={{ width: 12, height: 12, flexShrink: 0, bgcolor: chartSeriesColor(theme, idx) }} />
             <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
               {name}
             </Typography>

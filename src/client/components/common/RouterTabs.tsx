@@ -43,9 +43,15 @@ export const RouterTabs = ({ children, sx, tabSx }: RouterTabsProps) => {
       variant="scrollable"
       scrollButtons="auto"
       allowScrollButtonsMobile
-      slotProps={{ indicator: { style: { backgroundColor: 'black' } } }}
       textColor="inherit"
-      sx={sx}
+      sx={mergeSx(
+        {
+          '& .MuiTabs-indicator': { backgroundColor: 'text.primary' },
+          '& .MuiTab-root': { opacity: 1, color: 'text.secondary' },
+          '& .MuiTab-root.Mui-selected': { color: 'text.primary' },
+        },
+        sx,
+      )}
     >
       {tabs.map((tab) =>
         React.cloneElement(tab, {

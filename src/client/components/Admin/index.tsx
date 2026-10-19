@@ -11,6 +11,7 @@ import Updater from './Updater'
 import UserSearch from './UserSearch'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { RouterTabs } from '../common/RouterTabs'
+import { selectedTabStyle } from '../../util/accessibility'
 import Feedbacks from './Feedbacks'
 import Testing from './Testing'
 import NotificationManagement from './NotificationManagement'
@@ -54,10 +55,7 @@ export function Component() {
           tabSx={{
             borderRadius: 1.5,
             minHeight: 40,
-            '&.Mui-selected': {
-              backgroundColor: 'action.selected',
-              fontWeight: 700,
-            },
+            '&.Mui-selected': selectedTabStyle,
           }}
         >
           <Tab label={t('admin:searchUsers')} to="/admin/usersearch" component={Link} />

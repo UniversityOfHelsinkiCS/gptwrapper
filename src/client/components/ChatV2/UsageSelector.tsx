@@ -2,6 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Menu, MenuItem, Typography } from '@mui/material'
+import type { Theme } from '@mui/material/styles'
 import HelpOutline from '@mui/icons-material/HelpOutline'
 import EventRepeatIcon from '@mui/icons-material/EventRepeat'
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
@@ -22,6 +23,13 @@ export const usagePercent = (usage: number, limit: number) => (limit > 0 ? Math.
 export const formatTokens = (n: number) => (n >= 1000 ? `${Math.round(n / 1000)}k` : `${n}`)
 
 export const gaugeColorKey = (percent: number): 'error' | 'warning' | 'success' => (percent >= 75 ? 'error' : percent >= 50 ? 'warning' : 'success')
+
+const DARK_GAUGE_COLORS = { success: '#81c995', warning: '#fdba74', error: '#f28b82' } as const
+
+const gaugeColor = (theme: Theme, percent: number) => {
+  const key = gaugeColorKey(percent)
+  return theme.palette.mode === 'dark' ? DARK_GAUGE_COLORS[key] : theme.palette[key].main
+}
 
 const UsageInfoDialog = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const { t } = useTranslation()
@@ -70,8 +78,8 @@ const UsageGauge = ({ percent, size = 56 }: { percent: number; size?: number }) 
     skipAnimation
     sx={(theme) => ({
       flexShrink: 0,
-      [`& .${gaugeClasses.valueText}`]: { fontSize: 11, fontWeight: 700, fill: theme.palette[gaugeColorKey(percent)].main },
-      [`& .${gaugeClasses.valueArc}`]: { fill: theme.palette[gaugeColorKey(percent)].main },
+      [`& .${gaugeClasses.valueText}`]: { fontSize: 11, fontWeight: 700, fill: gaugeColor(theme, percent) },
+      [`& .${gaugeClasses.valueArc}`]: { fill: gaugeColor(theme, percent) },
       [`& .${gaugeClasses.referenceArc}`]: { fill: theme.palette.divider },
     })}
   />
@@ -151,7 +159,9 @@ const UsageSelector = () => {
           {pillLabel}
         </Typography>
         {pillPercent != null && (
-          <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: `${gaugeColorKey(pillPercent)}.main`, lineHeight: 1 }}>{pillPercent}%</Typography>
+          <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: (theme) => gaugeColor(theme, pillPercent), lineHeight: 1 }}>
+            {pillPercent}%
+          </Typography>
         )}
 
         {open ? (

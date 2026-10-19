@@ -1,4 +1,5 @@
 import { GlobalStyles, useTheme } from '@mui/material'
+import { focusIndicatorColors } from './theme'
 
 export default function Styles() {
   const theme = useTheme()
@@ -13,6 +14,7 @@ export default function Styles() {
           '--sb-thumb-hover-color': isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
           '--sb-size': '6px',
           '--loader-color': theme.palette.text.primary,
+          '--focus-indicator': focusIndicatorColors[theme.palette.mode],
           backgroundColor: theme.palette.background.default,
         },
         '*::-webkit-scrollbar': {

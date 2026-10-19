@@ -19,7 +19,7 @@ export const optionFocusIndicatorStyle = ({ color }: { color?: string } = {}): S
   borderRadius: 1,
   '&:has(:focus-visible)': {
     outline: '3px solid',
-    outlineColor: (theme) => color ?? theme.palette.primary.main,
+    outlineColor: color ?? focusIndicator,
     outlineOffset: '3px',
   },
 })
@@ -30,6 +30,11 @@ export const switchFocusIndicatorStyle: SystemStyleObject<Theme> = {
     outlineColor: focusIndicator,
     outlineOffset: '2px',
   },
+}
+
+export const selectedTabStyle: SystemStyleObject<Theme> = {
+  backgroundColor: 'action.selected',
+  fontWeight: 700,
 }
 
 const PENDING_FOCUS_STORAGE_KEY = 'pendingFocusTargetId'

@@ -24,7 +24,10 @@ declare module '@mui/material/styles' {
 
 export const monospaceFonts = "'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace"
 export const monospaceStyle = { fontFamily: monospaceFonts, fontSize: 'inherit' } as const
-export const focusIndicator = '#005fcc'
+
+export const focusIndicatorColors = { light: '#005fcc', dark: '#66b2ff' } as const
+
+export const focusIndicator = `var(--focus-indicator, ${focusIndicatorColors.light})`
 export const focusVisibleOutline = {
   outline: `3px solid ${focusIndicator}`,
   outlineOffset: '2px',
@@ -86,6 +89,18 @@ const baseOptions: Omit<ThemeOptions, 'palette'> = {
         root: {
           borderRadius: 5,
         },
+      },
+    },
+
+    MuiTabs: {
+      styleOverrides: {
+        indicator: ({ theme }) => theme.applyStyles('dark', { backgroundColor: theme.palette.text.primary }),
+      },
+    },
+
+    MuiTab: {
+      styleOverrides: {
+        textColorPrimary: ({ theme }) => theme.applyStyles('dark', { '&.Mui-selected': { color: theme.palette.text.primary } }),
       },
     },
 

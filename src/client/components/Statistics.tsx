@@ -47,6 +47,8 @@ import useStatistics from '../hooks/useStatistics'
 import faculties from '../locales/faculties.json'
 import programme from '../locales/programme.json'
 import { useSaveDiscussionsMutation } from '../hooks/useCourseMutation'
+import { selectedTabStyle } from '../util/accessibility'
+import { chartAxisColor, chartSeriesColor, chartTooltipStyle } from '../util/charts'
 
 /**
  * React-router compatible lazy loaded component for Statistics page
@@ -383,10 +385,7 @@ export function Component() {
             sx={{
               borderRadius: 1.5,
               minHeight: 40,
-              '&.Mui-selected': {
-                backgroundColor: 'action.selected',
-                fontWeight: 700,
-              },
+              '&.Mui-selected': selectedTabStyle,
             }}
           />
           <Tab
@@ -395,10 +394,7 @@ export function Component() {
             sx={{
               borderRadius: 1.5,
               minHeight: 40,
-              '&.Mui-selected': {
-                backgroundColor: 'action.selected',
-                fontWeight: 700,
-              },
+              '&.Mui-selected': selectedTabStyle,
             }}
           />
         </Tabs>
@@ -530,10 +526,11 @@ export function Component() {
                   <ResponsiveContainer>
                     <LineChart data={trendRows} margin={{ top: 8, right: 24, left: 0, bottom: 8 }}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="termLabel" />
-                      <YAxis yAxisId="count" />
-                      <YAxis yAxisId="percentage" orientation="right" tickFormatter={(value) => `${value}%`} />
+                      <XAxis dataKey="termLabel" stroke={chartAxisColor(theme)} />
+                      <YAxis yAxisId="count" stroke={chartAxisColor(theme)} />
+                      <YAxis yAxisId="percentage" orientation="right" stroke={chartAxisColor(theme)} tickFormatter={(value) => `${value}%`} />
                       <ChartTooltip
+                        {...chartTooltipStyle(theme)}
                         formatter={(value, _name, item) => {
                           if (item?.dataKey === 'percentage') return `${Number(value).toFixed(1)}%`
                           return value
@@ -541,10 +538,10 @@ export function Component() {
                       />
                       <Legend />
                       {trendSeries.courses && (
-                        <Line yAxisId="count" type="monotone" dataKey="courses" name={t('stats:trendCourses')} stroke="#1565c0" strokeWidth={2} dot={false} />
+                        <Line yAxisId="count" type="monotone" dataKey="courses" name={t('stats:trendCourses')} stroke={chartSeriesColor(theme, 0)} strokeWidth={2} dot={false} />
                       )}
                       {trendSeries.students && (
-                        <Line yAxisId="count" type="monotone" dataKey="students" name={t('stats:studentCount')} stroke="#2e7d32" strokeWidth={2} dot={false} />
+                        <Line yAxisId="count" type="monotone" dataKey="students" name={t('stats:studentCount')} stroke={chartSeriesColor(theme, 2)} strokeWidth={2} dot={false} />
                       )}
                       {trendSeries.percentage && (
                         <Line
@@ -552,16 +549,16 @@ export function Component() {
                           type="monotone"
                           dataKey="percentage"
                           name={t('stats:studentEnrollmentPercentage')}
-                          stroke="#ef6c00"
+                          stroke={chartSeriesColor(theme, 3)}
                           strokeWidth={2}
                           dot={false}
                         />
                       )}
                       {trendSeries.prompts && (
-                        <Line yAxisId="count" type="monotone" dataKey="prompts" name={t('stats:promptCount')} stroke="#6a1b9a" strokeWidth={2} dot={false} />
+                        <Line yAxisId="count" type="monotone" dataKey="prompts" name={t('stats:promptCount')} stroke={chartSeriesColor(theme, 4)} strokeWidth={2} dot={false} />
                       )}
                       {trendSeries.rags && (
-                        <Line yAxisId="count" type="monotone" dataKey="rags" name={t('stats:rags')} stroke="#455a64" strokeWidth={2} dot={false} />
+                        <Line yAxisId="count" type="monotone" dataKey="rags" name={t('stats:rags')} stroke={chartSeriesColor(theme, 7)} strokeWidth={2} dot={false} />
                       )}
                     </LineChart>
                   </ResponsiveContainer>
