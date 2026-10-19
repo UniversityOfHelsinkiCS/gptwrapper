@@ -32,6 +32,7 @@ import {
   Switch,
 } from '@mui/material'
 import type { Statistic } from '@shared/types'
+import { visuallyHidden } from '@mui/utils'
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMatch, useNavigate } from 'react-router-dom'
@@ -352,6 +353,9 @@ export function Component() {
   }
   return (
     <Container sx={{ mt: '6rem', mb: '10rem', position: 'relative', width: '100%' }} maxWidth={false}>
+      <Typography component="h2" sx={visuallyHidden}>
+        {t('common:courseStats')}
+      </Typography>
       <Box sx={{ mb: 2 }}>
         <Tabs
           value={activeTab}
@@ -564,34 +568,34 @@ export function Component() {
                 <TableHead>
                   <TableRow>
                     <TableCell align="left">
-                      <Typography variant="h6">
+                      <Typography variant="h6" component="span">
                         <b>{t('stats:trendTerm')}</b>
                       </Typography>
                     </TableCell>
                     <TableCell align="left">
-                      <Typography variant="h6">
+                      <Typography variant="h6" component="span">
                         <b>{t('stats:trendCourses')}</b>
                       </Typography>
                     </TableCell>
                     <TableCell align="left">
-                      <Typography variant="h6">
+                      <Typography variant="h6" component="span">
                         <b>{t('stats:studentCount')}</b>
                       </Typography>
                     </TableCell>
                     <TableCell align="left">
-                      <Typography variant="h6">
+                      <Typography variant="h6" component="span">
                         <Tooltip title={t('stats:studentEnrollmentPercentageTooltip')} describeChild>
                           <b tabIndex={0}>{t('stats:studentEnrollmentPercentage')}</b>
                         </Tooltip>
                       </Typography>
                     </TableCell>
                     <TableCell align="left">
-                      <Typography variant="h6">
+                      <Typography variant="h6" component="span">
                         <b>{t('stats:promptCount')}</b>
                       </Typography>
                     </TableCell>
                     <TableCell align="left">
-                      <Typography variant="h6">
+                      <Typography variant="h6" component="span">
                         <b>{t('stats:rags')}</b>
                       </Typography>
                     </TableCell>
@@ -627,7 +631,7 @@ export function Component() {
         </TableContainer>
       </Box>
       <Dialog open={Boolean(previewCourseId)} onClose={() => setPreviewCourseId(undefined)} fullWidth maxWidth="lg">
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+        <DialogTitle component="div" sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
           <IconButton onClick={() => setPreviewCourseId(undefined)} aria-label={t('common:close')}>
             <CloseIcon />
           </IconButton>
@@ -667,37 +671,37 @@ const CoursesTable = memo(function CoursesTable({
       <TableHead>
         <TableRow>
           <TableCell align="left">
-            <Typography variant="h6">
+            <Typography variant="h6" component="span">
               <b>{t('stats:courseCodes')}</b>
             </Typography>
           </TableCell>
           <TableCell>
-            <Typography variant="h6">
+            <Typography variant="h6" component="span">
               <b>{t('stats:courseNameInfo')}</b>
             </Typography>
           </TableCell>
           <TableCell align="left">
-            <Typography variant="h6">
+            <Typography variant="h6" component="span">
               <b>{t('stats:courseTerms')}</b>
             </Typography>
           </TableCell>
           <TableCell align="left">
-            <Typography variant="h6">
+            <Typography variant="h6" component="span">
               <b>{t('stats:programCodes')}</b>
             </Typography>
           </TableCell>
           <TableCell align="left">
-            <Typography variant="h6">
+            <Typography variant="h6" component="span">
               <b>{t('stats:studentCount')}</b>
             </Typography>
           </TableCell>
           <TableCell align="left">
-            <Typography variant="h6">
+            <Typography variant="h6" component="span">
               <b>{t('stats:enrollmentCount')}</b>
             </Typography>
           </TableCell>
           <TableCell align="left">
-            <Typography variant="h6">
+            <Typography variant="h6" component="span">
               <TableSortLabel
                 active={sortBy === 'usagePercentage'}
                 direction={sortBy === 'usagePercentage' ? sortDirection : 'desc'}
@@ -708,7 +712,7 @@ const CoursesTable = memo(function CoursesTable({
             </Typography>
           </TableCell>
           <TableCell align="left">
-            <Typography variant="h6">
+            <Typography variant="h6" component="span">
               <TableSortLabel
                 active={sortBy === 'usedTokens'}
                 direction={sortBy === 'usedTokens' ? sortDirection : 'desc'}
@@ -719,7 +723,7 @@ const CoursesTable = memo(function CoursesTable({
             </Typography>
           </TableCell>
           <TableCell align="left">
-            <Typography variant="h6">
+            <Typography variant="h6" component="span">
               <TableSortLabel
                 active={sortBy === 'promptCount'}
                 direction={sortBy === 'promptCount' ? sortDirection : 'desc'}
@@ -730,7 +734,7 @@ const CoursesTable = memo(function CoursesTable({
             </Typography>
           </TableCell>
           <TableCell align="left">
-            <Typography variant="h6">
+            <Typography variant="h6" component="span">
               <TableSortLabel
                 active={sortBy === 'ragIndicesCount'}
                 direction={sortBy === 'ragIndicesCount' ? sortDirection : 'desc'}
@@ -742,7 +746,7 @@ const CoursesTable = memo(function CoursesTable({
           </TableCell>
           {isAdmin && (
             <TableCell align="center">
-              <Typography variant="h6">
+              <Typography variant="h6" component="span">
                 <TableSortLabel
                   active={sortBy === 'saveDiscussions'}
                   direction={sortBy === 'saveDiscussions' ? sortDirection : 'desc'}
@@ -835,35 +839,35 @@ const SumRow = ({ statsToShow }) => {
   const statsMessage = t('stats:sum')
   return (
     <TableRow>
-      <TableCell align="left">
-        <Typography variant="h6">{statsMessage}</Typography>
+      <TableCell component="th" scope="row" align="left">
+        <Typography variant="h6" component="span">{statsMessage}</Typography>
       </TableCell>
       <TableCell>
-        <Typography variant="h6">{statsToShowLength + ' ' + t('stats:courses')}</Typography>
+        <Typography variant="h6" component="span">{statsToShowLength + ' ' + t('stats:courses')}</Typography>
       </TableCell>
       <TableCell align="left"></TableCell>
       <TableCell align="left"></TableCell>
       <TableCell align="left">
-        <Typography variant="h6">{totalStudents}</Typography>
+        <Typography variant="h6" component="span">{totalStudents}</Typography>
       </TableCell>
       <TableCell align="left">
-        <Typography variant="h6">{totalEnrolled}</Typography>
+        <Typography variant="h6" component="span">{totalEnrolled}</Typography>
       </TableCell>
       <TableCell align="left">
-        <Typography variant="h6">{totalUsagePercentage}</Typography>
+        <Typography variant="h6" component="span">{totalUsagePercentage}</Typography>
       </TableCell>
       <TableCell align="left">
-        <Typography variant="h6">{columnSum('usedTokens')}</Typography>
+        <Typography variant="h6" component="span">{columnSum('usedTokens')}</Typography>
       </TableCell>
       <TableCell align="left">
-        <Typography variant="h6">{columnSum('promptCount')}</Typography>
+        <Typography variant="h6" component="span">{columnSum('promptCount')}</Typography>
       </TableCell>
       <TableCell align="left">
-        <Typography variant="h6">{columnSum('ragIndicesCount')}</Typography>
+        <Typography variant="h6" component="span">{columnSum('ragIndicesCount')}</Typography>
       </TableCell>
       {user?.isAdmin && (
         <TableCell align="center">
-          <Typography variant="h6">{columnSum('saveDiscussions')}</Typography>
+          <Typography variant="h6" component="span">{columnSum('saveDiscussions')}</Typography>
         </TableCell>
       )}
     </TableRow>
