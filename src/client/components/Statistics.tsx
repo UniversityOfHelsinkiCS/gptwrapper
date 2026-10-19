@@ -30,6 +30,8 @@ import {
   Tooltip,
   Typography,
   Switch,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import type { Statistic } from '@shared/types'
 import { visuallyHidden } from '@mui/utils'
@@ -134,6 +136,8 @@ export function Component() {
   const { data: previewCourse } = useCourse(previewCourseId)
   const { data: statistics, isSuccess } = useStatistics()
   const { t, i18n } = useTranslation()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const { language } = i18n
   const { user, isLoading: isUserLoading } = useCurrentUser()
   const navigate = useNavigate()
@@ -630,7 +634,7 @@ export function Component() {
           )}
         </TableContainer>
       </Box>
-      <Dialog open={Boolean(previewCourseId)} onClose={() => setPreviewCourseId(undefined)} fullWidth maxWidth="lg">
+      <Dialog open={Boolean(previewCourseId)} onClose={() => setPreviewCourseId(undefined)} fullWidth maxWidth="lg" fullScreen={isMobile}>
         <DialogTitle component="div" sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
           <IconButton onClick={() => setPreviewCourseId(undefined)} aria-label={t('common:close')}>
             <CloseIcon />
