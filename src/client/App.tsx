@@ -22,6 +22,7 @@ import GlobalMenu from './components/GlobalMenu'
 import HYLoadingSpinner from './components/ChatV2/general/HYLoadingSpinner'
 import { DisclaimerModal } from './components/Disclaimer'
 import { GlobalSettings } from './components/GlobalSettings'
+import { ApiKeysDialog } from './components/ApiKeys/ApiKeysDialog'
 import { Feedback } from './components/Feedback'
 import { SuperSpeedLoginAs } from './components/Admin/SuperSpeedLoginAs'
 import { useLoggedInAs } from './hooks/useLoggedInAs'
@@ -108,6 +109,7 @@ const Layout = () => {
   const { user, isSuccess } = useCurrentUser()
   const [feedbackOpen, setFeedbackOpen] = React.useState(false)
   const [settingsOpen, setSettingsOpen] = React.useState(false)
+  const [apiKeysOpen, setApiKeysOpen] = React.useState(false)
   const [disclaimerStatus, setDisclaimerStatus] = React.useState(false)
   const headerRef = React.useRef<HTMLElement>(null)
   useEffect(() => {
@@ -136,6 +138,7 @@ const Layout = () => {
               openDisclaimer={() => setDisclaimerStatus(true)}
               openSettings={() => setSettingsOpen(true)}
               openFeedback={() => setFeedbackOpen(true)}
+              openApiKeys={() => setApiKeysOpen(true)}
               container={headerRef}
             />
           </Box>
@@ -143,6 +146,7 @@ const Layout = () => {
         <NotificationBanner />
         <Feedback open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
         <GlobalSettings open={settingsOpen} setOpen={setSettingsOpen} />
+        <ApiKeysDialog open={apiKeysOpen} setOpen={setApiKeysOpen} />
         <DisclaimerModal disclaimerStatus={disclaimerStatus} setDisclaimerStatus={setDisclaimerStatus} />
         <Content />
       </Box>

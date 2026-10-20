@@ -16,18 +16,20 @@ import { useTranslation } from 'react-i18next'
 import { Locale } from '@shared/lang'
 import { useLocation, useNavigate } from 'react-router-dom'
 import useCurrentUser from '../hooks/useCurrentUser'
-import { AdminPanelSettings, BarChart, Logout } from '@mui/icons-material'
+import { AdminPanelSettings, BarChart, Key, Logout } from '@mui/icons-material'
 import apiClient from '../util/apiClient'
 
 export default function GlobalMenu({
   openDisclaimer,
   openSettings,
   openFeedback,
+  openApiKeys,
   container,
 }: {
   openDisclaimer: () => void
   openSettings: () => void
   openFeedback: () => void
+  openApiKeys: () => void
   container?: React.RefObject<HTMLElement | null> | (() => HTMLElement | null)
 }) {
   const { t, i18n } = useTranslation()
@@ -144,6 +146,21 @@ export default function GlobalMenu({
           </ListItemIcon>
           <ListItemText>{t('feedback:giveFeedback')}</ListItemText>
         </MenuItem>
+        {/* TODO: show to all users once backend is ready */}
+        {user?.isAdmin && (
+          <MenuItem
+            data-testid="open-api-keys-button"
+            onClick={() => {
+              openApiKeys()
+              handleClose()
+            }}
+          >
+            <ListItemIcon>
+              <Key fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>{t('apiKeys:menuLabel')}</ListItemText>
+          </MenuItem>
+        )}
         {user?.isStatsViewer && (
           <MenuItem
             onClick={() => {
