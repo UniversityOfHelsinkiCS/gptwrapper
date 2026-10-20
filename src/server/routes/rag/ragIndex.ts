@@ -44,7 +44,7 @@ ragIndexRouter.get('/', async (req, res) => {
     Prompt.findAll({
       where: { ragIndexId: ragIndex.id },
       attributes: ['id', 'name', 'type'],
-      include: { model: ChatInstance, as: 'chatInstance', attributes: ['id', 'name'], required: false },
+      include: { model: ChatInstance, as: 'chatInstance', attributes: ['id', 'name', 'activityPeriod'], required: false },
       order: [['name', 'ASC']],
     }),
   ])

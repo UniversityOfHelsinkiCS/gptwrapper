@@ -23,8 +23,8 @@ import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import FindInPage from '@mui/icons-material/FindInPage'
 import Bookmarks from '@mui/icons-material/Bookmarks'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
-import { orderBy } from 'lodash'
-import { RagIndexDetails, useDeleteRagFileMutation, useDeleteRagIndexMutation, useRagIndexDetails, useRagIndexJobs, useUploadMutation } from './api'
+import { groupBy, orderBy } from 'lodash'
+import { RagIndexDetails, RagIndexPromptUsage, useDeleteRagFileMutation, useDeleteRagIndexMutation, useRagIndexDetails, useRagIndexJobs, useUploadMutation } from './api'
 import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
 import { BlueButton, OrangeButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
@@ -42,6 +42,7 @@ import { usePromptState } from '../ChatV2/PromptState'
 import { PromptType } from '../../types'
 import { useNavigate, useParams } from 'react-router-dom'
 import { focusIndicatorStyle } from 'src/client/util/accessibility'
+import { formatDate } from '../ChatV2/util'
 
 const promptTypeOrder: PromptType[] = ['CHAT_INSTANCE', 'PERSONAL', 'UNIVERSITY', 'TEMPLATE']
 
@@ -52,7 +53,9 @@ const promptTypeLabelKeys: Record<PromptType, string> = {
   TEMPLATE: 'rag:promptTypeTemplate',
 }
 
-const isImageFile = (fileType: string) => fileType === 'image/png'
+const promptChipListSx = { display: 'flex', flexWrap: 'wrap', gap: 0.75, listStyle: 'none', p: 0, m: 0 }
+
+const isImageFile =(fileType: string) => fileType === 'image/png'
 
 // Only PDFs benefit from a choice between standard and AI-based parsing. Images always require AI
 // parsing and text files never need it, so the toggle is shown for PDFs only.
@@ -199,6 +202,22 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
     .map((type) => ({ type, prompts: prompts.filter((prompt) => prompt.type === type) }))
     .filter((group) => group.prompts.length > 0)
 
+  const renderPromptChip = (prompt: RagIndexPromptUsage) => (
+    <Chip
+      key={prompt.id}
+      onClick={() => handleOpenPromptClick(prompt.id)}
+      component="li"
+      size="small"
+      variant="outlined"
+      label={prompt.name}
+      sx={{
+        maxWidth: '100%',
+        height: 'auto',
+        '& .MuiChip-label': { whiteSpace: 'normal', overflowWrap: 'anywhere', py: 0.25 },
+      }}
+    />
+  )
+
   return (
     <Box sx={{ flex: 1, overflow: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, px: 2, pt: 2 }}>
@@ -341,27 +360,38 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
                       {typePrompts.length}
                     </Typography>
                   </Box>
-                  <Box
-                    component="ul"
-                    aria-labelledby={`ragPromptUsage-${type}`}
-                    sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, listStyle: 'none', p: 1.5, m: 0 }}
-                  >
-                    {typePrompts.map((prompt) => (
-                      <Chip
-                        key={prompt.id}
-                        onClick={() => handleOpenPromptClick(prompt.id)}
-                        component="li"
-                        size="small"
-                        variant="outlined"
-                        label={[prompt.chatInstance?.name[language], prompt.name].filter(Boolean).join(' / ')}
-                        sx={{
-                          maxWidth: '100%',
-                          height: 'auto',
-                          '& .MuiChip-label': { whiteSpace: 'normal', overflowWrap: 'anywhere', py: 0.25 },
-                        }}
-                      />
-                    ))}
-                  </Box>
+                  {type === 'CHAT_INSTANCE' ? (
+                    <Box component="ul" aria-labelledby={`ragPromptUsage-${type}`} sx={{ listStyle: 'none', p: 0, m: 0 }}>
+                      {Object.entries(groupBy(typePrompts, (prompt) => prompt.chatInstance?.id)).map(([courseKey, coursePrompts]) => {
+                        const course = coursePrompts[0].chatInstance
+                        return (
+                          <Box
+                            component="li"
+                            key={courseKey}
+                            sx={{ px: 1.5, py: 1.25, '&:not(:first-of-type)': { borderTop: 1, borderColor: 'divider' } }}
+                          >
+                            {course && (
+                              <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap', mb: 0.75 }}>
+                                <Typography variant="body2" sx={{ fontWeight: 500, overflowWrap: 'anywhere' }}>
+                                  {course.name[language]}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                                  {formatDate(course.activityPeriod)}
+                                </Typography>
+                              </Box>
+                            )}
+                            <Box component="ul" aria-label={course?.name[language]} sx={promptChipListSx}>
+                              {coursePrompts.map(renderPromptChip)}
+                            </Box>
+                          </Box>
+                        )
+                      })}
+                    </Box>
+                  ) : (
+                    <Box component="ul" aria-labelledby={`ragPromptUsage-${type}`} sx={{ ...promptChipListSx, p: 1.5 }}>
+                      {typePrompts.map(renderPromptChip)}
+                    </Box>
+                  )}
                 </Paper>
               ))}
             </Box>
