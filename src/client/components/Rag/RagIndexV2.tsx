@@ -105,9 +105,10 @@ interface RagIndexV2Props {
   onBack: () => void
   onSelectFile: (fileId: number) => void
   onDeleted?: () => void
+  focusFileId?: number | null
 }
 
-export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelectFile, onDeleted }) => {
+export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelectFile, onDeleted, focusFileId }) => {
   const { user } = useCurrentUser()
   const { t, i18n } = useTranslation()
   const { language } = i18n
@@ -195,8 +196,12 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
 
   const handleDeleteFile = async (fileId: number) => {
     if (!window.confirm(t('rag:confirmDeleteFile'))) return
-    await deleteFileMutation.mutateAsync({ indexId, fileId })
-    enqueueSnackbar(t('rag:fileDeleted'), { variant: 'success' })
+    try {
+      await deleteFileMutation.mutateAsync({ indexId, fileId })
+      enqueueSnackbar(t('rag:fileDeleted'), { variant: 'success' })
+    } catch {
+      enqueueSnackbar(t('rag:fileDeleteError'), { variant: 'error' })
+    }
     refetch()
     refetchStatuses()
   }
@@ -323,6 +328,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
                   status={ragFileStatuses?.find((rfs) => rfs.ragFileId === file.id)}
                   uploadProgress={uploadMutation.isPending ? uploadProgress : undefined}
                   onSelectFile={onSelectFile}
+                  focusOnMount={file.id === focusFileId}
                   onDelete={handleDeleteFile}
                   onRetry={async () => {
                     await handleUpload([], [])

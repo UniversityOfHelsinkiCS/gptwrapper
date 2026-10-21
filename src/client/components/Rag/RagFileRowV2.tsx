@@ -1,5 +1,5 @@
-import React from 'react'
-import { Box, IconButton, LinearProgress, Link, Tooltip, Typography } from '@mui/material'
+import React, { useEffect, useRef } from 'react'
+import { Box, IconButton, LinearProgress, Tooltip, Typography } from '@mui/material'
 import { alpha } from '@mui/material/styles'
 import Autorenew from '@mui/icons-material/Autorenew'
 import CheckCircle from '@mui/icons-material/CheckCircle'
@@ -8,7 +8,7 @@ import ErrorOutline from '@mui/icons-material/ErrorOutline'
 import { IngestionJobStatus } from '@shared/ingestion'
 import type { RagFileAttributes } from '@shared/types'
 import { useTranslation } from 'react-i18next'
-import { OutlineButtonBlue } from '../ChatV2/general/Buttons'
+import { OutlineButtonBlue, TextButton } from '../ChatV2/general/Buttons'
 
 type BadgePalette = 'error' | 'warning' | 'primary' | 'secondary'
 
@@ -27,10 +27,18 @@ interface RagFileRowV2Props {
   onSelectFile: (fileId: number) => void
   onDelete: (fileId: number) => void
   onRetry: () => void
+  focusOnMount?: boolean
 }
 
-export const RagFileRowV2: React.FC<RagFileRowV2Props> = ({ file, status, uploadProgress, onSelectFile, onDelete, onRetry }) => {
+export const RagFileRowV2: React.FC<RagFileRowV2Props> = ({ file, status, uploadProgress, onSelectFile, onDelete, onRetry, focusOnMount }) => {
   const { t } = useTranslation()
+  const fileNameButtonRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (focusOnMount) {
+      fileNameButtonRef.current?.focus()
+    }
+  }, [focusOnMount])
 
   const pipelineStage = status?.pipelineStage ?? file.pipelineStage
   const isUploading = file.id < 0 && file.pipelineStage === 'ingesting' && uploadProgress !== undefined
@@ -72,13 +80,31 @@ export const RagFileRowV2: React.FC<RagFileRowV2Props> = ({ file, status, upload
       </Box>
 
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Link
-          component="button"
+        <TextButton
+          id={`file-name-button-${file.id}`}
+          ref={fileNameButtonRef}
           onClick={() => onSelectFile(file.id)}
-          sx={{ display: 'block', textAlign: 'left', maxWidth: '100%', fontWeight: 500, color: 'text.primary', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'pointer' }}
+          aria-label={t('accessibility:itemAction', {
+            action: t('rag:viewContent'),
+            item: file.filename,
+          })}
+          sx={{
+            display: 'block',
+            textAlign: 'left',
+            maxWidth: '100%',
+            fontWeight: 500,
+            fontSize: 16,
+            p: 0,
+            color: 'text.primary',
+            textDecoration: 'none',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            cursor: 'pointer',
+          }}
         >
           {file.filename}
-        </Link>
+        </TextButton>
 
         {isSuccess && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5, color: 'success.main' }}>

@@ -8,6 +8,7 @@ import { AccessTime, ExpandLess, ExpandMore, InsertDriveFileOutlined, Search as 
 import { useTranslation } from 'react-i18next'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { InfoBox } from '../common/InfoBox'
+import { focusIndicatorStyle } from 'src/client/util/accessibility'
 
 export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
   const { t } = useTranslation()
@@ -151,7 +152,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
               {t('rag:advancedOptionsLabel')}
             </Typography>
             <Typography component="span" variant="caption" color="text.secondary">
-              · {t('rag:adminOnly')}
+              - {t('rag:adminOnly')}
             </Typography>
             {adminOpen ? <ExpandLess sx={{ color: 'action.active' }} /> : <ExpandMore sx={{ color: 'action.active' }} />}
           </Box>
@@ -171,10 +172,58 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
               }}
             >
               <Box display="flex" flexWrap="wrap" sx={{ columnGap: '28px' }}>
-                <FormControlLabel control={<Checkbox checked={vector} onChange={(e) => setVector(e.target.checked)} />} label={t('rag:useSemanticSearch')} />
-                <FormControlLabel control={<Checkbox checked={ft} onChange={(e) => setFt(e.target.checked)} />} label={t('rag:useKeywordSearch')} />
-                <FormControlLabel control={<Checkbox checked={rerank} onChange={(e) => setRerank(e.target.checked)} />} label={t('rag:useReranking')} />
-                <FormControlLabel control={<Checkbox checked={curate} onChange={(e) => setCurate(e.target.checked)} />} label={t('rag:useCuration')} />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      disableRipple
+                      checked={vector}
+                      onChange={(e) => setVector(e.target.checked)}
+                      sx={{
+                        ...focusIndicatorStyle(),
+                      }}
+                    />
+                  }
+                  label={t('rag:useSemanticSearch')}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      disableRipple
+                      checked={ft}
+                      onChange={(e) => setFt(e.target.checked)}
+                      sx={{
+                        ...focusIndicatorStyle(),
+                      }}
+                    />
+                  }
+                  label={t('rag:useKeywordSearch')}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      disableRipple
+                      checked={rerank}
+                      onChange={(e) => setRerank(e.target.checked)}
+                      sx={{
+                        ...focusIndicatorStyle(),
+                      }}
+                    />
+                  }
+                  label={t('rag:useReranking')}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      disableRipple
+                      checked={curate}
+                      onChange={(e) => setCurate(e.target.checked)}
+                      sx={{
+                        ...focusIndicatorStyle(),
+                      }}
+                    />
+                  }
+                  label={t('rag:useCuration')}
+                />
               </Box>
 
               {results?.timings && (

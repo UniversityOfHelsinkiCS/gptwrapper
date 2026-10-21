@@ -73,7 +73,8 @@
     "fi": "SUOMI",
     "en": "ENGLISH",
     "sv": "SVENSKA",
-    "deleted": "Alustus \"{{name}}\" poistettu"
+    "deleted": "Alustus \"{{name}}\" poistettu",
+    "collection": "Kokoelma"
   },
   "stats": {
     "showing": "Näytetään",
@@ -720,6 +721,7 @@
     "backToCollection": "Takaisin kokoelmaan",
     "file": "Lähdemateriaalin tiedosto",
     "deleteFile": "Poista tiedosto",
+    "viewContent": "tarkastele sisältöä",
     "content": "Sisältö",
     "errorWithMessage": "Virhe: {{message}}",
     "noContent": "Ei sisältöä",
@@ -768,6 +770,7 @@
     "fileStatus": "Tila",
     "collectionDeleted": "Kokoelma poistettu",
     "fileDeleted": "Tiedosto poistettu",
+    "fileDeleteError": "Tiedoston poistaminen epäonnistui",
     "fileTextDeleted": "Uudelleenskannaus aloitettu",
     "deleteFileText": "Skannaa PDF uudestaan",
     "onlyPdf": "a",

@@ -72,7 +72,8 @@
     "fi": "SUOMI",
     "en": "ENGLISH",
     "sv": "SVENSKA",
-    "deleted": "Prompt \"{{name}}\" raderad"
+    "deleted": "Prompt \"{{name}}\" raderad",
+    "collection": "Index"
   },
   "chats": {
     "header": "Öppna kurschattar",
@@ -716,7 +717,9 @@
     "fileTextDeleted": "Filtext raderad",
     "deleteFileText": "Ta bort fil",
     "fileDeleted": "Fil raderad",
+    "fileDeleteError": "Det gick inte att radera filen",
     "deleteFile": "Ta bort fil",
+    "viewContent": "granska innehållet",
     "content": "Innehåll",
     "errorWithMessage": "Fel: {{message}}",
     "noContent": "Inget innehåll",

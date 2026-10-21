@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box, Divider, List, ListItemButton, ListItemText, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { useRagIndices } from '../../hooks/useRagIndices'
 import { RagCreator } from './RagCreator'
@@ -7,7 +7,6 @@ import { ArrowBack } from '@mui/icons-material'
 import { RagFileV2 } from './RagFileV2'
 import { RagIndexV2 } from './RagIndexV2'
 import { OutlineButtonBlue } from '../ChatV2/general/Buttons'
-import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
 
 interface RagDetailsProps {
   selectedIndexId: number | null
@@ -22,6 +21,16 @@ export const RagDetails: React.FC<RagDetailsProps> = ({ selectedIndexId, onBack,
   const { t } = useTranslation()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const [returnFocusFileId, setReturnFocusFileId] = useState<number | null>(null)
+
+  useEffect(() => {
+    setReturnFocusFileId(null)
+  }, [selectedIndexId])
+
+  const handleBackFromFile = () => {
+    setReturnFocusFileId(selectedFileId)
+    onSelectFile(null)
+  }
 
   return (
     <Box
@@ -49,8 +58,10 @@ export const RagDetails: React.FC<RagDetailsProps> = ({ selectedIndexId, onBack,
           <Typography>{t('rag:selectCollection')}</Typography>
         </Box>
       )}
-      {selectedIndexId && !selectedFileId && <RagIndexV2 indexId={selectedIndexId} onBack={onBack} onSelectFile={onSelectFile} onDeleted={onDeleted} />}
-      {selectedIndexId && selectedFileId && <RagFileV2 indexId={selectedIndexId} fileId={selectedFileId} onBack={() => onSelectFile(null)} />}
+      {selectedIndexId && !selectedFileId && (
+        <RagIndexV2 indexId={selectedIndexId} onBack={onBack} onSelectFile={onSelectFile} onDeleted={onDeleted} focusFileId={returnFocusFileId} />
+      )}
+      {selectedIndexId && selectedFileId && <RagFileV2 indexId={selectedIndexId} fileId={selectedFileId} onBack={handleBackFromFile} />}
     </Box>
   )
 }
@@ -87,10 +98,10 @@ const RagModal: React.FC<{ rag?: number; onDeleted?: () => void }> = ({ rag, onD
           <Divider sx={{ my: 1 }} />
           <List sx={{ flex: 1, overflowY: 'auto' }}>
             {sortedRagIndices?.map((ragIndex) => (
-              <>
+              <React.Fragment key={ragIndex.id}>
                 <ListItemButton
-                  key={ragIndex.id}
                   selected={selectedIndexId === ragIndex.id}
+                  aria-label={[t('common:collection'), ragIndex.metadata?.name, t('accessibility:previewAndManage')].filter(Boolean).join(', ')}
                   aria-pressed={selectedIndexId === ragIndex.id}
                   onClick={() => handleSelectIndex(ragIndex.id)}
                   sx={{
@@ -100,8 +111,7 @@ const RagModal: React.FC<{ rag?: number; onDeleted?: () => void }> = ({ rag, onD
                 >
                   <ListItemText primary={ragIndex.metadata?.name} slotProps={{ primary: { noWrap: true } }} />
                 </ListItemButton>
-                <StatusAnnouncer message={selectedIndexId === ragIndex.id ? t('accessibility:previewOpened', { name: ragIndex.metadata?.name }) : ''} />
-              </>
+              </React.Fragment>
             ))}
           </List>
           {ragIndices?.length === 0 && (

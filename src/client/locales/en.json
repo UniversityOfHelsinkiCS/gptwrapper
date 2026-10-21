@@ -72,7 +72,8 @@
     "fi": "SUOMI",
     "en": "ENGLISH",
     "sv": "SVENSKA",
-    "deleted": "Prompt \"{{name}}\" deleted"
+    "deleted": "Prompt \"{{name}}\" deleted",
+    "collection": "Collection"
   },
   "stats": {
     "timePeriodStart": "Starting",
@@ -719,6 +720,7 @@
     "backToCollection": "Back to collection",
     "file": "Source material file",
     "deleteFile": "Delete file",
+    "viewContent": "view content",
     "content": "Content",
     "errorWithMessage": "Error: {{message}}",
     "noContent": "No content",
@@ -767,6 +769,7 @@
     "fileStatus": "Status",
     "collectionDeleted": "Collection deleted",
     "fileDeleted": "File deleted",
+    "fileDeleteError": "Failed to delete file",
     "fileTextDeleted": "Rescanning started",
     "deleteFileText": "Rescan PDF",
     "onlyPdf": "a",
