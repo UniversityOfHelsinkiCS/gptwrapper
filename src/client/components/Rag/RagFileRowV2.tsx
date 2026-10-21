@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import { Box, IconButton, LinearProgress, Tooltip, Typography } from '@mui/material'
 import { alpha } from '@mui/material/styles'
 import Autorenew from '@mui/icons-material/Autorenew'
@@ -27,18 +27,10 @@ interface RagFileRowV2Props {
   onSelectFile: (fileId: number) => void
   onDelete: (fileId: number) => void
   onRetry: () => void
-  focusOnMount?: boolean
 }
 
-export const RagFileRowV2: React.FC<RagFileRowV2Props> = ({ file, status, uploadProgress, onSelectFile, onDelete, onRetry, focusOnMount }) => {
+export const RagFileRowV2: React.FC<RagFileRowV2Props> = ({ file, status, uploadProgress, onSelectFile, onDelete, onRetry }) => {
   const { t } = useTranslation()
-  const fileNameButtonRef = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    if (focusOnMount) {
-      fileNameButtonRef.current?.focus()
-    }
-  }, [focusOnMount])
 
   const pipelineStage = status?.pipelineStage ?? file.pipelineStage
   const isUploading = file.id < 0 && file.pipelineStage === 'ingesting' && uploadProgress !== undefined
@@ -82,7 +74,6 @@ export const RagFileRowV2: React.FC<RagFileRowV2Props> = ({ file, status, upload
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <TextButton
           id={`file-name-button-${file.id}`}
-          ref={fileNameButtonRef}
           onClick={() => onSelectFile(file.id)}
           aria-label={t('accessibility:itemAction', {
             action: t('rag:viewContent'),

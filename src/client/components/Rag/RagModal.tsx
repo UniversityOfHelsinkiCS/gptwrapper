@@ -21,14 +21,14 @@ export const RagDetails: React.FC<RagDetailsProps> = ({ selectedIndexId, onBack,
   const { t } = useTranslation()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-  const [returnFocusFileId, setReturnFocusFileId] = useState<number | null>(null)
+  const [returnedFromFile, setReturnedFromFile] = useState(false)
 
   useEffect(() => {
-    setReturnFocusFileId(null)
+    setReturnedFromFile(false)
   }, [selectedIndexId])
 
   const handleBackFromFile = () => {
-    setReturnFocusFileId(selectedFileId)
+    setReturnedFromFile(true)
     onSelectFile(null)
   }
 
@@ -59,7 +59,7 @@ export const RagDetails: React.FC<RagDetailsProps> = ({ selectedIndexId, onBack,
         </Box>
       )}
       {selectedIndexId && !selectedFileId && (
-        <RagIndexV2 indexId={selectedIndexId} onBack={onBack} onSelectFile={onSelectFile} onDeleted={onDeleted} focusFileId={returnFocusFileId} />
+        <RagIndexV2 indexId={selectedIndexId} onBack={onBack} onSelectFile={onSelectFile} onDeleted={onDeleted} focusUploadOnMount={returnedFromFile} />
       )}
       {selectedIndexId && selectedFileId && <RagFileV2 indexId={selectedIndexId} fileId={selectedFileId} onBack={handleBackFromFile} />}
     </Box>

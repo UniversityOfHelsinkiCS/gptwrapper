@@ -105,10 +105,10 @@ interface RagIndexV2Props {
   onBack: () => void
   onSelectFile: (fileId: number) => void
   onDeleted?: () => void
-  focusFileId?: number | null
+  focusUploadOnMount?: boolean
 }
 
-export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelectFile, onDeleted, focusFileId }) => {
+export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelectFile, onDeleted, focusUploadOnMount }) => {
   const { user } = useCurrentUser()
   const { t, i18n } = useTranslation()
   const { language } = i18n
@@ -125,6 +125,12 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
   const uploadMutation = useUploadMutation({ index: ragDetails, onUploadProgress: setUploadProgress })
   const { activePrompt, handleChangePrompt } = usePromptState()
   const navigate = useNavigate()
+  const uploadInputRef = React.useRef<HTMLInputElement>(null)
+  const focusUploadButton = () => uploadInputRef.current?.focus()
+
+  React.useEffect(() => {
+    if (isSuccess && focusUploadOnMount) focusUploadButton()
+  }, [isSuccess, focusUploadOnMount])
 
   const isComplete = ragFileStatuses ? ragFileStatuses.every(({ pipelineStage }) => pipelineStage !== 'ingesting') && !uploadMutation.isPending : false
 
@@ -199,6 +205,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
     try {
       await deleteFileMutation.mutateAsync({ indexId, fileId })
       enqueueSnackbar(t('rag:fileDeleted'), { variant: 'success' })
+      focusUploadButton()
     } catch {
       enqueueSnackbar(t('rag:fileDeleteError'), { variant: 'error' })
     }
@@ -245,6 +252,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
       <Box py={2} mx={2}>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
           <Button
+            id="upload-files-button"
             variant="contained"
             tabIndex={-1}
             component="label"
@@ -254,6 +262,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
           >
             {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
             <VisuallyHiddenInput
+              ref={uploadInputRef}
               type="file"
               accept={RAG_FILE_ACCEPT}
               aria-describedby="ragIndex-name"
@@ -328,7 +337,6 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
                   status={ragFileStatuses?.find((rfs) => rfs.ragFileId === file.id)}
                   uploadProgress={uploadMutation.isPending ? uploadProgress : undefined}
                   onSelectFile={onSelectFile}
-                  focusOnMount={file.id === focusFileId}
                   onDelete={handleDeleteFile}
                   onRetry={async () => {
                     await handleUpload([], [])
@@ -423,7 +431,13 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
           )}
         </Box>
       </Box>
-      <Dialog open={stagedFiles.length > 0} onClose={() => setStagedFiles([])} fullWidth maxWidth="sm">
+      <Dialog
+        open={stagedFiles.length > 0}
+        onClose={() => setStagedFiles([])}
+        fullWidth
+        maxWidth="sm"
+        slotProps={{ transition: { onExited: focusUploadButton } }}
+      >
         <DialogTitle>{t('rag:uploadFiles')}</DialogTitle>
         <DialogContent>
           <Collapse in={advancedParsing.some(Boolean)} timeout={220} unmountOnExit>
