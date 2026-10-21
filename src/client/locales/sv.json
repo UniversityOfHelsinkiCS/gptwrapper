@@ -742,6 +742,8 @@
     "promptUsageTitle": "Prompter som använder denna samling",
     "promptUsageEmpty": "Ingen prompt använder denna samling ännu",
     "promptUsageCount": "{{count}} prompter",
+    "openPersonalPromptDetails": "Öppna detaljer för personlig prompten {{- prompt}}",
+    "openCoursePromptDetails": "Öppna detaljer för prompten {{- prompt}}, kurs {{- course}}",
     "promptTypeChatInstance": "Kursprompt",
     "promptTypePersonal": "Personlig",
     "promptTypeUniversity": "Universitetsprompt",

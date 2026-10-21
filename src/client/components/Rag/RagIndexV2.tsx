@@ -223,19 +223,24 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
     .filter((group) => group.prompts.length > 0)
 
   const renderPromptChip = (prompt: RagIndexPromptUsage) => (
-    <Chip
-      key={prompt.id}
-      onClick={() => handleOpenPromptClick(prompt.id)}
-      component="li"
-      size="small"
-      variant="outlined"
-      label={prompt.name}
-      sx={{
-        maxWidth: '100%',
-        height: 'auto',
-        '& .MuiChip-label': { whiteSpace: 'normal', overflowWrap: 'anywhere', py: 0.25 },
-      }}
-    />
+    <Box component="li" key={prompt.id} sx={{ maxWidth: '100%' }}>
+      <Chip
+        onClick={() => handleOpenPromptClick(prompt.id)}
+        size="small"
+        variant="outlined"
+        label={prompt.name}
+        aria-label={
+          prompt.chatInstance
+            ? t('rag:openCoursePromptDetails', { prompt: prompt.name, course: prompt.chatInstance.name[language] })
+            : t('rag:openPersonalPromptDetails', { prompt: prompt.name })
+        }
+        sx={{
+          maxWidth: '100%',
+          height: 'auto',
+          '& .MuiChip-label': { whiteSpace: 'normal', overflowWrap: 'anywhere', py: 0.25 },
+        }}
+      />
+    </Box>
   )
 
   return (
@@ -389,6 +394,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
                     <Typography
                       id={`ragPromptUsage-${type}`}
                       variant="caption"
+                      component="h5"
                       sx={{ fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'text.secondary' }}
                     >
                       {t(promptTypeLabelKeys[type])}

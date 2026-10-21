@@ -797,6 +797,8 @@
     "promptUsageTitle": "Kokoelmaa käyttävät alustukset",
     "promptUsageEmpty": "Mikään alustus ei käytä tätä kokoelmaa",
     "promptUsageCount": "{{count}} alustusta",
+    "openPersonalPromptDetails": "Avaa oman alustuksen {{- prompt}} tiedot",
+    "openCoursePromptDetails": "Avaa alustuksen {{- prompt}} tiedot, kurssi {{- course}}",
     "promptTypeChatInstance": "Kurssin alustus",
     "promptTypePersonal": "Henkilökohtainen",
     "promptTypeUniversity": "Yliopiston alustus",

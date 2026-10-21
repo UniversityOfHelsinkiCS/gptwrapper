@@ -796,6 +796,8 @@
     "promptUsageTitle": "Prompts using this collection",
     "promptUsageEmpty": "No prompts use this collection yet",
     "promptUsageCount": "{{count}} prompts",
+    "openPersonalPromptDetails": "Open details of personal prompt {{- prompt}}",
+    "openCoursePromptDetails": "Open details of prompt {{- prompt}}, course {{- course}}",
     "promptTypeChatInstance": "Course prompt",
     "promptTypePersonal": "Personal",
     "promptTypeUniversity": "University prompt",
