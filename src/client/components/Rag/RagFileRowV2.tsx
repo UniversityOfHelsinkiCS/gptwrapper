@@ -125,7 +125,7 @@ export const RagFileRowV2: React.FC<RagFileRowV2Props> = ({ file, status, upload
         )}
 
         {isError && (
-          <Box sx={{ mt: 0.5 }}>
+          <Box id={`file-error-${file.id}`} sx={{ mt: 0.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'error.main' }}>
               <ErrorOutline sx={{ fontSize: 16 }} />
               <Typography variant="caption" sx={{ fontWeight: 600 }}>
@@ -142,7 +142,13 @@ export const RagFileRowV2: React.FC<RagFileRowV2Props> = ({ file, status, upload
       </Box>
 
       {isError && (
-        <OutlineButtonBlue startIcon={<Autorenew />} onClick={onRetry} sx={{ flexShrink: 0 }}>
+        <OutlineButtonBlue
+          startIcon={<Autorenew />}
+          onClick={onRetry}
+          aria-label={t('accessibility:itemAction', { action: t('rag:retryFailedFiles'), item: file.filename })}
+          aria-describedby={`file-error-${file.id}`}
+          sx={{ flexShrink: 0 }}
+        >
           {t('rag:retryFailedFiles')}
         </OutlineButtonBlue>
       )}
