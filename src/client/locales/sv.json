@@ -729,6 +729,8 @@
     "swedish": "Svenska",
     "english": "Engelska",
     "createIndex": "Skapa index",
+    "createIndexError": "Det gick inte att skapa index",
+    "createIndexSuccess": "Indexet {{kokoelma}} har skapats",
     "editSourceMaterial": "Redigera källmaterialsamlingar",
     "noCollections": "Inga samlingar ännu",
     "selectCollection": "Välj en samling",

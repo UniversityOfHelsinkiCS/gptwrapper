@@ -35,7 +35,7 @@ import {
 } from './api'
 import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
-import { BlueButton, OrangeButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
+import { BlueButton, OutlineButtonBlack, RedButton } from '../ChatV2/general/Buttons'
 import { InfoBox } from '../common/InfoBox'
 import { enqueueSnackbar } from '../common/Snackbar'
 import useCurrentUser from '../../hooks/useCurrentUser'
@@ -251,6 +251,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
             <VisuallyHiddenInput
               type="file"
               accept={RAG_FILE_ACCEPT}
+              aria-describedby="ragIndex-name"
               onChange={async (e) => {
                 const files = e.target.files
                 if (files && files.length > 0) {
@@ -261,7 +262,14 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
               multiple
             />
           </Button>
-          <Button variant="outlined" startIcon={<FindInPage />} onClick={() => setSearchOpen(true)} disabled={ragDetails.ragFiles.length === 0}>
+          <Button
+            variant="outlined"
+            startIcon={<FindInPage />}
+            onClick={() => setSearchOpen(true)}
+            disabled={ragDetails.ragFiles.length === 0}
+            aria-describedby="ragIndex-name"
+            aria-haspopup="dialog"
+          >
             {t('rag:testRetrievalButton')}
           </Button>
           <Dialog open={searchOpen} onClose={() => setSearchOpen(false)} fullWidth maxWidth="lg">
@@ -271,13 +279,15 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
             </DialogContent>
           </Dialog>
           {user?.isAdmin && (
-            <OrangeButton startIcon={<Autorenew />} onClick={handleReset}>
+            <RedButton startIcon={<Autorenew />} onClick={handleReset} aria-describedby="ragIndex-name">
               {t('admin:tryAgain')}
-            </OrangeButton>
+            </RedButton>
           )}
           <Button
-            startIcon={deleteIndexMutation.isPending ? <CircularProgress /> : <DeleteOutline />}
+            startIcon={deleteIndexMutation.isPending ? <CircularProgress size={20} aria-hidden /> : <DeleteOutline />}
             disabled={deleteIndexMutation.isPending}
+            aria-busy={deleteIndexMutation.isPending}
+            aria-describedby="ragIndex-name"
             variant="text"
             color="error"
             data-testid="ragIndexDeleteButton"
@@ -489,6 +499,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
                       size="small"
                       exclusive
                       value={mode}
+                      aria-label={t('accessibility:itemAction', { action: t('rag:parsing'), item: file.name })}
                       onChange={(_e, value) => {
                         if (!value) return
                         setAdvancedParsing((prev) => {
@@ -534,6 +545,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
               setStagedFiles([])
             }}
             disabled={uploadMutation.isPending}
+            aria-busy={uploadMutation.isPending}
           >
             {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
           </BlueButton>

@@ -1,24 +1,13 @@
 import { useState } from 'react'
 import { useCreateUserRagIndexMutation } from './api'
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  InputLabel,
-  Link,
-  MenuItem,
-  Select,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, Link, MenuItem, Select, TextField } from '@mui/material'
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
 import { BlueButton } from '../ChatV2/general/Buttons'
 import { InfoBox } from '../common/InfoBox'
 import { useTranslation } from 'react-i18next'
 import { RAG_LANGUAGES } from '@shared/lang'
+import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
+import { enqueueSnackbar } from '../common/Snackbar'
 
 export const RagCreator = ({ onCreated }: { onCreated?: (indexId: number) => void }) => {
   const { t } = useTranslation()
@@ -29,13 +18,7 @@ export const RagCreator = ({ onCreated }: { onCreated?: (indexId: number) => voi
 
   return (
     <>
-      <Button
-        variant="contained"
-        onClick={() => setOpen(true)}
-        data-testid="createNewRagButton"
-        startIcon={<Typography sx={{ fontSize: '1.5rem', lineHeight: 1 }}>+</Typography>}
-        sx={{ mb: 1 }}
-      >
+      <Button variant="contained" onClick={() => setOpen(true)} data-testid="createNewRagButton" sx={{ mb: 1 }}>
         {t('rag:createNewIndex')}
       </Button>
       <Dialog
@@ -47,10 +30,17 @@ export const RagCreator = ({ onCreated }: { onCreated?: (indexId: number) => voi
             onSubmit: async (event: React.FormEvent<HTMLFormElement>) => {
               event.preventDefault()
               event.stopPropagation()
-              const newIndex = await createUserIndexMutation.mutateAsync({ name: indexName, language })
+              let newIndex: Awaited<ReturnType<typeof createUserIndexMutation.mutateAsync>>
+              try {
+                newIndex = await createUserIndexMutation.mutateAsync({ name: indexName, language })
+              } catch {
+                enqueueSnackbar(t('rag:createIndexError'), { variant: 'error' })
+                return
+              }
               setIndexName('')
               if (onCreated) {
                 onCreated(newIndex.id)
+                announceToScreenReader(t('rag:createIndexSuccess', { kokoelma: indexName }))
               }
               setOpen(false)
             },

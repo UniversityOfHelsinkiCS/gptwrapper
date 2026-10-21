@@ -731,6 +731,8 @@
     "finnish": "Suomi",
     "english": "Englanti",
     "createIndex": "Luo kokoelma",
+    "createIndexError": "Kokoelman luonti epäonnistui",
+    "createIndexSuccess": "Kokoelman {{kokoelma}} luonti onnistui",
     "nameLabel": "Kokoelman nimi",
     "allFilesProcessedSuccessfully": "Tiedostot ladattu",
     "retryFailedFiles": "Yritä uudestaan",

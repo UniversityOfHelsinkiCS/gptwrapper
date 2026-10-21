@@ -91,6 +91,7 @@ const RagModal: React.FC<{ rag?: number; onDeleted?: () => void }> = ({ rag, onD
                 <ListItemButton
                   key={ragIndex.id}
                   selected={selectedIndexId === ragIndex.id}
+                  aria-pressed={selectedIndexId === ragIndex.id}
                   onClick={() => handleSelectIndex(ragIndex.id)}
                   sx={{
                     borderRadius: '8px',

@@ -730,6 +730,8 @@
     "finnish": "Finnish",
     "english": "English",
     "createIndex": "Create collection",
+    "createIndexError": "Failed to create collection",
+    "createIndexSuccess": "Collection {{kokoelma}} created successfully",
     "nameLabel": "Collection name",
     "allFilesProcessedSuccessfully": "Files processed",
     "retryFailedFiles": "Try again",
