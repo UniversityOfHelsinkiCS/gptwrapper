@@ -955,6 +955,9 @@
     "editPromptForm": "Alustuksen muokkaus",
     "editName": "Muokkaa nimeä",
     "scrollableTable": "Taulukko",
-    "scrollableFormula": "Kaava"
+    "scrollableFormula": "Kaava",
+    "closedCourse": "Suljettu kurssi",
+    "activeCourse": "Aktiivinen kurssi",
+    "expiredCourse": "Päättynyt kurssi"
   }
 }

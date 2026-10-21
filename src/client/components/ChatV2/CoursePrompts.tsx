@@ -140,7 +140,18 @@ const CoursePrompts = (props: CoursePromptsProps) => {
               ...focusIndicatorStyle(),
             }}
             data-testid={`show-course-info-${course.id}-button`}
-            aria-label={[t('common:course'), course.name[language], showActivityPeriod && formatDate(course.activityPeriod), t('common:preview')]
+            aria-label={[
+              course.expired
+                ? t('accessibility:endedCourse')
+                : course.activated
+                  ? t('accessibility:activeCourse')
+                  : !course.activated
+                    ? t('accessibility:inActiveCourse')
+                    : t('common:course'),
+              course.name[language],
+              showActivityPeriod && formatDate(course.activityPeriod),
+              t('common:preview'),
+            ]
               .filter(Boolean)
               .join(', ')}
             aria-pressed={previewCourse?.id === course.id}

@@ -954,6 +954,9 @@
     "editPromptForm": "Edit prompt",
     "editName": "Edit name",
     "scrollableTable": "Table",
-    "scrollableFormula": "Formula"
+    "scrollableFormula": "Formula",
+    "closedCourse": "Closed course",
+    "activeCourse": "Active course",
+    "expiredCourse": "Ended course"
   }
 }

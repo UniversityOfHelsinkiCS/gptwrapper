@@ -929,6 +929,9 @@
     "editPromptForm": "Redigera prompt",
     "editName": "Redigera namn",
     "scrollableTable": "Tabell",
-    "scrollableFormula": "Formel"
+    "scrollableFormula": "Formel",
+    "closedCourse": "Stängd kurs",
+    "activeCourse": "Aktiv kurs",
+    "expiredCourse": "Avslutad kurs"
   }
 }

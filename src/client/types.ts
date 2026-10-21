@@ -139,6 +139,7 @@ export interface CourseUnit {
 }
 
 export interface Course extends ChatInstance {
+  expired?: boolean
   activityPeriod: ActivityPeriod
   prompts: Prompt[]
   enrolments: Enrolment[]
