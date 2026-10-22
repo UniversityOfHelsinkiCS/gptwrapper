@@ -8,6 +8,7 @@ import useUserSearch from '../../hooks/useUserSearch'
 import type { User } from '../../types'
 import useResponsibilityUserSearch from '../../hooks/useResponsibilityUserSearch'
 import useEnrolmentUserSearch from '../../hooks/useEnrolmentUserSearch'
+import { SearchResultsAnnouncer } from '../common/accessibility/StatusAnnouncer'
 
 const handleLoginAs = (user: User) => () => {
   localStorage.setItem('adminLoggedInAs', user.id)
@@ -205,7 +206,7 @@ const ActionUserTable = ({
 }
 const UserSearch = () => {
   const [search, setSearch] = useState('')
-  const { users, isLoading, refetch } = useUserSearch(search)
+  const { users, isLoading, isFetching, refetch } = useUserSearch(search)
   const inputRef = useRef<HTMLInputElement>(null)
   const { t } = useTranslation()
 
@@ -228,6 +229,7 @@ const UserSearch = () => {
       {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
 
       {isLoading && <div>Loading...</div>}
+      <SearchResultsAnnouncer isSearching={isFetching} resultCount={search.length > 4 ? users?.length : undefined} />
       {users && <UserTable users={users} />}
     </Box>
   )
@@ -235,7 +237,7 @@ const UserSearch = () => {
 //a component which allows users to be searched in order to perform some kind of action with the user
 export const ActionUserSearch = ({ actionText, drawActionComponent }: { actionText: string; drawActionComponent: (user: any) => any }) => {
   const [search, setSearch] = useState('')
-  const { users, isLoading, refetch } = useUserSearch(search)
+  const { users, isLoading, isFetching, refetch } = useUserSearch(search)
   const { t } = useTranslation()
 
   useEffect(() => {
@@ -257,6 +259,7 @@ export const ActionUserSearch = ({ actionText, drawActionComponent }: { actionTe
       {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
 
       {isLoading && <div>Loading...</div>}
+      <SearchResultsAnnouncer isSearching={isFetching} resultCount={search.length > 4 ? users?.length : undefined} />
       {users && <ActionUserTable users={users} actionText={actionText} drawActionComponent={drawActionComponent} />}
     </Box>
   )
@@ -273,7 +276,7 @@ export const ResponsibilityActionUserSearch = ({
   courseId: string
 }) => {
   const [search, setSearch] = useState('')
-  const { users, isLoading, refetch } = useResponsibilityUserSearch(search, courseId)
+  const { users, isLoading, isFetching, refetch } = useResponsibilityUserSearch(search, courseId)
   const { t } = useTranslation()
 
   useEffect(() => {
@@ -295,6 +298,7 @@ export const ResponsibilityActionUserSearch = ({
       {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
 
       {isLoading && <div>Loading...</div>}
+      <SearchResultsAnnouncer isSearching={isFetching} resultCount={search.length > 4 ? users?.length : undefined} />
       {users && <ActionUserTable users={users} actionText={actionText} drawActionComponent={drawActionComponent} />}
     </Box>
   )
@@ -310,7 +314,7 @@ export const EnrolmentActionUserSearch = ({
   courseId: string
 }) => {
   const [search, setSearch] = useState('')
-  const { users, isLoading, refetch } = useEnrolmentUserSearch(search, courseId)
+  const { users, isLoading, isFetching, refetch } = useEnrolmentUserSearch(search, courseId)
   const { t } = useTranslation()
 
   useEffect(() => {
@@ -332,6 +336,7 @@ export const EnrolmentActionUserSearch = ({
       {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
 
       {isLoading && <div>Loading...</div>}
+      <SearchResultsAnnouncer isSearching={isFetching} resultCount={search.length > 4 ? users?.length : undefined} />
       {users && <ActionUserTable users={users} actionText={actionText} drawActionComponent={drawActionComponent} />}
     </Box>
   )

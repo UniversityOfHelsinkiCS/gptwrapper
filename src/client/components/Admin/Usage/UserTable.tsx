@@ -10,6 +10,7 @@ import useUsers from '../../../hooks/useUsers'
 import { useDeleteChatInstanceUsageMutation } from '../../../hooks/useChatInstanceUsageMutation'
 import useResetUsageMutation from '../../../hooks/useResetUsageMutation'
 import apiClient from '../../../util/apiClient'
+import { SearchResultsAnnouncer } from '../../common/accessibility/StatusAnnouncer'
 
 type Usage = Omit<ChatInstanceUsage, 'chatInstance'> & {
   chatInstance?: ChatInstance
@@ -30,6 +31,7 @@ const UserTable = () => {
   const resetUsage = useResetUsageMutation()
 
   const [searchedUsages, setSearchedUsages] = useState<Usage[]>([])
+  const [searchedCount, setSearchedCount] = useState<number>()
 
   const { t, i18n } = useTranslation()
 
@@ -57,6 +59,7 @@ const UserTable = () => {
   const handleSearchChange = debounce(async ({ target }) => {
     const query = target.value
 
+    setSearchedCount(undefined)
     if (query.length === 0) {
       setSearchedUsages([])
       return
@@ -79,6 +82,7 @@ const UserTable = () => {
     }))
 
     setSearchedUsages(searchedUserUsages)
+    setSearchedCount(persons.length)
   }, 400)
 
   const onResetUsage = (userId: string) => {
@@ -93,6 +97,7 @@ const UserTable = () => {
   return (
     <Box my={2}>
       <TextField sx={{ width: '30em', maxWidth: '100%', my: 2 }} label="Search users" variant="outlined" onChange={handleSearchChange} />
+      <SearchResultsAnnouncer isSearching={false} resultCount={searchedCount} />
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -124,10 +129,14 @@ const UserTable = () => {
             {(searchedUsages.length !== 0 ? searchedUsages : sortedUsage).map(({ id, usageCount, user, chatInstance }) => (
               <TableRow key={id}>
                 <TableCell component="th" scope="row">
-                  <Typography variant="h6" component="span">{user.username}</Typography>
+                  <Typography variant="h6" component="span">
+                    {user.username}
+                  </Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography variant="h6" component="span">{usageCount}</Typography>
+                  <Typography variant="h6" component="span">
+                    {usageCount}
+                  </Typography>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="overline">

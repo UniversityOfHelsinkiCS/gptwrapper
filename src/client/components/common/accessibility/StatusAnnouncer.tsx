@@ -72,3 +72,19 @@ export const StatusAnnouncer = ({ message }: { message: string }) => {
     </Box>
   )
 }
+
+/*
+ Announces the number of results of a search that updates while typing. The region is emptied while searching,
+ so that a new search with the same number of results is announced again. resultCount is undefined when no search has been made.
+*/
+export const SearchResultsAnnouncer = ({ isSearching, resultCount }: { isSearching: boolean; resultCount: number | undefined }) => {
+  const { t } = useTranslation()
+
+  const getMessage = () => {
+    if (isSearching || resultCount === undefined) return ''
+    if (resultCount === 0) return t('accessibility:noSearchResults')
+    return resultCount === 1 ? t('accessibility:searchResultsOne', { count: resultCount }) : t('accessibility:searchResultsOther', { count: resultCount })
+  }
+
+  return <StatusAnnouncer message={getMessage()} />
+}
