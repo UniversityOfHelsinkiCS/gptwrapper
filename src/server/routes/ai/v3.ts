@@ -19,7 +19,7 @@ import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
 import { upload } from './multer'
-import { getAccessLevel } from '../../services/chatInstances/access'
+import { requireActiveAccess } from '../../services/chatInstances/access'
 
 const router = express.Router()
 
@@ -52,13 +52,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       throw ApplicationError.NotFound('Course not found')
     }
 
-    const accessLevel = await getAccessLevel(user, course)
-    if (!accessLevel) {
-      throw ApplicationError.Forbidden('Not authorized for this course')
-    }
-    if (accessLevel === 'STUDENT_CLOSED') {
-      throw ApplicationError.Forbidden('Course is not active')
-    }
+    await requireActiveAccess(user, course)
 
     const [chatInstanceUsage] = await UserChatInstanceUsage.findOrCreate({
       where: {

@@ -3,12 +3,11 @@ import { Op, Sequelize, WhereOptions } from 'sequelize'
 
 import type { ActivityPeriod, RequestWithUser } from '../types'
 import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, PromptUsage, User, Responsibility, Discussion, RagIndex } from '../db/models'
-import { getAccessLevel, getEnrolledCourses, getTeachedCourses } from '../services/chatInstances/access'
+import { getEnrolledCourses, getTeachedCourses, requireAnyAccess, requireFullAccess } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
 import logger from '../util/logger'
 import _ from 'lodash'
-import type { User as SharedUser } from '@shared/user'
 import { chatIsActive, getChatStatus } from '../services/chatInstances/activity'
 import { AccessLevel } from '@shared/types'
 
@@ -75,7 +74,7 @@ courseRouter.get('/statistics/:id', async (req, res) => {
 
   if (!chatInstance) throw ApplicationError.NotFound('ChatInstance not found')
 
-  await enforceUserHasFullAccess(user, chatInstance)
+  await requireFullAccess(user, chatInstance)
 
   const usages = await UserChatInstanceUsage.findAll({
     where: { chatInstanceId: chatInstance.id },
@@ -111,7 +110,7 @@ courseRouter.get('/statistics/:id/prompt-usages', async (req, res) => {
 
   if (!chatInstance) throw ApplicationError.NotFound('ChatInstance not found')
 
-  await enforceUserHasFullAccess(user, chatInstance)
+  await requireFullAccess(user, chatInstance)
 
   const { startDate, endDate } = chatInstance.activityPeriod
 
@@ -166,7 +165,7 @@ courseRouter.get('/:id', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
 
-  const accessLevel = await requireCourseAccess(user, chatInstance)
+  const accessLevel = await requireAnyAccess(user, chatInstance)
 
   res.send(serializeCourse(chatInstance, accessLevel))
 })
@@ -198,28 +197,10 @@ courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Re
     throw ApplicationError.NotFound('Chat instance not found')
   }
 
-  await enforceUserHasFullAccess(user, chatInstance)
+  await requireFullAccess(user, chatInstance)
 
   res.send(chatInstance.enrolments)
 })
-
-//checks if user is a admin or is responsible for the course, returns forbidden error if not
-export const enforceUserHasFullAccess = async (user: SharedUser, chatInstance: ChatInstance) => {
-  const accessLevel = await getAccessLevel(user, chatInstance)
-
-  if (accessLevel !== 'FULL') {
-    throw ApplicationError.Forbidden('Unauthorized')
-  }
-}
-
-const requireCourseAccess = async (user: SharedUser, chatInstance: ChatInstance): Promise<AccessLevel> => {
-  const accessLevel = await getAccessLevel(user, chatInstance)
-
-  if (!accessLevel) {
-    throw ApplicationError.Forbidden('Unauthorized')
-  }
-  return accessLevel
-}
 
 export const serializeCourse = (chatInstance: ChatInstance, accessLevel: AccessLevel) => {
   const base = { ...chatInstance.toJSON(), status: getChatStatus(chatInstance), accessLevel }
@@ -273,7 +254,7 @@ const checkDiscussionAccess = async (req: express.Request, _res: express.Respons
     throw ApplicationError.NotFound('Chat instance not found')
   }
 
-  await enforceUserHasFullAccess(user, chatInstance)
+  await requireFullAccess(user, chatInstance)
 
   next()
 }
@@ -339,7 +320,7 @@ courseRouter.put('/:id', async (req, res) => {
 
   const request = req as unknown as RequestWithUser
   const { user } = request
-  await enforceUserHasFullAccess(user, chatInstance)
+  await requireFullAccess(user, chatInstance)
 
   if (activityPeriod !== undefined) {
     chatInstance.activityPeriod = activityPeriod
@@ -405,7 +386,7 @@ courseRouter.post('/:id/responsibilities/assign', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
   const chatInstance = await getChatInstance(courseId)
-  await enforceUserHasFullAccess(user, chatInstance)
+  await requireFullAccess(user, chatInstance)
 
   const userToAssign = await getUserByUsername(assignedUserUsername)
   if (!userToAssign) {
@@ -450,7 +431,7 @@ courseRouter.post('/:id/enrolments/assign', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
   const chatInstance = await getChatInstance(courseId)
-  await enforceUserHasFullAccess(user, chatInstance)
+  await requireFullAccess(user, chatInstance)
 
   const userToAssign = await getUserByUsername(assignedUserUsername)
   if (!userToAssign) {
@@ -491,7 +472,7 @@ courseRouter.post('/:id/enrolments/remove', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
   const chatInstance = await getChatInstance(courseId)
-  await enforceUserHasFullAccess(user, chatInstance)
+  await requireFullAccess(user, chatInstance)
 
   const userToRemove = await getUserByUsername(assignedUserUsername)
   if (!userToRemove) {
@@ -529,7 +510,7 @@ courseRouter.post('/:id/responsibilities/remove', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
   const chatInstance = await getChatInstance(courseId)
-  await enforceUserHasFullAccess(user, chatInstance)
+  await requireFullAccess(user, chatInstance)
 
   const userToRemove: User | null = await getUserByUsername(assignedUserUsername)
   if (!userToRemove) {
@@ -570,7 +551,7 @@ courseRouter.get('/:id/responsibilities/users/:search', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
   const chatInstance = await getChatInstance(courseId)
-  await enforceUserHasFullAccess(user, chatInstance)
+  await requireFullAccess(user, chatInstance)
 
   let where = {} as WhereOptions<User>
 
@@ -622,7 +603,7 @@ courseRouter.get('/:id/enrolments/users/:search', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
   const chatInstance = await getChatInstance(courseId)
-  await enforceUserHasFullAccess(user, chatInstance)
+  await requireFullAccess(user, chatInstance)
 
   let where = {} as WhereOptions<User>
 

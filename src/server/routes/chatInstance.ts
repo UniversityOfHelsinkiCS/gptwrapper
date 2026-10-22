@@ -8,7 +8,7 @@ import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { sequelize } from '../db/connection'
 import { ApplicationError } from '../util/ApplicationError'
 import { adminMiddleware } from '../middleware/adminMiddleware'
-import { getAccessLevel } from '../services/chatInstances/access'
+import { requireFullAccess } from '../services/chatInstances/access'
 import { RequestWithUser } from '../types'
 import { LocaleSchema } from '@shared/lang'
 
@@ -222,10 +222,7 @@ chatInstanceRouter.get('/:id/usages', async (req, res) => {
   }
 
   const { user } = req as RequestWithUser<{ id: string }>
-  const accessLevel = await getAccessLevel(user, chatInstance)
-  if (accessLevel !== 'FULL') {
-    throw ApplicationError.Forbidden()
-  }
+  await requireFullAccess(user, chatInstance)
 
   const usage = (await UserChatInstanceUsage.findAll({
     where: {
@@ -281,10 +278,7 @@ chatInstanceRouter.delete('/usage/:id', async (req, res) => {
   }
 
   const { user } = req as RequestWithUser<{ id: string }>
-  const accessLevel = await getAccessLevel(user, chatInstance)
-  if (accessLevel !== 'FULL') {
-    throw ApplicationError.Forbidden()
-  }
+  await requireFullAccess(user, chatInstance)
 
   chatInstanceUsage.usageCount = 0
 

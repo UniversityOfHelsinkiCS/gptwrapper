@@ -267,7 +267,7 @@ const accessCases = [
   { who: 'outsider', user: { id: 'outsider-1', isAdmin: false }, membership: {}, course: {}, status: 403 },
 ]
 
-describe('courses/:id/enrolments (enforceUserHasFullAccess)', () => {
+describe('courses/:id/enrolments (requireFullAccess)', () => {
   test.each(accessCases)('$who gets $status', async ({ user, membership, course, status }) => {
     currentUser = user
     setMembership(membership)

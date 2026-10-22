@@ -4,7 +4,7 @@ import { ChatInstance, RagFile, RagIndex } from '../../db/models'
 import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import ragIndexRouter from './ragIndex'
-import { getAccessLevel } from '../../services/chatInstances/access'
+import { requireAnyAccess } from '../../services/chatInstances/access'
 import { RedisVectorStore } from 'src/server/services/rag/vectorStore'
 import { ragIndexMiddleware } from './ragIndexMiddleware'
 
@@ -40,9 +40,7 @@ router.get('/indices', async (req, res) => {
     }
 
     // Any access level may read the course materials, STUDENT_CLOSED included (issue 17).
-    if (!(await getAccessLevel(user, chatInstance))) {
-      throw ApplicationError.Forbidden('Not allowed to use rag index. You must be at least an enrolled student.')
-    }
+    await requireAnyAccess(user, chatInstance)
   } else {
     if (!user.isAdmin) {
       res.json([])

@@ -2,6 +2,7 @@ import { type ChatInstance, Enrolment, Prompt, RagIndex, Responsibility, User as
 import type { User } from '../../../shared/user'
 import { STAFF_COURSES } from '../../../shared/testData'
 import logger from '../../util/logger'
+import { ApplicationError } from '../../util/ApplicationError'
 import { AccessLevel } from '@shared/types'
 import { chatIsActive } from './activity'
 import type { User as SharedUser } from '@shared/user'
@@ -161,4 +162,32 @@ export const getAccessLevel = async (user: SharedUser, chatInstance: ChatInstanc
   }
 
   return null
+}
+
+export const requireAnyAccess = async (user: SharedUser, chatInstance: ChatInstance): Promise<AccessLevel> => {
+  const accessLevel = await getAccessLevel(user, chatInstance)
+
+  if (!accessLevel) {
+    throw ApplicationError.Forbidden('Unauthorized')
+  }
+  return accessLevel
+}
+
+// Like requireAnyAccess, but a closed course is not enough. For using the chat, not reading it.
+export const requireActiveAccess = async (user: SharedUser, chatInstance: ChatInstance) => {
+  const accessLevel = await requireAnyAccess(user, chatInstance)
+
+  if (accessLevel === 'STUDENT_CLOSED') {
+    throw ApplicationError.Forbidden('Course is not active')
+  }
+  return accessLevel
+}
+
+// Admin or responsible for the course.
+export const requireFullAccess = async (user: SharedUser, chatInstance: ChatInstance) => {
+  const accessLevel = await getAccessLevel(user, chatInstance)
+
+  if (accessLevel !== 'FULL') {
+    throw ApplicationError.Forbidden('Unauthorized')
+  }
 }
