@@ -2,7 +2,7 @@ import PersonIcon from '@mui/icons-material/Person'
 import { Box, Divider, InputAdornment, ListItemIcon, ListItemText, ListSubheader, Menu, MenuItem, TextField, Typography } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import { enqueueSnackbar } from '../common/Snackbar'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { CoursesViewCourse } from '../../hooks/useUserCourses'
@@ -13,6 +13,18 @@ import { formatDate } from './util'
 
 /** Above this many courses the list is long enough that scanning it beats scrolling. */
 const SEARCH_THRESHOLD = 8
+
+/** Focuses the nearest sibling that MenuList would also treat as a focusable item. */
+const focusSiblingItem = (from: Element | null, direction: 'next' | 'previous') => {
+  let el = direction === 'next' ? from?.nextElementSibling : from?.previousElementSibling
+  while (el) {
+    if (el instanceof HTMLElement && el.hasAttribute('tabindex') && el.getAttribute('aria-disabled') !== 'true') {
+      el.focus()
+      return
+    }
+    el = direction === 'next' ? el.nextElementSibling : el.previousElementSibling
+  }
+}
 
 const CourseStatusDot = ({ activated }: { activated: boolean }) => (
   <Box
@@ -44,6 +56,8 @@ const CopyPromptMenu = ({
   const { t, i18n } = useTranslation()
   const { language } = i18n
   const [search, setSearch] = useState('')
+  const searchBoxRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const { mutateAsync: copyPrompt, isPending } = useCopyPromptMutation()
 
   const showSearch = targets.length > SEARCH_THRESHOLD
@@ -99,17 +113,33 @@ const CopyPromptMenu = ({
       {targets.length > 0 && <Divider />}
 
       {showSearch && (
-        <Box sx={{ px: 1.5, py: 1 }}>
+        // MenuList arrow navigation only stops on children with a tabindex, so the wrapper takes focus and hands it to the input.
+        <Box
+          ref={searchBoxRef}
+          tabIndex={-1}
+          onFocus={(e) => {
+            if (e.target === e.currentTarget) searchInputRef.current?.focus()
+          }}
+          sx={{ px: 1.5, py: 1, outline: 'none' }}
+        >
           <TextField
             size="small"
             fullWidth
             autoFocus
+            inputRef={searchInputRef}
             value={search}
             placeholder={t('settings:filterCourses')}
             onChange={(e) => setSearch(e.target.value)}
-            // Menus treat typing as type-ahead navigation, which would steal every keystroke.
-            onKeyDown={(e) => e.stopPropagation()}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') return
+              e.stopPropagation()
+              if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault()
+                focusSiblingItem(searchBoxRef.current, e.key === 'ArrowDown' ? 'next' : 'previous')
+              }
+            }}
             slotProps={{
+              htmlInput: { 'aria-label': t('settings:filterCourses') },
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
