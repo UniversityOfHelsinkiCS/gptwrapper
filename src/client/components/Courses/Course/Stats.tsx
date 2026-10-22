@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import useCourse, { useCourseEnrolments, useCoursePromptUsages, useCourseStatistics } from '../../../hooks/useCourse'
 import useCurrentUser from '../../../hooks/useCurrentUser'
+import { ariaSort } from '../../../util/accessibility'
 import PromptUsageHistogram from './PromptUsageHistogram'
 
 type SortConfig = {
@@ -70,7 +71,7 @@ const Stats: React.FC = () => {
                 <TableCell>
                   <strong>{t('admin:studentNumber')}</strong>
                 </TableCell>
-                <TableCell>
+                <TableCell aria-sort={ariaSort(sortConfig.key === 'last_name', sortConfig.direction)}>
                   <TableSortLabel
                     active={sortConfig.key === 'last_name'}
                     direction={sortConfig.direction}
@@ -83,7 +84,7 @@ const Stats: React.FC = () => {
                 <TableCell>
                   <strong>{t('admin:firstNames')}</strong>
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" aria-sort={ariaSort(sortConfig.key === 'usageCount', sortConfig.direction)}>
                   <Box
                     sx={{
                       display: 'flex',
@@ -114,7 +115,7 @@ const Stats: React.FC = () => {
                   </Box>
                 </TableCell>
 
-                <TableCell align="right">
+                <TableCell align="right" aria-sort={ariaSort(sortConfig.key === 'totalUsageCount', sortConfig.direction)}>
                   <Box
                     sx={{
                       display: 'flex',

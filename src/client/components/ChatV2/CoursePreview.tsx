@@ -44,6 +44,7 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import useUserUsages from '../../hooks/useUserUsage'
 import { useResetChatInstanceUsageMutation } from '../../hooks/useChatInstanceUsageMutation'
 import apiClient from '../../util/apiClient'
+import { ariaSort } from '../../util/accessibility'
 import { usagePercent, gaugeColorKey, formatTokens, UsageInfoButton } from './UsageSelector'
 import { formatDate, isCustomChatInstance } from './util'
 import { OutlineButtonBlue, BlueButton } from './general/Buttons'
@@ -494,7 +495,7 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
                     <TableRow sx={{ backgroundColor: 'background.subtle' }}>
                       <TableCell>#</TableCell>
                       <TableCell>{t('admin:studentNumber')}</TableCell>
-                      <TableCell>
+                      <TableCell aria-sort={ariaSort(sortConfig.key === 'last_name', sortConfig.direction)}>
                         <TableSortLabel
                           active={sortConfig.key === 'last_name'}
                           direction={sortConfig.direction}
@@ -504,7 +505,7 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
                           {t('admin:name')}
                         </TableSortLabel>
                       </TableCell>
-                      <TableCell align="center">
+                      <TableCell align="center" aria-sort={ariaSort(sortConfig.key === 'weekly', sortConfig.direction)}>
                         <TableSortLabel
                           active={sortConfig.key === 'weekly'}
                           direction={sortConfig.direction}
@@ -514,7 +515,7 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
                           {t('course:weeklyUsage')}
                         </TableSortLabel>
                       </TableCell>
-                      <TableCell align="center">
+                      <TableCell align="center" aria-sort={ariaSort(sortConfig.key === 'total', sortConfig.direction)}>
                         <TableSortLabel
                           active={sortConfig.key === 'total'}
                           direction={sortConfig.direction}

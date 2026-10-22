@@ -12,8 +12,8 @@ import { debounce } from 'lodash'
 import Paper from '@mui/material/Paper'
 import { Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { visuallyHidden } from '@mui/utils'
 import { ActivityPeriod, ChatInstance } from '../../../types'
+import { ariaSort } from '../../../util/accessibility'
 import useChatInstances from './useChatInstances'
 
 interface ChatInstanceWithTokens extends ChatInstance {
@@ -88,14 +88,15 @@ const Head = ({
     <TableHead>
       <TableRow>
         {headCells.map((headCell) => (
-          <TableCell key={headCell.id} align={headCell.numeric ? 'right' : 'left'} padding={headCell.disablePadding ? 'none' : 'normal'} sx={{ pl: 1 }}>
+          <TableCell
+            key={headCell.id}
+            align={headCell.numeric ? 'right' : 'left'}
+            padding={headCell.disablePadding ? 'none' : 'normal'}
+            sx={{ pl: 1 }}
+            aria-sort={ariaSort(orderBy === headCell.id, order)}
+          >
             <TableSortLabel active={orderBy === headCell.id} direction={orderBy === headCell.id ? order : 'asc'} onClick={createSortHandler(headCell.id)}>
               {t(`admin:${headCell.id}`)}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                </Box>
-              ) : null}
             </TableSortLabel>
           </TableCell>
         ))}

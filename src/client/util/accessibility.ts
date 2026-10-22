@@ -32,6 +32,8 @@ export const switchFocusIndicatorStyle: SystemStyleObject<Theme> = {
   },
 }
 
+export const ariaSort = (active: boolean, direction: 'asc' | 'desc') => (active ? (direction === 'asc' ? 'ascending' : 'descending') : undefined)
+
 export const selectedTabStyle: SystemStyleObject<Theme> = {
   backgroundColor: 'action.selected',
   fontWeight: 700,

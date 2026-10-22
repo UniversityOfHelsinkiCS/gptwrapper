@@ -47,7 +47,7 @@ import useStatistics from '../hooks/useStatistics'
 import faculties from '../locales/faculties.json'
 import programme from '../locales/programme.json'
 import { useSaveDiscussionsMutation } from '../hooks/useCourseMutation'
-import { selectedTabStyle } from '../util/accessibility'
+import { ariaSort, selectedTabStyle } from '../util/accessibility'
 import { chartAxisColor, chartSeriesColor, chartTooltipStyle } from '../util/charts'
 
 /**
@@ -742,7 +742,7 @@ const CoursesTable = memo(function CoursesTable({
               <b>{t('stats:enrollmentCount')}</b>
             </Typography>
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" aria-sort={ariaSort(sortBy === 'usagePercentage', sortDirection)}>
             <Typography variant="h6" component="span">
               <TableSortLabel
                 active={sortBy === 'usagePercentage'}
@@ -753,7 +753,7 @@ const CoursesTable = memo(function CoursesTable({
               </TableSortLabel>
             </Typography>
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" aria-sort={ariaSort(sortBy === 'usedTokens', sortDirection)}>
             <Typography variant="h6" component="span">
               <TableSortLabel
                 active={sortBy === 'usedTokens'}
@@ -764,7 +764,7 @@ const CoursesTable = memo(function CoursesTable({
               </TableSortLabel>
             </Typography>
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" aria-sort={ariaSort(sortBy === 'promptCount', sortDirection)}>
             <Typography variant="h6" component="span">
               <TableSortLabel
                 active={sortBy === 'promptCount'}
@@ -775,7 +775,7 @@ const CoursesTable = memo(function CoursesTable({
               </TableSortLabel>
             </Typography>
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" aria-sort={ariaSort(sortBy === 'ragIndicesCount', sortDirection)}>
             <Typography variant="h6" component="span">
               <TableSortLabel
                 active={sortBy === 'ragIndicesCount'}
@@ -787,7 +787,7 @@ const CoursesTable = memo(function CoursesTable({
             </Typography>
           </TableCell>
           {isAdmin && (
-            <TableCell align="center">
+            <TableCell align="center" aria-sort={ariaSort(sortBy === 'saveDiscussions', sortDirection)}>
               <Typography variant="h6" component="span">
                 <TableSortLabel
                   active={sortBy === 'saveDiscussions'}
