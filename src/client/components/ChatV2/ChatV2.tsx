@@ -563,9 +563,9 @@ const ChatV2Content = () => {
             }}
           >
             <OutlineButtonBlack onClick={() => setSideBarOpen(true)} data-testid="left-panel-open">
-              <CustomIcon src={sidebarOpen} />
+              <CustomIcon src={sidebarOpen} alt={t('sidebar:open')} />
             </OutlineButtonBlack>
-            <OutlineButtonBlack onClick={handleResetRequest} data-testid="new-conversation-button">
+            <OutlineButtonBlack onClick={handleResetRequest} aria-label={t('sidebar:chatNew')} data-testid="new-conversation-button">
               <MapsUgc fontSize="small" />
             </OutlineButtonBlack>
           </Box>
