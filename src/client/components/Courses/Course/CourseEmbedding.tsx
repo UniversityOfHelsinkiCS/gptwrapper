@@ -210,6 +210,7 @@ const createEmbeddingWithPrompt = (baseUrl: string, promptId: string) => embeddi
 const embeddingMake = (baseUrl: string, promptId?: string) =>
   `<div lang="fi" style="position: relative;" translate="yes"><iframe
     id="cc-iframe"
+    title="CurreChat"
     style="border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 0.3rem;"
     src="${baseUrl}?embedded=true&amp;promptId=${promptId}"
     width="100%" height="800px">
