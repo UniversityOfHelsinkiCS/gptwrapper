@@ -177,7 +177,7 @@ export const PromptEditorV2 = ({
 
           <DialogActions>
             <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-              {loading && <CircularProgress color="secondary" />}
+              {loading && <CircularProgress color="secondary" aria-label={t('accessibility:loading')} />}
               <OutlineButtonBlue
                 type="button"
                 onClick={() => {

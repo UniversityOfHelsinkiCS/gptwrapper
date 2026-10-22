@@ -143,7 +143,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
   }, [isComplete])
 
   if (!isSuccess) {
-    return <LinearProgress />
+    return <LinearProgress aria-label={t('accessibility:loading')} />
   }
 
   const handleStageFiles = (files: File[]) => {

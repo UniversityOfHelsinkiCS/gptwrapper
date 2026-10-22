@@ -259,7 +259,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
         </Box>
       )}
 
-      {isLoading && <LinearProgress />}
+      {isLoading && <LinearProgress aria-label={t('accessibility:loading')} />}
 
       {results && allResults.length > 0 && (
         <Box data-testid="rag-search-results">

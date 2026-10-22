@@ -181,7 +181,7 @@ export function Component() {
 
             {isLoading && (
               <Box>
-                <CircularProgress size={22} />
+                <CircularProgress size={22} aria-label={t('accessibility:loading')} />
               </Box>
             )}
 

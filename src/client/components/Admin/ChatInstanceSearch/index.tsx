@@ -100,7 +100,7 @@ const ChatInstanceSearch = () => {
           }}
         />
 
-        {hasQuery && isFetching && <CircularProgress size={24} />}
+        {hasQuery && isFetching && <CircularProgress size={24} aria-label={t('accessibility:loading')} />}
       </Box>
 
       <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>

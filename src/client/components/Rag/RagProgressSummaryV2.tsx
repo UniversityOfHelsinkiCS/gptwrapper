@@ -22,6 +22,7 @@ export const RagProgressSummaryV2: React.FC<{ ragFiles: RagFileAttributes[]; rag
       <LinearProgress
         variant="determinate"
         value={(completedCount / totalCount) * 100}
+        aria-label={t('rag:processedProgress', { done: completedCount, total: totalCount })}
         color={color}
         sx={{ flex: 1, height: 6, borderRadius: 3 }}
       />

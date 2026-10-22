@@ -165,7 +165,7 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
         {createdKey && <CreatedKeyPanel key={createdKey.id} createdKey={createdKey} onDismiss={() => createMutation.reset()} />}
 
         {isLoading ? (
-          <CircularProgress size={24} />
+          <CircularProgress size={24} aria-label={t('accessibility:loading')} />
         ) : isError ? (
           <Alert severity="error">{t('apiKeys:loadError')}</Alert>
         ) : !apiKeys?.length ? (
