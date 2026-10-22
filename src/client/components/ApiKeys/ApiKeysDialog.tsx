@@ -86,10 +86,9 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
   const createdKey = createMutation.data
 
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
-  const [cancelledDeleteId, setCancelledDeleteId] = useState<string | null>(null)
 
   const cancelDelete = (id: string) => {
-    setCancelledDeleteId(id)
+    document.getElementById(`delete-api-key-${id}`)?.focus()
     setConfirmDeleteId(null)
   }
 
@@ -98,7 +97,6 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
   const handleClose = () => {
     createMutation.reset()
     setConfirmDeleteId(null)
-    setCancelledDeleteId(null)
     setOpen(false)
   }
 
@@ -200,7 +198,28 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
             {apiKeys.map((apiKey, i) => (
               <Fragment key={apiKey.id}>
                 {i > 0 && <Divider />}
-                {confirmDeleteId === apiKey.id ? (
+                <Box sx={{ ...keyGrid, minHeight: 56, py: { xs: 1, sm: 0 } }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0 }}>
+                    <Typography variant="body2" sx={monospace}>
+                      {maskKey(apiKey)}
+                    </Typography>
+                    {createdKey?.id === apiKey.id && <Chip label={t('apiKeys:newBadge')} size="small" color="primary" variant="outlined" />}
+                  </Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ gridRow: { xs: 2, sm: 'auto' } }}>
+                    {formatDate(apiKey.createdAt)}
+                  </Typography>
+                  <IconButton
+                    id={`delete-api-key-${apiKey.id}`}
+                    onClick={() => setConfirmDeleteId(apiKey.id)}
+                    disabled={deleteMutation.isPending && deleteMutation.variables === apiKey.id}
+                    aria-label={t('apiKeys:deleteKey', { key: maskKey(apiKey) })}
+                    aria-expanded={confirmDeleteId === apiKey.id}
+                    sx={{ justifySelf: 'end', gridColumn: { xs: 2, sm: 'auto' }, gridRow: { xs: '1 / span 2', sm: 'auto' } }}
+                  >
+                    <DeleteOutline />
+                  </IconButton>
+                </Box>
+                {confirmDeleteId === apiKey.id && (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.5, px: 2, py: 1.5, bgcolor: 'error.light' + '1a' }}>
                     <Box sx={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: 0.25 }}>
                       <Typography id="api-key-delete-confirmation" variant="body2" fontWeight={600}>
@@ -227,27 +246,6 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
                         {t('apiKeys:delete')}
                       </RedButton>
                     </Box>
-                  </Box>
-                ) : (
-                  <Box sx={{ ...keyGrid, minHeight: 56, py: { xs: 1, sm: 0 } }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0 }}>
-                      <Typography variant="body2" sx={monospace}>
-                        {maskKey(apiKey)}
-                      </Typography>
-                      {createdKey?.id === apiKey.id && <Chip label={t('apiKeys:newBadge')} size="small" color="primary" variant="outlined" />}
-                    </Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ gridRow: { xs: 2, sm: 'auto' } }}>
-                      {formatDate(apiKey.createdAt)}
-                    </Typography>
-                    <IconButton
-                      onClick={() => setConfirmDeleteId(apiKey.id)}
-                      autoFocus={cancelledDeleteId === apiKey.id}
-                      disabled={deleteMutation.isPending && deleteMutation.variables === apiKey.id}
-                      aria-label={t('apiKeys:deleteKey', { key: maskKey(apiKey) })}
-                      sx={{ justifySelf: 'end', gridColumn: { xs: 2, sm: 'auto' }, gridRow: { xs: '1 / span 2', sm: 'auto' } }}
-                    >
-                      <DeleteOutline />
-                    </IconButton>
                   </Box>
                 )}
               </Fragment>
