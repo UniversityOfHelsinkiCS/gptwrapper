@@ -4,14 +4,7 @@ import { enqueueSnackbar } from '../common/Snackbar'
 import { lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom'
-import {
-  DEFAULT_MODEL,
-  DEFAULT_MODEL_TEMPERATURE,
-  DEFAULT_STREAM_TIMEOUT,
-  FREE_MODEL,
-  ValidModelNameSchema,
-  getModelConfig,
-} from '../../../config'
+import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, DEFAULT_STREAM_TIMEOUT, FREE_MODEL, ValidModelNameSchema, getModelConfig } from '../../../config'
 import type { ChatMessage, MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
@@ -59,7 +52,7 @@ const ChatV2Content = () => {
   const chatScroll = useChatScroll()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { t, i18n } = useTranslation()
-  const { promptInfo, isPromptHidden } = usePromptState()
+  const { promptInfo, isPromptHidden, activePrompt } = usePromptState()
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
   const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo, hasPotentialError } = useChatStream({
     onComplete: ({ message }) => {
@@ -106,7 +99,6 @@ const ChatV2Content = () => {
     'temperature',
     z.coerce.number(),
   )
-
 
   const tokenLimitExceeded = !!userStatus && userStatus.usage >= userStatus.limit
 
@@ -453,7 +445,7 @@ const ChatV2Content = () => {
   const shownToolResult = activeToolResult ?? latestToolResult
 
   // layout
-  const canShowToolResults = chatInstance?.accessLevel === 'FULL' || !isPromptHidden
+  const canShowToolResults = chatInstance?.accessLevel === 'FULL' || !isPromptHidden || activePrompt?.userId === user?.id
   const hasToolResults = !!shownToolResult && canShowToolResults
   const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
   const leftPanelFloating = isEmbeddedMode || isMobile
