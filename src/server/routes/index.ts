@@ -25,6 +25,8 @@ import apiKeyRouter from './apiKey'
 import { inProduction } from '../../config'
 import logger from '../util/logger'
 import statisticsRouter from './statistics'
+import {api as externalAPI} from './ai/openai'
+
 
 const router = express()
 
@@ -48,6 +50,7 @@ router.get('/ping', (_, res) => {
   res.send('pong')
 })
 
+router.use('/external', externalAPI)
 router.use('/ai', aiRouter)
 router.use('/rag', ragRouter)
 router.use('/users', userRouter)
