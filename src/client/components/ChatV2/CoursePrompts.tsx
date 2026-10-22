@@ -8,7 +8,6 @@ import type { Course, Prompt as PromptType } from '../../types'
 import { usePromptState } from './PromptState'
 import { PromptListItem } from './PromptModalV2.tsx'
 import AddIcon from '@mui/icons-material/Add'
-import useCurrentUser from '../../hooks/useCurrentUser'
 import { formatDate } from './util'
 import { focusIndicatorStyle } from '../../util/accessibility'
 import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer.tsx'
@@ -45,11 +44,10 @@ const CoursePrompts = (props: CoursePromptsProps) => {
   const { language } = i18n
   const { activePrompt, handleChangePrompt } = usePromptState()
   const navigate = useNavigate()
-  const { user } = useCurrentUser()
 
   const [showPrompts, setShowPrompts] = useState(previewPrompt?.chatInstanceId === course.id || false)
 
-  const amongResponsibles = course.responsibilities ? course.responsibilities.some((r) => r.user.id === user?.id) : false
+  const hasFullAccess = course.accessLevel === 'FULL'
 
   const currentPrompts = course.prompts ?? []
 
@@ -173,14 +171,14 @@ const CoursePrompts = (props: CoursePromptsProps) => {
                   variant: 'subtitle1',
                   component: 'span',
                   fontWeight: 600,
-                  color: course.activated || !amongResponsibles || user?.isAdmin ? 'default' : 'text.secondary',
+                  color: course.activated || !hasFullAccess ? 'default' : 'text.secondary',
                 },
               }}
             />
           </ListItemButton>
           <StatusAnnouncer message={previewCourse?.id === course.id ? t('accessibility:previewOpened', { name: course.name[language] }) : ''} />
 
-          {(amongResponsibles || user?.isAdmin) && (
+          {hasFullAccess && (
             <Tooltip title={t('settings:saveNewPrompt')}>
               <IconButton
                 aria-label={t('accessibility:newCoursePrompt', { name: course.name[language] })}

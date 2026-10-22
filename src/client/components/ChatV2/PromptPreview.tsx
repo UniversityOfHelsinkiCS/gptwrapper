@@ -62,15 +62,16 @@ const PromptPreview = ({
 
   const rag = prompt.ragIndex
 
-  const amongResponsibles = chatInstance?.responsibilities ? chatInstance.responsibilities.some((r) => r.user.id === user?.id) : false
+  const hasFullAccess = chatInstance?.accessLevel === 'FULL'
 
-  const canManage = Boolean(user?.isAdmin || amongResponsibles)
+  // A university or template prompt has no course, so isAdmin decides there.
+  const canManage = Boolean(user?.isAdmin || hasFullAccess)
 
   const isPersonalPrompt = prompt.type === 'PERSONAL' || myPrompts.some((p) => p.id === prompt.id)
 
   const canEditPrompt = !!user && (prompt.userId === user.id || user.isAdmin)
-  const showCopyPrompt = !!user && canCopyPrompt({ isAdmin: user.isAdmin, isOwner: prompt.userId === user.id, isResponsible: amongResponsibles })
-  const shouldFetchRagDetails = amongResponsibles || user?.isAdmin || isPersonalPrompt || (!!user && prompt.userId === user.id)
+  const showCopyPrompt = !!user && canCopyPrompt({ isAdmin: user.isAdmin, isOwner: prompt.userId === user.id, isResponsible: hasFullAccess })
+  const shouldFetchRagDetails = canManage || isPersonalPrompt || (!!user && prompt.userId === user.id)
   const ragIndexId = prompt.ragIndex === null ? null : prompt.ragIndexId ? prompt.ragIndexId : null
   const { data: ragDetails } = useRagIndexDetails(ragIndexId, shouldFetchRagDetails)
 
@@ -210,7 +211,7 @@ const PromptPreview = ({
               </Box>
             )}
           </Box>
-          {!isPersonalPrompt && prompt.hidden && !user?.isAdmin && !amongResponsibles ? (
+          {!isPersonalPrompt && prompt.hidden && !canManage ? (
             <InfoBox icon={<VisibilityOffOutlined fontSize="inherit" />} severity="info" sx={{ mt: 1.5 }}>
               {t('common:hiddenPromptInfo')}
             </InfoBox>

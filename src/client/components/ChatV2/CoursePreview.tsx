@@ -80,8 +80,7 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const courseResponsibilities = chatInstance?.responsibilities ?? course.responsibilities ?? []
-  const amongResponsibles = courseResponsibilities.some((r) => r.user.id === user?.id)
-  const canManage = Boolean(user?.isAdmin || amongResponsibles)
+  const canManage = (chatInstance ?? course).accessLevel === 'FULL'
   const isAdmin = Boolean(user?.isAdmin)
   const isCustomCourse = isCustomChatInstance(course)
 
