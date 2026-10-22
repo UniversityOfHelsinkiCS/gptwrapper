@@ -107,7 +107,6 @@ const ChatV2Content = () => {
     z.coerce.number(),
   )
 
-  const amongResponsibles = user?.isAdmin || chatInstance?.responsibilities.some((r) => r.user.id === user?.id)
 
   const tokenLimitExceeded = !!userStatus && userStatus.usage >= userStatus.limit
 
@@ -454,7 +453,7 @@ const ChatV2Content = () => {
   const shownToolResult = activeToolResult ?? latestToolResult
 
   // layout
-  const canShowToolResults = amongResponsibles || !isPromptHidden
+  const canShowToolResults = chatInstance?.accessLevel === 'FULL' || !isPromptHidden
   const hasToolResults = !!shownToolResult && canShowToolResults
   const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
   const leftPanelFloating = isEmbeddedMode || isMobile
