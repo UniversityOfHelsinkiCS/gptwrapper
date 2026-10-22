@@ -2,12 +2,13 @@ import { useId, useState, type ReactNode } from 'react'
 import { RagIndexAttributes } from '../../../shared/types'
 import { RagChunk, SearchInputParams } from '../../../shared/rag'
 import apiClient from '../../util/apiClient'
-import { Alert, Box, Checkbox, Collapse, Divider, FormControlLabel, IconButton, InputBase, LinearProgress, Typography } from '@mui/material'
+import { Box, Checkbox, Collapse, Divider, FormControlLabel, IconButton, InputBase, LinearProgress, Typography } from '@mui/material'
 import { alpha } from '@mui/material/styles'
 import { AccessTime, ExpandLess, ExpandMore, InsertDriveFileOutlined, Search as SearchIcon, Tune } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { InfoBox } from '../common/InfoBox'
+import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
 import { focusIndicatorStyle } from 'src/client/util/accessibility'
 
 export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
@@ -24,6 +25,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
   const [adminOpen, setAdminOpen] = useState(false)
   const adminOptionsId = useId()
   const resultsListId = useId()
+  const queryInputId = useId()
   const [results, setResults] = useState<{ results: RagChunk[]; timings: Record<string, number> }>()
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -76,8 +78,15 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
   const allResults = results?.results ?? []
   const visibleResults = showAll ? allResults : allResults.slice(0, 3)
 
+  const getStatusMessage = () => {
+    if (isLoading) return t('accessibility:searching')
+    if (!results) return ''
+    return allResults.length > 0 ? t('rag:resultsCount', { count: allResults.length }) : t('rag:searchNoResults', { query: searchedQuery })
+  }
+
   return (
     <Box my="0.5rem" display="flex" flexDirection="column" gap="18px">
+      <StatusAnnouncer message={getStatusMessage()} />
       <InfoBox severity="info">{t('rag:searchDescription')}</InfoBox>
 
       <Box
@@ -97,14 +106,18 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
         }}
       >
         <SearchIcon sx={{ color: 'action.active', flex: '0 0 auto' }} />
-        <InputBase
-          autoFocus
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={t('rag:searchQueryLabel')}
-          slotProps={{ input: { 'aria-label': t('rag:searchQueryLabel') } }}
-          sx={{ flex: 1, fontSize: '16px' }}
-        />
+        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+          <Typography component="label" htmlFor={queryInputId} variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.2 }}>
+            {t('rag:searchQueryLabel')}
+          </Typography>
+          <InputBase
+            autoFocus
+            id={queryInputId}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            sx={{ fontSize: '16px', '& .MuiInputBase-input': { py: 0 } }}
+          />
+        </Box>
         <IconButton
           type="submit"
           aria-label={t('rag:searchButton')}
@@ -270,7 +283,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
             gap="12px"
             sx={{ pb: '6px', borderBottom: '1px solid', borderColor: 'divider' }}
           >
-            <Typography variant="subtitle1" fontWeight={500}>
+            <Typography variant="subtitle1" component="h3" fontWeight={500}>
               {t('rag:resultsTitle')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ flex: '0 0 auto' }}>
@@ -335,7 +348,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
         </Box>
       )}
 
-      {results && allResults.length === 0 && <Alert severity="error">{t('rag:searchNoResults', { query: searchedQuery })}</Alert>}
+      {results && allResults.length === 0 && <InfoBox severity="error">{t('rag:searchNoResults', { query: searchedQuery })}</InfoBox>}
     </Box>
   )
 }
