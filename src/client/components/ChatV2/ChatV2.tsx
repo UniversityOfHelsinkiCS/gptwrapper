@@ -36,6 +36,7 @@ import HYLoadingSpinner from './general/HYLoadingSpinner'
 import { CustomIcon } from './general/CustomIcon'
 import { parseFileContent } from '../../util/fileParsing'
 import { ChatExpiredView } from './ChatExpiredView'
+import { canManageCourse } from './util'
 import { ApiErrorView } from '../common/ApiErrorView'
 import { PromptEditorState } from '../Prompt/context'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -445,7 +446,7 @@ const ChatV2Content = () => {
   const shownToolResult = activeToolResult ?? latestToolResult
 
   // layout
-  const canShowToolResults = chatInstance?.accessLevel === 'FULL' || !isPromptHidden || activePrompt?.userId === user?.id
+  const canShowToolResults = canManageCourse(chatInstance) || !isPromptHidden || activePrompt?.userId === user?.id
   const hasToolResults = !!shownToolResult && canShowToolResults
   const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
   const leftPanelFloating = isEmbeddedMode || isMobile

@@ -38,7 +38,7 @@ import ChevronRight from '@mui/icons-material/ChevronRight'
 import ExpandMore from '@mui/icons-material/ExpandMore'
 import useUserCourses, { type CoursesViewCourse } from '../../hooks/useUserCourses'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
-import { getGroupedCourses, isCustomChatInstance } from './util'
+import { canManageCourse, getGroupedCourses, isCustomChatInstance } from './util'
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import UniversityPromptGallery from './UniversityPromptGallery.tsx'
 import { focusIndicatorStyle, switchFocusIndicatorStyle } from '../../util/accessibility'
@@ -213,7 +213,7 @@ const PromptModalV2 = () => {
   const sisuCourses = visibleCourses.filter((course) => !isCustomChatInstance(course))
   const customCourses = visibleCourses.filter((course) => isCustomChatInstance(course))
 
-  const copyTargets = allCourses.filter((course) => course.accessLevel === 'FULL')
+  const copyTargets = allCourses.filter(canManageCourse)
   const [expandTarget, setExpandTarget] = useState<{ courseId: string; nonce: number } | null>(null)
 
   const handleCopied = (course?: CoursesViewCourse) => {

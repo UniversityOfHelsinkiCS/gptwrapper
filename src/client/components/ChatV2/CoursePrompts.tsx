@@ -8,7 +8,7 @@ import type { Course, Prompt as PromptType } from '../../types'
 import { usePromptState } from './PromptState'
 import { PromptListItem } from './PromptModalV2.tsx'
 import AddIcon from '@mui/icons-material/Add'
-import { formatDate } from './util'
+import { canManageCourse, formatDate } from './util'
 import { focusIndicatorStyle } from '../../util/accessibility'
 import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer.tsx'
 import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer.ts'
@@ -47,7 +47,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
 
   const [showPrompts, setShowPrompts] = useState(previewPrompt?.chatInstanceId === course.id || false)
 
-  const hasFullAccess = course.accessLevel === 'FULL'
+  const hasFullAccess = canManageCourse(course)
 
   const currentPrompts = course.prompts ?? []
 

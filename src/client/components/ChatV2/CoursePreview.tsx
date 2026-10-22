@@ -46,7 +46,7 @@ import { useResetChatInstanceUsageMutation } from '../../hooks/useChatInstanceUs
 import apiClient from '../../util/apiClient'
 import { ariaSort } from '../../util/accessibility'
 import { usagePercent, gaugeColorKey, formatTokens, UsageInfoButton } from './UsageSelector'
-import { formatDate, isCustomChatInstance } from './util'
+import { canManageCourse, formatDate, isCustomChatInstance } from './util'
 import { OutlineButtonBlue, BlueButton } from './general/Buttons'
 import { CourseActivityPeriodEditor } from '../Courses/Course/CourseActivityPeriodEditor'
 import DiscussionView from '../Courses/Course/Discussions'
@@ -80,7 +80,7 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const courseResponsibilities = chatInstance?.responsibilities ?? course.responsibilities ?? []
-  const canManage = (chatInstance ?? course).accessLevel === 'FULL'
+  const canManage = canManageCourse(chatInstance ?? course)
   const isAdmin = Boolean(user?.isAdmin)
   const isCustomCourse = isCustomChatInstance(course)
 

@@ -101,3 +101,6 @@ export const getGroupedCourses = (courses: CoursesViewCourse[] = []) => {
  * the ones created by hand (course creator / admin) never do.
  */
 export const isCustomChatInstance = (chatInstance: Partial<Pick<Course, 'courseUnits'>>) => (chatInstance.courseUnits?.length ?? 0) === 0
+
+// Admin or responsible for the course: may edit it and its prompts.
+export const canManageCourse = (course?: Pick<Course, 'accessLevel'>) => course?.accessLevel === 'FULL'

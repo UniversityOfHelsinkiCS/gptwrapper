@@ -8,6 +8,7 @@ import useCourse from '../../hooks/useCourse'
 import { InfoBox } from '../common/InfoBox'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import type { Prompt, Course } from '../../types'
+import { canManageCourse } from './util'
 import { usePromptState } from './PromptState'
 import PsychologyIcon from '@mui/icons-material/Psychology'
 import { useMediaQuery, useTheme } from '@mui/material'
@@ -62,7 +63,7 @@ const PromptPreview = ({
 
   const rag = prompt.ragIndex
 
-  const hasFullAccess = chatInstance?.accessLevel === 'FULL'
+  const hasFullAccess = canManageCourse(chatInstance)
 
   // A university or template prompt has no course, so isAdmin decides there.
   const canManage = Boolean(user?.isAdmin || hasFullAccess)
