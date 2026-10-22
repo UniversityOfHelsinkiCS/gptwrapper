@@ -6,7 +6,6 @@ import apiClient from '../util/apiClient'
 export type CoursesViewCourse = {
   activated: boolean
   expired: boolean
-  role: 'student' | 'teacher'
 } & Course
 
 const useUserCourses = () => {

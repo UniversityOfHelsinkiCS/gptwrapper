@@ -179,7 +179,53 @@ describe('courses/user', () => {
     const body = await response.json()
 
     expect(body.length).toBe(1)
-    expect(body[0].role).toBe('teacher')
+    expect(body[0].accessLevel).toBe('FULL')
+    expect(body[0].status).toBe('ACTIVATED')
+    expect(body[0].role).toBeUndefined()
+  })
+
+  test('sends an enrolled course as STUDENT with its status', async () => {
+    vi.mocked(getTeachedCourses).mockResolvedValue([] as any)
+    vi.mocked(getEnrolledCourses).mockResolvedValue([{ chatInstance: courseFixture() }] as any)
+
+    const body = await (await getUserCourses()).json()
+
+    expect(body).toHaveLength(1)
+    expect(body[0].accessLevel).toBe('STUDENT')
+    expect(body[0].status).toBe('ACTIVATED')
+  })
+
+  test('sends an enrolled course as FULL to an admin', async () => {
+    currentUser = { id: 'admin-1', isAdmin: true }
+    vi.mocked(getTeachedCourses).mockResolvedValue([] as any)
+    vi.mocked(getEnrolledCourses).mockResolvedValue([{ chatInstance: courseFixture() }] as any)
+
+    const body = await (await getUserCourses()).json()
+
+    expect(body[0].accessLevel).toBe('FULL')
+  })
+
+  test('sends the status of a taught course that is not activated or not started', async () => {
+    currentUser = { id: 'teacher-1', isAdmin: false }
+    vi.mocked(getTeachedCourses).mockResolvedValue([courseFixture({ id: 'ci-off', activated: false }), courseFixture({ id: 'ci-later', ...notStarted })] as any)
+    vi.mocked(getEnrolledCourses).mockResolvedValue([] as any)
+
+    const body = await (await getUserCourses()).json()
+
+    expect(body.map((course: { status: string }) => course.status)).toEqual(['NOT_ACTIVATED', 'NOT_STARTED'])
+  })
+
+  test('skips a taught course with a broken activityPeriod', async () => {
+    currentUser = { id: 'teacher-1', isAdmin: false }
+    vi.mocked(getTeachedCourses).mockResolvedValue([courseFixture({ id: 'ci-bad', activityPeriod: null }), courseFixture({ id: 'ci-good' })] as any)
+    vi.mocked(getEnrolledCourses).mockResolvedValue([] as any)
+
+    const response = await getUserCourses()
+    const body = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(body).toHaveLength(1)
+    expect(body[0].id).toBe('ci-good')
   })
 
   test('handles broken activityPeriod', async () => {

@@ -6,6 +6,7 @@ import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, PromptUsage, Us
 import { getAccessLevel, getEnrolledCourses, getTeachedCourses } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
+import logger from '../util/logger'
 import _ from 'lodash'
 import type { User as SharedUser } from '@shared/user'
 import { chatIsActive, getChatStatus } from '../services/chatInstances/activity'
@@ -33,19 +34,28 @@ courseRouter.get('/user', async (req, res) => {
   const { user } = request
 
   const [teached, enrolled] = await Promise.all([getTeachedCourses(user), getEnrolledCourses(user)])
-  const decorate = (ci: ChatInstance) => ({
+  const decorate = (ci: ChatInstance, accessLevel: AccessLevel) => ({
     ...ci.toJSON(),
     expired: Date.parse(ci.activityPeriod.endDate) < Date.now(),
+    status: getChatStatus(ci),
+    accessLevel,
   })
 
-  const byId = new Map<string, ReturnType<typeof decorate> & { role: 'teacher' | 'student' }>()
+  const byId = new Map<string, ReturnType<typeof decorate>>()
 
-  for (const ci of teached) byId.set(ci.id, { ...decorate(ci), role: 'teacher' })
+  // getChatStatus throws on a broken activityPeriod. Skip that course instead of failing the whole list.
+  for (const ci of teached) {
+    try {
+      byId.set(ci.id, decorate(ci, 'FULL'))
+    } catch {
+      logger.warn('Skipping a taught course with a broken activity period', { chatInstanceId: ci.id })
+    }
+  }
 
+  // The enrolled filter hides closed courses, so STUDENT_CLOSED cannot occur here.
   for (const { chatInstance } of enrolled.filter(({ chatInstance }) => chatIsActive(chatInstance))) {
-    const existing = byId.get(chatInstance.id)
-    if (existing) continue
-    else byId.set(chatInstance.id, { ...decorate(chatInstance), role: 'student' })
+    if (byId.has(chatInstance.id)) continue
+    byId.set(chatInstance.id, decorate(chatInstance, user.isAdmin ? 'FULL' : 'STUDENT'))
   }
 
   res.send([...byId.values()])

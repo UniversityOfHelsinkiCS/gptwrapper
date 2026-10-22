@@ -213,7 +213,7 @@ const PromptModalV2 = () => {
   const sisuCourses = visibleCourses.filter((course) => !isCustomChatInstance(course))
   const customCourses = visibleCourses.filter((course) => isCustomChatInstance(course))
 
-  const copyTargets = allCourses.filter((course) => course.role === 'teacher')
+  const copyTargets = allCourses.filter((course) => course.accessLevel === 'FULL')
   const [expandTarget, setExpandTarget] = useState<{ courseId: string; nonce: number } | null>(null)
 
   const handleCopied = (course?: CoursesViewCourse) => {

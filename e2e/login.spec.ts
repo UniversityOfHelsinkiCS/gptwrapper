@@ -26,9 +26,7 @@ const getUserCourses = async (request: APIRequestContext, workerIndex: number, r
 
 const sandboxCourseIds = Object.values(STAFF_COURSES).map((course) => course.courseId)
 
-// TODO:
-// this should be accessLevel === 'FULL' soon
-const ownCourseIds = (courses) => courses.filter((course) => course.role === 'teacher').map((course) => course.courseId)
+const ownCourseIds = (courses) => courses.filter((course) => course.accessLevel === 'FULL').map((course) => course.courseId)
 
 adminTest.describe('Login sandbox access', () => {
   adminTest('grants every sandbox course on first login', async ({ request }, testInfo) => {
