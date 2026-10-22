@@ -15,7 +15,7 @@ import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import { t } from 'i18next'
 import React, { useId, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTheme } from '@mui/material'
+import { useMediaQuery, useTheme } from '@mui/material'
 import {
   readMessageContent,
   readMessageImages,
@@ -79,60 +79,62 @@ const UserMessageItem = ({ message }: { message: UserMessage }) => (
   </Box>
 )
 
-const ToolResult = ({ toolResult, handleToolResult }: { toolResult: ToolCallResultEvent; handleToolResult: (toolResult: ToolCallResultEvent) => void }) => {
+const ToolResult = ({ toolResult, handleToolResult }: { toolResult: ToolCallResultEvent; handleToolResult?: (toolResult: ToolCallResultEvent) => void }) => {
   const sources = useMemo(() => Array.from(new Set<string>((toolResult.result?.files ?? []).map((file) => file.fileName)).values()).join(', '), [])
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const isClickable = isMobile && !!handleToolResult
   return (
-    <>
-      <Typography component="h3" sx={visuallyHidden}>
-        {t('accessibility:sourceResults')}
-      </Typography>
-      <Box
-        component="button"
-        type="button"
-        data-testid="file-search-sources"
-        sx={{
-          display: 'flex',
-          alignItems: { xs: 'flex-start', sm: 'center' },
-          gap: 2,
-          font: 'inherit',
-          color: 'inherit',
-          textAlign: 'left',
-          border: 'none',
-          background: 'none',
-          fontStyle: 'italic',
-          maxWidth: 'fit-content',
-          opacity: '0.85',
-          mt: 3,
-          cursor: 'pointer',
-          padding: '0.6rem',
-          borderRadius: '0.6rem',
-        }}
-        onClick={() => {
+    <Box
+      component={isClickable ? 'button' : 'div'}
+      {...(isClickable && {
+        type: 'button',
+        onClick: () => {
           handleToolResult(toolResult)
-        }}
-      >
-        <FormatQuoteIcon sx={{ fontSize: '2rem' }} />
-        <Box component="span" sx={{ display: 'block', minWidth: 0, mt: { xs: 0.5, md: 0 } }}>
-          <Typography
-            component="span"
-            variant="body2"
-            sx={{
-              display: 'block',
-              mr: 2,
-              wordBreak: 'break-all',
-              textOverflow: 'ellipsis',
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {`${t('chat:displaySources', { query: toolResult.input.query })}: `}
+        },
+      })}
+      data-testid="file-search-sources"
+      sx={{
+        display: 'flex',
+        alignItems: { xs: 'flex-start', sm: 'center' },
+        gap: 2,
+        font: 'inherit',
+        color: 'inherit',
+        textAlign: 'left',
+        border: 'none',
+        background: 'none',
+        fontStyle: 'italic',
+        width: 'fit-content',
+        maxWidth: '100%',
+        minWidth: 0,
+        opacity: '0.85',
 
-            <em>{sources}</em>
-            {!sources && <em>{t('chat:noToolResults')}</em>}
-          </Typography>
-        </Box>
+        mt: 3,
+        cursor: isClickable ? 'pointer' : 'default',
+        padding: '0.6rem',
+        borderRadius: '0.6rem',
+      }}
+    >
+      <FormatQuoteIcon sx={{ fontSize: '2rem', flexShrink: 0 }} />
+      <Box component="span" sx={{ display: 'block', flex: '1 1 auto', minWidth: 0, overflow: 'hidden', mt: { xs: 0.5, md: 0 } }}>
+        <Typography
+          component="span"
+          variant="body2"
+          sx={{
+            display: 'block',
+            mr: 2,
+            wordBreak: 'break-all',
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {`${t('chat:displaySources', { query: toolResult.input.query })}: `}
+          <em>{sources}</em>
+          {!sources && <em>{t('chat:noToolResults')}</em>}
+        </Typography>
       </Box>
-    </>
+    </Box>
   )
 }
 
@@ -379,6 +381,11 @@ const AssistantMessageItem = ({
             </Box>
           )}
         </Box>
+      )}
+      {Object.keys(message.toolCalls ?? {}).length > 0 && (
+        <Typography component="h3" sx={visuallyHidden}>
+          {t('accessibility:sourceResults')}
+        </Typography>
       )}
       {Object.values(message.toolCalls ?? {}).map((toolResult) => (
         <ToolResult key={toolResult.callId} toolResult={toolResult} handleToolResult={handleToolResult} />

@@ -466,7 +466,8 @@ const ChatV2Content = () => {
   const shownToolResult = activeToolResult ?? latestToolResult
 
   // layout
-  const hasToolResults = !!shownToolResult && (amongResponsibles || !isPromptHidden)
+  const canShowToolResults = amongResponsibles || !isPromptHidden
+  const hasToolResults = !!shownToolResult && canShowToolResults
   const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
   const leftPanelFloating = isEmbeddedMode || isMobile
   const [sideBarOpen, setSideBarOpen] = useState<boolean>(() => {
@@ -615,7 +616,9 @@ const ChatV2Content = () => {
             isStreaming={isStreaming}
             endState={endState}
             toolCalls={toolCalls}
-            setActiveToolResult={setActiveToolResult}
+            setActiveToolResult={(toolResult) => {
+              if (canShowToolResults) setActiveToolResult(toolResult)
+            }}
             isMobile={isMobile}
             onRetry={handleRetry}
             latestResponseIndex={latestResponseIndex}
