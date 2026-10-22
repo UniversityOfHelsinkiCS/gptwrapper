@@ -15,10 +15,11 @@ vi.mock('../../db/models', () => ({
   UserChatInstanceUsage: { findOrCreate: vi.fn() },
 }))
 
-vi.mock('../../services/chatInstances/usage', () => ({
+vi.mock('../../services/chatInstances/usage', async (importOriginal) => ({
   checkCourseUsage: vi.fn(() => true),
-  checkUsage: vi.fn(() => true),
+  checkUsage: (await importOriginal<typeof import('../../services/chatInstances/usage')>()).checkUsage,
   getCourseTokenLimit: vi.fn(() => 50_000),
+  getUsage: vi.fn(async () => 0),
   getUserTokenLimit: vi.fn(async () => 100_000),
   incrementCourseUsage: vi.fn(),
   incrementUsage: vi.fn(),
@@ -40,7 +41,7 @@ vi.mock('@sentry/node', () => ({ captureException: vi.fn() }))
 import v3Router from './v3'
 import { Prompt, ChatInstance, UserChatInstanceUsage } from '../../db/models'
 import { streamChat } from '../../services/langchain/chat'
-import { getUserTokenLimit } from '../../services/chatInstances/usage'
+import { getUsage, getUserTokenLimit } from '../../services/chatInstances/usage'
 import { FREE_MODEL } from '../../../config'
 
 let currentUser = { id: 'user-1', isAdmin: false }
@@ -142,6 +143,40 @@ describe('POST /ai/v3/stream with a saved prompt', () => {
     expect(response.status).toBe(200)
     expect(streamChat).toHaveBeenCalled()
     expect(getUserTokenLimit).not.toHaveBeenCalled()
+  })
+})
+
+describe('POST /ai/v3/stream in the general chat at the token limit', () => {
+  beforeEach(() => {
+    vi.mocked(Prompt.findByPk).mockResolvedValue(savedPrompt('PERSONAL'))
+    vi.mocked(getUsage).mockResolvedValue(100_000)
+  })
+
+  test('refuses a paid model', async () => {
+    const response = await stream('prompt-1')
+    await response.text()
+
+    expect(response.status).toBe(403)
+    expect(streamChat).not.toHaveBeenCalled()
+  })
+
+  test('still chats with the free model', async () => {
+    const response = await stream('prompt-1', undefined, FREE_MODEL)
+    await response.text()
+
+    expect(response.status).toBe(200)
+    expect(streamChat).toHaveBeenCalled()
+  })
+
+  test('still chats with a paid model as an admin', async () => {
+    currentUser = { id: 'admin-1', isAdmin: true }
+    vi.mocked(Prompt.findByPk).mockResolvedValue(savedPrompt('PERSONAL', 'admin-1'))
+
+    const response = await stream('prompt-1')
+    await response.text()
+
+    expect(response.status).toBe(200)
+    expect(streamChat).toHaveBeenCalled()
   })
 })
 

@@ -59,9 +59,9 @@ export const getUserTokenLimit = async (user: UserType): Promise<number> => {
   return tierLimit + COURSE_TOKEN_BONUS * activeCourseCount
 }
 
-export const checkUsage = (user: UserType, model: ValidModelName, tokenLimit: number): boolean => {
+export const checkUsage = (user: UserType, model: ValidModelName, usage: number, tokenLimit: number): boolean => {
   if (model === FREE_MODEL) return true
-  return user.isAdmin || (user.usage ?? 0) <= tokenLimit
+  return user.isAdmin || usage < tokenLimit
 }
 
 export const getCourseTokenLimit = (chatInstance: ChatInstance): number => (chatInstance.activated ? chatInstance.usageLimit : DEFAULT_TOKEN_LIMIT)

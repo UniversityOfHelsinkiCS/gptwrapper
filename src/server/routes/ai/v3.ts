@@ -3,7 +3,15 @@ import express from 'express'
 import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction, isMockModel, type ValidModelName } from '../../../config'
 import { PostStreamSchemaV3, type ChatEvent } from '../../../shared/chat'
 import { ChatInstance, Discussion, Prompt, PromptUsage, RagIndex, UserChatInstanceUsage } from '../../db/models'
-import { checkCourseUsage, checkUsage, getCourseTokenLimit, getUserTokenLimit, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
+import {
+  checkCourseUsage,
+  checkUsage,
+  getCourseTokenLimit,
+  getUsage,
+  getUserTokenLimit,
+  incrementCourseUsage,
+  incrementUsage,
+} from '../../services/chatInstances/usage'
 import { streamChat } from '../../services/langchain/chat'
 import { getMockRagIndexSearchTool } from '../../services/rag/mockSearchTool'
 import { getRagIndexSearchTool } from '../../services/rag/searchTool'
@@ -162,7 +170,9 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   const tokenLimit = course ? getCourseTokenLimit(course) : isFreeModel ? DEFAULT_TOKEN_LIMIT : await getUserTokenLimit(user)
 
-  const usageAllowed = course ? checkCourseUsage(user, course, tokenLimit) : checkUsage(user, generationInfo.model, tokenLimit)
+  const usageAllowed = course
+    ? checkCourseUsage(user, course, tokenLimit)
+    : isFreeModel || checkUsage(user, generationInfo.model, await getUsage(user.id), tokenLimit)
 
   if (!usageAllowed && !isFreeModel) {
     throw ApplicationError.Forbidden('Usage limit reached')
