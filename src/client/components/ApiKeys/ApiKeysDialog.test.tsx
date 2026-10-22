@@ -10,6 +10,7 @@ vi.mock('../../util/queryClient', async () => {
   return { default: new QueryClient() }
 })
 vi.mock('../common/Snackbar', () => ({ enqueueSnackbar: vi.fn() }))
+vi.mock('../common/accessibility/SnackbarAnnouncer', () => ({ announceToScreenReader: vi.fn() }))
 vi.mock('../../util/apiClient', () => ({ default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() } }))
 
 import en from '../../locales/en.json'
