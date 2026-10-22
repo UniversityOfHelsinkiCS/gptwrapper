@@ -2,7 +2,7 @@ import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
 import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction, isMockModel, type ValidModelName } from '../../../config'
 import { PostStreamSchemaV3, type ChatEvent } from '../../../shared/chat'
-import { ChatInstance, Discussion, Enrolment, Prompt, PromptUsage, RagIndex, Responsibility, UserChatInstanceUsage } from '../../db/models'
+import { ChatInstance, Discussion, Prompt, PromptUsage, RagIndex, UserChatInstanceUsage } from '../../db/models'
 import { checkCourseUsage, checkUsage, getCourseTokenLimit, getUserTokenLimit, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { streamChat } from '../../services/langchain/chat'
 import { getMockRagIndexSearchTool } from '../../services/rag/mockSearchTool'
@@ -11,7 +11,7 @@ import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
 import { upload } from './multer'
-import { chatIsActive } from '../../services/chatInstances/activity'
+import { getAccessLevel } from '../../services/chatInstances/access'
 
 const router = express.Router()
 
@@ -39,23 +39,16 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   let course: ChatInstance | null = null
 
   if (courseId) {
-    course = await ChatInstance.findOne({
-      where: { courseId },
-      include: [
-        { model: Enrolment, as: 'enrolments', where: { userId: user.id }, required: false },
-        { model: Responsibility, as: 'responsibilities', where: { userId: user.id }, required: false },
-      ],
-    })
+    course = await ChatInstance.findOne({ where: { courseId } })
     if (!course) {
       throw ApplicationError.NotFound('Course not found')
     }
 
-    if (!user.isAdmin && !course?.responsibilities?.length && !course?.enrolments?.length) {
+    const accessLevel = await getAccessLevel(user, course)
+    if (!accessLevel) {
       throw ApplicationError.Forbidden('Not authorized for this course')
     }
-
-    const isExempt = user.isAdmin || Boolean(course.responsibilities?.length)
-    if (!isExempt && !chatIsActive(course)) {
+    if (accessLevel === 'STUDENT_CLOSED') {
       throw ApplicationError.Forbidden('Course is not active')
     }
 

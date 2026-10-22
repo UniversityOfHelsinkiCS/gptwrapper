@@ -1,15 +1,17 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { startTestServer } from '../../tests/testServer'
+import { setMembership } from '../../tests/membership'
 
 vi.mock('../../db/models', () => ({
   ChatInstance: { findOne: vi.fn() },
   Discussion: { create: vi.fn() },
-  Enrolment: {},
+  Enrolment: { findOne: vi.fn() },
   Prompt: { findByPk: vi.fn() },
   PromptUsage: { create: vi.fn() },
   RagIndex: {},
-  Responsibility: {},
+  Responsibility: { findOne: vi.fn() },
+  User: {},
   UserChatInstanceUsage: { findOrCreate: vi.fn() },
 }))
 
@@ -154,12 +156,11 @@ const courseFixture = (overrides = {}) =>
     activated: true,
     activityPeriod: { startDate: '2020-01-01', endDate: '2099-01-01' },
     usageLimit: 10,
-    enrolments: [{ userId: 'user-1' }],
-    responsibilities: [],
     ...overrides,
   }) as any
 
-const givenCourse = (overrides = {}) => {
+const givenCourse = (overrides = {}, membership: Parameters<typeof setMembership>[0] = { enrolled: true }) => {
+  setMembership(membership)
   vi.mocked(ChatInstance.findOne).mockResolvedValue(courseFixture(overrides))
   vi.mocked(UserChatInstanceUsage.findOrCreate).mockResolvedValue([{}, false] as any)
   vi.mocked(Prompt.findByPk).mockResolvedValue(savedPrompt('CHAT_INSTANCE'))
@@ -167,8 +168,6 @@ const givenCourse = (overrides = {}) => {
 
 const expired = { activityPeriod: { startDate: '2020-01-01', endDate: '2020-06-01' } }
 const notStarted = { activityPeriod: { startDate: '2099-01-01', endDate: '2099-06-01' } }
-/** The real query filters both includes on the current user, so a teacher has no enrolment row. */
-const teaching = { enrolments: [], responsibilities: [{ userId: 'teacher-1' }] }
 
 describe('POST /ai/v3/stream as an enrolled student', () => {
   test('chats in an active course', async () => {
@@ -227,7 +226,7 @@ describe('POST /ai/v3/stream as a responsible teacher', () => {
   })
 
   test('chats in a course that has ended', async () => {
-    givenCourse({ ...teaching, ...expired })
+    givenCourse(expired, { responsible: true })
 
     const response = await stream('prompt-1', 'course-1')
     await response.text()
@@ -237,7 +236,7 @@ describe('POST /ai/v3/stream as a responsible teacher', () => {
   })
 
   test('chats in a course that is not activated', async () => {
-    givenCourse({ ...teaching, activated: false })
+    givenCourse({ activated: false }, { responsible: true })
 
     const response = await stream('prompt-1', 'course-1')
     await response.text()
@@ -250,12 +249,25 @@ describe('POST /ai/v3/stream as a responsible teacher', () => {
 describe('POST /ai/v3/stream as an admin', () => {
   test('chats in a course that is neither activated nor running', async () => {
     currentUser = { id: 'admin-1', isAdmin: true }
-    givenCourse({ ...expired, activated: false, enrolments: [], responsibilities: [] })
+    givenCourse({ ...expired, activated: false }, {})
 
     const response = await stream('prompt-1', 'course-1')
     await response.text()
 
     expect(response.status).toBe(200)
     expect(streamChat).toHaveBeenCalled()
+  })
+})
+
+describe('POST /ai/v3/stream as an outsider', () => {
+  test('is refused on an active course', async () => {
+    currentUser = { id: 'outsider-1', isAdmin: false }
+    givenCourse({}, {})
+
+    const response = await stream('prompt-1', 'course-1')
+    await response.text()
+
+    expect(response.status).toBe(403)
+    expect(streamChat).not.toHaveBeenCalled()
   })
 })
