@@ -168,12 +168,6 @@ courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Re
     where: { courseId: id },
     include: [
       {
-        model: Responsibility,
-        as: 'responsibilities',
-        attributes: ['userId'],
-      },
-
-      {
         model: Enrolment,
         as: 'enrolments',
         attributes: ['id'],
@@ -204,8 +198,6 @@ export const enforceUserHasFullAccess = async (user: SharedUser, chatInstance: C
   if (accessLevel !== 'FULL') {
     throw ApplicationError.Forbidden('Unauthorized')
   }
-
-  return true
 }
 
 const requireCourseAccess = async (user: SharedUser, chatInstance: ChatInstance): Promise<AccessLevel> => {
@@ -335,12 +327,7 @@ courseRouter.put('/:id', async (req, res) => {
 
   const request = req as unknown as RequestWithUser
   const { user } = request
-  const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
-  //TODO: I'm pretty sure this never runs, check:
-  if (!hasPermission) {
-    res.status(401).send('Unauthorized')
-    return
-  }
+  await enforceUserHasFullAccess(user, chatInstance)
 
   if (activityPeriod !== undefined) {
     chatInstance.activityPeriod = activityPeriod
@@ -360,6 +347,7 @@ courseRouter.put('/:id', async (req, res) => {
   res.send(chatInstance)
 })
 
+// Asks about the target user of an assign or remove, not the requester, so not an access level.
 const userAssignedAsResponsible = async (userId, chatInstance: ChatInstance) => {
   const responsibilities = await Responsibility.findOne({
     where: {
@@ -405,11 +393,7 @@ courseRouter.post('/:id/responsibilities/assign', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
   const chatInstance = await getChatInstance(courseId)
-  const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
-  if (!hasPermission) {
-    res.status(401).send('Unauthorized')
-    return
-  }
+  await enforceUserHasFullAccess(user, chatInstance)
 
   const userToAssign = await getUserByUsername(assignedUserUsername)
   if (!userToAssign) {
@@ -454,11 +438,7 @@ courseRouter.post('/:id/enrolments/assign', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
   const chatInstance = await getChatInstance(courseId)
-  const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
-  if (!hasPermission) {
-    res.status(401).send('Unauthorized')
-    return
-  }
+  await enforceUserHasFullAccess(user, chatInstance)
 
   const userToAssign = await getUserByUsername(assignedUserUsername)
   if (!userToAssign) {
@@ -499,11 +479,7 @@ courseRouter.post('/:id/enrolments/remove', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
   const chatInstance = await getChatInstance(courseId)
-  const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
-  if (!hasPermission) {
-    res.status(401).send('Unauthorized')
-    return
-  }
+  await enforceUserHasFullAccess(user, chatInstance)
 
   const userToRemove = await getUserByUsername(assignedUserUsername)
   if (!userToRemove) {
@@ -541,11 +517,7 @@ courseRouter.post('/:id/responsibilities/remove', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
   const chatInstance = await getChatInstance(courseId)
-  const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
-  if (!hasPermission) {
-    res.status(401).send('Unauthorized')
-    return
-  }
+  await enforceUserHasFullAccess(user, chatInstance)
 
   const userToRemove: User | null = await getUserByUsername(assignedUserUsername)
   if (!userToRemove) {
@@ -586,11 +558,7 @@ courseRouter.get('/:id/responsibilities/users/:search', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
   const chatInstance = await getChatInstance(courseId)
-  const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
-  if (!hasPermission) {
-    res.status(401).send('Unauthorized')
-    return
-  }
+  await enforceUserHasFullAccess(user, chatInstance)
 
   let where = {} as WhereOptions<User>
 
@@ -642,11 +610,7 @@ courseRouter.get('/:id/enrolments/users/:search', async (req, res) => {
   const request = req as unknown as RequestWithUser
   const { user } = request
   const chatInstance = await getChatInstance(courseId)
-  const hasPermission = await enforceUserHasFullAccess(user, chatInstance)
-  if (!hasPermission) {
-    res.status(401).send('Unauthorized')
-    return
-  }
+  await enforceUserHasFullAccess(user, chatInstance)
 
   let where = {} as WhereOptions<User>
 
