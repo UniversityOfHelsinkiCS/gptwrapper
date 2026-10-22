@@ -34,8 +34,7 @@ This list includes the issues that have been identified in the accessibility eva
 
 ### Robustness issues
 
-- **Name, role, value**: On mobile screens and in Moodle, the "Open sidebar" and "New conversation" buttons have no accessible name. In the teacher and admin views, some icon buttons, selects and progress bars have no accessible name. Sortable table columns do not tell screen readers how they are sorted, and the selected source material collection is not shown to them. The embed code that teachers copy into Moodle creates an iframe with no title. (WCAG 4.1.2)
-- **Status messages**: Some screen readers may read some messages twice. For example, when generating an answer fails, the error can be announced several times, and new notifications are read together with recent ones. Notification banners interrupt the screen reader every time a page is loaded, even when their content is static. Some status messages are not announced at all: "Copied" after copying, the progress of searching source materials, search result counts in the teacher and admin views, and processing progress of uploaded source material. (WCAG 4.1.3)
+- **Status messages**: Some screen readers may read some messages twice. For example, when generating an answer fails, the error can be announced several times, and new notifications are read together with recent ones. Notification banners interrupt the screen reader every time a page is loaded, even when their content is static. Status messages related to search result counts in the teacher and admin views are not announced at all. (WCAG 4.1.3)
 
 ### Accessibility features already in place
 
