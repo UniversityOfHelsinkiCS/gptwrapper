@@ -76,6 +76,8 @@ export const powerUserIam = 'grp-currechat-powerusers'
 
 export const employeeIam = 'hy-employees'
 
+export const nonemployeeIam = 'grp-currechat-teachers'
+
 const grandFunded = 'hy-grant-funded-researchers'
 
 export const accessIams = [basicUserIam, powerUserIam, employeeIam, grandFunded]
