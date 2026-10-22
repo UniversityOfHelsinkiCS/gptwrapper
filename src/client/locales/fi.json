@@ -137,6 +137,7 @@
     "fileTypeNotSupported": "Tiedostotyyppiä \"{{- type}}\" ei tueta tällä hetkellä",
     "supportedFileFormats": "Tällä hetkellä tuetut tiedostomuodot ovat \".pdf\" sekä tekstitiedostot, kuten \".txt\", \".csv\" ja \".md\"",
     "writeHere": "Kirjoita viestisi tähän...",
+    "messageLabel": "Viesti",
     "systemMessage": "Ohjeistus",
     "systemMessageCreation": "Alustus",
     "systemMessageInfo": "Alusta keskustelu antamalla yleistason ohjeita tekoälylle",
@@ -898,6 +899,8 @@
     "loadError": "API-avainten lataaminen epäonnistui"
   },
   "accessibility": {
+    "sendInstructionsShiftEnter": "Shift + Enter lähettää viestin ja Enter lisää uuden rivin.",
+    "sendInstructionsEnter": "Enter lähettää viestin ja Shift + Enter lisää uuden rivin.",
     "skipToContent": "Siirry sisältöön",
     "errorNotification": "Virhe",
     "warningNotification": "Varoitus",

@@ -144,6 +144,7 @@
     "fileTypeNotSupported": "Filtypen \"{{- type}}\" stöds inte för närvarande",
     "supportedFileFormats": "För närvarande stöds formaten \".pdf\" samt vanlig text, såsom \".txt\", \".csv\" och \".md\"",
     "writeHere": "Skriv ditt meddelande här...",
+    "messageLabel": "Meddelande",
     "systemMessage": "Vägledning",
     "systemMessageCreation": "Initiering",
     "systemMessageInfo": "Initiera konversationen genom att ge instruktioner på hög nivå till AI:n",
@@ -872,6 +873,8 @@
     "loadError": "Det gick inte att läsa in API-nycklarna"
   },
   "accessibility": {
+    "sendInstructionsShiftEnter": "Skift + Enter skickar meddelandet och Enter lägger till en ny rad.",
+    "sendInstructionsEnter": "Enter skickar meddelandet och Skift + Enter lägger till en ny rad.",
     "skipToContent": "Hoppa till innehållet",
     "errorNotification": "Fel",
     "warningNotification": "Varning",

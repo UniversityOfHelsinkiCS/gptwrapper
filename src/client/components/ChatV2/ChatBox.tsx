@@ -257,6 +257,9 @@ export const ChatBox = ({
         >
           <Box>
             <StatusAnnouncer message={fileAnnouncement} />
+            <Box id="chat-input-instructions" sx={visuallyHidden}>
+              {isShiftEnterSend ? t('accessibility:sendInstructionsShiftEnter') : t('accessibility:sendInstructionsEnter')}
+            </Box>
             <TextField
               autoFocus={!isEmbedded}
               id="chat-input"
@@ -273,7 +276,8 @@ export const ChatBox = ({
               slotProps={{
                 htmlInput: {
                   'data-testid': 'chat-input',
-                  'aria-label': t('chat:writeHere'),
+                  'aria-label': t('chat:messageLabel'),
+                  'aria-describedby': 'chat-input-instructions',
                 },
                 input: {
                   disableUnderline: true,
@@ -333,6 +337,7 @@ export const ChatBox = ({
                     textOverflow: 'ellipsis',
                   }}
                   color="textSecondary"
+                  aria-hidden
                 >
                   {isShiftEnterSend ? <ShiftEnterToSend t={t} /> : <ShiftEnterForNewline t={t} />}
                 </Typography>

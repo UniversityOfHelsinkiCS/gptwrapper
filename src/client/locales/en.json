@@ -136,6 +136,7 @@
     "fileTypeNotSupported": "File of type \"{{- type}}\" not supported currently",
     "supportedFileFormats": "Currently there is support for formats \".pdf\" and plain text such as \".txt\", \".csv\", and \".md\"",
     "writeHere": "Type your message here...",
+    "messageLabel": "Message",
     "systemMessage": "Instructions",
     "systemMessageCreation": "Prompt",
     "systemMessageInfo": "Initialize the conversation by giving high level instructions to the AI",
@@ -897,6 +898,8 @@
     "loadError": "Failed to load API keys"
   },
   "accessibility": {
+    "sendInstructionsShiftEnter": "Shift + Enter sends the message and Enter adds a new line.",
+    "sendInstructionsEnter": "Enter sends the message and Shift + Enter adds a new line.",
     "skipToContent": "Skip to content",
     "errorNotification": "Error",
     "warningNotification": "Warning",
