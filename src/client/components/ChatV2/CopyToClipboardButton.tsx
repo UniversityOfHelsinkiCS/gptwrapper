@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Box, IconButton, Tooltip } from '@mui/material'
 import ContentCopy from '@mui/icons-material/ContentCopy'
 import { useTranslation } from 'react-i18next'
+import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
 
 interface CopyToClipboardButtonProps {
   copied: string
@@ -32,7 +33,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ copied, i
         'text/html': blobHtml,
       }),
     ]
-    navigator.clipboard.write(data)
+    navigator.clipboard.write(data).then(() => announceToScreenReader(t('tooltip:copied')))
 
     setTimeout(() => {
       setTooltipMessage(t('chat:copyToClipboard'))
