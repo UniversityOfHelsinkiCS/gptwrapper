@@ -352,10 +352,25 @@ export default function NotificationManagement() {
                   <TableCell>{t(`notifications:${getSeverityFromPriority(notification.priority)}`)}</TableCell>
                   <TableCell>{notification.active ? t('common:yes') : t('common:no')}</TableCell>
                   <TableCell>
-                    <IconButton size="small" onClick={() => handleEdit(notification)}>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleEdit(notification)}
+                      aria-label={t('accessibility:itemAction', {
+                        action: t('common:edit'),
+                        item: notification.message[i18n.language as keyof Locales] || notification.message.en,
+                      })}
+                    >
                       <EditIcon />
                     </IconButton>
-                    <IconButton size="small" onClick={() => handleDelete(notification.id)} color="error">
+                    <IconButton
+                      size="small"
+                      onClick={() => handleDelete(notification.id)}
+                      color="error"
+                      aria-label={t('accessibility:itemAction', {
+                        action: t('common:delete'),
+                        item: notification.message[i18n.language as keyof Locales] || notification.message.en,
+                      })}
+                    >
                       <DeleteIcon />
                     </IconButton>
                   </TableCell>
