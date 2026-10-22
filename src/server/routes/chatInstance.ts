@@ -8,7 +8,7 @@ import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { sequelize } from '../db/connection'
 import { ApplicationError } from '../util/ApplicationError'
 import { adminMiddleware } from '../middleware/adminMiddleware'
-import { ChatInstanceAccess, getChatInstanceAccess } from '../services/chatInstances/access'
+import { getAccessLevel } from '../services/chatInstances/access'
 import { RequestWithUser } from '../types'
 import { LocaleSchema } from '@shared/lang'
 
@@ -39,6 +39,7 @@ const getAuthorizedCustomChatInstance = async (req: RequestWithUser<{ id: string
     throw ApplicationError.NotFound('ChatInstance not found')
   }
 
+  // Asks who created the custom chat instance, not the access level, so getAccessLevel does not fit.
   const responsibility = await Responsibility.findOne({
     where: {
       userId: user.id,
@@ -221,8 +222,8 @@ chatInstanceRouter.get('/:id/usages', async (req, res) => {
   }
 
   const { user } = req as RequestWithUser<{ id: string }>
-  const access = await getChatInstanceAccess(user, chatInstance)
-  if (access < ChatInstanceAccess.TEACHER) {
+  const accessLevel = await getAccessLevel(user, chatInstance)
+  if (accessLevel !== 'FULL') {
     throw ApplicationError.Forbidden()
   }
 
@@ -280,8 +281,8 @@ chatInstanceRouter.delete('/usage/:id', async (req, res) => {
   }
 
   const { user } = req as RequestWithUser<{ id: string }>
-  const access = await getChatInstanceAccess(user, chatInstance)
-  if (access < ChatInstanceAccess.TEACHER) {
+  const accessLevel = await getAccessLevel(user, chatInstance)
+  if (accessLevel !== 'FULL') {
     throw ApplicationError.Forbidden()
   }
 
