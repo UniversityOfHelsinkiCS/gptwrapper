@@ -36,6 +36,9 @@ router.use(cors())
 router.use(express.json({ limit: '10mb' }))
 router.use(express.urlencoded({ limit: '10mb' }))
 
+// This uses API-key based authentication so shibboleth is not needed
+router.use('/external', externalAPI)
+
 router.use(shibbolethMiddleware)
 router.use(userMiddleware)
 
@@ -50,7 +53,6 @@ router.get('/ping', (_, res) => {
   res.send('pong')
 })
 
-router.use('/external', externalAPI)
 router.use('/ai', aiRouter)
 router.use('/rag', ragRouter)
 router.use('/users', userRouter)
