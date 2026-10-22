@@ -245,7 +245,7 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
 
   const activeCourse: Course = chatInstance ? chatInstance : course
   const activated = activeCourse.activated
-  const courseEnded = Date.parse(activeCourse.activityPeriod.endDate) < Date.now()
+  const courseEnded = activeCourse.status === 'EXPIRED'
 
   return (
     <>

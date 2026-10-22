@@ -53,8 +53,7 @@ const CoursePrompts = (props: CoursePromptsProps) => {
 
   const currentPrompts = course.prompts ?? []
 
-  const courseEnded = Date.parse(course.activityPeriod.endDate) < Date.now()
-  const dotColor = courseEnded ? 'grey.400' : course.activated ? 'success.main' : 'error.main'
+  const dotColor = course.status === 'EXPIRED' ? 'grey.400' : course.status === 'ACTIVATED' ? 'success.main' : 'error.main'
 
   useEffect(() => {
     if (!previewPrompt) return
@@ -141,13 +140,11 @@ const CoursePrompts = (props: CoursePromptsProps) => {
             }}
             data-testid={`show-course-info-${course.id}-button`}
             aria-label={[
-              course.expired
+              course.status === 'EXPIRED'
                 ? t('accessibility:expiredCourse')
-                : course.activated
+                : course.status === 'ACTIVATED'
                   ? t('accessibility:activeCourse')
-                  : !course.activated
-                    ? t('accessibility:closedCourse')
-                    : t('common:course'),
+                  : t('accessibility:closedCourse'),
               course.name[language],
               showActivityPeriod && formatDate(course.activityPeriod),
               t('common:preview'),

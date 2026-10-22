@@ -8,21 +8,21 @@ import type { ChatInstanceUsage } from '../../types'
 const course = (overrides: Partial<CoursesViewCourse>): CoursesViewCourse =>
   ({
     id: 'c',
-    activated: false,
-    expired: false,
+    status: 'NOT_ACTIVATED',
     ...overrides,
   }) as CoursesViewCourse
 
 describe('getGroupedCourses', () => {
-  test('splits courses into enabled / disabled / ended buckets', () => {
-    const enabled = course({ id: 'enabled', activated: true, expired: false })
-    const disabled = course({ id: 'disabled', activated: false, expired: false })
-    const ended = course({ id: 'ended', activated: true, expired: true })
+  test('puts each status in its bucket, and a course that has not started under disabled', () => {
+    const enabled = course({ id: 'enabled', status: 'ACTIVATED' })
+    const disabled = course({ id: 'disabled', status: 'NOT_ACTIVATED' })
+    const notStarted = course({ id: 'not-started', status: 'NOT_STARTED' })
+    const ended = course({ id: 'ended', status: 'EXPIRED' })
 
-    const { curreEnabled, curreDisabled, ended: endedCourses } = getGroupedCourses([enabled, disabled, ended])
+    const { curreEnabled, curreDisabled, ended: endedCourses } = getGroupedCourses([enabled, disabled, notStarted, ended])
 
     expect(curreEnabled).toEqual([enabled])
-    expect(curreDisabled).toEqual([disabled])
+    expect(curreDisabled).toEqual([disabled, notStarted])
     expect(endedCourses).toEqual([ended])
   })
 
@@ -30,16 +30,12 @@ describe('getGroupedCourses', () => {
     expect(getGroupedCourses()).toEqual({ curreEnabled: [], curreDisabled: [], ended: [] })
   })
 
-  // Documents a real gap that is acually a feature: a course that is expired but never activated
-  // matches none of the three buckets and disappears from every list.
-  test('drops a course that is expired but not activated (no bucket matches)', () => {
-    const orphan = course({ id: 'orphan', activated: false, expired: true })
+  test('puts every course in exactly one bucket', () => {
+    const courses = (['ACTIVATED', 'NOT_ACTIVATED', 'NOT_STARTED', 'EXPIRED'] as const).map((status) => course({ id: status, status }))
 
-    const { curreEnabled, curreDisabled, ended } = getGroupedCourses([orphan])
+    const { curreEnabled, curreDisabled, ended } = getGroupedCourses(courses)
 
-    expect(curreEnabled).not.toContain(orphan)
-    expect(curreDisabled).not.toContain(orphan)
-    expect(ended).not.toContain(orphan)
+    expect([...curreEnabled, ...curreDisabled, ...ended].map((c) => c.id).sort()).toEqual(courses.map((c) => c.id).sort())
   })
 })
 

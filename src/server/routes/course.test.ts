@@ -215,6 +215,21 @@ describe('courses/user', () => {
     expect(body.map((course: { status: string }) => course.status)).toEqual(['NOT_ACTIVATED', 'NOT_STARTED'])
   })
 
+  test('leaves out a taught course that ended and was never activated', async () => {
+    currentUser = { id: 'teacher-1', isAdmin: false }
+    vi.mocked(getTeachedCourses).mockResolvedValue([
+      courseFixture({ id: 'ci-unused', activated: false, ...expired }),
+      courseFixture({ id: 'ci-ended', ...expired }),
+    ] as any)
+    vi.mocked(getEnrolledCourses).mockResolvedValue([] as any)
+
+    const body = await (await getUserCourses()).json()
+
+    expect(body.map((course: { id: string }) => course.id)).toEqual(['ci-ended'])
+    expect(body[0].status).toBe('EXPIRED')
+    expect(body[0].expired).toBeUndefined()
+  })
+
   test('skips a taught course with a broken activityPeriod', async () => {
     currentUser = { id: 'teacher-1', isAdmin: false }
     vi.mocked(getTeachedCourses).mockResolvedValue([courseFixture({ id: 'ci-bad', activityPeriod: null }), courseFixture({ id: 'ci-good' })] as any)

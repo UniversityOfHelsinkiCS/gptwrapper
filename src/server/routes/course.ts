@@ -36,7 +36,6 @@ courseRouter.get('/user', async (req, res) => {
   const [teached, enrolled] = await Promise.all([getTeachedCourses(user), getEnrolledCourses(user)])
   const decorate = (ci: ChatInstance, accessLevel: AccessLevel) => ({
     ...ci.toJSON(),
-    expired: Date.parse(ci.activityPeriod.endDate) < Date.now(),
     status: getChatStatus(ci),
     accessLevel,
   })
@@ -46,7 +45,10 @@ courseRouter.get('/user', async (req, res) => {
   // getChatStatus throws on a broken activityPeriod. Skip that course instead of failing the whole list.
   for (const ci of teached) {
     try {
-      byId.set(ci.id, decorate(ci, 'FULL'))
+      const course = decorate(ci, 'FULL')
+      // A course that ended without ever being activated was never used. Keep it out of the UI.
+      if (course.status === 'EXPIRED' && !ci.activated) continue
+      byId.set(ci.id, course)
     } catch {
       logger.warn('Skipping a taught course with a broken activity period', { chatInstanceId: ci.id })
     }
