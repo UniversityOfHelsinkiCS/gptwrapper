@@ -128,40 +128,35 @@ export const getTeachedCourses = async (user: User) => {
   return responsibilities.map((responsibility) => responsibility.chatInstance)
 }
 
+interface AccessFacts {
+  isAdmin: boolean
+  isResponsible: boolean
+  isEnrolled: boolean
+  isActive: boolean
+}
+
+// The access rule itself. getAccessLevel looks up the facts, courses/user already has them.
+export const toAccessLevel = ({ isAdmin, isResponsible, isEnrolled, isActive }: AccessFacts): AccessLevel | null => {
+  if (isAdmin || isResponsible) return 'FULL'
+  if (!isEnrolled) return null
+  return isActive ? 'STUDENT' : 'STUDENT_CLOSED'
+}
+
 export const getAccessLevel = async (user: SharedUser, chatInstance: ChatInstance): Promise<AccessLevel | null> => {
   if (user.isAdmin) {
     return 'FULL'
   }
 
-  const isResponsible = await Responsibility.findOne({
-    where: {
-      userId: user.id,
-      chatInstanceId: chatInstance.id,
-    },
-  })
+  const where = { userId: user.id, chatInstanceId: chatInstance.id }
 
+  const isResponsible = !!(await Responsibility.findOne({ where }))
   if (isResponsible) {
     return 'FULL'
   }
 
-  const isEnrolled = await Enrolment.findOne({
-    where: {
-      userId: user.id,
-      chatInstanceId: chatInstance.id,
-    },
-  })
+  const isEnrolled = !!(await Enrolment.findOne({ where }))
 
-  const courseIsOpen = chatIsActive(chatInstance)
-
-  if (isEnrolled && courseIsOpen) {
-    return 'STUDENT'
-  }
-
-  if (isEnrolled && !courseIsOpen) {
-    return 'STUDENT_CLOSED'
-  }
-
-  return null
+  return toAccessLevel({ isAdmin: false, isResponsible, isEnrolled, isActive: chatIsActive(chatInstance) })
 }
 
 export const requireAnyAccess = async (user: SharedUser, chatInstance: ChatInstance): Promise<AccessLevel> => {

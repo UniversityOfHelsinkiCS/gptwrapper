@@ -3,7 +3,7 @@ import { Op, Sequelize, WhereOptions } from 'sequelize'
 
 import type { ActivityPeriod, RequestWithUser } from '../types'
 import { ChatInstance, Enrolment, UserChatInstanceUsage, Prompt, PromptUsage, User, Responsibility, Discussion, RagIndex } from '../db/models'
-import { getEnrolledCourses, getTeachedCourses, requireAnyAccess, requireFullAccess } from '../services/chatInstances/access'
+import { getEnrolledCourses, getTeachedCourses, requireAnyAccess, requireFullAccess, toAccessLevel } from '../services/chatInstances/access'
 import { encrypt, decrypt } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
 import logger from '../util/logger'
@@ -53,10 +53,12 @@ courseRouter.get('/user', async (req, res) => {
     }
   }
 
-  // The enrolled filter hides closed courses, so STUDENT_CLOSED cannot occur here.
+  // The enrolled filter hides closed courses, and courses the user is responsible for are already in byId.
+  // isEnrolled is true, so there always is a level.
+  const enrolledAccessLevel = toAccessLevel({ isAdmin: user.isAdmin, isResponsible: false, isEnrolled: true, isActive: true })!
   for (const { chatInstance } of enrolled.filter(({ chatInstance }) => chatIsActive(chatInstance))) {
     if (byId.has(chatInstance.id)) continue
-    byId.set(chatInstance.id, decorate(chatInstance, user.isAdmin ? 'FULL' : 'STUDENT'))
+    byId.set(chatInstance.id, decorate(chatInstance, enrolledAccessLevel))
   }
 
   res.send([...byId.values()])
