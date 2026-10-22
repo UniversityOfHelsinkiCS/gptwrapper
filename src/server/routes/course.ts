@@ -33,18 +33,12 @@ courseRouter.get('/user', async (req, res) => {
   const { user } = request
 
   const [teached, enrolled] = await Promise.all([getTeachedCourses(user), getEnrolledCourses(user)])
-  const decorate = (ci: ChatInstance, accessLevel: AccessLevel) => ({
-    ...ci.toJSON(),
-    status: getChatStatus(ci),
-    accessLevel,
-  })
-
-  const byId = new Map<string, ReturnType<typeof decorate>>()
+  const byId = new Map<string, ReturnType<typeof serializeCourse>>()
 
   // getChatStatus throws on a broken activityPeriod. Skip that course instead of failing the whole list.
   for (const ci of teached) {
     try {
-      const course = decorate(ci, 'FULL')
+      const course = serializeCourse(ci, 'FULL')
       // A course that ended without ever being activated was never used. Keep it out of the UI.
       if (course.status === 'EXPIRED' && !ci.activated) continue
       byId.set(ci.id, course)
@@ -58,7 +52,7 @@ courseRouter.get('/user', async (req, res) => {
   const enrolledAccessLevel = toAccessLevel({ isAdmin: user.isAdmin, isResponsible: false, isEnrolled: true, isActive: true })!
   for (const { chatInstance } of enrolled.filter(({ chatInstance }) => chatIsActive(chatInstance))) {
     if (byId.has(chatInstance.id)) continue
-    byId.set(chatInstance.id, decorate(chatInstance, enrolledAccessLevel))
+    byId.set(chatInstance.id, serializeCourse(chatInstance, enrolledAccessLevel))
   }
 
   res.send([...byId.values()])
