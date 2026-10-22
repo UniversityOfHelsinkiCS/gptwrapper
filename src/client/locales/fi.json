@@ -877,6 +877,7 @@
     "create": "Luo uusi avain",
     "limitReached": "Sinulla on jo enimmäismäärä API-avaimia. Poista jokin avain, jos haluat luoda uuden.",
     "created": "Uusi avain luotu",
+    "createdKey": "Uusi avain",
     "shownOnce": "Kopioi avain nyt ja säilytä se turvallisessa paikassa. Avain näytetään vain kerran.",
     "copy": "Kopioi",
     "copied": "Kopioitu",

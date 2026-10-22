@@ -50,6 +50,17 @@ test.describe('axe wcag scan for global menu', () => {
     await expect(page.locator('#basic-menu')).toHaveCount(0)
     await scan(page, testInfo.title)
   })
+
+  adminTest('scan api-key modal', async ({ page }, testInfo) => {
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    await page.getByTestId('global-menu-button').click()
+    await page.getByRole('menuitem', { name: 'API keys' }).click()
+    const modal = page.getByRole('dialog')
+    await expect(modal).toBeVisible()
+    await expect(page.locator('#basic-menu')).toHaveCount(0)
+    await scan(page, testInfo.title)
+  })
 })
 
 test.describe('axe wcag scan for prompt modal', () => {

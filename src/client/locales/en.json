@@ -876,6 +876,7 @@
     "create": "Create new key",
     "limitReached": "You already have the maximum number of API keys. Delete one to create a new key.",
     "created": "New key created",
+    "createdKey": "New key",
     "shownOnce": "Copy the key now and store it somewhere safe. We show it in full only this once.",
     "copy": "Copy",
     "copied": "Copied",

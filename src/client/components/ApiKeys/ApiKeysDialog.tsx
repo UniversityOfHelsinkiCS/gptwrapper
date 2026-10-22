@@ -6,6 +6,7 @@ import { MAX_API_KEYS, type ApiKey } from '../../../shared/apiKey'
 import { BlueButton, OutlineButtonBlack, OutlineButtonBlue, RedButton, TextButton } from '../ChatV2/general/Buttons'
 import { enqueueSnackbar } from '../common/Snackbar'
 import { isConflictError, useApiKeys, useCreateApiKeyMutation, useDeleteApiKeyMutation } from './api'
+import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
 
 const formatDate = (date: string) => new Date(date).toLocaleString()
 const maskKey = (apiKey: ApiKey) => `••••••••${apiKey.apiKey.slice(-4)}`
@@ -29,7 +30,12 @@ const CreatedKeyPanel = ({ createdKey, onDismiss }: { createdKey: ApiKey; onDism
   }
 
   return (
-    <Paper variant="outlined" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, p: 2, borderColor: 'primary.light' }}>
+    <Paper
+      role="region"
+      aria-label={t('apiKeys:createdKey')}
+      variant="outlined"
+      sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, p: 2, borderColor: 'primary.light' }}
+    >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Check color="success" fontSize="small" />
         <Typography fontWeight={600}>{t('apiKeys:created')}</Typography>
@@ -64,7 +70,7 @@ const CreatedKeyPanel = ({ createdKey, onDismiss }: { createdKey: ApiKey; onDism
         </OutlineButtonBlue>
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <TextButton onClick={onDismiss} sx={{ color: 'primary.main' }}>
+        <TextButton onClick={onDismiss} sx={[{ color: 'primary.main' }, (theme) => theme.applyStyles('dark', { color: theme.palette.text.primary })]}>
           {t('apiKeys:dismiss')}
         </TextButton>
       </Box>
@@ -100,6 +106,7 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
     try {
       await createMutation.mutateAsync()
       setConfirmDeleteId(null)
+      announceToScreenReader(t('apiKeys:created'))
     } catch (error) {
       enqueueSnackbar(t(isConflictError(error) ? 'apiKeys:limitReached' : 'apiKeys:createError'), { variant: 'error' })
     }
@@ -111,6 +118,8 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
     try {
       await deleteMutation.mutateAsync(id)
       enqueueSnackbar(t('apiKeys:deleteSuccess'), { variant: 'success' })
+      const target = document.getElementById('close-api-keys')
+      if (target) target.focus()
     } catch {
       enqueueSnackbar(t('apiKeys:deleteError'), { variant: 'error' })
     }
@@ -121,7 +130,13 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
       <DialogTitle id="api-keys-dialog-title" sx={{ py: 2.5, pr: 10 }}>
         {t('apiKeys:title')}
       </DialogTitle>
-      <IconButton data-testid="close-api-keys" onClick={handleClose} aria-label={t('common:close')} sx={{ position: 'absolute', top: 16, right: 24 }}>
+      <IconButton
+        id="close-api-keys"
+        data-testid="close-api-keys"
+        onClick={handleClose}
+        aria-label={t('common:close')}
+        sx={{ position: 'absolute', top: 16, right: 24 }}
+      >
         <Close />
       </IconButton>
       <Divider />
@@ -188,7 +203,7 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
                 {confirmDeleteId === apiKey.id ? (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.5, px: 2, py: 1.5, bgcolor: 'error.light' + '1a' }}>
                     <Box sx={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: 0.25 }}>
-                      <Typography variant="body2" fontWeight={600}>
+                      <Typography id="api-key-delete-confirmation" variant="body2" fontWeight={600}>
                         <Trans
                           i18nKey="apiKeys:deleteConfirmTitle"
                           values={{ key: maskKey(apiKey) }}
@@ -200,10 +215,15 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 1 }}>
-                      <OutlineButtonBlack autoFocus onClick={() => cancelDelete(apiKey.id)}>
+                      <OutlineButtonBlack autoFocus onClick={() => cancelDelete(apiKey.id)} aria-describedby="api-key-delete-confirmation">
                         {t('common:cancel')}
                       </OutlineButtonBlack>
-                      <RedButton data-testid="confirm-delete-api-key" onClick={() => handleDelete(apiKey.id)}>
+                      <RedButton
+                        id="confirm-delete-api-key"
+                        data-testid="confirm-delete-api-key"
+                        onClick={() => handleDelete(apiKey.id)}
+                        aria-label={t('apiKeys:deleteKey', { key: maskKey(apiKey) })}
+                      >
                         {t('apiKeys:delete')}
                       </RedButton>
                     </Box>

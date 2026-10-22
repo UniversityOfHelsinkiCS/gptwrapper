@@ -851,6 +851,7 @@
     "create": "Skapa ny nyckel",
     "limitReached": "Du har redan det maximala antalet API-nycklar. Radera en nyckel för att skapa en ny.",
     "created": "Ny nyckel skapad",
+    "createdKey": "Ny nyckel",
     "shownOnce": "Kopiera nyckeln nu och förvara den på ett säkert ställe. Vi visar den i sin helhet bara den här gången.",
     "copy": "Kopiera",
     "copied": "Kopierat",
