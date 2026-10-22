@@ -82,6 +82,7 @@ const ChatInstanceSearch = () => {
           size="small"
           sx={{ width: 360, maxWidth: '100%' }}
           slotProps={{
+            htmlInput: { 'aria-label': t('admin:chatInstanceSearchPlaceholder') },
             input: {
               startAdornment: (
                 <InputAdornment position="start">

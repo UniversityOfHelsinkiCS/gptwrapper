@@ -404,9 +404,9 @@ export function Component() {
           <div>
             {activeTab === 'courses' && (
               <>
-                <span style={{ marginRight: 10 }}>{t('stats:timePeriodStart')}</span>
+                <span id="stats-from-label" style={{ marginRight: 10 }}>{t('stats:timePeriodStart')}</span>
 
-                <Select value={from} onChange={handleFromChange}>
+                <Select value={from} onChange={handleFromChange} labelId="stats-from-label">
                   {statistics.terms.map((term) => (
                     <MenuItem key={term.id} value={term.id}>
                       {term.label[language]}
@@ -414,8 +414,8 @@ export function Component() {
                   ))}
                 </Select>
 
-                <span style={{ margin: 10 }}>{t('stats:timePeriodStop')}</span>
-                <Select value={to} onChange={handleToChange}>
+                <span id="stats-to-label" style={{ margin: 10 }}>{t('stats:timePeriodStop')}</span>
+                <Select value={to} onChange={handleToChange} labelId="stats-to-label">
                   {statistics.terms
                     .filter((trm) => trm.id >= readTermFilter(from))
                     .map((term) => (
@@ -427,9 +427,9 @@ export function Component() {
               </>
             )}
 
-            <span style={{ margin: 10 }}>{t('stats:showing')}</span>
+            <span id="stats-faculty-label" style={{ margin: 10 }}>{t('stats:showing')}</span>
 
-            <Select value={selectedFaculty} onChange={(e) => setFaculties(e.target.value as string)}>
+            <Select value={selectedFaculty} onChange={(e) => setFaculties(e.target.value as string)} labelId="stats-faculty-label">
               {faculties.map((f) => (
                 <MenuItem key={f.code} value={f.code}>
                   {f.name[language]}
@@ -451,6 +451,7 @@ export function Component() {
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('stats:searchCourses')}
             slotProps={{
+              htmlInput: { 'aria-label': t('stats:searchCourses') },
               input: {
                 startAdornment: <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} />,
                 endAdornment: (

@@ -62,7 +62,7 @@ export const EditableTitle = ({ ragIndex }: { ragIndex: RagIndexAttributes }) =>
                 handleSave()
               }
             }}
-            slotProps={{ htmlInput: { 'data-testid': 'ragIndexNameEditInput' } }}
+            slotProps={{ htmlInput: { 'aria-label': t('rag:nameLabel'), 'data-testid': 'ragIndexNameEditInput' } }}
           />
           <Tooltip title={t('common:cancel')}>
             <IconButton

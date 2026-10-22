@@ -246,8 +246,9 @@ const NotificationDialog = ({
           </Stack>
 
           <FormControl fullWidth>
-            <InputLabel>{t('notifications:severity')}</InputLabel>
+            <InputLabel id="notification-severity-label">{t('notifications:severity')}</InputLabel>
             <Select
+              labelId="notification-severity-label"
               value={getSeverityFromPriority(formData.priority)}
               label={t('notifications:severity')}
               onChange={(e) => setFormData({ ...formData, priority: getPriorityFromSeverity(e.target.value) })}

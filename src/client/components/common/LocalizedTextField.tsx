@@ -2,14 +2,16 @@ import { Box, Stack, TextField, Typography } from "@mui/material"
 import { LANGUAGE_TRANSLATION_KEYS, LANGUAGES } from "@shared/lang"
 import { getLanguageValue } from "@shared/utils"
 import { useTranslation } from "react-i18next"
+import { useId } from "react"
 
 export const LocalizedTextField = ({ value, setValue, label, testId }) => {
   const { t } = useTranslation()
+  const labelId = useId()
 
   return (
     <Box>
-      <Stack direction='row' gap='1rem' alignItems="center">
-        <Typography>{label}</Typography>
+      <Stack direction='row' gap='1rem' alignItems="center" role="group" aria-labelledby={labelId}>
+        <Typography id={labelId}>{label}</Typography>
         {LANGUAGES.map(lang => (
           <TextField 
             label={t(LANGUAGE_TRANSLATION_KEYS[lang])}

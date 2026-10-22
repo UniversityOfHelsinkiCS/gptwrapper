@@ -78,22 +78,34 @@ const UserTable = ({ users }: { users: User[] }) => {
             {users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell component="th" scope="row">
-                  <Typography variant="h6" component="span">{user.username}</Typography>
+                  <Typography variant="h6" component="span">
+                    {user.username}
+                  </Typography>
                 </TableCell>
                 <TableCell align="left">
-                  <Typography variant="h6" component="span">{user.lastName}</Typography>
+                  <Typography variant="h6" component="span">
+                    {user.lastName}
+                  </Typography>
                 </TableCell>
                 <TableCell align="left">
-                  <Typography variant="h6" component="span">{user.firstNames}</Typography>
+                  <Typography variant="h6" component="span">
+                    {user.firstNames}
+                  </Typography>
                 </TableCell>
                 <TableCell align="left">
-                  <Typography variant="h6" component="span">{user.studentNumber}</Typography>
+                  <Typography variant="h6" component="span">
+                    {user.studentNumber}
+                  </Typography>
                 </TableCell>
                 <TableCell align="left">
-                  <Typography variant="h6" component="span">{user.primaryEmail}</Typography>
+                  <Typography variant="h6" component="span">
+                    {user.primaryEmail}
+                  </Typography>
                 </TableCell>
                 <TableCell align="left">
-                  <Typography variant="h6" component="span">{user.usage}</Typography>
+                  <Typography variant="h6" component="span">
+                    {user.usage}
+                  </Typography>
                 </TableCell>
                 <TableCell>
                   <Button variant="outlined" onClick={handleLoginAs(user)}>
@@ -210,8 +222,8 @@ const UserSearch = () => {
   }, [])
 
   return (
-    <Box>
-      <TextField value={search} onChange={(v) => setSearch(v.currentTarget.value)} inputRef={inputRef} />
+    <Box sx={{ mt: 1 }}>
+      <TextField label={t('admin:searchUsers')} value={search} onChange={(v) => setSearch(v.currentTarget.value)} inputRef={inputRef} />
 
       {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
 
@@ -239,7 +251,7 @@ export const ActionUserSearch = ({ actionText, drawActionComponent }: { actionTe
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder={t('admin:searchUsers')}
-        slotProps={{ input: { 'data-testid': 'enrolment-user-search-input' } as InputHTMLAttributes<HTMLInputElement> }}
+        slotProps={{ input: { 'aria-label': t('admin:searchUsers'), 'data-testid': 'enrolment-user-search-input' } as InputHTMLAttributes<HTMLInputElement> }}
       />
 
       {search.length > 2 && search.length < 5 && <div>{t('admin:typeMore')}</div>}
