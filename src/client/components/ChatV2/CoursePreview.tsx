@@ -52,7 +52,6 @@ import { CourseActivityPeriodEditor } from '../Courses/Course/CourseActivityPeri
 import DiscussionView from '../Courses/Course/Discussions'
 import PromptUsageHistogram from '../Courses/Course/PromptUsageHistogram'
 import { EnrolmentActionUserSearch, ResponsibilityActionUserSearch } from '../Admin/UserSearch'
-import { DEFAULT_TOKEN_LIMIT } from '@config'
 import CancelIcon from '@mui/icons-material/Cancel'
 import { visuallyHidden } from '@mui/utils'
 import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
@@ -334,8 +333,8 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
         {/* Personal usage card */}
         {currentCourseUsage &&
           (() => {
-            const limit = !course.activated && amongResponsibles ? DEFAULT_TOKEN_LIMIT : currentCourseUsage.limit
-            const percent = usagePercent(currentCourseUsage.usage, limit)
+            const { usage, limit } = currentCourseUsage
+            const percent = usagePercent(usage, limit)
             return (
               <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '8px', p: 2, mb: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', columnGap: 2, mb: 1.5 }}>
@@ -347,7 +346,7 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
                     <UsageInfoButton />
                   </Box>
                   <Typography variant="body2" color="text.secondary">
-                    {formatTokens(currentCourseUsage.usage)} / {formatTokens(limit)} {t('status:tokens')}
+                    {formatTokens(usage)} / {formatTokens(limit)} {t('status:tokens')}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>

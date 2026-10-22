@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { focusVisibleOutline } from '../../theme'
 import Send from '@mui/icons-material/Send'
 import StopIcon from '@mui/icons-material/Stop'
@@ -17,8 +17,7 @@ import { useKeyboardCommands } from './useKeyboardCommands'
 import { WarningType } from '@shared/aiApi'
 import ModelSelector from './ModelSelector'
 import UsageSelector from './UsageSelector'
-import { DEFAULT_TOKEN_LIMIT, ValidModelName } from '../../../config'
-import { Course } from 'src/client/types'
+import { ValidModelName } from '../../../config'
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat'
 import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
 
@@ -51,7 +50,7 @@ const skipLinkSx = {
 
 export const ChatBox = ({
   disabled,
-  chatInstance,
+  isTokenLimitExceeded,
   fileInputRef,
   fileName,
   messageWarning,
@@ -68,7 +67,7 @@ export const ChatBox = ({
   onGoToLatestResponse,
 }: {
   disabled: boolean
-  chatInstance?: Course
+  isTokenLimitExceeded: boolean
   fileInputRef: React.RefObject<HTMLInputElement | null>
   fileName: string
   messageWarning: { [key in WarningType]?: { message: string; ignored: boolean; tokenCount?: number; contextLimit?: number; tokenUsagePercentage?: number } }
@@ -87,9 +86,8 @@ export const ChatBox = ({
   const { courseId } = useParams()
   const isEmbedded = useIsEmbedded()
   const { user } = useCurrentUser()
-  const { userStatus, isLoading: statusLoading, refetch: refetchStatus } = useUserStatus(courseId)
+  const { refetch: refetchStatus } = useUserStatus(courseId)
 
-  const [isTokenLimitExceeded, setIsTokenLimitExceeded] = useState<boolean>(false)
   const [disallowedFileType, setDisallowedFileType] = useState<string>('')
   const [fileTypeAlertOpen, setFileTypeAlertOpen] = useState<boolean>(false)
   const [fileAnnouncement, setFileAnnouncement] = useState<string>('')
@@ -97,7 +95,6 @@ export const ChatBox = ({
   const sendButtonRef = useRef<HTMLButtonElement>(null)
   const textFieldRef = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState<string>('')
-  const amongResponsibles = user?.isAdmin || chatInstance?.responsibilities.some((r) => r.user.id === user?.id)
 
   const acuallyDisabled = disabled || message.length === 0
 
@@ -162,12 +159,6 @@ export const ChatBox = ({
       textFieldRef.current.focus()
     }
   }
-
-  useEffect(() => {
-    if (!userStatus) return
-    const limit = !chatInstance?.activated && amongResponsibles ? DEFAULT_TOKEN_LIMIT : userStatus.limit
-    setIsTokenLimitExceeded(userStatus.usage > limit)
-  }, [statusLoading, userStatus])
 
   const activeMessageWarnings = Object.values(messageWarning).filter((warning) => !warning.ignored)
 

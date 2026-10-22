@@ -8,7 +8,6 @@ import {
   DEFAULT_MODEL,
   DEFAULT_MODEL_TEMPERATURE,
   DEFAULT_STREAM_TIMEOUT,
-  DEFAULT_TOKEN_LIMIT,
   FREE_MODEL,
   ValidModelNameSchema,
   getModelConfig,
@@ -110,10 +109,7 @@ const ChatV2Content = () => {
 
   const amongResponsibles = user?.isAdmin || chatInstance?.responsibilities.some((r) => r.user.id === user?.id)
 
-  const isTokenUsageExceeded = (status: NonNullable<typeof userStatus>) => {
-    const { usage, limit } = status
-    return amongResponsibles && !chatInstance?.activated ? usage >= DEFAULT_TOKEN_LIMIT : usage >= limit
-  }
+  const tokenLimitExceeded = !!userStatus && userStatus.usage >= userStatus.limit
 
   // app states
   const [fileName, setFileName] = useState<string>('')
@@ -164,10 +160,9 @@ const ChatV2Content = () => {
 
   const handleSendMessage = async (message: string, resendPrevious: boolean, ignoredWarnings: WarningType[], messagesToResend?: ChatMessage[]) => {
     if (!userStatus) return
-    const tokenUsageExceeded = isTokenUsageExceeded(userStatus)
 
     const acualModel = activeModel
-    if (tokenUsageExceeded && acualModel !== FREE_MODEL) {
+    if (tokenLimitExceeded && acualModel !== FREE_MODEL) {
       enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
       handleCancel('error')
       return
@@ -411,15 +406,8 @@ const ChatV2Content = () => {
   }
 
   useEffect(() => {
-    if (!userStatus) return
-
-    const tokenUsageExceeded = isTokenUsageExceeded(userStatus)
-
-    if (tokenUsageExceeded) {
-      setActiveModel(FREE_MODEL)
-      return
-    }
-  }, [userStatus, chatInstance])
+    if (tokenLimitExceeded) setActiveModel(FREE_MODEL)
+  }, [tokenLimitExceeded])
 
   // Handle layout shift when right menu opens (tool result becomes visible)
   const prevScrollYProportional = useRef(0)
@@ -639,7 +627,7 @@ const ChatV2Content = () => {
           >
             <ChatBox
               disabled={isStreaming}
-              chatInstance={chatInstance}
+              isTokenLimitExceeded={tokenLimitExceeded}
               fileInputRef={fileInputRef}
               fileName={fileName}
               setFileName={setFileName}

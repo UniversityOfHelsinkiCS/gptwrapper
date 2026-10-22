@@ -91,7 +91,7 @@ describe('getUserTokenLimit', () => {
 })
 
 describe('getUserStatus', () => {
-  const chatInstance = (activityPeriod = ONGOING) => ({ id: 'ci-1', courseId: 'course-1', usageLimit: 1000, activityPeriod, activated: true })
+  const chatInstance = (activityPeriod = ONGOING, activated = true) => ({ id: 'ci-1', courseId: 'course-1', usageLimit: 1000, activityPeriod, activated })
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -118,6 +118,12 @@ describe('getUserStatus', () => {
     setMembership({ enrolled: true })
     vi.mocked(ChatInstance.findOne).mockResolvedValue(chatInstance(EXPIRED) as any)
     expect(await getUserStatus(user, 'course-1')).toEqual({ usage: 300, limit: 1000 })
+  })
+
+  test('a course that is not activated gets the default limit', async () => {
+    setMembership({ enrolled: true })
+    vi.mocked(ChatInstance.findOne).mockResolvedValue(chatInstance(ONGOING, false) as any)
+    expect(await getUserStatus(user, 'course-1')).toEqual({ usage: 300, limit: DEFAULT_TOKEN_LIMIT })
   })
 
   test('outsider gets zero usage and zero limit, and no usage row is created', async () => {

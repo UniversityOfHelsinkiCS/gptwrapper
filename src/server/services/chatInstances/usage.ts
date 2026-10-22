@@ -143,7 +143,7 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
 
   return {
     usage: chatInstanceUsage?.usageCount ?? 0,
-    limit: chatInstance?.usageLimit ?? 0,
+    limit: getCourseTokenLimit(chatInstance),
   }
 }
 
@@ -165,7 +165,7 @@ export const getCourseUsages = async (user: UserType): Promise<CourseUsage[]> =>
     courseId: ci.chatInstance!.courseId,
     name: ci.chatInstance!.name,
     usage: ci.usageCount ?? 0,
-    limit: ci.chatInstance!.usageLimit ?? 0,
+    limit: getCourseTokenLimit(ci.chatInstance!),
     activated: ci.chatInstance!.activated,
   }))
 }

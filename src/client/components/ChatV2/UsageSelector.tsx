@@ -15,7 +15,6 @@ import useUserUsages from '../../hooks/useUserUsage'
 import { InfoBox } from '../common/InfoBox'
 import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
 import { usePromptState } from './PromptState'
-import { DEFAULT_TOKEN_LIMIT } from '@config'
 import { visuallyHidden } from '@mui/utils'
 
 export const usagePercent = (usage: number, limit: number) => (limit > 0 ? Math.round((usage / limit) * 100) : 0)
@@ -213,7 +212,6 @@ const UsageSelector = () => {
               '&:hover': { backgroundColor: 'transparent' },
               '&.Mui-focusVisible': { backgroundColor: 'transparent' },
             }
-            const limit = course.activated ? course.limit : DEFAULT_TOKEN_LIMIT
             const content = (
               <>
                 <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25, minWidth: 0 }}>
@@ -229,14 +227,14 @@ const UsageSelector = () => {
                     {getLanguageValue(course.name, i18n.language)}
                   </Typography>
                   <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.3 }}>
-                    {formatTokens(course.usage)} / {formatTokens(limit)} {t('status:tokens')}
+                    {formatTokens(course.usage)} / {formatTokens(course.limit)} {t('status:tokens')}
                   </Typography>
                 </Box>
                 <UsageGauge percent={percent} />
               </>
             )
             const isSelectable = course.courseId === 'general'
-            const usageLabel = `${getLanguageValue(course.name, i18n.language)}, ${formatTokens(course.usage)} / ${formatTokens(limit)} ${t('status:tokens')}, ${percent}% ${t('status:tokensUsed')}`
+            const usageLabel = `${getLanguageValue(course.name, i18n.language)}, ${formatTokens(course.usage)} / ${formatTokens(course.limit)} ${t('status:tokens')}, ${percent}% ${t('status:tokensUsed')}`
             const ariaLabel = isSelectable ? `${usageLabel}, ${t('settings:chooseChat')}` : usageLabel
 
             return isSelectable ? (
