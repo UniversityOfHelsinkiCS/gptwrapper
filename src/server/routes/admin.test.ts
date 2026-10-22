@@ -1,9 +1,6 @@
 // @vitest-environment node
-import 'express-async-errors'
-import express from 'express'
-import type { AddressInfo } from 'node:net'
-import type { Server } from 'node:http'
-import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { startTestServer } from '../tests/testServer'
 
 vi.mock('../db/models', () => ({
   ChatInstance: { findAndCountAll: vi.fn() },
@@ -26,33 +23,12 @@ vi.mock('@sentry/node', () => ({
   captureException: vi.fn(),
 }))
 
-import errorHandler from '../middleware/error'
 import { ChatInstance } from '../db/models'
 import adminRouter from './admin'
 
 let currentUser: { id: string; isAdmin: boolean }
-let server: Server
-let baseUrl: string
 
-beforeAll(async () => {
-  const app = express()
-  app.use(express.json())
-  app.use((req, _res, next) => {
-    ;(req as any).user = currentUser
-    next()
-  })
-  app.use('/admin', adminRouter)
-  app.use(errorHandler)
-
-  await new Promise<void>((resolve) => {
-    server = app.listen(0, '127.0.0.1', () => resolve())
-  })
-  baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
-})
-
-afterAll(async () => {
-  await new Promise<void>((resolve, reject) => server.close((err) => (err ? reject(err) : resolve())))
-})
+const api = startTestServer('/admin', adminRouter, () => currentUser)
 
 const chatInstanceRow = (overrides: Record<string, unknown> = {}) => ({
   courseId: 'cur-1',
@@ -75,7 +51,7 @@ describe('GET /admin/chatinstance-search', () => {
       count: 2,
     } as any)
 
-    const res = await fetch(`${baseUrl}/admin/chatinstance-search?search=intro&language=en`)
+    const res = await api.fetch(`/admin/chatinstance-search?search=intro&language=en`)
     const body = await res.json()
 
     expect(res.status).toBe(200)
@@ -94,7 +70,7 @@ describe('GET /admin/chatinstance-search', () => {
       count: 1,
     } as any)
 
-    const res = await fetch(`${baseUrl}/admin/chatinstance-search?search=intro&language=en`)
+    const res = await api.fetch(`/admin/chatinstance-search?search=intro&language=en`)
     const body = await res.json()
 
     expect(body.results[0].saveDiscussions).toBe(false)
@@ -103,7 +79,7 @@ describe('GET /admin/chatinstance-search', () => {
   test('rejects non-admins', async () => {
     currentUser = { id: 'teacher-1', isAdmin: false }
 
-    const res = await fetch(`${baseUrl}/admin/chatinstance-search?search=intro&language=en`)
+    const res = await api.fetch(`/admin/chatinstance-search?search=intro&language=en`)
 
     expect(res.status).toBe(403)
     expect(ChatInstance.findAndCountAll).not.toHaveBeenCalled()

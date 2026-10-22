@@ -1,9 +1,6 @@
 // @vitest-environment node
-import 'express-async-errors'
-import express from 'express'
-import type { AddressInfo } from 'node:net'
-import type { Server } from 'node:http'
-import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { startTestServer } from '../tests/testServer'
 
 vi.mock('../db/models', () => ({
   Prompt: { findByPk: vi.fn(), findAll: vi.fn(), count: vi.fn(), create: vi.fn() },
@@ -22,37 +19,15 @@ vi.mock('@sentry/node', () => ({
 }))
 
 import promptRouter from './prompt'
-import errorHandler from '../middleware/error'
 import { ChatInstance, Prompt } from '../db/models'
 
 /**
- * The routers assume `req.user` is already populated by the user middleware, so the test app injects it
- * directly. Everything below the router (models, logger) is mocked; this exercises the route's own
+ * Everything below the router (models, logger) is mocked; this exercises the route's own
  * authorization logic, not the database.
  */
 let currentUser: { id: string; isAdmin: boolean }
-let server: Server
-let baseUrl: string
 
-beforeAll(async () => {
-  const app = express()
-  app.use(express.json())
-  app.use((req, _res, next) => {
-    ;(req as any).user = currentUser
-    next()
-  })
-  app.use('/prompts', promptRouter)
-  app.use(errorHandler)
-
-  await new Promise<void>((resolve) => {
-    server = app.listen(0, '127.0.0.1', () => resolve())
-  })
-  baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
-})
-
-afterAll(async () => {
-  await new Promise<void>((resolve, reject) => server.close((err) => (err ? reject(err) : resolve())))
-})
+const api = startTestServer('/prompts', promptRouter, () => currentUser)
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -63,7 +38,7 @@ beforeEach(() => {
 })
 
 const copy = (id: string, body: unknown) =>
-  fetch(`${baseUrl}/prompts/${id}/copy`, {
+  api.fetch(`/prompts/${id}/copy`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -147,7 +122,7 @@ describe('university types are locked out of /prompts mutations', () => {
     currentUser = { id: 'admin-1', isAdmin: true }
     vi.mocked(Prompt.findByPk).mockResolvedValue(sourcePrompt({ type: 'UNIVERSITY' }))
 
-    const response = await fetch(`${baseUrl}/prompts/source-1`, {
+    const response = await api.fetch(`/prompts/source-1`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: 'Renamed', userInstructions: '', systemMessage: 'x' }),
@@ -162,7 +137,7 @@ describe('university types are locked out of /prompts mutations', () => {
     prompt.destroy = vi.fn()
     vi.mocked(Prompt.findByPk).mockResolvedValue(prompt)
 
-    const response = await fetch(`${baseUrl}/prompts/source-1`, { method: 'DELETE' })
+    const response = await api.fetch(`/prompts/source-1`, { method: 'DELETE' })
 
     expect(response.status).toBe(403)
     expect(prompt.destroy).not.toHaveBeenCalled()

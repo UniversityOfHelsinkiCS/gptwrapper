@@ -1,9 +1,6 @@
 // @vitest-environment node
-import 'express-async-errors'
-import express from 'express'
-import type { AddressInfo } from 'node:net'
-import type { Server } from 'node:http'
-import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { startTestServer } from '../tests/testServer'
 
 vi.mock('../db/models', () => ({
   Prompt: {},
@@ -30,34 +27,13 @@ vi.mock('../services/chatInstances/access', async (importOriginal) => ({
   getTeachedCourses: vi.fn(),
 }))
 
-import errorHandler from '../middleware/error'
 import { ChatInstance, Enrolment, Responsibility } from '../db/models'
 import courseRouter from './course'
 import { getEnrolledCourses, getTeachedCourses } from '../services/chatInstances/access'
 
 let currentUser: { id: string; isAdmin: boolean }
-let server: Server
-let baseUrl: string
 
-beforeAll(async () => {
-  const app = express()
-  app.use(express.json())
-  app.use((req, _res, next) => {
-    ;(req as any).user = currentUser
-    next()
-  })
-  app.use('/courses', courseRouter)
-  app.use(errorHandler)
-
-  await new Promise<void>((resolve) => {
-    server = app.listen(0, '127.0.0.1', () => resolve())
-  })
-  baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
-})
-
-afterAll(async () => {
-  await new Promise<void>((resolve, reject) => server.close((err) => (err ? reject(err) : resolve())))
-})
+const api = startTestServer('/courses', courseRouter, () => currentUser)
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -68,7 +44,7 @@ beforeEach(() => {
 })
 
 const getCourse = (id: string) => {
-  return fetch(`${baseUrl}/courses/${id}`)
+  return api.fetch(`/courses/${id}`)
 }
 
 const courseFixture = (overrides = {}) => ({
@@ -189,7 +165,7 @@ describe('courses/:id', () => {
   })
 })
 
-const getUserCourses = () => fetch(`${baseUrl}/courses/user`)
+const getUserCourses = () => api.fetch(`/courses/user`)
 
 describe('courses/user', () => {
   test('returns one course if user is teacher AND enrolled', async () => {

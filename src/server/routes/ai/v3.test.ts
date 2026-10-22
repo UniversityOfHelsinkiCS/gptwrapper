@@ -1,9 +1,6 @@
 // @vitest-environment node
-import 'express-async-errors'
-import express from 'express'
-import type { AddressInfo } from 'node:net'
-import type { Server } from 'node:http'
-import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { startTestServer } from '../../tests/testServer'
 
 vi.mock('../../db/models', () => ({
   ChatInstance: { findOne: vi.fn() },
@@ -39,35 +36,14 @@ vi.mock('../../util/logger', () => ({
 vi.mock('@sentry/node', () => ({ captureException: vi.fn() }))
 
 import v3Router from './v3'
-import errorHandler from '../../middleware/error'
 import { Prompt, ChatInstance, UserChatInstanceUsage } from '../../db/models'
 import { streamChat } from '../../services/langchain/chat'
 import { getUserTokenLimit } from '../../services/chatInstances/usage'
 import { FREE_MODEL } from '../../../config'
 
-let server: Server
-let baseUrl: string
 let currentUser = { id: 'user-1', isAdmin: false }
 
-beforeAll(async () => {
-  const app = express()
-  app.use((req, res, next) => {
-    ;(req as any).user = currentUser
-    res.locals = res.locals ?? {}
-    next()
-  })
-  app.use('/ai/v3', v3Router)
-  app.use(errorHandler)
-
-  await new Promise<void>((resolve) => {
-    server = app.listen(0, '127.0.0.1', () => resolve())
-  })
-  baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
-})
-
-afterAll(async () => {
-  await new Promise<void>((resolve, reject) => server.close((err) => (err ? reject(err) : resolve())))
-})
+const api = startTestServer('/ai/v3', v3Router, () => currentUser)
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -99,7 +75,7 @@ const stream = (promptId: string, courseId?: string, model = 'mock') => {
     }),
   )
 
-  return fetch(`${baseUrl}/ai/v3/stream`, { method: 'POST', body: form })
+  return api.fetch(`/ai/v3/stream`, { method: 'POST', body: form })
 }
 
 /** PERSONAL prompts are refused with a 404 unless `userId` matches the requesting user. */

@@ -1,9 +1,6 @@
 // @vitest-environment node
-import 'express-async-errors'
-import express from 'express'
-import type { AddressInfo } from 'node:net'
-import type { Server } from 'node:http'
-import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { startTestServer } from '../tests/testServer'
 
 vi.mock('../util/pate', () => ({
   default: vi.fn(),
@@ -18,32 +15,11 @@ vi.mock('@sentry/node', () => ({
 }))
 
 import emailRouter from './email'
-import errorHandler from '../middleware/error'
 import sendEmail from '../util/pate'
 
 let currentUser: { id: string; email?: string }
-let server: Server
-let baseUrl: string
 
-beforeAll(async () => {
-  const app = express()
-  app.use(express.json())
-  app.use((req, _res, next) => {
-    ;(req as any).user = currentUser
-    next()
-  })
-  app.use('/email', emailRouter)
-  app.use(errorHandler)
-
-  await new Promise<void>((resolve) => {
-    server = app.listen(0, '127.0.0.1', () => resolve())
-  })
-  baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
-})
-
-afterAll(async () => {
-  await new Promise<void>((resolve, reject) => server.close((err) => (err ? reject(err) : resolve())))
-})
+const api = startTestServer('/email', emailRouter, () => currentUser)
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -51,7 +27,7 @@ beforeEach(() => {
 })
 
 const post = (body: unknown) =>
-  fetch(`${baseUrl}/email`, {
+  api.fetch(`/email`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
