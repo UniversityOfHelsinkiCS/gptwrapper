@@ -87,6 +87,13 @@ export const OutlineButtonBlue = styled(BaseButton)(({ theme }) => ({
   '&:hover': {
     backgroundColor: theme.palette.primary.light + '14',
   },
+  ...theme.applyStyles('dark', {
+    borderColor: 'theme.palette.primary.light',
+    color: theme.palette.text.primary,
+    '&:hover': {
+      backgroundColor: theme.palette.primary.light + '29',
+    },
+  }),
 }))
 
 export const TextButton = styled(BaseButton)(({ theme }) => ({
@@ -111,13 +118,7 @@ type LinkButtonHocProps = {
   external?: boolean
 }
 
-export const LinkButtonHoc = ({
-  button: ButtonComponent,
-  to,
-  children,
-  endIcon,
-  external,
-}: LinkButtonHocProps) => (
+export const LinkButtonHoc = ({ button: ButtonComponent, to, children, endIcon, external }: LinkButtonHocProps) => (
   <ButtonComponent
     component={external ? 'a' : Link}
     // when external use href, otherwise use to for react-router Link
