@@ -24,8 +24,8 @@ import {
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { enqueueSnackbar } from '../common/Snackbar'
-import SchoolIcon from '@mui/icons-material/School'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import SchoolIcon from '@mui/icons-material/School'
 import ForumIcon from '@mui/icons-material/Forum'
 import TagIcon from '@mui/icons-material/Tag'
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'
@@ -287,11 +287,13 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
               />
             </Tooltip>
           )}
-          {course.courseUnitRealisationTypeUrn && (
+          {course.courseUnitRealisationTypeUrn && course.courseId && (
             <Tooltip title={t('course:goToCoursePage')}>
               <IconButton
                 aria-label={t('course:goToCoursePage')}
-                onClick={() => window.open(`https://studies.helsinki.fi/kurssit/toteutus/${course.courseId}`, '_blank')}
+                href={`https://studies.helsinki.fi/kurssit/toteutus/${course.courseId}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 data-testid="go-to-course-page-link"
               >
                 <OpenInNewIcon color="primary" />
