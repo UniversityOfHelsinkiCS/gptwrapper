@@ -260,45 +260,18 @@ const getChatInstance = async (courseId: string) => {
   return chatInstance
 }
 
-const checkDiscussionAccess = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const request = req as unknown as RequestWithUser
-  const { user } = request
+const checkDiscussionAccess = async (req: express.Request, _res: express.Response, next: express.NextFunction) => {
+  const { user } = req as unknown as RequestWithUser
 
-  const { id } = req.params
-  const chatInstance = (await ChatInstance.findOne({
-    where: { courseId: id },
-    include: [
-      {
-        model: Responsibility,
-        as: 'responsibilities',
-        attributes: ['id'],
-        include: [
-          {
-            model: User,
-            as: 'user',
-            attributes: ['id', 'username', 'last_name', 'first_names'],
-          },
-        ],
-      },
-    ],
-  })) as ChatInstance
+  const chatInstance = await ChatInstance.findOne({ where: { courseId: req.params.id } })
 
   if (!chatInstance) {
     throw ApplicationError.NotFound('Chat instance not found')
   }
 
-  const hasFullAccess =
-    user.isAdmin ||
-    chatInstance.responsibilities
-      ?.map((r) => r.user?.id)
-      .filter(Boolean)
-      .includes(user.id)
+  await enforceUserHasFullAccess(user, chatInstance)
 
-  if (!hasFullAccess) {
-    res.status(401).send('Unauthorized')
-  } else {
-    next()
-  }
+  next()
 }
 
 courseRouter.get('/:id/discussions', checkDiscussionAccess, async (req, res) => {

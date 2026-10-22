@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { startTestServer } from '../tests/testServer'
+import { setMembership } from '../tests/membership'
 
 vi.mock('../db/models', () => ({
   Prompt: {},
@@ -9,7 +10,7 @@ vi.mock('../db/models', () => ({
   Responsibility: { findOne: vi.fn() },
   PromptChatInstance: {},
   User: {},
-  Discussion: {},
+  Discussion: { findAll: vi.fn() },
   Enrolment: { findOne: vi.fn() },
 }))
 
@@ -27,7 +28,7 @@ vi.mock('../services/chatInstances/access', async (importOriginal) => ({
   getTeachedCourses: vi.fn(),
 }))
 
-import { ChatInstance, Enrolment, Responsibility } from '../db/models'
+import { ChatInstance, Discussion, Enrolment, Responsibility } from '../db/models'
 import courseRouter from './course'
 import { getEnrolledCourses, getTeachedCourses } from '../services/chatInstances/access'
 
@@ -193,5 +194,44 @@ describe('courses/user', () => {
     expect(response.status).toBe(200)
     expect(body.length).toBe(1)
     expect(body[0].id).toBe('ci-good')
+  })
+})
+
+/** One case per access level: admin, teacher, student, student on a closed course, and a user with no row. */
+const accessCases = [
+  { who: 'admin', user: { id: 'admin-1', isAdmin: true }, membership: {}, course: {}, status: 200 },
+  { who: 'responsible teacher', user: { id: 'teacher-1', isAdmin: false }, membership: { responsible: true }, course: {}, status: 200 },
+  { who: 'enrolled student', user: { id: 'student-1', isAdmin: false }, membership: { enrolled: true }, course: {}, status: 403 },
+  { who: 'enrolled student on a closed course', user: { id: 'student-1', isAdmin: false }, membership: { enrolled: true }, course: expired, status: 403 },
+  { who: 'outsider', user: { id: 'outsider-1', isAdmin: false }, membership: {}, course: {}, status: 403 },
+]
+
+describe('courses/:id/enrolments (enforceUserHasFullAccess)', () => {
+  test.each(accessCases)('$who gets $status', async ({ user, membership, course, status }) => {
+    currentUser = user
+    setMembership(membership)
+    vi.mocked(ChatInstance.findOne).mockResolvedValue(courseFixture({ ...course, enrolments: [] }) as any)
+    const response = await api.fetch('/courses/course-1/enrolments')
+    expect(response.status).toBe(status)
+  })
+})
+
+describe('courses/:id/discussions', () => {
+  beforeEach(() => {
+    vi.mocked(Discussion.findAll).mockResolvedValue([])
+  })
+
+  test.each(accessCases)('$who gets $status', async ({ user, membership, course, status }) => {
+    currentUser = user
+    setMembership(membership)
+    vi.mocked(ChatInstance.findOne).mockResolvedValue(courseFixture(course) as any)
+    const response = await api.fetch('/courses/course-1/discussions')
+    expect(response.status).toBe(status)
+  })
+
+  test('404 when the course does not exist', async () => {
+    currentUser = { id: 'admin-1', isAdmin: true }
+    const response = await api.fetch('/courses/course-1/discussions')
+    expect(response.status).toBe(404)
   })
 })
