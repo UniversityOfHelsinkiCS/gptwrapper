@@ -2,11 +2,13 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('../../db/models', () => ({
-  ChatInstance: {},
-  Enrolment: { findAll: vi.fn() },
-  Responsibility: { findAll: vi.fn() },
+  ChatInstance: { findOne: vi.fn() },
+  Enrolment: { findAll: vi.fn(), findOne: vi.fn() },
+  Prompt: {},
+  RagIndex: {},
+  Responsibility: { findAll: vi.fn(), findOne: vi.fn() },
   User: {},
-  UserChatInstanceUsage: {},
+  UserChatInstanceUsage: { findOrCreate: vi.fn() },
 }))
 
 vi.mock('../../util/logger', () => ({
@@ -14,9 +16,10 @@ vi.mock('../../util/logger', () => ({
 }))
 
 import { DEFAULT_TOKEN_LIMIT } from '../../../config'
-import { Enrolment, Responsibility } from '../../db/models'
+import { ChatInstance, Enrolment, Responsibility, UserChatInstanceUsage } from '../../db/models'
 import type { User as UserType } from '../../../shared/user'
-import { COURSE_TOKEN_BONUS, getUserTokenLimit } from './usage'
+import { setMembership } from '../../tests/membership'
+import { COURSE_TOKEN_BONUS, getUserStatus, getUserTokenLimit } from './usage'
 
 const ONGOING = { startDate: '2020-01-01', endDate: '2099-01-01' }
 const EXPIRED = { startDate: '1744-01-01', endDate: '1818-12-31' }
@@ -84,5 +87,41 @@ describe('getUserTokenLimit', () => {
     mockMemberships({ enrolled: [membership('c1')] })
 
     expect(await getUserTokenLimit({ ...user, isAdmin: true, isPowerUser: true })).toBe(DEFAULT_TOKEN_LIMIT * 10 + COURSE_TOKEN_BONUS)
+  })
+})
+
+describe('getUserStatus', () => {
+  const chatInstance = (activityPeriod = ONGOING) => ({ id: 'ci-1', courseId: 'course-1', usageLimit: 1000, activityPeriod, activated: true })
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    setMembership({})
+    vi.mocked(ChatInstance.findOne).mockResolvedValue(chatInstance() as any)
+    vi.mocked(UserChatInstanceUsage.findOrCreate).mockResolvedValue([{ usageCount: 300 }, false] as any)
+  })
+
+  test('admin gets the usage and the limit', async () => {
+    expect(await getUserStatus({ ...user, isAdmin: true }, 'course-1')).toEqual({ usage: 300, limit: 1000 })
+  })
+
+  test('responsible teacher gets the usage and the limit', async () => {
+    setMembership({ responsible: true })
+    expect(await getUserStatus(user, 'course-1')).toEqual({ usage: 300, limit: 1000 })
+  })
+
+  test('enrolled student gets the usage and the limit', async () => {
+    setMembership({ enrolled: true })
+    expect(await getUserStatus(user, 'course-1')).toEqual({ usage: 300, limit: 1000 })
+  })
+
+  test('enrolled student on a closed course still gets the usage and the limit', async () => {
+    setMembership({ enrolled: true })
+    vi.mocked(ChatInstance.findOne).mockResolvedValue(chatInstance(EXPIRED) as any)
+    expect(await getUserStatus(user, 'course-1')).toEqual({ usage: 300, limit: 1000 })
+  })
+
+  test('outsider gets zero usage and zero limit, and no usage row is created', async () => {
+    expect(await getUserStatus(user, 'course-1')).toEqual({ usage: 0, limit: 0 })
+    expect(UserChatInstanceUsage.findOrCreate).not.toHaveBeenCalled()
   })
 })

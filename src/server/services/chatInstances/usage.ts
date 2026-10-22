@@ -8,6 +8,7 @@ import { ApplicationError } from '../../util/ApplicationError'
 import { readMessageContent, type Message } from '../../../shared/chat'
 import { checkIamAccess } from '../../util/iams'
 import { chatIsActive } from './activity'
+import { getAccessLevel } from './access'
 import { CourseUsage } from '@shared/types'
 
 export const getUsage = async (userId: string) => {
@@ -112,29 +113,14 @@ export const getUserStatus = async (user: UserType, courseId: string) => {
     where: {
       courseId,
     },
-    attributes: ['id', 'usageLimit', 'courseId'],
+    // getAccessLevel needs activityPeriod and activated to tell STUDENT from STUDENT_CLOSED.
+    attributes: ['id', 'usageLimit', 'courseId', 'activityPeriod', 'activated'],
   })
 
   if (!chatInstance) throw ApplicationError.NotFound('Chat instance not found')
 
-  // Get enrollment
-  const enrollment = await Enrolment.findOne({
-    where: {
-      userId: user.id,
-      chatInstanceId: chatInstance.id,
-    },
-  })
-
-  // Get responsibility
-  const responsibility = await Responsibility.findOne({
-    where: {
-      userId: user.id,
-      chatInstanceId: chatInstance.id,
-    },
-  })
-
-  // If user has neither and is not admin, return unauthorized
-  if (!enrollment && !responsibility && !user.isAdmin) {
+  // Any access level gets the usage, a closed course included.
+  if (!(await getAccessLevel(user, chatInstance))) {
     logger.info('Unauthorized user on course', { userId: user.id, courseId })
 
     return {
