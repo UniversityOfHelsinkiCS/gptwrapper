@@ -1,13 +1,16 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { startTestServer } from '../tests/testServer'
+import { setMembership } from '../tests/membership'
 
 vi.mock('../db/models', () => ({
   Prompt: { findByPk: vi.fn(), findAll: vi.fn(), count: vi.fn(), create: vi.fn() },
   ChatInstance: { findByPk: vi.fn() },
   RagIndex: {},
-  Responsibility: {},
+  Responsibility: { findOne: vi.fn() },
+  Enrolment: { findOne: vi.fn() },
   PromptChatInstance: { create: vi.fn(), destroy: vi.fn() },
+  User: {},
 }))
 
 vi.mock('../util/logger', () => ({
@@ -32,6 +35,7 @@ const api = startTestServer('/prompts', promptRouter, () => currentUser)
 beforeEach(() => {
   vi.clearAllMocks()
   currentUser = { id: 'student-1', isAdmin: false }
+  setMembership({})
   vi.mocked(Prompt.count).mockResolvedValue(0)
   vi.mocked(Prompt.findAll).mockResolvedValue([])
   vi.mocked(Prompt.create).mockImplementation(async (params: any) => ({ id: 'new-prompt', ...params }) as any)
@@ -77,7 +81,7 @@ describe('POST /prompts/:id/copy', () => {
 
   test('stops a student copying a TEMPLATE into a course they are not responsible for', async () => {
     vi.mocked(Prompt.findByPk).mockResolvedValue(sourcePrompt({ type: 'TEMPLATE' }))
-    vi.mocked(ChatInstance.findByPk).mockResolvedValue({ id: 'course-1', responsibilities: [] } as any)
+    vi.mocked(ChatInstance.findByPk).mockResolvedValue({ id: 'course-1' } as any)
 
     const response = await copy('source-1', { target: { type: 'CHAT_INSTANCE', chatInstanceId: 'course-1' } })
 
@@ -88,7 +92,8 @@ describe('POST /prompts/:id/copy', () => {
   test('lets a responsible teacher copy a TEMPLATE into their course', async () => {
     currentUser = { id: 'teacher-1', isAdmin: false }
     vi.mocked(Prompt.findByPk).mockResolvedValue(sourcePrompt({ type: 'TEMPLATE' }))
-    vi.mocked(ChatInstance.findByPk).mockResolvedValue({ id: 'course-1', responsibilities: [{ id: 1, userId: 'teacher-1' }] } as any)
+    vi.mocked(ChatInstance.findByPk).mockResolvedValue({ id: 'course-1' } as any)
+    setMembership({ responsible: true })
 
     const response = await copy('source-1', { target: { type: 'CHAT_INSTANCE', chatInstanceId: 'course-1' } })
 
@@ -108,7 +113,7 @@ describe('POST /prompts/:id/copy', () => {
 
   test('still refuses to copy a course prompt from a course the student is not responsible for', async () => {
     vi.mocked(Prompt.findByPk).mockResolvedValue(sourcePrompt({ type: 'CHAT_INSTANCE', chatInstanceId: 'course-1' }))
-    vi.mocked(ChatInstance.findByPk).mockResolvedValue({ id: 'course-1', responsibilities: [] } as any)
+    vi.mocked(ChatInstance.findByPk).mockResolvedValue({ id: 'course-1' } as any)
 
     const response = await copy('source-1', { target: { type: 'PERSONAL' } })
 

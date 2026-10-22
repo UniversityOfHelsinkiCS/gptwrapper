@@ -4,7 +4,8 @@ import { PromptCopyParamsSchema, PromptCreationParamsSchema, PromptUpdateablePar
 import { canCopyPrompt } from '../../shared/promptPermissions'
 import { resolveCopyName, shouldKeepRagIndex } from '../util/promptCopy'
 import type { User } from '@shared/user'
-import { ChatInstance, Prompt, RagIndex, Responsibility, PromptChatInstance } from '../db/models'
+import { ChatInstance, Prompt, RagIndex, PromptChatInstance } from '../db/models'
+import { getAccessLevel } from '../services/chatInstances/access'
 import type { RequestWithUser } from '../types'
 import { ApplicationError } from '../util/ApplicationError'
 import logger from '../util/logger'
@@ -56,28 +57,18 @@ interface ChatInstancePrompt {
   chatInstanceId: string
 }
 
-const isResponsibleForChatInstance = async (user: User, chatInstanceId: string) => {
-  const chatInstance = await ChatInstance.findByPk(chatInstanceId, {
-    include: [
-      {
-        model: Responsibility,
-        as: 'responsibilities',
-        attributes: ['id', 'userId'],
-      },
-    ],
-  })
+const hasFullAccessToChatInstance = async (user: User, chatInstanceId: string) => {
+  const chatInstance = await ChatInstance.findByPk(chatInstanceId)
 
   if (!chatInstance) {
     throw ApplicationError.NotFound('Chat instance not found')
   }
 
-  return chatInstance.responsibilities?.some((r) => r.userId === user.id) ?? false
+  return (await getAccessLevel(user, chatInstance)) === 'FULL'
 }
 
 const authorizeChatInstancePromptResponsible = async (user: User, prompt: ChatInstancePrompt) => {
-  const isResponsible = await isResponsibleForChatInstance(user, prompt.chatInstanceId)
-
-  if (!isResponsible && !user.isAdmin) {
+  if (!(await hasFullAccessToChatInstance(user, prompt.chatInstanceId))) {
     throw ApplicationError.Forbidden('Not allowed')
   }
 }
@@ -167,7 +158,7 @@ promptRouter.post('/:id/copy', async (req, res) => {
   }
 
   const isResponsibleForSource =
-    source.type === 'CHAT_INSTANCE' && source.chatInstanceId ? await isResponsibleForChatInstance(user, source.chatInstanceId) : false
+    source.type === 'CHAT_INSTANCE' && source.chatInstanceId ? await hasFullAccessToChatInstance(user, source.chatInstanceId) : false
 
   if (
     !canCopyPrompt({
