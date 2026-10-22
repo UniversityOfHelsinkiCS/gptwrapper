@@ -282,7 +282,7 @@ chatInstanceRouter.delete('/usage/:id', async (req, res) => {
 
   chatInstanceUsage.usageCount = 0
 
-  chatInstanceUsage.save()
+  await chatInstanceUsage.save()
 
   res.status(204).send()
 })
