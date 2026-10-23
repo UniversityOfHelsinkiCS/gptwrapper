@@ -146,8 +146,7 @@ export default function GlobalMenu({
           </ListItemIcon>
           <ListItemText>{t('feedback:giveFeedback')}</ListItemText>
         </MenuItem>
-        {/* TODO: show to all users once backend is ready */}
-        {user?.isAdmin && (
+        {/* TODO: show to all users once backend is ready, upd 23.10.2026: showing to all */}
           <MenuItem
             data-testid="open-api-keys-button"
             onClick={() => {
@@ -160,7 +159,6 @@ export default function GlobalMenu({
             </ListItemIcon>
             <ListItemText>{t('apiKeys:menuLabel')}</ListItemText>
           </MenuItem>
-        )}
         {user?.isStatsViewer && (
           <MenuItem
             onClick={() => {
