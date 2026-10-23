@@ -4,6 +4,7 @@ import { sequelize } from '../connection'
 
 class ApiKey extends Model<InferAttributes<ApiKey>, InferCreationAttributes<ApiKey>> {
   declare id: CreationOptional<string>
+  declare name: string
   declare userId: string
   declare apiKey: string
   declare createdAt: CreationOptional<Date>
@@ -16,6 +17,10 @@ ApiKey.init(
       allowNull: false,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     userId: {
       type: DataTypes.STRING,

@@ -4,11 +4,16 @@ import { ApplicationError } from '../util/ApplicationError'
 import crypto from 'crypto'
 import { ApiKey } from '../db/models'
 import z from 'zod/v4'
+import { API_KEY_NAME_MAX_LENGTH, MAX_API_KEYS } from '@shared/apiKey'
 
 const apiKeyRouter = express.Router()
 
 const ApiKeyParamsSchema = z.object({
   apiKeyId: z.uuid(),
+})
+
+const ApiKeyPostSchema = z.object({
+  name: z.string().trim().min(1).max(API_KEY_NAME_MAX_LENGTH),
 })
 
 apiKeyRouter.get('/', async (req, res) => {
@@ -26,13 +31,15 @@ apiKeyRouter.get('/', async (req, res) => {
 
 apiKeyRouter.post('/', async (req, res) => {
   const { user } = req as RequestWithUser
+  const { name } = ApiKeyPostSchema.parse(req.body)
+
   const apiKeyCount = await ApiKey.count({ where: { userId: user.id } })
-  if (apiKeyCount >= 10) {
+  if (apiKeyCount >= MAX_API_KEYS) {
     throw ApplicationError.Conflict('too many api keys')
   }
   const newKey = crypto.randomBytes(32).toString('hex')
 
-  const addedKey = await ApiKey.create({ userId: user.id, apiKey: newKey })
+  const addedKey = await ApiKey.create({ userId: user.id, apiKey: newKey, name })
 
   res.status(201).json(addedKey)
 })
