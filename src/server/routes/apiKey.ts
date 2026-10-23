@@ -19,7 +19,9 @@ apiKeyRouter.get('/', async (req, res) => {
     order: [['createdAt', 'DESC']],
   })
 
-  res.json(apiKeys)
+  const maskedKeys = apiKeys.map((key) => ({ ...key.toJSON(), apiKey: `••••••••${key.apiKey.slice(-4)}` }))
+
+  res.json(maskedKeys)
 })
 
 apiKeyRouter.post('/', async (req, res) => {

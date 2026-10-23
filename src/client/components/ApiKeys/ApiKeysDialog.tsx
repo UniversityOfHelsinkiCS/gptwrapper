@@ -9,7 +9,6 @@ import { isConflictError, useApiKeys, useCreateApiKeyMutation, useDeleteApiKeyMu
 import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
 
 const formatDate = (date: string) => new Date(date).toLocaleString()
-const maskKey = (apiKey: ApiKey) => `••••••••${apiKey.apiKey.slice(-4)}`
 
 const monospace = { fontFamily: 'monospace' }
 const keyGrid = { display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr) 56px', sm: 'minmax(0, 1fr) 190px 56px' }, alignItems: 'center', px: 2 }
@@ -201,7 +200,7 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
                 <Box sx={{ ...keyGrid, minHeight: 56, py: { xs: 1, sm: 0 } }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0 }}>
                     <Typography variant="body2" sx={monospace}>
-                      {maskKey(apiKey)}
+                      {apiKey.apiKey}
                     </Typography>
                     {createdKey?.id === apiKey.id && <Chip label={t('apiKeys:newBadge')} size="small" color="primary" variant="outlined" />}
                   </Box>
@@ -212,7 +211,7 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
                     id={`delete-api-key-${apiKey.id}`}
                     onClick={() => setConfirmDeleteId(apiKey.id)}
                     disabled={deleteMutation.isPending && deleteMutation.variables === apiKey.id}
-                    aria-label={t('apiKeys:deleteKey', { key: maskKey(apiKey) })}
+                    aria-label={t('apiKeys:deleteKey', { key: apiKey.apiKey })}
                     aria-expanded={confirmDeleteId === apiKey.id}
                     sx={{ justifySelf: 'end', gridColumn: { xs: 2, sm: 'auto' }, gridRow: { xs: '1 / span 2', sm: 'auto' } }}
                   >
@@ -225,7 +224,7 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
                       <Typography id="api-key-delete-confirmation" variant="body2" fontWeight={600}>
                         <Trans
                           i18nKey="apiKeys:deleteConfirmTitle"
-                          values={{ key: maskKey(apiKey) }}
+                          values={{ key: apiKey.apiKey }}
                           components={{ key: <Box component="span" sx={{ ...monospace, fontWeight: 500 }} /> }}
                         />
                       </Typography>
@@ -241,7 +240,7 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
                         id="confirm-delete-api-key"
                         data-testid="confirm-delete-api-key"
                         onClick={() => handleDelete(apiKey.id)}
-                        aria-label={t('apiKeys:deleteKey', { key: maskKey(apiKey) })}
+                        aria-label={t('apiKeys:deleteKey', { key: apiKey.apiKey })}
                       >
                         {t('apiKeys:delete')}
                       </RedButton>
