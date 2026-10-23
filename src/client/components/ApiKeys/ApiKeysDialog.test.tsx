@@ -25,7 +25,7 @@ const i18n = i18next.createInstance()
 let keys: ApiKey[] = []
 let nextKey = 0
 
-const storedKey = (id: string, apiKey: string, createdAt: Date): ApiKey => ({ id, apiKey, createdAt: createdAt.toISOString() })
+const storedKey = (id: string, name: string, apiKey: string, createdAt: Date): ApiKey => ({ id, name, apiKey, createdAt: createdAt.toISOString() })
 
 beforeAll(async () => {
   await i18n.use(initReactI18next).init({
@@ -39,10 +39,10 @@ beforeEach(() => {
   keys = []
   queryClient.clear()
   vi.mocked(apiClient.get).mockImplementation(async () => ({ data: [...keys].reverse().map((k) => ({ ...k, apiKey: `••••••••${k.apiKey.slice(-4)}` })) }))
-  vi.mocked(apiClient.post).mockImplementation(async () => {
+  vi.mocked(apiClient.post).mockImplementation(async (_url, body) => {
     if (keys.length >= MAX_API_KEYS) throw Object.assign(new Error('Conflict'), { response: { status: 409 } })
     nextKey += 1
-    const created = storedKey(`id-${nextKey}`, `secret-${String(nextKey).padStart(4, '0')}`, new Date(2026, 9, nextKey))
+    const created = storedKey(`id-${nextKey}`, (body as { name: string }).name, `secret-${String(nextKey).padStart(4, '0')}`, new Date(2026, 9, nextKey))
     keys.push(created)
     return { data: created }
   })
@@ -67,8 +67,9 @@ const renderDialog = async () => {
   return screen.findByRole('dialog', { name: 'API keys' })
 }
 
-const createKey = async (dialog: HTMLElement) => {
+const createKey = async (dialog: HTMLElement, name = 'My script') => {
   const count = within(dialog).queryAllByRole('button', { name: /^Delete key/ }).length
+  fireEvent.change(within(dialog).getByLabelText('Key name'), { target: { value: name } })
   fireEvent.click(within(dialog).getByRole('button', { name: 'Create new key' }))
   await waitFor(() => expect(within(dialog).getAllByRole('button', { name: /^Delete key/ })).toHaveLength(count + 1))
 }
@@ -78,15 +79,20 @@ describe('ApiKeysDialog', () => {
     const dialog = await renderDialog()
     expect(await within(dialog).findByText(en.apiKeys.empty)).toBeTruthy()
 
-    await createKey(dialog)
+    expect(within(dialog).getByRole('button', { name: 'Create new key' }).hasAttribute('disabled')).toBe(true)
+
+    await createKey(dialog, '  My script  ')
+    expect(apiClient.post).toHaveBeenCalledWith('/apikeys', { name: 'My script' })
     expect(within(dialog).getByTestId('created-api-key').textContent).toBe(keys[0].apiKey)
+    expect(within(dialog).getByText('••••••••0001')).toBeTruthy()
+    expect((within(dialog).getByLabelText('Key name') as HTMLInputElement).value).toBe('')
     expect(within(dialog).getByText('New')).toBeTruthy()
 
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Delete key ••••••••0001' }))
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Delete key My script' }))
     fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }))
-    expect(document.activeElement).toBe(within(dialog).getByRole('button', { name: 'Delete key ••••••••0001' }))
+    expect(document.activeElement).toBe(within(dialog).getByRole('button', { name: 'Delete key My script' }))
 
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Delete key ••••••••0001' }))
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Delete key My script' }))
     expect(document.activeElement).toBe(within(dialog).getByRole('button', { name: 'Cancel' }))
     fireEvent.click(within(dialog).getByTestId('confirm-delete-api-key'))
     expect(await within(dialog).findByText(en.apiKeys.empty)).toBeTruthy()
@@ -94,7 +100,7 @@ describe('ApiKeysDialog', () => {
     expect(apiClient.delete).toHaveBeenCalledWith('/apikeys/id-1')
   })
 
-  const oldKeys = (count: number) => Array.from({ length: count }, (_, i) => storedKey(`old-${i}`, `old-secret-${i}`, new Date(2026, 0, i + 1)))
+  const oldKeys = (count: number) => Array.from({ length: count }, (_, i) => storedKey(`old-${i}`, '', `old-secret-${i}`, new Date(2026, 0, i + 1)))
 
   test('disables creating at the key limit', async () => {
     keys = oldKeys(MAX_API_KEYS)
@@ -111,6 +117,7 @@ describe('ApiKeysDialog', () => {
     // Another session created a key, so the server is at the limit before this list refreshes
     keys = oldKeys(MAX_API_KEYS)
 
+    fireEvent.change(within(dialog).getByLabelText('Key name'), { target: { value: 'My script' } })
     fireEvent.click(within(dialog).getByRole('button', { name: 'Create new key' }))
     await waitFor(() => expect(enqueueSnackbar).toHaveBeenCalledWith(en.apiKeys.limitReached, { variant: 'error' }))
     expect(within(dialog).queryByTestId('created-api-key')).toBeNull()

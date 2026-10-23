@@ -13,8 +13,8 @@ export const useApiKeys = (enabled: boolean) => useGetQuery<ApiKey[]>({ queryKey
 
 export const useCreateApiKeyMutation = () => {
   return useMutation({
-    mutationFn: async () => {
-      const res = await apiClient.post<ApiKey>('/apikeys')
+    mutationFn: async (name: string) => {
+      const res = await apiClient.post<ApiKey>('/apikeys', { name })
       return res.data
     },
     onSuccess: invalidateApiKeys,
