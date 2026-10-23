@@ -38,7 +38,7 @@ beforeAll(async () => {
 beforeEach(() => {
   keys = []
   queryClient.clear()
-  vi.mocked(apiClient.get).mockImplementation(async () => ({ data: [...keys].reverse() }))
+  vi.mocked(apiClient.get).mockImplementation(async () => ({ data: [...keys].reverse().map((k) => ({ ...k, apiKey: `••••••••${k.apiKey.slice(-4)}` })) }))
   vi.mocked(apiClient.post).mockImplementation(async () => {
     if (keys.length >= MAX_API_KEYS) throw Object.assign(new Error('Conflict'), { response: { status: 409 } })
     nextKey += 1
