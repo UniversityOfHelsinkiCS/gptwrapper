@@ -18,6 +18,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import useCurrentUser from '../hooks/useCurrentUser'
 import { AdminPanelSettings, BarChart, Key, Logout } from '@mui/icons-material'
 import apiClient from '../util/apiClient'
+import { useIsEmbedded } from '../contexts/EmbeddedContext'
 
 export default function GlobalMenu({
   openDisclaimer,
@@ -41,6 +42,8 @@ export default function GlobalMenu({
   const showBackButton = pathname.includes('course-creator') || pathname.includes('admin') || pathname.includes('statistics')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  // embedded chat always shows a collapsed sidebar, the menu is placed at its bottom
+  const inSidebar = useIsEmbedded()
 
   const open = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -66,7 +69,13 @@ export default function GlobalMenu({
   }
 
   return (
-    <div style={{ position: 'fixed', top: isMobile ? 10 : 20, right: isMobile ? 15 : 'calc(20px + var(--global-menu-right-offset, 0px))' }}>
+    <div
+      style={
+        inSidebar
+          ? { position: 'fixed', bottom: 20, left: 0, width: 'var(--sidebar-width-collapsed)', display: 'flex', justifyContent: 'center' }
+          : { position: 'fixed', top: isMobile ? 10 : 20, right: isMobile ? 15 : 'calc(20px + var(--global-menu-right-offset, 0px))' }
+      }
+    >
       {showBackButton && (
         <BlueButton
           onClick={() => navigate('/general')}
@@ -96,6 +105,10 @@ export default function GlobalMenu({
         open={open}
         onClose={handleClose}
         container={typeof container === 'function' ? container : () => container?.current ?? null}
+        {...(inSidebar && {
+          anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+          transformOrigin: { vertical: 'bottom', horizontal: 'left' },
+        })}
         slotProps={{
           list: {
             'aria-labelledby': 'basic-button',
@@ -147,18 +160,18 @@ export default function GlobalMenu({
           <ListItemText>{t('feedback:giveFeedback')}</ListItemText>
         </MenuItem>
         {/* TODO: show to all users once backend is ready, upd 23.10.2026: showing to all */}
-          <MenuItem
-            data-testid="open-api-keys-button"
-            onClick={() => {
-              openApiKeys()
-              handleClose()
-            }}
-          >
-            <ListItemIcon>
-              <Key fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>{t('apiKeys:menuLabel')}</ListItemText>
-          </MenuItem>
+        <MenuItem
+          data-testid="open-api-keys-button"
+          onClick={() => {
+            openApiKeys()
+            handleClose()
+          }}
+        >
+          <ListItemIcon>
+            <Key fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>{t('apiKeys:menuLabel')}</ListItemText>
+        </MenuItem>
         {user?.isStatsViewer && (
           <MenuItem
             onClick={() => {

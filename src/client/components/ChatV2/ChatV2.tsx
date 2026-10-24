@@ -451,7 +451,7 @@ const ChatV2Content = () => {
   const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
   const leftPanelFloating = isEmbeddedMode || isMobile
   const [sideBarOpen, setSideBarOpen] = useState<boolean>(() => {
-    return isMobile ? false : !defaultCollapsedSidebar
+    return isMobile || isEmbeddedMode ? false : !defaultCollapsedSidebar
   })
   const leftPanelCollapsed = !sideBarOpen || leftPanelFloating
   const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
@@ -495,6 +495,8 @@ const ChatV2Content = () => {
       }}
     >
       {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
+      {/* Embedded chat keeps the collapsed sidebar visible so that no floating buttons cover the conversation */}
+      {isEmbeddedMode && <SideBar open={false} setOpen={setSideBarOpen} user={user} handleReset={handleResetRequest} messages={messages} />}
       {isEmbeddedMode || isMobile ? (
         <Drawer
           open={sideBarOpen}
@@ -530,7 +532,7 @@ const ChatV2Content = () => {
           marginRight: 'auto',
         }}
       >
-        {(isEmbeddedMode || isMobile) && (
+        {isMobile && !isEmbeddedMode && (
           <Box
             sx={{
               position: 'fixed',
