@@ -6,6 +6,7 @@ import { Route, Routes, Link, Navigate, useMatch } from 'react-router-dom'
 import { format } from 'date-fns'
 import ChatInstances from './ChatInstances'
 import ChatInstanceSearch from './ChatInstanceSearch'
+import CourseParticipants from './CourseParticipants'
 import Usage from './Usage'
 import Updater from './Updater'
 import UserSearch from './UserSearch'
@@ -37,6 +38,7 @@ export function Component() {
   ]
   usePageTitle(tabs.find((tab) => tab.path === tabPath)?.label, t('common:admin'))
   if (!user) return null
+  if (!user.isAdmin) return <Navigate to="/noaccess" replace />
 
   const lastRestart = format(new Date(user?.lastRestart), 'dd/MM/yyyy HH.mm.ss')
 
@@ -79,6 +81,7 @@ export function Component() {
         <Route path="/" element={<Navigate to="/admin/usersearch" />} />
         <Route path="/chatinstances" element={<ChatInstances />} />
         <Route path="/usage" element={<Usage />} />
+        <Route path="/course-participants/:courseId" element={<CourseParticipants />} />
         {user.iamGroups.includes('grp-toska') && <Route path="/updater" element={<Updater />} />}
         <Route path="/usersearch" element={<UserSearch />} />
         <Route path="/chatinstancesearch" element={<ChatInstanceSearch />} />

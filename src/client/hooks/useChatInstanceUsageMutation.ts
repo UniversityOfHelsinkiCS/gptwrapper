@@ -22,6 +22,24 @@ export const useDeleteChatInstanceUsageMutation = () => {
   return mutation
 }
 
+export const useResetCourseUsageMutation = () => {
+  const mutationFn = async (courseId: string) => {
+    const res = await apiClient.delete(`/admin/courses/${courseId}/usage`)
+
+    return res
+  }
+
+  const mutation = useMutation({
+    mutationFn,
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: ['courseUsage'],
+      }),
+  })
+
+  return mutation
+}
+
 export const useResetChatInstanceUsageMutation = () => {
   const queryKey = ['courseUsage']
   const mutationFn = async (id: string) => {

@@ -117,6 +117,32 @@ export interface ChatInstanceSearchResponse {
   results: ChatInstanceSearchResult[]
   count: number
 }
+
+export interface CourseParticipant {
+  id: string
+  username: string
+  firstNames: string | null
+  lastName: string | null
+  studentNumber: string | null
+  role: 'teacher' | 'student'
+  /** UserChatInstanceUsage id, null if the user has not used the course chat */
+  courseUsageId: string | null
+  /** current course usage, gets reset */
+  courseUsage: number
+  /** cumulative course usage, never reset */
+  courseTotalUsage: number
+  /** current general usage (User.usage), gets reset */
+  usage: number
+}
+
+export interface CourseParticipantsResponse {
+  course: {
+    courseId: string
+    name: Locales
+    usageLimit: number
+  }
+  participants: CourseParticipant[]
+}
 // State of the course, not about a user.
 export type ChatStatus = 'NOT_STARTED' | 'EXPIRED' | 'ACTIVATED' | 'NOT_ACTIVATED'
 // What this user can do. A fact about a pair.

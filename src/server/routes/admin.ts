@@ -1,14 +1,14 @@
 import express from 'express'
 import { Op, WhereOptions } from 'sequelize'
 
-import { ChatInstance, UserChatInstanceUsage, User } from '../db/models'
+import { ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../db/models'
 import { sequelize } from '../db/connection'
 import { run as runUpdater } from '../updater'
 import { ApplicationError } from '../util/ApplicationError'
 import { adminMiddleware } from '../middleware/adminMiddleware'
 import { generateTerms, getTermsOf } from '../util/util'
 import { LANGUAGES } from '../../shared/lang'
-import type { ChatInstanceSearchResponse, ChatInstanceSearchResult } from '../../shared/types'
+import type { ChatInstanceSearchResponse, ChatInstanceSearchResult, CourseParticipant, CourseParticipantsResponse } from '../../shared/types'
 
 const adminRouter = express.Router()
 
@@ -176,6 +176,80 @@ adminRouter.get('/chatinstance-search', async (req, res) => {
   const response: ChatInstanceSearchResponse = { results, count }
 
   res.send(response)
+})
+
+const findCourse = async (courseId: string) => {
+  const chatInstance = await ChatInstance.findOne({
+    where: { courseId },
+    attributes: ['id', 'courseId', 'name', 'usageLimit'],
+  })
+
+  if (!chatInstance) {
+    throw ApplicationError.NotFound('Chat instance not found')
+  }
+
+  return chatInstance
+}
+
+adminRouter.get('/courses/:courseId/participants', async (req, res) => {
+  const chatInstance = await findCourse(req.params.courseId)
+  const where = { chatInstanceId: chatInstance.id }
+
+  const [responsibilities, enrolments, usages] = await Promise.all([
+    Responsibility.findAll({ where, attributes: ['userId'] }),
+    Enrolment.findAll({ where, attributes: ['userId'] }),
+    UserChatInstanceUsage.findAll({ where, attributes: ['id', 'userId', 'usageCount', 'totalUsageCount'] }),
+  ])
+
+  // teacher role wins if the user is both responsible and enrolled
+  const roles = new Map<string, CourseParticipant['role']>()
+  enrolments.forEach((enrolment) => roles.set(enrolment.userId, 'student'))
+  responsibilities.forEach((responsibility) => roles.set(responsibility.userId, 'teacher'))
+
+  const users = await User.findAll({
+    where: { id: [...roles.keys()] },
+    attributes: ['id', 'username', 'firstNames', 'lastName', 'studentNumber', 'usage'],
+  })
+
+  const usageByUser = new Map(usages.map((usage) => [usage.userId, usage]))
+
+  const participants: CourseParticipant[] = users
+    .map((user) => {
+      const usage = usageByUser.get(user.id)
+
+      return {
+        id: user.id,
+        username: user.username,
+        firstNames: user.firstNames,
+        lastName: user.lastName,
+        studentNumber: user.studentNumber ?? null,
+        role: roles.get(user.id) as CourseParticipant['role'],
+        courseUsageId: usage?.id ?? null,
+        courseUsage: usage?.usageCount ?? 0,
+        courseTotalUsage: usage?.totalUsageCount ?? 0,
+        usage: user.usage ?? 0,
+      }
+    })
+    .sort((a, b) => (a.role === b.role ? b.courseUsage - a.courseUsage : a.role === 'teacher' ? -1 : 1))
+
+  const response: CourseParticipantsResponse = {
+    course: {
+      courseId: chatInstance.courseId as string,
+      name: chatInstance.name,
+      usageLimit: chatInstance.usageLimit,
+    },
+    participants,
+  }
+
+  res.send(response)
+})
+
+adminRouter.delete('/courses/:courseId/usage', async (req, res) => {
+  const chatInstance = await findCourse(req.params.courseId)
+
+  await UserChatInstanceUsage.update({ usageCount: 0 }, { where: { chatInstanceId: chatInstance.id } })
+
+  res.status(204).send()
 })
 
 adminRouter.post('/run-updater', async (_req, res) => {
