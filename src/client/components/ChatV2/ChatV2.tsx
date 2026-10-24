@@ -459,6 +459,17 @@ const ChatV2Content = () => {
   const rightPanelCollapsed = !isMobile && hasToolResults && !rightMenuExpanded
 
   useEffect(() => {
+    if (!isEmbeddedMode) return
+    // embedded chat has little room, so its always visible collapsed sidebar is narrower than normally
+    document.documentElement.style.setProperty('--sidebar-width-collapsed', '36px')
+    document.documentElement.style.setProperty('--sidebar-collapsed-button-padding', '6px')
+    return () => {
+      document.documentElement.style.removeProperty('--sidebar-width-collapsed')
+      document.documentElement.style.removeProperty('--sidebar-collapsed-button-padding')
+    }
+  }, [isEmbeddedMode])
+
+  useEffect(() => {
     if (!rightPanelCollapsed) return
     document.documentElement.style.setProperty('--global-menu-right-offset', 'var(--sidebar-width-collapsed)')
     return () => {

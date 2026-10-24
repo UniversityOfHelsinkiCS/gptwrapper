@@ -10,7 +10,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import InfoIcon from '@mui/icons-material/Info'
 import ReviewsIcon from '@mui/icons-material/Reviews'
 import LanguageIcon from '@mui/icons-material/Language'
-import { BlueButton, OutlineButtonBlack } from './ChatV2/general/Buttons'
+import { BlueButton, OutlineButtonBlack, TextButton } from './ChatV2/general/Buttons'
 import { useMediaQuery } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Locale } from '@shared/lang'
@@ -42,8 +42,9 @@ export default function GlobalMenu({
   const showBackButton = pathname.includes('course-creator') || pathname.includes('admin') || pathname.includes('statistics')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  // embedded chat always shows a collapsed sidebar, the menu is placed at its bottom
+  // embedded chat always shows a collapsed sidebar, the menu is placed at its bottom and shows only the essential items
   const inSidebar = useIsEmbedded()
+  const MenuButton = inSidebar ? TextButton : OutlineButtonBlack
 
   const open = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -88,7 +89,7 @@ export default function GlobalMenu({
           {t('backToChat')}
         </BlueButton>
       )}
-      <OutlineButtonBlack
+      <MenuButton
         id="basic-button"
         aria-label={t('accessibility:globalMenu')}
         data-testid="global-menu-button"
@@ -96,9 +97,10 @@ export default function GlobalMenu({
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
+        sx={inSidebar ? { px: 'var(--sidebar-collapsed-button-padding, .8rem)' } : undefined}
       >
-        <MenuIcon sx={{ color: 'text.primary' }} fontSize={isMobile ? 'small' : 'medium'} />
-      </OutlineButtonBlack>
+        <MenuIcon sx={{ color: 'text.primary' }} fontSize={isMobile || inSidebar ? 'small' : 'medium'} />
+      </MenuButton>
       <Menu
         id="basic-menu"
         anchorEl={anchorEl}
@@ -124,18 +126,20 @@ export default function GlobalMenu({
           },
         }}
       >
-        <MenuItem
-          data-testid="open-global-settings-button"
-          onClick={() => {
-            openSettings()
-            handleClose()
-          }}
-        >
-          <ListItemIcon>
-            <SettingsIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>{t('settings')}</ListItemText>
-        </MenuItem>
+        {!inSidebar && (
+          <MenuItem
+            data-testid="open-global-settings-button"
+            onClick={() => {
+              openSettings()
+              handleClose()
+            }}
+          >
+            <ListItemIcon>
+              <SettingsIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>{t('settings')}</ListItemText>
+          </MenuItem>
+        )}
         <MenuItem
           data-testid="open-disclaimer-button"
           onClick={() => {
@@ -148,71 +152,76 @@ export default function GlobalMenu({
           </ListItemIcon>
           <ListItemText>{t('about_service')}</ListItemText>
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            openFeedback()
-            handleClose()
-          }}
-        >
-          <ListItemIcon>
-            <ReviewsIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>{t('feedback:giveFeedback')}</ListItemText>
-        </MenuItem>
-        {/* TODO: show to all users once backend is ready, upd 23.10.2026: showing to all */}
-        <MenuItem
-          data-testid="open-api-keys-button"
-          onClick={() => {
-            openApiKeys()
-            handleClose()
-          }}
-        >
-          <ListItemIcon>
-            <Key fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>{t('apiKeys:menuLabel')}</ListItemText>
-        </MenuItem>
-        {user?.isStatsViewer && (
+        {!inSidebar && [
           <MenuItem
+            key="feedback"
             onClick={() => {
-              navigate('/statistics')
+              openFeedback()
               handleClose()
             }}
           >
             <ListItemIcon>
-              <BarChart fontSize="small" />
+              <ReviewsIcon fontSize="small" />
             </ListItemIcon>
-            <ListItemText>{t('courseStats')}</ListItemText>
-          </MenuItem>
-        )}
-
-        {user?.isAdmin && (
+            <ListItemText>{t('feedback:giveFeedback')}</ListItemText>
+          </MenuItem>,
+          // TODO: show to all users once backend is ready, upd 23.10.2026: showing to all
           <MenuItem
+            key="api-keys"
+            data-testid="open-api-keys-button"
             onClick={() => {
-              navigate('/admin')
+              openApiKeys()
               handleClose()
             }}
           >
             <ListItemIcon>
-              <AdminPanelSettings fontSize="small" />
+              <Key fontSize="small" />
             </ListItemIcon>
-            <ListItemText>{t('admin')}</ListItemText>
-          </MenuItem>
-        )}
-
-        {user?.isCourseCreator && (
-          <MenuItem
-            onClick={() => {
-              navigate('/course-creator')
-              handleClose()
-            }}
-          >
-            <ListItemIcon>
-              <AdminPanelSettings fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>{t('courseCreator:title')}</ListItemText>
-          </MenuItem>
-        )}
+            <ListItemText>{t('apiKeys:menuLabel')}</ListItemText>
+          </MenuItem>,
+          user?.isStatsViewer && (
+            <MenuItem
+              key="statistics"
+              onClick={() => {
+                navigate('/statistics')
+                handleClose()
+              }}
+            >
+              <ListItemIcon>
+                <BarChart fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>{t('courseStats')}</ListItemText>
+            </MenuItem>
+          ),
+          user?.isAdmin && (
+            <MenuItem
+              key="admin"
+              onClick={() => {
+                navigate('/admin')
+                handleClose()
+              }}
+            >
+              <ListItemIcon>
+                <AdminPanelSettings fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>{t('admin')}</ListItemText>
+            </MenuItem>
+          ),
+          user?.isCourseCreator && (
+            <MenuItem
+              key="course-creator"
+              onClick={() => {
+                navigate('/course-creator')
+                handleClose()
+              }}
+            >
+              <ListItemIcon>
+                <AdminPanelSettings fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>{t('courseCreator:title')}</ListItemText>
+            </MenuItem>
+          ),
+        ]}
 
         <MenuItem
           onClick={() => {
