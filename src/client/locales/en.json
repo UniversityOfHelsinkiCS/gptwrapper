@@ -496,6 +496,12 @@
     "confirmDeleteMessage": "Are you sure you want to delete '{{name}}'?"
   },
   "course": {
+    "confirmRemoveTeacher": "Remove {{- name}} from the teachers of the course?",
+    "confirmRemoveStudent": "Remove {{- name}} from the students of the course?",
+    "confirmAddTeacherTitle": "Add teacher",
+    "confirmAddTeacher": "Add {{- name}} as a teacher of the course?",
+    "confirmAddStudentTitle": "Add student",
+    "confirmAddStudent": "Add {{- name}} as a student of the course?",
     "showDiscussions": "Show the saved discussions",
     "reseachCourse": "Research course",
     "downloadAllDiscussions": "Download all conversations",

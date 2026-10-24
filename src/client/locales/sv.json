@@ -468,6 +468,12 @@
     "confirmDeleteMessage": "Är du säker på att du vill ta bort '{{name}}'?"
   },
   "course": {
+    "confirmRemoveTeacher": "Ta bort {{- name}} från kursens lärare?",
+    "confirmRemoveStudent": "Ta bort {{- name}} från kursens studenter?",
+    "confirmAddTeacherTitle": "Lägg till lärare",
+    "confirmAddTeacher": "Lägg till {{- name}} som lärare på kursen?",
+    "confirmAddStudentTitle": "Lägg till student",
+    "confirmAddStudent": "Lägg till {{- name}} som student på kursen?",
     "courseUpdated": "Kursen uppdaterad",
     "disableCurre": "Inaktivera CurreChat",
     "closeToMaxTokenLimit": "StudeInaktivera CurreChatnter nära token-gränsen",

@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, type ButtonProps } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 const ConfirmDialog = ({
@@ -7,12 +7,16 @@ const ConfirmDialog = ({
   message,
   onConfirm,
   onCancel,
+  confirmText,
+  confirmColor = 'error',
 }: {
   open: boolean
   title: string
   message: string
   onConfirm: () => void
   onCancel: () => void
+  confirmText?: string
+  confirmColor?: ButtonProps['color']
 }) => {
   const { t } = useTranslation()
 
@@ -26,8 +30,8 @@ const ConfirmDialog = ({
         <Button onClick={onCancel} variant="text">
           {t('common:cancel')}
         </Button>
-        <Button onClick={onConfirm} variant="contained" color="error" data-testid="confirm-dialog-confirm">
-          {t('common:delete')}
+        <Button onClick={onConfirm} variant="contained" color={confirmColor} data-testid="confirm-dialog-confirm">
+          {confirmText ?? t('common:delete')}
         </Button>
       </DialogActions>
     </Dialog>

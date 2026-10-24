@@ -55,11 +55,35 @@ import { EnrolmentActionUserSearch, ResponsibilityActionUserSearch } from '../Ad
 import CancelIcon from '@mui/icons-material/Cancel'
 import { visuallyHidden } from '@mui/utils'
 import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
+import ConfirmDialog from './general/ConfirmDialog'
 
 const initialsOf = (lastName?: string, firstNames?: string) => {
   const a = firstNames?.trim()?.[0] ?? ''
   const b = lastName?.trim()?.[0] ?? ''
   return `${a}${b}`.toUpperCase()
+}
+
+const fullNameOf = (user: User) => `${user.firstNames ?? ''} ${user.lastName ?? ''}`.trim()
+
+// responsibilities and enrolments carry their user with snake_case name fields
+const memberNameOf = (member: Responsibility | Enrolment) => `${member.user.first_names ?? ''} ${member.user.last_name ?? ''}`.trim()
+
+type PendingAction =
+  | { kind: 'addTeacher'; user: User }
+  | { kind: 'addStudent'; user: User }
+  | { kind: 'removeTeacher'; responsibility: Responsibility }
+  | { kind: 'removeStudent'; enrolment: Enrolment }
+
+const targetUserIdOf = (action: PendingAction) => {
+  switch (action.kind) {
+    case 'addTeacher':
+    case 'addStudent':
+      return action.user.id
+    case 'removeTeacher':
+      return action.responsibility.user.id
+    case 'removeStudent':
+      return action.enrolment.user.id
+  }
 }
 
 const addButtonSx = {
@@ -100,6 +124,11 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
   const [search, setSearch] = useState('')
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'last_name', direction: 'asc' })
   const [statusMessage, setStatusMessage] = useState('')
+  // kept after the dialog closes so that its texts do not change during the closing animation
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  // user whose addition or removal is in progress, its action buttons are disabled meanwhile
+  const [busyUserId, setBusyUserId] = useState<string | null>(null)
 
   useEffect(() => {
     if (chatInstance && refetchCourses) refetchCourses()
@@ -162,7 +191,10 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
       const result = await apiClient.post(`/courses/${course.courseId}/responsibilities/assign`, { username: target.username })
       if (result.status !== 200) throw new Error()
       setResponsibilities((prev) => [...prev, result.data])
-      setStatusMessage(t('accessibility:teacherAdded', { name: `${target.firstNames ?? ''} ${target.lastName ?? ''}`.trim() }))
+      const message = t('accessibility:teacherAdded', { name: fullNameOf(target) })
+      setStatusMessage(message)
+      enqueueSnackbar(message, { variant: 'success' })
+      setAddTeacherOpen(false)
       refetchCourse()
     } catch {
       enqueueSnackbar(t('course:addTeacherFailed'), { variant: 'error' })
@@ -170,12 +202,11 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
   }
 
   const handleRemoveResponsibility = async (responsibility: Responsibility): Promise<boolean> => {
-    if (!window.confirm(t('course:confirmRemoval'))) return false
     try {
       const result = await apiClient.post(`/courses/${course.courseId}/responsibilities/remove`, { username: responsibility.user?.username })
       if (result.status !== 200) throw new Error()
       setResponsibilities((prev) => prev.filter((r) => r.id !== responsibility.id))
-      setStatusMessage(t('accessibility:teacherRemoved', { name: `${responsibility.user.first_names ?? ''} ${responsibility.user.last_name ?? ''}`.trim() }))
+      setStatusMessage(t('accessibility:teacherRemoved', { name: memberNameOf(responsibility) }))
       refetchCourse()
       return true
     } catch {
@@ -189,19 +220,21 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
       const result = await apiClient.post(`/courses/${course.courseId}/enrolments/assign`, { username: target.username })
       if (result.status !== 200) throw new Error()
       setEnrolments((prev) => [...prev, result.data])
-      setStatusMessage(t('accessibility:studentAdded', { name: `${target.firstNames ?? ''} ${target.lastName ?? ''}`.trim() }))
+      const message = t('accessibility:studentAdded', { name: fullNameOf(target) })
+      setStatusMessage(message)
+      enqueueSnackbar(message, { variant: 'success' })
+      setAddStudentOpen(false)
     } catch {
       enqueueSnackbar(t('course:addStudentFailed'), { variant: 'error' })
     }
   }
 
   const handleRemoveEnrolment = async (enrolment: Enrolment) => {
-    if (!window.confirm(t('course:confirmRemoval'))) return
     try {
       const result = await apiClient.post(`/courses/${course.courseId}/enrolments/remove`, { username: enrolment.user.username })
       if (result.status !== 200) throw new Error()
       setEnrolments((prev) => prev.filter((e) => e.id !== enrolment.id))
-      setStatusMessage(t('accessibility:studentRemoved', { name: `${enrolment.user.first_names ?? ''} ${enrolment.user.last_name ?? ''}`.trim() }))
+      setStatusMessage(t('accessibility:studentRemoved', { name: memberNameOf(enrolment) }))
     } catch {
       enqueueSnackbar(t('course:removeStudentFailed'), { variant: 'error' })
     }
@@ -221,7 +254,8 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
     const existing = responsibilities.find((r) => r.user.id === target.id)
     return (
       <OutlineButtonBlue
-        onClick={() => (existing ? handleRemoveResponsibility(existing) : handleAddResponsible(target))}
+        disabled={busyUserId === target.id}
+        onClick={() => requestConfirm(existing ? { kind: 'removeTeacher', responsibility: existing } : { kind: 'addTeacher', user: target })}
         sx={existing ? undefined : addButtonSx}
       >
         {existing ? t('course:remove') : t('course:add')}
@@ -234,13 +268,60 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
     return (
       <OutlineButtonBlue
         data-testid={existing ? `remove-student-${target.username}` : `add-student-${target.username}`}
-        onClick={() => (existing ? handleRemoveEnrolment(existing) : handleAddEnrolment(target))}
+        disabled={busyUserId === target.id}
+        onClick={() => requestConfirm(existing ? { kind: 'removeStudent', enrolment: existing } : { kind: 'addStudent', user: target })}
         sx={existing ? undefined : addButtonSx}
       >
         {existing ? t('course:remove') : t('course:add')}
       </OutlineButtonBlue>
     )
   }
+
+  const requestConfirm = (action: PendingAction) => {
+    setPendingAction(action)
+    setConfirmOpen(true)
+  }
+
+  const handleConfirm = async () => {
+    if (!pendingAction) return
+    setConfirmOpen(false)
+    setBusyUserId(targetUserIdOf(pendingAction))
+    try {
+      if (pendingAction.kind === 'addTeacher') await handleAddResponsible(pendingAction.user)
+      if (pendingAction.kind === 'addStudent') await handleAddEnrolment(pendingAction.user)
+      if (pendingAction.kind === 'removeStudent') await handleRemoveEnrolment(pendingAction.enrolment)
+      if (pendingAction.kind === 'removeTeacher') {
+        const removed = await handleRemoveResponsibility(pendingAction.responsibility)
+        if (removed) document.getElementById('toggle-add-teacher-view')?.focus()
+      }
+    } finally {
+      setBusyUserId(null)
+    }
+  }
+
+  const confirmDialogTexts = (action: PendingAction | null) => {
+    switch (action?.kind) {
+      case 'addTeacher':
+        return {
+          title: t('course:confirmAddTeacherTitle'),
+          message: t('course:confirmAddTeacher', { name: fullNameOf(action.user) }),
+          confirmText: t('course:add'),
+        }
+      case 'addStudent':
+        return {
+          title: t('course:confirmAddStudentTitle'),
+          message: t('course:confirmAddStudent', { name: fullNameOf(action.user) }),
+          confirmText: t('course:add'),
+        }
+      case 'removeTeacher':
+        return { title: t('course:confirmRemoval'), message: t('course:confirmRemoveTeacher', { name: memberNameOf(action.responsibility) }) }
+      case 'removeStudent':
+        return { title: t('course:confirmRemoval'), message: t('course:confirmRemoveStudent', { name: memberNameOf(action.enrolment) }) }
+      default:
+        return { title: '', message: '' }
+    }
+  }
+  const { title: confirmTitle, message: confirmMessage, confirmText } = confirmDialogTexts(pendingAction)
 
   const activeCourse: Course = chatInstance ? chatInstance : course
   const activated = activeCourse.activated
@@ -249,6 +330,15 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
   return (
     <>
       <StatusAnnouncer message={statusMessage} />
+      <ConfirmDialog
+        open={confirmOpen}
+        title={confirmTitle}
+        message={confirmMessage}
+        confirmText={confirmText}
+        confirmColor={confirmText ? 'primary' : 'error'}
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmOpen(false)}
+      />
       <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: '12px', overflow: 'auto', maxHeight: '100%', mb: 2 }}>
         {/* Title */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mt: 1 }}>
@@ -421,14 +511,7 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
                       sx={{ '& .MuiChip-avatar': { bgcolor: 'primary.main', color: 'primary.contrastText' } }}
                       avatar={<Avatar>{initialsOf(responsibility.user.last_name, responsibility.user.first_names)}</Avatar>}
                       label={name}
-                      onDelete={
-                        deletable
-                          ? async () => {
-                              const removed = await handleRemoveResponsibility(responsibility)
-                              if (removed) document.getElementById('toggle-add-teacher-view')?.focus()
-                            }
-                          : undefined
-                      }
+                      onDelete={deletable ? () => requestConfirm({ kind: 'removeTeacher', responsibility }) : undefined}
                       deleteIcon={<CloseIcon />}
                       variant="outlined"
                       aria-label={deletable ? [name, t('accessibility:removeChip')].filter(Boolean).join(', ') : undefined}
@@ -578,7 +661,7 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
                                 size="small"
                                 onClick={() => {
                                   const existing = enrolments.find((e) => e.user.id === s.user.id)
-                                  if (existing) handleRemoveEnrolment(existing)
+                                  if (existing) requestConfirm({ kind: 'removeStudent', enrolment: existing })
                                 }}
                                 aria-label={t('accessibility:itemAction', {
                                   action: t('course:remove'),

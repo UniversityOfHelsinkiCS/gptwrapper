@@ -31,9 +31,9 @@ export const useResetCourseUsageMutation = () => {
 
   const mutation = useMutation({
     mutationFn,
-    onSuccess: () =>
+    onSuccess: (_res, courseId) =>
       queryClient.invalidateQueries({
-        queryKey: ['courseUsage'],
+        queryKey: ['courseParticipants', courseId],
       }),
   })
 

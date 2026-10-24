@@ -499,6 +499,12 @@
     "confirmDeleteMessage": "Haluatko varmasti poistaa työtilan '{{name}}'?"
   },
   "course": {
+    "confirmRemoveTeacher": "Poistetaanko {{- name}} kurssin opettajista?",
+    "confirmRemoveStudent": "Poistetaanko {{- name}} kurssin opiskelijoista?",
+    "confirmAddTeacherTitle": "Lisää opettaja",
+    "confirmAddTeacher": "Lisätäänkö {{- name}} kurssin opettajaksi?",
+    "confirmAddStudentTitle": "Lisää opiskelija",
+    "confirmAddStudent": "Lisätäänkö {{- name}} kurssin opiskelijaksi?",
     "showDiscussions": "Näytä talletetut keskustelut",
     "reseachCourse": "Tutkimuskurssi",
     "downloadAllDiscussions": "Lataa kaikki keskustelut",

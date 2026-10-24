@@ -1,4 +1,4 @@
-import { Box, Button, Container, Input, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material'
+import { Box, Button, Input, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import { enqueueSnackbar } from '../common/Snackbar'
 import { useEffect, useRef, useState, type InputHTMLAttributes } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -139,63 +139,43 @@ const ActionUserTable = ({
   const { t } = useTranslation()
   if (!users || users.length === 0) return null
 
+  // the action column is first so that the button stays visible on narrow screens
+  const headers = [actionText, t('admin:lastName'), t('admin:firstNames'), t('admin:email'), t('admin:studentNumber'), t('admin:username')]
+
   return (
     <Box my={2} sx={{ maxWidth: '100%', minWidth: 0, overflow: 'auto' }}>
-      <TableContainer component={Container}>
-        <Table>
+      <TableContainer>
+        <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>
-                <Typography variant="h6" component="span">
-                  <b>{t('admin:username')}</b>
-                </Typography>
-              </TableCell>
-              <TableCell align="left">
-                <Typography variant="h6" component="span">
-                  <b>{t('admin:lastName')}</b>
-                </Typography>
-              </TableCell>
-              <TableCell align="left">
-                <Typography variant="h6" component="span">
-                  <b>{t('admin:firstNames')}</b>
-                </Typography>
-              </TableCell>
-              <TableCell align="left">
-                <Typography variant="h6" component="span">
-                  <b>{t('admin:studentNumber')}</b>
-                </Typography>
-              </TableCell>
-              <TableCell align="left">
-                <Typography variant="h6" component="span">
-                  <b>{t('admin:email')}</b>
-                </Typography>
-              </TableCell>
-              <TableCell align="left">
-                <Typography variant="h6" component="span">
-                  <b>{actionText}</b>
-                </Typography>
-              </TableCell>
+              {headers.map((header) => (
+                <TableCell key={header} align="left">
+                  <Typography variant="body2" component="span" fontWeight="bold">
+                    {header}
+                  </Typography>
+                </TableCell>
+              ))}
             </TableRow>
           </TableHead>
           <TableBody>
             {users.map((user) => (
               <TableRow key={user.id}>
-                <TableCell component="th" scope="row">
-                  <Typography>{user.username}</Typography>
-                </TableCell>
-                <TableCell align="left">
-                  <Typography>{user.lastName}</Typography>
-                </TableCell>
-                <TableCell align="left">
-                  <Typography>{user.firstNames}</Typography>
-                </TableCell>
-                <TableCell align="left">
-                  <Typography>{user.studentNumber}</Typography>
-                </TableCell>
-                <TableCell align="left">
-                  <Typography>{user.primaryEmail}</Typography>
-                </TableCell>
                 <TableCell>{drawActionComponent(user)}</TableCell>
+                <TableCell component="th" scope="row">
+                  <Typography variant="body2">{user.lastName}</Typography>
+                </TableCell>
+                <TableCell align="left">
+                  <Typography variant="body2">{user.firstNames}</Typography>
+                </TableCell>
+                <TableCell align="left">
+                  <Typography variant="body2">{user.primaryEmail}</Typography>
+                </TableCell>
+                <TableCell align="left">
+                  <Typography variant="body2">{user.studentNumber}</Typography>
+                </TableCell>
+                <TableCell align="left">
+                  <Typography variant="body2">{user.username}</Typography>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
