@@ -83,6 +83,9 @@ test.describe('axe wcag scan for prompt modal', () => {
 
     await page.getByTestId('show-course-info-test-course-button').click()
     await expect(page.getByTestId('course-status-chip')).toBeVisible()
+    // the click leaves the pointer on the course row; move it away so that its hover tooltip is not part of the scan
+    await page.mouse.move(0, 0)
+    await expect(page.getByRole('tooltip')).toHaveCount(0)
     await scan(page, testInfo.title)
   })
 
