@@ -468,6 +468,8 @@
     "confirmDeleteMessage": "Är du säker på att du vill ta bort '{{name}}'?"
   },
   "course": {
+    "showPrompts": "Visa kursens prompter",
+    "hidePrompts": "Dölj kursens prompter",
     "confirmRemoveTeacher": "Ta bort {{- name}} från kursens lärare?",
     "confirmRemoveStudent": "Ta bort {{- name}} från kursens studenter?",
     "confirmAddTeacherTitle": "Lägg till lärare",

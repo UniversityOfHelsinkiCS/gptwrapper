@@ -499,6 +499,8 @@
     "confirmDeleteMessage": "Haluatko varmasti poistaa työtilan '{{name}}'?"
   },
   "course": {
+    "showPrompts": "Näytä kurssin alustukset",
+    "hidePrompts": "Piilota kurssin alustukset",
     "confirmRemoveTeacher": "Poistetaanko {{- name}} kurssin opettajista?",
     "confirmRemoveStudent": "Poistetaanko {{- name}} kurssin opiskelijoista?",
     "confirmAddTeacherTitle": "Lisää opettaja",

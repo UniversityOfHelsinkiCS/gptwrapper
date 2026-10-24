@@ -496,6 +496,8 @@
     "confirmDeleteMessage": "Are you sure you want to delete '{{name}}'?"
   },
   "course": {
+    "showPrompts": "Show the prompts of the course",
+    "hidePrompts": "Hide the prompts of the course",
     "confirmRemoveTeacher": "Remove {{- name}} from the teachers of the course?",
     "confirmRemoveStudent": "Remove {{- name}} from the students of the course?",
     "confirmAddTeacherTitle": "Add teacher",

@@ -122,60 +122,62 @@ const CoursePrompts = (props: CoursePromptsProps) => {
               : {}),
           }}
         >
-          <ListItemButton
-            onClick={() => {
-              setPreviewCourse(course)
-              setPreviewPrompt(undefined)
-              setShowPrompts(true)
-            }}
-            sx={{
-              px: 1,
-              borderRadius: 1,
-              flex: 1,
-              minWidth: 0,
-              '&:hover': { backgroundColor: 'transparent' },
-              ...focusIndicatorStyle(),
-            }}
-            data-testid={`show-course-info-${course.id}-button`}
-            aria-label={[
-              course.status === 'EXPIRED'
-                ? t('accessibility:expiredCourse')
-                : course.status === 'ACTIVATED'
-                  ? t('accessibility:activeCourse')
-                  : t('accessibility:closedCourse'),
-              course.name[language],
-              showActivityPeriod && formatDate(course.activityPeriod),
-              t('common:preview'),
-            ]
-              .filter(Boolean)
-              .join(', ')}
-            aria-pressed={previewCourse?.id === course.id}
-          >
-            <Box
-              component="span"
+          <Tooltip title={t('course:showCourse')} describeChild>
+            <ListItemButton
+              onClick={() => {
+                setPreviewCourse(course)
+                setPreviewPrompt(undefined)
+                setShowPrompts(true)
+              }}
               sx={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                mr: 1.5,
-                flexShrink: 0,
-                backgroundColor: dotColor,
+                px: 1,
+                borderRadius: 1,
+                flex: 1,
+                minWidth: 0,
+                '&:hover': { backgroundColor: 'transparent' },
+                ...focusIndicatorStyle(),
               }}
-            />
-            <ListItemText
-              primary={course.name[language]}
-              secondary={showActivityPeriod ? formatDate(course.activityPeriod) : undefined}
-              slotProps={{
-                primary: {
-                  id: `course-heading-${course.id}`,
-                  variant: 'subtitle1',
-                  component: 'span',
-                  fontWeight: 600,
-                  color: course.activated || !hasFullAccess ? 'default' : 'text.secondary',
-                },
-              }}
-            />
-          </ListItemButton>
+              data-testid={`show-course-info-${course.id}-button`}
+              aria-label={[
+                course.status === 'EXPIRED'
+                  ? t('accessibility:expiredCourse')
+                  : course.status === 'ACTIVATED'
+                    ? t('accessibility:activeCourse')
+                    : t('accessibility:closedCourse'),
+                course.name[language],
+                showActivityPeriod && formatDate(course.activityPeriod),
+                t('common:preview'),
+              ]
+                .filter(Boolean)
+                .join(', ')}
+              aria-pressed={previewCourse?.id === course.id}
+            >
+              <Box
+                component="span"
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  mr: 1.5,
+                  flexShrink: 0,
+                  backgroundColor: dotColor,
+                }}
+              />
+              <ListItemText
+                primary={course.name[language]}
+                secondary={showActivityPeriod ? formatDate(course.activityPeriod) : undefined}
+                slotProps={{
+                  primary: {
+                    id: `course-heading-${course.id}`,
+                    variant: 'subtitle1',
+                    component: 'span',
+                    fontWeight: 600,
+                    color: course.activated || !hasFullAccess ? 'default' : 'text.secondary',
+                  },
+                }}
+              />
+            </ListItemButton>
+          </Tooltip>
           <StatusAnnouncer message={previewCourse?.id === course.id ? t('accessibility:previewOpened', { name: course.name[language] }) : ''} />
 
           {hasFullAccess && (
@@ -192,15 +194,17 @@ const CoursePrompts = (props: CoursePromptsProps) => {
             </Tooltip>
           )}
 
-          <IconButton
-            aria-label={t('course:togglePrompts') + ` ${course.name[language]}`}
-            aria-expanded={showPrompts}
-            onClick={() => setShowPrompts((open) => !open)}
-            data-testid={`toggle-course-prompts-${course.id}-button`}
-            sx={{ color: 'text.secondary', ...focusIndicatorStyle() }}
-          >
-            {showPrompts ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
-          </IconButton>
+          <Tooltip title={showPrompts ? t('course:hidePrompts') : t('course:showPrompts')} describeChild>
+            <IconButton
+              aria-label={t('course:togglePrompts') + ` ${course.name[language]}`}
+              aria-expanded={showPrompts}
+              onClick={() => setShowPrompts((open) => !open)}
+              data-testid={`toggle-course-prompts-${course.id}-button`}
+              sx={{ color: 'text.secondary', ...focusIndicatorStyle() }}
+            >
+              {showPrompts ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
+            </IconButton>
+          </Tooltip>
         </Box>
         {showPrompts && sortedPrompts.length > 0 && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2.5, mb: 1 }}>
