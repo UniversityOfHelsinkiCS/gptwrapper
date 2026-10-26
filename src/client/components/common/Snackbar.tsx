@@ -160,10 +160,10 @@ const SnackbarCloseButton = ({ snackbarId, messageId }: { snackbarId: SnackbarKe
 const FixedWidthContent = styled(MaterialDesignContent)(({ theme, variant }) => {
   const backgroundColors: Record<VariantType, string> = {
     default: theme.palette.secondary.main,
-    success: theme.palette.success.main,
+    success: theme.palette.mode === 'dark' ? theme.palette.success.dark : theme.palette.success.main,
     error: theme.palette.mode === 'dark' ? theme.palette.error.dark : theme.palette.error.main,
     warning: theme.palette.warning.main,
-    info: theme.palette.primary.main,
+    info: theme.palette.mode === 'dark' ? theme.palette.info.dark : theme.palette.info.main,
   }
 
   return {

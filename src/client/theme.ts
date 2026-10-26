@@ -81,6 +81,11 @@ const baseOptions: Omit<ThemeOptions, 'palette'> = {
             borderWidth: '2px',
           },
         },
+        outlinedPrimary: ({ theme }) =>
+          theme.applyStyles('dark', {
+            color: theme.palette.text.primary,
+            borderColor: theme.palette.primary.light,
+          }),
       },
     },
 
@@ -159,14 +164,10 @@ const useTheme = () => {
             secondary: {
               main: '#79719D',
             },
-            success: {
-              main: '#4a7c59',
-            },
-            info: {
-              main: '#5779A2',
-            },
+            success: prefersDarkMode ? { main: '#81c784', dark: '#4a7c59' } : { main: '#4a7c59' },
+            info: prefersDarkMode ? { main: '#90a9cb', dark: '#5779A2' } : { main: '#5779A2' },
             warning: {
-              main: '#AA4408E4',
+              main: '#aa4308',
             },
             error: prefersDarkMode ? { main: '#e57373', dark: '#9b4545' } : { main: '#9b4545' },
             toskaDark: {

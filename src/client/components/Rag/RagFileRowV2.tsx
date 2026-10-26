@@ -108,7 +108,13 @@ export const RagFileRowV2: React.FC<RagFileRowV2Props> = ({ file, status, upload
 
         {!isSuccess && !isError && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.75 }}>
-            <LinearProgress variant="determinate" value={progress} aria-label={t('rag:statusProcessing')} color="info" sx={{ flex: 1, maxWidth: 200, height: 5, borderRadius: 3 }} />
+            <LinearProgress
+              variant="determinate"
+              value={progress}
+              aria-label={t('rag:statusProcessing')}
+              color="info"
+              sx={{ flex: 1, maxWidth: 200, height: 5, borderRadius: 3 }}
+            />
             <Typography variant="caption" sx={{ color: 'info.main', fontWeight: 700, whiteSpace: 'nowrap' }}>
               {t('rag:statusProcessing')} · {Math.round(progress)} %
             </Typography>
