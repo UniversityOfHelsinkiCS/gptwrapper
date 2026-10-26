@@ -522,6 +522,7 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
                 <Chip
                   variant="outlined"
                   color="primary"
+                  sx={(theme) => theme.applyStyles('dark', { color: theme.palette.toskaDark.contrastText, borderColor: theme.palette.text.secondary })}
                   onClick={() => setShowAllTeachers((open) => !open)}
                   label={showAllTeachers ? t('course:showLess') : t('course:showMore', { count: responsibilities.length - 5 })}
                   data-testid="toggle-show-all-teachers"
