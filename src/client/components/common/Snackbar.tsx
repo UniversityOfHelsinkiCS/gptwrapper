@@ -161,7 +161,7 @@ const FixedWidthContent = styled(MaterialDesignContent)(({ theme, variant }) => 
   const backgroundColors: Record<VariantType, string> = {
     default: theme.palette.secondary.main,
     success: theme.palette.success.main,
-    error: theme.palette.error.main,
+    error: theme.palette.mode === 'dark' ? theme.palette.error.dark : theme.palette.error.main,
     warning: theme.palette.warning.main,
     info: theme.palette.primary.main,
   }

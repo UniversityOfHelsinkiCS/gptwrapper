@@ -168,9 +168,7 @@ const useTheme = () => {
             warning: {
               main: '#AA4408E4',
             },
-            error: {
-              main: '#9b4545',
-            },
+            error: prefersDarkMode ? { main: '#e57373', dark: '#9b4545' } : { main: '#9b4545' },
             toskaDark: {
               main: '#1a202c',
               contrastText: '#fff',
