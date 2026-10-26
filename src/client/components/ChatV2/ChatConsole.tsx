@@ -91,14 +91,24 @@ type ContextCardProps = {
   prompt?: Prompt | undefined
   ragLabel?: string | null
   ragHidden?: boolean | null
-  isEmployeeOrAdmin?: boolean
+  canAccessSourceMaterials?: boolean
   onClear?: () => void
   clearTooltip?: string
   contextCardId?: string
   clearTestId?: string
 }
 
-const ContextCard = ({ courseLabel, prompt, ragLabel, ragHidden, isEmployeeOrAdmin, onClear, clearTooltip, contextCardId, clearTestId }: ContextCardProps) => {
+const ContextCard = ({
+  courseLabel,
+  prompt,
+  ragLabel,
+  ragHidden,
+  canAccessSourceMaterials,
+  onClear,
+  clearTooltip,
+  contextCardId,
+  clearTestId,
+}: ContextCardProps) => {
   const { t } = useTranslation()
   const promptLabel = prompt?.name
   const promptDescription = prompt?.userInstructions
@@ -113,7 +123,7 @@ const ContextCard = ({ courseLabel, prompt, ragLabel, ragHidden, isEmployeeOrAdm
       : t(`sidebar:${promptType === 'PERSONAL' ? 'myPrompt' : 'universityPrompt'}`)
     : null
 
-  const showRagLabel = Boolean(ragLabel) && (promptType === 'PERSONAL' || !ragHidden || isEmployeeOrAdmin)
+  const showRagLabel = Boolean(ragLabel) && (promptType === 'PERSONAL' || !ragHidden || canAccessSourceMaterials)
 
   const [descExpanded, setDescExpanded] = useState(false)
   const [descOverflows, setDescOverflows] = useState(false)
@@ -324,6 +334,7 @@ export default function ChatConsole({ user }: { user?: User | null }) {
   const isCourseChat = Boolean(courseId) && courseId !== 'general'
   const { data: course } = useCourse(isCourseChat ? courseId : undefined)
   const isEmployeeOrAdmin = user?.isEmployee || user?.isAdmin
+  const canAccessSourceMaterials = isEmployeeOrAdmin || user?.iamGroups.includes('grp-currechat-teachers')
 
   const promptsPath = `/${courseId ?? 'general'}/prompts`
   const courseLabel = isCourseChat ? (course ? getLanguageValue(course.name, i18n.language) : '') : undefined
@@ -343,7 +354,7 @@ export default function ChatConsole({ user }: { user?: User | null }) {
         />
       </Box>
 
-      {isEmployeeOrAdmin && (
+      {canAccessSourceMaterials && (
         <Box sx={{ mb: 1 }}>
           <SelectorRow
             icon={<LibraryBooksIcon />}
@@ -361,7 +372,7 @@ export default function ChatConsole({ user }: { user?: User | null }) {
           prompt={activePrompt}
           ragLabel={activePrompt?.ragIndex?.metadata.name}
           ragHidden={activePrompt?.ragHidden}
-          isEmployeeOrAdmin={Boolean(isEmployeeOrAdmin)}
+          canAccessSourceMaterials={Boolean(canAccessSourceMaterials)}
           onClear={
             activePrompt
               ? () => {

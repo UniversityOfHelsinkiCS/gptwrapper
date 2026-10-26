@@ -208,12 +208,14 @@ const RagSettingsSection = () => {
   const visibilityLabelId = useId()
   const selectedIndexName = (ragIndices?.find((i) => i.id === selectedIndexId) ?? userRagIndices?.find((i) => i.id === selectedIndexId))?.metadata.name
 
+  const canAccessSourceMaterials = user?.isEmployee || user?.isAdmin || user?.iamGroups.includes('grp-currechat-teachers')
+
   const handleBack = () => {
     setSelectedIndexId(null)
     setSelectedFileId(null)
   }
 
-  if (!user?.isEmployee && !user?.isAdmin) return null
+  if (!canAccessSourceMaterials) return null
 
   return (
     <Box>
