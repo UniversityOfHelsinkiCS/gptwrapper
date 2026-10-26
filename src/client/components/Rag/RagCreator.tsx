@@ -78,6 +78,7 @@ export const RagCreator = ({ onCreated }: { onCreated?: (indexId: number) => voi
               value={language}
               label={t('rag:language')}
               data-testid="ragIndexLanguageInput"
+              inputProps={{ 'aria-labelledby': 'language-label' }}
               onChange={(e) => setLanguage(e.target.value as (typeof RAG_LANGUAGES)[number])}
             >
               <MenuItem value={RAG_LANGUAGES[0]} data-testid="ragIndexLanguageOptionFinnish">
