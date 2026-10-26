@@ -87,7 +87,7 @@ export const DisclaimerModal = ({ disclaimerStatus, setDisclaimerStatus }: { dis
           <Close />
         </IconButton>
 
-        <Box sx={{ mt: 2 }}>
+        <Box sx={(theme) => ({ mt: 2, ...theme.applyStyles('dark', { '& a': { color: '#8ab4f8' }, '& a:visited': { color: '#c58af9' } }) })}>
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{InfoTexts.disclaimer[i18n.language]}</ReactMarkdown>
         </Box>
         <form onSubmit={handleSubmit}>
