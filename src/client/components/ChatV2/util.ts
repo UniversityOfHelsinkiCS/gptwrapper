@@ -46,11 +46,7 @@ const _preprocessMath = (content: string): string => {
       return `\\text{${innerContent.replace(/\(/g, '\\(').replace(/\)/g, '\\)')}}`
     })
 
-  codeBlocks.forEach((block, index) => {
-    processedContent = processedContent.replace(`__CODE_BLOCK_${index}__`, block)
-  })
-
-  return processedContent
+  return processedContent.replace(/__CODE_BLOCK_(\d+)__/g, (_, index: string) => codeBlocks[Number(index)])
 }
 
 export const getCurTypeLabel = (type: string, language: string) => curTypes[type] && curTypes[type].name[language]

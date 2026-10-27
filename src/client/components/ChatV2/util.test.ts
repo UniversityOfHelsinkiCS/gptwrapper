@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, test, expect } from 'vitest'
 
-import { getGroupedCourses, filterUsages, formatDate } from './util'
+import { getGroupedCourses, filterUsages, formatDate, preprocessMath } from './util'
 import type { CoursesViewCourse } from '../../hooks/useUserCourses'
 import type { ChatInstanceUsage } from '../../types'
 
@@ -53,6 +53,19 @@ describe('filterUsages', () => {
 
   test('returns empty when nobody is close to the limit', () => {
     expect(filterUsages(1000, [usage(0), usage(100)])).toEqual([])
+  })
+})
+
+describe('preprocessMath', () => {
+  test('converts latex delimiters outside code', () => {
+    expect(preprocessMath('Let \\(x\\) be')).toBe('Let $$ x $$ be')
+  })
+
+  test('restores code blocks verbatim, including $ replacement patterns', () => {
+    const code = "```bash\n# Print newline\necho $'\\n' $& $` $$\n```"
+    const content = `Let \\(x\\) be\n\n${code}\n\nAfter\n\n\`$'\``
+
+    expect(preprocessMath(content)).toBe(`Let $$ x $$ be\n\n${code}\n\nAfter\n\n\`$'\``)
   })
 })
 
