@@ -90,6 +90,8 @@ export const readMessageImages = (msg: Pick<Message, 'content'>): string[] => {
   return msg.content.filter((part) => part.type === 'image_url').map((part) => part.image_url.url)
 }
 
+export const hasFileResults = (toolResults: ToolCallResultEvent[]): boolean => toolResults.some((toolResult) => (toolResult.result?.files ?? []).length > 0)
+
 export type AssistantMessage = {
   role: 'assistant'
   content: MessageContent[] | string

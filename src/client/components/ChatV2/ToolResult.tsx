@@ -1,117 +1,22 @@
 import { useState, useRef, useEffect } from 'react'
-import { Box, Typography, Chip, IconButton, Drawer, Tooltip, useTheme } from '@mui/material'
-import Close from '@mui/icons-material/Close'
+import { Box, Typography, Chip, Tooltip } from '@mui/material'
 import Search from '@mui/icons-material/Search'
+import ExpandMore from '@mui/icons-material/ExpandMore'
+import ExpandLess from '@mui/icons-material/ExpandLess'
 import { useTranslation } from 'react-i18next'
 import { useToolResults } from './api'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { OutlineButtonBlack, TextButton } from './general/Buttons'
-import SubjectIcon from '@mui/icons-material/Subject'
 import type { ToolCallResultEvent } from '../../../shared/chat'
 import type { RagChunk } from '../../../shared/rag'
 import { CustomIcon } from './general/CustomIcon'
 import sidebarOpen from '../../assets/sidebar-open.svg'
 import sidebarClose from '../../assets/sidebar-close.svg'
 
-const AnnotationTruncated = ({
-  data,
-  relevanceOrder,
-  setIsDrawerOpen,
-  setSelectedAnnotation,
-}: {
-  data: RagChunk
-  relevanceOrder: number // By default the backend returns the RAG results in most relevant results first
-  setIsDrawerOpen: (open: boolean) => void
-  setSelectedAnnotation: (order: number) => void
-}) => {
-  const [isHovering, setIsHovering] = useState<boolean>(false)
-
-  const lineNum = 5
-  const multilineEllipsisTruncate = {
-    // This is a trick to achieve a responsive multi-line ellipsis truncation by <lineNum>.
-    // -webkit-box is used to support legacy browsers and for WebkitBoxOrient
-    overflow: 'hidden',
-    flex: '1',
-    display: '-webkit-box',
-    WebkitLineClamp: lineNum,
-    WebkitBoxOrient: 'vertical',
-    textOverflow: 'ellipsis',
-    lineHeight: '1.5',
-    maxHeight: `calc(1.5em * ${lineNum})`,
-  }
-
+const AnnotationExpanded = ({ data, relevanceOrder }: { data: RagChunk; relevanceOrder: number }) => {
   return (
-    <Box
-      component="button"
-      type="button"
-      data-testid="sources-truncated-item"
-      sx={{
-        display: 'flex',
-        width: '100%',
-        gap: 2,
-        font: 'inherit',
-        color: 'inherit',
-        textAlign: 'left',
-        border: 'none',
-        backgroundColor: isHovering ? 'action.hover' : 'transparent',
-        transition: 'background-color 0.1s ease-in-out',
-        padding: '0.8rem 0.6rem',
-        borderRadius: '0.6rem',
-        cursor: 'pointer',
-      }}
-      onClick={() => {
-        setIsDrawerOpen(true)
-        setSelectedAnnotation(relevanceOrder)
-      }}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-    >
-      <Box
-        component="span"
-        sx={{
-          color: 'text.primary',
-          backgroundColor: 'action.selected',
-          width: 24,
-          height: 24,
-          minWidth: 24,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          borderRadius: '100%',
-          fontSize: '0.8rem',
-        }}
-      >
-        {relevanceOrder}
-      </Box>
-      <Typography component="span" sx={multilineEllipsisTruncate}>
-        {data.content}
-      </Typography>
-    </Box>
-  )
-}
-
-const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: RagChunk; relevanceOrder: number; isSelected: boolean }) => {
-  const annotationRef = useRef<HTMLDivElement>(null)
-  const [shouldFlash, setShouldFlash] = useState(false)
-  const theme = useTheme()
-  const bgColor = theme.palette.action.hover
-  const flashColor = theme.palette.action.selected
-
-  useEffect(() => {
-    if (isSelected && annotationRef.current) {
-      annotationRef.current.scrollIntoView({
-        behavior: 'instant',
-        block: 'start',
-      })
-      setShouldFlash(true)
-    }
-
-    return () => setShouldFlash(false)
-  }, [isSelected])
-
-  return (
-    <Box ref={annotationRef} sx={{ display: 'flex', gap: 2 }}>
+    <Box sx={{ display: 'flex', gap: 2 }}>
       <Box
         sx={{
           color: 'text.primary',
@@ -138,31 +43,25 @@ const AnnotationExpanded = ({ data, relevanceOrder, isSelected }: { data: RagChu
           }}
         >
           <Typography fontWeight={600}>{data.metadata.ragFileName}</Typography>
-          <Typography
-            sx={{
-              opacity: 0.7,
-              whiteSpace: 'nowrap',
-              justifySelf: 'flex-end',
-            }}
-          >
-            {`Score: ${data.score ?? 'N/A'}`}
-          </Typography>
+          {data.score && (
+            <Typography
+              sx={{
+                opacity: 0.7,
+                whiteSpace: 'nowrap',
+                justifySelf: 'flex-end',
+              }}
+            >
+              {`Score: ${data.score}`}
+            </Typography>
+          )}
         </Box>
         <Box
           sx={{
             p: '0.5rem 1.5rem',
             borderRadius: '0.5rem',
-            backgroundColor: bgColor,
-            animation: shouldFlash ? 'flashIn 0.5s ease-out 0.4s 1' : undefined,
+            backgroundColor: 'action.hover',
           }}
         >
-          <style>{`
-            @keyframes flashIn {
-              0% { background-color: ${bgColor}; }
-              50% { background-color: ${flashColor}; }
-              100% { background-color: ${bgColor}; }
-            }
-          `}</style>
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.content}</ReactMarkdown>
         </Box>
       </Box>
@@ -206,13 +105,39 @@ const Queries = ({ queries }: { queries: string[] }) => {
   )
 }
 
-const ToolResult = ({ toolResult, open, onToggle }: { toolResult: ToolCallResultEvent; open: boolean; onToggle: () => void }) => {
+const ToolResultDetails = ({ toolResult }: { toolResult: ToolCallResultEvent }) => {
   const { data: results, isSuccess: isResultsSuccess } = useToolResults(toolResult.callId)
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
-  const [selectedAnnotation, setSelectedAnnotation] = useState<number | null>(null)
   const arrayResults = Array.isArray(results) ? results : []
   const { t } = useTranslation()
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+      <Queries queries={[toolResult.input?.query ?? '']} />
+      {isResultsSuccess ? (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
+          {arrayResults.length > 0 ? (
+            arrayResults.map((result, i) => <AnnotationExpanded key={i} data={result} relevanceOrder={i + 1} />)
+          ) : (
+            <Typography>{t('chat:noToolResults')}</Typography>
+          )}
+        </Box>
+      ) : (
+        <Typography>{t('chat:failedSources')}</Typography>
+      )}
+    </Box>
+  )
+}
+
+const ToolResult = ({ toolResults, open, onToggle }: { toolResults: ToolCallResultEvent[]; open: boolean; onToggle: () => void }) => {
+  const [showDetails, setShowDetails] = useState<boolean>(false)
+  const toggleButtonRef = useRef<HTMLButtonElement>(null)
+  const { t } = useTranslation()
   const toggleLabel = open ? t('sidebar:closeSources') : t('sidebar:openSources')
+  const fileNames = Array.from(new Set(toolResults.flatMap((toolResult) => (toolResult.result?.files ?? []).map((file) => file.fileName))))
+
+  useEffect(() => {
+    if (open) toggleButtonRef.current?.focus()
+  }, [open])
 
   // The toggle button stays mounted in both states so it keeps its position and the focus, and screen readers announce the aria-expanded change
   return (
@@ -225,8 +150,10 @@ const ToolResult = ({ toolResult, open, onToggle }: { toolResult: ToolCallResult
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        overflowY: open ? 'scroll' : 'hidden',
+        overflowY: open ? 'auto' : 'hidden',
       }}
+      role="region"
+      aria-labelledby="sources-header"
     >
       <Box
         sx={{
@@ -236,20 +163,24 @@ const ToolResult = ({ toolResult, open, onToggle }: { toolResult: ToolCallResult
           justifyContent: open ? 'flex-start' : 'center',
         }}
       >
-        <Tooltip arrow placement="left" title={toggleLabel}>
+        <Tooltip arrow placement="left" title={toggleLabel} describeChild>
           <TextButton
+            id="right-sidebar-toggle"
+            ref={toggleButtonRef}
             data-testid={open ? 'close-annotations' : 'open-annotations'}
+            aria-label={toggleLabel}
             aria-expanded={open}
             aria-controls={open ? 'tool-result-content' : undefined}
             onClick={onToggle}
           >
-            <CustomIcon src={open ? sidebarOpen : sidebarClose} alt={toggleLabel} />
+            <CustomIcon src={open ? sidebarOpen : sidebarClose} alt="" />
           </TextButton>
         </Tooltip>
       </Box>
       {open && (
-        <Box id="tool-result-content" sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+        <Box id="tool-result-content" sx={{ display: 'flex', flexDirection: 'column' }}>
           <Typography
+            id="sources-header"
             variant="h5"
             component="h3"
             fontWeight={600}
@@ -264,91 +195,37 @@ const ToolResult = ({ toolResult, open, onToggle }: { toolResult: ToolCallResult
             <Search fontSize="large" sx={{ opacity: 0.8 }} />
             {t('chat:searchResults')}
           </Typography>
-          <Queries queries={[toolResult.input?.query ?? '']} />
-          {isResultsSuccess ? (
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
-                minHeight: { xs: 'auto', md: 400 },
-                flex: 1,
-              }}
-            >
-              {arrayResults.map((result, i) => (
-                <AnnotationTruncated
-                  key={i}
-                  data={result}
-                  relevanceOrder={i + 1}
-                  setIsDrawerOpen={setIsDrawerOpen}
-                  setSelectedAnnotation={setSelectedAnnotation}
-                />
-              ))}
-              {arrayResults.length > 0 ? (
-                <OutlineButtonBlack
-                  sx={{ margin: '1rem auto' }}
-                  startIcon={<SubjectIcon />}
-                  onClick={() => {
-                    setIsDrawerOpen(true)
-                    setSelectedAnnotation(null)
-                  }}
-                >
-                  {t('chat:readMore')}
-                </OutlineButtonBlack>
-              ) : (
-                <Typography>{t('chat:noToolResults')}</Typography>
-              )}
-            </Box>
-          ) : (
-            <Typography>{t('chat:failedSources')}</Typography>
-          )}
-          <Drawer anchor="right" open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
-            <Box
-              sx={{
-                maxWidth: { xs: '100vw', md: '60vw' },
-                padding: '2rem',
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  mb: 2,
-                }}
-              >
-                <IconButton
-                  data-testid="close-expanded-annotations"
-                  aria-label={t('accessibility:closeInfo')}
-                  onClick={() => {
-                    setIsDrawerOpen(false)
-                    setSelectedAnnotation(null)
-                  }}
-                  sx={{
-                    position: 'fixed',
-                    top: 10,
-                    right: 10,
-                    color: 'text.secondary',
-                    bgcolor: 'background.elevated',
-                    opacity: 0.9,
-                  }}
-                >
-                  <Close />
-                </IconButton>
-              </Box>
-              <Box
-                sx={{
-                  display: 'flex',
-                  gap: '4rem',
-                  flexDirection: 'column',
-                  mt: 4,
-                }}
-              >
-                {arrayResults.map((result, i) => (
-                  <AnnotationExpanded key={i} data={result} relevanceOrder={i + 1} isSelected={selectedAnnotation === i + 1} />
+          {fileNames.length > 0 ? (
+            <>
+              <Typography fontWeight={500}>{t('chat:sources')}</Typography>
+              <Box component="ul" data-testid="sources-summary" sx={{ pl: 3, mt: 1, mb: 3 }}>
+                {fileNames.map((fileName) => (
+                  <Typography component="li" key={fileName} sx={{ wordBreak: 'break-word' }}>
+                    {fileName}
+                  </Typography>
                 ))}
               </Box>
+            </>
+          ) : (
+            <Typography sx={{ mb: 3 }}>{t('chat:notFoundFromMaterial')}</Typography>
+          )}
+          <OutlineButtonBlack
+            data-testid="toggle-source-details"
+            aria-expanded={showDetails}
+            aria-controls={showDetails ? 'tool-result-details' : undefined}
+            endIcon={showDetails ? <ExpandLess /> : <ExpandMore />}
+            onClick={() => setShowDetails(!showDetails)}
+            sx={{ alignSelf: 'flex-start', mb: 3 }}
+          >
+            {showDetails ? t('chat:hideDetails') : t('chat:showDetails')}
+          </OutlineButtonBlack>
+          {showDetails && (
+            <Box id="tool-result-details" sx={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
+              {toolResults.map((toolResult) => (
+                <ToolResultDetails key={toolResult.callId} toolResult={toolResult} />
+              ))}
             </Box>
-          </Drawer>
+          )}
         </Box>
       )}
     </Box>

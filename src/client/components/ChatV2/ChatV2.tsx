@@ -77,10 +77,7 @@ const ChatV2Content = () => {
       enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
       handleCancel('error')
     },
-    onToolCallComplete: (toolResult) => {
-      if (!isMobile) {
-        setActiveToolResult(toolResult)
-      }
+    onToolCallComplete: () => {
       dispatchAnalytics({ type: 'INCREMENT_FILE_SEARCHES' })
     },
   })
@@ -108,8 +105,8 @@ const ChatV2Content = () => {
   const [messageWarning, setMessageWarning] = useState<{
     [key in WarningType]?: { message: string; ignored: boolean; tokenCount?: number; contextLimit?: number; tokenUsagePercentage?: number }
   }>({})
-  const [activeToolResult, setActiveToolResult0] = useState<ToolCallResultEvent | undefined>()
-  const [rightMenuExpanded, setRightMenuExpanded0] = useState<boolean>(true)
+  const [activeToolResults, setActiveToolResults0] = useState<ToolCallResultEvent[] | undefined>()
+  const [rightMenuExpanded, setRightMenuExpanded0] = useState<boolean>(false)
   const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
   const [hasChanges, setHasChanges] = useState(false)
   const [cacheKey, setCacheKey] = useState('')
@@ -369,7 +366,8 @@ const ChatV2Content = () => {
 
     streamControllerRef.current?.abort('conversation_cleared')
     setMessages([])
-    setActiveToolResult(undefined)
+    setActiveToolResults0(undefined)
+    setRightMenuExpanded0(false)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -414,13 +412,11 @@ const ChatV2Content = () => {
     }, 0)
   }, [])
 
-  const setActiveToolResult = useCallback(
-    (toolResult: ToolCallResultEvent | undefined) => {
+  const openToolResults = useCallback(
+    (toolResults: ToolCallResultEvent[]) => {
       handleLayoutShift()
-      setActiveToolResult0(toolResult)
-      if (toolResult) {
-        setRightMenuExpanded0(true)
-      }
+      setActiveToolResults0(toolResults)
+      setRightMenuExpanded0(true)
     },
     [handleLayoutShift],
   )
@@ -433,21 +429,21 @@ const ChatV2Content = () => {
     [handleLayoutShift],
   )
 
-  // Fall back to the latest tool result of the conversation so the right menu can be reopened after it has been cleared (e.g. on page reload)
-  const latestToolResult = useMemo(() => {
+  const latestToolResults = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i--) {
       const message = messages[i]
       if (message.role !== 'assistant') continue
       const toolResults = Object.values(message.toolCalls ?? {})
-      if (toolResults.length > 0) return toolResults[toolResults.length - 1]
+      if (toolResults.length > 0) return toolResults
     }
     return undefined
   }, [messages])
-  const shownToolResult = activeToolResult ?? latestToolResult
+  const shownToolResults = activeToolResults ?? latestToolResults
 
   // layout
   const canShowToolResults = canManageCourse(chatInstance) || !isPromptHidden || activePrompt?.userId === user?.id
-  const hasToolResults = !!shownToolResult && canShowToolResults
+  const hasToolResults = !!shownToolResults && shownToolResults.length > 0 && canShowToolResults
+  const toolResultsKey = shownToolResults?.map((toolResult) => toolResult.callId).join(',')
   const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
   const leftPanelFloating = isEmbeddedMode || isMobile
   const [sideBarOpen, setSideBarOpen] = useState<boolean>(() => {
@@ -455,7 +451,7 @@ const ChatV2Content = () => {
   })
   const leftPanelCollapsed = !sideBarOpen || leftPanelFloating
   const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
-  const rightPanelContentWidth = !hasToolResults ? '0px' : rightMenuExpanded ? 'var(--right-menu-width)' : 'var(--sidebar-width-collapsed)'
+  const rightPanelContentWidth = !hasToolResults || isMobile ? '0px' : rightMenuExpanded ? 'var(--right-menu-width)' : 'var(--sidebar-width-collapsed)'
   const rightPanelCollapsed = !isMobile && hasToolResults && !rightMenuExpanded
 
   useEffect(() => {
@@ -610,9 +606,7 @@ const ChatV2Content = () => {
             isStreaming={isStreaming}
             endState={endState}
             toolCalls={toolCalls}
-            setActiveToolResult={(toolResult) => {
-              if (canShowToolResults) setActiveToolResult(toolResult)
-            }}
+            setActiveToolResults={canShowToolResults ? openToolResults : undefined}
             isMobile={isMobile}
             onRetry={handleRetry}
             latestResponseIndex={latestResponseIndex}
@@ -664,8 +658,8 @@ const ChatV2Content = () => {
       {isMobile ? (
         <Drawer
           anchor="right"
-          open={!!activeToolResult}
-          onClose={() => setActiveToolResult(undefined)}
+          open={hasToolResults && rightMenuExpanded}
+          onClose={() => setRightMenuExpanded(false)}
           sx={{
             '& .MuiDrawer-paper': {
               width: '100%',
@@ -685,12 +679,11 @@ const ChatV2Content = () => {
               overflow: 'auto',
             }}
           >
-            {!!activeToolResult && hasToolResults && <ToolResult toolResult={activeToolResult} open onToggle={() => setActiveToolResult(undefined)} />}
+            {hasToolResults && <ToolResult key={toolResultsKey} toolResults={shownToolResults} open onToggle={() => setRightMenuExpanded(false)} />}
           </Box>
         </Drawer>
       ) : (
-        hasToolResults &&
-        shownToolResult && (
+        hasToolResults && (
           <Box
             sx={{
               width: rightPanelContentWidth,
@@ -704,7 +697,12 @@ const ChatV2Content = () => {
               bgcolor: 'background.paper',
             }}
           >
-            <ToolResult toolResult={shownToolResult} open={rightMenuExpanded} onToggle={() => setRightMenuExpanded(!rightMenuExpanded)} />
+            <ToolResult
+              key={toolResultsKey}
+              toolResults={shownToolResults}
+              open={rightMenuExpanded}
+              onToggle={() => setRightMenuExpanded(!rightMenuExpanded)}
+            />
           </Box>
         )
       )}

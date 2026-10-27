@@ -13,12 +13,13 @@ import 'katex/dist/contrib/mhchem'
 import ArrowRight from '@mui/icons-material/ArrowRight'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import { t } from 'i18next'
-import React, { useId, useMemo } from 'react'
+import React, { useId } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useMediaQuery, useTheme } from '@mui/material'
+import { useTheme } from '@mui/material'
 import {
   readMessageContent,
   readMessageImages,
+  hasFileResults,
   type AssistantMessage,
   type ChatMessage,
   type MessageGenerationInfo,
@@ -79,61 +80,55 @@ const UserMessageItem = ({ message }: { message: UserMessage }) => (
   </Box>
 )
 
-const ToolResult = ({ toolResult, handleToolResult }: { toolResult: ToolCallResultEvent; handleToolResult?: (toolResult: ToolCallResultEvent) => void }) => {
-  const sources = useMemo(() => Array.from(new Set<string>((toolResult.result?.files ?? []).map((file) => file.fileName)).values()).join(', '), [])
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  const isClickable = isMobile && !!handleToolResult
+const ToolResultsButton = ({
+  toolResults,
+  setActiveToolResults,
+  isMobile,
+}: {
+  toolResults: ToolCallResultEvent[]
+  setActiveToolResults?: (toolResults: ToolCallResultEvent[]) => void
+  isMobile: boolean
+}) => {
+  const { t } = useTranslation()
+  const hasResults = hasFileResults(toolResults)
+  const onOpen = hasResults ? setActiveToolResults : undefined
+  const isClickable = !!onOpen
   return (
     <Box
       component={isClickable ? 'button' : 'div'}
-      {...(isClickable && {
+      {...(onOpen && {
         type: 'button',
         onClick: () => {
-          handleToolResult(toolResult)
+          onOpen(toolResults)
         },
       })}
       data-testid="file-search-sources"
+      aria-describedby={isClickable && !isMobile ? 'right-sidebar-toggle' : undefined}
       sx={{
         display: 'flex',
-        alignItems: { xs: 'flex-start', sm: 'center' },
-        gap: 2,
+        alignItems: 'center',
+        gap: 1,
         font: 'inherit',
         color: 'inherit',
         textAlign: 'left',
-        border: 'none',
+        border: isClickable ? '1px solid' : 'none',
+        borderColor: 'divider',
         background: 'none',
-        fontStyle: 'italic',
+        fontStyle: isClickable ? 'normal' : 'italic',
         width: 'fit-content',
         maxWidth: '100%',
-        minWidth: 0,
         opacity: '0.85',
-
         mt: 3,
         cursor: isClickable ? 'pointer' : 'default',
-        padding: '0.6rem',
+        padding: '0.4rem 0.8rem',
         borderRadius: '0.6rem',
+        '&:hover': isClickable ? { backgroundColor: 'action.hover' } : undefined,
       }}
     >
-      <FormatQuoteIcon sx={{ fontSize: '2rem', flexShrink: 0 }} />
-      <Box component="span" sx={{ display: 'block', flex: '1 1 auto', minWidth: 0, overflow: 'hidden', mt: { xs: 0.5, md: 0 } }}>
-        <Typography
-          component="span"
-          variant="body2"
-          sx={{
-            display: 'block',
-            mr: 2,
-            wordBreak: 'break-all',
-            textOverflow: 'ellipsis',
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {`${t('chat:displaySources', { query: toolResult.input.query })}: `}
-          <em>{sources}</em>
-          {!sources && <em>{t('chat:noToolResults')}</em>}
-        </Typography>
-      </Box>
+      <FormatQuoteIcon sx={{ fontSize: '1.5rem', flexShrink: 0 }} />
+      <Typography component="span" variant="body2">
+        {hasResults ? t('chat:foundFromMaterial') : t('chat:notFoundFromMaterial')}
+      </Typography>
     </Box>
   )
 }
@@ -168,14 +163,16 @@ const AssistantMessageInfo = ({ message }: { message: AssistantMessage }) => {
 
 const AssistantMessageItem = ({
   message,
-  setActiveToolResult,
+  setActiveToolResults,
+  isMobile = false,
   onRetry,
   isStreaming = false,
   isLatestResponse = false,
   latestResponseRef,
 }: {
   message: AssistantMessage
-  setActiveToolResult: (data: ToolCallResultEvent) => void
+  setActiveToolResults?: (toolResults: ToolCallResultEvent[]) => void
+  isMobile?: boolean
   onRetry?: () => void
   isStreaming?: boolean
   isLatestResponse?: boolean
@@ -224,11 +221,8 @@ const AssistantMessageItem = ({
   }
   let codeCount = 0
 
-  const handleToolResult = (toolResult: ToolCallResultEvent) => {
-    setActiveToolResult(toolResult)
-  }
-
   const msgId = useId()
+  const toolResults = Object.values(message.toolCalls ?? {})
 
   return (
     <Box
@@ -382,28 +376,27 @@ const AssistantMessageItem = ({
           )}
         </Box>
       )}
-      {Object.keys(message.toolCalls ?? {}).length > 0 && (
-        <Typography component="h3" sx={visuallyHidden}>
-          {t('accessibility:sourceResults')}
-        </Typography>
+      {toolResults.length > 0 && (
+        <>
+          <ToolResultsButton toolResults={toolResults} setActiveToolResults={setActiveToolResults} isMobile={isMobile} />
+        </>
       )}
-      {Object.values(message.toolCalls ?? {}).map((toolResult) => (
-        <ToolResult key={toolResult.callId} toolResult={toolResult} handleToolResult={handleToolResult} />
-      ))}
     </Box>
   )
 }
 
 export const MessageItem = ({
   message,
-  setActiveToolResult,
+  setActiveToolResults,
+  isMobile = false,
   onRetry,
   isStreaming = false,
   isLatestResponse = false,
   latestResponseRef,
 }: {
   message: ChatMessage
-  setActiveToolResult: (data: ToolCallResultEvent) => void
+  setActiveToolResults?: (toolResults: ToolCallResultEvent[]) => void
+  isMobile?: boolean
   onRetry?: () => void
   isStreaming?: boolean
   isLatestResponse?: boolean
@@ -420,7 +413,8 @@ export const MessageItem = ({
       >
         <AssistantMessageItem
           message={message}
-          setActiveToolResult={setActiveToolResult}
+          setActiveToolResults={setActiveToolResults}
+          isMobile={isMobile}
           onRetry={onRetry}
           isStreaming={isStreaming}
           isLatestResponse={isLatestResponse}
@@ -457,7 +451,7 @@ const Conversation = ({
   toolCalls,
   isStreaming,
   endState,
-  setActiveToolResult,
+  setActiveToolResults,
   initial,
   isMobile,
   onRetry,
@@ -470,7 +464,7 @@ const Conversation = ({
   toolCalls: { [callId: string]: ToolCallStatusEvent }
   isStreaming: boolean
   endState: 'none' | 'canceled' | 'error'
-  setActiveToolResult: (data: ToolCallResultEvent) => void
+  setActiveToolResults?: (toolResults: ToolCallResultEvent[]) => void
   initial?: React.ReactElement
   isMobile: boolean
   onRetry?: (index: number) => void
@@ -504,7 +498,8 @@ const Conversation = ({
             <MessageItem
               key={idx}
               message={message}
-              setActiveToolResult={setActiveToolResult}
+              setActiveToolResults={setActiveToolResults}
+              isMobile={isMobile}
               onRetry={showRetry ? () => onRetry!(idx) : undefined}
               isLatestResponse={isLatestResponse}
               latestResponseRef={isLatestResponse ? latestResponseRef : undefined}
@@ -521,7 +516,8 @@ const Conversation = ({
                 content: completion,
                 generationInfo,
               }}
-              setActiveToolResult={setActiveToolResult}
+              setActiveToolResults={setActiveToolResults}
+              isMobile={isMobile}
               isStreaming
             />
           ) : (

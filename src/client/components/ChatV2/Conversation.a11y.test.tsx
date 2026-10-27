@@ -34,7 +34,6 @@ const renderConversation = (props: { messages: ChatMessage[]; completion: string
           endState="none"
           {...props}
           toolCalls={{}}
-          setActiveToolResult={() => {}}
           isMobile={false}
           latestResponseIndex={props.messages.length - 1}
           latestResponseRef={createRef<HTMLDivElement>()}
@@ -50,7 +49,6 @@ const conversationProps = (props: { messages: ChatMessage[]; completion: string;
         endState="none"
         {...props}
         toolCalls={{}}
-        setActiveToolResult={() => {}}
         isMobile={false}
         latestResponseIndex={props.messages.length - 1}
         latestResponseRef={createRef<HTMLDivElement>()}

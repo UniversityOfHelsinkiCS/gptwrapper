@@ -175,6 +175,11 @@ test.describe('Prompts', () => {
     // The result should be echo of the course prompt
     await expect(page.getByTestId('assistant-message')).toContainText('Ok! Got some great results from that mock tool call!')
 
+    await expect(page.getByTestId('open-annotations')).toBeVisible()
+    await expect(page.getByTestId('sources-header')).toBeHidden()
+    await page.getByTestId('file-search-sources').click()
     await expect(page.getByTestId('sources-header')).toBeVisible()
+    await page.getByTestId('toggle-source-details').click()
+    await expect(page.locator('#tool-result-details')).toBeVisible()
   })
 })
