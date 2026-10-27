@@ -84,15 +84,18 @@ const ToolResultsButton = ({
   toolResults,
   setActiveToolResults,
   isMobile,
+  headingId,
 }: {
   toolResults: ToolCallResultEvent[]
   setActiveToolResults?: (toolResults: ToolCallResultEvent[]) => void
   isMobile: boolean
+  headingId: string
 }) => {
   const { t } = useTranslation()
   const hasResults = hasFileResults(toolResults)
   const onOpen = hasResults ? setActiveToolResults : undefined
   const isClickable = !!onOpen
+  const describedBy = isClickable && !isMobile ? `${headingId} right-sidebar-toggle` : headingId
   return (
     <Box
       component={isClickable ? 'button' : 'div'}
@@ -103,7 +106,7 @@ const ToolResultsButton = ({
         },
       })}
       data-testid="file-search-sources"
-      aria-describedby={isClickable && !isMobile ? 'right-sidebar-toggle' : undefined}
+      aria-describedby={describedBy}
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -133,14 +136,17 @@ const ToolResultsButton = ({
   )
 }
 
-const AssistantMessageInfo = ({ message }: { message: AssistantMessage }) => {
+const numberedHeading = (heading: string, number?: number) => (number === undefined ? heading : `${heading} ${number}`)
+
+const AssistantMessageInfo = ({ message, headingId, number }: { message: AssistantMessage; headingId: string; number?: number }) => {
   const { t } = useTranslation()
+  const heading = (
+    <Typography component="h2" id={headingId} sx={visuallyHidden}>
+      {numberedHeading(t('accessibility:responseHeading'), number)}
+    </Typography>
+  )
   if (!message.generationInfo) {
-    return (
-      <Typography component="h2" sx={visuallyHidden}>
-        {t('accessibility:responseHeading')}
-      </Typography>
-    )
+    return heading
   }
 
   const title =
@@ -150,9 +156,7 @@ const AssistantMessageInfo = ({ message }: { message: AssistantMessage }) => {
 
   return (
     <Box sx={{ display: 'flex', opacity: 0.7, alignItems: 'center' }}>
-      <Typography component="h2" sx={visuallyHidden}>
-        {t('accessibility:responseHeading')}
-      </Typography>
+      {heading}
       <ArrowRight fontSize="small" />
       <Typography aria-label={message.generationInfo.promptInfo.type === 'saved' ? t('common:promptAndModel') : t('status:modelInUse')} fontSize="small">
         {title}
@@ -169,6 +173,7 @@ const AssistantMessageItem = ({
   isStreaming = false,
   isLatestResponse = false,
   latestResponseRef,
+  number,
 }: {
   message: AssistantMessage
   setActiveToolResults?: (toolResults: ToolCallResultEvent[]) => void
@@ -177,6 +182,7 @@ const AssistantMessageItem = ({
   isStreaming?: boolean
   isLatestResponse?: boolean
   latestResponseRef?: React.Ref<HTMLDivElement>
+  number?: number
 }) => {
   const processedContent = React.useMemo(() => preprocessMath(readMessageContent(message)), [message.content])
   const { t } = useTranslation()
@@ -222,6 +228,7 @@ const AssistantMessageItem = ({
   let codeCount = 0
 
   const msgId = useId()
+  const headingId = useId()
   const toolResults = Object.values(message.toolCalls ?? {})
 
   return (
@@ -245,7 +252,7 @@ const AssistantMessageItem = ({
         },
       }}
     >
-      <AssistantMessageInfo message={message} />
+      <AssistantMessageInfo message={message} headingId={headingId} number={number} />
       <ReactMarkdown
         remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
         rehypePlugins={[[rehypeKatex, katexOptions]]}
@@ -360,7 +367,7 @@ const AssistantMessageItem = ({
           ...focusIndicatorStyle(),
         }}
       >
-        <CopyToClipboardButton id={msgId} copied={readMessageContent(message)} label={t('accessibility:responseHeading')} />
+        <CopyToClipboardButton id={msgId} copied={readMessageContent(message)} label={numberedHeading(t('accessibility:responseHeading'), number)} />
       </Box>
       {message.error && (
         <Box sx={{ mt: 2 }}>
@@ -378,7 +385,7 @@ const AssistantMessageItem = ({
       )}
       {toolResults.length > 0 && (
         <>
-          <ToolResultsButton toolResults={toolResults} setActiveToolResults={setActiveToolResults} isMobile={isMobile} />
+          <ToolResultsButton toolResults={toolResults} setActiveToolResults={setActiveToolResults} isMobile={isMobile} headingId={headingId} />
         </>
       )}
     </Box>
@@ -393,6 +400,7 @@ export const MessageItem = ({
   isStreaming = false,
   isLatestResponse = false,
   latestResponseRef,
+  number,
 }: {
   message: ChatMessage
   setActiveToolResults?: (toolResults: ToolCallResultEvent[]) => void
@@ -401,6 +409,7 @@ export const MessageItem = ({
   isStreaming?: boolean
   isLatestResponse?: boolean
   latestResponseRef?: React.Ref<HTMLDivElement>
+  number?: number
 }) => {
   const { t } = useTranslation()
   if (message.role === 'assistant') {
@@ -419,6 +428,7 @@ export const MessageItem = ({
           isStreaming={isStreaming}
           isLatestResponse={isLatestResponse}
           latestResponseRef={latestResponseRef}
+          number={number}
         />
       </Box>
     )
@@ -426,7 +436,7 @@ export const MessageItem = ({
     return (
       <Box data-sentry-mask data-testid="user-message" sx={{ alignSelf: 'flex-end' }}>
         <Typography component="h2" sx={visuallyHidden}>
-          {t('accessibility:userMessageHeading')}
+          {numberedHeading(t('accessibility:userMessageHeading'), number)}
         </Typography>
         <UserMessageItem message={message} />
       </Box>
@@ -473,6 +483,9 @@ const Conversation = ({
 }) => {
   const [reminderSeen, setReminderSeen] = useLocalStorageState<boolean>('reminderSeen', false)
 
+  let turn = 0
+  const messageNumbers = messages.map((message) => (message.role === 'user' ? ++turn : turn))
+
   return (
     <>
       <Box
@@ -498,6 +511,7 @@ const Conversation = ({
             <MessageItem
               key={idx}
               message={message}
+              number={messageNumbers[idx]}
               setActiveToolResults={setActiveToolResults}
               isMobile={isMobile}
               onRetry={showRetry ? () => onRetry!(idx) : undefined}
@@ -516,6 +530,7 @@ const Conversation = ({
                 content: completion,
                 generationInfo,
               }}
+              number={turn}
               setActiveToolResults={setActiveToolResults}
               isMobile={isMobile}
               isStreaming
