@@ -2,7 +2,7 @@
 
 SERVICE_NAME=app
 
-if docker compose ps --status running --services | grep -qx "${SERVICE_NAME}"; then
+if [ -z "$CI" ] && docker compose ps --status running --services | grep -qx "${SERVICE_NAME}"; then
   docker compose exec -T "${SERVICE_NAME}" npx tsc
   exit $?
 else
