@@ -31,6 +31,7 @@ import { announceSnackbar } from './components/common/accessibility/SnackbarAnno
 import { MAX_SNACKBARS, forgetClosedSnackbar, snackbarComponents } from './components/common/Snackbar'
 import { resolveContentView, getRedirect } from './util/contentView'
 import safeLocalStorage from './util/safeLocalStorage'
+import { useMediaQuery } from '@mui/material'
 
 const AdminLoggedInAsBanner = () => {
   const [open, setOpen] = React.useState(false)
@@ -90,12 +91,15 @@ const skipLinkSx = {
 
 const SkipToContent = () => {
   const { t } = useTranslation()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault()
     const target = document.querySelector<HTMLElement>('[data-skip-target]') ?? document.getElementById('main-content')
     target?.focus()
   }
+  if (isMobile) return
 
   return (
     <Box component="a" href="#main-content" onClick={handleClick} sx={skipLinkSx}>
