@@ -45,6 +45,7 @@ import { focusIndicatorStyle, switchFocusIndicatorStyle } from '../../util/acces
 import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer.tsx'
 import { getApiErrorMessage } from '../../util/apiClient'
 import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer.ts'
+import { requestFocusAfterNavigate } from '../../util/accessibility'
 
 const SECTION_LABEL_SX = {
   fontSize: '0.75rem',
@@ -76,6 +77,8 @@ export const PromptListItem = ({
   activeLabel,
 }: PromptListItemProps) => {
   const { t } = useTranslation()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   return (
     <Box
       component="li"
@@ -149,6 +152,7 @@ export const PromptListItem = ({
           onClick={(e) => {
             e.stopPropagation()
             if (!confirmClose()) return
+            if (!isMobile) requestFocusAfterNavigate('chat-input')
             onSelect(prompt)
           }}
           sx={{
