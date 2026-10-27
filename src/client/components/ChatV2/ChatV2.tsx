@@ -517,6 +517,7 @@ const ChatV2Content = () => {
         >
           <SideBar
             open={true} // always open in drawer
+            autoFocus
             setOpen={setSideBarOpen}
             user={user}
             handleReset={handleResetRequest}

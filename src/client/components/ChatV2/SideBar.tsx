@@ -21,8 +21,10 @@ const SideBar = ({
   user,
   handleReset,
   messages,
+  autoFocus = false,
 }: {
   open: boolean
+  autoFocus?: boolean
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
   user?: User | null
   handleReset: () => void
@@ -32,6 +34,10 @@ const SideBar = ({
   const openButtonRef = useRef<HTMLButtonElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const prevOpenRef = useRef(open)
+
+  useEffect(() => {
+    if (autoFocus) closeButtonRef.current?.focus()
+  }, [])
 
   useEffect(() => {
     if (prevOpenRef.current === open) return
@@ -101,7 +107,7 @@ const SideBar = ({
               }}
             >
               <Tooltip arrow placement="right" title={t('sidebar:close')}>
-                <TextButton ref={closeButtonRef} onClick={() => setOpen((prev) => !prev)}>
+                <TextButton ref={closeButtonRef} onClick={() => setOpen((prev) => !prev)} sx={{ mr: 1 }}>
                   <CustomIcon src={sidebarClose} alt={t('sidebar:close')} />
                 </TextButton>
               </Tooltip>

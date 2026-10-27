@@ -11,7 +11,7 @@ import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 import { getLanguageValue } from '@shared/utils'
 import { usePromptState } from './PromptState'
 import useCourse from '../../hooks/useCourse'
-import { consumePendingFocusTarget, requestFocusAfterNavigate } from '../../util/accessibility'
+import { consumePendingFocusTarget } from '../../util/accessibility'
 import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
 import type { Prompt } from '../../types'
 
@@ -376,7 +376,8 @@ export default function ChatConsole({ user }: { user?: User | null }) {
           onClear={
             activePrompt
               ? () => {
-                  requestFocusAfterNavigate('chat-input')
+                  const target = document.getElementById('choose-prompt-button')
+                  if (target) target.focus()
                   handleChangePrompt(undefined)
                   announceToScreenReader(t('accessibility:promptCleared'))
                   navigate('/general')
