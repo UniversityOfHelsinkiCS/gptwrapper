@@ -573,7 +573,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
             disabled={uploadMutation.isPending}
             aria-busy={uploadMutation.isPending}
           >
-            {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
+            {uploadMutation.isPending ? t('rag:uploading') : stagedFiles.length === 1 ? t('rag:uploadFilesOne') : t('rag:uploadFilesOther')}
           </BlueButton>
         </DialogActions>
       </Dialog>

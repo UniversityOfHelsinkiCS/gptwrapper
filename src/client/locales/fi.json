@@ -758,6 +758,8 @@
     "creatorLanguageTip": "Kokoelman tiedostojen on hyvä olla samalla kielellä. Kielten sekoittaminen heikentää hakutuloksia.",
     "uploading": "Ladataan",
     "uploadFiles": "Lisää tiedostoja",
+    "uploadFilesOne": "Lataa tiedosto",
+    "uploadFilesOther": "Lataa tiedostot",
     "createNewIndex": "Luo uusi kokoelma",
     "finnish": "Suomi",
     "english": "Englanti",
