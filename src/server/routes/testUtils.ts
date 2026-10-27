@@ -149,7 +149,7 @@ router.post('/reset-test-data', async (req, res) => {
         startDate: '2024-09-01',
         endDate: '2100-08-31',
       },
-      saveDiscussions: false,
+      saveDiscussions: true,
       courseUnits: [
         {
           code: `ACT-${testUserIdx}`,

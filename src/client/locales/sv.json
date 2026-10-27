@@ -591,8 +591,10 @@
     "altOpenSettings": "Moodle öppna inställningar",
     "altSourceView": "Moodle öppna källkodsvisning",
     "altPasteSave": "Moodle klistra in källkod och spara",
+    "deActivate": "Stäng för studerande",
     "courseActivePeriod": "Kurschatten öppen:",
     "goToCoursePage": "Gå till kurssidan",
+    "openDiscussions": "Visa studerandenas diskussioner",
     "saveDiscussions": "Sätt kursen \"{{course}}\" som en forskningskurs. Diskussioner kommer att sparas.",
     "unsaveDiscussions": "Ta bort kursen \"{{course}}\" från forskningskurser. Diskussioner kommer inte att sparas."
   },
@@ -901,6 +903,7 @@
     "sendInstructionsShiftEnter": "Skift + Enter skickar meddelandet och Enter lägger till en ny rad.",
     "sendInstructionsEnter": "Enter skickar meddelandet och Skift + Enter lägger till en ny rad.",
     "skipToContent": "Hoppa till innehållet",
+    "opensInNewTab": "öppnas i en ny flik",
     "errorNotification": "Fel",
     "warningNotification": "Varning",
     "notificationRegionOne": "Aviseringar, {{count}} avisering",

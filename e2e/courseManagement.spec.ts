@@ -46,6 +46,17 @@ test.describe('Course management (CoursePreview)', () => {
     await expect(statusChip).toHaveAttribute('data-active', 'false')
   })
 
+  test('teacher can open student discussions', async ({ page }) => {
+    const testUserIdx = test.info().workerIndex
+    await openActivationCourse(page, testUserIdx)
+
+    const discussionsDialog = page.getByTestId('course-discussions-dialog')
+    await expect(discussionsDialog).toBeHidden()
+
+    await page.getByTestId('open-course-discussions-button').click()
+    await expect(discussionsDialog).toBeVisible()
+  })
+
   test('student table shows the enrolled student', async ({ page }) => {
     const testUserIdx = test.info().workerIndex
     await openActivationCourse(page, testUserIdx)

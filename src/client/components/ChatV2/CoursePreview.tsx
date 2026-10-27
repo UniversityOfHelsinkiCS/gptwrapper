@@ -326,6 +326,7 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
   const activeCourse: Course = chatInstance ? chatInstance : course
   const activated = activeCourse.activated
   const courseEnded = activeCourse.status === 'EXPIRED'
+  const showDiscussions = canManage && course.saveDiscussions
 
   return (
     <>
@@ -379,7 +380,7 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
           {course.courseUnitRealisationTypeUrn && course.courseId && (
             <Tooltip title={t('course:goToCoursePage')}>
               <IconButton
-                aria-label={t('course:goToCoursePage')}
+                aria-label={`${t('course:goToCoursePage')} (${t('accessibility:opensInNewTab')})`}
                 href={`https://studies.helsinki.fi/kurssit/toteutus/${course.courseId}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -389,17 +390,10 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
               </IconButton>
             </Tooltip>
           )}
-          {canManage && course.saveDiscussions && (
-            <Tooltip title={t('course:discussions')}>
-              <IconButton aria-label={t('course:discussions')} onClick={() => setDiscussionsModalOpen(true)} data-testid="open-course-discussions-button">
-                <ForumIcon color="primary" />
-              </IconButton>
-            </Tooltip>
-          )}
         </Box>
 
         {/* Subtitle: code + open dates */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap', color: 'text.secondary', mt: 1, mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap', color: 'text.secondary', mt: 1, mb: showDiscussions ? 2 : 3 }}>
           {course.courseUnits?.[0]?.code && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <TagIcon fontSize="small" />
@@ -411,6 +405,15 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
             <Typography variant="body2">{formatDate(activeCourse.activityPeriod)}</Typography>
           </Box>
         </Box>
+
+        {/* Actions */}
+        {showDiscussions && (
+          <Box sx={{ mb: 3 }}>
+            <OutlineButtonBlue startIcon={<ForumIcon />} onClick={() => setDiscussionsModalOpen(true)} data-testid="open-course-discussions-button">
+              {t('course:openDiscussions')}
+            </OutlineButtonBlue>
+          </Box>
+        )}
 
         {/* Activity period editor (managers) */}
         {canManage && (
@@ -688,13 +691,18 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
           </Box>
         )}
       </Paper>
-      <Dialog open={discussionsModalOpen} onClose={() => setDiscussionsModalOpen(false)} fullWidth maxWidth="lg" fullScreen={isMobile}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pr: 2 }}>
-          <DialogTitle>{t('course:discussions')}</DialogTitle>
-          <IconButton onClick={() => setDiscussionsModalOpen(false)} aria-label={t('common:close')}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
+      <Dialog
+        open={discussionsModalOpen}
+        onClose={() => setDiscussionsModalOpen(false)}
+        fullWidth
+        maxWidth="lg"
+        fullScreen={isMobile}
+        data-testid="course-discussions-dialog"
+      >
+        <DialogTitle sx={{ pr: 7 }}>{t('course:discussions')}</DialogTitle>
+        <IconButton onClick={() => setDiscussionsModalOpen(false)} aria-label={t('common:close')} sx={{ position: 'absolute', right: 8, top: 8 }}>
+          <CloseIcon />
+        </IconButton>
         <DialogContent dividers>
           <DiscussionView courseId={course.courseId} />
         </DialogContent>
