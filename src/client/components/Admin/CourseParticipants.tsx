@@ -25,6 +25,7 @@ import useCourseParticipants from '../../hooks/useCourseParticipants'
 import { useResetChatInstanceUsageMutation, useResetCourseUsageMutation } from '../../hooks/useChatInstanceUsageMutation'
 import useResetUsageMutation from '../../hooks/useResetUsageMutation'
 import { enqueueSnackbar } from '../common/Snackbar'
+import ApiKeyCount from './ApiKeyCount'
 
 const CourseParticipants = () => {
   const { courseId } = useParams()
@@ -103,6 +104,7 @@ const CourseParticipants = () => {
               <TableCell align="right">{t('admin:courseUsage')}</TableCell>
               <TableCell align="right">{t('admin:courseTotalUsage')}</TableCell>
               <TableCell align="right">{t('admin:generalUsage')}</TableCell>
+              <TableCell align="right">{t('apiKeys:title')}</TableCell>
               <TableCell>{t('admin:actions')}</TableCell>
             </TableRow>
           </TableHead>
@@ -121,6 +123,9 @@ const CourseParticipants = () => {
                 </TableCell>
                 <TableCell align="right">{participant.courseTotalUsage}</TableCell>
                 <TableCell align="right">{participant.usage}</TableCell>
+                <TableCell align="right">
+                  <ApiKeyCount names={participant.apiKeyNames} />
+                </TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button

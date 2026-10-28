@@ -315,6 +315,7 @@
     "waitingForResponse": "Väntar på respons"
   },
   "admin": {
+    "apiUsers": "API-användare",
     "courseNotFound": "Kursen {{courseId}} hittades inte",
     "participantName": "Namn",
     "role": "Roll",

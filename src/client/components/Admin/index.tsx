@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Route, Routes, Link, Navigate, useMatch } from 'react-router-dom'
 
 import { format } from 'date-fns'
+import ApiUsers from './ApiUsers'
 import ChatInstances from './ChatInstances'
 import ChatInstanceSearch from './ChatInstanceSearch'
 import CourseParticipants from './CourseParticipants'
@@ -33,6 +34,7 @@ export function Component() {
     { path: 'notifications', label: t('admin:notifications') },
     { path: 'uniprompts', label: t('admin:uniPrompts') },
     { path: 'feedbacks', label: t('admin:feedbacks') },
+    { path: 'apiusers', label: t('admin:apiUsers') },
     ...(user?.iamGroups.includes('grp-toska') ? [{ path: 'updater', label: t('admin:updater') }] : []),
     { path: 'testing', label: t('admin:testing') },
   ]
@@ -86,6 +88,7 @@ export function Component() {
         <Route path="/usersearch" element={<UserSearch />} />
         <Route path="/chatinstancesearch" element={<ChatInstanceSearch />} />
         <Route path="/feedbacks" element={<Feedbacks />} />
+        <Route path="/apiusers" element={<ApiUsers />} />
         <Route path="/notifications" element={<NotificationManagement />} />
         <Route path="/uniprompts" element={<UniversityPromptManagement />} />
         <Route path="/testing" element={<Testing />} />

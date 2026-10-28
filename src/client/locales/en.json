@@ -343,6 +343,7 @@
     "noChats": "No open course chats"
   },
   "admin": {
+    "apiUsers": "API users",
     "courseNotFound": "Course {{courseId}} not found",
     "participantName": "Name",
     "role": "Role",

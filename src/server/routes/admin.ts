@@ -1,14 +1,14 @@
 import express from 'express'
 import { Op, WhereOptions } from 'sequelize'
 
-import { ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../db/models'
+import { ApiKey, ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../db/models'
 import { sequelize } from '../db/connection'
 import { run as runUpdater } from '../updater'
 import { ApplicationError } from '../util/ApplicationError'
 import { adminMiddleware } from '../middleware/adminMiddleware'
 import { generateTerms, getTermsOf } from '../util/util'
 import { LANGUAGES } from '../../shared/lang'
-import type { ChatInstanceSearchResponse, ChatInstanceSearchResult, CourseParticipant, CourseParticipantsResponse } from '../../shared/types'
+import type { ApiUser, ChatInstanceSearchResponse, ChatInstanceSearchResult, CourseParticipant, CourseParticipantsResponse } from '../../shared/types'
 
 const adminRouter = express.Router()
 
@@ -191,6 +191,19 @@ const findCourse = async (courseId: string) => {
   return chatInstance
 }
 
+const getApiKeyNamesByUser = async (userIds?: string[]) => {
+  const apiKeys = await ApiKey.findAll({
+    ...(userIds && { where: { userId: userIds } }),
+    attributes: ['userId', 'name'],
+    order: [['createdAt', 'ASC']],
+  })
+
+  const namesByUser = new Map<string, string[]>()
+  apiKeys.forEach((apiKey) => namesByUser.set(apiKey.userId, [...(namesByUser.get(apiKey.userId) ?? []), apiKey.name]))
+
+  return namesByUser
+}
+
 adminRouter.get('/courses/:courseId/participants', async (req, res) => {
   const chatInstance = await findCourse(req.params.courseId)
   const where = { chatInstanceId: chatInstance.id }
@@ -206,10 +219,15 @@ adminRouter.get('/courses/:courseId/participants', async (req, res) => {
   enrolments.forEach((enrolment) => roles.set(enrolment.userId, 'student'))
   responsibilities.forEach((responsibility) => roles.set(responsibility.userId, 'teacher'))
 
-  const users = await User.findAll({
-    where: { id: [...roles.keys()] },
-    attributes: ['id', 'username', 'firstNames', 'lastName', 'studentNumber', 'usage'],
-  })
+  const userIds = [...roles.keys()]
+
+  const [users, apiKeyNamesByUser] = await Promise.all([
+    User.findAll({
+      where: { id: userIds },
+      attributes: ['id', 'username', 'firstNames', 'lastName', 'studentNumber', 'usage'],
+    }),
+    getApiKeyNamesByUser(userIds),
+  ])
 
   const usageByUser = new Map(usages.map((usage) => [usage.userId, usage]))
 
@@ -228,9 +246,15 @@ adminRouter.get('/courses/:courseId/participants', async (req, res) => {
         courseUsage: usage?.usageCount ?? 0,
         courseTotalUsage: usage?.totalUsageCount ?? 0,
         usage: user.usage ?? 0,
+        apiKeyNames: apiKeyNamesByUser.get(user.id) ?? [],
       }
     })
-    .sort((a, b) => (a.role === b.role ? b.courseUsage - a.courseUsage : a.role === 'teacher' ? -1 : 1))
+    // users with API keys first, then teachers, then by course usage
+    .sort((a, b) => {
+      const hasKeys = Number(b.apiKeyNames.length > 0) - Number(a.apiKeyNames.length > 0)
+      if (hasKeys !== 0) return hasKeys
+      return a.role === b.role ? b.courseUsage - a.courseUsage : a.role === 'teacher' ? -1 : 1
+    })
 
   const response: CourseParticipantsResponse = {
     course: {
@@ -242,6 +266,29 @@ adminRouter.get('/courses/:courseId/participants', async (req, res) => {
   }
 
   res.send(response)
+})
+
+adminRouter.get('/api-users', async (_req, res) => {
+  const apiKeyNamesByUser = await getApiKeyNamesByUser()
+
+  const users = await User.findAll({
+    where: { id: [...apiKeyNamesByUser.keys()] },
+    attributes: ['id', 'username', 'firstNames', 'lastName', 'studentNumber', 'usage'],
+  })
+
+  const apiUsers: ApiUser[] = users
+    .map((user) => ({
+      id: user.id,
+      username: user.username,
+      firstNames: user.firstNames,
+      lastName: user.lastName,
+      studentNumber: user.studentNumber ?? null,
+      usage: user.usage ?? 0,
+      apiKeyNames: apiKeyNamesByUser.get(user.id) ?? [],
+    }))
+    .sort((a, b) => b.apiKeyNames.length - a.apiKeyNames.length || b.usage - a.usage)
+
+  res.send(apiUsers)
 })
 
 adminRouter.delete('/courses/:courseId/usage', async (req, res) => {

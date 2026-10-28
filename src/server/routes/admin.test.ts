@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { startTestServer } from '../tests/testServer'
 
 vi.mock('../db/models', () => ({
+  ApiKey: { findAll: vi.fn() },
   ChatInstance: { findAndCountAll: vi.fn(), findOne: vi.fn() },
   UserChatInstanceUsage: { findAll: vi.fn(), update: vi.fn() },
   User: { findAll: vi.fn() },
@@ -25,7 +26,7 @@ vi.mock('@sentry/node', () => ({
   captureException: vi.fn(),
 }))
 
-import { ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../db/models'
+import { ApiKey, ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../db/models'
 import adminRouter from './admin'
 
 let currentUser: { id: string; isAdmin: boolean }
@@ -109,6 +110,7 @@ describe('GET /admin/courses/:courseId/participants', () => {
         usage: 7,
       })) as any,
     )
+    vi.mocked(ApiKey.findAll).mockResolvedValue([])
   })
 
   test('merges teachers and students with their usage', async () => {
@@ -126,6 +128,23 @@ describe('GET /admin/courses/:courseId/participants', () => {
     expect(vi.mocked(User.findAll).mock.calls[0][0]?.where).toEqual({ id: ['student-1', 'student-2', 'both-1', 'teacher-1'] })
   })
 
+  test('lists users with API keys first and includes the key names', async () => {
+    vi.mocked(ApiKey.findAll).mockResolvedValue([
+      { userId: 'student-1', name: 'script' },
+      { userId: 'student-1', name: 'notebook' },
+    ] as any)
+
+    const res = await api.fetch('/admin/courses/cur-1/participants')
+    const body = await res.json()
+
+    expect(body.participants.map((p: any) => [p.id, p.apiKeyNames])).toEqual([
+      ['student-1', ['script', 'notebook']],
+      ['teacher-1', []],
+      ['both-1', []],
+      ['student-2', []],
+    ])
+  })
+
   test('returns 404 for an unknown course', async () => {
     vi.mocked(ChatInstance.findOne).mockResolvedValue(null)
 
@@ -141,6 +160,42 @@ describe('GET /admin/courses/:courseId/participants', () => {
 
     expect(res.status).toBe(403)
     expect(ChatInstance.findOne).not.toHaveBeenCalled()
+  })
+})
+
+describe('GET /admin/api-users', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    currentUser = { id: 'admin-1', isAdmin: true }
+    vi.mocked(ApiKey.findAll).mockResolvedValue([
+      { userId: 'user-1', name: 'a' },
+      { userId: 'user-2', name: 'b' },
+      { userId: 'user-2', name: 'c' },
+    ] as any)
+    vi.mocked(User.findAll).mockResolvedValue(
+      ['user-1', 'user-2'].map((id) => ({ id, username: id, firstNames: 'F', lastName: 'L', studentNumber: null, usage: 3 })) as any,
+    )
+  })
+
+  test('lists users with API keys, most keys first', async () => {
+    const res = await api.fetch('/admin/api-users')
+    const body = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(body.map((u: any) => [u.id, u.apiKeyNames, u.usage])).toEqual([
+      ['user-2', ['b', 'c'], 3],
+      ['user-1', ['a'], 3],
+    ])
+    expect(vi.mocked(User.findAll).mock.calls[0][0]?.where).toEqual({ id: ['user-1', 'user-2'] })
+  })
+
+  test('rejects non-admins', async () => {
+    currentUser = { id: 'user-1', isAdmin: false }
+
+    const res = await api.fetch('/admin/api-users')
+
+    expect(res.status).toBe(403)
+    expect(ApiKey.findAll).not.toHaveBeenCalled()
   })
 })
 

@@ -133,6 +133,8 @@ export interface CourseParticipant {
   courseTotalUsage: number
   /** current general usage (User.usage), gets reset */
   usage: number
+  /** names of the API keys the user has created */
+  apiKeyNames: string[]
 }
 
 export interface CourseParticipantsResponse {
@@ -142,6 +144,18 @@ export interface CourseParticipantsResponse {
     usageLimit: number
   }
   participants: CourseParticipant[]
+}
+
+export interface ApiUser {
+  id: string
+  username: string
+  firstNames: string | null
+  lastName: string | null
+  studentNumber: string | null
+  /** current general usage (User.usage), gets reset */
+  usage: number
+  /** names of the API keys the user has created */
+  apiKeyNames: string[]
 }
 // State of the course, not about a user.
 export type ChatStatus = 'NOT_STARTED' | 'EXPIRED' | 'ACTIVATED' | 'NOT_ACTIVATED'

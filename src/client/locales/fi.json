@@ -346,6 +346,7 @@
     "waitingForResponse": "Waiting for response"
   },
   "admin": {
+    "apiUsers": "API-käyttäjät",
     "courseNotFound": "Kurssia {{courseId}} ei löytynyt",
     "participantName": "Nimi",
     "role": "Rooli",
