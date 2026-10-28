@@ -382,7 +382,7 @@ const PromptModalV2 = () => {
         <Box
           sx={{
             display: !isMobile || (!previewPrompt && !previewCourse && !isEditing && !showUniversityPrompts) ? 'flex' : 'none',
-            width: !isMobile ? 350 : '90vw',
+            width: !isMobile ? { sm: 240, md: 300, lg: 350 } : '90vw',
             flexDirection: 'column',
           }}
         >
