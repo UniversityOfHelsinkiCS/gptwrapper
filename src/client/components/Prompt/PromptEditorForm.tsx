@@ -383,7 +383,7 @@ const RagSettingsSection = () => {
               {t('prompt:modelSourceMaterialInstructions')}
             </Typography>
             <Tooltip placement="right" title={t('prompt:promptHidden')} describeChild>
-              <Box component="span" role="img" tabIndex={0} aria-label={t('prompt:promptHidden')}>
+              <Box component="span" role="img" tabIndex={0} aria-label={t('prompt:promptHidden')} sx={{ mr: 1 }}>
                 <VisibilityOffOutlined fontSize="small" color="error" />
               </Box>
             </Tooltip>
