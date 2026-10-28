@@ -93,40 +93,35 @@ const PromptPreview = ({
     <>
       <StatusAnnouncer message={t('accessibility:previewOpened', { name: prompt.name })} />
       <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
-        {canManage ? (
-          <Box>
-            {(() => {
-              const promptCreator = chatInstance?.responsibilities.find((u) => u.user.id === prompt.userId)
-              const hasCreatorInfo = promptCreator && promptCreator.user.first_names && promptCreator.user.last_name
-              return (
-                <>
-                  {hasCreatorInfo ? (
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography variant="body2" fontWeight="light" data-testid={`prompt-preview-creator-for-${prompt.name}`}>
-                        {`${promptCreator.user.first_names.split(' ')[0]} ${promptCreator.user.last_name}`}
-                      </Typography>
-                    </Box>
-                  ) : null}
-                </>
-              )
-            })()}
-          </Box>
-        ) : (
-          <>
-            {user.id === prompt.userId && user.firstNames ? (
-              <Typography variant="body2" fontWeight="light" data-testid={`prompt-preview-creator-for-${prompt.name}`}>
-                {`${user.firstNames.split(' ')[0]} ${user.lastName ?? ''}`}
-              </Typography>
-            ) : null}
-          </>
-        )}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2, mt: 2 }}>
-          <Box sx={{ flexDirection: 'column', display: 'flex', gap: 1, maxWidth: '80%' }}>
-            <Typography variant="h4" component="h3" fontWeight="bold" data-testid={`prompt-preview-title-for-${prompt.name}`} sx={{ wordBreak: 'break-word' }}>
-              {prompt.name}
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {canManage ? (
+            <Box>
+              {(() => {
+                const promptCreator = chatInstance?.responsibilities.find((u) => u.user.id === prompt.userId)
+                const hasCreatorInfo = promptCreator && promptCreator.user.first_names && promptCreator.user.last_name
+                return (
+                  <>
+                    {hasCreatorInfo ? (
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Typography variant="body2" fontWeight="light" data-testid={`prompt-preview-creator-for-${prompt.name}`}>
+                          {`${promptCreator.user.first_names.split(' ')[0]} ${promptCreator.user.last_name}`}
+                        </Typography>
+                      </Box>
+                    ) : null}
+                  </>
+                )
+              })()}
+            </Box>
+          ) : (
+            <>
+              {user.id === prompt.userId && user.firstNames ? (
+                <Typography variant="body2" fontWeight="light" data-testid={`prompt-preview-creator-for-${prompt.name}`}>
+                  {`${user.firstNames.split(' ')[0]} ${user.lastName ?? ''}`}
+                </Typography>
+              ) : null}
+            </>
+          )}
+          <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', ml: 'auto' }}>
             {canEditPrompt && (
               <Tooltip arrow placement="bottom" title={t('prompt:editPromptTooltip')}>
                 <IconButton
@@ -189,6 +184,15 @@ const PromptPreview = ({
             )}
           </Box>
         </Box>
+        <Typography
+          variant="h4"
+          component="h3"
+          fontWeight="bold"
+          data-testid={`prompt-preview-title-for-${prompt.name}`}
+          sx={{ wordBreak: 'break-word', mt: 1, mb: 2 }}
+        >
+          {prompt.name}
+        </Typography>
         {prompt.userInstructions && (
           <Box sx={{ mb: 3 }}>
             <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
