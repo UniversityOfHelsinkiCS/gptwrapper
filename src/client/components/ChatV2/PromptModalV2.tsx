@@ -621,7 +621,7 @@ const PromptModalV2 = () => {
                 </Box>
               )}
               {/* Preview action buttons */}
-              <Box sx={{ pt: 2, display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
+              <Box sx={{ mb: 1, pt: 2, display: 'flex', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
                 {isMobile && (previewPrompt || previewCourse || showUniversityPrompts) && (
                   <OutlineButtonBlue onClick={() => handleMobileBackToPromptList()}>
                     <ArrowBackIcon />
