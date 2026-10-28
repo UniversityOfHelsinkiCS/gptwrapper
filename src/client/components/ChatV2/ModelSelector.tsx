@@ -11,9 +11,7 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import { visuallyHidden } from '@mui/utils'
 
 const filterAvailableModels = (models: ModelConfig[], isTokenLimitExceeded: boolean, isAdmin: boolean | undefined): ModelConfig[] => {
-  return models
-    .filter((model) => !isTokenLimitExceeded || model.name === FREE_MODEL)
-    .filter((model) => !isMockModel(model.name) || !inProduction || isAdmin)
+  return models.filter((model) => !isTokenLimitExceeded || model.name === FREE_MODEL).filter((model) => !isMockModel(model.name) || !inProduction || isAdmin)
 }
 
 const ModelSelector = ({
@@ -90,6 +88,7 @@ const ModelSelector = ({
             color="success"
             sx={{
               height: 18,
+              flexShrink: 0,
               fontSize: '0.65rem',
               fontWeight: 600,
               letterSpacing: '0.03em',
@@ -140,7 +139,7 @@ const ModelSelector = ({
               aria-label={[displayName, descriptionKey && t(descriptionKey), isFree(name) && t('chat:freeModel')].filter(Boolean).join(', ')}
               sx={{ gap: 1, py: 1, px: 1.75, alignItems: 'flex-start', mt: 1 }}
             >
-              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+              <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.25, whiteSpace: 'normal' }}>
                 <Typography sx={{ fontSize: '0.875rem', fontWeight: active ? 600 : 400 }}>{displayName}</Typography>
                 {descriptionKey && <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.3 }}>{t(descriptionKey)}</Typography>}
               </Box>
@@ -151,6 +150,8 @@ const ModelSelector = ({
                   color="success"
                   sx={{
                     height: 18,
+                    display: 'flex',
+                    flexShrink: 0,
                     fontSize: '0.65rem',
                     fontWeight: 600,
                     letterSpacing: '0.03em',
