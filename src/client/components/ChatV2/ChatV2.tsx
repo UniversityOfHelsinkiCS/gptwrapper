@@ -55,6 +55,8 @@ const ChatV2Content = () => {
   const { t, i18n } = useTranslation()
   const { promptInfo, isPromptHidden, activePrompt } = usePromptState()
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
+  const ragHidden = activePrompt?.ragHidden
+
   const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo, hasPotentialError } = useChatStream({
     onComplete: ({ message }) => {
       if (message.content.length > 0 || message.error) {
@@ -441,7 +443,7 @@ const ChatV2Content = () => {
   const shownToolResults = activeToolResults ?? latestToolResults
 
   // layout
-  const canShowToolResults = canManageCourse(chatInstance) || !isPromptHidden || activePrompt?.userId === user?.id
+  const canShowToolResults = canManageCourse(chatInstance) || !(isPromptHidden || ragHidden) || activePrompt?.userId === user?.id
   const hasToolResults = !!shownToolResults && shownToolResults.length > 0 && canShowToolResults
   const toolResultsKey = shownToolResults?.map((toolResult) => toolResult.callId).join(',')
   const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
