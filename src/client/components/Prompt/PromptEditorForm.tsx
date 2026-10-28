@@ -226,13 +226,13 @@ const RagSettingsSection = () => {
         </Typography>
       </Box>
       <Box mb={3}>
-        <Box display="flex" alignItems="center">
+        <Box display="flex" alignItems="center" flexWrap="wrap" columnGap={2}>
           <Typography id="rag-in-use-label" variant="overline" component="h5" fontWeight="bold" my={1}>
             {t('prompt:ragInUse')}
           </Typography>
           {type !== 'PERSONAL' && (
             <FormControlLabel
-              sx={{ ml: 'auto' }}
+              sx={{ ml: 'auto', mr: 0 }}
               control={
                 <Switch
                   checked={!form.ragHidden}
