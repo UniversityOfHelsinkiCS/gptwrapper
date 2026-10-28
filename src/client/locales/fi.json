@@ -576,6 +576,7 @@
     "promptUsageTitle": "Tokenien käyttö per alustus",
     "customPrompt": "Kustomoitu alustus",
     "showAsTable": "Näytä taulukkona",
+    "promptUsageChartLabel": "Pylväskaavio tokenien käytöstä päivittäin alustuksittain. Tiedot saa näkyviin taulukkona Näytä taulukkona -valinnalla.",
     "date": "Päivämäärä",
     "total": "Yhteensä",
     "tokens": "Tokenit",

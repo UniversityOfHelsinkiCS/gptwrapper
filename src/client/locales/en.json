@@ -573,6 +573,7 @@
     "promptUsageTitle": "Token usage per prompt",
     "customPrompt": "Custom prompt",
     "showAsTable": "Show as table",
+    "promptUsageChartLabel": "Bar chart of daily token usage per prompt. Turn on Show as table to see the data as a table.",
     "date": "Date",
     "total": "Total",
     "tokens": "Tokens",

@@ -147,7 +147,7 @@ const PromptUsageHistogram = ({ promptUsages, activityPeriod }: Props) => {
         </ScrollableRegion>
       ) : (
         <>
-          <Box sx={{ minWidth: 0 }}>
+          <Box role="img" aria-label={t('course:promptUsageChartLabel')} sx={{ minWidth: 0 }}>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />

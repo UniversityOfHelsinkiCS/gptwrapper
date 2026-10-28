@@ -522,6 +522,7 @@
     "promptUsageTitle": "Tokenanvändning per prompt",
     "customPrompt": "Egen prompt",
     "showAsTable": "Visa som tabell",
+    "promptUsageChartLabel": "Stapeldiagram över daglig tokenanvändning per prompt. Slå på Visa som tabell för att se uppgifterna som en tabell.",
     "date": "Datum",
     "total": "Totalt",
     "tokens": "Tokens",
