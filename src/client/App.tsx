@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
 import { EmbeddedProvider } from './contexts/EmbeddedContext'
+import NotificationBanner from './components/common/NotificationBanner'
 import { DarkModeProvider } from './contexts/DarkModeContext'
 import useCurrentUser from './hooks/useCurrentUser'
 import { AnalyticsProvider } from './stores/analytics'
@@ -26,7 +27,6 @@ import { ApiKeysDialog } from './components/ApiKeys/ApiKeysDialog'
 import { Feedback } from './components/Feedback'
 import { SuperSpeedLoginAs } from './components/Admin/SuperSpeedLoginAs'
 import { useLoggedInAs } from './hooks/useLoggedInAs'
-import NotificationBanner from './components/common/NotificationBanner'
 import { announceSnackbar } from './components/common/accessibility/SnackbarAnnouncer'
 import { MAX_SNACKBARS, forgetClosedSnackbar, snackbarComponents } from './components/common/Snackbar'
 import { resolveContentView, getRedirect } from './util/contentView'
@@ -186,7 +186,6 @@ const Layout = () => {
             />
           </Box>
         </Box>
-        <NotificationBanner />
         <Feedback open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
         <GlobalSettings open={settingsOpen} setOpen={setSettingsOpen} />
         <ApiKeysDialog open={apiKeysOpen} setOpen={setApiKeysOpen} />
@@ -232,7 +231,12 @@ const Content = () => {
   return (
     <Box component="main" id="main-content" tabIndex={-1} sx={{ flex: 1, '&:focus-visible': { outline: 'none' } }}>
       {view === 'loading' && <HYLoadingSpinner />}
-      {view === 'error' && <LoginError onRetry={() => refetch()} isRetrying={isFetching} />}
+      {view === 'error' && (
+        <>
+          <NotificationBanner />
+          <LoginError onRetry={() => refetch()} isRetrying={isFetching} />
+        </>
+      )}
       {view !== 'loading' && view !== 'error' && <Outlet />}
     </Box>
   )

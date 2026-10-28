@@ -1,4 +1,5 @@
-import { Alert, IconButton, Stack, Box } from '@mui/material'
+import { Alert, IconButton, Stack, Box, type SxProps, type Theme } from '@mui/material'
+import { memo, useEffect, useState } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
@@ -17,10 +18,19 @@ const severityIcons = {
   error: ErrorOutlineIcon,
 }
 
-const NotificationBanner = () => {
+// The banner remounts e.g. whenever a chat finishes loading. Screen readers announce every newly mounted
+// role="alert", so each notification is announced only once per page load.
+const announcedIds = new Set<string>()
+
+const NotificationBanner = ({ sx }: { sx?: SxProps<Theme> }) => {
   const { i18n, t } = useTranslation()
   const { notifications, isLoading } = useNotifications()
   const [dismissedIds, setDismissedIds] = useLocalStorageState<string[]>('dismissed-notifications', [])
+  const [previouslyAnnouncedIds] = useState(() => new Set(announcedIds))
+
+  useEffect(() => {
+    notifications.forEach((n) => announcedIds.add(n.id))
+  }, [notifications])
 
   if (isLoading) return null
 
@@ -39,7 +49,7 @@ const NotificationBanner = () => {
   }
 
   return (
-    <Box sx={{ position: 'relative', width: '100%', pr: '80px', pl: 2, pt: 2 }}>
+    <Box sx={[{ position: 'relative', width: '100%', pr: '80px', pl: 2, pt: 2 }, ...(Array.isArray(sx) ? sx : [sx])]}>
       <Stack spacing={2} sx={{ mb: 2 }}>
         {activeNotifications.map((notification) => {
           const severity = getSeverity(notification.priority)
@@ -51,6 +61,7 @@ const NotificationBanner = () => {
             <Alert
               key={notification.id}
               severity={severity}
+              role={previouslyAnnouncedIds.has(notification.id) ? 'note' : 'alert'}
               icon={false}
               sx={{
                 alignItems: 'center',
@@ -59,15 +70,20 @@ const NotificationBanner = () => {
                   alignItems: 'center',
                   gap: 1,
                   flex: 1,
+                  minWidth: 0,
                 },
               }}
             >
-              <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5 }}>
+              <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5 }}>
                 <SeverityIcon color={severity} sx={{ fontSize: 22, flexShrink: 0 }} />
                 <Box
                   id="notification"
                   sx={{
                     textAlign: 'center',
+                    maxWidth: '80ch',
+                    textWrap: 'balance',
+                    minWidth: 0,
+                    overflowWrap: 'anywhere',
                     '& > :first-child, & > span + *': { mt: 0 },
                     '& > :last-child': { mb: 0 },
                   }}
@@ -95,4 +111,5 @@ const NotificationBanner = () => {
   )
 }
 
-export default NotificationBanner
+// Memoized because ChatV2 re-renders on every streamed chunk
+export default memo(NotificationBanner)

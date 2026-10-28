@@ -38,6 +38,7 @@ import { parseFileContent } from '../../util/fileParsing'
 import { ChatExpiredView } from './ChatExpiredView'
 import { canManageCourse } from './util'
 import { ApiErrorView } from '../common/ApiErrorView'
+import NotificationBanner from '../common/NotificationBanner'
 import { PromptEditorState } from '../Prompt/context'
 import { usePageTitle } from '../../hooks/usePageTitle'
 
@@ -45,6 +46,10 @@ import { usePageTitle } from '../../hooks/usePageTitle'
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
  */
 const Conversation = lazy(() => import('./Conversation'))
+
+// On mobile the floating buttons and the global menu are fixed at top: 10 and are ~40px tall. Starting the
+// banner below them lets it use the full width instead of reserving room for the global menu.
+const bannerBelowFloatingButtonsSx = { pt: '64px', pr: 2 }
 
 const ChatV2Content = () => {
   const { courseId } = useParams()
@@ -448,6 +453,7 @@ const ChatV2Content = () => {
   const toolResultsKey = shownToolResults?.map((toolResult) => toolResult.callId).join(',')
   const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
   const leftPanelFloating = isEmbeddedMode || isMobile
+  const showFloatingButtons = isMobile && !isEmbeddedMode
   const [sideBarOpen, setSideBarOpen] = useState<boolean>(() => {
     return isMobile || isEmbeddedMode ? false : !defaultCollapsedSidebar
   })
@@ -486,13 +492,24 @@ const ChatV2Content = () => {
   }
 
   if (chatInstanceLoadError) {
-    return <ApiErrorView error={chatInstanceLoadError} />
+    return (
+      <>
+        <NotificationBanner />
+        <ApiErrorView error={chatInstanceLoadError} />
+      </>
+    )
   }
 
+  // No banner while loading, it would jump next to the side panel once the chat renders
   if (statusLoading || userLoading || chatInstanceLoading) return <HYLoadingSpinner />
 
   if (chatInstance?.accessLevel === 'STUDENT_CLOSED' && chatInstance.status !== 'ACTIVATED') {
-    return <ChatExpiredView status={chatInstance.status} chatInstance={chatInstance} />
+    return (
+      <>
+        <NotificationBanner />
+        <ChatExpiredView status={chatInstance.status} chatInstance={chatInstance} />
+      </>
+    )
   }
 
   return (
@@ -526,133 +543,137 @@ const ChatV2Content = () => {
         <SideBar open={sideBarOpen} setOpen={setSideBarOpen} user={user} handleReset={handleResetRequest} messages={messages} />
       )}
       {/* Chat view column ------------------------------------------------------------------------------------------------ */}
-      <Box
-        ref={chatContainerRef}
-        data-skip-target
-        tabIndex={-1}
-        sx={{
-          '&:focus-visible': { outline: 'none' },
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          // magical -11px prevents horizontal overflow when vertical scrollbar appears
-          width: `calc(100vw - 11px - ${leftPanelContentWidth} - ${rightPanelContentWidth})`,
-          maxWidth: '1080px',
-          marginLeft: 'auto',
-          marginRight: 'auto',
-        }}
-      >
-        {isMobile && !isEmbeddedMode && (
-          <Box
-            sx={{
-              position: 'fixed',
-              left: 15,
-              top: 10,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              zIndex: 999,
-            }}
-          >
-            <OutlineButtonBlack onClick={() => setSideBarOpen(true)} data-testid="left-panel-open">
-              <CustomIcon src={sidebarOpen} alt={t('sidebar:open')} />
-            </OutlineButtonBlack>
-            <OutlineButtonBlack onClick={handleResetRequest} aria-label={t('sidebar:chatNew')} data-testid="new-conversation-button">
-              <MapsUgc fontSize="small" />
-            </OutlineButtonBlack>
-          </Box>
-        )}
+      {/* The banner spans the whole space between the side panels, the chat below it stays narrower */}
+      <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+        <NotificationBanner sx={showFloatingButtons ? bannerBelowFloatingButtonsSx : undefined} />
         <Box
+          ref={chatContainerRef}
+          data-skip-target
+          tabIndex={-1}
           sx={{
-            height: '100%',
-            width: '100%',
-            margin: '0 auto',
-            overflow: 'hidden',
-            paddingLeft: '1rem',
-            paddingRight: '1rem',
-            paddingTop: '1rem',
-            maxWidth: '1000px',
+            '&:focus-visible': { outline: 'none' },
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            // magical -11px prevents horizontal overflow when vertical scrollbar appears
+            width: `calc(100vw - 11px - ${leftPanelContentWidth} - ${rightPanelContentWidth})`,
+            maxWidth: '1080px',
+            marginLeft: 'auto',
+            marginRight: 'auto',
           }}
-          ref={scrollRef}
         >
-          {chatInstance?.saveDiscussions && (
-            <Paper
-              variant="outlined"
+          {showFloatingButtons && (
+            <Box
               sx={{
-                padding: 2,
-                mt: 2,
+                position: 'fixed',
+                left: 15,
+                top: 10,
                 display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
+                alignItems: 'center',
+                gap: 1,
+                zIndex: 999,
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Typography variant="body1" fontWeight={600}>
-                  {t('course:isSavedNotOptOut')}
-                </Typography>
-              </Box>
-            </Paper>
+              <OutlineButtonBlack onClick={() => setSideBarOpen(true)} data-testid="left-panel-open">
+                <CustomIcon src={sidebarOpen} alt={t('sidebar:open')} />
+              </OutlineButtonBlack>
+              <OutlineButtonBlack onClick={handleResetRequest} aria-label={t('sidebar:chatNew')} data-testid="new-conversation-button">
+                <MapsUgc fontSize="small" />
+              </OutlineButtonBlack>
+            </Box>
           )}
-
-          <Conversation
-            initial={
-              <ConversationSplash
-                courseName={courseName}
-                courseDate={chatInstance?.activityPeriod}
-                promptName={promptInfo?.type === 'saved' ? promptInfo.name : undefined}
-              />
-            }
-            messages={messages}
-            completion={hasPotentialError ? `${completion} ⚠️` : completion}
-            generationInfo={generationInfo}
-            isStreaming={isStreaming}
-            endState={endState}
-            toolCalls={toolCalls}
-            setActiveToolResults={canShowToolResults ? openToolResults : undefined}
-            isMobile={isMobile}
-            onRetry={handleRetry}
-            latestResponseIndex={latestResponseIndex}
-            latestResponseRef={latestResponseRef}
-          />
-        </Box>
-        <Box
-          sx={{
-            width: '100%',
-            position: 'sticky',
-            bottom: 0,
-          }}
-        >
           <Box
             sx={{
-              padding: isMobile ? '0rem 1rem 1rem 1rem' : '0rem 2rem 2rem 2rem',
+              height: '100%',
+              width: '100%',
+              margin: '0 auto',
+              overflow: 'hidden',
+              paddingLeft: '1rem',
+              paddingRight: '1rem',
+              paddingTop: '1rem',
+              maxWidth: '1000px',
+            }}
+            ref={scrollRef}
+          >
+            {chatInstance?.saveDiscussions && (
+              <Paper
+                variant="outlined"
+                sx={{
+                  padding: 2,
+                  mt: 2,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 2,
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Typography variant="body1" fontWeight={600}>
+                    {t('course:isSavedNotOptOut')}
+                  </Typography>
+                </Box>
+              </Paper>
+            )}
+
+            <Conversation
+              initial={
+                <ConversationSplash
+                  courseName={courseName}
+                  courseDate={chatInstance?.activityPeriod}
+                  promptName={promptInfo?.type === 'saved' ? promptInfo.name : undefined}
+                />
+              }
+              messages={messages}
+              completion={hasPotentialError ? `${completion} ⚠️` : completion}
+              generationInfo={generationInfo}
+              isStreaming={isStreaming}
+              endState={endState}
+              toolCalls={toolCalls}
+              setActiveToolResults={canShowToolResults ? openToolResults : undefined}
+              isMobile={isMobile}
+              onRetry={handleRetry}
+              latestResponseIndex={latestResponseIndex}
+              latestResponseRef={latestResponseRef}
+            />
+          </Box>
+          <Box
+            sx={{
+              width: '100%',
+              position: 'sticky',
+              bottom: 0,
             }}
           >
-            <ChatBox
-              disabled={isStreaming}
-              isTokenLimitExceeded={tokenLimitExceeded}
-              fileInputRef={fileInputRef}
-              fileName={fileName}
-              setFileName={setFileName}
-              messageWarning={messageWarning}
-              handleCancel={handleCancel}
-              handleContinue={(_, ignoredWarnings) => {
-                handleSendMessage('', true, ignoredWarnings)
-                document.getElementById('chat-input')?.focus()
+            <Box
+              sx={{
+                padding: isMobile ? '0rem 1rem 1rem 1rem' : '0rem 2rem 2rem 2rem',
               }}
-              handleSubmit={(newMessage) => {
-                handleSendMessage(newMessage, false, [])
-              }}
-              handleReset={handleResetRequest}
-              handleStop={() => {
-                streamControllerRef.current?.abort('user_aborted')
-                setEndState('canceled')
-              }}
-              isMobile={isMobile}
-              currentModel={activeModel}
-              setModel={setActiveModel}
-              isNewResponseAvailable={isNewResponseAvailable}
-              onGoToLatestResponse={handleGoToLatestResponse}
-            />
+            >
+              <ChatBox
+                disabled={isStreaming}
+                isTokenLimitExceeded={tokenLimitExceeded}
+                fileInputRef={fileInputRef}
+                fileName={fileName}
+                setFileName={setFileName}
+                messageWarning={messageWarning}
+                handleCancel={handleCancel}
+                handleContinue={(_, ignoredWarnings) => {
+                  handleSendMessage('', true, ignoredWarnings)
+                  document.getElementById('chat-input')?.focus()
+                }}
+                handleSubmit={(newMessage) => {
+                  handleSendMessage(newMessage, false, [])
+                }}
+                handleReset={handleResetRequest}
+                handleStop={() => {
+                  streamControllerRef.current?.abort('user_aborted')
+                  setEndState('canceled')
+                }}
+                isMobile={isMobile}
+                currentModel={activeModel}
+                setModel={setActiveModel}
+                isNewResponseAvailable={isNewResponseAvailable}
+                onGoToLatestResponse={handleGoToLatestResponse}
+              />
+            </Box>
           </Box>
         </Box>
       </Box>
