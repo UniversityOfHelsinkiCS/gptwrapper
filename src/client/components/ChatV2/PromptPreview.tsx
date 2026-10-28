@@ -93,9 +93,18 @@ const PromptPreview = ({
     <>
       <StatusAnnouncer message={t('accessibility:previewOpened', { name: prompt.name })} />
       <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', overflow: 'auto', maxHeight: '100%' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '1fr auto',
+            gridTemplateAreas: { xs: '"owner actions" "title title"', sm: '"owner owner" "title actions"' },
+            alignItems: 'center',
+            columnGap: 1,
+            mb: 2,
+          }}
+        >
           {canManage ? (
-            <Box>
+            <Box sx={{ gridArea: 'owner' }}>
               {(() => {
                 const promptCreator = chatInstance?.responsibilities.find((u) => u.user.id === prompt.userId)
                 const hasCreatorInfo = promptCreator && promptCreator.user.first_names && promptCreator.user.last_name
@@ -113,15 +122,15 @@ const PromptPreview = ({
               })()}
             </Box>
           ) : (
-            <>
+            <Box sx={{ gridArea: 'owner' }}>
               {user.id === prompt.userId && user.firstNames ? (
                 <Typography variant="body2" fontWeight="light" data-testid={`prompt-preview-creator-for-${prompt.name}`}>
                   {`${user.firstNames.split(' ')[0]} ${user.lastName ?? ''}`}
                 </Typography>
               ) : null}
-            </>
+            </Box>
           )}
-          <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', ml: 'auto' }}>
+          <Box sx={{ gridArea: 'actions', display: 'flex', gap: 0.5, alignItems: 'center', justifySelf: 'end' }}>
             {canEditPrompt && (
               <Tooltip arrow placement="bottom" title={t('prompt:editPromptTooltip')}>
                 <IconButton
@@ -183,16 +192,16 @@ const PromptPreview = ({
               </Tooltip>
             )}
           </Box>
+          <Typography
+            variant="h4"
+            component="h3"
+            fontWeight="bold"
+            data-testid={`prompt-preview-title-for-${prompt.name}`}
+            sx={{ gridArea: 'title', wordBreak: 'break-word', mt: 1 }}
+          >
+            {prompt.name}
+          </Typography>
         </Box>
-        <Typography
-          variant="h4"
-          component="h3"
-          fontWeight="bold"
-          data-testid={`prompt-preview-title-for-${prompt.name}`}
-          sx={{ wordBreak: 'break-word', mt: 1, mb: 2 }}
-        >
-          {prompt.name}
-        </Typography>
         {prompt.userInstructions && (
           <Box sx={{ mb: 3 }}>
             <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
