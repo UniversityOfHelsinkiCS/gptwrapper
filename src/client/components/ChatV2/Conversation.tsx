@@ -354,21 +354,6 @@ const AssistantMessageItem = ({
       >
         {processedContent}
       </ReactMarkdown>
-      <Box
-        className="copy-message-button"
-        sx={{
-          position: 'absolute',
-          right: 10,
-          bottom: -15,
-          opacity: { xs: 0.7, md: 0 },
-          transition: 'opacity 0.2s ease-in-out',
-          bgcolor: 'background.paper',
-          borderRadius: 4,
-          ...focusIndicatorStyle(),
-        }}
-      >
-        <CopyToClipboardButton id={msgId} copied={readMessageContent(message)} label={numberedHeading(t('accessibility:responseHeading'), number)} />
-      </Box>
       {message.error && (
         <Box sx={{ mt: 2 }}>
           <Typography variant="body1" fontStyle="italic" color="error.main">
@@ -388,6 +373,24 @@ const AssistantMessageItem = ({
           <ToolResultsButton toolResults={toolResults} setActiveToolResults={setActiveToolResults} isMobile={isMobile} headingId={headingId} />
         </>
       )}
+      <Box
+        className="copy-message-button"
+        sx={{
+          position: { xs: 'static', md: 'absolute' },
+          width: { xs: 'fit-content', md: 'auto' },
+          ml: { xs: 'auto', md: 0 },
+          mt: { xs: 1, md: 0 },
+          right: 10,
+          bottom: -15,
+          opacity: { xs: 0.7, md: 0 },
+          transition: 'opacity 0.2s ease-in-out',
+          bgcolor: 'background.paper',
+          borderRadius: 4,
+          ...focusIndicatorStyle(),
+        }}
+      >
+        <CopyToClipboardButton id={msgId} copied={readMessageContent(message)} label={numberedHeading(t('accessibility:responseHeading'), number)} />
+      </Box>
     </Box>
   )
 }
