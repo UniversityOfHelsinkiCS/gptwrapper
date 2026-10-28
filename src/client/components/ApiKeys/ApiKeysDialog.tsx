@@ -163,7 +163,11 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
           <Divider sx={{ flex: 1 }} />
         </Box>
 
-        <Box component="form" onSubmit={handleCreate} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+        <Box
+          component="form"
+          onSubmit={handleCreate}
+          sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'flex-start' }, gap: 1.5 }}
+        >
           <TextField
             label={t('apiKeys:nameLabel')}
             size="small"
