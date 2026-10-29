@@ -4,7 +4,7 @@ import { randomBytes } from 'node:crypto'
 import logger from '../../util/logger'
 import { AIMessageChunk } from 'langchain'
 import { ChatOpenAI } from '@langchain/openai'
-import { AZURE_API_KEY, AZURE_RESOURCE, GOOGLE_CLOUD_PROJECT_ID } from 'src/server/util/config'
+import { AZURE_API_KEY, AZURE_RESOURCE, GOOGLE_CLOUD_PROJECT_ID, INFERENCE_API_TOKEN, INFERENCE_API_URL } from 'src/server/util/config'
 import { ChatGoogle } from '@langchain/google'
 import { ApiKey, User } from '../../db/models'
 import { checkUsage, getUserTokenLimit, incrementUsage } from 'src/server/services/chatInstances/usage'
@@ -44,6 +44,20 @@ export const getVertexModelProvider = (modelConfig: Pick<ModelConfig, 'name' | '
     })
 }
 
+export const getToskaProvider = (service: string, streaming = true, temperature: number | undefined, topP: number | undefined, _top_k: number | undefined, logprobs: boolean = false) =>
+    new ChatOpenAI({
+        configuration: {
+            baseURL: `${INFERENCE_API_URL}/${service}`
+        },
+        useResponsesApi: true,
+        apiKey: INFERENCE_API_TOKEN,
+        streaming: streaming,
+        temperature,
+        topP,
+        logprobs: logprobs,
+        topLogprobs: 5
+    })
+
 
 const getModel = (modelConfig, streaming, temperature, topP, topK, logprobs) => {
     switch (modelConfig.provider) {
@@ -52,6 +66,9 @@ const getModel = (modelConfig, streaming, temperature, topP, topK, logprobs) => 
         }
         case ModelProvider.Vertex: {
             return getVertexModelProvider(modelConfig, streaming, temperature, topP, topK, logprobs)
+        }
+        case ModelProvider.Toska: {
+            return getToskaProvider(modelConfig.service, streaming, temperature, topP, topK, logprobs)
         }
         default:
             throw new Error(`Unknown model provider: ${modelConfig.provider}`)

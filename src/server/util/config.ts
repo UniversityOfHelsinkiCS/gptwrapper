@@ -56,6 +56,10 @@ export const OLLAMA_EMBEDDER_MODEL = getEnv('OLLAMA_EMBEDDER_MODEL', 'placeholde
 export const LAAMA_API_URL = getEnv('LAAMA_API_URL', 'placeholder')
 export const LAAMA_API_TOKEN = getEnv('LAAMA_API_TOKEN', 'placeholder')
 
+export const INFERENCE_API_URL = getEnv('INFERENCE_API_URL', 'placeholder')
+export const INFERENCE_API_TOKEN = getEnv('INFERENCE_API_TOKEN', 'placeholder')
+
+
 export const S3_HOST = getEnv('S3_HOST', 'placeholder')
 
 export const S3_ACCESS_KEY = getEnv('S3_ACCESS_KEY', 'placeholder')

@@ -25,6 +25,7 @@ Wrap code in triple backticks with the correct language tag (js, ts, py, etc.) s
 export enum ModelProvider {
   Azure = 'azure',
   Vertex = 'vertex',
+  Toska = 'toska',
   Mock = 'mock',
 }
 
@@ -42,6 +43,9 @@ export type ModelConfig = {
   descriptionKey?: ModelDescriptionKey
   /** Vertex-only: overrides DEFAULT_VERTEX_LOCATION for models not available in that region. */
   modelRegion?: string
+  // local inference only, used to choose service in apigw
+  service?: string
+  tags: string[]
 }
 
 /**
@@ -49,6 +53,16 @@ export type ModelConfig = {
  * displayName: the human-readable name shown to users.
  */
 export const validModels: ModelConfig[] = [
+  // {
+  //   name: 'Qwen3.5',
+  //   displayName: 'Qwen 3.5 4B',
+  //   context: 128_000,
+  //   streamVersion: 'v3',
+  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+  //   provider: ModelProvider.Toska,
+  //   service: 'v1',
+  //   tags: ['local', 'open']
+  // },
   {
     name: 'gpt-5-mini',
     displayName: 'GPT-5 mini',
@@ -56,7 +70,56 @@ export const validModels: ModelConfig[] = [
     streamVersion: 'v3',
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Azure,
+    tags: ['cheap', 'fast']
   },
+  // {
+  //   name: 'gpt-6-luna',
+  //   displayName: 'GPT-6 Luna',
+  //   context: 128_000,
+  //   streamVersion: 'v3',
+  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+  //   provider: ModelProvider.Azure,
+  // },
+  // {
+  //   name: 'gpt-4o-mini',
+  //   displayName: 'GPT-4o mini',
+  //   context: 128_000,
+  //   streamVersion: 'v3',
+  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+  //   provider: ModelProvider.Azure,
+  // },
+  // {
+  //   name: 'gpt-4o',
+  //   displayName: 'GPT-4o',
+  //   context: 128_000,
+  //   streamVersion: 'v3',
+  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+  //   provider: ModelProvider.Azure,
+  // },
+  // {
+  //   name: 'gpt-4',
+  //   displayName: 'GPT-4',
+  //   context: 128_000,
+  //   streamVersion: 'v3',
+  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+  //   provider: ModelProvider.Azure,
+  // },
+  // {
+  //   name: 'gpt-5.1',
+  //   displayName: 'GPT-5.1',
+  //   context: 128_000,
+  //   streamVersion: 'v3',
+  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+  //   provider: ModelProvider.Azure,
+  // },
+  // {
+  //   name: 'gpt-4.1',
+  //   displayName: 'GPT-4.1',
+  //   context: 128_000,
+  //   streamVersion: 'v3',
+  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+  //   provider: ModelProvider.Azure,
+  // },
   {
     name: 'gpt-5.5',
     displayName: 'GPT-5.5',
@@ -65,6 +128,7 @@ export const validModels: ModelConfig[] = [
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',
+    tags: ['premium']
   },
   {
     name: 'gpt-6.1-sol',
@@ -74,6 +138,7 @@ export const validModels: ModelConfig[] = [
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',
+    tags: ['premium']
   },
   // {
   //   name: 'DeepSeek-V4-Flash',
@@ -92,6 +157,7 @@ export const validModels: ModelConfig[] = [
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.balanced',
+    tags: []
   },
   // gemini 3.5 flash lite is not available in EU for now. It is the direct replacement 2.5 flash
   // {
@@ -114,6 +180,7 @@ export const validModels: ModelConfig[] = [
     descriptionKey: 'chat:modelDescriptions.balanced',
     timeoutOverride: 60000,
     modelRegion: 'eu',
+    tags: []
   },
   {
     name: 'mock',
@@ -121,6 +188,7 @@ export const validModels: ModelConfig[] = [
     context: 1024,
     streamVersion: 'v3',
     provider: ModelProvider.Mock,
+    tags: []
   },
 ] as const
 
