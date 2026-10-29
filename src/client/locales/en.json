@@ -929,7 +929,7 @@
     "deleteConfirmTitle": "Delete key <key>{{key}}</key>?",
     "deleteConfirmText": "Applications using it will stop working immediately. This cannot be undone.",
     "delete": "Delete key",
-    "securityNote": "A key grants the same permissions as your own user account. Don't share it or store it in a public code repository. If a key has leaked, delete it and create a new one.",
+    "securityNote": "A key lets you call language models the same way as your own user account, but it can't be used to access the application's other features such as courses, prompts or source materials.",
     "deleteSuccess": "Key deleted",
     "deleteError": "Failed to delete key",
     "createError": "Failed to create key",

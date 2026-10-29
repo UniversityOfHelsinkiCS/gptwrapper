@@ -905,7 +905,7 @@
     "deleteConfirmTitle": "Radera nyckeln <key>{{key}}</key>?",
     "deleteConfirmText": "Applikationer som använder den slutar fungera omedelbart. Detta kan inte ångras.",
     "delete": "Radera nyckel",
-    "securityNote": "En nyckel ger samma behörigheter som ditt eget användarkonto. Dela den inte och spara den inte i ett offentligt kodförråd. Om en nyckel har läckt, radera den och skapa en ny.",
+    "securityNote": "Med en nyckel kan du anropa språkmodeller på samma sätt som med ditt eget användarkonto, men den kan inte användas för att komma åt applikationens övriga funktioner såsom kurser, prompter eller källmaterial.",
     "deleteSuccess": "Nyckeln har raderats",
     "deleteError": "Det gick inte att radera nyckeln",
     "createError": "Det gick inte att skapa nyckeln",

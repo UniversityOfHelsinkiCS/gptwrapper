@@ -930,7 +930,7 @@
     "deleteConfirmTitle": "Poistetaanko avain <key>{{key}}</key>?",
     "deleteConfirmText": "Sitä käyttävät sovellukset lakkaavat toimimasta heti. Toimintoa ei voi perua.",
     "delete": "Poista avain",
-    "securityNote": "Avaimella on samat oikeudet kuin käyttäjätililläsi. Älä jaa avainta muille äläkä tallenna sitä julkiseen koodirepositorioon. Jos avain pääsee vääriin käsiin, poista se ja luo tilalle uusi.",
+    "securityNote": "Avaimella on mahdollista kutsua kielimalleja samalla tavalla kuin käyttäjälläsi, mutta sen avulla ei voi käyttää sovelluksen muita toiminnallisuuksia kuten kursseja, alustuksia tai lähdemateriaaleja.",
     "deleteSuccess": "Avain poistettu",
     "deleteError": "Avaimen poistaminen epäonnistui",
     "createError": "Avaimen luominen epäonnistui",
