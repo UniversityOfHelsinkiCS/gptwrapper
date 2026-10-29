@@ -11,8 +11,6 @@ type Transport = winston.transport
 
 const transports: Transport[] = []
 
-transports.push(new winston.transports.File({ filename: 'debug.log' }))
-
 if (!inProduction) {
   const devFormat = printf(({ level, message, timestamp, ...rest }) => {
     let restString = ''
