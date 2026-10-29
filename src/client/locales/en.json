@@ -646,7 +646,7 @@
     "editPromptTooltip": "Edit",
     "deletePromptTooltip": "Delete",
     "copyPromptUrlTooltip": "Copy link",
-    "copyPromptTooltip": "Copy prompt…",
+    "copyPromptTooltip": "Copy prompt to…",
     "copyPromptTo": "Copy to",
     "copiedToCourse": "Copied to course \"{{course}}\"",
     "copiedToMyPrompts": "Copied to my prompts",

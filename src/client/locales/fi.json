@@ -648,7 +648,7 @@
     "editPromptTooltip": "Muokkaa",
     "deletePromptTooltip": "Poista",
     "copyPromptUrlTooltip": "Kopioi linkki",
-    "copyPromptTooltip": "Kopioi alustus…",
+    "copyPromptTooltip": "Kopioi alustus kohteeseen…",
     "copyPromptTo": "Kopioi kohteeseen",
     "copiedToCourse": "Kopioitu kurssille \"{{course}}\"",
     "copiedToMyPrompts": "Kopioitu omiin alustuksiin",

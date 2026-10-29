@@ -614,7 +614,7 @@
     "editPromptTooltip": "Redigera",
     "deletePromptTooltip": "Ta bort",
     "copyPromptUrlTooltip": "Kopiera länk",
-    "copyPromptTooltip": "Kopiera prompt…",
+    "copyPromptTooltip": "Kopiera prompt till…",
     "copyPromptTo": "Kopiera till",
     "copiedToCourse": "Kopierad till kursen \"{{course}}\"",
     "copiedToMyPrompts": "Kopierad till mina prompter",
