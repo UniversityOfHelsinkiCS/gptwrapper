@@ -909,7 +909,18 @@
     "deleteSuccess": "Nyckeln har raderats",
     "deleteError": "Det gick inte att radera nyckeln",
     "createError": "Det gick inte att skapa nyckeln",
-    "loadError": "Det gick inte att läsa in API-nycklarna"
+    "loadError": "Det gick inte att läsa in API-nycklarna",
+    "howToUse": "Så använder du din nyckel",
+    "integrationIntro": "CurreChats API fungerar som OpenAI:s Chat Completions API. Alla OpenAI-klientbibliotek och verktyg där du kan ange en bas-URL fungerar: använd bas-URL:en nedan och din nyckel som API-nyckel.",
+    "baseUrl": "URL",
+    "authHeader": "Authorization-huvud",
+    "endpoints": "Slutpunkter",
+    "listModels": "Listar AI-modellerna du kan använda.",
+    "chatCompletions": "Skickar meddelanden och returnerar svaret. Stöder strömning och verktygsanrop.",
+    "exampleRequest": "Exempelanrop",
+    "exampleHint": "Ersätt YOUR_API_KEY med din nyckel och MODEL_NAME med ett modell-id från /models.",
+    "usageNote": "Anropen räknas mot din veckovisa tokengräns, precis som när du chattar i CurreChat. När gränsen är nådd svarar API:et med status 429 tills gränsen nollställs på måndag.",
+    "freeModelNote": "<b>Gratis modell:</b> {{model}} får en miljon extra tokens per vecka utöver din vanliga gräns, så den fortsätter fungera när de andra modellerna har stoppats."
   },
   "accessibility": {
     "sendInstructionsShiftEnter": "Skift + Enter skickar meddelandet och Enter lägger till en ny rad.",

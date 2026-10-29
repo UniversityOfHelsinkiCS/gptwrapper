@@ -1,5 +1,23 @@
-import { Alert, Box, Chip, CircularProgress, Dialog, DialogContent, DialogTitle, Divider, IconButton, Paper, TextField, Typography } from '@mui/material'
-import { Add, Check, Close, ContentCopy, DeleteOutline, InfoOutlined, Key } from '@mui/icons-material'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
+  Box,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
+import { Add, Check, Close, Code, ContentCopy, DeleteOutline, ExpandMore, InfoOutlined, Key } from '@mui/icons-material'
+import { FREE_MODEL, PUBLIC_URL } from '@config'
 import { type FormEvent, Fragment, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { API_KEY_NAME_MAX_LENGTH, MAX_API_KEYS, type ApiKey } from '../../../shared/apiKey'
@@ -16,19 +34,128 @@ const monospace = { fontFamily: 'monospace' }
 const keyGrid = { display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr) 56px', sm: 'minmax(0, 1fr) 190px 56px' }, alignItems: 'center', px: 2 }
 const columnLabel = { fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }
 
-const CreatedKeyPanel = ({ createdKey, onDismiss }: { createdKey: ApiKey; onDismiss: () => void }) => {
+const codeSurface = { ...monospace, fontSize: 13, bgcolor: 'action.hover', border: 1, borderColor: 'divider', borderRadius: 1 }
+const codeBox = { ...codeSurface, minWidth: 0, minHeight: 44, display: 'flex', alignItems: 'center', px: 1.5, overflowWrap: 'anywhere' }
+
+const CopyButton = ({ text, label }: { text: string; label?: string }) => {
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(createdKey.apiKey)
+      await navigator.clipboard.writeText(text)
       setCopied(true)
       enqueueSnackbar(t('common:copiedToClipboard'), { variant: 'success' })
     } catch {
       enqueueSnackbar(t('apiKeys:copyError'), { variant: 'error' })
     }
   }
+
+  return (
+    <OutlineButtonBlue
+      onClick={handleCopy}
+      startIcon={<ContentCopy />}
+      aria-label={label && t('accessibility:copyToClipboard', { item: label })}
+      sx={{ minWidth: 112, flexShrink: 0 }}
+    >
+      {t(copied ? 'apiKeys:copied' : 'apiKeys:copy')}
+    </OutlineButtonBlue>
+  )
+}
+
+const CopyRow = ({ label, text }: { label: string; text: string }) => (
+  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+    <Typography variant="body2" fontWeight={600}>
+      {label}
+    </Typography>
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+      <Box component="code" sx={{ ...codeBox, flex: '1 1 260px' }}>
+        {text}
+      </Box>
+      <CopyButton text={text} label={label} />
+    </Box>
+  </Box>
+)
+
+const IntegrationGuide = () => {
+  const { t } = useTranslation()
+  const baseUrl = `${window.location.origin}${PUBLIC_URL}/api/external/v1`
+  const authHeader = 'Authorization: Bearer YOUR_API_KEY'
+  const curlExample = `curl ${baseUrl}/chat/completions \\
+  -H "${authHeader}" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "MODEL_NAME",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'`
+  const endpoints = [
+    { method: 'GET', path: '/models', description: t('apiKeys:listModels') },
+    { method: 'POST', path: '/chat/completions', description: t('apiKeys:chatCompletions') },
+  ]
+
+  return (
+    <Accordion variant="outlined" disableGutters slotProps={{ transition: { unmountOnExit: true } }} sx={{ '&::before': { display: 'none' } }}>
+      <AccordionSummary expandIcon={<ExpandMore />} sx={{ minHeight: 52 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+          <Code color="primary" />
+          <Typography fontWeight={600}>{t('apiKeys:howToUse')}</Typography>
+        </Box>
+      </AccordionSummary>
+      <AccordionDetails sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, borderTop: 1, borderColor: 'divider', pt: 2 }}>
+        <Typography variant="body2">{t('apiKeys:integrationIntro')}</Typography>
+
+        <CopyRow label={t('apiKeys:baseUrl')} text={baseUrl} />
+        <CopyRow label={t('apiKeys:authHeader')} text={authHeader} />
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Typography variant="body2" fontWeight={600}>
+            {t('apiKeys:endpoints')}
+          </Typography>
+          <Paper variant="outlined" component={Stack} divider={<Divider />}>
+            {endpoints.map((endpoint) => (
+              <Box key={endpoint.path} sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', columnGap: 2, rowGap: 0.5, px: 2, py: 1.5 }}>
+                <Box component="code" sx={{ ...monospace, flex: '0 0 220px', fontSize: 13, fontWeight: 600 }}>
+                  <Box component="span" sx={{ color: 'primary.main' }}>
+                    {endpoint.method}
+                  </Box>{' '}
+                  {endpoint.path}
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ flex: '1 1 240px' }}>
+                  {endpoint.description}
+                </Typography>
+              </Box>
+            ))}
+          </Paper>
+        </Box>
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
+            <Typography variant="body2" fontWeight={600}>
+              {t('apiKeys:exampleRequest')}
+            </Typography>
+            <CopyButton text={curlExample} label={t('apiKeys:exampleRequest')} />
+          </Box>
+          <Box component="pre" data-testid="api-curl-example" sx={{ ...codeSurface, m: 0, p: 2, overflowX: 'auto', lineHeight: 1.6 }}>
+            <code>{curlExample}</code>
+          </Box>
+          <Typography variant="body2" color="text.secondary">
+            {t('apiKeys:exampleHint')}
+          </Typography>
+        </Box>
+
+        <Alert severity="info" variant="outlined">
+          <Typography variant="body2">{t('apiKeys:usageNote')}</Typography>
+          <Typography variant="body2" sx={{ mt: 0.75 }}>
+            <Trans i18nKey="apiKeys:freeModelNote" values={{ model: FREE_MODEL }} components={{ b: <Box component="strong" sx={{ fontWeight: 600 }} /> }} />
+          </Typography>
+        </Alert>
+      </AccordionDetails>
+    </Accordion>
+  )
+}
+
+const CreatedKeyPanel = ({ createdKey, onDismiss }: { createdKey: ApiKey; onDismiss: () => void }) => {
+  const { t } = useTranslation()
 
   return (
     <Paper
@@ -45,30 +172,10 @@ const CreatedKeyPanel = ({ createdKey, onDismiss }: { createdKey: ApiKey; onDism
         {t('apiKeys:shownOnce')}
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1 }}>
-        <Box
-          component="code"
-          data-testid="created-api-key"
-          sx={{
-            ...monospace,
-            flex: 1,
-            minWidth: 0,
-            minHeight: 44,
-            display: 'flex',
-            alignItems: 'center',
-            px: 1.5,
-            fontSize: 13,
-            overflowWrap: 'anywhere',
-            bgcolor: 'action.hover',
-            border: 1,
-            borderColor: 'divider',
-            borderRadius: 1,
-          }}
-        >
+        <Box component="code" data-testid="created-api-key" sx={{ ...codeBox, flex: 1 }}>
           {createdKey.apiKey}
         </Box>
-        <OutlineButtonBlue onClick={handleCopy} startIcon={<ContentCopy />} sx={{ minWidth: 112 }}>
-          {t(copied ? 'apiKeys:copied' : 'apiKeys:copy')}
-        </OutlineButtonBlue>
+        <CopyButton text={createdKey.apiKey} />
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
         <TextButton onClick={onDismiss} sx={[{ color: 'primary.main' }, (theme) => theme.applyStyles('dark', { color: theme.palette.text.primary })]}>
@@ -288,6 +395,8 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
             ))}
           </Paper>
         )}
+
+        <IntegrationGuide />
 
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 'auto', color: 'text.secondary' }}>
           <InfoOutlined sx={{ fontSize: 16, mt: '2px' }} />

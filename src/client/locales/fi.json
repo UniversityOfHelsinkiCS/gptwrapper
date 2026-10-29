@@ -934,7 +934,18 @@
     "deleteSuccess": "Avain poistettu",
     "deleteError": "Avaimen poistaminen epäonnistui",
     "createError": "Avaimen luominen epäonnistui",
-    "loadError": "API-avainten lataaminen epäonnistui"
+    "loadError": "API-avainten lataaminen epäonnistui",
+    "howToUse": "Näin käytät avaintasi",
+    "integrationIntro": "CurreChatin API on OpenAI-yhteensopiva. Käytä alla olevaa URL-osoitetta ja avaintasi API-avaimena.",
+    "baseUrl": "URL",
+    "authHeader": "Authorization-otsake",
+    "endpoints": "Rajapinnan osoitteet",
+    "listModels": "Listaa käytettävissäsi olevat AI-mallit.",
+    "chatCompletions": "Lähettää viestit ja palauttaa vastauksen. Tukee striimausta ja työkalukutsuja.",
+    "exampleRequest": "Esimerkkipyyntö",
+    "exampleHint": "Korvaa YOUR_API_KEY avaimellasi ja MODEL_NAME mallin tunnisteella, jonka saat osoitteesta /models.",
+    "usageNote": "Pyynnöt kuluttavat viikoittaista token-rajaasi samalla tavalla kuin keskustelu CurreChatissa. Kun raja täyttyy, API vastaa tilakoodilla 429, kunnes raja nollautuu maanantaina.",
+    "freeModelNote": "<b>Ilmainen malli:</b> {{model}} saa miljoona lisätokenia viikossa normaalin rajasi päälle, joten se toimii vielä, kun muut mallit ovat jo pysähtyneet."
   },
   "accessibility": {
     "sendInstructionsShiftEnter": "Shift + Enter lähettää viestin ja Enter lisää uuden rivin.",

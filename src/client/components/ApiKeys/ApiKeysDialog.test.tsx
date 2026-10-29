@@ -9,6 +9,7 @@ vi.mock('../../util/queryClient', async () => {
   const { QueryClient } = await import('@tanstack/react-query')
   return { default: new QueryClient() }
 })
+vi.mock('@config', () => ({ PUBLIC_URL: '/chat', FREE_MODEL: 'gpt-5-mini' }))
 vi.mock('../common/Snackbar', () => ({ enqueueSnackbar: vi.fn() }))
 vi.mock('../common/accessibility/SnackbarAnnouncer', () => ({ announceToScreenReader: vi.fn() }))
 vi.mock('../../util/apiClient', () => ({ default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() } }))
@@ -137,5 +138,21 @@ describe('ApiKeysDialog', () => {
     setClipboard(() => Promise.reject(new Error('denied')))
     fireEvent.click(within(dialog).getByRole('button', { name: 'Copied' }))
     await waitFor(() => expect(enqueueSnackbar).toHaveBeenCalledWith(en.apiKeys.copyError, { variant: 'error' }))
+  })
+
+  test('shows integration instructions', async () => {
+    const dialog = await renderDialog()
+    expect(within(dialog).queryByText('Base URL')).toBeNull()
+
+    fireEvent.click(within(dialog).getByRole('button', { name: en.apiKeys.howToUse }))
+    const baseUrl = `${window.location.origin}/chat/api/external/v1`
+    expect(within(dialog).getByText(baseUrl)).toBeTruthy()
+    expect(within(dialog).getByTestId('api-curl-example').textContent).toContain(`curl ${baseUrl}/chat/completions`)
+    expect(within(dialog).getByText(/gpt-5-mini gets 1 million extra tokens a week/)).toBeTruthy()
+
+    const writeText = vi.fn(() => Promise.resolve())
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Copy Base URL to clipboard' }))
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(baseUrl))
   })
 })

@@ -933,7 +933,18 @@
     "deleteSuccess": "Key deleted",
     "deleteError": "Failed to delete key",
     "createError": "Failed to create key",
-    "loadError": "Failed to load API keys"
+    "loadError": "Failed to load API keys",
+    "howToUse": "How to use your key",
+    "integrationIntro": "The CurreChat API works like the OpenAI Chat Completions API. Any OpenAI client library or tool that lets you set a base URL works: use the base URL below and your key as the API key.",
+    "baseUrl": "URL",
+    "authHeader": "Authorization header",
+    "endpoints": "Endpoints",
+    "listModels": "Lists the AI models you can use.",
+    "chatCompletions": "Sends messages and returns the reply. Supports streaming and tool calls.",
+    "exampleRequest": "Example request",
+    "exampleHint": "Replace YOUR_API_KEY with your key and MODEL_NAME with a model id from /models.",
+    "usageNote": "Requests count toward your weekly token limit, the same as chatting in CurreChat. When the limit runs out, the API answers with status 429 until the limit resets on Monday.",
+    "freeModelNote": "<b>Free model:</b> {{model}} gets 1 million extra tokens a week on top of your normal limit, so it keeps working after the other models stop."
   },
   "accessibility": {
     "sendInstructionsShiftEnter": "Shift + Enter sends the message and Enter adds a new line.",
