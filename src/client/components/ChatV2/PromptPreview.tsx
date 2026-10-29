@@ -43,6 +43,7 @@ const PromptPreview = ({
   courses,
   copyTargets,
   onCopied,
+  viewAsStudent,
 }: {
   prompt: Prompt
   handleEdit: (courseId?: string) => void
@@ -51,6 +52,8 @@ const PromptPreview = ({
   /** Courses the user may copy into — narrower than `courses`, which includes enrolments. */
   copyTargets: CoursesViewCourse[]
   onCopied: (course?: CoursesViewCourse) => void
+  /** Render the preview as an enrolled student sees it. */
+  viewAsStudent: boolean
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -66,15 +69,19 @@ const PromptPreview = ({
   const hasFullAccess = canManageCourse(chatInstance)
 
   // A university or template prompt has no course, so isAdmin decides there.
-  const canManage = Boolean(user?.isAdmin || hasFullAccess)
+  const canManagePrompt = Boolean(user?.isAdmin || hasFullAccess)
 
   const isPersonalPrompt = prompt.type === 'PERSONAL' || myPrompts.some((p) => p.id === prompt.id)
 
-  const canEditPrompt = !!user && (prompt.userId === user.id || user.isAdmin)
-  const showCopyPrompt = !!user && canCopyPrompt({ isAdmin: user.isAdmin, isOwner: prompt.userId === user.id, isResponsible: hasFullAccess })
-  const shouldFetchRagDetails = canManage || isPersonalPrompt || (!!user && prompt.userId === user.id)
+  const canManage = canManagePrompt && !viewAsStudent
+
+  const canEditPrompt = !viewAsStudent && !!user && (prompt.userId === user.id || user.isAdmin)
+  const showCopyPrompt = !viewAsStudent && !!user && canCopyPrompt({ isAdmin: user.isAdmin, isOwner: prompt.userId === user.id, isResponsible: hasFullAccess })
+  const shouldFetchRagDetails = canManagePrompt || isPersonalPrompt || (!!user && prompt.userId === user.id)
   const ragIndexId = prompt.ragIndex === null ? null : prompt.ragIndexId ? prompt.ragIndexId : null
-  const { data: ragDetails } = useRagIndexDetails(ragIndexId, shouldFetchRagDetails)
+  const { data: fetchedRagDetails } = useRagIndexDetails(ragIndexId, shouldFetchRagDetails)
+  // Students never get the file list, only the source material name
+  const ragDetails = viewAsStudent ? undefined : fetchedRagDetails
 
   const ragFiles = ragDetails?.ragFiles.filter((file) => !file.error) ?? []
 
@@ -123,7 +130,7 @@ const PromptPreview = ({
             </Box>
           ) : (
             <Box sx={{ gridArea: 'owner' }}>
-              {user.id === prompt.userId && user.firstNames ? (
+              {!viewAsStudent && user.id === prompt.userId && user.firstNames ? (
                 <Typography variant="body2" fontWeight="light" data-testid={`prompt-preview-creator-for-${prompt.name}`}>
                   {`${user.firstNames.split(' ')[0]} ${user.lastName ?? ''}`}
                 </Typography>

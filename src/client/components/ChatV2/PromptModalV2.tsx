@@ -198,6 +198,8 @@ const PromptModalV2 = () => {
   const [previewPrompt, setPreviewPrompt] = useState<PromptType | undefined>(isMobile || opensOnGallery || initialPreviewPromptId ? undefined : activePrompt)
   const [previewCourse, setPreviewCourse] = useState<Course | undefined>(undefined)
   const [isEditing, setIsEditing] = useState(false)
+  // Kept here so it stays on while previewing other prompts
+  const [studentView, setStudentView] = useState(false)
   const focusEditButtonOnDone = useRef(false)
   const [showMyPrompts, setShowMyPrompts] = useState(myPrompts.some((p) => p.id === previewPrompt?.id) || false)
 
@@ -346,6 +348,10 @@ const PromptModalV2 = () => {
     setCacheKey('')
     return true
   }
+
+  // Teachers can preview a course prompt as an enrolled student sees it. Not offered on mobile.
+  const previewPromptCourse = allCourses.find((course) => course.id === previewPrompt?.chatInstanceId)
+  const canViewAsStudent = !isMobile && previewPrompt?.type === 'CHAT_INSTANCE' && Boolean(user?.isAdmin || canManageCourse(previewPromptCourse))
 
   const sortedMyPrompts = myPrompts.sort((a, b) => a.name.localeCompare(b.name, 'fi', { sensitivity: 'base', numeric: true }))
 
@@ -612,6 +618,7 @@ const PromptModalV2 = () => {
                   courses={allCourses}
                   copyTargets={copyTargets}
                   onCopied={handleCopied}
+                  viewAsStudent={studentView && canViewAsStudent}
                 />
               ) : previewCourse ? (
                 <CoursePreview course={previewCourse} refetchCourses={refetch} />
@@ -627,6 +634,13 @@ const PromptModalV2 = () => {
                     <ArrowBackIcon />
                     {t('prompt:backToPromptList')}
                   </OutlineButtonBlue>
+                )}
+                {canViewAsStudent && (
+                  <FormControlLabel
+                    control={<Switch checked={studentView} onChange={(e) => setStudentView(e.target.checked)} data-testid="student-view-toggle" />}
+                    label={t('prompt:viewAsStudent')}
+                    sx={{ ml: 0, mr: 'auto', ...switchFocusIndicatorStyle }}
+                  />
                 )}
                 {previewPrompt && (
                   <BlueButton

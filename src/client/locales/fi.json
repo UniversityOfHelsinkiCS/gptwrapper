@@ -660,6 +660,7 @@
     "hidePrompt": "Piilota alustuksen sisältö opiskelijoilta",
     "promptHidden": "Piilotettu opiskelijoilta",
     "promptNotHidden": "Näkyy opiskelijoille",
+    "viewAsStudent": "Esikatsele opiskelijana",
     "noSourceMaterials": "Ei lähdemateriaaleja",
     "ragSystemMessage": "Lähdemateriaaliohjeistus",
     "basicInformation": "Perustiedot",

@@ -626,6 +626,7 @@
     "hidePrompt": "Dölj prompttext för studenter",
     "promptHidden": "Dold för studenter",
     "promptNotHidden": "Synlig för studenter",
+    "viewAsStudent": "Förhandsgranska som student",
     "noSourceMaterials": "Inget källmaterial",
     "ragSystemMessage": "Instruktioner för källmaterial",
     "basicInformation": "Grundläggande information",

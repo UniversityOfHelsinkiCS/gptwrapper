@@ -658,6 +658,7 @@
     "hidePrompt": "Hide prompt text from students",
     "promptHidden": "Hidden from students",
     "promptNotHidden": "Visible to students",
+    "viewAsStudent": "Preview as student",
     "noSourceMaterials": "No source materials",
     "ragSystemMessage": "Source material instructions",
     "basicInformation": "Basic information",
