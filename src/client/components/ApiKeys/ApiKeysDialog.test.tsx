@@ -142,7 +142,7 @@ describe('ApiKeysDialog', () => {
 
   test('shows integration instructions', async () => {
     const dialog = await renderDialog()
-    expect(within(dialog).queryByText('Base URL')).toBeNull()
+    expect(within(dialog).queryByText(en.apiKeys.baseUrl)).toBeNull()
 
     fireEvent.click(within(dialog).getByRole('button', { name: en.apiKeys.howToUse }))
     const baseUrl = `${window.location.origin}/chat/api/external/v1`
@@ -152,7 +152,7 @@ describe('ApiKeysDialog', () => {
 
     const writeText = vi.fn(() => Promise.resolve())
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Copy Base URL to clipboard' }))
+    fireEvent.click(within(dialog).getByRole('button', { name: `Copy ${en.apiKeys.baseUrl} to clipboard` }))
     await waitFor(() => expect(writeText).toHaveBeenCalledWith(baseUrl))
   })
 })
