@@ -254,7 +254,7 @@ const RagSettingsSection = () => {
           <FormControl fullWidth>
             <Select
               data-testid="rag-select"
-              aria-describedby="rag-in-use-label"
+              labelId="rag-in-use-label"
               value={hasSelectedRagIndex ? form.ragIndexId : ''}
               onChange={(e) => {
                 setForm((prev) => ({
