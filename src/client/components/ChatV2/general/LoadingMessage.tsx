@@ -18,7 +18,7 @@ export const LoadingMessage = ({ toolCalls }: { toolCalls: Record<string, ToolCa
   const toolCallMessages = Object.values(toolCalls)
 
   return (
-    <div className="message-role-assistant" style={{ height: 'inherit' }}>
+    <div className="message-role-assistant">
       <style>
         {`
           @keyframes bounceWave {
@@ -42,14 +42,14 @@ export const LoadingMessage = ({ toolCalls }: { toolCalls: Record<string, ToolCa
           }
         `}
       </style>
-      <div style={{ alignItems: 'center', display: 'flex', height: '4rem' }}>
+      <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', minHeight: '4rem' }}>
         <div style={loadingDotStyle(0, dotColor)} />
         <div style={loadingDotStyle(0.15, dotColor)} />
         <div style={loadingDotStyle(0.3, dotColor)} />
         {toolCallMessages.map((tc) => (
           <Typography
             key={tc.callId}
-            sx={{ fontStyle: 'italic', ml: '1rem', color: 'text.secondary', animation: 'slideIn 0.3s ease-out' }}
+            sx={{ fontStyle: 'italic', ml: '1rem', minWidth: 0, overflowWrap: 'anywhere', color: 'text.secondary', animation: 'slideIn 0.3s ease-out' }}
             data-testid="tool-call-message"
           >
             {tc.text}
