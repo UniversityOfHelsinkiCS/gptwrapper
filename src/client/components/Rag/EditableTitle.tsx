@@ -1,5 +1,6 @@
 import { CancelOutlined, Check, Edit } from '@mui/icons-material'
 import { Box, CircularProgress, IconButton, TextField, Tooltip, Typography } from '@mui/material'
+import { visuallyHidden } from '@mui/utils'
 import type { RagIndexAttributes } from '@shared/types'
 import { useState, useEffect, useRef } from 'react'
 import { useUpdateRagIndexMutation } from './api'
@@ -52,6 +53,10 @@ export const EditableTitle = ({ ragIndex }: { ragIndex: RagIndexAttributes }) =>
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       {isEditing ? (
         <>
+          {/* keeps the heading structure and the aria-describedby target of the collection's buttons while editing */}
+          <Typography id="ragIndex-name" component="h3" sx={visuallyHidden}>
+            {ragIndex?.metadata?.name}
+          </Typography>
           <TextField
             size="small"
             value={title}

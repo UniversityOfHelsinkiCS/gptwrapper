@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Box, Divider, List, ListItemButton, ListItemText, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Divider, List, ListItem, ListItemButton, ListItemText, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { useRagIndices } from '../../hooks/useRagIndices'
 import { RagCreator } from './RagCreator'
 import { useTranslation } from 'react-i18next'
@@ -98,7 +98,7 @@ const RagModal: React.FC<{ rag?: number; onDeleted?: () => void }> = ({ rag, onD
           <Divider sx={{ my: 1 }} />
           <List sx={{ flex: 1, overflowY: 'auto' }}>
             {sortedRagIndices?.map((ragIndex) => (
-              <React.Fragment key={ragIndex.id}>
+              <ListItem key={ragIndex.id} disablePadding>
                 <ListItemButton
                   selected={selectedIndexId === ragIndex.id}
                   aria-label={[t('common:collection'), ragIndex.metadata?.name, t('accessibility:previewAndManage')].filter(Boolean).join(', ')}
@@ -111,7 +111,7 @@ const RagModal: React.FC<{ rag?: number; onDeleted?: () => void }> = ({ rag, onD
                 >
                   <ListItemText primary={ragIndex.metadata?.name} slotProps={{ primary: { noWrap: true } }} />
                 </ListItemButton>
-              </React.Fragment>
+              </ListItem>
             ))}
           </List>
           {ragIndices?.length === 0 && (

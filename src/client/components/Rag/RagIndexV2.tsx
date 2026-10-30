@@ -4,7 +4,6 @@ import {
   Box,
   Chip,
   Typography,
-  styled,
   LinearProgress,
   DialogTitle,
   DialogContent,
@@ -49,7 +48,6 @@ import { isSupportedRagFile, RAG_FILE_ACCEPT } from '@shared/utils'
 import { usePromptState } from '../ChatV2/PromptState'
 import { PromptType } from '../../types'
 import { useNavigate, useParams } from 'react-router-dom'
-import { focusVisibleOutline } from 'src/client/theme'
 import { formatDate } from '../ChatV2/util'
 
 const promptTypeOrder: PromptType[] = ['CHAT_INSTANCE', 'PERSONAL', 'UNIVERSITY', 'TEMPLATE']
@@ -88,18 +86,6 @@ const truncateMiddle = (name: string, max: number) => {
 
 const fileSizeLabel = (bytes: number) => `${(bytes / 1024).toFixed(0)} KB`
 
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: 1,
-})
-
 interface RagIndexV2Props {
   indexId: number
   onBack: () => void
@@ -126,7 +112,8 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
   const { activePrompt, handleChangePrompt } = usePromptState()
   const navigate = useNavigate()
   const uploadInputRef = React.useRef<HTMLInputElement>(null)
-  const focusUploadButton = () => uploadInputRef.current?.focus()
+  const uploadButtonRef = React.useRef<HTMLButtonElement>(null)
+  const focusUploadButton = () => uploadButtonRef.current?.focus()
 
   React.useEffect(() => {
     if (isSuccess && focusUploadOnMount) focusUploadButton()
@@ -258,29 +245,30 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
           <Button
             id="upload-files-button"
+            ref={uploadButtonRef}
             variant="contained"
-            tabIndex={-1}
-            component="label"
             startIcon={<CloudUpload />}
             disabled={uploadMutation.isPending}
-            sx={{ '&:has(:focus-visible)': focusVisibleOutline }}
+            aria-describedby="ragIndex-name"
+            onClick={() => uploadInputRef.current?.click()}
           >
             {uploadMutation.isPending ? t('rag:uploading') : t('rag:uploadFiles')}
-            <VisuallyHiddenInput
-              ref={uploadInputRef}
-              type="file"
-              accept={RAG_FILE_ACCEPT}
-              aria-describedby="ragIndex-name"
-              onChange={async (e) => {
-                const files = e.target.files
-                if (files && files.length > 0) {
-                  handleStageFiles(Array.from(files))
-                }
-                e.target.value = ''
-              }}
-              multiple
-            />
           </Button>
+          <input
+            ref={uploadInputRef}
+            type="file"
+            accept={RAG_FILE_ACCEPT}
+            hidden
+            aria-label={t('rag:uploadFiles')}
+            onChange={async (e) => {
+              const files = e.target.files
+              if (files && files.length > 0) {
+                handleStageFiles(Array.from(files))
+              }
+              e.target.value = ''
+            }}
+            multiple
+          />
           <Button
             variant="outlined"
             startIcon={<FindInPage />}

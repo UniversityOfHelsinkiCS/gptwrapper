@@ -21,79 +21,79 @@ export const RagCreator = ({ onCreated }: { onCreated?: (indexId: number) => voi
       <Button variant="contained" onClick={() => setOpen(true)} data-testid="createNewRagButton" sx={{ mb: 1 }}>
         {t('rag:createNewIndex')}
       </Button>
-      <Dialog
-        open={open}
-        onClose={() => setOpen(false)}
-        slotProps={{
-          paper: {
-            component: 'form',
-            onSubmit: async (event: React.FormEvent<HTMLFormElement>) => {
-              event.preventDefault()
-              event.stopPropagation()
-              let newIndex: Awaited<ReturnType<typeof createUserIndexMutation.mutateAsync>>
-              try {
-                newIndex = await createUserIndexMutation.mutateAsync({ name: indexName, language })
-              } catch {
-                enqueueSnackbar(t('rag:createIndexError'), { variant: 'error' })
-                return
-              }
-              setIndexName('')
-              if (onCreated) {
-                onCreated(newIndex.id)
-                announceToScreenReader(t('rag:createIndexSuccess', { kokoelma: indexName }))
-              }
-              setOpen(false)
-            },
-          },
-        }}
-      >
-        <DialogTitle>{t('rag:createNewIndex')}</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <InfoBox severity="info">
-            {t('rag:creatorInfo')}{' '}
-            <Link href="https://github.com/UniversityOfHelsinkiCS/gptwrapper/blob/main/documentation/rag.md" target="_blank" rel="noopener noreferrer">
-              {t('rag:readMoreAboutRag')}
-            </Link>
-          </InfoBox>
-          <InfoBox severity="success" icon={<LightbulbOutlinedIcon fontSize="small" />}>
-            {t('rag:creatorLanguageTip')}
-          </InfoBox>
-          <TextField
-            label={t('rag:nameLabel')}
-            variant="outlined"
-            value={indexName}
-            onChange={(e) => setIndexName(e.target.value)}
-            fullWidth
-            required
-            slotProps={{
-              htmlInput: { minLength: 5, maxLength: 100, 'data-testid': 'ragIndexNameInput' },
-            }}
-            sx={{ mt: '1rem' }}
-          />
-          <FormControl fullWidth>
-            <InputLabel id="language-label">{t('rag:language')}</InputLabel>
-            <Select
-              labelId="language-label"
-              id="language-select"
-              value={language}
-              label={t('rag:language')}
-              data-testid="ragIndexLanguageInput"
-              inputProps={{ 'aria-labelledby': 'language-label' }}
-              onChange={(e) => setLanguage(e.target.value as (typeof RAG_LANGUAGES)[number])}
-            >
-              <MenuItem value={RAG_LANGUAGES[0]} data-testid="ragIndexLanguageOptionFinnish">
-                {t('rag:finnish')}
-              </MenuItem>
-              <MenuItem value={RAG_LANGUAGES[1]}>{t('rag:swedish')}</MenuItem>
-              <MenuItem value={RAG_LANGUAGES[2]}>{t('rag:english')}</MenuItem>
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <BlueButton color="primary" type="submit" data-testid="ragIndexCreateSubmit">
-            {t('rag:createIndex')}
-          </BlueButton>
-        </DialogActions>
+      <Dialog open={open} onClose={() => setOpen(false)} aria-labelledby="rag-creator-title">
+        <form
+          onSubmit={async (event: React.FormEvent<HTMLFormElement>) => {
+            event.preventDefault()
+            event.stopPropagation()
+            let newIndex: Awaited<ReturnType<typeof createUserIndexMutation.mutateAsync>>
+            try {
+              newIndex = await createUserIndexMutation.mutateAsync({ name: indexName, language })
+            } catch {
+              enqueueSnackbar(t('rag:createIndexError'), { variant: 'error' })
+              return
+            }
+            setIndexName('')
+            if (onCreated) {
+              onCreated(newIndex.id)
+              announceToScreenReader(t('rag:createIndexSuccess', { kokoelma: indexName }))
+            }
+            setOpen(false)
+          }}
+        >
+          <DialogTitle id="rag-creator-title">{t('rag:createNewIndex')}</DialogTitle>
+          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <InfoBox severity="info">
+              {t('rag:creatorInfo')}{' '}
+              <Link
+                href="https://github.com/UniversityOfHelsinkiCS/gptwrapper/blob/main/documentation/rag.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                color="inherit"
+              >
+                {t('rag:readMoreAboutRag')}
+              </Link>
+            </InfoBox>
+            <InfoBox severity="success" icon={<LightbulbOutlinedIcon fontSize="small" />}>
+              {t('rag:creatorLanguageTip')}
+            </InfoBox>
+            <TextField
+              label={t('rag:nameLabel')}
+              variant="outlined"
+              value={indexName}
+              onChange={(e) => setIndexName(e.target.value)}
+              fullWidth
+              required
+              slotProps={{
+                htmlInput: { minLength: 5, maxLength: 100, 'data-testid': 'ragIndexNameInput' },
+              }}
+              sx={{ mt: '1rem' }}
+            />
+            <FormControl fullWidth>
+              <InputLabel id="language-label">{t('rag:language')}</InputLabel>
+              <Select
+                labelId="language-label"
+                id="language-select"
+                value={language}
+                label={t('rag:language')}
+                data-testid="ragIndexLanguageInput"
+                inputProps={{ 'aria-labelledby': 'language-label' }}
+                onChange={(e) => setLanguage(e.target.value as (typeof RAG_LANGUAGES)[number])}
+              >
+                <MenuItem value={RAG_LANGUAGES[0]} data-testid="ragIndexLanguageOptionFinnish">
+                  {t('rag:finnish')}
+                </MenuItem>
+                <MenuItem value={RAG_LANGUAGES[1]}>{t('rag:swedish')}</MenuItem>
+                <MenuItem value={RAG_LANGUAGES[2]}>{t('rag:english')}</MenuItem>
+              </Select>
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <BlueButton color="primary" type="submit" data-testid="ragIndexCreateSubmit">
+              {t('rag:createIndex')}
+            </BlueButton>
+          </DialogActions>
+        </form>
       </Dialog>
     </>
   )
