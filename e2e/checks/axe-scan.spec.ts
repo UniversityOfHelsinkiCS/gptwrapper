@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 import { studentTest as test, teacherTest, adminTest } from '../fixtures'
 import { scan, writeAxeReport } from '../axe/axe_utils'
 import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from '../utils/test-helpers'
@@ -188,6 +188,43 @@ adminTest.describe('axe wcag scan for university prompt gallery', () => {
   })
 })
 
+teacherTest.describe('axe wcag scan for source materials', () => {
+  teacherTest.afterAll(writeAxeReport)
+
+  teacherTest.beforeEach(async ({ page }) => {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await page.getByTestId('openSourceMaterialsButton').click()
+    await expect(page.getByTestId('createNewRagButton')).toBeVisible()
+  })
+
+  const createCollection = async (page: Page, name: string) => {
+    await page.getByTestId('createNewRagButton').click()
+    await page.getByTestId('ragIndexNameInput').fill(name)
+    await page.getByTestId('ragIndexCreateSubmit').press('Enter')
+    await expect(page.getByTestId('ragIndexCreateSubmit')).toBeHidden()
+    await expect(page.getByTestId('ragIndexDeleteButton')).toBeVisible()
+  }
+
+  teacherTest('scan source materials list', async ({ page }, testInfo) => {
+    await scan(page, testInfo.title)
+  })
+
+  teacherTest('scan source material collection creator', async ({ page }, testInfo) => {
+    await page.getByTestId('createNewRagButton').click()
+    await expect(page.getByTestId('ragIndexNameInput')).toBeVisible()
+    await scan(page, testInfo.title)
+  })
+
+  teacherTest('scan source material collection details', async ({ page }, testInfo) => {
+    const collectionName = `axe-collection-${testInfo.workerIndex}`
+
+    await createCollection(page, collectionName)
+    await expect(page.locator('#ragIndex-name')).toHaveText(collectionName)
+    await scan(page, testInfo.title)
+  })
+})
+
 teacherTest.describe('axe wcag scan for prompt modal previews', () => {
   teacherTest.afterAll(writeAxeReport)
 
@@ -206,6 +243,25 @@ teacherTest.describe('axe wcag scan for prompt modal previews', () => {
 
     await page.getByTestId(`prompt-row-${promptName}`).click()
     await expect(page.getByTestId(`prompt-preview-title-for-${promptName}`)).toContainText(promptName)
+    await scan(page, testInfo.title)
+  })
+
+  teacherTest('scan prompt editor', async ({ page }, testInfo) => {
+    const promptName = `axe-my-prompt-${testInfo.workerIndex}`
+
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    await page.getByTestId('choose-prompt-button').click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+
+    await page.getByTestId('create-personal-prompt-button').click()
+    await page.getByTestId('prompt-name-input').fill(promptName)
+    await page.getByTestId('system-message-input').fill('axe test prompt')
+    await page.getByRole('button', { name: 'Save' }).click()
+
+    await expect(page.getByTestId(`prompt-preview-title-for-${promptName}`)).toBeVisible()
+    await page.getByTestId(`edit-prompt-${promptName}`).click()
+    await expect(page.getByTestId('prompt-name-input')).toHaveValue(promptName)
     await scan(page, testInfo.title)
   })
 })
