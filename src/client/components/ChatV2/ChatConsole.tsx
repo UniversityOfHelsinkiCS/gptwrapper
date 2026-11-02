@@ -257,7 +257,8 @@ const ContextCard = ({
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      whiteSpace: 'normal',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
                     }}
                   >
                     {promptDescription}
