@@ -323,7 +323,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
           <>
             <Divider sx={{ my: 1 }} />
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              {orderBy(ragDetails.ragFiles, [(f) => Date.parse(f.createdAt as unknown as string)], ['desc']).map((file) => (
+              {orderBy(ragDetails.ragFiles, (file) => file.filename, ['asc']).map((file) => (
                 <RagFileRowV2
                   key={file.id}
                   file={file}
