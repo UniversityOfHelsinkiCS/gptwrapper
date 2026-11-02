@@ -33,6 +33,11 @@ export const focusVisibleOutline = {
   outlineOffset: '2px',
 } as const
 
+export const darkModeLinkColors = {
+  '& a': { color: '#8ab4f8' },
+  '& a:visited': { color: '#c58af9' },
+} as const
+
 const resetFocusVisibleBackground = {
   '&.Mui-focusVisible': {
     backgroundColor: 'transparent',

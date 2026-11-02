@@ -9,6 +9,7 @@ import { useAcceptTermsMutation } from '../hooks/useAcceptTermsMutation'
 import useCurrentUser from '../hooks/useCurrentUser'
 import { InfoTexts } from '../locales/infoTexts'
 import { focusIndicatorStyle } from 'src/client/util/accessibility'
+import { darkModeLinkColors } from '../theme'
 
 export const DisclaimerModal = ({ disclaimerStatus, setDisclaimerStatus }: { disclaimerStatus: boolean; setDisclaimerStatus: (status: boolean) => void }) => {
   const { t, i18n } = useTranslation()
@@ -87,7 +88,7 @@ export const DisclaimerModal = ({ disclaimerStatus, setDisclaimerStatus }: { dis
           <Close />
         </IconButton>
 
-        <Box sx={(theme) => ({ mt: 2, ...theme.applyStyles('dark', { '& a': { color: '#8ab4f8' }, '& a:visited': { color: '#c58af9' } }) })}>
+        <Box sx={(theme) => ({ mt: 2, ...theme.applyStyles('dark', darkModeLinkColors) })}>
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{InfoTexts.disclaimer[i18n.language]}</ReactMarkdown>
         </Box>
         <form onSubmit={handleSubmit}>

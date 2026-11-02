@@ -13,6 +13,7 @@ import type { RagChunk } from '../../../shared/rag'
 import { CustomIcon } from './general/CustomIcon'
 import sidebarOpen from '../../assets/sidebar-open.svg'
 import sidebarClose from '../../assets/sidebar-close.svg'
+import { darkModeLinkColors } from '../../theme'
 
 const AnnotationExpanded = ({ data, relevanceOrder }: { data: RagChunk; relevanceOrder: number }) => {
   return (
@@ -56,11 +57,12 @@ const AnnotationExpanded = ({ data, relevanceOrder }: { data: RagChunk; relevanc
           )}
         </Box>
         <Box
-          sx={{
+          sx={(theme) => ({
             p: '0.5rem 1.5rem',
             borderRadius: '0.5rem',
             backgroundColor: 'action.hover',
-          }}
+            ...theme.applyStyles('dark', darkModeLinkColors),
+          })}
         >
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.content}</ReactMarkdown>
         </Box>

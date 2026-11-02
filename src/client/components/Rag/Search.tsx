@@ -65,7 +65,10 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
         <Box
           component="mark"
           key={idx}
-          sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16), color: 'primary.dark', px: '2px', borderRadius: '2px', fontWeight: 500 }}
+          sx={[
+            { bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16), color: 'primary.dark', px: '2px', borderRadius: '2px', fontWeight: 500 },
+            (theme) => theme.applyStyles('dark', { color: 'text.primary', bgcolor: alpha(theme.palette.primary.main, 0.4) }),
+          ]}
         >
           {part}
         </Box>
@@ -92,18 +95,21 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
       <Box
         component="form"
         onSubmit={handleSubmit}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          bgcolor: 'grey.100',
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: '28px',
-          height: '56px',
-          pl: '18px',
-          pr: '8px',
-        }}
+        sx={[
+          {
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            bgcolor: 'grey.100',
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: '28px',
+            height: '56px',
+            pl: '18px',
+            pr: '8px',
+          },
+          (theme) => theme.applyStyles('dark', { bgcolor: 'background.elevated' }),
+        ]}
       >
         <SearchIcon sx={{ color: 'action.active', flex: '0 0 auto' }} />
         <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
@@ -174,16 +180,19 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
           <Collapse in={adminOpen} id={adminOptionsId}>
             <Box
               mt="12px"
-              sx={{
-                bgcolor: 'grey.50',
-                border: '1px solid',
-                borderColor: 'divider',
-                borderRadius: '8px',
-                p: '16px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px',
-              }}
+              sx={[
+                {
+                  bgcolor: 'grey.50',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: '8px',
+                  p: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                },
+                (theme) => theme.applyStyles('dark', { bgcolor: 'background.paper' }),
+              ]}
             >
               <Box display="flex" flexWrap="wrap" sx={{ columnGap: '28px' }}>
                 <FormControlLabel
@@ -301,7 +310,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
                   #{idx + 1}
                 </Typography>
                 <Box minWidth={0} display="flex" flexDirection="column" gap="6px">
-                  <Box display="flex" alignItems="center" gap="6px" sx={{ color: 'text.disabled', minWidth: 0 }}>
+                  <Box display="flex" alignItems="center" gap="6px" sx={{ color: 'text.secondary', minWidth: 0 }}>
                     <InsertDriveFileOutlined sx={{ fontSize: 14, flex: '0 0 auto' }} />
                     <Typography variant="caption" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {chunk.metadata?.ragFileName ?? t('rag:unknownSource')}

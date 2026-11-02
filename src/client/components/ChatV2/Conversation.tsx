@@ -3,6 +3,7 @@ import { Box, Paper, Typography } from '@mui/material'
 import ReactMarkdown from 'react-markdown'
 import { PrismAsync as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { accessibleOneDark } from './codeTheme'
+import { darkModeLinkColors } from '../../theme'
 import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -239,7 +240,7 @@ const AssistantMessageItem = ({
       ref={isLatestResponse ? latestResponseRef : undefined}
       tabIndex={isLatestResponse ? -1 : undefined}
       aria-label={isLatestResponse ? t('chat:latestResponseLabel') : undefined}
-      sx={{
+      sx={(theme) => ({
         width: '100%',
         position: 'relative',
         pr: 4,
@@ -250,7 +251,8 @@ const AssistantMessageItem = ({
         '&:focus-within .copy-message-button': {
           opacity: 0.7,
         },
-      }}
+        ...theme.applyStyles('dark', darkModeLinkColors),
+      })}
     >
       <AssistantMessageInfo message={message} headingId={headingId} number={number} />
       <ReactMarkdown

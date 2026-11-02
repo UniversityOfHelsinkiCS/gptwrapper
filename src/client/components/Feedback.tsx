@@ -72,7 +72,13 @@ export const Feedback: React.FC<{
             i18nKey="feedback:supportInfo"
             values={{ supportEmail }}
             components={{
-              mailTo: <Link href={`mailto:${supportEmail}`} underline="always" color="warning.main" />,
+              mailTo: (
+                <Link
+                  href={`mailto:${supportEmail}`}
+                  underline="always"
+                  sx={[{ color: 'warning.main' }, (theme) => theme.applyStyles('dark', { color: '#ffa36b' })]}
+                />
+              ),
             }}
           />
         </DialogContentText>
