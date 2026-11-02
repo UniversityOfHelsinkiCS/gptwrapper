@@ -790,7 +790,7 @@
     "statusReady": "Klar",
     "statusProcessing": "Bearbetar",
     "statusFailed": "Inläsning misslyckades",
-    "confirmDeleteFile": "Är du säker på att du vill radera den här filen?",
+    "confirmDeleteFile": "Är du säker på att du vill radera filen \"{{filename}}\"?",
     "imageRequiresAdvancedParsing": "AI-baserad tolkning krävs för bilder",
     "unsupportedFileType": "Filtypen stöds inte: {{files}}",
     "continueEditing": "Fortsätt redigera"

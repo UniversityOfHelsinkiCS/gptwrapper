@@ -843,7 +843,7 @@
     "statusReady": "Ready",
     "statusProcessing": "Processing",
     "statusFailed": "Ingestion failed",
-    "confirmDeleteFile": "Are you sure you want to delete this file?",
+    "confirmDeleteFile": "Are you sure you want to delete the file \"{{filename}}\"?",
     "imageRequiresAdvancedParsing": "AI-based parsing required for images",
     "unsupportedFileType": "Unsupported file type: {{files}}",
     "continueEditing": "Continue editing"

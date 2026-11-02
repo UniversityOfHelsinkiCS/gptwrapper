@@ -188,7 +188,8 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
   }
 
   const handleDeleteFile = async (fileId: number) => {
-    if (!window.confirm(t('rag:confirmDeleteFile'))) return
+    const filename = ragDetails?.ragFiles.find((file) => file.id === fileId)?.filename
+    if (!window.confirm(t('rag:confirmDeleteFile', { filename, interpolation: { escapeValue: false } }))) return
     try {
       await deleteFileMutation.mutateAsync({ indexId, fileId })
       enqueueSnackbar(t('rag:fileDeleted'), { variant: 'success' })

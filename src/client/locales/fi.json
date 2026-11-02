@@ -844,7 +844,7 @@
     "statusReady": "Valmis",
     "statusProcessing": "Käsitellään",
     "statusFailed": "Ingestointi epäonnistui",
-    "confirmDeleteFile": "Haluatko varmasti poistaa tämän tiedoston?",
+    "confirmDeleteFile": "Haluatko varmasti poistaa tiedoston \"{{filename}}\"?",
     "imageRequiresAdvancedParsing": "Kuville käytetään aina tekoälypohjaista käsittelyä",
     "unsupportedFileType": "Tiedostotyyppiä ei tueta: {{files}}",
     "continueEditing": "Jatka muokkausta"
