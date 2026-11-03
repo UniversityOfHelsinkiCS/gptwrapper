@@ -14,6 +14,7 @@ import { AIMessage, HumanMessage, SystemMessage, ToolMessage } from "@langchain/
 export const api = express.Router()
 
 const UNLIMITED_MODELS = new Set(["gpt-5-mini"]) // "DeepSeek-V4-Flash", "gpt-6-luna"
+const VERY_UNLIMITED_MODELS = new Set(["gemma-4-26B-A4B"])
 
 export const getAzureChatOpenAI = (modelName: string, streaming = true, temperature: number | undefined, topP: number | undefined, _top_k: number | undefined, logprobs: boolean = false) =>
     new ChatOpenAI({
@@ -178,6 +179,20 @@ api.post('/v1/chat/completions',
         if (UNLIMITED_MODELS.has(model)) {
             if (!checkUsage(user, model, user.usage ?? 0, userLimit + 1000000)) {
                 logger.info(`RATELIMIT: ${user.id}, ${user.usage}, ${model} limited for "unlimited" model`)
+                res.status(429).send({
+                    error: {
+                        "code": "slow_down",
+                        "type": "rate_limit_error",
+                        "param": null,
+                        "message": "Token limit exceeded on model, limits automatically reset on every monday"
+                    }
+                })
+                return
+            }
+        }
+        else if (VERY_UNLIMITED_MODELS.has(model)) {
+            if (!checkUsage(user, model, user.usage ?? 0, userLimit + 20000000)) {
+                logger.info(`RATELIMIT: ${user.id}, ${user.usage}, ${model} limited for "very unlimited" model`)
                 res.status(429).send({
                     error: {
                         "code": "slow_down",
