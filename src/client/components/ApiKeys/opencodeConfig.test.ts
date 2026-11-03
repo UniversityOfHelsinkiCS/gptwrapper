@@ -24,7 +24,7 @@ describe('downloadOpencodeConfig', () => {
     let blob: Blob | undefined
     vi.spyOn(URL, 'createObjectURL').mockImplementation((value) => {
       blob = value as Blob
-      return 'blob:opencode'
+      return 'blob:http://localhost/opencode'
     })
     const revoke = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
@@ -34,10 +34,10 @@ describe('downloadOpencodeConfig', () => {
     expect(click).toHaveBeenCalledOnce()
     const clicked = click.mock.contexts[0] as HTMLAnchorElement
     expect(clicked.download).toBe('opencode.json')
-    expect(clicked.href).toBe('blob:opencode')
+    expect(clicked.href).toBe('blob:http://localhost/opencode')
     expect(revoke).not.toHaveBeenCalled()
     vi.runAllTimers()
-    expect(revoke).toHaveBeenCalledWith('blob:opencode')
+    expect(revoke).toHaveBeenCalledWith('blob:http://localhost/opencode')
 
     expect(blob?.type).toBe('application/json')
     expect(JSON.parse(await blob!.text())).toEqual(buildOpencodeConfig('https://example.org/api/external/v1', 'secret'))
