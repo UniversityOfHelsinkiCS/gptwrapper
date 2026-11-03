@@ -55,28 +55,6 @@ export type ModelConfig = {
  * displayName: the human-readable name shown to users.
  */
 export const validModels: ModelConfig[] = [
-  // {
-  //   name: 'Qwen3.5',
-  //   displayName: 'Qwen 3.5 4B',
-  //   context: 128_000,
-  //   outputLimit: 16_384,
-  //   streamVersion: 'v3',
-  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
-  //   provider: ModelProvider.Toska,
-  //   service: 'v1',
-  //   tags: ['local', 'open']
-  // },
-  {
-    name: 'gemma-4-26B-A4B',
-    displayName: 'Gemma 4',
-    context: 128_000,
-    outputLimit: 16_384,
-    streamVersion: 'v3',
-    descriptionKey: 'chat:modelDescriptions.fastAndCheap',
-    provider: ModelProvider.Toska,
-    service: 'v1',
-    tags: ['local', 'open']
-  },
   {
     name: 'gpt-5-mini',
     displayName: 'GPT-5 mini',
@@ -208,6 +186,28 @@ export const validModels: ModelConfig[] = [
     timeoutOverride: 60000,
     modelRegion: 'eu',
     tags: [],
+  },
+  // {
+  //   name: 'Qwen3.5',
+  //   displayName: 'Qwen 3.5 4B',
+  //   context: 128_000,
+  //   outputLimit: 16_384,
+  //   streamVersion: 'v3',
+  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+  //   provider: ModelProvider.Toska,
+  //   service: 'v1',
+  //   tags: ['local', 'open']
+  // },
+  {
+    name: 'gemma-4-26B-A4B',
+    displayName: 'Gemma 4',
+    context: 128_000,
+    outputLimit: 16_384,
+    streamVersion: 'v3',
+    descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+    provider: ModelProvider.Toska,
+    service: 'v1',
+    tags: ['local', 'open']
   },
   {
     name: 'mock',
