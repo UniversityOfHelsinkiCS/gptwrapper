@@ -1,4 +1,4 @@
-import { FREE_MODEL, ModelProvider, validModels } from '@config'
+import { FREE_MODEL, ModelProvider, PUBLIC_URL, validModels } from '@config'
 
 export const API_KEY_PLACEHOLDER = 'YOUR_API_KEY'
 
@@ -20,7 +20,8 @@ export const buildOpencodeConfig = (baseURL: string, apiKey: string) => ({
   },
 })
 
-export const downloadOpencodeConfig = (baseURL: string, apiKey: string) => {
+export const downloadOpencodeConfig = (apiKey: string) => {
+  const baseURL = `${window.location.origin}${PUBLIC_URL}/api/external/v1`
   const blob = new Blob([`${JSON.stringify(buildOpencodeConfig(baseURL, apiKey), null, 2)}\n`], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')

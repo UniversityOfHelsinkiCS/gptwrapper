@@ -27,8 +27,6 @@ import { isConflictError, useApiKeys, useCreateApiKeyMutation, useDeleteApiKeyMu
 import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
 import { API_KEY_PLACEHOLDER, downloadOpencodeConfig } from './opencodeConfig'
 
-const getBaseUrl = () => `${window.location.origin}${PUBLIC_URL}/api/external/v1`
-
 const formatDate = (date: string) => new Date(date).toLocaleString()
 // Keys created before naming have an empty name
 const keyLabel = (apiKey: ApiKey) => apiKey.name || apiKey.apiKey
@@ -109,7 +107,7 @@ const OpencodeGuide = () => {
     <GuideAccordion icon={<Terminal color="primary" />} title={t('apiKeys:opencodeTitle')}>
       <Typography variant="body2">{t('apiKeys:opencodeHint')}</Typography>
       <Box>
-        <OpencodeDownloadButton onClick={() => downloadOpencodeConfig(getBaseUrl(), API_KEY_PLACEHOLDER)} />
+        <OpencodeDownloadButton onClick={() => downloadOpencodeConfig(API_KEY_PLACEHOLDER)} />
       </Box>
     </GuideAccordion>
   )
@@ -117,7 +115,7 @@ const OpencodeGuide = () => {
 
 const IntegrationGuide = () => {
   const { t } = useTranslation()
-  const baseUrl = getBaseUrl()
+  const baseUrl = `${window.location.origin}${PUBLIC_URL}/api/external/v1`
   const authHeader = `Authorization: Bearer ${API_KEY_PLACEHOLDER}`
   const curlExample = `curl ${baseUrl}/chat/completions \\
   -H "${authHeader}" \\
@@ -208,7 +206,7 @@ const CreatedKeyPanel = ({ createdKey, onDismiss }: { createdKey: ApiKey; onDism
         <CopyButton text={createdKey.apiKey} />
       </Box>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
-        <OpencodeDownloadButton onClick={() => downloadOpencodeConfig(getBaseUrl(), createdKey.apiKey)} />
+        <OpencodeDownloadButton onClick={() => downloadOpencodeConfig(createdKey.apiKey)} />
         <TextButton onClick={onDismiss} sx={[{ color: 'primary.main' }, (theme) => theme.applyStyles('dark', { color: theme.palette.text.primary })]}>
           {t('apiKeys:dismiss')}
         </TextButton>

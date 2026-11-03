@@ -88,7 +88,7 @@ describe('ApiKeysDialog', () => {
     expect(apiClient.post).toHaveBeenCalledWith('/apikeys', { name: 'My script' })
     expect(within(dialog).getByTestId('created-api-key').textContent).toBe(keys[0].apiKey)
     fireEvent.click(within(dialog).getByRole('button', { name: 'Download opencode.json' }))
-    expect(downloadOpencodeConfig).toHaveBeenCalledWith(`${window.location.origin}/chat/api/external/v1`, keys[0].apiKey)
+    expect(downloadOpencodeConfig).toHaveBeenCalledWith(keys[0].apiKey)
     expect(within(dialog).getByText('••••••••0001')).toBeTruthy()
     expect((within(dialog).getByLabelText('Key name') as HTMLInputElement).value).toBe('')
     expect(within(dialog).getByText('New')).toBeTruthy()

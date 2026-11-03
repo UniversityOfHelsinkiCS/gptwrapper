@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@config', () => ({
   FREE_MODEL: 'gpt-5-mini',
+  PUBLIC_URL: '/chat',
   ModelProvider: { Vertex: 'vertex' },
   validModels: [
     { name: 'gpt-5-mini', displayName: 'GPT-5 mini', context: 128_000, outputLimit: 16_384 },
@@ -29,7 +30,7 @@ describe('downloadOpencodeConfig', () => {
     const revoke = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
 
-    downloadOpencodeConfig('https://example.org/api/external/v1', 'secret')
+    downloadOpencodeConfig('secret')
 
     expect(click).toHaveBeenCalledOnce()
     const clicked = click.mock.contexts[0] as HTMLAnchorElement
@@ -40,7 +41,7 @@ describe('downloadOpencodeConfig', () => {
     expect(revoke).toHaveBeenCalledWith('blob:http://localhost/opencode')
 
     expect(blob?.type).toBe('application/json')
-    expect(JSON.parse(await blob!.text())).toEqual(buildOpencodeConfig('https://example.org/api/external/v1', 'secret'))
+    expect(JSON.parse(await blob!.text())).toEqual(buildOpencodeConfig(`${window.location.origin}/chat/api/external/v1`, 'secret'))
   })
 })
 
