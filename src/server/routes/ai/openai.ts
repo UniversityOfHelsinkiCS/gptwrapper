@@ -44,13 +44,16 @@ export const getVertexModelProvider = (modelConfig: Pick<ModelConfig, 'name' | '
     })
 }
 
-export const getToskaProvider = (service: string, streaming = true, temperature: number | undefined, topP: number | undefined, _top_k: number | undefined, logprobs: boolean = false) =>
+export const getToskaProvider = (_service: string, streaming = true, temperature: number | undefined, topP: number | undefined, _top_k: number | undefined, logprobs: boolean = false) =>
     new ChatOpenAI({
         configuration: {
-            baseURL: `${INFERENCE_API_URL}/${service}`
+            baseURL: INFERENCE_API_URL,
+            defaultHeaders: {
+                "token": INFERENCE_API_TOKEN
+            }
         },
         useResponsesApi: true,
-        apiKey: INFERENCE_API_TOKEN,
+        apiKey: 'none',
         streaming: streaming,
         temperature,
         topP,
