@@ -61,7 +61,8 @@ S3_SECRET_KEY=<secret-key>
 
 ## Developers: things to know
 
-- [Accessibility](documentation/accessibility.md) — when to use `Alert` vs `InfoBox`, and how to announce state changes.
+- [Accessibility](documentation/accessibility.md) — guidance and shared tools for implementing accessible features.
+- [Accessibility statement](documentation/accessibility-statement.md) — public statement of known accessibility issues; keep it up to date.
 
 ## Metrics (Prometheus)
 
