@@ -98,6 +98,7 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
             value={endDate}
             onChange={(date) => date && isValid(date) && setEndDate(date)}
             slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+            minDate={startDate}
           />
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>
             <Tooltip arrow placement="top" title={t('common:cancel')} describeChild>
