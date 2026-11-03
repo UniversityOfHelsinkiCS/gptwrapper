@@ -13,12 +13,14 @@ vi.mock('@config', () => ({ PUBLIC_URL: '/chat', FREE_MODEL: 'gpt-5-mini' }))
 vi.mock('../common/Snackbar', () => ({ enqueueSnackbar: vi.fn() }))
 vi.mock('../common/accessibility/SnackbarAnnouncer', () => ({ announceToScreenReader: vi.fn() }))
 vi.mock('../../util/apiClient', () => ({ default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() } }))
+vi.mock('./opencodeConfig', async (importOriginal) => ({ ...(await importOriginal<typeof import('./opencodeConfig')>()), downloadOpencodeConfig: vi.fn() }))
 
 import en from '../../locales/en.json'
 import apiClient from '../../util/apiClient'
 import queryClient from '../../util/queryClient'
 import { enqueueSnackbar } from '../common/Snackbar'
 import { ApiKeysDialog } from './ApiKeysDialog'
+import { downloadOpencodeConfig } from './opencodeConfig'
 
 const i18n = i18next.createInstance()
 
@@ -85,6 +87,8 @@ describe('ApiKeysDialog', () => {
     await createKey(dialog, '  My script  ')
     expect(apiClient.post).toHaveBeenCalledWith('/apikeys', { name: 'My script' })
     expect(within(dialog).getByTestId('created-api-key').textContent).toBe(keys[0].apiKey)
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Download opencode.json' }))
+    expect(downloadOpencodeConfig).toHaveBeenCalledWith(`${window.location.origin}/chat/api/external/v1`, keys[0].apiKey)
     expect(within(dialog).getByText('••••••••0001')).toBeTruthy()
     expect((within(dialog).getByLabelText('Key name') as HTMLInputElement).value).toBe('')
     expect(within(dialog).getByText('New')).toBeTruthy()

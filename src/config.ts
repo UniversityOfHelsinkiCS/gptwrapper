@@ -36,6 +36,8 @@ export type ModelConfig = {
   displayName: string
   context: number
   provider: ModelProvider
+  // outputLimit is for opencode
+  outputLimit: number
   streamVersion: string
   timeoutOverride?: number
   instructions?: string
@@ -57,6 +59,7 @@ export const validModels: ModelConfig[] = [
   //   name: 'Qwen3.5',
   //   displayName: 'Qwen 3.5 4B',
   //   context: 128_000,
+  //   outputLimit: 16_384,
   //   streamVersion: 'v3',
   //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   //   provider: ModelProvider.Toska,
@@ -67,15 +70,17 @@ export const validModels: ModelConfig[] = [
     name: 'gpt-5-mini',
     displayName: 'GPT-5 mini',
     context: 128_000,
+    outputLimit: 16_384,
     streamVersion: 'v3',
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Azure,
-    tags: ['cheap', 'fast']
+    tags: ['cheap', 'fast'],
   },
   // {
   //   name: 'gpt-6-luna',
   //   displayName: 'GPT-6 Luna',
   //   context: 128_000,
+  //   outputLimit: 16_384,
   //   streamVersion: 'v3',
   //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   //   provider: ModelProvider.Azure,
@@ -84,6 +89,7 @@ export const validModels: ModelConfig[] = [
   //   name: 'gpt-4o-mini',
   //   displayName: 'GPT-4o mini',
   //   context: 128_000,
+  //   outputLimit: 16_384,
   //   streamVersion: 'v3',
   //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   //   provider: ModelProvider.Azure,
@@ -92,6 +98,7 @@ export const validModels: ModelConfig[] = [
   //   name: 'gpt-4o',
   //   displayName: 'GPT-4o',
   //   context: 128_000,
+  //   outputLimit: 16_384,
   //   streamVersion: 'v3',
   //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   //   provider: ModelProvider.Azure,
@@ -100,6 +107,7 @@ export const validModels: ModelConfig[] = [
   //   name: 'gpt-4',
   //   displayName: 'GPT-4',
   //   context: 128_000,
+  //   outputLimit: 16_384,
   //   streamVersion: 'v3',
   //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   //   provider: ModelProvider.Azure,
@@ -108,6 +116,7 @@ export const validModels: ModelConfig[] = [
   //   name: 'gpt-5.1',
   //   displayName: 'GPT-5.1',
   //   context: 128_000,
+  //   outputLimit: 16_384,
   //   streamVersion: 'v3',
   //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   //   provider: ModelProvider.Azure,
@@ -116,6 +125,7 @@ export const validModels: ModelConfig[] = [
   //   name: 'gpt-4.1',
   //   displayName: 'GPT-4.1',
   //   context: 128_000,
+  //   outputLimit: 16_384,
   //   streamVersion: 'v3',
   //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   //   provider: ModelProvider.Azure,
@@ -124,26 +134,29 @@ export const validModels: ModelConfig[] = [
     name: 'gpt-5.5',
     displayName: 'GPT-5.5',
     context: 128_000,
+    outputLimit: 16_384,
     streamVersion: 'v3',
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',
-    tags: ['premium']
+    tags: ['premium'],
   },
   {
     name: 'gpt-6.1-sol',
     displayName: 'GPT-6.1 Sol',
     context: 128_000,
+    outputLimit: 16_384,
     streamVersion: 'v3',
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',
-    tags: ['premium']
+    tags: ['premium'],
   },
   // {
   //   name: 'DeepSeek-V4-Flash',
   //   displayName: 'DeepSeek V4 Flash',
   //   context: 128_000,
+  //   outputLimit: 16_384,
   //   streamVersion: 'v3',
   //   instructions: formatInstructions,
   //   provider: ModelProvider.Azure,
@@ -153,17 +166,19 @@ export const validModels: ModelConfig[] = [
     name: 'Mistral-Large-3-1',
     displayName: 'Mistral Large 3',
     context: 128_000,
+    outputLimit: 8_192,
     streamVersion: 'v3',
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.balanced',
-    tags: []
+    tags: [],
   },
   // gemini 3.5 flash lite is not available in EU for now. It is the direct replacement 2.5 flash
   // {
   //   name: 'gemini-3.5-flash-lite',
   //   displayName: 'Gemini 3.5 Flash-Lite',
   //   context: 128_000,
+  //   outputLimit: 16_384,
   //   streamVersion: 'v3',
   //   instructions: formatInstructions,
   //   provider: ModelProvider.Vertex,
@@ -174,21 +189,23 @@ export const validModels: ModelConfig[] = [
     name: 'gemini-3.8-flash',
     displayName: 'Gemini 3.8 Flash',
     context: 128_000,
+    outputLimit: 16_384,
     streamVersion: 'v3',
     instructions: formatInstructions,
     provider: ModelProvider.Vertex,
     descriptionKey: 'chat:modelDescriptions.balanced',
     timeoutOverride: 60000,
     modelRegion: 'eu',
-    tags: []
+    tags: [],
   },
   {
     name: 'mock',
     displayName: 'Mock',
     context: 1024,
+    outputLimit: 1024,
     streamVersion: 'v3',
     provider: ModelProvider.Mock,
-    tags: []
+    tags: [],
   },
 ] as const
 
