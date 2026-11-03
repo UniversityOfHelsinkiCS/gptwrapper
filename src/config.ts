@@ -67,6 +67,17 @@ export const validModels: ModelConfig[] = [
   //   tags: ['local', 'open']
   // },
   {
+    name: 'gemma-4-26B-A4B',
+    displayName: 'Gemma 4',
+    context: 128_000,
+    outputLimit: 16_384,
+    streamVersion: 'v3',
+    descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+    provider: ModelProvider.Toska,
+    service: 'v1',
+    tags: ['local', 'open']
+  },
+  {
     name: 'gpt-5-mini',
     displayName: 'GPT-5 mini',
     context: 128_000,
