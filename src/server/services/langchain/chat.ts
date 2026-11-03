@@ -14,7 +14,7 @@ import { AiApiWarning, WarningType } from '@shared/aiApi'
 import getEncoding from 'src/server/util/tiktoken'
 import { calculateUsage } from '../chatInstances/usage'
 import { truncateMessages } from './truncateMessages'
-import { getAzureChatOpenAI, getVertexModelProvider } from './modelGenerators'
+import { getAzureChatOpenAI, getToskaProvider, getVertexModelProvider } from './modelGenerators'
 import logger from 'src/server/util/logger'
 
 export type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
@@ -358,6 +358,10 @@ const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[]): ChatMo
     case ModelProvider.Vertex: {
       const vertexModel = getVertexModelProvider(modelConfig)
       return tools.length > 0 ? vertexModel.bindTools(tools) : vertexModel
+    }
+    case ModelProvider.Toska: {
+      const toskaModel = getToskaProvider(modelConfig.name)
+      return tools.length > 0 ? toskaModel.bindTools(tools) : toskaModel
     }
     case ModelProvider.Mock:
       return new MockModel({ tools })
