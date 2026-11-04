@@ -13,7 +13,7 @@ import { AIMessage, HumanMessage, SystemMessage, ToolMessage } from "@langchain/
 
 export const api = express.Router()
 
-const UNLIMITED_MODELS = new Set(["gpt-5-mini"]) // "DeepSeek-V4-Flash", "gpt-6-luna"
+const UNLIMITED_MODELS = new Set(["gpt-5-mini", "gpt-6-luna"]) // "DeepSeek-V4-Flash", "gpt-6-luna"
 const VERY_UNLIMITED_MODELS = new Set(["gemma-4-26B-A4B"])
 
 export const getAzureChatOpenAI = (modelName: string, streaming = true, temperature: number | undefined, topP: number | undefined, _top_k: number | undefined, logprobs: boolean = false) =>

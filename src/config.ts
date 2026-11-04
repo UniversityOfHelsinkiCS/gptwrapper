@@ -56,6 +56,16 @@ export type ModelConfig = {
  */
 export const validModels: ModelConfig[] = [
   {
+    name: 'gpt-6-luna',
+    displayName: 'GPT-6 Luna',
+    context: 128_000,
+    outputLimit: 16_384,
+    streamVersion: 'v3',
+    descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+    provider: ModelProvider.Azure,
+    tags: ['cheap', 'fast']
+  },
+  {
     name: 'gpt-5-mini',
     displayName: 'GPT-5 mini',
     context: 128_000,
@@ -65,15 +75,6 @@ export const validModels: ModelConfig[] = [
     provider: ModelProvider.Azure,
     tags: ['cheap', 'fast'],
   },
-  // {
-  //   name: 'gpt-6-luna',
-  //   displayName: 'GPT-6 Luna',
-  //   context: 128_000,
-  //   outputLimit: 16_384,
-  //   streamVersion: 'v3',
-  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
-  //   provider: ModelProvider.Azure,
-  // },
   // {
   //   name: 'gpt-4o-mini',
   //   displayName: 'GPT-4o mini',
@@ -236,9 +237,9 @@ export const isMockModel = (modelName: ValidModelName): boolean => modelName ===
 
 export const isVertexModel = (modelName: ValidModelName): boolean => vertexModels.some((model) => model.name === modelName)
 
-export const DEFAULT_MODEL = ValidModelNameSchema.parse(process.env.DEFAULT_MODEL || 'gpt-5-mini')
+export const DEFAULT_MODEL = ValidModelNameSchema.parse(process.env.DEFAULT_MODEL || 'gpt-6-luna')
 
-export const FREE_MODEL = ValidModelNameSchema.parse(process.env.FREE_MODEL || 'gpt-5-mini')
+export const FREE_MODEL = ValidModelNameSchema.parse(process.env.FREE_MODEL || 'gpt-6-luna')
 
 export const DEFAULT_ASSISTANT_INSTRUCTIONS = '' // 11th August 2025 we decided it should be empty
 
