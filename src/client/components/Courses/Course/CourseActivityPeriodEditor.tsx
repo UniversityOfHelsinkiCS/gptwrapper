@@ -29,6 +29,10 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
   }, [course.courseId])
 
   const handleSubmit = async (tokens?: number, activated?: boolean) => {
+    if (startDate > endDate) {
+      enqueueSnackbar(t('course:invalidActivityPeriod'), { variant: 'error' })
+      return
+    }
     try {
       if (activated === undefined) {
         await mutation.mutateAsync({

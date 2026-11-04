@@ -641,7 +641,8 @@
     "goToCoursePage": "Siirry kurssisivulle",
     "openDiscussions": "Näytä opiskelijoiden keskustelut",
     "saveDiscussions": "Aseta kurssi \"{{course}}\" tutkimuskurssiksi. Keskustelut tallennetaan.",
-    "unsaveDiscussions": "Poista kurssi \"{{course}}\" tutkimuskurssien joukosta. Keskusteluja ei tallenneta."
+    "unsaveDiscussions": "Poista kurssi \"{{course}}\" tutkimuskurssien joukosta. Keskusteluja ei tallenneta.",
+    "invalidActivityPeriod": "Tallennus epäonnistui: lopetuspäivämäärä ei voi olla ennen aloituspäivämäärää."
   },
   "prompt": {
     "createNew": "Luo uusi alustus",
