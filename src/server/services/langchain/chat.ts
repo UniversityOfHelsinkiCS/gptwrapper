@@ -16,6 +16,9 @@ import { calculateUsage } from '../chatInstances/usage'
 import { truncateMessages } from './truncateMessages'
 import { getAzureChatOpenAI, getToskaProvider, getVertexModelProvider } from './modelGenerators'
 import logger from 'src/server/util/logger'
+import { createAgent, ReactAgent } from 'langchain'
+import { AzureChatOpenAI } from '@langchain/openai'
+
 
 export type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
 
@@ -112,19 +115,19 @@ export const streamChat = async ({
   signal: AbortSignal
 }): Promise<
   | {
-      warnings: AiApiWarning[]
-      inputTokenCount: number
-    }
+    warnings: AiApiWarning[]
+    inputTokenCount: number
+  }
   | {
-      tokenCount: number
-      firstTokenTS: number
-      inputTokenCount: number
-      tokenStreamingDuration: number
-      timeToFirstToken?: number
-      tokensPerSecond: number
-      response: string
-      toolCalls?: string
-    }
+    tokenCount: number
+    firstTokenTS: number
+    inputTokenCount: number
+    tokenStreamingDuration: number
+    timeToFirstToken?: number
+    tokensPerSecond: number
+    response: string
+    toolCalls?: string
+  }
 > => {
   const toolsByName = Object.fromEntries(tools.map((tool) => [tool.name, tool]))
 
@@ -181,16 +184,17 @@ export const streamChat = async ({
     writeEvent({ type: 'processing', message: 'processing' }).catch((error) => logger.error(error))
   }, 5000)
 
+  // TODO: Nuke
   try {
-    const MAX_TOOL_ITERATIONS = 2
-    let iterations = MAX_TOOL_ITERATIONS
-    let result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user, signal)
+    // const MAX_TOOL_ITERATIONS = 2
+    // let iterations = MAX_TOOL_ITERATIONS
+    const result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user, signal)
 
     // If the model decided to call tools, execute them and send the results back to the model in subsequent turns.
-    while (result.toolCalls.length > 0 && iterations > 0) {
-      result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user, signal)
-      iterations--
-    }
+    // while (result.toolCalls.length > 0 && iterations > 0) {
+    //   result = await chatTurn(chatModel, messages, toolsByName, writeEvent, user, signal)
+    //   iterations--
+    // }
 
     // Temp disable: langchain does not support this anymore, and we are migrating to agents anyway
     // Escape hatch: if the cap was hit while the model was still calling tools,
@@ -217,6 +221,17 @@ export const streamChat = async ({
   }
 }
 
+// TODO: i18n
+const TOOL_COMPLETED_TEXT = 'Suoritettu komento'
+
+const streamExtractText = (content: AIMessageChunk['content']): string =>
+  typeof content === 'string'
+    ? content
+    : content.map((part) => (part as { text?: string }).text ?? '').join('')
+
+
+
+
 /**
  * Executes a single turn of the chat.
  * It streams the model's response, handles tool calls, and sends events.
@@ -228,117 +243,106 @@ export const streamChat = async ({
  * @param user The user for whom the tool results are stored.
  * @returns An object with statistics about the chat turn and any tool calls made.
  */
-const chatTurn = async (
-  model: ChatModel,
+export const chatTurn = async (
+  model: ReactAgent,
   messages: BaseMessageLike[],
-  toolsByName: Record<string, ChatTool>,
+  _toolsByName: Record<string, ChatTool>,
   writeEvent: WriteEventFunction,
-  user: User,
+  _user: User,
   signal: AbortSignal,
 ) => {
   const stream = await safelyStreamMessages(model, messages, signal)
 
   const startTS = Date.now()
-  let firstTokenTS = 0
-  let timeToFirstToken: number | undefined
-  const toolCallStatuses: Record<string, { status: 'pending' | 'completed' | 'error' }> = {}
+  let firstTokenTS: number | undefined
   let fullOutput: AIMessageChunk | undefined
 
-  for await (const chunk of stream) {
-    if (!timeToFirstToken) {
-      firstTokenTS = Date.now()
-      timeToFirstToken = firstTokenTS - startTS
-    }
+  const announcedToolCalls = new Set<string>()
+  const toolCalls: { name: string; callId: string }[] = []
 
-    for (const toolCall of chunk.tool_call_chunks ?? []) {
-      const id = toolCall.id
-      if (id && !toolCallStatuses[id]) {
-        toolCallStatuses[id] = {
-          status: 'pending',
-        }
+  for await (const event of stream) {
+    switch (event.event) {
+      case 'failure':
+        continue
+
+      case 'on_tool_start':
         await writeEvent({
           type: 'toolCallStatus',
-          toolName: toolCall.name as ChatToolDef['name'],
-          callId: id,
-          text: 'Searching',
+          toolName: event.name,
+          callId: event.run_id,
+          input: event.data?.input,
+          text: 'Running',
         })
-      }
-    }
+        break
 
-    const text = extractText(chunk.content)
-    if (text.length > 0) {
-      await writeEvent({
-        type: 'writing',
-        text,
-      })
-    }
-
-    // Append the chunk to the full response.
-    fullOutput = fullOutput !== undefined ? concat(fullOutput, chunk) : chunk
-  }
-
-  // Add the assistant's full response to the message history.
-  messages.push(fullOutput as AIMessageChunk)
-
-  const toolCalls = fullOutput?.tool_calls ?? []
-
-  for (const toolCall of toolCalls) {
-    const tool = toolsByName[toolCall.name]
-    const id = toolCall.id
-    const name = toolCall.name as ChatToolDef['name']
-    const input = toolCall.args as ChatToolDef['input']
-
-    if (id && tool) {
-      await writeEvent({
-        type: 'toolCallStatus',
-        toolName: name,
-        callId: id,
-        text: `Searching for '${input.query}'`,
-        input,
-      })
-
-      const result = await tool.invoke(toolCall, { signal })
-      const artifact = result.artifact as ChatToolOutput
-      await ToolResultStore.saveResults(id, artifact, user)
-
-      // Add the tool's output to the message history for the next turn.
-      messages.push(result)
-      toolCallStatuses[id] = {
-        status: 'completed',
+      case 'on_tool_end': {
+        const output = event.data?.output
+        await writeEvent({
+          type: 'toolCallStatus',
+          toolName: event.name,
+          callId: event.run_id,
+          input: event.data?.input,
+          text: TOOL_COMPLETED_TEXT,
+          result: output?.artifact ? { files: output.artifact } : output?.content,
+        })
+        toolCalls.push({ name: event.name, callId: event.run_id })
+        break
       }
 
-      await writeEvent({
-        type: 'toolCallStatus',
-        toolName: name,
-        callId: id,
-        text: `Completed search for '${input.query}'`,
-        input,
-        result: {
-          files: artifact.map((chunk) => ({
-            fileName: chunk.metadata.ragFileName,
-            score: chunk.score,
-          })),
-        },
-      })
+      case 'on_chat_model_stream': {
+        const chunk: AIMessageChunk | undefined = event.data?.chunk
+        if (!chunk) break
+
+        firstTokenTS ??= Date.now()
+
+        fullOutput = fullOutput ? fullOutput.concat(chunk) : chunk
+
+        const text = streamExtractText(chunk.content)
+        if (text.length > 0) {
+          await writeEvent({ type: 'writing', text })
+        }
+
+        for (const toolCall of chunk.tool_call_chunks ?? []) {
+          const id = toolCall.id
+          if (id && !announcedToolCalls.has(id)) {
+            announcedToolCalls.add(id)
+            await writeEvent({
+              type: 'toolCallStatus',
+              toolName: toolCall.name as ChatToolDef['name'],
+              callId: id,
+              text: 'Searching',
+            })
+          }
+        }
+        break
+      }
     }
   }
 
-  // Calculate statistics about the response generation.
+  if (fullOutput) {
+    messages.push(fullOutput)
+  }
+
+  // TODO: fallback tokencount like api
   const tokenCount = fullOutput?.usage_metadata?.output_tokens ?? 0
   const inputTokenCount = fullOutput?.usage_metadata?.input_tokens ?? 0
-  const tokenStreamingDuration = Date.now() - firstTokenTS
+  const timeToFirstToken = firstTokenTS !== undefined ? firstTokenTS - startTS : undefined
+  const tokenStreamingDuration = firstTokenTS !== undefined ? Date.now() - firstTokenTS : 0
+
+  console.log("Token", tokenCount, inputTokenCount, timeToFirstToken, tokenStreamingDuration)
 
   return {
     tokenCount,
     firstTokenTS,
     timeToFirstToken,
-    tokensPerSecond: (tokenCount / tokenStreamingDuration) * 1000,
+    tokensPerSecond: tokenStreamingDuration > 0 ? (tokenCount / tokenStreamingDuration) * 1000 : 0,
     inputTokenCount,
     tokenStreamingDuration,
     toolCalls,
     fullOutput,
   }
 }
+
 
 /**
  * Gets a chat model instance based on the provided configuration.
@@ -347,24 +351,24 @@ const chatTurn = async (
  * @param tools The structured tools the model can use.
  * @returns A chat model instance.
  */
-const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[]): ChatModel => {
+export const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[]): ReactAgent => {
   switch (modelConfig.provider) {
     case ModelProvider.Azure: {
       const azureModel = getAzureChatOpenAI(modelConfig.name)
       // Make tools available to the model. Without this, Azure models never see
       // the tools and can't emit tool_calls. Removed accidentally in 4fc8d9f9.
-      return tools.length > 0 ? (azureModel.bindTools(tools) as ChatModel) : azureModel
+      return createAgent({ model: azureModel, tools: tools })
     }
     case ModelProvider.Vertex: {
       const vertexModel = getVertexModelProvider(modelConfig)
-      return tools.length > 0 ? vertexModel.bindTools(tools) : vertexModel
+      return createAgent({ model: vertexModel, tools: tools })
     }
     case ModelProvider.Toska: {
       const toskaModel = getToskaProvider(modelConfig.name)
-      return tools.length > 0 ? toskaModel.bindTools(tools) : toskaModel
+      return createAgent({ model: toskaModel, tools: tools })
     }
     case ModelProvider.Mock:
-      return new MockModel({ tools })
+      return createAgent({ model: new MockModel({ tools }) })
     default:
       throw new Error(`Unknown model provider: ${modelConfig.provider}`)
   }
@@ -421,7 +425,9 @@ const handleWarnings = (
 
 const safelyStreamMessages = async (model: ChatModel, messages: BaseMessageLike[], signal: AbortSignal) => {
   try {
-    return await model.stream(messages, { signal })
+
+    //@ts-expect-error langchain wtf
+    return await model.streamEvents({ 'messages': messages }, { version: "v2", signal })
   } catch (error) {
     if (error instanceof Error) {
       // Handle API errors specifically.
@@ -433,9 +439,19 @@ const safelyStreamMessages = async (model: ChatModel, messages: BaseMessageLike[
           innerError?.message ?? 'The response was not generated due to the prompt triggering content filters. No further details available.'
 
         return [
-          new AIMessageChunk({
-            content: extraAzureInfo,
-          }),
+          {
+            event: "failure",
+            name: extraAzureInfo,
+            run_id: '',
+            tags: null,
+            metadata: {},
+            data: {
+              input: null,
+              output: null,
+              chunk: null,
+              error: null
+            }
+          }
         ]
       }
     }
