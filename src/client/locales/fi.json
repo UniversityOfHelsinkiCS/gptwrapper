@@ -171,6 +171,7 @@
     "readSources": "Luetaan lähteitä",
     "failedSources": "Lähteiden näyttäminen epäonnistui",
     "freeModel": "rajoittamaton",
+    "selfHostedModel": "Paikallinen malli, Toskan ylläpitämä",
     "modelDescriptions": {
       "premium": "Tehokkain — sopii vaativiin tehtäviin",
       "balanced": "Monipuolinen yleismalli",

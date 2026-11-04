@@ -172,6 +172,7 @@
     "readSources": "Läser källor",
     "failedSources": "Misslyckades att visa källor",
     "freeModel": "obegränsad",
+    "selfHostedModel": "Lokalt värd av Toska",
     "modelDescriptions": {
       "premium": "Kraftfullast — bäst för krävande uppgifter",
       "balanced": "Stark allroundmodell",

@@ -168,6 +168,7 @@
     "readSources": "Reading sources",
     "failedSources": "Failed to display sources",
     "freeModel": "unlimited",
+    "selfHostedModel": "Locally hosted by Toska",
     "modelDescriptions": {
       "premium": "Most capable — best for demanding tasks",
       "balanced": "Strong all-rounder",
