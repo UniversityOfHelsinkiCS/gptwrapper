@@ -711,7 +711,11 @@
     "creatorName": "Alustuksen luoja: {{firstNames}} {{lastName}}",
     "creatorHidden": "Piilotettu muilta käyttäjiltä",
     "tooShort": "Nimen on oltava vähintään 3 merkkiä pitkä",
-    "textTooLong": "Teksti on liian pitkä. Enimmäispituus on {{max}} merkkiä"
+    "textTooLong": "Teksti on liian pitkä. Enimmäispituus on {{max}} merkkiä",
+    "publish": "Julkaise",
+    "publishedHelp": "Luonnos näkyy vain kurssin vastuuhenkilöille. Julkaistu alustus näkyy myös opiskelijoille.",
+    "publishedPrompt": "Alustus \"{{name}}\" julkaistu",
+    "unpublishedPrompt": "Alustus \"{{name}}\" palautettu luonnokseksi"
   },
   "tooltip": {
     "copied": "Kopioitu!"

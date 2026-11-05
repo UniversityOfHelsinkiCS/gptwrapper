@@ -1,7 +1,23 @@
 import { PUBLIC_URL } from '@config'
 import { ContentCopyOutlined, EditOutlined, LinkOutlined, VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
-import { Box, Divider, Typography, Paper, Tooltip, IconButton, List, ListItem, ListItemText, Dialog, DialogContent, DialogTitle } from '@mui/material'
+import {
+  Box,
+  Chip,
+  Divider,
+  FormControlLabel,
+  Switch,
+  Typography,
+  Paper,
+  Tooltip,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from '@mui/material'
 import { enqueueSnackbar } from '../common/Snackbar'
 import { useTranslation } from 'react-i18next'
 import useCourse from '../../hooks/useCourse'
@@ -17,10 +33,13 @@ import { monospaceStyle } from '../../theme'
 import BookmarksIcon from '@mui/icons-material/Bookmarks'
 import { useRagIndexDetails } from '../Rag/api.ts'
 import { orderBy } from 'lodash'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import CopyPromptMenu from './CopyPromptMenu.tsx'
 import type { CoursesViewCourse } from '../../hooks/useUserCourses'
 import { canCopyPrompt } from '@shared/promptPermissions'
+import { isPromptDraft } from '@shared/prompt'
+import { getApiErrorMessage } from '../../util/apiClient'
+import { switchFocusIndicatorStyle } from '../../util/accessibility'
 import CodeIcon from '@mui/icons-material/Code'
 import CloseIcon from '@mui/icons-material/Close'
 import CourseEmbedding from '../Courses/Course/CourseEmbedding'
@@ -43,6 +62,7 @@ const PromptPreview = ({
   courses,
   copyTargets,
   onCopied,
+  onPublishedChange,
   viewAsStudent,
 }: {
   prompt: Prompt
@@ -52,12 +72,15 @@ const PromptPreview = ({
   /** Courses the user may copy into — narrower than `courses`, which includes enrolments. */
   copyTargets: CoursesViewCourse[]
   onCopied: (course?: CoursesViewCourse) => void
+  onPublishedChange: (promptId: string, published: boolean) => void
   /** Render the preview as an enrolled student sees it. */
   viewAsStudent: boolean
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-  const { myPrompts } = usePromptState()
+  const { myPrompts, setPromptPublishedMutation } = usePromptState()
+  const publishedLabelId = useId()
+  const [publishing, setPublishing] = useState(false)
   const { t } = useTranslation()
   const { user } = useCurrentUser()
   const [copyAnchor, setCopyAnchor] = useState<HTMLElement | null>(null)
@@ -76,6 +99,9 @@ const PromptPreview = ({
   const canManage = canManagePrompt && !viewAsStudent
 
   const canEditPrompt = !viewAsStudent && !!user && (prompt.userId === user.id || user.isAdmin)
+  const isCoursePrompt = prompt.type === 'CHAT_INSTANCE'
+  const isDraft = isPromptDraft(prompt)
+  const canPublish = isCoursePrompt && !viewAsStudent && !!user && (prompt.userId === user.id || user.isAdmin)
   const showCopyPrompt = !viewAsStudent && !!user && canCopyPrompt({ isAdmin: user.isAdmin, isOwner: prompt.userId === user.id, isResponsible: hasFullAccess })
   const shouldFetchRagDetails = canManagePrompt || isPersonalPrompt || (!!user && prompt.userId === user.id)
   const ragIndexId = prompt.ragIndex === null ? null : prompt.ragIndexId ? prompt.ragIndexId : null
@@ -92,6 +118,20 @@ const PromptPreview = ({
     const link = `${window.location.origin}${PUBLIC_URL}/${chatInstance?.courseId}?promptId=${prompt.id}`
     navigator.clipboard.writeText(link)
     enqueueSnackbar(t('common:copiedToClipboard'), { variant: 'success' })
+  }
+
+  const handleTogglePublished = async (published: boolean) => {
+    if (publishing) return
+    setPublishing(true)
+    try {
+      const updated = await setPromptPublishedMutation({ id: prompt.id, published })
+      onPublishedChange(prompt.id, updated.published ?? published)
+      enqueueSnackbar(t(published ? 'prompt:publishedPrompt' : 'prompt:unpublishedPrompt', { name: prompt.name }), { variant: 'success' })
+    } catch (error: any) {
+      enqueueSnackbar(getApiErrorMessage(error) ?? t('error:unexpected'), { variant: 'error' })
+    } finally {
+      setPublishing(false)
+    }
   }
 
   if (!user) return null
@@ -199,16 +239,29 @@ const PromptPreview = ({
               </Tooltip>
             )}
           </Box>
-          <Typography
-            variant="h4"
-            component="h3"
-            fontWeight="bold"
-            data-testid={`prompt-preview-title-for-${prompt.name}`}
-            sx={{ gridArea: 'title', wordBreak: 'break-word', mt: 1 }}
-          >
-            {prompt.name}
-          </Typography>
+          <Box sx={{ gridArea: 'title', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+            <Typography variant="h4" component="h3" fontWeight="bold" data-testid={`prompt-preview-title-for-${prompt.name}`} sx={{ wordBreak: 'break-word' }}>
+              {prompt.name}
+            </Typography>
+            {isDraft && (canPublish || canManage) && <Chip label={t('uniPrompts:draft')} size="small" variant="outlined" color="warning" />}
+          </Box>
         </Box>
+        {canPublish ? (
+          <Box sx={{ mb: 2 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={!isDraft}
+                  onChange={(e) => handleTogglePublished(e.target.checked)}
+                  slotProps={{ input: { 'aria-labelledby': publishedLabelId } }}
+                  sx={{ ...switchFocusIndicatorStyle }}
+                  data-testid={`publish-prompt-${prompt.name}`}
+                />
+              }
+              label={<span id={publishedLabelId}>{!isDraft ? t('uniPrompts:published') : t('uniPrompts:draft')}</span>}
+            />
+          </Box>
+        ) : null}
         {prompt.userInstructions && (
           <Box sx={{ mb: 3 }}>
             <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>

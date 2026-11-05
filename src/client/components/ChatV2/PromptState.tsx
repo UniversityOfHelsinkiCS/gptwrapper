@@ -14,6 +14,7 @@ import { invalidateAllPromptLists } from '../../util/promptQueries'
 export type CreatePromptMutation = UseMutateAsyncFunction<Prompt, ApiError, Omit<PromptCreationParams, 'userId'>, unknown>
 export type DeletePromptMutation = UseMutateAsyncFunction<void, ApiError, string, unknown>
 export type EditPromptMutation = UseMutateAsyncFunction<Prompt, ApiError, PromptEditableParams & { id: string }, unknown>
+export type SetPromptPublishedMutation = UseMutateAsyncFunction<Prompt, ApiError, { id: string; published: boolean }, unknown>
 
 interface PromptSelectorStateType {
   activePrompt: Prompt | undefined
@@ -27,6 +28,7 @@ interface PromptSelectorStateType {
   createPromptMutation: CreatePromptMutation
   deletePromptMutation: DeletePromptMutation
   editPromptMutation: EditPromptMutation
+  setPromptPublishedMutation: SetPromptPublishedMutation
 }
 
 const PromptStateContext = createContext<PromptSelectorStateType | undefined>(undefined)
@@ -137,6 +139,14 @@ export const PromptStateProvider: React.FC<{
     },
   })
 
+  const setPromptPublishedMutation = useMutation({
+    mutationFn: async ({ id, published }: { id: string; published: boolean }) => {
+      const res = await apiClient.patch(`/prompts/${id}/published`, { published })
+      refetchPrompts()
+      return res.data
+    },
+  })
+
   const promptInfo: MessageGenerationInfo['promptInfo'] = activePrompt
     ? {
         id: activePrompt.id,
@@ -158,6 +168,7 @@ export const PromptStateProvider: React.FC<{
     createPromptMutation: createPromptMutation.mutateAsync,
     deletePromptMutation: deletePromptMutation.mutateAsync,
     editPromptMutation: editPromptMutation.mutateAsync,
+    setPromptPublishedMutation: setPromptPublishedMutation.mutateAsync,
   }
 
   return <PromptStateContext.Provider value={value}>{children}</PromptStateContext.Provider>

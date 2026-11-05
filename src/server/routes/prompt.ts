@@ -1,6 +1,6 @@
 import express from 'express'
 import type { InferAttributes } from 'sequelize'
-import { PromptCopyParamsSchema, PromptCreationParamsSchema, PromptUpdateableParamsSchema } from '../../shared/prompt'
+import { isPromptDraft, PromptCopyParamsSchema, PromptCreationParamsSchema, PromptPublishParamsSchema, PromptUpdateableParamsSchema } from '../../shared/prompt'
 import { canCopyPrompt } from '../../shared/promptPermissions'
 import { resolveCopyName, shouldKeepRagIndex } from '../util/promptCopy'
 import type { User } from '@shared/user'
@@ -120,7 +120,10 @@ promptRouter.post('/', async (req, res) => {
     throw ApplicationError.Conflict('Prompt name already exists')
   }
 
-  const newPrompt = await Prompt.create(promptParams)
+  const newPrompt = await Prompt.create({
+    ...promptParams,
+    published: promptParams.type === 'CHAT_INSTANCE' ? promptParams.published ?? false : null,
+  })
 
   const chatInstanceID = input.chatInstanceId
 
@@ -187,7 +190,7 @@ promptRouter.post('/:id/copy', async (req, res) => {
 
   const copyParams =
     target.type === 'CHAT_INSTANCE'
-      ? { ...base, type: 'CHAT_INSTANCE' as const, chatInstanceId: target.chatInstanceId }
+      ? { ...base, type: 'CHAT_INSTANCE' as const, chatInstanceId: target.chatInstanceId, published: false }
       : { ...base, type: 'PERSONAL' as const }
 
   await authorizePromptCreation(user, copyParams)
@@ -275,7 +278,37 @@ promptRouter.put('/:id', async (req, res) => {
     throw ApplicationError.Conflict('Prompt name already exists')
   }
 
-  Object.assign(prompt, updates)
+  const { published, ...rest } = updates
+
+  Object.assign(prompt, rest)
+
+  if (prompt.type === 'CHAT_INSTANCE' && published !== undefined) {
+    prompt.published = published
+  }
+
+  await prompt.save()
+
+  res.send(prompt)
+})
+
+promptRouter.patch('/:id/published', async (req, res) => {
+  const { id } = req.params
+  const { user } = req as unknown as RequestWithUser
+  const { published } = PromptPublishParamsSchema.parse(req.body)
+
+  const prompt = await Prompt.findByPk(id)
+
+  if (!prompt) {
+    throw ApplicationError.NotFound('Prompt not found')
+  }
+
+  if (prompt.type !== 'CHAT_INSTANCE') {
+    throw ApplicationError.BadRequest('Only course prompts can be published')
+  }
+
+  await authorizePromptUpdate(user, prompt)
+
+  prompt.published = published
 
   await prompt.save()
 
@@ -284,6 +317,7 @@ promptRouter.put('/:id', async (req, res) => {
 
 promptRouter.get('/:id', async (req, res) => {
   const { id } = req.params
+  const { user } = req as unknown as RequestWithUser
 
   // Note: we dont have any authorization checks here. Consider?
   const prompt = await Prompt.findByPk(id, {
@@ -297,6 +331,11 @@ promptRouter.get('/:id', async (req, res) => {
 
   if (!prompt) {
     // We dont throw error here, since this is expected behaviour when the prompt has been deleted but someone still has it in their local storage.
+    res.status(404).send('Prompt not found')
+    return
+  }
+
+  if (isPromptDraft(prompt) && !(prompt.chatInstanceId && (await hasFullAccessToChatInstance(user, prompt.chatInstanceId)))) {
     res.status(404).send('Prompt not found')
     return
   }

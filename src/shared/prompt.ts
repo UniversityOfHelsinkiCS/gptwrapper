@@ -19,6 +19,7 @@ export const PromptUpdateableParamsSchema = z.object({
   messages: PromptMessagesSchema.optional().default([]),
   hidden: z.boolean().default(false),
   ragHidden: z.boolean().default(false),
+  published: z.boolean().optional(),
   ragIndexId: z.number().min(1).optional().nullable(),
 })
 
@@ -37,6 +38,12 @@ export const PromptCreationParamsSchema = z.intersection(
     }),
   ]),
 )
+
+export const PromptPublishParamsSchema = z.object({
+  published: z.boolean(),
+})
+
+export const isPromptDraft = (prompt: { type: string; published?: boolean | null }) => prompt.type === 'CHAT_INSTANCE' && prompt.published === false
 
 export const PromptCopyParamsSchema = z.object({
   name: z.string().min(1).max(255).optional(),

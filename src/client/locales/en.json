@@ -710,7 +710,11 @@
     "creatorName": "Creator: {{firstNames}} {{lastName}}",
     "creatorHidden": "Hidden from other users",
     "tooShort": "Name must be at least 3 characters long",
-    "textTooLong": "Text is too long. Maximum length is {{max}} characters"
+    "textTooLong": "Text is too long. Maximum length is {{max}} characters",
+    "publish": "Publish",
+    "publishedHelp": "A draft is only visible to course responsibles. A published prompt is also visible to students.",
+    "publishedPrompt": "Prompt \"{{name}}\" published",
+    "unpublishedPrompt": "Prompt \"{{name}}\" returned to draft"
   },
   "tooltip": {
     "copied": "Copied!"

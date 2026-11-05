@@ -19,7 +19,9 @@ import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
 import { upload } from './multer'
-import { requireActiveAccess } from '../../services/chatInstances/access'
+import { getAccessLevel, requireActiveAccess } from '../../services/chatInstances/access'
+import { isPromptDraft } from '../../../shared/prompt'
+import type { AccessLevel } from '@shared/types'
 
 const router = express.Router()
 
@@ -45,6 +47,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
   }
 
   let course: ChatInstance | null = null
+  let accessLevel: AccessLevel | null = null
 
   if (courseId) {
     course = await ChatInstance.findOne({ where: { courseId } })
@@ -52,7 +55,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
       throw ApplicationError.NotFound('Course not found')
     }
 
-    await requireActiveAccess(user, course)
+    accessLevel = await requireActiveAccess(user, course)
 
     const [chatInstanceUsage] = await UserChatInstanceUsage.findOrCreate({
       where: {
@@ -131,6 +134,14 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
     if (!prompt) {
       throw ApplicationError.NotFound('Prompt not found')
+    }
+
+    if (isPromptDraft(prompt)) {
+      const promptCourse = course ?? (prompt.chatInstanceId ? await ChatInstance.findByPk(prompt.chatInstanceId) : null)
+      const promptAccessLevel = course ? accessLevel : promptCourse ? await getAccessLevel(user, promptCourse) : null
+      if (promptAccessLevel !== 'FULL') {
+        throw ApplicationError.NotFound('Prompt not found')
+      }
     }
 
     if (prompt.type === 'TEMPLATE') {

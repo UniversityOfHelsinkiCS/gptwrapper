@@ -10,6 +10,7 @@ import logger from '../util/logger'
 import _ from 'lodash'
 import { chatIsActive, getChatStatus } from '../services/chatInstances/activity'
 import { AccessLevel } from '@shared/types'
+import { isPromptDraft } from '@shared/prompt'
 
 const courseRouter = express.Router()
 
@@ -200,7 +201,11 @@ courseRouter.get('/:id/enrolments', async (req: express.Request, res: express.Re
 
 export const serializeCourse = (chatInstance: ChatInstance, accessLevel: AccessLevel) => {
   const base = { ...chatInstance.toJSON(), status: getChatStatus(chatInstance), accessLevel }
-  return accessLevel === 'STUDENT_CLOSED' ? { ...base, prompts: [] } : base
+  if (accessLevel === 'STUDENT_CLOSED') return { ...base, prompts: [] }
+  if (accessLevel === 'STUDENT' && chatInstance.prompts) {
+    return { ...base, prompts: chatInstance.prompts.filter((prompt) => !isPromptDraft(prompt)) }
+  }
+  return base
 }
 
 // returns a chatInstance, throws an chat instance not found if not found

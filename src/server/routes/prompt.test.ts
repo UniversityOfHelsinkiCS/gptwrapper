@@ -98,7 +98,7 @@ describe('POST /prompts/:id/copy', () => {
     const response = await copy('source-1', { target: { type: 'CHAT_INSTANCE', chatInstanceId: 'course-1' } })
 
     expect(response.status).toBe(201)
-    expect(await response.json()).toMatchObject({ type: 'CHAT_INSTANCE', chatInstanceId: 'course-1' })
+    expect(await response.json()).toMatchObject({ type: 'CHAT_INSTANCE', chatInstanceId: 'course-1', published: false })
   })
 
   test('refuses to copy a UNIVERSITY prompt, even for an admin', async () => {
@@ -146,5 +146,120 @@ describe('university types are locked out of /prompts mutations', () => {
 
     expect(response.status).toBe(403)
     expect(prompt.destroy).not.toHaveBeenCalled()
+  })
+})
+
+describe('published state of course prompts', () => {
+  const publish = (id: string, published: boolean) =>
+    api.fetch(`/prompts/${id}/published`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ published }),
+    })
+
+  test('a new course prompt starts as a draft', async () => {
+    currentUser = { id: 'teacher-1', isAdmin: false }
+    vi.mocked(ChatInstance.findByPk).mockResolvedValue({ id: 'course-1' } as any)
+    setMembership({ responsible: true })
+
+    const response = await api.fetch('/prompts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'CHAT_INSTANCE', chatInstanceId: 'course-1', name: 'New', userInstructions: '', systemMessage: 'x' }),
+    })
+
+    expect(response.status).toBe(201)
+    expect(vi.mocked(Prompt.create).mock.calls[0][0]).toMatchObject({ published: false })
+  })
+
+  test('a personal prompt has no published state', async () => {
+    const response = await api.fetch('/prompts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'PERSONAL', name: 'Mine', userInstructions: '', systemMessage: 'x', published: true }),
+    })
+
+    expect(response.status).toBe(201)
+    expect(vi.mocked(Prompt.create).mock.calls[0][0]).toMatchObject({ published: null })
+  })
+
+  test('the creator can publish their course prompt', async () => {
+    currentUser = { id: 'teacher-1', isAdmin: false }
+    const prompt = sourcePrompt({ type: 'CHAT_INSTANCE', chatInstanceId: 'course-1', userId: 'teacher-1', published: false })
+    prompt.save = vi.fn()
+    vi.mocked(Prompt.findByPk).mockResolvedValue(prompt)
+    vi.mocked(ChatInstance.findByPk).mockResolvedValue({ id: 'course-1' } as any)
+
+    const response = await publish('source-1', true)
+
+    expect(response.status).toBe(200)
+    expect(prompt.published).toBe(true)
+    expect(prompt.save).toHaveBeenCalled()
+  })
+
+  test('an admin can publish a course prompt', async () => {
+    currentUser = { id: 'admin-1', isAdmin: true }
+    const prompt = sourcePrompt({ type: 'CHAT_INSTANCE', chatInstanceId: 'course-1', userId: 'teacher-1', published: false })
+    prompt.save = vi.fn()
+    vi.mocked(Prompt.findByPk).mockResolvedValue(prompt)
+    vi.mocked(ChatInstance.findByPk).mockResolvedValue({ id: 'course-1' } as any)
+
+    const response = await publish('source-1', true)
+
+    expect(response.status).toBe(200)
+    expect(prompt.published).toBe(true)
+    expect(prompt.save).toHaveBeenCalled()
+  })
+
+  test('someone else cannot publish a course prompt', async () => {
+    const prompt = sourcePrompt({ type: 'CHAT_INSTANCE', chatInstanceId: 'course-1', userId: 'teacher-1', published: false })
+    prompt.save = vi.fn()
+    vi.mocked(Prompt.findByPk).mockResolvedValue(prompt)
+    vi.mocked(ChatInstance.findByPk).mockResolvedValue({ id: 'course-1' } as any)
+
+    const response = await publish('source-1', true)
+
+    expect(response.status).toBe(403)
+    expect(prompt.save).not.toHaveBeenCalled()
+  })
+
+  test('a personal prompt cannot be published', async () => {
+    const prompt = sourcePrompt({ type: 'PERSONAL', userId: 'student-1' })
+    prompt.save = vi.fn()
+    vi.mocked(Prompt.findByPk).mockResolvedValue(prompt)
+
+    const response = await publish('source-1', true)
+
+    expect(response.status).toBe(400)
+    expect(prompt.save).not.toHaveBeenCalled()
+  })
+
+  test('GET /prompts/:id hides a draft from a student', async () => {
+    vi.mocked(Prompt.findByPk).mockResolvedValue(sourcePrompt({ type: 'CHAT_INSTANCE', chatInstanceId: 'course-1', published: false }))
+    vi.mocked(ChatInstance.findByPk).mockResolvedValue({ id: 'course-1' } as any)
+    setMembership({ enrolled: true })
+
+    const response = await api.fetch('/prompts/source-1')
+
+    expect(response.status).toBe(404)
+  })
+
+  test('GET /prompts/:id shows a draft to a responsible teacher', async () => {
+    currentUser = { id: 'teacher-1', isAdmin: false }
+    vi.mocked(Prompt.findByPk).mockResolvedValue(sourcePrompt({ type: 'CHAT_INSTANCE', chatInstanceId: 'course-1', published: false }))
+    vi.mocked(ChatInstance.findByPk).mockResolvedValue({ id: 'course-1' } as any)
+    setMembership({ responsible: true })
+
+    const response = await api.fetch('/prompts/source-1')
+
+    expect(response.status).toBe(200)
+  })
+
+  test('GET /prompts/:id treats a legacy course prompt as published', async () => {
+    vi.mocked(Prompt.findByPk).mockResolvedValue(sourcePrompt({ type: 'CHAT_INSTANCE', chatInstanceId: 'course-1', published: null }))
+
+    const response = await api.fetch('/prompts/source-1')
+
+    expect(response.status).toBe(200)
   })
 })

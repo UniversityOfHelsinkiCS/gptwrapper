@@ -28,9 +28,11 @@ import { BlueButton, OutlineButtonBlue } from './general/Buttons.tsx'
 import ConfirmDialog from './general/ConfirmDialog'
 import { usePromptEditorState } from '../Prompt/context.tsx'
 import AddIcon from '@mui/icons-material/Add'
+import { isPromptDraft } from '@shared/prompt'
 import PersonIcon from '@mui/icons-material/Person'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined'
 import PromptPreview from './PromptPreview.tsx'
 import CoursePrompts from './CoursePrompts.tsx'
 import CoursePreview from './CoursePreview.tsx'
@@ -118,7 +120,15 @@ export const PromptListItem = ({
         className={prompt.id !== activePromptId ? 'prompt-list-item__button' : undefined}
         selected={previewPromptId === prompt.id}
         aria-pressed={previewPromptId === prompt.id}
-        aria-label={[t('common:prompt'), prompt.name, prompt.id === activePromptId && t('common:selected'), t('common:preview')].filter(Boolean).join(', ')}
+        aria-label={[
+          t('common:prompt'),
+          prompt.name,
+          isPromptDraft(prompt) && t('uniPrompts:draft'),
+          prompt.id === activePromptId && t('common:selected'),
+          t('common:preview'),
+        ]
+          .filter(Boolean)
+          .join(', ')}
         onClick={() => {
           if (!confirmClose()) return
           onPreview(prompt)
@@ -131,6 +141,16 @@ export const PromptListItem = ({
         }}
         data-testid={`prompt-row-${prompt.name}`}
       >
+        {isPromptDraft(prompt) && (
+          <Tooltip title={t('uniPrompts:draft')}>
+            <EditNoteOutlinedIcon
+              fontSize="small"
+              aria-hidden
+              sx={{ mr: 1, flexShrink: 0, color: 'warning.main' }}
+              data-testid={`prompt-draft-${prompt.name}`}
+            />
+          </Tooltip>
+        )}
         <ListItemText className="prompt-list-item__text" primary={prompt.name} slotProps={{ primary: { noWrap: true } }} sx={{ minWidth: 0 }} />
         {prompt.id === activePromptId && (
           <Tooltip title={activeLabel ?? ''}>
@@ -300,6 +320,10 @@ const PromptModalV2 = () => {
     } catch (error) {
       enqueueSnackbar(getApiErrorMessage(error) ?? t('error:unexpected'), { variant: 'error' })
     }
+  }
+
+  const handlePublishedChange = (promptId: string, published: boolean) => {
+    setPreviewPrompt((prev) => (prev?.id === promptId ? { ...prev, published } : prev))
   }
 
   const handleEdit = (courseId?: string) => {
@@ -618,6 +642,7 @@ const PromptModalV2 = () => {
                   courses={allCourses}
                   copyTargets={copyTargets}
                   onCopied={handleCopied}
+                  onPublishedChange={handlePublishedChange}
                   viewAsStudent={studentView && canViewAsStudent}
                 />
               ) : previewCourse ? (

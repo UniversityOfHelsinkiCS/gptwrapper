@@ -678,7 +678,11 @@
     "creatorName": "Skapare: {{firstNames}} {{lastName}}",
     "creatorHidden": "Dold för andra användare",
     "tooShort": "Namnet måste vara minst 3 tecken långt",
-    "textTooLong": "Texten är för lång. Maxlängden är {{max}} tecken"
+    "textTooLong": "Texten är för lång. Maxlängden är {{max}} tecken",
+    "publish": "Publicera",
+    "publishedHelp": "Ett utkast syns endast för kursens ansvariga. En publicerad prompt syns även för studenter.",
+    "publishedPrompt": "Prompt \"{{name}}\" publicerad",
+    "unpublishedPrompt": "Prompt \"{{name}}\" återställd till utkast"
   },
   "tooltip": {
     "copied": "Kopierad!"

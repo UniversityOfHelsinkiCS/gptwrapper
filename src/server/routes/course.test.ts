@@ -156,6 +156,34 @@ describe('courses/:id', () => {
     })
   })
 
+  describe('Draft prompts', () => {
+    const prompts = [
+      { id: 'legacy', type: 'CHAT_INSTANCE', published: null, systemMessage: 'legacy' },
+      { id: 'published', type: 'CHAT_INSTANCE', published: true, systemMessage: 'published' },
+      { id: 'draft', type: 'CHAT_INSTANCE', published: false, systemMessage: 'very secret draft' },
+    ]
+
+    test('are hidden from an enrolled student', async () => {
+      vi.mocked(ChatInstance.findOne).mockResolvedValue(courseFixture({ prompts }) as any)
+      setMembership({ enrolled: true })
+      const response = await getCourse('course-1')
+      const body = await response.json()
+      expect(response.status).toBe(200)
+      expect(body.prompts.map((p: { id: string }) => p.id)).toEqual(['legacy', 'published'])
+      expect(JSON.stringify(body)).not.toContain('very secret draft')
+    })
+
+    test('are shown to a responsible teacher', async () => {
+      currentUser = { id: 'teacher-1', isAdmin: false }
+      vi.mocked(ChatInstance.findOne).mockResolvedValue(courseFixture({ prompts }) as any)
+      setMembership({ responsible: true })
+      const response = await getCourse('course-1')
+      const body = await response.json()
+      expect(response.status).toBe(200)
+      expect(body.prompts).toHaveLength(3)
+    })
+  })
+
   describe('Outsider', () => {
     test('gets 403 for open course', async () => {
       currentUser = { id: 'outsider-1', isAdmin: false }

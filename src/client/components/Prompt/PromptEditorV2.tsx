@@ -1,8 +1,8 @@
-import { Box, CircularProgress, DialogActions } from '@mui/material'
+import { Box, CircularProgress, DialogActions, FormControlLabel, Switch, Typography } from '@mui/material'
 import type { Message } from '@shared/chat'
-import { isPromptTextTooLong, PROMPT_TEXT_MAX_LENGTH } from '@shared/prompt'
+import { isPromptDraft, isPromptTextTooLong, PROMPT_TEXT_MAX_LENGTH } from '@shared/prompt'
 import { enqueueSnackbar } from '../common/Snackbar'
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import useCourse from '../../hooks/useCourse'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
@@ -13,6 +13,7 @@ import { usePromptState } from '../ChatV2/PromptState'
 import { PromptEditorFormContext, usePromptEditorState } from './context'
 import { PromptEditorForm } from './PromptEditorForm'
 import { Prompt, PromptEditorFormContextValue, PromptEditorFormState } from 'src/client/types'
+import { switchFocusIndicatorStyle } from 'src/client/util/accessibility'
 
 export const PromptEditorV2 = ({
   personal,
@@ -31,6 +32,7 @@ export const PromptEditorV2 = ({
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
   const { ragIndices: userRagIndices } = useRagIndices()
   const [loading, setLoading] = useState<boolean>(false)
+  const publishedLabelId = useId()
   const { createPromptMutation, editPromptMutation } = usePromptState()
 
   const ragMessages = [t('prompt:defaultRagMessage'), t('prompt:enforceRagMessage'), t('prompt:unknownRagMessage')]
@@ -70,6 +72,7 @@ export const PromptEditorV2 = ({
     ragHidden: previewPrompt?.ragHidden ?? true,
     ragIndexId: previewPrompt?.ragIndexId ?? null,
     userId: previewPrompt?.userId ?? null,
+    published: previewPrompt ? !isPromptDraft(previewPrompt) : false,
   }
 
   const cacheKey = `promptEditorForm:${previewPrompt ? `edit:${previewPrompt.id}` : `new:${type}:${courseId}`}`
@@ -113,7 +116,7 @@ export const PromptEditorV2 = ({
 
     setLoading(true)
 
-    const { name, userInstructions, systemMessage, ragSystemMessages, hidden, ragHidden, ragIndexId } = form
+    const { name, userInstructions, systemMessage, ragSystemMessages, hidden, ragHidden, ragIndexId, published } = form
     const ragSystemMessage = ragSystemMessages.join(' ')
 
     const messages: Message[] = ragIndexId && ragSystemMessage.length > 0 ? [{ role: 'system', content: ragSystemMessage }] : []
@@ -129,6 +132,7 @@ export const PromptEditorV2 = ({
           hidden,
           ragHidden,
           ragIndexId,
+          ...(type === 'CHAT_INSTANCE' ? { published } : {}),
         })
         enqueueSnackbar(t('prompt:updatedPrompt', { name }), { variant: 'success' })
         clearCachedForm()
@@ -145,6 +149,7 @@ export const PromptEditorV2 = ({
           hidden,
           ragHidden,
           ragIndexId,
+          ...(type === 'CHAT_INSTANCE' ? { published } : {}),
         })
         enqueueSnackbar(t('prompt:createdPrompt', { name }), { variant: 'success' })
         clearCachedForm()
@@ -175,8 +180,27 @@ export const PromptEditorV2 = ({
             <PromptEditorForm />
           </Box>
 
-          <DialogActions>
-            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+          <DialogActions sx={{ flexWrap: 'wrap', gap: 2 }}>
+            {type === 'CHAT_INSTANCE' && (
+              <Box sx={{ mr: 'auto', mt: 2 }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={!!form.published}
+                      onChange={(e) => setForm((prev) => ({ ...prev, published: e.target.checked }))}
+                      slotProps={{ input: { 'aria-labelledby': publishedLabelId, 'aria-describedby': `${publishedLabelId}-help` } }}
+                      sx={{ ...switchFocusIndicatorStyle }}
+                      data-testid="prompt-published-switch"
+                    />
+                  }
+                  label={<span id={publishedLabelId}>{form.published ? t('uniPrompts:published') : t('uniPrompts:draft')}</span>}
+                />
+                <Typography id={`${publishedLabelId}-help`} variant="body2" color="text.secondary">
+                  {t('prompt:publishedHelp')}
+                </Typography>
+              </Box>
+            )}
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, ml: 'auto' }}>
               {loading && <CircularProgress color="secondary" aria-label={t('accessibility:loading')} />}
               <OutlineButtonBlue
                 type="button"
