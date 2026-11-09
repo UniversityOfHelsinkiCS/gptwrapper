@@ -562,7 +562,7 @@ const PromptModalV2 = () => {
                     <Typography
                       id="course-filter-title"
                       component="span"
-                      sx={{ display: 'block', fontSize: '0.725rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled' }}
+                      sx={{ display: 'block', fontSize: '0.725rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.secondary' }}
                     >
                       {t('settings:filterCourses')}
                     </Typography>
