@@ -28,6 +28,7 @@ test.describe('Source material management', () => {
     await page.getByTestId('ragIndexDeleteButton').click()
 
     await expect(page.getByTestId('ragIndexDeleteSuccessSnackbar')).toBeVisible()
-    await expect(page.getByText('perkele')).toHaveCount(0)
+
+    await expect(page.getByRole('button', { name: /perkele/ })).toHaveCount(0)
   })
 })

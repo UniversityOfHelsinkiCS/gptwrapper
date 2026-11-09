@@ -4,8 +4,9 @@ import { studentTest as test } from './fixtures'
 
 /**
  * Course prompts can only be created by a responsible teacher, so the student specs borrow the
- * worker's teacher user for the setup. Logging in is what grants that responsibility. Resetting
- * test data only wipes the student's own prompts, so the caller has to remove this one again.
+ * worker's teacher user for the setup. Resetting the teacher's test data is what grants that
+ * responsibility. The student's own reset does not touch the teacher's prompts, so the caller has
+ * to remove this one again.
  */
 const createCoursePromptAsTeacher = async (baseURL: string, workerIndex: number, name: string) => {
   const teacher = await playwrightRequest.newContext({
@@ -16,7 +17,7 @@ const createCoursePromptAsTeacher = async (baseURL: string, workerIndex: number,
     },
   })
 
-  await teacher.get('/api/users/login')
+  await teacher.post('/api/test/reset-test-data', { data: { testUserIdx: workerIndex, testUserRole: 'teacher' } })
 
   const response = await teacher.post('/api/prompts', {
     data: {
@@ -25,6 +26,8 @@ const createCoursePromptAsTeacher = async (baseURL: string, workerIndex: number,
       name,
       systemMessage: 'mocktest opettajan prompti',
       userInstructions: '',
+      // Drafts are hidden from students
+      published: true,
     },
   })
 
