@@ -58,7 +58,7 @@ const ChatV2Content = () => {
   const chatScroll = useChatScroll()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { t, i18n } = useTranslation()
-  const { promptInfo, isPromptHidden, activePrompt } = usePromptState()
+  const { promptInfo, isPromptHidden, activePrompt, isUrlPromptUnavailable } = usePromptState()
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
   const ragHidden = activePrompt?.ragHidden
 
@@ -481,13 +481,15 @@ const ChatV2Content = () => {
     }
   }, [rightPanelCollapsed])
 
+  const noAccess = chatInstanceLoadError?.response?.status === 403 || isUrlPromptUnavailable
+
   useEffect(() => {
-    if (chatInstanceLoadError?.response?.status === 403) {
+    if (noAccess) {
       enqueueSnackbar(t('error:noCourseAccess'), { variant: 'error' })
     }
-  }, [chatInstanceLoadError])
+  }, [noAccess])
 
-  if (chatInstanceLoadError?.response?.status === 403) {
+  if (noAccess) {
     return <Navigate to="/general" replace />
   }
 

@@ -22,6 +22,7 @@ interface PromptSelectorStateType {
   coursePrompts: Prompt[]
   myPrompts: Prompt[]
   urlPrompt: Prompt | undefined
+  isUrlPromptUnavailable: boolean
   isPromptHidden: boolean
   isPromptEditable: boolean
   promptInfo: MessageGenerationInfo['promptInfo']
@@ -65,6 +66,7 @@ export const PromptStateProvider: React.FC<{
   const [activePrompt, setActivePrompt] = useLocalStorageState<Prompt | undefined>(`${localStoragePrefix}-active-prompt`, undefined)
 
   const urlPrompt = course?.prompts.find((p) => p.id === urlPromptId)
+  const isUrlPromptUnavailable = !!urlPromptId && !!course && !urlPrompt
   const isPromptHidden = activePrompt?.hidden ?? false
   const isPromptEditable = activePrompt === undefined || activePrompt?.type === 'PERSONAL'
   const dispatchAnalytics = useAnalyticsDispatch()
@@ -162,6 +164,7 @@ export const PromptStateProvider: React.FC<{
     coursePrompts: course?.prompts || [],
     myPrompts,
     urlPrompt,
+    isUrlPromptUnavailable,
     promptInfo,
     isPromptHidden,
     isPromptEditable,
