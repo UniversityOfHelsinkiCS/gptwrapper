@@ -137,6 +137,17 @@ const baseOptions: Omit<ThemeOptions, 'palette'> = {
       },
     },
 
+    MuiFormLabel: {
+      styleOverrides: {
+        root: ({ theme }) =>
+          theme.applyStyles('dark', {
+            '&.Mui-focused:not(.Mui-error)': {
+              color: theme.palette.toskaDark.contrastText,
+            },
+          }),
+      },
+    },
+
     MuiFilledInput: {
       styleOverrides: {
         root: {
