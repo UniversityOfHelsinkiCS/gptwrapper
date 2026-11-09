@@ -11,6 +11,10 @@ declare global {
   }
 }
 
+i18n.on('languageChanged', (lng) => {
+  document.documentElement.lang = lng
+})
+
 const initializeI18n = () =>
   i18n.use(initReactI18next).init({
     resources: {
