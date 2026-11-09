@@ -20,6 +20,7 @@ import { useUpdateUrlLang } from './hooks/useUpdateUrlLang'
 import Styles from './GlobalStyles'
 import './styles.css'
 import GlobalMenu from './components/GlobalMenu'
+import BackToChatButton from './components/BackToChatButton'
 import HYLoadingSpinner from './components/ChatV2/general/HYLoadingSpinner'
 import { DisclaimerModal } from './components/Disclaimer'
 import { GlobalSettings } from './components/GlobalSettings'
@@ -176,6 +177,7 @@ const Layout = () => {
           <Typography component="h1" sx={visuallyHidden}>
             {t('common:appName')}
           </Typography>
+          <BackToChatButton />
           <Box sx={{ top: 20, right: 20, zIndex: 999, position: 'fixed' }}>
             <GlobalMenu
               openDisclaimer={() => setDisclaimerStatus(true)}

@@ -10,11 +10,11 @@ import MenuIcon from '@mui/icons-material/Menu'
 import InfoIcon from '@mui/icons-material/Info'
 import ReviewsIcon from '@mui/icons-material/Reviews'
 import LanguageIcon from '@mui/icons-material/Language'
-import { BlueButton, OutlineButtonBlack, TextButton } from './ChatV2/general/Buttons'
+import { OutlineButtonBlack, TextButton } from './ChatV2/general/Buttons'
 import { useMediaQuery } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Locale } from '@shared/lang'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import useCurrentUser from '../hooks/useCurrentUser'
 import { AdminPanelSettings, BarChart, Key, Logout } from '@mui/icons-material'
 import apiClient from '../util/apiClient'
@@ -37,9 +37,7 @@ export default function GlobalMenu({
   const { user } = useCurrentUser()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
 
-  const { pathname } = useLocation()
   const navigate = useNavigate()
-  const showBackButton = pathname.includes('course-creator') || pathname.includes('admin') || pathname.includes('statistics')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   // embedded chat always shows a collapsed sidebar, the menu is placed at its bottom and shows only the essential items
@@ -77,18 +75,6 @@ export default function GlobalMenu({
           : { position: 'fixed', top: isMobile ? 10 : 20, right: isMobile ? 15 : 'calc(20px + var(--global-menu-right-offset, 0px))' }
       }
     >
-      {showBackButton && (
-        <BlueButton
-          onClick={() => navigate('/general')}
-          sx={{
-            position: 'fixed',
-            top: isMobile ? 10 : 20,
-            left: isMobile ? 15 : 20,
-          }}
-        >
-          {t('backToChat')}
-        </BlueButton>
-      )}
       <MenuButton
         id="basic-button"
         aria-label={t('accessibility:globalMenu')}
