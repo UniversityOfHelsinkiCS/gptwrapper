@@ -77,6 +77,17 @@ export const validModels: ModelConfig[] = [
     provider: ModelProvider.Azure,
     tags: ['cheap', 'fast'],
   },
+  {
+    name: 'gemma-4-26B-A4B',
+    displayName: 'Gemma 4',
+    context: 128_000,
+    outputLimit: 16_384,
+    streamVersion: 'v3',
+    descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+    provider: ModelProvider.Toska,
+    service: 'v1',
+    tags: ['local', 'open', 'free']
+  },
   // {
   //   name: 'gpt-4o-mini',
   //   displayName: 'GPT-4o mini',
@@ -188,17 +199,6 @@ export const validModels: ModelConfig[] = [
   //   service: 'v1',
   //   tags: ['local', 'open']
   // },
-  {
-    name: 'gemma-4-26B-A4B',
-    displayName: 'Gemma 4',
-    context: 128_000,
-    outputLimit: 16_384,
-    streamVersion: 'v3',
-    descriptionKey: 'chat:modelDescriptions.fastAndCheap',
-    provider: ModelProvider.Toska,
-    service: 'v1',
-    tags: ['local', 'open', 'free']
-  },
   {
     name: 'mock',
     displayName: 'Mock',
