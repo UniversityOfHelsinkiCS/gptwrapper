@@ -123,6 +123,9 @@ const UsageSelector = () => {
         component="button"
         type="button"
         onClick={handleClick}
+        aria-haspopup="true"
+        aria-expanded={open}
+        aria-controls={open ? 'usage-selector-menu' : undefined}
         data-testid="usage-selector"
         sx={{
           display: 'inline-flex',
@@ -170,6 +173,7 @@ const UsageSelector = () => {
         )}
       </Box>
       <Menu
+        id="usage-selector-menu"
         anchorEl={anchorEl}
         open={open}
         disableAutoFocusItem
@@ -187,7 +191,7 @@ const UsageSelector = () => {
           },
         }}
       >
-        <MenuItem aria-label={t('common:showInfo')} onClick={() => setInfoOpen(true)}>
+        <MenuItem aria-label={t('common:showInfo')} aria-haspopup="dialog" onClick={() => setInfoOpen(true)}>
           <Typography
             id="usage-selector-title"
             component="span"
@@ -233,18 +237,21 @@ const UsageSelector = () => {
                 <UsageGauge percent={percent} />
               </>
             )
-            const isSelectable = course.courseId === 'general'
-            const usageLabel = `${getLanguageValue(course.name, i18n.language)}, ${formatTokens(course.usage)} / ${formatTokens(course.limit)} ${t('status:tokens')}, ${percent}% ${t('status:tokensUsed')}`
-            const ariaLabel = isSelectable ? `${usageLabel}, ${t('settings:chooseChat')}` : usageLabel
+            const isSelectable = course.courseId === 'general' || active
+            const ariaLabel = `${getLanguageValue(course.name, i18n.language)}, ${formatTokens(course.usage)} / ${formatTokens(course.limit)} ${t('status:tokens')}, ${percent}% ${t('status:tokensUsed')}`
 
-            return isSelectable ? (
-              <MenuItem aria-label={ariaLabel} key={key} onClick={() => handleSelect(course)} sx={itemSx}>
+            return (
+              <MenuItem
+                role="menuitemradio"
+                aria-checked={active}
+                aria-disabled={isSelectable ? undefined : true}
+                aria-label={ariaLabel}
+                key={key}
+                onClick={isSelectable ? () => handleSelect(course) : undefined}
+                sx={isSelectable ? itemSx : staticItemSx}
+              >
                 {content}
               </MenuItem>
-            ) : (
-              <Box aria-label={ariaLabel} role="group" tabIndex={0} key={key} sx={staticItemSx}>
-                {content}
-              </Box>
             )
           })}
       </Menu>
