@@ -536,7 +536,6 @@ const PromptModalV2 = () => {
                     <IconButton
                       size="small"
                       onClick={(e) => setFilterAnchor(e.currentTarget)}
-                      aria-haspopup="true"
                       aria-expanded={Boolean(filterAnchor)}
                       data-testid="course-filter-button"
                       sx={{ color: filterAnchor ? 'primary.main' : 'text.secondary' }}
@@ -554,7 +553,7 @@ const PromptModalV2 = () => {
                   transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                   slotProps={{
                     paper: {
-                      role: 'menu',
+                      role: 'group',
                       'aria-labelledby': 'course-filter-title',
                     },
                   }}
