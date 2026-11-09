@@ -177,7 +177,7 @@ api.post('/v1/chat/completions',
         const userLimit = await getUserTokenLimit(user)
 
         if (UNLIMITED_MODELS.has(model)) {
-            if (!checkUsage(user, model, user.usage ?? 0, userLimit + 1000000)) {
+            if (!checkUsage(user, user.usage ?? 0, userLimit + 1000000)) {
                 logger.info(`RATELIMIT: ${user.id}, ${user.usage}, ${model} limited for "unlimited" model`)
                 res.status(429).send({
                     error: {
@@ -191,7 +191,7 @@ api.post('/v1/chat/completions',
             }
         }
         else if (VERY_UNLIMITED_MODELS.has(model)) {
-            if (!checkUsage(user, model, user.usage ?? 0, userLimit + 20000000)) {
+            if (!checkUsage(user, user.usage ?? 0, userLimit + 20000000)) {
                 logger.info(`RATELIMIT: ${user.id}, ${user.usage}, ${model} limited for "very unlimited" model`)
                 res.status(429).send({
                     error: {
@@ -205,7 +205,7 @@ api.post('/v1/chat/completions',
             }
         }
         else {
-            if (!checkUsage(user, model, user.usage ?? 0, userLimit)) {
+            if (!checkUsage(user, user.usage ?? 0, userLimit)) {
                 logger.info(`RATELIMIT: ${user.id}, ${user.usage}, ${model} limited for normal models`)
                 res.status(429).send({
                     error: {

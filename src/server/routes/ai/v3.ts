@@ -1,6 +1,6 @@
 import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
-import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, inProduction, isMockModel, type ValidModelName } from '../../../config'
+import { DEFAULT_TOKEN_LIMIT, inProduction, isFreeModel, isMockModel, type ValidModelName } from '../../../config'
 import { PostStreamSchemaV3, type ChatEvent } from '../../../shared/chat'
 import { ChatInstance, Discussion, Prompt, PromptUsage, RagIndex, UserChatInstanceUsage } from '../../db/models'
 import {
@@ -160,15 +160,15 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   ensureModelAllowedForUser(model, user.isAdmin)
 
-  const isFreeModel = model === FREE_MODEL
+  const isFree = isFreeModel(model)
 
-  const tokenLimit = course ? getCourseTokenLimit(course) : isFreeModel ? DEFAULT_TOKEN_LIMIT : await getUserTokenLimit(user)
+  const tokenLimit = course ? getCourseTokenLimit(course) : isFree ? DEFAULT_TOKEN_LIMIT : await getUserTokenLimit(user)
 
   const usageAllowed = course
     ? checkCourseUsage(user, course, tokenLimit)
-    : isFreeModel || checkUsage(user, generationInfo.model, await getUsage(user.id), tokenLimit)
+    : isFree || checkUsage(user, await getUsage(user.id), tokenLimit)
 
-  if (!usageAllowed && !isFreeModel) {
+  if (!usageAllowed && !isFree) {
     throw ApplicationError.Forbidden('Usage limit reached')
   }
 
@@ -211,7 +211,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   // Increment user usage if not using free model
   // If the user is hijacked by admin in production, charge the admin instead
-  if (!isFreeModel) {
+  if (!isFree) {
     let userToCharge = user
     if (inProduction && req.hijackedBy) {
       userToCharge = req.hijackedBy

@@ -1,6 +1,6 @@
 import { Tiktoken } from '@dqbd/tiktoken'
 
-import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, ValidModelName } from '../../../config'
+import { DEFAULT_TOKEN_LIMIT } from '../../../config'
 import type { User as UserType } from '../../../shared/user'
 import { ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../../db/models'
 import logger from '../../util/logger'
@@ -59,8 +59,7 @@ export const getUserTokenLimit = async (user: UserType): Promise<number> => {
   return tierLimit + COURSE_TOKEN_BONUS * activeCourseCount
 }
 
-export const checkUsage = (user: UserType, model: ValidModelName, usage: number, tokenLimit: number): boolean => {
-  if (model === FREE_MODEL) return true
+export const checkUsage = (user: UserType, usage: number, tokenLimit: number): boolean => {
   return user.isAdmin || usage < tokenLimit
 }
 

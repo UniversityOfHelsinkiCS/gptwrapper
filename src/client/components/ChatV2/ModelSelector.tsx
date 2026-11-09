@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { FREE_MODEL, getModelDisplayName, inProduction, isMockModel, ModelConfig, ModelProvider, ValidModelName, validModels } from '@config'
+import { getModelDisplayName, inProduction, isFreeModel, isMockModel, ModelConfig, ValidModelName, validModels } from '@config'
 import { Box, Chip, MenuItem, Typography, Menu, ListSubheader } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
@@ -21,7 +21,7 @@ const tagChipSx = {
 }
 
 const filterAvailableModels = (models: ModelConfig[], isTokenLimitExceeded: boolean, isAdmin: boolean | undefined): ModelConfig[] => {
-  return models.filter((model) => !isTokenLimitExceeded || model.name === FREE_MODEL).filter((model) => !isMockModel(model.name) || !inProduction || isAdmin)
+  return models.filter((model) => !isTokenLimitExceeded || isFreeModel(model.name)).filter((model) => !isMockModel(model.name) || !inProduction || isAdmin)
 }
 
 const ModelSelector = ({
@@ -55,7 +55,7 @@ const ModelSelector = ({
 
   const disabled = availableModels.length === 1
 
-  const isFree = (model: string) => model === FREE_MODEL
+  const isCurrentFree = isFreeModel(currentModel)
 
   return (
     <>
@@ -91,7 +91,7 @@ const ModelSelector = ({
         <PsychologyIcon sx={{ fontSize: 14, color: 'primary.main' }} />
         <Typography sx={visuallyHidden}>{t('accessibility:selectModel')}</Typography>
         <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: 'text.primary', lineHeight: 1 }}>{getModelDisplayName(currentModel)}</Typography>
-        {isFree(currentModel) && <Chip label={t('chat:freeModel')} size="small" color="success" sx={tagChipSx} />}
+        {isCurrentFree && <Chip label={t('chat:freeModel')} size="small" color="success" sx={tagChipSx} />}
         {!disabled &&
           (open ? (
             <ExpandLessIcon sx={{ fontSize: 16, color: 'text.secondary', ml: -0.25 }} />
@@ -121,9 +121,10 @@ const ModelSelector = ({
           {t('sidebar:modelTitle')}
         </ListSubheader>
 
-        {availableModels.map(({ name, displayName, descriptionKey, provider }) => {
+        {availableModels.map(({ name, displayName, descriptionKey, tags }) => {
           const active = name === currentModel
-          const isSelfHosted = provider === ModelProvider.Toska
+          const isSelfHosted = tags.includes('local')
+          const isFree = isFreeModel(name)
           return (
             <MenuItem
               key={name}
@@ -133,7 +134,7 @@ const ModelSelector = ({
               selected={active}
               role="menuitemradio"
               aria-checked={active}
-              aria-label={[displayName, descriptionKey && t(descriptionKey), isSelfHosted && t('chat:selfHostedModel'), isFree(name) && t('chat:freeModel')]
+              aria-label={[displayName, descriptionKey && t(descriptionKey), isSelfHosted && t('chat:selfHostedModel'), isFree && t('chat:freeModel')]
                 .filter(Boolean)
                 .join(', ')}
               sx={{ gap: 1, py: 1, px: 1.75, alignItems: 'flex-start', mt: 1 }}
@@ -143,7 +144,7 @@ const ModelSelector = ({
                 {descriptionKey && <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.3 }}>{t(descriptionKey)}</Typography>}
               </Box>
               {isSelfHosted && <Chip label={t('chat:selfHostedModel')} size="small" variant="outlined" sx={tagChipSx} />}
-              {isFree(name) && <Chip label={t('chat:freeModel')} size="small" color="success" sx={tagChipSx} />}
+              {isFree && <Chip label={t('chat:freeModel')} size="small" color="success" sx={tagChipSx} />}
               {active && <CheckIcon sx={{ fontSize: 16, color: 'primary.main' }} />}
             </MenuItem>
           )

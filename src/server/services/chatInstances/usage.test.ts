@@ -19,7 +19,7 @@ import { DEFAULT_TOKEN_LIMIT } from '../../../config'
 import { ChatInstance, Enrolment, Responsibility, UserChatInstanceUsage } from '../../db/models'
 import type { User as UserType } from '../../../shared/user'
 import { setMembership } from '../../tests/membership'
-import { COURSE_TOKEN_BONUS, getUserStatus, getUserTokenLimit } from './usage'
+import { checkUsage, COURSE_TOKEN_BONUS, getUserStatus, getUserTokenLimit } from './usage'
 
 const ONGOING = { startDate: '2020-01-01', endDate: '2099-01-01' }
 const EXPIRED = { startDate: '1744-01-01', endDate: '1818-12-31' }
@@ -35,6 +35,19 @@ const mockMemberships = ({ enrolled = [], teached = [] }: { enrolled?: unknown[]
   vi.mocked(Enrolment.findAll).mockResolvedValue(enrolled as any)
   vi.mocked(Responsibility.findAll).mockResolvedValue(teached as any)
 }
+
+// Free models are unlimited in chat (v3 skips checkUsage for them), but the
+// external API caps them with checkUsage, so it must not exempt any model.
+describe('checkUsage', () => {
+  test('blocks usage at the limit regardless of model', () => {
+    expect(checkUsage(user, 999, 1000)).toBe(true)
+    expect(checkUsage(user, 1000, 1000)).toBe(false)
+  })
+
+  test('admins are never blocked', () => {
+    expect(checkUsage({ ...user, isAdmin: true }, 5000, 1000)).toBe(true)
+  })
+})
 
 describe('getUserTokenLimit', () => {
   beforeEach(() => {

@@ -91,7 +91,6 @@ export default defineConfig({
     'process.env.PUBLIC_URL': defineEnv('PUBLIC_URL'),
     'process.env.DEFAULT_TOKEN_LIMIT': defineEnv('DEFAULT_TOKEN_LIMIT'),
     'process.env.DEFAULT_MODEL': defineEnv('DEFAULT_MODEL'),
-    'process.env.FREE_MODEL': defineEnv('FREE_MODEL'),
   },
   resolve: {
     alias: {

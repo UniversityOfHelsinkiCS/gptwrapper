@@ -4,7 +4,7 @@ import { AIMessageChunk, BaseMessageLike } from '@langchain/core/messages'
 import type { Runnable } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
-import { DEFAULT_TOKEN_LIMIT, FREE_MODEL, ModelConfig, ModelProvider, type ValidModelName, validModels } from '@config'
+import { DEFAULT_TOKEN_LIMIT, isFreeModel, ModelConfig, ModelProvider, type ValidModelName, validModels } from '@config'
 import type { ChatEvent, ChatMessage, Message } from '@shared/chat'
 import type { ChatToolDef, ChatToolOutput } from '@shared/tools'
 import type { User } from '@shared/user'
@@ -388,9 +388,9 @@ const handleWarnings = (
   // Warn about usage if over 10% of limit
   const tokenUsagePercentage = Math.round((tokenCount / tokenLimit) * 100)
 
-  const isFreeModel = modelConfig.name === FREE_MODEL
+  const isFree = isFreeModel(modelConfig.name)
 
-  if (!isFreeModel && tokenUsagePercentage > 10 && !ignoredWarnings?.includes('usage')) {
+  if (!isFree && tokenUsagePercentage > 10 && !ignoredWarnings?.includes('usage')) {
     warnings.push({
       warningType: 'usage',
       warning: `You are about to use ${tokenUsagePercentage}% of your weekly CurreChat usage`,

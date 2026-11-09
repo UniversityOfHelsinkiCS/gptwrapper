@@ -31,6 +31,8 @@ export enum ModelProvider {
 
 export type ModelDescriptionKey = 'chat:modelDescriptions.premium' | 'chat:modelDescriptions.balanced' | 'chat:modelDescriptions.fastAndCheap'
 
+export type ModelTag = 'cheap' | 'fast' | 'premium' | 'free' | 'local' | 'open'
+
 export type ModelConfig = {
   name: string
   displayName: string
@@ -47,7 +49,7 @@ export type ModelConfig = {
   modelRegion?: string
   // local inference only, used to choose service in apigw
   service?: string
-  tags: string[]
+  tags: ModelTag[]
 }
 
 /**
@@ -63,7 +65,7 @@ export const validModels: ModelConfig[] = [
     streamVersion: 'v3',
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Azure,
-    tags: ['cheap', 'fast']
+    tags: ['cheap', 'fast', 'free']
   },
   {
     name: 'gpt-5-mini',
@@ -195,7 +197,7 @@ export const validModels: ModelConfig[] = [
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Toska,
     service: 'v1',
-    tags: ['local', 'open']
+    tags: ['local', 'open', 'free']
   },
   {
     name: 'mock',
@@ -226,7 +228,14 @@ export const isVertexModel = (modelName: ValidModelName): boolean => vertexModel
 
 export const DEFAULT_MODEL = ValidModelNameSchema.parse(process.env.DEFAULT_MODEL || 'gpt-6-luna')
 
+export const FREE_MODELS = validModels.filter((model) => model.tags.includes('free')).map((model) => ValidModelNameSchema.parse(model.name))
+
+export const isFreeModel = (modelName: string): boolean => FREE_MODELS.some((name) => name === modelName)
+
+// Fallback when the token limit is exceeded and default for opencode
 export const FREE_MODEL = ValidModelNameSchema.parse(process.env.FREE_MODEL || 'gpt-6-luna')
+
+if (!isFreeModel(FREE_MODEL)) throw new Error(`FREE_MODEL ${FREE_MODEL} must be tagged 'free'`)
 
 export const DEFAULT_ASSISTANT_INSTRUCTIONS = '' // 11th August 2025 we decided it should be empty
 

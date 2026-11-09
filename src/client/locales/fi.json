@@ -950,7 +950,7 @@
     "downloadOpencode": "Lataa opencode.json",
     "opencodeHint": "Korvaa YOUR_API_KEY omalla avaimellasi. Voit myös ladata tiedoston, johon avain on jo täytetty, heti uuden avaimen luomisen jälkeen.",
     "usageNote": "Pyynnöt kuluttavat viikoittaista token-rajaasi samalla tavalla kuin keskustelu CurreChatissa. Kun raja täyttyy, API vastaa tilakoodilla 429, kunnes raja nollautuu maanantaina.",
-    "freeModelNote": "<b>Ilmainen malli:</b> {{model}} saa miljoona lisätokenia viikossa normaalin rajasi päälle, joten se toimii vielä normaalin rajan täyttyä."
+    "freeModelNote": "<b>Ilmaiset mallit:</b> {{models}}. Nämä saavat miljoona lisätokenia viikossa normaalin rajasi päälle, joten ne toimivat vielä normaalin rajan täytyttyä."
   },
   "accessibility": {
     "sendInstructionsShiftEnter": "Shift + Enter lähettää viestin ja Enter lisää uuden rivin.",

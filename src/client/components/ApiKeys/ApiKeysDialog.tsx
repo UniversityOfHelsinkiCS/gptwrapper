@@ -17,7 +17,7 @@ import {
   Typography,
 } from '@mui/material'
 import { Add, Check, Close, Code, ContentCopy, DeleteOutline, Download, ExpandMore, InfoOutlined, Key, Terminal } from '@mui/icons-material'
-import { FREE_MODEL, PUBLIC_URL } from '@config'
+import { FREE_MODELS, PUBLIC_URL } from '@config'
 import { type FormEvent, Fragment, type ReactNode, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { API_KEY_NAME_MAX_LENGTH, MAX_API_KEYS, type ApiKey } from '../../../shared/apiKey'
@@ -175,7 +175,7 @@ const IntegrationGuide = () => {
       <Alert severity="info" variant="outlined">
         <Typography variant="body2">{t('apiKeys:usageNote')}</Typography>
         <Typography variant="body2" sx={{ mt: 0.75 }}>
-          <Trans i18nKey="apiKeys:freeModelNote" values={{ model: FREE_MODEL }} components={{ b: <Box component="strong" sx={{ fontWeight: 600 }} /> }} />
+          <Trans i18nKey="apiKeys:freeModelNote" values={{ models: FREE_MODELS.join(', ') }} components={{ b: <Box component="strong" sx={{ fontWeight: 600 }} /> }} />
         </Typography>
       </Alert>
     </GuideAccordion>

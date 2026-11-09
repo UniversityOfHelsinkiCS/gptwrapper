@@ -9,7 +9,7 @@ vi.mock('../../util/queryClient', async () => {
   const { QueryClient } = await import('@tanstack/react-query')
   return { default: new QueryClient() }
 })
-vi.mock('@config', () => ({ PUBLIC_URL: '/chat', FREE_MODEL: 'gpt-5-mini' }))
+vi.mock('@config', () => ({ PUBLIC_URL: '/chat', FREE_MODELS: ['gpt-5-mini', 'gpt-6-luna'] }))
 vi.mock('../common/Snackbar', () => ({ enqueueSnackbar: vi.fn() }))
 vi.mock('../common/accessibility/SnackbarAnnouncer', () => ({ announceToScreenReader: vi.fn() }))
 vi.mock('../../util/apiClient', () => ({ default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() } }))
@@ -152,7 +152,7 @@ describe('ApiKeysDialog', () => {
     const baseUrl = `${window.location.origin}/chat/api/external/v1`
     expect(within(dialog).getByText(baseUrl)).toBeTruthy()
     expect(within(dialog).getByTestId('api-curl-example').textContent).toContain(`curl ${baseUrl}/chat/completions`)
-    expect(within(dialog).getByText(/gpt-5-mini gets 1 million extra tokens a week/)).toBeTruthy()
+    expect(within(dialog).getByText(/gpt-5-mini, gpt-6-luna\. These get 1 million extra tokens a week/)).toBeTruthy()
 
     const writeText = vi.fn(() => Promise.resolve())
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })

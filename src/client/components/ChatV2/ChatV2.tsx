@@ -4,7 +4,7 @@ import { enqueueSnackbar } from '../common/Snackbar'
 import { lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom'
-import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, DEFAULT_STREAM_TIMEOUT, FREE_MODEL, ValidModelNameSchema, getModelConfig } from '../../../config'
+import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, DEFAULT_STREAM_TIMEOUT, FREE_MODEL, isFreeModel, ValidModelNameSchema, getModelConfig } from '../../../config'
 import type { ChatMessage, MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
@@ -158,7 +158,7 @@ const ChatV2Content = () => {
     if (!userStatus) return
 
     const acualModel = activeModel
-    if (tokenLimitExceeded && acualModel !== FREE_MODEL) {
+    if (tokenLimitExceeded && !isFreeModel(acualModel)) {
       enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
       handleCancel('error')
       return
