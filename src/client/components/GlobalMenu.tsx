@@ -14,11 +14,12 @@ import { OutlineButtonBlack, TextButton } from './ChatV2/general/Buttons'
 import { useMediaQuery } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Locale } from '@shared/lang'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import useCurrentUser from '../hooks/useCurrentUser'
 import { AdminPanelSettings, BarChart, Key, Logout } from '@mui/icons-material'
 import apiClient from '../util/apiClient'
 import { useIsEmbedded } from '../contexts/EmbeddedContext'
+import { isManagementPage } from './BackToChatButton'
 
 export default function GlobalMenu({
   openDisclaimer,
@@ -38,6 +39,7 @@ export default function GlobalMenu({
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
 
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   // embedded chat always shows a collapsed sidebar, the menu is placed at its bottom and shows only the essential items
@@ -72,7 +74,12 @@ export default function GlobalMenu({
       style={
         inSidebar
           ? { position: 'fixed', bottom: 20, left: 0, width: 'var(--sidebar-width-collapsed)', display: 'flex', justifyContent: 'center' }
-          : { position: 'fixed', top: isMobile ? 10 : 20, right: isMobile ? 15 : 'calc(20px + var(--global-menu-right-offset, 0px))' }
+          : {
+              position: isManagementPage(pathname) ? 'absolute' : 'fixed',
+              zIndex: 999,
+              top: isMobile ? 10 : 20,
+              right: isMobile ? 15 : 'calc(20px + var(--global-menu-right-offset, 0px))',
+            }
       }
     >
       <MenuButton

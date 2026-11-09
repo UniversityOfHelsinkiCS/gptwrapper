@@ -1,10 +1,13 @@
 import * as React from 'react'
 import { useMediaQuery, useTheme } from '@mui/material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { BlueButton } from './ChatV2/general/Buttons'
+import { OutlineButtonBlack } from './ChatV2/general/Buttons'
 
 const NON_CHAT_ROUTES = ['noaccess', 'login-helper', 'changelog']
+
+export const isManagementPage = (pathname: string) => pathname.includes('course-creator') || pathname.includes('admin') || pathname.includes('statistics')
 
 export default function BackToChatButton() {
   const { t } = useTranslation()
@@ -12,7 +15,7 @@ export default function BackToChatButton() {
   const navigate = useNavigate()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  const showBackButton = pathname.includes('course-creator') || pathname.includes('admin') || pathname.includes('statistics')
+  const showBackButton = isManagementPage(pathname)
 
   const lastChatPath = React.useRef('/general')
   React.useEffect(() => {
@@ -25,16 +28,17 @@ export default function BackToChatButton() {
   if (!showBackButton) return null
 
   return (
-    <BlueButton
+    <OutlineButtonBlack
       onClick={() => navigate(lastChatPath.current)}
+      startIcon={<ArrowBack />}
       sx={{
-        position: 'fixed',
+        position: 'absolute',
         top: isMobile ? 10 : 20,
-        left: isMobile ? 15 : 20,
+        left: 20,
         zIndex: 999,
       }}
     >
       {t('backToChat')}
-    </BlueButton>
+    </OutlineButtonBlack>
   )
 }

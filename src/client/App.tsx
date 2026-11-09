@@ -155,6 +155,7 @@ const Layout = () => {
   const [apiKeysOpen, setApiKeysOpen] = React.useState(false)
   const [disclaimerStatus, setDisclaimerStatus] = React.useState(false)
   const headerRef = React.useRef<HTMLElement>(null)
+
   useEffect(() => {
     if (user && !user.termsAcceptedAt) {
       setDisclaimerStatus(true)
@@ -178,15 +179,13 @@ const Layout = () => {
             {t('common:appName')}
           </Typography>
           <BackToChatButton />
-          <Box sx={{ top: 20, right: 20, zIndex: 999, position: 'fixed' }}>
-            <GlobalMenu
-              openDisclaimer={() => setDisclaimerStatus(true)}
-              openSettings={() => setSettingsOpen(true)}
-              openFeedback={() => setFeedbackOpen(true)}
-              openApiKeys={() => setApiKeysOpen(true)}
-              container={headerRef}
-            />
-          </Box>
+          <GlobalMenu
+            openDisclaimer={() => setDisclaimerStatus(true)}
+            openSettings={() => setSettingsOpen(true)}
+            openFeedback={() => setFeedbackOpen(true)}
+            openApiKeys={() => setApiKeysOpen(true)}
+            container={headerRef}
+          />
         </Box>
         <Feedback open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
         <GlobalSettings open={settingsOpen} setOpen={setSettingsOpen} />
