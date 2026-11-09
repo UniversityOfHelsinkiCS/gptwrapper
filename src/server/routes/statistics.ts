@@ -85,8 +85,10 @@ statisticsRouter.get('/statistics', [adminMiddleware], async (req, res) => {
     }
 
     const extractFields = async (chatInstance: ChatInstance & { prompts: any[] }): Promise<Statistic & { enrollmentCount: number }> => {
-      const ragIndicesLength = chatInstance.ragIndices?.length
-      const ragIndicesCount = ragIndicesLength ? ragIndicesLength : 0
+      // RAGs used to be attached to courses, now they are attached to prompts. Count both, without duplicates
+      const legacyRagIndexIds = (chatInstance.ragIndices ?? []).map((ragIndex) => ragIndex.id)
+      const promptRagIndexIds = chatInstance.prompts.map((prompt) => prompt.ragIndexId).filter((id) => id != null)
+      const ragIndicesCount = new Set([...legacyRagIndexIds, ...promptRagIndexIds]).size
 
       const units = chatInstance.courseUnits
 
@@ -118,7 +120,7 @@ statisticsRouter.get('/statistics', [adminMiddleware], async (req, res) => {
           {
             model: Prompt,
             as: 'prompts',
-            attributes: ['id'],
+            attributes: ['id', 'ragIndexId'],
           },
           {
             model: RagIndex,
