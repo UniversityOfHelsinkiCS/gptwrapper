@@ -75,7 +75,7 @@ export const validModels: ModelConfig[] = [
     streamVersion: 'v3',
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Azure,
-    tags: ['cheap', 'fast'],
+    tags: ['cheap', 'fast', 'free'],
   },
   {
     name: 'gemma-4-26B-A4B',
