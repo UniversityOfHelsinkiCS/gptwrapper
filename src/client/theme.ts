@@ -126,6 +126,17 @@ const baseOptions: Omit<ThemeOptions, 'palette'> = {
       },
     },
 
+    MuiInputBase: {
+      styleOverrides: {
+        input: ({ theme }) => ({
+          '&::placeholder': {
+            color: theme.palette.text.secondary,
+            opacity: 1,
+          },
+        }),
+      },
+    },
+
     MuiFilledInput: {
       styleOverrides: {
         root: {
