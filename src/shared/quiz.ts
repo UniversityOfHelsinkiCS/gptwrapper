@@ -14,10 +14,14 @@ export const QuizOptionSchema = z.object({
 /** The input of a `present_quiz` call: one multiple-choice question, with the answer for the client to show after answering. */
 export const QuizSchema = z.object({
   question: z.string().describe('the question, markdown and math allowed; must not reveal the answer'),
-  options: z.array(QuizOptionSchema).describe('2 or more answer options. Do not add an "I don\'t know" option, it is added automatically'),
+  options: z
+    .array(QuizOptionSchema)
+    .describe('2 or more answer options; the wrong ones must be plausible but clearly wrong. Do not add an "I don\'t know" option, it is added automatically'),
   multiSelect: z.boolean().describe('true if the student may pick several options'),
   correct: z.array(z.string()).describe('ids of the correct options; exactly one when multiSelect is false'),
-  explanation: z.string().describe('why the correct answer is correct, shown to the student after answering'),
+  explanation: z
+    .string()
+    .describe('why the correct answer is correct (and, briefly, why a tempting wrong option is wrong), shown to the student after answering'),
   concept: z.string().optional().describe('the concept the question tests, in a few words'),
 })
 
