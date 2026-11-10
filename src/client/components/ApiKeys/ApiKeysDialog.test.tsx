@@ -93,13 +93,25 @@ describe('ApiKeysDialog', () => {
     expect((within(dialog).getByLabelText('Key name') as HTMLInputElement).value).toBe('')
     expect(within(dialog).getByText('New')).toBeTruthy()
 
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Delete key My script' }))
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }))
-    expect(document.activeElement).toBe(within(dialog).getByRole('button', { name: 'Delete key My script' }))
+    const table = within(dialog).getByRole('table', { name: /^Your keys/ })
+    expect(
+      within(table)
+        .getAllByRole('columnheader', { hidden: true })
+        .map((header) => header.textContent),
+    ).toEqual(['Key', 'Created', 'Actions'])
+    expect(within(table).getAllByRole('row')).toHaveLength(2)
 
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Delete key My script' }))
-    expect(document.activeElement).toBe(within(dialog).getByRole('button', { name: 'Cancel' }))
-    fireEvent.click(within(dialog).getByTestId('confirm-delete-api-key'))
+    const deleteButton = within(dialog).getByRole('button', { name: 'Delete key My script' })
+    fireEvent.click(deleteButton)
+    let confirmDialog = await screen.findByRole('dialog', { name: /^Delete key My script/ })
+    expect(document.activeElement).toBe(within(confirmDialog).getByRole('button', { name: 'Cancel' }))
+    fireEvent.click(within(confirmDialog).getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: /^Delete key My script/ })).toBeNull())
+    expect(document.activeElement).toBe(deleteButton)
+
+    fireEvent.click(deleteButton)
+    confirmDialog = await screen.findByRole('dialog', { name: /^Delete key My script/ })
+    fireEvent.click(within(confirmDialog).getByTestId('confirm-delete-api-key'))
     expect(await within(dialog).findByText(en.apiKeys.empty)).toBeTruthy()
     expect(within(dialog).queryByTestId('created-api-key')).toBeNull()
     expect(apiClient.delete).toHaveBeenCalledWith('/apikeys/id-1')

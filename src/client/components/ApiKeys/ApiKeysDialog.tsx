@@ -7,18 +7,25 @@ import {
   Chip,
   CircularProgress,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
   IconButton,
   Paper,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   TextField,
   Typography,
 } from '@mui/material'
+import { visuallyHidden } from '@mui/utils'
 import { Add, Check, Close, Code, ContentCopy, DeleteOutline, Download, ExpandMore, InfoOutlined, Key, Terminal } from '@mui/icons-material'
 import { FREE_MODELS, PUBLIC_URL } from '@config'
-import { type FormEvent, Fragment, type ReactNode, useState } from 'react'
+import { type FormEvent, type ReactNode, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { API_KEY_NAME_MAX_LENGTH, MAX_API_KEYS, type ApiKey } from '../../../shared/apiKey'
 import { BlueButton, OutlineButtonBlack, OutlineButtonBlue, RedButton, TextButton } from '../ChatV2/general/Buttons'
@@ -32,7 +39,7 @@ const formatDate = (date: string) => new Date(date).toLocaleString()
 const keyLabel = (apiKey: ApiKey) => apiKey.name || apiKey.apiKey
 
 const monospace = { fontFamily: 'monospace' }
-const keyGrid = { display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr) 56px', sm: 'minmax(0, 1fr) 190px 56px' }, alignItems: 'center', px: 2 }
+const createdColumn = { display: { xs: 'none', sm: 'table-cell' }, width: 190 }
 const columnLabel = { fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }
 
 const codeSurface = { ...monospace, fontSize: 13, bgcolor: 'action.hover', border: 1, borderColor: 'divider', borderRadius: 1 }
@@ -175,7 +182,11 @@ const IntegrationGuide = () => {
       <Alert severity="info" variant="outlined">
         <Typography variant="body2">{t('apiKeys:usageNote')}</Typography>
         <Typography variant="body2" sx={{ mt: 0.75 }}>
-          <Trans i18nKey="apiKeys:freeModelNote" values={{ models: FREE_MODELS.join(', ') }} components={{ b: <Box component="strong" sx={{ fontWeight: 600 }} /> }} />
+          <Trans
+            i18nKey="apiKeys:freeModelNote"
+            values={{ models: FREE_MODELS.join(', ') }}
+            components={{ b: <Box component="strong" sx={{ fontWeight: 600 }} /> }}
+          />
         </Typography>
       </Alert>
     </GuideAccordion>
@@ -215,6 +226,61 @@ const CreatedKeyPanel = ({ createdKey, onDismiss }: { createdKey: ApiKey; onDism
   )
 }
 
+const DeleteConfirmDialog = ({ apiKey, onCancel, onConfirm }: { apiKey: ApiKey | null; onCancel: () => void; onConfirm: (id: string) => void }) => {
+  const { t } = useTranslation()
+  // Keep showing the last key while the dialog fades out
+  const [shownKey, setShownKey] = useState(apiKey)
+  if (apiKey && apiKey !== shownKey) setShownKey(apiKey)
+
+  const restoreFocus = () => {
+    const target = (shownKey && document.getElementById(`delete-api-key-${shownKey.id}`)) || document.getElementById('close-api-keys')
+    target?.focus()
+  }
+
+  return (
+    <Dialog
+      open={!!apiKey}
+      onClose={onCancel}
+      maxWidth="xs"
+      fullWidth
+      disableRestoreFocus
+      slotProps={{ transition: { onExited: restoreFocus } }}
+      aria-labelledby="api-key-delete-title"
+      aria-describedby="api-key-delete-description"
+    >
+      {shownKey && (
+        <>
+          <DialogTitle id="api-key-delete-title" sx={{ fontSize: 18, fontWeight: 600 }}>
+            <Trans
+              i18nKey="apiKeys:deleteConfirmTitle"
+              values={{ key: keyLabel(shownKey) }}
+              components={{ key: <Box component="span" sx={{ ...(shownKey.name ? {} : monospace), overflowWrap: 'anywhere' }} /> }}
+            />
+          </DialogTitle>
+          <DialogContent>
+            <Typography id="api-key-delete-description" variant="body2" color="text.secondary">
+              {t('apiKeys:deleteConfirmText')}
+            </Typography>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2.5 }}>
+            <OutlineButtonBlack autoFocus onClick={onCancel}>
+              {t('common:cancel')}
+            </OutlineButtonBlack>
+            <RedButton
+              id="confirm-delete-api-key"
+              data-testid="confirm-delete-api-key"
+              onClick={() => onConfirm(shownKey.id)}
+              aria-label={t('apiKeys:deleteKey', { key: keyLabel(shownKey) })}
+            >
+              {t('apiKeys:delete')}
+            </RedButton>
+          </DialogActions>
+        </>
+      )}
+    </Dialog>
+  )
+}
+
 export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) => {
   const { t } = useTranslation()
   const { data: apiKeys, isLoading, isError } = useApiKeys(open)
@@ -222,19 +288,14 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
   const deleteMutation = useDeleteApiKeyMutation()
   const createdKey = createMutation.data
 
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<ApiKey | null>(null)
   const [name, setName] = useState('')
-
-  const cancelDelete = (id: string) => {
-    document.getElementById(`delete-api-key-${id}`)?.focus()
-    setConfirmDeleteId(null)
-  }
 
   const atLimit = (apiKeys?.length ?? 0) >= MAX_API_KEYS
 
   const handleClose = () => {
     createMutation.reset()
-    setConfirmDeleteId(null)
+    setDeleteTarget(null)
     setName('')
     setOpen(false)
   }
@@ -244,7 +305,6 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
     try {
       await createMutation.mutateAsync(name.trim())
       setName('')
-      setConfirmDeleteId(null)
       announceToScreenReader(t('apiKeys:created'))
     } catch (error) {
       enqueueSnackbar(t(isConflictError(error) ? 'apiKeys:limitReached' : 'apiKeys:createError'), { variant: 'error' })
@@ -252,7 +312,7 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
   }
 
   const handleDelete = async (id: string) => {
-    setConfirmDeleteId(null)
+    setDeleteTarget(null)
     if (createdKey?.id === id) createMutation.reset()
     try {
       await deleteMutation.mutateAsync(id)
@@ -322,7 +382,7 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
         {createdKey && <CreatedKeyPanel key={createdKey.id} createdKey={createdKey} onDismiss={() => createMutation.reset()} />}
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Typography component="h3" sx={columnLabel}>
+          <Typography component="h3" id="api-keys-table-heading" sx={columnLabel}>
             {t('apiKeys:yourKeys')}
             {apiKeys && ` · ${apiKeys.length}/${MAX_API_KEYS}`}
           </Typography>
@@ -355,73 +415,60 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
             </Typography>
           </Box>
         ) : (
-          <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
-            <Box sx={{ ...keyGrid, py: 1.25, borderBottom: 1, borderColor: 'divider' }}>
-              <Typography sx={columnLabel}>{t('apiKeys:keyColumn')}</Typography>
-              <Typography sx={{ ...columnLabel, display: { xs: 'none', sm: 'block' } }}>{t('apiKeys:createdAt')}</Typography>
-            </Box>
-            {apiKeys.map((apiKey, i) => (
-              <Fragment key={apiKey.id}>
-                {i > 0 && <Divider />}
-                <Box sx={{ ...keyGrid, minHeight: 56, py: { xs: 1, sm: 0 } }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0 }}>
-                    <Box sx={{ minWidth: 0 }}>
-                      {apiKey.name && (
-                        <Typography variant="body2" fontWeight={600} sx={{ overflowWrap: 'anywhere' }}>
-                          {apiKey.name}
-                        </Typography>
-                      )}
-                      <Typography variant="body2" color={apiKey.name ? 'text.secondary' : undefined} sx={monospace}>
-                        {apiKey.apiKey}
-                      </Typography>
+          <Paper variant="outlined" sx={{ overflow: 'hidden', flexShrink: 0 }}>
+            <Table
+              aria-labelledby="api-keys-table-heading"
+              sx={{ tableLayout: 'fixed', '& td, & th': { px: 2 }, '& tbody tr:last-of-type > td': { borderBottom: 0 } }}
+            >
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ ...columnLabel, py: 1.25 }}>{t('apiKeys:keyColumn')}</TableCell>
+                  <TableCell sx={{ ...columnLabel, ...createdColumn, py: 1.25 }}>{t('apiKeys:createdAt')}</TableCell>
+                  <TableCell sx={{ width: 72, py: 1.25 }}>
+                    <Box component="span" sx={visuallyHidden}>
+                      {t('apiKeys:actionsColumn')}
                     </Box>
-                    {createdKey?.id === apiKey.id && <Chip label={t('apiKeys:newBadge')} size="small" color="primary" variant="outlined" />}
-                  </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ gridRow: { xs: 2, sm: 'auto' } }}>
-                    {formatDate(apiKey.createdAt)}
-                  </Typography>
-                  <IconButton
-                    id={`delete-api-key-${apiKey.id}`}
-                    onClick={() => setConfirmDeleteId(apiKey.id)}
-                    disabled={deleteMutation.isPending && deleteMutation.variables === apiKey.id}
-                    aria-label={t('apiKeys:deleteKey', { key: keyLabel(apiKey) })}
-                    aria-expanded={confirmDeleteId === apiKey.id}
-                    sx={{ justifySelf: 'end', gridColumn: { xs: 2, sm: 'auto' }, gridRow: { xs: '1 / span 2', sm: 'auto' } }}
-                  >
-                    <DeleteOutline />
-                  </IconButton>
-                </Box>
-                {confirmDeleteId === apiKey.id && (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.5, px: 2, py: 1.5, bgcolor: 'error.light' + '1a' }}>
-                    <Box sx={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: 0.25 }}>
-                      <Typography id="api-key-delete-confirmation" variant="body2" fontWeight={600}>
-                        <Trans
-                          i18nKey="apiKeys:deleteConfirmTitle"
-                          values={{ key: keyLabel(apiKey) }}
-                          components={{ key: <Box component="span" sx={{ ...(apiKey.name ? {} : monospace), fontWeight: 500 }} /> }}
-                        />
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {t('apiKeys:deleteConfirmText')}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <OutlineButtonBlack autoFocus onClick={() => cancelDelete(apiKey.id)} aria-describedby="api-key-delete-confirmation">
-                        {t('common:cancel')}
-                      </OutlineButtonBlack>
-                      <RedButton
-                        id="confirm-delete-api-key"
-                        data-testid="confirm-delete-api-key"
-                        onClick={() => handleDelete(apiKey.id)}
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {apiKeys.map((apiKey) => (
+                  <TableRow key={apiKey.id}>
+                    <TableCell sx={{ py: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0 }}>
+                        <Box sx={{ minWidth: 0 }}>
+                          {apiKey.name && (
+                            <Typography variant="body2" fontWeight={600} sx={{ overflowWrap: 'anywhere' }}>
+                              {apiKey.name}
+                            </Typography>
+                          )}
+                          <Typography variant="body2" color={apiKey.name ? 'text.secondary' : undefined} sx={monospace}>
+                            {apiKey.apiKey}
+                          </Typography>
+                          {/* On narrow screens the Created column is hidden, so the date is shown under the key */}
+                          <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'block', sm: 'none' } }}>
+                            {formatDate(apiKey.createdAt)}
+                          </Typography>
+                        </Box>
+                        {createdKey?.id === apiKey.id && <Chip label={t('apiKeys:newBadge')} size="small" color="primary" variant="outlined" />}
+                      </Box>
+                    </TableCell>
+                    <TableCell sx={{ ...createdColumn, py: 1, color: 'text.secondary' }}>{formatDate(apiKey.createdAt)}</TableCell>
+                    <TableCell align="right" sx={{ py: 1 }}>
+                      <IconButton
+                        id={`delete-api-key-${apiKey.id}`}
+                        onClick={() => setDeleteTarget(apiKey)}
+                        disabled={deleteMutation.isPending && deleteMutation.variables === apiKey.id}
                         aria-label={t('apiKeys:deleteKey', { key: keyLabel(apiKey) })}
+                        aria-haspopup="dialog"
                       >
-                        {t('apiKeys:delete')}
-                      </RedButton>
-                    </Box>
-                  </Box>
-                )}
-              </Fragment>
-            ))}
+                        <DeleteOutline />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </Paper>
         )}
 
@@ -433,6 +480,7 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
           <Typography variant="caption">{t('apiKeys:securityNote')}</Typography>
         </Box>
       </DialogContent>
+      <DeleteConfirmDialog apiKey={deleteTarget} onCancel={() => setDeleteTarget(null)} onConfirm={handleDelete} />
     </Dialog>
   )
 }

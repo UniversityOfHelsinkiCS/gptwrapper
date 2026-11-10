@@ -905,6 +905,7 @@
     "yourKeys": "Mina nycklar",
     "keyColumn": "Nyckel",
     "createdAt": "Skapad",
+    "actionsColumn": "Åtgärder",
     "newBadge": "Ny",
     "empty": "Du har inga API-nycklar ännu",
     "emptyHint": "Skapa en nyckel med knappen ovan för att skicka meddelanden till CurreChat programmatiskt.",

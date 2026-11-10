@@ -930,6 +930,7 @@
     "yourKeys": "Omat avaimet",
     "keyColumn": "Avain",
     "createdAt": "Luotu",
+    "actionsColumn": "Toiminnot",
     "newBadge": "Uusi",
     "empty": "Sinulla ei ole vielä API-avaimia",
     "emptyHint": "Luo avain yllä olevasta painikkeesta, niin voit lähettää viestejä CurreChatiin ohjelmallisesti.",

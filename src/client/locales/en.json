@@ -929,6 +929,7 @@
     "yourKeys": "Your keys",
     "keyColumn": "Key",
     "createdAt": "Created",
+    "actionsColumn": "Actions",
     "newBadge": "New",
     "empty": "You have no API keys yet",
     "emptyHint": "Create a key with the button above to send messages to CurreChat programmatically.",
