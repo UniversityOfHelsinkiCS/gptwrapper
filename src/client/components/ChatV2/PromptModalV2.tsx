@@ -281,7 +281,11 @@ const PromptModalV2 = () => {
   }
 
   const onDone = (prompt?: PromptType) => {
-    if (prompt) focusEditButtonOnDone.current = true
+    if (prompt) {
+      focusEditButtonOnDone.current = true
+      // An admin may have started from the university prompt gallery; show the saved prompt instead
+      setShowUniversityPrompts(false)
+    }
     setIsEditing(false)
     setPreviewPrompt(prompt)
     if (!prompt) {

@@ -2,7 +2,7 @@ import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline'
 import HelpOutline from '@mui/icons-material/HelpOutline'
 import HighlightOff from '@mui/icons-material/HighlightOff'
 import Quiz from '@mui/icons-material/Quiz'
-import { Box, Checkbox, FormControlLabel, FormGroup, Radio, RadioGroup, TextField, Typography } from '@mui/material'
+import { Box, Checkbox, type Theme, FormControlLabel, FormGroup, Radio, RadioGroup, TextField, Typography } from '@mui/material'
 import { useEffect, useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
@@ -11,6 +11,7 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import type { ToolPart } from '../../../../shared/agentChat'
 import { parseQuiz, type Quiz as QuizInput, QUIZ_IDK, type QuizAnswer, quizOutcome, type QuizOutcome, type QuizResult } from '../../../../shared/quiz'
+import { accessibleTextColor } from '../../../theme'
 import { optionFocusIndicatorStyle } from '../../../util/accessibility'
 import { BlueButton } from '../general/Buttons'
 import { preprocessMath } from '../util'
@@ -32,8 +33,8 @@ const isQuizResult = (value: unknown): value is QuizResult =>
   typeof value === 'object' && value !== null && Array.isArray((value as QuizResult).correct) && typeof (value as QuizResult).explanation === 'string'
 
 const OUTCOME = {
-  correct: { key: 'chat:quizCorrect', icon: <CheckCircleOutline fontSize="small" />, color: 'success.main' },
-  incorrect: { key: 'chat:quizIncorrect', icon: <HighlightOff fontSize="small" />, color: 'error.main' },
+  correct: { key: 'chat:quizCorrect', icon: <CheckCircleOutline fontSize="small" />, color: (theme: Theme) => accessibleTextColor(theme, 'success') },
+  incorrect: { key: 'chat:quizIncorrect', icon: <HighlightOff fontSize="small" />, color: (theme: Theme) => accessibleTextColor(theme, 'error') },
   idk: { key: 'chat:quizIdkResult', icon: <HelpOutline fontSize="small" />, color: 'text.primary' },
 } as const satisfies Record<QuizOutcome, unknown>
 
@@ -94,7 +95,15 @@ export const QuizCard = ({ part, quiz }: { part: ToolPart; quiz: QuizInput }) =>
       <span>
         {id === QUIZ_IDK ? text : <QuizMarkdown text={text} inline />}
         {markers.length > 0 && (
-          <Typography component="span" variant="body2" sx={{ ml: 1, fontWeight: 600, color: result?.correct.includes(id) ? 'success.main' : 'text.secondary' }}>
+          <Typography
+            component="span"
+            variant="body2"
+            sx={{
+              ml: 1,
+              fontWeight: 600,
+              color: (theme) => (result?.correct.includes(id) ? accessibleTextColor(theme, 'success') : theme.palette.text.secondary),
+            }}
+          >
             ({markers.join(', ')})
           </Typography>
         )}
