@@ -191,7 +191,7 @@ const UsageSelector = () => {
           },
         }}
       >
-        <MenuItem aria-label={t('common:showInfo')} aria-haspopup="dialog" onClick={() => setInfoOpen(true)}>
+        <MenuItem aria-label={[t('status:usageTitle'), t('common:showInfo')].join(', ')} aria-haspopup="dialog" onClick={() => setInfoOpen(true)}>
           <Typography
             id="usage-selector-title"
             component="span"
