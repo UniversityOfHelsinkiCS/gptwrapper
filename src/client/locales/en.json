@@ -209,6 +209,8 @@
     "toolCallRunning": "Using the tool {{name}}…",
     "toolCallDone": "Used the tool {{name}}",
     "toolCallFailed": "The tool {{name}} failed",
+    "thinking": "Thinking…",
+    "thoughtFor": "Thought for {{seconds}} s",
     "processingRequest": "Processing the request.",
     "responseReady": "The response is ready.",
     "responseCanceled": "Response generation was canceled.",

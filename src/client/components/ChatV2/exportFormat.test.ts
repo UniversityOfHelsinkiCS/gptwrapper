@@ -35,3 +35,23 @@ describe('conversation export output', () => {
     expect(formatEmail(messages, t)).toMatchSnapshot()
   })
 })
+
+describe('reasoning in exports', () => {
+  test('is left out of the download and the email', () => {
+    const withReasoning = [
+      { role: 'user' as const, content: 'think' },
+      {
+        role: 'assistant' as const,
+        parts: [
+          { type: 'reasoning' as const, text: 'SECRET REASONING', durationMs: 1000 },
+          { type: 'text' as const, text: 'The answer.' },
+        ],
+      },
+    ]
+
+    for (const output of [formatMessagesAsText(withReasoning, t), formatMessagesAsPlainText(withReasoning, t), formatEmail(withReasoning, t)]) {
+      expect(output).toContain('The answer.')
+      expect(output).not.toContain('SECRET REASONING')
+    }
+  })
+})

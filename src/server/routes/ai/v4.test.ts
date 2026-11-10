@@ -36,6 +36,7 @@ vi.mock('../../util/logger', () => ({
 
 vi.mock('@sentry/node', () => ({ captureException: vi.fn() }))
 
+import { validModels } from '@config'
 import v4Router from './v4'
 import { ChatInstance, Discussion, Prompt, PromptUsage, UserChatInstanceUsage } from '../../db/models'
 import { getUsage, getUserTokenLimit, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
@@ -207,6 +208,57 @@ describe('POST /ai/v4/stream', () => {
     expect(assistant?.content).toBe('[Searched the course materials for "exam". Results (excerpts):\n- a.pdf: "On Monday."\n]\n\nOn Monday.')
     expect(assistant?.tool_calls ?? []).toEqual([])
     expect(messages.some((m) => m.type === 'tool')).toBe(false)
+  })
+
+  test('streams the reasoning of a `think` answer before its text', async () => {
+    const events = await readEvents(await stream({ message: 'think the answer' }))
+    const deltas = events.filter((e) => e.type === 'reasoning.delta' || e.type === 'text.delta')
+
+    expect(deltas.map((e) => e.type)).toEqual(['reasoning.delta', 'reasoning.delta', 'reasoning.delta', 'text.delta'])
+    expect(
+      deltas
+        .filter((e) => e.type === 'reasoning.delta')
+        .map((e) => e.text)
+        .join(''),
+    ).toBe('**Reading the question**\n\nThe user wants a mock answer after some mock thinking.')
+    expect(deltas.every((e) => e.path.length === 0)).toBe(true)
+    expect(textOf(events)).toBe('the answer')
+  })
+
+  test('does not stream reasoning for a model without a reasoning config', async () => {
+    const mock = validModels.find((m) => m.name === 'mock')!
+    const reasoning = mock.reasoning
+    delete mock.reasoning
+    try {
+      const events = await readEvents(await stream({ message: 'think the answer' }))
+      expect(events.some((e) => e.type === 'reasoning.delta')).toBe(false)
+      expect(textOf(events)).toBe('the answer')
+    } finally {
+      mock.reasoning = reasoning
+    }
+  })
+
+  test('never sends earlier reasoning back to the model', async () => {
+    const spy = vi.spyOn(MockModel.prototype, '_streamResponseChunks')
+    const history = [
+      { role: 'user', content: 'think hard' },
+      {
+        role: 'assistant',
+        parts: [
+          { type: 'reasoning', text: 'SECRET REASONING', durationMs: 2000 },
+          { type: 'text', text: 'hard' },
+        ],
+      },
+    ]
+
+    const response = await stream({ message: 'say thanks', history })
+    await response.text()
+
+    const messages = spy.mock.calls[0][0] as { type: string; content: unknown }[]
+    spy.mockRestore()
+    expect(response.status).toBe(200)
+    expect(messages.find((m) => m.type === 'ai')?.content).toBe('hard')
+    expect(JSON.stringify(messages)).not.toContain('SECRET REASONING')
   })
 
   test('emits an error event when the model fails', async () => {

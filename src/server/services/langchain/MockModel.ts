@@ -4,7 +4,21 @@ import { AIMessage, AIMessageChunk, type BaseMessage, isHumanMessage, isSystemMe
 import { ChatGenerationChunk, type ChatResult } from '@langchain/core/outputs'
 import type { StructuredTool } from '@langchain/core/tools'
 import { fakeModel } from 'langchain'
-import { basicTestContent, codeTestContent, mathTestContent } from './mockContent'
+import { setTimeout as sleep } from 'node:timers/promises'
+import { basicTestContent, codeTestContent, mathTestContent, thinkReasoningChunks, thinkTestAnswer } from './mockContent'
+
+/** Pause between the streamed chunks of a `think` answer, so the thinking block is seen while it streams. */
+const THINK_CHUNK_DELAY_MS = 250
+
+const lastHumanText = (messages: BaseMessage[]): string => (messages.findLast(isHumanMessage)?.content ?? '') as string
+
+/** `think <answer>` reasons first (in several chunks), then answers with `<answer>`. Not for tool results: the agent's second call answers normally. */
+const isThinkRequest = (messages: BaseMessage[]) => {
+  const last = messages.at(-1)
+  return lastHumanText(messages).startsWith('think') && !(last && isToolMessage(last))
+}
+
+const thinkAnswer = (messages: BaseMessage[]) => lastHumanText(messages).slice('think'.length).trim() || thinkTestAnswer
 
 export class MockModel extends BaseChatModel {
   tools: StructuredTool[]
@@ -37,7 +51,7 @@ export class MockModel extends BaseChatModel {
   }
 
   private buildFake(messages: BaseMessage[]) {
-    const lastHuman = (messages.findLast(isHumanMessage)?.content ?? '') as string
+    const lastHuman = lastHumanText(messages)
     const firstSystem = messages.find(isSystemMessage)
     const last = messages[messages.length - 1]
 
@@ -94,6 +108,15 @@ export class MockModel extends BaseChatModel {
   }
 
   async _generate(messages: BaseMessage[], options: this['ParsedCallOptions'], _runManager?: CallbackManagerForLLMRun): Promise<ChatResult> {
+    if (isThinkRequest(messages)) {
+      const message = new AIMessage({
+        content: [
+          { type: 'reasoning', reasoning: thinkReasoningChunks.join('') },
+          { type: 'text', text: thinkAnswer(messages) },
+        ],
+      })
+      return { generations: [{ text: thinkAnswer(messages), message }] }
+    }
     const message = await this.respond(messages, options)
     return {
       generations: [{ text: extractText(message.content), message }],
@@ -105,12 +128,35 @@ export class MockModel extends BaseChatModel {
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun,
   ): AsyncGenerator<ChatGenerationChunk> {
+    if (isThinkRequest(messages)) {
+      yield* streamThinkingChunks(messages, options.signal, runManager)
+      return
+    }
     const message = await this.respond(messages, options)
     const chunk = new AIMessageChunk({ id: message.id, content: message.content, tool_calls: message.tool_calls })
     const text = extractText(chunk.content)
     await runManager?.handleLLMNewToken(text)
     yield new ChatGenerationChunk({ message: chunk, text })
   }
+}
+
+/** Streams `reasoning` content blocks (the standard block type the providers' reasoning is converted to), then the answer. */
+async function* streamThinkingChunks(
+  messages: BaseMessage[],
+  signal: AbortSignal | undefined,
+  runManager?: CallbackManagerForLLMRun,
+): AsyncGenerator<ChatGenerationChunk> {
+  for (const reasoning of thinkReasoningChunks) {
+    await sleep(THINK_CHUNK_DELAY_MS, undefined, { signal })
+    const chunk = new ChatGenerationChunk({ message: new AIMessageChunk({ content: [{ type: 'reasoning', reasoning }] }), text: '' })
+    // With the chunk, agent.stream's `messages` mode reports the content blocks, not only the token text.
+    await runManager?.handleLLMNewToken('', undefined, undefined, undefined, undefined, { chunk })
+    yield chunk
+  }
+  await sleep(THINK_CHUNK_DELAY_MS, undefined, { signal })
+  const text = thinkAnswer(messages)
+  await runManager?.handleLLMNewToken(text)
+  yield new ChatGenerationChunk({ message: new AIMessageChunk({ content: [{ type: 'text', text }] }), text })
 }
 
 const extractText = (content: unknown): string => {

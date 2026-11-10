@@ -32,11 +32,21 @@ export const withToolInstructions = (systemMessage: string, enabled: EnabledTool
 const summarizeToolPart = (part: ToolPart): string =>
   getToolModule(part.name)?.summarizeForHistory(part) ?? `[Used the tool ${part.name}${part.status === 'error' ? ', which failed' : ''}.]`
 
-const partToHistoryText = (part: AssistantPart): string => (part.type === 'text' ? part.text : summarizeToolPart(part))
+const partToHistoryText = (part: AssistantPart): string => {
+  switch (part.type) {
+    case 'text':
+      return part.text
+    case 'tool':
+      return summarizeToolPart(part)
+    case 'reasoning':
+      // Reasoning is never sent back: it is not needed across turns (the client already leaves it out).
+      return ''
+  }
+}
 
 /**
  * An earlier answer as plain text for the model. Tool parts become summaries in their place, never real
- * `tool_calls` / `ToolMessage` pairs, which would break on edited or truncated history.
+ * `tool_calls` / `ToolMessage` pairs, which would break on edited or truncated history. Reasoning is dropped.
  */
 export const historyMessageToText = (message: HistoryAssistantMessage): string =>
   message.parts

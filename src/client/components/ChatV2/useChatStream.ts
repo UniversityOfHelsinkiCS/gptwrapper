@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import type { MessageGenerationInfo } from '../../../shared/chat'
 import type { AssistantMessageV2, AssistantPart, ChatEvent } from '../../../shared/agentChat'
-import { applyEvent } from './applyEvent'
+import { applyEvent, finishReasoning } from './applyEvent'
 
 export type StreamAbortReason = 'timeout_error' | 'user_aborted' | 'conversation_cleared' | 'error'
 export class TypedAbortController<Reason extends string> {
@@ -52,7 +52,8 @@ export const useChatStream = ({
 
     const message = (messageError: string | undefined): AssistantMessageV2 => ({
       role: 'assistant',
-      parts,
+      // A model that only reasoned (aborted, or failed before answering) still gets its thinking time.
+      parts: finishReasoning(parts, Date.now()),
       error: messageError,
       generationInfo: baseGenerationInfo,
     })

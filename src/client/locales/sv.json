@@ -216,6 +216,8 @@
     "toolCallRunning": "Använder verktyget {{name}}…",
     "toolCallDone": "Använde verktyget {{name}}",
     "toolCallFailed": "Verktyget {{name}} misslyckades",
+    "thinking": "Tänker…",
+    "thoughtFor": "Tänkte i {{seconds}} s",
     "processingRequest": "Din förfrågan behandlas.",
     "responseReady": "Svaret är klart.",
     "responseCanceled": "Genereringen av svaret avbröts.",

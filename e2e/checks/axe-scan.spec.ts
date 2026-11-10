@@ -150,6 +150,25 @@ test.describe('axe wcag scan for chat', () => {
   })
 })
 
+test.describe('axe wcag scan for chat with a thinking block', () => {
+  test.afterAll(writeAxeReport)
+
+  test('scan chat answer with a collapsed thinking block', async ({ page }, testInfo) => {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+
+    // The mock model reasons before answering for `think <answer>`
+    await sendChatMessage(page, 'think The answer after thinking.')
+    await closeSendPreference(page)
+
+    await expect(page.getByTestId('assistant-message')).toContainText('The answer after thinking.')
+    const toggle = page.getByRole('button', { name: /^Thought for \d+ s$/ })
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await scan(page, testInfo.title)
+  })
+})
+
 teacherTest.describe('axe wcag scan for chat with tool parts', () => {
   teacherTest.afterAll(writeAxeReport)
 

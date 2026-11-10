@@ -1,4 +1,4 @@
-import type { AssistantPart, ChatEvent, ToolPart } from '../../../shared/agentChat'
+import type { AssistantPart, ChatEvent, ReasoningPart, ToolPart } from '../../../shared/agentChat'
 
 /** Replaces the tool part with this call id, or returns `parts` unchanged when there is none. */
 const updateToolPart = (parts: AssistantPart[], callId: string, update: (part: ToolPart) => ToolPart): AssistantPart[] => {
@@ -7,19 +7,45 @@ const updateToolPart = (parts: AssistantPart[], callId: string, update: (part: T
   return parts.map((part, i) => (i === index ? update(part as ToolPart) : part))
 }
 
+const isOpenReasoning = (part: AssistantPart | undefined): part is ReasoningPart => part?.type === 'reasoning' && part.durationMs === undefined
+
+/**
+ * Ends the thinking of a still open reasoning part (the last one): its duration is known once the model moves
+ * on to answering or calling a tool, or the stream ends. Returns `parts` unchanged when nothing is open.
+ */
+export const finishReasoning = (parts: AssistantPart[], now: number): AssistantPart[] => {
+  const last = parts.at(-1)
+  if (!isOpenReasoning(last)) return parts
+  const { startedAt, ...rest } = last
+  return [...parts.slice(0, -1), { ...rest, durationMs: Math.max(0, now - (startedAt ?? now)) }]
+}
+
 /**
  * Pure reducer that builds an assistant message's `parts` from stream events.
  * Returns the same array when the event changes nothing, so React can skip re-renders.
  *
  * Parts keep the order the events came in: text written before a tool call, the tool part, the text after it.
  * Several tool calls of one model turn are parts in call order, whatever order they finish in.
+ * Reasoning deltas build a reasoning part, timed with `now` (the client clock) from its first delta until the
+ * next text or tool part starts; a model that reasons again after a tool call gets a new reasoning part.
  *
  * Errors, usage and processing events are not parts: errors end up in `AssistantMessage.error`,
  * usage is recorded on the server and processing only keeps the connection alive.
  * Events of subagents (non-empty path) are nested into subagent parts in a later slice and ignored for now.
  */
-export const applyEvent = (parts: AssistantPart[], event: ChatEvent): AssistantPart[] => {
+export const applyEvent = (parts: AssistantPart[], event: ChatEvent, now: number = Date.now()): AssistantPart[] => {
   switch (event.type) {
+    case 'reasoning.delta': {
+      if (event.path.length > 0) return parts
+      if (!event.text) return parts
+
+      const last = parts.at(-1)
+      if (isOpenReasoning(last)) {
+        return [...parts.slice(0, -1), { ...last, text: last.text + event.text }]
+      }
+      return [...parts, { type: 'reasoning', text: event.text, startedAt: now }]
+    }
+
     case 'text.delta': {
       if (event.path.length > 0) return parts
       if (!event.text) return parts
@@ -28,13 +54,13 @@ export const applyEvent = (parts: AssistantPart[], event: ChatEvent): AssistantP
       if (last?.type === 'text') {
         return [...parts.slice(0, -1), { ...last, text: last.text + event.text }]
       }
-      return [...parts, { type: 'text', text: event.text }]
+      return [...finishReasoning(parts, now), { type: 'text', text: event.text }]
     }
 
     case 'tool.start': {
       if (event.path.length > 0) return parts
       if (parts.some((part) => part.type === 'tool' && part.callId === event.callId)) return parts
-      return [...parts, { type: 'tool', callId: event.callId, name: event.name, input: event.input, status: 'running' }]
+      return [...finishReasoning(parts, now), { type: 'tool', callId: event.callId, name: event.name, input: event.input, status: 'running' }]
     }
 
     case 'tool.progress': {

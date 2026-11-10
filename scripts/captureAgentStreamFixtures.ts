@@ -5,7 +5,7 @@
  * Usage (from the repo root, needs AZURE_API_KEY, AZURE_RESOURCE, GOOGLE_CLOUD_PROJECT_ID in .env and
  * gcloud application default credentials for Vertex):
  *
- *   npx tsx --env-file=.env scripts/captureAgentStreamFixtures.ts [azure|vertex|vertex-replay|all]
+ *   npx tsx --env-file=.env scripts/captureAgentStreamFixtures.ts [azure|vertex|vertex-replay|all] [scenario]
  *
  * `vertex-replay` is the fallback for when Vertex cannot be called (in Nov 2026 the GCP project had billing
  * disabled by the budget kill switch, so every call failed with 403). It runs the real `ChatGoogle` model and
@@ -22,6 +22,7 @@ import path from 'node:path'
 import { tool } from '@langchain/core/tools'
 import { createAgent } from 'langchain'
 import { z } from 'zod/v4'
+import type { ModelReasoning } from '../src/config'
 import { getAzureChatOpenAI, getVertexModelProvider } from '../src/server/services/langchain/modelGenerators'
 
 const FIXTURE_DIR = path.join(import.meta.dirname, '../src/server/services/agent/fixtures')
@@ -91,18 +92,31 @@ const replayApiClient = {
   },
 }
 
-type Scenario = { name: string; withTools: boolean; prompt: string }
+type Scenario = { name: string; withTools: boolean; prompt: string; reasoning?: ModelReasoning }
 
 const scenarios: Scenario[] = [
   { name: 'text', withTools: false, prompt: 'Say hello in two short sentences.' },
   { name: 'tool', withTools: true, prompt: 'When is the exam? Search the course materials first, then answer in one sentence.' },
+  // With ModelConfig.reasoning, so the model streams its reasoning summary (Azure) or thoughts (Gemini).
+  {
+    name: 'reasoning',
+    withTools: false,
+    prompt: 'A bat and a ball cost 1.10 euros in total. The bat costs 1.00 euro more than the ball. How much does the ball cost? Answer in one sentence.',
+    reasoning: { effort: 'medium', showSummary: true },
+  },
+  {
+    name: 'reasoning-tool',
+    withTools: true,
+    prompt: 'When is the exam, and how many days after 1 December is it? Search the course materials first, then answer in one sentence.',
+    reasoning: { effort: 'medium', showSummary: true },
+  },
 ]
 
 type Provider = 'azure' | 'vertex' | 'vertex-replay'
 
-const getModel = (provider: Provider) => {
-  if (provider === 'azure') return getAzureChatOpenAI(AZURE_MODEL)
-  const model = getVertexModelProvider({ name: VERTEX_MODEL, modelRegion: VERTEX_REGION })
+const getModel = (provider: Provider, reasoning?: ModelReasoning) => {
+  if (provider === 'azure') return getAzureChatOpenAI(AZURE_MODEL, true, reasoning)
+  const model = getVertexModelProvider({ name: VERTEX_MODEL, modelRegion: VERTEX_REGION, reasoning })
   if (provider === 'vertex-replay') {
     ;(model as unknown as { apiClient: typeof replayApiClient }).apiClient = replayApiClient
   }
@@ -110,7 +124,7 @@ const getModel = (provider: Provider) => {
 }
 
 const capture = async (provider: Provider, scenario: Scenario) => {
-  const model = getModel(provider)
+  const model = getModel(provider, scenario.reasoning)
   const agent = createAgent({ model, tools: scenario.withTools ? [searchTool] : [] })
 
   const stream = await agent.stream(
@@ -138,11 +152,12 @@ const capture = async (provider: Provider, scenario: Scenario) => {
 
 const main = async () => {
   const which = process.argv[2] ?? 'all'
+  const onlyScenario = process.argv[3]
   await mkdir(FIXTURE_DIR, { recursive: true })
   const providers: Provider[] = which === 'all' ? ['azure', 'vertex'] : [which as Provider]
 
   for (const provider of providers) {
-    for (const scenario of scenarios) {
+    for (const scenario of scenarios.filter((s) => !onlyScenario || s.name === onlyScenario)) {
       try {
         await capture(provider, scenario)
       } catch (error) {

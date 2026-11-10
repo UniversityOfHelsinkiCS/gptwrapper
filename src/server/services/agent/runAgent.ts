@@ -110,6 +110,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
   const tools = createTools(enabledTools, { user, course: course?.chatInstance ?? null, model, signal })
   const agent = createAgent({ model: getAgentModel(modelConfig), tools, middleware: tools.length > 0 ? [toolErrorMiddleware(signal)] : [] })
 
+  const showReasoning = modelConfig.reasoning?.showSummary === true
   const startedAt = Date.now()
   let firstTokenAt: number | undefined
   let inputTokens = 0
@@ -139,6 +140,8 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
       }
 
       for (const event of mapStreamChunk(streamChunk, streamState)) {
+        // Models without a reasoning config look as before, even if their provider streams reasoning anyway.
+        if (event.type === 'reasoning.delta' && !showReasoning) continue
         if (event.type === 'text.delta' && event.path.length === 0) {
           firstTokenAt ??= Date.now()
           response += event.text
@@ -312,7 +315,7 @@ const toolErrorMiddleware = (signal: AbortSignal) =>
 const getAgentModel = (modelConfig: ModelConfig): BaseChatModel => {
   switch (modelConfig.provider) {
     case ModelProvider.Azure:
-      return getAzureChatOpenAI(modelConfig.name)
+      return getAzureChatOpenAI(modelConfig.name, true, modelConfig.reasoning)
     case ModelProvider.Vertex:
       return getVertexModelProvider(modelConfig)
     case ModelProvider.Toska:

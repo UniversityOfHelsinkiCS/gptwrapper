@@ -33,6 +33,16 @@ export type ModelDescriptionKey = 'chat:modelDescriptions.premium' | 'chat:model
 
 export type ModelTag = 'cheap' | 'fast' | 'premium' | 'free' | 'local' | 'open'
 
+/**
+ * Reasoning ("thinking") settings of a model. `modelGenerators.ts` translates them per provider: Azure/OpenAI
+ * Responses API `reasoning: { effort, summary: 'auto' }`, Gemini `reasoningEffort` (which sets
+ * `thinkingConfig.includeThoughts`). With `showSummary` the reasoning is streamed to the user as a thinking block.
+ */
+export type ModelReasoning = {
+  effort: 'low' | 'medium' | 'high'
+  showSummary: boolean
+}
+
 export type ModelConfig = {
   name: string
   displayName: string
@@ -50,6 +60,8 @@ export type ModelConfig = {
   // local inference only, used to choose service in apigw
   service?: string
   tags: ModelTag[]
+  /** Models without this show no thinking block. */
+  reasoning?: ModelReasoning
 }
 
 /**
@@ -65,7 +77,7 @@ export const validModels: ModelConfig[] = [
     streamVersion: 'v3',
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Azure,
-    tags: ['cheap', 'fast', 'free']
+    tags: ['cheap', 'fast', 'free'],
   },
   {
     name: 'gpt-5-mini',
@@ -76,6 +88,8 @@ export const validModels: ModelConfig[] = [
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Azure,
     tags: ['cheap', 'fast', 'free'],
+    // medium is the model's default effort; the config only adds the reasoning summary.
+    reasoning: { effort: 'medium', showSummary: true },
   },
   {
     name: 'gemma-4-26B-A4B',
@@ -86,7 +100,7 @@ export const validModels: ModelConfig[] = [
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Toska,
     service: 'v1',
-    tags: ['local', 'open', 'free']
+    tags: ['local', 'open', 'free'],
   },
   // {
   //   name: 'gpt-4o-mini',
@@ -187,6 +201,8 @@ export const validModels: ModelConfig[] = [
   //   provider: ModelProvider.Vertex,
   //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   //   timeoutOverride: 60000,
+  //   tags: [],
+  //   reasoning: { effort: 'low', showSummary: true },
   // },
   // {
   //   name: 'Qwen3.5',
@@ -207,6 +223,8 @@ export const validModels: ModelConfig[] = [
     streamVersion: 'v3',
     provider: ModelProvider.Mock,
     tags: [],
+    // The mock reasons only for messages starting with `think`.
+    reasoning: { effort: 'low', showSummary: true },
   },
 ] as const
 

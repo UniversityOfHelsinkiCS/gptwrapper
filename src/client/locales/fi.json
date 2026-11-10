@@ -212,6 +212,8 @@
     "toolCallRunning": "Käytetään työkalua {{name}}…",
     "toolCallDone": "Käytettiin työkalua {{name}}",
     "toolCallFailed": "Työkalu {{name}} epäonnistui",
+    "thinking": "Ajattelee…",
+    "thoughtFor": "Ajatteli {{seconds}} s",
     "processingRequest": "Käsitellään pyyntöä.",
     "responseReady": "Vastaus on valmis.",
     "responseCanceled": "Vastauksen generointi peruutettiin.",

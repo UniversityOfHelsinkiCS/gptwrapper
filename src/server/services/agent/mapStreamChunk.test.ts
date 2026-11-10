@@ -18,7 +18,8 @@ import {
 
 /**
  * Fixtures are raw `agent.stream` tuples written by `scripts/captureAgentStreamFixtures.ts`.
- * - `azure-*`: captured from real gpt-5-mini runs on Azure (Responses API).
+ * - `azure-*`: captured from real gpt-5-mini runs on Azure (Responses API). `azure-reasoning*` with
+ *   `reasoning: { effort: 'medium', summary: 'auto' }`, so they stream a reasoning summary.
  * - `vertex-replay-*`: SYNTHETIC. Vertex could not be called (billing disabled on the GCP project), so these
  *   come from the real ChatGoogle + createAgent code fed a hand-written Gemini HTTP response. The LangChain
  *   side (string vs array content, thought parts, usage deltas) is real; the Gemini reply text is not.
@@ -31,11 +32,15 @@ const loadFixture = async (name: string): Promise<StreamChunk[]> => {
 
 const eventsOf = (tuples: StreamChunk[]): ChatEvent[] => mapStreamChunks(tuples)
 
-const textOf = (events: ChatEvent[]) =>
+const joined = (events: ChatEvent[], type: 'text.delta' | 'reasoning.delta') =>
   events
-    .filter((e) => e.type === 'text.delta')
-    .map((e) => e.text)
+    .filter((e) => e.type === type)
+    .map((e) => (e as { text: string }).text)
     .join('')
+
+const textOf = (events: ChatEvent[]) => joined(events, 'text.delta')
+
+const reasoningOf = (events: ChatEvent[]) => joined(events, 'reasoning.delta')
 
 const sumUsage = (tuples: StreamChunk[]) =>
   tuples
@@ -96,8 +101,47 @@ describe('mapStreamChunk with captured Azure runs', () => {
   })
 })
 
+describe('mapStreamChunk reasoning with captured Azure runs', () => {
+  test('streams the reasoning summary as reasoning deltas, all before the answer text', async () => {
+    const events = eventsOf(await loadFixture('azure-reasoning'))
+    const firstText = events.findIndex((e) => e.type === 'text.delta')
+
+    expect(events.every((e) => (e.type === 'text.delta' || e.type === 'reasoning.delta') && e.path.length === 0)).toBe(true)
+    expect(events.slice(0, firstText).every((e) => e.type === 'reasoning.delta')).toBe(true)
+    expect(events.slice(firstText).every((e) => e.type === 'text.delta')).toBe(true)
+    expect(reasoningOf(events)).toMatch(/^\*\*Solving the cognitive reflection test\*\*\n\nI'm working through a classic cognitive reflection test/)
+    expect(reasoningOf(events)).toContain('the ball costs 0.05 euros')
+    expect(textOf(events)).toBe('The ball costs €0.05 (5 euro cents).')
+  })
+
+  test('a reasoning model that calls a tool: tool events, then reasoning about the result, then the answer', async () => {
+    const events = eventsOf(await loadFixture('azure-reasoning-tool'))
+    const kinds = events.map((e) => e.type).filter((type, i, all) => type !== all[i - 1])
+
+    expect(kinds).toEqual(['tool.start', 'tool.end', 'reasoning.delta', 'text.delta'])
+    expect(reasoningOf(events)).toMatch(/^\*\*Calculating exam dates\*\*\n\n/)
+    expect(textOf(events)).toContain('12 December')
+  })
+
+  test('separates the parts of a multi-part reasoning summary with a paragraph break', () => {
+    const summaryChunk = (text: string, index: number) =>
+      new AIMessageChunk({
+        content: text ? [{ type: 'reasoning', reasoning: text, index }] : [],
+        additional_kwargs: { reasoning: { type: 'reasoning', summary: [{ type: 'summary_text', text, index }] } },
+        response_metadata: { model_provider: 'openai' },
+      })
+    const chunks: StreamChunk[] = [summaryChunk('', 0), summaryChunk('**First**', 0), summaryChunk('', 1), summaryChunk('**Second**', 1)].map((chunk) => [
+      ['model_request:x'],
+      'messages',
+      [chunk, {}],
+    ])
+
+    expect(reasoningOf(eventsOf(chunks))).toBe('**First**\n\n**Second**')
+  })
+})
+
 describe('mapStreamChunk with Gemini runs (synthetic Vertex replay)', () => {
-  test('skips thought parts when a chunk has array content', async () => {
+  test('thought parts become reasoning deltas, the other parts of the same chunk text deltas', async () => {
     const tuples = await loadFixture('vertex-replay-text')
     const first = tuples[0][2] as [AIMessageChunk]
     expect(Array.isArray(first[0].content)).toBe(true)
@@ -105,6 +149,7 @@ describe('mapStreamChunk with Gemini runs (synthetic Vertex replay)', () => {
     const events = eventsOf(tuples)
 
     expect(events).toEqual([
+      { type: 'reasoning.delta', path: [], text: 'The user wants a short greeting.' },
       { type: 'text.delta', path: [], text: 'Hello there!' },
       { type: 'text.delta', path: [], text: ' Nice to meet you.' },
     ])

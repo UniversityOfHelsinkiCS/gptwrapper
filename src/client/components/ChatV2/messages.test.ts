@@ -127,6 +127,18 @@ describe('messageToText', () => {
     })
   })
 
+  test('reasoning is not part of the text (copy, email, download)', () => {
+    expect(
+      messageToText({
+        role: 'assistant',
+        parts: [
+          { type: 'reasoning', text: 'secret thoughts', durationMs: 1000 },
+          { type: 'text', text: 'answer' },
+        ],
+      }),
+    ).toBe('answer')
+  })
+
   test('only text parts count, joined by a blank line', () => {
     expect(
       messageToText({
@@ -151,6 +163,24 @@ describe('toHistoryMessages', () => {
     expect(history[5]).toEqual({ role: 'assistant', parts: [] })
     expect(history[7]).toEqual({ role: 'assistant', parts: (migrated[7] as AssistantMessageV2).parts })
     expect((history[7] as { parts: AssistantPart[] }).parts.map((part) => part.type)).toEqual(['tool', 'tool', 'text'])
+  })
+
+  test('never sends reasoning back to the model', () => {
+    const history = toHistoryMessages([
+      { role: 'user', content: 'think hard' },
+      {
+        role: 'assistant',
+        parts: [
+          { type: 'reasoning', text: 'secret thoughts', durationMs: 1000 },
+          { type: 'tool', callId: 'c1', name: 'document_search', input: { query: 'q' }, status: 'ok', result: { files: [] } },
+          { type: 'reasoning', text: 'more thoughts', startedAt: 5 },
+          { type: 'text', text: 'answer' },
+        ],
+      },
+    ])
+
+    expect((history[1] as { parts: AssistantPart[] }).parts.map((part) => part.type)).toEqual(['tool', 'text'])
+    expect(JSON.stringify(history)).not.toContain('thoughts')
   })
 
   test('leaves the artifact and progress of tool parts out', () => {

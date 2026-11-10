@@ -12,7 +12,7 @@ type HistoryMessage = PostStreamSchemaV4Type['options']['chatMessages'][number]
 
 /**
  * The plain text of a message. Used for copy, email, download and for the history sent to the model,
- * so they all agree on what a message says.
+ * so they all agree on what a message says. Only text parts: reasoning and tool parts are left out.
  */
 export const messageToText = (msg: ClientChatMessage): string => {
   if (msg.role === 'user') return readMessageContent(msg)
@@ -29,9 +29,10 @@ const toHistoryPart = (part: AssistantPart): AssistantPart => {
 /**
  * The conversation as sent to the server: user messages as they are, assistant messages as their parts.
  * The server turns the parts into text for the model, tool parts as summaries of their tool.
+ * Reasoning is never sent back to the model.
  */
 export const toHistoryMessages = (messages: ClientChatMessage[]): HistoryMessage[] =>
-  messages.map((msg) => (msg.role === 'user' ? msg : { role: 'assistant', parts: msg.parts.map(toHistoryPart) }))
+  messages.map((msg) => (msg.role === 'user' ? msg : { role: 'assistant', parts: msg.parts.filter((part) => part.type !== 'reasoning').map(toHistoryPart) }))
 
 /**
  * Sources of an assistant message, in the shape the Sources button, side panel and exports use. The client

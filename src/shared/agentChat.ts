@@ -4,10 +4,12 @@ import { ChatMessageSchema, PostStreamSchemaV3, type MessageGenerationInfo } fro
 /**
  * Agent stream protocol (v4). See .scratch/agent-architecture/plan.md, section 3.
  * path = [] for the main agent, ['<callId>'] for a subagent, ['<callId>', '<callId2>'] for nested subagents.
- * `callId` is always the model's tool call id. More event types (reasoning, subagent) are added in later slices.
+ * `callId` is always the model's tool call id. Subagent events are added in a later slice.
  */
 export type ChatEvent =
   | { type: 'text.delta'; path: string[]; text: string }
+  /** The model's reasoning (or only its summary), streamed before or between its answer text. Only sent for models with `ModelConfig.reasoning.showSummary`. */
+  | { type: 'reasoning.delta'; path: string[]; text: string }
   /** A tool call whose input is complete. Tool-argument chunks are not streamed. */
   | { type: 'tool.start'; path: string[]; callId: string; name: string; input: unknown }
   /** Whatever a running tool reports about its progress (written with `writeToolProgress`). */
@@ -22,6 +24,18 @@ export type ToolPartStatus = 'running' | 'ok' | 'error'
 
 const TextPartSchema = z.object({ type: z.literal('text'), text: z.string() })
 
+/**
+ * What the model thought before answering, shown collapsed in a thinking block. Never sent back to the model
+ * and not part of the message's text (copy, email, download).
+ * `startedAt` (client clock, ms) is set while it streams; `durationMs` once the model moved on to answering.
+ */
+const ReasoningPartSchema = z.object({
+  type: z.literal('reasoning'),
+  text: z.string(),
+  startedAt: z.number().optional(),
+  durationMs: z.number().optional(),
+})
+
 const ToolPartSchema = z.object({
   type: z.literal('tool'),
   callId: z.string(),
@@ -34,11 +48,12 @@ const ToolPartSchema = z.object({
   progress: z.unknown().optional(),
 })
 
-/** More part types (reasoning, subagent) are added in later slices. */
-export const AssistantPartSchema = z.discriminatedUnion('type', [TextPartSchema, ToolPartSchema])
+/** Subagent parts are added in a later slice. */
+export const AssistantPartSchema = z.discriminatedUnion('type', [TextPartSchema, ReasoningPartSchema, ToolPartSchema])
 
 export type AssistantPart = z.infer<typeof AssistantPartSchema>
 export type ToolPart = Extract<AssistantPart, { type: 'tool' }>
+export type ReasoningPart = Extract<AssistantPart, { type: 'reasoning' }>
 
 export type AssistantMessageV2 = {
   role: 'assistant'
@@ -49,7 +64,8 @@ export type AssistantMessageV2 = {
 
 /**
  * An assistant message in the history sent to the server. The server turns its parts into text for the model
- * (tool parts through `ToolModule.summarizeForHistory`), never into real tool calls.
+ * (tool parts through `ToolModule.summarizeForHistory`), never into real tool calls. The client leaves reasoning
+ * parts out, and the server ignores any that come anyway.
  */
 export const HistoryAssistantMessageSchema = z.object({
   role: z.literal('assistant'),

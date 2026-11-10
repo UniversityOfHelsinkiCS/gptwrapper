@@ -28,6 +28,7 @@ import {
 import type { AssistantMessageV2, AssistantPart } from '../../../shared/agentChat'
 import { type ClientChatMessage, messageToolResults, messageToText } from './messages'
 import { ToolPartView } from './tools/registry'
+import { ThinkingBlock } from './ThinkingBlock'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import CopyToClipboardButton from './CopyToClipboardButton'
 import { StreamStatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
@@ -261,6 +262,8 @@ const AssistantMessageItem = ({
       {processedParts.map((part, partIdx) =>
         part.type === 'tool' ? (
           <ToolPartView key={`tool-${part.callId}`} part={part} />
+        ) : part.type === 'reasoning' ? (
+          <ThinkingBlock key={`reasoning-${partIdx}`} part={part} />
         ) : (
           <ReactMarkdown
             key={`text-${partIdx}`}

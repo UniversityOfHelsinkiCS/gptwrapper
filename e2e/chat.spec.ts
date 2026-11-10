@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test'
 import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from './utils/test-helpers'
-import { TestByRole } from './fixtures'
+import { studentTest, TestByRole } from './fixtures'
 import { FREE_MODEL, validModels } from '../src/config'
 
 // Matrix of tests
@@ -126,5 +126,37 @@ testMatrix.forEach((testConfig) => {
         })
       }
     })
+  })
+})
+
+studentTest.describe('Thinking block', () => {
+  studentTest('a reasoning answer shows a collapsed thinking block that opens and closes', async ({ page }) => {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+
+    // The mock model streams reasoning chunks before answering for `think <answer>`
+    await sendChatMessage(page, 'think The thought-through answer.')
+    // While it streams the block says "Thinking…". The send preference popover hides the rest of the page from
+    // the accessibility tree, so the streaming state is checked from the DOM.
+    const block = page.getByTestId('thinking-block')
+    await expect(block).toHaveAttribute('data-thinking', 'true')
+    await expect(block).toContainText('Thinking…')
+    await closeSendPreference(page)
+
+    const answer = page.getByTestId('assistant-message')
+    await expect(answer).toContainText('The thought-through answer.')
+    const toggle = answer.getByRole('button', { name: /^Thought for \d+ s$/ })
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await expect(answer).not.toContainText('mock thinking')
+
+    await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    await expect(answer.getByTestId('thinking-content')).toContainText('Reading the question')
+    await expect(answer.getByTestId('thinking-content')).toContainText('The user wants a mock answer after some mock thinking.')
+
+    await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await expect(answer.getByTestId('thinking-content')).toHaveCount(0)
   })
 })

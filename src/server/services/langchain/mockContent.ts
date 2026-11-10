@@ -424,3 +424,8 @@ import Foundation
 print("Hello, Swift!")
 \`\`\`
 `
+
+/** Reasoning of the mock model's `think` answers, streamed one chunk at a time. */
+export const thinkReasoningChunks = ['**Reading the question**\n\n', 'The user wants a mock answer', ' after some mock thinking.']
+
+export const thinkTestAnswer = 'This is the mock answer after thinking.'

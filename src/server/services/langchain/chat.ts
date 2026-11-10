@@ -356,7 +356,8 @@ const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[]): ChatMo
       return tools.length > 0 ? (azureModel.bindTools(tools) as ChatModel) : azureModel
     }
     case ModelProvider.Vertex: {
-      const vertexModel = getVertexModelProvider(modelConfig)
+      // v3 has no reasoning events, so the thinking config (ModelConfig.reasoning) is left out.
+      const vertexModel = getVertexModelProvider({ name: modelConfig.name, modelRegion: modelConfig.modelRegion })
       return tools.length > 0 ? vertexModel.bindTools(tools) : vertexModel
     }
     case ModelProvider.Toska: {
