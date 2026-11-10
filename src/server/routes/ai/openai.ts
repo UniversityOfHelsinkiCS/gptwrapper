@@ -351,18 +351,30 @@ api.post('/v1/chat/completions',
         }
 
         let tokens = 0
+        const tokenDetails = {}
         if (full?.usage_metadata) {
-            if (full?.usage_metadata?.output_tokens) tokens += full?.usage_metadata.output_tokens
-            if (full?.usage_metadata?.input_tokens) tokens += full?.usage_metadata.input_tokens
+            if (full?.usage_metadata?.output_tokens) {
+                tokens += full?.usage_metadata.output_tokens
+                tokenDetails["output"] = full?.usage_metadata.output_tokens
+            }
+            if (full?.usage_metadata?.input_tokens){
+                tokens += full?.usage_metadata.input_tokens
+                tokenDetails["input"] = full?.usage_metadata.input_tokens
+            } 
 
             // Discount 70% of cached token read from total usage
-            if (full?.usage_metadata?.input_token_details?.cache_read) tokens -= Math.round(full?.usage_metadata?.input_token_details?.cache_read * 0.70)
+            if (full?.usage_metadata?.input_token_details?.cache_read){
+                tokens -= Math.round(full?.usage_metadata?.input_token_details?.cache_read * 0.70)
+                tokenDetails["cacheRead"] = full?.usage_metadata?.input_token_details?.cache_read
+            } 
 
         }
         if (tokens <= 0) {
             logger.error(`Fallback token count on user ${user.id} and model ${model}`)
             tokens = textLength
         }
+
+        logger.info(`api-usage: ${user.username} | ${user.id} | ${model} | ${tokens} | ${JSON.stringify(tokenDetails)}`)
 
         await incrementUsage(user, tokens)
 
