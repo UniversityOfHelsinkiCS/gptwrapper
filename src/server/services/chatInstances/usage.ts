@@ -6,7 +6,6 @@ import { ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } 
 import logger from '../../util/logger'
 import { ApplicationError } from '../../util/ApplicationError'
 import { readMessageContent, type Message } from '../../../shared/chat'
-import { checkIamAccess } from '../../util/iams'
 import { chatIsActive } from './activity'
 import { getAccessLevel } from './access'
 import { CourseUsage } from '@shared/types'
@@ -50,9 +49,7 @@ const countActiveCourseMemberships = async (user: UserType): Promise<number> => 
 }
 
 export const getUserTokenLimit = async (user: UserType): Promise<number> => {
-  const hasFullAccess = user.isAdmin || checkIamAccess(user.iamGroups)
-  const baseLimit = hasFullAccess ? DEFAULT_TOKEN_LIMIT : DEFAULT_TOKEN_LIMIT / 2
-  const tierLimit = user.isPowerUser ? baseLimit * 10 : baseLimit
+  const tierLimit = user.isPowerUser ? DEFAULT_TOKEN_LIMIT * 10 : DEFAULT_TOKEN_LIMIT
 
   const activeCourseCount = await countActiveCourseMemberships(user)
 

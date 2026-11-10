@@ -57,49 +57,49 @@ describe('getUserTokenLimit', () => {
   test('is the plain tier limit without any course memberships', async () => {
     mockMemberships({})
 
-    expect(await getUserTokenLimit(user)).toBe(DEFAULT_TOKEN_LIMIT / 2)
+    expect(await getUserTokenLimit(user)).toBe(DEFAULT_TOKEN_LIMIT)
   })
 
   test('grants the bonus for each ongoing course', async () => {
     mockMemberships({ enrolled: [membership('c1'), membership('c2')] })
 
-    expect(await getUserTokenLimit(user)).toBe(DEFAULT_TOKEN_LIMIT / 2 + 2 * COURSE_TOKEN_BONUS)
+    expect(await getUserTokenLimit(user)).toBe(DEFAULT_TOKEN_LIMIT + 2 * COURSE_TOKEN_BONUS)
   })
 
   test('counts taught courses alongside enrolled ones', async () => {
     mockMemberships({ enrolled: [membership('c1')], teached: [membership('c2')] })
 
-    expect(await getUserTokenLimit(user)).toBe(DEFAULT_TOKEN_LIMIT / 2 + 2 * COURSE_TOKEN_BONUS)
+    expect(await getUserTokenLimit(user)).toBe(DEFAULT_TOKEN_LIMIT + 2 * COURSE_TOKEN_BONUS)
   })
 
   test('counts a course the user both attends and teaches only once', async () => {
     mockMemberships({ enrolled: [membership('c1')], teached: [membership('c1')] })
 
-    expect(await getUserTokenLimit(user)).toBe(DEFAULT_TOKEN_LIMIT / 2 + COURSE_TOKEN_BONUS)
+    expect(await getUserTokenLimit(user)).toBe(DEFAULT_TOKEN_LIMIT + COURSE_TOKEN_BONUS)
   })
 
   test('ignores courses outside their activity period', async () => {
     mockMemberships({ enrolled: [membership('c1'), membership('c2', EXPIRED)] })
 
-    expect(await getUserTokenLimit(user)).toBe(DEFAULT_TOKEN_LIMIT / 2 + COURSE_TOKEN_BONUS)
+    expect(await getUserTokenLimit(user)).toBe(DEFAULT_TOKEN_LIMIT + COURSE_TOKEN_BONUS)
   })
 
   test('ignores courses the teacher has not activated', async () => {
     mockMemberships({ enrolled: [membership('c1'), membership('c2', ONGOING, false)] })
 
-    expect(await getUserTokenLimit(user)).toBe(DEFAULT_TOKEN_LIMIT / 2 + COURSE_TOKEN_BONUS)
+    expect(await getUserTokenLimit(user)).toBe(DEFAULT_TOKEN_LIMIT + COURSE_TOKEN_BONUS)
   })
 
-  test('adds the bonus on top of the full access limit', async () => {
-    mockMemberships({ enrolled: [membership('c1')] })
+  test('gives users with IAM access the same base limit as students', async () => {
+    mockMemberships({})
 
-    expect(await getUserTokenLimit({ ...user, isAdmin: true })).toBe(DEFAULT_TOKEN_LIMIT + COURSE_TOKEN_BONUS)
+    expect(await getUserTokenLimit({ ...user, isAdmin: true })).toBe(DEFAULT_TOKEN_LIMIT)
   })
 
   test('adds the bonus on top of the power user limit', async () => {
     mockMemberships({ enrolled: [membership('c1')] })
 
-    expect(await getUserTokenLimit({ ...user, isAdmin: true, isPowerUser: true })).toBe(DEFAULT_TOKEN_LIMIT * 10 + COURSE_TOKEN_BONUS)
+    expect(await getUserTokenLimit({ ...user, isPowerUser: true })).toBe(DEFAULT_TOKEN_LIMIT * 10 + COURSE_TOKEN_BONUS)
   })
 })
 
