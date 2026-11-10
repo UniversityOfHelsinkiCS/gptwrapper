@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import type { AssistantPart } from '../../../shared/agentChat'
+import type { AssistantPart, ChatEvent } from '../../../shared/agentChat'
 import { applyEvent } from './applyEvent'
 
 describe('applyEvent', () => {
@@ -38,6 +38,54 @@ describe('applyEvent', () => {
 
   test('unknown event types are ignored', () => {
     const parts: AssistantPart[] = [{ type: 'text', text: 'Main' }]
-    expect(applyEvent(parts, { type: 'tool.start', path: [] } as any)).toBe(parts)
+    expect(applyEvent(parts, { type: 'reasoning.delta', path: [], text: 'hmm' } as any)).toBe(parts)
+  })
+})
+
+const files = (fileName: string) => ({ files: [{ fileName }] })
+
+describe('applyEvent with tool events', () => {
+  test('multitool: two calls of one turn stay in call order between the text before and after them', () => {
+    // The order the v4 stream sends a `multitool` run in: both calls start, they finish in any order, then the answer.
+    const events: ChatEvent[] = [
+      { type: 'text.delta', path: [], text: 'Let me search.' },
+      { type: 'tool.start', path: [], callId: 'mock_multitool_1', name: 'document_search', input: { query: 'first' } },
+      { type: 'tool.start', path: [], callId: 'mock_multitool_2', name: 'document_search', input: { query: 'second' } },
+      { type: 'tool.end', path: [], callId: 'mock_multitool_2', status: 'ok', result: files('b.pdf') },
+      { type: 'tool.end', path: [], callId: 'mock_multitool_1', status: 'ok', result: files('a.pdf') },
+      { type: 'text.delta', path: [], text: 'Found ' },
+      { type: 'text.delta', path: [], text: 'both.' },
+    ]
+
+    expect(events.reduce(applyEvent, [])).toEqual([
+      { type: 'text', text: 'Let me search.' },
+      { type: 'tool', callId: 'mock_multitool_1', name: 'document_search', input: { query: 'first' }, status: 'ok', result: files('a.pdf') },
+      { type: 'tool', callId: 'mock_multitool_2', name: 'document_search', input: { query: 'second' }, status: 'ok', result: files('b.pdf') },
+      { type: 'text', text: 'Found both.' },
+    ])
+  })
+
+  test('a started tool is running until it ends; progress is kept only while it runs', () => {
+    const started = applyEvent([], { type: 'tool.start', path: [], callId: 'c1', name: 'document_search', input: { query: 'q' } })
+    expect(started).toEqual([{ type: 'tool', callId: 'c1', name: 'document_search', input: { query: 'q' }, status: 'running' }])
+
+    const progressed = applyEvent(started, { type: 'tool.progress', path: [], callId: 'c1', data: { step: 1 } })
+    expect(progressed[0]).toMatchObject({ status: 'running', progress: { step: 1 } })
+
+    const ended = applyEvent(progressed, { type: 'tool.end', path: [], callId: 'c1', status: 'error', result: 'failed' })
+    expect(ended).toEqual([{ type: 'tool', callId: 'c1', name: 'document_search', input: { query: 'q' }, status: 'error', result: 'failed' }])
+  })
+
+  test('a duplicate start, or progress and end of an unknown call, change nothing', () => {
+    const parts = applyEvent([], { type: 'tool.start', path: [], callId: 'c1', name: 'document_search', input: {} })
+
+    expect(applyEvent(parts, { type: 'tool.start', path: [], callId: 'c1', name: 'document_search', input: {} })).toBe(parts)
+    expect(applyEvent(parts, { type: 'tool.progress', path: [], callId: 'other', data: 1 })).toBe(parts)
+    expect(applyEvent(parts, { type: 'tool.end', path: [], callId: 'other', status: 'ok', result: null })).toBe(parts)
+  })
+
+  test('tool events of a subagent (non-empty path) are ignored for now', () => {
+    const parts: AssistantPart[] = []
+    expect(applyEvent(parts, { type: 'tool.start', path: ['call_1'], callId: 'c2', name: 'document_search', input: {} })).toBe(parts)
   })
 })

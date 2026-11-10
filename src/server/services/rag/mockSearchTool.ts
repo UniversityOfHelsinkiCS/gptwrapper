@@ -11,7 +11,7 @@ const mockDocuments = [
   new Document({ pageContent: 'This is the third mock document.', metadata: { ragFileName: 'mock_document3.pdf' } }),
 ]
 
-const mockSearch: typeof search = async (_index: RagIndex, _params: { query: string }) => {
+export const mockSearch: typeof search = async (_index: RagIndex, _params: { query: string }) => {
   await new Promise((resolve) => setTimeout(resolve, 300))
 
   return {

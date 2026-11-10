@@ -18,12 +18,22 @@ export class MockModel extends BaseChatModel {
     return 'mock'
   }
 
+  /** Names of the tools bound by createAgent. */
+  private boundToolNames: string[] = []
+
   /**
-   * createAgent requires bindTools. The mock picks its tool calls from the message prefix (`rag`, ...),
-   * so binding is a no-op. Construct it with `tools: []` for createAgent, which refuses pre-bound tools.
+   * createAgent requires bindTools. The mock picks its tool calls from the message prefix (`rag`, `multitool`),
+   * so binding only records the tool names. Construct it with `tools: []` for createAgent, which refuses pre-bound tools.
    */
-  override bindTools(_tools: BindToolsInput[]) {
+  override bindTools(tools: BindToolsInput[]) {
+    this.boundToolNames = tools.flatMap((t) => (typeof t === 'object' && t !== null && 'name' in t && typeof t.name === 'string' ? [t.name] : []))
     return this
+  }
+
+  /** v3 binds `mock_document_search` through the constructor; the agent (v4) binds the registry's `document_search`. */
+  private get searchToolName() {
+    const names = [...this.tools.map((t) => t.name), ...this.boundToolNames]
+    return names.find((name) => name === 'mock_document_search') ?? names.find((name) => name === 'document_search') ?? 'mock_document_search'
   }
 
   private buildFake(messages: BaseMessage[]) {
@@ -44,7 +54,19 @@ export class MockModel extends BaseChatModel {
       return fakeModel().respond(
         new AIMessage({
           content: '',
-          tool_calls: [{ name: 'mock_document_search', args: { query: 'mock test query' }, id: 'mock_document_search_id', type: 'tool_call' }],
+          tool_calls: [{ name: this.searchToolName, args: { query: 'mock test query' }, id: 'mock_document_search_id', type: 'tool_call' }],
+        }),
+      )
+    }
+    if (lastHuman.startsWith('multitool')) {
+      // Two tool calls in one turn, to test that both results end up in order in the answer.
+      return fakeModel().respond(
+        new AIMessage({
+          content: '',
+          tool_calls: [
+            { name: this.searchToolName, args: { query: 'first mock query' }, id: 'mock_multitool_1', type: 'tool_call' },
+            { name: this.searchToolName, args: { query: 'second mock query' }, id: 'mock_multitool_2', type: 'tool_call' },
+          ],
         }),
       )
     }

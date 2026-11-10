@@ -76,7 +76,7 @@ const ChatV2Content = () => {
 
   const { processStream, streamingParts, isStreaming, setIsStreaming, streamControllerRef, generationInfo, hasPotentialError } = useChatStream({
     onComplete: ({ message }) => {
-      // Counts file searches once they are in the message. The text-only v4 stream has no tool parts yet.
+      // Counts file searches (finished document_search parts) once they are in the message.
       messageToolResults(message).forEach(() => dispatchAnalytics({ type: 'INCREMENT_FILE_SEARCHES' }))
       if (message.parts.length > 0 || message.error) {
         setMessages((prev: ClientChatMessage[]) => prev.concat(message))

@@ -16,7 +16,8 @@ export type ToolCallInput = {
 }
 
 export type ToolCallResult = {
-  files: { fileName: string; score?: number }[]
+  /** `excerpt`: the start of the matching chunk (document_search on v4), used in the history summary. */
+  files: { fileName: string; score?: number; excerpt?: string }[]
 }
 
 export type ToolCallStatusEvent = {
@@ -125,7 +126,7 @@ export type MessageGenerationInfo = z.Infer<typeof MessageGenerationInfoSchema>
 
 export const MessageContentArraySchema = z.union([z.string(), z.array(MessageContentSchema)])
 
-const ChatMessageSchema = z.object({
+export const ChatMessageSchema = z.object({
   role: z.enum(['user', 'assistant']),
   content: z.union([z.string().min(0).max(1_200_000), MessageContentArraySchema]),
   attachements: z.union([z.string(), z.array(z.string())]).optional(),

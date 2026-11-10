@@ -157,3 +157,52 @@ describe('old saved conversations', () => {
     expect(screen.getByText('Found it in the lecture notes.')).toBeTruthy()
   })
 })
+
+describe('tool parts', () => {
+  const answer: ClientChatMessage = {
+    role: 'assistant',
+    parts: [
+      { type: 'tool', callId: 'c1', name: 'document_search', input: { query: 'exam date' }, status: 'ok', result: { files: [{ fileName: 'syllabus.pdf' }] } },
+      { type: 'tool', callId: 'c2', name: 'document_search', input: { query: 'exam hall' }, status: 'ok', result: { files: [] } },
+      { type: 'text', text: 'The exam is on 12 December.' },
+    ],
+  }
+
+  test('render in their place in the answer, as labelled groups, followed by one Sources button', () => {
+    renderConversation({ messages: [...userTurn, answer], completion: '', isStreaming: false })
+
+    const message = screen.getByTestId('assistant-message')
+    const groups = screen.getAllByRole('group', { name: 'Source material search' })
+    expect(groups.map((group) => group.textContent)).toEqual([
+      'Searched the source material for “exam date”',
+      'Nothing found in the source material for “exam hall”',
+    ])
+    // Tool parts come before the text that followed them
+    const text = screen.getByText('The exam is on 12 December.')
+    expect(groups.every((group) => group.compareDocumentPosition(text) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true)
+    expect(message.querySelectorAll('[data-testid="file-search-sources"]')).toHaveLength(1)
+  })
+
+  test('a running search says so, and an unknown tool gets a generic label', () => {
+    const parts: AssistantPart[] = [
+      { type: 'tool', callId: 'c1', name: 'document_search', input: { query: 'exam' }, status: 'running' },
+      { type: 'tool', callId: 'c2', name: 'some_new_tool', input: {}, status: 'error', result: 'boom' },
+    ]
+    render(
+      <I18nextProvider i18n={i18n}>
+        <Conversation
+          endState="none"
+          messages={userTurn}
+          streamingParts={parts}
+          isStreaming
+          isMobile={false}
+          latestResponseIndex={null}
+          latestResponseRef={createRef<HTMLDivElement>()}
+        />
+      </I18nextProvider>,
+    )
+
+    expect(screen.getByRole('group', { name: 'Source material search' }).textContent).toBe('Searching the source material for “exam”…')
+    expect(screen.getByRole('group', { name: 'Tool some_new_tool' }).textContent).toBe('The tool some_new_tool failed')
+  })
+})

@@ -4,6 +4,7 @@ vi.mock('../../../config', async () => ({ ValidModelNameSchema: (await import('z
 
 import { act, renderHook } from '@testing-library/react'
 import { readMessageContent } from '../../../shared/chat'
+import type { AssistantMessageV2, AssistantPart } from '../../../shared/agentChat'
 import { oldFormatMessages, oldFormatMessageWithToolCalls } from './__fixtures__/oldFormatMessages'
 import {
   MESSAGES_VERSION,
@@ -140,15 +141,40 @@ describe('messageToText', () => {
 })
 
 describe('toHistoryMessages', () => {
-  test('assistant messages become plain text, user messages pass through', () => {
+  test('assistant messages are sent as their parts (the server summarises tool parts), user messages pass through', () => {
     const migrated = migrateMessages(oldFormatMessages)
     const history = toHistoryMessages(migrated)
 
     expect(history[0]).toBe(migrated[0])
     expect(history[2]).toBe(migrated[2])
-    expect(history[1]).toEqual({ role: 'assistant', content: oldFormatMessages[1].content })
-    expect(history[5]).toEqual({ role: 'assistant', content: '' })
-    // Tool parts are left out of the history
-    expect(history[7]).toEqual({ role: 'assistant', content: 'Found it in the lecture notes.' })
+    expect(history[1]).toEqual({ role: 'assistant', parts: [{ type: 'text', text: oldFormatMessages[1].content }] })
+    expect(history[5]).toEqual({ role: 'assistant', parts: [] })
+    expect(history[7]).toEqual({ role: 'assistant', parts: (migrated[7] as AssistantMessageV2).parts })
+    expect((history[7] as { parts: AssistantPart[] }).parts.map((part) => part.type)).toEqual(['tool', 'tool', 'text'])
+  })
+
+  test('leaves the artifact and progress of tool parts out', () => {
+    const [history] = toHistoryMessages([
+      {
+        role: 'assistant',
+        parts: [
+          {
+            type: 'tool',
+            callId: 'c1',
+            name: 'document_search',
+            input: { query: 'q' },
+            status: 'ok',
+            result: { files: [] },
+            artifact: { big: true },
+            progress: 1,
+          },
+        ],
+      },
+    ])
+
+    expect(history).toEqual({
+      role: 'assistant',
+      parts: [{ type: 'tool', callId: 'c1', name: 'document_search', input: { query: 'q' }, status: 'ok', result: { files: [] } }],
+    })
   })
 })

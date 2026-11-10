@@ -1,11 +1,12 @@
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models'
-import type { StructuredTool } from '@langchain/core/tools'
-import { createAgent } from 'langchain'
+import { isGraphInterrupt } from '@langchain/langgraph'
+import { createAgent, createMiddleware, ToolMessage } from 'langchain'
 import type { z } from 'zod/v4'
 import { DEFAULT_TOKEN_LIMIT, inProduction, isFreeModel, isMockModel, ModelProvider, type ModelConfig, type ValidModelName, validModels } from '@config'
 import type { AiApiWarning } from '@shared/aiApi'
 import type { ChatEvent, PostStreamSchemaV4 } from '@shared/agentChat'
 import { isPromptDraft } from '@shared/prompt'
+import type { ChatMessage } from '@shared/chat'
 import type { AccessLevel } from '@shared/types'
 import type { User } from '@shared/user'
 import { ChatInstance, Discussion, Prompt, PromptUsage, RagIndex, UserChatInstanceUsage } from '../../db/models'
@@ -16,9 +17,10 @@ import { checkCourseUsage, checkUsage, getCourseTokenLimit, getUsage, getUserTok
 import { handleWarnings, modelConfigHasInstructions, prepareMessagesForLLM } from '../langchain/chat'
 import { MockModel } from '../langchain/MockModel'
 import { getAzureChatOpenAI, getToskaProvider, getVertexModelProvider } from '../langchain/modelGenerators'
-import { getMockRagIndexSearchTool } from '../rag/mockSearchTool'
-import { getRagIndexSearchTool } from '../rag/searchTool'
-import { getMainAgentModelCall, mapStreamChunk, type StreamChunk } from './mapStreamChunk'
+import { getMainAgentModelCall, INITIAL_STREAM_STATE, mapStreamChunk, nextStreamState, type StreamChunk } from './mapStreamChunk'
+import { DOCUMENT_SEARCH } from './tools/documentSearch'
+import { createTools, historyMessageToText, withToolInstructions } from './tools/registry'
+import type { EnabledTool } from './tools/types'
 
 export const RECURSION_LIMIT = 25
 const KEEP_ALIVE_INTERVAL_MS = 5000
@@ -70,7 +72,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
     meta.course = course.chatInstance.name?.fi
   }
 
-  const { prompt, systemMessage, tools } = await resolvePrompt(user, generationInfo, course, meta)
+  const { prompt, systemMessage, enabledTools } = await resolvePrompt(user, generationInfo, course, meta)
 
   const isFree = isFreeModel(model)
   const tokenLimit = course ? getCourseTokenLimit(course.chatInstance) : isFree ? DEFAULT_TOKEN_LIMIT : await getUserTokenLimit(user)
@@ -80,12 +82,19 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
     throw ApplicationError.Forbidden('Usage limit reached')
   }
 
-  meta.tools = tools.map((t) => t.name)
+  meta.tools = enabledTools.map((t) => t.name)
 
+  // Discussions are saved with this text history too, so saved discussions keep the `content` shape they always had.
+  const history = toModelHistory(options.chatMessages)
   const instructionMessage = modelConfigHasInstructions(modelConfig) ? [{ role: 'system' as const, content: modelConfig.instructions }] : []
   const { messages, warnings, inputTokenCount } = handleWarnings(
     modelConfig,
-    [...instructionMessage, ...(prompt?.messages ?? []), { role: 'system', content: systemMessage }, ...prepareMessagesForLLM(options.chatMessages)],
+    [
+      ...instructionMessage,
+      ...(prompt?.messages ?? []),
+      { role: 'system', content: withToolInstructions(systemMessage, enabledTools) },
+      ...prepareMessagesForLLM(history),
+    ],
     options.ignoredWarnings,
     tokenLimit,
   )
@@ -98,7 +107,8 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
 
   onStart()
 
-  const agent = createAgent({ model: getAgentModel(modelConfig), tools })
+  const tools = createTools(enabledTools, { user, course: course?.chatInstance ?? null, model, signal })
+  const agent = createAgent({ model: getAgentModel(modelConfig), tools, middleware: tools.length > 0 ? [toolErrorMiddleware(signal)] : [] })
 
   const startedAt = Date.now()
   let firstTokenAt: number | undefined
@@ -114,9 +124,11 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
 
   try {
     const stream = await agent.stream({ messages }, { streamMode: ['messages', 'updates', 'custom'], subgraphs: true, signal, recursionLimit: RECURSION_LIMIT })
+    let streamState = INITIAL_STREAM_STATE
 
     for await (const chunk of stream) {
       const streamChunk = chunk as StreamChunk
+      streamState = nextStreamState(streamState, streamChunk)
 
       const call = getMainAgentModelCall(streamChunk)
       if (call) {
@@ -126,7 +138,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
         toolCalls.push(...call.toolCalls)
       }
 
-      for (const event of mapStreamChunk(streamChunk)) {
+      for (const event of mapStreamChunk(streamChunk, streamState)) {
         if (event.type === 'text.delta' && event.path.length === 0) {
           firstTokenAt ??= Date.now()
           response += event.text
@@ -184,7 +196,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
   })
 
   if (courseId && course?.chatInstance.saveDiscussions) {
-    await Discussion.create({ userId: user.id, courseId, response, metadata: options })
+    await Discussion.create({ userId: user.id, courseId, response, metadata: { ...options, chatMessages: history } })
   }
 
   return { status: 'completed' }
@@ -219,9 +231,9 @@ const resolvePrompt = async (
   generationInfo: RunAgentRequest['options']['generationInfo'],
   course: CourseContext | null,
   meta: Record<string, unknown>,
-): Promise<{ prompt: Prompt | null; systemMessage: string; tools: StructuredTool[] }> => {
+): Promise<{ prompt: Prompt | null; systemMessage: string; enabledTools: EnabledTool[] }> => {
   if (generationInfo.promptInfo.type !== 'saved') {
-    return { prompt: null, systemMessage: generationInfo.promptInfo.systemMessage, tools: [] }
+    return { prompt: null, systemMessage: generationInfo.promptInfo.systemMessage, enabledTools: [] }
   }
 
   const prompt = await Prompt.findByPk(generationInfo.promptInfo.id, {
@@ -248,9 +260,10 @@ const resolvePrompt = async (
     throw ApplicationError.NotFound('Prompt not found')
   }
 
-  const tools: StructuredTool[] = []
+  // document_search is still derived from the prompt's RAG index (no tools column yet). The mock model gets the mock search.
+  const enabledTools: EnabledTool[] = []
   if (prompt.ragIndex) {
-    tools.push(isMockModel(generationInfo.model) ? getMockRagIndexSearchTool(prompt.ragIndex) : getRagIndexSearchTool(prompt.ragIndex))
+    enabledTools.push({ name: DOCUMENT_SEARCH, config: { ragIndex: prompt.ragIndex } })
     meta.ragIndexId = prompt.ragIndex.id
     meta.ragIndex = prompt.ragIndex.metadata.name
   }
@@ -262,8 +275,38 @@ const resolvePrompt = async (
     promptLanguage: prompt.language ?? null,
   })
 
-  return { prompt, systemMessage: prompt.systemMessage, tools }
+  return { prompt, systemMessage: prompt.systemMessage, enabledTools }
 }
+
+/** The history as the model gets it: assistant messages with `parts` become text, tool parts summarised by their tool module. */
+const toModelHistory = (chatMessages: RunAgentRequest['options']['chatMessages']): ChatMessage[] =>
+  chatMessages.map((message) => ('parts' in message ? { role: 'assistant', content: historyMessageToText(message) } : message))
+
+/**
+ * Turns a failing tool into an error `ToolMessage` (status `error`, so the client shows the call as failed)
+ * that the model can react to. Without this the agent's default handler hides the failure in a normal result.
+ */
+const toolErrorMiddleware = (signal: AbortSignal) =>
+  createMiddleware({
+    name: 'ToolErrors',
+    wrapToolCall: async (request, handler) => {
+      try {
+        return await handler(request)
+      } catch (error) {
+        if (signal.aborted || isGraphInterrupt(error)) throw error
+        logger.error('Tool call failed', {
+          tool: request.toolCall.name,
+          error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
+        })
+        return new ToolMessage({
+          content: 'The tool failed. Tell the user it did not work, and answer without it if you can.',
+          tool_call_id: request.toolCall.id ?? '',
+          name: request.toolCall.name,
+          status: 'error',
+        })
+      }
+    },
+  })
 
 /** The chat model without bound tools: createAgent binds the tools itself and refuses a pre-bound model. */
 const getAgentModel = (modelConfig: ModelConfig): BaseChatModel => {

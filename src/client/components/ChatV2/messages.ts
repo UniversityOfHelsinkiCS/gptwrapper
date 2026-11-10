@@ -1,5 +1,6 @@
-import { readMessageContent, type ToolCallInput, type ToolCallResult, type ToolCallResultEvent, type UserMessage } from '../../../shared/chat'
-import type { AssistantMessageV2, AssistantPart, PostStreamSchemaV4Type } from '../../../shared/agentChat'
+import { readMessageContent, type ToolCallResultEvent, type UserMessage } from '../../../shared/chat'
+import type { AssistantMessageV2, AssistantPart, PostStreamSchemaV4Type, ToolPart } from '../../../shared/agentChat'
+import { toolPartSource } from './tools/registry'
 
 /** A chat message as the client keeps it in state and localStorage. */
 export type ClientChatMessage = UserMessage | AssistantMessageV2
@@ -18,25 +19,29 @@ export const messageToText = (msg: ClientChatMessage): string => {
   return msg.parts.flatMap((part) => (part.type === 'text' ? [part.text] : [])).join('\n\n')
 }
 
-/** The conversation as sent to the model: user messages as they are, assistant messages as text only (tool parts are left out). */
-export const toHistoryMessages = (messages: ClientChatMessage[]): HistoryMessage[] =>
-  messages.map((msg) => (msg.role === 'user' ? msg : { role: 'assistant', content: messageToText(msg) }))
-
-type ToolPart = Extract<AssistantPart, { type: 'tool' }>
-
-const hasFileList = (result: unknown): result is ToolCallResult =>
-  typeof result === 'object' && result !== null && Array.isArray((result as ToolCallResult).files)
+/** Leaves out what the server does not need to summarise a part: the client-only artifact and the progress of a running tool. */
+const toHistoryPart = (part: AssistantPart): AssistantPart => {
+  if (part.type !== 'tool') return part
+  const { artifact: _artifact, progress: _progress, ...rest } = part
+  return rest
+}
 
 /**
- * RAG sources of an assistant message: its tool parts whose result lists files, in the shape the
- * Sources button, side panel and exports use. Other tool parts are not sources.
+ * The conversation as sent to the server: user messages as they are, assistant messages as their parts.
+ * The server turns the parts into text for the model, tool parts as summaries of their tool.
+ */
+export const toHistoryMessages = (messages: ClientChatMessage[]): HistoryMessage[] =>
+  messages.map((msg) => (msg.role === 'user' ? msg : { role: 'assistant', parts: msg.parts.map(toHistoryPart) }))
+
+/**
+ * Sources of an assistant message, in the shape the Sources button, side panel and exports use. The client
+ * tool registry decides which tool parts are sources (finished document searches).
  */
 export const messageToolResults = (msg: AssistantMessageV2): ToolCallResultEvent[] =>
-  msg.parts.flatMap((part) =>
-    part.type === 'tool' && part.input && hasFileList(part.result)
-      ? [{ type: 'toolCallStatus' as const, callId: part.callId, toolName: part.name, text: '', input: part.input as ToolCallInput, result: part.result }]
-      : [],
-  )
+  msg.parts.flatMap((part) => {
+    const source = part.type === 'tool' ? toolPartSource(part) : null
+    return source ? [source] : []
+  })
 
 const toolCallToPart = (toolCall: ToolCallResultEvent): ToolPart => ({
   type: 'tool',

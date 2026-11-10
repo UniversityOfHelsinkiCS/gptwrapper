@@ -150,6 +150,39 @@ test.describe('axe wcag scan for chat', () => {
   })
 })
 
+teacherTest.describe('axe wcag scan for chat with tool parts', () => {
+  teacherTest.afterAll(writeAxeReport)
+
+  teacherTest('scan chat answer with two document searches', async ({ page }, testInfo) => {
+    const promptName = `axe-rag-prompt-${testInfo.workerIndex}`
+
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    await page.goto('/test-course-course-id')
+    await useMockModel(page)
+
+    await page.getByTestId('choose-prompt-button').click()
+    await page.getByTestId('create-course-prompt-test-course-course-id-button').click()
+    await page.getByTestId('prompt-name-input').fill(promptName)
+    await page.getByTestId('system-message-input').fill('axe rag prompt')
+    await page.getByTestId('rag-select').click()
+    await page.getByTestId(`source-material-rag-${testInfo.workerIndex}-teacher`).click()
+    await page.getByRole('button', { name: 'Save' }).click()
+    await page.getByTestId(`prompt-row-${promptName}`).click()
+    await page.getByTestId('change-to-prompt-button').click()
+    await expect(page.getByTestId('prompt-name').first()).toContainText(promptName)
+
+    // The mock model makes two document_search calls in one turn for `multitool`
+    await sendChatMessage(page, 'multitool')
+    await closeSendPreference(page)
+
+    await expect(page.getByTestId('assistant-message')).toContainText('Ok! Got some great results from that mock tool call!')
+    await expect(page.getByRole('group', { name: 'Source material search' })).toHaveCount(2)
+    await expect(page.getByTestId('tool-part').first()).toHaveAttribute('data-tool-status', 'ok')
+    await scan(page, testInfo.title)
+  })
+})
+
 adminTest.describe('axe wcag scan for university prompt gallery', () => {
   adminTest.afterAll(writeAxeReport)
 
