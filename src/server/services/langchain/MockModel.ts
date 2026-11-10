@@ -1,6 +1,6 @@
 import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager'
-import { BaseChatModel, type BaseChatModelParams } from '@langchain/core/language_models/chat_models'
-import { AIMessage, type BaseMessage, isHumanMessage, isSystemMessage, isToolMessage } from '@langchain/core/messages'
+import { BaseChatModel, type BaseChatModelParams, type BindToolsInput } from '@langchain/core/language_models/chat_models'
+import { AIMessage, AIMessageChunk, type BaseMessage, isHumanMessage, isSystemMessage, isToolMessage } from '@langchain/core/messages'
 import { ChatGenerationChunk, type ChatResult } from '@langchain/core/outputs'
 import type { StructuredTool } from '@langchain/core/tools'
 import { fakeModel } from 'langchain'
@@ -16,6 +16,14 @@ export class MockModel extends BaseChatModel {
 
   _llmType() {
     return 'mock'
+  }
+
+  /**
+   * createAgent requires bindTools. The mock picks its tool calls from the message prefix (`rag`, ...),
+   * so binding is a no-op. Construct it with `tools: []` for createAgent, which refuses pre-bound tools.
+   */
+  override bindTools(_tools: BindToolsInput[]) {
+    return this
   }
 
   private buildFake(messages: BaseMessage[]) {
@@ -53,8 +61,18 @@ export class MockModel extends BaseChatModel {
     return fakeModel().respond(new AIMessage(basicTestContent))
   }
 
+  /**
+   * Calls the fake model's `_generate` directly instead of `invoke`/`stream`. Going through the Runnable
+   * interface makes the inner fake model a child run that inherits the callbacks (also from the async
+   * context inside a LangGraph run), so agent.stream's `messages` mode would report every message twice.
+   */
+  private async respond(messages: BaseMessage[], options: this['ParsedCallOptions']): Promise<AIMessage> {
+    const result = await this.buildFake(messages)._generate(messages, { signal: options.signal } as typeof options)
+    return result.generations[0].message as AIMessage
+  }
+
   async _generate(messages: BaseMessage[], options: this['ParsedCallOptions'], _runManager?: CallbackManagerForLLMRun): Promise<ChatResult> {
-    const message = await this.buildFake(messages).invoke(messages, options)
+    const message = await this.respond(messages, options)
     return {
       generations: [{ text: extractText(message.content), message }],
     }
@@ -65,11 +83,11 @@ export class MockModel extends BaseChatModel {
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun,
   ): AsyncGenerator<ChatGenerationChunk> {
-    for await (const chunk of await this.buildFake(messages).stream(messages, options)) {
-      const text = extractText(chunk.content)
-      await runManager?.handleLLMNewToken(text)
-      yield new ChatGenerationChunk({ message: chunk, text })
-    }
+    const message = await this.respond(messages, options)
+    const chunk = new AIMessageChunk({ id: message.id, content: message.content, tool_calls: message.tool_calls })
+    const text = extractText(chunk.content)
+    await runManager?.handleLLMNewToken(text)
+    yield new ChatGenerationChunk({ message: chunk, text })
   }
 }
 

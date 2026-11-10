@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Box, Button, Divider, Tooltip, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import type { ChatMessage } from '@shared/chat'
+import type { ClientChatMessage } from './messages'
 import type { User } from '../../types'
 import { TextButton } from './general/Buttons'
 import MapsUgcIcon from '@mui/icons-material/MapsUgc'
@@ -28,7 +28,7 @@ const SideBar = ({
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
   user?: User | null
   handleReset: () => void
-  messages: ChatMessage[]
+  messages: ClientChatMessage[]
 }) => {
   const { t } = useTranslation()
   const openButtonRef = useRef<HTMLButtonElement>(null)

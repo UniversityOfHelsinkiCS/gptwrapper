@@ -1,0 +1,183 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`conversation export output > email 1`] = `
+"
+    <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body {
+                    color: rgba(0, 0, 0, 0.8);
+                    line-height: 1.6;
+                    margin: 0 auto;
+                }
+            </style>
+        </head>
+        <body>
+            
+      <div style="padding: 1rem; background: #efefef; margin-left: 100px; border-radius: 0.6rem; box-shadow: 0px 2px 2px rgba(0,0,0,0.2); white-space: pre-wrap; word-break: break-word; ">
+        
+        Explain **Pythagoras** &amp; &lt;script&gt;alert(1)&lt;/script&gt;
+      </div>
+    
+      <div style="padding: 1rem; margin-right: 2rem;">
+        <h3 style="font-style: italic; margin: 0; color: #107eab">gpt-5-mini:</h3>
+        <h1>Pythagoras</h1>
+<p>The theorem says [a^2 + b^2 = c^2] where α is <em>not</em> used.</p>
+<pre><div style="margin:1rem 0;border-radius:8px;overflow:hidden"><div style="font-size:12px;padding:8px 12px;background-color:#f8f9fa;border-bottom:1px solid #e9ecef">python</div><pre style="background-color:#2d3748;color:#e2e8f0;padding:16px;margin:0;font-size:16px;font-family:Monaco, Consolas, monospace"><code>print(&quot;hi&quot;)
+</code></pre></div></pre>
+<p>See <a href="https://en.wikipedia.org">Wikipedia</a> and <code style="background-color:#f1f3f4;padding:2px 6px;border-radius:4px;font-family:Monaco, Consolas, monospace;font-size:16px">code</code>.</p>
+      </div>
+    
+      <div style="padding: 1rem; background: #efefef; margin-left: 100px; border-radius: 0.6rem; box-shadow: 0px 2px 2px rgba(0,0,0,0.2); white-space: pre-wrap; word-break: break-word; ">
+        
+        What is in this picture?
+      </div>
+    
+      <div style="padding: 1rem; margin-right: 2rem;">
+        <h3 style="font-style: italic; margin: 0; color: #107eab">Biology helper (gpt-5-mini):</h3>
+        <p>A <em><strong>cat</strong></em>.
+It is <strong>sleeping</strong>.</p>
+      </div>
+    
+      <div style="padding: 1rem; background: #efefef; margin-left: 100px; border-radius: 0.6rem; box-shadow: 0px 2px 2px rgba(0,0,0,0.2); white-space: pre-wrap; word-break: break-word; ">
+        
+        And now?
+      </div>
+    
+      <div style="padding: 1rem; margin-right: 2rem;">
+        <h3 style="font-style: italic; margin: 0; color: #107eab">gpt-5-mini:</h3>
+        
+      </div>
+    
+      <div style="padding: 1rem; background: #efefef; margin-left: 100px; border-radius: 0.6rem; box-shadow: 0px 2px 2px rgba(0,0,0,0.2); white-space: pre-wrap; word-break: break-word; ">
+        
+        Where is this in the material?
+      </div>
+    
+      <div style="padding: 1rem; margin-right: 2rem;">
+        <h3 style="font-style: italic; margin: 0; color: #107eab">gpt-5-mini:</h3>
+        <p>Found it in the lecture notes.</p>
+      </div>
+    
+        </body>
+    </html>
+"
+`;
+
+exports[`conversation export output > markdown download 1`] = `
+"# chat:conversation 10-11-2026
+
+[USER]
+Explain **Pythagoras** & <script>alert(1)</script>
+
+---
+
+[ASSISTANT - gpt-5-mini]
+# Pythagoras
+
+The theorem says $$a^2 + b^2 = c^2$$ where \\alpha is *not* used.
+
+\`\`\`python
+print("hi")
+\`\`\`
+
+See [Wikipedia](https://en.wikipedia.org) and \`code\`.
+
+---
+
+[USER]
+What is in this picture?
+[Attachment: cat.png]
+
+---
+
+[ASSISTANT - Biology helper (gpt-5-mini)]
+A ***cat***.
+It is **sleeping**.
+
+---
+
+[USER]
+And now?
+[Attachment: notes.txt]
+
+---
+
+[ASSISTANT - gpt-5-mini]
+
+[Error: timeout_error]
+
+---
+
+[USER]
+Where is this in the material?
+
+---
+
+[ASSISTANT - gpt-5-mini]
+Found it in the lecture notes.
+[Sources: lecture1.pdf, lecture2.pdf - Query: "pythagoras"]
+[Sources:  - Query: "triangle"]"
+`;
+
+exports[`conversation export output > plain text download 1`] = `
+"chat:conversation 10-11-2026
+
+========================================
+
+[USER]
+Explain Pythagoras & <script>alert(1)</script>
+
+----------------------------------------
+
+[ASSISTANT - gpt-5-mini]
+Pythagoras
+
+The theorem says $$a^2 + b^2 = c^2$$ where \\alpha is not used.
+
+\`python
+print("hi")
+\`
+
+See Wikipedia and code.
+
+----------------------------------------
+
+[USER]
+What is in this picture?
+[Attachment: cat.png]
+
+----------------------------------------
+
+[ASSISTANT - Biology helper (gpt-5-mini)]
+A cat.
+It is sleeping.
+
+----------------------------------------
+
+[USER]
+And now?
+[Attachment: notes.txt]
+
+----------------------------------------
+
+[ASSISTANT - gpt-5-mini]
+
+[Error: timeout_error]
+
+----------------------------------------
+
+[USER]
+Where is this in the material?
+
+----------------------------------------
+
+[ASSISTANT - gpt-5-mini]
+Found it in the lecture notes.
+[Sources: lecture1.pdf, lecture2.pdf - Query: "pythagoras"]
+[Sources:  - Query: "triangle"]
+
+----------------------------------------
+"
+`;

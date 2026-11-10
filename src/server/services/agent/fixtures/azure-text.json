@@ -1,0 +1,914 @@
+{
+  "provider": "azure",
+  "model": "gpt-5-mini",
+  "capturedAt": "2026-11-10T15:46:51.127Z",
+  "prompt": "Say hello in two short sentences.",
+  "tuples": [
+    [
+      [
+        "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "AIMessageChunk"
+          ],
+          "kwargs": {
+            "id": "run-01a1c623-f749-726f-8845-b0332b9ef656",
+            "content": [],
+            "tool_call_chunks": [],
+            "additional_kwargs": {},
+            "response_metadata": {
+              "model_provider": "openai",
+              "id": "resp_0b6ac2b9a4b879f4006af33c68f4508196a9affec0363a8063",
+              "model_name": "gpt-5-mini",
+              "model": "gpt-5-mini"
+            },
+            "tool_calls": [],
+            "invalid_tool_calls": []
+          }
+        },
+        {
+          "tags": [],
+          "ls_integration": "langchain_chat_model",
+          "langgraph_step": 1,
+          "langgraph_node": "model_request",
+          "langgraph_triggers": [
+            "branch:to:model_request"
+          ],
+          "langgraph_path": [
+            "__pregel_pull",
+            "model_request"
+          ],
+          "langgraph_checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "ls_provider": "openai",
+          "ls_model_name": "gpt-5-mini",
+          "ls_model_type": "chat",
+          "versions": {
+            "@langchain/core": "1.2.12",
+            "@langchain/openai": "1.4.5"
+          }
+        }
+      ]
+    ],
+    [
+      [
+        "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "AIMessageChunk"
+          ],
+          "kwargs": {
+            "id": "run-01a1c623-f749-726f-8845-b0332b9ef656",
+            "content": [],
+            "tool_call_chunks": [],
+            "additional_kwargs": {
+              "reasoning": {
+                "id": "rs_0b6ac2b9a4b879f4006af33c6945048196899710738ae95faf",
+                "type": "reasoning",
+                "summary": []
+              }
+            },
+            "response_metadata": {
+              "model_provider": "openai"
+            },
+            "tool_calls": [],
+            "invalid_tool_calls": []
+          }
+        },
+        {
+          "tags": [],
+          "ls_integration": "langchain_chat_model",
+          "langgraph_step": 1,
+          "langgraph_node": "model_request",
+          "langgraph_triggers": [
+            "branch:to:model_request"
+          ],
+          "langgraph_path": [
+            "__pregel_pull",
+            "model_request"
+          ],
+          "langgraph_checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "ls_provider": "openai",
+          "ls_model_name": "gpt-5-mini",
+          "ls_model_type": "chat",
+          "versions": {
+            "@langchain/core": "1.2.12",
+            "@langchain/openai": "1.4.5"
+          }
+        }
+      ]
+    ],
+    [
+      [
+        "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "AIMessageChunk"
+          ],
+          "kwargs": {
+            "id": "msg_0b6ac2b9a4b879f4006af33c6a36788196a47c0acbb759d83b",
+            "content": [],
+            "tool_call_chunks": [],
+            "additional_kwargs": {},
+            "response_metadata": {
+              "model_provider": "openai"
+            },
+            "tool_calls": [],
+            "invalid_tool_calls": []
+          }
+        },
+        {
+          "tags": [],
+          "ls_integration": "langchain_chat_model",
+          "langgraph_step": 1,
+          "langgraph_node": "model_request",
+          "langgraph_triggers": [
+            "branch:to:model_request"
+          ],
+          "langgraph_path": [
+            "__pregel_pull",
+            "model_request"
+          ],
+          "langgraph_checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "ls_provider": "openai",
+          "ls_model_name": "gpt-5-mini",
+          "ls_model_type": "chat",
+          "versions": {
+            "@langchain/core": "1.2.12",
+            "@langchain/openai": "1.4.5"
+          }
+        }
+      ]
+    ],
+    [
+      [
+        "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "AIMessageChunk"
+          ],
+          "kwargs": {
+            "id": "run-01a1c623-f749-726f-8845-b0332b9ef656",
+            "content": [
+              {
+                "type": "text",
+                "text": "Hello",
+                "index": 0
+              }
+            ],
+            "tool_call_chunks": [],
+            "additional_kwargs": {},
+            "response_metadata": {
+              "model_provider": "openai"
+            },
+            "tool_calls": [],
+            "invalid_tool_calls": []
+          }
+        },
+        {
+          "tags": [],
+          "ls_integration": "langchain_chat_model",
+          "langgraph_step": 1,
+          "langgraph_node": "model_request",
+          "langgraph_triggers": [
+            "branch:to:model_request"
+          ],
+          "langgraph_path": [
+            "__pregel_pull",
+            "model_request"
+          ],
+          "langgraph_checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "ls_provider": "openai",
+          "ls_model_name": "gpt-5-mini",
+          "ls_model_type": "chat",
+          "versions": {
+            "@langchain/core": "1.2.12",
+            "@langchain/openai": "1.4.5"
+          }
+        }
+      ]
+    ],
+    [
+      [
+        "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "AIMessageChunk"
+          ],
+          "kwargs": {
+            "id": "run-01a1c623-f749-726f-8845-b0332b9ef656",
+            "content": [
+              {
+                "type": "text",
+                "text": ".",
+                "index": 0
+              }
+            ],
+            "tool_call_chunks": [],
+            "additional_kwargs": {},
+            "response_metadata": {
+              "model_provider": "openai"
+            },
+            "tool_calls": [],
+            "invalid_tool_calls": []
+          }
+        },
+        {
+          "tags": [],
+          "ls_integration": "langchain_chat_model",
+          "langgraph_step": 1,
+          "langgraph_node": "model_request",
+          "langgraph_triggers": [
+            "branch:to:model_request"
+          ],
+          "langgraph_path": [
+            "__pregel_pull",
+            "model_request"
+          ],
+          "langgraph_checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "ls_provider": "openai",
+          "ls_model_name": "gpt-5-mini",
+          "ls_model_type": "chat",
+          "versions": {
+            "@langchain/core": "1.2.12",
+            "@langchain/openai": "1.4.5"
+          }
+        }
+      ]
+    ],
+    [
+      [
+        "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "AIMessageChunk"
+          ],
+          "kwargs": {
+            "id": "run-01a1c623-f749-726f-8845-b0332b9ef656",
+            "content": [
+              {
+                "type": "text",
+                "text": " I'm",
+                "index": 0
+              }
+            ],
+            "tool_call_chunks": [],
+            "additional_kwargs": {},
+            "response_metadata": {
+              "model_provider": "openai"
+            },
+            "tool_calls": [],
+            "invalid_tool_calls": []
+          }
+        },
+        {
+          "tags": [],
+          "ls_integration": "langchain_chat_model",
+          "langgraph_step": 1,
+          "langgraph_node": "model_request",
+          "langgraph_triggers": [
+            "branch:to:model_request"
+          ],
+          "langgraph_path": [
+            "__pregel_pull",
+            "model_request"
+          ],
+          "langgraph_checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "ls_provider": "openai",
+          "ls_model_name": "gpt-5-mini",
+          "ls_model_type": "chat",
+          "versions": {
+            "@langchain/core": "1.2.12",
+            "@langchain/openai": "1.4.5"
+          }
+        }
+      ]
+    ],
+    [
+      [
+        "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "AIMessageChunk"
+          ],
+          "kwargs": {
+            "id": "run-01a1c623-f749-726f-8845-b0332b9ef656",
+            "content": [
+              {
+                "type": "text",
+                "text": " here",
+                "index": 0
+              }
+            ],
+            "tool_call_chunks": [],
+            "additional_kwargs": {},
+            "response_metadata": {
+              "model_provider": "openai"
+            },
+            "tool_calls": [],
+            "invalid_tool_calls": []
+          }
+        },
+        {
+          "tags": [],
+          "ls_integration": "langchain_chat_model",
+          "langgraph_step": 1,
+          "langgraph_node": "model_request",
+          "langgraph_triggers": [
+            "branch:to:model_request"
+          ],
+          "langgraph_path": [
+            "__pregel_pull",
+            "model_request"
+          ],
+          "langgraph_checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "ls_provider": "openai",
+          "ls_model_name": "gpt-5-mini",
+          "ls_model_type": "chat",
+          "versions": {
+            "@langchain/core": "1.2.12",
+            "@langchain/openai": "1.4.5"
+          }
+        }
+      ]
+    ],
+    [
+      [
+        "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "AIMessageChunk"
+          ],
+          "kwargs": {
+            "id": "run-01a1c623-f749-726f-8845-b0332b9ef656",
+            "content": [
+              {
+                "type": "text",
+                "text": " to",
+                "index": 0
+              }
+            ],
+            "tool_call_chunks": [],
+            "additional_kwargs": {},
+            "response_metadata": {
+              "model_provider": "openai"
+            },
+            "tool_calls": [],
+            "invalid_tool_calls": []
+          }
+        },
+        {
+          "tags": [],
+          "ls_integration": "langchain_chat_model",
+          "langgraph_step": 1,
+          "langgraph_node": "model_request",
+          "langgraph_triggers": [
+            "branch:to:model_request"
+          ],
+          "langgraph_path": [
+            "__pregel_pull",
+            "model_request"
+          ],
+          "langgraph_checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "ls_provider": "openai",
+          "ls_model_name": "gpt-5-mini",
+          "ls_model_type": "chat",
+          "versions": {
+            "@langchain/core": "1.2.12",
+            "@langchain/openai": "1.4.5"
+          }
+        }
+      ]
+    ],
+    [
+      [
+        "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "AIMessageChunk"
+          ],
+          "kwargs": {
+            "id": "run-01a1c623-f749-726f-8845-b0332b9ef656",
+            "content": [
+              {
+                "type": "text",
+                "text": " help",
+                "index": 0
+              }
+            ],
+            "tool_call_chunks": [],
+            "additional_kwargs": {},
+            "response_metadata": {
+              "model_provider": "openai"
+            },
+            "tool_calls": [],
+            "invalid_tool_calls": []
+          }
+        },
+        {
+          "tags": [],
+          "ls_integration": "langchain_chat_model",
+          "langgraph_step": 1,
+          "langgraph_node": "model_request",
+          "langgraph_triggers": [
+            "branch:to:model_request"
+          ],
+          "langgraph_path": [
+            "__pregel_pull",
+            "model_request"
+          ],
+          "langgraph_checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "ls_provider": "openai",
+          "ls_model_name": "gpt-5-mini",
+          "ls_model_type": "chat",
+          "versions": {
+            "@langchain/core": "1.2.12",
+            "@langchain/openai": "1.4.5"
+          }
+        }
+      ]
+    ],
+    [
+      [
+        "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "AIMessageChunk"
+          ],
+          "kwargs": {
+            "id": "run-01a1c623-f749-726f-8845-b0332b9ef656",
+            "content": [
+              {
+                "type": "text",
+                "text": ".",
+                "index": 0
+              }
+            ],
+            "tool_call_chunks": [],
+            "additional_kwargs": {},
+            "response_metadata": {
+              "model_provider": "openai"
+            },
+            "tool_calls": [],
+            "invalid_tool_calls": []
+          }
+        },
+        {
+          "tags": [],
+          "ls_integration": "langchain_chat_model",
+          "langgraph_step": 1,
+          "langgraph_node": "model_request",
+          "langgraph_triggers": [
+            "branch:to:model_request"
+          ],
+          "langgraph_path": [
+            "__pregel_pull",
+            "model_request"
+          ],
+          "langgraph_checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "ls_provider": "openai",
+          "ls_model_name": "gpt-5-mini",
+          "ls_model_type": "chat",
+          "versions": {
+            "@langchain/core": "1.2.12",
+            "@langchain/openai": "1.4.5"
+          }
+        }
+      ]
+    ],
+    [
+      [
+        "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "AIMessageChunk"
+          ],
+          "kwargs": {
+            "id": "run-01a1c623-f749-726f-8845-b0332b9ef656",
+            "content": [],
+            "tool_call_chunks": [],
+            "usage_metadata": {
+              "input_tokens": 24,
+              "output_tokens": 164,
+              "total_tokens": 188,
+              "input_token_details": {
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "reasoning": 128
+              }
+            },
+            "additional_kwargs": {},
+            "response_metadata": {
+              "model_provider": "openai",
+              "object": "response",
+              "created_at": 1794325608,
+              "status": "completed",
+              "access_programs": null,
+              "background": false,
+              "completed_at": 1794325611,
+              "content_filters": [
+                {
+                  "blocked": false,
+                  "source_type": "completion",
+                  "content_filter_raw": [],
+                  "content_filter_results": {},
+                  "content_filter_offsets": {
+                    "start_offset": 0,
+                    "end_offset": 644,
+                    "check_offset": 0
+                  }
+                },
+                {
+                  "blocked": false,
+                  "source_type": "prompt",
+                  "content_filter_raw": [],
+                  "content_filter_results": {},
+                  "content_filter_offsets": {
+                    "start_offset": 0,
+                    "end_offset": 1166,
+                    "check_offset": 0
+                  }
+                }
+              ],
+              "error": null,
+              "frequency_penalty": 0,
+              "incomplete_details": null,
+              "instructions": null,
+              "max_output_tokens": null,
+              "max_tool_calls": null,
+              "model": "gpt-5-mini",
+              "moderation": null,
+              "output": [
+                {
+                  "id": "rs_0b6ac2b9a4b879f4006af33c6945048196899710738ae95faf",
+                  "type": "reasoning",
+                  "content": [],
+                  "encrypted_content": "gAAAAABq8zxrVkvg8YMcC6k1M4m0A_UKO_of5gLGP8I-vqlgTfe1x5HiILjLCadpw6K8mWODBVa0SgoYoLDdC6PoulHS3J9_LtaF6UBNbB23JSw3ETkD1-cZ46MAMGlmim0-vGFweyONFkmkaQJ-hNu6M5KLDEdHbwTI5M6_DzMsTPQvhHw5pQeCNOHuXyQdFS6Kod2AkgvSXF3lecmZUoIH10GdyfZDfqNR0SAtVzY_dxXPh5ohXD3BuM_1D9U7tJUMQD13HKc6DZpNGJSaAscEu9zmCaHPoHdSdu1lbgDxeYLqtWNOyDJeAfHsfGeJ3Wj5tb8xdws12FaP3ElkacRNubfayFD5KSIU_e5wIDifynJNJAOTU8q1V3VOwsJcQohKkcq35oKhjcyn5QSUg7ImZr_ivIGg7ApQtJqNVn46EbfukSm6TSY_m0iUiso45s209nwriBLbBRlmMD-__vgVip9OCUgsT7JIR1egcIkvKVhz-SMSLMa2Gxi34VR3kg5ufEWXVGWsp6r0hhKp1A5jK_TKRgXoy2sBl06vEQbiyt0FAmNsZ7GT4vQvDSggghheit-dKG8lhztM9pdZbEmnk4uB_Srt9xV2FMnFhwEVzejYYXm8GhbvBe2lbPNGrgk9kCYNw6SK9vK2sFgkbDCJ5at55AbtnENnqDKchXCzsVkea05YfRZdzfcLyHjGzYaOWzzuthSq9TasNOF5Xa9ugExeQqIYP0hSVxp3gyLYpzw9z42uiqhlN0S-CQ2Z_gkzlpFKcLHPINkks2EGvYVIVUFKJHWQx8BVTJYvFXPvlGiGHVpibRZddvVauSDHDMAIQ0MuS5z5YkONhKYESXzvqSo8bnvT1WV_EcTcSDv6jjwkV3bBFt4egwFCvaoFJbhqcR9cpZEs_zBqZTQhRrJQbSj48LTytx_o7uxeTWGNNCW0C4ARXEC5eJZ-6dF8MUXiUSMZVt1BgFVTxw0XXBrw_bEDY48bMPHOp9bQyQ9xQZ6eagmKwVmBcxXK10pWIOjE3IyDwfgwA9AxKYYaNfAPQtq7A7R-fQTt2QxQwtV6N-5U2Y_v66VMypvZdZnRtPsJJcpxDLQUGA09iIrkRyeRsgkQg4qGPH9ogY6-4JrZJ2OLv7hEm3kPqYSzlqQ0pm2cA8OkIkiZMR4TY0pGcZ9veRyIFddqExkV47YB5UiuMOJAyF14IOfatqmCq6On0zV4hS3O6ejXuGQpgelfIKImavTx0v_VVMBzjjWRGw40ccV0b-bisYOevcrDEBv_YQW6jHH76flfPpmcjMoHUHG2f-jlNjlWOhoVmMZEJXZvF-ypufDW97HMmWZMCKP9qpIMNqpYLdWr6kDZYNu2s1hntNVhi3AkQBjUKFYOXP-hTQSryLIgTMkOjDd2oPiZdLcm9OygB8rMTihinMdkE6-2TZRboxTT3qXLKL5ppASIHcsPgxhpmJLdUILylr0hkjTJNZ1gdOvjbzl2fGEno4HEqscqL2f3-vVDBlgOdJChcO_cNmAReywIXDKV-A7rWjTxp_zEZ2efELe3r-ekscRqHGPQJPcEZX1fKAip-broiidTHiBVD7W_Eqp3NIs-WgstB0hTndXQqeFXPIchPpOhEuqxk2T1oWV8zZ2NyaCtxDPvqnm02UBDseJr2fk-7lBEybS_ZsBV6bZ4qAVW41AJIPcXSfJ-gZgGQ1MV8NlT1uGHQP0hex3fslDZv4vjLwFolDhsgO1vqH9mq6XSQy4XAqPevXGL71VlRSsOW7JQ0I-5LzIeYZWjJxBZvfINADM_tBysQY8qxlVlwJOTBxD3Cf9qc8mPKiOm21-mqbKKSmcg05q8OlqW2UgFaNIfG8c_Hlm78x09m03gfDWKIci4e3WMNpju8mokRSkz173Ij4c_oGbTatwRTXNJmK5FwiM4MfwHq6pfaIvNvB6bUBAY14l0tR5KCvnXWuGAk06RPzkcCe-XGd4JjZVCAwIyxjJnzGXW-oUV7NwIk9706l8wDdYitacKRF0hUotilKbM4nbBxgOGDtkehkNV5tcf4yIKYhnLJODVrttfjVmmtAQSv4icz1l_QK-iyUed4__AWYPSdgWktpoSZwtG2zQwIfLfoHqXQ5a-aQidU9LNqAsl7a33gbDEm3fxneEhPuCox96M39zxtkL8Domc8Ranv_pytwO8-un75U8jrNJWK8P58fpaTrSaAaFg2LtN6D48kVxt75H212LZCVwklJa7TcGn2jHzU5_jOoTJTr4FEpJjodM7pwnP5JFPW95fxzpDKjqR7raM5Bis_w96u5CQAXpn2sFUCFK_7mkFZIudRu0Kk9hHLNM6k1qFInEyJXmjzLKPR4ofM85hg9fufrJhYOSkLPvfT1habGkooLrcvLntsHeadQoka6v7x_Sww1Pq_vc77m1R2Lmcy6z2LYPP3tuV-CCpnkOnxfuhpEaOv1n0kyUyW1G-J16lp7SK-BJWZ9D51NVT2fYQEDueOoxxnd7u_eIUEoLLA3PtC_aucWyiu5YP1X0fx4Pmqvv_Uw6AnhZ9-mcqMSSVjQxgJZd30buhyQxYWc6tOUFU2LflyrXkOpSPHH1ombCdMiHmxL7ECat_7_3riaeZ3yiOb9cze8URMLsGTHb52Lrq2HdWacNFMuJ3bESkS5CiaqcTEQL0NcH7v9oMBfA_hResrJjDQeTdAMLFpSVujUNYoG_RzRZUU5L2biweg_3Y7QqdIhuK9C1KqjUvlfQNlV8yv4k5iDQhWtQ71JmAQWjb9cIssjwSzMhDMrHTOJmZ0_9bk5EkIEo8CsGTwVomhbknDo7qIiGgOrUTqKpyUQfOapDE52kPUfj-mJPWBvAyJP4xW1Zw6TC734JJToIUIGXnAjjWT1fQQdIpKWLqj1dxMehA_Gd_-BgWFOzlaEDNmkeV0KlnMuNIOuUMfzIv9yoNRi7oZSLeXC9_c_E3LN-ZJJc-61ILNS33xRUEyPxCuIGrNipbpkZSbIdFU_TjXUiAz5cJjYb3NgK9ZKcw3dgSdwdbycm0x4zbGIky02c82bDm15lGN75syR7Om4CPG4RgmF0wUso2pZVua4Hi7RDp1uQbhn_6i8JhgUaIjX6lUrNM1Vs7rduSAbU1z2GhmUq48HFnih-jPh0cLqLWjG3tX6egCDelvXCKYVzMQxqK3fuEWQqQLvjfGmirHdktD1tlEuHefO2gfyEwk7SHrOs1twiGdO-Kz73maE4r9PoHUZVqSkxJzKWasFdgoa71W0OS8uWgg1i8LS5GwcK9bqi7DTT_H0UsLs-WqZJk5Q==",
+                  "summary": []
+                },
+                {
+                  "id": "msg_0b6ac2b9a4b879f4006af33c6a36788196a47c0acbb759d83b",
+                  "type": "message",
+                  "status": "completed",
+                  "content": [
+                    {
+                      "type": "output_text",
+                      "annotations": [],
+                      "logprobs": [],
+                      "text": "Hello. I'm here to help."
+                    }
+                  ],
+                  "role": "assistant"
+                }
+              ],
+              "parallel_tool_calls": true,
+              "presence_penalty": 0,
+              "previous_response_id": null,
+              "prompt_cache_key": null,
+              "prompt_cache_retention": "in_memory",
+              "reasoning": {
+                "context": "current_turn",
+                "effort": "medium",
+                "mode": "standard",
+                "summary": null
+              },
+              "safety_identifier": null,
+              "service_tier": "default",
+              "store": true,
+              "temperature": 1,
+              "text": {
+                "format": {
+                  "type": "text"
+                },
+                "verbosity": "medium"
+              },
+              "tool_choice": "auto",
+              "tool_usage": {
+                "image_gen": {
+                  "input_tokens": 0,
+                  "input_tokens_details": {
+                    "image_tokens": 0,
+                    "text_tokens": 0
+                  },
+                  "output_tokens": 0,
+                  "output_tokens_details": {
+                    "image_tokens": 0,
+                    "text_tokens": 0
+                  },
+                  "total_tokens": 0
+                },
+                "web_search": {
+                  "num_requests": 0
+                }
+              },
+              "tools": [],
+              "top_logprobs": 0,
+              "top_p": 1,
+              "truncation": "disabled",
+              "usage": {
+                "input_tokens": 24,
+                "input_tokens_details": {
+                  "cache_write_tokens": 0,
+                  "cached_tokens": 0
+                },
+                "output_tokens": 164,
+                "output_tokens_details": {
+                  "reasoning_tokens": 128
+                },
+                "total_tokens": 188
+              },
+              "user": null,
+              "metadata": {}
+            },
+            "tool_calls": [],
+            "invalid_tool_calls": []
+          }
+        },
+        {
+          "tags": [],
+          "ls_integration": "langchain_chat_model",
+          "langgraph_step": 1,
+          "langgraph_node": "model_request",
+          "langgraph_triggers": [
+            "branch:to:model_request"
+          ],
+          "langgraph_path": [
+            "__pregel_pull",
+            "model_request"
+          ],
+          "langgraph_checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "checkpoint_ns": "model_request:303392b9-1501-50cc-a394-ec05fa93c0fc",
+          "ls_provider": "openai",
+          "ls_model_name": "gpt-5-mini",
+          "ls_model_type": "chat",
+          "versions": {
+            "@langchain/core": "1.2.12",
+            "@langchain/openai": "1.4.5"
+          }
+        }
+      ]
+    ],
+    [
+      [],
+      "updates",
+      {
+        "model_request": {
+          "messages": [
+            {
+              "lc": 1,
+              "type": "constructor",
+              "id": [
+                "langchain_core",
+                "messages",
+                "AIMessageChunk"
+              ],
+              "kwargs": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Hello. I'm here to help.",
+                    "index": 0
+                  }
+                ],
+                "additional_kwargs": {
+                  "reasoning": {
+                    "id": "rs_0b6ac2b9a4b879f4006af33c6945048196899710738ae95faf",
+                    "type": "reasoning",
+                    "summary": []
+                  }
+                },
+                "response_metadata": {
+                  "model_provider": "openai",
+                  "id": "resp_0b6ac2b9a4b879f4006af33c68f4508196a9affec0363a8063",
+                  "model_name": "gpt-5-mini",
+                  "model": "gpt-5-minigpt-5-mini",
+                  "object": "response",
+                  "created_at": 1794325608,
+                  "status": "completed",
+                  "access_programs": null,
+                  "background": false,
+                  "completed_at": 1794325611,
+                  "content_filters": [
+                    {
+                      "blocked": false,
+                      "source_type": "completion",
+                      "content_filter_raw": [],
+                      "content_filter_results": {},
+                      "content_filter_offsets": {
+                        "start_offset": 0,
+                        "end_offset": 644,
+                        "check_offset": 0
+                      }
+                    },
+                    {
+                      "blocked": false,
+                      "source_type": "prompt",
+                      "content_filter_raw": [],
+                      "content_filter_results": {},
+                      "content_filter_offsets": {
+                        "start_offset": 0,
+                        "end_offset": 1166,
+                        "check_offset": 0
+                      }
+                    }
+                  ],
+                  "error": null,
+                  "frequency_penalty": 0,
+                  "incomplete_details": null,
+                  "instructions": null,
+                  "max_output_tokens": null,
+                  "max_tool_calls": null,
+                  "moderation": null,
+                  "output": [
+                    {
+                      "id": "rs_0b6ac2b9a4b879f4006af33c6945048196899710738ae95faf",
+                      "type": "reasoning",
+                      "content": [],
+                      "encrypted_content": "gAAAAABq8zxrVkvg8YMcC6k1M4m0A_UKO_of5gLGP8I-vqlgTfe1x5HiILjLCadpw6K8mWODBVa0SgoYoLDdC6PoulHS3J9_LtaF6UBNbB23JSw3ETkD1-cZ46MAMGlmim0-vGFweyONFkmkaQJ-hNu6M5KLDEdHbwTI5M6_DzMsTPQvhHw5pQeCNOHuXyQdFS6Kod2AkgvSXF3lecmZUoIH10GdyfZDfqNR0SAtVzY_dxXPh5ohXD3BuM_1D9U7tJUMQD13HKc6DZpNGJSaAscEu9zmCaHPoHdSdu1lbgDxeYLqtWNOyDJeAfHsfGeJ3Wj5tb8xdws12FaP3ElkacRNubfayFD5KSIU_e5wIDifynJNJAOTU8q1V3VOwsJcQohKkcq35oKhjcyn5QSUg7ImZr_ivIGg7ApQtJqNVn46EbfukSm6TSY_m0iUiso45s209nwriBLbBRlmMD-__vgVip9OCUgsT7JIR1egcIkvKVhz-SMSLMa2Gxi34VR3kg5ufEWXVGWsp6r0hhKp1A5jK_TKRgXoy2sBl06vEQbiyt0FAmNsZ7GT4vQvDSggghheit-dKG8lhztM9pdZbEmnk4uB_Srt9xV2FMnFhwEVzejYYXm8GhbvBe2lbPNGrgk9kCYNw6SK9vK2sFgkbDCJ5at55AbtnENnqDKchXCzsVkea05YfRZdzfcLyHjGzYaOWzzuthSq9TasNOF5Xa9ugExeQqIYP0hSVxp3gyLYpzw9z42uiqhlN0S-CQ2Z_gkzlpFKcLHPINkks2EGvYVIVUFKJHWQx8BVTJYvFXPvlGiGHVpibRZddvVauSDHDMAIQ0MuS5z5YkONhKYESXzvqSo8bnvT1WV_EcTcSDv6jjwkV3bBFt4egwFCvaoFJbhqcR9cpZEs_zBqZTQhRrJQbSj48LTytx_o7uxeTWGNNCW0C4ARXEC5eJZ-6dF8MUXiUSMZVt1BgFVTxw0XXBrw_bEDY48bMPHOp9bQyQ9xQZ6eagmKwVmBcxXK10pWIOjE3IyDwfgwA9AxKYYaNfAPQtq7A7R-fQTt2QxQwtV6N-5U2Y_v66VMypvZdZnRtPsJJcpxDLQUGA09iIrkRyeRsgkQg4qGPH9ogY6-4JrZJ2OLv7hEm3kPqYSzlqQ0pm2cA8OkIkiZMR4TY0pGcZ9veRyIFddqExkV47YB5UiuMOJAyF14IOfatqmCq6On0zV4hS3O6ejXuGQpgelfIKImavTx0v_VVMBzjjWRGw40ccV0b-bisYOevcrDEBv_YQW6jHH76flfPpmcjMoHUHG2f-jlNjlWOhoVmMZEJXZvF-ypufDW97HMmWZMCKP9qpIMNqpYLdWr6kDZYNu2s1hntNVhi3AkQBjUKFYOXP-hTQSryLIgTMkOjDd2oPiZdLcm9OygB8rMTihinMdkE6-2TZRboxTT3qXLKL5ppASIHcsPgxhpmJLdUILylr0hkjTJNZ1gdOvjbzl2fGEno4HEqscqL2f3-vVDBlgOdJChcO_cNmAReywIXDKV-A7rWjTxp_zEZ2efELe3r-ekscRqHGPQJPcEZX1fKAip-broiidTHiBVD7W_Eqp3NIs-WgstB0hTndXQqeFXPIchPpOhEuqxk2T1oWV8zZ2NyaCtxDPvqnm02UBDseJr2fk-7lBEybS_ZsBV6bZ4qAVW41AJIPcXSfJ-gZgGQ1MV8NlT1uGHQP0hex3fslDZv4vjLwFolDhsgO1vqH9mq6XSQy4XAqPevXGL71VlRSsOW7JQ0I-5LzIeYZWjJxBZvfINADM_tBysQY8qxlVlwJOTBxD3Cf9qc8mPKiOm21-mqbKKSmcg05q8OlqW2UgFaNIfG8c_Hlm78x09m03gfDWKIci4e3WMNpju8mokRSkz173Ij4c_oGbTatwRTXNJmK5FwiM4MfwHq6pfaIvNvB6bUBAY14l0tR5KCvnXWuGAk06RPzkcCe-XGd4JjZVCAwIyxjJnzGXW-oUV7NwIk9706l8wDdYitacKRF0hUotilKbM4nbBxgOGDtkehkNV5tcf4yIKYhnLJODVrttfjVmmtAQSv4icz1l_QK-iyUed4__AWYPSdgWktpoSZwtG2zQwIfLfoHqXQ5a-aQidU9LNqAsl7a33gbDEm3fxneEhPuCox96M39zxtkL8Domc8Ranv_pytwO8-un75U8jrNJWK8P58fpaTrSaAaFg2LtN6D48kVxt75H212LZCVwklJa7TcGn2jHzU5_jOoTJTr4FEpJjodM7pwnP5JFPW95fxzpDKjqR7raM5Bis_w96u5CQAXpn2sFUCFK_7mkFZIudRu0Kk9hHLNM6k1qFInEyJXmjzLKPR4ofM85hg9fufrJhYOSkLPvfT1habGkooLrcvLntsHeadQoka6v7x_Sww1Pq_vc77m1R2Lmcy6z2LYPP3tuV-CCpnkOnxfuhpEaOv1n0kyUyW1G-J16lp7SK-BJWZ9D51NVT2fYQEDueOoxxnd7u_eIUEoLLA3PtC_aucWyiu5YP1X0fx4Pmqvv_Uw6AnhZ9-mcqMSSVjQxgJZd30buhyQxYWc6tOUFU2LflyrXkOpSPHH1ombCdMiHmxL7ECat_7_3riaeZ3yiOb9cze8URMLsGTHb52Lrq2HdWacNFMuJ3bESkS5CiaqcTEQL0NcH7v9oMBfA_hResrJjDQeTdAMLFpSVujUNYoG_RzRZUU5L2biweg_3Y7QqdIhuK9C1KqjUvlfQNlV8yv4k5iDQhWtQ71JmAQWjb9cIssjwSzMhDMrHTOJmZ0_9bk5EkIEo8CsGTwVomhbknDo7qIiGgOrUTqKpyUQfOapDE52kPUfj-mJPWBvAyJP4xW1Zw6TC734JJToIUIGXnAjjWT1fQQdIpKWLqj1dxMehA_Gd_-BgWFOzlaEDNmkeV0KlnMuNIOuUMfzIv9yoNRi7oZSLeXC9_c_E3LN-ZJJc-61ILNS33xRUEyPxCuIGrNipbpkZSbIdFU_TjXUiAz5cJjYb3NgK9ZKcw3dgSdwdbycm0x4zbGIky02c82bDm15lGN75syR7Om4CPG4RgmF0wUso2pZVua4Hi7RDp1uQbhn_6i8JhgUaIjX6lUrNM1Vs7rduSAbU1z2GhmUq48HFnih-jPh0cLqLWjG3tX6egCDelvXCKYVzMQxqK3fuEWQqQLvjfGmirHdktD1tlEuHefO2gfyEwk7SHrOs1twiGdO-Kz73maE4r9PoHUZVqSkxJzKWasFdgoa71W0OS8uWgg1i8LS5GwcK9bqi7DTT_H0UsLs-WqZJk5Q==",
+                      "summary": []
+                    },
+                    {
+                      "id": "msg_0b6ac2b9a4b879f4006af33c6a36788196a47c0acbb759d83b",
+                      "type": "message",
+                      "status": "completed",
+                      "content": [
+                        {
+                          "type": "output_text",
+                          "annotations": [],
+                          "logprobs": [],
+                          "text": "Hello. I'm here to help."
+                        }
+                      ],
+                      "role": "assistant"
+                    }
+                  ],
+                  "parallel_tool_calls": true,
+                  "presence_penalty": 0,
+                  "previous_response_id": null,
+                  "prompt_cache_key": null,
+                  "prompt_cache_retention": "in_memory",
+                  "reasoning": {
+                    "context": "current_turn",
+                    "effort": "medium",
+                    "mode": "standard",
+                    "summary": null
+                  },
+                  "safety_identifier": null,
+                  "service_tier": "default",
+                  "store": true,
+                  "temperature": 1,
+                  "text": {
+                    "format": {
+                      "type": "text"
+                    },
+                    "verbosity": "medium"
+                  },
+                  "tool_choice": "auto",
+                  "tool_usage": {
+                    "image_gen": {
+                      "input_tokens": 0,
+                      "input_tokens_details": {
+                        "image_tokens": 0,
+                        "text_tokens": 0
+                      },
+                      "output_tokens": 0,
+                      "output_tokens_details": {
+                        "image_tokens": 0,
+                        "text_tokens": 0
+                      },
+                      "total_tokens": 0
+                    },
+                    "web_search": {
+                      "num_requests": 0
+                    }
+                  },
+                  "tools": [],
+                  "top_logprobs": 0,
+                  "top_p": 1,
+                  "truncation": "disabled",
+                  "usage": {
+                    "input_tokens": 24,
+                    "input_tokens_details": {
+                      "cache_write_tokens": 0,
+                      "cached_tokens": 0
+                    },
+                    "output_tokens": 164,
+                    "output_tokens_details": {
+                      "reasoning_tokens": 128
+                    },
+                    "total_tokens": 188
+                  },
+                  "user": null,
+                  "metadata": {}
+                },
+                "tool_call_chunks": [],
+                "tool_calls": [],
+                "id": "run-01a1c623-f749-726f-8845-b0332b9ef656",
+                "usage_metadata": {
+                  "input_tokens": 24,
+                  "output_tokens": 164,
+                  "total_tokens": 188,
+                  "input_token_details": {
+                    "cache_read": 0
+                  },
+                  "output_token_details": {
+                    "reasoning": 128
+                  }
+                },
+                "invalid_tool_calls": [],
+                "name": "model"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  ]
+}

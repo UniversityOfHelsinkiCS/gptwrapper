@@ -8,7 +8,9 @@ vi.mock('../../../config', () => ({ ValidModelNameSchema: { parse: (v: unknown) 
 vi.mock('react-syntax-highlighter', () => ({ PrismAsync: () => null }))
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({ oneDark: {} }))
 
-import type { ChatMessage } from '../../../shared/chat'
+import type { AssistantPart } from '../../../shared/agentChat'
+import { type ClientChatMessage, migrateMessages } from './messages'
+import { oldFormatMessages } from './__fixtures__/oldFormatMessages'
 import en from '../../locales/en.json'
 import Conversation from './Conversation'
 
@@ -26,14 +28,24 @@ afterEach(cleanup)
 
 const RESPONSE_TEXT = 'The capital of Finland is Helsinki.'
 
-const renderConversation = (props: { messages: ChatMessage[]; completion: string; isStreaming: boolean; endState?: 'none' | 'canceled' | 'error' }) =>
+type Props = { messages: ClientChatMessage[]; completion: string; isStreaming: boolean; endState?: 'none' | 'canceled' | 'error' }
+
+// Stable references: Conversation memoizes on `parts`
+const partsCache = new Map<string, AssistantPart[]>()
+const textParts = (text: string): AssistantPart[] => {
+  if (!text) return []
+  if (!partsCache.has(text)) partsCache.set(text, [{ type: 'text', text }])
+  return partsCache.get(text)!
+}
+
+const renderConversation = ({ completion, ...props }: Props) =>
   render(
     <StrictMode>
       <I18nextProvider i18n={i18n}>
         <Conversation
           endState="none"
           {...props}
-          toolCalls={{}}
+          streamingParts={textParts(completion)}
           isMobile={false}
           latestResponseIndex={props.messages.length - 1}
           latestResponseRef={createRef<HTMLDivElement>()}
@@ -42,13 +54,13 @@ const renderConversation = (props: { messages: ChatMessage[]; completion: string
     </StrictMode>,
   )
 
-const conversationProps = (props: { messages: ChatMessage[]; completion: string; isStreaming: boolean; endState?: 'none' | 'canceled' | 'error' }) => (
+const conversationProps = ({ completion, ...props }: Props) => (
   <StrictMode>
     <I18nextProvider i18n={i18n}>
       <Conversation
         endState="none"
         {...props}
-        toolCalls={{}}
+        streamingParts={textParts(completion)}
         isMobile={false}
         latestResponseIndex={props.messages.length - 1}
         latestResponseRef={createRef<HTMLDivElement>()}
@@ -57,7 +69,7 @@ const conversationProps = (props: { messages: ChatMessage[]; completion: string;
   </StrictMode>
 )
 
-const userTurn: ChatMessage[] = [{ role: 'user', content: 'What is the capital of Finland?' }]
+const userTurn: ClientChatMessage[] = [{ role: 'user', content: 'What is the capital of Finland?' }]
 
 describe('Conversation streaming accessibility', () => {
   test('marks the streaming assistant message as aria-busy', () => {
@@ -68,7 +80,7 @@ describe('Conversation streaming accessibility', () => {
 
   test('a completed assistant message is no longer aria-busy', () => {
     renderConversation({
-      messages: [...userTurn, { role: 'assistant', content: RESPONSE_TEXT }],
+      messages: [...userTurn, { role: 'assistant', parts: textParts(RESPONSE_TEXT) }],
       completion: '',
       isStreaming: false,
     })
@@ -91,7 +103,7 @@ describe('Conversation streaming accessibility', () => {
 
     rerender(
       conversationProps({
-        messages: [...userTurn, { role: 'assistant', content: RESPONSE_TEXT }],
+        messages: [...userTurn, { role: 'assistant', parts: textParts(RESPONSE_TEXT) }],
         completion: '',
         isStreaming: false,
       }),
@@ -133,5 +145,15 @@ describe('Conversation streaming accessibility', () => {
     rerender(conversationProps({ messages: userTurn, completion: '', isStreaming: false, endState: 'error' }))
 
     expect(screen.getByTestId('stream-status-announcer').textContent).toBe('Generating a response failed.')
+  })
+})
+
+describe('old saved conversations', () => {
+  test('a migrated message with RAG tool calls shows its Sources button', () => {
+    const messages = migrateMessages(oldFormatMessages)
+    renderConversation({ messages, completion: '', isStreaming: false })
+
+    expect(screen.getAllByTestId('file-search-sources')).toHaveLength(1)
+    expect(screen.getByText('Found it in the lecture notes.')).toBeTruthy()
   })
 })

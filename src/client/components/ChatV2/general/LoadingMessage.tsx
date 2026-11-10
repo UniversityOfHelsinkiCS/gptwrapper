@@ -11,7 +11,9 @@ const loadingDotStyle = (delay: number, color: string) => ({
   animationDelay: `${delay}s`,
 })
 
-export const LoadingMessage = ({ toolCalls }: { toolCalls: Record<string, ToolCallStatusEvent> }) => {
+const NO_TOOL_CALLS: Record<string, ToolCallStatusEvent> = {}
+
+export const LoadingMessage = ({ toolCalls = NO_TOOL_CALLS }: { toolCalls?: Record<string, ToolCallStatusEvent> }) => {
   const theme = useTheme()
   const dotColor = theme.palette.text.secondary
 

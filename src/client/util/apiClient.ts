@@ -69,7 +69,7 @@ export const postAbortableStream = async (
         controller,
       }
     }
-  } else if (contentType?.includes('text/event-stream')) {
+  } else if (contentType?.includes('text/event-stream') || contentType?.includes('application/x-ndjson')) {
     return {
       stream: response.body as ReadableStream<Uint8Array>,
       controller,

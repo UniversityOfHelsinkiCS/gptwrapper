@@ -46,7 +46,7 @@ export type ProcessingEvent = {
   message: string
 }
 
-export type ChatEvent = WritingEvent | ToolCallStatusEvent | ToolCallResultEvent | ErrorEvent | ProcessingEvent
+export type ChatEventV3 = WritingEvent | ToolCallStatusEvent | ToolCallResultEvent | ErrorEvent | ProcessingEvent
 
 const TextContentPartSchema = z.object({
   type: z.literal('text'),

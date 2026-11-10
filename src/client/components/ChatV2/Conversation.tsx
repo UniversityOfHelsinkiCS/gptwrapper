@@ -21,13 +21,12 @@ import {
   readMessageContent,
   readMessageImages,
   hasFileResults,
-  type AssistantMessage,
-  type ChatMessage,
   type MessageGenerationInfo,
   type ToolCallResultEvent,
-  type ToolCallStatusEvent,
   type UserMessage,
 } from '../../../shared/chat'
+import type { AssistantMessageV2, AssistantPart } from '../../../shared/agentChat'
+import { type ClientChatMessage, messageToolResults, messageToText } from './messages'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import CopyToClipboardButton from './CopyToClipboardButton'
 import { StreamStatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
@@ -139,7 +138,7 @@ const ToolResultsButton = ({
 
 const numberedHeading = (heading: string, number?: number) => (number === undefined ? heading : `${heading} ${number}`)
 
-const AssistantMessageInfo = ({ message, headingId, number }: { message: AssistantMessage; headingId: string; number?: number }) => {
+const AssistantMessageInfo = ({ message, headingId, number }: { message: AssistantMessageV2; headingId: string; number?: number }) => {
   const { t } = useTranslation()
   const heading = (
     <Typography component="h2" id={headingId} sx={visuallyHidden}>
@@ -176,7 +175,7 @@ const AssistantMessageItem = ({
   latestResponseRef,
   number,
 }: {
-  message: AssistantMessage
+  message: AssistantMessageV2
   setActiveToolResults?: (toolResults: ToolCallResultEvent[]) => void
   isMobile?: boolean
   onRetry?: () => void
@@ -185,7 +184,7 @@ const AssistantMessageItem = ({
   latestResponseRef?: React.Ref<HTMLDivElement>
   number?: number
 }) => {
-  const processedContent = React.useMemo(() => preprocessMath(readMessageContent(message)), [message.content])
+  const processedParts = React.useMemo(() => message.parts.flatMap((part) => (part.type === 'text' ? [preprocessMath(part.text)] : [])), [message.parts])
   const { t } = useTranslation()
   const theme = useTheme()
   const katexOptions = {
@@ -230,7 +229,7 @@ const AssistantMessageItem = ({
 
   const msgId = useId()
   const headingId = useId()
-  const toolResults = Object.values(message.toolCalls ?? {})
+  const toolResults = messageToolResults(message)
 
   return (
     <Box
@@ -255,107 +254,110 @@ const AssistantMessageItem = ({
       })}
     >
       <AssistantMessageInfo message={message} headingId={headingId} number={number} />
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
-        rehypePlugins={[[rehypeKatex, katexOptions]]}
-        components={{
-          pre(props) {
-            const { children, node, ...rest } = props
-            const codeNode = node?.children[0]
-            if (codeNode?.type === 'element' && /language-(\w+)/.test(String(codeNode.properties.className ?? ''))) {
-              return <>{children}</>
-            }
-            return <pre {...rest}>{children}</pre>
-          },
-          table(props) {
-            const { node, ...rest } = props
-            return (
-              <ScrollableRegion label={t('accessibility:scrollableTable')} sx={{ '& th, & td': { wordBreak: 'normal', overflowWrap: 'normal' } }}>
-                <table {...rest} />
-              </ScrollableRegion>
-            )
-          },
-          span(props) {
-            const { node, ...rest } = props
-            if (!rest.className?.includes('katex-display')) {
-              return <span {...rest} />
-            }
-            return (
-              <ScrollableRegion label={t('accessibility:scrollableFormula')}>
-                <span {...rest} />
-              </ScrollableRegion>
-            )
-          },
-          code(props) {
-            const { children, className, node, ...rest } = props
-            const match = /language-(\w+)/.exec(className || '')
-            const language = match?.[1] || 'plaintext' // safe fallback
-
-            if (match) {
-              const codeBlockId = `codeBlock-${++codeCount}`
-
+      {processedParts.map((processedText, partIdx) => (
+        <ReactMarkdown
+          key={partIdx}
+          remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
+          rehypePlugins={[[rehypeKatex, katexOptions]]}
+          components={{
+            pre(props) {
+              const { children, node, ...rest } = props
+              const codeNode = node?.children[0]
+              if (codeNode?.type === 'element' && /language-(\w+)/.test(String(codeNode.properties.className ?? ''))) {
+                return <>{children}</>
+              }
+              return <pre {...rest}>{children}</pre>
+            },
+            table(props) {
+              const { node, ...rest } = props
               return (
-                <Box
-                  sx={{
-                    borderRadius: '0.5rem',
-                    overflowX: 'auto',
-                  }}
-                >
-                  <Typography
+                <ScrollableRegion label={t('accessibility:scrollableTable')} sx={{ '& th, & td': { wordBreak: 'normal', overflowWrap: 'normal' } }}>
+                  <table {...rest} />
+                </ScrollableRegion>
+              )
+            },
+            span(props) {
+              const { node, ...rest } = props
+              if (!rest.className?.includes('katex-display')) {
+                return <span {...rest} />
+              }
+              return (
+                <ScrollableRegion label={t('accessibility:scrollableFormula')}>
+                  <span {...rest} />
+                </ScrollableRegion>
+              )
+            },
+            code(props) {
+              const { children, className, node, ...rest } = props
+              const match = /language-(\w+)/.exec(className || '')
+              const language = match?.[1] || 'plaintext' // safe fallback
+
+              if (match) {
+                const codeBlockId = `codeBlock-${++codeCount}`
+
+                return (
+                  <Box
                     sx={{
-                      opacity: 1,
-                      fontSize: '0.8rem',
-                      padding: '0.4rem 0.8rem',
-                      backgroundColor: 'action.hover',
+                      borderRadius: '0.5rem',
+                      overflowX: 'auto',
                     }}
                   >
-                    {language}
-                  </Typography>
-                  <Box sx={{ position: 'relative' }}>
-                    {/* @ts-ignore */}
-                    <SyntaxHighlighter
-                      {...rest}
-                      PreTag="pre"
-                      children={String(children)}
-                      language={language}
-                      customStyle={{
-                        padding: '1rem 4rem 1rem 1rem', // 4rem keeps the CopyToClipboard button visible
-                        margin: 0,
-                        fontSize: '15px',
-                        wordBreak: 'break-all',
-                        overflowWrap: 'break-word',
-                        whiteSpace: 'pre-wrap',
+                    <Typography
+                      sx={{
+                        opacity: 1,
+                        fontSize: '0.8rem',
+                        padding: '0.4rem 0.8rem',
+                        backgroundColor: 'action.hover',
                       }}
-                      style={accessibleOneDark}
-                      className="scrollable-code-highlight"
-                      id={codeBlockId}
-                    />
-                    <CopyToClipboardButton
-                      id={codeBlockId}
-                      copied={String(children)}
-                      label={t('chat:codeBlock')}
-                      iconColor="#FFF"
-                      buttonStyle={{
-                        position: 'absolute',
-                        top: '8px',
-                        right: '8px',
-                      }}
-                    />
+                    >
+                      {language}
+                    </Typography>
+                    <Box sx={{ position: 'relative' }}>
+                      {/* @ts-ignore */}
+                      <SyntaxHighlighter
+                        {...rest}
+                        PreTag="pre"
+                        children={String(children)}
+                        language={language}
+                        customStyle={{
+                          padding: '1rem 4rem 1rem 1rem', // 4rem keeps the CopyToClipboard button visible
+                          margin: 0,
+                          fontSize: '15px',
+                          wordBreak: 'break-all',
+                          overflowWrap: 'break-word',
+                          whiteSpace: 'pre-wrap',
+                        }}
+                        style={accessibleOneDark}
+                        className="scrollable-code-highlight"
+                        id={codeBlockId}
+                      />
+                      <CopyToClipboardButton
+                        id={codeBlockId}
+                        copied={String(children)}
+                        label={t('chat:codeBlock')}
+                        iconColor="#FFF"
+                        buttonStyle={{
+                          position: 'absolute',
+                          top: '8px',
+                          right: '8px',
+                        }}
+                      />
+                    </Box>
                   </Box>
-                </Box>
-              )
-            } else {
-              return (
-                <code {...rest} className={className}>
-                  {children}
-                </code>
-              )
-            }
-          },
-        }}
-      >
-        {processedContent}
-      </ReactMarkdown>
+                )
+              } else {
+                return (
+                  <code {...rest} className={className}>
+                    {children}
+                  </code>
+                )
+              }
+            },
+          }}
+        >
+          {processedText}
+        </ReactMarkdown>
+      ))}
       {message.error && (
         <Box sx={{ mt: 2 }}>
           <Typography variant="body1" fontStyle="italic" color="error.main">
@@ -391,7 +393,7 @@ const AssistantMessageItem = ({
           ...focusIndicatorStyle(),
         }}
       >
-        <CopyToClipboardButton id={msgId} copied={readMessageContent(message)} label={numberedHeading(t('accessibility:responseHeading'), number)} />
+        <CopyToClipboardButton id={msgId} copied={messageToText(message)} label={numberedHeading(t('accessibility:responseHeading'), number)} />
       </Box>
     </Box>
   )
@@ -407,7 +409,7 @@ export const MessageItem = ({
   latestResponseRef,
   number,
 }: {
-  message: ChatMessage
+  message: ClientChatMessage
   setActiveToolResults?: (toolResults: ToolCallResultEvent[]) => void
   isMobile?: boolean
   onRetry?: () => void
@@ -450,9 +452,9 @@ export const MessageItem = ({
 }
 
 const shouldShowRetryButton = (
-  message: ChatMessage,
+  message: ClientChatMessage,
   idx: number,
-  messages: ChatMessage[],
+  messages: ClientChatMessage[],
   isStreaming: boolean,
   onRetry?: (index: number) => void,
 ): boolean => {
@@ -461,9 +463,8 @@ const shouldShowRetryButton = (
 
 const Conversation = ({
   messages,
-  completion,
+  streamingParts,
   generationInfo,
-  toolCalls,
   isStreaming,
   endState,
   setActiveToolResults,
@@ -473,10 +474,10 @@ const Conversation = ({
   latestResponseIndex,
   latestResponseRef,
 }: {
-  messages: ChatMessage[]
-  completion: string
+  messages: ClientChatMessage[]
+  /** Parts of the response that is being streamed */
+  streamingParts: AssistantPart[]
   generationInfo?: MessageGenerationInfo
-  toolCalls: { [callId: string]: ToolCallStatusEvent }
   isStreaming: boolean
   endState: 'none' | 'canceled' | 'error'
   setActiveToolResults?: (toolResults: ToolCallResultEvent[]) => void
@@ -506,7 +507,7 @@ const Conversation = ({
         role="region"
         aria-label={t('chat:conversation')}
       >
-        <StreamStatusAnnouncer isStreaming={isStreaming} hasCompletion={completion.length > 0} endState={endState} />
+        <StreamStatusAnnouncer isStreaming={isStreaming} hasCompletion={streamingParts.length > 0} endState={endState} />
 
         {messages.length === 0 && initial}
         {messages.map((message, idx) => {
@@ -528,11 +529,11 @@ const Conversation = ({
 
         {isStreaming &&
           messages.length > 0 &&
-          (completion.length > 0 ? (
+          (streamingParts.length > 0 ? (
             <MessageItem
               message={{
                 role: 'assistant',
-                content: completion,
+                parts: streamingParts,
                 generationInfo,
               }}
               number={turn}
@@ -541,7 +542,7 @@ const Conversation = ({
               isStreaming
             />
           ) : (
-            <LoadingMessage toolCalls={toolCalls} />
+            <LoadingMessage />
           ))}
       </Box>
       {!reminderSeen && !isStreaming && messages.length > 15 && (

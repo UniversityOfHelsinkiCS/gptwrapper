@@ -1,7 +1,7 @@
 import type { StructuredTool } from '@langchain/core/tools'
 import express from 'express'
 import { DEFAULT_TOKEN_LIMIT, inProduction, isFreeModel, isMockModel, type ValidModelName } from '../../../config'
-import { PostStreamSchemaV3, type ChatEvent } from '../../../shared/chat'
+import { PostStreamSchemaV3, type ChatEventV3 } from '../../../shared/chat'
 import { ChatInstance, Discussion, Prompt, PromptUsage, RagIndex, UserChatInstanceUsage } from '../../db/models'
 import {
   checkCourseUsage,
@@ -86,7 +86,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
     res.flushHeaders()
   }
 
-  const writeEvent = async (event: ChatEvent) => {
+  const writeEvent = async (event: ChatEventV3) => {
     if (res.destroyed || res.writableEnded) return
     await new Promise<void>((resolve) => {
       const success = res.write(`${JSON.stringify(event)}\n`, (err) => {
@@ -175,9 +175,7 @@ router.post('/stream', upload.single('file'), async (r, res) => {
 
   const tokenLimit = course ? getCourseTokenLimit(course) : isFree ? DEFAULT_TOKEN_LIMIT : await getUserTokenLimit(user)
 
-  const usageAllowed = course
-    ? checkCourseUsage(user, course, tokenLimit)
-    : isFree || checkUsage(user, await getUsage(user.id), tokenLimit)
+  const usageAllowed = course ? checkCourseUsage(user, course, tokenLimit) : isFree || checkUsage(user, await getUsage(user.id), tokenLimit)
 
   if (!usageAllowed && !isFree) {
     throw ApplicationError.Forbidden('Usage limit reached')

@@ -3,11 +3,11 @@ import { Menu, MenuItem, Tooltip } from '@mui/material'
 import DownloadIcon from '@mui/icons-material/Download'
 import { enqueueSnackbar } from '../common/Snackbar'
 import { useTranslation } from 'react-i18next'
-import type { ChatMessage } from '../../../shared/chat'
+import type { ClientChatMessage } from './messages'
 import { TextButton } from './general/Buttons'
 import { downloadDiscussionAsFile } from './api'
 
-const DownloadButton = ({ messages, disabled, collapsed = false }: { messages: ChatMessage[]; disabled: boolean; collapsed?: boolean }) => {
+const DownloadButton = ({ messages, disabled, collapsed = false }: { messages: ClientChatMessage[]; disabled: boolean; collapsed?: boolean }) => {
   const { t } = useTranslation()
   const [isCooldown, setIsCooldown] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)

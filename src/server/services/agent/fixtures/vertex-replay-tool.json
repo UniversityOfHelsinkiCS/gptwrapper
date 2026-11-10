@@ -1,0 +1,521 @@
+{
+  "provider": "vertex-replay",
+  "synthetic": true,
+  "model": "gemini-2.5-flash",
+  "capturedAt": "2026-11-10T15:48:42.458Z",
+  "prompt": "When is the exam? Search the course materials first, then answer in one sentence.",
+  "tuples": [
+    [
+      [
+        "model_request:cf82e2af-01df-5b13-886f-8195de54c785"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "AIMessageChunk"
+          ],
+          "kwargs": {
+            "content": [
+              {
+                "thoughtSignature": "CiQB0e2Kb2synthetic",
+                "type": "functionCall",
+                "functionCall": {
+                  "name": "document_search",
+                  "args": {
+                    "query": "exam date"
+                  }
+                }
+              }
+            ],
+            "tool_calls": [
+              {
+                "type": "tool_call",
+                "id": "lc-tool-call-756ac157e63b433f85c57c119afd25ca",
+                "name": "document_search",
+                "args": {
+                  "query": "exam date"
+                },
+                "thoughtSignature": "CiQB0e2Kb2synthetic"
+              }
+            ],
+            "response_metadata": {
+              "model_provider": "google"
+            },
+            "additional_kwargs": {
+              "finishReason": "STOP"
+            },
+            "usage_metadata": {
+              "input_tokens": 70,
+              "output_tokens": 73,
+              "total_tokens": 143,
+              "input_token_details": {
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "reasoning": 55
+              }
+            },
+            "invalid_tool_calls": [],
+            "tool_call_chunks": [],
+            "id": "run-01a1c625-b54e-74ee-8e58-4b5377bbaf4c",
+            "name": "model"
+          }
+        },
+        {
+          "tags": [],
+          "ls_integration": "langchain_chat_model",
+          "langgraph_step": 1,
+          "langgraph_node": "model_request",
+          "langgraph_triggers": [
+            "branch:to:model_request"
+          ],
+          "langgraph_path": [
+            "__pregel_pull",
+            "model_request"
+          ],
+          "langgraph_checkpoint_ns": "model_request:cf82e2af-01df-5b13-886f-8195de54c785",
+          "checkpoint_ns": "model_request:cf82e2af-01df-5b13-886f-8195de54c785",
+          "ls_provider": "google_vertexai",
+          "ls_model_name": "gemini-2.5-flash",
+          "ls_model_type": "chat",
+          "ls_temperature": 1,
+          "versions": {
+            "@langchain/core": "1.2.12",
+            "@langchain/google": "0.2.7"
+          }
+        }
+      ]
+    ],
+    [
+      [],
+      "updates",
+      {
+        "model_request": {
+          "messages": [
+            {
+              "lc": 1,
+              "type": "constructor",
+              "id": [
+                "langchain_core",
+                "messages",
+                "AIMessageChunk"
+              ],
+              "kwargs": {
+                "content": [
+                  {
+                    "thoughtSignature": "CiQB0e2Kb2synthetic",
+                    "type": "functionCall",
+                    "functionCall": {
+                      "name": "document_search",
+                      "args": {
+                        "query": "exam date"
+                      }
+                    }
+                  }
+                ],
+                "tool_calls": [
+                  {
+                    "type": "tool_call",
+                    "id": "lc-tool-call-756ac157e63b433f85c57c119afd25ca",
+                    "name": "document_search",
+                    "args": {
+                      "query": "exam date"
+                    },
+                    "thoughtSignature": "CiQB0e2Kb2synthetic"
+                  }
+                ],
+                "response_metadata": {
+                  "model_provider": "google"
+                },
+                "additional_kwargs": {
+                  "finishReason": "STOP"
+                },
+                "usage_metadata": {
+                  "input_tokens": 70,
+                  "output_tokens": 73,
+                  "total_tokens": 143,
+                  "input_token_details": {
+                    "cache_read": 0
+                  },
+                  "output_token_details": {
+                    "reasoning": 55
+                  }
+                },
+                "invalid_tool_calls": [],
+                "tool_call_chunks": [],
+                "id": "run-01a1c625-b54e-74ee-8e58-4b5377bbaf4c",
+                "name": "model"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    [
+      [
+        "tools:da207e19-7d8c-54da-b27c-41ed63394f08"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "ToolMessage"
+          ],
+          "kwargs": {
+            "status": "success",
+            "content": "Course material about \"exam date\": the exam is on 12 December in hall A.",
+            "artifact": [
+              {
+                "id": "doc-1"
+              }
+            ],
+            "tool_call_id": "lc-tool-call-756ac157e63b433f85c57c119afd25ca",
+            "name": "document_search",
+            "metadata": {
+              "versions": {
+                "@langchain/core": "1.2.12"
+              }
+            },
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "id": "run-01a1c625-b553-705d-9aa4-54ecdd8b95c6-tool-lc-tool-call-756ac157e63b433f85c57c119afd25ca"
+          }
+        },
+        {
+          "tags": [
+            "graph:step:2"
+          ],
+          "name": "tools",
+          "ls_integration": "langchain_create_agent",
+          "langgraph_step": 2,
+          "langgraph_node": "tools",
+          "langgraph_triggers": [
+            "__pregel_push"
+          ],
+          "langgraph_path": [
+            "__pregel_push",
+            0
+          ],
+          "langgraph_checkpoint_ns": "tools:da207e19-7d8c-54da-b27c-41ed63394f08",
+          "checkpoint_ns": "tools:da207e19-7d8c-54da-b27c-41ed63394f08"
+        }
+      ]
+    ],
+    [
+      [],
+      "updates",
+      {
+        "tools": {
+          "messages": [
+            {
+              "lc": 1,
+              "type": "constructor",
+              "id": [
+                "langchain_core",
+                "messages",
+                "ToolMessage"
+              ],
+              "kwargs": {
+                "status": "success",
+                "content": "Course material about \"exam date\": the exam is on 12 December in hall A.",
+                "artifact": [
+                  {
+                    "id": "doc-1"
+                  }
+                ],
+                "tool_call_id": "lc-tool-call-756ac157e63b433f85c57c119afd25ca",
+                "name": "document_search",
+                "metadata": {
+                  "versions": {
+                    "@langchain/core": "1.2.12"
+                  }
+                },
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "id": "run-01a1c625-b553-705d-9aa4-54ecdd8b95c6-tool-lc-tool-call-756ac157e63b433f85c57c119afd25ca"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    [
+      [
+        "model_request:d38ff9e9-f058-58d2-8626-8d56297b72f8"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "AIMessageChunk"
+          ],
+          "kwargs": {
+            "content": [
+              {
+                "type": "text",
+                "text": "The exam is on "
+              },
+              {
+                "thoughtSignature": "CiQB0e2Kb3synthetic",
+                "type": "text",
+                "text": "12 December"
+              }
+            ],
+            "tool_calls": [],
+            "response_metadata": {
+              "model_provider": "google"
+            },
+            "additional_kwargs": {},
+            "usage_metadata": {
+              "input_tokens": 110,
+              "output_tokens": 6,
+              "total_tokens": 116,
+              "input_token_details": {
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "reasoning": 0
+              }
+            },
+            "invalid_tool_calls": [],
+            "tool_call_chunks": [],
+            "id": "run-01a1c625-b557-72b1-bdcc-4d02cdbf35ec"
+          }
+        },
+        {
+          "tags": [],
+          "ls_integration": "langchain_chat_model",
+          "langgraph_step": 3,
+          "langgraph_node": "model_request",
+          "langgraph_triggers": [
+            "branch:to:model_request"
+          ],
+          "langgraph_path": [
+            "__pregel_pull",
+            "model_request"
+          ],
+          "langgraph_checkpoint_ns": "model_request:d38ff9e9-f058-58d2-8626-8d56297b72f8",
+          "checkpoint_ns": "model_request:d38ff9e9-f058-58d2-8626-8d56297b72f8",
+          "ls_provider": "google_vertexai",
+          "ls_model_name": "gemini-2.5-flash",
+          "ls_model_type": "chat",
+          "ls_temperature": 1,
+          "versions": {
+            "@langchain/core": "1.2.12",
+            "@langchain/google": "0.2.7"
+          }
+        }
+      ]
+    ],
+    [
+      [
+        "model_request:d38ff9e9-f058-58d2-8626-8d56297b72f8"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "AIMessageChunk"
+          ],
+          "kwargs": {
+            "content": " in hall A.",
+            "tool_calls": [],
+            "response_metadata": {
+              "model_provider": "google"
+            },
+            "additional_kwargs": {
+              "originalTextContentBlock": {
+                "type": "text",
+                "text": " in hall A."
+              }
+            },
+            "usage_metadata": {
+              "input_tokens": 0,
+              "output_tokens": 5,
+              "total_tokens": 5,
+              "input_token_details": {
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "reasoning": 0
+              }
+            },
+            "invalid_tool_calls": [],
+            "tool_call_chunks": [],
+            "id": "run-01a1c625-b557-72b1-bdcc-4d02cdbf35ec"
+          }
+        },
+        {
+          "tags": [],
+          "ls_integration": "langchain_chat_model",
+          "langgraph_step": 3,
+          "langgraph_node": "model_request",
+          "langgraph_triggers": [
+            "branch:to:model_request"
+          ],
+          "langgraph_path": [
+            "__pregel_pull",
+            "model_request"
+          ],
+          "langgraph_checkpoint_ns": "model_request:d38ff9e9-f058-58d2-8626-8d56297b72f8",
+          "checkpoint_ns": "model_request:d38ff9e9-f058-58d2-8626-8d56297b72f8",
+          "ls_provider": "google_vertexai",
+          "ls_model_name": "gemini-2.5-flash",
+          "ls_model_type": "chat",
+          "ls_temperature": 1,
+          "versions": {
+            "@langchain/core": "1.2.12",
+            "@langchain/google": "0.2.7"
+          }
+        }
+      ]
+    ],
+    [
+      [
+        "model_request:d38ff9e9-f058-58d2-8626-8d56297b72f8"
+      ],
+      "messages",
+      [
+        {
+          "lc": 1,
+          "type": "constructor",
+          "id": [
+            "langchain_core",
+            "messages",
+            "AIMessageChunk"
+          ],
+          "kwargs": {
+            "content": "",
+            "tool_calls": [],
+            "response_metadata": {
+              "model_provider": "google"
+            },
+            "additional_kwargs": {
+              "originalTextContentBlock": {
+                "type": "text",
+                "text": ""
+              },
+              "finishReason": "STOP"
+            },
+            "usage_metadata": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "total_tokens": 0,
+              "input_token_details": {
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "reasoning": 0
+              }
+            },
+            "invalid_tool_calls": [],
+            "tool_call_chunks": [],
+            "id": "run-01a1c625-b557-72b1-bdcc-4d02cdbf35ec"
+          }
+        },
+        {
+          "tags": [],
+          "ls_integration": "langchain_chat_model",
+          "langgraph_step": 3,
+          "langgraph_node": "model_request",
+          "langgraph_triggers": [
+            "branch:to:model_request"
+          ],
+          "langgraph_path": [
+            "__pregel_pull",
+            "model_request"
+          ],
+          "langgraph_checkpoint_ns": "model_request:d38ff9e9-f058-58d2-8626-8d56297b72f8",
+          "checkpoint_ns": "model_request:d38ff9e9-f058-58d2-8626-8d56297b72f8",
+          "ls_provider": "google_vertexai",
+          "ls_model_name": "gemini-2.5-flash",
+          "ls_model_type": "chat",
+          "ls_temperature": 1,
+          "versions": {
+            "@langchain/core": "1.2.12",
+            "@langchain/google": "0.2.7"
+          }
+        }
+      ]
+    ],
+    [
+      [],
+      "updates",
+      {
+        "model_request": {
+          "messages": [
+            {
+              "lc": 1,
+              "type": "constructor",
+              "id": [
+                "langchain_core",
+                "messages",
+                "AIMessageChunk"
+              ],
+              "kwargs": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "The exam is on "
+                  },
+                  {
+                    "thoughtSignature": "CiQB0e2Kb3synthetic",
+                    "type": "text",
+                    "text": "12 December"
+                  },
+                  {
+                    "type": "text",
+                    "text": " in hall A."
+                  }
+                ],
+                "additional_kwargs": {
+                  "originalTextContentBlock": {
+                    "type": "text",
+                    "text": " in hall A."
+                  },
+                  "finishReason": "STOP"
+                },
+                "response_metadata": {
+                  "model_provider": "google"
+                },
+                "tool_call_chunks": [],
+                "tool_calls": [],
+                "id": "run-01a1c625-b557-72b1-bdcc-4d02cdbf35ec",
+                "usage_metadata": {
+                  "input_tokens": 110,
+                  "output_tokens": 11,
+                  "total_tokens": 121,
+                  "input_token_details": {
+                    "cache_read": 0
+                  },
+                  "output_token_details": {
+                    "reasoning": 0
+                  }
+                },
+                "invalid_tool_calls": [],
+                "name": "model"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  ]
+}

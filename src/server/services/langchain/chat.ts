@@ -5,7 +5,7 @@ import type { Runnable } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { concat } from '@langchain/core/utils/stream'
 import { DEFAULT_TOKEN_LIMIT, isFreeModel, ModelConfig, ModelProvider, type ValidModelName, validModels } from '@config'
-import type { ChatEvent, ChatMessage, Message } from '@shared/chat'
+import type { ChatEventV3, ChatMessage, Message } from '@shared/chat'
 import type { ChatToolDef, ChatToolOutput } from '@shared/tools'
 import type { User } from '@shared/user'
 import { ToolResultStore } from './fileSearchResultsStore'
@@ -19,7 +19,7 @@ import logger from 'src/server/util/logger'
 
 export type ChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>
 
-type WriteEventFunction = (data: ChatEvent) => Promise<void>
+type WriteEventFunction = (data: ChatEventV3) => Promise<void>
 
 type ChatTool = StructuredTool<any, any, any, string>
 
@@ -56,7 +56,7 @@ const extractText = (content: unknown): string => {
 /**
  * Prepares chat messages for the LLM by combining message content with file content
  */
-const prepareMessagesForLLM = (messages: ChatMessage[]): ChatMessage[] => {
+export const prepareMessagesForLLM = (messages: ChatMessage[]): ChatMessage[] => {
   return messages.map((msg) => {
     if (msg.role === 'user' && msg.fileContent && typeof msg.content === 'string') {
       // Combine the user's message with the file content for the LLM
@@ -370,10 +370,10 @@ const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[]): ChatMo
   }
 }
 
-const modelConfigHasInstructions = (modelConfig: ModelConfig): modelConfig is ModelConfig & { instructions: string } =>
+export const modelConfigHasInstructions = (modelConfig: ModelConfig): modelConfig is ModelConfig & { instructions: string } =>
   'instructions' in modelConfig && typeof modelConfig.instructions === 'string'
 
-const handleWarnings = (
+export const handleWarnings = (
   modelConfig: (typeof validModels)[number],
   messages: Message[],
   ignoredWarnings?: WarningType[],

@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react'
-import type { AssistantMessage, ChatEvent, MessageGenerationInfo, ToolCallResultEvent, ToolCallStatusEvent } from '../../../shared/chat'
+import type { MessageGenerationInfo } from '../../../shared/chat'
+import type { AssistantMessageV2, AssistantPart, ChatEvent } from '../../../shared/agentChat'
+import { applyEvent } from './applyEvent'
 
 export type StreamAbortReason = 'timeout_error' | 'user_aborted' | 'conversation_cleared' | 'error'
 export class TypedAbortController<Reason extends string> {
@@ -15,108 +17,75 @@ export class TypedAbortController<Reason extends string> {
   }
 }
 
-type ToolCallState = ToolCallStatusEvent
+/** Anything that can abort the current run with a reason, such as a `ChatTransport`. */
+export type StreamAbortHandle = {
+  readonly signal: AbortSignal
+  abort(reason: StreamAbortReason): void
+}
+
+const NO_PARTS: AssistantPart[] = []
 
 export const useChatStream = ({
   onComplete,
-  onToolCallComplete,
   onError,
   onText,
 }: {
-  onComplete: ({ message }: { message: AssistantMessage }) => void
-  onToolCallComplete: (toolResult: ToolCallResultEvent) => void
+  onComplete: ({ message }: { message: AssistantMessageV2 }) => void
   onError: (error: unknown) => void
   onText: () => void
 }) => {
-  const [completion, setCompletion] = useState('')
+  const [streamingParts, setStreamingParts] = useState<AssistantPart[]>(NO_PARTS)
   const [generationInfo, setGenerationInfo] = useState<MessageGenerationInfo | undefined>()
   const [isStreaming, setIsStreaming] = useState(false)
-  const [toolCalls, setToolCalls] = useState<Record<string, ToolCallState>>({})
   const [hasPotentialError, setHasPotentialError] = useState(false)
 
   const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const streamControllerRef = useRef<TypedAbortController<StreamAbortReason>>(null)
+  const streamControllerRef = useRef<StreamAbortHandle>(null)
 
-  const processStream = async (stream: ReadableStream, baseGenerationInfo: MessageGenerationInfo) => {
-    const decoder = new TextDecoder()
-    let content = ''
+  const processStream = async (events: AsyncIterable<ChatEvent>, baseGenerationInfo: MessageGenerationInfo) => {
+    let parts: AssistantPart[] = NO_PARTS
     let error = ''
     // The stream usually breaks right after an error event, which must not report the same failure again
     let errorReported = false
-    let accumulated = ''
-    const toolCallResultsAccum: Record<string, ToolCallResultEvent> = {}
     setGenerationInfo(baseGenerationInfo)
 
+    const message = (messageError: string | undefined): AssistantMessageV2 => ({
+      role: 'assistant',
+      parts,
+      error: messageError,
+      generationInfo: baseGenerationInfo,
+    })
+
     try {
-      const reader = stream.getReader()
-
-      while (true) {
-        const { value, done } = await reader.read()
-        if (done) break
-
-        processChunks(decoder.decode(value, { stream: true }))
+      for await (const event of events) {
+        handleEvent(event)
       }
 
-      const flushed = decoder.decode()
-      if (flushed) processChunks(flushed)
-
-      onComplete({
-        message: {
-          role: 'assistant',
-          content,
-          error: error.length > 0 ? error : undefined,
-          toolCalls: toolCallResultsAccum,
-          generationInfo: baseGenerationInfo,
-        },
-      })
+      onComplete({ message: message(error.length > 0 ? error : undefined) })
     } catch (err: unknown) {
       if (streamControllerRef.current?.signal.aborted) {
         const reason = streamControllerRef.current?.signal.reason as StreamAbortReason | undefined
 
         switch (reason) {
           case 'timeout_error':
-            onComplete({
-              message: {
-                role: 'assistant',
-                content,
-                error: 'timeout_error',
-                toolCalls: toolCallResultsAccum,
-                generationInfo: baseGenerationInfo,
-              },
-            })
+            onComplete({ message: message('timeout_error') })
             return
 
           case 'user_aborted':
-            onComplete({
-              message: {
-                role: 'assistant',
-                content,
-                error: error.length > 0 ? error : undefined,
-                toolCalls: toolCallResultsAccum,
-                generationInfo: baseGenerationInfo,
-              },
-            })
+            onComplete({ message: message(error.length > 0 ? error : undefined) })
             return
 
           case 'conversation_cleared':
-            setCompletion('')
+            setStreamingParts(NO_PARTS)
             return
         }
       } else {
         error += '\nResponse stream was interrupted'
       }
       if (!errorReported) onError(err)
-      if (content.length > 0) {
-        onComplete({
-          message: {
-            role: 'assistant',
-            content,
-            error: error.length > 0 ? error : undefined,
-            toolCalls: toolCallResultsAccum,
-            generationInfo: baseGenerationInfo,
-          },
-        })
+      if (parts.length > 0) {
+        onComplete({ message: message(error.length > 0 ? error : undefined) })
       }
     } finally {
       // A pending error timeout would otherwise abort the next stream's controller
@@ -125,89 +94,50 @@ export const useChatStream = ({
         errorTimeoutRef.current = null
       }
       streamControllerRef.current = null
-      setCompletion('')
-      setToolCalls({})
+      setStreamingParts(NO_PARTS)
       setIsStreaming(false)
       setGenerationInfo(undefined)
     }
 
-    function processChunks(data: string) {
-      for (const chunk of data.split('\n')) {
-        if (!chunk || chunk.trim().length === 0) continue
-        const result = parseStreamChunk(chunk, accumulated)
-        accumulated = result.accumulated
-        if (!result.parsed) continue
+    function handleEvent(event: ChatEvent) {
+      onText()
 
-        const parsedChunk = result.parsed
+      // Successfully received something, so clear any existing error timeout
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current)
+        errorTimeoutRef.current = null
+        setHasPotentialError(false)
+      }
 
-        onText()
+      if (event.type === 'error') {
+        error += event.error
 
-        // Successfully received something, so clear any existing error timeout
-        if (errorTimeoutRef.current) {
-          clearTimeout(errorTimeoutRef.current)
-          errorTimeoutRef.current = null
-          setHasPotentialError(false)
-        }
+        errorReported = true
+        onError({ error: event.error })
 
-        switch (parsedChunk.type) {
-          case 'writing':
-            setCompletion((prev) => prev + parsedChunk.text)
-            content += parsedChunk.text
-            break
+        errorTimeoutRef.current = setTimeout(() => {
+          console.error('Error timeout:', event)
+          streamControllerRef.current?.abort('error')
+        }, 3000)
+        setHasPotentialError(true)
+        return
+      }
 
-          case 'processing':
-            break
-
-          case 'toolCallStatus':
-            if ('result' in parsedChunk) {
-              toolCallResultsAccum[parsedChunk.callId] = parsedChunk
-              onToolCallComplete(parsedChunk)
-            }
-            setToolCalls((prev) => ({ ...prev, [parsedChunk.callId]: parsedChunk }))
-            break
-
-          case 'error':
-            error += parsedChunk.error
-
-            errorReported = true
-            onError({ error: parsedChunk.error })
-
-            errorTimeoutRef.current = setTimeout(() => {
-              console.error('Error timeout:', parsedChunk)
-              streamControllerRef.current?.abort('error')
-            }, 3000)
-            setHasPotentialError(true)
-
-            break
-
-          default:
-            break
-        }
+      const next = applyEvent(parts, event)
+      if (next !== parts) {
+        parts = next
+        setStreamingParts(next)
       }
     }
   }
 
   return {
     processStream,
-    completion,
+    streamingParts,
     generationInfo,
     isStreaming,
     setIsStreaming,
-    toolCalls,
     streamControllerRef,
     hasPotentialError,
-  }
-}
-
-export function parseStreamChunk(chunk: string, accumulated: string): { parsed: ChatEvent | undefined; accumulated: string } {
-  try {
-    return { parsed: JSON.parse(chunk), accumulated: '' }
-  } catch {
-    const next = accumulated + chunk
-    try {
-      return { parsed: JSON.parse(next), accumulated: '' }
-    } catch {
-      return { parsed: undefined, accumulated: next }
-    }
   }
 }

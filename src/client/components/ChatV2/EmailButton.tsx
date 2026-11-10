@@ -4,11 +4,11 @@ import EmailIcon from '@mui/icons-material/Email'
 import { enqueueSnackbar } from '../common/Snackbar'
 import { useTranslation } from 'react-i18next'
 import useCurrentUser from '../../hooks/useCurrentUser'
-import type { ChatMessage } from '../../../shared/chat'
+import type { ClientChatMessage } from './messages'
 import { TextButton } from './general/Buttons'
 import { sendConversationEmail } from './api'
 
-const EmailButton = ({ messages, disabled, collapsed = false }: { messages: ChatMessage[]; disabled: boolean; collapsed?: boolean }) => {
+const EmailButton = ({ messages, disabled, collapsed = false }: { messages: ClientChatMessage[]; disabled: boolean; collapsed?: boolean }) => {
   const { t } = useTranslation()
   const { user, isLoading } = useCurrentUser()
   const [isCooldown, setIsCooldown] = useState(false)

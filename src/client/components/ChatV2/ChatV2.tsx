@@ -13,12 +13,12 @@ import {
   ValidModelNameSchema,
   getModelConfig,
 } from '../../../config'
-import type { ChatMessage, MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
+import type { MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { useChatScroll } from './useChatScroll'
 import useCourse from '../../hooks/useCourse'
-import useLocalStorageState, { useLocalStorageStateWithURLDefault } from '../../hooks/useLocalStorageState'
+import { useLocalStorageStateWithURLDefault } from '../../hooks/useLocalStorageState'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
 import { invalidateUserUsage } from '../../hooks/useUserUsage'
@@ -28,8 +28,12 @@ import { ChatBox } from './ChatBox'
 import { OutlineButtonBlack } from './general/Buttons'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
-import { StreamAbortReason, TypedAbortController, useChatStream } from './useChatStream'
-import { postCompletionStreamV3, sendConversationEmail, downloadDiscussionAsFile } from './api'
+import { useChatStream } from './useChatStream'
+import { sendConversationEmail, downloadDiscussionAsFile } from './api'
+import { HttpChatTransport } from './chatTransport'
+import { applyEvent } from './applyEvent'
+import { type ClientChatMessage, messageToolResults, toHistoryMessages } from './messages'
+import { useChatMessages } from './useChatMessages'
 import { ConversationSplash } from './general/ConversationSplash'
 import { PromptStateProvider, usePromptState } from './PromptState'
 import z from 'zod/v4'
@@ -70,10 +74,12 @@ const ChatV2Content = () => {
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
   const ragHidden = activePrompt?.ragHidden
 
-  const { processStream, completion, isStreaming, setIsStreaming, toolCalls, streamControllerRef, generationInfo, hasPotentialError } = useChatStream({
+  const { processStream, streamingParts, isStreaming, setIsStreaming, streamControllerRef, generationInfo, hasPotentialError } = useChatStream({
     onComplete: ({ message }) => {
-      if (message.content.length > 0 || message.error) {
-        setMessages((prev: ChatMessage[]) => prev.concat(message))
+      // Counts file searches once they are in the message. The text-only v4 stream has no tool parts yet.
+      messageToolResults(message).forEach(() => dispatchAnalytics({ type: 'INCREMENT_FILE_SEARCHES' }))
+      if (message.parts.length > 0 || message.error) {
+        setMessages((prev: ClientChatMessage[]) => prev.concat(message))
         refetchStatus()
       }
       if (message.error) {
@@ -92,9 +98,6 @@ const ChatV2Content = () => {
       enqueueSnackbar(t('chat:errorInstructions'), { variant: 'error' })
       handleCancel('error')
     },
-    onToolCallComplete: () => {
-      dispatchAnalytics({ type: 'INCREMENT_FILE_SEARCHES' })
-    },
   })
 
   // queries
@@ -105,7 +108,7 @@ const ChatV2Content = () => {
   // local storage states
   const localStoragePrefix = courseId ? `course-${courseId}` : 'general'
   const [activeModel, setActiveModel] = useLocalStorageStateWithURLDefault('model-v2', DEFAULT_MODEL, 'model', ValidModelNameSchema)
-  const [messages, setMessages] = useLocalStorageState(`${localStoragePrefix}-chat-messages`, [] as ChatMessage[])
+  const [messages, setMessages] = useChatMessages(`${localStoragePrefix}-chat-messages`)
   const [modelTemperature, _setModelTemperature] = useLocalStorageStateWithURLDefault(
     `${localStoragePrefix}-chat-model-temperature`,
     String(DEFAULT_MODEL_TEMPERATURE),
@@ -162,7 +165,7 @@ const ChatV2Content = () => {
   }
   const lastRearmRef = useRef(0)
 
-  const handleSendMessage = async (message: string, resendPrevious: boolean, ignoredWarnings: WarningType[], messagesToResend?: ChatMessage[]) => {
+  const handleSendMessage = async (message: string, resendPrevious: boolean, ignoredWarnings: WarningType[], messagesToResend?: ClientChatMessage[]) => {
     if (!userStatus) return
 
     const acualModel = activeModel
@@ -172,7 +175,8 @@ const ChatV2Content = () => {
       return
     }
 
-    streamControllerRef.current = new TypedAbortController<StreamAbortReason>()
+    const transport = new HttpChatTransport()
+    streamControllerRef.current = transport
 
     const formData = new FormData()
 
@@ -270,18 +274,17 @@ const ChatV2Content = () => {
     }
 
     try {
-      const res = await postCompletionStreamV3(
+      const res = await transport.start({
         formData,
-        {
+        input: {
           options: {
             generationInfo,
-            chatMessages: newMessages,
+            chatMessages: toHistoryMessages(newMessages),
             ignoredWarnings,
           },
           courseId: courseId !== 'general' ? courseId : undefined,
         },
-        streamControllerRef.current,
-      )
+      })
 
       logAdminTiming(`headers received after ${Math.round(performance.now() - armedAt)}ms`)
 
@@ -318,8 +321,8 @@ const ChatV2Content = () => {
         return
       }
 
-      if ('stream' in res) {
-        await processStream(res.stream, generationInfo)
+      if ('events' in res) {
+        await processStream(res.events, generationInfo)
         clearRetryTimeout()
         invalidateUserUsage()
       } else {
@@ -331,7 +334,7 @@ const ChatV2Content = () => {
       const abortReason = streamControllerRef.current?.signal.reason
       const wasTimeout = abortReason === 'timeout_error'
       if (wasTimeout) {
-        setMessages((prev: ChatMessage[]) => prev.concat({ role: 'assistant', content: '', error: 'timeout_error', toolCalls: {}, generationInfo }))
+        setMessages((prev: ClientChatMessage[]) => prev.concat({ role: 'assistant', parts: [], error: 'timeout_error', generationInfo }))
       } else {
         console.error(err)
       }
@@ -448,12 +451,18 @@ const ChatV2Content = () => {
     for (let i = messages.length - 1; i >= 0; i--) {
       const message = messages[i]
       if (message.role !== 'assistant') continue
-      const toolResults = Object.values(message.toolCalls ?? {})
+      const toolResults = messageToolResults(message)
       if (toolResults.length > 0) return toolResults
     }
     return undefined
   }, [messages])
   const shownToolResults = activeToolResults ?? latestToolResults
+
+  // Marks the response that may have failed while waiting to see whether the stream recovers
+  const shownStreamingParts = useMemo(
+    () => (hasPotentialError ? applyEvent(streamingParts, { type: 'text.delta', path: [], text: ' ⚠️' }) : streamingParts),
+    [hasPotentialError, streamingParts],
+  )
 
   // layout
   const canShowToolResults = canManageCourse(chatInstance) || !(isPromptHidden || ragHidden) || activePrompt?.userId === user?.id
@@ -633,11 +642,10 @@ const ChatV2Content = () => {
                 />
               }
               messages={messages}
-              completion={hasPotentialError ? `${completion} ⚠️` : completion}
+              streamingParts={shownStreamingParts}
               generationInfo={generationInfo}
               isStreaming={isStreaming}
               endState={endState}
-              toolCalls={toolCalls}
               setActiveToolResults={canShowToolResults ? openToolResults : undefined}
               isMobile={isMobile}
               onRetry={handleRetry}

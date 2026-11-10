@@ -1,6 +1,4 @@
-import { usesStreamVersion } from '../../../config'
-import { readMessageContent, type ChatMessage, type PostStreamSchemaV3Type } from '../../../shared/chat'
-import { postAbortableStream } from '../../util/apiClient'
+import { type ClientChatMessage, messageToolResults, messageToText } from './messages'
 import type { ChatToolOutput } from '../../../shared/tools'
 import { useGetQuery } from '../../hooks/apiHooks'
 import { TFunction } from 'i18next'
@@ -21,19 +19,11 @@ export const useToolResults = (toolCallId: string) => {
   })
 }
 
-export const postCompletionStreamV3 = async (formData: FormData, input: PostStreamSchemaV3Type, abortController?: AbortController) => {
-  formData.set('data', JSON.stringify(input))
-
-  const path = usesStreamVersion(input.options.generationInfo.model, 'v4') ? 'ai/v4/stream' : 'ai/v3/stream'
-
-  return postAbortableStream(path, formData, abortController)
-}
-
 // Helper function to parse markdown and create TextRun objects
 const parseMarkdownToTextRuns = (text: string): TextRun[] => {
   const runs: TextRun[] = []
   let currentPos = 0
-  
+
   // Match patterns: ***text***, **text**, *text*, `text`, and links [text](url)
   const patterns = [
     { regex: /\*\*\*(.+?)\*\*\*/g, format: { bold: true, italics: true } },
@@ -41,9 +31,9 @@ const parseMarkdownToTextRuns = (text: string): TextRun[] => {
     { regex: /\*(.+?)\*/g, format: { italics: true } },
     { regex: /`(.+?)`/g, format: { font: 'Courier New' } },
   ]
-  
+
   const matches: Array<{ start: number; end: number; text: string; format: any }> = []
-  
+
   // Find all matches
   patterns.forEach(({ regex, format }) => {
     const re = new RegExp(regex)
@@ -53,26 +43,26 @@ const parseMarkdownToTextRuns = (text: string): TextRun[] => {
         start: match.index,
         end: match.index + match[0].length,
         text: match[1],
-        format
+        format,
       })
     }
   })
-  
+
   // Sort matches by position
   matches.sort((a, b) => a.start - b.start)
-  
+
   // Remove overlapping matches (keep longer/earlier ones)
   const filteredMatches: typeof matches = []
   let lastEnd = 0
-  matches.forEach(match => {
+  matches.forEach((match) => {
     if (match.start >= lastEnd) {
       filteredMatches.push(match)
       lastEnd = match.end
     }
   })
-  
+
   // Build TextRuns
-  filteredMatches.forEach(match => {
+  filteredMatches.forEach((match) => {
     // Add plain text before this match
     if (match.start > currentPos) {
       const plainText = text.substring(currentPos, match.start)
@@ -84,7 +74,7 @@ const parseMarkdownToTextRuns = (text: string): TextRun[] => {
     runs.push(new TextRun({ text: match.text, ...match.format }))
     currentPos = match.end
   })
-  
+
   // Add remaining plain text
   if (currentPos < text.length) {
     const remainingText = text.substring(currentPos)
@@ -92,12 +82,12 @@ const parseMarkdownToTextRuns = (text: string): TextRun[] => {
       runs.push(new TextRun({ text: remainingText }))
     }
   }
-  
+
   // If no matches, return plain text
   if (runs.length === 0 && text) {
     runs.push(new TextRun({ text }))
   }
-  
+
   return runs.length > 0 ? runs : [new TextRun({ text: ' ' })]
 }
 
@@ -108,13 +98,13 @@ const parseHeading = (line: string): { isHeading: boolean; level: number; text: 
     return {
       isHeading: true,
       level: headingMatch[1].length,
-      text: headingMatch[2]
+      text: headingMatch[2],
     }
   }
   return { isHeading: false, level: 0, text: line }
 }
 
-export const sendConversationEmail = async (messages: ChatMessage[], t: TFunction) => {
+export const sendConversationEmail = async (messages: ClientChatMessage[], t: TFunction) => {
   const date = new Date()
   const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
   const subject = `${t('chat:conversation')} ${formattedDate}`
@@ -124,7 +114,7 @@ export const sendConversationEmail = async (messages: ChatMessage[], t: TFunctio
   return response
 }
 
-export const downloadDiscussionAsFile = (messages: ChatMessage[], t: TFunction, format: 'md' | 'docx' | 'pdf' | 'txt' = 'md') => {
+export const downloadDiscussionAsFile = (messages: ClientChatMessage[], t: TFunction, format: 'md' | 'docx' | 'pdf' | 'txt' = 'md') => {
   if (format === 'docx') {
     downloadDiscussionAsDocx(messages, t)
   } else if (format === 'pdf') {
@@ -136,10 +126,10 @@ export const downloadDiscussionAsFile = (messages: ChatMessage[], t: TFunction, 
   }
 }
 
-const downloadDiscussionAsMarkdown = async (messages: ChatMessage[], t: TFunction) => {
+const downloadDiscussionAsMarkdown = async (messages: ClientChatMessage[], t: TFunction) => {
   const textContent = formatMessagesAsText(messages, t)
   const blob = new Blob([textContent], { type: 'text/markdown;charset=utf-8' })
-  
+
   const date = new Date()
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -148,14 +138,14 @@ const downloadDiscussionAsMarkdown = async (messages: ChatMessage[], t: TFunctio
   const minutes = String(date.getMinutes()).padStart(2, '0')
   const seconds = String(date.getSeconds()).padStart(2, '0')
   const filename = `currechat-discussion-${year}-${month}-${day}-${hours}${minutes}${seconds}.md`
-  
+
   await saveFileWithDialog(blob, filename, { 'text/markdown': ['.md'] })
 }
 
-const downloadDiscussionAsText = async (messages: ChatMessage[], t: TFunction) => {
+export const formatMessagesAsPlainText = (messages: ClientChatMessage[], t: TFunction): string => {
   const date = new Date()
   const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
-  
+
   const textLines: string[] = []
   textLines.push(`${t('chat:conversation')} ${formattedDate}`)
   textLines.push('')
@@ -163,21 +153,21 @@ const downloadDiscussionAsText = async (messages: ChatMessage[], t: TFunction) =
   textLines.push('')
 
   messages.forEach((msg) => {
-    const content = readMessageContent(msg)
-    
+    const content = messageToText(msg)
+
     // Strip all markdown formatting for plain text
     const cleanContent = content
-      .replace(/^#{1,6}\s+(.+)$/gm, '$1')   // Strip headings
-      .replace(/\*\*\*(.+?)\*\*\*/g, '$1')  // ***bold+italic***
-      .replace(/\*\*(.+?)\*\*/g, '$1')      // **bold**
-      .replace(/\*(.+?)\*/g, '$1')          // *italic*
-      .replace(/`(.+?)`/g, '$1')            // `code`
-      .replace(/\[(.+?)\]\(.+?\)/g, '$1')  // [text](url)
-    
+      .replace(/^#{1,6}\s+(.+)$/gm, '$1') // Strip headings
+      .replace(/\*\*\*(.+?)\*\*\*/g, '$1') // ***bold+italic***
+      .replace(/\*\*(.+?)\*\*/g, '$1') // **bold**
+      .replace(/\*(.+?)\*/g, '$1') // *italic*
+      .replace(/`(.+?)`/g, '$1') // `code`
+      .replace(/\[(.+?)\]\(.+?\)/g, '$1') // [text](url)
+
     if (msg.role === 'user') {
       textLines.push('[USER]')
       textLines.push(cleanContent)
-      
+
       if (msg.attachments) {
         textLines.push(`[Attachment: ${msg.attachments}]`)
       }
@@ -189,35 +179,38 @@ const downloadDiscussionAsText = async (messages: ChatMessage[], t: TFunction) =
           modelInfo = `${msg.generationInfo.promptInfo.name} (${msg.generationInfo.model})`
         }
       }
-      
+
       textLines.push(`[ASSISTANT - ${modelInfo}]`)
       textLines.push(cleanContent)
-      
+
       if (msg.error) {
         textLines.push(`[Error: ${msg.error}]`)
       }
-      
-      if (msg.toolCalls) {
-        const toolCallEntries = Object.entries(msg.toolCalls)
-        if (toolCallEntries.length > 0) {
-          toolCallEntries.forEach(([, toolCall]) => {
-            if (toolCall.result && toolCall.input) {
-              const filenames = (toolCall.result.files ?? []).map((f) => f.fileName).join(', ')
-              textLines.push(`[Sources: ${filenames} - Query: "${toolCall.input.query}"]`)
-            }
-          })
-        }
+
+      const toolResults = messageToolResults(msg)
+      if (toolResults.length > 0) {
+        toolResults.forEach((toolCall) => {
+          if (toolCall.result && toolCall.input) {
+            const filenames = (toolCall.result.files ?? []).map((f) => f.fileName).join(', ')
+            textLines.push(`[Sources: ${filenames} - Query: "${toolCall.input.query}"]`)
+          }
+        })
       }
     }
-    
+
     textLines.push('')
     textLines.push('----------------------------------------')
     textLines.push('')
   })
-  
-  const textContent = textLines.join('\n')
+
+  return textLines.join('\n')
+}
+
+const downloadDiscussionAsText = async (messages: ClientChatMessage[], t: TFunction) => {
+  const date = new Date()
+  const textContent = formatMessagesAsPlainText(messages, t)
   const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' })
-  
+
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
@@ -225,14 +218,14 @@ const downloadDiscussionAsText = async (messages: ChatMessage[], t: TFunction) =
   const minutes = String(date.getMinutes()).padStart(2, '0')
   const seconds = String(date.getSeconds()).padStart(2, '0')
   const filename = `currechat-discussion-${year}-${month}-${day}-${hours}${minutes}${seconds}.txt`
-  
+
   await saveFileWithDialog(blob, filename, { 'text/plain': ['.txt'] })
 }
 
-const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) => {
+const downloadDiscussionAsDocx = async (messages: ClientChatMessage[], t: TFunction) => {
   const date = new Date()
   const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
-  
+
   const children: Paragraph[] = [
     new Paragraph({
       text: `${t('chat:conversation')} ${formattedDate}`,
@@ -242,13 +235,13 @@ const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) =
   ]
 
   messages.forEach((msg) => {
-    const content = readMessageContent(msg)
+    const content = messageToText(msg)
     let header = ''
     let modelInfo = ''
-    
+
     if (msg.role === 'user') {
       header = '[USER]'
-      
+
       children.push(
         new Paragraph({
           children: [
@@ -259,9 +252,9 @@ const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) =
             }),
           ],
           spacing: { before: 300, after: 100 },
-        })
+        }),
       )
-      
+
       // Split content by newlines and create separate paragraphs
       const contentLines = content.split('\n')
       contentLines.forEach((line, index) => {
@@ -274,28 +267,28 @@ const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) =
             HeadingLevel.HEADING_3,
             HeadingLevel.HEADING_4,
             HeadingLevel.HEADING_5,
-            HeadingLevel.HEADING_6
+            HeadingLevel.HEADING_6,
           ]
           children.push(
             new Paragraph({
               text: heading.text,
               heading: headingLevels[heading.level - 1],
               spacing: { before: 200, after: 100 },
-            })
+            }),
           )
         } else {
           const textRuns = parseMarkdownToTextRuns(line || ' ')
           children.push(
             new Paragraph({
               children: textRuns,
-              spacing: { 
-                after: index === contentLines.length - 1 ? 100 : 0 
+              spacing: {
+                after: index === contentLines.length - 1 ? 100 : 0,
               },
-            })
+            }),
           )
         }
       })
-      
+
       if (msg.attachments) {
         children.push(
           new Paragraph({
@@ -307,7 +300,7 @@ const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) =
               }),
             ],
             spacing: { after: 200 },
-          })
+          }),
         )
       }
     } else {
@@ -320,7 +313,7 @@ const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) =
         }
       }
       header = `[ASSISTANT - ${modelInfo}]`
-      
+
       children.push(
         new Paragraph({
           children: [
@@ -331,9 +324,9 @@ const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) =
             }),
           ],
           spacing: { before: 300, after: 100 },
-        })
+        }),
       )
-      
+
       // Split content by newlines and create separate paragraphs
       const contentLines = content.split('\n')
       contentLines.forEach((line, index) => {
@@ -346,28 +339,28 @@ const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) =
             HeadingLevel.HEADING_3,
             HeadingLevel.HEADING_4,
             HeadingLevel.HEADING_5,
-            HeadingLevel.HEADING_6
+            HeadingLevel.HEADING_6,
           ]
           children.push(
             new Paragraph({
               text: heading.text,
               heading: headingLevels[heading.level - 1],
               spacing: { before: 200, after: 100 },
-            })
+            }),
           )
         } else {
           const textRuns = parseMarkdownToTextRuns(line || ' ')
           children.push(
             new Paragraph({
               children: textRuns,
-              spacing: { 
-                after: index === contentLines.length - 1 ? 100 : 0 
+              spacing: {
+                after: index === contentLines.length - 1 ? 100 : 0,
               },
-            })
+            }),
           )
         }
       })
-      
+
       if (msg.error) {
         children.push(
           new Paragraph({
@@ -378,31 +371,29 @@ const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) =
               }),
             ],
             spacing: { after: 100 },
-          })
+          }),
         )
       }
-      
-      if (msg.toolCalls) {
-        const toolCallEntries = Object.entries(msg.toolCalls)
-        if (toolCallEntries.length > 0) {
-          toolCallEntries.forEach(([, toolCall]) => {
-            if (toolCall.result && toolCall.input) {
-              const filenames = (toolCall.result.files ?? []).map((f) => f.fileName).join(', ')
-              children.push(
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: `[Sources: ${filenames} - Query: "${toolCall.input.query}"]`,
-                      italics: true,
-                      color: '666666',
-                    }),
-                  ],
-                  spacing: { after: 100 },
-                })
-              )
-            }
-          })
-        }
+
+      const toolResults = messageToolResults(msg)
+      if (toolResults.length > 0) {
+        toolResults.forEach((toolCall) => {
+          if (toolCall.result && toolCall.input) {
+            const filenames = (toolCall.result.files ?? []).map((f) => f.fileName).join(', ')
+            children.push(
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `[Sources: ${filenames} - Query: "${toolCall.input.query}"]`,
+                    italics: true,
+                    color: '666666',
+                  }),
+                ],
+                spacing: { after: 100 },
+              }),
+            )
+          }
+        })
       }
     }
   })
@@ -416,7 +407,7 @@ const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) =
   })
 
   const blob = await Packer.toBlob(doc)
-  
+
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
@@ -424,14 +415,14 @@ const downloadDiscussionAsDocx = async (messages: ChatMessage[], t: TFunction) =
   const minutes = String(date.getMinutes()).padStart(2, '0')
   const seconds = String(date.getSeconds()).padStart(2, '0')
   const filename = `currechat-discussion-${year}-${month}-${day}-${hours}${minutes}${seconds}.docx`
-  
+
   await saveFileWithDialog(blob, filename, { 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] })
 }
 
-const downloadDiscussionAsPdf = async (messages: ChatMessage[], t: TFunction) => {
+const downloadDiscussionAsPdf = async (messages: ClientChatMessage[], t: TFunction) => {
   const date = new Date()
   const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
-  
+
   const doc = new jsPDF()
   const pageWidth = doc.internal.pageSize.getWidth()
   const margin = 15
@@ -445,8 +436,8 @@ const downloadDiscussionAsPdf = async (messages: ChatMessage[], t: TFunction) =>
   yPosition += 15
 
   messages.forEach((msg) => {
-    const content = readMessageContent(msg)
-    
+    const content = messageToText(msg)
+
     // Check if we need a new page
     if (yPosition > 260) {
       doc.addPage()
@@ -456,23 +447,23 @@ const downloadDiscussionAsPdf = async (messages: ChatMessage[], t: TFunction) =>
     // Message header
     doc.setFontSize(12)
     doc.setFont('helvetica', 'bold')
-    
+
     if (msg.role === 'user') {
       doc.setTextColor(0, 0, 0)
       doc.text('[USER]', margin, yPosition)
       yPosition += 8
-      
+
       // Message content
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(10)
       // Strip markdown formatting for cleaner PDF output
       const cleanContent = content
-        .replace(/\*\*\*(.+?)\*\*\*/g, '$1')  // ***bold+italic***
-        .replace(/\*\*(.+?)\*\*/g, '$1')      // **bold**
-        .replace(/\*(.+?)\*/g, '$1')          // *italic*
-        .replace(/`(.+?)`/g, '$1')            // `code`
-        .replace(/\[(.+?)\]\(.+?\)/g, '$1')  // [text](url)
-      
+        .replace(/\*\*\*(.+?)\*\*\*/g, '$1') // ***bold+italic***
+        .replace(/\*\*(.+?)\*\*/g, '$1') // **bold**
+        .replace(/\*(.+?)\*/g, '$1') // *italic*
+        .replace(/`(.+?)`/g, '$1') // `code`
+        .replace(/\[(.+?)\]\(.+?\)/g, '$1') // [text](url)
+
       const contentLines = cleanContent.split('\n')
       contentLines.forEach((line: string) => {
         const heading = parseHeading(line)
@@ -501,7 +492,7 @@ const downloadDiscussionAsPdf = async (messages: ChatMessage[], t: TFunction) =>
           })
         }
       })
-      
+
       // Attachments
       if (msg.attachments) {
         doc.setFont('helvetica', 'italic')
@@ -520,23 +511,23 @@ const downloadDiscussionAsPdf = async (messages: ChatMessage[], t: TFunction) =>
           modelInfo = `${msg.generationInfo.promptInfo.name} (${msg.generationInfo.model})`
         }
       }
-      
+
       doc.setTextColor(16, 126, 171)
       doc.text(`[ASSISTANT - ${modelInfo}]`, margin, yPosition)
       doc.setTextColor(0, 0, 0)
       yPosition += 8
-      
+
       // Message content
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(10)
       // Strip markdown formatting for cleaner PDF output
       const cleanContent = content
-        .replace(/\*\*\*(.+?)\*\*\*/g, '$1')  // ***bold+italic***
-        .replace(/\*\*(.+?)\*\*/g, '$1')      // **bold**
-        .replace(/\*(.+?)\*/g, '$1')          // *italic*
-        .replace(/`(.+?)`/g, '$1')            // `code`
-        .replace(/\[(.+?)\]\(.+?\)/g, '$1')  // [text](url)
-      
+        .replace(/\*\*\*(.+?)\*\*\*/g, '$1') // ***bold+italic***
+        .replace(/\*\*(.+?)\*\*/g, '$1') // **bold**
+        .replace(/\*(.+?)\*/g, '$1') // *italic*
+        .replace(/`(.+?)`/g, '$1') // `code`
+        .replace(/\[(.+?)\]\(.+?\)/g, '$1') // [text](url)
+
       const contentLines = cleanContent.split('\n')
       contentLines.forEach((line: string) => {
         const heading = parseHeading(line)
@@ -565,7 +556,7 @@ const downloadDiscussionAsPdf = async (messages: ChatMessage[], t: TFunction) =>
           })
         }
       })
-      
+
       // Error
       if (msg.error) {
         doc.setTextColor(255, 0, 0)
@@ -574,36 +565,34 @@ const downloadDiscussionAsPdf = async (messages: ChatMessage[], t: TFunction) =>
         doc.setTextColor(0, 0, 0)
         yPosition += 6
       }
-      
+
       // Tool calls
-      if (msg.toolCalls) {
-        const toolCallEntries = Object.entries(msg.toolCalls)
-        if (toolCallEntries.length > 0) {
-          doc.setFont('helvetica', 'italic')
-          doc.setTextColor(102, 102, 102)
-          doc.setFontSize(9)
-          
-          toolCallEntries.forEach(([, toolCall]) => {
-            if (toolCall.result && toolCall.input) {
-              const filenames = (toolCall.result.files ?? []).map((f) => f.fileName).join(', ')
-              const sourceLine = `[Sources: ${filenames} - Query: "${toolCall.input.query}"]`
-              const sourceLines = doc.splitTextToSize(sourceLine, maxWidth)
-              sourceLines.forEach((line: string) => {
-                if (yPosition > 270) {
-                  doc.addPage()
-                  yPosition = 20
-                }
-                doc.text(line, margin, yPosition)
-                yPosition += 5
-              })
-            }
-          })
-          
-          doc.setTextColor(0, 0, 0)
-        }
+      const toolResults = messageToolResults(msg)
+      if (toolResults.length > 0) {
+        doc.setFont('helvetica', 'italic')
+        doc.setTextColor(102, 102, 102)
+        doc.setFontSize(9)
+
+        toolResults.forEach((toolCall) => {
+          if (toolCall.result && toolCall.input) {
+            const filenames = (toolCall.result.files ?? []).map((f) => f.fileName).join(', ')
+            const sourceLine = `[Sources: ${filenames} - Query: "${toolCall.input.query}"]`
+            const sourceLines = doc.splitTextToSize(sourceLine, maxWidth)
+            sourceLines.forEach((line: string) => {
+              if (yPosition > 270) {
+                doc.addPage()
+                yPosition = 20
+              }
+              doc.text(line, margin, yPosition)
+              yPosition += 5
+            })
+          }
+        })
+
+        doc.setTextColor(0, 0, 0)
       }
     }
-    
+
     yPosition += 10 // Space between messages
   })
 
@@ -614,25 +603,25 @@ const downloadDiscussionAsPdf = async (messages: ChatMessage[], t: TFunction) =>
   const minutes = String(date.getMinutes()).padStart(2, '0')
   const seconds = String(date.getSeconds()).padStart(2, '0')
   const filename = `currechat-discussion-${year}-${month}-${day}-${hours}${minutes}${seconds}.pdf`
-  
+
   const pdfBlob = doc.output('blob')
   await saveFileWithDialog(pdfBlob, filename, { 'application/pdf': ['.pdf'] })
 }
 
-const formatMessagesAsText = (messages: ChatMessage[], t: TFunction): string => {
+export const formatMessagesAsText = (messages: ClientChatMessage[], t: TFunction): string => {
   const textContent = messages
     .map((msg) => {
-      const content = readMessageContent(msg)
+      const content = messageToText(msg)
       let header = ''
-      
+
       if (msg.role === 'user') {
         header = '[USER]'
         const parts = [header, content]
-        
+
         if (msg.attachments) {
           parts.push(`[Attachment: ${msg.attachments}]`)
         }
-        
+
         return parts.join('\n')
       } else {
         // Assistant message
@@ -644,42 +633,40 @@ const formatMessagesAsText = (messages: ChatMessage[], t: TFunction): string => 
           }
         }
         header = `[ASSISTANT - ${modelInfo}]`
-        
+
         const parts = [header, content]
-        
+
         if (msg.error) {
           parts.push(`[Error: ${msg.error}]`)
         }
-        
-        if (msg.toolCalls) {
-          const toolCallEntries = Object.entries(msg.toolCalls)
-          if (toolCallEntries.length > 0) {
-            const sources = toolCallEntries
-              .map(([, toolCall]) => {
-                if (toolCall.result && toolCall.input) {
-                  const filenames = (toolCall.result.files ?? []).map(f => f.fileName).join(', ')
-                  return `[Sources: ${filenames} - Query: "${toolCall.input.query}"]`
-                }
-                return null
-              })
-              .filter(Boolean)
-              .join('\n')
-            
-            if (sources) {
-              parts.push(sources)
-            }
+
+        const toolResults = messageToolResults(msg)
+        if (toolResults.length > 0) {
+          const sources = toolResults
+            .map((toolCall) => {
+              if (toolCall.result && toolCall.input) {
+                const filenames = (toolCall.result.files ?? []).map((f) => f.fileName).join(', ')
+                return `[Sources: ${filenames} - Query: "${toolCall.input.query}"]`
+              }
+              return null
+            })
+            .filter(Boolean)
+            .join('\n')
+
+          if (sources) {
+            parts.push(sources)
           }
         }
-        
+
         return parts.join('\n')
       }
     })
     .join('\n\n---\n\n')
-  
+
   const date = new Date()
   const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
   const title = `# ${t('chat:conversation')} ${formattedDate}\n\n`
-  
+
   return title + textContent
 }
 
@@ -808,10 +795,10 @@ const formatEmailContent = (content: string): string => {
   }
 }
 
-const formatEmail = (messages: ChatMessage[], t): string => {
+export const formatEmail = (messages: ClientChatMessage[], t: TFunction): string => {
   const emailContent = messages
     .map((msg) => {
-      const formattedContent = msg.role === 'assistant' ? formatEmailContent(readMessageContent(msg)) : escapeHtml(readMessageContent(msg))
+      const formattedContent = msg.role === 'assistant' ? formatEmailContent(messageToText(msg)) : escapeHtml(messageToText(msg))
 
       let title = ''
       if (msg.role === 'assistant') {
@@ -825,10 +812,11 @@ const formatEmail = (messages: ChatMessage[], t): string => {
       }
 
       return `
-      <div style="padding: 1rem; ${msg.role === 'user'
+      <div style="padding: 1rem; ${
+        msg.role === 'user'
           ? 'background: #efefef; margin-left: 100px; border-radius: 0.6rem; box-shadow: 0px 2px 2px rgba(0,0,0,0.2); white-space: pre-wrap; word-break: break-word; '
           : 'margin-right: 2rem;'
-        }">
+      }">
         ${title ? `<h3 style="font-style: italic; margin: 0; color: #107eab">${title}:</h3>` : ''}
         ${formattedContent}
       </div>
