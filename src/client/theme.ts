@@ -1,4 +1,4 @@
-import { createTheme, responsiveFontSizes, type ThemeOptions } from '@mui/material/styles'
+import { createTheme, darken, lighten, responsiveFontSizes, type Theme, type ThemeOptions } from '@mui/material/styles'
 import { useMemo } from 'react'
 import { useDarkMode } from './contexts/DarkModeContext'
 
@@ -32,6 +32,11 @@ export const focusVisibleOutline = {
   outline: `3px solid ${focusIndicator}`,
   outlineOffset: '2px',
 } as const
+
+type TextPaletteKey = 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success'
+
+export const accessibleTextColor = (theme: Theme, key: TextPaletteKey): string =>
+  theme.palette.mode === 'dark' ? lighten(theme.palette[key].main, 0.5) : darken(theme.palette[key].main, 0.3)
 
 export const darkModeLinkColors = {
   '& a': { color: '#8ab4f8' },

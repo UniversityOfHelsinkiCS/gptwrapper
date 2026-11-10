@@ -49,6 +49,7 @@ import { usePromptState } from '../ChatV2/PromptState'
 import { PromptType } from '../../types'
 import { useNavigate, useParams } from 'react-router-dom'
 import { formatDate } from '../ChatV2/util'
+import { accessibleTextColor } from '../../theme'
 
 const promptTypeOrder: PromptType[] = ['CHAT_INSTANCE', 'PERSONAL', 'UNIVERSITY', 'TEMPLATE']
 
@@ -494,7 +495,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
                         justifyContent: 'center',
                         fontSize: 11,
                         fontWeight: 700,
-                        color: 'primary.main',
+                        color: (theme) => accessibleTextColor(theme, 'primary'),
                       }}
                     >
                       {fileExtension(file.name)}

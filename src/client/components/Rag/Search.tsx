@@ -10,6 +10,7 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import { InfoBox } from '../common/InfoBox'
 import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
 import { focusIndicatorStyle } from 'src/client/util/accessibility'
+import { accessibleTextColor } from '../../theme'
 
 export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
   const { t } = useTranslation()
@@ -306,7 +307,16 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
                 key={chunk.id ?? `${chunk.metadata?.ragFileName ?? 'unknown'}-${idx}`}
                 sx={{ display: 'flex', gap: '14px', py: '16px', borderBottom: idx < visibleResults.length - 1 ? '1px solid' : 'none', borderColor: 'divider' }}
               >
-                <Typography sx={{ fontFamily: 'monospace', fontSize: '13px', fontWeight: 500, color: 'primary.main', flex: '0 0 auto', pt: '1px' }}>
+                <Typography
+                  sx={{
+                    fontFamily: 'monospace',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    color: (theme) => accessibleTextColor(theme, 'primary'),
+                    flex: '0 0 auto',
+                    pt: '1px',
+                  }}
+                >
                   #{idx + 1}
                 </Typography>
                 <Box minWidth={0} display="flex" flexDirection="column" gap="6px">
@@ -340,7 +350,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
                 p: '12px',
                 cursor: 'pointer',
                 font: 'inherit',
-                color: 'primary.main',
+                color: (theme) => accessibleTextColor(theme, 'primary'),
                 bgcolor: 'transparent',
                 fontSize: '14px',
                 fontWeight: 500,

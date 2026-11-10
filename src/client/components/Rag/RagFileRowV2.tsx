@@ -9,6 +9,7 @@ import { IngestionJobStatus } from '@shared/ingestion'
 import type { RagFileAttributes } from '@shared/types'
 import { useTranslation } from 'react-i18next'
 import { OutlineButtonBlue, TextButton } from '../ChatV2/general/Buttons'
+import { accessibleTextColor } from '../../theme'
 
 type BadgePalette = 'error' | 'warning' | 'primary' | 'secondary'
 
@@ -65,7 +66,7 @@ export const RagFileRowV2: React.FC<RagFileRowV2Props> = ({ file, status, upload
           fontWeight: 700,
           fontSize: badge.label.length > 3 ? '0.6rem' : '0.65rem',
           backgroundColor: (theme) => alpha(theme.palette[badge.palette].main, 0.13),
-          color: (theme) => theme.palette[badge.palette].main,
+          color: (theme) => accessibleTextColor(theme, badge.palette),
         }}
       >
         {badge.label}
@@ -98,7 +99,7 @@ export const RagFileRowV2: React.FC<RagFileRowV2Props> = ({ file, status, upload
         </TextButton>
 
         {isSuccess && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5, color: 'success.main' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5, color: (theme) => accessibleTextColor(theme, 'success') }}>
             <CheckCircle sx={{ fontSize: 16 }} />
             <Typography variant="caption" sx={{ fontWeight: 600 }}>
               {t('rag:statusReady')}
@@ -115,7 +116,7 @@ export const RagFileRowV2: React.FC<RagFileRowV2Props> = ({ file, status, upload
               color="info"
               sx={{ flex: 1, maxWidth: 200, height: 5, borderRadius: 3 }}
             />
-            <Typography variant="caption" sx={{ color: 'info.main', fontWeight: 700, whiteSpace: 'nowrap' }}>
+            <Typography variant="caption" sx={{ color: (theme) => accessibleTextColor(theme, 'info'), fontWeight: 700, whiteSpace: 'nowrap' }}>
               {t('rag:statusProcessing')} · {Math.round(progress)} %
             </Typography>
           </Box>
@@ -123,14 +124,14 @@ export const RagFileRowV2: React.FC<RagFileRowV2Props> = ({ file, status, upload
 
         {isError && (
           <Box id={`file-error-${file.id}`} sx={{ mt: 0.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'error.main' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: (theme) => accessibleTextColor(theme, 'error') }}>
               <ErrorOutline sx={{ fontSize: 16 }} />
               <Typography variant="caption" sx={{ fontWeight: 600 }}>
                 {t('rag:statusFailed')}
               </Typography>
             </Box>
             {error && (
-              <Typography variant="caption" color="error" sx={{ display: 'block' }}>
+              <Typography variant="caption" sx={{ display: 'block', color: (theme) => accessibleTextColor(theme, 'error') }}>
                 {t('error:errorMessage')}: {error}
               </Typography>
             )}
