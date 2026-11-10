@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { teacherTest as test } from './fixtures'
+import { adminTest, teacherTest as test } from './fixtures'
 import { acceptDisclaimer, closeSendPreference, closeSnackbars, sendChatMessage, useMockModel } from './utils/test-helpers'
 
 test.describe('Prompts', () => {
@@ -183,5 +183,45 @@ test.describe('Prompts', () => {
     await expect(page.getByTestId('sources-header')).toBeVisible()
     await page.getByTestId('toggle-source-details').click()
     await expect(page.locator('#tool-result-details')).toBeVisible()
+  })
+})
+
+test.describe('Prompt tools', () => {
+  adminTest('an admin turns on an experimental tool, and it is saved and loaded with the prompt', async ({ page }, testInfo) => {
+    const promptName = `quiz-tool-prompt-${testInfo.workerIndex}`
+
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    await page.getByTestId('choose-prompt-button').click()
+    await page.getByTestId('create-personal-prompt-button').click()
+    await page.getByTestId('prompt-name-input').fill(promptName)
+    await page.getByTestId('system-message-input').fill('Ask me quizzes')
+
+    const quizTool = page.getByRole('checkbox', { name: /Quizzes/ })
+    await expect(quizTool).not.toBeChecked()
+    await expect(page.getByText(/multiple-choice questions shown as interactive cards/)).toBeVisible()
+    await quizTool.check()
+    await page.getByRole('button', { name: 'Save' }).click()
+
+    await expect(page.getByTestId(`prompt-preview-title-for-${promptName}`)).toBeVisible()
+    await page.getByTestId(`edit-prompt-${promptName}`).click()
+    await expect(page.getByRole('checkbox', { name: /Quizzes/ })).toBeChecked()
+
+    // Turning it off is saved too
+    await page.getByRole('checkbox', { name: /Quizzes/ }).uncheck()
+    await page.getByRole('button', { name: 'Save' }).click()
+    await expect(page.getByTestId(`prompt-preview-title-for-${promptName}`)).toBeVisible()
+    await page.getByTestId(`edit-prompt-${promptName}`).click()
+    await expect(page.getByRole('checkbox', { name: /Quizzes/ })).not.toBeChecked()
+  })
+
+  test('a teacher is not offered experimental tools', async ({ page }) => {
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    await page.getByTestId('choose-prompt-button').click()
+    await page.getByTestId('create-personal-prompt-button').click()
+    await expect(page.getByTestId('prompt-name-input')).toBeVisible()
+
+    await expect(page.getByRole('checkbox', { name: /Quizzes/ })).toHaveCount(0)
   })
 })

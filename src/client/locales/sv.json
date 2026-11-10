@@ -712,7 +712,12 @@
     "publish": "Publicera",
     "publishedHelp": "Ett utkast syns endast för kursens ansvariga. En publicerad prompt syns även för studenter.",
     "publishedPrompt": "Prompt \"{{name}}\" publicerad",
-    "unpublishedPrompt": "Prompt \"{{name}}\" återställd till utkast"
+    "unpublishedPrompt": "Prompt \"{{name}}\" återställd till utkast",
+    "toolsHeading": "Verktyg",
+    "toolsHelp": "Verktyg som modellen kan använda i chatten med denna prompt.",
+    "toolExperimental": "Experimentell",
+    "toolPresentQuizLabel": "Flervalsfrågor",
+    "toolPresentQuizDescription": "Modellen kan kontrollera vad studenten kan med flervalsfrågor som visas som interaktiva kort."
   },
   "tooltip": {
     "copied": "Kopierad!"

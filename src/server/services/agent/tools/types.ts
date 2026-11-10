@@ -2,6 +2,7 @@ import type { StructuredToolInterface, ToolRunnableConfig } from '@langchain/cor
 import type { ZodType } from 'zod/v4'
 import type { ValidModelName } from '@config'
 import type { SubagentPart, ToolPart } from '@shared/agentChat'
+import type { ToolStage } from '@shared/promptTools'
 import type { User } from '@shared/user'
 import type { ChatInstance } from '../../../db/models'
 
@@ -46,12 +47,18 @@ type ToolModuleBase<Config> = {
   name: string
   /** `client` tools run in the browser (phase 2). */
   executor: 'server' | 'client'
-  /** `experimental` tools can only be enabled by admins. */
-  stage: 'experimental' | 'stable'
+  /** `experimental` tools can only be added to a prompt by admins. */
+  stage: ToolStage
+  /**
+   * Set when the tool can be turned on per prompt (`Prompt.tools`): the translation keys of its checkbox in the
+   * prompt editor. Tools without it are enabled some other way (`document_search` from the prompt's RAG index,
+   * `mock_subagent` for the mock model only) and are never listed in `GET /api/tools` or accepted on save.
+   */
+  promptOption?: { labelKey: string; descriptionKey: string }
   returnDirect?: boolean
   /** English instructions appended to the system message under `## Tool: <name>` when the tool is enabled. */
   instructions?: string
-  /** Schema of the per-prompt config that teachers can set (issue 06). */
+  /** Schema of the per-prompt `config`, checked when a prompt is saved. Without it, a prompt cannot give the tool a config. */
   configSchema?: ZodType
   create: (ctx: ToolContext<Config>) => StructuredToolInterface
 }

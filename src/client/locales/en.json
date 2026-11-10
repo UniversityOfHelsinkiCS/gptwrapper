@@ -744,7 +744,12 @@
     "publish": "Publish",
     "publishedHelp": "A draft is only visible to course responsibles. A published prompt is also visible to students.",
     "publishedPrompt": "Prompt \"{{name}}\" published",
-    "unpublishedPrompt": "Prompt \"{{name}}\" returned to draft"
+    "unpublishedPrompt": "Prompt \"{{name}}\" returned to draft",
+    "toolsHeading": "Tools",
+    "toolsHelp": "Tools the model can use when chatting with this prompt.",
+    "toolExperimental": "Experimental",
+    "toolPresentQuizLabel": "Quizzes",
+    "toolPresentQuizDescription": "The model can check what the student knows with multiple-choice questions shown as interactive cards."
   },
   "tooltip": {
     "copied": "Copied!"

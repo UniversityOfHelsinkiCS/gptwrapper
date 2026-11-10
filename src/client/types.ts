@@ -1,6 +1,7 @@
 import type { ChatMessage } from '@shared/chat'
 import { Locale } from '@shared/lang'
 import { AccessLevel, ChatStatus, Locales, Statistic, Term } from '@shared/types'
+import type { PromptTool } from '@shared/promptTools'
 import type { UserPreferences } from '@shared/user'
 
 /*
@@ -58,6 +59,7 @@ export type Prompt = {
   ragIndex?: ragInfo | null
   language?: PromptLanguage | null
   universityPromptId?: string | null
+  tools?: PromptTool[]
 }
 
 export type ragInfo = {
@@ -74,11 +76,15 @@ export type PromptEditorFormState = Pick<Prompt, 'name' | 'systemMessage' | 'hid
   customMessage: string
   ragIndexId?: number | null
   published?: boolean
+  /** Optional: the university prompt editor has no tools, and forms cached before tools existed lack them. */
+  tools?: PromptTool[]
 }
 
 export type PromptEditorFormContextValue = {
   form: PromptEditorFormState
   setForm: React.Dispatch<React.SetStateAction<PromptEditorFormState>>
+  /** The tools of the prompt as saved. Shown even when the user cannot add them, so they can keep or remove them. */
+  initialTools?: PromptTool[]
   type: PromptType
   ragIndices?: { id: number; metadata: { name: string } }[]
   userRagIndices?: { id: number; metadata: { name: string } }[]

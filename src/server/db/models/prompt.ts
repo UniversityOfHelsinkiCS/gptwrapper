@@ -1,6 +1,7 @@
 import { type CreationOptional, DataTypes, type InferAttributes, type InferCreationAttributes, Model, NonAttribute } from 'sequelize'
 
 import type { Message } from '@shared/chat'
+import type { PromptTool } from '@shared/promptTools'
 import { sequelize } from '../connection'
 import RagIndex from './ragIndex'
 import type UniversityPrompt from './universityPrompt'
@@ -42,6 +43,9 @@ class Prompt extends Model<InferAttributes<Prompt>, InferCreationAttributes<Prom
   declare language?: CreationOptional<PromptLanguage | null>
 
   declare universityPrompt?: NonAttribute<UniversityPrompt>
+
+  /** Tools turned on in this prompt, checked on save. `document_search` is not here: it comes from `ragIndex`. */
+  declare tools: CreationOptional<PromptTool[]>
 }
 
 Prompt.init(
@@ -111,6 +115,11 @@ Prompt.init(
     language: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    tools: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: [],
     },
   },
   {

@@ -21,6 +21,10 @@ vi.mock('@sentry/node', () => ({
   captureException: vi.fn(),
 }))
 
+// The tool registry imports the RAG search, which needs the vector DB.
+vi.mock('../services/rag/search', () => ({ search: vi.fn() }))
+vi.mock('../services/langchain/fileSearchResultsStore', () => ({ ToolResultStore: { saveResults: vi.fn() } }))
+
 import promptRouter from './prompt'
 import { ChatInstance, Prompt } from '../db/models'
 
@@ -261,5 +265,105 @@ describe('published state of course prompts', () => {
     const response = await api.fetch('/prompts/source-1')
 
     expect(response.status).toBe(200)
+  })
+})
+
+describe('tools of a prompt', () => {
+  const create = (body: Record<string, unknown>) =>
+    api.fetch('/prompts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'PERSONAL', name: 'Quizzer', userInstructions: '', systemMessage: 'x', ...body }),
+    })
+
+  const update = (id: string, body: Record<string, unknown>) =>
+    api.fetch(`/prompts/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Quizzer', userInstructions: '', systemMessage: 'x', ...body }),
+    })
+
+  const editablePrompt = (overrides: Record<string, unknown> = {}) => {
+    const prompt = sourcePrompt({ type: 'PERSONAL', userId: 'student-1', tools: [], ...overrides })
+    prompt.save = vi.fn()
+    vi.mocked(Prompt.findByPk).mockResolvedValue(prompt)
+    return prompt
+  }
+
+  test('a non-admin cannot add an experimental tool', async () => {
+    const response = await create({ tools: [{ name: 'present_quiz' }] })
+
+    expect(response.status).toBe(403)
+    expect(Prompt.create).not.toHaveBeenCalled()
+  })
+
+  test('an admin can add an experimental tool', async () => {
+    currentUser = { id: 'admin-1', isAdmin: true }
+
+    const response = await create({ tools: [{ name: 'present_quiz' }] })
+
+    expect(response.status).toBe(201)
+    expect(vi.mocked(Prompt.create).mock.calls[0][0]).toMatchObject({ tools: [{ name: 'present_quiz' }] })
+  })
+
+  test('a prompt without tools is saved with none', async () => {
+    const response = await create({})
+
+    expect(response.status).toBe(201)
+    expect(vi.mocked(Prompt.create).mock.calls[0][0]).toMatchObject({ tools: [] })
+  })
+
+  test.each([
+    ['an unknown tool', [{ name: 'web_search' }]],
+    ['a tool that comes from the RAG index', [{ name: 'document_search' }]],
+    ['a mock-only tool', [{ name: 'mock_subagent' }]],
+    ['the same tool twice', [{ name: 'present_quiz' }, { name: 'present_quiz' }]],
+    ['a config for a tool that takes none', [{ name: 'present_quiz', config: { count: 3 } }]],
+  ])('rejects %s with 400, even from an admin', async (_, tools) => {
+    currentUser = { id: 'admin-1', isAdmin: true }
+
+    const response = await create({ tools })
+
+    expect(response.status).toBe(400)
+    expect(Prompt.create).not.toHaveBeenCalled()
+  })
+
+  test('a non-admin cannot add an experimental tool to an existing prompt', async () => {
+    const prompt = editablePrompt()
+
+    const response = await update('source-1', { tools: [{ name: 'present_quiz' }] })
+
+    expect(response.status).toBe(403)
+    expect(prompt.save).not.toHaveBeenCalled()
+  })
+
+  test('a non-admin can keep or remove an experimental tool that an admin added', async () => {
+    const prompt = editablePrompt({ tools: [{ name: 'present_quiz' }] })
+
+    expect((await update('source-1', { tools: [{ name: 'present_quiz' }] })).status).toBe(200)
+    expect(prompt.tools).toEqual([{ name: 'present_quiz' }])
+
+    expect((await update('source-1', { tools: [] })).status).toBe(200)
+    expect(prompt.tools).toEqual([])
+  })
+
+  test('an update without tools leaves them as they are', async () => {
+    const prompt = editablePrompt({ tools: [{ name: 'present_quiz' }] })
+
+    const response = await update('source-1', {})
+
+    expect(response.status).toBe(200)
+    expect(prompt.tools).toEqual([{ name: 'present_quiz' }])
+  })
+
+  test('a copy keeps only the tools the copying user could add', async () => {
+    vi.mocked(Prompt.findByPk).mockResolvedValue(sourcePrompt({ type: 'TEMPLATE', tools: [{ name: 'present_quiz' }, { name: 'removed_tool' }] }))
+
+    expect((await copy('source-1', { target: { type: 'PERSONAL' } })).status).toBe(201)
+    expect(vi.mocked(Prompt.create).mock.calls[0][0]).toMatchObject({ tools: [] })
+
+    currentUser = { id: 'admin-1', isAdmin: true }
+    expect((await copy('source-1', { target: { type: 'PERSONAL' } })).status).toBe(201)
+    expect(vi.mocked(Prompt.create).mock.calls[1][0]).toMatchObject({ tools: [{ name: 'present_quiz' }] })
   })
 })

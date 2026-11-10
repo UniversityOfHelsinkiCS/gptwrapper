@@ -1,5 +1,6 @@
 import z from 'zod/v4'
 import { MessageContentArraySchema } from './chat'
+import { PromptToolsSchema } from './promptTools'
 
 export const PROMPT_TEXT_MAX_LENGTH = 20_000
 
@@ -21,6 +22,8 @@ export const PromptUpdateableParamsSchema = z.object({
   ragHidden: z.boolean().default(false),
   published: z.boolean().optional(),
   ragIndexId: z.number().min(1).optional().nullable(),
+  /** Left out, the tools of an edited prompt stay as they are. */
+  tools: PromptToolsSchema.optional(),
 })
 
 export const PromptCreationParamsSchema = z.intersection(

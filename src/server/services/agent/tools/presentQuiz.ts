@@ -26,6 +26,7 @@ export const presentQuiz: PlainToolModule = {
   kind: 'tool',
   executor: 'server',
   stage: 'experimental',
+  promptOption: { labelKey: 'prompt:toolPresentQuizLabel', descriptionKey: 'prompt:toolPresentQuizDescription' },
   returnDirect: true,
   instructions: [
     'Use present_quiz to check what the student knows with one multiple-choice question.',

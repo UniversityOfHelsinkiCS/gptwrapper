@@ -100,6 +100,24 @@ test.describe('axe wcag scan for prompt modal', () => {
     await scan(page, testInfo.title)
   })
 
+  adminTest('scan prompt creator with tool checkboxes', async ({ page }, testInfo) => {
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    await page.getByTestId('choose-prompt-button').click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+
+    await page.getByTestId('create-personal-prompt-button').click()
+    await expect(page.getByTestId('prompt-name-input')).toBeVisible()
+    // Admins are offered the experimental quiz tool; check it so the checked state is scanned too
+    const quizTool = page.getByRole('checkbox', { name: /Quizzes/ })
+    await quizTool.check()
+    await expect(quizTool).toBeChecked()
+    // The click leaves the pointer on the form; make sure no tooltip is open during the scan
+    await page.mouse.move(0, 0)
+    await expect(page.getByRole('tooltip')).toHaveCount(0)
+    await scan(page, testInfo.title)
+  })
+
   test('scan my prompt editor', async ({ page }, testInfo) => {
     const promptName = `axe-my-prompt-${testInfo.workerIndex}`
 

@@ -548,6 +548,18 @@ describe('POST /ai/v4/stream with the mock quiz', () => {
     expect(String(systemMessages.at(-1)?.content)).toContain('## Tool: present_quiz\n\nUse present_quiz')
   })
 
+  test("uses the prompt's tools, without adding the mock model's quiz twice or failing on a removed tool", async () => {
+    vi.mocked(Prompt.findByPk).mockResolvedValue(savedPrompt('PERSONAL', { tools: [{ name: 'present_quiz' }, { name: 'removed_tool' }] }))
+    const spy = vi.spyOn(MockModel.prototype, '_streamResponseChunks')
+
+    const events = await readEvents(await stream({ message: 'quiz', promptId: 'prompt-1' }))
+    const systemMessages = (spy.mock.calls[0][0] as { type: string; content: unknown }[]).filter((m) => m.type === 'system')
+    spy.mockRestore()
+
+    expect(String(systemMessages.at(-1)?.content).match(/## Tool: present_quiz/g)).toHaveLength(1)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'tool.start', name: 'present_quiz' }))
+  })
+
   test('a multi-select quiz for `quiz multi`', async () => {
     const events = await readEvents(await stream({ message: 'quiz multi' }))
     expect(events).toContainEqual(expect.objectContaining({ type: 'tool.start', name: 'present_quiz', input: expect.objectContaining({ multiSelect: true }) }))

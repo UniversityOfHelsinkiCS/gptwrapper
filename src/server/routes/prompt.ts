@@ -6,6 +6,7 @@ import { resolveCopyName, shouldKeepRagIndex } from '../util/promptCopy'
 import type { User } from '@shared/user'
 import { ChatInstance, Prompt, RagIndex, PromptChatInstance } from '../db/models'
 import { getAccessLevel } from '../services/chatInstances/access'
+import { copyablePromptTools, validatePromptTools } from '../services/agent/tools/promptTools'
 import type { RequestWithUser } from '../types'
 import { ApplicationError } from '../util/ApplicationError'
 import logger from '../util/logger'
@@ -28,7 +29,7 @@ promptRouter.get('/my-prompts', async (req, res) => {
   return
 })
 
-const getPotentialNameConflicts = async (prompt: InferAttributes<Prompt, { omit: 'id' }>) => {
+const getPotentialNameConflicts = async (prompt: Pick<InferAttributes<Prompt>, 'type' | 'chatInstanceId' | 'userId'>) => {
   switch (prompt.type) {
     case 'CHAT_INSTANCE': {
       return await Prompt.findAll({
@@ -120,8 +121,11 @@ promptRouter.post('/', async (req, res) => {
     throw ApplicationError.Conflict('Prompt name already exists')
   }
 
+  const tools = validatePromptTools(user, promptParams.tools ?? [])
+
   const newPrompt = await Prompt.create({
     ...promptParams,
+    tools,
     published: promptParams.type === 'CHAT_INSTANCE' ? promptParams.published ?? false : null,
   })
 
@@ -186,6 +190,8 @@ promptRouter.post('/:id/copy', async (req, res) => {
     hidden: source.hidden,
     ragHidden: source.ragHidden,
     ragIndexId: keepRagIndex ? source.ragIndexId ?? null : null,
+    // Copying must not get round the save-time check: only tools the user could add themselves are copied.
+    tools: copyablePromptTools(user, source.tools),
   }
 
   const copyParams =
@@ -278,9 +284,13 @@ promptRouter.put('/:id', async (req, res) => {
     throw ApplicationError.Conflict('Prompt name already exists')
   }
 
-  const { published, ...rest } = updates
+  const { published, tools, ...rest } = updates
 
   Object.assign(prompt, rest)
+
+  if (tools !== undefined) {
+    prompt.tools = validatePromptTools(user, tools, prompt.tools ?? [])
+  }
 
   if (prompt.type === 'CHAT_INSTANCE' && published !== undefined) {
     prompt.published = published

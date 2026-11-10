@@ -73,6 +73,7 @@ export const PromptEditorV2 = ({
     ragIndexId: previewPrompt?.ragIndexId ?? null,
     userId: previewPrompt?.userId ?? null,
     published: previewPrompt ? !isPromptDraft(previewPrompt) : false,
+    tools: previewPrompt?.tools ?? [],
   }
 
   const cacheKey = `promptEditorForm:${previewPrompt ? `edit:${previewPrompt.id}` : `new:${type}:${courseId}`}`
@@ -116,7 +117,7 @@ export const PromptEditorV2 = ({
 
     setLoading(true)
 
-    const { name, userInstructions, systemMessage, ragSystemMessages, hidden, ragHidden, ragIndexId, published } = form
+    const { name, userInstructions, systemMessage, ragSystemMessages, hidden, ragHidden, ragIndexId, published, tools = [] } = form
     const ragSystemMessage = ragSystemMessages.join(' ')
 
     const messages: Message[] = ragIndexId && ragSystemMessage.length > 0 ? [{ role: 'system', content: ragSystemMessage }] : []
@@ -132,6 +133,7 @@ export const PromptEditorV2 = ({
           hidden,
           ragHidden,
           ragIndexId,
+          tools,
           ...(type === 'CHAT_INSTANCE' ? { published } : {}),
         })
         enqueueSnackbar(t('prompt:updatedPrompt', { name }), { variant: 'success' })
@@ -149,6 +151,7 @@ export const PromptEditorV2 = ({
           hidden,
           ragHidden,
           ragIndexId,
+          tools,
           ...(type === 'CHAT_INSTANCE' ? { published } : {}),
         })
         enqueueSnackbar(t('prompt:createdPrompt', { name }), { variant: 'success' })
@@ -165,6 +168,7 @@ export const PromptEditorV2 = ({
 
   const context: PromptEditorFormContextValue = {
     form,
+    initialTools: initialForm.tools ?? [],
     setForm,
     type,
     ragIndices,

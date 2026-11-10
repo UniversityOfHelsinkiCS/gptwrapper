@@ -17,6 +17,7 @@ import {
 import { visuallyHidden } from '@mui/utils'
 import { useTranslation } from 'react-i18next'
 import RagMessageEditor from './RagMessageEditor'
+import { ToolsSection } from './ToolsSection'
 import { ClearOutlined, VisibilityOutlined, VisibilityOffOutlined } from '@mui/icons-material'
 import PsychologyIcon from '@mui/icons-material/Psychology'
 import EditNoteIcon from '@mui/icons-material/EditNote'
@@ -417,7 +418,8 @@ const RagSettingsSection = () => {
 export const PromptEditorForm = ({
   hideRagSettings = false,
   hideVisibilityToggle = false,
-}: { hideRagSettings?: boolean; hideVisibilityToggle?: boolean } = {}) => (
+  hideTools = false,
+}: { hideRagSettings?: boolean; hideVisibilityToggle?: boolean; hideTools?: boolean } = {}) => (
   <Box>
     <BasicInfoSection />
     <Divider sx={{ my: 3 }} />
@@ -429,5 +431,7 @@ export const PromptEditorForm = ({
         <Divider sx={{ my: 3 }} />
       </>
     )}
+    {/* Has its own divider, since it renders nothing when there are no tools to show */}
+    {!hideTools && <ToolsSection />}
   </Box>
 )

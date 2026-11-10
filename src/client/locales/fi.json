@@ -745,7 +745,12 @@
     "publish": "Julkaise",
     "publishedHelp": "Luonnos näkyy vain kurssin vastuuhenkilöille. Julkaistu alustus näkyy myös opiskelijoille.",
     "publishedPrompt": "Alustus \"{{name}}\" julkaistu",
-    "unpublishedPrompt": "Alustus \"{{name}}\" palautettu luonnokseksi"
+    "unpublishedPrompt": "Alustus \"{{name}}\" palautettu luonnokseksi",
+    "toolsHeading": "Työkalut",
+    "toolsHelp": "Työkalut, joita malli voi käyttää keskustellessa tällä alustuksella.",
+    "toolExperimental": "Kokeellinen",
+    "toolPresentQuizLabel": "Monivalintakysymykset",
+    "toolPresentQuizDescription": "Malli voi tarkistaa opiskelijan osaamista monivalintakysymyksillä, jotka näytetään vuorovaikutteisina kortteina."
   },
   "tooltip": {
     "copied": "Kopioitu!"

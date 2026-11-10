@@ -19,15 +19,17 @@ import { handleWarnings, modelConfigHasInstructions, prepareMessagesForLLM } fro
 import { MockModel } from '../langchain/MockModel'
 import { getAzureChatOpenAI, getToskaProvider, getVertexModelProvider } from '../langchain/modelGenerators'
 import { createStreamState, getMainAgentModelCall, getSubagentModelCall, mapStreamChunk, nextStreamState, type StreamChunk } from './mapStreamChunk'
-import { DOCUMENT_SEARCH } from './tools/documentSearch'
 import { MOCK_SUBAGENT } from './tools/mockSubagent'
 import { findQuizPart, quizAnswerToText } from './tools/presentQuiz'
+import { promptEnabledTools } from './tools/promptTools'
 import { createTools, getToolModule, historyMessageToText, withToolInstructions } from './tools/registry'
 import type { EnabledTool } from './tools/types'
 
 export const RECURSION_LIMIT = 25
 const KEEP_ALIVE_INTERVAL_MS = 5000
 const GENERATION_ERROR = 'Error while generating response'
+/** Tools the mock model always has, for its `subagent` and `quiz` prefixes. */
+const MOCK_MODEL_TOOLS = [MOCK_SUBAGENT, PRESENT_QUIZ]
 
 export type RunAgentRequest = z.output<typeof PostStreamSchemaV4>
 
@@ -85,10 +87,12 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
     throw ApplicationError.Forbidden('Usage limit reached')
   }
 
-  // The mock model always has the mock subagent and the quiz, for its `subagent` and `quiz` prefixes.
-  // Other models get tools per prompt (issue 06).
+  // The mock model always has the mock subagent and the quiz, for its `subagent` and `quiz` prefixes (e2e tests),
+  // whatever the prompt has. Other models only get the prompt's tools.
   if (isMockModel(model)) {
-    enabledTools.push({ name: MOCK_SUBAGENT }, { name: PRESENT_QUIZ })
+    for (const name of MOCK_MODEL_TOOLS) {
+      if (!enabledTools.some((t) => t.name === name)) enabledTools.push({ name })
+    }
   }
 
   meta.tools = enabledTools.map((t) => t.name)
@@ -290,10 +294,9 @@ const resolvePrompt = async (
     throw ApplicationError.NotFound('Prompt not found')
   }
 
-  // document_search is still derived from the prompt's RAG index (no tools column yet). The mock model gets the mock search.
-  const enabledTools: EnabledTool[] = []
+  // document_search is still derived from the prompt's RAG index; the other tools come from `prompt.tools`.
+  const enabledTools = promptEnabledTools(prompt)
   if (prompt.ragIndex) {
-    enabledTools.push({ name: DOCUMENT_SEARCH, config: { ragIndex: prompt.ragIndex } })
     meta.ragIndexId = prompt.ragIndex.id
     meta.ragIndex = prompt.ragIndex.metadata.name
   }

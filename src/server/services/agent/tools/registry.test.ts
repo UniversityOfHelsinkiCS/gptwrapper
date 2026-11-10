@@ -7,7 +7,10 @@ vi.mock('../../langchain/fileSearchResultsStore', () => ({ ToolResultStore: { sa
 vi.mock('../../../util/logger', () => ({ default: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }))
 
 import { documentSearch, toDocumentSearchResult } from './documentSearch'
-import { historyMessageToText, withToolInstructions } from './registry'
+import { historyMessageToText, listToolModules, withToolInstructions } from './registry'
+import en from '../../../../client/locales/en.json'
+import fi from '../../../../client/locales/fi.json'
+import sv from '../../../../client/locales/sv.json'
 
 const searchPart = (overrides: Partial<ToolPart> = {}): ToolPart => ({
   type: 'tool',
@@ -97,5 +100,21 @@ describe('withToolInstructions', () => {
 
   test('leaves the system message alone without tools', () => {
     expect(withToolInstructions('You help with essays.', [])).toBe('You help with essays.')
+  })
+})
+
+describe('prompt options of the tools', () => {
+  // `npm run translations` only checks keys written in the client, and these come from the server (`GET /api/tools`).
+  test.each([
+    ['fi', fi],
+    ['en', en],
+    ['sv', sv],
+  ])('every label and description key is in %s', (_, locale) => {
+    const keys = listToolModules().flatMap((module) => (module.promptOption ? [module.promptOption.labelKey, module.promptOption.descriptionKey] : []))
+    expect(keys.length).toBeGreaterThan(0)
+    for (const key of keys) {
+      const [namespace, name] = key.split(':')
+      expect((locale as unknown as Record<string, Record<string, unknown>>)[namespace]?.[name], key).toBeTruthy()
+    }
   })
 })
