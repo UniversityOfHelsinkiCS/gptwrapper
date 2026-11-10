@@ -118,7 +118,7 @@
     "client": "Client version {{version}}",
     "uptime": "Uptime: {{uptime}}",
     "mismatch": "Reload for latest changes",
-    "toska": "Read about the developers of CurreChat.",
+    "toska": "Toska – read about the developers of CurreChat",
     "changelog": "Changelog",
     "accessibilityStatement": "Accessibility statement"
   },

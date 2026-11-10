@@ -126,7 +126,7 @@
     "client": "Klient version {{version}}",
     "uptime": "Uptime: {{uptime}}",
     "mismatch": "Ladda sida om",
-    "toska": "Läs om CurreChats utvecklare.",
+    "toska": "Toska – läs om CurreChats utvecklare",
     "changelog": "Ändringslogg",
     "accessibilityStatement": "Tillgänglighetsutlåtande"
   },

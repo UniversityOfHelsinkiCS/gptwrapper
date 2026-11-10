@@ -119,7 +119,7 @@
     "client": "Selainversio {{version}}",
     "uptime": "Uptime: {{uptime}}",
     "mismatch": "Lataa sivu uudelleen",
-    "toska": "Lue CurreChatin kehittäjistä.",
+    "toska": "Toska – lue CurreChatin kehittäjistä",
     "changelog": "Muutosloki",
     "accessibilityStatement": "Saavutettavuusseloste"
   },
