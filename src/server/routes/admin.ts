@@ -153,6 +153,18 @@ adminRouter.get('/chatinstance-search', async (req, res) => {
       [Op.or]: [
         sequelize.literal(`EXISTS (SELECT 1 FROM unnest("ChatInstance"."course_units") AS course_unit WHERE course_unit->>'code' ILIKE ${like})`),
         { [`name.${language}`]: { [Op.iLike]: `%${search}%` } },
+        sequelize.literal(`EXISTS (
+          SELECT 1 FROM responsibilities r
+          JOIN users u ON u.id = r.user_id
+          WHERE r.chat_instance_id = "ChatInstance"."id"
+            AND ${search
+              .split(/\s+/)
+              .map((word) => {
+                const wordLike = sequelize.escape(`%${word}%`)
+                return `(u.first_names ILIKE ${wordLike} OR u.last_name ILIKE ${wordLike} OR u.username ILIKE ${wordLike})`
+              })
+              .join(' AND ')}
+        )`),
       ],
     },
     order: [

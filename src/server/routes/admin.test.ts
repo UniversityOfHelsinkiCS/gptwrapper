@@ -79,6 +79,17 @@ describe('GET /admin/chatinstance-search', () => {
     expect(body.results[0].saveDiscussions).toBe(false)
   })
 
+  test('also matches teachers by username or name', async () => {
+    vi.mocked(ChatInstance.findAndCountAll).mockResolvedValue({ rows: [], count: 0 } as any)
+
+    await api.fetch(`/admin/chatinstance-search?search=${encodeURIComponent('Matti Meik')}&language=en`)
+
+    const where = vi.mocked(ChatInstance.findAndCountAll).mock.calls[0][0]?.where as any
+    const teacherClause = where[Symbol.for('or')].find((c: unknown) => typeof c === 'string' && c.includes('FROM responsibilities'))
+    expect(teacherClause).toContain("u.first_names ILIKE '%Matti%' OR u.last_name ILIKE '%Matti%' OR u.username ILIKE '%Matti%'")
+    expect(teacherClause).toContain("u.first_names ILIKE '%Meik%' OR u.last_name ILIKE '%Meik%' OR u.username ILIKE '%Meik%'")
+  })
+
   test('rejects non-admins', async () => {
     currentUser = { id: 'teacher-1', isAdmin: false }
 
