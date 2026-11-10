@@ -20,7 +20,7 @@ Screen-reader-only strings go in the `accessibility` namespace of `locales/{fi,e
 
 Give every routed page a title with `usePageTitle(...)` ([`hooks/usePageTitle.ts`](../src/client/hooks/usePageTitle.ts)); it produces `Page – CurreChat` and restores the plain app name on unmount.
 
-`index.html` hard-codes `<html lang="en">` and nothing updates it when the UI language changes. This is a known WCAG 3.1.1 issue listed in the accessibility statement.
+`index.html` starts with `<html lang="en">`; a `languageChanged` listener in [`util/i18n.ts`](../src/client/util/i18n.ts) keeps `document.documentElement.lang` in sync with the UI language.
 
 ## `Alert` vs `InfoBox`
 
