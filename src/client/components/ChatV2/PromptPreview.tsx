@@ -258,7 +258,7 @@ const PromptPreview = ({
                   data-testid={`publish-prompt-${prompt.name}`}
                 />
               }
-              label={<span id={publishedLabelId}>{!isDraft ? t('uniPrompts:published') : t('uniPrompts:draft')}</span>}
+              label={<span id={publishedLabelId}>{t('uniPrompts:published')}</span>}
             />
           </Box>
         ) : null}

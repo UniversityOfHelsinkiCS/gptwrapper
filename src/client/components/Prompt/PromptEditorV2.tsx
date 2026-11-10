@@ -193,7 +193,7 @@ export const PromptEditorV2 = ({
                       data-testid="prompt-published-switch"
                     />
                   }
-                  label={<span id={publishedLabelId}>{form.published ? t('uniPrompts:published') : t('uniPrompts:draft')}</span>}
+                  label={<span id={publishedLabelId}>{t('uniPrompts:published')}</span>}
                 />
                 <Typography id={`${publishedLabelId}-help`} variant="body2" color="text.secondary">
                   {t('prompt:publishedHelp')}
