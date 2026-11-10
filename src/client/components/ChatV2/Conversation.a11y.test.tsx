@@ -9,7 +9,7 @@ vi.mock('react-syntax-highlighter', () => ({ PrismAsync: () => null }))
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({ oneDark: {} }))
 
 import type { AssistantPart } from '../../../shared/agentChat'
-import { type ClientChatMessage, migrateMessages } from './messages'
+import { type ClientChatMessage, migrateMessages, parseStoredMessages, serializeMessages } from './messages'
 import { oldFormatMessages } from './__fixtures__/oldFormatMessages'
 import en from '../../locales/en.json'
 import Conversation from './Conversation'
@@ -278,5 +278,83 @@ describe('subagent parts', () => {
     const running = screen.getByRole('button', { name: 'Subagent searcher is working…' })
     expect(running.getAttribute('aria-expanded')).toBe('false')
     expect(running.hasAttribute('aria-describedby')).toBe(false)
+  })
+})
+
+describe('quiz parts', () => {
+  const quizInput = {
+    question: 'Which of these is a prime number?',
+    options: [
+      { id: 'a', text: '4' },
+      { id: 'b', text: '7' },
+    ],
+    multiSelect: false,
+    correct: ['b'],
+    explanation: 'Seven has no other divisors.',
+  }
+  const quizMessage: ClientChatMessage = {
+    role: 'assistant',
+    parts: [
+      { type: 'text', text: "Let's check." },
+      { type: 'tool', callId: 'q1', name: 'present_quiz', input: quizInput, status: 'ok', result: { correct: ['b'], explanation: quizInput.explanation } },
+    ],
+  }
+  const quizTurn: ClientChatMessage[] = [{ role: 'user', content: 'quiz' }, quizMessage]
+  const answerMessage: ClientChatMessage = { role: 'user', content: 'My answer: 7', quizAnswer: { callId: 'q1', selected: ['b'] } }
+
+  const renderWith = (messages: ClientChatMessage[], { isStreaming = false, onQuizAnswer }: { isStreaming?: boolean; onQuizAnswer?: () => void } = {}) =>
+    render(
+      <I18nextProvider i18n={i18n}>
+        <Conversation
+          endState="none"
+          messages={messages}
+          streamingParts={[]}
+          isStreaming={isStreaming}
+          isMobile={false}
+          onQuizAnswer={onQuizAnswer}
+          latestResponseIndex={null}
+          latestResponseRef={createRef<HTMLDivElement>()}
+        />
+      </I18nextProvider>,
+    )
+
+  test('a quiz in the latest answer can be answered, which sends the answer', () => {
+    const onQuizAnswer = vi.fn()
+    renderWith(quizTurn, { onQuizAnswer })
+
+    expect(screen.getByTestId('quiz-card').getAttribute('data-quiz-state')).toBe('open')
+    fireEvent.click(screen.getByRole('radio', { name: '7' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Submit answer' }))
+    expect(onQuizAnswer).toHaveBeenCalledWith({ callId: 'q1', selected: ['b'] }, 'My answer: 7')
+  })
+
+  test('cannot be answered while a response streams', () => {
+    renderWith(quizTurn, { isStreaming: true, onQuizAnswer: vi.fn() })
+    expect(screen.getByTestId('quiz-card').getAttribute('data-quiz-state')).toBe('waiting')
+    expect(screen.queryByRole('button', { name: 'Submit answer' })).toBeNull()
+  })
+
+  test('the answer message after it keeps the quiz answered, also after a reload from localStorage', () => {
+    const stored = parseStoredMessages(serializeMessages([...quizTurn, answerMessage]))
+    expect(stored[2]).toEqual(answerMessage)
+
+    renderWith(stored, { onQuizAnswer: vi.fn() })
+    expect(screen.getByTestId('quiz-card').getAttribute('data-quiz-state')).toBe('answered')
+    expect(screen.getByTestId('quiz-result').getAttribute('data-quiz-outcome')).toBe('correct')
+    expect((screen.getByRole('radio', { name: /^7/ }) as HTMLInputElement).checked).toBe(true)
+    expect(screen.getByText('My answer: 7')).toBeTruthy()
+  })
+
+  test('a quiz the student went past without answering is closed', () => {
+    renderWith([...quizTurn, { role: 'user', content: 'never mind' }], { onQuizAnswer: vi.fn() })
+    expect(screen.getByTestId('quiz-card').getAttribute('data-quiz-state')).toBe('closed')
+  })
+
+  test('a regenerated quiz with the same call id is a new, open quiz', () => {
+    // The mock model always uses the same call id: only the message right after a quiz answers it
+    renderWith([...quizTurn, answerMessage, { role: 'assistant', parts: [{ type: 'text', text: 'Right!' }] }, { role: 'user', content: 'quiz' }, quizMessage], {
+      onQuizAnswer: vi.fn(),
+    })
+    expect(screen.getAllByTestId('quiz-card').map((card) => card.getAttribute('data-quiz-state'))).toEqual(['answered', 'open'])
   })
 })

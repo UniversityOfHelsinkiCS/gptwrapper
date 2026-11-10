@@ -1,6 +1,7 @@
 import z from 'zod/v4'
 import { ValidModelNameSchema } from '../config'
 import { WarningTypes } from './aiApi'
+import { type QuizAnswer, QuizAnswerSchema } from './quiz'
 
 /**
  * Event emitted when text is added to a chat message
@@ -73,6 +74,8 @@ export type UserMessage = {
   content: MessageContent[] | string
   attachments?: string
   fileContent?: string
+  /** Set when the message is the student's answer to a quiz. `content` is then only for display and export; the server gives the model a text made from this. */
+  quizAnswer?: QuizAnswer
 }
 
 export const readMessageContent = (msg: Pick<Message, 'content'>): string => {
@@ -131,6 +134,7 @@ export const ChatMessageSchema = z.object({
   content: z.union([z.string().min(0).max(1_200_000), MessageContentArraySchema]),
   attachements: z.union([z.string(), z.array(z.string())]).optional(),
   fileContent: z.string().optional(),
+  quizAnswer: QuizAnswerSchema.optional(),
 })
 
 export const PostStreamSchemaV3 = z.object({

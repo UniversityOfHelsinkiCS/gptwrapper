@@ -225,6 +225,24 @@ describe('toHistoryMessages', () => {
     expect(JSON.stringify(history)).not.toContain('thoughts')
   })
 
+  test('sends the quiz part with its input and result, and the quiz answer of the user message after it', () => {
+    const quiz = { question: 'q?', options: [{ id: 'a', text: 'A' }], multiSelect: false, correct: ['a'], explanation: 'because' }
+    const history = toHistoryMessages([
+      { role: 'user', content: 'quiz' },
+      {
+        role: 'assistant',
+        parts: [{ type: 'tool', callId: 'q1', name: 'present_quiz', input: quiz, status: 'ok', result: { correct: ['a'], explanation: 'because' } }],
+      },
+      { role: 'user', content: 'My answer: A', quizAnswer: { callId: 'q1', selected: ['a'], explanation: 'sure' } },
+    ])
+
+    expect(history[1]).toEqual({
+      role: 'assistant',
+      parts: [{ type: 'tool', callId: 'q1', name: 'present_quiz', input: quiz, status: 'ok', result: { correct: ['a'], explanation: 'because' } }],
+    })
+    expect(history[2]).toEqual({ role: 'user', content: 'My answer: A', quizAnswer: { callId: 'q1', selected: ['a'], explanation: 'sure' } })
+  })
+
   test('leaves the artifact and progress of tool parts out', () => {
     const [history] = toHistoryMessages([
       {

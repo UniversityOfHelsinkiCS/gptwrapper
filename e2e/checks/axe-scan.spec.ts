@@ -192,6 +192,34 @@ test.describe('axe wcag scan for chat with a subagent card', () => {
   })
 })
 
+test.describe('axe wcag scan for chat with a quiz card', () => {
+  test.afterAll(writeAxeReport)
+
+  test('scan chat answer with an open quiz card', async ({ page }, testInfo) => {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+
+    // The mock model calls present_quiz for `quiz`
+    await sendChatMessage(page, 'quiz')
+    await closeSendPreference(page)
+
+    const card = page.getByTestId('quiz-card')
+    await expect(card).toHaveAttribute('data-quiz-state', 'open')
+    await card.getByRole('radio', { name: '7', exact: true }).check()
+    await page.mouse.move(0, 0)
+    await expect(page.getByRole('tooltip')).toHaveCount(0)
+    await scan(page, `${testInfo.title} (open)`)
+
+    await card.getByRole('button', { name: 'Submit answer' }).click()
+    await expect(page.getByTestId('assistant-message').nth(1)).toContainText('Thanks for answering the quiz!')
+    await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'correct')
+    await page.mouse.move(0, 0)
+    await expect(page.getByRole('tooltip')).toHaveCount(0)
+    await scan(page, `${testInfo.title} (answered)`)
+  })
+})
+
 teacherTest.describe('axe wcag scan for chat with tool parts', () => {
   teacherTest.afterAll(writeAxeReport)
 

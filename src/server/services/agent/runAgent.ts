@@ -6,6 +6,7 @@ import { DEFAULT_TOKEN_LIMIT, inProduction, isFreeModel, isMockModel, ModelProvi
 import type { AiApiWarning } from '@shared/aiApi'
 import type { ChatEvent, PostStreamSchemaV4 } from '@shared/agentChat'
 import { isPromptDraft } from '@shared/prompt'
+import { PRESENT_QUIZ } from '@shared/quiz'
 import type { ChatMessage } from '@shared/chat'
 import type { AccessLevel } from '@shared/types'
 import type { User } from '@shared/user'
@@ -20,6 +21,7 @@ import { getAzureChatOpenAI, getToskaProvider, getVertexModelProvider } from '..
 import { createStreamState, getMainAgentModelCall, getSubagentModelCall, mapStreamChunk, nextStreamState, type StreamChunk } from './mapStreamChunk'
 import { DOCUMENT_SEARCH } from './tools/documentSearch'
 import { MOCK_SUBAGENT } from './tools/mockSubagent'
+import { findQuizPart, quizAnswerToText } from './tools/presentQuiz'
 import { createTools, getToolModule, historyMessageToText, withToolInstructions } from './tools/registry'
 import type { EnabledTool } from './tools/types'
 
@@ -83,9 +85,10 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
     throw ApplicationError.Forbidden('Usage limit reached')
   }
 
-  // The mock model always has the mock subagent, for its `subagent` prefix.
+  // The mock model always has the mock subagent and the quiz, for its `subagent` and `quiz` prefixes.
+  // Other models get tools per prompt (issue 06).
   if (isMockModel(model)) {
-    enabledTools.push({ name: MOCK_SUBAGENT })
+    enabledTools.push({ name: MOCK_SUBAGENT }, { name: PRESENT_QUIZ })
   }
 
   meta.tools = enabledTools.map((t) => t.name)
@@ -305,9 +308,19 @@ const resolvePrompt = async (
   return { prompt, systemMessage: prompt.systemMessage, enabledTools }
 }
 
-/** The history as the model gets it: assistant messages with `parts` become text, tool parts summarised by their tool module. */
+/**
+ * The history as the model gets it: assistant messages with `parts` become text, tool parts summarised by their
+ * tool module. A quiz answer becomes a text made from the answer and its quiz, instead of its display `content`.
+ */
 const toModelHistory = (chatMessages: RunAgentRequest['options']['chatMessages']): ChatMessage[] =>
-  chatMessages.map((message) => ('parts' in message ? { role: 'assistant', content: historyMessageToText(message) } : message))
+  chatMessages.map((message, index): ChatMessage => {
+    if ('parts' in message) return { role: 'assistant', content: historyMessageToText(message) }
+    if (message.role === 'user' && message.quizAnswer) {
+      const earlierParts = chatMessages.slice(0, index).flatMap((earlier) => ('parts' in earlier ? [earlier.parts] : []))
+      return { role: 'user', content: quizAnswerToText(message.quizAnswer, findQuizPart(earlierParts, message.quizAnswer.callId)) }
+    }
+    return message
+  })
 
 /**
  * Turns a failing tool into an error `ToolMessage` (status `error`, so the client shows the call as failed)

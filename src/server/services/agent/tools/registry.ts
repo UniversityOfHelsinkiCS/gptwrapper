@@ -2,11 +2,12 @@ import type { StructuredToolInterface } from '@langchain/core/tools'
 import type { AssistantPart, HistoryAssistantMessage, SubagentPart, ToolPart } from '@shared/agentChat'
 import { documentSearch } from './documentSearch'
 import { mockSubagent } from './mockSubagent'
+import { presentQuiz } from './presentQuiz'
 import { summarizeSubagentPart } from './subagent'
 import type { EnabledTool, ToolContext, ToolModule } from './types'
 
 /** Every tool the agent can use. The client has a matching registry of renderers (`ChatV2/tools/registry.tsx`). */
-const TOOL_MODULES: ToolModule<any>[] = [documentSearch, mockSubagent]
+const TOOL_MODULES: ToolModule<any>[] = [documentSearch, mockSubagent, presentQuiz]
 
 const toolModules = new Map(TOOL_MODULES.map((module) => [module.name, module]))
 
@@ -19,7 +20,10 @@ export const createTools = (enabled: EnabledTool[], ctx: Omit<ToolContext, 'conf
   enabled.map(({ name, config }) => {
     const module = getToolModule(name)
     if (!module) throw new Error(`Unknown tool: ${name}`)
-    return module.create({ ...ctx, config })
+    const created = module.create({ ...ctx, config })
+    // The module's flag decides: createAgent ends the turn after a `returnDirect` tool.
+    if (module.returnDirect) created.returnDirect = true
+    return created
   })
 
 /** The system message followed by the `instructions` of the enabled tools, each under a `## Tool: <name>` heading. */

@@ -7,6 +7,7 @@ export const basicTestContent = `### You are calling mock endpoint for streaming
 - To mock a code block, write: **code block**
 - To mock a math block, write: **math block**
 - To mock a subagent, write: **subagent** (optionally followed by its task)
+- To mock a quiz, write: **quiz** (or **quiz multi** for a multi-select quiz)
 OVER
 `
 
@@ -441,3 +442,37 @@ export const mockSubagentLeadIn = 'Let me look that up.'
 
 /** Token usage the mock model reports for the subagent's tool call, so tests can tell it from the main agent's (zero) usage. */
 export const mockSubagentUsage = { input_tokens: 12, output_tokens: 7, total_tokens: 19 }
+
+/** Lead-in the mock model writes before its `present_quiz` call. */
+export const mockQuizLeadIn = "Let's check what you remember."
+
+/** The quiz of the mock `quiz` prefix. Nothing in it may contain "fail", which makes the reply to an answer fail. */
+export const mockQuiz = {
+  question: 'Which of these numbers is a prime number?',
+  options: [
+    { id: 'a', text: '4' },
+    { id: 'b', text: '7' },
+    { id: 'c', text: '9' },
+  ],
+  multiSelect: false,
+  correct: ['b'],
+  explanation: '7 is only divisible by 1 and itself, while 4 = 2 · 2 and 9 = 3 · 3.',
+  concept: 'prime numbers',
+}
+
+/** The quiz of the mock `quiz multi` prefix. */
+export const mockMultiQuiz = {
+  question: 'Which of these numbers are even?',
+  options: [
+    { id: 'a', text: '2' },
+    { id: 'b', text: '3' },
+    { id: 'c', text: '4' },
+  ],
+  multiSelect: true,
+  correct: ['a', 'c'],
+  explanation: 'Even numbers are divisible by 2: 2 and 4 are, 3 is not.',
+  concept: 'even numbers',
+}
+
+/** The mock model's deterministic reply to a quiz answer, given the `Result:` line of the answer text. */
+export const mockQuizReply = (result: string) => `Thanks for answering the quiz! Result: ${result}.`

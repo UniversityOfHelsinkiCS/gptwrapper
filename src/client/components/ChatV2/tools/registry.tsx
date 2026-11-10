@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { ToolPart } from '../../../../shared/agentChat'
 import type { ToolCallResultEvent } from '../../../../shared/chat'
 import { DocumentSearchPart, documentSearchSource } from './DocumentSearchPart'
+import { QuizPart } from './QuizCard'
 import { ToolPartRow } from './ToolPartRow'
 
 /** How the client shows the parts of one tool. Matches the server's tool registry (`services/agent/tools/registry.ts`) by name. */
@@ -20,6 +21,7 @@ const toolRenderers: Record<string, ToolRenderer> = {
   document_search: documentSearchRenderer,
   // Saved by v3 with the mock model
   mock_document_search: documentSearchRenderer,
+  present_quiz: { Part: QuizPart },
 }
 
 /** Shown for tools that have no renderer of their own. */

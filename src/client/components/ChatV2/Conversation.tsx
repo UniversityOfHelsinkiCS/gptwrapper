@@ -28,6 +28,8 @@ import {
 import type { AssistantMessageV2, AssistantPart } from '../../../shared/agentChat'
 import { type ClientChatMessage, messageToolResults, messageToText } from './messages'
 import { ToolPartView } from './tools/registry'
+import { QuizAnswerProvider } from './tools/quizAnswerContext'
+import type { QuizAnswer } from '../../../shared/quiz'
 import { ThinkingBlock } from './ThinkingBlock'
 import { SubagentCard } from './SubagentCard'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
@@ -499,6 +501,7 @@ const Conversation = ({
   initial,
   isMobile,
   onRetry,
+  onQuizAnswer,
   latestResponseIndex,
   latestResponseRef,
 }: {
@@ -512,6 +515,8 @@ const Conversation = ({
   initial?: React.ReactElement
   isMobile: boolean
   onRetry?: (index: number) => void
+  /** Sends the answer to a quiz in the latest message as a user message. */
+  onQuizAnswer?: (answer: QuizAnswer, text: string) => void
   latestResponseIndex: number | null
   latestResponseRef: React.RefObject<HTMLDivElement | null>
 }) => {
@@ -541,17 +546,26 @@ const Conversation = ({
         {messages.map((message, idx) => {
           const showRetry = shouldShowRetryButton(message, idx, messages, isStreaming, onRetry)
           const isLatestResponse = idx === latestResponseIndex
+          const isLast = idx === messages.length - 1
+          const next = messages[idx + 1]
           return (
-            <MessageItem
+            // A quiz is answered by the user message right after it, and can be answered while it is in the latest message.
+            <QuizAnswerProvider
               key={idx}
-              message={message}
-              number={messageNumbers[idx]}
-              setActiveToolResults={setActiveToolResults}
-              isMobile={isMobile}
-              onRetry={showRetry ? () => onRetry!(idx) : undefined}
-              isLatestResponse={isLatestResponse}
-              latestResponseRef={isLatestResponse ? latestResponseRef : undefined}
-            />
+              answer={next?.role === 'user' ? next.quizAnswer : undefined}
+              onAnswer={isLast && !isStreaming ? onQuizAnswer : undefined}
+              closed={!isLast}
+            >
+              <MessageItem
+                message={message}
+                number={messageNumbers[idx]}
+                setActiveToolResults={setActiveToolResults}
+                isMobile={isMobile}
+                onRetry={showRetry ? () => onRetry!(idx) : undefined}
+                isLatestResponse={isLatestResponse}
+                latestResponseRef={isLatestResponse ? latestResponseRef : undefined}
+              />
+            </QuizAnswerProvider>
           )
         })}
 

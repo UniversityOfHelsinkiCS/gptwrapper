@@ -5,6 +5,8 @@ import { ChatGenerationChunk, type ChatResult } from '@langchain/core/outputs'
 import type { StructuredTool } from '@langchain/core/tools'
 import { fakeModel } from 'langchain'
 import { setTimeout as sleep } from 'node:timers/promises'
+import { PRESENT_QUIZ } from '@shared/quiz'
+import { QUIZ_ANSWER_PREFIX } from '../agent/tools/presentQuiz'
 import {
   basicTestContent,
   codeTestContent,
@@ -13,6 +15,10 @@ import {
   mockSubagentSystemPrompt,
   mockSubagentTask,
   mockSubagentUsage,
+  mockMultiQuiz,
+  mockQuiz,
+  mockQuizLeadIn,
+  mockQuizReply,
   thinkReasoningChunks,
   thinkTestAnswer,
 } from './mockContent'
@@ -84,7 +90,20 @@ export class MockModel extends BaseChatModel {
       )
     }
     if (systemText?.startsWith('mocktest')) {
-      return fakeModel().respond(new AIMessage(systemText))
+      // Echoes the teacher's system message, without the instructions of the enabled tools appended to it.
+      return fakeModel().respond(new AIMessage(systemText.split('\n\n## Tool: ')[0]))
+    }
+    if (lastHuman.startsWith(QUIZ_ANSWER_PREFIX)) {
+      // The reply to a quiz answer. An answer whose explanation contains `fail` fails, to test regenerating the reply.
+      if (lastHuman.includes('fail')) return fakeModel().respond(new Error('Mock error injected'))
+      return fakeModel().respond(new AIMessage(mockQuizReply(/^Result: (.+)$/m.exec(lastHuman)?.[1] ?? 'not checked')))
+    }
+    if (lastHuman.startsWith('quiz')) {
+      // A short lead-in and a `present_quiz` call (added for the mock model). The turn ends at the quiz.
+      const quiz = lastHuman.startsWith('quiz multi') ? mockMultiQuiz : mockQuiz
+      return fakeModel().respond(
+        new AIMessage({ content: mockQuizLeadIn, tool_calls: [{ name: PRESENT_QUIZ, args: quiz, id: 'mock_quiz_id', type: 'tool_call' }] }),
+      )
     }
     if (lastHuman.startsWith('say ')) {
       return fakeModel().respond(new AIMessage(lastHuman.replace('say ', '')))

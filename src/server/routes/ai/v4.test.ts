@@ -63,13 +63,14 @@ const stream = ({
   promptId,
   courseId,
   history = [],
-}: { message?: string; promptId?: string; courseId?: string; history?: unknown[] } = {}) => {
+  quizAnswer,
+}: { message?: string; promptId?: string; courseId?: string; history?: unknown[]; quizAnswer?: unknown } = {}) => {
   const form = new FormData()
   form.append(
     'data',
     JSON.stringify({
       options: {
-        chatMessages: [...history, { role: 'user', content: message }],
+        chatMessages: [...history, { role: 'user', content: message, ...(quizAnswer ? { quizAnswer } : {}) }],
         generationInfo: {
           model: 'mock',
           promptInfo: promptId ? { type: 'saved', id: promptId, name: 'Essay helper' } : { type: 'custom', systemMessage: 'You are helpful' },
@@ -489,5 +490,115 @@ describe('POST /ai/v4/stream with the mock subagent', () => {
       '[Asked the subagent mock_subagent: "count the moons". It answered (excerpt): "There are 95 moons."]\n\nSaturn has 95 moons.',
     )
     expect(JSON.stringify(messages)).not.toContain('SECRET TOOL RESULT')
+  })
+})
+
+describe('POST /ai/v4/stream with the mock quiz', () => {
+  const quizInput = {
+    question: 'Which of these numbers is a prime number?',
+    options: [
+      { id: 'a', text: '4' },
+      { id: 'b', text: '7' },
+      { id: 'c', text: '9' },
+    ],
+    multiSelect: false,
+    correct: ['b'],
+    explanation: '7 is only divisible by 1 and itself, while 4 = 2 · 2 and 9 = 3 · 3.',
+    concept: 'prime numbers',
+  }
+  const quizHistory = [
+    { role: 'user', content: 'quiz' },
+    {
+      role: 'assistant',
+      parts: [
+        { type: 'text', text: "Let's check what you remember." },
+        {
+          type: 'tool',
+          callId: 'mock_quiz_id',
+          name: 'present_quiz',
+          input: quizInput,
+          status: 'ok',
+          result: { correct: ['b'], explanation: quizInput.explanation },
+        },
+      ],
+    },
+  ]
+
+  test('writes a lead-in, shows the quiz with its answer key as the result, and ends the turn there', async () => {
+    const spy = vi.spyOn(MockModel.prototype, '_streamResponseChunks')
+    const events = await readEvents(await stream({ message: 'quiz' }))
+    const calls = spy.mock.calls.length
+    spy.mockRestore()
+
+    expect(events.filter((e) => e.type !== 'processing' && e.type !== 'usage')).toEqual([
+      { type: 'text.delta', path: [], text: "Let's check what you remember." },
+      { type: 'tool.start', path: [], callId: 'mock_quiz_id', name: 'present_quiz', input: quizInput },
+      { type: 'tool.end', path: [], callId: 'mock_quiz_id', status: 'ok', result: { correct: ['b'], explanation: quizInput.explanation } },
+    ])
+    // returnDirect: the model is not called again after the quiz
+    expect(calls).toBe(1)
+  })
+
+  test('the quiz instructions are in the system message for the mock model', async () => {
+    const spy = vi.spyOn(MockModel.prototype, '_streamResponseChunks')
+    await (await stream({ message: 'say hi' })).text()
+    const systemMessages = (spy.mock.calls[0][0] as { type: string; content: unknown }[]).filter((m) => m.type === 'system')
+    spy.mockRestore()
+
+    expect(String(systemMessages.at(-1)?.content)).toContain('## Tool: present_quiz\n\nUse present_quiz')
+  })
+
+  test('a multi-select quiz for `quiz multi`', async () => {
+    const events = await readEvents(await stream({ message: 'quiz multi' }))
+    expect(events).toContainEqual(expect.objectContaining({ type: 'tool.start', name: 'present_quiz', input: expect.objectContaining({ multiSelect: true }) }))
+  })
+
+  test('sends the quiz and the answer to the model as text, and the mock replies deterministically', async () => {
+    const spy = vi.spyOn(MockModel.prototype, '_streamResponseChunks')
+    const response = await stream({
+      message: 'My answer: 4',
+      history: quizHistory,
+      quizAnswer: { callId: 'mock_quiz_id', selected: ['a'], explanation: 'it looked odd' },
+    })
+    const events = await readEvents(response)
+    const messages = spy.mock.calls[0][0] as { type: string; content: unknown; tool_calls?: unknown[] }[]
+    spy.mockRestore()
+
+    expect(response.status).toBe(200)
+    expect(messages.find((m) => m.type === 'ai')?.content).toBe(
+      [
+        "Let's check what you remember.",
+        '',
+        '[Showed the student a quiz on prime numbers: "Which of these numbers is a prime number?"',
+        'Options:',
+        '- a) 4',
+        '- b) 7 (correct)',
+        '- c) 9',
+        `Explanation shown after answering: "${quizInput.explanation}"]`,
+      ].join('\n'),
+    )
+    expect(messages.some((m) => m.type === 'tool')).toBe(false)
+    expect(messages.at(-1)).toMatchObject({
+      type: 'human',
+      content: '[Quiz answer]\nSelected: a) 4\nResult: incorrect\nCorrect answer: b) 7\nStudent\'s reasoning: "it looked odd"',
+    })
+    expect(textOf(events)).toBe('Thanks for answering the quiz! Result: incorrect.')
+  })
+
+  test('"I don\'t know" is sent as such', async () => {
+    const events = await readEvents(await stream({ message: "I don't know", history: quizHistory, quizAnswer: { callId: 'mock_quiz_id', selected: ['idk'] } }))
+    expect(textOf(events)).toBe('Thanks for answering the quiz! Result: did not know.')
+  })
+
+  test('the reply fails for an explanation with `fail`, so regenerating the reply can be tested', async () => {
+    const events = await readEvents(
+      await stream({ message: 'My answer: 7', history: quizHistory, quizAnswer: { callId: 'mock_quiz_id', selected: ['b'], explanation: 'fail please' } }),
+    )
+    expect(events).toContainEqual({ type: 'error', error: 'Error while generating response' })
+  })
+
+  test('rejects a quiz answer without a selection', async () => {
+    const response = await stream({ message: 'x', history: quizHistory, quizAnswer: { callId: 'mock_quiz_id', selected: [] } })
+    expect(response.status).toBe(400)
   })
 })

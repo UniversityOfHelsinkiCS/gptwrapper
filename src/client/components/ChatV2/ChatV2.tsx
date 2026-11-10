@@ -15,6 +15,7 @@ import {
 } from '../../../config'
 import type { MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
+import type { QuizAnswer } from '@shared/quiz'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { useChatScroll } from './useChatScroll'
 import useCourse from '../../hooks/useCourse'
@@ -165,7 +166,13 @@ const ChatV2Content = () => {
   }
   const lastRearmRef = useRef(0)
 
-  const handleSendMessage = async (message: string, resendPrevious: boolean, ignoredWarnings: WarningType[], messagesToResend?: ClientChatMessage[]) => {
+  const handleSendMessage = async (
+    message: string,
+    resendPrevious: boolean,
+    ignoredWarnings: WarningType[],
+    messagesToResend?: ClientChatMessage[],
+    quizAnswer?: QuizAnswer,
+  ) => {
     if (!userStatus) return
 
     const acualModel = activeModel
@@ -180,7 +187,8 @@ const ChatV2Content = () => {
 
     const formData = new FormData()
 
-    const file = fileInputRef.current?.files?.[0]
+    // A quiz answer is sent from the quiz card; a file waiting in the chat box stays for the next message.
+    const file = quizAnswer ? undefined : fileInputRef.current?.files?.[0]
 
     // Parse file content on client side and keep it separate from the message
     let messageContent: MessageContent[] | string = message
@@ -225,14 +233,17 @@ const ChatV2Content = () => {
           content: messageContent,
           attachments: file && fileName ? fileName : undefined,
           fileContent: parsedFileContent, // Store file content separately
+          quizAnswer,
         })
 
     setMessages(newMessages)
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+    if (!quizAnswer) {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+      setFileName('')
     }
-    setFileName('')
     const streamCreationTimeout = getModelConfig(acualModel)?.timeoutOverride ?? DEFAULT_STREAM_TIMEOUT
 
     // Admin-only timing instrumentation: confirms whether timeouts really fire
@@ -402,6 +413,11 @@ const ChatV2Content = () => {
     clearRetryTimeout()
     setEndState(reason)
     document.getElementById('chat-input')?.focus()
+  }
+
+  /** The quiz card sends the student's answer as a user message; `text` is what the message shows. */
+  const handleQuizAnswer = (answer: QuizAnswer, text: string) => {
+    handleSendMessage(text, false, [], undefined, answer)
   }
 
   const handleRetry = (messageIndex: number) => {
@@ -649,6 +665,7 @@ const ChatV2Content = () => {
               setActiveToolResults={canShowToolResults ? openToolResults : undefined}
               isMobile={isMobile}
               onRetry={handleRetry}
+              onQuizAnswer={handleQuizAnswer}
               latestResponseIndex={latestResponseIndex}
               latestResponseRef={latestResponseRef}
             />

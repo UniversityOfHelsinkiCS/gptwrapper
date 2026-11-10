@@ -193,3 +193,102 @@ studentTest.describe('Subagent card', () => {
     await expect(content).toHaveCount(0)
   })
 })
+
+studentTest.describe('Quiz card', () => {
+  studentTest.beforeEach(async ({ page }) => {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+  })
+
+  studentTest('answering a quiz shows the result at once, the agent replies, and the answer survives a reload', async ({ page }) => {
+    // The mock model writes a lead-in and calls present_quiz for `quiz`; the turn ends at the quiz
+    await sendChatMessage(page, 'quiz')
+    await closeSendPreference(page)
+
+    const answer = page.getByTestId('assistant-message').first()
+    await expect(answer).toContainText("Let's check what you remember.")
+    const card = answer.getByTestId('quiz-card')
+    await expect(card).toHaveAttribute('data-quiz-state', 'open')
+    await expect(card.getByRole('radiogroup', { name: 'Which of these numbers is a prime number?' })).toBeVisible()
+
+    const submit = card.getByRole('button', { name: 'Submit answer' })
+    await expect(submit).toBeDisabled()
+    // Keyboard: the radios are one tab stop, arrow keys move the selection
+    await card.getByRole('radio', { name: '4', exact: true }).focus()
+    await page.keyboard.press('ArrowDown')
+    await expect(card.getByRole('radio', { name: '7', exact: true })).toBeChecked()
+    await card.getByRole('textbox', { name: 'Your reasoning (optional)' }).fill('It has no other divisors')
+    await submit.click()
+
+    await expect(card).toHaveAttribute('data-quiz-state', 'answered')
+    await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'correct')
+    await expect(card.getByTestId('quiz-result')).toContainText('Correct!')
+    await expect(card.getByTestId('quiz-result')).toContainText('7 is only divisible by 1 and itself')
+    await expect(card.getByRole('radio', { name: /^7/ })).toBeDisabled()
+
+    // The answer is sent as a user message and the agent continues
+    await expect(page.getByTestId('user-message').nth(1)).toContainText('My answer: 7')
+    await expect(page.getByTestId('assistant-message').nth(1)).toContainText('Thanks for answering the quiz! Result: correct.')
+
+    await page.reload()
+    const reloaded = page.getByTestId('quiz-card')
+    await expect(reloaded).toHaveAttribute('data-quiz-state', 'answered')
+    await expect(reloaded.getByRole('radio', { name: /^7/ })).toBeChecked()
+    await expect(reloaded.getByTestId('quiz-result')).toContainText('Correct!')
+    await expect(reloaded.getByRole('button', { name: 'Submit answer' })).toHaveCount(0)
+  })
+
+  studentTest('"I don\'t know" clears the other options in a multi-select quiz and is answered as not knowing', async ({ page }) => {
+    await sendChatMessage(page, 'quiz multi')
+    await closeSendPreference(page)
+
+    const card = page.getByTestId('quiz-card')
+    const group = card.getByRole('group', { name: 'Which of these numbers are even?' })
+    await group.getByRole('checkbox', { name: '2', exact: true }).check()
+    await group.getByRole('checkbox', { name: '4', exact: true }).check()
+    await group.getByRole('checkbox', { name: "I don't know" }).check()
+    await expect(group.getByRole('checkbox', { name: '2', exact: true })).not.toBeChecked()
+    await expect(group.getByRole('checkbox', { name: '4', exact: true })).not.toBeChecked()
+
+    const explanation = card.getByRole('textbox', { name: 'Your reasoning (optional)' })
+    await expect(explanation).toHaveAttribute('placeholder', 'What part is unclear?')
+    await explanation.fill('What does even mean?')
+    await card.getByRole('button', { name: 'Submit answer' }).click()
+
+    await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'idk')
+    await expect(card.getByTestId('quiz-result')).toContainText('No problem, here is the answer.')
+    await expect(page.getByTestId('user-message').nth(1)).toContainText("My answer: I don't know")
+    await expect(page.getByTestId('assistant-message').nth(1)).toContainText('Result: did not know.')
+  })
+
+  studentTest('regenerating the reply to an answer keeps the quiz answered, and a new quiz is open again', async ({ page }) => {
+    await sendChatMessage(page, 'quiz')
+    await closeSendPreference(page)
+
+    const card = page.getByTestId('quiz-card')
+    await card.getByRole('radio', { name: '4', exact: true }).check()
+    // The mock model fails its reply to an answer whose explanation contains `fail`
+    await card.getByRole('textbox', { name: 'Your reasoning (optional)' }).fill('fail this reply')
+    await card.getByRole('button', { name: 'Submit answer' }).click()
+    await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'incorrect')
+
+    const reply = page.getByTestId('assistant-message').nth(1)
+    await expect(reply).toContainText('Error while generating response')
+    await reply.getByRole('button', { name: 'Retry' }).click()
+    // The retry resends the history up to the quiz answer (the deterministic mock fails it again): the quiz
+    // stays answered, the answer message is not duplicated, and the reply is replaced, not added
+    await expect(page.getByTestId('assistant-message').nth(1).getByRole('button', { name: 'Retry' })).toBeVisible()
+    await expect(page.getByTestId('assistant-message')).toHaveCount(2)
+    await expect(page.getByTestId('user-message')).toHaveCount(2)
+    await expect(card).toHaveAttribute('data-quiz-state', 'answered')
+    await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'incorrect')
+
+    // Asking again gives a new quiz (the mock reuses its call id), which is open while the old one stays answered
+    await sendChatMessage(page, 'quiz')
+    const cards = page.getByTestId('quiz-card')
+    await expect(cards).toHaveCount(2)
+    await expect(cards.nth(0)).toHaveAttribute('data-quiz-state', 'answered')
+    await expect(cards.nth(1)).toHaveAttribute('data-quiz-state', 'open')
+  })
+})
