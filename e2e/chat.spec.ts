@@ -160,3 +160,36 @@ studentTest.describe('Thinking block', () => {
     await expect(answer.getByTestId('thinking-content')).toHaveCount(0)
   })
 })
+
+studentTest.describe('Subagent card', () => {
+  studentTest("a delegated task shows a collapsed subagent card with the subagent's own output nested in it", async ({ page }) => {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+
+    // The mock model delegates `subagent <task>` to the mock subagent, which writes text and makes a lookup tool call
+    await sendChatMessage(page, 'subagent Find the mock facts')
+    await closeSendPreference(page)
+
+    const answer = page.getByTestId('assistant-message')
+    // The main agent answers with what the subagent found
+    await expect(answer).toContainText('The mock lookup found 42 facts')
+
+    const card = answer.getByTestId('subagent-card')
+    await expect(card).toHaveAttribute('data-subagent-status', 'ok')
+    await expect(card).toContainText('Task: Find the mock facts')
+    const toggle = card.getByRole('button', { name: 'Subagent mock_subagent finished' })
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await expect(answer).not.toContainText('Let me look that up.')
+
+    await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    const content = card.getByTestId('subagent-content')
+    await expect(content).toContainText('Let me look that up.')
+    await expect(content.getByRole('group', { name: 'Tool mock_lookup' })).toHaveAttribute('data-tool-status', 'ok')
+
+    await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await expect(content).toHaveCount(0)
+  })
+})

@@ -17,9 +17,10 @@ import { checkCourseUsage, checkUsage, getCourseTokenLimit, getUsage, getUserTok
 import { handleWarnings, modelConfigHasInstructions, prepareMessagesForLLM } from '../langchain/chat'
 import { MockModel } from '../langchain/MockModel'
 import { getAzureChatOpenAI, getToskaProvider, getVertexModelProvider } from '../langchain/modelGenerators'
-import { getMainAgentModelCall, INITIAL_STREAM_STATE, mapStreamChunk, nextStreamState, type StreamChunk } from './mapStreamChunk'
+import { createStreamState, getMainAgentModelCall, getSubagentModelCall, mapStreamChunk, nextStreamState, type StreamChunk } from './mapStreamChunk'
 import { DOCUMENT_SEARCH } from './tools/documentSearch'
-import { createTools, historyMessageToText, withToolInstructions } from './tools/registry'
+import { MOCK_SUBAGENT } from './tools/mockSubagent'
+import { createTools, getToolModule, historyMessageToText, withToolInstructions } from './tools/registry'
 import type { EnabledTool } from './tools/types'
 
 export const RECURSION_LIMIT = 25
@@ -82,6 +83,11 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
     throw ApplicationError.Forbidden('Usage limit reached')
   }
 
+  // The mock model always has the mock subagent, for its `subagent` prefix.
+  if (isMockModel(model)) {
+    enabledTools.push({ name: MOCK_SUBAGENT })
+  }
+
   meta.tools = enabledTools.map((t) => t.name)
 
   // Discussions are saved with this text history too, so saved discussions keep the `content` shape they always had.
@@ -118,6 +124,9 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
   let modelCalls = 0
   const toolCalls: string[] = []
   let response = ''
+  // Subagents' model calls are not charged to the user but logged per subagent tool.
+  const subagentNames = new Map<string, string>()
+  const subagentUsage: Record<string, SubagentUsage> = {}
 
   const keepAlive = setInterval(() => {
     emit({ type: 'processing' }).catch((error) => logger.error('Failed to write keep-alive', { error }))
@@ -125,7 +134,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
 
   try {
     const stream = await agent.stream({ messages }, { streamMode: ['messages', 'updates', 'custom'], subgraphs: true, signal, recursionLimit: RECURSION_LIMIT })
-    let streamState = INITIAL_STREAM_STATE
+    let streamState = createStreamState(enabledTools.map((t) => t.name).filter((name) => getToolModule(name)?.kind === 'subagent'))
 
     for await (const chunk of stream) {
       const streamChunk = chunk as StreamChunk
@@ -139,7 +148,18 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
         toolCalls.push(...call.toolCalls)
       }
 
+      const subagentCall = getSubagentModelCall(streamChunk, streamState)
+      if (subagentCall) {
+        const name = subagentNames.get(subagentCall.callId) ?? 'unknown'
+        const usage = (subagentUsage[name] ??= { modelCalls: 0, inputTokens: 0, outputTokens: 0, toolCalls: [] })
+        usage.modelCalls++
+        usage.inputTokens += subagentCall.inputTokens
+        usage.outputTokens += subagentCall.outputTokens
+        usage.toolCalls.push(...subagentCall.toolCalls)
+      }
+
       for (const event of mapStreamChunk(streamChunk, streamState)) {
+        if (event.type === 'subagent.start') subagentNames.set(event.callId, event.name)
         // Models without a reasoning config look as before, even if their provider streams reasoning anyway.
         if (event.type === 'reasoning.delta' && !showReasoning) continue
         if (event.type === 'text.delta' && event.path.length === 0) {
@@ -196,6 +216,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
     timeToFirstToken: firstTokenAt ? firstTokenAt - startedAt : undefined,
     tokensPerSecond: streamingMs > 0 ? (outputTokens / streamingMs) * 1000 : undefined,
     toolCalls: toolCalls.length > 0 ? JSON.stringify(toolCalls) : undefined,
+    subagentUsage: Object.keys(subagentUsage).length > 0 ? JSON.stringify(subagentUsage) : undefined,
   })
 
   if (courseId && course?.chatInstance.saveDiscussions) {
@@ -204,6 +225,9 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
 
   return { status: 'completed' }
 }
+
+/** Model calls of one subagent tool in a run, summed over its calls. Logged in `chatCompletionMeta.subagentUsage`. */
+type SubagentUsage = { modelCalls: number; inputTokens: number; outputTokens: number; toolCalls: string[] }
 
 const ensureModelAllowedForUser = (model: ValidModelName, isAdmin: boolean) => {
   if (inProduction && isMockModel(model) && !isAdmin) {

@@ -1,6 +1,6 @@
 import { AIMessage, ToolMessage } from '@langchain/core/messages'
 import type { ChatEvent } from '@shared/agentChat'
-import type { ToolProgressPayload } from './tools/types'
+import type { SubagentRunPayload, ToolProgressPayload } from './tools/types'
 
 /**
  * One item of `agent.stream(…, { streamMode: ['messages', 'updates', 'custom'], subgraphs: true })`.
@@ -11,16 +11,21 @@ import type { ToolProgressPayload } from './tools/types'
 export type StreamChunk = [namespace: string[], mode: 'messages' | 'updates' | 'custom', data: unknown]
 
 /**
- * What the mapping has learned from earlier chunks of the same run.
+ * What the mapping knows about the run: the names of the tools that are subagents (fixed for the run), and
+ * what it has learned from earlier chunks.
  *
  * The id in a `tools:<id>` namespace segment is the LangGraph task id of the tool node, not the model's tool
  * call id, which is what events must carry. `taskCallIds` maps one to the other. It is filled from chunks
- * that name both: a tool's `ToolMessage` (streamed under its own `tools:<task>` namespace) and the
- * `tool.progress` payloads written by `writeToolProgress`.
+ * that name both: the `subagent.run` payload a subagent writes before its first chunk (see `runSubagent`), a
+ * tool's `ToolMessage` (streamed under its own `tools:<task>` namespace) and the `tool.progress` payloads
+ * written by `writeToolProgress`.
  */
-export type StreamState = { readonly taskCallIds: ReadonlyMap<string, string> }
+export type StreamState = { readonly taskCallIds: ReadonlyMap<string, string>; readonly subagentNames: ReadonlySet<string> }
 
-export const INITIAL_STREAM_STATE: StreamState = { taskCallIds: new Map() }
+export const INITIAL_STREAM_STATE: StreamState = { taskCallIds: new Map(), subagentNames: new Set() }
+
+/** The state at the start of a run whose tools with these names are subagents. */
+export const createStreamState = (subagentNames: Iterable<string>): StreamState => ({ ...INITIAL_STREAM_STATE, subagentNames: new Set(subagentNames) })
 
 const TOOLS_SEGMENT = 'tools:'
 
@@ -43,19 +48,30 @@ const isToolProgressPayload = (data: unknown): data is ToolProgressPayload =>
   (data as ToolProgressPayload).type === 'tool.progress' &&
   typeof (data as ToolProgressPayload).callId === 'string'
 
-/** The call id that the last `tools:<task>` segment of the namespace stands for, if the chunk tells it. */
-const callIdOfChunk = ([, mode, data]: StreamChunk): string | null => {
-  if (mode === 'custom' && isToolProgressPayload(data)) return data.callId
-  if (mode === 'messages' && Array.isArray(data) && ToolMessage.isInstance(data[0])) return data[0].tool_call_id
+const isSubagentRunPayload = (data: unknown): data is SubagentRunPayload =>
+  typeof data === 'object' &&
+  data !== null &&
+  (data as SubagentRunPayload).type === 'subagent.run' &&
+  typeof (data as SubagentRunPayload).callId === 'string' &&
+  typeof (data as SubagentRunPayload).namespaceSegment === 'string'
+
+/** The task id and call id of one `tools:<task>` segment, if the chunk tells them. */
+const taskCallOfChunk = ([namespace, mode, data]: StreamChunk): { taskId: string | null; callId: string } | null => {
+  // A subagent names its own segment: its custom chunks are streamed under the namespace of the agent that called it.
+  if (mode === 'custom' && isSubagentRunPayload(data)) return { taskId: toolTaskId(data.namespaceSegment), callId: data.callId }
+
+  // Otherwise the chunk comes from inside the tool, and the call id is that of the innermost segment.
+  const taskId = toolTaskId(namespace.findLast((segment) => segment.startsWith(TOOLS_SEGMENT)))
+  if (mode === 'custom' && isToolProgressPayload(data)) return { taskId, callId: data.callId }
+  if (mode === 'messages' && Array.isArray(data) && ToolMessage.isInstance(data[0])) return { taskId, callId: data[0].tool_call_id }
   return null
 }
 
-/** Pure state transition: learns the tool call id of the chunk's innermost `tools:<task>` segment. Returns `state` when nothing new is learned. */
+/** Pure state transition: learns which tool call id a `tools:<task>` segment stands for. Returns `state` when nothing new is learned. */
 export const nextStreamState = (state: StreamState, chunk: StreamChunk): StreamState => {
-  const taskId = toolTaskId(chunk[0].findLast((segment) => segment.startsWith(TOOLS_SEGMENT)))
-  const callId = callIdOfChunk(chunk)
-  if (taskId === null || callId === null || state.taskCallIds.get(taskId) === callId) return state
-  return { taskCallIds: new Map(state.taskCallIds).set(taskId, callId) }
+  const learned = taskCallOfChunk(chunk)
+  if (!learned || learned.taskId === null || state.taskCallIds.get(learned.taskId) === learned.callId) return state
+  return { ...state, taskCallIds: new Map(state.taskCallIds).set(learned.taskId, learned.callId) }
 }
 
 /**
@@ -122,31 +138,47 @@ const mapMessagesChunk = (namespace: string[], data: unknown, state: StreamState
   return deltasOf(message).map(({ type, text }) => ({ type, path, text }))
 }
 
+/** The `task` argument every subagent tool has (see `ToolModule`). */
+const taskOf = (args: unknown): string => {
+  const task = (args as { task?: unknown } | null | undefined)?.task
+  return typeof task === 'string' ? task : ''
+}
+
 /**
  * Tool calls come from the finished model call (`model_request` update), so their input is complete; tool
  * results from the `tools` node update. Both carry the model's tool call id. Tool-argument chunks in
- * `messages` mode are not streamed.
+ * `messages` mode are not streamed. Calls of subagent tools are `subagent.*` events instead of `tool.*`.
  */
 const mapUpdatesChunk = (namespace: string[], data: unknown, state: StreamState): ChatEvent[] => {
   if (typeof data !== 'object' || data === null) return []
   const path = namespaceToPath(namespace, state)
   const updates = data as Record<string, { messages?: unknown[] } | null | undefined>
+  const isSubagent = (name: string | undefined) => name !== undefined && state.subagentNames.has(name)
 
   const toolStarts: ChatEvent[] = (updates.model_request?.messages ?? [])
     .filter((message): message is AIMessage => AIMessage.isInstance(message))
     .flatMap((message) => message.tool_calls ?? [])
-    .flatMap((call) => (call.id ? [{ type: 'tool.start' as const, path, callId: call.id, name: call.name, input: call.args }] : []))
+    .flatMap((call): ChatEvent[] => {
+      if (!call.id) return []
+      return isSubagent(call.name)
+        ? [{ type: 'subagent.start', path, callId: call.id, name: call.name, task: taskOf(call.args) }]
+        : [{ type: 'tool.start', path, callId: call.id, name: call.name, input: call.args }]
+    })
 
   const toolEnds: ChatEvent[] = (updates.tools?.messages ?? [])
     .filter((message): message is ToolMessage => ToolMessage.isInstance(message))
-    .map((message) => ({
-      type: 'tool.end' as const,
-      path,
-      callId: message.tool_call_id,
-      status: message.status === 'error' ? ('error' as const) : ('ok' as const),
-      // The artifact is the part meant for the client; the content is what the model read.
-      result: message.artifact !== undefined ? message.artifact : textOf(message),
-    }))
+    .map((message): ChatEvent => {
+      const status = message.status === 'error' ? 'error' : 'ok'
+      if (isSubagent(message.name)) return { type: 'subagent.end', path, callId: message.tool_call_id, status }
+      return {
+        type: 'tool.end',
+        path,
+        callId: message.tool_call_id,
+        status,
+        // The artifact is the part meant for the client; the content is what the model read.
+        result: message.artifact !== undefined ? message.artifact : textOf(message),
+      }
+    })
 
   return [...toolStarts, ...toolEnds]
 }
@@ -161,7 +193,8 @@ const mapCustomChunk = (namespace: string[], data: unknown, state: StreamState):
 
 /**
  * Pure mapping of one `agent.stream` chunk to protocol events, given the state learned from the earlier chunks
- * (see `nextStreamState`, which the caller applies first). Subagent events come in a later slice.
+ * (see `nextStreamState`, which the caller applies first). The events of a subagent's own agent carry the
+ * subagent's call id in their path.
  */
 export const mapStreamChunk = ([namespace, mode, data]: StreamChunk, state: StreamState = INITIAL_STREAM_STATE): ChatEvent[] => {
   switch (mode) {
@@ -177,8 +210,8 @@ export const mapStreamChunk = ([namespace, mode, data]: StreamChunk, state: Stre
 }
 
 /** Maps a whole run, threading the state through. For tests and replays. */
-export const mapStreamChunks = (chunks: StreamChunk[]): ChatEvent[] => {
-  let state = INITIAL_STREAM_STATE
+export const mapStreamChunks = (chunks: StreamChunk[], initialState: StreamState = INITIAL_STREAM_STATE): ChatEvent[] => {
+  let state = initialState
   return chunks.flatMap((chunk) => {
     state = nextStreamState(state, chunk)
     return mapStreamChunk(chunk, state)
@@ -198,7 +231,23 @@ export type ModelCallSummary = {
  */
 export const getMainAgentModelCall = ([namespace, mode, data]: StreamChunk): ModelCallSummary | null => {
   if (mode !== 'updates' || namespaceToPath(namespace).length > 0) return null
+  return modelCallOf(data)
+}
 
+/**
+ * For an `updates` chunk in which a **subagent's** model node finished a call, returns that call's usage and
+ * the call id of the subagent it belongs to (the innermost one, for nested subagents). Null for anything else.
+ * These calls are not charged to the user, only logged.
+ */
+export const getSubagentModelCall = ([namespace, mode, data]: StreamChunk, state: StreamState): (ModelCallSummary & { callId: string }) | null => {
+  if (mode !== 'updates') return null
+  const callId = namespaceToPath(namespace, state).at(-1)
+  if (callId === undefined) return null
+  const call = modelCallOf(data)
+  return call && { ...call, callId }
+}
+
+const modelCallOf = (data: unknown): ModelCallSummary | null => {
   const update = (data as Record<string, { messages?: unknown[] } | undefined> | null)?.model_request
   const aiMessages = (update?.messages ?? []).filter((message): message is AIMessage => AIMessage.isInstance(message))
   if (aiMessages.length === 0) return null

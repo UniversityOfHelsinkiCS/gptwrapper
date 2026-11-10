@@ -6,7 +6,9 @@ import { AIMessageChunk, ToolMessage } from '@langchain/core/messages'
 import { describe, expect, test } from 'vitest'
 import type { ChatEvent } from '@shared/agentChat'
 import {
+  createStreamState,
   getMainAgentModelCall,
+  getSubagentModelCall,
   INITIAL_STREAM_STATE,
   mapStreamChunk,
   mapStreamChunks,
@@ -249,5 +251,103 @@ describe('mapStreamChunk tool events', () => {
 
     expect(getMainAgentModelCall([['tools:t1'], 'updates', { model_request: { messages: [subagentCall] } }])).toBeNull()
     expect(getMainAgentModelCall([[], 'updates', { model_request: { messages: [subagentCall] } }])).toEqual({ inputTokens: 5, outputTokens: 5, toolCalls: [] })
+  })
+})
+
+describe('mapStreamChunk subagents', () => {
+  const state = createStreamState(['researcher'])
+  const usage = (input: number, output: number) => ({ input_tokens: input, output_tokens: output, total_tokens: input + output })
+  const call = (name: string, args: unknown, id: string) => ({ name, args: args as Record<string, unknown>, id, type: 'tool_call' as const })
+
+  /**
+   * A run in the chunk order a live `agent.stream` gives for a tool that runs its own agent (checked with nested
+   * `createAgent`s): the subagent's `subagent.run` payload is streamed under its caller's namespace, its own
+   * chunks under `tools:<task>`, and its ToolMessage last.
+   */
+  const run: StreamChunk[] = [
+    [[], 'updates', { model_request: { messages: [new AIMessageChunk({ content: '', tool_calls: [call('researcher', { task: 'Find it' }, 'call_sub')] })] } }],
+    [[], 'custom', { type: 'subagent.run', callId: 'call_sub', namespaceSegment: 'tools:task-sub' }],
+    [['tools:task-sub', 'model_request:m1'], 'messages', [new AIMessageChunk({ content: 'Looking.' }), {}]],
+    [
+      ['tools:task-sub'],
+      'updates',
+      {
+        model_request: {
+          messages: [new AIMessageChunk({ content: 'Looking.', tool_calls: [call('lookup', { q: 'it' }, 'call_inner')], usage_metadata: usage(10, 4) })],
+        },
+      },
+    ],
+    [['tools:task-sub', 'tools:task-inner'], 'messages', [new ToolMessage({ content: 'found', tool_call_id: 'call_inner', name: 'lookup' }), {}]],
+    [['tools:task-sub'], 'updates', { tools: { messages: [new ToolMessage({ content: 'found', tool_call_id: 'call_inner', name: 'lookup' })] } }],
+    [['tools:task-sub', 'model_request:m2'], 'messages', [new AIMessageChunk({ content: 'It is found.' }), {}]],
+    [['tools:task-sub'], 'updates', { model_request: { messages: [new AIMessageChunk({ content: 'It is found.', usage_metadata: usage(20, 6) })] } }],
+    [['tools:task-sub'], 'messages', [new ToolMessage({ content: 'It is found.', tool_call_id: 'call_sub', name: 'researcher' }), {}]],
+    [[], 'updates', { tools: { messages: [new ToolMessage({ content: 'It is found.', tool_call_id: 'call_sub', name: 'researcher' })] } }],
+    [['model_request:m3'], 'messages', [new AIMessageChunk({ content: 'Done.' }), {}]],
+  ]
+
+  test("a subagent tool is subagent.start and subagent.end, its own agent's events nested under its call id from the first chunk", () => {
+    expect(mapStreamChunks(run, state)).toEqual([
+      { type: 'subagent.start', path: [], callId: 'call_sub', name: 'researcher', task: 'Find it' },
+      { type: 'text.delta', path: ['call_sub'], text: 'Looking.' },
+      { type: 'tool.start', path: ['call_sub'], callId: 'call_inner', name: 'lookup', input: { q: 'it' } },
+      { type: 'tool.end', path: ['call_sub'], callId: 'call_inner', status: 'ok', result: 'found' },
+      { type: 'text.delta', path: ['call_sub'], text: 'It is found.' },
+      { type: 'subagent.end', path: [], callId: 'call_sub', status: 'ok' },
+      { type: 'text.delta', path: [], text: 'Done.' },
+    ])
+  })
+
+  test('the subagent.run payload maps the namespace segment it names, whatever namespace it is streamed under', () => {
+    const marker: StreamChunk = [['tools:outer'], 'custom', { type: 'subagent.run', callId: 'call_nested', namespaceSegment: 'tools:task-nested' }]
+    const learned = nextStreamState(nextStreamState(state, run[1]), marker)
+
+    expect(namespaceToPath(['tools:task-sub', 'model_request:x'], learned)).toEqual(['call_sub'])
+    expect(namespaceToPath(['tools:outer', 'tools:task-nested', 'model_request:y'], learned)).toEqual(['outer', 'call_nested'])
+    expect(mapStreamChunk(marker, learned)).toEqual([])
+    expect(learned.subagentNames).toBe(state.subagentNames)
+  })
+
+  test('a failed subagent call ends as an error; without the name in the state, the same call is a plain tool', () => {
+    const failed: StreamChunk = [
+      [],
+      'updates',
+      { tools: { messages: [new ToolMessage({ content: 'The tool failed.', tool_call_id: 'call_sub', name: 'researcher', status: 'error' })] } },
+    ]
+
+    expect(mapStreamChunk(failed, state)).toEqual([{ type: 'subagent.end', path: [], callId: 'call_sub', status: 'error' }])
+    expect(mapStreamChunk(run[0])).toEqual([{ type: 'tool.start', path: [], callId: 'call_sub', name: 'researcher', input: { task: 'Find it' } }])
+  })
+
+  test('a subagent started from inside another subagent is nested by path', () => {
+    const nestedStart: StreamChunk = [
+      ['tools:task-sub'],
+      'updates',
+      { model_request: { messages: [new AIMessageChunk({ content: '', tool_calls: [call('researcher', { task: 'Deeper' }, 'call_deep')] })] } },
+    ]
+    const learned = nextStreamState(state, run[1])
+
+    expect(mapStreamChunk(nestedStart, learned)).toEqual([
+      { type: 'subagent.start', path: ['call_sub'], callId: 'call_deep', name: 'researcher', task: 'Deeper' },
+    ])
+  })
+
+  test("the subagent's model calls are not the main agent's, but are reported with the subagent's call id", () => {
+    let current = state
+    const main: ModelCallSummary[] = []
+    const sub: (ModelCallSummary & { callId: string })[] = []
+    for (const chunk of run) {
+      current = nextStreamState(current, chunk)
+      const mainCall = getMainAgentModelCall(chunk)
+      if (mainCall) main.push(mainCall)
+      const subCall = getSubagentModelCall(chunk, current)
+      if (subCall) sub.push(subCall)
+    }
+
+    expect(main).toEqual([{ inputTokens: 0, outputTokens: 0, toolCalls: ['researcher'] }])
+    expect(sub).toEqual([
+      { callId: 'call_sub', inputTokens: 10, outputTokens: 4, toolCalls: ['lookup'] },
+      { callId: 'call_sub', inputTokens: 20, outputTokens: 6, toolCalls: [] },
+    ])
   })
 })

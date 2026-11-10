@@ -1,5 +1,6 @@
 import { readMessageContent, type ToolCallResultEvent, type UserMessage } from '../../../shared/chat'
 import type { AssistantMessageV2, AssistantPart, PostStreamSchemaV4Type, ToolPart } from '../../../shared/agentChat'
+import { finishParts } from './applyEvent'
 import { toolPartSource } from './tools/registry'
 
 /** A chat message as the client keeps it in state and localStorage. */
@@ -19,20 +20,33 @@ export const messageToText = (msg: ClientChatMessage): string => {
   return msg.parts.flatMap((part) => (part.type === 'text' ? [part.text] : [])).join('\n\n')
 }
 
-/** Leaves out what the server does not need to summarise a part: the client-only artifact and the progress of a running tool. */
-const toHistoryPart = (part: AssistantPart): AssistantPart => {
-  if (part.type !== 'tool') return part
-  const { artifact: _artifact, progress: _progress, ...rest } = part
-  return rest
-}
+/**
+ * Leaves out what the server does not need to summarise parts: reasoning, the client-only artifact and the
+ * progress of a running tool, also inside subagent parts.
+ */
+const toHistoryParts = (parts: AssistantPart[]): AssistantPart[] =>
+  parts.flatMap((part): AssistantPart[] => {
+    switch (part.type) {
+      case 'reasoning':
+        return []
+      case 'tool': {
+        const { artifact: _artifact, progress: _progress, ...rest } = part
+        return [rest]
+      }
+      case 'subagent':
+        return [{ ...part, parts: toHistoryParts(part.parts) }]
+      default:
+        return [part]
+    }
+  })
 
 /**
  * The conversation as sent to the server: user messages as they are, assistant messages as their parts.
- * The server turns the parts into text for the model, tool parts as summaries of their tool.
+ * The server turns the parts into text for the model, tool and subagent parts as summaries of their tool.
  * Reasoning is never sent back to the model.
  */
 export const toHistoryMessages = (messages: ClientChatMessage[]): HistoryMessage[] =>
-  messages.map((msg) => (msg.role === 'user' ? msg : { role: 'assistant', parts: msg.parts.filter((part) => part.type !== 'reasoning').map(toHistoryPart) }))
+  messages.map((msg) => (msg.role === 'user' ? msg : { role: 'assistant', parts: toHistoryParts(msg.parts) }))
 
 /**
  * Sources of an assistant message, in the shape the Sources button, side panel and exports use. The client
@@ -70,13 +84,24 @@ export const migrateMessage = (msg: any): ClientChatMessage => {
 
 export const migrateMessages = (messages: unknown): ClientChatMessage[] => (Array.isArray(messages) ? messages.map(migrateMessage) : [])
 
-/** Reads the raw localStorage value of a conversation, migrating old formats. */
-export const parseStoredMessages = (raw: string | null): ClientChatMessage[] => {
+/**
+ * Finalizes parts saved while still running (before runs were finalized at their end), so they do not show a
+ * spinner forever. Unchanged messages keep their identity.
+ */
+const finishStoredMessages = (messages: ClientChatMessage[], now: number): ClientChatMessage[] =>
+  messages.map((msg) => {
+    if (msg.role !== 'assistant') return msg
+    const parts = finishParts(msg.parts, now)
+    return parts === msg.parts ? msg : { ...msg, parts }
+  })
+
+/** Reads the raw localStorage value of a conversation, migrating old formats and finalizing parts left running. */
+export const parseStoredMessages = (raw: string | null, now: number = Date.now()): ClientChatMessage[] => {
   if (!raw) return []
   try {
     const stored = JSON.parse(raw) as { value?: unknown; messagesVersion?: number }
-    if (stored.messagesVersion === MESSAGES_VERSION && Array.isArray(stored.value)) return stored.value as ClientChatMessage[]
-    return migrateMessages(stored.value)
+    if (stored.messagesVersion === MESSAGES_VERSION && Array.isArray(stored.value)) return finishStoredMessages(stored.value as ClientChatMessage[], now)
+    return finishStoredMessages(migrateMessages(stored.value), now)
   } catch (error) {
     console.error('Failed to parse stored chat messages:', error)
     return []

@@ -9,7 +9,7 @@ import logger from '../../../util/logger'
 import { ToolResultStore } from '../../langchain/fileSearchResultsStore'
 import { mockSearch } from '../../rag/mockSearchTool'
 import { search } from '../../rag/search'
-import type { ToolModule } from './types'
+import type { PlainToolModule } from './types'
 
 export const DOCUMENT_SEARCH = 'document_search'
 
@@ -38,7 +38,7 @@ const schema = z.object({
  * RAG search over the prompt's source material. The full chunks go to the model and to `ToolResultStore`
  * (read by the Sources details view); the client gets file names, scores and short excerpts as the artifact.
  */
-export const documentSearch: ToolModule<DocumentSearchConfig> = {
+export const documentSearch: PlainToolModule<DocumentSearchConfig> = {
   name: DOCUMENT_SEARCH,
   kind: 'tool',
   executor: 'server',

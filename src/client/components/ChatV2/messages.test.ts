@@ -20,6 +20,48 @@ import { useChatMessages } from './useChatMessages'
 
 const oldStored = JSON.stringify({ value: oldFormatMessages })
 
+describe('loading saved conversations with parts left running', () => {
+  test('finalizes running tools and subagents, nested ones included, as failed, and leaves finished answers as they were', () => {
+    const finished: ClientChatMessage = { role: 'assistant', parts: [{ type: 'text', text: 'done' }] }
+    const raw = serializeMessages([
+      { role: 'user', content: 'subagent' },
+      {
+        role: 'assistant',
+        parts: [
+          { type: 'tool', callId: 't1', name: 'document_search', input: {}, status: 'running' },
+          {
+            type: 'subagent',
+            callId: 's1',
+            name: 'mock_subagent',
+            task: 'x',
+            status: 'running',
+            parts: [{ type: 'tool', callId: 't2', name: 'mock_lookup', input: {}, status: 'running' }],
+          },
+        ],
+      },
+      finished,
+    ])
+
+    const messages = parseStoredMessages(raw, 5000)
+
+    expect(messages[1]).toEqual({
+      role: 'assistant',
+      parts: [
+        { type: 'tool', callId: 't1', name: 'document_search', input: {}, status: 'error' },
+        {
+          type: 'subagent',
+          callId: 's1',
+          name: 'mock_subagent',
+          task: 'x',
+          status: 'error',
+          parts: [{ type: 'tool', callId: 't2', name: 'mock_lookup', input: {}, status: 'error' }],
+        },
+      ],
+    })
+    expect(messages[2]).toEqual(finished)
+  })
+})
+
 describe('migrating saved conversations', () => {
   test('old assistant messages get their content as a single text part', () => {
     const messages = parseStoredMessages(oldStored)
@@ -206,5 +248,60 @@ describe('toHistoryMessages', () => {
       role: 'assistant',
       parts: [{ type: 'tool', callId: 'c1', name: 'document_search', input: { query: 'q' }, status: 'ok', result: { files: [] } }],
     })
+  })
+
+  test('sends subagent parts with their nested parts, leaving reasoning and tool artifacts out there too', () => {
+    const [history] = toHistoryMessages([
+      {
+        role: 'assistant',
+        parts: [
+          {
+            type: 'subagent',
+            callId: 's1',
+            name: 'mock_subagent',
+            task: 'find',
+            status: 'ok',
+            parts: [
+              { type: 'reasoning', text: 'secret thoughts', durationMs: 1 },
+              { type: 'tool', callId: 'c1', name: 'mock_lookup', input: {}, status: 'ok', result: 'r', artifact: { big: true } },
+              { type: 'text', text: 'found' },
+            ],
+          },
+          { type: 'text', text: 'answer' },
+        ],
+      },
+    ])
+
+    expect(history).toEqual({
+      role: 'assistant',
+      parts: [
+        {
+          type: 'subagent',
+          callId: 's1',
+          name: 'mock_subagent',
+          task: 'find',
+          status: 'ok',
+          parts: [
+            { type: 'tool', callId: 'c1', name: 'mock_lookup', input: {}, status: 'ok', result: 'r' },
+            { type: 'text', text: 'found' },
+          ],
+        },
+        { type: 'text', text: 'answer' },
+      ],
+    })
+  })
+})
+
+describe('messageToText with subagents', () => {
+  test("leaves a subagent's own text out of the message text", () => {
+    expect(
+      messageToText({
+        role: 'assistant',
+        parts: [
+          { type: 'subagent', callId: 's1', name: 'mock_subagent', task: 'find', status: 'ok', parts: [{ type: 'text', text: 'subagent text' }] },
+          { type: 'text', text: 'answer' },
+        ],
+      }),
+    ).toBe('answer')
   })
 })

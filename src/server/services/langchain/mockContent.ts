@@ -6,6 +6,7 @@ export const basicTestContent = `### You are calling mock endpoint for streaming
 - To mock a file search, write: **rag** -- _make sure to have a RAG index selected_
 - To mock a code block, write: **code block**
 - To mock a math block, write: **math block**
+- To mock a subagent, write: **subagent** (optionally followed by its task)
 OVER
 `
 
@@ -429,3 +430,14 @@ print("Hello, Swift!")
 export const thinkReasoningChunks = ['**Reading the question**\n\n', 'The user wants a mock answer', ' after some mock thinking.']
 
 export const thinkTestAnswer = 'This is the mock answer after thinking.'
+
+/** System prompt of the agent run by the `mock_subagent` tool. The mock model answers it with text and a `mock_lookup` call. */
+export const mockSubagentSystemPrompt = 'mock subagent'
+
+/** Task the mock model gives `mock_subagent` for a bare `subagent` message. */
+export const mockSubagentTask = 'Find the mock facts'
+
+export const mockSubagentLeadIn = 'Let me look that up.'
+
+/** Token usage the mock model reports for the subagent's tool call, so tests can tell it from the main agent's (zero) usage. */
+export const mockSubagentUsage = { input_tokens: 12, output_tokens: 7, total_tokens: 19 }

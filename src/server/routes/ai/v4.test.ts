@@ -43,6 +43,8 @@ import { getUsage, getUserTokenLimit, incrementCourseUsage, incrementUsage } fro
 import type { ChatEvent } from '../../../shared/agentChat'
 import { MockModel } from '../../services/langchain/MockModel'
 import { ToolResultStore } from '../../services/langchain/fileSearchResultsStore'
+import { runAgent } from '../../services/agent/runAgent'
+import { PostStreamSchemaV4 } from '../../../shared/agentChat'
 
 let currentUser = { id: 'user-1', isAdmin: false }
 
@@ -390,5 +392,102 @@ describe('POST /ai/v4/stream in a course', () => {
     const response = await stream({ promptId: 'prompt-1', courseId: 'course-1' })
 
     expect(response.status).toBe(403)
+  })
+})
+
+describe('POST /ai/v4/stream with the mock subagent', () => {
+  const SUB = 'mock_subagent_id'
+
+  test("nests the subagent's text and tool events under its call id, between its start and end", async () => {
+    const events = await readEvents(await stream({ message: 'subagent' }))
+    const withoutKeepAlive = events.filter((e) => e.type !== 'processing' && e.type !== 'usage')
+
+    expect(withoutKeepAlive).toEqual([
+      { type: 'subagent.start', path: [], callId: SUB, name: 'mock_subagent', task: 'Find the mock facts' },
+      { type: 'text.delta', path: [SUB], text: 'Let me look that up.' },
+      { type: 'tool.start', path: [SUB], callId: 'mock_lookup_id', name: 'mock_lookup', input: { query: 'Find the mock facts' } },
+      { type: 'tool.end', path: [SUB], callId: 'mock_lookup_id', status: 'ok', result: 'The mock lookup found 42 facts about "Find the mock facts".' },
+      { type: 'text.delta', path: [SUB], text: expect.stringContaining('Ok! Got some great results from that mock tool call!') },
+      { type: 'subagent.end', path: [], callId: SUB, status: 'ok' },
+      { type: 'text.delta', path: [], text: expect.stringContaining('The mock lookup found 42 facts') },
+    ])
+  })
+
+  test('the subagent task comes from the message after the prefix', async () => {
+    const events = await readEvents(await stream({ message: 'subagent count the moons' }))
+    expect(events[0]).toMatchObject({ type: 'subagent.start', task: 'count the moons' })
+  })
+
+  test('a subagent failing midway ends as an error and the main agent still answers', async () => {
+    const events = await readEvents(await stream({ message: 'subagent please fail' }))
+
+    expect(events).toContainEqual(expect.objectContaining({ type: 'tool.end', path: [SUB], callId: 'mock_lookup_id', status: 'ok' }))
+    expect(events).toContainEqual({ type: 'subagent.end', path: [], callId: SUB, status: 'error' })
+    expect(events.some((e) => e.type === 'error')).toBe(false)
+    expect(textOf(events.filter((e) => 'path' in e && e.path.length === 0))).toContain('Ok! Got some great results from that mock tool call!')
+  })
+
+  test("charges only the main agent's tokens and logs the subagent's per tool", async () => {
+    const meta: Record<string, unknown> = {}
+    const emitted: ChatEvent[] = []
+    const request = PostStreamSchemaV4.parse({
+      options: {
+        chatMessages: [{ role: 'user', content: 'subagent' }],
+        generationInfo: { model: 'mock', promptInfo: { type: 'custom', systemMessage: 'You are helpful' } },
+      },
+    })
+
+    await runAgent({
+      user: currentUser as any,
+      request,
+      meta,
+      signal: new AbortController().signal,
+      onStart: () => {},
+      emit: async (event) => void emitted.push(event),
+    })
+
+    // The mock subagent reports 12 + 7 tokens for its tool call; the main agent's mock calls report none.
+    expect(emitted.at(-1)).toEqual({ type: 'usage', inputTokens: 0, outputTokens: 0 })
+    expect(incrementUsage).toHaveBeenCalledWith(currentUser, 0)
+    expect(meta).toMatchObject({ tokenCount: 0, modelCalls: 2, toolCalls: JSON.stringify(['mock_subagent']) })
+    expect(JSON.parse(meta.subagentUsage as string)).toEqual({
+      mock_subagent: { modelCalls: 2, inputTokens: 12, outputTokens: 7, toolCalls: ['mock_lookup'] },
+    })
+  })
+
+  test('sends earlier subagent parts to the model as a summary with an excerpt of its answer', async () => {
+    const spy = vi.spyOn(MockModel.prototype, '_streamResponseChunks')
+    const history = [
+      { role: 'user', content: 'subagent count the moons' },
+      {
+        role: 'assistant',
+        parts: [
+          {
+            type: 'subagent',
+            callId: 'old',
+            name: 'mock_subagent',
+            task: 'count the moons',
+            status: 'ok',
+            parts: [
+              { type: 'text', text: 'Let me look that up.' },
+              { type: 'tool', callId: 'old_lookup', name: 'mock_lookup', input: { query: 'moons' }, status: 'ok', result: 'SECRET TOOL RESULT' },
+              { type: 'text', text: 'There are 95 moons.' },
+            ],
+          },
+          { type: 'text', text: 'Saturn has 95 moons.' },
+        ],
+      },
+    ]
+
+    const response = await stream({ message: 'say thanks', history })
+    await response.text()
+
+    const messages = spy.mock.calls[0][0] as { type: string; content: unknown }[]
+    spy.mockRestore()
+    expect(response.status).toBe(200)
+    expect(messages.find((m) => m.type === 'ai')?.content).toBe(
+      '[Asked the subagent mock_subagent: "count the moons". It answered (excerpt): "There are 95 moons."]\n\nSaturn has 95 moons.',
+    )
+    expect(JSON.stringify(messages)).not.toContain('SECRET TOOL RESULT')
   })
 })

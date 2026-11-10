@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, test, vi } from 'vitest'
-import type { ToolPart } from '@shared/agentChat'
+import type { SubagentPart, ToolPart } from '@shared/agentChat'
 
 vi.mock('../../rag/search', () => ({ search: vi.fn() }))
 vi.mock('../../langchain/fileSearchResultsStore', () => ({ ToolResultStore: { saveResults: vi.fn() } }))
@@ -58,6 +58,29 @@ describe('historyMessageToText', () => {
     })
 
     expect(text).toBe('Let me check.\n\n[Searched the course materials for "exam date": nothing found.]\n\nNot in the materials.')
+  })
+
+  test('replaces a subagent part with its task and an excerpt of its last answer, without its tool results', () => {
+    const subagent = (overrides: Partial<SubagentPart> = {}): SubagentPart => ({
+      type: 'subagent',
+      callId: 'call_sub',
+      name: 'mock_subagent',
+      task: 'count the moons',
+      status: 'ok',
+      parts: [{ type: 'text', text: 'Looking.' }, searchPart(), { type: 'text', text: `Saturn has\n95 moons. ${'x'.repeat(600)}` }],
+      ...overrides,
+    })
+
+    const text = historyMessageToText({ role: 'assistant', parts: [subagent()] })
+    expect(text).toMatch(/^\[Asked the subagent mock_subagent: "count the moons". It answered \(excerpt\): "Saturn has 95 moons\. x+…"\]$/)
+    expect(text).not.toContain('syllabus.pdf')
+
+    expect(historyMessageToText({ role: 'assistant', parts: [subagent({ status: 'error' })] })).toBe(
+      '[Asked the subagent mock_subagent: "count the moons", but it failed.]',
+    )
+    expect(historyMessageToText({ role: 'assistant', parts: [subagent({ name: 'retired_subagent', parts: [] })] })).toBe(
+      '[Asked the subagent retired_subagent: "count the moons". It gave no answer.]',
+    )
   })
 
   test('summarises a tool that is no longer in the registry generically', () => {

@@ -1,10 +1,12 @@
 import type { StructuredToolInterface } from '@langchain/core/tools'
-import type { AssistantPart, HistoryAssistantMessage, ToolPart } from '@shared/agentChat'
+import type { AssistantPart, HistoryAssistantMessage, SubagentPart, ToolPart } from '@shared/agentChat'
 import { documentSearch } from './documentSearch'
+import { mockSubagent } from './mockSubagent'
+import { summarizeSubagentPart } from './subagent'
 import type { EnabledTool, ToolContext, ToolModule } from './types'
 
 /** Every tool the agent can use. The client has a matching registry of renderers (`ChatV2/tools/registry.tsx`). */
-const TOOL_MODULES: ToolModule<any>[] = [documentSearch]
+const TOOL_MODULES: ToolModule<any>[] = [documentSearch, mockSubagent]
 
 const toolModules = new Map(TOOL_MODULES.map((module) => [module.name, module]))
 
@@ -29,8 +31,15 @@ export const withToolInstructions = (systemMessage: string, enabled: EnabledTool
   return [systemMessage, ...sections].filter((text) => text.length > 0).join('\n\n')
 }
 
-const summarizeToolPart = (part: ToolPart): string =>
-  getToolModule(part.name)?.summarizeForHistory(part) ?? `[Used the tool ${part.name}${part.status === 'error' ? ', which failed' : ''}.]`
+const summarizeToolPart = (part: ToolPart): string => {
+  const module = getToolModule(part.name)
+  return module?.kind === 'tool' ? module.summarizeForHistory(part) : `[Used the tool ${part.name}${part.status === 'error' ? ', which failed' : ''}.]`
+}
+
+const summarizeSubagent = (part: SubagentPart): string => {
+  const module = getToolModule(part.name)
+  return module?.kind === 'subagent' ? module.summarizeForHistory(part) : summarizeSubagentPart(part)
+}
 
 const partToHistoryText = (part: AssistantPart): string => {
   switch (part.type) {
@@ -38,6 +47,8 @@ const partToHistoryText = (part: AssistantPart): string => {
       return part.text
     case 'tool':
       return summarizeToolPart(part)
+    case 'subagent':
+      return summarizeSubagent(part)
     case 'reasoning':
       // Reasoning is never sent back: it is not needed across turns (the client already leaves it out).
       return ''
@@ -45,8 +56,8 @@ const partToHistoryText = (part: AssistantPart): string => {
 }
 
 /**
- * An earlier answer as plain text for the model. Tool parts become summaries in their place, never real
- * `tool_calls` / `ToolMessage` pairs, which would break on edited or truncated history. Reasoning is dropped.
+ * An earlier answer as plain text for the model. Tool and subagent parts become summaries in their place, never
+ * real `tool_calls` / `ToolMessage` pairs, which would break on edited or truncated history. Reasoning is dropped.
  */
 export const historyMessageToText = (message: HistoryAssistantMessage): string =>
   message.parts

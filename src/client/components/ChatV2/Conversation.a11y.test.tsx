@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import i18next from 'i18next'
 import { createRef, StrictMode } from 'react'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
@@ -204,5 +204,79 @@ describe('tool parts', () => {
 
     expect(screen.getByRole('group', { name: 'Source material search' }).textContent).toBe('Searching the source material for “exam”…')
     expect(screen.getByRole('group', { name: 'Tool some_new_tool' }).textContent).toBe('The tool some_new_tool failed')
+  })
+})
+
+describe('subagent parts', () => {
+  const answer: ClientChatMessage = {
+    role: 'assistant',
+    parts: [
+      {
+        type: 'subagent',
+        callId: 's1',
+        name: 'mock_subagent',
+        task: 'Find the mock facts',
+        status: 'ok',
+        parts: [
+          { type: 'text', text: 'Let me look that up.' },
+          { type: 'tool', callId: 'c1', name: 'mock_lookup', input: { query: 'facts' }, status: 'ok', result: 'found' },
+          { type: 'text', text: 'Found **42** facts.' },
+        ],
+      },
+      { type: 'text', text: 'There are 42 facts.' },
+    ],
+  }
+
+  test('show a card with name, status and task, collapsed by default, before the text that followed', () => {
+    renderConversation({ messages: [...userTurn, answer], completion: '', isStreaming: false })
+
+    const toggle = screen.getByRole('button', { name: 'Subagent mock_subagent finished' })
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
+    expect(toggle.hasAttribute('aria-controls')).toBe(false)
+    expect(document.getElementById(toggle.getAttribute('aria-describedby')!)?.textContent).toBe('Task: Find the mock facts')
+    expect(screen.queryByText('Let me look that up.')).toBeNull()
+    expect(screen.queryByRole('group', { name: 'Tool mock_lookup' })).toBeNull()
+
+    const card = screen.getByTestId('subagent-card')
+    expect(card.compareDocumentPosition(screen.getByText('There are 42 facts.')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  test("open to show the subagent's own text and tool parts, rendered like an answer's", () => {
+    renderConversation({ messages: [...userTurn, answer], completion: '', isStreaming: false })
+    const toggle = screen.getByRole('button', { name: 'Subagent mock_subagent finished' })
+
+    fireEvent.click(toggle)
+
+    const content = screen.getByTestId('subagent-content')
+    expect(toggle.getAttribute('aria-expanded')).toBe('true')
+    expect(toggle.getAttribute('aria-controls')).toBe(content.id)
+    expect(content.textContent).toContain('Let me look that up.')
+    expect(content.querySelector('strong')?.textContent).toBe('42')
+    expect(screen.getByRole('group', { name: 'Tool mock_lookup' }).textContent).toBe('Used the tool mock_lookup')
+  })
+
+  test('a running and a failed subagent say so', () => {
+    const parts: AssistantPart[] = [
+      { type: 'subagent', callId: 's1', name: 'reader', task: 'Read it', status: 'error', parts: [] },
+      { type: 'subagent', callId: 's2', name: 'searcher', task: '', status: 'running', parts: [] },
+    ]
+    render(
+      <I18nextProvider i18n={i18n}>
+        <Conversation
+          endState="none"
+          messages={userTurn}
+          streamingParts={parts}
+          isStreaming
+          isMobile={false}
+          latestResponseIndex={null}
+          latestResponseRef={createRef<HTMLDivElement>()}
+        />
+      </I18nextProvider>,
+    )
+
+    expect(screen.getByRole('button', { name: 'Subagent reader failed' })).toBeTruthy()
+    const running = screen.getByRole('button', { name: 'Subagent searcher is working…' })
+    expect(running.getAttribute('aria-expanded')).toBe('false')
+    expect(running.hasAttribute('aria-describedby')).toBe(false)
   })
 })

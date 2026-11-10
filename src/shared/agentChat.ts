@@ -4,7 +4,7 @@ import { ChatMessageSchema, PostStreamSchemaV3, type MessageGenerationInfo } fro
 /**
  * Agent stream protocol (v4). See .scratch/agent-architecture/plan.md, section 3.
  * path = [] for the main agent, ['<callId>'] for a subagent, ['<callId>', '<callId2>'] for nested subagents.
- * `callId` is always the model's tool call id. Subagent events are added in a later slice.
+ * `callId` is always the model's tool call id. A subagent's own events carry its call id in their path.
  */
 export type ChatEvent =
   | { type: 'text.delta'; path: string[]; text: string }
@@ -16,11 +16,17 @@ export type ChatEvent =
   | { type: 'tool.progress'; path: string[]; callId: string; data: unknown }
   /** `result` is what the client shows (the tool's artifact when it has one); `artifact` is reserved for larger client-only payloads. */
   | { type: 'tool.end'; path: string[]; callId: string; status: 'ok' | 'error'; result: unknown; artifact?: unknown }
+  /** A tool of kind `subagent` started; it is a subagent part instead of a tool part. `task` is what it was asked to do. */
+  | { type: 'subagent.start'; path: string[]; callId: string; name: string; task: string }
+  /** The subagent finished. `status` is `error` when its tool call failed. */
+  | { type: 'subagent.end'; path: string[]; callId: string; status: 'ok' | 'error' }
   | { type: 'usage'; inputTokens: number; outputTokens: number }
   | { type: 'error'; error: string }
   | { type: 'processing' }
 
 export type ToolPartStatus = 'running' | 'ok' | 'error'
+
+const PartStatusSchema = z.enum(['running', 'ok', 'error'])
 
 const TextPartSchema = z.object({ type: z.literal('text'), text: z.string() })
 
@@ -41,19 +47,42 @@ const ToolPartSchema = z.object({
   callId: z.string(),
   name: z.string(),
   input: z.unknown(),
-  status: z.enum(['running', 'ok', 'error']),
+  status: PartStatusSchema,
   result: z.unknown().optional(),
   artifact: z.unknown().optional(),
   /** Latest `tool.progress` data, while the tool runs. */
   progress: z.unknown().optional(),
 })
 
-/** Subagent parts are added in a later slice. */
-export const AssistantPartSchema = z.discriminatedUnion('type', [TextPartSchema, ReasoningPartSchema, ToolPartSchema])
+type TextPart = z.infer<typeof TextPartSchema>
+export type ReasoningPart = z.infer<typeof ReasoningPartSchema>
+export type ToolPart = z.infer<typeof ToolPartSchema>
 
-export type AssistantPart = z.infer<typeof AssistantPartSchema>
-export type ToolPart = Extract<AssistantPart, { type: 'tool' }>
-export type ReasoningPart = Extract<AssistantPart, { type: 'reasoning' }>
+/** Work the main agent delegated to a subagent: its own parts (text, reasoning, tools, nested subagents), shown collapsed in a card. */
+export type SubagentPart = {
+  type: 'subagent'
+  callId: string
+  /** The tool name of the subagent. */
+  name: string
+  task: string
+  parts: AssistantPart[]
+  status: ToolPartStatus
+}
+
+export type AssistantPart = TextPart | ReasoningPart | ToolPart | SubagentPart
+
+const SubagentPartSchema: z.ZodType<SubagentPart> = z.object({
+  type: z.literal('subagent'),
+  callId: z.string(),
+  name: z.string(),
+  task: z.string(),
+  get parts() {
+    return z.array(AssistantPartSchema)
+  },
+  status: PartStatusSchema,
+})
+
+export const AssistantPartSchema: z.ZodType<AssistantPart> = z.union([TextPartSchema, ReasoningPartSchema, ToolPartSchema, SubagentPartSchema])
 
 export type AssistantMessageV2 = {
   role: 'assistant'

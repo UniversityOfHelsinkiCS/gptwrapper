@@ -169,6 +169,29 @@ test.describe('axe wcag scan for chat with a thinking block', () => {
   })
 })
 
+test.describe('axe wcag scan for chat with a subagent card', () => {
+  test.afterAll(writeAxeReport)
+
+  test('scan chat answer with a collapsed subagent card', async ({ page }, testInfo) => {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+
+    // The mock model delegates `subagent <task>` to the mock subagent
+    await sendChatMessage(page, 'subagent Find the mock facts')
+    await closeSendPreference(page)
+
+    await expect(page.getByTestId('assistant-message')).toContainText('The mock lookup found 42 facts')
+    const card = page.getByTestId('subagent-card')
+    await expect(card).toHaveAttribute('data-subagent-status', 'ok')
+    // Collapsed, with no popover or tooltip open during the scan
+    await expect(card.getByRole('button', { name: 'Subagent mock_subagent finished' })).toHaveAttribute('aria-expanded', 'false')
+    await page.mouse.move(0, 0)
+    await expect(page.getByRole('tooltip')).toHaveCount(0)
+    await scan(page, testInfo.title)
+  })
+})
+
 teacherTest.describe('axe wcag scan for chat with tool parts', () => {
   teacherTest.afterAll(writeAxeReport)
 

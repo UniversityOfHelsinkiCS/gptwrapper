@@ -5,7 +5,17 @@ import { ChatGenerationChunk, type ChatResult } from '@langchain/core/outputs'
 import type { StructuredTool } from '@langchain/core/tools'
 import { fakeModel } from 'langchain'
 import { setTimeout as sleep } from 'node:timers/promises'
-import { basicTestContent, codeTestContent, mathTestContent, thinkReasoningChunks, thinkTestAnswer } from './mockContent'
+import {
+  basicTestContent,
+  codeTestContent,
+  mathTestContent,
+  mockSubagentLeadIn,
+  mockSubagentSystemPrompt,
+  mockSubagentTask,
+  mockSubagentUsage,
+  thinkReasoningChunks,
+  thinkTestAnswer,
+} from './mockContent'
 
 /** Pause between the streamed chunks of a `think` answer, so the thinking block is seen while it streams. */
 const THINK_CHUNK_DELAY_MS = 250
@@ -52,14 +62,29 @@ export class MockModel extends BaseChatModel {
 
   private buildFake(messages: BaseMessage[]) {
     const lastHuman = lastHumanText(messages)
-    const firstSystem = messages.find(isSystemMessage)
+    // `text` also reads the content-block array that createAgent's `systemPrompt` becomes.
+    const systemText = messages.find(isSystemMessage)?.text
     const last = messages[messages.length - 1]
 
+    if (systemText === mockSubagentSystemPrompt && last && isToolMessage(last) && lastHuman.includes('fail')) {
+      // A subagent task with `fail` in it fails midway: after its tool call, before its answer.
+      return fakeModel().respond(new Error('Mock subagent error injected'))
+    }
     if (last && isToolMessage(last)) {
       return fakeModel().respond(new AIMessage(`Ok! Got some great results from that mock tool call!: "${last.content}"`))
     }
-    if (firstSystem && (firstSystem.content as string).startsWith('mocktest')) {
-      return fakeModel().respond(new AIMessage(firstSystem.content as string))
+    if (systemText === mockSubagentSystemPrompt) {
+      // The agent of the `mock_subagent` tool: some text and a lookup of its task, then the generic tool-result answer above.
+      return fakeModel().respond(
+        new AIMessage({
+          content: mockSubagentLeadIn,
+          tool_calls: [{ name: 'mock_lookup', args: { query: lastHuman }, id: 'mock_lookup_id', type: 'tool_call' }],
+          usage_metadata: mockSubagentUsage,
+        }),
+      )
+    }
+    if (systemText?.startsWith('mocktest')) {
+      return fakeModel().respond(new AIMessage(systemText))
     }
     if (lastHuman.startsWith('say ')) {
       return fakeModel().respond(new AIMessage(lastHuman.replace('say ', '')))
@@ -69,6 +94,17 @@ export class MockModel extends BaseChatModel {
         new AIMessage({
           content: '',
           tool_calls: [{ name: this.searchToolName, args: { query: 'mock test query' }, id: 'mock_document_search_id', type: 'tool_call' }],
+        }),
+      )
+    }
+    if (lastHuman.startsWith('subagent')) {
+      // `subagent <task>` delegates the task (or a default one) to the `mock_subagent` tool, added for the mock model.
+      return fakeModel().respond(
+        new AIMessage({
+          content: '',
+          tool_calls: [
+            { name: 'mock_subagent', args: { task: lastHuman.slice('subagent'.length).trim() || mockSubagentTask }, id: 'mock_subagent_id', type: 'tool_call' },
+          ],
         }),
       )
     }
@@ -133,7 +169,7 @@ export class MockModel extends BaseChatModel {
       return
     }
     const message = await this.respond(messages, options)
-    const chunk = new AIMessageChunk({ id: message.id, content: message.content, tool_calls: message.tool_calls })
+    const chunk = new AIMessageChunk({ id: message.id, content: message.content, tool_calls: message.tool_calls, usage_metadata: message.usage_metadata })
     const text = extractText(chunk.content)
     await runManager?.handleLLMNewToken(text)
     yield new ChatGenerationChunk({ message: chunk, text })

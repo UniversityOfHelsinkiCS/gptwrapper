@@ -29,6 +29,7 @@ import type { AssistantMessageV2, AssistantPart } from '../../../shared/agentCha
 import { type ClientChatMessage, messageToolResults, messageToText } from './messages'
 import { ToolPartView } from './tools/registry'
 import { ThinkingBlock } from './ThinkingBlock'
+import { SubagentCard } from './SubagentCard'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import CopyToClipboardButton from './CopyToClipboardButton'
 import { StreamStatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
@@ -167,29 +168,12 @@ const AssistantMessageInfo = ({ message, headingId, number }: { message: Assista
   )
 }
 
-const AssistantMessageItem = ({
-  message,
-  setActiveToolResults,
-  isMobile = false,
-  onRetry,
-  isStreaming = false,
-  isLatestResponse = false,
-  latestResponseRef,
-  number,
-}: {
-  message: AssistantMessageV2
-  setActiveToolResults?: (toolResults: ToolCallResultEvent[]) => void
-  isMobile?: boolean
-  onRetry?: () => void
-  isStreaming?: boolean
-  isLatestResponse?: boolean
-  latestResponseRef?: React.Ref<HTMLDivElement>
-  number?: number
-}) => {
-  const processedParts = React.useMemo(
-    () => message.parts.map((part) => (part.type === 'text' ? { ...part, text: preprocessMath(part.text) } : part)),
-    [message.parts],
-  )
+/**
+ * The parts of an assistant message in order: text as markdown, reasoning in a thinking block, tool parts by
+ * their renderer, and subagent parts as cards that render their own parts with this same component.
+ */
+const AssistantParts = ({ parts }: { parts: AssistantPart[] }) => {
+  const processedParts = React.useMemo(() => parts.map((part) => (part.type === 'text' ? { ...part, text: preprocessMath(part.text) } : part)), [parts])
   const { t } = useTranslation()
   const theme = useTheme()
   const katexOptions = {
@@ -230,38 +214,19 @@ const AssistantMessageItem = ({
     throwOnError: true,
     strict: 'error', // disables logging katex warnings/errors – if debugging, turn these two on
   }
+  // Unique per list of parts: a subagent card's parts are rendered by another AssistantParts in the same message.
+  const codeBlockIdPrefix = useId()
   let codeCount = 0
 
-  const msgId = useId()
-  const headingId = useId()
-  const toolResults = messageToolResults(message)
-
   return (
-    <Box
-      data-testid="assistant-message"
-      id={msgId}
-      aria-busy={isStreaming}
-      ref={isLatestResponse ? latestResponseRef : undefined}
-      tabIndex={isLatestResponse ? -1 : undefined}
-      aria-label={isLatestResponse ? t('chat:latestResponseLabel') : undefined}
-      sx={(theme) => ({
-        width: '100%',
-        position: 'relative',
-        pr: 4,
-        wordBreak: 'break-word',
-        '&:hover .copy-message-button': {
-          opacity: 0.7,
-        },
-        '&:focus-within .copy-message-button': {
-          opacity: 0.7,
-        },
-        ...theme.applyStyles('dark', darkModeLinkColors),
-      })}
-    >
-      <AssistantMessageInfo message={message} headingId={headingId} number={number} />
+    <>
       {processedParts.map((part, partIdx) =>
         part.type === 'tool' ? (
           <ToolPartView key={`tool-${part.callId}`} part={part} />
+        ) : part.type === 'subagent' ? (
+          <SubagentCard key={`subagent-${part.callId}`} part={part}>
+            <AssistantParts parts={part.parts} />
+          </SubagentCard>
         ) : part.type === 'reasoning' ? (
           <ThinkingBlock key={`reasoning-${partIdx}`} part={part} />
         ) : (
@@ -303,7 +268,7 @@ const AssistantMessageItem = ({
                 const language = match?.[1] || 'plaintext' // safe fallback
 
                 if (match) {
-                  const codeBlockId = `codeBlock-${++codeCount}`
+                  const codeBlockId = `${codeBlockIdPrefix}codeBlock-${++codeCount}`
 
                   return (
                     <Box
@@ -369,6 +334,58 @@ const AssistantMessageItem = ({
           </ReactMarkdown>
         ),
       )}
+    </>
+  )
+}
+
+const AssistantMessageItem = ({
+  message,
+  setActiveToolResults,
+  isMobile = false,
+  onRetry,
+  isStreaming = false,
+  isLatestResponse = false,
+  latestResponseRef,
+  number,
+}: {
+  message: AssistantMessageV2
+  setActiveToolResults?: (toolResults: ToolCallResultEvent[]) => void
+  isMobile?: boolean
+  onRetry?: () => void
+  isStreaming?: boolean
+  isLatestResponse?: boolean
+  latestResponseRef?: React.Ref<HTMLDivElement>
+  number?: number
+}) => {
+  const { t } = useTranslation()
+  const msgId = useId()
+  const headingId = useId()
+  const toolResults = messageToolResults(message)
+
+  return (
+    <Box
+      data-testid="assistant-message"
+      id={msgId}
+      aria-busy={isStreaming}
+      ref={isLatestResponse ? latestResponseRef : undefined}
+      tabIndex={isLatestResponse ? -1 : undefined}
+      aria-label={isLatestResponse ? t('chat:latestResponseLabel') : undefined}
+      sx={(theme) => ({
+        width: '100%',
+        position: 'relative',
+        pr: 4,
+        wordBreak: 'break-word',
+        '&:hover .copy-message-button': {
+          opacity: 0.7,
+        },
+        '&:focus-within .copy-message-button': {
+          opacity: 0.7,
+        },
+        ...theme.applyStyles('dark', darkModeLinkColors),
+      })}
+    >
+      <AssistantMessageInfo message={message} headingId={headingId} number={number} />
+      <AssistantParts parts={message.parts} />
       {message.error && (
         <Box sx={{ mt: 2 }}>
           <Typography variant="body1" fontStyle="italic" color="error.main">
