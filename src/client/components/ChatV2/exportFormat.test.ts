@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest'
 import type { TFunction } from 'i18next'
 
-vi.mock('../../../config', async () => ({ usesStreamVersion: () => false, ValidModelNameSchema: (await import('zod/v4')).z.string() }))
+vi.mock('../../../config', async () => ({ ValidModelNameSchema: (await import('zod/v4')).z.string() }))
 vi.mock('../../util/apiClient', () => ({ postAbortableStream: vi.fn() }))
 vi.mock('../../hooks/apiHooks', () => ({ useGetQuery: vi.fn() }))
 vi.mock('../../util/email', () => ({ sendEmail: vi.fn() }))

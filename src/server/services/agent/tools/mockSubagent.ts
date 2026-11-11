@@ -31,7 +31,7 @@ export const mockSubagent: SubagentToolModule = {
     tool(
       async ({ task }: { task: string }, runtime: ToolRunnableConfig) =>
         runSubagent({
-          agent: createAgent({ model: new MockModel({ tools: [] }), tools: [mockLookup], systemPrompt: mockSubagentSystemPrompt }),
+          agent: createAgent({ model: new MockModel({}), tools: [mockLookup], systemPrompt: mockSubagentSystemPrompt }),
           task,
           runtime,
         }),

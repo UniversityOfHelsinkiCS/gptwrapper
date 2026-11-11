@@ -1,5 +1,6 @@
 import z from 'zod/v4'
-import { ChatMessageSchema, PostStreamSchemaV3, type MessageGenerationInfo } from './chat'
+import { WarningTypes } from './aiApi'
+import { ChatMessageSchema, MessageGenerationInfoSchema, type MessageGenerationInfo } from './chat'
 
 /**
  * Agent stream protocol (v4). See .scratch/agent-architecture/plan.md, section 3.
@@ -103,10 +104,14 @@ export const HistoryAssistantMessageSchema = z.object({
 
 export type HistoryAssistantMessage = z.infer<typeof HistoryAssistantMessageSchema>
 
-/** Request body for POST /api/ai/v4/stream. Like v3, but assistant messages may carry `parts` instead of `content`. */
-export const PostStreamSchemaV4 = PostStreamSchemaV3.extend({
-  options: PostStreamSchemaV3.shape.options.extend({
+/** Request body for POST /api/ai/v4/stream. Assistant messages in the history may carry `parts` instead of `content`. */
+export const PostStreamSchemaV4 = z.object({
+  options: z.object({
     chatMessages: z.array(z.union([HistoryAssistantMessageSchema, ChatMessageSchema])),
+    generationInfo: MessageGenerationInfoSchema,
+    ignoredWarnings: WarningTypes.array().optional(),
+    courseId: z.string().optional(),
   }),
+  courseId: z.string().optional(),
 })
 export type PostStreamSchemaV4Type = z.input<typeof PostStreamSchemaV4>

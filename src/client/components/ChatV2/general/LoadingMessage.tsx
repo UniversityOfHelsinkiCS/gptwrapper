@@ -1,5 +1,4 @@
-import { Typography, useTheme } from '@mui/material'
-import type { ToolCallStatusEvent } from '../../../../shared/chat'
+import { useTheme } from '@mui/material'
 
 const loadingDotStyle = (delay: number, color: string) => ({
   width: 5,
@@ -11,13 +10,9 @@ const loadingDotStyle = (delay: number, color: string) => ({
   animationDelay: `${delay}s`,
 })
 
-const NO_TOOL_CALLS: Record<string, ToolCallStatusEvent> = {}
-
-export const LoadingMessage = ({ toolCalls = NO_TOOL_CALLS }: { toolCalls?: Record<string, ToolCallStatusEvent> }) => {
+export const LoadingMessage = () => {
   const theme = useTheme()
   const dotColor = theme.palette.text.secondary
-
-  const toolCallMessages = Object.values(toolCalls)
 
   return (
     <div className="message-role-assistant">
@@ -31,32 +26,12 @@ export const LoadingMessage = ({ toolCalls = NO_TOOL_CALLS }: { toolCalls?: Reco
               transform: translateY(-8px);
             }
           }
-
-          @keyframes slideIn {
-            0% {
-              transform: translateX(-20px);
-              opacity: 0;
-            }
-            100% {
-              transform: translateX(0);
-              opacity: 1;
-            }
-          }
         `}
       </style>
       <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', minHeight: '4rem' }}>
         <div style={loadingDotStyle(0, dotColor)} />
         <div style={loadingDotStyle(0.15, dotColor)} />
         <div style={loadingDotStyle(0.3, dotColor)} />
-        {toolCallMessages.map((tc) => (
-          <Typography
-            key={tc.callId}
-            sx={{ fontStyle: 'italic', ml: '1rem', minWidth: 0, overflowWrap: 'anywhere', color: 'text.secondary', animation: 'slideIn 0.3s ease-out' }}
-            data-testid="tool-call-message"
-          >
-            {tc.text}
-          </Typography>
-        ))}
       </div>
     </div>
   )

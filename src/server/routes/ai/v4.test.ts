@@ -57,7 +57,7 @@ beforeEach(() => {
   vi.mocked(getUserTokenLimit).mockResolvedValue(100_000)
 })
 
-/** The /stream route reads its JSON payload out of a multipart `data` field, like v3. The real MockModel answers. */
+/** The /stream route reads its JSON payload out of a multipart `data` field. The real MockModel answers. */
 const stream = ({
   message = 'say hello world',
   promptId,
@@ -274,7 +274,7 @@ describe('POST /ai/v4/stream', () => {
     expect(incrementUsage).not.toHaveBeenCalled()
   })
 
-  test('shows the content-filter explanation as the answer, like v3', async () => {
+  test('shows the content-filter explanation as the answer', async () => {
     const filtered = Object.assign(new Error('filtered'), { code: 'content_filter', error: { message: 'Blocked by the content filter.' } })
     const spy = vi.spyOn(MockModel.prototype, '_streamResponseChunks').mockImplementation(async function* () {
       yield* []
@@ -305,6 +305,25 @@ describe('POST /ai/v4/stream', () => {
     expect(response.status).toBe(403)
   })
 
+  test('still chats at the weekly usage limit as an admin', async () => {
+    currentUser = { id: 'admin-1', isAdmin: true }
+    vi.mocked(getUsage).mockResolvedValue(100_000)
+
+    const response = await stream()
+
+    expect(response.status).toBe(200)
+    expect(textOf(await readEvents(response))).toBe('hello world')
+  })
+
+  test('chats with a UNIVERSITY prompt', async () => {
+    vi.mocked(Prompt.findByPk).mockResolvedValue(savedPrompt('UNIVERSITY', { language: 'fi' }))
+
+    const response = await stream({ promptId: 'prompt-1' })
+
+    expect(response.status).toBe(200)
+    expect(textOf(await readEvents(response))).toBe('hello world')
+  })
+
   test('refuses to chat with a TEMPLATE prompt', async () => {
     vi.mocked(Prompt.findByPk).mockResolvedValue(savedPrompt('TEMPLATE'))
 
@@ -332,6 +351,8 @@ const course = (overrides = {}) =>
     saveDiscussions: false,
     ...overrides,
   }) as any
+
+const expired = { activityPeriod: { startDate: '2020-01-01', endDate: '2020-06-01' } }
 
 const givenCourse = (overrides = {}, membership: Parameters<typeof setMembership>[0] = { enrolled: true }) => {
   setMembership(membership)
@@ -388,11 +409,51 @@ describe('POST /ai/v4/stream in a course', () => {
   })
 
   test('refuses a student when the course has ended', async () => {
-    givenCourse({ activityPeriod: { startDate: '2020-01-01', endDate: '2020-06-01' } })
+    givenCourse(expired)
 
     const response = await stream({ promptId: 'prompt-1', courseId: 'course-1' })
 
     expect(response.status).toBe(403)
+  })
+
+  test('refuses a student when the course has not started', async () => {
+    givenCourse({ activityPeriod: { startDate: '2099-01-01', endDate: '2099-06-01' } })
+
+    const response = await stream({ promptId: 'prompt-1', courseId: 'course-1' })
+
+    expect(response.status).toBe(403)
+  })
+
+  test('refuses a student when the course chat is not activated', async () => {
+    givenCourse({ activated: false })
+
+    const response = await stream({ promptId: 'prompt-1', courseId: 'course-1' })
+
+    expect(response.status).toBe(403)
+  })
+
+  test('lets a responsible teacher chat in a course that has ended or is not activated', async () => {
+    currentUser = { id: 'teacher-1', isAdmin: false }
+
+    givenCourse(expired, { responsible: true })
+    const ended = await stream({ promptId: 'prompt-1', courseId: 'course-1' })
+    await ended.text()
+    expect(ended.status).toBe(200)
+
+    givenCourse({ activated: false }, { responsible: true })
+    const notActivated = await stream({ promptId: 'prompt-1', courseId: 'course-1' })
+    await notActivated.text()
+    expect(notActivated.status).toBe(200)
+  })
+
+  test('lets an admin chat in a course that is neither activated nor running', async () => {
+    currentUser = { id: 'admin-1', isAdmin: true }
+    givenCourse({ ...expired, activated: false }, {})
+
+    const response = await stream({ promptId: 'prompt-1', courseId: 'course-1' })
+    await response.text()
+
+    expect(response.status).toBe(200)
   })
 })
 

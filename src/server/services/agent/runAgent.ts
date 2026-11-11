@@ -15,7 +15,7 @@ import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
 import { getAccessLevel, requireActiveAccess } from '../chatInstances/access'
 import { checkCourseUsage, checkUsage, getCourseTokenLimit, getUsage, getUserTokenLimit, incrementCourseUsage, incrementUsage } from '../chatInstances/usage'
-import { handleWarnings, modelConfigHasInstructions, prepareMessagesForLLM } from '../langchain/chat'
+import { handleWarnings, modelConfigHasInstructions, prepareMessagesForLLM } from './prepareMessages'
 import { MockModel } from '../langchain/MockModel'
 import { getAzureChatOpenAI, getToskaProvider, getVertexModelProvider } from '../langchain/modelGenerators'
 import { createStreamState, getMainAgentModelCall, getSubagentModelCall, mapStreamChunk, nextStreamState, type StreamChunk } from './mapStreamChunk'
@@ -185,7 +185,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
 
     const contentFilterMessage = getContentFilterMessage(error)
     if (contentFilterMessage) {
-      // Same as v3: the content-filter explanation is shown as the assistant's answer.
+      // The content-filter explanation is shown as the assistant's answer.
       await emit({ type: 'text.delta', path: [], text: contentFilterMessage })
       return { status: 'completed' }
     }
@@ -362,13 +362,13 @@ const getAgentModel = (modelConfig: ModelConfig): BaseChatModel => {
     case ModelProvider.Toska:
       return getToskaProvider(modelConfig.name, true, modelConfig.reasoning)
     case ModelProvider.Mock:
-      return new MockModel({ tools: [] })
+      return new MockModel({})
     default:
       throw new Error(`Unknown model provider: ${modelConfig.provider}`)
   }
 }
 
-/** Azure refuses some prompts with `code: 'content_filter'`; v3 shows the explanation as the answer. */
+/** Azure refuses some prompts with `code: 'content_filter'`; the explanation is shown as the answer. */
 const getContentFilterMessage = (error: unknown): string | null => {
   if (!(error instanceof Error) || !('code' in error) || error.code !== 'content_filter') return null
   const innerError = 'error' in error ? (error.error as { message?: string } | undefined) : undefined

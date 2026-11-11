@@ -47,38 +47,31 @@ graph TB
 ```mermaid
 sequenceDiagram
     participant Client
-    participant v3Router as /api/ai/v3/stream
-    participant streamChat as streamChat
-    participant AzureChat as AzureChatOpenAI
-    participant Tools as RAG Search Tool
+    participant v4Router as /api/ai/v4/stream
+    participant runAgent as runAgent
+    participant Agent as createAgent (agent.stream)
+    participant Tools as Tools (document_search, present_quiz, ...)
 
-    Client->>v3Router: POST /stream with messages, model, courseId
-    v3Router->>v3Router: Validate user and course access
-    v3Router->>v3Router: Load Prompt and RagIndex if saved prompt
+    Client->>v4Router: POST /stream with messages, model, courseId
+    v4Router->>runAgent: Run the turn, emitting ChatEvents
+    runAgent->>runAgent: Validate user and course access
+    runAgent->>runAgent: Load Prompt, RagIndex and enabled tools
+    runAgent->>runAgent: Check token limits and warnings
 
-    alt File Attachment
-        v3Router->>v3Router: parseFileAndAddToLastMessage
-    end
-
-    v3Router->>streamChat: Start streaming
-    streamChat->>streamChat: Prepare messages with system and history
-    streamChat->>streamChat: Check token limits and warnings
-
-    loop Chat Turns - max 2
-        streamChat->>AzureChat: stream messages
-        AzureChat-->>streamChat: Stream chunks
-        streamChat-->>Client: SSE writing events
+    loop Until the model answers without tool calls
+        runAgent->>Agent: stream messages
+        Agent-->>runAgent: Stream chunks
+        runAgent-->>Client: NDJSON text.delta / reasoning.delta
 
         alt Tool Calls Present
-            streamChat->>Tools: invoke tool_call
-            Tools-->>streamChat: Tool results
-            streamChat-->>Client: SSE toolCallStatus
+            Agent->>Tools: invoke tool_call
+            Tools-->>Agent: Tool results
+            runAgent-->>Client: NDJSON tool.start / tool.end
         end
     end
 
-    streamChat->>v3Router: Return stats
-    v3Router->>v3Router: Increment usage
-    v3Router-->>Client: Close stream
+    runAgent->>runAgent: Increment usage
+    runAgent-->>Client: usage event, close stream
 ```
 
 ## 2. Embedding Pipeline
@@ -368,22 +361,20 @@ flowchart TB
 src/server/
 ├── routes/
 │   ├── ai/
-│   │   ├── v3.ts           # Chat completion endpoint
+│   │   ├── v4.ts           # Chat completion endpoint (runs services/agent/runAgent.ts)
 │   │   └── fileParsing.ts  # File parsing utilities
 │   └── rag/
 │       ├── rag.ts          # RAG index CRUD
 │       └── ragIndex.ts     # File upload & search
 ├── services/
 │   ├── langchain/
-│   │   ├── azure.ts        # Azure OpenAI client
-│   │   └── chat.ts         # Chat streaming logic
+│   │   └── modelGenerators.ts  # Azure, Vertex and Toska model clients
 │   ├── rag/
 │   │   ├── embedder.ts     # Ollama embeddings
 │   │   ├── ingestion.ts    # Document ingestion
 │   │   ├── search.ts       # Search orchestration
 │   │   ├── retrievers.ts   # Various retriever types
-│   │   ├── vectorStore.ts  # Redis vector store
-│   │   └── searchTool.ts   # LangChain tool wrapper
+│   │   └── vectorStore.ts  # Redis vector store
 │   └── jobs/
 │       └── pdfParsing.job.ts  # PDF job submission
 

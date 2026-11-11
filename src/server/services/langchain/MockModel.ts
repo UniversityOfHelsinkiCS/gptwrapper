@@ -1,8 +1,7 @@
 import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager'
-import { BaseChatModel, type BaseChatModelParams, type BindToolsInput } from '@langchain/core/language_models/chat_models'
+import { BaseChatModel, type BindToolsInput } from '@langchain/core/language_models/chat_models'
 import { AIMessage, AIMessageChunk, type BaseMessage, isHumanMessage, isSystemMessage, isToolMessage } from '@langchain/core/messages'
 import { ChatGenerationChunk, type ChatResult } from '@langchain/core/outputs'
-import type { StructuredTool } from '@langchain/core/tools'
 import { fakeModel } from 'langchain'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { PRESENT_QUIZ } from '@shared/quiz'
@@ -37,33 +36,16 @@ const isThinkRequest = (messages: BaseMessage[]) => {
 const thinkAnswer = (messages: BaseMessage[]) => lastHumanText(messages).slice('think'.length).trim() || thinkTestAnswer
 
 export class MockModel extends BaseChatModel {
-  tools: StructuredTool[]
-
-  constructor({ tools, ...rest }: { tools: StructuredTool[] } & BaseChatModelParams) {
-    super(rest)
-    this.tools = tools
-  }
-
   _llmType() {
     return 'mock'
   }
 
-  /** Names of the tools bound by createAgent. */
-  private boundToolNames: string[] = []
-
   /**
    * createAgent requires bindTools. The mock picks its tool calls from the message prefix (`rag`, `multitool`),
-   * so binding only records the tool names. Construct it with `tools: []` for createAgent, which refuses pre-bound tools.
+   * so binding does nothing. createAgent refuses a model with pre-bound tools.
    */
-  override bindTools(tools: BindToolsInput[]) {
-    this.boundToolNames = tools.flatMap((t) => (typeof t === 'object' && t !== null && 'name' in t && typeof t.name === 'string' ? [t.name] : []))
+  override bindTools(_tools: BindToolsInput[]) {
     return this
-  }
-
-  /** v3 binds `mock_document_search` through the constructor; the agent (v4) binds the registry's `document_search`. */
-  private get searchToolName() {
-    const names = [...this.tools.map((t) => t.name), ...this.boundToolNames]
-    return names.find((name) => name === 'mock_document_search') ?? names.find((name) => name === 'document_search') ?? 'mock_document_search'
   }
 
   private buildFake(messages: BaseMessage[]) {
@@ -112,7 +94,7 @@ export class MockModel extends BaseChatModel {
       return fakeModel().respond(
         new AIMessage({
           content: '',
-          tool_calls: [{ name: this.searchToolName, args: { query: 'mock test query' }, id: 'mock_document_search_id', type: 'tool_call' }],
+          tool_calls: [{ name: 'document_search', args: { query: 'mock test query' }, id: 'mock_document_search_id', type: 'tool_call' }],
         }),
       )
     }
@@ -133,8 +115,8 @@ export class MockModel extends BaseChatModel {
         new AIMessage({
           content: '',
           tool_calls: [
-            { name: this.searchToolName, args: { query: 'first mock query' }, id: 'mock_multitool_1', type: 'tool_call' },
-            { name: this.searchToolName, args: { query: 'second mock query' }, id: 'mock_multitool_2', type: 'tool_call' },
+            { name: 'document_search', args: { query: 'first mock query' }, id: 'mock_multitool_1', type: 'tool_call' },
+            { name: 'document_search', args: { query: 'second mock query' }, id: 'mock_multitool_2', type: 'tool_call' },
           ],
         }),
       )

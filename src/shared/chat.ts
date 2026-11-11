@@ -1,15 +1,6 @@
 import z from 'zod/v4'
 import { ValidModelNameSchema } from '../config'
-import { WarningTypes } from './aiApi'
 import { type QuizAnswer, QuizAnswerSchema } from './quiz'
-
-/**
- * Event emitted when text is added to a chat message
- */
-export type WritingEvent = {
-  type: 'writing'
-  text: string
-}
 
 export type ToolCallInput = {
   query?: string
@@ -21,7 +12,7 @@ export type ToolCallResult = {
   files: { fileName: string; score?: number; excerpt?: string }[]
 }
 
-export type ToolCallStatusEvent = {
+type ToolCallStatusEvent = {
   type: 'toolCallStatus'
   callId: string
   toolName: string
@@ -29,26 +20,11 @@ export type ToolCallStatusEvent = {
   input?: ToolCallInput
 }
 
+/** A finished tool call as saved in `AssistantMessage.toolCalls` by the old (v3) stream. Old saved messages are migrated to parts from this. */
 export type ToolCallResultEvent = ToolCallStatusEvent & {
   input: ToolCallInput
   result: ToolCallResult
 }
-
-export type ErrorEvent = {
-  type: 'error'
-  error: string
-}
-
-/**
- * Event emitted when a long-running operation is in progress (e.g., file parsing)
- * Used to keep the connection alive during processing
- */
-export type ProcessingEvent = {
-  type: 'processing'
-  message: string
-}
-
-export type ChatEventV3 = WritingEvent | ToolCallStatusEvent | ToolCallResultEvent | ErrorEvent | ProcessingEvent
 
 const TextContentPartSchema = z.object({
   type: z.literal('text'),
@@ -136,15 +112,3 @@ export const ChatMessageSchema = z.object({
   fileContent: z.string().optional(),
   quizAnswer: QuizAnswerSchema.optional(),
 })
-
-export const PostStreamSchemaV3 = z.object({
-  options: z.object({
-    chatMessages: z.array(ChatMessageSchema),
-    generationInfo: MessageGenerationInfoSchema,
-    ignoredWarnings: WarningTypes.array().optional(),
-    courseId: z.string().optional(),
-  }),
-  courseId: z.string().optional(),
-})
-
-export type PostStreamSchemaV3Type = z.input<typeof PostStreamSchemaV3>

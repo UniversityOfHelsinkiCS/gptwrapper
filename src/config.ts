@@ -50,7 +50,6 @@ export type ModelConfig = {
   provider: ModelProvider
   // outputLimit is for opencode
   outputLimit: number
-  streamVersion: string
   timeoutOverride?: number
   instructions?: string
   temperature?: number
@@ -74,7 +73,6 @@ export const validModels: ModelConfig[] = [
     displayName: 'GPT-6 Luna',
     context: 128_000,
     outputLimit: 16_384,
-    streamVersion: 'v3',
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Azure,
     tags: ['cheap', 'fast', 'free'],
@@ -86,7 +84,6 @@ export const validModels: ModelConfig[] = [
     displayName: 'GPT-5 mini',
     context: 128_000,
     outputLimit: 16_384,
-    streamVersion: 'v3',
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Azure,
     tags: ['cheap', 'fast', 'free'],
@@ -98,7 +95,6 @@ export const validModels: ModelConfig[] = [
     displayName: 'Gemma 4',
     context: 128_000,
     outputLimit: 16_384,
-    streamVersion: 'v3',
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Toska,
     service: 'v1',
@@ -111,7 +107,6 @@ export const validModels: ModelConfig[] = [
   //   displayName: 'GPT-4o mini',
   //   context: 128_000,
   //   outputLimit: 16_384,
-  //   streamVersion: 'v3',
   //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   //   provider: ModelProvider.Azure,
   // },
@@ -120,7 +115,6 @@ export const validModels: ModelConfig[] = [
   //   displayName: 'GPT-4o',
   //   context: 128_000,
   //   outputLimit: 16_384,
-  //   streamVersion: 'v3',
   //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   //   provider: ModelProvider.Azure,
   // },
@@ -129,7 +123,6 @@ export const validModels: ModelConfig[] = [
   //   displayName: 'GPT-4',
   //   context: 128_000,
   //   outputLimit: 16_384,
-  //   streamVersion: 'v3',
   //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   //   provider: ModelProvider.Azure,
   // },
@@ -138,7 +131,6 @@ export const validModels: ModelConfig[] = [
   //   displayName: 'GPT-5.1',
   //   context: 128_000,
   //   outputLimit: 16_384,
-  //   streamVersion: 'v3',
   //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   //   provider: ModelProvider.Azure,
   // },
@@ -147,7 +139,6 @@ export const validModels: ModelConfig[] = [
   //   displayName: 'GPT-4.1',
   //   context: 128_000,
   //   outputLimit: 16_384,
-  //   streamVersion: 'v3',
   //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   //   provider: ModelProvider.Azure,
   // },
@@ -156,7 +147,6 @@ export const validModels: ModelConfig[] = [
     displayName: 'GPT-5.5',
     context: 128_000,
     outputLimit: 16_384,
-    streamVersion: 'v3',
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',
@@ -169,7 +159,6 @@ export const validModels: ModelConfig[] = [
     displayName: 'GPT-6.1 Sol',
     context: 128_000,
     outputLimit: 16_384,
-    streamVersion: 'v3',
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',
@@ -182,7 +171,6 @@ export const validModels: ModelConfig[] = [
   //   displayName: 'DeepSeek V4 Flash',
   //   context: 128_000,
   //   outputLimit: 16_384,
-  //   streamVersion: 'v3',
   //   instructions: formatInstructions,
   //   provider: ModelProvider.Azure,
   //   descriptionKey: 'chat:modelDescriptions.balanced',
@@ -192,7 +180,6 @@ export const validModels: ModelConfig[] = [
     displayName: 'Mistral Large 3',
     context: 128_000,
     outputLimit: 8_192,
-    streamVersion: 'v3',
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.balanced',
@@ -204,7 +191,6 @@ export const validModels: ModelConfig[] = [
   //   displayName: 'Gemini 3.5 Flash-Lite',
   //   context: 128_000,
   //   outputLimit: 16_384,
-  //   streamVersion: 'v3',
   //   instructions: formatInstructions,
   //   provider: ModelProvider.Vertex,
   //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
@@ -217,7 +203,6 @@ export const validModels: ModelConfig[] = [
   //   displayName: 'Qwen 3.5 4B',
   //   context: 128_000,
   //   outputLimit: 16_384,
-  //   streamVersion: 'v3',
   //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
   //   provider: ModelProvider.Toska,
   //   service: 'v1',
@@ -228,7 +213,6 @@ export const validModels: ModelConfig[] = [
     displayName: 'Mock',
     context: 1024,
     outputLimit: 1024,
-    streamVersion: 'v3',
     provider: ModelProvider.Mock,
     tags: [],
     // The mock reasons only for messages starting with `think`.
@@ -245,8 +229,6 @@ export type ValidModelName = z.infer<typeof ValidModelNameSchema>
 export const getModelConfig = (modelName: ValidModelName): ModelConfig | undefined => validModels.find((model) => model.name === modelName)
 
 export const getModelDisplayName = (modelName: ValidModelName): string => getModelConfig(modelName)?.displayName ?? modelName
-
-export const usesStreamVersion = (modelName: ValidModelName, version: string): boolean => getModelConfig(modelName)?.streamVersion === version
 
 export const isMockModel = (modelName: ValidModelName): boolean => modelName === 'mock'
 

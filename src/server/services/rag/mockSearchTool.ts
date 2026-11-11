@@ -1,7 +1,4 @@
-import { tool } from '@langchain/core/tools'
-import { z } from 'zod/v4'
 import type { RagIndex } from '../../db/models'
-import { SearchSchema } from '../../../shared/rag'
 import { Document } from '@langchain/core/documents'
 import type { search } from './search'
 
@@ -23,22 +20,3 @@ export const mockSearch: typeof search = async (_index: RagIndex, _params: { que
     timings: { search: 1000 },
   }
 }
-
-//Todo fix the typing here
-export const getMockRagIndexSearchTool: any = (ragIndex: RagIndex) =>
-  tool(
-    async ({ query }: { query: string }) => {
-      console.log('Mock search tool invoked with query:', query)
-      const { results: documents } = await mockSearch(ragIndex, SearchSchema.parse({ query }))
-      // With responseFormat: content_and_artifact, return content and artifact like this:
-      return [documents.map((doc) => doc.content).join('\n\n'), documents]
-    },
-    {
-      name: `mock_document_search`, // Gotcha: function name must match '^[a-zA-Z0-9_\.-]+$' at least in AzureOpenAI. This name must satisfy the name in ChatToolDef type
-      description: `Search documents in the materials (titled '${ragIndex.metadata.name}'). Prefer ${ragIndex.metadata.language}, which is the language used in the documents.`,
-      schema: z.object({
-        query: z.string().describe('the query to search for'),
-      }),
-      responseFormat: 'content_and_artifact',
-    },
-  )

@@ -9,7 +9,7 @@ import { upload } from './multer'
 const router = express.Router()
 
 /**
- * Streams one chat turn as NDJSON `ChatEvent`s (same framing as v3). The run itself lives in `runAgent`;
+ * Streams one chat turn as NDJSON `ChatEvent`s. The run itself lives in `runAgent`;
  * this route only adapts it to HTTP: request parsing, headers, backpressure and abort on disconnect.
  * Responds 201 with `{ warnings }` instead of a stream when the client must confirm warnings first.
  */
