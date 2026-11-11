@@ -1,6 +1,6 @@
 import ChevronRight from '@mui/icons-material/ChevronRight'
 import ExpandMore from '@mui/icons-material/ExpandMore'
-import { Box, List, ListItemButton, ListItemText, Typography, IconButton, Tooltip } from '@mui/material'
+import { Box, List, ListItemButton, ListItemText, Typography, IconButton, Tooltip, type Theme } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -51,7 +51,12 @@ const CoursePrompts = (props: CoursePromptsProps) => {
 
   const currentPrompts = course.prompts ?? []
 
-  const dotColor = course.status === 'EXPIRED' ? 'grey.400' : course.status === 'ACTIVATED' ? 'success.main' : 'error.main'
+  const dotColor = (theme: Theme) => {
+    const dark = theme.palette.mode === 'dark'
+    if (course.status === 'EXPIRED') return dark ? theme.palette.grey[600] : theme.palette.grey[400]
+    if (course.status === 'ACTIVATED') return dark ? '#13ba1c' : theme.palette.success.main
+    return dark ? '#f44336' : theme.palette.error.main
+  }
 
   useEffect(() => {
     if (!previewPrompt) return
