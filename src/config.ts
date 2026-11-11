@@ -103,6 +103,8 @@ export const validModels: ModelConfig[] = [
     provider: ModelProvider.Toska,
     service: 'v1',
     tags: ['local', 'open', 'free'],
+    // Toska is a llama.cpp server, which ignores fields it doesn't use, so this is safe even if no reasoning comes back.
+    reasoning: { effort: 'medium', showSummary: true },
   },
   // {
   //   name: 'gpt-4o-mini',

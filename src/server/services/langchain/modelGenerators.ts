@@ -39,7 +39,7 @@ export const getToskaProvider = (modelName: string, streaming = true, reasoning?
         token: INFERENCE_API_TOKEN,
       },
     },
-    useResponsesApi: true,
+    useResponsesApi: false,
     streaming: streaming,
     apiKey: 'none',
     ...openAIReasoningFields(reasoning),
