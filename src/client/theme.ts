@@ -145,14 +145,10 @@ const baseOptions: Omit<ThemeOptions, 'palette'> = {
 
     MuiSwitch: {
       styleOverrides: {
-        track: ({ theme }) =>
+        switchBase: ({ theme }) =>
           theme.applyStyles('light', {
-            opacity: 1,
-            backgroundColor: theme.palette.grey[600],
-          }),
-        thumb: ({ theme }) =>
-          theme.applyStyles('light', {
-            color: theme.palette.grey[300],
+            '&:not(.Mui-checked) .MuiSwitch-thumb': { color: theme.palette.grey[300], border: `1px solid ${theme.palette.grey[500]}` },
+            '&:not(.Mui-checked) + .MuiSwitch-track': { opacity: 1, backgroundColor: theme.palette.grey[600] },
           }),
         colorPrimary: ({ theme }) =>
           theme.applyStyles('dark', {
