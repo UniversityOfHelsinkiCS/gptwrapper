@@ -19,6 +19,8 @@ const ApiUsers = () => {
     )
   }
 
+  const sortedApiUsers = [...apiUsers].sort((a, b) => b.usage - a.usage || b.apiKeyNames.length - a.apiKeyNames.length)
+
   return (
     <Box my={2}>
       <Typography variant="h4" component="h3" sx={{ mb: 2 }}>
@@ -37,7 +39,7 @@ const ApiUsers = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {apiUsers.map((apiUser) => (
+            {sortedApiUsers.map((apiUser) => (
               <TableRow key={apiUser.id}>
                 <TableCell component="th" scope="row">
                   {apiUser.lastName} {apiUser.firstNames}
