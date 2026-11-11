@@ -28,8 +28,7 @@ import {
 import type { AssistantMessageV2, AssistantPart } from '../../../shared/agentChat'
 import { type ClientChatMessage, messageToolResults, messageToText } from './messages'
 import { ToolPartView } from './tools/registry'
-import { QuizAnswerProvider } from './tools/quizAnswerContext'
-import type { QuizAnswer } from '../../../shared/quiz'
+import { QuizAnswerProvider, type QuizSelection } from './tools/quizAnswerContext'
 import { ThinkingBlock } from './ThinkingBlock'
 import { SubagentCard } from './SubagentCard'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
@@ -501,7 +500,9 @@ const Conversation = ({
   initial,
   isMobile,
   onRetry,
-  onQuizAnswer,
+  quizSelection,
+  onQuizSelect,
+  onQuizSubmit,
   latestResponseIndex,
   latestResponseRef,
 }: {
@@ -515,8 +516,12 @@ const Conversation = ({
   initial?: React.ReactElement
   isMobile: boolean
   onRetry?: (index: number) => void
-  /** Sends the answer to a quiz in the latest message as a user message. */
-  onQuizAnswer?: (answer: QuizAnswer, text: string) => void
+  /** The options picked in the quiz of the latest message. */
+  quizSelection?: QuizSelection | null
+  /** Picks options in a quiz of the latest message. */
+  onQuizSelect?: (selection: QuizSelection) => void
+  /** Sends the picked options, with the text in the chat box, as the answer. */
+  onQuizSubmit?: () => void
   latestResponseIndex: number | null
   latestResponseRef: React.RefObject<HTMLDivElement | null>
 }) => {
@@ -555,7 +560,9 @@ const Conversation = ({
             <QuizAnswerProvider
               key={idx}
               answer={next?.role === 'user' ? next.quizAnswer : undefined}
-              onAnswer={isLast && !isStreaming ? onQuizAnswer : undefined}
+              selection={isLast && !isStreaming ? quizSelection : undefined}
+              onSelect={isLast && !isStreaming ? onQuizSelect : undefined}
+              onSubmit={isLast && !isStreaming ? onQuizSubmit : undefined}
               closed={!isLast}
             >
               <MessageItem

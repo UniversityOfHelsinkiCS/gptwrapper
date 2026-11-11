@@ -218,7 +218,11 @@ studentTest.describe('Quiz card', () => {
     await card.getByRole('radio', { name: '4', exact: true }).focus()
     await page.keyboard.press('ArrowDown')
     await expect(card.getByRole('radio', { name: '7', exact: true })).toBeChecked()
-    await card.getByRole('textbox', { name: 'Your reasoning (optional)' }).fill('It has no other divisors')
+    // The card has no text field: the explanation is written in the chat box, which asks for it
+    await expect(card.getByRole('textbox')).toHaveCount(0)
+    const chatInput = page.getByTestId('chat-input')
+    await expect(chatInput).toHaveAttribute('placeholder', 'Why did you pick this? (optional)')
+    await chatInput.fill('It has no other divisors')
     await submit.click()
 
     await expect(card).toHaveAttribute('data-quiz-state', 'answered')
@@ -226,6 +230,10 @@ studentTest.describe('Quiz card', () => {
     await expect(card.getByTestId('quiz-result')).toContainText('Correct!')
     await expect(card.getByTestId('quiz-result')).toContainText('7 is only divisible by 1 and itself')
     await expect(card.getByRole('radio', { name: /^7/ })).toBeDisabled()
+    await expect(card.getByTestId('quiz-explanation')).toContainText('It has no other divisors')
+    await expect(card.getByTestId('quiz-result')).toBeFocused()
+    await expect(chatInput).toHaveValue('')
+    await expect(chatInput).toHaveAttribute('placeholder', 'Type your message here...')
 
     // The answer is sent as a user message and the agent continues
     await expect(page.getByTestId('user-message')).toHaveCount(1)
@@ -251,15 +259,45 @@ studentTest.describe('Quiz card', () => {
     await expect(group.getByRole('checkbox', { name: '2', exact: true })).not.toBeChecked()
     await expect(group.getByRole('checkbox', { name: '4', exact: true })).not.toBeChecked()
 
-    const explanation = card.getByRole('textbox', { name: 'Your reasoning (optional)' })
-    await expect(explanation).toHaveAttribute('placeholder', 'What part is unclear?')
-    await explanation.fill('What does even mean?')
-    await card.getByRole('button', { name: 'Submit answer' }).click()
+    // Send in the chat box answers the quiz too, with the chat box text as what is unclear
+    const chatInput = page.getByTestId('chat-input')
+    await expect(chatInput).toHaveAttribute('placeholder', 'What part is unclear? (optional)')
+    await chatInput.fill('What does even mean?')
+    await page.getByTestId('send-chat-message').click()
 
     await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'idk')
     await expect(card.getByTestId('quiz-result')).toContainText('No problem, here is the answer.')
     await expect(page.getByTestId('user-message')).toHaveCount(1)
     await expect(page.getByTestId('assistant-message').nth(1)).toContainText('Result: did not know.')
+    await expect(card.getByTestId('quiz-explanation')).toContainText('What does even mean?')
+  })
+
+  studentTest('Send with an empty chat box answers a quiz without explanation, and without a picked option the text is a message', async ({ page }) => {
+    await sendChatMessage(page, 'quiz')
+    await closeSendPreference(page)
+
+    const card = page.getByTestId('quiz-card')
+    const chatInput = page.getByTestId('chat-input')
+    const send = page.getByTestId('send-chat-message')
+    await expect(chatInput).toHaveAttribute('placeholder', 'Type your message here...')
+    await expect(send).toBeDisabled()
+
+    await card.getByRole('radio', { name: '7', exact: true }).check()
+    await expect(send).toBeEnabled()
+    await send.click()
+    await expect(card).toHaveAttribute('data-quiz-state', 'answered')
+    await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'correct')
+    await expect(card.getByTestId('quiz-explanation')).toHaveCount(0)
+    await expect(page.getByTestId('assistant-message').nth(1)).toContainText('Thanks for answering the quiz! Result: correct.')
+
+    // A new quiz left unanswered: a typed message is an ordinary message and the quiz is not answered
+    await sendChatMessage(page, 'quiz')
+    const second = page.getByTestId('quiz-card').nth(1)
+    await expect(second).toHaveAttribute('data-quiz-state', 'open')
+    await sendChatMessage(page, 'never mind')
+    await expect(second).toHaveAttribute('data-quiz-state', 'closed')
+    await expect(second).toContainText('Not answered')
+    await expect(page.getByTestId('user-message').last()).toContainText('never mind')
   })
 
   studentTest('regenerating the reply to an answer keeps the quiz answered, and a new quiz is open again', async ({ page }) => {
@@ -269,7 +307,7 @@ studentTest.describe('Quiz card', () => {
     const card = page.getByTestId('quiz-card')
     await card.getByRole('radio', { name: '4', exact: true }).check()
     // The mock model fails its reply to an answer whose explanation contains `fail`
-    await card.getByRole('textbox', { name: 'Your reasoning (optional)' }).fill('fail this reply')
+    await page.getByTestId('chat-input').fill('fail this reply')
     await card.getByRole('button', { name: 'Submit answer' }).click()
     await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'incorrect')
 

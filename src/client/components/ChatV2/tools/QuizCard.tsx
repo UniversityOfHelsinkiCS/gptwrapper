@@ -2,7 +2,8 @@ import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline'
 import HelpOutline from '@mui/icons-material/HelpOutline'
 import HighlightOff from '@mui/icons-material/HighlightOff'
 import Quiz from '@mui/icons-material/Quiz'
-import { Box, Checkbox, type Theme, FormControlLabel, FormGroup, Radio, RadioGroup, TextField, Typography } from '@mui/material'
+import { Box, Checkbox, type Theme, FormControlLabel, FormGroup, Radio, RadioGroup, Typography } from '@mui/material'
+import { visuallyHidden } from '@mui/utils'
 import { useEffect, useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
@@ -10,7 +11,7 @@ import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import type { ToolPart } from '../../../../shared/agentChat'
-import { parseQuiz, type Quiz as QuizInput, QUIZ_IDK, type QuizAnswer, quizOutcome, type QuizOutcome, type QuizResult } from '../../../../shared/quiz'
+import { parseQuiz, type Quiz as QuizInput, QUIZ_IDK, quizOutcome, type QuizOutcome, type QuizResult } from '../../../../shared/quiz'
 import { accessibleTextColor } from '../../../theme'
 import { optionFocusIndicatorStyle } from '../../../util/accessibility'
 import { BlueButton } from '../general/Buttons'
@@ -46,44 +47,40 @@ const toggleOption = (selected: string[], id: string, multiSelect: boolean): str
 }
 
 /**
- * One multiple-choice question from `present_quiz`, with an "I don't know" option, an optional explanation and
- * Submit. Submit locks the card, shows right or wrong and the explanation from the tool's result (no model call)
- * and sends the answer as a user message. The answered state comes from that message, so it survives a reload.
+ * One multiple-choice question from `present_quiz`, with an "I don't know" option and Submit. The student explains
+ * their answer in the chat box, and Submit (or sending from the chat box) sends the picked options with that text
+ * as a user message. The card then shows right or wrong and the explanation from the tool's result (no model call).
+ * The answered state comes from that message, so it survives a reload.
  */
 export const QuizCard = ({ part, quiz }: { part: ToolPart; quiz: QuizInput }) => {
   const { t } = useTranslation()
-  const { answer: sentAnswer, onAnswer, closed } = useQuizAnswer()
-  const [selected, setSelected] = useState<string[]>([])
-  const [explanation, setExplanation] = useState('')
-  const [submitted, setSubmitted] = useState<QuizAnswer | null>(null)
+  const { answer: sentAnswer, selection, onSelect, onSubmit, closed } = useQuizAnswer()
+  const [submitted, setSubmitted] = useState(false)
   const resultRef = useRef<HTMLDivElement>(null)
   const titleId = useId()
   const questionId = useId()
+  const submitDescriptionId = useId()
 
-  const answer = sentAnswer?.callId === part.callId ? sentAnswer : submitted
-  const locked = answer !== null || !onAnswer
+  const answer = sentAnswer?.callId === part.callId ? sentAnswer : null
+  const locked = answer !== null || !onSelect
+  const selected = !locked && selection?.callId === part.callId ? selection.selected : []
   const shownSelected = answer?.selected ?? selected
-  const isIdk = shownSelected.includes(QUIZ_IDK)
   const result = isQuizResult(part.result) ? part.result : null
   const outcome = answer && result ? quizOutcome(result.correct, answer.selected) : null
 
   // Submit removes the button, so focus moves to the result, which a screen reader then reads.
   useEffect(() => {
-    if (submitted) resultRef.current?.focus()
-  }, [submitted])
+    if (submitted && outcome) resultRef.current?.focus()
+  }, [submitted, outcome])
 
   const options = [...quiz.options, { id: QUIZ_IDK, text: t('chat:quizIdk') }]
-  const optionLabel = (id: string) => options.find((option) => option.id === id)?.text ?? id
+
+  const select = (id: string) => onSelect?.({ callId: part.callId, selected: toggleOption(selected, id, quiz.multiSelect) })
 
   const handleSubmit = () => {
     if (locked || selected.length === 0) return
-    const trimmed = explanation.trim()
-    const newAnswer: QuizAnswer = { callId: part.callId, selected, ...(trimmed ? { explanation: trimmed } : {}) }
-    const text = [t('chat:quizAnswerMessage', { answer: selected.map(optionLabel).join(', '), interpolation: { escapeValue: false } }), trimmed]
-      .filter(Boolean)
-      .join('\n\n')
-    setSubmitted(newAnswer)
-    onAnswer?.(newAnswer, text)
+    setSubmitted(true)
+    onSubmit?.()
   }
 
   const optionLabelContent = (id: string, text: string) => {
@@ -120,15 +117,13 @@ export const QuizCard = ({ part, quiz }: { part: ToolPart; quiz: QuizInput }) =>
       sx={{ ...optionFocusIndicatorStyle(), my: 0.25, '& .MuiFormControlLabel-label.Mui-disabled': { color: 'text.primary' } }}
       control={
         quiz.multiSelect ? (
-          <Checkbox checked={shownSelected.includes(option.id)} onChange={() => setSelected((value) => toggleOption(value, option.id, true))} />
+          <Checkbox checked={shownSelected.includes(option.id)} onChange={() => select(option.id)} />
         ) : (
           <Radio checked={shownSelected.includes(option.id)} />
         )
       }
     />
   ))
-
-  const shownExplanation = answer ? answer.explanation ?? '' : explanation
 
   return (
     <Box
@@ -153,31 +148,29 @@ export const QuizCard = ({ part, quiz }: { part: ToolPart; quiz: QuizInput }) =>
           {optionControls}
         </FormGroup>
       ) : (
-        <RadioGroup aria-labelledby={questionId} value={shownSelected[0] ?? ''} onChange={(event) => setSelected([event.target.value])}>
+        <RadioGroup aria-labelledby={questionId} value={shownSelected[0] ?? ''} onChange={(event) => select(event.target.value)}>
           {optionControls}
         </RadioGroup>
       )}
 
-      {(!locked || shownExplanation) && (
-        <TextField
-          label={t('chat:quizExplanationLabel')}
-          placeholder={isIdk ? t('chat:quizUnclearPlaceholder') : t('chat:quizExplanationPlaceholder')}
-          value={shownExplanation}
-          onChange={(event) => setExplanation(event.target.value)}
-          disabled={locked}
-          multiline
-          minRows={2}
-          fullWidth
-          size="small"
-          sx={{ mt: 1.5 }}
-          slotProps={{ htmlInput: { 'data-testid': 'quiz-explanation-input', maxLength: 10_000 } }}
-        />
+      {answer?.explanation && (
+        <Typography data-testid="quiz-explanation" variant="body2" sx={{ mt: 1.5, whiteSpace: 'pre-wrap' }}>
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            {t('chat:quizYourComment')}:
+          </Box>{' '}
+          {answer.explanation}
+        </Typography>
       )}
 
       {!locked && (
-        <BlueButton data-testid="quiz-submit" onClick={handleSubmit} disabled={selected.length === 0} sx={{ mt: 1.5 }}>
-          {t('chat:quizSubmit')}
-        </BlueButton>
+        <>
+          <BlueButton data-testid="quiz-submit" onClick={handleSubmit} disabled={selected.length === 0} aria-describedby={submitDescriptionId} sx={{ mt: 1.5 }}>
+            {t('chat:quizSubmit')}
+          </BlueButton>
+          <Box id={submitDescriptionId} sx={visuallyHidden}>
+            {t('chat:quizSubmitDescription')}
+          </Box>
+        </>
       )}
 
       {outcome && result && (

@@ -15,7 +15,7 @@ import {
 } from '../../../config'
 import type { MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
-import type { QuizAnswer } from '@shared/quiz'
+import { QUIZ_IDK, type QuizAnswer } from '@shared/quiz'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { useChatScroll } from './useChatScroll'
 import useCourse from '../../hooks/useCourse'
@@ -25,7 +25,8 @@ import useUserStatus from '../../hooks/useUserStatus'
 import { invalidateUserUsage } from '../../hooks/useUserUsage'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import sidebarOpen from '../../assets/sidebar-open.svg'
-import { ChatBox } from './ChatBox'
+import { ChatBox, type ChatBoxActions } from './ChatBox'
+import { findQuiz, quizAnswerMessage, type QuizSelection } from './tools/quizAnswerContext'
 import { OutlineButtonBlack } from './general/Buttons'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
@@ -130,6 +131,9 @@ const ChatV2Content = () => {
   const [hasChanges, setHasChanges] = useState(false)
   const [cacheKey, setCacheKey] = useState('')
   const [endState, setEndState] = useState<'none' | 'canceled' | 'error'>('none')
+  // Options picked in the quiz of the latest message. The card and the chat box both use them: sending from either
+  // answers the quiz with the chat box text as the explanation. Only valid while that message is still the latest.
+  const [quizSelection, setQuizSelection] = useState<(QuizSelection & { messageIndex: number }) | null>(null)
 
   // Analytics
   const dispatchAnalytics = useAnalyticsDispatch()
@@ -147,6 +151,7 @@ const ChatV2Content = () => {
   // Refs
   const chatContainerRef = useRef<HTMLDivElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const chatBoxRef = useRef<ChatBoxActions>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const sendSeq = useRef(0) // increments per send attempt, for admin timing logs
   const armStreamTimeoutRef = useRef<(() => void) | null>(null)
@@ -187,7 +192,7 @@ const ChatV2Content = () => {
 
     const formData = new FormData()
 
-    // A quiz answer is sent from the quiz card; a file waiting in the chat box stays for the next message.
+    // A file waiting in the chat box stays for the next message, it is not sent with a quiz answer.
     const file = quizAnswer ? undefined : fileInputRef.current?.files?.[0]
 
     // Parse file content on client side and keep it separate from the message
@@ -403,6 +408,7 @@ const ChatV2Content = () => {
     setFileName('')
     setMessageWarning({})
     setEndState('none')
+    setQuizSelection(null)
     clearRetryTimeout()
     dispatchAnalytics({ type: 'RESET_CHAT' })
   }
@@ -415,9 +421,31 @@ const ChatV2Content = () => {
     document.getElementById('chat-input')?.focus()
   }
 
-  /** The quiz card sends the student's answer as a user message; `text` is what the message shows. */
-  const handleQuizAnswer = (answer: QuizAnswer, text: string) => {
-    handleSendMessage(text, false, [], undefined, answer)
+  const lastMessage = messages.at(-1)
+  const openQuizSelection =
+    quizSelection &&
+    quizSelection.selected.length > 0 &&
+    !isStreaming &&
+    quizSelection.messageIndex === messages.length - 1 &&
+    lastMessage?.role === 'assistant'
+      ? quizSelection
+      : null
+  const openQuiz = openQuizSelection && lastMessage?.role === 'assistant' ? findQuiz(lastMessage.parts, openQuizSelection.callId) : null
+  const quizPrompt = openQuiz && openQuizSelection ? (openQuizSelection.selected.includes(QUIZ_IDK) ? 'unclear' : 'reasoning') : null
+
+  const handleQuizSelect = useCallback((selection: QuizSelection) => setQuizSelection({ ...selection, messageIndex: messages.length - 1 }), [messages.length])
+  const handleQuizSubmit = useCallback(() => chatBoxRef.current?.submit(), [])
+
+  /** Sends the chat box text: as the explanation of the quiz answer while an option is picked, otherwise as a message. */
+  const handleChatBoxSubmit = (message: string) => {
+    if (!openQuizSelection || !openQuiz) {
+      handleSendMessage(message, false, [])
+      return
+    }
+    const explanation = message.trim().slice(0, 10_000)
+    const answer: QuizAnswer = { callId: openQuizSelection.callId, selected: openQuizSelection.selected, ...(explanation ? { explanation } : {}) }
+    setQuizSelection(null)
+    handleSendMessage(quizAnswerMessage(openQuiz, answer, t), false, [], undefined, answer)
   }
 
   const handleRetry = (messageIndex: number) => {
@@ -665,7 +693,9 @@ const ChatV2Content = () => {
               setActiveToolResults={canShowToolResults ? openToolResults : undefined}
               isMobile={isMobile}
               onRetry={handleRetry}
-              onQuizAnswer={handleQuizAnswer}
+              quizSelection={openQuizSelection}
+              onQuizSelect={handleQuizSelect}
+              onQuizSubmit={handleQuizSubmit}
               latestResponseIndex={latestResponseIndex}
               latestResponseRef={latestResponseRef}
             />
@@ -694,9 +724,7 @@ const ChatV2Content = () => {
                   handleSendMessage('', true, ignoredWarnings)
                   document.getElementById('chat-input')?.focus()
                 }}
-                handleSubmit={(newMessage) => {
-                  handleSendMessage(newMessage, false, [])
-                }}
+                handleSubmit={handleChatBoxSubmit}
                 handleReset={handleResetRequest}
                 handleStop={() => {
                   streamControllerRef.current?.abort('user_aborted')
@@ -707,6 +735,8 @@ const ChatV2Content = () => {
                 setModel={setActiveModel}
                 isNewResponseAvailable={isNewResponseAvailable}
                 onGoToLatestResponse={handleGoToLatestResponse}
+                quizPrompt={quizPrompt}
+                actionsRef={chatBoxRef}
               />
             </Box>
           </Box>

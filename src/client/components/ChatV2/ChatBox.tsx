@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useImperativeHandle, useState } from 'react'
 import { focusVisibleOutline } from '../../theme'
 import Send from '@mui/icons-material/Send'
 import StopIcon from '@mui/icons-material/Stop'
@@ -48,6 +48,14 @@ const skipLinkSx = {
   },
 }
 
+/** What the chat box asks for while an option is picked in the open quiz: sending then answers the quiz with the text as the explanation. */
+export type QuizPrompt = 'reasoning' | 'unclear'
+
+export type ChatBoxActions = {
+  /** Sends the text in the chat box as if Send was pressed, without moving focus to the chat box. */
+  submit: () => void
+}
+
 export const ChatBox = ({
   disabled,
   isTokenLimitExceeded,
@@ -65,6 +73,8 @@ export const ChatBox = ({
   setModel,
   isNewResponseAvailable,
   onGoToLatestResponse,
+  quizPrompt,
+  actionsRef,
 }: {
   disabled: boolean
   isTokenLimitExceeded: boolean
@@ -82,6 +92,9 @@ export const ChatBox = ({
   setModel: (model: ValidModelName) => void
   isNewResponseAvailable: boolean
   onGoToLatestResponse: () => void
+  /** Set while an option is picked in the open quiz. The message may then be empty. */
+  quizPrompt?: QuizPrompt | null
+  actionsRef?: React.Ref<ChatBoxActions>
 }) => {
   const { courseId } = useParams()
   const isEmbedded = useIsEmbedded()
@@ -96,7 +109,8 @@ export const ChatBox = ({
   const textFieldRef = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState<string>('')
 
-  const acuallyDisabled = disabled || message.length === 0
+  // A quiz answer can be sent without an explanation
+  const acuallyDisabled = disabled || (message.length === 0 && !quizPrompt)
 
   const { t } = useTranslation()
 
@@ -142,9 +156,7 @@ export const ChatBox = ({
     setFileAnnouncement(t('accessibility:fileAttached', { file: file.name }))
   }
 
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
+  const send = ({ focusInput }: { focusInput: boolean }) => {
     if (acuallyDisabled) return
 
     handleSubmit(message)
@@ -155,10 +167,19 @@ export const ChatBox = ({
       setSendPreferenceConfiguratorOpen(true)
     }
 
-    if (textFieldRef.current) {
+    if (focusInput && textFieldRef.current) {
       textFieldRef.current.focus()
     }
   }
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    send({ focusInput: true })
+  }
+
+  useImperativeHandle(actionsRef, () => ({ submit: () => send({ focusInput: false }) }))
+
+  const quizPromptText = quizPrompt === 'unclear' ? t('chat:quizUnclearPrompt') : quizPrompt === 'reasoning' ? t('chat:quizReasoningPrompt') : undefined
 
   const activeMessageWarnings = Object.values(messageWarning).filter((warning) => !warning.ignored)
 
@@ -251,13 +272,18 @@ export const ChatBox = ({
             <Box id="chat-input-instructions" sx={visuallyHidden}>
               {isShiftEnterSend ? t('accessibility:sendInstructionsShiftEnter') : t('accessibility:sendInstructionsEnter')}
             </Box>
+            {quizPrompt && (
+              <Box id="chat-input-quiz-prompt" sx={visuallyHidden}>
+                {quizPromptText}
+              </Box>
+            )}
             <TextField
               autoFocus={!isEmbedded}
               id="chat-input"
               inputRef={textFieldRef}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder={t('chat:writeHere')}
+              placeholder={quizPromptText ?? t('chat:writeHere')}
               fullWidth
               multiline
               data-sentry-mask
@@ -268,7 +294,7 @@ export const ChatBox = ({
                 htmlInput: {
                   'data-testid': 'chat-input',
                   'aria-label': t('chat:messageLabel'),
-                  'aria-describedby': 'chat-input-instructions',
+                  'aria-describedby': quizPrompt ? 'chat-input-quiz-prompt chat-input-instructions' : 'chat-input-instructions',
                 },
                 input: {
                   disableUnderline: true,

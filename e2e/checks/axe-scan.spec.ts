@@ -225,6 +225,8 @@ test.describe('axe wcag scan for chat with a quiz card', () => {
     const card = page.getByTestId('quiz-card')
     await expect(card).toHaveAttribute('data-quiz-state', 'open')
     await card.getByRole('radio', { name: '7', exact: true }).check()
+    // The explanation is written in the chat box, which asks for it once an option is picked
+    await page.getByTestId('chat-input').fill('It has no other divisors')
     await page.mouse.move(0, 0)
     await expect(page.getByRole('tooltip')).toHaveCount(0)
     await scan(page, `${testInfo.title} (open)`)
@@ -232,6 +234,7 @@ test.describe('axe wcag scan for chat with a quiz card', () => {
     await card.getByRole('button', { name: 'Submit answer' }).click()
     await expect(page.getByTestId('assistant-message').nth(1)).toContainText('Thanks for answering the quiz!')
     await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'correct')
+    await expect(card.getByTestId('quiz-explanation')).toBeVisible()
     await page.mouse.move(0, 0)
     await expect(page.getByRole('tooltip')).toHaveCount(0)
     await scan(page, `${testInfo.title} (answered)`)
