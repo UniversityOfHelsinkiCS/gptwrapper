@@ -20,7 +20,7 @@ describe('ModelConfig.reasoning per provider', () => {
     expect(reasoningParam(getAzureChatOpenAI('gpt-6-luna', true, { effort: 'medium', showSummary: true }))).toEqual({ effort: 'medium', summary: 'auto' })
   })
 
-  test('Toska (Responses API) gets the model name, and the reasoning options like Azure', () => {
+  test('Toska gets the model name, and the reasoning options like Azure', () => {
     const paramsOf = (model: ReturnType<typeof getToskaProvider>) => model.invocationParams() as { model?: string; reasoning?: unknown }
 
     expect(paramsOf(getToskaProvider('gemma-4-26B-A4B')).model).toBe('gemma-4-26B-A4B')

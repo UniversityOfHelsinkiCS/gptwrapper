@@ -140,6 +140,24 @@ describe('mapStreamChunk reasoning with captured Azure runs', () => {
 
     expect(reasoningOf(eventsOf(chunks))).toBe('**First**\n\n**Second**')
   })
+
+  test('Chat Completions reasoning_content (llama.cpp / Toska) becomes reasoning deltas before the text', () => {
+    const chunk = (fields: { content?: string; reasoning?: string }) =>
+      new AIMessageChunk({
+        content: fields.content ?? '',
+        additional_kwargs: fields.reasoning !== undefined ? { reasoning_content: fields.reasoning } : {},
+        response_metadata: { model_provider: 'openai' },
+      })
+    const chunks: StreamChunk[] = [chunk({ reasoning: 'Is 91 ' }), chunk({ reasoning: 'prime?' }), chunk({ content: 'No, 7 × 13.' })].map((c) => [
+      ['model_request:x'],
+      'messages',
+      [c, {}],
+    ])
+
+    const events = eventsOf(chunks)
+    expect(reasoningOf(events)).toBe('Is 91 prime?')
+    expect(events.map((event) => event.type)).toEqual(['reasoning.delta', 'reasoning.delta', 'text.delta'])
+  })
 })
 
 describe('mapStreamChunk with Gemini runs (synthetic Vertex replay)', () => {

@@ -112,6 +112,12 @@ const isCompletedResponse = (message: AIMessage): boolean => Array.isArray(messa
 const deltasOf = (message: AIMessage): { type: DeltaType; text: string }[] => {
   const deltas: { type: DeltaType; text: string }[] = startsLaterSummaryPart(message) ? [{ type: 'reasoning.delta', text: '\n\n' }] : []
   const skipReasoning = isCompletedResponse(message)
+  // Chat Completions servers such as llama.cpp (Toska) stream reasoning as `delta.reasoning_content`. LangChain keeps
+  // it in `additional_kwargs.reasoning_content`, but its OpenAI block translator does not turn it into a reasoning block.
+  const reasoningContent = message.additional_kwargs?.reasoning_content
+  if (typeof reasoningContent === 'string' && reasoningContent.length > 0 && !message.contentBlocks.some((block) => block.type === 'reasoning')) {
+    deltas.push({ type: 'reasoning.delta', text: reasoningContent })
+  }
   for (const block of message.contentBlocks) {
     if (block.type === 'reasoning' && skipReasoning) continue
     const delta =
