@@ -72,3 +72,55 @@ adminTest('the agent reads a specific page of an attached PDF', async ({ page })
     rmSync(root, { recursive: true, force: true })
   }
 })
+
+// The main agent delegates the PDF to the read_pdf subagent, whose own read_file call runs in the browser too.
+adminTest('the PDF reader subagent reads an attached PDF and the answer uses its result', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-pdf-reader-'))
+  try {
+    const folder = join(root, 'Course notes')
+    mkdirSync(folder, { recursive: true })
+    writeFileSync(
+      join(folder, 'book.pdf'),
+      makeTextPdf([['Chapter 1: Energy.'], ['Chapter 2: Entropy.', 'The exam is on Friday the 13th.'], ['Chapter 3: Heat engines.']]),
+    )
+
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+
+    await page.getByTestId('my-files-button').click()
+    const dialog = page.getByRole('dialog', { name: 'My files' })
+    await dialog.getByTestId('my-files-input-folder').setInputFiles(folder)
+    await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+    await dialog.getByTestId('my-files-close').click()
+    await page.getByTestId('attach-folders-button').click()
+    await page.getByRole('menuitemcheckbox', { name: 'Course notes' }).click()
+    await page.keyboard.press('Escape')
+    await expect(page.getByTestId('attached-folder')).toHaveAttribute('data-folder', 'Course notes')
+
+    // The mock subagent reads pages 1-2; the main agent's answer quotes what it answered
+    await sendChatMessage(page, 'pdfread Course notes/book.pdf')
+    await closeSendPreference(page)
+    const answer = page.getByTestId('assistant-message')
+    await expect(answer).toContainText('The PDF says (pages 1-2)')
+    await expect(answer).toContainText('The exam is on Friday the 13th.')
+
+    const card = page.getByTestId('subagent-card')
+    await expect(card).toHaveAttribute('data-subagent-name', 'read_pdf')
+    await expect(card).toHaveAttribute('data-subagent-status', 'ok')
+    await expect(card).toContainText('Task: Summarise the first pages')
+    await expect(card.getByTestId('subagent-progress')).toHaveCount(0)
+
+    // Its own tool call is nested in the card, which is collapsed by default
+    const toggle = card.getByRole('button', { name: 'Subagent read_pdf finished' })
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await expect(card.getByTestId('tool-part')).toHaveCount(0)
+    await toggle.click()
+    const nested = card.getByTestId('subagent-content').getByTestId('tool-part')
+    await expect(nested).toHaveCount(1)
+    await expect(nested).toHaveAttribute('data-tool-status', 'ok')
+    await expect(nested).toContainText('Read the file Course notes/book.pdf, pages 1–2 of 3')
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})

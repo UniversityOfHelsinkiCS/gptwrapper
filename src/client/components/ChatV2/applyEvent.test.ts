@@ -176,6 +176,21 @@ describe('applyEvent subagents', () => {
     ])
   })
 
+  test("keeps the latest progress of the subagent's own call while it runs, and drops it when it ends", () => {
+    const progress: ChatEvent = {
+      type: 'tool.progress',
+      path: [],
+      callId: SUB,
+      data: { action: 'read', path: 'a.pdf', startPage: 1, endPage: 5, totalPages: 40 },
+    }
+    const running = reduce([start, { type: 'tool.progress', path: [], callId: SUB, data: { action: 'read', path: 'a.pdf' } }, progress])
+    expect(running[0]).toMatchObject({ type: 'subagent', status: 'running', progress: progress.data })
+
+    const ended = applyEvent(running, { type: 'subagent.end', path: [], callId: SUB, status: 'ok' })
+    expect(ended[0]).not.toHaveProperty('progress')
+    expect(finishParts(running, 0)[0]).not.toHaveProperty('progress')
+  })
+
   test('a subagent started inside a subagent nests one level deeper', () => {
     const parts = reduce([
       start,

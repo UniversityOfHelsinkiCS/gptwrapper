@@ -68,6 +68,8 @@ export type SubagentPart = {
   task: string
   parts: AssistantPart[]
   status: ToolPartStatus
+  /** Latest `tool.progress` data of the subagent's own tool call, while it runs (for `read_pdf`, `ReadPdfProgress`). */
+  progress?: unknown
 }
 
 export type AssistantPart = TextPart | ReasoningPart | ToolPart | SubagentPart
@@ -81,6 +83,7 @@ const SubagentPartSchema: z.ZodType<SubagentPart> = z.object({
     return z.array(AssistantPartSchema)
   },
   status: PartStatusSchema,
+  progress: z.unknown().optional(),
 })
 
 export const AssistantPartSchema: z.ZodType<AssistantPart> = z.union([TextPartSchema, ReasoningPartSchema, ToolPartSchema, SubagentPartSchema])

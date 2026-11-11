@@ -10,6 +10,7 @@ export const basicTestContent = `### You are calling mock endpoint for streaming
 - To mock a quiz, write: **quiz** (or **quiz multi** for a multi-select quiz)
 - To mock reading My files, attach a folder and write: **files** followed by the folder name
 - To mock reading a page of a PDF in My files, write: **pdfpage** followed by the page (or range) and the path, e.g. pdfpage 2 Course notes/book.pdf
+- To mock delegating a PDF in My files to the PDF reader subagent, write: **pdfread** followed by the path (or **pdfread many** and the path, to reach the per-answer limit)
 - To mock writing a file into Outputs, write: **writeout** followed by the file name
 - To mock writing a note into Agent notes, write: **note** followed by the text of the note
 OVER
@@ -25,6 +26,35 @@ export const MOCK_PDF_PAGE_PREFIX = 'pdfpage '
 export const parseMockPdfPage = (message: string): { path: string; pages: string } | null => {
   const match = /^(\S+)\s+(.+)$/.exec(message.slice(MOCK_PDF_PAGE_PREFIX.length).trim())
   return match ? { pages: match[1], path: match[2] } : null
+}
+
+/**
+ * `pdfread <path>`: the mock model delegates the PDF to the `read_pdf` subagent (on for admins' socket runs with
+ * attached folders), whose mock reads pages 1-2 with `read_file` and answers with an excerpt. `pdfread many <path>`
+ * calls `read_pdf` again after each answer, one call more than the per-run limit allows.
+ */
+export const MOCK_PDF_READ_PREFIX = 'pdfread '
+export const MOCK_PDF_READ_MANY = 'many '
+
+/** The task the mock model gives `read_pdf`, and the pages its subagent reads. */
+export const mockPdfReadTask = 'Summarise the first pages'
+export const MOCK_PDF_READ_PAGES = '1-2'
+
+/** Token usage the mock PDF reader reports for each model call (not charged to the user). */
+export const mockPdfReaderUsage = { input_tokens: 30, output_tokens: 10, total_tokens: 40 }
+
+/** The `read_pdf` path and how many calls the mock model makes for a `pdfread` message. */
+export const parseMockPdfRead = (message: string): { path: string; calls: number } | null => {
+  const rest = message.slice(MOCK_PDF_READ_PREFIX.length).trim()
+  const many = rest.startsWith(MOCK_PDF_READ_MANY)
+  const path = (many ? rest.slice(MOCK_PDF_READ_MANY.length) : rest).trim()
+  return path ? { path, calls: many ? 4 : 1 } : null
+}
+
+/** The mock PDF reader's answer from what `read_file` returned. */
+export const mockPdfReaderAnswer = (content: string) => {
+  const flat = content.replace(/\s+/g, ' ').trim()
+  return `The PDF says (pages ${MOCK_PDF_READ_PAGES}): "${flat.length > 300 ? `${flat.slice(0, 300)}…` : flat}"`
 }
 
 /** `writeout <name>`: the mock model writes `Outputs/<name>` with `write_file`. */

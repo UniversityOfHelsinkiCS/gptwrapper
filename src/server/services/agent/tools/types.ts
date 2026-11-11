@@ -44,7 +44,14 @@ export type SubagentToolModule<Config = unknown> = ToolModuleBase<Config> & {
   kind: 'subagent'
   /** Text that replaces a subagent part of an earlier answer in the history sent to the model. */
   summarizeForHistory: (part: SubagentPart) => string
+  /**
+   * Most calls of this subagent in one run (plan section 6), `DEFAULT_SUBAGENT_CALLS_PER_RUN` by default. Further
+   * calls end as an error the model reads, so it answers with what it has.
+   */
+  maxCallsPerRun?: number
 }
+
+export const DEFAULT_SUBAGENT_CALLS_PER_RUN = 3
 
 type ToolModuleBase<Config> = {
   name: string

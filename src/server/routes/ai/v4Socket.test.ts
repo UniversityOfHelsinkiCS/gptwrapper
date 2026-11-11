@@ -334,6 +334,122 @@ const answerAsBrowser = (client: Awaited<ReturnType<typeof connect>>, request: T
 const toolRequest = (client: Awaited<ReturnType<typeof connect>>, name: string) =>
   client.waitFor((m) => m.type === 'tool.request' && m.name === name) as Promise<ToolRequest>
 
+const PDF_PATH = 'Course notes/book.pdf'
+const PDF_TEXT = '[Page 1]\nChapter 1: Energy.\n\n[Page 2]\nChapter 2: Entropy. The exam is on Friday the 13th.'
+
+/** Answers a `read_file` call of the PDF reader like the browser: pages 1-2 of a 40-page PDF. */
+const answerPdfRead = (client: Awaited<ReturnType<typeof connect>>, request: ToolRequest) =>
+  client.send({
+    type: 'tool.result',
+    runId: request.runId,
+    callId: request.callId,
+    result: {
+      status: 'ok',
+      content: PDF_TEXT,
+      artifact: { tool: 'read_file', path: PDF_PATH, startPage: 1, endPage: 2, totalPages: 40, excerpt: 'Chapter 1: Energy.' },
+    },
+  })
+
+/** The `read_file` requests so far. */
+const readRequests = (client: Awaited<ReturnType<typeof connect>>) =>
+  client.received.filter((m): m is ToolRequest => m.type === 'tool.request' && m.name === 'read_file')
+
+describe('the read_pdf subagent over the chat socket', () => {
+  const SUB = 'mock_read_pdf_id_1'
+
+  test('reads the PDF through the browser in its own agent, shows progress and nested calls, and the answer uses the result', async () => {
+    const client = await connect(adminHeaders)
+    client.send(runStart('1', `pdfread ${PDF_PATH}`, ['Course notes']))
+
+    // The subagent's own read_file call goes through the same bridge, under its own call id
+    const read = await toolRequest(client, 'read_file')
+    expect(read).toEqual({
+      type: 'tool.request',
+      runId: '1',
+      callId: 'mock_pdf_reader_read_file_id',
+      name: 'read_file',
+      input: { path: PDF_PATH, pages: '1-2' },
+    })
+    answerPdfRead(client, read)
+
+    expect((await client.runEnd('1')).result).toEqual({ status: 'completed' })
+    const events = client.eventsOf('1').filter((e) => e.type !== 'processing')
+    expect(events).toEqual([
+      { type: 'subagent.start', path: [], callId: SUB, name: 'read_pdf', task: 'Summarise the first pages' },
+      { type: 'tool.start', path: [SUB], callId: 'mock_pdf_reader_read_file_id', name: 'read_file', input: { path: PDF_PATH, pages: '1-2' } },
+      { type: 'tool.progress', path: [], callId: SUB, data: { action: 'read', path: PDF_PATH, startPage: 1, endPage: 2 } },
+      { type: 'tool.progress', path: [], callId: SUB, data: { action: 'read', path: PDF_PATH, startPage: 1, endPage: 2, totalPages: 40 } },
+      expect.objectContaining({
+        type: 'tool.end',
+        path: [SUB],
+        callId: 'mock_pdf_reader_read_file_id',
+        status: 'ok',
+        result: expect.objectContaining({ totalPages: 40 }),
+      }),
+      { type: 'text.delta', path: [SUB], text: expect.stringContaining('The PDF says (pages 1-2)') },
+      { type: 'subagent.end', path: [], callId: SUB, status: 'ok' },
+      { type: 'text.delta', path: [], text: expect.stringContaining('The exam is on Friday the 13th.') },
+      { type: 'usage', inputTokens: 0, outputTokens: 0 },
+    ])
+    expect(vi.mocked(runAgent).mock.calls[0][0].meta.tools).toEqual(expect.arrayContaining(['read_pdf', 'read_file']))
+    client.ws.close()
+  })
+
+  test("logs the subagent's tokens per tool and charges only the main agent's", async () => {
+    const client = await connect(adminHeaders)
+    client.send(runStart('1', `pdfread ${PDF_PATH}`, ['Course notes']))
+    answerPdfRead(client, await toolRequest(client, 'read_file'))
+    await client.runEnd('1')
+
+    // The mock PDF reader reports 30 + 10 tokens per model call; the main agent's mock calls report none.
+    const { meta } = vi.mocked(runAgent).mock.calls[0][0]
+    expect(meta).toMatchObject({ tokenCount: 0, modelCalls: 2, toolCalls: JSON.stringify(['read_pdf']) })
+    expect(JSON.parse(meta.subagentUsage as string)).toEqual({ read_pdf: { modelCalls: 2, inputTokens: 60, outputTokens: 20, toolCalls: ['read_file'] } })
+    expect(incrementUsage).toHaveBeenCalledTimes(1)
+    expect(vi.mocked(incrementUsage).mock.calls[0][1]).toBe(0)
+    client.ws.close()
+  })
+
+  test('a fourth call in one run is refused with an error the model reads, and the run goes on', async () => {
+    const client = await connect(adminHeaders)
+    client.send(runStart('1', `pdfread many ${PDF_PATH}`, ['Course notes']))
+    for (let n = 1; n <= 3; n++) {
+      await client.waitFor(() => readRequests(client).length >= n)
+      answerPdfRead(client, readRequests(client)[n - 1])
+    }
+
+    expect((await client.runEnd('1')).result).toEqual({ status: 'completed' })
+    const events = client.eventsOf('1')
+    expect(events.filter((e) => e.type === 'subagent.end')).toEqual([
+      { type: 'subagent.end', path: [], callId: 'mock_read_pdf_id_1', status: 'ok' },
+      { type: 'subagent.end', path: [], callId: 'mock_read_pdf_id_2', status: 'ok' },
+      { type: 'subagent.end', path: [], callId: 'mock_read_pdf_id_3', status: 'ok' },
+      { type: 'subagent.end', path: [], callId: 'mock_read_pdf_id_4', status: 'error' },
+    ])
+    // The fourth subagent never ran, so the browser got only three reads
+    expect(readRequests(client)).toHaveLength(3)
+    expect(events.some((e) => 'path' in e && e.path[0] === 'mock_read_pdf_id_4')).toBe(false)
+    expect(textOf(events.filter((e) => 'path' in e && e.path.length === 0))).toContain('read_pdf can be used at most 3 times per answer')
+    client.ws.close()
+  })
+
+  test('is not on without attached folders, nor for students', async () => {
+    const admin = await connect(adminHeaders)
+    admin.send(runStart('1', 'say hi', []))
+    await admin.runEnd('1')
+    const student = await connect()
+    student.send(runStart('2', 'say hi', ['Course notes']))
+    await student.runEnd('2')
+
+    expect(vi.mocked(runAgent).mock.calls.map(([params]) => params.meta.tools)).toEqual([
+      expect.not.arrayContaining(['read_pdf']),
+      expect.not.arrayContaining(['read_pdf']),
+    ])
+    admin.ws.close()
+    student.ws.close()
+  })
+})
+
 describe('client-executed tools over the chat socket', () => {
   test('the agent lists and reads attached files through tool.request and tool.result', async () => {
     const client = await connect(adminHeaders)

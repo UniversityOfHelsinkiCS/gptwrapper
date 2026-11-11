@@ -7,7 +7,10 @@ vi.mock('../../langchain/fileSearchResultsStore', () => ({ ToolResultStore: { sa
 vi.mock('../../../util/logger', () => ({ default: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }))
 
 import { documentSearch, toDocumentSearchResult } from './documentSearch'
-import { historyMessageToText, listToolModules, withToolInstructions } from './registry'
+import { mockSubagent } from './mockSubagent'
+import { readPdf } from './readPdf'
+import { historyMessageToText, listToolModules, subagentCallLimits, withToolInstructions } from './registry'
+import { listAddableTools } from './promptTools'
 import en from '../../../../client/locales/en.json'
 import fi from '../../../../client/locales/fi.json'
 import sv from '../../../../client/locales/sv.json'
@@ -115,6 +118,51 @@ describe('prompt options of the tools', () => {
     for (const key of keys) {
       const [namespace, name] = key.split(':')
       expect((locale as unknown as Record<string, Record<string, unknown>>)[namespace]?.[name], key).toBeTruthy()
+    }
+  })
+})
+
+describe('read_pdf in the registry', () => {
+  test('is a subagent with no prompt option, so GET /api/tools never lists it', () => {
+    expect(listToolModules().find((module) => module.name === 'read_pdf')).toMatchObject({ kind: 'subagent', stage: 'experimental' })
+    expect(readPdf.promptOption).toBeUndefined()
+    expect(listAddableTools({ isAdmin: true } as any).map((tool) => tool.name)).not.toContain('read_pdf')
+  })
+
+  test('summarises an earlier call with the PDF it read, its task and an excerpt of its answer', () => {
+    const part: SubagentPart = {
+      type: 'subagent',
+      callId: 'call_pdf',
+      name: 'read_pdf',
+      task: 'Find the exam date',
+      status: 'ok',
+      parts: [
+        { type: 'tool', callId: 'r1', name: 'read_file', input: { path: 'Course notes/book.pdf', pages: '1-5' }, status: 'ok', result: { tool: 'read_file' } },
+        { type: 'text', text: 'The exam is on Friday the 13th (p. 2).' },
+      ],
+    }
+    expect(readPdf.summarizeForHistory(part)).toBe(
+      '[Asked the subagent read_pdf about "Course notes/book.pdf": "Find the exam date". It answered (excerpt): "The exam is on Friday the 13th (p. 2)."]',
+    )
+  })
+})
+
+describe('subagentCallLimits', () => {
+  test('caps every enabled subagent tool at 3 calls per run by default, and no other tools', () => {
+    expect(subagentCallLimits([{ name: 'mock_subagent' }, { name: 'read_pdf' }, { name: 'read_file' }, { name: 'present_quiz' }])).toEqual(
+      new Map([
+        ['mock_subagent', 3],
+        ['read_pdf', 3],
+      ]),
+    )
+  })
+
+  test("uses the module's own maxCallsPerRun", () => {
+    mockSubagent.maxCallsPerRun = 1
+    try {
+      expect(subagentCallLimits([{ name: 'mock_subagent' }])).toEqual(new Map([['mock_subagent', 1]]))
+    } finally {
+      delete mockSubagent.maxCallsPerRun
     }
   })
 })

@@ -2,6 +2,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, type Page } from '@playwright/test'
+import { makeTextPdf } from '../../src/test/pdfFixtures'
 import { studentTest as test, teacherTest, adminTest } from '../fixtures'
 import { scan, writeAxeReport } from '../axe/axe_utils'
 import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from '../utils/test-helpers'
@@ -451,6 +452,47 @@ adminTest.describe('axe wcag scan for chat with attached folders', () => {
       await expect(page.getByTestId('assistant-message')).toContainText('The exam is on Friday.')
       await expect(page.getByTestId('tool-part')).toHaveCount(2)
       await expect(page.getByTestId('attached-folder')).toBeVisible()
+      await page.mouse.move(0, 0)
+      await expect(page.getByRole('tooltip')).toHaveCount(0)
+      await scan(page, testInfo.title)
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+})
+
+adminTest.describe('axe wcag scan for chat with the PDF reader subagent', () => {
+  adminTest.afterAll(writeAxeReport)
+
+  adminTest('scan chat answer with a collapsed PDF reader card', async ({ page }, testInfo) => {
+    const root = mkdtempSync(join(tmpdir(), 'axe-pdf-reader-'))
+    try {
+      mkdirSync(join(root, 'Course notes'), { recursive: true })
+      writeFileSync(join(root, 'Course notes', 'book.pdf'), makeTextPdf([['Chapter 1: Energy.'], ['The exam is on Friday.']]))
+
+      await page.goto('/test-course-course-id')
+      await acceptDisclaimer(page)
+      await useMockModel(page)
+      await page.getByTestId('my-files-button').click()
+      const dialog = page.getByRole('dialog', { name: 'My files' })
+      await dialog.getByTestId('my-files-input-folder').setInputFiles(join(root, 'Course notes'))
+      await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+      await dialog.getByTestId('my-files-close').click()
+      await expect(dialog).toBeHidden()
+
+      await page.getByTestId('attach-folders-button').click()
+      await page.getByRole('menuitemcheckbox', { name: 'Course notes' }).click()
+      await page.keyboard.press('Escape')
+      await expect(page.getByRole('menu')).toBeHidden()
+
+      // The mock model delegates the PDF to read_pdf, whose subagent reads it in the browser
+      await sendChatMessage(page, 'pdfread Course notes/book.pdf')
+      await closeSendPreference(page)
+      await expect(page.getByTestId('assistant-message')).toContainText('The exam is on Friday.')
+      const card = page.getByTestId('subagent-card')
+      await expect(card).toHaveAttribute('data-subagent-status', 'ok')
+      // Collapsed, with no popover or tooltip open during the scan
+      await expect(card.getByRole('button', { name: 'Subagent read_pdf finished' })).toHaveAttribute('aria-expanded', 'false')
       await page.mouse.move(0, 0)
       await expect(page.getByRole('tooltip')).toHaveCount(0)
       await scan(page, testInfo.title)

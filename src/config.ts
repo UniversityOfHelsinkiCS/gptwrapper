@@ -245,6 +245,12 @@ export const FREE_MODEL = ValidModelNameSchema.parse(process.env.FREE_MODEL || '
 
 if (!isFreeModel(FREE_MODEL)) throw new Error(`FREE_MODEL ${FREE_MODEL} must be tagged 'free'`)
 
+/**
+ * Model of the `read_pdf` subagent, independent of the chat model: by default the local Toska model, whose tokens
+ * cost nothing. Chats with the mock model use the mock model for the subagent too (tests).
+ */
+export const PDF_READER_MODEL = ValidModelNameSchema.parse(process.env.PDF_READER_MODEL || 'gemma-4-26B-A4B')
+
 export const DEFAULT_ASSISTANT_INSTRUCTIONS = '' // 11th August 2025 we decided it should be empty
 
 export const DEFAULT_MODEL_TEMPERATURE = 1.0

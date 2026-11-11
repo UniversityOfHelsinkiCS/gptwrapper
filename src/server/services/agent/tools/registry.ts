@@ -4,11 +4,12 @@ import { documentSearch } from './documentSearch'
 import { fileTools } from './fileTools'
 import { mockSubagent } from './mockSubagent'
 import { presentQuiz } from './presentQuiz'
+import { readPdf } from './readPdf'
 import { summarizeSubagentPart } from './subagent'
-import type { EnabledTool, ToolContext, ToolModule } from './types'
+import { DEFAULT_SUBAGENT_CALLS_PER_RUN, type EnabledTool, type ToolContext, type ToolModule } from './types'
 
 /** Every tool the agent can use. The client has a matching registry of renderers (`ChatV2/tools/registry.tsx`). */
-const TOOL_MODULES: ToolModule<any>[] = [documentSearch, mockSubagent, presentQuiz, ...fileTools]
+const TOOL_MODULES: ToolModule<any>[] = [documentSearch, mockSubagent, presentQuiz, ...fileTools, readPdf]
 
 const toolModules = new Map(TOOL_MODULES.map((module) => [module.name, module]))
 
@@ -26,6 +27,18 @@ export const createTools = (enabled: EnabledTool[], ctx: Omit<ToolContext, 'conf
     if (module.returnDirect) created.returnDirect = true
     return created
   })
+
+/**
+ * The per-run call limit of each enabled subagent tool (plan section 6): its module's `maxCallsPerRun`,
+ * `DEFAULT_SUBAGENT_CALLS_PER_RUN` by default. For `callLimitMiddleware`.
+ */
+export const subagentCallLimits = (enabled: EnabledTool[]): Map<string, number> =>
+  new Map(
+    enabled.flatMap(({ name }) => {
+      const module = getToolModule(name)
+      return module?.kind === 'subagent' ? [[name, module.maxCallsPerRun ?? DEFAULT_SUBAGENT_CALLS_PER_RUN] as const] : []
+    }),
+  )
 
 /** The system message followed by the `instructions` of the enabled tools, each under a `## Tool: <name>` heading. */
 export const withToolInstructions = (systemMessage: string, enabled: EnabledTool[]): string => {

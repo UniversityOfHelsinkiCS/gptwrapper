@@ -43,7 +43,8 @@ const stopRunning = (parts: AssistantPart[], status: 'ok' | 'error', now: number
       const nested = stopRunning(part.parts, status, now)
       if (nested === part.parts && part.status !== 'running') return part
       changed = true
-      return { ...part, parts: nested, status: part.status === 'running' ? status : part.status }
+      const { progress: _progress, ...rest } = part
+      return { ...rest, parts: nested, status: part.status === 'running' ? status : part.status }
     }
     return part
   })
@@ -97,8 +98,11 @@ const applyToParts = (parts: AssistantPart[], event: ChatEvent, now: number): As
       return [...finishReasoning(parts, now), { type: 'tool', callId: event.callId, name: event.name, input: event.input, status: 'running' }]
     }
 
-    case 'tool.progress':
-      return updatePart<ToolPart>(parts, 'tool', event.callId, (part) => ({ ...part, progress: event.data }))
+    case 'tool.progress': {
+      // A subagent reports progress of its own tool call too (`read_pdf`: the pages it reads).
+      const updated = updatePart<ToolPart>(parts, 'tool', event.callId, (part) => ({ ...part, progress: event.data }))
+      return updated !== parts ? updated : updatePart<SubagentPart>(parts, 'subagent', event.callId, (part) => ({ ...part, progress: event.data }))
+    }
 
     case 'tool.end':
       return updatePart<ToolPart>(parts, 'tool', event.callId, ({ progress: _progress, ...part }) => ({
@@ -115,7 +119,7 @@ const applyToParts = (parts: AssistantPart[], event: ChatEvent, now: number): As
 
     case 'subagent.end':
       // Whatever the subagent left running stopped with it; it failed if the subagent did.
-      return updatePart<SubagentPart>(parts, 'subagent', event.callId, (part) => ({
+      return updatePart<SubagentPart>(parts, 'subagent', event.callId, ({ progress: _progress, ...part }) => ({
         ...part,
         parts: stopRunning(part.parts, event.status, now),
         status: event.status,

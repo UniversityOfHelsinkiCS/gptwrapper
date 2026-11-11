@@ -1,8 +1,6 @@
-import type { BaseChatModel } from '@langchain/core/language_models/chat_models'
-import { isGraphInterrupt } from '@langchain/langgraph'
-import { createAgent, createMiddleware, ToolMessage } from 'langchain'
+import { createAgent } from 'langchain'
 import type { z } from 'zod/v4'
-import { DEFAULT_TOKEN_LIMIT, inProduction, isFreeModel, isMockModel, ModelProvider, type ModelConfig, type ValidModelName, validModels } from '@config'
+import { DEFAULT_TOKEN_LIMIT, inProduction, isFreeModel, isMockModel, type ValidModelName, validModels } from '@config'
 import type { AiApiWarning } from '@shared/aiApi'
 import type { ChatEvent, PostStreamSchemaV4 } from '@shared/agentChat'
 import { isPromptDraft } from '@shared/prompt'
@@ -16,16 +14,17 @@ import logger from '../../util/logger'
 import { getAccessLevel, requireActiveAccess } from '../chatInstances/access'
 import { checkCourseUsage, checkUsage, getCourseTokenLimit, getUsage, getUserTokenLimit, incrementCourseUsage, incrementUsage } from '../chatInstances/usage'
 import { handleWarnings, modelConfigHasInstructions, prepareMessagesForLLM } from './prepareMessages'
-import { MockModel } from '../langchain/MockModel'
-import { getAzureChatOpenAI, getToskaProvider, getVertexModelProvider } from '../langchain/modelGenerators'
+import { getAgentModel } from './agentModel'
 import { createStreamState, getMainAgentModelCall, getSubagentModelCall, mapStreamChunk, nextStreamState, type StreamChunk } from './mapStreamChunk'
 import type { ClientToolCaller } from './clientTools'
 import { fileToolsFor } from './tools/fileTools'
+import { readPdfFor } from './tools/readPdf'
 import { MOCK_SUBAGENT } from './tools/mockSubagent'
 import { findQuizPart, quizAnswerToText } from './tools/presentQuiz'
 import { promptEnabledTools } from './tools/promptTools'
-import { createTools, getToolModule, historyMessageToText, withToolInstructions } from './tools/registry'
-import { ToolError, type EnabledTool } from './tools/types'
+import { createTools, getToolModule, historyMessageToText, subagentCallLimits, withToolInstructions } from './tools/registry'
+import type { EnabledTool } from './tools/types'
+import { callLimitMiddleware, toolErrorMiddleware } from './toolMiddleware'
 
 export const RECURSION_LIMIT = 25
 const KEEP_ALIVE_INTERVAL_MS = 5000
@@ -104,7 +103,8 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
 
   // The file tools are always on for admins' socket runs whose browser runs them, whatever the prompt has.
   if (clientTools) {
-    enabledTools.push(...fileToolsFor(clientTools.attachedFolders).filter((tool) => !enabledTools.some((t) => t.name === tool.name)))
+    const clientRunTools = [...fileToolsFor(clientTools.attachedFolders), ...readPdfFor(clientTools.attachedFolders)]
+    enabledTools.push(...clientRunTools.filter((tool) => !enabledTools.some((t) => t.name === tool.name)))
   }
 
   meta.tools = enabledTools.map((t) => t.name)
@@ -133,7 +133,11 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
   onStart()
 
   const tools = createTools(enabledTools, { user, course: course?.chatInstance ?? null, model, signal, callClientTool: clientTools?.call })
-  const agent = createAgent({ model: getAgentModel(modelConfig), tools, middleware: tools.length > 0 ? [toolErrorMiddleware(signal)] : [] })
+  const agent = createAgent({
+    model: getAgentModel(modelConfig),
+    tools,
+    middleware: tools.length > 0 ? [callLimitMiddleware(subagentCallLimits(enabledTools)), toolErrorMiddleware(signal)] : [],
+  })
 
   const showReasoning = modelConfig.reasoning?.showSummary === true
   const startedAt = Date.now()
@@ -337,58 +341,6 @@ const toModelHistory = (chatMessages: RunAgentRequest['options']['chatMessages']
     }
     return message
   })
-
-/**
- * Turns a failing tool into an error `ToolMessage` (status `error`, so the client shows the call as failed)
- * that the model can react to. Without this the agent's default handler hides the failure in a normal result.
- */
-const toolErrorMiddleware = (signal: AbortSignal) =>
-  createMiddleware({
-    name: 'ToolErrors',
-    wrapToolCall: async (request, handler) => {
-      try {
-        return await handler(request)
-      } catch (error) {
-        if (signal.aborted || isGraphInterrupt(error)) throw error
-        if (error instanceof ToolError) {
-          // An expected failure (a refused path, a missing file, no answer from the browser) that the model can act on.
-          logger.info('Tool call failed', { tool: request.toolCall.name, error: error.message })
-          return new ToolMessage({
-            content: `Error: ${error.message}`,
-            tool_call_id: request.toolCall.id ?? '',
-            name: request.toolCall.name,
-            status: 'error',
-          })
-        }
-        logger.error('Tool call failed', {
-          tool: request.toolCall.name,
-          error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
-        })
-        return new ToolMessage({
-          content: 'The tool failed. Tell the user it did not work, and answer without it if you can.',
-          tool_call_id: request.toolCall.id ?? '',
-          name: request.toolCall.name,
-          status: 'error',
-        })
-      }
-    },
-  })
-
-/** The chat model without bound tools: createAgent binds the tools itself and refuses a pre-bound model. */
-const getAgentModel = (modelConfig: ModelConfig): BaseChatModel => {
-  switch (modelConfig.provider) {
-    case ModelProvider.Azure:
-      return getAzureChatOpenAI(modelConfig.name, true, modelConfig.reasoning)
-    case ModelProvider.Vertex:
-      return getVertexModelProvider(modelConfig)
-    case ModelProvider.Toska:
-      return getToskaProvider(modelConfig.name, true, modelConfig.reasoning)
-    case ModelProvider.Mock:
-      return new MockModel({})
-    default:
-      throw new Error(`Unknown model provider: ${modelConfig.provider}`)
-  }
-}
 
 /** Azure refuses some prompts with `code: 'content_filter'`; the explanation is shown as the answer. */
 const getContentFilterMessage = (error: unknown): string | null => {

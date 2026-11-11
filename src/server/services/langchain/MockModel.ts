@@ -5,7 +5,9 @@ import { ChatGenerationChunk, type ChatResult } from '@langchain/core/outputs'
 import { fakeModel } from 'langchain'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { PRESENT_QUIZ } from '@shared/quiz'
+import { READ_PDF } from '@shared/readPdf'
 import { QUIZ_ANSWER_PREFIX } from '../agent/tools/presentQuiz'
+import { pdfPathOfTask, pdfReaderSystemPrompt } from '../agent/tools/readPdfPrompt'
 import {
   basicTestContent,
   firstFileInListing,
@@ -13,7 +15,13 @@ import {
   MOCK_NOTE_PATH,
   MOCK_NOTE_PREFIX,
   MOCK_PDF_PAGE_PREFIX,
+  MOCK_PDF_READ_PAGES,
+  MOCK_PDF_READ_PREFIX,
+  mockPdfReadTask,
+  mockPdfReaderAnswer,
+  mockPdfReaderUsage,
   parseMockPdfPage,
+  parseMockPdfRead,
   MOCK_WRITE_OUTPUT_PREFIX,
   mockOutputContent,
   codeTestContent,
@@ -65,6 +73,42 @@ export class MockModel extends BaseChatModel {
     if (systemText === mockSubagentSystemPrompt && last && isToolMessage(last) && lastHuman.includes('fail')) {
       // A subagent task with `fail` in it fails midway: after its tool call, before its answer.
       return fakeModel().respond(new Error('Mock subagent error injected'))
+    }
+    if (systemText === pdfReaderSystemPrompt) {
+      // The agent of the `read_pdf` subagent: reads the first pages of its PDF, then answers with an excerpt of them.
+      if (last && isToolMessage(last)) {
+        const content = String(last.content)
+        const answer = last.status === 'error' ? `I could not read the PDF: ${content}` : mockPdfReaderAnswer(content)
+        return fakeModel().respond(new AIMessage({ content: answer, usage_metadata: mockPdfReaderUsage }))
+      }
+      const path = pdfPathOfTask(lastHuman) ?? ''
+      return fakeModel().respond(
+        new AIMessage({
+          content: '',
+          tool_calls: [{ name: 'read_file', args: { path, pages: MOCK_PDF_READ_PAGES }, id: 'mock_pdf_reader_read_file_id', type: 'tool_call' }],
+          usage_metadata: mockPdfReaderUsage,
+        }),
+      )
+    }
+    if (lastHuman.startsWith(MOCK_PDF_READ_PREFIX)) {
+      // `pdfread [many] <path>` calls `read_pdf` (again after each answer, for `many`), then the generic tool-result answer below.
+      const request = parseMockPdfRead(lastHuman)
+      const done = messages.filter((message) => isToolMessage(message) && message.name === READ_PDF).length
+      if (request && done < request.calls) {
+        return fakeModel().respond(
+          new AIMessage({
+            content: '',
+            tool_calls: [
+              {
+                name: READ_PDF,
+                args: { path: request.path, task: request.calls > 1 ? `${mockPdfReadTask} (${done + 1})` : mockPdfReadTask },
+                id: `mock_read_pdf_id_${done + 1}`,
+                type: 'tool_call',
+              },
+            ],
+          }),
+        )
+      }
     }
     if (last && isToolMessage(last) && last.name === 'ls' && last.status !== 'error' && lastHuman.startsWith(MOCK_FILES_PREFIX)) {
       // `files`: after listing the folder, read its first file (then the generic tool-result answer below).

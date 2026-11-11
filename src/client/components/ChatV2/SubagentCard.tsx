@@ -6,6 +6,7 @@ import { type ReactNode, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { SubagentPart } from '../../../shared/agentChat'
 import { focusIndicatorStyle } from '../../util/accessibility'
+import { subagentProgressText } from './tools/subagentProgress'
 
 const STATUS_KEYS = {
   running: 'chat:subagentRunning',
@@ -16,7 +17,8 @@ const STATUS_KEYS = {
 /**
  * Work the main agent delegated to a subagent: its name, status and task, with the subagent's own output
  * (`children`, its parts rendered like an answer's) collapsed by default, also while it runs. The header is a
- * labelled button with `aria-expanded`, described by the task. The subagent's output is not part of the
+ * labelled button with `aria-expanded`, described by the task. While it runs, a subagent that reports progress (`read_pdf`)
+ * shows it in a status line. The subagent's output is not part of the
  * message text (copy, email, download).
  */
 export const SubagentCard = ({ part, children }: { part: SubagentPart; children: ReactNode }) => {
@@ -25,6 +27,7 @@ export const SubagentCard = ({ part, children }: { part: SubagentPart; children:
   const contentId = useId()
   const taskId = useId()
   const params = { name: part.name, task: part.task, interpolation: { escapeValue: false } }
+  const progress = subagentProgressText(part, t)
 
   return (
     <Box
@@ -72,6 +75,17 @@ export const SubagentCard = ({ part, children }: { part: SubagentPart; children:
       {part.task && (
         <Typography id={taskId} variant="body2" sx={{ color: 'text.secondary', mt: 0.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
           {t('chat:subagentTask', params)}
+        </Typography>
+      )}
+      {/* Rendered while running, also when empty, so screen readers announce the progress as it changes */}
+      {part.status === 'running' && (
+        <Typography
+          data-testid="subagent-progress"
+          role="status"
+          variant="body2"
+          sx={{ color: 'text.secondary', mt: progress ? 0.5 : 0, wordBreak: 'break-word' }}
+        >
+          {progress}
         </Typography>
       )}
       <Collapse in={open} unmountOnExit>
