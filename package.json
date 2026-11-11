@@ -116,6 +116,7 @@
     "dotenv": "16.4.1",
     "express": "4.22.2",
     "express-async-errors": "3.1.1",
+    "fflate": "0.8.3",
     "googleapis": "^171.4.0",
     "i18next": "25.0.0",
     "ioredis": "5.10.1",

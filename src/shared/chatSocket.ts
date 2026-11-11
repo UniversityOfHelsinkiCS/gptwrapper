@@ -26,8 +26,9 @@ export type ChatSocketClientMessage =
       /** Size of the attached file, for the request log. The file itself is parsed in the browser and is in the history. */
       fileSize?: number
       /**
-       * Top-level My files folders attached to the chat. With at least one, the run gets the client-executed file
-       * tools (admins only). Only the browser decides what the tools can read: it checks every path itself.
+       * Top-level My files folders attached to the chat. Sent (also as an empty list) when the browser can run the
+       * client-executed My files tools: the run then gets them (admins only), with `Outputs/` and `Agent notes/`
+       * always visible. Only the browser decides what the tools can read and write: it checks every path itself.
        */
       attachedFolders?: string[]
     }

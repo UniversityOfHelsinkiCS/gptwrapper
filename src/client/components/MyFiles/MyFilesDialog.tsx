@@ -19,7 +19,8 @@ import {
   TableRow,
   Typography,
 } from '@mui/material'
-import { useCallback, useEffect, useId, useMemo, useRef, useState, type DragEvent } from 'react'
+import { visuallyHidden } from '@mui/utils'
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type DragEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { focusIndicatorStyle } from '../../util/accessibility'
 import safeLocalStorage from '../../util/safeLocalStorage'
@@ -32,7 +33,9 @@ import {
   type ImportResult,
   type ImportSource,
 } from '../../util/myFiles/importFiles'
-import { RESERVED_FOLDERS, isReservedPath } from '../../util/myFiles/paths'
+import { downloadMyFile, saveBlob } from '../../util/myFiles/download'
+import { exportAgentNotes, NOTES_ZIP_FILE_NAME, NotesZipError, readAgentNotesZip, replaceAgentNotes, type NotesZipFile } from '../../util/myFiles/notesZip'
+import { AGENT_NOTES_FOLDER, OUTPUTS_FOLDER, RESERVED_FOLDERS, baseName, isReservedPath } from '../../util/myFiles/paths'
 import type { MyFilesEntry, MyFilesStore } from '../../util/myFiles/store'
 import ConfirmDialog from '../ChatV2/general/ConfirmDialog'
 import { useMyFilesStore } from './MyFilesStoreContext'
@@ -114,13 +117,20 @@ const FileTable = ({
   stripPrefix,
   statuses,
   label,
+  actions,
+  details,
 }: {
   files: MyFilesEntry[]
   stripPrefix: string
   statuses: Map<string, FileStatus>
   label: string
+  /** Buttons for each file (download, view), in a column of their own. */
+  actions?: (file: MyFilesEntry) => ReactNode
+  /** Shown in a row under the file when not null, e.g. the text of a note. */
+  details?: (file: MyFilesEntry) => ReactNode
 }) => {
   const { t, i18n } = useTranslation()
+  const columns = actions ? 4 : 3
   return (
     <Table size="small" aria-label={label}>
       <TableHead>
@@ -128,12 +138,20 @@ const FileTable = ({
           <TableCell>{t('myFiles:name')}</TableCell>
           <TableCell align="right">{t('myFiles:size')}</TableCell>
           <TableCell>{t('myFiles:modified')}</TableCell>
+          {actions && (
+            <TableCell>
+              <Box component="span" sx={visuallyHidden}>
+                {t('myFiles:actions')}
+              </Box>
+            </TableCell>
+          )}
         </TableRow>
       </TableHead>
       <TableBody>
-        {files.map((file) => {
+        {files.flatMap((file) => {
           const status = statuses.get(file.path)
-          return (
+          const detail = details?.(file)
+          return [
             <TableRow key={file.path} data-testid="my-files-file" data-path={file.path} data-status={status}>
               <TableCell sx={{ wordBreak: 'break-word' }}>
                 {stripPrefix ? file.path.slice(stripPrefix.length + 1) : file.path}
@@ -150,11 +168,60 @@ const FileTable = ({
                 {formatBytes(file.size, i18n.language)}
               </TableCell>
               <TableCell sx={{ whiteSpace: 'nowrap' }}>{new Date(file.lastModified).toLocaleString(i18n.language)}</TableCell>
-            </TableRow>
-          )
+              {actions && <TableCell sx={{ whiteSpace: 'nowrap' }}>{actions(file)}</TableCell>}
+            </TableRow>,
+            ...(detail
+              ? [
+                  <TableRow key={`${file.path}-details`}>
+                    <TableCell colSpan={columns}>{detail}</TableCell>
+                  </TableRow>,
+                ]
+              : []),
+          ]
         })}
       </TableBody>
     </Table>
+  )
+}
+
+/** The text of a note in `Agent notes/`, read when it is opened. */
+const NoteText = ({ store, path }: { store: MyFilesStore; path: string }) => {
+  const { t } = useTranslation()
+  const [text, setText] = useState<string | null>(null)
+  const [failed, setFailed] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    store.readText(path).then(
+      (value) => !cancelled && setText(value),
+      () => !cancelled && setFailed(true),
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [store, path])
+
+  if (failed) return <Typography color="error">{t('myFiles:error')}</Typography>
+  if (text === null) return <LinearProgress aria-label={t('common:loading')} />
+  return (
+    <Box
+      component="pre"
+      tabIndex={0}
+      aria-label={t('myFiles:noteContent', { name: baseName(path), interpolation: { escapeValue: false } })}
+      data-testid="my-files-note-text"
+      sx={{
+        m: 0,
+        p: 1,
+        maxHeight: '20rem',
+        overflow: 'auto',
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
+        bgcolor: 'action.hover',
+        borderRadius: '0.5rem',
+        ...focusIndicatorStyle(),
+      }}
+    >
+      {text}
+    </Box>
   )
 }
 
@@ -163,14 +230,63 @@ const FolderItem = ({
   statuses,
   onSync,
   disabled,
+  store,
+  onExportNotes,
+  onImportNotes,
+  onDownloadError,
 }: {
   folder: FolderGroup
   statuses: Map<string, FileStatus>
   onSync: (folder: string) => void
   disabled: boolean
+  store: MyFilesStore
+  onExportNotes: () => void
+  onImportNotes: () => void
+  onDownloadError: () => void
 }) => {
   const { t, i18n } = useTranslation()
   const [open, setOpen] = useState(false)
+  const [viewing, setViewing] = useState<string[]>([])
+  const isOutputs = folder.name === OUTPUTS_FOLDER
+  const isNotes = folder.name === AGENT_NOTES_FOLDER
+  const params = { interpolation: { escapeValue: false } }
+
+  const download = async (path: string) => {
+    try {
+      await downloadMyFile(store, path)
+    } catch {
+      onDownloadError()
+    }
+  }
+
+  const actions = isOutputs
+    ? (file: MyFilesEntry) => (
+        <Button
+          size="small"
+          onClick={() => void download(file.path)}
+          aria-label={t('myFiles:downloadNamed', { ...params, name: file.name })}
+          data-testid="my-files-download"
+        >
+          {t('myFiles:download')}
+        </Button>
+      )
+    : isNotes
+      ? (file: MyFilesEntry) => {
+          const shown = viewing.includes(file.path)
+          return (
+            <Button
+              size="small"
+              aria-expanded={shown}
+              onClick={() => setViewing((current) => (shown ? current.filter((p) => p !== file.path) : [...current, file.path]))}
+              aria-label={t(shown ? 'myFiles:hideNoteNamed' : 'myFiles:viewNoteNamed', { ...params, name: file.name })}
+              data-testid="my-files-view-note"
+            >
+              {t(shown ? 'myFiles:hideNote' : 'myFiles:viewNote')}
+            </Button>
+          )
+        }
+      : undefined
+  const details = isNotes ? (file: MyFilesEntry) => (viewing.includes(file.path) ? <NoteText store={store} path={file.path} /> : null) : undefined
   const contentId = useId()
   const hasFiles = folder.files.length > 0
   const label = (
@@ -212,9 +328,19 @@ const FolderItem = ({
           </Button>
         )}
       </Box>
+      {isNotes && (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, pl: 4, pb: 0.5 }}>
+          <Button size="small" variant="outlined" onClick={onExportNotes} disabled={disabled || !hasFiles} data-testid="my-files-export-notes">
+            {t('myFiles:exportNotes')}
+          </Button>
+          <Button size="small" variant="outlined" onClick={onImportNotes} disabled={disabled} data-testid="my-files-import-notes">
+            {t('myFiles:importNotes')}
+          </Button>
+        </Box>
+      )}
       {open && hasFiles && (
         <Box id={contentId} sx={{ pl: 4, pb: 1 }}>
-          <FileTable files={folder.files} stripPrefix={folder.name} statuses={statuses} label={folder.name} />
+          <FileTable files={folder.files} stripPrefix={folder.name} statuses={statuses} label={folder.name} actions={actions} details={details} />
         </Box>
       )}
     </Box>
@@ -236,6 +362,9 @@ const MyFilesContent = ({ store }: { store: MyFilesStore }) => {
   const [result, setResult] = useState<ImportResult | null>(null)
   const [error, setError] = useState(false)
   const [confirmClear, setConfirmClear] = useState(false)
+  const [notice, setNotice] = useState<{ text: string; error?: boolean } | null>(null)
+  const [pendingImport, setPendingImport] = useState<{ name: string; files: NotesZipFile[] } | null>(null)
+  const notesZipInputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const filesInputRef = useRef<HTMLInputElement>(null)
   const folderInputRef = useRef<HTMLInputElement>(null)
@@ -266,6 +395,7 @@ const MyFilesContent = ({ store }: { store: MyFilesStore }) => {
   const runImport = async (sources: ImportSource[]) => {
     if (!sources.length) return
     setError(false)
+    setNotice(null)
     setResult(null)
     setProgress({ done: 0, total: sources.length })
     try {
@@ -300,6 +430,60 @@ const MyFilesContent = ({ store }: { store: MyFilesStore }) => {
     if (busy) return
     const sources = await sourcesFromDataTransfer(event.dataTransfer)
     await runImport(sources)
+  }
+
+  const handleExportNotes = async () => {
+    setNotice(null)
+    try {
+      saveBlob(await exportAgentNotes(store), NOTES_ZIP_FILE_NAME)
+    } catch {
+      setError(true)
+    }
+  }
+
+  const zipErrorText = (error: unknown) => {
+    if (!(error instanceof NotesZipError)) return t('myFiles:importNotesInvalid')
+    switch (error.code) {
+      case 'invalid_path':
+        return t('myFiles:importNotesInvalidPath', { path: error.path ?? '', interpolation: { escapeValue: false } })
+      case 'too_large':
+        return t('myFiles:importNotesTooLarge')
+      case 'too_many_files':
+        return t('myFiles:importNotesTooMany')
+      case 'empty':
+        return t('myFiles:importNotesEmpty')
+      default:
+        return t('myFiles:importNotesInvalid')
+    }
+  }
+
+  /** Checks the picked zip first; the notes are replaced only after the student confirms. */
+  const handleNotesZip = async (input: HTMLInputElement) => {
+    const file = input.files?.[0]
+    input.value = ''
+    if (!file) return
+    setNotice(null)
+    setResult(null)
+    try {
+      const files = await readAgentNotesZip(file)
+      if (files.length === 0) throw new NotesZipError('empty')
+      setPendingImport({ name: file.name, files })
+    } catch (zipError) {
+      setNotice({ text: zipErrorText(zipError), error: true })
+    }
+  }
+
+  const confirmImport = async () => {
+    const pending = pendingImport
+    setPendingImport(null)
+    if (!pending) return
+    try {
+      await replaceAgentNotes(store, pending.files)
+      setNotice({ text: t('myFiles:importNotesDone', { files: pending.files.length }) })
+    } catch {
+      setError(true)
+    }
+    await refresh()
   }
 
   const handleClear = async () => {
@@ -380,7 +564,23 @@ const MyFilesContent = ({ store }: { store: MyFilesStore }) => {
         </Typography>
       </Box>
 
+      <input
+        ref={notesZipInputRef}
+        type="file"
+        accept=".zip,application/zip"
+        hidden
+        tabIndex={-1}
+        aria-label={t('myFiles:importNotes')}
+        onChange={(event) => void handleNotesZip(event.currentTarget)}
+        data-testid="my-files-input-notes-zip"
+      />
+
       <Box role="status" aria-live="polite" data-testid="my-files-status" sx={{ mb: 2 }}>
+        {notice && (
+          <Typography variant="body2" color={notice.error ? 'error' : undefined}>
+            {notice.text}
+          </Typography>
+        )}
         {progress && (
           <>
             <Typography variant="body2">{t('myFiles:copying', { done: progress.done, total: progress.total })}</Typography>
@@ -411,7 +611,17 @@ const MyFilesContent = ({ store }: { store: MyFilesStore }) => {
           )}
           <Box component="ul" aria-label={t('myFiles:folders')} sx={{ listStyle: 'none', m: 0, p: 0 }}>
             {folders.map((folder) => (
-              <FolderItem key={folder.name} folder={folder} statuses={statuses} onSync={pickFolder} disabled={busy} />
+              <FolderItem
+                key={folder.name}
+                folder={folder}
+                statuses={statuses}
+                onSync={pickFolder}
+                disabled={busy}
+                store={store}
+                onExportNotes={() => void handleExportNotes()}
+                onImportNotes={() => notesZipInputRef.current?.click()}
+                onDownloadError={() => setNotice({ text: t('myFiles:downloadFailed'), error: true })}
+              />
             ))}
           </Box>
           {rootFiles.length > 0 && (
@@ -441,6 +651,18 @@ const MyFilesContent = ({ store }: { store: MyFilesStore }) => {
         confirmText={t('myFiles:clear')}
         onCancel={() => setConfirmClear(false)}
         onConfirm={handleClear}
+      />
+      <ConfirmDialog
+        open={pendingImport !== null}
+        title={t('myFiles:importNotesConfirmTitle')}
+        message={t('myFiles:importNotesConfirmMessage', {
+          files: pendingImport?.files.length ?? 0,
+          name: pendingImport?.name ?? '',
+          interpolation: { escapeValue: false },
+        })}
+        confirmText={t('myFiles:importNotesConfirm')}
+        onCancel={() => setPendingImport(null)}
+        onConfirm={confirmImport}
       />
     </>
   )

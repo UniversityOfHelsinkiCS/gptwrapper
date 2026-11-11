@@ -212,6 +212,15 @@ describe('client-executed tools', () => {
     expect('events' in result && (await collect(result.events))).toEqual([text('a')])
   })
 
+  test('client tools without attached folders still tell the server that the browser runs them', async () => {
+    const { sockets, connection } = setup()
+    const execute = vi.fn(async () => ({ status: 'ok' as const, content: 'done' }))
+    void new WebSocketChatTransport(connection).start({ ...run, clientTools: { attachedFolders: [], execute } })
+    sockets[0].open()
+    await flush()
+    expect(sockets[0].sent).toEqual([{ type: 'run.start', runId: '1', input: run.input, attachedFolders: [] }])
+  })
+
   test('without client tools, or when the tool throws, the result is an error', async () => {
     const { sockets, connection } = setup()
     const started = new WebSocketChatTransport(connection).start(run)

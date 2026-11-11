@@ -4,18 +4,24 @@ import {
   FILE_TOOL_SUMMARY_LIMITS,
   FileToolInputSchemas,
   isFileToolName,
+  LEARNING_GRAPH_PATH,
   MAX_ATTACHED_FOLDERS,
   type FileToolInput,
   type FileToolName,
   type FileToolSummary,
 } from '../../../shared/fileTools'
-import { isReservedPath, RESERVED_FOLDERS, splitPath } from './paths'
+import { AGENT_NOTES_FOLDER, isReservedPath, isWithin, OUTPUTS_FOLDER, RESERVED_FOLDERS, splitPath } from './paths'
 import { isMyFilesError, type MyFilesEntry, type MyFilesStore } from './store'
 
 /**
- * The browser side of the agent's My files tools (`ls`, `read_file`, `glob`, `grep`). The server relays the model's
- * calls as they are, so every path is resolved and checked here: the agent sees only the folders attached to the chat,
- * `Outputs/` and `Agent notes/`, and only reads. Anything else is refused with a `FileToolError`, whose message the
+ * The browser side of the agent's My files tools. The server relays the model's calls as they are, so every path is
+ * resolved and checked here:
+ * - the read tools (`ls`, `read_file`, `glob`, `grep`) see only the folders attached to the chat, `Outputs/` and
+ *   `Agent notes/`;
+ * - the write tools (`write_file`, `edit_file`) write only inside `Outputs/` and `Agent notes/`, and `delete_file`
+ *   deletes only inside `Agent notes/`. The attached (student's) folders are never written. All of them refuse
+ *   `Agent notes/learning-graph.json`, which is for the typed graph tools.
+ * Folder names are compared case-sensitively. Anything else is refused with a `FileToolError`, whose message the
  * model reads.
  */
 
@@ -308,11 +314,105 @@ const grep = async (ctx: Context, input: FileToolInput<'grep'>): Promise<ToolOut
   }
 }
 
+/** Where `write_file` and `edit_file` may write, and where `delete_file` may delete. Exact folder names. */
+const WRITABLE_FOLDERS: readonly string[] = [OUTPUTS_FOLDER, AGENT_NOTES_FOLDER]
+const DELETABLE_FOLDERS: readonly string[] = [AGENT_NOTES_FOLDER]
+
+/**
+ * Resolves a path for a write tool: the same checks as reading (`resolveAgentPath`), then it must be inside (not be)
+ * one of `allowed`, and must not be the learning graph (compared case-insensitively, so no variant of it can be made).
+ */
+export const resolveWritePath = (path: unknown, folders: readonly string[], allowed: readonly string[] = WRITABLE_FOLDERS): string => {
+  const resolved = resolveAgentPath(path, folders)
+  const segments = resolved === '' ? [] : resolved.split('/')
+  const where = allowed.map((folder) => quote(`${folder}/`)).join(' or ')
+  if (segments.length === 0 || !allowed.includes(segments[0])) {
+    throw new FileToolError(
+      `${quote(resolved || String(path))} cannot be changed: you can only change files in ${where}. The student's own folders are read-only.`,
+    )
+  }
+  if (segments.length === 1)
+    throw new FileToolError(`${quote(resolved)} is a folder. Give the path of a file in it, for example ${quote(`${resolved}/notes.md`)}.`)
+  // Also refuses paths inside it, which would make it a folder.
+  if (isWithin(resolved.toLowerCase(), LEARNING_GRAPH_PATH.toLowerCase())) {
+    throw new FileToolError(
+      `${quote(resolved)} is reserved for the learning graph and cannot be changed with ${quote('write_file')}, ${quote('edit_file')} or ${quote('delete_file')}.`,
+    )
+  }
+  return resolved
+}
+
+const checkWriteSize = (path: string, text: string) => {
+  if (text.length > FILE_TOOL_LIMITS.writeChars) {
+    throw new FileToolError(`${quote(path)} would be ${text.length} characters; files you write can have at most ${FILE_TOOL_LIMITS.writeChars}.`)
+  }
+}
+
+const writeFile = async (ctx: Context, input: FileToolInput<'write_file'>): Promise<ToolOutput> => {
+  const path = resolveWritePath(input.path, ctx.folders)
+  checkWriteSize(path, input.content)
+  const existing = await ctx.store.stat(path)
+  if (existing?.kind === 'directory') throw new FileToolError(`${quote(path)} is a folder. Give the path of a file.`)
+  const entry = await ctx.store.write(path, input.content)
+  await ctx.store.flush()
+  return {
+    content: `${existing ? 'Replaced' : 'Created'} ${quote(path)} (${entry.size} bytes).`,
+    artifact: { tool: 'write_file', path, bytes: entry.size, created: !existing },
+  }
+}
+
+const countOccurrences = (text: string, part: string) => {
+  let count = 0
+  for (let index = text.indexOf(part); index !== -1; index = text.indexOf(part, index + part.length)) count++
+  return count
+}
+
+const editFile = async (ctx: Context, input: FileToolInput<'edit_file'>): Promise<ToolOutput> => {
+  const path = resolveWritePath(input.path, ctx.folders)
+  const entry = await statOrThrow(ctx, path)
+  if (entry.kind === 'directory') throw new FileToolError(`${quote(path)} is a folder. Give the path of a file.`)
+  const read = await readTextFile(ctx, entry)
+  if ('skipped' in read) throw new FileToolError(`${quote(path)} cannot be edited: ${read.skipped}.`)
+
+  const count = countOccurrences(read.text, input.old)
+  if (count === 0) throw new FileToolError(`The text to replace was not found in ${quote(path)}. Read the file and copy the text exactly.`)
+  if (count > 1) throw new FileToolError(`The text to replace occurs ${count} times in ${quote(path)}. Include more of the text around it so it occurs once.`)
+
+  const index = read.text.indexOf(input.old)
+  const text = read.text.slice(0, index) + input.new + read.text.slice(index + input.old.length)
+  checkWriteSize(path, text)
+  const written = await ctx.store.write(path, text)
+  await ctx.store.flush()
+  return { content: `Edited ${quote(path)} (${written.size} bytes).`, artifact: { tool: 'edit_file', path, bytes: written.size } }
+}
+
+const deleteFile = async (ctx: Context, input: FileToolInput<'delete_file'>): Promise<ToolOutput> => {
+  const path = resolveWritePath(input.path, ctx.folders, DELETABLE_FOLDERS)
+  await statOrThrow(ctx, path)
+  await ctx.store.delete(path)
+  await ctx.store.flush()
+  return { content: `Deleted ${quote(path)}.`, artifact: { tool: 'delete_file', path } }
+}
+
+/** True for a successful `write_file` or `edit_file` summary of a file in `Outputs/`: what the chat lists under the answer. */
+export const isOutputWrite = (summary: unknown): summary is Extract<FileToolSummary, { tool: 'write_file' | 'edit_file' }> => {
+  const s = summary as Partial<FileToolSummary> | null | undefined
+  if (!s || (s.tool !== 'write_file' && s.tool !== 'edit_file') || typeof s.path !== 'string') return false
+  try {
+    return isWithin(s.path, OUTPUTS_FOLDER) && s.path !== OUTPUTS_FOLDER
+  } catch {
+    return false
+  }
+}
+
 const executors: { [Name in FileToolName]: (ctx: Context, input: FileToolInput<Name>) => Promise<ToolOutput> } = {
   ls,
   read_file: readFile,
   glob,
   grep,
+  write_file: writeFile,
+  edit_file: editFile,
+  delete_file: deleteFile,
 }
 
 const storeErrorMessage = (error: unknown): string | null => {
@@ -333,7 +433,8 @@ const storeErrorMessage = (error: unknown): string | null => {
 
 /**
  * Runs one My files tool call from the agent against `store`, seeing only `attachedFolders`, `Outputs` and
- * `Agent notes`. Never throws: refusals and failures are error results for the model.
+ * `Agent notes`, and writing only in `Outputs` and `Agent notes`. Never throws: refusals and failures are error
+ * results for the model.
  */
 export const executeFileTool = async (
   store: MyFilesStore | null,
@@ -356,6 +457,6 @@ export const executeFileTool = async (
     const message = storeErrorMessage(error)
     if (message) return { status: 'error', error: message }
     console.error('My files tool failed:', error)
-    return { status: 'error', error: 'Reading My files failed in the browser.' }
+    return { status: 'error', error: 'The My files tool failed in the browser.' }
   }
 }

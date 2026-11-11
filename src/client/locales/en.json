@@ -247,7 +247,11 @@
     "fileToolReadFileLines": "Read the file {{path}}, lines {{start}}–{{end}} of {{total}}",
     "fileToolGlob": "Looked for files matching {{pattern}}",
     "fileToolGrep": "Searched for {{pattern}} in {{path}}",
-    "fileToolFailed": "{{action}}: failed"
+    "fileToolFailed": "{{action}}: failed",
+    "fileToolWriteFile": "Wrote the file {{path}}",
+    "fileToolEditFile": "Edited the file {{path}}",
+    "fileToolDeleteFile": "Deleted {{path}}",
+    "outputFiles": "Files from this answer (in My files, Outputs)"
   },
   "settings": {
     "prompt": "Conversation prompt",
@@ -1107,6 +1111,27 @@
     "attachFolders": "Attach folders from My files",
     "attachedFolder": "Attached folder {{name}}",
     "detachFolder": "press Delete to detach",
-    "noFoldersToAttach": "Add folders in My files first."
+    "noFoldersToAttach": "Add folders in My files first.",
+    "actions": "Actions",
+    "download": "Download",
+    "downloadNamed": "Download {{name}}",
+    "downloadFailed": "The file could not be downloaded. It may no longer be in My files.",
+    "fileMissing": "{{name}} is no longer in My files.",
+    "viewNote": "View",
+    "hideNote": "Hide",
+    "viewNoteNamed": "View {{name}}",
+    "hideNoteNamed": "Hide {{name}}",
+    "noteContent": "Contents of {{name}}",
+    "exportNotes": "Export Agent notes as zip",
+    "importNotes": "Import Agent notes from zip",
+    "importNotesConfirmTitle": "Replace Agent notes?",
+    "importNotesConfirmMessage": "Everything in Agent notes is deleted and replaced with the {{files}} files in {{name}}.",
+    "importNotesConfirm": "Replace",
+    "importNotesDone": "Agent notes replaced: {{files}} files imported.",
+    "importNotesInvalid": "The file could not be read as a zip of Agent notes.",
+    "importNotesInvalidPath": "Nothing was imported: the zip has a file outside Agent notes ({{path}}).",
+    "importNotesTooLarge": "Nothing was imported: the zip is too large.",
+    "importNotesTooMany": "Nothing was imported: the zip has too many files.",
+    "importNotesEmpty": "Nothing was imported: the zip has no files in Agent notes."
   }
 }

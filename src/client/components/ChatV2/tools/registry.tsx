@@ -28,6 +28,9 @@ const toolRenderers: Record<string, ToolRenderer> = {
   read_file: { Part: FileToolPart },
   glob: { Part: FileToolPart },
   grep: { Part: FileToolPart },
+  write_file: { Part: FileToolPart },
+  edit_file: { Part: FileToolPart },
+  delete_file: { Part: FileToolPart },
 }
 
 /** Shown for tools that have no renderer of their own. */

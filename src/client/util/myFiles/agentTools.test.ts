@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 import type { ClientToolResult } from '../../../shared/chatSocket'
 import { FILE_TOOL_LIMITS } from '../../../shared/fileTools'
-import { executeFileTool, FileToolError, globToRegExp, resolveAgentPath, visibleFolders } from './agentTools'
+import { executeFileTool, FileToolError, globToRegExp, isOutputWrite, resolveAgentPath, resolveWritePath, visibleFolders } from './agentTools'
 import { createMemoryStore } from './memoryStore'
 import type { MyFilesStore } from './store'
 
@@ -112,7 +112,7 @@ describe('executeFileTool', () => {
   })
 
   test('refuses unknown tools, invalid input and a missing store', async () => {
-    expect(errorOf(await run('write_file', { path: 'Outputs/x.md' }))).toContain('Unknown tool')
+    expect(errorOf(await run('rm', { path: 'Outputs/x.md' }))).toContain('Unknown tool')
     expect(errorOf(await run('read_file', { path: 1 }))).toContain('Invalid input for read_file')
     expect(errorOf(await executeFileTool(null, ['Course notes'], 'ls', { path: '' }))).toContain('cannot store My files')
   })
@@ -274,5 +274,156 @@ describe('executeFileTool', () => {
       expect(errorOf(await run('grep', { pattern: 'exam', path: '../Secret' }))).toContain('not a valid path')
       expect(errorOf(await run('grep', { pattern: '(' }))).toContain('not a valid JavaScript regular expression')
     })
+  })
+})
+
+describe('write tools', () => {
+  let store: MyFilesStore
+  const run = (name: string, input: unknown, attached = ['Course notes']) => executeFileTool(store, attached, name, input)
+
+  /** Every file in the store with its text, to check that a refused call changed nothing. */
+  const snapshot = async () => {
+    const entries = await store.list('', { recursive: true })
+    return Promise.all(entries.map(async (e) => [e.path, e.kind === 'file' ? await store.readText(e.path) : null]))
+  }
+
+  beforeEach(async () => {
+    store = createMemoryStore()
+    await store.write('Course notes/syllabus.md', '# Syllabus')
+    await store.write('Secret/diary.md', 'Private.')
+    await store.write('outputs/clash.md', 'A student folder whose name differs from Outputs only in case.')
+    await store.mkdir('Outputs')
+    await store.mkdir('Agent notes')
+  })
+
+  describe('resolveWritePath', () => {
+    test.each([
+      ['Outputs/summary.md', 'Outputs/summary.md'],
+      ['Outputs/week 1/plan.md', 'Outputs/week 1/plan.md'],
+      ['./Agent notes//learner-profile.md', 'Agent notes/learner-profile.md'],
+      ['Agent notes/learning-graph.json.bak', 'Agent notes/learning-graph.json.bak'],
+    ])('allows %j', (path, expected) => {
+      expect(resolveWritePath(path, FOLDERS)).toBe(expected)
+    })
+
+    test.each([
+      // the student's folders, attached or not
+      'Course notes/syllabus.md',
+      'Course notes/new.md',
+      'Secret/diary.md',
+      'x.md',
+      '',
+      // the writable folders themselves
+      'Outputs',
+      'Agent notes/',
+      // case variants of the writable folders
+      'outputs/clash.md',
+      'OUTPUTS/x.md',
+      'agent notes/x.md',
+      'Agent Notes/x.md',
+      // escapes
+      'Outputs/../Course notes/syllabus.md',
+      'Agent notes/../../x',
+      '/Outputs/x.md',
+      'C:/Outputs/x.md',
+      'Outputs\\x.md',
+      // the learning graph, in any case, and paths inside it
+      'Agent notes/learning-graph.json',
+      'Agent notes/Learning-Graph.JSON',
+      './Agent notes/learning-graph.json',
+      'Agent notes/learning-graph.json/x.md',
+    ])('refuses %j', (path) => {
+      expect(() => resolveWritePath(path, FOLDERS)).toThrow(FileToolError)
+    })
+
+    test('deletes are limited to Agent notes', () => {
+      expect(resolveWritePath('Agent notes/old.md', FOLDERS, ['Agent notes'])).toBe('Agent notes/old.md')
+      expect(() => resolveWritePath('Outputs/x.md', FOLDERS, ['Agent notes'])).toThrow(FileToolError)
+    })
+  })
+
+  test('write_file creates and replaces files in Outputs and Agent notes', async () => {
+    const created = await run('write_file', { path: 'Outputs/plan/week1.md', content: 'Read chapter 1.' })
+    expect(okContent(created)).toBe('Created "Outputs/plan/week1.md" (15 bytes).')
+    expect(created).toMatchObject({ artifact: { tool: 'write_file', path: 'Outputs/plan/week1.md', bytes: 15, created: true } })
+    expect(await store.readText('Outputs/plan/week1.md')).toBe('Read chapter 1.')
+
+    const replaced = await run('write_file', { path: 'Outputs/plan/week1.md', content: 'Read chapter 2.' })
+    expect(replaced).toMatchObject({ status: 'ok', artifact: { created: false } })
+    expect(await store.readText('Outputs/plan/week1.md')).toBe('Read chapter 2.')
+
+    expect(okContent(await run('write_file', { path: 'Agent notes/learner-profile.md', content: 'Goal: pass the exam.' }))).toContain('Created')
+    expect(await store.readText('Agent notes/learner-profile.md')).toBe('Goal: pass the exam.')
+  })
+
+  test('the write tools work without attached folders', async () => {
+    expect(okContent(await run('write_file', { path: 'Agent notes/a.md', content: 'x' }, []))).toContain('Created')
+    expect(errorOf(await run('write_file', { path: 'Course notes/a.md', content: 'x' }, []))).toContain('outside the folders you can see')
+  })
+
+  test.each([
+    ['write_file', { path: 'Course notes/syllabus.md', content: 'overwritten' }, 'read-only'],
+    ['write_file', { path: 'Secret/diary.md', content: 'overwritten' }, 'outside the folders you can see'],
+    ['write_file', { path: 'outputs/clash.md', content: 'overwritten' }, 'outside the folders you can see'],
+    ['write_file', { path: 'Outputs/../Course notes/syllabus.md', content: 'x' }, 'not a valid path'],
+    ['write_file', { path: 'Agent notes/learning-graph.json', content: '{}' }, 'reserved for the learning graph'],
+    ['write_file', { path: 'Agent notes/LEARNING-GRAPH.json', content: '{}' }, 'reserved for the learning graph'],
+    ['write_file', { path: 'Outputs', content: 'x' }, 'is a folder'],
+    ['edit_file', { path: 'Course notes/syllabus.md', old: 'Syllabus', new: 'Hacked' }, 'read-only'],
+    ['edit_file', { path: 'Agent notes/learning-graph.json', old: 'a', new: 'b' }, 'reserved for the learning graph'],
+    ['delete_file', { path: 'Course notes/syllabus.md' }, 'read-only'],
+    ['delete_file', { path: 'Course notes' }, 'read-only'],
+    ['delete_file', { path: 'Outputs/x.md' }, 'only change files in "Agent notes/"'],
+    ['delete_file', { path: 'Agent notes' }, 'is a folder'],
+    ['delete_file', { path: 'Agent notes/learning-graph.json' }, 'reserved for the learning graph'],
+    ['delete_file', { path: '' }, 'cannot be changed'],
+  ])('%s %j is refused and changes nothing', async (name, input, message) => {
+    await store.write('Outputs/x.md', 'kept')
+    await store.write('Agent notes/learning-graph.json', '{"concepts":[]}')
+    const before = await snapshot()
+    expect(errorOf(await run(name, input))).toContain(message)
+    expect(await snapshot()).toEqual(before)
+  })
+
+  test('write_file refuses content over the limit', async () => {
+    const content = 'x'.repeat(FILE_TOOL_LIMITS.writeChars + 1)
+    expect(errorOf(await run('write_file', { path: 'Outputs/big.md', content }))).toContain('Invalid input for write_file')
+    expect(await store.stat('Outputs/big.md')).toBeNull()
+  })
+
+  test('edit_file replaces text that occurs exactly once', async () => {
+    await store.write('Agent notes/profile.md', 'Level: beginner\nGoal: pass\nGoal: pass\n')
+    expect(okContent(await run('edit_file', { path: 'Agent notes/profile.md', old: 'beginner', new: 'intermediate' }))).toContain('Edited')
+    expect(await store.readText('Agent notes/profile.md')).toBe('Level: intermediate\nGoal: pass\nGoal: pass\n')
+
+    expect(errorOf(await run('edit_file', { path: 'Agent notes/profile.md', old: 'Goal: pass', new: 'x' }))).toContain('occurs 2 times')
+    expect(errorOf(await run('edit_file', { path: 'Agent notes/profile.md', old: 'missing', new: 'x' }))).toContain('was not found')
+    expect(errorOf(await run('edit_file', { path: 'Agent notes/none.md', old: 'a', new: 'b' }))).toContain('was not found in My files')
+    // `$` patterns in the new text are not special
+    await run('edit_file', { path: 'Agent notes/profile.md', old: 'intermediate', new: '$& $1' })
+    expect(await store.readText('Agent notes/profile.md')).toContain('Level: $& $1')
+  })
+
+  test('delete_file deletes in Agent notes only', async () => {
+    await store.write('Agent notes/old/plan.md', 'x')
+    await store.write('Agent notes/keep.md', 'y')
+    expect(okContent(await run('delete_file', { path: 'Agent notes/old' }))).toBe('Deleted "Agent notes/old".')
+    expect(await store.stat('Agent notes/old')).toBeNull()
+    expect(await store.readText('Agent notes/keep.md')).toBe('y')
+    expect(errorOf(await run('delete_file', { path: 'Agent notes/old' }))).toContain('was not found')
+  })
+
+  test('a file as a parent folder is an error for the model', async () => {
+    await store.write('Outputs/a.md', 'x')
+    expect(errorOf(await run('write_file', { path: 'Outputs/a.md/b.md', content: 'y' }))).toContain('is a file, not a folder')
+  })
+
+  test('isOutputWrite is true only for successful writes in Outputs', () => {
+    expect(isOutputWrite({ tool: 'write_file', path: 'Outputs/a.md', bytes: 1, created: true })).toBe(true)
+    expect(isOutputWrite({ tool: 'edit_file', path: 'Outputs/sub/a.md', bytes: 1 })).toBe(true)
+    expect(isOutputWrite({ tool: 'write_file', path: 'Agent notes/a.md', bytes: 1, created: true })).toBe(false)
+    expect(isOutputWrite({ tool: 'write_file', path: 'Outputs/../x', bytes: 1, created: true })).toBe(false)
+    expect(isOutputWrite({ tool: 'read_file', path: 'Outputs/a.md' })).toBe(false)
+    expect(isOutputWrite(null)).toBe(false)
   })
 })

@@ -49,7 +49,7 @@ export type RunAgentParams = {
   emit: (event: ChatEvent) => Promise<void>
   /**
    * Client-executed tools, only for runs over the chat socket by admins: the My files tools on the attached folders
-   * (none without folders), called in the browser through `call`.
+   * (maybe none) and `Outputs/` and `Agent notes/`, called in the browser through `call`.
    */
   clientTools?: { attachedFolders: string[]; call: ClientToolCaller }
 }
@@ -102,7 +102,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
     }
   }
 
-  // The file tools are always on for socket runs with attached folders, whatever the prompt has.
+  // The file tools are always on for admins' socket runs whose browser runs them, whatever the prompt has.
   if (clientTools) {
     enabledTools.push(...fileToolsFor(clientTools.attachedFolders).filter((tool) => !enabledTools.some((t) => t.name === tool.name)))
   }

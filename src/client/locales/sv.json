@@ -254,7 +254,11 @@
     "fileToolReadFileLines": "Läste filen {{path}}, rader {{start}}–{{end}} av {{total}}",
     "fileToolGlob": "Sökte efter filer som matchar {{pattern}}",
     "fileToolGrep": "Sökte efter {{pattern}} i {{path}}",
-    "fileToolFailed": "{{action}}: misslyckades"
+    "fileToolFailed": "{{action}}: misslyckades",
+    "fileToolWriteFile": "Skrev filen {{path}}",
+    "fileToolEditFile": "Redigerade filen {{path}}",
+    "fileToolDeleteFile": "Raderade {{path}}",
+    "outputFiles": "Filer från det här svaret (i Mina filer, Outputs)"
   },
   "settings": {
     "prompt": "Samtalsstart",
@@ -1083,6 +1087,27 @@
     "attachFolders": "Bifoga mappar från Mina filer",
     "attachedFolder": "Bifogad mapp {{name}}",
     "detachFolder": "tryck på Delete för att ta bort",
-    "noFoldersToAttach": "Lägg först till mappar i Mina filer."
+    "noFoldersToAttach": "Lägg först till mappar i Mina filer.",
+    "actions": "Åtgärder",
+    "download": "Ladda ner",
+    "downloadNamed": "Ladda ner {{name}}",
+    "downloadFailed": "Filen kunde inte laddas ner. Den kanske inte längre finns i Mina filer.",
+    "fileMissing": "{{name}} finns inte längre i Mina filer.",
+    "viewNote": "Visa",
+    "hideNote": "Dölj",
+    "viewNoteNamed": "Visa {{name}}",
+    "hideNoteNamed": "Dölj {{name}}",
+    "noteContent": "Innehållet i {{name}}",
+    "exportNotes": "Exportera Agent notes som zip",
+    "importNotes": "Importera Agent notes från zip",
+    "importNotesConfirmTitle": "Ersätta Agent notes?",
+    "importNotesConfirmMessage": "Allt i Agent notes raderas och ersätts med de {{files}} filerna i {{name}}.",
+    "importNotesConfirm": "Ersätt",
+    "importNotesDone": "Agent notes ersatt: {{files}} filer importerade.",
+    "importNotesInvalid": "Filen kunde inte läsas som en zip med Agent notes.",
+    "importNotesInvalidPath": "Inget importerades: zip-filen har en fil utanför Agent notes ({{path}}).",
+    "importNotesTooLarge": "Inget importerades: zip-filen är för stor.",
+    "importNotesTooMany": "Inget importerades: zip-filen har för många filer.",
+    "importNotesEmpty": "Inget importerades: zip-filen har inga filer i Agent notes."
   }
 }

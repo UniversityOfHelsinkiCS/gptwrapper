@@ -255,7 +255,8 @@ const startSocketRun = async (socket: ChatSocket, { input, formData, clientTools
     runId,
     input,
     fileSize: file instanceof Blob ? file.size : undefined,
-    ...(clientTools && clientTools.attachedFolders.length > 0 ? { attachedFolders: clientTools.attachedFolders } : {}),
+    // Also an empty list: it tells the server that this browser runs the My files tools.
+    ...(clientTools ? { attachedFolders: clientTools.attachedFolders } : {}),
   })
 
   let first: RunStreamMessage | undefined

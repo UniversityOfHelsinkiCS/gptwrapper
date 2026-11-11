@@ -1,12 +1,17 @@
 import z from 'zod/v4'
 
 /**
- * The My files tools (issue 11): run in the browser against the My files store, called by the agent over the chat
- * socket (`tool.request` / `tool.result` in `chatSocket.ts`). The server only defines them for the model and relays
- * the calls; the browser executor (`client/util/myFiles/agentTools.ts`) checks every path itself.
+ * The My files tools (issues 11 and 12): run in the browser against the My files store, called by the agent over the
+ * chat socket (`tool.request` / `tool.result` in `chatSocket.ts`). The server only defines them for the model and
+ * relays the calls; the browser executor (`client/util/myFiles/agentTools.ts`) checks every path itself. The read
+ * tools see the attached folders, `Outputs/` and `Agent notes/`; the write tools write only in `Outputs/` and
+ * `Agent notes/`, and `delete_file` deletes only in `Agent notes/`.
  */
-export const FILE_TOOL_NAMES = ['ls', 'read_file', 'glob', 'grep'] as const
+export const FILE_READ_TOOL_NAMES = ['ls', 'read_file', 'glob', 'grep'] as const
+export const FILE_WRITE_TOOL_NAMES = ['write_file', 'edit_file', 'delete_file'] as const
+export const FILE_TOOL_NAMES = [...FILE_READ_TOOL_NAMES, ...FILE_WRITE_TOOL_NAMES] as const
 export type FileToolName = (typeof FILE_TOOL_NAMES)[number]
+export type FileWriteToolName = (typeof FILE_WRITE_TOOL_NAMES)[number]
 
 export const isFileToolName = (name: string): name is FileToolName => (FILE_TOOL_NAMES as readonly string[]).includes(name)
 
@@ -30,7 +35,15 @@ export const FILE_TOOL_LIMITS = {
   grepLineChars: 300,
   /** Characters of a regular expression or glob pattern. */
   patternChars: 500,
+  /** Characters of a file the agent writes (`write_file` content, or a file after `edit_file`). */
+  writeChars: 100_000,
 } as const
+
+/**
+ * Reserved for the typed learning graph tools (Phase 4): the generic write tools refuse it, in any case. Restoring it
+ * from a zip of `Agent notes/` is allowed.
+ */
+export const LEARNING_GRAPH_PATH = 'Agent notes/learning-graph.json'
 
 const PathSchema = z.string().max(4096)
 
@@ -54,6 +67,18 @@ export const FileToolInputSchemas = {
     path: PathSchema.optional().describe('folder or file to search, relative to My files; default all the folders you can see'),
     ignore_case: z.boolean().optional().describe('match case-insensitively; default false'),
   }),
+  write_file: z.object({
+    path: PathSchema.describe('file to create or replace, in "Outputs/" or "Agent notes/", e.g. "Outputs/study-plan.md"'),
+    content: z.string().max(FILE_TOOL_LIMITS.writeChars).describe('the whole text of the file'),
+  }),
+  edit_file: z.object({
+    path: PathSchema.describe('file to change, in "Outputs/" or "Agent notes/", e.g. "Agent notes/learner-profile.md"'),
+    old: z.string().min(1).max(FILE_TOOL_LIMITS.writeChars).describe('the exact text to replace; it must occur exactly once in the file'),
+    new: z.string().max(FILE_TOOL_LIMITS.writeChars).describe('the text that replaces it'),
+  }),
+  delete_file: z.object({
+    path: PathSchema.describe('file or folder to delete, in "Agent notes/" only, e.g. "Agent notes/old-plan.md"'),
+  }),
 } satisfies Record<FileToolName, z.ZodType>
 
 export type FileToolInput<Name extends FileToolName> = z.infer<(typeof FileToolInputSchemas)[Name]>
@@ -68,6 +93,9 @@ export type FileToolSummary =
   | { tool: 'read_file'; path: string; startLine: number; endLine: number; totalLines: number; excerpt: string }
   | { tool: 'glob'; pattern: string; matches: string[]; total: number }
   | { tool: 'grep'; pattern: string; path: string; matches: { path: string; line: number; text: string }[]; total: number }
+  | { tool: 'write_file'; path: string; bytes: number; created: boolean }
+  | { tool: 'edit_file'; path: string; bytes: number }
+  | { tool: 'delete_file'; path: string }
 
 /** How many entries, matches and characters a summary keeps. */
 export const FILE_TOOL_SUMMARY_LIMITS = { entries: 30, matches: 10, excerptChars: 200, matchChars: 120 } as const

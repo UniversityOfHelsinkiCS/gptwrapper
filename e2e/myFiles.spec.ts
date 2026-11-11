@@ -1,7 +1,8 @@
-import { mkdtempSync, mkdirSync, rmSync, utimesSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, utimesSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, type Page } from '@playwright/test'
+import { strToU8, zipSync } from 'fflate'
 import { adminTest, studentTest } from './fixtures'
 import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from './utils/test-helpers'
 
@@ -163,4 +164,91 @@ studentTest('students cannot attach folders', async ({ page }) => {
   await acceptDisclaimer(page)
   await expect(page.getByTestId('chat-input')).toBeVisible()
   await expect(page.getByTestId('attach-folders-button')).toHaveCount(0)
+})
+
+adminTest('the agent writes a file into Outputs, downloaded from the chat and from My files', async ({ page }) => {
+  await page.goto('/test-course-course-id')
+  await acceptDisclaimer(page)
+  await useMockModel(page)
+
+  // No folders attached: Outputs and Agent notes are in every chat
+  await sendChatMessage(page, 'writeout study-plan.md')
+  await closeSendPreference(page)
+  const part = page.getByTestId('tool-part')
+  await expect(part).toHaveAttribute('data-tool-name', 'write_file')
+  await expect(part).toHaveAttribute('data-tool-status', 'ok')
+  await expect(part).toContainText('Wrote the file Outputs/study-plan.md')
+
+  const outputs = page.getByTestId('output-files')
+  await expect(outputs.getByTestId('output-file')).toHaveAttribute('data-path', 'Outputs/study-plan.md')
+  const [fromChat] = await Promise.all([page.waitForEvent('download'), outputs.getByRole('button', { name: 'Download study-plan.md' }).click()])
+  expect(fromChat.suggestedFilename()).toBe('study-plan.md')
+  expect(readFileSync(await fromChat.path(), 'utf8')).toContain('A file written by the mock model.')
+
+  await page.getByTestId('my-files-button').click()
+  const dialog = page.getByRole('dialog', { name: 'My files' })
+  await expect(dialog.locator('[data-folder="Outputs"]')).toContainText('Files: 1')
+  await dialog.getByRole('button', { name: /^Outputs/ }).click()
+  const [fromDialog] = await Promise.all([page.waitForEvent('download'), dialog.getByRole('button', { name: 'Download study-plan.md' }).click()])
+  expect(fromDialog.suggestedFilename()).toBe('study-plan.md')
+  expect(readFileSync(await fromDialog.path(), 'utf8')).toContain('A file written by the mock model.')
+  await dialog.getByTestId('my-files-close').click()
+
+  // A write outside Outputs and Agent notes is refused in the browser
+  await sendChatMessage(page, 'writeout ../Course notes/x.md')
+  await expect(part.nth(1)).toHaveAttribute('data-tool-status', 'error')
+  await expect(page.getByTestId('assistant-message').nth(1)).toContainText('not a valid path')
+  await expect(page.getByTestId('output-files')).toHaveCount(1)
+})
+
+adminTest('notes written in one chat are read by the agent in a new chat, and export and import as a zip', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-notes-'))
+  try {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+
+    await sendChatMessage(page, 'note Goal: pass the thermodynamics exam in May.')
+    await closeSendPreference(page)
+    await expect(page.getByTestId('tool-part')).toHaveAttribute('data-tool-status', 'ok')
+    await expect(page.getByTestId('tool-part')).toContainText('Wrote the file Agent notes/learner-profile.md')
+    // Notes are not outputs
+    await expect(page.getByTestId('output-files')).toHaveCount(0)
+
+    await page.getByTestId('new-conversation-button').click()
+    await page.getByTestId('submit-confirm-reset').click()
+    await expect(page.getByTestId('assistant-message')).toHaveCount(0)
+
+    // The mock model lists Agent notes and reads its first file
+    await sendChatMessage(page, 'files Agent notes')
+    await expect(page.getByTestId('tool-part').nth(1)).toContainText('Read the file Agent notes/learner-profile.md')
+    await expect(page.getByTestId('assistant-message')).toContainText('Goal: pass the thermodynamics exam in May.')
+
+    // The student views the note, exports Agent notes and imports the zip back
+    await page.getByTestId('my-files-button').click()
+    const dialog = page.getByRole('dialog', { name: 'My files' })
+    await dialog.getByRole('button', { name: /^Agent notes/ }).click()
+    await dialog.getByRole('button', { name: 'View learner-profile.md' }).click()
+    await expect(dialog.getByTestId('my-files-note-text')).toHaveText('Goal: pass the thermodynamics exam in May.')
+
+    const [exported] = await Promise.all([page.waitForEvent('download'), dialog.getByTestId('my-files-export-notes').click()])
+    expect(exported.suggestedFilename()).toBe('agent-notes.zip')
+    const zipPath = join(root, 'agent-notes.zip')
+    await exported.saveAs(zipPath)
+
+    await dialog.getByTestId('my-files-input-notes-zip').setInputFiles(zipPath)
+    const confirm = page.getByRole('dialog', { name: 'Replace Agent notes?' })
+    await expect(confirm).toContainText('the 1 files in agent-notes.zip')
+    await page.getByTestId('confirm-dialog-confirm').click()
+    await expect(dialog.getByTestId('my-files-status')).toContainText('Agent notes replaced: 1 files imported.')
+    await expect(dialog.locator('[data-folder="Agent notes"]')).toContainText('Files: 1')
+
+    // A zip with a path outside Agent notes is refused
+    writeFileSync(join(root, 'evil.zip'), zipSync({ 'Agent notes/ok.md': strToU8('ok'), '../evil.md': strToU8('evil') }))
+    await dialog.getByTestId('my-files-input-notes-zip').setInputFiles(join(root, 'evil.zip'))
+    await expect(dialog.getByTestId('my-files-status')).toContainText('the zip has a file outside Agent notes (../evil.md)')
+    await expect(dialog.locator('[data-folder="Agent notes"]')).toContainText('Files: 1')
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
 })

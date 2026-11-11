@@ -359,6 +359,20 @@ describe('client-executed tools over the chat socket', () => {
     client.ws.close()
   })
 
+  test('without attached folders, the agent writes a file into Outputs through the browser', async () => {
+    const client = await connect(adminHeaders)
+    client.send(runStart('1', 'writeout plan.md', []))
+
+    const write = await toolRequest(client, 'write_file')
+    expect(write).toMatchObject({ callId: 'mock_write_file_id', input: { path: 'Outputs/plan.md', content: expect.stringContaining('# plan.md') } })
+    const artifact = { tool: 'write_file', path: 'Outputs/plan.md', bytes: 40, created: true }
+    client.send({ type: 'tool.result', runId: '1', callId: write.callId, result: { status: 'ok', content: 'Created "Outputs/plan.md" (40 bytes).', artifact } })
+
+    expect((await client.runEnd('1')).result).toEqual({ status: 'completed' })
+    expect(client.eventsOf('1').find((e) => e.type === 'tool.end')).toMatchObject({ callId: 'mock_write_file_id', status: 'ok', result: artifact })
+    client.ws.close()
+  })
+
   test('results for another run or an unknown call are ignored', async () => {
     const client = await connect(adminHeaders)
     client.send(runStart('1', 'files Course notes', ['Course notes']))
@@ -414,7 +428,7 @@ describe('client-executed tools over the chat socket', () => {
     expect(vi.mocked(runAgent).mock.calls[0][0].signal.reason).toBe('client_disconnected')
   })
 
-  test('students and runs without attached folders get no client tools', async () => {
+  test('students, and browsers that do not run the tools, get no client tools; admins get them also without folders', async () => {
     const student = await connect()
     student.send(runStart('1', 'say hi', ['Course notes']))
     await student.runEnd('1')
@@ -423,8 +437,10 @@ describe('client-executed tools over the chat socket', () => {
     await admin.runEnd('2')
     admin.send(runStart('3', 'say hi', ['Outputs', '../x']))
     await admin.runEnd('3')
+    admin.send(runStart('4', 'say hi', []))
+    await admin.runEnd('4')
 
-    expect(vi.mocked(runAgent).mock.calls.map(([params]) => params.clientTools)).toEqual([undefined, undefined, undefined])
+    expect(vi.mocked(runAgent).mock.calls.map(([params]) => params.clientTools?.attachedFolders)).toEqual([undefined, undefined, [], []])
     expect(student.received.some((m) => m.type === 'tool.request')).toBe(false)
     student.ws.close()
     admin.ws.close()

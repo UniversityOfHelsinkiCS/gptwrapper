@@ -10,6 +10,10 @@ import {
   basicTestContent,
   firstFileInListing,
   MOCK_FILES_PREFIX,
+  MOCK_NOTE_PATH,
+  MOCK_NOTE_PREFIX,
+  MOCK_WRITE_OUTPUT_PREFIX,
+  mockOutputContent,
   codeTestContent,
   mathTestContent,
   mockSubagentLeadIn,
@@ -102,6 +106,28 @@ export class MockModel extends BaseChatModel {
       // `files <folder>` lists the folder with the My files tools (on for socket runs with attached folders), then reads its first file.
       const path = lastHuman.slice(MOCK_FILES_PREFIX.length).trim()
       return fakeModel().respond(new AIMessage({ content: '', tool_calls: [{ name: 'ls', args: { path }, id: 'mock_ls_id', type: 'tool_call' }] }))
+    }
+    if (lastHuman.startsWith(MOCK_WRITE_OUTPUT_PREFIX)) {
+      // `writeout <name>` writes `Outputs/<name>` with the My files tools (on for admins' socket runs).
+      const name = lastHuman.slice(MOCK_WRITE_OUTPUT_PREFIX.length).trim()
+      return fakeModel().respond(
+        new AIMessage({
+          content: '',
+          tool_calls: [
+            { name: 'write_file', args: { path: `Outputs/${name}`, content: mockOutputContent(name) }, id: 'mock_write_file_id', type: 'tool_call' },
+          ],
+        }),
+      )
+    }
+    if (lastHuman.startsWith(MOCK_NOTE_PREFIX)) {
+      // `note <text>` writes the text as a note in `Agent notes/` with the My files tools.
+      const content = `${lastHuman.slice(MOCK_NOTE_PREFIX.length).trim()}\n`
+      return fakeModel().respond(
+        new AIMessage({
+          content: '',
+          tool_calls: [{ name: 'write_file', args: { path: MOCK_NOTE_PATH, content }, id: 'mock_write_note_id', type: 'tool_call' }],
+        }),
+      )
     }
     if (lastHuman.startsWith('say ')) {
       return fakeModel().respond(new AIMessage(lastHuman.replace('say ', '')))

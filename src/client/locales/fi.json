@@ -250,7 +250,11 @@
     "fileToolReadFileLines": "Luki tiedoston {{path}}, rivit {{start}}–{{end}} / {{total}}",
     "fileToolGlob": "Etsi tiedostoja hakuehdolla {{pattern}}",
     "fileToolGrep": "Haki tekstiä {{pattern}} kohteesta {{path}}",
-    "fileToolFailed": "{{action}}: epäonnistui"
+    "fileToolFailed": "{{action}}: epäonnistui",
+    "fileToolWriteFile": "Kirjoitti tiedoston {{path}}",
+    "fileToolEditFile": "Muokkasi tiedostoa {{path}}",
+    "fileToolDeleteFile": "Poisti kohteen {{path}}",
+    "outputFiles": "Tämän vastauksen tiedostot (Omat tiedostot, Outputs)"
   },
   "settings": {
     "prompt": "Keskustelun alustus",
@@ -1108,6 +1112,27 @@
     "attachFolders": "Liitä kansioita Omista tiedostoista",
     "attachedFolder": "Liitetty kansio {{name}}",
     "detachFolder": "poista liitos Delete-näppäimellä",
-    "noFoldersToAttach": "Lisää ensin kansioita Omiin tiedostoihin."
+    "noFoldersToAttach": "Lisää ensin kansioita Omiin tiedostoihin.",
+    "actions": "Toiminnot",
+    "download": "Lataa",
+    "downloadNamed": "Lataa {{name}}",
+    "downloadFailed": "Tiedostoa ei voitu ladata. Se ei ehkä ole enää Omissa tiedostoissa.",
+    "fileMissing": "{{name}} ei ole enää Omissa tiedostoissa.",
+    "viewNote": "Näytä",
+    "hideNote": "Piilota",
+    "viewNoteNamed": "Näytä {{name}}",
+    "hideNoteNamed": "Piilota {{name}}",
+    "noteContent": "Tiedoston {{name}} sisältö",
+    "exportNotes": "Vie Agent notes zip-tiedostona",
+    "importNotes": "Tuo Agent notes zip-tiedostosta",
+    "importNotesConfirmTitle": "Korvataanko Agent notes?",
+    "importNotesConfirmMessage": "Kaikki Agent notes -kansion tiedostot poistetaan, ja tilalle tuodaan {{files}} tiedostoa zip-tiedostosta {{name}}.",
+    "importNotesConfirm": "Korvaa",
+    "importNotesDone": "Agent notes korvattu: {{files}} tiedostoa tuotu.",
+    "importNotesInvalid": "Tiedostoa ei voitu lukea Agent notes -zip-tiedostona.",
+    "importNotesInvalidPath": "Mitään ei tuotu: zip-tiedostossa on tiedosto Agent notes -kansion ulkopuolella ({{path}}).",
+    "importNotesTooLarge": "Mitään ei tuotu: zip-tiedosto on liian suuri.",
+    "importNotesTooMany": "Mitään ei tuotu: zip-tiedostossa on liikaa tiedostoja.",
+    "importNotesEmpty": "Mitään ei tuotu: zip-tiedostossa ei ole tiedostoja Agent notes -kansiossa."
   }
 }

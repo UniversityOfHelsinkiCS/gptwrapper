@@ -1,3 +1,4 @@
+import EditNoteOutlined from '@mui/icons-material/EditNoteOutlined'
 import FolderOutlined from '@mui/icons-material/FolderOutlined'
 import { useTranslation } from 'react-i18next'
 import type { ToolPart } from '../../../../shared/agentChat'
@@ -13,7 +14,9 @@ const readSummary = (part: ToolPart): Extract<FileToolSummary, { tool: 'read_fil
   return part.status === 'ok' && result?.tool === 'read_file' ? (result as Extract<FileToolSummary, { tool: 'read_file' }>) : null
 }
 
-/** A My files tool call (`ls`, `read_file`, `glob`, `grep`) in its place in the answer: what the agent looked at. */
+const WRITE_TOOLS = ['write_file', 'edit_file', 'delete_file']
+
+/** A My files tool call in its place in the answer: what the agent looked at, wrote or deleted. */
 export const FileToolPart = ({ part }: { part: ToolPart }) => {
   const { t } = useTranslation()
   const input = inputOf(part)
@@ -32,11 +35,24 @@ export const FileToolPart = ({ part }: { part: ToolPart }) => {
       }
       case 'glob':
         return t('chat:fileToolGlob', { ...params, pattern: str(input.pattern) })
+      case 'write_file':
+        return t('chat:fileToolWriteFile', { ...params, path: str(input.path) })
+      case 'edit_file':
+        return t('chat:fileToolEditFile', { ...params, path: str(input.path) })
+      case 'delete_file':
+        return t('chat:fileToolDeleteFile', { ...params, path: str(input.path) })
       default:
         return t('chat:fileToolGrep', { ...params, pattern: str(input.pattern), path: pathOrRoot(str(input.path)) })
     }
   })()
 
   const text = part.status === 'error' ? t('chat:fileToolFailed', { ...params, action }) : part.status === 'running' ? `${action}…` : action
-  return <ToolPartRow part={part} label={t('myFiles:title')} icon={<FolderOutlined fontSize="small" />} text={text} />
+  return (
+    <ToolPartRow
+      part={part}
+      label={t('myFiles:title')}
+      icon={WRITE_TOOLS.includes(part.name) ? <EditNoteOutlined fontSize="small" /> : <FolderOutlined fontSize="small" />}
+      text={text}
+    />
+  )
 }

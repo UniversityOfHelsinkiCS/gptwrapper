@@ -28,6 +28,7 @@ import {
 import type { AssistantMessageV2, AssistantPart } from '../../../shared/agentChat'
 import { type ClientChatMessage, messageToolResults, messageToText } from './messages'
 import { ToolPartView } from './tools/registry'
+import { OutputFiles } from './tools/OutputFiles'
 import { QuizAnswerProvider, type QuizSelection } from './tools/quizAnswerContext'
 import { ThinkingBlock } from './ThinkingBlock'
 import { SubagentCard } from './SubagentCard'
@@ -387,6 +388,7 @@ const AssistantMessageItem = ({
     >
       <AssistantMessageInfo message={message} headingId={headingId} number={number} />
       <AssistantParts parts={message.parts} />
+      <OutputFiles parts={message.parts} />
       {message.error && (
         <Box sx={{ mt: 2 }}>
           <Typography variant="body1" fontStyle="italic" color="error.main">

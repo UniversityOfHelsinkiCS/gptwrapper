@@ -9,14 +9,14 @@ export type ChatRun = {
   /** Carries the attached file, if any. `data` is set from `input`. */
   formData: FormData
   /**
-   * Tools the browser runs for the agent (the My files tools on the attached folders). Only the WebSocket transport
+   * Tools the browser runs for the agent (the My files tools: the attached folders, `Outputs/` and `Agent notes/`). Only the WebSocket transport
    * uses them; over HTTP the run has no client tools.
    */
   clientTools?: ClientTools
 }
 
 export type ClientTools = {
-  /** Sent with the run so the server enables the tools and tells the model about the folders. */
+  /** Sent with the run (also when empty) so the server enables the tools and tells the model about the folders. */
   attachedFolders: string[]
   /** Runs one tool call. Must check the input itself: it comes from the model through the server. */
   execute: (name: string, input: unknown) => Promise<ClientToolResult>

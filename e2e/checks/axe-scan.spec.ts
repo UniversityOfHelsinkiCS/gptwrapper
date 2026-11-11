@@ -459,3 +459,40 @@ adminTest.describe('axe wcag scan for chat with attached folders', () => {
     }
   })
 })
+
+adminTest.describe('axe wcag scan for agent outputs and notes', () => {
+  adminTest.afterAll(writeAxeReport)
+
+  adminTest('scan chat with an output file list', async ({ page }, testInfo) => {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+    await sendChatMessage(page, 'writeout study-plan.md')
+    await closeSendPreference(page)
+    await expect(page.getByTestId('output-file')).toBeVisible()
+    await page.mouse.move(0, 0)
+    await expect(page.getByRole('tooltip')).toHaveCount(0)
+    await scan(page, testInfo.title)
+  })
+
+  adminTest('scan my files dialog with the Outputs list and a note open', async ({ page }, testInfo) => {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+    await sendChatMessage(page, 'writeout study-plan.md')
+    await closeSendPreference(page)
+    await expect(page.getByTestId('output-file')).toBeVisible()
+    await sendChatMessage(page, 'note Goal: pass the exam.')
+    await expect(page.getByTestId('tool-part').nth(1)).toHaveAttribute('data-tool-status', 'ok')
+
+    await page.getByTestId('my-files-button').click()
+    const dialog = page.getByRole('dialog', { name: 'My files' })
+    await dialog.getByRole('button', { name: /^Outputs/ }).click()
+    await expect(dialog.getByRole('button', { name: 'Download study-plan.md' })).toBeVisible()
+    await dialog.getByRole('button', { name: /^Agent notes/ }).click()
+    await dialog.getByRole('button', { name: 'View learner-profile.md' }).click()
+    await expect(dialog.getByTestId('my-files-note-text')).toContainText('Goal: pass the exam.')
+    await page.mouse.move(0, 0)
+    await scan(page, testInfo.title)
+  })
+})

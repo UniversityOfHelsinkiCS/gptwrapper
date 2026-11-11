@@ -301,12 +301,12 @@ const ChatV2Content = () => {
       promptInfo,
     }
 
-    // The browser runs the file tools itself and checks every path the agent asks for (`agentTools.ts`).
+    // The browser runs the file tools itself and checks every path the agent asks for (`agentTools.ts`). They are on
+    // without attached folders too: `Outputs/` and `Agent notes/` are in every chat.
     const folders = attachedFolders
-    const clientTools: ClientTools | undefined =
-      canAttachFolders && folders.length > 0
-        ? { attachedFolders: folders, execute: (name, toolInput) => executeFileTool(myFilesStore, folders, name, toolInput) }
-        : undefined
+    const clientTools: ClientTools | undefined = canAttachFolders
+      ? { attachedFolders: folders, execute: (name, toolInput) => executeFileTool(myFilesStore, folders, name, toolInput) }
+      : undefined
 
     try {
       const res = await transport.start({

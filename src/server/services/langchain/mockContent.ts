@@ -9,11 +9,22 @@ export const basicTestContent = `### You are calling mock endpoint for streaming
 - To mock a subagent, write: **subagent** (optionally followed by its task)
 - To mock a quiz, write: **quiz** (or **quiz multi** for a multi-select quiz)
 - To mock reading My files, attach a folder and write: **files** followed by the folder name
+- To mock writing a file into Outputs, write: **writeout** followed by the file name
+- To mock writing a note into Agent notes, write: **note** followed by the text of the note
 OVER
 `
 
 /** `files <folder>`: the mock model lists the folder with `ls` and reads its first file with `read_file`. */
 export const MOCK_FILES_PREFIX = 'files'
+
+/** `writeout <name>`: the mock model writes `Outputs/<name>` with `write_file`. */
+export const MOCK_WRITE_OUTPUT_PREFIX = 'writeout '
+
+/** `note <text>`: the mock model writes `<text>` into `MOCK_NOTE_PATH` with `write_file`. */
+export const MOCK_NOTE_PREFIX = 'note '
+export const MOCK_NOTE_PATH = 'Agent notes/learner-profile.md'
+
+export const mockOutputContent = (name: string) => `# ${name}\n\nA file written by the mock model.\n`
 
 /** The first file in an `ls` result, whose file lines are `<path> (<n> bytes)` (see `client/util/myFiles/agentTools.ts`). */
 export const firstFileInListing = (listing: string): string | null => {

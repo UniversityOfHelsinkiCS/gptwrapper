@@ -210,8 +210,9 @@ const handleConnection = (ws: WebSocket, socketUser: SocketUser, { clientToolTim
     const run: ActiveRun = { runId, controller, clientTools }
     activeRun = run
     const startedAt = Date.now()
-    const folders = canUseClientTools(socketUser) ? parseAttachedFolders(attachedFolders) : []
-    const meta: Record<string, unknown> = { streamVersion: 'v4', transport: 'websocket', fileSize, attachedFolderCount: folders.length || undefined }
+    // `attachedFolders` (also an empty list) says that the browser runs the My files tools.
+    const folders = canUseClientTools(socketUser) && attachedFolders !== undefined ? parseAttachedFolders(attachedFolders) : null
+    const meta: Record<string, unknown> = { streamVersion: 'v4', transport: 'websocket', fileSize, attachedFolderCount: folders?.length || undefined }
 
     // An aborted run may still be winding down; it must not write into the next run.
     const emit = async (event: ChatEvent) => {
@@ -232,7 +233,7 @@ const handleConnection = (ws: WebSocket, socketUser: SocketUser, { clientToolTim
           meta.timeToStreamStart = Date.now() - startedAt
         },
         emit,
-        clientTools: folders.length > 0 ? { attachedFolders: folders, call: clientTools.call } : undefined,
+        clientTools: folders ? { attachedFolders: folders, call: clientTools.call } : undefined,
       })
       result = runResult
     } catch (error) {

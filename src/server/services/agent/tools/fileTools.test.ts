@@ -37,9 +37,24 @@ describe('file tool modules', () => {
     expect(() => validatePromptTools({ isAdmin: true }, [{ name: 'read_file' }])).toThrow('Unknown tool: read_file')
   })
 
-  test('are enabled only with attached folders', () => {
-    expect(fileToolsFor([])).toEqual([])
+  test('are all enabled, also without attached folders (Outputs and Agent notes are in every chat)', () => {
+    expect(fileToolsFor([])).toEqual(FILE_TOOL_NAMES.map((name) => ({ name, config: { attachedFolders: [] } })))
     expect(fileToolsFor(['Course notes'])).toEqual(FILE_TOOL_NAMES.map((name) => ({ name, config: { attachedFolders: ['Course notes'] } })))
+    expect(FILE_TOOL_NAMES).toEqual(expect.arrayContaining(['write_file', 'edit_file', 'delete_file']))
+  })
+
+  test('instructions without attached folders name only Outputs and Agent notes, and say when to write notes', () => {
+    const text = withToolInstructions('Be helpful.', fileToolsFor([]))
+    expect(text.match(/## Tool: /g)).toHaveLength(1)
+    expect(text).not.toContain('attached to this chat by the student')
+    expect(text).not.toContain('Use the attached files')
+    expect(text).toContain('has not attached any of their own folders')
+    expect(text).toContain('e.g. "Agent notes/notes.md"')
+    expect(text).toContain('- Outputs: when the student asks for a file')
+    expect(text).toContain('stable facts about the student and their goals')
+    expect(text).toContain('not chat logs')
+    expect(text).toContain('read your notes at the start of a chat')
+    expect(text).toContain('"Agent notes/learning-graph.json" is reserved')
   })
 
   test('instructions name the attached folders once, with Outputs and Agent notes', () => {
@@ -50,6 +65,8 @@ describe('file tool modules', () => {
     expect(text).toContain('- "Thesis": attached to this chat')
     expect(text).toContain('- "Outputs"')
     expect(text).toContain('- "Agent notes"')
+    expect(text).toContain('Use the attached files')
+    expect(text).not.toContain('has not attached')
   })
 
   test('a tool calls the browser with its call id and returns content and artifact', async () => {
@@ -150,6 +167,39 @@ describe('file tool summarizeForHistory', () => {
     if (readFile.kind !== 'tool') throw new Error('not a tool')
     const summary = readFile.summarizeForHistory(part('read_file', { path: 'A/x.md' }, FILE_CONTENT))
     expect(summary).toBe('[Used read_file to read "A/x.md" in My files.]')
+  })
+})
+
+describe('write tool summarizeForHistory', () => {
+  const summarize = (name: string, toolPart: ToolPart) => {
+    const module = getToolModule(name)!
+    if (module.kind !== 'tool') throw new Error('not a tool')
+    return module.summarizeForHistory(toolPart)
+  }
+
+  test('says what was written, edited or deleted, never the content', () => {
+    const content = 'The whole study plan, which must not be repeated in the history summary.'
+    expect(
+      summarize(
+        'write_file',
+        part('write_file', { path: 'Outputs/plan.md', content }, { tool: 'write_file', path: 'Outputs/plan.md', bytes: 72, created: true }),
+      ),
+    ).toBe('[Created "Outputs/plan.md" in My files (72 bytes).]')
+    expect(
+      summarize(
+        'write_file',
+        part('write_file', { path: 'Outputs/plan.md', content }, { tool: 'write_file', path: 'Outputs/plan.md', bytes: 72, created: false }),
+      ),
+    ).toBe('[Replaced "Outputs/plan.md" in My files (72 bytes).]')
+    expect(
+      summarize('edit_file', part('edit_file', { path: 'Agent notes/p.md', old: 'a', new: 'b' }, { tool: 'edit_file', path: 'Agent notes/p.md', bytes: 5 })),
+    ).toBe('[Edited "Agent notes/p.md" in My files (5 bytes now).]')
+    expect(summarize('delete_file', part('delete_file', { path: 'Agent notes/p.md' }, { tool: 'delete_file', path: 'Agent notes/p.md' }))).toBe(
+      '[Deleted "Agent notes/p.md" from My files.]',
+    )
+    expect(summarize('write_file', part('write_file', { path: 'Course notes/x.md', content }, 'Error: "Course notes/x.md" cannot be changed.', 'error'))).toBe(
+      '[Tried to write "Course notes/x.md" in My files, but it failed: Error: "Course notes/x.md" cannot be changed.]',
+    )
   })
 })
 
