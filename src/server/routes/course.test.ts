@@ -305,6 +305,49 @@ describe('courses/:id/enrolments (requireFullAccess)', () => {
   })
 })
 
+describe('PUT courses/:id', () => {
+  const putCourse = (body: object) =>
+    api.fetch('/courses/course-1', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+
+  const teacher = { id: 'teacher-1', isAdmin: false }
+  const admin = { id: 'admin-1', isAdmin: true }
+
+  const mockCourse = () => {
+    const course = courseFixture({ saveDiscussions: false, save: vi.fn() }) as any
+    vi.mocked(ChatInstance.findOne).mockResolvedValue(course as any)
+    return course
+  }
+
+  test('responsible teacher cannot change research course status', async () => {
+    currentUser = teacher
+    setMembership({ responsible: true })
+    const course = mockCourse()
+    const response = await putCourse({ saveDiscussions: true })
+    expect(response.status).toBe(403)
+    expect(course.save).not.toHaveBeenCalled()
+    expect(course.saveDiscussions).toBe(false)
+  })
+
+  test('admin can change research course status', async () => {
+    currentUser = admin
+    const course = mockCourse()
+    const response = await putCourse({ saveDiscussions: true })
+    expect(response.status).toBe(200)
+    expect(course.save).toHaveBeenCalled()
+    expect(course.saveDiscussions).toBe(true)
+  })
+
+  test('responsible teacher can still change the activity period', async () => {
+    currentUser = teacher
+    setMembership({ responsible: true })
+    const course = mockCourse()
+    const activityPeriod = { startDate: '2026-01-01', endDate: '2026-12-31' }
+    const response = await putCourse({ activityPeriod })
+    expect(response.status).toBe(200)
+    expect(course.activityPeriod).toEqual(activityPeriod)
+  })
+})
+
 describe('courses/:id/discussions', () => {
   beforeEach(() => {
     vi.mocked(Discussion.findAll).mockResolvedValue([])

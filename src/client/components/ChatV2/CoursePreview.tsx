@@ -49,6 +49,7 @@ import { usagePercent, gaugeColorKey, formatTokens, UsageInfoButton } from './Us
 import { canManageCourse, formatDate, isCustomChatInstance } from './util'
 import { OutlineButtonBlue, BlueButton } from './general/Buttons'
 import { CourseActivityPeriodEditor } from '../Courses/Course/CourseActivityPeriodEditor'
+import { ResearchCourseToggle } from '../Courses/Course/ResearchCourseToggle'
 import DiscussionView from '../Courses/Course/Discussions'
 import PromptUsageHistogram from '../Courses/Course/PromptUsageHistogram'
 import { EnrolmentActionUserSearch, ResponsibilityActionUserSearch } from '../Admin/UserSearch'
@@ -326,7 +327,7 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
   const activeCourse: Course = chatInstance ? chatInstance : course
   const activated = activeCourse.activated
   const courseEnded = activeCourse.status === 'EXPIRED'
-  const showDiscussions = canManage && course.saveDiscussions
+  const showDiscussions = canManage && activeCourse.saveDiscussions
 
   return (
     <>
@@ -421,6 +422,9 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
             <CourseActivityPeriodEditor course={activeCourse} />
           </Box>
         )}
+
+        {/* Research course toggle (admins) */}
+        {isAdmin && <ResearchCourseToggle course={activeCourse} />}
 
         {/* Personal usage card */}
         {currentCourseUsage &&

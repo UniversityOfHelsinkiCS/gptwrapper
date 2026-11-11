@@ -63,11 +63,13 @@ export const RedButton = styled(BaseButton)({
   },
 })
 
+export const ORANGE = { main: '#ed6c02', dark: '#e65100' } as const
+
 export const OrangeButton = styled(BaseButton)({
-  backgroundColor: '#ed6c02',
+  backgroundColor: ORANGE.main,
   color: 'white',
   '&:hover': {
-    backgroundColor: '#e65100',
+    backgroundColor: ORANGE.dark,
   },
 })
 

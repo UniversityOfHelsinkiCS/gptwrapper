@@ -34,7 +34,7 @@ import {
 } from './api'
 import { Search } from './Search'
 import { useTranslation } from 'react-i18next'
-import { BlueButton, OutlineButtonBlack, RedButton } from '../ChatV2/general/Buttons'
+import { BlueButton, OrangeButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import { InfoBox } from '../common/InfoBox'
 import { enqueueSnackbar } from '../common/Snackbar'
 import useCurrentUser from '../../hooks/useCurrentUser'
@@ -288,9 +288,9 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
             </DialogContent>
           </Dialog>
           {user?.isAdmin && (
-            <RedButton startIcon={<Autorenew />} onClick={handleReset} aria-describedby="ragIndex-name">
+            <OrangeButton startIcon={<Autorenew />} onClick={handleReset} aria-describedby="ragIndex-name">
               {t('admin:tryAgain')}
-            </RedButton>
+            </OrangeButton>
           )}
           <Button
             startIcon={deleteIndexMutation.isPending ? <CircularProgress size={20} aria-hidden /> : <DeleteOutline />}

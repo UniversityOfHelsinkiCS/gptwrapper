@@ -5,9 +5,12 @@ import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vi
 
 const searchedUser = { id: 'user-2', username: 'salosanna', firstNames: 'Sanna', lastName: 'Salo' }
 
+// the refetched course, tests set its data in place to keep the reference stable
+const courseQuery = vi.hoisted(() => ({ data: undefined as any, refetch: () => {} }))
+
 // hook results must be stable references, CoursePreview copies them into state in effects
 vi.mock('../../hooks/useCourse', () => {
-  const course = { data: undefined, refetch: () => {} }
+  const course = courseQuery
   const enrolments = { data: [] }
   const statistics = { stats: undefined, refetch: () => {} }
   const promptUsages = { data: [] }
@@ -25,6 +28,7 @@ vi.mock('../../util/apiClient', () => ({ default: { post: vi.fn() } }))
 vi.mock('../common/Snackbar', () => ({ enqueueSnackbar: vi.fn() }))
 vi.mock('./UsageSelector', () => ({ usagePercent: () => 0, gaugeColorKey: () => 'primary', formatTokens: String, UsageInfoButton: () => null }))
 vi.mock('../Courses/Course/CourseActivityPeriodEditor', () => ({ CourseActivityPeriodEditor: () => null }))
+vi.mock('../Courses/Course/ResearchCourseToggle', () => ({ ResearchCourseToggle: () => null }))
 vi.mock('../Courses/Course/Discussions', () => ({ default: () => null }))
 vi.mock('../Courses/Course/PromptUsageHistogram', () => ({ default: () => null }))
 // the search results are replaced by a single searched user rendered with the real action button
@@ -49,7 +53,10 @@ beforeAll(async () => {
     interpolation: { escapeValue: false },
   })
 })
-afterEach(() => cleanup())
+afterEach(() => {
+  cleanup()
+  courseQuery.data = undefined
+})
 
 const course = {
   id: 'ci-1',
@@ -115,5 +122,28 @@ describe('CoursePreview adding a teacher', () => {
 
     await waitFor(() => expect((screen.getByRole('button', { name: en.course.add }) as HTMLButtonElement).disabled).toBe(true))
     expect(apiClient.post).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('CoursePreview discussions button', () => {
+  const renderPreview = () =>
+    render(
+      <I18nextProvider i18n={i18n}>
+        <CoursePreview course={{ ...course, saveDiscussions: false }} />
+      </I18nextProvider>,
+    )
+
+  test('follows the refetched course, not a stale course prop', () => {
+    courseQuery.data = { ...course, saveDiscussions: true }
+    renderPreview()
+
+    expect(screen.getByTestId('open-course-discussions-button')).toBeTruthy()
+  })
+
+  test('is hidden when the refetched course is not a research course', () => {
+    courseQuery.data = { ...course, saveDiscussions: false }
+    renderPreview()
+
+    expect(screen.queryByTestId('open-course-discussions-button')).toBeNull()
   })
 })

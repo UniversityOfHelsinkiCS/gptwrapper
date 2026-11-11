@@ -323,6 +323,10 @@ courseRouter.put('/:id', async (req, res) => {
   const { user } = request
   await requireFullAccess(user, chatInstance)
 
+  if (saveDiscussions !== undefined && !user.isAdmin) {
+    throw ApplicationError.Forbidden('Only admins can change research course status')
+  }
+
   if (activityPeriod !== undefined) {
     chatInstance.activityPeriod = activityPeriod
   }
