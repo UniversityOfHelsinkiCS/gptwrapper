@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, test } from 'vitest'
-import { getAzureChatOpenAI, getVertexModelProvider, toGeminiReasoning, toOpenAIReasoning } from './modelGenerators'
+import { getAzureChatOpenAI, getToskaProvider, getVertexModelProvider, toGeminiReasoning, toOpenAIReasoning } from './modelGenerators'
 
 /**
  * The Gemini side is checked only against the request LangChain builds (Vertex cannot be called: the GCP project
@@ -15,6 +15,18 @@ describe('ModelConfig.reasoning per provider', () => {
     const reasoningParam = (model: ReturnType<typeof getAzureChatOpenAI>) => (model.invocationParams() as { reasoning?: unknown }).reasoning
     expect(reasoningParam(getAzureChatOpenAI('gpt-5-mini', true, { effort: 'low', showSummary: true }))).toEqual({ effort: 'low', summary: 'auto' })
     expect(reasoningParam(getAzureChatOpenAI('gpt-5-mini'))).toBeUndefined()
+
+    // ChatOpenAI's own `reasoning` option is dropped for names it does not know as reasoning models
+    expect(reasoningParam(getAzureChatOpenAI('gpt-6-luna', true, { effort: 'medium', showSummary: true }))).toEqual({ effort: 'medium', summary: 'auto' })
+  })
+
+  test('Toska (Responses API) gets the model name, and the reasoning options like Azure', () => {
+    const paramsOf = (model: ReturnType<typeof getToskaProvider>) => model.invocationParams() as { model?: string; reasoning?: unknown }
+
+    expect(paramsOf(getToskaProvider('gemma-4-26B-A4B')).model).toBe('gemma-4-26B-A4B')
+    expect(paramsOf(getToskaProvider('gemma-4-26B-A4B')).reasoning).toBeUndefined()
+    expect(paramsOf(getToskaProvider('gemma-4-26B-A4B', true, { effort: 'low', showSummary: true })).reasoning).toEqual({ effort: 'low', summary: 'auto' })
+    expect(paramsOf(getToskaProvider('gemma-4-26B-A4B', true, { effort: 'high', showSummary: false })).reasoning).toEqual({ effort: 'high' })
   })
 
   test('Gemini gets thinkingConfig with includeThoughts from the effort', async () => {

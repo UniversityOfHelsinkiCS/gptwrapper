@@ -7,6 +7,12 @@ import { DEFAULT_MODEL_TEMPERATURE, DEFAULT_VERTEX_LOCATION, type ModelConfig, t
 export const toOpenAIReasoning = ({ effort, showSummary }: ModelReasoning) => ({ effort, ...(showSummary ? { summary: 'auto' as const } : {}) })
 
 /**
+ * The `reasoning` request field goes through `modelKwargs`: ChatOpenAI sends its own `reasoning` option only for
+ * model names it knows as reasoning models (`o1…`, `gpt-5…`), so it would silently drop it for gpt-6-* and Toska models.
+ */
+const openAIReasoningFields = (reasoning?: ModelReasoning) => (reasoning ? { modelKwargs: { reasoning: toOpenAIReasoning(reasoning) } } : {})
+
+/**
  * Gemini thinking options. LangChain turns `reasoningEffort` into `thinkingConfig` with `includeThoughts: true`
  * (and a `thinkingBudget` for Gemini 2.5, `thinkingLevel` for Gemini 3).
  */
@@ -21,11 +27,12 @@ export const getAzureChatOpenAI = (modelName: string, streaming = true, reasonin
     useResponsesApi: true,
     apiKey: AZURE_API_KEY,
     streaming: streaming,
-    ...(reasoning ? { reasoning: toOpenAIReasoning(reasoning) } : {}),
+    ...openAIReasoningFields(reasoning),
   })
 
-export const getToskaProvider = (modelName: string, streaming = true) =>
+export const getToskaProvider = (modelName: string, streaming = true, reasoning?: ModelReasoning) =>
   new ChatOpenAI({
+    model: modelName,
     configuration: {
       baseURL: INFERENCE_API_URL,
       defaultHeaders: {
@@ -35,6 +42,7 @@ export const getToskaProvider = (modelName: string, streaming = true) =>
     useResponsesApi: true,
     streaming: streaming,
     apiKey: 'none',
+    ...openAIReasoningFields(reasoning),
   })
 
 export const getVertexModelProvider = (modelConfig: Pick<ModelConfig, 'name' | 'modelRegion' | 'reasoning'>) => {

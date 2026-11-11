@@ -78,6 +78,8 @@ export const validModels: ModelConfig[] = [
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Azure,
     tags: ['cheap', 'fast', 'free'],
+    // medium is the deployment's default effort (Azure echoes it when no effort is sent); the config only adds the reasoning summary.
+    reasoning: { effort: 'medium', showSummary: true },
   },
   {
     name: 'gpt-5-mini',
@@ -157,6 +159,8 @@ export const validModels: ModelConfig[] = [
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',
     tags: ['premium'],
+    // medium is the deployment's default effort (Azure echoes it when no effort is sent); the config only adds the reasoning summary.
+    reasoning: { effort: 'medium', showSummary: true },
   },
   {
     name: 'gpt-6.1-sol',
@@ -168,6 +172,8 @@ export const validModels: ModelConfig[] = [
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',
     tags: ['premium'],
+    // medium is the deployment's default effort (Azure echoes it when no effort is sent); the config only adds the reasoning summary.
+    reasoning: { effort: 'medium', showSummary: true },
   },
   // {
   //   name: 'DeepSeek-V4-Flash',

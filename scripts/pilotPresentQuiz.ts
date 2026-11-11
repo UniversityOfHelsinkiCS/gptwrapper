@@ -79,7 +79,7 @@ const user: User = { id: 'pilot', username: 'pilot', isAdmin: true, iamGroups: [
 
 const getModel = (config: ModelConfig): BaseChatModel => {
   if (config.provider === ModelProvider.Azure) return getAzureChatOpenAI(config.name, true, config.reasoning)
-  if (config.provider === ModelProvider.Toska) return getToskaProvider(config.name)
+  if (config.provider === ModelProvider.Toska) return getToskaProvider(config.name, true, config.reasoning)
   throw new Error(`The pilot does not support ${config.provider}`)
 }
 

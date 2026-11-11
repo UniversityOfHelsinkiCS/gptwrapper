@@ -361,6 +361,7 @@ const getChatModel = (modelConfig: ModelConfig, tools: StructuredTool[]): ChatMo
       return tools.length > 0 ? vertexModel.bindTools(tools) : vertexModel
     }
     case ModelProvider.Toska: {
+      // Like Azure and Vertex above, v3 leaves out the reasoning config.
       const toskaModel = getToskaProvider(modelConfig.name)
       return tools.length > 0 ? toskaModel.bindTools(tools) : toskaModel
     }

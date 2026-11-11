@@ -359,7 +359,7 @@ const getAgentModel = (modelConfig: ModelConfig): BaseChatModel => {
     case ModelProvider.Vertex:
       return getVertexModelProvider(modelConfig)
     case ModelProvider.Toska:
-      return getToskaProvider(modelConfig.name)
+      return getToskaProvider(modelConfig.name, true, modelConfig.reasoning)
     case ModelProvider.Mock:
       return new MockModel({ tools: [] })
     default:
