@@ -13,8 +13,8 @@ export type ChatRun = {
 export type ChatStartResult = AiApiJsonResponse | { events: AsyncIterable<ChatEvent> }
 
 /**
- * How the client runs a chat. The HTTP NDJSON transport is used now; a WebSocket transport can replace it
- * without changing the rest of the client. `signal.reason` tells why a run was aborted.
+ * How the client runs a chat: over HTTP NDJSON (`HttpChatTransport`) or a WebSocket (`WebSocketChatTransport`
+ * in `chatSocket.ts`). `signal.reason` tells why a run was aborted.
  */
 export interface ChatTransport {
   start(run: ChatRun): Promise<ChatStartResult>
@@ -58,8 +58,12 @@ export async function* readNdjsonEvents(stream: ReadableStream<Uint8Array>): Asy
 
 /** One chat run over `POST /api/ai/v4/stream`, streaming NDJSON `ChatEvent`s. Create one per run. */
 export class HttpChatTransport implements ChatTransport {
-  private controller = new TypedAbortController<StreamAbortReason>()
-  readonly signal = this.controller.signal
+  readonly signal: AbortSignal
+
+  /** `controller` is passed by a transport that falls back to HTTP, so its abort still applies. */
+  constructor(private controller = new TypedAbortController<StreamAbortReason>()) {
+    this.signal = controller.signal
+  }
 
   async start({ input, formData }: ChatRun): Promise<ChatStartResult> {
     formData.set('data', JSON.stringify(input))

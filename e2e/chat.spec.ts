@@ -1,13 +1,14 @@
 import { expect } from '@playwright/test'
 import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from './utils/test-helpers'
-import { studentTest, TestByRole } from './fixtures'
+import { adminTest, studentTest, TestByRole } from './fixtures'
 import { FREE_MODEL, validModels } from '../src/config'
 
 // Matrix of tests
 const testMatrix: { role: keyof typeof TestByRole; courses: (string | undefined)[] }[] = [
   { role: 'student', courses: ['test-course-course-id'] },
   { role: 'teacher', courses: ['test-course-course-id', undefined] },
-  // { role: 'admin', courses: ['test-course-course-id', undefined] },
+  // Admins chat over the WebSocket transport
+  { role: 'admin', courses: ['test-course-course-id', undefined] },
 ]
 
 testMatrix.forEach((testConfig) => {
@@ -129,204 +130,248 @@ testMatrix.forEach((testConfig) => {
   })
 })
 
-studentTest.describe('Thinking block', () => {
-  studentTest('a reasoning answer shows a collapsed thinking block that opens and closes', async ({ page }) => {
+for (const [role, roleTest] of [
+  ['student', studentTest],
+  ['admin', adminTest],
+] as const) {
+  roleTest.describe(`Thinking block for ${role}`, () => {
+    roleTest('a reasoning answer shows a collapsed thinking block that opens and closes', async ({ page }) => {
+      await page.goto('/test-course-course-id')
+      await acceptDisclaimer(page)
+      await useMockModel(page)
+
+      // The mock model streams reasoning chunks before answering for `think <answer>`
+      await sendChatMessage(page, 'think The thought-through answer.')
+      // While it streams the block says "Thinking…". The send preference popover hides the rest of the page from
+      // the accessibility tree, so the streaming state is checked from the DOM.
+      const block = page.getByTestId('thinking-block')
+      await expect(block).toHaveAttribute('data-thinking', 'true')
+      await expect(block).toContainText('Thinking…')
+      await closeSendPreference(page)
+
+      const answer = page.getByTestId('assistant-message')
+      await expect(answer).toContainText('The thought-through answer.')
+      const toggle = answer.getByRole('button', { name: /^Thought for \d+ s$/ })
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+      await expect(answer).not.toContainText('mock thinking')
+
+      await toggle.click()
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+      await expect(answer.getByTestId('thinking-content')).toContainText('Reading the question')
+      await expect(answer.getByTestId('thinking-content')).toContainText('The user wants a mock answer after some mock thinking.')
+
+      await toggle.click()
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+      await expect(answer.getByTestId('thinking-content')).toHaveCount(0)
+    })
+  })
+
+  roleTest.describe(`Subagent card for ${role}`, () => {
+    roleTest("a delegated task shows a collapsed subagent card with the subagent's own output nested in it", async ({ page }) => {
+      await page.goto('/test-course-course-id')
+      await acceptDisclaimer(page)
+      await useMockModel(page)
+
+      // The mock model delegates `subagent <task>` to the mock subagent, which writes text and makes a lookup tool call
+      await sendChatMessage(page, 'subagent Find the mock facts')
+      await closeSendPreference(page)
+
+      const answer = page.getByTestId('assistant-message')
+      // The main agent answers with what the subagent found
+      await expect(answer).toContainText('The mock lookup found 42 facts')
+
+      const card = answer.getByTestId('subagent-card')
+      await expect(card).toHaveAttribute('data-subagent-status', 'ok')
+      await expect(card).toContainText('Task: Find the mock facts')
+      const toggle = card.getByRole('button', { name: 'Subagent mock_subagent finished' })
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+      await expect(answer).not.toContainText('Let me look that up.')
+
+      await toggle.click()
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+      const content = card.getByTestId('subagent-content')
+      await expect(content).toContainText('Let me look that up.')
+      await expect(content.getByRole('group', { name: 'Tool mock_lookup' })).toHaveAttribute('data-tool-status', 'ok')
+
+      await toggle.click()
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+      await expect(content).toHaveCount(0)
+    })
+  })
+
+  roleTest.describe(`Quiz card for ${role}`, () => {
+    roleTest.beforeEach(async ({ page }) => {
+      await page.goto('/test-course-course-id')
+      await acceptDisclaimer(page)
+      await useMockModel(page)
+    })
+
+    roleTest('answering a quiz shows the result at once, the agent replies, and the answer survives a reload', async ({ page }) => {
+      // The mock model writes a lead-in and calls present_quiz for `quiz`; the turn ends at the quiz
+      await sendChatMessage(page, 'quiz')
+      await closeSendPreference(page)
+
+      const answer = page.getByTestId('assistant-message').first()
+      await expect(answer).toContainText("Let's check what you remember.")
+      const card = answer.getByTestId('quiz-card')
+      await expect(card).toHaveAttribute('data-quiz-state', 'open')
+      await expect(card.getByRole('radiogroup', { name: 'Which of these numbers is a prime number?' })).toBeVisible()
+
+      const submit = card.getByRole('button', { name: 'Submit answer' })
+      await expect(submit).toBeDisabled()
+      // Keyboard: the radios are one tab stop, arrow keys move the selection
+      await card.getByRole('radio', { name: '4', exact: true }).focus()
+      await page.keyboard.press('ArrowDown')
+      await expect(card.getByRole('radio', { name: '7', exact: true })).toBeChecked()
+      // The card has no text field: the explanation is written in the chat box, which asks for it
+      await expect(card.getByRole('textbox')).toHaveCount(0)
+      const chatInput = page.getByTestId('chat-input')
+      await expect(chatInput).toHaveAttribute('placeholder', 'Why did you pick this? (optional)')
+      await chatInput.fill('It has no other divisors')
+      await submit.click()
+
+      await expect(card).toHaveAttribute('data-quiz-state', 'answered')
+      await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'correct')
+      await expect(card.getByTestId('quiz-result')).toContainText('Correct!')
+      await expect(card.getByTestId('quiz-result')).toContainText('7 is only divisible by 1 and itself')
+      await expect(card.getByRole('radio', { name: /^7/ })).toBeDisabled()
+      await expect(card.getByTestId('quiz-explanation')).toContainText('It has no other divisors')
+      await expect(card.getByTestId('quiz-result')).toBeFocused()
+      await expect(chatInput).toHaveValue('')
+      await expect(chatInput).toHaveAttribute('placeholder', 'Type your message here...')
+
+      // The answer is sent as a user message and the agent continues
+      await expect(page.getByTestId('user-message')).toHaveCount(1)
+      await expect(page.getByTestId('assistant-message').nth(1)).toContainText('Thanks for answering the quiz! Result: correct.')
+
+      await page.reload()
+      const reloaded = page.getByTestId('quiz-card')
+      await expect(reloaded).toHaveAttribute('data-quiz-state', 'answered')
+      await expect(reloaded.getByRole('radio', { name: /^7/ })).toBeChecked()
+      await expect(reloaded.getByTestId('quiz-result')).toContainText('Correct!')
+      await expect(reloaded.getByRole('button', { name: 'Submit answer' })).toHaveCount(0)
+    })
+
+    roleTest('"I don\'t know" clears the other options in a multi-select quiz and is answered as not knowing', async ({ page }) => {
+      await sendChatMessage(page, 'quiz multi')
+      await closeSendPreference(page)
+
+      const card = page.getByTestId('quiz-card')
+      const group = card.getByRole('group', { name: 'Which of these numbers are even?' })
+      await group.getByRole('checkbox', { name: '2', exact: true }).check()
+      await group.getByRole('checkbox', { name: '4', exact: true }).check()
+      await group.getByRole('checkbox', { name: "I don't know" }).check()
+      await expect(group.getByRole('checkbox', { name: '2', exact: true })).not.toBeChecked()
+      await expect(group.getByRole('checkbox', { name: '4', exact: true })).not.toBeChecked()
+
+      // Send in the chat box answers the quiz too, with the chat box text as what is unclear
+      const chatInput = page.getByTestId('chat-input')
+      await expect(chatInput).toHaveAttribute('placeholder', 'What part is unclear? (optional)')
+      await chatInput.fill('What does even mean?')
+      await page.getByTestId('send-chat-message').click()
+
+      await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'idk')
+      await expect(card.getByTestId('quiz-result')).toContainText('No problem, here is the answer.')
+      await expect(page.getByTestId('user-message')).toHaveCount(1)
+      await expect(page.getByTestId('assistant-message').nth(1)).toContainText('Result: did not know.')
+      await expect(card.getByTestId('quiz-explanation')).toContainText('What does even mean?')
+    })
+
+    roleTest('Send with an empty chat box answers a quiz without explanation, and without a picked option the text is a message', async ({ page }) => {
+      await sendChatMessage(page, 'quiz')
+      await closeSendPreference(page)
+
+      const card = page.getByTestId('quiz-card')
+      const chatInput = page.getByTestId('chat-input')
+      const send = page.getByTestId('send-chat-message')
+      await expect(chatInput).toHaveAttribute('placeholder', 'Type your message here...')
+      await expect(send).toBeDisabled()
+
+      await card.getByRole('radio', { name: '7', exact: true }).check()
+      await expect(send).toBeEnabled()
+      await send.click()
+      await expect(card).toHaveAttribute('data-quiz-state', 'answered')
+      await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'correct')
+      await expect(card.getByTestId('quiz-explanation')).toHaveCount(0)
+      await expect(page.getByTestId('assistant-message').nth(1)).toContainText('Thanks for answering the quiz! Result: correct.')
+
+      // A new quiz left unanswered: a typed message is an ordinary message and the quiz is not answered
+      await sendChatMessage(page, 'quiz')
+      const second = page.getByTestId('quiz-card').nth(1)
+      await expect(second).toHaveAttribute('data-quiz-state', 'open')
+      await sendChatMessage(page, 'never mind')
+      await expect(second).toHaveAttribute('data-quiz-state', 'closed')
+      await expect(second).toContainText('Not answered')
+      await expect(page.getByTestId('user-message').last()).toContainText('never mind')
+    })
+
+    roleTest('regenerating the reply to an answer keeps the quiz answered, and a new quiz is open again', async ({ page }) => {
+      await sendChatMessage(page, 'quiz')
+      await closeSendPreference(page)
+
+      const card = page.getByTestId('quiz-card')
+      await card.getByRole('radio', { name: '4', exact: true }).check()
+      // The mock model fails its reply to an answer whose explanation contains `fail`
+      await page.getByTestId('chat-input').fill('fail this reply')
+      await card.getByRole('button', { name: 'Submit answer' }).click()
+      await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'incorrect')
+
+      const reply = page.getByTestId('assistant-message').nth(1)
+      await expect(reply).toContainText('Error while generating response')
+      await reply.getByRole('button', { name: 'Retry' }).click()
+      // The retry resends the history up to the quiz answer (the deterministic mock fails it again): the quiz
+      // stays answered (its answer message is hidden), and the reply is replaced, not added
+      await expect(page.getByTestId('assistant-message').nth(1).getByRole('button', { name: 'Retry' })).toBeVisible()
+      await expect(page.getByTestId('assistant-message')).toHaveCount(2)
+      await expect(page.getByTestId('user-message')).toHaveCount(1)
+      await expect(card).toHaveAttribute('data-quiz-state', 'answered')
+      await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'incorrect')
+
+      // Asking again gives a new quiz (the mock reuses its call id), which is open while the old one stays answered
+      await sendChatMessage(page, 'quiz')
+      const cards = page.getByTestId('quiz-card')
+      await expect(cards).toHaveCount(2)
+      await expect(cards.nth(0)).toHaveAttribute('data-quiz-state', 'answered')
+      await expect(cards.nth(1)).toHaveAttribute('data-quiz-state', 'open')
+    })
+  })
+}
+
+adminTest.describe('Chat transport', () => {
+  adminTest('an admin chats over the WebSocket, not the HTTP stream', async ({ page }) => {
+    const sockets: string[] = []
+    const httpStreams: string[] = []
+    page.on('websocket', (ws) => sockets.push(ws.url()))
+    page.on('request', (request) => {
+      if (request.url().includes('/api/ai/v4/stream')) httpStreams.push(request.url())
+    })
+
     await page.goto('/test-course-course-id')
     await acceptDisclaimer(page)
     await useMockModel(page)
-
-    // The mock model streams reasoning chunks before answering for `think <answer>`
-    await sendChatMessage(page, 'think The thought-through answer.')
-    // While it streams the block says "Thinking…". The send preference popover hides the rest of the page from
-    // the accessibility tree, so the streaming state is checked from the DOM.
-    const block = page.getByTestId('thinking-block')
-    await expect(block).toHaveAttribute('data-thinking', 'true')
-    await expect(block).toContainText('Thinking…')
+    await sendChatMessage(page, 'say over the socket')
     await closeSendPreference(page)
+    await expect(page.getByTestId('assistant-message')).toContainText('over the socket')
+    await sendChatMessage(page, 'say again')
+    await expect(page.getByTestId('assistant-message').nth(1)).toContainText('again')
 
-    const answer = page.getByTestId('assistant-message')
-    await expect(answer).toContainText('The thought-through answer.')
-    const toggle = answer.getByRole('button', { name: /^Thought for \d+ s$/ })
-    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
-    await expect(answer).not.toContainText('mock thinking')
-
-    await toggle.click()
-    await expect(toggle).toHaveAttribute('aria-expanded', 'true')
-    await expect(answer.getByTestId('thinking-content')).toContainText('Reading the question')
-    await expect(answer.getByTestId('thinking-content')).toContainText('The user wants a mock answer after some mock thinking.')
-
-    await toggle.click()
-    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
-    await expect(answer.getByTestId('thinking-content')).toHaveCount(0)
+    // One socket per tab, reused for the second message
+    expect(sockets.filter((url) => url.includes('/api/ai/v4/ws'))).toHaveLength(1)
+    expect(httpStreams).toEqual([])
   })
-})
 
-studentTest.describe('Subagent card', () => {
-  studentTest("a delegated task shows a collapsed subagent card with the subagent's own output nested in it", async ({ page }) => {
-    await page.goto('/test-course-course-id')
+  adminTest('embedded mode chats over HTTP', async ({ page }) => {
+    const sockets: string[] = []
+    page.on('websocket', (ws) => sockets.push(ws.url()))
+    const httpStream = page.waitForRequest((request) => request.url().includes('/api/ai/v4/stream'))
+
+    await page.goto('/test-course-course-id?embedded=true')
     await acceptDisclaimer(page)
     await useMockModel(page)
-
-    // The mock model delegates `subagent <task>` to the mock subagent, which writes text and makes a lookup tool call
-    await sendChatMessage(page, 'subagent Find the mock facts')
+    await sendChatMessage(page, 'say embedded')
+    await httpStream
     await closeSendPreference(page)
-
-    const answer = page.getByTestId('assistant-message')
-    // The main agent answers with what the subagent found
-    await expect(answer).toContainText('The mock lookup found 42 facts')
-
-    const card = answer.getByTestId('subagent-card')
-    await expect(card).toHaveAttribute('data-subagent-status', 'ok')
-    await expect(card).toContainText('Task: Find the mock facts')
-    const toggle = card.getByRole('button', { name: 'Subagent mock_subagent finished' })
-    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
-    await expect(answer).not.toContainText('Let me look that up.')
-
-    await toggle.click()
-    await expect(toggle).toHaveAttribute('aria-expanded', 'true')
-    const content = card.getByTestId('subagent-content')
-    await expect(content).toContainText('Let me look that up.')
-    await expect(content.getByRole('group', { name: 'Tool mock_lookup' })).toHaveAttribute('data-tool-status', 'ok')
-
-    await toggle.click()
-    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
-    await expect(content).toHaveCount(0)
-  })
-})
-
-studentTest.describe('Quiz card', () => {
-  studentTest.beforeEach(async ({ page }) => {
-    await page.goto('/test-course-course-id')
-    await acceptDisclaimer(page)
-    await useMockModel(page)
-  })
-
-  studentTest('answering a quiz shows the result at once, the agent replies, and the answer survives a reload', async ({ page }) => {
-    // The mock model writes a lead-in and calls present_quiz for `quiz`; the turn ends at the quiz
-    await sendChatMessage(page, 'quiz')
-    await closeSendPreference(page)
-
-    const answer = page.getByTestId('assistant-message').first()
-    await expect(answer).toContainText("Let's check what you remember.")
-    const card = answer.getByTestId('quiz-card')
-    await expect(card).toHaveAttribute('data-quiz-state', 'open')
-    await expect(card.getByRole('radiogroup', { name: 'Which of these numbers is a prime number?' })).toBeVisible()
-
-    const submit = card.getByRole('button', { name: 'Submit answer' })
-    await expect(submit).toBeDisabled()
-    // Keyboard: the radios are one tab stop, arrow keys move the selection
-    await card.getByRole('radio', { name: '4', exact: true }).focus()
-    await page.keyboard.press('ArrowDown')
-    await expect(card.getByRole('radio', { name: '7', exact: true })).toBeChecked()
-    // The card has no text field: the explanation is written in the chat box, which asks for it
-    await expect(card.getByRole('textbox')).toHaveCount(0)
-    const chatInput = page.getByTestId('chat-input')
-    await expect(chatInput).toHaveAttribute('placeholder', 'Why did you pick this? (optional)')
-    await chatInput.fill('It has no other divisors')
-    await submit.click()
-
-    await expect(card).toHaveAttribute('data-quiz-state', 'answered')
-    await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'correct')
-    await expect(card.getByTestId('quiz-result')).toContainText('Correct!')
-    await expect(card.getByTestId('quiz-result')).toContainText('7 is only divisible by 1 and itself')
-    await expect(card.getByRole('radio', { name: /^7/ })).toBeDisabled()
-    await expect(card.getByTestId('quiz-explanation')).toContainText('It has no other divisors')
-    await expect(card.getByTestId('quiz-result')).toBeFocused()
-    await expect(chatInput).toHaveValue('')
-    await expect(chatInput).toHaveAttribute('placeholder', 'Type your message here...')
-
-    // The answer is sent as a user message and the agent continues
-    await expect(page.getByTestId('user-message')).toHaveCount(1)
-    await expect(page.getByTestId('assistant-message').nth(1)).toContainText('Thanks for answering the quiz! Result: correct.')
-
-    await page.reload()
-    const reloaded = page.getByTestId('quiz-card')
-    await expect(reloaded).toHaveAttribute('data-quiz-state', 'answered')
-    await expect(reloaded.getByRole('radio', { name: /^7/ })).toBeChecked()
-    await expect(reloaded.getByTestId('quiz-result')).toContainText('Correct!')
-    await expect(reloaded.getByRole('button', { name: 'Submit answer' })).toHaveCount(0)
-  })
-
-  studentTest('"I don\'t know" clears the other options in a multi-select quiz and is answered as not knowing', async ({ page }) => {
-    await sendChatMessage(page, 'quiz multi')
-    await closeSendPreference(page)
-
-    const card = page.getByTestId('quiz-card')
-    const group = card.getByRole('group', { name: 'Which of these numbers are even?' })
-    await group.getByRole('checkbox', { name: '2', exact: true }).check()
-    await group.getByRole('checkbox', { name: '4', exact: true }).check()
-    await group.getByRole('checkbox', { name: "I don't know" }).check()
-    await expect(group.getByRole('checkbox', { name: '2', exact: true })).not.toBeChecked()
-    await expect(group.getByRole('checkbox', { name: '4', exact: true })).not.toBeChecked()
-
-    // Send in the chat box answers the quiz too, with the chat box text as what is unclear
-    const chatInput = page.getByTestId('chat-input')
-    await expect(chatInput).toHaveAttribute('placeholder', 'What part is unclear? (optional)')
-    await chatInput.fill('What does even mean?')
-    await page.getByTestId('send-chat-message').click()
-
-    await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'idk')
-    await expect(card.getByTestId('quiz-result')).toContainText('No problem, here is the answer.')
-    await expect(page.getByTestId('user-message')).toHaveCount(1)
-    await expect(page.getByTestId('assistant-message').nth(1)).toContainText('Result: did not know.')
-    await expect(card.getByTestId('quiz-explanation')).toContainText('What does even mean?')
-  })
-
-  studentTest('Send with an empty chat box answers a quiz without explanation, and without a picked option the text is a message', async ({ page }) => {
-    await sendChatMessage(page, 'quiz')
-    await closeSendPreference(page)
-
-    const card = page.getByTestId('quiz-card')
-    const chatInput = page.getByTestId('chat-input')
-    const send = page.getByTestId('send-chat-message')
-    await expect(chatInput).toHaveAttribute('placeholder', 'Type your message here...')
-    await expect(send).toBeDisabled()
-
-    await card.getByRole('radio', { name: '7', exact: true }).check()
-    await expect(send).toBeEnabled()
-    await send.click()
-    await expect(card).toHaveAttribute('data-quiz-state', 'answered')
-    await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'correct')
-    await expect(card.getByTestId('quiz-explanation')).toHaveCount(0)
-    await expect(page.getByTestId('assistant-message').nth(1)).toContainText('Thanks for answering the quiz! Result: correct.')
-
-    // A new quiz left unanswered: a typed message is an ordinary message and the quiz is not answered
-    await sendChatMessage(page, 'quiz')
-    const second = page.getByTestId('quiz-card').nth(1)
-    await expect(second).toHaveAttribute('data-quiz-state', 'open')
-    await sendChatMessage(page, 'never mind')
-    await expect(second).toHaveAttribute('data-quiz-state', 'closed')
-    await expect(second).toContainText('Not answered')
-    await expect(page.getByTestId('user-message').last()).toContainText('never mind')
-  })
-
-  studentTest('regenerating the reply to an answer keeps the quiz answered, and a new quiz is open again', async ({ page }) => {
-    await sendChatMessage(page, 'quiz')
-    await closeSendPreference(page)
-
-    const card = page.getByTestId('quiz-card')
-    await card.getByRole('radio', { name: '4', exact: true }).check()
-    // The mock model fails its reply to an answer whose explanation contains `fail`
-    await page.getByTestId('chat-input').fill('fail this reply')
-    await card.getByRole('button', { name: 'Submit answer' }).click()
-    await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'incorrect')
-
-    const reply = page.getByTestId('assistant-message').nth(1)
-    await expect(reply).toContainText('Error while generating response')
-    await reply.getByRole('button', { name: 'Retry' }).click()
-    // The retry resends the history up to the quiz answer (the deterministic mock fails it again): the quiz
-    // stays answered (its answer message is hidden), and the reply is replaced, not added
-    await expect(page.getByTestId('assistant-message').nth(1).getByRole('button', { name: 'Retry' })).toBeVisible()
-    await expect(page.getByTestId('assistant-message')).toHaveCount(2)
-    await expect(page.getByTestId('user-message')).toHaveCount(1)
-    await expect(card).toHaveAttribute('data-quiz-state', 'answered')
-    await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'incorrect')
-
-    // Asking again gives a new quiz (the mock reuses its call id), which is open while the old one stays answered
-    await sendChatMessage(page, 'quiz')
-    const cards = page.getByTestId('quiz-card')
-    await expect(cards).toHaveCount(2)
-    await expect(cards.nth(0)).toHaveAttribute('data-quiz-state', 'answered')
-    await expect(cards.nth(1)).toHaveAttribute('data-quiz-state', 'open')
+    await expect(page.getByTestId('assistant-message')).toContainText('embedded')
+    expect(sockets.filter((url) => url.includes('/api/ai/v4/ws'))).toEqual([])
   })
 })

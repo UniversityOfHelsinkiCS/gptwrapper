@@ -33,6 +33,7 @@ import ToolResult from './ToolResult'
 import { useChatStream } from './useChatStream'
 import { sendConversationEmail, downloadDiscussionAsFile } from './api'
 import { HttpChatTransport } from './chatTransport'
+import { WebSocketChatTransport } from './chatSocket'
 import { applyEvent } from './applyEvent'
 import { type ClientChatMessage, messageToolResults, toHistoryMessages } from './messages'
 import { useChatMessages } from './useChatMessages'
@@ -187,7 +188,8 @@ const ChatV2Content = () => {
       return
     }
 
-    const transport = new HttpChatTransport()
+    // Admins chat over the WebSocket (experimental, needed for the My files tools), everyone else and embedded mode over HTTP.
+    const transport = user?.isAdmin && !isEmbeddedMode ? new WebSocketChatTransport() : new HttpChatTransport()
     streamControllerRef.current = transport
 
     const formData = new FormData()

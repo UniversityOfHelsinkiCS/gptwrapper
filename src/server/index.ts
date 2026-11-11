@@ -17,6 +17,7 @@ import { connectToDatabase } from './db/connection'
 import seed from './db/seeders'
 import setupCron from './util/cron'
 import { updateLastRestart } from './util/lastRestart'
+import { attachChatSocket } from './routes/ai/v4Socket'
 
 const app = express()
 
@@ -45,6 +46,8 @@ if (inProduction || inStaging) {
   await setupCron()
 }
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`)
 })
+
+attachChatSocket(server)

@@ -73,6 +73,8 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
+        // The chat WebSocket (/api/ai/v4/ws)
+        ws: true,
       },
     },
     watch: {
