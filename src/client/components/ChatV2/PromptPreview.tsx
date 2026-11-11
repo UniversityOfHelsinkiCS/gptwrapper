@@ -243,7 +243,7 @@ const PromptPreview = ({
             <Typography variant="h4" component="h3" fontWeight="bold" data-testid={`prompt-preview-title-for-${prompt.name}`} sx={{ wordBreak: 'break-word' }}>
               {prompt.name}
             </Typography>
-            {isDraft && (canPublish || canManage) && <Chip label={t('uniPrompts:draft')} size="small" variant="outlined" color="warning" />}
+            {isDraft && (canPublish || canManage) && <Chip label={t('uniPrompts:draft')} size="small" variant="outlined" color="error" />}
           </Box>
         </Box>
         {canPublish ? (

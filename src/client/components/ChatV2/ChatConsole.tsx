@@ -314,7 +314,7 @@ const ContextCard = ({
                 onClick={onClear}
                 aria-label={clearTooltip ?? t('common:close')}
                 data-testid={clearTestId}
-                sx={{ position: 'absolute', top: 4, right: 4, color: 'text.disabled', '&:hover': { color: 'text.secondary' } }}
+                sx={{ position: 'absolute', top: 4, right: 4, color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
               >
                 <CloseIcon sx={{ fontSize: 16 }} />
               </IconButton>

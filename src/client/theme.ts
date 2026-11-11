@@ -104,6 +104,15 @@ const baseOptions: Omit<ThemeOptions, 'palette'> = {
         root: {
           borderRadius: 5,
         },
+        deleteIcon: ({ theme, ownerState }) =>
+          (ownerState.color ?? 'default') === 'default'
+            ? {
+                color: theme.palette.text.secondary,
+                '&:hover': {
+                  color: theme.palette.text.primary,
+                },
+              }
+            : {},
       },
     },
 
@@ -116,6 +125,36 @@ const baseOptions: Omit<ThemeOptions, 'palette'> = {
     MuiTab: {
       styleOverrides: {
         textColorPrimary: ({ theme }) => theme.applyStyles('dark', { '&.Mui-selected': { color: theme.palette.text.primary } }),
+      },
+    },
+
+    MuiRadio: {
+      styleOverrides: {
+        colorPrimary: ({ theme }) => theme.applyStyles('dark', { '&.Mui-checked': { color: accessibleTextColor(theme, 'primary') } }),
+      },
+    },
+
+    MuiCheckbox: {
+      styleOverrides: {
+        colorPrimary: ({ theme }) =>
+          theme.applyStyles('dark', {
+            '&.Mui-checked, &.MuiCheckbox-indeterminate': { color: accessibleTextColor(theme, 'primary') },
+          }),
+      },
+    },
+
+    MuiSwitch: {
+      styleOverrides: {
+        track: ({ theme }) =>
+          theme.applyStyles('light', {
+            opacity: 1,
+            backgroundColor: theme.palette.grey[600],
+          }),
+        colorPrimary: ({ theme }) =>
+          theme.applyStyles('dark', {
+            '&.Mui-checked:not(.Mui-disabled)': { color: lighten(theme.palette.primary.main, 0.75) },
+            '&.Mui-checked:not(.Mui-disabled) + .MuiSwitch-track': { opacity: 1, backgroundColor: theme.palette.primary.main },
+          }),
       },
     },
 

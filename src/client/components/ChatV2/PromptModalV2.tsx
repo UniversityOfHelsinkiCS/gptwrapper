@@ -143,12 +143,7 @@ export const PromptListItem = ({
       >
         {isPromptDraft(prompt) && (
           <Tooltip title={t('uniPrompts:draft')}>
-            <EditNoteOutlinedIcon
-              fontSize="small"
-              aria-hidden
-              sx={{ mr: 1, flexShrink: 0, color: 'warning.main' }}
-              data-testid={`prompt-draft-${prompt.name}`}
-            />
+            <EditNoteOutlinedIcon fontSize="small" aria-hidden sx={{ mr: 1, flexShrink: 0, color: 'error.main' }} data-testid={`prompt-draft-${prompt.name}`} />
           </Tooltip>
         )}
         <ListItemText className="prompt-list-item__text" primary={prompt.name} slotProps={{ primary: { noWrap: true } }} sx={{ minWidth: 0 }} />
