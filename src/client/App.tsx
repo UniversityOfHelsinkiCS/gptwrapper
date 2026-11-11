@@ -114,6 +114,7 @@ const App = () => (
 const ThemedApp = () => {
   useUpdateUrlLang()
   const theme = useTheme()
+  const [snackbarRoot, setSnackbarRoot] = React.useState<HTMLElement | null>(null)
 
   useEffect(() => {
     initShibbolethPinger()
@@ -131,10 +132,11 @@ const ThemedApp = () => {
           Components={snackbarComponents}
           onEnter={announceSnackbar}
           onClose={forgetClosedSnackbar}
+          domRoot={snackbarRoot ?? undefined}
         >
           <EmbeddedProvider>
             <AnalyticsProvider>
-              <Layout />
+              <Layout snackbarRootRef={setSnackbarRoot} />
             </AnalyticsProvider>
           </EmbeddedProvider>
         </SnackbarProvider>
@@ -143,7 +145,7 @@ const ThemedApp = () => {
   )
 }
 
-const Layout = () => {
+const Layout = ({ snackbarRootRef }: { snackbarRootRef: (node: HTMLElement | null) => void }) => {
   const { t } = useTranslation()
   const { user, isSuccess } = useCurrentUser()
   const [feedbackOpen, setFeedbackOpen] = React.useState(false)
@@ -182,6 +184,7 @@ const Layout = () => {
             openApiKeys={() => setApiKeysOpen(true)}
             container={headerRef}
           />
+          <div ref={snackbarRootRef} />
         </Box>
         <Feedback open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
         <GlobalSettings open={settingsOpen} setOpen={setSettingsOpen} />
