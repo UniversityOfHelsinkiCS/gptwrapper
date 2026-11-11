@@ -155,6 +155,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
         toolCalls.push(...call.toolCalls)
       }
 
+      // TODO: check this
       const subagentCall = getSubagentModelCall(streamChunk, streamState)
       if (subagentCall) {
         const name = subagentNames.get(subagentCall.callId) ?? 'unknown'
