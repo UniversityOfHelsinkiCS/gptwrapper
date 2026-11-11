@@ -8,8 +8,21 @@ export const basicTestContent = `### You are calling mock endpoint for streaming
 - To mock a math block, write: **math block**
 - To mock a subagent, write: **subagent** (optionally followed by its task)
 - To mock a quiz, write: **quiz** (or **quiz multi** for a multi-select quiz)
+- To mock reading My files, attach a folder and write: **files** followed by the folder name
 OVER
 `
+
+/** `files <folder>`: the mock model lists the folder with `ls` and reads its first file with `read_file`. */
+export const MOCK_FILES_PREFIX = 'files'
+
+/** The first file in an `ls` result, whose file lines are `<path> (<n> bytes)` (see `client/util/myFiles/agentTools.ts`). */
+export const firstFileInListing = (listing: string): string | null => {
+  for (const line of listing.split('\n')) {
+    const match = /^(.+) \(\d+ bytes\)$/.exec(line)
+    if (match) return match[1]
+  }
+  return null
+}
 
 export const mathTestContent = `
 ### Inline Math to be displayed (as display math)

@@ -19,7 +19,7 @@ import { QUIZ_IDK, type QuizAnswer } from '@shared/quiz'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { useChatScroll } from './useChatScroll'
 import useCourse from '../../hooks/useCourse'
-import { useLocalStorageStateWithURLDefault } from '../../hooks/useLocalStorageState'
+import useLocalStorageState, { useLocalStorageStateWithURLDefault } from '../../hooks/useLocalStorageState'
 import useRetryTimeout from '../../hooks/useRetryTimeout'
 import useUserStatus from '../../hooks/useUserStatus'
 import { invalidateUserUsage } from '../../hooks/useUserUsage'
@@ -56,6 +56,10 @@ import { ApiErrorView } from '../common/ApiErrorView'
 import NotificationBanner from '../common/NotificationBanner'
 import { PromptEditorState } from '../Prompt/context'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { AttachFolders, parseStoredFolders } from '../MyFiles/AttachFolders'
+import { useMyFilesStore } from '../MyFiles/MyFilesStoreContext'
+import { executeFileTool } from '../../util/myFiles/agentTools'
+import type { ClientTools } from './chatTransport'
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
@@ -118,6 +122,12 @@ const ChatV2Content = () => {
     'temperature',
     z.coerce.number(),
   )
+
+  // My files folders attached to this chat, for the agent's file tools. Experimental: admins over the WebSocket, not embedded.
+  const myFilesStore = useMyFilesStore()
+  const canAttachFolders = !!user?.isAdmin && !isEmbeddedMode && !!myFilesStore
+  const [storedAttachedFolders, setAttachedFolders] = useLocalStorageState<unknown>(`${localStoragePrefix}-attached-folders`, [])
+  const attachedFolders = useMemo(() => parseStoredFolders(storedAttachedFolders), [storedAttachedFolders])
 
   const tokenLimitExceeded = !!userStatus && userStatus.usage >= userStatus.limit
 
@@ -291,8 +301,16 @@ const ChatV2Content = () => {
       promptInfo,
     }
 
+    // The browser runs the file tools itself and checks every path the agent asks for (`agentTools.ts`).
+    const folders = attachedFolders
+    const clientTools: ClientTools | undefined =
+      canAttachFolders && folders.length > 0
+        ? { attachedFolders: folders, execute: (name, toolInput) => executeFileTool(myFilesStore, folders, name, toolInput) }
+        : undefined
+
     try {
       const res = await transport.start({
+        clientTools,
         formData,
         input: {
           options: {
@@ -739,6 +757,11 @@ const ChatV2Content = () => {
                 onGoToLatestResponse={handleGoToLatestResponse}
                 quizPrompt={quizPrompt}
                 actionsRef={chatBoxRef}
+                folderControls={
+                  canAttachFolders && myFilesStore ? (
+                    <AttachFolders store={myFilesStore} attachedFolders={attachedFolders} onChange={setAttachedFolders} />
+                  ) : undefined
+                }
               />
             </Box>
           </Box>

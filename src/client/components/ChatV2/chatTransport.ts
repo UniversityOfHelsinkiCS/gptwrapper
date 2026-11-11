@@ -1,5 +1,6 @@
 import type { AiApiJsonResponse } from '../../../shared/aiApi'
 import type { ChatEvent, PostStreamSchemaV4Type } from '../../../shared/agentChat'
+import type { ClientToolResult } from '../../../shared/chatSocket'
 import { postAbortableStream } from '../../util/apiClient'
 import { TypedAbortController, type StreamAbortReason } from './useChatStream'
 
@@ -7,6 +8,18 @@ export type ChatRun = {
   input: PostStreamSchemaV4Type
   /** Carries the attached file, if any. `data` is set from `input`. */
   formData: FormData
+  /**
+   * Tools the browser runs for the agent (the My files tools on the attached folders). Only the WebSocket transport
+   * uses them; over HTTP the run has no client tools.
+   */
+  clientTools?: ClientTools
+}
+
+export type ClientTools = {
+  /** Sent with the run so the server enables the tools and tells the model about the folders. */
+  attachedFolders: string[]
+  /** Runs one tool call. Must check the input itself: it comes from the model through the server. */
+  execute: (name: string, input: unknown) => Promise<ClientToolResult>
 }
 
 /** The server either answers with warnings or an error before streaming, or starts the event stream. */

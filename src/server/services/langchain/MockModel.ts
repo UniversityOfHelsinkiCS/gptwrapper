@@ -8,6 +8,8 @@ import { PRESENT_QUIZ } from '@shared/quiz'
 import { QUIZ_ANSWER_PREFIX } from '../agent/tools/presentQuiz'
 import {
   basicTestContent,
+  firstFileInListing,
+  MOCK_FILES_PREFIX,
   codeTestContent,
   mathTestContent,
   mockSubagentLeadIn,
@@ -58,6 +60,15 @@ export class MockModel extends BaseChatModel {
       // A subagent task with `fail` in it fails midway: after its tool call, before its answer.
       return fakeModel().respond(new Error('Mock subagent error injected'))
     }
+    if (last && isToolMessage(last) && last.name === 'ls' && last.status !== 'error' && lastHuman.startsWith(MOCK_FILES_PREFIX)) {
+      // `files`: after listing the folder, read its first file (then the generic tool-result answer below).
+      const path = firstFileInListing(String(last.content))
+      if (path) {
+        return fakeModel().respond(
+          new AIMessage({ content: '', tool_calls: [{ name: 'read_file', args: { path }, id: 'mock_read_file_id', type: 'tool_call' }] }),
+        )
+      }
+    }
     if (last && isToolMessage(last)) {
       return fakeModel().respond(new AIMessage(`Ok! Got some great results from that mock tool call!: "${last.content}"`))
     }
@@ -86,6 +97,11 @@ export class MockModel extends BaseChatModel {
       return fakeModel().respond(
         new AIMessage({ content: mockQuizLeadIn, tool_calls: [{ name: PRESENT_QUIZ, args: quiz, id: 'mock_quiz_id', type: 'tool_call' }] }),
       )
+    }
+    if (lastHuman.startsWith(MOCK_FILES_PREFIX)) {
+      // `files <folder>` lists the folder with the My files tools (on for socket runs with attached folders), then reads its first file.
+      const path = lastHuman.slice(MOCK_FILES_PREFIX.length).trim()
+      return fakeModel().respond(new AIMessage({ content: '', tool_calls: [{ name: 'ls', args: { path }, id: 'mock_ls_id', type: 'tool_call' }] }))
     }
     if (lastHuman.startsWith('say ')) {
       return fakeModel().respond(new AIMessage(lastHuman.replace('say ', '')))

@@ -19,11 +19,13 @@ import { handleWarnings, modelConfigHasInstructions, prepareMessagesForLLM } fro
 import { MockModel } from '../langchain/MockModel'
 import { getAzureChatOpenAI, getToskaProvider, getVertexModelProvider } from '../langchain/modelGenerators'
 import { createStreamState, getMainAgentModelCall, getSubagentModelCall, mapStreamChunk, nextStreamState, type StreamChunk } from './mapStreamChunk'
+import type { ClientToolCaller } from './clientTools'
+import { fileToolsFor } from './tools/fileTools'
 import { MOCK_SUBAGENT } from './tools/mockSubagent'
 import { findQuizPart, quizAnswerToText } from './tools/presentQuiz'
 import { promptEnabledTools } from './tools/promptTools'
 import { createTools, getToolModule, historyMessageToText, withToolInstructions } from './tools/registry'
-import type { EnabledTool } from './tools/types'
+import { ToolError, type EnabledTool } from './tools/types'
 
 export const RECURSION_LIMIT = 25
 const KEEP_ALIVE_INTERVAL_MS = 5000
@@ -45,6 +47,11 @@ export type RunAgentParams = {
   /** Called once, after all checks have passed and just before the first event is emitted. */
   onStart: () => void
   emit: (event: ChatEvent) => Promise<void>
+  /**
+   * Client-executed tools, only for runs over the chat socket by admins: the My files tools on the attached folders
+   * (none without folders), called in the browser through `call`.
+   */
+  clientTools?: { attachedFolders: string[]; call: ClientToolCaller }
 }
 
 export type RunAgentResult =
@@ -58,7 +65,7 @@ export type RunAgentResult =
  * Throws `ApplicationError` (404/403) before `onStart` when the course, prompt, model or usage checks fail.
  * Errors during generation are emitted as an `error` event instead of thrown.
  */
-export const runAgent = async ({ user, chargeUser = user, request, meta, signal, onStart, emit }: RunAgentParams): Promise<RunAgentResult> => {
+export const runAgent = async ({ user, chargeUser = user, request, meta, signal, onStart, emit, clientTools }: RunAgentParams): Promise<RunAgentResult> => {
   const { options, courseId } = request
   const { generationInfo } = options
   const model = generationInfo.model
@@ -95,6 +102,11 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
     }
   }
 
+  // The file tools are always on for socket runs with attached folders, whatever the prompt has.
+  if (clientTools) {
+    enabledTools.push(...fileToolsFor(clientTools.attachedFolders).filter((tool) => !enabledTools.some((t) => t.name === tool.name)))
+  }
+
   meta.tools = enabledTools.map((t) => t.name)
 
   // Discussions are saved with this text history too, so saved discussions keep the `content` shape they always had.
@@ -120,7 +132,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
 
   onStart()
 
-  const tools = createTools(enabledTools, { user, course: course?.chatInstance ?? null, model, signal })
+  const tools = createTools(enabledTools, { user, course: course?.chatInstance ?? null, model, signal, callClientTool: clientTools?.call })
   const agent = createAgent({ model: getAgentModel(modelConfig), tools, middleware: tools.length > 0 ? [toolErrorMiddleware(signal)] : [] })
 
   const showReasoning = modelConfig.reasoning?.showSummary === true
@@ -338,6 +350,16 @@ const toolErrorMiddleware = (signal: AbortSignal) =>
         return await handler(request)
       } catch (error) {
         if (signal.aborted || isGraphInterrupt(error)) throw error
+        if (error instanceof ToolError) {
+          // An expected failure (a refused path, a missing file, no answer from the browser) that the model can act on.
+          logger.info('Tool call failed', { tool: request.toolCall.name, error: error.message })
+          return new ToolMessage({
+            content: `Error: ${error.message}`,
+            tool_call_id: request.toolCall.id ?? '',
+            name: request.toolCall.name,
+            status: 'error',
+          })
+        }
         logger.error('Tool call failed', {
           tool: request.toolCall.name,
           error: error instanceof Error ? { message: error.message, stack: error.stack } : error,

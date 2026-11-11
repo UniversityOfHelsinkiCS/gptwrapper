@@ -1,13 +1,14 @@
 import type { StructuredToolInterface } from '@langchain/core/tools'
 import type { AssistantPart, HistoryAssistantMessage, SubagentPart, ToolPart } from '@shared/agentChat'
 import { documentSearch } from './documentSearch'
+import { fileTools } from './fileTools'
 import { mockSubagent } from './mockSubagent'
 import { presentQuiz } from './presentQuiz'
 import { summarizeSubagentPart } from './subagent'
 import type { EnabledTool, ToolContext, ToolModule } from './types'
 
 /** Every tool the agent can use. The client has a matching registry of renderers (`ChatV2/tools/registry.tsx`). */
-const TOOL_MODULES: ToolModule<any>[] = [documentSearch, mockSubagent, presentQuiz]
+const TOOL_MODULES: ToolModule<any>[] = [documentSearch, mockSubagent, presentQuiz, ...fileTools]
 
 const toolModules = new Map(TOOL_MODULES.map((module) => [module.name, module]))
 
@@ -28,8 +29,9 @@ export const createTools = (enabled: EnabledTool[], ctx: Omit<ToolContext, 'conf
 
 /** The system message followed by the `instructions` of the enabled tools, each under a `## Tool: <name>` heading. */
 export const withToolInstructions = (systemMessage: string, enabled: EnabledTool[]): string => {
-  const sections = enabled.flatMap(({ name }) => {
-    const instructions = getToolModule(name)?.instructions
+  const sections = enabled.flatMap(({ name, config }) => {
+    const module = getToolModule(name)
+    const instructions = typeof module?.instructions === 'function' ? module.instructions(config) : module?.instructions
     return instructions ? [`## Tool: ${name}\n\n${instructions}`] : []
   })
   return [systemMessage, ...sections].filter((text) => text.length > 0).join('\n\n')

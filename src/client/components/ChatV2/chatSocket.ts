@@ -1,8 +1,14 @@
 import { PUBLIC_URL } from '../../../config'
 import type { ChatEvent } from '../../../shared/agentChat'
-import { CHAT_SOCKET_LOGGED_IN_AS_PARAM, CHAT_SOCKET_PATH, type ChatSocketClientMessage, type ChatSocketServerMessage } from '../../../shared/chatSocket'
+import {
+  CHAT_SOCKET_LOGGED_IN_AS_PARAM,
+  CHAT_SOCKET_PATH,
+  type ChatSocketClientMessage,
+  type ChatSocketServerMessage,
+  type ClientToolResult,
+} from '../../../shared/chatSocket'
 import safeLocalStorage from '../../util/safeLocalStorage'
-import { HttpChatTransport, type ChatRun, type ChatStartResult, type ChatTransport } from './chatTransport'
+import { HttpChatTransport, type ChatRun, type ChatStartResult, type ChatTransport, type ClientTools } from './chatTransport'
 import { TypedAbortController, type StreamAbortReason } from './useChatStream'
 
 const OPEN_TIMEOUT_MS = 5000
@@ -12,6 +18,9 @@ const OPEN = 1
 const RETRY_AFTER_FAILURE_MS = 60_000
 
 type RunMessage = Extract<ChatSocketServerMessage, { runId: string }>
+type ToolRequestMessage = Extract<RunMessage, { type: 'tool.request' }>
+/** What a run's events come from: everything for the run except tool requests, which are answered on the side. */
+type RunStreamMessage = Exclude<RunMessage, ToolRequestMessage>
 
 type RunListener = {
   onMessage: (message: RunMessage) => void
@@ -203,12 +212,31 @@ const untilAborted = <T>(promise: Promise<T>, signal: AbortSignal) =>
     promise.then(resolve, reject).finally(() => signal.removeEventListener('abort', onAbort))
   })
 
-const startSocketRun = async (socket: ChatSocket, { input, formData }: ChatRun, signal: AbortSignal): Promise<ChatStartResult> => {
+/** Runs a tool the server asked for and sends its result back. Without client tools, or if it throws, the result is an error. */
+const answerToolRequest = async (socket: ChatSocket, { runId, callId, name, input }: ToolRequestMessage, clientTools: ClientTools | undefined) => {
+  let result: ClientToolResult
+  try {
+    result = clientTools ? await clientTools.execute(name, input) : { status: 'error', error: 'This chat has no tools in the browser.' }
+  } catch (error) {
+    console.error('Client tool failed:', error)
+    result = { status: 'error', error: 'The tool failed in the browser.' }
+  }
+  // After an abort or a closed socket nobody waits for the result; the server ignores it anyway.
+  socket.send({ type: 'tool.result', runId, callId, result })
+}
+
+const startSocketRun = async (socket: ChatSocket, { input, formData, clientTools }: ChatRun, signal: AbortSignal): Promise<ChatStartResult> => {
   const runId = socket.nextRunId()
-  const messages = createChannel<RunMessage>()
+  const messages = createChannel<RunStreamMessage>()
 
   const unregister = socket.register(runId, {
-    onMessage: (message) => messages.push(message),
+    onMessage: (message) => {
+      if (message.type === 'tool.request') {
+        if (!signal.aborted) void answerToolRequest(socket, message, clientTools)
+        return
+      }
+      messages.push(message)
+    },
     onClose: () => messages.fail(new Error('Chat socket closed')),
   })
   const onAbort = () => {
@@ -222,9 +250,15 @@ const startSocketRun = async (socket: ChatSocket, { input, formData }: ChatRun, 
   }
 
   const file = formData.get('file')
-  socket.send({ type: 'run.start', runId, input, fileSize: file instanceof Blob ? file.size : undefined })
+  socket.send({
+    type: 'run.start',
+    runId,
+    input,
+    fileSize: file instanceof Blob ? file.size : undefined,
+    ...(clientTools && clientTools.attachedFolders.length > 0 ? { attachedFolders: clientTools.attachedFolders } : {}),
+  })
 
-  let first: RunMessage | undefined
+  let first: RunStreamMessage | undefined
   try {
     first = await messages.next()
   } catch (error) {
@@ -248,7 +282,7 @@ const startSocketRun = async (socket: ChatSocket, { input, formData }: ChatRun, 
   }
 }
 
-async function* runEvents(first: ChatEvent | null, messages: Channel<RunMessage>, cleanup: () => void): AsyncGenerator<ChatEvent> {
+async function* runEvents(first: ChatEvent | null, messages: Channel<RunStreamMessage>, cleanup: () => void): AsyncGenerator<ChatEvent> {
   try {
     if (!first) return
     yield first

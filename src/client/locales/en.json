@@ -241,7 +241,13 @@
     "noPrompt": "No prompt",
     "showFullDescription": "Show full description",
     "showLessDescription": "Show less",
-    "codeBlock": "Code block"
+    "codeBlock": "Code block",
+    "fileToolLs": "Looked in the folder {{path}}",
+    "fileToolReadFile": "Read the file {{path}}",
+    "fileToolReadFileLines": "Read the file {{path}}, lines {{start}}–{{end}} of {{total}}",
+    "fileToolGlob": "Looked for files matching {{pattern}}",
+    "fileToolGrep": "Searched for {{pattern}} in {{path}}",
+    "fileToolFailed": "{{action}}: failed"
   },
   "settings": {
     "prompt": "Conversation prompt",
@@ -1097,6 +1103,10 @@
     "folderSummary": "Files: {{files}}, {{size}}",
     "reserved": "Filled by the assistant",
     "syncFolder": "Sync",
-    "syncFolderNamed": "Sync folder {{name}}"
+    "syncFolderNamed": "Sync folder {{name}}",
+    "attachFolders": "Attach folders from My files",
+    "attachedFolder": "Attached folder {{name}}",
+    "detachFolder": "press Delete to detach",
+    "noFoldersToAttach": "Add folders in My files first."
   }
 }

@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, type Page } from '@playwright/test'
 import { adminTest, studentTest } from './fixtures'
-import { acceptDisclaimer } from './utils/test-helpers'
+import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from './utils/test-helpers'
 
 // My files is stored in OPFS, which each Playwright browser context gets empty.
 
@@ -88,4 +88,79 @@ adminTest('My files is hidden in embedded mode', async ({ page }) => {
   await acceptDisclaimer(page)
   await expect(page.getByTestId('new-conversation-button').first()).toBeVisible()
   await expect(page.getByTestId('my-files-button')).toHaveCount(0)
+})
+
+const SECRET_TAIL = 'This last sentence must not be in the tool results of the history.'
+
+/** Copies a `Course notes` folder into My files and attaches it to the chat with the attach menu. */
+const attachCourseNotes = async (page: Page, root: string) => {
+  const folder = join(root, 'Course notes')
+  mkdirSync(folder, { recursive: true })
+  writeFileSync(join(folder, 'syllabus.md'), `The exam is on Friday the 13th.\n${'Filler line.\n'.repeat(30)}${SECRET_TAIL}\n`)
+
+  await page.getByTestId('my-files-button').click()
+  const dialog = page.getByRole('dialog', { name: 'My files' })
+  await dialog.getByTestId('my-files-input-folder').setInputFiles(folder)
+  await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+  await dialog.getByTestId('my-files-close').click()
+  await expect(dialog).toBeHidden()
+
+  await page.getByTestId('attach-folders-button').click()
+  await page.getByRole('menuitemcheckbox', { name: 'Course notes' }).click()
+  await expect(page.getByRole('menuitemcheckbox', { name: 'Course notes' })).toHaveAttribute('aria-checked', 'true')
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('menu')).toBeHidden()
+  await expect(page.getByTestId('attached-folder')).toHaveAttribute('data-folder', 'Course notes')
+}
+
+adminTest('the agent reads a file from an attached folder in the browser', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-agent-'))
+  const sentFrames: string[] = []
+  page.on('websocket', (ws) => ws.on('framesent', (frame) => sentFrames.push(String(frame.payload))))
+  try {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+    await attachCourseNotes(page, root)
+
+    // The mock model lists the folder with `ls`, then reads its first file with `read_file`
+    await sendChatMessage(page, 'files Course notes')
+    await closeSendPreference(page)
+    await expect(page.getByTestId('assistant-message')).toContainText('The exam is on Friday the 13th.')
+    const parts = page.getByTestId('tool-part')
+    await expect(parts).toHaveCount(2)
+    await expect(parts.nth(0)).toHaveAttribute('data-tool-name', 'ls')
+    await expect(parts.nth(0)).toHaveAttribute('data-tool-status', 'ok')
+    await expect(parts.nth(1)).toHaveAttribute('data-tool-status', 'ok')
+    await expect(parts.nth(1)).toContainText('Read the file Course notes/syllabus.md, lines 1–32 of 32')
+
+    // A path outside the attached folders is refused in the browser
+    await sendChatMessage(page, 'files Secret')
+    await expect(parts.nth(2)).toHaveAttribute('data-tool-status', 'error')
+    await expect(page.getByTestId('assistant-message').nth(1)).toContainText('outside the folders you can see')
+
+    // The tool parts in the history are short summaries, not the file contents
+    const runStarts = sentFrames.map((frame) => JSON.parse(frame)).filter((message) => message.type === 'run.start')
+    expect(runStarts.map((message) => message.attachedFolders)).toEqual([['Course notes'], ['Course notes']])
+    const historyToolParts = runStarts[1].input.options.chatMessages.flatMap((message: { parts?: { type: string }[] }) =>
+      (message.parts ?? []).filter((part) => part.type === 'tool'),
+    )
+    expect(historyToolParts).toHaveLength(2)
+    expect(JSON.stringify(historyToolParts)).not.toContain(SECRET_TAIL)
+
+    // The attached folder survives a reload
+    await page.reload()
+    await expect(page.getByTestId('attached-folder')).toHaveAttribute('data-folder', 'Course notes')
+    await page.getByTestId('attached-folder').press('Delete')
+    await expect(page.getByTestId('attached-folder')).toHaveCount(0)
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
+studentTest('students cannot attach folders', async ({ page }) => {
+  await page.goto('/general')
+  await acceptDisclaimer(page)
+  await expect(page.getByTestId('chat-input')).toBeVisible()
+  await expect(page.getByTestId('attach-folders-button')).toHaveCount(0)
 })

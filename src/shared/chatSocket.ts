@@ -7,8 +7,10 @@ import type { ChatEvent, PostStreamSchemaV4Type } from './agentChat'
  * belongs to a run by its `runId`, which the client picks (unique per socket). The server validates
  * client messages with `ChatSocketClientMessageSchema` in `server/routes/ai/v4Socket.ts`.
  *
- * Client-executed tools (issue 11) add `tool.request` (server → client) and `tool.result` (client → server)
- * to these unions, also keyed by `runId`.
+ * Client-executed tools (the My files tools, `fileTools.ts`): when the agent calls one, the server sends
+ * `tool.request` and waits for the `tool.result` with the same `runId` and `callId`. Results for other runs, unknown
+ * calls or calls that already ended (answered or timed out) are ignored. A call that gets no result in time ends
+ * as an error for the model, and the run goes on.
  */
 export const CHAT_SOCKET_PATH = '/api/ai/v4/ws'
 
@@ -23,8 +25,20 @@ export type ChatSocketClientMessage =
       input: PostStreamSchemaV4Type
       /** Size of the attached file, for the request log. The file itself is parsed in the browser and is in the history. */
       fileSize?: number
+      /**
+       * Top-level My files folders attached to the chat. With at least one, the run gets the client-executed file
+       * tools (admins only). Only the browser decides what the tools can read: it checks every path itself.
+       */
+      attachedFolders?: string[]
     }
   | { type: 'run.abort'; runId: string }
+  | { type: 'tool.result'; runId: string; callId: string; result: ClientToolResult }
+
+/**
+ * The browser's answer to a `tool.request`. `content` is what the model reads, `artifact` what the chat shows and
+ * keeps in the history (short, see `FileToolSummary`). `error` is read by the model too, so it says what went wrong.
+ */
+export type ClientToolResult = { status: 'ok'; content: string; artifact?: unknown } | { status: 'error'; error: string }
 
 /** How a run ended. `warnings` and `error` mean nothing was streamed, like the 201 and error responses on HTTP. */
 export type RunEndResult =
@@ -38,5 +52,7 @@ export type RunEndResult =
 export type ChatSocketServerMessage =
   | { type: 'run.event'; runId: string; event: ChatEvent }
   | { type: 'run.end'; runId: string; result: RunEndResult }
+  /** Asks the browser to run a client-executed tool. `callId` is the model's tool call id, as in the `tool.*` events. */
+  | { type: 'tool.request'; runId: string; callId: string; name: string; input: unknown }
   /** A message that could not be read, so it has no run to answer to. */
   | { type: 'error'; error: string }

@@ -75,6 +75,7 @@ export const ChatBox = ({
   onGoToLatestResponse,
   quizPrompt,
   actionsRef,
+  folderControls,
 }: {
   disabled: boolean
   isTokenLimitExceeded: boolean
@@ -95,6 +96,8 @@ export const ChatBox = ({
   /** Set while an option is picked in the open quiz. The message may then be empty. */
   quizPrompt?: QuizPrompt | null
   actionsRef?: React.Ref<ChatBoxActions>
+  /** Shown next to the attach-file button: attaching My files folders (admins only). */
+  folderControls?: React.ReactNode
 }) => {
   const { courseId } = useParams()
   const isEmbedded = useIsEmbedded()
@@ -317,7 +320,7 @@ export const ChatBox = ({
                 mt: '0.5rem',
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
                 <Tooltip title={t('chat:attachFile')} arrow placement="top">
                   <IconButton id="attach-file-button" onClick={() => fileInputRef.current?.click()}>
                     <AttachFileIcon />
@@ -340,6 +343,7 @@ export const ChatBox = ({
                     aria-label={[t('accessibility:attachment', { file: fileName }), t('accessibility:removeAttachment')].join(', ')}
                   />
                 )}
+                {folderControls}
               </Box>
               {!isMobile && (
                 <Typography

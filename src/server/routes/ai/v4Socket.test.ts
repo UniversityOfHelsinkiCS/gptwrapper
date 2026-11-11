@@ -58,9 +58,11 @@ const shibbolethHeaders = {
   hygroupcn: 'grp-students',
 }
 
-const listen = async (heartbeatIntervalMs?: number) => {
+const adminHeaders = { ...shibbolethHeaders, uid: 'admin1', mail: 'admin1@example.com', hypersonsisuid: 'hlo-admin', hygroupcn: 'grp-toska' }
+
+const listen = async (heartbeatIntervalMs?: number, clientToolTimeoutMs?: number) => {
   const server = createServer((_req, res) => res.writeHead(404).end())
-  attachChatSocket(server, { heartbeatIntervalMs })
+  attachChatSocket(server, { heartbeatIntervalMs, clientToolTimeoutMs })
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
   return { server, url: `ws://127.0.0.1:${(server.address() as AddressInfo).port}${CHAT_SOCKET_PATH}` }
 }
@@ -122,9 +124,10 @@ const refusedStatus = (headers: Record<string, string>, socketUrl = url) =>
     ws.on('error', () => {})
   })
 
-const runStart = (runId: string, message = 'say hello world'): ChatSocketClientMessage => ({
+const runStart = (runId: string, message = 'say hello world', attachedFolders?: string[]): ChatSocketClientMessage => ({
   type: 'run.start',
   runId,
+  ...(attachedFolders ? { attachedFolders } : {}),
   input: {
     options: {
       chatMessages: [{ role: 'user', content: message }],
@@ -304,5 +307,126 @@ describe('chat socket runs', () => {
     expect(await client.waitFor((m) => m.type === 'error')).toEqual({ type: 'error', error: 'Invalid message' })
     expect(runAgent).not.toHaveBeenCalled()
     client.ws.close()
+  })
+})
+
+type ToolRequest = Extract<ChatSocketServerMessage, { type: 'tool.request' }>
+
+const LISTING = ['"Course notes" contains 2 entries:', 'Course notes/syllabus.md (40 bytes)', 'Course notes/week1/'].join('\n')
+const FILE_TEXT = '1\tThe exam is on Friday the 13th.'
+
+/** Answers the mock model's `files` calls like the browser: the listing for `ls`, the file for `read_file`. */
+const answerAsBrowser = (client: Awaited<ReturnType<typeof connect>>, request: ToolRequest) =>
+  client.send({
+    type: 'tool.result',
+    runId: request.runId,
+    callId: request.callId,
+    result:
+      request.name === 'ls'
+        ? { status: 'ok', content: LISTING, artifact: { tool: 'ls', path: 'Course notes', entries: ['syllabus.md', 'week1/'], total: 2 } }
+        : {
+            status: 'ok',
+            content: FILE_TEXT,
+            artifact: { tool: 'read_file', path: 'Course notes/syllabus.md', startLine: 1, endLine: 1, totalLines: 1, excerpt: 'The exam…' },
+          },
+  })
+
+const toolRequest = (client: Awaited<ReturnType<typeof connect>>, name: string) =>
+  client.waitFor((m) => m.type === 'tool.request' && m.name === name) as Promise<ToolRequest>
+
+describe('client-executed tools over the chat socket', () => {
+  test('the agent lists and reads attached files through tool.request and tool.result', async () => {
+    const client = await connect(adminHeaders)
+    client.send(runStart('1', 'files Course notes', ['Course notes']))
+
+    const ls = await toolRequest(client, 'ls')
+    expect(ls).toEqual({ type: 'tool.request', runId: '1', callId: 'mock_ls_id', name: 'ls', input: { path: 'Course notes' } })
+    answerAsBrowser(client, ls)
+
+    const read = await toolRequest(client, 'read_file')
+    expect(read.input).toEqual({ path: 'Course notes/syllabus.md' })
+    answerAsBrowser(client, read)
+
+    expect((await client.runEnd('1')).result).toEqual({ status: 'completed' })
+    const events = client.eventsOf('1')
+    expect(events.filter((e) => e.type === 'tool.end')).toEqual([
+      expect.objectContaining({ callId: 'mock_ls_id', status: 'ok', result: expect.objectContaining({ tool: 'ls' }) }),
+      expect.objectContaining({ callId: 'mock_read_file_id', status: 'ok', result: expect.objectContaining({ tool: 'read_file' }) }),
+    ])
+    expect(textOf(events)).toContain('The exam is on Friday the 13th.')
+    // The tools are always on for the run, and the model was told about the folder.
+    expect(vi.mocked(runAgent).mock.calls[0][0].clientTools?.attachedFolders).toEqual(['Course notes'])
+    client.ws.close()
+  })
+
+  test('results for another run or an unknown call are ignored', async () => {
+    const client = await connect(adminHeaders)
+    client.send(runStart('1', 'files Course notes', ['Course notes']))
+    const ls = await toolRequest(client, 'ls')
+
+    client.send({ type: 'tool.result', runId: '2', callId: ls.callId, result: { status: 'ok', content: 'Wrong run (1 bytes)' } })
+    client.send({ type: 'tool.result', runId: '1', callId: 'unknown', result: { status: 'ok', content: 'Unknown call (1 bytes)' } })
+    answerAsBrowser(client, ls)
+    answerAsBrowser(client, await toolRequest(client, 'read_file'))
+
+    await client.runEnd('1')
+    const read = client.received.find((m): m is ToolRequest => m.type === 'tool.request' && m.name === 'read_file')
+    expect(read?.input).toEqual({ path: 'Course notes/syllabus.md' })
+    client.ws.close()
+  })
+
+  test('a call the browser does not answer in time ends as an error, and the run goes on', async () => {
+    const quick = await listen(undefined, 50)
+    const client = await connect(adminHeaders, { socketUrl: quick.url })
+    client.send(runStart('1', 'files Course notes', ['Course notes']))
+    const ls = await toolRequest(client, 'ls')
+
+    expect((await client.runEnd('1')).result).toEqual({ status: 'completed' })
+    // The late answer is ignored.
+    answerAsBrowser(client, ls)
+    const events = client.eventsOf('1')
+    expect(events.find((e) => e.type === 'tool.end')).toMatchObject({ callId: 'mock_ls_id', status: 'error' })
+    expect(textOf(events)).toContain('The browser did not answer within 0.05 s.')
+    client.ws.close()
+    await close(quick.server)
+  })
+
+  test('a browser error result ends the tool as an error the model reads', async () => {
+    const client = await connect(adminHeaders)
+    client.send(runStart('1', 'files Secret', ['Course notes']))
+    const ls = await toolRequest(client, 'ls')
+    client.send({ type: 'tool.result', runId: '1', callId: ls.callId, result: { status: 'error', error: '"Secret" is outside the folders you can see.' } })
+
+    expect((await client.runEnd('1')).result).toEqual({ status: 'completed' })
+    const events = client.eventsOf('1')
+    expect(events.find((e) => e.type === 'tool.end')).toMatchObject({ status: 'error', result: 'Error: "Secret" is outside the folders you can see.' })
+    expect(textOf(events)).toContain('outside the folders you can see')
+    client.ws.close()
+  })
+
+  test('a closed socket while a call waits aborts the run', async () => {
+    const client = await connect(adminHeaders)
+    client.send(runStart('1', 'files Course notes', ['Course notes']))
+    await toolRequest(client, 'ls')
+    client.ws.terminate()
+
+    await vi.waitFor(async () => expect(await vi.mocked(runAgent).mock.results[0]?.value).toEqual({ status: 'aborted' }))
+    expect(vi.mocked(runAgent).mock.calls[0][0].signal.reason).toBe('client_disconnected')
+  })
+
+  test('students and runs without attached folders get no client tools', async () => {
+    const student = await connect()
+    student.send(runStart('1', 'say hi', ['Course notes']))
+    await student.runEnd('1')
+    const admin = await connect(adminHeaders)
+    admin.send(runStart('2', 'say hi'))
+    await admin.runEnd('2')
+    admin.send(runStart('3', 'say hi', ['Outputs', '../x']))
+    await admin.runEnd('3')
+
+    expect(vi.mocked(runAgent).mock.calls.map(([params]) => params.clientTools)).toEqual([undefined, undefined, undefined])
+    expect(student.received.some((m) => m.type === 'tool.request')).toBe(false)
+    student.ws.close()
+    admin.ws.close()
   })
 })

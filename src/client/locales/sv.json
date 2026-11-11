@@ -248,7 +248,13 @@
     "noPrompt": "Ingen prompt",
     "showFullDescription": "Visa hela beskrivningen",
     "showLessDescription": "Visa mindre",
-    "codeBlock": "Kodblock"
+    "codeBlock": "Kodblock",
+    "fileToolLs": "Tittade i mappen {{path}}",
+    "fileToolReadFile": "Läste filen {{path}}",
+    "fileToolReadFileLines": "Läste filen {{path}}, rader {{start}}–{{end}} av {{total}}",
+    "fileToolGlob": "Sökte efter filer som matchar {{pattern}}",
+    "fileToolGrep": "Sökte efter {{pattern}} i {{path}}",
+    "fileToolFailed": "{{action}}: misslyckades"
   },
   "settings": {
     "prompt": "Samtalsstart",
@@ -1073,6 +1079,10 @@
     "folderSummary": "Filer: {{files}}, {{size}}",
     "reserved": "Fylls av assistenten",
     "syncFolder": "Synkronisera",
-    "syncFolderNamed": "Synkronisera mappen {{name}}"
+    "syncFolderNamed": "Synkronisera mappen {{name}}",
+    "attachFolders": "Bifoga mappar från Mina filer",
+    "attachedFolder": "Bifogad mapp {{name}}",
+    "detachFolder": "tryck på Delete för att ta bort",
+    "noFoldersToAttach": "Lägg först till mappar i Mina filer."
   }
 }

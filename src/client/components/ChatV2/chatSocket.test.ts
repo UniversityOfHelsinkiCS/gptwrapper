@@ -184,3 +184,66 @@ describe('WebSocketChatTransport', () => {
     expect(sockets).toHaveLength(2)
   })
 })
+
+describe('client-executed tools', () => {
+  test('sends the attached folders, runs a requested tool and sends its result', async () => {
+    const { sockets, connection } = setup()
+    const execute = vi.fn(async () => ({ status: 'ok' as const, content: 'listing', artifact: { tool: 'ls' } }))
+    const started = new WebSocketChatTransport(connection).start({ ...run, clientTools: { attachedFolders: ['Course notes'], execute } })
+    sockets[0].open()
+    await flush()
+
+    expect(sockets[0].sent).toEqual([{ type: 'run.start', runId: '1', input: run.input, attachedFolders: ['Course notes'] }])
+    sockets[0].receive({ type: 'run.event', runId: '1', event: text('a') })
+    const result = await started
+    sockets[0].receive({ type: 'tool.request', runId: '1', callId: 'call_1', name: 'ls', input: { path: 'Course notes' } })
+    await flush()
+
+    expect(execute).toHaveBeenCalledWith('ls', { path: 'Course notes' })
+    expect(sockets[0].sent.at(-1)).toEqual({
+      type: 'tool.result',
+      runId: '1',
+      callId: 'call_1',
+      result: { status: 'ok', content: 'listing', artifact: { tool: 'ls' } },
+    })
+
+    // The request is not an event of the run
+    sockets[0].receive({ type: 'run.end', runId: '1', result: { status: 'completed' } })
+    expect('events' in result && (await collect(result.events))).toEqual([text('a')])
+  })
+
+  test('without client tools, or when the tool throws, the result is an error', async () => {
+    const { sockets, connection } = setup()
+    const started = new WebSocketChatTransport(connection).start(run)
+    sockets[0].open()
+    await flush()
+    expect(sockets[0].sent[0]).not.toHaveProperty('attachedFolders')
+    sockets[0].receive({ type: 'tool.request', runId: '1', callId: 'call_1', name: 'ls', input: {} })
+    await flush()
+    expect(sockets[0].sent.at(-1)).toEqual({
+      type: 'tool.result',
+      runId: '1',
+      callId: 'call_1',
+      result: { status: 'error', error: 'This chat has no tools in the browser.' },
+    })
+    sockets[0].receive({ type: 'run.end', runId: '1', result: { status: 'completed' } })
+    await started
+
+    const execute = vi.fn(async () => {
+      throw new Error('boom')
+    })
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const second = new WebSocketChatTransport(connection).start({ ...run, clientTools: { attachedFolders: ['A'], execute } })
+    await flush()
+    sockets[0].receive({ type: 'tool.request', runId: '2', callId: 'call_2', name: 'ls', input: {} })
+    await flush()
+    expect(sockets[0].sent.at(-1)).toEqual({
+      type: 'tool.result',
+      runId: '2',
+      callId: 'call_2',
+      result: { status: 'error', error: 'The tool failed in the browser.' },
+    })
+    sockets[0].receive({ type: 'run.end', runId: '2', result: { status: 'completed' } })
+    await second
+  })
+})

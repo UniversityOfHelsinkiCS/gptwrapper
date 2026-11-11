@@ -244,7 +244,13 @@
     "noPrompt": "Ei alustusta",
     "showFullDescription": "Näytä koko kuvaus",
     "showLessDescription": "Näytä vähemmän",
-    "codeBlock": "Koodikenttä"
+    "codeBlock": "Koodikenttä",
+    "fileToolLs": "Katsoi kansiota {{path}}",
+    "fileToolReadFile": "Luki tiedoston {{path}}",
+    "fileToolReadFileLines": "Luki tiedoston {{path}}, rivit {{start}}–{{end}} / {{total}}",
+    "fileToolGlob": "Etsi tiedostoja hakuehdolla {{pattern}}",
+    "fileToolGrep": "Haki tekstiä {{pattern}} kohteesta {{path}}",
+    "fileToolFailed": "{{action}}: epäonnistui"
   },
   "settings": {
     "prompt": "Keskustelun alustus",
@@ -1098,6 +1104,10 @@
     "folderSummary": "Tiedostoja: {{files}}, {{size}}",
     "reserved": "Avustaja täyttää",
     "syncFolder": "Synkronoi",
-    "syncFolderNamed": "Synkronoi kansio {{name}}"
+    "syncFolderNamed": "Synkronoi kansio {{name}}",
+    "attachFolders": "Liitä kansioita Omista tiedostoista",
+    "attachedFolder": "Liitetty kansio {{name}}",
+    "detachFolder": "poista liitos Delete-näppäimellä",
+    "noFoldersToAttach": "Lisää ensin kansioita Omiin tiedostoihin."
   }
 }

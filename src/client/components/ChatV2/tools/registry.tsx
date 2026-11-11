@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { ToolPart } from '../../../../shared/agentChat'
 import type { ToolCallResultEvent } from '../../../../shared/chat'
 import { DocumentSearchPart, documentSearchSource } from './DocumentSearchPart'
+import { FileToolPart } from './FileToolPart'
 import { QuizPart } from './QuizCard'
 import { ToolPartRow } from './ToolPartRow'
 
@@ -22,6 +23,11 @@ const toolRenderers: Record<string, ToolRenderer> = {
   // Saved by v3 with the mock model
   mock_document_search: documentSearchRenderer,
   present_quiz: { Part: QuizPart },
+  // The My files tools, run in the browser
+  ls: { Part: FileToolPart },
+  read_file: { Part: FileToolPart },
+  glob: { Part: FileToolPart },
+  grep: { Part: FileToolPart },
 }
 
 /** Shown for tools that have no renderer of their own. */

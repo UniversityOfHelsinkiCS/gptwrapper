@@ -5,6 +5,7 @@ import type { SubagentPart, ToolPart } from '@shared/agentChat'
 import type { ToolStage } from '@shared/promptTools'
 import type { User } from '@shared/user'
 import type { ChatInstance } from '../../../db/models'
+import type { ClientToolCaller } from '../clientTools'
 
 /**
  * What a tool may know about the run that creates it. Deliberately not the `Prompt`: the teacher agent will
@@ -19,6 +20,8 @@ export type ToolContext<Config = unknown> = {
   /** Settings of this tool for this run (for `document_search`, the RAG index). */
   config: Config
   signal: AbortSignal
+  /** Runs a client-executed tool in the browser. Only set for runs over the chat socket that have client tools. */
+  callClientTool?: ClientToolCaller
 }
 
 /**
@@ -56,11 +59,25 @@ type ToolModuleBase<Config> = {
    */
   promptOption?: { labelKey: string; descriptionKey: string }
   returnDirect?: boolean
-  /** English instructions appended to the system message under `## Tool: <name>` when the tool is enabled. */
-  instructions?: string
+  /**
+   * English instructions appended to the system message under `## Tool: <name>` when the tool is enabled. A function
+   * gets the tool's config for the run (for the file tools, the attached folders).
+   */
+  instructions?: string | ((config: Config) => string)
   /** Schema of the per-prompt `config`, checked when a prompt is saved. Without it, a prompt cannot give the tool a config. */
   configSchema?: ZodType
   create: (ctx: ToolContext<Config>) => StructuredToolInterface
+}
+
+/**
+ * A failure the model should read as it is (the tool part also ends as `error`). Other errors thrown by a tool reach
+ * the model only as a generic "the tool failed".
+ */
+export class ToolError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'ToolError'
+  }
 }
 
 /** A tool enabled for one run, with its config. */

@@ -10,7 +10,9 @@ import { CHAT_SOCKET_LOGGED_IN_AS_PARAM, CHAT_SOCKET_PATH, type ChatSocketServer
 import type { User } from '../../../shared/user'
 import shibbolethMiddleware from '../../middleware/shibboleth'
 import userMiddleware from '../../middleware/user'
+import { createClientToolBridge, type ClientToolBridge } from '../../services/agent/clientTools'
 import { runAgent } from '../../services/agent/runAgent'
+import { parseAttachedFolders } from '../../services/agent/tools/fileTools'
 import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
 
@@ -19,24 +21,38 @@ export const HEARTBEAT_INTERVAL_MS = 25_000
 /** The same as the JSON body limit of the HTTP API. */
 const MAX_MESSAGE_BYTES = 10 * 1024 * 1024
 
+const ClientToolResultSchema = z.discriminatedUnion('status', [
+  z.object({ status: z.literal('ok'), content: z.string(), artifact: z.unknown().optional() }),
+  z.object({ status: z.literal('error'), error: z.string() }),
+])
+
 const ChatSocketClientMessageSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('run.start'), runId: z.string().min(1), input: PostStreamSchemaV4, fileSize: z.number().optional() }),
+  z.object({
+    type: z.literal('run.start'),
+    runId: z.string().min(1),
+    input: PostStreamSchemaV4,
+    fileSize: z.number().optional(),
+    attachedFolders: z.array(z.string()).max(100).optional(),
+  }),
   z.object({ type: z.literal('run.abort'), runId: z.string().min(1) }),
-  // Issue 11: tool.result
+  z.object({ type: z.literal('tool.result'), runId: z.string().min(1), callId: z.string().min(1), result: ClientToolResultSchema }),
 ])
 
 type SocketUser = { user: User; hijackedBy?: User }
 
-type ActiveRun = { runId: string; controller: AbortController }
+type ActiveRun = { runId: string; controller: AbortController; clientTools: ClientToolBridge }
 
-type ChatSocketOptions = { path?: string; heartbeatIntervalMs?: number }
+type ChatSocketOptions = { path?: string; heartbeatIntervalMs?: number; clientToolTimeoutMs?: number }
 
 /**
  * Serves chat runs over WebSocket on `CHAT_SOCKET_PATH` (protocol in `shared/chatSocket.ts`), next to the HTTP
  * NDJSON route in `v4.ts`. Both run the same `runAgent`. The user comes from the Shibboleth headers of the
  * upgrade request, through the same middleware as HTTP requests.
  */
-export const attachChatSocket = (server: Server, { path = CHAT_SOCKET_PATH, heartbeatIntervalMs = HEARTBEAT_INTERVAL_MS }: ChatSocketOptions = {}) => {
+export const attachChatSocket = (
+  server: Server,
+  { path = CHAT_SOCKET_PATH, heartbeatIntervalMs = HEARTBEAT_INTERVAL_MS, clientToolTimeoutMs }: ChatSocketOptions = {},
+) => {
   const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE_BYTES })
   const alive = new WeakMap<WebSocket, boolean>()
 
@@ -57,7 +73,7 @@ export const attachChatSocket = (server: Server, { path = CHAT_SOCKET_PATH, hear
         wss.handleUpgrade(req, socket, head, (ws) => {
           alive.set(ws, true)
           ws.on('pong', () => alive.set(ws, true))
-          handleConnection(ws, result)
+          handleConnection(ws, result, { clientToolTimeoutMs })
         })
       })
       .catch((error) => {
@@ -165,7 +181,11 @@ const isSameOrigin = (req: IncomingMessage) => {
   }
 }
 
-const handleConnection = (ws: WebSocket, { user, hijackedBy }: SocketUser) => {
+/** The client-executed file tools are experimental: only for admins, also while they chat as another user. */
+const canUseClientTools = ({ user, hijackedBy }: SocketUser) => Boolean((hijackedBy ?? user).isAdmin)
+
+const handleConnection = (ws: WebSocket, socketUser: SocketUser, { clientToolTimeoutMs }: { clientToolTimeoutMs?: number } = {}) => {
+  const { user, hijackedBy } = socketUser
   let activeRun: ActiveRun | null = null
 
   const send = (message: ChatSocketServerMessage) =>
@@ -181,12 +201,17 @@ const handleConnection = (ws: WebSocket, { user, hijackedBy }: SocketUser) => {
       })
     })
 
-  const startRun = async ({ runId, input, fileSize }: RunStartMessage) => {
+  const startRun = async ({ runId, input, fileSize, attachedFolders }: RunStartMessage) => {
     const controller = new AbortController()
-    const run: ActiveRun = { runId, controller }
+    const clientTools = createClientToolBridge({
+      send: ({ callId, name, input: toolInput }) => void send({ type: 'tool.request', runId, callId, name, input: toolInput }),
+      timeoutMs: clientToolTimeoutMs,
+    })
+    const run: ActiveRun = { runId, controller, clientTools }
     activeRun = run
     const startedAt = Date.now()
-    const meta: Record<string, unknown> = { streamVersion: 'v4', transport: 'websocket', fileSize }
+    const folders = canUseClientTools(socketUser) ? parseAttachedFolders(attachedFolders) : []
+    const meta: Record<string, unknown> = { streamVersion: 'v4', transport: 'websocket', fileSize, attachedFolderCount: folders.length || undefined }
 
     // An aborted run may still be winding down; it must not write into the next run.
     const emit = async (event: ChatEvent) => {
@@ -207,11 +232,14 @@ const handleConnection = (ws: WebSocket, { user, hijackedBy }: SocketUser) => {
           meta.timeToStreamStart = Date.now() - startedAt
         },
         emit,
+        clientTools: folders.length > 0 ? { attachedFolders: folders, call: clientTools.call } : undefined,
       })
       result = runResult
     } catch (error) {
       result = toErrorResult(error)
     } finally {
+      // Results arriving after the run are ignored.
+      clientTools.close('The run has ended.')
       if (activeRun === run) activeRun = null
     }
 
@@ -241,8 +269,16 @@ const handleConnection = (ws: WebSocket, { user, hijackedBy }: SocketUser) => {
         void startRun(message)
         return
 
+      case 'tool.result':
+        // Only the running run's own calls; anything else (an old run, an unknown or finished call) is ignored.
+        if (activeRun?.runId === message.runId && !activeRun.clientTools.resolve(message.callId, message.result)) {
+          logger.info('Ignoring a tool.result for an unknown or finished call')
+        }
+        return
+
       case 'run.abort':
         if (activeRun?.runId === message.runId) {
+          activeRun.clientTools.close('The run was aborted.')
           activeRun.controller.abort('client_aborted')
           // The aborted run frees the connection at once, so the next message is not refused while it winds down.
           activeRun = null
@@ -254,6 +290,7 @@ const handleConnection = (ws: WebSocket, { user, hijackedBy }: SocketUser) => {
   ws.on('close', () => {
     if (activeRun) {
       logger.info('Chat socket closed, aborting agent run')
+      activeRun.clientTools.close()
       activeRun.controller.abort('client_disconnected')
       activeRun = null
     }

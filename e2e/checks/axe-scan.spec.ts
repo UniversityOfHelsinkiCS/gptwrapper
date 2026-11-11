@@ -420,3 +420,42 @@ adminTest.describe('axe wcag scan for my files', () => {
     }
   })
 })
+
+adminTest.describe('axe wcag scan for chat with attached folders', () => {
+  adminTest.afterAll(writeAxeReport)
+
+  adminTest('scan chat with an attached folder and file tool parts', async ({ page }, testInfo) => {
+    const root = mkdtempSync(join(tmpdir(), 'axe-attached-'))
+    try {
+      mkdirSync(join(root, 'Course notes'), { recursive: true })
+      writeFileSync(join(root, 'Course notes', 'syllabus.md'), 'The exam is on Friday.')
+
+      await page.goto('/test-course-course-id')
+      await acceptDisclaimer(page)
+      await useMockModel(page)
+      await page.getByTestId('my-files-button').click()
+      const dialog = page.getByRole('dialog', { name: 'My files' })
+      await dialog.getByTestId('my-files-input-folder').setInputFiles(join(root, 'Course notes'))
+      await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+      await dialog.getByTestId('my-files-close').click()
+      await expect(dialog).toBeHidden()
+
+      await page.getByTestId('attach-folders-button').click()
+      await page.getByRole('menuitemcheckbox', { name: 'Course notes' }).click()
+      await page.keyboard.press('Escape')
+      await expect(page.getByRole('menu')).toBeHidden()
+
+      // The mock model lists the attached folder and reads its first file
+      await sendChatMessage(page, 'files Course notes')
+      await closeSendPreference(page)
+      await expect(page.getByTestId('assistant-message')).toContainText('The exam is on Friday.')
+      await expect(page.getByTestId('tool-part')).toHaveCount(2)
+      await expect(page.getByTestId('attached-folder')).toBeVisible()
+      await page.mouse.move(0, 0)
+      await expect(page.getByRole('tooltip')).toHaveCount(0)
+      await scan(page, testInfo.title)
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+})
