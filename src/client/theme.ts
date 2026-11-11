@@ -150,6 +150,10 @@ const baseOptions: Omit<ThemeOptions, 'palette'> = {
             opacity: 1,
             backgroundColor: theme.palette.grey[600],
           }),
+        thumb: ({ theme }) =>
+          theme.applyStyles('light', {
+            color: theme.palette.grey[300],
+          }),
         colorPrimary: ({ theme }) =>
           theme.applyStyles('dark', {
             '&.Mui-checked:not(.Mui-disabled)': { color: lighten(theme.palette.primary.main, 0.75) },
@@ -229,12 +233,8 @@ const useTheme = () => {
           ...baseOptions,
           palette: {
             mode: prefersDarkMode ? 'dark' : 'light',
-            primary: {
-              main: '#54749C',
-            },
-            secondary: {
-              main: '#79719D',
-            },
+            primary: prefersDarkMode ? { main: '#93B4E0', light: '#B7CEEC', dark: '#6A8DBB' } : { main: '#54749C' },
+            secondary: prefersDarkMode ? { main: '#AFA6D9', dark: '#8A80B8' } : { main: '#79719D' },
             success: prefersDarkMode ? { main: '#81c784', dark: '#4a7c59' } : { main: '#4a7c59' },
             info: prefersDarkMode ? { main: '#90a9cb', dark: '#5779A2' } : { main: '#5779A2' },
             warning: {
