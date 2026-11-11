@@ -62,7 +62,9 @@ export default defineConfig({
   ],
   base,
   build: {
-    minify: inCI ? false : 'esbuild',
+    // TODO: update dependencies, so vite can be updated to use OXC as minifier. esbuild is deprecated and crashes build
+    // minify: inCI ? false : 'esbuild',
+    minify: false,
     sourcemap: true,
   },
   server: {
