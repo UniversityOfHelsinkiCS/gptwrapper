@@ -1,3 +1,6 @@
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { expect, type Page } from '@playwright/test'
 import { studentTest as test, teacherTest, adminTest } from '../fixtures'
 import { scan, writeAxeReport } from '../axe/axe_utils'
@@ -387,5 +390,33 @@ teacherTest.describe('axe wcag scan for prompt modal previews', () => {
     await page.getByTestId(`edit-prompt-${promptName}`).click()
     await expect(page.getByTestId('prompt-name-input')).toHaveValue(promptName)
     await scan(page, testInfo.title)
+  })
+})
+
+adminTest.describe('axe wcag scan for my files', () => {
+  adminTest.afterAll(writeAxeReport)
+
+  adminTest('scan my files dialog with an expanded folder', async ({ page }, testInfo) => {
+    const root = mkdtempSync(join(tmpdir(), 'axe-my-files-'))
+    try {
+      mkdirSync(join(root, 'Course notes', 'week1'), { recursive: true })
+      writeFileSync(join(root, 'Course notes', 'syllabus.md'), '# Syllabus')
+      writeFileSync(join(root, 'Course notes', 'week1', 'lecture.md'), 'Lecture 1')
+
+      await page.goto('/general')
+      await acceptDisclaimer(page)
+      await page.getByTestId('my-files-button').click()
+      const dialog = page.getByRole('dialog', { name: 'My files' })
+      await expect(dialog).toBeVisible()
+      await dialog.getByTestId('my-files-input-folder').setInputFiles(join(root, 'Course notes'))
+      await expect(dialog.getByTestId('my-files-status')).toContainText('New: 2')
+      await dialog.getByRole('button', { name: /^Course notes/ }).click()
+      await expect(dialog.locator('[data-path="Course notes/syllabus.md"]')).toBeVisible()
+      // Moving the mouse away so no tooltip is open during the scan.
+      await page.mouse.move(0, 0)
+      await scan(page, testInfo.title)
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
   })
 })

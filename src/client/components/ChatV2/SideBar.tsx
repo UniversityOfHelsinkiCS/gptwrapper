@@ -9,6 +9,7 @@ import sidebarClose from '../../assets/sidebar-close.svg'
 import sidebarOpen from '../../assets/sidebar-open.svg'
 import EmailButton from './EmailButton'
 import DownloadButton from './DownloadButton'
+import MyFilesButton from '../MyFiles/MyFilesButton'
 import { HYLogo } from './general/HYLogo'
 
 import Footer from '../Footer'
@@ -90,6 +91,7 @@ const SideBar = ({
             </Tooltip>
             <EmailButton messages={messages} disabled={!messages.length} collapsed />
             {user?.isAdmin && <DownloadButton messages={messages} disabled={!messages.length} collapsed />}
+            <MyFilesButton user={user} collapsed />
           </Box>
         ) : (
           <Box>
@@ -137,6 +139,7 @@ const SideBar = ({
             <Box sx={{ px: 3, py: 1 }}>
               <EmailButton messages={messages} disabled={!messages.length} />
               <DownloadButton messages={messages} disabled={!messages.length} />
+              <MyFilesButton user={user} />
             </Box>
             <Divider />
             <Box px={3} py={2}>
