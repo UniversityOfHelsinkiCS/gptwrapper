@@ -3,6 +3,7 @@ import type { ClientToolResult } from '../../../shared/chatSocket'
 import { FILE_TOOL_LIMITS } from '../../../shared/fileTools'
 import { executeFileTool, FileToolError, globToRegExp, isOutputWrite, resolveAgentPath, resolveWritePath, visibleFolders } from './agentTools'
 import { createMemoryStore } from './memoryStore'
+import { PdfParseError } from './pdfText'
 import type { MyFilesStore } from './store'
 
 const FOLDERS = visibleFolders(['Course notes'])
@@ -98,7 +99,11 @@ describe('globToRegExp', () => {
 
 describe('executeFileTool', () => {
   let store: MyFilesStore
-  const run = (name: string, input: unknown, attached = ['Course notes']) => executeFileTool(store, attached, name, input)
+  // PDFs are tested in `pdfText.node.test.ts`; the fixture here is not a valid PDF.
+  const readPdf = async () => {
+    throw new PdfParseError('invalid', 'it could not be parsed as a PDF')
+  }
+  const run = (name: string, input: unknown, attached = ['Course notes']) => executeFileTool(store, attached, name, input, { readPdf })
 
   beforeEach(async () => {
     store = createMemoryStore()
@@ -196,8 +201,10 @@ describe('executeFileTool', () => {
       if (result.status === 'ok') expect(JSON.stringify(result.artifact).length).toBeLessThan(500)
     })
 
-    test('refuses PDFs, binary files, folders and too large files', async () => {
-      expect(errorOf(await run('read_file', { path: 'Course notes/slides.pdf' }))).toContain('PDF files cannot be read yet')
+    test('refuses broken PDFs, binary files, folders and too large files', async () => {
+      expect(errorOf(await run('read_file', { path: 'Course notes/slides.pdf' }))).toBe(
+        '"Course notes/slides.pdf" cannot be read: it could not be parsed as a PDF.',
+      )
       expect(errorOf(await run('read_file', { path: 'Course notes/image.png' }))).toContain('binary file')
       expect(errorOf(await run('read_file', { path: 'Course notes/week1' }))).toContain('is a folder')
       await store.write('Course notes/huge.txt', new Uint8Array(FILE_TOOL_LIMITS.fileBytes + 1).fill(65))
@@ -249,7 +256,7 @@ describe('executeFileTool', () => {
         [
           'Lines matching "exam" in the folders you can see:',
           'Course notes/syllabus.md:2: The exam is on Friday.',
-          '[Not searched (PDF, binary or too large): Course notes/image.png, Course notes/slides.pdf]',
+          '[Not searched (binary, too large, or PDFs without a text layer): Course notes/image.png, Course notes/slides.pdf]',
         ].join('\n'),
       )
       expect(okContent(result)).not.toContain('42')

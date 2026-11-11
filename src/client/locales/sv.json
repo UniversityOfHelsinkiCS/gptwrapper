@@ -252,6 +252,7 @@
     "fileToolLs": "Tittade i mappen {{path}}",
     "fileToolReadFile": "Läste filen {{path}}",
     "fileToolReadFileLines": "Läste filen {{path}}, rader {{start}}–{{end}} av {{total}}",
+    "fileToolReadFilePages": "Läste filen {{path}}, sidorna {{start}}–{{end}} av {{total}}",
     "fileToolGlob": "Sökte efter filer som matchar {{pattern}}",
     "fileToolGrep": "Sökte efter {{pattern}} i {{path}}",
     "fileToolFailed": "{{action}}: misslyckades",

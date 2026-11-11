@@ -36,6 +36,7 @@ import {
 import { downloadMyFile, saveBlob } from '../../util/myFiles/download'
 import { exportAgentNotes, NOTES_ZIP_FILE_NAME, NotesZipError, readAgentNotesZip, replaceAgentNotes, type NotesZipFile } from '../../util/myFiles/notesZip'
 import { AGENT_NOTES_FOLDER, OUTPUTS_FOLDER, RESERVED_FOLDERS, baseName, isReservedPath } from '../../util/myFiles/paths'
+import { getPdfTextCache } from '../../util/myFiles/pdfText'
 import type { MyFilesEntry, MyFilesStore } from '../../util/myFiles/store'
 import ConfirmDialog from '../ChatV2/general/ConfirmDialog'
 import { useMyFilesStore } from './MyFilesStoreContext'
@@ -491,6 +492,8 @@ const MyFilesContent = ({ store }: { store: MyFilesStore }) => {
     setResult(null)
     try {
       await store.clear()
+      // The text extracted from PDFs is kept outside the tree.
+      await getPdfTextCache()?.clear()
       await ensureReservedFolders(store)
     } catch {
       setError(true)

@@ -26,8 +26,10 @@ export const FILE_TOOL_LIMITS = {
   readLines: 500,
   /** Longer lines are cut in `read_file` and `grep` results. */
   lineChars: 2000,
-  /** Files larger than this are not read or searched. */
+  /** Text files larger than this are not read or searched. */
   fileBytes: 10 * 1024 * 1024,
+  /** PDFs larger than this are not parsed. */
+  pdfBytes: 50 * 1024 * 1024,
   lsEntries: 500,
   globMatches: 200,
   grepMatches: 100,
@@ -47,14 +49,23 @@ export const LEARNING_GRAPH_PATH = 'Agent notes/learning-graph.json'
 
 const PathSchema = z.string().max(4096)
 
+/** A page range of `read_file` on a PDF: one page (`'3'`) or a range (`'3-5'`), 1-based. */
+export const PAGE_RANGE_PATTERN = /^\s*(\d{1,6})\s*(?:[-–]\s*(\d{1,6})\s*)?$/
+
 export const FileToolInputSchemas = {
   ls: z.object({
     path: PathSchema.describe('folder to list, relative to My files, e.g. "Course notes/week1"; "" lists the folders you can see'),
   }),
   read_file: z.object({
     path: PathSchema.describe('file to read, relative to My files, e.g. "Course notes/week1/lecture.md"'),
-    offset: z.number().int().min(1).optional().describe('first line to read (1-based); default 1'),
-    limit: z.number().int().min(1).optional().describe(`number of lines to read; default ${FILE_TOOL_LIMITS.readLines}`),
+    offset: z.number().int().min(1).optional().describe('first line to read (1-based); default 1. Not for PDFs'),
+    limit: z.number().int().min(1).optional().describe(`number of lines to read; default ${FILE_TOOL_LIMITS.readLines}. Not for PDFs`),
+    pages: z
+      .string()
+      .max(20)
+      .regex(PAGE_RANGE_PATTERN, 'pages must be a page number or a range like "3-5"')
+      .optional()
+      .describe('PDFs only: the page or pages to read, e.g. "3" or "3-5" (1-based); default from page 1 as far as fits'),
   }),
   glob: z.object({
     pattern: z
@@ -63,7 +74,7 @@ export const FileToolInputSchemas = {
       .describe('glob pattern matched against file paths relative to My files: * and ? within a name, ** across folders, {a,b} alternatives; e.g. "**/*.md"'),
   }),
   grep: z.object({
-    pattern: z.string().max(FILE_TOOL_LIMITS.patternChars).describe('JavaScript regular expression searched for in each line of the text files'),
+    pattern: z.string().max(FILE_TOOL_LIMITS.patternChars).describe('JavaScript regular expression searched for in each line of the text files and PDFs'),
     path: PathSchema.optional().describe('folder or file to search, relative to My files; default all the folders you can see'),
     ignore_case: z.boolean().optional().describe('match case-insensitively; default false'),
   }),
@@ -91,8 +102,11 @@ export type FileToolInput<Name extends FileToolName> = z.infer<(typeof FileToolI
 export type FileToolSummary =
   | { tool: 'ls'; path: string; entries: string[]; total: number }
   | { tool: 'read_file'; path: string; startLine: number; endLine: number; totalLines: number; excerpt: string }
+  /** `read_file` on a PDF. */
+  | { tool: 'read_file'; path: string; startPage: number; endPage: number; totalPages: number; excerpt: string }
   | { tool: 'glob'; pattern: string; matches: string[]; total: number }
-  | { tool: 'grep'; pattern: string; path: string; matches: { path: string; line: number; text: string }[]; total: number }
+  /** `page` is set for matches in a PDF; their `line` is the line within that page. */
+  | { tool: 'grep'; pattern: string; path: string; matches: { path: string; line: number; page?: number; text: string }[]; total: number }
   | { tool: 'write_file'; path: string; bytes: number; created: boolean }
   | { tool: 'edit_file'; path: string; bytes: number }
   | { tool: 'delete_file'; path: string }

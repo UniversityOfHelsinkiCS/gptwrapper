@@ -12,6 +12,8 @@ import {
   MOCK_FILES_PREFIX,
   MOCK_NOTE_PATH,
   MOCK_NOTE_PREFIX,
+  MOCK_PDF_PAGE_PREFIX,
+  parseMockPdfPage,
   MOCK_WRITE_OUTPUT_PREFIX,
   mockOutputContent,
   codeTestContent,
@@ -106,6 +108,13 @@ export class MockModel extends BaseChatModel {
       // `files <folder>` lists the folder with the My files tools (on for socket runs with attached folders), then reads its first file.
       const path = lastHuman.slice(MOCK_FILES_PREFIX.length).trim()
       return fakeModel().respond(new AIMessage({ content: '', tool_calls: [{ name: 'ls', args: { path }, id: 'mock_ls_id', type: 'tool_call' }] }))
+    }
+    if (lastHuman.startsWith(MOCK_PDF_PAGE_PREFIX)) {
+      // `pdfpage <pages> <path>` reads those pages of a PDF in My files (then the generic tool-result answer above).
+      const args = parseMockPdfPage(lastHuman)
+      if (args) {
+        return fakeModel().respond(new AIMessage({ content: '', tool_calls: [{ name: 'read_file', args, id: 'mock_read_pdf_id', type: 'tool_call' }] }))
+      }
     }
     if (lastHuman.startsWith(MOCK_WRITE_OUTPUT_PREFIX)) {
       // `writeout <name>` writes `Outputs/<name>` with the My files tools (on for admins' socket runs).

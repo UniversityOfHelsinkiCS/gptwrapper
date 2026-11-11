@@ -142,6 +142,44 @@ describe('file tool summarizeForHistory', () => {
     )
   })
 
+  test('summarises PDF reads and searches with page numbers', () => {
+    const text = historyMessageToText({
+      role: 'assistant',
+      parts: [
+        part(
+          'grep',
+          { pattern: 'entropy', path: 'Course notes' },
+          {
+            tool: 'grep',
+            pattern: 'entropy',
+            path: 'Course notes',
+            matches: [{ path: 'Course notes/book.pdf', page: 3, line: 1, text: 'Entropy is a state function.' }],
+            total: 1,
+          },
+        ),
+        part(
+          'read_file',
+          { path: 'Course notes/book.pdf', pages: '3' },
+          { tool: 'read_file', path: 'Course notes/book.pdf', startPage: 3, endPage: 3, totalPages: 12, excerpt: 'Entropy is a state function.' },
+        ),
+      ],
+    })
+    expect(text).toBe(
+      [
+        '[Searched for "entropy" in "Course notes" in My files: 1 matching lines, for example:\n- Course notes/book.pdf (page 3): "Entropy is a state function."\n]',
+        '[Read "Course notes/book.pdf" from My files, pages 3-3 of 12. It starts: "Entropy is a state function.". Read it again for the content.]',
+      ].join('\n\n'),
+    )
+  })
+
+  test('a failed PDF read names the pages', () => {
+    const readFile = getToolModule('read_file')!
+    if (readFile.kind !== 'tool') throw new Error('not a tool')
+    expect(readFile.summarizeForHistory(part('read_file', { path: 'A/b.pdf', pages: '40' }, 'Error: "A/b.pdf" has only 12 pages', 'error'))).toBe(
+      '[Tried to read "A/b.pdf" (pages 40) in My files, but it failed: Error: "A/b.pdf" has only 12 pages]',
+    )
+  })
+
   test('says how many more entries there were and when nothing was found', () => {
     const ls = getToolModule('ls')!
     const glob = getToolModule('glob')!

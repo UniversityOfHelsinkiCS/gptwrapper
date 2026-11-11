@@ -245,6 +245,7 @@
     "fileToolLs": "Looked in the folder {{path}}",
     "fileToolReadFile": "Read the file {{path}}",
     "fileToolReadFileLines": "Read the file {{path}}, lines {{start}}–{{end}} of {{total}}",
+    "fileToolReadFilePages": "Read the file {{path}}, pages {{start}}–{{end}} of {{total}}",
     "fileToolGlob": "Looked for files matching {{pattern}}",
     "fileToolGrep": "Searched for {{pattern}} in {{path}}",
     "fileToolFailed": "{{action}}: failed",

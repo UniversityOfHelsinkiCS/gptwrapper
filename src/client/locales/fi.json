@@ -248,6 +248,7 @@
     "fileToolLs": "Katsoi kansiota {{path}}",
     "fileToolReadFile": "Luki tiedoston {{path}}",
     "fileToolReadFileLines": "Luki tiedoston {{path}}, rivit {{start}}–{{end}} / {{total}}",
+    "fileToolReadFilePages": "Luki tiedoston {{path}}, sivut {{start}}–{{end}} / {{total}}",
     "fileToolGlob": "Etsi tiedostoja hakuehdolla {{pattern}}",
     "fileToolGrep": "Haki tekstiä {{pattern}} kohteesta {{path}}",
     "fileToolFailed": "{{action}}: epäonnistui",

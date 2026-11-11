@@ -6,11 +6,13 @@ import {
   isFileToolName,
   LEARNING_GRAPH_PATH,
   MAX_ATTACHED_FOLDERS,
+  PAGE_RANGE_PATTERN,
   type FileToolInput,
   type FileToolName,
   type FileToolSummary,
 } from '../../../shared/fileTools'
 import { AGENT_NOTES_FOLDER, isReservedPath, isWithin, OUTPUTS_FOLDER, RESERVED_FOLDERS, splitPath } from './paths'
+import { defaultPdfPagesReader, PdfParseError, type PdfPagesReader } from './pdfText'
 import { isMyFilesError, type MyFilesEntry, type MyFilesStore } from './store'
 
 /**
@@ -21,6 +23,7 @@ import { isMyFilesError, type MyFilesEntry, type MyFilesStore } from './store'
  * - the write tools (`write_file`, `edit_file`) write only inside `Outputs/` and `Agent notes/`, and `delete_file`
  *   deletes only inside `Agent notes/`. The attached (student's) folders are never written. All of them refuse
  *   `Agent notes/learning-graph.json`, which is for the typed graph tools.
+ * PDFs are read and searched as the text of their pages (`pdfText.ts`), with page numbers.
  * Folder names are compared case-sensitively. Anything else is refused with a `FileToolError`, whose message the
  * model reads.
  */
@@ -133,7 +136,7 @@ const excerptOf = (text: string, max: number) => {
   return flat.length > max ? `${flat.slice(0, max)}…` : flat
 }
 
-type Context = { store: MyFilesStore; folders: string[] }
+type Context = { store: MyFilesStore; folders: string[]; readPdf: PdfPagesReader }
 type ToolOutput = { content: string; artifact: FileToolSummary }
 
 const statOrThrow = async ({ store }: Context, path: string): Promise<MyFilesEntry> => {
@@ -161,11 +164,94 @@ const filesUnder = async (ctx: Context, path: string): Promise<MyFilesEntry[]> =
 
 /** The text of a file for reading or searching, or the reason it cannot be read as text. */
 const readTextFile = async ({ store }: Context, entry: MyFilesEntry): Promise<{ text: string } | { skipped: string }> => {
-  if (isPdf(entry.path)) return { skipped: 'PDF files cannot be read yet' }
+  if (isPdf(entry.path)) return { skipped: 'it is a PDF' }
   if (entry.size > FILE_TOOL_LIMITS.fileBytes) return { skipped: `the file is too large (${entry.size} bytes)` }
   const bytes = await store.readBytes(entry.path)
   if (looksBinary(bytes)) return { skipped: 'it is a binary file, not text' }
   return { text: new TextDecoder().decode(bytes) }
+}
+
+const NO_TEXT_LAYER = 'the PDF has no text layer (it is probably scanned, or its pages are images), and text in images cannot be read here'
+
+/** The page texts of a PDF, or the reason it cannot be read. */
+const readPdfPages = async (ctx: Context, entry: MyFilesEntry): Promise<{ pages: string[] } | { skipped: string }> => {
+  if (entry.size > FILE_TOOL_LIMITS.pdfBytes) return { skipped: `the PDF is too large (${entry.size} bytes)` }
+  let pages: string[]
+  try {
+    pages = await ctx.readPdf(ctx.store, entry)
+  } catch (error) {
+    if (error instanceof PdfParseError) return { skipped: error.message }
+    throw error
+  }
+  if (pages.every((page) => page.trim() === '')) return { skipped: NO_TEXT_LAYER }
+  return { pages }
+}
+
+const pageRange = (from: number, to: number) => (from === to ? `page ${from}` : `pages ${from}-${to}`)
+
+const readPdfFile = async (ctx: Context, path: string, entry: MyFilesEntry, input: FileToolInput<'read_file'>): Promise<ToolOutput> => {
+  const read = await readPdfPages(ctx, entry)
+  if ('skipped' in read) throw new FileToolError(`${quote(path)} cannot be read: ${read.skipped}.`)
+  const { pages } = read
+  const total = pages.length
+
+  let start = 1
+  let end = total
+  if (input.pages !== undefined) {
+    const match = PAGE_RANGE_PATTERN.exec(input.pages)
+    start = Number(match?.[1])
+    end = match?.[2] === undefined ? start : Number(match[2])
+    if (!match || start < 1 || end < start)
+      throw new FileToolError(`${quote(input.pages)} is not a page range. Use a page number like "3" or a range like "3-5".`)
+    if (start > total) throw new FileToolError(`${quote(path)} has only ${total} pages; page ${start} is past its end.`)
+    end = Math.min(end, total)
+  }
+
+  const blocks: string[] = []
+  let chars = 0
+  let last = start - 1
+  let pageCut = false
+  for (let n = start; n <= end; n++) {
+    const text = pages[n - 1].trim()
+    const body =
+      text === ''
+        ? '[No text on this page]'
+        : splitLines(text)
+            .map((line) => cutLine(line, FILE_TOOL_LIMITS.lineChars))
+            .join('\n')
+    let block = `[Page ${n}]\n${body}`
+    if (blocks.length > 0 && chars + block.length + 1 > FILE_TOOL_LIMITS.readChars) break
+    // Always at least one page, cut if it alone is over the cap.
+    if (block.length > FILE_TOOL_LIMITS.readChars) {
+      block = `${block.slice(0, FILE_TOOL_LIMITS.readChars)}… [page cut]`
+      pageCut = true
+    }
+    blocks.push(block)
+    chars += block.length + 1
+    last = n
+    if (pageCut) break
+  }
+
+  const header = `${quote(path)} is a PDF with ${total} pages. ${pageRange(start, last).replace(/^p/, 'P')}:`
+  const footer: string[] = []
+  if (pageCut) footer.push(`[Page ${last} is longer than ${FILE_TOOL_LIMITS.readChars} characters and was cut. Use grep to find text in the rest of it.]`)
+  if (last < total && (input.pages === undefined || last < end)) {
+    const next = `${last + 1}-${Math.min(total, last + (last - start + 1))}`
+    footer.push(`[Showing ${pageRange(start, last)} of ${total}. Use pages ${quote(next)} to read further.]`)
+  }
+  if (input.offset !== undefined || input.limit !== undefined) footer.push('[offset and limit do not apply to PDFs: use pages.]')
+
+  return {
+    content: [header, ...blocks, ...footer].join('\n'),
+    artifact: {
+      tool: 'read_file',
+      path,
+      startPage: start,
+      endPage: last,
+      totalPages: total,
+      excerpt: excerptOf(pages.slice(start - 1, last).join('\n'), FILE_TOOL_SUMMARY_LIMITS.excerptChars),
+    },
+  }
 }
 
 const entryLine = (entry: MyFilesEntry) => (entry.kind === 'directory' ? `${entry.path}/` : `${entry.path} (${entry.size} bytes)`)
@@ -206,6 +292,8 @@ const readFile = async (ctx: Context, input: FileToolInput<'read_file'>): Promis
   if (path === '') throw new FileToolError('Give the path of a file to read, for example from ls.')
   const entry = await statOrThrow(ctx, path)
   if (entry.kind === 'directory') throw new FileToolError(`${quote(path)} is a folder. Use ls to list it.`)
+  if (isPdf(path)) return readPdfFile(ctx, path, entry, input)
+  if (input.pages !== undefined) throw new FileToolError(`pages is only for PDF files. Use offset and limit to read ${quote(path)}.`)
 
   const read = await readTextFile(ctx, entry)
   if ('skipped' in read) throw new FileToolError(`${quote(path)} cannot be read: ${read.skipped}.`)
@@ -273,34 +361,55 @@ const grep = async (ctx: Context, input: FileToolInput<'grep'>): Promise<ToolOut
   const path = input.path === undefined ? '' : resolveAgentPath(input.path, ctx.folders)
   const files = await filesUnder(ctx, path)
 
-  const matches: { path: string; line: number; text: string }[] = []
+  const matches: { path: string; line: number; page?: number; text: string }[] = []
   const skipped: string[] = []
   let more = false
   search: for (const file of files) {
-    const read = await readTextFile(ctx, file)
-    if ('skipped' in read) {
-      skipped.push(file.path)
-      continue
-    }
-    const lines = splitLines(read.text)
-    for (let i = 0; i < lines.length; i++) {
-      const line = cutLine(lines[i], FILE_TOOL_LIMITS.lineChars)
-      if (!regex.test(line)) continue
-      if (matches.length === FILE_TOOL_LIMITS.grepMatches) {
-        more = true
-        break search
+    // A text file is one page without a number.
+    let pages: (string | undefined)[]
+    if (isPdf(file.path)) {
+      const read = await readPdfPages(ctx, file)
+      if ('skipped' in read) {
+        skipped.push(file.path)
+        continue
       }
-      matches.push({ path: file.path, line: i + 1, text: cutLine(line.trim(), FILE_TOOL_LIMITS.grepLineChars) })
+      pages = read.pages
+    } else {
+      const read = await readTextFile(ctx, file)
+      if ('skipped' in read) {
+        skipped.push(file.path)
+        continue
+      }
+      pages = [read.text]
+    }
+    const pdf = isPdf(file.path)
+    for (let p = 0; p < pages.length; p++) {
+      const lines = splitLines(pages[p] ?? '')
+      for (let i = 0; i < lines.length; i++) {
+        const line = cutLine(lines[i], FILE_TOOL_LIMITS.lineChars)
+        if (!regex.test(line)) continue
+        if (matches.length === FILE_TOOL_LIMITS.grepMatches) {
+          more = true
+          break search
+        }
+        const text = cutLine(line.trim(), FILE_TOOL_LIMITS.grepLineChars)
+        matches.push(pdf ? { path: file.path, page: p + 1, line: i + 1, text } : { path: file.path, line: i + 1, text })
+      }
     }
   }
 
   const where = path === '' ? 'the folders you can see' : quote(path)
   const lines =
     matches.length === 0
-      ? [`No lines match ${quote(input.pattern)} in ${where} (${files.length - skipped.length} text files searched).`]
-      : [`Lines matching ${quote(input.pattern)} in ${where}:`, ...matches.map((m) => `${m.path}:${m.line}: ${m.text}`)]
+      ? [`No lines match ${quote(input.pattern)} in ${where} (${files.length - skipped.length} files searched).`]
+      : [
+          `Lines matching ${quote(input.pattern)} in ${where}:`,
+          ...matches.map((m) => (m.page === undefined ? `${m.path}:${m.line}: ${m.text}` : `${m.path} (page ${m.page}, line ${m.line}): ${m.text}`)),
+        ]
   if (more) lines.push(`[Only the first ${matches.length} matches are shown. Use a narrower pattern or path.]`)
-  if (skipped.length > 0) lines.push(`[Not searched (PDF, binary or too large): ${skipped.slice(0, 10).join(', ')}${skipped.length > 10 ? ', …' : ''}]`)
+  if (skipped.length > 0) {
+    lines.push(`[Not searched (binary, too large, or PDFs without a text layer): ${skipped.slice(0, 10).join(', ')}${skipped.length > 10 ? ', …' : ''}]`)
+  }
 
   return {
     content: lines.join('\n'),
@@ -434,13 +543,14 @@ const storeErrorMessage = (error: unknown): string | null => {
 /**
  * Runs one My files tool call from the agent against `store`, seeing only `attachedFolders`, `Outputs` and
  * `Agent notes`, and writing only in `Outputs` and `Agent notes`. Never throws: refusals and failures are error
- * results for the model.
+ * results for the model. `readPdf` is the app's pdf.js reader with its OPFS cache unless given (tests).
  */
 export const executeFileTool = async (
   store: MyFilesStore | null,
   attachedFolders: readonly string[],
   name: string,
   input: unknown,
+  { readPdf = defaultPdfPagesReader }: { readPdf?: PdfPagesReader } = {},
 ): Promise<ClientToolResult> => {
   if (!isFileToolName(name)) return { status: 'error', error: `Unknown tool ${quote(name)}.` }
   if (!store) return { status: 'error', error: 'This browser cannot store My files.' }
@@ -450,7 +560,7 @@ export const executeFileTool = async (
 
   try {
     const execute = executors[name] as (ctx: Context, input: unknown) => Promise<ToolOutput>
-    const { content, artifact } = await execute({ store, folders: visibleFolders(attachedFolders) }, parsed.data)
+    const { content, artifact } = await execute({ store, folders: visibleFolders(attachedFolders), readPdf }, parsed.data)
     return { status: 'ok', content, artifact }
   } catch (error) {
     if (error instanceof FileToolError) return { status: 'error', error: error.message }

@@ -1,10 +1,6 @@
-import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import type { MessageContent } from '../../shared/chat'
 import { imageFileTypes, textFileTypes } from '../../config'
-
-// Configure PDF.js worker for browser environment
-// Using CDN for the worker file to match the installed pdfjs-dist version
-GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.149/pdf.worker.min.mjs`
+import { loadPdfjs } from './pdfjs'
 
 /**
  * Parse a file and return its content in the appropriate format for chat messages
@@ -33,6 +29,7 @@ export const parseFileContent = async (file: File): Promise<MessageContent[] | s
   if (file.type === 'application/pdf') {
     const arrayBuffer = await file.arrayBuffer()
     const data = new Uint8Array(arrayBuffer)
+    const { getDocument } = await loadPdfjs()
     const loadingTask = getDocument({ data })
     const pdf = await loadingTask.promise
 

@@ -9,6 +9,7 @@ export const basicTestContent = `### You are calling mock endpoint for streaming
 - To mock a subagent, write: **subagent** (optionally followed by its task)
 - To mock a quiz, write: **quiz** (or **quiz multi** for a multi-select quiz)
 - To mock reading My files, attach a folder and write: **files** followed by the folder name
+- To mock reading a page of a PDF in My files, write: **pdfpage** followed by the page (or range) and the path, e.g. pdfpage 2 Course notes/book.pdf
 - To mock writing a file into Outputs, write: **writeout** followed by the file name
 - To mock writing a note into Agent notes, write: **note** followed by the text of the note
 OVER
@@ -16,6 +17,15 @@ OVER
 
 /** `files <folder>`: the mock model lists the folder with `ls` and reads its first file with `read_file`. */
 export const MOCK_FILES_PREFIX = 'files'
+
+/** `pdfpage <pages> <path>`: the mock model reads those pages of the PDF with `read_file`. */
+export const MOCK_PDF_PAGE_PREFIX = 'pdfpage '
+
+/** The `read_file` input of a `pdfpage` message, e.g. `pdfpage 3-5 Course notes/book.pdf`. */
+export const parseMockPdfPage = (message: string): { path: string; pages: string } | null => {
+  const match = /^(\S+)\s+(.+)$/.exec(message.slice(MOCK_PDF_PAGE_PREFIX.length).trim())
+  return match ? { pages: match[1], path: match[2] } : null
+}
 
 /** `writeout <name>`: the mock model writes `Outputs/<name>` with `write_file`. */
 export const MOCK_WRITE_OUTPUT_PREFIX = 'writeout '

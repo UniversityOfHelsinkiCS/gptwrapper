@@ -29,6 +29,9 @@ export const FileToolPart = ({ part }: { part: ToolPart }) => {
         return t('chat:fileToolLs', { ...params, path: pathOrRoot(str(input.path)) })
       case 'read_file': {
         const summary = readSummary(part)
+        if (summary && 'totalPages' in summary) {
+          return t('chat:fileToolReadFilePages', { ...params, path: summary.path, start: summary.startPage, end: summary.endPage, total: summary.totalPages })
+        }
         return summary && summary.totalLines > 0
           ? t('chat:fileToolReadFileLines', { ...params, path: summary.path, start: summary.startLine, end: summary.endLine, total: summary.totalLines })
           : t('chat:fileToolReadFile', { ...params, path: str(input.path) })
