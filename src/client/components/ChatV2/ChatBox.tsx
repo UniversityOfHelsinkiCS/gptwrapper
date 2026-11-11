@@ -33,7 +33,7 @@ const skipLinkSx = {
     bgcolor: 'primary.main',
     borderRadius: '0.5rem',
     p: 1,
-    color: 'white',
+    color: 'primary.contrastText',
     margin: 0,
     overflow: 'visible',
     clip: 'auto',
@@ -164,7 +164,7 @@ export const ChatBox = ({
 
   return (
     <Box sx={{ mb: 1 }}>
-      <Box sx={{ mb: 0.75, px: 0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
+      <Box sx={{ mb: 0.75, px: 0.5, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
         <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} />
         <UsageSelector />
       </Box>
@@ -349,7 +349,7 @@ export const ChatBox = ({
                       disabled={acuallyDisabled}
                       sx={{
                         backgroundColor: acuallyDisabled ? 'action.disabledBackground' : 'primary.main',
-                        color: acuallyDisabled ? 'action.disabled' : '#fff',
+                        color: acuallyDisabled ? 'action.disabled' : 'primary.contrastText',
                         borderRadius: '0.5rem',
                         width: 36,
                         height: 36,
