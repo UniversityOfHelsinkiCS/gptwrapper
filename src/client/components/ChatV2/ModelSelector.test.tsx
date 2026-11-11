@@ -35,48 +35,67 @@ const openSelector = ({ currentModel = 'gpt-6-luna' as ValidModelName, isTokenLi
 }
 
 describe('ModelSelector', () => {
-  test('models tagged more are hidden behind "More models"', () => {
+  test('models tagged more are hidden behind "More models", which opens a separate submenu', () => {
     const { menu, setModel } = openSelector()
 
     expect(within(menu).queryByTestId('gpt-6-luna-option')).toBeTruthy()
-    expect(within(menu).queryByTestId('gpt-5.5-option')).toBeNull()
-    expect(within(menu).queryByTestId('gpt-5-mini-option')).toBeNull()
+    expect(screen.queryByTestId('gpt-5.5-option')).toBeNull()
+    expect(screen.queryByTestId('gpt-5-mini-option')).toBeNull()
 
     const toggle = within(menu).getByTestId('more-models-toggle')
+    expect(toggle.getAttribute('aria-haspopup')).toBe('menu')
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
     fireEvent.click(toggle)
     expect(toggle.getAttribute('aria-expanded')).toBe('true')
 
-    fireEvent.click(within(menu).getByTestId('gpt-5.5-option'))
+    const submenu = screen.getByRole('menu', { name: 'More models' })
+    expect(document.getElementById(toggle.getAttribute('aria-controls')!)?.contains(submenu)).toBe(true)
+    expect(within(menu).queryByTestId('gpt-5.5-option')).toBeNull()
+
+    fireEvent.click(within(submenu).getByTestId('gpt-5.5-option'))
     expect(setModel).toHaveBeenCalledWith('gpt-5.5')
   })
 
-  test('"More models" is keyboard operable and the revealed models are reachable with arrow keys', () => {
+  test('ArrowRight opens the submenu with focus inside it, ArrowLeft closes it', () => {
+    const { menu } = openSelector()
+    const toggle = within(menu).getByTestId('more-models-toggle')
+
+    toggle.focus()
+    fireEvent.keyDown(toggle, { key: 'ArrowRight' })
+    expect(toggle.getAttribute('aria-expanded')).toBe('true')
+
+    const submenu = screen.getByRole('menu', { name: 'More models' })
+    expect(submenu.contains(document.activeElement)).toBe(true)
+    expect(document.activeElement?.getAttribute('role')).toBe('menuitemradio')
+
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowLeft' })
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
+  })
+
+  test('Enter on "More models" opens the submenu', () => {
     const { menu } = openSelector()
     const toggle = within(menu).getByTestId('more-models-toggle')
 
     toggle.focus()
     fireEvent.keyDown(toggle, { key: 'Enter' })
     expect(toggle.getAttribute('aria-expanded')).toBe('true')
-    expect(toggle.textContent).toContain('More models')
-
-    fireEvent.keyDown(menu, { key: 'ArrowDown' })
-    expect(document.activeElement?.getAttribute('data-testid')).toBe('gpt-5-mini-option')
-    expect(document.activeElement?.getAttribute('role')).toBe('menuitemradio')
   })
 
-  test('section starts expanded when a model under it is selected', () => {
+  test('"More models" is marked selected when the current model is in it', () => {
     const { menu } = openSelector({ currentModel: 'gpt-5.5' })
+    const toggle = within(menu).getByTestId('more-models-toggle')
 
-    expect(within(menu).getByTestId('more-models-toggle').getAttribute('aria-expanded')).toBe('true')
-    expect(within(menu).getByTestId('gpt-5.5-option').getAttribute('aria-checked')).toBe('true')
+    expect(toggle.className).toContain('Mui-selected')
+    fireEvent.click(toggle)
+    expect(screen.getByTestId('gpt-5.5-option').getAttribute('aria-checked')).toBe('true')
   })
 
   test('only free models under "More models" are offered when the token limit is exceeded', () => {
     const { menu } = openSelector({ isTokenLimitExceeded: true })
     fireEvent.click(within(menu).getByTestId('more-models-toggle'))
 
-    expect(within(menu).queryByTestId('gpt-5-mini-option')).toBeTruthy()
-    expect(within(menu).queryByTestId('gpt-5.5-option')).toBeNull()
+    const submenu = screen.getByRole('menu', { name: 'More models' })
+    expect(within(submenu).queryByTestId('gpt-5-mini-option')).toBeTruthy()
+    expect(within(submenu).queryByTestId('gpt-5.5-option')).toBeNull()
   })
 })

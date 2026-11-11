@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { getModelDisplayName, inProduction, isFreeModel, isMockModel, ModelConfig, ValidModelName, validModels } from '@config'
 import { Box, Chip, Divider, MenuItem, Typography, Menu, ListSubheader } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PsychologyIcon from '@mui/icons-material/Psychology'
@@ -35,8 +36,9 @@ const ModelSelector = ({
 }) => {
   const { t } = useTranslation()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const [moreOpen, setMoreOpen] = React.useState(false)
+  const [moreAnchorEl, setMoreAnchorEl] = React.useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
+  const moreOpen = Boolean(moreAnchorEl)
   const { user } = useCurrentUser()
   const { activePrompt } = usePromptState()
 
@@ -49,21 +51,27 @@ const ModelSelector = ({
     }
   }, [isTokenLimitExceeded, user, activePrompt])
 
+  const isCurrentInMore = moreModels.some((model) => model.name === currentModel)
+
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setMoreOpen(moreModels.some((model) => model.name === currentModel))
     setAnchorEl(event.currentTarget)
+  }
+
+  const handleClose = () => {
+    setMoreAnchorEl(null)
+    setAnchorEl(null)
   }
 
   const handleSelect = (model: ValidModelName) => {
     setModel(model)
-    setAnchorEl(null)
+    handleClose()
   }
 
   const disabled = availableModels.length === 1
 
   const isCurrentFree = isFreeModel(currentModel)
 
-  const renderOption = (model: ModelConfig, nested = false) => {
+  const renderOption = (model: ModelConfig) => {
     const { name, displayName, descriptionKey, tags } = model
     const active = name === currentModel
     const description = descriptionKey && t(descriptionKey)
@@ -79,7 +87,7 @@ const ModelSelector = ({
         role="menuitemradio"
         aria-checked={active}
         aria-label={[displayName, description, selfHostedLabel, freeLabel].filter(Boolean).join(', ')}
-        sx={{ gap: 1, py: 1, pr: 1.75, pl: nested ? 3.5 : 1.75, alignItems: 'flex-start', mt: nested ? 0 : 1 }}
+        sx={{ gap: 1, py: 1, px: 1.75, alignItems: 'flex-start', mt: 1 }}
       >
         <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.25, whiteSpace: 'normal' }}>
           <Typography sx={{ fontSize: '0.875rem', fontWeight: active ? 600 : 400 }}>{displayName}</Typography>
@@ -92,7 +100,7 @@ const ModelSelector = ({
     )
   }
 
-  const MoreToggleIcon = moreOpen ? ExpandLessIcon : ExpandMoreIcon
+  const menuPaperStyle = { minWidth: 260, borderRadius: '0.75rem' }
 
   return (
     <>
@@ -140,18 +148,12 @@ const ModelSelector = ({
         id="model-selector-menu"
         anchorEl={anchorEl}
         open={open}
-        onClose={() => setAnchorEl(null)}
+        onClose={handleClose}
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         slotProps={{
           list: { 'aria-label': t('sidebar:modelTitle') },
-          paper: {
-            style: {
-              minWidth: 260,
-              borderRadius: '0.75rem',
-              marginTop: '-8px',
-            },
-          },
+          paper: { style: { ...menuPaperStyle, marginTop: '-8px' } },
         }}
       >
         <ListSubheader sx={{ display: 'block', fontSize: '0.725rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.secondary' }}>
@@ -164,16 +166,46 @@ const ModelSelector = ({
           <Divider key="more-divider" />,
           <MenuItem
             key="more-toggle"
-            onClick={() => setMoreOpen((prev) => !prev)}
+            onClick={(event) => setMoreAnchorEl(event.currentTarget)}
+            onKeyDown={(event) => {
+              if (event.key === 'ArrowRight') {
+                event.preventDefault()
+                setMoreAnchorEl(event.currentTarget)
+              }
+            }}
+            selected={isCurrentInMore}
+            aria-haspopup="menu"
             aria-expanded={moreOpen}
+            aria-controls={moreOpen ? 'more-models-menu' : undefined}
             data-testid="more-models-toggle"
             sx={{ gap: 1, py: 1, px: 1.75, alignItems: 'center', color: 'primary.main' }}
           >
             <Typography sx={{ flex: 1, fontSize: '0.8125rem', fontWeight: 600 }}>{t('chat:moreModels')}</Typography>
-            <MoreToggleIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+            <ChevronRightIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
           </MenuItem>,
         ]}
-        {moreOpen && moreModels.map((model) => renderOption(model, true))}
+      </Menu>
+      <Menu
+        id="more-models-menu"
+        anchorEl={moreAnchorEl}
+        open={moreOpen}
+        onClose={() => setMoreAnchorEl(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        slotProps={{
+          list: {
+            'aria-label': t('chat:moreModels'),
+            onKeyDown: (event: React.KeyboardEvent) => {
+              if (event.key === 'ArrowLeft') {
+                event.preventDefault()
+                setMoreAnchorEl(null)
+              }
+            },
+          },
+          paper: { style: { ...menuPaperStyle, marginLeft: '4px' } },
+        }}
+      >
+        {moreModels.map(renderOption)}
       </Menu>
     </>
   )
