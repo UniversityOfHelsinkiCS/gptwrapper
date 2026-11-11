@@ -228,7 +228,7 @@ studentTest.describe('Quiz card', () => {
     await expect(card.getByRole('radio', { name: /^7/ })).toBeDisabled()
 
     // The answer is sent as a user message and the agent continues
-    await expect(page.getByTestId('user-message').nth(1)).toContainText('My answer: 7')
+    await expect(page.getByTestId('user-message')).toHaveCount(1)
     await expect(page.getByTestId('assistant-message').nth(1)).toContainText('Thanks for answering the quiz! Result: correct.')
 
     await page.reload()
@@ -258,7 +258,7 @@ studentTest.describe('Quiz card', () => {
 
     await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'idk')
     await expect(card.getByTestId('quiz-result')).toContainText('No problem, here is the answer.')
-    await expect(page.getByTestId('user-message').nth(1)).toContainText("My answer: I don't know")
+    await expect(page.getByTestId('user-message')).toHaveCount(1)
     await expect(page.getByTestId('assistant-message').nth(1)).toContainText('Result: did not know.')
   })
 
@@ -277,10 +277,10 @@ studentTest.describe('Quiz card', () => {
     await expect(reply).toContainText('Error while generating response')
     await reply.getByRole('button', { name: 'Retry' }).click()
     // The retry resends the history up to the quiz answer (the deterministic mock fails it again): the quiz
-    // stays answered, the answer message is not duplicated, and the reply is replaced, not added
+    // stays answered (its answer message is hidden), and the reply is replaced, not added
     await expect(page.getByTestId('assistant-message').nth(1).getByRole('button', { name: 'Retry' })).toBeVisible()
     await expect(page.getByTestId('assistant-message')).toHaveCount(2)
-    await expect(page.getByTestId('user-message')).toHaveCount(2)
+    await expect(page.getByTestId('user-message')).toHaveCount(1)
     await expect(card).toHaveAttribute('data-quiz-state', 'answered')
     await expect(card.getByTestId('quiz-result')).toHaveAttribute('data-quiz-outcome', 'incorrect')
 

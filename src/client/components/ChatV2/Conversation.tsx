@@ -548,6 +548,8 @@ const Conversation = ({
           const isLatestResponse = idx === latestResponseIndex
           const isLast = idx === messages.length - 1
           const next = messages[idx + 1]
+          // A quiz answer is already shown on the answered quiz card, so its user message is not shown again.
+          if (message.role === 'user' && message.quizAnswer) return null
           return (
             // A quiz is answered by the user message right after it, and can be answered while it is in the latest message.
             <QuizAnswerProvider

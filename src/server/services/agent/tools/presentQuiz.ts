@@ -35,6 +35,7 @@ export const presentQuiz: PlainToolModule = {
     '- Before the quiz, write one short sentence (after your explanation, if you explained something first). Do not repeat the question or the options in your text, the quiz card shows them. Write nothing after the quiz: your turn ends there.',
     '- Do not reveal the answer in the question or in your own text. Right after explaining something, ask the student to apply it (for example to a new case) rather than to recognise your own wording.',
     '- Exactly the options in `correct` must be right: no other option may also be correct or equivalent to a correct one (for example the same expression written differently).',
+    '- Make the question hard enough that it tests understanding. Every wrong option must be plausible to a student who has not understood the topic, for example a common mistake or misconception. The student must not be able to find the right answer by elimination because only one option makes sense.',
     '- Do not add an "I don\'t know" option; it is added automatically.',
     "- The student's answer comes in their next message, with the result and their own reasoning or what is unclear to them. Respond to their reasoning, not only to the result: say what is right in it and correct what is wrong. If they did not know, explain the part they found unclear, simply and briefly, without re-teaching the whole topic. Keep the feedback short. If the student is practising, you can then ask a new question (an easier one if they did not know).",
   ].join('\n'),

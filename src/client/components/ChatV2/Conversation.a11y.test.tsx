@@ -342,7 +342,7 @@ describe('quiz parts', () => {
     expect(screen.getByTestId('quiz-card').getAttribute('data-quiz-state')).toBe('answered')
     expect(screen.getByTestId('quiz-result').getAttribute('data-quiz-outcome')).toBe('correct')
     expect((screen.getByRole('radio', { name: /^7/ }) as HTMLInputElement).checked).toBe(true)
-    expect(screen.getByText('My answer: 7')).toBeTruthy()
+    expect(screen.queryByText('My answer: 7')).toBeNull()
   })
 
   test('a quiz the student went past without answering is closed', () => {
