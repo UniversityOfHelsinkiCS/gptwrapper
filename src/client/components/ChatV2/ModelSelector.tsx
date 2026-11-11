@@ -14,8 +14,8 @@ const tagChipSx = {
   height: 18,
   display: 'flex',
   flexShrink: 0,
-  fontSize: '0.65rem',
-  fontWeight: 600,
+  fontSize: '0.75rem',
+  fontWeight: 500,
   letterSpacing: '0.03em',
   '& .MuiChip-label': { px: 0.75 },
 }
