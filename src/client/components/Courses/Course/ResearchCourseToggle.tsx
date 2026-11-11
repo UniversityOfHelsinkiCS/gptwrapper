@@ -5,6 +5,7 @@ import { getLanguageValue } from '@shared/utils'
 import type { Course } from '../../../types'
 import { useSaveDiscussionsMutation } from '../../../hooks/useCourseMutation'
 import { ORANGE } from '../../ChatV2/general/Buttons'
+import { switchFocusIndicatorStyle } from 'src/client/util/accessibility'
 
 // Admin-only: same orange as OrangeButton to set it apart from the controls teachers see
 export const ResearchCourseToggle = ({ course }: { course: Course }) => {
@@ -27,6 +28,7 @@ export const ResearchCourseToggle = ({ course }: { course: Course }) => {
             sx={{
               '& .MuiSwitch-switchBase.Mui-checked': { color: ORANGE.main, '&:hover': { backgroundColor: `${ORANGE.main}14` } },
               '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: ORANGE.main },
+              ...switchFocusIndicatorStyle,
             }}
           />
         }
