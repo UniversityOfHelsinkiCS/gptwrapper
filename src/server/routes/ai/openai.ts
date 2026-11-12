@@ -98,6 +98,7 @@ api.use(async (req: any, res: any, next: any) => {
 
             if (user) {
                 req.user = user.toJSON()
+                req.apikey = apiKey
                 next()
                 return
             }
@@ -159,6 +160,7 @@ api.post('/v1/chat/completions',
 
         //@ts-expect-error middleware makes sure req.user is defined
         const user = req.user as unknown as UserType
+        const apikey = req.apikey as unknown as ApiKey
 
         const matching = validModels.find(modelObj => (modelObj.name != "mock") && (modelObj.name == model))
 
@@ -357,16 +359,16 @@ api.post('/v1/chat/completions',
                 tokens += full?.usage_metadata.output_tokens
                 tokenDetails["output"] = full?.usage_metadata.output_tokens
             }
-            if (full?.usage_metadata?.input_tokens){
+            if (full?.usage_metadata?.input_tokens) {
                 tokens += full?.usage_metadata.input_tokens
                 tokenDetails["input"] = full?.usage_metadata.input_tokens
-            } 
+            }
 
             // Discount 70% of cached token read from total usage
-            if (full?.usage_metadata?.input_token_details?.cache_read){
+            if (full?.usage_metadata?.input_token_details?.cache_read) {
                 tokens -= Math.round(full?.usage_metadata?.input_token_details?.cache_read * 0.70)
-                tokenDetails["cacheRead"] = full?.usage_metadata?.input_token_details?.cache_read
-            } 
+                tokenDetails["read_cache"] = full?.usage_metadata?.input_token_details?.cache_read
+            }
 
         }
         if (tokens <= 0) {
@@ -374,7 +376,22 @@ api.post('/v1/chat/completions',
             tokens = textLength
         }
 
-        logger.info(`api-usage: ${user.username} | ${user.id} | ${model} | ${tokens} | ${JSON.stringify(tokenDetails)}`)
+        const logData = {
+            type: "api",
+            keyname: apikey.name ? apikey.name : "<unnamed>",
+            username: user.username,
+            userid: user.id,
+            model: model,
+            tokens: tokens,
+            output: tokenDetails["output"] ? tokenDetails["output"] : "null",
+            input: tokenDetails["input"] ? tokenDetails["input"] : "null",
+            read_cache: tokenDetails["read_cache"] ? tokenDetails["read_cache"] : "null",
+            user_agent: req.headers['user-agent'],
+            ip: req.headers['x-forwarded-for'],
+            stream, logprobs, top_p, top_k, temperature
+        };
+
+        logger.info(JSON.stringify(logData))
 
         await incrementUsage(user, tokens)
 
