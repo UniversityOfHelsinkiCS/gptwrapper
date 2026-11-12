@@ -29,7 +29,7 @@ See `compose.yaml` for local development. In short, in addition to the CC server
 - Redis (docker)
 - Ollama (docker)
 - Azure
-- S3 (minio, docker)
+- S3
 
 ### Azure
 
@@ -46,9 +46,7 @@ AZURE_API_KEY=<asd>
 
 ### S3
 
-(using minio by default, no need to do this locally)
-
-S3 is used for storing user-uploaded files and their processed versions.
+S3 is used for storing user-uploaded files and their processed versions. It is also needed for local development (there is no local S3 container).
 
 Create an S3 bucket and populate .env with the following:
 
@@ -56,7 +54,7 @@ Create an S3 bucket and populate .env with the following:
 S3_HOST=<host-url>
 S3_BUCKET=<name-of-the-bucket-you-created>
 S3_ACCESS_KEY=<access-key>
-S3_SECRET_KEY=<secret-key>
+S3_SECRET_ACCESS_KEY=<secret-key>
 ```
 
 ## Developers: things to know
