@@ -160,6 +160,8 @@ api.post('/v1/chat/completions',
 
         //@ts-expect-error middleware makes sure req.user is defined
         const user = req.user as unknown as UserType
+
+        //@ts-ignore
         const apikey = req.apikey as unknown as ApiKey
 
         const matching = validModels.find(modelObj => (modelObj.name != "mock") && (modelObj.name == model))
