@@ -97,7 +97,7 @@ const SECRET_TAIL = 'This last sentence must not be in the tool results of the h
 const attachCourseNotes = async (page: Page, root: string) => {
   const folder = join(root, 'Course notes')
   mkdirSync(folder, { recursive: true })
-  writeFileSync(join(folder, 'syllabus.md'), `The exam is on Friday the 13th.\n${'Filler line.\n'.repeat(30)}${SECRET_TAIL}\n`)
+  writeFileSync(join(folder, 'syllabus.md'), `The exam is on Friday the 13th.\n${'Filler line.\n'.repeat(10)}${SECRET_TAIL}\n`)
 
   await page.getByTestId('my-files-button').click()
   const dialog = page.getByRole('dialog', { name: 'My files' })
@@ -133,7 +133,7 @@ adminTest('the agent reads a file from an attached folder in the browser', async
     await expect(parts.nth(0)).toHaveAttribute('data-tool-name', 'ls')
     await expect(parts.nth(0)).toHaveAttribute('data-tool-status', 'ok')
     await expect(parts.nth(1)).toHaveAttribute('data-tool-status', 'ok')
-    await expect(parts.nth(1)).toContainText('Read the file Course notes/syllabus.md, lines 1–32 of 32')
+    await expect(parts.nth(1)).toContainText('Read the file Course notes/syllabus.md, lines 1–12 of 12')
 
     // A path outside the attached folders is refused in the browser
     await sendChatMessage(page, 'files Secret')
