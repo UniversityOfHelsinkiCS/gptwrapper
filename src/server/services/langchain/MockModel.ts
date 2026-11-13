@@ -41,6 +41,11 @@ import {
 /** Pause between the streamed chunks of a `think` answer, so the thinking block is seen while it streams. */
 const THINK_CHUNK_DELAY_MS = 250
 
+/** `flaky <id>` calls the mock subagent, then its next model call fails once per message text with this error. */
+export const MOCK_FLAKY_PREFIX = 'flaky'
+export const MOCK_FLAKY_ERROR = '429 Mock rate limit reached'
+const flakyFailures = new Set<string>()
+
 const lastHumanText = (messages: BaseMessage[]): string => (messages.findLast(isHumanMessage)?.content ?? '') as string
 
 /** `think <answer>` reasons first (in several chunks), then answers with `<answer>`. Not for tool results: the agent's second call answers normally. */
@@ -119,6 +124,11 @@ export class MockModel extends BaseChatModel {
         )
       }
     }
+    if (lastHuman.startsWith(MOCK_FLAKY_PREFIX) && last && isToolMessage(last) && !flakyFailures.has(lastHuman)) {
+      // `flaky <id>`: the model call after the subagent's result fails once (like a rate limit), so Retry can continue the run.
+      flakyFailures.add(lastHuman)
+      return fakeModel().respond(new Error(MOCK_FLAKY_ERROR))
+    }
     if (last && isToolMessage(last)) {
       return fakeModel().respond(new AIMessage(`Ok! Got some great results from that mock tool call!: "${last.content}"`))
     }
@@ -193,13 +203,18 @@ export class MockModel extends BaseChatModel {
         }),
       )
     }
-    if (lastHuman.startsWith('subagent')) {
+    if (lastHuman.startsWith('subagent') || lastHuman.startsWith(MOCK_FLAKY_PREFIX)) {
       // `subagent <task>` delegates the task (or a default one) to the `mock_subagent` tool, added for the mock model.
       return fakeModel().respond(
         new AIMessage({
           content: '',
           tool_calls: [
-            { name: 'mock_subagent', args: { task: lastHuman.slice('subagent'.length).trim() || mockSubagentTask }, id: 'mock_subagent_id', type: 'tool_call' },
+            {
+              name: 'mock_subagent',
+              args: { task: (lastHuman.startsWith('subagent') && lastHuman.slice('subagent'.length).trim()) || mockSubagentTask },
+              id: 'mock_subagent_id',
+              type: 'tool_call',
+            },
           ],
         }),
       )

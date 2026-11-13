@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import type { AssistantPart, ChatEvent } from '../../../shared/agentChat'
-import { applyEvent, finishParts, finishReasoning } from './applyEvent'
+import { applyEvent, finishParts, finishReasoning, partsToContinue } from './applyEvent'
 
 describe('applyEvent', () => {
   test('first text delta creates a text part', () => {
@@ -342,5 +342,48 @@ describe('finishParts', () => {
     ]
     expect(finishParts(done, 2500)).toBe(done)
     expect(finishParts([], 2500)).toEqual([])
+  })
+})
+
+describe('partsToContinue', () => {
+  const read = (callId: string, status: 'ok' | 'error' = 'ok'): AssistantPart => ({
+    type: 'tool',
+    callId,
+    name: 'read_file',
+    input: {},
+    status,
+    result: `content ${callId}`,
+  })
+
+  test('without pending calls, drops what the failed model call wrote after the last tool call', () => {
+    const parts: AssistantPart[] = [
+      { type: 'text', text: 'Reading the files.' },
+      read('a'),
+      read('b'),
+      { type: 'reasoning', text: 'Now I', durationMs: 10 },
+      { type: 'text', text: 'The files sa' },
+    ]
+    expect(partsToContinue(parts, [])).toEqual(parts.slice(0, 3))
+    expect(partsToContinue([{ type: 'text', text: 'Half an ans' }], [])).toEqual([])
+  })
+
+  test('pending calls run again: their parts are running, and a subagent loses its nested parts', () => {
+    const subagent: AssistantPart = {
+      type: 'subagent',
+      callId: 's',
+      name: 'read_pdf',
+      task: 'Read it',
+      parts: [read('inner')],
+      status: 'error',
+      progress: { page: 3 },
+    }
+    const parts: AssistantPart[] = [{ type: 'text', text: 'Reading.' }, read('a'), read('b', 'error'), subagent]
+
+    expect(partsToContinue(parts, ['b', 's'])).toEqual([
+      { type: 'text', text: 'Reading.' },
+      read('a'),
+      { type: 'tool', callId: 'b', name: 'read_file', input: {}, status: 'running' },
+      { type: 'subagent', callId: 's', name: 'read_pdf', task: 'Read it', parts: [], status: 'running' },
+    ])
   })
 })

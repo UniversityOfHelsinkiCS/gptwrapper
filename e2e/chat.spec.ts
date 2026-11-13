@@ -197,6 +197,29 @@ for (const [role, roleTest] of [
       await expect(toggle).toHaveAttribute('aria-expanded', 'false')
       await expect(content).toHaveCount(0)
     })
+
+    roleTest('Retry continues a failed run and keeps what it had done', async ({ page }) => {
+      await page.goto('/test-course-course-id')
+      await acceptDisclaimer(page)
+      await useMockModel(page)
+
+      // `flaky <id>` delegates to the mock subagent, then the model call after it fails once (a mock rate limit)
+      await sendChatMessage(page, `flaky ${role} ${Date.now()}`)
+      await closeSendPreference(page)
+
+      const answer = page.getByTestId('assistant-message')
+      await expect(answer).toContainText('Error while generating response: 429 Mock rate limit reached')
+      await expect(answer.getByTestId('subagent-card')).toHaveAttribute('data-subagent-status', 'ok')
+
+      await answer.getByRole('button', { name: 'Retry' }).click()
+
+      // The answer keeps the subagent's finished work and the model carries on from there
+      await expect(answer).toContainText('Ok! Got some great results from that mock tool call!')
+      await expect(answer).not.toContainText('Error while generating response')
+      await expect(page.getByTestId('assistant-message')).toHaveCount(1)
+      await expect(answer.getByTestId('subagent-card')).toHaveCount(1)
+      await expect(answer.getByTestId('subagent-card')).toHaveAttribute('data-subagent-status', 'ok')
+    })
   })
 
   roleTest.describe(`Quiz card for ${role}`, () => {

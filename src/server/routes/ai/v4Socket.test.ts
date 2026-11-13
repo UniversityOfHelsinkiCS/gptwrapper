@@ -279,7 +279,7 @@ describe('chat socket runs', () => {
     client.send(runStart('1', 'fail'))
 
     expect((await client.runEnd('1')).result).toEqual({ status: 'completed' })
-    expect(client.eventsOf('1')).toContainEqual({ type: 'error', error: 'Error while generating response: Mock error injected' })
+    expect(client.eventsOf('1')).toContainEqual({ type: 'error', error: 'Error while generating response: Mock error injected', resumeId: expect.any(String) })
     client.ws.close()
   })
 

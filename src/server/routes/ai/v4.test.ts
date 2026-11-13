@@ -41,7 +41,7 @@ import v4Router from './v4'
 import { ChatInstance, Discussion, Prompt, PromptUsage, UserChatInstanceUsage } from '../../db/models'
 import { getUsage, getUserTokenLimit, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import type { ChatEvent } from '../../../shared/agentChat'
-import { MockModel } from '../../services/langchain/MockModel'
+import { MOCK_FLAKY_ERROR, MOCK_FLAKY_PREFIX, MockModel } from '../../services/langchain/MockModel'
 import { ToolResultStore } from '../../services/langchain/fileSearchResultsStore'
 import { runAgent } from '../../services/agent/runAgent'
 import { PostStreamSchemaV4 } from '../../../shared/agentChat'
@@ -64,7 +64,8 @@ const stream = ({
   courseId,
   history = [],
   quizAnswer,
-}: { message?: string; promptId?: string; courseId?: string; history?: unknown[]; quizAnswer?: unknown } = {}) => {
+  resumeRunId,
+}: { message?: string; promptId?: string; courseId?: string; history?: unknown[]; quizAnswer?: unknown; resumeRunId?: string } = {}) => {
   const form = new FormData()
   form.append(
     'data',
@@ -75,6 +76,7 @@ const stream = ({
           model: 'mock',
           promptInfo: promptId ? { type: 'saved', id: promptId, name: 'Essay helper' } : { type: 'custom', systemMessage: 'You are helpful' },
         },
+        ...(resumeRunId ? { resumeRunId } : {}),
       },
       ...(courseId ? { courseId } : {}),
     }),
@@ -269,9 +271,41 @@ describe('POST /ai/v4/stream', () => {
     const events = await readEvents(response)
 
     expect(response.status).toBe(200)
-    expect(events).toContainEqual({ type: 'error', error: 'Error while generating response: Mock error injected' })
+    expect(events).toContainEqual({ type: 'error', error: 'Error while generating response: Mock error injected', resumeId: expect.any(String) })
     expect(events.some((e) => e.type === 'usage')).toBe(false)
     expect(incrementUsage).not.toHaveBeenCalled()
+  })
+
+  test('a failed run continues from the step that failed, without running its finished tool calls again', async () => {
+    const message = `${MOCK_FLAKY_PREFIX} resume-test`
+    const failed = await readEvents(await stream({ message }))
+    const error = failed.find((e) => e.type === 'error')
+    expect(failed.some((e) => e.type === 'subagent.start')).toBe(true)
+    // The subagent finished before the failing model call, even if the stream lost its end: it is emitted before the error
+    const subagentEnd = failed.findIndex((e) => e.type === 'subagent.end' && e.status === 'ok')
+    expect(subagentEnd).toBeGreaterThan(-1)
+    expect(subagentEnd).toBeLessThan(failed.findIndex((e) => e.type === 'error'))
+    expect(error).toEqual({ type: 'error', error: `Error while generating response: ${MOCK_FLAKY_ERROR}`, resumeId: expect.any(String) })
+
+    const resumeRunId = error?.type === 'error' ? error.resumeId : undefined
+    const resumed = await readEvents(await stream({ message, resumeRunId }))
+
+    expect(resumed[0]).toEqual({ type: 'resumed', pendingCallIds: [] })
+    expect(resumed.some((e) => e.type === 'subagent.start' || e.type === 'tool.start')).toBe(false)
+    expect(textOf(resumed)).toContain('Ok! Got some great results from that mock tool call!')
+    expect(resumed.some((e) => e.type === 'error')).toBe(false)
+
+    // A run can be continued once: the same id again starts over.
+    const again = await readEvents(await stream({ message, resumeRunId }))
+    expect(again.some((e) => e.type === 'resumed')).toBe(false)
+    expect(again.some((e) => e.type === 'subagent.start')).toBe(true)
+  })
+
+  test('an unknown resume id starts the run over', async () => {
+    const events = await readEvents(await stream({ message: 'say hello', resumeRunId: 'no-such-run' }))
+
+    expect(events.some((e) => e.type === 'resumed')).toBe(false)
+    expect(textOf(events)).toBe('hello')
   })
 
   test('shows the content-filter explanation as the answer', async () => {
@@ -667,7 +701,7 @@ describe('POST /ai/v4/stream with the mock quiz', () => {
     const events = await readEvents(
       await stream({ message: 'My answer: 7', history: quizHistory, quizAnswer: { callId: 'mock_quiz_id', selected: ['b'], explanation: 'fail please' } }),
     )
-    expect(events).toContainEqual({ type: 'error', error: 'Error while generating response: Mock error injected' })
+    expect(events).toContainEqual({ type: 'error', error: 'Error while generating response: Mock error injected', resumeId: expect.any(String) })
   })
 
   test('rejects a quiz answer without a selection', async () => {

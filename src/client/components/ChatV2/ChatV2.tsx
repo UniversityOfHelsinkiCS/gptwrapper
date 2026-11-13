@@ -13,6 +13,7 @@ import {
   ValidModelNameSchema,
   getModelConfig,
 } from '../../../config'
+import type { AssistantMessageV2 } from '@shared/agentChat'
 import type { MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
 import { QUIZ_IDK, type QuizAnswer } from '@shared/quiz'
@@ -188,6 +189,8 @@ const ChatV2Content = () => {
     ignoredWarnings: WarningType[],
     messagesToResend?: ClientChatMessage[],
     quizAnswer?: QuizAnswer,
+    /** A failed answer whose run the server can continue (it has a `resumeId`). */
+    failedAnswer?: AssistantMessageV2,
   ) => {
     if (!userStatus) return
 
@@ -317,6 +320,7 @@ const ChatV2Content = () => {
             generationInfo,
             chatMessages: toHistoryMessages(newMessages),
             ignoredWarnings,
+            resumeRunId: failedAnswer?.resumeId,
           },
           courseId: courseId !== 'general' ? courseId : undefined,
         },
@@ -358,7 +362,7 @@ const ChatV2Content = () => {
       }
 
       if ('events' in res) {
-        await processStream(res.events, generationInfo)
+        await processStream(res.events, generationInfo, failedAnswer?.parts)
         clearRetryTimeout()
         invalidateUserUsage()
       } else {
@@ -472,9 +476,14 @@ const ChatV2Content = () => {
     const newMessages = messages.slice(0, messageIndex)
     setMessages(newMessages)
 
+    // A failed run the server still has continues from the step that failed (finished tool calls are not run
+    // again) and the answer keeps its parts; otherwise the server starts over.
+    const failed = messages[messageIndex]
+    const failedAnswer = failed?.role === 'assistant' && failed.resumeId ? failed : undefined
+
     // Pass the sliced history explicitly: setMessages is async, so the closure
     // inside handleSendMessage would otherwise still see the errored message.
-    handleSendMessage('', true, [], newMessages)
+    handleSendMessage('', true, [], newMessages, undefined, failedAnswer)
   }
 
   useEffect(() => {

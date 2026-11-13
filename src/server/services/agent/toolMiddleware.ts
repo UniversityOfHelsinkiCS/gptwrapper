@@ -46,10 +46,11 @@ export const callLimitMessage = (name: string, limit: number) =>
 /**
  * Caps the calls of tools per run (one middleware per run): `limits` maps a tool name to the most calls it may
  * have. Further calls are not run; they end as an error `ToolMessage` the model reads. Calls are counted when they
- * start, so parallel calls in one model turn are counted too.
+ * start, so parallel calls in one model turn are counted too. A resumed run starts from the calls the failed run made
+ * (`usedCalls`).
  */
-export const callLimitMiddleware = (limits: ReadonlyMap<string, number>) => {
-  const counts = new Map<string, number>()
+export const callLimitMiddleware = (limits: ReadonlyMap<string, number>, usedCalls: ReadonlyMap<string, number> = new Map()) => {
+  const counts = new Map(usedCalls)
   return createMiddleware({
     name: 'ToolCallLimits',
     wrapToolCall: async (request, handler) => {
@@ -74,9 +75,10 @@ export const FINAL_ANSWER_NOTE = 'You cannot use tools any more in this answer. 
  * Caps the model calls of an agent run (one middleware per run). The last allowed call gets `toolChoice: 'none'`
  * and `FINAL_ANSWER_NOTE`, so the run ends with an answer instead of a `GraphRecursionError` that loses all the
  * work so far. Tool calls that the model still makes in that call are dropped, so the run always ends there.
+ * A resumed run starts from the calls the failed run made (`usedCalls`).
  */
-export const modelCallBudgetMiddleware = (maxModelCalls: number) => {
-  let calls = 0
+export const modelCallBudgetMiddleware = (maxModelCalls: number, usedCalls = 0) => {
+  let calls = usedCalls
   return createMiddleware({
     name: 'ModelCallBudget',
     wrapModelCall: async (request, handler) => {

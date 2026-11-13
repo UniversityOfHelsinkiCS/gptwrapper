@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto'
+import { MemorySaver } from '@langchain/langgraph'
 import { createAgent } from 'langchain'
 import type { z } from 'zod/v4'
 import { DEFAULT_TOKEN_LIMIT, inProduction, isFreeModel, isMockModel, type ValidModelName, validModels } from '@config'
@@ -16,6 +18,7 @@ import { checkCourseUsage, checkUsage, getCourseTokenLimit, getUsage, getUserTok
 import { handleWarnings, modelConfigHasInstructions, prepareMessagesForLLM } from './prepareMessages'
 import { getAgentModel } from './agentModel'
 import { describeGenerationError } from './generationError'
+import { keepFailedRun, readMissedCallUpdate, readResumeState, takeFailedRun } from './resumableRuns'
 import { createStreamState, getMainAgentModelCall, getSubagentModelCall, mapStreamChunk, nextStreamState, type StreamChunk } from './mapStreamChunk'
 import type { ClientToolCaller } from './clientTools'
 import { fileToolsFor } from './tools/fileTools'
@@ -136,14 +139,29 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
     return { status: 'warnings', warnings }
   }
 
+  // Every run keeps its checkpoints in memory, so a run that fails can be continued from the step that failed. A retry
+  // of a run that is gone (restart, another server, expired) starts over.
+  const resumed = options.resumeRunId ? takeFailedRun(user.id, options.resumeRunId) : null
+  const runId = resumed && options.resumeRunId ? options.resumeRunId : randomUUID()
+  const checkpointer = resumed ?? new MemorySaver()
+  const resumeState = resumed ? await readResumeState(resumed, runId) : null
+  meta.resumed = !!resumed
+
   onStart()
 
   const tools = createTools(enabledTools, { user, course: course?.chatInstance ?? null, model, signal, callClientTool: clientTools?.call })
   const agent = createAgent({
     model: getAgentModel(modelConfig),
     tools,
+    checkpointer,
     middleware:
-      tools.length > 0 ? [modelCallBudgetMiddleware(MAX_MODEL_CALLS), callLimitMiddleware(subagentCallLimits(enabledTools)), toolErrorMiddleware(signal)] : [],
+      tools.length > 0
+        ? [
+            modelCallBudgetMiddleware(MAX_MODEL_CALLS, resumeState?.modelCalls),
+            callLimitMiddleware(subagentCallLimits(enabledTools), resumeState?.toolCalls),
+            toolErrorMiddleware(signal),
+          ]
+        : [],
   })
 
   const showReasoning = modelConfig.reasoning?.showSummary === true
@@ -162,9 +180,21 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
     emit({ type: 'processing' }).catch((error) => logger.error('Failed to write keep-alive', { error }))
   }, KEEP_ALIVE_INTERVAL_MS)
 
+  let streamState = createStreamState(enabledTools.map((t) => t.name).filter((name) => getToolModule(name)?.kind === 'subagent'))
+  // Main agent tool calls the client has seen start and end, to emit what a failing stream lost (`readMissedCallUpdate`).
+  const startedCalls = new Set<string>()
+  const endedCalls = new Set<string>()
+
   try {
-    const stream = await agent.stream({ messages }, { streamMode: ['messages', 'updates', 'custom'], subgraphs: true, signal, recursionLimit: RECURSION_LIMIT })
-    let streamState = createStreamState(enabledTools.map((t) => t.name).filter((name) => getToolModule(name)?.kind === 'subagent'))
+    if (resumeState) await emit({ type: 'resumed', pendingCallIds: resumeState.pendingCallIds })
+    // A `null` input continues the thread from its latest checkpoint: only the step that failed runs again.
+    const stream = await agent.stream(resumeState ? (null as unknown as { messages: typeof messages }) : { messages }, {
+      configurable: { thread_id: runId },
+      streamMode: ['messages', 'updates', 'custom'],
+      subgraphs: true,
+      signal,
+      recursionLimit: RECURSION_LIMIT,
+    })
 
     for await (const chunk of stream) {
       const streamChunk = chunk as StreamChunk
@@ -191,6 +221,8 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
 
       for (const event of mapStreamChunk(streamChunk, streamState)) {
         if (event.type === 'subagent.start') subagentNames.set(event.callId, event.name)
+        if ((event.type === 'tool.start' || event.type === 'subagent.start') && event.path.length === 0) startedCalls.add(event.callId)
+        if ((event.type === 'tool.end' || event.type === 'subagent.end') && event.path.length === 0) endedCalls.add(event.callId)
         // Models without a reasoning config look as before, even if their provider streams reasoning anyway.
         if (event.type === 'reasoning.delta' && !showReasoning) continue
         if (event.type === 'text.delta' && event.path.length === 0) {
@@ -215,7 +247,14 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
 
     // Errors from inside the graph only serialise their own fields (pregelTaskId), so log message and stack explicitly.
     logger.error('Agent run failed', { model, error: error instanceof Error ? { name: error.name, message: error.message, stack: error.stack } : error })
-    await emit({ type: 'error', error: describeGenerationError(error) })
+    try {
+      const missed = await readMissedCallUpdate(checkpointer, runId, startedCalls, endedCalls)
+      if (missed) for (const event of mapStreamChunk([[], 'updates', missed], streamState)) await emit(event)
+    } catch (missedError) {
+      logger.error('Failed to emit the tool calls of a failed run', { error: missedError instanceof Error ? missedError.message : missedError })
+    }
+    keepFailedRun(user.id, runId, checkpointer)
+    await emit({ type: 'error', error: describeGenerationError(error), resumeId: runId })
     return { status: 'completed' }
   } finally {
     clearInterval(keepAlive)

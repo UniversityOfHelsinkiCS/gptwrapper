@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import type { MessageGenerationInfo } from '../../../shared/chat'
 import type { AssistantMessageV2, AssistantPart, ChatEvent } from '../../../shared/agentChat'
-import { applyEvent, finishParts } from './applyEvent'
+import { applyEvent, finishParts, partsToContinue } from './applyEvent'
 
 export type StreamAbortReason = 'timeout_error' | 'user_aborted' | 'conversation_cleared' | 'error'
 export class TypedAbortController<Reason extends string> {
@@ -43,9 +43,11 @@ export const useChatStream = ({
 
   const streamControllerRef = useRef<StreamAbortHandle>(null)
 
-  const processStream = async (events: AsyncIterable<ChatEvent>, baseGenerationInfo: MessageGenerationInfo) => {
+  /** `continueFrom` is the failed answer whose run this stream continues, when the server confirms it (`resumed`). */
+  const processStream = async (events: AsyncIterable<ChatEvent>, baseGenerationInfo: MessageGenerationInfo, continueFrom?: AssistantPart[]) => {
     let parts: AssistantPart[] = NO_PARTS
     let error = ''
+    let resumeId: string | undefined
     // The stream usually breaks right after an error event, which must not report the same failure again
     let errorReported = false
     setGenerationInfo(baseGenerationInfo)
@@ -55,6 +57,7 @@ export const useChatStream = ({
       // A model that only reasoned (aborted, or failed before answering) still gets its thinking time.
       parts: finishParts(parts, Date.now()),
       error: messageError,
+      ...(messageError && resumeId ? { resumeId } : {}),
       generationInfo: baseGenerationInfo,
     })
 
@@ -110,8 +113,15 @@ export const useChatStream = ({
         setHasPotentialError(false)
       }
 
+      if (event.type === 'resumed') {
+        parts = continueFrom ? partsToContinue(continueFrom, event.pendingCallIds) : NO_PARTS
+        setStreamingParts(parts)
+        return
+      }
+
       if (event.type === 'error') {
         error += event.error
+        resumeId = event.resumeId
 
         errorReported = true
         onError({ error: event.error })

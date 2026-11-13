@@ -22,7 +22,13 @@ export type ChatEvent =
   /** The subagent finished. `status` is `error` when its tool call failed. */
   | { type: 'subagent.end'; path: string[]; callId: string; status: 'ok' | 'error' }
   | { type: 'usage'; inputTokens: number; outputTokens: number }
-  | { type: 'error'; error: string }
+  /** The run failed. With `resumeId`, sending it back as `resumeRunId` continues the run from the step that failed. */
+  | { type: 'error'; error: string; resumeId?: string }
+  /**
+   * The first event of a run that continues a failed one: the client keeps the failed answer's parts and adds the new
+   * ones. `pendingCallIds` are the tool calls that run again; without any, the model call that failed runs again.
+   */
+  | { type: 'resumed'; pendingCallIds: string[] }
   | { type: 'processing' }
 
 export type ToolPartStatus = 'running' | 'ok' | 'error'
@@ -92,6 +98,8 @@ export type AssistantMessageV2 = {
   role: 'assistant'
   parts: AssistantPart[]
   error?: string
+  /** Set on a failed answer the server can continue: Retry sends it back as `resumeRunId`. */
+  resumeId?: string
   generationInfo?: MessageGenerationInfo
 }
 
@@ -113,6 +121,8 @@ export const PostStreamSchemaV4 = z.object({
     chatMessages: z.array(z.union([HistoryAssistantMessageSchema, ChatMessageSchema])),
     generationInfo: MessageGenerationInfoSchema,
     ignoredWarnings: WarningTypes.array().optional(),
+    /** The `resumeId` of a failed run to continue. The history must be the one that run had. */
+    resumeRunId: z.string().max(100).optional(),
     courseId: z.string().optional(),
   }),
   courseId: z.string().optional(),

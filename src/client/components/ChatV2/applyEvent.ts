@@ -60,7 +60,31 @@ const stopRunning = (parts: AssistantPart[], status: 'ok' | 'error', now: number
  */
 export const finishParts = (parts: AssistantPart[], now: number): AssistantPart[] => stopRunning(parts, 'error', now)
 
-/** Applies `update` to the parts at `path`: the top-level parts for `[]`, the parts of the subagent part with that call id chain otherwise. */
+const isCall = (part: AssistantPart): part is ToolPart | SubagentPart => part.type === 'tool' || part.type === 'subagent'
+
+/**
+ * The parts of a failed answer that a continued run (`resumed` event) builds on.
+ *
+ * With `pendingCallIds`, a tool step failed: those calls run again, so their parts are running again (a subagent
+ * also loses its nested parts, which it writes again). Without, the model call that failed runs again: the text and
+ * reasoning it streamed after the last tool call are dropped, since it writes them again.
+ */
+export const partsToContinue = (parts: AssistantPart[], pendingCallIds: string[]): AssistantPart[] => {
+  if (pendingCallIds.length === 0) return parts.slice(0, parts.findLastIndex(isCall) + 1)
+
+  const pending = new Set(pendingCallIds)
+  return parts.map((part): AssistantPart => {
+    if (!isCall(part) || !pending.has(part.callId)) return part
+    if (part.type === 'subagent') {
+      const { progress: _progress, ...rest } = part
+      return { ...rest, parts: [], status: 'running' }
+    }
+    const { progress: _progress, result: _result, artifact: _artifact, ...rest } = part
+    return { ...rest, status: 'running' }
+  })
+}
+
+/** Applies `update` to the parts at `path`:the top-level parts for `[]`, the parts of the subagent part with that call id chain otherwise. */
 const updateAtPath = (parts: AssistantPart[], path: string[], update: (parts: AssistantPart[]) => AssistantPart[]): AssistantPart[] => {
   if (path.length === 0) return update(parts)
   const [callId, ...rest] = path
@@ -150,6 +174,7 @@ export const applyEvent = (parts: AssistantPart[], event: ChatEvent, now: number
   switch (event.type) {
     case 'usage':
     case 'processing':
+    case 'resumed':
       return parts
     case 'error':
       return stopRunning(parts, 'error', now)
