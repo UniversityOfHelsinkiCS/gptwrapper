@@ -1,45 +1,128 @@
 import { AIMessage, type BaseMessage, HumanMessage, ToolMessage } from '@langchain/core/messages'
 import { MemorySaver } from '@langchain/langgraph'
+import logger from '../../util/logger'
+import { redisClient } from '../../util/redis'
 
-/** How long a failed run can be continued. Its checkpoints are in memory, so keep this short. */
+/** How long a failed run can be continued. */
 export const RESUME_TTL_MS = 30 * 60 * 1000
-
-type FailedRun = { runId: string; checkpointer: MemorySaver; timer: NodeJS.Timeout }
+/** A failed run bigger than this (many large tool results) is not put in Redis; only this server can continue it. */
+export const MAX_STORED_RUN_LENGTH = 5 * 1024 * 1024
 
 /**
- * The latest failed run of each user, in this server process only. Retry continues it from the step that failed
- * instead of starting over. A restart, another server instance or the TTL loses it, and the retry then starts over.
+ * The latest failed run of each user, kept so that Retry continues it from the step that failed instead of starting
+ * over. It is in Redis, so any server instance can continue it, and taken out when continued. Only the run's latest
+ * checkpoint and its pending writes are stored: that is all continuing needs. When Redis cannot take it (down, or the
+ * run is too big), it is kept in this server's memory instead, and a retry that reaches another server starts over.
  */
-const failedRuns = new Map<string, FailedRun>()
+const redisKey = (userId: string) => `failed-agent-run:${userId}`
+
+type StoredRun = {
+  runId: string
+  checkpointId: string
+  /** The serialised checkpoint and metadata, base64. */
+  checkpoint: string
+  metadata: string
+  /** Pending writes of the checkpoint by `MemorySaver`'s inner key: [taskId, channel, serialised value as base64]. */
+  writes: Record<string, [string, string, string]>
+}
+
+type LocalRun = { runId: string; checkpointer: MemorySaver; timer: NodeJS.Timeout }
+
+/** Failed runs that Redis could not take, in this server process only. */
+const localRuns = new Map<string, LocalRun>()
+
+const toBase64 = (bytes: Uint8Array) => Buffer.from(bytes).toString('base64')
+const fromBase64 = (text: string) => new Uint8Array(Buffer.from(text, 'base64'))
+
+/** `MemorySaver`'s key of the pending writes of a checkpoint in the root namespace. */
+const writesKey = (threadId: string, checkpointId: string) => JSON.stringify([threadId, '', checkpointId])
+
+/** The run's latest checkpoint in the root namespace, with its pending writes. */
+export const snapshotRun = (checkpointer: MemorySaver, runId: string): StoredRun | null => {
+  const checkpoints = checkpointer.storage[runId]?.['']
+  const checkpointId = checkpoints ? Object.keys(checkpoints).sort((a, b) => b.localeCompare(a))[0] : undefined
+  if (!checkpoints || !checkpointId) return null
+
+  const [checkpoint, metadata] = checkpoints[checkpointId]
+  const writes = checkpointer.writes[writesKey(runId, checkpointId)] ?? {}
+  return {
+    runId,
+    checkpointId,
+    checkpoint: toBase64(checkpoint),
+    metadata: toBase64(metadata),
+    writes: Object.fromEntries(Object.entries(writes).map(([key, [taskId, channel, value]]) => [key, [taskId, channel, toBase64(value)]])),
+  }
+}
+
+/** A checkpointer with only the stored checkpoint, from which the run continues. */
+export const restoreRun = (stored: StoredRun): MemorySaver => {
+  const checkpointer = new MemorySaver()
+  // No parent: a checkpoint holds all its channel values, and continuing never reads older ones.
+  checkpointer.storage[stored.runId] = { '': { [stored.checkpointId]: [fromBase64(stored.checkpoint), fromBase64(stored.metadata), undefined] } }
+  checkpointer.writes[writesKey(stored.runId, stored.checkpointId)] = Object.fromEntries(
+    Object.entries(stored.writes).map(([key, [taskId, channel, value]]) => [key, [taskId, channel, fromBase64(value)]]),
+  )
+  return checkpointer
+}
 
 /** Keeps a failed run for `RESUME_TTL_MS`, replacing the user's earlier one. */
-export const keepFailedRun = (userId: string, runId: string, checkpointer: MemorySaver) => {
-  dropFailedRun(userId)
+export const keepFailedRun = async (userId: string, runId: string, checkpointer: MemorySaver) => {
+  dropLocalRun(userId)
+  const stored = snapshotRun(checkpointer, runId)
+  if (!stored) return
+
+  const value = JSON.stringify(stored)
+  if (value.length <= MAX_STORED_RUN_LENGTH && redisClient.isReady) {
+    try {
+      await redisClient.set(redisKey(userId), value, { PX: RESUME_TTL_MS })
+      return
+    } catch (error) {
+      logger.warn('Failed to store a failed agent run in Redis, keeping it in this server', { error: error instanceof Error ? error.message : error })
+    }
+  } else {
+    logger.info('Keeping a failed agent run in this server only', { length: value.length, redisReady: redisClient.isReady })
+  }
+
   const timer = setTimeout(() => {
-    if (failedRuns.get(userId)?.runId === runId) failedRuns.delete(userId)
+    if (localRuns.get(userId)?.runId === runId) localRuns.delete(userId)
   }, RESUME_TTL_MS)
   timer.unref()
-  failedRuns.set(userId, { runId, checkpointer, timer })
+  localRuns.set(userId, { runId, checkpointer, timer })
 }
 
-/** The user's failed run with this id, removed from the store, or null when it is gone. */
-export const takeFailedRun = (userId: string, runId: string): MemorySaver | null => {
-  const run = failedRuns.get(userId)
-  if (!run || run.runId !== runId) return null
-  dropFailedRun(userId)
-  return run.checkpointer
+/** The user's failed run with this id, taken out so it is continued once, or null when it is gone. */
+export const takeFailedRun = async (userId: string, runId: string): Promise<MemorySaver | null> => {
+  const local = localRuns.get(userId)
+  if (local?.runId === runId) {
+    dropLocalRun(userId)
+    return local.checkpointer
+  }
+  if (!redisClient.isReady) return null
+
+  try {
+    const value = await redisClient.get(redisKey(userId))
+    if (typeof value !== 'string') return null
+    const stored = JSON.parse(value) as StoredRun
+    // An older id must not take the user's newer failed run.
+    if (stored.runId !== runId) return null
+    await redisClient.del(redisKey(userId))
+    return restoreRun(stored)
+  } catch (error) {
+    logger.warn('Failed to read a failed agent run from Redis', { error: error instanceof Error ? error.message : error })
+    return null
+  }
 }
 
-const dropFailedRun = (userId: string) => {
-  const run = failedRuns.get(userId)
+const dropLocalRun = (userId: string) => {
+  const run = localRuns.get(userId)
   if (!run) return
   clearTimeout(run.timer)
-  failedRuns.delete(userId)
+  localRuns.delete(userId)
 }
 
 /** For tests. */
-export const clearFailedRuns = () => {
-  for (const userId of [...failedRuns.keys()]) dropFailedRun(userId)
+export const clearLocalRuns = () => {
+  for (const userId of [...localRuns.keys()]) dropLocalRun(userId)
 }
 
 export type ResumeState = {
@@ -49,6 +132,9 @@ export type ResumeState = {
   toolCalls: Map<string, number>
   /** Tool calls the model made that have no result yet: the resumed run runs them (again). */
   pendingCallIds: string[]
+  /** Tool calls of this turn that the client already has, started and ended, so a resumed run does not send them again. */
+  startedCallIds: string[]
+  endedCallIds: string[]
 }
 
 const isToolMessage = (value: unknown): value is ToolMessage => ToolMessage.isInstance(value)
@@ -99,6 +185,7 @@ export const readResumeState = async (checkpointer: MemorySaver, threadId: strin
   const aiMessages = turn.filter((message): message is AIMessage => AIMessage.isInstance(message))
   const lastCalls = aiMessages.at(-1)?.tool_calls ?? []
   const pendingCallIds = lastCalls.flatMap((call) => (call.id && !resultIds.has(call.id) ? [call.id] : []))
+  const startedCallIds = aiMessages.flatMap((message) => message.tool_calls ?? []).flatMap((call) => (call.id ? [call.id] : []))
 
-  return { modelCalls: aiMessages.length, toolCalls, pendingCallIds }
+  return { modelCalls: aiMessages.length, toolCalls, pendingCallIds, startedCallIds, endedCallIds: [...resultIds] }
 }

@@ -141,7 +141,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
 
   // Every run keeps its checkpoints in memory, so a run that fails can be continued from the step that failed. A retry
   // of a run that is gone (restart, another server, expired) starts over.
-  const resumed = options.resumeRunId ? takeFailedRun(user.id, options.resumeRunId) : null
+  const resumed = options.resumeRunId ? await takeFailedRun(user.id, options.resumeRunId) : null
   const runId = resumed && options.resumeRunId ? options.resumeRunId : randomUUID()
   const checkpointer = resumed ?? new MemorySaver()
   const resumeState = resumed ? await readResumeState(resumed, runId) : null
@@ -182,8 +182,8 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
 
   let streamState = createStreamState(enabledTools.map((t) => t.name).filter((name) => getToolModule(name)?.kind === 'subagent'))
   // Main agent tool calls the client has seen start and end, to emit what a failing stream lost (`readMissedCallUpdate`).
-  const startedCalls = new Set<string>()
-  const endedCalls = new Set<string>()
+  const startedCalls = new Set<string>(resumeState?.startedCallIds)
+  const endedCalls = new Set<string>(resumeState?.endedCallIds)
 
   try {
     if (resumeState) await emit({ type: 'resumed', pendingCallIds: resumeState.pendingCallIds })
@@ -253,7 +253,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
     } catch (missedError) {
       logger.error('Failed to emit the tool calls of a failed run', { error: missedError instanceof Error ? missedError.message : missedError })
     }
-    keepFailedRun(user.id, runId, checkpointer)
+    await keepFailedRun(user.id, runId, checkpointer)
     await emit({ type: 'error', error: describeGenerationError(error), resumeId: runId })
     return { status: 'completed' }
   } finally {

@@ -35,6 +35,7 @@ vi.mock('../../util/logger', () => ({
 }))
 
 vi.mock('@sentry/node', () => ({ captureException: vi.fn() }))
+vi.mock('../../util/redis', async () => (await import('../../tests/fakeRedis')).fakeRedisModule())
 
 import { validModels } from '@config'
 import v4Router from './v4'
@@ -45,6 +46,8 @@ import { MOCK_FLAKY_ERROR, MOCK_FLAKY_PREFIX, MockModel } from '../../services/l
 import { ToolResultStore } from '../../services/langchain/fileSearchResultsStore'
 import { runAgent } from '../../services/agent/runAgent'
 import { PostStreamSchemaV4 } from '../../../shared/agentChat'
+import { fakeRedisStore } from '../../tests/fakeRedis'
+import { clearLocalRuns } from '../../services/agent/resumableRuns'
 
 let currentUser = { id: 'user-1', isAdmin: false }
 
@@ -286,6 +289,10 @@ describe('POST /ai/v4/stream', () => {
     expect(subagentEnd).toBeGreaterThan(-1)
     expect(subagentEnd).toBeLessThan(failed.findIndex((e) => e.type === 'error'))
     expect(error).toEqual({ type: 'error', error: `Error while generating response: ${MOCK_FLAKY_ERROR}`, resumeId: expect.any(String) })
+
+    // The failed run is in Redis, not only in this server, so the other server instance can continue it too
+    expect([...fakeRedisStore.keys()]).toEqual([expect.stringMatching(/^failed-agent-run:/)])
+    clearLocalRuns()
 
     const resumeRunId = error?.type === 'error' ? error.resumeId : undefined
     const resumed = await readEvents(await stream({ message, resumeRunId }))

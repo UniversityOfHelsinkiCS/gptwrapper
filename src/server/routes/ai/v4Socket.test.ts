@@ -37,6 +37,7 @@ vi.mock('../../services/rag/search', () => ({ search: vi.fn() }))
 vi.mock('../../services/langchain/fileSearchResultsStore', () => ({ ToolResultStore: { saveResults: vi.fn() } }))
 vi.mock('../../util/logger', () => ({ default: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }))
 vi.mock('@sentry/node', () => ({ captureException: vi.fn() }))
+vi.mock('../../util/redis', async () => (await import('../../tests/fakeRedis')).fakeRedisModule())
 
 vi.mock('../../services/agent/runAgent', async (importOriginal) => {
   const original = await importOriginal<typeof import('../../services/agent/runAgent')>()
