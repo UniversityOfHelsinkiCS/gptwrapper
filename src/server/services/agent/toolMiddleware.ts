@@ -1,5 +1,5 @@
 import { isGraphInterrupt } from '@langchain/langgraph'
-import { createMiddleware, ToolMessage } from 'langchain'
+import { AIMessage, createMiddleware, ToolMessage } from 'langchain'
 import logger from '../../util/logger'
 import { ToolError } from './tools/types'
 
@@ -63,6 +63,37 @@ export const callLimitMiddleware = (limits: ReadonlyMap<string, number>) => {
 
       logger.info('Tool call over its per-run limit', { tool: name, limit })
       return new ToolMessage({ content: callLimitMessage(name, limit), tool_call_id: request.toolCall.id ?? '', name, status: 'error' })
+    },
+  })
+}
+
+/** Added to the system message of the last model call a run may have. */
+export const FINAL_ANSWER_NOTE = 'You cannot use tools any more in this answer. Answer now with what you have, and tell the user if something is missing.'
+
+/**
+ * Caps the model calls of an agent run (one middleware per run). The last allowed call gets `toolChoice: 'none'`
+ * and `FINAL_ANSWER_NOTE`, so the run ends with an answer instead of a `GraphRecursionError` that loses all the
+ * work so far. Tool calls that the model still makes in that call are dropped, so the run always ends there.
+ */
+export const modelCallBudgetMiddleware = (maxModelCalls: number) => {
+  let calls = 0
+  return createMiddleware({
+    name: 'ModelCallBudget',
+    wrapModelCall: async (request, handler) => {
+      calls++
+      if (calls < maxModelCalls) return handler(request)
+
+      logger.info('Model call budget reached, asking for a final answer', { maxModelCalls })
+      const response = await handler({ ...request, toolChoice: 'none', systemMessage: request.systemMessage.concat(`\n\n${FINAL_ANSWER_NOTE}`) })
+      if (!AIMessage.isInstance(response) || !response.tool_calls?.length) return response
+
+      logger.warn('Model called tools after the model call budget, dropping the calls', { tools: response.tool_calls.map((call) => call.name) })
+      return new AIMessage({
+        id: response.id,
+        content: response.content,
+        usage_metadata: response.usage_metadata,
+        response_metadata: response.response_metadata,
+      })
     },
   })
 }

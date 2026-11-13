@@ -6,13 +6,16 @@ import type { SubagentPart } from '@shared/agentChat'
 import { FILE_TOOL_SUMMARY_LIMITS, PAGE_RANGE_PATTERN, type FileToolSummary } from '@shared/fileTools'
 import { READ_PDF, type ReadPdfProgress } from '@shared/readPdf'
 import { getAgentModel } from '../agentModel'
-import { toolErrorMiddleware } from '../toolMiddleware'
+import { modelCallBudgetMiddleware, toolErrorMiddleware } from '../toolMiddleware'
 import { createFileTool, type FileToolHooks } from './fileTools'
 import { pdfReaderSystemPrompt, pdfReaderTask } from './readPdfPrompt'
 import { runSubagent, summarizeSubagentPart } from './subagent'
 import { DEFAULT_SUBAGENT_CALLS_PER_RUN, ToolError, writeToolProgress, type EnabledTool, type SubagentToolModule, type ToolContext } from './types'
 
 /** The subagent's model: `PDF_READER_MODEL` (the local Toska model by default), the mock model in chats with the mock model. */
+/** The most model calls of the PDF reader per `read_pdf` call; well under the graph's recursion limit. */
+const MAX_READER_MODEL_CALLS = 8
+
 export const pdfReaderModel = (chatModel: ValidModelName): ValidModelName => (isMockModel(chatModel) ? 'mock' : PDF_READER_MODEL)
 
 const InputSchema = z.object({
@@ -111,7 +114,7 @@ export const readPdf: SubagentToolModule = {
           model: getAgentModel(modelConfig),
           tools: readerTools(ctx, (progress) => writeToolProgress(runtime, progress)),
           systemPrompt: pdfReaderSystemPrompt,
-          middleware: [toolErrorMiddleware(ctx.signal)],
+          middleware: [modelCallBudgetMiddleware(MAX_READER_MODEL_CALLS), toolErrorMiddleware(ctx.signal)],
         })
         const answer = await runSubagent({ agent, task: pdfReaderTask(path, task), runtime })
         return answer.trim().length > 0 ? answer : 'The PDF reader gave no answer.'

@@ -24,9 +24,15 @@ import { findQuizPart, quizAnswerToText } from './tools/presentQuiz'
 import { promptEnabledTools } from './tools/promptTools'
 import { createTools, getToolModule, historyMessageToText, subagentCallLimits, withToolInstructions } from './tools/registry'
 import type { EnabledTool } from './tools/types'
-import { callLimitMiddleware, toolErrorMiddleware } from './toolMiddleware'
+import { callLimitMiddleware, modelCallBudgetMiddleware, toolErrorMiddleware } from './toolMiddleware'
 
-export const RECURSION_LIMIT = 25
+/** The most model calls of the main agent in one run; the last one must answer without tools. */
+export const MAX_MODEL_CALLS = 12
+/**
+ * The graph steps of `MAX_MODEL_CALLS` model calls and the tool steps between them, with some spare. Only a safety
+ * net: `modelCallBudgetMiddleware` ends the run before it.
+ */
+export const RECURSION_LIMIT = 2 * MAX_MODEL_CALLS + 5
 const KEEP_ALIVE_INTERVAL_MS = 5000
 const GENERATION_ERROR = 'Error while generating response'
 /** Tools the mock model always has, for its `subagent` and `quiz` prefixes. */
@@ -136,7 +142,8 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
   const agent = createAgent({
     model: getAgentModel(modelConfig),
     tools,
-    middleware: tools.length > 0 ? [callLimitMiddleware(subagentCallLimits(enabledTools)), toolErrorMiddleware(signal)] : [],
+    middleware:
+      tools.length > 0 ? [modelCallBudgetMiddleware(MAX_MODEL_CALLS), callLimitMiddleware(subagentCallLimits(enabledTools)), toolErrorMiddleware(signal)] : [],
   })
 
   const showReasoning = modelConfig.reasoning?.showSummary === true
