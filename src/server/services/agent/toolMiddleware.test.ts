@@ -9,7 +9,7 @@ import { z } from 'zod/v4'
 
 vi.mock('../../util/logger', () => ({ default: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }))
 
-import { callLimitMessage, callLimitMiddleware, FINAL_ANSWER_NOTE, modelCallBudgetMiddleware } from './toolMiddleware'
+import { callLimitMessage, callLimitMiddleware, FINAL_ANSWER_NOTE, modelCallBudgetMiddleware, STEP_LIMIT_ANSWER } from './toolMiddleware'
 
 type WrapToolCall = (request: unknown, handler: (request: unknown) => Promise<ToolMessage>) => Promise<ToolMessage>
 
@@ -42,12 +42,15 @@ describe('callLimitMiddleware', () => {
   })
 })
 
-/** Calls the `echo` tool on every call, unless bound with `tool_choice: 'none'`. Records how each call was bound and its system text. */
+/**
+ * Calls the `echo` tool on every call while it has tools; answers when bound without any. A `stubborn` model calls the
+ * tool (with no text) even without tools. Records how many tools each call was bound with and its system text.
+ */
 class LoopingModel extends BaseChatModel {
   constructor(
-    readonly calls: { toolChoice: unknown; system: string }[] = [],
-    private readonly ignoreToolChoice = false,
-    private readonly toolChoice?: unknown,
+    readonly calls: { toolCount: number; system: string }[] = [],
+    private readonly stubborn = false,
+    private readonly toolCount = 0,
   ) {
     super({})
   }
@@ -56,15 +59,15 @@ class LoopingModel extends BaseChatModel {
     return 'looping'
   }
 
-  override bindTools(_tools: BindToolsInput[], kwargs?: { tool_choice?: unknown }) {
-    return new LoopingModel(this.calls, this.ignoreToolChoice, kwargs?.tool_choice) as any
+  override bindTools(tools: BindToolsInput[]) {
+    return new LoopingModel(this.calls, this.stubborn, tools.length) as any
   }
 
   async _generate(messages: BaseMessage[]): Promise<ChatResult> {
-    this.calls.push({ toolChoice: this.toolChoice, system: messages.find(isSystemMessage)?.text ?? '' })
+    this.calls.push({ toolCount: this.toolCount, system: messages.find(isSystemMessage)?.text ?? '' })
     const n = this.calls.length
     const message =
-      this.toolChoice === 'none' && !this.ignoreToolChoice
+      this.toolCount === 0 && !this.stubborn
         ? new AIMessage('final answer')
         : new AIMessage({ content: '', tool_calls: [{ name: 'echo', args: { n }, id: `call_${n}`, type: 'tool_call' }] })
     return { generations: [{ text: message.text, message }] }
@@ -84,20 +87,21 @@ describe('modelCallBudgetMiddleware', () => {
     const model = new LoopingModel()
     const result = await runLoop(model, 4)
 
-    expect(model.calls.map((call) => call.toolChoice === 'none')).toEqual([false, false, false, true])
+    expect(model.calls.map((call) => call.toolCount)).toEqual([1, 1, 1, 0])
     expect(model.calls[3].system).toContain(FINAL_ANSWER_NOTE)
     expect(model.calls[2].system).not.toContain(FINAL_ANSWER_NOTE)
     expect(result.messages.filter((message) => ToolMessage.isInstance(message))).toHaveLength(3)
     expect(result.messages.at(-1)?.text).toBe('final answer')
   })
 
-  test('drops tool calls that the model still makes in its last call, so the run ends there', async () => {
+  test('drops tool calls that the model still makes in its last call, and never ends the run without an answer', async () => {
     const model = new LoopingModel([], true)
     const result = await runLoop(model, 3)
 
     expect(model.calls).toHaveLength(3)
     const last = result.messages.at(-1)
     expect(AIMessage.isInstance(last) && last.tool_calls?.length).toBeFalsy()
+    expect(last?.text).toBe(STEP_LIMIT_ANSWER)
   })
 
   test('a run without the budget hits the recursion limit (what the budget prevents)', async () => {

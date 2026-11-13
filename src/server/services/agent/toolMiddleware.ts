@@ -71,11 +71,16 @@ export const callLimitMiddleware = (limits: ReadonlyMap<string, number>, usedCal
 /** Added to the system message of the last model call a run may have. */
 export const FINAL_ANSWER_NOTE = 'You cannot use tools any more in this answer. Answer now with what you have, and tell the user if something is missing.'
 
+/** The answer of a run whose last allowed model call still wrote no text. Should not happen: that call has no tools. */
+export const STEP_LIMIT_ANSWER =
+  'I reached the limit of steps I can take for one answer before I could finish. Ask me to continue, and I will go on from where I stopped.'
+
 /**
- * Caps the model calls of an agent run (one middleware per run). The last allowed call gets `toolChoice: 'none'`
- * and `FINAL_ANSWER_NOTE`, so the run ends with an answer instead of a `GraphRecursionError` that loses all the
- * work so far. Tool calls that the model still makes in that call are dropped, so the run always ends there.
- * A resumed run starts from the calls the failed run made (`usedCalls`).
+ * Caps the model calls of an agent run (one middleware per run). The last allowed call has no tools at all and gets
+ * `FINAL_ANSWER_NOTE`, so the run ends with an answer instead of a `GraphRecursionError` that loses all the work so
+ * far. (Some models ignore `toolChoice: 'none'`, so the tools are taken away instead.) Tool calls that the model
+ * still makes in that call are dropped, so the run always ends there, and a call that wrote no text answers with
+ * `STEP_LIMIT_ANSWER`, so the run never ends empty. A resumed run starts from the calls the failed run made (`usedCalls`).
  */
 export const modelCallBudgetMiddleware = (maxModelCalls: number, usedCalls = 0) => {
   let calls = usedCalls
@@ -86,13 +91,23 @@ export const modelCallBudgetMiddleware = (maxModelCalls: number, usedCalls = 0) 
       if (calls < maxModelCalls) return handler(request)
 
       logger.info('Model call budget reached, asking for a final answer', { maxModelCalls })
-      const response = await handler({ ...request, toolChoice: 'none', systemMessage: request.systemMessage.concat(`\n\n${FINAL_ANSWER_NOTE}`) })
-      if (!AIMessage.isInstance(response) || !response.tool_calls?.length) return response
+      const response = await handler({
+        ...request,
+        tools: [],
+        toolChoice: undefined,
+        systemMessage: request.systemMessage.concat(`\n\n${FINAL_ANSWER_NOTE}`),
+      })
+      if (!AIMessage.isInstance(response)) return response
+      const hasText = response.text.trim().length > 0
+      if (!response.tool_calls?.length && hasText) return response
 
-      logger.warn('Model called tools after the model call budget, dropping the calls', { tools: response.tool_calls.map((call) => call.name) })
+      logger.warn('Last model call of the budget made no answer, ending the run', {
+        droppedTools: response.tool_calls?.map((call) => call.name) ?? [],
+        hasText,
+      })
       return new AIMessage({
         id: response.id,
-        content: response.content,
+        content: hasText ? response.content : STEP_LIMIT_ANSWER,
         usage_metadata: response.usage_metadata,
         response_metadata: response.response_metadata,
       })
