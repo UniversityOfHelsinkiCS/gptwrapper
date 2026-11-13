@@ -269,7 +269,7 @@ describe('POST /ai/v4/stream', () => {
     const events = await readEvents(response)
 
     expect(response.status).toBe(200)
-    expect(events).toContainEqual({ type: 'error', error: 'Error while generating response' })
+    expect(events).toContainEqual({ type: 'error', error: 'Error while generating response: Mock error injected' })
     expect(events.some((e) => e.type === 'usage')).toBe(false)
     expect(incrementUsage).not.toHaveBeenCalled()
   })
@@ -667,7 +667,7 @@ describe('POST /ai/v4/stream with the mock quiz', () => {
     const events = await readEvents(
       await stream({ message: 'My answer: 7', history: quizHistory, quizAnswer: { callId: 'mock_quiz_id', selected: ['b'], explanation: 'fail please' } }),
     )
-    expect(events).toContainEqual({ type: 'error', error: 'Error while generating response' })
+    expect(events).toContainEqual({ type: 'error', error: 'Error while generating response: Mock error injected' })
   })
 
   test('rejects a quiz answer without a selection', async () => {

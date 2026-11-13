@@ -43,6 +43,8 @@ export const handleCompletionStreamError = (err: any, file: string) => {
     enqueueSnackbar(t('error:waitingForResponse'), { variant: 'error' })
   } else {
     console.error('Unexpected error in completion stream: ', error)
-    enqueueSnackbar(t('error:unexpected'), { variant: 'error' })
+    // Show the server's message too (e.g. "Usage limit reached" or the model provider's error), not only a generic one
+    const detail = typeof error === 'string' && error.trim() ? error.trim() : null
+    enqueueSnackbar(detail ? `${t('error:unexpected')}: ${detail}` : t('error:unexpected'), { variant: 'error' })
   }
 }

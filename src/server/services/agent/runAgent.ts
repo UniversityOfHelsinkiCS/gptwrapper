@@ -15,6 +15,7 @@ import { getAccessLevel, requireActiveAccess } from '../chatInstances/access'
 import { checkCourseUsage, checkUsage, getCourseTokenLimit, getUsage, getUserTokenLimit, incrementCourseUsage, incrementUsage } from '../chatInstances/usage'
 import { handleWarnings, modelConfigHasInstructions, prepareMessagesForLLM } from './prepareMessages'
 import { getAgentModel } from './agentModel'
+import { describeGenerationError } from './generationError'
 import { createStreamState, getMainAgentModelCall, getSubagentModelCall, mapStreamChunk, nextStreamState, type StreamChunk } from './mapStreamChunk'
 import type { ClientToolCaller } from './clientTools'
 import { fileToolsFor } from './tools/fileTools'
@@ -34,7 +35,6 @@ export const MAX_MODEL_CALLS = 12
  */
 export const RECURSION_LIMIT = 2 * MAX_MODEL_CALLS + 5
 const KEEP_ALIVE_INTERVAL_MS = 5000
-const GENERATION_ERROR = 'Error while generating response'
 /** Tools the mock model always has, for its `subagent` and `quiz` prefixes. */
 const MOCK_MODEL_TOOLS = [MOCK_SUBAGENT, PRESENT_QUIZ]
 
@@ -215,7 +215,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
 
     // Errors from inside the graph only serialise their own fields (pregelTaskId), so log message and stack explicitly.
     logger.error('Agent run failed', { model, error: error instanceof Error ? { name: error.name, message: error.message, stack: error.stack } : error })
-    await emit({ type: 'error', error: GENERATION_ERROR })
+    await emit({ type: 'error', error: describeGenerationError(error) })
     return { status: 'completed' }
   } finally {
     clearInterval(keepAlive)
