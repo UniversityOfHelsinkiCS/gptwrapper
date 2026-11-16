@@ -6,7 +6,7 @@ vi.mock('../../rag/search', () => ({ search: vi.fn() }))
 vi.mock('../../langchain/fileSearchResultsStore', () => ({ ToolResultStore: { saveResults: vi.fn() } }))
 vi.mock('../../../util/logger', () => ({ default: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }))
 
-import { documentSearch, toDocumentSearchResult } from './documentSearch'
+import { documentSearch, formatSearchResults, toDocumentSearchResult } from './documentSearch'
 import { mockSubagent } from './mockSubagent'
 import { readPdf } from './readPdf'
 import { historyMessageToText, listToolModules, subagentCallLimits, withToolInstructions } from './registry'
@@ -53,6 +53,33 @@ describe('document_search summarizeForHistory', () => {
     expect(files[0].score).toBe(0.5)
     expect(files[0].excerpt).toMatch(/^first line x+…$/)
     expect(files[0].excerpt!.length).toBe(201)
+  })
+
+  test('the model gets each chunk under its number and file name', () => {
+    const chunks = [
+      { content: 'The exam is on 12 December.', metadata: { ragFileName: 'syllabus.pdf' } },
+      { content: 'Bring a calculator.', metadata: { ragFileName: 'faq.md' } },
+    ]
+
+    expect(formatSearchResults('exam date', chunks)).toBe('[1] syllabus.pdf\nThe exam is on 12 December.\n\n[2] faq.md\nBring a calculator.')
+  })
+
+  test('the description names the materials and their language only when the collection has one', () => {
+    const describe = (metadata: { name: string; language?: string }) =>
+      documentSearch.create({
+        user: {} as never,
+        course: null,
+        model: 'mock',
+        signal: new AbortController().signal,
+        config: { ragIndex: { id: 1, metadata } as never },
+      }).description
+
+    expect(describe({ name: 'Algebra', language: 'Finnish' })).toContain("titled 'Algebra'). The materials are mainly in Finnish: prefer it in the query.")
+    expect(describe({ name: 'Algebra' })).not.toMatch(/undefined|mainly in/)
+  })
+
+  test('the model is told when nothing was found', () => {
+    expect(formatSearchResults('exam "hall"', [])).toBe('No results found for "exam \\"hall\\"".')
   })
 })
 

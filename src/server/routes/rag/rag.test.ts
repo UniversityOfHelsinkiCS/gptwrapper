@@ -15,7 +15,7 @@ vi.mock('../../db/models', () => ({
 
 vi.mock('./ragIndex', async () => ({ default: (await import('express')).Router() }))
 vi.mock('./ragIndexMiddleware', () => ({ ragIndexMiddleware: vi.fn() }))
-vi.mock('../../services/rag/vectorStore', () => ({ RedisVectorStore: {} }))
+vi.mock('../../services/rag/vectorStore', () => ({ RagVectorStore: {} }))
 
 vi.mock('../../util/logger', () => ({
   default: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
