@@ -703,8 +703,15 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
         fullScreen={isMobile}
         data-testid="course-discussions-dialog"
       >
-        <DialogTitle sx={{ pr: 7 }}>{t('course:discussions')}</DialogTitle>
-        <IconButton onClick={() => setDiscussionsModalOpen(false)} aria-label={t('common:close')} sx={{ position: 'absolute', right: 8, top: 8 }}>
+        <DialogTitle sx={{ pr: 7 }} id="discussions-modal-title">
+          {t('course:discussions')}
+        </DialogTitle>
+        <IconButton
+          onClick={() => setDiscussionsModalOpen(false)}
+          aria-label={t('common:close')}
+          aria-describedby="discussions-modal-title"
+          sx={{ position: 'absolute', right: 8, top: 8 }}
+        >
           <CloseIcon />
         </IconButton>
         <DialogContent dividers>

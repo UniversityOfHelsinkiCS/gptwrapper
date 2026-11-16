@@ -442,10 +442,17 @@ const PromptPreview = ({
         )}
       </Paper>
       <Dialog open={embeddingModalOpen} onClose={() => setEmbeddingModalOpen(false)} fullWidth maxWidth="lg">
-        <IconButton onClick={() => setEmbeddingModalOpen(false)} aria-label={t('common:close')} sx={{ position: 'absolute', top: 16, right: 24 }}>
+        <IconButton
+          onClick={() => setEmbeddingModalOpen(false)}
+          aria-label={t('common:close')}
+          aria-describedby="embedding-modal-title"
+          sx={{ position: 'absolute', top: 16, right: 24 }}
+        >
           <CloseIcon />
         </IconButton>
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>{t('course:moodleEmbedding')}</DialogTitle>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} id="embedding-modal-title">
+          {t('course:moodleEmbedding')}
+        </DialogTitle>
         <DialogContent dividers>
           <CourseEmbedding courseId={courseId} prompt={prompt} />
         </DialogContent>
