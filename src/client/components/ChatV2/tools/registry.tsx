@@ -1,7 +1,7 @@
 import Build from '@mui/icons-material/Build'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { ToolPart } from '../../../../shared/agentChat'
+import type { AssistantPart, ToolPart } from '../../../../shared/agentChat'
 import type { ToolCallResultEvent } from '../../../../shared/chat'
 import { DocumentSearchPart, documentSearchSource } from './DocumentSearchPart'
 import { FileToolPart } from './FileToolPart'
@@ -14,6 +14,8 @@ export type ToolRenderer = {
   Part: ComponentType<{ part: ToolPart }>
   /** The part as a source for the Sources button and side panel, or null when it is not one. */
   toSource?: (part: ToolPart) => ToolCallResultEvent | null
+  /** The part is content of the answer (a quiz), not activity, so it is never folded into an activity group. */
+  isContent?: boolean
 }
 
 const documentSearchRenderer: ToolRenderer = { Part: DocumentSearchPart, toSource: documentSearchSource }
@@ -22,7 +24,7 @@ const toolRenderers: Record<string, ToolRenderer> = {
   document_search: documentSearchRenderer,
   // Saved by v3 with the mock model
   mock_document_search: documentSearchRenderer,
-  present_quiz: { Part: QuizPart },
+  present_quiz: { Part: QuizPart, isContent: true },
   // The My files tools, run in the browser
   ls: { Part: FileToolPart },
   read_file: { Part: FileToolPart },
@@ -45,5 +47,9 @@ export const ToolPartView = ({ part }: { part: ToolPart }) => {
   const Part = toolRenderers[part.name]?.Part ?? GenericToolPart
   return <Part part={part} />
 }
+
+/** Whether a part is activity (tool calls, subagents, reasoning) that can be folded into an activity group. */
+export const isActivityPart = (part: AssistantPart) =>
+  part.type === 'reasoning' || part.type === 'subagent' || (part.type === 'tool' && !toolRenderers[part.name]?.isContent)
 
 export const toolPartSource = (part: ToolPart): ToolCallResultEvent | null => toolRenderers[part.name]?.toSource?.(part) ?? null

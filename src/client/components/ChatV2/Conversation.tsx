@@ -27,7 +27,9 @@ import {
 } from '../../../shared/chat'
 import type { AssistantMessageV2, AssistantPart } from '../../../shared/agentChat'
 import { type ClientChatMessage, messageToolResults, messageToText } from './messages'
-import { ToolPartView } from './tools/registry'
+import { isActivityPart, ToolPartView } from './tools/registry'
+import { ActivityGroup } from './ActivityGroup'
+import { groupParts } from './groupParts'
 import { OutputFiles } from './tools/OutputFiles'
 import { QuizAnswerProvider, type QuizSelection } from './tools/quizAnswerContext'
 import { ThinkingBlock } from './ThinkingBlock'
@@ -173,6 +175,7 @@ const AssistantMessageInfo = ({ message, headingId, number }: { message: Assista
 /**
  * The parts of an assistant message in order: text as markdown, reasoning in a thinking block, tool parts by
  * their renderer, and subagent parts as cards that render their own parts with this same component.
+ * Consecutive activity parts (tools, subagents, reasoning) are folded into one activity group.
  */
 const AssistantParts = ({ parts }: { parts: AssistantPart[] }) => {
   const processedParts = React.useMemo(() => parts.map((part) => (part.type === 'text' ? { ...part, text: preprocessMath(part.text) } : part)), [parts])
@@ -220,120 +223,127 @@ const AssistantParts = ({ parts }: { parts: AssistantPart[] }) => {
   const codeBlockIdPrefix = useId()
   let codeCount = 0
 
+  const renderPart = (part: AssistantPart, partIdx: number) =>
+    part.type === 'tool' ? (
+      <ToolPartView key={`tool-${part.callId}`} part={part} />
+    ) : part.type === 'subagent' ? (
+      <SubagentCard key={`subagent-${part.callId}`} part={part}>
+        <AssistantParts parts={part.parts} />
+      </SubagentCard>
+    ) : part.type === 'reasoning' ? (
+      <ThinkingBlock key={`reasoning-${partIdx}`} part={part} />
+    ) : (
+      <ReactMarkdown
+        key={`text-${partIdx}`}
+        remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
+        rehypePlugins={[[rehypeKatex, katexOptions]]}
+        components={{
+          pre(props) {
+            const { children, node, ...rest } = props
+            const codeNode = node?.children[0]
+            if (codeNode?.type === 'element' && /language-(\w+)/.test(String(codeNode.properties.className ?? ''))) {
+              return <>{children}</>
+            }
+            return <pre {...rest}>{children}</pre>
+          },
+          table(props) {
+            const { node, ...rest } = props
+            return (
+              <ScrollableRegion label={t('accessibility:scrollableTable')} sx={{ '& th, & td': { wordBreak: 'normal', overflowWrap: 'normal' } }}>
+                <table {...rest} />
+              </ScrollableRegion>
+            )
+          },
+          span(props) {
+            const { node, ...rest } = props
+            if (!rest.className?.includes('katex-display')) {
+              return <span {...rest} />
+            }
+            return (
+              <ScrollableRegion label={t('accessibility:scrollableFormula')}>
+                <span {...rest} />
+              </ScrollableRegion>
+            )
+          },
+          code(props) {
+            const { children, className, node, ...rest } = props
+            const match = /language-(\w+)/.exec(className || '')
+            const language = match?.[1] || 'plaintext' // safe fallback
+
+            if (match) {
+              const codeBlockId = `${codeBlockIdPrefix}codeBlock-${++codeCount}`
+
+              return (
+                <Box
+                  sx={{
+                    borderRadius: '0.5rem',
+                    overflowX: 'auto',
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      opacity: 1,
+                      fontSize: '0.8rem',
+                      padding: '0.4rem 0.8rem',
+                      backgroundColor: 'action.hover',
+                    }}
+                  >
+                    {language}
+                  </Typography>
+                  <Box sx={{ position: 'relative' }}>
+                    {/* @ts-ignore */}
+                    <SyntaxHighlighter
+                      {...rest}
+                      PreTag="pre"
+                      children={String(children)}
+                      language={language}
+                      customStyle={{
+                        padding: '1rem 4rem 1rem 1rem', // 4rem keeps the CopyToClipboard button visible
+                        margin: 0,
+                        fontSize: '15px',
+                        wordBreak: 'break-all',
+                        overflowWrap: 'break-word',
+                        whiteSpace: 'pre-wrap',
+                      }}
+                      style={accessibleOneDark}
+                      className="scrollable-code-highlight"
+                      id={codeBlockId}
+                    />
+                    <CopyToClipboardButton
+                      id={codeBlockId}
+                      copied={String(children)}
+                      label={t('chat:codeBlock')}
+                      iconColor="#FFF"
+                      buttonStyle={{
+                        position: 'absolute',
+                        top: '8px',
+                        right: '8px',
+                      }}
+                    />
+                  </Box>
+                </Box>
+              )
+            } else {
+              return (
+                <code {...rest} className={className}>
+                  {children}
+                </code>
+              )
+            }
+          },
+        }}
+      >
+        {part.text}
+      </ReactMarkdown>
+    )
+
   return (
     <>
-      {processedParts.map((part, partIdx) =>
-        part.type === 'tool' ? (
-          <ToolPartView key={`tool-${part.callId}`} part={part} />
-        ) : part.type === 'subagent' ? (
-          <SubagentCard key={`subagent-${part.callId}`} part={part}>
-            <AssistantParts parts={part.parts} />
-          </SubagentCard>
-        ) : part.type === 'reasoning' ? (
-          <ThinkingBlock key={`reasoning-${partIdx}`} part={part} />
+      {groupParts(processedParts, isActivityPart).map((item) =>
+        item.type === 'activity' ? (
+          <ActivityGroup key={`activity-${item.index}`} parts={item.parts} index={item.index} renderPart={renderPart} />
         ) : (
-          <ReactMarkdown
-            key={`text-${partIdx}`}
-            remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
-            rehypePlugins={[[rehypeKatex, katexOptions]]}
-            components={{
-              pre(props) {
-                const { children, node, ...rest } = props
-                const codeNode = node?.children[0]
-                if (codeNode?.type === 'element' && /language-(\w+)/.test(String(codeNode.properties.className ?? ''))) {
-                  return <>{children}</>
-                }
-                return <pre {...rest}>{children}</pre>
-              },
-              table(props) {
-                const { node, ...rest } = props
-                return (
-                  <ScrollableRegion label={t('accessibility:scrollableTable')} sx={{ '& th, & td': { wordBreak: 'normal', overflowWrap: 'normal' } }}>
-                    <table {...rest} />
-                  </ScrollableRegion>
-                )
-              },
-              span(props) {
-                const { node, ...rest } = props
-                if (!rest.className?.includes('katex-display')) {
-                  return <span {...rest} />
-                }
-                return (
-                  <ScrollableRegion label={t('accessibility:scrollableFormula')}>
-                    <span {...rest} />
-                  </ScrollableRegion>
-                )
-              },
-              code(props) {
-                const { children, className, node, ...rest } = props
-                const match = /language-(\w+)/.exec(className || '')
-                const language = match?.[1] || 'plaintext' // safe fallback
-
-                if (match) {
-                  const codeBlockId = `${codeBlockIdPrefix}codeBlock-${++codeCount}`
-
-                  return (
-                    <Box
-                      sx={{
-                        borderRadius: '0.5rem',
-                        overflowX: 'auto',
-                      }}
-                    >
-                      <Typography
-                        sx={{
-                          opacity: 1,
-                          fontSize: '0.8rem',
-                          padding: '0.4rem 0.8rem',
-                          backgroundColor: 'action.hover',
-                        }}
-                      >
-                        {language}
-                      </Typography>
-                      <Box sx={{ position: 'relative' }}>
-                        {/* @ts-ignore */}
-                        <SyntaxHighlighter
-                          {...rest}
-                          PreTag="pre"
-                          children={String(children)}
-                          language={language}
-                          customStyle={{
-                            padding: '1rem 4rem 1rem 1rem', // 4rem keeps the CopyToClipboard button visible
-                            margin: 0,
-                            fontSize: '15px',
-                            wordBreak: 'break-all',
-                            overflowWrap: 'break-word',
-                            whiteSpace: 'pre-wrap',
-                          }}
-                          style={accessibleOneDark}
-                          className="scrollable-code-highlight"
-                          id={codeBlockId}
-                        />
-                        <CopyToClipboardButton
-                          id={codeBlockId}
-                          copied={String(children)}
-                          label={t('chat:codeBlock')}
-                          iconColor="#FFF"
-                          buttonStyle={{
-                            position: 'absolute',
-                            top: '8px',
-                            right: '8px',
-                          }}
-                        />
-                      </Box>
-                    </Box>
-                  )
-                } else {
-                  return (
-                    <code {...rest} className={className}>
-                      {children}
-                    </code>
-                  )
-                }
-              },
-            }}
-          >
-            {part.text}
-          </ReactMarkdown>
+          renderPart(item.part, item.index)
         ),
       )}
     </>
