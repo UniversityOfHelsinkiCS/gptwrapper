@@ -4,7 +4,7 @@ import type { Duplex } from 'node:stream'
 import * as Sentry from '@sentry/node'
 import { WebSocketServer, WebSocket, type RawData } from 'ws'
 import { z } from 'zod/v4'
-import { inCI, inDevelopment, inProduction, inStaging } from '../../../config'
+import { inCI, inDevelopment, inProduction, inStaging, PUBLIC_URL } from '../../../config'
 import { PostStreamSchemaV4, type ChatEvent } from '../../../shared/agentChat'
 import { CHAT_SOCKET_LOGGED_IN_AS_PARAM, CHAT_SOCKET_PATH, type ChatSocketServerMessage, type RunEndResult } from '../../../shared/chatSocket'
 import type { User } from '../../../shared/user'
@@ -59,6 +59,7 @@ export const attachChatSocket = (
   server.on('upgrade', (req: IncomingMessage, socket: Duplex, head: Buffer) => {
     const url = new URL(req.url ?? '/', 'http://localhost')
     if (url.pathname !== path) {
+      logger.info('Chat socket upgrade refused: wrong path', { path: url.pathname, expectedPath: path, host: req.headers.host })
       refuseUpgrade(socket, 404)
       return
     }
@@ -93,6 +94,12 @@ export const attachChatSocket = (
       ws.ping()
     }
   }, heartbeatIntervalMs)
+
+  server.once('listening', () => {
+    const address = server.address()
+    const listeningOn = typeof address === 'string' ? address : `${address?.address}:${address?.port}`
+    logger.info(`Chat socket listening on ${listeningOn}${path}`, { path, publicUrl: PUBLIC_URL })
+  })
 
   server.on('close', () => {
     clearInterval(heartbeat)
