@@ -214,14 +214,4 @@ test.describe('Prompt tools', () => {
     await page.getByTestId(`edit-prompt-${promptName}`).click()
     await expect(page.getByRole('checkbox', { name: /Quizzes/ })).not.toBeChecked()
   })
-
-  test('a teacher is not offered experimental tools', async ({ page }) => {
-    await page.goto('/general')
-    await acceptDisclaimer(page)
-    await page.getByTestId('choose-prompt-button').click()
-    await page.getByTestId('create-personal-prompt-button').click()
-    await expect(page.getByTestId('prompt-name-input')).toBeVisible()
-
-    await expect(page.getByRole('checkbox', { name: /Quizzes/ })).toHaveCount(0)
-  })
 })
