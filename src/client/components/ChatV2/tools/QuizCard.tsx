@@ -114,7 +114,15 @@ export const QuizCard = ({ part, quiz }: { part: ToolPart; quiz: QuizInput }) =>
       value={option.id}
       disabled={locked}
       label={optionLabelContent(option.id, option.text)}
-      sx={{ ...optionFocusIndicatorStyle(), my: 0.25, '& .MuiFormControlLabel-label.Mui-disabled': { color: 'text.primary' } }}
+      sx={{
+        ...optionFocusIndicatorStyle(),
+        my: 0.25,
+        '& .MuiFormControlLabel-label.Mui-disabled': { color: 'text.primary' },
+        '& .MuiRadio-root.Mui-disabled, & .MuiCheckbox-root.Mui-disabled': { color: 'text.secondary' },
+        '& .MuiRadio-root.Mui-disabled.Mui-checked, & .MuiCheckbox-root.Mui-disabled.Mui-checked': {
+          color: (theme) => accessibleTextColor(theme, 'primary'),
+        },
+      }}
       control={
         quiz.multiSelect ? (
           <Checkbox checked={shownSelected.includes(option.id)} onChange={() => select(option.id)} />
