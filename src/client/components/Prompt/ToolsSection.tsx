@@ -5,6 +5,7 @@ import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import useAddableTools from '../../hooks/useAddableTools'
 import { usePromptEditorForm } from './context'
+import { focusIndicatorStyle } from 'src/client/util/accessibility'
 
 type ToolOption = { name: string; label: string; description?: string; access?: ToolAccess; maturity?: ToolMaturity }
 
@@ -57,14 +58,16 @@ export const ToolsSection = () => {
         {options.map((option) => {
           const descriptionId = `${helpId}-${option.name}`
           return (
-            <Box key={option.name} mb={1}>
+            <Box key={option.name} mb={1} ml={1.5}>
               <FormControlLabel
                 control={
                   <Checkbox
+                    disableRipple
                     checked={selected.some((tool) => tool.name === option.name)}
                     onChange={(e) => setChecked(option.name, e.target.checked)}
                     slotProps={{ input: { 'aria-describedby': option.description ? descriptionId : undefined } }}
                     data-testid={`prompt-tool-${option.name}`}
+                    sx={{ ...focusIndicatorStyle() }}
                   />
                 }
                 label={
