@@ -8,7 +8,8 @@ import type { PromptEditorFormState } from '../../types'
 
 const quizTool: ToolInfo = {
   name: 'present_quiz',
-  stage: 'experimental',
+  access: 'everyone',
+  maturity: 'experimental',
   labelKey: 'prompt:toolPresentQuizLabel',
   descriptionKey: 'prompt:toolPresentQuizDescription',
 }
@@ -72,7 +73,16 @@ describe('ToolsSection', () => {
     const descriptionId = checkbox.getAttribute('aria-describedby')
     expect(document.getElementById(descriptionId!)?.textContent).toBe(en.prompt.toolPresentQuizDescription)
     expect(screen.getByText('Experimental')).toBeTruthy()
+    expect(screen.queryByText('Admins only')).toBeNull()
     expect(screen.getByRole('group', { name: 'Tools' })).toBeTruthy()
+  })
+
+  test('tags admin-only tools, and stable tools are not tagged experimental', () => {
+    addableTools = { tools: [{ ...quizTool, access: 'admin', maturity: 'stable' }] }
+    renderEditor({ tools: [] })
+
+    expect(screen.getByText('Admins only')).toBeTruthy()
+    expect(screen.queryByText('Experimental')).toBeNull()
   })
 
   test('loads the saved tools as checked and toggles them in the form', () => {

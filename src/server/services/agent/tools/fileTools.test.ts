@@ -24,10 +24,10 @@ const part = (name: string, input: unknown, result: unknown, status: ToolPart['s
 const FILE_CONTENT = 'Entropy always increases. This sentence is far into the file and must never reach the history.'
 
 describe('file tool modules', () => {
-  test('are client-executed, experimental and in the registry', () => {
+  test('are client-executed, admin-only, experimental and in the registry', () => {
     expect(fileTools.map((m) => m.name)).toEqual([...FILE_TOOL_NAMES])
     for (const name of FILE_TOOL_NAMES) {
-      expect(getToolModule(name)).toMatchObject({ executor: 'client', stage: 'experimental', kind: 'tool' })
+      expect(getToolModule(name)).toMatchObject({ executor: 'client', access: 'admin', maturity: 'experimental', kind: 'tool' })
     }
   })
 

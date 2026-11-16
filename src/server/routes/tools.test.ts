@@ -24,9 +24,15 @@ const listTools = async () => {
 }
 
 describe('GET /tools', () => {
-  test('lists stable tools to non-admins, with the translation keys of their checkbox', async () => {
+  test('lists the experimental quiz tool to non-admins, with the translation keys of its checkbox', async () => {
     expect(await listTools()).toEqual([
-      { name: 'present_quiz', stage: 'stable', labelKey: 'prompt:toolPresentQuizLabel', descriptionKey: 'prompt:toolPresentQuizDescription' },
+      {
+        name: 'present_quiz',
+        access: 'everyone',
+        maturity: 'experimental',
+        labelKey: 'prompt:toolPresentQuizLabel',
+        descriptionKey: 'prompt:toolPresentQuizDescription',
+      },
     ])
   })
 

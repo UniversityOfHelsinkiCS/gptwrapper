@@ -124,7 +124,7 @@ describe('prompt options of the tools', () => {
 
 describe('read_pdf in the registry', () => {
   test('is a subagent with no prompt option, so GET /api/tools never lists it', () => {
-    expect(listToolModules().find((module) => module.name === 'read_pdf')).toMatchObject({ kind: 'subagent', stage: 'experimental' })
+    expect(listToolModules().find((module) => module.name === 'read_pdf')).toMatchObject({ kind: 'subagent', access: 'admin', maturity: 'experimental' })
     expect(readPdf.promptOption).toBeUndefined()
     expect(listAddableTools({ isAdmin: true } as any).map((tool) => tool.name)).not.toContain('read_pdf')
   })

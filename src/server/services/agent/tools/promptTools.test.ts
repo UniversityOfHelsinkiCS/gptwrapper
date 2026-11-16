@@ -7,7 +7,7 @@ vi.mock('../../../util/logger', () => ({ default: { info: vi.fn(), error: vi.fn(
 vi.mock('./documentSearch', () => ({ DOCUMENT_SEARCH: 'document_search' }))
 
 const fakeModule = (overrides: Partial<ToolModule>): ToolModule =>
-  ({ kind: 'tool', executor: 'server', stage: 'stable', create: vi.fn(), summarizeForHistory: vi.fn(), ...overrides }) as ToolModule
+  ({ kind: 'tool', executor: 'server', access: 'everyone', maturity: 'stable', create: vi.fn(), summarizeForHistory: vi.fn(), ...overrides }) as ToolModule
 
 const modules = [
   fakeModule({
@@ -15,7 +15,8 @@ const modules = [
     promptOption: { labelKey: 'prompt:a', descriptionKey: 'prompt:b' },
     configSchema: z.object({ count: z.number().int().min(1).max(10) }),
   }),
-  fakeModule({ name: 'quiz', stage: 'experimental', promptOption: { labelKey: 'prompt:c', descriptionKey: 'prompt:d' } }),
+  fakeModule({ name: 'quiz', access: 'admin', maturity: 'experimental', promptOption: { labelKey: 'prompt:c', descriptionKey: 'prompt:d' } }),
+  fakeModule({ name: 'mindmap', maturity: 'experimental', promptOption: { labelKey: 'prompt:e', descriptionKey: 'prompt:f' } }),
   fakeModule({ name: 'document_search' }),
 ]
 
@@ -39,9 +40,19 @@ const statusOf = (fn: () => unknown) => {
 }
 
 describe('listAddableTools', () => {
-  test('lists stable prompt tools to everyone and experimental ones to admins only', () => {
-    expect(listAddableTools(teacher).map((t) => t.name)).toEqual(['flashcards'])
-    expect(listAddableTools(admin).map((t) => t.name)).toEqual(['flashcards', 'quiz'])
+  test('lists `everyone` prompt tools to everyone and `admin` ones to admins only, whatever their maturity', () => {
+    expect(listAddableTools(teacher).map((t) => t.name)).toEqual(['flashcards', 'mindmap'])
+    expect(listAddableTools(admin).map((t) => t.name)).toEqual(['flashcards', 'quiz', 'mindmap'])
+  })
+
+  test('includes the access and maturity of each tool', () => {
+    expect(listAddableTools(admin).find((t) => t.name === 'mindmap')).toEqual({
+      name: 'mindmap',
+      access: 'everyone',
+      maturity: 'experimental',
+      labelKey: 'prompt:e',
+      descriptionKey: 'prompt:f',
+    })
   })
 })
 
@@ -56,10 +67,14 @@ describe('validatePromptTools', () => {
     expect(statusOf(() => validatePromptTools(admin, [{ name: 'quiz', config: {} }]))).toBe(400)
   })
 
-  test('experimental tools: 403 for a non-admin adding one, allowed when already on the prompt', () => {
+  test('`admin` tools: 403 for a non-admin adding one, allowed when already on the prompt', () => {
     expect(statusOf(() => validatePromptTools(teacher, [{ name: 'quiz' }]))).toBe(403)
     expect(validatePromptTools(teacher, [{ name: 'quiz' }], [{ name: 'quiz' }])).toEqual([{ name: 'quiz' }])
     expect(validatePromptTools(admin, [{ name: 'quiz' }])).toEqual([{ name: 'quiz' }])
+  })
+
+  test('a non-admin can add an experimental tool that is open to everyone', () => {
+    expect(validatePromptTools(teacher, [{ name: 'mindmap' }])).toEqual([{ name: 'mindmap' }])
   })
 
   test('unknown tools and tools not turned on per prompt are 400', () => {
