@@ -764,6 +764,7 @@
     "toolsHeading": "Tools",
     "toolsHelp": "Tools the model can use when chatting with this prompt.",
     "toolExperimental": "Experimental",
+    "toolAdminOnly": "Admins only",
     "toolPresentQuizLabel": "Quizzes",
     "toolPresentQuizDescription": "The model can check what the student knows with multiple-choice questions shown as interactive cards."
   },

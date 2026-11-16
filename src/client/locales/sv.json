@@ -732,6 +732,7 @@
     "toolsHeading": "Verktyg",
     "toolsHelp": "Verktyg som modellen kan använda i chatten med denna prompt.",
     "toolExperimental": "Experimentell",
+    "toolAdminOnly": "Endast för administratörer",
     "toolPresentQuizLabel": "Flervalsfrågor",
     "toolPresentQuizDescription": "Modellen kan kontrollera vad studenten kan med flervalsfrågor som visas som interaktiva kort."
   },

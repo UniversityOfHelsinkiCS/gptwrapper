@@ -1,16 +1,16 @@
 import BuildIcon from '@mui/icons-material/Build'
 import { Box, Checkbox, Chip, Divider, FormControlLabel, FormGroup, Typography } from '@mui/material'
-import type { PromptTool } from '@shared/promptTools'
+import type { PromptTool, ToolAccess, ToolMaturity } from '@shared/promptTools'
 import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import useAddableTools from '../../hooks/useAddableTools'
 import { usePromptEditorForm } from './context'
 
-type ToolOption = { name: string; label: string; description?: string; experimental: boolean }
+type ToolOption = { name: string; label: string; description?: string; access?: ToolAccess; maturity?: ToolMaturity }
 
 /**
  * Checkboxes for the tools of the prompt, from `GET /api/tools`. A tool already on the prompt that the user cannot
- * add (an experimental tool an admin added) is shown too, by its name, so it can be kept or removed.
+ * add (an admin-only tool an admin added) is shown too, by its name, so it can be kept or removed.
  * Renders nothing when there are no tools to show.
  */
 export const ToolsSection = () => {
@@ -26,11 +26,10 @@ export const ToolsSection = () => {
       name: tool.name,
       label: t(tool.labelKey),
       description: t(tool.descriptionKey),
-      experimental: tool.stage === 'experimental',
+      access: tool.access,
+      maturity: tool.maturity,
     })),
-    ...initialTools
-      .filter((tool) => !addableTools.some((addable) => addable.name === tool.name))
-      .map((tool) => ({ name: tool.name, label: tool.name, experimental: false })),
+    ...initialTools.filter((tool) => !addableTools.some((addable) => addable.name === tool.name)).map((tool) => ({ name: tool.name, label: tool.name })),
   ]
 
   if (options.length === 0) return null
@@ -71,7 +70,8 @@ export const ToolsSection = () => {
                 label={
                   <Box component="span" display="flex" alignItems="center" gap={1}>
                     <span>{option.label}</span>
-                    {option.experimental && <Chip size="small" variant="outlined" color="warning" label={t('prompt:toolExperimental')} />}
+                    {option.maturity === 'experimental' && <Chip size="small" variant="outlined" color="warning" label={t('prompt:toolExperimental')} />}
+                    {option.access === 'admin' && <Chip size="small" variant="outlined" label={t('prompt:toolAdminOnly')} />}
                   </Box>
                 }
               />

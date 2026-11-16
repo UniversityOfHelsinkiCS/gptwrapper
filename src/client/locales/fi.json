@@ -765,6 +765,7 @@
     "toolsHeading": "Työkalut",
     "toolsHelp": "Työkalut, joita malli voi käyttää keskustellessa tällä alustuksella.",
     "toolExperimental": "Kokeellinen",
+    "toolAdminOnly": "Vain ylläpitäjille",
     "toolPresentQuizLabel": "Monivalintakysymykset",
     "toolPresentQuizDescription": "Malli voi tarkistaa opiskelijan osaamista monivalintakysymyksillä, jotka näytetään vuorovaikutteisina kortteina."
   },
