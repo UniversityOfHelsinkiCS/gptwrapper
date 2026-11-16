@@ -272,6 +272,8 @@ teacherTest.describe('axe wcag scan for chat with tool parts', () => {
     await closeSendPreference(page)
 
     await expect(page.getByTestId('assistant-message')).toContainText('Ok! Got some great results from that mock tool call!')
+    // Scanned with their activity group open
+    await page.getByRole('button', { name: '2 steps' }).click()
     await expect(page.getByRole('group', { name: 'Source material search' })).toHaveCount(2)
     await expect(page.getByTestId('tool-part').first()).toHaveAttribute('data-tool-status', 'ok')
     await scan(page, testInfo.title)
@@ -450,6 +452,8 @@ adminTest.describe('axe wcag scan for chat with attached folders', () => {
       await sendChatMessage(page, 'files Course notes')
       await closeSendPreference(page)
       await expect(page.getByTestId('assistant-message')).toContainText('The exam is on Friday.')
+      // Scanned with their activity group open
+      await page.getByRole('button', { name: '2 steps' }).click()
       await expect(page.getByTestId('tool-part')).toHaveCount(2)
       await expect(page.getByTestId('attached-folder')).toBeVisible()
       await page.mouse.move(0, 0)

@@ -173,6 +173,15 @@ describe('tool parts', () => {
     renderConversation({ messages: [...userTurn, answer], completion: '', isStreaming: false })
 
     const message = screen.getByTestId('assistant-message')
+    // Consecutive tool parts are folded into one activity group, closed by default
+    const toggle = screen.getByRole('button', { name: '2 steps' })
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
+    expect(screen.queryByRole('group', { name: 'Source material search' })).toBeNull()
+
+    fireEvent.click(toggle)
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('true')
+    expect(toggle.getAttribute('aria-controls')).toBe(screen.getByTestId('activity-content').id)
     const groups = screen.getAllByRole('group', { name: 'Source material search' })
     expect(groups.map((group) => group.textContent)).toEqual([
       'Searched the source material for “exam date”',
@@ -203,8 +212,33 @@ describe('tool parts', () => {
       </I18nextProvider>,
     )
 
+    // While the group runs, closed it shows its latest part
+    const toggle = screen.getByRole('button', { name: 'Working… (2 steps)' })
+    expect(screen.queryByRole('group', { name: 'Source material search' })).toBeNull()
+    expect(screen.getByRole('group', { name: 'Tool some_new_tool' }).textContent).toBe('The tool some_new_tool failed')
+
+    fireEvent.click(toggle)
+
     expect(screen.getByRole('group', { name: 'Source material search' }).textContent).toBe('Searching the source material for “exam”…')
     expect(screen.getByRole('group', { name: 'Tool some_new_tool' }).textContent).toBe('The tool some_new_tool failed')
+  })
+
+  test('a finished group with a failed part says so', () => {
+    const failedAnswer: ClientChatMessage = {
+      role: 'assistant',
+      parts: [
+        { type: 'reasoning', text: 'Let me search.', durationMs: 2000 },
+        { type: 'tool', callId: 'c1', name: 'document_search', input: { query: 'exam' }, status: 'ok', result: { files: [] } },
+        { type: 'tool', callId: 'c2', name: 'some_new_tool', input: {}, status: 'error', result: 'boom' },
+        { type: 'text', text: 'Done.' },
+      ],
+    }
+    renderConversation({ messages: [...userTurn, failedAnswer], completion: '', isStreaming: false })
+
+    expect(screen.getByTestId('activity-group').getAttribute('data-activity-status')).toBe('error')
+    expect(screen.getByRole('button', { name: '3 steps (1 failed)' })).toBeTruthy()
+    expect(screen.queryByTestId('activity-latest')).toBeNull()
+    expect(screen.queryByTestId('thinking-block')).toBeNull()
   })
 })
 
@@ -275,6 +309,8 @@ describe('subagent parts', () => {
       </I18nextProvider>,
     )
 
+    fireEvent.click(screen.getByRole('button', { name: 'Working… (2 steps)' }))
+
     expect(screen.getByRole('button', { name: 'Subagent reader failed' })).toBeTruthy()
     const running = screen.getByRole('button', { name: 'Subagent searcher is working…' })
     expect(running.getAttribute('aria-expanded')).toBe('false')
@@ -321,6 +357,23 @@ describe('quiz parts', () => {
     )
 
   const openQuizProps = () => ({ onQuizSelect: vi.fn(), onQuizSubmit: vi.fn() })
+
+  test('a quiz after tool calls is not folded into their activity group', () => {
+    const searches: AssistantPart[] = [
+      { type: 'tool', callId: 'c1', name: 'document_search', input: { query: 'primes' }, status: 'ok', result: { files: [] } },
+      { type: 'tool', callId: 'c2', name: 'document_search', input: { query: 'divisors' }, status: 'ok', result: { files: [] } },
+    ]
+    renderWith(
+      [
+        { role: 'user', content: 'quiz' },
+        { ...quizMessage, parts: [...searches, quizMessage.parts[1]] },
+      ],
+      openQuizProps(),
+    )
+
+    expect(screen.getByRole('button', { name: '2 steps' })).toBeTruthy()
+    expect(screen.getByTestId('activity-group').contains(screen.getByTestId('quiz-card'))).toBe(false)
+  })
 
   test('picking an option in the latest answer reports the selection, and Submit sends it', () => {
     const props = openQuizProps()

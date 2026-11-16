@@ -128,6 +128,10 @@ adminTest('the agent reads a file from an attached folder in the browser', async
     await sendChatMessage(page, 'files Course notes')
     await closeSendPreference(page)
     await expect(page.getByTestId('assistant-message')).toContainText('The exam is on Friday the 13th.')
+    // The two tool calls are folded into one activity group, closed by default
+    const group = page.getByRole('button', { name: '2 steps' })
+    await expect(group).toHaveAttribute('aria-expanded', 'false')
+    await group.click()
     const parts = page.getByTestId('tool-part')
     await expect(parts).toHaveCount(2)
     await expect(parts.nth(0)).toHaveAttribute('data-tool-name', 'ls')
@@ -221,6 +225,7 @@ adminTest('notes written in one chat are read by the agent in a new chat, and ex
 
     // The mock model lists Agent notes and reads its first file
     await sendChatMessage(page, 'files Agent notes')
+    await page.getByRole('button', { name: '2 steps' }).click()
     await expect(page.getByTestId('tool-part').nth(1)).toContainText('Read the file Agent notes/learner-profile.md')
     await expect(page.getByTestId('assistant-message')).toContainText('Goal: pass the thermodynamics exam in May.')
 
