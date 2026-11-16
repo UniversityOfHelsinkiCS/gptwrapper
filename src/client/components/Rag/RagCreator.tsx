@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useCreateUserRagIndexMutation } from './api'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, Link, MenuItem, Select, TextField } from '@mui/material'
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
-import { BlueButton } from '../ChatV2/general/Buttons'
+import { BlueButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import { InfoBox } from '../common/InfoBox'
 import { useTranslation } from 'react-i18next'
 import { RAG_LANGUAGES } from '@shared/lang'
@@ -89,6 +89,9 @@ export const RagCreator = ({ onCreated }: { onCreated?: (indexId: number) => voi
             </FormControl>
           </DialogContent>
           <DialogActions>
+            <OutlineButtonBlack onClick={() => setOpen(false)} data-testid="ragIndexCreateCancel">
+              {t('common:cancel')}
+            </OutlineButtonBlack>
             <BlueButton color="primary" type="submit" data-testid="ragIndexCreateSubmit">
               {t('rag:createIndex')}
             </BlueButton>

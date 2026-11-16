@@ -1,8 +1,9 @@
 import CheckBox from '@mui/icons-material/CheckBox'
 import CheckBoxOutlineBlank from '@mui/icons-material/CheckBoxOutlineBlank'
+import CloseIcon from '@mui/icons-material/Close'
 import CreateNewFolderOutlined from '@mui/icons-material/CreateNewFolderOutlined'
 import FolderOutlined from '@mui/icons-material/FolderOutlined'
-import { Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip } from '@mui/material'
+import { Chip, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip } from '@mui/material'
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MAX_ATTACHED_FOLDERS } from '../../../shared/fileTools'
@@ -31,6 +32,7 @@ export const AttachFolders = ({
 }) => {
   const { t } = useTranslation()
   const menuId = useId()
+  const buttonId = useId()
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
   const [folders, setFolders] = useState<string[] | null>(null)
   const [failed, setFailed] = useState(false)
@@ -54,6 +56,7 @@ export const AttachFolders = ({
     <>
       <Tooltip title={t('myFiles:attachFolders')} arrow placement="top" describeChild>
         <IconButton
+          id={buttonId}
           aria-label={t('myFiles:attachFolders')}
           aria-haspopup="menu"
           aria-expanded={!!anchor}
@@ -64,7 +67,13 @@ export const AttachFolders = ({
           <CreateNewFolderOutlined />
         </IconButton>
       </Tooltip>
-      <Menu id={menuId} anchorEl={anchor} open={!!anchor && folders !== null} onClose={() => setAnchor(null)}>
+      <Menu
+        id={menuId}
+        anchorEl={anchor}
+        open={!!anchor && folders !== null}
+        onClose={() => setAnchor(null)}
+        slotProps={{ list: { 'aria-labelledby': buttonId } }}
+      >
         {folders?.length === 0 && (
           <MenuItem disabled>
             <ListItemText>{t(failed ? 'myFiles:error' : 'myFiles:noFoldersToAttach')}</ListItemText>
@@ -87,6 +96,14 @@ export const AttachFolders = ({
             </MenuItem>
           )
         })}
+        {/* Selecting a folder keeps the menu open, so touch screen reader users (TalkBack) need an explicit way out */}
+        <Divider />
+        <MenuItem onClick={() => setAnchor(null)} aria-describedby={buttonId} data-testid="attach-folders-close">
+          <ListItemIcon aria-hidden>
+            <CloseIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>{t('common:close')}</ListItemText>
+        </MenuItem>
       </Menu>
       {attachedFolders.map((folder) => (
         <Chip

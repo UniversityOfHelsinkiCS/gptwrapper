@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogActions,
   Dialog,
+  IconButton,
   CircularProgress,
   Divider,
   Collapse,
@@ -20,6 +21,7 @@ import Autorenew from '@mui/icons-material/Autorenew'
 import CloudUpload from '@mui/icons-material/CloudUpload'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import FindInPage from '@mui/icons-material/FindInPage'
+import CloseIcon from '@mui/icons-material/Close'
 import Bookmarks from '@mui/icons-material/Bookmarks'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { groupBy, orderBy } from 'lodash'
@@ -282,8 +284,19 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
           >
             {t('rag:testRetrievalButton')}
           </Button>
-          <Dialog open={searchOpen} onClose={() => setSearchOpen(false)} fullWidth maxWidth="lg">
-            <DialogTitle>{t('rag:testRetrieval', { name: ragDetails.metadata.name })}</DialogTitle>
+          <Dialog open={searchOpen} onClose={() => setSearchOpen(false)} fullWidth maxWidth="lg" aria-labelledby="rag-search-title">
+            <DialogTitle id="rag-search-title" sx={{ pr: 7 }}>
+              {t('rag:testRetrieval', { name: ragDetails.metadata.name })}
+            </DialogTitle>
+            <IconButton
+              onClick={() => setSearchOpen(false)}
+              aria-label={t('common:close')}
+              aria-describedby="rag-search-title"
+              data-testid="rag-search-close"
+              sx={{ position: 'absolute', top: 12, right: 12 }}
+            >
+              <CloseIcon />
+            </IconButton>
             <DialogContent>
               <Search ragIndex={ragDetails} />
             </DialogContent>

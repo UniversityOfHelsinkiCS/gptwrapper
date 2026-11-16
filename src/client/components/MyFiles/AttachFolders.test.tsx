@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import i18next from 'i18next'
 import { useState } from 'react'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
@@ -62,7 +62,15 @@ describe('AttachFolders', () => {
   test('says when there are no folders to attach', async () => {
     renderAttach(createMemoryStore())
     fireEvent.click(screen.getByRole('button', { name: 'Attach folders from My files' }))
-    expect((await screen.findByRole('menuitem')).textContent).toBe('Add folders in My files first.')
+    const items = await screen.findAllByRole('menuitem')
+    expect(items.map((item) => item.textContent)).toEqual(['Add folders in My files first.', 'Close'])
+  })
+
+  test('closes the menu from its Close item, as selecting folders keeps it open', async () => {
+    renderAttach(await storeWithFolders())
+    fireEvent.click(screen.getByRole('button', { name: 'Attach folders from My files' }))
+    fireEvent.click(await screen.findByTestId('attach-folders-close'))
+    await waitFor(() => expect(screen.queryByRole('menu')).toBeNull())
   })
 })
 
