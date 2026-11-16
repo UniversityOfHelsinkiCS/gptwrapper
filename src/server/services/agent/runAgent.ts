@@ -388,9 +388,13 @@ const toModelHistory = (chatMessages: RunAgentRequest['options']['chatMessages']
     return message
   })
 
-/** Azure refuses some prompts with `code: 'content_filter'`; the explanation is shown as the answer. */
+/**
+ * Azure refuses some prompts with `code: 'content_filter'`; the explanation is shown as the answer. Errors from a
+ * model call inside middleware (`wrapModelCall`) arrive wrapped in a `MiddlewareError`, so follow the `cause` chain.
+ */
 const getContentFilterMessage = (error: unknown): string | null => {
-  if (!(error instanceof Error) || !('code' in error) || error.code !== 'content_filter') return null
+  if (!(error instanceof Error)) return null
+  if (!('code' in error) || error.code !== 'content_filter') return getContentFilterMessage(error.cause)
   const innerError = 'error' in error ? (error.error as { message?: string } | undefined) : undefined
   return innerError?.message ?? 'The response was not generated due to the prompt triggering content filters. No further details available.'
 }
