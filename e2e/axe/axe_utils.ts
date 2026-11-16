@@ -14,7 +14,24 @@ const NAMED_ROLE_SELECTOR =
 // writeAxeReport can write a single report. Running the project multi-worker would split it.
 const findings: Finding[] = []
 
+// Colors read mid-transition (a dialog fading in, a button going from disabled to enabled)
+// are blends of the start and end values and fail color-contrast at random. Let every
+// running CSS transition and animation settle first. Infinite ones (spinners) never finish,
+// so only finite ones are awaited.
+async function waitForAnimations(page: Page) {
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((animation) => animation.effect?.getComputedTiming().iterations !== Infinity)
+        .map((animation) => animation.finished.catch(() => undefined)),
+    ),
+  )
+}
+
 export async function scan(page: Page, state: string) {
+  await waitForAnimations(page)
+
   const builder = new AxeBuilder({ page }).options({
     runOnly: { type: 'tag', values: AXE_CONFIG.wcagTags },
     rules: Object.fromEntries(AXE_CONFIG.extraRules.map((id) => [id, { enabled: true }])),
