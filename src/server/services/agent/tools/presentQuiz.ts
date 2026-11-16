@@ -25,7 +25,7 @@ export const presentQuiz: PlainToolModule = {
   name: PRESENT_QUIZ,
   kind: 'tool',
   executor: 'server',
-  stage: 'experimental',
+  stage: 'stable',
   promptOption: { labelKey: 'prompt:toolPresentQuizLabel', descriptionKey: 'prompt:toolPresentQuizDescription' },
   returnDirect: true,
   instructions: [

@@ -24,16 +24,10 @@ const listTools = async () => {
 }
 
 describe('GET /tools', () => {
-  test('lists experimental tools to admins, with the translation keys of their checkbox', async () => {
-    currentUser = { id: 'admin-1', isAdmin: true }
-
+  test('lists stable tools to non-admins, with the translation keys of their checkbox', async () => {
     expect(await listTools()).toEqual([
-      { name: 'present_quiz', stage: 'experimental', labelKey: 'prompt:toolPresentQuizLabel', descriptionKey: 'prompt:toolPresentQuizDescription' },
+      { name: 'present_quiz', stage: 'stable', labelKey: 'prompt:toolPresentQuizLabel', descriptionKey: 'prompt:toolPresentQuizDescription' },
     ])
-  })
-
-  test('does not list experimental tools to others', async () => {
-    expect((await listTools()).map((tool) => tool.name)).not.toContain('present_quiz')
   })
 
   test('never lists mock-only tools or document_search, which comes from the RAG index', async () => {

@@ -290,16 +290,7 @@ describe('tools of a prompt', () => {
     return prompt
   }
 
-  test('a non-admin cannot add an experimental tool', async () => {
-    const response = await create({ tools: [{ name: 'present_quiz' }] })
-
-    expect(response.status).toBe(403)
-    expect(Prompt.create).not.toHaveBeenCalled()
-  })
-
-  test('an admin can add an experimental tool', async () => {
-    currentUser = { id: 'admin-1', isAdmin: true }
-
+  test('a non-admin can add a stable tool', async () => {
     const response = await create({ tools: [{ name: 'present_quiz' }] })
 
     expect(response.status).toBe(201)
@@ -328,16 +319,16 @@ describe('tools of a prompt', () => {
     expect(Prompt.create).not.toHaveBeenCalled()
   })
 
-  test('a non-admin cannot add an experimental tool to an existing prompt', async () => {
+  test('a non-admin can add a stable tool to an existing prompt', async () => {
     const prompt = editablePrompt()
 
     const response = await update('source-1', { tools: [{ name: 'present_quiz' }] })
 
-    expect(response.status).toBe(403)
-    expect(prompt.save).not.toHaveBeenCalled()
+    expect(response.status).toBe(200)
+    expect(prompt.tools).toEqual([{ name: 'present_quiz' }])
   })
 
-  test('a non-admin can keep or remove an experimental tool that an admin added', async () => {
+  test('a non-admin can keep or remove a tool already on the prompt', async () => {
     const prompt = editablePrompt({ tools: [{ name: 'present_quiz' }] })
 
     expect((await update('source-1', { tools: [{ name: 'present_quiz' }] })).status).toBe(200)
@@ -360,10 +351,6 @@ describe('tools of a prompt', () => {
     vi.mocked(Prompt.findByPk).mockResolvedValue(sourcePrompt({ type: 'TEMPLATE', tools: [{ name: 'present_quiz' }, { name: 'removed_tool' }] }))
 
     expect((await copy('source-1', { target: { type: 'PERSONAL' } })).status).toBe(201)
-    expect(vi.mocked(Prompt.create).mock.calls[0][0]).toMatchObject({ tools: [] })
-
-    currentUser = { id: 'admin-1', isAdmin: true }
-    expect((await copy('source-1', { target: { type: 'PERSONAL' } })).status).toBe(201)
-    expect(vi.mocked(Prompt.create).mock.calls[1][0]).toMatchObject({ tools: [{ name: 'present_quiz' }] })
+    expect(vi.mocked(Prompt.create).mock.calls[0][0]).toMatchObject({ tools: [{ name: 'present_quiz' }] })
   })
 })

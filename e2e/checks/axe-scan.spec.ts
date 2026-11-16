@@ -112,7 +112,7 @@ test.describe('axe wcag scan for prompt modal', () => {
 
     await page.getByTestId('create-personal-prompt-button').click()
     await expect(page.getByTestId('prompt-name-input')).toBeVisible()
-    // Admins are offered the experimental quiz tool; check it so the checked state is scanned too
+    // Check the quiz tool so the checked state is scanned too
     const quizTool = page.getByRole('checkbox', { name: /Quizzes/ })
     await quizTool.check()
     await expect(quizTool).toBeChecked()
