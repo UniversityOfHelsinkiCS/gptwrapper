@@ -97,6 +97,19 @@ Where MUI's own focus styling gets in the way, use the helpers in `util/accessib
 - The chat's "Go to latest response" button focuses the newest assistant message (`latestResponseRef` in `ChatV2.tsx`).
 - Use `autoFocus` only where focus is expected to land, such as the first field of a dialog the user just opened.
 
+## Dialogs, popovers and menus: always a visible way out
+
+MUI `Dialog`, `Popover`, `Menu`, `Modal` and temporary `Drawer` are modal: they trap focus, hide the rest of the page with `aria-hidden`, and their invisible backdrop is `aria-hidden` too. Out of the box the only ways to close them are Escape and clicking outside. A touch screen reader (TalkBack, VoiceOver on iOS) has no Escape key and cannot reach the backdrop, so if nothing _inside_ the overlay closes it, the user is stuck.
+
+**Rule: every modal overlay must contain at least one visible control that closes it.**
+
+No separate close control is needed when:
+
+- the overlay is a `Menu` where **every** item closes it and at least one item is always enabled (`DownloadButton`, `ModelSelector`, `GlobalMenu`)
+- the overlay is a MUI `Select`: choosing an option closes it
+- the overlay is a `Drawer` whose content already has a close button (the chat sidebar, the tool results drawer)
+- leaving is deliberately blocked until the user does something, and that something is reachable (the disclaimer, until the terms are accepted)
+
 ## Colour and contrast
 
 WCAG AA requires a contrast ratio of at least 4.5:1 for normal text, and 3:1 for large text (about 24px, or 18.5px bold), icons, borders of inputs and other UI components, and focus indicators. Both themes must meet these on every background the element can sit on.
