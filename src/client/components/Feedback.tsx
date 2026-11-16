@@ -1,11 +1,13 @@
 import { Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, Link, TextField } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { Trans, useTranslation } from 'react-i18next'
 import apiClient from '../util/apiClient'
 import { addJustInTimeFields, useAnalytics } from '../stores/analytics'
 import type { FeedbackPost } from '../../shared/feedback'
 import { enqueueSnackbar } from './common/Snackbar'
+import { useFormError } from './common/accessibility/FormError'
 import { BlueButton, OutlineButtonBlack } from './ChatV2/general/Buttons'
 import { supportEmail } from '@config'
 import { focusIndicatorStyle } from '../util/accessibility'
@@ -34,26 +36,56 @@ export const Feedback: React.FC<{
   const { t } = useTranslation()
   const [feedback, setFeedback] = useState('')
   const [responseWanted, setResponseWanted] = useState(false)
+  const [error, setError] = useFormError()
+  const feedbackInputRef = useRef<HTMLTextAreaElement>(null)
 
   const submitFeedback = useSubmitFeedbackMutation()
 
-  const handleSubmit = async () => {
+  const handleClose = () => {
+    setError(null)
     onClose()
+  }
+
+  const handleSubmit = async () => {
+    setError(null)
+    if (!feedback.trim()) {
+      flushSync(() => setError(t('feedback:empty'), { announce: false }))
+      feedbackInputRef.current?.focus()
+      return
+    }
     try {
       await submitFeedback.mutateAsync({ feedback, responseWanted })
+      setFeedback('')
+      setResponseWanted(false)
+      handleClose()
       enqueueSnackbar(t('feedback:success'), { variant: 'success' })
     } catch (e) {
       console.error('Error submitting feedback:', e)
-      enqueueSnackbar(t('feedback:error'), { variant: 'error' })
+      setError(t('feedback:error'))
     }
   }
 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={open} onClose={handleClose}>
       <DialogTitle>{t('feedback:title')}</DialogTitle>
       <DialogContent>
         <DialogContentText sx={{ mb: 2 }}>{t('feedback:description')}</DialogContentText>
-        <TextField label={t('feedback:message')} multiline rows={4} fullWidth value={feedback} onChange={(e) => setFeedback(e.target.value)} />
+        <TextField
+          label={t('feedback:message')}
+          multiline
+          rows={4}
+          fullWidth
+          required
+          inputRef={feedbackInputRef}
+          value={feedback}
+          onChange={(e) => {
+            setFeedback(e.target.value)
+
+            if (error === t('feedback:empty')) setError(null)
+          }}
+          error={!!error}
+          helperText={error}
+        />
         <FormControlLabel
           control={
             <Checkbox
@@ -84,8 +116,10 @@ export const Feedback: React.FC<{
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <OutlineButtonBlack onClick={onClose}>{t('feedback:cancel')}</OutlineButtonBlack>
-        <BlueButton onClick={handleSubmit}>{t('feedback:submit')}</BlueButton>
+        <OutlineButtonBlack onClick={handleClose}>{t('feedback:cancel')}</OutlineButtonBlack>
+        <BlueButton onClick={handleSubmit} disabled={submitFeedback.isPending}>
+          {t('feedback:submit')}
+        </BlueButton>
       </DialogActions>
     </Dialog>
   )

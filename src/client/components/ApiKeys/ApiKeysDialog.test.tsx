@@ -136,7 +136,8 @@ describe('ApiKeysDialog', () => {
 
     fireEvent.change(within(dialog).getByLabelText('Key name'), { target: { value: 'My script' } })
     fireEvent.click(within(dialog).getByRole('button', { name: 'Create new key' }))
-    await waitFor(() => expect(enqueueSnackbar).toHaveBeenCalledWith(en.apiKeys.limitReached, { variant: 'error' }))
+    await waitFor(() => expect(within(dialog).getByText(en.apiKeys.limitReached)).toBeTruthy())
+    expect(enqueueSnackbar).not.toHaveBeenCalledWith(en.apiKeys.limitReached, expect.anything())
     expect(within(dialog).queryByTestId('created-api-key')).toBeNull()
   })
 

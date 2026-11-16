@@ -686,7 +686,7 @@
     "openDiscussions": "Show student discussions",
     "saveDiscussions": "Set course \"{{course}}\" as a research course. Discussions will be saved.",
     "unsaveDiscussions": "Remove course \"{{course}}\" from research courses. Discussions will not be saved.",
-    "invalidActivityPeriod": "Saving failed: the end date cannot be before the start date."
+    "invalidActivityPeriod": "The end date cannot be before the start date."
   },
   "prompt": {
     "createNew": "Create new prompt",
@@ -756,6 +756,7 @@
     "creatorName": "Creator: {{firstNames}} {{lastName}}",
     "creatorHidden": "Hidden from other users",
     "tooShort": "Name must be at least 3 characters long",
+    "nameTaken": "A prompt with this name already exists",
     "textTooLong": "Text is too long. Maximum length is {{max}} characters",
     "publish": "Publish",
     "publishedHelp": "A draft is only visible to course responsibles. A published prompt is also visible to students.",
@@ -775,8 +776,9 @@
     "giveFeedback": "Give feedback",
     "success": "Feedback sent, thank you!",
     "error": "Sending feedback failed",
+    "empty": "The feedback is empty. Write your feedback before sending.",
     "title": "Give feedback about CurreChat to the developers",
-    "message": "Write your feedback...",
+    "message": "Write your feedback",
     "cancel": "Cancel",
     "submit": "Send",
     "description": "Noticed something we should improve? Or have a feature suggestion? Tell us about it below. Note that the feedback is not anonymous. You can also ask for a reply from the developers.",
@@ -952,6 +954,8 @@
     "updated": "Prompt saved",
     "deleted": "Prompt deleted",
     "error": "Something went wrong",
+    "createFailed": "Creating the prompt failed",
+    "saveFailed": "Saving the prompt failed",
     "galleryNav": "University prompts",
     "galleryHelp": "Prompts curated by the university.",
     "sectionReady": "Ready to use",
@@ -1082,7 +1086,9 @@
     "scrollableFormula": "Formula",
     "closedCourse": "Closed course",
     "activeCourse": "Active course",
-    "expiredCourse": "Ended course"
+    "expiredCourse": "Ended course",
+    "savingFailed": "Saving failed: {{- error}}",
+    "savingFailedFixFields": "Saving failed. Correct the invalid field."
   },
   "myFiles": {
     "title": "My files",

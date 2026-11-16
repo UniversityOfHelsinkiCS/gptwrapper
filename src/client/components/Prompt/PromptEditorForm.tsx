@@ -56,7 +56,7 @@ const promptTextLimitProps = (text: string) => ({
 })
 
 const BasicInfoSection = () => {
-  const { form, setForm, type } = usePromptEditorForm()
+  const { form, setForm, type, nameTaken } = usePromptEditorForm()
   const { t } = useTranslation()
   const { user } = useCurrentUser()
   const { courseId } = useParams()
@@ -102,8 +102,8 @@ const BasicInfoSection = () => {
           value={form.name}
           onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
           fullWidth
-          error={form.name.length < 3}
-          helperText={form.name.length < 3 ? t('prompt:tooShort') : ''}
+          error={form.name.length < 3 || !!nameTaken}
+          helperText={form.name.length < 3 ? t('prompt:tooShort') : nameTaken ? t('prompt:nameTaken') : ''}
         />
       </Box>
       <Box>
@@ -123,6 +123,7 @@ const BasicInfoSection = () => {
           label={t('prompt:promptDescription')}
           value={form.userInstructions}
           onChange={(e) => setForm((prev) => ({ ...prev, userInstructions: e.target.value }))}
+          {...promptTextLimitProps(form.userInstructions)}
           fullWidth
           multiline
           minRows={type === 'PERSONAL' ? 1 : 4}

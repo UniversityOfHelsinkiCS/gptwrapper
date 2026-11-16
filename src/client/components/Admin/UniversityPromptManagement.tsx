@@ -33,6 +33,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import UndoIcon from '@mui/icons-material/Undo'
 import { useTranslation } from 'react-i18next'
 import { enqueueSnackbar } from '../common/Snackbar'
+import { FormError, useFormError } from '../common/accessibility/FormError'
 import type { UniversityPromptBody, UniversityPromptType } from '@shared/prompt'
 import { PromptEditorFormContext } from '../Prompt/context'
 import { PromptEditorForm } from '../Prompt/PromptEditorForm'
@@ -206,6 +207,8 @@ const UniversityPromptDialog = ({ open, onClose, group }: { open: boolean; onClo
 
   const clearDraft = () => localStorage.removeItem(cacheKey)
 
+  const [error, setError] = useFormError()
+
   const handleClose = () => {
     if (hasChanges && !window.confirm(t('prompt:unSavedChanges'))) return
 
@@ -214,8 +217,12 @@ const UniversityPromptDialog = ({ open, onClose, group }: { open: boolean; onClo
   }
 
   const handleSubmit = async () => {
+    setError(null)
+    const failed = isEdit && group ? t('uniPrompts:saveFailed') : t('uniPrompts:createFailed')
+    const setFailedError = (reason?: string) => setError(reason ? `${failed}: ${reason}` : failed)
+
     if (enabledLanguages.length === 0) {
-      enqueueSnackbar(t('uniPrompts:atLeastOneLanguage'), { variant: 'error' })
+      setFailedError(t('uniPrompts:atLeastOneLanguage'))
       return
     }
 
@@ -224,7 +231,7 @@ const UniversityPromptDialog = ({ open, onClose, group }: { open: boolean; onClo
     if (incomplete) {
       // Saving anyway would drop the language from the body, and the API reads
       // an omitted language as "delete it".
-      enqueueSnackbar(t('uniPrompts:incompleteLanguage', { language: languageLabels[incomplete] }), { variant: 'error' })
+      setFailedError(t('uniPrompts:incompleteLanguage', { language: languageLabels[incomplete] }))
       setCurrentTab(incomplete)
       return
     }
@@ -264,8 +271,8 @@ const UniversityPromptDialog = ({ open, onClose, group }: { open: boolean; onClo
       }
       clearDraft()
       onClose()
-    } catch (error: any) {
-      enqueueSnackbar(error?.response?.data?.message || error?.message || t('uniPrompts:error'), { variant: 'error' })
+    } catch (err: any) {
+      setFailedError(err?.response?.data?.message || err?.message)
     }
   }
 
@@ -347,6 +354,8 @@ const UniversityPromptDialog = ({ open, onClose, group }: { open: boolean; onClo
               </Stack>
             )}
           </Box>
+
+          <FormError error={error} />
         </Stack>
       </DialogContent>
       <DialogActions>

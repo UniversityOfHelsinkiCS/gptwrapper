@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Box, Typography, Divider, Stack, Tooltip, IconButton } from '@mui/material'
 import CancelIcon from '@mui/icons-material/Cancel'
 import DoneIcon from '@mui/icons-material/Done'
@@ -6,6 +6,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { useTranslation } from 'react-i18next'
 import { format, isValid } from 'date-fns'
 import { enqueueSnackbar } from '../../common/Snackbar'
+import { FormError, focusFirstInvalidField, useFormError } from '../../common/accessibility/FormError'
+import { announceToScreenReader } from '../../common/accessibility/SnackbarAnnouncer'
 import { Course } from '../../../types'
 import { useEditCourseMutation } from '../../../hooks/useCourseMutation'
 import { GreenButton, RedButton } from '../../ChatV2/general/Buttons'
@@ -15,6 +17,8 @@ import DateRangeIcon from '@mui/icons-material/DateRange'
 export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
   const { t } = useTranslation()
   const mutation = useEditCourseMutation(course.courseId as string)
+  const [error, setError] = useFormError()
+  const datesRef = useRef<HTMLDivElement>(null)
 
   const [startDate, setStartDate] = useState(new Date(course.activityPeriod?.startDate || new Date()))
   const [endDate, setEndDate] = useState(new Date(course.activityPeriod?.endDate || new Date()))
@@ -28,9 +32,13 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
     setEndDate(new Date(course.activityPeriod?.endDate || new Date()))
   }, [course.courseId])
 
+  const periodInvalid = startDate > endDate
+
   const handleSubmit = async (tokens?: number, activated?: boolean) => {
-    if (startDate > endDate) {
-      enqueueSnackbar(t('course:invalidActivityPeriod'), { variant: 'error' })
+    setError(null)
+    if (periodInvalid) {
+      if (focusFirstInvalidField(datesRef.current)) announceToScreenReader(t('accessibility:savingFailedFixFields'), { assertive: true })
+      else setError(t('accessibility:savingFailed', { error: t('course:invalidActivityPeriod') }))
       return
     }
     try {
@@ -52,12 +60,13 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
       if (target) {
         target.focus()
       }
-    } catch (error: any) {
-      enqueueSnackbar(error.message, { variant: 'error' })
+    } catch (err: any) {
+      setError(err.message || t('error:unexpected'))
     }
   }
 
   const handleCancel = () => {
+    setError(null)
     setStartDate(new Date(course.activityPeriod?.startDate || new Date()))
     setEndDate(new Date(course.activityPeriod?.endDate || new Date()))
     const target = document.getElementsByName('course-activity-period-editor')[0] as HTMLElement | null
@@ -87,7 +96,7 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
             {t('editActivityPeriod')}
           </Typography>
         </Box>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'flex-start' }}>
+        <Stack ref={datesRef} direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'flex-start' }}>
           <DatePicker
             name="course-activity-period-editor"
             label={t('opensAt')}
@@ -101,7 +110,14 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
             enableAccessibleFieldDOMStructure={false}
             value={endDate}
             onChange={(date) => date && isValid(date) && setEndDate(date)}
-            slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+            slotProps={{
+              textField: {
+                fullWidth: true,
+                size: 'small',
+                error: periodInvalid,
+                helperText: periodInvalid ? t('course:invalidActivityPeriod') : undefined,
+              },
+            }}
             minDate={startDate}
           />
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>
@@ -150,6 +166,8 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
           </GreenButton>
         )}
       </Stack>
+
+      <FormError error={error} />
     </Box>
   )
 }

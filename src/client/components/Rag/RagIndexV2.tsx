@@ -37,6 +37,7 @@ import { useTranslation } from 'react-i18next'
 import { BlueButton, OrangeButton, OutlineButtonBlack } from '../ChatV2/general/Buttons'
 import { InfoBox } from '../common/InfoBox'
 import { enqueueSnackbar } from '../common/Snackbar'
+import { FormError, useFormError } from '../common/accessibility/FormError'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import queryClient from '../../util/queryClient'
 import { IngestionPipelineStageKey } from '@shared/ingestion'
@@ -107,6 +108,8 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
   const [uploadProgress, setUploadProgress] = React.useState(0)
   const [stagedFiles, setStagedFiles] = React.useState<File[]>([])
   const [advancedParsing, setAdvancedParsing] = React.useState<boolean[]>([])
+  // Stays visible next to the upload button (and in the upload dialog) until the next selection
+  const [unsupportedFilesError, setUnsupportedFilesError] = useFormError()
   const { data: ragDetails, isSuccess, refetch } = useRagIndexDetails(indexId)
   const { data: ragFileStatuses, refetch: refetchStatuses } = useRagIndexJobs(indexId, refetchInterval)
   const uploadMutation = useUploadMutation({ index: ragDetails, onUploadProgress: setUploadProgress })
@@ -138,9 +141,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
     const supported = files.filter((f) => isSupportedRagFile(f.name, f.type))
     const unsupported = files.filter((f) => !isSupportedRagFile(f.name, f.type))
 
-    if (unsupported.length > 0) {
-      enqueueSnackbar(t('rag:unsupportedFileType', { files: unsupported.map((f) => f.name).join(', ') }), { variant: 'error' })
-    }
+    setUnsupportedFilesError(unsupported.length > 0 ? t('rag:unsupportedFileType', { files: unsupported.map((f) => f.name).join(', ') }) : null)
     if (supported.length === 0) return
 
     setStagedFiles(supported)
@@ -320,6 +321,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
             {t('rag:deleteCollection')}
           </Button>
         </Box>
+        <FormError error={unsupportedFilesError} sx={{ mt: 2 }} />
         <RagProgressSummaryV2 ragFileStatuses={ragFileStatuses ?? []} ragFiles={ragDetails?.ragFiles ?? []} />
         {ragDetails.ragFiles.length > 0 && (
           <>
@@ -436,6 +438,7 @@ export const RagIndexV2: React.FC<RagIndexV2Props> = ({ indexId, onBack, onSelec
       >
         <DialogTitle>{t('rag:uploadFiles')}</DialogTitle>
         <DialogContent>
+          <FormError error={unsupportedFilesError} sx={{ mb: 2 }} />
           <Collapse in={advancedParsing.some(Boolean)} timeout={220} unmountOnExit>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 2 }}>
               <InfoBox severity="info">{t('rag:advancedParsingInfo')}</InfoBox>

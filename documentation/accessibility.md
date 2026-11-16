@@ -68,6 +68,14 @@ Always import `enqueueSnackbar` from [`components/common/Snackbar.tsx`](../src/c
 - **Focus after close** ([`SnackbarFocus.ts`](../src/client/components/common/accessibility/SnackbarFocus.ts)): closing a snackbar with its focused close button moves focus to the next open snackbar, else to `#chat-input`, else back to where focus was before the notifications.
 - **Labelling**: the notistack container is labelled as a region with the number of open notifications, and error/warning snackbars get a visually hidden severity prefix.
 
+**Do not show form errors only in a snackbar.** A snackbar disappears, so an error the user needs in order to fix their input (validation, a failed save, a rejected file) must also stay visible next to the form (WCAG 2.2.1). Use the helpers in [`common/FormError.tsx`](../src/client/components/common/FormError.tsx):
+
+- `useFormError()` — `[error, setError]`; `setError` also announces the message assertively through the live regions above. When you move focus to the invalid field instead, call `setError(message, { announce: false })`: the field's error is read from its `aria-describedby`, and announcing it too makes screen readers read it twice.
+- A field's error goes to its `error` / `helperText`. On submit, `focusFirstInvalidField(form)` moves focus to the first `aria-invalid` field so its error is read out.
+- An error that belongs to the whole form goes to `<FormError error={error} />` near the submit button. Keep a dialog open when submitting it fails, so the error and the user's input stay.
+
+Snackbars remain fine for confirmations (saved, copied, deleted) and for errors of one-off actions that the user can see failed and retry.
+
 Known gaps (snackbars are not reachable by keyboard while a dialog is open, the virtual cursor does not pause the timer, the oldest snackbar is dropped when a fifth arrives) are listed in the accessibility statement.
 
 ## Focus

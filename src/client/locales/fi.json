@@ -688,7 +688,7 @@
     "openDiscussions": "Näytä opiskelijoiden keskustelut",
     "saveDiscussions": "Aseta kurssi \"{{course}}\" tutkimuskurssiksi. Keskustelut tallennetaan.",
     "unsaveDiscussions": "Poista kurssi \"{{course}}\" tutkimuskurssien joukosta. Keskusteluja ei tallenneta.",
-    "invalidActivityPeriod": "Tallennus epäonnistui: lopetuspäivämäärä ei voi olla ennen aloituspäivämäärää."
+    "invalidActivityPeriod": "Lopetuspäivämäärä ei voi olla ennen aloituspäivämäärää."
   },
   "prompt": {
     "createNew": "Luo uusi alustus",
@@ -757,6 +757,7 @@
     "creatorName": "Alustuksen luoja: {{firstNames}} {{lastName}}",
     "creatorHidden": "Piilotettu muilta käyttäjiltä",
     "tooShort": "Nimen on oltava vähintään 3 merkkiä pitkä",
+    "nameTaken": "Samanniminen alustus on jo olemassa",
     "textTooLong": "Teksti on liian pitkä. Enimmäispituus on {{max}} merkkiä",
     "publish": "Julkaise",
     "publishedHelp": "Luonnos näkyy vain kurssin vastuuhenkilöille. Julkaistu alustus näkyy myös opiskelijoille.",
@@ -776,8 +777,9 @@
     "giveFeedback": "Anna palautetta",
     "success": "Palaute lähetetty, kiitos!",
     "error": "Palautteen lähetys ei onnistunut",
+    "empty": "Palaute on tyhjä. Kirjoita palaute ennen lähettämistä.",
     "title": "Anna palautetta CurreChatistä kehittäjille",
-    "message": "Kirjoita palaute...",
+    "message": "Kirjoita palaute",
     "cancel": "Peru",
     "submit": "Lähetä",
     "description": "Huomasitko jotain parannettavaa? Onko sinulle kehitysehdotus? Kerro siitä tässä. Huom. palaute ei ole anonyymiä. Voit myös halutessasi pyytää vastausta kehittäjiltä.",
@@ -953,6 +955,8 @@
     "updated": "Alustus tallennettu",
     "deleted": "Alustus poistettu",
     "error": "Jokin meni pieleen",
+    "createFailed": "Alustuksen luonti epäonnistui",
+    "saveFailed": "Alustuksen tallennus epäonnistui",
     "galleryNav": "Yliopiston alustukset",
     "galleryHelp": "Yliopiston kokoamia alustuksia.",
     "sectionReady": "Valmiit alustukset",
@@ -1083,7 +1087,9 @@
     "scrollableFormula": "Kaava",
     "closedCourse": "Suljettu kurssi",
     "activeCourse": "Aktiivinen kurssi",
-    "expiredCourse": "Päättynyt kurssi"
+    "expiredCourse": "Päättynyt kurssi",
+    "savingFailed": "Tallennus epäonnistui: {{- error}}",
+    "savingFailedFixFields": "Tallennus epäonnistui. Korjaa virheellinen kenttä."
   },
   "myFiles": {
     "title": "Omat tiedostot",

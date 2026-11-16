@@ -30,6 +30,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { API_KEY_NAME_MAX_LENGTH, MAX_API_KEYS, type ApiKey } from '../../../shared/apiKey'
 import { BlueButton, OutlineButtonBlack, OutlineButtonBlue, RedButton, TextButton } from '../ChatV2/general/Buttons'
 import { enqueueSnackbar } from '../common/Snackbar'
+import { useFormError } from '../common/accessibility/FormError'
 import { isConflictError, useApiKeys, useCreateApiKeyMutation, useDeleteApiKeyMutation } from './api'
 import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
 import { API_KEY_PLACEHOLDER, downloadOpencodeConfig } from './opencodeConfig'
@@ -290,11 +291,13 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
 
   const [deleteTarget, setDeleteTarget] = useState<ApiKey | null>(null)
   const [name, setName] = useState('')
+  const [createError, setCreateError] = useFormError()
 
   const atLimit = (apiKeys?.length ?? 0) >= MAX_API_KEYS
 
   const handleClose = () => {
     createMutation.reset()
+    setCreateError(null)
     setDeleteTarget(null)
     setName('')
     setOpen(false)
@@ -302,12 +305,13 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
 
   const handleCreate = async (event: FormEvent) => {
     event.preventDefault()
+    setCreateError(null)
     try {
       await createMutation.mutateAsync(name.trim())
       setName('')
       announceToScreenReader(t('apiKeys:created'))
     } catch (error) {
-      enqueueSnackbar(t(isConflictError(error) ? 'apiKeys:limitReached' : 'apiKeys:createError'), { variant: 'error' })
+      setCreateError(t(isConflictError(error) ? 'apiKeys:limitReached' : 'apiKeys:createError'))
     }
   }
 
@@ -370,8 +374,12 @@ export const ApiKeysDialog = ({ open, setOpen }: { open: boolean; setOpen: (open
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={atLimit}
-            helperText={atLimit ? t('apiKeys:limitReached') : undefined}
-            slotProps={{ htmlInput: { maxLength: API_KEY_NAME_MAX_LENGTH } }}
+            error={!atLimit && !!createError}
+            helperText={atLimit ? t('apiKeys:limitReached') : createError}
+            slotProps={{
+              htmlInput: { maxLength: API_KEY_NAME_MAX_LENGTH },
+              formHelperText: { sx: { '&.Mui-disabled': { color: 'text.secondary' } } },
+            }}
             sx={{ flex: 1 }}
           />
           <BlueButton type="submit" disabled={createMutation.isPending || atLimit || !name.trim()} startIcon={<Add />}>

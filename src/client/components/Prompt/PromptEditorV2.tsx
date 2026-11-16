@@ -2,7 +2,9 @@ import { Box, CircularProgress, DialogActions, FormControlLabel, Switch, Typogra
 import type { Message } from '@shared/chat'
 import { isPromptDraft, isPromptTextTooLong, PROMPT_TEXT_MAX_LENGTH } from '@shared/prompt'
 import { enqueueSnackbar } from '../common/Snackbar'
-import { useEffect, useId, useState } from 'react'
+import { FormError, focusFirstInvalidField, useFormError } from '../common/accessibility/FormError'
+import { useEffect, useId, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import useCourse from '../../hooks/useCourse'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
@@ -32,8 +34,12 @@ export const PromptEditorV2 = ({
   const { ragIndices } = useCourseRagIndices(chatInstance?.id, false)
   const { ragIndices: userRagIndices } = useRagIndices()
   const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useFormError()
+
+  const [rejectedNames, setRejectedNames] = useState<string[]>([])
+  const formRef = useRef<HTMLFormElement>(null)
   const publishedLabelId = useId()
-  const { createPromptMutation, editPromptMutation } = usePromptState()
+  const { createPromptMutation, editPromptMutation, myPrompts } = usePromptState()
 
   const ragMessages = [t('prompt:defaultRagMessage'), t('prompt:enforceRagMessage'), t('prompt:unknownRagMessage')]
 
@@ -79,6 +85,9 @@ export const PromptEditorV2 = ({
   const cacheKey = `promptEditorForm:${previewPrompt ? `edit:${previewPrompt.id}` : `new:${type}:${courseId}`}`
   const [form, setForm] = useLocalStorageState<PromptEditorFormState>(cacheKey, initialForm)
 
+  const existingPrompts = type === 'PERSONAL' ? myPrompts : chatInstance?.prompts ?? []
+  const nameTaken = rejectedNames.includes(form.name) || existingPrompts.some((prompt) => prompt.name === form.name && prompt.id !== previewPrompt?.id)
+
   const clearCachedForm = () => {
     localStorage.removeItem(cacheKey)
     setForm(initialForm)
@@ -104,14 +113,16 @@ export const PromptEditorV2 = ({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    setError(null)
 
-    if (!form.name) {
-      enqueueSnackbar(t('prompt:missingPromptName'), { variant: 'error' })
-      return
-    }
+    let validationError: string | null = null
+    if (!form.name) validationError = t('prompt:missingPromptName')
+    else if (nameTaken) validationError = t('prompt:nameTaken')
+    else if (isPromptTextTooLong(form.systemMessage) || isPromptTextTooLong(form.userInstructions))
+      validationError = t('prompt:textTooLong', { max: PROMPT_TEXT_MAX_LENGTH })
 
-    if (isPromptTextTooLong(form.systemMessage) || isPromptTextTooLong(form.userInstructions)) {
-      enqueueSnackbar(t('prompt:textTooLong', { max: PROMPT_TEXT_MAX_LENGTH }), { variant: 'error' })
+    if (validationError) {
+      if (!focusFirstInvalidField(event.currentTarget)) setError(validationError)
       return
     }
 
@@ -159,8 +170,14 @@ export const PromptEditorV2 = ({
         setHasChanges(false)
         onDone(newPrompt ?? undefined)
       }
-    } catch (error: any) {
-      enqueueSnackbar(getApiErrorMessage(error) ?? t('error:unexpected'), { variant: 'error' })
+    } catch (err: any) {
+      if (err?.response?.status === 409) {
+        const formElement = formRef.current
+        flushSync(() => setRejectedNames((prev) => [...prev, name]))
+        focusFirstInvalidField(formElement)
+        return
+      }
+      setError(getApiErrorMessage(err) ?? t('error:unexpected'))
     } finally {
       setLoading(false)
     }
@@ -174,15 +191,18 @@ export const PromptEditorV2 = ({
     ragIndices,
     userRagIndices,
     courseId,
+    nameTaken,
   }
 
   return (
     <PromptEditorFormContext.Provider value={context}>
       <Box sx={{ flex: 1, overflow: 'auto' }}>
-        <form onSubmit={handleSubmit}>
+        <form ref={formRef} onSubmit={handleSubmit}>
           <Box sx={{ py: 0 }}>
             <PromptEditorForm />
           </Box>
+
+          <FormError error={error} sx={{ mt: 2 }} />
 
           <DialogActions sx={{ flexWrap: 'wrap', gap: 2 }}>
             {type === 'CHAT_INSTANCE' && (

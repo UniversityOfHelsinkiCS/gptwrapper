@@ -654,7 +654,7 @@
     "openDiscussions": "Visa studerandenas diskussioner",
     "saveDiscussions": "Sätt kursen \"{{course}}\" som en forskningskurs. Diskussioner kommer att sparas.",
     "unsaveDiscussions": "Ta bort kursen \"{{course}}\" från forskningskurser. Diskussioner kommer inte att sparas.",
-    "invalidActivityPeriod": "Det gick inte att spara: slutdatumet kan inte vara tidigare än startdatumet."
+    "invalidActivityPeriod": "Slutdatumet kan inte vara tidigare än startdatumet."
   },
   "prompt": {
     "createNew": "Skapa ny prompt",
@@ -724,6 +724,7 @@
     "creatorName": "Skapare: {{firstNames}} {{lastName}}",
     "creatorHidden": "Dold för andra användare",
     "tooShort": "Namnet måste vara minst 3 tecken långt",
+    "nameTaken": "En prompt med detta namn finns redan",
     "textTooLong": "Texten är för lång. Maxlängden är {{max}} tecken",
     "publish": "Publicera",
     "publishedHelp": "Ett utkast syns endast för kursens ansvariga. En publicerad prompt syns även för studenter.",
@@ -742,10 +743,11 @@
   "feedback": {
     "success": "Feedback skickad, tack!",
     "error": "Det gick inte att skicka feedback",
+    "empty": "Feedbacken är tom. Skriv din feedback innan du skickar den.",
     "giveFeedback": "Ge feedback",
     "title": "Ge feedback om CurreChat till utvecklarna",
     "description": "Har du problem? Eller har du ett förslag på en funktion? Berätta om det nedan. Observera att feedbacken inte är anonym. Du kan också be om ett svar från utvecklarna.",
-    "message": "Skriv din feedback...",
+    "message": "Skriv din feedback",
     "responseWanted": "Jag vill få ett svar på min feedback",
     "cancel": "Avboka",
     "submit": "Skicka till",
@@ -928,6 +930,8 @@
     "updated": "Prompten sparades",
     "deleted": "Prompten raderades",
     "error": "Något gick fel",
+    "createFailed": "Det gick inte att skapa prompten",
+    "saveFailed": "Det gick inte att spara prompten",
     "galleryNav": "Universitetets prompter",
     "galleryHelp": "Sammanställda av universitetet.",
     "sectionReady": "Färdiga att använda",
@@ -1058,7 +1062,9 @@
     "scrollableFormula": "Formel",
     "closedCourse": "Stängd kurs",
     "activeCourse": "Aktiv kurs",
-    "expiredCourse": "Avslutad kurs"
+    "expiredCourse": "Avslutad kurs",
+    "savingFailed": "Det gick inte att spara: {{- error}}",
+    "savingFailedFixFields": "Det gick inte att spara. Korrigera det ogiltiga fältet."
   },
   "myFiles": {
     "title": "Mina filer",

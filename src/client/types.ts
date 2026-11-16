@@ -89,6 +89,7 @@ export type PromptEditorFormContextValue = {
   ragIndices?: { id: number; metadata: { name: string } }[]
   userRagIndices?: { id: number; metadata: { name: string } }[]
   courseId: string
+  nameTaken?: boolean
 }
 
 export type PromptEditorContextValue = {
