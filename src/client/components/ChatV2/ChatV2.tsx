@@ -699,7 +699,7 @@ const ChatV2Content = () => {
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Typography variant="body1" fontWeight={600}>
+                  <Typography component="h2" variant="body1" fontWeight={600}>
                     {t('course:isSavedNotOptOut')}
                   </Typography>
                 </Box>
