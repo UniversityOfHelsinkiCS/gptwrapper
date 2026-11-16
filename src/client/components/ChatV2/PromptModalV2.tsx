@@ -31,6 +31,7 @@ import AddIcon from '@mui/icons-material/Add'
 import { isPromptDraft } from '@shared/prompt'
 import PersonIcon from '@mui/icons-material/Person'
 import FilterListIcon from '@mui/icons-material/FilterList'
+import CloseIcon from '@mui/icons-material/Close'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined'
 import PromptPreview from './PromptPreview.tsx'
@@ -558,13 +559,24 @@ const PromptModalV2 = () => {
                   }}
                 >
                   <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', minWidth: 260, mb: 1 }}>
-                    <Typography
-                      id="course-filter-title"
-                      component="span"
-                      sx={{ display: 'block', fontSize: '0.725rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.secondary' }}
-                    >
-                      {t('settings:filterCourses')}
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Typography
+                        id="course-filter-title"
+                        component="span"
+                        sx={{ display: 'block', fontSize: '0.725rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.secondary' }}
+                      >
+                        {t('settings:filterCourses')}
+                      </Typography>
+                      <IconButton
+                        size="small"
+                        onClick={() => setFilterAnchor(null)}
+                        aria-label={t('common:close')}
+                        aria-describedby="course-filter-title"
+                        data-testid="course-filter-close"
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
                     {(user?.isAdmin || user?.isEmployee) && (
                       <>
                         <FormControlLabel
