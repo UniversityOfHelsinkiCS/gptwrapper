@@ -94,7 +94,7 @@ flowchart LR
     Config --> Embedder
     Embedder -->|HTTP + Token Header| OllamaEmbed
     OllamaEmbed --> Vectors[1024-dim Vectors]
-    Vectors --> Redis[(Redis Vector Store)]
+    Vectors --> VectorDB[(PostgreSQL + pgvector)]
 ```
 
 ### Embedder Configuration
@@ -118,31 +118,25 @@ graph LR
 ```mermaid
 flowchart TB
     subgraph "RAG Search Flow"
-        Query[User Query]
-        Transform[Query Transformer]
+        Query[Search Query]
 
         subgraph Retrievers
             Vector[Vector Search<br/>weight: 0.4]
-            Exact[Exact FT Search<br/>weight: 1.0]
-            Substring[Substring FT Search<br/>weight: 0.6]
+            Phrase[Exact Phrase FT Search<br/>weight: 1.0]
             AndFT[AND FT Search<br/>weight: 0.5]
             OrFT[OR FT Search<br/>weight: 0.4]
         end
 
-        Ensemble[Ensemble Retriever]
-        Curator[Document Curator]
-        Results[Ranked Results]
+        Ensemble[Ensemble Retriever<br/>weighted reciprocal rank fusion]
+        Results[Top 8 Chunks]
     end
 
-    Query --> Transform
-    Transform --> |Multiple Queries| Retrievers
+    Query --> Retrievers
     Vector --> Ensemble
-    Exact --> Ensemble
-    Substring --> Ensemble
+    Phrase --> Ensemble
     AndFT --> Ensemble
     OrFT --> Ensemble
-    Ensemble --> Curator
-    Curator --> Results
+    Ensemble --> Results
 ```
 
 ### RAG Ingestion Pipeline
@@ -155,7 +149,7 @@ sequenceDiagram
     participant PDFJob as PDF Parsing Jobs
     participant Splitter as Text Splitter
     participant Embedder as Embedder
-    participant VectorStore as RedisVectorStore
+    participant VectorStore as RagVectorStore
 
     Upload->>FileStore: Store file in S3
     Upload->>Ingestion: Start ingestion
@@ -189,16 +183,16 @@ flowchart LR
     subgraph "Search Service"
         Search[search function]
         Retrievers[Multiple Retrievers]
-        Curator[Curator - LLM Reranking]
     end
 
     Chat -->|Tool Call| Tool
     Tool -->|SearchSchema| Search
     Search --> Retrievers
-    Retrievers --> Curator
-    Curator -->|Ranked Chunks| Tool
+    Retrievers -->|Ranked Chunks| Tool
     Tool -->|content_and_artifact| Chat
 ```
+
+The model gets each chunk under its number and file name; the client gets the file names and short excerpts as the artifact.
 
 ## 4. PDF Parsing Pipeline
 
@@ -284,15 +278,16 @@ flowchart TB
 
 ```mermaid
 erDiagram
-    REDIS_INDEX {
+    DOCUMENTS {
+        UUID id
         TEXT content
-        TEXT content_exact
-        TEXT metadata
-        VECTOR content_vector
+        JSONB metadata
+        VECTOR vector
+        TSVECTOR fts_index
     }
 ```
 
-Note: `content_exact` has NOSTEM and WITHSUFFIXTRIE flags. `content_vector` uses HNSW algorithm with FLOAT32, DIM=1024, COSINE distance.
+Note: one `documents` table in a PostgreSQL database with pgvector holds the chunks of all RAG indices. `metadata.ragIndex` (`ragIndex-<id>`) tells which index a chunk belongs to and has a B-tree expression index. `fts_index` is generated from `content` with the `simple` text search configuration (no stemming, language independent). `vector` uses HNSW with DIM=1024 and cosine distance.
 
 ## 6. Complete Data Flow
 
@@ -309,7 +304,7 @@ flowchart TB
         Dalai[Dalai VLM Worker]
         Chunk[Split into Chunks]
         Embed[Generate Embeddings]
-        Store[Store in Redis]
+        Store[Store in pgvector]
     end
 
     subgraph "Chat Processing"
@@ -319,7 +314,7 @@ flowchart TB
         ToolCall[RAG Tool Call]
         VectorSearch[Vector Search]
         FTSearch[Full-text Search]
-        Rerank[Curator Reranking]
+        Fuse[Rank Fusion]
         Respond[Stream Response]
     end
 
@@ -337,9 +332,9 @@ flowchart TB
     Stream -->|Tool Call| ToolCall
     ToolCall --> VectorSearch
     ToolCall --> FTSearch
-    VectorSearch --> Rerank
-    FTSearch --> Rerank
-    Rerank --> Stream
+    VectorSearch --> Fuse
+    FTSearch --> Fuse
+    Fuse --> Stream
     Stream --> Respond
 ```
 
@@ -351,7 +346,8 @@ flowchart TB
 | Laama/Ollama   | `LAAMA_API_URL`, `LAAMA_API_TOKEN`      | Embeddings               |
 | Embedder Model | `OLLAMA_EMBEDDER_MODEL`                 | Embedding model name     |
 | S3 Storage     | `S3_HOST`, `S3_BUCKET`, `S3_ACCESS_KEY` | Document storage         |
-| Redis          | `REDIS_HOST`, `REDIS_PORT`              | Vector store & job queue |
+| Redis          | `REDIS_HOST`, `REDIS_PORT`              | Cache & search results   |
+| Vector DB      | `VECTORDB_HOST`, `VECTORDB_DATABASE`    | Chunks, vectors & FTS    |
 | BullMQ Redis   | `BMQ_REDIS_HOST`, `BMQ_REDIS_PORT`      | Job queue connection     |
 | Dalai VLM      | `VLM_URL`, `MODEL`, `PROVIDER`          | Vision language model    |
 
@@ -374,7 +370,7 @@ src/server/
 │   │   ├── ingestion.ts    # Document ingestion
 │   │   ├── search.ts       # Search orchestration
 │   │   ├── retrievers.ts   # Various retriever types
-│   │   └── vectorStore.ts  # Redis vector store
+│   │   └── vectorStore.ts  # PostgreSQL + pgvector store
 │   └── jobs/
 │       └── pdfParsing.job.ts  # PDF job submission
 

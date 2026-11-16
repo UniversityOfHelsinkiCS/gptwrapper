@@ -89,8 +89,9 @@ CurreChat uses snowflake-arctic-embed2, run on the University's servers.
 
 ### Database
 
-The processed chunks alongside their semantic vectors are stored in a Redis database, running on the University's servers. 
-A full-text-search index is created over the text content of the chunks, and a semantic vector index is created over the vectors of the chunks. 
+The processed chunks alongside their semantic vectors are stored in a PostgreSQL database with the pgvector extension, running on the University's servers.
+All collections share one table; each chunk carries the id of its collection, which is indexed.
+A full-text-search index is created over the text content of the chunks, and a semantic vector index (HNSW) is created over the vectors of the chunks.
 
 ## Retrieval
 
@@ -104,8 +105,8 @@ In the chat context, instead of answering directly to the user the LLM may initi
 ```js
 {
    toolName: 'document_search',
-   description: `Search documents in the materials (titled '${ragIndex.metadata.name}'). 
-      Prefer ${ragIndex.metadata.language}, which is the language used in the documents. 
+   description: `Search documents in the materials (titled '${ragIndex.metadata.name}').
+      The materials are mainly in ${ragIndex.metadata.language}: prefer it in the query.
       If multiple queries are needed, call this tool multiple times, once for each query.`,
    schema: {
       query: 'The query to search for'
@@ -118,42 +119,33 @@ The Prompt in use and the name of the Source Material Collection have an effect 
 to make those descriptive of the materials and steer the LLM into making good queries.
 
 Once the tool call is initiated, the search system runs and returns some chunks from the Source Material Collection as results. These are added to the context of the chat.
+Each chunk is given to the LLM under a running number and the name of the file it is from, so that the LLM can tell which files its answer is based on.
+If nothing is found, the LLM is told so.
 
 ### Search
 
 To perform the search to retrieve the result, a hybrid search is used. 
 The search dataset contains the chunks of the Source Material Collection.
 
-A hybrid search over the dataset is performed over the dataset using several retrieval methods in parallel:
+A hybrid search over the dataset is performed using several retrieval methods in parallel:
 
 1. Semantic similarity search using semantic vectors. An embedding vector is created from the query and cosine-similarity is used to return the most similar chunks.
-2. Keyword search using several search queries:
-    - Exact match
-    - Substring match
-    - AND of each query word occuring
-    - OR of each query word occuring
+2. Keyword search using three search queries:
+    - Exact phrase: the query words next to each other in the same order
+    - AND: every query word occurs in the chunk
+    - OR: at least one query word occurs in the chunk
 
-For keyword search, stemming (reduction to base word form) and stop-word removal are used,
-but they require the information about the language of the Source Material Collection. 
-**Multilinguality in one collection is not supported.**
+Each keyword search returns its 10 best matches, ranked by how often and how close to each other the query words occur.
 
-The results of all retrievers are merged using weighted reciprocal rank fusion, with exact match having the highest weight.
+The keyword search matches whole words as they are written: no stemming (reduction to base word form) or stop-word removal is done.
+This keeps the search independent of language, so a collection can contain material in several languages.
+The semantic search is what finds a chunk when the query uses a different word form or different words than the material.
 
-The top 15 chunks are selected from the initial retrieval step. 
+The results of all retrievers are merged using weighted reciprocal rank fusion, with the exact phrase match having the highest weight.
+A chunk found by several retrievers ranks higher than a chunk found by one.
 
-Next, an experimental LLM-based _curation_ step is performed: 
-each result chunk with the search query is passed to a one-shot LLM prompt using OpenAI's gpt-4o-mini.
-The LLM is prompted to give a structured output containing score and a flag whether to include or exclude the chunk.
-The excluded chunks are filtered from the output and the remaining chunks are ordered based on the score.
-The curation step is useful to improve precision, 
-although it does carry a risk of excluding relevant chunks and therefore reducing recall. 
-In one example Source Material Collection, the number of resulting chunks are usually reduced from 15 to 2-4 and precision is greatly improved.
-
-> [!NOTE]
-> The retrieval pipeline is similar to a systematic literature review, where first an initial
-> search query is created. Then inclusion and exclusion criteria are applied to the results of the initial query
-> to improve precision. Future work could focus on dynamically generating more sophisticated
-> inclusion/exclusion criteria for the curation step.
+The top 8 chunks are returned to the LLM, which itself judges which of them are relevant to the question.
+There is no separate LLM-based filtering step between the search and the chat LLM.
 
 ## RAG performance
 
