@@ -30,13 +30,27 @@ export const toDocumentSearchResult = (documents: RagChunk[]): DocumentSearchRes
   files: documents.map((doc) => ({ fileName: doc.metadata.ragFileName, score: doc.score, excerpt: excerpt(doc.content) })),
 })
 
+/** The search results as the model reads them: each chunk under its number and the name of the file it is from. */
+export const formatSearchResults = (query: string, documents: RagChunk[]): string =>
+  documents.length === 0
+    ? `No results found for ${JSON.stringify(query)}.`
+    : documents.map((doc, i) => `[${i + 1}] ${doc.metadata.ragFileName}\n${doc.content}`).join('\n\n')
+
+/** The materials can be in several languages; the language of the collection is only a hint for the query. */
+const describeSearch = (ragIndex: RagIndex) =>
+  [
+    `Search documents in the materials (titled '${ragIndex.metadata.name}').`,
+    ...(ragIndex.metadata.language ? [`The materials are mainly in ${ragIndex.metadata.language}: prefer it in the query.`] : []),
+    'If multiple queries are needed, call this tool multiple times, once for each query.',
+  ].join(' ')
+
 const schema = z.object({
-  query: z.string().describe('the query to search for'),
+  query: z.string().min(1).max(2000).describe('the query to search for'),
 })
 
 /**
- * RAG search over the prompt's source material. The full chunks go to the model and to `ToolResultStore`
- * (read by the Sources details view); the client gets file names, scores and short excerpts as the artifact.
+ * RAG search over the prompt's source material. The full chunks go to the model (`formatSearchResults`) and to
+ * `ToolResultStore` (read by the Sources details view); the client gets file names and short excerpts as the artifact.
  */
 export const documentSearch: PlainToolModule<DocumentSearchConfig> = {
   name: DOCUMENT_SEARCH,
@@ -46,7 +60,9 @@ export const documentSearch: PlainToolModule<DocumentSearchConfig> = {
   maturity: 'stable',
   instructions:
     'Use document_search to look up the course source material when the question may be answered by it. ' +
-    'Base your answer on the search results, and say so when they do not cover the question instead of guessing.',
+    'Each result starts with its number and the name of the file it is from. ' +
+    'Base your answer on the search results and name the files you used. ' +
+    'Say so when the results do not cover the question instead of guessing; a search with other words may still find it.',
 
   create: ({ user, model, config: { ragIndex } }) =>
     tool(
@@ -58,7 +74,7 @@ export const documentSearch: PlainToolModule<DocumentSearchConfig> = {
         try {
           const { results: documents } = isMockModel(model)
             ? await mockSearch(ragIndex, SearchSchema.parse({ query }))
-            : await search(ragIndex, SearchSchema.parse({ query, curate: true }))
+            : await search(ragIndex, SearchSchema.parse({ query }))
 
           const callId = runtime.toolCall?.id
           if (callId) {
@@ -66,7 +82,7 @@ export const documentSearch: PlainToolModule<DocumentSearchConfig> = {
           }
           logResult('success')
 
-          return [documents.map((doc) => doc.content).join('\n\n'), toDocumentSearchResult(documents)]
+          return [formatSearchResults(query, documents), toDocumentSearchResult(documents)]
         } catch (error) {
           logResult('error')
           throw error
@@ -74,7 +90,7 @@ export const documentSearch: PlainToolModule<DocumentSearchConfig> = {
       },
       {
         name: DOCUMENT_SEARCH, // Must match '^[a-zA-Z0-9_\.-]+$' (Azure OpenAI)
-        description: `Search documents in the materials (titled '${ragIndex.metadata.name}'). Prefer ${ragIndex.metadata.language}, which is the language used in the documents. If multiple queries are needed, call this tool multiple times, once for each query.`,
+        description: describeSearch(ragIndex),
         schema,
         responseFormat: 'content_and_artifact',
       },
