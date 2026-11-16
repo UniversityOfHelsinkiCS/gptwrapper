@@ -845,8 +845,6 @@
     "msValue": "{{value}} ms",
     "useSemanticSearch": "Käytä semanttista hakua",
     "useKeywordSearch": "Käytä avainsanahakua",
-    "useReranking": "Käytä uudelleenjärjestystä",
-    "useCuration": "Käytä kuratointia",
     "searchButton": "Hae",
     "timingsTitle": "Ajat",
     "timingEntry": "{{key}}: {{value}} ms",

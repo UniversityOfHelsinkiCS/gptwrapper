@@ -844,8 +844,6 @@
     "msValue": "{{value}} ms",
     "useSemanticSearch": "Use semantic search",
     "useKeywordSearch": "Use keyword search",
-    "useReranking": "Use reranking",
-    "useCuration": "Use curation",
     "searchButton": "Search",
     "timingsTitle": "Timings",
     "timingEntry": "{{key}}: {{value}} ms",

@@ -793,8 +793,6 @@
     "msValue": "{{value}} ms",
     "useSemanticSearch": "Använd semantisk sökning",
     "useKeywordSearch": "Använd nyckelordssökning",
-    "useReranking": "Använd omrankning",
-    "useCuration": "Använd kurering",
     "searchButton": "Sök",
     "timingsTitle": "Tider",
     "timingEntry": "{{key}}: {{value}} ms",

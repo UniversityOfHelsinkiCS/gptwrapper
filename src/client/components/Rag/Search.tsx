@@ -19,8 +19,6 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
   const [searchedQuery, setSearchedQuery] = useState('')
   const [vector, setVector] = useState(true)
   const [ft, setFt] = useState(true)
-  const [rerank, setRerank] = useState(true)
-  const [curate, setCurate] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [showAll, setShowAll] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
@@ -36,12 +34,7 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
     const searchParams: SearchInputParams = {
       query,
       vector,
-      ftExact: ft,
-      ftSubstring: ft,
-      ftAnd: ft,
-      ftOr: ft,
-      rerank,
-      curate,
+      fullText: ft,
     }
     setIsLoading(true)
     setShowAll(false)
@@ -221,32 +214,6 @@ export const Search = ({ ragIndex }: { ragIndex: RagIndexAttributes }) => {
                     />
                   }
                   label={t('rag:useKeywordSearch')}
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      disableRipple
-                      checked={rerank}
-                      onChange={(e) => setRerank(e.target.checked)}
-                      sx={{
-                        ...focusIndicatorStyle(),
-                      }}
-                    />
-                  }
-                  label={t('rag:useReranking')}
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      disableRipple
-                      checked={curate}
-                      onChange={(e) => setCurate(e.target.checked)}
-                      sx={{
-                        ...focusIndicatorStyle(),
-                      }}
-                    />
-                  }
-                  label={t('rag:useCuration')}
                 />
               </Box>
 
