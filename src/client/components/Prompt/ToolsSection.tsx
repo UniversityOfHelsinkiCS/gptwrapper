@@ -70,7 +70,7 @@ export const ToolsSection = () => {
                 label={
                   <Box component="span" display="flex" alignItems="center" gap={1}>
                     <span>{option.label}</span>
-                    {option.maturity === 'experimental' && <Chip size="small" variant="outlined" color="warning" label={t('prompt:toolExperimental')} />}
+                    {option.maturity === 'experimental' && <Chip size="small" variant="outlined" color="error" label={t('prompt:toolExperimental')} />}
                     {option.access === 'admin' && <Chip size="small" variant="outlined" label={t('prompt:toolAdminOnly')} />}
                   </Box>
                 }
