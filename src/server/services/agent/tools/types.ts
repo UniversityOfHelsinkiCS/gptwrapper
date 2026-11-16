@@ -2,7 +2,7 @@ import type { StructuredToolInterface, ToolRunnableConfig } from '@langchain/cor
 import type { ZodType } from 'zod/v4'
 import type { ValidModelName } from '@config'
 import type { SubagentPart, ToolPart } from '@shared/agentChat'
-import type { ToolStage } from '@shared/promptTools'
+import type { ToolAccess, ToolMaturity } from '@shared/promptTools'
 import type { User } from '@shared/user'
 import type { ChatInstance } from '../../../db/models'
 import type { ClientToolCaller } from '../clientTools'
@@ -57,8 +57,10 @@ type ToolModuleBase<Config> = {
   name: string
   /** `client` tools run in the browser (phase 2). */
   executor: 'server' | 'client'
-  /** `experimental` tools can only be added to a prompt by admins. */
-  stage: ToolStage
+  /** `admin` tools can only be added to a prompt by admins. */
+  access: ToolAccess
+  /** `experimental` tools are tagged in the prompt editor. */
+  maturity: ToolMaturity
   /**
    * Set when the tool can be turned on per prompt (`Prompt.tools`): the translation keys of its checkbox in the
    * prompt editor. Tools without it are enabled some other way (`document_search` from the prompt's RAG index,

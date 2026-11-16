@@ -16,13 +16,17 @@ export const PromptToolsSchema = z.array(PromptToolSchema).max(MAX_PROMPT_TOOLS)
 
 export type PromptTool = z.infer<typeof PromptToolSchema>
 
-/** `experimental` tools can only be added to a prompt by admins. */
-export type ToolStage = 'experimental' | 'stable'
+/** Who can add the tool to a prompt: `admin` tools only admins, `everyone` tools anyone who can edit the prompt. */
+export type ToolAccess = 'admin' | 'everyone'
+
+/** How finished the tool is. `experimental` tools are tagged in the prompt editor. Independent of `ToolAccess`. */
+export type ToolMaturity = 'experimental' | 'stable'
 
 /** One item of `GET /api/tools`: a tool the current user can add to a prompt, with the translation keys of its checkbox. */
 export type ToolInfo = {
   name: string
-  stage: ToolStage
+  access: ToolAccess
+  maturity: ToolMaturity
   labelKey: string
   descriptionKey: string
 }

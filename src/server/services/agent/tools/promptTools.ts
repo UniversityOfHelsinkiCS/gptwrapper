@@ -15,14 +15,22 @@ const getPromptToolModule = (name: string): PromptToolModule | undefined => {
   return module?.promptOption ? (module as PromptToolModule) : undefined
 }
 
-/** `experimental` tools can only be added by admins; `stable` ones by anyone who can edit the prompt. */
-const canAddTool = (user: Pick<User, 'isAdmin'>, module: ToolModule) => module.stage === 'stable' || user.isAdmin
+/** `admin` tools can only be added by admins; `everyone` tools by anyone who can edit the prompt. */
+const canAddTool = (user: Pick<User, 'isAdmin'>, module: ToolModule) => module.access === 'everyone' || user.isAdmin
 
 /** The tools the user can add to a prompt, for the checkboxes of the prompt editor (`GET /api/tools`). */
 export const listAddableTools = (user: Pick<User, 'isAdmin'>): ToolInfo[] =>
   listToolModules().flatMap((module) =>
     module.promptOption && canAddTool(user, module)
-      ? [{ name: module.name, stage: module.stage, labelKey: module.promptOption.labelKey, descriptionKey: module.promptOption.descriptionKey }]
+      ? [
+          {
+            name: module.name,
+            access: module.access,
+            maturity: module.maturity,
+            labelKey: module.promptOption.labelKey,
+            descriptionKey: module.promptOption.descriptionKey,
+          },
+        ]
       : [],
   )
 
@@ -38,7 +46,7 @@ const parseConfig = (module: ToolModule, config: unknown): Pick<PromptTool, 'con
 
 /**
  * Checks the tools of a prompt being saved and returns them with parsed configs. Unknown tools (and tools that are
- * not turned on per prompt) and duplicates are 400, an `experimental` tool added by a non-admin is 403.
+ * not turned on per prompt) and duplicates are 400, an `admin` tool added by a non-admin is 403.
  * Tools already on the prompt (`current`) may stay, so a teacher can still edit a prompt an admin added one to.
  */
 export const validatePromptTools = (user: Pick<User, 'isAdmin'>, requested: PromptTool[], current: PromptTool[] = []): PromptTool[] => {
@@ -51,7 +59,7 @@ export const validatePromptTools = (user: Pick<User, 'isAdmin'>, requested: Prom
 
     const alreadyOnPrompt = current.some((tool) => tool.name === name)
     if (!alreadyOnPrompt && !canAddTool(user, module)) {
-      throw ApplicationError.Forbidden(`Only admins can add the experimental tool ${name}`)
+      throw ApplicationError.Forbidden(`Only admins can add the tool ${name}`)
     }
 
     return { name, ...parseConfig(module, config) }

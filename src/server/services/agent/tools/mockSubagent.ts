@@ -25,7 +25,8 @@ export const mockSubagent: SubagentToolModule = {
   name: MOCK_SUBAGENT,
   kind: 'subagent',
   executor: 'server',
-  stage: 'experimental',
+  access: 'admin',
+  maturity: 'experimental',
 
   create: () =>
     tool(

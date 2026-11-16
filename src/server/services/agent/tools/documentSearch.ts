@@ -42,7 +42,8 @@ export const documentSearch: PlainToolModule<DocumentSearchConfig> = {
   name: DOCUMENT_SEARCH,
   kind: 'tool',
   executor: 'server',
-  stage: 'stable',
+  access: 'everyone',
+  maturity: 'stable',
   instructions:
     'Use document_search to look up the course source material when the question may be answered by it. ' +
     'Base your answer on the search results, and say so when they do not cover the question instead of guessing.',
