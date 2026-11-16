@@ -178,6 +178,7 @@
       "balanced": "Stark allroundmodell",
       "fastAndCheap": "Basmodell — passar för enkla uppgifter"
     },
+    "moreModels": "Fler modeller",
     "emptyReminder": "Observera att långa konversationer förbrukar fler tokens. Vi rekommenderar att du rensar konversationen när du byter samtalsämne.",
     "modelDisabled": "Språkmodellen är inte tillgänglig",
     "attachFile": "Bifoga fil",

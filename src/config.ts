@@ -31,7 +31,7 @@ export enum ModelProvider {
 
 export type ModelDescriptionKey = 'chat:modelDescriptions.premium' | 'chat:modelDescriptions.balanced' | 'chat:modelDescriptions.fastAndCheap'
 
-export type ModelTag = 'cheap' | 'fast' | 'premium' | 'free' | 'local' | 'open'
+export type ModelTag = 'free' | 'local' | 'open' | 'more'
 
 /**
  * Reasoning ("thinking") settings of a model. `modelGenerators.ts` translates them per provider: Azure/OpenAI
@@ -75,7 +75,7 @@ export const validModels: ModelConfig[] = [
     outputLimit: 16_384,
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Azure,
-    tags: ['cheap', 'fast', 'free'],
+    tags: ['free'],
     // medium is the deployment's default effort (Azure echoes it when no effort is sent); the config only adds the reasoning summary.
     reasoning: { effort: 'medium', showSummary: true },
   },
@@ -86,7 +86,7 @@ export const validModels: ModelConfig[] = [
     outputLimit: 16_384,
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Azure,
-    tags: ['cheap', 'fast', 'free'],
+    tags: ['free', 'more'],
     // medium is the model's default effort; the config only adds the reasoning summary.
     reasoning: { effort: 'medium', showSummary: true },
   },
@@ -102,46 +102,43 @@ export const validModels: ModelConfig[] = [
     // Toska is a llama.cpp server, which ignores fields it doesn't use, so this is safe even if no reasoning comes back.
     reasoning: { effort: 'medium', showSummary: true },
   },
-  // {
-  //   name: 'gpt-4o-mini',
-  //   displayName: 'GPT-4o mini',
-  //   context: 128_000,
-  //   outputLimit: 16_384,
-  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
-  //   provider: ModelProvider.Azure,
-  // },
-  // {
-  //   name: 'gpt-4o',
-  //   displayName: 'GPT-4o',
-  //   context: 128_000,
-  //   outputLimit: 16_384,
-  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
-  //   provider: ModelProvider.Azure,
-  // },
-  // {
-  //   name: 'gpt-4',
-  //   displayName: 'GPT-4',
-  //   context: 128_000,
-  //   outputLimit: 16_384,
-  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
-  //   provider: ModelProvider.Azure,
-  // },
-  // {
-  //   name: 'gpt-5.1',
-  //   displayName: 'GPT-5.1',
-  //   context: 128_000,
-  //   outputLimit: 16_384,
-  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
-  //   provider: ModelProvider.Azure,
-  // },
-  // {
-  //   name: 'gpt-4.1',
-  //   displayName: 'GPT-4.1',
-  //   context: 128_000,
-  //   outputLimit: 16_384,
-  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
-  //   provider: ModelProvider.Azure,
-  // },
+  {
+    name: 'gpt-4o-mini',
+    displayName: 'GPT-4o mini',
+    context: 128_000,
+    outputLimit: 16_384,
+    descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+    provider: ModelProvider.Azure,
+    tags: ['free', 'more'],
+  },
+  {
+    name: 'gpt-4o',
+    displayName: 'GPT-4o',
+    context: 128_000,
+    outputLimit: 16_384,
+    descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+    provider: ModelProvider.Azure,
+    tags: ['more'],
+  },
+  {
+    name: 'gpt-5.1',
+    displayName: 'GPT-5.1',
+    context: 128_000,
+    outputLimit: 16_384,
+    descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+    provider: ModelProvider.Azure,
+    tags: ['more'],
+    reasoning: { effort: 'medium', showSummary: true },
+  },
+  {
+    name: 'gpt-4.1',
+    displayName: 'GPT-4.1',
+    context: 128_000,
+    outputLimit: 16_384,
+    descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+    provider: ModelProvider.Azure,
+    tags: ['more'],
+  },
   {
     name: 'gpt-5.5',
     displayName: 'GPT-5.5',
@@ -150,7 +147,7 @@ export const validModels: ModelConfig[] = [
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',
-    tags: ['premium'],
+    tags: ['more'],
     // medium is the deployment's default effort (Azure echoes it when no effort is sent); the config only adds the reasoning summary.
     reasoning: { effort: 'medium', showSummary: true },
   },
@@ -162,7 +159,7 @@ export const validModels: ModelConfig[] = [
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',
-    tags: ['premium'],
+    tags: [],
     // medium is the deployment's default effort (Azure echoes it when no effort is sent); the config only adds the reasoning summary.
     reasoning: { effort: 'medium', showSummary: true },
   },

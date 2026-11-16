@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test'
 import { acceptDisclaimer, closeSendPreference, sendChatMessage, useMockModel } from './utils/test-helpers'
 import { adminTest, studentTest, TestByRole } from './fixtures'
-import { FREE_MODEL, validModels } from '../src/config'
+import { validModels } from '../src/config'
 
 // Matrix of tests
 const testMatrix: { role: keyof typeof TestByRole; courses: (string | undefined)[] }[] = [
@@ -119,10 +119,9 @@ testMatrix.forEach((testConfig) => {
         test('Every validModel is available in general chat', async ({ page }) => {
           await page.getByTestId('model-selector').first().click()
 
-          const modelNames = validModels.map((modelConfig) => (modelConfig.name + FREE_MODEL === modelConfig.name ? ' (free)' : ''))
-
-          for (const name of modelNames) {
-            await expect(page.getByText(name, { exact: true }).first()).toBeVisible()
+          await page.getByTestId('more-models-toggle').click()
+          for (const { name } of validModels) {
+            await expect(page.getByTestId(`${name}-option`).first()).toBeVisible()
           }
         })
       }
