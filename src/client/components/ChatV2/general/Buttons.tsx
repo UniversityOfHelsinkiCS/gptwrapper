@@ -90,7 +90,7 @@ export const OutlineButtonBlue = styled(BaseButton)(({ theme }) => ({
     backgroundColor: theme.palette.primary.light + '14',
   },
   ...theme.applyStyles('dark', {
-    borderColor: 'theme.palette.primary.light',
+    borderColor: theme.palette.primary.light,
     color: theme.palette.text.primary,
     '&:hover': {
       backgroundColor: theme.palette.primary.light + '29',
