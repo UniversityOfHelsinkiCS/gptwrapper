@@ -6,7 +6,7 @@ import { FileStore, isBinaryFile, isImage } from './fileStore'
 import logger from 'src/server/util/logger'
 import type { IngestionJobStatus, IngestionPipelineStageKey } from '@shared/ingestion'
 import type { RagFileMetadata } from '@shared/types'
-import { RedisVectorStore } from './vectorStore'
+import { RagVectorStore } from './vectorStore'
 import crypto from 'crypto'
 import { vlmQueue } from '../jobs/vlmQueue'
 import { USE_DALAI_PROCESSING } from 'src/server/util/config'
@@ -48,7 +48,7 @@ export const ingestRagFile = async (ragFile: RagFile, ragIndex: RagIndex) => {
 
   await ragFile.update({ error: null, pipelineStage: 'ingesting' })
 
-  const vectorStore = RedisVectorStore.fromRagIndex(ragIndex)
+  const vectorStore = RagVectorStore.fromRagIndex(ragIndex)
 
   let progress = 2.5
   const update = {

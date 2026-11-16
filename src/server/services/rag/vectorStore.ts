@@ -1,13 +1,11 @@
-import { RAG_LANGUAGES } from '@shared/lang'
 import type { RagIndex } from '../../db/models'
 
-import { PGVectorStore, DistanceStrategy } from "@langchain/pgvector";
-import { PoolConfig } from "pg";
-import { getEmbedder } from './embedder';
-import { VECTORDB_DATABASE, VECTORDB_HOST, VECTORDB_PASSWORD, VECTORDB_PORT, VECTORDB_USER } from 'src/server/util/config';
-import { Document } from "@langchain/core/documents";
-import { randomUUID } from 'node:crypto';
-
+import { PGVectorStore, DistanceStrategy } from '@langchain/pgvector'
+import { PoolConfig } from 'pg'
+import { getEmbedder } from './embedder'
+import { VECTORDB_DATABASE, VECTORDB_HOST, VECTORDB_PASSWORD, VECTORDB_PORT, VECTORDB_USER } from 'src/server/util/config'
+import { Document } from '@langchain/core/documents'
+import { randomUUID } from 'node:crypto'
 
 const config = {
   postgresConnectionOptions: {
@@ -17,27 +15,27 @@ const config = {
     password: VECTORDB_PASSWORD,
     database: VECTORDB_DATABASE,
   } as PoolConfig,
-  tableName: "documents",
+  tableName: 'documents',
   columns: {
-    idColumnName: "id",
-    vectorColumnName: "vector",
-    contentColumnName: "content",
-    metadataColumnName: "metadata",
+    idColumnName: 'id',
+    vectorColumnName: 'vector',
+    contentColumnName: 'content',
+    metadataColumnName: 'metadata',
   },
-  distanceStrategy: "cosine" as DistanceStrategy,
-};
+  distanceStrategy: 'cosine' as DistanceStrategy,
+}
 
 const ollamaEmbedder = getEmbedder()
 
 // This also initializes the table, if it does not exist yet
-const vectorStore = await PGVectorStore.initialize(ollamaEmbedder, config);
+const vectorStore = await PGVectorStore.initialize(ollamaEmbedder, config)
 
 // Improve nn-search with HNSW index
 await vectorStore.createHnswIndex({
   dimensions: 1024,
   m: 16,
   efConstruction: 64,
-});
+})
 
 export const vectorPool = vectorStore.pool
 
@@ -45,48 +43,32 @@ export const vectorPool = vectorStore.pool
 await vectorPool.query(`ALTER TABLE documents ADD COLUMN IF NOT EXISTS fts_index tsvector
     GENERATED ALWAYS AS (to_tsvector('simple', coalesce(content, ''))) STORED;`)
 
+// Every search, delete and re-ingest filters the chunks by the RAG index they belong to (`metadata.ragIndex`).
+await vectorPool.query(`CREATE INDEX IF NOT EXISTS documents_rag_index_idx ON documents ((metadata->>'ragIndex'));`)
 
-export const getRetriever = (ragid) => vectorStore.asRetriever({
-  searchType: "mmr",
-  k: 6,
-  filter: {
-    ragIndex: ragid
-  }
-});
+/** Semantic search over the chunks of one RAG index (`ragIndex-<id>`). */
+export const getRetriever = (indexName: string) =>
+  vectorStore.asRetriever({
+    searchType: 'mmr',
+    k: 6,
+    filter: {
+      ragIndex: indexName,
+    },
+  })
 
-export class CustomPGVectorStore {
-  indexName: string
-  store: PGVectorStore
-  language: typeof RAG_LANGUAGES[number]
-
-  constructor(indexName: string, language: typeof RAG_LANGUAGES[number]) {
-    this.indexName = indexName
-    this.language = language
-    this.store = vectorStore
-  }
+/** The chunks of one RAG index in the shared `documents` table, told apart by `metadata.ragIndex`. */
+export class RagVectorStore {
+  constructor(private indexName: string) {}
 
   static fromRagIndex(ragIndex: RagIndex) {
-    console.log("Asked for", ragIndex)
-    return new CustomPGVectorStore(`ragIndex-${ragIndex.id}`, ragIndex.metadata.language ?? 'English')
-  }
-
-  async createIndex() {
-    console.log("Called stubbed function createIndex")
+    return new RagVectorStore(`ragIndex-${ragIndex.id}`)
   }
 
   async addDocuments(documents: Document[]) {
-    await this.store.addDocuments(documents, { ids: documents.map(_doc => randomUUID())})
+    await vectorStore.addDocuments(documents, { ids: documents.map(() => randomUUID()) })
   }
 
   async deleteAllDocuments() {
-      console.log("Deleted all under", this.indexName)
-      await this.store.delete({ filter: { ragIndex: this.indexName } });
-  }
-
-  async dropIndex() {
-    await this.deleteAllDocuments()
-    console.log("Dropped stub", this.indexName)
+    await vectorStore.delete({ filter: { ragIndex: this.indexName } })
   }
 }
-
-export const RedisVectorStore = CustomPGVectorStore

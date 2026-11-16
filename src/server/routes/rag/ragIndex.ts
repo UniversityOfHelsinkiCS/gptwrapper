@@ -14,7 +14,7 @@ import { S3_BUCKET } from '../../util/config'
 import { s3Client } from '../../util/s3client'
 import { ingestRagFiles } from '../../services/rag/ingestion'
 import { IngestionJobStatus } from '@shared/ingestion'
-import { RedisVectorStore } from '../../services/rag/vectorStore'
+import { RagVectorStore } from '../../services/rag/vectorStore'
 import logger from '../../util/logger'
 import { RagIndexRequest } from './ragIndexMiddleware'
 
@@ -26,7 +26,7 @@ ragIndexRouter.delete('/', async (req, res) => {
 
   await FileStore.deleteRagIndexDocuments(ragIndex)
 
-  await RedisVectorStore.fromRagIndex(ragIndex).dropIndex()
+  await RagVectorStore.fromRagIndex(ragIndex).deleteAllDocuments()
 
   await ragIndex.destroy() // Cascade deletes RagFiles
 
@@ -255,7 +255,7 @@ ragIndexRouter.post('/reset', async (req, res) => {
   const ragIndexRequest = req as unknown as RagIndexRequest
   const { ragIndex } = ragIndexRequest
 
-  const vectorStore = RedisVectorStore.fromRagIndex(ragIndex)
+  const vectorStore = RagVectorStore.fromRagIndex(ragIndex)
 
   await RagFile.update(
     {
@@ -266,8 +266,7 @@ ragIndexRouter.post('/reset', async (req, res) => {
     },
   )
 
-  await vectorStore.dropIndex()
-  await vectorStore.createIndex()
+  await vectorStore.deleteAllDocuments()
 
   // Now we need to re-ingest
   ingestRagFiles(ragIndex).catch((error) => {

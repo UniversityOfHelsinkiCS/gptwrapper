@@ -1,158 +1,95 @@
-import { CallbackManagerForRetrieverRun } from '@langchain/core/callbacks/manager'
-import { Document, DocumentInterface } from '@langchain/core/documents'
+import type { CallbackManagerForRetrieverRun } from '@langchain/core/callbacks/manager'
+import { Document } from '@langchain/core/documents'
 import { BaseRetriever } from '@langchain/core/retrievers'
-import { RediSearchLanguage, SearchReply } from 'redis'
-import { Embeddings } from '@langchain/core/embeddings'
-import { getEmbedder } from './embedder'
-import { transformQuery, TransformQueryOptions } from './queryTransformer'
-import { EnsembleRetriever } from '@langchain/classic/retrievers/ensemble'
+import logger from '../../util/logger'
 import { getRetriever, vectorPool } from './vectorStore'
 
-const normalizeWhitespace = (str: string) => {
-  return str.replace(/\s+/g, ' ').trim();
+/** Most chunks one full-text retriever returns, best first. */
+export const FT_SEARCH_LIMIT = 10
+
+/**
+ * How the words of the query must occur in a chunk: next to each other in the same order, all of them anywhere,
+ * or at least one of them.
+ */
+export type FTSearchMode = 'phrase' | 'and' | 'or'
+
+/**
+ * The Postgres function that turns the query text into a tsquery. `phraseto_tsquery` and `plainto_tsquery` take any
+ * text and read no operators from it; `to_tsquery` gets the syntax built by `toOrQuery`.
+ */
+const TSQUERY_FUNCTIONS: Record<FTSearchMode, string> = {
+  phrase: 'phraseto_tsquery',
+  and: 'plainto_tsquery',
+  or: 'to_tsquery',
 }
 
-const TOKEN_RE = new RegExp(
-  /[,.<>{}[\]"':;!@#$%^&*()\-+=~]/g
-);
+/** The words of a query: runs of letters and digits in any language. Punctuation only separates them. */
+export const queryWords = (query: string): string[] => query.match(/[\p{L}\p{N}]+/gu) ?? []
 
-const removeIllegalCharacters = (str: string) => {
-  return str.replace(TOKEN_RE, '');
+/** `to_tsquery` text matching any word of the query. The words have no punctuation, so they cannot be read as operators. */
+export const toOrQuery = (query: string): string => queryWords(query).join(' | ')
+
+const normalizeWhitespace = (text: string) => text.replace(/\s+/g, ' ').trim()
+
+/** The text given to the mode's tsquery function, '' when the query has nothing to search for. */
+export const toFTQueryText = (mode: FTSearchMode, query: string): string => {
+  if (queryWords(query).length === 0) return ''
+  return mode === 'or' ? toOrQuery(query) : normalizeWhitespace(query)
 }
 
-export const getExactFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `"${q}"`, language, 'exact', highlight)
-export const getSubstringFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => `${removeIllegalCharacters(q)}`, language, 'substring', highlight)
-export const getAndFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => removeIllegalCharacters(q), language, 'and', highlight)
-export const getOrFTSearchRetriever = (indexName: string, language?: RediSearchLanguage, highlight?: boolean) => new FTSearchRetriever(indexName, (q) => q.split(' ').map(word => word.trim()).filter(word => word.length > 0).join(' | '), language, 'or', highlight)
+/**
+ * Full-text search over the chunks of one RAG index, ranked by `ts_rank_cd`. The text search configuration is
+ * `simple` (no stemming or stop words), so that collections can be in any language or several.
+ */
+export const ftSearchSql = (mode: FTSearchMode) => `
+  SELECT d.id, d.content, d.metadata
+  FROM documents d, ${TSQUERY_FUNCTIONS[mode]}('simple', $1::text) query
+  WHERE d.metadata->>'ragIndex' = $2 AND d.fts_index @@ query
+  ORDER BY ts_rank_cd(d.fts_index, query) DESC, d.id
+  LIMIT $3`
 
 class FTSearchRetriever extends BaseRetriever {
-  name?: string
-  indexName: string
-  language?: RediSearchLanguage
-  queryTransform: (query: string) => string
-  highlight?: boolean
+  lc_namespace: string[] = ['currechat', 'services', 'rag', 'retrievers']
 
-  constructor(indexName: string, queryTransform: (query: string) => string, language?: RediSearchLanguage, name?: string, highlight?: boolean) {
+  constructor(
+    private indexName: string,
+    private mode: FTSearchMode,
+  ) {
     super()
-    this.indexName = indexName
-    this.language = language
-    this.queryTransform = queryTransform
-    this.name = name
-    this.highlight = highlight
   }
 
-  async _getRelevantDocuments(query: string, _callbacks?: CallbackManagerForRetrieverRun): Promise<DocumentInterface<Record<string, any>>[]> {
-    const documents = await this.redisQuery(
-      this.queryTransform(normalizeWhitespace(query))
-    )
+  async _getRelevantDocuments(query: string, _callbacks?: CallbackManagerForRetrieverRun): Promise<Document[]> {
+    const queryText = toFTQueryText(this.mode, query)
+    if (!queryText) return []
 
-    return documents.map(
-      (doc) =>
-        new Document({
-          pageContent: doc.value.content as string,
-          metadata: doc.value.metadata as Record<string, any>,
-        }),
-    )
-  }
-
-  async redisQuery(query: string): Promise<SearchReply['documents']> {
     try {
-      const results = await vectorPool.query(`SELECT id, content, metadata FROM documents WHERE fts_index @@ websearch_to_tsquery('simple', $1::text) AND metadata->>'ragIndex' = $2;`, [query, this.indexName])
-
-      if (!results || !results.rows) {
-        console.warn('ft.search did not return documents for query:', query, 'index:', this.indexName)
-        return []
-      }
-
-      const formatted =  results.rows.map((row) => {
-        return {
-          id: row.id,
-          value: {
-            content: row.content,
-            metadata: row.metadata
-          }
-        }
-      })
-
-
-
-      return formatted
+      const { rows } = await vectorPool.query(ftSearchSql(this.mode), [queryText, this.indexName, FT_SEARCH_LIMIT])
+      return rows.map((row) => new Document({ id: row.id, pageContent: row.content, metadata: row.metadata }))
     } catch (error) {
-      console.error(`Error during FT search (${this.name}, '${query}'):`, error)
+      logger.error('Full-text search failed', { mode: this.mode, indexName: this.indexName, query, error })
       return []
     }
   }
-
-  lc_namespace: string[] = ['currechat', 'services', 'rag', 'retrievers']
 }
+
+export const getFTSearchRetriever = (indexName: string, mode: FTSearchMode) => new FTSearchRetriever(indexName, mode)
 
 class VectorSearchRetriever extends BaseRetriever {
-  indexName: string
-  k: number
-  embedder: Embeddings
+  lc_namespace: string[] = ['currechat', 'services', 'rag', 'retrievers']
 
-  constructor(indexName: string, k = 6) {
+  constructor(private indexName: string) {
     super()
-    this.indexName = indexName
-    this.k = k
-    this.embedder = getEmbedder()
   }
 
-  async _getRelevantDocuments(query: string, _callbacks?: CallbackManagerForRetrieverRun): Promise<DocumentInterface<Record<string, any>>[]> {
+  async _getRelevantDocuments(query: string, _callbacks?: CallbackManagerForRetrieverRun): Promise<Document[]> {
     try {
-      const retriever = getRetriever(this.indexName)
-      const docs = await retriever.invoke(query)
-      return docs.map(
-        (doc) =>
-          new Document({
-            pageContent: doc.pageContent as string,
-            metadata: doc.metadata as Record<string, any>,
-          }),
-      )
+      const docs = await getRetriever(this.indexName).invoke(query)
+      return docs.map((doc) => new Document({ id: doc.id, pageContent: doc.pageContent, metadata: doc.metadata }))
     } catch (error) {
-      console.error('Error during vector search:', error)
+      logger.error('Vector search failed', { indexName: this.indexName, query, error })
       return []
     }
   }
-
-  lc_namespace: string[] = ['currechat', 'services', 'rag', 'retrievers']
 }
 
-export const getVectorSearchRetriever = (indexName: string, k: number) => new VectorSearchRetriever(indexName, k)
-
-export const retrieverFrom = (fn: (query: string) => Promise<DocumentInterface<Record<string, any>>[]>) => {
-  return new FunctionRetriever(fn)
-}
-
-class FunctionRetriever extends BaseRetriever {
-  fn: (query: string) => Promise<DocumentInterface<Record<string, any>>[]>
-
-  constructor(fn: (query: string) => Promise<DocumentInterface<Record<string, any>>[]>) {
-    super()
-    this.fn = fn
-  }
-
-  async _getRelevantDocuments(query: string, _callbacks?: CallbackManagerForRetrieverRun): Promise<DocumentInterface<Record<string, any>>[]> {
-    return this.fn(query)
-  }
-
-  lc_namespace: string[] = ['currechat', 'services', 'rag', 'retrievers']
-}
-
-export const getMultiQueryEnsembleRetriever = (baseRetriever: BaseRetriever, timings: Record<string, number>, transformQueryOptions: TransformQueryOptions = {}) => retrieverFrom(async (query: string) => {
-
-  timings.transformQuery = Date.now()
-  const queries = await transformQuery(query, transformQueryOptions)
-  timings.transformQuery = Date.now() - timings.transformQuery
-
-  const ensemble = new EnsembleRetriever({
-    retrievers: queries.map((q) => retrieverFrom((_) => baseRetriever.invoke(q))),
-    weights: queries.map(() => 1.0),
-  })
-
-  timings.search = Date.now()
-  const result = ensemble.invoke('')
-  timings.search = Date.now() - timings.search
-
-  return result
-})
+export const getVectorSearchRetriever = (indexName: string) => new VectorSearchRetriever(indexName)

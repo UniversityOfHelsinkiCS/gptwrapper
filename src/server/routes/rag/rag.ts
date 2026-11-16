@@ -5,7 +5,6 @@ import type { RequestWithUser } from '../../types'
 import { ApplicationError } from '../../util/ApplicationError'
 import ragIndexRouter from './ragIndex'
 import { requireAnyAccess } from '../../services/chatInstances/access'
-import { RedisVectorStore } from 'src/server/services/rag/vectorStore'
 import { ragIndexMiddleware } from './ragIndexMiddleware'
 
 const router = Router()
@@ -85,7 +84,6 @@ router.post('/indicesV2', async (req, res) => {
     .parse(req.body)
 
   const ragIndex = await RagIndex.create({ userId: user.id, metadata: { name, language } })
-  await RedisVectorStore.fromRagIndex(ragIndex).createIndex()
   res.json(ragIndex)
 })
 
