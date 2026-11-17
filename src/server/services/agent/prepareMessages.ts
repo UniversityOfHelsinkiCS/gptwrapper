@@ -1,4 +1,4 @@
-import { DEFAULT_TOKEN_LIMIT, isFreeModel, type ModelConfig, validModels } from '@config'
+import { DEFAULT_TOKEN_LIMIT, inputLimit, isFreeModel, type ModelConfig, validModels } from '@config'
 import type { AiApiWarning, WarningType } from '@shared/aiApi'
 import type { ChatMessage, Message } from '@shared/chat'
 import getEncoding from '../../util/tiktoken'
@@ -51,7 +51,7 @@ export const handleWarnings = (
   }
 
   // Check context limit
-  const contextLimit = modelConfig.context
+  const contextLimit = inputLimit(modelConfig)
 
   if (tokenCount > contextLimit) {
     if (!ignoredWarnings?.includes('contextLimit')) {

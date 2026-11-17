@@ -46,9 +46,10 @@ export type ModelReasoning = {
 export type ModelConfig = {
   name: string
   displayName: string
+  /** Total context window (input + output) as documented by the provider. */
   context: number
   provider: ModelProvider
-  // outputLimit is for opencode
+  /** Max output tokens, reasoning included. Reserved from the context window; also sent to opencode. */
   outputLimit: number
   timeoutOverride?: number
   instructions?: string
@@ -71,8 +72,9 @@ export const validModels: ModelConfig[] = [
   {
     name: 'gpt-6-luna',
     displayName: 'GPT-6 Luna',
-    context: 128_000,
-    outputLimit: 16_384,
+    // Window is 1_050_000, but input over 272k is billed at 2x; 400k - 128k output keeps input at 272k.
+    context: 400_000,
+    outputLimit: 128_000,
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Azure,
     tags: ['free'],
@@ -82,8 +84,8 @@ export const validModels: ModelConfig[] = [
   {
     name: 'gpt-5-mini',
     displayName: 'GPT-5 mini',
-    context: 128_000,
-    outputLimit: 16_384,
+    context: 400_000,
+    outputLimit: 128_000,
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Azure,
     tags: ['free', 'more'],
@@ -93,8 +95,8 @@ export const validModels: ModelConfig[] = [
   {
     name: 'gemma-4-26B-A4B',
     displayName: 'Gemma 4',
-    context: 128_000,
-    outputLimit: 16_384,
+    context: 16_384,
+    outputLimit: 8_192,
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Toska,
     service: 'v1',
@@ -123,8 +125,8 @@ export const validModels: ModelConfig[] = [
   {
     name: 'gpt-5.1',
     displayName: 'GPT-5.1',
-    context: 128_000,
-    outputLimit: 16_384,
+    context: 400_000,
+    outputLimit: 128_000,
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Azure,
     tags: ['more'],
@@ -133,8 +135,8 @@ export const validModels: ModelConfig[] = [
   {
     name: 'gpt-4.1',
     displayName: 'GPT-4.1',
-    context: 128_000,
-    outputLimit: 16_384,
+    context: 1_047_576,
+    outputLimit: 32_768,
     descriptionKey: 'chat:modelDescriptions.fastAndCheap',
     provider: ModelProvider.Azure,
     tags: ['more'],
@@ -142,8 +144,9 @@ export const validModels: ModelConfig[] = [
   {
     name: 'gpt-5.5',
     displayName: 'GPT-5.5',
-    context: 128_000,
-    outputLimit: 16_384,
+    // Window is 1_050_000, but input over 272k is billed at 2x; 400k - 128k output keeps input at 272k.
+    context: 400_000,
+    outputLimit: 128_000,
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',
@@ -154,8 +157,9 @@ export const validModels: ModelConfig[] = [
   {
     name: 'gpt-6.1-sol',
     displayName: 'GPT-6.1 Sol',
-    context: 128_000,
-    outputLimit: 16_384,
+    // Window is 1_050_000, but input over 272k is billed at 2x; 400k - 128k output keeps input at 272k.
+    context: 400_000,
+    outputLimit: 128_000,
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',
@@ -176,7 +180,7 @@ export const validModels: ModelConfig[] = [
     name: 'Mistral-Large-3-1',
     displayName: 'Mistral Large 3',
     context: 128_000,
-    outputLimit: 8_192,
+    outputLimit: 4_096,
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.balanced',
@@ -208,7 +212,7 @@ export const validModels: ModelConfig[] = [
   {
     name: 'mock',
     displayName: 'Mock',
-    context: 1024,
+    context: 2048,
     outputLimit: 1024,
     provider: ModelProvider.Mock,
     tags: [],
@@ -216,6 +220,9 @@ export const validModels: ModelConfig[] = [
     reasoning: { effort: 'low', showSummary: true },
   },
 ] as const
+
+/** Max input tokens: the context window minus the space reserved for output. */
+export const inputLimit = (model: Pick<ModelConfig, 'context' | 'outputLimit'>): number => model.context - model.outputLimit
 
 export const vertexModels = validModels.filter((model) => model.provider === ModelProvider.Vertex)
 

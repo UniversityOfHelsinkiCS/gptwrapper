@@ -1,5 +1,5 @@
 import getEncoding from "src/server/util/tiktoken";
-import { validModels } from "@config";
+import { inputLimit, validModels } from "@config";
 import { Message, readMessageContent } from "@shared/chat";
 
 export const truncateMessages = (modelConfig: typeof validModels[number], messages: Message[]): Message[] => {
@@ -25,7 +25,7 @@ export const truncateMessages = (modelConfig: typeof validModels[number], messag
     const encoded = encoding.encode(content)
     const messageTokenCount = encoded.length
 
-    if (tokenCount + messageTokenCount <= modelConfig.context) {
+    if (tokenCount + messageTokenCount <= inputLimit(modelConfig)) {
       truncatedMessages.unshift(message) // Add to the start since we're iterating backwards
       tokenCount += messageTokenCount
     } else {
