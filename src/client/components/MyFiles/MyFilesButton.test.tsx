@@ -90,6 +90,28 @@ describe('MyFilesButton', () => {
     expect(within(dialog).getByText('a.md').closest('tr')?.getAttribute('data-status')).toBeNull()
   })
 
+  test("shows the student's folders and the default folders in separate sections", async () => {
+    const store = createMemoryStore()
+    await store.write('Thesis/draft.md', 'x')
+    await store.write('Agent notes/profile.md', 'x')
+    renderButton(admin, store)
+    const dialog = await openDialog()
+
+    await pick('my-files-input-files', [new File(['s'], 'single.md')])
+    await waitFor(() => expect(screen.getByTestId('my-files-status').textContent).toContain('New: 1'))
+
+    const own = within(dialog).getByRole('region', { name: 'Your folders' })
+    const defaults = within(dialog).getByRole('region', { name: 'Default folders' })
+    const folderNames = (section: HTMLElement) =>
+      within(section)
+        .getAllByTestId('my-files-folder')
+        .map((item) => item.getAttribute('data-folder'))
+    expect(folderNames(own)).toEqual(['Thesis'])
+    expect(folderNames(defaults)).toEqual(['Files', 'Outputs', 'Agent notes'])
+    expect(within(defaults).getByText('Single files you add')).toBeTruthy()
+    expect(within(defaults).queryByRole('button', { name: /^Sync folder/ })).toBeNull()
+  })
+
   test('refuses uploads into reserved folders', async () => {
     const store = createMemoryStore()
     renderButton(admin, store)
