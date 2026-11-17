@@ -1,4 +1,4 @@
-import React, { useImperativeHandle, useState } from 'react'
+import React, { useEffect, useImperativeHandle, useState } from 'react'
 import { focusVisibleOutline } from '../../theme'
 import Send from '@mui/icons-material/Send'
 import StopIcon from '@mui/icons-material/Stop'
@@ -112,6 +112,16 @@ export const ChatBox = ({
   const textFieldRef = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState<string>('')
 
+  const attachmentChipRef = useRef<HTMLDivElement>(null)
+  const focusAttachment = useRef(false)
+
+  useEffect(() => {
+    if (fileName && focusAttachment.current) {
+      focusAttachment.current = false
+      attachmentChipRef.current?.focus()
+    }
+  }, [fileName])
+
   // A quiz answer can be sent without an explanation
   const acuallyDisabled = disabled || (message.length === 0 && !quizPrompt)
 
@@ -155,6 +165,9 @@ export const ChatBox = ({
       }, 6000)
       return
     }
+
+    if (file.name === fileName) attachmentChipRef.current?.focus()
+    else focusAttachment.current = true
     setFileName(file.name)
     setFileAnnouncement(t('accessibility:fileAttached', { file: file.name }))
   }
@@ -337,6 +350,7 @@ export const ChatBox = ({
 
                 {fileName && (
                   <Chip
+                    ref={attachmentChipRef}
                     sx={{ borderRadius: 100 }}
                     label={fileName}
                     onDelete={handleDeleteFile}

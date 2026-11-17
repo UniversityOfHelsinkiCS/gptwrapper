@@ -250,10 +250,13 @@ export const ResponsibilityActionUserSearch = ({
   actionText,
   drawActionComponent,
   courseId,
+  autoFocus,
 }: {
   actionText: string
   drawActionComponent: (user: any) => any
   courseId: string
+  /** Moves focus to the search field when the search is opened */
+  autoFocus?: boolean
 }) => {
   const [search, setSearch] = useState('')
   const { users, isLoading, isFetching, refetch } = useResponsibilityUserSearch(search, courseId)
@@ -271,6 +274,7 @@ export const ResponsibilityActionUserSearch = ({
         type="text"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
+        autoFocus={autoFocus}
         placeholder={t('admin:searchUsers')}
         slotProps={{ input: { 'aria-label': t('admin:searchUsers'), 'aria-describedby': 'teachers-header' } }}
       />
@@ -288,10 +292,13 @@ export const EnrolmentActionUserSearch = ({
   actionText,
   drawActionComponent,
   courseId,
+  autoFocus,
 }: {
   actionText: string
   drawActionComponent: (user: any) => any
   courseId: string
+  /** Moves focus to the search field when the search is opened */
+  autoFocus?: boolean
 }) => {
   const [search, setSearch] = useState('')
   const { users, isLoading, isFetching, refetch } = useEnrolmentUserSearch(search, courseId)
@@ -309,6 +316,7 @@ export const EnrolmentActionUserSearch = ({
         type="text"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
+        autoFocus={autoFocus}
         placeholder={t('admin:searchUsers')}
         slotProps={{ input: { 'aria-label': t('admin:searchUsers'), 'aria-describedby': 'students-header' } }}
       />

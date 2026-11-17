@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Avatar,
   Box,
@@ -130,6 +130,9 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
   const [confirmOpen, setConfirmOpen] = useState(false)
   // user whose addition or removal is in progress, its action buttons are disabled meanwhile
   const [busyUserId, setBusyUserId] = useState<string | null>(null)
+  // the first teacher chip revealed by "Show more" gets focus (WCAG 2.4.3)
+  const firstRevealedTeacherRef = useRef<HTMLDivElement>(null)
+  const focusRevealedTeacher = useRef(false)
 
   useEffect(() => {
     if (chatInstance && refetchCourses) refetchCourses()
@@ -142,6 +145,13 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
   useEffect(() => {
     if (enrolmentsData) setEnrolments(enrolmentsData)
   }, [enrolmentsData])
+
+  useEffect(() => {
+    if (showAllTeachers && focusRevealedTeacher.current) {
+      focusRevealedTeacher.current = false
+      firstRevealedTeacherRef.current?.focus()
+    }
+  }, [showAllTeachers])
 
   const currentCourseUsage = usageInfo?.courses.find((c) => c.courseId === course.courseId)
 
@@ -187,7 +197,7 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
     setSortConfig((prev) => ({ key, direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc' }))
   }
 
-  const handleAddResponsible = async (target: User) => {
+  const handleAddResponsible = async (target: User): Promise<boolean> => {
     try {
       const result = await apiClient.post(`/courses/${course.courseId}/responsibilities/assign`, { username: target.username })
       if (result.status !== 200) throw new Error()
@@ -197,8 +207,10 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
       enqueueSnackbar(message, { variant: 'success' })
       setAddTeacherOpen(false)
       refetchCourse()
+      return true
     } catch {
       enqueueSnackbar(t('course:addTeacherFailed'), { variant: 'error' })
+      return false
     }
   }
 
@@ -216,7 +228,7 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
     }
   }
 
-  const handleAddEnrolment = async (target: User) => {
+  const handleAddEnrolment = async (target: User): Promise<boolean> => {
     try {
       const result = await apiClient.post(`/courses/${course.courseId}/enrolments/assign`, { username: target.username })
       if (result.status !== 200) throw new Error()
@@ -225,8 +237,10 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
       setStatusMessage(message)
       enqueueSnackbar(message, { variant: 'success' })
       setAddStudentOpen(false)
+      return true
     } catch {
       enqueueSnackbar(t('course:addStudentFailed'), { variant: 'error' })
+      return false
     }
   }
 
@@ -288,8 +302,14 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
     setConfirmOpen(false)
     setBusyUserId(targetUserIdOf(pendingAction))
     try {
-      if (pendingAction.kind === 'addTeacher') await handleAddResponsible(pendingAction.user)
-      if (pendingAction.kind === 'addStudent') await handleAddEnrolment(pendingAction.user)
+      if (pendingAction.kind === 'addTeacher') {
+        const added = await handleAddResponsible(pendingAction.user)
+        if (added) document.getElementById('toggle-add-teacher-view')?.focus()
+      }
+      if (pendingAction.kind === 'addStudent') {
+        const added = await handleAddEnrolment(pendingAction.user)
+        if (added) document.getElementById('toggle-add-student-view')?.focus()
+      }
       if (pendingAction.kind === 'removeStudent') await handleRemoveEnrolment(pendingAction.enrolment)
       if (pendingAction.kind === 'removeTeacher') {
         const removed = await handleRemoveResponsibility(pendingAction.responsibility)
@@ -501,20 +521,29 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
             )}
           </Box>
           {addTeacherOpen ? (
-            <ResponsibilityActionUserSearch courseId={course.courseId as string} actionText={t('course:add')} drawActionComponent={drawTeacherAction} />
+            <ResponsibilityActionUserSearch
+              autoFocus
+              courseId={course.courseId as string}
+              actionText={t('course:add')}
+              drawActionComponent={drawTeacherAction}
+            />
           ) : (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
               {responsibilities
                 .slice()
                 .sort((a, b) => (a.user.last_name ?? '').localeCompare(b.user.last_name ?? '', 'fi', { sensitivity: 'base' }))
                 .slice(0, showAllTeachers ? undefined : 5)
-                .map((responsibility) => {
+                .map((responsibility, index) => {
                   const name = `${responsibility.user.last_name ?? ''} ${responsibility.user.first_names?.split(' ')[0] ?? ''}`.trim()
                   // Only deletable chips get role="button"; aria-label is prohibited on the plain div otherwise
                   const deletable = canManage && Boolean(responsibility.createdByUserId)
+                  // "Show more" moves focus to the first revealed chip, a plain chip needs tabIndex -1 to take it
+                  const firstRevealed = index === 5
                   return (
                     <Chip
                       key={responsibility.id}
+                      ref={firstRevealed ? firstRevealedTeacherRef : undefined}
+                      tabIndex={firstRevealed && !deletable ? -1 : undefined}
                       sx={{ '& .MuiChip-avatar': { bgcolor: 'primary.main', color: 'primary.contrastText' } }}
                       avatar={<Avatar>{initialsOf(responsibility.user.last_name, responsibility.user.first_names)}</Avatar>}
                       label={name}
@@ -530,9 +559,13 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
                   variant="outlined"
                   color="primary"
                   sx={(theme) => theme.applyStyles('dark', { color: theme.palette.toskaDark.contrastText, borderColor: theme.palette.text.secondary })}
-                  onClick={() => setShowAllTeachers((open) => !open)}
+                  onClick={() => {
+                    if (!showAllTeachers) focusRevealedTeacher.current = true
+                    setShowAllTeachers((open) => !open)
+                  }}
                   label={showAllTeachers ? t('course:showLess') : t('course:showMore', { count: responsibilities.length - 5 })}
                   data-testid="toggle-show-all-teachers"
+                  aria-describedby="teachers-header"
                 />
               )}
             </Box>
@@ -569,14 +602,19 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
               )}
 
               {isAdmin && isCustomCourse && (
-                <BlueButton startIcon={<GroupAddIcon />} onClick={() => setAddStudentOpen((open) => !open)} data-testid="toggle-add-student-view">
+                <BlueButton
+                  id="toggle-add-student-view"
+                  startIcon={<GroupAddIcon />}
+                  onClick={() => setAddStudentOpen((open) => !open)}
+                  data-testid="toggle-add-student-view"
+                >
                   {addStudentOpen ? t('common:close') : t('course:addNewStudent')}
                 </BlueButton>
               )}
             </Box>
 
             {addStudentOpen && isAdmin && isCustomCourse ? (
-              <EnrolmentActionUserSearch courseId={course.courseId as string} actionText={t('course:add')} drawActionComponent={drawStudentAction} />
+              <EnrolmentActionUserSearch autoFocus courseId={course.courseId as string} actionText={t('course:add')} drawActionComponent={drawStudentAction} />
             ) : (
               <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '8px', overflow: 'auto' }}>
                 <Table size="small" data-testid="students-table">

@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { createTheme, ThemeProvider } from '@mui/material'
 import i18next from 'i18next'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
@@ -33,7 +34,12 @@ vi.mock('../Courses/Course/Discussions', () => ({ default: () => null }))
 vi.mock('../Courses/Course/PromptUsageHistogram', () => ({ default: () => null }))
 // the search results are replaced by a single searched user rendered with the real action button
 vi.mock('../Admin/UserSearch', () => ({
-  ResponsibilityActionUserSearch: ({ drawActionComponent }: any) => <div data-testid="teacher-search">{drawActionComponent(searchedUser)}</div>,
+  ResponsibilityActionUserSearch: ({ drawActionComponent, autoFocus }: any) => (
+    <div data-testid="teacher-search">
+      <input aria-label="Search users" data-testid="teacher-search-input" autoFocus={autoFocus} />
+      {drawActionComponent(searchedUser)}
+    </div>
+  ),
   EnrolmentActionUserSearch: ({ drawActionComponent }: any) => <div data-testid="student-search">{drawActionComponent(searchedUser)}</div>,
 }))
 
@@ -145,5 +151,28 @@ describe('CoursePreview discussions button', () => {
     renderPreview()
 
     expect(screen.queryByTestId('open-course-discussions-button')).toBeNull()
+  })
+})
+
+describe('CoursePreview show more teachers', () => {
+  const teacher = (n: number) => ({ id: `resp-${n}`, user: { id: `t-${n}`, username: `t${n}`, first_names: 'Opettaja', last_name: `Teacher${n}` } })
+
+  test('moves focus to the first teacher revealed by Show more', () => {
+    courseQuery.data = { ...course, responsibilities: [1, 2, 3, 4, 5, 6, 7].map(teacher) }
+    // the Show more chip styles itself with the app's toskaDark palette color
+    const theme = createTheme({ palette: { toskaDark: { main: '#1a202c', contrastText: '#fff' } } } as any)
+    render(
+      <ThemeProvider theme={theme}>
+        <I18nextProvider i18n={i18n}>
+          <CoursePreview course={course} />
+        </I18nextProvider>
+      </ThemeProvider>,
+    )
+
+    fireEvent.click(screen.getByTestId('toggle-show-all-teachers'))
+
+    const focused = document.activeElement as HTMLElement
+    expect(focused.textContent).toContain('Teacher6')
+    expect(focused.getAttribute('tabindex')).toBe('-1')
   })
 })
