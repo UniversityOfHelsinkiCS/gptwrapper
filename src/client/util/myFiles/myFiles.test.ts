@@ -153,6 +153,14 @@ describe('importFiles', () => {
     expect(result).toEqual({ added: ['Course/sub/b.md'], updated: [], skipped: ['Course/a.md'], refused: [] })
   })
 
+  test('puts single files into the default folder', async () => {
+    const store = createMemoryStore()
+    const result = await importFiles(store, [source('single.md', 's'), source('/dropped.md', 'd'), source('Course/a.md', 'a')])
+    expect(result.added).toEqual(['Files/single.md', 'Files/dropped.md', 'Course/a.md'])
+    expect(await store.readText('Files/single.md')).toBe('s')
+    expect((await store.list('')).some((entry) => entry.kind === 'file')).toBe(false)
+  })
+
   test('sourcesFromFiles uses the file name when there is no relative path', () => {
     const file = new File(['x'], 'single.md')
     expect(sourcesFromFiles([file])).toEqual([{ path: 'single.md', file }])
